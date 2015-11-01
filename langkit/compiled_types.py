@@ -245,7 +245,7 @@ class Field(AbstractNodeField):
     # order (assuming it is the same as the Field instantiation order).
     _counter = iter(count(0))
 
-    def __init__(self, repr=True, doc=None):
+    def __init__(self, repr=True, doc=None, type=None):
         """Create an AST node field.
 
         :param bool repr: If true, the field will be displayed when
@@ -266,8 +266,9 @@ class Field(AbstractNodeField):
 
         self._type = None
         """
-        Type of the field, set to a concrete CompiledType subclass after type
-        resolution.
+        Type of the field. If not set, it will be set to a concrete
+        CompiledType subclass after type resolution. If set, it will be
+        verified at type resolution time.
         :type: CompiledType
         """
 

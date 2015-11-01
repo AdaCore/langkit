@@ -12,6 +12,7 @@ this is the way it is done for the ada language::
 from collections import defaultdict
 from distutils.spawn import find_executable
 from glob import glob
+import inspect
 import itertools
 import names
 import os
@@ -25,7 +26,7 @@ from c_api import CAPISettings
 import caching
 import documentation
 from python_api import PythonAPISettings
-from utils import Colors, printcol
+from utils import Colors, printcol, col
 
 
 compile_ctx = None
@@ -279,7 +280,27 @@ class CompileCtx():
             astnode.is_type_resolved = True
             self.astnode_types.append(astnode)
             for field_type, field in zip(types, fields):
-                field.type = field_type
+
+                # At this stage, if the field has a type, it means that the
+                # user assigned it one originally. In this case we will use the
+                # inferred type for checking only (raising an assertion if it
+                # does not correspond).
+                if field.type:
+                    f = inspect.getfile(astnode)
+                    l = inspect.getsourcelines(astnode)[1]
+                    assert field.type == field_type, (
+                        col("Inferred type for field does not correspond to "
+                            "type provided by the user.\n", Colors.FAIL) +
+                        col("class {astnode_name}, file {file} line {line}\n",
+                            Colors.WARNING) +
+                        "Field {field_name}, "
+                        "Provided type : {ptype}, Inferred type: {itype}"
+                    ).format(astnode_name=astnode.name(), file=f, line=l,
+                             ptype=field.type.name().camel,
+                             itype=field_type.name().camel,
+                             field_name=field._name.camel)
+                else:
+                    field.type = field_type
 
     def order_astnode_types(self):
         """Sort the "astnode_types" field."""
@@ -512,8 +533,8 @@ class CompileCtx():
         """
         Generate the Python binding module.
 
-        :param str python_path: The directory in which the Python module will be
-            generated.
+        :param str python_path: The directory in which the Python module will
+            be generated.
         """
         module_filename = "{}.py".format(self.python_api_settings.module_name)
 
