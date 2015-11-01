@@ -229,10 +229,6 @@ class Token(BasicType):
         return PythonAPIType(python_api_settings, 'token', False)
 
 
-class TermToken(Token):
-    quex_token_name = "TERMINATION"
-
-
 class Field(AbstractNodeField):
     """
     Placeholder descriptors used to associate data to AST nodes (see below).
