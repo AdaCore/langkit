@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import sys
 
-from langkit.utils import Colors, printcol
+from langkit.utils import Colors, printcol, col
 
 
 class Directories(object):
@@ -287,7 +287,16 @@ class ManageScript(object):
         # Set the extensions dir on the compile context
         self.context.extensions_dir = self.dirs.lang_source_dir("extensions")
 
-        parsed_args.func(parsed_args)
+        try:
+            parsed_args.func(parsed_args)
+        except AssertionError as e:
+            # If in verbose mode, show the full exception traceback + message.
+            # If in normal mode, just show the message and exit.
+            if parsed_args.verbose:
+                raise e
+            else:
+                print col("ERROR :", Colors.FAIL), e.message
+                exit(1)
 
         if cov is not None:
             cov.stop()
@@ -300,6 +309,7 @@ class ManageScript(object):
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
         """
+
         printcol("Generating source for libadalang ...", Colors.HEADER)
         self.context.emit(file_root=self.dirs.build_dir())
 
