@@ -3,7 +3,7 @@ from collections import OrderedDict
 from c_api import CAPIType
 from common import get_type, null_constant, is_keyword
 from compile_context import get_context
-from expressions import Property, AbstractNodeField
+from expressions import Property, AbstractNodeData
 import names
 from python_api import PythonAPIType
 from template_utils import TemplateEnvironment, common_renderer
@@ -228,19 +228,25 @@ class Token(BasicType):
         return PythonAPIType(python_api_settings, 'token', False)
 
 
-class Field(AbstractNodeField):
+class AbstractField(AbstractNodeData):
     """
     Placeholder descriptors used to associate data to AST nodes (see below).
     """
+    concrete = False
 
     def __init__(self, repr=True, doc=None, type=None):
-        """Create an AST node field.
+        """
+        Create an AST node field.
 
         :param bool repr: If true, the field will be displayed when
             pretty-printing the embedding AST node.
         :param str|None doc: User documentation for this field.
         """
-        super(Field, self).__init__()
+
+        if not self.concrete:
+            raise NotImplementedError()
+
+        super(AbstractField, self).__init__()
 
         self.repr = repr
         self._name = None
@@ -290,6 +296,32 @@ class Field(AbstractNodeField):
         return self._doc
 
 
+class Field(AbstractField):
+    """
+    Fields that are meant to store parsing results. Can be used only on
+    subclasses of ASTNode.
+    """
+    concrete = True
+
+
+class UserField(AbstractField):
+    """
+    Fields that are not meant to store parsing results. Can be used on any
+    Node type, will be ignored by the parsing code.
+    """
+
+    def __init__(self, type, repr=True, doc=None):
+        """
+        See inherited doc. In this version we just ensure that a type is
+        passed because it is mandatory for data fields.
+        :type type: CompiledType
+        :type doc: str
+        """
+        super(UserField, self).__init__(repr, doc, type)
+
+    concrete = True
+
+
 class AstNodeMetaclass(type):
     """
     Internal metaclass for AST nodes, used to ease fields handling during code
@@ -303,7 +335,7 @@ class AstNodeMetaclass(type):
         fields = OrderedDict(sorted(
             ((f_n, f_v)
              for f_n, f_v in dct.items()
-             if isinstance(f_v, AbstractNodeField)),
+             if isinstance(f_v, AbstractNodeData)),
             # Recover the order of field declarations.  See the Field
             # class definition for more details.
             key=lambda (_, f): f._index
@@ -436,6 +468,8 @@ class ASTNode(CompiledType):
         """
         Return a list for all classes from ASTNode to `cls` in the inheritance
         chain.
+
+        :rtype: list[ASTNode]
         """
         return reversed([base_class for base_class in cls.mro()
                          if issubclass(base_class, ASTNode)])
@@ -458,9 +492,10 @@ class ASTNode(CompiledType):
                                        field_class=Property)
 
     @classmethod
-    def get_fields(cls, predicate=None, include_inherited=True):
+    def get_parse_fields(cls, predicate=None, include_inherited=True):
         """
-        Return the list of all the fields `cls` has, including its parents'.
+        Return the list of all the parse fields `cls` has, including its
+        parents'.
 
         :param predicate: Predicate to filter fields if needed.
         :type predicate: None|(Field) -> bool
@@ -475,8 +510,25 @@ class ASTNode(CompiledType):
                                        field_class=Field)
 
     @classmethod
+    def get_fields(cls, predicate=None, include_inherited=True):
+        """
+        Return the list of all the fields `cls` has, including its parents'.
+
+        :param predicate: Predicate to filter fields if needed.
+        :type predicate: None|(Field) -> bool
+
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :rtype: list[AbstractField]
+        """
+        return cls.get_abstract_fields(predicate, include_inherited,
+                                       field_class=AbstractField)
+
+    @classmethod
     def get_abstract_fields(cls, predicate=None, include_inherited=True,
-                            field_class=AbstractNodeField):
+                            field_class=AbstractNodeData):
         """
         Get all AbstractField instances for the class.
 
@@ -499,7 +551,7 @@ class ASTNode(CompiledType):
 
     @classmethod
     def get_abstract_fields_dict(cls, include_inherited=True,
-                                 field_class=AbstractNodeField):
+                                 field_class=AbstractNodeData):
         """
         Get all AbstractField instances for the class.
 

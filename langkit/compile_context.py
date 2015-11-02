@@ -244,7 +244,7 @@ class CompileCtx():
         :param ASTNode astnode: The AST node we want to associate the types to.
         :param list[CompiledType] types: The types to associate to the fields.
         """
-        fields = astnode.get_fields(include_inherited=False)
+        fields = astnode.get_parse_fields(include_inherited=False)
 
         assert len(fields) == len(types), (
             "{} has {} fields ({} types given). You probably have"

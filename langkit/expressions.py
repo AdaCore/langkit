@@ -431,7 +431,7 @@ class LocalVars(object):
         return "\n".join(lv.render() for lv in self.local_vars)
 
 
-class AbstractNodeField(object):
+class AbstractNodeData(object):
     """
     This class defines an abstract base class for fields and properties on
     AST nodes.
@@ -482,7 +482,7 @@ class AbstractNodeField(object):
         raise NotImplementedError()
 
 
-class Property(AbstractNodeField):
+class Property(AbstractNodeData):
     """
     This is the public class via which you'll create properties in the DSL.
 
