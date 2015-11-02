@@ -32,6 +32,10 @@ def decl_type(ada_type):
     return str(ada_type.name())
 
 
+def c_node_type(capi):
+    return CAPIType(capi, 'base_node')
+
+
 def make_renderer(base_renderer=None):
     """
     Create a template renderer with common helpers.
@@ -60,7 +64,7 @@ def make_renderer(base_renderer=None):
             'analysis_context_type': CAPIType(capi, 'analysis_context').name,
             'analysis_unit_type':    CAPIType(capi, 'analysis_unit').name,
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
-            'node_type':             CAPIType(capi, 'node').name,
+            'node_type':             c_node_type(capi).name,
             'token_type':            CAPIType(capi, 'token').name,
             'sloc_type':             CAPIType(capi, 'source_location').name,
             'sloc_range_type':       SourceLocationRangeType.c_type(capi).name,
@@ -673,7 +677,7 @@ class ASTNode(CompiledType):
 
     @classmethod
     def c_type(cls, c_api_settings):
-        return CAPIType(c_api_settings, 'node')
+        return c_node_type(c_api_settings)
 
     @classmethod
     def py_type(cls, python_api_settings):
