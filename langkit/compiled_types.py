@@ -236,7 +236,12 @@ class AbstractField(AbstractNodeData):
     """
     Placeholder descriptors used to associate data to AST nodes (see below).
     """
+
     concrete = False
+    """
+    Field used to prevent instantiation of the class. Concrete descendants
+    of AbstractField must put that field to True in their definition.
+    """
 
     def __init__(self, repr=True, doc=None, type=None):
         """
