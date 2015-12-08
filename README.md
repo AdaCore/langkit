@@ -31,7 +31,7 @@ The developper and user's documentation for Langkit is in langkit/doc. You can
 consult it as a text files or you can build it. For instance, to generate HTML
 documents, run from the top directory:
 
-$ make -C langkit/doc html
+    $ make -C langkit/doc html
 
 And then open the following file in your favorite browser:
 
@@ -44,13 +44,13 @@ Nothing is more simple than getting an initial project skeleton to work on a
 new language engine. Imagine you want to create an engine for the Foo language,
 run from the top-level directory:
 
-$ python langkit/create-project.py Foo
+    $ python langkit/create-project.py Foo
 
 And then have a look at the created "foo" directory: you have minimal
 lexers and parsers and a "manage.py" script you can use to build this new
 engine:
 
-$ python foo/manage.py make
+    $ python foo/manage.py make
 
 Here you are!
 
