@@ -8,24 +8,25 @@ with Interfaces.C.Strings; use Interfaces.C.Strings;
 
 package ${_self.ada_api_settings.lib_name}.C is
 
+## The following must not output extra line breaks, hence the odd layout
+<%def name='ada_c_doc(entity, column=0, **kwargs)'><%
+   # Generate an Ada comment to document an entity in the C binding
+   kwargs['lang'] = 'c' %>${ada_doc(entity, column, **kwargs)}</%def>
+
    type ${analysis_context_type} is new System.Address;
-   --  Context for all source analysis
+   ${ada_c_doc('langkit.analysis_context_type', 3)}
 
    type ${analysis_unit_type} is new System.Address;
-   --  Context for the analysis of a single compilation unit. References are
-   --  ref-counted.
+   ${ada_c_doc('langkit.analysis_unit_type', 3)}
 
    type ${node_type} is new System.Address;
-   --  Data type for all AST nodes. AST nodes are assembled to make up a tree.
-   --  See the AST node primitives below to inspect such trees. References are
-   --  ref-counted.
+   ${ada_c_doc('langkit.node_type', 3)}
 
    type ${node_kind_type} is new int;
-   --  Kind of AST nodes in parse trees
+   ${ada_c_doc('langkit.node_kind_type', 3)}
 
    type ${token_type} is new System.Address;
-   --  Data type for tokens. Tokens always come from AST node and have the
-   --  same lifetime than the AST node they come from.
+   ${ada_c_doc('langkit.node_kind_type', 3)}
 
    --  Helper data structures for source location handling
 
@@ -42,13 +43,13 @@ package ${_self.ada_api_settings.lib_name}.C is
 
    type ${text_type} is record
       Chars  : System.Address;
-      --  Address for the content of the string
+      ${ada_c_doc('langkit.text_type.chars', 6)}
 
       Length : size_t;
-      --  Size of the string (in characters)
+      ${ada_c_doc('langkit.text_type.length', 6)}
    end record
      with Convention => C_Pass_By_Copy;
-   --  String encoded in UTF-32 (native endianness)
+   ${ada_c_doc('langkit.text_type', 3)}
 
    type ${diagnostic_type} is record
       Sloc_Range : ${sloc_range_type};
@@ -57,7 +58,7 @@ package ${_self.ada_api_settings.lib_name}.C is
       --  message string.
    end record
      with Convention => C;
-   --  Analysis unit diagnostics
+   ${ada_c_doc('langkit.diagnostic_type', 3)}
 
    % for type_name in (node_type, token_type, sloc_type, sloc_range_type, diagnostic_type):
       type ${type_name}_Ptr is access ${type_name};
@@ -80,20 +81,14 @@ package ${_self.ada_api_settings.lib_name}.C is
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("create_analysis_context")}";
-   --  Create and return an analysis context. The caller is responsible to
-   --  destroy it when done with it.
-   --
-   --  Charset will be used as a default charset to decode input sources in
-   --  analysis units. Be careful: passing an unsupported charset here is not
-   --  guaranteed to raise an error here.
+   ${ada_c_doc('langkit.create_context', 3)}
 
    procedure ${capi.get_name("destroy_analysis_context")}
      (Context : ${analysis_context_type})
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("destroy_analysis_context")}";
-   --  Destroy an analysis context. Any analysis units it contains may survive
-   --  if there are still references to it.
+   ${ada_c_doc('langkit.destroy_context', 3)}
 
    function ${capi.get_name("get_analysis_unit_from_file")}
      (Context           : ${analysis_context_type};
@@ -104,20 +99,7 @@ package ${_self.ada_api_settings.lib_name}.C is
            Convention    => C,
            External_name =>
               "${capi.get_name("get_analysis_unit_from_file")}";
-   --  Create a new analysis unit for Filename or return the existing one if
-   --  any. If Reparse is true and the analysis unit already exists, reparse it
-   --  from Filename.
-   --
-   --  The result is owned by the context: the caller must increase its ref.
-   --  count in order to keep a reference to it.
-   --
-   --  Use Charset in order to decode the content of Filename. If Charset is
-   --  empty or NULL, then use the last charset used for this unit, or use the
-   --  context's default if creating this unit.
-   --
-   --  If any failure occurs, such as file opening, decoding, lexing or parsing
-   --  failure, return an Analysis_Unit anyway: errors are described as
-   --  diagnostics.
+   ${ada_c_doc('langkit.get_unit_from_file', 3)}
 
    function ${capi.get_name("get_analysis_unit_from_buffer")}
      (Context           : ${analysis_context_type};
@@ -129,20 +111,7 @@ package ${_self.ada_api_settings.lib_name}.C is
            Convention    => C,
            External_name =>
               "${capi.get_name("get_analysis_unit_from_buffer")}";
-   --  Create a new analysis unit for Filename or return the existing one if
-   --  any. Whether the analysis unit already exists or not, (re)parse it from
-   --  the source code in Buffer.
-   --
-   --  The result is owned by the context: the caller must increase its ref.
-   --  count in order to keep a reference to it.
-   --
-   --  Use Charset in order to decode the content of Buffer. If Charset is
-   --  empty or NULL, then use the last charset used for this unit, or use the
-   --  context's default if creating this unit.
-   --
-   --  If any failure occurs, such as decoding, lexing or parsing
-   --  failure, return an Analysis_Unit anyway: errors are described as
-   --  diagnostics.
+   ${ada_c_doc('langkit.get_unit_from_buffer', 3)}
 
    function ${capi.get_name("remove_analysis_unit")}
      (Context  : ${analysis_context_type};
@@ -150,24 +119,21 @@ package ${_self.ada_api_settings.lib_name}.C is
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("remove_analysis_unit")}";
-   --  Remove the corresponding analysis unit from this context. Note that if
-   --  someone still owns a reference to this unit, it is still available.
-   --  Return whether the removal was successful (i.e. whether the analysis
-   --  unit existed).
+   ${ada_c_doc('langkit.remove_unit', 3)}
 
    function ${capi.get_name("unit_root")} (Unit : ${analysis_unit_type})
                                            return ${node_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("unit_root")}";
-   --  Return the root AST node for this unit, or NULL if there is none
+   ${ada_c_doc('langkit.unit_root', 3)}
 
    function ${capi.get_name("unit_diagnostic_count")}
      (Unit : ${analysis_unit_type}) return unsigned
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("unit_diagnostic_count")}";
-   --  Return the number of diagnostics associated to this unit
+   ${ada_c_doc('langkit.unit_diagnostic_count', 3)}
 
    function ${capi.get_name("unit_diagnostic")}
      (Unit         : ${analysis_unit_type};
@@ -176,36 +142,27 @@ package ${_self.ada_api_settings.lib_name}.C is
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("unit_diagnostic")}";
-   --  Get the Nth diagnostic in this unit and store it into Diagnostic_P.all.
-   --  Return zero on failure (when N is too big).
+   ${ada_c_doc('langkit.unit_diagnostic', 3)}
 
    function ${capi.get_name("unit_incref")}
      (Unit : ${analysis_unit_type}) return ${analysis_unit_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("unit_incref")}";
-   --  Increase the reference count to an analysis unit. Return the reference
-   --  for convenience.
+   ${ada_c_doc('langkit.unit_incref', 3)}
 
    procedure ${capi.get_name("unit_decref")} (Unit : ${analysis_unit_type})
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("unit_decref")}";
-   --  Decrease the reference count to an analysis unit
+   ${ada_c_doc('langkit.unit_decref', 3)}
 
    procedure ${capi.get_name("unit_reparse_from_file")}
      (Unit : ${analysis_unit_type}; Charset : chars_ptr)
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("unit_reparse_from_file")}";
-   --  Reparse an analysis unit from the associated file.
-   --
-   --  Use Charset in order to decode the input. If Charset is empty or NULL,
-   --  then use the last charset used for this unit.
-   --
-   --  If any failure occurs, such as file opening, decoding, lexing or parsing
-   --  failure, return an Analysis_Unit anyway: errors are described as
-   --  diagnostics.
+   ${ada_c_doc('langkit.unit_reparse_file', 3)}
 
    procedure ${capi.get_name("unit_reparse_from_buffer")}
      (Unit        : ${analysis_unit_type};
@@ -215,14 +172,7 @@ package ${_self.ada_api_settings.lib_name}.C is
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("unit_reparse_from_buffer")}";
-   --  Reparse an analysis unit from a buffer.
-   --
-   --  Use Charset in order to decode the content of Buffer. If Charset is
-   --  empty or NULL, then use the last charset used for this unit.
-   --
-   --  If any failure occurs, such as decoding, lexing or parsing
-   --  failure, return an Analysis_Unit anyway: errors are described as
-   --  diagnostics.
+   ${ada_c_doc('langkit.unit_reparse_buffer', 3)}
 
    ---------------------------------
    -- General AST node primitives --
@@ -233,15 +183,14 @@ package ${_self.ada_api_settings.lib_name}.C is
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("node_kind")}";
-   --  Get the kind of an AST node
+   ${ada_c_doc('langkit.node_kind', 3)}
 
    function ${capi.get_name("kind_name")} (Kind : ${node_kind_type})
                                            return ${text_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("kind_name")}";
-   --  Helper for textual dump: return the name of a node kind. The returned
-   --  string is internalized and thus must *not* be free'd by the caller.
+   ${ada_c_doc('langkit.kind_name', 3)}
 
    procedure ${capi.get_name("node_sloc_range")}
      (Node         : ${node_type};
@@ -249,7 +198,7 @@ package ${_self.ada_api_settings.lib_name}.C is
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("node_sloc_range")}";
-   --  Get the spanning source location range for an AST node
+   ${ada_c_doc('langkit.node_sloc_range', 3)}
 
    function ${capi.get_name("lookup_in_node")}
      (Node : ${node_type};
@@ -257,23 +206,21 @@ package ${_self.ada_api_settings.lib_name}.C is
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("lookup_in_node")}";
-   --  Return the bottom-most AST node from NODE that contains SLOC, or NULL if
-   --  there is none.
+   ${ada_c_doc('langkit.lookup_in_node', 3)}
 
    function ${capi.get_name("node_parent")} (Node : ${node_type})
                                              return ${node_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("node_parent")}";
-   --  Return the lexical parent of NODE, if any. Return NULL for the root AST
-   --  node or for AST nodes for which no one has a reference to the parent.
+   ${ada_c_doc('langkit.node_parent', 3)}
 
    function ${capi.get_name("node_child_count")} (Node : ${node_type})
                                                   return unsigned
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("node_child_count")}";
-   --  Return the number of AST node in NODE's fields
+   ${ada_c_doc('langkit.node_child_count', 3)}
 
    function ${capi.get_name("node_child")}
      (Node    : ${node_type};
@@ -282,28 +229,21 @@ package ${_self.ada_api_settings.lib_name}.C is
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("node_child")}";
-   --  Get the Nth child AST node in NODE's fields and store it into
-   --  CHILD_P.all. Return zero on failure (when N is too big).
+   ${ada_c_doc('langkit.node_child', 3)}
 
    function ${capi.get_name("token_text")} (Token : ${token_type})
                                             return ${text_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("token_text")}";
-   --  Get the text of the given token
+   ${ada_c_doc('langkit.token_text', 3)}
 
    function ${capi.get_name("text_to_locale_string")}
      (Text : ${text_type}) return System.Address
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("text_to_locale_string")}";
-   --  Encode some text using the current locale.  The result is dynamically
-   --  allocated: it is up to the caller to free it when done with it.
-   --
-   --  This is a development helper to make it quick and easy to print token
-   --  and diagnostic text: it ignores errors (when the locale does not support
-   --  some characters).  Production code should use real conversion routines
-   --  such as libiconv's in order to deal with UTF-32 texts.
+   ${ada_c_doc('langkit.text_to_locale_string', 3)}
 
 
    ---------------------------------------
@@ -326,29 +266,20 @@ package ${_self.ada_api_settings.lib_name}.C is
    -- Extensions handling --
    -------------------------
 
-   --  The following functions make it possible to attach arbitrary data to AST
-   --  nodes: these are extensions. Each data is associated with both an
-   --  extension ID and a destructor. AST nodes can have either none or only
-   --  one extension for a given ID. The destructor is called when the AST
-   --  node is about to be destroyed itself.
-
-   --  This mechanism is inteded to ease annotating trees with analysis data
-   --  but also to host node wrappers for language bindings.
+   ${ada_c_doc('langkit.extensions_handling', 3)}
 
    type ${capi.get_name("node_extension_destructor")} is
       access procedure (Node      : ${node_type};
                         Extension : System.Address)
       with Convention => C;
-   --  Type for extension destructors. The parameter are the "node" the
-   --  extension was attached to and the "extension" itself.
+   ${ada_c_doc('langkit.node_extension_destructor', 3)}
 
    function ${capi.get_name("register_extension")} (Name : chars_ptr)
       return unsigned
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("register_extension")}";
-   --  Register an extension and return its identifier. Multiple calls with
-   --  the same name will return the same identifier.
+   ${ada_c_doc('langkit.register_extension', 3)}
 
    function ${capi.get_name("node_extension")}
      (Node   : ${node_type};
@@ -358,12 +289,6 @@ package ${_self.ada_api_settings.lib_name}.C is
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name("node_extension")}";
-   --  Create an extension slot in "node". If this node already contains an
-   --  extension for "ext_id", return the existing slot. If not, create such a
-   --  slot, associate the "dtor" destructor to it and initialize the slot to
-   --  NULL. Return a pointer to the slot.
-   --
-   --  Note that the pointer is not guaranteed to stay valid after further
-   --  calls to this function.
+   ${ada_c_doc('langkit.node_extension', 3)}
 
 end ${_self.ada_api_settings.lib_name}.C;

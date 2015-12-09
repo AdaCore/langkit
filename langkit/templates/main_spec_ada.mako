@@ -22,15 +22,17 @@ package ${_self.ada_api_settings.lib_name} is
           Convention    => C,
           External_Name =>
              "${get_context().ada_api_settings.lib_name.lower()}_initialize";
-   --  Initialize the library. Must be called before anything else from this
-   --  library and from Langkit_Support.
+   ${ada_doc('langkit.initialize', 3)}
 
    ----------------------
    -- Analysis context --
    ----------------------
 
    type Analysis_Context_Type;
+   ${ada_doc('langkit.analysis_context_type', 3)}
+
    type Analysis_Unit_Type;
+   ${ada_doc('langkit.analysis_unit_type', 3)}
 
    type Analysis_Context is access all Analysis_Context_Type;
    type Analysis_Unit is access all Analysis_Unit_Type;
@@ -65,15 +67,7 @@ package ${_self.ada_api_settings.lib_name} is
    end record;
 
    function Create (Charset : String) return Analysis_Context;
-   --  Create a new Analysis_Context. When done with it, invoke Destroy on it.
-   --
-   --  Charset will be used as a default charset to decode input sources in
-   --  analysis units. Please see GNATCOLL.Iconv for a couple of supported
-   --  charsets.
-   --
-   --  TODO??? passing an unsupported charset here is not
-   --  guaranteed to raise an error right here, but this would be really
-   --  helpful for users.
+   ${ada_doc('langkit.create_context', 3)}
 
    function Get_From_File
      (Context     : Analysis_Context;
@@ -82,23 +76,7 @@ package ${_self.ada_api_settings.lib_name} is
       Reparse     : Boolean := False;
       With_Trivia : Boolean := False)
       return Analysis_Unit;
-   --  Create a new Analysis_Unit for Filename or return the existing one if
-   --  any. If Reparse is true and the analysis unit already exists, reparse it
-   --  from Filename.
-   --
-   --  The result is owned by the context: the caller must increase its ref.
-   --  count in order to keep a reference to it.
-   --
-   --  Use Charset in order to decode the content of Filename. If Charset is
-   --  empty then use the last charset used for this unit, or use the context's
-   --  default if creating this unit.
-   --
-   --  If any failure occurs, such as file opening, decoding, lexing or parsing
-   --  failure, return an Analysis_Unit anyway: errors are described as
-   --  diagnostics.
-   --
-   --  When With_Trivia is true, the parsed analysis unit will contain trivias.
-   --  Already existing analysis units are reparsed if needed.
+   ${ada_doc('langkit.get_unit_from_file', 3)}
 
    function Get_From_Buffer
      (Context     : Analysis_Context;
@@ -107,64 +85,29 @@ package ${_self.ada_api_settings.lib_name} is
       Buffer      : String;
       With_Trivia : Boolean := False)
       return Analysis_Unit;
-   --  Create a new Analysis_Unit for Filename or return the existing one if
-   --  any. Whether the analysis unit already exists or not, (re)parse it from
-   --  the source code in Buffer.
-   --
-   --  The result is owned by the context: the caller must increase its ref.
-   --  count in order to keep a reference to it.
-   --
-   --  Use Charset in order to decode the content of Filename. If Charset is
-   --  empty then use the last charset used for this unit, or use the context's
-   --  default if creating this unit.
-   --
-   --  If any failure occurs, such as decoding, lexing or parsing
-   --  failure, return an Analysis_Unit anyway: errors are described as
-   --  diagnostics.
-   --
-   --  When With_Trivia is true, the parsed analysis unit will contain trivias.
-   --  Already existing analysis units are reparsed if needed.
+   ${ada_doc('langkit.get_unit_from_buffer', 3)}
 
    procedure Remove (Context   : Analysis_Context;
                      File_Name : String);
-   --  Remove the corresponding Analysis_Unit from this context. If someone
-   --  still owns a reference to it, it remains available but becomes
-   --  context-less.
-   --
-   --  If there is no such Analysis_Unit, raise a Constraint_Error exception.
+   ${ada_doc('langkit.remove_unit', 3)}
 
    procedure Destroy (Context : in out Analysis_Context);
-   --  Invoke Remove on all the units Context contains and free Context
+   ${ada_doc('langkit.destroy_context', 3)}
 
    procedure Inc_Ref (Unit : Analysis_Unit);
+   ${ada_doc('langkit.unit_incref')}
+
    procedure Dec_Ref (Unit : Analysis_Unit);
+   ${ada_doc('langkit.unit_decref')}
 
    procedure Reparse (Unit : Analysis_Unit; Charset : String := "");
-   --  Reparse an analysis unit from the associated file. If Charset is null,
-   --  use the last charset successfuly used for this unit, otherwise use it to
-   --  decode the input.
-   --
-   --  Use Charset in order to decode the content of Filename. If Charset is
-   --  empty then use the last charset used for this unit.
-   --
-   --  If any failure occurs, such as file opening, decoding, lexing or parsing
-   --  failure, return an Analysis_Unit anyway: errors are described as
-   --  diagnostics.
+   ${ada_doc('langkit.unit_reparse_file', 3)}
 
    procedure Reparse
      (Unit    : Analysis_Unit;
       Charset : String := "";
       Buffer  : String);
-   --  Reparse an analysis unit from a buffer.  If Charset is null, use the
-   --  last charset successfuly used for this unit, otherwise ute it to decode
-   --  the input.
-   --
-   --  Use Charset in order to decode the content of Filename. If Charset is
-   --  empty then use the last charset used for this unit.
-   --
-   --  If any failure occurs, such as decoding, lexing or parsing
-   --  failure, return an Analysis_Unit anyway: errors are described as
-   --  diagnostics.
+   ${ada_doc('langkit.unit_reparse_buffer', 3)}
 
    procedure Print (Unit : Analysis_Unit);
    --  Debug helper: output the AST and eventual diagnostic for this unit on

@@ -6,9 +6,10 @@ import sys
 
 
 class AnalysisContext(object):
-    # TODO: document this class and its methods
+    ${py_doc('langkit.analysis_context_type', 4)}
 
     def __init__(self, charset):
+        ${py_doc('langkit.create_context', 8)}
         self._c_value = _create_analysis_context(charset)
 
     def __del__(self):
@@ -16,25 +17,29 @@ class AnalysisContext(object):
         super(AnalysisContext, self).__init__()
 
     def get_from_file(self, filename, charset=None, reparse=False):
+        ${py_doc('langkit.get_unit_from_file', 8)}
         c_value = _get_analysis_unit_from_file(self._c_value, filename,
                                                charset or '', reparse)
         return AnalysisUnit(c_value)
 
     def get_from_buffer(self, filename, buffer, charset=None):
+        ${py_doc('langkit.get_unit_from_buffer', 8)}
         c_value = _get_analysis_unit_from_buffer(self._c_value, filename,
                                                  charset or '',
                                                  buffer, len(buffer))
         return AnalysisUnit(c_value)
 
     def remove(self, filename):
+        ${py_doc('langkit.remove_unit', 8)}
         if not _remove_analysis_unit(self._c_value, filename):
             raise KeyError('No such unit: {}'.format(filename))
 
 
 class AnalysisUnit(object):
-    # TODO: document this class and its methods
+    ${py_doc('langkit.analysis_unit_type', 4)}
 
     class DiagnosticsList(object):
+        """List of analysis unit diagnostics."""
         def __init__(self, unit):
             self.unit = unit
 
@@ -68,6 +73,7 @@ class AnalysisUnit(object):
         super(AnalysisUnit, self).__init__()
 
     def reparse(self, buffer=None, charset=None):
+        ${py_doc('langkit.unit_reparse_generic', 8)}
         if buffer is None:
             _unit_reparse_from_file(self._c_value, charset or '')
         else:
@@ -76,15 +82,17 @@ class AnalysisUnit(object):
 
     @property
     def root(self):
+        ${py_doc('langkit.unit_root', 8)}
         return _wrap_astnode(_unit_root(self._c_value))
 
     @property
     def diagnostics(self):
+        """Diagnostics for this unit."""
         return self.DiagnosticsList(self)
 
 
 class Token(object):
-    # TODO: document this class and its methods
+    ${py_doc('langkit.token_type', 4)}
 
     def __init__(self, c_value):
         text = _token_text(c_value)
@@ -129,7 +137,7 @@ class SlocRange(object):
 
 
 class Diagnostic(object):
-    # TODO: document this class and its methods
+    ${py_doc('langkit.diagnostic_type', 4)}
 
     def __init__(self, sloc_range, message):
         self.sloc_range = sloc_range
@@ -145,7 +153,7 @@ class Diagnostic(object):
 
 
 class ASTNode(object):
-    # TODO: document this class and its methods
+    ${py_doc('langkit.node_type', 4)}
 
     _field_names = ()
 
@@ -157,15 +165,18 @@ class ASTNode(object):
 
     @property
     def kind_name(self):
+        ${py_doc('langkit.node_kind', 8)}
         return self._kind_name
 
     @property
     def sloc_range(self):
+        ${py_doc('langkit.node_sloc_range', 8)}
         result = _SlocRange()
         _node_sloc_range(self._c_value, ctypes.byref(result))
         return _wrap_sloc_range(result)
 
     def lookup(self, sloc):
+        ${py_doc('langkit.lookup_in_node', 8)}
         c_sloc = _unwrap_sloc(sloc)
         c_node =_lookup_in_node(self._c_value,
                                 ctypes.byref(c_sloc))
@@ -173,14 +184,15 @@ class ASTNode(object):
 
     @property
     def parent(self):
+        ${py_doc('langkit.node_parent', 8)}
         return _wrap_astnode(_node_parent(self._c_value))
 
     def __len__(self):
-        """Return the number of ASTNode children this node has"""
+        """Return the number of ASTNode children this node has."""
         return _node_child_count(self._c_value)
 
     def __getitem__(self, key):
-        """Return the Nth ASTNode child this node has
+        """Return the Nth ASTNode child this node has.
 
         Raise an IndexError if "key" is out of range.
         """

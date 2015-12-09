@@ -9,23 +9,19 @@
 extern "C" {
 #endif
 
-/* Initialize the library. Must be called before anything else from this
-   library and from Langkit_Support.  */
+${c_doc('langkit.initialize')}
 void ${capi.lib_name}_initialize(void);
 
-/* Context for all source analysis.  */
+${c_doc('langkit.analysis_context_type')}
 typedef void* ${analysis_context_type};
 
-/* Context for the analysis of a single compilation unit.  References are
-   ref-counted.  */
+${c_doc('langkit.analysis_unit_type')}
 typedef void* ${analysis_unit_type};
 
-/* Data type for all AST nodes.  AST nodes are assembled to make up a tree.
-   See the AST node primitives below to inspect such trees.  References are
-   ref-counted.  */
+${c_doc('langkit.node_type')}
 typedef void* ${node_type};
 
-/* Kind of AST nodes in parse trees.  */
+${c_doc('langkit.node_kind_type')}
 typedef enum {
     /* TODO: do we keep a single node kind for all lists or should we
        specialize them?  */
@@ -38,8 +34,7 @@ typedef enum {
 % endfor
 } ${node_kind_type};
 
-/* Data type for tokens.  Tokens always come from AST node and have the same
-   lifetime than the AST node they come from.  */
+${c_doc('langkit.token_type')}
 typedef void* ${token_type};
 
 
@@ -56,16 +51,16 @@ typedef struct {
 } ${sloc_range_type};
 
 
-/* String encoded in UTF-32 (native endianness).  */
+${c_doc('langkit.text_type')}
 typedef struct {
-    /* Address for the content of the string.  */
+   ${c_doc('langkit.text_type.chars')}
     uint32_t *chars;
-    /* Size of the string (in characters).  */
+   ${c_doc('langkit.text_type.length')}
     size_t length;
 } ${text_type};
 
 
-/* Analysis unit diagnostics.  */
+${c_doc('langkit.diagnostic_type')}
 typedef struct {
     ${sloc_range_type} sloc_range;
     ${text_type} message;
@@ -86,38 +81,16 @@ typedef struct {
  * Analysis primitives
  */
 
-/* Create and return an analysis context.  The caller is responsible to destroy
-   it when done with it.
-
-   Charset will be used as a default charset to decode input sources in
-   analysis units. Be careful: passing an unsupported charset here is not
-   guaranteed to raise an error here.  */
+${c_doc('langkit.create_context')}
 extern ${analysis_context_type}
 ${capi.get_name("create_analysis_context")}(const char *charset);
 
-/* Destroy an analysis context.  Any analysis units it contains may survive if
-   there are still references to it.  */
+${c_doc('langkit.destroy_context')}
 extern void
 ${capi.get_name("destroy_analysis_context")}(
         ${analysis_context_type} context);
 
-/* Create a new analysis unit for Filename or return the existing one if
-   any. If Reparse is true and the analysis unit already exists, reparse it
-   from Filename.
-
-   The result is owned by the context: the caller must increase its ref.
-   count in order to keep a reference to it.
-
-   Use Charset in order to decode the content of Filename. If Charset is empty
-   or NULL, then use the last charset used for this unit, or use the context's
-   default if creating this unit.
-
-   On file opening failure, return a null address and in this case, if the
-   analysis unit did not exist yet, do not register it.
-
-   If any failure occurs, such as file opening, decoding, lexing or parsing
-   failure, return an Analysis_Unit anyway: errors are described as
-   diagnostics.  */
+${c_doc('langkit.get_unit_from_file')}
 extern ${analysis_unit_type}
 ${capi.get_name("get_analysis_unit_from_file")}(
         ${analysis_context_type} context,
@@ -125,24 +98,7 @@ ${capi.get_name("get_analysis_unit_from_file")}(
         const char *charset,
         int reparse);
 
-/* Create a new analysis unit for Filename or return the existing one if
-   any. Whether the analysis unit already exists or not, (re)parse it from
-   the source code in Buffer.
-
-   The result is owned by the context: the caller must increase its ref.
-   count in order to keep a reference to it.
-
-   Use Charset in order to decode the content of Buffer. If Charset is empty or
-   NULL, then use the last charset used for this unit, or use the context's
-   default if creating this unit.
-
-   On file opening failure, return a null address and in this case, if the
-   analysis unit did not exist yet, do not register it.  In this case, if
-   the analysis unit was already existing, this preserves the AST.
-
-   If any failure occurs, such as decoding, lexing or parsing
-   failure, return an Analysis_Unit anyway: errors are described as
-   diagnostics.  */
+${c_doc('langkit.get_unit_from_buffer')}
 extern ${analysis_unit_type}
 ${capi.get_name("get_analysis_unit_from_buffer")}(
         ${analysis_context_type} context,
@@ -151,58 +107,39 @@ ${capi.get_name("get_analysis_unit_from_buffer")}(
         const char *buffer,
         size_t buffer_size);
 
-/* Remove the corresponding analysis unit from this context.  Note that if
-   someone still owns a reference to this unit, it is still available.  Return
-   whether the removal was successful (i.e. whether the analysis unit
-   existed). */
+${c_doc('langkit.remove_unit')}
 extern int
 ${capi.get_name("remove_analysis_unit")}(${analysis_context_type} context,
                                          const char *filename);
 
-/* Return the root AST node for this unit, or NULL if there is none.  */
+${c_doc('langkit.unit_root')}
 extern ${node_type}
 ${capi.get_name("unit_root")}(${analysis_unit_type} unit);
 
-/* Return the number of diagnostics associated to this unit.  */
+${c_doc('langkit.unit_diagnostic_count')}
 extern unsigned
 ${capi.get_name("unit_diagnostic_count")}(${analysis_unit_type} unit);
 
-/* Get the Nth diagnostic in this unit and store it into *DIAGNOSTIC_P.  Return
-   zero on failure (when N is too big).  */
+${c_doc('langkit.unit_diagnostic')}
 extern int
 ${capi.get_name("unit_diagnostic")}(${analysis_unit_type} unit,
                                     unsigned n,
                                     ${diagnostic_type} *diagnostic_p);
 
-/* Increase the reference count to an analysis unit.  Return the reference for
-   convenience.  */
+${c_doc('langkit.unit_incref')}
 extern ${analysis_unit_type}
 ${capi.get_name("unit_incref")}(${analysis_unit_type} unit);
 
-/* Decrease the reference count to an analysis unit.  */
+${c_doc('langkit.unit_decref')}
 extern void
 ${capi.get_name("unit_decref")}(${analysis_unit_type} unit);
 
-/* Reparse an analysis unit from the associated file.
-
-   Use Charset in order to decode the input. If Charset is empty or NULL,
-   then use the last charset used for this unit.
-
-   If any failure occurs, such as file opening, decoding, lexing or parsing
-   failure, return an Analysis_Unit anyway: errors are described as
-   diagnostics.  */
+${c_doc('langkit.unit_reparse_file')}
 extern void
 ${capi.get_name("unit_reparse_from_file")}(${analysis_unit_type} unit,
                                            const char *charset);
 
-/* Reparse an analysis unit from a buffer.
-
-   Use Charset in order to decode the content of Buffer. If Charset is
-   empty or NULL, then use the last charset used for this unit.
-
-   If any failure occurs, such as decoding, lexing or parsing
-   failure, return an Analysis_Unit anyway: errors are described as
-   diagnostics.  */
+${c_doc('langkit.unit_reparse_buffer')}
 extern void
 ${capi.get_name("unit_reparse_from_buffer")} (${analysis_unit_type} unit,
                                               const char *charset,
@@ -214,53 +151,43 @@ ${capi.get_name("unit_reparse_from_buffer")} (${analysis_unit_type} unit,
  * General AST node primitives
  */
 
-/* Get the kind of an AST node.  */
+${c_doc('langkit.node_kind')}
 extern ${node_kind_type}
 ${capi.get_name("node_kind")}(${node_type} node);
 
-/* Helper for textual dump: return the name of a node kind.  The returned
-   string is a copy and thus must be free'd by the caller.  */
+${c_doc('langkit.kind_name')}
 extern ${text_type}
 ${capi.get_name("kind_name")}(${node_kind_type} kind);
 
-/* Get the spanning source location range for an AST node.  */
+${c_doc('langkit.node_sloc_range')}
 extern void
 ${capi.get_name("node_sloc_range")}(${node_type} node,
                                     ${sloc_range_type} *sloc_range);
 
-/* Return the bottom-most AST node from NODE that contains SLOC, or NULL if
-   there is none.  */
+${c_doc('langkit.lookup_in_node')}
 extern ${node_type}
 ${capi.get_name("lookup_in_node")}(${node_type} node,
                                    const ${sloc_type} *sloc);
 
-/* Return the lexical parent of NODE, if any.  Return NULL for the root AST
-   node or for AST nodes for which no one has a reference to the parent.  */
+${c_doc('langkit.node_parent')}
 extern ${node_type}
 ${capi.get_name("node_parent")}(${node_type} node);
 
-/* Return the number of AST node in NODE's fields.  */
+${c_doc('langkit.node_child_count')}
 extern unsigned
 ${capi.get_name("node_child_count")}(${node_type} node);
 
-/* Get the Nth child AST node in NODE's fields and store it into *CHILD_P.
-   Return zero on failure (when N is too big).  */
+${c_doc('langkit.node_child')}
 extern int
 ${capi.get_name("node_child")}(${node_type} node,
                                unsigned n,
                                ${node_type}* child_p);
 
-/* Get the text of the given token.  */
+${c_doc('langkit.node_child')}
 extern ${text_type}
 ${capi.get_name("token_text")}(${token_type} token);
 
-/* Encode some text using the current locale.  The result is dynamically
-   allocated: it is up to the caller to free it when done with it.
-
-   This is a development helper to make it quick and easy to print token
-   and diagnostic text: it ignores errors (when the locale does not support
-   some characters).  Production code should use real conversion routines
-   such as libiconv's in order to deal with UTF-32 texts.  */
+${c_doc('langkit.text_to_locale_string')}
 extern char *
 ${capi.get_name("text_to_locale_string")}(${text_type} text);
 
@@ -285,32 +212,17 @@ ${capi.get_name("text_to_locale_string")}(${text_type} text);
  * Extensions handling
  */
 
-/* The following functions make it possible to attach arbitrary data to AST
-   nodes: these are extensions.  Each data is associated with both an extension
-   ID and a destructor.  AST nodes can have either none or only one extension
-   for a given ID.  The destructor is called when the AST node is about to be
-   destroyed itself.
+${c_doc('langkit.extensions_handling')}
 
-   This mechanism is inteded to ease annotating trees with analysis data but
-   also to host node wrappers for language bindings.  */
-
-/* Type for extension destructors.  The parameter are the "node" the extension
-   was attached to and the "extension" itself.  */
+${c_doc('langkit.node_extension_destructor')}
 typedef void (*${capi.get_name("node_extension_destructor")})(${node_type} node,
                                                               void *extension);
 
-/* Register an extension and return its identifier.  Multiple calls with the
-   same name will return the same identifier.  */
+${c_doc('langkit.register_extension')}
 extern unsigned
 ${capi.get_name("register_extension")}(const char *name);
 
-/* Create an extension slot in "node".  If this node already contains an
-   extension for "ext_id", return the existing slot.  If not, create such a
-   slot, associate the "dtor" destructor to it and initialize the slot to NULL.
-   Return a pointer to the slot.
-
-   Note that the pointer is not guaranteed to stay valid after further calls to
-   this function.  */
+${c_doc('langkit.node_extension')}
 extern void **
 ${capi.get_name("node_extension")}(${node_type} node,
                                    unsigned ext_id,

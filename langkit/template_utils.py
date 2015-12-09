@@ -6,6 +6,7 @@ from mako.lookup import TemplateLookup
 from mako.template import Template
 
 from common import string_repr, get_type, null_constant
+import documentation
 import names
 
 
@@ -78,4 +79,8 @@ common_renderer = Renderer({
     'get_type':         get_type,
     'null_constant':    null_constant,
     'Name':             names.Name,
+
+    'ada_doc':          documentation.ada_doc,
+    'c_doc':            documentation.c_doc,
+    'py_doc':           documentation.py_doc,
 })
