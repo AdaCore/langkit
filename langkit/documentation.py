@@ -323,17 +323,21 @@ def _render(entity, **kwargs):
     """
     Render a documentation template.
 
-    :param str entity: Name for the entity to document.
+    :param entity: Name for the entity to document, or entity to document.
+    :type entity: str|compiled_types.CompiledType
     :param dict kwargs: Additional parameters to pass to the Mako template
         rendering. Must at least contain a "lang" entry to specify the binding
         language.
     :rtype: str
     """
-    lang = kwargs['lang']
-    kwargs['null'] = null_names[lang]
-    kwargs['TODO'] = todo_markers[lang]
-    template = documentations[entity]
-    return template.render(**kwargs)
+    if isinstance(entity, str):
+        lang = kwargs['lang']
+        kwargs['null'] = null_names[lang]
+        kwargs['TODO'] = todo_markers[lang]
+        text = documentations[entity].render(**kwargs)
+    else:
+        text = entity.doc()
+    return text
 
 
 def get_available_width(indent_level):

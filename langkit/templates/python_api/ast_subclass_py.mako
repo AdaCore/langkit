@@ -2,7 +2,7 @@
 
 
 class ${cls.name().camel}(${parent_cls.name().camel}):
-    # TODO: document this class and its methods
+    ${py_doc(cls, 4)}
 
     _field_names = ${parent_cls.name().camel}._field_names + (
         % for primitive in primitives:
@@ -13,13 +13,13 @@ class ${cls.name().camel}(${parent_cls.name().camel}):
     % if not cls.abstract:
     _kind_name = ${repr(cls.name().camel)}
     % endif
-
     % for primitive in primitives:
+
     @property
     def ${primitive.field.name.lower}(self):
+        ${py_doc(primitive.field, 8)}
         result = ${primitive.field.type.py_type(pyapi).name_low}()
         assert _${primitive.name.lower}(self._c_value, ctypes.byref(result))
-
         ## Depending on the type of the field, we need to convert the value to
         ## the most appropriate Python type.
         % if is_ast_node(primitive.field.type):

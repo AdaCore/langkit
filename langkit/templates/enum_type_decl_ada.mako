@@ -5,6 +5,7 @@
    type ${cls.name()} is
      (Uninitialized,
       ${", ".join(str(alt) for alt in cls.alternatives_for(ada_api))});
+   ${ada_doc(cls, 3)}
 
    ## Assign explicit constants members to ease binding to other languages.
    ## Start regular enumerators at 1 so that uninitialized is always 0, which

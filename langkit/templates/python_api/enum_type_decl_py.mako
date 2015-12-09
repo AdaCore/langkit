@@ -1,6 +1,7 @@
 ## vim: filetype=python
 
 # Enumerators for ${cls.c_type(capi).name}
+${py_doc(cls)}
 % for py_alt, alt in zip(cls.alternatives_for(pyapi), cls.alternatives):
 ${py_alt} = '${alt}'
 % endfor

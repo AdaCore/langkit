@@ -6,3 +6,4 @@ function ${accessor_name}
    with Export        => True,
         Convention    => C,
         External_name => "${accessor_name}";
+${ada_doc(field, lang='c')}

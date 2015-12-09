@@ -121,6 +121,16 @@ class CompiledType(object):
         raise NotImplementedError()
 
     @classmethod
+    def doc(cls):
+        """
+        Return the user documentation for this type, or None if there is no
+        documentation.
+
+        :rtype: None|str
+        """
+        return None
+
+    @classmethod
     def c_type(cls, c_api_settings):
         """Return a CAPIType instance for this type.
 
@@ -235,15 +245,17 @@ class Field(AbstractNodeField):
     # order (assuming it is the same as the Field instantiation order).
     _counter = iter(count(0))
 
-    def __init__(self, repr=True):
+    def __init__(self, repr=True, doc=None):
         """Create an AST node field.
 
         :param bool repr: If true, the field will be displayed when
-        pretty-printing the embedding AST node.
+            pretty-printing the embedding AST node.
+        :param str|None doc: User documentation for this field.
         """
         self.repr = repr
         self._name = None
         self._index = next(self._counter)
+        self._doc = doc
 
         self.ast_node = None
         """
@@ -283,6 +295,9 @@ class Field(AbstractNodeField):
 
     def __repr__(self):
         return '<ASTNode {} Field({})>'.format(self._index, self._name)
+
+    def doc(self):
+        return self._doc
 
 
 class AstNodeMetaclass(type):
@@ -555,6 +570,12 @@ class ASTNode(CompiledType):
             return "nil_{0}".format(cls.name())
 
     @classmethod
+    def doc(cls):
+        # Yield documentation only for user types: types defined in Langkit
+        # have documentation that targets Langkit users.
+        return cls.__doc__ if cls != ASTNode else None
+
+    @classmethod
     def c_type(cls, c_api_settings):
         return CAPIType(c_api_settings, 'node')
 
@@ -684,6 +705,10 @@ class EnumType(CompiledType):
     @classmethod
     def nullexpr(cls):
         return "Uninitialized"
+
+    @classmethod
+    def doc(cls):
+        return cls.__doc__
 
     @classmethod
     def c_type(cls, c_api_settings):

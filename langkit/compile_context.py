@@ -23,6 +23,7 @@ import sys
 from ada_api import AdaAPISettings
 from c_api import CAPISettings
 import caching
+import documentation
 from python_api import PythonAPISettings
 from utils import Colors, printcol
 
@@ -530,11 +531,16 @@ class CompileCtx():
         """
         i = 0
         for type_decl in self.enum_declarations:
+            typ = type_decl.type
             i += 1
-            print >> file, 'enum {}: {}'.format(
-                type_decl.type.name().camel,
-                ' '.join(type_decl.type.alternatives)
+            print >> file, 'enum {}:'.format(typ.name().camel)
+            doc = typ.doc()
+            if doc:
+                print >> file, documentation.format_text(doc, 4)
+            print >> file, '    {}'.format(
+                ' '.join(typ.alternatives)
             )
+            print >> file, ''
 
         if i > 0:
             print >> file, ''
@@ -556,6 +562,10 @@ class CompileCtx():
                 '({})'.format(base.name().camel) if base else '',
                 ':' if fields else ''
             )
+            doc = typ.doc()
+            if doc:
+                print >> file, documentation.format_text(doc, 4)
+                print >> file, ''
 
             for field in fields:
                 inherit_note = (
@@ -565,6 +575,9 @@ class CompileCtx():
                 print >> file, '    field {}: {}{}'.format(
                     field.name.lower, field.type.name().camel, inherit_note
                 )
+                doc = field.doc()
+                if doc:
+                    print >> file, documentation.format_text(doc, 8)
 
     @property
     def extensions_dir(self):

@@ -27,7 +27,13 @@ typedef enum {
        specialize them?  */
     ${capi.get_name(Name("List"))} = 1,
 % for astnode in _self.astnode_types:
-    % if not astnode.abstract:
+    % if astnode.abstract:
+
+        /* ${astnode.name()} (abstract)  */
+        ${c_doc(astnode, 8)}
+    % else:
+
+        ${c_doc(astnode, 8)}
         ${capi.get_name(astnode.name())}
           = ${ctx.node_kind_constants[astnode]},
     % endif

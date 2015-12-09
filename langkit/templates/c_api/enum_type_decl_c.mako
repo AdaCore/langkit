@@ -1,5 +1,6 @@
 ## vim: filetype=makocpp
 
+${c_doc(cls)}
 typedef enum {
     ${capi.get_enum_alternative(
         cls.base_name(), Name("Uninitialized"), cls.suffix

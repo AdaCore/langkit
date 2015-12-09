@@ -52,6 +52,7 @@
    % for field in cls.get_fields(include_inherited=False):
        function ${field.name}
          (Node : ${cls.name()}) return ${decl_type(field.type)};
+       ${ada_doc(field, 6)}
    % endfor
 
    % for prop in cls._properties.values():
@@ -71,6 +72,7 @@
        % for f in fields:
             ${f.name} : aliased ${decl_type(f.type)}
                := ${f.type.nullexpr()};
+            ${ada_doc(f, 12)}
        % endfor
          ${exts.include_extension(ext)}
       end record;
