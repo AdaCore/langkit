@@ -1,5 +1,6 @@
 import re
 
+from language_api import AbstractAPISettings
 import names
 
 
@@ -34,7 +35,7 @@ class CAPIType(object):
                 self.c_api_settings.get_name(names.Name(self._name)))
 
 
-class CAPISettings(object):
+class CAPISettings(AbstractAPISettings):
     """Convenient container for C API generation settings.
 
     The convention is to make instances for this class available to templates
@@ -95,11 +96,6 @@ class CAPISettings(object):
                           if self.symbol_prefix else name).lower
 
     def get_enum_alternative(self, type_name, alt_name, suffix):
-        """
-        Return a name that is suitable for code generation for the `alt_name`
-        alternative in the `type_name` enumeration type. `suffix` should be
-        used to post-process names that are invalid enumerators.
-        """
         return self.get_name(
             names.Name('{}_{}'.format(type_name.base_name,
                                       alt_name.base_name)))

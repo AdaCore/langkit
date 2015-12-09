@@ -1,3 +1,6 @@
+from langkit.language_api import AbstractAPISettings
+
+
 class PythonAPIType(object):
     """
     Python API generation helper: encapsulate the logic of Python types names.
@@ -29,7 +32,7 @@ class PythonAPIType(object):
                 if self._external_low else '_{}'.format(self._name_low))
 
 
-class PythonAPISettings(object):
+class PythonAPISettings(AbstractAPISettings):
     """Container for Python API generation settings."""
 
     name = 'python'
@@ -39,9 +42,4 @@ class PythonAPISettings(object):
         self.module_name = module_name
 
     def get_enum_alternative(self, type_name, alt_name, suffix):
-        """
-        Return a name that is suitable for code generation for the `alt_name`
-        alternative in the `type_name` enumeration type. `suffix` should be
-        used to post-process names that are invalid enumerators.
-        """
         return alt_name.upper
