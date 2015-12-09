@@ -34,7 +34,12 @@ def decl_type(ada_type):
 
 
 def make_renderer(base_renderer=None):
-    """Create a template renderer with common helpers."""
+    """
+    Create a template renderer with common helpers.
+
+    :param Renderer base_renderer: The renderer to base the resulting
+        renderer on.
+    """
     if base_renderer is None:
         base_renderer = common_renderer
 
@@ -120,6 +125,8 @@ class CompiledType(object):
         """Return a CAPIType instance for this type.
 
         Must be overriden in subclasses.
+
+        :param CAPISettings c_api_settings: The settings for the C API
         """
         raise NotImplementedError()
 
@@ -128,6 +135,9 @@ class CompiledType(object):
         """Return a PythonAPIType instance for this type.
 
         Must be overriden in subclasses.
+
+        :param PythonApiSettings python_api_settings: The settings for the C
+            API.
         """
         raise NotImplementedError()
 
@@ -312,7 +322,11 @@ class AstNodeMetaclass(type):
 
 
 def abstract(cls):
-    """Decorator to tag an ASTNode subclass as abstract."""
+    """
+    Decorator to tag an ASTNode subclass as abstract.
+
+    :param ASTNode cls: Type parameter. The ASTNode subclass to decorate.
+    """
     assert issubclass(cls, ASTNode)
     cls.abstract = True
     return cls
@@ -322,6 +336,15 @@ class TypeDeclaration(object):
     """Simple holder for generated type declarations."""
 
     def __init__(self, type, public_part, private_part):
+        """
+
+        :param type(ASTNode) type: The type that this TypeDeclaration holds
+            onto
+        :param str public_part: The generated code for the public part of
+            the type declaration.
+        :param private_part: The generated code for the private part of the
+            type declaration.
+        """
         self.type = type
         self.public_part = public_part
         self.private_part = private_part
@@ -331,6 +354,13 @@ class TypeDeclaration(object):
         """
         Helper to create a TypeDeclaration out of the instantiations of a
         single template.
+
+        :param str template_name: The name of the template
+        :param TemplateEnvironment|None t_env: The environment to use for
+            rendering.
+        :param CompiledType type: Type parameter. The type to render
+        :param dict kwargs: Additional arguments to pass to the mako render
+            function.
         """
         return TypeDeclaration(
             type,
@@ -352,7 +382,18 @@ class ASTNode(CompiledType):
     types: type declaration and type usage (to declare AST node variables).
     """
 
-    _fields = []
+    _fields = OrderedDict()
+    """
+    The fields for this ASTNode, instantiated by the metaclass
+    :type: dict[str, Field]
+    """
+
+    _properties = OrderedDict()
+    """
+    The properties for this ASTNode, instantiated by the metaclass
+    :type: dict[str, Property]
+    """
+
     __metaclass__ = AstNodeMetaclass
 
     @classmethod
@@ -523,8 +564,12 @@ ASTNode.abstract = True
 def list_type(element_type):
     """
     Return an ASTNode subclass that represent a list of `element_type`.
+
+    :param ASTNode element_type: Type parameter. The type of the elements of
+        the resulting list.
     """
 
+    # noinspection PyUnusedLocal
     @classmethod
     def name(cls):
         return names.Name('List') + element_type.name()
@@ -569,6 +614,11 @@ class EnumType(CompiledType):
 
     is_ptr = False
     alternatives = []
+    """
+    The list of alternatives for this EnumType subclass.
+
+    :type: list[str]
+    """
 
     # Suffix to use for the alternatives when they are invalid identifiers in
     # some target language.
@@ -576,7 +626,11 @@ class EnumType(CompiledType):
 
     # noinspection PyMissingConstructor
     def __init__(self, alt):
-        """Create a value that represent one of the enum alternatives."""
+        """
+        Create a value that represent one of the enum alternatives.
+
+        :param str alt: The alternative to use for this instance
+        """
         # CompiledType are not usually supposed to be instantiated.  EnumType
         # is an exception to this rule, so do not call CompiledType.__init__.
         assert alt in self.alternatives
@@ -586,6 +640,8 @@ class EnumType(CompiledType):
     def base_name(cls):
         """
         Return a names.Name instance holding the unescaped name for this type.
+
+        :rtype: names.Name
         """
         return names.Name.from_camel(cls.__name__)
 
@@ -630,7 +686,10 @@ class EnumType(CompiledType):
         """
         Return a names.Name instance for alt's enumerator name.
 
-        This is be used in code generation.
+        This is used in Ada code generation.
+
+        :param str alt: The alternative for which we want the enumerator name
+        :rtype: names.Name
         """
         result = names.Name(alt)
         return (result + names.Name.from_lower(cls.suffix)
@@ -638,14 +697,20 @@ class EnumType(CompiledType):
 
     @property
     def enumerator(self):
-        """Return "get_enumerator" for this alternative."""
+        """
+        Return `get_enumerator` for this alternative.
+        :rtype: names.Name
+        """
         return self.get_enumerator(self.alt)
 
     @classmethod
     def alternatives_for(cls, language_settings):
         """
         Return the sequence of names to use for alternatives in the language
-        corresponding to "language_settings".
+        corresponding to language_settings.
+
+        :param AbstractAPISettings language_settings: The language for which we
+            want the enum names.
         """
         type_name = cls.base_name()
         return [
