@@ -4,7 +4,7 @@ from itertools import count
 from c_api import CAPIType
 from common import get_type, null_constant, is_keyword
 from compile_context import get_context
-from expressions import Property
+from expressions import Property, AbstractNodeField
 import names
 from python_api import PythonAPIType
 from template_utils import TemplateEnvironment, common_renderer
@@ -223,7 +223,7 @@ class TermToken(Token):
     quex_token_name = "TERMINATION"
 
 
-class Field(object):
+class Field(AbstractNodeField):
     """
     Placeholder descriptors used to associate data to AST nodes (see below).
     """
@@ -252,22 +252,34 @@ class Field(object):
         :type: ASTNode
         """
 
-        self.type = None
+        self._type = None
         """
         Type of the field, set to a concrete CompiledType subclass after type
         resolution.
         :type: CompiledType
         """
 
-    def _get_name(self):
+    @property
+    def type(self):
+        return self._type
+
+    @type.setter
+    def type(self, type):
+        assert issubclass(type, CompiledType)
+        self._type = type
+
+    @property
+    def name(self):
+        """
+        :rtype: names.Name
+        """
         assert self._name
         return names.Name("F") + self._name
 
-    def _set_name(self, name):
+    @name.setter
+    def name(self, name):
         assert isinstance(name, names.Name)
         self._name = name
-
-    name = property(_get_name, _set_name)
 
     def __repr__(self):
         return '<ASTNode {} Field({})>'.format(self._index, self._name)

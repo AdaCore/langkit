@@ -32,7 +32,8 @@ class Frozable(object):
     For example, for an object that implements the FieldTrait trait, you might
     want to access regular fields on the object in the implementation part:
 
-    >>> a = FieldTraitInstance()
+    >>> a = Self.some_field
+    >>> assert isinstance(a, FieldAccess)
     >>> a.wrong_spellled_field
 
     If the object is not frozen, this will generate a new FieldAccess object.
@@ -52,85 +53,18 @@ class Frozable(object):
         """
         Freeze the object and all its frozable components recursively.
         """
+        # Deactivate this inspection because we don't want to force every
+        # implementer of frozable to call super.
+
+        # noinspection PyAttributeOutsideInit
         self._frozen = True
+
         for _, val in self.__dict__.items():
             if isinstance(val, Frozable):
                 val.freeze()
 
 
-class FieldTrait(Frozable):
-    """
-    Trait class for objects on which you can use the field access notation,
-    which will construct a new expression.
-    """
-
-    def __getattr__(self, attr):
-        """
-        Returns a FieldAccess expression object when the user uses the field
-        access notation on self.
-
-        :rtype: FieldAccess
-        """
-        if self.frozen:
-            raise Exception("Illegal field access")
-        return FieldAccess(self, attr)
-
-
-class CallTrait(Frozable):
-    """
-    Trait class for objects on which you can use the field access notation,
-    which will construct a new expression.
-    """
-
-    def __call__(self, *args, **kwargs):
-        """
-        Returns a OpCall expression object when the user uses the call
-        notation on self.
-
-        :rtype: OpCall
-        """
-        if self.frozen:
-            raise Exception("Illegal call expr")
-        return OpCall(self, args, kwargs)
-
-
-class OrTrait(Frozable):
-    """
-    Trait class for objects on which you can use the binary or notation, which
-    will construct a new expression.
-    """
-
-    def __or__(self, other):
-        """
-        Returns a OrExpr expression object when the user uses the binary or
-        notation on self.
-
-        :rtype: OrExpr
-        """
-        if self.frozen:
-            raise Exception("Illegal or expr")
-        return OrExpr(self, other)
-
-
-class AndTrait(Frozable):
-    """
-    Trait class for objects on which you can use the binary and notation, which
-    will construct a new expression.
-    """
-
-    def __and__(self, other):
-        """
-        Returns a AndExpr expression object when the user uses the binary and
-        notation on self.
-
-        :rtype: AndExpr
-        """
-        if self.frozen:
-            raise Exception("Illegal and expr")
-        return AndExpr(self, other)
-
-
-class AbstractExpression(object):
+class AbstractExpression(Frozable):
     """
     An abstract expression is an expression that is not yet resolved. To be
     able to emulate lexical scope in expressions, the expression trees produced
@@ -148,6 +82,80 @@ class AbstractExpression(object):
         :rtype: ResolvedExpression
         """
         raise NotImplementedError()
+
+
+class FieldTrait(AbstractExpression):
+    """
+    Trait class for objects on which you can use the field access notation,
+    which will construct a new expression.
+    """
+
+    def __getattr__(self, attr):
+        """
+        Returns a FieldAccess expression object when the user uses the field
+        access notation on self.
+
+        :rtype: FieldAccess
+        """
+        if self.frozen:
+            raise Exception("Illegal field access")
+
+        assert isinstance(self, AbstractExpression)
+        return FieldAccess(self, attr)
+
+
+class CallTrait(AbstractExpression):
+    """
+    Trait class for objects on which you can use the field access notation,
+    which will construct a new expression.
+    """
+
+    def __call__(self, *args, **kwargs):
+        """
+        Returns a OpCall expression object when the user uses the call
+        notation on self.
+
+        :rtype: OpCall
+        """
+        if self.frozen:
+            raise Exception("Illegal call expr")
+        return OpCall(self, args, kwargs)
+
+
+class OrTrait(AbstractExpression):
+    """
+    Trait class for objects on which you can use the binary or notation, which
+    will construct a new expression.
+    """
+
+    def __or__(self, other):
+        """
+        Returns a OrExpr expression object when the user uses the binary or
+        notation on self.
+
+        :rtype: OrExpr
+        """
+        if self.frozen:
+            raise Exception("Illegal or expr")
+        return OrExpr(self, other)
+
+
+class AndTrait(AbstractExpression):
+    """
+    Trait class for objects on which you can use the binary and notation, which
+    will construct a new expression.
+    """
+
+    def __and__(self, other):
+        """
+        Returns a AndExpr expression object when the user uses the binary and
+        notation on self.
+
+        :rtype: AndExpr
+        """
+        if self.frozen:
+            raise Exception("Illegal and expr")
+        return AndExpr(self, other)
 
 
 class OrExpr(AbstractExpression):
@@ -174,7 +182,7 @@ class AndExpr(AbstractExpression):
         self.right = right
 
 
-class OpCall(AbstractExpression, FieldTrait, OrTrait, AndTrait):
+class OpCall(FieldTrait, OrTrait, AndTrait):
     """
     Abstract expression that is the result of a call expression evaluation.
 
@@ -189,7 +197,7 @@ class OpCall(AbstractExpression, FieldTrait, OrTrait, AndTrait):
         return "<OpCall {} {} {}>".format(self.called, self.args, self.kwargs)
 
 
-class FieldAccess(AbstractExpression, CallTrait, FieldTrait):
+class FieldAccess(CallTrait, FieldTrait):
     """
     Abstract expression that is the result of a field access expression
     evaluation.
@@ -213,14 +221,21 @@ class FieldAccess(AbstractExpression, CallTrait, FieldTrait):
 
         :rtype: FieldAccessExpr
         """
-        receiver_expr = self.receiver.construct()
 
-        # First search for a property
-        to_get = receiver_expr.type._properties.get(
-            self.field,
+        receiver_expr = self.receiver.construct()
+        ":type: ResolvedExpression"
+
+        # For the moment, this can work only on expressions deriving from
+        # ASTNode.
+        receiver_type = receiver_expr.type
+        ":type: compiled_types.ASTNode"
+
+        to_get = (
+            receiver_type._properties.get(self.field, None) or
             # If there's no property by that name, search for a field
-            receiver_expr.type._fields.get(self.field, None)
+            receiver_type._fields.get(self.field, None)
         )
+        ":type: AbstractNodeField"
 
         # If still not found, there's a problem
         assert to_get, col("Type {} has no '{}' field or property".format(
@@ -234,7 +249,7 @@ class FieldAccess(AbstractExpression, CallTrait, FieldTrait):
         return "<FieldAccess {} {}>".format(self.receiver, self.field)
 
 
-class PlaceHolder(AbstractExpression, FieldTrait):
+class PlaceHolder(FieldTrait):
     """
     Abstract expression that is an entry point into the expression DSL.
 
@@ -258,6 +273,9 @@ class PlaceHolder(AbstractExpression, FieldTrait):
     def bind(self, type):
         """
         Bind the type of this placeholder.
+
+        :param compiled_types.CompiledType type: Type parameter. The type of
+            this placeholder
         """
         self._type = type
         yield
@@ -319,9 +337,9 @@ class ResolvedExpression(object):
         """
         Returns the type of the resolved expression.
 
-        :rtype: CompiledType
+        :rtype: compiled_types.CompiledType
         """
-        return NotImplementedError()
+        raise NotImplementedError()
 
 
 class VarExpr(ResolvedExpression):
@@ -381,7 +399,16 @@ class LocalVars(object):
         """
         Represents one local variable in a property definition.
         """
-        def __init__(self, name, type):
+        def __init__(self, vars, name, type):
+            """
+
+            :param LocalVars vars: The LocalVars instance to which this
+                local variable is bound
+            :param str name: The name of this local variable
+            :param compiled_types.CompiledType type: Type parameter. The
+                type of this local variable
+            """
+            self.vars = vars
             self.name = name
             self.type = type
 
@@ -393,7 +420,13 @@ class LocalVars(object):
         This getattr override allows you to declare local variables in
         templates via the syntax::
 
-            >>> var = vars('Index', 'Integer')
+            import compiled_types
+            vars = LocalVars()
+            var = vars('Index', compiled_types.LongType)
+
+        :param str name: The name of the variable
+        :param compiled_types.CompiledType type: Type parameter. The type of
+            the local variable
         """
         ret = LocalVars.LocalVar(self, name, type)
         assert name not in self.local_vars, (
@@ -407,7 +440,9 @@ class LocalVars(object):
         Returns existing instance of variable called name, so that you can use
         existing variables via the syntax::
 
-            >>> ivar = var.Index
+            ivar = var.Index
+
+        :param str name: The name of the variable
         """
         return self.local_vars[name]
 
@@ -415,7 +450,41 @@ class LocalVars(object):
         return "\n".join(lv.render() for lv in self.local_vars)
 
 
-class Property(object):
+class AbstractNodeField(object):
+    """
+    This class defines an abstract base class for fields and properties on
+    AST nodes.
+
+    It defines the basis of what is needed to bind them in other languages
+    bindings: a type and a name.
+    """
+
+    @property
+    def type(self):
+        """
+        Type of the abstract node field
+        :rtype: compiled_types.CompiledType
+        """
+        raise NotImplementedError()
+
+    @type.setter
+    def type(self, type):
+        raise NotImplementedError()
+
+    @property
+    def name(self):
+        """
+        Name of the abstract node field
+        :rtype: names.Name
+        """
+        raise NotImplementedError()
+
+    @name.setter
+    def name(self, name):
+        raise NotImplementedError()
+
+
+class Property(AbstractNodeField):
     """
     This is the public class via which you'll create properties in the DSL.
 
@@ -439,11 +508,28 @@ class Property(object):
         self.constructed_expr = None
         self.vars = LocalVars()
 
+        self.prop_decl = None
+        """
+        The emitted code for this property declaration
+        :type: str
+        """
+
+        self.prop_def = None
+        """
+        The emitted code for this property definition
+        :type: str
+        """
+
+        self._name = None
+        ":type: names.Name"
+
     @classmethod
     def get(cls):
         """
         Return the currently bound property. Used by the rendering context to
         get the current property.
+
+        :rtype: Property
         """
         return cls.__current_property__
 
@@ -464,6 +550,8 @@ class Property(object):
     def type(self):
         """
         Returns the type of the underlying expression after resolution.
+
+        :rtype: compiled_types.CompiledType
         """
         return self.constructed_expr.type
 
@@ -471,8 +559,8 @@ class Property(object):
         """
         Render the given property to generated code.
 
-        :param CompiledType owner_type: The ast node subclass to which this
-                                        property is bound.
+        :param compiled_types.CompiledType owner_type: The ast node subclass to
+            which this property is bound.
         :rtype: basestring
         """
         with Self.bind(owner_type):
