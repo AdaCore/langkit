@@ -21,10 +21,10 @@ class GeneratedFunction(object):
         self.implementation = implementation
 
 
-class FieldAccessor(GeneratedFunction):
+class AbstractFieldAccessor(GeneratedFunction):
     """Generated function that expose field read access."""
     def __init__(self, name, field, c_declaration, **kwargs):
-        super(FieldAccessor, self).__init__(name, **kwargs)
+        super(AbstractFieldAccessor, self).__init__(name, **kwargs)
         self.field = field
         self.c_declaration = c_declaration
 
@@ -464,6 +464,23 @@ class ASTNode(CompiledType):
                          if issubclass(base_class, ASTNode)])
 
     @classmethod
+    def get_properties(cls, predicate=None, include_inherited=True):
+        """
+        Return the list of all the fields `cls` has, including its parents'.
+
+        :param predicate: Predicate to filter fields if needed
+        :type predicate: None|(Field) -> bool
+
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :rtype: list[Property]
+        """
+        return cls._get_abstract_fields(predicate, include_inherited,
+                                        field_name='_properties')
+
+    @classmethod
     def get_fields(cls, predicate=None, include_inherited=True):
         """
         Return the list of all the fields `cls` has, including its parents'.
@@ -472,16 +489,45 @@ class ASTNode(CompiledType):
         :type predicate: None|(Field) -> bool
 
         :param bool include_inherited: If true, include inheritted fields in
-        the returned list. Return only fields that were part of the declaration
-        of this node otherwise.
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :rtype: list[Field]
         """
+        return cls._get_abstract_fields(predicate, include_inherited)
+
+    @classmethod
+    def _get_abstract_fields(cls, predicate=None, include_inherited=True,
+                             field_name='_fields'):
         if include_inherited:
             fields = []
             for base_class in cls.get_inheritance_chain():
-                fields.extend(base_class._fields.values())
+                fields.extend(getattr(base_class, field_name).values())
         else:
-            fields = cls._fields.values()
+            fields = getattr(cls, field_name).values()
         return filter(predicate or (lambda f: True), fields)
+
+    @classmethod
+    def get_abstract_fields(cls, predicate=None, include_inherited=True):
+        """
+        Get all AbstractField instances for the class.
+
+        :param predicate: Predicate to filter fields if needed
+        :type predicate: None|(Field) -> bool
+
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :rtype: list[AbstractField]
+        """
+        ret = cls.get_fields(predicate, include_inherited)
+        ":type: list[AbstractField]"
+
+        props = cls.get_properties(predicate, include_inherited)
+        ret.extend(props)
+
+        return ret
 
     @classmethod
     def add_to_context(cls):
@@ -498,9 +544,10 @@ class ASTNode(CompiledType):
             cls.compute_properties()
             cls.create_type_definition()
 
-            # Generate field accessors (C public API) for this node kind
+            # Generate abstract field accessors (C public API) for this node
+            # kind.
             primitives = []
-            for field in cls.get_fields(include_inherited=False):
+            for field in cls.get_abstract_fields(include_inherited=False):
                 accessor_basename = names.Name(
                     '{}_{}'.format(cls.name().base_name,
                                    field.name.base_name)
@@ -521,7 +568,7 @@ class ASTNode(CompiledType):
                 accessor_c_decl = render(
                     'c_api/astnode_field_access_decl_c', t_env)
 
-                primitives.append(FieldAccessor(
+                primitives.append(AbstractFieldAccessor(
                     accessor_basename,
                     declaration=accessor_decl,
                     implementation=accessor_impl,

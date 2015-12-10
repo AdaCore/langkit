@@ -483,6 +483,13 @@ class AbstractNodeField(object):
     def name(self, name):
         raise NotImplementedError()
 
+    def doc(self):
+        """
+        Documentation for the abstract node field
+        :rtype: str
+        """
+        raise NotImplementedError()
+
 
 class Property(AbstractNodeField):
     """
@@ -586,3 +593,6 @@ class Property(AbstractNodeField):
     def name(self, name):
         assert isinstance(name, names.Name)
         self._name = name
+
+    def doc(self):
+        return ""
