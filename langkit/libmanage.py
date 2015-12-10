@@ -40,8 +40,11 @@ class Directories(object):
 
     def langkit_source_dir(self, *args):
         """
-        Build and return the path for ARGS under the root source directory for
-        langkit.
+        Build and return the path for ``args`` under the root source directory
+        for langkit.
+
+        :param list[str] args: The path components, same semantics as in
+            os.path.join.
         """
         return os.path.join(self.root_langkit_source_dir, *args)
 
@@ -246,6 +249,9 @@ class ManageScript(object):
         instance).
 
         This must be overriden by subclasses.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
         """
         raise NotImplementedError()
 
@@ -253,7 +259,7 @@ class ManageScript(object):
     def lib_name(self):
         return self.context.ada_api_settings.lib_name
 
-    def run(self, args=None):
+    def run(self):
         parsed_args = self.args_parser.parse_args()
         self.dirs.set_build_dir(parsed_args.build_dir)
         install_dir = getattr(parsed_args, 'install-dir', None)
@@ -288,7 +294,12 @@ class ManageScript(object):
             cov.generate_report()
 
     def do_generate(self, args):
-        """Generate source code for libadalang."""
+        """
+        Generate source code for libadalang.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
+        """
         printcol("Generating source for libadalang ...", Colors.HEADER)
         self.context.emit(file_root=self.dirs.build_dir())
 
@@ -314,7 +325,12 @@ class ManageScript(object):
         printcol("Generation complete!", Colors.OKGREEN)
 
     def do_build(self, args):
-        """Build generated source code."""
+        """
+        Build generated source code.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
+        """
 
         build_mode = args.build_mode if args.build_mode else 'dev'
 
@@ -368,13 +384,23 @@ class ManageScript(object):
         printcol("Compilation complete!", Colors.OKGREEN)
 
     def do_make(self, args):
-        """Generate and build in one command."""
+        """
+        Generate and build in one command.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
+        """
         self.do_generate(args)
         self.do_build(args)
 
     def do_install(self, args):
-        """Install programs and libraries."""
-        del args
+        """
+        Install programs and libraries.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
+        """
+        del args  # Unused in this implementation
 
         for subdir in ('bin', 'include', 'lib', 'share', 'python'):
             install_dir = self.dirs.install_dir(subdir)
@@ -390,7 +416,12 @@ class ManageScript(object):
         """
         Display Bourne shell commands that setup environment in order to make
         libadalang available.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
         """
+        del args  # Unused in this implementation
+
         def add_path(name, path):
             print('{name}={path}:${name}; export {name}'.format(
                 name=name, path=pipes.quote(path)
@@ -398,7 +429,13 @@ class ManageScript(object):
         self.setup_environment(add_path)
 
     def do_help(self, args):
-        """Print usage and exit."""
+        """
+        Print usage and exit.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
+        """
+        del args  # Unused in this implementation
         self.args_parser.print_help()
 
     def setup_environment(self, add_path):

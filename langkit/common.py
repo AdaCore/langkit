@@ -93,9 +93,11 @@ def is_keyword(name):
     :param str|names.Name name: The name we want to test
     :rtype: bool
     """
-    if isinstance(name, names.Name):
-        name = name.lower
-    return name.lower() in keywords[LANGUAGE]
+
+    str_name = name.lower if isinstance(name, names.Name) else name
+    assert isinstance(str_name, basestring)
+
+    return str_name.lower() in keywords[LANGUAGE]
 
 
 __next_ids = defaultdict(lambda: itertools.count(0))
@@ -144,6 +146,7 @@ basic_types = {
         bool: "bool"
     }
 }
+":type: dict[str, dict[type, str]]"
 
 
 def get_type(typ):
@@ -151,7 +154,7 @@ def get_type(typ):
     Given a base python type, long or bool, will return the representation
     of that type in the target global language.
 
-    :param long|bool typ: The type to be represented
+    :param type typ: The type to be represented
     :rtype: str
     """
     return basic_types[LANGUAGE][typ]

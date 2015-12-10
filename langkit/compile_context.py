@@ -239,6 +239,9 @@ class CompileCtx():
         Associate `types` (a list of CompiledType) to fields in `astnode` (an
         ASTNode sub-class). It is valid to perform this association multiple
         times as long as types are consistent.
+
+        :param ASTNode astnode: The AST node we want to associate the types to
+        :param list[CompiledType] types: The types to associate to the fields
         """
         fields = astnode.get_fields(include_inherited=False)
 
@@ -391,7 +394,7 @@ class CompileCtx():
         ):
             self.node_kind_constants[astnode] = i
 
-        with open(os.path.join(share_path, 'ast-types.txt'), 'w') as f:
+        with file(os.path.join(share_path, 'ast-types.txt'), 'w') as f:
             self.emit_ast_doc_txt(f)
 
         printcol("Generating sources... ", Colors.OKBLUE)
@@ -481,7 +484,12 @@ class CompileCtx():
         self.cache.save()
 
     def emit_c_api(self, src_path, include_path):
-        """Generate header and binding body for the external C API."""
+        """
+        Generate header and binding body for the external C API.
+
+        :param str include_path: The include path
+        :param str src_path: The source path
+        """
         def render(template_name):
             return self.render_template(template_name, _self=self)
 
@@ -501,7 +509,12 @@ class CompileCtx():
                            render("c_api/body_ada"))
 
     def emit_python_api(self, python_path):
-        """Generate the Python binding module."""
+        """
+        Generate the Python binding module.
+
+        :param str python_path: The directory in which the Python module will be
+            generated.
+        """
         module_filename = "{}.py".format(self.python_api_settings.module_name)
 
         # Collect ASTNode subclass declarations preserving "astnode_types"'s
@@ -525,7 +538,8 @@ class CompileCtx():
                 ))
 
     def emit_ast_doc_txt(self, file):
-        """Generate a synthetic text documentation about AST nodes and types.
+        """
+        Generate a synthetic text documentation about AST nodes and types.
 
         :param file file: Output file for the documentation
         """
@@ -598,8 +612,8 @@ class CompileCtx():
         Return an extension file's absolute path, given strings/names
         arguments, so that you can do::
 
-            >>> ext('a', 'b', 'c')
-            $lang_dir/extensions/a/b/c
+            ext('a', 'b', 'c')
+            # returns '$lang_dir/extensions/a/b/c'
 
         :param [str|names.Name] args: The list of components to constitute the
                                       extension's path.

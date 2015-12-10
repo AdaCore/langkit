@@ -111,6 +111,8 @@ class Grammar(object):
         """
         Add rules to the grammar.  The keyword arguments will provide a name to
         rules.
+
+        :param dict[str, Parser] kwargs: The rules to add to the grammar.
         """
         for name, rule in kwargs.items():
             self.rules[name] = rule
@@ -119,7 +121,11 @@ class Grammar(object):
             rule.is_root = True
 
     def __getattr__(self, rule_name):
-        """Build and return a Defer parser that references the above rule."""
+        """
+        Build and return a Defer parser that references the above rule.
+
+        :param str rule_name: The name of the rule.
+        """
         return Defer(rule_name, lambda: self.rules[rule_name])
 
 
@@ -184,7 +190,11 @@ class Parser(object):
         return Transform(self, transform_fn)
 
     def set_grammar(self, grammar):
-        """Associate `grammar` to this parser and to all its children."""
+        """
+        Associate `grammar` to this parser and to all its children.
+
+        :param Grammar grammar: The grammar instance.
+        """
         for c in self.children():
             c.set_grammar(grammar)
         self.grammar = grammar
@@ -193,6 +203,9 @@ class Parser(object):
         """
         Rename this parser and all its children so that `name` is part of the
         corresponding function in the generated code.
+
+        :param names.Name name: The name to include in the name of this parser
+            tree.
         """
         for c in self.children():
             if not c._name and not isinstance(c, Defer):
@@ -319,6 +332,9 @@ class Parser(object):
 
         Subclasses must override this method.  It is a low-level routine used
         by the `gen_code_or_fncall` method.  See above for arguments meaning.
+
+        :param str pos_name: The name of the position variable, which is the
+            position of the current token in the lexer stream.
         """
         raise NotImplementedError()
 
@@ -425,6 +441,7 @@ class Or(Parser):
                 res = common_ancestor(*types)
             else:
                 typs = list(types)
+
                 assert all(type(t) == type(typs[0]) for t in typs)
                 res = typs[0]
 
@@ -474,7 +491,11 @@ class Or(Parser):
 
 
 def always_make_progress(parser):
-    """Return whether `parser` cannot match an empty sequence of tokens."""
+    """
+    Return whether `parser` cannot match an empty sequence of tokens.
+
+    :param Parser parser: The parser to evaluate
+    """
     if isinstance(parser, List):
         return not parser.empty_valid or always_make_progress(parser.parser)
     return not isinstance(parser, (Opt, Null))
@@ -515,10 +536,13 @@ class Row(Parser):
         self.allargs = []
 
     def assign_wrapper(self, parser):
-        """Associate `parser` as a wrapper for this Row.
+        """
+        Associate `parser` as a wrapper for this Row.
 
         Note that a Row can have at most only one wrapper, so this does nothing
         if this Row is a root parser.
+
+        :param Parser parser: The parser to associate to this row
         """
         assert not self.is_root and not self.typ, (
             "Row parsers do not represent a concrete result. They must be used"
@@ -587,8 +611,7 @@ class List(Parser):
     def _is_left_recursive(self, rule_name):
         res = self.parser._is_left_recursive(rule_name)
         assert not(
-            res and (self.empty_valid
-                     or not always_make_progress(self.parser))
+            res and (self.empty_valid or not always_make_progress(self.parser))
         )
         return res
 

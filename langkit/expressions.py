@@ -30,11 +30,11 @@ class Frozable(object):
     non magic behavior.
 
     For example, for an object that implements the FieldTrait trait, you might
-    want to access regular fields on the object in the implementation part:
+    want to access regular fields on the object in the implementation part::
 
-    >>> a = Self.some_field
-    >>> assert isinstance(a, FieldAccess)
-    >>> a.wrong_spellled_field
+        a = Self.some_field
+        assert isinstance(a, FieldAccess)
+        a.wrong_spellled_field
 
     If the object is not frozen, this will generate a new FieldAccess object.
     If it is frozen, this will throw an exception.

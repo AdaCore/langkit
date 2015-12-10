@@ -450,7 +450,10 @@ def create_doc_printer(lang, formatter):
     """
 
     def func(entity, column=0, **kwargs):
-        ":type entity: str|compiled_types.CompiledType"
+        """
+        :type entity: str|compiled_types.CompiledType
+        :type column: int
+        """
 
         # Tell _render for which binding we are generating documentation
         kwargs.setdefault('lang', lang)

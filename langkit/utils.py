@@ -42,8 +42,24 @@ def copy_with(obj, **kwargs):
     """
     Copy an object, and add every key value association passed in kwargs to it.
 
-    :type obj: T
+    :param dict[str, Any] kwargs: key value associations to attach to the
+        object.
+    :param T obj: The object to copy
     :rtype: T
+
+    Example use::
+
+        class A(object):
+            def __init__(self, a, b):
+                self.a = a
+                self.b = b
+
+        inst = A(12, 15)
+        inst_2 = copy_with(inst, a=16)
+        print inst_2.a
+        # Prints "16"
+        print inst_2.b
+        # Prints "12"
     """
     c = copy(obj)
 
@@ -89,7 +105,9 @@ def common_ancestor(*classes):
     :type classes: list[types.ClassType]
     :rtype: types.ClassType
     """
-    rmro = lambda k: reversed(k.mro())
+    def rmro(klass):
+        return reversed(klass.mro())
+
     result = list(takewhile(lambda a: len(set(a)) == 1,
                             zip(*map(rmro, classes))))[-1][0]
     return result
@@ -99,6 +117,8 @@ def memoized(func):
     """
     Decorator to memoize a function.
     This function must be passed only hashable arguments.
+
+    :param func: The function to decorate
     """
     cache = {}
 

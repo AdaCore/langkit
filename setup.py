@@ -19,7 +19,7 @@ setup(
     author_email='report@adacore.com',
     url='https://www.adacore.com',
     description='A Python framework to generate language parsers',
-    requires=['Mako'],
+    requires=['Mako', 'coverage'],
     packages=['langkit'],
     package_data={'langkit': ['support/*']},
     scripts=[os.path.join('scripts', 'create-project.py')]
