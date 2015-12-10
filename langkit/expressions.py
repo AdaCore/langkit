@@ -65,13 +65,27 @@ class Frozable(object):
             if isinstance(val, Frozable):
                 val.freeze()
 
+    @staticmethod
+    def protect(func):
+        """
+        Decorator for subclasses methods to prevent invokation after freeze.
+
+        :param func: Unbound method to protect.
+        :rtype: function
+        """
+        def wrapper(self, *args, **kwargs):
+            if self.__dict__.get('_frozen', False):
+                raise Exception("Illegal field access")
+            return func(self, *args, **kwargs)
+        return wrapper
+
 
 class AbstractExpression(Frozable):
     """
-    An abstract expression is an expression that is not yet resolved. To be
-    able to emulate lexical scope in expressions, the expression trees produced
-    by initial python evaluation of the expressions will be a tree of
-    AbstractExpression objects.
+    An abstract expression is an expression that is not yet resolved (think:
+    typed and bound to some AST node context). To be able to emulate lexical
+    scope in expressions, the expression trees produced by initial python
+    evaluation of the expressions will be a tree of AbstractExpression objects.
 
     You can then call construct on the root of the expression tree to get back
     a resolved tree of ResolvedExpression objects.
@@ -85,78 +99,47 @@ class AbstractExpression(Frozable):
         """
         raise NotImplementedError()
 
-
-class FieldTrait(AbstractExpression):
-    """
-    Trait class for objects on which you can use the field access notation,
-    which will construct a new expression.
-    """
-
+    @Frozable.protect
     def __getattr__(self, attr):
         """
         Returns a FieldAccess expression object when the user uses the field
         access notation on self.
 
+        :param str attr: Name of the field to access.
         :rtype: FieldAccess
         """
-        if self.frozen:
-            raise Exception("Illegal field access")
-
-        assert isinstance(self, AbstractExpression)
         return FieldAccess(self, attr)
 
-
-class CallTrait(AbstractExpression):
-    """
-    Trait class for objects on which you can use the field access notation,
-    which will construct a new expression.
-    """
-
+    @Frozable.protect
     def __call__(self, *args, **kwargs):
         """
-        Returns a OpCall expression object when the user uses the call
-        notation on self.
+        Returns a OpCall expression object when the user uses the call notation
+        on self.
 
         :rtype: OpCall
         """
-        if self.frozen:
-            raise Exception("Illegal call expr")
         return OpCall(self, args, kwargs)
 
-
-class OrTrait(AbstractExpression):
-    """
-    Trait class for objects on which you can use the binary or notation, which
-    will construct a new expression.
-    """
-
+    @Frozable.protect
     def __or__(self, other):
         """
         Returns a OrExpr expression object when the user uses the binary or
         notation on self.
 
+        :type other: AbstractExpression
         :rtype: OrExpr
         """
-        if self.frozen:
-            raise Exception("Illegal or expr")
         return OrExpr(self, other)
 
-
-class AndTrait(AbstractExpression):
-    """
-    Trait class for objects on which you can use the binary and notation, which
-    will construct a new expression.
-    """
-
+    @Frozable.protect
     def __and__(self, other):
         """
         Returns a AndExpr expression object when the user uses the binary and
         notation on self.
 
+        :type other: AbstractExpression
         :rtype: AndExpr
         """
-        if self.frozen:
-            raise Exception("Illegal and expr")
         return AndExpr(self, other)
 
 
@@ -184,7 +167,7 @@ class AndExpr(AbstractExpression):
         self.right = right
 
 
-class OpCall(FieldTrait, OrTrait, AndTrait):
+class OpCall(AbstractExpression):
     """
     Abstract expression that is the result of a call expression evaluation.
 
@@ -199,7 +182,7 @@ class OpCall(FieldTrait, OrTrait, AndTrait):
         return "<OpCall {} {} {}>".format(self.called, self.args, self.kwargs)
 
 
-class FieldAccess(CallTrait, FieldTrait):
+class FieldAccess(AbstractExpression):
     """
     Abstract expression that is the result of a field access expression
     evaluation.
@@ -247,7 +230,7 @@ class FieldAccess(CallTrait, FieldTrait):
         return "<FieldAccess {} {}>".format(self.receiver, self.field)
 
 
-class PlaceHolder(FieldTrait):
+class PlaceHolder(AbstractExpression):
     """
     Abstract expression that is an entry point into the expression DSL.
 
