@@ -12,6 +12,8 @@ notably to define properties on AST nodes.
 """
 
 from contextlib import contextmanager
+from itertools import count
+
 import names
 from utils import Colors, col
 
@@ -230,11 +232,7 @@ class FieldAccess(CallTrait, FieldTrait):
         receiver_type = receiver_expr.type
         ":type: compiled_types.ASTNode"
 
-        to_get = (
-            receiver_type._properties.get(self.field, None) or
-            # If there's no property by that name, search for a field
-            receiver_type._fields.get(self.field, None)
-        )
+        to_get = receiver_type.get_abstract_fields_dict().get(self.field, None)
         ":type: AbstractNodeField"
 
         # If still not found, there's a problem
@@ -459,6 +457,16 @@ class AbstractNodeField(object):
     bindings: a type and a name.
     """
 
+    # Hack: the field declarations order in AST nodes matters.  The simple and
+    # very handy syntax we use here for such declarations doesn't preserve this
+    # order in Python2, however.  Waiting for the move to Python3, we use a
+    # hack here: the following counter will help us to recover the declaration
+    # order (assuming it is the same as the Field instantiation order).
+    _counter = iter(count(0))
+
+    def __init__(self):
+        self._index = next(self._counter)
+
     @property
     def type(self):
         """
@@ -512,6 +520,9 @@ class Property(AbstractNodeField):
         :param AbstractExpression expr: The expression for the property.
         :param str|None doc: User documentation for this property.
         """
+
+        super(Property, self).__init__()
+
         self.expr = expr
         self.constructed_expr = None
         self.vars = LocalVars()

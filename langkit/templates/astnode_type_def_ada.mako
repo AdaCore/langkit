@@ -55,7 +55,7 @@
        ${ada_doc(field, 6)}
    % endfor
 
-   % for prop in cls._properties.values():
+   % for prop in cls.get_properties(include_inherited=False):
    ${prop.prop_decl}
    % endfor
 

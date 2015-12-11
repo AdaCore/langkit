@@ -251,6 +251,6 @@ type_name = '{}_Type'.format(cls.name())
    end ${field.name};
 % endfor
 
-% for prop in cls._properties.values():
+% for prop in cls.get_properties(include_inherited=False):
 ${prop.prop_def}
 % endfor

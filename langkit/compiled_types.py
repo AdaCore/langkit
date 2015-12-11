@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from itertools import count
 
 from c_api import CAPIType
 from common import get_type, null_constant, is_keyword
@@ -234,13 +233,6 @@ class Field(AbstractNodeField):
     Placeholder descriptors used to associate data to AST nodes (see below).
     """
 
-    # Hack: the field declarations order in AST nodes matters.  The simple and
-    # very handy syntax we use here for such declarations doesn't preserve this
-    # order in Python2, however.  Waiting for the move to Python3, we use a
-    # hack here: the following counter will help us to recover the declaration
-    # order (assuming it is the same as the Field instantiation order).
-    _counter = iter(count(0))
-
     def __init__(self, repr=True, doc=None, type=None):
         """Create an AST node field.
 
@@ -248,9 +240,10 @@ class Field(AbstractNodeField):
             pretty-printing the embedding AST node.
         :param str|None doc: User documentation for this field.
         """
+        super(Field, self).__init__()
+
         self.repr = repr
         self._name = None
-        self._index = next(self._counter)
         self._doc = doc
 
         self.ast_node = None
@@ -306,23 +299,17 @@ class AstNodeMetaclass(type):
         assert len(bases) == 1, (
             "Multiple inheritance for AST nodes is not supported")
 
-        # Gather the fields in a dictionary
+        # Gather the fields and properties in a dictionary
         fields = OrderedDict(sorted(
             ((f_n, f_v)
-             for f_n, f_v in dct.items() if isinstance(f_v, Field)),
+             for f_n, f_v in dct.items()
+             if isinstance(f_v, AbstractNodeField)),
             # Recover the order of field declarations.  See the Field
             # class definition for more details.
             key=lambda (_, f): f._index
         ))
 
-        # Gather the properties in a dictionary
-        properties = OrderedDict(sorted(
-            [(f_n, f_v) for f_n, f_v in dct.items()
-             if isinstance(f_v, Property)],
-            key=lambda (n, v): n
-        ))
-
-        for field_name, field in fields.items() + properties.items():
+        for field_name, field in fields.items():
             # Remove fields/props as class members: we want them to be
             # stored in their own dicts.
             dct.pop(field_name)
@@ -330,7 +317,6 @@ class AstNodeMetaclass(type):
             field.name = names.Name.from_lower(field_name)
 
         dct['_fields'] = fields
-        dct['_properties'] = properties
 
         # By default, ASTNode subtypes aren't abstract
         dct['abstract'] = False
@@ -414,17 +400,11 @@ class ASTNode(CompiledType):
     :type: dict[str, Field]
     """
 
-    _properties = OrderedDict()
-    """
-    The properties for this ASTNode, instantiated by the metaclass
-    :type: dict[str, Property]
-    """
-
     __metaclass__ = AstNodeMetaclass
 
     @classmethod
     def compute_properties(cls):
-        for p in cls._properties.values():
+        for p in cls.get_properties(include_inherited=False):
             p.render(cls)
 
     @classmethod
@@ -476,8 +456,8 @@ class ASTNode(CompiledType):
 
         :rtype: list[Property]
         """
-        return cls._get_abstract_fields(predicate, include_inherited,
-                                        field_name='_properties')
+        return cls.get_abstract_fields(predicate, include_inherited,
+                                       field_class=Property)
 
     @classmethod
     def get_fields(cls, predicate=None, include_inherited=True):
@@ -493,21 +473,12 @@ class ASTNode(CompiledType):
 
         :rtype: list[Field]
         """
-        return cls._get_abstract_fields(predicate, include_inherited)
+        return cls.get_abstract_fields(predicate, include_inherited,
+                                       field_class=Field)
 
     @classmethod
-    def _get_abstract_fields(cls, predicate=None, include_inherited=True,
-                             field_name='_fields'):
-        if include_inherited:
-            fields = []
-            for base_class in cls.get_inheritance_chain():
-                fields.extend(getattr(base_class, field_name).values())
-        else:
-            fields = getattr(cls, field_name).values()
-        return filter(predicate or (lambda f: True), fields)
-
-    @classmethod
-    def get_abstract_fields(cls, predicate=None, include_inherited=True):
+    def get_abstract_fields(cls, predicate=None, include_inherited=True,
+                            field_class=AbstractNodeField):
         """
         Get all AbstractField instances for the class.
 
@@ -518,15 +489,44 @@ class ASTNode(CompiledType):
             the returned list. Return only fields that were part of the
             declaration of this node otherwise.
 
+        :param type field_class: The field class to use to filter fields.
+
         :rtype: list[AbstractField]
         """
-        ret = cls.get_fields(predicate, include_inherited)
-        ":type: list[AbstractField]"
+        return filter(
+            predicate or (lambda f: True),
+            cls.get_abstract_fields_dict(include_inherited,
+                                         field_class).values()
+        )
 
-        props = cls.get_properties(predicate, include_inherited)
-        ret.extend(props)
+    @classmethod
+    def get_abstract_fields_dict(cls, include_inherited=True,
+                                 field_class=AbstractNodeField):
+        """
+        Get all AbstractField instances for the class.
 
-        return ret
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :param type field_class: The field class to use to filter fields.
+
+        :rtype: dict[str, AbstractField]
+        """
+
+        def get_fields(klass):
+            return OrderedDict(
+                filter(lambda (k, v): isinstance(v, field_class),
+                       klass._fields.items())
+            )
+
+        if include_inherited:
+            fields = OrderedDict()
+            for base_class in cls.get_inheritance_chain():
+                fields.update(get_fields(base_class))
+            return fields
+        else:
+            return get_fields(cls)
 
     @classmethod
     def add_to_context(cls):
