@@ -275,7 +275,7 @@ class PlaceHolder(FieldTrait):
         Bind the type of this placeholder.
 
         :param compiled_types.CompiledType type: Type parameter. The type of
-            this placeholder
+            this placeholder.
         """
         self._type = type
         yield
@@ -403,10 +403,10 @@ class LocalVars(object):
             """
 
             :param LocalVars vars: The LocalVars instance to which this
-                local variable is bound
-            :param str name: The name of this local variable
+                local variable is bound.
+            :param str name: The name of this local variable.
             :param compiled_types.CompiledType type: Type parameter. The
-                type of this local variable
+                type of this local variable.
             """
             self.vars = vars
             self.name = name
@@ -424,9 +424,9 @@ class LocalVars(object):
             vars = LocalVars()
             var = vars('Index', compiled_types.LongType)
 
-        :param str name: The name of the variable
+        :param str name: The name of the variable.
         :param compiled_types.CompiledType type: Type parameter. The type of
-            the local variable
+            the local variable.
         """
         ret = LocalVars.LocalVar(self, name, type)
         assert name not in self.local_vars, (
@@ -442,7 +442,7 @@ class LocalVars(object):
 
             ivar = var.Index
 
-        :param str name: The name of the variable
+        :param str name: The name of the variable.
         """
         return self.local_vars[name]
 
@@ -462,7 +462,7 @@ class AbstractNodeField(object):
     @property
     def type(self):
         """
-        Type of the abstract node field
+        Type of the abstract node field.
         :rtype: compiled_types.CompiledType
         """
         raise NotImplementedError()
@@ -474,7 +474,7 @@ class AbstractNodeField(object):
     @property
     def name(self):
         """
-        Name of the abstract node field
+        Name of the abstract node field.
         :rtype: names.Name
         """
         raise NotImplementedError()
@@ -485,7 +485,7 @@ class AbstractNodeField(object):
 
     def doc(self):
         """
-        Documentation for the abstract node field
+        Documentation for the abstract node field.
         :rtype: str
         """
         raise NotImplementedError()
@@ -509,7 +509,7 @@ class Property(AbstractNodeField):
 
     def __init__(self, expr):
         """
-        :param AbstractExpression expr: The expression for the property
+        :param AbstractExpression expr: The expression for the property.
         """
         self.expr = expr
         self.constructed_expr = None
@@ -517,13 +517,13 @@ class Property(AbstractNodeField):
 
         self.prop_decl = None
         """
-        The emitted code for this property declaration
+        The emitted code for this property declaration.
         :type: str
         """
 
         self.prop_def = None
         """
-        The emitted code for this property definition
+        The emitted code for this property definition.
         :type: str
         """
 

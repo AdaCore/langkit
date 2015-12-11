@@ -82,10 +82,10 @@ class CompileCtx():
         """Create a new context for code emission.
 
         :param str lang_name: string (mixed case and underscore: see
-        langkit.names.Name) for the Name of the target language.
+            langkit.names.Name) for the Name of the target language.
 
         :param str main_rule_name: Name for the grammar rule that will be used
-        as an entry point when parsing units.
+            as an entry point when parsing units.
 
         :param lexer: A lexer for the target language.
         :type lexer: langkit.lexer.Lexer
@@ -94,22 +94,22 @@ class CompileCtx():
         :type grammar: langkit.parsers.Grammer
 
         :param lib_name: If provided, must be a string (mixed case and
-        underscore: see langkit.names.Name), otherwise set to
-        "Lib<lang_name>lang". It is used for the filenames, package names, etc.
-        in the generated library.
+            underscore: see langkit.names.Name), otherwise set to
+            "Lib<lang_name>lang". It is used for the filenames, package names,
+            etc.  in the generated library.
         :type lib_name: str or None
 
         :param c_symbol_prefix: Valid C identifier used as a prefix for all
-        top-level declarations in the generated C API.  If not provided, set to
-        the name of the language in lower case.  Empty string stands for no
-        prefix.
+            top-level declarations in the generated C API.  If not provided,
+            set to the name of the language in lower case.  Empty string stands
+            for no prefix.
         :type c_symbol_prefix: str or None
 
         :param bool enable_python_api: If True (which is the default),
-        generates a Python API for the generated library.
+            generates a Python API for the generated library.
 
         :param bool verbose: If True (which is not the default), print various
-        debug messages on standard output.
+            debug messages on standard output.
         """
         self.lang_name = names.Name(lang_name)
         self.main_rule_name = main_rule_name
@@ -241,8 +241,8 @@ class CompileCtx():
         ASTNode sub-class). It is valid to perform this association multiple
         times as long as types are consistent.
 
-        :param ASTNode astnode: The AST node we want to associate the types to
-        :param list[CompiledType] types: The types to associate to the fields
+        :param ASTNode astnode: The AST node we want to associate the types to.
+        :param list[CompiledType] types: The types to associate to the fields.
         """
         fields = astnode.get_fields(include_inherited=False)
 
@@ -508,8 +508,8 @@ class CompileCtx():
         """
         Generate header and binding body for the external C API.
 
-        :param str include_path: The include path
-        :param str src_path: The source path
+        :param str include_path: The include path.
+        :param str src_path: The source path.
         """
         def render(template_name):
             return self.render_template(template_name, _self=self)
@@ -562,7 +562,7 @@ class CompileCtx():
         """
         Generate a synthetic text documentation about AST nodes and types.
 
-        :param file file: Output file for the documentation
+        :param file file: Output file for the documentation.
         """
         i = 0
         for type_decl in self.enum_declarations:

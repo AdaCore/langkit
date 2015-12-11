@@ -288,7 +288,7 @@ class Parser(object):
         relies on the subclasses-defined `generated_code` for "parsing code"
         generation.
 
-        :param str|names.Name pos_name: The name of the position variable
+        :param str|names.Name pos_name: The name of the position variable.
         :rtype: ParserCodeContext
         """
 
@@ -494,7 +494,7 @@ def always_make_progress(parser):
     """
     Return whether `parser` cannot match an empty sequence of tokens.
 
-    :param Parser parser: The parser to evaluate
+    :param Parser parser: The parser to evaluate.
     """
     if isinstance(parser, List):
         return not parser.empty_valid or always_make_progress(parser.parser)
@@ -542,7 +542,7 @@ class Row(Parser):
         Note that a Row can have at most only one wrapper, so this does nothing
         if this Row is a root parser.
 
-        :param Parser parser: The parser to associate to this row
+        :param Parser parser: The parser to associate to this row.
         """
         assert not self.is_root and not self.typ, (
             "Row parsers do not represent a concrete result. They must be used"
@@ -727,7 +727,7 @@ class Opt(Parser):
     def __init__(self, parser, *parsers):
         """
         Create a parser that matches `parser` and then `parsers` if possible or
-        matches an empty sequence otherwise.  The result is equivalent to:
+        matches an empty sequence otherwise.  The result is equivalent to::
 
             Opt(Row(parser, *parsers)).
         """
@@ -834,8 +834,8 @@ class Extract(Parser):
     def __init__(self, parser, index):
         """
         :param Row parser: The parser that will serve as target for
-        extract operation
-        :param int index: The index you want to extract from the row
+            extract operation.
+        :param int index: The index you want to extract from the row.
         """
         Parser.__init__(self)
         self.parser = parser

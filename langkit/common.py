@@ -69,8 +69,8 @@ def string_repr(string):
     """
     Return a representation of string as a literal, usable in the generated
     code.
-    :param str string: The string to represent
-    :return: A string literal representation of string
+    :param str string: The string to represent.
+    :return: A string literal representation of string.
     """
     return '"{0}"'.format(repr(string)[1:-1].replace('"', r'""'))
 
@@ -80,7 +80,7 @@ def null_constant():
     Return the applicable representation of the null constant given the
     chosen global language.
 
-    :return: The null constant
+    :return: The null constant.
     :rtype: str
     """
     return null_constants[LANGUAGE]
@@ -90,7 +90,7 @@ def is_keyword(name):
     """
     Returns wether `name` is a keyword given the chosen global language.
 
-    :param str|names.Name name: The name we want to test
+    :param str|names.Name name: The name we want to test.
     :rtype: bool
     """
 
@@ -108,7 +108,7 @@ def gen_name(var_name):
     Generates a unique name from var_name.
 
     :param str|names.Name var_name: The base name. If it is a string,
-    it needs to be a lower case with underscores string
+        it needs to be a lower case with underscores string.
     :rtype: names.Name
     """
     # This function is mostly used to generate temporary variables in parsing
@@ -129,7 +129,7 @@ def gen_names(*var_names):
 
         name_a, name_b = gen_names("a", "b")
 
-    :param list[str] var_names: The list of base names
+    :param list[str] var_names: The list of base names.
     :rtype: list[str]
     """
     for var_name in var_names:
@@ -154,7 +154,7 @@ def get_type(typ):
     Given a base python type, long or bool, will return the representation
     of that type in the target global language.
 
-    :param type typ: The type to be represented
+    :param type typ: The type to be represented.
     :rtype: str
     """
     return basic_types[LANGUAGE][typ]

@@ -136,7 +136,7 @@ class CompiledType(object):
 
         Must be overriden in subclasses.
 
-        :param CAPISettings c_api_settings: The settings for the C API
+        :param CAPISettings c_api_settings: The settings for the C API.
         """
         raise NotImplementedError()
 
@@ -363,7 +363,7 @@ class TypeDeclaration(object):
         """
 
         :param type(ASTNode) type: The type that this TypeDeclaration holds
-            onto
+            onto.
         :param str public_part: The generated code for the public part of
             the type declaration.
         :param private_part: The generated code for the private part of the
@@ -379,10 +379,10 @@ class TypeDeclaration(object):
         Helper to create a TypeDeclaration out of the instantiations of a
         single template.
 
-        :param str template_name: The name of the template
+        :param str template_name: The name of the template.
         :param TemplateEnvironment|None t_env: The environment to use for
             rendering.
-        :param CompiledType type: Type parameter. The type to render
+        :param CompiledType type: Type parameter. The type to render.
         :param dict kwargs: Additional arguments to pass to the mako render
             function.
         """
@@ -465,7 +465,7 @@ class ASTNode(CompiledType):
         """
         Return the list of all the fields `cls` has, including its parents'.
 
-        :param predicate: Predicate to filter fields if needed
+        :param predicate: Predicate to filter fields if needed.
         :type predicate: None|(Field) -> bool
 
         :param bool include_inherited: If true, include inheritted fields in
@@ -482,7 +482,7 @@ class ASTNode(CompiledType):
         """
         Return the list of all the fields `cls` has, including its parents'.
 
-        :param predicate: Predicate to filter fields if needed
+        :param predicate: Predicate to filter fields if needed.
         :type predicate: None|(Field) -> bool
 
         :param bool include_inherited: If true, include inheritted fields in
@@ -509,7 +509,7 @@ class ASTNode(CompiledType):
         """
         Get all AbstractField instances for the class.
 
-        :param predicate: Predicate to filter fields if needed
+        :param predicate: Predicate to filter fields if needed.
         :type predicate: None|(Field) -> bool
 
         :param bool include_inherited: If true, include inheritted fields in
@@ -706,7 +706,7 @@ class EnumType(CompiledType):
         """
         Create a value that represent one of the enum alternatives.
 
-        :param str alt: The alternative to use for this instance
+        :param str alt: The alternative to use for this instance.
         """
         # CompiledType are not usually supposed to be instantiated.  EnumType
         # is an exception to this rule, so do not call CompiledType.__init__.
@@ -769,7 +769,7 @@ class EnumType(CompiledType):
 
         This is used in Ada code generation.
 
-        :param str alt: The alternative for which we want the enumerator name
+        :param str alt: The alternative for which we want the enumerator name.
         :rtype: names.Name
         """
         result = names.Name(alt)

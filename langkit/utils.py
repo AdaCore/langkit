@@ -30,7 +30,7 @@ def unescape(char):
     """
     Unescape char if it is escaped.
 
-    :param str char: An eventually escaped character
+    :param str char: An eventually escaped character.
     :rtype: str
     """
     if char[0] == "\\":
@@ -44,7 +44,7 @@ def copy_with(obj, **kwargs):
 
     :param dict[str, Any] kwargs: key value associations to attach to the
         object.
-    :param T obj: The object to copy
+    :param T obj: The object to copy.
     :rtype: T
 
     Example use::
@@ -118,7 +118,7 @@ def memoized(func):
     Decorator to memoize a function.
     This function must be passed only hashable arguments.
 
-    :param func: The function to decorate
+    :param func: The function to decorate.
     """
     cache = {}
 
