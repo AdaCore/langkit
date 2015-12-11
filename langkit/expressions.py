@@ -507,9 +507,10 @@ class Property(AbstractNodeField):
 
     __current_property__ = None
 
-    def __init__(self, expr):
+    def __init__(self, expr, doc=None):
         """
         :param AbstractExpression expr: The expression for the property.
+        :param str|None doc: User documentation for this property.
         """
         self.expr = expr
         self.constructed_expr = None
@@ -529,6 +530,12 @@ class Property(AbstractNodeField):
 
         self._name = None
         ":type: names.Name"
+
+        self._doc = doc
+        ":type: str|None"
+
+        self.ast_node = None
+        ":type: ASTNode|None"
 
     @classmethod
     def get(cls):
@@ -595,4 +602,4 @@ class Property(AbstractNodeField):
         self._name = name
 
     def doc(self):
-        return ""
+        return self._doc

@@ -564,6 +564,8 @@ class CompileCtx():
 
         :param file file: Output file for the documentation.
         """
+        import compiled_types
+
         i = 0
         for type_decl in self.enum_declarations:
             typ = type_decl.type
@@ -589,28 +591,35 @@ class CompileCtx():
             # If this is not ASTNode, get the parent class
             bases = list(typ.get_inheritance_chain())
             base = bases[-2] if len(bases) > 1 else None
-            fields = list(typ.get_fields())
+            abs_fields = list(typ.get_abstract_fields())
 
             print >> file, '{}node {}{}{}'.format(
                 'abstract ' if typ.abstract else '',
                 typ.name().camel,
                 '({})'.format(base.name().camel) if base else '',
-                ':' if fields else ''
+                ':' if abs_fields else ''
             )
             doc = typ.doc()
             if doc:
                 print >> file, documentation.format_text(doc, 4)
                 print >> file, ''
 
-            for field in fields:
+            for abs_field in abs_fields:
                 inherit_note = (
-                    '' if field.ast_node == typ else
-                    ' [inherited from {}]'.format(field.ast_node.name().camel)
+                    '' if abs_field.ast_node == typ else
+                    ' [inherited from {}]'.format(
+                        abs_field.ast_node.name().camel
+                    )
                 )
-                print >> file, '    field {}: {}{}'.format(
-                    field.name.lower, field.type.name().camel, inherit_note
+                print >> file, '    {} {}: {}{}'.format(
+                    ('field'
+                     if isinstance(abs_field, compiled_types.Field) else
+                     'property'),
+                    abs_field.name.lower,
+                    abs_field.type.name().camel,
+                    inherit_note
                 )
-                doc = field.doc()
+                doc = abs_field.doc()
                 if doc:
                     print >> file, documentation.format_text(doc, 8)
 

@@ -338,9 +338,11 @@ class AstNodeMetaclass(type):
         dct['is_type_resolved'] = False
         cls = type.__new__(mcs, name, bases, dct)
 
-        # Associate each field to this ASTNode subclass
+        # Associate each field and property to this ASTNode subclass
         for field in fields.values():
             field.ast_node = cls
+        for prop in properties.values():
+            prop.ast_node = cls
 
         return cls
 
