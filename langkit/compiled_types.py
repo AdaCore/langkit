@@ -260,7 +260,7 @@ class Field(AbstractNodeField):
         :type: ASTNode
         """
 
-        self._type = None
+        self._type = type
         """
         Type of the field. If not set, it will be set to a concrete
         CompiledType subclass after type resolution. If set, it will be
