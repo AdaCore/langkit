@@ -327,8 +327,6 @@ class AstNodeMetaclass(type):
         # Associate each field and property to this ASTNode subclass
         for field in fields.values():
             field.ast_node = cls
-        for prop in properties.values():
-            prop.ast_node = cls
 
         return cls
 
