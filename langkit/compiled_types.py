@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import inspect
 
 from c_api import CAPIType
 from common import get_type, null_constant, is_keyword
@@ -7,7 +8,7 @@ from expressions import Property, AbstractNodeData
 import names
 from python_api import PythonAPIType
 from template_utils import TemplateEnvironment, common_renderer
-from utils import memoized, type_check
+from utils import memoized, type_check, col, Colors
 
 
 class GeneratedFunction(object):
@@ -440,6 +441,73 @@ class ASTNode(CompiledType):
     """
 
     __metaclass__ = AstNodeMetaclass
+
+    @classmethod
+    def set_types(cls, types):
+        """
+        Associate `types` (a list of CompiledType) to fields in `cls` . It is
+        valid to perform this association multiple times as long as types are
+        consistent.
+        """
+        fields = cls.get_parse_fields(include_inherited=False)
+
+        assert len(fields) == len(types), (
+            "{} has {} fields ({} types given). You probably have"
+            " inconsistent grammar rules and type declarations".format(
+                cls, len(fields), len(types)
+            )
+        )
+
+        def is_subtype(base_type, subtype):
+            return issubclass(subtype, base_type)
+
+        def are_subtypes(fields, new_types):
+            return all(
+                is_subtype(f.type, n)
+                for f, n in zip(fields, new_types)
+            )
+
+        # TODO: instead of expecting types to be *exactly* the same, perform
+        # type unification (take the nearest common ancestor for all field
+        # types).
+        assert (not cls.is_type_resolved or
+                are_subtypes(fields, types)), (
+            "Already associated types for some fields are not consistent with"
+            " current ones:\n- {}\n- {}".format(
+                [f.type for f in fields], types
+            )
+        )
+
+        # Only assign types if cls was not yet typed. In the case where it
+        # was already typed, we checked above that the new types were
+        # consistent with the already present ones.
+        if not cls.is_type_resolved:
+            cls.is_type_resolved = True
+
+            get_context().astnode_types.append(cls)
+
+            for field_type, field in zip(types, fields):
+
+                # At this stage, if the field has a type, it means that the
+                # user assigned it one originally. In this case we will use the
+                # inferred type for checking only (raising an assertion if it
+                # does not correspond).
+                if field.type:
+                    f = inspect.getfile(cls)
+                    l = inspect.getsourcelines(cls)[1]
+                    assert field.type == field_type, (
+                        col("Inferred type for field does not correspond to "
+                            "type provided by the user.\n", Colors.FAIL) +
+                        col("class {astnode_name}, file {file} line {line}\n",
+                            Colors.WARNING) +
+                        "Field {field_name}, "
+                        "Provided type : {ptype}, Inferred type: {itype}"
+                    ).format(astnode_name=cls.name(), file=f, line=l,
+                             ptype=field.type.name().camel,
+                             itype=field_type.name().camel,
+                             field_name=field._name.camel)
+                else:
+                    field.type = field_type
 
     @classmethod
     def compute_properties(cls):

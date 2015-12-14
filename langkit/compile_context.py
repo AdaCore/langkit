@@ -12,7 +12,6 @@ this is the way it is done for the ada language::
 from collections import defaultdict
 from distutils.spawn import find_executable
 from glob import glob
-import inspect
 import itertools
 import names
 import os
@@ -26,7 +25,7 @@ import astdoc
 from c_api import CAPISettings
 import caching
 from python_api import PythonAPISettings
-from utils import Colors, printcol, col
+from utils import Colors, printcol
 
 
 compile_ctx = None
@@ -234,73 +233,6 @@ class CompileCtx():
 
         # Internal field for extensions directory
         self._extensions_dir = None
-
-    def set_ast_fields_types(self, astnode, types):
-        """
-        Associate `types` (a list of CompiledType) to fields in `astnode` (an
-        ASTNode sub-class). It is valid to perform this association multiple
-        times as long as types are consistent.
-
-        :param ASTNode astnode: The AST node we want to associate the types to.
-        :param list[CompiledType] types: The types to associate to the fields.
-        """
-        fields = astnode.get_parse_fields(include_inherited=False)
-
-        assert len(fields) == len(types), (
-            "{} has {} fields ({} types given). You probably have"
-            " inconsistent grammar rules and type declarations".format(
-                astnode, len(fields), len(types)
-            )
-        )
-
-        def is_subtype(base_type, subtype):
-            return issubclass(subtype, base_type)
-
-        def are_subtypes(fields, new_types):
-            return all(
-                is_subtype(f.type, n)
-                for f, n in zip(fields, new_types)
-            )
-
-        # TODO: instead of expecting types to be *exactly* the same, perform
-        # type unification (take the nearest common ancestor for all field
-        # types).
-        assert (not astnode.is_type_resolved or
-                are_subtypes(fields, types)), (
-            "Already associated types for some fields are not consistent with"
-            " current ones:\n- {}\n- {}".format(
-                [f.type for f in fields], types
-            )
-        )
-
-        # Only assign types if astnode was not yet typed. In the case where it
-        # was already typed, we checked above that the new types were
-        # consistent with the already present ones.
-        if not astnode.is_type_resolved:
-            astnode.is_type_resolved = True
-            self.astnode_types.append(astnode)
-            for field_type, field in zip(types, fields):
-
-                # At this stage, if the field has a type, it means that the
-                # user assigned it one originally. In this case we will use the
-                # inferred type for checking only (raising an assertion if it
-                # does not correspond).
-                if field.type:
-                    f = inspect.getfile(astnode)
-                    l = inspect.getsourcelines(astnode)[1]
-                    assert field.type == field_type, (
-                        col("Inferred type for field does not correspond to "
-                            "type provided by the user.\n", Colors.FAIL) +
-                        col("class {astnode_name}, file {file} line {line}\n",
-                            Colors.WARNING) +
-                        "Field {field_name}, "
-                        "Provided type : {ptype}, Inferred type: {itype}"
-                    ).format(astnode_name=astnode.name(), file=f, line=l,
-                             ptype=field.type.name().camel,
-                             itype=field_type.name().camel,
-                             field_name=field._name.camel)
-                else:
-                    field.type = field_type
 
     def order_astnode_types(self):
         """Sort the "astnode_types" field."""

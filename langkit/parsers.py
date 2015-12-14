@@ -667,9 +667,7 @@ class List(Parser):
             "For folding, revtree classes must have two fields"
         )
 
-        get_context().set_ast_fields_types(
-            self.revtree_class, [self.get_type()] * 2
-        )
+        self.revtree_class.set_types([self.get_type(), self.get_type()])
 
     def generate_code(self, pos_name="pos"):
 
@@ -977,9 +975,7 @@ class Transform(Parser):
         # ASTNode hierarchy.
         for cls in self.typ.get_inheritance_chain():
             fields_count = len(cls.get_parse_fields(include_inherited=False))
-            get_context().set_ast_fields_types(
-                cls, fields_types[:fields_count]
-            )
+            cls.set_types(fields_types[:fields_count])
             fields_types = fields_types[fields_count:]
 
         Parser.compute_fields_types(self)
