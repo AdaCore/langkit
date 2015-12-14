@@ -24,6 +24,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.LongType, lambda _: '{}.value'),
             (ct.EnumType, lambda _: '{}_to_str[{{}}.value]'.format(
                 type.c_type(self.c_api_settings).name)),
+            (ct.ArrayType, lambda cls: '{}({{}})'.format(type.name().camel)),
         ], exception_msg='Unhandled field type'
                          ' in the python binding: {}'.format(type)
         ).format(value)
@@ -35,7 +36,6 @@ class PythonAPISettings(AbstractAPISettings):
 
         :param CompiledType type: Type parameter. The type for which we want to
             get the internal name.
-
         :rtype: str
         """
         def ctype_type(name):
@@ -51,4 +51,5 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.Token, lambda _: wrapped_type('token')),
             (ct.ASTNode, lambda _: wrapped_type('node')),
             (ct.EnumType, lambda _: ctype_type('c_uint')),
+            (ct.ArrayType, lambda cls: wrapped_type(cls.name().camel)),
         ])

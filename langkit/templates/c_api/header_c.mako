@@ -82,6 +82,10 @@ typedef struct {
     ${chunk}
 % endfor
 
+% for chunk in _self.c_array_types.values():
+    ${chunk}
+% endfor
+
 
 /*
  * Analysis primitives
@@ -196,6 +200,10 @@ ${capi.get_name("token_text")}(${token_type} token);
 ${c_doc('langkit.text_to_locale_string')}
 extern char *
 ${capi.get_name("text_to_locale_string")}(${text_type} text);
+
+${c_doc('langkit.free')}
+extern void
+${capi.get_name("free")}(void *address);
 
 
 /*

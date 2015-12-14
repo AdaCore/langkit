@@ -14,6 +14,7 @@ notably to define properties on AST nodes.
 from contextlib import contextmanager
 from itertools import count
 
+import compiled_types
 import names
 from utils import Colors, col
 
@@ -102,13 +103,34 @@ class AbstractExpression(Frozable):
     @Frozable.protect
     def __getattr__(self, attr):
         """
-        Returns a FieldAccess expression object when the user uses the field
-        access notation on self.
+        Depending on "attr", return either an AbstractExpression or an
+        AbstractExpression constructor.
 
         :param str attr: Name of the field to access.
-        :rtype: FieldAccess
+        :rtype: AbstractExpression|function
         """
-        return FieldAccess(self, attr)
+
+        # Constructors for operations with attribute-like syntax
+
+        def _build_filter(filter):
+            return Map(None, Vars, self, filter)
+
+        def _build_mapcat(expr, filter=None, var=None):
+            return Map(var, expr, self, filter, concat=True)
+
+        def _build_map(expr, filter=None, var=None):
+            return Map(var, expr, self, filter)
+
+        CONSTRUCTORS = {
+            'filter': _build_filter,
+            'map':    _build_map,
+            'mapcat': _build_mapcat,
+        }
+
+        try:
+            return CONSTRUCTORS[attr]
+        except KeyError:
+            return FieldAccess(self, attr)
 
     @Frozable.protect
     def __call__(self, *args, **kwargs):
@@ -182,6 +204,107 @@ class OpCall(AbstractExpression):
         return "<OpCall {} {} {}>".format(self.called, self.args, self.kwargs)
 
 
+class CollectionExpression(AbstractExpression):
+    """
+    Base class to provide common code for abstract expressions working on
+    collections.
+    """
+
+    def __init__(self, expr, collection, induction_var=None):
+        """
+        :param induction_var: Variable to use in "expr".
+        :type induction_var: None|InductionVariable
+        :param AbstractExpression expr: Expression to evaluate for each item in
+            "collection".
+        :param AbstractExpression collection: Collection on which this map
+            operation works.
+        """
+        super(CollectionExpression, self).__init__()
+        self.expr = expr
+        self.collection = collection
+        self.induction_var = induction_var
+
+    def construct_collection(self):
+        """
+        Construct the collection expression and determine the type of the
+        induction variable.
+
+        :rtype: (ResolvedExpression, langkit.compiled_types.CompiledType)
+        """
+        collection_expr = self.collection.construct()
+        assert issubclass(collection_expr.type,
+                          (compiled_types.ASTList,
+                           compiled_types.ArrayType)), (
+            'Map cannot iterate on {}, which is not a collection'
+        ).format(collection_expr.type)
+
+        return (collection_expr, collection_expr.type.element_type)
+
+    def bind_induction_var(self, type):
+        """
+        Return a context manager to bind temporarily the induction variable to
+        a specific type. Also create the induction variable first if there is
+        none.
+
+        :param langkit.compiled_types.CompiledType type: Type for the induction
+            variable.
+        """
+        default_induction_var = not self.induction_var
+        if default_induction_var:
+            self.induction_var = Vars.create_default()
+        return self.induction_var.vars.bind(self.induction_var, type)
+
+
+class Map(CollectionExpression):
+    """
+    Abstract expression that is the result of a map expression evaluation.
+    """
+
+    def __init__(self, induction_var, expr, collection, filter_expr=None,
+                 concat=False):
+        """
+        See CollectionExpression for the other parameters.
+
+        :param filter_expr: If provided, a boolean expression that says whether
+            to include or exclude an item from the collection.
+        :type filter: None|AbstractExpression
+        :param bool concat: If true, "expr" must return arrays, and this
+            expression returns the concatenation of all the arrays "expr"
+            returns.
+        """
+        super(Map, self).__init__(expr, collection, induction_var)
+        self.filter_expr = filter_expr
+        self.concat = concat
+
+    def construct(self):
+        """
+        Construct a resolved expression for this map operation.
+
+        :rtype: MapExpr
+        """
+        collection_expr, elt_type = self.construct_collection()
+
+        # Now construct the expressions that rely on the induction variable
+        with self.bind_induction_var(elt_type):
+            ind_var = self.induction_var.construct()
+            expr = self.expr.construct()
+            assert (not self.concat or
+                    issubclass(expr.type, (compiled_types.ASTList,
+                                           compiled_types.ArrayType))), (
+                'Cannot mapcat with expressions returning {} values'
+                ' (collections expected instead)'
+            ).format(expr.name())
+
+            if self.filter_expr:
+                filter_expr = self.filter_expr.construct()
+                assert filter_expr.type == compiled_types.BoolType
+            else:
+                filter_expr = None
+
+        return MapExpr(ind_var, expr, collection_expr, filter_expr,
+                       self.concat)
+
+
 class FieldAccess(AbstractExpression):
     """
     Abstract expression that is the result of a field access expression
@@ -213,7 +336,7 @@ class FieldAccess(AbstractExpression):
         # For the moment, this can work only on expressions deriving from
         # ASTNode.
         receiver_type = receiver_expr.type
-        ":type: compiled_types.ASTNode"
+        ":type: langkit.compiled_types.ASTNode"
 
         to_get = receiver_type.get_abstract_fields_dict().get(self.field, None)
         ":type: AbstractNodeField"
@@ -255,8 +378,8 @@ class PlaceHolder(AbstractExpression):
         """
         Bind the type of this placeholder.
 
-        :param compiled_types.CompiledType type: Type parameter. The type of
-            this placeholder.
+        :param langkit.compiled_types.CompiledType type: Type parameter. The
+            type of this placeholder.
         """
         self._type = type
         yield
@@ -273,12 +396,95 @@ class PlaceHolder(AbstractExpression):
         return "<PlaceHolder {}>".format(self.name)
 
 
+class InductionVariable(AbstractExpression):
+    """
+    Abstract expression that represents an induction variable in loops exprs.
+    """
+
+    def __init__(self, vars, name):
+        """
+        :param InductionVariables vars: Factory from which "self" comes.
+        :param names.Name name: The name of the induction variable.
+        """
+        self.vars = vars
+        self.name = name
+
+    def __repr__(self):
+        return '<InductionVariable {}>'.format(self.name)
+
+    def construct(self):
+        return VarExpr(self.vars.get_type(self), self.name)
+
+
+class DefaultInductionVariable(AbstractExpression):
+    """
+    Abstract expression that represents an anonymous induction variable.
+    """
+
+    def construct(self):
+        return Vars.default.construct()
+
+
+class InductionVariables(object):
+    """
+    Factory for InductionVariable instances.
+    """
+
+    def __init__(self):
+        self.vars = {}
+        self.bind_stack = []
+
+    def create_default(self):
+        return self._create_var(names.Name('Item'))
+
+    def _create_var(self, name):
+        """
+        :type name: names.Name
+        :rtype: InductionVariable
+        """
+        try:
+            return self.vars[name]
+        except KeyError:
+            var = InductionVariable(self, name)
+            self.vars[name] = var
+            return var
+
+    def __getattr__(self, name):
+        return self._create_var(names.Name('I') + names.Name.from_lower(name))
+
+    @contextmanager
+    def bind(self, var, type):
+        """
+        Bind the type of this placeholder.
+
+        :param var: Variable to bind as the default induction variable.
+        :type var: langkit.compiled_types.CompiledType
+        """
+        self.bind_stack.append((var, type))
+        yield
+        self.bind_stack.pop()
+
+    @property
+    def default(self):
+        var, type = self.bind_stack[-1]
+        return var
+
+    def get_type(self, var):
+        for v, t in reversed(self.bind_stack):
+            if var == v:
+                return t
+        else:
+            raise KeyError('Unknown induction variable: {}'.format(var))
+
+
 Self = PlaceHolder("Self")
+Vars = InductionVariables()
+Var = DefaultInductionVariable()
 
 
 def render(*args, **kwargs):
-    from compiled_types import render
-    return render(*args, property=Property.get(), Self=Self, **kwargs)
+    return compiled_types.render(*args, property=Property.get(), Self=Self,
+                                 **kwargs)
 
 
 class ResolvedExpression(object):
@@ -318,7 +524,7 @@ class ResolvedExpression(object):
         """
         Returns the type of the resolved expression.
 
-        :rtype: compiled_types.CompiledType
+        :rtype: langkit.compiled_types.CompiledType
         """
         raise NotImplementedError()
 
@@ -329,6 +535,7 @@ class VarExpr(ResolvedExpression):
     """
 
     def __init__(self, type, name):
+        assert issubclass(type, compiled_types.CompiledType)
         self._type = type
         self.name = name
 
@@ -368,6 +575,63 @@ class FieldAccessExpr(ResolvedExpression):
         return "{}.{}".format(self.receiver_expr.render(), self.property.name)
 
 
+class MapExpr(ResolvedExpression):
+    """
+    Resolved expression that represents a map expression in the generated code.
+    """
+
+    def __init__(self, induction_var, expr, collection, filter=None,
+                 concat=False):
+        """
+        :param InductionVariable induction_var: Variable to use in "expr".
+        :param ResolvedExpression expr: Expression to evaluate for each item in
+            "collection".
+        :param ResolvedExpression collection: Collection on which this map
+            operation works.
+        :param filter: If provided, a boolean expression that says whether to
+            include or exclude an item from the collection.
+        :type filter: None|ResolvedExpression
+        :param bool concat: If true, "expr" must return arrays, and this
+            expression returns the concatenation of all the arrays "expr"
+            returns.
+        :return:
+        """
+        self.induction_var = induction_var
+        self.expr = expr
+        self.collection = collection
+        self.filter = filter
+        self.concat = concat
+
+        element_type = (self.expr.type.element_type
+                        if self.concat else
+                        self.expr.type)
+        self._type = compiled_types.array_type(element_type)
+        self._type.add_to_context()
+
+        p = Property.get()
+        self.array_var = p.vars(names.Name('Map'), self.type,
+                                create_unique=False)
+
+    @property
+    def type(self):
+        return self._type
+
+    def __repr__(self):
+        return "<MapExpr {}: {} -> {}{}>".format(
+            self.collection,
+            self.induction_var,
+            self.expr,
+            " (if {})".format(self.filter) if self.filter else ""
+        )
+
+    def render_pre(self):
+        return compiled_types.render('properties/map_ada', map=self,
+                                     Name=names.Name)
+
+    def render_expr(self):
+        return self.array_var.name.camel_with_underscores
+
+
 class LocalVars(object):
     """
     Represents the state of local variables in a property definition.
@@ -385,34 +649,47 @@ class LocalVars(object):
 
             :param LocalVars vars: The LocalVars instance to which this
                 local variable is bound.
-            :param str name: The name of this local variable.
-            :param compiled_types.CompiledType type: Type parameter. The
-                type of this local variable.
+            :param langkit.names.Name name: The name of this local variable.
+            :param langkit.compiled_types.CompiledType type: Type parameter.
+                The type of this local variable.
             """
+            assert isinstance(name, names.Name)
             self.vars = vars
             self.name = name
             self.type = type
 
         def render(self):
-            return "{} : {};".format(self.name, self.type)
+            return "{} : {};".format(
+                self.name.camel_with_underscores,
+                self.type.name().camel_with_underscores
+            )
 
-    def __call__(self, name, type):
+    def __call__(self, name, type, create_unique=True):
         """
         This getattr override allows you to declare local variables in
         templates via the syntax::
 
-            import compiled_types
+            import langkit.compiled_types
             vars = LocalVars()
-            var = vars('Index', compiled_types.LongType)
+            var = vars('Index', langkit.compiled_types.LongType)
 
-        :param str name: The name of the variable.
-        :param compiled_types.CompiledType type: Type parameter. The type of
-            the local variable.
+        :param names.Name name: The name of the variable.
+        :param langkit.compiled_types.CompiledType type: Type parameter. The
+            type of the local variable.
+        :param bool create_unique: If true and "name" is already associated to
+            a variable, raise an error. Otherwise, add a suffix to create a new
+            variable.
         """
-        ret = LocalVars.LocalVar(self, name, type)
-        assert name not in self.local_vars, (
+        assert isinstance(name, names.Name)
+        assert not create_unique or (name not in self.local_vars), (
             "Already declared local variable {}".format(name)
         )
+        i = 0
+        orig_name = name
+        while name in self.local_vars:
+            i += 1
+            name = orig_name + names.Name(str(i))
+        ret = LocalVars.LocalVar(self, name, type)
         self.local_vars[name] = ret
         return ret
 
@@ -428,7 +705,7 @@ class LocalVars(object):
         return self.local_vars[name]
 
     def render(self):
-        return "\n".join(lv.render() for lv in self.local_vars)
+        return "\n".join(lv.render() for lv in self.local_vars.values())
 
 
 class AbstractNodeData(object):
@@ -454,7 +731,7 @@ class AbstractNodeData(object):
     def type(self):
         """
         Type of the abstract node field.
-        :rtype: compiled_types.CompiledType
+        :rtype: langkit.compiled_types.CompiledType
         """
         raise NotImplementedError()
 
@@ -559,7 +836,7 @@ class Property(AbstractNodeData):
         """
         Returns the type of the underlying expression after resolution.
 
-        :rtype: compiled_types.CompiledType
+        :rtype: langkit.compiled_types.CompiledType
         """
         return self.constructed_expr.type
 
@@ -567,15 +844,15 @@ class Property(AbstractNodeData):
         """
         Render the given property to generated code.
 
-        :param compiled_types.CompiledType owner_type: The ast node subclass to
-            which this property is bound.
+        :param langkit.compiled_types.CompiledType owner_type: The ast node
+            subclass to which this property is bound.
         :rtype: basestring
         """
         with Self.bind(owner_type):
-            self.expr.freeze()
-            self.constructed_expr = self.expr.construct()
-            with names.camel_with_underscores:
-                with self.bind():
+            with self.bind():
+                self.expr.freeze()
+                self.constructed_expr = self.expr.construct()
+                with names.camel_with_underscores:
                     self.prop_decl = render('properties/decl_ada')
                     self.prop_def = render('properties/def_ada')
 

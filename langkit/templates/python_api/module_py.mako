@@ -319,11 +319,21 @@ class _Diagnostic(ctypes.Structure):
                 ("message", _text)]
 
 
+% for chunk in _self.py_array_types.values():
+${chunk}
+% endfor
+
+
 _initialize = _import_func(
     '${capi.lib_name}_initialize',
     [], None
 )
 _initialize()
+
+_free = _import_func(
+    '${capi.get_name("free")}',
+    [ctypes.c_void_p], None
+)
 
 
 # Analysis primitives

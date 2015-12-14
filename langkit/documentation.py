@@ -244,6 +244,11 @@ documentations = {
         support some characters). Production code should use real conversion
         routines such as libiconv's in order to deal with UTF-32 texts.
     """),
+    'langkit.free': Template("""
+        Free dynamically allocated memory.
+
+        This is a helper to free objects from dynamic languages.
+    """),
 
     #
     # Extensions handling

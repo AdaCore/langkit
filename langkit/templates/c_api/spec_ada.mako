@@ -70,6 +70,18 @@ package ${_self.ada_api_settings.lib_name}.C is
        ${chunk}
    % endfor
 
+   % for chunk in _self.c_array_types_ada.values():
+       ${chunk}
+   % endfor
+
+
+   procedure Free (Address : System.Address)
+     with Export        => True,
+          Convention    => C,
+          External_Name => "${capi.get_name('free')}";
+   ${ada_c_doc('langkit.free', 3)}
+   --  Helper to free objects in dynamic languages
+
 
    -------------------------
    -- Analysis primitives --

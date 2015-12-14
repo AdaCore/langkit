@@ -53,6 +53,8 @@ def make_renderer(base_renderer=None):
         'is_ast_node':      type_check(ASTNode),
         'is_sloc_range':    type_check(SourceLocationRangeType),
         'is_token_type':    type_check(Token),
+        'is_array_type':    type_check(ArrayType),
+        'is_list_type':     type_check(ASTList),
         'decl_type':        decl_type,
     }
     if get_context():
@@ -740,9 +742,9 @@ class ASTList(ASTNode):
 
     element_type = None
     """
-    CompiledType subclass for the type of elements contained in this list type.
-    Must be overriden in subclasses.
-    :type: CompiledType|None
+    CompiledType subclass for the type of elements contained in this list
+    type. Must be overriden in subclasses.
+    :type: CompiledType
     """
 
     @classmethod
@@ -769,6 +771,72 @@ class ASTList(ASTNode):
         return null_constant()
 
 
+class ArrayType(CompiledType):
+    """
+    Base class for array types.
+    """
+
+    is_ptr = True
+
+    element_type = None
+    """
+    CompiledType subclass for the type of elements contained in this list
+    type. Must be overriden in subclasses.
+    :type: CompiledType
+    """
+
+    @classmethod
+    def name(cls):
+        return cls.element_type.name() + names.Name('Array_Access')
+
+    @classmethod
+    def c_type(cls, c_api_settings):
+        return CAPIType(c_api_settings, cls.api_name().lower)
+
+    @classmethod
+    def nullexpr(cls):
+        null_constant()
+
+    @classmethod
+    def add_to_context(cls):
+        if cls in get_context().types:
+            return
+        get_context().types.add(cls)
+        get_context().array_types.add(cls)
+
+        # Make sure the type this list contains is already declared
+        cls.element_type.add_to_context()
+
+        t_env = TemplateEnvironment(element_type=cls.element_type, cls=cls)
+        get_context().list_types_declarations.append(TypeDeclaration.render(
+            'array_def_ada', t_env, cls
+        ))
+        get_context().c_array_types[cls] = render(
+            'c_api/array_type_decl_c', t_env
+        )
+        get_context().c_array_types_ada[cls] = render(
+            'c_api/array_type_spec_ada', t_env
+        )
+        get_context().py_array_types[cls] = render(
+            'python_api/array_type_decl_py', t_env,
+            pyapi=get_context().python_api_settings,
+        )
+
+    @classmethod
+    def api_name(cls):
+        """
+        """
+        return cls.element_type.name() + names.Name('Array')
+
+    @classmethod
+    def pointed(cls):
+        return cls.element_type.name() + names.Name('Array_Record')
+
+    @classmethod
+    def vector(cls):
+        return cls.element_type.name() + names.Name('Vectors.Vector')
+
+
 # We want structural equality on lists whose elements have the same types.
 # Memoization is one way to make sure that, for each CompiledType subclass X::
 #    list_type(X) == list_type(X)
@@ -783,6 +851,24 @@ def list_type(element_type):
 
     return type(
         '{}ListType'.format(element_type.name()), (ASTList, ), {
+            'element_type': element_type,
+        }
+    )
+
+
+# Likewise for array types
+@memoized
+def array_type(element_type):
+    """
+    Return a CompiledType subclass.
+
+    :param CompiledType element_type: Type parameter. The type contained in the
+        resulting array type.
+    :rtype: CompiledType
+    """
+
+    return type(
+        '{}ArrayType'.format(element_type.name()), (ArrayType, ), {
             'element_type': element_type,
         }
     )

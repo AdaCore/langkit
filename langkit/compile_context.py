@@ -183,6 +183,14 @@ class CompileCtx():
         :type: set[langkit.compiled_types.ASTNode]
         """
 
+        self.array_types = set()
+        """
+        Set of all CompiledType for which we generate a corresponding array
+        type.
+
+        :type: set[langkit.compiled_types.CompiledType]
+        """
+
         #
         # Holders for the Ada generated code chunks
         #
@@ -193,6 +201,13 @@ class CompileCtx():
         AST node fields and all ASTNode subclasses.
 
         :type: list[langkit.compiled_types.TypeDeclaration]
+        """
+
+        self.array_types_declarations = []
+        """
+        List of types for all array types.
+
+        :type: list[langkit.compiled_types.CompiledTypes]
         """
 
         self.types_declarations = []
@@ -268,6 +283,20 @@ class CompileCtx():
         :type: dict[langkit.compiled_types.CompiledType, str]
         """
 
+        self.c_array_types = {}
+        """
+        Mapping: CompiledType -> string (C declarations) for all array types
+
+        :type: dict[langkit.compiled_types.CompiledType, str]
+        """
+
+        self.c_array_types_ada = {}
+        """
+        Likewise but for Ada declarations.
+
+        :type: dict[langkit.compiled_types.CompiledType, str]
+        """
+
         #
         # Corresponding holders for the Python API
         #
@@ -284,6 +313,14 @@ class CompileCtx():
         """
         Mapping CompiledType -> string (Python declarations) for types used
         in AST node fields.
+
+        :type: dict[langkit.compiled_types.CompiledType, str]
+        """
+
+        self.py_array_types = {}
+        """
+        Mapping: CompiledType -> string (Python declarations) for all array
+        types.
 
         :type: dict[langkit.compiled_types.CompiledType, str]
         """

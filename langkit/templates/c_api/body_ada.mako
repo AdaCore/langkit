@@ -80,6 +80,19 @@ package body ${_self.ada_api_settings.lib_name}.C is
        then ""
        else Value (S));
 
+   ----------
+   -- Free --
+   ----------
+
+   procedure Free (Address : System.Address) is
+      procedure C_Free (Address : System.Address)
+        with Import        => True,
+             Convention    => C,
+             External_Name => "free";
+   begin
+      C_Free (Address);
+   end Free;
+
    -------------------------
    -- Analysis primitives --
    -------------------------
