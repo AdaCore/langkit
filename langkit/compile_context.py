@@ -36,6 +36,8 @@ def get_context():
     Returns the current compilation context. Meant to be used by the rest of
     LangKit, in any code that has been called as part of the CompileCtx.emit
     primitive.
+
+    :rtype: CompileCtx
     """
     assert compile_ctx is not None, (
         "Get context has been called in a state in which the compile context"
@@ -134,100 +136,156 @@ class CompileCtx():
         # TODO: why do we need this? The grammar already has such a mapping.
         self.rules_to_fn_names = {}
 
-        # Lexer instance
         self.lexer = lexer
+        ":type: langkit.lexer.Lexer"
 
-        # Grammar instance
         self.grammar = grammar
+        ":type: langkit.parsers.Grammar"
 
         self.python_api_settings = (
             PythonAPISettings(lib_name.lower, self.c_api_settings)
             if enable_python_api else None
         )
 
-        # Set of names (names.Name instances) for all generated parser
-        # functions. This is used to avoid generating these multiple times.
         self.fns = set()
+        """
+        Set of names (names.Name instances) for all generated parser
+        functions. This is used to avoid generating these multiple times.
 
-        # Set of CompiledType subclasses: all such subclasses must register
-        # themselves here when their add_to_context method is invoked. This
-        # field too is used to avoid multiple generation issues.
+        :type: set[names.Name]
+        """
+
         self.types = set()
+        """
+        Set of CompiledType subclasses: all such subclasses must register
+        themselves here when their add_to_context method is invoked. This
+        field too is used to avoid multiple generation issues.
 
-        # List for all ASTnode subclasses (ASTNode excluded), sorted so that A
-        # is before B when A is a parent class for B. This sorting is important
-        # to output declarations in dependency order.
-        # This is computed right after field types inference.
+        :type: set[langkit.compiled_types.CompiledType]
+        """
+
         self.astnode_types = []
+        """
+        List for all ASTnode subclasses (ASTNode excluded), sorted so that A
+        is before B when A is a parent class for B. This sorting is important
+        to output declarations in dependency order.
+        This is computed right after field types inference.
 
-        # Set of all ASTNode subclasses (ASTNode included) for which we
-        # generate a corresponding list type.
+        :type: list[langkit.compiled_types.ASTNode]
+        """
+
         self.list_types = set()
+        """
+        Set of all ASTNode subclasses (ASTNode included) for which we
+        generate a corresponding list type.
+
+        :type: set[langkit.compiled_types.ASTNode]
+        """
 
         #
         # Holders for the Ada generated code chunks
         #
 
-        # List of TypeDeclaration instances for all enumeration types used in
-        # AST node fields and all ASTNode subclasses.
         self.enum_declarations = []
+        """
+        List of TypeDeclaration instances for all enumeration types used in
+        AST node fields and all ASTNode subclasses.
 
-        # List of TypeDeclaration instances for all ASTNode derivations
-        # (excluding ASTList derivations). These contain the type full
-        # declarations.
+        :type: list[langkit.compiled_types.TypeDeclaration]
+        """
+
         self.types_declarations = []
+        """
+        List of TypeDeclaration instances for all ASTNode derivations
+        (excluding ASTList derivations). These contain the type full
+        declarations.
 
-        # List of TypeDeclaration instances for all ASTNode derivations. These
-        # only contain forward declarations so that full declarations have
-        # access to all declared types.
+        :type: list[langkit.compiled_types.TypeDeclaration]
+        """
+
         self.incomplete_types_declarations = []
+        """
+        List of TypeDeclaration instances for all ASTNode derivations. These
+        only contain forward declarations so that full declarations have
+        access to all declared types.
 
-        # List of TypeDeclaration instances for all ASTList derivations. These
-        # don't need forward declarations.
+        :type: list[langkit.compiled_types.TypeDeclaration]
+        """
+
         self.list_types_declarations = []
+        """
+        List of TypeDeclaration instances for all ASTList derivations. These
+        don't need forward declarations.
 
-        # List of strings for all ASTNode subclasses primitives body
+        :type: list[langkit.compiled_types.TypeDeclaration]
+        """
+
         self.primitives_bodies = []
+        """
+        List of strings for all ASTNode subclasses primitives body
 
-        # List of GeneratedParser instances
+        :type: list[str]
+        """
+
         self.generated_parsers = []
+        ":type: list[langkit.parsers.GeneratedParser]"
 
         #
         # Holders for the C external API generated code chunks
         #
 
-        # Mapping: ASTNode concrete (i.e. non abstract) subclass -> int,
-        # associating specific constants to be used reliably in bindings.  This
-        # mapping is built at the beginning of code emission.
         self.node_kind_constants = {}
+        """
+        Mapping: ASTNode concrete (i.e. non abstract) subclass -> int,
+        associating specific constants to be used reliably in bindings.  This
+        mapping is built at the beginning of code emission.
 
-        # Mapping: ASTNode concrete (i.e. non abstract) subclass -> int,
-        # associating specific constants to be used reliably in bindings.  This
-        # mapping is built at the beginning of code emission.
-        self.node_kind_constants = {}
+        :type: dict[langkit.compiled_types.ASTNode, int]
+        """
 
-        # Mapping: ASTNode subclass -> GeneratedFunction instances for all
-        # subclass field accessors.
         self.c_astnode_primitives = defaultdict(list)
+        """
+        Mapping: ASTNode subclass -> GeneratedFunction instances for all
+        subclass field accessors.
 
-        # Mapping: CompiledType -> string (C declarations) for types used in
-        # AST node fields.
+        :type: dict[langkit.compiled_types.ASTNode,
+                    list[langkit.compiled_types.GeneratedFunction]]
+        """
+
         self.c_astnode_field_types = {}
+        """
+        Mapping: CompiledType -> string (C declarations) for types used in
+        AST node fields.
 
-        # Likewise but for Ada declarations
+        :type: dict[langkit.compiled_types.CompiledType, str]
+        """
+
         self.c_astnode_field_types_ada = {}
+        """
+        Likewise but for Ada declarations
+
+        :type: dict[langkit.compiled_types.CompiledType, str]
+        """
 
         #
         # Corresponding holders for the Python API
         #
 
-        # Mapping: ASTNode subclass -> string (generated Python code ASTNode
-        # subclass declarations).
         self.py_astnode_subclasses = {}
+        """
+        Mapping: ASTNode subclass -> string (generated Python code ASTNode
+        subclass declarations).
 
-        # Mapping CompiledType -> string (Python declarations) for types used
-        # in AST node fields.
+        :type: dict[langkit.compiled_types.ASTNode, str]
+        """
+
         self.py_astnode_field_types = {}
+        """
+        Mapping CompiledType -> string (Python declarations) for types used
+        in AST node fields.
+
+        :type: dict[langkit.compiled_types.CompiledType, str]
+        """
 
         self.cache = None
 
