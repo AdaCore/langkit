@@ -112,6 +112,9 @@ class AbstractExpression(Frozable):
 
         # Constructors for operations with attribute-like syntax
 
+        def _build_cast(astnode):
+            return Cast(self, astnode)
+
         def _build_filter(filter):
             return Map(None, Vars, self, filter)
 
@@ -125,6 +128,7 @@ class AbstractExpression(Frozable):
             return Map(var, expr, self, filter)
 
         CONSTRUCTORS = {
+            'cast':   _build_cast,
             'filter': _build_filter,
             'is_a':   _build_is_a,
             'map':    _build_map,
@@ -206,6 +210,34 @@ class OpCall(AbstractExpression):
 
     def __repr__(self):
         return "<OpCall {} {} {}>".format(self.called, self.args, self.kwargs)
+
+
+class Cast(AbstractExpression):
+    """
+    Abstract expression that is the result of casting an ASTNode subclass value
+    to another subclass.
+    """
+
+    def __init__(self, expr, astnode):
+        """
+        :param AbstractExpression expr: Expression on which the cast is
+            performed.
+        :param ASTNode astnode: ASTNode subclass to use for the cast.
+        """
+        assert issubclass(astnode, compiled_types.ASTNode)
+        self.expr = expr
+        self.astnode = astnode
+
+    def construct(self):
+        """
+        Construct a resolved expression that is the result of casting a AST
+        node.
+
+        :rtype: CastExpr
+        """
+        expr = self.expr.construct()
+        assert issubclass(expr.type, compiled_types.ASTNode)
+        return CastExpr(expr, self.astnode)
 
 
 class IsA(AbstractExpression):
@@ -604,6 +636,34 @@ class FieldAccessExpr(ResolvedExpression):
 
     def render_expr(self):
         return "{}.{}".format(self.receiver_expr.render(), self.property.name)
+
+
+class CastExpr(ResolvedExpression):
+    """
+    Resolved expression that is the result of casting an ASTNode subclass value
+    to another subclass.
+    """
+
+    def __init__(self, expr, astnode):
+        """
+        :param ResolvedExpr expr: Expression on which the cast is performed.
+        :param ASTNode astnode: ASTNode subclass to use for the cast.
+        """
+        self.expr = expr
+        self.astnode = astnode
+
+    @property
+    def type(self):
+        return self.astnode
+
+    def render_pre(self):
+        return self.expr.render_pre()
+
+    def render_expr(self):
+        return "{} ({})".format(
+            self.astnode.name().camel_with_underscores,
+            self.expr.render_expr()
+        )
 
 
 class IsAExpr(ResolvedExpression):
