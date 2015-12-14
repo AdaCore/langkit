@@ -115,6 +115,9 @@ class AbstractExpression(Frozable):
         def _build_filter(filter):
             return Map(None, Vars, self, filter)
 
+        def _build_is_a(astnode):
+            return IsA(self, astnode)
+
         def _build_mapcat(expr, filter=None, var=None):
             return Map(var, expr, self, filter, concat=True)
 
@@ -123,6 +126,7 @@ class AbstractExpression(Frozable):
 
         CONSTRUCTORS = {
             'filter': _build_filter,
+            'is_a':   _build_is_a,
             'map':    _build_map,
             'mapcat': _build_mapcat,
         }
@@ -202,6 +206,33 @@ class OpCall(AbstractExpression):
 
     def __repr__(self):
         return "<OpCall {} {} {}>".format(self.called, self.args, self.kwargs)
+
+
+class IsA(AbstractExpression):
+    """
+    Abstract expression that is the result of testing the kind of a node.
+    """
+
+    def __init__(self, expr, astnode):
+        """
+        :param AbstractExpression astnode: Expression on which the test is
+            performed.
+        :param ASTNode astnode: ASTNode subclass to use for the test.
+        """
+        assert issubclass(astnode, compiled_types.ASTNode)
+        self.expr = expr
+        self.astnode = astnode
+
+    def construct(self):
+        """
+        Construct a resolved expression that is the result of testing the kind
+        of a node.
+
+        :rtype: IsAExpr
+        """
+        expr = self.expr.construct()
+        assert issubclass(expr.type, compiled_types.ASTNode)
+        return IsAExpr(expr, self.astnode)
 
 
 class CollectionExpression(AbstractExpression):
@@ -573,6 +604,33 @@ class FieldAccessExpr(ResolvedExpression):
 
     def render_expr(self):
         return "{}.{}".format(self.receiver_expr.render(), self.property.name)
+
+
+class IsAExpr(ResolvedExpression):
+    """
+    Resolved expression that represents a kind test of a node.
+    """
+
+    def __init__(self, expr, astnode):
+        """
+        :param ResolvedExpr expr: Expression on which the test is performed.
+        :param ASTNode astnode: ASTNode subclass to use for the test.
+        """
+        self.expr = expr
+        self.astnode = astnode
+
+    @property
+    def type(self):
+        return compiled_types.BoolType
+
+    def render_pre(self):
+        return self.expr.render_pre()
+
+    def render_expr(self):
+        return "{}.all in {}_Type'Class".format(
+            self.expr.render_expr(),
+            self.astnode.name().camel_with_underscores
+        )
 
 
 class MapExpr(ResolvedExpression):
