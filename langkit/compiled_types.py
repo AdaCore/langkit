@@ -306,7 +306,7 @@ class UserField(AbstractField):
     concrete = True
 
 
-class AstNodeMetaclass(type):
+class StructMetaClass(type):
     """
     Internal metaclass for AST nodes, used to ease fields handling during code
     generation.
@@ -395,17 +395,13 @@ class TypeDeclaration(object):
         )
 
 
-class ASTNode(CompiledType):
+class Struct(CompiledType):
     """
-    Base class for all user AST nodes.
+    Base class for all user struct-like composite types, such as POD structs
+    and AST nodes.
 
-    Subclasses can define new AST node types, but they also can be abstract
-    themselves (to form a true tree of AST node types).  Each subclass can
-    define a list of fields (see the above Field class), so that each concrete
-    class' fields are the sum of all its subclass' fields plus its own.
-
-    This base class defines utilities to emit native code for the AST node
-    types: type declaration and type usage (to declare AST node variables).
+    User subclasses deriving from Struct will define by-value POD types that
+    cannot be subclassed themselves.
     """
 
     _fields = OrderedDict()
@@ -414,7 +410,18 @@ class ASTNode(CompiledType):
     :type: dict[str, Field]
     """
 
-    __metaclass__ = AstNodeMetaclass
+    __metaclass__ = StructMetaClass
+    is_ptr = False
+
+    @classmethod
+    def is_ast_node(cls):
+        """
+        Helper for issubclass(cls, ASTNode), to determine if a subclass is a
+        struct or an astnode descendent.
+
+        :rtype: bool
+        """
+        return False
 
     @classmethod
     def set_types(cls, types):
@@ -453,6 +460,8 @@ class ASTNode(CompiledType):
                 [f.type for f in fields], types
             )
         )
+
+        assert issubclass(cls, ASTNode)
 
         # Only assign types if cls was not yet typed. In the case where it
         # was already typed, we checked above that the new types were
@@ -501,20 +510,33 @@ class ASTNode(CompiledType):
         Also emit the implementation for the corresponding methods/singletons
         in `context.body`.
         """
+
+        def template(template_suffix):
+            """
+            Helper to render templates for structs/ast nodes, dispatching on
+            the correct template wether cls is an ASTNode or a Struct subclass.
+
+            :type template_suffix: str
+            :rtype: str
+            """
+            return "{}_{}".format(
+                "astnode" if cls.is_ast_node() else "struct", template_suffix
+            )
+
         base_class = cls.__bases__[0]
 
-        t_env = TemplateEnvironment(
-            cls=cls,
-            base_name=base_class.name()
-        )
+        t_env = TemplateEnvironment(cls=cls, base_name=base_class.name())
+
         tdef_incomp = TypeDeclaration.render(
-            'astnode_type_def_incomplete_ada', t_env, cls)
-        tdef = TypeDeclaration.render('astnode_type_def_ada', t_env, cls)
+            template('type_def_incomplete_ada'), t_env, cls
+        )
+        tdef = TypeDeclaration.render(template('type_def_ada'), t_env, cls)
         get_context().incomplete_types_declarations.append(tdef_incomp)
         get_context().types_declarations.append(tdef)
 
         get_context().primitives_bodies.append(
-            render('astnode_type_impl_ada', t_env))
+            render(template('type_impl_ada'), t_env)
+        )
 
     @classmethod
     def get_inheritance_chain(cls):
@@ -623,7 +645,7 @@ class ASTNode(CompiledType):
                        klass._fields.items())
             )
 
-        if include_inherited:
+        if include_inherited and cls.is_ast_node():
             fields = OrderedDict()
             for base_class in cls.get_inheritance_chain():
                 fields.update(get_fields(base_class))
@@ -632,17 +654,38 @@ class ASTNode(CompiledType):
             return get_fields(cls)
 
     @classmethod
+    def is_typed(cls):
+        """
+        Helper to determine whether the Struct is typed or not, eg. whether
+        every field has a definite type.
+
+        :rtype: bool
+        """
+        return all(
+            f.type for f in cls.get_fields(include_inherited=False)
+        )
+
+    @classmethod
     def add_to_context(cls):
-        """
-        Emit code in the global context for this AST node type.  Do nothing if
-        called more than once on a single class or if called on ASTNode itself.
-        """
+
+        assert cls.is_typed, (
+            "Trying to generate code for a type before typing is complete"
+        )
+
+        if not cls.is_ast_node():
+            get_context().struct_types.append(cls)
+
         if cls not in get_context().types and cls != ASTNode:
             base_class = cls.__bases__[0]
             if issubclass(base_class, ASTNode):
                 base_class.add_to_context()
 
             get_context().types.add(cls)
+
+            for f in cls.get_fields(include_inherited=False):
+                if f.type:
+                    f.type.add_to_context()
+
             cls.compute_properties()
             cls.create_type_definition()
 
@@ -654,40 +697,45 @@ class ASTNode(CompiledType):
                     '{}_{}'.format(cls.name().base_name,
                                    field.name.base_name)
                 )
-                accessor_fullname = get_context().c_api_settings.get_name(
-                    accessor_basename
-                )
-
                 t_env = TemplateEnvironment(
                     astnode=cls,
                     field=field,
-                    accessor_name=accessor_fullname,
+                    accessor_name=get_context().c_api_settings.get_name(
+                        accessor_basename
+                    )
                 )
-                accessor_decl = render(
-                    'c_api/astnode_field_access_decl_ada', t_env)
-                accessor_impl = render(
-                    'c_api/astnode_field_access_impl_ada', t_env)
-                accessor_c_decl = render(
-                    'c_api/astnode_field_access_decl_c', t_env)
 
                 primitives.append(AbstractFieldAccessor(
                     accessor_basename,
-                    declaration=accessor_decl,
-                    implementation=accessor_impl,
-                    c_declaration=accessor_c_decl,
+                    declaration=render(
+                        'c_api/astnode_field_access_decl_ada', t_env
+                    ),
+                    implementation=render(
+                        'c_api/astnode_field_access_impl_ada', t_env
+                    ),
+                    c_declaration=render(
+                        'c_api/astnode_field_access_decl_c', t_env
+                    ),
                     field=field,
                 ))
-            get_context().c_astnode_primitives[cls] = primitives
+            if cls.is_ast_node():
+                get_context().c_astnode_primitives[cls] = primitives
 
             # For the Python API, generate subclasses for each AST node kind
             # (for both abstract and concrete classes). Each will ship accessor
             # for the fields they define.
             if get_context().python_api_settings:
-                get_context().py_astnode_subclasses[cls] = render(
-                    'python_api/ast_subclass_py',
+                get_context().py_struct_classes[cls] = render(
+                    'python_api/{}'.format(
+                        'ast_subclass_py'
+                        if cls.is_ast_node() else 'struct_type_py'
+                    ),
                     pyapi=get_context().python_api_settings,
                     cls=cls,
-                    parent_cls=list(cls.get_inheritance_chain())[-2],
+                    parent_cls=(
+                        list(cls.get_inheritance_chain())[-2]
+                        if cls.is_ast_node() else None
+                    ),
                     primitives=primitives,
                 )
 
@@ -716,13 +764,37 @@ class ASTNode(CompiledType):
         if cls.is_ptr:
             return null_constant()
         else:
-            return "nil_{0}".format(cls.name())
+            return names.Name('No') + cls.name()
 
     @classmethod
     def doc(cls):
         # Yield documentation only for user types: types defined in Langkit
         # have documentation that targets Langkit users.
         return cls.__doc__ if cls != ASTNode else None
+
+    @classmethod
+    def c_type(cls, c_api_settings):
+        return CAPIType(c_api_settings, cls.name())
+
+
+class ASTNode(Struct):
+    """
+    Base class for all user AST nodes.
+
+    Subclasses can define new AST node types, but they also can be abstract
+    themselves (to form a true tree of AST node types).  Each subclass can
+    define a list of fields (see the above Field class), so that each concrete
+    class' fields are the sum of all its subclass' fields plus its own.
+
+    This base class defines utilities to emit native code for the AST node
+    types: type declaration and type usage (to declare AST node variables).
+    """
+
+    is_ptr = True
+
+    @classmethod
+    def is_ast_node(cls):
+        return True
 
     @classmethod
     def c_type(cls, c_api_settings):
@@ -941,7 +1013,7 @@ class EnumType(CompiledType):
                 'c_api/enum_type_spec_ada', cls=cls,
             )
             if get_context().python_api_settings:
-                get_context().py_astnode_field_types[cls] = render(
+                get_context().py_field_types[cls] = render(
                     'python_api/enum_type_decl_py', cls=cls,
                     pyapi=get_context().python_api_settings
                 )

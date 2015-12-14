@@ -190,10 +190,11 @@ type_name = '{}_Type'.format(cls.name())
       ## assume that all lookups fall into this node's sloc range.
 
       Nod : constant AST_Node := AST_Node (Node);
-      pragma Assert(Compare (Sloc_Range (Nod, Snap), Sloc) = Inside);
+      pragma Assert (Compare (Sloc_Range (Nod, Snap), Sloc) = Inside);
 
       Child : AST_Node;
       Pos   : Relative_Position;
+
       ## Some ASTnodes have no ASTNode child: avoid the "unused parameter"
       ## compilation warning for them.
       % if not astnode_fields:
@@ -247,7 +248,8 @@ type_name = '{}_Type'.format(cls.name())
      (Node : ${cls.name()}) return ${decl_type(field.type)}
    is
    begin
-      return ${decl_type(field.type)} (${type_name} (Node.all).${field.name});
+      return ${decl_type(field.type)}
+        (${type_name} (Node.all).${field.name});
    end ${field.name};
 % endfor
 

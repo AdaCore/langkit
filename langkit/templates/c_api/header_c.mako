@@ -43,6 +43,13 @@ typedef enum {
 ${c_doc('langkit.token_type')}
 typedef void* ${token_type};
 
+% for rec in _self.struct_types:
+   typedef struct {
+      % for f in rec.get_fields():
+         ${f.type.c_type(capi).name} ${f.name};
+      % endfor
+   } ${rec.c_type(capi).name};
+% endfor
 
 /* Helper data structures for source location handling.  */
 

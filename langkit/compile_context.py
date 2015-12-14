@@ -175,6 +175,12 @@ class CompileCtx():
         :type: list[langkit.compiled_types.ASTNode]
         """
 
+        self.struct_types = []
+        """
+        List of all plain record types, sorted in no particular order
+        :type: list[compiled_types.Node]
+        """
+
         self.list_types = set()
         """
         Set of all ASTNode subclasses (ASTNode included) for which we
@@ -301,18 +307,18 @@ class CompileCtx():
         # Corresponding holders for the Python API
         #
 
-        self.py_astnode_subclasses = {}
+        self.py_struct_classes = {}
         """
-        Mapping: ASTNode subclass -> string (generated Python code ASTNode
+        Mapping: Struct subclass -> string (generated Python code Struct
         subclass declarations).
 
-        :type: dict[langkit.compiled_types.ASTNode, str]
+        :type: dict[langkit.compiled_types.Struct, str]
         """
 
-        self.py_astnode_field_types = {}
+        self.py_field_types = {}
         """
         Mapping CompiledType -> string (Python declarations) for types used
-        in AST node fields.
+        in Struct fields.
 
         :type: dict[langkit.compiled_types.CompiledType, str]
         """
@@ -568,14 +574,10 @@ class CompileCtx():
 
         # Collect ASTNode subclass declarations preserving "astnode_types"'s
         # order so that dependencies comes first.
-        astnode_subclass_decls = []
-        for cls in self.astnode_types:
-            try:
-                decl = self.py_astnode_subclasses[cls]
-            except KeyError:
-                pass
-            else:
-                astnode_subclass_decls.append(decl)
+        astnode_subclass_decls = filter(bool, [
+            self.py_struct_classes.get(cls, None)
+            for cls in self.astnode_types + self.struct_types
+        ])
 
         with names.camel:
             with open(os.path.join(python_path, module_filename), "w") as f:

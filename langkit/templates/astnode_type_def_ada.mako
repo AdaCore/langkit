@@ -2,7 +2,11 @@
 
 <%namespace name="exts" file="extensions.mako" />
 
-<% type_name = '{}_Type'.format(cls.name()) %>
+<%
+   type_name = "{}_Type".format(cls.name())
+   fields = cls.get_fields(include_inherited=False)
+   ext = ctx.ext("nodes", cls.name(), "components")
+%>
 
 % if not private_part:
 
@@ -10,7 +14,7 @@
    --  ${cls.name()}
    --
 
-   type ${cls.name()}_Type is ${"abstract" if cls.abstract else "" }
+   type ${type_name} is ${"abstract" if cls.abstract else "" }
       new ${base_name}_Type with private;
 
    % if not cls.abstract:
@@ -60,11 +64,8 @@
    % endfor
 
 % else:
-   <%
-      fields = cls.get_fields(include_inherited=False)
-      ext = ctx.ext("nodes", cls.name(), "components")
-   %>
-   type ${type_name} is ${"abstract" if cls.abstract else ""}
+
+   type ${type_name} is ${"abstract" if cls.abstract else "" }
       new ${base_name}_Type with
 
    % if fields or ext:
@@ -79,6 +80,7 @@
    % else:
       null record;
    % endif
+
 
    % if not cls.abstract:
       package ${cls.name()}_Alloc is

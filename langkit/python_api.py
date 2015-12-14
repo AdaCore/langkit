@@ -25,6 +25,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.EnumType, lambda _: '{}_to_str[{{}}.value]'.format(
                 type.c_type(self.c_api_settings).name)),
             (ct.ArrayType, lambda cls: '{}({{}})'.format(type.name().camel)),
+            (ct.Struct, lambda _: '{}'),
         ], exception_msg='Unhandled field type'
                          ' in the python binding: {}'.format(type)
         ).format(value)
@@ -52,4 +53,5 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ASTNode, lambda _: wrapped_type('node')),
             (ct.EnumType, lambda _: ctype_type('c_uint')),
             (ct.ArrayType, lambda cls: wrapped_type(cls.name().camel)),
+            (ct.Struct, lambda _: type.name().camel),
         ])

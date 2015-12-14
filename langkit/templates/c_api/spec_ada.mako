@@ -82,6 +82,9 @@ package ${_self.ada_api_settings.lib_name}.C is
    ${ada_c_doc('langkit.free', 3)}
    --  Helper to free objects in dynamic languages
 
+   % for rec in _self.struct_types:
+      type ${rec.c_type(capi).name}_Ptr is access ${rec.name()};
+   % endfor
 
    -------------------------
    -- Analysis primitives --

@@ -32,7 +32,7 @@ from compiled_types import (
 )
 import names
 from template_utils import TemplateEnvironment
-from utils import (Colors, common_ancestor, copy_with, printcol,
+from utils import (Colors, common_ancestor, copy_with, col,
                    type_check_instance)
 
 
@@ -293,8 +293,9 @@ class Parser(object):
         """
 
         if self.name and get_context().verbose:
-            printcol("Compiling rule : {0}".format(str(self.gen_fn_name)),
-                     Colors.HEADER)
+            print "Compiling rule : {0}".format(
+                col(self.gen_fn_name, Colors.HEADER)
+            )
 
         # Users must be able to run parsers that implement a named rule, so
         # generate dedicated functions for them.

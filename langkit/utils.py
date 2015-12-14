@@ -135,6 +135,17 @@ def memoized(func):
     return wrapper
 
 
+def type_check_exact(klass):
+    """
+    Return a predicate that will return true if its parameter is exactly egal
+    to `klass`.
+
+    :param type klass: Class to check against.
+    :rtype: (T) -> bool
+    """
+    return lambda t: t and t == klass
+
+
 def type_check(klass):
     """
     Return a predicate that will return true if its parameter is a subclass
