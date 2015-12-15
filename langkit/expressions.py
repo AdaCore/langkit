@@ -112,6 +112,12 @@ class AbstractExpression(Frozable):
 
         # Constructors for operations with attribute-like syntax
 
+        def _build_all(predicate, var=None):
+            return Quantifier(Quantifier.ALL, self, predicate, var)
+
+        def _build_any(predicate, var=None):
+            return Quantifier(Quantifier.ANY, self, predicate, var)
+
         def _build_cast(astnode):
             return Cast(self, astnode)
 
@@ -128,6 +134,8 @@ class AbstractExpression(Frozable):
             return Map(var, expr, self, filter)
 
         CONSTRUCTORS = {
+            'all':    _build_all,
+            'any':    _build_any,
             'cast':   _build_cast,
             'filter': _build_filter,
             'is_a':   _build_is_a,
@@ -366,6 +374,45 @@ class Map(CollectionExpression):
 
         return MapExpr(ind_var, expr, collection_expr, filter_expr,
                        self.concat)
+
+
+class Quantifier(CollectionExpression):
+    """
+    Abstract expression that tests a predicate over the items of a collection.
+    """
+
+    # Available quantifier kinds
+    ALL = 'all'
+    ANY = 'any'
+
+    def __init__(self, kind, collection, predicate, induction_var):
+        """
+        See CollectionExpression for the other parameters.
+
+        :param str kind: Quantifier kind. ALL that checks "predicate" holds on
+            all elements in "collection" while ANY checks that it holds on at
+            least one of them.
+        :param AbstractExpression predicate: Boolean expression to evaluate on
+            elements in "collection".
+        """
+        super(Quantifier, self).__init__(predicate, collection, induction_var)
+        assert kind in (self.ALL, self.ANY)
+        self.kind = kind
+
+    def construct(self):
+        """
+        Construct a resolved expression for this quantifier expression.
+
+        :rtype: QuantifierExpr
+        """
+        collection_expr, elt_type = self.construct_collection()
+
+        # Now construct the expressions that rely on the induction variable
+        with self.bind_induction_var(elt_type):
+            ind_var = self.induction_var.construct()
+            expr = self.expr.construct()
+
+        return QuantifierExpr(self.kind, collection_expr, expr, ind_var)
 
 
 class FieldAccess(AbstractExpression):
@@ -748,6 +795,52 @@ class MapExpr(ResolvedExpression):
 
     def render_expr(self):
         return self.array_var.name.camel_with_underscores
+
+
+class QuantifierExpr(ResolvedExpression):
+    """
+    Resolved expression that represents a qualifier expression in the generated
+    code.
+    """
+
+    def __init__(self, kind, collection, expr, induction_var):
+        """
+        :param str kind: Kind for this quantifier expression. 'all' will check
+            that all items in "collection" fullfill "expr" while 'any' will
+            check that at least one of them does.
+        :param ResolvedExpression expr: Expression to evaluate for each item in
+            "collection".
+        :param ResolvedExpression collection: Collection on which this map
+            operation works.
+        :param ResolvedExpression expr: A boolean expression to evaluate on the
+            collection's items.
+        :param induction_var: Variable to use in "expr".
+        :type induction_var: ResolvedExpression
+        """
+        self.kind = kind
+        self.collection = collection
+        self.expr = expr
+        self.induction_var = induction_var
+
+        self.result_var = Property.get().vars(names.Name('Result'),
+                                              compiled_types.BoolType,
+                                              create_unique=False)
+
+    @property
+    def type(self):
+        return compiled_types.BoolType
+
+    def render_pre(self):
+        return compiled_types.render(
+            'properties/quantifier_ada',
+            quantifier=self,
+            ALL=Quantifier.ALL,
+            ANY=Quantifier.ANY,
+            Name=names.Name
+        )
+
+    def render_expr(self):
+        return self.result_var.name.camel_with_underscores
 
 
 class LocalVars(object):
