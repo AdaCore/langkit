@@ -293,7 +293,7 @@ class ManageScript(object):
             # If in verbose mode, show the full exception traceback + message.
             # If in normal mode, just show the message and exit.
             if parsed_args.verbose:
-                raise e
+                raise
             else:
                 print col("ERROR :", Colors.FAIL), e.message
                 exit(1)
