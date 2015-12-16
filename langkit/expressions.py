@@ -463,7 +463,7 @@ class FieldAccess(AbstractExpression):
         return "<FieldAccess {} {}>".format(self.receiver, self.field)
 
 
-class PlaceHolder(AbstractExpression):
+class PlaceHolderSingleton(AbstractExpression):
     """
     Abstract expression that is an entry point into the expression DSL.
 
@@ -526,7 +526,7 @@ class InductionVariable(AbstractExpression):
         return VarExpr(self.vars.get_type(self), self.name)
 
 
-class DefaultInductionVariable(AbstractExpression):
+class DefaultInductionVariableSingleton(AbstractExpression):
     """
     Abstract expression that represents an anonymous induction variable.
     """
@@ -535,7 +535,7 @@ class DefaultInductionVariable(AbstractExpression):
         return Vars.default.construct()
 
 
-class InductionVariables(object):
+class InductionVariablesSingleton(object):
     """
     Factory for InductionVariable instances.
     """
@@ -587,9 +587,9 @@ class InductionVariables(object):
             raise KeyError('Unknown induction variable: {}'.format(var))
 
 
-Self = PlaceHolder("Self")
-Vars = InductionVariables()
-Var = DefaultInductionVariable()
+Self = PlaceHolderSingleton("Self")
+Vars = InductionVariablesSingleton()
+Var = DefaultInductionVariableSingleton()
 
 
 def render(*args, **kwargs):
