@@ -1,4 +1,6 @@
-import documentation
+from __future__ import absolute_import
+
+from langkit import compiled_types, documentation
 
 
 def write_astdoc(context, file):
@@ -9,10 +11,6 @@ def write_astdoc(context, file):
         are retreived.
     :param file file: Output file for the documentation.
     """
-    # Because of circular dependencies between compiled_types and
-    # compile_context, we need to delay the following import.
-    import compiled_types
-
     i = 0
     for type_decl in context.enum_declarations:
         typ = type_decl.type

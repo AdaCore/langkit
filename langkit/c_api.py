@@ -1,7 +1,9 @@
+from __future__ import absolute_import
+
 import re
 
-from language_api import AbstractAPISettings
-import names
+from langkit import names
+from langkit.language_api import AbstractAPISettings
 
 
 class CAPIType(object):

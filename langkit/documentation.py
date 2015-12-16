@@ -18,6 +18,8 @@ the interface of entities can depend on the language binding that exposes
 them), these chunks are implemented as Mako templates.
 """
 
+from __future__ import absolute_import
+
 import textwrap
 
 from mako.template import Template

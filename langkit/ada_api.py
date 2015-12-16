@@ -1,6 +1,7 @@
-import common
-from language_api import AbstractAPISettings
-import names
+from __future__ import absolute_import
+
+from langkit import common, names
+from langkit.language_api import AbstractAPISettings
 
 
 class AdaAPISettings(AbstractAPISettings):

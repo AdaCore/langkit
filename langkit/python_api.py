@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import langkit.compiled_types as ct
 from langkit.language_api import AbstractAPISettings
 from langkit.utils import dispatch_on_type

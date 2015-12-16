@@ -9,22 +9,23 @@ this is the way it is done for the ada language::
     ...
     context.emit(...)
 """
+
+from __future__ import absolute_import
+
 from collections import defaultdict
 from distutils.spawn import find_executable
 from glob import glob
 import itertools
-import names
 import os
 from os import path, environ
 import shutil
 import subprocess
 import sys
 
-from ada_api import AdaAPISettings
-import astdoc
-from c_api import CAPISettings
-import caching
-from utils import Colors, printcol
+from langkit import astdoc, caching, names
+from langkit.ada_api import AdaAPISettings
+from langkit.c_api import CAPISettings
+from langkit.utils import Colors, printcol
 
 
 compile_ctx = None
@@ -111,7 +112,7 @@ class CompileCtx():
         :param bool verbose: If True (which is not the default), print various
             debug messages on standard output.
         """
-        from python_api import PythonAPISettings
+        from langkit.python_api import PythonAPISettings
 
         self.lang_name = names.Name(lang_name)
         self.main_rule_name = main_rule_name
@@ -341,7 +342,7 @@ class CompileCtx():
         """Compute the "astnode_types" field."""
 
         # Get the list of ASTNode types from the Struct metaclass
-        from compiled_types import StructMetaClass
+        from langkit.compiled_types import StructMetaClass
         self.astnode_types = list(StructMetaClass.astnode_types)
 
         # Skipping the first element which is Struct, because it is not a
@@ -365,7 +366,7 @@ class CompileCtx():
         # TODO: If the render method was dynamically bound, like the compile
         # context, rather than being explicitly redefined in every module, we
         # could avoid this, maybe.
-        from parsers import render
+        from langkit.parsers import render
         return render(*args, **kwargs)
 
     def emit(self, file_root="."):
@@ -635,8 +636,7 @@ class CompileCtx():
 
         :rtype: str
         """
-        from names import Name
-        args = [a.lower if isinstance(a, Name) else a for a in args]
+        args = [a.lower if isinstance(a, names.Name) else a for a in args]
         if self.extensions_dir:
             ret = os.path.join(self.extensions_dir, *args)
             return ret if os.path.isfile(ret) else None

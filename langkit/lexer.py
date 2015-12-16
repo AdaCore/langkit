@@ -1,8 +1,10 @@
+from __future__ import absolute_import
+
 from collections import defaultdict
 from itertools import count
 
-from common import TOKEN_PREFIX
-from template_utils import common_renderer
+from langkit.common import TOKEN_PREFIX
+from langkit.template_utils import common_renderer
 
 
 class Matcher(object):

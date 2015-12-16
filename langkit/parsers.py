@@ -20,20 +20,21 @@ declared for if_stmt, and for the `expression` and `statements` rule, that are
 not defined in the example, but relied on explicitly.
 """
 
+from __future__ import absolute_import
+
 from copy import copy
 import inspect
 from itertools import chain
 
-from common import gen_name, gen_names
-from compile_context import get_context
-import compiled_types
-from compiled_types import (
+from langkit import compiled_types, names
+from langkit.common import gen_name, gen_names
+from langkit.compile_context import get_context
+from langkit.compiled_types import (
     CompiledType, BoolType, LongType, Token, ASTNode, list_type, decl_type
 )
-import names
-from template_utils import TemplateEnvironment
-from utils import (Colors, common_ancestor, copy_with, col,
-                   type_check_instance)
+from langkit.template_utils import TemplateEnvironment
+from langkit.utils import (Colors, common_ancestor, copy_with, col,
+                           type_check_instance)
 
 
 class GeneratedParser(object):

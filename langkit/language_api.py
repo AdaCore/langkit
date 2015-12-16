@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+
+
 class AbstractAPISettings(object):
     """
     Abstract class that defines an interface for the settings for a language we

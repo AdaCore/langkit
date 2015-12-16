@@ -11,12 +11,12 @@ notably to define properties on AST nodes.
   code for properties in the generated library.
 """
 
-from contextlib import contextmanager
-from itertools import count
+from __future__ import absolute_import
 
-import compiled_types
-import names
-from utils import Colors, col, common_ancestor
+from contextlib import contextmanager
+
+from langkit import compiled_types, names
+from langkit.utils import Colors, col, common_ancestor
 
 
 class Frozable(object):
@@ -1178,58 +1178,7 @@ class LocalVars(object):
         return "\n".join(lv.render() for lv in self.local_vars.values())
 
 
-class AbstractNodeData(object):
-    """
-    This class defines an abstract base class for fields and properties on
-    AST nodes.
-
-    It defines the basis of what is needed to bind them in other languages
-    bindings: a type and a name.
-    """
-
-    # Hack: the field declarations order in AST nodes matters.  The simple and
-    # very handy syntax we use here for such declarations doesn't preserve this
-    # order in Python2, however.  Waiting for the move to Python3, we use a
-    # hack here: the following counter will help us to recover the declaration
-    # order (assuming it is the same as the Field instantiation order).
-    _counter = iter(count(0))
-
-    def __init__(self):
-        self._index = next(self._counter)
-
-    @property
-    def type(self):
-        """
-        Type of the abstract node field.
-        :rtype: langkit.compiled_types.CompiledType
-        """
-        raise NotImplementedError()
-
-    @type.setter
-    def type(self, type):
-        raise NotImplementedError()
-
-    @property
-    def name(self):
-        """
-        Name of the abstract node field.
-        :rtype: names.Name
-        """
-        raise NotImplementedError()
-
-    @name.setter
-    def name(self, name):
-        raise NotImplementedError()
-
-    def doc(self):
-        """
-        Documentation for the abstract node field.
-        :rtype: str
-        """
-        raise NotImplementedError()
-
-
-class Property(AbstractNodeData):
+class Property(compiled_types.AbstractNodeData):
     """
     This is the public class via which you'll create properties in the DSL.
 
@@ -1244,6 +1193,8 @@ class Property(AbstractNodeData):
     """
 
     __current_property__ = None
+
+    is_property = True
 
     def __init__(self, expr, doc=None):
         """
@@ -1334,8 +1285,7 @@ class Property(AbstractNodeData):
         :rtype: names.Name
         """
         assert self._name
-        from names import Name
-        return Name("P") + self._name
+        return names.Name("P") + self._name
 
     @name.setter
     def name(self, name):

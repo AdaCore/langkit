@@ -3,6 +3,9 @@ This file contains general utility functions. It is basically the support
 library for langkit, aggregating general python utilities that we could not
 find in the standard library.
 """
+
+from __future__ import absolute_import
+
 from copy import copy
 from itertools import takewhile
 

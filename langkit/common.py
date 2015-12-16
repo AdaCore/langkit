@@ -1,6 +1,9 @@
+from __future__ import absolute_import
+
 from collections import defaultdict
 import itertools
-import names
+
+from langkit import names
 
 LANGUAGE = "ada"
 

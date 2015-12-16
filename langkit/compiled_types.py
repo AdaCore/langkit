@@ -1,13 +1,28 @@
+from __future__ import absolute_import
+
 from collections import OrderedDict
 import inspect
+from itertools import count
 
-from c_api import CAPIType
-from common import get_type, null_constant, is_keyword
-from compile_context import get_context
-from expressions import Property, AbstractNodeData
-import names
-from template_utils import TemplateEnvironment, common_renderer
-from utils import memoized, type_check, col, Colors
+from langkit import names
+from langkit.c_api import CAPIType
+from langkit.common import get_type, null_constant, is_keyword
+from langkit.template_utils import TemplateEnvironment, common_renderer
+from langkit.utils import memoized, type_check, col, Colors
+
+
+def get_context():
+    """
+    Return the current compilation context, see
+    langkit.compile_context.get_context.
+
+    TODO: this function exists only to workaround circular dependency issues.
+    We should get rid of them.
+
+    :rtype: CompileCtx
+    """
+    from langkit.compile_context import get_context
+    return get_context()
 
 
 class GeneratedFunction(object):
@@ -211,6 +226,63 @@ class Token(BasicType):
     @classmethod
     def c_type(cls, c_api_settings):
         return CAPIType(c_api_settings, 'token')
+
+
+class AbstractNodeData(object):
+    """
+    This class defines an abstract base class for fields and properties on
+    AST nodes.
+
+    It defines the basis of what is needed to bind them in other languages
+    bindings: a type and a name.
+    """
+
+    # Hack: the field declarations order in AST nodes matters.  The simple and
+    # very handy syntax we use here for such declarations doesn't preserve this
+    # order in Python2, however.  Waiting for the move to Python3, we use a
+    # hack here: the following counter will help us to recover the declaration
+    # order (assuming it is the same as the Field instantiation order).
+    _counter = iter(count(0))
+
+    is_property = False
+    """
+    Whether this class is Property (to be overriden in the Property subclass).
+    :type: bool
+    """
+
+    def __init__(self):
+        self._index = next(self._counter)
+
+    @property
+    def type(self):
+        """
+        Type of the abstract node field.
+        :rtype: langkit.compiled_types.CompiledType
+        """
+        raise NotImplementedError()
+
+    @type.setter
+    def type(self, type):
+        raise NotImplementedError()
+
+    @property
+    def name(self):
+        """
+        Name of the abstract node field.
+        :rtype: names.Name
+        """
+        raise NotImplementedError()
+
+    @name.setter
+    def name(self, name):
+        raise NotImplementedError()
+
+    def doc(self):
+        """
+        Documentation for the abstract node field.
+        :rtype: str
+        """
+        raise NotImplementedError()
 
 
 class AbstractField(AbstractNodeData):
@@ -630,10 +702,12 @@ class Struct(CompiledType):
             the returned list. Return only fields that were part of the
             declaration of this node otherwise.
 
-        :rtype: list[Property]
+        :rtype: list[langkit.expressions.Property]
         """
-        return cls.get_abstract_fields(predicate, include_inherited,
-                                       field_class=Property)
+        return cls.get_abstract_fields(
+            lambda f: (predicate is None or predicate(f)) and f.is_property,
+            include_inherited
+        )
 
     @classmethod
     def get_parse_fields(cls, predicate=None, include_inherited=True):

@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+
+
 class Name(object):
     """
     Code generation helpers to format names with various casing conventions.
