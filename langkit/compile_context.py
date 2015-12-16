@@ -24,7 +24,6 @@ from ada_api import AdaAPISettings
 import astdoc
 from c_api import CAPISettings
 import caching
-from python_api import PythonAPISettings
 from utils import Colors, printcol
 
 
@@ -112,6 +111,8 @@ class CompileCtx():
         :param bool verbose: If True (which is not the default), print various
             debug messages on standard output.
         """
+        from python_api import PythonAPISettings
+
         self.lang_name = names.Name(lang_name)
         self.main_rule_name = main_rule_name
 

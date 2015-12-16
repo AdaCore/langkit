@@ -153,3 +153,27 @@ def type_check_instance(klass):
     :rtype: (T) -> bool
     """
     return lambda t: isinstance(t, klass)
+
+
+def dispatch_on_type(type, type_to_action_assocs, exception_msg=""):
+    """
+    Dispatch on the type parameter, execute the corresponding action
+    depending on the type. Every type in type_to_action_assocs will be
+    tested in turn. If type is a subtype of one of them, then the
+    corresponding action will be executed.
+
+    :param type type: The type to dispatch upon.
+
+    :param type_to_action_assocs: An association of types to actions that
+        returns something.
+    :type type_to_action_assocs: list[(type, (type) -> T)]
+
+    :param str exception_msg: The exception message for the exception that
+    will be raised.
+
+    :rtype: T
+    """
+    for target_type, action in type_to_action_assocs:
+        if issubclass(type, target_type):
+            return action(type)
+    raise Exception(exception_msg)

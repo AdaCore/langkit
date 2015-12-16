@@ -18,7 +18,7 @@ class ${cls.name().camel}(${parent_cls.name().camel}):
     @property
     def ${primitive.field.name.lower}(self):
         ${py_doc(primitive.field, 8)}
-        result = ${primitive.field.type.py_type(pyapi).name_low}()
+        result = ${pyapi.type_internal_name(primitive.field.type)}()
         assert _${primitive.name.lower}(self._c_value, ctypes.byref(result))
         return ${pyapi.wrap_value('result', primitive.field.type)}
     % endfor

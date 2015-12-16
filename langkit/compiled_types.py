@@ -6,7 +6,6 @@ from common import get_type, null_constant, is_keyword
 from compile_context import get_context
 from expressions import Property, AbstractNodeData
 import names
-from python_api import PythonAPIType
 from template_utils import TemplateEnvironment, common_renderer
 from utils import memoized, type_check, col, Colors
 
@@ -189,20 +188,12 @@ class BoolType(BasicType):
         # stdbool.h...
         return CAPIType(c_api_settings, 'int', external=True)
 
-    @classmethod
-    def py_type(cls, python_api_settings):
-        return PythonAPIType(python_api_settings, 'c_int', True)
-
 
 class LongType(BasicType):
     is_ptr = False
     _name = get_type(long)
     _nullexpr = "0"
     _external = True
-
-    @classmethod
-    def py_type(cls, python_api_settings):
-        return PythonAPIType(python_api_settings, 'c_long', True)
 
 
 class SourceLocationRangeType(BasicType):
@@ -214,10 +205,6 @@ class SourceLocationRangeType(BasicType):
     def c_type(cls, c_api_settings):
         return CAPIType(c_api_settings, 'source_location_range')
 
-    @classmethod
-    def py_type(cls, python_api_settings):
-        return PythonAPIType(python_api_settings, 'SlocRange', False)
-
 
 class Token(BasicType):
     is_ptr = False
@@ -227,10 +214,6 @@ class Token(BasicType):
     @classmethod
     def c_type(cls, c_api_settings):
         return CAPIType(c_api_settings, 'token')
-
-    @classmethod
-    def py_type(cls, python_api_settings):
-        return PythonAPIType(python_api_settings, 'token', False)
 
 
 class AbstractField(AbstractNodeData):
@@ -752,10 +735,6 @@ class ASTNode(CompiledType):
     def c_type(cls, c_api_settings):
         return c_node_type(c_api_settings)
 
-    @classmethod
-    def py_type(cls, python_api_settings):
-        return PythonAPIType(python_api_settings, 'node', False)
-
 
 # We tag the ASTNode class as abstract here, because of the circular dependency
 # between the @abstract decorator and the ASTNode class, which is caused by the
@@ -886,10 +865,6 @@ class EnumType(CompiledType):
     @classmethod
     def c_type(cls, c_api_settings):
         return CAPIType(c_api_settings, cls.base_name().lower)
-
-    @classmethod
-    def py_type(cls, python_api_settings):
-        return PythonAPIType(python_api_settings, 'c_uint', True)
 
     @classmethod
     def get_enumerator(cls, alt):

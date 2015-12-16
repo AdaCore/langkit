@@ -430,7 +430,7 @@ _token_text = _import_func(
 _${primitive.name.lower} = _import_func(
     '${capi.get_name(primitive.name)}',
     [_node,
-     ctypes.POINTER(${primitive.field.type.py_type(pyapi).name_low})],
+     ctypes.POINTER(${pyapi.type_internal_name(primitive.field.type)})],
     ctypes.c_int
 )
     % endfor

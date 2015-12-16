@@ -1,36 +1,6 @@
+import langkit.compiled_types as ct
 from langkit.language_api import AbstractAPISettings
-
-
-class PythonAPIType(object):
-    """
-    Python API generation helper: encapsulate the logic of Python types names.
-    """
-
-    def __init__(self, python_api_settings,
-                 name_low, external_low):
-        """Create a stub for a Python type.
-
-        :param PythonAPISettings python_api_settings: A
-            python_api.PythonAPISettings instance.
-        :param str name_low: Name for the type used in the low-level binding.
-        :param bool external_low: Whether this type is declared in the "ctypes"
-            standard package. If not, we consider that this type is declared in
-            the generated Python module.
-        """
-        self.python_api_settings = python_api_settings
-
-        self._name_low = name_low
-        self._external_low = external_low
-
-    @property
-    def name_low(self):
-        """
-        Return the name to be used for the low-level Python API for this type.
-
-        :rtype: str
-        """
-        return ('ctypes.{}'.format(self._name_low)
-                if self._external_low else '_{}'.format(self._name_low))
+from langkit.utils import dispatch_on_type
 
 
 class PythonAPISettings(AbstractAPISettings):
@@ -46,26 +16,39 @@ class PythonAPISettings(AbstractAPISettings):
         return alt_name.upper
 
     def wrap_value(self, value, type):
-        import compiled_types
+        return dispatch_on_type(type, [
+            (ct.ASTNode, lambda _: '_wrap_astnode({})'),
+            (ct.SourceLocationRangeType, lambda _: '_wrap_sloc_range({})'),
+            (ct.Token, lambda _: 'Token({})'),
+            (ct.BoolType, lambda _: 'bool({}.value)'),
+            (ct.LongType, lambda _: '{}.value'),
+            (ct.EnumType, lambda _: '{}_to_str[{{}}.value]'.format(
+                type.c_type(self.c_api_settings).name)),
+        ], exception_msg='Unhandled field type'
+                         ' in the python binding: {}'.format(type)
+        ).format(value)
 
-        # Depending on the type of the field, we need to convert the value to
-        # the most appropriate Python type.
-        if issubclass(type, compiled_types.ASTNode):
-            result = '_wrap_astnode({})'
-        elif type == compiled_types.SourceLocationRangeType:
-            result = '_wrap_sloc_range({})'
-        elif type == compiled_types.Token:
-            result = 'Token({})'
-        elif type == compiled_types.BoolType:
-            result = 'bool({}.value)'
-        elif type == compiled_types.LongType:
-            result = '{}.value'
-        elif issubclass(type, compiled_types.EnumType):
-            result = '{}_to_str[{{}}.value]'.format(
-                type.c_type(self.c_api_settings).name
-            )
-        else:
-            raise Exception('Unhandled field type in the python binding:'
-                            ' {}'.format(type))
+    def type_internal_name(self, type):
+        """
+        Python specific helper, to get the internal name of a type that is
+        wrapped.
 
-        return result.format(value)
+        :param CompiledType type: Type parameter. The type for which we want to
+            get the internal name.
+
+        :rtype: str
+        """
+        def ctype_type(name):
+            return "ctypes.{}".format(name)
+
+        def wrapped_type(name):
+            return "_{}".format(name)
+
+        return dispatch_on_type(type, [
+            (ct.BoolType, lambda _: ctype_type('c_int')),
+            (ct.LongType, lambda _: ctype_type('c_long')),
+            (ct.SourceLocationRangeType, lambda _: wrapped_type('SlocRange')),
+            (ct.Token, lambda _: wrapped_type('token')),
+            (ct.ASTNode, lambda _: wrapped_type('node')),
+            (ct.EnumType, lambda _: ctype_type('c_uint')),
+        ])
