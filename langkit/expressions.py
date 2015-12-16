@@ -16,7 +16,7 @@ from itertools import count
 
 import compiled_types
 import names
-from utils import Colors, col
+from utils import Colors, col, common_ancestor
 
 
 class Frozable(object):
@@ -165,9 +165,9 @@ class AbstractExpression(Frozable):
         notation on self.
 
         :type other: AbstractExpression
-        :rtype: OrExpr
+        :rtype: BinaryBooleanOperator
         """
-        return OrExpr(self, other)
+        return BinaryBooleanOperator(BinaryBooleanOperator.OR, self, other)
 
     @Frozable.protect
     def __and__(self, other):
@@ -176,33 +176,9 @@ class AbstractExpression(Frozable):
         notation on self.
 
         :type other: AbstractExpression
-        :rtype: AndExpr
+        :rtype: BinaryBooleanOperator
         """
-        return AndExpr(self, other)
-
-
-class OrExpr(AbstractExpression):
-    """
-    Abstract expression that is the result of the evaluation of an or
-    expression.
-
-    TODO: Not implemented yet!
-    """
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
-
-
-class AndExpr(AbstractExpression):
-    """
-    Abstract expression that is the result of the evaluation of an and
-    expression.
-
-    TODO: Not implemented yet!
-    """
-    def __init__(self, left, right):
-        self.left = left
-        self.right = right
+        return BinaryBooleanOperator(BinaryBooleanOperator.AND, self, other)
 
 
 class OpCall(AbstractExpression):
@@ -218,6 +194,46 @@ class OpCall(AbstractExpression):
 
     def __repr__(self):
         return "<OpCall {} {} {}>".format(self.called, self.args, self.kwargs)
+
+
+class BinaryBooleanOperator(AbstractExpression):
+    """
+    Abstract expression for binary boolean expressions.
+    """
+
+    AND = 'and'
+    OR = 'or'
+
+    def __init__(self, kind, lhs, rhs):
+        """
+        :param str kind: Kind for this binary boolean operator
+            (short-circuiting).
+        :param AbstractExpression lhs: Left operand.
+        :param AbstractExpression rhs: Right operand.
+        """
+        assert kind in (self.AND, self.OR)
+        self.kind = kind
+        self.lhs = lhs
+        self.rhs = rhs
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: IfExpr
+        """
+        lhs = self.lhs.construct()
+        rhs = self.rhs.construct()
+        assert lhs.type == compiled_types.BoolType
+        assert rhs.type == compiled_types.BoolType
+
+        if self.kind == self.AND:
+            then = rhs
+            else_then = LiteralExpr('False', compiled_types.BoolType)
+        else:
+            then = LiteralExpr('True', compiled_types.BoolType)
+            else_then = rhs
+        return IfExpr(lhs, then, else_then, compiled_types.BoolType)
 
 
 class Cast(AbstractExpression):
@@ -246,6 +262,45 @@ class Cast(AbstractExpression):
         expr = self.expr.construct()
         assert issubclass(expr.type, compiled_types.ASTNode)
         return CastExpr(expr, self.astnode)
+
+
+class If(AbstractExpression):
+    """
+    Abstract expression for a conditional expression.
+    """
+
+    def __init__(self, cond, then, else_then):
+        """
+        :param AbstractExpression cond: A boolean expression.
+        :param AbstractExpression then: If "cond" is evaluated to true, this
+            part is returned.
+        :param AbstractExpression else_then: If "cond" is evaluated to false,
+            this part is returned.
+        """
+        self.cond = cond
+        self.then = then
+        self.else_then = else_then
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: IfExpr
+        """
+        cond = self.cond.construct()
+        assert cond.type == compiled_types.BoolType
+
+        then = self.then.construct()
+        else_then = self.else_then.construct()
+
+        if issubclass(then.type, compiled_types.ASTNode):
+            assert issubclass(else_then.type, compiled_types.ASTNode)
+            rtype = common_ancestor(then.type, else_then.type)
+        else:
+            assert then.type == else_then.type
+            rtype = then.type
+
+        return IfExpr(cond, then, else_then, rtype)
 
 
 class IsA(AbstractExpression):
@@ -713,6 +768,40 @@ class CastExpr(ResolvedExpression):
         )
 
 
+class IfExpr(ResolvedExpression):
+    """
+    Resolved expression for a conditional expression.
+    """
+
+    def __init__(self, cond, then, else_then, rtype):
+        """
+        :param ResolvedExpression cond: A boolean expression.
+        :param ResolvedExpression then: If "cond" is evaluated to true, this
+            part is returned.
+        :param ResolvedExpression else_then: If "cond" is evaluated to false,
+            this part is returned.
+        :param langkit.compiled_types.CompiledType rtype: Type parameter. The
+            type that is returned by then and else_then.
+        """
+        self.cond = cond
+        self.then = then
+        self.else_then = else_then
+        self.rtype = rtype
+
+        self.result_var = Property.get().vars(names.Name('Result'), rtype,
+                                              create_unique=False)
+
+    @property
+    def type(self):
+        return self.rtype
+
+    def render_pre(self):
+        return compiled_types.render('properties/if_ada', expr=self)
+
+    def render_expr(self):
+        return self.result_var.name.camel_with_underscores
+
+
 class IsAExpr(ResolvedExpression):
     """
     Resolved expression that represents a kind test of a node.
@@ -738,6 +827,23 @@ class IsAExpr(ResolvedExpression):
             self.expr.render_expr(),
             self.astnode.name().camel_with_underscores
         )
+
+
+class LiteralExpr(ResolvedExpression):
+    """
+    Resolved expression for literals of any type.
+    """
+
+    def __init__(self, literal, type):
+        self.literal = literal
+        self._type = type
+
+    @property
+    def type(self):
+        return self._type
+
+    def render_expr(self):
+        return self.literal
 
 
 class MapExpr(ResolvedExpression):
