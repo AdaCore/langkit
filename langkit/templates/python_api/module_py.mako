@@ -208,14 +208,17 @@ class ASTNode(object):
         else:
             return _wrap_astnode(result)
 
-    def iter_fields(self):
+    def iter_fields(self, with_fields=True, with_properties=True):
         """Iterate through all the fields this node contains
 
-        Return an iterator that yields (field_name, field_value) couples for
-        all fields in this node.
+        Return an iterator that yields (name, value) couples for all abstract
+        fields in this node. If "with_fields", this includes parsing fields. If
+        "with_properties", this also includes properties.
         """
         for field_name in self._field_names:
-            yield (field_name, getattr(self, '{}'.format(field_name)))
+            if ((field_name.startswith('f_') and with_fields) or
+                    (field_name.startswith('p_') and with_properties)):
+                yield (field_name, getattr(self, '{}'.format(field_name)))
 
     def dump(self, indent='', file=sys.stdout):
         """Dump the sub-tree in a human-readable format on the given file.
@@ -240,7 +243,7 @@ class ASTNode(object):
             for i, value in enumerate(self):
                 print_node("item {}".format(i), value)
         else:
-            for name, value in self.iter_fields():
+            for name, value in self.iter_fields(with_properties=False):
                 # Remove the f_ prefix to have the same behavior as the Ada
                 # dumper
                 print_node(name[2:], value)
