@@ -121,6 +121,12 @@ class AbstractExpression(Frozable):
         def _build_cast(astnode):
             return Cast(self, astnode)
 
+        def _build_contains(other):
+            return Contains(self, other)
+
+        def _build_equals(other):
+            return Eq(self, other)
+
         def _build_filter(filter, var=None):
             return Map(var, var or Var, self, filter)
 
@@ -137,6 +143,8 @@ class AbstractExpression(Frozable):
             'all':      _build_all,
             'any':      _build_any,
             'cast':     _build_cast,
+            'contains': _build_contains,
+            'equals':   _build_equals,
             'filter':   _build_filter,
             'is_a':     _build_is_a,
             'map':      _build_map,
@@ -179,6 +187,56 @@ class AbstractExpression(Frozable):
         :rtype: BinaryBooleanOperator
         """
         return BinaryBooleanOperator(BinaryBooleanOperator.AND, self, other)
+
+
+class CollectionExpression(AbstractExpression):
+    """
+    Base class to provide common code for abstract expressions working on
+    collections.
+    """
+
+    def __init__(self, expr, collection, induction_var=None):
+        """
+        :param induction_var: Variable to use in "expr".
+        :type induction_var: None|InductionVariable
+        :param AbstractExpression expr: Expression to evaluate for each item in
+            "collection".
+        :param AbstractExpression collection: Collection on which this map
+            operation works.
+        """
+        super(CollectionExpression, self).__init__()
+        self.expr = expr
+        self.collection = collection
+        self.induction_var = induction_var
+
+    def construct_collection(self):
+        """
+        Construct the collection expression and determine the type of the
+        induction variable.
+
+        :rtype: (ResolvedExpression, langkit.compiled_types.CompiledType)
+        """
+        collection_expr = self.collection.construct()
+        assert (collection_expr.type.is_list_type or
+                issubclass(collection_expr.type, compiled_types.ArrayType)), (
+            'Map cannot iterate on {}, which is not a collection'
+        ).format(collection_expr.type)
+
+        return (collection_expr, collection_expr.type.element_type)
+
+    def bind_induction_var(self, type):
+        """
+        Return a context manager to bind temporarily the induction variable to
+        a specific type. Also create the induction variable first if there is
+        none.
+
+        :param langkit.compiled_types.CompiledType type: Type for the induction
+            variable.
+        """
+        default_induction_var = not self.induction_var
+        if default_induction_var:
+            self.induction_var = Vars.create_default()
+        return self.induction_var.vars.bind(self.induction_var, type)
 
 
 class OpCall(AbstractExpression):
@@ -264,6 +322,84 @@ class Cast(AbstractExpression):
         return CastExpr(expr, self.astnode)
 
 
+class Contains(CollectionExpression):
+    """
+    Abstract expression for a membership test expression.
+    """
+
+    def __init__(self, collection, item):
+        """
+        :param AbstractExpression collection: The collection of which to check
+            membership.
+        :param AbstractExpression item: The item to check in "collection".
+        """
+        self.item = item
+        super(Contains, self).__init__(
+            Vars.membership_test_item.equals(self.item),
+            collection,
+            Vars.membership_test_item,
+        )
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: QuantifierExpr
+        """
+        collection, elt_type = self.construct_collection()
+
+        with self.bind_induction_var(elt_type):
+            ind_var = self.induction_var.construct()
+
+        # "collection" contains "item" if at least one element in "collection"
+        # is equal to "item".
+        return QuantifierExpr(Quantifier.ANY, collection,
+                              EqExpr(ind_var, self.item.construct()),
+                              ind_var)
+
+
+class Eq(AbstractExpression):
+    """
+    Abstract expressinon for equality test expression.
+    """
+
+    def __init__(self, lhs, rhs):
+        """
+        :param AbstractExpression lhs: Left operand.
+        :param AbstractExpression rhs: Right operand.
+        """
+        self.lhs = lhs
+        self.rhs = rhs
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: EqExpr
+        """
+        lhs = self.lhs.construct()
+        rhs = self.rhs.construct()
+
+        if issubclass(compiled_types.ASTNode, lhs.type):
+            # Handle checks between two subclasses without explicit casts. In
+            # order to help users to detect dubious checks, forbid operands
+            # that can never be equal because they have no subclass in common.
+            if issubclass(lhs.type, rhs.type):
+                lhs = CastExpr(lhs, rhs.type)
+            elif issubclass(rhs.type, lhs.type):
+                rhs = CastExpr(rhs, lhs.type)
+            else:
+                assert False, '{} and {} values are never equal'.format(
+                    lhs.type.name().camel, rhs.type.name().camel
+                )
+        else:
+            assert lhs.type == rhs.type, (
+                'Incompatible types for equality: {} and {}'
+            ).format(lhs.type.name().camel, rhs.type.name().camel)
+
+        return EqExpr(lhs, rhs)
+
+
 class If(AbstractExpression):
     """
     Abstract expression for a conditional expression.
@@ -328,56 +464,6 @@ class IsA(AbstractExpression):
         expr = self.expr.construct()
         assert issubclass(expr.type, compiled_types.ASTNode)
         return IsAExpr(expr, self.astnode)
-
-
-class CollectionExpression(AbstractExpression):
-    """
-    Base class to provide common code for abstract expressions working on
-    collections.
-    """
-
-    def __init__(self, expr, collection, induction_var=None):
-        """
-        :param induction_var: Variable to use in "expr".
-        :type induction_var: None|InductionVariable
-        :param AbstractExpression expr: Expression to evaluate for each item in
-            "collection".
-        :param AbstractExpression collection: Collection on which this map
-            operation works.
-        """
-        super(CollectionExpression, self).__init__()
-        self.expr = expr
-        self.collection = collection
-        self.induction_var = induction_var
-
-    def construct_collection(self):
-        """
-        Construct the collection expression and determine the type of the
-        induction variable.
-
-        :rtype: (ResolvedExpression, langkit.compiled_types.CompiledType)
-        """
-        collection_expr = self.collection.construct()
-        assert (collection_expr.type.is_list_type or
-                issubclass(collection_expr.type, compiled_types.ArrayType)), (
-            'Map cannot iterate on {}, which is not a collection'
-        ).format(collection_expr.type)
-
-        return (collection_expr, collection_expr.type.element_type)
-
-    def bind_induction_var(self, type):
-        """
-        Return a context manager to bind temporarily the induction variable to
-        a specific type. Also create the induction variable first if there is
-        none.
-
-        :param langkit.compiled_types.CompiledType type: Type for the induction
-            variable.
-        """
-        default_induction_var = not self.induction_var
-        if default_induction_var:
-            self.induction_var = Vars.create_default()
-        return self.induction_var.vars.bind(self.induction_var, type)
 
 
 class Map(CollectionExpression):
@@ -770,6 +856,29 @@ class CastExpr(ResolvedExpression):
             self.astnode.name().camel_with_underscores,
             self.expr.render_expr()
         )
+
+
+class EqExpr(ResolvedExpression):
+    """
+    Resolved expression for an equality test expression.
+    """
+
+    def __init__(self, lhs, rhs):
+        self.lhs = lhs
+        self.rhs = rhs
+
+    @property
+    def type(self):
+        return compiled_types.BoolType
+
+    def render_pre(self):
+        return '{}\n{}'.format(
+            self.lhs.render_pre(),
+            self.rhs.render_pre()
+        )
+
+    def render_expr(self):
+        return '{} = {}'.format(self.lhs.render_expr(), self.rhs.render_expr())
 
 
 class IfExpr(ResolvedExpression):
