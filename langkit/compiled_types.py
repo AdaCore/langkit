@@ -344,6 +344,10 @@ class StructMetaClass(type):
         for field in fields.values():
             field.ast_node = cls
 
+        assert cls.is_ast_node() or not cls.get_properties(), (
+            "Properties are not yet supported on plain structs"
+        )
+
         return cls
 
 
@@ -688,56 +692,32 @@ class Struct(CompiledType):
 
             cls.compute_properties()
             cls.create_type_definition()
-
-            # Generate abstract field accessors (C public API) for this node
-            # kind.
-            primitives = []
-            for field in cls.get_abstract_fields(include_inherited=False):
-                accessor_basename = names.Name(
-                    '{}_{}'.format(cls.name().base_name,
-                                   field.name.base_name)
-                )
-                t_env = TemplateEnvironment(
-                    astnode=cls,
-                    field=field,
-                    accessor_name=get_context().c_api_settings.get_name(
-                        accessor_basename
-                    )
-                )
-
-                primitives.append(AbstractFieldAccessor(
-                    accessor_basename,
-                    declaration=render(
-                        'c_api/astnode_field_access_decl_ada', t_env
-                    ),
-                    implementation=render(
-                        'c_api/astnode_field_access_impl_ada', t_env
-                    ),
-                    c_declaration=render(
-                        'c_api/astnode_field_access_decl_c', t_env
-                    ),
-                    field=field,
-                ))
-            if cls.is_ast_node():
-                get_context().c_astnode_primitives[cls] = primitives
-
-            # For the Python API, generate subclasses for each AST node kind
-            # (for both abstract and concrete classes). Each will ship accessor
-            # for the fields they define.
+            accessors = cls.create_c_accessors()
             if get_context().python_api_settings:
-                get_context().py_struct_classes[cls] = render(
-                    'python_api/{}'.format(
-                        'ast_subclass_py'
-                        if cls.is_ast_node() else 'struct_type_py'
-                    ),
-                    pyapi=get_context().python_api_settings,
-                    cls=cls,
-                    parent_cls=(
-                        list(cls.get_inheritance_chain())[-2]
-                        if cls.is_ast_node() else None
-                    ),
-                    primitives=primitives,
-                )
+                cls.create_python_type_def(accessors)
+
+    @classmethod
+    def create_c_accessors(cls):
+        """
+        Create the c accessors for abstract fields for cls.
+
+        :rtype: list[AbstractFieldAccessors]
+        """
+        return []  # No primitives for structs
+
+    @classmethod
+    def create_python_type_def(cls, accessors):
+        """
+        Helper to create the python type definition and add it to the context.
+
+        :param list[AbstractFieldAccessor] accessors: The list of accessors
+            for the type.
+        """
+        get_context().py_struct_classes[cls] = render(
+            'python_api/struct_type_py',
+            pyapi=get_context().python_api_settings,
+            cls=cls,
+        )
 
     @classmethod
     def name(cls):
@@ -801,6 +781,52 @@ class ASTNode(Struct):
     def c_type(cls, c_api_settings):
         return c_node_type(c_api_settings)
 
+    @classmethod
+    def create_c_accessors(cls):
+        # Generate abstract field accessors (C public API) for this node
+        # kind.
+        primitives = []
+        for field in cls.get_abstract_fields(include_inherited=False):
+            accessor_basename = names.Name(
+                '{}_{}'.format(cls.name().base_name,
+                               field.name.base_name)
+            )
+            t_env = TemplateEnvironment(
+                astnode=cls,
+                field=field,
+                accessor_name=get_context().c_api_settings.get_name(
+                    accessor_basename
+                )
+            )
+
+            primitives.append(AbstractFieldAccessor(
+                accessor_basename,
+                declaration=render(
+                    'c_api/astnode_field_access_decl_ada', t_env
+                ),
+                implementation=render(
+                    'c_api/astnode_field_access_impl_ada', t_env
+                ),
+                c_declaration=render(
+                    'c_api/astnode_field_access_decl_c', t_env
+                ),
+                field=field,
+            ))
+        get_context().c_astnode_primitives[cls] = primitives
+        return primitives
+
+    @classmethod
+    def create_python_type_def(cls, accessors):
+        # For the Python API, generate subclasses for each AST node kind
+        # (for both abstract and concrete classes). Each will ship accessor
+        # for the fields they define.
+        get_context().py_struct_classes[cls] = render(
+            'python_api/ast_subclass_py',
+            pyapi=get_context().python_api_settings,
+            cls=cls,
+            parent_cls=list(cls.get_inheritance_chain())[-2],
+            primitives=accessors
+        )
 
 # We tag the ASTNode class as abstract here, because of the circular dependency
 # between the @abstract decorator and the ASTNode class, which is caused by the
