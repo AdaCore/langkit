@@ -791,6 +791,7 @@ class ASTNode(Struct):
     """
 
     is_ptr = True
+    abstract = False
 
     @classmethod
     def is_ast_node(cls):
