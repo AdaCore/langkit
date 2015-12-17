@@ -311,6 +311,15 @@ class StructMetaClass(type):
     Internal metaclass for AST nodes, used to ease fields handling during code
     generation.
     """
+
+    astnode_types = []
+    """
+    List of ASTNode types. This list is updated every time a new astnode type
+    is created.
+
+    :type: list[ASTNode]
+    """
+
     def __new__(mcs, name, bases, dct):
         assert len(bases) == 1, (
             "Multiple inheritance for AST nodes is not supported")
@@ -343,6 +352,9 @@ class StructMetaClass(type):
         # Associate each field and property to this ASTNode subclass
         for field in fields.values():
             field.ast_node = cls
+
+        if cls.is_ast_node():
+            mcs.astnode_types.append(cls)
 
         assert cls.is_ast_node() or not cls.get_properties(), (
             "Properties are not yet supported on plain structs"
@@ -465,15 +477,11 @@ class Struct(CompiledType):
             )
         )
 
-        assert issubclass(cls, ASTNode)
-
         # Only assign types if cls was not yet typed. In the case where it
         # was already typed, we checked above that the new types were
         # consistent with the already present ones.
         if not cls.is_type_resolved:
             cls.is_type_resolved = True
-
-            get_context().astnode_types.append(cls)
 
             for field_type, field in zip(types, fields):
 

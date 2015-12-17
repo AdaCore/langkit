@@ -336,8 +336,13 @@ class CompileCtx():
         # Internal field for extensions directory
         self._extensions_dir = None
 
-    def order_astnode_types(self):
-        """Sort the "astnode_types" field."""
+    def compute_astnode_types(self):
+        """Compute the "astnode_types" field."""
+
+        # Get the list of ASTNode types from the Struct metaclass
+        from compiled_types import StructMetaClass
+        self.astnode_types = list(StructMetaClass.astnode_types)
+
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a
         # relatively stable order. This is really useful for debugging
@@ -374,6 +379,10 @@ class CompileCtx():
         testing purposes.
         """
         assert self.grammar, "Set grammar before calling emit"
+
+        # Populate the astnode_types field, so that it is available for
+        # further compilation stages.
+        self.compute_astnode_types()
 
         lib_name_low = self.ada_api_settings.lib_name.lower()
 
@@ -435,7 +444,13 @@ class CompileCtx():
                 r.compile()
                 self.rules_to_fn_names[r_name] = r
 
-        self.order_astnode_types()
+        for astnode_type in self.astnode_types:
+            assert astnode_type.is_type_resolved, (
+                "ASTNode subclass {} is not type resolved. It is probably "
+                "not used by the grammar, and its type not annotated".format(
+                    astnode_type.name()
+                )
+            )
 
         for i, astnode in enumerate(
             (astnode
