@@ -422,6 +422,8 @@ class ASTNode(CompiledType):
         Associate `types` (a list of CompiledType) to fields in `cls` . It is
         valid to perform this association multiple times as long as types are
         consistent.
+
+        :type types: list[CompiledType]
         """
         fields = cls.get_parse_fields(include_inherited=False)
 

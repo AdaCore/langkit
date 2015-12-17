@@ -121,8 +121,8 @@ class AbstractExpression(Frozable):
         def _build_cast(astnode):
             return Cast(self, astnode)
 
-        def _build_filter(filter):
-            return Map(None, Vars, self, filter)
+        def _build_filter(filter, var=None):
+            return Map(var, var or Var, self, filter)
 
         def _build_is_a(astnode):
             return IsA(self, astnode)
@@ -133,18 +133,18 @@ class AbstractExpression(Frozable):
         def _build_map(expr, filter=None, var=None):
             return Map(var, expr, self, filter)
 
-        CONSTRUCTORS = {
-            'all':    _build_all,
-            'any':    _build_any,
-            'cast':   _build_cast,
-            'filter': _build_filter,
-            'is_a':   _build_is_a,
-            'map':    _build_map,
-            'mapcat': _build_mapcat,
+        constructors = {
+            'all':      _build_all,
+            'any':      _build_any,
+            'cast':     _build_cast,
+            'filter':   _build_filter,
+            'is_a':     _build_is_a,
+            'map':      _build_map,
+            'mapcat':   _build_mapcat,
         }
 
         try:
-            return CONSTRUCTORS[attr]
+            return constructors[attr]
         except KeyError:
             return FieldAccess(self, attr)
 
@@ -393,7 +393,7 @@ class Map(CollectionExpression):
 
         :param filter_expr: If provided, a boolean expression that says whether
             to include or exclude an item from the collection.
-        :type filter: None|AbstractExpression
+        :type filter_expr: None|AbstractExpression
         :param bool concat: If true, "expr" must return arrays, and this
             expression returns the concatenation of all the arrays "expr"
             returns.
@@ -401,6 +401,8 @@ class Map(CollectionExpression):
         super(Map, self).__init__(expr, collection, induction_var)
         self.filter_expr = filter_expr
         self.concat = concat
+        assert (self.filter_expr is None or
+                isinstance(self.filter_expr, AbstractExpression))
 
     def construct(self):
         """
@@ -419,7 +421,7 @@ class Map(CollectionExpression):
                                            compiled_types.ArrayType))), (
                 'Cannot mapcat with expressions returning {} values'
                 ' (collections expected instead)'
-            ).format(expr.name())
+            ).format(expr.type.name())
 
             if self.filter_expr:
                 filter_expr = self.filter_expr.construct()
@@ -623,6 +625,9 @@ class InductionVariablesSingleton(object):
         Bind the type of this placeholder.
 
         :param var: Variable to bind as the default induction variable.
+        :type var: langkit.compiled_types.CompiledType
+
+        :param type: Type parameter to assign to "var".
         :type var: langkit.compiled_types.CompiledType
         """
         self.bind_stack.append((var, type))
@@ -854,7 +859,7 @@ class MapExpr(ResolvedExpression):
     def __init__(self, induction_var, expr, collection, filter=None,
                  concat=False):
         """
-        :param InductionVariable induction_var: Variable to use in "expr".
+        :param VarExpr induction_var: Variable to use in "expr".
         :param ResolvedExpression expr: Expression to evaluate for each item in
             "collection".
         :param ResolvedExpression collection: Collection on which this map

@@ -66,7 +66,7 @@ class Name(object):
         Returns a name which is a concatenation of two names, so that
         A_Name + Another_Name = A_Name_Another_Name.
 
-        :type Name: other:
+        :type other: Name
         :rtype: Name
         """
         return Name('{}_{}'.format(self.base_name, other.base_name))
