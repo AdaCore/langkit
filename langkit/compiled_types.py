@@ -326,6 +326,15 @@ class StructMetaClass(type):
     :type: list[ASTNode]
     """
 
+    root_grammar_class = None
+    """
+    The class used as a root for the whole ASTNode hierarchy for the
+    currently compiled grammar. Every ASTNode must derive directly or
+    indirectly from that class.
+
+    :type: ASTNode
+    """
+
     def __new__(mcs, name, bases, dct):
         assert len(bases) == 1, (
             "Multiple inheritance for AST nodes is not supported")
@@ -359,12 +368,30 @@ class StructMetaClass(type):
         for field in fields.values():
             field.ast_node = cls
 
-        if cls.is_ast_node():
-            mcs.astnode_types.append(cls)
-
         assert cls.is_ast_node() or not cls.get_properties(), (
             "Properties are not yet supported on plain structs"
         )
+
+        # We want to check that every type deriving from ASTNode
+        # actually derives from an user defined subclass of ASTNode.
+
+        # cls.is_ast_node is true for the ASTNode class, but we don't want
+        # to check it since the it's the internal root class.
+        if cls.is_ast_node() and cls.__name__ != "ASTNode":
+            assert (
+                # If the only registered astnode type is ASTNode, then we
+                # skip the check so that the user can register a root
+                # grammar class via the decorator that is ran *after* this
+                # metaclass constructor.
+                mcs.astnode_types == [ASTNode]
+                or issubclass(cls, mcs.root_grammar_class)
+            ), (
+                "Every ASTNode subclass must derive directly or indirectly"
+                " from the root grammar class"
+            )
+
+        if cls.is_ast_node():
+            mcs.astnode_types.append(cls)
 
         return cls
 
@@ -377,6 +404,21 @@ def abstract(cls):
     """
     assert issubclass(cls, ASTNode)
     cls.abstract = True
+    return cls
+
+
+def root_grammar_class(cls):
+    """
+    Decorator to tag an ASTNode subclass as the root grammar node.
+
+    :param ASTNode cls: Type parameter. The ASTNode subclass to decorate.
+    """
+    assert issubclass(cls, ASTNode)
+    assert not StructMetaClass.root_grammar_class, (
+        "You can have only one class derived from ASTNode be the root "
+        "grammar class"
+    )
+    StructMetaClass.root_grammar_class = cls
     return cls
 
 
@@ -941,7 +983,8 @@ def list_type(element_type):
         ))
 
     return type(
-        '{}ListType'.format(element_type.name()), (ASTNode, ), {
+        '{}ListType'.format(element_type.name()),
+        (StructMetaClass.root_grammar_class, ), {
             'is_ptr': True,
 
             'name': classmethod(lambda cls:
