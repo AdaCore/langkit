@@ -731,6 +731,44 @@ class ASTNode(CompiledType):
 ASTNode.abstract = True
 
 
+class ASTList(ASTNode):
+    """
+    Base class for ASTList types.
+    """
+
+    is_ptr = True
+
+    element_type = None
+    """
+    CompiledType subclass for the type of elements contained in this list type.
+    Must be overriden in subclasses.
+    :type: CompiledType|None
+    """
+
+    @classmethod
+    def name(cls):
+        return names.Name('List') + cls.element_type.name()
+
+    @classmethod
+    def add_to_context(cls):
+        if cls in get_context().types:
+            return
+        get_context().types.add(cls)
+        get_context().list_types.add(cls.element_type)
+
+        # Make sure the type this list contains is already declared
+        cls.element_type.add_to_context()
+
+        t_env = TemplateEnvironment(element_type=cls.element_type)
+        get_context().list_types_declarations.append(TypeDeclaration.render(
+            'astlist_def_ada', t_env, cls
+        ))
+
+    @classmethod
+    def nullexpr(cls):
+        return null_constant()
+
+
 # We want structural equality on lists whose elements have the same types.
 # Memoization is one way to make sure that, for each CompiledType subclass X::
 #    list_type(X) == list_type(X)
@@ -743,32 +781,9 @@ def list_type(element_type):
         the resulting list.
     """
 
-    # noinspection PyUnusedLocal
-    @classmethod
-    def name(cls):
-        return names.Name('List') + element_type.name()
-
-    @classmethod
-    def add_to_context(cls):
-        if cls in get_context().types:
-            return
-        get_context().types.add(cls)
-        get_context().list_types.add(element_type)
-
-        # Make sure the type this list contains is already declared
-        element_type.add_to_context()
-
-        t_env = TemplateEnvironment(element_type=element_type)
-        get_context().list_types_declarations.append(TypeDeclaration.render(
-            'astlist_def_ada', t_env, cls
-        ))
-
     return type(
-        '{}ListType'.format(element_type.name()), (ASTNode, ), {
-            'is_ptr':         True,
-            'add_to_context': add_to_context,
-            'name':           name,
-            'nullexpr':       classmethod(lambda cls: null_constant()),
+        '{}ListType'.format(element_type.name()), (ASTList, ), {
+            'element_type': element_type,
         }
     )
 
