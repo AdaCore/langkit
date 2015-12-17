@@ -143,17 +143,6 @@ class CompiledType(object):
         """
         raise NotImplementedError()
 
-    @classmethod
-    def py_type(cls, python_api_settings):
-        """Return a PythonAPIType instance for this type.
-
-        Must be overriden in subclasses.
-
-        :param PythonApiSettings python_api_settings: The settings for the C
-            API.
-        """
-        raise NotImplementedError()
-
 
 class BasicType(CompiledType):
     """
