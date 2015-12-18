@@ -518,6 +518,27 @@ class Map(CollectionExpression):
                        self.concat)
 
 
+class Not(AbstractExpression):
+    """
+    Abstract expression for "not" boolean expressions.
+    """
+
+    def __init__(self, expr):
+        """
+        :param AbstractExpression expr: Operand for the "not" expression.
+        """
+        self.expr = expr
+
+    def construct(self):
+        """
+        Consrtuct a resolved expression for this.
+        :rtype: NotExpr
+        """
+        expr = self.expr.construct()
+        assert expr.type == compiled_types.BoolType
+        return NotExpr(expr)
+
+
 class Quantifier(CollectionExpression):
     """
     Abstract expression that tests a predicate over the items of a collection.
@@ -1014,6 +1035,25 @@ class MapExpr(ResolvedExpression):
 
     def render_expr(self):
         return self.array_var.name.camel_with_underscores
+
+
+class NotExpr(ResolvedExpression):
+    """
+    Resolved expression for "not" boolean expressions.
+    """
+
+    def __init__(self, expr):
+        self.expr = expr
+
+    @property
+    def type(self):
+        return compiled_types.BoolType
+
+    def render_pre(self):
+        return self.expr.render_pre()
+
+    def render_expr(self):
+        return 'not ({})'.format(self.expr.render_expr())
 
 
 class QuantifierExpr(ResolvedExpression):
