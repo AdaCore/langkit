@@ -10,7 +10,7 @@ declare
    ${vec_var} : ${map.type.vector()};
 begin
    for ${ind_var} of
-      % if is_list_type(map.collection.type):
+      % if map.collection.type.is_list_type:
          ${map.collection.render_expr()}.Vec
       % else:
          ${map.collection.render_expr()}.Items
@@ -25,7 +25,7 @@ begin
 
       % if map.concat:
          for Item_To_Append of
-            % if is_list_type(map.expr.type):
+            % if map.expr.type.is_list_type:
                ${map.expr.render_expr()}.Vec
             % else:
                ${map.expr.render_expr()}.Items

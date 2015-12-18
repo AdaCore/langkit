@@ -9,7 +9,7 @@ ${quantifier.collection.render_pre()}
 
 ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
 for ${ind_var} of
-   % if is_list_type(quantifier.collection.type):
+   % if quantifier.collection.type.is_list_type:
       ${quantifier.collection.render_expr()}.Vec
    % else:
       ${quantifier.collection.render_expr()}.Items

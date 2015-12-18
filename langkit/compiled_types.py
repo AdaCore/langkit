@@ -54,7 +54,6 @@ def make_renderer(base_renderer=None):
         'is_sloc_range':    type_check(SourceLocationRangeType),
         'is_token_type':    type_check(Token),
         'is_array_type':    type_check(ArrayType),
-        'is_list_type':     type_check(ASTList),
         'decl_type':        decl_type,
     }
     if get_context():
@@ -90,6 +89,13 @@ class CompiledType(object):
 
     # Whether this type is handled through pointers only in the generated code
     is_ptr = True
+
+    is_list_type = False
+    """
+    Whether this type represents an instantiation of ASTList (i.e. a list of
+    AST nodes).
+    :type: bool
+    """
 
     def __init__(self):
         assert False, (
@@ -842,44 +848,6 @@ class ASTNode(Struct):
 ASTNode.abstract = True
 
 
-class ASTList(ASTNode):
-    """
-    Base class for ASTList types.
-    """
-
-    is_ptr = True
-
-    element_type = None
-    """
-    CompiledType subclass for the type of elements contained in this list
-    type. Must be overriden in subclasses.
-    :type: CompiledType
-    """
-
-    @classmethod
-    def name(cls):
-        return names.Name('List') + cls.element_type.name()
-
-    @classmethod
-    def add_to_context(cls):
-        if cls in get_context().types:
-            return
-        get_context().types.add(cls)
-        get_context().list_types.add(cls.element_type)
-
-        # Make sure the type this list contains is already declared
-        cls.element_type.add_to_context()
-
-        t_env = TemplateEnvironment(element_type=cls.element_type)
-        get_context().list_types_declarations.append(TypeDeclaration.render(
-            'astlist_def_ada', t_env, cls
-        ))
-
-    @classmethod
-    def nullexpr(cls):
-        return null_constant()
-
-
 class ArrayType(CompiledType):
     """
     Base class for array types.
@@ -958,8 +926,30 @@ def list_type(element_type):
         the resulting list.
     """
 
+    def add_to_context(cls):
+        if cls in get_context().types:
+            return
+        get_context().types.add(cls)
+        get_context().list_types.add(cls.element_type)
+
+        # Make sure the type this list contains is already declared
+        cls.element_type.add_to_context()
+
+        t_env = TemplateEnvironment(element_type=cls.element_type)
+        get_context().list_types_declarations.append(TypeDeclaration.render(
+            'astlist_def_ada', t_env, cls
+        ))
+
     return type(
-        '{}ListType'.format(element_type.name()), (ASTList, ), {
+        '{}ListType'.format(element_type.name()), (ASTNode, ), {
+            'is_ptr': True,
+
+            'name': classmethod(lambda cls:
+                                names.Name('List') + cls.element_type.name()),
+            'add_to_context': classmethod(add_to_context),
+            'nullexpr': classmethod(lambda cls: null_constant()),
+
+            'is_list_type': True,
             'element_type': element_type,
         }
     )
