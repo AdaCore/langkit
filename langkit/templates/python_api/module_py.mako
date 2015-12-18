@@ -260,7 +260,7 @@ ${subclass_decl}
 
 UNINITIALIZED = 'uninitialized'
 
-% for chunk in _self.py_astnode_field_types.values():
+% for chunk in _self.py_field_types.values():
 ${chunk}
 % endfor
 
