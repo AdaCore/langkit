@@ -177,8 +177,9 @@ class CompileCtx():
 
         self.struct_types = []
         """
-        List of all plain record types, sorted in no particular order
-        :type: list[compiled_types.Node]
+        List of all plain struct types.
+
+        :type: list[langkit.compiled_types.Struct]
         """
 
         self.list_types = set()
@@ -336,12 +337,16 @@ class CompileCtx():
         # Internal field for extensions directory
         self._extensions_dir = None
 
-    def compute_astnode_types(self):
+    def compute_types(self):
         """Compute the "astnode_types" field."""
 
         # Get the list of ASTNode types from the Struct metaclass
         from compiled_types import StructMetaClass
         self.astnode_types = list(StructMetaClass.astnode_types)
+
+        # Skipping the first element which is Struct, because it is not a
+        # real type in the generated library.
+        self.struct_types = list(StructMetaClass.struct_types)[1:]
 
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a
@@ -382,7 +387,7 @@ class CompileCtx():
 
         # Populate the astnode_types field, so that it is available for
         # further compilation stages.
-        self.compute_astnode_types()
+        self.compute_types()
 
         lib_name_low = self.ada_api_settings.lib_name.lower()
 

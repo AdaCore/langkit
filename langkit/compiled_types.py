@@ -326,6 +326,13 @@ class StructMetaClass(type):
     :type: list[ASTNode]
     """
 
+    struct_types = []
+    """
+    List of all plain struct types.
+
+    :type: list[Struct]
+    """
+
     root_grammar_class = None
     """
     The class used as a root for the whole ASTNode hierarchy for the
@@ -392,6 +399,8 @@ class StructMetaClass(type):
 
         if cls.is_ast_node():
             mcs.astnode_types.append(cls)
+        else:
+            mcs.struct_types.append(cls)
 
         return cls
 
@@ -731,9 +740,6 @@ class Struct(CompiledType):
         assert cls.is_typed, (
             "Trying to generate code for a type before typing is complete"
         )
-
-        if not cls.is_ast_node():
-            get_context().struct_types.append(cls)
 
         if cls not in get_context().types and cls != ASTNode:
             base_class = cls.__bases__[0]
