@@ -8,7 +8,7 @@ class ${cls.name().camel}(ctypes.Structure):
         ${pyapi.type_internal_name(field.type)}),
     % endfor
     ]
-    % for primitive in primitives:
+    % for field in cls.get_fields():
 
     @property
     def ${field.name.lower}(self):
