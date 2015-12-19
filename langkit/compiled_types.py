@@ -73,7 +73,20 @@ def make_renderer(base_renderer=None):
     }
     if get_context():
         capi = get_context().c_api_settings
+
+        # Name of the root AST node access type
+        type_name = get_context().root_grammar_class.name()
+
+        # Name of the root AST node record type
+        value_type = type_name + names.Name("Type")
+
+        # Name of the root AST node kind type
+        kind_name = value_type + names.Name("Kind")
+
         template_args.update({
+            'root_node_type_name':   type_name,
+            'root_node_value_type':  value_type,
+            'root_node_kind_name':   kind_name,
             'ctx':                   get_context(),
             'ada_api':               get_context().ada_api_settings,
             'capi':                  capi,
@@ -658,6 +671,11 @@ class Struct(CompiledType):
         Also emit the implementation for the corresponding methods/singletons
         in `context.body`.
         """
+        # Exit if this is the root grammar class. It doesn't need to be
+        # emitted because it is automatically generated at the root of the
+        # compilation process.
+        if cls == StructMetaClass.root_grammar_class:
+            return
 
         def template(template_suffix):
             """

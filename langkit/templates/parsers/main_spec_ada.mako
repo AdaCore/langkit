@@ -47,7 +47,7 @@ package ${_self.ada_api_settings.lib_name}.Parsers is
 
    function Parse
      (Parser         : in out Parser_Type;
-      Check_Complete : Boolean := True) return AST_Node
+      Check_Complete : Boolean := True) return ${root_node_type_name}
      with Inline_Always => True;
    --  Do the actual parsing using the main parsing rule.  If Check_Complete,
    --  consider the case when the parser could not consume all the input tokens

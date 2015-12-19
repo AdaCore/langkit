@@ -135,10 +135,10 @@ package body ${_self.ada_api_settings.lib_name}.Parsers is
 
    function Parse
      (Parser         : in out Parser_Type;
-      Check_Complete : Boolean := True) return AST_Node
+      Check_Complete : Boolean := True) return ${root_node_type_name}
    is
    begin
-      return AST_Node
+      return ${root_node_type_name}
         (Parse_${_self.rules_to_fn_names[_self.main_rule_name]._name}
            (Parser, Check_Complete));
    end Parse;

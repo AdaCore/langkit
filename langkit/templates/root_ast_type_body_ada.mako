@@ -1,18 +1,20 @@
+## vim: filetype=makoada
+
 with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.PP_Utils; use Langkit_Support.PP_Utils;
 with Langkit_Support.Text;     use Langkit_Support.Text;
 
-package body Langkit_Support.AST is
+package body AST is
 
    -----------
    -- Child --
    -----------
 
-   function Child (Node  : AST_Node;
-                   Index : Natural) return AST_Node
+   function Child (Node  : ${root_node_type_name};
+                   Index : Natural) return ${root_node_type_name}
    is
-      Result : AST_Node;
+      Result : ${root_node_type_name};
       Exists : Boolean;
    begin
       Get_Child (Node, Index, Exists, Result);
@@ -24,8 +26,9 @@ package body Langkit_Support.AST is
    --------------
 
    function Traverse
-     (Node  : AST_Node;
-      Visit : access function (Node : AST_Node) return Visit_Status)
+     (Node  : ${root_node_type_name};
+      Visit : access function (Node : ${root_node_type_name})
+              return Visit_Status)
      return Visit_Status
    is
       Status : Visit_Status := Into;
@@ -42,7 +45,7 @@ package body Langkit_Support.AST is
          if Status = Into then
             for I in 1 .. Child_Count (Node) loop
                declare
-                  Cur_Child : constant AST_Node := Child (Node, I - 1);
+                  Cur_Child : constant ${root_node_type_name} := Child (Node, I - 1);
 
                begin
                   if Cur_Child /= null then
@@ -70,8 +73,9 @@ package body Langkit_Support.AST is
    --------------
 
    procedure Traverse
-     (Node  : AST_Node;
-      Visit : access function (Node : AST_Node) return Visit_Status)
+     (Node  : ${root_node_type_name};
+      Visit : access function (Node : ${root_node_type_name})
+              return Visit_Status)
    is
       Result_Status : Visit_Status;
       pragma Unreferenced (Result_Status);
@@ -83,8 +87,9 @@ package body Langkit_Support.AST is
    -- Sloc_Range --
    ----------------
 
-   function Sloc_Range (Node : AST_Node;
-                        Snap : Boolean := False) return Source_Location_Range
+   function Sloc_Range
+     (Node : ${root_node_type_name};
+      Snap : Boolean := False) return Source_Location_Range
    is
       Tokens : Token_Vectors.Vector renames Node.Token_Data.Tokens;
       Sloc_Start, Sloc_End : Source_Location;
@@ -112,12 +117,12 @@ package body Langkit_Support.AST is
    -- Lookup --
    ------------
 
-   function Lookup (Node : AST_Node;
+   function Lookup (Node : ${root_node_type_name};
                     Sloc : Source_Location;
-                    Snap : Boolean := False) return AST_Node
+                    Snap : Boolean := False) return ${root_node_type_name}
    is
       Position : Relative_Position;
-      Result   : AST_Node;
+      Result   : ${root_node_type_name};
    begin
       Lookup_Relative (Node, Sloc, Position, Result, Snap);
       return Result;
@@ -127,7 +132,7 @@ package body Langkit_Support.AST is
    -- Compare --
    -------------
 
-   function Compare (Node : AST_Node;
+   function Compare (Node : ${root_node_type_name};
                      Sloc : Source_Location;
                      Snap : Boolean := False) return Relative_Position is
    begin
@@ -139,7 +144,7 @@ package body Langkit_Support.AST is
    -------------------
 
    function Get_Extension
-     (Node : AST_Node;
+     (Node : ${root_node_type_name};
       ID   : Extension_ID;
       Dtor : Extension_Destructor) return Extension_Access
    is
@@ -167,7 +172,7 @@ package body Langkit_Support.AST is
    -- Free_Extensions --
    ---------------------
 
-   procedure Free_Extensions (Node : access AST_Node_Type) is
+   procedure Free_Extensions (Node : access ${root_node_value_type}) is
       procedure Free is new Ada.Unchecked_Deallocation
         (Extension_Type, Extension_Access);
       use Extension_Vectors;
@@ -176,7 +181,7 @@ package body Langkit_Support.AST is
       --  Explicit iteration for perf
       for J in 0 .. Last_Index (Node.Extensions) loop
          Slot := Get (Node.Extensions, J);
-         Slot.Dtor (AST_Node (Node), Slot.Extension.all);
+         Slot.Dtor (${root_node_type_name} (Node), Slot.Extension.all);
          Free (Slot.Extension);
       end loop;
    end Free_Extensions;
@@ -185,10 +190,10 @@ package body Langkit_Support.AST is
    -- Lookup_Relative --
    ---------------------
 
-   procedure Lookup_Relative (Node       : AST_Node;
+   procedure Lookup_Relative (Node       : ${root_node_type_name};
                               Sloc       : Source_Location;
                               Position   : out Relative_Position;
-                              Node_Found : out AST_Node;
+                              Node_Found : out ${root_node_type_name};
                               Snap       : Boolean := False) is
       Result : constant Relative_Position :=
         Compare (Node, Sloc, Snap);
@@ -203,10 +208,12 @@ package body Langkit_Support.AST is
    -- Children --
    --------------
 
-   function Children (Node : AST_Node) return AST_Node_Arrays.Array_Type
+   function Children
+     (Node : ${root_node_type_name})
+     return ${root_node_type_name}_Arrays.Array_Type
    is
    begin
-      return A : AST_Node_Arrays.Array_Type (0 .. Child_Count (Node)) do
+      return A : ${root_node_type_name}_Arrays.Array_Type (0 .. Child_Count (Node)) do
          for I in 0 .. Child_Count (Node) loop
             A (I) := Child (Node, I);
          end loop;
@@ -218,7 +225,7 @@ package body Langkit_Support.AST is
    --------------------------
 
    function Children_With_Trivia
-     (Node : AST_Node) return Children_Arrays.Array_Type
+     (Node : ${root_node_type_name}) return Children_Arrays.Array_Type
    is
       Ret_Vec : Children_Vectors.Vector;
       use Children_Vectors;
@@ -236,10 +243,12 @@ package body Langkit_Support.AST is
          end loop;
       end Append_Trivias;
 
-      function Not_Null (N : AST_Node) return Boolean is (N /= null);
+      function Not_Null
+        (N : ${root_node_type_name}) return Boolean is (N /= null);
 
-      N_Children : constant AST_Node_Arrays.Array_Type
-        := AST_Node_Arrays.Filter (Children (Node), Not_Null'Access);
+      N_Children : constant ${root_node_type_name}_Arrays.Array_Type
+        := ${root_node_type_name}_Arrays.Filter
+          (Children (Node), Not_Null'Access);
    begin
       if N_Children'Length > 0
         and then Node.Token_Start /= N_Children (0).Token_Start
@@ -266,7 +275,7 @@ package body Langkit_Support.AST is
    -- PP_Trivia --
    ---------------
 
-   procedure PP_Trivia (Node : AST_Node; Level : Integer := 0) is
+   procedure PP_Trivia (Node : ${root_node_type_name}; Level : Integer := 0) is
    begin
       Put_Line (Level, Kind_Name (Node));
       for C of Children_With_Trivia (Node) loop
@@ -279,4 +288,4 @@ package body Langkit_Support.AST is
       end loop;
    end PP_Trivia;
 
-end Langkit_Support.AST;
+end AST;

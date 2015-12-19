@@ -20,7 +20,7 @@
    % if not cls.abstract:
 
       overriding
-      function Kind (Node : access ${type_name}) return AST_Node_Kind;
+      function Kind (Node : access ${type_name}) return ${root_node_kind_name};
       overriding
       function Kind_Name (Node : access ${type_name}) return String;
       overriding
@@ -33,19 +33,20 @@
       procedure Get_Child (Node  : access ${type_name};
                            Index : Natural;
                            Exists : out Boolean;
-                           Result : out AST_Node);
+                           Result : out ${root_node_type_name});
 
       overriding
       procedure Print (Node  : access ${type_name};
                        Level : Natural := 0);
       overriding
       procedure Validate (Node   : access ${type_name};
-                          Parent : AST_Node := null);
+                          Parent : ${root_node_type_name} := null);
 
       overriding
       function Lookup_Children (Node : access ${type_name};
                                 Sloc : Source_Location;
-                                Snap : Boolean := False) return AST_Node;
+                                Snap : Boolean := False)
+        return ${root_node_type_name};
 
       overriding procedure Destroy
         (Node : access ${cls.name()}_Type);

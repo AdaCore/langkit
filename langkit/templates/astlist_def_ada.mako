@@ -4,13 +4,13 @@
 
 % if not private_part:
 
-   type List_${type}_Type is new AST_Node_Type with private;
+   type List_${type}_Type is new ${root_node_value_type} with private;
    type List_${type} is
       access all List_${type}_Type'Class;
 
 % else:
 
-   package Lists_${type} is new Langkit_Support.AST.List
+   package Lists_${type} is new AST.List
      (Node_Type   => ${type}_Type,
       Node_Access => ${type});
 

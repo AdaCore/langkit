@@ -7,13 +7,14 @@ with Ada.Strings.Unbounded.Hash;
 
 with Interfaces; use Interfaces;
 
-with Langkit_Support.AST;                use Langkit_Support.AST;
-with Langkit_Support.AST.List;
+with AST;                                use AST;
+with AST.List;
 with Langkit_Support.Bump_Ptr;           use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
 with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
 with Langkit_Support.Tokens;             use Langkit_Support.Tokens;
+
 
 package ${_self.ada_api_settings.lib_name} is
 
@@ -54,7 +55,7 @@ package ${_self.ada_api_settings.lib_name} is
    type Analysis_Unit_Type is record
       Context         : Analysis_Context;
       Ref_Count       : Natural;
-      AST_Root        : AST_Node;
+      AST_Root        : ${root_node_type_name};
       File_Name       : Unbounded_String;
       Charset         : Unbounded_String;
       TDH             : aliased Token_Data_Handler;
@@ -124,10 +125,10 @@ package ${_self.ada_api_settings.lib_name} is
    ## AST_Node_Kind. Nothing can be an instance of an abstract subclass, so
    ## these do not need their own kind. Note that we start from 2 because 1 is
    ## reserved for all lists.
-   List_Kind : constant AST_Node_Kind := 1;
+   List_Kind : constant ${root_node_kind_name} := 1;
    % for cls in _self.astnode_types:
       % if not cls.abstract:
-         ${cls.name()}_Kind : constant AST_Node_Kind :=
+         ${cls.name()}_Kind : constant ${root_node_kind_name} :=
             ${ctx.node_kind_constants[cls]};
       % endif
    % endfor

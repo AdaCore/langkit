@@ -22,7 +22,7 @@ type_name = '{}_Type'.format(cls.name())
    ----------
 
    overriding
-   function Kind (Node : access ${type_name}) return AST_Node_Kind is
+   function Kind (Node : access ${type_name}) return ${root_node_kind_name} is
    begin
       return ${cls.name()}_Kind;
    end Kind;
@@ -47,7 +47,7 @@ type_name = '{}_Type'.format(cls.name())
    begin
       Append (Result, Kind_Name (Node));
       Append (Result, '[');
-      Append (Result, Image (Sloc_Range (AST_Node (Node))));
+      Append (Result, Image (Sloc_Range (${root_node_type_name} (Node))));
       Append (Result, "](");
 
       % for i, field in enumerate(repr_fields):
@@ -60,7 +60,7 @@ type_name = '{}_Type'.format(cls.name())
           % endif
 
           % if is_ast_node(field.type):
-             Append (Result, Image (AST_Node (Node.${field.name})));
+             Append (Result, Image (${root_node_type_name} (Node.${field.name})));
           % else:
              Append (Result, Image (Node.${field.name}));
           % endif
@@ -94,7 +94,7 @@ type_name = '{}_Type'.format(cls.name())
    procedure Get_Child (Node   : access ${type_name};
                         Index  : Natural;
                         Exists : out Boolean;
-                        Result : out AST_Node) is
+                        Result : out ${root_node_type_name}) is
       ## Some ASTnodes have no ASTNode child: avoid the "unused parameter"
       ## compilation warning for them.
       % if not astnode_fields:
@@ -105,7 +105,7 @@ type_name = '{}_Type'.format(cls.name())
       case Index is
           % for i, field in enumerate(astnode_fields):
               when ${i} =>
-                  Result := AST_Node (Node.${field.name});
+                  Result := ${root_node_type_name} (Node.${field.name});
                   Exists := True;
           % endfor
           when others =>
@@ -122,7 +122,7 @@ type_name = '{}_Type'.format(cls.name())
    procedure Print (Node  : access ${type_name};
                     Level : Natural := 0)
    is
-      Nod : constant AST_Node := AST_Node (Node);
+      Nod : constant ${root_node_type_name} := ${root_node_type_name} (Node);
    begin
       Put_Line (Level, Kind_Name (Nod) & "[" & Image (Sloc_Range (Nod)) & "]");
 
@@ -135,7 +135,8 @@ type_name = '{}_Type'.format(cls.name())
                Node.${field.name}.Print (Level + 2);
             end if;
          % else:
-            Put_Line (Level + 1, "${field._name.lower}: " & Image (Node.${field.name}));
+            Put_Line (Level + 1, "${field._name.lower}: "
+                      & Image (Node.${field.name}));
          % endif
       % endfor
 
@@ -147,9 +148,9 @@ type_name = '{}_Type'.format(cls.name())
 
    overriding
    procedure Validate (Node   : access ${type_name};
-                       Parent : AST_Node := null)
+                       Parent : ${root_node_type_name} := null)
    is
-      Nod : constant AST_Node := AST_Node (Node);
+      Nod : constant ${root_node_type_name} := ${root_node_type_name} (Node);
    begin
       if Node.Parent /= Parent then
          raise Program_Error;
@@ -157,7 +158,7 @@ type_name = '{}_Type'.format(cls.name())
 
       % for field in astnode_fields:
          if Node.${field.name} /= null then
-            Node.${field.name}.Validate (AST_Node (Node));
+            Node.${field.name}.Validate (${root_node_type_name} (Node));
          end if;
       % endfor
    end Validate;
@@ -185,14 +186,16 @@ type_name = '{}_Type'.format(cls.name())
    overriding
    function Lookup_Children (Node : access ${type_name};
                              Sloc : Source_Location;
-                             Snap : Boolean := False) return AST_Node is
+                             Snap : Boolean := False)
+     return ${root_node_type_name}
+   is
       ## For this implementation helper (i.e. internal primitive), we can
       ## assume that all lookups fall into this node's sloc range.
 
-      Nod : constant AST_Node := AST_Node (Node);
+      Nod : constant ${root_node_type_name} := ${root_node_type_name} (Node);
       pragma Assert (Compare (Sloc_Range (Nod, Snap), Sloc) = Inside);
 
-      Child : AST_Node;
+      Child : ${root_node_type_name};
       Pos   : Relative_Position;
 
       ## Some ASTnodes have no ASTNode child: avoid the "unused parameter"
@@ -212,7 +215,7 @@ type_name = '{}_Type'.format(cls.name())
          ## sloc range of the second child node, etc.
 
          if Node.${field.name} /= null then
-            Lookup_Relative (AST_Node (Node.${field.name}), Sloc,
+            Lookup_Relative (${root_node_type_name} (Node.${field.name}), Sloc,
                              Pos, Child,
                              Snap);
             case Pos is

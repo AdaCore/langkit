@@ -194,6 +194,14 @@ class CompileCtx():
         :type: list[langkit.compiled_types.Struct]
         """
 
+        self.root_grammar_class = None
+        """
+        The ASTNode subclass that is the root class for every node used in
+        the grammar.
+
+        :type: langkit.compiled_types.ASTNode
+        """
+
         self.list_types = set()
         """
         Set of all ASTNode subclasses (ASTNode included) for which we
@@ -363,11 +371,16 @@ class CompileCtx():
 
         # Get the list of ASTNode types from the Struct metaclass
         from langkit.compiled_types import StructMetaClass
-        self.astnode_types = list(StructMetaClass.astnode_types)
+
+        # Skipping the first element which is ASTNode, because it is not a
+        # real type in the generated library.
+        self.astnode_types = list(StructMetaClass.astnode_types)[1:]
 
         # Skipping the first element which is Struct, because it is not a
         # real type in the generated library.
         self.struct_types = list(StructMetaClass.struct_types)[1:]
+
+        self.root_grammar_class = StructMetaClass.root_grammar_class
 
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a
@@ -397,7 +410,8 @@ class CompileCtx():
         finally:
             compile_ctx = None
 
-    def write_ada_module(self, out_dir, template_base_name, qual_name):
+    def write_ada_module(self, out_dir, template_base_name, qual_name,
+                         in_library=True):
         """
         Write an Ada module (both spec and body) using a standardized scheme
         for finding the corresponding templates.
@@ -412,20 +426,27 @@ class CompileCtx():
             as a list of strings. The base library name is automatically
             prepended to that list, so every generated module will be a
             child module of the base library module.
+
+        :param bool in_library: If true, the module will be considered as
+            part of the generated library hierarchy, and will be a child of the
+            parent package.
         """
-        for kind_name, kind in [("spec", ADA_SPEC), ("body", ADA_BODY)]:
+        for kind in [ADA_SPEC, ADA_BODY]:
             with names.camel_with_underscores:
                 write_ada_file(
                     out_dir=out_dir,
                     source_kind=kind,
-                    qual_name=[self.ada_api_settings.lib_name] + qual_name,
+                    qual_name=([self.ada_api_settings.lib_name] if in_library
+                               else []) + qual_name,
                     content=self.render_template(
                         "{}{}_ada".format(
                             template_base_name +
+                            # If the base name ends with a /, we don't
+                            # put a "_" separator.
                             ("" if template_base_name.endswith("/") else "_"),
-                            kind_name
+                            kind
                         ),
-                        _self=self,
+                        _self=self
                     )
                 )
 
@@ -533,6 +554,11 @@ class CompileCtx():
             t.add_to_context()
 
         printcol("Generating sources... ", Colors.OKBLUE)
+
+        self.write_ada_module(src_path, "root_ast_type", ["ast"],
+                              in_library=False)
+        self.write_ada_module(src_path, "root_ast_list_type", ["ast", "list"],
+                              in_library=False)
 
         ada_modules = [
             # unit for all derived AST nodes

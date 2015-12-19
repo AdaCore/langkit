@@ -4,7 +4,7 @@ function ${accessor_name}
   (Node    : ${node_type};
    Value_P : ${field.type.c_type(capi).name}_Ptr) return int
 is
-   N : constant AST_Node := Unwrap (Node);
+   N : constant ${root_node_type_name} := Unwrap (Node);
 begin
    if N.all in ${astnode.name()}_Type'Class then
       declare
@@ -16,7 +16,8 @@ begin
           % elif is_bool(field.type):
               Value_P.all := int (Boolean'Pos (Typed_Node.${field.name}));
           % elif is_ast_node(field.type):
-              Value_P.all := Wrap (AST_Node (Typed_Node.${field.name}));
+              Value_P.all :=
+                Wrap (${root_node_type_name} (Typed_Node.${field.name}));
           % elif is_token_type(field.type):
               Value_P.all := Wrap (Typed_Node.${field.name}'Access);
           % else:

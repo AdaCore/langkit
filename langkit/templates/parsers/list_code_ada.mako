@@ -79,8 +79,9 @@ loop
                ${_self.get_type().name()} (${parser_context.res_var_name});
 
             ## Set the parent of both children to the created node
-            ${res}.Parent := AST_Node (New_Res);
-            ${parser_context.res_var_name}.Parent := AST_Node (New_Res);
+            ${res}.Parent := ${root_node_type_name} (New_Res);
+            ${parser_context.res_var_name}.Parent :=
+              ${root_node_type_name} (New_Res);
 
             ## Store node as previously accumulated result
             ${res} := ${_self.get_type().name()} (New_Res);
@@ -118,7 +119,8 @@ loop
       ## list, and increment its ref count.
       % if is_ast_node (_self.parser.get_type()):
          if ${parser_context.res_var_name} /= null then
-            ${parser_context.res_var_name}.Parent := AST_Node (${res});
+            ${parser_context.res_var_name}.Parent :=
+              ${root_node_type_name} (${res});
          end if;
       % endif
    % endif

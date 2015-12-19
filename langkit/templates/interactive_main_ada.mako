@@ -13,7 +13,7 @@ with Interfaces; use Interfaces;
 with GNAT.Command_Line; use GNAT.Command_Line;
 with GNAT.Strings;
 
-with Langkit_Support.AST; use Langkit_Support.AST;
+with AST; use AST;
 with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
@@ -47,7 +47,7 @@ procedure Parse is
    -- Process_Node --
    ------------------
 
-   procedure Process_Node (Res : in out AST_Node) is
+   procedure Process_Node (Res : in out ${root_node_type_name}) is
    begin
       if Res = null then
          Put_Line ("<null node>");
@@ -75,8 +75,8 @@ procedure Parse is
               (Slice (Lookup_Str, Sep + 1, Length (Lookup_Str)));
 
             Sloc : constant Source_Location := (Line, Column);
-            Lookup_Res : AST_Node :=
-               Lookup (AST_Node (Res), (Line, Column));
+            Lookup_Res : ${root_node_type_name} :=
+               Lookup (${root_node_type_name} (Res), (Line, Column));
          begin
             Put_Line ("Lookup " & Image (Sloc) & ":");
             Lookup_Res.Print;
@@ -123,7 +123,7 @@ procedure Parse is
                ## Error recovery may make the parser return something even on
                ## error: print anyway.
                % if is_ast_node(parser.get_type()):
-                  Process_Node (AST_Node (Res));
+                  Process_Node (${root_node_type_name} (Res));
                % else:
                   Put_Line (${parser.get_type().name()}'Image (Res));
                   if not Lookups.Is_Empty then

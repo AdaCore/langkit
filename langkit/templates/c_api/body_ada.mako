@@ -14,7 +14,7 @@ with System.Memory;
 
 with GNATCOLL.Iconv;
 
-with Langkit_Support.AST;        use Langkit_Support.AST;
+with AST;                        use AST;
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
 with Langkit_Support.Text;       use Langkit_Support.Text;
 with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
@@ -62,9 +62,9 @@ package body ${_self.ada_api_settings.lib_name}.C is
      (${analysis_unit_type}, Analysis_Unit);
 
    function Wrap is new Ada.Unchecked_Conversion
-     (AST_Node, ${node_type});
+     (${root_node_type_name}, ${node_type});
    function Unwrap is new Ada.Unchecked_Conversion
-     (${node_type}, AST_Node);
+     (${node_type}, ${root_node_type_name});
 
    function Convert is new Ada.Unchecked_Conversion
      (${capi.get_name("node_extension_destructor")},
@@ -254,7 +254,7 @@ package body ${_self.ada_api_settings.lib_name}.C is
    function ${capi.get_name("node_kind")} (Node : ${node_type})
       return ${node_kind_type}
    is
-      N : constant AST_Node := Unwrap (Node);
+      N : constant ${root_node_type_name} := Unwrap (Node);
    begin
       return ${node_kind_type} (Kind (N));
    end ${capi.get_name("node_kind")};
@@ -271,7 +271,7 @@ package body ${_self.ada_api_settings.lib_name}.C is
      (Node         : ${node_type};
       Sloc_Range_P : ${sloc_range_type}_Ptr)
    is
-      N : constant AST_Node := Unwrap (Node);
+      N : constant ${root_node_type_name} := Unwrap (Node);
    begin
       Sloc_Range_P.all := Wrap (Sloc_Range (N));
    end ${capi.get_name("node_sloc_range")};
@@ -280,7 +280,7 @@ package body ${_self.ada_api_settings.lib_name}.C is
      (Node : ${node_type};
       Sloc : ${sloc_type}_Ptr) return ${node_type}
    is
-      N : constant AST_Node := Unwrap (Node);
+      N : constant ${root_node_type_name} := Unwrap (Node);
       S : constant Source_Location := Unwrap (Sloc.all);
    begin
       return Wrap (Lookup (N, S));
@@ -289,7 +289,7 @@ package body ${_self.ada_api_settings.lib_name}.C is
    function ${capi.get_name("node_parent")} (Node : ${node_type})
                                              return ${node_type}
    is
-      N : constant AST_Node := Unwrap (Node);
+      N : constant ${root_node_type_name} := Unwrap (Node);
    begin
       return Wrap (N.Parent);
    end ${capi.get_name("node_parent")};
@@ -297,7 +297,7 @@ package body ${_self.ada_api_settings.lib_name}.C is
    function ${capi.get_name("node_child_count")} (Node : ${node_type})
                                                   return unsigned
    is
-      N : constant AST_Node := Unwrap (Node);
+      N : constant ${root_node_type_name} := Unwrap (Node);
    begin
       return unsigned (Child_Count (N));
    end ${capi.get_name("node_child_count")};
@@ -307,8 +307,8 @@ package body ${_self.ada_api_settings.lib_name}.C is
       N       : unsigned;
       Child_P : ${node_type}_Ptr) return int
    is
-      Nod    : constant AST_Node := Unwrap (Node);
-      Result : AST_Node;
+      Nod    : constant ${root_node_type_name} := Unwrap (Node);
+      Result : ${root_node_type_name};
       Exists : Boolean;
    begin
       if N > unsigned (Natural'Last) then
@@ -421,7 +421,7 @@ package body ${_self.ada_api_settings.lib_name}.C is
       Dtor   : ${capi.get_name("node_extension_destructor")})
       return System.Address
    is
-      N  : constant AST_Node := Unwrap (Node);
+      N  : constant ${root_node_type_name} := Unwrap (Node);
       ID : constant Extension_ID := Extension_Id (Ext_Id);
       D  : constant Extension_Destructor := Convert (Dtor);
    begin

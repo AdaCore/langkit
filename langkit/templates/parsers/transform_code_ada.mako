@@ -29,7 +29,7 @@ if ${parser_context.pos_var_name} /= -1 then
       ## Set the parent backlink if needed
       % if is_ast_node(field.type):
          if ${arg} /= null then
-            ${arg}.Parent := AST_Node (${res});
+            ${arg}.Parent := ${root_node_type_name} (${res});
          end if;
       % endif
    % endfor

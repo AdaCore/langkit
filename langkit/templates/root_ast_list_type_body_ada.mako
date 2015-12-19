@@ -1,6 +1,8 @@
+## vim: filetype=makoada
+
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-package body Langkit_Support.AST.List is
+package body AST.List is
 
    use Node_Vectors;
 
@@ -9,7 +11,7 @@ package body Langkit_Support.AST.List is
    ----------
 
    overriding
-   function Kind (Node : access List_Type) return AST_Node_Kind is
+   function Kind (Node : access List_Type) return ${root_node_kind_name} is
       pragma Unreferenced (Node);
    begin
       return List_Kind;
@@ -66,14 +68,15 @@ package body Langkit_Support.AST.List is
    procedure Get_Child (Node   : access List_Type;
                         Index  : Natural;
                         Exists : out Boolean;
-                        Result : out AST_Node)
+                        Result : out ${root_node_type_name})
    is
    begin
       if Index >= Length (Node.Vec) then
          Exists := False;
       else
          Exists := True;
-         Result := AST_Node (Node_Vectors.Get_At_Index (Node.Vec, Index));
+         Result :=
+           ${root_node_type_name} (Node_Vectors.Get_At_Index (Node.Vec, Index));
       end if;
    end Get_Child;
 
@@ -83,7 +86,7 @@ package body Langkit_Support.AST.List is
 
    overriding
    procedure Validate (Node   : access List_Type;
-                       Parent : AST_Node := null)
+                       Parent : ${root_node_type_name} := null)
    is
    begin
       if Node.Parent /= Parent then
@@ -92,7 +95,7 @@ package body Langkit_Support.AST.List is
 
       for Child of Node.Vec loop
          if Child /= null then
-            Child.Validate (AST_Node (Node));
+            Child.Validate (${root_node_type_name} (Node));
          end if;
       end loop;
    end Validate;
@@ -123,18 +126,18 @@ package body Langkit_Support.AST.List is
    overriding
    function Lookup_Children (Node : access List_Type;
                              Sloc : Source_Location;
-                             Snap : Boolean := False) return AST_Node
+                             Snap : Boolean := False) return ${root_node_type_name}
    is
    begin
       for Child of Node.Vec loop
          declare
             Position : Relative_Position;
-            Result   : AST_Node;
+            Result   : ${root_node_type_name};
          begin
             Lookup_Relative (Child.all'Access, Sloc, Position, Result, Snap);
             case Position is
                when Before =>
-                  return AST_Node (Node);
+                  return ${root_node_type_name} (Node);
                when Inside =>
                   return Result;
                when After =>
@@ -142,7 +145,7 @@ package body Langkit_Support.AST.List is
             end case;
          end;
       end loop;
-      return AST_Node (Node);
+      return ${root_node_type_name} (Node);
    end Lookup_Children;
 
    -------------
@@ -157,4 +160,4 @@ package body Langkit_Support.AST.List is
       end loop;
    end Destroy;
 
-end Langkit_Support.AST.List;
+end AST.List;

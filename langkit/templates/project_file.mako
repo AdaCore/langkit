@@ -21,7 +21,9 @@ library project ${lib_name} is
    for Library_Name use "${capi.shared_object_basename}";
    for Library_Kind use Library_Kind_Param;
    for Interfaces use
-     ("${lib_name.lower()}.adb",
+     ("ast.adb", "ast.ads",
+      "ast-list.adb", "ast-list.ads",
+      "${lib_name.lower()}.adb",
       "${lib_name.lower()}.ads",
       "${lib_name.lower()}-c.adb",
       "${lib_name.lower()}-c.ads",
