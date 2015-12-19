@@ -57,19 +57,30 @@ def write_cpp_file(file_path, source):
             out_file.write(source)
 
 
-ada_spec = "spec"
-ada_body = "body"
+ADA_SPEC = "spec"
+ADA_BODY = "body"
 
 
-def write_ada_file(path, source_kind, qual_name, source):
-    assert source_kind in (ada_spec, ada_body)
+def write_ada_file(out_dir, source_kind, qual_name, content):
+    """
+    Helper to write an Ada file.
+
+    :param str out_dir: The complete path to the directory in which we want to
+        write the file.
+    :param str source_kind: One of the constants ADA_SPEC or ADA_BODY,
+        determining whether the source is a spec or a body.
+    :param list[str] qual_name: The qualified name of the Ada spec/body,
+        as a list of string components.
+    :param str content: The source content to write to the file.
+    """
+    assert source_kind in (ADA_SPEC, ADA_BODY)
     file_name = "{}.{}".format("-".join(qual_name).lower(),
-                               "ads" if source_kind == ada_spec else "adb")
-    file_path = os.path.join(path, file_name)
+                               "ads" if source_kind == ADA_SPEC else "adb")
+    file_path = os.path.join(out_dir, file_name)
 
     # TODO: no tool is able to pretty-print a single Ada source file
     with open(file_path, "wb") as out_file:
-            out_file.write(source)
+            out_file.write(content)
 
 
 class CompileCtx():
@@ -377,6 +388,38 @@ class CompileCtx():
         finally:
             compile_ctx = None
 
+    def write_ada_module(self, out_dir, template_base_name, qual_name):
+        """
+        Write an Ada module (both spec and body) using a standardized scheme
+        for finding the corresponding templates.
+
+        :param str out_dir: The out directory for the generated module.
+
+        :param str template_base_name: The base name for the template,
+            basically everything that comes before the _body_ada/_spec_ada
+            component, including the directory.
+
+        :param list[str] qual_name: Qualified name for the Ada module,
+            as a list of strings. The base library name is automatically
+            prepended to that list, so every generated module will be a
+            child module of the base library module.
+        """
+        for kind_name, kind in [("spec", ADA_SPEC), ("body", ADA_BODY)]:
+            with names.camel_with_underscores:
+                write_ada_file(
+                    out_dir=out_dir,
+                    source_kind=kind,
+                    qual_name=[self.ada_api_settings.lib_name] + qual_name,
+                    content=self.render_template(
+                        "{}{}_ada".format(
+                            template_base_name +
+                            ("" if template_base_name.endswith("/") else "_"),
+                            kind_name
+                        ),
+                        _self=self,
+                    )
+                )
+
     def _emit(self, file_root):
         """
         Emit native code for all the rules in this grammar as a library:
@@ -475,33 +518,22 @@ class CompileCtx():
 
         printcol("Generating sources... ", Colors.OKBLUE)
 
-        with names.camel_with_underscores:
-            for template_base_name, qual_name in [
-                # Generate the unit for all derived AST nodes
-                ("main", [self.ada_api_settings.lib_name]),
-                # Generate the unit for the lexer
-                ("lexer/lexer",
-                 [self.ada_api_settings.lib_name, "lexer"]),
-                # Generate the unit for all parsers
-                ("parsers/main",
-                 [self.ada_api_settings.lib_name, "parsers"]),
-            ]:
-                for kind_name, kind in [("spec", ada_spec),
-                                        ("body", ada_body)]:
-                    write_ada_file(
-                        src_path, kind, qual_name,
-                        self.render_template(
-                            "{}_{}_ada".format(
-                                template_base_name, kind_name
-                            ),
-                            _self=self,
-                        )
-                    )
+        ada_modules = [
+            # unit for all derived AST nodes
+            ("main", []),
+            # unit for the lexer
+            ("lexer/lexer", ["lexer"]),
+            # unit for all parsers
+            ("parsers/main", ["parsers"]),
+        ]
 
-            write_ada_file(
-                path.join(file_root, "src"), ada_body, ["parse"],
-                self.render_template("interactive_main_ada", _self=self)
-            )
+        for template_base_name, qual_name in ada_modules:
+            self.write_ada_module(src_path, template_base_name, qual_name)
+
+        write_ada_file(
+            path.join(file_root, "src"), ADA_BODY, ["parse"],
+            self.render_template("interactive_main_ada", _self=self)
+        )
 
         with names.lower:
             # ... and the Quex C interface
@@ -576,13 +608,7 @@ class CompileCtx():
                 render("c_api/header_c")
             )
 
-        with names.camel_with_underscores:
-            write_ada_file(src_path, ada_spec,
-                           [self.ada_api_settings.lib_name, "C"],
-                           render("c_api/spec_ada"))
-            write_ada_file(src_path, ada_body,
-                           [self.ada_api_settings.lib_name, "C"],
-                           render("c_api/body_ada"))
+        self.write_ada_module(src_path, "c_api/", ["C"])
 
     def emit_python_api(self, python_path):
         """
