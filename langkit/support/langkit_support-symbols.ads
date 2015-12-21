@@ -1,3 +1,4 @@
+with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Sets;
 
 with GNAT.String_Hash;
@@ -28,6 +29,11 @@ package Langkit_Support.Symbols is
    --  Deallocate a symbol table and all the text returned by the corresponding
    --  calls to Find.
 
+   function Hash (ST : Symbol_Type) return Hash_Type;
+   --  Default hash function for symbols.
+   --  WARNING: It assumes that you don't mix symbols from different symbol
+   --  tables, but doesn't verify it!
+
 private
 
    function Hash is new GNAT.String_Hash.Hash
@@ -35,14 +41,14 @@ private
       Key_Type  => Text_Type,
       Hash_Type => Ada.Containers.Hash_Type);
 
-   function Hash (T : Symbol_Type) return Ada.Containers.Hash_Type is
+   function String_Hash (T : Symbol_Type) return Ada.Containers.Hash_Type is
      (Hash (T.all));
 
    function Key_Equal (L, R : Symbol_Type) return Boolean is (L.all = R.all);
 
    package Sets is new Ada.Containers.Hashed_Sets
      (Element_Type        => Symbol_Type,
-      Hash                => Hash,
+      Hash                => String_Hash,
       Equivalent_Elements => Key_Equal,
       "="                 => "=");
 

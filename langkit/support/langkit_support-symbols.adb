@@ -1,4 +1,6 @@
 with Ada.Unchecked_Deallocation;
+with System; use System;
+with System.Storage_Elements; use System.Storage_Elements;
 
 package body Langkit_Support.Symbols is
 
@@ -59,5 +61,16 @@ package body Langkit_Support.Symbols is
       end loop;
       Deallocate (ST);
    end Destroy;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (ST : Symbol_Type) return Hash_Type is
+      S : constant Storage_Elements.Integer_Address :=
+        To_Integer (ST.all'Address);
+   begin
+      return Hash_Type (S);
+   end Hash;
 
 end Langkit_Support.Symbols;
