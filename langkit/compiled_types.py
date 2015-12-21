@@ -250,8 +250,15 @@ class AbstractNodeData(object):
     :type: bool
     """
 
-    def __init__(self):
+    def __init__(self, private=False):
+        """
+        :param bool private: Whether this AbstractNodeData instance is
+            supposed to be private or not. For the moment since the Ada API is
+            not well defined, private properties are not exposed in C and
+            Python, but are public in Ada.
+        """
         self._index = next(self._counter)
+        self.is_private = private
 
     @property
     def type(self):
@@ -308,7 +315,7 @@ class AbstractField(AbstractNodeData):
         if not self.concrete:
             raise NotImplementedError()
 
-        super(AbstractField, self).__init__()
+        super(AbstractField, self).__init__(private=False)
 
         self.repr = repr
         self._name = None
@@ -927,11 +934,16 @@ class ASTNode(Struct):
         # Generate abstract field accessors (C public API) for this node
         # kind.
         primitives = []
-        for field in cls.get_abstract_fields(include_inherited=False):
+
+        fields = cls.get_abstract_fields(
+            include_inherited=False, predicate=lambda f: not f.is_private
+        )  # We iterate over the fields, excluding private fields
+
+        for field in fields:
             accessor_basename = names.Name(
-                '{}_{}'.format(cls.name().base_name,
-                               field.name.base_name)
+                '{}_{}'.format(cls.name().base_name, field.name.base_name)
             )
+
             t_env = TemplateEnvironment(
                 astnode=cls,
                 field=field,

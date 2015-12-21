@@ -1298,13 +1298,14 @@ class Property(compiled_types.AbstractNodeData):
 
     is_property = True
 
-    def __init__(self, expr, doc=None):
+    def __init__(self, expr, doc=None, private=False):
         """
         :param AbstractExpression expr: The expression for the property.
         :param str|None doc: User documentation for this property.
+        :param bool private: Whether this property is private or not.
         """
 
-        super(Property, self).__init__()
+        super(Property, self).__init__(private=private)
 
         self.expr = expr
         self.constructed_expr = None
