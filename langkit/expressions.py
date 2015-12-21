@@ -711,7 +711,7 @@ class PlaceHolderSingleton(AbstractExpression):
         """
         :param str name: The name of the PlaceHolder variable.
         """
-        self.name = name
+        self._name = name
         self._type = None
 
     @contextmanager
@@ -727,14 +727,14 @@ class PlaceHolderSingleton(AbstractExpression):
         self._type = None
 
     def construct(self):
-        return VarExpr(self._type, self.name)
+        return VarExpr(self._type, self._name)
 
     @property
     def type(self):
         return self._type
 
     def __repr__(self):
-        return "<PlaceHolder {}>".format(self.name)
+        return "<PlaceHolder {}>".format(self._name)
 
 
 class InductionVariable(AbstractExpression):

@@ -288,4 +288,109 @@ package body AST is
       end loop;
    end PP_Trivia;
 
+   --------------------------
+   -- Populate_Lexical_Env --
+   --------------------------
+
+   procedure Populate_Lexical_Env (Node : ${root_node_type_name}) is
+
+      Stack : Env_Stack;
+
+      --  The internal algorithm, as well as the Do_Env_Action implementations,
+      --  use a stack of environments. They represent nested environments,  the
+      --  top environment on the stack being the most nested. We do that
+      --  because:
+      --
+      --  - We want to be able to replace the topmost env that will be seen by
+      --    subsequent nodes. This is to support constructs such as use clauses
+      --    in ada where you can do stuff like this::
+      --
+      --        declare  -- new LexicalEnv Lex_1 introduced
+      --           A : Integer;
+      --           B : Integer := A; -- Will get A from Lex_1
+      --           use Foo;
+      --           -- We create a new env, Lex_2, from Lex_1, where you can now
+      --           -- reference stuff from foo, and for every subsequent
+      --           -- declaration, Lex_2 will be the lexical environment !
+      --
+      --           C : Integer := D
+      --           -- F was gotten from Foo which is reachable from Lex_2
+      --        begin
+      --           ...
+      --        end;
+      --
+      --    In this example, the topmost env on the stack will be *replaced*
+      --    when we evaluate env actions for the use clause, but the env that
+      --    was previously on the top of the stack *won't change*, so stuff
+      --    from Foo will still not be reachable to declarations/statements
+      --    before the use clause. This allows to decouple env construction and
+      --    symbol resolution in two passes, rather than interleave the two
+      --    like in the GNAT compiler.
+      --
+      --  - We don't to mutate the topmost env, because that would change what
+      --    other nodes 'see'. So we create a new env and substitute it on the
+      --    stack.
+
+      procedure Populate_Internal (Node : ${root_node_type_name});
+
+      -----------------------
+      -- Populate_Internal --
+      -----------------------
+
+      procedure Populate_Internal (Node : ${root_node_type_name})
+      is
+         use Ast_Envs.Lexical_Env_Vectors, Ast_Envs;
+
+         Env_Idx : Natural := 0;
+         Env     : Ast_Envs.Lexical_Env;
+      begin
+         if Node = null then
+            return;
+         end if;
+
+         --  Initial implementation: we always put a null on the stack, because
+         --  not every node type will create a new nested scope. Those who do
+         --  will replace the null by a Lexical Environment instance. This way we
+         --  always pop when exiting Populate_Internal.
+
+         --  TODO??? Alternate implementation possible: Node.Do_Env_Actions
+         --  returns a boolean telling whether it pushed a new env on the stack or
+         --  not.
+         --  Pros: shallower stack, no nulls on it so easier to find last env.
+         --  Cons: Conditional Pop.
+         --  Conclusion: Probably worth it.
+         Append (Stack, null);
+
+         Find_Env : for I in reverse First_Index (Stack) .. Last_Index (Stack) loop
+            if Get (Stack, I) /= null then
+               Env_Idx := I;
+               Env := Get (Stack, I);
+               exit Find_Env;
+            end if;
+         end loop Find_Env;
+
+         --  Set the lexical env of node to the found environment
+         Node.Parent_Env := Env;
+
+         --  Execute environment actions for Node. That might create a new env
+         --  in the created stack slot, or mutate the Stack of envs.
+
+         --  TODO??? To be pondered, but we probably never want to mutate
+         --  another env on the stack than the topmost environment, in which
+         --  case we could just use an in-out parameter set to the topmost env
+         --  to get a new env to put on top of the stack if necessary.
+         Node.Do_Env_Actions (Stack, Env_Idx);
+
+         for Child of Children (Node) loop
+            Populate_Internal (Child);
+         end loop;
+
+         --  We always pop the value on the stack, disregarding whether a new
+         --  lex env was created or not.
+         Pop (Stack);
+      end Populate_Internal;
+   begin
+      Populate_Internal (Node);
+   end Populate_Lexical_Env;
+
 end AST;

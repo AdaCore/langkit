@@ -242,6 +242,55 @@ type_name = '{}_Type'.format(cls.name())
 
       return Nod;
    end Lookup_Children;
+
+   % if cls.env_spec:
+   --------------------
+   -- Do_Env_Actions --
+   --------------------
+
+   overriding procedure Do_Env_Actions
+     (Self : access ${type_name}; Stack : Env_Stack; Index : Natural)
+   is
+      use Ast_Envs;
+      use Ast_Envs.Lexical_Env_Vectors;
+   begin
+         % if cls.env_spec._add_env:
+
+            ## Populate_Lexical_Env has created an empty stack slot for this
+            ## node in the environment stack. If _add_env is True, we'll put
+            ## a new Lexical_Env instance in there.
+            Get_Access (Stack, Last_Index (Stack)).all :=
+              Ast_Envs.Create (Get (Stack, Index));
+
+            ##  We then initiate the environment of self to this new env
+            Self.Parent_Env := Get (Stack, Last_Index (Stack));
+         % endif
+
+         % if cls.env_spec._add_to_env:
+
+            ## If we have an _add_to_env specification, we generate code to add
+            ## elements to the lexical environment.
+            declare
+
+               ## We assume the existence of a P_Token property on the result
+               ## of the key expression. TODO: Add check for this in
+               ## EnvSpec.compute.
+               ## Ultimately, _add_to_env will be able to recognize other
+               ## return types for the key expression, and handle them
+               ## appropriately.
+               T : Token := ${cls.env_spec._add_to_env[0].render_expr()}.P_Token;
+            begin
+
+               ## Add a new entry to the lexical env, for which the key is the
+               ## symbol for retrieved token, and the value is the result of the
+               ## expression for the value.
+               Set (Self.Parent_Env, Symbol_Type (T.Text),
+                    ${root_node_type_name}
+                      (${cls.env_spec._add_to_env[1].render_expr().strip()}));
+            end;
+         % endif
+   end Do_Env_Actions;
+   % endif
 % endif
 
 ## Body of attribute getters

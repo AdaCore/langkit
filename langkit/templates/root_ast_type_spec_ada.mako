@@ -3,6 +3,7 @@
 with System;
 
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
+with Langkit_Support.Lexical_Env;
 with Langkit_Support.Token_Data_Handler;
 use Langkit_Support.Token_Data_Handler;
 with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
@@ -35,10 +36,20 @@ package AST is
    package Extension_Vectors is new Langkit_Support.Vectors
      (Element_Type => Extension_Slot);
 
+   type Dummy_Metadata is new Integer;
+   No_Metadata : constant Dummy_Metadata := 0;
+   function Combine (L, R : Dummy_Metadata) return Dummy_Metadata is (0);
+   --  This type and constants are added waiting for a real metadata type.
+   --  TODO??? Use a real metadata type.
+
+   package Ast_Envs is new Langkit_Support.Lexical_Env
+     (${root_node_type_name}, Dummy_Metadata, No_Metadata, Combine);
+
    type ${root_node_value_type} is abstract tagged record
       Parent                 : ${root_node_type_name} := null;
       Token_Data             : Token_Data_Handler_Access := null;
       Token_Start, Token_End : Natural  := 0;
+      Parent_Env             : Ast_Envs.Lexical_Env;
       Extensions             : Extension_Vectors.Vector;
    end record;
 
@@ -62,6 +73,8 @@ package AST is
 
    package ${root_node_type_name}_Arrays
    renames ${root_node_type_name}_Vectors.Elements_Arrays;
+
+   subtype Env_Stack is Ast_Envs.Lexical_Env_Vectors.Vector;
 
    type Visit_Status is (Into, Over, Stop);
    type ${root_node_kind_name} is new Natural;
@@ -172,5 +185,15 @@ package AST is
 
    function Is_Empty_List (Node : access ${root_node_value_type}) return Boolean is
      (False);
+
+   procedure Populate_Lexical_Env (Node : ${root_node_type_name});
+   --  Populate the lexical environment for node and all its children
+
+   procedure Do_Env_Actions
+     (Node : access ${root_node_value_type}; Stack : Env_Stack; Index : Natural)
+   is null;
+   --  Internal procedure that will execute all necessary lexical env actions
+   --  for Node. This is meant to be called by Populate_Lexical_Env, and not by
+   --  the user.
 
 end AST;

@@ -569,6 +569,9 @@ class Struct(CompiledType):
     cannot be subclassed themselves.
     """
 
+    env_spec = None
+    ":type: langkit.compiled_types.EnvSpec"
+
     _fields = OrderedDict()
     """
     The fields for this ASTNode, instantiated by the metaclass
@@ -857,6 +860,10 @@ class Struct(CompiledType):
                     f.type.add_to_context()
 
             cls.compute_properties()
+
+            if cls.env_spec:
+                cls.env_spec.compute(cls)
+
             cls.create_type_definition()
             accessors = cls.create_c_accessors()
             if get_context().python_api_settings:
