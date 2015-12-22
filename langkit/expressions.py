@@ -518,6 +518,74 @@ class Map(CollectionExpression):
                        self.concat)
 
 
+class New(AbstractExpression):
+    """
+    Abstract expression to create Struct values.
+    """
+
+    def __init__(self, struct_type, **field_values):
+        """
+        :param langkit.compiled_types.Struct struct_type: Struct subclass (but
+            not an ASTNode subclass) for the struct type this expression must
+            create.
+        :param dict[str, AbstractExpression] fields: Values to assign to the
+            fields for the created struct value.
+        """
+        assert (issubclass(struct_type, compiled_types.Struct) and
+                not issubclass(struct_type, compiled_types.ASTNode))
+        self.struct_type = struct_type
+        self.field_values = field_values
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: NewExpr
+        """
+        provided_fields = {
+            names.Name.from_lower('f_' + name): value.construct()
+            for name, value in self.field_values.iteritems()
+        }
+        required_fields = {
+            f.name: f
+            for f in self.struct_type.get_fields()
+        }
+
+        # Make sure the provided set of fields matches the one the struct
+        # needs.
+        def complain_if_not_empty(name_set, message):
+            assert not name_set, '{}: {}'.format(
+                message,
+                ', '.join(name.lower for name in name_set)
+            )
+
+        complain_if_not_empty(
+            set(required_fields) - set(provided_fields),
+            'Values are missing for {} fields'.format(
+                self.struct_type.name().camel
+            )
+        )
+        complain_if_not_empty(
+            set(provided_fields) - set(required_fields),
+            'Unknown {} fields'.format(
+                self.struct_type.name().camel
+            )
+        )
+
+        # And make sure we have the proper types
+        for name, value in provided_fields.iteritems():
+            field = required_fields[name]
+            assert issubclass(value.type, field.type), (
+                'Invalid value for field {}: got {} but expected {}'.format(
+                    name,
+                    value.type.name().camel,
+                    field.type.name().camel
+                )
+            )
+
+        return NewExpr(self.struct_type, provided_fields)
+
+
 class Not(AbstractExpression):
     """
     Abstract expression for "not" boolean expressions.
@@ -1035,6 +1103,40 @@ class MapExpr(ResolvedExpression):
 
     def render_expr(self):
         return self.array_var.name.camel_with_underscores
+
+
+class NewExpr(ResolvedExpression):
+    """
+    Resolved expression to create Struct values.
+    """
+
+    def __init__(self, struct_type, field_values):
+        self.struct_type = struct_type
+        self.field_values = field_values
+
+    @property
+    def type(self):
+        return self.struct_type
+
+    def _iter_ordered(self):
+        keys = sorted(self.field_values)
+        for k in keys:
+            yield (k, self.field_values[k])
+
+    def render_pre(self):
+        return '\n'.join(
+            expr.render_pre()
+            for _, expr in self._iter_ordered()
+        )
+
+    def render_expr(self):
+        return '({})'.format(', '.join(
+            '{} => {}'.format(
+                name.camel_with_underscores,
+                expr.render_expr()
+            )
+            for name, expr in self._iter_ordered()
+        ))
 
 
 class NotExpr(ResolvedExpression):
