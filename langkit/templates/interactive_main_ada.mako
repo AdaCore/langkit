@@ -30,15 +30,16 @@ procedure Parse is
    package String_Vectors is new Ada.Containers.Vectors
      (Natural, Unbounded_String);
 
-   Config    : Command_Line_Configuration;
-   Silent    : aliased Boolean;
+   Config     : Command_Line_Configuration;
+   Silent     : aliased Boolean;
    Measure_Time, Do_Print_Trivia : aliased Boolean;
-   Rule_Name : aliased GNAT.Strings.String_Access :=
+   Rule_Name  : aliased GNAT.Strings.String_Access :=
       new String'("${get_context().main_rule_name}");
-   Charset   : aliased GNAT.Strings.String_Access :=
+   Charset    : aliased GNAT.Strings.String_Access :=
       new String'("iso-8859-1");
-   File_Name : aliased GNAT.Strings.String_Access;
-   File_List : aliased GNAT.Strings.String_Access;
+   File_Name  : aliased GNAT.Strings.String_Access;
+   File_List  : aliased GNAT.Strings.String_Access;
+   Print_Envs : aliased Boolean;
 
    Input_Str : Unbounded_String;
    Lookups : String_Vectors.Vector;
@@ -166,6 +167,11 @@ procedure Parse is
          end if;
       end if;
 
+      if Print_Envs then
+         Populate_Lexical_Env (Unit.AST_Root);
+         Dump_Lexical_Env (Unit.AST_Root);
+      end if;
+
       if Measure_Time then
          Put_Line
            ("Time elapsed: " & Duration'Image (Time_After - Time_Before));
@@ -182,6 +188,9 @@ begin
    Define_Switch
      (Config, Silent'Access, "-s", "--silent",
       Help   => "Do not print the representation of the resulting tree");
+   Define_Switch
+     (Config, Print_Envs'Access, "-E", "--print-envs",
+      Help   => "Print lexical environments computed");
    Define_Switch
      (Config, Measure_Time'Access, "-t", "--time",
       Help   => "Time the execution of parsing");
