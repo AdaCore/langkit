@@ -1,5 +1,11 @@
 ## vim: filetype=makoada
 
+with System;
+with System.Storage_Elements; use System.Storage_Elements;
+
+with Ada.Containers; use Ada.Containers;
+with Ada.Containers.Hashed_Maps;
+with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.PP_Utils; use Langkit_Support.PP_Utils;
@@ -392,5 +398,110 @@ package body AST is
    begin
       Populate_Internal (Node);
    end Populate_Lexical_Env;
+
+   -----------------
+   -- Short_Image --
+   -----------------
+
+   function Short_Image (Node : ${root_node_type_name}) return String is
+   begin
+      return "<" & Kind_Name (Node) & " " & Image (Sloc_Range (Node)) & ">";
+   end Short_Image;
+
+   ------------------------
+   -- Address_To_Id_Maps --
+   ------------------------
+
+   --  Those maps are used to give unique ids to lexical envs while pretty
+   --  printing them.
+
+   use type AST_Envs.Lexical_Env;
+
+   function Hash (S : AST_Envs.Lexical_Env) return Hash_Type is
+     (Hash_Type (To_Integer (S.all'Address)));
+
+   package Address_To_Id_Maps is new Ada.Containers.Hashed_Maps
+     (Ast_Envs.Lexical_Env, Positive, Hash, "=");
+
+   ----------------------
+   -- Dump_Lexical_Env --
+   ----------------------
+
+   procedure Dump_Lexical_Env (Node : ${root_node_type_name}) is
+      use Address_To_Id_Maps;
+      use Ast_Envs;
+
+      Env_Ids        : Address_To_Id_Maps.Map;
+      Current_Env_Id : Positive := 1;
+
+      ----------------
+      -- Get_Env_Id --
+      ----------------
+
+      function Get_Env_Id (E : AST_Envs.Lexical_Env) return Integer is
+         C        : Address_To_Id_Maps.Cursor;
+         Inserted : Boolean;
+      begin
+         Env_Ids.Insert (E, Current_Env_Id, C, Inserted);
+         if Inserted then
+            Current_Env_Id := Current_Env_Id + 1;
+         end if;
+         return Address_To_Id_Maps.Element (C);
+      end Get_Env_Id;
+      --  Retrieve the Id for a lexical env. Assign one if none was yet
+      --  assigned.
+
+      Env : Ast_Envs.Lexical_Env := null;
+
+      ----------
+      -- Dump --
+      ----------
+
+      procedure Dump (Self : AST_Envs.Lexical_Env) is
+         use AST_Envs.Internal_Envs;
+
+         function Image (El : AST_Envs.Env_Element) return String is
+           (Short_Image (El.El));
+
+         function Image is new AST_Envs.Env_Element_Vectors.Image (Image);
+      begin
+         Put ("<LexEnv Id" & Get_Env_Id (Self)'Img & " Parent"
+              & (if Self.Parent /= null then Get_Env_Id (Self.Parent)'Img
+                 else " null") & " (");
+
+         for El in Self.Env.Iterate loop
+            Put (Langkit_Support.Text.Image (Key (El).all) & ": "
+                 & Image (Element (El)));
+         end loop;
+         Put (")>");
+      end Dump;
+      --  This procedure dumps *one* lexical environment
+
+      --------------
+      -- Internal --
+      --------------
+
+      procedure Internal (Current : ${root_node_type_name}) is
+      begin
+         if Current = null then
+            return;
+         end if;
+
+         if Current.Parent_Env /= Env then
+            Env := Current.Parent_Env;
+            Put ("<" & Kind_Name (Current) & " " & Image (Sloc_Range (Current)) & "> - ");
+            Dump (Env);
+            Put_Line ("");
+         end if;
+
+         for Child of Children (Current) loop
+            Internal (Child);
+         end loop;
+      end Internal;
+      --  This procedure implements the main recursive logic of dumping the
+      --  environments.
+   begin
+      Internal (Node);
+   end Dump_Lexical_Env;
 
 end AST;

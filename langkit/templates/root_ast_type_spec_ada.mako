@@ -87,6 +87,10 @@ package AST is
    function Image
      (Node : access ${root_node_value_type}) return String is abstract;
 
+   function Short_Image (Node : ${root_node_type_name}) return String;
+   --  Return a short representation of the string, containing just the kind
+   --  name and the sloc.
+
    function Child_Count (Node : access ${root_node_value_type})
                          return Natural is abstract;
    procedure Get_Child (Node   : access ${root_node_value_type};
@@ -195,5 +199,9 @@ package AST is
    --  Internal procedure that will execute all necessary lexical env actions
    --  for Node. This is meant to be called by Populate_Lexical_Env, and not by
    --  the user.
+
+   procedure Dump_Lexical_Env (Node : ${root_node_type_name});
+   --  Dump the lexical environment of Node, and consequently any nested
+   --  lexical environment. Used for debugging/testing purpose.
 
 end AST;
