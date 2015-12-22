@@ -1012,7 +1012,7 @@ class ArrayType(CompiledType):
         cls.element_type.add_to_context()
 
         t_env = TemplateEnvironment(element_type=cls.element_type, cls=cls)
-        get_context().list_types_declarations.append(TypeDeclaration.render(
+        get_context().array_types_declarations.append(TypeDeclaration.render(
             'array_def_ada', t_env, cls
         ))
         get_context().c_array_types[cls] = render(
