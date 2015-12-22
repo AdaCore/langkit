@@ -220,7 +220,7 @@ class CollectionExpression(AbstractExpression):
         assert (collection_expr.type.is_list_type or
                 issubclass(collection_expr.type, compiled_types.ArrayType)), (
             'Map cannot iterate on {}, which is not a collection'
-        ).format(collection_expr.type)
+        ).format(collection_expr.type.name().camel)
 
         return (collection_expr, collection_expr.type.element_type)
 
