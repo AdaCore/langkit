@@ -229,7 +229,16 @@ class CompileCtx():
         :type: list[langkit.compiled_types.CompiledTypes]
         """
 
-        self.types_declarations = []
+        self.struct_types_declarations = []
+        """
+        List of TypeDeclaration instances for all Struct derivations
+        (excluding ASTNode derivations). These contain the type full
+        declarations.
+
+        :type: list[langkit.compiled_types.TypeDeclaration]
+        """
+
+        self.astnode_types_declarations = []
         """
         List of TypeDeclaration instances for all ASTNode derivations
         (excluding ASTList derivations). These contain the type full

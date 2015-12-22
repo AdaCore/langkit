@@ -674,7 +674,10 @@ class Struct(CompiledType):
             )
             tdef = TypeDeclaration.render(template('type_def_ada'), t_env, cls)
         get_context().incomplete_types_declarations.append(tdef_incomp)
-        get_context().types_declarations.append(tdef)
+        if cls.is_ast_node():
+            get_context().astnode_types_declarations.append(tdef)
+        else:
+            get_context().struct_types_declarations.append(tdef)
 
         with names.camel_with_underscores:
             get_context().primitives_bodies.append(

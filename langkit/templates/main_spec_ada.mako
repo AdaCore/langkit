@@ -139,10 +139,6 @@ package ${_self.ada_api_settings.lib_name} is
    ${decl.public_part}
    % endfor
 
-   % for decl in _self.array_types_declarations:
-   ${decl.public_part}
-   % endfor
-
    ---------------------------
    -- ASTNode derived types --
    ---------------------------
@@ -155,13 +151,25 @@ package ${_self.ada_api_settings.lib_name} is
    ${decl.public_part}
    % endfor
 
-   % for decl in _self.types_declarations:
+   % for decl in _self.struct_types_declarations:
+   ${decl.public_part}
+   % endfor
+
+   % for decl in _self.array_types_declarations:
+   ${decl.public_part}
+   % endfor
+
+   % for decl in _self.astnode_types_declarations:
    ${decl.public_part}
    % endfor
 
 private
 
-   % for decl in _self.types_declarations:
+   % for decl in _self.struct_types_declarations:
+   ${decl.private_part}
+   % endfor
+
+   % for decl in _self.astnode_types_declarations:
    ${decl.private_part}
    % endfor
 
