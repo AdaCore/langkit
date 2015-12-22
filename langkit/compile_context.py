@@ -516,6 +516,13 @@ class CompileCtx():
         with file(os.path.join(share_path, 'ast-types.txt'), 'w') as f:
             astdoc.write_astdoc(self, f)
 
+        # Now that all Struct subclasses referenced by the grammar have been
+        # typed, iterate over all declared subclasses to register the ones that
+        # are unreachable from the grammar.  TODO: this kludge will eventually
+        # disappear as part of OC22-016.
+        for t in self.astnode_types + self.struct_types:
+            t.add_to_context()
+
         printcol("Generating sources... ", Colors.OKBLUE)
 
         ada_modules = [

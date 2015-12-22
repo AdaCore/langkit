@@ -668,16 +668,18 @@ class Struct(CompiledType):
 
         t_env = TemplateEnvironment(cls=cls, base_name=base_class.name())
 
-        tdef_incomp = TypeDeclaration.render(
-            template('type_def_incomplete_ada'), t_env, cls
-        )
-        tdef = TypeDeclaration.render(template('type_def_ada'), t_env, cls)
+        with names.camel_with_underscores:
+            tdef_incomp = TypeDeclaration.render(
+                template('type_def_incomplete_ada'), t_env, cls
+            )
+            tdef = TypeDeclaration.render(template('type_def_ada'), t_env, cls)
         get_context().incomplete_types_declarations.append(tdef_incomp)
         get_context().types_declarations.append(tdef)
 
-        get_context().primitives_bodies.append(
-            render(template('type_impl_ada'), t_env)
-        )
+        with names.camel_with_underscores:
+            get_context().primitives_bodies.append(
+                render(template('type_impl_ada'), t_env)
+            )
 
     @classmethod
     def get_inheritance_chain(cls):
