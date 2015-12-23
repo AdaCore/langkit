@@ -1,0 +1,3 @@
+# TODO??? Remove this once the server accepts Ada2012...
+langkit/support/*.adb no-precommit-check
+langkit/support/*.ads no-precommit-check
