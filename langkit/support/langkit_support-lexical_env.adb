@@ -76,7 +76,7 @@ package body Langkit_Support.Lexical_Env is
    -- Set --
    ---------
 
-   procedure Set
+   procedure Add
      (Self  : Lexical_Env;
       Key   : Symbol_Type;
       Value : Element_T;
@@ -90,7 +90,7 @@ package body Langkit_Support.Lexical_Env is
    begin
       Self.Env.Insert (Key, Env_Element_Vectors.Empty_Vector, C, Dummy);
       Append (Reference (Self.Env, C).Element.all, Env_El);
-   end Set;
+   end Add;
 
    ---------
    -- Get --

@@ -112,7 +112,7 @@ package Langkit_Support.Lexical_Env is
    --  Constructor. Creates a new lexical env, given a parent, an internal data
    --  env, and a default metadata.
 
-   procedure Set
+   procedure Add
      (Self  : Lexical_Env;
       Key   : Symbol_Type;
       Value : Element_T;

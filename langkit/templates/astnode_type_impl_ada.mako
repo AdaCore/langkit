@@ -284,7 +284,7 @@ type_name = '{}_Type'.format(cls.name())
                ## Add a new entry to the lexical env, for which the key is the
                ## symbol for retrieved token, and the value is the result of the
                ## expression for the value.
-               Set (Self.Parent_Env, Symbol_Type (T.Text),
+               Add (Self.Parent_Env, Symbol_Type (T.Text),
                     ${root_node_type_name}
                       (${cls.env_spec._add_to_env[1].render_expr().strip()}));
             end;
