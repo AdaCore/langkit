@@ -294,6 +294,8 @@ package body AST is
       end loop;
    end PP_Trivia;
 
+   use AST_Envs;
+
    --------------------------
    -- Populate_Lexical_Env --
    --------------------------
@@ -345,10 +347,10 @@ package body AST is
 
       procedure Populate_Internal (Node : ${root_node_type_name})
       is
-         use Ast_Envs.Lexical_Env_Vectors, Ast_Envs;
+         use Lexical_Env_Vectors;
 
          Env_Idx : Natural := 0;
-         Env     : Ast_Envs.Lexical_Env;
+         Env     : Lexical_Env;
       begin
          if Node = null then
             return;
@@ -415,13 +417,11 @@ package body AST is
    --  Those maps are used to give unique ids to lexical envs while pretty
    --  printing them.
 
-   use type AST_Envs.Lexical_Env;
-
-   function Hash (S : AST_Envs.Lexical_Env) return Hash_Type is
+   function Hash (S : Lexical_Env) return Hash_Type is
      (Hash_Type (To_Integer (S.all'Address)));
 
    package Address_To_Id_Maps is new Ada.Containers.Hashed_Maps
-     (Ast_Envs.Lexical_Env, Positive, Hash, "=");
+     (Lexical_Env, Positive, Hash, "=");
 
    ----------------------
    -- Dump_Lexical_Env --
@@ -429,7 +429,6 @@ package body AST is
 
    procedure Dump_Lexical_Env (Node : ${root_node_type_name}) is
       use Address_To_Id_Maps;
-      use Ast_Envs;
 
       Env_Ids        : Address_To_Id_Maps.Map;
       Current_Env_Id : Positive := 1;
@@ -438,7 +437,7 @@ package body AST is
       -- Get_Env_Id --
       ----------------
 
-      function Get_Env_Id (E : AST_Envs.Lexical_Env) return Integer is
+      function Get_Env_Id (E : Lexical_Env) return Integer is
          C        : Address_To_Id_Maps.Cursor;
          Inserted : Boolean;
       begin
@@ -451,19 +450,19 @@ package body AST is
       --  Retrieve the Id for a lexical env. Assign one if none was yet
       --  assigned.
 
-      Env : Ast_Envs.Lexical_Env := null;
+      Env : Lexical_Env := null;
 
       ----------
       -- Dump --
       ----------
 
-      procedure Dump (Self : AST_Envs.Lexical_Env) is
-         use AST_Envs.Internal_Envs;
+      procedure Dump (Self : Lexical_Env) is
+         use Internal_Envs;
 
-         function Image (El : AST_Envs.Env_Element) return String is
+         function Image (El : Env_Element) return String is
            (Short_Image (El.El));
 
-         function Image is new AST_Envs.Env_Element_Vectors.Image (Image);
+         function Image is new Env_Element_Vectors.Image (Image);
       begin
          Put ("<LexEnv Id" & Get_Env_Id (Self)'Img & " Parent"
               & (if Self.Parent /= null then Get_Env_Id (Self.Parent)'Img

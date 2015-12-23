@@ -251,8 +251,8 @@ type_name = '{}_Type'.format(cls.name())
    overriding procedure Do_Env_Actions
      (Self : access ${type_name}; Stack : Env_Stack; Index : Natural)
    is
-      use Ast_Envs;
-      use Ast_Envs.Lexical_Env_Vectors;
+      use AST_Envs;
+      use AST_Envs.Lexical_Env_Vectors;
    begin
          % if cls.env_spec._add_env:
 
@@ -260,7 +260,7 @@ type_name = '{}_Type'.format(cls.name())
             ## node in the environment stack. If _add_env is True, we'll put
             ## a new Lexical_Env instance in there.
             Get_Access (Stack, Last_Index (Stack)).all :=
-              Ast_Envs.Create (Get (Stack, Index));
+              AST_Envs.Create (Get (Stack, Index));
 
             ##  We then initiate the environment of self to this new env
             Self.Parent_Env := Get (Stack, Last_Index (Stack));

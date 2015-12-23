@@ -42,14 +42,14 @@ package AST is
    --  This type and constants are added waiting for a real metadata type.
    --  TODO??? Use a real metadata type.
 
-   package Ast_Envs is new Langkit_Support.Lexical_Env
+   package AST_Envs is new Langkit_Support.Lexical_Env
      (${root_node_type_name}, Dummy_Metadata, No_Metadata, Combine);
 
    type ${root_node_value_type} is abstract tagged record
       Parent                 : ${root_node_type_name} := null;
       Token_Data             : Token_Data_Handler_Access := null;
       Token_Start, Token_End : Natural  := 0;
-      Parent_Env             : Ast_Envs.Lexical_Env;
+      Parent_Env             : AST_Envs.Lexical_Env;
       Extensions             : Extension_Vectors.Vector;
    end record;
 
@@ -74,7 +74,7 @@ package AST is
    package ${root_node_type_name}_Arrays
    renames ${root_node_type_name}_Vectors.Elements_Arrays;
 
-   subtype Env_Stack is Ast_Envs.Lexical_Env_Vectors.Vector;
+   subtype Env_Stack is AST_Envs.Lexical_Env_Vectors.Vector;
 
    type Visit_Status is (Into, Over, Stop);
    type ${root_node_kind_name} is new Natural;
