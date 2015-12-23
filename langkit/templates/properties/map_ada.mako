@@ -6,6 +6,8 @@
    vec_var = map.array_var.name + Name('Vec')
 %>
 
+${map.collection.render_pre()}
+
 declare
    ${vec_var} : ${map.type.vector()};
 begin
