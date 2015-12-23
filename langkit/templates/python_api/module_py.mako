@@ -3,6 +3,7 @@
 import ctypes
 import os
 import sys
+import collections
 
 
 #
@@ -291,6 +292,67 @@ class ASTNode(object):
                 # Remove the f_ prefix to have the same behavior as the Ada
                 # dumper
                 print_node(name[2:], value)
+
+    def findall(self, ast_type_or_pred, **kwargs):
+        """
+        Helper for finditer that will return all results as a list. See
+        finditer's documentation for more details.
+        """
+        return list(self.finditer(ast_type_or_pred, **kwargs))
+
+    def find(self, ast_type_or_pred, **kwargs):
+        """
+        Helper for finditer that will return only the first result. See
+        finditer's documentation for more details.
+        """
+        try:
+            return next(self.finditer(ast_type_or_pred, **kwargs))
+        except Exception:
+            return None
+
+    def finditer(self, ast_type_or_pred, **kwargs):
+        """
+        Find every node corresponding to the passed predicates.
+
+        :param ast_type_or_pred: If supplied with a subclass of
+            ASTNode, will constrain the resulting collection to only the
+            instances of this type or any subclass. If supplied with a
+            predicate, it will apply the predicate on every node and keep only
+            the ones for which it returns True. If supplied with a list of
+            subclasses of ASTNode, it will match all instances of any of them.
+        :type ast_type_or_pred: type|((ASTNode) -> bool)|list[type]
+
+        :param kwargs: Allows the user to filter on attributes of the node. For
+            every key value association, if the node has an attribute of name
+            key that has the specified value, then the child is kept.
+        :type kwargs: dict[str, Any]
+        """
+        if isinstance(ast_type_or_pred, type):
+            sought_type = ast_type_or_pred
+            pred = lambda node: isinstance(node, sought_type)
+        elif isinstance(ast_type_or_pred, collections.Sequence):
+            sought_types = ast_type_or_pred
+            pred = lambda node: isinstance(node, tuple(sought_types))
+
+        def match(left, right):
+            if left is None:
+                return
+            if hasattr(left, "match"):
+                return left.match(right)
+            else:
+                return left == right
+
+        for child in self:
+            if child:
+                if pred(child):
+                    if not kwargs:
+                        yield child
+                    elif all([match(getattr(child, key, None), val)
+                              for key, val in kwargs.items()]):
+                        yield child
+                for c in child.finditer(pred, **kwargs):
+                    if c:
+                        yield c
 
 
 class ASTList(ASTNode):
