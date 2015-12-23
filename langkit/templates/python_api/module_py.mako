@@ -5,6 +5,50 @@ import os
 import sys
 
 
+#
+# Basic types for the low-level binding
+#
+
+
+class _analysis_context(ctypes.c_void_p):
+    pass
+class _analysis_unit(ctypes.c_void_p):
+    pass
+class _node(ctypes.c_void_p):
+    pass
+_enum_node_kind = ctypes.c_uint
+class _token(ctypes.c_void_p):
+    pass
+
+class _text(ctypes.Structure):
+    # The chars field really is a uint32_t* but considering it as a char* here
+    # is more convenient for conversion in this binding layer. On the other
+    # side, we have to be careful about converting the length when retrieving
+    # the chars.
+    _fields_ = [("chars", ctypes.POINTER(ctypes.c_char)),
+                ("length", ctypes.c_size_t)]
+
+
+class _Sloc(ctypes.Structure):
+    _fields_ = [("line", ctypes.c_uint32),
+                ("column", ctypes.c_uint16)]
+
+
+class _SlocRange(ctypes.Structure):
+    _fields_ = [("start", _Sloc),
+                ("end", _Sloc)]
+
+
+class _Diagnostic(ctypes.Structure):
+    _fields_ = [("sloc_range", _SlocRange),
+                ("message", _text)]
+
+
+#
+# High-level binding
+#
+
+
 class AnalysisContext(object):
     ${py_doc('langkit.analysis_context_type', 4)}
 
@@ -265,7 +309,7 @@ ${chunk}
 % endfor
 
 #
-# Low-level C binding
+# Rest of the low-level binding
 #
 
 so_ext = {
@@ -286,40 +330,6 @@ def _import_func(name, argtypes, restype):
     func.argtypes = argtypes
     func.restype = restype
     return func
-
-
-class _analysis_context(ctypes.c_void_p):
-    pass
-class _analysis_unit(ctypes.c_void_p):
-    pass
-class _node(ctypes.c_void_p):
-    pass
-_enum_node_kind = ctypes.c_uint
-class _token(ctypes.c_void_p):
-    pass
-
-class _text(ctypes.Structure):
-    # The chars field really is a uint32_t* but considering it as a char* here
-    # is more convenient for conversion in this binding layer. On the other
-    # side, we have to be careful about converting the length when retrieving
-    # the chars.
-    _fields_ = [("chars", ctypes.POINTER(ctypes.c_char)),
-                ("length", ctypes.c_size_t)]
-
-
-class _Sloc(ctypes.Structure):
-    _fields_ = [("line", ctypes.c_uint32),
-                ("column", ctypes.c_uint16)]
-
-
-class _SlocRange(ctypes.Structure):
-    _fields_ = [("start", _Sloc),
-                ("end", _Sloc)]
-
-
-class _Diagnostic(ctypes.Structure):
-    _fields_ = [("sloc_range", _SlocRange),
-                ("message", _text)]
 
 
 % for chunk in _self.py_array_types.values():
