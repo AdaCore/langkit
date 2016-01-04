@@ -169,6 +169,8 @@ procedure Parse is
 
       if Print_Envs then
          Populate_Lexical_Env (Unit.AST_Root);
+         Put_Line ("");
+         Put_Line ("==== Dumping lexical environments ====");
          Dump_Lexical_Env (Unit.AST_Root);
       end if;
 
