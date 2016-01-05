@@ -446,8 +446,37 @@ class StructMetaClass(type):
     """
 
     def __new__(mcs, name, bases, dct):
+
+        is_root_grammar_class = False
+
         assert len(bases) == 1, (
-            "Multiple inheritance for AST nodes is not supported")
+            "Multiple inheritance for AST nodes is not supported"
+        )
+        base, = bases
+
+        # We want to check that every type deriving from ASTNode
+        # actually derives from an user defined subclass of ASTNode.
+
+        # First, skip Struct and ASTNode built-ins, and skip subclasses of
+        # Struct.
+        if name not in ["Struct", "ASTNode"] and base is not Struct:
+            # If we have no root grammar class yet and reach this point,
+            # the type necessarily derives from ASTNode. It's the root
+            # grammar class.
+            if mcs.root_grammar_class is None and base is ASTNode:
+                is_root_grammar_class = True
+            # Else, check that it does indeed derives from the root grammar
+            # class.
+            else:
+                assert issubclass(base, mcs.root_grammar_class), (
+                    "Every ASTNode subclass must derive directly or indirectly"
+                    " from the root grammar class"
+                )
+
+                assert base != ASTNode, (
+                    "You can have only one class deriving from ASTNode, which"
+                    " will be the root class of your grammar"
+                )
 
         # Gather the fields and properties in a dictionary
         fields = OrderedDict(sorted(
@@ -482,28 +511,13 @@ class StructMetaClass(type):
             "Properties are not yet supported on plain structs"
         )
 
-        # We want to check that every type deriving from ASTNode
-        # actually derives from an user defined subclass of ASTNode.
-
-        # cls.is_ast_node is true for the ASTNode class, but we don't want
-        # to check it since the it's the internal root class.
-        if cls.is_ast_node() and cls.__name__ != "ASTNode":
-            assert (
-                # If the only registered astnode type is ASTNode, then we
-                # skip the check so that the user can register a root
-                # grammar class via the decorator that is ran *after* this
-                # metaclass constructor.
-                mcs.astnode_types == [ASTNode]
-                or issubclass(cls, mcs.root_grammar_class)
-            ), (
-                "Every ASTNode subclass must derive directly or indirectly"
-                " from the root grammar class"
-            )
-
         if cls.is_ast_node():
             mcs.astnode_types.append(cls)
         else:
             mcs.struct_types.append(cls)
+
+        if is_root_grammar_class:
+            mcs.root_grammar_class = cls
 
         return cls
 
@@ -525,12 +539,11 @@ def root_grammar_class(cls):
 
     :param ASTNode cls: Type parameter. The ASTNode subclass to decorate.
     """
-    assert issubclass(cls, ASTNode)
-    assert not StructMetaClass.root_grammar_class, (
-        "You can have only one class derived from ASTNode be the root "
-        "grammar class"
+    assert cls.base() == ASTNode
+    assert StructMetaClass.root_grammar_class == cls, (
+        "You can have only one descendent of ASTNode, and it must be the "
+        "root grammar class"
     )
-    StructMetaClass.root_grammar_class = cls
     return cls
 
 
