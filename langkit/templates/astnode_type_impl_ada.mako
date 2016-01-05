@@ -268,14 +268,14 @@ type_name = '{}_Type'.format(cls.name())
             ## elements to the lexical environment.
             declare
 
-               ## We assume the existence of a P_Token property on the result
+               ## We assume the existence of a P_Name property on the result
                ## of the key expression. TODO: Add check for this in
                ## EnvSpec.compute.
                ## Ultimately, _add_to_env will be able to recognize other
                ## return types for the key expression, and handle them
                ## appropriately.
                T : Token :=
-                 ${cls.env_spec._add_to_env[0].render_expr()}.P_Token;
+                 ${cls.env_spec._add_to_env[0].render_expr()}.P_Name;
             begin
 
                ## Add a new entry to the lexical env, for which the key is the
