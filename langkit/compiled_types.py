@@ -202,6 +202,17 @@ class BasicType(CompiledType):
         return CAPIType(c_api_settings, cls.name(), external=cls._external)
 
 
+class LexicalEnvType(BasicType):
+    _name = "Lexical_Env"
+    _nullexpr = "null"
+    is_ptr = True
+
+    @classmethod
+    def c_type(cls, c_api_settings):
+        raise Exception("Cannot expose lexical environments to C at the "
+                        "moment")
+
+
 class BoolType(BasicType):
     is_ptr = False
     _name = get_type(bool)
