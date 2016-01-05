@@ -74,8 +74,6 @@ package AST is
    package ${root_node_type_name}_Arrays
    renames ${root_node_type_name}_Vectors.Elements_Arrays;
 
-   subtype Env_Stack is AST_Envs.Lexical_Env_Vectors.Vector;
-
    type Visit_Status is (Into, Over, Stop);
    type ${root_node_kind_name} is new Natural;
 
@@ -196,12 +194,25 @@ package AST is
    procedure Populate_Lexical_Env (Node : ${root_node_type_name});
    --  Populate the lexical environment for node and all its children
 
-   procedure Do_Env_Actions
-     (Node : access ${root_node_value_type}; Stack : Env_Stack; Index : Natural)
-   is null;
+   function Do_Env_Actions
+     (Self       : access ${root_node_value_type};
+      Parent_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
+   is (null);
    --  Internal procedure that will execute all necessary lexical env actions
    --  for Node. This is meant to be called by Populate_Lexical_Env, and not by
    --  the user.
+   --
+   --  Parent_Env is the environment that is the parent scope for Self when
+   --  entering the function. It is an in out parameter because the
+   --  implementation can replace Parent_Env by a new Lexical_Env derived from
+   --  it.
+   --
+   --  The return value can be either null, or a new Lexical_Env that represent
+   --  a new scope that will be used by Self's children.
+   --  The difference between replacing Parent_Env and returning a new env, is
+   --  that replacing Parent_Env will affect the env that the following
+   --  siblings of Self see, while returning a new env will only affect the
+   --  environment seen by Self's children.
 
    procedure Dump_Lexical_Env (Node : ${root_node_type_name});
    --  Dump the lexical environment of Node, and consequently any nested

@@ -305,12 +305,9 @@ package body AST is
 
    procedure Populate_Lexical_Env (Node : ${root_node_type_name}) is
 
-      Stack : Env_Stack;
-
       --  The internal algorithm, as well as the Do_Env_Action implementations,
-      --  use a stack of environments. They represent nested environments,  the
-      --  top environment on the stack being the most nested. We do that
-      --  because:
+      --  use an implicit stack of environment, where the topmost parent
+      --  environment (Parent_Env parameter) is mutable.
       --
       --  - We want to be able to replace the topmost env that will be seen by
       --    subsequent nodes. This is to support constructs such as use clauses
@@ -337,73 +334,51 @@ package body AST is
       --    before the use clause. This allows to decouple env construction and
       --    symbol resolution in two passes, rather than interleave the two
       --    like in the GNAT compiler.
-      --
-      --  - We don't to mutate the topmost env, because that would change what
-      --    other nodes 'see'. So we create a new env and substitute it on the
-      --    stack.
 
-      procedure Populate_Internal (Node : ${root_node_type_name});
+      procedure Populate_Internal
+        (Node : ${root_node_type_name};
+         Parent_Env : aliased in out Lexical_Env);
 
       -----------------------
       -- Populate_Internal --
       -----------------------
 
-      procedure Populate_Internal (Node : ${root_node_type_name})
+      procedure Populate_Internal
+        (Node : ${root_node_type_name};
+         Parent_Env : aliased in out Lexical_Env)
       is
-         use Lexical_Env_Vectors;
-
-         Env_Idx : Natural := 0;
-         Env     : Lexical_Env;
+         New_Parent_Env : aliased Lexical_Env;
       begin
          if Node = null then
             return;
          end if;
 
-         --  Initial implementation: we always put a null on the stack, because
-         --  not every node type will create a new nested scope. Those who do
-         --  will replace the null by a Lexical Environment instance. This way
-         --  always pop when exiting Populate_Internal.
+         --  Set the lexical env of node to the Parent environment
+         Node.Parent_Env := Parent_Env;
 
-         --  TODO??? Alternate implementation possible: Node.Do_Env_Actions
-         --  returns a boolean telling whether it pushed a new env on the stack
-         --  or not.
-         --  Pros: shallower stack, no nulls on it so easier to find last env.
-         --  Cons: Conditional Pop.
-         --  Conclusion: Probably worth it.
-         Append (Stack, null);
+         --  Call Do_Env_Actions on the Node. This might:
+         --  1. Mutate the Parent_Env functionally, eg. replace the pointer by
+         --     a pointer to a new env derived from Parent_Env.
+         --  2. Return a new Env, that will be used as the Parent_Env for the
+         --     node's children.
+         New_Parent_Env := Node.Do_Env_Actions (Parent_Env);
 
-         Find_Env : for I in reverse First_Index (Stack)
-                                  .. Last_Index (Stack)
-         loop
-            if Get (Stack, I) /= null then
-               Env_Idx := I;
-               Env := Get (Stack, I);
-               exit Find_Env;
-            end if;
-         end loop Find_Env;
-
-         --  Set the lexical env of node to the found environment
-         Node.Parent_Env := Env;
-
-         --  Execute environment actions for Node. That might create a new env
-         --  in the created stack slot, or mutate the Stack of envs.
-
-         --  TODO??? To be pondered, but we probably never want to mutate
-         --  another env on the stack than the topmost environment, in which
-         --  case we could just use an in-out parameter set to the topmost env
-         --  to get a new env to put on top of the stack if necessary.
-         Node.Do_Env_Actions (Stack, Env_Idx);
-
+         --  Call recursively on children. Use the New_Parent_Env if available,
+         --  else pass the existing Parent_Env.
          for Child of Children (Node) loop
-            Populate_Internal (Child);
+            if New_Parent_Env = null then
+               Populate_Internal (Child, Parent_Env);
+            else
+               Populate_Internal (Child, New_Parent_Env);
+            end if;
          end loop;
-
-         --  We always pop the value on the stack, disregarding whether a new
-         --  lex env was created or not.
-         Pop (Stack);
       end Populate_Internal;
+
+      --  TODO??? For the moment this is null, but eventually we'll want a real
+      --  root env that will be shared across analysis units.
+      Root_Env : aliased Lexical_Env := null;
    begin
-      Populate_Internal (Node);
+      Populate_Internal (Node, Root_Env);
    end Populate_Lexical_Env;
 
    -----------------
@@ -491,7 +466,11 @@ package body AST is
             return;
          end if;
 
-         if Current.Parent_Env /= Env then
+         --  We only dump environments that we haven't dumped before. This way
+         --  we'll only dump environments at the site of their creation, and
+         --  not in any subsequent link. We use the Env_Ids map to check which
+         --  envs we have already seen or not.
+         if not Env_Ids.Contains (Current.Parent_Env) then
             Env := Current.Parent_Env;
             Put ("<" & Kind_Name (Current) & " "
                  & Image (Sloc_Range (Current)) & "> - ");

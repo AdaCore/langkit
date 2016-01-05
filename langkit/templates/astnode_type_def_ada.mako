@@ -49,8 +49,9 @@
         return ${root_node_type_name};
 
       % if cls.env_spec:
-      overriding procedure Do_Env_Actions
-        (Self : access ${type_name}; Stack : Env_Stack; Index : Natural);
+      overriding function Do_Env_Actions
+        (Self       : access ${type_name};
+         Parent_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env;
       % endif
 
       overriding procedure Destroy

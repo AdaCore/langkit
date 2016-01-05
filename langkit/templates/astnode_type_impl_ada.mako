@@ -249,22 +249,17 @@ type_name = '{}_Type'.format(cls.name())
    -- Do_Env_Actions --
    --------------------
 
-   overriding procedure Do_Env_Actions
-     (Self : access ${type_name}; Stack : Env_Stack; Index : Natural)
+   overriding function Do_Env_Actions
+     (Self : access ${type_name};
+      Parent_Env: in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
    is
       use AST_Envs;
       use AST_Envs.Lexical_Env_Vectors;
+      Ret : Lexical_Env := null;
    begin
          % if cls.env_spec._add_env:
-
-            ## Populate_Lexical_Env has created an empty stack slot for this
-            ## node in the environment stack. If _add_env is True, we'll put
-            ## a new Lexical_Env instance in there.
-            Get_Access (Stack, Last_Index (Stack)).all :=
-              AST_Envs.Create (Get (Stack, Index));
-
-            ##  We then initiate the environment of self to this new env
-            Self.Parent_Env := Get (Stack, Last_Index (Stack));
+            Ret := AST_Envs.Create (Parent_Env);
+            Self.Parent_Env := Ret;
          % endif
 
          % if cls.env_spec._add_to_env:
@@ -291,6 +286,8 @@ type_name = '{}_Type'.format(cls.name())
                       (${cls.env_spec._add_to_env[1].render_expr().strip()}));
             end;
          % endif
+
+      return Ret;
    end Do_Env_Actions;
    % endif
 % endif
