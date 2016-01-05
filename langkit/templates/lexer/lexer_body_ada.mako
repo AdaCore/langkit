@@ -168,7 +168,8 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                   if Last_Token_Was_Trivia then
                      Last_Element (TDH.Trivias).all.Has_Next := True;
                   else
-                     Last_Element (TDH.Tokens_To_Trivias).all := Length (TDH.Trivias);
+                     Last_Element (TDH.Tokens_To_Trivias).all :=
+                        Length (TDH.Trivias);
                   end if;
 
                   Append

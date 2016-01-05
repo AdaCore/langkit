@@ -60,7 +60,8 @@ type_name = '{}_Type'.format(cls.name())
           % endif
 
           % if is_ast_node(field.type):
-             Append (Result, Image (${root_node_type_name} (Node.${field.name})));
+             Append (Result,
+                     Image (${root_node_type_name} (Node.${field.name})));
           % else:
              Append (Result, Image (Node.${field.name}));
           % endif
@@ -278,7 +279,8 @@ type_name = '{}_Type'.format(cls.name())
                ## Ultimately, _add_to_env will be able to recognize other
                ## return types for the key expression, and handle them
                ## appropriately.
-               T : Token := ${cls.env_spec._add_to_env[0].render_expr()}.P_Token;
+               T : Token :=
+                 ${cls.env_spec._add_to_env[0].render_expr()}.P_Token;
             begin
 
                ## Add a new entry to the lexical env, for which the key is the

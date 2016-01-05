@@ -121,7 +121,8 @@ package AST is
 
    function Traverse
      (Node  : ${root_node_type_name};
-      Visit : access function (Node : ${root_node_type_name}) return Visit_Status)
+      Visit : access function (Node : ${root_node_type_name})
+                               return Visit_Status)
      return Visit_Status;
    --  Given the parent node for a subtree, traverse all syntactic nodes of
    --  this tree, calling the given function on each node in pre order (ie.
@@ -187,7 +188,9 @@ package AST is
    procedure Destroy
      (Node : access ${root_node_value_type}) is abstract;
 
-   function Is_Empty_List (Node : access ${root_node_value_type}) return Boolean is
+   function Is_Empty_List
+     (Node : access ${root_node_value_type})
+      return Boolean is
      (False);
 
    procedure Populate_Lexical_Env (Node : ${root_node_type_name});

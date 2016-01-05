@@ -245,9 +245,11 @@ ${capi.get_name("register_extension")}(const char *name);
 
 ${c_doc('langkit.node_extension')}
 extern void **
-${capi.get_name("node_extension")}(${node_type} node,
-                                   unsigned ext_id,
-                                   ${capi.get_name("node_extension_destructor")} dtor);
+${capi.get_name("node_extension")}(
+    ${node_type} node,
+    unsigned ext_id,
+    ${capi.get_name("node_extension_destructor")} dtor
+);
 
 #ifdef __cplusplus
 }

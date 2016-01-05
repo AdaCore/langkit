@@ -60,7 +60,8 @@ package ${_self.ada_api_settings.lib_name}.C is
      with Convention => C;
    ${ada_c_doc('langkit.diagnostic_type', 3)}
 
-   % for type_name in (node_type, token_type, sloc_type, sloc_range_type, diagnostic_type):
+   % for type_name in (node_type, token_type, sloc_type, sloc_range_type, \
+                       diagnostic_type):
       type ${type_name}_Ptr is access ${type_name};
    % endfor
 

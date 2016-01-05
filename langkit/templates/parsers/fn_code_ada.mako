@@ -13,7 +13,8 @@ is
 
    % if _self.is_left_recursive():
       Mem_Pos : Integer := Pos;
-      Mem_Res : ${decl_type(_self.get_type())} := ${_self.get_type().nullexpr()};
+      Mem_Res : ${decl_type(_self.get_type())} :=
+         ${_self.get_type().nullexpr()};
    % endif
 
    M       : ${decl_type(_self.get_type())}_Memos.Memo_Entry :=

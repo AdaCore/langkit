@@ -51,7 +51,8 @@ package body AST is
          if Status = Into then
             for I in 1 .. Child_Count (Node) loop
                declare
-                  Cur_Child : constant ${root_node_type_name} := Child (Node, I - 1);
+                  Cur_Child : constant ${root_node_type_name} :=
+                     Child (Node, I - 1);
 
                begin
                   if Cur_Child /= null then
@@ -219,7 +220,9 @@ package body AST is
      return ${root_node_type_name}_Arrays.Array_Type
    is
    begin
-      return A : ${root_node_type_name}_Arrays.Array_Type (0 .. Child_Count (Node)) do
+      return A : ${root_node_type_name}_Arrays.Array_Type
+                    (0 .. Child_Count (Node))
+      do
          for I in 0 .. Child_Count (Node) loop
             A (I) := Child (Node, I);
          end loop;
@@ -358,18 +361,20 @@ package body AST is
 
          --  Initial implementation: we always put a null on the stack, because
          --  not every node type will create a new nested scope. Those who do
-         --  will replace the null by a Lexical Environment instance. This way we
+         --  will replace the null by a Lexical Environment instance. This way
          --  always pop when exiting Populate_Internal.
 
          --  TODO??? Alternate implementation possible: Node.Do_Env_Actions
-         --  returns a boolean telling whether it pushed a new env on the stack or
-         --  not.
+         --  returns a boolean telling whether it pushed a new env on the stack
+         --  or not.
          --  Pros: shallower stack, no nulls on it so easier to find last env.
          --  Cons: Conditional Pop.
          --  Conclusion: Probably worth it.
          Append (Stack, null);
 
-         Find_Env : for I in reverse First_Index (Stack) .. Last_Index (Stack) loop
+         Find_Env : for I in reverse First_Index (Stack)
+                                  .. Last_Index (Stack)
+         loop
             if Get (Stack, I) /= null then
                Env_Idx := I;
                Env := Get (Stack, I);
@@ -488,7 +493,8 @@ package body AST is
 
          if Current.Parent_Env /= Env then
             Env := Current.Parent_Env;
-            Put ("<" & Kind_Name (Current) & " " & Image (Sloc_Range (Current)) & "> - ");
+            Put ("<" & Kind_Name (Current) & " "
+                 & Image (Sloc_Range (Current)) & "> - ");
             Dump (Env);
             Put_Line ("");
          end if;

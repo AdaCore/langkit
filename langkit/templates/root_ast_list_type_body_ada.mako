@@ -124,9 +124,11 @@ package body AST.List is
    ---------------------
 
    overriding
-   function Lookup_Children (Node : access List_Type;
-                             Sloc : Source_Location;
-                             Snap : Boolean := False) return ${root_node_type_name}
+   function Lookup_Children
+     (Node : access List_Type;
+      Sloc : Source_Location;
+      Snap : Boolean := False)
+      return ${root_node_type_name}
    is
    begin
       for Child of Node.Vec loop
