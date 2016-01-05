@@ -297,19 +297,19 @@ class definition with the following ones:
 
 ::
 
-    class Function(ASTNode):
+    class Function(KaleidoscopeNode):
         proto = Field()
         body  = Field()
 
-    class ExternDecl(ASTNode):
+    class ExternDecl(KaleidoscopeNode):
         proto = Field()
 
-    class Prototype(ASTNode):
+    class Prototype(KaleidoscopeNode):
         name = Field()
         args = Field()
 
     @abstract
-    class Expr(ASTNode):
+    class Expr(KaleidoscopeNode):
         pass
 
     class Number(Expr):
@@ -352,8 +352,8 @@ describe such AST nodes: there is an abstract ``Expr`` class while the
 ``Number`` and ``BinaryExpr`` are concrete classes deriving from it.
 
 This is exactly the approach that Langkit handles: all "root" AST nodes derive
-from the ``ASTNode`` class, and you can create abstract classes (using the
-``abstract`` class decorator) to create a hierarchy of node types.
+from the ``KaleidoscopeNode`` class, and you can create abstract classes (using
+the ``abstract`` class decorator) to create a hierarchy of node types.
 
 Careful readers may also have spotted something else: the ``Operator``
 enumeration type. We use an enumeration type in order to store in the most
@@ -419,9 +419,9 @@ is what ``prototype`` matched, and so there is exactly one result to put in
 
 In Langkit, the human-friendly name for ``^`` is the *transform* operator.  On
 the left side it takes a sub-parser while on the right side it takes a concrete
-ASTNode subclass that must have the same number of fields as the number of
-results the sub-parser yields (i.e. one for every sub-parser except ``Row`` and
-the number of non-discarded items in ``Row`` sub-parsers).  
+KaleidoscopeNode subclass that must have the same number of fields as the
+number of results the sub-parser yields (i.e. one for every sub-parser except
+``Row`` and the number of non-discarded items in ``Row`` sub-parsers).
 
 ::
 
@@ -429,7 +429,7 @@ the number of non-discarded items in ``Row`` sub-parsers).
 
 We have here a pattern that is very similar to ``extern_decl``, expect that the
 ``Row`` part has two non-discarded results: ``prototype`` and ``expr``.  This
-is fortunate, as the ``Function`` ASTNode requires two fields.
+is fortunate, as the ``Function`` node requires two fields.
 
 ::
 

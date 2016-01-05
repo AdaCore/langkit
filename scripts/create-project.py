@@ -44,23 +44,23 @@ MANAGE_TEMPLATE = '''#! /usr/bin/env python
 
 import os
 
-from langkit.compile_context import CompileCtx
 from langkit.libmanage import ManageScript
-
-from language.lexer import {lang_name_slug}_lexer
-from language.parser import {lang_name_slug}_grammar
 
 
 class Manage(ManageScript):
     def create_context(self, args):
+        from langkit.compile_context import CompileCtx
+
+        from language.lexer import kaleidoscope_lexer
+        from language.parser import kaleidoscope_grammar
+
         return CompileCtx(lang_name={lang_name_repr},
                           main_rule_name='main_rule',
                           lexer={lang_name_slug}_lexer,
                           grammar={lang_name_slug}_grammar)
 
 if __name__ == '__main__':
-    {lang_name_slug}_dir = os.path.dirname(os.path.abspath(__file__))
-    Manage({lang_name_slug}_dir).run()
+    Manage().run()
 '''
 
 
@@ -80,10 +80,19 @@ class Token(LexerToken):
 
 
 PARSER_TEMPLATE = '''\
-from langkit.compiled_types import ASTNode
+from langkit.compiled_types import ASTNode, abstract, root_grammar_class
 from langkit.parsers import Grammar, Row
 
-class ExampleNode(ASTNode):
+
+@abstract
+@root_grammar_class
+class {lang_name}Node(ASTNode):
+    """
+    Root node class for {lang_name} AST nodes.
+    """
+    pass
+
+class ExampleNode({lang_name}Node):
     pass
 
 {lang_name_slug}_grammar = Grammar()
