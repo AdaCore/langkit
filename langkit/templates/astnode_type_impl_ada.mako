@@ -257,11 +257,6 @@ type_name = '{}_Type'.format(cls.name())
       use AST_Envs.Lexical_Env_Vectors;
       Ret : Lexical_Env := null;
    begin
-         % if cls.env_spec._add_env:
-            Ret := AST_Envs.Create (Parent_Env);
-            Self.Parent_Env := Ret;
-         % endif
-
          % if cls.env_spec._add_to_env:
 
             ## If we have an _add_to_env specification, we generate code to add
@@ -285,6 +280,11 @@ type_name = '{}_Type'.format(cls.name())
                     ${root_node_type_name}
                       (${cls.env_spec._add_to_env[1].render_expr().strip()}));
             end;
+         % endif
+
+         % if cls.env_spec._add_env:
+            Ret := AST_Envs.Create (Parent_Env);
+            Self.Parent_Env := Ret;
          % endif
 
       return Ret;
