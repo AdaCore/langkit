@@ -438,16 +438,39 @@ class UserField(AbstractField):
     Node type, will be ignored by the parsing code.
     """
 
-    def __init__(self, type, repr=True, doc=None):
+    def __init__(self, type, repr=False, doc=None, is_private=False):
         """
         See inherited doc. In this version we just ensure that a type is
-        passed because it is mandatory for data fields.
+        passed because it is mandatory for data fields. We also set repr to
+        False because most of the time you don't want User fields to show up in
+        the pretty printer.
+
         :type type: CompiledType
         :type doc: str
         """
         super(UserField, self).__init__(repr, doc, type)
+        self.is_private = is_private
 
     concrete = True
+
+
+class BuiltinField(UserField):
+    """
+    A built-in field is just like a UserField, except that its name has no
+    prefix. It is disregarded by the parsing machinery too.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(BuiltinField, self).__init__(*args, **kwargs)
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        assert isinstance(name, names.Name)
+        self._name = name
 
 
 class StructMetaClass(type):
@@ -489,8 +512,8 @@ class StructMetaClass(type):
         )
         base, = bases
 
-        # We want to check that every type deriving from ASTNode
-        # actually derives from an user defined subclass of ASTNode.
+        # We want to check that every type deriving from ASTNode actually
+        # derives from an user defined subclass of ASTNode.
 
         # First, skip Struct and ASTNode built-ins, and skip subclasses of
         # Struct.
@@ -513,15 +536,19 @@ class StructMetaClass(type):
                     " will be the root class of your grammar"
                 )
 
-        # Gather the fields and properties in a dictionary
-        fields = OrderedDict(sorted(
-            ((f_n, f_v)
-             for f_n, f_v in dct.items()
-             if isinstance(f_v, AbstractNodeData)),
-            # Recover the order of field declarations.  See the Field
-            # class definition for more details.
-            key=lambda (_, f): f._index
-        ))
+        # Here, we'll register fields and properties for the root AST node
+        # class.
+        if is_root_grammar_class:
+            dct["parent_env"] = BuiltinField(type=LexicalEnvType,
+                                             is_private=True)
+
+        fields_list = [(f_n, f_v) for f_n, f_v in dct.items()
+                       if isinstance(f_v, AbstractNodeData)]
+
+        # Gather the fields and properties in a dictionary. Recover the order
+        # of field declarations.  See the Field class definition for more
+        # details.
+        fields = OrderedDict(sorted(fields_list, key=lambda (_, f): f._index))
 
         for field_name, field in fields.items():
             # Remove fields/props as class members: we want them to be
