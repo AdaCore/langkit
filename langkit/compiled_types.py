@@ -947,6 +947,18 @@ class ASTNode(Struct):
     abstract = False
 
     @classmethod
+    def base(cls):
+        """
+        Helper to return the base class of this ASTNode subclass.
+        :rtype: ASTNode
+        """
+        assert cls != ASTNode, (
+            "Base is not meant to be called on ASTNode itself, only on"
+            " subclasses of it"
+        )
+        return cls.__base__
+
+    @classmethod
     def is_ast_node(cls):
         return True
 

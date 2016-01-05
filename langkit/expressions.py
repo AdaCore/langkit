@@ -1338,18 +1338,47 @@ class Property(compiled_types.AbstractNodeData):
 
     is_property = True
 
-    def __init__(self, expr, doc=None, private=False):
+    def __init__(self, expr, doc=None, private=False, abstract=False,
+                 type=None):
         """
-        :param AbstractExpression expr: The expression for the property.
+        :param AbstractExpression|None expr: The expression for the property.
         :param str|None doc: User documentation for this property.
         :param bool private: Whether this property is private or not.
+        :param bool abstract: Whether this property is abstract or not. If this
+            is True, then expr can be None.
+        :param CompiledType|None type: The optional type annotation for this
+            property. If supplied, it will be used to check the validity of
+            inferred types for this propery, and eventually for overriding
+            properties in sub classes. NOTE: The type is mandatory for abstract
+            base properties.
         """
 
         super(Property, self).__init__(private=private)
 
+        assert ((expr is None and abstract) or (expr and not abstract)), (
+            "Property can either be abstract, either have an expression, "
+            "not both"
+        )
+
         self.expr = expr
         self.constructed_expr = None
         self.vars = LocalVars()
+        self.expected_type = type
+        self.abstract = abstract
+
+        self.overriding = False
+        """
+        Whether this property is overriding or not. This is put to False by
+        default, and the information is inferred during the compute phase.
+        """
+
+        self.dispatching = self.abstract
+        """
+        Whether this property is dispatching or not. Initial value of that is
+        self.abstract, because every abstract property is dispatching. For
+        other dispatching properties (non abstract base properties, overriding
+        properties), this information is inferred during the compute phase.
+        """
 
         self.prop_decl = None
         """
@@ -1371,6 +1400,14 @@ class Property(compiled_types.AbstractNodeData):
 
         self.ast_node = None
         ":type: ASTNode|None"
+
+        if self.abstract:
+            # TODO: We could also at a later stage add a check to see that the
+            # abstract property definition doesn't override another property
+            # definition on a base class.
+            assert self.expected_type, (
+                "Abstract properties need an explicit type annotation"
+            )
 
     @classmethod
     def get(cls):
@@ -1402,23 +1439,91 @@ class Property(compiled_types.AbstractNodeData):
 
         :rtype: langkit.compiled_types.CompiledType
         """
-        return self.constructed_expr.type
+        if self.abstract:
+            return self.expected_type
+        else:
+            return self.constructed_expr.type
+
+    def base_property(self, owner_type):
+        """
+        Get the base property for this property, if it exists.
+
+        :param ASTNode owner_type: The type on which this property was
+            declared.
+        :rtype: Property|None
+        """
+        return owner_type.base().get_abstract_fields_dict(
+            field_class=Property
+        ).get(self._name.lower, None)
+
+    def compute(self, owner_type):
+        """
+        Compute information related to dispatching for properties.
+
+        :param ASTNode owner_type: The type on which this property was
+            declared.
+        """
+
+        base_prop = self.base_property(owner_type)
+
+        if base_prop:
+            # If we have a base property, then this property is dispatching and
+            # overriding, and the base property is dispatching (This
+            # information can be missing at this stage for non abstract base
+            # properties).
+            self.overriding = True
+            self.dispatching = True
+            base_prop.dispatching = True
+
+            # We then want to check the consistency of type annotations if they
+            # exist.
+            if base_prop.expected_type:
+                if self.expected_type:
+                    assert base_prop.expected_type == self.expected_type, (
+                        "Property doesn't have the same type as parent "
+                        "property"
+                    )
+                else:
+                    # If base has a type annotation and not self, then
+                    # propagate it.
+                    self.expected_type = base_prop.expected_type
 
     def render(self, owner_type):
         """
         Render the given property to generated code.
 
-        :param langkit.compiled_types.CompiledType owner_type: The ast node
+        :param langkit.compiled_types.ASTNode owner_type: The ast node
             subclass to which this property is bound.
         :rtype: basestring
         """
-        with Self.bind(owner_type):
-            with self.bind():
+        with self.bind():
+            with Self.bind(owner_type):
+                if self.abstract:
+                    self.prop_decl = render('properties/decl_ada')
+                    self.prop_def = ""
+                    return
+
                 self.expr.freeze()
                 self.constructed_expr = self.expr.construct()
+
+                if self.expected_type:
+                    assert self.expected_type == self.constructed_expr.type, (
+                        "Property's expession doesn't have the expected type"
+                    )
+
                 with names.camel_with_underscores:
                     self.prop_decl = render('properties/decl_ada')
                     self.prop_def = render('properties/def_ada')
+
+        base_prop = self.base_property(owner_type)
+        if base_prop and base_prop.type:
+            # TODO: We need to make sure Properties are rendered in the proper
+            # order (base classes first), to make sure that this check is
+            # always effectful.
+            assert self.type == base_prop.type, (
+                "Overriding property doesn't have the same type as base"
+                "property !"
+            )
 
     @property
     def name(self):
@@ -1437,3 +1542,16 @@ class Property(compiled_types.AbstractNodeData):
 
     def doc(self):
         return self._doc
+
+
+# noinspection PyPep8Naming
+def AbstractProperty(type, doc="", **kwargs):
+    """
+    Shortcut for abstract properties, where you can pass no expression but
+    must pass a type. See Property for further documentation.
+
+    :type type: CompiledType
+    :type doc: str
+    :rtype: Property
+    """
+    return Property(expr=None, type=type, doc=doc, abstract=True, **kwargs)

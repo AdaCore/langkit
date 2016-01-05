@@ -367,7 +367,10 @@ class CompileCtx():
         self._extensions_dir = None
 
     def compute_types(self):
-        """Compute the "astnode_types" field."""
+        """
+        Compute various information related to compiled types, that needs to be
+        available for code generation.
+        """
 
         # Get the list of ASTNode types from the Struct metaclass
         from langkit.compiled_types import StructMetaClass
@@ -392,6 +395,17 @@ class CompileCtx():
             for cls in self.astnode_types
         }
         self.astnode_types.sort(key=lambda cls: keys[cls])
+
+    def compute_properties(self):
+        """
+        Compute information related to ASTNode's properties. This needs to be a
+        global analysis because we want to compute which properties need to be
+        dispatching, and this is determined not only by the context of one
+        node, but by whether the parent has a property with the same name.
+        """
+        for astnode_type in self.astnode_types:
+            for prop in astnode_type.get_properties(include_inherited=False):
+                prop.compute(astnode_type)
 
     def render_template(self, *args, **kwargs):
         # Kludge: to avoid circular dependency issues, do not import parsers
@@ -459,9 +473,13 @@ class CompileCtx():
         """
         assert self.grammar, "Set grammar before calling emit"
 
-        # Populate the astnode_types field, so that it is available for
-        # further compilation stages.
+        # Compute type information, so that it is available for further
+        # compilation stages.
         self.compute_types()
+
+        # Compute properties information, so that it is available for further
+        # compilation stages.
+        self.compute_properties()
 
         lib_name_low = self.ada_api_settings.lib_name.lower()
 
