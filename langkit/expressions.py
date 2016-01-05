@@ -133,11 +133,18 @@ class AbstractExpression(Frozable):
         def _build_is_a(astnode):
             return IsA(self, astnode)
 
+        def _build_is_null():
+            return IsNull(self)
+
         def _build_mapcat(expr, filter=None, var=None):
             return Map(var, expr, self, filter, concat=True)
 
         def _build_map(expr, filter=None, var=None):
             return Map(var, expr, self, filter)
+
+        direct_constructors = {
+            'is_null':  _build_is_null,
+        }
 
         constructors = {
             'all':      _build_all,
@@ -150,6 +157,13 @@ class AbstractExpression(Frozable):
             'map':      _build_map,
             'mapcat':   _build_mapcat,
         }
+
+        try:
+            c = direct_constructors[attr]
+        except KeyError:
+            pass
+        else:
+            return c()
 
         try:
             return constructors[attr]
@@ -464,6 +478,32 @@ class IsA(AbstractExpression):
         expr = self.expr.construct()
         assert issubclass(expr.type, compiled_types.ASTNode)
         return IsAExpr(expr, self.astnode)
+
+
+class IsNull(AbstractExpression):
+    """
+    Abstract expression to test whether an AST node is null.
+    """
+
+    def __init__(self, expr):
+        """
+        :param AbstractExpression expr: Expression on which the test is
+            performed.
+        """
+        self.expr = expr
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: EqExpr
+        """
+        expr = self.expr.construct()
+        assert issubclass(expr.type, compiled_types.ASTNode)
+        return EqExpr(
+            expr,
+            LiteralExpr('null', compiled_types.ASTNode),
+        )
 
 
 class Map(CollectionExpression):
