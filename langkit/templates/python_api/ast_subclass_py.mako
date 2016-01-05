@@ -22,7 +22,8 @@ class ${cls.name().camel}(${parent_cls.name().camel}):
         result = ${pyapi.type_internal_name(primitive.field.type)}()
 
         ## Get it via the C field accessor
-        assert _${primitive.name.lower}(self._c_value, ctypes.byref(result))
+        if not _${primitive.name.lower}(self._c_value, ctypes.byref(result)):
+           raise PropertyError()
 
         return ${pyapi.wrap_value('result', primitive.field.type)}
     % endfor

@@ -38,6 +38,9 @@ package ${_self.ada_api_settings.lib_name} is
    type Analysis_Context is access all Analysis_Context_Type;
    type Analysis_Unit is access all Analysis_Unit_Type;
 
+   Property_Error : exception;
+   ${ada_doc('langkit.property_error', 3)}
+
    package Units_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Unbounded_String,
       Element_Type    => Analysis_Unit,

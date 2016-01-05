@@ -24,6 +24,16 @@ begin
               Value_P.all := Typed_Node.${field.name};
           % endif
           return 1;
+      exception
+         when Property_Error =>
+            ## If we reach this handler, it means the expression failed at
+            ## some point because of a safety check. Tell the user about it.
+            return 0;
+
+         ## TODO: if code generation is buggy, we may have other exceptions
+         ## here. We should find a way to propagate them cleanly through
+         ## bindings so that, for instance, we do not just crash in Python but
+         ## have a proper stack trace.
       end;
    else
       return 0;

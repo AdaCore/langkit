@@ -767,7 +767,7 @@ class PlaceHolderSingleton(AbstractExpression):
         self._type = None
 
     def construct(self):
-        return VarExpr(self._type, self._name)
+        return VarExpr(self._type, self._name, make_access=True)
 
     @property
     def type(self):
@@ -918,17 +918,35 @@ class VarExpr(ResolvedExpression):
     Resolved expression that represents a variable in generated code.
     """
 
-    def __init__(self, type, name):
+    def __init__(self, type, name, make_access=False):
+        """
+        Create a variable reference expression.
+
+        :param langkit.compiled_types.CompiledType type: Type for the
+            referenced variable.
+        :param names.Name name: Name of the referenced variable.
+        :param bool make_access: In the generated code, properties take as
+            a single parameter an AST node as a record instead of as an access
+            as we usually handle them. In order to simplify code generation,
+            reference to these turn these records into access to records. In
+            this case, pass True to "make_access". Pass False for regular
+            variables. TODO: turn these single parameters into accesses
+            everywhere.
+        """
         assert issubclass(type, compiled_types.CompiledType)
         self._type = type
         self.name = name
+        self._make_access = make_access
 
     @property
     def type(self):
         return self._type
 
     def render_expr(self):
-        return self.name
+        if self._make_access:
+            return self.name + "'Unrestricted_Access"
+        else:
+            return self.name
 
 
 class FieldAccessExpr(ResolvedExpression):
@@ -945,18 +963,30 @@ class FieldAccessExpr(ResolvedExpression):
         self.receiver_expr = receiver_expr
         self.property = property
 
+        p = Property.get()
+        self.result_var = p.vars(names.Name('Prefix'),
+                                 self.receiver_expr.type,
+                                 create_unique=False)
+
     @property
     def type(self):
         return self.property.type
 
     def __repr__(self):
-
         return "<FieldAccessExpr {} {} {}>".format(
             self.receiver_expr, self.property, self.type
         )
 
+    def render_pre(self):
+        # Before accessing the field of a record through an access, we must
+        # check that whether this access is null in order to raise a
+        # Property_Error in the case it is.
+        return compiled_types.render('properties/null_safety_check_ada',
+                                     expr=self.receiver_expr,
+                                     result_var=self.result_var)
+
     def render_expr(self):
-        return "{}.{}".format(self.receiver_expr.render(), self.property.name)
+        return "{}.{}".format(self.result_var.name, self.property.name)
 
 
 class CastExpr(ResolvedExpression):
@@ -973,12 +1003,22 @@ class CastExpr(ResolvedExpression):
         self.expr = expr
         self.astnode = astnode
 
+        p = Property.get()
+        self.result_var = p.vars(names.Name('Base'),
+                                 self.expr.type,
+                                 create_unique=False)
+
     @property
     def type(self):
         return self.astnode
 
     def render_pre(self):
-        return self.expr.render_pre()
+        # Before actually downcasting an access to an AST node, add a type
+        # check so that we raise a Property_Error if it's wrong.
+        return compiled_types.render('properties/type_safety_check_ada',
+                                     expr=self.expr,
+                                     astnode=self.astnode,
+                                     result_var=self.result_var)
 
     def render_expr(self):
         return "{} ({})".format(

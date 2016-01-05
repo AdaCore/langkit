@@ -45,6 +45,11 @@ class _Diagnostic(ctypes.Structure):
                 ("message", _text)]
 
 
+class PropertyError(Exception):
+    ${py_doc('langkit.property_error', 4)}
+    pass
+
+
 #
 # High-level binding
 #

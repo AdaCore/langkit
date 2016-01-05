@@ -76,6 +76,9 @@ documentations = {
     'langkit.diagnostic_type': Template("""
         Analysis unit diagnostics.
     """),
+    'langkit.property_error': Template("""
+        Raised when an error occurs while evaluating a property.
+    """),
 
     #
     # Analysis primitives
