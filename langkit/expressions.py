@@ -128,11 +128,13 @@ class AbstractExpression(Frozable):
         def _build_map(expr, filter=None):
             return Map(self, expr, filter)
 
+        # Constructors for primitives that don't take any parameters
         direct_constructors = {
             'is_null':
                 lambda: IsNull(self),
         }
 
+        # Constructors for primitives that take parameters
         constructors = {
             'all':
                 lambda predicate: Quantifier(Quantifier.ALL, self, predicate),
@@ -151,17 +153,9 @@ class AbstractExpression(Frozable):
             'mapcat':   _build_mapcat,
         }
 
-        try:
-            c = direct_constructors[attr]
-        except KeyError:
-            pass
-        else:
-            return c()
-
-        try:
-            return constructors[attr]
-        except KeyError:
-            return FieldAccess(self, attr)
+        return direct_constructors.get(
+            attr, constructors.get(attr, FieldAccess(self, attr))
+        )
 
     @Frozable.protect
     def __call__(self, *args, **kwargs):
