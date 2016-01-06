@@ -56,6 +56,13 @@ class Frozable(object):
         """
         Freeze the object and all its frozable components recursively.
         """
+
+        # AbstractExpression instances can appear in more than one place in
+        # expression "trees" (which are more DAGs actually), so avoid
+        # unnecessary processing.
+        if self.frozen:
+            return
+
         # Deactivate this inspection because we don't want to force every
         # implementer of frozable to call super.
 
@@ -112,11 +119,11 @@ class AbstractExpression(Frozable):
 
         # Constructors for operations with attribute-like syntax
 
-        def _build_all(predicate, var=None):
-            return Quantifier(Quantifier.ALL, self, predicate, var)
+        def _build_all(predicate):
+            return Quantifier(Quantifier.ALL, self, predicate)
 
         def _build_any(predicate, var=None):
-            return Quantifier(Quantifier.ANY, self, predicate, var)
+            return Quantifier(Quantifier.ANY, self, predicate)
 
         def _build_cast(astnode):
             return Cast(self, astnode)
@@ -127,8 +134,8 @@ class AbstractExpression(Frozable):
         def _build_equals(other):
             return Eq(self, other)
 
-        def _build_filter(filter, var=None):
-            return Map(var, var or Var, self, filter)
+        def _build_filter(filter):
+            return Map(self, lambda x: x, filter)
 
         def _build_is_a(astnode):
             return IsA(self, astnode)
@@ -136,11 +143,11 @@ class AbstractExpression(Frozable):
         def _build_is_null():
             return IsNull(self)
 
-        def _build_mapcat(expr, filter=None, var=None):
-            return Map(var, expr, self, filter, concat=True)
+        def _build_mapcat(expr, filter=None):
+            return Map(self, expr, filter, concat=True)
 
-        def _build_map(expr, filter=None, var=None):
-            return Map(var, expr, self, filter)
+        def _build_map(expr, filter=None):
+            return Map(self, expr, filter)
 
         direct_constructors = {
             'is_null':  _build_is_null,
@@ -209,26 +216,27 @@ class CollectionExpression(AbstractExpression):
     collections.
     """
 
-    def __init__(self, expr, collection, induction_var=None):
+    def __init__(self, collection, expr):
         """
-        :param induction_var: Variable to use in "expr".
-        :type induction_var: None|InductionVariable
-        :param AbstractExpression expr: Expression to evaluate for each item in
-            "collection".
         :param AbstractExpression collection: Collection on which this map
             operation works.
+
+        :param expr: Function that takes the induction variable and returns an
+            expression to evaluate for each item in "collection".
+        :type collection: (InductionVariable) -> AbstractExpression
         """
         super(CollectionExpression, self).__init__()
-        self.expr = expr
         self.collection = collection
-        self.induction_var = induction_var
+        self.induction_var = InductionVariable()
+        self.expr = expr(self.induction_var)
+        assert isinstance(self.expr, AbstractExpression)
 
     def construct_collection(self):
         """
         Construct the collection expression and determine the type of the
-        induction variable.
+        induction variable. Return the resolved expression for the collection.
 
-        :rtype: (ResolvedExpression, langkit.compiled_types.CompiledType)
+        :rtype: ResolvedExpression
         """
         collection_expr = self.collection.construct()
         assert (collection_expr.type.is_list_type or
@@ -236,21 +244,8 @@ class CollectionExpression(AbstractExpression):
             'Map cannot iterate on {}, which is not a collection'
         ).format(collection_expr.type.name().camel)
 
-        return (collection_expr, collection_expr.type.element_type)
-
-    def bind_induction_var(self, type):
-        """
-        Return a context manager to bind temporarily the induction variable to
-        a specific type. Also create the induction variable first if there is
-        none.
-
-        :param langkit.compiled_types.CompiledType type: Type for the induction
-            variable.
-        """
-        default_induction_var = not self.induction_var
-        if default_induction_var:
-            self.induction_var = Vars.create_default()
-        return self.induction_var.vars.bind(self.induction_var, type)
+        self.induction_var.type = collection_expr.type.element_type
+        return collection_expr
 
 
 class OpCall(AbstractExpression):
@@ -354,9 +349,8 @@ class Contains(CollectionExpression):
         """
         self.item = item
         super(Contains, self).__init__(
-            Vars.membership_test_item.equals(self.item),
             collection,
-            Vars.membership_test_item,
+            lambda item: item.equals(self.item),
         )
 
     def construct(self):
@@ -365,16 +359,13 @@ class Contains(CollectionExpression):
 
         :rtype: QuantifierExpr
         """
-        collection, elt_type = self.construct_collection()
-
-        with self.bind_induction_var(elt_type):
-            ind_var = self.induction_var.construct()
+        collection = self.construct_collection()
+        predicate = self.expr.construct()
+        ind_var = self.induction_var.construct()
 
         # "collection" contains "item" if at least one element in "collection"
         # is equal to "item".
-        return QuantifierExpr(Quantifier.ANY, collection,
-                              EqExpr(ind_var, self.item.construct()),
-                              ind_var)
+        return QuantifierExpr(Quantifier.ANY, collection, predicate, ind_var)
 
 
 class Eq(AbstractExpression):
@@ -516,23 +507,26 @@ class Map(CollectionExpression):
     Abstract expression that is the result of a map expression evaluation.
     """
 
-    def __init__(self, induction_var, expr, collection, filter_expr=None,
-                 concat=False):
+    def __init__(self, collection, expr, filter_expr=None, concat=False):
         """
         See CollectionExpression for the other parameters.
 
-        :param filter_expr: If provided, a boolean expression that says whether
+        :param filter_expr: If provided, a function that takes an induction
+            variable and that returns a boolean expression which says whether
             to include or exclude an item from the collection.
-        :type filter_expr: None|AbstractExpression
+        :type filter_expr: None|(InductionVariable) -> AbstractExpression
+
         :param bool concat: If true, "expr" must return arrays, and this
             expression returns the concatenation of all the arrays "expr"
             returns.
         """
-        super(Map, self).__init__(expr, collection, induction_var)
-        self.filter_expr = filter_expr
+        super(Map, self).__init__(collection, expr)
+        if filter_expr:
+            self.filter_expr = filter_expr(self.induction_var)
+            assert isinstance(self.filter_expr, AbstractExpression)
+        else:
+            self.filter_expr = None
         self.concat = concat
-        assert (self.filter_expr is None or
-                isinstance(self.filter_expr, AbstractExpression))
 
     def construct(self):
         """
@@ -540,26 +534,24 @@ class Map(CollectionExpression):
 
         :rtype: MapExpr
         """
-        collection_expr, elt_type = self.construct_collection()
+        collection_expr = self.construct_collection()
+        ind_var = self.induction_var.construct()
+        expr = self.expr.construct()
 
-        # Now construct the expressions that rely on the induction variable
-        with self.bind_induction_var(elt_type):
-            ind_var = self.induction_var.construct()
-            expr = self.expr.construct()
-            assert (not self.concat or
-                    expr.type.is_list_type or
-                    issubclass(expr.type, compiled_types.ArrayType)), (
-                'Cannot mapcat with expressions returning {} values'
-                ' (collections expected instead)'
-            ).format(expr.type.name())
+        assert (not self.concat or
+                expr.type.is_list_type or
+                issubclass(expr.type, compiled_types.ArrayType)), (
+            'Cannot mapcat with expressions returning {} values'
+            ' (collections expected instead)'
+        ).format(expr.type.name())
 
-            if self.filter_expr:
-                filter_expr = self.filter_expr.construct()
-                assert filter_expr.type.matches(compiled_types.BoolType)
-            else:
-                filter_expr = None
+        if self.filter_expr:
+            filter_expr = self.filter_expr.construct()
+            assert filter_expr.type.matches(compiled_types.BoolType)
+        else:
+            filter_expr = None
 
-        return MapExpr(ind_var, expr, collection_expr, filter_expr,
+        return MapExpr(ind_var, collection_expr, expr, filter_expr,
                        self.concat)
 
 
@@ -671,7 +663,7 @@ class Quantifier(CollectionExpression):
         :param AbstractExpression predicate: Boolean expression to evaluate on
             elements in "collection".
         """
-        super(Quantifier, self).__init__(predicate, collection, induction_var)
+        super(Quantifier, self).__init__(collection, predicate)
         assert kind in (self.ALL, self.ANY)
         self.kind = kind
 
@@ -681,13 +673,10 @@ class Quantifier(CollectionExpression):
 
         :rtype: QuantifierExpr
         """
-        collection_expr, elt_type = self.construct_collection()
-
-        # Now construct the expressions that rely on the induction variable
-        with self.bind_induction_var(elt_type):
-            ind_var = self.induction_var.construct()
-            expr = self.expr.construct()
-            assert expr.type.matches(compiled_types.BoolType)
+        collection_expr = self.construct_collection()
+        ind_var = self.induction_var.construct()
+        expr = self.expr.construct()
+        assert expr.type.matches(compiled_types.BoolType)
 
         return QuantifierExpr(self.kind, collection_expr, expr, ind_var)
 
@@ -788,88 +777,34 @@ class InductionVariable(AbstractExpression):
     Abstract expression that represents an induction variable in loops exprs.
     """
 
-    def __init__(self, vars, name):
-        """
-        :param InductionVariables vars: Factory from which "self" comes.
-        :param names.Name name: The name of the induction variable.
-        """
-        self.vars = vars
-        self.name = name
-
-    def __repr__(self):
-        return '<InductionVariable {}>'.format(self.name)
-
-    def construct(self):
-        return VarExpr(self.vars.get_type(self), self.name)
-
-
-class DefaultInductionVariableSingleton(AbstractExpression):
+    _counter = 0
     """
-    Abstract expression that represents an anonymous induction variable.
-    """
-
-    def construct(self):
-        return Vars.default.construct()
-
-
-class InductionVariablesSingleton(object):
-    """
-    Factory for InductionVariable instances.
+    Counter used to generate unique variable names.
+    :type: int
     """
 
     def __init__(self):
-        self.vars = {}
-        self.bind_stack = []
+        self.i = InductionVariable._counter
+        InductionVariable._counter += 1
+        self._type = None
 
-    def create_default(self):
-        return self._create_var(names.Name('Item'))
-
-    def _create_var(self, name):
-        """
-        :type name: names.Name
-        :rtype: InductionVariable
-        """
-        try:
-            return self.vars[name]
-        except KeyError:
-            var = InductionVariable(self, name)
-            self.vars[name] = var
-            return var
-
-    def __getattr__(self, name):
-        return self._create_var(names.Name('I') + names.Name.from_lower(name))
-
-    @contextmanager
-    def bind(self, var, type):
-        """
-        Bind the type of this placeholder.
-
-        :param var: Variable to bind as the default induction variable.
-        :type var: langkit.compiled_types.CompiledType
-
-        :param type: Type parameter to assign to "var".
-        :type var: langkit.compiled_types.CompiledType
-        """
-        self.bind_stack.append((var, type))
-        yield
-        self.bind_stack.pop()
+    def __repr__(self):
+        return '<InductionVariable {}>'.format(self.i)
 
     @property
-    def default(self):
-        var, type = self.bind_stack[-1]
-        return var
+    def type(self):
+        assert self._type
+        return self._type
 
-    def get_type(self, var):
-        for v, t in reversed(self.bind_stack):
-            if var == v:
-                return t
-        else:
-            raise KeyError('Unknown induction variable: {}'.format(var))
+    @type.setter
+    def type(self, type):
+        self._type = type
+
+    def construct(self):
+        return VarExpr(self.type, names.Name('Item_{}'.format(self.i)))
 
 
 Self = PlaceHolderSingleton("Self")
-Vars = InductionVariablesSingleton()
-Var = DefaultInductionVariableSingleton()
 
 
 def render(*args, **kwargs):
@@ -1139,14 +1074,14 @@ class MapExpr(ResolvedExpression):
     Resolved expression that represents a map expression in the generated code.
     """
 
-    def __init__(self, induction_var, expr, collection, filter=None,
+    def __init__(self, induction_var, collection, expr, filter=None,
                  concat=False):
         """
         :param VarExpr induction_var: Variable to use in "expr".
-        :param ResolvedExpression expr: Expression to evaluate for each item in
-            "collection".
         :param ResolvedExpression collection: Collection on which this map
             operation works.
+        :param ResolvedExpression expr: Expression to evaluate for each item in
+            "collection".
         :param filter: If provided, a boolean expression that says whether to
             include or exclude an item from the collection.
         :type filter: None|ResolvedExpression
@@ -1156,8 +1091,8 @@ class MapExpr(ResolvedExpression):
         :return:
         """
         self.induction_var = induction_var
-        self.expr = expr
         self.collection = collection
+        self.expr = expr
         self.filter = filter
         self.concat = concat
 
