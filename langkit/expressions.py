@@ -715,7 +715,7 @@ class FieldAccess(AbstractExpression):
         return "<FieldAccess {} {}>".format(self.receiver, self.field)
 
 
-class PlaceHolderSingleton(AbstractExpression):
+class PlaceholderSingleton(AbstractExpression):
     """
     Abstract expression that is an entry point into the expression DSL.
 
@@ -728,12 +728,13 @@ class PlaceHolderSingleton(AbstractExpression):
     - Calling construct on the PlaceHolder.
     """
 
-    def __init__(self, name):
+    def __init__(self, name, type=None):
         """
         :param str name: The name of the PlaceHolder variable.
         """
         self._name = name
-        self._type = None
+        self._type = type
+        self._old_type = None
 
     @contextmanager
     def bind(self, type):
@@ -743,9 +744,11 @@ class PlaceHolderSingleton(AbstractExpression):
         :param langkit.compiled_types.CompiledType type: Type parameter. The
             type of this placeholder.
         """
+        self._old_type = self._type
         self._type = type
         yield
-        self._type = None
+        self._type = self._old_type
+        self._old_type = None
 
     def construct(self):
         return VarExpr(self._type, self._name, make_access=True)
@@ -790,7 +793,7 @@ class InductionVariable(AbstractExpression):
         return VarExpr(self.type, names.Name('Item_{}'.format(self.i)))
 
 
-Self = PlaceHolderSingleton("Self")
+Self = PlaceholderSingleton("Self")
 
 
 def render(*args, **kwargs):
