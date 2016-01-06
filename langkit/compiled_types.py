@@ -179,6 +179,41 @@ class CompiledType(object):
         """
         raise NotImplementedError()
 
+    @classmethod
+    def unify(cls, other):
+        """
+        Assuming "cls" and "other" are types that match, return the most
+        general type to cover both. An AssertionError is raised if they don't
+        match.
+
+        :param CompiledType cls: Type parameter.
+        :param CompiledType other: Type parameter.
+        :rtype: CompiledType
+        """
+        assert matches(cls, other)
+        if issubclass(other, ASTNode):
+            return utils.common_ancestor(cls, other)
+        else:
+            return cls
+
+    @classmethod
+    def matches(cls, formal):
+        """
+        Return whether the "cls" type matches "formal".
+
+        This is mere equality for all types but AST nodes, in which "cls" is
+        allowed to be a subclass for "formal".
+
+        :param CompiledType cls: Type parameter.
+        :param CompiledType formal: Type parameter.
+        :rtype: bool
+        """
+
+        if issubclass(formal, ASTNode):
+            return issubclass(cls, formal)
+        else:
+            return cls == formal
+
 
 class BasicType(CompiledType):
     """

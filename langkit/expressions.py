@@ -296,8 +296,8 @@ class BinaryBooleanOperator(AbstractExpression):
         """
         lhs = self.lhs.construct()
         rhs = self.rhs.construct()
-        assert lhs.type == compiled_types.BoolType
-        assert rhs.type == compiled_types.BoolType
+        assert lhs.type.matches(compiled_types.BoolType)
+        assert rhs.type.matches(compiled_types.BoolType)
 
         if self.kind == self.AND:
             then = rhs
@@ -320,7 +320,7 @@ class Cast(AbstractExpression):
             performed.
         :param ASTNode astnode: ASTNode subclass to use for the cast.
         """
-        assert issubclass(astnode, compiled_types.ASTNode)
+        assert astnode.matches(compiled_types.ASTNode)
         self.expr = expr
         self.astnode = astnode
 
@@ -332,7 +332,12 @@ class Cast(AbstractExpression):
         :rtype: CastExpr
         """
         expr = self.expr.construct()
-        assert issubclass(expr.type, compiled_types.ASTNode)
+        assert self.astnode.matches(expr.type), (
+            'Cannot cast {} to {}: only downcasting is allowed'.format(
+                expr.type.name().camel,
+                self.astnode.name().camel
+            )
+        )
         return CastExpr(expr, self.astnode)
 
 
@@ -394,7 +399,10 @@ class Eq(AbstractExpression):
         lhs = self.lhs.construct()
         rhs = self.rhs.construct()
 
-        if issubclass(compiled_types.ASTNode, lhs.type):
+        # Don't use CompiledType.matches since in the generated code, we need
+        # both operands to be *exactly* the same types, so handle specifically
+        # each case.
+        if issubclass(lhs.type, compiled_types.ASTNode):
             # Handle checks between two subclasses without explicit casts. In
             # order to help users to detect dubious checks, forbid operands
             # that can never be equal because they have no subclass in common.
@@ -438,18 +446,12 @@ class If(AbstractExpression):
         :rtype: IfExpr
         """
         cond = self.cond.construct()
-        assert cond.type == compiled_types.BoolType
+        assert cond.type.matches(compiled_types.BoolType)
 
         then = self.then.construct()
         else_then = self.else_then.construct()
 
-        if issubclass(then.type, compiled_types.ASTNode):
-            assert issubclass(else_then.type, compiled_types.ASTNode)
-            rtype = common_ancestor(then.type, else_then.type)
-        else:
-            assert then.type == else_then.type
-            rtype = then.type
-
+        rtype = then.type.unify(else_then.type)
         return IfExpr(cond, then, else_then, rtype)
 
 
@@ -476,7 +478,10 @@ class IsA(AbstractExpression):
         :rtype: IsAExpr
         """
         expr = self.expr.construct()
-        assert issubclass(expr.type, compiled_types.ASTNode)
+        assert self.astnode.matches(expr.type), (
+            'When testing the dynamic subtype of an AST node, the type to'
+            ' check must be a subclass of the value static type.'
+        )
         return IsAExpr(expr, self.astnode)
 
 
@@ -550,7 +555,7 @@ class Map(CollectionExpression):
 
             if self.filter_expr:
                 filter_expr = self.filter_expr.construct()
-                assert filter_expr.type == compiled_types.BoolType
+                assert filter_expr.type.matches(compiled_types.BoolType)
             else:
                 filter_expr = None
 
@@ -615,7 +620,7 @@ class New(AbstractExpression):
         # And make sure we have the proper types
         for name, value in provided_fields.iteritems():
             field = required_fields[name]
-            assert issubclass(value.type, field.type), (
+            assert value.type.matches(field.type), (
                 'Invalid value for field {}: got {} but expected {}'.format(
                     name,
                     value.type.name().camel,
@@ -643,7 +648,7 @@ class Not(AbstractExpression):
         :rtype: NotExpr
         """
         expr = self.expr.construct()
-        assert expr.type == compiled_types.BoolType
+        assert expr.type.matches(compiled_types.BoolType)
         return NotExpr(expr)
 
 
@@ -682,6 +687,7 @@ class Quantifier(CollectionExpression):
         with self.bind_induction_var(elt_type):
             ind_var = self.induction_var.construct()
             expr = self.expr.construct()
+            assert expr.type.matches(compiled_types.BoolType)
 
         return QuantifierExpr(self.kind, collection_expr, expr, ind_var)
 
@@ -1519,9 +1525,11 @@ class Property(compiled_types.AbstractNodeData):
             # exist.
             if base_prop.expected_type:
                 if self.expected_type:
-                    assert base_prop.expected_type == self.expected_type, (
-                        "Property doesn't have the same type as parent "
-                        "property"
+                    assert self.expected_type.matches(
+                        base_prop.expected_type
+                    ), (
+                        "Property type does not match the type of the parent"
+                        " property"
                     )
                 else:
                     # If base has a type annotation and not self, then
