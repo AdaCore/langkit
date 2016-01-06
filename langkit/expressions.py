@@ -119,29 +119,8 @@ class AbstractExpression(Frozable):
 
         # Constructors for operations with attribute-like syntax
 
-        def _build_all(predicate):
-            return Quantifier(Quantifier.ALL, self, predicate)
-
         def _build_any(predicate, var=None):
             return Quantifier(Quantifier.ANY, self, predicate)
-
-        def _build_cast(astnode):
-            return Cast(self, astnode)
-
-        def _build_contains(other):
-            return Contains(self, other)
-
-        def _build_equals(other):
-            return Eq(self, other)
-
-        def _build_filter(filter):
-            return Map(self, lambda x: x, filter)
-
-        def _build_is_a(astnode):
-            return IsA(self, astnode)
-
-        def _build_is_null():
-            return IsNull(self)
 
         def _build_mapcat(expr, filter=None):
             return Map(self, expr, filter, concat=True)
@@ -150,17 +129,24 @@ class AbstractExpression(Frozable):
             return Map(self, expr, filter)
 
         direct_constructors = {
-            'is_null':  _build_is_null,
+            'is_null':
+                lambda: IsNull(self),
         }
 
         constructors = {
-            'all':      _build_all,
+            'all':
+                lambda predicate: Quantifier(Quantifier.ALL, self, predicate),
             'any':      _build_any,
-            'cast':     _build_cast,
-            'contains': _build_contains,
-            'equals':   _build_equals,
-            'filter':   _build_filter,
-            'is_a':     _build_is_a,
+            'cast':
+                lambda astnode: Cast(self, astnode),
+            'contains':
+                lambda other:   Contains(self, other),
+            'equals':
+                lambda other:   Eq(self, other),
+            'filter':
+                lambda filter:  Map(self, lambda x: x, filter),
+            'is_a':
+                lambda astnode: IsA(self, astnode),
             'map':      _build_map,
             'mapcat':   _build_mapcat,
         }
