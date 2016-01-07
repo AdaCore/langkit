@@ -278,6 +278,17 @@ package Langkit_Support.Array_Utils is
    --  is for the special case in which the type of the returned arrays is the
    --  same as the type of the In_Array.
 
+   generic
+      type Other_Index_Type is (<>);
+      type Other_Array_Type is
+        array (Other_Index_Type range <>) of Element_Type;
+      with function "+"
+        (L, R : Other_Index_Type) return Other_Index_Type is <>;
+   function Copy (In_Array : Array_Type) return Other_Array_Type;
+   --  Given an array type Other_Array_Type, of compatible element type but
+   --  dissimilar index type, and an array of type Array_Type, return a new
+   --  array of type Other_Array_Type.
+
 private
    type Bool_Array is array (Index_Type range <>) of Boolean;
 end Langkit_Support.Array_Utils;

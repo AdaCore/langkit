@@ -377,4 +377,24 @@ package body Langkit_Support.Array_Utils is
       end if;
    end Find;
 
+   ----------
+   -- Copy --
+   ----------
+
+   function Copy (In_Array : Array_Type) return Other_Array_Type
+   is
+      I           : Other_Index_Type := Other_Index_Type'First;
+      Other_Array : Other_Array_Type
+        (Other_Index_Type'First ..
+           Other_Index_Type'First
+         + Other_Index_Type'Val (In_Array'Length - 1));
+   begin
+      for El of In_Array loop
+         Other_Array (I) := El;
+         I := I + Other_Index_Type'Val (1);
+      end loop;
+
+      return Other_Array;
+   end Copy;
+
 end Langkit_Support.Array_Utils;
