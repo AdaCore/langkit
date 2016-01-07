@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="enum_types" file="enum_types_ada.mako" />
+
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Vectors;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
@@ -142,8 +144,8 @@ package ${_self.ada_api_settings.lib_name} is
    function Image (Value : Boolean) return String is
      (if Value then "True" else "False");
 
-   % for decl in _self.enum_declarations:
-   ${decl.public_part}
+   % for cls in _self.sorted_types(_self.enum_types):
+   ${enum_types.public_decl(cls)}
    % endfor
 
    ---------------------------

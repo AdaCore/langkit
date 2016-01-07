@@ -1,5 +1,7 @@
 ## vim: filetype=python
 
+<%namespace name="enum_types" file="enum_types_py.mako" />
+
 import ctypes
 import os
 import sys
@@ -376,6 +378,10 @@ ${subclass_decl}
 % endfor
 
 UNINITIALIZED = 'uninitialized'
+
+% for enum_type in _self.sorted_types(_self.enum_types):
+${enum_types.decl(enum_type)}
+% endfor
 
 % for chunk in _self.py_field_types.values():
 ${chunk}

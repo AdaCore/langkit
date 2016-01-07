@@ -1,5 +1,7 @@
 ## vim: filetype=makocpp
 
+<%namespace name="enum_types" file="enum_types_c.mako" />
+
 #ifndef ${capi.header_guard_id}
 #define ${capi.header_guard_id}
 
@@ -84,6 +86,10 @@ typedef struct {
  * Data structures held in AST nodes
  */
 
+
+% for enum_type in _self.sorted_types(_self.enum_types):
+    ${enum_types.decl(enum_type)}
+% endfor
 
 % for chunk in _self.c_astnode_field_types.values():
     ${chunk}

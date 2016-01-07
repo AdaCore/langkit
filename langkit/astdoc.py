@@ -12,15 +12,14 @@ def write_astdoc(context, file):
     :param file file: Output file for the documentation.
     """
     i = 0
-    for type_decl in context.enum_declarations:
-        typ = type_decl.type
+    for enum_type in context.enum_types:
         i += 1
-        print >> file, 'enum {}:'.format(typ.name().camel)
-        doc = typ.doc()
+        print >> file, 'enum {}:'.format(enum_type.name().camel)
+        doc = enum_type.doc()
         if doc:
             print >> file, documentation.format_text(doc, 4)
         print >> file, '    {}'.format(
-            ' '.join(typ.alternatives)
+            ' '.join(enum_type.alternatives)
         )
         print >> file, ''
 

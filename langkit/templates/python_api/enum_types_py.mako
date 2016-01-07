@@ -1,4 +1,6 @@
-## vim: filetype=python
+## vim: filetype=makopython
+
+<%def name="decl(cls)">
 
 # Enumerators for ${cls.c_type(capi).name}
 ${py_doc(cls)}
@@ -11,3 +13,5 @@ ${cls.c_type(capi).name}_to_str = [
     '${alt}',
 % endfor
 ]
+
+</%def>

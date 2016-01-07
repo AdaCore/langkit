@@ -14,10 +14,10 @@ package body ${_self.ada_api_settings.lib_name}.Parsers is
    --  Prepare packrat instantiations: one per enum type and onefor each kind
    --  of node (including lists).
 
-   % for enum_type in _self.enum_declarations:
-      package ${enum_type.type.name()}_Memos is new Langkit_Support.Packrat
-        (${enum_type.type.name()});
-      use ${enum_type.type.name()}_Memos;
+   % for enum_type in _self.enum_types:
+      package ${enum_type.name()}_Memos is new Langkit_Support.Packrat
+        (${enum_type.name()});
+      use ${enum_type.name()}_Memos;
    % endfor
 
    % for cls in _self.astnode_types:

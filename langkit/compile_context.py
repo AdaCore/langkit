@@ -177,6 +177,13 @@ class CompileCtx():
         :type: set[langkit.compiled_types.CompiledType]
         """
 
+        self.enum_types = set()
+        """
+        Set of EnumType subclasses, registered by EnumType.add_to_context.
+
+        :type: set[langkit.compiled_types.CompiledType]
+        """
+
         self.astnode_types = []
         """
         List for all ASTnode subclasses (ASTNode excluded), sorted so that A
@@ -221,14 +228,6 @@ class CompileCtx():
         #
         # Holders for the Ada generated code chunks
         #
-
-        self.enum_declarations = []
-        """
-        List of TypeDeclaration instances for all enumeration types used in
-        AST node fields and all ASTNode subclasses.
-
-        :type: list[langkit.compiled_types.TypeDeclaration]
-        """
 
         self.array_types_declarations = []
         """
@@ -365,6 +364,19 @@ class CompileCtx():
 
         # Internal field for extensions directory
         self._extensions_dir = None
+
+    def sorted_types(self, type_set):
+        """
+        Turn "type_set" into a list of types sorted by name.
+
+        This is useful during code generation as sorted types keep a consistent
+        order for declarations.
+
+        :param set[langkit.compiled_types.CompiledType] type_set: Set of
+            CompiledType subclasses to sort.
+        :rtype: list[langkit.compiled_types.CompiledType]
+        """
+        return sorted(type_set, key=lambda cls: cls.name())
 
     def compute_types(self):
         """

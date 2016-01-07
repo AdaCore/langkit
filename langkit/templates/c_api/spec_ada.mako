@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="enum_types" file="enum_types_ada.mako" />
+
 with System;
 
 with Interfaces;           use Interfaces;
@@ -66,6 +68,10 @@ package ${_self.ada_api_settings.lib_name}.C is
    % endfor
 
    type int_Ptr is access int;
+
+   % for enum_type in _self.sorted_types(_self.enum_types):
+      ${enum_types.spec(enum_type)}
+   % endfor
 
    % for chunk in _self.c_astnode_field_types_ada.values():
        ${chunk}

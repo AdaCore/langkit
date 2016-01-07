@@ -1,6 +1,6 @@
 ## vim: filetype=makoada
 
-% if not private_part:
+<%def name="public_decl(cls)">
 
    type ${cls.name()} is
      (Uninitialized,
@@ -23,4 +23,4 @@
       % endfor
       when Uninitialized => "uninitialized");
 
-% endif
+</%def>

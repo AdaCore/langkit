@@ -1291,20 +1291,7 @@ class EnumType(CompiledType):
         if cls not in get_context().types:
             render = make_renderer().render
             get_context().types.add(cls)
-            get_context().enum_declarations.append(TypeDeclaration.render(
-                'enum_type_decl_ada', None, cls, cls=cls
-            ))
-            get_context().c_astnode_field_types[cls] = render(
-                'c_api/enum_type_decl_c', cls=cls,
-            )
-            get_context().c_astnode_field_types_ada[cls] = render(
-                'c_api/enum_type_spec_ada', cls=cls,
-            )
-            if get_context().python_api_settings:
-                get_context().py_field_types[cls] = render(
-                    'python_api/enum_type_decl_py', cls=cls,
-                    pyapi=get_context().python_api_settings
-                )
+            get_context().enum_types.add(cls)
 
     @classmethod
     def nullexpr(cls):
