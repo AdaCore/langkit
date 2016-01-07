@@ -784,7 +784,7 @@ class PlaceholderSingleton(AbstractExpression):
         self._old_type = None
 
     def construct(self):
-        return VarExpr(self._type, self._name, make_access=True)
+        return VarExpr(self._type, self._name)
 
     @property
     def type(self):
@@ -907,7 +907,7 @@ class EnvGetExpr(ResolvedExpression):
 
     def render_expr(self):
         return "Create (AST_Envs.Get ({}, Symbol_Type ({}.Text)))".format(
-            self.env_expr.render(), self.token_expr.render()
+            self.env_expr.render_expr(), self.token_expr.render_expr()
         )
 
 
@@ -916,35 +916,24 @@ class VarExpr(ResolvedExpression):
     Resolved expression that represents a variable in generated code.
     """
 
-    def __init__(self, type, name, make_access=False):
+    def __init__(self, type, name):
         """
         Create a variable reference expression.
 
         :param langkit.compiled_types.CompiledType type: Type for the
             referenced variable.
         :param names.Name name: Name of the referenced variable.
-        :param bool make_access: In the generated code, properties take as
-            a single parameter an AST node as a record instead of as an access
-            as we usually handle them. In order to simplify code generation,
-            reference to these turn these records into access to records. In
-            this case, pass True to "make_access". Pass False for regular
-            variables. TODO: turn these single parameters into accesses
-            everywhere.
         """
         assert issubclass(type, compiled_types.CompiledType)
         self._type = type
         self.name = name
-        self._make_access = make_access
 
     @property
     def type(self):
         return self._type
 
     def render_expr(self):
-        if self._make_access:
-            return self.name + "'Unrestricted_Access"
-        else:
-            return self.name
+        return self.name
 
 
 class FieldAccessExpr(ResolvedExpression):
@@ -960,11 +949,21 @@ class FieldAccessExpr(ResolvedExpression):
         """
         self.receiver_expr = receiver_expr
         self.property = property
+        self.simple_field_access = False
+
+        # TODO: For the moment we use field accesses in the environments
+        # code, which doesn't have a property context and hence local
+        # variables instance. At a later stage we'll want to get rid of that
+        #  limitation by binding the local variables separately from the
+        # current property.
 
         p = Property.get()
-        self.result_var = p.vars(names.Name('Prefix'),
-                                 self.receiver_expr.type,
-                                 create_unique=False)
+        if p:
+            self.result_var = p.vars(names.Name('Prefix'),
+                                     self.receiver_expr.type,
+                                     create_unique=False)
+        else:
+            self.simple_field_access = True
 
     @property
     def type(self):
@@ -984,7 +983,11 @@ class FieldAccessExpr(ResolvedExpression):
                                      result_var=self.result_var)
 
     def render_expr(self):
-        return "{}.{}".format(self.result_var.name, self.property.name)
+        if self.simple_field_access:
+            prefix = self.receiver_expr.render()
+        else:
+            prefix = self.result_var.name
+        return "{}.{}".format(prefix, self.property.name)
 
 
 class CastExpr(ResolvedExpression):
