@@ -132,8 +132,14 @@ package body Langkit_Support.Lexical_Env is
       --  parent.
 
    begin
+      if Self = null then
+         return Env_Element_Arrays.Empty_Array;
+      end if;
+
       return Get_Elements
-        (Self & Self.Parent
+        ((if Self.Parent /= null
+          then (Self & Self.Parent)
+          else (0 => Self))
          & Lexical_Env_Vectors.To_Array (Self.Referenced_Envs));
    end Get;
 

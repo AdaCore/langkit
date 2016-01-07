@@ -151,6 +151,8 @@ class AbstractExpression(Frozable):
                 lambda astnode: IsA(self, astnode),
             'map':      _build_map,
             'mapcat':   _build_mapcat,
+            'get':
+                lambda tok: EnvGet(self, tok)
         }
 
         return direct_constructors.get(
@@ -188,6 +190,43 @@ class AbstractExpression(Frozable):
         :rtype: BinaryBooleanOperator
         """
         return BinaryBooleanOperator(BinaryBooleanOperator.AND, self, other)
+
+
+class EnvGet(AbstractExpression):
+    """
+    Abstract expression for lexical environment get operation.
+    """
+
+    def __init__(self, env_expr, token_expr):
+        """
+        :param AbstractExpression env_expr: Expression that will yield
+            the env to get the element from.
+        :param AbstractExpression token_expr: Expression that will yield the
+            token to use as a key on the env.
+        """
+        self.env_expr = env_expr
+        self.token_expr = token_expr
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: EnvGetExpr
+        """
+        env_expr = self.env_expr.construct()
+        token_expr = self.token_expr.construct()
+
+        assert env_expr.type.matches(compiled_types.LexicalEnvType), (
+            "Environment expressions must return objects of type "
+            "LexicalEnvType: got {} instead".format(env_expr.type.name().camel)
+        )
+
+        assert token_expr.type.matches(compiled_types.Token), (
+            "Token expr to a env get expression must return an object of "
+            "type Token"
+        )
+
+        return EnvGetExpr(env_expr, token_expr)
 
 
 class CollectionExpression(AbstractExpression):
@@ -350,7 +389,7 @@ class Contains(CollectionExpression):
 
 class Eq(AbstractExpression):
     """
-    Abstract expressinon for equality test expression.
+    Abstract expression for equality test expression.
     """
 
     def __init__(self, lhs, rhs):
@@ -835,6 +874,41 @@ class ResolvedExpression(object):
         :rtype: langkit.compiled_types.CompiledType
         """
         raise NotImplementedError()
+
+
+class EnvGetExpr(ResolvedExpression):
+    """
+    Resolved expression for lexical environment get operation.
+    """
+
+    def __init__(self, env_expr, token_expr):
+        """
+        :param ResolvedExpression env_expr: The expression representing the
+            env to get from.
+        :param ResolvedExpression token_expr: The expression representing
+            the token key.
+        """
+        self.env_expr = env_expr
+        self.token_expr = token_expr
+        self.type.add_to_context()
+
+    @property
+    def type(self):
+        """
+        :rtype: compiled_types.ArrayType
+        """
+        return compiled_types.array_type(
+            compiled_types.StructMetaClass.root_grammar_class
+        )
+
+    def render_pre(self):
+        return "{}\n{}".format(self.env_expr.render_pre(),
+                               self.token_expr.render_pre())
+
+    def render_expr(self):
+        return "Create (AST_Envs.Get ({}, Symbol_Type ({}.Text)))".format(
+            self.env_expr.render(), self.token_expr.render()
+        )
 
 
 class VarExpr(ResolvedExpression):
