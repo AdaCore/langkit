@@ -338,6 +338,8 @@ class ASTNode(object):
         elif isinstance(ast_type_or_pred, collections.Sequence):
             sought_types = ast_type_or_pred
             pred = lambda node: isinstance(node, tuple(sought_types))
+        else:
+            pred = ast_type_or_pred
 
         def match(left, right):
             if left is None:
@@ -348,7 +350,7 @@ class ASTNode(object):
                 return left == right
 
         for child in self:
-            if child:
+            if child is not None:
                 if pred(child):
                     if not kwargs:
                         yield child
@@ -356,7 +358,7 @@ class ASTNode(object):
                               for key, val in kwargs.items()]):
                         yield child
                 for c in child.finditer(pred, **kwargs):
-                    if c:
+                    if c is not None:
                         yield c
 
 
