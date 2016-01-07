@@ -1,8 +1,8 @@
 ## vim: filetype=makoada
 
-<% type = decl_type(element_type) %>
+<%def name="public_decl(cls)">
 
-% if not private_part:
+   <% type = decl_type(cls.element_type) %>
 
    type ${type}_Array is array (Positive range <>) of ${type};
    type ${type}_Array_Record (N : Natural) is record
@@ -27,4 +27,4 @@
      (Index_Type  => Positive,
       Element_Type => ${type});
 
-% endif
+</%def>

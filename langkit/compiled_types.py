@@ -1147,19 +1147,6 @@ class ArrayType(CompiledType):
         cls.element_type.add_to_context()
 
         t_env = TemplateEnvironment(element_type=cls.element_type, cls=cls)
-        get_context().array_types_declarations.append(TypeDeclaration.render(
-            'array_def_ada', t_env, cls
-        ))
-        get_context().c_array_types[cls] = render(
-            'c_api/array_type_decl_c', t_env
-        )
-        get_context().c_array_types_ada[cls] = render(
-            'c_api/array_type_spec_ada', t_env
-        )
-        get_context().py_array_types[cls] = render(
-            'python_api/array_type_decl_py', t_env,
-            pyapi=get_context().python_api_settings,
-        )
 
     @classmethod
     def api_name(cls):

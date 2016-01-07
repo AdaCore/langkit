@@ -1,6 +1,7 @@
 ## vim: filetype=python
 
-<%namespace name="enum_types" file="enum_types_py.mako" />
+<%namespace name="array_types" file="array_types_py.mako" />
+<%namespace name="enum_types"  file="enum_types_py.mako" />
 
 import ctypes
 import os
@@ -411,8 +412,8 @@ def _import_func(name, argtypes, restype):
     return func
 
 
-% for chunk in _self.py_array_types.values():
-${chunk}
+% for array_type in _self.sorted_types(_self.array_types):
+${array_types.decl(array_type)}
 % endfor
 
 

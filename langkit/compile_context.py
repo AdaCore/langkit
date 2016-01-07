@@ -219,22 +219,14 @@ class CompileCtx():
 
         self.array_types = set()
         """
-        Set of all CompiledType for which we generate a corresponding array
-        type.
+        Set of all ArrayType subclasses.
 
-        :type: set[langkit.compiled_types.CompiledType]
+        :type: set[langkit.compiled_types.ArrayType]
         """
 
         #
         # Holders for the Ada generated code chunks
         #
-
-        self.array_types_declarations = []
-        """
-        List of types for all array types.
-
-        :type: list[langkit.compiled_types.CompiledTypes]
-        """
 
         self.struct_types_declarations = []
         """
@@ -318,20 +310,6 @@ class CompileCtx():
         :type: dict[langkit.compiled_types.CompiledType, str]
         """
 
-        self.c_array_types = {}
-        """
-        Mapping: CompiledType -> string (C declarations) for all array types
-
-        :type: dict[langkit.compiled_types.CompiledType, str]
-        """
-
-        self.c_array_types_ada = {}
-        """
-        Likewise but for Ada declarations.
-
-        :type: dict[langkit.compiled_types.CompiledType, str]
-        """
-
         #
         # Corresponding holders for the Python API
         #
@@ -348,14 +326,6 @@ class CompileCtx():
         """
         Mapping CompiledType -> string (Python declarations) for types used
         in Struct fields.
-
-        :type: dict[langkit.compiled_types.CompiledType, str]
-        """
-
-        self.py_array_types = {}
-        """
-        Mapping: CompiledType -> string (Python declarations) for all array
-        types.
 
         :type: dict[langkit.compiled_types.CompiledType, str]
         """

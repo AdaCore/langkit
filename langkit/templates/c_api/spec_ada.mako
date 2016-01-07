@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
-<%namespace name="enum_types" file="enum_types_ada.mako" />
+<%namespace name="array_types" file="array_types_ada.mako" />
+<%namespace name="enum_types"  file="enum_types_ada.mako" />
 
 with System;
 
@@ -77,8 +78,8 @@ package ${_self.ada_api_settings.lib_name}.C is
        ${chunk}
    % endfor
 
-   % for chunk in _self.c_array_types_ada.values():
-       ${chunk}
+   % for array_type in _self.sorted_types(_self.array_types):
+       ${array_types.decl(array_type)}
    % endfor
 
 

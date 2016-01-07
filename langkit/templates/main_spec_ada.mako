@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
-<%namespace name="enum_types" file="enum_types_ada.mako" />
+<%namespace name="array_types" file="array_types_ada.mako" />
+<%namespace name="enum_types"  file="enum_types_ada.mako" />
 
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Vectors;
@@ -164,8 +165,8 @@ package ${_self.ada_api_settings.lib_name} is
    ${decl.public_part}
    % endfor
 
-   % for decl in _self.array_types_declarations:
-   ${decl.public_part}
+   % for array_type in _self.sorted_types(_self.array_types):
+   ${array_types.public_decl(array_type)}
    % endfor
 
    % for decl in _self.astnode_types_declarations:

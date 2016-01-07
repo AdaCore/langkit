@@ -1,4 +1,6 @@
-## vim: filetype=python
+## vim: filetype=makopython
+
+<%def name="decl(cls)">
 
 ${py_doc(cls)}
 
@@ -46,3 +48,5 @@ class ${cls.name().camel}(object):
         elif not (0 <= key < self._length):
             raise IndexError()
         return ${pyapi.wrap_value('self._items[key]', cls.element_type)}
+
+</%def>

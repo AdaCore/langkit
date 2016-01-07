@@ -1,6 +1,7 @@
 ## vim: filetype=makocpp
 
-<%namespace name="enum_types" file="enum_types_c.mako" />
+<%namespace name="array_types" file="array_types_c.mako" />
+<%namespace name="enum_types"  file="enum_types_c.mako" />
 
 #ifndef ${capi.header_guard_id}
 #define ${capi.header_guard_id}
@@ -95,8 +96,8 @@ typedef struct {
     ${chunk}
 % endfor
 
-% for chunk in _self.c_array_types.values():
-    ${chunk}
+% for array_type in _self.sorted_types(_self.array_types):
+    ${array_types.decl(array_type)}
 % endfor
 
 
