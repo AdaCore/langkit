@@ -1095,11 +1095,6 @@ def list_type(element_type):
         # Make sure the type this list contains is already declared
         cls.element_type.add_to_context()
 
-        t_env = TemplateEnvironment(element_type=cls.element_type)
-        get_context().list_types_declarations.append(TypeDeclaration.render(
-            'astlist_def_ada', t_env, cls
-        ))
-
     return type(
         '{}ListType'.format(element_type.name()),
         (StructMetaClass.root_grammar_class, ), {

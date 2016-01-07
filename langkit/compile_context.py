@@ -237,14 +237,6 @@ class CompileCtx():
         # Holders for the Ada generated code chunks
         #
 
-        self.list_types_declarations = []
-        """
-        List of TypeDeclaration instances for all ASTList derivations. These
-        don't need forward declarations.
-
-        :type: list[langkit.compiled_types.TypeDeclaration]
-        """
-
         self.generated_parsers = []
         ":type: list[langkit.parsers.GeneratedParser]"
 

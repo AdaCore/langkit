@@ -1,14 +1,19 @@
 ## vim: filetype=makoada
 
-<% type = decl_type(element_type) %>
+<%def name="public_decl(element_type)">
 
-% if not private_part:
+   <% type = decl_type(element_type) %>
 
    type List_${type}_Type is new ${root_node_value_type} with private;
    type List_${type} is
       access all List_${type}_Type'Class;
 
-% else:
+</%def>
+
+
+<%def name="private_decl(element_type)">
+
+   <% type = decl_type(element_type) %>
 
    package Lists_${type} is new AST.List
      (Node_Type   => ${type}_Type,
@@ -22,4 +27,4 @@
    package List_${type}_Alloc is
      new Tagged_Alloc (List_${type}_Type, List_${type}_Access);
 
-% endif
+</%def>

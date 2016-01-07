@@ -3,6 +3,7 @@
 <%namespace name="array_types"   file="array_types_ada.mako" />
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
 <%namespace name="enum_types"    file="enum_types_ada.mako" />
+<%namespace name="list_types"    file="list_types_ada.mako" />
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 
 with Ada.Containers.Hashed_Maps;
@@ -165,8 +166,8 @@ package ${_self.ada_api_settings.lib_name} is
       % endif
    % endfor
 
-   % for decl in _self.list_types_declarations:
-   ${decl.public_part}
+   % for element_type in _self.sorted_types(_self.list_types):
+   ${list_types.public_decl(element_type)}
    % endfor
 
    % for struct_type in _self.struct_types:
@@ -195,8 +196,8 @@ private
       % endif
    % endfor
 
-   % for decl in _self.list_types_declarations:
-   ${decl.private_part}
+   % for element_type in _self.sorted_types(_self.list_types):
+   ${list_types.private_decl(element_type)}
    % endfor
 
 end ${_self.ada_api_settings.lib_name};
