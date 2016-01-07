@@ -1,5 +1,8 @@
 ## vim: filetype=makoada
 
+<%namespace name="astnode_types" file="astnode_types_ada.mako" />
+<%namespace name="struct_types"  file="struct_types_ada.mako" />
+
 with Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO; use Ada.Text_IO;
@@ -399,8 +402,14 @@ package body ${_self.ada_api_settings.lib_name} is
       end loop;
    end PP_Trivia;
 
-   % for chunk in _self.primitives_bodies:
-   ${chunk}
+   % for struct_type in _self.struct_types:
+   ${struct_types.body(struct_type)}
+   % endfor
+
+   % for astnode in _self.astnode_types:
+      % if astnode != _self.root_grammar_class:
+         ${astnode_types.body(astnode)}
+      % endif
    % endfor
 
    --------------------------

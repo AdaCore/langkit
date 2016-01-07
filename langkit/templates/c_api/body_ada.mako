@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="astnode_types" file="astnode_types_ada.mako" />
+
 with Ada.Containers;                  use Ada.Containers;
 with Ada.IO_Exceptions;               use Ada.IO_Exceptions;
 with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
@@ -405,8 +407,8 @@ package body ${_self.ada_api_settings.lib_name}.C is
    ---------------------------------------
 
    % for astnode in _self.astnode_types:
-       % for primitive in _self.c_astnode_primitives[astnode]:
-           ${primitive.implementation}
+       % for field in astnode.fields_with_accessors():
+           ${astnode_types.accessor_body(field)}
        % endfor
    % endfor
 

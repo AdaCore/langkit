@@ -1,12 +1,18 @@
-## vim: filetype=python
+## vim: filetype=makopython
 
-<%namespace name="array_types" file="array_types_py.mako" />
-<%namespace name="enum_types"  file="enum_types_py.mako" />
+<%namespace name="array_types"   file="array_types_py.mako" />
+<%namespace name="astnode_types" file="astnode_types_py.mako" />
+<%namespace name="enum_types"    file="enum_types_py.mako" />
+<%namespace name="struct_types"  file="struct_types_py.mako" />
 
+
+<% root_astnode_name = _self.root_grammar_class.name().camel %>
+
+
+import collections
 import ctypes
 import os
 import sys
-import collections
 
 
 #
@@ -209,7 +215,7 @@ class Diagnostic(object):
         return '<Diagnostic {} at {:#x}>'.format(repr(str(self)), id(self))
 
 
-class ASTNode(object):
+class ${root_astnode_name}(object):
     ${py_doc('langkit.node_type', 4)}
 
     _field_names = ()
@@ -218,7 +224,7 @@ class ASTNode(object):
         self._c_value = c_value
 
     def __del__(self):
-        super(ASTNode, self).__init__()
+        super(${root_astnode_name}, self).__init__()
 
     @property
     def kind_name(self):
@@ -245,17 +251,17 @@ class ASTNode(object):
         return _wrap_astnode(_node_parent(self._c_value))
 
     def __len__(self):
-        """Return the number of ASTNode children this node has."""
+        """Return the number of ${root_astnode_name} children this node has."""
         return _node_child_count(self._c_value)
 
     def __getitem__(self, key):
-        """Return the Nth ASTNode child this node has.
+        """Return the Nth ${root_astnode_name} child this node has.
 
         Raise an IndexError if "key" is out of range.
         """
         if not isinstance(key, int):
-            msg = 'ASTNode children are integer-indexed (got {})'.format(
-                type(key))
+            msg = ('${root_astnode_name} children are integer-indexed'
+                   ' (got {})').format(type(key))
             raise TypeError(msg)
 
         result = _node()
@@ -285,7 +291,7 @@ class ASTNode(object):
         """
 
         def print_node(name, value):
-            if isinstance(value, ASTNode):
+            if isinstance(value, ${root_astnode_name}):
                 print >> file, '{}{}:'.format(indent, name)
                 value.dump(indent + '  ', file)
             elif isinstance(value, Token):
@@ -302,7 +308,7 @@ class ASTNode(object):
         else:
             for name, value in self.iter_fields(with_properties=False):
                 # Remove the f_ prefix to have the same behavior as the Ada
-                # dumper
+                # dumper.
                 print_node(name[2:], value)
 
     def findall(self, ast_type_or_pred, **kwargs):
@@ -327,12 +333,14 @@ class ASTNode(object):
         Find every node corresponding to the passed predicates.
 
         :param ast_type_or_pred: If supplied with a subclass of
-            ASTNode, will constrain the resulting collection to only the
-            instances of this type or any subclass. If supplied with a
+            ${root_astnode_name}, will constrain the resulting collection to
+            only the instances of this type or any subclass. If supplied with a
             predicate, it will apply the predicate on every node and keep only
             the ones for which it returns True. If supplied with a list of
-            subclasses of ASTNode, it will match all instances of any of them.
-        :type ast_type_or_pred: type|((ASTNode) -> bool)|list[type]
+            subclasses of ${root_astnode_name}, it will match all instances of
+            any of them.
+        :type ast_type_or_pred:
+            type|((${root_astnode_name}) -> bool)|list[type]
 
         :param kwargs: Allows the user to filter on attributes of the node. For
             every key value association, if the node has an attribute of name
@@ -369,13 +377,15 @@ class ASTNode(object):
                         yield c
 
 
-class ASTList(ASTNode):
+class ASTList(${root_astnode_name}):
     # TODO: document this class
     _kind_name = 'list'
 
 
-% for subclass_decl in astnode_subclass_decls:
-${subclass_decl}
+% for astnode in _self.astnode_types:
+    % if astnode != _self.root_grammar_class:
+${astnode_types.decl(astnode)}
+    % endif
 % endfor
 
 UNINITIALIZED = 'uninitialized'
@@ -384,8 +394,8 @@ UNINITIALIZED = 'uninitialized'
 ${enum_types.decl(enum_type)}
 % endfor
 
-% for chunk in _self.py_field_types.values():
-${chunk}
+% for struct_type in _self.struct_types:
+${struct_types.decl(struct_type)}
 % endfor
 
 #
@@ -534,11 +544,11 @@ _token_text = _import_func(
 )
 
 % for astnode in _self.astnode_types:
-    % for primitive in _self.c_astnode_primitives[astnode]:
-_${primitive.name.lower} = _import_func(
-    '${capi.get_name(primitive.name)}',
+    % for field in astnode.fields_with_accessors():
+_${field.accessor_basename.lower} = _import_func(
+    '${capi.get_name(field.accessor_basename)}',
     [_node,
-     ctypes.POINTER(${pyapi.type_internal_name(primitive.field.type)})],
+     ctypes.POINTER(${pyapi.type_internal_name(field.type)})],
     ctypes.c_int
 )
     % endfor
@@ -603,21 +613,22 @@ _kind_to_astnode_cls = {
     % endfor
 }
 
-# We use the extension mechanism to keep a single wrapper ASTNode instance per
-# underlying AST node. This way, users can store attributes in wrappers and
-# expect to find these attributes back when getting the same node later.
+# We use the extension mechanism to keep a single wrapper ${root_astnode_name}
+# instance per underlying AST node. This way, users can store attributes in
+# wrappers and expect to find these attributes back when getting the same node
+# later.
 
-# TODO: this mechanism currently introduces reference loops between the ASTNode
-# and its wrapper. When a Python wraper is created for some ASTNode, both will
-# never be deallocated (i.e. we have memory leaks). This absolutely needs to be
-# fixed for real world use but in the meantime, let's keep this implementation
-# for prototyping.
+# TODO: this mechanism currently introduces reference loops between the
+# ${root_astnode_name} and its wrapper. When a Python wraper is created for
+# some ${root_astnode_name}, both will never be deallocated (i.e. we have
+# memory leaks).  This absolutely needs to be fixed for real world use but in
+# the meantime, let's keep this implementation for prototyping.
 
 _node_extension_id = _register_extension("python_api_astnode_wrapper")
 def _node_ext_dtor_py(c_node, c_pyobj):
     """
-    Callback for extension upon ASTNode destruction: free the reference for the
-    Python wrapper.
+    Callback for extension upon ${root_astnode_name} destruction: free the
+    reference for the Python wrapper.
     """
     # At this point, c_pyobj is a System.Address in Ada that have been decoded
     # by ctypes.c_void_p as a "long" Python object. We used to try to convert

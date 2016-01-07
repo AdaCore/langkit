@@ -1,7 +1,8 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types" file="array_types_ada.mako" />
-<%namespace name="enum_types"  file="enum_types_ada.mako" />
+<%namespace name="array_types"   file="array_types_ada.mako" />
+<%namespace name="astnode_types" file="astnode_types_ada.mako" />
+<%namespace name="enum_types"    file="enum_types_ada.mako" />
 
 with System;
 
@@ -74,14 +75,9 @@ package ${_self.ada_api_settings.lib_name}.C is
       ${enum_types.spec(enum_type)}
    % endfor
 
-   % for chunk in _self.c_astnode_field_types_ada.values():
-       ${chunk}
-   % endfor
-
    % for array_type in _self.sorted_types(_self.array_types):
        ${array_types.decl(array_type)}
    % endfor
-
 
    procedure Free (Address : System.Address)
      with Export        => True,
@@ -286,8 +282,8 @@ package ${_self.ada_api_settings.lib_name}.C is
    --  AST node is returned, its ref-count is left as-is.
 
    % for astnode in _self.astnode_types:
-       % for primitive in _self.c_astnode_primitives[astnode]:
-           ${primitive.declaration}
+       % for field in astnode.fields_with_accessors():
+           ${astnode_types.accessor_decl(field)}
        % endfor
    % endfor
 

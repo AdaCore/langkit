@@ -194,6 +194,15 @@ class CompileCtx():
         :type: list[langkit.compiled_types.ASTNode]
         """
 
+        self.node_kind_constants = {}
+        """
+        Mapping: ASTNode concrete (i.e. non abstract) subclass -> int,
+        associating specific constants to be used reliably in bindings.  This
+        mapping is built at the beginning of code emission.
+
+        :type: dict[langkit.compiled_types.ASTNode, int]
+        """
+
         self.struct_types = []
         """
         List of all plain struct types.
@@ -228,33 +237,6 @@ class CompileCtx():
         # Holders for the Ada generated code chunks
         #
 
-        self.struct_types_declarations = []
-        """
-        List of TypeDeclaration instances for all Struct derivations
-        (excluding ASTNode derivations). These contain the type full
-        declarations.
-
-        :type: list[langkit.compiled_types.TypeDeclaration]
-        """
-
-        self.astnode_types_declarations = []
-        """
-        List of TypeDeclaration instances for all ASTNode derivations
-        (excluding ASTList derivations). These contain the type full
-        declarations.
-
-        :type: list[langkit.compiled_types.TypeDeclaration]
-        """
-
-        self.incomplete_types_declarations = []
-        """
-        List of TypeDeclaration instances for all ASTNode derivations. These
-        only contain forward declarations so that full declarations have
-        access to all declared types.
-
-        :type: list[langkit.compiled_types.TypeDeclaration]
-        """
-
         self.list_types_declarations = []
         """
         List of TypeDeclaration instances for all ASTList derivations. These
@@ -263,72 +245,8 @@ class CompileCtx():
         :type: list[langkit.compiled_types.TypeDeclaration]
         """
 
-        self.primitives_bodies = []
-        """
-        List of strings for all ASTNode subclasses primitives body
-
-        :type: list[str]
-        """
-
         self.generated_parsers = []
         ":type: list[langkit.parsers.GeneratedParser]"
-
-        #
-        # Holders for the C external API generated code chunks
-        #
-
-        self.node_kind_constants = {}
-        """
-        Mapping: ASTNode concrete (i.e. non abstract) subclass -> int,
-        associating specific constants to be used reliably in bindings.  This
-        mapping is built at the beginning of code emission.
-
-        :type: dict[langkit.compiled_types.ASTNode, int]
-        """
-
-        self.c_astnode_primitives = defaultdict(list)
-        """
-        Mapping: ASTNode subclass -> GeneratedFunction instances for all
-        subclass field accessors.
-
-        :type: dict[langkit.compiled_types.ASTNode,
-                    list[langkit.compiled_types.GeneratedFunction]]
-        """
-
-        self.c_astnode_field_types = {}
-        """
-        Mapping: CompiledType -> string (C declarations) for types used in
-        AST node fields.
-
-        :type: dict[langkit.compiled_types.CompiledType, str]
-        """
-
-        self.c_astnode_field_types_ada = {}
-        """
-        Likewise but for Ada declarations
-
-        :type: dict[langkit.compiled_types.CompiledType, str]
-        """
-
-        #
-        # Corresponding holders for the Python API
-        #
-
-        self.py_struct_classes = {}
-        """
-        Mapping: Struct subclass -> string (generated Python code Struct
-        subclass declarations).
-
-        :type: dict[langkit.compiled_types.Struct, str]
-        """
-
-        self.py_field_types = {}
-        """
-        Mapping CompiledType -> string (Python declarations) for types used
-        in Struct fields.
-
-        :type: dict[langkit.compiled_types.CompiledType, str]
-        """
 
         self.cache = None
 
@@ -661,20 +579,12 @@ class CompileCtx():
         """
         module_filename = "{}.py".format(self.python_api_settings.module_name)
 
-        # Collect ASTNode subclass declarations preserving "astnode_types"'s
-        # order so that dependencies comes first.
-        astnode_subclass_decls = filter(bool, [
-            self.py_struct_classes.get(cls, None)
-            for cls in self.astnode_types + self.struct_types
-        ])
-
         with names.camel:
             with open(os.path.join(python_path, module_filename), "w") as f:
                 f.write(self.render_template(
                     "python_api/module_py", _self=self,
                     c_api=self.c_api_settings,
                     pyapi=self.python_api_settings,
-                    astnode_subclass_decls=astnode_subclass_decls,
                 ))
 
     @property

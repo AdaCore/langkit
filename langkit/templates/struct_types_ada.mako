@@ -2,12 +2,22 @@
 
 <%namespace name="exts" file="extensions.mako" />
 
-<%
-   fields = cls.get_fields(include_inherited=False)
-   ext = ctx.ext("nodes", cls.name(), "components")
-%>
 
-% if not private_part:
+<%def name="public_incomplete_decl(cls)">
+
+   type ${cls.name()};
+   ${ada_doc(cls, 3)}
+
+</%def>
+
+
+<%def name="public_decl(cls)">
+
+   <%
+      fields = cls.get_fields(include_inherited=False)
+      ext = ctx.ext("nodes", cls.name(), "components")
+   %>
+
    type ${cls.name()} is record
    % if fields or ext:
       % for f in fields:
@@ -23,6 +33,21 @@
      with Convention => C;
 
    ${cls.nullexpr()} : constant ${cls.name()};
-% else:
+
+</%def>
+
+
+<%def name="private_decl(cls)">
+
    ${cls.nullexpr()} : constant ${cls.name()} := (others => <>);
-% endif
+
+</%def>
+
+
+<%def name="body(cls)">
+
+   % for prop in cls.get_properties(include_inherited=False):
+   ${prop.prop_def}
+   % endfor
+
+</%def>

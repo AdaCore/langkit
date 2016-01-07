@@ -1,7 +1,8 @@
 ## vim: filetype=makocpp
 
-<%namespace name="array_types" file="array_types_c.mako" />
-<%namespace name="enum_types"  file="enum_types_c.mako" />
+<%namespace name="array_types"   file="array_types_c.mako" />
+<%namespace name="astnode_types" file="astnode_types_c.mako" />
+<%namespace name="enum_types"    file="enum_types_c.mako" />
 
 #ifndef ${capi.header_guard_id}
 #define ${capi.header_guard_id}
@@ -90,10 +91,6 @@ typedef struct {
 
 % for enum_type in _self.sorted_types(_self.enum_types):
     ${enum_types.decl(enum_type)}
-% endfor
-
-% for chunk in _self.c_astnode_field_types.values():
-    ${chunk}
 % endfor
 
 % for array_type in _self.sorted_types(_self.array_types):
@@ -233,8 +230,8 @@ ${capi.get_name("free")}(void *address);
    is returned, its ref-count is left as-is.  */
 
 % for astnode in _self.astnode_types:
-    % for primitive in _self.c_astnode_primitives[astnode]:
-        ${primitive.c_declaration}
+    % for field in astnode.fields_with_accessors():
+        ${astnode_types.accessor_decl(field)}
     % endfor
 % endfor
 

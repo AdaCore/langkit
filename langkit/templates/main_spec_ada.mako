@@ -1,7 +1,9 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types" file="array_types_ada.mako" />
-<%namespace name="enum_types"  file="enum_types_ada.mako" />
+<%namespace name="array_types"   file="array_types_ada.mako" />
+<%namespace name="astnode_types" file="astnode_types_ada.mako" />
+<%namespace name="enum_types"    file="enum_types_ada.mako" />
+<%namespace name="struct_types"  file="struct_types_ada.mako" />
 
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Vectors;
@@ -153,34 +155,44 @@ package ${_self.ada_api_settings.lib_name} is
    -- ASTNode derived types --
    ---------------------------
 
-   % for decl in _self.incomplete_types_declarations:
-   ${decl.public_part}
+   % for struct_type in _self.struct_types:
+   ${struct_types.public_incomplete_decl(struct_type)}
+   % endfor
+
+   % for astnode in _self.astnode_types:
+      % if astnode != _self.root_grammar_class:
+         ${astnode_types.public_incomplete_decl(astnode)}
+      % endif
    % endfor
 
    % for decl in _self.list_types_declarations:
    ${decl.public_part}
    % endfor
 
-   % for decl in _self.struct_types_declarations:
-   ${decl.public_part}
+   % for struct_type in _self.struct_types:
+   ${struct_types.public_decl(struct_type)}
    % endfor
 
    % for array_type in _self.sorted_types(_self.array_types):
    ${array_types.public_decl(array_type)}
    % endfor
 
-   % for decl in _self.astnode_types_declarations:
-   ${decl.public_part}
+   % for astnode in _self.astnode_types:
+      % if astnode != _self.root_grammar_class:
+         ${astnode_types.public_decl(astnode)}
+      % endif
    % endfor
 
 private
 
-   % for decl in _self.struct_types_declarations:
-   ${decl.private_part}
+   % for struct_type in _self.struct_types:
+   ${struct_types.private_decl(struct_type)}
    % endfor
 
-   % for decl in _self.astnode_types_declarations:
-   ${decl.private_part}
+   % for astnode in _self.astnode_types:
+      % if astnode != _self.root_grammar_class:
+         ${astnode_types.private_decl(astnode)}
+      % endif
    % endfor
 
    % for decl in _self.list_types_declarations:

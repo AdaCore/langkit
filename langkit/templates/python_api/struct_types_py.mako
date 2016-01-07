@@ -1,5 +1,7 @@
 ## vim: filetype=makopython
 
+<%def name="decl(cls)">
+
 class ${cls.name().camel}(ctypes.Structure):
     ${py_doc(cls, 4)}
     _fields_ = [
@@ -28,3 +30,5 @@ class ${cls.name().camel}(ctypes.Structure):
          return getattr(self, field_name[1:])
       else:
          raise IndexError('There is no {}th field'.format(key))
+
+</%def>

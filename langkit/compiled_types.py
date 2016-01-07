@@ -350,6 +350,20 @@ class AbstractNodeData(object):
         """
         raise NotImplementedError()
 
+    @property
+    def accessor_basename(self):
+        """
+        Return the base name for the accessor we generate for this field.
+
+        Note that this is available only for fields attached to AST nodes.
+
+        :rtype: names.Name
+        """
+        assert self.ast_node
+        return names.Name(
+            '{}_{}'.format(self.ast_node.name().base_name, self.name.base_name)
+        )
+
 
 class AbstractField(AbstractNodeData):
     """
@@ -750,55 +764,6 @@ class Struct(CompiledType):
             p.render(cls)
 
     @classmethod
-    def create_type_definition(cls):
-        """
-        Emit a type definition for this AST node type in
-        `context.types_definitions`, emit:
-          - a class with all its fields and its methods;
-          - a forward declaration for this AST node type's "nil" singleton.
-
-        Also emit the implementation for the corresponding methods/singletons
-        in `context.body`.
-        """
-        # Exit if this is the root grammar class. It doesn't need to be
-        # emitted because it is automatically generated at the root of the
-        # compilation process.
-        if cls == StructMetaClass.root_grammar_class:
-            return
-
-        def template(template_suffix):
-            """
-            Helper to render templates for structs/ast nodes, dispatching on
-            the correct template wether cls is an ASTNode or a Struct subclass.
-
-            :type template_suffix: str
-            :rtype: str
-            """
-            return "{}_{}".format(
-                "astnode" if cls.is_ast_node() else "struct", template_suffix
-            )
-
-        base_class = cls.__bases__[0]
-
-        t_env = TemplateEnvironment(cls=cls, base_name=base_class.name())
-
-        with names.camel_with_underscores:
-            tdef_incomp = TypeDeclaration.render(
-                template('type_def_incomplete_ada'), t_env, cls
-            )
-            tdef = TypeDeclaration.render(template('type_def_ada'), t_env, cls)
-        get_context().incomplete_types_declarations.append(tdef_incomp)
-        if cls.is_ast_node():
-            get_context().astnode_types_declarations.append(tdef)
-        else:
-            get_context().struct_types_declarations.append(tdef)
-
-        with names.camel_with_underscores:
-            get_context().primitives_bodies.append(
-                render(template('type_impl_ada'), t_env)
-            )
-
-    @classmethod
     def get_inheritance_chain(cls):
         """
         Return a list for all classes from ASTNode to `cls` in the inheritance
@@ -950,34 +915,6 @@ class Struct(CompiledType):
             if cls.env_spec:
                 cls.env_spec.compute(cls)
 
-            cls.create_type_definition()
-            accessors = cls.create_c_accessors()
-            if get_context().python_api_settings:
-                cls.create_python_type_def(accessors)
-
-    @classmethod
-    def create_c_accessors(cls):
-        """
-        Create the c accessors for abstract fields for cls.
-
-        :rtype: list[AbstractFieldAccessors]
-        """
-        return []  # No primitives for structs
-
-    @classmethod
-    def create_python_type_def(cls, accessors):
-        """
-        Helper to create the python type definition and add it to the context.
-
-        :param list[AbstractFieldAccessor] accessors: The list of accessors
-            for the type.
-        """
-        get_context().py_struct_classes[cls] = render(
-            'python_api/struct_type_py',
-            pyapi=get_context().python_api_settings,
-            cls=cls,
-        )
-
     @classmethod
     def name(cls):
         """
@@ -1045,51 +982,25 @@ class ASTNode(Struct):
         return cls.__base__
 
     @classmethod
+    def fields_with_accessors(cls):
+        """
+        Return a list of fields for which we must generate accessors in APIs.
+
+        This list excludes inherited fields so that they are not generated
+        multiple times.
+        """
+        return cls.get_abstract_fields(
+            include_inherited=False,
+            predicate=lambda f: not f.is_private
+        )
+
+    @classmethod
     def is_ast_node(cls):
         return True
 
     @classmethod
     def c_type(cls, c_api_settings):
         return c_node_type(c_api_settings)
-
-    @classmethod
-    def create_c_accessors(cls):
-        # Generate abstract field accessors (C public API) for this node
-        # kind.
-        primitives = []
-
-        fields = cls.get_abstract_fields(
-            include_inherited=False, predicate=lambda f: not f.is_private
-        )  # We iterate over the fields, excluding private fields
-
-        for field in fields:
-            accessor_basename = names.Name(
-                '{}_{}'.format(cls.name().base_name, field.name.base_name)
-            )
-
-            t_env = TemplateEnvironment(
-                astnode=cls,
-                field=field,
-                accessor_name=get_context().c_api_settings.get_name(
-                    accessor_basename
-                )
-            )
-
-            primitives.append(AbstractFieldAccessor(
-                accessor_basename,
-                declaration=render(
-                    'c_api/astnode_field_access_decl_ada', t_env
-                ),
-                implementation=render(
-                    'c_api/astnode_field_access_impl_ada', t_env
-                ),
-                c_declaration=render(
-                    'c_api/astnode_field_access_decl_c', t_env
-                ),
-                field=field,
-            ))
-        get_context().c_astnode_primitives[cls] = primitives
-        return primitives
 
     @classmethod
     def create_python_type_def(cls, accessors):
