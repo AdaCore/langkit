@@ -120,6 +120,9 @@ package ${_self.ada_api_settings.lib_name} is
    procedure PP_Trivia (Unit : Analysis_Unit);
    --  Debug helper: output a minimal AST with mixed trivias
 
+   procedure Populate_Lexical_Env (Unit : Analysis_Unit);
+   ${ada_doc('langkit.unit_populate_lexical_env')}
+
    -----------------------
    -- Enumeration types --
    -----------------------

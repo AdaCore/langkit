@@ -237,6 +237,13 @@ package body ${_self.ada_api_settings.lib_name}.C is
       Reparse (U, Value_Or_Empty (Charset), Buffer_Str);
    end ${capi.get_name("unit_reparse_from_buffer")};
 
+   procedure ${capi.get_name("unit_populate_lexical_env")}
+     (Unit : ${analysis_unit_type})
+   is
+      U : constant Analysis_Unit := Unwrap (Unit);
+   begin
+      Populate_Lexical_Env (U);
+   end ${capi.get_name("unit_populate_lexical_env")};
 
    ---------------------------------
    -- General AST node primitives --

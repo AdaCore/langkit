@@ -403,6 +403,15 @@ package body ${_self.ada_api_settings.lib_name} is
    ${chunk}
    % endfor
 
+   --------------------------
+   -- Populate_Lexical_Env --
+   --------------------------
+
+   procedure Populate_Lexical_Env (Unit : Analysis_Unit) is
+   begin
+      Populate_Lexical_Env (Unit.AST_Root);
+   end Populate_Lexical_Env;
+
    ----------------
    -- Initialize --
    ----------------

@@ -206,6 +206,11 @@ documentations = {
         Decrease the reference count to an analysis unit.
     """),
 
+    'langkit.unit_populate_lexical_env': Template("""
+        Populate the lexical environments for this analysis unit, according to
+        the specifications given in the language spec.
+    """),
+
     #
     # General AST node primitives
     #

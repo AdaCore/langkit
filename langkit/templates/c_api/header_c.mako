@@ -163,6 +163,9 @@ ${capi.get_name("unit_reparse_from_buffer")} (${analysis_unit_type} unit,
                                               const char *buffer,
                                               size_t buffer_size);
 
+${c_doc('langkit.unit_populate_lexical_env')}
+extern void
+${capi.get_name("unit_populate_lexical_env")}(${analysis_unit_type} unit);
 
 /*
  * General AST node primitives

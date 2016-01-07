@@ -190,6 +190,13 @@ package ${_self.ada_api_settings.lib_name}.C is
            External_name => "${capi.get_name("unit_reparse_from_buffer")}";
    ${ada_c_doc('langkit.unit_reparse_buffer', 3)}
 
+   procedure ${capi.get_name("unit_populate_lexical_env")}
+     (Unit : ${analysis_unit_type})
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('unit_populate_lexical_env')}";
+   ${ada_c_doc('langkit.unit_populate_lexical_env', 3)}
+
    ---------------------------------
    -- General AST node primitives --
    ---------------------------------

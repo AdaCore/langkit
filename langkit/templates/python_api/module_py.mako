@@ -130,6 +130,10 @@ class AnalysisUnit(object):
             _unit_reparse_from_buffer(self._c_value, charset or '',
                                       buffer, len(buffer))
 
+    def populate_lexical_env(self):
+        ${py_doc('langkit.unit_populate_lexical_env', 8)}
+        _unit_populate_lexical_env(self._c_value)
+
     @property
     def root(self):
         ${py_doc('langkit.unit_root', 8)}
@@ -480,6 +484,11 @@ _unit_reparse_from_buffer = _import_func(
      ctypes.c_char_p,   # charset
      ctypes.c_char_p,   # buffer
      ctypes.c_size_t],  # buffer_size
+    None
+)
+_unit_populate_lexical_env = _import_func(
+    '${capi.get_name("unit_populate_lexical_env")}',
+    [_analysis_unit],
     None
 )
 
