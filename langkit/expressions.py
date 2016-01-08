@@ -19,6 +19,25 @@ from langkit import compiled_types, names
 from langkit.utils import Colors, col
 
 
+def construct(expr):
+    """
+    Construct a ResolvedExpression from an object that is a valid expression in
+    the Property DSL.
+
+    :param AbstractExpression|bool|int expr: The expression to resolve.
+    :rtype: ResolvedExpression
+    """
+
+    if isinstance(expr, AbstractExpression):
+        return expr.construct()
+    elif isinstance(expr, int):
+        return LiteralExpr(str(expr), compiled_types.LongType)
+    elif isinstance(expr, bool):
+        return LiteralExpr(str(expr), compiled_types.LongType)
+    else:
+        raise TypeError('Invalid abstract expression: {}'.format(type(expr)))
+
+
 class Frozable(object):
     """
     Trait class that defines:
@@ -206,8 +225,8 @@ class EnvGet(AbstractExpression):
 
         :rtype: EnvGetExpr
         """
-        env_expr = self.env_expr.construct()
-        token_expr = self.token_expr.construct()
+        env_expr = construct(self.env_expr)
+        token_expr = construct(self.token_expr)
 
         assert env_expr.type.matches(compiled_types.LexicalEnvType), (
             "Environment expressions must return objects of type "
@@ -250,7 +269,7 @@ class CollectionExpression(AbstractExpression):
 
         :rtype: ResolvedExpression
         """
-        collection_expr = self.collection.construct()
+        collection_expr = construct(self.collection)
         assert (collection_expr.type.is_list_type or
                 issubclass(collection_expr.type, compiled_types.ArrayType)), (
             'Map cannot iterate on {}, which is not a collection'
@@ -301,8 +320,8 @@ class BinaryBooleanOperator(AbstractExpression):
 
         :rtype: IfExpr
         """
-        lhs = self.lhs.construct()
-        rhs = self.rhs.construct()
+        lhs = construct(self.lhs)
+        rhs = construct(self.rhs)
         assert lhs.type.matches(compiled_types.BoolType)
         assert rhs.type.matches(compiled_types.BoolType)
 
@@ -372,8 +391,8 @@ class Contains(CollectionExpression):
         :rtype: QuantifierExpr
         """
         collection = self.construct_collection()
-        predicate = self.expr.construct()
-        ind_var = self.induction_var.construct()
+        predicate = construct(self.expr)
+        ind_var = construct(self.induction_var)
 
         # "collection" contains "item" if at least one element in "collection"
         # is equal to "item".
@@ -399,8 +418,8 @@ class Eq(AbstractExpression):
 
         :rtype: EqExpr
         """
-        lhs = self.lhs.construct()
-        rhs = self.rhs.construct()
+        lhs = construct(self.lhs)
+        rhs = construct(self.rhs)
 
         # Don't use CompiledType.matches since in the generated code, we need
         # both operands to be *exactly* the same types, so handle specifically
@@ -480,7 +499,7 @@ class IsA(AbstractExpression):
 
         :rtype: IsAExpr
         """
-        expr = self.expr.construct()
+        expr = construct(self.expr)
         assert self.astnode.matches(expr.type), (
             'When testing the dynamic subtype of an AST node, the type to'
             ' check must be a subclass of the value static type.'
@@ -506,7 +525,7 @@ class IsNull(AbstractExpression):
 
         :rtype: EqExpr
         """
-        expr = self.expr.construct()
+        expr = construct(self.expr)
         assert issubclass(expr.type, compiled_types.ASTNode)
         return EqExpr(
             expr,
@@ -547,7 +566,7 @@ class Map(CollectionExpression):
         :rtype: MapExpr
         """
         collection_expr = self.construct_collection()
-        ind_var = self.induction_var.construct()
+        ind_var = construct(self.induction_var)
         expr = self.expr.construct()
 
         assert (not self.concat or
@@ -651,7 +670,7 @@ class Not(AbstractExpression):
         Consrtuct a resolved expression for this.
         :rtype: NotExpr
         """
-        expr = self.expr.construct()
+        expr = construct(self.expr)
         assert expr.type.matches(compiled_types.BoolType)
         return NotExpr(expr)
 
@@ -686,8 +705,8 @@ class Quantifier(CollectionExpression):
         :rtype: QuantifierExpr
         """
         collection_expr = self.construct_collection()
-        ind_var = self.induction_var.construct()
-        expr = self.expr.construct()
+        ind_var = construct(self.induction_var)
+        expr = construct(self.expr)
         assert expr.type.matches(compiled_types.BoolType)
 
         return QuantifierExpr(self.kind, collection_expr, expr, ind_var)
@@ -1541,7 +1560,7 @@ class Property(compiled_types.AbstractNodeData):
                     return
 
                 self.expr.freeze()
-                self.constructed_expr = self.expr.construct()
+                self.constructed_expr = construct(self.expr)
 
                 if self.expected_type:
                     assert self.expected_type == self.constructed_expr.type, (
