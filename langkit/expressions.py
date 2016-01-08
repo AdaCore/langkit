@@ -820,6 +820,7 @@ class InductionVariable(AbstractExpression):
 
 
 Self = PlaceholderSingleton("Self")
+Env = PlaceholderSingleton("Current_Env", type=compiled_types.LexicalEnvType)
 
 
 def render(*args, **kwargs):
