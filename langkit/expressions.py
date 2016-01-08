@@ -16,7 +16,7 @@ from __future__ import absolute_import
 from contextlib import contextmanager
 
 from langkit import compiled_types, names
-from langkit.utils import Colors, col, common_ancestor
+from langkit.utils import Colors, col
 
 
 class Frozable(object):
@@ -136,23 +136,16 @@ class AbstractExpression(Frozable):
 
         # Constructors for primitives that take parameters
         constructors = {
-            'all':
-                lambda predicate: Quantifier(Quantifier.ALL, self, predicate),
-            'any':      _build_any,
-            'cast':
-                lambda astnode: Cast(self, astnode),
-            'contains':
-                lambda other:   Contains(self, other),
-            'equals':
-                lambda other:   Eq(self, other),
-            'filter':
-                lambda filter:  Map(self, lambda x: x, filter),
-            'is_a':
-                lambda astnode: IsA(self, astnode),
-            'map':      _build_map,
-            'mapcat':   _build_mapcat,
-            'get':
-                lambda tok: EnvGet(self, tok)
+            'all': lambda pred: Quantifier(Quantifier.ALL, self, pred),
+            'any': _build_any,
+            'cast': lambda astnode: Cast(self, astnode),
+            'contains': lambda other: Contains(self, other),
+            'equals': lambda other: Eq(self, other),
+            'filter': lambda filter: Map(self, lambda x: x, filter),
+            'is_a': lambda astnode: IsA(self, astnode),
+            'map': _build_map,
+            'mapcat': _build_mapcat,
+            'get': lambda tok: EnvGet(self, tok)
         }
 
         return direct_constructors.get(
@@ -672,7 +665,7 @@ class Quantifier(CollectionExpression):
     ALL = 'all'
     ANY = 'any'
 
-    def __init__(self, kind, collection, predicate, induction_var):
+    def __init__(self, kind, collection, predicate):
         """
         See CollectionExpression for the other parameters.
 
