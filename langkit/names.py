@@ -6,6 +6,9 @@ class Name(object):
     Code generation helpers to format names with various casing conventions.
     """
 
+    default_formatting = None
+    formatting_stack = []
+
     def __init__(self, mixed_with_underscores):
         """
         Create a name from a string with mixed case and underscores.
@@ -61,8 +64,8 @@ class Name(object):
 
     def __str__(self):
         """Format to default casing convention."""
-        assert default_formatting is not None
-        return getattr(self, default_formatting)
+        assert Name.default_formatting is not None
+        return getattr(self, Name.default_formatting)
 
     def __add__(self, other):
         """
@@ -132,27 +135,21 @@ class Name(object):
                             for word in name.split('_')))
 
 
-default_formatting = None
-
-
 class Convention(object):
     """Guard to set a default convention."""
 
     def __init__(self, name):
         self.name = name
-        self.old_name = None
 
     def __enter__(self):
         """Set the current convention to self's convention."""
-        global default_formatting
-        self.old_name = default_formatting
-        default_formatting = self.name
+        Name.formatting_stack.append(Name.default_formatting)
+        Name.default_formatting = self.name
 
     def __exit__(self, exc, exc_type, traceback):
         """Sets the convention back to the old convention."""
         del exc, exc_type, traceback
-        global default_formatting
-        default_formatting = self.old_name
+        Name.default_formatting = Name.formatting_stack.pop()
 
 
 camel_with_underscores = Convention('camel_with_underscores')

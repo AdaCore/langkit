@@ -481,10 +481,11 @@ class CompileCtx():
         for template_base_name, qual_name in ada_modules:
             self.write_ada_module(src_path, template_base_name, qual_name)
 
-        write_ada_file(
-            path.join(file_root, "src"), ADA_BODY, ["parse"],
-            self.render_template("interactive_main_ada", _self=self)
-        )
+        with names.camel_with_underscores:
+            write_ada_file(
+                path.join(file_root, "src"), ADA_BODY, ["parse"],
+                self.render_template("interactive_main_ada", _self=self)
+            )
 
         with names.lower:
             # ... and the Quex C interface
