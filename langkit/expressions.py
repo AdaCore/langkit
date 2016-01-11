@@ -280,7 +280,7 @@ class CollectionExpression(AbstractExpression):
             'Map cannot iterate on {}, which is not a collection'
         ).format(collection_expr.type.name().camel)
 
-        self.induction_var.type = collection_expr.type.element_type
+        self.induction_var.type = collection_expr.type.element_type()
         return collection_expr
 
 
@@ -1164,7 +1164,7 @@ class MapExpr(ResolvedExpression):
         self.filter = filter
         self.concat = concat
 
-        element_type = (self.expr.type.element_type
+        element_type = (self.expr.type.element_type()
                         if self.concat else
                         self.expr.type)
         self._type = array_type(element_type)

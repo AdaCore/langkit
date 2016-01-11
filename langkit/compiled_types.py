@@ -141,6 +141,16 @@ class CompiledType(object):
         pass
 
     @classmethod
+    def element_type(cls):
+        """
+        CompiledType subclass for the type of elements contained in this list
+        type. Must be overriden in subclasses.
+
+        :rtype: CompiledType
+        """
+        raise NotImplementedError("element_type used on a non collection type")
+
+    @classmethod
     def name(cls):
         """
         Return a names.Name instance to be used in code generation to reference
@@ -1014,16 +1024,9 @@ class ArrayType(CompiledType):
 
     is_ptr = True
 
-    element_type = None
-    """
-    CompiledType subclass for the type of elements contained in this list
-    type. Must be overriden in subclasses.
-    :type: CompiledType
-    """
-
     @classmethod
     def name(cls):
-        return cls.element_type.name() + names.Name('Array_Access')
+        return cls.element_type().name() + names.Name('Array_Access')
 
     @classmethod
     def c_type(cls, c_api_settings):
@@ -1041,21 +1044,21 @@ class ArrayType(CompiledType):
         get_context().array_types.add(cls)
 
         # Make sure the type this list contains is already declared
-        cls.element_type.add_to_context()
+        cls.element_type().add_to_context()
 
     @classmethod
     def api_name(cls):
         """
         """
-        return cls.element_type.name() + names.Name('Array')
+        return cls.element_type().name() + names.Name('Array')
 
     @classmethod
     def pointed(cls):
-        return cls.element_type.name() + names.Name('Array_Record')
+        return cls.element_type().name() + names.Name('Array_Record')
 
     @classmethod
     def vector(cls):
-        return cls.element_type.name() + names.Name('Vectors.Vector')
+        return cls.element_type().name() + names.Name('Vectors.Vector')
 
 
 # We want structural equality on lists whose elements have the same types.
@@ -1074,10 +1077,10 @@ def list_type(element_type):
         if cls in get_context().types:
             return
         get_context().types.add(cls)
-        get_context().list_types.add(cls.element_type)
+        get_context().list_types.add(cls.element_type())
 
         # Make sure the type this list contains is already declared
-        cls.element_type.add_to_context()
+        cls.element_type().add_to_context()
 
     return type(
         '{}ListType'.format(element_type.name()),
@@ -1085,12 +1088,13 @@ def list_type(element_type):
             'is_ptr': True,
 
             'name': classmethod(lambda cls:
-                                names.Name('List') + cls.element_type.name()),
+                                names.Name('List') +
+                                cls.element_type().name()),
             'add_to_context': classmethod(add_to_context),
             'nullexpr': classmethod(lambda cls: null_constant()),
 
             'is_list_type': True,
-            'element_type': element_type,
+            'element_type': classmethod(lambda cls: element_type),
         }
     )
 
@@ -1108,7 +1112,7 @@ def array_type(element_type):
 
     return type(
         '{}ArrayType'.format(element_type.name()), (ArrayType, ), {
-            'element_type': element_type,
+            'element_type': classmethod(lambda cls: element_type),
         }
     )
 

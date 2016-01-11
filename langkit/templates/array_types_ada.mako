@@ -2,7 +2,7 @@
 
 <%def name="public_decl(cls)">
 
-   <% type = decl_type(cls.element_type) %>
+   <% type = decl_type(cls.element_type()) %>
 
    type ${type}_Array is array (Positive range <>) of ${type};
    type ${type}_Array_Record (N : Natural) is record
@@ -16,7 +16,7 @@
    ## arrays starting from 1. We need it to convert from env element arrays,
    ## that are arrays of instances of the root grammar class, to our array
    ## record type.
-   % if cls.element_type == ctx.root_grammar_class:
+   % if cls.element_type() == ctx.root_grammar_class:
    function Copy is new AST_Envs.Element_Arrays.Copy (Positive, ${type}_Array);
 
    function Create (Items : AST_Envs.Element_Array) return ${type}_Array_Access

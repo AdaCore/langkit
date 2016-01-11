@@ -7,7 +7,7 @@ ${py_doc(cls)}
 
 class ${pyapi.type_internal_name(cls)}_Struct(ctypes.Structure):
     _fields_ = [('n', ctypes.c_int),
-                ('items', ${pyapi.type_internal_name(cls.element_type)} * 1)]
+                ('items', ${pyapi.type_internal_name(cls.element_type())} * 1)]
 
 
 ${pyapi.type_internal_name(cls)} = ctypes.POINTER(
@@ -17,7 +17,7 @@ ${pyapi.type_internal_name(cls)} = ctypes.POINTER(
 
 class ${cls.name().camel}(object):
     """
-    Wrapper class for arrays of ${cls.element_type.name()}.
+    Wrapper class for arrays of ${cls.element_type().name()}.
     """
 
     def __init__(self, c_value):
@@ -47,6 +47,6 @@ class ${cls.name().camel}(object):
             ))
         elif not (0 <= key < self._length):
             raise IndexError()
-        return ${pyapi.wrap_value('self._items[key]', cls.element_type)}
+        return ${pyapi.wrap_value('self._items[key]', cls.element_type())}
 
 </%def>
