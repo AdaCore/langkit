@@ -760,8 +760,7 @@ class Struct(CompiledType):
 
     @classmethod
     def compute_properties(cls):
-        for p in cls.get_properties(include_inherited=False):
-            p.render(cls)
+        pass
 
     @classmethod
     def get_inheritance_chain(cls):
@@ -968,6 +967,11 @@ class ASTNode(Struct):
 
     is_ptr = True
     abstract = False
+
+    @classmethod
+    def compute_properties(cls):
+        for p in cls.get_properties(include_inherited=False):
+            p.render(cls)
 
     @classmethod
     def base(cls):
