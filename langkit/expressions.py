@@ -570,7 +570,7 @@ class Map(CollectionExpression):
         :rtype: MapExpr
         """
         collection_expr = self.construct_collection()
-        ind_var = construct(self.induction_var)
+        ind_var = assert_type(construct(self.induction_var), VarExpr)
         expr = self.expr.construct()
 
         assert (not self.concat or
@@ -774,7 +774,7 @@ class PlaceholderSingleton(AbstractExpression):
 
     def __init__(self, name, type=None):
         """
-        :param str name: The name of the PlaceHolder variable.
+        :param names.Name name: The name of the PlaceHolder variable.
         """
         self._name = name
         self._type = type
@@ -837,8 +837,8 @@ class InductionVariable(AbstractExpression):
         return VarExpr(self.type, names.Name('Item_{}'.format(self.i)))
 
 
-Self = PlaceholderSingleton("Self")
-Env = PlaceholderSingleton("Current_Env", type=LexicalEnvType)
+Self = PlaceholderSingleton(names.Name("Self"))
+Env = PlaceholderSingleton(names.Name("Current_Env"), type=LexicalEnvType)
 
 
 def render(*args, **kwargs):
@@ -941,7 +941,7 @@ class VarExpr(ResolvedExpression):
         return self._type
 
     def render_expr(self):
-        return self.name
+        return self.name.camel_with_underscores
 
 
 class FieldAccessExpr(ResolvedExpression):
