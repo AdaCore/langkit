@@ -4,6 +4,10 @@ from __future__ import absolute_import
 class Name(object):
     """
     Code generation helpers to format names with various casing conventions.
+
+    This class is intended to be used as a more evoluted version of "str": you
+    can use it as a key in dict or as a key for sorting. In other words:
+    hashing and order checking are supported and behave as one could expect.
     """
 
     default_formatting = None
@@ -25,6 +29,12 @@ class Name(object):
 
     def __eq__(self, other):
         return self.base_name == other.base_name
+
+    def __lt__(self, other):
+        return self.base_name < other.base_name
+
+    def __gt__(self, other):
+        return self.base_name > other.base_name
 
     @property
     def camel_with_underscores(self):
