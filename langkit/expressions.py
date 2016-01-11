@@ -434,9 +434,9 @@ class Eq(AbstractExpression):
             # order to help users to detect dubious checks, forbid operands
             # that can never be equal because they have no subclass in common.
             if issubclass(lhs.type, rhs.type):
-                lhs = CastExpr(lhs, rhs.type)
+                lhs = CastExpr(lhs, assert_type(rhs.type, ASTNode))
             elif issubclass(rhs.type, lhs.type):
-                rhs = CastExpr(rhs, lhs.type)
+                rhs = CastExpr(rhs, assert_type(lhs.type, ASTNode))
             else:
                 assert False, '{} and {} values are never equal'.format(
                     lhs.type.name().camel, rhs.type.name().camel

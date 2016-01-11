@@ -12,7 +12,6 @@ this is the way it is done for the ada language::
 
 from __future__ import absolute_import
 
-from collections import defaultdict
 from distutils.spawn import find_executable
 from glob import glob
 import itertools
@@ -460,7 +459,7 @@ class CompileCtx():
         # typed, iterate over all declared subclasses to register the ones that
         # are unreachable from the grammar.  TODO: this kludge will eventually
         # disappear as part of OC22-016.
-        for t in self.astnode_types + self.struct_types:
+        for t in self.struct_types + self.astnode_types:
             t.add_to_context()
 
         printcol("Generating sources... ", Colors.OKBLUE)
