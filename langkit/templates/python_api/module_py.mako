@@ -216,9 +216,9 @@ class Diagnostic(object):
 
 
 class ${root_astnode_name}(object):
-    ${py_doc('langkit.node_type', 4)}
+    ${py_doc(ctx.root_grammar_class, 4)}
 
-    _field_names = ()
+    ${astnode_types.subclass_decls(ctx.root_grammar_class)}
 
     def __init__(self, c_value):
         self._c_value = c_value
@@ -244,11 +244,6 @@ class ${root_astnode_name}(object):
         c_node =_lookup_in_node(self._c_value,
                                 ctypes.byref(c_sloc))
         return _wrap_astnode(c_node)
-
-    @property
-    def parent(self):
-        ${py_doc('langkit.node_parent', 8)}
-        return _wrap_astnode(_node_parent(self._c_value))
 
     def __len__(self):
         """Return the number of ${root_astnode_name} children this node has."""
@@ -525,10 +520,6 @@ _node_sloc_range = _import_func(
 _lookup_in_node = _import_func(
     '${capi.get_name("lookup_in_node")}',
     [_node, ctypes.POINTER(_Sloc)], _node
-)
-_node_parent = _import_func(
-    '${capi.get_name("node_parent")}',
-    [_node], _node
 )
 _node_child_count = _import_func(
     '${capi.get_name("node_child_count")}',

@@ -1,13 +1,20 @@
 ## vim: filetype=makopython
 
-<%def name="decl(cls)">
+<%def name="subclass_decls(cls)">
 
-   <% parent_cls = cls.base() %>
+   <%
+      # Parent class for "cls", or None if "cls" is actually the root AST node
+      # (if we called .base() on it, it would return ASTNode).
+      parent_cls = cls.base() if ctx.root_grammar_class != cls else None
 
-class ${cls.name().camel}(${parent_cls.name().camel}):
-    ${py_doc(cls, 4)}
+      # Python expression that yield a tuple that contains the names for all
+      # fields that "cls" inherits.
+      parent_fields = ('{}._field_names'.format(parent_cls.name().camel)
+                       if parent_cls else
+                       '()')
+   %>
 
-    _field_names = ${parent_cls.name().camel}._field_names + (
+    _field_names = ${parent_fields} + (
         % for field in cls.fields_with_accessors():
         "${field.name.lower}",
         % endfor
@@ -32,5 +39,12 @@ class ${cls.name().camel}(${parent_cls.name().camel}):
 
         return ${pyapi.wrap_value('result', field.type)}
     % endfor
+</%def>
+
+<%def name="decl(cls)">
+
+class ${cls.name().camel}(${cls.base().name().camel}):
+    ${py_doc(cls, 4)}
+${subclass_decls(cls)}
 
 </%def>

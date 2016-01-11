@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<% root_node_array = ctx.root_grammar_class.array_type() %>
+
 with System;
 with System.Storage_Elements; use System.Storage_Elements;
 
@@ -487,5 +489,34 @@ package body AST is
    begin
       Internal (Node);
    end Dump_Lexical_Env;
+
+   -------------
+   -- Parents --
+   -------------
+
+   function Parents
+     (Node : access ${root_node_value_type})
+      return ${root_node_array.name()}
+   is
+      Count : Natural := 1;
+      Cur   : ${root_node_type_name} := ${root_node_type_name} (Node);
+   begin
+      while Cur.Parent /= null loop
+         Count := Count + 1;
+         Cur := Cur.Parent;
+      end loop;
+
+      declare
+         Result : constant ${root_node_array.name()} :=
+           new ${root_node_array.pointed()} (Count);
+      begin
+         Cur := ${root_node_type_name} (Node);
+         for I in Result.Items'Range loop
+            Result.Items (I) := Cur;
+            Cur := Cur.Parent;
+         end loop;
+         return Result;
+      end;
+   end Parents;
 
 end AST;

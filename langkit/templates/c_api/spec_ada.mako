@@ -234,13 +234,6 @@ package ${_self.ada_api_settings.lib_name}.C is
            External_name => "${capi.get_name("lookup_in_node")}";
    ${ada_c_doc('langkit.lookup_in_node', 3)}
 
-   function ${capi.get_name("node_parent")} (Node : ${node_type})
-                                             return ${node_type}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name("node_parent")}";
-   ${ada_c_doc('langkit.node_parent', 3)}
-
    function ${capi.get_name("node_child_count")} (Node : ${node_type})
                                                   return unsigned
       with Export        => True,

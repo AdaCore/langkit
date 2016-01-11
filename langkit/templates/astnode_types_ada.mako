@@ -124,10 +124,10 @@
 
    <%
    # Keep a list of ASTNode fields
-   astnode_fields = cls.get_fields(lambda f: is_ast_node(f.type))
+   astnode_fields = cls.get_parse_fields(lambda f: is_ast_node(f.type))
 
    # Keep a list of fields that are annotated with repr
-   repr_fields = cls.get_fields(lambda f: f.repr)
+   repr_fields = cls.get_parse_fields(lambda f: f.repr)
 
    # Shortcut for ${cls.name()}_Type
    type_name = '{}_Type'.format(cls.name())

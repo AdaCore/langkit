@@ -229,11 +229,6 @@ documentations = {
         Return the bottom-most AST node from NODE that contains SLOC, or
         ${null} if there is none.
     """),
-    'langkit.node_parent': Template("""
-        Return the lexical parent of NODE, if any. Return ${null} for the root
-        AST node or for AST nodes for which no one has a reference to the
-        parent.
-    """),
     'langkit.node_child_count': Template("""
         Return the number of AST node in NODE's fields.
     """),

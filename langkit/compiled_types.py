@@ -572,6 +572,17 @@ class StructMetaClass(type):
         if is_root_grammar_class:
             dct["parent_env"] = BuiltinField(type=LexicalEnvType,
                                              is_private=True)
+            dct["parent"] = BuiltinField(
+                type=None,
+                doc="Return the lexical parent for this node. Return null for"
+                    " the root AST node or for AST nodes for which no one has"
+                    " a reference to the parent."
+            )
+            dct["parents"] = BuiltinField(
+                type=None,
+                doc="Return an array that contains the lexical parents (this"
+                    " node included). Nearer parents are first in the list."
+            )
 
         fields_list = [(f_n, f_v) for f_n, f_v in dct.items()
                        if isinstance(f_v, AbstractNodeData)]
@@ -611,6 +622,8 @@ class StructMetaClass(type):
 
         if is_root_grammar_class:
             mcs.root_grammar_class = cls
+            fields["parent"].type = cls
+            fields["parents"].type = cls.array_type()
 
         return cls
 

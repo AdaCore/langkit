@@ -224,4 +224,9 @@ package AST is
    --  Dump the lexical environment of Node, and consequently any nested
    --  lexical environment. Used for debugging/testing purpose.
 
+   function Parents
+     (Node : access ${root_node_value_type})
+      return ${root_node_array.name()};
+   --  Return the list of parents for this node (this node included)
+
 end AST;

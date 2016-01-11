@@ -295,14 +295,6 @@ package body ${_self.ada_api_settings.lib_name}.C is
       return Wrap (Lookup (N, S));
    end ${capi.get_name("lookup_in_node")};
 
-   function ${capi.get_name("node_parent")} (Node : ${node_type})
-                                             return ${node_type}
-   is
-      N : constant ${root_node_type_name} := Unwrap (Node);
-   begin
-      return Wrap (N.Parent);
-   end ${capi.get_name("node_parent")};
-
    function ${capi.get_name("node_child_count")} (Node : ${node_type})
                                                   return unsigned
    is

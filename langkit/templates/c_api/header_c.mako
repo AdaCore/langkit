@@ -193,10 +193,6 @@ extern ${node_type}
 ${capi.get_name("lookup_in_node")}(${node_type} node,
                                    const ${sloc_type} *sloc);
 
-${c_doc('langkit.node_parent')}
-extern ${node_type}
-${capi.get_name("node_parent")}(${node_type} node);
-
 ${c_doc('langkit.node_child_count')}
 extern unsigned
 ${capi.get_name("node_child_count")}(${node_type} node);
