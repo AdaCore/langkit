@@ -150,22 +150,36 @@ class ManageScript(object):
             help='Show verbose output'
         )
 
+        def create_parser(fn):
+            """
+            Create a subparser from a function. Uses the name and the docstring
+            of the function to document the subparsers.
+
+            :param (ManageScript, Namespace) -> None fn: The function to use.
+            :rtype: argparse.ArgumentParser
+            """
+            p = subparsers.add_parser(
+                # Take the name of the function without the do_ prefix
+                fn.__name__.replace('do_', ''),
+
+                # Take the first paragraph of the function's documentation as
+                # help.
+                help=fn.__doc__.split('\n\n')[0].strip()
+            )
+            p.set_defaults(func=fn)
+            return p
+
         ########
         # Help #
         ########
 
-        self.help_parser = help_parser = subparsers.add_parser(
-            'help', help=self.do_help.__doc__
-        )
-        help_parser.set_defaults(func=self.do_help)
+        self.help_parser = create_parser(self.do_help)
 
         ############
         # Generate #
         ############
 
-        self.generate_parser = generate_parser = subparsers.add_parser(
-            'generate', help=self.do_generate.__doc__
-        )
+        generate_parser = create_parser(self.do_generate)
         generate_parser.add_argument(
             '--coverage', '-C', action='store_true',
             help='Compute code coverage for the code generator'
@@ -174,15 +188,12 @@ class ManageScript(object):
             '--pretty-print', '-p', action='store_true',
             help='Pretty-print generated source code'
         )
-        generate_parser.set_defaults(func=self.do_generate)
 
         #########
         # Build #
         #########
 
-        self.build_parser = build_parser = subparsers.add_parser(
-            'build', help=self.do_build.__doc__
-        )
+        self.build_parser = build_parser = create_parser(self.do_build)
         build_parser.add_argument(
             '--jobs', '-j', type=int, default=get_cpu_count(),
             help='Number of parallel jobs to spawn in parallel '
@@ -197,15 +208,12 @@ class ManageScript(object):
             '--cargs', nargs='*', default=[],
             help='Options to pass as "-cargs" to GPRbuild'
         )
-        build_parser.set_defaults(func=self.do_build)
 
         ########
         # Make #
         ########
 
-        self.make_parser = make_parser = subparsers.add_parser(
-            'make', help=self.do_make.__doc__
-        )
+        self.make_parser = make_parser = create_parser(self.do_make)
         make_parser.add_argument(
             '--jobs', '-j', type=int, default=get_cpu_count(),
             help='Number of parallel jobs to spawn in parallel'
@@ -216,29 +224,22 @@ class ManageScript(object):
             default='dev',
             help='Selects a preset for build options'
         )
-        make_parser.set_defaults(func=self.do_make)
 
         ###########
         # Install #
         ###########
 
-        self.install_parser = install_parser = subparsers.add_parser(
-            'install', help=self.do_install.__doc__
-        )
+        self.install_parser = install_parser = create_parser(self.do_install)
         install_parser.add_argument(
             'install-dir',
             help='Installation directory.'
         )
-        install_parser.set_defaults(func=self.do_install)
 
         ##########
         # Setenv #
         ##########
 
-        self.setenv_parser = setenv_parser = subparsers.add_parser(
-            'setenv', help=self.do_setenv.__doc__
-        )
-        setenv_parser.set_defaults(func=self.do_setenv)
+        self.setenv_parser = create_parser(self.do_setenv)
 
         # The create_context method will create the context and set it here
         # only right before executing commands so that coverage computation
