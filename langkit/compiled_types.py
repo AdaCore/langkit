@@ -328,6 +328,9 @@ class AbstractNodeData(object):
         self.is_private = private
         self._name = names.Name("")
 
+        self.ast_node = None
+        ":type: ASTNode"
+
     @property
     def type(self):
         """
@@ -998,19 +1001,6 @@ class ASTNode(Struct):
     def c_type(cls, c_api_settings):
         return c_node_type(c_api_settings)
 
-    @classmethod
-    def create_python_type_def(cls, accessors):
-        # For the Python API, generate subclasses for each AST node kind
-        # (for both abstract and concrete classes). Each will ship accessor
-        # for the fields they define.
-        get_context().py_struct_classes[cls] = render(
-            'python_api/ast_subclass_py',
-            pyapi=get_context().python_api_settings,
-            cls=cls,
-            parent_cls=list(cls.get_inheritance_chain())[-2],
-            primitives=accessors
-        )
-
 # We tag the ASTNode class as abstract here, because of the circular dependency
 # between the @abstract decorator and the ASTNode class, which is caused by the
 # assert statement that is inside the decorator.
@@ -1052,8 +1042,6 @@ class ArrayType(CompiledType):
 
         # Make sure the type this list contains is already declared
         cls.element_type.add_to_context()
-
-        t_env = TemplateEnvironment(element_type=cls.element_type, cls=cls)
 
     @classmethod
     def api_name(cls):
@@ -1178,7 +1166,6 @@ class EnumType(CompiledType):
     @classmethod
     def add_to_context(cls):
         if cls not in get_context().types:
-            render = make_renderer().render
             get_context().types.add(cls)
             get_context().enum_types.add(cls)
 
