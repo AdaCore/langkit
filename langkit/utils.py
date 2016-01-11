@@ -191,3 +191,38 @@ def dispatch_on_type(type, type_to_action_assocs, exception_msg=""):
         if issubclass(type, target_type):
             return action(type)
     raise Exception(exception_msg)
+
+
+def assert_type(obj, typ):
+    """
+    Ensure that obj is a subtype or subclass of type, depending on whether
+    obj is a type or an instance. Return obj. This allows a few things
+    compared to regular asserts:
+
+    1. The type of the return is correctly inferred by Pycharm.
+    2. You can use a "fluent interface" style for style checks, using::
+
+        b = assert_type(c, int) + 15
+
+    rather than::
+
+        assert isinstance(c, int)
+        b = c + 15
+
+    3. Provides a relatively informative error message by default.
+
+    :param Any obj: The object to check.
+    :param T typ: Type parameter. The expected type of obj.
+    :rtype: T
+    """
+    if issubclass(type(obj), type):
+        assert issubclass(obj, typ), (
+            "Wrong base type for type {}, expected {}".format(obj, typ)
+        )
+    else:
+        assert isinstance(obj, typ), (
+            "Wrong type for object {}, expected {}, found {}".format(
+                obj, typ, type(obj)
+            )
+        )
+    return obj

@@ -15,8 +15,13 @@ from __future__ import absolute_import
 
 from contextlib import contextmanager
 
-from langkit import compiled_types, names
-from langkit.utils import Colors, col
+from langkit import names
+from langkit.compiled_types import (
+    render as ct_render, LongType, LexicalEnvType, Token, ArrayType, BoolType,
+    ASTNode, Struct, array_type, StructMetaClass, CompiledType,
+    AbstractNodeData
+)
+from langkit.utils import Colors, col, assert_type
 
 
 def construct(expr):
@@ -31,9 +36,9 @@ def construct(expr):
     if isinstance(expr, AbstractExpression):
         return expr.construct()
     elif isinstance(expr, int):
-        return LiteralExpr(str(expr), compiled_types.LongType)
+        return LiteralExpr(str(expr), LongType)
     elif isinstance(expr, bool):
-        return LiteralExpr(str(expr), compiled_types.LongType)
+        return LiteralExpr(str(expr), LongType)
     else:
         raise TypeError('Invalid abstract expression: {}'.format(type(expr)))
 
@@ -138,7 +143,7 @@ class AbstractExpression(Frozable):
 
         # Constructors for operations with attribute-like syntax
 
-        def _build_any(predicate, var=None):
+        def _build_any(predicate):
             return Quantifier(Quantifier.ANY, self, predicate)
 
         def _build_mapcat(expr, filter=None):
@@ -228,12 +233,12 @@ class EnvGet(AbstractExpression):
         env_expr = construct(self.env_expr)
         token_expr = construct(self.token_expr)
 
-        assert env_expr.type.matches(compiled_types.LexicalEnvType), (
+        assert env_expr.type.matches(LexicalEnvType), (
             "Environment expressions must return objects of type "
             "LexicalEnvType: got {} instead".format(env_expr.type.name().camel)
         )
 
-        assert token_expr.type.matches(compiled_types.Token), (
+        assert token_expr.type.matches(Token), (
             "Token expr to a env get expression must return an object of "
             "type Token"
         )
@@ -271,7 +276,7 @@ class CollectionExpression(AbstractExpression):
         """
         collection_expr = construct(self.collection)
         assert (collection_expr.type.is_list_type or
-                issubclass(collection_expr.type, compiled_types.ArrayType)), (
+                issubclass(collection_expr.type, ArrayType)), (
             'Map cannot iterate on {}, which is not a collection'
         ).format(collection_expr.type.name().camel)
 
@@ -322,16 +327,16 @@ class BinaryBooleanOperator(AbstractExpression):
         """
         lhs = construct(self.lhs)
         rhs = construct(self.rhs)
-        assert lhs.type.matches(compiled_types.BoolType)
-        assert rhs.type.matches(compiled_types.BoolType)
+        assert lhs.type.matches(BoolType)
+        assert rhs.type.matches(BoolType)
 
         if self.kind == self.AND:
             then = rhs
-            else_then = LiteralExpr('False', compiled_types.BoolType)
+            else_then = LiteralExpr('False', BoolType)
         else:
-            then = LiteralExpr('True', compiled_types.BoolType)
+            then = LiteralExpr('True', BoolType)
             else_then = rhs
-        return IfExpr(lhs, then, else_then, compiled_types.BoolType)
+        return IfExpr(lhs, then, else_then, BoolType)
 
 
 class Cast(AbstractExpression):
@@ -346,7 +351,7 @@ class Cast(AbstractExpression):
             performed.
         :param ASTNode astnode: ASTNode subclass to use for the cast.
         """
-        assert astnode.matches(compiled_types.ASTNode)
+        assert astnode.matches(ASTNode)
         self.expr = expr
         self.astnode = astnode
 
@@ -424,7 +429,7 @@ class Eq(AbstractExpression):
         # Don't use CompiledType.matches since in the generated code, we need
         # both operands to be *exactly* the same types, so handle specifically
         # each case.
-        if issubclass(lhs.type, compiled_types.ASTNode):
+        if issubclass(lhs.type, ASTNode):
             # Handle checks between two subclasses without explicit casts. In
             # order to help users to detect dubious checks, forbid operands
             # that can never be equal because they have no subclass in common.
@@ -468,7 +473,7 @@ class If(AbstractExpression):
         :rtype: IfExpr
         """
         cond = self.cond.construct()
-        assert cond.type.matches(compiled_types.BoolType)
+        assert cond.type.matches(BoolType)
 
         then = self.then.construct()
         else_then = self.else_then.construct()
@@ -488,9 +493,8 @@ class IsA(AbstractExpression):
             performed.
         :param ASTNode astnode: ASTNode subclass to use for the test.
         """
-        assert issubclass(astnode, compiled_types.ASTNode)
         self.expr = expr
-        self.astnode = astnode
+        self.astnode = assert_type(astnode, ASTNode)
 
     def construct(self):
         """
@@ -526,10 +530,10 @@ class IsNull(AbstractExpression):
         :rtype: EqExpr
         """
         expr = construct(self.expr)
-        assert issubclass(expr.type, compiled_types.ASTNode)
+        assert issubclass(expr.type, ASTNode)
         return EqExpr(
             expr,
-            LiteralExpr('null', compiled_types.ASTNode),
+            LiteralExpr('null', ASTNode),
         )
 
 
@@ -571,14 +575,14 @@ class Map(CollectionExpression):
 
         assert (not self.concat or
                 expr.type.is_list_type or
-                issubclass(expr.type, compiled_types.ArrayType)), (
+                issubclass(expr.type, ArrayType)), (
             'Cannot mapcat with expressions returning {} values'
             ' (collections expected instead)'
         ).format(expr.type.name())
 
         if self.filter_expr:
             filter_expr = self.filter_expr.construct()
-            assert filter_expr.type.matches(compiled_types.BoolType)
+            assert filter_expr.type.matches(BoolType)
         else:
             filter_expr = None
 
@@ -599,8 +603,8 @@ class New(AbstractExpression):
         :param dict[str, AbstractExpression] fields: Values to assign to the
             fields for the created struct value.
         """
-        assert (issubclass(struct_type, compiled_types.Struct) and
-                not issubclass(struct_type, compiled_types.ASTNode))
+        assert (issubclass(struct_type, Struct) and
+                not issubclass(struct_type, ASTNode))
         self.struct_type = struct_type
         self.field_values = field_values
 
@@ -671,7 +675,7 @@ class Not(AbstractExpression):
         :rtype: NotExpr
         """
         expr = construct(self.expr)
-        assert expr.type.matches(compiled_types.BoolType)
+        assert expr.type.matches(BoolType)
         return NotExpr(expr)
 
 
@@ -707,7 +711,7 @@ class Quantifier(CollectionExpression):
         collection_expr = self.construct_collection()
         ind_var = construct(self.induction_var)
         expr = construct(self.expr)
-        assert expr.type.matches(compiled_types.BoolType)
+        assert expr.type.matches(BoolType)
 
         return QuantifierExpr(self.kind, collection_expr, expr, ind_var)
 
@@ -737,15 +741,10 @@ class FieldAccess(AbstractExpression):
         :rtype: FieldAccessExpr
         """
 
-        receiver_expr = self.receiver.construct()
-        ":type: ResolvedExpression"
+        receiver_expr = construct(self.receiver)
 
-        # For the moment, this can work only on expressions deriving from
-        # ASTNode.
-        receiver_type = receiver_expr.type
-        ":type: langkit.compiled_types.ASTNode"
-
-        to_get = receiver_type.get_abstract_fields_dict().get(self.field, None)
+        to_get = assert_type(receiver_expr.type, Struct)\
+            .get_abstract_fields_dict().get(self.field, None)
         ":type: AbstractNodeField"
 
         # If still not found, there's a problem
@@ -839,12 +838,11 @@ class InductionVariable(AbstractExpression):
 
 
 Self = PlaceholderSingleton("Self")
-Env = PlaceholderSingleton("Current_Env", type=compiled_types.LexicalEnvType)
+Env = PlaceholderSingleton("Current_Env", type=LexicalEnvType)
 
 
 def render(*args, **kwargs):
-    return compiled_types.render(*args, property=Property.get(), Self=Self,
-                                 **kwargs)
+    return ct_render(*args, property=Property.get(), Self=Self, **kwargs)
 
 
 class ResolvedExpression(object):
@@ -910,9 +908,7 @@ class EnvGetExpr(ResolvedExpression):
         """
         :rtype: compiled_types.ArrayType
         """
-        return compiled_types.array_type(
-            compiled_types.StructMetaClass.root_grammar_class
-        )
+        return array_type(StructMetaClass.root_grammar_class)
 
     def render_pre(self):
         return "{}\n{}".format(self.env_expr.render_pre(),
@@ -937,8 +933,7 @@ class VarExpr(ResolvedExpression):
             referenced variable.
         :param names.Name name: Name of the referenced variable.
         """
-        assert issubclass(type, compiled_types.CompiledType)
-        self._type = type
+        self._type = assert_type(type, CompiledType)
         self.name = name
 
     @property
@@ -991,9 +986,9 @@ class FieldAccessExpr(ResolvedExpression):
         # Before accessing the field of a record through an access, we must
         # check that whether this access is null in order to raise a
         # Property_Error in the case it is.
-        return compiled_types.render('properties/null_safety_check_ada',
-                                     expr=self.receiver_expr,
-                                     result_var=self.result_var)
+        return render('properties/null_safety_check_ada',
+                      expr=self.receiver_expr,
+                      result_var=self.result_var)
 
     def render_expr(self):
         if self.simple_field_access:
@@ -1029,10 +1024,10 @@ class CastExpr(ResolvedExpression):
     def render_pre(self):
         # Before actually downcasting an access to an AST node, add a type
         # check so that we raise a Property_Error if it's wrong.
-        return compiled_types.render('properties/type_safety_check_ada',
-                                     expr=self.expr,
-                                     astnode=self.astnode,
-                                     result_var=self.result_var)
+        return render('properties/type_safety_check_ada',
+                      expr=self.expr,
+                      astnode=self.astnode,
+                      result_var=self.result_var)
 
     def render_expr(self):
         return "{} ({})".format(
@@ -1052,7 +1047,7 @@ class EqExpr(ResolvedExpression):
 
     @property
     def type(self):
-        return compiled_types.BoolType
+        return BoolType
 
     def render_pre(self):
         return '{}\n{}'.format(
@@ -1092,7 +1087,7 @@ class IfExpr(ResolvedExpression):
         return self.rtype
 
     def render_pre(self):
-        return compiled_types.render('properties/if_ada', expr=self)
+        return render('properties/if_ada', expr=self)
 
     def render_expr(self):
         return self.result_var.name.camel_with_underscores
@@ -1113,7 +1108,7 @@ class IsAExpr(ResolvedExpression):
 
     @property
     def type(self):
-        return compiled_types.BoolType
+        return BoolType
 
     def render_pre(self):
         return self.expr.render_pre()
@@ -1172,7 +1167,7 @@ class MapExpr(ResolvedExpression):
         element_type = (self.expr.type.element_type
                         if self.concat else
                         self.expr.type)
-        self._type = compiled_types.array_type(element_type)
+        self._type = array_type(element_type)
         self._type.add_to_context()
 
         p = Property.get()
@@ -1192,8 +1187,8 @@ class MapExpr(ResolvedExpression):
         )
 
     def render_pre(self):
-        return compiled_types.render('properties/map_ada', map=self,
-                                     Name=names.Name)
+        return render('properties/map_ada', map=self,
+                      Name=names.Name)
 
     def render_expr(self):
         return self.array_var.name.camel_with_underscores
@@ -1243,7 +1238,7 @@ class NotExpr(ResolvedExpression):
 
     @property
     def type(self):
-        return compiled_types.BoolType
+        return BoolType
 
     def render_pre(self):
         return self.expr.render_pre()
@@ -1278,15 +1273,15 @@ class QuantifierExpr(ResolvedExpression):
         self.induction_var = induction_var
 
         self.result_var = Property.get().vars(names.Name('Result'),
-                                              compiled_types.BoolType,
+                                              BoolType,
                                               create_unique=False)
 
     @property
     def type(self):
-        return compiled_types.BoolType
+        return BoolType
 
     def render_pre(self):
-        return compiled_types.render(
+        return render(
             'properties/quantifier_ada',
             quantifier=self,
             ALL=Quantifier.ALL,
@@ -1374,7 +1369,7 @@ class LocalVars(object):
         return "\n".join(lv.render() for lv in self.local_vars.values())
 
 
-class Property(compiled_types.AbstractNodeData):
+class Property(AbstractNodeData):
     """
     This is the public class via which you'll create properties in the DSL.
 
