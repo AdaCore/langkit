@@ -3,7 +3,9 @@
 <%
    ind_var = map.induction_var.name
    array_var = map.array_var.name
+
    vec_var = map.array_var.name + Name('Vec')
+   vec_pkg = map.type.pkg_vector()
 %>
 
 ${map.collection.render_pre()}
@@ -36,10 +38,11 @@ begin
                   ${map.expr.render_expr()}.Items
                % endif
             loop
-               ${vec_var}.Append (Item_To_Append);
+               ${vec_pkg}.Append (${vec_var}, Item_To_Append);
             end loop;
          % else:
-            ${vec_var}.Append (${map.expr.render_expr()});
+            ${vec_pkg}.Append
+              (${vec_var}, ${map.expr.render_expr()});
          % endif
 
          % if map.filter:
@@ -49,10 +52,11 @@ begin
 
       ## Then convert the vector into the final array type
       ${array_var} := new ${map.array_var.type.pointed()}
-        (Natural (${vec_var}.Length));
+        (Natural (${vec_pkg}.Length (${vec_var})));
       for I in 1 .. ${array_var}.N loop
-         ${array_var}.Items (I) := ${vec_var} (I);
+         ${array_var}.Items (I) := ${vec_pkg}.Get (${vec_var}, I - 1);
       end loop;
+      ${vec_pkg}.Destroy (${vec_var});
    </%def>
 
    % if map.collection.type.is_list_type:

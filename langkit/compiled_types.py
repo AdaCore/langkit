@@ -1029,6 +1029,11 @@ class ArrayType(CompiledType):
 
     @classmethod
     def name(cls):
+        """
+        Name of the type for general values in the Ada generated code.
+
+        :rtype: names.Name
+        """
         return cls.element_type().name() + names.Name('Array_Access')
 
     @classmethod
@@ -1052,16 +1057,37 @@ class ArrayType(CompiledType):
     @classmethod
     def api_name(cls):
         """
+        Name of the type for general values in our bindings.
         """
         return cls.element_type().name() + names.Name('Array')
 
     @classmethod
     def pointed(cls):
+        """
+        Name of the type for values that are pointed to by general values.
+
+        :rtype: names.Name
+        """
         return cls.element_type().name() + names.Name('Array_Record')
 
     @classmethod
+    def pkg_vector(cls):
+        """
+        Name of the Langkit_Support.Vectors package instantiation corresponding
+        to this element_type.
+
+        :rtype: names.Name
+        """
+        return cls.element_type().name() + names.Name('Vectors')
+
+    @classmethod
     def vector(cls):
-        return cls.element_type().name() + names.Name('Vectors.Vector')
+        """
+        Name of the type for vector values.
+
+        :rtype: names.Name
+        """
+        return names.Name(cls.pkg_vector().camel_with_underscores + '.Vector')
 
 
 # We want structural equality on lists whose elements have the same types.
@@ -1114,7 +1140,7 @@ def array_type(element_type):
     """
 
     return type(
-        '{}ArrayType'.format(element_type.name()), (ArrayType, ), {
+        '{}ArrayType'.format(element_type.name().camel), (ArrayType, ), {
             'element_type': classmethod(lambda cls: element_type),
         }
     )

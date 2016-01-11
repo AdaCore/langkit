@@ -2,14 +2,14 @@
 
 <%def name="public_decl(cls)">
 
-   <% type = decl_type(cls.element_type()) %>
+   <% elt_type = cls.element_type() %>
 
-   type ${type}_Array is array (Positive range <>) of ${type};
-   type ${type}_Array_Record (N : Natural) is record
-      Items : ${type}_Array (1 .. N);
+   type ${cls.api_name()} is array (Positive range <>) of ${elt_type.name()};
+   type ${cls.pointed()} (N : Natural) is record
+      Items : ${cls.api_name()} (1 .. N);
    end record;
 
-   type ${type}_Array_Access is access all ${type}_Array_Record;
+   type ${cls.name()} is access all ${cls.pointed()};
 
    ## If we are on the root grammar class type, we need a conversion function
    ## to be able to get element arrays starting from 0 and convert them into
@@ -17,14 +17,14 @@
    ## that are arrays of instances of the root grammar class, to our array
    ## record type.
    % if cls.element_type() == ctx.root_grammar_class:
-   function Copy is new AST_Envs.Element_Arrays.Copy (Positive, ${type}_Array);
+   function Copy is new AST_Envs.Element_Arrays.Copy
+     (Positive, ${cls.api_name()});
 
-   function Create (Items : AST_Envs.Element_Array) return ${type}_Array_Access
-   is (new ${type}_Array_Record'(Items => Copy (Items), N => Items'Length));
+   function Create (Items : AST_Envs.Element_Array) return ${cls.name()}
+   is (new ${cls.pointed()}'(Items => Copy (Items), N => Items'Length));
    % endif
 
-   package ${type}_Vectors is new Ada.Containers.Vectors
-     (Index_Type  => Positive,
-      Element_Type => ${type});
+   package ${cls.pkg_vector()} is new Langkit_Support.Vectors
+     (${elt_type.name()});
 
 </%def>
