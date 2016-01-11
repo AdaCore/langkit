@@ -224,6 +224,21 @@ class CompiledType(object):
         else:
             return cls == formal
 
+    @classmethod
+    @memoized
+    def array_type(cls):
+        """
+        Create an array type for "cls".
+
+        :rtype: CompiledType
+        """
+        element_type = cls
+        return type(
+            '{}ArrayType'.format(element_type.name().camel), (ArrayType, ), {
+                'element_type': classmethod(lambda cls: element_type),
+            }
+        )
+
 
 class BasicType(CompiledType):
     """
@@ -1123,24 +1138,6 @@ def list_type(element_type):
             'nullexpr': classmethod(lambda cls: null_constant()),
 
             'is_list_type': True,
-            'element_type': classmethod(lambda cls: element_type),
-        }
-    )
-
-
-# Likewise for array types
-@memoized
-def array_type(element_type):
-    """
-    Return a CompiledType subclass.
-
-    :param CompiledType element_type: Type parameter. The type contained in the
-        resulting array type.
-    :rtype: CompiledType
-    """
-
-    return type(
-        '{}ArrayType'.format(element_type.name().camel), (ArrayType, ), {
             'element_type': classmethod(lambda cls: element_type),
         }
     )

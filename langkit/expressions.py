@@ -18,8 +18,7 @@ from contextlib import contextmanager
 from langkit import names
 from langkit.compiled_types import (
     render as ct_render, LongType, LexicalEnvType, Token, ArrayType, BoolType,
-    ASTNode, Struct, array_type, StructMetaClass, CompiledType,
-    AbstractNodeData
+    ASTNode, Struct, StructMetaClass, CompiledType, AbstractNodeData
 )
 from langkit.utils import Colors, col, assert_type
 
@@ -908,7 +907,7 @@ class EnvGetExpr(ResolvedExpression):
         """
         :rtype: compiled_types.ArrayType
         """
-        return array_type(StructMetaClass.root_grammar_class)
+        return StructMetaClass.root_grammar_class.array_type()
 
     def render_pre(self):
         return "{}\n{}".format(self.env_expr.render_pre(),
@@ -1167,7 +1166,7 @@ class MapExpr(ResolvedExpression):
         element_type = (self.expr.type.element_type()
                         if self.concat else
                         self.expr.type)
-        self._type = array_type(element_type)
+        self._type = element_type.array_type()
         self._type.add_to_context()
 
         p = Property.get()

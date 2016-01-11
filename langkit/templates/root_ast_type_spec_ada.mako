@@ -1,5 +1,9 @@
 ## vim: filetype=makoada
 
+<%namespace name="array_types" file="array_types_ada.mako" />
+
+<% root_node_array = ctx.root_grammar_class.array_type() %>
+
 with System;
 
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
@@ -45,6 +49,14 @@ package AST is
    package AST_Envs is new Langkit_Support.Lexical_Env
      (${root_node_type_name}, Dummy_Metadata, No_Metadata, Combine);
 
+   ## Declare arrays of root nodes here since some primitives rely on it. TODO:
+   ## As a consequence, we have to put renamings in the root package, this
+   ## somehow feels hackish.
+   ${array_types.public_decl(root_node_array)}
+
+   package ${root_node_type_name}_Arrays
+   renames ${root_node_type_name}_Vectors.Elements_Arrays;
+
    type ${root_node_value_type} is abstract tagged record
       Parent                 : ${root_node_type_name} := null;
       Token_Data             : Token_Data_Handler_Access := null;
@@ -67,12 +79,6 @@ package AST is
    package Children_Vectors is
      new Langkit_Support.Vectors (Child_Record);
    package Children_Arrays renames Children_Vectors.Elements_Arrays;
-
-   package ${root_node_type_name}_Vectors
-   is new Langkit_Support.Vectors (${root_node_type_name});
-
-   package ${root_node_type_name}_Arrays
-   renames ${root_node_type_name}_Vectors.Elements_Arrays;
 
    type Visit_Status is (Into, Over, Stop);
    type ${root_node_kind_name} is new Natural;

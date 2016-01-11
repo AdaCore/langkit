@@ -175,8 +175,37 @@ package ${_self.ada_api_settings.lib_name} is
    ${struct_types.public_decl(struct_type)}
    % endfor
 
+   ## The array type for the root node is needed in the AST package, so just
+   ## make it available here.
+
+   <%
+      root_node = ctx.root_grammar_class
+      root_node_array = root_node.array_type()
+   %>
+
+   subtype ${root_node_array.api_name()} is
+      AST.${root_node_array.api_name()};
+   subtype ${root_node_array.pointed()} is
+      AST.${root_node_array.pointed()};
+   subtype ${root_node_array.name()} is
+      AST.${root_node_array.name()};
+   function Copy
+     (A : AST.AST_Envs.Element_Arrays.Array_Type)
+      return ${root_node_array.api_name()}
+      renames AST.Copy;
+
+   function Create
+     (Items : AST.AST_Envs.Element_Array)
+      return ${root_node_array.name()}
+      renames AST.Create;
+
+   package ${root_node_array.element_type().name()}_Vectors renames
+     AST.${root_node_array.element_type().name()}_Vectors;
+
    % for array_type in _self.sorted_types(_self.array_types):
+      % if array_type != root_node_array:
    ${array_types.public_decl(array_type)}
+      % endif
    % endfor
 
    % for astnode in _self.astnode_types:
