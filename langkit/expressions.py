@@ -1386,6 +1386,7 @@ class Property(AbstractNodeData):
     __current_property__ = None
 
     is_property = True
+    prefix = names.Name("P")
 
     def __init__(self, expr, doc=None, private=False, abstract=False,
                  type=None):
@@ -1575,21 +1576,6 @@ class Property(AbstractNodeData):
                 "Overriding property doesn't have the same type as base"
                 "property !"
             )
-
-    @property
-    def name(self):
-        """
-        Return the name of the property, namely P_ + the name defined by the
-        user.
-        :rtype: names.Name
-        """
-        assert self._name
-        return names.Name("P") + self._name
-
-    @name.setter
-    def name(self, name):
-        assert isinstance(name, names.Name)
-        self._name = name
 
     def doc(self):
         return self._doc

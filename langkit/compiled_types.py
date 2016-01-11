@@ -309,6 +309,14 @@ class AbstractNodeData(object):
     :type: bool
     """
 
+    prefix = None
+    """
+    This can be overriden in subclasses of AbstractNodeData to add a prefix to
+    the name of AbstractNodeData instances.
+
+    :type: names.Name|None
+    """
+
     def __init__(self, private=False):
         """
         :param bool private: Whether this AbstractNodeData instance is
@@ -318,6 +326,7 @@ class AbstractNodeData(object):
         """
         self._index = next(self._counter)
         self.is_private = private
+        self._name = names.Name("")
 
     @property
     def type(self):
@@ -334,14 +343,15 @@ class AbstractNodeData(object):
     @property
     def name(self):
         """
-        Name of the abstract node field.
         :rtype: names.Name
         """
-        raise NotImplementedError()
+        assert self._name
+        return (self.prefix + self._name if self.prefix else self._name)
 
     @name.setter
     def name(self, name):
-        raise NotImplementedError()
+        assert isinstance(name, names.Name)
+        self._name = name
 
     def doc(self):
         """
@@ -375,6 +385,8 @@ class AbstractField(AbstractNodeData):
     Field used to prevent instantiation of the class. Concrete descendants
     of AbstractField must put that field to True in their definition.
     """
+
+    prefix = names.Name("F")
 
     def __init__(self, repr=True, doc=None, type=None):
         """
@@ -417,19 +429,6 @@ class AbstractField(AbstractNodeData):
     def type(self, type):
         assert issubclass(type, CompiledType)
         self._type = type
-
-    @property
-    def name(self):
-        """
-        :rtype: names.Name
-        """
-        assert self._name
-        return names.Name("F") + self._name
-
-    @name.setter
-    def name(self, name):
-        assert isinstance(name, names.Name)
-        self._name = name
 
     def __repr__(self):
         return '<ASTNode {} Field({})>'.format(self._index, self._name)
@@ -474,17 +473,10 @@ class BuiltinField(UserField):
     prefix. It is disregarded by the parsing machinery too.
     """
 
+    prefix = names.Name("")
+
     def __init__(self, *args, **kwargs):
         super(BuiltinField, self).__init__(*args, **kwargs)
-
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, name):
-        assert isinstance(name, names.Name)
-        self._name = name
 
 
 class StructMetaClass(type):
