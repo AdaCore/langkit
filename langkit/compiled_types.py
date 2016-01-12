@@ -765,6 +765,12 @@ class Struct(CompiledType):
 
     @classmethod
     def compute_properties(cls):
+        """
+        Render generated code for properties.
+
+        Since we handle properties on AST nodes only, there is nothing to do in
+        the general case: this is overriden in ASTNode.
+        """
         pass
 
     @classmethod
