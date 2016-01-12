@@ -339,7 +339,11 @@ class AbstractNodeData(object):
         self._name = names.Name("")
 
         self.ast_node = None
-        ":type: ASTNode"
+        """
+        ASTNode subclass that declared this field. Initialized when creating
+        ASTNode subclasses (so left None for other Struct subclasses).
+        :type: ASTNode
+        """
 
     @property
     def type(self):
@@ -418,13 +422,6 @@ class AbstractField(AbstractNodeData):
         self.repr = repr
         self._name = None
         self._doc = doc
-
-        self.ast_node = None
-        """
-        ASTNode subclass that declared this field. Initialized when creating
-        ASTNode subclasses.
-        :type: ASTNode
-        """
 
         self._type = type
         """
