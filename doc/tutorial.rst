@@ -141,7 +141,7 @@ always unique and thus are not good candidates for symbol tables.
 In Langkit, we declare the list of token kinds subclassing the ``LexerToken``
 class.
 
-::
+.. code-block:: python
 
     class Token(LexerToken):
         Example    = NoText()
@@ -190,14 +190,14 @@ that you can use them in your lexer specification.
 Good, so now let's create the lexer itself.  The first thing to do is to
 instantiate the ``Lexer`` class and provide it the set of available tokens:
 
-::
+.. code-block:: python
 
     kaleidoscope_lexer = Lexer(Token)
 
 Then, the only thing left to do is to add lexing rules to match text and
 actually yield Tokens. This is done using our lexer's ``add_rules`` method:
 
-::
+.. code-block:: python
 
     kaleidoscope_lexer.add_rules(
         (Pattern(r"[ \t\r\n]+"),                        Ignore()),
@@ -295,7 +295,7 @@ parser will know what to create.
 Take your code editor, open ``language/parser.py`` and replace the ``Example``
 class definition with the following ones:
 
-::
+.. code-block:: python
 
     class Function(KaleidoscopeNode):
         proto = Field()
@@ -389,7 +389,7 @@ move forward with a real world example: Kaleidoscope! Each chunk of code below
 appears as a keyword argument of the ``add_rules`` method invocation (you can
 remove the previous ``main_rule`` one).
 
-::
+.. code-block:: python
 
     main_rule=List(Or(G.extern_decl, G.function, G.expr)),
 
@@ -402,7 +402,7 @@ fashion.
 So what this rule matches is a list in which elements can be either external
 declarations, function definitions or expressions.
 
-::
+.. code-block:: python
 
     extern_decl=Row('extern', G.prototype) ^ ExternDecl,
 
@@ -423,7 +423,7 @@ KaleidoscopeNode subclass that must have the same number of fields as the
 number of results the sub-parser yields (i.e. one for every sub-parser except
 ``Row`` and the number of non-discarded items in ``Row`` sub-parsers).
 
-::
+.. code-block:: python
 
     function=Row('def', G.prototype, G.expr) ^ Function,
 
@@ -431,7 +431,7 @@ We have here a pattern that is very similar to ``extern_decl``, expect that the
 ``Row`` part has two non-discarded results: ``prototype`` and ``expr``.  This
 is fortunate, as the ``Function`` node requires two fields.
 
-::
+.. code-block:: python
 
     prototype=Row(G.identifier, '(',
                   List(G.identifier, sep=',', empty_valid=True),
@@ -447,7 +447,7 @@ not allowed by default).
 So our argument list has commas to separate arguments and we may have functions
 that take no argument.
 
-::
+.. code-block:: python
 
     expr=Or(
         Row('(', G.expr, ')')[1],
@@ -470,7 +470,7 @@ An expression can be either:
   * Two sub-expressions with an operator in the middle, building a binary
     expression. This shows how we can turn tokens into enumerators:
 
-    ::
+    .. code-block:: python
 
         Enum('+', Operator('plus'))
 
@@ -479,7 +479,7 @@ An expression can be either:
 
   * The ``prod_expr`` kind of expression: see below.
 
-::
+.. code-block:: python
 
     prod_expr=Or(
         Row(G.prod_expr,
@@ -503,7 +503,7 @@ articles that explain `how this works
 <https://www.google.fr/search?q=recursive+descent+parser+associativity>`_ (just
 remember that: yes, Langkit handles left recursivity!).
 
-::
+.. code-block:: python
 
     call_or_single=Or(
         Row (G.identifier, '(',
@@ -515,7 +515,7 @@ remember that: yes, Langkit handles left recursivity!).
 
 Well, this time there is nothing new. Moving on to the two last rules...
 
-::
+.. code-block:: python
 
     identifier=Tok(Token.Identifier, keep=True) ^ Identifier,
     number=Tok(Token.Number, keep=True) ^ Number,
@@ -537,7 +537,7 @@ without associated types. However, in order to generate the library, someone
 which deduces types automatically from how AST nodes are used in the grammar.
 For instance, doing the following (fictive example):
 
-::
+.. code-block:: python
 
     Enum('sometok', SomeEnumeration('someval')) ^ SomeNode
 
@@ -646,7 +646,7 @@ from Python (check ``PYTHONPATH``).
 Alright, so the first thing to do with the Python API is to import the
 ``libkaleidoscopelang`` module and instantiate an analysis context from it:
 
-::
+.. code-block:: python
 
     import libkaleidoscopelang as lkl
     ctx = lkl.AnalysisContext()
@@ -655,7 +655,7 @@ Then, we can parse code in order to yield ``AnalysisUnit`` objects, which
 contain the AST. There are two ways to parse code: parse from a file or parse
 from a buffer (i.e. a string value):
 
-::
+.. code-block:: python
 
     # Parse code from the 'foo.kal' file.
     unit_1 = ctx.get_from_file('foo.kal')
@@ -706,7 +706,7 @@ use the ``help(...)`` built-in in order to discover how you can explore trees.
 Alright, let's start the interpreter, now! First, let's declare an
 ``Interpreter`` class and an ``ExecutionError`` exception:
 
-::
+.. code-block:: python
 
     class ExecutionError(Exception):
         def __init__(self, sloc_range, message):
@@ -733,7 +733,7 @@ the ``evaluate`` method passing it an ``Expr`` instance.
 
 Our top-level code looks like this:
 
-::
+.. code-block:: python
 
     def print_error(filename, sloc_range, message):
         line = sloc_range.start.line
@@ -771,7 +771,7 @@ The ``print_error`` function is a fancy helper to nicely show the user where
 the error occurred. Now that the framework is ready, let's implement the
 important bits in ``Interpreter``:
 
-::
+.. code-block:: python
 
     # Method for the Interpreter class
     def execute(self, ast):
@@ -808,7 +808,7 @@ instead.
 
 Now comes the last bit: expression evaluation.
 
-::
+.. code-block:: python
 
     # Method for the Interpreter class
     def evaluate(self, node, env=None):
@@ -836,7 +836,7 @@ then ``env`` will be ``{'a': 1.0}``.
 Let's continue: first add the following declaration to the ``Interpreter``
 class:
 
-::
+.. code-block:: python
 
     # Mapping: enumerators for the Operator type -> callables to perform the
     # operations themselves.
