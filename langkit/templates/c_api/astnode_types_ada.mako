@@ -28,6 +28,8 @@
    is
       N : constant ${root_node_type_name} := Unwrap (Node);
    begin
+      Clear_Last_Exception;
+
       if N.all in ${astnode.name()}_Type'Class then
          declare
             Typed_Node : constant ${astnode.name()} := ${astnode.name()} (N);
@@ -51,16 +53,16 @@
                ## If we reach this handler, it means the expression failed at
                ## some point because of a safety check. Tell the user about
                ## it.
-               return 0;
 
-            ## TODO: if code generation is buggy, we may have other exceptions
-            ## here. We should find a way to propagate them cleanly through
-            ## bindings so that, for instance, we do not just crash in Python
-            ## but have a proper stack trace.
+               return 0;
          end;
       else
          return 0;
       end if;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
    end ${accessor_name};
 
 </%def>

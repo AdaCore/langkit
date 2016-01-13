@@ -3,6 +3,7 @@
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
 
 with Ada.Containers;                  use Ada.Containers;
+with Ada.Exceptions;                  use Ada.Exceptions;
 with Ada.IO_Exceptions;               use Ada.IO_Exceptions;
 with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
@@ -82,6 +83,16 @@ package body ${_self.ada_api_settings.lib_name}.C is
        then ""
        else Value (S));
 
+   Last_Exception : ${exception_type}_Ptr := null
+     with Thread_Local_Storage => True;
+
+   procedure Clear_Last_Exception;
+   --  Free the information contained in Last_Exception
+
+   procedure Set_Last_Exception (Exc  : Exception_Occurrence);
+   --  Free the information contained in Last_Exception and replace it with
+   --  newly allocated information from Exc.
+
    ----------
    -- Free --
    ----------
@@ -104,15 +115,29 @@ package body ${_self.ada_api_settings.lib_name}.C is
       return ${analysis_context_type}
    is
    begin
+      Clear_Last_Exception;
+
       return Wrap (Create (Value (Charset)));
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${analysis_context_type} (System.Null_Address);
    end ${capi.get_name("create_analysis_context")};
 
    procedure ${capi.get_name("destroy_analysis_context")}
      (Context : ${analysis_context_type})
    is
-      C : Analysis_Context := Unwrap (Context);
    begin
-      Destroy (C);
+      Clear_Last_Exception;
+
+      declare
+         C : Analysis_Context := Unwrap (Context);
+      begin
+         Destroy (C);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end ${capi.get_name("destroy_analysis_context")};
 
    function ${capi.get_name("get_analysis_unit_from_file")}
@@ -120,14 +145,23 @@ package body ${_self.ada_api_settings.lib_name}.C is
       Filename, Charset : chars_ptr;
       Reparse           : int) return ${analysis_unit_type}
    is
-      Ctx : constant Analysis_Context := Unwrap (Context);
-      Unit : Analysis_Unit := Get_From_File
-        (Ctx,
-         Value (Filename),
-         Value_Or_Empty (Charset),
-         Reparse /= 0);
    begin
-      return Wrap (Unit);
+      Clear_Last_Exception;
+
+      declare
+         Ctx : constant Analysis_Context := Unwrap (Context);
+         Unit : Analysis_Unit := Get_From_File
+           (Ctx,
+            Value (Filename),
+            Value_Or_Empty (Charset),
+            Reparse /= 0);
+      begin
+         return Wrap (Unit);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${analysis_unit_type} (System.Null_Address);
    end ${capi.get_name("get_analysis_unit_from_file")};
 
    function ${capi.get_name("get_analysis_unit_from_buffer")}
@@ -136,49 +170,85 @@ package body ${_self.ada_api_settings.lib_name}.C is
       Buffer            : chars_ptr;
       Buffer_Size       : size_t) return ${analysis_unit_type}
    is
-      Ctx : constant Analysis_Context := Unwrap (Context);
-      Unit : Analysis_Unit;
-
-      Buffer_Str : String (1 .. Positive (Buffer_Size));
-      for Buffer_Str'Address use Convert (Buffer);
    begin
-      Unit := Get_From_Buffer
-        (Ctx,
-         Value (Filename),
-         Value_Or_Empty (Charset),
-         Buffer_Str);
-      return Wrap (Unit);
+      Clear_Last_Exception;
+
+      declare
+         Ctx : constant Analysis_Context := Unwrap (Context);
+         Unit : Analysis_Unit;
+
+         Buffer_Str : String (1 .. Positive (Buffer_Size));
+         for Buffer_Str'Address use Convert (Buffer);
+      begin
+         Unit := Get_From_Buffer
+           (Ctx,
+            Value (Filename),
+            Value_Or_Empty (Charset),
+            Buffer_Str);
+         return Wrap (Unit);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${analysis_unit_type} (System.Null_Address);
    end ${capi.get_name("get_analysis_unit_from_buffer")};
 
    function ${capi.get_name("remove_analysis_unit")}
      (Context  : ${analysis_context_type};
       Filename : chars_ptr) return int
    is
-      Ctx : constant Analysis_Context := Unwrap (Context);
    begin
+      Clear_Last_Exception;
+
+      declare
+         Ctx : constant Analysis_Context := Unwrap (Context);
       begin
-         Remove (Ctx, Value (Filename));
-      exception
-         when Constraint_Error =>
-            return 0;
+         begin
+            Remove (Ctx, Value (Filename));
+         exception
+            when Constraint_Error =>
+               return 0;
+         end;
+         return 1;
       end;
-      return 1;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
    end ${capi.get_name("remove_analysis_unit")};
 
    function ${capi.get_name("unit_root")} (Unit : ${analysis_unit_type})
                                            return ${node_type}
    is
-      U : constant Analysis_Unit := Unwrap (Unit);
    begin
-      return Wrap (U.AST_Root);
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+      begin
+         return Wrap (U.AST_Root);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${node_type} (System.Null_Address);
    end ${capi.get_name("unit_root")};
 
    function ${capi.get_name("unit_diagnostic_count")}
      (Unit : ${analysis_unit_type}) return unsigned
    is
-      U : constant Analysis_Unit := Unwrap (Unit);
    begin
-      return unsigned (U.Diagnostics.Length);
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+      begin
+         return unsigned (U.Diagnostics.Length);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
    end ${capi.get_name("unit_diagnostic_count")};
 
    function ${capi.get_name("unit_diagnostic")}
@@ -186,44 +256,78 @@ package body ${_self.ada_api_settings.lib_name}.C is
       N            : unsigned;
       Diagnostic_P : ${diagnostic_type}_Ptr) return int
    is
-      U : constant Analysis_Unit := Unwrap (Unit);
    begin
-      if N < unsigned (U.Diagnostics.Length) then
-         declare
-            D_In  : Diagnostic renames U.Diagnostics (Natural (N));
-            D_Out : ${diagnostic_type} renames Diagnostic_P.all;
-         begin
-            D_Out.Sloc_Range := Wrap (D_In.Sloc_Range);
-            D_Out.Message := Wrap (D_In.Message);
-            return 1;
-         end;
-      else
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+      begin
+         if N < unsigned (U.Diagnostics.Length) then
+            declare
+               D_In  : Diagnostic renames U.Diagnostics (Natural (N));
+               D_Out : ${diagnostic_type} renames Diagnostic_P.all;
+            begin
+               D_Out.Sloc_Range := Wrap (D_In.Sloc_Range);
+               D_Out.Message := Wrap (D_In.Message);
+               return 1;
+            end;
+         else
+            return 0;
+         end if;
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
          return 0;
-      end if;
    end ${capi.get_name("unit_diagnostic")};
 
    function ${capi.get_name("unit_incref")}
      (Unit : ${analysis_unit_type}) return ${analysis_unit_type}
    is
-      U : constant Analysis_Unit := Unwrap (Unit);
    begin
-      Inc_Ref (U);
-      return Unit;
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+      begin
+         Inc_Ref (U);
+         return Unit;
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${analysis_unit_type} (System.Null_Address);
    end ${capi.get_name("unit_incref")};
 
    procedure ${capi.get_name("unit_decref")} (Unit : ${analysis_unit_type})
    is
-      U : Analysis_Unit := Unwrap (Unit);
    begin
-      Dec_Ref (U);
+      Clear_Last_Exception;
+
+      declare
+         U : Analysis_Unit := Unwrap (Unit);
+      begin
+         Dec_Ref (U);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end ${capi.get_name("unit_decref")};
 
    procedure ${capi.get_name("unit_reparse_from_file")}
      (Unit : ${analysis_unit_type}; Charset : chars_ptr)
    is
-      U : constant Analysis_Unit := Unwrap (Unit);
    begin
-      Reparse (U, Value_Or_Empty (Charset));
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+      begin
+         Reparse (U, Value_Or_Empty (Charset));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end ${capi.get_name("unit_reparse_from_file")};
 
    procedure ${capi.get_name("unit_reparse_from_buffer")}
@@ -232,19 +336,35 @@ package body ${_self.ada_api_settings.lib_name}.C is
       Buffer      : chars_ptr;
       Buffer_Size : size_t)
    is
-      U : constant Analysis_Unit := Unwrap (Unit);
-      Buffer_Str : String (1 .. Positive (Buffer_Size));
-      for Buffer_Str'Address use Convert (Buffer);
    begin
-      Reparse (U, Value_Or_Empty (Charset), Buffer_Str);
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+         Buffer_Str : String (1 .. Positive (Buffer_Size));
+         for Buffer_Str'Address use Convert (Buffer);
+      begin
+         Reparse (U, Value_Or_Empty (Charset), Buffer_Str);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end ${capi.get_name("unit_reparse_from_buffer")};
 
    procedure ${capi.get_name("unit_populate_lexical_env")}
      (Unit : ${analysis_unit_type})
    is
-      U : constant Analysis_Unit := Unwrap (Unit);
    begin
-      Populate_Lexical_Env (U);
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+      begin
+         Populate_Lexical_Env (U);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end ${capi.get_name("unit_populate_lexical_env")};
 
    ---------------------------------
@@ -263,44 +383,88 @@ package body ${_self.ada_api_settings.lib_name}.C is
    function ${capi.get_name("node_kind")} (Node : ${node_type})
       return ${node_kind_type}
    is
-      N : constant ${root_node_type_name} := Unwrap (Node);
    begin
-      return ${node_kind_type} (Kind (N));
+      Clear_Last_Exception;
+
+      declare
+         N : constant ${root_node_type_name} := Unwrap (Node);
+      begin
+         return ${node_kind_type} (Kind (N));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${node_kind_type}'First;
    end ${capi.get_name("node_kind")};
 
    function ${capi.get_name("kind_name")} (Kind : ${node_kind_type})
                                            return ${text_type}
    is
-      Name : Text_Access renames Node_Kind_Names (Natural (Kind));
    begin
-      return (Chars => Name.all'Address, Length => Name'Length);
+      Clear_Last_Exception;
+
+      declare
+         Name : Text_Access renames Node_Kind_Names (Natural (Kind));
+      begin
+         return (Chars => Name.all'Address, Length => Name'Length);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return (System.Null_Address, 0);
    end ${capi.get_name("kind_name")};
 
    procedure ${capi.get_name("node_sloc_range")}
      (Node         : ${node_type};
       Sloc_Range_P : ${sloc_range_type}_Ptr)
    is
-      N : constant ${root_node_type_name} := Unwrap (Node);
    begin
-      Sloc_Range_P.all := Wrap (Sloc_Range (N));
+      Clear_Last_Exception;
+
+      declare
+         N : constant ${root_node_type_name} := Unwrap (Node);
+      begin
+         Sloc_Range_P.all := Wrap (Sloc_Range (N));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end ${capi.get_name("node_sloc_range")};
 
    function ${capi.get_name("lookup_in_node")}
      (Node : ${node_type};
       Sloc : ${sloc_type}_Ptr) return ${node_type}
    is
-      N : constant ${root_node_type_name} := Unwrap (Node);
-      S : constant Source_Location := Unwrap (Sloc.all);
    begin
-      return Wrap (Lookup (N, S));
+      Clear_Last_Exception;
+
+      declare
+         N : constant ${root_node_type_name} := Unwrap (Node);
+         S : constant Source_Location := Unwrap (Sloc.all);
+      begin
+         return Wrap (Lookup (N, S));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${node_type} (System.Null_Address);
    end ${capi.get_name("lookup_in_node")};
 
    function ${capi.get_name("node_child_count")} (Node : ${node_type})
                                                   return unsigned
    is
-      N : constant ${root_node_type_name} := Unwrap (Node);
    begin
-      return unsigned (Child_Count (N));
+      Clear_Last_Exception;
+
+      declare
+         N : constant ${root_node_type_name} := Unwrap (Node);
+      begin
+         return unsigned (Child_Count (N));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
    end ${capi.get_name("node_child_count")};
 
    function ${capi.get_name("node_child")}
@@ -308,89 +472,116 @@ package body ${_self.ada_api_settings.lib_name}.C is
       N       : unsigned;
       Child_P : ${node_type}_Ptr) return int
    is
-      Nod    : constant ${root_node_type_name} := Unwrap (Node);
-      Result : ${root_node_type_name};
-      Exists : Boolean;
    begin
-      if N > unsigned (Natural'Last) then
+      Clear_Last_Exception;
+
+      declare
+         Nod    : constant ${root_node_type_name} := Unwrap (Node);
+         Result : ${root_node_type_name};
+         Exists : Boolean;
+      begin
+         if N > unsigned (Natural'Last) then
+            return 0;
+         end if;
+         Get_Child (Nod, Natural (N), Exists, Result);
+         if Exists then
+            Child_P.all := Wrap (Result);
+            return 1;
+         else
+            return 0;
+         end if;
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
          return 0;
-      end if;
-      Get_Child (Nod, Natural (N), Exists, Result);
-      if Exists then
-         Child_P.all := Wrap (Result);
-         return 1;
-      else
-         return 0;
-      end if;
    end ${capi.get_name("node_child")};
 
    function ${capi.get_name("token_text")} (Token : ${token_type})
                                             return ${text_type}
    is
-      T : Langkit_Support.Tokens.Token renames Unwrap (Token).all;
    begin
-      return (if T.Text = null
-             then (Chars => System.Null_Address, Length => 0)
-             else (Chars => T.Text.all'Address, Length => T.Text'Length));
+      Clear_Last_Exception;
+
+      declare
+         T : Langkit_Support.Tokens.Token renames Unwrap (Token).all;
+      begin
+         return (if T.Text = null
+                 then (Chars => System.Null_Address, Length => 0)
+                 else (Chars => T.Text.all'Address, Length => T.Text'Length));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return (System.Null_Address, 0);
    end ${capi.get_name("token_text")};
 
    function ${capi.get_name("text_to_locale_string")}
      (Text : ${text_type}) return System.Address
    is
-      use GNATCOLL.Iconv;
-
-      Input_Byte_Size : constant size_t := 4 * Text.Length;
-
-      Output_Byte_Size : constant size_t := Input_Byte_Size + 1;
-      --  Assuming no encoding will take more than 4 bytes per character, 4
-      --  times the size of the input text plus one null byte should be enough
-      --  to hold the result. This is a development helper anyway, so we don't
-      --  have performance concerns.
-
-      Result : constant System.Address := System.Memory.Alloc
-        (System.Memory.size_t (Output_Byte_Size));
-      --  Buffer we are going to return to the caller. We use
-      --  System.Memory.Alloc so that users can call C's "free" function in
-      --  order to free it.
-
-      Input : String (1 .. Natural (Input_Byte_Size));
-      for Input'Address use Text.Chars;
-
-      Output : String (1 .. Natural (Output_Byte_Size));
-      for Output'Address use Result;
-
-      State                     : Iconv_T;
-      Input_Index, Output_Index : Positive := 1;
-      Status                    : Iconv_Result;
-
-      From_Code : constant String :=
-        (if System."=" (System.Default_Bit_Order, System.Low_Order_First)
-         then UTF32LE
-         else UTF32BE);
-
    begin
-      --  GNATCOLL.Iconv raises Constraint_Error exceptions for empty strings,
-      --  so handle them ourselves.
+      Clear_Last_Exception;
 
-      if Input_Byte_Size = 0 then
-         Output (1) := ASCII.NUL;
-      end if;
+      declare
+         use GNATCOLL.Iconv;
 
-      --  Encode to the locale. Don't bother with error checking...
+         Input_Byte_Size : constant size_t := 4 * Text.Length;
 
-      Set_Locale;
-      State := Iconv_Open
-        (To_Code         => Locale,
-         From_Code       => From_Code,
-         Transliteration => True,
-         Ignore          => True);
-      Iconv (State, Input, Input_Index, Output, Output_Index, Status);
-      Iconv_Close (State);
+         Output_Byte_Size : constant size_t := Input_Byte_Size + 1;
+         --  Assuming no encoding will take more than 4 bytes per character, 4
+         --  times the size of the input text plus one null byte should be
+         --  enough to hold the result. This is a development helper anyway, so
+         --  we don't have performance concerns.
 
-      --  Don't forget the trailing NULL character to keep C programs happy
-      Output (Output_Index) := ASCII.NUL;
+         Result : constant System.Address := System.Memory.Alloc
+           (System.Memory.size_t (Output_Byte_Size));
+         --  Buffer we are going to return to the caller. We use
+         --  System.Memory.Alloc so that users can call C's "free" function in
+         --  order to free it.
 
-      return Result;
+         Input : String (1 .. Natural (Input_Byte_Size));
+         for Input'Address use Text.Chars;
+
+         Output : String (1 .. Natural (Output_Byte_Size));
+         for Output'Address use Result;
+
+         State                     : Iconv_T;
+         Input_Index, Output_Index : Positive := 1;
+         Status                    : Iconv_Result;
+
+         From_Code : constant String :=
+           (if System."=" (System.Default_Bit_Order, System.Low_Order_First)
+            then UTF32LE
+            else UTF32BE);
+
+      begin
+         --  GNATCOLL.Iconv raises Constraint_Error exceptions for empty
+         --  strings, so handle them ourselves.
+
+         if Input_Byte_Size = 0 then
+            Output (1) := ASCII.NUL;
+         end if;
+
+         --  Encode to the locale. Don't bother with error checking...
+
+         Set_Locale;
+         State := Iconv_Open
+           (To_Code         => Locale,
+            From_Code       => From_Code,
+            Transliteration => True,
+            Ignore          => True);
+         Iconv (State, Input, Input_Index, Output, Output_Index, Status);
+         Iconv_Close (State);
+
+         --  Don't forget the trailing NULL character to keep C programs happy
+         Output (Output_Index) := ASCII.NUL;
+
+         return Result;
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return System.Null_Address;
    end ${capi.get_name("text_to_locale_string")};
 
 
@@ -413,7 +604,13 @@ package body ${_self.ada_api_settings.lib_name}.C is
       return unsigned
    is
    begin
+      Clear_Last_Exception;
+
       return unsigned (Register_Extension (Value (Name)));
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
    end ${capi.get_name("register_extension")};
 
    function ${capi.get_name("node_extension")}
@@ -422,11 +619,20 @@ package body ${_self.ada_api_settings.lib_name}.C is
       Dtor   : ${capi.get_name("node_extension_destructor")})
       return System.Address
    is
-      N  : constant ${root_node_type_name} := Unwrap (Node);
-      ID : constant Extension_ID := Extension_Id (Ext_Id);
-      D  : constant Extension_Destructor := Convert (Dtor);
    begin
-      return Get_Extension (N, ID, D).all'Address;
+      Clear_Last_Exception;
+
+      declare
+         N  : constant ${root_node_type_name} := Unwrap (Node);
+         ID : constant Extension_ID := Extension_Id (Ext_Id);
+         D  : constant Extension_Destructor := Convert (Dtor);
+      begin
+         return Get_Extension (N, ID, D).all'Address;
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return System.Null_Address;
    end ${capi.get_name("node_extension")};
 
    ----------
@@ -440,5 +646,49 @@ package body ${_self.ada_api_settings.lib_name}.C is
       Get_Wide_Wide_String (S, Chars, Length);
       return (Chars.all'Address, size_t (Length));
    end Wrap;
+
+   ------------------------
+   -- Set_Last_Exception --
+   ------------------------
+
+   procedure Set_Last_Exception (Exc  : Exception_Occurrence) is
+   begin
+      --  If it's the first time, allocate room for the exception information
+
+      if Last_Exception = null then
+         Last_Exception := new ${exception_type};
+
+      --  If it is not the first time, free memory allocated for the last
+      --  exception.
+
+      elsif Last_Exception.Information /= Null_Ptr then
+         Free (Last_Exception.Information);
+      end if;
+
+      Last_Exception.Information := New_String (Exception_Information (Exc));
+   end Set_Last_Exception;
+
+   --------------------------
+   -- Clear_Last_Exception --
+   --------------------------
+
+   procedure Clear_Last_Exception is
+   begin
+      if Last_Exception /= null then
+         Free (Last_Exception.Information);
+      end if;
+   end Clear_Last_Exception;
+
+   function ${capi.get_name("get_last_exception")} return ${exception_type}_Ptr
+   is
+   begin
+      if Last_Exception = null
+         or else Last_Exception.Information = Null_Ptr
+      then
+         return null;
+      else
+         return Last_Exception;
+      end if;
+   end ${capi.get_name("get_last_exception")};
 
 end ${_self.ada_api_settings.lib_name}.C;

@@ -54,6 +54,24 @@ class _Diagnostic(ctypes.Structure):
                 ("message", _text)]
 
 
+class _Exception(ctypes.Structure):
+    _fields_ = [("information", ctypes.c_char_p)]
+
+
+class NativeException(Exception):
+    """
+    Exception raised when the underlying C API reports an error that occurred
+    in the library.
+
+    This kind of exception is raised for internal errors: they should never
+    happen in normal situations and if they are raised at some point, it means
+    the state is potentially corrupted.
+
+    Nevertheless, the library does its best not to crash the program,
+    materializing internal errors as Python exceptions.
+    """
+    pass
+
 class PropertyError(Exception):
     ${py_doc('langkit.property_error', 4)}
     pass
@@ -406,15 +424,29 @@ _c_lib = ctypes.cdll.LoadLibrary(
 )
 
 
-def _import_func(name, argtypes, restype):
+def _import_func(name, argtypes, restype, exc_wrap=True):
     """
     Import "name" from the C library, set its arguments/return types and return
     the binding.
+
+    :param bool exc_wrap: If True, wrap the returned function to check for
+      exceptions.
     """
     func = getattr(_c_lib, name)
     func.argtypes = argtypes
     func.restype = restype
-    return func
+
+    # Wrapper for "func" that raises a NativeException in case of internal
+    # error.
+
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        exc = _get_last_exception()
+        if exc:
+            raise NativeException(exc.contents.information)
+        return result
+
+    return wrapper if exc_wrap else func
 
 
 % for array_type in _self.sorted_types(_self.array_types):
@@ -424,7 +456,7 @@ ${array_types.decl(array_type)}
 
 _initialize = _import_func(
     '${capi.lib_name}_initialize',
-    [], None
+    [], None, exc_wrap=False
 )
 _initialize()
 
@@ -559,6 +591,13 @@ _node_extension = _import_func(
     '${capi.get_name("node_extension")}',
     [_node, ctypes.c_uint, _node_extension_destructor],
     ctypes.POINTER(ctypes.c_void_p)
+)
+
+# Misc
+_get_last_exception = _import_func(
+   '${capi.get_name("get_last_exception")}',
+   [], ctypes.POINTER(_Exception),
+   exc_wrap=False
 )
 
 

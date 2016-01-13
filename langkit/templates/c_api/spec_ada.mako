@@ -64,8 +64,14 @@ package ${_self.ada_api_settings.lib_name}.C is
      with Convention => C;
    ${ada_c_doc('langkit.diagnostic_type', 3)}
 
+   type ${exception_type} is record
+      Information : chars_ptr;
+      ${ada_c_doc('langkit.exception_type.information', 6)}
+   end record;
+   ${ada_c_doc('langkit.exception_type', 3)}
+
    % for type_name in (node_type, token_type, sloc_type, sloc_range_type, \
-                       diagnostic_type):
+                       diagnostic_type, exception_type):
       type ${type_name}_Ptr is access ${type_name};
    % endfor
 
@@ -309,5 +315,15 @@ package ${_self.ada_api_settings.lib_name}.C is
            Convention    => C,
            External_name => "${capi.get_name("node_extension")}";
    ${ada_c_doc('langkit.node_extension', 3)}
+
+   ----------
+   -- Misc --
+   ----------
+
+   function ${capi.get_name("get_last_exception")} return ${exception_type}_Ptr
+     with Export        => True,
+          Convention    => C,
+          External_Name => "${capi.get_name('get_last_exception')}";
+   ${ada_c_doc('langkit.get_last_exception', 3)}
 
 end ${_self.ada_api_settings.lib_name}.C;

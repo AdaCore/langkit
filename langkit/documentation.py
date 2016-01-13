@@ -76,6 +76,18 @@ documentations = {
     'langkit.diagnostic_type': Template("""
         Analysis unit diagnostics.
     """),
+    'langkit.exception_type': Template("""
+        Holder for native exceptions-related information.  Memory management
+        for this and all the fields is handled by the library: one just has to
+        make sure not to keep references to it.
+
+        TODO: For the moment, this structure contains already formatted
+        information, but depending on possible future Ada runtime improvements,
+        this might change.
+    """),
+    'langkit.exception_type.information': Template("""
+        Message and context information associated with this exception.
+    """),
     'langkit.property_error': Template("""
         Raised when an error occurs while evaluating a property.
     """),
@@ -285,6 +297,16 @@ documentations = {
 
         Note that the pointer is not guaranteed to stay valid after further
         calls to this function.
+    """),
+
+    #
+    # Misc
+    #
+
+    'langkit.get_last_exception': Template("""
+        Return exception information for the last error that happened in the
+        current thread. Will be automatically allocated on error and free'd on
+        the next error.
     """),
 }
 

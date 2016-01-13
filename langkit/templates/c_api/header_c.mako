@@ -84,6 +84,17 @@ typedef struct {
 } ${diagnostic_type};
 
 
+${c_doc('langkit.exception_type')}
+typedef struct {
+   ${c_doc('langkit.exception_type.information')}
+   const char *information;
+} ${exception_type};
+
+/* All the functions below can potentially raise an exception, so
+   ${capi.get_name("get_last_exception")} must be checked after them even
+   before trying to use the returned value.  */
+
+
 /*
  * Data structures held in AST nodes
  */
@@ -253,6 +264,14 @@ ${capi.get_name("node_extension")}(
     unsigned ext_id,
     ${capi.get_name("node_extension_destructor")} dtor
 );
+
+/*
+ * Misc
+ */
+
+${c_doc('langkit.get_last_exception')}
+extern const ${exception_type} *
+${capi.get_name('get_last_exception')}(void);
 
 #ifdef __cplusplus
 }

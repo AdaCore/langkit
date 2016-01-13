@@ -99,6 +99,7 @@ def make_renderer(base_renderer=None):
             'sloc_range_type':       SourceLocationRangeType.c_type(capi).name,
             'text_type':             CAPIType(capi, 'text').name,
             'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
+            'exception_type':        CAPIType(capi, 'exception').name,
         })
     return base_renderer.update(template_args)
 
