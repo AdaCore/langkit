@@ -30,7 +30,7 @@ from langkit import compiled_types, names
 from langkit.common import gen_name, gen_names
 from langkit.compile_context import get_context
 from langkit.compiled_types import (
-    CompiledType, BoolType, LongType, Token, ASTNode, list_type, decl_type
+    CompiledType, BoolType, LongType, Token, ASTNode, decl_type
 )
 from langkit.template_utils import TemplateEnvironment
 from langkit.utils import (Colors, common_ancestor, copy_with, col,
@@ -655,7 +655,7 @@ class List(Parser):
         if self.revtree_class:
             return common_ancestor(self.parser.get_type(), self.revtree_class)
         else:
-            return list_type(self.parser.get_type())
+            return self.parser.get_type().list_type()
 
     def compute_fields_types(self):
         Parser.compute_fields_types(self)

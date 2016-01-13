@@ -224,6 +224,43 @@ class CompiledType(object):
         else:
             return cls == formal
 
+    # We want structural equality on lists whose elements have the same types.
+    # Memoization is one way to make sure that, for each CompiledType subclass
+    # X: X.list_type() is X.list_type().
+    @classmethod
+    @memoized
+    def list_type(cls):
+        """
+        Return an ASTNode subclass that represent a list of "cls".
+        """
+        element_type = cls
+
+        def add_to_context(cls):
+            if cls in get_context().types:
+                return
+            get_context().types.add(cls)
+            get_context().list_types.add(cls.element_type())
+
+            # Make sure the type this list contains is already declared
+            cls.element_type().add_to_context()
+
+        return type(
+            '{}ListType'.format(element_type.name()),
+            (StructMetaClass.root_grammar_class, ), {
+                'is_ptr': True,
+
+                'name': classmethod(lambda cls:
+                                    names.Name('List') +
+                                    cls.element_type().name()),
+                'add_to_context': classmethod(add_to_context),
+                'nullexpr': classmethod(lambda cls: null_constant()),
+
+                'is_list_type': True,
+                'element_type': classmethod(lambda cls: element_type),
+            }
+        )
+
+    # Likewise for array types
     @classmethod
     @memoized
     def array_type(cls):
@@ -1116,44 +1153,6 @@ class ArrayType(CompiledType):
         :rtype: names.Name
         """
         return names.Name(cls.pkg_vector().camel_with_underscores + '.Vector')
-
-
-# We want structural equality on lists whose elements have the same types.
-# Memoization is one way to make sure that, for each CompiledType subclass X::
-#    list_type(X) == list_type(X)
-@memoized
-def list_type(element_type):
-    """
-    Return an ASTNode subclass that represent a list of `element_type`.
-
-    :param ASTNode element_type: Type parameter. The type of the elements of
-        the resulting list.
-    """
-
-    def add_to_context(cls):
-        if cls in get_context().types:
-            return
-        get_context().types.add(cls)
-        get_context().list_types.add(cls.element_type())
-
-        # Make sure the type this list contains is already declared
-        cls.element_type().add_to_context()
-
-    return type(
-        '{}ListType'.format(element_type.name()),
-        (StructMetaClass.root_grammar_class, ), {
-            'is_ptr': True,
-
-            'name': classmethod(lambda cls:
-                                names.Name('List') +
-                                cls.element_type().name()),
-            'add_to_context': classmethod(add_to_context),
-            'nullexpr': classmethod(lambda cls: null_constant()),
-
-            'is_list_type': True,
-            'element_type': classmethod(lambda cls: element_type),
-        }
-    )
 
 
 class EnumType(CompiledType):
