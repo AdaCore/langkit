@@ -53,8 +53,7 @@ package body ${_self.ada_api_settings.lib_name}.AST_List is
    -----------------
 
    overriding
-   function Child_Count (Node : access List_Type)
-                         return Natural
+   function Child_Count (Node : access List_Type) return Natural
    is
    begin
       return Length (Node.Vec);

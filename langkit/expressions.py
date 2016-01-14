@@ -17,8 +17,9 @@ from contextlib import contextmanager
 
 from langkit import names
 from langkit.compiled_types import (
-    render as ct_render, LongType, LexicalEnvType, Token, BoolType, ASTNode,
-    Struct, StructMetaClass, CompiledType, AbstractNodeData
+    render as ct_render, LongType, LexicalEnvType, Token, BoolType,
+    ASTNode, Struct, StructMetaClass, CompiledType,
+    AbstractNodeData
 )
 from langkit.utils import Colors, col, assert_type
 
@@ -176,6 +177,9 @@ class AbstractExpression(Frozable):
         def _build_map(expr, filter=None):
             return Map(self, expr, filter)
 
+        def _build_index_expr(index_expr, or_null=True):
+            return CollectionGet(self, index_expr, or_null=or_null)
+
         # Constructors for primitives that don't take any parameters
         direct_constructors = {
             'is_null':
@@ -193,7 +197,8 @@ class AbstractExpression(Frozable):
             'is_a': lambda astnode: IsA(self, astnode),
             'map': _build_map,
             'mapcat': _build_mapcat,
-            'get': lambda tok: EnvGet(self, tok)
+            'get': lambda tok: EnvGet(self, tok),
+            'at': _build_index_expr
         }
 
         return direct_constructors.get(
@@ -862,6 +867,43 @@ Self = PlaceholderSingleton(names.Name("Self"))
 Env = PlaceholderSingleton(names.Name("Current_Env"), type=LexicalEnvType)
 
 
+class CollectionGet(AbstractExpression):
+    """
+    Abstract expression that will get an element from a collection.
+    """
+
+    def __init__(self, coll_expr, index_expr, or_null=True):
+        """
+        :param AbstractExpression coll_expr: The expression representing the
+            collection to get from.
+        :param AbstractExpression index_expr: The expression representing the
+            index of the element to get.
+        :param bool or_null: If true, the expression will return null if the
+            index is not valid for the collection. If False, it will raise an
+            exception.
+        """
+        self.coll_expr = coll_expr
+        self.index_expr = index_expr
+        self.or_null = or_null
+
+    def construct(self):
+        coll_expr = construct(self.coll_expr)
+        index_expr = construct(self.index_expr)
+
+        assert coll_expr.type.is_collection(), (
+            "Expression needs to be of a collection type, got {}".format(
+                coll_expr.type.name().camel
+            )
+        )
+        assert index_expr.type is LongType, (
+            "Index expression needs to be of long type, got {}".format(
+                index_expr.type.name().camel
+            )
+        )
+
+        return CollectionGetExpr(coll_expr, index_expr, or_null=self.or_null)
+
+
 def render(*args, **kwargs):
     return ct_render(*args, property=Property.get(), Self=Self, **kwargs)
 
@@ -906,6 +948,43 @@ class ResolvedExpression(object):
         :rtype: langkit.compiled_types.CompiledType
         """
         raise NotImplementedError()
+
+
+class CollectionGetExpr(ResolvedExpression):
+    """
+    Abstract expression that will get an element from a collection.
+    """
+
+    def __init__(self, coll_expr, index_expr, or_null):
+        """
+        See CollectionGet for more details.
+
+        :type coll_expr: ResolvedExpression
+        :type index_expr: ResolvedExpression
+        :type or_null: bool
+        """
+        self.coll_expr = coll_expr
+        self.index_expr = index_expr
+        self.or_null = or_null
+
+    @property
+    def type(self):
+        """
+        :rtype: CompiledType
+        """
+        return self.coll_expr.type.element_type
+
+    def render_pre(self):
+        return "{}\n{}".format(
+            self.coll_expr.render_pre(),
+            self.index_expr.render_pre()
+        )
+
+    def render_expr(self):
+        return "Get ({}, {}, Or_Null => {})".format(
+            self.coll_expr.render_expr(), self.index_expr.render_expr(),
+            self.or_null
+        )
 
 
 class EnvGetExpr(ResolvedExpression):

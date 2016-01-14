@@ -2,9 +2,9 @@
 
 <%def name="public_decl(cls)">
 
-   <% elt_type = cls.element_type() %>
+   <% elt_type = cls.element_type().name() %>
 
-   type ${cls.api_name()} is array (Positive range <>) of ${elt_type.name()};
+   type ${cls.api_name()} is array (Positive range <>) of ${elt_type};
    type ${cls.pointed()} (N : Natural) is record
       Items : ${cls.api_name()} (1 .. N);
    end record;
@@ -25,6 +25,16 @@
    % endif
 
    package ${cls.pkg_vector()} is new Langkit_Support.Vectors
-     (${elt_type.name()});
+     (${elt_type});
+
+   ## Helper getter generated for properties code. Used in CollectionGet's code
+   function Get
+     (T       : ${cls.name()};
+      Index   : Natural;
+      Or_Null : Boolean := False) return ${elt_type}
+   is
+     (if Index < T.Items'Length
+      then T.Items (Index + 1)
+      else (if Or_Null then ${cls.element_type().nullexpr()} else raise Property_Error));
 
 </%def>

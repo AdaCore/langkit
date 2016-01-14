@@ -29,6 +29,11 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
    type ${root_node_type_name} is access all ${root_node_value_type}'Class;
    --  Most generic AST node type
 
+   ## This type is defined here so as to be accessible to the AST array Get
+   ## helper.
+   Property_Error : exception;
+   ${ada_doc('langkit.property_error', 3)}
+
    ----------------
    -- Extensions --
    ----------------
@@ -314,8 +319,5 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
      (Node : access ${root_node_value_type})
       return ${root_node_array.name()};
    --  Return the list of parents for this node (this node included)
-
-   Property_Error : exception;
-   ${ada_doc('langkit.property_error', 3)}
 
 end ${_self.ada_api_settings.lib_name}.AST_Root;

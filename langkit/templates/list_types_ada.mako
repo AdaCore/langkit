@@ -26,4 +26,14 @@
    package List_${type}_Alloc is
      new Tagged_Alloc (List_${type}_Type);
 
+   ## Helper getter generated for properties code. Used in CollectionGet's code
+   function Get
+     (Node    : List_${type};
+      Index   : Natural;
+      Or_Null : Boolean := False) return ${root_node_type_name}
+   is
+     (if Index < Node.Child_Count
+      then Ada_Node (Lists_${type}.Node_Vectors.Get_At_Index (Node.Vec, Index))
+      else (if Or_Null then null else raise Property_Error));
+
 </%def>
