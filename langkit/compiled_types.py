@@ -132,6 +132,10 @@ class CompiledType(object):
         )
 
     @classmethod
+    def is_collection(cls):
+        return False
+
+    @classmethod
     def add_to_context(cls):
         """
         If needed, put bits into the global context to implement this compiled
@@ -257,6 +261,7 @@ class CompiledType(object):
                 'nullexpr': classmethod(lambda cls: null_constant()),
 
                 'is_list_type': True,
+                'is_collection': classmethod(lambda cls: True),
                 'element_type': classmethod(lambda cls: element_type),
             }
         )
@@ -1119,6 +1124,10 @@ class ArrayType(CompiledType):
 
         # Make sure the type this list contains is already declared
         cls.element_type().add_to_context()
+
+    @classmethod
+    def is_collection(cls):
+        return True
 
     @classmethod
     def api_name(cls):

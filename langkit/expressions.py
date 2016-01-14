@@ -274,8 +274,7 @@ class CollectionExpression(AbstractExpression):
         :rtype: ResolvedExpression
         """
         collection_expr = construct(self.collection)
-        assert (collection_expr.type.is_list_type or
-                issubclass(collection_expr.type, ArrayType)), (
+        assert collection_expr.type.is_collection(), (
             'Map cannot iterate on {}, which is not a collection'
         ).format(collection_expr.type.name().camel)
 
@@ -572,9 +571,7 @@ class Map(CollectionExpression):
         ind_var = assert_type(construct(self.induction_var), VarExpr)
         expr = self.expr.construct()
 
-        assert (not self.concat or
-                expr.type.is_list_type or
-                issubclass(expr.type, ArrayType)), (
+        assert (not self.concat or expr.type.is_collection()), (
             'Cannot mapcat with expressions returning {} values'
             ' (collections expected instead)'
         ).format(expr.type.name())
