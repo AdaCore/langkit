@@ -224,6 +224,10 @@ class ManageScript(object):
             default='dev',
             help='Selects a preset for build options'
         )
+        make_parser.add_argument(
+            '--pretty-print', '-p', action='store_true',
+            help='Pretty-print generated source code'
+        )
 
         ###########
         # Install #
@@ -316,24 +320,28 @@ class ManageScript(object):
         printcol("Generating source for libadalang ...", Colors.HEADER)
         self.context.emit(file_root=self.dirs.build_dir())
 
-        def gnatpp(project_file):
+        def gnatpp(project_file, glob_pattern):
             try:
                 subprocess.check_call([
                     'gnatpp',
                     '-P{}'.format(project_file),
                     '-XLIBRARY_TYPE=relocatable',
                     '-rnb',
-                ], env=self.derived_env())
+                ] + glob.glob(glob_pattern), env=self.derived_env())
             except subprocess.CalledProcessError as exc:
                 print >> sys.stderr, 'Pretty-printing failed: {}'.format(exc)
                 sys.exit(1)
 
         if hasattr(args, 'pretty_print') and args.pretty_print:
-            printcol("Pretty-printing sources for libadalang ...",
+            printcol("Pretty-printing sources for Libadalang ...",
                      Colors.HEADER)
-            gnatpp(self.dirs.build_dir('lib', 'gnat',
-                                       '{}.gpr'.format(self.lib_name.lower())))
-            gnatpp(self.dirs.build_dir('src', 'parse.gpr'))
+            gnatpp(
+                self.dirs.build_dir('lib', 'gnat',
+                                    '{}.gpr'.format(self.lib_name.lower())),
+                self.dirs.build_dir('include', self.lib_name.lower(), '*.ad*')
+            )
+            gnatpp(self.dirs.build_dir('src', 'parse.gpr'),
+                   self.dirs.build_dir('src', '*.ad*'))
 
         printcol("Generation complete!", Colors.OKGREEN)
 
