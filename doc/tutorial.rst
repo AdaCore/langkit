@@ -109,9 +109,9 @@ Lexing
 
 We are about to start with the most elementary piece of code that will handle
 our language: the lexer!  Also known as a scanner, a lexer will take a stream
-of text (i.e.  your source files) and split it into *tokens* (or *lexems*),
+of text (i.e.  your source files) and split it into *tokens* (or *lexemes*),
 which are kind of "words" for programming languages. Langkit relies on Quex to
-generate an efficient lexer but hides you the gory details and let you just
+generate an efficient lexer but hides the gory details and lets you just
 write a Python description for the lexer. Fire up your favorite code editor and
 open ``language/lexer.py``.
 
@@ -135,7 +135,7 @@ we keep the text associated to it and if we do, how to store it.
 For instance we generally keep identifiers in symbol tables so that we can
 compare them efficiently (no string comparison, just a pointer equality, for
 example) and allocate memory for the text only once: identical identifiers will
-reference the memory chunk. On the other hand, string literals are almost
+reference the same memory chunk. On the other hand, string literals are almost
 always unique and thus are not good candidates for symbol tables.
 
 In Langkit, we declare the list of token kinds subclassing the ``LexerToken``
@@ -175,7 +175,7 @@ Ok, so here we have four kind of tokens:
 
   * Identifiers, which we'll use for function names and variable names so we
     want to put the corresponding text in a symbol table. We use ``WithSymbol``
-    insances to achieve this.
+    instances to achieve this.
 
   * Decimal literals (``Number``), for which we will keep the associated text
     so we can later extract the corresponding value later. We use ``WithText``
@@ -232,19 +232,19 @@ right you have what should be done with it:
   * The two ``Literal`` matchers hit on the corresponding keywords and
     associate the corresponding token kinds.
 
-  * Two two last ``Pattern`` will respectively match identifiers and numbers, and
-    emit the corresponding token kinds.
+  * The two last ``Pattern`` will respectively match identifiers and numbers,
+    and emit the corresponding token kinds.
 
 Only exact input strings trigger ``Literal`` matchers while the input is
 matched against a regular expression with ``Pattern`` matchers. Note that the
 order of rules is meaningful: here, the input is matched first against keywords
 and then only if there is no match, identifers and number patterns are matched.
-If ``Literal`` rules did appear at the end, ``def`` would always be emitted
+If ``Literal`` rules appeared at the end, ``def`` would always be emitted
 as an identifier.
 
 In both the token kinds definition and the rules specification above, we kept
 handling for the ``example`` token in order to keep the parser happy (it still
-references it). You will be able to get rid of it once we took care of the
+references it). You will be able to get rid of it once we take care of the
 parser.
 
 Alright, let's see how this affects our library. As for token kind definitions,
@@ -336,7 +336,7 @@ As usual, new code comes with its new dependencies: also complete the
 
 Each class definition is a way to declare how a particular AST node will look.
 Think of it as a kind of structure: here the ``Function`` AST node has two
-fields: ``proto`` an ``body``. Note that unlike most AST declarations out
+fields: ``proto`` and ``body``. Note that unlike most AST declarations out
 there, we did not associate types to the fields: this is expected as we will
 see later.
 
@@ -351,7 +351,7 @@ to use inheritance (as in `OOP
 describe such AST nodes: there is an abstract ``Expr`` class while the
 ``Number`` and ``BinaryExpr`` are concrete classes deriving from it.
 
-This is exactly the approach that Langkit handles: all "root" AST nodes derive
+This is exactly the approach that Langkit uses: all "root" AST nodes derive
 from the ``KaleidoscopeNode`` class, and you can create abstract classes (using
 the ``abstract`` class decorator) to create a hierarchy of node types.
 
@@ -359,13 +359,13 @@ Careful readers may also have spotted something else: the ``Operator``
 enumeration type. We use an enumeration type in order to store in the most
 simple way what kind of operation a ``BinaryExpr`` represents. As you can see,
 creating an enumeration type is very easy: just subclass ``EnumType`` and set
-the ``alternative`` field to a sequence of strings that will serve as
+the ``alternatives`` field to a sequence of strings that will serve as
 identifiers for the enumeration values (also called *enumerators*).
 
 Fine, we have our data structures so now we shall use them! In order to create
 a parser, Langkit requires you to describe a grammar, hence the ``Grammar``
 instantiation already present in ``parser.py``. Basically, the only thing you
-have to do with a grammar is to ada *rules* to it: a rule is a kind of
+have to do with a grammar is to add *rules* to it: a rule is a kind of
 sub-parser, in that it describes how to turn a stream of token into an AST.
 Rules can reference each other recursively: an expression can be a binary
 operator, but a binary operator is itself composed of expressions! And in order
@@ -406,7 +406,7 @@ declarations, function definitions or expressions.
 
     extern_decl=Row('extern', G.prototype) ^ ExternDecl,
 
-This one is interersting: the ``Row`` part matches the ``extern`` keyword
+This one is interesting: the ``Row`` part matches the ``extern`` keyword
 followed by what the ``prototype`` rule matches. Then, what the ``^
 ExternDecl`` part does is to take what the ``Row`` part matched and create an
 ``ExternDecl`` AST node to hold the result.
@@ -427,7 +427,7 @@ number of results the sub-parser yields (i.e. one for every sub-parser except
 
     function=Row('def', G.prototype, G.expr) ^ Function,
 
-We have here a pattern that is very similar to ``extern_decl``, expect that the
+We have here a pattern that is very similar to ``extern_decl``, except that the
 ``Row`` part has two non-discarded results: ``prototype`` and ``expr``.  This
 is fortunate, as the ``Function`` node requires two fields.
 
@@ -498,7 +498,7 @@ the right-hand-side of binary operations and the "forward" sub-parser: it
 references the ``prod_expr`` rule instead. On the other hand, ``prod_expr``
 references itself everywhere with the same exceptions.  This layering pattern
 is used to deal with associativity in the parser: going into details of parsing
-methods is not the purpose of this tutorial buf fortunately there are many
+methods is not the purpose of this tutorial but fortunately there are many
 articles that explain `how this works
 <https://www.google.fr/search?q=recursive+descent+parser+associativity>`_ (just
 remember that: yes, Langkit handles left recursivity!).
@@ -534,7 +534,7 @@ Until now, we completely put aside types in the AST: fields were declared
 without associated types. However, in order to generate the library, someone
 *has* to take care of assigning definite type to them. Langkit uses for that a
 `type inference <https://en.wikipedia.org/wiki/Type_inference>`_ algorithm
-which deduces types automatically from how AST nodes are used in the grammar.
+that deduces types automatically from how AST nodes are used in the grammar.
 For instance, doing the following (fictive example):
 
 .. code-block:: python
@@ -599,7 +599,7 @@ to launch another build and then run ``parse`` on some code:
     | | | | | | | | Number[1:42-1:43]
     | | | | | | | | | value: 1
 
-Yey! What a pretty AST! Here's also a very useful tip for grammar development:
+Yay! What a pretty AST! Here's also a very useful tip for grammar development:
 it's possible to run ``parse`` on rules that are not the main ones. For
 instance, imagine we want to test only the ``expr`` parsing rule: you just
 have to use the ``-r`` argument to specify that we want the parser to start
