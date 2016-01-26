@@ -51,8 +51,8 @@ class Manage(ManageScript):
     def create_context(self, args):
         from langkit.compile_context import CompileCtx
 
-        from language.lexer import kaleidoscope_lexer
-        from language.parser import kaleidoscope_grammar
+        from language.lexer import {lang_name_slug}_lexer
+        from language.parser import {lang_name_slug}_grammar
 
         return CompileCtx(lang_name={lang_name_repr},
                           main_rule_name='main_rule',
