@@ -359,6 +359,16 @@ class CompileCtx():
         """
         assert self.grammar, "Set grammar before calling emit"
 
+        unreferenced_rules = self.grammar.get_unreferenced_rules(
+            self.main_rule_name
+        )
+        if unreferenced_rules:
+            print (
+                "warning: The following parsing rules are not used: {}".format(
+                    ", ".join(sorted(unreferenced_rules))
+                )
+            )
+
         # Compute type information, so that it is available for further
         # compilation stages.
         self.compute_types()
@@ -427,13 +437,18 @@ class CompileCtx():
                 r.compile()
                 self.rules_to_fn_names[r_name] = r
 
+        not_resolved_types = set()
         for astnode_type in self.astnode_types:
-            assert astnode_type.is_type_resolved, (
-                "ASTNode subclass {} is not type resolved. It is probably "
-                "not used by the grammar, and its type not annotated".format(
-                    astnode_type.name()
-                )
+            if not astnode_type.is_type_resolved:
+                not_resolved_types.add(astnode_type)
+        assert not not_resolved_types, (
+            "The following ASTNode subclasss are not type resolved. They are"
+            " not used by the grammar, and their types not annotated:"
+            " {}".format(
+                ", ".join(astnode_type.name().camel
+                          for astnode_type in not_resolved_types)
             )
+        )
 
         for i, astnode in enumerate(
             (astnode

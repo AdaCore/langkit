@@ -116,6 +116,9 @@ class Grammar(object):
         :param dict[str, Parser] kwargs: The rules to add to the grammar.
         """
         for name, rule in kwargs.items():
+            assert name not in self.rules, (
+                "Rule {} is already present in the grammar".format(name)
+            )
             self.rules[name] = rule
             rule.set_name(names.Name.from_lower(name))
             rule.set_grammar(self)
@@ -128,6 +131,48 @@ class Grammar(object):
         :param str rule_name: The name of the rule.
         """
         return Defer(rule_name, lambda: self.rules[rule_name])
+
+    def get_unreferenced_rules(self, main_rule_name):
+        """
+        Return a set of names for all rules that are not transitively
+        referenced by the main rule.
+
+        :param str main_rule_name: Name of the main rule from which the
+            analysis is performed.
+        :rtype: set[str]
+        """
+        # We'll first build the set of rules that are referenced, then we'll
+        # know the ones not referenced.
+        referenced_rules = set()
+
+        def visit_parser(parser):
+            """
+            Visit all subparsers in "parser" and call "visit_rule" for Defer
+            parsers.
+
+            :param Parser parser: Parser to visit.
+            """
+            if isinstance(parser, Defer):
+                visit_rule(parser.name)
+
+            for sub_parser in parser.children():
+                visit_parser(sub_parser)
+
+        def visit_rule(rule_name):
+            """
+            Register "rule_name" as referenced and call "visit_parser" on the
+            root parser that implements it. Do nothing if "rule_name" is
+            already registered to avoid infinite recursion.
+            """
+            if rule_name in referenced_rules:
+                return
+            referenced_rules.add(rule_name)
+            visit_parser(self.rules[rule_name])
+
+        # The following will fill "referenced_rules" thanks to recursion
+        visit_rule(main_rule_name)
+
+        return set(self.rules) - referenced_rules
 
 
 class Parser(object):
