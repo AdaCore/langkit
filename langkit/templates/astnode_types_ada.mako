@@ -144,6 +144,7 @@
         (Node : access ${type_name})
          return ${root_node_kind_name}
       is
+         pragma Unreferenced (Node);
       begin
          return ${cls.name()}_Kind;
       end Kind;
@@ -154,6 +155,7 @@
 
       overriding
       function Kind_Name (Node : access ${type_name}) return String is
+         pragma Unreferenced (Node);
       begin
          return "${cls.repr_name()}";
       end Kind_Name;
@@ -204,6 +206,7 @@
 
       overriding
       function Child_Count (Node : access ${type_name}) return Natural is
+         pragma Unreferenced (Node);
       begin
          return ${len(astnode_fields)};
       end Child_Count;
@@ -274,8 +277,6 @@
       procedure Validate (Node   : access ${type_name};
                           Parent : ${root_node_type_name} := null)
       is
-         Nod : constant ${root_node_type_name} :=
-            ${root_node_type_name} (Node);
       begin
          if Node.Parent /= Parent then
             raise Program_Error;
@@ -375,8 +376,12 @@
 
       overriding function Do_Env_Actions
         (Self : access ${type_name};
-         Parent_Env: in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
+         Parent_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
       is
+         % if not cls.env_spec._add_env:
+            pragma Unreferenced (Parent_Env);
+         % endif
+
          use AST_Envs;
          use AST_Envs.Lexical_Env_Vectors;
          Ret : Lexical_Env := null;

@@ -510,3 +510,13 @@ def create_doc_printer(lang, formatter):
 ada_doc = create_doc_printer('ada', format_ada)
 c_doc = create_doc_printer('c', format_c)
 py_doc = create_doc_printer('python', format_python)
+
+
+def ada_c_doc(entity, column=0, **kwargs):
+    """
+    Shortcut to render documentation for a C entity with an Ada doc syntax.
+
+    :type entity: str|compiled_types.CompiledType
+    :type column: int
+    """
+    return ada_doc(entity, column, lang='c', **kwargs)

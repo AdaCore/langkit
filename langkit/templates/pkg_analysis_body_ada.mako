@@ -1,24 +1,19 @@
 ## vim: filetype=makoada
 
-<%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="struct_types"  file="struct_types_ada.mako" />
-
+with Ada.Containers;                  use Ada.Containers;
 with Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
-with GNATCOLL.Iconv;
-
-with Langkit_Support.Extensions;
-with Langkit_Support.PP_Utils; use Langkit_Support.PP_Utils;
-with Langkit_Support.Text;     use Langkit_Support.Text;
+with Langkit_Support.Text;   use Langkit_Support.Text;
+with Langkit_Support.Tokens; use Langkit_Support.Tokens;
 
 with ${get_context().ada_api_settings.lib_name}.Lexer;
-with ${get_context().ada_api_settings.lib_name}.Parsers;
-use ${get_context().ada_api_settings.lib_name}.Parsers;
+with ${get_context().ada_api_settings.lib_name}.AST.Parsers;
+use ${get_context().ada_api_settings.lib_name}.AST.Parsers;
 
-package body ${_self.ada_api_settings.lib_name} is
+package body ${_self.ada_api_settings.lib_name}.Analysis is
 
    procedure Destroy (Unit : Analysis_Unit);
 
@@ -402,16 +397,6 @@ package body ${_self.ada_api_settings.lib_name} is
       end loop;
    end PP_Trivia;
 
-   % for struct_type in _self.struct_types:
-   ${struct_types.body(struct_type)}
-   % endfor
-
-   % for astnode in _self.astnode_types:
-      % if astnode != _self.root_grammar_class:
-         ${astnode_types.body(astnode)}
-      % endif
-   % endfor
-
    --------------------------
    -- Populate_Lexical_Env --
    --------------------------
@@ -421,21 +406,4 @@ package body ${_self.ada_api_settings.lib_name} is
       Populate_Lexical_Env (Unit.AST_Root);
    end Populate_Lexical_Env;
 
-   ----------------
-   -- Initialize --
-   ----------------
-
-   procedure Initialize is
-   begin
-      --  Nowadays, on the platforms we support, everything has already been
-      --  automatically initialized. Still, this is a convenient place to check
-      --  that we actually have full Libiconv support: as nothing works without
-      --  it, we explicitely check support here instead of letting
-      --  user-unfriendly errors happen during lexing.
-
-      if not GNATCOLL.Iconv.Has_Iconv then
-         raise Program_Error with "Libiconv is not available";
-      end if;
-   end Initialize;
-
-end ${_self.ada_api_settings.lib_name};
+end ${_self.ada_api_settings.lib_name}.Analysis;

@@ -15,8 +15,10 @@ is
    ## Properties are evaluated in the context of a lexical environment. If none
    ## was passed to the property, we assume that the users want to evaluate it
    ## in the context of the scope of the node.
+   pragma Warnings (Off, "is not referenced");
    Current_Env : AST_Envs.Lexical_Env :=
      (if Lex_Env /= null then Lex_Env else Node.Parent_Env);
+   pragma Warnings (On, "is not referenced");
 
    ${property.vars.render()}
 begin

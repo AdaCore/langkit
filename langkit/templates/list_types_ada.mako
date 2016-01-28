@@ -15,7 +15,7 @@
 
    <% type = decl_type(element_type) %>
 
-   package Lists_${type} is new AST.List
+   package Lists_${type} is new AST_List
      (Node_Type   => ${type}_Type,
       Node_Access => ${type});
 

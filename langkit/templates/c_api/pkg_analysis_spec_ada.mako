@@ -1,8 +1,10 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"   file="array_types_ada.mako" />
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="enum_types"    file="enum_types_ada.mako" />
+
+with Ada.Exceptions;                  use Ada.Exceptions;
+with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Unchecked_Conversion;
 
 with System;
 
@@ -10,12 +12,15 @@ with Interfaces;           use Interfaces;
 with Interfaces.C;         use Interfaces.C;
 with Interfaces.C.Strings; use Interfaces.C.Strings;
 
-package ${_self.ada_api_settings.lib_name}.C is
+with Langkit_Support.Tokens; use Langkit_Support.Tokens;
 
-## The following must not output extra line breaks, hence the odd layout
-<%def name='ada_c_doc(entity, column=0, **kwargs)'><%
-   # Generate an Ada comment to document an entity in the C binding
-   kwargs['lang'] = 'c' %>${ada_doc(entity, column, **kwargs)}</%def>
+--  This package defines data types and subprograms to provide the
+--  implementation of the exported C API for analysis primitives.
+--
+--  Unless one wants to deal with C code, it is very likely that one needs to
+--  use this package.
+
+package ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    type ${analysis_context_type} is new System.Address;
    ${ada_c_doc('langkit.analysis_context_type', 3)}
@@ -77,24 +82,12 @@ package ${_self.ada_api_settings.lib_name}.C is
 
    type int_Ptr is access int;
 
-   % for enum_type in _self.sorted_types(_self.enum_types):
-      ${enum_types.spec(enum_type)}
-   % endfor
-
-   % for array_type in _self.sorted_types(_self.array_types):
-       ${array_types.decl(array_type)}
-   % endfor
-
    procedure Free (Address : System.Address)
      with Export        => True,
           Convention    => C,
           External_Name => "${capi.get_name('free')}";
    ${ada_c_doc('langkit.free', 3)}
    --  Helper to free objects in dynamic languages
-
-   % for rec in _self.struct_types:
-      type ${rec.c_type(capi).name}_Ptr is access ${rec.name()};
-   % endfor
 
    -------------------------
    -- Analysis primitives --
@@ -271,22 +264,6 @@ package ${_self.ada_api_settings.lib_name}.C is
    ${ada_c_doc('langkit.text_to_locale_string', 3)}
 
 
-   ---------------------------------------
-   -- Kind-specific AST node primitives --
-   ---------------------------------------
-
-   --  All these primitives return their result through an OUT parameter. They
-   --  return a boolean telling whether the operation was successful (it can
-   --  fail if the node does not have the proper type, for instance). When an
-   --  AST node is returned, its ref-count is left as-is.
-
-   % for astnode in _self.astnode_types:
-       % for field in astnode.fields_with_accessors():
-           ${astnode_types.accessor_decl(field)}
-       % endfor
-   % endfor
-
-
    -------------------------
    -- Extensions handling --
    -------------------------
@@ -326,4 +303,70 @@ package ${_self.ada_api_settings.lib_name}.C is
           External_Name => "${capi.get_name('get_last_exception')}";
    ${ada_c_doc('langkit.get_last_exception', 3)}
 
-end ${_self.ada_api_settings.lib_name}.C;
+   procedure Clear_Last_Exception;
+   --  Free the information contained in Last_Exception
+
+   procedure Set_Last_Exception (Exc  : Exception_Occurrence);
+   --  Free the information contained in Last_Exception and replace it with
+   --  newly allocated information from Exc.
+
+   ------------------------
+   -- Conversion helpers --
+   ------------------------
+
+   --  The following conversion helpers are use by the various C bindings
+
+   function Wrap (S : Source_Location) return ${sloc_type} is
+     ((S.Line, S.Column));
+   function Unwrap (S : ${sloc_type}) return Source_Location is
+     ((S.Line, S.Column));
+
+   function Wrap (S : Source_Location_Range) return ${sloc_range_type} is
+     ((Start_S => (S.Start_Line, S.Start_Column),
+       End_S   => (S.End_Line,   S.End_Column)));
+   function Unwrap (S : ${sloc_range_type}) return Source_Location_Range is
+     ((S.Start_S.Line, S.End_S.Line,
+       S.Start_S.Column, S.End_S.Column));
+
+   function Wrap (S : Unbounded_Wide_Wide_String) return ${text_type};
+
+   --  The following conversions are used only at the interface between Ada and
+   --  C (i.e. as parameters and return types for C entry points) for access
+   --  types.  All read/writes for the pointed values are made through the
+   --  access values and never through the System.Address values.  Thus, strict
+   --  aliasing issues should not arise for these.
+   --
+   --  See <https://gcc.gnu.org/onlinedocs/gnat_ugn/
+   --       Optimization-and-Strict-Aliasing.html>.
+
+   pragma Warnings (Off, "possible aliasing problem for type");
+
+   function Wrap is new Ada.Unchecked_Conversion
+     (Token_Access, ${token_type});
+   function Unwrap is new Ada.Unchecked_Conversion
+     (${token_type}, Token_Access);
+
+   function Wrap is new Ada.Unchecked_Conversion
+     (Analysis_Context, ${analysis_context_type});
+   function Unwrap is new Ada.Unchecked_Conversion
+     (${analysis_context_type}, Analysis_Context);
+
+   function Wrap is new Ada.Unchecked_Conversion
+     (Analysis_Unit, ${analysis_unit_type});
+   function Unwrap is new Ada.Unchecked_Conversion
+     (${analysis_unit_type}, Analysis_Unit);
+
+   function Wrap is new Ada.Unchecked_Conversion
+     (${root_node_type_name}, ${node_type});
+   function Unwrap is new Ada.Unchecked_Conversion
+     (${node_type}, ${root_node_type_name});
+
+   function Convert is new Ada.Unchecked_Conversion
+     (${capi.get_name("node_extension_destructor")},
+      Extension_Destructor);
+   function Convert is new Ada.Unchecked_Conversion
+     (chars_ptr, System.Address);
+
+   pragma Warnings (Off, "possible aliasing problem for type");
+
+end ${_self.ada_api_settings.lib_name}.Analysis.C;

@@ -2,80 +2,25 @@
 
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
 
-with Ada.Containers;                  use Ada.Containers;
-with Ada.Exceptions;                  use Ada.Exceptions;
-with Ada.IO_Exceptions;               use Ada.IO_Exceptions;
-with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
-with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 pragma Warnings (Off, "is an internal GNAT unit");
 with Ada.Strings.Wide_Wide_Unbounded.Aux;
 use Ada.Strings.Wide_Wide_Unbounded.Aux;
 pragma Warnings (On, "is an internal GNAT unit");
-with Ada.Unchecked_Conversion;
 
 with System.Memory;
 
 with GNATCOLL.Iconv;
 
-with AST;                        use AST;
-with Langkit_Support.Extensions; use Langkit_Support.Extensions;
-with Langkit_Support.Text;       use Langkit_Support.Text;
-with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
+with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
+with Langkit_Support.Extensions;  use Langkit_Support.Extensions;
+with Langkit_Support.Text;        use Langkit_Support.Text;
 
-package body ${_self.ada_api_settings.lib_name}.C is
+with ${_self.ada_api_settings.lib_name}.Analysis;
+use ${_self.ada_api_settings.lib_name}.Analysis;
+with ${_self.ada_api_settings.lib_name}.AST;
+use ${_self.ada_api_settings.lib_name}.AST;
 
-   function Wrap (S : Source_Location) return ${sloc_type} is
-     ((S.Line, S.Column));
-   function Unwrap (S : ${sloc_type}) return Source_Location is
-     ((S.Line, S.Column));
-
-   function Wrap (S : Source_Location_Range) return ${sloc_range_type} is
-     ((Start_S => (S.Start_Line, S.Start_Column),
-       End_S   => (S.End_Line,   S.End_Column)));
-   function Unwrap (S : ${sloc_range_type}) return Source_Location_Range is
-     ((S.Start_S.Line, S.End_S.Line,
-       S.Start_S.Column, S.End_S.Column));
-
-   function Wrap (S : Unbounded_Wide_Wide_String) return ${text_type};
-
-   --  The following conversions are used only at the interface between Ada and
-   --  C (i.e. as parameters and return types for C entry points) for access
-   --  types.  All read/writes for the pointed values are made through the
-   --  access values and never through the System.Address values.  Thus, strict
-   --  aliasing issues should not arise for these.
-   --
-   --  See <https://gcc.gnu.org/onlinedocs/gnat_ugn/
-   --       Optimization-and-Strict-Aliasing.html>.
-
-   pragma Warnings (Off, "possible aliasing problem for type");
-
-   function Wrap is new Ada.Unchecked_Conversion
-     (Token_Access, ${token_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${token_type}, Token_Access);
-
-   function Wrap is new Ada.Unchecked_Conversion
-     (Analysis_Context, ${analysis_context_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${analysis_context_type}, Analysis_Context);
-
-   function Wrap is new Ada.Unchecked_Conversion
-     (Analysis_Unit, ${analysis_unit_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${analysis_unit_type}, Analysis_Unit);
-
-   function Wrap is new Ada.Unchecked_Conversion
-     (${root_node_type_name}, ${node_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${node_type}, ${root_node_type_name});
-
-   function Convert is new Ada.Unchecked_Conversion
-     (${capi.get_name("node_extension_destructor")},
-      Extension_Destructor);
-   function Convert is new Ada.Unchecked_Conversion
-     (chars_ptr, System.Address);
-
-   pragma Warnings (Off, "possible aliasing problem for type");
+package body ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    function Value_Or_Empty (S : chars_ptr) return String
    --  If S is null, return an empty string. Return Value (S) otherwise.
@@ -85,13 +30,6 @@ package body ${_self.ada_api_settings.lib_name}.C is
 
    Last_Exception : ${exception_type}_Ptr := null
      with Thread_Local_Storage => True;
-
-   procedure Clear_Last_Exception;
-   --  Free the information contained in Last_Exception
-
-   procedure Set_Last_Exception (Exc  : Exception_Occurrence);
-   --  Free the information contained in Last_Exception and replace it with
-   --  newly allocated information from Exc.
 
    ----------
    -- Free --
@@ -149,8 +87,8 @@ package body ${_self.ada_api_settings.lib_name}.C is
       Clear_Last_Exception;
 
       declare
-         Ctx : constant Analysis_Context := Unwrap (Context);
-         Unit : Analysis_Unit := Get_From_File
+         Ctx  : constant Analysis_Context := Unwrap (Context);
+         Unit : constant Analysis_Unit := Get_From_File
            (Ctx,
             Value (Filename),
             Value_Or_Empty (Charset),
@@ -305,7 +243,7 @@ package body ${_self.ada_api_settings.lib_name}.C is
       Clear_Last_Exception;
 
       declare
-         U : Analysis_Unit := Unwrap (Unit);
+         U : constant Analysis_Unit := Unwrap (Unit);
       begin
          Dec_Ref (U);
       end;
@@ -584,18 +522,6 @@ package body ${_self.ada_api_settings.lib_name}.C is
          return System.Null_Address;
    end ${capi.get_name("text_to_locale_string")};
 
-
-   ---------------------------------------
-   -- Kind-specific AST node primitives --
-   ---------------------------------------
-
-   % for astnode in _self.astnode_types:
-       % for field in astnode.fields_with_accessors():
-           ${astnode_types.accessor_body(field)}
-       % endfor
-   % endfor
-
-
    -------------------------
    -- Extensions handling --
    -------------------------
@@ -691,4 +617,4 @@ package body ${_self.ada_api_settings.lib_name}.C is
       end if;
    end ${capi.get_name("get_last_exception")};
 
-end ${_self.ada_api_settings.lib_name}.C;
+end ${_self.ada_api_settings.lib_name}.Analysis.C;

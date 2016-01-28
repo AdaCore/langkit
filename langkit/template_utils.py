@@ -84,4 +84,5 @@ common_renderer = Renderer({
     'ada_doc':          documentation.ada_doc,
     'c_doc':            documentation.c_doc,
     'py_doc':           documentation.py_doc,
+    'ada_c_doc':        documentation.ada_c_doc,
 })

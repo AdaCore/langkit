@@ -13,14 +13,21 @@ with Interfaces; use Interfaces;
 with GNAT.Command_Line; use GNAT.Command_Line;
 with GNAT.Strings;
 
-with AST; use AST;
 with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
 with Langkit_Support.Tokens; use Langkit_Support.Tokens;
-with ${_self.ada_api_settings.lib_name}; use ${_self.ada_api_settings.lib_name};
-with ${_self.ada_api_settings.lib_name}.Parsers;
-use ${_self.ada_api_settings.lib_name}.Parsers;
+
+with ${_self.ada_api_settings.lib_name}.Analysis;
+use ${_self.ada_api_settings.lib_name}.Analysis;
+with ${_self.ada_api_settings.lib_name}.AST_Root;
+use ${_self.ada_api_settings.lib_name}.AST_Root;
+with ${_self.ada_api_settings.lib_name}.AST;
+use ${_self.ada_api_settings.lib_name}.AST;
+with ${_self.ada_api_settings.lib_name}.AST.Parsers;
+use ${_self.ada_api_settings.lib_name}.AST.Parsers;
+with ${_self.ada_api_settings.lib_name}.Init;
+use ${_self.ada_api_settings.lib_name}.Init;
 
 procedure Parse is
 

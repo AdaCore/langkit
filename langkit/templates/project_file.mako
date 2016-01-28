@@ -21,16 +21,25 @@ library project ${lib_name} is
    for Library_Name use "${capi.shared_object_basename}";
    for Library_Kind use Library_Kind_Param;
    for Interfaces use
-     ("ast.adb", "ast.ads",
-      "ast-list.adb", "ast-list.ads",
-      "${lib_name.lower()}.adb",
-      "${lib_name.lower()}.ads",
-      "${lib_name.lower()}-c.adb",
-      "${lib_name.lower()}-c.ads",
+     ("${lib_name.lower()}.ads",
+      "${lib_name.lower()}-analysis.adb",
+      "${lib_name.lower()}-analysis.ads",
+      "${lib_name.lower()}-analysis-c.adb",
+      "${lib_name.lower()}-analysis-c.ads",
+      "${lib_name.lower()}-ast_root.adb",
+      "${lib_name.lower()}-ast_root.ads",
+      "${lib_name.lower()}-ast_list.adb",
+      "${lib_name.lower()}-ast_list.ads",
+      "${lib_name.lower()}-ast.adb",
+      "${lib_name.lower()}-ast.ads",
+      "${lib_name.lower()}-ast-parsers.adb",
+      "${lib_name.lower()}-ast-parsers.ads",
+      "${lib_name.lower()}-ast-c.adb",
+      "${lib_name.lower()}-ast-c.ads",
+      "${lib_name.lower()}-init.adb",
+      "${lib_name.lower()}-init.ads",
       "${lib_name.lower()}-lexer.adb",
       "${lib_name.lower()}-lexer.ads",
-      "${lib_name.lower()}-parsers.adb",
-      "${lib_name.lower()}-parsers.ads",
       "quex_interface.c",
       "quex_interface.h",
       "quex_lexer.c",
@@ -54,7 +63,16 @@ library project ${lib_name} is
    package Compiler is
       case Build_Mode is
          when "dev" =>
-            for Default_Switches ("Ada") use ("-g", "-O0");
+            for Default_Switches ("Ada") use ("-g", "-O0", "-gnatwaeKMR");
+            --  Enable all warnings and treat them as errors, except:
+            --    * variables that could be turned into constants (K), as this
+            --      is very common in generated parsers code;
+            --    * variables that are assigned and never read (M), as this is
+            --      also common in generated parsers code;
+            --    * redundant constructs (R), as we do have redundant
+            --      conversions for AST nodes (A'Class and B'Class are not
+            --      compatible even though B derives from A).
+
             for Default_Switches ("C") use Common_C_Cargs & ("-g3", "-O0");
 
             for Switches ("quex_lexer.c") use Common_C_Cargs & ("-g0", "-O0");

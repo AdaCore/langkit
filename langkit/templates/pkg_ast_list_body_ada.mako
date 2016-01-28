@@ -2,7 +2,7 @@
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-package body AST.List is
+package body ${_self.ada_api_settings.lib_name}.AST_List is
 
    use Node_Vectors;
 
@@ -162,4 +162,4 @@ package body AST.List is
       end loop;
    end Destroy;
 
-end AST.List;
+end ${_self.ada_api_settings.lib_name}.AST_List;

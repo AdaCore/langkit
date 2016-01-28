@@ -1,13 +1,16 @@
 ## vim: filetype=makoada
 
-with Ada.Containers.Vectors;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+
 with Interfaces; use Interfaces;
 
-with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
+with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
 
-package ${_self.ada_api_settings.lib_name}.Parsers is
+--  This package provides types and primitives to parse buffers and files and
+--  get AST out of them.
+
+package ${_self.ada_api_settings.lib_name}.AST.Parsers is
 
    type Fail_Info is record
       Pos               : Integer := -1;
@@ -69,4 +72,4 @@ package ${_self.ada_api_settings.lib_name}.Parsers is
    --  memos should be stored in Parser_Type. In the end, this should be turned
    --  into a Parser_Type finalizer.
 
-end ${_self.ada_api_settings.lib_name}.Parsers;
+end ${_self.ada_api_settings.lib_name}.AST.Parsers;

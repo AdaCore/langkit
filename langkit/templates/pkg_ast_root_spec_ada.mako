@@ -1,22 +1,24 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types" file="array_types_ada.mako" />
-
+<%namespace name="array_types"   file="array_types_ada.mako" />
 <% root_node_array = ctx.root_grammar_class.array_type() %>
 
 with System;
 
-with Langkit_Support.Extensions; use Langkit_Support.Extensions;
+with Langkit_Support.Extensions;         use Langkit_Support.Extensions;
 with Langkit_Support.Lexical_Env;
-with Langkit_Support.Token_Data_Handler;
-use Langkit_Support.Token_Data_Handler;
-with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
+with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
+with Langkit_Support.Tokens;             use Langkit_Support.Tokens;
 with Langkit_Support.Vectors;
 
---  TODO: We want to move this package to
---  ${_self.ada_api_settings.lib_name}.AST once we took care of moving type
---  definitions to another module than the root lang module (OC22-022).
-package AST is
+--  This package defines the base ("root") type for AST nodes. All node types
+--  that appear in the AST derive from it.
+
+package ${_self.ada_api_settings.lib_name}.AST_Root is
+
+   -------------------
+   -- Root AST node --
+   -------------------
 
    type ${root_node_value_type} is tagged;
    type ${root_node_type_name} is access all ${root_node_value_type}'Class;
@@ -49,9 +51,7 @@ package AST is
    package AST_Envs is new Langkit_Support.Lexical_Env
      (${root_node_type_name}, Dummy_Metadata, No_Metadata, Combine);
 
-   ## Declare arrays of root nodes here since some primitives rely on it. TODO:
-   ## As a consequence, we have to put renamings in the root package, this
-   ## somehow feels hackish.
+   ## Declare arrays of root nodes here since some primitives rely on it
    ${array_types.public_decl(root_node_array)}
 
    package ${root_node_type_name}_Arrays
@@ -81,7 +81,11 @@ package AST is
    package Children_Arrays renames Children_Vectors.Elements_Arrays;
 
    type Visit_Status is (Into, Over, Stop);
+
    type ${root_node_kind_name} is new Natural;
+   --  Describe the concrete type (aka dynamic type) of an AST node (i.e. from
+   --  which concrete derivation it comes from).
+   --  See ${_self.ada_api_settings.lib_name}.AST for possible values.
 
    function Kind (Node : access ${root_node_value_type})
                   return ${root_node_kind_name} is abstract;
@@ -229,4 +233,7 @@ package AST is
       return ${root_node_array.name()};
    --  Return the list of parents for this node (this node included)
 
-end AST;
+   Property_Error : exception;
+   ${ada_doc('langkit.property_error', 3)}
+
+end ${_self.ada_api_settings.lib_name}.AST_Root;

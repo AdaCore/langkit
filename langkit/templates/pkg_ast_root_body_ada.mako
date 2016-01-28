@@ -1,19 +1,21 @@
 ## vim: filetype=makoada
 
+<%namespace name="array_types"   file="array_types_ada.mako" />
 <% root_node_array = ctx.root_grammar_class.array_type() %>
 
-with System;
-with System.Storage_Elements; use System.Storage_Elements;
-
-with Ada.Containers; use Ada.Containers;
+with Ada.Containers;        use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
-with Langkit_Support.PP_Utils; use Langkit_Support.PP_Utils;
-with Langkit_Support.Text;     use Langkit_Support.Text;
+with System.Storage_Elements; use System.Storage_Elements;
 
-package body AST is
+with Langkit_Support.Extensions; use Langkit_Support.Extensions;
+with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
+with Langkit_Support.Text;       use Langkit_Support.Text;
+with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
+
+package body ${_self.ada_api_settings.lib_name}.AST_Root is
 
    -----------
    -- Child --
@@ -519,4 +521,4 @@ package body AST is
       end;
    end Parents;
 
-end AST;
+end ${_self.ada_api_settings.lib_name}.AST_Root;

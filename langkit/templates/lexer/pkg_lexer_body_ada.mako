@@ -1,11 +1,9 @@
 ## vim: filetype=makoada
 
-with Ada.IO_Exceptions;     use Ada.IO_Exceptions;
 with Ada.Unchecked_Conversion;
 
-with Interfaces;           use Interfaces;
-with Interfaces.C;         use Interfaces.C;
-with Interfaces.C.Strings; use Interfaces.C.Strings;
+with Interfaces;   use Interfaces;
+with Interfaces.C; use Interfaces.C;
 
 with System;
 

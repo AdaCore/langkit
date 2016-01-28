@@ -1,14 +1,16 @@
 ## vim: filetype=makoada
 
+with Ada.Containers;        use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Strings.Unbounded.Hash;
 
-with Interfaces;           use Interfaces;
-with Interfaces.C.Strings; use Interfaces.C.Strings;
+with Interfaces; use Interfaces;
 
-with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
-with Langkit_Support.Tokens;             use Langkit_Support.Tokens;
+with Langkit_Support.Token_Data_Handler;
+use Langkit_Support.Token_Data_Handler;
+
+--  This package provides types and primitives to split text streams into lists
+--  of tokens.
 
 package ${_self.ada_api_settings.lib_name}.Lexer is
 

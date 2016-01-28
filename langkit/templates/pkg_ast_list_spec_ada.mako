@@ -1,14 +1,20 @@
 ## vim: filetype=makoada
 
 with Langkit_Support.Bump_Ptr.Vectors;
+with Langkit_Support.Tokens; use Langkit_Support.Tokens;
 
---  TODO: We want to move this package to
---  ${_self.ada_api_settings.lib_name}.AST once we took care of moving type
---  definitions to another module than the root lang module (OC22-022).
-generic
+with ${_self.ada_api_settings.lib_name}.AST_Root;
+use ${_self.ada_api_settings.lib_name}.AST_Root;
+
+--  Generic package to create AST node types that just contain lists of other
+--  AST node types.
+--
+--  This package is not part of the public API.
+
+private generic
    type Node_Type is abstract new ${root_node_value_type} with private;
    type Node_Access is access all Node_Type'Class;
-package AST.List is
+package ${_self.ada_api_settings.lib_name}.AST_List is
 
    List_Kind : constant ${root_node_kind_name} := 1;
 
@@ -51,4 +57,4 @@ package AST.List is
 
    overriding procedure Destroy (Node : access List_Type);
 
-end AST.List;
+end ${_self.ada_api_settings.lib_name}.AST_List;

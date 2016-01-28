@@ -128,9 +128,7 @@ class CompileCtx():
         self.main_rule_name = main_rule_name
 
         lib_name = (
-            names.Name('Lib{}lang'.format(
-                self.lang_name.camel_with_underscores
-            ))
+            names.Name('Lib{}lang'.format(self.lang_name.lower))
             if lib_name is None else
             names.Name(lib_name)
         )
@@ -316,7 +314,7 @@ class CompileCtx():
             compile_ctx = None
 
     def write_ada_module(self, out_dir, template_base_name, qual_name,
-                         in_library=True):
+                         has_body=True):
         """
         Write an Ada module (both spec and body) using a standardized scheme
         for finding the corresponding templates.
@@ -332,17 +330,14 @@ class CompileCtx():
             prepended to that list, so every generated module will be a
             child module of the base library module.
 
-        :param bool in_library: If true, the module will be considered as
-            part of the generated library hierarchy, and will be a child of the
-            parent package.
+        :param bool has_body: If true, generate a body for this unit.
         """
-        for kind in [ADA_SPEC, ADA_BODY]:
+        for kind in [ADA_SPEC] + ([ADA_BODY] if has_body else []):
             with names.camel_with_underscores:
                 write_ada_file(
                     out_dir=out_dir,
                     source_kind=kind,
-                    qual_name=([self.ada_api_settings.lib_name] if in_library
-                               else []) + qual_name,
+                    qual_name=[self.ada_api_settings.lib_name] + qual_name,
                     content=self.render_template(
                         "{}{}_ada".format(
                             template_base_name +
@@ -464,22 +459,28 @@ class CompileCtx():
 
         printcol("Generating sources... ", Colors.OKBLUE)
 
-        self.write_ada_module(src_path, "root_ast_type", ["ast"],
-                              in_library=False)
-        self.write_ada_module(src_path, "root_ast_list_type", ["ast", "list"],
-                              in_library=False)
-
         ada_modules = [
-            # unit for all derived AST nodes
-            ("main", []),
-            # unit for the lexer
-            ("lexer/lexer", ["lexer"]),
-            # unit for all parsers
-            ("parsers/main", ["parsers"]),
+            # Top (pure) package
+            ("pkg_main", [], False),
+            # Unit for initialization primitives
+            ("pkg_init", ["init"], True),
+            # Unit for analysis primitives
+            ("pkg_analysis", ["analysis"], True),
+            # Unit for the root AST node
+            ("pkg_ast_root", ["ast_root"], True),
+            # Unit for generic AST_List
+            ("pkg_ast_list", ["ast_list"], True),
+            # Unit for all derived AST nodes
+            ("pkg_ast", ["ast"], True),
+            # Unit for all parsers
+            ("parsers/pkg_main", ["ast", "parsers"], True),
+            # Unit for the lexer
+            ("lexer/pkg_lexer", ["lexer"], True),
         ]
 
-        for template_base_name, qual_name in ada_modules:
-            self.write_ada_module(src_path, template_base_name, qual_name)
+        for template_base_name, qual_name, has_body in ada_modules:
+            self.write_ada_module(src_path, template_base_name, qual_name,
+                                  has_body)
 
         with names.camel_with_underscores:
             write_ada_file(
@@ -560,7 +561,12 @@ class CompileCtx():
                 render("c_api/header_c")
             )
 
-        self.write_ada_module(src_path, "c_api/", ["C"])
+        self.write_ada_module(src_path, "c_api/pkg_analysis",
+                              ["Analysis", "C"])
+        self.write_ada_module(src_path, "c_api/pkg_analysis",
+                              ["Analysis", "C"])
+        self.write_ada_module(src_path, "c_api/pkg_ast", ["AST", "C"])
+        self.write_ada_module(src_path, "c_api/pkg_ast", ["AST", "C"])
 
     def emit_python_api(self, python_path):
         """
