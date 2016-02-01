@@ -17,8 +17,8 @@ from contextlib import contextmanager
 
 from langkit import names
 from langkit.compiled_types import (
-    render as ct_render, LongType, LexicalEnvType, Token, ArrayType, BoolType,
-    ASTNode, Struct, StructMetaClass, CompiledType, AbstractNodeData
+    render as ct_render, LongType, LexicalEnvType, Token, BoolType, ASTNode,
+    Struct, StructMetaClass, CompiledType, AbstractNodeData
 )
 from langkit.utils import Colors, col, assert_type
 
