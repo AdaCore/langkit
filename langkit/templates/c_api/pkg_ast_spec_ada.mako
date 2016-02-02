@@ -14,7 +14,8 @@ use ${_self.ada_api_settings.lib_name}.Analysis.C;
 --  implementation of the exported C API for AST nodes.
 --
 --  Unless one wants to deal with C code, it is very likely that one needs to
---  use this package.
+--  use this package. Please refer to the C header if you want to use the C
+--  API.
 
 package ${_self.ada_api_settings.lib_name}.AST.C is
 

@@ -18,7 +18,8 @@ with Langkit_Support.Tokens; use Langkit_Support.Tokens;
 --  implementation of the exported C API for analysis primitives.
 --
 --  Unless one wants to deal with C code, it is very likely that one needs to
---  use this package.
+--  use this package. Please refer to the C header if you want to use the C
+--  API.
 
 package ${_self.ada_api_settings.lib_name}.Analysis.C is
 

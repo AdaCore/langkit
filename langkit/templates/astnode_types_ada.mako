@@ -294,6 +294,8 @@
       begin
          ## When no extension is registered, we don't need to recurse on the
          ## tree at all.
+         ## TODO: this is wrong: leaf nodes can have extensions even if their
+         ## parents don't.
          if Langkit_Support.Extensions.Has_Extensions then
             Node.Free_Extensions;
             % for i, field in enumerate(astnode_fields):

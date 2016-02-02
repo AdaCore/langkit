@@ -14,6 +14,10 @@ use ${_self.ada_api_settings.lib_name}.AST_Root;
 
 --  This package provides types and primitives to analyze source files as
 --  analysis units.
+--
+--  This is the entry point to parse and process an unit: first create an
+--  analysis context with Create, then get analysis units out of it using
+--  Get_From_File and/or Get_From_Buffer.
 
 package ${_self.ada_api_settings.lib_name}.Analysis is
 

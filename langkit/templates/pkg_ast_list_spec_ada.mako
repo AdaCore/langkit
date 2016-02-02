@@ -16,6 +16,11 @@ private generic
    type Node_Access is access all Node_Type'Class;
 package ${_self.ada_api_settings.lib_name}.AST_List is
 
+   --  See AST_Root for primitive operations documentations.
+   --
+   --  Note that as this package is instantiated in private parts, there is no
+   --  real need to create a private part here.
+
    List_Kind : constant ${root_node_kind_name} := 1;
 
    package Node_Vectors is new Langkit_Support.Bump_Ptr.Vectors

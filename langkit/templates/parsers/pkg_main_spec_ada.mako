@@ -9,6 +9,9 @@ with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
 
 --  This package provides types and primitives to parse buffers and files and
 --  get AST out of them.
+--
+--  TODO??? For now, consider that this package is not part of the public API.
+--  Please use the Analysis package to parse source files.
 
 package ${_self.ada_api_settings.lib_name}.AST.Parsers is
 

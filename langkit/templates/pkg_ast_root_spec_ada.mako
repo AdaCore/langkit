@@ -21,26 +21,59 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
    -------------------
 
    type ${root_node_value_type} is tagged;
+   --  This "by-value" type is public to expose the fact that the various
+   --  AST nodes are a hierarchy of tagged types, but it is not intended to be
+   --  used directly, hence the "_Type" suffix. Please use instead the
+   --  class-wide types such at the one below.
+
    type ${root_node_type_name} is access all ${root_node_value_type}'Class;
+   --  Most generic AST node type
+
+   ----------------
+   -- Extensions --
+   ----------------
+
+   --  Extensions are a way to associate arbitrary data (Extension_Type, i.e.
+   --  pointers) to AST nodes.
+   --
+   --  In order to associate an extension to an AST node, one has first to
+   --  register itself in Langkit_Support.Extensions to get an Extension_ID.
+   --  Then, this ID must be passed to Get_Extension, which will create a slot
+   --  to store this extension (or return an already existing one for the same
+   --  ID). It is this slot that can be used to store arbitrary data.
+   --
+   --  As AST nodes can be deallocated later on, this abritrary data sometimes
+   --  needs to be deallocated as well. The destructor mechanism was designed
+   --  for this: when the AST node is about to be deallocated, the destructor
+   --  callback is invoked so that one has a chance to release allocated
+   --  resources.
 
    type Extension_Type is new System.Address;
+   --  Data type storing arbitrary values in AST nodes
+
    type Extension_Access is access all Extension_Type;
+   --  Access to the arbitrary values stored in AST nodes
 
    type Extension_Destructor is
      access procedure (Node      : ${root_node_type_name};
                        Extension : Extension_Type)
      with Convention => C;
-   --  Type for extension destructors. The parameter are the "node" the
-   --  extension was attached to and the "extension" itself.
+   --  Type for extension destructors. The parameter are the "Node" the
+   --  extension was attached to and the "Extension" itself.
 
    type Extension_Slot is record
       ID        : Extension_ID;
       Extension : Extension_Access;
       Dtor      : Extension_Destructor;
    end record;
+   --  TODO??? Remove this from the public API
 
    package Extension_Vectors is new Langkit_Support.Vectors
      (Element_Type => Extension_Slot);
+
+   ----------------------------
+   --  Environments handling --
+   ----------------------------
 
    type Dummy_Metadata is new Integer;
    No_Metadata : constant Dummy_Metadata := 0;
@@ -51,11 +84,9 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
    package AST_Envs is new Langkit_Support.Lexical_Env
      (${root_node_type_name}, Dummy_Metadata, No_Metadata, Combine);
 
-   ## Declare arrays of root nodes here since some primitives rely on it
-   ${array_types.public_decl(root_node_array)}
-
-   package ${root_node_type_name}_Arrays
-   renames ${root_node_type_name}_Vectors.Elements_Arrays;
+   -------------------------------
+   -- Root AST node (internals) --
+   -------------------------------
 
    type ${root_node_value_type} is abstract tagged record
       Parent                 : ${root_node_type_name} := null;
@@ -64,8 +95,10 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
       Parent_Env             : AST_Envs.Lexical_Env;
       Extensions             : Extension_Vectors.Vector;
    end record;
+   --  TODO??? Remove this from the public API
 
    type Child_Or_Trivia is (Child, Trivia);
+   --  Discriminator for the Child_Record type
 
    type Child_Record (Kind : Child_Or_Trivia := Child) is record
       case Kind is
@@ -75,25 +108,32 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
             Trivia : Token;
       end case;
    end record;
+   --  Variant that holds either an AST node or a token
 
-   package Children_Vectors is
-     new Langkit_Support.Vectors (Child_Record);
+   package Children_Vectors is new Langkit_Support.Vectors (Child_Record);
    package Children_Arrays renames Children_Vectors.Elements_Arrays;
-
-   type Visit_Status is (Into, Over, Stop);
 
    type ${root_node_kind_name} is new Natural;
    --  Describe the concrete type (aka dynamic type) of an AST node (i.e. from
    --  which concrete derivation it comes from).
    --  See ${_self.ada_api_settings.lib_name}.AST for possible values.
 
+   ## Declare arrays of root nodes here since some primitives rely on it
+   ${array_types.public_decl(root_node_array)}
+
+   package ${root_node_type_name}_Arrays renames
+     ${root_node_type_name}_Vectors.Elements_Arrays;
+
    function Kind (Node : access ${root_node_value_type})
                   return ${root_node_kind_name} is abstract;
    function Kind_Name
      (Node : access ${root_node_value_type}) return String is abstract;
+   --  Return the concrete kind for Node
 
    function Image
      (Node : access ${root_node_value_type}) return String is abstract;
+   --  Debug helper: return a textual representation of this node and all its
+   --  children.
 
    function Short_Image (Node : ${root_node_type_name}) return String;
    --  Return a short representation of the string, containing just the kind
@@ -101,13 +141,19 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
 
    function Child_Count (Node : access ${root_node_value_type})
                          return Natural is abstract;
+   --  Return the number of children Node has
+
    procedure Get_Child (Node   : access ${root_node_value_type};
                         Index  : Natural;
                         Exists : out Boolean;
                         Result : out ${root_node_type_name}) is abstract;
+   --  Get the Index'th child of Node, storing it into Result. Store in Exists
+   --  whether Node had such a child (if not, the content of Result is
+   --  undefined).
 
    function Child (Node  : ${root_node_type_name};
                    Index : Natural) return ${root_node_type_name};
+   --  Return the Index'th child of Node, or null if Node has no such child
 
    function Children
      (Node : ${root_node_type_name})
@@ -125,7 +171,8 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
    --    will be part of the returned array;
    --  - Nodes and trivias will be lexically ordered.
 
-   procedure PP_Trivia (Node : ${root_node_type_name}; Level : Integer := 0);
+   type Visit_Status is (Into, Over, Stop);
+   --  Helper type to control the AST node traversal process. See Traverse.
 
    function Traverse
      (Node  : ${root_node_type_name};
@@ -157,30 +204,44 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
 
    procedure Validate (Node   : access ${root_node_value_type};
                        Parent : ${root_node_type_name} := null) is abstract;
-   --  Perform consistency checks on Node. Check that Parent is Node's parent
-
-   procedure Print (Node  : access ${root_node_value_type};
-                    Level : Natural := 0) is abstract;
+   --  Perform consistency checks on Node. Check that Parent is Node's parent.
 
    function Sloc_Range (Node : ${root_node_type_name};
                         Snap : Boolean := False) return Source_Location_Range;
+   --  Return the source location range corresponding to the set of tokens from
+   --  which Node was parsed.
+   --
+   --  TODO??? Document the Snap formal.
+
    function Lookup (Node : ${root_node_type_name};
                     Sloc : Source_Location;
                     Snap : Boolean := False) return ${root_node_type_name};
+   --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
+   --  it, or null if no such node was found.
+   --
+   --  TODO??? Document the Snap formal.
+
    function Compare (Node : ${root_node_type_name};
                      Sloc : Source_Location;
                      Snap : Boolean := False) return Relative_Position;
+   --  Compare Sloc to the sloc range of Node.
+   --
+   --  TODO??? Document the Snap formal.
 
    function Lookup_Children
      (Node : access ${root_node_value_type};
       Sloc : Source_Location;
       Snap : Boolean := False) return ${root_node_type_name} is abstract;
+   --  Implementation helper for the looking up process. TODO??? Do not expose
+   --  it in the public API.
 
    procedure Lookup_Relative (Node       : ${root_node_type_name};
                               Sloc       : Source_Location;
                               Position   : out Relative_Position;
                               Node_Found : out ${root_node_type_name};
                               Snap       : Boolean := False);
+   --  Implementation helper for the looking up process. TODO??? Do not expose
+   --  it in the public API.
 
    function Get_Extension
      (Node : ${root_node_type_name};
@@ -191,15 +252,33 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
    --  Note that the returned access is not guaranteed to stay valid after
    --  subsequent calls to Get_Extension.
 
+   procedure Print (Node  : access ${root_node_value_type};
+                    Level : Natural := 0) is abstract;
+   --  Debug helper: print to standard output Node and all its children. Level
+   --  indicates the indentation level for the output.
+
+   procedure PP_Trivia (Node : ${root_node_type_name}; Level : Integer := 0);
+   --  Debug helper: print to standard output Node and all its children along
+   --  with the trivia associated to them. Level indicates the indentation
+   --  level for the output.
+
    procedure Free_Extensions (Node : access ${root_node_value_type});
+   --  Implementation helper to free the extensions associatde to Node. TODO???
+   --  Do not expose it in the public API.
 
    procedure Destroy
      (Node : access ${root_node_value_type}) is abstract;
+   --  Free the resources allocated to this node and all its children
+   --  TODO??? We probably don't want this to be exposed in the public API, as
+   --  destruction is supposed to be done automatically when the refcount
+   --  reaches zero.
 
    function Is_Empty_List
      (Node : access ${root_node_value_type})
       return Boolean is
      (False);
+   --  Return whether Node is an empty list (so this is wrong for all nodes
+   --  that are not lists).
 
    procedure Populate_Lexical_Env (Node : ${root_node_type_name});
    --  Populate the lexical environment for node and all its children.
@@ -228,8 +307,8 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
    --  environment seen by Self's children.
 
    procedure Dump_Lexical_Env (Node : ${root_node_type_name});
-   --  Dump the lexical environment of Node, and consequently any nested
-   --  lexical environment. Used for debugging/testing purpose.
+   --  Debug helper: dump the lexical environment of Node, and consequently any
+   --  nested lexical environment. Used for debugging/testing purpose.
 
    function Parents
      (Node : access ${root_node_value_type})
