@@ -6,7 +6,6 @@
 <%def name="public_incomplete_decl(cls)">
 
    type ${cls.name()}_Type;
-   type ${cls.name()}_Access is access all ${cls.name()}_Type;
    type ${cls.name()} is access all ${cls.name()}_Type'Class;
    ${ada_doc(cls, 3)}
 
@@ -110,7 +109,7 @@
 
    % if not cls.abstract:
       package ${cls.name()}_Alloc is
-        new Tagged_Alloc (${cls.name()}_Type, ${cls.name()}_Access);
+        new Tagged_Alloc (${type_name});
    % endif
 
 </%def>

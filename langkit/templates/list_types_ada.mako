@@ -5,8 +5,7 @@
    <% type = decl_type(element_type) %>
 
    type List_${type}_Type is new ${root_node_value_type} with private;
-   type List_${type} is
-      access all List_${type}_Type'Class;
+   type List_${type} is access all List_${type}_Type'Class;
 
 </%def>
 
@@ -25,6 +24,6 @@
    type List_${type}_Access is access all List_${type}_Type;
 
    package List_${type}_Alloc is
-     new Tagged_Alloc (List_${type}_Type, List_${type}_Access);
+     new Tagged_Alloc (List_${type}_Type);
 
 </%def>

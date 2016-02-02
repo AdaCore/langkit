@@ -68,14 +68,9 @@ package Langkit_Support.Bump_Ptr is
 
    generic
       type Element_T is tagged private;
-      type Element_Access is access all Element_T;
    package Tagged_Alloc is
-
-      pragma No_Strict_Aliasing (Element_Access);
-      --  Deactivate strict aliasing optimizations for Element_Access
-
       function Alloc
-        (Pool : Bump_Ptr_Pool) return Element_Access
+        (Pool : Bump_Ptr_Pool) return access Element_T
         with Inline_Always;
    end Tagged_Alloc;
    --  This generic allocation package can be used to allocate an object
