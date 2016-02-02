@@ -202,7 +202,10 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
      (False);
 
    procedure Populate_Lexical_Env (Node : ${root_node_type_name});
-   --  Populate the lexical environment for node and all its children
+   --  Populate the lexical environment for node and all its children.
+   --
+   --  TODO??? This is probably an internal implementation detail, so this
+   --  should not appear in the public API.
 
    function Do_Env_Actions
      (Self       : access ${root_node_value_type};

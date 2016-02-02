@@ -20,4 +20,6 @@ package Langkit_Support.Diagnostics is
      (Index_Type   => Natural,
       Element_Type => Diagnostic);
 
+   type Diagnostics_Array is array (Natural range <>) of Diagnostic;
+
 end Langkit_Support.Diagnostics;

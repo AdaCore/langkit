@@ -21,43 +21,11 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    -- Analysis context --
    ----------------------
 
-   type Analysis_Context_Type;
+   type Analysis_Context is private;
    ${ada_doc('langkit.analysis_context_type', 3)}
 
-   type Analysis_Unit_Type;
+   type Analysis_Unit is private;
    ${ada_doc('langkit.analysis_unit_type', 3)}
-
-   type Analysis_Context is access all Analysis_Context_Type;
-   type Analysis_Unit is access all Analysis_Unit_Type;
-
-   package Units_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Unbounded_String,
-      Element_Type    => Analysis_Unit,
-      Hash            => Ada.Strings.Unbounded.Hash,
-      Equivalent_Keys => "=");
-
-   type Analysis_Context_Type is record
-      Units_Map : Units_Maps.Map;
-      Symbols   : Symbol_Table;
-
-      Charset   : Unbounded_String;
-      --  Default charset to use in analysis units
-   end record;
-
-   type Analysis_Unit_Type is record
-      Context         : Analysis_Context;
-      Ref_Count       : Natural;
-      AST_Root        : ${root_node_type_name};
-      File_Name       : Unbounded_String;
-      Charset         : Unbounded_String;
-      TDH             : aliased Token_Data_Handler;
-      Diagnostics     : Diagnostics_Vectors.Vector;
-      With_Trivia     : Boolean;
-
-      AST_Mem_Pool    : Bump_Ptr_Pool;
-      --  This memory pool shall only be used for AST parsing. Stored here
-      --  because it is more convenient, but one shall not allocate from it.
-   end record;
 
    function Create (Charset : String) return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
@@ -102,6 +70,18 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
       Buffer  : String);
    ${ada_doc('langkit.unit_reparse_buffer', 3)}
 
+   procedure Populate_Lexical_Env (Unit : Analysis_Unit);
+   ${ada_doc('langkit.unit_populate_lexical_env')}
+
+   function Has_Diagnostics (Unit : Analysis_Unit) return Boolean;
+   ${ada_doc('langkit.unit_has_diagnostics', 3)}
+
+   function Diagnostics (Unit : Analysis_Unit) return Diagnostics_Array;
+   ${ada_doc('langkit.unit_diagnostics', 3)}
+
+   function Root (Unit : Analysis_Unit) return ${root_node_type_name};
+   ${ada_doc('langkit.unit_root', 3)}
+
    procedure Print (Unit : Analysis_Unit);
    --  Debug helper: output the AST and eventual diagnostic for this unit on
    --  standard output.
@@ -109,8 +89,44 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    procedure PP_Trivia (Unit : Analysis_Unit);
    --  Debug helper: output a minimal AST with mixed trivias
 
-   procedure Populate_Lexical_Env (Unit : Analysis_Unit);
-   ${ada_doc('langkit.unit_populate_lexical_env')}
+private
 
+   type Analysis_Context_Type;
+   type Analysis_Unit_Type;
+
+   type Analysis_Context is access all Analysis_Context_Type;
+   type Analysis_Unit is access all Analysis_Unit_Type;
+
+   package Units_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Unbounded_String,
+      Element_Type    => Analysis_Unit,
+      Hash            => Ada.Strings.Unbounded.Hash,
+      Equivalent_Keys => "=");
+
+   type Analysis_Context_Type is record
+      Units_Map : Units_Maps.Map;
+      Symbols   : Symbol_Table;
+
+      Charset   : Unbounded_String;
+      --  Default charset to use in analysis units
+   end record;
+
+   type Analysis_Unit_Type is record
+      Context         : Analysis_Context;
+      Ref_Count       : Natural;
+      AST_Root        : ${root_node_type_name};
+      File_Name       : Unbounded_String;
+      Charset         : Unbounded_String;
+      TDH             : aliased Token_Data_Handler;
+      Diagnostics     : Diagnostics_Vectors.Vector;
+      With_Trivia     : Boolean;
+
+      AST_Mem_Pool    : Bump_Ptr_Pool;
+      --  This memory pool shall only be used for AST parsing. Stored here
+      --  because it is more convenient, but one shall not allocate from it.
+   end record;
+
+   function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
+     (Unit.AST_Root);
 
 end ${_self.ada_api_settings.lib_name}.Analysis;

@@ -406,4 +406,28 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Populate_Lexical_Env (Unit.AST_Root);
    end Populate_Lexical_Env;
 
+   ---------------------
+   -- Has_Diagnostics --
+   ---------------------
+
+   function Has_Diagnostics (Unit : Analysis_Unit) return Boolean is
+   begin
+      return not Unit.Diagnostics.Is_Empty;
+   end Has_Diagnostics;
+
+   -----------------
+   -- Diagnostics --
+   -----------------
+
+   function Diagnostics (Unit : Analysis_Unit) return Diagnostics_Array is
+      Result : Diagnostics_Array (0 .. Natural (Unit.Diagnostics.Length) - 1);
+      I      : Natural := 0;
+   begin
+      for D of Unit.Diagnostics loop
+         Result (I) := D;
+         I := I + 1;
+      end loop;
+      return Result;
+   end Diagnostics;
+
 end ${_self.ada_api_settings.lib_name}.Analysis;

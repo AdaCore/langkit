@@ -208,6 +208,12 @@ documentations = {
         Get the Nth diagnostic in this unit and store it into *DIAGNOSTIC_P.
         Return zero on failure (when N is too big).
     """),
+    'langkit.unit_has_diagnostics': Template("""
+        Return whether this unit has associated diagnostics.
+    """),
+    'langkit.unit_diagnostics': Template("""
+        Return an array that contains the diagnostics associated to this unit.
+    """),
     'langkit.unit_incref': Template("""
         Increase the reference count to an analysis unit.
         % if lang == 'c':

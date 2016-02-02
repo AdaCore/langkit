@@ -13,10 +13,12 @@ with Interfaces; use Interfaces;
 with GNAT.Command_Line; use GNAT.Command_Line;
 with GNAT.Strings;
 
-with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
-with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
-with Langkit_Support.Tokens; use Langkit_Support.Tokens;
+with Langkit_Support.Bump_Ptr;           use Langkit_Support.Bump_Ptr;
+with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
+with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
+with Langkit_Support.Token_Data_Handler;
+use Langkit_Support.Token_Data_Handler;
+with Langkit_Support.Tokens;             use Langkit_Support.Tokens;
 
 with ${_self.ada_api_settings.lib_name}.Analysis;
 use ${_self.ada_api_settings.lib_name}.Analysis;
@@ -100,12 +102,12 @@ procedure Parse is
       Input_Str_Ptr    : Big_String_Access;
       Input_Str_Length : Natural;
 
-      Context : Analysis_Context := Create (Charset.all);
       TDH     : Token_Data_Handler;
+      Symbols : Symbol_Table := Create;
       Parser  : Parser_Type;
       Pool    : Bump_Ptr_Pool := Create;
    begin
-      Initialize (TDH, Context.Symbols);
+      Initialize (TDH, Symbols);
 
       Get_String (Input_Str, Input_Str_Ptr, Input_Str_Length);
       Parser := Create_From_Buffer
@@ -150,22 +152,24 @@ procedure Parse is
          end if;
 
       Free (TDH);
+      Destroy (Symbols);
       Free (Pool);
-      Destroy (Context);
    end Parse_Input;
 
    procedure Process_File (File_Name : String; Ctx : in out Analysis_Context) is
       Unit         : Analysis_Unit;
       Time_Before  : constant Time := Clock;
       Time_After   : Time;
+      AST          : ${root_node_type_name};
    begin
       Unit := Get_From_File (Ctx, File_Name, "", True,
                              With_Trivia => Do_Print_Trivia);
+      AST := Root (Unit);
       Time_After := Clock;
 
-      if not Unit.Diagnostics.Is_Empty then
+      if Has_Diagnostics (Unit) then
          Put_Line ("Errors while parsing " & File_Name);
-         for D of Unit.Diagnostics loop
+         for D of Diagnostics (Unit) loop
             Put_Line (To_Pretty_String (D));
          end loop;
 
@@ -173,15 +177,15 @@ procedure Parse is
          if Do_Print_Trivia then
             PP_Trivia (Unit);
          else
-            Unit.AST_Root.Print;
+            AST.Print;
          end if;
       end if;
 
       if Print_Envs then
-         Populate_Lexical_Env (Unit.AST_Root);
+         Populate_Lexical_Env (Unit);
          Put_Line ("");
          Put_Line ("==== Dumping lexical environments ====");
-         Dump_Lexical_Env (Unit.AST_Root);
+         Dump_Lexical_Env (AST);
       end if;
 
       if Measure_Time then
