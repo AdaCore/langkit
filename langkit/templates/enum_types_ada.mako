@@ -4,7 +4,8 @@
 
    type ${cls.name()} is
      (Uninitialized,
-      ${", ".join(str(alt) for alt in cls.alternatives_for(ada_api))});
+      ${", ".join(str(alt) for alt in cls.alternatives_for(ada_api))})
+     with Convention => C;
    ${ada_doc(cls, 3)}
 
    ## Assign explicit constants members to ease binding to other languages.
