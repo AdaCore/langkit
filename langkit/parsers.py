@@ -163,6 +163,8 @@ class Grammar(object):
             Register "rule_name" as referenced and call "visit_parser" on the
             root parser that implements it. Do nothing if "rule_name" is
             already registered to avoid infinite recursion.
+
+            :param str rule_name: Name for the rule to visit.
             """
             if rule_name in referenced_rules:
                 return
