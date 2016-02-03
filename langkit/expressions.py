@@ -23,23 +23,48 @@ from langkit.compiled_types import (
 from langkit.utils import Colors, col, assert_type
 
 
-def construct(expr):
+def construct(expr, expected_type_or_pred=None):
     """
     Construct a ResolvedExpression from an object that is a valid expression in
     the Property DSL.
+
+    :param expected_type_or_pred: A type or a predicate. If a type, it will
+        be checked against the ResolvedExpression's type to see if it
+        corresponds. If a predicate, expects the type of the
+        ResolvedExpression as a parameter, and returns a boolean, to allow
+        checking properties of the type.
+    :type expected_type_or_pred: type|(CompiledType) -> bool
 
     :param AbstractExpression|bool|int expr: The expression to resolve.
     :rtype: ResolvedExpression
     """
 
     if isinstance(expr, AbstractExpression):
-        return expr.construct()
+        ret = expr.construct()
     elif isinstance(expr, int):
-        return LiteralExpr(str(expr), LongType)
+        ret = LiteralExpr(str(expr), LongType)
     elif isinstance(expr, bool):
-        return LiteralExpr(str(expr), LongType)
+        ret = LiteralExpr(str(expr), LongType)
     else:
         raise TypeError('Invalid abstract expression: {}'.format(type(expr)))
+
+    if expected_type_or_pred:
+        if isinstance(expected_type_or_pred, type):
+            assert issubclass(ret.type, expected_type_or_pred), (
+                "Expected type {}, got {}".format(
+                    expected_type_or_pred, ret.type
+                )
+            )
+        else:
+            assert callable(expected_type_or_pred), (
+                "Expected_type_or_pred must either be a type, or a predicate"
+                " of type (ResolvedExpression) -> bool"
+            )
+            assert expected_type_or_pred(ret.type), (
+                "Evaluating predicate on {} failed".format(ret.type)
+            )
+
+    return ret
 
 
 class Frozable(object):
