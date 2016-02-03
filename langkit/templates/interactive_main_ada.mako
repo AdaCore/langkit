@@ -185,7 +185,7 @@ procedure Parse is
          Populate_Lexical_Env (Unit);
          Put_Line ("");
          Put_Line ("==== Dumping lexical environments ====");
-         Dump_Lexical_Env (AST);
+         Dump_Lexical_Env (Unit);
       end if;
 
       if Measure_Time then

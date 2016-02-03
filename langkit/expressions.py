@@ -198,7 +198,8 @@ class AbstractExpression(Frozable):
             'map': _build_map,
             'mapcat': _build_mapcat,
             'get': lambda tok: EnvGet(self, tok),
-            'at': _build_index_expr
+            'at': _build_index_expr,
+            'eval_in_env': lambda to_eval_expr: EnvBind(self, to_eval_expr)
         }
 
         return direct_constructors.get(
@@ -769,8 +770,9 @@ class FieldAccess(AbstractExpression):
 
         receiver_expr = construct(self.receiver)
 
-        to_get = assert_type(receiver_expr.type, Struct)\
-            .get_abstract_fields_dict().get(self.field, None)
+        to_get = assert_type(
+            receiver_expr.type, Struct
+        ).get_abstract_fields_dict().get(self.field, None)
         ":type: AbstractNodeField"
 
         # If still not found, there's a problem
@@ -793,7 +795,7 @@ class PlaceholderSingleton(AbstractExpression):
     abstract expressions.
 
     You can then resolve the constructed expressions by:
-    - Binding the type of the PlaceHolder instance via a call to the bind
+    - Binding the type of the PlaceHolder instance via a call to the bind_type
       context manager.
     - Calling construct on the PlaceHolder.
     """
@@ -804,21 +806,31 @@ class PlaceholderSingleton(AbstractExpression):
         """
         self._name = name
         self._type = type
-        self._old_type = None
 
     @contextmanager
-    def bind(self, type):
+    def bind_name(self, name):
+        """
+        Bind the name of this placeholder.
+
+        :param name: The new name.
+        """
+        _old_name = self._name
+        self._name = name
+        yield
+        self._name = _old_name
+
+    @contextmanager
+    def bind_type(self, type):
         """
         Bind the type of this placeholder.
 
         :param langkit.compiled_types.CompiledType type: Type parameter. The
             type of this placeholder.
         """
-        self._old_type = self._type
+        _old_type = self._type
         self._type = type
         yield
-        self._type = self._old_type
-        self._old_type = None
+        self._type = _old_type
 
     def construct(self):
         return VarExpr(self._type, self._name)
@@ -887,8 +899,8 @@ class CollectionGet(AbstractExpression):
         self.or_null = or_null
 
     def construct(self):
-        coll_expr = construct(self.coll_expr)
-        index_expr = construct(self.index_expr)
+        coll_expr = construct(self.coll_expr, lambda t: t.is_collection())
+        index_expr = construct(self.index_expr, LongType)
 
         assert coll_expr.type.is_collection(), (
             "Expression needs to be of a collection type, got {}".format(
@@ -950,6 +962,57 @@ class ResolvedExpression(object):
         raise NotImplementedError()
 
 
+class EnvBind(AbstractExpression):
+    """
+    Expression that will evaluate a subexpression in the context of a
+    particular lexical environment. Not meant to be used directly,
+    but instead via the eval_in_env shortcut.
+    """
+
+    class EnvBindExpr(ResolvedExpression):
+        def __init__(self, env_expr, to_eval_expr):
+            self.to_eval_expr = to_eval_expr
+            self.env_expr = env_expr
+
+            # Declare a variable that will hold the value of the
+            # bound environment.
+            self.env_var = Property.get().vars(
+                names.Name("New_Env"), LexicalEnvType, create_unique=True
+            )
+
+        def render_pre(self):
+            # We assign to our environment variable the value of the result
+            # of the environment expression.
+            return "{}\n{}\n{} := {};".format(
+                self.to_eval_expr.render_pre(), self.env_expr.render_pre(),
+                self.env_var.name, self.env_expr.render_expr()
+            )
+
+        def render_expr(self):
+            # We just bind the name of the environment placeholder to our
+            # variable.
+            with Env.bind_name(self.env_var.name):
+                return self.to_eval_expr.render_expr()
+
+        @property
+        def type(self):
+            return self.to_eval_expr.type
+
+    def __init__(self, env_expr, to_eval_expr):
+        """
+
+        :param AbstractExpression env_expr: An expression that will return a
+            lexical environment in which we will eval to_eval_expr.
+        :param AbstractExpression to_eval_expr: The expression to eval.
+        """
+        self.env_expr = env_expr
+        self.to_eval_expr = to_eval_expr
+
+    def construct(self):
+        return EnvBind.EnvBindExpr(construct(self.env_expr, LexicalEnvType),
+                                   construct(self.to_eval_expr))
+
+
 class CollectionGetExpr(ResolvedExpression):
     """
     Abstract expression that will get an element from a collection.
@@ -972,7 +1035,7 @@ class CollectionGetExpr(ResolvedExpression):
         """
         :rtype: CompiledType
         """
-        return self.coll_expr.type.element_type
+        return self.coll_expr.type.element_type()
 
     def render_pre(self):
         return "{}\n{}".format(
@@ -1095,7 +1158,14 @@ class FieldAccessExpr(ResolvedExpression):
             prefix = self.receiver_expr.render()
         else:
             prefix = self.result_var.name
-        return "{}.{}".format(prefix, self.property.name)
+        ret = "{}.{}".format(prefix, self.property.name)
+
+        # If we're calling a property, then pass the currently bound lexical
+        # environment as parameter.
+        if isinstance(self.property, Property):
+            ret += " ({})".format(Env._name)
+
+        return ret
 
 
 class CastExpr(ResolvedExpression):
@@ -1576,7 +1646,7 @@ class Property(AbstractNodeData):
         expression templates.
         """
         assert self.__current_property__ is None, (
-            "You cannot nest calls to Property.bind context manager"
+            "You cannot nest calls to Property.bind_type context manager"
         )
         self.__class__.__current_property__ = self
         yield
@@ -1649,7 +1719,7 @@ class Property(AbstractNodeData):
         :rtype: basestring
         """
         with self.bind():
-            with Self.bind(owner_type):
+            with Self.bind_type(owner_type):
                 if self.abstract:
                     self.prop_decl = render('properties/decl_ada')
                     self.prop_def = ""

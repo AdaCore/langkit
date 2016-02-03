@@ -35,6 +35,8 @@
    is
      (if Index < T.Items'Length
       then T.Items (Index + 1)
-      else (if Or_Null then ${cls.element_type().nullexpr()} else raise Property_Error));
+      else (if Or_Null
+            then ${cls.element_type().nullexpr()}
+            else raise Property_Error));
 
 </%def>

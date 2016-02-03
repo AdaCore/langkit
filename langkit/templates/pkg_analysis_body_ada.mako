@@ -65,9 +65,10 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    function Create (Charset : String) return Analysis_Context is
    begin
       return new Analysis_Context_Type'
-        (Units_Map => <>,
-         Symbols   => Create,
-         Charset   => To_Unbounded_String (Charset));
+        (Units_Map  => <>,
+         Symbols    => Create,
+         Charset    => To_Unbounded_String (Charset),
+         Root_Scope => AST_Envs.Create (null));
    end Create;
 
    --------------
@@ -403,7 +404,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
    procedure Populate_Lexical_Env (Unit : Analysis_Unit) is
    begin
-      Populate_Lexical_Env (Unit.AST_Root);
+      Populate_Lexical_Env (Unit.AST_Root, Unit.Context.Root_Scope);
    end Populate_Lexical_Env;
 
    ---------------------
@@ -429,5 +430,14 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       end loop;
       return Result;
    end Diagnostics;
+
+   ----------------------
+   -- Dump_Lexical_Env --
+   ----------------------
+
+   procedure Dump_Lexical_Env (Unit : Analysis_Unit) is
+   begin
+      Dump_Lexical_Env (Unit.AST_Root, Unit.Context.Root_Scope);
+   end Dump_Lexical_Env;
 
 end ${_self.ada_api_settings.lib_name}.Analysis;

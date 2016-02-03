@@ -379,14 +379,17 @@
         (Self : access ${type_name};
          Parent_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
       is
-         % if not cls.env_spec._add_env:
-            pragma Unreferenced (Parent_Env);
-         % endif
-
          use AST_Envs;
          use AST_Envs.Lexical_Env_Vectors;
          Ret : Lexical_Env := null;
+
+         Initial_Env : Lexical_Env := Parent_Env;
       begin
+
+         % if cls.env_spec._initial_env:
+            Initial_Env := ${cls.env_spec.initial_env};
+         % endif
+
          % if cls.env_spec._add_to_env:
 
             ## If we have an _add_to_env specification, we generate code to
@@ -400,20 +403,20 @@
                ## return types for the key expression, and handle them
                ## appropriately.
                T : Token :=
-                 ${cls.env_spec._add_to_env[0].render_expr()}.P_Name;
+                 ${cls.env_spec.add_to_env_key}.P_Name;
             begin
 
                ## Add a new entry to the lexical env, for which the key is
                ## the symbol for retrieved token, and the value is the
                ## result of the expression for the value.
-               Add (Self.Parent_Env, Symbol_Type (T.Text),
+               Add (Initial_Env, Symbol_Type (T.Text),
                     ${root_node_type_name}
-                      (${cls.env_spec._add_to_env[1].render_expr().strip()}));
+                      (${cls.env_spec.add_to_env_val.strip()}));
             end;
          % endif
 
          % if cls.env_spec._add_env:
-            Ret := AST_Envs.Create (Parent_Env);
+            Ret := AST_Envs.Create (Initial_Env);
             Self.Parent_Env := Ret;
          % endif
 

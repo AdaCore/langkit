@@ -285,7 +285,8 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
    --  Return whether Node is an empty list (so this is wrong for all nodes
    --  that are not lists).
 
-   procedure Populate_Lexical_Env (Node : ${root_node_type_name});
+   procedure Populate_Lexical_Env
+     (Node : ${root_node_type_name}; Root_Env : AST_Envs.Lexical_Env);
    --  Populate the lexical environment for node and all its children.
    --
    --  TODO??? This is probably an internal implementation detail, so this
@@ -311,9 +312,11 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
    --  siblings of Self see, while returning a new env will only affect the
    --  environment seen by Self's children.
 
-   procedure Dump_Lexical_Env (Node : ${root_node_type_name});
+   procedure Dump_Lexical_Env
+     (Node : ${root_node_type_name}; Root_Env : AST_Envs.Lexical_Env);
    --  Debug helper: dump the lexical environment of Node, and consequently any
-   --  nested lexical environment. Used for debugging/testing purpose.
+   --  nested lexical environment. Used for debugging/testing purpose. Pass the
+   --  root env explicitly so that we can tag it properly in the output.
 
    function Parents
      (Node : access ${root_node_value_type})

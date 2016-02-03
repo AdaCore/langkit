@@ -86,6 +86,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    function Root (Unit : Analysis_Unit) return ${root_node_type_name};
    ${ada_doc('langkit.unit_root', 3)}
 
+   procedure Dump_Lexical_Env (Unit : Analysis_Unit);
+   --  Debug helper: output the lexical envs for given analysis unit
+
    procedure Print (Unit : Analysis_Unit);
    --  Debug helper: output the AST and eventual diagnostic for this unit on
    --  standard output.
@@ -113,6 +116,10 @@ private
 
       Charset   : Unbounded_String;
       --  Default charset to use in analysis units
+
+      Root_Scope      : AST_Envs.Lexical_Env;
+      --  The lexical scope that is shared amongst every compilation unit. Used
+      --  to resolve cross file references.
    end record;
 
    type Analysis_Unit_Type is record

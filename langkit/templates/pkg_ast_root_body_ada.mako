@@ -307,7 +307,9 @@ package body ${_self.ada_api_settings.lib_name}.AST_Root is
    -- Populate_Lexical_Env --
    --------------------------
 
-   procedure Populate_Lexical_Env (Node : ${root_node_type_name}) is
+   procedure Populate_Lexical_Env
+     (Node : ${root_node_type_name}; Root_Env : AST_Envs.Lexical_Env)
+   is
 
       --  The internal algorithm, as well as the Do_Env_Action implementations,
       --  use an implicit stack of environment, where the topmost parent
@@ -378,11 +380,9 @@ package body ${_self.ada_api_settings.lib_name}.AST_Root is
          end loop;
       end Populate_Internal;
 
-      --  TODO??? For the moment this is null, but eventually we'll want a real
-      --  root env that will be shared across analysis units.
-      Root_Env : aliased Lexical_Env := null;
+      Env : aliased AST_Envs.Lexical_Env := Root_Env;
    begin
-      Populate_Internal (Node, Root_Env);
+      Populate_Internal (Node, Env);
    end Populate_Lexical_Env;
 
    -----------------
@@ -411,7 +411,9 @@ package body ${_self.ada_api_settings.lib_name}.AST_Root is
    -- Dump_Lexical_Env --
    ----------------------
 
-   procedure Dump_Lexical_Env (Node : ${root_node_type_name}) is
+   procedure Dump_Lexical_Env
+     (Node : ${root_node_type_name}; Root_Env : AST_Envs.Lexical_Env)
+   is
       use Address_To_Id_Maps;
 
       Env_Ids        : Address_To_Id_Maps.Map;
@@ -421,15 +423,19 @@ package body ${_self.ada_api_settings.lib_name}.AST_Root is
       -- Get_Env_Id --
       ----------------
 
-      function Get_Env_Id (E : Lexical_Env) return Integer is
+      function Get_Env_Id (E : Lexical_Env) return String is
          C        : Address_To_Id_Maps.Cursor;
          Inserted : Boolean;
       begin
+         if E = Root_Env then
+            return " <root>";
+         end if;
+
          Env_Ids.Insert (E, Current_Env_Id, C, Inserted);
          if Inserted then
             Current_Env_Id := Current_Env_Id + 1;
          end if;
-         return Address_To_Id_Maps.Element (C);
+         return Address_To_Id_Maps.Element (C)'Img;
       end Get_Env_Id;
       --  Retrieve the Id for a lexical env. Assign one if none was yet
       --  assigned.
@@ -447,12 +453,18 @@ package body ${_self.ada_api_settings.lib_name}.AST_Root is
            (Short_Image (El.El));
 
          function Image is new Env_Element_Vectors.Image (Image);
+
+         First_Iter : Boolean := True;
       begin
-         Put ("<LexEnv Id" & Get_Env_Id (Self)'Img & " Parent"
-              & (if Self.Parent /= null then Get_Env_Id (Self.Parent)'Img
+         Put ("<LexEnv Id" & Get_Env_Id (Self) & " Parent"
+              & (if Self.Parent /= null then Get_Env_Id (Self.Parent)
                  else " null") & " (");
 
          for El in Self.Env.Iterate loop
+            if not First_Iter then
+               Put (" ");
+            end if;
+            First_Iter := False;
             Put (Langkit_Support.Text.Image (Key (El).all) & ": "
                  & Image (Element (El)));
          end loop;
