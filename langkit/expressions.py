@@ -14,6 +14,7 @@ notably to define properties on AST nodes.
 from __future__ import absolute_import
 
 from contextlib import contextmanager
+from copy import copy
 
 from langkit import names
 from langkit.compiled_types import (
@@ -1538,6 +1539,17 @@ class LocalVars(object):
     def render(self):
         return "\n".join(lv.render() for lv in self.local_vars.values())
 
+    def __copy__(self):
+        """
+        When copying local variables, we want to make sure they don't share
+        the underlying dictionnary, so we copy it.
+
+        :rtype: LocalVars
+        """
+        new = LocalVars()
+        new.local_vars = copy(self.local_vars)
+        return new
+
 
 class Property(AbstractNodeData):
     """
@@ -1628,6 +1640,19 @@ class Property(AbstractNodeData):
             assert self.expected_type, (
                 "Abstract properties need an explicit type annotation"
             )
+
+    def __copy__(self):
+        """
+        When copying properties, we want to make sure they don't share local
+        variables, so we implement a custom copier that duplicates the
+        LocalVars instance.
+
+        :rtype: Property
+        """
+        new = Property(self.expr, self._doc, self.is_private, self.abstract,
+                       self.expected_type)
+        new.vars = copy(self.vars)
+        return new
 
     @classmethod
     def get(cls):
