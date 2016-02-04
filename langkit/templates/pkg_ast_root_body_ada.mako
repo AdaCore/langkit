@@ -5,6 +5,7 @@
 
 with Ada.Containers;        use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
+with Ada.Containers.Ordered_Maps;
 with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
@@ -12,6 +13,7 @@ with System.Storage_Elements; use System.Storage_Elements;
 
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
 with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
+with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
 with Langkit_Support.Text;       use Langkit_Support.Text;
 with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
 
@@ -407,6 +409,23 @@ package body ${_self.ada_api_settings.lib_name}.AST_Root is
    package Address_To_Id_Maps is new Ada.Containers.Hashed_Maps
      (Lexical_Env, Positive, Hash, "=");
 
+   -----------------
+   -- Sorted_Envs --
+   -----------------
+
+   --  Those ordered maps are used to have a stable representation of internal
+   --  lexical environments, which is not the case with hashed maps.
+
+   function "<" (L, R : Symbol_Type) return Boolean
+   is
+     (L.all < R.all);
+
+   package Sorted_Envs is new Ada.Containers.Ordered_Maps
+     (Symbol_Type,
+      Element_Type    => AST_Envs.Env_Element_Vectors.Vector,
+      "<"             => "<",
+      "="             => AST_Envs.Env_Element_Vectors."=");
+
    ----------------------
    -- Dump_Lexical_Env --
    ----------------------
@@ -418,6 +437,20 @@ package body ${_self.ada_api_settings.lib_name}.AST_Root is
 
       Env_Ids        : Address_To_Id_Maps.Map;
       Current_Env_Id : Positive := 1;
+
+      -------------------
+      -- To_Sorted_Env --
+      -------------------
+
+      function To_Sorted_Env (Env : Internal_Envs.Map) return Sorted_Envs.Map is
+         Ret_Env : Sorted_Envs.Map;
+         use Internal_Envs;
+      begin
+         for El in Env.Iterate loop
+            Ret_Env.Include (Key (El), Element (El));
+         end loop;
+         return Ret_Env;
+      end To_Sorted_Env;
 
       ----------------
       -- Get_Env_Id --
@@ -447,7 +480,7 @@ package body ${_self.ada_api_settings.lib_name}.AST_Root is
       ----------
 
       procedure Dump (Self : Lexical_Env) is
-         use Internal_Envs;
+         use Sorted_Envs;
 
          function Image (El : Env_Element) return String is
            (Short_Image (El.El));
@@ -460,7 +493,7 @@ package body ${_self.ada_api_settings.lib_name}.AST_Root is
               & (if Self.Parent /= null then Get_Env_Id (Self.Parent)
                  else " null") & " (");
 
-         for El in Self.Env.Iterate loop
+         for El in To_Sorted_Env (Self.Env).Iterate loop
             if not First_Iter then
                Put (" ");
             end if;
