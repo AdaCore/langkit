@@ -1,13 +1,14 @@
 from __future__ import absolute_import
 
 from collections import OrderedDict
+from copy import copy
 import inspect
 from itertools import count
 
 from langkit import names
 from langkit.c_api import CAPIType
 from langkit.common import get_type, null_constant, is_keyword
-from langkit.template_utils import TemplateEnvironment, common_renderer
+from langkit.template_utils import common_renderer
 from langkit.utils import memoized, type_check, col, Colors, common_ancestor
 
 
@@ -547,6 +548,33 @@ class BuiltinField(UserField):
         super(BuiltinField, self).__init__(*args, **kwargs)
 
 
+class NodeMacro(object):
+    """
+    This class is used to extend Struct subclasses in a programmatic way.
+    You can put fields and attributes on a NodeMacro subclass that you would
+    put on a Struct subclass, and then extend any Struct subclass by adding
+    the NodeMacro subclass in the list of _macros of the Struct. For example::
+
+        class Foo(NodeMacro):
+            a = Field(..)
+            b = Property(Self.c)
+
+        class Bar(RootASTNode):
+            _macros = [Foo]
+            c = Field(..)
+
+        class Baz(RootASTNode):
+            _macros = [Foo]
+            c = Property(..)
+
+    What is highlighted by this example is that type checking is done after
+    macro expansion, and since langkit has type inference, macros are
+    polymorphic. Here Bar.c and Baz.c can have different types, and their b
+    property will also have a different type.
+    """
+    pass
+
+
 class StructMetaClass(type):
     """
     Internal metaclass for AST nodes, used to ease fields handling during code
@@ -576,6 +604,18 @@ class StructMetaClass(type):
 
     :type: ASTNode
     """
+
+    @staticmethod
+    def fields_dict(fields):
+        """
+        From a list of (name, AbstractNodeData) tuples, return an ordered
+        dict of the same data, sorted by field index. Abstracts the logic of
+        field reordering.
+
+        :type fields: [(str, AbstractNodeData)]
+        :rtype: OrderedDict[str, AbstractNodeData]
+        """
+        return OrderedDict(sorted(fields, key=lambda (_, f): f._index))
 
     def __new__(mcs, name, bases, dct):
 
@@ -627,18 +667,47 @@ class StructMetaClass(type):
                     " node included). Nearer parents are first in the list."
             )
 
-        fields_list = [(f_n, f_v) for f_n, f_v in dct.items()
-                       if isinstance(f_v, AbstractNodeData)]
+        # Get the list of macro classes, and compute the ordered dicts of
+        # fields for each of them.
+        macro_classes = dct.get("_macros", [])
+        macro_fields = [
+            mcs.fields_dict([
+                (f_n, copy(f_v)) for f_n, f_v in klass.__dict__.items()
+                if isinstance(f_v, AbstractNodeData)
+            ]) for klass in macro_classes
+        ]
 
         # Gather the fields and properties in a dictionary. Recover the order
         # of field declarations.  See the Field class definition for more
         # details.
-        fields = OrderedDict(sorted(fields_list, key=lambda (_, f): f._index))
+        fields = mcs.fields_dict(
+            [(f_n, f_v) for f_n, f_v in dct.items()
+             if isinstance(f_v, AbstractNodeData)]
+        )
+
+        # Append the list of fields that we've got from macros. Append them
+        # in order, so that the order of declaration in NodeMacro classes is
+        # respected, aswell as the order of macro classes in the _macro field.
+        for fields_dict in macro_fields:
+            fields.update(fields_dict)
+
+        # Compute lexical environment specification. Since it can be
+        # specified in macros, we want to make sure that there's only one.
+        env_spec = dct.get('env_spec', None)
+        for klass in macro_classes:
+            es = klass.__dict__.get('env_spec', None)
+            assert not (es and env_spec), (
+                "Too many lexical environments specifications defined for "
+                "node {}".format(name)
+            )
+            env_spec = env_spec or es
+        dct['env_spec'] = env_spec
 
         for field_name, field in fields.items():
             # Remove fields/props as class members: we want them to be
             # stored in their own dicts.
-            dct.pop(field_name)
+            if field_name in dct:
+                dct.pop(field_name)
             # Store the name of the field in the field
             field.name = names.Name.from_lower(field_name)
 
