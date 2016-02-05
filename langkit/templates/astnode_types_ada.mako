@@ -381,9 +381,21 @@
       is
          use AST_Envs;
          use AST_Envs.Lexical_Env_Vectors;
-         Ret : Lexical_Env := null;
 
+         Ret         : Lexical_Env := null;
          Initial_Env : Lexical_Env := Parent_Env;
+
+         <%def name="add_to_env(key, val)">
+            ## Add a new entry to the lexical env, for which the key is
+            ## the symbol for retrieved token, and the value is the
+            ## result of the expression for the value.
+
+            ## We assume the existence of a P_Name property on the result
+            ## of the key expression. TODO: Add check for this in
+            ## EnvSpec.compute.
+            Add (Initial_Env, Symbol_Type (${key}.P_Name.Text),
+                 ${root_node_type_name} (${val.strip()}));
+         </%def>
       begin
 
          % if cls.env_spec._initial_env:
@@ -391,28 +403,25 @@
          % endif
 
          % if cls.env_spec._add_to_env:
-
             ## If we have an _add_to_env specification, we generate code to
             ## add elements to the lexical environment.
-            declare
 
-               ## We assume the existence of a P_Name property on the result
-               ## of the key expression. TODO: Add check for this in
-               ## EnvSpec.compute.
-               ## Ultimately, _add_to_env will be able to recognize other
-               ## return types for the key expression, and handle them
-               ## appropriately.
-               T : Token :=
-                 ${cls.env_spec.add_to_env_key}.P_Name;
-            begin
+            % if cls.env_spec._add_to_env[0].type.is_list_type:
 
-               ## Add a new entry to the lexical env, for which the key is
-               ## the symbol for retrieved token, and the value is the
-               ## result of the expression for the value.
-               Add (Initial_Env, Symbol_Type (T.Text),
-                    ${root_node_type_name}
-                      (${cls.env_spec.add_to_env_val.strip()}));
-            end;
+               ## If the supplied expression for the key has type list, we add
+               ## a (kn, v) pair for every kn in the list. V stays the same for
+               ## every element.
+               ## TODO: We'd like to support both Property DSL array types and
+               ## AST lists here, but we need a common iteration protocol
+               ## first.
+               for El of ${cls.env_spec.add_to_env_key}.Vec loop
+                  ${add_to_env("El", cls.env_spec.add_to_env_val)}
+               end loop;
+            % else:
+               ## Else, just add (key, val) pair once
+               ${add_to_env(cls.env_spec.add_to_env_key,
+                            cls.env_spec.add_to_env_val)}
+            % endif
          % endif
 
          % if cls.env_spec._add_env:
