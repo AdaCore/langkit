@@ -156,12 +156,12 @@ package ${_self.ada_api_settings.lib_name}.AST_Root is
    --  whether Node had such a child (if not, the content of Result is
    --  undefined).
 
-   function Child (Node  : ${root_node_type_name};
+   function Child (Node  : access ${root_node_value_type}'Class;
                    Index : Natural) return ${root_node_type_name};
    --  Return the Index'th child of Node, or null if Node has no such child
 
    function Children
-     (Node : ${root_node_type_name})
+     (Node : access ${root_node_value_type}'Class)
      return ${root_node_type_name}_Arrays.Array_Type;
    --  Return an array containing all the children of Node.
    --  This is an alternative to the Child/Child_Count pair, useful if you want

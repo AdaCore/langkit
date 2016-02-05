@@ -23,7 +23,7 @@ package body ${_self.ada_api_settings.lib_name}.AST_Root is
    -- Child --
    -----------
 
-   function Child (Node  : ${root_node_type_name};
+   function Child (Node  : access ${root_node_value_type}'Class;
                    Index : Natural) return ${root_node_type_name}
    is
       Result : ${root_node_type_name};
@@ -222,7 +222,7 @@ package body ${_self.ada_api_settings.lib_name}.AST_Root is
    --------------
 
    function Children
-     (Node : ${root_node_type_name})
+     (Node : access ${root_node_value_type}'Class)
      return ${root_node_type_name}_Arrays.Array_Type
    is
    begin
