@@ -293,6 +293,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          Unit.Context := null;
          Dec_Ref (Unit);
       end loop;
+      AST_Envs.Free (Context.Root_Scope);
       Destroy (Context.Symbols);
       Free (Context);
    end Destroy;

@@ -1,5 +1,6 @@
 with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
+with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Array_Utils;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
@@ -126,5 +127,8 @@ package Langkit_Support.Lexical_Env is
    function Get
      (Self : Lexical_Env; Key : Symbol_Type) return Env_Element_Array;
    --  Get the array of wrapped elements for this key
+
+   procedure Free is
+     new Ada.Unchecked_Deallocation (Lexical_Env_Type, Lexical_Env);
 
 end Langkit_Support.Lexical_Env;
