@@ -199,6 +199,7 @@ class AbstractExpression(Frozable):
             'map': _build_map,
             'mapcat': _build_mapcat,
             'get': lambda tok: EnvGet(self, tok),
+            'resolve_unique': lambda tok: EnvGet(self, tok, True),
             'at': _build_index_expr,
             'eval_in_env': lambda to_eval_expr: EnvBind(self, to_eval_expr)
         }
@@ -238,43 +239,6 @@ class AbstractExpression(Frozable):
         :rtype: BinaryBooleanOperator
         """
         return BinaryBooleanOperator(BinaryBooleanOperator.AND, self, other)
-
-
-class EnvGet(AbstractExpression):
-    """
-    Abstract expression for lexical environment get operation.
-    """
-
-    def __init__(self, env_expr, token_expr):
-        """
-        :param AbstractExpression env_expr: Expression that will yield
-            the env to get the element from.
-        :param AbstractExpression token_expr: Expression that will yield the
-            token to use as a key on the env.
-        """
-        self.env_expr = env_expr
-        self.token_expr = token_expr
-
-    def construct(self):
-        """
-        Construct a resolved expression for this.
-
-        :rtype: EnvGetExpr
-        """
-        env_expr = construct(self.env_expr)
-        token_expr = construct(self.token_expr)
-
-        assert env_expr.type.matches(LexicalEnvType), (
-            "Environment expressions must return objects of type "
-            "LexicalEnvType: got {} instead".format(env_expr.type.name().camel)
-        )
-
-        assert token_expr.type.matches(Token), (
-            "Token expr to a env get expression must return an object of "
-            "type Token"
-        )
-
-        return EnvGetExpr(env_expr, token_expr)
 
 
 class CollectionExpression(AbstractExpression):
@@ -963,6 +927,72 @@ class ResolvedExpression(object):
         raise NotImplementedError()
 
 
+class EnvGet(AbstractExpression):
+    """
+    Expression for lexical environment get operation.
+    """
+
+    class EnvGetExpr(ResolvedExpression):
+        def __init__(self, env_expr, token_expr, resolve_unique):
+            """
+            :param ResolvedExpression env_expr: The expression representing the
+                env to get from.
+            :param ResolvedExpression token_expr: The expression representing
+                the token key.
+            """
+            self.env_expr = env_expr
+            self.token_expr = token_expr
+            self.resolve_unique = resolve_unique
+            self.type.add_to_context()
+
+        @property
+        def type(self):
+            """
+            :rtype: compiled_types.ArrayType
+            """
+            rgc = StructMetaClass.root_grammar_class
+            return rgc if self.resolve_unique else rgc.array_type()
+
+        def render_pre(self):
+            return "{}\n{}".format(self.env_expr.render_pre(),
+                                   self.token_expr.render_pre())
+
+        def render_expr(self):
+            return (
+                "{} (0)" if self.resolve_unique else "Create ({})"
+            ).format("AST_Envs.Get ({}, Symbol_Type ({}.Text))".format(
+                self.env_expr.render_expr(), self.token_expr.render_expr()
+            ))
+
+    def __init__(self, env_expr, token_expr,
+                 resolve_unique=False):
+        """
+        :param AbstractExpression env_expr: Expression that will yield
+            the env to get the element from.
+        :param AbstractExpression token_expr: Expression that will yield the
+            token to use as a key on the env.
+        :param bool resolve_unique: Wether we want an unique result or not.
+            NOTE: For the moment, nothing will be done to ensure that only one
+            result is available. The implementation will just take the first
+            result.
+        """
+        self.env_expr = env_expr
+        self.token_expr = token_expr
+        self.resolve_unique = resolve_unique
+        # TODO: Add a filter here. This will wait further developments in the
+        # array machinery.
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: EnvGetExpr
+        """
+        return EnvGet.EnvGetExpr(construct(self.env_expr, LexicalEnvType),
+                                 construct(self.token_expr, Token),
+                                 self.resolve_unique)
+
+
 class EnvBind(AbstractExpression):
     """
     Expression that will evaluate a subexpression in the context of a
@@ -1048,39 +1078,6 @@ class CollectionGetExpr(ResolvedExpression):
         return "Get ({}, {}, Or_Null => {})".format(
             self.coll_expr.render_expr(), self.index_expr.render_expr(),
             self.or_null
-        )
-
-
-class EnvGetExpr(ResolvedExpression):
-    """
-    Resolved expression for lexical environment get operation.
-    """
-
-    def __init__(self, env_expr, token_expr):
-        """
-        :param ResolvedExpression env_expr: The expression representing the
-            env to get from.
-        :param ResolvedExpression token_expr: The expression representing
-            the token key.
-        """
-        self.env_expr = env_expr
-        self.token_expr = token_expr
-        self.type.add_to_context()
-
-    @property
-    def type(self):
-        """
-        :rtype: compiled_types.ArrayType
-        """
-        return StructMetaClass.root_grammar_class.array_type()
-
-    def render_pre(self):
-        return "{}\n{}".format(self.env_expr.render_pre(),
-                               self.token_expr.render_pre())
-
-    def render_expr(self):
-        return "Create (AST_Envs.Get ({}, Symbol_Type ({}.Text)))".format(
-            self.env_expr.render_expr(), self.token_expr.render_expr()
         )
 
 
