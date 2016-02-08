@@ -52,7 +52,7 @@ def construct(expr, expected_type_or_pred=None):
 
     if expected_type_or_pred:
         if isinstance(expected_type_or_pred, type):
-            assert issubclass(ret.type, expected_type_or_pred), (
+            assert ret.type.matches(expected_type_or_pred), (
                 "Expected type {}, got {}".format(
                     expected_type_or_pred, ret.type
                 )
