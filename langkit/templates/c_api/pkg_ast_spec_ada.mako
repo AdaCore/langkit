@@ -17,7 +17,7 @@ use ${_self.ada_api_settings.lib_name}.Analysis.C;
 --  use this package. Please refer to the C header if you want to use the C
 --  API.
 
-package ${_self.ada_api_settings.lib_name}.AST.C is
+package ${_self.ada_api_settings.lib_name}.AST.Types.C is
 
    % for enum_type in _self.sorted_types(_self.enum_types):
       ${enum_types.spec(enum_type)}
@@ -46,4 +46,4 @@ package ${_self.ada_api_settings.lib_name}.AST.C is
        % endfor
    % endfor
 
-end ${_self.ada_api_settings.lib_name}.AST.C;
+end ${_self.ada_api_settings.lib_name}.AST.Types.C;

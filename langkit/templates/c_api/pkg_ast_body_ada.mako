@@ -7,7 +7,7 @@
 with ${_self.ada_api_settings.lib_name}.Analysis;
 use ${_self.ada_api_settings.lib_name}.Analysis;
 
-package body ${_self.ada_api_settings.lib_name}.AST.C is
+package body ${_self.ada_api_settings.lib_name}.AST.Types.C is
 
    ---------------------------------------
    -- Kind-specific AST node primitives --
@@ -19,4 +19,4 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
        % endfor
    % endfor
 
-end ${_self.ada_api_settings.lib_name}.AST.C;
+end ${_self.ada_api_settings.lib_name}.AST.Types.C;

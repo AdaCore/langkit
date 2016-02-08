@@ -9,7 +9,7 @@ with Langkit_Support.Text;    use Langkit_Support.Text;
 with ${get_context().ada_api_settings.lib_name}.Lexer;
 use ${get_context().ada_api_settings.lib_name}.Lexer;
 
-package body ${_self.ada_api_settings.lib_name}.AST.Parsers is
+package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    --  Prepare packrat instantiations: one per enum type and onefor each kind
    --  of node (including lists).
@@ -174,4 +174,4 @@ package body ${_self.ada_api_settings.lib_name}.AST.Parsers is
       % endfor
    end Clean_All_Memos;
 
-end ${_self.ada_api_settings.lib_name}.AST.Parsers;
+end ${_self.ada_api_settings.lib_name}.AST.Types.Parsers;

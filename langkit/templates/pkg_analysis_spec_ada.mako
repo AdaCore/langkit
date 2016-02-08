@@ -9,8 +9,8 @@ with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
 with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
 
-with ${_self.ada_api_settings.lib_name}.AST_Root;
-use ${_self.ada_api_settings.lib_name}.AST_Root;
+with ${_self.ada_api_settings.lib_name}.AST;
+use ${_self.ada_api_settings.lib_name}.AST;
 
 --  This package provides types and primitives to analyze source files as
 --  analysis units.

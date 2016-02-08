@@ -47,21 +47,6 @@
       overriding
       procedure Print (Node  : access ${type_name};
                        Level : Natural := 0);
-      overriding
-      procedure Validate (Node   : access ${type_name};
-                          Parent : ${root_node_type_name} := null);
-
-      overriding
-      function Lookup_Children (Node : access ${type_name};
-                                Sloc : Source_Location;
-                                Snap : Boolean := False)
-        return ${root_node_type_name};
-
-      % if cls.env_spec:
-      overriding function Do_Env_Actions
-        (Self       : access ${type_name};
-         Parent_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env;
-      % endif
 
       overriding procedure Destroy
         (Node : access ${cls.name()}_Type);
@@ -108,6 +93,20 @@
    % endif
 
    % if not cls.abstract:
+      % if cls.env_spec:
+         overriding
+         function Do_Env_Actions
+           (Self       : access ${type_name};
+            Parent_Env : in out AST_Envs.Lexical_Env)
+            return AST_Envs.Lexical_Env;
+      % endif
+
+      overriding
+      function Lookup_Children (Node : access ${type_name};
+                                Sloc : Source_Location;
+                                Snap : Boolean := False)
+        return ${root_node_type_name};
+
       package ${cls.name()}_Alloc is
         new Tagged_Alloc (${type_name});
    % endif
@@ -268,25 +267,9 @@
 
       end Print;
 
-      --------------
-      -- Validate --
-      --------------
-
-      overriding
-      procedure Validate (Node   : access ${type_name};
-                          Parent : ${root_node_type_name} := null)
-      is
-      begin
-         if Node.Parent /= Parent then
-            raise Program_Error;
-         end if;
-
-         % for field in astnode_fields:
-            if Node.${field.name} /= null then
-               Node.${field.name}.Validate (${root_node_type_name} (Node));
-            end if;
-         % endfor
-      end Validate;
+      -------------
+      -- Destroy --
+      -------------
 
       overriding procedure Destroy
         (Node : access ${cls.name()}_Type)
@@ -375,7 +358,8 @@
       -- Do_Env_Actions --
       --------------------
 
-      overriding function Do_Env_Actions
+      overriding
+      function Do_Env_Actions
         (Self : access ${type_name};
          Parent_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
       is

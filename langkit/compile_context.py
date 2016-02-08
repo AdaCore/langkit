@@ -476,21 +476,21 @@ class CompileCtx():
 
         ada_modules = [
             # Top (pure) package
-            ("pkg_main", [], False),
+            ("pkg_main",         [], False),
             # Unit for initialization primitives
-            ("pkg_init", ["init"], True),
+            ("pkg_init",         ["init"], True),
             # Unit for analysis primitives
-            ("pkg_analysis", ["analysis"], True),
+            ("pkg_analysis",     ["analysis"], True),
             # Unit for the root AST node
-            ("pkg_ast_root", ["ast_root"], True),
-            # Unit for generic AST_List
-            ("pkg_ast_list", ["ast_list"], True),
+            ("pkg_ast",          ["ast"], True),
+            # Unit for generic AST lists
+            ("pkg_ast_list",     ["ast", "list"], True),
             # Unit for all derived AST nodes
-            ("pkg_ast", ["ast"], True),
+            ("pkg_ast_types",    ["ast", "types"], True),
             # Unit for all parsers
-            ("parsers/pkg_main", ["ast", "parsers"], True),
+            ("parsers/pkg_main", ["ast", "types", "parsers"], True),
             # Unit for the lexer
-            ("lexer/pkg_lexer", ["lexer"], True),
+            ("lexer/pkg_lexer",  ["lexer"], True),
         ]
 
         for template_base_name, qual_name, has_body in ada_modules:
@@ -580,8 +580,8 @@ class CompileCtx():
                               ["Analysis", "C"])
         self.write_ada_module(src_path, "c_api/pkg_analysis",
                               ["Analysis", "C"])
-        self.write_ada_module(src_path, "c_api/pkg_ast", ["AST", "C"])
-        self.write_ada_module(src_path, "c_api/pkg_ast", ["AST", "C"])
+        self.write_ada_module(src_path, "c_api/pkg_ast", ["AST", "Types", "C"])
+        self.write_ada_module(src_path, "c_api/pkg_ast", ["AST", "Types", "C"])
 
     def emit_python_api(self, python_path):
         """

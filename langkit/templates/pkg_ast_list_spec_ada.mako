@@ -3,9 +3,6 @@
 with Langkit_Support.Bump_Ptr.Vectors;
 with Langkit_Support.Tokens; use Langkit_Support.Tokens;
 
-with ${_self.ada_api_settings.lib_name}.AST_Root;
-use ${_self.ada_api_settings.lib_name}.AST_Root;
-
 --  Generic package to create AST node types that just contain lists of other
 --  AST node types.
 --
@@ -14,12 +11,12 @@ use ${_self.ada_api_settings.lib_name}.AST_Root;
 private generic
    type Node_Type is abstract new ${root_node_value_type} with private;
    type Node_Access is access all Node_Type'Class;
-package ${_self.ada_api_settings.lib_name}.AST_List is
+package ${_self.ada_api_settings.lib_name}.AST.List is
 
    --  See AST_Root for primitive operations documentations.
    --
-   --  Note that as this package is instantiated in private parts, there is no
-   --  real need to create a private part here.
+   --  Note that as this package is instantiated in private parts and is itself
+   --  private, there is no real need to create a private part here.
 
    List_Kind : constant ${root_node_kind_name} := 1;
 
@@ -47,10 +44,6 @@ package ${_self.ada_api_settings.lib_name}.AST_List is
                         Result : out ${root_node_type_name});
 
    overriding
-   procedure Validate (Node : access List_Type;
-                       Parent : ${root_node_type_name} := null);
-
-   overriding
    procedure Print (Node  : access List_Type;
                     Level : Natural := 0);
 
@@ -62,4 +55,4 @@ package ${_self.ada_api_settings.lib_name}.AST_List is
 
    overriding procedure Destroy (Node : access List_Type);
 
-end ${_self.ada_api_settings.lib_name}.AST_List;
+end ${_self.ada_api_settings.lib_name}.AST.List;

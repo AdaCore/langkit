@@ -13,7 +13,7 @@ with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
 --  TODO??? For now, consider that this package is not part of the public API.
 --  Please use the Analysis package to parse source files.
 
-package ${_self.ada_api_settings.lib_name}.AST.Parsers is
+package ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    type Fail_Info is record
       Pos               : Integer := -1;
@@ -75,4 +75,4 @@ package ${_self.ada_api_settings.lib_name}.AST.Parsers is
    --  memos should be stored in Parser_Type. In the end, this should be turned
    --  into a Parser_Type finalizer.
 
-end ${_self.ada_api_settings.lib_name}.AST.Parsers;
+end ${_self.ada_api_settings.lib_name}.AST.Types.Parsers;

@@ -2,7 +2,7 @@
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-package body ${_self.ada_api_settings.lib_name}.AST_List is
+package body ${_self.ada_api_settings.lib_name}.AST.List is
 
    use Node_Vectors;
 
@@ -79,26 +79,6 @@ package body ${_self.ada_api_settings.lib_name}.AST_List is
       end if;
    end Get_Child;
 
-   --------------
-   -- Validate --
-   --------------
-
-   overriding
-   procedure Validate (Node   : access List_Type;
-                       Parent : ${root_node_type_name} := null)
-   is
-   begin
-      if Node.Parent /= Parent then
-         raise Program_Error;
-      end if;
-
-      for Child of Node.Vec loop
-         if Child /= null then
-            Child.Validate (${root_node_type_name} (Node));
-         end if;
-      end loop;
-   end Validate;
-
    -----------
    -- Print --
    -----------
@@ -161,4 +141,4 @@ package body ${_self.ada_api_settings.lib_name}.AST_List is
       end loop;
    end Destroy;
 
-end ${_self.ada_api_settings.lib_name}.AST_List;
+end ${_self.ada_api_settings.lib_name}.AST.List;

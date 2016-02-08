@@ -22,12 +22,12 @@ with Langkit_Support.Tokens;             use Langkit_Support.Tokens;
 
 with ${_self.ada_api_settings.lib_name}.Analysis;
 use ${_self.ada_api_settings.lib_name}.Analysis;
-with ${_self.ada_api_settings.lib_name}.AST_Root;
-use ${_self.ada_api_settings.lib_name}.AST_Root;
 with ${_self.ada_api_settings.lib_name}.AST;
 use ${_self.ada_api_settings.lib_name}.AST;
-with ${_self.ada_api_settings.lib_name}.AST.Parsers;
-use ${_self.ada_api_settings.lib_name}.AST.Parsers;
+with ${_self.ada_api_settings.lib_name}.AST.Types;
+use ${_self.ada_api_settings.lib_name}.AST.Types;
+with ${_self.ada_api_settings.lib_name}.AST.Types.Parsers;
+use ${_self.ada_api_settings.lib_name}.AST.Types.Parsers;
 with ${_self.ada_api_settings.lib_name}.Init;
 use ${_self.ada_api_settings.lib_name}.Init;
 
@@ -64,7 +64,6 @@ procedure Parse is
          return;
       end if;
 
-      Res.Validate;
       if not Silent then
          if Do_Print_Trivia then
             PP_Trivia (Res);

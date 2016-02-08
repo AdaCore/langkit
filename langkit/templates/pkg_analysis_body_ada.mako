@@ -10,8 +10,8 @@ with Langkit_Support.Text;   use Langkit_Support.Text;
 with Langkit_Support.Tokens; use Langkit_Support.Tokens;
 
 with ${get_context().ada_api_settings.lib_name}.Lexer;
-with ${get_context().ada_api_settings.lib_name}.AST.Parsers;
-use ${get_context().ada_api_settings.lib_name}.AST.Parsers;
+with ${get_context().ada_api_settings.lib_name}.AST.Types.Parsers;
+use ${get_context().ada_api_settings.lib_name}.AST.Types.Parsers;
 
 package body ${_self.ada_api_settings.lib_name}.Analysis is
 
@@ -386,6 +386,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    ---------------
 
    procedure PP_Trivia (Unit : Analysis_Unit) is
+      Last_Token : constant Natural := Token_End (Unit.AST_Root);
    begin
       for Tok of Get_Leading_Trivias (Unit.TDH) loop
          Put_Line (Image (Tok.Text.all));
@@ -393,7 +394,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
       PP_Trivia (Unit.AST_Root);
 
-      for Tok of Get_Trivias (Unit.TDH, Unit.AST_Root.Token_End) loop
+      for Tok of Get_Trivias (Unit.TDH, Last_Token) loop
          Put_Line (Image (Tok.Text.all));
       end loop;
    end PP_Trivia;
