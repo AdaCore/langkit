@@ -15,6 +15,7 @@ from __future__ import absolute_import
 
 from contextlib import contextmanager
 from copy import copy
+from functools import partial
 
 from langkit import names
 from langkit.compiled_types import (
@@ -22,7 +23,7 @@ from langkit.compiled_types import (
     ASTNode, Struct, StructMetaClass, CompiledType,
     AbstractNodeData
 )
-from langkit.utils import Colors, col, assert_type
+from langkit.utils import Colors, col, assert_type, memoized
 
 
 def construct(expr, expected_type_or_pred=None):
@@ -157,6 +158,27 @@ class AbstractExpression(Frozable):
         """
         raise NotImplementedError()
 
+    @memoized
+    def attrs(self):
+        # Using partial allows the user to be able to use keyword arguments
+        # defined on the expressions constructors.
+        return {
+            'all':            partial(Quantifier, Quantifier.ALL, self),
+            'any':            partial(Quantifier, Quantifier.ANY, self),
+            'cast':           partial(Cast, self),
+            'contains':       partial(Contains, self),
+            'equals':         partial(Eq, self),
+            'filter':         partial(Map, self, lambda x: x),
+            'is_a':           partial(IsA, self),
+            'map':            partial(Map, self),
+            'mapcat':         partial(Map, self, concat=True),
+            'get':            partial(EnvGet, self),
+            'resolve_unique': partial(EnvGet, self, resolve_unique=True),
+            'at':             partial(CollectionGet, self),
+            'eval_in_env':    partial(EnvBind, self),
+            'is_null':        IsNull(self)
+        }
+
     @Frozable.protect
     def __getattr__(self, attr):
         """
@@ -166,47 +188,7 @@ class AbstractExpression(Frozable):
         :param str attr: Name of the field to access.
         :rtype: AbstractExpression|function
         """
-
-        # Constructors for operations with attribute-like syntax
-
-        def _build_any(predicate):
-            return Quantifier(Quantifier.ANY, self, predicate)
-
-        def _build_mapcat(expr, filter=None):
-            return Map(self, expr, filter, concat=True)
-
-        def _build_map(expr, filter=None):
-            return Map(self, expr, filter)
-
-        def _build_index_expr(index_expr, or_null=True):
-            return CollectionGet(self, index_expr, or_null=or_null)
-
-        # Constructors for primitives that don't take any parameters
-        direct_constructors = {
-            'is_null':
-                lambda: IsNull(self),
-        }
-
-        # Constructors for primitives that take parameters
-        constructors = {
-            'all': lambda pred: Quantifier(Quantifier.ALL, self, pred),
-            'any': _build_any,
-            'cast': lambda astnode: Cast(self, astnode),
-            'contains': lambda other: Contains(self, other),
-            'equals': lambda other: Eq(self, other),
-            'filter': lambda filter: Map(self, lambda x: x, filter),
-            'is_a': lambda astnode: IsA(self, astnode),
-            'map': _build_map,
-            'mapcat': _build_mapcat,
-            'get': lambda tok: EnvGet(self, tok),
-            'resolve_unique': lambda tok: EnvGet(self, tok, True),
-            'at': _build_index_expr,
-            'eval_in_env': lambda to_eval_expr: EnvBind(self, to_eval_expr)
-        }
-
-        return direct_constructors.get(
-            attr, constructors.get(attr, FieldAccess(self, attr))
-        )
+        return self.attrs().get(attr, FieldAccess(self, attr))
 
     @Frozable.protect
     def __call__(self, *args, **kwargs):
