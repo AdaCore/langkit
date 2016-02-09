@@ -2,6 +2,7 @@
 
 <%namespace name="array_types"   file="array_types_ada.mako" />
 <% root_node_array = ctx.root_grammar_class.array_type() %>
+<% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
 with System;
 

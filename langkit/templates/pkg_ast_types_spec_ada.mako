@@ -7,6 +7,7 @@
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 
 <% root_node_array = ctx.root_grammar_class.array_type() %>
+<% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
 with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Tokens;   use Langkit_Support.Tokens;
@@ -50,7 +51,7 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
    -- Structure types (incomplete declarations --
    ----------------------------------------------
 
-   % for struct_type in _self.struct_types:
+   % for struct_type in no_builtins(_self.struct_types):
    ${struct_types.public_incomplete_decl(struct_type)}
    % endfor
 
@@ -58,10 +59,8 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
    -- ASTNode derived types (incomplete declarations) --
    -----------------------------------------------------
 
-   % for astnode in _self.astnode_types:
-      % if astnode != _self.root_grammar_class:
-         ${astnode_types.public_incomplete_decl(astnode)}
-      % endif
+   % for astnode in no_builtins(_self.astnode_types):
+   ${astnode_types.public_incomplete_decl(astnode)}
    % endfor
 
    % for element_type in _self.sorted_types(_self.list_types):
@@ -72,7 +71,7 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
    -- Structure types (full declarations) --
    -----------------------------------------
 
-   % for struct_type in _self.struct_types:
+   % for struct_type in no_builtins(_self.struct_types):
    ${struct_types.public_decl(struct_type)}
    % endfor
 
@@ -87,9 +86,9 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
    --  have here pure Ada arrays instead.
 
    % for array_type in _self.sorted_types(_self.array_types):
-      % if array_type != root_node_array:
+   % if array_type != root_node_array:
    ${array_types.public_decl(array_type)}
-      % endif
+   % endif
    % endfor
 
    ---------------------------------------------------
@@ -98,22 +97,18 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
 
    --  See AST_Root for primitive operations documentations
 
-   % for astnode in _self.astnode_types:
-      % if astnode != _self.root_grammar_class:
-         ${astnode_types.public_decl(astnode)}
-      % endif
+   % for astnode in no_builtins(_self.astnode_types):
+   ${astnode_types.public_decl(astnode)}
    % endfor
 
 private
 
-   % for struct_type in _self.struct_types:
+   % for struct_type in no_builtins(_self.struct_types):
    ${struct_types.private_decl(struct_type)}
    % endfor
 
-   % for astnode in _self.astnode_types:
-      % if astnode != _self.root_grammar_class:
-         ${astnode_types.private_decl(astnode)}
-      % endif
+   % for astnode in no_builtins(_self.astnode_types):
+   ${astnode_types.private_decl(astnode)}
    % endfor
 
    % for element_type in _self.sorted_types(_self.list_types):

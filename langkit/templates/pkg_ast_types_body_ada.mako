@@ -7,6 +7,7 @@
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 
 <% root_node_array = ctx.root_grammar_class.array_type() %>
+<% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
@@ -17,14 +18,12 @@ with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
 
 package body ${_self.ada_api_settings.lib_name}.AST.Types is
 
-   % for struct_type in _self.struct_types:
+   % for struct_type in no_builtins(_self.struct_types):
    ${struct_types.body(struct_type)}
    % endfor
 
-   % for astnode in _self.astnode_types:
-      % if astnode != _self.root_grammar_class:
-         ${astnode_types.body(astnode)}
-      % endif
+   % for astnode in no_builtins(_self.astnode_types):
+   ${astnode_types.body(astnode)}
    % endfor
 
 end ${_self.ada_api_settings.lib_name}.AST.Types;

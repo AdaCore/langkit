@@ -824,6 +824,18 @@ class Struct(CompiledType):
     is_ptr = False
 
     @classmethod
+    def is_builtin(cls):
+        """
+        Some Structs are considered "built-in", which means that either no
+        code needs to be emitted for them, either special code will be
+        emitted on a special path, and we can omit them from regular code
+        generation.
+
+        :rtype: bool
+        """
+        return cls == StructMetaClass.root_grammar_class
+
+    @classmethod
     def is_ast_node(cls):
         """
         Helper for issubclass(cls, ASTNode), to determine if a subclass is a

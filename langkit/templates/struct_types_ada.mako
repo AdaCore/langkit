@@ -2,14 +2,12 @@
 
 <%namespace name="exts" file="extensions.mako" />
 
-
 <%def name="public_incomplete_decl(cls)">
 
    type ${cls.name()};
    ${ada_doc(cls, 3)}
 
 </%def>
-
 
 <%def name="public_decl(cls)">
 
