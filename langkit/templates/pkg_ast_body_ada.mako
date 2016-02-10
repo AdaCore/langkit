@@ -426,6 +426,55 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       "<"             => "<",
       "="             => AST_Envs.Env_Element_Vectors."=");
 
+   -------------------
+   -- To_Sorted_Env --
+   -------------------
+
+   function To_Sorted_Env (Env : Internal_Envs.Map) return Sorted_Envs.Map is
+      Ret_Env : Sorted_Envs.Map;
+      use Internal_Envs;
+   begin
+      for El in Env.Iterate loop
+         Ret_Env.Include (Key (El), Element (El));
+      end loop;
+      return Ret_Env;
+   end To_Sorted_Env;
+
+
+   ----------
+   -- Dump --
+   ----------
+
+   procedure Dump_One_Lexical_Env
+     (Self : AST_Envs.Lexical_Env; Env_Id : String := "";
+      Parent_Env_Id : String := "")
+   is
+      use Sorted_Envs;
+
+      function Image (El : Env_Element) return String is
+        (Short_Image (El.El));
+
+      function Image is new Env_Element_Vectors.Image (Image);
+
+      First_Iter : Boolean := True;
+   begin
+      Put ("<LexEnv Id" & Env_Id & " Parent"
+           & (if Self.Parent /= null then Parent_Env_Id
+              else " null") & " (");
+
+      for El in To_Sorted_Env (Self.Env).Iterate loop
+         if not First_Iter then
+            Put (" ");
+         end if;
+         First_Iter := False;
+         Put (Langkit_Support.Text.Image (Key (El).all) & ": "
+              & Image (Element (El)));
+      end loop;
+      Put (")>");
+   end Dump_One_Lexical_Env;
+   --  This procedure dumps *one* lexical environment
+
+
    ----------------------
    -- Dump_Lexical_Env --
    ----------------------
@@ -437,20 +486,6 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
       Env_Ids        : Address_To_Id_Maps.Map;
       Current_Env_Id : Positive := 1;
-
-      -------------------
-      -- To_Sorted_Env --
-      -------------------
-
-      function To_Sorted_Env (Env : Internal_Envs.Map) return Sorted_Envs.Map is
-         Ret_Env : Sorted_Envs.Map;
-         use Internal_Envs;
-      begin
-         for El in Env.Iterate loop
-            Ret_Env.Include (Key (El), Element (El));
-         end loop;
-         return Ret_Env;
-      end To_Sorted_Env;
 
       ----------------
       -- Get_Env_Id --
@@ -473,41 +508,11 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       --  Retrieve the Id for a lexical env. Assign one if none was yet
       --  assigned.
 
-      Env : Lexical_Env := null;
-
-      ----------
-      -- Dump --
-      ----------
-
-      procedure Dump (Self : Lexical_Env) is
-         use Sorted_Envs;
-
-         function Image (El : Env_Element) return String is
-           (Short_Image (El.El));
-
-         function Image is new Env_Element_Vectors.Image (Image);
-
-         First_Iter : Boolean := True;
-      begin
-         Put ("<LexEnv Id" & Get_Env_Id (Self) & " Parent"
-              & (if Self.Parent /= null then Get_Env_Id (Self.Parent)
-                 else " null") & " (");
-
-         for El in To_Sorted_Env (Self.Env).Iterate loop
-            if not First_Iter then
-               Put (" ");
-            end if;
-            First_Iter := False;
-            Put (Langkit_Support.Text.Image (Key (El).all) & ": "
-                 & Image (Element (El)));
-         end loop;
-         Put (")>");
-      end Dump;
-      --  This procedure dumps *one* lexical environment
-
       --------------
       -- Internal --
       --------------
+
+      Env : Lexical_Env := null;
 
       procedure Internal (Current : ${root_node_type_name}) is
       begin
@@ -523,7 +528,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
             Env := Current.Parent_Env;
             Put ("<" & Kind_Name (Current) & " "
                  & Image (Sloc_Range (Current)) & "> - ");
-            Dump (Env);
+            Dump_One_Lexical_Env
+              (Env, Get_Env_Id (Env), Get_Env_Id (Env.Parent));
             Put_Line ("");
          end if;
 
