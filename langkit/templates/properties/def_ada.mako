@@ -6,7 +6,7 @@ ${"overriding" if property.overriding else ""} function ${property.name}
    Lex_Env : AST_Envs.Lexical_Env := null)
    return ${property.type.name()}
 is
-   use AST_Envs;
+   use type AST_Envs.Lexical_Env;
 
    pragma Warnings (Off, "is not referenced");
    ## We declare a variable Self, that has the named class wide access type

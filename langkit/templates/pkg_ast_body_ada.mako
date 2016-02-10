@@ -566,4 +566,19 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end;
    end Parents;
 
+   -------------
+   -- Combine --
+   -------------
+
+   function Combine
+     (L, R : ${ctx.env_metadata.name()}) return ${ctx.env_metadata.name()}
+   is
+      Ret : ${ctx.env_metadata.name()} := (others => False);
+   begin
+      % for field in ctx.env_metadata.get_fields():
+         Ret.${field.name} := L.${field.name} or R.${field.name};
+      % endfor
+      return Ret;
+   end Combine;
+
 end ${_self.ada_api_settings.lib_name}.AST;

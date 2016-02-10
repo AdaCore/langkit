@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
 <%namespace name="array_types"   file="array_types_ada.mako" />
+<%namespace name="struct_types"  file="struct_types_ada.mako" />
 <% root_node_array = ctx.root_grammar_class.array_type() %>
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
@@ -83,14 +84,30 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  The following types and operations are implementation details we did not
    --  manage yet to put in a private part. Please don't use them.
 
+   % if ctx.env_metadata:
+   ${struct_types.public_decl(ctx.env_metadata)}
+
+   function Combine
+     (L, R : ${ctx.env_metadata.name()}) return ${ctx.env_metadata.name()};
+   ## The combine function on environments metadata does a boolean Or on every
+   ## boolean component of the env metadata.
+
+   % else:
    type Dummy_Metadata is new Integer;
    No_Metadata : constant Dummy_Metadata := 0;
    function Combine (L, R : Dummy_Metadata) return Dummy_Metadata is (0);
-   --  This type and constants are added waiting for a real metadata type.
-   --  TODO??? Use a real metadata type.
+   --  This type and constants are added waiting for a real metadata type
+   % endif
 
    package AST_Envs is new Langkit_Support.Lexical_Env
-     (${root_node_type_name}, Dummy_Metadata, No_Metadata, Combine);
+     (${root_node_type_name},
+      ${ctx.env_metadata.name() if ctx.env_metadata else "Dummy_Metadata" },
+      No_Metadata, Combine);
+
+   ## This subtype is introduced to make the manipulation of env elements
+   ## possible from the DSL without using AST_Envs.
+   subtype Env_Element is AST_Envs.Env_Element;
+   No_Env_Element : constant Env_Element := (null, No_Metadata);
 
    ## Declare arrays of root nodes here since some primitives rely on it and
    ## since the declarations require AST_Envs.

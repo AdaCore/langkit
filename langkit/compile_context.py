@@ -340,17 +340,26 @@ class CompileCtx():
         """
 
         # Get the list of ASTNode types from the Struct metaclass
-        from langkit.compiled_types import StructMetaClass
+        from langkit.compiled_types import StructMetaClass, EnvElement, Struct
 
         # Skipping the first element which is ASTNode, because it is not a
         # real type in the generated library.
         self.astnode_types = list(StructMetaClass.astnode_types)[1:]
 
-        # Skipping the first element which is Struct, because it is not a
-        # real type in the generated library.
-        self.struct_types = list(StructMetaClass.struct_types)[1:]
+        # Here we're skipping Struct because it's not a real type in
+        # generated code. We're also putting env_metadata and EnvElement in
+        # the beginning and in the right dependency order (the metadata
+        # type before the env element type).
+        # TODO: Using a dependency order topological sort wouldn't hurt at
+        # some point.
+        self.struct_types = [StructMetaClass.env_metadata, EnvElement] + [
+            t for t in StructMetaClass.struct_types
+            if t not in [EnvElement, StructMetaClass.env_metadata, Struct]
+        ]
 
         self.root_grammar_class = StructMetaClass.root_grammar_class
+        self.env_metadata = StructMetaClass.env_metadata
+        self.env_element = EnvElement
 
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a
@@ -519,6 +528,7 @@ class CompileCtx():
             printcol("Compiling the grammar...", Colors.OKBLUE)
 
         with names.camel_with_underscores:
+            # Compute the type of fields for types used in the grammar
             for r_name, r in self.grammar.rules.items():
                 r.compute_fields_types()
 

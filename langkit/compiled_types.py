@@ -611,6 +611,14 @@ class StructMetaClass(type):
     :type: ASTNode
     """
 
+    env_metadata = None
+    """
+    The class designing the type used as metadata for the lexical environments
+    values. Must be a pure struct type.
+
+    :type: Struct
+    """
+
     @staticmethod
     def fields_dict(fields):
         """
@@ -768,6 +776,56 @@ def root_grammar_class(cls):
         "You can have only one descendent of ASTNode, and it must be the "
         "root grammar class"
     )
+    EnvElement.get_abstract_fields_dict()['el'].type = cls
+    return cls
+
+
+def env_metadata(cls):
+    """
+    Decorator to tag a Struct subclass as the type used for lexical
+    environments metadata.
+
+    The assumption that is done for the moment is that the struct subclass
+    given as argument must only have boolean fields. In the context of
+    libadalang, the idea is that env metadata is to be used to express things
+    such as "is this element accessed through an implicit dereference ?" or
+    "does this element correspond to an Ada 2005 dot notation call".
+
+    This allows metadata to be combinable, that is you must be able to take two
+    metadata objects and combine them. Obvious for booleans, not so much
+    generally.
+
+    The fact that metadata is combinable allows us, for example, to take an
+    env containing subpprograms accessed via dot notation, and annotate the
+    whole env with the property "implicit dereference", if the receiver is
+    an access. Env elements containing a subprogram will thus have both
+    properties set.
+
+    :param Struct cls: Type parameter. The Struct subclass to decorate.
+    """
+
+    StructMetaClass.env_metadata = cls
+    assert issubclass(cls, Struct), (
+        "The type chosen to be environment metadata must be a struct type"
+    )
+
+    assert not issubclass(cls, ASTNode), (
+        "The type chosen to be environment metadata must not be an ASTNode "
+        "type"
+    )
+    for field in cls.get_fields():
+        assert isinstance(field, UserField), (
+            "Fields of the Struct type chosen to be environment metadata "
+            "must be instances of UserField."
+        )
+        assert field.type == BoolType, (
+            "Fields of the Struct type chosen to be environment metadata "
+            "must have type boolean"
+        )
+
+    # Set the type of the EnvElement metadata field to cls
+    EnvElement.get_abstract_fields_dict()['MD'].type = cls
+
     return cls
 
 
@@ -839,7 +897,17 @@ class Struct(CompiledType):
 
         :rtype: bool
         """
-        return cls == StructMetaClass.root_grammar_class
+        return cls in (
+            # The root grammar class is emitted separately from the others
+            StructMetaClass.root_grammar_class,
+
+            # The env metadata struct is emitted separately from the others
+            StructMetaClass.env_metadata,
+
+            # EnvElement is not emitted per se, because it is a generic
+            # instantiation from Langkit_Support.Lexical_Env.
+            EnvElement
+        )
 
     @classmethod
     def is_ast_node(cls):
@@ -1359,3 +1427,18 @@ class EnumType(CompiledType):
             )
             for alt in cls.alternatives
         ]
+
+
+class EnvElement(Struct):
+    """
+    Denotes the type returned by doing a get operation on a lexical
+    environment. This is a wrapper containing the ast node stored as a
+    value, as well as the metadata associated to this node in the source
+    lexical environment.
+    """
+    # The type of el will be filled when the root_grammar_class is used
+    el = BuiltinField(None, doc="The stored AST node")
+
+    # The type of MD is initialized to LongType, because by default,
+    # the type for metadata is an integer in Ada.
+    MD = BuiltinField(LongType, doc="The metadata associated to the AST node")

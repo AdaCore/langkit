@@ -20,8 +20,7 @@ from functools import partial
 from langkit import names
 from langkit.compiled_types import (
     render as ct_render, LongType, LexicalEnvType, Token, BoolType,
-    ASTNode, Struct, StructMetaClass, CompiledType,
-    AbstractNodeData
+    ASTNode, Struct, CompiledType, AbstractNodeData, EnvElement
 )
 from langkit.utils import Colors, col, assert_type, memoized
 
@@ -932,8 +931,9 @@ class EnvGet(AbstractExpression):
             """
             :rtype: compiled_types.ArrayType
             """
-            rgc = StructMetaClass.root_grammar_class
-            return rgc if self.resolve_unique else rgc.array_type()
+            return (
+                EnvElement if self.resolve_unique else EnvElement.array_type()
+            )
 
         def render_pre(self):
             return "{}\n{}".format(self.env_expr.render_pre(),
