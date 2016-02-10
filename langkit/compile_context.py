@@ -82,6 +82,84 @@ def write_ada_file(out_dir, source_kind, qual_name, content):
             out_file.write(content)
 
 
+class Verbosity(object):
+    """
+    Helper object to handle verbosity level of notifications during code
+    generation.
+    """
+
+    NONE = 0
+    INFO = 1
+    DEBUG = 2
+
+    NAMES = ('none', 'info', 'debug')
+
+    def __init__(self, level):
+        """
+        Create a verbosity level holder.
+
+        :param level: Verbosity level. Can be either the lower-case name for
+            this level or the corresponding integer constant.
+        :type level: str|int
+        """
+        if isinstance(level, str):
+            if level not in self.NAMES:
+                raise ValueError('Invalid verbosity level: {}'.format(level))
+            self.level = self._get(level)
+        else:
+            if level not in [self._get(name) for name in self.NAMES]:
+                raise ValueError('Invalid verbosity level: {}'.format(level))
+            self.level = level
+
+    @classmethod
+    def _get(cls, name):
+        """
+        Return the integer constant corresponding to the lower-case "name"
+        verbosity level.
+
+        :param str name: Verbosity level name.
+        :rtype: int
+        """
+        return getattr(cls, name.upper())
+
+    def __eq__(self, other):
+        return isinstance(other, Verbosity) and self.level == other.level
+
+    def __getattr__(self, name):
+        """
+        Assuming "name" is a lower-case verbosity level name, return whether
+        this instance has a level that is either equal or above it.
+
+        :param str name: Lower-case verbosity level name to compare.
+        :rtype: bool
+        """
+        if name in self.NAMES:
+            return self.level >= self._get(name)
+        else:
+            raise AttributeError()
+
+    def __str__(self):
+        for name in self.NAMES:
+            if self.level == self._get(name):
+                return name
+        assert False
+
+    def __repr__(self):
+        return str(self)
+
+    @classmethod
+    def choices(cls):
+        """
+        Return a list of instances for all available verbosity levels.
+
+        :rtype: list[Verbosity]
+        """
+        return [
+            cls(getattr(cls, name.upper()))
+            for name in cls.NAMES
+        ]
+
+
 class CompileCtx():
     """State holder for native code emission."""
 
@@ -89,7 +167,7 @@ class CompileCtx():
                  lib_name=None,
                  c_symbol_prefix=None,
                  enable_python_api=True,
-                 verbose=False):
+                 verbosity=Verbosity('none')):
         """Create a new context for code emission.
 
         :param str lang_name: string (mixed case and underscore: see
@@ -119,8 +197,8 @@ class CompileCtx():
         :param bool enable_python_api: If True (which is the default),
             generates a Python API for the generated library.
 
-        :param bool verbose: If True (which is not the default), print various
-            debug messages on standard output.
+        :param Verbosity verbosity: Amount of messages to display on standard
+            output. None by default.
         """
         from langkit.python_api import PythonAPISettings
 
@@ -140,7 +218,7 @@ class CompileCtx():
                                            (self.lang_name.lower
                                             if c_symbol_prefix is None else
                                             c_symbol_prefix))
-        self.verbose = verbose
+        self.verbosity = verbosity
 
         # Mapping: rule name -> Parser instances.
         # TODO: why do we need this? The grammar already has such a mapping.
@@ -305,11 +383,23 @@ class CompileCtx():
         from langkit.parsers import render
         return render(*args, **kwargs)
 
-    def emit(self, file_root="."):
+    def emit(self, file_root='.', generate_lexer=True):
+        """
+        Generate sources for the analysis library. Also emit a tiny program
+        useful for testing purposes.
+
+        :param str file_root: (optional) Path of the directory in which the
+            library should be generated. The default is the current directory.
+
+        :param bool generate_lexer: (optional) Whether to invoke Quex to
+            generate the lexer source code. Will do by default. As this can
+            take time, it is useful to disable it during testing.
+        """
+
         global compile_ctx
         try:
             compile_ctx = self
-            self._emit(file_root)
+            self._emit(file_root, generate_lexer)
         finally:
             compile_ctx = None
 
@@ -350,12 +440,9 @@ class CompileCtx():
                     )
                 )
 
-    def _emit(self, file_root):
+    def _emit(self, file_root, generate_lexer):
         """
-        Emit native code for all the rules in this grammar as a library:
-        a library specification and the corresponding implementation.  Also
-        emit a tiny program that can parse starting with any parsing rule for
-        testing purposes.
+        Helper for the "emit" method: please refer to it for documentation.
         """
         assert self.grammar, "Set grammar before calling emit"
 
@@ -387,7 +474,8 @@ class CompileCtx():
         if not path.exists(file_root):
             os.mkdir(file_root)
 
-        printcol("File setup ...", Colors.OKBLUE)
+        if self.verbosity.info:
+            printcol("File setup ...", Colors.OKBLUE)
 
         for d in ["include",
                   "include/langkit_support",
@@ -427,7 +515,8 @@ class CompileCtx():
         shutil.copy(join(lngk_support_dir, "langkit_support_installed.gpr"),
                     join(lib_path, "gnat", "langkit_support.gpr"))
 
-        printcol("Compiling the grammar...", Colors.OKBLUE)
+        if self.verbosity.info:
+            printcol("Compiling the grammar...", Colors.OKBLUE)
 
         with names.camel_with_underscores:
             for r_name, r in self.grammar.rules.items():
@@ -472,7 +561,8 @@ class CompileCtx():
         for t in self.struct_types + self.astnode_types:
             t.add_to_context()
 
-        printcol("Generating sources... ", Colors.OKBLUE)
+        if self.verbosity.info:
+            printcol("Generating sources... ", Colors.OKBLUE)
 
         ada_modules = [
             # Top (pure) package
@@ -533,7 +623,8 @@ class CompileCtx():
             for f in glob(join(self.ext('support'), "*.ad*")):
                 shutil.copy(f, src_path)
 
-        printcol("Compiling the quex lexer specification", Colors.OKBLUE)
+        if self.verbosity.info:
+            printcol("Compiling the quex lexer specification", Colors.OKBLUE)
 
         quex_file = os.path.join(src_path,
                                  "{}.qx".format(self.lang_name.lower))
@@ -543,7 +634,8 @@ class CompileCtx():
 
         # Generating the lexer C code with Quex is quite long: do it only when
         # the Quex specification changed from last build.
-        if self.cache.is_stale('quex_specification', quex_spec):
+        if generate_lexer and self.cache.is_stale('quex_specification',
+                                                  quex_spec):
             quex_py_file = path.join(environ["QUEX_PATH"], "quex-exe.py")
             subprocess.check_call([sys.executable, quex_py_file, "-i",
                                    quex_file,

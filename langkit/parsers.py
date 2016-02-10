@@ -340,7 +340,7 @@ class Parser(object):
         :rtype: ParserCodeContext
         """
 
-        if self.name and get_context().verbose:
+        if self.name and get_context().verbosity.debug:
             print "Compiling rule : {0}".format(
                 col(self.gen_fn_name, Colors.HEADER)
             )

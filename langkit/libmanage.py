@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 
+from langkit.compile_context import Verbosity
 from langkit.utils import Colors, printcol, col
 
 
@@ -146,8 +147,12 @@ class ManageScript(object):
             help='Bindings to generate (by default: only Python)'
         )
         args_parser.add_argument(
-            '--verbose', '-v', action='store_true',
-            help='Show verbose output'
+            '--verbosity', '-v', nargs='?',
+            type=Verbosity,
+            choices=Verbosity.choices(),
+            default=Verbosity('info'),
+            const=Verbosity('debug'),
+            help='Verbosity level'
         )
 
         def create_parser(fn):
@@ -297,12 +302,12 @@ class ManageScript(object):
         try:
             parsed_args.func(parsed_args)
         except AssertionError as e:
-            # If in verbose mode, show the full exception traceback + message.
+            # If in debug mode, show the full exception traceback + message.
             # If in normal mode, just show the message and exit.
-            if parsed_args.verbose:
+            if parsed_args.verbosity.debug:
                 raise
             else:
-                print col("ERROR :", Colors.FAIL), e.message
+                print >> sys.stderr, col("ERROR :", Colors.FAIL), e.message
                 exit(1)
 
         if cov is not None:
@@ -317,7 +322,8 @@ class ManageScript(object):
             line invocation of manage.py.
         """
 
-        printcol("Generating source for libadalang ...", Colors.HEADER)
+        if args.verbosity.info:
+            printcol("Generating source for libadalang ...", Colors.HEADER)
         self.context.emit(file_root=self.dirs.build_dir())
 
         def gnatpp(project_file, glob_pattern):
@@ -333,8 +339,9 @@ class ManageScript(object):
                 sys.exit(1)
 
         if hasattr(args, 'pretty_print') and args.pretty_print:
-            printcol("Pretty-printing sources for Libadalang ...",
-                     Colors.HEADER)
+            if args.verbosity.info:
+                printcol("Pretty-printing sources for Libadalang ...",
+                         Colors.HEADER)
             gnatpp(
                 self.dirs.build_dir('lib', 'gnat',
                                     '{}.gpr'.format(self.lib_name.lower())),
@@ -343,7 +350,8 @@ class ManageScript(object):
             gnatpp(self.dirs.build_dir('src', 'parse.gpr'),
                    self.dirs.build_dir('src', '*.ad*'))
 
-        printcol("Generation complete!", Colors.OKGREEN)
+        if args.verbosity.info:
+            printcol("Generation complete!", Colors.OKGREEN)
 
     def do_build(self, args):
         """
@@ -379,7 +387,8 @@ class ManageScript(object):
                 print >> sys.stderr, 'Build failed: {}'.format(exc)
                 sys.exit(1)
 
-        printcol("Building the generated source code ...", Colors.HEADER)
+        if args.verbosity.info:
+            printcol("Building the generated source code ...", Colors.HEADER)
         lib_project = self.dirs.build_dir(
             'lib', 'gnat', '{}.gpr'.format(self.lib_name.lower())
         )
@@ -388,7 +397,8 @@ class ManageScript(object):
         if not args.disable_shared:
             gprbuild(lib_project, True)
 
-        printcol("Building the interactive test main ...", Colors.HEADER)
+        if args.verbosity.info:
+            printcol("Building the interactive test main ...", Colors.HEADER)
         if args.enable_static:
             gprbuild(self.dirs.build_dir('src', 'parse.gpr'), False)
         if not args.disable_shared:
@@ -402,7 +412,8 @@ class ManageScript(object):
                 shutil.copy(dll,
                             self.dirs.build_dir('bin', os.path.basename(dll)))
 
-        printcol("Compilation complete!", Colors.OKGREEN)
+        if args.verbosity.info:
+            printcol("Compilation complete!", Colors.OKGREEN)
 
     def do_make(self, args):
         """
