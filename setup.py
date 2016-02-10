@@ -23,6 +23,10 @@ setup(
     description='A Python framework to generate language parsers',
     requires=['Mako', 'coverage'],
     packages=['langkit'],
-    package_data={'langkit': ['support/*']},
+    package_data={'langkit': ['support/*.adb',
+                              'support/*.ads',
+                              'support/*.gpr',
+                              'templates/*.mako',
+                              'templates/*/*.mako']},
     scripts=[os.path.join('scripts', 'create-project.py')]
 )
