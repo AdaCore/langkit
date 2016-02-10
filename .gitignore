@@ -45,3 +45,6 @@ nosetests.xml
 # Devel environment
 /.idea/
 /*.iml
+out
+testsuite/out
+testsuite/tmp

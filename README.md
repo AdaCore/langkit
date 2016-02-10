@@ -21,8 +21,14 @@ this directory is self-contained, so you can copy it somewhere else.
 Testing
 -------
 
-There is currently no testsuite dedicated to Langkit. Yeah, it's bad! But we
-plan to add one at some point.
+First, make sure the langkit package is available from the Python interpreter
+(see Install).  Then, in order to run the testsuite, launch the following
+command from the top-level directory:
+
+    $ python testsuite/testsuite.py
+
+If you want to learn more about this test driver's options (for instance to run
+tests under Valgrind), add a `-h` flag.
 
 Documentation
 -------------
