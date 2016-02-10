@@ -79,6 +79,9 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Environments handling --
    ----------------------------
 
+   --  The following types and operations are implementation details we did not
+   --  manage yet to put in a private part. Please don't use them.
+
    type Dummy_Metadata is new Integer;
    No_Metadata : constant Dummy_Metadata := 0;
    function Combine (L, R : Dummy_Metadata) return Dummy_Metadata is (0);
@@ -87,11 +90,6 @@ package ${_self.ada_api_settings.lib_name}.AST is
 
    package AST_Envs is new Langkit_Support.Lexical_Env
      (${root_node_type_name}, Dummy_Metadata, No_Metadata, Combine);
-
-   type ${root_node_kind_name} is new Natural;
-   --  Describe the concrete type (aka dynamic type) of an AST node (i.e. from
-   --  which concrete derivation it comes from).
-   --  See ${_self.ada_api_settings.lib_name}.AST for possible values.
 
    ## Declare arrays of root nodes here since some primitives rely on it and
    ## since the declarations require AST_Envs.
@@ -103,13 +101,15 @@ package ${_self.ada_api_settings.lib_name}.AST is
    procedure Populate_Lexical_Env
      (Node : ${root_node_type_name}; Root_Env : AST_Envs.Lexical_Env);
    --  Populate the lexical environment for node and all its children.
-   --
-   --  TODO??? This is probably an internal implementation detail, so this
-   --  should not appear in the public API.
 
    -----------------------------
    -- Miscellanous operations --
    -----------------------------
+
+   type ${root_node_kind_name} is new Natural;
+   --  Describe the concrete type (aka dynamic type) of an AST node (i.e. from
+   --  which concrete derivation it comes from).
+   --  See ${_self.ada_api_settings.lib_name}.AST for possible values.
 
    function Kind (Node : access ${root_node_value_type})
                   return ${root_node_kind_name} is abstract;
@@ -120,9 +120,10 @@ package ${_self.ada_api_settings.lib_name}.AST is
    procedure Destroy
      (Node : access ${root_node_value_type}) is abstract;
    --  Free the resources allocated to this node and all its children
-   --  TODO??? We probably don't want this to be exposed in the public API, as
-   --  destruction is supposed to be done automatically when the refcount
-   --  reaches zero.
+   --
+   --  This is an internal implementation detail, please don't use this.
+   --  TODO??? Hide it somehow: destruction is done automatically when the
+   --  owning analysis unit is destroyed itself.
 
    -------------------------------
    -- Tree traversal operations --
