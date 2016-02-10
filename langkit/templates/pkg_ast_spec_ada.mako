@@ -100,7 +100,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
 
    procedure Populate_Lexical_Env
      (Node : ${root_node_type_name}; Root_Env : AST_Envs.Lexical_Env);
-   --  Populate the lexical environment for node and all its children.
+   --  Populate the lexical environment for node and all its children
 
    -----------------------------
    -- Miscellanous operations --
@@ -119,7 +119,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
 
    procedure Destroy
      (Node : access ${root_node_value_type}) is abstract;
-   --  Free the resources allocated to this node and all its children
+   --  Free the resources allocated to this node and all its children.
    --
    --  This is an internal implementation detail, please don't use this.
    --  TODO??? Hide it somehow: destruction is done automatically when the
@@ -346,8 +346,9 @@ private
    --
    --  This should be an abstract primitive, but it's not possible to have a
    --  private abstract primitive, so we provide a default implementation that
-   --  raises a Program_Error since it's never not supposed to be called. We
-   --  lost the capacity to detect at compile time that this is not overriden.
+   --  raises a Program_Error. This is consistent as this default
+   --  implementation is never supposed to be called. However, we lost the
+   --  capacity to detect at compile time that this is not overriden.
 
    procedure Lookup_Relative (Node       : ${root_node_type_name};
                               Sloc       : Source_Location;
