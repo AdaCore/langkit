@@ -1110,7 +1110,7 @@ class FieldAccessExpr(ResolvedExpression):
 
         p = Property.get()
         if p:
-            self.result_var = p.vars(names.Name('Prefix'),
+            self.result_var = p.vars(names.Name('Internal_Pfx'),
                                      self.receiver_expr.type,
                                      create_unique=False)
         else:
