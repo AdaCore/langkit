@@ -1550,7 +1550,7 @@ class Property(AbstractNodeData):
     prefix = names.Name("P")
 
     def __init__(self, expr, doc=None, private=False, abstract=False,
-                 type=None):
+                 type=None, abstract_runtime_check=False):
         """
         :param AbstractExpression|None expr: The expression for the property.
         :param str|None doc: User documentation for this property.
@@ -1562,6 +1562,16 @@ class Property(AbstractNodeData):
             inferred types for this propery, and eventually for overriding
             properties in sub classes. NOTE: The type is mandatory for abstract
             base properties.
+
+        :param abstract_runtime_check: If the property is abstract, whether the
+            implementation by subclasses requirement must be checked at compile
+            time, or at runtime. If true, you can have an abstract property
+            that is not implemented by all subclasses. In the absence of
+            interface types in Langkit, this is helpful to develop features
+            faster, because first you don't have to make every implementation
+            at once, and second you don't have to find a typing scheme with
+            current langkit capabilities in which the parser generate the right
+            types for the functionality you want.
         """
 
         super(Property, self).__init__(private=private)
@@ -1576,6 +1586,7 @@ class Property(AbstractNodeData):
         self.vars = LocalVars()
         self.expected_type = type
         self.abstract = abstract
+        self.abstract_runtime_check = abstract_runtime_check
 
         self.overriding = False
         """
@@ -1756,13 +1767,15 @@ class Property(AbstractNodeData):
 
 
 # noinspection PyPep8Naming
-def AbstractProperty(type, doc="", **kwargs):
+def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
     """
     Shortcut for abstract properties, where you can pass no expression but
     must pass a type. See Property for further documentation.
 
     :type type: CompiledType
     :type doc: str
+    :type runtime_check: bool
     :rtype: Property
     """
-    return Property(expr=None, type=type, doc=doc, abstract=True, **kwargs)
+    return Property(expr=None, type=type, doc=doc, abstract=True,
+                    abstract_runtime_check=runtime_check, **kwargs)
