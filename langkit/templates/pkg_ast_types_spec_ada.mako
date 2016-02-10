@@ -103,10 +103,6 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
 
 private
 
-   % for struct_type in no_builtins(_self.struct_types):
-   ${struct_types.private_decl(struct_type)}
-   % endfor
-
    % for astnode in no_builtins(_self.astnode_types):
    ${astnode_types.private_decl(astnode)}
    % endfor

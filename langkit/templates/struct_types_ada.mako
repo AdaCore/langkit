@@ -29,16 +29,7 @@
    % endif
    end record
      with Convention => C;
-
-   ${cls.nullexpr()} : constant ${cls.name()};
-
-</%def>
-
-
-<%def name="private_decl(cls)">
-
    ${cls.nullexpr()} : constant ${cls.name()} := (others => <>);
-
 </%def>
 
 
