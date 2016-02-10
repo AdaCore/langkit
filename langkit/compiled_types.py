@@ -335,6 +335,12 @@ class LongType(BasicType):
     _nullexpr = "0"
     _external = True
 
+    @classmethod
+    def c_type(cls, c_api_settings):
+        return CAPIType(
+            c_api_settings, names.Name("int"), external=cls._external
+        )
+
 
 class SourceLocationRangeType(BasicType):
     is_ptr = False
