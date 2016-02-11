@@ -1,6 +1,18 @@
 Langkit
 =======
 
+Langkit (nickname for language kit) is a tool whose purpose is to make it easy
+to create syntactic and semantic analysis engines. Write a language
+specification in our Python DSL and Langkit will generate for you an Ada
+library with bindings for the C and Python programming languages.
+
+The generated library is meant to provide a basis to write tooling, including
+tools working on potentially changing and incorrect code, such as IDEs.
+
+The currently main Langkit user is
+[Libadalang](https://github.com/AdaCore/libadalang), a high performance
+semantic engine for the Ada programming language.
+
 Dependencies
 ------------
 
