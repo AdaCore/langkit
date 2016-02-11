@@ -320,6 +320,22 @@ class CompileCtx():
         # Internal field for extensions directory
         self._extensions_dir = None
 
+        self.env_metadata = None
+        """
+        Struct subclass used to annotate environment elements. Initialized
+        during the typing pass.
+
+        :type: langkit.compiled_types.Struct
+        """
+
+        self.env_element = None
+        """
+        Shortcut for langkit.compiled_types.EnvElement. Initialized
+        during the typing pass.
+
+        :type: langkit.compiled_types.EnvElement
+        """
+
     def sorted_types(self, type_set):
         """
         Turn "type_set" into a list of types sorted by name.
