@@ -457,35 +457,6 @@ class If(AbstractExpression):
         return IfExpr(cond, then, else_then, rtype)
 
 
-class IsA(AbstractExpression):
-    """
-    Abstract expression that is the result of testing the kind of a node.
-    """
-
-    def __init__(self, expr, astnode):
-        """
-        :param AbstractExpression astnode: Expression on which the test is
-            performed.
-        :param ASTNode astnode: ASTNode subclass to use for the test.
-        """
-        self.expr = expr
-        self.astnode = assert_type(astnode, ASTNode)
-
-    def construct(self):
-        """
-        Construct a resolved expression that is the result of testing the kind
-        of a node.
-
-        :rtype: IsAExpr
-        """
-        expr = construct(self.expr)
-        assert self.astnode.matches(expr.type), (
-            'When testing the dynamic subtype of an AST node, the type to'
-            ' check must be a subclass of the value static type.'
-        )
-        return IsAExpr(expr, self.astnode)
-
-
 class IsNull(AbstractExpression):
     """
     Abstract expression to test whether an AST node is null.
@@ -908,6 +879,62 @@ class ResolvedExpression(object):
         raise NotImplementedError()
 
 
+class IsA(AbstractExpression):
+    """
+    Expression that is the result of testing the kind of a node.
+    """
+
+    class IsAExpr(ResolvedExpression):
+        def __init__(self, expr, astnodes):
+            """
+            :param ResolvedExpr expr: Expression on which the test is
+                performed.
+            :param [ASTNode] astnodes: ASTNode subclasses to use for the test.
+            """
+            self.expr = expr
+            self.astnodes = astnodes
+
+        @property
+        def type(self):
+            return BoolType
+
+        def render_pre(self):
+            return self.expr.render_pre()
+
+        def render_expr(self):
+            return "{}.all in {}".format(
+                self.expr.render_expr(),
+                " | ".join(
+                    "{}_Type'Class".format(a.name().camel_with_underscores)
+                    for a in self.astnodes
+                )
+            )
+
+    def __init__(self, expr, *astnodes):
+        """
+        :param AbstractExpression astnode: Expression on which the test is
+            performed.
+        :param ASTNode astnode: ASTNode subclass to use for the test.
+        """
+        self.expr = expr
+        self.astnodes = [assert_type(a, ASTNode) for a in astnodes]
+
+    def construct(self):
+        """
+        Construct a resolved expression that is the result of testing the kind
+        of a node.
+
+        :rtype: IsAExpr
+        """
+        expr = construct(self.expr)
+        for a in self.astnodes:
+            assert a.matches(expr.type), (
+                'When testing the dynamic subtype of an AST node, the type to'
+                ' check must be a subclass of the value static type.'
+            )
+        return IsA.IsAExpr(expr, self.astnodes)
+
+
 class EnvGet(AbstractExpression):
     """
     Expression for lexical environment get operation.
@@ -1241,33 +1268,6 @@ class IfExpr(ResolvedExpression):
 
     def render_expr(self):
         return self.result_var.name.camel_with_underscores
-
-
-class IsAExpr(ResolvedExpression):
-    """
-    Resolved expression that represents a kind test of a node.
-    """
-
-    def __init__(self, expr, astnode):
-        """
-        :param ResolvedExpr expr: Expression on which the test is performed.
-        :param ASTNode astnode: ASTNode subclass to use for the test.
-        """
-        self.expr = expr
-        self.astnode = astnode
-
-    @property
-    def type(self):
-        return BoolType
-
-    def render_pre(self):
-        return self.expr.render_pre()
-
-    def render_expr(self):
-        return "{}.all in {}_Type'Class".format(
-            self.expr.render_expr(),
-            self.astnode.name().camel_with_underscores
-        )
 
 
 class LiteralExpr(ResolvedExpression):
