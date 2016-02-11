@@ -1552,7 +1552,13 @@ class Property(AbstractNodeData):
     def __init__(self, expr, doc=None, private=False, abstract=False,
                  type=None, abstract_runtime_check=False):
         """
-        :param AbstractExpression|None expr: The expression for the property.
+        :param expr: The expression for the property. It can be either an
+            expression, or a function that will take the Self placeholder as
+            parameter and return the constructed AbstractExpression. This is
+            useful to reference classes that are not yet defined.
+        :type expr:
+            None|AbstractExpression|(AbstractExpression) -> AbstractExpression
+
         :param str|None doc: User documentation for this property.
         :param bool private: Whether this property is private or not.
         :param bool abstract: Whether this property is abstract or not. If this
@@ -1562,7 +1568,6 @@ class Property(AbstractNodeData):
             inferred types for this propery, and eventually for overriding
             properties in sub classes. NOTE: The type is mandatory for abstract
             base properties.
-
         :param abstract_runtime_check: If the property is abstract, whether the
             implementation by subclasses requirement must be checked at compile
             time, or at runtime. If true, you can have an abstract property
@@ -1582,6 +1587,14 @@ class Property(AbstractNodeData):
         )
 
         self.expr = expr
+        if expr:
+            assert isinstance(self.expr,
+                              AbstractExpression) or callable(expr), (
+                "Invalid object passed for expression of property: {}".format(
+                    expr
+                )
+            )
+
         self.constructed_expr = None
         self.vars = LocalVars()
         self.expected_type = type
@@ -1698,6 +1711,12 @@ class Property(AbstractNodeData):
         :param ASTNode owner_type: The type on which this property was
             declared.
         """
+
+        # If the user passed a lambda or function for the expression,
+        # now is the moment to transform it into an abstract expression by
+        # calling it.
+        if self.expr and not isinstance(self.expr, AbstractExpression):
+            self.expr = assert_type(self.expr(Self), AbstractExpression)
 
         base_prop = self.base_property(owner_type)
 
