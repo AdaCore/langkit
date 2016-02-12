@@ -353,6 +353,42 @@ class ManageScript(object):
         if args.verbosity.info:
             printcol("Generation complete!", Colors.OKGREEN)
 
+    def gprbuild(self, args, project_file):
+        """
+        Run GPRbuild on a project file.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
+        :param str project_file: Path to the project file to pass to GPRbuild.
+        """
+
+        cargs = []
+        # Depending on where this is invoked, the "cargs" option may not be set
+        if hasattr(args, 'cargs'):
+            cargs.extend(args.cargs)
+
+        is_dynamic = not args.disable_shared
+        build_mode = (args.build_mode
+                      if getattr(args, 'build_mode', None)
+                      else 'dev')
+        try:
+            subprocess.check_call([
+                'gprbuild', '-m', '-p', '-j{}'.format(args.jobs),
+                '-P{}'.format(project_file),
+                '-XBUILD_MODE={}'.format(build_mode),
+                '-XLIBRARY_TYPE={}'.format(
+                    'relocatable' if is_dynamic else 'static'
+                ),
+                '-XLIBLANG_SUPPORT_EXTERNALLY_BUILT=false',
+                '-X{}_EXTERNALLY_BUILT=false'.format(
+                    self.lib_name.upper()
+                ),
+                '-cargs',
+            ] + cargs, env=self.derived_env())
+        except subprocess.CalledProcessError as exc:
+            print >> sys.stderr, 'Build failed: {}'.format(exc)
+            sys.exit(1)
+
     def do_build(self, args):
         """
         Build generated source code.
@@ -361,48 +397,16 @@ class ManageScript(object):
             line invocation of manage.py.
         """
 
-        build_mode = args.build_mode if args.build_mode else 'dev'
-
-        cargs = []
-        # Depending on where this is invoked, the "cargs" option may not be set
-        if hasattr(args, 'cargs'):
-            cargs.extend(args.cargs)
-
-        def gprbuild(project_file, is_dynamic):
-            try:
-                subprocess.check_call([
-                    'gprbuild', '-m', '-p', '-j{}'.format(args.jobs),
-                    '-P{}'.format(project_file),
-                    '-XBUILD_MODE={}'.format(build_mode),
-                    '-XLIBRARY_TYPE={}'.format(
-                        'relocatable' if is_dynamic else 'static'
-                    ),
-                    '-XLIBLANG_SUPPORT_EXTERNALLY_BUILT=false',
-                    '-X{}_EXTERNALLY_BUILT=false'.format(
-                        self.lib_name.upper()
-                    ),
-                    '-cargs',
-                ] + cargs, env=self.derived_env())
-            except subprocess.CalledProcessError as exc:
-                print >> sys.stderr, 'Build failed: {}'.format(exc)
-                sys.exit(1)
-
         if args.verbosity.info:
             printcol("Building the generated source code ...", Colors.HEADER)
         lib_project = self.dirs.build_dir(
             'lib', 'gnat', '{}.gpr'.format(self.lib_name.lower())
         )
-        if args.enable_static:
-            gprbuild(lib_project, False)
-        if not args.disable_shared:
-            gprbuild(lib_project, True)
+        self.gprbuild(args, lib_project)
 
         if args.verbosity.info:
             printcol("Building the interactive test main ...", Colors.HEADER)
-        if args.enable_static:
-            gprbuild(self.dirs.build_dir('src', 'parse.gpr'), False)
-        if not args.disable_shared:
-            gprbuild(self.dirs.build_dir('src', 'parse.gpr'), True)
+        self.gprbuild(args, self.dirs.build_dir('src', 'parse.gpr'))
 
         # On Windows, shared libraries (DLL) are looked up in the PATH, just
         # like binaries (it's LD_LIBRARY_PATH on Unix). For this platform,
