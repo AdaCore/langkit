@@ -660,6 +660,33 @@ class New(AbstractExpression):
     Abstract expression to create Struct values.
     """
 
+    class NewExpr(ResolvedExpression):
+        """
+        Resolved expression to create Struct values.
+        """
+
+        def __init__(self, struct_type, assocs):
+            self.struct_type = struct_type
+            self.assocs = assocs
+
+        @property
+        def type(self):
+            return self.struct_type
+
+        def _iter_ordered(self):
+            return ((k, self.assocs[k]) for k in sorted(self.assocs))
+
+        def render_pre(self):
+            return '\n'.join(expr.render_pre()
+                             for _, expr in self._iter_ordered())
+
+        def render_expr(self):
+            return '({})'.format(
+                ', '.join('{} => {}'.format(name.camel_with_underscores,
+                                            expr.render_expr())
+                          for name, expr in self._iter_ordered())
+            )
+
     def __init__(self, struct_type, **field_values):
         """
         :param langkit.compiled_types.Struct struct_type: Struct subclass (but
@@ -675,25 +702,19 @@ class New(AbstractExpression):
 
     def construct(self):
         """
-        Construct a resolved expression for this.
-
         :rtype: NewExpr
         """
         provided_fields = {
             names.Name.from_lower('f_' + name): value.construct()
             for name, value in self.field_values.iteritems()
         }
-        required_fields = {
-            f.name: f
-            for f in self.struct_type.get_fields()
-        }
+        required_fields = {f.name: f for f in self.struct_type.get_fields()}
 
         # Make sure the provided set of fields matches the one the struct
         # needs.
         def complain_if_not_empty(name_set, message):
             assert not name_set, '{}: {}'.format(
-                message,
-                ', '.join(name.lower for name in name_set)
+                message, ', '.join(name.lower for name in name_set)
             )
 
         complain_if_not_empty(
@@ -704,9 +725,7 @@ class New(AbstractExpression):
         )
         complain_if_not_empty(
             set(provided_fields) - set(required_fields),
-            'Unknown {} fields'.format(
-                self.struct_type.name().camel
-            )
+            'Unknown {} fields'.format(self.struct_type.name().camel)
         )
 
         # And make sure we have the proper types
@@ -720,7 +739,7 @@ class New(AbstractExpression):
                 )
             )
 
-        return NewExpr(self.struct_type, provided_fields)
+        return New.NewExpr(self.struct_type, provided_fields)
 
 
 class Not(AbstractExpression):
@@ -1322,40 +1341,6 @@ class LiteralExpr(ResolvedExpression):
 
     def render_expr(self):
         return self.literal
-
-
-class NewExpr(ResolvedExpression):
-    """
-    Resolved expression to create Struct values.
-    """
-
-    def __init__(self, struct_type, field_values):
-        self.struct_type = struct_type
-        self.field_values = field_values
-
-    @property
-    def type(self):
-        return self.struct_type
-
-    def _iter_ordered(self):
-        keys = sorted(self.field_values)
-        for k in keys:
-            yield (k, self.field_values[k])
-
-    def render_pre(self):
-        return '\n'.join(
-            expr.render_pre()
-            for _, expr in self._iter_ordered()
-        )
-
-    def render_expr(self):
-        return '({})'.format(', '.join(
-            '{} => {}'.format(
-                name.camel_with_underscores,
-                expr.render_expr()
-            )
-            for name, expr in self._iter_ordered()
-        ))
 
 
 class NotExpr(ResolvedExpression):
