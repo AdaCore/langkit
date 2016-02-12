@@ -562,6 +562,62 @@ class Map(CollectionExpression):
     Abstract expression that is the result of a map expression evaluation.
     """
 
+    class MapExpr(ResolvedExpression):
+        """
+        Resolved expression that represents a map expression in the generated
+        code.
+        """
+
+        def __init__(self, induction_var, collection, expr, filter=None,
+                     concat=False):
+            """
+            :param VarExpr induction_var: Variable to use in "expr".
+            :param ResolvedExpression collection: Collection on which this map
+                operation works.
+            :param ResolvedExpression expr: Expression to evaluate for each
+                item in "collection".
+            :param filter: If provided, a boolean expression that says whether
+                to include or exclude an item from the collection.
+            :type filter: None|ResolvedExpression
+            :param bool concat: If true, "expr" must return arrays, and this
+                expression returns the concatenation of all the arrays "expr"
+                returns.
+            """
+            self.induction_var = induction_var
+            self.collection = collection
+            self.expr = expr
+            self.filter = filter
+            self.concat = concat
+
+            element_type = (self.expr.type.element_type()
+                            if self.concat else
+                            self.expr.type)
+            self._type = element_type.array_type()
+            self._type.add_to_context()
+
+            p = Property.get()
+            self.array_var = p.vars(names.Name('Map'), self.type,
+                                    create_unique=False)
+
+        @property
+        def type(self):
+            return self._type
+
+        def __repr__(self):
+            return "<MapExpr {}: {} -> {}{}>".format(
+                self.collection,
+                self.induction_var,
+                self.expr,
+                " (if {})".format(self.filter) if self.filter else ""
+            )
+
+        def render_pre(self):
+            return render('properties/map_ada', map=self,
+                          Name=names.Name)
+
+        def render_expr(self):
+            return self.array_var.name.camel_with_underscores
+
     def __init__(self, collection, expr, filter_expr=None, concat=False):
         """
         See CollectionExpression for the other parameters.
@@ -595,8 +651,8 @@ class Map(CollectionExpression):
         filter_expr = (construct(self.filter_fn(ind_var), BoolType)
                        if self.filter_fn else None)
 
-        return MapExpr(construct(ind_var), collection_expr, expr, filter_expr,
-                       self.concat)
+        return Map.MapExpr(construct(ind_var), collection_expr, expr,
+                           filter_expr, self.concat)
 
 
 class New(AbstractExpression):
@@ -1266,63 +1322,6 @@ class LiteralExpr(ResolvedExpression):
 
     def render_expr(self):
         return self.literal
-
-
-class MapExpr(ResolvedExpression):
-    """
-    Resolved expression that represents a map expression in the generated code.
-    """
-
-    def __init__(self, induction_var, collection, expr, filter=None,
-                 concat=False):
-        """
-        :param VarExpr induction_var: Variable to use in "expr".
-        :param ResolvedExpression collection: Collection on which this map
-            operation works.
-        :param ResolvedExpression expr: Expression to evaluate for each item in
-            "collection".
-        :param filter: If provided, a boolean expression that says whether to
-            include or exclude an item from the collection.
-        :type filter: None|ResolvedExpression
-        :param bool concat: If true, "expr" must return arrays, and this
-            expression returns the concatenation of all the arrays "expr"
-            returns.
-        :return:
-        """
-        self.induction_var = induction_var
-        self.collection = collection
-        self.expr = expr
-        self.filter = filter
-        self.concat = concat
-
-        element_type = (self.expr.type.element_type()
-                        if self.concat else
-                        self.expr.type)
-        self._type = element_type.array_type()
-        self._type.add_to_context()
-
-        p = Property.get()
-        self.array_var = p.vars(names.Name('Map'), self.type,
-                                create_unique=False)
-
-    @property
-    def type(self):
-        return self._type
-
-    def __repr__(self):
-        return "<MapExpr {}: {} -> {}{}>".format(
-            self.collection,
-            self.induction_var,
-            self.expr,
-            " (if {})".format(self.filter) if self.filter else ""
-        )
-
-    def render_pre(self):
-        return render('properties/map_ada', map=self,
-                      Name=names.Name)
-
-    def render_expr(self):
-        return self.array_var.name.camel_with_underscores
 
 
 class NewExpr(ResolvedExpression):
