@@ -191,16 +191,6 @@ class AbstractExpression(Frozable):
         return self.attrs().get(attr, FieldAccess(self, attr))
 
     @Frozable.protect
-    def __call__(self, *args, **kwargs):
-        """
-        Returns a OpCall expression object when the user uses the call notation
-        on self.
-
-        :rtype: OpCall
-        """
-        return OpCall(self, args, kwargs)
-
-    @Frozable.protect
     def __or__(self, other):
         """
         Returns a OrExpr expression object when the user uses the binary or
@@ -313,21 +303,6 @@ class CollectionExpression(AbstractExpression):
                                      AbstractExpression))
 
         return collection_expr, expr, induction_var
-
-
-class OpCall(AbstractExpression):
-    """
-    Abstract expression that is the result of a call expression evaluation.
-
-    TODO: Not implemented yet!
-    """
-    def __init__(self, called, args, kwargs):
-        self.called = called
-        self.args = args
-        self.kwargs = kwargs
-
-    def __repr__(self):
-        return "<OpCall {} {} {}>".format(self.called, self.args, self.kwargs)
 
 
 class BinaryBooleanOperator(AbstractExpression):
