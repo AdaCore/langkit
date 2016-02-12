@@ -342,7 +342,7 @@ class BinaryBooleanOperator(AbstractExpression):
         else:
             then = LiteralExpr('True', BoolType)
             else_then = rhs
-        return IfExpr(lhs, then, else_then, BoolType)
+        return If.IfExpr(lhs, then, else_then, BoolType)
 
 
 class Cast(AbstractExpression):
@@ -481,6 +481,38 @@ class If(AbstractExpression):
     Abstract expression for a conditional expression.
     """
 
+    class IfExpr(ResolvedExpression):
+        """
+        Resolved expression for a conditional expression.
+        """
+
+        def __init__(self, cond, then, else_then, rtype):
+            """
+            :param ResolvedExpression cond: A boolean expression.
+            :param ResolvedExpression then: If "cond" is evaluated to true,
+                this part is returned.
+            :param ResolvedExpression else_then: If "cond" is evaluated to
+                false, this part is returned.
+            :param langkit.compiled_types.CompiledType rtype: Type parameter.
+                The type that is returned by then and else_then.
+            """
+            self.cond = cond
+            self.then = then
+            self.else_then = else_then
+            self.rtype = rtype
+            self.result_var = Property.get().vars(names.Name('Result'), rtype,
+                                                  create_unique=False)
+
+        @property
+        def type(self):
+            return self.rtype
+
+        def render_pre(self):
+            return render('properties/if_ada', expr=self)
+
+        def render_expr(self):
+            return self.result_var.name.camel_with_underscores
+
     def __init__(self, cond, then, else_then):
         """
         :param AbstractExpression cond: A boolean expression.
@@ -506,7 +538,7 @@ class If(AbstractExpression):
         else_then = self.else_then.construct()
 
         rtype = then.type.unify(else_then.type)
-        return IfExpr(cond, then, else_then, rtype)
+        return If.IfExpr(cond, then, else_then, rtype)
 
 
 class IsNull(AbstractExpression):
@@ -1265,40 +1297,6 @@ class CastExpr(ResolvedExpression):
             self.astnode.name().camel_with_underscores,
             self.expr.render_expr()
         )
-
-
-class IfExpr(ResolvedExpression):
-    """
-    Resolved expression for a conditional expression.
-    """
-
-    def __init__(self, cond, then, else_then, rtype):
-        """
-        :param ResolvedExpression cond: A boolean expression.
-        :param ResolvedExpression then: If "cond" is evaluated to true, this
-            part is returned.
-        :param ResolvedExpression else_then: If "cond" is evaluated to false,
-            this part is returned.
-        :param langkit.compiled_types.CompiledType rtype: Type parameter. The
-            type that is returned by then and else_then.
-        """
-        self.cond = cond
-        self.then = then
-        self.else_then = else_then
-        self.rtype = rtype
-
-        self.result_var = Property.get().vars(names.Name('Result'), rtype,
-                                              create_unique=False)
-
-    @property
-    def type(self):
-        return self.rtype
-
-    def render_pre(self):
-        return render('properties/if_ada', expr=self)
-
-    def render_expr(self):
-        return self.result_var.name.camel_with_underscores
 
 
 class LiteralExpr(ResolvedExpression):
