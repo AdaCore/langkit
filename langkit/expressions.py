@@ -783,8 +783,22 @@ class New(AbstractExpression):
 
 class Not(AbstractExpression):
     """
-    Abstract expression for "not" boolean expressions.
+    Expression for "not" boolean expressions.
     """
+
+    class NotExpr(ResolvedExpression):
+        def __init__(self, expr):
+            self.expr = expr
+
+        @property
+        def type(self):
+            return BoolType
+
+        def render_pre(self):
+            return self.expr.render_pre()
+
+        def render_expr(self):
+            return 'not ({})'.format(self.expr.render_expr())
 
     def __init__(self, expr):
         """
@@ -793,13 +807,7 @@ class Not(AbstractExpression):
         self.expr = expr
 
     def construct(self):
-        """
-        Consrtuct a resolved expression for this.
-        :rtype: NotExpr
-        """
-        expr = construct(self.expr)
-        assert expr.type.matches(BoolType)
-        return NotExpr(expr)
+        return Not.NotExpr(construct(self.expr, BoolType))
 
 
 class Quantifier(CollectionExpression):
@@ -1308,25 +1316,6 @@ class LiteralExpr(ResolvedExpression):
 
     def render_expr(self):
         return self.literal
-
-
-class NotExpr(ResolvedExpression):
-    """
-    Resolved expression for "not" boolean expressions.
-    """
-
-    def __init__(self, expr):
-        self.expr = expr
-
-    @property
-    def type(self):
-        return BoolType
-
-    def render_pre(self):
-        return self.expr.render_pre()
-
-    def render_expr(self):
-        return 'not ({})'.format(self.expr.render_expr())
 
 
 class LocalVars(object):
