@@ -888,6 +888,66 @@ class FieldAccess(AbstractExpression):
     evaluation.
     """
 
+    class FieldAccessExpr(ResolvedExpression):
+        """
+        Resolved expression that represents a field access in generated code.
+        """
+
+        def __init__(self, receiver_expr, property):
+            """
+            :param ResolvedExpression receiver_expr: The receiver of the field
+                   access.
+            :param Property|Field property: The accessed property or field.
+            """
+            self.receiver_expr = receiver_expr
+            self.property = property
+            self.simple_field_access = False
+
+            # TODO: For the moment we use field accesses in the environments
+            # code, which doesn't have a property context and hence local
+            # variables instance. At a later stage we'll want to get rid of
+            # that limitation by binding the local variables separately from
+            # the current property.
+
+            p = Property.get()
+            if p:
+                self.result_var = p.vars(names.Name('Internal_Pfx'),
+                                         self.receiver_expr.type,
+                                         create_unique=False)
+            else:
+                self.simple_field_access = True
+
+        @property
+        def type(self):
+            return self.property.type
+
+        def __repr__(self):
+            return "<FieldAccessExpr {} {} {}>".format(
+                self.receiver_expr, self.property, self.type
+            )
+
+        def render_pre(self):
+            # Before accessing the field of a record through an access, we must
+            # check that whether this access is null in order to raise a
+            # Property_Error in the case it is.
+            return render('properties/null_safety_check_ada',
+                          expr=self.receiver_expr,
+                          result_var=self.result_var)
+
+        def render_expr(self):
+            if self.simple_field_access:
+                prefix = self.receiver_expr.render()
+            else:
+                prefix = self.result_var.name
+            ret = "{}.{}".format(prefix, self.property.name)
+
+            # If we're calling a property, then pass the currently bound
+            # lexical environment as parameter.
+            if isinstance(self.property, Property):
+                ret += " ({})".format(Env._name)
+
+            return ret
+
     def __init__(self, receiver, field):
         """
         :param AbstractExpression receiver: Expression on which the field
@@ -919,7 +979,7 @@ class FieldAccess(AbstractExpression):
             receiver_expr.type.__name__, self.field
         ), Colors.FAIL)
 
-        ret = FieldAccessExpr(receiver_expr, to_get)
+        ret = FieldAccess.FieldAccessExpr(receiver_expr, to_get)
         return ret
 
     def __repr__(self):
@@ -1238,67 +1298,6 @@ class CollectionGet(AbstractExpression):
             coll_expr=construct(self.coll_expr, lambda t: t.is_collection()),
             index_expr=construct(self.index_expr, LongType),
             or_null=self.or_null)
-
-
-class FieldAccessExpr(ResolvedExpression):
-    """
-    Resolved expression that represents a field access in generated code.
-    """
-
-    def __init__(self, receiver_expr, property):
-        """
-        :param ResolvedExpression receiver_expr: The receiver of the field
-               access.
-        :param Property|Field property: The accessed property or field.
-        """
-        self.receiver_expr = receiver_expr
-        self.property = property
-        self.simple_field_access = False
-
-        # TODO: For the moment we use field accesses in the environments
-        # code, which doesn't have a property context and hence local
-        # variables instance. At a later stage we'll want to get rid of that
-        #  limitation by binding the local variables separately from the
-        # current property.
-
-        p = Property.get()
-        if p:
-            self.result_var = p.vars(names.Name('Internal_Pfx'),
-                                     self.receiver_expr.type,
-                                     create_unique=False)
-        else:
-            self.simple_field_access = True
-
-    @property
-    def type(self):
-        return self.property.type
-
-    def __repr__(self):
-        return "<FieldAccessExpr {} {} {}>".format(
-            self.receiver_expr, self.property, self.type
-        )
-
-    def render_pre(self):
-        # Before accessing the field of a record through an access, we must
-        # check that whether this access is null in order to raise a
-        # Property_Error in the case it is.
-        return render('properties/null_safety_check_ada',
-                      expr=self.receiver_expr,
-                      result_var=self.result_var)
-
-    def render_expr(self):
-        if self.simple_field_access:
-            prefix = self.receiver_expr.render()
-        else:
-            prefix = self.result_var.name
-        ret = "{}.{}".format(prefix, self.property.name)
-
-        # If we're calling a property, then pass the currently bound lexical
-        # environment as parameter.
-        if isinstance(self.property, Property):
-            ret += " ({})".format(Env._name)
-
-        return ret
 
 
 class LiteralExpr(ResolvedExpression):
