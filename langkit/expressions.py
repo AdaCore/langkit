@@ -438,6 +438,29 @@ class Eq(AbstractExpression):
     Abstract expression for equality test expression.
     """
 
+    class EqExpr(ResolvedExpression):
+        """
+        Resolved expression for an equality test expression.
+        """
+
+        def __init__(self, lhs, rhs):
+            self.lhs = lhs
+            self.rhs = rhs
+
+        @property
+        def type(self):
+            return BoolType
+
+        def render_pre(self):
+            return '{}\n{}'.format(
+                self.lhs.render_pre(),
+                self.rhs.render_pre()
+            )
+
+        def render_expr(self):
+            return '{} = {}'.format(self.lhs.render_expr(),
+                                    self.rhs.render_expr())
+
     def __init__(self, lhs, rhs):
         """
         :param AbstractExpression lhs: Left operand.
@@ -475,7 +498,7 @@ class Eq(AbstractExpression):
                 'Incompatible types for equality: {} and {}'
             ).format(lhs.type.name().camel, rhs.type.name().camel)
 
-        return EqExpr(lhs, rhs)
+        return Eq.EqExpr(lhs, rhs)
 
 
 class If(AbstractExpression):
@@ -531,10 +554,7 @@ class IsNull(AbstractExpression):
         """
         expr = construct(self.expr)
         assert issubclass(expr.type, ASTNode)
-        return EqExpr(
-            expr,
-            LiteralExpr('null', ASTNode),
-        )
+        return Eq.EqExpr(expr, LiteralExpr('null', ASTNode))
 
 
 class Map(CollectionExpression):
@@ -1195,29 +1215,6 @@ class CastExpr(ResolvedExpression):
             self.astnode.name().camel_with_underscores,
             self.expr.render_expr()
         )
-
-
-class EqExpr(ResolvedExpression):
-    """
-    Resolved expression for an equality test expression.
-    """
-
-    def __init__(self, lhs, rhs):
-        self.lhs = lhs
-        self.rhs = rhs
-
-    @property
-    def type(self):
-        return BoolType
-
-    def render_pre(self):
-        return '{}\n{}'.format(
-            self.lhs.render_pre(),
-            self.rhs.render_pre()
-        )
-
-    def render_expr(self):
-        return '{} = {}'.format(self.lhs.render_expr(), self.rhs.render_expr())
 
 
 class IfExpr(ResolvedExpression):
