@@ -429,8 +429,8 @@ class Contains(CollectionExpression):
         collection, predicate, ind_var = self.construct_common()
         # "collection" contains "item" if at least one element in "collection"
         # is equal to "item".
-        return QuantifierExpr(Quantifier.ANY, collection, predicate,
-                              construct(ind_var))
+        return Quantifier.QuantifierExpr(Quantifier.ANY, collection, predicate,
+                                         construct(ind_var))
 
 
 class Eq(AbstractExpression):
@@ -670,8 +670,45 @@ class Not(AbstractExpression):
 
 class Quantifier(CollectionExpression):
     """
-    Abstract expression that tests a predicate over the items of a collection.
+    Expression that tests a predicate over the items of a collection.
     """
+
+    class QuantifierExpr(ResolvedExpression):
+        def __init__(self, kind, collection, expr, induction_var):
+            """
+            :param str kind: Kind for this quantifier expression. 'all' will
+                check that all items in "collection" fullfill "expr" while
+                'any' will check that at least one of them does.
+            :param ResolvedExpression expr: Expression to evaluate for each
+                item in "collection".
+            :param ResolvedExpression collection: Collection on which this map
+                operation works.
+            :param ResolvedExpression expr: A boolean expression to evaluate on
+                the collection's items.
+            :param induction_var: Variable to use in "expr".
+            :type induction_var: ResolvedExpression
+            """
+            self.kind = kind
+            self.collection = collection
+            self.expr = expr
+            self.induction_var = induction_var
+
+            self.result_var = Property.get().vars(names.Name('Result'),
+                                                  BoolType,
+                                                  create_unique=False)
+
+        @property
+        def type(self):
+            return BoolType
+
+        def render_pre(self):
+            return render(
+                'properties/quantifier_ada', quantifier=self,
+                ALL=Quantifier.ALL, ANY=Quantifier.ANY, Name=names.Name
+            )
+
+        def render_expr(self):
+            return self.result_var.name.camel_with_underscores
 
     # Available quantifier kinds
     ALL = 'all'
@@ -699,8 +736,8 @@ class Quantifier(CollectionExpression):
         """
         collection_expr, expr, ind_var = self.construct_common()
         assert expr.type.matches(BoolType)
-        return QuantifierExpr(self.kind, collection_expr, expr,
-                              construct(ind_var))
+        return Quantifier.QuantifierExpr(self.kind, collection_expr, expr,
+                                         construct(ind_var))
 
 
 class FieldAccess(AbstractExpression):
@@ -1342,52 +1379,6 @@ class NotExpr(ResolvedExpression):
 
     def render_expr(self):
         return 'not ({})'.format(self.expr.render_expr())
-
-
-class QuantifierExpr(ResolvedExpression):
-    """
-    Resolved expression that represents a qualifier expression in the generated
-    code.
-    """
-
-    def __init__(self, kind, collection, expr, induction_var):
-        """
-        :param str kind: Kind for this quantifier expression. 'all' will check
-            that all items in "collection" fullfill "expr" while 'any' will
-            check that at least one of them does.
-        :param ResolvedExpression expr: Expression to evaluate for each item in
-            "collection".
-        :param ResolvedExpression collection: Collection on which this map
-            operation works.
-        :param ResolvedExpression expr: A boolean expression to evaluate on the
-            collection's items.
-        :param induction_var: Variable to use in "expr".
-        :type induction_var: ResolvedExpression
-        """
-        self.kind = kind
-        self.collection = collection
-        self.expr = expr
-        self.induction_var = induction_var
-
-        self.result_var = Property.get().vars(names.Name('Result'),
-                                              BoolType,
-                                              create_unique=False)
-
-    @property
-    def type(self):
-        return BoolType
-
-    def render_pre(self):
-        return render(
-            'properties/quantifier_ada',
-            quantifier=self,
-            ALL=Quantifier.ALL,
-            ANY=Quantifier.ANY,
-            Name=names.Name
-        )
-
-    def render_expr(self):
-        return self.result_var.name.camel_with_underscores
 
 
 class LocalVars(object):
