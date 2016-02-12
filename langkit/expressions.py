@@ -442,14 +442,10 @@ class Contains(CollectionExpression):
 
 class Eq(AbstractExpression):
     """
-    Abstract expression for equality test expression.
+    Expression for equality test expression.
     """
 
     class EqExpr(ResolvedExpression):
-        """
-        Resolved expression for an equality test expression.
-        """
-
         def __init__(self, lhs, rhs):
             self.lhs = lhs
             self.rhs = rhs
