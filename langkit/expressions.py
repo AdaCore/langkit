@@ -270,7 +270,7 @@ class CollectionExpression(AbstractExpression):
 
         :param expr: Function that takes the induction variable and returns an
             expression to evaluate for each item in "collection".
-        :type collection: (InductionVariable) -> AbstractExpression
+        :type collection: AbstractExpression
         """
         super(CollectionExpression, self).__init__()
         self.collection = collection
