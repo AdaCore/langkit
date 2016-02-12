@@ -16,6 +16,7 @@ from __future__ import absolute_import
 from contextlib import contextmanager
 from copy import copy
 from functools import partial
+from itertools import count
 
 from langkit import names
 from langkit.compiled_types import (
@@ -222,11 +223,55 @@ class AbstractExpression(Frozable):
         return BinaryBooleanOperator(BinaryBooleanOperator.AND, self, other)
 
 
+class ResolvedExpression(object):
+    """
+    Resolved expressions are expressions that can be readily rendered to code
+    that will correspond to the initial expression, depending on the bound
+    lexical scope.
+    """
+
+    def render_expr(self):
+        """
+        Renders the expression itself.
+
+        :rtype: basestring
+        """
+        raise NotImplementedError()
+
+    def render_pre(self):
+        """
+        Renders initial statements that might be needed to the expression.
+
+        :rtype: basestring
+        """
+        return ""
+
+    def render(self):
+        """
+        Render both the initial statements and the expression itself. This is
+        basically a wrapper that calls render_pre and render_expr in turn.
+
+        :rtype: basestring
+        """
+        return "{}\n{}".format(self.render_pre(), self.render_expr())
+
+    @property
+    def type(self):
+        """
+        Returns the type of the resolved expression.
+
+        :rtype: langkit.compiled_types.CompiledType
+        """
+        raise NotImplementedError()
+
+
 class CollectionExpression(AbstractExpression):
     """
     Base class to provide common code for abstract expressions working on
     collections.
     """
+
+    _counter = count()
 
     def __init__(self, collection, expr):
         """
@@ -239,24 +284,35 @@ class CollectionExpression(AbstractExpression):
         """
         super(CollectionExpression, self).__init__()
         self.collection = collection
-        self.induction_var = InductionVariable()
-        self.expr = expr(self.induction_var)
-        assert isinstance(self.expr, AbstractExpression)
+        self.expr_fn = expr
 
-    def construct_collection(self):
+    def construct_common(self):
         """
-        Construct the collection expression and determine the type of the
-        induction variable. Return the resolved expression for the collection.
+        Construct the expressions commonly needed by collection expression
+        subclasses, and return them as a tuple constituted of:
 
-        :rtype: ResolvedExpression
+        1. The resolved collection expression.
+        2. The resolved expression function passed to CollectionExpression's
+           constructor.
+        3. The induction variable, still in the AbstractExpression form,
+           so that it can be reused in subclasses (for example for filter).
+
+        :rtype: (ResolvedExpression, ResolvedExpression, AbstractExpression)
         """
         collection_expr = construct(self.collection)
         assert collection_expr.type.is_collection(), (
             'Map cannot iterate on {}, which is not a collection'
         ).format(collection_expr.type.name().camel)
 
-        self.induction_var.type = collection_expr.type.element_type()
-        return collection_expr
+        induction_var = AbstractVariable(
+            names.Name("Item_{}".format(next(CollectionExpression._counter))),
+            collection_expr.type.element_type()
+        )
+
+        expr = construct(assert_type(self.expr_fn(induction_var),
+                                     AbstractExpression))
+
+        return collection_expr, expr, induction_var
 
 
 class OpCall(AbstractExpression):
@@ -370,13 +426,11 @@ class Contains(CollectionExpression):
 
         :rtype: QuantifierExpr
         """
-        collection = self.construct_collection()
-        predicate = construct(self.expr)
-        ind_var = construct(self.induction_var)
-
+        collection, predicate, ind_var = self.construct_common()
         # "collection" contains "item" if at least one element in "collection"
         # is equal to "item".
-        return QuantifierExpr(Quantifier.ANY, collection, predicate, ind_var)
+        return QuantifierExpr(Quantifier.ANY, collection, predicate,
+                              construct(ind_var))
 
 
 class Eq(AbstractExpression):
@@ -495,18 +549,14 @@ class Map(CollectionExpression):
         :param filter_expr: If provided, a function that takes an induction
             variable and that returns a boolean expression which says whether
             to include or exclude an item from the collection.
-        :type filter_expr: None|(InductionVariable) -> AbstractExpression
+        :type filter_expr: None|(AbstractExpression) -> AbstractExpression
 
         :param bool concat: If true, "expr" must return arrays, and this
             expression returns the concatenation of all the arrays "expr"
             returns.
         """
         super(Map, self).__init__(collection, expr)
-        if filter_expr:
-            self.filter_expr = filter_expr(self.induction_var)
-            assert isinstance(self.filter_expr, AbstractExpression)
-        else:
-            self.filter_expr = None
+        self.filter_fn = filter_expr
         self.concat = concat
 
     def construct(self):
@@ -515,22 +565,17 @@ class Map(CollectionExpression):
 
         :rtype: MapExpr
         """
-        collection_expr = self.construct_collection()
-        ind_var = assert_type(construct(self.induction_var), VarExpr)
-        expr = self.expr.construct()
+        collection_expr, expr, ind_var = self.construct_common()
 
         assert (not self.concat or expr.type.is_collection()), (
             'Cannot mapcat with expressions returning {} values'
             ' (collections expected instead)'
         ).format(expr.type.name())
 
-        if self.filter_expr:
-            filter_expr = self.filter_expr.construct()
-            assert filter_expr.type.matches(BoolType)
-        else:
-            filter_expr = None
+        filter_expr = (construct(self.filter_fn(ind_var), BoolType)
+                       if self.filter_fn else None)
 
-        return MapExpr(ind_var, collection_expr, expr, filter_expr,
+        return MapExpr(construct(ind_var), collection_expr, expr, filter_expr,
                        self.concat)
 
 
@@ -652,12 +697,10 @@ class Quantifier(CollectionExpression):
 
         :rtype: QuantifierExpr
         """
-        collection_expr = self.construct_collection()
-        ind_var = construct(self.induction_var)
-        expr = construct(self.expr)
+        collection_expr, expr, ind_var = self.construct_common()
         assert expr.type.matches(BoolType)
-
-        return QuantifierExpr(self.kind, collection_expr, expr, ind_var)
+        return QuantifierExpr(self.kind, collection_expr, expr,
+                              construct(ind_var))
 
 
 class FieldAccess(AbstractExpression):
@@ -704,7 +747,7 @@ class FieldAccess(AbstractExpression):
         return "<FieldAccess {} {}>".format(self.receiver, self.field)
 
 
-class PlaceholderSingleton(AbstractExpression):
+class AbstractVariable(AbstractExpression):
     """
     Abstract expression that is an entry point into the expression DSL.
 
@@ -716,6 +759,29 @@ class PlaceholderSingleton(AbstractExpression):
       context manager.
     - Calling construct on the PlaceHolder.
     """
+
+    class VarExpr(ResolvedExpression):
+        """
+        Resolved expression that represents a variable in generated code.
+        """
+
+        def __init__(self, type, name):
+            """
+            Create a variable reference expression.
+
+            :param langkit.compiled_types.CompiledType type: Type for the
+                referenced variable.
+            :param names.Name name: Name of the referenced variable.
+            """
+            self._type = assert_type(type, CompiledType)
+            self.name = name
+
+        @property
+        def type(self):
+            return self._type
+
+        def render_expr(self):
+            return self.name.camel_with_underscores
 
     def __init__(self, name, type=None):
         """
@@ -750,7 +816,7 @@ class PlaceholderSingleton(AbstractExpression):
         self._type = _old_type
 
     def construct(self):
-        return VarExpr(self._type, self._name)
+        return AbstractVariable.VarExpr(self._type, self._name)
 
     @property
     def type(self):
@@ -760,86 +826,12 @@ class PlaceholderSingleton(AbstractExpression):
         return "<PlaceHolder {}>".format(self._name)
 
 
-class InductionVariable(AbstractExpression):
-    """
-    Abstract expression that represents an induction variable in loops exprs.
-    """
-
-    _counter = 0
-    """
-    Counter used to generate unique variable names.
-    :type: int
-    """
-
-    def __init__(self):
-        self.i = InductionVariable._counter
-        InductionVariable._counter += 1
-        self._type = None
-
-    def __repr__(self):
-        return '<InductionVariable {}>'.format(self.i)
-
-    @property
-    def type(self):
-        assert self._type
-        return self._type
-
-    @type.setter
-    def type(self, type):
-        self._type = type
-
-    def construct(self):
-        return VarExpr(self.type, names.Name('Item_{}'.format(self.i)))
-
-
-Self = PlaceholderSingleton(names.Name("Self"))
-Env = PlaceholderSingleton(names.Name("Current_Env"), type=LexicalEnvType)
+Self = AbstractVariable(names.Name("Self"))
+Env = AbstractVariable(names.Name("Current_Env"), type=LexicalEnvType)
 
 
 def render(*args, **kwargs):
     return ct_render(*args, property=Property.get(), Self=Self, **kwargs)
-
-
-class ResolvedExpression(object):
-    """
-    Resolved expressions are expressions that can be readily rendered to code
-    that will correspond to the initial expression, depending on the bound
-    lexical scope.
-    """
-
-    def render_expr(self):
-        """
-        Renders the expression itself.
-
-        :rtype: basestring
-        """
-        raise NotImplementedError()
-
-    def render_pre(self):
-        """
-        Renders initial statements that might be needed to the expression.
-
-        :rtype: basestring
-        """
-        return ""
-
-    def render(self):
-        """
-        Render both the initial statements and the expression itself. This is
-        basically a wrapper that calls render_pre and render_expr in turn.
-
-        :rtype: basestring
-        """
-        return "{}\n{}".format(self.render_pre(), self.render_expr())
-
-    @property
-    def type(self):
-        """
-        Returns the type of the resolved expression.
-
-        :rtype: langkit.compiled_types.CompiledType
-        """
-        raise NotImplementedError()
 
 
 class IsA(AbstractExpression):
@@ -1067,30 +1059,6 @@ class CollectionGet(AbstractExpression):
             coll_expr=construct(self.coll_expr, lambda t: t.is_collection()),
             index_expr=construct(self.index_expr, LongType),
             or_null=self.or_null)
-
-
-class VarExpr(ResolvedExpression):
-    """
-    Resolved expression that represents a variable in generated code.
-    """
-
-    def __init__(self, type, name):
-        """
-        Create a variable reference expression.
-
-        :param langkit.compiled_types.CompiledType type: Type for the
-            referenced variable.
-        :param names.Name name: Name of the referenced variable.
-        """
-        self._type = assert_type(type, CompiledType)
-        self.name = name
-
-    @property
-    def type(self):
-        return self._type
-
-    def render_expr(self):
-        return self.name.camel_with_underscores
 
 
 class FieldAccessExpr(ResolvedExpression):
@@ -1443,7 +1411,6 @@ class LocalVars(object):
             :param langkit.compiled_types.CompiledType type: Type parameter.
                 The type of this local variable.
             """
-            assert isinstance(name, names.Name)
             self.vars = vars
             self.name = name
             self.type = type
