@@ -347,9 +347,42 @@ class BinaryBooleanOperator(AbstractExpression):
 
 class Cast(AbstractExpression):
     """
-    Abstract expression that is the result of casting an ASTNode subclass value
+    Expression that is the result of casting an ASTNode subclass value
     to another subclass.
     """
+
+    class CastExpr(ResolvedExpression):
+        def __init__(self, expr, astnode):
+            """
+            :param ResolvedExpr expr: Expression on which the cast is
+                performed.
+            :param ASTNode astnode: ASTNode subclass to use for the cast.
+            """
+            self.expr = expr
+            self.astnode = astnode
+
+            p = Property.get()
+            self.result_var = p.vars(names.Name('Base'),
+                                     self.expr.type,
+                                     create_unique=False)
+
+        @property
+        def type(self):
+            return self.astnode
+
+        def render_pre(self):
+            # Before actually downcasting an access to an AST node, add a type
+            # check so that we raise a Property_Error if it's wrong.
+            return render('properties/type_safety_check_ada',
+                          expr=self.expr,
+                          astnode=self.astnode,
+                          result_var=self.result_var)
+
+        def render_expr(self):
+            return "{} ({})".format(
+                self.astnode.name().camel_with_underscores,
+                self.expr.render_expr()
+            )
 
     def __init__(self, expr, astnode):
         """
@@ -371,11 +404,10 @@ class Cast(AbstractExpression):
         expr = self.expr.construct()
         assert self.astnode.matches(expr.type), (
             'Cannot cast {} to {}: only downcasting is allowed'.format(
-                expr.type.name().camel,
-                self.astnode.name().camel
+                expr.type.name().camel, self.astnode.name().camel
             )
         )
-        return CastExpr(expr, self.astnode)
+        return Cast.CastExpr(expr, self.astnode)
 
 
 class Contains(CollectionExpression):
@@ -461,9 +493,9 @@ class Eq(AbstractExpression):
             # order to help users to detect dubious checks, forbid operands
             # that can never be equal because they have no subclass in common.
             if issubclass(lhs.type, rhs.type):
-                lhs = CastExpr(lhs, assert_type(rhs.type, ASTNode))
+                lhs = Cast.CastExpr(lhs, assert_type(rhs.type, ASTNode))
             elif issubclass(rhs.type, lhs.type):
-                rhs = CastExpr(rhs, assert_type(lhs.type, ASTNode))
+                rhs = Cast.CastExpr(rhs, assert_type(lhs.type, ASTNode))
             else:
                 assert False, '{} and {} values are never equal'.format(
                     lhs.type.name().camel, rhs.type.name().camel
@@ -1259,44 +1291,6 @@ class FieldAccessExpr(ResolvedExpression):
             ret += " ({})".format(Env._name)
 
         return ret
-
-
-class CastExpr(ResolvedExpression):
-    """
-    Resolved expression that is the result of casting an ASTNode subclass value
-    to another subclass.
-    """
-
-    def __init__(self, expr, astnode):
-        """
-        :param ResolvedExpr expr: Expression on which the cast is performed.
-        :param ASTNode astnode: ASTNode subclass to use for the cast.
-        """
-        self.expr = expr
-        self.astnode = astnode
-
-        p = Property.get()
-        self.result_var = p.vars(names.Name('Base'),
-                                 self.expr.type,
-                                 create_unique=False)
-
-    @property
-    def type(self):
-        return self.astnode
-
-    def render_pre(self):
-        # Before actually downcasting an access to an AST node, add a type
-        # check so that we raise a Property_Error if it's wrong.
-        return render('properties/type_safety_check_ada',
-                      expr=self.expr,
-                      astnode=self.astnode,
-                      result_var=self.result_var)
-
-    def render_expr(self):
-        return "{} ({})".format(
-            self.astnode.name().camel_with_underscores,
-            self.expr.render_expr()
-        )
 
 
 class LiteralExpr(ResolvedExpression):
