@@ -12,6 +12,7 @@ this is the way it is done for the ada language::
 
 from __future__ import absolute_import
 
+from contextlib import contextmanager
 from distutils.spawn import find_executable
 from glob import glob
 import itertools
@@ -43,6 +44,20 @@ def get_context():
         " is not set"
     )
     return compile_ctx
+
+
+@contextmanager
+def global_context(ctx):
+    """
+    Context manager that temporarily make "ctx" global.
+
+    :param CompileContext ctx: Context to make global.
+    """
+    global compile_ctx
+    old_ctx = compile_ctx
+    compile_ctx = ctx
+    yield
+    compile_ctx = old_ctx
 
 
 def write_cpp_file(file_path, source):
@@ -219,6 +234,14 @@ class CompileCtx():
                                             if c_symbol_prefix is None else
                                             c_symbol_prefix))
         self.verbosity = verbosity
+
+        self.compiled = False
+        """
+        Whether the language specification was compiled. This is used to avoid
+        doing it multiple times.
+
+        :type: bool
+        """
 
         # Mapping: rule name -> Parser instances.
         # TODO: why do we need this? The grammar already has such a mapping.
@@ -425,13 +448,13 @@ class CompileCtx():
             generate the lexer source code. Will do by default. As this can
             take time, it is useful to disable it during testing.
         """
-
-        global compile_ctx
-        try:
-            compile_ctx = self
+        self.compile()
+        with global_context(self):
             self._emit(file_root, generate_lexer)
-        finally:
-            compile_ctx = None
+
+    def compile(self):
+        with global_context(self):
+            self._compile()
 
     def write_ada_module(self, out_dir, template_base_name, qual_name,
                          has_body=True):
@@ -470,11 +493,17 @@ class CompileCtx():
                     )
                 )
 
-    def _emit(self, file_root, generate_lexer):
+    def _compile(self):
         """
-        Helper for the "emit" method: please refer to it for documentation.
+        Compile the language specification: perform legality checks and type
+        inference.
         """
-        assert self.grammar, "Set grammar before calling emit"
+        # Compile the first time, do nothing next times
+        if self.compiled:
+            return
+        self.compiled = True
+
+        assert self.grammar, "Set grammar before compiling"
 
         unreferenced_rules = self.grammar.get_unreferenced_rules(
             self.main_rule_name
@@ -494,6 +523,57 @@ class CompileCtx():
         # compilation stages.
         self.compute_properties()
 
+        if self.verbosity.info:
+            printcol("Compiling the grammar...", Colors.OKBLUE)
+
+        with names.camel_with_underscores:
+            # Compute the type of fields for types used in the grammar
+            for r_name, r in self.grammar.rules.items():
+                r.compute_fields_types()
+
+            for r_name, r in self.grammar.rules.items():
+                r.compile()
+                self.rules_to_fn_names[r_name] = r
+
+        not_resolved_types = set()
+        for astnode_type in self.astnode_types:
+            if not astnode_type.is_type_resolved:
+                not_resolved_types.add(astnode_type)
+        assert not not_resolved_types, (
+            "The following ASTNode subclasss are not type resolved. They are"
+            " not used by the grammar, and their types not annotated:"
+            " {}".format(
+                ", ".join(astnode_type.name().camel
+                          for astnode_type in not_resolved_types)
+            )
+        )
+
+        for i, astnode in enumerate(
+            (astnode
+             for astnode in self.astnode_types
+             if not astnode.abstract),
+            # Compute kind constants for all ASTNode concrete subclasses.
+            # Start with 2: the constant 0 is reserved as an
+            # error/uninitialized code and the constant 1 is reserved for all
+            # ASTList nodes.
+            start=2
+        ):
+            self.node_kind_constants[astnode] = i
+
+        # Now that all Struct subclasses referenced by the grammar have been
+        # typed, iterate over all declared subclasses to register the ones that
+        # are unreachable from the grammar.  TODO: this kludge will eventually
+        # disappear as part of OC22-016.
+        for t in self.struct_types + self.astnode_types:
+            t.add_to_context()
+
+    def _emit(self, file_root, generate_lexer):
+        """
+        Emit native code for all the rules in this grammar as a library:
+        a library specification and the corresponding implementation.  Also
+        emit a tiny program that can parse starting with any parsing rule for
+        testing purposes.
+        """
         lib_name_low = self.ada_api_settings.lib_name.lower()
 
         include_path = path.join(file_root, "include")
@@ -545,52 +625,8 @@ class CompileCtx():
         shutil.copy(join(lngk_support_dir, "langkit_support_installed.gpr"),
                     join(lib_path, "gnat", "langkit_support.gpr"))
 
-        if self.verbosity.info:
-            printcol("Compiling the grammar...", Colors.OKBLUE)
-
-        with names.camel_with_underscores:
-            # Compute the type of fields for types used in the grammar
-            for r_name, r in self.grammar.rules.items():
-                r.compute_fields_types()
-
-            for r_name, r in self.grammar.rules.items():
-                r.compile()
-                self.rules_to_fn_names[r_name] = r
-
-        not_resolved_types = set()
-        for astnode_type in self.astnode_types:
-            if not astnode_type.is_type_resolved:
-                not_resolved_types.add(astnode_type)
-        assert not not_resolved_types, (
-            "The following ASTNode subclasss are not type resolved. They are"
-            " not used by the grammar, and their types not annotated:"
-            " {}".format(
-                ", ".join(astnode_type.name().camel
-                          for astnode_type in not_resolved_types)
-            )
-        )
-
-        for i, astnode in enumerate(
-            (astnode
-             for astnode in self.astnode_types
-             if not astnode.abstract),
-            # Compute kind constants for all ASTNode concrete subclasses.
-            # Start with 2: the constant 0 is reserved as an
-            # error/uninitialized code and the constant 1 is reserved for all
-            # ASTList nodes.
-            start=2
-        ):
-            self.node_kind_constants[astnode] = i
-
         with file(os.path.join(share_path, 'ast-types.txt'), 'w') as f:
             astdoc.write_astdoc(self, f)
-
-        # Now that all Struct subclasses referenced by the grammar have been
-        # typed, iterate over all declared subclasses to register the ones that
-        # are unreachable from the grammar.  TODO: this kludge will eventually
-        # disappear as part of OC22-016.
-        for t in self.struct_types + self.astnode_types:
-            t.add_to_context()
 
         if self.verbosity.info:
             printcol("Generating sources... ", Colors.OKBLUE)
