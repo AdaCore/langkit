@@ -26,7 +26,7 @@ class EnvSpec(object):
         :type add_to_env:
             (expressions.AbstractExpression, expressions.AbstractExpression)
 
-        :param expressions.AbstractExpression ref_envs: if an
+        :param langkit.expressions.base.AbstractExpression ref_envs: if an
             AbstractExpression returning a list of environments is supplied,
             the topmost environment in the environment resolution will be
             altered to include the list of environments as referenced
