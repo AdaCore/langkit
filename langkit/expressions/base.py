@@ -263,7 +263,7 @@ class AbstractVariable(AbstractExpression):
     - Calling construct on the PlaceHolder.
     """
 
-    class VarExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         """
         Resolved expression that represents a variable in generated code.
         """
@@ -296,7 +296,7 @@ class AbstractVariable(AbstractExpression):
     @contextmanager
     def bind_name(self, name):
         """
-        Bind the name of this placeholder.
+        Bind the name of this var.
 
         :param name: The new name.
         """
@@ -308,7 +308,7 @@ class AbstractVariable(AbstractExpression):
     @contextmanager
     def bind_type(self, type):
         """
-        Bind the type of this placeholder.
+        Bind the type of this var.
 
         :param langkit.compiled_types.CompiledType type: Type parameter. The
             type of this placeholder.
@@ -319,7 +319,7 @@ class AbstractVariable(AbstractExpression):
         self._type = _old_type
 
     def construct(self):
-        return AbstractVariable.VarExpr(self._type, self._name)
+        return AbstractVariable.Expr(self._type, self._name)
 
     @property
     def type(self):

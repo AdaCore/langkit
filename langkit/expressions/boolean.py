@@ -44,7 +44,7 @@ class BinaryBooleanOperator(AbstractExpression):
         else:
             then = LiteralExpr('True', BoolType)
             else_then = rhs
-        return If.IfExpr(lhs, then, else_then, BoolType)
+        return If.Expr(lhs, then, else_then, BoolType)
 
 
 class Eq(AbstractExpression):
@@ -52,7 +52,7 @@ class Eq(AbstractExpression):
     Expression for equality test expression.
     """
 
-    class EqExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         def __init__(self, lhs, rhs):
             self.lhs = lhs
             self.rhs = rhs
@@ -97,9 +97,9 @@ class Eq(AbstractExpression):
             # order to help users to detect dubious checks, forbid operands
             # that can never be equal because they have no subclass in common.
             if issubclass(lhs.type, rhs.type):
-                lhs = Cast.CastExpr(lhs, assert_type(rhs.type, ASTNode))
+                lhs = Cast.Expr(lhs, assert_type(rhs.type, ASTNode))
             elif issubclass(rhs.type, lhs.type):
-                rhs = Cast.CastExpr(rhs, assert_type(lhs.type, ASTNode))
+                rhs = Cast.Expr(rhs, assert_type(lhs.type, ASTNode))
             else:
                 assert False, '{} and {} values are never equal'.format(
                     lhs.type.name().camel, rhs.type.name().camel
@@ -109,7 +109,7 @@ class Eq(AbstractExpression):
                 'Incompatible types for equality: {} and {}'
             ).format(lhs.type.name().camel, rhs.type.name().camel)
 
-        return Eq.EqExpr(lhs, rhs)
+        return Eq.Expr(lhs, rhs)
 
 
 class If(AbstractExpression):
@@ -117,7 +117,7 @@ class If(AbstractExpression):
     Abstract expression for a conditional expression.
     """
 
-    class IfExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         """
         Resolved expression for a conditional expression.
         """
@@ -179,7 +179,7 @@ class If(AbstractExpression):
         else_then = self.else_then.construct()
 
         rtype = then.type.unify(else_then.type)
-        return If.IfExpr(cond, then, else_then, rtype)
+        return If.Expr(cond, then, else_then, rtype)
 
 
 class Not(AbstractExpression):
@@ -187,7 +187,7 @@ class Not(AbstractExpression):
     Expression for "not" boolean expressions.
     """
 
-    class NotExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         def __init__(self, expr):
             self.expr = expr
 
@@ -209,4 +209,4 @@ class Not(AbstractExpression):
         self.expr = expr
 
     def construct(self):
-        return Not.NotExpr(construct(self.expr, BoolType))
+        return Not.Expr(construct(self.expr, BoolType))

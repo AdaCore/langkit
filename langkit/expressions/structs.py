@@ -15,7 +15,7 @@ class Cast(AbstractExpression):
     to another subclass.
     """
 
-    class CastExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         def __init__(self, expr, astnode):
             """
             :param ResolvedExpr expr: Expression on which the cast is
@@ -71,7 +71,7 @@ class Cast(AbstractExpression):
                 expr.type.name().camel, self.astnode.name().camel
             )
         )
-        return Cast.CastExpr(expr, self.astnode)
+        return Cast.Expr(expr, self.astnode)
 
 
 class IsNull(AbstractExpression):
@@ -92,7 +92,7 @@ class IsNull(AbstractExpression):
 
         :rtype: EqExpr
         """
-        return Eq.EqExpr(
+        return Eq.Expr(
             construct(self.expr, ASTNode), LiteralExpr('null', ASTNode)
         )
 
@@ -102,7 +102,7 @@ class New(AbstractExpression):
     Abstract expression to create Struct values.
     """
 
-    class NewExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         """
         Resolved expression to create Struct values.
         """
@@ -181,7 +181,7 @@ class New(AbstractExpression):
                 )
             )
 
-        return New.NewExpr(self.struct_type, provided_fields)
+        return New.Expr(self.struct_type, provided_fields)
 
 
 class FieldAccess(AbstractExpression):
@@ -190,7 +190,7 @@ class FieldAccess(AbstractExpression):
     evaluation.
     """
 
-    class FieldAccessExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         """
         Resolved expression that represents a field access in generated code.
         """
@@ -281,7 +281,7 @@ class FieldAccess(AbstractExpression):
             receiver_expr.type.__name__, self.field
         ), Colors.FAIL)
 
-        ret = FieldAccess.FieldAccessExpr(receiver_expr, to_get)
+        ret = FieldAccess.Expr(receiver_expr, to_get)
         return ret
 
     def __repr__(self):
@@ -293,7 +293,7 @@ class IsA(AbstractExpression):
     Expression that is the result of testing the kind of a node.
     """
 
-    class IsAExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         def __init__(self, expr, astnodes):
             """
             :param ResolvedExpr expr: Expression on which the test is
@@ -341,4 +341,4 @@ class IsA(AbstractExpression):
                 'When testing the dynamic subtype of an AST node, the type to'
                 ' check must be a subclass of the value static type.'
             )
-        return IsA.IsAExpr(expr, self.astnodes)
+        return IsA.Expr(expr, self.astnodes)

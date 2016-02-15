@@ -89,8 +89,8 @@ class Contains(CollectionExpression):
         collection, predicate, ind_var = self.construct_common()
         # "collection" contains "item" if at least one element in "collection"
         # is equal to "item".
-        return Quantifier.QuantifierExpr(Quantifier.ANY, collection, predicate,
-                                         construct(ind_var))
+        return Quantifier.Expr(Quantifier.ANY, collection, predicate,
+                               construct(ind_var))
 
 
 class Map(CollectionExpression):
@@ -98,7 +98,7 @@ class Map(CollectionExpression):
     Abstract expression that is the result of a map expression evaluation.
     """
 
-    class MapExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         """
         Resolved expression that represents a map expression in the generated
         code.
@@ -187,8 +187,8 @@ class Map(CollectionExpression):
         filter_expr = (construct(self.filter_fn(ind_var), BoolType)
                        if self.filter_fn else None)
 
-        return Map.MapExpr(construct(ind_var), collection_expr, expr,
-                           filter_expr, self.concat)
+        return Map.Expr(construct(ind_var), collection_expr, expr,
+                        filter_expr, self.concat)
 
 
 class Quantifier(CollectionExpression):
@@ -196,7 +196,7 @@ class Quantifier(CollectionExpression):
     Expression that tests a predicate over the items of a collection.
     """
 
-    class QuantifierExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         def __init__(self, kind, collection, expr, induction_var):
             """
             :param str kind: Kind for this quantifier expression. 'all' will
@@ -259,8 +259,8 @@ class Quantifier(CollectionExpression):
         """
         collection_expr, expr, ind_var = self.construct_common()
         assert expr.type.matches(BoolType)
-        return Quantifier.QuantifierExpr(self.kind, collection_expr, expr,
-                                         construct(ind_var))
+        return Quantifier.Expr(self.kind, collection_expr, expr,
+                               construct(ind_var))
 
 
 class CollectionGet(AbstractExpression):
@@ -268,7 +268,7 @@ class CollectionGet(AbstractExpression):
     Expression that will get an element from a collection.
     """
 
-    class CollectionGetExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         def __init__(self, coll_expr, index_expr, or_null):
             """
             :type coll_expr: ResolvedExpression
@@ -310,7 +310,7 @@ class CollectionGet(AbstractExpression):
         self.or_null = or_null
 
     def construct(self):
-        return CollectionGet.CollectionGetExpr(
+        return CollectionGet.Expr(
             coll_expr=construct(self.coll_expr, lambda t: t.is_collection()),
             index_expr=construct(self.index_expr, LongType),
             or_null=self.or_null)

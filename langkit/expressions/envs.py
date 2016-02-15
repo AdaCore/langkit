@@ -13,7 +13,7 @@ class EnvGet(AbstractExpression):
     Expression for lexical environment get operation.
     """
 
-    class EnvGetExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         def __init__(self, env_expr, token_expr, resolve_unique):
             """
             :param langkit.expressions.base.ResolvedExpression env_expr: The
@@ -65,9 +65,9 @@ class EnvGet(AbstractExpression):
         # array machinery.
 
     def construct(self):
-        return EnvGet.EnvGetExpr(construct(self.env_expr, LexicalEnvType),
-                                 construct(self.token_expr, Token),
-                                 self.resolve_unique)
+        return EnvGet.Expr(construct(self.env_expr, LexicalEnvType),
+                           construct(self.token_expr, Token),
+                           self.resolve_unique)
 
 
 class EnvBind(AbstractExpression):
@@ -77,7 +77,7 @@ class EnvBind(AbstractExpression):
     via the eval_in_env shortcut.
     """
 
-    class EnvBindExpr(ResolvedExpression):
+    class Expr(ResolvedExpression):
         def __init__(self, env_expr, to_eval_expr):
             self.to_eval_expr = to_eval_expr
             self.env_expr = env_expr
@@ -119,5 +119,5 @@ class EnvBind(AbstractExpression):
         self.to_eval_expr = to_eval_expr
 
     def construct(self):
-        return EnvBind.EnvBindExpr(construct(self.env_expr, LexicalEnvType),
-                                   construct(self.to_eval_expr))
+        return EnvBind.Expr(construct(self.env_expr, LexicalEnvType),
+                            construct(self.to_eval_expr))
