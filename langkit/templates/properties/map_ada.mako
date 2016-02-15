@@ -14,6 +14,24 @@ declare
    ${vec_var} : ${map.type.vector()};
 begin
 
+   <%def name="build_loop_body()">
+      ${map.expr.render_pre()}
+      % if map.concat:
+         for Item_To_Append of
+            % if map.expr.type.is_list_type:
+               ${map.expr.render_expr()}.Vec
+            % else:
+               ${map.expr.render_expr()}.Items
+            % endif
+         loop
+            ${vec_pkg}.Append (${vec_var}, Item_To_Append);
+         end loop;
+      % else:
+         ${vec_pkg}.Append
+           (${vec_var}, ${map.expr.render_expr()});
+      % endif
+   </%def>
+
    <%def name="build_loop()">
       ## First, build a vector for all the resulting elements
       for ${ind_var} of
@@ -26,27 +44,10 @@ begin
          % if map.filter:
             ${map.filter.render_pre()}
             if ${map.filter.render_expr()} then
-         % endif
-
-         ${map.expr.render_pre()}
-
-         % if map.concat:
-            for Item_To_Append of
-               % if map.expr.type.is_list_type:
-                  ${map.expr.render_expr()}.Vec
-               % else:
-                  ${map.expr.render_expr()}.Items
-               % endif
-            loop
-               ${vec_pkg}.Append (${vec_var}, Item_To_Append);
-            end loop;
-         % else:
-            ${vec_pkg}.Append
-              (${vec_var}, ${map.expr.render_expr()});
-         % endif
-
-         % if map.filter:
+               ${build_loop_body()}
             end if;
+         % else:
+            ${build_loop_body()}
          % endif
       end loop;
 
