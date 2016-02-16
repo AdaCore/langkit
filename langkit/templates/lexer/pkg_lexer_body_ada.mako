@@ -199,7 +199,9 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
              Sloc_Range => (Token.Start_Line,   Token.End_Line,
                             Token.Start_Column, Token.End_Column)));
 
+      % if get_context().lexer.token_actions['WithTrivia']:
          <<Dont_Append>>
+      % endif
       end loop;
 
    end Process_All_Tokens;
