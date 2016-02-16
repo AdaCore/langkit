@@ -9,9 +9,11 @@
 <% root_node_array = ctx.root_grammar_class.array_type() %>
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
+pragma Warnings (Off, "referenced");
 with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Tokens;   use Langkit_Support.Tokens;
 with Langkit_Support.Vectors;
+pragma Warnings (On, "referenced");
 
 private with ${_self.ada_api_settings.lib_name}.AST.List;
 

@@ -11,10 +11,12 @@
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
+pragma Warnings (Off, "referenced");
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
 with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
 with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
 with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
+pragma Warnings (On, "referenced");
 
 package body ${_self.ada_api_settings.lib_name}.AST.Types is
 
