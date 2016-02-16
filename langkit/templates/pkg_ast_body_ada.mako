@@ -572,6 +572,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end;
    end Parents;
 
+   % if ctx.env_metadata:
    -------------
    -- Combine --
    -------------
@@ -586,5 +587,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       % endfor
       return Ret;
    end Combine;
+
+   % endif
 
 end ${_self.ada_api_settings.lib_name}.AST;
