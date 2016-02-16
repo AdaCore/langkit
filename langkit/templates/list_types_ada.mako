@@ -33,7 +33,7 @@
       Or_Null : Boolean := False) return ${root_node_type_name}
    is
      (if Index < Node.Child_Count
-      then Ada_Node (Lists_${type}.Node_Vectors.Get_At_Index (Node.Vec, Index))
+      then ${root_node_type_name} (Lists_${type}.Node_Vectors.Get_At_Index (Node.Vec, Index))
       else (if Or_Null then null else raise Property_Error));
 
 </%def>
