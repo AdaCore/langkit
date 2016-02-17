@@ -15,6 +15,11 @@ declare
 begin
 
    <%def name="build_loop_body()">
+      % if map.take_while:
+      ${map.take_while.render_pre()}
+      exit when not (${map.take_while.render_expr()});
+      % endif
+
       ${map.expr.render_pre()}
       % if map.concat:
          for Item_To_Append of

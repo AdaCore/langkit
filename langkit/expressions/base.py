@@ -161,6 +161,7 @@ class AbstractExpression(Frozable):
             'contains':       partial(Contains, self),
             'equals':         partial(Eq, self),
             'filter':         partial(Map, self, lambda x: x),
+            'take_while':     partial(Map, self, lambda x: x, None, False),
             'is_a':           partial(IsA, self),
             'map':            partial(Map, self),
             'mapcat':         partial(Map, self, concat=True),

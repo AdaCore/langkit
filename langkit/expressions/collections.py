@@ -105,20 +105,16 @@ class Map(CollectionExpression):
         """
 
         def __init__(self, induction_var, collection, expr, filter=None,
-                     concat=False):
+                     concat=False, take_while=None):
             """
-            :param VarExpr induction_var: Variable to use in "expr".
-            :param ResolvedExpression collection: Collection on which this map
-                operation works.
-            :param ResolvedExpression expr: Expression to evaluate for each
-                item in "collection".
-            :param filter: If provided, a boolean expression that says whether
-                to include or exclude an item from the collection.
-            :type filter: None|langkit.expressions.base.ResolvedExpression
-            :param bool concat: If true, "expr" must return arrays, and this
-                expression returns the concatenation of all the arrays "expr"
-                returns.
+            :type induction_var: VarExpr
+            :type collection: ResolvedExpression
+            :type expr: ResolvedExpression
+            :type filter: ResolvedExpression
+            :type concat: bool
+            :type take_while: ResolvedExpression
             """
+            self.take_while = take_while
             self.induction_var = induction_var
             self.collection = collection
             self.expr = expr
@@ -154,7 +150,8 @@ class Map(CollectionExpression):
         def render_expr(self):
             return self.array_var.name.camel_with_underscores
 
-    def __init__(self, collection, expr, filter_expr=None, concat=False):
+    def __init__(self, collection, expr, filter_expr=None, concat=False,
+                 take_while_pred=None):
         """
         See CollectionExpression for the other parameters.
 
@@ -166,9 +163,15 @@ class Map(CollectionExpression):
         :param bool concat: If true, "expr" must return arrays, and this
             expression returns the concatenation of all the arrays "expr"
             returns.
+
+        :param take_while_pred: If provided, a function that takes an
+            induction variable and that returns a boolean expression which says
+            whether to continue the map or not.
+        :type take_while_pred: None|(AbstractExpression) -> AbstractExpression
         """
         super(Map, self).__init__(collection, expr)
         self.filter_fn = filter_expr
+        self.take_while_pred = take_while_pred
         self.concat = concat
 
     def construct(self):
@@ -187,8 +190,11 @@ class Map(CollectionExpression):
         filter_expr = (construct(self.filter_fn(ind_var), BoolType)
                        if self.filter_fn else None)
 
+        take_while_expr = (construct(self.take_while_pred(ind_var), BoolType)
+                           if self.take_while_pred else None)
+
         return Map.Expr(construct(ind_var), collection_expr, expr,
-                        filter_expr, self.concat)
+                        filter_expr, self.concat, take_while_expr)
 
 
 class Quantifier(CollectionExpression):
