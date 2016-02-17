@@ -358,7 +358,9 @@ class CompileCtx():
         ]
 
         if StructMetaClass.env_metadata:
-            self.struct_types += [StructMetaClass.env_metadata]
+            self.struct_types = (
+                [StructMetaClass.env_metadata] + self.struct_types
+            )
 
         self.root_grammar_class = StructMetaClass.root_grammar_class
         self.env_metadata = StructMetaClass.env_metadata
