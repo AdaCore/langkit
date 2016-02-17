@@ -548,13 +548,15 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -------------
 
    function Parents
-     (Node : access ${root_node_value_type})
+     (Node : access ${root_node_value_type}; Include_Self : Boolean := False)
       return ${root_node_array.name()}
    is
-      Count : Natural := 1;
-      Cur   : ${root_node_type_name} := ${root_node_type_name} (Node);
+      Count : Natural := 0;
+      Start : ${root_node_type_name} :=
+        ${root_node_type_name} (if Include_Self then Node else Node.Parent);
+      Cur   : ${root_node_type_name} := Start;
    begin
-      while Cur.Parent /= null loop
+      while Cur /= null loop
          Count := Count + 1;
          Cur := Cur.Parent;
       end loop;
@@ -563,7 +565,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          Result : constant ${root_node_array.name()} :=
            new ${root_node_array.pointed()} (Count);
       begin
-         Cur := ${root_node_type_name} (Node);
+         Cur := Start;
          for I in Result.Items'Range loop
             Result.Items (I) := Cur;
             Cur := Cur.Parent;

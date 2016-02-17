@@ -203,7 +203,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  i.e. the Traverse function is called and the result is simply discarded.
 
    function Parents
-     (Node : access ${root_node_value_type})
+     (Node : access ${root_node_value_type}; Include_Self : Boolean := False)
       return ${root_node_array.name()};
    --  Return the list of parents for this node (this node included)
 
