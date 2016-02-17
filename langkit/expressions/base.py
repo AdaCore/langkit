@@ -149,7 +149,7 @@ class AbstractExpression(Frozable):
         )
         from langkit.expressions.structs import Cast, IsA, IsNull
         from langkit.expressions.envs import EnvGet, EnvBind
-        from langkit.expressions.boolean import Eq
+        from langkit.expressions.boolean import Eq, BinaryBooleanOperator
         from langkit.expressions.collections import CollectionGet
 
         # Using partial allows the user to be able to use keyword arguments
@@ -168,7 +168,11 @@ class AbstractExpression(Frozable):
             'resolve_unique': partial(EnvGet, self, resolve_unique=True),
             'at':             partial(CollectionGet, self),
             'eval_in_env':    partial(EnvBind, self),
-            'is_null':        IsNull(self)
+            'is_null':        IsNull(self),
+            'or_else':        partial(BinaryBooleanOperator,
+                                      BinaryBooleanOperator.OR, self),
+            'and_then':       partial(BinaryBooleanOperator,
+                                      BinaryBooleanOperator.AND, self)
         }
 
     @Frozable.protect
