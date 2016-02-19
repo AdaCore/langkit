@@ -788,7 +788,7 @@ def env_metadata(cls):
     The assumption that is done for the moment is that the struct subclass
     given as argument must only have boolean fields. In the context of
     libadalang, the idea is that env metadata is to be used to express things
-    such as "is this element accessed through an implicit dereference ?" or
+    such as "is this element accessed through an implicit dereference?" or
     "does this element correspond to an Ada 2005 dot notation call".
 
     This allows metadata to be combinable, that is you must be able to take two
