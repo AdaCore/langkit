@@ -71,6 +71,7 @@ def make_renderer(base_renderer=None):
         'is_token_type':    type_check(Token),
         'is_array_type':    type_check(ArrayType),
         'is_lexical_env':   type_check(LexicalEnvType),
+        'is_struct_type':   type_check(Struct),
         'decl_type':        decl_type,
     }
     if get_context():
