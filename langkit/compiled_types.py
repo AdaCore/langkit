@@ -70,6 +70,7 @@ def make_renderer(base_renderer=None):
         'is_sloc_range':    type_check(SourceLocationRangeType),
         'is_token_type':    type_check(Token),
         'is_array_type':    type_check(ArrayType),
+        'is_lexical_env':   type_check(LexicalEnvType),
         'decl_type':        decl_type,
     }
     if get_context():
