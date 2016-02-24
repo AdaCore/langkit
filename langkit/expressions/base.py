@@ -172,6 +172,7 @@ class AbstractExpression(Frozable):
             'get':            partial(EnvGet, self),
             'resolve_unique': partial(EnvGet, self, resolve_unique=True),
             'at':             partial(CollectionGet, self),
+            'at_or_raise':    partial(CollectionGet, self, or_null=False),
             'eval_in_env':    partial(EnvBind, self),
             'is_null':        IsNull(self),
             'or_else':        partial(BinaryBooleanOperator,
