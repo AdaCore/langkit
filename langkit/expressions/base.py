@@ -295,11 +295,24 @@ class AbstractVariable(AbstractExpression):
         def render_expr(self):
             return self.name.camel_with_underscores
 
-    def __init__(self, name, type=None):
+    def __init__(self, name, type=None, create_local=False):
         """
         :param names.Name name: The name of the PlaceHolder variable.
+        :param CompiledType type: The type of the variable. Optional for
+            global abstract variables where you will use bind_type. Mandatory
+            if create_local is True.
+        :param bool create_local: Whether to create a corresponding local
+            variable in the current property.
         """
-        self._name = name
+        if create_local:
+            assert type, (
+                "When create_local is True, a type needs to be provided"
+            )
+            v = Property.get().vars(name, type)
+            self._name = v.name
+        else:
+            self._name = name
+
         self._type = type
 
     @contextmanager
