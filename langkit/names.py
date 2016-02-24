@@ -144,6 +144,19 @@ class Name(object):
         return cls('_'.join(word.lower().capitalize()
                             for word in name.split('_')))
 
+    @classmethod
+    def get(cls, name_or_str):
+        """
+        Convenience function that will take a name or a string, and return a
+        name.
+
+        :param str|Name name_or_str:
+        :rtype: Name
+        """
+        if isinstance(name_or_str, Name):
+            return name_or_str
+        return Name(name_or_str)
+
 
 class Convention(object):
     """Guard to set a default convention."""
