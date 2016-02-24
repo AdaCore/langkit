@@ -310,7 +310,7 @@ class AbstractVariable(AbstractExpression):
             assert type, (
                 "When create_local is True, a type needs to be provided"
             )
-            v = Property.get().vars(name, type)
+            v = Property.get().vars.create(name, type)
             self._name = v.name
         else:
             self._name = name
@@ -426,7 +426,10 @@ class Property(AbstractNodeData):
             )
 
         self.constructed_expr = None
+
         self.vars = LocalVars()
+        ":type: LocalVars"
+
         self.expected_type = type
         self.abstract = abstract
         self.abstract_runtime_check = abstract_runtime_check
@@ -678,7 +681,7 @@ class LocalVars(object):
                 self.type.name().camel_with_underscores
             )
 
-    def __call__(self, name, type):
+    def create(self, name, type):
         """
         This getattr override allows you to declare local variables in
         templates via the syntax::
@@ -687,11 +690,12 @@ class LocalVars(object):
             vars = LocalVars()
             var = vars('Index', langkit.compiled_types.LongType)
 
-        :param names.Name name: The name of the variable.
+        :param str|names.Name name: The name of the variable.
         :param langkit.compiled_types.CompiledType type: Type parameter. The
             type of the local variable.
         """
-        assert isinstance(name, names.Name)
+        name = names.Name.get(name)
+
         i = 0
         orig_name = name
         while name in self.local_vars:
