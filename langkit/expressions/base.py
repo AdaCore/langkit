@@ -19,7 +19,7 @@ def construct(expr, expected_type_or_pred=None):
         corresponds. If a predicate, expects the type of the
         ResolvedExpression as a parameter, and returns a boolean, to allow
         checking properties of the type.
-    :type expected_type_or_pred: type|(CompiledType) -> bool
+    :type expected_type_or_pred: CompiledType|(CompiledType) -> bool
 
     :param AbstractExpression|bool|int expr: The expression to resolve.
     :rtype: ResolvedExpression
