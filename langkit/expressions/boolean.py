@@ -2,7 +2,7 @@ from langkit import names
 from langkit.compiled_types import BoolType, ASTNode
 from langkit.expressions.base import (
     render, Property, LiteralExpr, AbstractExpression, construct,
-    ResolvedExpression
+    ResolvedExpression, AbstractVariable
 )
 from langkit.utils import assert_type
 
@@ -209,3 +209,71 @@ class Not(AbstractExpression):
 
     def construct(self):
         return Not.Expr(construct(self.expr, BoolType))
+
+
+class Then(AbstractExpression):
+    """
+    Expression for the then boolean combinator that works as follows::
+
+        expression.then(
+            lambda expr_result: arbitrary_expression, default_expression
+        )
+
+    This property code will evaluate the arbitrary expression if expression
+    evaluates to a not null result, and will evaluate the default_expression
+    otherwise.
+    """
+
+    class Expr(ResolvedExpression):
+        def __init__(self, expr, var_expr, then_expr, default_expr):
+            self.expr = expr
+            self.var_expr = var_expr
+            self.then_expr = then_expr
+            self.default_expr = default_expr
+            self.result = Property.get().vars(names.Name("Result_Var"),
+                                              self.type)
+
+        @property
+        def type(self):
+            return self.then_expr.type
+
+        def render_pre(self):
+            return render('properties/then_ada', then=self)
+
+        def render_expr(self):
+            return self.result.name.camel_with_underscores
+
+    def __init__(self, expr, then_fn, default_val=None):
+        """
+        :param AbstractExpression expr: The expression to use as a source
+            for the then. Must be of a pointer type.
+        :param (AbstractExpression) -> AbstractExpression then_fn: The
+            function describing the expression to compute if expr is not null.
+        :param AbstractExpression default_val: The expression to use as
+            fallback if expr is null.
+        """
+        self.expr = expr
+        self.then_fn = then_fn
+        self.default_val = default_val
+
+    def construct(self):
+        expr = construct(self.expr, lambda t: t.is_ptr)
+        var_expr = AbstractVariable(names.Name("Var_Expr"), expr.type,
+                                    create_local=True)
+        then_expr = construct(self.then_fn(var_expr))
+
+        # Affect default value to the fallback expression. For the moment,
+        # only booleans are handled.
+        if not self.default_val:
+            if then_expr.type.matches(BoolType):
+                default_expr = construct(False)
+            else:
+                raise AssertionError(
+                    "Then expression should have a default value provided, "
+                    "in cases where the provided function's return type is "
+                    "not Bool, here {}".format(then_expr.type)
+                )
+        else:
+            default_expr = construct(self.default_val, then_expr.type)
+
+        return Then.Expr(expr, construct(var_expr), then_expr, default_expr)
