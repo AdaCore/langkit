@@ -26,9 +26,7 @@ class Cast(AbstractExpression):
             self.astnode = astnode
 
             p = Property.get()
-            self.result_var = p.vars(names.Name('Base'),
-                                     self.expr.type,
-                                     create_unique=False)
+            self.result_var = p.vars(names.Name('Base'), self.expr.type)
 
         @property
         def type(self):
@@ -214,8 +212,7 @@ class FieldAccess(AbstractExpression):
             p = Property.get()
             if p:
                 self.result_var = p.vars(names.Name('Internal_Pfx'),
-                                         self.receiver_expr.type,
-                                         create_unique=False)
+                                         self.receiver_expr.type)
             else:
                 self.simple_field_access = True
 

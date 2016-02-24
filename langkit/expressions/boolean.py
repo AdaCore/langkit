@@ -139,8 +139,7 @@ class If(AbstractExpression):
             self.then = then
             self.else_then = else_then
             self.rtype = rtype
-            self.result_var = Property.get().vars(names.Name('Result'), rtype,
-                                                  create_unique=False)
+            self.result_var = Property.get().vars(names.Name('Result'), rtype)
 
         @property
         def type(self):

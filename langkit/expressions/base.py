@@ -662,7 +662,7 @@ class LocalVars(object):
                 self.type.name().camel_with_underscores
             )
 
-    def __call__(self, name, type, create_unique=True):
+    def __call__(self, name, type):
         """
         This getattr override allows you to declare local variables in
         templates via the syntax::
@@ -674,14 +674,8 @@ class LocalVars(object):
         :param names.Name name: The name of the variable.
         :param langkit.compiled_types.CompiledType type: Type parameter. The
             type of the local variable.
-        :param bool create_unique: If true and "name" is already associated to
-            a variable, raise an error. Otherwise, add a suffix to create a new
-            variable.
         """
         assert isinstance(name, names.Name)
-        assert not create_unique or (name not in self.local_vars), (
-            "Already declared local variable {}".format(name)
-        )
         i = 0
         orig_name = name
         while name in self.local_vars:

@@ -85,7 +85,7 @@ class EnvBind(AbstractExpression):
             # Declare a variable that will hold the value of the
             # bound environment.
             self.env_var = Property.get().vars(
-                names.Name("New_Env"), LexicalEnvType, create_unique=True
+                names.Name("New_Env"), LexicalEnvType
             )
 
         def render_pre(self):

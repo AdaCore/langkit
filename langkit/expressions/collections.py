@@ -128,8 +128,7 @@ class Map(CollectionExpression):
             self._type.add_to_context()
 
             p = Property.get()
-            self.array_var = p.vars(names.Name('Map'), self.type,
-                                    create_unique=False)
+            self.array_var = p.vars(names.Name('Map'), self.type)
 
         @property
         def type(self):
@@ -223,8 +222,7 @@ class Quantifier(CollectionExpression):
             self.induction_var = induction_var
 
             self.result_var = Property.get().vars(names.Name('Result'),
-                                                  BoolType,
-                                                  create_unique=False)
+                                                  BoolType)
 
         @property
         def type(self):
