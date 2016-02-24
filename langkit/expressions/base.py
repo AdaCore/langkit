@@ -185,6 +185,17 @@ class AbstractExpression(Frozable):
             'then':           partial(Then, self)
         }
 
+    @memoized
+    def composed_attrs(self):
+        """
+        Helper memoized dict for attributes that are composed on top of
+        built-in ones. Since they're built on regular attrs, we cannot put
+        them in attrs or it would cause infinite recursion.
+        """
+        return {
+            'empty': self.length.equals(0)
+        }
+
     @Frozable.protect
     def __getattr__(self, attr):
         """
@@ -195,7 +206,11 @@ class AbstractExpression(Frozable):
         :rtype: AbstractExpression|function
         """
         from langkit.expressions.structs import FieldAccess
-        return self.attrs().get(attr, FieldAccess(self, attr))
+
+        try:
+            return self.attrs()[attr]
+        except KeyError:
+            return self.composed_attrs().get(attr, FieldAccess(self, attr))
 
     @Frozable.protect
     def __or__(self, other):
