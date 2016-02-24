@@ -4,7 +4,7 @@ from functools import partial
 
 from langkit import names
 from langkit.compiled_types import (
-    LongType, CompiledType, render as ct_render, AbstractNodeData
+    LongType, CompiledType, render as ct_render, AbstractNodeData, BoolType
 )
 from langkit.utils import memoized, assert_type
 
@@ -27,9 +27,12 @@ def construct(expr, expected_type_or_pred=None):
 
     if isinstance(expr, AbstractExpression):
         ret = expr.construct()
-    elif isinstance(expr, int):
-        ret = LiteralExpr(str(expr), LongType)
+
+    # WARNING: Since bools are ints in python, this check needs to be before
+    # the "is int" check.
     elif isinstance(expr, bool):
+        ret = LiteralExpr(str(expr), BoolType)
+    elif isinstance(expr, int):
         ret = LiteralExpr(str(expr), LongType)
     else:
         raise TypeError('Invalid abstract expression: {}'.format(type(expr)))
