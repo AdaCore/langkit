@@ -160,7 +160,8 @@ class AbstractExpression(Frozable):
         return {
             'all':            partial(Quantifier, Quantifier.ALL, self),
             'any':            partial(Quantifier, Quantifier.ANY, self),
-            'cast':           partial(Cast, self),
+            'cast':           partial(Cast, self, do_raise=False),
+            'cast_or_raise':  partial(Cast, self, do_raise=True),
             'contains':       partial(Contains, self),
             'equals':         partial(Eq, self),
             'filter':         partial(Map, self, lambda x: x),

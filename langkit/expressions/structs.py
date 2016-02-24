@@ -16,17 +16,19 @@ class Cast(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
-        def __init__(self, expr, astnode):
+        def __init__(self, expr, astnode, do_raise=False):
             """
-            :param ResolvedExpr expr: Expression on which the cast is
-                performed.
-            :param ASTNode astnode: ASTNode subclass to use for the cast.
+            :type expr: ResolvedExpr
+            :type astnode: ASTNode
+            :type do_raise: bool
             """
+            self.do_raise = do_raise
             self.expr = expr
             self.astnode = astnode
 
             p = Property.get()
-            self.result_var = p.vars(names.Name('Base'), self.expr.type)
+            self.expr_var = p.vars(names.Name('Cast_Expr'), self.expr.type)
+            self.result_var = p.vars(names.Name('Cast_Result'), astnode)
 
         @property
         def type(self):
@@ -35,26 +37,23 @@ class Cast(AbstractExpression):
         def render_pre(self):
             # Before actually downcasting an access to an AST node, add a type
             # check so that we raise a Property_Error if it's wrong.
-            return render('properties/type_safety_check_ada',
-                          expr=self.expr,
-                          astnode=self.astnode,
-                          result_var=self.result_var)
+            return render('properties/type_safety_check_ada', expr=self)
 
         def render_expr(self):
-            return "{} ({})".format(
-                self.astnode.name().camel_with_underscores,
-                self.expr.render_expr()
-            )
+            return self.result_var.name
 
-    def __init__(self, expr, astnode):
+    def __init__(self, expr, astnode, do_raise=False):
         """
         :param langkit.expressions.base.AbstractExpression expr: Expression
             on which the cast is performed.
         :param ASTNode astnode: ASTNode subclass to use for the cast.
+        :param bool do_raise: Whether the exception should raise an
+            exception or return null when the cast is invalid.
         """
         assert astnode.matches(ASTNode)
         self.expr = expr
         self.astnode = astnode
+        self.do_raise = do_raise
 
     def construct(self):
         """
