@@ -37,6 +37,11 @@ package ${_self.ada_api_settings.lib_name}.AST.List is
    overriding
    function Child_Count (Node : access List_Type)
                          return Natural;
+
+   function Length (Node : access List_Type'Class) return Natural
+   is (Node.Child_Count);
+   ## Helper for properties code
+
    overriding
    procedure Get_Child (Node   : access List_Type;
                         Index  : Natural;

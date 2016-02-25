@@ -292,3 +292,22 @@ class CollectionGet(AbstractExpression):
             [coll_expr, construct(self.index_expr, LongType),
              construct(self.or_null)]
         )
+
+
+class CollectionLength(AbstractExpression):
+    """
+    Expression that will return the length of a collection.
+    """
+
+    def __init__(self, coll_expr):
+        """
+        :param AbstractExpression coll_expr: The expression representing the
+            collection to get from.
+        """
+        self.coll_expr = coll_expr
+
+    def construct(self):
+        return BuiltinCallExpr(
+            "Length", LongType,
+            [construct(self.coll_expr, lambda t: t.is_collection())]
+        )
