@@ -39,6 +39,8 @@
                    (${field.type.name()}'Pos (Typed_Node.${field.name}));
              % elif is_bool(field.type):
                  Value_P.all := int (Boolean'Pos (Typed_Node.${field.name}));
+             % elif is_long(field.type):
+                 Value_P.all := int (Typed_Node.${field.name});
              % elif is_ast_node(field.type):
                  Value_P.all :=
                    Wrap (${root_node_type_name} (Typed_Node.${field.name}));
