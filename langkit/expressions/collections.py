@@ -4,7 +4,7 @@ from langkit import names
 from langkit.compiled_types import BoolType, LongType
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, AbstractVariable,
-    render, Property
+    render, Property, BuiltinCallExpr
 )
 from langkit.utils import assert_type
 
@@ -271,33 +271,6 @@ class CollectionGet(AbstractExpression):
     Expression that will get an element from a collection.
     """
 
-    class Expr(ResolvedExpression):
-        def __init__(self, coll_expr, index_expr, or_null):
-            """
-            :type coll_expr: ResolvedExpression
-            :type index_expr: ResolvedExpression
-            :type or_null: bool
-            """
-            self.coll_expr = coll_expr
-            self.index_expr = index_expr
-            self.or_null = or_null
-
-        @property
-        def type(self):
-            return self.coll_expr.type.element_type()
-
-        def render_pre(self):
-            return "{}\n{}".format(
-                self.coll_expr.render_pre(),
-                self.index_expr.render_pre()
-            )
-
-        def render_expr(self):
-            return "Get ({}, {}, Or_Null => {})".format(
-                self.coll_expr.render_expr(), self.index_expr.render_expr(),
-                self.or_null
-            )
-
     def __init__(self, coll_expr, index_expr, or_null=True):
         """
         :param AbstractExpression coll_expr: The expression representing the
@@ -313,7 +286,9 @@ class CollectionGet(AbstractExpression):
         self.or_null = or_null
 
     def construct(self):
-        return CollectionGet.Expr(
-            coll_expr=construct(self.coll_expr, lambda t: t.is_collection()),
-            index_expr=construct(self.index_expr, LongType),
-            or_null=self.or_null)
+        coll_expr = construct(self.coll_expr, lambda t: t.is_collection())
+        return BuiltinCallExpr(
+            "Get", coll_expr.type.element_type(),
+            [coll_expr, construct(self.index_expr, LongType),
+             construct(self.or_null)]
+        )

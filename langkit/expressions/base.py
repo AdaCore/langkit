@@ -729,3 +729,35 @@ class LocalVars(object):
         new = LocalVars()
         new.local_vars = copy(self.local_vars)
         return new
+
+
+class BuiltinCallExpr(ResolvedExpression):
+    """
+    Convenience resolved expression that models a call to a function on the
+    Ada side of things.
+    """
+
+    def __init__(self, name, type, exprs):
+        """
+        :param names.Name|str name: The name of the procedure to call.
+        :param CompiledType type: The return type of the function call.
+        :param [ResolvedExpression] exprs: A list of expressions that
+            represents the arguments to the function call.
+        """
+        self.name = names.Name.get(name)
+        self.exprs = exprs
+        self._type = type
+
+    @property
+    def type(self):
+        return self._type
+
+    def render_pre(self):
+        return "\n".join(expr.render_pre() for expr in self.exprs)
+
+    def render_expr(self):
+        return "{} ({})".format(
+            self.name.camel_with_underscores, ", ".join(
+                expr.render_expr() for expr in self.exprs
+            )
+        )
