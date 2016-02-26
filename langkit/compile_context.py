@@ -407,10 +407,11 @@ class CompileCtx():
         # type before the env element type).
         # TODO: Using a dependency order topological sort wouldn't hurt at
         # some point.
-        self.struct_types = [EnvElement] + [
+        self.struct_types = [
             t for t in StructMetaClass.struct_types
             if t not in [EnvElement, StructMetaClass.env_metadata, Struct]
         ]
+        self.struct_types.insert(0, EnvElement)
 
         if StructMetaClass.env_metadata:
             self.struct_types = (
