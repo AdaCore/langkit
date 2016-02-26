@@ -62,7 +62,10 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    -- Create --
    ------------
 
-   function Create (Charset : String) return Analysis_Context is
+   function Create
+     (Charset : String := ${string_repr(_self.default_charset)})
+      return Analysis_Context
+   is
    begin
       return new Analysis_Context_Type'
         (Units_Map  => <>,

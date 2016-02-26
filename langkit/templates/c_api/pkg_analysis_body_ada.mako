@@ -55,7 +55,15 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    begin
       Clear_Last_Exception;
 
-      return Wrap (Create (Value (Charset)));
+      declare
+         C : constant String := (if Charset = Null_Ptr
+                                 then ""
+                                 else Value (Charset));
+      begin
+         return Wrap (if C'Length = 0
+                      then Create
+                      else Create (C));
+      end;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);

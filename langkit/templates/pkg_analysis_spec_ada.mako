@@ -31,7 +31,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    type Analysis_Unit is private;
    ${ada_doc('langkit.analysis_unit_type', 3)}
 
-   function Create (Charset : String) return Analysis_Context;
+   function Create
+     (Charset : String := ${string_repr(_self.default_charset)})
+      return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
 
    function Get_From_File

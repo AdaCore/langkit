@@ -107,6 +107,11 @@ documentations = {
         charsets. Be careful: passing an unsupported charset here is not
         guaranteed to raise an error here.
 
+        % if lang != 'ada':
+            If no charset is provided, take ${ctx.default_charset} as the
+            default.
+        % endif
+
         ${TODO} Passing an unsupported charset here is not guaranteed to raise
         an error right here, but this would be really helpful for users.
     """),
@@ -493,8 +498,11 @@ def create_doc_printer(lang, formatter):
         :type column: int
         """
 
+        from langkit.compile_context import get_context
+
         # Tell _render for which binding we are generating documentation
         kwargs.setdefault('lang', lang)
+        kwargs['ctx'] = get_context()
 
         doc = _render(entity, **kwargs)
         return formatter(doc, column) if doc else ''

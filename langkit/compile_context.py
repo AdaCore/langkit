@@ -182,6 +182,7 @@ class CompileCtx():
                  lib_name=None,
                  c_symbol_prefix=None,
                  enable_python_api=True,
+                 default_charset='utf-8',
                  verbosity=Verbosity('none')):
         """Create a new context for code emission.
 
@@ -212,6 +213,9 @@ class CompileCtx():
         :param bool enable_python_api: If True (which is the default),
             generates a Python API for the generated library.
 
+        :param str default_charset: In the generated library, this will be the
+            default charset to use to scan input source files.
+
         :param Verbosity verbosity: Amount of messages to display on standard
             output. None by default.
         """
@@ -233,6 +237,9 @@ class CompileCtx():
                                            (self.lang_name.lower
                                             if c_symbol_prefix is None else
                                             c_symbol_prefix))
+
+        self.default_charset = default_charset
+
         self.verbosity = verbosity
 
         self.compiled = False

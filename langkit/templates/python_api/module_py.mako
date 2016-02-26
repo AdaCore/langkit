@@ -85,7 +85,7 @@ class PropertyError(Exception):
 class AnalysisContext(object):
     ${py_doc('langkit.analysis_context_type', 4)}
 
-    def __init__(self, charset):
+    def __init__(self, charset=None):
         ${py_doc('langkit.create_context', 8)}
         self._c_value = _create_analysis_context(charset)
 
