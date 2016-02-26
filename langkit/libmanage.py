@@ -134,8 +134,8 @@ class ManageScript(object):
             )
         )
         args_parser.add_argument(
-            '--enable-static', action='store_true',
-            help='Enabled the generation of static libraries'
+            '--disable-static', action='store_true',
+            help='Disable the generation of static libraries'
         )
         args_parser.add_argument(
             '--disable-shared', action='store_true',
@@ -353,13 +353,16 @@ class ManageScript(object):
         if args.verbosity.info:
             printcol("Generation complete!", Colors.OKGREEN)
 
-    def gprbuild(self, args, project_file):
+    def gprbuild(self, args, project_file, is_library):
         """
         Run GPRbuild on a project file.
 
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
         :param str project_file: Path to the project file to pass to GPRbuild.
+        :param bool is_library: If true, build both relocatable and static
+            libraries (depending on modes enabled in "args"). Otherwise, use
+            relocatable if available or static mode otherwise.
         """
 
         cargs = []
@@ -367,27 +370,39 @@ class ManageScript(object):
         if hasattr(args, 'cargs'):
             cargs.extend(args.cargs)
 
-        is_dynamic = not args.disable_shared
         build_mode = (args.build_mode
                       if getattr(args, 'build_mode', None)
                       else 'dev')
-        try:
-            subprocess.check_call([
-                'gprbuild', '-m', '-p', '-j{}'.format(args.jobs),
-                '-P{}'.format(project_file),
-                '-XBUILD_MODE={}'.format(build_mode),
-                '-XLIBRARY_TYPE={}'.format(
-                    'relocatable' if is_dynamic else 'static'
-                ),
-                '-XLIBLANG_SUPPORT_EXTERNALLY_BUILT=false',
-                '-X{}_EXTERNALLY_BUILT=false'.format(
-                    self.lib_name.upper()
-                ),
-                '-cargs',
-            ] + cargs, env=self.derived_env())
-        except subprocess.CalledProcessError as exc:
-            print >> sys.stderr, 'Build failed: {}'.format(exc)
-            sys.exit(1)
+
+        env = self.derived_env()
+
+        def run(library_type):
+            try:
+                subprocess.check_call([
+                    'gprbuild', '-m', '-p', '-j{}'.format(args.jobs),
+                    '-P{}'.format(project_file),
+                    '-XBUILD_MODE={}'.format(build_mode),
+                    '-XLIBRARY_TYPE={}'.format(library_type),
+                    '-XLIBLANG_SUPPORT_EXTERNALLY_BUILT=false',
+                    '-X{}_EXTERNALLY_BUILT=false'.format(
+                        self.lib_name.upper()
+                    ),
+                    '-cargs',
+                ] + cargs, env=env)
+            except subprocess.CalledProcessError as exc:
+                print >> sys.stderr, 'Build failed: {}'.format(exc)
+                sys.exit(1)
+
+        # The basic principle is: build shared unless disabled and build static
+        # unless disabled. But for programs, we can build only one mode: in
+        # this case, shared has priority over static.
+        build_shared = not args.disable_shared
+        build_static = (not args.disable_static and
+                        (is_library or not build_shared))
+        if build_shared:
+            run('relocatable')
+        if build_static:
+            run('static')
 
     def do_build(self, args):
         """
@@ -402,11 +417,11 @@ class ManageScript(object):
         lib_project = self.dirs.build_dir(
             'lib', 'gnat', '{}.gpr'.format(self.lib_name.lower())
         )
-        self.gprbuild(args, lib_project)
+        self.gprbuild(args, lib_project, True)
 
         if args.verbosity.info:
             printcol("Building the interactive test main ...", Colors.HEADER)
-        self.gprbuild(args, self.dirs.build_dir('src', 'parse.gpr'))
+        self.gprbuild(args, self.dirs.build_dir('src', 'parse.gpr'), False)
 
         # On Windows, shared libraries (DLL) are looked up in the PATH, just
         # like binaries (it's LD_LIBRARY_PATH on Unix). For this platform,
