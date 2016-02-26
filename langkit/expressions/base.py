@@ -538,8 +538,14 @@ class Property(AbstractNodeData):
 
         :rtype: langkit.compiled_types.CompiledType
         """
-        if self.abstract:
+        # If the user has provided a type, we'll return it for clients wanting
+        # to know the type of the Property. Internal consistency with the
+        # constructed_expr is checked when we emit the Property.
+        if self.expected_type:
             return self.expected_type
+        # In other cases, let's rely on the constructed expr's type. TODO: We
+        # need to add a proper error message for the cases when the type is
+        # asked too early, or when there is a circular dep.
         else:
             return self.constructed_expr.type
 
