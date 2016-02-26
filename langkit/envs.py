@@ -1,4 +1,5 @@
 from langkit import expressions
+from langkit.expressions import check_simple_expr
 
 
 class EnvSpec(object):
@@ -68,21 +69,6 @@ class EnvSpec(object):
         :type: expressions.AbstractExpression
         """
 
-    def check_simple_expr(self, expr):
-        """
-        Helper method to check that the expression is valid for evaluation
-        in the env spec context.
-
-        :param AbstractExpression expr: The expression to check.
-        """
-        assert (
-            expr == expressions.Self
-            or (isinstance(expr, expressions.FieldAccess)
-                and expr.receiver == expressions.Self)
-        ), ("Only simple expressions consisting of a reference to"
-            " Self, or a Field/Property access on Self, are allowed in"
-            " the expressions in a lexical environment specification")
-
     @staticmethod
     def render_expr(expr):
         """
@@ -128,13 +114,13 @@ class EnvSpec(object):
             type this environment specification is attached to.
         """
         if self._unresolved_initial_env:
-            self.check_simple_expr(self._unresolved_initial_env)
+            check_simple_expr(self._unresolved_initial_env)
             with expressions.Self.bind_type(ast_node_type):
                 self._initial_env = self._unresolved_initial_env.construct()
 
         if self._unresolved_add_to_env:
             for e in self._unresolved_add_to_env:
-                self.check_simple_expr(e)
+                check_simple_expr(e)
 
             with expressions.Self.bind_type(ast_node_type):
                 kexpr, vexpr = self._unresolved_add_to_env

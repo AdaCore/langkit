@@ -785,3 +785,32 @@ class BuiltinCallExpr(ResolvedExpression):
                 expr.render_expr() for expr in self.exprs
             )
         )
+
+
+def is_simple_expr(expr):
+    """
+    Helper method to check that the expression is a simple expression,
+    that can be evaluated outside of a property context.
+
+    :param AbstractExpression expr: The expression to check.
+    """
+    from langkit.expressions.structs import FieldAccess
+    return (
+        expr == Self or (isinstance(expr, FieldAccess)
+                         and expr.receiver == Self)
+    )
+
+
+def check_simple_expr(expr):
+    """
+    Helper method to check that the expression is a simple expression,
+    that can be evaluated outside of a property context, and to raise an
+    AssertionError otherwise.
+
+    :param AbstractExpression expr: The expression to check.
+    """
+    assert is_simple_expr(expr), (
+        "Only simple expressions consisting of a reference to"
+        " Self, or a Field/Property access on Self, are allowed in"
+        " the expressions in a lexical environment specification"
+    )
