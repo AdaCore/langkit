@@ -583,6 +583,16 @@ class NodeMacro(object):
     pass
 
 
+def create_macro(attrib_dict):
+    """
+    Helper to create macro types from a dict of attributes.
+
+    :param dict attrib_dict: The attributes to put on the macro class.
+    :rtype: NodeMacro
+    """
+    return type('macro', (NodeMacro, ), attrib_dict)
+
+
 class StructMetaClass(type):
     """
     Internal metaclass for AST nodes, used to ease fields handling during code
