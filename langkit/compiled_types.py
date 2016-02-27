@@ -364,6 +364,12 @@ class Token(BasicType):
         return CAPIType(c_api_settings, 'token')
 
 
+class Symbol(BasicType):
+    is_ptr = False
+    _name = "Symbol_Type"
+    _nullexpr = "null"
+
+
 class AbstractNodeData(object):
     """
     This class defines an abstract base class for fields and properties on

@@ -3,7 +3,8 @@ with Ada.Strings.Fixed;
 
 with Interfaces; use Interfaces;
 
-with Langkit_Support.Text; use Langkit_Support.Text;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Text;    use Langkit_Support.Text;
 
 package Langkit_Support.Tokens is
 
@@ -78,5 +79,8 @@ package Langkit_Support.Tokens is
      (if T.Text = null
       then ""
       else Image (T.Text.all));
+
+   function Get_Symbol (T : Token) return Symbol_Type is
+      (Symbol_Type (T.Text));
 
 end Langkit_Support.Tokens;

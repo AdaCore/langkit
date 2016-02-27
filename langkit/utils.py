@@ -176,7 +176,7 @@ def dispatch_on_type(type, type_to_action_assocs, exception_msg=""):
     tested in turn. If type is a subtype of one of them, then the
     corresponding action will be executed.
 
-    :param type type: The type to dispatch upon.
+    :param type: The type to dispatch upon.
 
     :param type_to_action_assocs: An association of types to actions that
         returns something.

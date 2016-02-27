@@ -4,8 +4,8 @@ from functools import partial
 
 from langkit import names
 from langkit.compiled_types import (
-    LongType, CompiledType, render as ct_render, AbstractNodeData, BoolType
-)
+    LongType, CompiledType, render as ct_render, AbstractNodeData, BoolType,
+    Symbol, Token)
 from langkit.utils import memoized, assert_type
 
 
@@ -182,7 +182,8 @@ class AbstractExpression(Frozable):
                                       BinaryBooleanOperator.OR, self),
             'and_then':       partial(BinaryBooleanOperator,
                                       BinaryBooleanOperator.AND, self),
-            'then':           partial(Then, self)
+            'then':           partial(Then, self),
+            'symbol':         GetSymbol(self)
         }
 
     @memoized
@@ -372,6 +373,27 @@ class AbstractVariable(AbstractExpression):
 
 
 Self = AbstractVariable(names.Name("Self"))
+
+
+class GetSymbol(AbstractExpression):
+    """
+    Abstract expression that gets a symbol out of a token.
+    """
+
+    def __init__(self, token_expr):
+        """
+        :param AbstractExpression token_expr: Expression returning a token.
+        """
+        self.token_expr = token_expr
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: BuiltinCallExpr
+        """
+        return BuiltinCallExpr("Get_Symbol", Symbol,
+                               [construct(self.token_expr, Token)])
 
 
 def render(*args, **kwargs):

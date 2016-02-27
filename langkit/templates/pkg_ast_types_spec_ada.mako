@@ -11,6 +11,7 @@
 
 pragma Warnings (Off, "referenced");
 with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
+with Langkit_Support.Symbols;  use Langkit_Support.Symbols;
 with Langkit_Support.Tokens;   use Langkit_Support.Tokens;
 with Langkit_Support.Vectors;
 pragma Warnings (On, "referenced");
