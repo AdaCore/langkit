@@ -22,6 +22,7 @@ library project Langkit_Support is
       "Langkit_Support.Bump_Ptr",
       "Langkit_Support.Bump_Ptr.Vectors",
       "Langkit_Support.Diagnostics",
+      "Langkit_Support.Iterators",
       "Langkit_Support.Extensions",
       "Langkit_Support.Lexical_Env",
       "Langkit_Support.Packrat",
