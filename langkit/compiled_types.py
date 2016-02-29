@@ -162,9 +162,9 @@ class CompiledType(object):
     def name(cls):
         """
         Return a names.Name instance to be used in code generation to reference
-        this type.
+        this type. Must be overriden in subclasses.
 
-        Must be overriden in subclasses.
+        :rtype: names.Name
         """
         raise NotImplementedError()
 
@@ -253,7 +253,7 @@ class CompiledType(object):
             cls.element_type().add_to_context()
 
         return type(
-            '{}ListType'.format(element_type.name()),
+            '{}ListType'.format(element_type.name().camel),
             (StructMetaClass.root_grammar_class, ), {
                 'is_ptr': True,
 
