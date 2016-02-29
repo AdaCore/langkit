@@ -134,11 +134,21 @@ class ManageScript(object):
             )
         )
         args_parser.add_argument(
-            '--disable-static', action='store_true',
+            '--enable-static', action='store_true',
+            help='Enable the generation of static libraries (default:'
+                 ' disabled)'
+        )
+        args_parser.add_argument(
+            '--disable-static', action='store_false', dest='enable_static',
             help='Disable the generation of static libraries'
         )
         args_parser.add_argument(
-            '--disable-shared', action='store_true',
+            '--enable-shared', action='store_true', default=True,
+            help='Enable the generation (and testing) of shared libraries'
+                 ' (default: enabled)'
+        )
+        args_parser.add_argument(
+            '--disable-shared', action='store_false', dest='enable_shared',
             help='Disable the generation (and testing) of shared libraries'
         )
         args_parser.add_argument(
@@ -394,8 +404,8 @@ class ManageScript(object):
         # The basic principle is: build shared unless disabled and build static
         # unless disabled. But for programs, we can build only one mode: in
         # this case, shared has priority over static.
-        build_shared = not args.disable_shared
-        build_static = (not args.disable_static and
+        build_shared = args.enable_shared
+        build_static = (args.enable_static and
                         (is_library or not build_shared))
         if build_shared:
             run('relocatable')
