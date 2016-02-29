@@ -14,7 +14,8 @@ generic
    type Element_Type is private;
 package Langkit_Support.Iterators is
 
-   type Iterator is interface;
+   type Iterator is limited interface;
+   type Iterator_Access is access all Iterator'Class;
    --  Iterator interface: iterator consumers do not need to mind about
    --  concrete interator implementations.
 

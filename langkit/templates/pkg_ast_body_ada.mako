@@ -96,6 +96,156 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       Result_Status := Traverse (Node, Visit);
    end Traverse;
 
+   ----------
+   -- Next --
+   ----------
+
+   procedure Next (It       : in out Traverse_Iterator;
+                   Has_Next : out Boolean;
+                   Element  : out ${root_node_type_name})
+   is
+      use Natural_Vectors;
+
+      Exists : Boolean;
+      Child  : ${root_node_type_name};
+      I      : Natural;
+   begin
+      if It.Node /= null then
+
+         --  We have a next element to yield: put it aside and then look for
+         --  the element we'll yield at the next iteration: first non-null
+         --  children first, then siblings.
+
+         Element := It.Node;
+         Has_Next := True;
+
+         I := 0;
+         loop
+            It.Node.Get_Child (I, Exists, Child);
+            exit when not Exists;
+
+            if Child /= null then
+               Append (It.Stack, I + 1);
+               It.Node := Child;
+               return;
+            end if;
+            I := I + 1;
+         end loop;
+
+         --  We could not find non-null children: look for the next non-null
+         --  sibling. If there's none, look for the parent's sibling and so on.
+
+         while Length (It.Stack) > 0 loop
+            I := Pop (It.Stack);
+            It.Node := It.Node.Parent;
+
+            loop
+               It.Node.Get_Child (I, Exists, Child);
+               exit when not Exists;
+
+               if Child /= null then
+                  --  We found a sibling! Remember to look for the next one
+                  --  when we get back to the parent and proceed.
+
+                  Append (It.Stack, I + 1);
+                  It.Node := Child;
+                  return;
+               end if;
+               I := I + 1;
+            end loop;
+         end loop;
+      end if;
+
+      Has_Next := False;
+   end Next;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding
+   procedure Finalize (It : in out Traverse_Iterator) is
+   begin
+      Natural_Vectors.Destroy (It.Stack);
+   end Finalize;
+
+   --------------
+   -- Traverse --
+   --------------
+
+   function Traverse
+     (Root : ${root_node_type_name})
+      return Traverse_Iterator
+   is
+   begin
+      return (Ada.Finalization.Limited_Controlled with
+              Node  => Root,
+              Stack => Natural_Vectors.Empty_Vector);
+   end Traverse;
+
+   ----------
+   -- Next --
+   ----------
+
+   procedure Next (It       : in out Find_Iterator;
+                   Has_Next : out Boolean;
+                   Element  : out ${root_node_type_name})
+   is
+      Has_Node : Boolean := True;
+   begin
+      loop
+         Next (It.Traverse_It, Has_Node, Element);
+         if Has_Node then
+            if It.Predicate.Evaluate (Element) then
+               Has_Next := True;
+               Element := Element;
+               return;
+            end if;
+         else
+            Has_Next := False;
+            return;
+         end if;
+      end loop;
+   end Next;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding
+   procedure Finalize (It : in out Find_Iterator) is
+   begin
+      Destroy (It.Predicate);
+   end Finalize;
+
+   ----------
+   -- Find --
+   ----------
+
+   function Find
+     (Root      : ${root_node_type_name};
+      Predicate : ${root_node_type_name}_Predicate)
+      return Find_Iterator
+   is
+   begin
+      return (Ada.Finalization.Limited_Controlled with
+              Traverse_It => Traverse (Root),
+              Predicate   => Predicate);
+   end Find;
+
+   --------------
+   -- Evaluate --
+   --------------
+
+   function Evaluate
+     (P : access ${root_node_type_name}_Kind_Filter;
+      N : ${root_node_type_name})
+      return Boolean
+   is
+   begin
+      return N.Kind = P.Kind;
+   end Evaluate;
+
    ----------------
    -- Sloc_Range --
    ----------------

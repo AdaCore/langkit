@@ -5,11 +5,14 @@
 <% root_node_array = ctx.root_grammar_class.array_type() %>
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
+with Ada.Finalization;
 with Ada.Iterator_Interfaces;
+with Ada.Unchecked_Deallocation;
 
 with System;
 
 with Langkit_Support.Extensions;         use Langkit_Support.Extensions;
+with Langkit_Support.Iterators;
 with Langkit_Support.Lexical_Env;
 with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
 with Langkit_Support.Tokens;             use Langkit_Support.Tokens;
@@ -176,6 +179,11 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  the convenience of ada arrays, and you don't care about the small
    --  performance hit of creating an array.
 
+   function Parents
+     (Node : access ${root_node_value_type}; Include_Self : Boolean := False)
+      return ${root_node_array.name()};
+   --  Return the list of parents for this node (this node included)
+
    type Visit_Status is (Into, Over, Stop);
    --  Helper type to control the AST node traversal process. See Traverse.
 
@@ -207,10 +215,72 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  This is the same as Traverse function except that no result is returned
    --  i.e. the Traverse function is called and the result is simply discarded.
 
-   function Parents
-     (Node : access ${root_node_value_type}; Include_Self : Boolean := False)
-      return ${root_node_array.name()};
-   --  Return the list of parents for this node (this node included)
+   package ${root_node_type_name}_Iterators is new Langkit_Support.Iterators
+     (Element_Type => ${root_node_type_name});
+
+   type Traverse_Iterator is limited
+     new ${root_node_type_name}_Iterators.Iterator
+     with private;
+   --  Iterator type for Traverse (see below)
+
+   overriding
+   procedure Next (It       : in out Traverse_Iterator;
+                   Has_Next : out Boolean;
+                   Element  : out ${root_node_type_name});
+
+   function Traverse
+     (Root : ${root_node_type_name})
+      return Traverse_Iterator;
+   --  Return an iterator that yields all AST nodes under Root (included) in a
+   --  prefix DFS (depth first search) fasion.
+
+   type ${root_node_type_name}_Predicate_Type is interface;
+   type ${root_node_type_name}_Predicate is
+      access all ${root_node_type_name}_Predicate_Type'Class;
+   --  Predicate on AST nodes.
+   --
+   --  Useful predicates often rely on values from some context, so predicates
+   --  that are mere accesses to a function are not powerful enough. Having a
+   --  full interface for this makes it possible to package both the predicate
+   --  code and some data it needs.
+
+   function Evaluate
+     (P : access ${root_node_type_name}_Predicate_Type;
+      N : ${root_node_type_name})
+      return Boolean is abstract;
+   --  Return the value of the predicate for the N node
+
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (${root_node_type_name}_Predicate_Type'Class,
+      ${root_node_type_name}_Predicate);
+
+   type Find_Iterator is limited
+     new ${root_node_type_name}_Iterators.Iterator
+     with private;
+   --  Iterator type for Find (see below)
+
+   overriding
+   procedure Next (It       : in out Find_Iterator;
+                   Has_Next : out Boolean;
+                   Element  : out ${root_node_type_name});
+
+   function Find
+     (Root      : ${root_node_type_name};
+      Predicate : ${root_node_type_name}_Predicate) return Find_Iterator;
+   --  Return an iterator that yields all AST nodes under Root (included) that
+   --  satisfy the Pred predicate.
+
+   type ${root_node_type_name}_Kind_Filter is
+      new ${root_node_type_name}_Predicate_Type with
+   record
+      Kind : ${root_node_kind_name};
+   end record;
+   --  Predicate that returns true for all AST nodes of some kind
+
+   function Evaluate
+     (P : access ${root_node_type_name}_Kind_Filter;
+      N : ${root_node_type_name})
+      return Boolean;
 
    ----------------------------------------
    -- Source location-related operations --
@@ -390,6 +460,49 @@ private
    --  that replacing Parent_Env will affect the env that the following
    --  siblings of Self see, while returning a new env will only affect the
    --  environment seen by Self's children.
+
+   --------------------------------
+   -- Tree traversal (internals) --
+   --------------------------------
+
+   package Natural_Vectors is new Langkit_Support.Vectors (Natural);
+
+   type Traverse_Iterator is limited
+      new Ada.Finalization.Limited_Controlled
+      and ${root_node_type_name}_Iterators.Iterator with
+   record
+      Node  : ${root_node_type_name};
+      --  Node that is currently being traversed. The next times Next will be
+      --  called, it will process this node, then all its children, then it
+      --  will go to its next sibling.
+
+      Stack : Natural_Vectors.Vector;
+      --  Stack of child indices for the nodes currently being traversed. When
+      --  empty, it means that Node is the root node to explore. Otherwise, the
+      --  top-most (i.e. last) element I tells what's the index for the next
+      --  sibling to traverse (in this case, Node is at index I - 1).
+   end record;
+
+   overriding
+   procedure Initialize (It : in out Traverse_Iterator) is null;
+   overriding
+   procedure Finalize (It : in out Traverse_Iterator);
+
+   type Find_Iterator is limited
+      new Ada.Finalization.Limited_Controlled
+      and ${root_node_type_name}_Iterators.Iterator with
+   record
+      Traverse_It : Traverse_Iterator;
+      --  Traverse iterator to fetch all nodes
+
+      Predicate   : ${root_node_type_name}_Predicate;
+      --  Predicate used to filter the nodes Traverse_It yields
+   end record;
+
+   overriding
+   procedure Initialize (It : in out Find_Iterator) is null;
+   overriding
+   procedure Finalize (It : in out Find_Iterator);
 
    ---------------------------------------------------
    -- Source location-related operations (interals) --
