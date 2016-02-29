@@ -184,7 +184,9 @@ class ManageScript(object):
         # Generate #
         ############
 
-        generate_parser = create_parser(self.do_generate)
+        self.generate_parser = generate_parser = create_parser(
+            self.do_generate
+        )
         self.add_generate_args(generate_parser)
 
         #########
