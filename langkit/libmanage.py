@@ -185,54 +185,22 @@ class ManageScript(object):
         ############
 
         generate_parser = create_parser(self.do_generate)
-        generate_parser.add_argument(
-            '--coverage', '-C', action='store_true',
-            help='Compute code coverage for the code generator'
-        )
-        generate_parser.add_argument(
-            '--pretty-print', '-p', action='store_true',
-            help='Pretty-print generated source code'
-        )
+        self.add_generate_args(generate_parser)
 
         #########
         # Build #
         #########
 
         self.build_parser = build_parser = create_parser(self.do_build)
-        build_parser.add_argument(
-            '--jobs', '-j', type=int, default=get_cpu_count(),
-            help='Number of parallel jobs to spawn in parallel '
-                 '(default: your number of cpu)'
-        )
-        build_parser.add_argument(
-            '--build-mode', '-b', choices=list(self.BUILD_MODES),
-            default='dev',
-            help='Selects a preset for build options'
-        )
-        build_parser.add_argument(
-            '--cargs', nargs='*', default=[],
-            help='Options to pass as "-cargs" to GPRbuild'
-        )
+        self.add_build_args(build_parser)
 
         ########
         # Make #
         ########
 
         self.make_parser = make_parser = create_parser(self.do_make)
-        make_parser.add_argument(
-            '--jobs', '-j', type=int, default=get_cpu_count(),
-            help='Number of parallel jobs to spawn in parallel'
-                 ' (default: your number of cpu)'
-        )
-        make_parser.add_argument(
-            '--build-mode', '-b', choices=list(self.BUILD_MODES),
-            default='dev',
-            help='Selects a preset for build options'
-        )
-        make_parser.add_argument(
-            '--pretty-print', '-p', action='store_true',
-            help='Pretty-print generated source code'
-        )
+        self.add_generate_args(make_parser)
+        self.add_build_args(make_parser)
 
         ###########
         # Install #
@@ -254,6 +222,38 @@ class ManageScript(object):
         # only right before executing commands so that coverage computation
         # will apply to create_context.
         self.context = None
+
+    def add_generate_args(self, subparser):
+        """
+        Add arguments to tune code generation to "subparser".
+        """
+        subparser.add_argument(
+            '--coverage', '-C', action='store_true',
+            help='Compute code coverage for the code generator'
+        )
+        subparser.add_argument(
+            '--pretty-print', '-p', action='store_true',
+            help='Pretty-print generated source code'
+        )
+
+    def add_build_args(self, subparser):
+        """
+        Add arguments to tune code compilation to "subparser".
+        """
+        subparser.add_argument(
+            '--jobs', '-j', type=int, default=get_cpu_count(),
+            help='Number of parallel jobs to spawn in parallel '
+                 '(default: your number of cpu)'
+        )
+        subparser.add_argument(
+            '--build-mode', '-b', choices=list(self.BUILD_MODES),
+            default='dev',
+            help='Selects a preset for build options'
+        )
+        subparser.add_argument(
+            '--cargs', nargs='*', default=[],
+            help='Options to pass as "-cargs" to GPRbuild'
+        )
 
     def create_context(self, args):
         """
@@ -370,10 +370,6 @@ class ManageScript(object):
         if hasattr(args, 'cargs'):
             cargs.extend(args.cargs)
 
-        build_mode = (args.build_mode
-                      if getattr(args, 'build_mode', None)
-                      else 'dev')
-
         env = self.derived_env()
 
         def run(library_type):
@@ -381,7 +377,7 @@ class ManageScript(object):
                 subprocess.check_call([
                     'gprbuild', '-m', '-p', '-j{}'.format(args.jobs),
                     '-P{}'.format(project_file),
-                    '-XBUILD_MODE={}'.format(build_mode),
+                    '-XBUILD_MODE={}'.format(args.build_mode),
                     '-XLIBRARY_TYPE={}'.format(library_type),
                     '-XLIBLANG_SUPPORT_EXTERNALLY_BUILT=false',
                     '-X{}_EXTERNALLY_BUILT=false'.format(
