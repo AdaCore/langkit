@@ -5,6 +5,8 @@
 <% root_node_array = ctx.root_grammar_class.array_type() %>
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
+with Ada.Iterator_Interfaces;
+
 with System;
 
 with Langkit_Support.Extensions;         use Langkit_Support.Extensions;
@@ -22,7 +24,10 @@ package ${_self.ada_api_settings.lib_name}.AST is
    -- Root AST node --
    -------------------
 
-   type ${root_node_value_type} is abstract tagged private;
+   type ${root_node_value_type} is abstract tagged private
+     with Default_Iterator => Iterate,
+          Iterator_Element => ${root_node_type_name},
+          Constant_Indexing => Element_Value;
    --  This "by-value" type is public to expose the fact that the various
    --  AST nodes are a hierarchy of tagged types, but it is not intended to be
    --  used directly, hence the "_Type" suffix. Please use instead the
@@ -303,6 +308,29 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Debug helper: Dumps one lexical env. You can supply ids for env and its
    --  parent, so that they will be identified in the output.
 
+   ----------------------------------------
+   -- Tree traversal (Ada 2012 iterator) --
+   ----------------------------------------
+
+   type Children_Cursor is private;
+   --  Cursor for AST node children iteration
+
+   No_Children : constant Children_Cursor;
+
+   function Has_Element (C : Children_Cursor) return Boolean;
+   --  Whether C references a valid AST node child
+
+   package ${root_node_type_name}_Iterators is new Ada.Iterator_Interfaces
+     (Children_Cursor, Has_Element);
+
+   function Iterate
+     (Node : ${root_node_value_type})
+      return ${root_node_type_name}_Iterators.Reversible_Iterator'Class;
+
+   function Element_Value
+     (Node : ${root_node_value_type}; C : Children_Cursor)
+      return ${root_node_type_name};
+
 private
 
    --------------------------
@@ -362,6 +390,10 @@ private
    --  siblings of Self see, while returning a new env will only affect the
    --  environment seen by Self's children.
 
+   ---------------------------------------------------
+   -- Source location-related operations (interals) --
+   ---------------------------------------------------
+
    function Lookup_Children
      (Node : access ${root_node_value_type};
       Sloc : Source_Location;
@@ -387,5 +419,45 @@ private
      (Node.Token_Start);
    function Token_End (Node : ${root_node_type_name}) return Natural is
      (Node.Token_End);
+
+   ----------------------------------------
+   -- Tree traversal (Ada 2012 iterator) --
+   ----------------------------------------
+
+   type Children_Cursor is record
+      Node             : ${root_node_type_name};
+      --  This cursor references a children in Node
+
+      Child_Index : Natural;
+      --  1-based index of Node's children this cursor references, or zero when
+      --  this cursor does not reference a valid child.
+   end record;
+
+   No_Children : constant Children_Cursor := (null, 0);
+
+   function Has_Element (C : Children_Cursor) return Boolean is
+     (C.Child_Index /= 0);
+
+   function Element_Value
+     (Node : ${root_node_value_type}; C : Children_Cursor)
+      return ${root_node_type_name} is
+     (C.Node.Child (C.Child_Index - 1));
+
+   type Iterator is new
+      ${root_node_type_name}_Iterators.Reversible_Iterator with
+   record
+      Node : ${root_node_type_name};
+   end record;
+
+   overriding function First (Object : Iterator) return Children_Cursor;
+   overriding function Last (Object : Iterator) return Children_Cursor;
+   overriding function Next
+     (Object : Iterator;
+      C      : Children_Cursor)
+      return Children_Cursor;
+   overriding function Previous
+     (Object : Iterator;
+      C      : Children_Cursor)
+      return Children_Cursor;
 
 end ${_self.ada_api_settings.lib_name}.AST;

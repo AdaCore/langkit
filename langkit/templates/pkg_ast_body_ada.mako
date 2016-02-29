@@ -574,6 +574,85 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end;
    end Parents;
 
+   -------------
+   -- Iterate --
+   -------------
+
+   function Iterate
+     (Node : ${root_node_value_type})
+      return ${root_node_type_name}_Iterators.Reversible_Iterator'Class
+   is
+   begin
+      return It : constant Iterator := (Node => Node'Unrestricted_Access)
+      do
+         null;
+      end return;
+   end Iterate;
+
+   -----------
+   -- First --
+   -----------
+
+   overriding
+   function First (Object : Iterator) return Children_Cursor is
+      Node : ${root_node_type_name} renames Object.Node;
+   begin
+      return (if Node.Child_Count > 0
+              then (Node, 1)
+              else No_Children);
+   end First;
+
+   ----------
+   -- Last --
+   ----------
+
+   overriding
+   function Last (Object : Iterator) return Children_Cursor is
+      Node : ${root_node_type_name} renames Object.Node;
+   begin
+      return (if Node.Child_Count > 0
+              then (Node, Node.Child_Count)
+              else No_Children);
+   end Last;
+
+   ----------
+   -- Next --
+   ----------
+
+   overriding
+   function Next
+     (Object : Iterator;
+      C      : Children_Cursor)
+      return Children_Cursor
+   is
+      Node : ${root_node_type_name} renames Object.Node;
+   begin
+      if C = No_Children or else C.Child_Index >= Node.Child_Count then
+         return No_Children;
+      else
+         return (Node, C.Child_Index + 1);
+      end if;
+   end Next;
+
+   --------------
+   -- Previous --
+   --------------
+
+   overriding
+   function Previous
+     (Object : Iterator;
+      C      : Children_Cursor)
+      return Children_Cursor
+   is
+      pragma Unreferenced (Object);
+   begin
+      if C = No_Children or else C.Child_Index <= 1 then
+         return No_Children;
+      else
+         return (C.Node, C.Child_Index - 1);
+      end if;
+   end Previous;
+
    % if ctx.env_metadata:
    -------------
    -- Combine --
