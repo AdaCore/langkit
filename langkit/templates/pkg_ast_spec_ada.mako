@@ -320,12 +320,13 @@ package ${_self.ada_api_settings.lib_name}.AST is
    function Has_Element (C : Children_Cursor) return Boolean;
    --  Whether C references a valid AST node child
 
-   package ${root_node_type_name}_Iterators is new Ada.Iterator_Interfaces
-     (Children_Cursor, Has_Element);
+   package ${root_node_type_name}_Ada2012_Iterators is
+     new Ada.Iterator_Interfaces (Children_Cursor, Has_Element);
 
    function Iterate
      (Node : ${root_node_value_type})
-      return ${root_node_type_name}_Iterators.Reversible_Iterator'Class;
+      return
+      ${root_node_type_name}_Ada2012_Iterators.Reversible_Iterator'Class;
 
    function Element_Value
      (Node : ${root_node_value_type}; C : Children_Cursor)
@@ -444,7 +445,7 @@ private
      (C.Node.Child (C.Child_Index - 1));
 
    type Iterator is new
-      ${root_node_type_name}_Iterators.Reversible_Iterator with
+      ${root_node_type_name}_Ada2012_Iterators.Reversible_Iterator with
    record
       Node : ${root_node_type_name};
    end record;

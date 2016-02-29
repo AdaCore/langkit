@@ -580,7 +580,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
    function Iterate
      (Node : ${root_node_value_type})
-      return ${root_node_type_name}_Iterators.Reversible_Iterator'Class
+      return
+      ${root_node_type_name}_Ada2012_Iterators.Reversible_Iterator'Class
    is
    begin
       return It : constant Iterator := (Node => Node'Unrestricted_Access)
