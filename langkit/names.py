@@ -77,6 +77,9 @@ class Name(object):
         assert Name.default_formatting is not None
         return getattr(self, Name.default_formatting)
 
+    def __repr__(self):
+        return "<Name {}>".format(self.camel_with_underscores)
+
     def __add__(self, other):
         """
         Returns a name which is a concatenation of two names, so that

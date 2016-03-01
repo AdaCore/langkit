@@ -377,7 +377,7 @@ class AbstractVariable(AbstractExpression):
         return self._type
 
     def __repr__(self):
-        return "<PlaceHolder {}>".format(self._name)
+        return "<PlaceHolder {}>".format(self._name.camel_with_underscores)
 
 
 Self = AbstractVariable(names.Name("Self"))
