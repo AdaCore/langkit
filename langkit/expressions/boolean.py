@@ -250,12 +250,17 @@ class Then(AbstractExpression):
         self.expr = expr
         self.then_fn = then_fn
         self.default_val = default_val
+        self.var_expr = self.then_expr = None
+
+    def do_prepare(self):
+        self.var_expr = AbstractVariable(names.Name("Var_Expr"),
+                                         create_local=True)
+        self.then_expr = self.then_fn(self.var_expr)
 
     def construct(self):
         expr = construct(self.expr, lambda t: t.is_ptr)
-        var_expr = AbstractVariable(names.Name("Var_Expr"), expr.type,
-                                    create_local=True)
-        then_expr = construct(self.then_fn(var_expr))
+        self.var_expr.set_type(expr.type)
+        then_expr = construct(self.then_expr)
 
         # Affect default value to the fallback expression. For the moment,
         # only booleans are handled.
@@ -271,4 +276,5 @@ class Then(AbstractExpression):
         else:
             default_expr = construct(self.default_val, then_expr.type)
 
-        return Then.Expr(expr, construct(var_expr), then_expr, default_expr)
+        return Then.Expr(expr, construct(self.var_expr), then_expr,
+                         default_expr)

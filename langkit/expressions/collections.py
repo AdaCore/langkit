@@ -29,6 +29,14 @@ class CollectionExpression(AbstractExpression):
         super(CollectionExpression, self).__init__()
         self.collection = collection
         self.expr_fn = expr
+        self.expr = None
+        self.ind_var = None
+
+    def do_prepare(self):
+        self.ind_var = AbstractVariable(
+            names.Name("Item_{}".format(next(CollectionExpression._counter))),
+        )
+        self.expr = assert_type(self.expr_fn(self.ind_var), AbstractExpression)
 
     def construct_common(self):
         """
@@ -41,24 +49,15 @@ class CollectionExpression(AbstractExpression):
         3. The induction variable, still in the AbstractExpression form,
            so that it can be reused in subclasses (for example for filter).
 
-        :rtype: (langkit.expressions.base.ResolvedExpression,
-        langkit.expressions.base.ResolvedExpression,
-        langkit.expressions.base.AbstractExpression)
+        :rtype: langkit.expressions.base.ResolvedExpression
         """
         collection_expr = construct(self.collection)
         assert collection_expr.type.is_collection(), (
             'Map cannot iterate on {}, which is not a collection'
         ).format(collection_expr.type.name().camel)
+        self.ind_var.set_type(collection_expr.type.element_type())
 
-        induction_var = AbstractVariable(
-            names.Name("Item_{}".format(next(CollectionExpression._counter))),
-            collection_expr.type.element_type()
-        )
-
-        expr = construct(assert_type(self.expr_fn(induction_var),
-                                     AbstractExpression))
-
-        return collection_expr, expr, induction_var
+        return collection_expr, construct(self.expr), construct(self.ind_var)
 
 
 class Contains(CollectionExpression):
@@ -89,8 +88,7 @@ class Contains(CollectionExpression):
         collection, predicate, ind_var = self.construct_common()
         # "collection" contains "item" if at least one element in "collection"
         # is equal to "item".
-        return Quantifier.Expr(Quantifier.ANY, collection, predicate,
-                               construct(ind_var))
+        return Quantifier.Expr(Quantifier.ANY, collection, predicate, ind_var)
 
 
 class Map(CollectionExpression):
@@ -149,8 +147,8 @@ class Map(CollectionExpression):
         def render_expr(self):
             return self.array_var.name.camel_with_underscores
 
-    def __init__(self, collection, expr, filter_expr=None, concat=False,
-                 take_while_pred=None):
+    def __init__(self, collection, expr, filter_expr=lambda x: None,
+                 concat=False, take_while_pred=lambda x: None):
         """
         See CollectionExpression for the other parameters.
 
@@ -172,6 +170,13 @@ class Map(CollectionExpression):
         self.filter_fn = filter_expr
         self.take_while_pred = take_while_pred
         self.concat = concat
+        self.filter_expr = None
+        self.take_while_expr = None
+
+    def do_prepare(self):
+        super(Map, self).do_prepare()
+        self.filter_expr = self.filter_fn(self.ind_var)
+        self.take_while_expr = self.take_while_pred(self.ind_var)
 
     def construct(self):
         """
@@ -186,13 +191,13 @@ class Map(CollectionExpression):
             ' (collections expected instead)'
         ).format(expr.type.name())
 
-        filter_expr = (construct(self.filter_fn(ind_var), BoolType)
-                       if self.filter_fn else None)
+        filter_expr = (construct(self.filter_expr, BoolType)
+                       if self.filter_expr else None)
 
-        take_while_expr = (construct(self.take_while_pred(ind_var), BoolType)
-                           if self.take_while_pred else None)
+        take_while_expr = (construct(self.take_while_expr, BoolType)
+                           if self.take_while_expr else None)
 
-        return Map.Expr(construct(ind_var), collection_expr, expr,
+        return Map.Expr(ind_var, collection_expr, expr,
                         filter_expr, self.concat, take_while_expr)
 
 
@@ -262,8 +267,7 @@ class Quantifier(CollectionExpression):
         """
         collection_expr, expr, ind_var = self.construct_common()
         assert expr.type.matches(BoolType)
-        return Quantifier.Expr(self.kind, collection_expr, expr,
-                               construct(ind_var))
+        return Quantifier.Expr(self.kind, collection_expr, expr, ind_var)
 
 
 class CollectionGet(AbstractExpression):

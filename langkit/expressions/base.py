@@ -36,6 +36,8 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
         custom_msg = "Expected type {}, got {}"
 
     if isinstance(expr, AbstractExpression):
+        expr.prepare()
+        expr.freeze()
         ret = expr.construct()
 
     # WARNING: Since bools are ints in python, this check needs to be before
@@ -144,6 +146,32 @@ class AbstractExpression(Frozable):
     a resolved tree of ResolvedExpression objects.
     """
 
+    def do_prepare(self):
+        """
+        This method will automatically be called before construct on every
+        node of a property's AbstractExpression. If you have stuff that
+        needs to be done before construct, such as constructing new
+        AbstractExpression instances, this is the place to do it.
+
+        :rtype: None
+        """
+        pass
+
+    def prepare(self):
+        """
+        This method will be called in the top-level construct function, for
+        expressions that have not been prepared yet. When prepare is called,
+        the idea is that AbstractExpressions are not yet frozen so you can
+        still construct new AbstractExpressions, which is not necessarily
+        possible in construct.
+        """
+        if not self.__dict__.get("_is_prepared", False):
+            self.do_prepare()
+            self.__dict__['_is_prepared'] = True
+            for _, v in self.__dict__.items():
+                if isinstance(v, AbstractExpression):
+                    v.prepare()
+
     def construct(self):
         """
         Returns a resolved tree of resolved expressions.
@@ -175,7 +203,8 @@ class AbstractExpression(Frozable):
             'contains':       partial(Contains, self),
             'equals':         partial(Eq, self),
             'filter':         partial(Map, self, lambda x: x),
-            'take_while':     partial(Map, self, lambda x: x, None, False),
+            'take_while':     partial(Map, self, lambda x: x, lambda x: None,
+                                      False),
             'is_a':           partial(IsA, self),
             'map':            partial(Map, self),
             'mapcat':         partial(Map, self, concat=True),
@@ -333,12 +362,10 @@ class AbstractVariable(AbstractExpression):
         :param bool create_local: Whether to create a corresponding local
             variable in the current property.
         """
+        self.local_var = None
         if create_local:
-            assert type, (
-                "When create_local is True, a type needs to be provided"
-            )
-            v = Property.get().vars.create(name, type)
-            self._name = v.name
+            self.local_var = Property.get().vars.create(name, type)
+            self._name = self.local_var.name
         else:
             self._name = name
 
@@ -376,8 +403,17 @@ class AbstractVariable(AbstractExpression):
     def type(self):
         return self._type
 
+    def set_type(self, type):
+        assert self._type is None, ("You cannot change the type of a "
+                                    "variable that already has one")
+        self._type = type
+        if self.local_var:
+            self.local_var.type = type
+
     def __repr__(self):
-        return "<PlaceHolder {}>".format(self._name.camel_with_underscores)
+        return "<AbstractVariable {}>".format(
+            self._name.camel_with_underscores
+        )
 
 
 Self = AbstractVariable(names.Name("Self"))
@@ -646,7 +682,6 @@ class Property(AbstractNodeData):
                     self.prop_def = ""
                     return
 
-                self.expr.freeze()
                 self.constructed_expr = construct(self.expr)
 
                 if self.expected_type:
@@ -716,7 +751,7 @@ class LocalVars(object):
         """
         Represents one local variable in a property definition.
         """
-        def __init__(self, vars, name, type):
+        def __init__(self, vars, name, type=None):
             """
 
             :param LocalVars vars: The LocalVars instance to which this
@@ -730,6 +765,7 @@ class LocalVars(object):
             self.type = type
 
         def render(self):
+            assert self.type, "Local var must have type before it is rendered"
             return "{} : {};".format(
                 self.name.camel_with_underscores,
                 self.type.name().camel_with_underscores
