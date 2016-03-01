@@ -1,5 +1,5 @@
 from langkit import expressions
-from langkit.expressions import check_simple_expr
+from langkit.expressions import check_simple_expr, construct
 
 
 class EnvSpec(object):
@@ -116,7 +116,7 @@ class EnvSpec(object):
         if self._unresolved_initial_env:
             check_simple_expr(self._unresolved_initial_env)
             with expressions.Self.bind_type(ast_node_type):
-                self._initial_env = self._unresolved_initial_env.construct()
+                self._initial_env = construct(self._unresolved_initial_env)
 
         if self._unresolved_add_to_env:
             for e in self._unresolved_add_to_env:
@@ -124,4 +124,4 @@ class EnvSpec(object):
 
             with expressions.Self.bind_type(ast_node_type):
                 kexpr, vexpr = self._unresolved_add_to_env
-                self._add_to_env = kexpr.construct(), vexpr.construct()
+                self._add_to_env = construct(kexpr), construct(vexpr)

@@ -9,7 +9,7 @@ from langkit.compiled_types import (
 from langkit.utils import memoized, assert_type
 
 
-def construct(expr, expected_type_or_pred=None):
+def construct(expr, expected_type_or_pred=None, custom_msg=None):
     """
     Construct a ResolvedExpression from an object that is a valid expression in
     the Property DSL.
@@ -22,8 +22,18 @@ def construct(expr, expected_type_or_pred=None):
     :type expected_type_or_pred: CompiledType|(CompiledType) -> bool
 
     :param AbstractExpression|bool|int expr: The expression to resolve.
+
+    :param custom_msg: A string for the error messages, containing
+        format-like template holes "{}". If expected_type_or_pred is a type,
+        the message must contain two holes for the names of the types, the
+        expected one first, and the obtained type second. If it is a
+        predicate, it must contain one hole for the expr type.
+
     :rtype: ResolvedExpression
     """
+
+    if not custom_msg:
+        custom_msg = "Expected type {}, got {}"
 
     if isinstance(expr, AbstractExpression):
         ret = expr.construct()
@@ -40,9 +50,7 @@ def construct(expr, expected_type_or_pred=None):
     if expected_type_or_pred:
         if isinstance(expected_type_or_pred, type):
             assert ret.type.matches(expected_type_or_pred), (
-                "Expected type {}, got {}".format(
-                    expected_type_or_pred, ret.type
-                )
+                custom_msg.format(expected_type_or_pred, ret.type)
             )
         else:
             assert callable(expected_type_or_pred), (

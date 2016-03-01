@@ -62,13 +62,12 @@ class Cast(AbstractExpression):
 
         :rtype: CastExpr
         """
-        expr = self.expr.construct()
-        assert self.astnode.matches(expr.type), (
-            'Cannot cast {} to {}: only downcasting is allowed'.format(
-                expr.type.name().camel, self.astnode.name().camel
+        return Cast.Expr(construct(
+            self.expr, lambda t: self.astnode.matches(t),
+            'Cannot cast {{}} to {}: only downcasting is allowed'.format(
+                self.astnode
             )
-        )
-        return Cast.Expr(expr, self.astnode)
+        ), self.astnode)
 
 
 class IsNull(AbstractExpression):
@@ -143,11 +142,17 @@ class New(AbstractExpression):
         """
         :rtype: NewExpr
         """
-        provided_fields = {
-            names.Name.from_lower('f_' + name): value.construct()
-            for name, value in self.field_values.iteritems()
-        }
+
         required_fields = {f.name: f for f in self.struct_type.get_fields()}
+
+        # First construct a sequence of field names to values
+        fields = [(names.Name.from_lower('f_' + n), v)
+                  for n, v in self.field_values.items()]
+
+        provided_fields = {name: construct(
+            value, required_fields[name].type,
+            'Wrong type for field {}: got {{}} but expected {{}}'.format(name)
+        ) for name, value in fields}
 
         # Make sure the provided set of fields matches the one the struct
         # needs.
@@ -166,17 +171,6 @@ class New(AbstractExpression):
             set(provided_fields) - set(required_fields),
             'Unknown {} fields'.format(self.struct_type.name().camel)
         )
-
-        # And make sure we have the proper types
-        for name, value in provided_fields.iteritems():
-            field = required_fields[name]
-            assert value.type.matches(field.type), (
-                'Invalid value for field {}: got {} but expected {}'.format(
-                    name,
-                    value.type.name().camel,
-                    field.type.name().camel
-                )
-            )
 
         return New.Expr(self.struct_type, provided_fields)
 

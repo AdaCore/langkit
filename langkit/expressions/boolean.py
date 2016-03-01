@@ -171,14 +171,10 @@ class If(AbstractExpression):
 
         :rtype: IfExpr
         """
-        cond = self.cond.construct()
-        assert cond.type.matches(BoolType)
-
-        then = self.then.construct()
-        else_then = self.else_then.construct()
-
+        then = construct(self.then)
+        else_then = construct(self.else_then)
         rtype = then.type.unify(else_then.type)
-        return If.Expr(cond, then, else_then, rtype)
+        return If.Expr(construct(self.cond, BoolType), then, else_then, rtype)
 
 
 class Not(AbstractExpression):
