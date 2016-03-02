@@ -274,6 +274,58 @@ class AbstractExpression(Frozable):
         from langkit.expressions.boolean import BinaryBooleanOperator
         return BinaryBooleanOperator(BinaryBooleanOperator.AND, self, other)
 
+    @Frozable.protect
+    def __lt__(self, other):
+        """
+        Return an OrderingTest expression to compare two values with the "less
+        than" test.
+
+        :param AbstractExpression other: Right-hand side expression for the
+            test.
+        :rtype: OrderingTest
+        """
+        from langkit.expressions.boolean import OrderingTest
+        return OrderingTest(OrderingTest.LT, self, other)
+
+    @Frozable.protect
+    def __le__(self, other):
+        """
+        Return an OrderingTest expression to compare two values with the "less
+        than or equal" test.
+
+        :param AbstractExpression other: Right-hand side expression for the
+            test.
+        :rtype: OrderingTest
+        """
+        from langkit.expressions.boolean import OrderingTest
+        return OrderingTest(OrderingTest.LE, self, other)
+
+    @Frozable.protect
+    def __gt__(self, other):
+        """
+        Return an OrderingTest expression to compare two values with the
+        "greater than" test.
+
+        :param AbstractExpression other: Right-hand side expression for the
+            test.
+        :rtype: OrderingTest
+        """
+        from langkit.expressions.boolean import OrderingTest
+        return OrderingTest(OrderingTest.GT, self, other)
+
+    @Frozable.protect
+    def __ge__(self, other):
+        """
+        Return an OrderingTest expression to compare two values with the
+        "greater than or equal" test.
+
+        :param AbstractExpression other: Right-hand side expression for the
+            test.
+        :rtype: OrderingTest
+        """
+        from langkit.expressions.boolean import OrderingTest
+        return OrderingTest(OrderingTest.GE, self, other)
+
 
 class ResolvedExpression(object):
     """

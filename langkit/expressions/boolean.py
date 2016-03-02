@@ -1,5 +1,5 @@
 from langkit import names
-from langkit.compiled_types import BoolType, ASTNode
+from langkit.compiled_types import BoolType, ASTNode, LongType
 from langkit.expressions.base import (
     render, Property, LiteralExpr, AbstractExpression, construct,
     ResolvedExpression, AbstractVariable
@@ -110,6 +110,75 @@ class Eq(AbstractExpression):
             ).format(lhs.type.name().camel, rhs.type.name().camel)
 
         return Eq.Expr(lhs, rhs)
+
+
+class OrderingTest(AbstractExpression):
+    """
+    Expression for ordering test expression (less than, greater than).
+    """
+
+    LT = 'lt'  # Less than (strict)
+    LE = 'le'  # Less than or equal
+    GT = 'gt'  # Greater than (strict)
+    GE = 'ge'  # Greater than or equal
+
+    OPERATOR_IMAGE = {
+        LT: '<',
+        LE: '<=',
+        GT: '>',
+        GE: '>=',
+    }
+
+    class Expr(ResolvedExpression):
+        def __init__(self, operator, lhs, rhs):
+            self.operator = operator
+            self.lhs = lhs
+            self.rhs = rhs
+
+        @property
+        def type(self):
+            return BoolType
+
+        def render_pre(self):
+            return '{}\n{}'.format(
+                self.lhs.render_pre(),
+                self.rhs.render_pre()
+            )
+
+        def render_expr(self):
+            return '{} {} {}'.format(
+                self.lhs.render_expr(),
+                OrderingTest.OPERATOR_IMAGE[self.operator],
+                self.rhs.render_expr()
+            )
+
+    def __init__(self, operator, lhs, rhs):
+        """
+        :param langkit.expressions.base.AbstractExpression lhs: Left operand.
+        :param langkit.expressions.base.AbstractExpression rhs: Right operand.
+        """
+        assert operator in OrderingTest.OPERATOR_IMAGE
+        self.operator = operator
+        self.lhs = lhs
+        self.rhs = rhs
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: OrderingTest.Expr
+        """
+        lhs = construct(self.lhs)
+        rhs = construct(self.rhs)
+
+        for operand in (lhs, rhs):
+            assert operand.type.matches(LongType), (
+                'Comparisons only work on scalars, not {}'.format(
+                    operand.type.name().camel
+                )
+            )
+
+        return OrderingTest.Expr(self.operator, lhs, rhs)
 
 
 class If(AbstractExpression):
