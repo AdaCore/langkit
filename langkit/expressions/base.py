@@ -1,12 +1,14 @@
 from contextlib import contextmanager
 from copy import copy
 from functools import partial
+import inspect
 
 from langkit import names
 from langkit.compiled_types import (
-    LongType, CompiledType, render as ct_render, AbstractNodeData, BoolType,
-    Symbol, Token)
-from langkit.utils import memoized, assert_type
+    AbstractNodeData, BoolType, CompiledType, LexicalEnvType, LongType,
+    render as ct_render, Symbol, Token
+)
+from langkit.utils import assert_type, memoized, user_assert
 
 
 def construct(expr, expected_type_or_pred=None, custom_msg=None):
@@ -516,15 +518,25 @@ class Property(AbstractNodeData):
     self_arg_name = names.Name('Node')
     env_arg_name = names.Name('Lex_Env')
 
+    reserved_arg_names = (self_arg_name, env_arg_name)
+    reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
+
     def __init__(self, expr, doc=None, private=False, abstract=False,
                  type=None, abstract_runtime_check=False):
         """
-        :param expr: The expression for the property. It can be either an
-            expression, or a function that will take the Self placeholder as
-            parameter and return the constructed AbstractExpression. This is
-            useful to reference classes that are not yet defined.
+        :param expr: The expression for the property. It can be either:
+            * An expression.
+            * A function that will take the Self placeholder as parameter and
+              return the constructed AbstractExpression. This is useful to
+              reference classes that are not yet defined.
+            * A function that takes one or more arguments with default values
+              which are CompiledType subclasses. This is the way one can write
+              properties that take parameters.
         :type expr:
-            None|AbstractExpression|(AbstractExpression) -> AbstractExpression
+            None
+          | AbstractExpression
+          | (AbstractExpression) -> AbstractExpression
+          | () -> AbstractExpression
 
         :param str|None doc: User documentation for this property.
         :param bool private: Whether this property is private or not.
@@ -534,7 +546,7 @@ class Property(AbstractNodeData):
             property. If supplied, it will be used to check the validity of
             inferred types for this propery, and eventually for overriding
             properties in sub classes. NOTE: The type is mandatory for abstract
-            base properties.
+            base properties and for properties that take parameters.
         :param abstract_runtime_check: If the property is abstract, whether the
             implementation by subclasses requirement must be checked at compile
             time, or at runtime. If true, you can have an abstract property
@@ -570,6 +582,13 @@ class Property(AbstractNodeData):
         self.expected_type = type
         self.abstract = abstract
         self.abstract_runtime_check = abstract_runtime_check
+
+        self.argument_vars = []
+        """
+        For each argument additional to Self, this is the AbstractVariable
+        corresponding to this argument. Note that this is computed in the
+        "prepare" pass.
+        """
 
         self.overriding = False
         """
@@ -668,6 +687,19 @@ class Property(AbstractNodeData):
         else:
             return self.constructed_expr.type
 
+    def _add_argument(self, name, type, default_value=None):
+        """
+        Helper to add an argument to this property.
+
+        This basically just fills the .arguments and the .argument_vars lists.
+
+        :param str names.Name: Name for this argument.
+        :param CompiledType type: Type argument. Type for this argument.
+        :param None|str default_value: Default value for this argument, if any.
+        """
+        self.arguments.append((name, type, default_value))
+        self.argument_vars.append(AbstractVariable(name, type))
+
     def base_property(self, owner_type):
         """
         Get the base property for this property, if it exists.
@@ -694,6 +726,12 @@ class Property(AbstractNodeData):
 
         :rtype: None
         """
+
+        # Add the implicit lexical env. parameter
+        self._add_argument(Property.env_arg_name,
+                           LexicalEnvType,
+                           LexicalEnvType.nullexpr())
+
         if not self.expr:
             return
 
@@ -701,7 +739,64 @@ class Property(AbstractNodeData):
         # now is the moment to transform it into an abstract expression by
         # calling it.
         if self.expr and not isinstance(self.expr, AbstractExpression):
-            self.expr = assert_type(self.expr(Self), AbstractExpression)
+            user_assert(callable(self.expr),
+                        'Expression should be either AbstractExpression'
+                        ' instances, either functions that return these')
+            argspec = inspect.getargspec(self.expr)
+
+            if (len(argspec.args) == 1 and
+                    not argspec.varargs and
+                    not argspec.keywords and
+                    not argspec.defaults):
+                # This is a mere: lambda self: <expression>
+                self.expr = assert_type(self.expr(Self), AbstractExpression)
+
+            else:
+                user_assert(
+                    not argspec.varargs or not argspec.keywords,
+                    'Invalid lamda signature: no *args nor **kwargs allowed'
+                )
+                user_assert(
+                    len(argspec.args) > 0,
+                    'Invalid lambda signature: at least one parameter expected'
+                )
+                user_assert(
+                    len(argspec.args) == len(argspec.defaults),
+                    'All types must have an associated type as a default value'
+                )
+
+                # This is a lambda for a property that takes parameters: check
+                # that all parameters have declared types in default arguments.
+                for kw, default in zip(argspec.args, argspec.defaults):
+                    # Because there's no forward definition mechanism, it is
+                    # sometimes not possible to annotate an argument with a
+                    # type because the type does not exist yet. In this case,
+                    # we allow lambda functions that take no argument just to
+                    # delay the evaluation of the type itself.
+                    if not inspect.isclass(default):
+                        default = default()
+
+                    user_assert(
+                        kw.lower not in Property.reserved_arg_lower_names,
+                        'Cannot define reserved arguments ({})'.format(
+                            ', '.join(Property.reserved_arg_lower_names)
+                        )
+                    )
+                    user_assert(
+                        issubclass(default, CompiledType),
+                        'A type is required for parameter {} (got {})'.format(
+                            kw, default
+                        )
+                    )
+
+                    self._add_argument(names.Name.from_lower(kw), default)
+
+                # Now that we have placeholder for all explicit arguments (i.e.
+                # only the ones the user defined), we can expand the lambda
+                # into a real AbstractExpression.
+                explicit_args = self.argument_vars[1:]
+                self.expr = assert_type(self.expr(*explicit_args),
+                                        AbstractExpression)
 
         with self.bind():
             self.expr.prepare()
@@ -789,6 +884,17 @@ class Property(AbstractNodeData):
 
     def doc(self):
         return self._doc
+
+    @property
+    def explicit_arguments(self):
+        """
+        Return the subset of "self.arguments" that are to be passed explicitely
+        when invoking this property.
+
+        :rtype: list[(names.Name, CompiledType, None|str)]
+        """
+        # Strip the implicit "Lex_Env" argument
+        return self.arguments[1:]
 
 
 # noinspection PyPep8Naming
@@ -943,11 +1049,16 @@ def is_simple_expr(expr):
     that can be evaluated outside of a property context.
 
     :param AbstractExpression expr: The expression to check.
+    :rtype: bool
     """
     from langkit.expressions.structs import FieldAccess
+
+    # Only accept FieldAccess. If the designated field is actually a property,
+    # only allow argument-less ones.
     return (
-        expr == Self or (isinstance(expr, FieldAccess)
-                         and expr.receiver == Self)
+        expr == Self or (isinstance(expr, FieldAccess) and
+                         expr.receiver == Self and
+                         not expr.arguments)
     )
 
 

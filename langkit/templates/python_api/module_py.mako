@@ -594,6 +594,9 @@ _token_text = _import_func(
 _${field.accessor_basename.lower} = _import_func(
     '${capi.get_name(field.accessor_basename)}',
     [_node,
+     % for _, t, _ in field.explicit_arguments:
+        ${pyapi.type_internal_name(t)},
+     % endfor
      ctypes.POINTER(${pyapi.type_internal_name(field.type)})],
     ctypes.c_int
 )
@@ -694,9 +697,15 @@ def _node_ext_dtor_py(c_node, c_pyobj):
     c_pyobj = ctypes.cast(c_pyobj, ctypes.py_object)
     ctypes.pythonapi.Py_DecRef(c_pyobj)
 
+
 _node_ext_dtor_c = _node_extension_destructor(_node_ext_dtor_py)
 
+
 def _wrap_astnode(c_value):
+    """
+    Internal helper to wrap a low-level ASTnode value into an instance of the
+    the appropriate high-level ASTNode subclass.
+    """
     if not c_value:
         return None
 
@@ -722,3 +731,19 @@ def _wrap_astnode(c_value):
         ctypes.pythonapi.Py_IncRef(ctypes.py_object(py_obj))
 
         return py_obj
+
+
+def _unwrap_astnode(py_value):
+    """
+    Internal helper to unwrap a high-level ASTNode instance into a low-level
+    value. Raise a TypeError if the input value has unexpected type.
+    """
+    if py_value is None:
+        return None
+    if not isinstance(py_value, ${root_astnode_name}):
+        raise TypeError(
+            '${root_astnode_name} expected but got {} instead'.format(
+                type(py_value)
+            )
+        )
+    return py_value._c_value

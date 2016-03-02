@@ -26,15 +26,27 @@
 
     % for field in cls.fields_with_accessors():
 
+    <%
+      arg_list = ['self'] + [n.lower for n, _, _ in field.explicit_arguments]
+    %>
+
+    % if not field.explicit_arguments:
     @property
-    def ${field.name.lower}(self):
+    % endif
+    def ${field.name.lower}(${', '.join(arg_list)}):
         ${py_doc(field, 8)}
         ## Declare a variable of the type
         result = ${pyapi.type_internal_name(field.type)}()
 
-        ## Get it via the C field accessor
-        if not _${field.accessor_basename.lower}(self._c_value,
-                                                 ctypes.byref(result)):
+        ## Get it via the C field accessor. Note that "unwrap_value" already
+        ## takes care of type checking so we should keep memory safety.
+        if not _${field.accessor_basename.lower}(
+            self._c_value,
+            % for n, t, _ in field.explicit_arguments:
+            ${pyapi.unwrap_value(n.lower, t)},
+            % endfor
+            ctypes.byref(result)
+        ):
            raise PropertyError()
 
         return ${pyapi.wrap_value('result', field.type)}

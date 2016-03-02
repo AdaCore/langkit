@@ -418,6 +418,25 @@ class AbstractNodeData(object):
         :type: ASTNode
         """
 
+        self.arguments = []
+        """
+        Code generation-wise, all node data can be considered as functions
+        which take at least a mandatory Self argument and return the
+        corresponding data.
+
+        This is a list that describes all other arguments. For each argument,
+        this contains a tuple for:
+
+          * the name of the argument;
+          * its type;
+          * its default value as a string, or None if there is no default
+            value.
+
+        Note that only Property instances accept other arguments.
+
+        :type: list[(names.Name, CompiledType, None|str)]
+        """
+
     @property
     def type(self):
         """
@@ -476,6 +495,14 @@ class AbstractNodeData(object):
         return names.Name(
             '{}_{}'.format(self.ast_node.name().base_name, self.name.base_name)
         )
+
+    @property
+    def explicit_arguments(self):
+        """
+        Return the subset of "self.arguments" that are explicit arguments, that
+        is to say the subset that users actually handle in expressions.
+        """
+        return self.arguments
 
 
 class AbstractField(AbstractNodeData):

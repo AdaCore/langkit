@@ -6,7 +6,7 @@ from langkit.expressions.base import (
 )
 from langkit.expressions.boolean import Eq
 from langkit.expressions.envs import Env
-from langkit.utils import assert_type, col, Colors
+from langkit.utils import assert_type, col, user_assert, Colors
 
 
 class Cast(AbstractExpression):
@@ -186,14 +186,16 @@ class FieldAccess(AbstractExpression):
         Resolved expression that represents a field access in generated code.
         """
 
-        def __init__(self, receiver_expr, property):
+        def __init__(self, receiver_expr, property, arguments):
             """
             :param langkit.expressions.base.ResolvedExpression receiver_expr:
                 The receiver of the field access.
             :param Property|Field property: The accessed property or field.
+            :type arguments: list[ResolvedExpression] arguments
             """
             self.receiver_expr = receiver_expr
             self.property = property
+            self.arguments = arguments
             self.simple_field_access = False
 
             # TODO: For the moment we use field accesses in the environments
@@ -223,9 +225,12 @@ class FieldAccess(AbstractExpression):
             # Before accessing the field of a record through an access, we must
             # check that whether this access is null in order to raise a
             # Property_Error in the case it is.
-            return render('properties/null_safety_check_ada',
-                          expr=self.receiver_expr,
-                          result_var=self.result_var)
+            result = [render('properties/null_safety_check_ada',
+                             expr=self.receiver_expr,
+                             result_var=self.result_var)]
+
+            result.extend(arg.render_pre() for arg in self.arguments)
+            return '\n'.join(result)
 
         def render_expr(self):
             if self.simple_field_access:
@@ -234,21 +239,52 @@ class FieldAccess(AbstractExpression):
                 prefix = self.result_var.name
             ret = "{}.{}".format(prefix, self.property.name)
 
+            # Sequence of tuples: (formal name, expression) for each argument
+            # to pass.
+            args = []
+
             # If we're calling a property, then pass the currently bound
             # lexical environment as parameter.
             if isinstance(self.property, Property):
-                ret += " ({})".format(Env._name)
+                args.append((Property.env_arg_name, str(Env._name)))
+
+            # Then add the explicit arguments
+            if isinstance(self.property, Property):
+                for actual, (formal_name, formal_type, _) in zip(
+                    self.arguments, self.property.explicit_arguments
+                ):
+                    expr = actual.render_expr()
+
+                    # The only case in which actual and formal types can be
+                    # differents is when using object derivation. In this case,
+                    # we have to introduce explicit view conversions in Ada.
+                    if actual.type != formal_type:
+                        expr = '{} ({})'.format(formal_type.name(), expr)
+
+                    args.append((formal_name, expr))
+
+            if args:
+                ret += " ({})".format(', '.join(
+                    '{} => {}'.format(name, value)
+                    for name, value in args
+                ))
 
             return ret
 
-    def __init__(self, receiver, field):
+    def __init__(self, receiver, field, arguments=()):
         """
         :param langkit.expressions.base.AbstractExpression receiver: Expression
             on which the field access was done.
+
         :param str field: The name of the field that is accessed.
+
+        :param arguments: Assuming field is a property that takes arguments,
+            these are passed to it.
+        :type arguments: list[AbstractExpression]
         """
         self.receiver = receiver
         self.field = field
+        self.arguments = arguments
 
     def construct(self):
         """
@@ -272,8 +308,48 @@ class FieldAccess(AbstractExpression):
             receiver_expr.type.__name__, self.field
         ), Colors.FAIL)
 
-        ret = FieldAccess.Expr(receiver_expr, to_get)
+        # Check that this property actually accepts these arguments and that
+        # they are correctly typed.
+        user_assert(
+            len(self.arguments) == len(to_get.explicit_arguments),
+            'Invalid number of arguments in the call to {}:'
+            ' {} expected but got {}'.format(
+                to_get.qualname,
+                len(to_get.explicit_arguments),
+                len(self.arguments),
+            )
+        )
+        arg_exprs = map(construct, self.arguments)
+        exprs_and_formals = zip(arg_exprs, to_get.explicit_arguments)
+        for i, (actual, formal) in enumerate(exprs_and_formals, 1):
+            formal_name, formal_type, _ = formal
+            user_assert(
+                actual.type.matches(formal_type),
+                'Invalid {} actual (#{}) for {}:'
+                ' expected {} but got {}'.format(
+                    formal_name, i,
+                    to_get.qualname,
+                    formal_type.name().camel,
+                    actual.type.name().camel,
+                )
+            )
+
+        ret = FieldAccess.Expr(receiver_expr, to_get, arg_exprs)
         return ret
+
+    def __call__(self, *args):
+        """
+        Build a new FieldAccess instance with "args" as arguments.
+
+        :param args: List of arguments for the call.
+        :type args: list[AbstractExpression]
+        :rtype: FieldAccess
+        """
+        # TODO: at some point, it could be useful to allow passing arguments by
+        # keywords.
+
+        assert not self.arguments, 'Cannot call the result of a property'
+        return FieldAccess(self.receiver, self.field, args)
 
     def __repr__(self):
         return "<FieldAccess {} {}>".format(self.receiver, self.field)

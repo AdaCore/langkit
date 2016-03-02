@@ -28,8 +28,21 @@ class PythonAPISettings(AbstractAPISettings):
                 type.c_type(self.c_api_settings).name)),
             (ct.ArrayType, lambda cls: '{}({{}})'.format(type.name().camel)),
             (ct.Struct, lambda _: '{}'),
-        ], exception_msg='Unhandled field type'
-                         ' in the python binding: {}'.format(type)
+        ], exception_msg='Unhandled field type in the python binding'
+                         ' (wrapping): {}'.format(type)
+        ).format(value)
+
+    def unwrap_value(self, value, type):
+        return dispatch_on_type(type, [
+            (ct.ASTNode, lambda _: '_unwrap_astnode({})'),
+            (ct.BoolType, lambda _: 'bool({})'),
+            (ct.LongType, lambda _: 'int({})'),
+            (ct.EnumType, lambda _: '_unwrap_enum({{}}, str_to_{}, {})'.format(
+                type.c_type(self.c_api_settings).name,
+                type.name().camel
+            )),
+        ], exception_msg='Unhandled field type in the python binding'
+                         ' (unwrapping): {}'.format(type)
         ).format(value)
 
     def type_internal_name(self, type):
