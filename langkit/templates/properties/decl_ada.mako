@@ -1,9 +1,9 @@
 ## vim: filetype=makoada
 
 ${"overriding" if property.overriding else ""} function ${property.name}
-  (Node :
+  (${property.self_arg_name} :
    access ${Self.type.name()}_Type${"" if property.dispatching else "'Class"};
-   Lex_Env : AST_Envs.Lexical_Env := null)
+   ${property.env_arg_name} : AST_Envs.Lexical_Env := null)
    return ${property.type.name()}
    % if property.abstract:
       % if property.abstract_runtime_check:

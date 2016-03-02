@@ -463,6 +463,9 @@ class Property(AbstractNodeData):
     is_property = True
     prefix = names.Name("P")
 
+    self_arg_name = names.Name('Node')
+    env_arg_name = names.Name('Lex_Env')
+
     def __init__(self, expr, doc=None, private=False, abstract=False,
                  type=None, abstract_runtime_check=False):
         """
