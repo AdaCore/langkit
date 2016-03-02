@@ -36,8 +36,6 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
         custom_msg = "Expected type {}, got {}"
 
     if isinstance(expr, AbstractExpression):
-        expr.prepare()
-        expr.freeze()
         ret = expr.construct()
 
     # WARNING: Since bools are ints in python, this check needs to be before
@@ -682,13 +680,22 @@ class Property(AbstractNodeData):
             field_class=Property
         ).get(self._name.lower, None)
 
-    def compute(self, owner_type):
+    def prepare(self):
         """
-        Compute information related to dispatching for properties.
+        Run the "prepare" pass on the expression associated to this property.
 
-        :param ASTNode owner_type: The type on which this property was
-            declared.
+        This pass, which just invokes the "prepare" method on all
+        AbstractExpression nodes in the expression, expands all lambda
+        functions there into AbstractExpression nodes (which are then prepared
+        themselves).
+
+        After this pass, the expression tree is ready for the "construct" pass,
+        which can yield a ResolvedExpression tree.
+
+        :rtype: None
         """
+        if not self.expr:
+            return
 
         # If the user passed a lambda or function for the expression,
         # now is the moment to transform it into an abstract expression by
@@ -696,6 +703,28 @@ class Property(AbstractNodeData):
         if self.expr and not isinstance(self.expr, AbstractExpression):
             self.expr = assert_type(self.expr(Self), AbstractExpression)
 
+        with self.bind():
+            self.expr.prepare()
+
+    def freeze(self):
+        """
+        Run the "freeze" pass on the expression associated to this property.
+
+        Afterwards, it will not be possible anymore to build
+        AbstractExpressions trees out of the overloaded operators of the
+        AbstractExpression instances in self.expr. See Frozable for more
+        details.
+        """
+        if self.expr:
+            self.expr.freeze()
+
+    def compute(self, owner_type):
+        """
+        Compute information related to dispatching for properties.
+
+        :param ASTNode owner_type: The type on which this property was
+            declared.
+        """
         base_prop = self.base_property(owner_type)
 
         if base_prop:

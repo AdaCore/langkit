@@ -447,9 +447,17 @@ class CompileCtx():
         dispatching, and this is determined not only by the context of one
         node, but by whether the parent has a property with the same name.
         """
-        for astnode_type in self.astnode_types:
-            for prop in astnode_type.get_properties(include_inherited=False):
-                prop.compute(astnode_type)
+
+        # Run:
+        #   * the prepare pass on all properties;
+        #   * then, the freeze pass on all properties;
+        #   * then, the compute pass.
+        for pass_fn in (lambda astnode, prop: prop.prepare(),
+                        lambda astnode, prop: prop.freeze(),
+                        lambda astnode, prop: prop.compute(astnode)):
+            for astnode in self.astnode_types:
+                for prop in astnode.get_properties(include_inherited=False):
+                    pass_fn(astnode, prop)
 
     def render_template(self, *args, **kwargs):
         # Kludge: to avoid circular dependency issues, do not import parsers
