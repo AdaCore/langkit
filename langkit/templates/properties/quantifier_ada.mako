@@ -35,11 +35,11 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
    end loop;
 </%def>
 
-% if map.collection.type.is_list_type:
+% if quantifier.collection.type.is_list_type:
    ## Empty lists are null: handle this pecularity here to make it easier
    ## for property writers.
 
-   if ${map.collection.render_expr()} /= null then
+   if ${quantifier.collection.render_expr()} /= null then
       ${build_loop()}
    end if;
 
