@@ -10,6 +10,20 @@ from copy import copy
 from itertools import takewhile
 
 
+def user_assert(predicate, error_message):
+    """
+    If "predicate" is false, raise an error with "error_message".
+
+    This should be used in order to check user input. This way, we can using
+    assertions for what they really are: invariant checkers in Langkit.
+
+    :param bool predicate: Boolean predicate to test.
+    :param str error_message: Error message to raise in case of predicate
+        failure.
+    """
+    assert predicate, error_message
+
+
 class StructEq(object):
     """
     Mixin for structural equality.
