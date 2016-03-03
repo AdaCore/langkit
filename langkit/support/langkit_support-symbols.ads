@@ -11,6 +11,13 @@ package Langkit_Support.Symbols is
 
    type Symbol_Type is new Text_Access;
 
+   function Image
+     (S           : Symbol_Type;
+      With_Quotes : Boolean := False)
+      return String
+   is
+     (Image (S.all, With_Quotes));
+
    type Symbol_Table is private;
    --  The actual symbol table type to use
 
