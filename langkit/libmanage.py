@@ -238,6 +238,8 @@ class ManageScript(object):
     def add_generate_args(self, subparser):
         """
         Add arguments to tune code generation to "subparser".
+
+        :type subparser: argparse.ArgumentParser
         """
         subparser.add_argument(
             '--coverage', '-C', action='store_true',
@@ -251,6 +253,8 @@ class ManageScript(object):
     def add_build_args(self, subparser):
         """
         Add arguments to tune code compilation to "subparser".
+
+        :type subparser: argparse.ArgumentParser
         """
         subparser.add_argument(
             '--jobs', '-j', type=int, default=get_cpu_count(),
