@@ -34,21 +34,25 @@
          declare
             Typed_Node : constant ${astnode.name()} := ${astnode.name()} (N);
          begin
-             % if is_enum(field.type):
-                 Value_P.all := ${field.type.c_type(capi).name}
-                   (${field.type.name()}'Pos (Typed_Node.${field.name}));
-             % elif is_bool(field.type):
-                 Value_P.all := int (Boolean'Pos (Typed_Node.${field.name}));
-             % elif is_long(field.type):
-                 Value_P.all := int (Typed_Node.${field.name});
-             % elif is_ast_node(field.type):
-                 Value_P.all :=
-                   Wrap (${root_node_type_name} (Typed_Node.${field.name}));
-             % elif is_token_type(field.type):
-                 Value_P.all := Wrap (Typed_Node.${field.name}'Access);
-             % else:
-                 Value_P.all := Typed_Node.${field.name};
-             % endif
+             <%
+               field_access = 'Typed_Node.{}'.format(field.name)
+             %>
+             Value_P.all :=
+                % if is_enum(field.type):
+                    ${field.type.c_type(capi).name}
+                      (${field.type.name()}'Pos (${field_access}))
+                % elif is_bool(field.type):
+                    int (Boolean'Pos (${field_access}))
+                % elif is_long(field.type):
+                    int (${field_access})
+                % elif is_ast_node(field.type):
+                    Wrap (${root_node_type_name} (${field_access}))
+                % elif is_token_type(field.type):
+                    Wrap (${field_access}'Access)
+                % else:
+                    ${field_access}
+                % endif
+             ;
              return 1;
          exception
             when Property_Error =>
