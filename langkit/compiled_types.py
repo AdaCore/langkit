@@ -438,6 +438,19 @@ class AbstractNodeData(object):
         assert self._name
         return (self.prefix + self._name if self.prefix else self._name)
 
+    @property
+    def qualname(self):
+        """
+        Return the qualified name for this field, i.e. the name of the owning
+        type plus the name of the field itself. This is useful for diagnostic
+        messages.
+        :rtype: str
+        """
+        return '{}.{}'.format(
+            self.ast_node.name().camel if self.ast_node else '???',
+            self.name.lower
+        )
+
     @name.setter
     def name(self, name):
         assert isinstance(name, names.Name)
