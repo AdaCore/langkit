@@ -40,4 +40,7 @@
 
    function Length (T : ${cls.name()}) return Natural is (T.N);
    ## Helper for properties code
+
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (${cls.pointed()}, ${cls.name()});
 </%def>
