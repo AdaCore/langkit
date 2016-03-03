@@ -13,5 +13,11 @@ ${cls.c_type(capi).name}_to_str = [
     '${alt}',
 % endfor
 ]
+str_to_${cls.c_type(capi).name} = {
+    UNINITIALIZED: 0,
+% for i, alt in enumerate(cls.alternatives, 1):
+    '${alt}': ${i},
+% endfor
+}
 
 </%def>

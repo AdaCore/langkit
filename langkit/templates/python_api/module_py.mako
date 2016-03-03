@@ -407,6 +407,29 @@ UNINITIALIZED = 'uninitialized'
 ${enum_types.decl(enum_type)}
 % endfor
 
+
+def _unwrap_enum(py_value, type_name, translator):
+    """
+    Internal helper to unwrap a high-level enumeration value (i.e. a string)
+    into a low-level value (i.e. an integer). Raise a TypeError if the input
+    value has an unexpected type and a ValueError if the string does not
+    represent a valid enumerator.
+
+    :param str py_value: The high-level enumeration value.
+    :param str type_name: Name for the enumeration type.
+    :param dict[str, int] translator: A mapping that provides the low-level
+        values for all high-level ones.
+    """
+    if not isinstance(py_value, str):
+        raise TypeError('str expected but got {} instead'.format(
+            type(py_value)
+        ))
+    try:
+        return translator[py_value]
+    except KeyError:
+        raise ValueError('Invalid {}: {}'.format(type_name, py_value))
+
+
 % for struct_type in _self.struct_types:
 ${struct_types.decl(struct_type)}
 % endfor
