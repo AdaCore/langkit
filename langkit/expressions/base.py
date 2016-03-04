@@ -242,7 +242,11 @@ class AbstractExpression(Frozable):
         them in attrs or it would cause infinite recursion.
         """
         return {
-            'empty': self.length.equals(0)
+            'empty': self.length.equals(0),
+            'find': lambda filter_expr:
+                self.filter(filter_expr).at(0),
+            'find_or_raise': lambda filter_expr:
+                self.filter(filter_expr).at_or_raise(0),
         }
 
     @Frozable.protect
