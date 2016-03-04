@@ -10,6 +10,10 @@ ${quantifier.collection.render_pre()}
 ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
 
 <%def name="build_loop()">
+   % if quantifier.index_var:
+      ${quantifier.index_var.name} := 0;
+   % endif
+
    for ${ind_var} of
       % if quantifier.collection.type.is_list_type:
          ${quantifier.collection.render_expr()}.Vec
@@ -31,6 +35,10 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
             ${result_var} := False;
             exit;
          end if;
+      % endif
+
+      % if quantifier.index_var:
+         ${quantifier.index_var.name} := ${quantifier.index_var.name} + 1;
       % endif
    end loop;
 </%def>

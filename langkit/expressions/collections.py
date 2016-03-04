@@ -1,3 +1,4 @@
+import inspect
 from itertools import count
 
 from langkit import names
@@ -6,7 +7,7 @@ from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, AbstractVariable,
     render, Property, BuiltinCallExpr
 )
-from langkit.utils import assert_type
+from langkit.utils import assert_type, user_assert
 
 
 class CollectionExpression(AbstractExpression):
@@ -23,7 +24,9 @@ class CollectionExpression(AbstractExpression):
             operation works.
 
         :param expr: Function that takes the induction variable and returns an
-            expression to evaluate for each item in "collection".
+            expression to evaluate for each item in "collection". If the
+            function takes two parameters, the first one will also be the
+            an induction variable for the iteration index.
         :type collection: langkit.expressions.base.AbstractExpression
         """
         super(CollectionExpression, self).__init__()
@@ -32,11 +35,29 @@ class CollectionExpression(AbstractExpression):
         self.expr = None
         self.ind_var = None
 
+        argspec = inspect.getargspec(self.expr_fn)
+        user_assert(len(argspec.args) in (1, 2) and
+                    not argspec.varargs and
+                    not argspec.keywords and
+                    not argspec.defaults,
+                    'Invalid collection iteration lambda: only one or two'
+                    ' parameters expected')
+        self.requires_index = len(argspec.args) == 2
+        self.index_var = None
+
     def do_prepare(self):
         self.ind_var = AbstractVariable(
             names.Name("Item_{}".format(next(CollectionExpression._counter))),
         )
-        self.expr = assert_type(self.expr_fn(self.ind_var), AbstractExpression)
+        if self.requires_index:
+            self.index_var = AbstractVariable(
+                names.Name('I'), type=LongType,
+                create_local=True
+            )
+            expr = self.expr_fn(self.index_var, self.ind_var)
+        else:
+            expr = self.expr_fn(self.ind_var)
+        self.expr = assert_type(expr, AbstractExpression)
 
     def construct_common(self):
         """
@@ -48,6 +69,8 @@ class CollectionExpression(AbstractExpression):
            constructor.
         3. The induction variable, still in the AbstractExpression form,
            so that it can be reused in subclasses (for example for filter).
+        4. The index induction variable, also in the AbstractExpression form,
+           or None if no such variable is needed for iteration.
 
         :rtype: langkit.expressions.base.ResolvedExpression
         """
@@ -57,7 +80,10 @@ class CollectionExpression(AbstractExpression):
         ).format(collection_expr.type.name().camel)
         self.ind_var.set_type(collection_expr.type.element_type())
 
-        return collection_expr, construct(self.expr), construct(self.ind_var)
+        return (collection_expr,
+                construct(self.expr),
+                construct(self.ind_var),
+                construct(self.index_var) if self.index_var else None)
 
 
 class Contains(CollectionExpression):
@@ -85,10 +111,13 @@ class Contains(CollectionExpression):
 
         :rtype: QuantifierExpr
         """
-        collection, predicate, ind_var = self.construct_common()
+        collection, predicate, ind_var, index_var = self.construct_common()
+        assert index_var is None
+
         # "collection" contains "item" if at least one element in "collection"
         # is equal to "item".
-        return Quantifier.Expr(Quantifier.ANY, collection, predicate, ind_var)
+        return Quantifier.Expr(Quantifier.ANY, collection, predicate, ind_var,
+                               index_var)
 
 
 class Map(CollectionExpression):
@@ -102,10 +131,11 @@ class Map(CollectionExpression):
         code.
         """
 
-        def __init__(self, induction_var, collection, expr, filter=None,
-                     concat=False, take_while=None):
+        def __init__(self, induction_var, index_var, collection, expr,
+                     filter=None, concat=False, take_while=None):
             """
             :type induction_var: VarExpr
+            :type index_var: None|VarExpr
             :type collection: ResolvedExpression
             :type expr: ResolvedExpression
             :type filter: ResolvedExpression
@@ -114,6 +144,7 @@ class Map(CollectionExpression):
             """
             self.take_while = take_while
             self.induction_var = induction_var
+            self.index_var = index_var
             self.collection = collection
             self.expr = expr
             self.filter = filter
@@ -184,7 +215,7 @@ class Map(CollectionExpression):
 
         :rtype: MapExpr
         """
-        collection_expr, expr, ind_var = self.construct_common()
+        collection_expr, expr, ind_var, index_var = self.construct_common()
 
         assert (not self.concat or expr.type.is_collection()), (
             'Cannot mapcat with expressions returning {} values'
@@ -197,7 +228,7 @@ class Map(CollectionExpression):
         take_while_expr = (construct(self.take_while_expr, BoolType)
                            if self.take_while_expr else None)
 
-        return Map.Expr(ind_var, collection_expr, expr,
+        return Map.Expr(ind_var, index_var, collection_expr, expr,
                         filter_expr, self.concat, take_while_expr)
 
 
@@ -207,24 +238,32 @@ class Quantifier(CollectionExpression):
     """
 
     class Expr(ResolvedExpression):
-        def __init__(self, kind, collection, expr, induction_var):
+        def __init__(self, kind, collection, expr, induction_var, index_var):
             """
             :param str kind: Kind for this quantifier expression. 'all' will
                 check that all items in "collection" fullfill "expr" while
                 'any' will check that at least one of them does.
+
             :param ResolvedExpression expr: Expression to evaluate for each
                 item in "collection".
+
             :param langkit.expressions.base.ResolvedExpression collection:
                 Collection on which this map operation works.
+
             :param langkit.expressions.base.ResolvedExpression expr: A
                 boolean expression to evaluate on the collection's items.
+
             :param induction_var: Variable to use in "expr".
             :type induction_var: langkit.expressions.base.ResolvedExpression
+
+            :param index_var: Index variable to use in "expr".
+            :type index_var: None|langkit.expressions.base.ResolvedExpression
             """
             self.kind = kind
             self.collection = collection
             self.expr = expr
             self.induction_var = induction_var
+            self.index_var = index_var
 
             self.result_var = Property.get().vars.create('Result', BoolType)
 
@@ -265,9 +304,10 @@ class Quantifier(CollectionExpression):
 
         :rtype: QuantifierExpr
         """
-        collection_expr, expr, ind_var = self.construct_common()
+        collection_expr, expr, ind_var, index_var = self.construct_common()
         assert expr.type.matches(BoolType)
-        return Quantifier.Expr(self.kind, collection_expr, expr, ind_var)
+        return Quantifier.Expr(self.kind, collection_expr, expr, ind_var,
+                               index_var)
 
 
 class CollectionGet(AbstractExpression):

@@ -38,6 +38,10 @@ begin
    </%def>
 
    <%def name="build_loop()">
+      % if map.index_var:
+         ${map.index_var.name} := 0;
+      % endif
+
       ## First, build a vector for all the resulting elements
       for ${ind_var} of
          % if map.collection.type.is_list_type:
@@ -53,6 +57,10 @@ begin
             end if;
          % else:
             ${build_loop_body()}
+         % endif
+
+         % if map.index_var:
+            ${map.index_var.name} := ${map.index_var.name} + 1;
          % endif
       end loop;
 
