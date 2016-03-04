@@ -882,7 +882,12 @@ class Property(AbstractNodeData):
 
                 if self.expected_type:
                     assert self.expected_type == self.constructed_expr.type, (
-                        "Property's expession doesn't have the expected type"
+                        'The {} property expression returns {}, but it is'
+                        ' expected to return {} instead'.format(
+                            self.qualname,
+                            self.constructed_expr.type.name().camel,
+                            self.expected_type.name().camel
+                        )
                     )
 
                 with names.camel_with_underscores:
