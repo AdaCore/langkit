@@ -52,6 +52,7 @@ typedef void* ${token_type};
       % for f in rec.get_fields():
          ${f.type.c_type(capi).name} ${f.name};
       % endfor
+      char is_null;
    } ${rec.c_type(capi).name};
 % endfor
 

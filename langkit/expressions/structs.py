@@ -119,7 +119,7 @@ class New(AbstractExpression):
                              for _, expr in self._iter_ordered())
 
         def render_expr(self):
-            return '({})'.format(
+            return '({}, Is_Null => False)'.format(
                 ', '.join('{} => {}'.format(name.camel_with_underscores,
                                             expr.render_expr())
                           for name, expr in self._iter_ordered())
