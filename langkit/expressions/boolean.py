@@ -1,5 +1,5 @@
 from langkit import names
-from langkit.compiled_types import BoolType, ASTNode, LongType
+from langkit.compiled_types import BoolType, ASTNode, LongType, Struct
 from langkit.expressions.base import (
     render, Property, LiteralExpr, AbstractExpression, construct,
     ResolvedExpression, AbstractVariable
@@ -327,8 +327,13 @@ class Then(AbstractExpression):
         self.then_expr = self.then_fn(self.var_expr)
 
     def construct(self):
-        expr = construct(self.expr, lambda t: t.is_ptr)
+        # Accept as a prefix:
+        # * any pointer, since it can be checked against "null";
+        # * any Struct, since its "Is_Null" field can be checked.
+        expr = construct(self.expr,
+                         lambda cls: cls.is_ptr or issubclass(cls, Struct))
         self.var_expr.set_type(expr.type)
+
         then_expr = construct(self.then_expr)
 
         # Affect default value to the fallback expression. For the moment,
