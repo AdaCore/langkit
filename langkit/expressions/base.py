@@ -60,7 +60,9 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
                 " of type (ResolvedExpression) -> bool"
             )
             assert expected_type_or_pred(ret.type), (
-                "Evaluating predicate on {} failed".format(ret.type)
+                "Evaluating predicate on {} failed".format(
+                    ret.type.name().camel
+                )
             )
 
     return ret

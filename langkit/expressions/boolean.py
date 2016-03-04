@@ -345,7 +345,7 @@ class Then(AbstractExpression):
                 raise AssertionError(
                     "Then expression should have a default value provided, "
                     "in cases where the provided function's return type is "
-                    "not Bool, here {}".format(then_expr.type)
+                    "not Bool, here {}".format(then_expr.type.name().camel)
                 )
         else:
             default_expr = construct(self.default_val, then_expr.type)
