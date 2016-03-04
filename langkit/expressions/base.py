@@ -196,31 +196,42 @@ class AbstractExpression(Frozable):
         # Using partial allows the user to be able to use keyword arguments
         # defined on the expressions constructors.
         return {
+            # Quantifiers
             'all':            partial(Quantifier, Quantifier.ALL, self),
             'any':            partial(Quantifier, Quantifier.ANY, self),
+
+            # Type handling
             'cast':           partial(Cast, self, do_raise=False),
             'cast_or_raise':  partial(Cast, self, do_raise=True),
-            'contains':       partial(Contains, self),
-            'equals':         partial(Eq, self),
-            'filter':         partial(Map, self, lambda x: x),
-            'take_while':     partial(Map, self, lambda x: x, lambda x: None,
-                                      False),
             'is_a':           partial(IsA, self),
+            'symbol':         GetSymbol(self),
+
+            # Other predicate combinators
+            'equals':         partial(Eq, self),
+            'is_null':        IsNull(self),
+
+            # Other containers handling
+            'at':             partial(CollectionGet, self),
+            'at_or_raise':    partial(CollectionGet, self, or_null=False),
+            'contains':       partial(Contains, self),
+            'filter':         partial(Map, self, lambda x: x),
+            'length':         CollectionLength(self),
             'map':            partial(Map, self),
             'mapcat':         partial(Map, self, concat=True),
-            'get':            partial(EnvGet, self),
-            'resolve_unique': partial(EnvGet, self, resolve_unique=True),
-            'at':             partial(CollectionGet, self),
-            'length':         CollectionLength(self),
-            'at_or_raise':    partial(CollectionGet, self, or_null=False),
-            'eval_in_env':    partial(EnvBind, self),
-            'is_null':        IsNull(self),
-            'or_else':        partial(BinaryBooleanOperator,
-                                      BinaryBooleanOperator.OR, self),
+            'take_while':     partial(Map, self, lambda x: x, lambda x: None,
+                                      False),
+
+            # Control flow handling
             'and_then':       partial(BinaryBooleanOperator,
                                       BinaryBooleanOperator.AND, self),
+            'or_else':        partial(BinaryBooleanOperator,
+                                      BinaryBooleanOperator.OR, self),
             'then':           partial(Then, self),
-            'symbol':         GetSymbol(self)
+
+            # Environments handling
+            'eval_in_env':    partial(EnvBind, self),
+            'get':            partial(EnvGet, self),
+            'resolve_unique': partial(EnvGet, self, resolve_unique=True),
         }
 
     @memoized
