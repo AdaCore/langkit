@@ -509,6 +509,81 @@ class GetSymbol(AbstractExpression):
                                [construct(self.token_expr, Token)])
 
 
+class Let(AbstractExpression):
+    """
+    Abstract expressions that associates names to values from other abstract
+    expressions and that evaluates yet another abstract expressions with these
+    names available.
+    """
+
+    class Expr(ResolvedExpression):
+        def __init__(self, vars, var_exprs, expr):
+            self.vars = vars
+            self.var_exprs = var_exprs
+            self.expr = expr
+
+        @property
+        def type(self):
+            return self.expr.type
+
+        def render_pre(self):
+            result = []
+            for var, expr in zip(self.vars, self.var_exprs):
+                result.append(expr.render_pre())
+                result.append('{} := {};'.format(var.name, expr.render_expr()))
+            result.append(self.expr.render_pre())
+            return '\n'.join(result)
+
+        def render_expr(self):
+            return self.expr.render_expr()
+
+    def __init__(self, lambda_fn):
+        """
+        :param () -> AbstractExpression lambda_fn: Function that take an
+            arbitrary number of arguments with default values
+            (AbstractExpression instances) and that returns another
+            AbstractExpression.
+        """
+        argspec = inspect.getargspec(lambda_fn)
+        user_assert(
+            not argspec.varargs and
+            not argspec.keywords,
+            'Invalid function for Let expression (varargs not accepted)'
+        )
+        user_assert(
+            len(argspec.args) == len(argspec.defaults),
+            'All Let expression function arguments must have default values'
+        )
+
+        self.vars = None
+        self.var_names = argspec.args
+        self.var_exprs = argspec.defaults
+        self.expr = None
+        self.lambda_fn = lambda_fn
+
+    def do_prepare(self):
+        # Create the variables this Let expression binds and expand the result
+        # expression using them.
+        self.vars = [
+            AbstractVariable(names.Name.from_lower(arg), create_local=True)
+            for arg in self.var_names
+        ]
+        self.expr = self.lambda_fn(*self.vars)
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: LetExpr
+        """
+        var_exprs = map(construct, self.var_exprs)
+        for var, expr in zip(self.vars, var_exprs):
+            var.set_type(expr.type)
+        vars = map(construct, self.vars)
+
+        return Let.Expr(vars, var_exprs, construct(self.expr))
+
+
 def render(*args, **kwargs):
     return ct_render(*args, property=Property.get(), Self=Self, **kwargs)
 
