@@ -2,17 +2,17 @@
 
 <%def name="decl(cls)">
 
+<% struct_name = '{}_Struct'.format(pyapi.type_internal_name(cls)) %>
+
 ${py_doc(cls)}
 
 
-class ${pyapi.type_internal_name(cls)}_Struct(ctypes.Structure):
+class ${struct_name}(ctypes.Structure):
     _fields_ = [('n', ctypes.c_int),
                 ('items', ${pyapi.type_internal_name(cls.element_type())} * 1)]
 
 
-${pyapi.type_internal_name(cls)} = ctypes.POINTER(
-    ${pyapi.type_internal_name(cls)}_Struct
-)
+${pyapi.type_internal_name(cls)} = ctypes.POINTER(${struct_name})
 
 
 class ${cls.name().camel}(object):
