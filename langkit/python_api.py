@@ -18,6 +18,16 @@ class PythonAPISettings(AbstractAPISettings):
         return alt_name.upper
 
     def wrap_value(self, value, type):
+        """
+        Given an expression for a low-level value and the associated type,
+        return an other expression that yields the corresponding high-level
+        value.
+
+        :param str value: Expression yielding a low-level value.
+        :param ct.CompiledType type: Type parameter. Type corresponding to
+            the "value" expression.
+        :rtype: str
+        """
         return dispatch_on_type(type, [
             (ct.ASTNode, lambda _: '_wrap_astnode({})'),
             (ct.SourceLocationRangeType, lambda _: '_wrap_sloc_range({})'),
@@ -33,6 +43,16 @@ class PythonAPISettings(AbstractAPISettings):
         ).format(value)
 
     def unwrap_value(self, value, type):
+        """
+        Given an expression for a high-level value and the associated type,
+        return an other expression that yields the corresponding low-level
+        value.
+
+        :param str value: Expression yielding a high-level value.
+        :param ct.CompiledType type: Type parameter. Type corresponding to the
+            "value" expression.
+        :rtype: str
+        """
         return dispatch_on_type(type, [
             (ct.ASTNode, lambda _: '_unwrap_astnode({})'),
             (ct.BoolType, lambda _: 'bool({})'),
