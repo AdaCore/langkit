@@ -11,6 +11,17 @@ class ${cls.name().camel}(ctypes.Structure):
     % endfor
         ('is_null', ctypes.c_uint8),
     ]
+
+    def copy(self):
+        """
+        Return a copy of this structure.
+        """
+        return ${cls.name().camel}(
+            % for field in cls.get_fields():
+                self._${field.name.lower},
+            % endfor
+        )
+
     % for field in cls.get_fields():
 
     @property

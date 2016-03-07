@@ -53,6 +53,17 @@ class ${cls.name().camel}(object):
             ))
         elif not (0 <= key < self._length):
             raise IndexError()
-        return ${pyapi.wrap_value('self._items[key]', cls.element_type())}
+
+        item = self._items[key]
+        ## In the case of array of Structure instances, array[index] returns a
+        ## reference to the record. Thus, in order to keep memory safety, we
+        ## must copy the record itself so that the array can be deallocated
+        ## while the user still has a reference to a record.
+        <% elt_type = cls.element_type() %>
+        % if is_struct_type(elt_type) and not is_ast_node(elt_type):
+        return item.copy()
+        % else:
+        return ${pyapi.wrap_value('item', elt_type)}
+        % endif
 
 </%def>
