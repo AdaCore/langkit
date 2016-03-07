@@ -17,7 +17,7 @@ class PythonAPISettings(AbstractAPISettings):
     def get_enum_alternative(self, type_name, alt_name, suffix):
         return alt_name.upper
 
-    def wrap_value(self, value, type):
+    def wrap_value(self, value, type, from_field_access=False):
         """
         Given an expression for a low-level value and the associated type,
         return an other expression that yields the corresponding high-level
@@ -26,16 +26,22 @@ class PythonAPISettings(AbstractAPISettings):
         :param str value: Expression yielding a low-level value.
         :param ct.CompiledType type: Type parameter. Type corresponding to
             the "value" expression.
+        :param bool from_field_access: True if "value" is a record field
+            access (False by default). This is a special case because of the
+            way ctypes works.
         :rtype: str
         """
+        value_suffix = '' if from_field_access else '.value'
         return dispatch_on_type(type, [
             (ct.ASTNode, lambda _: '_wrap_astnode({})'),
             (ct.SourceLocationRangeType, lambda _: '_wrap_sloc_range({})'),
             (ct.Token, lambda _: 'Token({})'),
-            (ct.BoolType, lambda _: 'bool({}.value)'),
-            (ct.LongType, lambda _: '{}.value'),
-            (ct.EnumType, lambda _: '{}_to_str[{{}}.value]'.format(
-                type.c_type(self.c_api_settings).name)),
+            (ct.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
+            (ct.LongType, lambda _: '{{}}{}'.format(value_suffix)),
+            (ct.EnumType, lambda _: '{}_to_str[{{}}{}]'.format(
+                type.c_type(self.c_api_settings).name,
+                value_suffix,
+            )),
             (ct.ArrayType, lambda cls: '{}({{}})'.format(type.name().camel)),
             (ct.Struct, lambda _: '{}'),
         ], exception_msg='Unhandled field type in the python binding'

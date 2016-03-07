@@ -17,7 +17,8 @@ class ${cls.name().camel}(ctypes.Structure):
     def ${field.name.lower}(self):
         ${py_doc(field, 8)}
         result = self._${field.name.lower}
-        return ${pyapi.wrap_value('result', field.type)}
+        return ${pyapi.wrap_value('result', field.type,
+                                  from_field_access=True)}
     % endfor
 
     def __getitem__(self, key):
