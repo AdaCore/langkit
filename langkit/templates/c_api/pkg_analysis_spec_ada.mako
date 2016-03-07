@@ -76,8 +76,10 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    end record;
    ${ada_c_doc('langkit.exception_type', 3)}
 
-   % for type_name in (node_type, token_type, sloc_type, sloc_range_type, \
-                       diagnostic_type, exception_type):
+   type ${bool_type} is new Unsigned_8;
+
+   % for type_name in (bool_type, node_type, token_type, sloc_type, \
+                       sloc_range_type, diagnostic_type, exception_type):
       type ${type_name}_Ptr is access ${type_name};
    % endfor
 

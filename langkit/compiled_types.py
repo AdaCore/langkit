@@ -93,6 +93,7 @@ def make_renderer(base_renderer=None):
             'ctx':                   get_context(),
             'ada_api':               get_context().ada_api_settings,
             'capi':                  capi,
+            'bool_type':             BoolType.c_type(capi).name,
             'analysis_context_type': CAPIType(capi, 'analysis_context').name,
             'analysis_unit_type':    CAPIType(capi, 'analysis_unit').name,
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
@@ -326,9 +327,9 @@ class BoolType(BasicType):
 
     @classmethod
     def c_type(cls, c_api_settings):
-        # "bool" is not a built-in in C: do not force users to pull
-        # stdbool.h...
-        return CAPIType(c_api_settings, 'int', external=True)
+        # "bool" is not a built-in type in C: we define our own type based on
+        # uint8_t.
+        return CAPIType(c_api_settings, 'bool')
 
 
 class LongType(BasicType):

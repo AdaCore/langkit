@@ -44,7 +44,7 @@
             % if is_enum(arg_type):
                ${field.type} (${arg_name})
             % elif is_bool(arg_type):
-               Boolean'Val (${arg_name})
+               ${arg_name} /= 0
             % elif is_long(arg_type):
                Integer (${arg_name})
             % elif is_ast_node(arg_type):
@@ -79,7 +79,7 @@
                     ${field.type.c_type(capi).name}
                       (${field.type.name()}'Pos (${field_access}))
                 % elif is_bool(field.type):
-                    int (Boolean'Pos (${field_access}))
+                    ${bool_type} (Boolean'Pos (${field_access}))
                 % elif is_long(field.type):
                     int (${field_access})
                 % elif is_ast_node(field.type):

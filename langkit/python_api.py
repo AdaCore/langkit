@@ -87,7 +87,7 @@ class PythonAPISettings(AbstractAPISettings):
             return "_{}".format(name)
 
         return dispatch_on_type(type, [
-            (ct.BoolType, lambda _: ctype_type('c_int')),
+            (ct.BoolType, lambda _: ctype_type('c_uint8')),
             (ct.LongType, lambda _: ctype_type('c_long')),
             (ct.SourceLocationRangeType, lambda _: wrapped_type('SlocRange')),
             (ct.Token, lambda _: wrapped_type('token')),

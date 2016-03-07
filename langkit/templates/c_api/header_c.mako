@@ -47,6 +47,8 @@ typedef enum {
 ${c_doc('langkit.token_type')}
 typedef void* ${token_type};
 
+typedef uint8_t ${bool_type};
+
 % for rec in _self.struct_types:
    typedef struct {
       % for f in rec.get_fields():

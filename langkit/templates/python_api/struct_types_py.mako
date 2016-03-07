@@ -9,7 +9,7 @@ class ${cls.name().camel}(ctypes.Structure):
         ('_${field.name.lower}',
          ${pyapi.type_internal_name(field.type)}),
     % endfor
-        ('is_null', ctypes.c_bool),
+        ('is_null', ctypes.c_uint8),
     ]
     % for field in cls.get_fields():
 
