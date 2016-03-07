@@ -2,14 +2,17 @@
 
 <%def name="decl(cls)">
 
-<% struct_name = '{}_Struct'.format(pyapi.type_internal_name(cls)) %>
+<%
+   struct_name = '{}_Struct'.format(pyapi.type_internal_name(cls))
+   element_type = pyapi.type_internal_name(cls.element_type())
+%>
 
 ${py_doc(cls)}
 
 
 class ${struct_name}(ctypes.Structure):
     _fields_ = [('n', ctypes.c_int),
-                ('items', ${pyapi.type_internal_name(cls.element_type())} * 1)]
+                ('items', ${element_type} * 1)]
 
 
 ${pyapi.type_internal_name(cls)} = ctypes.POINTER(${struct_name})
@@ -23,7 +26,10 @@ class ${cls.name().camel}(object):
     def __init__(self, c_value):
         self._c_value = c_value
         self._length = c_value.contents.n
-        self._items = ctypes.pointer(c_value.contents.items[0])
+
+        items_addr = _field_address(c_value.contents, 'items')
+        items = ${element_type}.from_address(items_addr)
+        self._items = ctypes.pointer(items)
 
     def __repr__(self):
         return '<${cls.name().camel} object at {} {}>'.format(

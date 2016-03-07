@@ -747,3 +747,27 @@ def _unwrap_astnode(py_value):
             )
         )
     return py_value._c_value
+
+
+def _field_address(struct, field_name):
+    """
+    Get the address of a structure field from a structure value.
+
+    For instance::
+
+        class Foo(ctypes.Structure):
+            _fields_ = [('i', ctypes.c_int)]
+
+        f = Foo()
+        i_addr =_field_address(f, 'i')
+    """
+    struct_type = type(struct)
+    struct_addr = ctypes.addressof(struct)
+    field = getattr(struct_type, field_name)
+    field_type = None
+    for f_name, f_type in struct_type._fields_:
+        if f_name == field_name:
+            field_type = f_type
+            break
+    assert field_type is not None
+    return struct_addr + field.offset
