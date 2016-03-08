@@ -40,7 +40,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Reparse           : Boolean;
       Get_Parser        : access function (Unit : Analysis_Unit)
                                            return Parser_Type;
-      With_Trivia       : Boolean)
+      With_Trivia       : Boolean;
+      Rule              : Grammar_Rule)
       return Analysis_Unit;
    --  Helper for Get_From_File and Get_From_Buffer: do all the common work
    --  using Get_Parser to either parse from a file or from a buffer. Return
@@ -84,7 +85,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Reparse           : Boolean;
       Get_Parser        : access function (Unit : Analysis_Unit)
                                            return Parser_Type;
-      With_Trivia : Boolean)
+      With_Trivia       : Boolean;
+      Rule              : Grammar_Rule)
       return Analysis_Unit
    is
       use Units_Maps;
@@ -116,10 +118,11 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
             Ref_Count    => 1,
             AST_Root     => null,
             File_Name    => Fname,
-            Charset     => <>,
+            Charset      => <>,
             TDH          => <>,
             Diagnostics  => <>,
             With_Trivia  => With_Trivia,
+            Rule         => Rule,
             AST_Mem_Pool => No_Pool);
          Initialize (Unit.TDH, Context.Symbols);
          Context.Units_Map.Insert (Fname, Unit);
@@ -212,7 +215,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Unit.AST_Mem_Pool := Create;
       Parser.Mem_Pool := Unit.AST_Mem_Pool;
 
-      Unit.AST_Root := Parse (Parser);
+      Unit.AST_Root := Parse (Parser, Rule => Unit.Rule);
       Unit.Diagnostics := Parser.Diagnostics;
       Clean_All_Memos;
    end Do_Parsing;
@@ -226,7 +229,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Filename    : String;
       Charset     : String := "";
       Reparse     : Boolean := False;
-      With_Trivia : Boolean := False)
+      With_Trivia : Boolean := False;
+      Rule        : Grammar_Rule :=
+         ${Name.from_lower(_self.main_rule_name)}_Rule)
       return Analysis_Unit
    is
       function Get_Parser (Unit : Analysis_Unit) return Parser_Type
@@ -234,7 +239,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
                             Unit.TDH'Access, With_Trivia));
    begin
       return Get_Unit
-        (Context, Filename, Charset, Reparse, Get_Parser'Access, With_Trivia);
+        (Context, Filename, Charset, Reparse, Get_Parser'Access, With_Trivia,
+         Rule);
    end Get_From_File;
 
    ---------------------
@@ -246,7 +252,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Filename    : String;
       Charset     : String := "";
       Buffer      : String;
-      With_Trivia : Boolean := False)
+      With_Trivia : Boolean := False;
+      Rule        : Grammar_Rule :=
+         ${Name.from_lower(_self.main_rule_name)}_Rule)
       return Analysis_Unit
    is
       function Get_Parser (Unit : Analysis_Unit) return Parser_Type
@@ -254,7 +262,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
                               Unit.TDH'Access, With_Trivia));
    begin
       return Get_Unit (Context, Filename, Charset, True, Get_Parser'Access,
-                       With_Trivia);
+                       With_Trivia, Rule);
    end Get_From_Buffer;
 
    ------------

@@ -31,6 +31,16 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    type Analysis_Unit is private;
    ${ada_doc('langkit.analysis_unit_type', 3)}
 
+   type Grammar_Rule is (
+      % for i, name in enumerate(_self.user_rule_names):
+         % if i > 0:
+            ,
+         % endif
+         ${Name.from_lower(name)}_Rule
+      % endfor
+   );
+   ${ada_doc('langkit.grammar_rule_type')}
+
    function Create
      (Charset : String := ${string_repr(_self.default_charset)})
       return Analysis_Context;
@@ -41,7 +51,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
       Filename    : String;
       Charset     : String := "";
       Reparse     : Boolean := False;
-      With_Trivia : Boolean := False)
+      With_Trivia : Boolean := False;
+      Rule        : Grammar_Rule :=
+         ${Name.from_lower(_self.main_rule_name)}_Rule)
       return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_file', 3)}
 
@@ -50,7 +62,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
       Filename    : String;
       Charset     : String := "";
       Buffer      : String;
-      With_Trivia : Boolean := False)
+      With_Trivia : Boolean := False;
+      Rule        : Grammar_Rule :=
+         ${Name.from_lower(_self.main_rule_name)}_Rule)
       return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_buffer', 3)}
 
@@ -133,6 +147,9 @@ private
       TDH             : aliased Token_Data_Handler;
       Diagnostics     : Diagnostics_Vectors.Vector;
       With_Trivia     : Boolean;
+
+      Rule            : Grammar_Rule;
+      --  The grammar rule used to parse this unit
 
       AST_Mem_Pool    : Bump_Ptr_Pool;
       --  This memory pool shall only be used for AST parsing. Stored here

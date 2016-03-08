@@ -254,6 +254,16 @@ class CompileCtx():
         # TODO: why do we need this? The grammar already has such a mapping.
         self.rules_to_fn_names = {}
 
+        self.user_rule_names = None
+        """
+        Sorted list of names for all grammar rules available for users.
+
+        This list should contain all rules that return AST nodes. It is
+        computed right after "rules_to_fn_names".
+
+        :rtype: list[str]
+        """
+
         self.lexer = lexer
         ":type: langkit.lexer.Lexer"
 
@@ -566,6 +576,13 @@ class CompileCtx():
             for r_name, r in self.grammar.rules.items():
                 r.compile()
                 self.rules_to_fn_names[r_name] = r
+
+        from langkit.compiled_types import ASTNode
+        self.user_rule_names = sorted(
+            name
+            for name, parser in self.rules_to_fn_names.items()
+            if issubclass(parser.get_type(), ASTNode)
+        )
 
         not_resolved_types = set()
         for astnode_type in self.astnode_types:

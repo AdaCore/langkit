@@ -57,7 +57,7 @@ procedure Parse is
    -- Process_Node --
    ------------------
 
-   procedure Process_Node (Res : in out ${root_node_type_name}) is
+   procedure Process_Node (Res : ${root_node_type_name}) is
    begin
       if Res = null then
          Put_Line ("<null node>");
@@ -101,61 +101,43 @@ procedure Parse is
       Input_Str_Ptr    : Big_String_Access;
       Input_Str_Length : Natural;
 
-      TDH     : Token_Data_Handler;
-      Symbols : Symbol_Table := Create;
-      Parser  : Parser_Type;
-      Pool    : Bump_Ptr_Pool := Create;
+      Ctx  : Analysis_Context := Create;
+      Unit : Analysis_Unit;
+      Rule : Grammar_Rule;
    begin
-      Initialize (TDH, Symbols);
+      begin
+         Rule := Grammar_Rule'Value (Rule_Name.all & "_Rule");
+      exception
+         when Constraint_Error =>
+            raise Program_Error with "Unsupported rule: " & Rule_Name.all;
+      end;
 
       Get_String (Input_Str, Input_Str_Ptr, Input_Str_Length);
-      Parser := Create_From_Buffer
-        (Input_Str_Ptr (1 .. Input_Str_Length), "",
-         TDH'Unrestricted_Access,
-         --  Parse with trivia if we want to print it ultimately
-         With_Trivia => Do_Print_Trivia);
-      Parser.Mem_Pool := Pool;
+      Unit := Get_From_Buffer
+        (Context  => Ctx,
+         Filename => "<input>",
+         Buffer   => Input_Str_Ptr (1 .. Input_Str_Length),
+         Rule     => Rule);
 
-      % for i, (rule_name, parser) in \
-            enumerate(_self.rules_to_fn_names.items()):
-         ${"if" if i == 0 else "elsif"}
-            Rule_Name.all = ${string_repr(rule_name)}
-         then
-            declare
-               Res : ${parser.get_type().name()} :=
-                  Parse_${parser._name} (Parser);
-            begin
-               if not Parser.Diagnostics.Is_Empty then
-                  Put_Line ("Parsing failed:");
-                  for D of Parser.Diagnostics loop
-                     Put_Line (To_Pretty_String (D));
-                  end loop;
-               end if;
+      if Has_Diagnostics (Unit) then
+         Put_Line ("Parsing failed:");
+         for D of Diagnostics (Unit) loop
+            Put_Line (To_Pretty_String (D));
+         end loop;
+      end if;
 
-               ## Error recovery may make the parser return something even on
-               ## error: print anyway.
-               % if is_ast_node(parser.get_type()):
-                  Process_Node (${root_node_type_name} (Res));
-               % else:
-                  Put_Line (${parser.get_type().name()}'Image (Res));
-                  if not Lookups.Is_Empty then
-                     Put_Line ("Cannot lookup non-AST nodes!");
-                  end if;
-               % endif
-            end;
-
-      % endfor
-
-         else
-            raise Program_Error with "Unknown rule: " & Rule_Name.all;
-         end if;
-
-      Free (TDH);
-      Destroy (Symbols);
-      Free (Pool);
+      --  Error recovery may make the parser return something even on error:
+      --  process it anyway.
+      Process_Node (Root (Unit));
+      Destroy (Ctx);
    end Parse_Input;
 
-   procedure Process_File (File_Name : String; Ctx : in out Analysis_Context) is
+   ------------------
+   -- Process_File --
+   ------------------
+
+   procedure Process_File (File_Name : String; Ctx : in out Analysis_Context)
+   is
       Unit         : Analysis_Unit;
       Time_Before  : constant Time := Clock;
       Time_After   : Time;

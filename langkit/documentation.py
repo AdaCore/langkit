@@ -47,6 +47,9 @@ documentations = {
             References are ref-counted.
         % endif
     """),
+    'langkit.grammar_rule_type': Template("""
+        Gramar rule to use for parsing.
+    """),
     'langkit.node_type': Template("""
         Data type for all AST nodes. AST nodes are assembled to make up a tree.
         See the AST node primitives below to inspect such trees.
@@ -129,6 +132,12 @@ documentations = {
         % if lang != 'python':
             The result is owned by the context: the caller must increase its
             ref-count in order to keep a reference to it.
+        % endif
+
+        % if lang == 'ada':
+            Rule controls which grammar rule is used to parse the unit.
+
+            ${TODO} export this feature to the C and Python APIs.
         % endif
 
         Use Charset in order to decode the content of Filename. If Charset is

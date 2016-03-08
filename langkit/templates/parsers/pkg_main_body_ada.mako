@@ -135,29 +135,23 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    function Parse
      (Parser         : in out Parser_Type;
-      Check_Complete : Boolean := True) return ${root_node_type_name}
-   is
-   begin
+      Check_Complete : Boolean := True;
+      Rule           : Grammar_Rule)
       return ${root_node_type_name}
-        (Parse_${_self.rules_to_fn_names[_self.main_rule_name]._name}
-           (Parser, Check_Complete));
+   is
+      Result : ${root_node_type_name};
+   begin
+      case Rule is
+      % for name in _self.user_rule_names:
+         when ${Name.from_lower(name)}_Rule =>
+            Result := ${root_node_type_name}
+              (${_self.rules_to_fn_names[name].gen_fn_name} (Parser, 0));
+      % endfor
+      end case;
+      Process_Parsing_Error (Parser, Check_Complete);
+      Clean_All_Memos;
+      return Result;
    end Parse;
-
-   ## Generate user wrappers for all parsing rules
-   % for rule_name, parser in sorted(_self.rules_to_fn_names.items()):
-      function Parse_${parser._name}
-        (Parser         : in out Parser_Type;
-         Check_Complete : Boolean := True)
-         return ${decl_type(parser.get_type())}
-      is
-         Result : ${decl_type(parser.get_type())} :=
-            ${parser.gen_fn_name} (Parser, 0);
-      begin
-         Process_Parsing_Error (Parser, Check_Complete);
-         Clean_All_Memos;
-         return Result;
-      end Parse_${parser._name};
-   % endfor
 
    % for parser in _self.generated_parsers:
    ${parser.body}
