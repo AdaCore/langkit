@@ -38,8 +38,8 @@
             then ${cls.element_type().nullexpr()}
             else raise Property_Error));
 
-   function Length (T : ${cls.name()}) return Natural is (T.N);
    ## Helper for properties code
+   function Length (T : ${cls.name()}) return Natural is (T.N);
 
    procedure Destroy is new Ada.Unchecked_Deallocation
      (${cls.pointed()}, ${cls.name()});

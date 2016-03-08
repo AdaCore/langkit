@@ -37,4 +37,8 @@
         (Lists_${type}.Node_Vectors.Get_At_Index (Node.Vec, Index))
       else (if Or_Null then null else raise Property_Error));
 
+   ## Helper for properties code
+   function Length (Node : List_${type}) return Natural is
+     (Node.Child_Count);
+
 </%def>
