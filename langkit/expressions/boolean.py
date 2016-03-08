@@ -71,6 +71,9 @@ class Eq(AbstractExpression):
             return '{} = {}'.format(self.lhs.render_expr(),
                                     self.rhs.render_expr())
 
+        def __repr__(self):
+            return '<Eq.Expr>'
+
     def __init__(self, lhs, rhs):
         """
         :param langkit.expressions.base.AbstractExpression lhs: Left operand.
@@ -152,6 +155,9 @@ class OrderingTest(AbstractExpression):
                 self.rhs.render_expr()
             )
 
+        def __repr__(self):
+            return '<OrderingTest.Expr {}>'.format(self.operator)
+
     def __init__(self, operator, lhs, rhs):
         """
         :param langkit.expressions.base.AbstractExpression lhs: Left operand.
@@ -220,6 +226,9 @@ class If(AbstractExpression):
         def render_expr(self):
             return self.result_var.name.camel_with_underscores
 
+        def __repr__(self):
+            return '<If.Expr>'
+
     def __init__(self, cond, then, else_then):
         """
         :param langkit.expressions.base.AbstractExpression cond: A boolean
@@ -265,6 +274,9 @@ class Not(AbstractExpression):
         def render_expr(self):
             return 'not ({})'.format(self.expr.render_expr())
 
+        def __repr__(self):
+            return '<Not.Expr>'
+
     def __init__(self, expr):
         """
         :param langkit.expressions.base.AbstractExpression expr: Operand for
@@ -306,6 +318,9 @@ class Then(AbstractExpression):
 
         def render_expr(self):
             return self.result.name.camel_with_underscores
+
+        def __repr__(self):
+            return '<Then.Expr>'
 
     def __init__(self, expr, then_fn, default_val=None):
         """

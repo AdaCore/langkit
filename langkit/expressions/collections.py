@@ -280,6 +280,9 @@ class Quantifier(CollectionExpression):
         def render_expr(self):
             return self.result_var.name.camel_with_underscores
 
+        def __repr__(self):
+            return '<Quantifier.Expr {}>'.format(self.kind)
+
     # Available quantifier kinds
     ALL = 'all'
     ANY = 'any'

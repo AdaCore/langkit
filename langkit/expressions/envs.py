@@ -46,6 +46,9 @@ class EnvGet(AbstractExpression):
                 self.env_expr.render_expr(), self.token_expr.render_expr()
             ))
 
+        def __repr__(self):
+            return '<EnvGet.Expr>'
+
     def __init__(self, env_expr, token_expr,
                  resolve_unique=False):
         """
@@ -104,6 +107,9 @@ class EnvBind(AbstractExpression):
         @property
         def type(self):
             return self.to_eval_expr.type
+
+        def __repr__(self):
+            return '<EnvBind.Expr>'
 
     def __init__(self, env_expr, to_eval_expr):
         """

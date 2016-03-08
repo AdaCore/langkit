@@ -42,6 +42,9 @@ class Cast(AbstractExpression):
         def render_expr(self):
             return self.result_var.name
 
+        def __repr__(self):
+            return '<Cast.Expr {}>'.format(self.astnode.name().camel)
+
     def __init__(self, expr, astnode, do_raise=False):
         """
         :param langkit.expressions.base.AbstractExpression expr: Expression
@@ -124,6 +127,9 @@ class New(AbstractExpression):
                                             expr.render_expr())
                           for name, expr in self._iter_ordered())
             )
+
+        def __repr__(self):
+            return '<New.Expr {}>'.format(self.struct_type.name().camel)
 
     def __init__(self, struct_type, **field_values):
         """
@@ -385,6 +391,11 @@ class IsA(AbstractExpression):
                     for a in self.astnodes
                 )
             )
+
+        def __repr__(self):
+            return '<IsA.Expr {}>'.format(', '.join(
+                astnode.name().camel for astnode in self.astnodes
+            ))
 
     def __init__(self, expr, *astnodes):
         """

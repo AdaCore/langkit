@@ -422,6 +422,11 @@ class AbstractVariable(AbstractExpression):
         def render_expr(self):
             return self.name.camel_with_underscores
 
+        def __repr__(self):
+            return '<AbstractVariable.Expression {}>'.format(
+                self.name.lower
+            )
+
     def __init__(self, name, type=None, create_local=False):
         """
         :param names.Name name: The name of the PlaceHolder variable.
@@ -536,6 +541,11 @@ class Let(AbstractExpression):
 
         def render_expr(self):
             return self.expr.render_expr()
+
+        def __repr__(self):
+            return '<Let.Expr (vars: {})>'.format(
+                ', '.join(var.name.lower for var in self.vars)
+            )
 
     def __init__(self, lambda_fn):
         """
@@ -1025,6 +1035,10 @@ class LiteralExpr(ResolvedExpression):
     def render_expr(self):
         return self.literal
 
+    def __repr__(self):
+        return '<LiteralExpr {} ({})>'.format(self.literal,
+                                              self.type.name().camel)
+
 
 class LocalVars(object):
     """
@@ -1138,6 +1152,9 @@ class BuiltinCallExpr(ResolvedExpression):
                 expr.render_expr() for expr in self.exprs
             )
         )
+
+    def __repr__(self):
+        return '<BuiltinCallExpr {}>'.format(self.name.camel_with_underscores)
 
 
 def is_simple_expr(expr):
