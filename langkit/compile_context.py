@@ -686,6 +686,8 @@ class CompileCtx():
             # Unit for initialization primitives
             ("pkg_init",         ["init"], True),
             # Unit for analysis primitives
+            ("pkg_analysis_interfaces", ["analysis_interfaces"], False),
+            # Unit for analysis primitives
             ("pkg_analysis",     ["analysis"], True),
             # Unit for the root AST node
             ("pkg_ast",          ["ast"], True),

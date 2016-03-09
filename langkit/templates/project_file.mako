@@ -26,6 +26,7 @@ library project ${lib_name} is
       "${lib_name.lower()}-analysis.ads",
       "${lib_name.lower()}-analysis-c.adb",
       "${lib_name.lower()}-analysis-c.ads",
+      "${lib_name.lower()}-analysis_interfaces.ads",
       "${lib_name.lower()}-ast.adb",
       "${lib_name.lower()}-ast.ads",
       "${lib_name.lower()}-ast-list.adb",
