@@ -1,3 +1,5 @@
+with Ada.Unchecked_Deallocation;
+
 package body Langkit_Support.Lexical_Env is
 
    function Decorate
@@ -150,5 +152,20 @@ package body Langkit_Support.Lexical_Env is
    begin
       return Unwrap (Get (Self, Key));
    end Get;
+
+   ----------------
+   -- Deallocate --
+   ----------------
+
+   procedure Destroy (Self : in out Lexical_Env) is
+      procedure Free is
+        new Ada.Unchecked_Deallocation (Lexical_Env_Type, Lexical_Env);
+   begin
+      for Elts of Self.Env loop
+         Env_Element_Vectors.Destroy (Elts);
+      end loop;
+      Lexical_Env_Vectors.Destroy (Self.Referenced_Envs);
+      Free (Self);
+   end Destroy;
 
 end Langkit_Support.Lexical_Env;

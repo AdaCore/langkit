@@ -1,6 +1,5 @@
 with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
-with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Array_Utils;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
@@ -128,7 +127,7 @@ package Langkit_Support.Lexical_Env is
      (Self : Lexical_Env; Key : Symbol_Type) return Env_Element_Array;
    --  Get the array of wrapped elements for this key
 
-   procedure Destroy is
-     new Ada.Unchecked_Deallocation (Lexical_Env_Type, Lexical_Env);
+   procedure Destroy (Self : in out Lexical_Env);
+   --  Deallocate the resources allocated to the Self lexical environment
 
 end Langkit_Support.Lexical_Env;
