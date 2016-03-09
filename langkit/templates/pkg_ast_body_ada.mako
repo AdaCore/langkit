@@ -15,6 +15,8 @@ with Langkit_Support.Extensions; use Langkit_Support.Extensions;
 with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
 with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
 with Langkit_Support.Text;       use Langkit_Support.Text;
+with Langkit_Support.Token_Data_Handler;
+use Langkit_Support.Token_Data_Handler;
 with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
 
 package body ${_self.ada_api_settings.lib_name}.AST is
@@ -254,9 +256,11 @@ package body ${_self.ada_api_settings.lib_name}.AST is
      (Node : ${root_node_type_name};
       Snap : Boolean := False) return Source_Location_Range
    is
-      Tokens : Token_Vectors.Vector renames Node.Token_Data.Tokens;
-      Sloc_Start, Sloc_End : Source_Location;
       use Token_Vectors;
+
+      Tokens               : Token_Vectors.Vector renames
+         Node.Unit.Token_Data.Tokens;
+      Sloc_Start, Sloc_End : Source_Location;
    begin
       if Snap then
          declare
@@ -392,8 +396,10 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    function Children_With_Trivia
      (Node : ${root_node_type_name}) return Children_Arrays.Array_Type
    is
-      Ret_Vec : Children_Vectors.Vector;
       use Children_Vectors;
+
+      Ret_Vec : Children_Vectors.Vector;
+      TDH     : Token_Data_Handler renames Node.Unit.Token_Data.all;
 
       procedure Append_Trivias (First, Last : Natural);
       --  Append all the trivias of tokens between indices First and Last to
@@ -402,7 +408,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       procedure Append_Trivias (First, Last : Natural) is
       begin
          for I in First .. Last loop
-            for T of Get_Trivias (Node.Token_Data.all, I) loop
+            for T of Get_Trivias (TDH, I) loop
                Append (Ret_Vec, Child_Record'(Kind => Trivia, Trivia => T));
             end loop;
          end loop;

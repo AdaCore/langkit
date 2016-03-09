@@ -14,9 +14,11 @@ with System;
 with Langkit_Support.Extensions;         use Langkit_Support.Extensions;
 with Langkit_Support.Iterators;
 with Langkit_Support.Lexical_Env;
-with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
 with Langkit_Support.Tokens;             use Langkit_Support.Tokens;
 with Langkit_Support.Vectors;
+
+with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
+use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 
 --  This package defines the base ("root") type for AST nodes. All node types
 --  that appear in the AST derive from it.
@@ -424,7 +426,10 @@ private
 
    type ${root_node_value_type} is abstract tagged record
       Parent                 : ${root_node_type_name} := null;
-      Token_Data             : Token_Data_Handler_Access := null;
+
+      Unit                   : Analysis_Unit_Interface := null;
+      --  Reference to the analysis unit that owns this node
+
       Token_Start, Token_End : Natural  := 0;
       Parent_Env             : AST_Envs.Lexical_Env;
       Extensions             : Extension_Vectors.Vector;

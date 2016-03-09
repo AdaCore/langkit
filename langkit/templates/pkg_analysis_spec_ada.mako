@@ -7,7 +7,8 @@ with Ada.Strings.Unbounded.Hash;
 with Langkit_Support.Bump_Ptr;           use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
-with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
+with Langkit_Support.Token_Data_Handler;
+use Langkit_Support.Token_Data_Handler;
 
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
@@ -158,6 +159,13 @@ private
       --  This memory pool shall only be used for AST parsing. Stored here
       --  because it is more convenient, but one shall not allocate from it.
    end record;
+
+   overriding
+   function Token_Data
+     (Unit : access Analysis_Unit_Type)
+      return Token_Data_Handler_Access
+   is
+     (Unit.TDH'Access);
 
    function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
      (Unit.AST_Root);

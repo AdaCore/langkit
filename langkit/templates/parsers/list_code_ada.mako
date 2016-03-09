@@ -88,7 +88,7 @@ loop
          end;
 
          ## Set token data for result
-         ${res}.Token_Data := Parser.TDH;
+         ${res}.Unit := Parser.Unit;
          ${res}.Token_Start := ${pos_name};
          ${res}.Token_End := (if ${cpos} = ${pos_name}
                               then ${pos_name}
@@ -141,7 +141,7 @@ end loop;
 ## If we managed to parse a list, compute and set the sloc range for this AST
 ## node.
 if ${res} /= null then
-   ${res}.Token_Data := Parser.TDH;
+   ${res}.Unit := Parser.Unit;
    ${res}.Token_Start := ${pos_name};
    ${res}.Token_End := (if ${cpos} = ${pos_name}
                         then ${pos_name}

@@ -9,6 +9,8 @@ with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
 
 with ${_self.ada_api_settings.lib_name}.Analysis;
 use ${_self.ada_api_settings.lib_name}.Analysis;
+with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
+use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 
 --  This package provides types and primitives to parse buffers and files and
 --  get AST out of them.
@@ -28,13 +30,14 @@ package ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
       Current_Pos : Integer := 0;
       Last_Fail   : Fail_Info;
       Diagnostics : Diagnostics_Vectors.Vector;
+      Unit        : Analysis_Unit_Interface;
       TDH         : Token_Data_Handler_Access;
       Mem_Pool    : Bump_Ptr_Pool;
    end record;
 
    function Create_From_File
      (Filename, Charset : String;
-      TDH               : Token_Data_Handler_Access;
+      Unit              : Analysis_Unit_Interface;
       With_Trivia       : Boolean := False) return Parser_type;
    --  Create a parser to parse the source in Filename, decoding it using
    --  Charset. The resulting tokens (and trivia if With_Trivia) are stored
@@ -45,7 +48,7 @@ package ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    function Create_From_Buffer
      (Buffer, Charset : String;
-      TDH             : Token_Data_Handler_Access;
+      Unit            : Analysis_Unit_Interface;
       With_Trivia     : Boolean := False) return Parser_type;
    --  Create a parser to parse the source in Buffer, decoding it using
    --  Charset. The resulting tokens (and trivia if With_Trivia) are stored

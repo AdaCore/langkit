@@ -11,7 +11,7 @@ if ${parser_context.pos_var_name} /= -1 then
      (${_self.typ.name()}_Alloc.Alloc (Parser.Mem_Pool));
 
    ## Compute and set the sloc range for this AST node
-   ${res}.Token_Data := Parser.TDH;
+   ${res}.Unit := Parser.Unit;
    ${res}.Token_Start := ${pos_name};
    ${res}.Token_End := (if ${parser_context.pos_var_name} = ${pos_name}
                         then ${pos_name}
