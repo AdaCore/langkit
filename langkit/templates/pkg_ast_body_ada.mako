@@ -33,7 +33,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    procedure Deallocate_Lexical_Env (A : System.Address) is
       Env : AST_Envs.Lexical_Env := To_Lexical_Env (A);
    begin
-      AST_Envs.Free (Env);
+      AST_Envs.Destroy (Env);
    end Deallocate_Lexical_Env;
 
    -----------

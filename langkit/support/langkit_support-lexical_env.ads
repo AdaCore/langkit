@@ -128,7 +128,7 @@ package Langkit_Support.Lexical_Env is
      (Self : Lexical_Env; Key : Symbol_Type) return Env_Element_Array;
    --  Get the array of wrapped elements for this key
 
-   procedure Free is
+   procedure Destroy is
      new Ada.Unchecked_Deallocation (Lexical_Env_Type, Lexical_Env);
 
 end Langkit_Support.Lexical_Env;
