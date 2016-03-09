@@ -114,16 +114,17 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
       if Created then
          Unit := new Analysis_Unit_Type'
-           (Context      => Context,
-            Ref_Count    => 1,
-            AST_Root     => null,
-            File_Name    => Fname,
-            Charset      => <>,
-            TDH          => <>,
-            Diagnostics  => <>,
-            With_Trivia  => With_Trivia,
-            Rule         => Rule,
-            AST_Mem_Pool => No_Pool);
+           (Context        => Context,
+            Ref_Count      => 1,
+            AST_Root       => null,
+            File_Name      => Fname,
+            Charset        => <>,
+            TDH            => <>,
+            Diagnostics    => <>,
+            With_Trivia    => With_Trivia,
+            Rule           => Rule,
+            AST_Mem_Pool   => No_Pool,
+            Deallocatables => Deallocatable_Vectors.Empty_Vector);
          Initialize (Unit.TDH, Context.Symbols);
          Context.Units_Map.Insert (Fname, Unit);
       else
@@ -377,6 +378,10 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       end if;
       Free (Unit.TDH);
       Free (Unit.AST_Mem_Pool);
+      for D of Unit.Deallocatables loop
+         D.Deallocate (D.Object);
+      end loop;
+      Deallocatable_Vectors.Destroy (Unit.Deallocatables);
       Free (Unit_Var);
    end Destroy;
 
@@ -452,5 +457,19 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    begin
       Dump_Lexical_Env (Unit.AST_Root, Unit.Context.Root_Scope);
    end Dump_Lexical_Env;
+
+   ----------------------------
+   -- Register_Deallocatable --
+   ----------------------------
+
+   overriding
+   procedure Register_Deallocatable
+     (Unit       : access Analysis_Unit_Type;
+      Object     : System.Address;
+      Deallocate : Deallocate_Procedure)
+   is
+   begin
+      Deallocatable_Vectors.Append (Unit.Deallocatables, (Object, Deallocate));
+   end Register_Deallocatable;
 
 end ${_self.ada_api_settings.lib_name}.Analysis;

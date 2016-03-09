@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+with System;
+
 with Langkit_Support.Token_Data_Handler;
 use Langkit_Support.Token_Data_Handler;
 
@@ -21,5 +23,15 @@ package ${_self.ada_api_settings.lib_name}.Analysis_Interfaces is
    --  Get an access to the token data handler bundled in Unit. Note that this
    --  token data handler is not valid anymore as soon as Unit is destroy or as
    --  it is reparsed.
+
+   type Deallocate_Procedure is access procedure (Object : System.Address);
+   --  Type for generic deallocation procedure, to be used with
+   --  Register_Deallocatable.
+
+   procedure Register_Deallocatable
+     (Unit       : access Analysis_Unit_Interface_Type;
+      Object     : System.Address;
+      Deallocate : Deallocate_Procedure)
+      is abstract;
 
 end ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;

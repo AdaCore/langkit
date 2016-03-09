@@ -4,11 +4,14 @@ with Ada.Containers.Hashed_Maps;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
 
+with System;
+
 with Langkit_Support.Bump_Ptr;           use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
 with Langkit_Support.Token_Data_Handler;
 use Langkit_Support.Token_Data_Handler;
+with Langkit_Support.Vectors;
 
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
@@ -141,6 +144,19 @@ private
       --  to resolve cross file references.
    end record;
 
+   type Deallocatable_Type is record
+      Object     : System.Address;
+      --  Object to deallocate
+
+      Deallocate : Deallocate_Procedure;
+      --  Prodecure to deallocate Object
+   end record;
+   --  Simple holder to associate an object to deallocate and the procedure to
+   --  perform the deallocation.
+
+   package Deallocatable_Vectors is new Langkit_Support.Vectors
+     (Deallocatable_Type);
+
    type Analysis_Unit_Type is new Analysis_Unit_Interface_Type with
    record
       Context         : Analysis_Context;
@@ -158,6 +174,10 @@ private
       AST_Mem_Pool    : Bump_Ptr_Pool;
       --  This memory pool shall only be used for AST parsing. Stored here
       --  because it is more convenient, but one shall not allocate from it.
+
+      Deallocatables  : Deallocatable_Vectors.Vector;
+      --  Collection of objects to deallocate when destroying the analysis
+      --  unit.
    end record;
 
    overriding
@@ -166,6 +186,12 @@ private
       return Token_Data_Handler_Access
    is
      (Unit.TDH'Access);
+
+   overriding
+   procedure Register_Deallocatable
+     (Unit       : access Analysis_Unit_Type;
+      Object     : System.Address;
+      Deallocate : Deallocate_Procedure);
 
    function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
      (Unit.AST_Root);
