@@ -467,7 +467,7 @@ class AbstractNodeData(object):
         :rtype: str
         """
         return '{}.{}'.format(
-            self.ast_node.name().camel if self.ast_node else '???',
+            self.ast_node.name().camel if self.ast_node else '<unresolved>',
             self.name.lower
         )
 
