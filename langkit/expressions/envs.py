@@ -16,10 +16,10 @@ class EnvGet(AbstractExpression):
     class Expr(ResolvedExpression):
         def __init__(self, env_expr, token_expr, resolve_unique):
             """
-            :param langkit.expressions.base.ResolvedExpression env_expr: The
-                expression representing the env to get from.
-            :param langkit.expressions.base.ResolvedExpression token_expr: The
-                expression representing the token key.
+            :param ResolvedExpression env_expr: The expression representing the
+                env to get from.
+            :param ResolvedExpression token_expr: The expression representing
+                the token key.
             """
             self.env_expr = env_expr
             self.token_expr = token_expr
@@ -52,10 +52,10 @@ class EnvGet(AbstractExpression):
     def __init__(self, env_expr, token_expr,
                  resolve_unique=False):
         """
-        :param langkit.expressions.base.AbstractExpression env_expr:
-            Expression that will yield the env to get the element from.
-        :param langkit.expressions.base.AbstractExpression token_expr:
-            Expression that will yield the token to use as a key on the env.
+        :param AbstractExpression env_expr: Expression that will yield the env
+            to get the element from.
+        :param AbstractExpression token_expr: Expression that will yield the
+            token to use as a key on the env.
         :param bool resolve_unique: Wether we want an unique result or not.
             NOTE: For the moment, nothing will be done to ensure that only one
             result is available. The implementation will just take the first
@@ -114,11 +114,9 @@ class EnvBind(AbstractExpression):
     def __init__(self, env_expr, to_eval_expr):
         """
 
-        :param langkit.expressions.base.AbstractExpression env_expr: An
-            expression that will return a lexical environment in which we will
-            eval to_eval_expr.
-        :param langkit.expressions.base.AbstractExpression to_eval_expr: The
-            expression to eval.
+        :param AbstractExpression env_expr: An expression that will return a
+            lexical environment in which we will eval to_eval_expr.
+        :param AbstractExpression to_eval_expr: The expression to eval.
         """
         self.env_expr = env_expr
         self.to_eval_expr = to_eval_expr

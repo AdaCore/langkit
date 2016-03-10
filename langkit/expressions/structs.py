@@ -47,8 +47,8 @@ class Cast(AbstractExpression):
 
     def __init__(self, expr, astnode, do_raise=False):
         """
-        :param langkit.expressions.base.AbstractExpression expr: Expression
-            on which the cast is performed.
+        :param AbstractExpression expr: Expression on which the cast is
+            performed.
         :param ASTNode astnode: ASTNode subclass to use for the cast.
         :param bool do_raise: Whether the exception should raise an
             exception or return null when the cast is invalid.
@@ -80,8 +80,8 @@ class IsNull(AbstractExpression):
 
     def __init__(self, expr):
         """
-        :param langkit.expressions.base.AbstractExpression expr: Expression on
-            which the test is performed.
+        :param AbstractExpression expr: Expression on which the test is
+            performed.
         """
         self.expr = expr
 
@@ -136,8 +136,8 @@ class New(AbstractExpression):
         :param langkit.compiled_types.Struct struct_type: Struct subclass (but
             not an ASTNode subclass) for the struct type this expression must
             create.
-        :param dict[str, langkit.expressions.base.AbstractExpression] fields:
-            Values to assign to the fields for the created struct value.
+        :param dict[str, AbstractExpression] fields: Values to assign to the
+            fields for the created struct value.
         """
         assert (issubclass(struct_type, Struct) and
                 not issubclass(struct_type, ASTNode))
@@ -194,8 +194,8 @@ class FieldAccess(AbstractExpression):
 
         def __init__(self, receiver_expr, property, arguments):
             """
-            :param langkit.expressions.base.ResolvedExpression receiver_expr:
-                The receiver of the field access.
+            :param ResolvedExpression receiver_expr: The receiver of the field
+                access.
             :param Property|Field property: The accessed property or field.
             :type arguments: list[ResolvedExpression] arguments
             """
@@ -279,8 +279,8 @@ class FieldAccess(AbstractExpression):
 
     def __init__(self, receiver, field, arguments=()):
         """
-        :param langkit.expressions.base.AbstractExpression receiver: Expression
-            on which the field access was done.
+        :param AbstractExpression receiver: Expression on which the field
+            access was done.
 
         :param str field: The name of the field that is accessed.
 

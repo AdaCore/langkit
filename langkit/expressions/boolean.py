@@ -19,8 +19,8 @@ class BinaryBooleanOperator(AbstractExpression):
         """
         :param str kind: Kind for this binary boolean operator
             (short-circuiting).
-        :param langkit.expressions.base.AbstractExpression lhs: Left operand.
-        :param langkit.expressions.base.AbstractExpression rhs: Right operand.
+        :param AbstractExpression lhs: Left operand.
+        :param AbstractExpression rhs: Right operand.
         """
         assert kind in (self.AND, self.OR)
         self.kind = kind
@@ -125,8 +125,8 @@ class Eq(AbstractExpression):
 
     def __init__(self, lhs, rhs):
         """
-        :param langkit.expressions.base.AbstractExpression lhs: Left operand.
-        :param langkit.expressions.base.AbstractExpression rhs: Right operand.
+        :param AbstractExpression lhs: Left operand.
+        :param AbstractExpression rhs: Right operand.
         """
         self.lhs = lhs
         self.rhs = rhs
@@ -209,8 +209,8 @@ class OrderingTest(AbstractExpression):
 
     def __init__(self, operator, lhs, rhs):
         """
-        :param langkit.expressions.base.AbstractExpression lhs: Left operand.
-        :param langkit.expressions.base.AbstractExpression rhs: Right operand.
+        :param AbstractExpression lhs: Left operand.
+        :param AbstractExpression rhs: Right operand.
         """
         assert operator in OrderingTest.OPERATOR_IMAGE
         self.operator = operator
@@ -248,13 +248,10 @@ class If(AbstractExpression):
 
         def __init__(self, cond, then, else_then, rtype):
             """
-            :param langkit.expressions.base.ResolvedExpression cond: A
-            boolean expression.
-            :param langkit.expressions.base.ResolvedExpression then: If
-            "cond" is evaluated to true,
+            :param ResolvedExpression cond: A boolean expression.
+            :param ResolvedExpression then: If "cond" is evaluated to true,
                 this part is returned.
-            :param langkit.expressions.base.ResolvedExpression else_then: If
-            "cond" is evaluated to
+            :param ResolvedExpression else_then: If "cond" is evaluated to
                 false, this part is returned.
             :param langkit.compiled_types.CompiledType rtype: Type parameter.
                 The type that is returned by then and else_then.
@@ -280,12 +277,10 @@ class If(AbstractExpression):
 
     def __init__(self, cond, then, else_then):
         """
-        :param langkit.expressions.base.AbstractExpression cond: A boolean
-            expression.
-        :param langkit.expressions.base.AbstractExpression then: If "cond"
-            is evaluated to true, this part is returned.
-        :param langkit.expressions.base.AbstractExpression else_then: If "cond"
-            is evaluated to false,
+        :param AbstractExpression cond: A boolean expression.
+        :param AbstractExpression then: If "cond" is evaluated to true, this
+            part is returned.
+        :param AbstractExpression else_then: If "cond" is evaluated to false,
             this part is returned.
         """
         self.cond = cond
@@ -328,8 +323,7 @@ class Not(AbstractExpression):
 
     def __init__(self, expr):
         """
-        :param langkit.expressions.base.AbstractExpression expr: Operand for
-            the "not" expression.
+        :param AbstractExpression expr: Operand for the "not" expression.
         """
         self.expr = expr
 
@@ -373,8 +367,8 @@ class Then(AbstractExpression):
 
     def __init__(self, expr, then_fn, default_val=None):
         """
-        :param AbstractExpression expr: The expression to use as a source
-            for the then. Must be of a pointer type.
+        :param AbstractExpression expr: The expression to use as a source for
+            the then. Must be of a pointer type.
         :param (AbstractExpression) -> AbstractExpression then_fn: The
             function describing the expression to compute if expr is not null.
         :param AbstractExpression default_val: The expression to use as

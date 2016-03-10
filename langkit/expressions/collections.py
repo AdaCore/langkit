@@ -27,7 +27,7 @@ class CollectionExpression(AbstractExpression):
             expression to evaluate for each item in "collection". If the
             function takes two parameters, the first one will also be the
             an induction variable for the iteration index.
-        :type collection: langkit.expressions.base.AbstractExpression
+        :type collection: AbstractExpression
         """
         super(CollectionExpression, self).__init__()
         self.collection = collection
@@ -72,7 +72,7 @@ class CollectionExpression(AbstractExpression):
         4. The index induction variable, also in the AbstractExpression form,
            or None if no such variable is needed for iteration.
 
-        :rtype: langkit.expressions.base.ResolvedExpression
+        :rtype: ResolvedExpression
         """
         collection_expr = construct(self.collection)
         assert collection_expr.type.is_collection(), (
@@ -93,11 +93,9 @@ class Contains(CollectionExpression):
 
     def __init__(self, collection, item):
         """
-        :param langkit.expressions.base.AbstractExpression collection: The
-        collection of which to check
+        :param AbstractExpression collection: The collection of which to check
             membership.
-        :param langkit.expressions.base.AbstractExpression item: The item to
-        check in "collection".
+        :param AbstractExpression item: The item to check in "collection".
         """
         self.item = item
         super(Contains, self).__init__(
@@ -247,17 +245,17 @@ class Quantifier(CollectionExpression):
             :param ResolvedExpression expr: Expression to evaluate for each
                 item in "collection".
 
-            :param langkit.expressions.base.ResolvedExpression collection:
-                Collection on which this map operation works.
+            :param ResolvedExpression collection: Collection on which this map
+                operation works.
 
-            :param langkit.expressions.base.ResolvedExpression expr: A
-                boolean expression to evaluate on the collection's items.
+            :param ResolvedExpression expr: A boolean expression to evaluate on
+                the collection's items.
 
             :param induction_var: Variable to use in "expr".
-            :type induction_var: langkit.expressions.base.ResolvedExpression
+            :type induction_var: ResolvedExpression
 
             :param index_var: Index variable to use in "expr".
-            :type index_var: None|langkit.expressions.base.ResolvedExpression
+            :type index_var: None|ResolvedExpression
             """
             self.kind = kind
             self.collection = collection
