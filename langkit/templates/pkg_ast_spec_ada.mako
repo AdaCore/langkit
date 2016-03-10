@@ -184,7 +184,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
    function Parents
      (Node : access ${root_node_value_type}; Include_Self : Boolean := False)
       return ${root_node_array.name()};
-   --  Return the list of parents for this node (this node included)
+   --  Return the list of parents for this node. This node included in the list
+   --  iff Include_Self.
 
    type Visit_Status is (Into, Over, Stop);
    --  Helper type to control the AST node traversal process. See Traverse.
