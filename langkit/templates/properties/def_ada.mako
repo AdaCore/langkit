@@ -27,7 +27,7 @@ is
    Current_Env : AST_Envs.Lexical_Env :=
      (if ${property.env_arg_name} /= null
       then ${property.env_arg_name}
-      else Node.Parent_Env);
+      else Node.Self_Env);
    pragma Warnings (On, "is not referenced");
 
    ${property.vars.render()}

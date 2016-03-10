@@ -724,10 +724,22 @@ class StructMetaClass(type):
                 )
 
         # Here, we'll register fields and properties for the root AST node
-        # class.
+        # class. Note that we must not provide implementation for them here (no
+        # expression) since the implementation comes from the hard-coded root
+        # AST node type definition.
         if is_root_grammar_class:
-            dct["parent_env"] = BuiltinField(type=LexicalEnvType,
-                                             is_private=True)
+            dct["node_env"] = BuiltinField(
+                type=LexicalEnvType, is_private=True,
+                doc='For nodes that introduce a new environment, return the'
+                    ' parent lexical environment. Return the "inherited"'
+                    ' environment otherwise.'
+            )
+            dct["children_env"] = BuiltinField(
+                type=LexicalEnvType, is_private=True,
+                doc='For nodes that introduce a new environment, return it.'
+                    ' Return the "inherited" environment otherwise.'
+            )
+
             dct["parent"] = BuiltinField(
                 type=None,
                 doc="Return the lexical parent for this node. Return null for"

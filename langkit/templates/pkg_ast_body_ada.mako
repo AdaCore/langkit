@@ -485,8 +485,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    is
 
       --  The internal algorithm, as well as the Do_Env_Action implementations,
-      --  use an implicit stack of environment, where the topmost parent
-      --  environment (Parent_Env parameter) is mutable.
+      --  use an implicit stack of environment, where the topmost
+      --  environment (Current_Env parameter) is mutable.
       --
       --  - We want to be able to replace the topmost env that will be seen by
       --    subsequent nodes. This is to support constructs such as use clauses
@@ -515,45 +515,46 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       --    like in the GNAT compiler.
 
       procedure Populate_Internal
-        (Node : ${root_node_type_name};
-         Parent_Env : aliased in out Lexical_Env);
+        (Node        : ${root_node_type_name};
+         Current_Env : in out Lexical_Env);
 
       -----------------------
       -- Populate_Internal --
       -----------------------
 
       procedure Populate_Internal
-        (Node : ${root_node_type_name};
-         Parent_Env : aliased in out Lexical_Env)
+        (Node        : ${root_node_type_name};
+         Current_Env : in out Lexical_Env)
       is
-         New_Parent_Env : aliased Lexical_Env;
+         Children_Env : Lexical_Env;
       begin
          if Node = null then
             return;
          end if;
 
-         --  Set the lexical env of node to the Parent environment
-         Node.Parent_Env := Parent_Env;
+         --  By default (i.e. unless Do_Env_Actions does something special),
+         --  the environment we store in Node is the current one.
+         Node.Self_Env := Current_Env;
 
          --  Call Do_Env_Actions on the Node. This might:
-         --  1. Mutate the Parent_Env functionally, eg. replace the pointer by
-         --     a pointer to a new env derived from Parent_Env.
-         --  2. Return a new Env, that will be used as the Parent_Env for the
-         --     node's children.
-         New_Parent_Env := Node.Do_Env_Actions (Parent_Env);
+         --  1. Mutate Current_Env, eg. replace it with a new env derived from
+         --     Current_Env.
+         --  2. Return a new env, that will be used as the Current_Env for
+         --     Node's children.
+         Children_Env := Node.Do_Env_Actions (Current_Env);
 
-         --  Call recursively on children. Use the New_Parent_Env if available,
-         --  else pass the existing Parent_Env.
+         --  Call recursively on children. Use the Children_Env if available,
+         --  else pass the existing Current_Env.
          for Child of Children (Node) loop
-            if New_Parent_Env = null then
-               Populate_Internal (Child, Parent_Env);
+            if Children_Env = null then
+               Populate_Internal (Child, Current_Env);
             else
-               Populate_Internal (Child, New_Parent_Env);
+               Populate_Internal (Child, Children_Env);
             end if;
          end loop;
       end Populate_Internal;
 
-      Env : aliased AST_Envs.Lexical_Env := Root_Env;
+      Env : AST_Envs.Lexical_Env := Root_Env;
    begin
       Populate_Internal (Node, Env);
    end Populate_Lexical_Env;
@@ -617,7 +618,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    ----------
 
    procedure Dump_One_Lexical_Env
-     (Self : AST_Envs.Lexical_Env; Env_Id : String := "";
+     (Self          : AST_Envs.Lexical_Env; Env_Id : String := "";
       Parent_Env_Id : String := "")
    is
       use Sorted_Envs;
@@ -695,8 +696,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          --  we'll only dump environments at the site of their creation, and
          --  not in any subsequent link. We use the Env_Ids map to check which
          --  envs we have already seen or not.
-         if not Env_Ids.Contains (Current.Parent_Env) then
-            Env := Current.Parent_Env;
+         if not Env_Ids.Contains (Current.Self_Env) then
+            Env := Current.Self_Env;
             Put ("<" & Kind_Name (Current) & " "
                  & Image (Sloc_Range (Current)) & "> - ");
             Dump_One_Lexical_Env

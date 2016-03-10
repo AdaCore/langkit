@@ -78,7 +78,7 @@ class EnvSpec(object):
         :param ResolvedExpression expr: The expression to render.
         :rtype: str
         """
-        with expressions.Env.bind_name("Parent_Env"):
+        with expressions.Env.bind_name("Current_Env"):
             return expr.render_expr()
 
     @property

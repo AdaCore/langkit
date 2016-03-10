@@ -94,11 +94,21 @@
 
    % if not cls.abstract:
       % if cls.env_spec:
+
          overriding
          function Do_Env_Actions
-           (Self       : access ${type_name};
-            Parent_Env : in out AST_Envs.Lexical_Env)
+           (Self        : access ${type_name};
+            Current_Env : in out AST_Envs.Lexical_Env)
             return AST_Envs.Lexical_Env;
+
+         % if cls.env_spec._add_env:
+            overriding
+            function Children_Env
+              (Node : access ${type_name})
+               return AST_Envs.Lexical_Env
+            is (Node.Self_Env.Parent);
+         % endif
+
       % endif
 
       overriding
@@ -360,14 +370,14 @@
 
       overriding
       function Do_Env_Actions
-        (Self : access ${type_name};
-         Parent_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
+        (Self        : access ${type_name};
+         Current_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
       is
          use AST_Envs;
          use AST_Envs.Lexical_Env_Vectors;
 
          Ret         : Lexical_Env := null;
-         Initial_Env : Lexical_Env := Parent_Env;
+         Initial_Env : Lexical_Env := Current_Env;
 
          <%def name="add_to_env(key, val)">
             ## Add a new entry to the lexical env, for which the key is
@@ -391,7 +401,6 @@
             ## add elements to the lexical environment.
 
             % if cls.env_spec._add_to_env[0].type.is_list_type:
-
                ## If the supplied expression for the key has type list, we add
                ## a (kn, v) pair for every kn in the list. V stays the same for
                ## every element.
@@ -401,6 +410,7 @@
                for El of ${cls.env_spec.add_to_env_key}.Vec loop
                   ${add_to_env("El", cls.env_spec.add_to_env_val)}
                end loop;
+
             % else:
                ## Else, just add (key, val) pair once
                ${add_to_env(cls.env_spec.add_to_env_key,
@@ -412,7 +422,7 @@
             Ret := AST_Envs.Create (Initial_Env);
             Self.Unit.Register_Deallocatable
               (Ret.all'Address, Deallocate_Lexical_Env'Access);
-            Self.Parent_Env := Ret;
+            Self.Self_Env := Ret;
          % endif
 
          return Ret;

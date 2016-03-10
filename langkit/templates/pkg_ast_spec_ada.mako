@@ -374,8 +374,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  root env explicitly so that we can tag it properly in the output.
 
    procedure Dump_One_Lexical_Env
-     (Self : AST_Envs.Lexical_Env;
-      Env_Id : String := "";
+     (Self          : AST_Envs.Lexical_Env;
+      Env_Id        : String := "";
       Parent_Env_Id : String := "");
    --  Debug helper: Dumps one lexical env. You can supply ids for env and its
    --  parent, so that they will be identified in the output.
@@ -431,8 +431,11 @@ private
       --  Reference to the analysis unit that owns this node
 
       Token_Start, Token_End : Natural  := 0;
-      Parent_Env             : AST_Envs.Lexical_Env;
       Extensions             : Extension_Vectors.Vector;
+
+      Self_Env               : AST_Envs.Lexical_Env;
+      --  Hold the environment this node defines, or the parent environment
+      --  otherwise.
    end record;
    --  TODO??? Remove this from the public API
 
@@ -447,24 +450,36 @@ private
    --  that are not lists).
 
    function Do_Env_Actions
-     (Self       : access ${root_node_value_type};
-      Parent_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
+     (Self        : access ${root_node_value_type};
+      Current_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
    is (null);
    --  Internal procedure that will execute all necessary lexical env actions
    --  for Node. This is meant to be called by Populate_Lexical_Env, and not by
    --  the user.
    --
-   --  Parent_Env is the environment that is the parent scope for Self when
+   --  Current_Env is the environment that is the parent scope for Self when
    --  entering the function. It is an in out parameter because the
-   --  implementation can replace Parent_Env by a new Lexical_Env derived from
+   --  implementation can replace it by a new Lexical_Env derived from
    --  it.
    --
    --  The return value can be either null, or a new Lexical_Env that represent
    --  a new scope that will be used by Self's children.
-   --  The difference between replacing Parent_Env and returning a new env, is
-   --  that replacing Parent_Env will affect the env that the following
+   --  The difference between replacing Current_Env and returning a new env, is
+   --  that replacing Current_Env will affect the env that the following
    --  siblings of Self see, while returning a new env will only affect the
    --  environment seen by Self's children.
+
+   function Node_Env
+     (Node : access ${root_node_value_type})
+      return AST_Envs.Lexical_Env
+   is (Node.Self_Env);
+   ${ada_doc(_self.root_grammar_class._fields['node_env'], 3)}
+
+   function Children_Env
+     (Node : access ${root_node_value_type})
+      return AST_Envs.Lexical_Env
+   is (Node.Self_Env);
+   ${ada_doc(_self.root_grammar_class._fields['children_env'], 3)}
 
    --------------------------------
    -- Tree traversal (internals) --
