@@ -555,7 +555,7 @@ class AbstractField(AbstractNodeData):
         self._type = type
 
     def __repr__(self):
-        return '<ASTNode {} Field({})>'.format(self._index, self._name)
+        return '<ASTNode {} Field({})>'.format(self._index, self.qualname)
 
     def doc(self):
         return self._doc
