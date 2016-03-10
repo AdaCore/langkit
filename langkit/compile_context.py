@@ -462,9 +462,10 @@ class CompileCtx():
         #   * the prepare pass on all properties;
         #   * then, the freeze pass on all properties;
         #   * then, the compute pass.
-        for pass_fn in (lambda astnode, prop: prop.prepare(),
-                        lambda astnode, prop: prop.freeze(),
-                        lambda astnode, prop: prop.compute(astnode)):
+        passes = (lambda astnode, prop: prop.prepare(),
+                  lambda astnode, prop: prop.freeze(),
+                  lambda astnode, prop: prop.compute(astnode))
+        for pass_fn in passes:
             for astnode in self.astnode_types:
                 for prop in astnode.get_properties(include_inherited=False):
                     pass_fn(astnode, prop)
