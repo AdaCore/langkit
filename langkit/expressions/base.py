@@ -614,12 +614,15 @@ class Property(AbstractNodeData):
 
     __current_property__ = None
 
+    # Overridings for AbstractNodeData class attributes
     is_property = True
     prefix = names.Name("P")
 
+    # Reserved names for arguments in generated subprograms
     self_arg_name = names.Name('Node')
     env_arg_name = names.Name('Lex_Env')
 
+    # Collections for these
     reserved_arg_names = (self_arg_name, env_arg_name)
     reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
 
