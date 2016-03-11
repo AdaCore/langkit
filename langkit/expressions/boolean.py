@@ -1,8 +1,8 @@
 from langkit import names
 from langkit.compiled_types import BoolType, ASTNode, LongType, Struct
 from langkit.expressions.base import (
-    render, Property, LiteralExpr, AbstractExpression, construct,
-    ResolvedExpression, AbstractVariable
+    AbstractExpression, AbstractVariable, LiteralExpr, No, Property,
+    ResolvedExpression, render, construct,
 )
 from langkit.utils import assert_type
 
@@ -395,10 +395,17 @@ class Then(AbstractExpression):
         then_expr = construct(self.then_expr)
 
         # Affect default value to the fallback expression. For the moment,
-        # only booleans are handled.
+        # only booleans and AST nodes are handled.
         if not self.default_val:
             if then_expr.type.matches(BoolType):
                 default_expr = construct(False)
+            elif issubclass(then_expr.type, Struct):
+                default_expr = construct(No(
+                    # Because we're doing issubclass instead of isinstance,
+                    # PyCharm do not understand that then_exp.type is a Struct,
+                    # so the following is necessary not to have warnings.
+                    assert_type(then_expr.type, Struct)
+                ))
             else:
                 raise AssertionError(
                     "Then expression should have a default value provided, "
