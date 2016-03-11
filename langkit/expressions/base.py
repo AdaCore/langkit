@@ -172,7 +172,14 @@ class AbstractExpression(Frozable):
             self.__dict__['_is_prepared'] = True
             for _, v in self.__dict__.items():
                 if isinstance(v, AbstractExpression):
+                    # Prepare the AbstractExpression direct attributes
                     v.prepare()
+
+                elif isinstance(v, (list, tuple)):
+                    # Also prepare the ones in list attributes
+                    for item in v:
+                        if isinstance(item, AbstractExpression):
+                            item.prepare()
 
     def construct(self):
         """
