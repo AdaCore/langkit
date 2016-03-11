@@ -601,6 +601,34 @@ class Let(AbstractExpression):
         return Let.Expr(vars, var_exprs, construct(self.expr))
 
 
+class No(AbstractExpression):
+    """
+    Expression that returns a null value.
+
+    So far, it is only supported for Struct subclasses.
+    """
+
+    def __init__(self, return_type):
+        """
+        :param langkit.expressions.structs.Struct return_type: Type parameter.
+            Type for the returned value.
+        """
+        from langkit.expressions.structs import Struct
+        user_assert(
+            inspect.isclass(return_type) and issubclass(return_type, Struct),
+            'Invalid return type for Null expression: {}'.format(return_type)
+        )
+        self.return_type = return_type
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: LiteralExpr
+        """
+        return LiteralExpr(self.return_type.nullexpr(), self.return_type)
+
+
 def render(*args, **kwargs):
     return ct_render(*args, property=Property.get(), Self=Self, **kwargs)
 
