@@ -803,7 +803,11 @@ class Property(AbstractNodeData):
         expression templates.
         """
         assert self.__current_property__ is None, (
-            "You cannot nest calls to Property.bind_type context manager"
+            'Invalid Property.bind context manager nesting detected: tried to'
+            ' do it on {} while processing {}'.format(
+                self.qualname,
+                self.__current_property__.qualname,
+            )
         )
         self.__class__.__current_property__ = self
         yield
