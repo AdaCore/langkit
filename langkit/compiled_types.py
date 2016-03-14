@@ -145,6 +145,10 @@ class CompiledType(object):
         If needed, put bits into the global context to implement this compiled
         type.
 
+        Note that once this method got called on some "cls", further calls on
+        the same class must do nothing. Thus it is safe to call this method
+        multiple times for the same type.
+
         Must be overriden in subclasses if needed.
         """
         pass
