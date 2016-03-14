@@ -647,7 +647,14 @@ class Property(AbstractNodeData):
     and functions will be generated in the resulting library.
     """
 
-    __current_property__ = None
+    __current_properties__ = []
+    """
+    Stack for the properties that are currently bound.
+
+    See the "bind" method.
+
+    :type: list[Property|None]
+    """
 
     # Overridings for AbstractNodeData class attributes
     is_property = True
@@ -794,24 +801,36 @@ class Property(AbstractNodeData):
 
         :rtype: Property
         """
-        return cls.__current_property__
+        return (cls.__current_properties__[-1]
+                if cls.__current_properties__ else
+                None)
 
     @contextmanager
     def bind(self):
         """
-        Bind the current property to self, so that it is accessible in the
+        Bind the current property to "Self", so that it is accessible in the
         expression templates.
         """
-        assert self.__current_property__ is None, (
-            'Invalid Property.bind context manager nesting detected: tried to'
-            ' do it on {} while processing {}'.format(
-                self.qualname,
-                self.__current_property__.qualname,
-            )
-        )
-        self.__class__.__current_property__ = self
+        self.__current_properties__.append(self)
         yield
-        self.__class__.__current_property__ = None
+        self.__current_properties__.pop()
+
+    @classmethod
+    def bind_none(cls):
+        """
+        Unbind "Self", so that compilation no longer see the current property.
+
+        This is needed to compile Property-less expressions such as environment
+        specifications.
+        """
+
+        @contextmanager
+        def guard():
+            cls.__current_properties__.append(None)
+            yield
+            cls.__current_properties__.pop()
+
+        return guard()
 
     @property
     def type(self):

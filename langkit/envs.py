@@ -113,15 +113,16 @@ class EnvSpec(object):
         :param langkit.compiled_types.ASTNode ast_node_type: The ASTNode
             type this environment specification is attached to.
         """
-        if self._unresolved_initial_env:
-            check_simple_expr(self._unresolved_initial_env)
-            with expressions.Self.bind_type(ast_node_type):
-                self._initial_env = construct(self._unresolved_initial_env)
+        with expressions.Property.bind_none():
+            if self._unresolved_initial_env:
+                check_simple_expr(self._unresolved_initial_env)
+                with expressions.Self.bind_type(ast_node_type):
+                    self._initial_env = construct(self._unresolved_initial_env)
 
-        if self._unresolved_add_to_env:
-            for e in self._unresolved_add_to_env:
-                check_simple_expr(e)
+            if self._unresolved_add_to_env:
+                for e in self._unresolved_add_to_env:
+                    check_simple_expr(e)
 
-            with expressions.Self.bind_type(ast_node_type):
-                kexpr, vexpr = self._unresolved_add_to_env
-                self._add_to_env = construct(kexpr), construct(vexpr)
+                with expressions.Self.bind_type(ast_node_type):
+                    kexpr, vexpr = self._unresolved_add_to_env
+                    self._add_to_env = construct(kexpr), construct(vexpr)
