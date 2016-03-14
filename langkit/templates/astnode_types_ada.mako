@@ -92,25 +92,25 @@
       null record;
    % endif
 
-   % if not cls.abstract:
-      % if cls.env_spec:
+   % if cls.env_spec:
 
+      overriding
+      function Do_Env_Actions
+        (Self        : access ${type_name};
+         Current_Env : in out AST_Envs.Lexical_Env)
+         return AST_Envs.Lexical_Env;
+
+      % if cls.env_spec._add_env:
          overriding
-         function Do_Env_Actions
-           (Self        : access ${type_name};
-            Current_Env : in out AST_Envs.Lexical_Env)
-            return AST_Envs.Lexical_Env;
-
-         % if cls.env_spec._add_env:
-            overriding
-            function Children_Env
-              (Node : access ${type_name})
-               return AST_Envs.Lexical_Env
-            is (Node.Self_Env.Parent);
-         % endif
-
+         function Children_Env
+           (Node : access ${type_name})
+            return AST_Envs.Lexical_Env
+         is (Node.Self_Env.Parent);
       % endif
 
+   % endif
+
+   % if not cls.abstract:
       overriding
       function Lookup_Children (Node : access ${type_name};
                                 Sloc : Source_Location;
@@ -363,71 +363,72 @@
          return Nod;
       end Lookup_Children;
 
-      % if cls.env_spec:
-      --------------------
-      -- Do_Env_Actions --
-      --------------------
+   % endif
 
-      overriding
-      function Do_Env_Actions
-        (Self        : access ${type_name};
-         Current_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
-      is
-         use AST_Envs;
-         use AST_Envs.Lexical_Env_Vectors;
+   % if cls.env_spec:
+   --------------------
+   -- Do_Env_Actions --
+   --------------------
 
-         Ret         : Lexical_Env := null;
-         Initial_Env : Lexical_Env := Current_Env;
+   overriding
+   function Do_Env_Actions
+     (Self        : access ${type_name};
+      Current_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
+   is
+      use AST_Envs;
+      use AST_Envs.Lexical_Env_Vectors;
 
-         <%def name="add_to_env(key, val)">
-            ## Add a new entry to the lexical env, for which the key is
-            ## the symbol for retrieved token, and the value is the
-            ## result of the expression for the value.
+      Ret         : Lexical_Env := null;
+      Initial_Env : Lexical_Env := Current_Env;
 
-            ## We assume the existence of a P_Name property on the result
-            ## of the key expression. TODO: Add check for this in
-            ## EnvSpec.compute.
-            Add (Initial_Env, Symbol_Type (${key}.P_Name.Text),
-                 ${root_node_type_name} (${val.strip()}));
-         </%def>
-      begin
+      <%def name="add_to_env(key, val)">
+         ## Add a new entry to the lexical env, for which the key is
+         ## the symbol for retrieved token, and the value is the
+         ## result of the expression for the value.
 
-         % if cls.env_spec._initial_env:
-            Initial_Env := ${cls.env_spec.initial_env};
-         % endif
+         ## We assume the existence of a P_Name property on the result
+         ## of the key expression. TODO: Add check for this in
+         ## EnvSpec.compute.
+         Add (Initial_Env, Symbol_Type (${key}.P_Name.Text),
+              ${root_node_type_name} (${val.strip()}));
+      </%def>
+   begin
 
-         % if cls.env_spec._add_to_env:
-            ## If we have an _add_to_env specification, we generate code to
-            ## add elements to the lexical environment.
-
-            % if cls.env_spec._add_to_env[0].type.is_list_type:
-               ## If the supplied expression for the key has type list, we add
-               ## a (kn, v) pair for every kn in the list. V stays the same for
-               ## every element.
-               ## TODO: We'd like to support both Property DSL array types and
-               ## AST lists here, but we need a common iteration protocol
-               ## first.
-               for El of ${cls.env_spec.add_to_env_key}.Vec loop
-                  ${add_to_env("El", cls.env_spec.add_to_env_val)}
-               end loop;
-
-            % else:
-               ## Else, just add (key, val) pair once
-               ${add_to_env(cls.env_spec.add_to_env_key,
-                            cls.env_spec.add_to_env_val)}
-            % endif
-         % endif
-
-         % if cls.env_spec._add_env:
-            Ret := AST_Envs.Create (Initial_Env);
-            Self.Unit.Register_Deallocatable
-              (Ret.all'Address, Deallocate_Lexical_Env'Access);
-            Self.Self_Env := Ret;
-         % endif
-
-         return Ret;
-      end Do_Env_Actions;
+      % if cls.env_spec._initial_env:
+         Initial_Env := ${cls.env_spec.initial_env};
       % endif
+
+      % if cls.env_spec._add_to_env:
+         ## If we have an _add_to_env specification, we generate code to
+         ## add elements to the lexical environment.
+
+         % if cls.env_spec._add_to_env[0].type.is_list_type:
+            ## If the supplied expression for the key has type list, we add
+            ## a (kn, v) pair for every kn in the list. V stays the same for
+            ## every element.
+            ## TODO: We'd like to support both Property DSL array types and
+            ## AST lists here, but we need a common iteration protocol
+            ## first.
+            for El of ${cls.env_spec.add_to_env_key}.Vec loop
+               ${add_to_env("El", cls.env_spec.add_to_env_val)}
+            end loop;
+
+         % else:
+            ## Else, just add (key, val) pair once
+            ${add_to_env(cls.env_spec.add_to_env_key,
+                         cls.env_spec.add_to_env_val)}
+         % endif
+      % endif
+
+      % if cls.env_spec._add_env:
+         Ret := AST_Envs.Create (Initial_Env);
+         Self.Unit.Register_Deallocatable
+           (Ret.all'Address, Deallocate_Lexical_Env'Access);
+         Self.Self_Env := Ret;
+      % endif
+
+      return Ret;
+   end Do_Env_Actions;
    % endif
 
    ## Body of attribute getters
