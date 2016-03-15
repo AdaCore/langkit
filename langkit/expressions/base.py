@@ -689,11 +689,16 @@ class Property(AbstractNodeData):
         :param bool private: Whether this property is private or not.
         :param bool abstract: Whether this property is abstract or not. If this
             is True, then expr can be None.
-        :param CompiledType|None type: The optional type annotation for this
-            property. If supplied, it will be used to check the validity of
-            inferred types for this propery, and eventually for overriding
-            properties in sub classes. NOTE: The type is mandatory for abstract
-            base properties and for properties that take parameters.
+
+        :param type: The optional type annotation for this property. If
+            supplied, it will be used to check the validity of inferred types
+            for this propery, and eventually for overriding properties in sub
+            classes. NOTE: The type is mandatory for abstract base properties
+            and for properties that take parameters. If the type itself is not
+            available when creating the property, a lambda function that
+            returns it is available.
+        :type type: CompiledType|() -> CompiledType|None
+
         :param abstract_runtime_check: If the property is abstract, whether the
             implementation by subclasses requirement must be checked at compile
             time, or at runtime. If true, you can have an abstract property
@@ -707,7 +712,8 @@ class Property(AbstractNodeData):
 
         super(Property, self).__init__(private=private)
 
-        assert ((expr is None and abstract) or (expr and not abstract)), (
+        assert ((expr is None and abstract) or
+                (expr is not None and not abstract)), (
             "Property can either be abstract, either have an expression, "
             "not both"
         )
@@ -889,6 +895,8 @@ class Property(AbstractNodeData):
 
         :rtype: None
         """
+        if self.expected_type and not inspect.isclass(self.expected_type):
+            self.expected_type = self.expected_type()
 
         # Add the implicit lexical env. parameter
         self._add_argument(Property.env_arg_name,
