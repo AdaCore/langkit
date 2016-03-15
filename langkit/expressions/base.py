@@ -1121,6 +1121,33 @@ class LiteralExpr(ResolvedExpression):
                                               self.type.name().camel)
 
 
+class UnreachableExpr(ResolvedExpression):
+    """
+    Resolved expression that just raises an error.
+
+    This is useful to use as a placeholder for unreachable code.
+    """
+
+    def __init__(self, expr_type):
+        """
+        :param CompiledType expr_type: Type parameter. Type that a usual
+            expression would return in this case.
+        """
+        self.expr_type = expr_type
+
+    @property
+    def type(self):
+        return self.expr_type
+
+    def render_expr(self):
+        return 'raise Program_Error'
+
+    def __repr__(self):
+        return '<UnreachableExpr (for {} expr)>'.format(
+            self.type.name().camel
+        )
+
+
 class LocalVars(object):
     """
     Represents the state of local variables in a property definition.
