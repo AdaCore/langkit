@@ -16,11 +16,15 @@ class Cast(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
-        def __init__(self, expr, astnode, do_raise=False):
+        def __init__(self, expr, astnode, do_raise=False, result_var=None):
             """
             :type expr: ResolvedExpr
             :type astnode: ASTNode
             :type do_raise: bool
+
+            :param ResolvedExpr result_var: If provided, the cast will use it
+                to store the cast result. Othewise, a dedicated variable is
+                created for this.
             """
             self.do_raise = do_raise
             self.expr = expr
@@ -28,7 +32,16 @@ class Cast(AbstractExpression):
 
             p = Property.get()
             self.expr_var = p.vars.create('Cast_Expr', self.expr.type)
-            self.result_var = p.vars.create('Cast_Result', astnode)
+            self.result_var = (
+                result_var or p.vars.create('Cast_Result', astnode)
+            )
+            assert self.result_var.type == astnode, (
+                'Cast temporaries must have exactly the cast type: {} expeced'
+                ' but got {} instead'.format(
+                    astnode.name().camel,
+                    self.result_var.type.name().camel
+                )
+            )
 
         @property
         def type(self):
