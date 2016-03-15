@@ -1088,6 +1088,18 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
                     abstract_runtime_check=runtime_check, **kwargs)
 
 
+class Literal(AbstractExpression):
+    """
+    Expression for literals of any type.
+    """
+
+    def __init__(self, literal):
+        self.literal = literal
+
+    def construct(self):
+        return construct(self.literal)
+
+
 class LiteralExpr(ResolvedExpression):
     """
     Resolved expression for literals of any type.
