@@ -1,10 +1,12 @@
+import inspect
+
 from langkit import names
 from langkit.compiled_types import ASTNode, Struct, BoolType
 from langkit.expressions.base import (
-    AbstractExpression, ResolvedExpression, construct, render, Property,
-    LiteralExpr
+    AbstractExpression, AbstractVariable, ResolvedExpression, construct,
+    render, Property, LiteralExpr, UnreachableExpr
 )
-from langkit.expressions.boolean import Eq
+from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
 from langkit.utils import assert_type, col, user_assert, Colors
 
@@ -433,3 +435,165 @@ class IsA(AbstractExpression):
                 ' check must be a subclass of the value static type.'
             )
         return IsA.Expr(expr, self.astnodes)
+
+
+class Match(AbstractExpression):
+    """
+    Expression that performs computations that depend on a AST node type match.
+
+    For instance::
+
+        expression.match(
+            lambda n=SomeNodeType: t.foo,
+            lambda n=SomeOtherType: t.bar,
+        )
+
+    Will return t.foo for a node "t" that is a SomeNodeType.
+    """
+
+    class Expr(ResolvedExpression):
+        pass
+
+    def __init__(self, expr, *matchers):
+        """
+        :param AbstractExpression expr: The expression to match.
+
+        :param matchers: Sequence of functions that return the expressions to
+            evaluate depending on the match. There are two cases.
+
+            1.  Either they all must accept one optional argument whose default
+                values are the types to match. In this case, the set of types
+                to match must cover all possible values. For instance, given
+                the following type tree::
+
+                    Statement
+                    Expr:
+                        BinaryOp:
+                            PlusOp
+                            MinusOp
+                        Call
+
+                Then given an "expr" parameter that yields an Expr value, the
+                follwing matchers are valid::
+
+                    Match(expr,
+                          lambda e=PlusOp: X,
+                          lambda e=MinusOp: Y,
+                          lambda e=Call: Z)
+                    Match(expr,
+                          lambda e=BinaryOp: X,
+                          lambda e=Call: Y)
+
+                But the following are not::
+
+                    # MinusOp not handled:
+                    Match(expr,
+                          lambda e=PlusOp: X,
+                          lambda e=Call: Z)
+
+                    # Expr nodes can never be Statement
+                    Match(expr,
+                          lambda e=BinaryOp: X,
+                          lambda e=Call: Y,
+                          lambda e=Statement: Z)
+
+            2.  Otherwise, all but one must accept such an optional argument.
+                The only other one must accept a mandatory argument and will
+                match the remaining cases. For
+                instance::
+
+                    Match(expr,
+                          lambda e=BinaryOp: X,
+                          lambda e: Y)
+        :type matchers: list[() -> AbstractExpression]
+        """
+        self.matched_expr = expr
+        self.matchers_functions = matchers
+
+        self.matchers = None
+        """
+        Dictionary of matchers. Built in the "prepare" pass.
+        :type: dict[CompiledType, (AbstractVariable, AbstractExpression)]
+        """
+
+    def do_prepare(self):
+        # TODO: implement complete input validation
+        self.matchers = {}
+
+        for i, match_fn in enumerate(self.matchers_functions):
+            argspec = inspect.getargspec(match_fn)
+            user_assert(len(argspec.args) == 1 and
+                        not argspec.varargs and
+                        not argspec.keywords and
+                        (not argspec.defaults or len(argspec.defaults) < 2),
+                        'Invalid matcher lambda')
+
+            if argspec.defaults:
+                match_type = argspec.defaults[0]
+                user_assert(inspect.isclass(match_type) and
+                            issubclass(match_type, ASTNode) and
+                            match_type != ASTNode,
+                            'Invalid matching type: {}'.format(match_type))
+            else:
+                match_type = None
+
+            match_var = AbstractVariable(
+                names.Name('Match_{}'.format(i)),
+                type=match_type,
+                create_local=True
+            )
+            self.matchers[match_type] = (match_var, match_fn(match_var))
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: ResolvedExpression
+        """
+        matched_expr = construct(self.matched_expr)
+        user_assert(issubclass(matched_expr.type, ASTNode),
+                    'Match expressions can only work on AST nodes')
+
+        # The default matcher (if any) matches the most general type, which is
+        # the input type.
+        default_matcher = self.matchers.get(None)
+        if default_matcher:
+            match_var, match_expr = default_matcher
+            match_var.set_type(matched_expr.type)
+
+        # We are going to expand this Match expression into a chain of if/else
+        # constructs that will test the matchers one by one. We have to find an
+        # other so that the more specific matchers go first. For now, sort by
+        # ASTNode subclassing depth. In the list below, the most general
+        # matchers will appear first.
+        match_list = sorted(
+            (
+                (0 if match_var.type is None else
+                 len(list(match_var.type.get_inheritance_chain()))),
+                construct(match_var),
+                construct(expr)
+            )
+            for match_var, expr in self.matchers.values()
+        )
+
+        # Compute the return type as the unification of all branches
+        _, _, expr = match_list[-1]
+        rtype = expr.type
+        for _, _, expr in match_list:
+            rtype = expr.type.unify(rtype)
+
+        # This is the expression execution will reach if we have a bug in our
+        # code (i.e. if matchers did not cover all cases).
+        result = UnreachableExpr(rtype)
+
+        # Wrap this "failing" expression with all the cases to match in the
+        # appropriate order, so that in the end the most specific matchers are
+        # tested first.
+        for _, match_var, expr in match_list:
+            casted = Cast.Expr(matched_expr,
+                               match_var.type,
+                               result_var=match_var)
+            guard = Not.Expr(Eq.Expr(casted, LiteralExpr('null', casted.type)))
+            result = If.Expr(guard, expr, result, rtype)
+
+        return result

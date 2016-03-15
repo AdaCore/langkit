@@ -195,7 +195,7 @@ class AbstractExpression(Frozable):
         from langkit.expressions.collections import (
             Quantifier, Map, Contains
         )
-        from langkit.expressions.structs import Cast, IsA, IsNull
+        from langkit.expressions.structs import Cast, IsA, IsNull, Match
         from langkit.expressions.envs import EnvGet, EnvBind
         from langkit.expressions.boolean import Eq, BinaryBooleanOperator, Then
         from langkit.expressions.collections import (
@@ -233,6 +233,7 @@ class AbstractExpression(Frozable):
             # Control flow handling
             'and_then':       partial(BinaryBooleanOperator,
                                       BinaryBooleanOperator.AND, self),
+            'match':          partial(Match, self),
             'or_else':        partial(BinaryBooleanOperator,
                                       BinaryBooleanOperator.OR, self),
             'then':           partial(Then, self),
