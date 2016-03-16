@@ -811,6 +811,8 @@ class StructMetaClass(type):
         # By default, ASTNode subtypes aren't abstract
         dct['abstract'] = False
 
+        dct['subclasses'] = []
+
         dct['is_type_resolved'] = False
         cls = type.__new__(mcs, name, bases, dct)
 
@@ -831,6 +833,8 @@ class StructMetaClass(type):
             mcs.root_grammar_class = cls
             fields["parent"].type = cls
             fields["parents"].type = cls.array_type()
+        elif cls.is_ast_node():
+            base.subclasses.append(cls)
 
         return cls
 
@@ -1282,6 +1286,12 @@ class ASTNode(Struct):
 
     is_ptr = True
     abstract = False
+
+    subclasses = []
+    """
+    List of subclasses. Overriden in the root grammar class and its children.
+    :type: list[ASTNode]
+    """
 
     @classmethod
     def compute_properties(cls):
