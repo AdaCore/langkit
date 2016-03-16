@@ -920,12 +920,12 @@ class Property(AbstractNodeData):
                         ' instances, either functions that return these')
             argspec = inspect.getargspec(self.expr)
 
-            if (len(argspec.args) == 1 and
+            if (len(argspec.args) == 0 and
                     not argspec.varargs and
                     not argspec.keywords and
                     not argspec.defaults):
-                # This is a mere: lambda self: <expression>
-                self.expr = assert_type(self.expr(Self), AbstractExpression)
+                # This is a mere: lambda: <expression>
+                self.expr = assert_type(self.expr(), AbstractExpression)
 
             else:
                 user_assert(
