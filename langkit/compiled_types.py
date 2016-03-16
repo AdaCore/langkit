@@ -1321,6 +1321,19 @@ class ASTNode(Struct):
     def c_type(cls, c_api_settings):
         return c_node_type(c_api_settings)
 
+    @classmethod
+    def hierarchical_name(cls):
+        """
+        Return a name that contains all the base classes for this node type.
+
+        For instance, if C derives from B which itself derives from A, this
+        returns "A.B.C".
+
+        :rtype: str
+        """
+        return '.'.join(cls.name().base_name
+                        for cls in cls.get_inheritance_chain())
+
 # We tag the ASTNode class as abstract here, because of the circular dependency
 # between the @abstract decorator and the ASTNode class, which is caused by the
 # assert statement that is inside the decorator.

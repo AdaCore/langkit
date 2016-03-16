@@ -444,8 +444,7 @@ class CompileCtx():
         # relatively stable order. This is really useful for debugging
         # purposes.
         keys = {
-            cls: ".".join(cls.name().base_name
-                          for cls in cls.get_inheritance_chain())
+            cls: cls.hierarchical_name()
             for cls in self.astnode_types
         }
         self.astnode_types.sort(key=lambda cls: keys[cls])
