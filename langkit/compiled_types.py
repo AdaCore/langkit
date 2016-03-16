@@ -472,7 +472,7 @@ class AbstractNodeData(object):
         """
         return '{}.{}'.format(
             self.ast_node.name().camel if self.ast_node else '<unresolved>',
-            self.name.lower
+            self.name.lower if self._name else '<unresolved>'
         )
 
     def __repr__(self):
