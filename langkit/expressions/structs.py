@@ -517,7 +517,6 @@ class Match(AbstractExpression):
         """
 
     def do_prepare(self):
-        # TODO: implement complete input validation
         self.matchers = {}
 
         for i, match_fn in enumerate(self.matchers_functions):
@@ -530,12 +529,21 @@ class Match(AbstractExpression):
 
             if argspec.defaults:
                 match_type = argspec.defaults[0]
-                user_assert(inspect.isclass(match_type) and
-                            issubclass(match_type, ASTNode) and
-                            match_type != ASTNode,
-                            'Invalid matching type: {}'.format(match_type))
+                user_assert(
+                    issubclass(match_type, ASTNode) and
+                    match_type != ASTNode,
+                    'Invalid matching type: {}'.format(
+                        match_type.name().camel
+                    )
+                )
+                user_assert(
+                    match_type not in self.matchers,
+                    'Multiple matchers for {}'.format(match_type.name().camel)
+                )
             else:
                 match_type = None
+                user_assert(match_type not in self.matchers,
+                            'Multiple default matchers')
 
             match_var = AbstractVariable(
                 names.Name('Match_{}'.format(i)),
@@ -543,6 +551,54 @@ class Match(AbstractExpression):
                 create_local=True
             )
             self.matchers[match_type] = (match_var, match_fn(match_var))
+
+    def _check_no_missing_matcher(self, input_type):
+        """
+        Given some input type for this match expression, make sure the set of
+        matchers cover all cases. user_assert will raise an error if it's not
+        the case.
+
+        :param ASTNode input_type: Type parameter.
+        :rtype: None
+        """
+
+        # Make sure there is at least one matcher for any possible input type
+        def missing_matchers(astnode):
+            """
+            Return the set of subclasses for which this match expression lacks
+            a matcher.
+
+            :param ASTNode astnode: Type parameter.
+            :rtype: set[ASTNode]
+            """
+            if astnode not in self.matchers:
+                result = set()
+                for subclass in astnode.subclasses:
+                    result.update(missing_matchers(subclass))
+
+                # Return the most simple result: if all subclasses are missing,
+                # only report this abstract subclass.
+                if result == set(astnode.subclasses):
+                    result = {astnode}
+
+                return result
+
+            else:
+                return set()
+
+        if None not in self.matchers:
+            mm = sorted(
+                missing_matchers(input_type),
+                key=lambda cls: cls.hierarchical_name()
+            )
+            user_assert(
+                not mm,
+                'The following AST nodes have no handler: {} (all {}'
+                ' subclasses require one)'.format(
+                    ', '.join(t.name().camel for t in mm),
+                    input_type.name().camel
+                )
+            )
 
     def construct(self):
         """
@@ -553,6 +609,25 @@ class Match(AbstractExpression):
         matched_expr = construct(self.matched_expr)
         user_assert(issubclass(matched_expr.type, ASTNode),
                     'Match expressions can only work on AST nodes')
+
+        # Yes, the assertion below is what we just checked above, but unlike
+        # user_assert, assert_type provides type information to PyCharm's
+        # static analyzer.
+        matched_type = assert_type(matched_expr.type, ASTNode)
+
+        # Check the set of matchers is valid:
+        # * all possible input types must have at least one matcher;
+        # * all matchers must target allowed types, i.e. input type subclasses.
+        self._check_no_missing_matcher(matched_type)
+        for t in self.matchers.keys():
+            if t is not None:
+                user_assert(
+                    t.matches(matched_expr.type),
+                    'Cannot match {} (input type is {})'.format(
+                        t.name().camel,
+                        matched_expr.type.name().camel
+                    )
+                )
 
         # The default matcher (if any) matches the most general type, which is
         # the input type.
