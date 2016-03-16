@@ -1,0 +1,16 @@
+== Missing NullNode ==
+AssertionError: The following AST nodes have no handler: NullNode (all BodyNode subclasses require one)
+
+== Missing Expression ==
+AssertionError: The following AST nodes have no handler: Expression (all BodyNode subclasses require one)
+
+== Missing Compound ==
+AssertionError: The following AST nodes have no handler: Compound (all BodyNode subclasses require one)
+
+== Invalid type ==
+AssertionError: Invalid matching type: Boolean
+
+== Irrelevant AST node ==
+AssertionError: Cannot match FooNode (input type is BodyNode)
+
+Done
