@@ -475,6 +475,12 @@ class AbstractNodeData(object):
             self.name.lower
         )
 
+    def __repr__(self):
+        return '<{} {}>'.format(
+            type(self).__name__,
+            self.qualname
+        )
+
     @name.setter
     def name(self, name):
         assert isinstance(name, names.Name)
