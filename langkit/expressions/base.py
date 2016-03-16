@@ -850,11 +850,15 @@ class Property(AbstractNodeData):
         # constructed_expr is checked when we emit the Property.
         if self.expected_type:
             return self.expected_type
-        # In other cases, let's rely on the constructed expr's type. TODO: We
-        # need to add a proper error message for the cases when the type is
-        # asked too early, or when there is a circular dep.
-        else:
-            return self.constructed_expr.type
+
+        # In other cases, let's rely on the constructed expr's type
+        assert self.constructed_expr, (
+            'Trying to early to get the type of the {} property. Try to'
+            ' specify its return type explicitely.'.format(
+                self.qualname
+            )
+        )
+        return self.constructed_expr.type
 
     def _add_argument(self, name, type, default_value=None):
         """
