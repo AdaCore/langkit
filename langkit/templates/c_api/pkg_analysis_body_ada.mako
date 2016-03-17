@@ -28,8 +28,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
        then ""
        else Value (S));
 
-   Last_Exception : ${exception_type}_Ptr := null
-     with Thread_Local_Storage => True;
+   Last_Exception : ${exception_type}_Ptr := null;
 
    ----------
    -- Free --
