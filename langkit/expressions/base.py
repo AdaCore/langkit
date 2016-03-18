@@ -854,7 +854,7 @@ class Property(AbstractNodeData):
 
         # In other cases, let's rely on the constructed expr's type
         assert self.constructed_expr, (
-            'Trying to early to get the type of the {} property. Try to'
+            'Trying too early to get the type of the {} property. Try to'
             ' specify its return type explicitely.'.format(
                 self.qualname
             )

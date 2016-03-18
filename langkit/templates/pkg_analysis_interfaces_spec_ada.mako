@@ -24,8 +24,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis_Interfaces is
      (Unit : access Analysis_Unit_Interface_Type)
       return Token_Data_Handler_Access is abstract;
    --  Get an access to the token data handler bundled in Unit. Note that this
-   --  token data handler is not valid anymore as soon as Unit is destroy or as
-   --  it is reparsed.
+   --  token data handler is not valid anymore as soon as Unit is destroyed or
+   --  reparsed.
 
    type Deallocate_Procedure is access procedure (Object : System.Address);
    --  Type for generic deallocation procedure, to be used with

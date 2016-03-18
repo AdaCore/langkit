@@ -38,7 +38,7 @@ class Cast(AbstractExpression):
                 result_var or p.vars.create('Cast_Result', astnode)
             )
             assert self.result_var.type == astnode, (
-                'Cast temporaries must have exactly the cast type: {} expeced'
+                'Cast temporaries must have exactly the cast type: {} expected'
                 ' but got {} instead'.format(
                     astnode.name().camel,
                     self.result_var.type.name().camel
@@ -444,15 +444,12 @@ class Match(AbstractExpression):
     For instance::
 
         expression.match(
-            lambda n=SomeNodeType: t.foo,
-            lambda n=SomeOtherType: t.bar,
+            lambda n=SomeNodeType: n.foo,
+            lambda n=SomeOtherType: n.bar,
         )
 
-    Will return t.foo for a node "t" that is a SomeNodeType.
+    Will return n.foo for a node "n" that is a SomeNodeType.
     """
-
-    class Expr(ResolvedExpression):
-        pass
 
     def __init__(self, expr, *matchers):
         """
