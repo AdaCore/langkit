@@ -551,7 +551,7 @@ class CompileCtx():
             self.main_rule_name
         )
         if unreferenced_rules:
-            print (
+            print(
                 "warning: The following parsing rules are not used: {}".format(
                     ", ".join(sorted(unreferenced_rules))
                 )
