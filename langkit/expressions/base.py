@@ -609,17 +609,17 @@ class No(AbstractExpression):
     So far, it is only supported for Struct subclasses.
     """
 
-    def __init__(self, return_type):
+    def __init__(self, expr_type):
         """
-        :param langkit.expressions.structs.Struct return_type: Type parameter.
-            Type for the returned value.
+        :param langkit.expressions.structs.Struct expr_type: Type parameter.
+            Type for the value this expression creates.
         """
         from langkit.expressions.structs import Struct
         user_assert(
-            inspect.isclass(return_type) and issubclass(return_type, Struct),
-            'Invalid return type for Null expression: {}'.format(return_type)
+            inspect.isclass(expr_type) and issubclass(expr_type, Struct),
+            'Invalid type for Null expression: {}'.format(expr_type)
         )
-        self.return_type = return_type
+        self.expr_type = expr_type
 
     def construct(self):
         """
@@ -627,7 +627,7 @@ class No(AbstractExpression):
 
         :rtype: LiteralExpr
         """
-        return LiteralExpr(self.return_type.nullexpr(), self.return_type)
+        return LiteralExpr(self.expr_type.nullexpr(), self.expr_type)
 
 
 def render(*args, **kwargs):
