@@ -47,31 +47,6 @@ class BinaryBooleanOperator(AbstractExpression):
         return If.Expr(lhs, then, else_then, BoolType)
 
 
-def expand_list_to_bintree(args, bin_fn):
-    """
-    Helper to turn a list into a tree of binary expression.
-
-    For instance::
-
-        expand_list_to_bin_tree([A], bin_fn)
-        # Just returns A
-
-        expand_list_to_bin_tree([A, B], bin_fn)
-        # Returns bin_fn(A, B)
-
-        expand_list_to_bin_tree([A, B, C], bin_fn)
-        # Returns bin_fn(bin_fn(A, B), C)
-
-    :param list[T] args: List of operands to turn into binary expressions.
-    :param (T, T) -> T bin_fn: Constructor for binary expressions.
-    :rtype: T
-    """
-    result = args[0]
-    for arg in args[1:]:
-        result = bin_fn(result, arg)
-    return result
-
-
 def And(*args):
     """
     Syntactic sugar for nested "&" operators.
@@ -81,19 +56,19 @@ def And(*args):
     :param list[AbstractExpression] args: Operands.
     :rtype: BinaryBooleanOperator
     """
-    return expand_list_to_bintree(args, lambda a, b: a & b)
+    return reduce(lambda a, b: a & b, args)
 
 
 def Or(*args):
     """
     Syntactic sugar for nested "|" operators.
 
-    Or(X, Y, Z) is expanded into X & (Y & Z).
+    Or(X, Y, Z) is expanded into X | (Y | Z).
 
     :param list[AbstractExpression] args: Operands.
     :rtype: BinaryBooleanOperator
     """
-    return expand_list_to_bintree(args, lambda a, b: a | b)
+    return reduce(lambda a, b: a | b, args)
 
 
 class Eq(AbstractExpression):
