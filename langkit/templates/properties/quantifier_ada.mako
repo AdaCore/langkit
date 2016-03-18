@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
 <%
-   ind_var = quantifier.induction_var.name
+   element_var = quantifier.element_var.name
    result_var = quantifier.result_var.name
 %>
 
@@ -14,7 +14,7 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
       ${quantifier.index_var.name} := 0;
    % endif
 
-   for ${ind_var} of
+   for ${element_var} of
       % if quantifier.collection.type.is_list_type:
          ${quantifier.collection.render_expr()}.Vec
       % else:

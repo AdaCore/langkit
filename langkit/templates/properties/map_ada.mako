@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
 <%
-   ind_var = map.induction_var.name
+   element_var = map.element_var.name
    array_var = map.array_var.name
 
    vec_var = map.array_var.name + Name('Vec')
@@ -43,7 +43,7 @@ begin
       % endif
 
       ## First, build a vector for all the resulting elements
-      for ${ind_var} of
+      for ${element_var} of
          % if map.collection.type.is_list_type:
             ${map.collection.render_expr()}.Vec
          % else:

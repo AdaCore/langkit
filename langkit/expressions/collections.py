@@ -33,7 +33,7 @@ class CollectionExpression(AbstractExpression):
         self.collection = collection
         self.expr_fn = expr
         self.expr = None
-        self.ind_var = None
+        self.element_var = None
 
         argspec = inspect.getargspec(self.expr_fn)
         user_assert(len(argspec.args) in (1, 2) and
@@ -46,7 +46,7 @@ class CollectionExpression(AbstractExpression):
         self.index_var = None
 
     def do_prepare(self):
-        self.ind_var = AbstractVariable(
+        self.element_var = AbstractVariable(
             names.Name("Item_{}".format(next(CollectionExpression._counter))),
         )
         if self.requires_index:
@@ -54,9 +54,9 @@ class CollectionExpression(AbstractExpression):
                 names.Name('I'), type=LongType,
                 create_local=True
             )
-            expr = self.expr_fn(self.index_var, self.ind_var)
+            expr = self.expr_fn(self.index_var, self.element_var)
         else:
-            expr = self.expr_fn(self.ind_var)
+            expr = self.expr_fn(self.element_var)
         self.expr = assert_type(expr, AbstractExpression)
 
     def construct_common(self):
@@ -78,11 +78,11 @@ class CollectionExpression(AbstractExpression):
         assert collection_expr.type.is_collection(), (
             'Map cannot iterate on {}, which is not a collection'
         ).format(collection_expr.type.name().camel)
-        self.ind_var.set_type(collection_expr.type.element_type())
+        self.element_var.set_type(collection_expr.type.element_type())
 
         return (collection_expr,
                 construct(self.expr),
-                construct(self.ind_var),
+                construct(self.element_var),
                 construct(self.index_var) if self.index_var else None)
 
 
@@ -109,13 +109,13 @@ class Contains(CollectionExpression):
 
         :rtype: QuantifierExpr
         """
-        collection, predicate, ind_var, index_var = self.construct_common()
+        collection, predicate, element_var, index_var = self.construct_common()
         assert index_var is None
 
         # "collection" contains "item" if at least one element in "collection"
         # is equal to "item".
-        return Quantifier.Expr(Quantifier.ANY, collection, predicate, ind_var,
-                               index_var)
+        return Quantifier.Expr(Quantifier.ANY, collection, predicate,
+                               element_var, index_var)
 
 
 class Map(CollectionExpression):
@@ -129,10 +129,10 @@ class Map(CollectionExpression):
         code.
         """
 
-        def __init__(self, induction_var, index_var, collection, expr,
+        def __init__(self, element_var, index_var, collection, expr,
                      filter=None, concat=False, take_while=None):
             """
-            :type induction_var: VarExpr
+            :type element_var: VarExpr
             :type index_var: None|VarExpr
             :type collection: ResolvedExpression
             :type expr: ResolvedExpression
@@ -141,7 +141,7 @@ class Map(CollectionExpression):
             :type take_while: ResolvedExpression
             """
             self.take_while = take_while
-            self.induction_var = induction_var
+            self.element_var = element_var
             self.index_var = index_var
             self.collection = collection
             self.expr = expr
@@ -164,7 +164,7 @@ class Map(CollectionExpression):
         def __repr__(self):
             return "<MapExpr {}: {} -> {}{}>".format(
                 self.collection,
-                self.induction_var,
+                self.element_var,
                 self.expr,
                 " (if {})".format(self.filter) if self.filter else ""
             )
@@ -204,8 +204,8 @@ class Map(CollectionExpression):
 
     def do_prepare(self):
         super(Map, self).do_prepare()
-        self.filter_expr = self.filter_fn(self.ind_var)
-        self.take_while_expr = self.take_while_pred(self.ind_var)
+        self.filter_expr = self.filter_fn(self.element_var)
+        self.take_while_expr = self.take_while_pred(self.element_var)
 
     def construct(self):
         """
@@ -213,7 +213,7 @@ class Map(CollectionExpression):
 
         :rtype: MapExpr
         """
-        collection_expr, expr, ind_var, index_var = self.construct_common()
+        collection_expr, expr, element_var, index_var = self.construct_common()
 
         assert (not self.concat or expr.type.is_collection()), (
             'Cannot mapcat with expressions returning {} values'
@@ -226,7 +226,7 @@ class Map(CollectionExpression):
         take_while_expr = (construct(self.take_while_expr, BoolType)
                            if self.take_while_expr else None)
 
-        return Map.Expr(ind_var, index_var, collection_expr, expr,
+        return Map.Expr(element_var, index_var, collection_expr, expr,
                         filter_expr, self.concat, take_while_expr)
 
 
@@ -236,7 +236,7 @@ class Quantifier(CollectionExpression):
     """
 
     class Expr(ResolvedExpression):
-        def __init__(self, kind, collection, expr, induction_var, index_var):
+        def __init__(self, kind, collection, expr, element_var, index_var):
             """
             :param str kind: Kind for this quantifier expression. 'all' will
                 check that all items in "collection" fullfill "expr" while
@@ -251,8 +251,8 @@ class Quantifier(CollectionExpression):
             :param ResolvedExpression expr: A boolean expression to evaluate on
                 the collection's items.
 
-            :param induction_var: Variable to use in "expr".
-            :type induction_var: ResolvedExpression
+            :param element_var: Variable to use in "expr".
+            :type element_var: ResolvedExpression
 
             :param index_var: Index variable to use in "expr".
             :type index_var: None|ResolvedExpression
@@ -260,7 +260,7 @@ class Quantifier(CollectionExpression):
             self.kind = kind
             self.collection = collection
             self.expr = expr
-            self.induction_var = induction_var
+            self.element_var = element_var
             self.index_var = index_var
 
             self.result_var = Property.get().vars.create('Result', BoolType)
@@ -305,9 +305,9 @@ class Quantifier(CollectionExpression):
 
         :rtype: QuantifierExpr
         """
-        collection_expr, expr, ind_var, index_var = self.construct_common()
+        collection_expr, expr, element_var, index_var = self.construct_common()
         assert expr.type.matches(BoolType)
-        return Quantifier.Expr(self.kind, collection_expr, expr, ind_var,
+        return Quantifier.Expr(self.kind, collection_expr, expr, element_var,
                                index_var)
 
 
