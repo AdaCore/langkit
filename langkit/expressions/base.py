@@ -1145,7 +1145,8 @@ class UnreachableExpr(ResolvedExpression):
         return self.expr_type
 
     def render_expr(self):
-        return 'raise Program_Error'
+        return ('raise Program_Error with'
+                ' "Executing supposedly unreachable code"')
 
     def __repr__(self):
         return '<UnreachableExpr (for {} expr)>'.format(
