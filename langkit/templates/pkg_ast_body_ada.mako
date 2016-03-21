@@ -15,6 +15,7 @@ with System.Storage_Elements; use System.Storage_Elements;
 
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
 with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
+with Langkit_Support.Relative_Get;
 with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
 with Langkit_Support.Text;       use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handler;
@@ -35,6 +36,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    begin
       AST_Envs.Destroy (Env);
    end Deallocate_Lexical_Env;
+
+   ${array_types.body(root_node_array)}
 
    -----------
    -- Child --

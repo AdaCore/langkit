@@ -30,15 +30,7 @@
    function Get
      (T       : ${cls.name()};
       Index   : Integer;
-      Or_Null : Boolean := False) return ${elt_type}
-   is
-     (if Index in 0 .. T.Items'Length - 1
-      then T.Items (Index + 1)
-      else (if Index in -T.Items'Length + 1 .. -1
-            then T.Items (T.Items'Length - Index)
-            else (if Or_Null
-                  then ${cls.element_type().nullexpr()}
-                  else raise Property_Error)));
+      Or_Null : Boolean := False) return ${elt_type};
    --  When Index is positive, return the Index'th element in T. Otherwise,
    --  return the element at index (Size - Index - 1). Index is zero-based.
 
@@ -47,4 +39,42 @@
 
    procedure Destroy is new Ada.Unchecked_Deallocation
      (${cls.pointed()}, ${cls.name()});
+</%def>
+
+<%def name="body(cls)">
+
+   <% elt_type = cls.element_type().name() %>
+
+   ---------
+   -- Get --
+   ---------
+
+   function Get
+     (T       : ${cls.name()};
+      Index   : Integer;
+      Or_Null : Boolean := False) return ${elt_type}
+   is
+      function Absolute_Get
+        (T : ${cls.name()}; Index : Integer)
+         return ${elt_type}
+      is
+        (T.Items (Index + 1)); --  T.Items is 1-based but Index is 0-based
+
+      function Relative_Get is new Langkit_Support.Relative_Get
+        (Item_Type     => ${elt_type},
+         Sequence_Type => ${cls.name()},
+         Length        => Length,
+         Get           => Absolute_Get);
+
+      Result : ${elt_type};
+   begin
+      if Relative_Get (T, Index, Result) then
+         return Result;
+      elsif Or_Null then
+         return ${cls.element_type().nullexpr()};
+      else
+         raise Property_Error;
+      end if;
+   end Get;
+
 </%def>

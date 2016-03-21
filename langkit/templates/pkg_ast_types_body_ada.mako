@@ -14,6 +14,7 @@ with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 pragma Warnings (Off, "referenced");
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
 with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
+with Langkit_Support.Relative_Get;
 with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
 with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
 pragma Warnings (On, "referenced");
@@ -24,8 +25,18 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types is
    ${struct_types.body(struct_type)}
    % endfor
 
+   % for array_type in _self.sorted_types(_self.array_types):
+   % if array_type != root_node_array:
+   ${array_types.body(array_type)}
+   % endif
+   % endfor
+
    % for astnode in no_builtins(_self.astnode_types):
    ${astnode_types.body(astnode)}
+   % endfor
+
+   % for element_type in _self.sorted_types(_self.list_types):
+   ${list_types.body(element_type)}
    % endfor
 
 end ${_self.ada_api_settings.lib_name}.AST.Types;

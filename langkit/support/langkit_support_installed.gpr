@@ -27,6 +27,7 @@ library project Langkit_Support is
       "Langkit_Support.Lexical_Env",
       "Langkit_Support.Packrat",
       "Langkit_Support.PP_Utils",
+      "Langkit_Support.Relative_Get",
       "Langkit_Support.Symbols",
       "Langkit_Support.Token_Data_Handler",
       "Langkit_Support.Text",
