@@ -796,6 +796,7 @@ class StructMetaClass(type):
                 "node {}".format(name)
             )
             env_spec = env_spec or es
+        dct['is_env_spec_inherited'] = env_spec is None
         dct['env_spec'] = env_spec
 
         for field_name, field in fields.items():

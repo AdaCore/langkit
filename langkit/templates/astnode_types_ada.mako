@@ -92,7 +92,7 @@
       null record;
    % endif
 
-   % if cls.env_spec:
+   % if not cls.is_env_spec_inherited:
 
       overriding
       function Do_Env_Actions
@@ -365,7 +365,7 @@
 
    % endif
 
-   % if cls.env_spec:
+   % if not cls.is_env_spec_inherited:
    --------------------
    -- Do_Env_Actions --
    --------------------
