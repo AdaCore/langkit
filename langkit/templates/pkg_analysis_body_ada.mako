@@ -114,17 +114,17 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
       if Created then
          Unit := new Analysis_Unit_Type'
-           (Context        => Context,
-            Ref_Count      => 1,
-            AST_Root       => null,
-            File_Name      => Fname,
-            Charset        => <>,
-            TDH            => <>,
-            Diagnostics    => <>,
-            With_Trivia    => With_Trivia,
-            Rule           => Rule,
-            AST_Mem_Pool   => No_Pool,
-            Deallocatables => Deallocatable_Vectors.Empty_Vector);
+           (Context      => Context,
+            Ref_Count    => 1,
+            AST_Root     => null,
+            File_Name    => Fname,
+            Charset      => <>,
+            TDH          => <>,
+            Diagnostics  => <>,
+            With_Trivia  => With_Trivia,
+            Rule         => Rule,
+            AST_Mem_Pool => No_Pool,
+            Destroyables => Destroyable_Vectors.Empty_Vector);
          Initialize (Unit.TDH, Context.Symbols);
          Context.Units_Map.Insert (Fname, Unit);
       else
@@ -378,10 +378,10 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       end if;
       Free (Unit.TDH);
       Free (Unit.AST_Mem_Pool);
-      for D of Unit.Deallocatables loop
-         D.Deallocate (D.Object);
+      for D of Unit.Destroyables loop
+         D.Destroy (D.Object);
       end loop;
-      Deallocatable_Vectors.Destroy (Unit.Deallocatables);
+      Destroyable_Vectors.Destroy (Unit.Destroyables);
       Free (Unit_Var);
    end Destroy;
 
@@ -458,18 +458,18 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Dump_Lexical_Env (Unit.AST_Root, Unit.Context.Root_Scope);
    end Dump_Lexical_Env;
 
-   ----------------------------
-   -- Register_Deallocatable --
-   ----------------------------
+   --------------------------
+   -- Register_Destroyable --
+   --------------------------
 
    overriding
-   procedure Register_Deallocatable
-     (Unit       : access Analysis_Unit_Type;
-      Object     : System.Address;
-      Deallocate : Deallocate_Procedure)
+   procedure Register_Destroyable_Helper
+     (Unit    : access Analysis_Unit_Type;
+      Object  : System.Address;
+      Destroy : Destroy_Procedure)
    is
    begin
-      Deallocatable_Vectors.Append (Unit.Deallocatables, (Object, Deallocate));
-   end Register_Deallocatable;
+      Destroyable_Vectors.Append (Unit.Destroyables, (Object, Destroy));
+   end Register_Destroyable_Helper;
 
 end ${_self.ada_api_settings.lib_name}.Analysis;

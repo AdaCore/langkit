@@ -27,14 +27,26 @@ package ${_self.ada_api_settings.lib_name}.Analysis_Interfaces is
    --  token data handler is not valid anymore as soon as Unit is destroyed or
    --  reparsed.
 
-   type Deallocate_Procedure is access procedure (Object : System.Address);
-   --  Type for generic deallocation procedure, to be used with
-   --  Register_Deallocatable.
+   type Destroy_Procedure is access procedure (Object : System.Address);
 
-   procedure Register_Deallocatable
-     (Unit       : access Analysis_Unit_Interface_Type;
-      Object     : System.Address;
-      Deallocate : Deallocate_Procedure)
+   procedure Register_Destroyable_Helper
+     (Unit    : access Analysis_Unit_Interface_Type;
+      Object  : System.Address;
+      Destroy : Destroy_Procedure)
       is abstract;
+   --  Internal implementation helper for Register_Destroyable. This is
+   --  basically an untyped version of it, using System.Address instead of
+   --  access types. This is required to we can store these values in the same
+   --  place.
+
+   generic
+      type T is private;
+      type T_Access is access all T;
+      with procedure Destroy (Object : in out T_Access);
+   procedure Register_Destroyable
+     (Unit   : access Analysis_Unit_Interface_Type'Class;
+      Object : T_Access);
+   --  Generic procedure to register an object so that it is automatically
+   --  destroyed when Unit is destroyed.
 
 end ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;

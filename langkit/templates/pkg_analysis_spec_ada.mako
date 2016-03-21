@@ -144,40 +144,39 @@ private
       --  to resolve cross file references.
    end record;
 
-   type Deallocatable_Type is record
-      Object     : System.Address;
-      --  Object to deallocate
+   type Destroyable_Type is record
+      Object  : System.Address;
+      --  Object to destroy
 
-      Deallocate : Deallocate_Procedure;
-      --  Prodecure to deallocate Object
+      Destroy : Destroy_Procedure;
+      --  Procedure to destroy Object
    end record;
-   --  Simple holder to associate an object to deallocate and the procedure to
-   --  perform the deallocation.
+   --  Simple holder to associate an object to destroy and the procedure to
+   --  perform the destruction.
 
-   package Deallocatable_Vectors is new Langkit_Support.Vectors
-     (Deallocatable_Type);
+   package Destroyable_Vectors is new Langkit_Support.Vectors
+     (Destroyable_Type);
 
    type Analysis_Unit_Type is new Analysis_Unit_Interface_Type with
    record
-      Context         : Analysis_Context;
-      Ref_Count       : Natural;
-      AST_Root        : ${root_node_type_name};
-      File_Name       : Unbounded_String;
-      Charset         : Unbounded_String;
-      TDH             : aliased Token_Data_Handler;
-      Diagnostics     : Diagnostics_Vectors.Vector;
-      With_Trivia     : Boolean;
+      Context      : Analysis_Context;
+      Ref_Count    : Natural;
+      AST_Root     : ${root_node_type_name};
+      File_Name    : Unbounded_String;
+      Charset      : Unbounded_String;
+      TDH          : aliased Token_Data_Handler;
+      Diagnostics  : Diagnostics_Vectors.Vector;
+      With_Trivia  : Boolean;
 
-      Rule            : Grammar_Rule;
+      Rule         : Grammar_Rule;
       --  The grammar rule used to parse this unit
 
-      AST_Mem_Pool    : Bump_Ptr_Pool;
+      AST_Mem_Pool : Bump_Ptr_Pool;
       --  This memory pool shall only be used for AST parsing. Stored here
       --  because it is more convenient, but one shall not allocate from it.
 
-      Deallocatables  : Deallocatable_Vectors.Vector;
-      --  Collection of objects to deallocate when destroying the analysis
-      --  unit.
+      Destroyables : Destroyable_Vectors.Vector;
+      --  Collection of objects to destroy when destroying the analysis unit
    end record;
 
    overriding
@@ -188,10 +187,10 @@ private
      (Unit.TDH'Access);
 
    overriding
-   procedure Register_Deallocatable
-     (Unit       : access Analysis_Unit_Type;
-      Object     : System.Address;
-      Deallocate : Deallocate_Procedure);
+   procedure Register_Destroyable_Helper
+     (Unit    : access Analysis_Unit_Type;
+      Object  : System.Address;
+      Destroy : Destroy_Procedure);
 
    function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
      (Unit.AST_Root);

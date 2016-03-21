@@ -595,8 +595,4 @@ private
       C      : Children_Cursor)
       return Children_Cursor;
 
-   procedure Deallocate_Lexical_Env (A : System.Address);
-   --  Helper to deallocate lexical evnironments along with their owning
-   --  analysis unit.
-
 end ${_self.ada_api_settings.lib_name}.AST;

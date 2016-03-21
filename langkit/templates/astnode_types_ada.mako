@@ -422,8 +422,7 @@
 
       % if cls.env_spec._add_env:
          Ret := AST_Envs.Create (Initial_Env);
-         Self.Unit.Register_Deallocatable
-           (Ret.all'Address, Deallocate_Lexical_Env'Access);
+         Register_Destroyable (Self.Unit, Ret);
          Self.Self_Env := Ret;
       % endif
 

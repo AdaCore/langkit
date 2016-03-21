@@ -7,10 +7,8 @@ with Ada.Containers;        use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Ordered_Maps;
 with Ada.Text_IO;           use Ada.Text_IO;
-with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
-with System;
 with System.Storage_Elements; use System.Storage_Elements;
 
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
@@ -23,19 +21,6 @@ use Langkit_Support.Token_Data_Handler;
 with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
 
 package body ${_self.ada_api_settings.lib_name}.AST is
-
-   function To_Lexical_Env is new Ada.Unchecked_Conversion
-     (System.Address, AST_Envs.Lexical_Env);
-
-   ----------------------------
-   -- Deallocate_Lexical_Env --
-   ----------------------------
-
-   procedure Deallocate_Lexical_Env (A : System.Address) is
-      Env : AST_Envs.Lexical_Env := To_Lexical_Env (A);
-   begin
-      AST_Envs.Destroy (Env);
-   end Deallocate_Lexical_Env;
 
    ${array_types.body(root_node_array)}
 
