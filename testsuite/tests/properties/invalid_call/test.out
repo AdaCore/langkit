@@ -1,0 +1,16 @@
+== Correct code ==
+Code generation was successful
+
+== Incorrect call code 1 ==
+Error: Type BarNode has no 'non_exisisting_prop' field or property
+In definition of property 'prop', class 'BarNode': test.py Line 32
+
+== Incorrect call code 2 ==
+Error: Invalid number of arguments in the call to BarNode.p_prop_2: 1 expected but got 2
+In definition of property 'prop', class 'BarNode': test.py Line 32
+
+== Incorrect call code 3 ==
+Error: Invalid X actual (#1) for BarNode.p_prop_2: expected Integer but got FooNode
+In definition of property 'prop', class 'BarNode': test.py Line 32
+
+Done
