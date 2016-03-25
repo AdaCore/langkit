@@ -10,7 +10,8 @@ import subprocess
 import sys
 
 from langkit.compile_context import Verbosity
-from langkit.utils import Colors, printcol, col
+from langkit.diagnostics import DiagnosticError
+from langkit.utils import Colors, printcol
 
 
 class Directories(object):
@@ -317,14 +318,8 @@ class ManageScript(object):
 
         try:
             parsed_args.func(parsed_args)
-        except AssertionError as e:
-            # If in debug mode, show the full exception traceback + message.
-            # If in normal mode, just show the message and exit.
-            if parsed_args.verbosity.debug:
-                raise
-            else:
-                print >> sys.stderr, col("ERROR :", Colors.FAIL), e.message
-                exit(1)
+        except DiagnosticError:
+            print >> sys.stderr, "Errors, exiting"
 
         if cov is not None:
             cov.stop()

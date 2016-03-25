@@ -25,6 +25,7 @@ import sys
 from langkit import astdoc, caching, names
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
+from langkit.diagnostics import check_source_language
 from langkit.utils import Colors, printcol
 
 
@@ -583,17 +584,13 @@ class CompileCtx():
                 r.compile()
                 self.rules_to_fn_names[r_name] = r
 
-        not_resolved_types = set()
-        for astnode_type in self.astnode_types:
-            if not astnode_type.is_type_resolved:
-                not_resolved_types.add(astnode_type)
-        assert not not_resolved_types, (
-            "The following ASTNode subclasss are not type resolved. They are"
+        unresolved_types = set([t for t in self.astnode_types
+                                if not t.is_type_resolved])
+        check_source_language(
+            not unresolved_types,
+            "The following ASTNode subclasses are not type resolved. They are"
             " not used by the grammar, and their types not annotated:"
-            " {}".format(
-                ", ".join(astnode_type.name().camel
-                          for astnode_type in not_resolved_types)
-            )
+            " {}".format(", ".join(t.name().camel for t in unresolved_types))
         )
 
         for i, astnode in enumerate(

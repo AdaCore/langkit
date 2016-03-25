@@ -2,13 +2,14 @@ import inspect
 
 from langkit import names
 from langkit.compiled_types import ASTNode, Struct, BoolType
+from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, ResolvedExpression, construct,
     render, Property, LiteralExpr, UnreachableExpr
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
-from langkit.utils import assert_type, col, user_assert, Colors
+from langkit.utils import assert_type, col, Colors
 
 
 class Cast(AbstractExpression):
@@ -331,7 +332,7 @@ class FieldAccess(AbstractExpression):
 
         # Check that this property actually accepts these arguments and that
         # they are correctly typed.
-        user_assert(
+        check_source_language(
             len(self.arguments) == len(to_get.explicit_arguments),
             'Invalid number of arguments in the call to {}:'
             ' {} expected but got {}'.format(
@@ -344,7 +345,7 @@ class FieldAccess(AbstractExpression):
         exprs_and_formals = zip(arg_exprs, to_get.explicit_arguments)
         for i, (actual, formal) in enumerate(exprs_and_formals, 1):
             formal_name, formal_type, _ = formal
-            user_assert(
+            check_source_language(
                 actual.type.matches(formal_type),
                 'Invalid {} actual (#{}) for {}:'
                 ' expected {} but got {}'.format(
@@ -518,29 +519,33 @@ class Match(AbstractExpression):
 
         for i, match_fn in enumerate(self.matchers_functions):
             argspec = inspect.getargspec(match_fn)
-            user_assert(len(argspec.args) == 1 and
-                        not argspec.varargs and
-                        not argspec.keywords and
-                        (not argspec.defaults or len(argspec.defaults) < 2),
-                        'Invalid matcher lambda')
+            check_source_language(
+                len(argspec.args) == 1 and
+                not argspec.varargs and
+                not argspec.keywords and
+                (not argspec.defaults or len(argspec.defaults) < 2),
+                'Invalid matcher lambda'
+            )
 
             if argspec.defaults:
                 match_type = argspec.defaults[0]
-                user_assert(
+                check_source_language(
                     issubclass(match_type, ASTNode) and
                     match_type != ASTNode,
                     'Invalid matching type: {}'.format(
                         match_type.name().camel
                     )
                 )
-                user_assert(
+                check_source_language(
                     match_type not in self.matchers,
                     'Multiple matchers for {}'.format(match_type.name().camel)
                 )
             else:
                 match_type = None
-                user_assert(match_type not in self.matchers,
-                            'Multiple default matchers')
+                check_source_language(
+                    match_type not in self.matchers,
+                    'Multiple default matchers'
+                )
 
             match_var = AbstractVariable(
                 names.Name('Match_{}'.format(i)),
@@ -552,8 +557,8 @@ class Match(AbstractExpression):
     def _check_no_missing_matcher(self, input_type):
         """
         Given some input type for this match expression, make sure the set of
-        matchers cover all cases. user_assert will raise an error if it's not
-        the case.
+        matchers cover all cases. check_source_language will raise an error if
+        it's not the case.
 
         :param ASTNode input_type: Type parameter.
         :rtype: None
@@ -588,7 +593,7 @@ class Match(AbstractExpression):
                 missing_matchers(input_type),
                 key=lambda cls: cls.hierarchical_name()
             )
-            user_assert(
+            check_source_language(
                 not mm,
                 'The following AST nodes have no handler: {} (all {}'
                 ' subclasses require one)'.format(
@@ -604,12 +609,12 @@ class Match(AbstractExpression):
         :rtype: ResolvedExpression
         """
         matched_expr = construct(self.matched_expr)
-        user_assert(issubclass(matched_expr.type, ASTNode),
-                    'Match expressions can only work on AST nodes')
+        check_source_language(issubclass(matched_expr.type, ASTNode),
+                              'Match expressions can only work on AST nodes')
 
         # Yes, the assertion below is what we just checked above, but unlike
-        # user_assert, assert_type provides type information to PyCharm's
-        # static analyzer.
+        # check_source_language, assert_type provides type information to
+        # PyCharm's static analyzer.
         matched_type = assert_type(matched_expr.type, ASTNode)
 
         # Check the set of matchers is valid:
@@ -618,7 +623,7 @@ class Match(AbstractExpression):
         self._check_no_missing_matcher(matched_type)
         for t in self.matchers.keys():
             if t is not None:
-                user_assert(
+                check_source_language(
                     t.matches(matched_expr.type),
                     'Cannot match {} (input type is {})'.format(
                         t.name().camel,

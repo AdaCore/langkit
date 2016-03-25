@@ -3,11 +3,12 @@ from itertools import count
 
 from langkit import names
 from langkit.compiled_types import BoolType, LongType
+from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, AbstractVariable,
     render, Property, BuiltinCallExpr
 )
-from langkit.utils import assert_type, user_assert
+from langkit.utils import assert_type
 
 
 class CollectionExpression(AbstractExpression):
@@ -36,12 +37,12 @@ class CollectionExpression(AbstractExpression):
         self.element_var = None
 
         argspec = inspect.getargspec(self.expr_fn)
-        user_assert(len(argspec.args) in (1, 2) and
-                    not argspec.varargs and
-                    not argspec.keywords and
-                    not argspec.defaults,
-                    'Invalid collection iteration lambda: only one or two'
-                    ' parameters expected')
+        check_source_language(len(argspec.args) in (1, 2) and
+                              not argspec.varargs and
+                              not argspec.keywords and
+                              not argspec.defaults,
+                              'Invalid collection iteration lambda: only one'
+                              ' or two parameters expected')
         self.requires_index = len(argspec.args) == 2
         self.index_var = None
 

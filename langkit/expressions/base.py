@@ -8,7 +8,10 @@ from langkit.compiled_types import (
     AbstractNodeData, BoolType, CompiledType, LexicalEnvType, LongType,
     render as ct_render, Symbol, Token
 )
-from langkit.utils import assert_type, memoized, user_assert
+from langkit.diagnostics import (
+    extract_library_location, check_source_language, check_multiple
+)
+from langkit.utils import assert_type, memoized
 
 
 def construct(expr, expected_type_or_pred=None, custom_msg=None):
@@ -563,12 +566,12 @@ class Let(AbstractExpression):
             AbstractExpression.
         """
         argspec = inspect.getargspec(lambda_fn)
-        user_assert(
+        check_source_language(
             not argspec.varargs and
             not argspec.keywords,
             'Invalid function for Let expression (varargs not accepted)'
         )
-        user_assert(
+        check_source_language(
             len(argspec.args) == len(argspec.defaults),
             'All Let expression function arguments must have default values'
         )
@@ -614,8 +617,9 @@ class No(AbstractExpression):
         :param langkit.expressions.structs.Struct expr_type: Type parameter.
             Type for the value this expression creates.
         """
+        super(No, self).__init__()
         from langkit.expressions.structs import Struct
-        user_assert(
+        check_source_language(
             inspect.isclass(expr_type) and issubclass(expr_type, Struct),
             'Invalid type for Null expression: {}'.format(expr_type)
         )
@@ -915,9 +919,10 @@ class Property(AbstractNodeData):
         # now is the moment to transform it into an abstract expression by
         # calling it.
         if self.expr and not isinstance(self.expr, AbstractExpression):
-            user_assert(callable(self.expr),
-                        'Expression should be either AbstractExpression'
-                        ' instances, either functions that return these')
+
+            check_source_language(callable(self.expr), 'Expected either an'
+                                  ' expression or a function')
+
             argspec = inspect.getargspec(self.expr)
 
             if (len(argspec.args) == 0 and
@@ -928,18 +933,16 @@ class Property(AbstractNodeData):
                 self.expr = assert_type(self.expr(), AbstractExpression)
 
             else:
-                user_assert(
-                    not argspec.varargs or not argspec.keywords,
-                    'Invalid lamda signature: no *args nor **kwargs allowed'
-                )
-                user_assert(
-                    len(argspec.args) > 0,
-                    'Invalid lambda signature: at least one parameter expected'
-                )
-                user_assert(
-                    len(argspec.args) == len(argspec.defaults),
-                    'All types must have an associated type as a default value'
-                )
+                check_multiple([
+                    (not argspec.varargs or not argspec.keywords, 'Invalid'
+                     ' lambda signature: no *args nor **kwargs allowed'),
+
+                    (len(argspec.args) > 0, 'Invalid lambda signature: at '
+                     'least one parameter expected'),
+
+                    (len(argspec.args) == len(argspec.defaults), 'All types '
+                     'must have an associated type as a default value')
+                ])
 
                 # This is a lambda for a property that takes parameters: check
                 # that all parameters have declared types in default arguments.
@@ -952,13 +955,13 @@ class Property(AbstractNodeData):
                     if not inspect.isclass(default):
                         default = default()
 
-                    user_assert(
+                    check_source_language(
                         kw.lower not in Property.reserved_arg_lower_names,
                         'Cannot define reserved arguments ({})'.format(
                             ', '.join(Property.reserved_arg_lower_names)
                         )
                     )
-                    user_assert(
+                    check_source_language(
                         issubclass(default, CompiledType),
                         'A type is required for parameter {} (got {})'.format(
                             kw, default

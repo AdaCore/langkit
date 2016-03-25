@@ -3,6 +3,7 @@ import shutil
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import root_grammar_class, StructMetaClass
+from langkit.diagnostics import DiagnosticError
 from langkit.expressions import Self
 
 from lexer_example import foo_lexer
@@ -24,15 +25,13 @@ def emit_and_print_errors(grammar, main_rule_name='main_rule',
     try:
         ctx.emit('build', generate_lexer=False)
         # ... and tell about how it went
-
-    except AssertionError as exc:
-        print('{}: {}'.format(
-            type(exc).__name__,
-            str(exc)
-        ))
+    except DiagnosticError:
+        # If there is a diagnostic error, don't say anything, the diagnostics
+        # are enough.
+        pass
 
     else:
-        print('Code generation was successful')
+        print 'Code generation was successful'
 
 
 def reset_langkit():
