@@ -162,10 +162,22 @@ class New(AbstractExpression):
             fields for the created struct value.
         """
         super(New, self).__init__()
-        assert (issubclass(struct_type, Struct) and
-                not issubclass(struct_type, ASTNode))
         self.struct_type = struct_type
         self.field_values = field_values
+
+    def do_prepare(self):
+        check_source_language(issubclass(self.struct_type, Struct), (
+            "Invalid type, expected struct type, got {}".format(
+                self.struct_type.name().camel
+            )
+        ))
+
+        check_source_language(not issubclass(self.struct_type, ASTNode), (
+            "Invalid type, expected struct type, got {} which is an "
+            "ASTNode".format(
+                self.struct_type.name().camel
+            )
+        ))
 
     def construct(self):
         """
@@ -186,9 +198,9 @@ class New(AbstractExpression):
         # Make sure the provided set of fields matches the one the struct
         # needs.
         def complain_if_not_empty(name_set, message):
-            assert not name_set, '{}: {}'.format(
+            check_source_language(not name_set, ('{}: {}'.format(
                 message, ', '.join(name.lower for name in name_set)
-            )
+            )))
 
         complain_if_not_empty(
             set(required_fields) - set(provided_fields),
