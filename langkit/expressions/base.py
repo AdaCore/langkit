@@ -628,12 +628,15 @@ class No(AbstractExpression):
             Type for the value this expression creates.
         """
         super(No, self).__init__()
+        self.expr_type = expr_type
+
+    def do_prepare(self):
         from langkit.expressions.structs import Struct
         check_source_language(
-            inspect.isclass(expr_type) and issubclass(expr_type, Struct),
-            'Invalid type for Null expression: {}'.format(expr_type)
+            inspect.isclass(self.expr_type)
+            and issubclass(self.expr_type, Struct),
+            'Invalid type for Null expression: {}'.format(self.expr_type)
         )
-        self.expr_type = expr_type
 
     def construct(self):
         """
