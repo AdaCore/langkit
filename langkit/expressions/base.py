@@ -42,6 +42,7 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
 
     if isinstance(expr, AbstractExpression):
         ret = expr.construct()
+        ret.location = expr.location
 
     # WARNING: Since bools are ints in python, this check needs to be before
     # the "is int" check.
@@ -150,6 +151,9 @@ class AbstractExpression(Frozable):
     You can then call construct on the root of the expression tree to get back
     a resolved tree of ResolvedExpression objects.
     """
+
+    def __init__(self):
+        self.location = extract_library_location()
 
     def do_prepare(self):
         """
@@ -447,6 +451,7 @@ class AbstractVariable(AbstractExpression):
         :param bool create_local: Whether to create a corresponding local
             variable in the current property.
         """
+        super(AbstractVariable, self).__init__()
         self.local_var = None
         if create_local:
             self.local_var = Property.get().vars.create(name, type)
@@ -513,6 +518,7 @@ class GetSymbol(AbstractExpression):
         """
         :param AbstractExpression token_expr: Expression returning a token.
         """
+        super(GetSymbol, self).__init__()
         self.token_expr = token_expr
 
     def construct(self):
@@ -565,6 +571,7 @@ class Let(AbstractExpression):
             (AbstractExpression instances) and that returns another
             AbstractExpression.
         """
+        super(Let, self).__init__()
         argspec = inspect.getargspec(lambda_fn)
         check_source_language(
             not argspec.varargs and
@@ -1102,6 +1109,7 @@ class Literal(AbstractExpression):
     """
 
     def __init__(self, literal):
+        super(Literal, self).__init__()
         self.literal = literal
 
     def construct(self):

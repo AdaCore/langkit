@@ -1,16 +1,20 @@
 == Missing NullNode ==
 Error: The following AST nodes have no handler: NullNode (all BodyNode subclasses require one)
+In definition of property 'prop', class 'ExampleNode': test.py Line 52
 
 == Missing Expression ==
 Error: The following AST nodes have no handler: Expression (all BodyNode subclasses require one)
+In definition of property 'prop', class 'ExampleNode': test.py Line 52
 
 == Missing Compound ==
 Error: The following AST nodes have no handler: Compound (all BodyNode subclasses require one)
+In definition of property 'prop', class 'ExampleNode': test.py Line 52
 
 == Invalid type ==
 Error: Invalid matching type: Boolean
 
 == Irrelevant AST node ==
 Error: Cannot match FooNode (input type is BodyNode)
+In definition of property 'prop', class 'ExampleNode': test.py Line 52
 
 Done

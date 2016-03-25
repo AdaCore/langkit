@@ -1,10 +1,12 @@
 from langkit.compiled_types import (
     ASTNode, BoolType, Field, abstract, root_grammar_class
 )
+from langkit.diagnostics import LangSourceDir
 from langkit.expressions import Literal, Match, Property, Self
 from langkit.parsers import Grammar, Or, Row, Tok
 
 from lexer_example import Token, foo_lexer
+from os import path
 from utils import emit_and_print_errors, reset_langkit
 
 
@@ -15,6 +17,8 @@ def run(name, match_expr):
     """
 
     global Compound, Expression, FooNode, NullNode, Number
+
+    LangSourceDir.set_lang_source_dir(path.abspath(__file__))
 
     print('== {} =='.format(name))
     reset_langkit()

@@ -49,8 +49,7 @@ class EnvGet(AbstractExpression):
         def __repr__(self):
             return '<EnvGet.Expr>'
 
-    def __init__(self, env_expr, token_expr,
-                 resolve_unique=False):
+    def __init__(self, env_expr, token_expr, resolve_unique=False):
         """
         :param AbstractExpression env_expr: Expression that will yield the env
             to get the element from.
@@ -61,6 +60,7 @@ class EnvGet(AbstractExpression):
             result is available. The implementation will just take the first
             result.
         """
+        super(EnvGet, self).__init__()
         self.env_expr = env_expr
         self.token_expr = token_expr
         self.resolve_unique = resolve_unique
@@ -118,6 +118,7 @@ class EnvBind(AbstractExpression):
             lexical environment in which we will eval to_eval_expr.
         :param AbstractExpression to_eval_expr: The expression to eval.
         """
+        super(EnvBind, self).__init__()
         self.env_expr = env_expr
         self.to_eval_expr = to_eval_expr
 

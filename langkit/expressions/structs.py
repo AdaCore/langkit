@@ -69,6 +69,7 @@ class Cast(AbstractExpression):
         :param bool do_raise: Whether the exception should raise an
             exception or return null when the cast is invalid.
         """
+        super(Cast, self).__init__()
         assert astnode.matches(ASTNode)
         self.expr = expr
         self.astnode = astnode
@@ -99,6 +100,7 @@ class IsNull(AbstractExpression):
         :param AbstractExpression expr: Expression on which the test is
             performed.
         """
+        super(IsNull, self).__init__()
         self.expr = expr
 
     def construct(self):
@@ -155,6 +157,7 @@ class New(AbstractExpression):
         :param dict[str, AbstractExpression] fields: Values to assign to the
             fields for the created struct value.
         """
+        super(New, self).__init__()
         assert (issubclass(struct_type, Struct) and
                 not issubclass(struct_type, ASTNode))
         self.struct_type = struct_type
@@ -304,6 +307,7 @@ class FieldAccess(AbstractExpression):
             these are passed to it.
         :type arguments: list[AbstractExpression]
         """
+        super(FieldAccess, self).__init__()
         self.receiver = receiver
         self.field = field
         self.arguments = arguments
@@ -419,6 +423,7 @@ class IsA(AbstractExpression):
             performed.
         :param ASTNode astnode: ASTNode subclass to use for the test.
         """
+        super(IsA, self).__init__()
         self.expr = expr
         self.astnodes = [assert_type(a, ASTNode) for a in astnodes]
 
@@ -505,6 +510,7 @@ class Match(AbstractExpression):
                           lambda e: Y)
         :type matchers: list[() -> AbstractExpression]
         """
+        super(Match, self).__init__()
         self.matched_expr = expr
         self.matchers_functions = matchers
 

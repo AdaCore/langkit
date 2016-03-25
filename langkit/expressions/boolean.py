@@ -22,6 +22,7 @@ class BinaryBooleanOperator(AbstractExpression):
         :param AbstractExpression lhs: Left operand.
         :param AbstractExpression rhs: Right operand.
         """
+        super(BinaryBooleanOperator, self).__init__()
         assert kind in (self.AND, self.OR)
         self.kind = kind
         self.lhs = lhs
@@ -103,6 +104,7 @@ class Eq(AbstractExpression):
         :param AbstractExpression lhs: Left operand.
         :param AbstractExpression rhs: Right operand.
         """
+        super(Eq, self).__init__()
         self.lhs = lhs
         self.rhs = rhs
 
@@ -187,6 +189,7 @@ class OrderingTest(AbstractExpression):
         :param AbstractExpression lhs: Left operand.
         :param AbstractExpression rhs: Right operand.
         """
+        super(OrderingTest, self).__init__()
         assert operator in OrderingTest.OPERATOR_IMAGE
         self.operator = operator
         self.lhs = lhs
@@ -258,6 +261,7 @@ class If(AbstractExpression):
         :param AbstractExpression else_then: If "cond" is evaluated to false,
             this part is returned.
         """
+        super(If, self).__init__()
         self.cond = cond
         self.then = then
         self.else_then = else_then
@@ -300,6 +304,7 @@ class Not(AbstractExpression):
         """
         :param AbstractExpression expr: Operand for the "not" expression.
         """
+        super(Not, self).__init__()
         self.expr = expr
 
     def construct(self):
@@ -349,6 +354,7 @@ class Then(AbstractExpression):
         :param AbstractExpression default_val: The expression to use as
             fallback if expr is null.
         """
+        super(Then, self).__init__()
         self.expr = expr
         self.then_fn = then_fn
         self.default_val = default_val

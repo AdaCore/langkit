@@ -327,6 +327,7 @@ class CollectionGet(AbstractExpression):
             index is not valid for the collection. If False, it will raise an
             exception.
         """
+        super(CollectionGet, self).__init__()
         self.coll_expr = coll_expr
         self.index_expr = index_expr
         self.or_null = or_null
@@ -350,6 +351,7 @@ class CollectionLength(AbstractExpression):
         :param AbstractExpression coll_expr: The expression representing the
             collection to get from.
         """
+        super(CollectionLength, self).__init__()
         self.coll_expr = coll_expr
 
     def construct(self):

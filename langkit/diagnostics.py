@@ -10,7 +10,7 @@ class LangSourceDir(object):
     be called by manage before functions depending on knowing the language
     source dir can be called.
     """
-    lang_source_dir = ""
+    lang_source_dir = "<invalid dir>"
 
     @classmethod
     def set_lang_source_dir(cls, lang_source_dir):

@@ -8,6 +8,7 @@ from itertools import count
 from langkit import names
 from langkit.c_api import CAPIType
 from langkit.common import get_type, null_constant, is_keyword
+from langkit.diagnostics import extract_library_location, context
 from langkit.template_utils import common_renderer
 from langkit.utils import memoized, type_check, col, Colors, common_ancestor
 
@@ -415,7 +416,7 @@ class AbstractNodeData(object):
         self._index = next(self._counter)
         self.is_private = private
         self._name = names.Name("")
-
+        self.location = extract_library_location()
         self.ast_node = None
         """
         ASTNode subclass that declared this field. Initialized when creating
@@ -1297,7 +1298,11 @@ class ASTNode(Struct):
     @classmethod
     def compute_properties(cls):
         for p in cls.get_properties(include_inherited=False):
-            p.render(cls)
+            ctx_message = "In definition of property '{}', class '{}'".format(
+                p._name.lower, cls.name().camel
+            )
+            with context(ctx_message, p.location):
+                p.render(cls)
 
     @classmethod
     def base(cls):
