@@ -635,7 +635,9 @@ class No(AbstractExpression):
         check_source_language(
             inspect.isclass(self.expr_type)
             and issubclass(self.expr_type, Struct),
-            'Invalid type for Null expression: {}'.format(self.expr_type)
+            'Invalid type for Null expression: {}'.format(
+                self.expr_type.name().camel
+            )
         )
 
     def construct(self):
