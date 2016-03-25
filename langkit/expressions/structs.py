@@ -26,7 +26,7 @@ class Cast(AbstractExpression):
             :type do_raise: bool
 
             :param ResolvedExpr result_var: If provided, the cast will use it
-                to store the cast result. Othewise, a dedicated variable is
+                to store the cast result. Otherwise, a dedicated variable is
                 created for this.
             """
             self.do_raise = do_raise
