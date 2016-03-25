@@ -3,10 +3,10 @@ Code generation was successful
 
 == Missing var value ==
 Error: All Let expression function arguments must have default values
-In definition of property 'prop', class 'ExampleNode': test.py Line 52
+In definition of property 'prop', class 'BarNode': test.py Line 31
 
 == Invalid args ==
 Error: Invalid function for Let expression (*args and **kwargs not accepted)
-In definition of property 'prop', class 'ExampleNode': test.py Line 52
+In definition of property 'prop', class 'BarNode': test.py Line 31
 
 Done
