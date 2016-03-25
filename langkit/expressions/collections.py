@@ -3,7 +3,7 @@ from itertools import count
 
 from langkit import names
 from langkit.compiled_types import BoolType, LongType
-from langkit.diagnostics import check_source_language
+from langkit.diagnostics import check_source_language, check_multiple
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, AbstractVariable,
     render, Property, BuiltinCallExpr
@@ -35,18 +35,24 @@ class CollectionExpression(AbstractExpression):
         self.expr_fn = expr
         self.expr = None
         self.element_var = None
-
-        argspec = inspect.getargspec(self.expr_fn)
-        check_source_language(len(argspec.args) in (1, 2) and
-                              not argspec.varargs and
-                              not argspec.keywords and
-                              not argspec.defaults,
-                              'Invalid collection iteration lambda: only one'
-                              ' or two parameters expected')
-        self.requires_index = len(argspec.args) == 2
+        self.requires_index = False
         self.index_var = None
 
     def do_prepare(self):
+        argspec = inspect.getargspec(self.expr_fn)
+
+        check_multiple([
+            (len(argspec.args) in (1, 2),
+             'Invalid collection iteration lambda: only one '
+             'or two parameters expected'),
+            (not argspec.varargs and not argspec.keywords,
+             'Invalid collection iteration lambda: no *args or **kwargs'),
+            (not argspec.defaults,
+             'Invalid collection iteration lambda: No default values allowed '
+             'for arguments')
+        ])
+
+        self.requires_index = len(argspec.args) == 2
         self.element_var = AbstractVariable(
             names.Name("Item_{}".format(next(CollectionExpression._counter))),
         )
