@@ -38,9 +38,6 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
     :rtype: ResolvedExpression
     """
 
-    if not custom_msg:
-        custom_msg = "Expected type {}, got {}"
-
     if isinstance(expr, AbstractExpression):
         ret = expr.construct()
         ret.location = expr.location
@@ -56,19 +53,21 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
 
     if expected_type_or_pred:
         if isinstance(expected_type_or_pred, type):
-            assert ret.type.matches(expected_type_or_pred), (
+            if not custom_msg:
+                custom_msg = "Expected type {}, got {}"
+            check_source_language(ret.type.matches(expected_type_or_pred), (
                 custom_msg.format(expected_type_or_pred, ret.type)
-            )
+            ))
         else:
+            if not custom_msg:
+                custom_msg = "Evaluating predicate on {} failed"
             assert callable(expected_type_or_pred), (
                 "Expected_type_or_pred must either be a type, or a predicate"
                 " of type (ResolvedExpression) -> bool"
             )
-            assert expected_type_or_pred(ret.type), (
-                "Evaluating predicate on {} failed".format(
-                    ret.type.name().camel
-                )
-            )
+            check_source_language(expected_type_or_pred(ret.type), (
+                custom_msg.format(ret.type.name().camel)
+            ))
 
     return ret
 
