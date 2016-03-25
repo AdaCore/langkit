@@ -9,7 +9,7 @@ from langkit.expressions.base import (
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
-from langkit.utils import assert_type, col, Colors
+from langkit.utils import assert_type
 
 
 class Cast(AbstractExpression):
