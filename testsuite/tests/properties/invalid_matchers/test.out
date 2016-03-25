@@ -12,6 +12,7 @@ In definition of property 'prop', class 'ExampleNode': test.py Line 52
 
 == Invalid type ==
 Error: Invalid matching type: Boolean
+In definition of property 'prop', class 'ExampleNode': test.py Line 52
 
 == Irrelevant AST node ==
 Error: Cannot match FooNode (input type is BodyNode)

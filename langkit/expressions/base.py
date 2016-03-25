@@ -9,7 +9,8 @@ from langkit.compiled_types import (
     render as ct_render, Symbol, Token
 )
 from langkit.diagnostics import (
-    extract_library_location, check_source_language, check_multiple
+    extract_library_location, check_source_language, check_multiple,
+    context
 )
 from langkit.utils import assert_type, memoized
 
@@ -813,6 +814,12 @@ class Property(AbstractNodeData):
         new.vars = copy(self.vars)
         return new
 
+    def diagnostic_context(self):
+        ctx_message = "In definition of property '{}', class '{}'".format(
+            self._name.lower, self.ast_node.name().camel
+        )
+        return context(ctx_message, self.location)
+
     @classmethod
     def get(cls):
         """
@@ -986,7 +993,7 @@ class Property(AbstractNodeData):
                 self.expr = assert_type(self.expr(*explicit_args),
                                         AbstractExpression)
 
-        with self.bind():
+        with self.bind(), self.diagnostic_context():
             self.expr.prepare()
 
     def freeze(self):

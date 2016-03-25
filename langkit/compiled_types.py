@@ -8,7 +8,7 @@ from itertools import count
 from langkit import names
 from langkit.c_api import CAPIType
 from langkit.common import get_type, null_constant, is_keyword
-from langkit.diagnostics import extract_library_location, context
+from langkit.diagnostics import extract_library_location
 from langkit.template_utils import common_renderer
 from langkit.utils import memoized, type_check, col, Colors, common_ancestor
 
@@ -1298,10 +1298,7 @@ class ASTNode(Struct):
     @classmethod
     def compute_properties(cls):
         for p in cls.get_properties(include_inherited=False):
-            ctx_message = "In definition of property '{}', class '{}'".format(
-                p._name.lower, cls.name().camel
-            )
-            with context(ctx_message, p.location):
+            with p.diagnostic_context():
                 p.render(cls)
 
     @classmethod
