@@ -1,0 +1,8 @@
+== Correct code ==
+Code generation was successful
+
+== Incorrect No usage ==
+Error: Invalid type for Null expression: Integer
+In definition of property 'prop', class 'BarNode': test.py Line 31
+
+Done
