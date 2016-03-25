@@ -70,10 +70,14 @@ class Cast(AbstractExpression):
             exception or return null when the cast is invalid.
         """
         super(Cast, self).__init__()
-        assert astnode.matches(ASTNode)
         self.expr = expr
         self.astnode = astnode
         self.do_raise = do_raise
+
+    def do_prepare(self):
+        check_source_language(self.astnode.matches(ASTNode), (
+            "One can only cast to an ASTNode subtype"
+        ))
 
     def construct(self):
         """
@@ -85,7 +89,7 @@ class Cast(AbstractExpression):
         return Cast.Expr(construct(
             self.expr, lambda t: self.astnode.matches(t),
             'Cannot cast {{}} to {}: only downcasting is allowed'.format(
-                self.astnode
+                self.astnode.name().camel
             )
         ), self.astnode)
 
