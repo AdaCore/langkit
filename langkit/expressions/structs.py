@@ -190,8 +190,11 @@ class New(AbstractExpression):
         fields = [(names.Name.from_lower('f_' + n), v)
                   for n, v in self.field_values.items()]
 
+        class FieldPlaceHolder(object):
+            type = None
+
         provided_fields = {name: construct(
-            value, required_fields[name].type,
+            value, required_fields.get(name, FieldPlaceHolder).type,
             'Wrong type for field {}: got {{}} but expected {{}}'.format(name)
         ) for name, value in fields}
 
@@ -210,7 +213,7 @@ class New(AbstractExpression):
         )
         complain_if_not_empty(
             set(provided_fields) - set(required_fields),
-            'Unknown {} fields'.format(self.struct_type.name().camel)
+            'Extraneous fields for {}'.format(self.struct_type.name().camel)
         )
 
         return New.Expr(self.struct_type, provided_fields)
