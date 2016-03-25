@@ -321,6 +321,7 @@ class ManageScript(object):
             parsed_args.func(parsed_args)
         except DiagnosticError:
             print >> sys.stderr, "Errors, exiting"
+            sys.exit(1)
 
         if cov is not None:
             cov.stop()
