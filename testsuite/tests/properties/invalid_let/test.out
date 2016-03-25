@@ -1,0 +1,10 @@
+== Correct code ==
+Code generation was successful
+
+== Missing var value ==
+Error: All Let expression function arguments must have default values
+
+== Invalid args ==
+Error: Invalid function for Let expression (*args and **kwargs not accepted)
+
+Done
