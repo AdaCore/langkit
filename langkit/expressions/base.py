@@ -945,58 +945,48 @@ class Property(AbstractNodeData):
                                   ' expression or a function')
 
             argspec = inspect.getargspec(self.expr)
+            defaults = argspec.defaults or []
 
-            if (len(argspec.args) == 0 and
-                    not argspec.varargs and
-                    not argspec.keywords and
-                    not argspec.defaults):
-                # This is a mere: lambda: <expression>
-                self.expr = assert_type(self.expr(), AbstractExpression)
+            check_multiple([
+                (not argspec.varargs or not argspec.keywords, 'Invalid'
+                 ' lambda signature: no *args nor **kwargs allowed'),
 
-            else:
-                check_multiple([
-                    (not argspec.varargs or not argspec.keywords, 'Invalid'
-                     ' lambda signature: no *args nor **kwargs allowed'),
+                (len(argspec.args) == len(defaults), 'All types '
+                 'must have an associated type as a default value')
+            ])
 
-                    (len(argspec.args) > 0, 'Invalid lambda signature: at '
-                     'least one parameter expected'),
+            # This is a lambda for a property that takes parameters: check
+            # that all parameters have declared types in default arguments.
+            for kw, default in zip(argspec.args, defaults):
+                # Because there's no forward definition mechanism, it is
+                # sometimes not possible to annotate an argument with a
+                # type because the type does not exist yet. In this case,
+                # we allow lambda functions that take no argument just to
+                # delay the evaluation of the type itself.
+                if not inspect.isclass(default):
+                    default = default()
 
-                    (len(argspec.args) == len(argspec.defaults), 'All types '
-                     'must have an associated type as a default value')
-                ])
-
-                # This is a lambda for a property that takes parameters: check
-                # that all parameters have declared types in default arguments.
-                for kw, default in zip(argspec.args, argspec.defaults):
-                    # Because there's no forward definition mechanism, it is
-                    # sometimes not possible to annotate an argument with a
-                    # type because the type does not exist yet. In this case,
-                    # we allow lambda functions that take no argument just to
-                    # delay the evaluation of the type itself.
-                    if not inspect.isclass(default):
-                        default = default()
-
-                    check_source_language(
-                        kw.lower not in Property.reserved_arg_lower_names,
-                        'Cannot define reserved arguments ({})'.format(
-                            ', '.join(Property.reserved_arg_lower_names)
-                        )
+                check_source_language(
+                    kw.lower not in Property.reserved_arg_lower_names,
+                    'Cannot define reserved arguments ({})'.format(
+                        ', '.join(Property.reserved_arg_lower_names)
                     )
-                    check_source_language(
-                        issubclass(default, CompiledType),
-                        'A type is required for parameter {} (got {})'.format(
-                            kw, default
-                        )
+                )
+                check_source_language(
+                    issubclass(default, CompiledType),
+                    'A type is required for parameter {} (got {})'.format(
+                        kw, default
                     )
+                )
 
-                    self._add_argument(names.Name.from_lower(kw), default)
+                self._add_argument(names.Name.from_lower(kw), default)
 
-                # Now that we have placeholder for all explicit arguments (i.e.
-                # only the ones the user defined), we can expand the lambda
-                # into a real AbstractExpression.
-                explicit_args = self.argument_vars[1:]
-                self.expr = assert_type(self.expr(*explicit_args),
-                                        AbstractExpression)
+            # Now that we have placeholder for all explicit arguments (i.e.
+            # only the ones the user defined), we can expand the lambda
+            # into a real AbstractExpression.
+            explicit_args = self.argument_vars[1:]
+            self.expr = assert_type(self.expr(*explicit_args),
+                                    AbstractExpression)
 
         with self.bind(), self.diagnostic_context():
             self.expr.prepare()
