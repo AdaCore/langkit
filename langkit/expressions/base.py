@@ -573,19 +573,21 @@ class Let(AbstractExpression):
         """
         super(Let, self).__init__()
         argspec = inspect.getargspec(lambda_fn)
+        defaults = argspec.defaults or []
+
         check_source_language(
-            not argspec.varargs and
-            not argspec.keywords,
-            'Invalid function for Let expression (varargs not accepted)'
+            not argspec.varargs and not argspec.keywords,
+            'Invalid function for Let expression (*args and **kwargs '
+            'not accepted)'
         )
         check_source_language(
-            len(argspec.args) == len(argspec.defaults),
+            len(argspec.args) == len(defaults),
             'All Let expression function arguments must have default values'
         )
 
         self.vars = None
         self.var_names = argspec.args
-        self.var_exprs = argspec.defaults
+        self.var_exprs = defaults
         self.expr = None
         self.lambda_fn = lambda_fn
 
