@@ -330,9 +330,11 @@ class FieldAccess(AbstractExpression):
         ":type: AbstractNodeField"
 
         # If still not found, there's a problem
-        assert to_get, col("Type {} has no '{}' field or property".format(
-            receiver_expr.type.__name__, self.field
-        ), Colors.FAIL)
+        check_source_language(
+            to_get is not None, "Type {} has no '{}' field or property".format(
+                receiver_expr.type.__name__, self.field
+            )
+        )
 
         # Check that this property actually accepts these arguments and that
         # they are correctly typed.
@@ -345,6 +347,7 @@ class FieldAccess(AbstractExpression):
                 len(self.arguments),
             )
         )
+
         arg_exprs = map(construct, self.arguments)
         exprs_and_formals = zip(arg_exprs, to_get.explicit_arguments)
         for i, (actual, formal) in enumerate(exprs_and_formals, 1):
