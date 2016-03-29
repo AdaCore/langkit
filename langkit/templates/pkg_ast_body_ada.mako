@@ -616,21 +616,22 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
       function Image is new Env_Element_Vectors.Image (Image);
 
-      First_Iter : Boolean := True;
    begin
-      Put ("<LexEnv Id" & Env_Id & " Parent"
-           & (if Self.Parent /= null then Parent_Env_Id
-              else " null") & " (");
+      Put ("<LexEnv (Id" & Env_Id & ", Parent"
+           & (if Self.Parent /= null then Parent_Env_Id else " null")
+           & "), ");
 
-      for El in To_Sorted_Env (Self.Env).Iterate loop
-         if not First_Iter then
-            Put (" ");
-         end if;
-         First_Iter := False;
-         Put (Langkit_Support.Text.Image (Key (El).all) & ": "
-              & Image (Element (El)));
-      end loop;
-      Put (")>");
+      if Self.Env.Is_Empty then
+         Put_Line ("empty>");
+      else
+         Put_Line ("{");
+         for El in To_Sorted_Env (Self.Env).Iterate loop
+            Put ("    ");
+            Put_Line (Langkit_Support.Text.Image (Key (El).all) & ": "
+                 & Image (Element (El)));
+         end loop;
+         Put_Line ("}>");
+      end if;
    end Dump_One_Lexical_Env;
    --  This procedure dumps *one* lexical environment
 
@@ -690,7 +691,6 @@ package body ${_self.ada_api_settings.lib_name}.AST is
                  & Image (Sloc_Range (Current)) & "> - ");
             Dump_One_Lexical_Env
               (Env, Get_Env_Id (Env), Get_Env_Id (Env.Parent));
-            Put_Line ("");
          end if;
 
          for Child of Children (Current) loop
