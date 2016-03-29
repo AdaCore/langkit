@@ -16,7 +16,7 @@ def run(name, match_expr):
     a property in ExampleNode.
     """
 
-    global Compound, Expression, FooNode, NullNode, Number
+    global BodyNode, Compound, Expression, FooNode, NullNode, Number
 
     LangSourceDir.set_lang_source_dir(path.abspath(__file__))
 
@@ -74,6 +74,7 @@ def run(name, match_expr):
     print('')
 
 
+# Incomplete set of matchers
 run('Missing NullNode', lambda: Self.body.match(
     lambda e=Expression: Literal(0),
 ))
@@ -84,6 +85,8 @@ run('Missing Compound', lambda: Self.body.match(
     lambda e=NullNode: Literal(0),
     lambda e=Number:   Literal(1),
 ))
+
+# Invalid matchers
 run('Invalid type', lambda: Self.body.match(
     lambda e=NullNode:   Literal(0),
     lambda e=Expression: Literal(1),
@@ -93,6 +96,32 @@ run('Irrelevant AST node', lambda: Self.body.match(
     lambda e=NullNode:   Literal(0),
     lambda e=Expression: Literal(1),
     lambda e=FooNode:    Literal(1),
+))
+
+# Unreachable matchers
+run('Default case after full coverage', lambda: Self.body.match(
+    lambda e=BodyNode: Literal(0),
+    lambda _:          Literal(1),
+))
+
+run('Node after default case (1)', lambda: Self.body.match(
+    lambda _:          Literal(0),
+    lambda e=BodyNode: Literal(1),
+))
+run('Node after default case (2)', lambda: Self.body.match(
+    lambda _:        Literal(0),
+    lambda e=Number: Literal(1),
+))
+
+run('Node after full coverage (1)', lambda: Self.body.match(
+    lambda e=BodyNode: Literal(0),
+    lambda e=Number:   Literal(1),
+))
+run('Node after full coverage (2)', lambda: Self.body.match(
+    lambda e=NullNode: Literal(0),
+    lambda e=Number:   Literal(1),
+    lambda e=Compound: Literal(2),
+    lambda e=BodyNode: Literal(3),
 ))
 
 print 'Done'

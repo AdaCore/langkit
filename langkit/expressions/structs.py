@@ -2,7 +2,7 @@ import inspect
 
 from langkit import names
 from langkit.compiled_types import ASTNode, Struct, BoolType
-from langkit.diagnostics import check_source_language
+from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, ResolvedExpression, construct,
     render, Property, LiteralExpr, UnreachableExpr
@@ -538,12 +538,12 @@ class Match(AbstractExpression):
 
         self.matchers = None
         """
-        Dictionary of matchers. Built in the "prepare" pass.
-        :type: dict[CompiledType, (AbstractVariable, AbstractExpression)]
+        List of matchers. Built in the "prepare" pass.
+        :type: list[(CompiledType, AbstractVariable, AbstractExpression)]
         """
 
     def do_prepare(self):
-        self.matchers = {}
+        self.matchers = []
 
         for i, match_fn in enumerate(self.matchers_functions):
             argspec = inspect.getargspec(match_fn)
@@ -564,71 +564,112 @@ class Match(AbstractExpression):
                         match_type.name().camel
                     )
                 )
-                check_source_language(
-                    match_type not in self.matchers,
-                    'Multiple matchers for {}'.format(match_type.name().camel)
-                )
             else:
                 match_type = None
-                check_source_language(
-                    match_type not in self.matchers,
-                    'Multiple default matchers'
-                )
 
             match_var = AbstractVariable(
                 names.Name('Match_{}'.format(i)),
                 type=match_type,
                 create_local=True
             )
-            self.matchers[match_type] = (match_var, match_fn(match_var))
+            self.matchers.append((match_type, match_var, match_fn(match_var)))
 
-    def _check_no_missing_matcher(self, input_type):
+    def _check_match_coverage(self, input_type):
         """
         Given some input type for this match expression, make sure the set of
         matchers cover all cases. check_source_language will raise an error if
-        it's not the case.
+        it's not the case. Also emit warnings for unreachable matchers.
 
         :param ASTNode input_type: Type parameter.
         :rtype: None
         """
 
-        # Make sure there is at least one matcher for any possible input type
-        def missing_matchers(astnode):
-            """
-            Return the set of subclasses for which this match expression lacks
-            a matcher.
+        # Working set of ASTNode subclasses for the types that are covered by
+        # matchers. Updated as we go through the list of matchers.
+        matched_types = set()
 
-            :param ASTNode astnode: Type parameter.
+        def include(t):
+            """
+            Include a type and of its subclasses in "matched_types". None is
+            interpreted as the default matcher, i.e. the input type.
+
+            Conversely, when this adds the last subclass for some type, this
+            adds the parent subclass to "matched_types". This makes sense as
+            once all concrete subclasses of the abstract A type are handled, it
+            is true that A is handled.
+
+            Return whether t was already present in "matched_types".
+
+            :param ASTNode|None t: Type parameter.
+            :rtype: bool
+            """
+            if t is None:
+                t = input_type
+            if t in matched_types:
+                return True
+
+            # Include "t" and all its subclasses
+            matched_types.add(t)
+            for child in t.subclasses:
+                include(child)
+
+            # Include its parents if all their children are matched
+            parents = list(t.get_inheritance_chain())[:-1]
+            for parent in reversed(parents):
+                if parent in matched_types:
+                    break
+                subclasses = set(parent.subclasses)
+                if not subclasses.issubset(matched_types):
+                    break
+                # If we reach this point, all parent's subclasses are matched,
+                # so we can state that parent itself is always matched.
+                matched_types.add(parent)
+
+            return False
+
+        for i, (t, _, _) in enumerate(self.matchers, 1):
+            t_name = 'default one' if t is None else t.name().camel
+            check_source_language(not include(t),
+                                  'The #{} matcher ({}) is unreachable'
+                                  ' as all previous matchers cover all the'
+                                  ' nodes it can match'.format(i, t_name),
+                                  Severity.warning)
+
+        def unmatched_types(t):
+            """
+            Return the set of t subclasses that are not matched by any matcher.
+
+            Omit subclasses when none of them are matched: only the parent is
+            returned in this case, so that we don't flood users with whole
+            hierarchies of classes.
+
+            :param ASTNode t: Type parameter.
             :rtype: set[ASTNode]
             """
-            if astnode not in self.matchers:
-                result = set()
-                for subclass in astnode.subclasses:
-                    result.update(missing_matchers(subclass))
-
-                # Return the most simple result: if all subclasses are missing,
-                # only report this abstract subclass.
-                if result == set(astnode.subclasses):
-                    result = {astnode}
-
-                return result
-
-            else:
+            if t in matched_types:
                 return set()
 
-        if None not in self.matchers:
-            mm = sorted(
-                missing_matchers(input_type),
-                key=lambda cls: cls.hierarchical_name()
+            subclasses = set(t.subclasses)
+            if subclasses & matched_types:
+                result = set()
+                for cls in subclasses:
+                    result.update(unmatched_types(cls))
+            else:
+                result = {t}
+            return result
+
+        mm = sorted(
+            unmatched_types(input_type),
+            key=lambda cls: cls.hierarchical_name()
+        )
+        check_source_language(
+            not mm,
+            'The following AST nodes have no handler: {} (all {} subclasses'
+            ' require one)'.format(
+                ', '.join(t.name().camel for t in mm),
+                input_type.name().camel
             )
-            check_source_language(
-                not mm,
-                'The following AST nodes have no handler: {} (all {}'
-                ' subclasses require one)'.format(
-                    ', '.join(t.name().camel for t in mm),
-                    input_type.name().camel
-                )
-            )
+        )
 
     def construct(self):
         """
@@ -645,11 +686,12 @@ class Match(AbstractExpression):
         # PyCharm's static analyzer.
         matched_type = assert_type(matched_expr.type, ASTNode)
 
-        # Check the set of matchers is valid:
-        # * all possible input types must have at least one matcher;
-        # * all matchers must target allowed types, i.e. input type subclasses.
-        self._check_no_missing_matcher(matched_type)
-        for t in self.matchers.keys():
+        constructed_matchers = []
+
+        # Check (i.e. raise an error if no true) the set of matchers is valid:
+
+        # * all matchers must target allowed types, i.e. input type subclasses;
+        for t, v, e in self.matchers:
             if t is not None:
                 check_source_language(
                     t.matches(matched_expr.type),
@@ -658,33 +700,20 @@ class Match(AbstractExpression):
                         matched_expr.type.name().camel
                     )
                 )
+            else:
+                # The default matcher (if any) matches the most general type,
+                # which is the input type.
+                v.set_type(matched_expr.type)
+            constructed_matchers.append((construct(v), construct(e)))
 
-        # The default matcher (if any) matches the most general type, which is
-        # the input type.
-        default_matcher = self.matchers.get(None)
-        if default_matcher:
-            match_var, match_expr = default_matcher
-            match_var.set_type(matched_expr.type)
-
-        # We are going to expand this Match expression into a chain of if/else
-        # constructs that will test the matchers one by one. We have to find an
-        # other so that the more specific matchers go first. For now, sort by
-        # ASTNode subclassing depth. In the list below, the most general
-        # matchers will appear first.
-        match_list = sorted(
-            (
-                (0 if match_var.type is None else
-                 len(list(match_var.type.get_inheritance_chain()))),
-                construct(match_var),
-                construct(expr)
-            )
-            for match_var, expr in self.matchers.values()
-        )
+        # * all possible input types must have at least one matcher. Also warn
+        #   if some matchers are unreachable.
+        self._check_match_coverage(matched_type)
 
         # Compute the return type as the unification of all branches
-        _, _, expr = match_list[-1]
+        _, expr = constructed_matchers[-1]
         rtype = expr.type
-        for _, _, expr in match_list:
+        for _, expr in constructed_matchers:
             rtype = expr.type.unify(rtype)
 
         # This is the expression execution will reach if we have a bug in our
@@ -692,9 +721,9 @@ class Match(AbstractExpression):
         result = UnreachableExpr(rtype)
 
         # Wrap this "failing" expression with all the cases to match in the
-        # appropriate order, so that in the end the most specific matchers are
-        # tested first.
-        for _, match_var, expr in match_list:
+        # appropriate order, so that in the end the first matchers are tested
+        # first.
+        for match_var, expr in reversed(constructed_matchers):
             casted = Cast.Expr(matched_expr,
                                match_var.type,
                                result_var=match_var)

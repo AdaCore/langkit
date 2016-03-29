@@ -18,4 +18,29 @@ In definition of property 'prop', class 'ExampleNode': test.py Line 52
 Error: Cannot match FooNode (input type is BodyNode)
 In definition of property 'prop', class 'ExampleNode': test.py Line 52
 
+== Default case after full coverage ==
+Warning: The #2 matcher (default one) is unreachable as all previous matchers cover all the nodes it can match
+In definition of property 'prop', class 'ExampleNode': test.py Line 52
+Code generation was successful
+
+== Node after default case (1) ==
+Warning: The #2 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
+In definition of property 'prop', class 'ExampleNode': test.py Line 52
+Code generation was successful
+
+== Node after default case (2) ==
+Warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
+In definition of property 'prop', class 'ExampleNode': test.py Line 52
+Code generation was successful
+
+== Node after full coverage (1) ==
+Warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
+In definition of property 'prop', class 'ExampleNode': test.py Line 52
+Code generation was successful
+
+== Node after full coverage (2) ==
+Warning: The #4 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
+In definition of property 'prop', class 'ExampleNode': test.py Line 52
+Code generation was successful
+
 Done
