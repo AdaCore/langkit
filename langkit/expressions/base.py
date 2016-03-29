@@ -798,6 +798,12 @@ class Property(AbstractNodeData):
         new = Property(self.expr, self._doc, self.is_private, self.abstract,
                        self.expected_type)
         new.vars = copy(self.vars)
+
+        # Copy is used in the context of macros. In macros, we want to copy
+        # the original Property's source location for error diagnostics,
+        # rather than use the copied stack trace that will reference the new
+        # class.
+        new.location = self.location
         return new
 
     def diagnostic_context(self):
