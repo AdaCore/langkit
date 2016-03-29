@@ -9,6 +9,7 @@ from mako.template import Template
 
 from langkit import documentation, names
 from langkit.common import string_repr, get_type, null_constant
+from langkit.diagnostics import DiagnosticError
 
 
 class TemplateEnvironment(dict):
@@ -48,6 +49,10 @@ class Renderer(object):
     def _render(self, template_name):
         try:
             return mako_template(template_name).render(**self.env)
+        except DiagnosticError:
+            # In the case of DiagnosticErrors, we don't want to show the
+            # traceback.
+            raise
         except Exception:
             sys.stderr.write('Mako exception:\n{}\n'.format(
                 mako.exceptions.text_error_template().render())
