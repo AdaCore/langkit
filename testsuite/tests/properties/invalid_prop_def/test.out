@@ -1,0 +1,28 @@
+== Correct code ==
+Code generation was successful
+
+== Incorrect property definition 1 ==
+Error: Invalid object passed for expression of property: ['Lol this is obviously wrong']
+In definition of property 'propyprop', class 'BarNode': test.py Line 47
+
+== Incorrect property definition 2 ==
+Error: Invalid lambda signature: no *args nor **kwargs allowed
+In definition of property 'propyprop', class 'BarNode': test.py Line 52
+
+== Incorrect property definition 3 ==
+Error: All parameters must have an associated type as a default value
+In definition of property 'propyprop', class 'BarNode': test.py Line 57
+
+== Incorrect property definition 4 ==
+Error: Cannot define reserved arguments (node, lex_env)
+In definition of property 'propyprop', class 'BarNode': test.py Line 62
+
+== Incorrect property definition 5 ==
+Error: Invalid type argument passed for parameter a : ['Obviously wrong']
+In definition of property 'propyprop', class 'BarNode': test.py Line 67
+
+== Incorrect property definition 6 ==
+Error: A valid langkit CompiledType is required for parameter a (got <class 'langkit.compiled_types.NodeMacro'>)
+In definition of property 'propyprop', class 'BarNode': test.py Line 72
+
+Done
