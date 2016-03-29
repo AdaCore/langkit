@@ -965,7 +965,7 @@ class PropertyDef(AbstractNodeData):
                         )
 
                 check_source_language(
-                    kw.lower not in PropertyDef.reserved_arg_lower_names,
+                    kw.lower() not in PropertyDef.reserved_arg_lower_names,
                     'Cannot define reserved arguments ({})'.format(
                         ', '.join(PropertyDef.reserved_arg_lower_names)
                     )
