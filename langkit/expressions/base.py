@@ -733,20 +733,8 @@ class Property(AbstractNodeData):
 
         super(Property, self).__init__(private=private)
 
-        assert ((expr is None and abstract) or
-                (expr is not None and not abstract)), (
-            "Property can either be abstract, either have an expression, "
-            "not both"
-        )
-
         self.expr = expr
-        if expr:
-            assert isinstance(self.expr,
-                              AbstractExpression) or callable(expr), (
-                "Invalid object passed for expression of property: {}".format(
-                    expr
-                )
-            )
+        ":type: AbstractExpression"
 
         self.constructed_expr = None
 
@@ -798,14 +786,6 @@ class Property(AbstractNodeData):
 
         self.ast_node = None
         ":type: ASTNode|None"
-
-        if self.abstract:
-            # TODO: We could also at a later stage add a check to see that the
-            # abstract property definition doesn't override another property
-            # definition on a base class.
-            assert self.expected_type, (
-                "Abstract properties need an explicit type annotation"
-            )
 
     def __copy__(self):
         """
@@ -924,6 +904,23 @@ class Property(AbstractNodeData):
 
         :rtype: None
         """
+
+        check_source_language(
+            (self.expr is None and self.abstract)
+            or (self.expr is not None and not self.abstract),
+            "Property can either be abstract, either have an expression, "
+            "not both"
+        )
+
+        if self.abstract:
+            # TODO: We could also at a later stage add a check to see that the
+            # abstract property definition doesn't override another property
+            # definition on a base class.
+            check_source_language(
+                self.expected_type is not None,
+                "Abstract properties need an explicit type annotation"
+            )
+
         if self.expected_type and not inspect.isclass(self.expected_type):
             self.expected_type = self.expected_type()
 
@@ -935,10 +932,18 @@ class Property(AbstractNodeData):
         if not self.expr:
             return
 
+        check_source_language(
+            isinstance(self.expr, AbstractExpression)
+            or callable(self.expr),
+            "Invalid object passed for expression of property: {}".format(
+                self.expr
+            )
+        )
+
         # If the user passed a lambda or function for the expression,
         # now is the moment to transform it into an abstract expression by
         # calling it.
-        if self.expr and not isinstance(self.expr, AbstractExpression):
+        if not isinstance(self.expr, AbstractExpression):
 
             check_source_language(callable(self.expr), 'Expected either an'
                                   ' expression or a function')
