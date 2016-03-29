@@ -458,10 +458,10 @@ class IsA(AbstractExpression):
         """
         expr = construct(self.expr)
         for a in self.astnodes:
-            assert a.matches(expr.type), (
+            check_source_language(a.matches(expr.type), (
                 'When testing the dynamic subtype of an AST node, the type to'
                 ' check must be a subclass of the value static type.'
-            )
+            ))
         return IsA.Expr(expr, self.astnodes)
 
 
