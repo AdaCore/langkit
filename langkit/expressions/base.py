@@ -878,12 +878,10 @@ class Property(AbstractNodeData):
             return self.expected_type
 
         # In other cases, let's rely on the constructed expr's type
-        assert self.constructed_expr, (
-            'Trying too early to get the type of the {} property. Try to'
-            ' specify its return type explicitely.'.format(
-                self.qualname
-            )
-        )
+        check_source_language(self.constructed_expr, (
+            'Trying to get the type of the {} property too early. Try to'
+            ' specify its return type explicitly.'.format(self.qualname)
+        ))
         return self.constructed_expr.type
 
     def _add_argument(self, name, type, default_value=None):
