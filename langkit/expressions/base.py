@@ -956,7 +956,13 @@ class PropertyDef(AbstractNodeData):
                 # we allow lambda functions that take no argument just to
                 # delay the evaluation of the type itself.
                 if not inspect.isclass(default):
-                    default = default()
+                    try:
+                        default = default()
+                    except TypeError:
+                        check_source_language(
+                            False, "Invalid type argument passed for "
+                            "parameter {} : {}".format(kw, default)
+                        )
 
                 check_source_language(
                     kw.lower not in PropertyDef.reserved_arg_lower_names,
@@ -966,9 +972,8 @@ class PropertyDef(AbstractNodeData):
                 )
                 check_source_language(
                     issubclass(default, CompiledType),
-                    'A type is required for parameter {} (got {})'.format(
-                        kw, default
-                    )
+                    'A valid langkit CompiledType is required for '
+                    'parameter {} (got {})'.format(kw, default)
                 )
 
                 self._add_argument(names.Name.from_lower(kw), default)
