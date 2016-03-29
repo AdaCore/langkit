@@ -1,0 +1,3 @@
+#! /bin/sh
+
+WITHOUT_GNATPYTHON=1 python testsuite/testsuite.py --show-error-output $@

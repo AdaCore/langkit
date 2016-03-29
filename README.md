@@ -37,7 +37,10 @@ First, make sure the langkit package is available from the Python interpreter
 (see Install).  Then, in order to run the testsuite, launch the following
 command from the top-level directory:
 
-    $ python testsuite/testsuite.py
+    $ scripts/interactive_testsuite
+
+This is just a wrapper script passing convenient options to the real testsuite
+driver that is in `testsuite/testsuite.py`.
 
 If you want to learn more about this test driver's options (for instance to run
 tests under Valgrind), add a `-h` flag.
