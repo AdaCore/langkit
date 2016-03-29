@@ -4,6 +4,7 @@ import argparse
 import glob
 import inspect
 import os.path
+import pdb
 import pipes
 import shutil
 import subprocess
@@ -167,6 +168,14 @@ class ManageScript(object):
             help='Verbosity level'
         )
 
+        # Don't enable this by default so that errors will not make automated
+        # tasks hang.
+        args_parser.add_argument(
+            '-g', '--debug', action='store_true',
+            help='In case of internal error or diagnostic error, run a'
+                 ' post-motrem PDB session'
+        )
+
         def create_parser(fn):
             """
             Create a subparser from a function. Uses the name and the docstring
@@ -321,7 +330,13 @@ class ManageScript(object):
             parsed_args.func(parsed_args)
         except DiagnosticError:
             print >> sys.stderr, "Errors, exiting"
+            if parsed_args.debug:
+                pdb.post_mortem()
             sys.exit(1)
+        except:
+            if parsed_args.debug:
+                pdb.post_mortem()
+            raise
 
         if cov is not None:
             cov.stop()
