@@ -943,7 +943,7 @@ class PropertyDef(AbstractNodeData):
                 (not argspec.varargs or not argspec.keywords, 'Invalid'
                  ' lambda signature: no *args nor **kwargs allowed'),
 
-                (len(argspec.args) == len(defaults), 'All types '
+                (len(argspec.args) == len(defaults), 'All parameters '
                  'must have an associated type as a default value')
             ])
 
