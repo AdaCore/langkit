@@ -474,7 +474,8 @@ class CompileCtx():
         for pass_fn in passes:
             for astnode in self.astnode_types + [self.root_grammar_class]:
                 for prop in astnode.get_properties(include_inherited=False):
-                    pass_fn(astnode, prop)
+                    with prop.diagnostic_context():
+                        pass_fn(astnode, prop)
 
     def render_template(self, *args, **kwargs):
         # Kludge: to avoid circular dependency issues, do not import parsers

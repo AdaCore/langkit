@@ -987,7 +987,7 @@ class Property(AbstractNodeData):
             self.expr = assert_type(self.expr(*explicit_args),
                                     AbstractExpression)
 
-        with self.bind(), self.diagnostic_context():
+        with self.bind():
             self.expr.prepare()
 
     def freeze(self):
