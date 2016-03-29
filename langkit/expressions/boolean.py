@@ -1,7 +1,7 @@
 from langkit import names
 from langkit.compiled_types import BoolType, ASTNode, LongType, Struct
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, LiteralExpr, No, Property,
+    AbstractExpression, AbstractVariable, LiteralExpr, No, PropertyDef,
     ResolvedExpression, render, construct,
 )
 from langkit.utils import assert_type
@@ -238,7 +238,7 @@ class If(AbstractExpression):
             self.then = then
             self.else_then = else_then
             self.rtype = rtype
-            self.result_var = Property.get().vars.create('Result', rtype)
+            self.result_var = PropertyDef.get().vars.create('Result', rtype)
 
         @property
         def type(self):
@@ -330,7 +330,8 @@ class Then(AbstractExpression):
             self.var_expr = var_expr
             self.then_expr = then_expr
             self.default_expr = default_expr
-            self.result = Property.get().vars.create("Result_Var", self.type)
+            self.result = PropertyDef.get().vars.create("Result_Var",
+                                                        self.type)
 
         @property
         def type(self):

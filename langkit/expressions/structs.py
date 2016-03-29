@@ -5,7 +5,7 @@ from langkit.compiled_types import ASTNode, Struct, BoolType
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, ResolvedExpression, construct,
-    render, Property, LiteralExpr, UnreachableExpr
+    render, PropertyDef, LiteralExpr, UnreachableExpr
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
@@ -33,7 +33,7 @@ class Cast(AbstractExpression):
             self.expr = expr
             self.astnode = astnode
 
-            p = Property.get()
+            p = PropertyDef.get()
             self.expr_var = p.vars.create('Cast_Expr', self.expr.type)
             self.result_var = (
                 result_var or p.vars.create('Cast_Result', astnode)
@@ -234,7 +234,7 @@ class FieldAccess(AbstractExpression):
             """
             :param ResolvedExpression receiver_expr: The receiver of the field
                 access.
-            :param Property|Field property: The accessed property or field.
+            :param PropertyDef|Field property: The accessed property or field.
             :type arguments: list[ResolvedExpression] arguments
             """
             self.receiver_expr = receiver_expr
@@ -248,7 +248,7 @@ class FieldAccess(AbstractExpression):
             # that limitation by binding the local variables separately from
             # the current property.
 
-            p = Property.get()
+            p = PropertyDef.get()
 
             if p:
                 self.result_var = p.vars.create('Internal_Pfx',
@@ -289,11 +289,11 @@ class FieldAccess(AbstractExpression):
 
             # If we're calling a property, then pass the currently bound
             # lexical environment as parameter.
-            if isinstance(self.property, Property):
-                args.append((Property.env_arg_name, str(Env._name)))
+            if isinstance(self.property, PropertyDef):
+                args.append((PropertyDef.env_arg_name, str(Env._name)))
 
             # Then add the explicit arguments
-            if isinstance(self.property, Property):
+            if isinstance(self.property, PropertyDef):
                 for actual, (formal_name, formal_type, _) in zip(
                     self.arguments, self.property.explicit_arguments
                 ):

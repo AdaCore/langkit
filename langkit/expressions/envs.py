@@ -2,7 +2,7 @@ from langkit import names
 from langkit.compiled_types import LexicalEnvType, EnvElement, Token
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ResolvedExpression, construct,
-    Property
+    PropertyDef
 )
 
 Env = AbstractVariable(names.Name("Current_Env"), type=LexicalEnvType)
@@ -87,8 +87,8 @@ class EnvBind(AbstractExpression):
 
             # Declare a variable that will hold the value of the
             # bound environment.
-            self.env_var = Property.get().vars.create("New_Env",
-                                                      LexicalEnvType)
+            self.env_var = PropertyDef.get().vars.create("New_Env",
+                                                         LexicalEnvType)
 
         def render_pre(self):
             # We assign to our environment variable the value of the result

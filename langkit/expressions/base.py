@@ -456,7 +456,7 @@ class AbstractVariable(AbstractExpression):
         super(AbstractVariable, self).__init__()
         self.local_var = None
         if create_local:
-            self.local_var = Property.get().vars.create(name, type)
+            self.local_var = PropertyDef.get().vars.create(name, type)
             self._name = self.local_var.name
         else:
             self._name = name
@@ -651,21 +651,15 @@ class No(AbstractExpression):
 
 
 def render(*args, **kwargs):
-    return ct_render(*args, property=Property.get(), Self=Self, **kwargs)
+    return ct_render(*args, property=PropertyDef.get(), Self=Self, **kwargs)
 
 
-class Property(AbstractNodeData):
+class PropertyDef(AbstractNodeData):
     """
-    This is the public class via which you'll create properties in the DSL.
-
-    You can declare your properties on your ast node subclasses directly, like
-    this::
-
-        class SubNode(ASTNode):
-            my_field = Field()
-            my_property = Property(Self.my_field)
-
-    and functions will be generated in the resulting library.
+    This is the underlying class that is used to represent properties in the
+    DSL. You are not supposed to use it directly, but instead use one of
+    Property/AbstractProperty proxy constructors that will ensure the
+    consistency of the passed arguments.
     """
 
     __current_properties__ = []
@@ -731,7 +725,7 @@ class Property(AbstractNodeData):
             types for the functionality you want.
         """
 
-        super(Property, self).__init__(private=private)
+        super(PropertyDef, self).__init__(private=private)
 
         self.expr = expr
         ":type: AbstractExpression"
@@ -795,8 +789,8 @@ class Property(AbstractNodeData):
 
         :rtype: Property
         """
-        new = Property(self.expr, self._doc, self.is_private, self.abstract,
-                       self.expected_type)
+        new = PropertyDef(self.expr, self._doc, self.is_private, self.abstract,
+                          self.expected_type)
         new.vars = copy(self.vars)
 
         # Copy is used in the context of macros. In macros, we want to copy
@@ -893,7 +887,7 @@ class Property(AbstractNodeData):
         :rtype: Property|None
         """
         return owner_type.base().get_abstract_fields_dict(
-            field_class=Property
+            field_class=PropertyDef
         ).get(self._name.lower, None)
 
     def prepare(self):
@@ -911,27 +905,15 @@ class Property(AbstractNodeData):
         :rtype: None
         """
 
-        check_source_language(
-            (self.expr is None and self.abstract)
-            or (self.expr is not None and not self.abstract),
-            "Property can either be abstract, either have an expression, "
-            "not both"
-        )
-
-        if self.abstract:
-            # TODO: We could also at a later stage add a check to see that the
-            # abstract property definition doesn't override another property
-            # definition on a base class.
-            check_source_language(
-                self.expected_type is not None,
-                "Abstract properties need an explicit type annotation"
-            )
+        # TODO: We could at a later stage add a check to see that the abstract
+        # property definition doesn't override another property definition on a
+        # base class.
 
         if self.expected_type and not inspect.isclass(self.expected_type):
             self.expected_type = self.expected_type()
 
         # Add the implicit lexical env. parameter
-        self._add_argument(Property.env_arg_name,
+        self._add_argument(PropertyDef.env_arg_name,
                            LexicalEnvType,
                            LexicalEnvType.nullexpr())
 
@@ -977,9 +959,9 @@ class Property(AbstractNodeData):
                     default = default()
 
                 check_source_language(
-                    kw.lower not in Property.reserved_arg_lower_names,
+                    kw.lower not in PropertyDef.reserved_arg_lower_names,
                     'Cannot define reserved arguments ({})'.format(
-                        ', '.join(Property.reserved_arg_lower_names)
+                        ', '.join(PropertyDef.reserved_arg_lower_names)
                     )
                 )
                 check_source_language(
@@ -1105,16 +1087,37 @@ class Property(AbstractNodeData):
 # noinspection PyPep8Naming
 def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
     """
-    Shortcut for abstract properties, where you can pass no expression but
-    must pass a type. See Property for further documentation.
+    Public constructor for abstract properties, where you can pass no
+    expression but must pass a type. See _Property for further documentation.
 
     :type type: CompiledType
     :type doc: str
     :type runtime_check: bool
-    :rtype: Property
+    :rtype: PropertyDef
     """
-    return Property(expr=None, type=type, doc=doc, abstract=True,
-                    abstract_runtime_check=runtime_check, **kwargs)
+    return PropertyDef(expr=None, type=type, doc=doc, abstract=True,
+                       abstract_runtime_check=runtime_check, **kwargs)
+
+
+# noinspection PyPep8Naming
+def Property(expr, doc=None, private=False, type=None):
+    """
+    Public constructor for concrete properties. You can declare your properties
+    on your ast node subclasses directly, like this::
+
+        class SubNode(ASTNode):
+            my_field = Field()
+            my_property = Property(Self.my_field)
+
+    and functions will be generated in the resulting library.
+
+    :type expr: AbstractExpression|function
+    :type type: CompiledType
+    :type doc: str
+    :type private: bool
+    :rtype: PropertyDef
+    """
+    return PropertyDef(expr, doc=doc, private=private, type=type)
 
 
 class Literal(AbstractExpression):

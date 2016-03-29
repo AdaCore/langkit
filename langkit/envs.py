@@ -113,7 +113,7 @@ class EnvSpec(object):
         :param langkit.compiled_types.ASTNode ast_node_type: The ASTNode
             type this environment specification is attached to.
         """
-        with expressions.Property.bind_none():
+        with expressions.PropertyDef.bind_none():
             if self._unresolved_initial_env:
                 check_simple_expr(self._unresolved_initial_env)
                 with expressions.Self.bind_type(ast_node_type):

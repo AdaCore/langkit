@@ -6,7 +6,7 @@ from langkit.compiled_types import BoolType, LongType
 from langkit.diagnostics import check_multiple
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, AbstractVariable,
-    render, Property, BuiltinCallExpr
+    render, PropertyDef, BuiltinCallExpr
 )
 from langkit.utils import assert_type
 
@@ -161,7 +161,7 @@ class Map(CollectionExpression):
             self._type = element_type.array_type()
             self._type.add_to_context()
 
-            p = Property.get()
+            p = PropertyDef.get()
             self.array_var = p.vars.create('Map', self.type)
 
         @property
@@ -270,7 +270,7 @@ class Quantifier(CollectionExpression):
             self.element_var = element_var
             self.index_var = index_var
 
-            self.result_var = Property.get().vars.create('Result', BoolType)
+            self.result_var = PropertyDef.get().vars.create('Result', BoolType)
 
         @property
         def type(self):
