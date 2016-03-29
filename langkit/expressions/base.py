@@ -55,8 +55,9 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
         if isinstance(expected_type_or_pred, type):
             if not custom_msg:
                 custom_msg = "Expected type {}, got {}"
-            check_source_language(ret.type.matches(expected_type_or_pred), (
-                custom_msg.format(expected_type_or_pred.name().camel,
+            expected_type = assert_type(expected_type_or_pred, CompiledType)
+            check_source_language(ret.type.matches(expected_type), (
+                custom_msg.format(expected_type.name().camel,
                                   ret.type.name().camel)
             ))
         else:

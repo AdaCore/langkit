@@ -3,7 +3,7 @@ from itertools import count
 
 from langkit import names
 from langkit.compiled_types import BoolType, LongType
-from langkit.diagnostics import check_source_language, check_multiple
+from langkit.diagnostics import check_multiple
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, AbstractVariable,
     render, Property, BuiltinCallExpr
