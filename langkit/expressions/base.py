@@ -208,7 +208,7 @@ class AbstractExpression(Frozable):
         from langkit.expressions.envs import EnvGet, EnvBind
         from langkit.expressions.boolean import Eq, BinaryBooleanOperator, Then
         from langkit.expressions.collections import (
-            CollectionGet, CollectionLength
+            CollectionGet, CollectionLength, CollectionSingleton
         )
 
         # Using partial allows the user to be able to use keyword arguments
@@ -238,6 +238,8 @@ class AbstractExpression(Frozable):
             'mapcat':         partial(Map, self, concat=True),
             'take_while':     partial(Map, self, lambda x: x, lambda x: None,
                                       False),
+
+            'singleton':      CollectionSingleton(self),
 
             # Control flow handling
             'and_then':       partial(BinaryBooleanOperator,
@@ -372,7 +374,7 @@ class ResolvedExpression(object):
         """
         Renders the expression itself.
 
-        :rtype: basestring
+        :rtype: str
         """
         raise NotImplementedError()
 
@@ -380,7 +382,7 @@ class ResolvedExpression(object):
         """
         Renders initial statements that might be needed to the expression.
 
-        :rtype: basestring
+        :rtype: str
         """
         return ""
 
@@ -389,7 +391,7 @@ class ResolvedExpression(object):
         Render both the initial statements and the expression itself. This is
         basically a wrapper that calls render_pre and render_expr in turn.
 
-        :rtype: basestring
+        :rtype: str
         """
         return "{}\n{}".format(self.render_pre(), self.render_expr())
 
@@ -812,7 +814,7 @@ class PropertyDef(AbstractNodeData):
         Return the currently bound property. Used by the rendering context to
         get the current property.
 
-        :rtype: Property
+        :rtype: PropertyDef
         """
         return (cls.__current_properties__[-1]
                 if cls.__current_properties__ else

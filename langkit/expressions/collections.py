@@ -177,8 +177,7 @@ class Map(CollectionExpression):
             )
 
         def render_pre(self):
-            return render('properties/map_ada', map=self,
-                          Name=names.Name)
+            return render('properties/map_ada', map=self, Name=names.Name)
 
         def render_expr(self):
             return self.array_var.name.camel_with_underscores
@@ -365,3 +364,45 @@ class CollectionLength(AbstractExpression):
             "Length", LongType,
             [construct(self.coll_expr, lambda t: t.is_collection())]
         )
+
+
+class CollectionSingleton(AbstractExpression):
+    """
+    Expression that will return a collection of a single element, given the
+    single element.
+    """
+
+    class Expr(ResolvedExpression):
+        def __init__(self, expr):
+            """
+            :type expr: ResolvedExpression
+            """
+            self.expr = expr
+            p = PropertyDef.get()
+            self.array_var = p.vars.create('Singleton', self.type)
+
+        @property
+        def type(self):
+            self.expr.type.array_type().add_to_context()
+            return self.expr.type.array_type()
+
+        def render_pre(self):
+            return self.expr.render_pre() + """
+            {array_var} := new {array_type}'(N => 1, Items => (1 => {item}));
+            """.format(array_var=self.array_var.name,
+                       array_type=self.type.pointed(),
+                       item=self.expr.render_expr())
+
+        def render_expr(self):
+            return self.array_var.name
+
+    def __init__(self, expr):
+        """
+        :param AbstractExpression expr: The expression representing the
+            single element to create the collection from.
+        """
+        super(CollectionSingleton, self).__init__()
+        self.expr = expr
+
+    def construct(self):
+        return CollectionSingleton.Expr(construct(self.expr))

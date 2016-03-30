@@ -282,7 +282,7 @@ class CompiledType(object):
         """
         Create an array type for "cls".
 
-        :rtype: CompiledType
+        :rtype: ArrayType
         """
         element_type = cls
         return type(
