@@ -183,38 +183,34 @@ class New(AbstractExpression):
         """
         :rtype: NewExpr
         """
-
-        required_fields = {f.name: f for f in self.struct_type.get_fields()}
-
-        # First construct a sequence of field names to values
-        fields = [(names.Name.from_lower('f_' + n), v)
-                  for n, v in self.field_values.items()]
-
-        class FieldPlaceHolder(object):
-            type = None
-
-        provided_fields = {name: construct(
-            value, required_fields.get(name, FieldPlaceHolder).type,
-            'Wrong type for field {}: got {{}} but expected {{}}'.format(name)
-        ) for name, value in fields}
-
         # Make sure the provided set of fields matches the one the struct
         # needs.
-        def complain_if_not_empty(name_set, message):
+        def error_if_not_empty(name_set, message):
             check_source_language(not name_set, ('{}: {}'.format(
-                message, ', '.join(name.lower for name in name_set)
+                message, ', '.join(name for name in name_set)
             )))
 
-        complain_if_not_empty(
-            set(required_fields) - set(provided_fields),
+        # Create a dict of field names to fields in the struct type
+        required_fields = {f._name.lower: f for f in
+                           self.struct_type.get_fields()}
+
+        error_if_not_empty(
+            set(required_fields) - set(self.field_values.keys()),
             'Values are missing for {} fields'.format(
                 self.struct_type.name().camel
             )
         )
-        complain_if_not_empty(
-            set(provided_fields) - set(required_fields),
+        error_if_not_empty(
+            set(self.field_values.keys()) - set(required_fields),
             'Extraneous fields for {}'.format(self.struct_type.name().camel)
         )
+
+        # At this stage, we know that the user has only provided fields that
+        # are valid for the struct type.
+        provided_fields = {names.Name.from_lower('f_' + name): construct(
+            value, required_fields[name].type,
+            'Wrong type for field {}: expected {{}}, got {{}}'.format(name)
+        ) for name, value in self.field_values.items()}
 
         return New.Expr(self.struct_type, provided_fields)
 
