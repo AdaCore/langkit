@@ -9,6 +9,8 @@ from __future__ import absolute_import
 from copy import copy
 from itertools import takewhile
 
+import inspect
+
 
 class StructEq(object):
     """
@@ -306,3 +308,15 @@ class TypeSet(object):
         else:
             result = {t}
         return result
+
+
+def issubtype(type, parent_type):
+    """
+    Helper wrapper around issubclass, because issubclass will raise an
+    exception if compared object is not a class, which is extremely tedious for
+    us in langkit.
+
+    :param type: The object or type to check against parent_type.
+    :param type parent_type: The supposed parent_type of type.
+    """
+    return inspect.isclass(type) and issubclass(type, parent_type)

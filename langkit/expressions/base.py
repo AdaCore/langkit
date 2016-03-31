@@ -12,7 +12,7 @@ from langkit.diagnostics import (
     extract_library_location, check_source_language, check_multiple,
     context, Severity
 )
-from langkit.utils import assert_type, memoized, TypeSet
+from langkit.utils import assert_type, memoized, TypeSet, issubtype
 
 
 def construct(expr, expected_type_or_pred=None, custom_msg=None):
@@ -636,8 +636,7 @@ class No(AbstractExpression):
     def do_prepare(self):
         from langkit.expressions.structs import Struct
         check_source_language(
-            inspect.isclass(self.expr_type)
-            and issubclass(self.expr_type, Struct),
+            issubtype(self.expr_type, Struct),
             'Invalid type for Null expression: {}'.format(
                 self.expr_type.name().camel
             )
