@@ -1106,7 +1106,7 @@ class Struct(CompiledType):
             the returned list. Return only fields that were part of the
             declaration of this node otherwise.
 
-        :rtype: list[langkit.expressions.base.Property]
+        :rtype: list[langkit.expressions.base.PropertyDef]
         """
         return cls.get_abstract_fields(
             lambda f: (predicate is None or predicate(f)) and f.is_property,
