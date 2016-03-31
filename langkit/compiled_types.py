@@ -8,9 +8,11 @@ from itertools import count
 from langkit import names
 from langkit.c_api import CAPIType
 from langkit.common import get_type, null_constant, is_keyword
-from langkit.diagnostics import extract_library_location
+from langkit.diagnostics import extract_library_location, check_source_language
 from langkit.template_utils import common_renderer
-from langkit.utils import memoized, type_check, col, Colors, common_ancestor
+from langkit.utils import (
+    memoized, type_check, col, Colors, common_ancestor, issubtype
+)
 
 
 def get_context():
@@ -246,6 +248,8 @@ class CompiledType(object):
     def list_type(cls):
         """
         Return an ASTNode subclass that represent a list of "cls".
+
+        :rtype: CompiledType
         """
         element_type = cls
 
@@ -1549,3 +1553,94 @@ class EnvElement(Struct):
     # The type of MD is initialized to LongType, because by default,
     # the type for metadata is an integer in Ada.
     MD = BuiltinField(LongType, doc="The metadata associated to the AST node")
+
+
+class TypeRepo(object):
+    """
+    Repository of types. Used to be able to do early references to not yet
+    declared types, in this fashion::
+
+        T = TypeRepo()
+
+        class A(ASTNode):
+            p = AbstractProperty(type=T.B)
+
+        class B(ASTNode):
+            pass
+
+    Only struct and ast node types are reachable through the type repository.
+    """
+
+    @memoized
+    def type_dict(self):
+        """
+        Returns a dictionnary of names to types.
+
+        :rtype: dict[str, CompiledType]
+        """
+        return {
+            t.__name__: t
+            for t in
+            StructMetaClass.struct_types + StructMetaClass.astnode_types
+        }
+
+    class Defer(object):
+        """
+        Internal class representing a not-yet resolved type.
+        """
+        def __init__(self, getter):
+            """
+            :param () -> CompiledType getter: A function that will return
+                the resolved type when called.
+            """
+            self.getter = getter
+
+        def get(self):
+            """
+            Resolve the internally referenced type.
+
+            :rtype: CompiledType
+            """
+            return self.getter()
+
+        def array_type(self):
+            """
+            Proxy to the CompiledType.array_type classmethod.
+
+            :rtype: ArrayType
+            """
+            return TypeRepo.Defer(lambda: self.get().array_type())
+
+        def list_type(self):
+            """
+            Proxy to the CompiledType.list_type classmethod.
+
+            :rtype: CompiledType
+            """
+            return TypeRepo.Defer(lambda: self.get().list_type())
+
+    def __getattr__(self, type_name):
+        """
+        Build and return a Defer type that references the above type.
+
+        :param str type_name: The name of the rule.
+        """
+        return TypeRepo.Defer(lambda: self.type_dict()[type_name])
+
+
+def resolve_type(type_or_defer):
+    """
+    Given an object that can be either a TypeRepo.Defer instance or a
+    CompiledType, returns a CompiledType.
+
+    :param CompiledType|TypeRepo.Defer type_or_defer: the type to resolve.
+    :rtype: CompiledType
+    """
+    if type_or_defer and not issubtype(type_or_defer, CompiledType):
+        check_source_language(
+            isinstance(type_or_defer, TypeRepo.Defer),
+            "Type provided is neither a CompiledType, "
+            "neither a defered type reference: {}".format(type_or_defer)
+        )
+        return type_or_defer.get()
+    return type_or_defer
