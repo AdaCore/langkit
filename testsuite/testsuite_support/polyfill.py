@@ -15,6 +15,7 @@ import os.path
 import shutil
 import subprocess
 import sys
+import tempfile
 import yaml
 
 from parallel_map import pmap
@@ -129,6 +130,7 @@ class ReportWriter(object):
         )
         # ... or more if told to do so.
         if (self.show_error_output and
+                output and
                 output.strip() and
                 status not in ('PASSED', 'OK', 'UOK', 'XFAIL')):
             print '{clr.red}{output}{clr.reset}'.format(
@@ -204,9 +206,7 @@ class BaseTestsuite(object):
         # Determine important paths
         self.root_dir = os.path.abspath(root_dir)
         self.test_dir = os.path.join(self.root_dir, self.TEST_SUBDIR)
-        self.working_dir = os.path.join(self.root_dir, 'tmp')
-        if not os.path.isdir(self.working_dir):
-            os.mkdir(self.working_dir)
+        self.working_dir = tempfile.mkdtemp(prefix='polyfill-')
 
         # This will be available to both subclasses and TestDriver instances
         self.global_env = {
@@ -220,6 +220,10 @@ class BaseTestsuite(object):
             description='Run the testsuite.'
         )
         self.main = _Main(self.arg_parser.add_argument)
+        self.arg_parser.add_argument(
+            '--disable-cleanup', action='store_true',
+            help='Do not remove temporary files before exiting'
+        )
         self.arg_parser.add_argument(
             '--enable-color', action='store_true',
             default=os.isatty(sys.stdout.fileno()),
@@ -267,6 +271,9 @@ class BaseTestsuite(object):
         else:
             self.colors.disable()
 
+        if self.args.disable_cleanup:
+            print 'Temporary directory: {}'.format(self.working_dir)
+
         self.tear_up()
 
         # We'll use regular map if there's only one job
@@ -286,6 +293,8 @@ class BaseTestsuite(object):
         self.tear_down()
         self.report_writer.print_hits()
         self.report_writer.close()
+        if not self.args.disable_cleanup:
+            shutil.rmtree(self.working_dir)
 
     def _run_testcase(self, test_dir):
         """Helper for testsuite_main: run the testcase in test_dir."""
