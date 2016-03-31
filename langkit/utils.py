@@ -187,6 +187,10 @@ def dispatch_on_type(type, type_to_action_assocs, exception_msg=""):
 
     :rtype: T
     """
+    if not exception_msg:
+        exception_msg = "Error in dispatch_on_type: {} not handled".format(
+            type
+        )
     for target_type, action in type_to_action_assocs:
         if issubclass(type, target_type):
             return action(type)
