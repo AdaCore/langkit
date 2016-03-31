@@ -6,7 +6,7 @@ Error: One can only cast to an ASTNode subtype
 In definition of property 'prop', class 'ListNode': test.py Line 36
 
 == Invalid cast 2 ==
-Error: Cannot cast BarNode to ListNode: only downcasting is allowed
+Error: Cannot cast BarNode to ListNode: only (up/down)casting is allowed
 In definition of property 'prop', class 'ListNode': test.py Line 36
 
 Done

@@ -88,8 +88,9 @@ class Cast(AbstractExpression):
         :rtype: CastExpr
         """
         return Cast.Expr(construct(
-            self.expr, lambda t: self.astnode.matches(t),
-            'Cannot cast {{}} to {}: only downcasting is allowed'.format(
+            self.expr,
+            lambda t: self.astnode.matches(t) or t.matches(self.astnode),
+            'Cannot cast {{}} to {}: only (up/down)casting is allowed'.format(
                 self.astnode.name().camel
             )
         ), self.astnode)
