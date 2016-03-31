@@ -1,7 +1,7 @@
 from langkit.compiled_types import (
     ASTNode, root_grammar_class, Field
 )
-from langkit.diagnostics import LangSourceDir
+from langkit.diagnostics import Diagnostics
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, Row
 
@@ -9,7 +9,7 @@ from os import path
 from utils import emit_and_print_errors
 
 
-LangSourceDir.set_lang_source_dir(path.abspath(__file__))
+Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 
 @root_grammar_class

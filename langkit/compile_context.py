@@ -25,7 +25,7 @@ import sys
 from langkit import astdoc, caching, names
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
-from langkit.diagnostics import check_source_language
+from langkit.diagnostics import check_source_language, errors_checkpoint
 from langkit.utils import Colors, printcol
 
 
@@ -573,6 +573,8 @@ class CompileCtx():
         # compilation stages.
         self.compute_properties()
 
+        errors_checkpoint()
+
         if self.verbosity.info:
             printcol("Compiling the grammar...", Colors.OKBLUE)
 
@@ -584,6 +586,8 @@ class CompileCtx():
             for r_name, r in self.grammar.rules.items():
                 r.compile()
                 self.rules_to_fn_names[r_name] = r
+
+        errors_checkpoint()
 
         unresolved_types = set([t for t in self.astnode_types
                                 if not t.is_type_resolved])
@@ -612,6 +616,8 @@ class CompileCtx():
         # disappear as part of OC22-016.
         for t in self.struct_types + self.astnode_types:
             t.add_to_context()
+
+        errors_checkpoint()
 
     def _emit(self, file_root, generate_lexer):
         """

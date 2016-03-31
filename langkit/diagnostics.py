@@ -6,13 +6,14 @@ import traceback
 from langkit.utils import assert_type
 
 
-class LangSourceDir(object):
+class Diagnostics(object):
     """
     Holder class that'll store the language definition source dir. Meant to
     be called by manage before functions depending on knowing the language
     source dir can be called.
     """
     lang_source_dir = "<invalid dir>"
+    has_pending_error = False
 
     @classmethod
     def set_lang_source_dir(cls, lang_source_dir):
@@ -27,6 +28,7 @@ class Location(object):
     """
     Holder for a location in the source code.
     """
+
     def __init__(self, file, line, text):
         self.file = file
         self.line = line
@@ -49,7 +51,7 @@ def extract_library_location():
     """
     l = [Location(t[0], t[1], t[3])
          for t in traceback.extract_stack()
-         if LangSourceDir.lang_source_dir in path.abspath(t[0])
+         if Diagnostics.lang_source_dir in path.abspath(t[0])
          and "manage.py" not in t[0]]
     return l[-1] if l else None
 
@@ -89,6 +91,17 @@ class Severity(enum.IntEnum):
     """
     warning = 1
     error = 2
+    non_blocking_error = 3
+
+
+def format_severity(severity):
+    """
+    :param Severity severity:
+    """
+    if severity == Severity.non_blocking_error:
+        return "Error"
+    else:
+        return severity.name.capitalize()
 
 
 def check_source_language(predicate, message, severity=Severity.error):
@@ -100,19 +113,36 @@ def check_source_language(predicate, message, severity=Severity.error):
     :param bool predicate: The predicate to check.
     :param str message: The base message to display if predicate happens to
         be false.
-    :param int severity: The severity of the diagnostic.
+    :param Severity severity: The severity of the diagnostic.
     """
     # PyCharm's static analyzer thinks Severity.foo is an int because of the
     # class declaration, it it's really an instance of Severity instead.
     severity = assert_type(severity, Severity)
     if not predicate:
-        print "{}: {}".format(severity.name.capitalize(), message)
+        print "{}: {}".format(format_severity(severity), message)
         for message, location in context_stack:
             print "{}: {}".format(message, location)
         if severity == Severity.error:
             raise DiagnosticError()
+        elif severity == Severity.non_blocking_error:
+            Diagnostics.has_pending_error = True
 
 
 def check_multiple(predicates_and_messages, severity=Severity.error):
+    """
+    Helper around check_source_language, check multiple predicates at once.
+
+    :param list[(bool, str)] predicates_and_messages: List of diagnostic
+        tuples.
+    :param Severity severity: The severity of the diagnostics.
+    """
     for predicate, message in predicates_and_messages:
         check_source_language(predicate, message, severity)
+
+
+def errors_checkpoint():
+    """
+    If there was a non-blocking error, exit the compilation process.
+    """
+    if Diagnostics.has_pending_error:
+        raise DiagnosticError()

@@ -1,7 +1,7 @@
 from langkit.compiled_types import (
     ASTNode, BoolType, Field, abstract, root_grammar_class
 )
-from langkit.diagnostics import LangSourceDir
+from langkit.diagnostics import Diagnostics
 from langkit.expressions import Literal, Match, Property, Self
 from langkit.parsers import Grammar, Or, Row, Tok
 
@@ -18,7 +18,7 @@ def run(name, match_expr):
 
     global BodyNode, Compound, Expression, FooNode, NullNode, Number
 
-    LangSourceDir.set_lang_source_dir(path.abspath(__file__))
+    Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
     print('== {} =='.format(name))
     reset_langkit()

@@ -11,7 +11,7 @@ import subprocess
 import sys
 
 from langkit.compile_context import Verbosity
-from langkit.diagnostics import LangSourceDir, DiagnosticError
+from langkit.diagnostics import Diagnostics, DiagnosticError
 from langkit.utils import Colors, printcol
 
 
@@ -117,7 +117,7 @@ class ManageScript(object):
                 os.path.abspath(inspect.getfile(self.__class__))
             )
         )
-        LangSourceDir.set_lang_source_dir(self.dirs.lang_source_dir())
+        Diagnostics.set_lang_source_dir(self.dirs.lang_source_dir())
 
         ########################
         # Main argument parser #
