@@ -957,14 +957,7 @@ class PropertyDef(AbstractNodeData):
                 # type because the type does not exist yet. In this case,
                 # we allow lambda functions that take no argument just to
                 # delay the evaluation of the type itself.
-                if not inspect.isclass(default):
-                    try:
-                        default = default()
-                    except TypeError:
-                        check_source_language(
-                            False, "Invalid type argument passed for "
-                            "parameter {} : {}".format(kw, default)
-                        )
+                default = resolve_type(default)
 
                 check_source_language(
                     kw.lower() not in PropertyDef.reserved_arg_lower_names,

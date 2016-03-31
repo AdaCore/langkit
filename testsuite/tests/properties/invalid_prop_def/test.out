@@ -18,11 +18,11 @@ Error: Cannot define reserved arguments (node, lex_env)
 In definition of property 'propyprop', class 'BarNode': test.py Line 62
 
 == Incorrect property definition 5 ==
-Error: Invalid type argument passed for parameter a : ['Obviously wrong']
+Error: Type provided is neither a CompiledType, neither a defered type reference: ['Obviously wrong']
 In definition of property 'propyprop', class 'BarNode': test.py Line 67
 
 == Incorrect property definition 6 ==
-Error: A valid langkit CompiledType is required for parameter a (got <class 'langkit.compiled_types.NodeMacro'>)
+Error: Type provided is neither a CompiledType, neither a defered type reference: <class 'langkit.compiled_types.NodeMacro'>
 In definition of property 'propyprop', class 'BarNode': test.py Line 72
 
 Done
