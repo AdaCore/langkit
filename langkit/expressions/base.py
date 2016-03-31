@@ -10,9 +10,9 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import (
     extract_library_location, check_source_language, check_multiple,
-    context
+    context, Severity
 )
-from langkit.utils import assert_type, memoized
+from langkit.utils import assert_type, memoized, TypeSet
 
 
 def construct(expr, expected_type_or_pred=None, custom_msg=None):
@@ -1006,10 +1006,41 @@ class PropertyDef(AbstractNodeData):
         """
         Compute information related to dispatching for properties.
 
-        :param ASTNode owner_type: The type on which this property was
-            declared.
+        :param langkit.compiled_types.ASTNode owner_type: The type on which
+            this property was declared.
         """
         base_prop = self.base_property(owner_type)
+
+        type_set = TypeSet()
+
+        def check_overriding_props(klass):
+            """
+            Recursive helper. Checks wether klass and its subclasses override
+            self.
+
+            :param langkit.compiled_types.ASTNode klass: The class to check.
+            """
+            for subclass in klass.subclasses:
+                for prop in subclass.get_properties(include_inherited=False):
+                    if prop._name == self._name:
+                        type_set.include(subclass)
+                check_overriding_props(subclass)
+
+        if self.abstract and not self.abstract_runtime_check:
+            check_overriding_props(owner_type)
+
+            unmatched_types = sorted(type_set.unmatched_types(owner_type),
+                                     key=lambda cls: cls.hierarchical_name())
+
+            check_source_language(
+                not unmatched_types,
+                "Abstract property {} is not overriden in all subclasses. "
+                "Missing overriding properties on classes: {}".format(
+                    self.name.lower, ", ".join([t.name().camel for t in
+                                                unmatched_types])
+                ),
+                severity=Severity.non_blocking_error
+            )
 
         if base_prop:
             # If we have a base property, then this property is dispatching and
