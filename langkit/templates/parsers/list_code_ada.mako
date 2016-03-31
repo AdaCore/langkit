@@ -72,11 +72,11 @@ loop
             )
             %>
             ## Set left children of node to the previously accumulated result
-            New_Res.${field_0.name} := ${res};
+            New_Res.${field_0.name} := ${field_0.type.name()} (${res});
 
             ## Set right children of node to just parsed result
             New_Res.${field_1.name} :=
-               ${_self.get_type().name()} (${parser_context.res_var_name});
+              ${field_1.type.name()} (${parser_context.res_var_name});
 
             ## Set the parent of both children to the created node
             ${res}.Parent := ${root_node_type_name} (New_Res);
