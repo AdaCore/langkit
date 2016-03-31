@@ -1,7 +1,7 @@
 import inspect
 
 from langkit import names
-from langkit.compiled_types import ASTNode, Struct, BoolType
+from langkit.compiled_types import ASTNode, Struct, BoolType, resolve_type
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, ResolvedExpression, construct,
@@ -75,6 +75,7 @@ class Cast(AbstractExpression):
         self.do_raise = do_raise
 
     def do_prepare(self):
+        self.astnode = resolve_type(self.astnode)
         check_source_language(self.astnode.matches(ASTNode), (
             "One can only cast to an ASTNode subtype"
         ))
