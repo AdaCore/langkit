@@ -226,3 +226,79 @@ def assert_type(obj, typ):
             )
         )
     return obj
+
+
+class TypeSet(object):
+    """
+    This class is an helper for when you need to check wether an abstract
+    operation was fulfilled for a whole hierarchy of classes, given that if
+    the operation is fulfilled for all subclasses, then we consider that it is
+    done for the parent class.
+
+    This allows to automate the logic of, for example, checking if abstract
+    properties are overridden properly, or if a match expression handles all
+    cases.
+    """
+
+    def __init__(self):
+        # Working set of ASTNode subclasses for the types that are covered by
+        # matchers. Updated as we go through the list of matchers.
+        self.matched_types = set()
+
+    def include(self, t):
+        """
+        Include a class and all of its subclasses.
+
+        If t is the last subclass for some base class, this adds the parent
+        subclass. This makes sense as once all concrete subclasses of the
+        abstract A type are handled, it is true that A is handled.
+
+        Return whether t was already present in self.
+
+        :param ASTNode|None t: Type parameter.
+        :rtype: bool
+        """
+        if t in self.matched_types:
+            return True
+
+        # Include "t" and all its subclasses
+        self.matched_types.add(t)
+        for child in t.subclasses:
+            self.include(child)
+
+        # Include its parents if all their children are matched
+        parents = list(t.get_inheritance_chain())[:-1]
+        for parent in reversed(parents):
+            if parent in self.matched_types:
+                break
+            subclasses = set(parent.subclasses)
+            if not subclasses.issubset(self.matched_types):
+                break
+            # If we reach this point, all parent's subclasses are matched,
+            # so we can state that parent itself is always matched.
+            self.matched_types.add(parent)
+
+        return False
+
+    def unmatched_types(self, t):
+        """
+        Return the set of t subclasses that are not matched by any matcher.
+
+        Omit subclasses when none of them are matched: only the parent is
+        returned in this case, so that we don't flood users with whole
+        hierarchies of classes.
+
+        :param ASTNode t: Type parameter.
+        :rtype: set[ASTNode]
+        """
+        if t in self.matched_types:
+            return set()
+
+        subclasses = set(t.subclasses)
+        if subclasses & self.matched_types:
+            result = set()
+            for cls in subclasses:
+                result.update(self.unmatched_types(cls))
+        else:
+            result = {t}
+        return result

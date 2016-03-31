@@ -9,7 +9,7 @@ from langkit.expressions.base import (
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
-from langkit.utils import assert_type
+from langkit.utils import assert_type, TypeSet
 
 
 class Cast(AbstractExpression):
@@ -580,84 +580,19 @@ class Match(AbstractExpression):
         :rtype: None
         """
 
-        # Working set of ASTNode subclasses for the types that are covered by
-        # matchers. Updated as we go through the list of matchers.
-        matched_types = set()
-
-        def include(t):
-            """
-            Include a type and of its subclasses in "matched_types". None is
-            interpreted as the default matcher, i.e. the input type.
-
-            Conversely, when this adds the last subclass for some type, this
-            adds the parent subclass to "matched_types". This makes sense as
-            once all concrete subclasses of the abstract A type are handled, it
-            is true that A is handled.
-
-            Return whether t was already present in "matched_types".
-
-            :param ASTNode|None t: Type parameter.
-            :rtype: bool
-            """
-            if t is None:
-                t = input_type
-            if t in matched_types:
-                return True
-
-            # Include "t" and all its subclasses
-            matched_types.add(t)
-            for child in t.subclasses:
-                include(child)
-
-            # Include its parents if all their children are matched
-            parents = list(t.get_inheritance_chain())[:-1]
-            for parent in reversed(parents):
-                if parent in matched_types:
-                    break
-                subclasses = set(parent.subclasses)
-                if not subclasses.issubset(matched_types):
-                    break
-                # If we reach this point, all parent's subclasses are matched,
-                # so we can state that parent itself is always matched.
-                matched_types.add(parent)
-
-            return False
+        type_set = TypeSet()
 
         for i, (t, _, _) in enumerate(self.matchers, 1):
             t_name = 'default one' if t is None else t.name().camel
-            check_source_language(not include(t),
+            check_source_language(not type_set.include(t or input_type),
                                   'The #{} matcher ({}) is unreachable'
                                   ' as all previous matchers cover all the'
                                   ' nodes it can match'.format(i, t_name),
                                   Severity.warning)
 
-        def unmatched_types(t):
-            """
-            Return the set of t subclasses that are not matched by any matcher.
+        mm = sorted(type_set.unmatched_types(input_type),
+                    key=lambda cls: cls.hierarchical_name())
 
-            Omit subclasses when none of them are matched: only the parent is
-            returned in this case, so that we don't flood users with whole
-            hierarchies of classes.
-
-            :param ASTNode t: Type parameter.
-            :rtype: set[ASTNode]
-            """
-            if t in matched_types:
-                return set()
-
-            subclasses = set(t.subclasses)
-            if subclasses & matched_types:
-                result = set()
-                for cls in subclasses:
-                    result.update(unmatched_types(cls))
-            else:
-                result = {t}
-            return result
-
-        mm = sorted(
-            unmatched_types(input_type),
-            key=lambda cls: cls.hierarchical_name()
-        )
         check_source_language(
             not mm,
             'The following AST nodes have no handler: {} (all {} subclasses'
