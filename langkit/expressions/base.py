@@ -6,7 +6,7 @@ import inspect
 from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, BoolType, CompiledType, LexicalEnvType, LongType,
-    render as ct_render, Symbol, Token
+    render as ct_render, Symbol, Token, resolve_type
 )
 from langkit.diagnostics import (
     extract_library_location, check_source_language, check_multiple,
@@ -713,7 +713,7 @@ class PropertyDef(AbstractNodeData):
             and for properties that take parameters. If the type itself is not
             available when creating the property, a lambda function that
             returns it is available.
-        :type type: CompiledType|() -> CompiledType|None
+        :type type: CompiledType|langkit.compiled_types.TypeRepo.Defer|None
 
         :param abstract_runtime_check: If the property is abstract, whether the
             implementation by subclasses requirement must be checked at compile
@@ -910,8 +910,9 @@ class PropertyDef(AbstractNodeData):
         # property definition doesn't override another property definition on a
         # base class.
 
-        if self.expected_type and not inspect.isclass(self.expected_type):
-            self.expected_type = self.expected_type()
+        # If the expected type is not a CompiledType, then it's a Defer.
+        # Resolve it.
+        self.expected_type = resolve_type(self.expected_type)
 
         # Add the implicit lexical env. parameter
         self._add_argument(PropertyDef.env_arg_name,
