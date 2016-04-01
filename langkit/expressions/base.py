@@ -943,20 +943,17 @@ class PropertyDef(AbstractNodeData):
 
             check_multiple([
                 (not argspec.varargs or not argspec.keywords, 'Invalid'
-                 ' lambda signature: no *args nor **kwargs allowed'),
+                 ' function signature: no *args nor **kwargs allowed'),
 
                 (len(argspec.args) == len(defaults), 'All parameters '
                  'must have an associated type as a default value')
             ])
 
-            # This is a lambda for a property that takes parameters: check
+            # This is a function for a property that takes parameters: check
             # that all parameters have declared types in default arguments.
             for kw, default in zip(argspec.args, defaults):
-                # Because there's no forward definition mechanism, it is
-                # sometimes not possible to annotate an argument with a
-                # type because the type does not exist yet. In this case,
-                # we allow lambda functions that take no argument just to
-                # delay the evaluation of the type itself.
+                # The type could be an early reference to a not yet declared
+                # type, resolve it.
                 default = resolve_type(default)
 
                 check_source_language(

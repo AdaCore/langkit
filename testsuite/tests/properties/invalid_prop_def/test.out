@@ -6,7 +6,7 @@ Error: Invalid object passed for expression of property: ['Lol this is obviously
 In definition of property 'propyprop', class 'BarNode': test.py Line 47
 
 == Incorrect property definition 2 ==
-Error: Invalid lambda signature: no *args nor **kwargs allowed
+Error: Invalid function signature: no *args nor **kwargs allowed
 In definition of property 'propyprop', class 'BarNode': test.py Line 52
 
 == Incorrect property definition 3 ==
