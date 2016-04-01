@@ -3,6 +3,8 @@ from copy import copy
 from functools import partial
 import inspect
 
+import types
+
 from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, BoolType, CompiledType, LexicalEnvType, LongType,
@@ -579,8 +581,13 @@ class Let(AbstractExpression):
         argspec = inspect.getargspec(lambda_fn)
 
         self.vars = None
+        ":type: list[AbstractVariable]"
+
         self.var_names = argspec.args
+
         self.var_exprs = argspec.defaults or []
+        ":type: list[AbstractExpression]"
+
         self.expr = None
         self.lambda_fn = lambda_fn
 
@@ -616,6 +623,57 @@ class Let(AbstractExpression):
         vars = map(construct, self.vars)
 
         return Let.Expr(vars, var_exprs, construct(self.expr))
+
+
+class Block(Let):
+    """
+    Block is a helper class around let, that is not meant to be used directly,
+    but is instead implicitly created when a property is given a function as an
+    expression, so that you can do stuff like::
+
+        @langkit_property()
+        def my_prop():
+            a = Var(1)
+            b = Var(2)
+            ...
+    """
+
+    blocks = []
+
+    @classmethod
+    @contextmanager
+    def set_block(cls, block):
+        cls.blocks.append(block)
+        yield
+        cls.blocks.pop()
+
+    def __init__(self):
+        # We bypass the let constructor, because we have a different
+        # construction mode. However, we still want to call
+        # AbstractExpression's __init__.
+        AbstractExpression.__init__(self)
+
+        self.vars = []
+        self.var_exprs = []
+
+    def add_var(self, var, expr):
+        self.vars.append(var)
+        self.var_exprs.append(expr)
+
+    def do_prepare(self):
+        pass
+
+
+class Var(AbstractVariable):
+    """
+    Var allows you to declare local variable bound to expressions in the body
+    of Properties, when those are defined through a function. See Block's
+    documentation for more details.
+    """
+
+    def __init__(self, expr):
+        super(Var, self).__init__(names.Name("Block_Var"), create_local=True)
+        Block.blocks[-1].add_var(self, expr)
 
 
 class No(AbstractExpression):
@@ -974,8 +1032,16 @@ class PropertyDef(AbstractNodeData):
             # only the ones the user defined), we can expand the lambda
             # into a real AbstractExpression.
             explicit_args = self.argument_vars[1:]
-            self.expr = assert_type(self.expr(*explicit_args),
-                                    AbstractExpression)
+
+            # Wrap the expression in a Let block, so that the user can
+            # declare local variables via the Var helper.
+            with self.bind():
+                function_block = Block()
+                with Block.set_block(function_block):
+                    fn = assert_type(self.expr, types.FunctionType)
+                    expr = assert_type(fn(*explicit_args), AbstractExpression)
+                    function_block.expr = expr
+                    self.expr = function_block
 
         with self.bind():
             self.expr.prepare()
