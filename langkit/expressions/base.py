@@ -1252,7 +1252,11 @@ class LocalVars(object):
 
             import langkit.compiled_types
             vars = LocalVars()
-            var = vars('Index', langkit.compiled_types.LongType)
+            var = vars.create('Index', langkit.compiled_types.LongType)
+
+        The names are *always* unique, so you can pass several time the same
+        string as a name, and create will handle creating a name that is unique
+        in the scope.
 
         :param str|names.Name name: The name of the variable.
         :param langkit.compiled_types.CompiledType type: Type parameter. The
