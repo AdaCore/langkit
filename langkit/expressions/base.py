@@ -1151,6 +1151,21 @@ def Property(expr, doc=None, private=False, type=None):
     return PropertyDef(expr, doc=doc, private=private, type=type)
 
 
+def langkit_property(private=False, return_type=None):
+    """
+    Decorator to create properties from real python methods. See Property for
+    more details.
+
+    :type private: bool
+    :type return_type: CompiledType
+    """
+    def decorator(expr_fn):
+        return Property(expr=expr_fn,
+                        type=return_type,
+                        private=private, doc=expr_fn.__doc__)
+    return decorator
+
+
 class Literal(AbstractExpression):
     """
     Expression for literals of any type.
