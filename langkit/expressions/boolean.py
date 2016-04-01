@@ -48,6 +48,7 @@ class BinaryBooleanOperator(AbstractExpression):
         return If.Expr(lhs, then, else_then, BoolType)
 
 
+# noinspection PyPep8Naming
 def And(*args):
     """
     Syntactic sugar for nested "&" operators.
@@ -60,6 +61,7 @@ def And(*args):
     return reduce(lambda a, b: a & b, args)
 
 
+# noinspection PyPep8Naming
 def Or(*args):
     """
     Syntactic sugar for nested "|" operators.
