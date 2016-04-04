@@ -2,7 +2,7 @@ import os
 import shutil
 
 from langkit.compile_context import CompileCtx
-from langkit.compiled_types import root_grammar_class, StructMetaClass
+from langkit.compiled_types import ASTNode, StructMetaClass, root_grammar_class
 from langkit.diagnostics import DiagnosticError
 from langkit.expressions import Self
 
@@ -11,6 +11,11 @@ from lexer_example import foo_lexer
 
 def emit_and_print_errors(grammar, main_rule_name='main_rule',
                           lexer=foo_lexer):
+    """
+    Return wether code emission was successful.
+
+    :rtype: bool
+    """
     # Have a clean build directory
     if os.path.exists('build'):
         shutil.rmtree('build')
@@ -28,10 +33,11 @@ def emit_and_print_errors(grammar, main_rule_name='main_rule',
     except DiagnosticError:
         # If there is a diagnostic error, don't say anything, the diagnostics
         # are enough.
-        pass
+        return False
 
     else:
         print 'Code generation was successful'
+        return True
 
 
 def reset_langkit():
@@ -42,7 +48,7 @@ def reset_langkit():
     future, we should get rid of this global state in Langkit.
     """
     StructMetaClass.root_grammar_class = None
-    StructMetaClass.astnode_types = []
+    StructMetaClass.astnode_types = [ASTNode]
     StructMetaClass.struct_types = []
     StructMetaClass.env_metadata = None
     Self.__dict__['_frozen'] = False

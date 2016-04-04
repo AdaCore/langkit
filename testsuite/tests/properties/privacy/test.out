@@ -1,0 +1,43 @@
+== abstract: default, concrete: default ==
+Code generation was successful
+  AbstractNode.p_prop: public
+  ConcreteNode.p_prop: public
+
+== abstract: default, concrete: private ==
+Error: AbstractNode.p_prop is public, so should be ConcreteNode.p_prop
+In definition of property 'prop', class 'ConcreteNode': test.py Line 38
+
+== abstract: default, concrete: public ==
+Code generation was successful
+  AbstractNode.p_prop: public
+  ConcreteNode.p_prop: public
+
+== abstract: private, concrete: default ==
+Code generation was successful
+  AbstractNode.p_prop: private
+  ConcreteNode.p_prop: private
+
+== abstract: private, concrete: private ==
+Code generation was successful
+  AbstractNode.p_prop: private
+  ConcreteNode.p_prop: private
+
+== abstract: private, concrete: public ==
+Error: AbstractNode.p_prop is private, so should be ConcreteNode.p_prop
+In definition of property 'prop', class 'ConcreteNode': test.py Line 38
+
+== abstract: public, concrete: default ==
+Code generation was successful
+  AbstractNode.p_prop: public
+  ConcreteNode.p_prop: public
+
+== abstract: public, concrete: private ==
+Error: AbstractNode.p_prop is public, so should be ConcreteNode.p_prop
+In definition of property 'prop', class 'ConcreteNode': test.py Line 38
+
+== abstract: public, concrete: public ==
+Code generation was successful
+  AbstractNode.p_prop: public
+  ConcreteNode.p_prop: public
+
+Done
