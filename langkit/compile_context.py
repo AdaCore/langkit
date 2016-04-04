@@ -472,7 +472,7 @@ class CompileCtx():
                   lambda astnode, prop: prop.freeze(),
                   lambda astnode, prop: prop.compute(astnode))
         for pass_fn in passes:
-            for astnode in self.astnode_types + [self.root_grammar_class]:
+            for astnode in self.astnode_types:
                 for prop in astnode.get_properties(include_inherited=False):
                     with prop.diagnostic_context():
                         pass_fn(astnode, prop)
