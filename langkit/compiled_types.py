@@ -55,6 +55,10 @@ def c_node_type(capi):
     return CAPIType(capi, 'base_node')
 
 
+def exported_field(field):
+    return not field.is_private
+
+
 def make_renderer(base_renderer=None):
     """
     Create a template renderer with common helpers.
@@ -107,6 +111,8 @@ def make_renderer(base_renderer=None):
             'text_type':             CAPIType(capi, 'text').name,
             'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
             'exception_type':        CAPIType(capi, 'exception').name,
+
+            'exported_field':        exported_field,
         })
     return base_renderer.update(template_args)
 
@@ -413,9 +419,7 @@ class AbstractNodeData(object):
     def __init__(self, private=False):
         """
         :param bool private: Whether this AbstractNodeData instance is
-            supposed to be private or not. For the moment since the Ada API is
-            not well defined, private properties are not exposed in C and
-            Python, but are public in Ada.
+            supposed to be private or not.
         """
         self._index = next(self._counter)
         self.is_private = private

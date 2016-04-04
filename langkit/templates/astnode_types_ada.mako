@@ -12,6 +12,13 @@
 </%def>
 
 
+<%def name="field_decl(field)">
+   function ${field.name}
+     (Node : ${field.ast_node.name()}) return ${decl_type(field.type)};
+   ${ada_doc(field, 6)}
+</%def>
+
+
 <%def name="public_decl(cls)">
 
    <%
@@ -52,16 +59,16 @@
         (Node : access ${cls.name()}_Type);
    % endif
 
-   ## Attribute getters
+   ## Public field getters
 
-   % for field in cls.get_fields(include_inherited=False):
-       function ${field.name}
-         (Node : ${cls.name()}) return ${decl_type(field.type)};
-       ${ada_doc(field, 6)}
+   % for field in cls.get_fields(include_inherited=False, \
+                                 predicate=exported_field):
+      ${field_decl(field)}
    % endfor
 
-   % for prop in cls.get_properties(include_inherited=False):
-   ${prop.prop_decl}
+   % for prop in cls.get_properties(include_inherited=False, \
+                                    predicate=exported_field):
+      ${prop.prop_decl}
    % endfor
 
 </%def>
@@ -91,6 +98,20 @@
    % else:
       null record;
    % endif
+
+   ## Private field getters
+
+   <% not_exported_field = lambda f: not exported_field(f) %>
+
+   % for field in cls.get_fields(include_inherited=False, \
+                                 predicate=not_exported_field):
+      ${field_decl(field)}
+   % endfor
+
+   % for prop in cls.get_properties(include_inherited=False, \
+                                    predicate=not_exported_field):
+      ${prop.prop_decl}
+   % endfor
 
    % if not cls.is_env_spec_inherited:
 
