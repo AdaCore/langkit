@@ -742,7 +742,7 @@ class PropertyDef(AbstractNodeData):
     reserved_arg_names = (self_arg_name, env_arg_name)
     reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
 
-    def __init__(self, expr, doc=None, private=False, abstract=False,
+    def __init__(self, expr, doc=None, private=None, abstract=False,
                  type=None, abstract_runtime_check=False):
         """
         :param expr: The expression for the property. It can be either:
@@ -760,7 +760,7 @@ class PropertyDef(AbstractNodeData):
           | () -> AbstractExpression
 
         :param str|None doc: User documentation for this property.
-        :param bool private: Whether this property is private or not.
+        :param bool|None private: See AbstractNodeData's constructor.
         :param bool abstract: Whether this property is abstract or not. If this
             is True, then expr can be None.
 
@@ -848,8 +848,8 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: Property
         """
-        new = PropertyDef(self.expr, self._doc, self.is_private, self.abstract,
-                          self.expected_type)
+        new = PropertyDef(self.expr, self._doc, self._is_private,
+                          self.abstract, self.expected_type)
         new.vars = copy(self.vars)
 
         # Copy is used in the context of macros. In macros, we want to copy
@@ -1107,6 +1107,20 @@ class PropertyDef(AbstractNodeData):
             self.dispatching = True
             base_prop.dispatching = True
 
+            # Inherit the privacy level or check that it's consistent with the
+            # base property.
+            if self._is_private is None:
+                self._is_private = base_prop.is_private
+            else:
+                check_source_language(
+                    self._is_private == base_prop.is_private,
+                    "{} is {}, so should be {}".format(
+                        base_prop.qualname,
+                        'private' if base_prop.is_private else 'public',
+                        self.qualname,
+                    )
+                )
+
             # We then want to check the consistency of type annotations if they
             # exist.
             if base_prop.expected_type:
@@ -1121,6 +1135,9 @@ class PropertyDef(AbstractNodeData):
                     # If base has a type annotation and not self, then
                     # propagate it.
                     self.expected_type = base_prop.expected_type
+        elif self._is_private is None:
+            # By default, properties are public
+            self._is_private = False
 
     def render(self, owner_type):
         """
@@ -1194,7 +1211,7 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 
 
 # noinspection PyPep8Naming
-def Property(expr, doc=None, private=False, type=None):
+def Property(expr, doc=None, private=None, type=None):
     """
     Public constructor for concrete properties. You can declare your properties
     on your ast node subclasses directly, like this::

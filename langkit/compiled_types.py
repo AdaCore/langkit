@@ -418,11 +418,16 @@ class AbstractNodeData(object):
 
     def __init__(self, private=False):
         """
-        :param bool private: Whether this AbstractNodeData instance is
+        :param bool|None private: Whether this AbstractNodeData instance is
             supposed to be private or not.
+
+            In the context of properties only, None is also allowed: in this
+            case, inherit vibility from parents. If there is no property to
+            override and None is passed, make the property public. This is
+            computed in the "compute" pass.
         """
         self._index = next(self._counter)
-        self.is_private = private
+        self._is_private = private
         self._name = names.Name("")
         self.location = extract_library_location()
         self.ast_node = None
@@ -450,6 +455,15 @@ class AbstractNodeData(object):
 
         :type: list[(names.Name, CompiledType, None|str)]
         """
+
+    @property
+    def is_private(self):
+        """
+        Whether this field is private.
+        :rtype: bool
+        """
+        assert self._is_private is not None
+        return self._is_private
 
     @property
     def type(self):
@@ -605,7 +619,7 @@ class UserField(AbstractField):
         :type doc: str
         """
         super(UserField, self).__init__(repr, doc, type)
-        self.is_private = is_private
+        self._is_private = is_private
 
     concrete = True
 
