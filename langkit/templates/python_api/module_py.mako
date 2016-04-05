@@ -27,6 +27,8 @@ class _analysis_unit(ctypes.c_void_p):
 class _node(ctypes.c_void_p):
     pass
 _enum_node_kind = ctypes.c_uint
+class _lexical_env(ctypes.c_void_p):
+    pass
 class _token(ctypes.c_void_p):
     pass
 
@@ -170,6 +172,20 @@ class AnalysisUnit(object):
     def diagnostics(self):
         """Diagnostics for this unit."""
         return self.DiagnosticsList(self)
+
+
+class LexicalEnv(object):
+    ${py_doc('langkit.lexical_env_type', 4)}
+
+    def __init__(self, c_value):
+        self._c_value = c_value
+
+    def unwrap(self):
+        return self._c_value
+
+    @classmethod
+    def wrap(self, c_value):
+        return LexicalEnv(c_value) if c_value else None
 
 
 class Token(object):

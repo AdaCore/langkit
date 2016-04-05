@@ -105,6 +105,7 @@ def make_renderer(base_renderer=None):
             'analysis_unit_type':    CAPIType(capi, 'analysis_unit').name,
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             c_node_type(capi).name,
+            'lexical_env_type':      CAPIType(capi, 'lexical_env').name,
             'token_type':            CAPIType(capi, 'token').name,
             'sloc_type':             CAPIType(capi, 'source_location').name,
             'sloc_range_type':       SourceLocationRangeType.c_type(capi).name,
@@ -331,8 +332,7 @@ class LexicalEnvType(BasicType):
 
     @classmethod
     def c_type(cls, c_api_settings):
-        raise Exception("Cannot expose lexical environments to C at the "
-                        "moment")
+        return CAPIType(c_api_settings, names.Name('lexical_env'))
 
 
 class BoolType(BasicType):

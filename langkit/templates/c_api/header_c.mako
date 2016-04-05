@@ -44,6 +44,9 @@ typedef enum {
 % endfor
 } ${node_kind_type};
 
+${c_doc('langkit.lexical_env_type')}
+typedef void *${lexical_env_type};
+
 ${c_doc('langkit.token_type')}
 typedef void* ${token_type};
 

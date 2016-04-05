@@ -60,6 +60,9 @@ documentations = {
     'langkit.node_kind_type': Template("""
         Kind of AST nodes in parse trees.
     """),
+    'langkit.lexical_env_type': Template("""
+        Data type for lexical environments.
+    """),
     'langkit.token_type': Template("""
         Data type for tokens.
         % if lang != 'python':

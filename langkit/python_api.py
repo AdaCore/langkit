@@ -44,6 +44,7 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (ct.ArrayType, lambda cls: '{}({{}})'.format(type.name().camel)),
             (ct.Struct, lambda _: '{}'),
+            (ct.LexicalEnvType, lambda _: 'LexicalEnv.wrap({})'),
         ], exception_msg='Unhandled field type in the python binding'
                          ' (wrapping): {}'.format(type)
         ).format(value)
@@ -67,6 +68,7 @@ class PythonAPISettings(AbstractAPISettings):
                 type.c_type(self.c_api_settings).name,
                 type.name().camel
             )),
+            (ct.LexicalEnvType, lambda _: '{}._c_value'),
         ], exception_msg='Unhandled field type in the python binding'
                          ' (unwrapping): {}'.format(type)
         ).format(value)
@@ -89,6 +91,7 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (ct.BoolType, lambda _: ctype_type('c_uint8')),
             (ct.LongType, lambda _: ctype_type('c_long')),
+            (ct.LexicalEnvType, lambda _: wrapped_type('lexical_env')),
             (ct.SourceLocationRangeType, lambda _: wrapped_type('SlocRange')),
             (ct.Token, lambda _: wrapped_type('token')),
             (ct.ASTNode, lambda _: wrapped_type('node')),

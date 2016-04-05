@@ -86,6 +86,8 @@
                     Wrap (${root_node_type_name} (${field_access}))
                 % elif is_token_type(field.type):
                     Wrap (${field_access}'Access)
+                % elif is_lexical_env(field.type):
+                    Wrap (${field_access})
                 % else:
                     ${field_access}
                 % endif

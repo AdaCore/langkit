@@ -35,6 +35,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    type ${node_kind_type} is new int;
    ${ada_c_doc('langkit.node_kind_type', 3)}
 
+   type ${lexical_env_type} is new System.Address;
+   ${ada_c_doc('langkit.lexical_env_type', 3)}
+
    type ${token_type} is new System.Address;
    ${ada_c_doc('langkit.node_kind_type', 3)}
 
@@ -78,8 +81,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    type ${bool_type} is new Unsigned_8;
 
-   % for type_name in (bool_type, node_type, token_type, sloc_type, \
-                       sloc_range_type, diagnostic_type, exception_type):
+   % for type_name in (bool_type, node_type, lexical_env_type, token_type, \
+                       sloc_type, sloc_range_type, \
+                       diagnostic_type, exception_type):
       type ${type_name}_Ptr is access ${type_name};
    % endfor
 
@@ -343,6 +347,11 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    --       Optimization-and-Strict-Aliasing.html>.
 
    pragma Warnings (Off, "possible aliasing problem for type");
+
+   function Wrap is new Ada.Unchecked_Conversion
+     (AST_Envs.Lexical_Env, ${lexical_env_type});
+   function Unwrap is new Ada.Unchecked_Conversion
+     (${lexical_env_type}, AST_Envs.Lexical_Env);
 
    function Wrap is new Ada.Unchecked_Conversion
      (Token_Access, ${token_type});
