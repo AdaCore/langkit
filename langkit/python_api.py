@@ -36,6 +36,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ASTNode, lambda _: '_wrap_astnode({})'),
             (ct.SourceLocationRangeType, lambda _: '_wrap_sloc_range({})'),
             (ct.Token, lambda _: '{}'),
+            (ct.Symbol, lambda _: '{}.wrap()'),
             (ct.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (ct.LongType, lambda _: '{{}}{}'.format(value_suffix)),
             (ct.EnumType, lambda _: '{}_to_str[{{}}{}]'.format(
@@ -68,6 +69,7 @@ class PythonAPISettings(AbstractAPISettings):
                 type.c_type(self.c_api_settings).name,
                 type.name().camel
             )),
+            (ct.Symbol, lambda _: '_text.unwrap({})'),
             (ct.LexicalEnvType, lambda _: '{}._c_value'),
         ], exception_msg='Unhandled field type in the python binding'
                          ' (unwrapping): {}'.format(type)
@@ -94,6 +96,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.LexicalEnvType, lambda _: wrapped_type('lexical_env')),
             (ct.SourceLocationRangeType, lambda _: wrapped_type('SlocRange')),
             (ct.Token, lambda _: 'Token'),
+            (ct.Symbol, lambda _: wrapped_type('text')),
             (ct.ASTNode, lambda _: wrapped_type('node')),
             (ct.EnumType, lambda _: ctype_type('c_uint')),
             (ct.ArrayType, lambda cls: wrapped_type(cls.name().camel)),

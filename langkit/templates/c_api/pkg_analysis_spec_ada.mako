@@ -87,7 +87,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    type ${bool_type} is new Unsigned_8;
 
    % for type_name in (bool_type, node_type, lexical_env_type, token_type, \
-                       sloc_type, sloc_range_type, \
+                       text_type, sloc_type, sloc_range_type, \
                        diagnostic_type, exception_type):
       type ${type_name}_Ptr is access ${type_name};
    % endfor
@@ -346,6 +346,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
      (if T = null
       then (Chars => System.Null_Address, Length => 0)
       else (Chars => T.all'Address, Length => T.all'Length));
+   function Wrap (T : Symbol_Type) return ${text_type} is
+     (Wrap (Text_Access (T)));
 
    --  The following conversions are used only at the interface between Ada and
    --  C (i.e. as parameters and return types for C entry points) for access

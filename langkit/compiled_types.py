@@ -76,6 +76,7 @@ def make_renderer(base_renderer=None):
         'is_ast_node':      type_check(ASTNode),
         'is_sloc_range':    type_check(SourceLocationRangeType),
         'is_token_type':    type_check(Token),
+        'is_symbol_type':   type_check(Symbol),
         'is_array_type':    type_check(ArrayType),
         'is_lexical_env':   type_check(LexicalEnvType),
         'is_struct_type':   type_check(Struct),
@@ -384,6 +385,10 @@ class Symbol(BasicType):
     is_ptr = False
     _name = "Symbol_Type"
     _nullexpr = "null"
+
+    @classmethod
+    def c_type(cls, c_api_settings):
+        return CAPIType(c_api_settings, 'text')
 
 
 class AbstractNodeData(object):

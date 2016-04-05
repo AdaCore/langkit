@@ -40,6 +40,19 @@ class _text(ctypes.Structure):
 
     encoding = 'utf-32le' if sys.byteorder == 'little' else 'utf-32be'
 
+    @classmethod
+    def unwrap(cls, value):
+        if not isinstance(value, str):
+            raise TypeError('String expected but got {} instead'.format(
+                type(value)
+            ))
+        ## TODO: implement this if needed. This is not trivial because this
+        ## will involve memory management: the text buffer must live as long as
+        ## the returned value lives. There's no known use case for functions
+        ## (in particular properties) that accept a symbol as argument in a
+        ## public API for now, so that's acceptable.
+        raise NotImplementedError()
+
     def wrap(self):
         if self.length > 0:
             # self.length tells how much UTF-32 chars there are in self.chars

@@ -51,6 +51,8 @@
                ${arg_type.name()} (Unwrap (${arg_name}))
             % elif is_token_type(arg_type):
                Token_Index (${arg_name}.Index)
+            % elif is_symbol_type(arg_type):
+               Text_To_Symbol (N.Unit, ${arg_name})
             % else:
                ${arg_name}
             % endif
@@ -97,6 +99,8 @@
                 % elif is_token_type(field.type):
                     (Unit  => Wrap (N.Unit),
                      Index => int (${field_access}))
+                % elif is_symbol_type(field.type):
+                    Wrap (${field_access})
                 % elif is_lexical_env(field.type):
                     Wrap (${field_access})
                 % else:

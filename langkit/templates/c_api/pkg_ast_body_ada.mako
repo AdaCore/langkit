@@ -6,6 +6,8 @@
 
 with ${_self.ada_api_settings.lib_name}.Analysis;
 use ${_self.ada_api_settings.lib_name}.Analysis;
+with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
+use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 
 package body ${_self.ada_api_settings.lib_name}.AST.Types.C is
 
