@@ -647,6 +647,10 @@ class Block(Let):
         yield
         cls.blocks.pop()
 
+    @classmethod
+    def get(cls):
+        return cls.blocks[-1]
+
     def __init__(self):
         # We bypass the let constructor, because we have a different
         # construction mode. However, we still want to call
@@ -673,7 +677,7 @@ class Var(AbstractVariable):
 
     def __init__(self, expr):
         super(Var, self).__init__(names.Name("Block_Var"), create_local=True)
-        Block.blocks[-1].add_var(self, expr)
+        Block.get().add_var(self, expr)
 
 
 class No(AbstractExpression):
