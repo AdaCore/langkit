@@ -35,7 +35,7 @@ def write_astdoc(context, file):
         # If this is not ASTNode, get the parent class
         bases = list(typ.get_inheritance_chain())
         base = bases[-2] if len(bases) > 1 else None
-        abs_fields = list(typ.get_abstract_fields())
+        abs_fields = list(typ.get_abstract_fields(lambda f: not f.is_private))
 
         print >> file, '{}node {}{}{}'.format(
             'abstract ' if typ.abstract else '',
