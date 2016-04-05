@@ -260,6 +260,10 @@ class ManageScript(object):
             '--pretty-print', '-p', action='store_true',
             help='Pretty-print generated source code'
         )
+        subparser.add_argument(
+            '--export-private-fields', action='store_true',
+            help='Export all fields and properties as if they were all public'
+        )
 
     def add_build_args(self, subparser):
         """
@@ -322,6 +326,9 @@ class ManageScript(object):
             cov = None
 
         self.context = self.create_context(parsed_args)
+        self.context.export_private_fields = getattr(
+            parsed_args, 'export_private_fields', False
+        )
 
         # Set the extensions dir on the compile context
         self.context.extensions_dir = self.dirs.lang_source_dir("extensions")
