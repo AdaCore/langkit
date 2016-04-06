@@ -220,7 +220,7 @@ ${capi.get_name("node_child")}(${node_type} node,
                                unsigned n,
                                ${node_type}* child_p);
 
-${c_doc('langkit.node_child')}
+${c_doc('langkit.token_text')}
 extern ${text_type}
 ${capi.get_name("token_text")}(${token_type} token);
 
