@@ -1177,7 +1177,7 @@ class Struct(CompiledType):
         Get all AbstractField instances for the class.
 
         :param predicate: Predicate to filter fields if needed.
-        :type predicate: None|(Field) -> bool
+        :type predicate: None|(AbstractNodeData) -> bool
 
         :param bool include_inherited: If true, include inheritted fields in
             the returned list. Return only fields that were part of the
