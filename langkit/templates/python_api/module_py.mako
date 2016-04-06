@@ -40,6 +40,16 @@ class _text(ctypes.Structure):
     _fields_ = [("chars", ctypes.POINTER(ctypes.c_char)),
                 ("length", ctypes.c_size_t)]
 
+    encoding = 'utf-32le' if sys.byteorder == 'little' else 'utf-32be'
+
+    def wrap(self):
+        if self.length > 0:
+            # self.length tells how much UTF-32 chars there are in self.chars
+            # but self.chars is a char* so we have to fetch 4 times more bytes
+            # than characters.
+            return self.chars[:4 * self.length].decode(self.encoding)
+        else:
+            return None
 
 class _Sloc(ctypes.Structure):
     _fields_ = [("line", ctypes.c_uint32),
@@ -648,17 +658,6 @@ _get_last_exception = _import_func(
 #
 
 
-def _decode_text(text):
-    if text.length > 0:
-        encoding = 'utf-32le' if sys.byteorder == 'little' else 'utf-32be'
-        # text.length tells how much UTF-32 chars there are in text.chars but
-        # text.chars is a char* so we have to fetch 4 times more bytes than
-        # characters.
-        return text.chars[:4 * text.length].decode(encoding)
-    else:
-        return None
-
-
 def _wrap_sloc(c_value):
     return Sloc(c_value.line, c_value.column)
 
@@ -673,7 +672,7 @@ def _wrap_sloc_range(c_value):
 
 def _wrap_diagnostic(c_value):
     return Diagnostic(_wrap_sloc_range(c_value.sloc_range),
-                      _decode_text(c_value.message))
+                      c_value.message.wrap())
 
 
 _kind_to_astnode_cls = {
