@@ -55,19 +55,32 @@ class _Sloc(ctypes.Structure):
     _fields_ = [("line", ctypes.c_uint32),
                 ("column", ctypes.c_uint16)]
 
+    def wrap(self):
+        return Sloc(self.line, self.column)
+
 
 class _SlocRange(ctypes.Structure):
     _fields_ = [("start", _Sloc),
                 ("end", _Sloc)]
+
+    def wrap(self):
+        return SlocRange(self.start.wrap(), self.end.wrap())
 
 
 class _Diagnostic(ctypes.Structure):
     _fields_ = [("sloc_range", _SlocRange),
                 ("message", _text)]
 
+    def wrap(self):
+        return Diagnostic(self.sloc_range.wrap(),
+                          self.message.wrap())
+
 
 class _Exception(ctypes.Structure):
     _fields_ = [("information", ctypes.c_char_p)]
+
+    def wrap(self):
+        return NativeException(self.information)
 
 
 class NativeException(Exception):
@@ -150,7 +163,7 @@ class AnalysisUnit(object):
             if not success:
                 raise IndexError('diagnostic index out of range')
             else:
-                result = _wrap_diagnostic(diag)
+                result = diag.wrap()
                 return result
 
     def __init__(self, c_value):
@@ -280,7 +293,7 @@ class ${root_astnode_name}(object):
         ${py_doc('langkit.node_sloc_range', 8)}
         result = _SlocRange()
         _node_sloc_range(self._c_value, ctypes.byref(result))
-        return _wrap_sloc_range(result)
+        return result.wrap()
 
     def lookup(self, sloc):
         ${py_doc('langkit.lookup_in_node', 8)}
@@ -492,7 +505,7 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
         result = func(*args, **kwargs)
         exc = _get_last_exception()
         if exc:
-            raise NativeException(exc.contents.information)
+            raise exc.contents.wrap()
         return result
 
     return wrapper if exc_wrap else func
@@ -656,23 +669,6 @@ _get_last_exception = _import_func(
 #
 # Layering helpers
 #
-
-
-def _wrap_sloc(c_value):
-    return Sloc(c_value.line, c_value.column)
-
-
-def _unwrap_sloc(sloc):
-    return _Sloc(sloc.line, sloc.column)
-
-
-def _wrap_sloc_range(c_value):
-    return SlocRange(_wrap_sloc(c_value.start),
-                     _wrap_sloc(c_value.end))
-
-def _wrap_diagnostic(c_value):
-    return Diagnostic(_wrap_sloc_range(c_value.sloc_range),
-                      c_value.message.wrap())
 
 
 _kind_to_astnode_cls = {
