@@ -338,7 +338,7 @@ class LexicalEnvType(BasicType):
 
     @classmethod
     def c_type(cls, c_api_settings):
-        return CAPIType(c_api_settings, names.Name('lexical_env'))
+        return CAPIType(c_api_settings, 'lexical_env')
 
 
 class BoolType(BasicType):
@@ -361,9 +361,7 @@ class LongType(BasicType):
 
     @classmethod
     def c_type(cls, c_api_settings):
-        return CAPIType(
-            c_api_settings, names.Name("int"), external=cls._external
-        )
+        return CAPIType(c_api_settings, 'int', external=cls._external)
 
 
 class SourceLocationRangeType(BasicType):
@@ -1404,7 +1402,7 @@ class ArrayType(CompiledType):
 
     @classmethod
     def c_type(cls, c_api_settings):
-        return CAPIType(c_api_settings, cls.api_name().lower)
+        return CAPIType(c_api_settings, cls.api_name())
 
     @classmethod
     def nullexpr(cls):
@@ -1526,7 +1524,7 @@ class EnumType(CompiledType):
 
     @classmethod
     def c_type(cls, c_api_settings):
-        return CAPIType(c_api_settings, cls.base_name().lower)
+        return CAPIType(c_api_settings, cls.base_name())
 
     @classmethod
     def get_enumerator(cls, alt):

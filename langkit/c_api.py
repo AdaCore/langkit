@@ -14,18 +14,21 @@ class CAPIType(object):
     def __init__(self, c_api_settings, name, external=False):
         """Create a stub for a C API type.
 
-        c_api_settings: A c_api.CAPISettings instance.
+        :param CAPISettings c_api_settings: API settings to use for this type.
 
-        name: The name for the type.
+        :param name: The name for the type. Can be either a Name or a
+            lower-case formatted name.
+        :type name: str|names.Name
 
-        external: Whether this type is already declared outside the C API. For
-        instance: "int" is external, but "node" is not.
+        :param bool external: Whether this type is already declared outside the
+            C API. For instance: "int" is external, but "node" is not.
         """
         self.c_api_settings = c_api_settings
         self.external = external
         # Make private thefollowing in order to avoid accidental use of these
         # instead of the properties.
-        self._name = name
+        self._name = (name if isinstance(name, names.Name) else
+                      names.Name.from_lower(name))
 
     @property
     def name(self):
@@ -34,7 +37,7 @@ class CAPIType(object):
         # don't conflict with "external" names. Keep "external" ones untouched
         # since we don't control them.
         return (self._name if self.external else
-                self.c_api_settings.get_name(names.Name(self._name)))
+                self.c_api_settings.get_name(self._name))
 
 
 class CAPISettings(AbstractAPISettings):
