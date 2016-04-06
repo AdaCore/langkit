@@ -1,3 +1,6 @@
+with Langkit_Support.Token_Data_Handler;
+use Langkit_Support.Token_Data_Handler;
+
 generic
    type T is private;
    Memo_Size : Positive := 16;
@@ -8,19 +11,20 @@ package Langkit_Support.Packrat is
    type Memo_Entry is record
       State             : Memo_State;
       Instance          : T;
-      Offset, Final_Pos : Integer;
+      Offset, Final_Pos : Token_Index;
    end record;
 
    type Memo_Type is private;
 
    procedure Clear (Memo : in out Memo_Type);
-   function Get (Memo : Memo_Type; Offset : Integer) return Memo_Entry
+
+   function Get (Memo : Memo_Type; Offset : Token_Index) return Memo_Entry
      with Inline_Always;
 
    procedure Set (Memo              : in out Memo_Type;
                   Is_Success        : Boolean;
                   Instance          : T;
-                  Offset, Final_Pos : Integer)
+                  Offset, Final_Pos : Token_Index)
      with Inline_Always;
 
 private

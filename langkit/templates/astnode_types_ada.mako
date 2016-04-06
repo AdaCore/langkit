@@ -214,6 +214,8 @@
              % if is_ast_node(field.type):
                 Append (Result,
                         Image (${root_node_type_name} (Node.${field.name})));
+             % elif is_token_type(field.type):
+                Append (Result, Image (Get (Node, Node.${field.name})));
              % else:
                 Append (Result, Image (Node.${field.name}));
              % endif
@@ -290,6 +292,11 @@
                   Put_Line (Level + 1, "${field._name.lower}:");
                   Node.${field.name}.Print (Level + 2);
                end if;
+
+            % elif is_token_type(field.type):
+               Put_Line (Level + 1, "${field._name.lower}: "
+                         & Image (Get (Node, Node.${field.name})));
+
             % else:
                Put_Line (Level + 1, "${field._name.lower}: "
                          & Image (Node.${field.name}));
@@ -410,8 +417,11 @@
          ## We assume the existence of a P_Name property on the result
          ## of the key expression. TODO: Add check for this in
          ## EnvSpec.compute.
-         Add (Initial_Env, Symbol_Type (${key}.P_Name.Text),
-              ${root_node_type_name} (${val.strip()}));
+         declare
+            S : constant Symbol_Type := Get_Symbol (Get (Self, ${key}.P_Name));
+         begin
+            Add (Initial_Env, S, ${root_node_type_name} (${val.strip()}));
+         end;
       </%def>
    begin
 

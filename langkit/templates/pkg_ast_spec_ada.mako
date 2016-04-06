@@ -14,6 +14,8 @@ with System;
 with Langkit_Support.Extensions;         use Langkit_Support.Extensions;
 with Langkit_Support.Iterators;
 with Langkit_Support.Lexical_Env;
+with Langkit_Support.Token_Data_Handler;
+use Langkit_Support.Token_Data_Handler;
 with Langkit_Support.Tokens;             use Langkit_Support.Tokens;
 with Langkit_Support.Vectors;
 
@@ -339,11 +341,18 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --    will be part of the returned array;
    --  - Nodes and trivias will be lexically ordered.
 
-   function Token_Start (Node : ${root_node_type_name}) return Natural;
+   function Token_Start (Node : ${root_node_type_name}) return Token_Index;
    --  Return the index of the first token used to parse Node
 
-   function Token_End (Node : ${root_node_type_name}) return Natural;
+   function Token_End (Node : ${root_node_type_name}) return Token_Index;
    --  Return the index of the last token used to parse Node
+
+   function Get
+     (Node  : access ${root_node_value_type}'Class;
+      Index : Token_Index)
+      return Token;
+   --  Get information about the token at Index. Node must be any AST node in
+   --  the corresponding analysis unit.
 
    -------------------
    -- Debug helpers --
@@ -431,7 +440,7 @@ private
       Unit                   : Analysis_Unit_Interface := null;
       --  Reference to the analysis unit that owns this node
 
-      Token_Start, Token_End : Natural  := 0;
+      Token_Start, Token_End : Token_Index  := 0;
       Extensions             : Extension_Vectors.Vector;
 
       Self_Env               : AST_Envs.Lexical_Env;
@@ -550,10 +559,17 @@ private
    --  Implementation helper for the looking up process. TODO??? Do not expose
    --  it in the public API.
 
-   function Token_Start (Node : ${root_node_type_name}) return Natural is
+   function Token_Start (Node : ${root_node_type_name}) return Token_Index is
      (Node.Token_Start);
-   function Token_End (Node : ${root_node_type_name}) return Natural is
+   function Token_End (Node : ${root_node_type_name}) return Token_Index is
      (Node.Token_End);
+
+   function Get
+     (Node  : access ${root_node_value_type}'Class;
+      Index : Token_Index)
+      return Token
+   is
+     (Get_Token (Node.Unit.Token_Data.all, Index));
 
    ----------------------------------------
    -- Tree traversal (Ada 2012 iterator) --

@@ -533,8 +533,19 @@ class GetSymbol(AbstractExpression):
 
         :rtype: BuiltinCallExpr
         """
-        return BuiltinCallExpr("Get_Symbol", Symbol,
-                               [construct(self.token_expr, Token)])
+        token_index = construct(self.token_expr, Token)
+
+        # The following call expression returns a value for which we do not
+        # have any CompiledType subclass available. Indeed, it returns a Token
+        # record whereas our Token CompiledType subclass represents a token
+        # index. Specifying the actual type here is not useful anyway as it's
+        # not going to be used for typing: this call is immediatly wrapped into
+        # another call expression that has the correct type: see below. So
+        # provide a dummy type instead.
+        token = BuiltinCallExpr("Get", CompiledType,
+                                [construct(Self), token_index])
+
+        return BuiltinCallExpr("Get_Symbol", Symbol, [token])
 
 
 class Let(AbstractExpression):

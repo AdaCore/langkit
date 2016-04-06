@@ -29,8 +29,6 @@ class _node(ctypes.c_void_p):
 _enum_node_kind = ctypes.c_uint
 class _lexical_env(ctypes.c_void_p):
     pass
-class _token(ctypes.c_void_p):
-    pass
 
 class _text(ctypes.Structure):
     # The chars field really is a uint32_t* but considering it as a char* here
@@ -211,12 +209,15 @@ class LexicalEnv(object):
         return LexicalEnv(c_value) if c_value else None
 
 
-class Token(object):
+class Token(ctypes.Structure):
     ${py_doc('langkit.token_type', 4)}
 
-    def __init__(self, c_value):
-        text = _token_text(c_value)
-        self.text = _decode_text(text)
+    _fields_ = [("_unit", _analysis_unit),
+                ("_index", ctypes.c_int)]
+
+    @property
+    def text(self):
+        return _token_text(self).wrap()
 
     def __repr__(self):
         return "<Token {}>".format(self.text)
@@ -625,7 +626,7 @@ _node_child = _import_func(
 )
 _token_text = _import_func(
     '${capi.get_name("token_text")}',
-    [_token], _text
+    [Token], _text
 )
 
 % for astnode in _self.astnode_types:

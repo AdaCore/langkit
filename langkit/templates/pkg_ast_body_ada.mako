@@ -259,26 +259,28 @@ package body ${_self.ada_api_settings.lib_name}.AST is
      (Node : ${root_node_type_name};
       Snap : Boolean := False) return Source_Location_Range
    is
-      use Token_Vectors;
-
-      Tokens               : Token_Vectors.Vector renames
-         Node.Unit.Token_Data.Tokens;
+      TDH                  : Token_Data_Handler renames
+         Node.Unit.Token_Data.all;
       Sloc_Start, Sloc_End : Source_Location;
+
+      function Get (Index : Token_Index) return Token is
+        (Get_Token (TDH, Index));
+
    begin
       if Snap then
          declare
-            Tok_Start : constant Natural :=
-              Natural'Max (Node.Token_Start - 1, 0);
-            Tok_End : constant Natural :=
-              Natural'Min (Node.Token_End + 1, Last_Index (Tokens));
+            Tok_Start : constant Token_Index :=
+              Token_Index'Max (Node.Token_Start - 1, 0);
+            Tok_End : constant Token_Index :=
+              Token_Index'Min (Node.Token_End + 1, Last_Token (TDH));
          begin
-            Sloc_Start := End_Sloc (Get (Tokens, Tok_Start).Sloc_Range);
+            Sloc_Start := End_Sloc (Get (Tok_Start).Sloc_Range);
             Sloc_End :=
-              Start_Sloc (Get (Tokens, Tok_End).Sloc_Range);
+              Start_Sloc (Get (Tok_End).Sloc_Range);
          end;
       else
-         Sloc_Start := Start_Sloc (Get (Tokens, Node.Token_Start).Sloc_Range);
-         Sloc_End := End_Sloc (Get (Tokens, Node.Token_End).Sloc_Range);
+         Sloc_Start := Start_Sloc (Get (Node.Token_Start).Sloc_Range);
+         Sloc_End := End_Sloc (Get (Node.Token_End).Sloc_Range);
       end if;
       return Make_Range (Sloc_Start, Sloc_End);
    end Sloc_Range;
@@ -404,11 +406,11 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       Ret_Vec : Children_Vectors.Vector;
       TDH     : Token_Data_Handler renames Node.Unit.Token_Data.all;
 
-      procedure Append_Trivias (First, Last : Natural);
+      procedure Append_Trivias (First, Last : Token_Index);
       --  Append all the trivias of tokens between indices First and Last to
       --  the returned vector.
 
-      procedure Append_Trivias (First, Last : Natural) is
+      procedure Append_Trivias (First, Last : Token_Index) is
       begin
          for I in First .. Last loop
             for T of Get_Trivias (TDH, I) loop

@@ -35,7 +35,7 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (ct.ASTNode, lambda _: '_wrap_astnode({})'),
             (ct.SourceLocationRangeType, lambda _: '_wrap_sloc_range({})'),
-            (ct.Token, lambda _: 'Token({})'),
+            (ct.Token, lambda _: '{}'),
             (ct.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (ct.LongType, lambda _: '{{}}{}'.format(value_suffix)),
             (ct.EnumType, lambda _: '{}_to_str[{{}}{}]'.format(
@@ -93,7 +93,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.LongType, lambda _: ctype_type('c_long')),
             (ct.LexicalEnvType, lambda _: wrapped_type('lexical_env')),
             (ct.SourceLocationRangeType, lambda _: wrapped_type('SlocRange')),
-            (ct.Token, lambda _: wrapped_type('token')),
+            (ct.Token, lambda _: 'Token'),
             (ct.ASTNode, lambda _: wrapped_type('node')),
             (ct.EnumType, lambda _: ctype_type('c_uint')),
             (ct.ArrayType, lambda cls: wrapped_type(cls.name().camel)),

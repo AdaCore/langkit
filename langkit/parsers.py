@@ -30,7 +30,7 @@ from langkit import compiled_types, names
 from langkit.common import gen_name, gen_names
 from langkit.compile_context import get_context
 from langkit.compiled_types import (
-    CompiledType, BoolType, LongType, Token, ASTNode, decl_type
+    CompiledType, BoolType, Token, ASTNode, decl_type
 )
 from langkit.template_utils import TemplateEnvironment
 from langkit.utils import (Colors, common_ancestor, copy_with, col,
@@ -367,7 +367,7 @@ class Parser(object):
                 res_var_name=res,
                 code=fncall_block,
                 var_defs=[
-                    (pos, LongType),
+                    (pos, Token),
                     (res, self.get_type())
                 ]
             )
@@ -428,7 +428,7 @@ class Tok(Parser):
             pos_var_name=pos,
             res_var_name=res,
             code=code,
-            var_defs=[(pos, LongType), (res, Token)]
+            var_defs=[(pos, Token), (res, Token)]
         )
 
 
@@ -533,7 +533,7 @@ class Or(Parser):
             # all the sub parsers variable definitions, adding the Or parser's
             # own pos and res variables.
             var_defs=list(chain(
-                [(pos, LongType), (res, self.get_type())],
+                [(pos, Token), (res, self.get_type())],
                 *[sr.var_defs for sr in t_env.results]
             ))
         )
@@ -612,7 +612,7 @@ class Row(Parser):
         t_env._self = self
 
         t_env.pos, t_env.res = gen_names("row_pos", "row_res")
-        decls = [(t_env.pos, LongType)]
+        decls = [(t_env.pos, Token)]
 
         t_env.subresults = list(gen_names(*[
             "row_subres_{0}".format(i)
@@ -743,9 +743,9 @@ class List(Parser):
         )
 
         decls = [
-            (t_env.pos, LongType),
+            (t_env.pos, Token),
             (t_env.res, self.get_type()),
-            (t_env.cpos, LongType),
+            (t_env.cpos, Token),
         ] + parser_context.var_defs + sep_context.var_defs
 
         return ParserCodeContext(

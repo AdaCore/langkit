@@ -1,5 +1,8 @@
 package body Langkit_Support.Packrat is
 
+   function Entry_Index (Offset : Token_Index) return Natural is
+     (Integer (Offset) mod Memo_Size);
+
    -----------
    -- Clear --
    -----------
@@ -15,8 +18,8 @@ package body Langkit_Support.Packrat is
    -- Get --
    ---------
 
-   function Get (Memo : Memo_Type; Offset : Integer) return Memo_Entry is
-      E : Memo_Entry renames Memo (Offset mod Memo_Size);
+   function Get (Memo : Memo_Type; Offset : Token_Index) return Memo_Entry is
+      E : Memo_Entry renames Memo (Entry_Index (Offset));
    begin
       if E.Offset = Offset then
          return E;
@@ -29,12 +32,12 @@ package body Langkit_Support.Packrat is
    -- Set --
    ---------
 
-   procedure Set (Memo              : in out Memo_Type;
-                  Is_Success        : Boolean;
-                  Instance          : T;
-                  Offset, Final_Pos : Integer)
+   procedure Set (Memo       : in out Memo_Type;
+                  Is_Success : Boolean;
+                  Instance   : T;
+                  Offset, Final_Pos : Token_Index)
    is
-      E : Memo_Entry renames Memo (Offset mod Memo_Size);
+      E : Memo_Entry renames Memo (Entry_Index (Offset));
    begin
       E := (State     => (if Is_Success then Success else Failure),
             Instance  => Instance,

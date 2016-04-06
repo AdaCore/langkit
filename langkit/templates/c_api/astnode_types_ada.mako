@@ -50,7 +50,7 @@
             % elif is_ast_node(arg_type):
                ${arg_type.name()} (Unwrap (${arg_name}))
             % elif is_token_type(arg_type):
-               Unwrap (${arg_name}).all
+               Token_Index (${arg_name}.Index)
             % else:
                ${arg_name}
             % endif
@@ -58,6 +58,16 @@
       % endfor
    begin
       Clear_Last_Exception;
+
+      % for arg_name, arg_type, _ in field.explicit_arguments:
+         % if is_token_type(arg_type):
+            if Unwrap (${arg_name}).Unit /= N.Unit then
+               raise Constraint_Error with
+                 ("The input token does not belong to the same unit as"
+                  & " the input node");
+            end if;
+         % endif
+      % endfor
 
       if N.all in ${astnode.name()}_Type'Class then
          declare
@@ -85,7 +95,8 @@
                 % elif is_ast_node(field.type):
                     Wrap (${root_node_type_name} (${field_access}))
                 % elif is_token_type(field.type):
-                    Wrap (${field_access}'Access)
+                    (Unit  => Wrap (N.Unit),
+                     Index => int (${field_access}))
                 % elif is_lexical_env(field.type):
                     Wrap (${field_access})
                 % else:

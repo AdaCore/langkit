@@ -372,7 +372,7 @@ class SourceLocationRangeType(BasicType):
 
 class Token(BasicType):
     is_ptr = False
-    _name = "Token"
+    _name = "Token_Index"
     _nullexpr = "No_Token"
 
     @classmethod

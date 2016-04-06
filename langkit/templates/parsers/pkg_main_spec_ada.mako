@@ -21,13 +21,13 @@ use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 package ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    type Fail_Info is record
-      Pos               : Integer := -1;
+      Pos               : Token_Index := -1;
       Expected_Token_Id : Unsigned_16;
       Found_Token_Id    : Unsigned_16;
    end record;
 
    type Parser_Type is record
-      Current_Pos : Integer := 0;
+      Current_Pos : Token_Index := 0;
       Last_Fail   : Fail_Info;
       Diagnostics : Diagnostics_Vectors.Vector;
       Unit        : Analysis_Unit_Interface;

@@ -38,8 +38,12 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    type ${lexical_env_type} is new System.Address;
    ${ada_c_doc('langkit.lexical_env_type', 3)}
 
-   type ${token_type} is new System.Address;
-   ${ada_c_doc('langkit.node_kind_type', 3)}
+   type ${token_type} is record
+      Unit  : ${analysis_unit_type};
+      Index : int;
+   end record
+     with Convention => C_Pass_By_Copy;
+   ${ada_c_doc('langkit.token_type', 3)}
 
    --  Helper data structures for source location handling
 
@@ -354,11 +358,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
      (${lexical_env_type}, AST_Envs.Lexical_Env);
 
    function Wrap is new Ada.Unchecked_Conversion
-     (Token_Access, ${token_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${token_type}, Token_Access);
-
-   function Wrap is new Ada.Unchecked_Conversion
      (Analysis_Context, ${analysis_context_type});
    function Unwrap is new Ada.Unchecked_Conversion
      (${analysis_context_type}, Analysis_Context);
@@ -367,6 +366,10 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
      (Analysis_Unit, ${analysis_unit_type});
    function Unwrap is new Ada.Unchecked_Conversion
      (${analysis_unit_type}, Analysis_Unit);
+   function Wrap is new Ada.Unchecked_Conversion
+     (Analysis_Unit_Interface, ${analysis_unit_type});
+   function Unwrap is new Ada.Unchecked_Conversion
+     (${analysis_unit_type}, Analysis_Unit_Interface);
 
    function Wrap is new Ada.Unchecked_Conversion
      (${root_node_type_name}, ${node_type});

@@ -3,16 +3,16 @@
 ${_self.gen_fn_name}_Memo : ${decl_type(_self.get_type())}_Memos.Memo_Type;
 
 function ${_self.gen_fn_name} (Parser : in out Parser_Type;
-                               Pos    : Integer)
+                               Pos    : Token_Index)
                                return ${decl_type(_self.get_type())}
 is
    % for name, typ in parser_context.var_defs:
       ${name} : ${decl_type(typ)}
-         ${":=" + typ.nullexpr() if typ.nullexpr() else ""};
+         ${":= " + typ.nullexpr() if typ.nullexpr() else ""};
    % endfor
 
    % if _self.is_left_recursive():
-      Mem_Pos : Integer := Pos;
+      Mem_Pos : Token_Index := Pos;
       Mem_Res : ${decl_type(_self.get_type())} :=
          ${_self.get_type().nullexpr()};
    % endif

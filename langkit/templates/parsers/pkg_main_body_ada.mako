@@ -105,8 +105,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
       if Parser.Current_Pos = -1 then
          Add_Last_Fail_Diagnostic;
       elsif Check_Complete
-        and then (Parser.Current_Pos
-                  /= Token_Vectors.Last_Index (Parser.TDH.Tokens))
+        and then Parser.Current_Pos /= Last_Token (Parser.TDH.all)
       then
          --  If the fail pos is the current position of the parser, it means
          --  that the longest parse is the correct result, and that we have

@@ -34,6 +34,13 @@ package Langkit_Support.Token_Data_Handler is
 
    use Token_Vectors, Text_Vectors, Trivia_Vectors, Integer_Vectors;
 
+   type Token_Index is new Integer range -1 .. Integer'Last;
+   --  Although we cannot use anything else than Natural as Token_Vectors
+   --  indexes, this type will be used outside this package so that typing
+   --  helps us fining index misuses.
+
+   No_Token : constant Token_Index := -1;
+
    type Token_Data_Handler is record
       Tokens            : Token_Vectors.Vector;
       Trivias           : Trivia_Vectors.Vector;
@@ -63,15 +70,19 @@ package Langkit_Support.Token_Data_Handler is
 
    function Get_Token
      (TDH   : Token_Data_Handler;
-      Index : Natural) return Token
+      Index : Token_Index) return Token
    is
-     (Token_Vectors.Get (TDH.Tokens, Index));
+     (Token_Vectors.Get (TDH.Tokens, Natural (Index)));
+
+   function Last_Token (TDH : Token_Data_Handler) return Token_Index
+   is
+     (Token_Index (Token_Vectors.Last_Index (TDH.Tokens)));
 
    procedure Free (TDH : in out Token_Data_Handler);
 
    function Get_Trivias
      (TDH   : Token_Data_Handler;
-      Index : Natural) return Token_Vectors.Elements_Array;
+      Index : Token_Index) return Token_Vectors.Elements_Array;
 
    function Get_Leading_Trivias
      (TDH : Token_Data_Handler) return Token_Vectors.Elements_Array;

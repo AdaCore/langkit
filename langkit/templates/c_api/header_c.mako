@@ -48,7 +48,10 @@ ${c_doc('langkit.lexical_env_type')}
 typedef void *${lexical_env_type};
 
 ${c_doc('langkit.token_type')}
-typedef void* ${token_type};
+typedef struct {
+    ${analysis_unit_type} unit;
+    int index;
+} ${token_type};
 
 typedef uint8_t ${bool_type};
 

@@ -449,7 +449,10 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       Clear_Last_Exception;
 
       declare
-         T : Langkit_Support.Tokens.Token renames Unwrap (Token).all;
+         Unit : constant Analysis_Unit_Interface := Unwrap (Token.Unit);
+         TDH  : Token_Data_Handler renames Unit.Token_Data.all;
+         T    : constant Langkit_Support.Tokens.Token :=
+            Get_Token (TDH, Token_Index (Token.Index));
       begin
          return (if T.Text = null
                  then (Chars => System.Null_Address, Length => 0)

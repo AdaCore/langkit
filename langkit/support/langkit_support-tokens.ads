@@ -37,8 +37,6 @@ package Langkit_Support.Tokens is
 
    No_Source_Location       : constant Source_Location       := (0, 0);
    No_Source_Location_Range : constant Source_Location_Range := (0, 0, 0, 0);
-   No_Token                 : constant Token :=
-     (0, null, No_Source_Location_Range);
 
    function Start_Sloc (Sloc_Range : Source_Location_Range)
                         return Source_Location is

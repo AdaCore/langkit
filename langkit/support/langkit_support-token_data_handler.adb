@@ -104,10 +104,10 @@ package body Langkit_Support.Token_Data_Handler is
 
    function Get_Trivias
      (TDH   : Token_Data_Handler;
-      Index : Natural) return Token_Vectors.Elements_Arrays.Array_Type
+      Index : Token_Index) return Token_Vectors.Elements_Arrays.Array_Type
    is
    begin
-      return Internal_Get_Trivias (TDH, Index + 1);
+      return Internal_Get_Trivias (TDH, Natural (Index + 1));
    end Get_Trivias;
 
    -------------------------
