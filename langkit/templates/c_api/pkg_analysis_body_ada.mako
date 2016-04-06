@@ -454,9 +454,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          T    : constant Langkit_Support.Tokens.Token :=
             Get_Token (TDH, Token_Index (Token.Index));
       begin
-         return (if T.Text = null
-                 then (Chars => System.Null_Address, Length => 0)
-                 else (Chars => T.Text.all'Address, Length => T.Text'Length));
+         return Wrap (T.Text);
       end;
    exception
       when Exc : others =>

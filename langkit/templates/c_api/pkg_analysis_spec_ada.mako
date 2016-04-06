@@ -12,6 +12,7 @@ with Interfaces;           use Interfaces;
 with Interfaces.C;         use Interfaces.C;
 with Interfaces.C.Strings; use Interfaces.C.Strings;
 
+with Langkit_Support.Text;   use Langkit_Support.Text;
 with Langkit_Support.Tokens; use Langkit_Support.Tokens;
 
 --  This package defines data types and subprograms to provide the
@@ -340,6 +341,11 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
        S.Start_S.Column, S.End_S.Column));
 
    function Wrap (S : Unbounded_Wide_Wide_String) return ${text_type};
+
+   function Wrap (T : Text_Access) return ${text_type} is
+     (if T = null
+      then (Chars => System.Null_Address, Length => 0)
+      else (Chars => T.all'Address, Length => T.all'Length));
 
    --  The following conversions are used only at the interface between Ada and
    --  C (i.e. as parameters and return types for C entry points) for access
