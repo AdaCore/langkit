@@ -94,6 +94,9 @@ package Langkit_Support.Lexical_Env is
       Parent          : Lexical_Env := null;
       --  Parent environment for this env. Null by default.
 
+      Node            : Element_T;
+      --  Node for which this environment was created
+
       Referenced_Envs : Lexical_Env_Vectors.Vector;
       --  A list of environments referenced by this environment
 
@@ -107,6 +110,7 @@ package Langkit_Support.Lexical_Env is
 
    function Create
      (Parent     : Lexical_Env;
+      Node       : Element_T;
       Env        : Internal_Map := Internal_Envs.Empty_Map;
       Default_MD : Element_Metadata := Empty_Metadata) return Lexical_Env;
    --  Constructor. Creates a new lexical env, given a parent, an internal data

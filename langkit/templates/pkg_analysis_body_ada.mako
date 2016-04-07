@@ -72,7 +72,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
         (Units_Map  => <>,
          Symbols    => Create,
          Charset    => To_Unbounded_String (Charset),
-         Root_Scope => AST_Envs.Create (null));
+         Root_Scope => AST_Envs.Create (null, null));
    end Create;
 
    --------------
