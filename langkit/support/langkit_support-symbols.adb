@@ -20,27 +20,31 @@ package body Langkit_Support.Symbols is
    -- Find --
    ----------
 
-   function Find (ST : Symbol_Table; T : Text_Type) return Symbol_Type
+   function Find
+     (ST     : Symbol_Table;
+      T      : Text_Type;
+      Create : Boolean := True)
+      return Symbol_Type
    is
       use Sets;
 
-      T_Acc    : Symbol_Type := T'Unrestricted_Access;
-      Result   : Cursor := ST.Find (T_Acc);
-      Inserted : Boolean;
+      T_Acc  : Symbol_Type := T'Unrestricted_Access;
+      Result : constant Cursor := ST.Find (T_Acc);
    begin
       --  If we already have such a symbol, return the access we already
-      --  internalized.
+      --  internalized. Otherwise, give up if asked to.
 
-      if not Has_Element (Result) then
-
-         --  Otherwise internalize it first
-
-         T_Acc := new Text_Type'(T);
-         ST.Insert (T_Acc, Result, Inserted);
-         pragma Assert (Inserted);
+      if Has_Element (Result) then
+         return Element (Result);
+      elsif not Create then
+         return null;
       end if;
 
-      return Element (Result);
+      --  At this point, we know we have to internalize a new symbol
+
+      T_Acc := new Text_Type'(T);
+      ST.Insert (T_Acc);
+      return T_Acc;
    end Find;
 
    -------------

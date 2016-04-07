@@ -27,10 +27,18 @@ package Langkit_Support.Symbols is
    function Create return Symbol_Table;
    --  Allocate a new symbol table and return it
 
-   function Find (ST : Symbol_Table; T : Text_Type) return Symbol_Type
-     with Inline_Always;
-   --  Look for an entry for the T text in the ST symbol table. Return an
-   --  access that is guaranteed to be the same for all equal Text_Type.
+   function Find
+     (ST     : Symbol_Table;
+      T      : Text_Type;
+      Create : Boolean := True)
+      return Symbol_Type
+      with Inline_Always;
+   --  Look for an entry for the T text in the ST symbol table. If there is
+   --  such an entry, return it. Otherwise, create it and return it if Create
+   --  is true. Elsewise, return null.
+   --
+   --  Non-null returned accesses are guaranteed to be the same for all equal
+   --  Text_Type.
 
    procedure Destroy (ST : in out Symbol_Table);
    --  Deallocate a symbol table and all the text returned by the corresponding
