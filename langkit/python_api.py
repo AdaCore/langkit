@@ -70,7 +70,7 @@ class PythonAPISettings(AbstractAPISettings):
                 type.name().camel
             )),
             (ct.Symbol, lambda _: '_text.unwrap({})'),
-            (ct.LexicalEnvType, lambda _: '{}._c_value'),
+            (ct.LexicalEnvType, lambda _: '{}.unwrap()'),
         ], exception_msg='Unhandled field type in the python binding'
                          ' (unwrapping): {}'.format(type)
         ).format(value)

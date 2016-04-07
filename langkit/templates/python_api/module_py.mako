@@ -231,6 +231,13 @@ class LexicalEnv(object):
     def wrap(self, c_value):
         return LexicalEnv(c_value) if c_value else None
 
+% if env_element_type:
+    def get(self, name):
+        ${py_doc('langkit.lexical_env_get', 8)}
+        result = _lexical_env_get(self._c_value, _text.unwrap(name))
+        return ${pyapi.wrap_value('result', _self.env_element.array_type())}
+% endif
+
 
 class Token(ctypes.Structure):
     ${py_doc('langkit.token_type', 4)}
@@ -651,6 +658,15 @@ _token_text = _import_func(
     '${capi.get_name("token_text")}',
     [Token], _text
 )
+
+# Lexical environment primitives
+% if env_element_type:
+_lexical_env_get = _import_func(
+    '${capi.get_name("lexical_env_get")}',
+    [_lexical_env, _text],
+    ${pyapi.type_internal_name(_self.env_element.array_type())}
+)
+% endif
 
 % for astnode in _self.astnode_types:
     % for field in astnode.fields_with_accessors():

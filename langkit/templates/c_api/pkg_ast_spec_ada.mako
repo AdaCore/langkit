@@ -31,6 +31,20 @@ package ${_self.ada_api_settings.lib_name}.AST.Types.C is
       type ${rec.c_type(capi).name}_Ptr is access ${rec.name()};
    % endfor
 
+   ------------------------------------
+   -- Lexical environment primitives --
+   ------------------------------------
+
+% if env_element_type:
+   function ${capi.get_name('lexical_env_get')}
+     (Env  : ${lexical_env_type};
+      Name : ${text_type})
+      return ${_self.env_element.array_type().name().camel_with_underscores}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('lexical_env_get')}";
+% endif
+
    ---------------------------------------
    -- Kind-specific AST node primitives --
    ---------------------------------------

@@ -235,6 +235,14 @@ ${c_doc('langkit.free')}
 extern void
 ${capi.get_name("free")}(void *address);
 
+/* Lexical environment primitives */
+
+% if env_element_type:
+${c_doc('langkit.lexical_env_get')}
+extern ${_self.env_element.array_type().c_type(capi).name}
+${capi.get_name('lexical_env_get')}(${lexical_env_type} env,
+                                    ${text_type} name);
+% endif
 
 /*
  * Kind-specific AST node primitives

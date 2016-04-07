@@ -349,6 +349,11 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    function Wrap (T : Symbol_Type) return ${text_type} is
      (Wrap (Text_Access (T)));
 
+   function Unwrap
+     (Unit : Analysis_Unit_Interface;
+      Text : ${text_type})
+      return Symbol_Type;
+
    --  The following conversions are used only at the interface between Ada and
    --  C (i.e. as parameters and return types for C entry points) for access
    --  types.  All read/writes for the pointed values are made through the

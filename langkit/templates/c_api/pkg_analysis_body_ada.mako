@@ -625,4 +625,19 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       end if;
    end ${capi.get_name("get_last_exception")};
 
+   ------------
+   -- Unwrap --
+   ------------
+
+   function Unwrap
+     (Unit : Analysis_Unit_Interface;
+      Text : ${text_type})
+      return Symbol_Type
+   is
+      T : Text_Type (1 .. Natural (Text.Length));
+      for T'Address use Text.Chars;
+   begin
+     return Find (Unit.Token_Data.Symbols, T, False);
+   end Unwrap;
+
 end ${_self.ada_api_settings.lib_name}.Analysis.C;

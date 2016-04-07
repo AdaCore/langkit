@@ -90,6 +90,7 @@ def make_renderer(base_renderer=None):
     }
     if get_context():
         capi = get_context().c_api_settings
+        env_element = get_context().env_element
 
         # Name of the root AST node access type
         type_name = get_context().root_grammar_class.name()
@@ -113,6 +114,8 @@ def make_renderer(base_renderer=None):
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             c_node_type(capi).name,
             'lexical_env_type':      CAPIType(capi, 'lexical_env').name,
+            'env_element_type':      (env_element.c_type(capi).name
+                                      if env_element else None),
             'token_type':            CAPIType(capi, 'token').name,
             'sloc_type':             CAPIType(capi, 'source_location').name,
             'sloc_range_type':       SourceLocationRangeType.c_type(capi).name,

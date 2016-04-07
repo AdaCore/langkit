@@ -291,6 +291,20 @@ documentations = {
     """),
 
     #
+    # Lexical environment primitives
+    #
+
+    'langkit.lexical_env_get': Template("""
+        Look for elements in ENV corresponding to NAME.
+
+        % if lang != 'python':
+        The result is a dynamically allocated array. The caller is responsible
+        for deallocating it afterwards. The content of the array is owned by
+        the corresponding analysis unit, however.
+        % endif
+    """),
+
+    #
     # Extensions handling
     #
 
