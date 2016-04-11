@@ -294,6 +294,10 @@ documentations = {
     # Lexical environment primitives
     #
 
+    'langkit.lexical_env_parent': Template("""
+        Get the ENV's parent lexical environment. This returns ${null} for the
+        root lexical environment.
+    """),
     'langkit.lexical_env_get': Template("""
         Look for elements in ENV corresponding to NAME.
 

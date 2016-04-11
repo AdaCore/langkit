@@ -237,6 +237,10 @@ ${capi.get_name("free")}(void *address);
 
 /* Lexical environment primitives */
 
+${c_doc('langkit.lexical_env_parent')}
+extern ${lexical_env_type}
+${capi.get_name('lexical_env_parent')}(${lexical_env_type} env);
+
 % if env_element_type:
 ${c_doc('langkit.lexical_env_get')}
 extern ${_self.env_element.array_type().c_type(capi).name}

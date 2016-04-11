@@ -231,6 +231,10 @@ class LexicalEnv(object):
     def wrap(self, c_value):
         return LexicalEnv(c_value) if c_value else None
 
+    @property
+    def parent(self):
+        return LexicalEnv.wrap(_lexical_env_parent(self._c_value))
+
 % if env_element_type:
     def get(self, name):
         ${py_doc('langkit.lexical_env_get', 8)}
@@ -660,6 +664,10 @@ _token_text = _import_func(
 )
 
 # Lexical environment primitives
+_lexical_env_parent = _import_func(
+    '${capi.get_name("lexical_env_parent")}',
+    [_lexical_env], _lexical_env
+)
 % if env_element_type:
 _lexical_env_get = _import_func(
     '${capi.get_name("lexical_env_get")}',

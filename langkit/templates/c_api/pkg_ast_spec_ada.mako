@@ -35,6 +35,13 @@ package ${_self.ada_api_settings.lib_name}.AST.Types.C is
    -- Lexical environment primitives --
    ------------------------------------
 
+   function ${capi.get_name('lexical_env_parent')}
+     (Env : ${lexical_env_type})
+      return ${lexical_env_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('lexical_env_parent')}";
+
 % if env_element_type:
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};

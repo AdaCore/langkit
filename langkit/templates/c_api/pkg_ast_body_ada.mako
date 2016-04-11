@@ -11,6 +11,15 @@ use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 
 package body ${_self.ada_api_settings.lib_name}.AST.Types.C is
 
+   function ${capi.get_name('lexical_env_parent')}
+     (Env : ${lexical_env_type})
+      return ${lexical_env_type}
+   is
+      E : constant AST_Envs.Lexical_Env := Unwrap (Env);
+   begin
+      return Wrap (E.Parent);
+   end ${capi.get_name('lexical_env_parent')};
+
 % if env_element_type:
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};
