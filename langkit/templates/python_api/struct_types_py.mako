@@ -45,4 +45,12 @@ class ${cls.name().camel}(ctypes.Structure):
       else:
          raise IndexError('There is no {}th field'.format(key))
 
+    def __repr__(self):
+        field_names = [name[1:] for name, _ in self._fields_[:-1]]
+        return '<{} {}>'.format(
+            type(self).__name__,
+            ' '.join('{}={}'.format(name, getattr(self, name))
+                      for name in field_names)
+        )
+
 </%def>
