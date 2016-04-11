@@ -40,18 +40,28 @@ class _text(ctypes.Structure):
 
     encoding = 'utf-32le' if sys.byteorder == 'little' else 'utf-32be'
 
+    # Instances can hold buffers that they own. In this case, the buffer must
+    # be deallocated when the instance is destroyed. Thus instances will hold
+    # a "chars_buffer" attribute that will be automatically destroyed.
+    text_buffer = None
+
     @classmethod
     def unwrap(cls, value):
-        if not isinstance(value, str):
-            raise TypeError('String expected but got {} instead'.format(
-                type(value)
-            ))
-        ## TODO: implement this if needed. This is not trivial because this
-        ## will involve memory management: the text buffer must live as long as
-        ## the returned value lives. There's no known use case for functions
-        ## (in particular properties) that accept a symbol as argument in a
-        ## public API for now, so that's acceptable.
-        raise NotImplementedError()
+        if isinstance(value, str):
+            value = value.decode('ascii')
+        elif not isinstance(value, unicode):
+            raise TypeError('String or unicode object expected but got {}'
+                            ' instead'.format(type(value)))
+
+        text = value.encode(cls.encoding)
+        text_buffer = ctypes.create_string_buffer(text)
+        text_buffer_ptr = ctypes.cast(
+            ctypes.pointer(text_buffer),
+            ctypes.POINTER(ctypes.c_char)
+        )
+        result = _text(text_buffer_ptr, len(value))
+        result.text_buffer = text_buffer
+        return result
 
     def wrap(self):
         if self.length > 0:
