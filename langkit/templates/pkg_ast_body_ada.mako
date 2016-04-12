@@ -824,6 +824,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    function Combine
      (L, R : ${ctx.env_metadata.name()}) return ${ctx.env_metadata.name()}
    is
+      % if not ctx.env_metadata.get_fields():
+      pragma Unreferenced (L, R);
+      % endif
       Ret : ${ctx.env_metadata.name()} := (others => False);
    begin
       % for field in ctx.env_metadata.get_fields():
