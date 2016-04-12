@@ -302,8 +302,8 @@ class ManageScript(object):
     def lib_name(self):
         return self.context.ada_api_settings.lib_name
 
-    def run(self):
-        parsed_args = self.args_parser.parse_args()
+    def run(self, argv=None):
+        parsed_args = self.args_parser.parse_args(argv)
         self.dirs.set_build_dir(parsed_args.build_dir)
         install_dir = getattr(parsed_args, 'install-dir', None)
         if install_dir:
