@@ -1,0 +1,22 @@
+== From <Def foo line 1> ==
+  foo      : <Def foo line 1>
+  p        : <Def p line 2>
+  t        : <none>
+  q        : <Def q line 6>
+  o        : <none>
+  nosymbol : <none>
+== From <Def q line 6> ==
+  foo      : <Def foo line 1>
+  p        : <Def p line 7>, <Def p line 2>
+  t        : <none>
+  q        : <Def q line 6>
+  o        : <Def o line 10>
+  nosymbol : <none>
+== From <Def o line 10> ==
+  foo      : <Def foo line 1>
+  p        : <Def p line 7>, <Def p line 2>
+  t        : <none>
+  q        : <Def q line 6>
+  o        : <Def o line 10>
+  nosymbol : <none>
+Done.
