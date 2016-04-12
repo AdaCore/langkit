@@ -987,7 +987,7 @@ class Transform(Parser):
         return self.parser._is_left_recursive(rule_name)
 
     def __repr__(self):
-        return "{0} ^ {1}".format(self.parser, self.typ.name())
+        return "{0} ^ {1}".format(self.parser, self.typ.name().camel)
 
     def __init__(self, parser, typ):
         """
