@@ -123,7 +123,7 @@
 
       % if cls.env_spec._add_env:
          overriding
-         function Children_Env
+         function Node_Env
            (Node : access ${type_name})
             return AST_Envs.Lexical_Env
          is (Node.Self_Env.Parent);
