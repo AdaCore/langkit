@@ -1066,16 +1066,17 @@ class Struct(CompiledType):
                 for f, n in zip(fields, new_types)
             )
 
-        # TODO: instead of expecting types to be *exactly* the same, perform
-        # type unification (take the nearest common ancestor for all field
-        # types).
-        assert (not cls.is_type_resolved or
-                are_subtypes(fields, types)), (
-            "Already associated types for some fields are not consistent with"
-            " current ones:\n- {}\n- {}".format(
-                [f.type for f in fields], types
-            )
-        )
+        # TODO: instead of expecting types to be subtypes, we might want to
+        # perform type unification (take the nearest common ancestor for all
+        # field types). But then again, maybe not, it might be too confusing.
+        if cls.is_type_resolved:
+            for field, type in zip(fields, types):
+                check_source_language(
+                    is_subtype(field.type, type),
+                    "Field {} already had type {}, got {}".format(
+                        field.name, field.type.name(), type.name()
+                    )
+                )
 
         # Only assign types if cls was not yet typed. In the case where it
         # was already typed, we checked above that the new types were
