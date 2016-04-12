@@ -1,21 +1,37 @@
 import os
 import shutil
+import subprocess
+import sys
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import ASTNode, StructMetaClass, root_grammar_class
 from langkit.diagnostics import DiagnosticError
 from langkit.expressions import Self
+from langkit.libmanage import ManageScript
 
 from lexer_example import foo_lexer
 
 
-def emit_and_print_errors(grammar, main_rule_name='main_rule',
-                          lexer=foo_lexer):
+def prepare_context(grammar, main_rule_name='main_rule',
+                    lexer=foo_lexer,
+                    export_private_fields=False):
     """
-    Return wether code emission was successful.
+    Create a compile context and prepare the build directory for code
+    generation.
 
-    :rtype: bool
+    :param langkit.parsers.Grammar grammar: The language grammar to use for
+        this context.
+
+    :param str main_rule_name: Name of the main gramma rule to use for this
+        context.
+
+    :param langkit.lexer.Lexer lexer: The language lexer to use for this
+        context.
+
+    :param bool export_private_fields: Whether private fields should be
+        exported in code generation (they are not by default).
     """
+
     # Have a clean build directory
     if os.path.exists('build'):
         shutil.rmtree('build')
@@ -26,6 +42,21 @@ def emit_and_print_errors(grammar, main_rule_name='main_rule',
                      main_rule_name=main_rule_name,
                      lexer=lexer,
                      grammar=grammar)
+    ctx.export_private_fields = export_private_fields
+
+    return ctx
+
+
+def emit_and_print_errors(grammar, main_rule_name='main_rule',
+                          lexer=foo_lexer,
+                          export_private_fields=False):
+    """
+    Compile and emit code for CTX. Return whether this was successful.
+
+    :rtype: bool
+    """
+    ctx = prepare_context(grammar, main_rule_name, lexer,
+                          export_private_fields)
 
     try:
         ctx.emit('build', generate_lexer=False)
@@ -38,6 +69,38 @@ def emit_and_print_errors(grammar, main_rule_name='main_rule',
     else:
         print 'Code generation was successful'
         return True
+
+
+def build_and_run(grammar, py_script, main_rule_name='main_rule',
+                  lexer=foo_lexer,
+                  export_private_fields=False):
+    """
+    Compile and emit code for CTX and build the generated library. Then run
+    PY_SCRIPT with this library available.
+
+    An exception is raised if any step fails (the script must return code 0).
+    """
+
+    ctx = prepare_context(grammar, main_rule_name, lexer,
+                          export_private_fields)
+
+    class Manage(ManageScript):
+        def create_context(self, args):
+            return ctx
+
+    m = Manage()
+
+    # First build the library
+    argv = ['-vnone', 'make']
+    if ctx.export_private_fields:
+        argv.append('--export-private-fields')
+    m.run(argv)
+
+    # Then execute a script with it
+    subprocess.check_call(
+        [sys.executable, py_script],
+        env=m.derived_env()
+    )
 
 
 def reset_langkit():
