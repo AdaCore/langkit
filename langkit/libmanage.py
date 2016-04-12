@@ -400,6 +400,17 @@ class ManageScript(object):
             relocatable if available or static mode otherwise.
         """
 
+        base_argv = ['gprbuild', '-m', '-p',
+                     '-j{}'.format(args.jobs),
+                     '-P{}'.format(project_file),
+                     '-XBUILD_MODE={}'.format(args.build_mode),
+                     '-XLIBLANG_SUPPORT_EXTERNALLY_BUILT=false',
+                     '-X{}_EXTERNALLY_BUILT=false'.format(
+                         self.lib_name.upper()
+                     )]
+        if args.verbosity == Verbosity('none'):
+            base_argv.append('-q')
+
         cargs = []
         # Depending on where this is invoked, the "cargs" option may not be set
         if hasattr(args, 'cargs'):
@@ -408,18 +419,12 @@ class ManageScript(object):
         env = self.derived_env()
 
         def run(library_type):
+            argv = list(base_argv)
+            argv.append('-XLIBRARY_TYPE={}'.format(library_type))
+            argv.append('-cargs')
+            argv.extend(cargs)
             try:
-                subprocess.check_call([
-                    'gprbuild', '-m', '-p', '-j{}'.format(args.jobs),
-                    '-P{}'.format(project_file),
-                    '-XBUILD_MODE={}'.format(args.build_mode),
-                    '-XLIBRARY_TYPE={}'.format(library_type),
-                    '-XLIBLANG_SUPPORT_EXTERNALLY_BUILT=false',
-                    '-X{}_EXTERNALLY_BUILT=false'.format(
-                        self.lib_name.upper()
-                    ),
-                    '-cargs',
-                ] + cargs, env=env)
+                subprocess.check_call(argv, env=env)
             except subprocess.CalledProcessError as exc:
                 print >> sys.stderr, 'Build failed: {}'.format(exc)
                 sys.exit(1)
