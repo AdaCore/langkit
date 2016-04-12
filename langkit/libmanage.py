@@ -108,6 +108,11 @@ class ManageScript(object):
 
     BUILD_MODES = ('dev', 'prod')
 
+    ENABLE_WARNINGS_DEFAULT = False
+    """
+    Whether warnings to build the generated library are enabled by default.
+    """
+
     def __init__(self):
 
         self.dirs = Directories(
@@ -282,6 +287,18 @@ class ManageScript(object):
             help='Selects a preset for build options'
         )
         subparser.add_argument(
+            '--enable-warnings', '-w',
+            action='store_true', dest='enable_warnings',
+            default=self.ENABLE_WARNINGS_DEFAULT,
+            help='Enable warnings to build the generated library'
+        )
+        subparser.add_argument(
+            '--disable-warnings', '-W',
+            action='store_false', dest='enable_warnings',
+            default=self.ENABLE_WARNINGS_DEFAULT,
+            help='Disable warnings to build the generated library'
+        )
+        subparser.add_argument(
             '--cargs', nargs='*', default=[],
             help='Options to pass as "-cargs" to GPRbuild'
         )
@@ -408,6 +425,10 @@ class ManageScript(object):
                      '-X{}_EXTERNALLY_BUILT=false'.format(
                          self.lib_name.upper()
                      )]
+        if args.enable_warnings:
+            base_argv.append(
+                '-X{}_WARNINGS=true'.format(self.lib_name.upper())
+            )
         if args.verbosity == Verbosity('none'):
             base_argv.append('-q')
 

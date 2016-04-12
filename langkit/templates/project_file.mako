@@ -1,3 +1,5 @@
+## vim: filetype=makoada
+
 with "gnatcoll";
 with "gnatcoll_iconv";
 with "langkit_support";
@@ -14,6 +16,9 @@ library project ${lib_name} is
    type Boolean is ("false", "true");
    Is_Externally_Built : Boolean :=
      external ("${lib_name.upper()}_EXTERNALLY_BUILT", "true");
+
+   Enable_Warnings : Boolean :=
+     external ("${lib_name.upper()}_WARNINGS", "false");
 
    for Externally_Built use Is_Externally_Built;
 
@@ -56,16 +61,23 @@ library project ${lib_name} is
    for Object_Dir
       use "../../obj/${lib_name.lower()}/" & Library_Kind_Param;
 
-   Common_C_Cargs :=
-     ("-I${quex_path}",
-      "-DQUEX_OPTION_ASSERTS_DISABLED",
-      "-DQUEX_OPTION_ASSERTS_WARNING_MESSAGE_DISABLED");
-
    package Compiler is
+
+      Common_Ada_Cargs := ();
+
+      Common_C_Cargs :=
+        ("-I${quex_path}",
+         "-DQUEX_OPTION_ASSERTS_DISABLED",
+         "-DQUEX_OPTION_ASSERTS_WARNING_MESSAGE_DISABLED");
+
       case Build_Mode is
          when "dev" =>
-            for Default_Switches ("Ada") use ("-g", "-O0", "-gnatwaeKMR");
-            --  Enable all warnings and treat them as errors, except:
+            case Enable_Warnings is
+               when "true" => Common_Ada_Cargs := ("-gnatwaeKMR");
+               when others => null;
+            end case;
+            --  If asked to, enable all warnings and treat them as errors,
+            --  except:
             --    * variables that could be turned into constants (K), as this
             --      is very common in generated parsers code;
             --    * variables that are assigned and never read (M), as this is
@@ -73,6 +85,8 @@ library project ${lib_name} is
             --    * redundant constructs (R), as we do have redundant
             --      conversions for AST nodes (A'Class and B'Class are not
             --      compatible even though B derives from A).
+
+            for Default_Switches ("Ada") use ("-g", "-O0") & Common_Ada_Cargs;
 
             for Default_Switches ("C") use Common_C_Cargs & ("-g3", "-O0");
 
@@ -84,7 +98,8 @@ library project ${lib_name} is
          when "prod" =>
             --  Debug information is useful even with optimization for
             --  profiling, for instance.
-            for Default_Switches ("Ada") use ("-g", "-Ofast", "-gnatp");
+            for Default_Switches ("Ada") use
+              ("-g", "-Ofast", "-gnatp") & Common_Ada_Cargs;
             for Default_Switches ("C") use Common_C_Cargs
               & ("-Ofast",
                  -- Deactivate because of memory usage, see OA26-005
