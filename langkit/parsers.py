@@ -570,10 +570,14 @@ class Row(Parser):
         Create a parser that matches the sequence of matches for all
         sub-parsers in `parsers`.
 
+        If a parser is none it will be ignored. This allows to create
+        programmatic helpers that generate rows more easily.
+
         :type parsers: list[Parser|types.Token|type]
         """
         Parser.__init__(self)
-        self.parsers = [resolve(m) for m in parsers]
+
+        self.parsers = [resolve(m) for m in parsers if m]
 
         # The type this row returns is initialized either when assigning a
         # wrapper parser or when trying to get the type (though the get_type
