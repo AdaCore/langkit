@@ -453,6 +453,10 @@ class CompileCtx():
         self.env_metadata = StructMetaClass.env_metadata
         self.env_element = EnvElement
 
+        # LexicalEnv.get returns array of env elements, so we always need to
+        # generate the array type.
+        self.array_types.add(EnvElement.array_type())
+
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a
         # relatively stable order. This is really useful for debugging
