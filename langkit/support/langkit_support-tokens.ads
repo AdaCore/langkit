@@ -28,7 +28,7 @@ package Langkit_Support.Tokens is
       Text       : Text_Access;
       --  Text as found in original source file or null depending on the token
       --  kind (as decided in the lexer specification). For instance: null for
-      --  keywords but actual text for identiifers.
+      --  keywords but actual text for identifiers.
 
       Sloc_Range : Source_Location_Range;
    end record;
