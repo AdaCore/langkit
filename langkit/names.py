@@ -19,7 +19,7 @@ class Name(object):
 
         For instance: C_OOP_Extension.
 
-        :param str mixed_with_underscores: Name in the mixed cade and
+        :param str mixed_with_underscores: Name in the mixed case and
             underscore format.
         """
         self.base_name = mixed_with_underscores
