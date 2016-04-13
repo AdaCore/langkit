@@ -9,8 +9,10 @@ with System;
 with Langkit_Support.Bump_Ptr;           use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
+with Langkit_Support.Text;               use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handler;
 use Langkit_Support.Token_Data_Handler;
+with Langkit_Support.Tokens;             use Langkit_Support.Tokens;
 with Langkit_Support.Vectors;
 
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
@@ -108,6 +110,12 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    function Root (Unit : Analysis_Unit) return ${root_node_type_name};
    ${ada_doc('langkit.unit_root', 3)}
 
+   function Get_Token
+     (Unit  : Analysis_Unit;
+      Token : Token_Index)
+      return Token_Type;
+   --  Return the data associated to a token identifier
+
    procedure Dump_Lexical_Env (Unit : Analysis_Unit);
    --  Debug helper: output the lexical envs for given analysis unit
 
@@ -194,5 +202,12 @@ private
 
    function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
      (Unit.AST_Root);
+
+   function Get_Token
+     (Unit  : Analysis_Unit;
+      Token : Token_Index)
+      return Token_Type
+   is
+     (Get_Token (Unit.TDH, Token));
 
 end ${_self.ada_api_settings.lib_name}.Analysis;
