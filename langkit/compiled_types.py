@@ -540,9 +540,7 @@ class AbstractNodeData(object):
         :rtype: names.Name
         """
         assert self.ast_node
-        return names.Name(
-            '{}_{}'.format(self.ast_node.name().base_name, self.name.base_name)
-        )
+        return self.ast_node.name() + self.name
 
     @property
     def explicit_arguments(self):
