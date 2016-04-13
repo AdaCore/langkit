@@ -419,6 +419,9 @@ class AbstractNodeData(object):
     :type: bool
     """
 
+    PREFIX_FIELD = names.Name('F')
+    PREFIX_PROPERTY = names.Name('P')
+
     prefix = None
     """
     This can be overriden in subclasses of AbstractNodeData to add a prefix to
@@ -561,7 +564,7 @@ class AbstractField(AbstractNodeData):
     of AbstractField must put that field to True in their definition.
     """
 
-    prefix = names.Name("F")
+    prefix = AbstractNodeData.PREFIX_FIELD
 
     def __init__(self, repr=True, doc=None, type=None):
         """
@@ -641,7 +644,7 @@ class BuiltinField(UserField):
     prefix. It is disregarded by the parsing machinery too.
     """
 
-    prefix = names.Name("")
+    prefix = None
 
     def __init__(self, *args, **kwargs):
         super(BuiltinField, self).__init__(*args, **kwargs)

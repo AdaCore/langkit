@@ -743,7 +743,6 @@ class PropertyDef(AbstractNodeData):
 
     # Overridings for AbstractNodeData class attributes
     is_property = True
-    prefix = names.Name("P")
 
     # Reserved names for arguments in generated subprograms
     self_arg_name = names.Name('Node')
@@ -753,9 +752,11 @@ class PropertyDef(AbstractNodeData):
     reserved_arg_names = (self_arg_name, env_arg_name)
     reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
 
-    def __init__(self, expr, doc=None, private=None, abstract=False,
+    def __init__(self, prefix, expr, doc=None, private=None, abstract=False,
                  type=None, abstract_runtime_check=False):
         """
+        :param names.Name prefix: Prefix to use for the name of the subprogram
+            that implements this property in code generation.
         :param expr: The expression for the property. It can be either:
             * An expression.
             * A function that will take the Self placeholder as parameter and
@@ -796,6 +797,8 @@ class PropertyDef(AbstractNodeData):
         """
 
         super(PropertyDef, self).__init__(private=private)
+
+        self.prefix = prefix
 
         self.expr = expr
         ":type: AbstractExpression"
@@ -859,7 +862,7 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: Property
         """
-        new = PropertyDef(self.expr, self._doc, self._is_private,
+        new = PropertyDef(self.prefix, self.expr, self._doc, self._is_private,
                           self.abstract, self.expected_type)
         new.vars = copy(self.vars)
 
@@ -1217,7 +1220,8 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
     :type runtime_check: bool
     :rtype: PropertyDef
     """
-    return PropertyDef(expr=None, type=type, doc=doc, abstract=True,
+    return PropertyDef(AbstractNodeData.PREFIX_PROPERTY, expr=None, type=type,
+                       doc=doc, abstract=True,
                        abstract_runtime_check=runtime_check, **kwargs)
 
 
@@ -1239,7 +1243,8 @@ def Property(expr, doc=None, private=None, type=None):
     :type private: bool
     :rtype: PropertyDef
     """
-    return PropertyDef(expr, doc=doc, private=private, type=type)
+    return PropertyDef(AbstractNodeData.PREFIX_PROPERTY, expr, doc=doc,
+                       private=private, type=type)
 
 
 def langkit_property(private=False, return_type=None):
