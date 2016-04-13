@@ -14,7 +14,7 @@ from lexer_example import foo_lexer
 
 def prepare_context(grammar, main_rule_name='main_rule',
                     lexer=foo_lexer,
-                    export_private_fields=False):
+                    library_fields_all_public=False):
     """
     Create a compile context and prepare the build directory for code
     generation.
@@ -28,7 +28,7 @@ def prepare_context(grammar, main_rule_name='main_rule',
     :param langkit.lexer.Lexer lexer: The language lexer to use for this
         context.
 
-    :param bool export_private_fields: Whether private fields should be
+    :param bool library_fields_all_public: Whether private fields should be
         exported in code generation (they are not by default).
     """
 
@@ -42,21 +42,21 @@ def prepare_context(grammar, main_rule_name='main_rule',
                      main_rule_name=main_rule_name,
                      lexer=lexer,
                      grammar=grammar)
-    ctx.export_private_fields = export_private_fields
+    ctx.library_fields_all_public = library_fields_all_public
 
     return ctx
 
 
 def emit_and_print_errors(grammar, main_rule_name='main_rule',
                           lexer=foo_lexer,
-                          export_private_fields=False):
+                          library_fields_all_public=False):
     """
     Compile and emit code for CTX. Return whether this was successful.
 
     :rtype: bool
     """
     ctx = prepare_context(grammar, main_rule_name, lexer,
-                          export_private_fields)
+                          library_fields_all_public)
 
     try:
         ctx.emit('build', generate_lexer=False)
@@ -73,7 +73,7 @@ def emit_and_print_errors(grammar, main_rule_name='main_rule',
 
 def build_and_run(grammar, py_script, main_rule_name='main_rule',
                   lexer=foo_lexer,
-                  export_private_fields=False):
+                  library_fields_all_public=False):
     """
     Compile and emit code for CTX and build the generated library. Then run
     PY_SCRIPT with this library available.
@@ -82,7 +82,7 @@ def build_and_run(grammar, py_script, main_rule_name='main_rule',
     """
 
     ctx = prepare_context(grammar, main_rule_name, lexer,
-                          export_private_fields)
+                          library_fields_all_public)
 
     class Manage(ManageScript):
         def create_context(self, args):
@@ -92,8 +92,8 @@ def build_and_run(grammar, py_script, main_rule_name='main_rule',
 
     # First build the library
     argv = ['-vnone', 'make']
-    if ctx.export_private_fields:
-        argv.append('--export-private-fields')
+    if ctx.library_fields_all_public:
+        argv.append('--library-fields-all-public')
     m.run(argv)
 
     # Then execute a script with it

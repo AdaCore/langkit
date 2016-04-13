@@ -57,4 +57,4 @@ foo_grammar.add_rules(
 
 build_and_run(foo_grammar, 'script.py',
               main_rule_name='stmts_rule',
-              export_private_fields=True)
+              library_fields_all_public=True)

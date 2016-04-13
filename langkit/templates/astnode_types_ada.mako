@@ -62,12 +62,12 @@
    ## Public field getters
 
    % for field in cls.get_fields(include_inherited=False, \
-                                 predicate=exported_field):
+                                 predicate=library_public_field):
       ${field_decl(field)}
    % endfor
 
    % for prop in cls.get_properties(include_inherited=False, \
-                                    predicate=exported_field):
+                                    predicate=library_public_field):
       ${prop.prop_decl}
    % endfor
 
@@ -101,15 +101,15 @@
 
    ## Private field getters
 
-   <% not_exported_field = lambda f: not exported_field(f) %>
+   <% library_private_field = lambda f: not library_public_field(f) %>
 
    % for field in cls.get_fields(include_inherited=False, \
-                                 predicate=not_exported_field):
+                                 predicate=library_private_field):
       ${field_decl(field)}
    % endfor
 
    % for prop in cls.get_properties(include_inherited=False, \
-                                    predicate=not_exported_field):
+                                    predicate=library_private_field):
       ${prop.prop_decl}
    % endfor
 

@@ -55,14 +55,14 @@ def c_node_type(capi):
     return CAPIType(capi, 'base_node')
 
 
-def exported_field(field):
+def library_public_field(field):
     """
     Return whether we must generate accessors in APIs for this field.
 
     :param AbstractNodeData field: Field to test.
     :rtype: bool
     """
-    return not field.is_private or get_context().export_private_fields
+    return not field.is_private or get_context().library_fields_all_public
 
 
 def make_renderer(base_renderer=None):
@@ -122,7 +122,7 @@ def make_renderer(base_renderer=None):
             'text_type':             CAPIType(capi, 'text').name,
             'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
             'exception_type':        CAPIType(capi, 'exception').name,
-            'exported_field':        exported_field,
+            'library_public_field':  library_public_field,
         })
     return base_renderer.update(template_args)
 
@@ -1352,12 +1352,12 @@ class ASTNode(Struct):
         Return a list of fields for which we must generate accessors in APIs.
 
         This list excludes inherited fields so that they are not generated
-        multiple times. This list also excludes private fields unles the
-        context requires them to be exported.
+        multiple times. This list also excludes private fields unless the
+        context requires them to be public in the generated library.
         """
         return cls.get_abstract_fields(
             include_inherited=False,
-            predicate=exported_field
+            predicate=library_public_field
         )
 
     @classmethod

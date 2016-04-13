@@ -181,7 +181,7 @@ class CompileCtx():
 
     def __init__(self, lang_name, main_rule_name, lexer, grammar,
                  lib_name=None,
-                 export_private_fields=False,
+                 library_fields_all_public=False,
                  c_symbol_prefix=None,
                  enable_python_api=True,
                  default_charset='utf-8',
@@ -206,9 +206,9 @@ class CompileCtx():
             etc.  in the generated library.
         :type lib_name: str or None
 
-        :param bool export_private_fields: Whether private fields are exposed
-            anyway in the various generated APIs. Doing so is useful for
-            debugging.
+        :param bool library_fields_all_public: Whether private fields are
+            exposed anyway in the various generated APIs. Doing so is useful
+            for debugging.
 
         :param c_symbol_prefix: Valid C identifier used as a prefix for all
             top-level declarations in the generated C API.  If not provided,
@@ -244,7 +244,7 @@ class CompileCtx():
                                             if c_symbol_prefix is None else
                                             c_symbol_prefix))
 
-        self.export_private_fields = export_private_fields
+        self.library_fields_all_public = library_fields_all_public
 
         self.default_charset = default_charset
 
