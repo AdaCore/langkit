@@ -535,15 +535,11 @@ class GetSymbol(AbstractExpression):
         """
         token_index = construct(self.token_expr, Token)
 
-        # The following call expression returns a value for which we do not
-        # have any CompiledType subclass available. Indeed, it returns a Token
-        # record whereas our Token CompiledType subclass represents a token
-        # index. Specifying the actual type here is not useful anyway as it's
-        # not going to be used for typing: this call is immediatly wrapped into
-        # another call expression that has the correct type: see below. So
-        # provide a dummy type instead.
-        token = BuiltinCallExpr("Get", CompiledType,
-                                [construct(Self), token_index])
+        # We have no compiled type corresponding to the type of this
+        # BuiltinCallExpr (Token record). It's no big deal because it is an
+        # internal ResolvedExpression whose type will not be used anyway. So
+        # pass None for the type.
+        token = BuiltinCallExpr("Get", None, [construct(Self), token_index])
 
         return BuiltinCallExpr("Get_Symbol", Symbol, [token])
 
@@ -1418,7 +1414,7 @@ class BuiltinCallExpr(ResolvedExpression):
     def __init__(self, name, type, exprs):
         """
         :param names.Name|str name: The name of the procedure to call.
-        :param CompiledType type: The return type of the function call.
+        :param CompiledType|None type: The return type of the function call.
         :param [ResolvedExpression] exprs: A list of expressions that
             represents the arguments to the function call.
         """
