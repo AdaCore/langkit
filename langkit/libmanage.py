@@ -385,16 +385,12 @@ class ManageScript(object):
         self.context.emit(file_root=self.dirs.build_dir())
 
         def gnatpp(project_file, glob_pattern):
-            try:
-                subprocess.check_call([
-                    'gnatpp',
-                    '-P{}'.format(project_file),
-                    '-XLIBRARY_TYPE=relocatable',
-                    '-rnb',
-                ] + glob.glob(glob_pattern), env=self.derived_env())
-            except subprocess.CalledProcessError as exc:
-                print >> sys.stderr, 'Pretty-printing failed: {}'.format(exc)
-                sys.exit(1)
+            self.check_call(args, 'Pretty-printing', [
+                'gnatpp',
+                '-P{}'.format(project_file),
+                '-XLIBRARY_TYPE=relocatable',
+                '-rnb',
+            ] + glob.glob(glob_pattern))
 
         if hasattr(args, 'pretty_print') and args.pretty_print:
             if args.verbosity.info:
@@ -443,18 +439,12 @@ class ManageScript(object):
         if hasattr(args, 'cargs'):
             cargs.extend(args.cargs)
 
-        env = self.derived_env()
-
         def run(library_type):
             argv = list(base_argv)
             argv.append('-XLIBRARY_TYPE={}'.format(library_type))
             argv.append('-cargs')
             argv.extend(cargs)
-            try:
-                subprocess.check_call(argv, env=env)
-            except subprocess.CalledProcessError as exc:
-                print >> sys.stderr, 'Build failed: {}'.format(exc)
-                sys.exit(1)
+            self.check_call(args, 'Build', argv)
 
         # The basic principle is: build shared unless disabled and build static
         # unless disabled. But for programs, we can build only one mode: in
@@ -575,3 +565,35 @@ class ManageScript(object):
 
         self.setup_environment(add_path)
         return env
+
+    def check_call(self, args, name, argv):
+        """
+        Log and run a command with a derived environment.
+
+        If the command exists with an error status code, exit ourselves with a
+        status code and a proper error message.
+        """
+        self.log_exec(args, argv)
+        try:
+            subprocess.check_call(argv, env=self.derived_env())
+        except (subprocess.CalledProcessError, OSError) as exc:
+            print '{color}{name} failed:{reset} {exc}'.format(
+                color=Colors.FAIL,
+                name=name,
+                reset=Colors.ENDC,
+                exc=exc
+            )
+            sys.exit(1)
+
+    def log_exec(self, args, argv):
+        """
+        If verbosity level is debug, log a command we are about to execute.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
+        :param list[str] argv: Arguments for the command to log.
+        """
+        if args.verbosity.debug:
+            printcol('Executing: {}'.format(
+                ' '.join(pipes.quote(arg) for arg in argv)
+            ), Colors.CYAN)
