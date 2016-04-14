@@ -1057,24 +1057,15 @@ class Struct(CompiledType):
             )
         )
 
-        def is_subtype(base_type, subtype):
-            return issubclass(subtype, base_type)
-
-        def are_subtypes(fields, new_types):
-            return all(
-                is_subtype(f.type, n)
-                for f, n in zip(fields, new_types)
-            )
-
         # TODO: instead of expecting types to be subtypes, we might want to
         # perform type unification (take the nearest common ancestor for all
         # field types). But then again, maybe not, it might be too confusing.
         if cls.is_type_resolved:
-            for field, type in zip(fields, types):
+            for field, f_type in zip(fields, types):
                 check_source_language(
-                    is_subtype(field.type, type),
+                    issubclass(f_type, field.type),
                     "Field {} already had type {}, got {}".format(
-                        field.name, field.type.name(), type.name()
+                        field.name, field.type.name(), f_type.name()
                     )
                 )
 
