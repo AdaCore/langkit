@@ -22,7 +22,7 @@ package Langkit_Support.Tokens is
       Start_Column, End_Column : Unsigned_16;
    end record;
 
-   type Token is record
+   type Token_Type is record
       Id         : Unsigned_16;
 
       Text       : Text_Access;
@@ -33,7 +33,7 @@ package Langkit_Support.Tokens is
       Sloc_Range : Source_Location_Range;
    end record;
 
-   type Token_Access is access all Token;
+   type Token_Access is access all Token_Type;
 
    No_Source_Location       : constant Source_Location       := (0, 0);
    No_Source_Location_Range : constant Source_Location_Range := (0, 0, 0, 0);
@@ -73,12 +73,12 @@ package Langkit_Support.Tokens is
      (Image (Start_Sloc (Sloc_Range)) & '-'
       & Image (End_Sloc (Sloc_Range)));
 
-   function Image (T : Token) return String is
+   function Image (T : Token_Type) return String is
      (if T.Text = null
       then ""
       else Image (T.Text.all));
 
-   function Get_Symbol (T : Token) return Symbol_Type is
+   function Get_Symbol (T : Token_Type) return Symbol_Type is
       (Symbol_Type (T.Text));
 
 end Langkit_Support.Tokens;

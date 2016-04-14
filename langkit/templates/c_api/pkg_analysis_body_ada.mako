@@ -451,7 +451,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       declare
          Unit : constant Analysis_Unit_Interface := Unwrap (Token.Unit);
          TDH  : Token_Data_Handler renames Unit.Token_Data.all;
-         T    : constant Langkit_Support.Tokens.Token :=
+         T    : constant Langkit_Support.Tokens.Token_Type :=
             Get_Token (TDH, Token_Index (Token.Index));
       begin
          return Wrap (T.Text);

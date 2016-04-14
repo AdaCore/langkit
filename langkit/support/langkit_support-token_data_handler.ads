@@ -18,13 +18,13 @@ package Langkit_Support.Token_Data_Handler is
    --  is every trivia that is between the current token and the next token.
 
    type Trivia_Node is record
-      T        : Token;
+      T        : Token_Type;
       Has_Next : Boolean;
    end record;
    --  This defines a node in a trivia linked list
 
    package Token_Vectors is new Langkit_Support.Vectors
-     (Element_Type => Token);
+     (Element_Type => Token_Type);
    package Text_Vectors is new Langkit_Support.Vectors
      (Element_Type => Text_Access);
    package Trivia_Vectors is new Langkit_Support.Vectors
@@ -70,7 +70,7 @@ package Langkit_Support.Token_Data_Handler is
 
    function Get_Token
      (TDH   : Token_Data_Handler;
-      Index : Token_Index) return Token
+      Index : Token_Index) return Token_Type
    is
      (Token_Vectors.Get (TDH.Tokens, Natural (Index)));
 

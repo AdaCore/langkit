@@ -325,7 +325,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
          when Child =>
             Node : ${root_node_type_name};
          when Trivia =>
-            Trivia : Token;
+            Trivia : Token_Type;
       end case;
    end record;
    --  Variant that holds either an AST node or a token
@@ -350,7 +350,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
    function Get
      (Node  : access ${root_node_value_type}'Class;
       Index : Token_Index)
-      return Token;
+      return Token_Type;
    --  Get information about the token at Index. Node must be any AST node in
    --  the corresponding analysis unit.
 
@@ -567,7 +567,7 @@ private
    function Get
      (Node  : access ${root_node_value_type}'Class;
       Index : Token_Index)
-      return Token
+      return Token_Type
    is
      (Get_Token (Node.Unit.Token_Data.all, Index));
 

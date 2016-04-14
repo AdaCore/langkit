@@ -263,7 +263,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          Node.Unit.Token_Data.all;
       Sloc_Start, Sloc_End : Source_Location;
 
-      function Get (Index : Token_Index) return Token is
+      function Get (Index : Token_Index) return Token_Type is
         (Get_Token (TDH, Index));
 
    begin
