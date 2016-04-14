@@ -1,7 +1,9 @@
 ## vim: filetype=makoada
 
 <%namespace name="array_types"   file="array_types_ada.mako" />
+<%namespace name="astnode_types" file="astnode_types_ada.mako" />
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
+
 <% root_node_array = ctx.root_grammar_class.array_type() %>
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
@@ -446,6 +448,8 @@ private
       Self_Env               : AST_Envs.Lexical_Env;
       --  Hold the environment this node defines, or the parent environment
       --  otherwise.
+
+      ${astnode_types.node_fields(ctx.root_grammar_class, emit_null=False)}
    end record;
    --  TODO??? Remove this from the public API
 

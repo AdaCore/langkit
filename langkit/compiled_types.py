@@ -48,7 +48,11 @@ class AbstractFieldAccessor(GeneratedFunction):
 
 
 def decl_type(ada_type):
-    return str(ada_type.name())
+    """
+    :type ada_type: CompiledType
+    :rtype: str
+    """
+    return str(ada_type.storage_type_name())
 
 
 def c_node_type(capi):
@@ -139,14 +143,25 @@ class CompiledType(object):
     However, subclasses are not intended to be instantiated.
     """
 
-    # Whether this type is handled through pointers only in the generated code
     is_ptr = True
+    """
+    Whether this type is handled through pointers only in the generated code
+    """
+
+    is_storage_value = False
+    """
+    Whether this type is stored by value. If this is True, we expect:
+    1. is_ptr to be true.
+    2. storage_type_name to be overloaded to provide the name of the value
+       type.
+
+    TODO: We should check that those invariants are respected this somewhere.
+    """
 
     is_list_type = False
     """
     Whether this type represents an instantiation of ASTList (i.e. a list of
     AST nodes).
-    :type: bool
     """
 
     def __init__(self):
@@ -193,6 +208,17 @@ class CompiledType(object):
         raise NotImplementedError()
 
     @classmethod
+    def storage_type_name(cls):
+        """
+        Return the name of the type that is used to store instances of this
+        type in Structs/ASTNodes. This only needs to be overloaded when the
+        "is_storage_value" attribute is set to True, in which case the storage
+        type and the type passed around in properties and in the public API are
+        not the same.
+        """
+        return cls.name()
+
+    @classmethod
     def nullexpr(cls):
         """
         Return a string to be used in code generation for "null" expressions.
@@ -200,6 +226,15 @@ class CompiledType(object):
         Must be overriden in subclasses.
         """
         raise NotImplementedError()
+
+    @classmethod
+    def storage_nullexpr(cls):
+        """
+        Return the nullexpr that is used for fields of this type in
+        Structs/ASTNodes. Only needed if "is_storage_value" is True. See
+        storage_type_name for more details.
+        """
+        return cls.nullexpr()
 
     @classmethod
     def doc(cls):
@@ -319,6 +354,7 @@ class BasicType(CompiledType):
     """
     _name = None
     _nullexpr = None
+    _storage_nullexpr = None
     _external = False
 
     @classmethod
@@ -328,6 +364,12 @@ class BasicType(CompiledType):
     @classmethod
     def nullexpr(cls):
         return cls._nullexpr
+
+    @classmethod
+    def storage_nullexpr(cls):
+        return (cls._storage_nullexpr
+                if cls._storage_nullexpr
+                else cls.nullexpr())
 
     @classmethod
     def c_type(cls, c_api_settings):
@@ -606,6 +648,12 @@ class AbstractField(AbstractNodeData):
         self._name = None
         self._doc = doc
 
+        self.emit = True
+        """
+        Subclasses can change that variable to trigger wether the field
+        should be emitted or not.
+        """
+
         self._type = type
         """
         Type of the field. If not set, it will be set to a concrete
@@ -663,13 +711,16 @@ class UserField(AbstractField):
 class BuiltinField(UserField):
     """
     A built-in field is just like a UserField, except that its name has no
-    prefix. It is disregarded by the parsing machinery too.
+    prefix. It is disregarded by the parsing machinery too. It is typically
+    used for fields on the root node that don't really exist/are added
+    manually.
     """
 
     prefix = None
 
     def __init__(self, *args, **kwargs):
         super(BuiltinField, self).__init__(*args, **kwargs)
+        self.emit = False
 
 
 class NodeMacro(object):

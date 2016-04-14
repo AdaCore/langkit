@@ -73,31 +73,35 @@
 
 </%def>
 
+<%def name="node_fields(cls, emit_null=True)">
+   <%
+      fields = cls.get_fields(include_inherited=False,
+                              predicate=lambda f: f.emit)
+      ext = ctx.ext("nodes", cls.name(), "components")
+   %>
+   % if fields or ext:
+       % for f in fields:
+            ${f.name} : aliased ${decl_type(f.type)}
+               := ${f.type.storage_nullexpr()};
+            ${ada_doc(f, 12)}
+       % endfor
+       ${exts.include_extension(ext)}
+   % elif emit_null:
+      null;
+   % endif
+</%def>
 
 <%def name="private_decl(cls)">
 
    <%
       type_name = "{}_Type".format(cls.name())
       base_name = cls.base().name()
-      fields = cls.get_fields(include_inherited=False)
-      ext = ctx.ext("nodes", cls.name(), "components")
    %>
 
    type ${type_name} is ${"abstract" if cls.abstract else "" }
-      new ${base_name}_Type with
-
-   % if fields or ext:
-      record
-       % for f in fields:
-            ${f.name} : aliased ${decl_type(f.type)}
-               := ${f.type.nullexpr()};
-            ${ada_doc(f, 12)}
-       % endfor
-         ${exts.include_extension(ext)}
-      end record;
-   % else:
-      null record;
-   % endif
+      new ${base_name}_Type with record
+      ${node_fields(cls)}
+   end record;
 
    ## Private field getters
 
@@ -464,7 +468,8 @@
       is
       begin
          return ${decl_type(field.type)}
-           (${type_name} (Node.all).${field.name});
+           (${type_name} (Node.all).${field.name}
+           ${"'Unrestricted_Access" if field.type.is_storage_value else ""});
       end ${field.name};
    % endfor
 

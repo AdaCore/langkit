@@ -308,6 +308,15 @@ class FieldAccess(AbstractExpression):
                     for name, value in args
                 ))
 
+            elif self.property.type.is_storage_value:
+                # If this is true, the type of field is a ptr but the
+                # storage is not. We want to return an access. IMPORTANT: Note
+                # that we do that *only* if we're not calling a property, which
+                # means we're accessing a field. If we're calling a property
+                # that is stored by value, we don't want to do anything
+                # special.
+                ret += "'Unrestricted_Access"
+
             return ret
 
     def __init__(self, receiver, field, arguments=()):
