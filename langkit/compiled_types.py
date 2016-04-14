@@ -829,7 +829,7 @@ class StructMetaClass(type):
 
         # Append the list of fields that we've got from macros. Append them
         # in order, so that the order of declaration in NodeMacro classes is
-        # respected, aswell as the order of macro classes in the _macro field.
+        # respected, as well as the order of macro classes in the _macro field.
         for fields_dict in macro_fields:
             fields.update(fields_dict)
 
