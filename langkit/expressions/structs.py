@@ -232,8 +232,11 @@ class FieldAccess(AbstractExpression):
             """
             :param ResolvedExpression receiver_expr: The receiver of the field
                 access.
+
             :param PropertyDef|Field property: The accessed property or field.
-            :type arguments: list[ResolvedExpression] arguments
+
+            :param list[ResolvedExpression] arguments: If non-empty, this field
+                access will actually be a primitive call.
             """
             self.receiver_expr = receiver_expr
             self.property = property
