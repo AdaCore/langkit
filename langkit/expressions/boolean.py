@@ -1,5 +1,6 @@
 from langkit import names
 from langkit.compiled_types import BoolType, ASTNode, LongType, Struct
+from langkit.diagnostics import check_multiple
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, LiteralExpr, No, PropertyDef,
     ResolvedExpression, render, construct,
@@ -36,8 +37,14 @@ class BinaryBooleanOperator(AbstractExpression):
         """
         lhs = construct(self.lhs)
         rhs = construct(self.rhs)
-        assert lhs.type.matches(BoolType)
-        assert rhs.type.matches(BoolType)
+        check_multiple([
+            (lhs.type.matches(BoolType),
+             "Operands of binary logic operator must be of boolean type, "
+             "got {}".format(lhs.type.name().camel)),
+            (rhs.type.matches(BoolType),
+             "Operands of binary logic operator must be of boolean type, "
+             "got {}".format(rhs.type.name().camel))
+        ])
 
         if self.kind == self.AND:
             then = rhs
