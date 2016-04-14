@@ -356,6 +356,12 @@ class FieldAccess(AbstractExpression):
             )
         )
 
+        check_source_language(
+            not to_get.is_internal, (
+                '{} is for internal use only'.format(to_get.qualname)
+            )
+        )
+
         # Check that this property actually accepts these arguments and that
         # they are correctly typed.
         check_source_language(

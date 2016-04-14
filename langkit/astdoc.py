@@ -37,6 +37,10 @@ def write_astdoc(context, file):
         base = bases[-2] if len(bases) > 1 else None
         abs_fields = list(typ.get_abstract_fields())
 
+        # Do not document internal fields unless everything is public
+        if not context.library_fields_all_public:
+            abs_fields = [f for f in abs_fields if not f.is_internal]
+
         print >> file, '{}node {}{}{}'.format(
             'abstract ' if typ.abstract else '',
             typ.name().camel,

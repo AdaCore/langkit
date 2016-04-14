@@ -421,6 +421,7 @@ class AbstractNodeData(object):
 
     PREFIX_FIELD = names.Name('F')
     PREFIX_PROPERTY = names.Name('P')
+    PREFIX_INTERNAL = names.Name('Internal')
 
     prefix = None
     """
@@ -492,6 +493,14 @@ class AbstractNodeData(object):
         return self._is_private
 
     @property
+    def is_internal(self):
+        """
+        Whether this property is internal.
+        :rtype: bool
+        """
+        return self._name.base_name.startswith('_')
+
+    @property
     def type(self):
         """
         Type of the abstract node field.
@@ -509,7 +518,10 @@ class AbstractNodeData(object):
         :rtype: names.Name
         """
         assert self._name
-        return (self.prefix + self._name if self.prefix else self._name)
+        radix = (names.Name(self._name.base_name[1:])
+                 if self.is_internal else
+                 self._name)
+        return self.prefix + radix if self.prefix else radix
 
     @property
     def qualname(self):
@@ -832,6 +844,12 @@ class StructMetaClass(type):
         # respected, as well as the order of macro classes in the _macro field.
         for fields_dict in macro_fields:
             fields.update(fields_dict)
+
+        for f_n, f_v in fields.iteritems():
+            check_source_language(
+                not f_n.startswith('_'),
+                'Underscode-prefixed field names are not allowed'
+            )
 
         # Compute lexical environment specification. Since it can be
         # specified in macros, we want to make sure that there's only one.
