@@ -752,8 +752,8 @@ class PropertyDef(AbstractNodeData):
     reserved_arg_names = (self_arg_name, env_arg_name)
     reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
 
-    def __init__(self, prefix, expr, doc=None, private=None, abstract=False,
-                 type=None, abstract_runtime_check=False):
+    def __init__(self, prefix, expr, name=None, doc=None, private=None,
+                 abstract=False, type=None, abstract_runtime_check=False):
         """
         :param names.Name prefix: Prefix to use for the name of the subprogram
             that implements this property in code generation.
@@ -771,6 +771,7 @@ class PropertyDef(AbstractNodeData):
           | (AbstractExpression) -> AbstractExpression
           | () -> AbstractExpression
 
+        :param names.Name|None name: See AbstractNodeData's constructor.
         :param str|None doc: User documentation for this property.
         :param bool|None private: See AbstractNodeData's constructor.
         :param bool abstract: Whether this property is abstract or not. If this
@@ -796,7 +797,7 @@ class PropertyDef(AbstractNodeData):
             types for the functionality you want.
         """
 
-        super(PropertyDef, self).__init__(private=private)
+        super(PropertyDef, self).__init__(name=name, private=private)
 
         self.prefix = prefix
 
@@ -856,8 +857,8 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: Property
         """
-        new = PropertyDef(self.prefix, self.expr, self._doc, self._is_private,
-                          self.abstract, self.expected_type)
+        new = PropertyDef(self.prefix, self.expr, self._name, self._doc,
+                          self._is_private, self.abstract, self.expected_type)
         new.vars = copy(self.vars)
 
         # Copy is used in the context of macros. In macros, we want to copy

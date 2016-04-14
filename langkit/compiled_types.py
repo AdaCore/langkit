@@ -430,8 +430,12 @@ class AbstractNodeData(object):
     :type: names.Name|None
     """
 
-    def __init__(self, private=False):
+    def __init__(self, name=None, private=False):
         """
+        :param names.Name|None name: Name for this field. Most of the time,
+            this is initially unknown at field creation, so it is filled only
+            at Struct creation time.
+
         :param bool|None private: Whether this AbstractNodeData instance is
             supposed to be private or not.
 
@@ -442,8 +446,16 @@ class AbstractNodeData(object):
         """
         self._index = next(self._counter)
         self._is_private = private
-        self._name = names.Name("")
+
         self.location = extract_library_location()
+
+        self._name = name
+        """
+        Name for this property. If None at instanciation time, it must be
+        initialized when the embedding Struct subclass is created.
+        :type: names.Name
+        """
+
         self.ast_node = None
         """
         ASTNode subclass that declared this field. Initialized when creating
