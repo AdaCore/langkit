@@ -343,6 +343,13 @@ class FieldAccess(AbstractExpression):
         """
 
         receiver_expr = construct(self.receiver)
+        check_source_language(
+            issubclass(receiver_expr.type, Struct),
+            '{} values have no field (accessed field was {})'.format(
+                receiver_expr.type.name().camel,
+                self.field
+            )
+        )
 
         to_get = assert_type(
             receiver_expr.type, Struct
