@@ -282,17 +282,14 @@ class FieldAccess(AbstractExpression):
                 prefix = self.result_var.name
             ret = "{}.{}".format(prefix, self.property.name)
 
-            # Sequence of tuples: (formal name, expression) for each argument
-            # to pass.
-            args = []
-
             # If we're calling a property, then pass the currently bound
             # lexical environment as parameter.
             if isinstance(self.property, PropertyDef):
-                args.append((PropertyDef.env_arg_name, str(Env._name)))
+                # Sequence of tuples: (formal name, expression) for each
+                # argument to pass.
+                args = [(PropertyDef.env_arg_name, str(Env._name))]
 
-            # Then add the explicit arguments
-            if isinstance(self.property, PropertyDef):
+                # Then add the explicit arguments
                 for actual, (formal_name, formal_type, _) in zip(
                     self.arguments, self.property.explicit_arguments
                 ):
@@ -306,7 +303,6 @@ class FieldAccess(AbstractExpression):
 
                     args.append((formal_name, expr))
 
-            if args:
                 ret += " ({})".format(', '.join(
                     '{} => {}'.format(name, value)
                     for name, value in args
