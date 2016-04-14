@@ -270,12 +270,10 @@ class FieldAccess(AbstractExpression):
             # Before accessing the field of a record through an access, we must
             # check that whether this access is null in order to raise a
             # Property_Error in the case it is.
-            result = [render('properties/null_safety_check_ada',
-                             expr=self.receiver_expr,
-                             result_var=self.result_var)]
-
-            result.extend(arg.render_pre() for arg in self.arguments)
-            return '\n'.join(result)
+            return "\n".join([
+                render('properties/null_safety_check_ada',
+                       expr=self.receiver_expr, result_var=self.result_var)
+            ] + [arg.render_pre() for arg in self.arguments])
 
         def render_expr(self):
             if self.simple_field_access:
