@@ -864,6 +864,12 @@ class StructMetaClass(type):
         dct['is_env_spec_inherited'] = env_spec is None
         dct['env_spec'] = env_spec
 
+        # Env specs may need to create properties: add these as fields for this
+        # node.
+        if env_spec:
+            for p in env_spec.create_properties():
+                fields[p._name.lower] = p
+
         for field_name, field in fields.items():
             # Remove fields/props as class members: we want them to be
             # stored in their own dicts.
@@ -882,9 +888,12 @@ class StructMetaClass(type):
         dct['is_type_resolved'] = False
         cls = type.__new__(mcs, name, bases, dct)
 
-        # Associate each field and property to this ASTNode subclass
+        # Associate each field and property to this ASTNode subclass. Likewise
+        # for the environment specification.
         for field in fields.values():
             field.ast_node = cls
+        if env_spec:
+            env_spec.ast_node = cls
 
         assert cls.is_ast_node() or not cls.get_properties(), (
             "Properties are not yet supported on plain structs"
@@ -1287,9 +1296,6 @@ class Struct(CompiledType):
                     f.type.add_to_context()
 
             cls.compute_properties()
-
-            if cls.env_spec:
-                cls.env_spec.compute(cls)
 
     @classmethod
     def name(cls):

@@ -1,5 +1,8 @@
-from langkit import expressions
-from langkit.expressions import check_simple_expr, construct
+from langkit import names
+from langkit.compiled_types import (
+    AbstractNodeData, LexicalEnvType, StructMetaClass
+)
+from langkit.expressions import Env, FieldAccess, PropertyDef, Self, construct
 
 
 class EnvSpec(object):
@@ -24,105 +27,153 @@ class EnvSpec(object):
             the moment, the element returned by the first expression must be a
             node with a token property, and the second expression must be a
             single element of type ASTNode.
-        :type add_to_env:
-            (expressions.AbstractExpression, expressions.AbstractExpression)
+        :type add_to_env: (AbstractExpression, AbstractExpression)
 
-        :param langkit.expressions.base.AbstractExpression ref_envs: if an
-            AbstractExpression returning a list of environments is supplied,
-            the topmost environment in the environment resolution will be
-            altered to include the list of environments as referenced
-            environments. TODO: Not yet implemented!
+        :param AbstractExpression ref_envs: if an AbstractExpression returning
+            a list of environments is supplied, the topmost environment in the
+            environment resolution will be altered to include the list of
+            environments as referenced environments. TODO: Not yet implemented!
 
-        :param expressions.AbstractExpression initial_env: If supplied,
-            this env will be used as the lexical environment to execute the
-            rest of the actions. For example, if you pass an initial_env, and
-            add_env, then an env will be added to the env passed as
-            initial_env, and the node concerned by this env specification will
-            have initial_env as a parent indirectly.
+        :param AbstractExpression initial_env: If supplied, this env will be
+            used as the lexical environment to execute the rest of the actions.
+            For example, if you pass an initial_env, and add_env, then an env
+            will be added to the env passed as initial_env, and the node
+            concerned by this env specification will have initial_env as a
+            parent indirectly.
         """
 
-        self._add_env = add_env
-        ":type: bool"
-
-        self._unresolved_initial_env = initial_env
-        ":type: expressions.AbstractExpression"
-
-        self._initial_env = None
-        ":type: expressions.ResolvedExpression"
-
-        self._unresolved_add_to_env = add_to_env
-        """
-        :type: (expressions.AbstractExpression, expression.AbstractExpression)
-        """
-
-        self._add_to_env = None
-        """
-        :type: (expressions.ResolvedExpression, expressions.ResolvedExpression)
-        """
+        unr_key, unr_value = add_to_env if add_to_env else (None, None)
 
         assert ref_envs is None, (
             "Ref envs is not implemented yet!"
         )
 
-        self._ref_envs = ref_envs
+        self.ast_node = None
         """
-        :type: expressions.AbstractExpression
+        ASTNode subclass associated to this environment specification.
+        Initialized when creating ASTNode subclasses.
+        :type: langkit.compiled_types.ASTNode
         """
 
-    @staticmethod
-    def render_expr(expr):
-        """
-        Helper to render a simple expression in the context of an
-        environment specification.
+        self._add_env = add_env
+        ":type: bool"
 
-        :param ResolvedExpression expr: The expression to render.
+        # The following attributes (unresolved_*) contain abstract expressions
+        # used to describe various environment behaviors. They all have
+        # corresponding attributes that embed them as properties: see below.
+
+        self._unresolved_initial_env = initial_env
+        ":type: AbstractExpression"
+
+        self._unresolved_env_key = unr_key
+        ":type: AbstractExpression"
+
+        self._unresolved_env_value = unr_value
+        ":type: AbstractExpression"
+
+        self._unresolved_ref_envs = ref_envs
+        ":type: AbstractExpression"
+
+        # These are the property attributes
+
+        self.initial_env = None
+        ":type: PropertyDef"
+
+        self.add_to_env_key = None
+        ":type: PropertyDef"
+
+        self.add_to_env_value = None
+        ":type: PropertyDef"
+
+        self.ref_envs = None
+        ":type: PropertyDef"
+
+    def create_properties(self):
+        """
+        Turn the various abstract expression attributes for this env spec into
+        internal properties.
+
+        :rtype: None
+        """
+        result = []
+
+        def create_internal_property(name, expr, type):
+            if expr is None:
+                return None
+
+            p = PropertyDef(AbstractNodeData.PREFIX_INTERNAL,
+                            expr, name=names.Name('_' + name),
+                            private=True, type=type)
+            result.append(p)
+            return p
+
+        # We are doing this when creating ASTNode subclasses, so there's no
+        # context yet. So fetch the root grammar class in StructMetaClass
+        # instead.
+        node_type = StructMetaClass.root_grammar_class
+
+        self.initial_env = create_internal_property(
+            'Initial_Env', self._unresolved_initial_env, LexicalEnvType
+        )
+
+        self.add_to_env_key = create_internal_property(
+            'Env_Key', self._unresolved_env_key, None
+        )
+        self.add_to_env_value = create_internal_property(
+            'Env_Value', self._unresolved_env_value, node_type
+        )
+
+        # TODO: what is the expected type for this one?
+        self.ref_envs = create_internal_property(
+            'Ref_Envs', self._unresolved_ref_envs, None
+        )
+
+        return result
+
+    def _render_field_access(self, p):
+        """
+        Helper to render a simple field access to the property P in the context
+        of an environment specification.
+
+        :param PropertyDef p: The property to access. It must accept no
+            explicit argument.
         :rtype: str
         """
-        with expressions.Env.bind_name("Current_Env"):
-            return expr.render_expr()
+        assert not p.explicit_arguments
+
+        with PropertyDef.bind_none(), \
+                Self.bind_type(self.ast_node), \
+                Env.bind_name('Current_Env'):
+            return FieldAccess.Expr(construct(Self), p, []).render_expr()
 
     @property
-    def initial_env(self):
+    def initial_env_expr(self):
         """
         The initial environment expression.
         :rtype: str
         """
-        return self.render_expr(self._initial_env)
+        return self._render_field_access(self.initial_env)
 
     @property
-    def add_to_env_key(self):
+    def add_to_env_key_expr(self):
         """
         The expression for the key of the environment to add in add_to_env.
         :rtype: str
         """
-        return self.render_expr(self._add_to_env[0])
+        return self._render_field_access(self.add_to_env_key)
 
     @property
-    def add_to_env_val(self):
+    def add_to_env_value_expr(self):
         """
         The expression for the value of the environment to add in add_to_env.
         :rtype: str
         """
-        return self.render_expr(self._add_to_env[1])
+        return self._render_field_access(self.add_to_env_value)
 
-    def compute(self, ast_node_type):
+    @property
+    def is_adding_to_env(self):
         """
-        Compute the fields necessary for code generation. For the moment,
-        only self.add_to_env needs computation.
-
-        :param langkit.compiled_types.ASTNode ast_node_type: The ASTNode
-            type this environment specification is attached to.
+        Return whether this specification adds an entry to the environment.
+        :rtype: bool
         """
-        with expressions.PropertyDef.bind_none():
-            if self._unresolved_initial_env:
-                check_simple_expr(self._unresolved_initial_env)
-                with expressions.Self.bind_type(ast_node_type):
-                    self._initial_env = construct(self._unresolved_initial_env)
-
-            if self._unresolved_add_to_env:
-                for e in self._unresolved_add_to_env:
-                    check_simple_expr(e)
-
-                with expressions.Self.bind_type(ast_node_type):
-                    kexpr, vexpr = self._unresolved_add_to_env
-                    self._add_to_env = construct(kexpr), construct(vexpr)
+        return bool(self.add_to_env_key)

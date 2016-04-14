@@ -425,29 +425,29 @@
       </%def>
    begin
 
-      % if cls.env_spec._initial_env:
-         Initial_Env := ${cls.env_spec.initial_env};
+      % if cls.env_spec.initial_env:
+         Initial_Env := ${cls.env_spec.initial_env_expr};
       % endif
 
-      % if cls.env_spec._add_to_env:
+      % if cls.env_spec.is_adding_to_env:
          ## If we have an _add_to_env specification, we generate code to
          ## add elements to the lexical environment.
 
-         % if cls.env_spec._add_to_env[0].type.is_list_type:
+         % if cls.env_spec.add_to_env_key.type.is_list_type:
             ## If the supplied expression for the key has type list, we add
             ## a (kn, v) pair for every kn in the list. V stays the same for
             ## every element.
             ## TODO: We'd like to support both Property DSL array types and
             ## AST lists here, but we need a common iteration protocol
             ## first.
-            for El of ${cls.env_spec.add_to_env_key}.Vec loop
-               ${add_to_env("El", cls.env_spec.add_to_env_val)}
+            for El of ${cls.env_spec.add_to_env_key_expr}.Vec loop
+               ${add_to_env("El", cls.env_spec.add_to_env_value_expr)}
             end loop;
 
          % else:
             ## Else, just add (key, val) pair once
-            ${add_to_env(cls.env_spec.add_to_env_key,
-                         cls.env_spec.add_to_env_val)}
+            ${add_to_env(cls.env_spec.add_to_env_key_expr,
+                         cls.env_spec.add_to_env_value_expr)}
          % endif
       % endif
 
