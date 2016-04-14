@@ -7,8 +7,8 @@ import types
 
 from langkit import names
 from langkit.compiled_types import (
-    AbstractNodeData, BoolType, CompiledType, LexicalEnvType, LongType,
-    render as ct_render, Symbol, Token, resolve_type
+    AbstractNodeData, ASTNode, BoolType, CompiledType, LexicalEnvType,
+    LongType, get_context, render as ct_render, Symbol, Token, resolve_type
 )
 from langkit.diagnostics import (
     extract_library_location, check_source_language, check_multiple,
@@ -58,10 +58,23 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
             if not custom_msg:
                 custom_msg = "Expected type {}, got {}"
             expected_type = assert_type(expected_type_or_pred, CompiledType)
+
+            if expected_type == ASTNode:
+                # ASTNode does not exist in the generated code: we use it as a
+                # shortcut for the actual root grammar class instead.
+                expected_type = get_context().root_grammar_class
+
             check_source_language(ret.type.matches(expected_type), (
                 custom_msg.format(expected_type.name().camel,
                                   ret.type.name().camel)
             ))
+
+            # If the type matches expectation but is incompatible in the
+            # generated code, generate a conversion. This is needed for the
+            # various ASTNode subclasses.
+            if expected_type != ret.type:
+                from langkit.expressions import Cast
+                return Cast.Expr(ret, expected_type)
         else:
             if not custom_msg:
                 custom_msg = "Evaluating predicate on {} failed"
@@ -1163,17 +1176,8 @@ class PropertyDef(AbstractNodeData):
                     self.prop_def = ""
                     return
 
-                self.constructed_expr = construct(self.expr)
-
-                if self.expected_type:
-                    assert self.expected_type == self.constructed_expr.type, (
-                        'The {} property expression returns {}, but it is'
-                        ' expected to return {} instead'.format(
-                            self.qualname,
-                            self.constructed_expr.type.name().camel,
-                            self.expected_type.name().camel
-                        )
-                    )
+                self.constructed_expr = construct(self.expr,
+                                                  self.expected_type)
 
                 with names.camel_with_underscores:
                     self.prop_decl = render('properties/decl_ada')
