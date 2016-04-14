@@ -343,7 +343,12 @@ class ManageScript(object):
         else:
             cov = None
 
-        self.context = self.create_context(parsed_args)
+        try:
+            self.context = self.create_context(parsed_args)
+        except:
+            if parsed_args.debug:
+                pdb.post_mortem()
+            raise
         self.context.library_fields_all_public = getattr(
             parsed_args, 'library_fields_all_public', False
         )
