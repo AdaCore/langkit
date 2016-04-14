@@ -845,14 +845,8 @@ class PropertyDef(AbstractNodeData):
         :type: str
         """
 
-        self._name = None
-        ":type: names.Name"
-
         self._doc = doc
         ":type: str|None"
-
-        self.ast_node = None
-        ":type: ASTNode|None"
 
     def __copy__(self):
         """
