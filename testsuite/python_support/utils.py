@@ -96,9 +96,13 @@ def build_and_run(grammar, py_script, main_rule_name='main_rule',
         argv.append('--library-fields-all-public')
     m.run(argv)
 
-    # Then execute a script with it
+    # Then execute a script with it. Note that in order to use the generated
+    # library, we have to use the special Python interpreter the testsuite
+    # provides us. See the corresponding code in
+    # testuite_support/python_driver.py.
+    python_interpreter = os.environ['PYTHON_INTERPRETER']
     subprocess.check_call(
-        [sys.executable, py_script],
+        [python_interpreter, py_script],
         env=m.derived_env()
     )
 

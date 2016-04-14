@@ -220,7 +220,7 @@ class BaseDriver(TestDriver):
     # Run helpers
     #
 
-    def run_and_check(self, argv):
+    def run_and_check(self, argv, env=None):
         """
         Run a subprocess with `argv` and check it completes with status code 0.
 
@@ -232,7 +232,8 @@ class BaseDriver(TestDriver):
         p = Run(argv, cwd=self.working_dir(),
                 timeout=self.TIMEOUT,
                 output=self.output_file,
-                error=STDOUT)
+                error=STDOUT,
+                env=env)
 
         if p.status != 0:
             self.result.actual_output += (

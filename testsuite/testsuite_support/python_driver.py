@@ -1,5 +1,6 @@
 import os
 import os.path
+import sys
 
 from testsuite_support.base_driver import (
     BaseDriver, catch_test_errors, SetupError,
@@ -24,7 +25,13 @@ class PythonDriver(BaseDriver):
 
     @catch_test_errors
     def run(self):
-        self.run_and_check([self.python_interpreter, 'test.py'])
+        # The "test.py" script will not import a generated library, however
+        # another spawned script could: provide the path to the interpreter in
+        # the environment so it can use it.
+        derived_env = dict(os.environ)
+        derived_env['PYTHON_INTERPRETER'] = self.python_interpreter
+
+        self.run_and_check([sys.executable, 'test.py'], derived_env)
 
     @property
     def support_dir(self):
