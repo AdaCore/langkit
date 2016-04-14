@@ -13,6 +13,9 @@ with Ada.Unchecked_Deallocation;
 
 with System;
 
+with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;
+with Adalog.Eq_Same;
+
 with Langkit_Support.Extensions;         use Langkit_Support.Extensions;
 with Langkit_Support.Iterators;
 with Langkit_Support.Lexical_Env;
@@ -415,6 +418,19 @@ package ${_self.ada_api_settings.lib_name}.AST is
    function Element_Value
      (Node : ${root_node_value_type}; C : Children_Cursor)
       return ${root_node_type_name};
+
+   ---------------------------
+   -- Adalog instantiations --
+   ---------------------------
+
+   package Eq_Node is new Adalog.Eq_Same (${root_node_type_name});
+   subtype Logic_Var is Eq_Node.Refs.Raw_Var;
+   subtype Logic_Var_Record is Eq_Node.Refs.Var;
+   Null_Var : constant Logic_Var := null;
+   Null_Var_Record : constant Logic_Var_Record := (Reset => True, others => <>);
+
+   subtype Logic_Equation is Rel;
+   Null_Logic_Equation : Logic_Equation renames Ptrs.Null_Ref;
 
 private
 

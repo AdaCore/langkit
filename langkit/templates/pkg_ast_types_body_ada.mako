@@ -9,7 +9,9 @@
 <% root_node_array = ctx.root_grammar_class.array_type() %>
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
+
+with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;
 
 pragma Warnings (Off, "referenced");
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
@@ -20,6 +22,9 @@ with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
 pragma Warnings (On, "referenced");
 
 package body ${_self.ada_api_settings.lib_name}.AST.Types is
+
+   use Eq_Node, Eq_Node.Raw_Impl;
+   ##  Make logic operations on nodes accessible
 
    procedure Register_Destroyable is new
       Analysis_Interfaces.Register_Destroyable

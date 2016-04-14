@@ -386,6 +386,52 @@ class LexicalEnvType(BasicType):
         return CAPIType(c_api_settings, 'lexical_env')
 
 
+class LogicVarType(BasicType):
+    """
+    This type represents a logical variable. A logical variable is a reference,
+    that can take a specific value when it is bound to a specific Equation, and
+    that equation is solved for a certain problem set.
+
+    It is a special type in langkit at this point, in that its value is
+    initially undefined, and is mutated after the solve of an equation to a
+    specific value. It is thus the only type in langkit for the moment for
+    which variables of the type can be mutated after creation.
+    """
+    _name = "Logic_Var"
+    _nullexpr = "null"
+    _storage_nullexpr = "Null_Var_Record"
+    is_ptr = False
+    is_storage_value = True
+
+    @classmethod
+    def storage_type_name(cls):
+        return names.Name("Logic_Var_Record")
+
+    @classmethod
+    def c_type(cls, c_api_settings):
+        raise Exception("Cannot expose logic variables to C at the moment")
+
+
+class EquationType(BasicType):
+    """
+    An EquationType instance is an equation where logic variables (of type
+    LogicVarType) are involved in logical expressions.
+
+    An equation can be solved, and the variables instances will then be bound
+    to specific values.
+
+    Equations instance will typically be produced by expressions involving
+    logic variables.
+    """
+    _name = "Logic_Equation"
+    _nullexpr = "Null_Rel"
+    is_ptr = False
+
+    @classmethod
+    def c_type(cls, c_api_settings):
+        raise Exception("Cannot expose logic variables to C at the moment")
+
+
 class BoolType(BasicType):
     is_ptr = False
     _name = get_type(bool)
