@@ -377,6 +377,29 @@ class AbstractExpression(Frozable):
         from langkit.expressions.boolean import OrderingTest
         return OrderingTest(OrderingTest.GE, self, other)
 
+    @Frozable.protect
+    def __eq__(self, other):
+        """
+        Return an Eq expression. Be careful when using this because the '=='
+        operator priority in python is lower than the '&' and '|' operators
+        priority that we use for logic. So it means that::
+
+            A == B | B == C
+
+        is actually interpreted as::
+
+            A == (B | B) == C
+
+        and not as what you would expect::
+
+            (A == B) | (B == C)
+
+        So be careful to parenthesize your expressions, or use non operator
+        overloaded boolean operators.
+        """
+        from langkit.expressions.boolean import Eq
+        return Eq(self, other)
+
 
 class ResolvedExpression(object):
     """
@@ -1460,8 +1483,8 @@ def is_simple_expr(expr):
     # Only accept FieldAccess. If the designated field is actually a property,
     # only allow argument-less ones.
     return (
-        expr == Self or (isinstance(expr, FieldAccess) and
-                         expr.receiver == Self and
+        expr is Self or (isinstance(expr, FieldAccess) and
+                         expr.receiver is Self and
                          not expr.arguments)
     )
 
