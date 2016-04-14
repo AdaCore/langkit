@@ -413,15 +413,7 @@
          ## Add a new entry to the lexical env, for which the key is
          ## the symbol for retrieved token, and the value is the
          ## result of the expression for the value.
-
-         ## We assume the existence of a P_Name property on the result
-         ## of the key expression. TODO: Add check for this in
-         ## EnvSpec.compute.
-         declare
-            S : constant Symbol_Type := Get_Symbol (Get (Self, ${key}.P_Name));
-         begin
-            Add (Initial_Env, S, ${root_node_type_name} (${val.strip()}));
-         end;
+         Add (Initial_Env, ${key}, ${val});
       </%def>
    begin
 
@@ -433,14 +425,11 @@
          ## If we have an _add_to_env specification, we generate code to
          ## add elements to the lexical environment.
 
-         % if cls.env_spec.add_to_env_key.type.is_list_type:
-            ## If the supplied expression for the key has type list, we add
-            ## a (kn, v) pair for every kn in the list. V stays the same for
+         % if is_array_type(cls.env_spec.add_to_env_key.type):
+            ## If the supplied expression for the key is an array, we add
+            ## a (kn, v) pair for every kn it contains. V stays the same for
             ## every element.
-            ## TODO: We'd like to support both Property DSL array types and
-            ## AST lists here, but we need a common iteration protocol
-            ## first.
-            for El of ${cls.env_spec.add_to_env_key_expr}.Vec loop
+            for El of ${cls.env_spec.add_to_env_key_expr}.Items loop
                ${add_to_env("El", cls.env_spec.add_to_env_value_expr)}
             end loop;
 

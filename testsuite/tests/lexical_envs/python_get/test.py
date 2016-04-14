@@ -29,8 +29,7 @@ class Def(Stmt):
     id = Field()
     body = Field()
 
-    name = Property(Self.id)
-    env_spec = EnvSpec(add_env=True, add_to_env=(Self, Self))
+    env_spec = EnvSpec(add_env=True, add_to_env=(Self.id.symbol, Self))
 
 
 class Block(Stmt):

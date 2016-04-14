@@ -1,7 +1,8 @@
 from langkit import names
 from langkit.compiled_types import (
-    AbstractNodeData, LexicalEnvType, StructMetaClass
+    AbstractNodeData, LexicalEnvType, StructMetaClass, Symbol
 )
+from langkit.diagnostics import check_source_language
 from langkit.expressions import Env, FieldAccess, PropertyDef, Self, construct
 
 
@@ -116,6 +117,9 @@ class EnvSpec(object):
             'Initial_Env', self._unresolved_initial_env, LexicalEnvType
         )
 
+        # This property can return either a single symbol or an array of these,
+        # so we cannot specify a single type here. So we will do this just
+        # before using it: see add_to_env_key_expr.
         self.add_to_env_key = create_internal_property(
             'Env_Key', self._unresolved_env_key, None
         )
@@ -160,6 +164,17 @@ class EnvSpec(object):
         The expression for the key of the environment to add in add_to_env.
         :rtype: str
         """
+        key_prop = self.add_to_env_key
+        with key_prop.diagnostic_context():
+            check_source_language(
+                key_prop.type.matches(Symbol) or
+                key_prop.type.matches(Symbol.array_type()),
+                'The key expression in environment specification must be'
+                ' either a symbol or an array of symbol: got {}'
+                ' instead'.format(
+                    key_prop.type.name().camel
+                )
+            )
         return self._render_field_access(self.add_to_env_key)
 
     @property
