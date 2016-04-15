@@ -2,15 +2,15 @@
 Code generation was successful
 
 == Incorrect map code 1 ==
-Error: Invalid collection iteration lambda: only one or two parameters expected
-In definition of property 'prop', class 'ListNode': test.py Line 35
+File "test.py", line 35, in ListNode.prop
+    Error: Invalid collection iteration lambda: only one or two parameters expected
 
 == Incorrect map code 2 ==
-Error: Invalid collection iteration lambda: No default values allowed for arguments
-In definition of property 'prop', class 'ListNode': test.py Line 35
+File "test.py", line 35, in ListNode.prop
+    Error: Invalid collection iteration lambda: No default values allowed for arguments
 
 == Incorrect map code 3 ==
-Error: Invalid collection iteration lambda: no *args or **kwargs
-In definition of property 'prop', class 'ListNode': test.py Line 35
+File "test.py", line 35, in ListNode.prop
+    Error: Invalid collection iteration lambda: no *args or **kwargs
 
 Done

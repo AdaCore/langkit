@@ -2,27 +2,27 @@
 Code generation was successful
 
 == Incorrect property definition 1 ==
-Error: Invalid object passed for expression of property: ['Lol this is obviously wrong']
-In definition of property 'propyprop', class 'BarNode': test.py Line 47
+File "test.py", line 47, in BarNode.propyprop
+    Error: Invalid object passed for expression of property: ['Lol this is obviously wrong']
 
 == Incorrect property definition 2 ==
-Error: Invalid function signature: no *args nor **kwargs allowed
-In definition of property 'propyprop', class 'BarNode': test.py Line 52
+File "test.py", line 52, in BarNode.propyprop
+    Error: Invalid function signature: no *args nor **kwargs allowed
 
 == Incorrect property definition 3 ==
-Error: All parameters must have an associated type as a default value
-In definition of property 'propyprop', class 'BarNode': test.py Line 57
+File "test.py", line 57, in BarNode.propyprop
+    Error: All parameters must have an associated type as a default value
 
 == Incorrect property definition 4 ==
-Error: Cannot define reserved arguments (node, lex_env)
-In definition of property 'propyprop', class 'BarNode': test.py Line 62
+File "test.py", line 62, in BarNode.propyprop
+    Error: Cannot define reserved arguments (node, lex_env)
 
 == Incorrect property definition 5 ==
-Error: Type provided is neither a CompiledType, neither a defered type reference: ['Obviously wrong']
-In definition of property 'propyprop', class 'BarNode': test.py Line 67
+File "test.py", line 67, in BarNode.propyprop
+    Error: Type provided is neither a CompiledType, neither a defered type reference: ['Obviously wrong']
 
 == Incorrect property definition 6 ==
-Error: Type provided is neither a CompiledType, neither a defered type reference: <class 'langkit.compiled_types.NodeMacro'>
-In definition of property 'propyprop', class 'BarNode': test.py Line 72
+File "test.py", line 72, in BarNode.propyprop
+    Error: Type provided is neither a CompiledType, neither a defered type reference: <class 'langkit.compiled_types.NodeMacro'>
 
 Done

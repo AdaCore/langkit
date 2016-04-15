@@ -882,9 +882,8 @@ class PropertyDef(AbstractNodeData):
         return new
 
     def diagnostic_context(self):
-        ctx_message = "In definition of property '{}', class '{}'".format(
-            self._name.lower, self.ast_node.name().camel
-        )
+        ctx_message = 'in {}.{}'.format(self.ast_node.name().camel,
+                                        self._name.lower)
         return context(ctx_message, self.location)
 
     @classmethod

@@ -2,11 +2,11 @@
 Code generation was successful
 
 == Missing var value ==
-Error: All Let expression function arguments must have default values
-In definition of property 'prop', class 'BarNode': test.py Line 31
+File "test.py", line 31, in BarNode.prop
+    Error: All Let expression function arguments must have default values
 
 == Invalid args ==
-Error: Invalid function for Let expression (*args and **kwargs not accepted)
-In definition of property 'prop', class 'BarNode': test.py Line 31
+File "test.py", line 31, in BarNode.prop
+    Error: Invalid function for Let expression (*args and **kwargs not accepted)
 
 Done

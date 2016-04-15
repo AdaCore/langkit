@@ -2,11 +2,11 @@
 Code generation was successful
 
 == Invalid cast 1 ==
-Error: One can only cast to an ASTNode subtype
-In definition of property 'prop', class 'ListNode': test.py Line 36
+File "test.py", line 36, in ListNode.prop
+    Error: One can only cast to an ASTNode subtype
 
 == Invalid cast 2 ==
-Error: Cannot cast BarNode to ListNode: only (up/down)casting is allowed
-In definition of property 'prop', class 'ListNode': test.py Line 36
+File "test.py", line 36, in ListNode.prop
+    Error: Cannot cast BarNode to ListNode: only (up/down)casting is allowed
 
 Done

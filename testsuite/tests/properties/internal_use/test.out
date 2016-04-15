@@ -1,3 +1,3 @@
-Error: Def.internal_env_value is for internal use only
-In definition of property 'faulty_prop', class 'Def': test.py Line 40
+File "test.py", line 40, in Def.faulty_prop
+    Error: Def.internal_env_value is for internal use only
 Done

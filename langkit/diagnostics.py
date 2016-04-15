@@ -38,7 +38,7 @@ class Location(object):
         return "<Location {} {}>".format(self.file, self.line)
 
     def __str__(self):
-        return "{} Line {}".format(self.file, self.line)
+        return 'File "{}", line {}'.format(self.file, self.line)
 
 
 def extract_library_location():
@@ -119,9 +119,13 @@ def check_source_language(predicate, message, severity=Severity.error):
     # class declaration, it it's really an instance of Severity instead.
     severity = assert_type(severity, Severity)
     if not predicate:
-        print "{}: {}".format(format_severity(severity), message)
-        for message, location in context_stack:
-            print "{}: {}".format(message, location)
+        for ctx_msg, ctx_loc in context_stack:
+            print "{}, {}".format(ctx_loc, ctx_msg)
+        print "{}{}: {}".format(
+            "    " if context_stack else '',
+            format_severity(severity),
+            message
+        )
         if severity == Severity.error:
             raise DiagnosticError()
         elif severity == Severity.non_blocking_error:

@@ -1,4 +1,4 @@
-Error: Trying to get the type of the BarCode.p_prop_1 property too early. Try to specify its return type explicitly.
-In definition of property 'prop_2', class 'BarNode': test.py Line 26
+File "test.py", line 26, in BarNode.prop_2
+    Error: Trying to get the type of the BarCode.p_prop_1 property too early. Try to specify its return type explicitly.
 
 Done

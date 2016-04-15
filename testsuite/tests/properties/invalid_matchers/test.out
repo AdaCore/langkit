@@ -1,46 +1,46 @@
 == Missing NullNode ==
-Error: The following AST nodes have no handler: NullNode (all BodyNode subclasses require one)
-In definition of property 'prop', class 'ExampleNode': test.py Line 52
+File "test.py", line 52, in ExampleNode.prop
+    Error: The following AST nodes have no handler: NullNode (all BodyNode subclasses require one)
 
 == Missing Expression ==
-Error: The following AST nodes have no handler: Expression (all BodyNode subclasses require one)
-In definition of property 'prop', class 'ExampleNode': test.py Line 52
+File "test.py", line 52, in ExampleNode.prop
+    Error: The following AST nodes have no handler: Expression (all BodyNode subclasses require one)
 
 == Missing Compound ==
-Error: The following AST nodes have no handler: Compound (all BodyNode subclasses require one)
-In definition of property 'prop', class 'ExampleNode': test.py Line 52
+File "test.py", line 52, in ExampleNode.prop
+    Error: The following AST nodes have no handler: Compound (all BodyNode subclasses require one)
 
 == Invalid type ==
-Error: Invalid matching type: Boolean
-In definition of property 'prop', class 'ExampleNode': test.py Line 52
+File "test.py", line 52, in ExampleNode.prop
+    Error: Invalid matching type: Boolean
 
 == Irrelevant AST node ==
-Error: Cannot match FooNode (input type is BodyNode)
-In definition of property 'prop', class 'ExampleNode': test.py Line 52
+File "test.py", line 52, in ExampleNode.prop
+    Error: Cannot match FooNode (input type is BodyNode)
 
 == Default case after full coverage ==
-Warning: The #2 matcher (default one) is unreachable as all previous matchers cover all the nodes it can match
-In definition of property 'prop', class 'ExampleNode': test.py Line 52
+File "test.py", line 52, in ExampleNode.prop
+    Warning: The #2 matcher (default one) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after default case (1) ==
-Warning: The #2 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
-In definition of property 'prop', class 'ExampleNode': test.py Line 52
+File "test.py", line 52, in ExampleNode.prop
+    Warning: The #2 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after default case (2) ==
-Warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
-In definition of property 'prop', class 'ExampleNode': test.py Line 52
+File "test.py", line 52, in ExampleNode.prop
+    Warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after full coverage (1) ==
-Warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
-In definition of property 'prop', class 'ExampleNode': test.py Line 52
+File "test.py", line 52, in ExampleNode.prop
+    Warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after full coverage (2) ==
-Warning: The #4 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
-In definition of property 'prop', class 'ExampleNode': test.py Line 52
+File "test.py", line 52, in ExampleNode.prop
+    Warning: The #4 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 Done

@@ -2,15 +2,15 @@
 Code generation was successful
 
 == Incorrect new 1 ==
-Error: Values are missing for MyStruct fields: b
-In definition of property 'prop', class 'BarNode': test.py Line 34
+File "test.py", line 34, in BarNode.prop
+    Error: Values are missing for MyStruct fields: b
 
 == Incorrect new 2 ==
-Error: Wrong type for field b: expected Integer, got FooNode
-In definition of property 'prop', class 'BarNode': test.py Line 34
+File "test.py", line 34, in BarNode.prop
+    Error: Wrong type for field b: expected Integer, got FooNode
 
 == Incorrect new 1 ==
-Error: Extraneous fields for MyStruct: c
-In definition of property 'prop', class 'BarNode': test.py Line 34
+File "test.py", line 34, in BarNode.prop
+    Error: Extraneous fields for MyStruct: c
 
 Done
