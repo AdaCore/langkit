@@ -359,7 +359,9 @@ class ManageScript(object):
         try:
             parsed_args.func(parsed_args)
         except DiagnosticError:
-            print >> sys.stderr, "Errors, exiting"
+            print >> sys.stderr, (
+                "{c.FAIL}Errors, exiting{c.ENDC}".format(c=Colors)
+            )
             if parsed_args.debug:
                 pdb.post_mortem()
             sys.exit(1)
