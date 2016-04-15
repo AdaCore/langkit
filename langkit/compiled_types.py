@@ -5,7 +5,7 @@ from copy import copy
 import inspect
 from itertools import count
 
-from langkit import names
+from langkit import diagnostics, names
 from langkit.c_api import CAPIType
 from langkit.common import get_type, null_constant, is_keyword
 from langkit.diagnostics import extract_library_location, check_source_language
@@ -846,10 +846,14 @@ class StructMetaClass(type):
             fields.update(fields_dict)
 
         for f_n, f_v in fields.iteritems():
-            check_source_language(
-                not f_n.startswith('_'),
-                'Underscode-prefixed field names are not allowed'
-            )
+            with diagnostics.context(
+                'in {}.{}'.format(name, f_n),
+                extract_library_location()
+            ):
+                check_source_language(
+                    not f_n.startswith('_'),
+                    'Underscode-prefixed field names are not allowed'
+                )
 
         # Compute lexical environment specification. Since it can be
         # specified in macros, we want to make sure that there's only one.
