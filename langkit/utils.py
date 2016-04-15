@@ -10,6 +10,7 @@ from copy import copy
 from itertools import takewhile
 
 import inspect
+import sys
 
 
 class StructEq(object):
@@ -94,6 +95,22 @@ class Colors:
     OKGREEN = GREEN
     WARNING = YELLOW
     FAIL = RED
+
+    @classmethod
+    def disable_colors(cls):
+        """
+        Reset color codes to empty strings.
+        """
+        for name in dir(cls):
+            value = getattr(cls, name)
+            if (all(c.isalpha() for c in name) and
+                    name.upper() == name and
+                    isinstance(value, str)):
+                setattr(cls, name, '')
+
+
+if not sys.stdout.isatty() or not sys.stderr.isatty():
+    Colors.disable_colors()
 
 
 def col(msg, color):
