@@ -78,12 +78,22 @@ class Colors:
     """
     Utility escape sequences to color output in terminal.
     """
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
     ENDC = '\033[0m'
+    BOLD = '\033[1m'
+
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    GREY = '\033[97m'
+
+    HEADER = MAGENTA
+    OKBLUE = BLUE
+    OKGREEN = GREEN
+    WARNING = YELLOW
+    FAIL = RED
 
 
 def col(msg, color):
