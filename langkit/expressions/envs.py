@@ -91,12 +91,18 @@ class EnvBind(AbstractExpression):
                                                          LexicalEnvType)
 
         def render_pre(self):
-            # We assign to our environment variable the value of the result
-            # of the environment expression.
-            return "{}\n{}\n{} := {};".format(
-                self.to_eval_expr.render_pre(), self.env_expr.render_pre(),
-                self.env_var.name, self.env_expr.render_expr()
-            )
+            # First, compute the environment to bind using the current one and
+            # store it in the "New_Env" local variable.
+            result = [self.env_expr.render_pre(),
+                      '{} := {};'.format(self.env_var.name,
+                                         self.env_expr.render_expr())]
+
+            # Then we can compute the nested expression with the bound
+            # environment.
+            with Env.bind_name(self.env_var.name):
+                result.append(self.to_eval_expr.render_pre())
+
+            return '\n'.join(result)
 
         def render_expr(self):
             # We just bind the name of the environment placeholder to our
