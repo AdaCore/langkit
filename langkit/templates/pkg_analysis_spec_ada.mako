@@ -9,7 +9,6 @@ with System;
 with Langkit_Support.Bump_Ptr;           use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
-with Langkit_Support.Text;               use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handler;
 use Langkit_Support.Token_Data_Handler;
 with Langkit_Support.Tokens;             use Langkit_Support.Tokens;
