@@ -429,9 +429,15 @@
             ## If the supplied expression for the key is an array, we add
             ## a (kn, v) pair for every kn it contains. V stays the same for
             ## every element.
-            for El of ${cls.env_spec.add_to_env_key_expr}.Items loop
-               ${add_to_env("El", cls.env_spec.add_to_env_value_expr)}
-            end loop;
+            declare
+               Names : ${cls.env_spec.add_to_env_key.type.name()} :=
+                  ${cls.env_spec.add_to_env_key_expr};
+            begin
+               for El of Names.Items loop
+                  ${add_to_env("El", cls.env_spec.add_to_env_value_expr)}
+               end loop;
+               Destroy (Names);
+            end;
 
          % else:
             ## Else, just add (key, val) pair once
