@@ -268,6 +268,14 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name("token_text")}";
    ${ada_c_doc('langkit.token_text', 3)}
 
+   procedure ${capi.get_name("token_sloc_range")}
+     (Token        : ${token_type};
+      Sloc_Range_P : ${sloc_range_type}_Ptr)
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name("token_sloc_range")}";
+   ${ada_c_doc('langkit.token_sloc_range', 3)}
+
    function ${capi.get_name("text_to_locale_string")}
      (Text : ${text_type}) return System.Address
       with Export        => True,

@@ -454,6 +454,20 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          return (System.Null_Address, 0);
    end ${capi.get_name("token_text")};
 
+   procedure ${capi.get_name("token_sloc_range")}
+     (Token        : ${token_type};
+      Sloc_Range_P : ${sloc_range_type}_Ptr)
+   is
+      T : Token_Type;
+   begin
+      Clear_Last_Exception;
+      T := Unwrap (Token);
+      Sloc_Range_P.all := Wrap (T.Sloc_Range);
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end ${capi.get_name("token_sloc_range")};
+
    function ${capi.get_name("text_to_locale_string")}
      (Text : ${text_type}) return System.Address
    is

@@ -253,6 +253,12 @@ class Token(ctypes.Structure):
     def text(self):
         return _token_text(self).wrap()
 
+    @property
+    def sloc_range(self):
+        result = _SlocRange()
+        _token_sloc_range(self, ctypes.byref(result))
+        return result.wrap()
+
     def __repr__(self):
         return "<Token {}>".format(self.text)
 
@@ -661,6 +667,10 @@ _node_child = _import_func(
 _token_text = _import_func(
     '${capi.get_name("token_text")}',
     [Token], _text
+)
+_token_sloc_range = _import_func(
+    '${capi.get_name("token_sloc_range")}',
+    [Token], _SlocRange
 )
 
 # Lexical environment primitives

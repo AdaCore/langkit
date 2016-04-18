@@ -275,6 +275,9 @@ documentations = {
     'langkit.token_text': Template("""
         Get the text of the given token.
     """),
+    'langkit.token_sloc_range': Template("""
+        Get the source location range of the given token.
+    """),
     'langkit.text_to_locale_string': Template("""
         Encode some text using the current locale. The result is dynamically
         allocated: it is up to the caller to free it when done with it.

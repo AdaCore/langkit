@@ -227,6 +227,11 @@ ${c_doc('langkit.token_text')}
 extern ${text_type}
 ${capi.get_name("token_text")}(${token_type} token);
 
+${c_doc('langkit.token_sloc_range')}
+extern void
+${capi.get_name("token_sloc_range")}(${token_type} token,
+                                     ${sloc_range_type} *sloc_range);
+
 ${c_doc('langkit.text_to_locale_string')}
 extern char *
 ${capi.get_name("text_to_locale_string")}(${text_type} text);
