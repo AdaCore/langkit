@@ -447,15 +447,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    is
    begin
       Clear_Last_Exception;
-
-      declare
-         Unit : constant Analysis_Unit_Interface := Unwrap (Token.Unit);
-         TDH  : Token_Data_Handler renames Unit.Token_Data.all;
-         T    : constant Langkit_Support.Tokens.Token_Type :=
-            Get_Token (TDH, Token_Index (Token.Index));
-      begin
-         return Wrap (T.Text);
-      end;
+      return Wrap (Unwrap (Token).Text);
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -624,6 +616,17 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          return Last_Exception;
       end if;
    end ${capi.get_name("get_last_exception")};
+
+   ------------
+   -- Unwrap --
+   ------------
+
+   function Unwrap (Token : ${token_type}) return Token_Type is
+      Unit : constant Analysis_Unit_Interface := Unwrap (Token.Unit);
+      TDH  : Token_Data_Handler renames Unit.Token_Data.all;
+   begin
+      return Get_Token (TDH, Token_Index (Token.Index));
+   end Unwrap;
 
    ------------
    -- Unwrap --
