@@ -74,7 +74,7 @@ package body Langkit_Support.Symbols is
       S : constant Storage_Elements.Integer_Address :=
         To_Integer (ST.all'Address);
    begin
-      return Hash_Type (S);
+      return Hash_Type'Mod (S);
    end Hash;
 
 end Langkit_Support.Symbols;
