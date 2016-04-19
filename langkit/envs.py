@@ -1,3 +1,5 @@
+from itertools import count
+
 from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, LexicalEnvType, StructMetaClass, Symbol
@@ -10,6 +12,8 @@ class EnvSpec(object):
     """
     Class defining a lexical environment specification for an ASTNode subclass.
     """
+
+    PROPERTY_COUNT = count(0)
 
     def __init__(self,
                  add_env=False,
@@ -103,7 +107,11 @@ class EnvSpec(object):
                 return None
 
             p = PropertyDef(AbstractNodeData.PREFIX_INTERNAL,
-                            expr, name=names.Name('_' + name),
+                            expr,
+                            name=names.Name('_{}_{}'.format(
+                                name,
+                                next(self.PROPERTY_COUNT))
+                            ),
                             private=True, type=type)
             result.append(p)
             return p
