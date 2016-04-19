@@ -570,7 +570,7 @@ class Match(AbstractExpression):
             )
 
             if argspec.defaults:
-                match_type = argspec.defaults[0]
+                match_type = resolve_type(argspec.defaults[0])
                 check_source_language(
                     issubclass(match_type, ASTNode) and
                     match_type != ASTNode,
