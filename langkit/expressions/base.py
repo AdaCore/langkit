@@ -384,7 +384,7 @@ class AbstractExpression(Frozable):
         operator priority in python is lower than the '&' and '|' operators
         priority that we use for logic. So it means that::
 
-            A == B | B == C
+            A == B | B == C
 
         is actually interpreted as::
 
@@ -392,7 +392,7 @@ class AbstractExpression(Frozable):
 
         and not as what you would expect::
 
-            (A == B) | (B == C)
+            (A == B) | (B == C)
 
         So be careful to parenthesize your expressions, or use non operator
         overloaded boolean operators.
