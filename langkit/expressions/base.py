@@ -1238,19 +1238,19 @@ def Property(expr, doc=None, private=None, type=None):
     :type expr: AbstractExpression|function
     :type type: CompiledType
     :type doc: str
-    :type private: bool
+    :type private: bool|None
     :rtype: PropertyDef
     """
     return PropertyDef(AbstractNodeData.PREFIX_PROPERTY, expr, doc=doc,
                        private=private, type=type)
 
 
-def langkit_property(private=False, return_type=None):
+def langkit_property(private=None, return_type=None):
     """
     Decorator to create properties from real python methods. See Property for
     more details.
 
-    :type private: bool
+    :type private: bool|None
     :type return_type: CompiledType
     """
     def decorator(expr_fn):
