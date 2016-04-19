@@ -1187,9 +1187,13 @@ class PropertyDef(AbstractNodeData):
             # TODO: We need to make sure Properties are rendered in the proper
             # order (base classes first), to make sure that this check is
             # always effectful.
-            assert self.type == base_prop.type, (
-                "Overriding property doesn't have the same type as base"
-                "property !"
+            check_source_language(
+                self.type.matches(base_prop.type),
+                "{} returns {} whereas it overrides {}, which returns {}."
+                " The former should match the latter.".format(
+                    self.qualname, self.type.name().camel,
+                    base_prop.qualname, base_prop.type.name().camel
+                )
             )
 
     def doc(self):
