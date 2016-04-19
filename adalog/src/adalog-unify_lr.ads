@@ -21,69 +21,72 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Adalog.Abstract_Relation;
+--  This package represents the unification logic for the case where both
+--  operands are logic variables. See Adalog.Unify for more details.
+
+with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
 with Adalog.Logic_Var;
 with Adalog.Relation;
-with Adalog.Relation_Interface;
-
---  Internal implementation package, not to be used directly by users a-priori.
---  TODO??? document the inner workings a bit more.
 
 generic
    type L_Type is private;
    type R_Type is private;
-   with function Equals (L : L_Type; R : R_Type) return Boolean is <>;
-   with function Convert (From : R_Type) return L_Type is <>;
-   with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
-package Adalog.Unify_One_Side is
 
-   type R_Type_Array is array (Positive range <>) of R_Type;
+   type Left_C_Data is private;
+   type Right_C_Data is private;
 
-   -----------
-   -- Unify --
-   -----------
+   with function Convert
+     (C_Data : Right_C_Data; From : R_Type) return L_Type is <>;
+   with function Convert
+     (C_Data : Left_C_Data; From : L_Type) return R_Type is <>;
 
-   type Unify is record
-      Left : Var.Var;
-      Right : R_Type;
-      Changed : Boolean := False;
+   with package Left_Var is new Adalog.Logic_Var
+     (Element_Type => L_Type, others => <>);
+
+   with package Right_Var is new Logic_Var
+     (Element_Type => R_Type, others => <>);
+package Adalog.Unify_LR is
+
+   --------------
+   -- Unify_LR --
+   --------------
+
+   type LR_State is (No_Change, Left_Changed, Right_Changed);
+   type Unify_LR is record
+      Left   : Left_Var.Var;
+      Right  : Right_Var.Var;
+      L_Data : Left_C_Data;
+      R_Data : Right_C_Data;
+      State : LR_State := No_Change;
    end record;
+
+   function Apply (Self : in out Unify_LR) return Boolean;
+   procedure Revert (Self : in out Unify_LR);
 
    function Create
-     (Left : Var.Var; Right : R_Type) return Unify
+     (Left   : Left_Var.Var;
+      Right  : Right_Var.Var;
+      L_Data : Left_C_Data;
+      R_Data : Right_C_Data) return Unify_LR
+   is ((Left  => Left, Right => Right, State => No_Change,
+        L_Data => L_Data, R_Data => R_Data));
+
+   package Unify_LR_Rel is new Relation.Stateful_Relation (Unify_LR);
+
+   function Create
+     (Left   : Left_Var.Var;
+      Right  : Right_Var.Var;
+      L_Data : Left_C_Data;
+      R_Data : Right_C_Data) return Unify_LR_Rel.Rel
    is
-     ((Left => Left, Right => Right, Changed => False));
+     (Rel => Create (Left, Right, L_Data, R_Data), others => <>);
 
-   function Apply (Self : in out Unify) return Boolean;
-   procedure Revert (Self : in out Unify);
-
-   package Rel is new Relation.Stateful_Relation (Unify);
-
-   ------------
-   -- Member --
-   ------------
-
-   --  TODO??? Why is member not implemented in terms of
-   --  Relation.Stateful_Relation?
-
-   type Member_T is record
-      Left           : Var.Var;
-      Values         : access R_Type_Array;
-      Current_Index  : Positive := 1;
-      Changed        : Boolean := False;
-      Domain_Checked : Boolean := False;
-   end record;
-
-   function Call (Self : in out Member_T) return Boolean;
-   procedure Reset (Self : in out Member_T);
-
-   package Member_Impl is new Relation_Interface (Member_T);
-
-   function Member (R : Var.Var; Vals : R_Type_Array) return Member_T;
-
-   function Member
-     (R : Var.Var; Vals : R_Type_Array) return Abstract_Relation.Rel
+   function Create
+     (Left   : Left_Var.Var;
+      Right  : Right_Var.Var;
+      L_Data : Left_C_Data;
+      R_Data : Right_C_Data) return Rel
    is
-     (Member_Impl.Dynamic (Member (R, Vals)));
+     (Unify_LR_Rel.Impl.Dynamic (Create (Left, Right, L_Data, R_Data)));
 
-end Adalog.Unify_One_Side;
+end Adalog.Unify_LR;

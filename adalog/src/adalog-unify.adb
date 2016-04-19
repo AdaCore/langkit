@@ -23,47 +23,11 @@
 
 package body Adalog.Unify is
 
-   use Left_Var; use Right_Var;
-
-   -----------
-   -- Apply --
-   -----------
-
-   function Apply (Self : in out Unify_LR) return Boolean is
+   --  TODO HACK FIXME??? P418-022 Removing the body for this package causes a
+   --  generic instantiation error.
+   procedure What is
    begin
-      if Is_Defined (Self.Left) then
-
-         --  Both values are defined, return true if they are equal
-         if Is_Defined (Self.Right) then
-            return GetL (Self.Left) = GetL (Self.Right);
-         end if;
-
-         --  Left is defined, right is not, give right the value of left and
-         --  return true.
-         SetL (Self.Right, Convert (GetL (Self.Left)));
-         Self.State := Right_Changed;
-         return True;
-      end if;
-
-      --  Right is defined, left is not, give left the value of right and
-      --  return true.
-      SetL (Self.Left, Convert (GetL (Self.Right)));
-      Self.State := Left_Changed;
-      return True;
-   end Apply;
-
-   ------------
-   -- Revert --
-   ------------
-
-   procedure Revert (Self : in out Unify_LR) is
-   begin
-      case Self.State is
-         when Left_Changed => Reset (Self.Left);
-         when Right_Changed => Reset (Self.Right);
-         when others => null;
-      end case;
-      Self.State := No_Change;
-   end Revert;
+      null;
+   end What;
 
 end Adalog.Unify;

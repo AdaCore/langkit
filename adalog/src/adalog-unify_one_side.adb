@@ -31,10 +31,11 @@ package body Adalog.Unify_One_Side is
 
    function Apply (Self : in out Unify) return Boolean is
    begin
-      Self.Changed := True;
       if Is_Defined (Self.Left) then
          return Equals (GetL (Self.Left), Self.Right);
       end if;
+
+      Self.Changed := True;
       SetL (Self.Left, Convert (Self.Right));
       return True;
    end Apply;
@@ -58,10 +59,29 @@ package body Adalog.Unify_One_Side is
    function Call (Self : in out Member_T) return Boolean is
    begin
       if Self.Current_Index in Self.Values.all'Range then
-         Self.Current_Index := Self.Current_Index + 1;
-         SetL (Self.Left, Convert (Self.Values (Self.Current_Index - 1)));
-         return True;
+         if Is_Defined (Self.Left) and then not Self.Changed then
+
+            if Self.Domain_Checked then
+               return False;
+            end if;
+
+            Self.Domain_Checked := True;
+            for V of Self.Values.all loop
+               if GetL (Self.Left) = Convert (V) then
+                  return True;
+               end if;
+            end loop;
+            return False;
+         else
+            Self.Current_Index := Self.Current_Index + 1;
+            SetL (Self.Left, Convert (Self.Values (Self.Current_Index - 1)));
+            Self.Changed := True;
+            return True;
+         end if;
       else
+         if Self.Changed then
+            Reset (Self.Left);
+         end if;
          return False;
       end if;
    end Call;
@@ -72,7 +92,11 @@ package body Adalog.Unify_One_Side is
 
    procedure Reset (Self : in out Member_T) is
    begin
-      Reset (Self.Left);
+      Self.Domain_Checked := False;
+      if Self.Changed then
+         Reset (Self.Left);
+         Self.Changed := False;
+      end if;
       Self.Current_Index := 1;
    end Reset;
 
@@ -82,7 +106,7 @@ package body Adalog.Unify_One_Side is
 
    function Member (R : Var.Var; Vals : R_Type_Array) return Member_T is
    begin
-      return Member_T'(R, new R_Type_Array'(Vals), 1);
+      return Member_T'(R, new R_Type_Array'(Vals), 1, False, False);
    end Member;
 
 end Adalog.Unify_One_Side;

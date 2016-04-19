@@ -63,7 +63,7 @@ package body Adalog.Predicates is
       -- Apply --
       -----------
 
-      function Call (Inst : in out Predicate_Logic) return Boolean is
+      function Apply (Inst : in out Predicate_Logic) return Boolean is
         (Is_Defined (Inst.Ref)
          and then Inst.P (GetL (Inst.Ref)));
 
@@ -71,23 +71,10 @@ package body Adalog.Predicates is
       -- Revert --
       ------------
 
-      procedure Reset (Inst : in out Predicate_Logic) is
+      procedure Revert (Inst : in out Predicate_Logic) is
       begin
          null;
-      end Reset;
-
-      ------------
-      -- Create --
-      ------------
-
-      function Create
-        (R    : Var.Var;
-         Pred : Predicate_Access)
-         return Predicate_Logic
-      is
-      begin
-         return Predicate_Logic'(Ref => R, P => Pred);
-      end Create;
+      end Revert;
 
    end Dyn_Predicate;
 

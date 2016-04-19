@@ -23,6 +23,7 @@
 
 with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
 with Adalog.Logic_Var;
+with Adalog.Relation;          use Adalog.Relation;
 with Adalog.Relation_Interface;
 
 package Adalog.Predicates is
@@ -60,19 +61,23 @@ package Adalog.Predicates is
          P   : Predicate_Access;
       end record;
 
-      function Call (Inst : in out Predicate_Logic) return Boolean;
-      procedure Reset (Inst : in out Predicate_Logic);
+      function Apply (Inst : in out Predicate_Logic) return Boolean;
+      procedure Revert (Inst : in out Predicate_Logic);
 
-      package Impl is new Relation_Interface (Ty => Predicate_Logic);
+      package Impl is new Stateful_Relation (Ty => Predicate_Logic);
 
       function Create
         (R    : Var.Var;
          Pred : Predicate_Access)
-         return Predicate_Logic;
+         return Impl.Rel
+      is
+         (Rel => Predicate_Logic'(Ref => R, P => Pred), others => <>);
 
       function Create
         (R    : Var.Var;
          Pred : Predicate_Access) return Rel
-      is (Impl.Dynamic (Create (R, Pred)));
+      is (Impl.Impl.Dynamic (Create (R, Pred)));
+
    end Dyn_Predicate;
+
 end Adalog.Predicates;

@@ -48,6 +48,8 @@ library project ${lib_name} is
       "adalog-pure_relations.ads",
       "adalog-relation.adb",
       "adalog-relation.ads",
+      "adalog-unify_lr.adb",
+      "adalog-unify_lr.ads",
       "${lib_name.lower()}.ads",
       "${lib_name.lower()}-analysis.adb",
       "${lib_name.lower()}-analysis.ads",

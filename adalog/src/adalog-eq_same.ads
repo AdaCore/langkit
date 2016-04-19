@@ -24,6 +24,7 @@
 with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
 with Adalog.Logic_Ref;
 with Adalog.Unify;
+with Adalog.Unify_LR;
 
 --  Convenience wrapper generic package that, from a type implementing
 --  equality, will instantiate all the needed stuff to create logical
@@ -50,7 +51,6 @@ with Adalog.Unify;
 
 generic
    type LR_Type is private;
-   with function "=" (L, R : LR_Type) return Boolean is <>;
 package Adalog.Eq_Same is
 
    function Convert (From : LR_Type) return LR_Type
@@ -70,5 +70,34 @@ package Adalog.Eq_Same is
 
    subtype Refcounted_Member_Array is Refcounted_Impl.Unify_Left.R_Type_Array;
    subtype Raw_Member_Array is Raw_Impl.Unify_Left.R_Type_Array;
+
+   --  This package can be used to provide custom bind operations, with a
+   --  custom conversion from LR_Type to LR_Type.
+
+   generic
+      type Converter is private;
+      with function Convert (Data : Converter; From : LR_Type) return LR_Type;
+   package Raw_Custom_Bind is
+      package Impl is new Unify_LR
+        (LR_Type, LR_Type, Converter, Converter,
+         Convert, Convert, Refs.Raw_Logic_Var, Refs.Raw_Logic_Var);
+
+      function Create (L, R : Refs.Raw_Logic_Var.Var; Data : Converter)
+        return Rel
+      is
+        (Impl.Create (L, R, Data, Data));
+
+   end Raw_Custom_Bind;
+
+   generic
+      type Converter is private;
+      with function Convert (Data : Converter; From : LR_Type) return LR_Type;
+   package Refcounted_Custom_Bind is
+      package Impl is new Unify_LR
+        (LR_Type, LR_Type,
+         Converter, Converter,
+         Convert, Convert,
+         Refs.Refcounted_Logic_Var, Refs.Refcounted_Logic_Var);
+   end Refcounted_Custom_Bind;
 
 end Adalog.Eq_Same;

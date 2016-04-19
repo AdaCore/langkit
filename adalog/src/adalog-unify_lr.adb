@@ -21,69 +21,48 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Adalog.Abstract_Relation;
-with Adalog.Logic_Var;
-with Adalog.Relation;
-with Adalog.Relation_Interface;
-
---  Internal implementation package, not to be used directly by users a-priori.
---  TODO??? document the inner workings a bit more.
-
-generic
-   type L_Type is private;
-   type R_Type is private;
-   with function Equals (L : L_Type; R : R_Type) return Boolean is <>;
-   with function Convert (From : R_Type) return L_Type is <>;
-   with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
-package Adalog.Unify_One_Side is
-
-   type R_Type_Array is array (Positive range <>) of R_Type;
+package body Adalog.Unify_LR is
+   use Left_Var; use Right_Var;
 
    -----------
-   -- Unify --
+   -- Apply --
    -----------
 
-   type Unify is record
-      Left : Var.Var;
-      Right : R_Type;
-      Changed : Boolean := False;
-   end record;
+   function Apply (Self : in out Unify_LR) return Boolean is
+   begin
+      if Is_Defined (Self.Left) then
 
-   function Create
-     (Left : Var.Var; Right : R_Type) return Unify
-   is
-     ((Left => Left, Right => Right, Changed => False));
+         --  Both values are defined, return true if they are equal
+         if Is_Defined (Self.Right) then
+            return
+              Convert (Self.L_Data, GetL (Self.Left)) = GetL (Self.Right);
+         end if;
 
-   function Apply (Self : in out Unify) return Boolean;
-   procedure Revert (Self : in out Unify);
+         --  Left is defined, right is not, give right the value of left and
+         --  return true.
+         SetL (Self.Right, Convert (Self.L_Data, GetL (Self.Left)));
+         Self.State := Right_Changed;
+         return True;
+      end if;
 
-   package Rel is new Relation.Stateful_Relation (Unify);
+      --  Right is defined, left is not, give left the value of right and
+      --  return true.
+      SetL (Self.Left, Convert (Self.R_Data, GetL (Self.Right)));
+      Self.State := Left_Changed;
+      return True;
+   end Apply;
 
    ------------
-   -- Member --
+   -- Revert --
    ------------
 
-   --  TODO??? Why is member not implemented in terms of
-   --  Relation.Stateful_Relation?
-
-   type Member_T is record
-      Left           : Var.Var;
-      Values         : access R_Type_Array;
-      Current_Index  : Positive := 1;
-      Changed        : Boolean := False;
-      Domain_Checked : Boolean := False;
-   end record;
-
-   function Call (Self : in out Member_T) return Boolean;
-   procedure Reset (Self : in out Member_T);
-
-   package Member_Impl is new Relation_Interface (Member_T);
-
-   function Member (R : Var.Var; Vals : R_Type_Array) return Member_T;
-
-   function Member
-     (R : Var.Var; Vals : R_Type_Array) return Abstract_Relation.Rel
-   is
-     (Member_Impl.Dynamic (Member (R, Vals)));
-
-end Adalog.Unify_One_Side;
+   procedure Revert (Self : in out Unify_LR) is
+   begin
+      case Self.State is
+         when Left_Changed => Reset (Self.Left);
+         when Right_Changed => Reset (Self.Right);
+         when others => null;
+      end case;
+      Self.State := No_Change;
+   end Revert;
+end Adalog.Unify_LR;

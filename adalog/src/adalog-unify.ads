@@ -21,10 +21,10 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
+with Adalog.Abstract_Relation;  use Adalog.Abstract_Relation;
 with Adalog.Logic_Var;
-with Adalog.Pure_Relations; use Adalog.Pure_Relations;
-with Adalog.Relation;       use Adalog.Relation;
+with Adalog.Pure_Relations;     use Adalog.Pure_Relations;
+with Adalog.Unify_LR;
 with Adalog.Unify_One_Side;
 
 --  This package makes the unification algorithms of Adalog accessible under
@@ -37,7 +37,7 @@ with Adalog.Unify_One_Side;
 generic
    type L_Type is private;
    type R_Type is private;
-   with function "=" (L : L_Type; R : R_Type) return Boolean is <>;
+
    with function Convert (From : R_Type) return L_Type is <>;
    with function Convert (From : L_Type) return R_Type is <>;
 
@@ -49,38 +49,39 @@ generic
 
 package Adalog.Unify is
 
+   --  TODO HACK FIXME??? P418-022 Removing the body for this package causes a
+   --  generic instantiation error.
+   procedure What;
+
+   type R_Convert_Data is null record;
+   type L_Convert_Data is null record;
+   Dummy_L : L_Convert_Data;
+   Dummy_R : R_Convert_Data;
+
+   function Convert (Data : R_Convert_Data; From : R_Type) return L_Type
+   is
+     (Convert (From));
+
+   function Convert (Data : L_Convert_Data; From : L_Type) return R_Type
+   is
+     (Convert (From));
+
+   package Simple_Unify is new Adalog.Unify_LR
+     (L_Type, R_Type, L_Convert_Data, R_Convert_Data,
+      Convert, Convert, Left_Var, Right_Var);
+   use Simple_Unify;
+
    function Equals (R : R_Type; L : L_Type) return Boolean
-   is (L = R) with Inline_Always;
+   is (Convert (L) = R) with Inline_Always;
 
    function Equals (L : L_Type; R : R_Type) return Boolean
-   is (L = R) with Inline_Always;
+   is (Convert (L) = R) with Inline_Always;
 
    package Unify_Left is new Unify_One_Side
-     (L_Type => L_Type, R_Type => R_Type, Var => Left_Var);
+     (L_Type, R_Type, Equals, Convert, Left_Var);
 
    package Unify_Right is new Unify_One_Side
-     (L_Type => R_Type, R_Type => L_Type, Var => Right_Var);
-
-   --------------
-   -- Unify_LR --
-   --------------
-
-   type LR_State is (No_Change, Left_Changed, Right_Changed);
-   type Unify_LR is record
-      Left  : Left_Var.Var;
-      Right : Right_Var.Var;
-      State : LR_State := No_Change;
-   end record;
-
-   function Apply (Self : in out Unify_LR) return Boolean;
-   procedure Revert (Self : in out Unify_LR);
-
-   function Create
-     (Left : Left_Var.Var; Right : Right_Var.Var) return Unify_LR
-   is ((Left => Left, Right => Right, State => No_Change));
-
-   package Unify_LR_Rel is
-     new Relation.Stateful_Relation (Unify_LR);
+     (R_Type, L_Type, Equals, Convert, Right_Var);
 
    ------------------
    -- Eq predicate --
@@ -88,10 +89,10 @@ package Adalog.Unify is
 
    function "="
      (L : Left_Var.Var; R : Right_Var.Var) return Unify_LR_Rel.Rel
-   is ((Rel => Create (L, R), others => <>)) with Inline;
+   is ((Rel => Create (L, R, Dummy_L, Dummy_R), others => <>)) with Inline;
 
    function "=" (L : L_Type; R : R_Type) return Boolean_Relation.Rel
-   is ((Rel => (Result => L = R), others => <>)) with Inline;
+   is ((Rel => (Result => Equals (L, R)), others => <>)) with Inline;
 
    function "=" (L : Left_Var.Var; R : R_Type) return Unify_Left.Rel.Rel
    is ((Rel => Unify_Left.Create (L, R), others => <>)) with Inline;
