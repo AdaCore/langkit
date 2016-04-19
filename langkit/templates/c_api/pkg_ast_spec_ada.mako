@@ -42,6 +42,13 @@ package ${_self.ada_api_settings.lib_name}.AST.Types.C is
            Convention    => C,
            External_name => "${capi.get_name('lexical_env_parent')}";
 
+   function ${capi.get_name('lexical_env_node')}
+     (Env : ${lexical_env_type})
+      return ${node_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('lexical_env_node')}";
+
 % if env_element_type:
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};

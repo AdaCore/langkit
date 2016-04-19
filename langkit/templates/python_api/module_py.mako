@@ -235,6 +235,10 @@ class LexicalEnv(object):
     def parent(self):
         return LexicalEnv.wrap(_lexical_env_parent(self._c_value))
 
+    @property
+    def node(self):
+        return _wrap_astnode(_lexical_env_node(self._c_value))
+
 % if env_element_type:
     def get(self, name):
         ${py_doc('langkit.lexical_env_get', 8)}
@@ -677,6 +681,10 @@ _token_sloc_range = _import_func(
 _lexical_env_parent = _import_func(
     '${capi.get_name("lexical_env_parent")}',
     [_lexical_env], _lexical_env
+)
+_lexical_env_node = _import_func(
+    '${capi.get_name("lexical_env_node")}',
+    [_lexical_env], _node
 )
 % if env_element_type:
 _lexical_env_get = _import_func(

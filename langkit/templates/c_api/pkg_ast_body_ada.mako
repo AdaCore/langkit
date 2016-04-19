@@ -20,6 +20,15 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.C is
       return Wrap (E.Parent);
    end ${capi.get_name('lexical_env_parent')};
 
+   function ${capi.get_name('lexical_env_node')}
+     (Env : ${lexical_env_type})
+      return ${node_type}
+   is
+      E : constant AST_Envs.Lexical_Env := Unwrap (Env);
+   begin
+      return Wrap (E.Node);
+   end ${capi.get_name('lexical_env_node')};
+
 % if env_element_type:
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};

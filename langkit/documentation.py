@@ -301,6 +301,9 @@ documentations = {
         Get the ENV's parent lexical environment. This returns ${null} for the
         root lexical environment.
     """),
+    'langkit.lexical_env_node': Template("""
+        Get the AST node for which this environment was created.
+    """),
     'langkit.lexical_env_get': Template("""
         Look for elements in ENV corresponding to NAME.
 
