@@ -6,6 +6,7 @@ from langkit.expressions.base import (
 )
 
 Env = AbstractVariable(names.Name("Current_Env"), type=LexicalEnvType)
+EmptyEnv = AbstractVariable(names.Name("AST.Empty_Env"), type=LexicalEnvType)
 
 
 class EnvGet(AbstractExpression):

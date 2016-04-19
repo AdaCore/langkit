@@ -491,6 +491,8 @@ private
    is (Node.Self_Env);
    ${ada_doc(_self.root_grammar_class._fields['children_env'], 3)}
 
+   Empty_Env : constant AST_Envs.Lexical_Env := AST_Envs.Create (null, null);
+
    --------------------------------
    -- Tree traversal (internals) --
    --------------------------------
