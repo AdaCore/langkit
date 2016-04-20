@@ -1,0 +1,12 @@
+== FooNode ==
+File "test.py", line 42, in ExampleNode.get_random_node
+    Error: ExampleNode.p_get_random_node: expected type MiddleNode, got FooNode instead (expected type comes from MiddleNode)
+
+== MiddleNode ==
+Code generation was successful
+
+== NullNode ==
+File "test.py", line 42, in ExampleNode.get_random_node
+    Error: ExampleNode.p_get_random_node: expected type MiddleNode, got NullNode instead (expected type comes from MiddleNode)
+
+Done
