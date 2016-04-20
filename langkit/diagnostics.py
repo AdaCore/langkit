@@ -3,7 +3,7 @@ import enum
 from os import path
 import traceback
 
-from langkit.utils import Colors, assert_type
+from langkit.utils import Colors, assert_type, col
 
 
 class Diagnostics(object):
@@ -104,12 +104,10 @@ def format_severity(severity):
     """
     :param Severity severity:
     """
-    return '{c.BOLD}{color}{name}{c.ENDC}'.format(
-        c=Colors,
-        color=SEVERITY_COLORS[severity],
-        name=('Error'
-              if severity == Severity.non_blocking_error else
-              severity.name.capitalize()))
+    msg = ('Error'
+           if severity == Severity.non_blocking_error else
+           severity.name.capitalize())
+    return col(msg, Colors.BOLD + SEVERITY_COLORS[severity])
 
 
 def check_source_language(predicate, message, severity=Severity.error):
@@ -128,11 +126,11 @@ def check_source_language(predicate, message, severity=Severity.error):
     severity = assert_type(severity, Severity)
     if not predicate:
         for ctx_msg, ctx_loc in context_stack:
-            print ('File {c.CYAN}"{file}"{c.ENDC},'
-                   ' line {c.CYAN}{line}{c.ENDC},'
-                   ' {msg}'.format(c=Colors, file=ctx_loc.file,
-                                   line=ctx_loc.line,
-                                   msg=ctx_msg))
+            print ('File "{file}", line {line}, {msg}'.format(
+                file=col(ctx_loc.file, Colors.CYAN),
+                line=col(ctx_loc.line, Colors.CYAN),
+                msg=ctx_msg
+            ))
         print "{}{}: {}".format(
             "    " if context_stack else '',
             format_severity(severity),
