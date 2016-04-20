@@ -396,6 +396,10 @@ class LogicVarType(BasicType):
     initially undefined, and is mutated after the solve of an equation to a
     specific value. It is thus the only type in langkit for the moment for
     which variables of the type can be mutated after creation.
+
+    TODO: For the moment a logic variable is necessarily a holder around an
+    ASTNode. At some point we might want to make it generic, like list and
+    array types.
     """
     _name = "Logic_Var"
     _nullexpr = "null"
