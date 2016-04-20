@@ -37,7 +37,7 @@ class Def(Stmt):
     name = Property(Self.id)
     env_spec = EnvSpec(add_env=True, add_to_env=(Self, Self))
 
-    faulty_prop = Property(Self._env_value)
+    faulty_prop = Property(Self._env_value_1)
 
 
 class Block(Stmt):
