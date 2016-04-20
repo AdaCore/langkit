@@ -138,6 +138,15 @@ package Langkit_Support.Lexical_Env is
      (Self : Lexical_Env; Key : Symbol_Type) return Env_Element_Array;
    --  Get the array of wrapped elements for this key
 
+   function Orphan (Self : Lexical_Env) return Lexical_Env is
+     (new Lexical_Env_Type'(
+        Parent          => null,
+        Node            => Self.Node,
+        Referenced_Envs => Self.Referenced_Envs,
+        Env             => Self.Env,
+        Default_MD      => Self.Default_MD));
+   --  Return a copy of Self that has no parent
+
    procedure Destroy (Self : in out Lexical_Env);
    --  Deallocate the resources allocated to the Self lexical environment
 

@@ -1,8 +1,8 @@
 from langkit import names
 from langkit.compiled_types import LexicalEnvType, EnvElement, Token
 from langkit.expressions.base import (
-    AbstractVariable, AbstractExpression, ResolvedExpression, construct,
-    PropertyDef
+    AbstractVariable, AbstractExpression, BuiltinCallExpr, ResolvedExpression,
+    construct, PropertyDef
 )
 
 Env = AbstractVariable(names.Name("Current_Env"), type=LexicalEnvType)
@@ -133,3 +133,24 @@ class EnvBind(AbstractExpression):
     def construct(self):
         return EnvBind.Expr(construct(self.env_expr, LexicalEnvType),
                             construct(self.to_eval_expr))
+
+
+class EnvOrphan(AbstractExpression):
+    """
+    Expression that will create a lexical environment copy with no parent.
+    """
+
+    def __init__(self, env_expr):
+        """
+        :param AbstractExpression env_expr: Expression that will return a
+            lexical environment.
+        """
+        super(EnvOrphan, self).__init__()
+        self.env_expr = env_expr
+
+    def construct(self):
+        return BuiltinCallExpr(
+            'AST_Envs.Orphan',
+            LexicalEnvType,
+            [construct(self.env_expr, LexicalEnvType)]
+        )
