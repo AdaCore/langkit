@@ -543,11 +543,6 @@ class AbstractNodeData(object):
         self.location = extract_library_location()
 
         self._name = name
-        """
-        Name for this property. If None at instanciation time, it must be
-        initialized when the embedding Struct subclass is created.
-        :type: names.Name
-        """
 
         self.ast_node = None
         """
