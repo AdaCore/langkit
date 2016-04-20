@@ -627,7 +627,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          Put_Line ("empty>");
       else
          Put_Line ("{");
-         for El in To_Sorted_Env (Self.Env).Iterate loop
+         for El in To_Sorted_Env (Self.Env.all).Iterate loop
             Put ("    ");
             Put_Line (Langkit_Support.Text.Image (Key (El).all) & ": "
                  & Image (Element (El)));

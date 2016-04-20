@@ -1,5 +1,6 @@
 with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
+with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Array_Utils;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
@@ -87,8 +88,12 @@ package Langkit_Support.Lexical_Env is
       Element_Type    => Env_Element_Vectors.Vector,
       Hash            => Hash,
       Equivalent_Keys => "=");
-   subtype Internal_Map is Internal_Envs.Map;
+
+   type Internal_Map is access Internal_Envs.Map;
    --  Internal maps of Symbols to vectors of elements
+
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (Internal_Envs.Map, Internal_Map);
 
    type Lexical_Env_Type is record
       Parent          : Lexical_Env := null;
@@ -100,7 +105,7 @@ package Langkit_Support.Lexical_Env is
       Referenced_Envs : Lexical_Env_Vectors.Vector;
       --  A list of environments referenced by this environment
 
-      Env             : Internal_Map := Internal_Envs.Empty_Map;
+      Env             : Internal_Map := null;
       --  Map containing mappings from symbols to elements for this env
       --  instance. In the generated library, Elements will be AST nodes.
 

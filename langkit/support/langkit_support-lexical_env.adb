@@ -1,5 +1,3 @@
-with Ada.Unchecked_Deallocation;
-
 package body Langkit_Support.Lexical_Env is
 
    function Decorate
@@ -71,7 +69,7 @@ package body Langkit_Support.Lexical_Env is
         (Parent          => Parent,
          Node            => Node,
          Referenced_Envs => <>,
-         Env             => <>,
+         Env             => new Internal_Envs.Map,
          Default_MD      => Default_MD);
    end Create;
 
@@ -92,7 +90,7 @@ package body Langkit_Support.Lexical_Env is
       Dummy  : Boolean;
    begin
       Self.Env.Insert (Key, Env_Element_Vectors.Empty_Vector, C, Dummy);
-      Append (Reference (Self.Env, C).Element.all, Env_El);
+      Append (Reference (Self.Env.all, C).Element.all, Env_El);
    end Add;
 
    ---------
@@ -162,10 +160,11 @@ package body Langkit_Support.Lexical_Env is
       procedure Free is
         new Ada.Unchecked_Deallocation (Lexical_Env_Type, Lexical_Env);
    begin
-      for Elts of Self.Env loop
+      for Elts of Self.Env.all loop
          Env_Element_Vectors.Destroy (Elts);
       end loop;
       Lexical_Env_Vectors.Destroy (Self.Referenced_Envs);
+      Destroy (Self.Env);
       Free (Self);
    end Destroy;
 
