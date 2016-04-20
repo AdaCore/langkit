@@ -605,9 +605,13 @@ class AbstractNodeData(object):
         :rtype: names.Name
         """
         assert self._name
+
+        # If this is an internal property, the name has an underscore prefix
+        # that we want to get rid of for code generation.
         radix = (names.Name(self._name.base_name[1:])
                  if self.is_internal else
                  self._name)
+
         return self.prefix + radix if self.prefix else radix
 
     @property
