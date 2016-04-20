@@ -98,7 +98,7 @@ class EnvSpec(object):
         Turn the various abstract expression attributes for this env spec into
         internal properties.
 
-        :rtype: None
+        :rtype: list[PropertyDef]
         """
         result = []
 
