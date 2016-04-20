@@ -152,9 +152,9 @@ package body Langkit_Support.Lexical_Env is
       return Unwrap (Get (Self, Key));
    end Get;
 
-   ----------------
-   -- Deallocate --
-   ----------------
+   -------------
+   -- Destroy --
+   -------------
 
    procedure Destroy (Self : in out Lexical_Env) is
       procedure Free is
