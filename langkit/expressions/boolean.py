@@ -1,6 +1,6 @@
 from langkit import names
 from langkit.compiled_types import BoolType, ASTNode, LongType, Struct
-from langkit.diagnostics import check_multiple
+from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, LiteralExpr, No, PropertyDef,
     ResolvedExpression, render, construct,
@@ -35,16 +35,11 @@ class BinaryBooleanOperator(AbstractExpression):
 
         :rtype: IfExpr
         """
-        lhs = construct(self.lhs)
-        rhs = construct(self.rhs)
-        check_multiple([
-            (lhs.type.matches(BoolType),
-             "Operands of binary logic operator must be of boolean type, "
-             "got {}".format(lhs.type.name().camel)),
-            (rhs.type.matches(BoolType),
-             "Operands of binary logic operator must be of boolean type, "
-             "got {}".format(rhs.type.name().camel))
-        ])
+        lhs = construct(self.lhs, BoolType, "Operands of binary logic operator"
+                        " must be of boolean type, got {expr_type}")
+
+        rhs = construct(self.rhs, BoolType, "Operands of binary logic operator"
+                        " must be of boolean type, got {expr_type}")
 
         if self.kind == self.AND:
             then = rhs
@@ -143,9 +138,12 @@ class Eq(AbstractExpression):
                     lhs.type.name().camel, rhs.type.name().camel
                 )
         else:
-            assert lhs.type == rhs.type, (
-                'Incompatible types for equality: {} and {}'
-            ).format(lhs.type.name().camel, rhs.type.name().camel)
+            check_source_language(
+                lhs.type == rhs.type,
+                'Incompatible types for equality: {} and {}'.format(
+                    lhs.type.name().camel, rhs.type.name().camel
+                )
+            )
 
         return Eq.Expr(lhs, rhs)
 
