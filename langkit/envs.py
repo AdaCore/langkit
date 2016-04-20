@@ -107,8 +107,7 @@ class EnvSpec(object):
                 return None
 
             p = PropertyDef(
-                AbstractNodeData.PREFIX_INTERNAL,
-                expr,
+                expr, AbstractNodeData.PREFIX_INTERNAL,
                 name=names.Name('_{}_{}'.format(name,
                                                 next(self.PROPERTY_COUNT))),
                 private=True, type=type

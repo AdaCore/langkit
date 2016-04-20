@@ -790,11 +790,9 @@ class PropertyDef(AbstractNodeData):
     reserved_arg_names = (self_arg_name, env_arg_name)
     reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
 
-    def __init__(self, prefix, expr, name=None, doc=None, private=None,
+    def __init__(self, expr, prefix, name=None, doc=None, private=None,
                  abstract=False, type=None, abstract_runtime_check=False):
         """
-        :param names.Name prefix: Prefix to use for the name of the subprogram
-            that implements this property in code generation.
         :param expr: The expression for the property. It can be either:
             * An expression.
             * A function that will take the Self placeholder as parameter and
@@ -809,6 +807,8 @@ class PropertyDef(AbstractNodeData):
           | (AbstractExpression) -> AbstractExpression
           | () -> AbstractExpression
 
+        :param names.Name prefix: Prefix to use for the name of the subprogram
+            that implements this property in code generation.
         :param names.Name|None name: See AbstractNodeData's constructor.
         :param str|None doc: User documentation for this property.
         :param bool|None private: See AbstractNodeData's constructor.
@@ -898,7 +898,7 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: Property
         """
-        new = PropertyDef(self.prefix, self.expr, self._name, self._doc,
+        new = PropertyDef(self.expr, self.prefix, self._name, self._doc,
                           self._is_private, self.abstract, self.expected_type)
         new.vars = copy(self.vars)
 
@@ -1265,8 +1265,8 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
     :type runtime_check: bool
     :rtype: PropertyDef
     """
-    return PropertyDef(AbstractNodeData.PREFIX_PROPERTY, expr=None, type=type,
-                       doc=doc, abstract=True,
+    return PropertyDef(expr=None, prefix=AbstractNodeData.PREFIX_PROPERTY,
+                       type=type, doc=doc, abstract=True,
                        abstract_runtime_check=runtime_check, **kwargs)
 
 
@@ -1288,7 +1288,7 @@ def Property(expr, doc=None, private=None, type=None):
     :type private: bool|None
     :rtype: PropertyDef
     """
-    return PropertyDef(AbstractNodeData.PREFIX_PROPERTY, expr, doc=doc,
+    return PropertyDef(expr, AbstractNodeData.PREFIX_PROPERTY, doc=doc,
                        private=private, type=type)
 
 
