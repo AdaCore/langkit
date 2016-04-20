@@ -1189,8 +1189,11 @@ class PropertyDef(AbstractNodeData):
                 if self.expected_type:
                     check_source_language(
                         self.expected_type.matches(base_prop.expected_type),
-                        "Property type does not match the type of the parent"
-                        " property"
+                        '{} returns {} whereas it overrides {}, which returns'
+                        ' {}. The former should match the latter.'.format(
+                            self.qualname, self.expected_type.name().camel,
+                            base_prop.qualname, base_prop.type.name().camel
+                        )
                     )
                 else:
                     # If base has a type annotation and not self, then
@@ -1210,7 +1213,17 @@ class PropertyDef(AbstractNodeData):
             return
 
         with self.bind(), Self.bind_type(self.ast_node):
-            self.constructed_expr = construct(self.expr, self.expected_type)
+            base_prop = self.base_property()
+            message = (
+                '{self_prop}: expected type {{expected}}, got'
+                ' {{expr_type}} instead (expected type comes from'
+                ' {base_prop})'.format(
+                    self_prop=self.qualname,
+                    base_prop=base_prop.ast_node.name().camel
+                )
+            ) if base_prop else None
+            self.constructed_expr = construct(self.expr, self.expected_type,
+                                              message)
 
     def render_property(self):
         """
