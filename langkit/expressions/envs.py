@@ -95,16 +95,19 @@ class EnvBind(AbstractExpression):
         def render_pre(self):
             # First, compute the environment to bind using the current one and
             # store it in the "New_Env" local variable.
-            result = [self.env_expr.render_pre(),
-                      '{} := {};'.format(self.env_var.name,
-                                         self.env_expr.render_expr())]
+            result = (
+                '{}\n'
+                '{} := {};'.format(
+                    self.env_expr.render_pre(),
+                    self.env_var.name,
+                    self.env_expr.render_expr()
+                )
+            )
 
             # Then we can compute the nested expression with the bound
             # environment.
             with Env.bind_name(self.env_var.name):
-                result.append(self.to_eval_expr.render_pre())
-
-            return '\n'.join(result)
+                return '{}\n{}'.format(result, self.to_eval_expr.render_pre())
 
         def render_expr(self):
             # We just bind the name of the environment placeholder to our
