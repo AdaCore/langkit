@@ -208,17 +208,11 @@ class OrderingTest(AbstractExpression):
 
         :rtype: OrderingTest.Expr
         """
-        lhs = construct(self.lhs)
-        rhs = construct(self.rhs)
-
-        for operand in (lhs, rhs):
-            assert operand.type.matches(LongType), (
-                'Comparisons only work on scalars, not {}'.format(
-                    operand.type.name().camel
-                )
-            )
-
-        return OrderingTest.Expr(self.operator, lhs, rhs)
+        return OrderingTest.Expr(self.operator, *[
+            construct(e, LongType,
+                      "Comparisons only work on scalars, not {expr_type}")
+            for e in (self.lhs, self.rhs)
+        ])
 
 
 class If(AbstractExpression):
