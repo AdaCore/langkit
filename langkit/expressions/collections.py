@@ -3,7 +3,7 @@ from itertools import count
 
 from langkit import names
 from langkit.compiled_types import BoolType, LongType
-from langkit.diagnostics import check_multiple
+from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, AbstractVariable,
     render, PropertyDef, BuiltinCallExpr
@@ -220,10 +220,11 @@ class Map(CollectionExpression):
         """
         collection_expr, expr, element_var, index_var = self.construct_common()
 
-        assert (not self.concat or expr.type.is_collection()), (
+        check_source_language(
+            not self.concat or expr.type.is_collection(),
             'Cannot mapcat with expressions returning {} values'
-            ' (collections expected instead)'
-        ).format(expr.type.name())
+            ' (collections expected instead)'.format(expr.type.name())
+        )
 
         filter_expr = (construct(self.filter_expr, BoolType)
                        if self.filter_expr else None)
