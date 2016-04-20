@@ -27,6 +27,7 @@ with Langkit_Support.Vectors;
 generic
    type Element_T is private;
    type Element_Metadata is private;
+   No_Element     : Element_T;
    Empty_Metadata : Element_Metadata;
    with function Combine (L, R : Element_Metadata) return Element_Metadata;
 package Langkit_Support.Lexical_Env is
@@ -112,6 +113,13 @@ package Langkit_Support.Lexical_Env is
       Default_MD      : Element_Metadata;
       --  Default metadata for this env instance
    end record;
+
+   Empty_Env : constant Lexical_Env := new Lexical_Env_Type'
+     (Parent          => null,
+      Node            => No_Element,
+      Referenced_Envs => <>,
+      Env             => new Internal_Envs.Map,
+      Default_MD      => Empty_Metadata);
 
    function Create
      (Parent     : Lexical_Env;

@@ -117,9 +117,12 @@ package ${_self.ada_api_settings.lib_name}.AST is
    % endif
 
    package AST_Envs is new Langkit_Support.Lexical_Env
-     (${root_node_type_name},
-      ${ctx.env_metadata.name() if ctx.env_metadata else "Dummy_Metadata" },
-      No_Metadata, Combine);
+     (Element_T        => ${root_node_type_name},
+      Element_Metadata =>
+         ${ctx.env_metadata.name() if ctx.env_metadata else "Dummy_Metadata" },
+      No_Element       => null,
+      Empty_Metadata   => No_Metadata,
+      Combine          => Combine);
 
    ## This subtype is introduced to make the manipulation of env elements
    ## possible from the DSL without using AST_Envs.
@@ -510,8 +513,6 @@ private
       return AST_Envs.Lexical_Env
    is (Node.Self_Env);
    ${ada_doc(_self.root_grammar_class._fields['children_env'], 3)}
-
-   Empty_Env : constant AST_Envs.Lexical_Env := AST_Envs.Create (null, null);
 
    --------------------------------
    -- Tree traversal (internals) --
