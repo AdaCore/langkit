@@ -64,7 +64,6 @@ package body Langkit_Support.Lexical_Env is
    function Create
      (Parent     : Lexical_Env;
       Node       : Element_T;
-      Env        : Internal_Map := Internal_Envs.Empty_Map;
       Default_MD : Element_Metadata := Empty_Metadata) return Lexical_Env
    is
    begin
@@ -72,7 +71,7 @@ package body Langkit_Support.Lexical_Env is
         (Parent          => Parent,
          Node            => Node,
          Referenced_Envs => <>,
-         Env             => Env,
+         Env             => <>,
          Default_MD      => Default_MD);
    end Create;
 
