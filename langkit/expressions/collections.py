@@ -80,10 +80,10 @@ class CollectionExpression(AbstractExpression):
         :rtype: (ResolvedExpression, ResolvedExpression,
                  ResolvedExpression, ResolvedExpression)
         """
-        collection_expr = construct(self.collection)
-        assert collection_expr.type.is_collection(), (
-            'Map cannot iterate on {}, which is not a collection'
-        ).format(collection_expr.type.name().camel)
+        collection_expr = construct(
+            self.collection, lambda t: t.is_collection(),
+            'Map cannot iterate on {expr_type}, which is not a collection'
+        )
         self.element_var.set_type(collection_expr.type.element_type())
 
         return (collection_expr,
