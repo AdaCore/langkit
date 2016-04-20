@@ -90,7 +90,8 @@ class Cast(AbstractExpression):
         return Cast.Expr(construct(
             self.expr,
             lambda t: self.astnode.matches(t) or t.matches(self.astnode),
-            'Cannot cast {{}} to {}: only (up/down)casting is allowed'.format(
+            'Cannot cast {{expr_type}} to {}: only (up/down)casting is '
+            'allowed'.format(
                 self.astnode.name().camel
             )
         ), self.astnode)
@@ -211,7 +212,8 @@ class New(AbstractExpression):
         # are valid for the struct type.
         provided_fields = {names.Name.from_lower('f_' + name): construct(
             value, required_fields[name].type,
-            'Wrong type for field {}: expected {{}}, got {{}}'.format(name)
+            'Wrong type for field {}: expected {{expected}}, '
+            'got {{expr_type}}'.format(name)
         ) for name, value in self.field_values.items()}
 
         return New.Expr(self.struct_type, provided_fields)

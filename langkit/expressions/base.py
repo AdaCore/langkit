@@ -31,11 +31,12 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
 
     :param AbstractExpression|bool|int expr: The expression to resolve.
 
-    :param custom_msg: A string for the error messages, containing
-        format-like template holes "{}". If expected_type_or_pred is a type,
-        the message must contain two holes for the names of the types, the
-        expected one first, and the obtained type second. If it is a
-        predicate, it must contain one hole for the expr type.
+    :param custom_msg: A string for the error messages. It can contain the
+        format-like template holes {expected} and {expr_type}, which will be
+        substituted with the expected type, and the obtained expression type
+        respectively.If expected_type_or_pred is a predicate, only {expr_type}
+        will be provided, and putting an {expected} template hole will result
+        in an error.
 
     :rtype: ResolvedExpression
     """
@@ -56,7 +57,7 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
     if expected_type_or_pred:
         if isinstance(expected_type_or_pred, type):
             if not custom_msg:
-                custom_msg = "Expected type {}, got {}"
+                custom_msg = "Expected type {expected}, got {expr_type}"
             expected_type = assert_type(expected_type_or_pred, CompiledType)
 
             if expected_type == ASTNode:
@@ -65,8 +66,8 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
                 expected_type = get_context().root_grammar_class
 
             check_source_language(ret.type.matches(expected_type), (
-                custom_msg.format(expected_type.name().camel,
-                                  ret.type.name().camel)
+                custom_msg.format(expected=expected_type.name().camel,
+                                  expr_type=ret.type.name().camel)
             ))
 
             # If the type matches expectation but is incompatible in the
@@ -77,13 +78,13 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
                 return Cast.Expr(ret, expected_type)
         else:
             if not custom_msg:
-                custom_msg = "Evaluating predicate on {} failed"
+                custom_msg = "Evaluating predicate on {expr_type} failed"
             assert callable(expected_type_or_pred), (
                 "Expected_type_or_pred must either be a type, or a predicate"
                 " of type (ResolvedExpression) -> bool"
             )
             check_source_language(expected_type_or_pred(ret.type), (
-                custom_msg.format(ret.type.name().camel)
+                custom_msg.format(expr_type=ret.type.name().camel)
             ))
 
     return ret

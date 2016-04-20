@@ -82,8 +82,8 @@ class Domain(AbstractExpression):
     def construct(self):
         return Domain.Expr(
             construct(
-                self.domain, lambda d: d.is_collection(),
-                "Type given to LogicVar must be collection type, got {}"
+                self.domain, lambda d: d.is_collection(), "Type given to "
+                "LogicVar must be collection type, got {expr_type}"
             ),
             construct(self.logic_var_expr, LogicVarType)
         )
