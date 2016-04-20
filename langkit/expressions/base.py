@@ -742,6 +742,9 @@ class No(AbstractExpression):
 
     def do_prepare(self):
         from langkit.expressions.structs import Struct
+
+        self.expr_type = resolve_type(self.expr_type)
+
         check_source_language(
             issubtype(self.expr_type, Struct),
             'Invalid type for Null expression: {}'.format(
