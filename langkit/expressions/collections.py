@@ -312,7 +312,12 @@ class Quantifier(CollectionExpression):
         :rtype: QuantifierExpr
         """
         collection_expr, expr, element_var, index_var = self.construct_common()
-        assert expr.type.matches(BoolType)
+        check_source_language(
+            expr.type.matches(BoolType),
+            "Wrong type for expression in quantifier: expected bool, "
+            "got {}".format(expr.type.name().camel)
+        )
+
         return Quantifier.Expr(self.kind, collection_expr, expr, element_var,
                                index_var)
 
