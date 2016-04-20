@@ -74,12 +74,11 @@ class CollectionExpression(AbstractExpression):
         1. The resolved collection expression.
         2. The resolved expression function passed to CollectionExpression's
            constructor.
-        3. The induction variable, still in the AbstractExpression form,
-           so that it can be reused in subclasses (for example for filter).
-        4. The index induction variable, also in the AbstractExpression form,
-           or None if no such variable is needed for iteration.
+        3. The element variable as a resolved expression.
+        4. The index variable as a resolved expression.
 
-        :rtype: ResolvedExpression
+        :rtype: (ResolvedExpression, ResolvedExpression,
+                 ResolvedExpression, ResolvedExpression)
         """
         collection_expr = construct(self.collection)
         assert collection_expr.type.is_collection(), (
