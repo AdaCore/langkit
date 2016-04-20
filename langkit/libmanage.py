@@ -12,7 +12,7 @@ import sys
 
 from langkit.compile_context import Verbosity
 from langkit.diagnostics import Diagnostics, DiagnosticError
-from langkit.utils import Colors, printcol
+from langkit.utils import Colors, col, printcol
 
 
 class Directories(object):
@@ -359,9 +359,7 @@ class ManageScript(object):
         try:
             parsed_args.func(parsed_args)
         except DiagnosticError:
-            print >> sys.stderr, (
-                "{c.FAIL}Errors, exiting{c.ENDC}".format(c=Colors)
-            )
+            print >> sys.stderr, col('Errors, exiting', Colors.FAIL)
             if parsed_args.debug:
                 pdb.post_mortem()
             sys.exit(1)
