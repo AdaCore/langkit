@@ -390,7 +390,8 @@ class Then(AbstractExpression):
                     assert_type(then_expr.type, Struct)
                 ))
             else:
-                raise AssertionError(
+                check_source_language(
+                    False,
                     "Then expression should have a default value provided, "
                     "in cases where the provided function's return type is "
                     "not Bool, here {}".format(then_expr.type.name().camel)
