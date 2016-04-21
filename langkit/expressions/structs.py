@@ -246,11 +246,13 @@ class FieldAccess(AbstractExpression):
             self.arguments = arguments
             self.simple_field_access = False
 
-            # TODO: For the moment we use field accesses in the environments
-            # code, which doesn't have a property context and hence local
-            # variables instance. At a later stage we'll want to get rid of
-            # that limitation by binding the local variables separately from
-            # the current property.
+            # Expressions in environment specifications only allow field
+            # accesses. These are not evaluated in a property context, so
+            # they cannot create local variables.
+            #
+            # TODO: in this context, it would still be useful to emit a null
+            # check so that we raise a special exception instead of a
+            # Storage_Error.
 
             p = PropertyDef.get()
 
