@@ -164,6 +164,14 @@ class CompiledType(object):
     AST nodes).
     """
 
+    should_emit_array_type = True
+    """
+    Whether the array type for this CompiledType is to be automatically
+    generated in the AST.Types generated package. If not, hard-wired code in
+    the AST package should emit do it. See CompileContext.array_types for more
+    information.
+    """
+
     def __init__(self):
         assert False, (
             'CompiledType subclasses are not meant to be instantiated'
@@ -891,6 +899,8 @@ class StructMetaClass(type):
                     "You can have only one class deriving from ASTNode, which"
                     " will be the root class of your grammar"
                 )
+
+        dct["should_emit_array_type"] = not is_root_grammar_class
 
         # Here, we'll register fields and properties for the root AST node
         # class. Note that we must not provide implementation for them here (no

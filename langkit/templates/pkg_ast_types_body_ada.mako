@@ -35,7 +35,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types is
    % endfor
 
    % for array_type in _self.sorted_types(_self.array_types):
-   % if array_type != root_node_array:
+   % if array_type.element_type().should_emit_array_type:
    ${array_types.body(array_type)}
    % endif
    % endfor

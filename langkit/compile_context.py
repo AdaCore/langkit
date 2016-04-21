@@ -361,6 +361,11 @@ class CompileCtx():
         """
         Set of all ArrayType subclasses.
 
+        For each ArrayType subclass T, code emission for type definition will
+        automatically happen in the AST.Types packages unless
+        T.element_type().should_emit_array_type is False. In this case, type
+        definition should be hard-wired in the AST package.
+
         :type: set[langkit.compiled_types.ArrayType]
         """
 
