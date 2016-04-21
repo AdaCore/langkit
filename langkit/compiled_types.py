@@ -698,7 +698,7 @@ class AbstractField(AbstractNodeData):
         self._name = None
         self._doc = doc
 
-        self.emit = True
+        self.should_emit = True
         """
         Subclasses can change that variable to trigger wether the field
         should be emitted or not.
@@ -770,7 +770,7 @@ class BuiltinField(UserField):
 
     def __init__(self, *args, **kwargs):
         super(BuiltinField, self).__init__(*args, **kwargs)
-        self.emit = False
+        self.should_emit = False
 
 
 class NodeMacro(object):

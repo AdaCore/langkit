@@ -76,7 +76,7 @@
 <%def name="node_fields(cls, emit_null=True)">
    <%
       fields = cls.get_fields(include_inherited=False,
-                              predicate=lambda f: f.emit)
+                              predicate=lambda f: f.should_emit)
       ext = ctx.ext("nodes", cls.name(), "components")
    %>
    % if fields or ext:
