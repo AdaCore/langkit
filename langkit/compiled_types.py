@@ -385,7 +385,7 @@ class BasicType(CompiledType):
 
 
 class LexicalEnvType(BasicType):
-    _name = "AST_Envs.Lexical_Env"
+    _name = "Lexical_Env"
     _nullexpr = "null"
     is_ptr = True
 

@@ -124,8 +124,9 @@ package ${_self.ada_api_settings.lib_name}.AST is
       Empty_Metadata   => No_Metadata,
       Combine          => Combine);
 
-   ## This subtype is introduced to make the manipulation of env elements
-   ## possible from the DSL without using AST_Envs.
+   ## The following subtypes are introduced to ease code generation, so we
+   ## don't have to deal with the AST_Envs suffix.
+   subtype Lexical_Env is AST_Envs.Lexical_Env;
    subtype Env_Element is AST_Envs.Env_Element;
    No_Env_Element : constant Env_Element := (null, No_Metadata);
 
