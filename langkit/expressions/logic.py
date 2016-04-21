@@ -10,8 +10,8 @@ class Domain(AbstractExpression):
     this expression:
 
     This is the entry point into the logic DSL. A variable of LogicVarType
-    *must* have a domain defined in the context of an equation. If it doesnt,
-    it's solution set is empty, and thus the only possible value for it is
+    *must* have a domain defined in the context of an equation. If it doesn't,
+    its solution set is empty, and thus the only possible value for it is
     undefined.
 
     If an equation is defined in which the only constraint on variables is
@@ -36,6 +36,10 @@ class Domain(AbstractExpression):
     a domain, and, due to runtime dispatch , we cannot statically predict if
     that's gonna happen. Thus, trying to solve such an equation will result in
     an error.
+
+    Please note that for the moment equations can exist only on AST nodes,
+    so the above examples are invalid, and just meant to illustrate the
+    semantics.
     """
 
     class Expr(ResolvedExpression):
@@ -71,6 +75,14 @@ class Domain(AbstractExpression):
             return self.res_var.name
 
     def __init__(self, logic_var_expr, domain):
+        """
+        :param AbstractExpression logic_var_expr: An expression
+            that must resolve to an instance of a logic variable.
+        :param AbstractExpression domain: An expression that must resolve to
+            the domain, which needs to be a collection of a type that
+            derives from the root grammar class, or the root grammar class
+            itself.
+        """
         super(Domain, self).__init__()
 
         self.domain = domain
