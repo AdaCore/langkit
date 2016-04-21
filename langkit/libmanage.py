@@ -572,6 +572,12 @@ class ManageScript(object):
 
         If the command exists with an error status code, exit ourselves with a
         status code and a proper error message.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
+        :param str name: Name of the process to run, use for error message
+            formatting only.
+        :param list[str] argv: Arguments for the command to run.
         """
         self.log_exec(args, argv)
         try:
