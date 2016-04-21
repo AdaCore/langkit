@@ -674,7 +674,7 @@ _token_text = _import_func(
 )
 _token_sloc_range = _import_func(
     '${capi.get_name("token_sloc_range")}',
-    [Token], _SlocRange
+    [Token, ctypes.POINTER(_SlocRange)], None
 )
 
 # Lexical environment primitives
