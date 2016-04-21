@@ -230,18 +230,19 @@ class FieldAccess(AbstractExpression):
         Resolved expression that represents a field access in generated code.
         """
 
-        def __init__(self, receiver_expr, property, arguments):
+        def __init__(self, receiver_expr, node_data, arguments):
             """
             :param ResolvedExpression receiver_expr: The receiver of the field
                 access.
 
-            :param PropertyDef|Field property: The accessed property or field.
+            :param langkit.compiled_types.AbstracNodeData node_data: The
+                accessed property or field.
 
             :param list[ResolvedExpression] arguments: If non-empty, this field
                 access will actually be a primitive call.
             """
             self.receiver_expr = receiver_expr
-            self.property = property
+            self.node_data = node_data
             self.arguments = arguments
             self.simple_field_access = False
 
@@ -261,11 +262,11 @@ class FieldAccess(AbstractExpression):
 
         @property
         def type(self):
-            return self.property.type
+            return self.node_data.type
 
         def __repr__(self):
             return "<FieldAccessExpr {} {} {}>".format(
-                self.receiver_expr, self.property, self.type
+                self.receiver_expr, self.node_data, self.type
             )
 
         def render_pre(self):
@@ -282,18 +283,18 @@ class FieldAccess(AbstractExpression):
                 prefix = self.receiver_expr.render()
             else:
                 prefix = self.result_var.name
-            ret = "{}.{}".format(prefix, self.property.name)
+            ret = "{}.{}".format(prefix, self.node_data.name)
 
             # If we're calling a property, then pass the currently bound
             # lexical environment as parameter.
-            if isinstance(self.property, PropertyDef):
+            if isinstance(self.node_data, PropertyDef):
                 # Sequence of tuples: (formal name, expression) for each
                 # argument to pass.
                 args = [(PropertyDef.env_arg_name, str(Env._name))]
 
                 # Then add the explicit arguments
                 for actual, (formal_name, formal_type, _) in zip(
-                    self.arguments, self.property.explicit_arguments
+                    self.arguments, self.node_data.explicit_arguments
                 ):
                     expr = actual.render_expr()
 
@@ -310,7 +311,7 @@ class FieldAccess(AbstractExpression):
                     for name, value in args
                 ))
 
-            elif self.property.type.is_storage_value:
+            elif self.node_data.type.is_storage_value:
                 # If this is true, the type of field is a ptr but the
                 # storage is not. We want to return an access. IMPORTANT: Note
                 # that we do that *only* if we're not calling a property, which
