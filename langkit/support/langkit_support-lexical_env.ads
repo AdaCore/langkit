@@ -90,7 +90,7 @@ package Langkit_Support.Lexical_Env is
       Hash            => Hash,
       Equivalent_Keys => "=");
 
-   type Internal_Map is access Internal_Envs.Map;
+   type Internal_Map is access all Internal_Envs.Map;
    --  Internal maps of Symbols to vectors of elements
 
    procedure Destroy is new Ada.Unchecked_Deallocation
@@ -114,12 +114,7 @@ package Langkit_Support.Lexical_Env is
       --  Default metadata for this env instance
    end record;
 
-   Empty_Env : constant Lexical_Env := new Lexical_Env_Type'
-     (Parent          => null,
-      Node            => No_Element,
-      Referenced_Envs => <>,
-      Env             => new Internal_Envs.Map,
-      Default_MD      => Empty_Metadata);
+   Empty_Env : constant Lexical_Env;
 
    function Create
      (Parent     : Lexical_Env;
@@ -145,5 +140,16 @@ package Langkit_Support.Lexical_Env is
 
    procedure Destroy (Self : in out Lexical_Env);
    --  Deallocate the resources allocated to the Self lexical environment
+
+private
+
+   Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
+   Empty_Env_Record : aliased Lexical_Env_Type :=
+     (Parent          => null,
+      Node            => No_Element,
+      Referenced_Envs => <>,
+      Env             => Empty_Env_Map'Access,
+      Default_MD      => Empty_Metadata);
+   Empty_Env : constant Lexical_Env := Empty_Env_Record'Access;
 
 end Langkit_Support.Lexical_Env;
