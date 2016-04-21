@@ -130,6 +130,20 @@ package ${_self.ada_api_settings.lib_name}.AST is
    subtype Env_Element is AST_Envs.Env_Element;
    No_Env_Element : constant Env_Element := (null, No_Metadata);
 
+   ## Declare arrays of lexical environments here because we need them for the
+   ## Group operation below.
+   ${array_types.public_decl(LexicalEnvType.array_type())}
+
+   function Group is new AST_Envs.Group
+     (Index_Type        => Positive,
+      Lexical_Env_Array => ${LexicalEnvType.array_type().api_name()});
+
+   function Group
+     (Envs : ${LexicalEnvType.array_type().name()})
+      return ${LexicalEnvType.name()}
+   is (Group (Envs.Items));
+   --  Convenience wrapper for uniform types handling in code generation
+
    ## Declare arrays of root nodes here since some primitives rely on it and
    ## since the declarations require AST_Envs.
    ${array_types.public_decl(root_node_array)}

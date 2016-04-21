@@ -151,6 +151,16 @@ package Langkit_Support.Lexical_Env is
         Default_MD      => Self.Default_MD));
    --  Return a copy of Self that has no parent
 
+   generic
+      type Index_Type is range <>;
+      type Lexical_Env_Array is array (Index_Type range <>) of Lexical_Env;
+   function Group (Envs : Lexical_Env_Array) return Lexical_Env;
+   --  Return a lexical environment that logically groups together multiple
+   --  lexical environments. Note that this does not modify the input
+   --  environments.
+   --
+   --  If this array is empty, Empty_Env is returned.
+
    procedure Destroy (Self : in out Lexical_Env);
    --  Deallocate the resources allocated to the Self lexical environment
 

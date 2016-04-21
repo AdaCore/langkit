@@ -433,7 +433,9 @@ class CompileCtx():
         """
 
         # Get the list of ASTNode types from the Struct metaclass
-        from langkit.compiled_types import StructMetaClass, EnvElement, Struct
+        from langkit.compiled_types import (
+            EnvElement, LexicalEnvType, Struct, StructMetaClass
+        )
 
         # Skipping the first element which is ASTNode, because it is not a
         # real type in the generated library.
@@ -460,8 +462,11 @@ class CompileCtx():
         self.env_metadata = StructMetaClass.env_metadata
         self.env_element = EnvElement
 
-        # LexicalEnv.get returns array of env elements, so we always need to
-        # generate the array type.
+        # The Group lexical environment operation takes an array of lexical
+        # envs, so we always need to generate the corresponding array type.
+        self.array_types.add(LexicalEnvType.array_type())
+
+        # Likewise for the EnvElement array type: LexicalEnv.get returns it
         self.array_types.add(EnvElement.array_type())
 
         # Sort them in dependency order as required but also then in

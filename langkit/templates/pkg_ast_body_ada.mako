@@ -22,6 +22,7 @@ with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
 
 package body ${_self.ada_api_settings.lib_name}.AST is
 
+   ${array_types.body(LexicalEnvType.array_type())}
    ${array_types.body(root_node_array)}
 
    -----------

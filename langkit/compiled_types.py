@@ -91,6 +91,7 @@ def make_renderer(base_renderer=None):
         'is_lexical_env':   type_check(LexicalEnvType),
         'is_struct_type':   type_check(Struct),
         'decl_type':        decl_type,
+        'LexicalEnvType':   LexicalEnvType,
     }
     if get_context():
         capi = get_context().c_api_settings
@@ -388,6 +389,7 @@ class LexicalEnvType(BasicType):
     _name = "Lexical_Env"
     _nullexpr = "null"
     is_ptr = True
+    should_emit_array_type = False
 
     @classmethod
     def c_type(cls, c_api_settings):
