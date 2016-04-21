@@ -37,7 +37,7 @@ class AdalogDriver(BaseDriver):
                                     "adalog.gpr")
             ))
 
-        self.run_and_check(['gprbuild', '-P', 'p.gpr'])
+        self.run_and_check(['gprbuild', '-p', '-P', 'p.gpr'])
         self.run_and_check(['./{}'.format(source[:-4])])
 
     @property
