@@ -390,6 +390,10 @@ class Then(AbstractExpression):
                     assert_type(then_expr.type, Struct)
                 ))
             else:
+                # The following is not actually used but PyCharm's typer
+                # requires it.
+                default_expr = None
+
                 check_source_language(
                     False,
                     "Then expression should have a default value provided, "
