@@ -89,6 +89,12 @@ package body Langkit_Support.Lexical_Env is
       C      : Cursor;
       Dummy  : Boolean;
    begin
+      --  See Empty_Env's documentation
+
+      if Self = Empty_Env then
+         return;
+      end if;
+
       Self.Env.Insert (Key, Env_Element_Vectors.Empty_Vector, C, Dummy);
       Append (Reference (Self.Env.all, C).Element.all, Env_El);
    end Add;

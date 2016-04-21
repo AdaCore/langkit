@@ -115,6 +115,10 @@ package Langkit_Support.Lexical_Env is
    end record;
 
    Empty_Env : constant Lexical_Env;
+   --  Empty_Env is a magical lexical environment that will always be empty. We
+   --  allow users to call Add on it anyway as a convenience, but this is a
+   --  no-op. This makes sense as Empty_Env's purpose is to be used to
+   --  represent missing scopes from erroneous trees.
 
    function Create
      (Parent     : Lexical_Env;
