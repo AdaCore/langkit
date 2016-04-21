@@ -15,7 +15,6 @@ class AdalogDriver(BaseDriver):
 
     @catch_test_errors
     def tear_up(self):
-        # Create test.out if it doesn't exist.
         super(AdalogDriver, self).tear_up()
 
     @catch_test_errors
@@ -39,10 +38,3 @@ class AdalogDriver(BaseDriver):
 
         self.run_and_check(['gprbuild', '-p', '-P', 'p.gpr'])
         self.run_and_check(['./{}'.format(source[:-4])])
-
-    @property
-    def support_dir(self):
-        """
-        Return the absolute path to the directory for support Python modules.
-        """
-        return os.path.join(self.testsuite_dir, 'python_support')
