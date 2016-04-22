@@ -837,6 +837,9 @@ class PropertyDef(AbstractNodeData):
 
         super(PropertyDef, self).__init__(name=name, private=private)
 
+        self.in_type = False
+        "Recursion guard for the type property"
+
         self.prefix = prefix
 
         self.expr = expr
@@ -963,12 +966,20 @@ class PropertyDef(AbstractNodeData):
         if self.expected_type:
             return self.expected_type
 
-        # In other cases, let's rely on the constructed expr's type
-        check_source_language(self.constructed_expr, (
-            'Trying to get the type of the {} property too early. Try to'
-            ' specify its return type explicitly.'.format(self.qualname)
-        ))
-        return self.constructed_expr.type
+        check_source_language(
+            not self.in_type,
+            'Recursion loop in type inference for property {}. Try to '
+            'specify its return type explicitly.'.format(self.qualname)
+        )
+
+        # If the expr has not yet been constructed, try to construct it
+        if not self.constructed_expr:
+            self.construct()
+
+        self.in_type = True
+        ret = self.constructed_expr.type
+        self.in_type = False
+        return ret
 
     def _add_argument(self, name, type, default_value=None):
         """
@@ -983,15 +994,13 @@ class PropertyDef(AbstractNodeData):
         self.arguments.append((name, type, default_value))
         self.argument_vars.append(AbstractVariable(name, type))
 
-    def base_property(self, owner_type):
+    def base_property(self):
         """
         Get the base property for this property, if it exists.
 
-        :param ASTNode owner_type: The type on which this property was
-            declared.
         :rtype: Property|None
         """
-        return owner_type.base().get_abstract_fields_dict(
+        return self.ast_node.base().get_abstract_fields_dict(
             field_class=PropertyDef
         ).get(self._name.lower, None)
 
@@ -1104,14 +1113,11 @@ class PropertyDef(AbstractNodeData):
         if self.expr:
             self.expr.freeze()
 
-    def compute(self, owner_type):
+    def compute(self):
         """
         Compute information related to dispatching for properties.
-
-        :param langkit.compiled_types.ASTNode owner_type: The type on which
-            this property was declared.
         """
-        base_prop = self.base_property(owner_type)
+        base_prop = self.base_property()
 
         type_set = TypeSet()
 
@@ -1129,9 +1135,9 @@ class PropertyDef(AbstractNodeData):
                 check_overriding_props(subclass)
 
         if self.abstract and not self.abstract_runtime_check:
-            check_overriding_props(owner_type)
+            check_overriding_props(self.ast_node)
 
-            unmatched_types = sorted(type_set.unmatched_types(owner_type),
+            unmatched_types = sorted(type_set.unmatched_types(self.ast_node),
                                      key=lambda cls: cls.hierarchical_name())
 
             check_source_language(
@@ -1185,29 +1191,31 @@ class PropertyDef(AbstractNodeData):
             # By default, properties are public
             self._is_private = False
 
-    def render(self, owner_type):
+    def construct(self):
+        # If expr has already been constructed, return
+        if self.constructed_expr or self.abstract:
+            return
+
+        with self.bind(), Self.bind_type(self.ast_node):
+            self.constructed_expr = construct(self.expr, self.expected_type)
+
+    def render(self):
         """
         Render the given property to generated code.
 
-        :param langkit.compiled_types.ASTNode owner_type: The ast node
-            subclass to which this property is bound.
         :rtype: basestring
         """
-        with self.bind():
-            with Self.bind_type(owner_type):
-                if self.abstract:
-                    self.prop_decl = render('properties/decl_ada')
-                    self.prop_def = ""
-                    return
+        with self.bind(), Self.bind_type(self.ast_node):
+            if self.abstract:
+                self.prop_decl = render('properties/decl_ada')
+                self.prop_def = ""
+                return
 
-                self.constructed_expr = construct(self.expr,
-                                                  self.expected_type)
+            with names.camel_with_underscores:
+                self.prop_decl = render('properties/decl_ada')
+                self.prop_def = render('properties/def_ada')
 
-                with names.camel_with_underscores:
-                    self.prop_decl = render('properties/decl_ada')
-                    self.prop_def = render('properties/def_ada')
-
-        base_prop = self.base_property(owner_type)
+        base_prop = self.base_property()
         if base_prop and base_prop.type:
             # TODO: We need to make sure Properties are rendered in the proper
             # order (base classes first), to make sure that this check is

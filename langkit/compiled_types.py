@@ -1244,16 +1244,6 @@ class Struct(CompiledType):
                     field.type = field_type
 
     @classmethod
-    def compute_properties(cls):
-        """
-        Render generated code for properties.
-
-        Since we handle properties on AST nodes only, there is nothing to do in
-        the general case: this is overriden in ASTNode.
-        """
-        pass
-
-    @classmethod
     def get_inheritance_chain(cls):
         """
         Return a list for all classes from ASTNode to `cls` in the inheritance
@@ -1400,8 +1390,6 @@ class Struct(CompiledType):
                 if f.type:
                     f.type.add_to_context()
 
-            cls.compute_properties()
-
     @classmethod
     def name(cls):
         """
@@ -1461,12 +1449,6 @@ class ASTNode(Struct):
     List of subclasses. Overriden in the root grammar class and its children.
     :type: list[ASTNode]
     """
-
-    @classmethod
-    def compute_properties(cls):
-        for p in cls.get_properties(include_inherited=False):
-            with p.diagnostic_context():
-                p.render(cls)
 
     @classmethod
     def base(cls):

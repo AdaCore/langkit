@@ -26,6 +26,7 @@ from langkit import astdoc, caching, names
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.diagnostics import check_source_language, errors_checkpoint
+from langkit.expressions import PropertyDef
 from langkit.utils import Colors, printcol
 
 
@@ -479,14 +480,17 @@ class CompileCtx():
         #   * the prepare pass on all properties;
         #   * then, the freeze pass on all properties;
         #   * then, the compute pass.
-        passes = (lambda astnode, prop: prop.prepare(),
-                  lambda astnode, prop: prop.freeze(),
-                  lambda astnode, prop: prop.compute(astnode))
+        passes = [PropertyDef.prepare,
+                  PropertyDef.freeze,
+                  PropertyDef.compute,
+                  PropertyDef.construct,
+                  PropertyDef.render]
+
         for pass_fn in passes:
             for astnode in self.astnode_types:
                 for prop in astnode.get_properties(include_inherited=False):
                     with prop.diagnostic_context():
-                        pass_fn(astnode, prop)
+                        pass_fn(prop)
 
     def render_template(self, *args, **kwargs):
         # Kludge: to avoid circular dependency issues, do not import parsers
@@ -579,11 +583,6 @@ class CompileCtx():
         # Compute type information, so that it is available for further
         # compilation stages.
         self.compute_types()
-
-        # Compute properties information, so that it is available for further
-        # compilation stages.
-        self.compute_properties()
-
         errors_checkpoint()
 
         if self.verbosity.info:
@@ -594,11 +593,14 @@ class CompileCtx():
             for r_name, r in self.grammar.rules.items():
                 r.compute_fields_types()
 
+            # Compute properties information, so that it is available for
+            # further compilation stages.
+            self.compute_properties()
+            errors_checkpoint()
+
             for r_name, r in self.grammar.rules.items():
                 r.compile()
                 self.rules_to_fn_names[r_name] = r
-
-        errors_checkpoint()
 
         unresolved_types = set([t for t in self.astnode_types
                                 if not t.is_type_resolved])
