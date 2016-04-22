@@ -580,7 +580,7 @@ class ManageScript(object):
         self.setup_environment(add_path)
         return env
 
-    def check_call(self, args, name, argv):
+    def check_call(self, args, name, argv, env=None):
         """
         Log and run a command with a derived environment.
 
@@ -592,10 +592,14 @@ class ManageScript(object):
         :param str name: Name of the process to run, use for error message
             formatting only.
         :param list[str] argv: Arguments for the command to run.
+        :param dict[str, str]|None env: Environment to use for the command to
+            run. If None, use self.derived_env().
         """
         self.log_exec(args, argv)
+        if env is None:
+            env = self.derived_env()
         try:
-            subprocess.check_call(argv, env=self.derived_env())
+            subprocess.check_call(argv, env=env)
         except (subprocess.CalledProcessError, OSError) as exc:
             print '{color}{name} failed:{reset} {exc}'.format(
                 color=Colors.FAIL,
