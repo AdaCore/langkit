@@ -476,15 +476,11 @@ class CompileCtx():
         node, but by whether the parent has a property with the same name.
         """
 
-        # Run:
-        #   * the prepare pass on all properties;
-        #   * then, the freeze pass on all properties;
-        #   * then, the compute pass.
-        passes = [PropertyDef.prepare,
-                  PropertyDef.freeze,
-                  PropertyDef.compute,
-                  PropertyDef.construct,
-                  PropertyDef.render]
+        passes = [PropertyDef.prepare_abstract_expression,
+                  PropertyDef.freeze_abstract_expression,
+                  PropertyDef.compute_property_attributes,
+                  PropertyDef.construct_and_type_expression,
+                  PropertyDef.render_property]
 
         for pass_fn in passes:
             for astnode in self.astnode_types:

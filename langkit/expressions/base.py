@@ -970,7 +970,7 @@ class PropertyDef(AbstractNodeData):
 
         # If the expr has not yet been constructed, try to construct it
         if not self.constructed_expr:
-            self.construct()
+            self.construct_and_type_expression()
 
         self.in_type = True
         ret = self.constructed_expr.type
@@ -1000,14 +1000,20 @@ class PropertyDef(AbstractNodeData):
             field_class=PropertyDef
         ).get(self._name.lower, None)
 
-    def prepare(self):
+    def prepare_abstract_expression(self):
         """
         Run the "prepare" pass on the expression associated to this property.
 
-        This pass, which just invokes the "prepare" method on all
-        AbstractExpression nodes in the expression, expands all lambda
-        functions there into AbstractExpression nodes (which are then prepared
-        themselves).
+        This pass will:
+
+        * Handle expansion of the toplevel function, and of property
+          arguments, if there are some.
+
+        * Call the prepare pass on the AbstractExpression tree. It will expand
+          the abstract expression tree where needed, and perform some checks on
+          it that cannot be done in the constructors. Notably, it will expand
+          all lambda functions there into AbstractExpression nodes (which are
+          then prepared themselves).
 
         After this pass, the expression tree is ready for the "construct" pass,
         which can yield a ResolvedExpression tree.
@@ -1097,7 +1103,7 @@ class PropertyDef(AbstractNodeData):
         with self.bind():
             self.expr.prepare()
 
-    def freeze(self):
+    def freeze_abstract_expression(self):
         """
         Run the "freeze" pass on the expression associated to this property.
 
@@ -1109,9 +1115,14 @@ class PropertyDef(AbstractNodeData):
         if self.expr:
             self.expr.freeze()
 
-    def compute(self):
+    def compute_property_attributes(self):
         """
-        Compute information related to dispatching for properties.
+        Compute various property attributes, notably:
+        * Information related to dispatching for properties.
+        * Inheritance based information generally, like inheriting return
+          type or privacy, consistency of annotations between base property
+          and inherited properties.
+        * Property overriding completeness checking.
         """
         base_prop = self.base_property()
 
@@ -1187,7 +1198,11 @@ class PropertyDef(AbstractNodeData):
             # By default, properties are public
             self._is_private = False
 
-    def construct(self):
+    def construct_and_type_expression(self):
+        """
+        This pass will construct the resolved expression from the abstract
+        expression, and get type information at the same time.
+        """
         # If expr has already been constructed, return
         if self.constructed_expr or self.abstract:
             return
@@ -1195,7 +1210,7 @@ class PropertyDef(AbstractNodeData):
         with self.bind(), Self.bind_type(self.ast_node):
             self.constructed_expr = construct(self.expr, self.expected_type)
 
-    def render(self):
+    def render_property(self):
         """
         Render the given property to generated code.
 
