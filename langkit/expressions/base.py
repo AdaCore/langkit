@@ -1184,9 +1184,8 @@ class PropertyDef(AbstractNodeData):
             # exist.
             if base_prop.expected_type:
                 if self.expected_type:
-                    assert self.expected_type.matches(
-                        base_prop.expected_type
-                    ), (
+                    check_source_language(
+                        self.expected_type.matches(base_prop.expected_type),
                         "Property type does not match the type of the parent"
                         " property"
                     )
