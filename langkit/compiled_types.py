@@ -1195,11 +1195,10 @@ class Struct(CompiledType):
         """
         fields = cls.get_parse_fields(include_inherited=False)
 
-        assert len(fields) == len(types), (
-            "{} has {} fields ({} types given). You probably have"
-            " inconsistent grammar rules and type declarations".format(
-                cls, len(fields), len(types)
-            )
+        check_source_language(
+            len(fields) == len(types), "{} has {} fields ({} types given). You"
+            " probably have inconsistent grammar rules and type "
+            "declarations".format(cls.name().camel, len(fields), len(types))
         )
 
         # TODO: instead of expecting types to be subtypes, we might want to
