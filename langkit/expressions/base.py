@@ -937,6 +937,7 @@ class PropertyDef(AbstractNodeData):
         self.__current_properties__.pop()
 
     @classmethod
+    @contextmanager
     def bind_none(cls):
         """
         Unbind "Self", so that compilation no longer see the current property.
@@ -944,14 +945,9 @@ class PropertyDef(AbstractNodeData):
         This is needed to compile Property-less expressions such as environment
         specifications.
         """
-
-        @contextmanager
-        def guard():
-            cls.__current_properties__.append(None)
-            yield
-            cls.__current_properties__.pop()
-
-        return guard()
+        cls.__current_properties__.append(None)
+        yield
+        cls.__current_properties__.pop()
 
     @property
     def type(self):
