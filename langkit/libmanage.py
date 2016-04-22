@@ -322,6 +322,25 @@ class ManageScript(object):
 
     def run(self, argv=None):
         parsed_args = self.args_parser.parse_args(argv)
+
+        # If asked to, setup the exception hook as a last-chance handler to
+        # invoke a debugger in case of uncaught exception.
+        if parsed_args.debug:
+            # Try to use IPython's debugger if it is available, otherwise
+            # fallback to PDB.
+            try:
+                from IPython.core import ultratb
+            except ImportError:
+                def excepthook(type, value, tb):
+                    import traceback
+                    traceback.print_exception(type, value, tb)
+                    pdb.post_mortem(tb)
+                sys.excepthook = excepthook
+            else:
+                sys.excepthook = ultratb.FormattedTB(
+                    mode='Verbose', color_scheme='Linux', call_pdb=1
+                )
+
         self.dirs.set_build_dir(parsed_args.build_dir)
         install_dir = getattr(parsed_args, 'install-dir', None)
         if install_dir:
@@ -343,12 +362,7 @@ class ManageScript(object):
         else:
             cov = None
 
-        try:
-            self.context = self.create_context(parsed_args)
-        except:
-            if parsed_args.debug:
-                pdb.post_mortem()
-            raise
+        self.context = self.create_context(parsed_args)
         self.context.library_fields_all_public = getattr(
             parsed_args, 'library_fields_all_public', False
         )
@@ -359,14 +373,10 @@ class ManageScript(object):
         try:
             parsed_args.func(parsed_args)
         except DiagnosticError:
+            if parsed_args.debug:
+                raise
             print >> sys.stderr, col('Errors, exiting', Colors.FAIL)
-            if parsed_args.debug:
-                pdb.post_mortem()
             sys.exit(1)
-        except:
-            if parsed_args.debug:
-                pdb.post_mortem()
-            raise
 
         if cov is not None:
             cov.stop()
