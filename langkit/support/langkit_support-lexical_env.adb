@@ -185,13 +185,20 @@ package body Langkit_Support.Lexical_Env is
          Env := null;
          Last_Parent := null;
          while E /= null loop
-            Last_Parent := Create (Last_Parent, E.Node, E.Default_MD);
+            declare
+               New_Last_Parent : constant Lexical_Env :=
+                 Create (null, E.Node, E.Default_MD);
+            begin
+               if First then
+                  Env := New_Last_Parent;
+                  First := False;
+               else
+                  Last_Parent.Parent := New_Last_Parent;
+               end if;
+               Last_Parent := New_Last_Parent;
+            end;
             Last_Parent.Referenced_Envs := E.Referenced_Envs;
             Last_Parent.Env := E.Env;
-            if First then
-               Env := Last_Parent;
-               First := False;
-            end if;
             E := E.Parent;
          end loop;
       end Duplicate_Parent_Chain;
