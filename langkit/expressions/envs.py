@@ -1,8 +1,8 @@
 from langkit import names
 from langkit.compiled_types import LexicalEnvType, EnvElement, Token
 from langkit.expressions.base import (
-    AbstractVariable, AbstractExpression, BuiltinCallExpr, ResolvedExpression,
-    construct, PropertyDef
+    AbstractVariable, AbstractExpression, ArrayExpr, BuiltinCallExpr,
+    ResolvedExpression, construct, PropertyDef
 )
 
 Env = AbstractVariable(names.Name("Current_Env"), type=LexicalEnvType)
@@ -156,6 +156,24 @@ class EnvOrphan(AbstractExpression):
             'AST_Envs.Orphan',
             LexicalEnvType,
             [construct(self.env_expr, LexicalEnvType)]
+        )
+
+
+class EnvGroup(AbstractExpression):
+    """
+    Expression that will return a lexical environment thata logically groups
+    together multiple lexical environments.
+    """
+
+    def __init__(self, *env_exprs):
+        super(EnvGroup, self).__init__()
+        self.env_exprs = list(env_exprs)
+
+    def construct(self):
+        env_exprs = [construct(e, LexicalEnvType) for e in self.env_exprs]
+        return BuiltinCallExpr(
+            'Group', LexicalEnvType,
+            [ArrayExpr(env_exprs, LexicalEnvType)]
         )
 
 

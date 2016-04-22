@@ -1360,6 +1360,33 @@ class LiteralExpr(ResolvedExpression):
                                               self.type.name().camel)
 
 
+class ArrayExpr(ResolvedExpression):
+    """
+    Resolved expression for an aggregate expression for any type of array.
+    """
+
+    def __init__(self, exprs, element_type):
+        """
+        :param list[ResolvedExpression] exprs: List of resolved expression
+            whose types match element_type.
+        :param CompiledType element_type: Type for elements in this array.
+        """
+        self.exprs = exprs
+        self.element_type = element_type
+
+    @property
+    def type(self):
+        return self.element_type.array_type()
+
+    def render_pre(self):
+        return '\n'.join(e.render_pre() for e in self.exprs)
+
+    def render_expr(self):
+        return ('({})'.format(', '.join(e.render_expr() for e in self.exprs))
+                if self.exprs else
+                '(1 .. 0 => <>)')
+
+
 class UnreachableExpr(ResolvedExpression):
     """
     Resolved expression that just raises an error.
