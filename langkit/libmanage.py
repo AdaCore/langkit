@@ -329,8 +329,11 @@ class ManageScript(object):
             # Try to use IPython's debugger if it is available, otherwise
             # fallback to PDB.
             try:
+                # noinspection PyPackageRequirements
                 from IPython.core import ultratb
             except ImportError:
+                ultratb = None  # To keep PyCharm happy...
+
                 def excepthook(type, value, tb):
                     import traceback
                     traceback.print_exception(type, value, tb)
@@ -340,6 +343,7 @@ class ManageScript(object):
                 sys.excepthook = ultratb.FormattedTB(
                     mode='Verbose', color_scheme='Linux', call_pdb=1
                 )
+            del ultratb
 
         self.dirs.set_build_dir(parsed_args.build_dir)
         install_dir = getattr(parsed_args, 'install-dir', None)
