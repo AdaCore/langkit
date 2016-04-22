@@ -159,10 +159,11 @@ class EnvOrphan(AbstractExpression):
         )
 
 
-class EnvGroup(AbstractExpression):
+class EnvGroupArray(AbstractExpression):
     """
     Expression that will return a lexical environment that logically groups
-    together multiple lexical environments.
+    together multiple lexical environments from an array of lexical
+    environments.
     """
 
     def __init__(self, env_array_expr):
@@ -171,7 +172,7 @@ class EnvGroup(AbstractExpression):
             an array of lexical environments. If this array is empty, the empty
             environment is returned.
         """
-        super(EnvGroup, self).__init__()
+        super(EnvGroupArray, self).__init__()
         self.env_array_expr = env_array_expr
 
     def construct(self):
