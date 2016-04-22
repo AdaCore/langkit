@@ -106,13 +106,13 @@ class EnvSpec(object):
             if expr is None:
                 return None
 
-            p = PropertyDef(AbstractNodeData.PREFIX_INTERNAL,
-                            expr,
-                            name=names.Name('_{}_{}'.format(
-                                name,
-                                next(self.PROPERTY_COUNT))
-                            ),
-                            private=True, type=type)
+            p = PropertyDef(
+                AbstractNodeData.PREFIX_INTERNAL,
+                expr,
+                name=names.Name('_{}_{}'.format(name,
+                                                next(self.PROPERTY_COUNT))),
+                private=True, type=type
+            )
             result.append(p)
             return p
 
