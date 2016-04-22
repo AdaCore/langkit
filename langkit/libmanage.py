@@ -178,7 +178,7 @@ class ManageScript(object):
         args_parser.add_argument(
             '-g', '--debug', action='store_true',
             help='In case of internal error or diagnostic error, run a'
-                 ' post-motrem PDB session'
+                 ' post-mortem PDB session'
         )
 
         def create_parser(fn):
