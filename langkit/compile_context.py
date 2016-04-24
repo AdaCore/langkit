@@ -17,7 +17,7 @@ from distutils.spawn import find_executable
 from glob import glob
 import itertools
 import os
-from os import path, environ
+from os import path
 import shutil
 import subprocess
 import sys
@@ -251,6 +251,8 @@ class CompileCtx():
         self.default_charset = default_charset
 
         self.verbosity = verbosity
+
+        self.set_quex_path()
 
         self.compiled = False
         """
@@ -683,7 +685,7 @@ class CompileCtx():
             f.write(self.render_template(
                 "project_file",
                 lib_name=self.ada_api_settings.lib_name,
-                quex_path=os.environ["QUEX_PATH"],
+                quex_path=os.environ['QUEX_PATH'],
             ))
 
         # Copy langkit_support sources files to the include prefix and
@@ -784,7 +786,7 @@ class CompileCtx():
         # the Quex specification changed from last build.
         if generate_lexer and self.cache.is_stale('quex_specification',
                                                   quex_spec):
-            quex_py_file = path.join(environ["QUEX_PATH"], "quex-exe.py")
+            quex_py_file = path.join(os.environ["QUEX_PATH"], "quex-exe.py")
             subprocess.check_call([sys.executable, quex_py_file, "-i",
                                    quex_file,
                                    "-o", "quex_lexer",
@@ -871,3 +873,25 @@ class CompileCtx():
         if self.extensions_dir:
             ret = os.path.join(self.extensions_dir, *args)
             return ret if os.path.isfile(ret) else None
+
+    def set_quex_path(self):
+        """
+        If the QUEX_PATH environment variable is defined, do nothing.
+        Otherwise, look for the "quex" program and determine Quex's "share"
+        install directory: define the QUEX_PATH environment variable with it.
+        """
+        if 'QUEX_PATH' in os.environ:
+            return
+
+        try:
+            quex_bin = subprocess.check_output(['which', 'quex']).strip()
+        except subprocess.CalledProcessError:
+            printcol('Cannot find the "quex" program. Please define the'
+                     ' QUEX_PATH environment variable to Quex\'s "share"'
+                     ' install directory', Colors.FAIL)
+            raise
+
+        os.environ['QUEX_PATH'] = os.path.join(
+            os.path.dirname(os.path.dirname(quex_bin)),
+            'share', 'quex'
+        )
