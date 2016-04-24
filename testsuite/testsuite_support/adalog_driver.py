@@ -32,8 +32,8 @@ class AdalogDriver(BaseDriver):
             end P;
             """.format(
                 main_source=source,
-                adalog=os.path.join(self.testsuite_dir, "..", "adalog",
-                                    "adalog.gpr")
+                adalog=os.path.join(self.testsuite_dir, "..", "langkit",
+                                    "adalog", "adalog.gpr")
             ))
 
         self.run_and_check(['gprbuild', '-p', '-P', 'p.gpr'])

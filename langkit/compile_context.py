@@ -702,7 +702,7 @@ class CompileCtx():
         # Copy adalog files. TODO: This is kludgeish to the extreme, and is
         # only a workaround the fact you can't with regular projects from
         # library projects.
-        adalog_dir = join(dirname(dirname(abspath(__file__))), "adalog")
+        adalog_dir = join(dirname(abspath(__file__)), "adalog")
         for f in glob(join(adalog_dir, "src", "*.ad*")):
             shutil.copy(f, join(include_path, lib_name_low))
 
