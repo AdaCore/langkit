@@ -1268,6 +1268,19 @@ class PropertyDef(AbstractNodeData):
         # Strip the implicit "Lex_Env" argument
         return self.arguments[1:]
 
+    @classmethod
+    def compilation_passes(cls):
+        """
+        Return the list of compilation passes to run for properties.
+
+        :rtype: list[(PropertyDef) -> None]
+        """
+        return [cls.prepare_abstract_expression,
+                cls.freeze_abstract_expression,
+                cls.compute_property_attributes,
+                cls.construct_and_type_expression,
+                cls.render_property]
+
 
 # noinspection PyPep8Naming
 def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
