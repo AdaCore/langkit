@@ -271,7 +271,7 @@ class AbstractExpression(Frozable):
             'eval_in_env':    partial(EnvBind, self),
             'get':            partial(EnvGet, self),
             'env_group':      EnvGroupArray(self),
-            'orphan':         EnvOrphan(self),
+            'env_orphan':     EnvOrphan(self),
             'resolve_unique': partial(EnvGet, self, resolve_unique=True),
         }
 
