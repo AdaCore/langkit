@@ -246,9 +246,10 @@ class FieldAccess(AbstractExpression):
             self.arguments = arguments
             self.simple_field_access = False
 
-            # Expressions in environment specifications only allow field
-            # accesses. These are not evaluated in a property context, so
-            # they cannot create local variables.
+            # After EnvSpec.create_properties has been run, expressions in
+            # environment specifications only allow field accesses. These are
+            # not evaluated in a property context, so they cannot create local
+            # variables.
             #
             # TODO: in this context, it would still be useful to emit a null
             # check so that we raise a special exception instead of a
