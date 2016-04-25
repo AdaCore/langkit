@@ -25,7 +25,8 @@ import sys
 from langkit import astdoc, caching, names
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
-from langkit.diagnostics import check_source_language, errors_checkpoint
+from langkit.diagnostics import check_source_language, errors_checkpoint, \
+    Severity
 from langkit.expressions import PropertyDef
 from langkit.utils import Colors, printcol
 
@@ -569,12 +570,12 @@ class CompileCtx():
         unreferenced_rules = self.grammar.get_unreferenced_rules(
             self.main_rule_name
         )
-        if unreferenced_rules:
-            print(
-                "warning: The following parsing rules are not used: {}".format(
-                    ", ".join(sorted(unreferenced_rules))
-                )
-            )
+
+        check_source_language(
+            not unreferenced_rules, "The following parsing rules are not "
+            "used: {}".format(", ".join(sorted(unreferenced_rules))),
+            severity=Severity.warning
+        )
 
         # Compute type information, so that it is available for further
         # compilation stages.
