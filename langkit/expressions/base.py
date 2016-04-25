@@ -192,19 +192,19 @@ class AbstractExpression(Frozable):
         still construct new AbstractExpressions, which is not necessarily
         possible in construct.
         """
-        if not self.__dict__.get("_is_prepared", False):
-            self.do_prepare()
-            self.__dict__['_is_prepared'] = True
-            for _, v in self.__dict__.items():
+        def explore_objs(objs):
+            for v in objs:
                 if isinstance(v, AbstractExpression):
                     # Prepare the AbstractExpression direct attributes
                     v.prepare()
 
                 elif isinstance(v, (list, tuple)):
-                    # Also prepare the ones in list attributes
-                    for item in v:
-                        if isinstance(item, AbstractExpression):
-                            item.prepare()
+                    explore_objs(v)
+
+        if not self.__dict__.get("_is_prepared", False):
+            self.do_prepare()
+            self.__dict__['_is_prepared'] = True
+            explore_objs(self.__dict__.items())
 
     def construct(self):
         """
