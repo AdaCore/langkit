@@ -711,7 +711,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -------------
 
    function Parents
-     (Node : access ${root_node_value_type}; Include_Self : Boolean := False)
+     (Node : access ${root_node_value_type}; Include_Self : Boolean := True)
       return ${root_node_array.name()}
    is
       Count : Natural := 0;

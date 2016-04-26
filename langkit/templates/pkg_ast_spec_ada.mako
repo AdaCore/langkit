@@ -207,7 +207,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  performance hit of creating an array.
 
    function Parents
-     (Node : access ${root_node_value_type}; Include_Self : Boolean := False)
+     (Node : access ${root_node_value_type}; Include_Self : Boolean := True)
       return ${root_node_array.name()};
    --  Return the list of parents for this node. This node included in the list
    --  iff Include_Self.
