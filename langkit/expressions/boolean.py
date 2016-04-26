@@ -1,10 +1,13 @@
 from langkit import names
-from langkit.compiled_types import BoolType, ASTNode, LongType, Struct
+from langkit.compiled_types import (
+    ASTNode, BoolType, LexicalEnvType, LongType, Struct
+)
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, LiteralExpr, No, PropertyDef,
     ResolvedExpression, render, construct,
 )
+from langkit.expressions.envs import EmptyEnv
 from langkit.utils import assert_type
 
 
@@ -389,6 +392,8 @@ class Then(AbstractExpression):
                     # so the following is necessary not to have warnings.
                     assert_type(then_expr.type, Struct)
                 ))
+            elif then_expr.type.matches(LexicalEnvType):
+                default_expr = construct(EmptyEnv)
             else:
                 # The following is not actually used but PyCharm's typer
                 # requires it.
