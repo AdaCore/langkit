@@ -1,0 +1,4 @@
+File "test.py", line 21, in ExampleNode.prop
+    Warning: Casting to the same type
+Code generation was successful
+Done
