@@ -87,14 +87,20 @@ class Cast(AbstractExpression):
 
         :rtype: CastExpr
         """
-        return Cast.Expr(construct(
+        expr = construct(
             self.expr,
             lambda t: self.astnode.matches(t) or t.matches(self.astnode),
             'Cannot cast {{expr_type}} to {}: only (up/down)casting is '
             'allowed'.format(
                 self.astnode.name().camel
             )
-        ), self.astnode)
+        )
+        check_source_language(
+            expr.type != self.astnode,
+            'Casting to the same type',
+            severity=Severity.warning
+        )
+        return Cast.Expr(expr, self.astnode)
 
 
 class IsNull(AbstractExpression):
