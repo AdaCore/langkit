@@ -134,7 +134,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
             ## Token id is part of the class of token types for which we want to
             ## keep the text, but without internalization of the text.
             when ${" | ".join(
-               get_context().lexer.token_name(tok)
+               get_context().lexer.c_token_name(tok)
                for tok in get_context().lexer.token_actions['WithText']
             )} =>
                Text := Add_String (TDH, Bounded_Text);
@@ -147,7 +147,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
             ## Token id is part of the class of token types for which we want to
             ## internalize the text.
             when ${" | ".join(
-               get_context().lexer.token_name(tok)
+               get_context().lexer.c_token_name(tok)
                for tok in get_context().lexer.token_actions['WithSymbol']
             )} =>
                Text := Text_Access (Find (TDH.Symbols, Bounded_Text));
@@ -157,7 +157,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
          % if get_context().lexer.token_actions['WithTrivia']:
             when ${" | ".join(
-               get_context().lexer.token_name(tok)
+               get_context().lexer.c_token_name(tok)
                for tok in get_context().lexer.token_actions['WithTrivia']
             )} =>
                if With_Trivia then
@@ -378,7 +378,7 @@ begin
       Entries : constant array (Natural range <>) of Entry_Type :=
         (
        % for tok in get_context().lexer.tokens_class:
-           (Id   => ${get_context().lexer.token_name(tok)},
+           (Id   => ${get_context().lexer.c_token_name(tok)},
             Text => To_Unbounded_String
               ("${tok.name}"))
            % if (not loop.last):

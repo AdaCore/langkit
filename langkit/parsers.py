@@ -422,7 +422,7 @@ class Tok(Parser):
             'parsers/tok_code_ada',
             _self=self, pos_name=pos_name,
             pos=pos, res=res,
-            token_kind=get_context().lexer.token_name(self.val)
+            token_kind=get_context().lexer.c_token_name(self.val)
         )
 
         return ParserCodeContext(

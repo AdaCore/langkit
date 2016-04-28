@@ -4,6 +4,7 @@ from collections import defaultdict
 from itertools import count
 
 from langkit.common import TOKEN_PREFIX
+from langkit.names import Name
 from langkit.template_utils import common_renderer
 
 
@@ -57,12 +58,24 @@ class TokenAction(Action):
 
     def __init__(self):
         self._index = next(TokenAction._counter)
-        self.name = ""
+
+        self.name = None
+        ":type: names.Name"
+
         self.lexer = None
 
     @property
     def value(self):
         return self._index
+
+    def render(self, lexer):
+        """
+        Return Quex code to implement this token action.
+
+        :param Lexer lexer: Corresponding lexer.
+        :rtype: str
+        """
+        raise NotImplementedError()
 
 
 class NoText(TokenAction):
@@ -76,7 +89,7 @@ class NoText(TokenAction):
     """
 
     def render(self, lexer):
-        return "=> {};".format(lexer.token_name(self.name))
+        return "=> {};".format(lexer.c_token_name(self.name.upper))
 
 
 class WithText(TokenAction):
@@ -91,7 +104,7 @@ class WithText(TokenAction):
     """
 
     def render(self, lexer):
-        return "=> {}(Lexeme);".format(lexer.token_name(self.name))
+        return "=> {}(Lexeme);".format(lexer.c_token_name(self.name.upper))
 
 
 class WithTrivia(WithText):
@@ -120,7 +133,7 @@ class WithSymbol(TokenAction):
     """
 
     def render(self, lexer):
-        return "=> {}(Lexeme);".format(lexer.token_name(self.name))
+        return "=> {}(Lexeme);".format(lexer.c_token_name(self.name.upper))
 
 
 class LexerTokenMetaclass(type):
@@ -138,7 +151,7 @@ class LexerTokenMetaclass(type):
         fields = []
         for fld_name, fld_value in dct.items():
             if isinstance(fld_value, TokenAction):
-                fld_value.name = fld_name
+                fld_value.name = Name.from_camel(fld_name)
                 fields.append(fld_value)
 
         dct['fields'] = getattr(bases[0], 'fields', []) + fields
@@ -235,7 +248,7 @@ class Lexer(object):
         self.patterns = Patterns()
         self.__patterns = []
         self.rules = []
-        self.tokens_set = {el.name.lower() for el in self.tokens_class}
+        self.tokens_set = {el.name for el in self.tokens_class}
 
         # This map will keep a mapping from literal matches to token kind
         # values, so that you can find back those values if you have the
@@ -337,34 +350,47 @@ class Lexer(object):
             lexer=self
         )
 
-    def token_name(self, token):
+    def token_base_name(self, token):
         """
-        Helper function to get a token's internal name from an instance of the
-        token enum class, or from it's string representation (case
-        insensitive).
+        Helper function to get the name of a token.
 
-        :param Enum|str token: The instance of the token enum class.
-        :rtype: str
+        :param TokenAction|Enum|Name|str token: Input token. It can be either a
+            TokenAction subclass (i.e. a Lexer subclass attribute), an enum
+            value from "self.tokens_class", the token Name or a string (case
+            insensitive token name).
+        :rtype: Name
         """
         if isinstance(token, TokenAction):
-            name = token.name.upper()
+            return token.name
+        elif isinstance(token, Name):
+            assert token in self.tokens_set
+            return token
         else:
             assert isinstance(token, str), (
                 "Bad type for {}, supposed to be str|{}".format(
-                    token, self.tokens_class
+                    token, self.tokens_class.__name__
                 )
             )
-            if token.lower() in self.tokens_set:
-                name = token.upper()
+            name = Name.from_lower(token.lower())
+            if name in self.tokens_set:
+                return name
             elif token in self.literals_map:
-                name = self.literals_map[token].name
+                return self.literals_map[token].name
             else:
                 raise Exception(
                     "{} token literal is not part of the valid tokens for "
                     "this grammar".format(token)
                 )
 
-        return "{}{}".format(self.prefix, name.upper())
+    def c_token_name(self, token):
+        """
+        Helper function to get the name of the C constant to represent the kind
+        of "token".
+
+        :param TokenAction|Enum|Name|str token: See the token_base_name method.
+        :rtype: str
+        """
+        return "{}{}".format(self.prefix, self.token_base_name(token).upper)
 
 
 class Literal(Matcher):

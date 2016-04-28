@@ -42,7 +42,7 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
 
    % for tok in sorted(get_context().lexer.tokens_class, \
                        key=lambda tok: tok.value):
-       ${get_context().lexer.token_name(tok)} : constant := ${tok.value};
+       ${get_context().lexer.c_token_name(tok)} : constant := ${tok.value};
    % endfor
 
 private
