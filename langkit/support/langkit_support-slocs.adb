@@ -1,4 +1,4 @@
-package body Langkit_Support.Tokens is
+package body Langkit_Support.Slocs is
 
    -------------
    -- Compare --
@@ -36,4 +36,4 @@ package body Langkit_Support.Tokens is
                     else Inside));
    end Compare;
 
-end Langkit_Support.Tokens;
+end Langkit_Support.Slocs;

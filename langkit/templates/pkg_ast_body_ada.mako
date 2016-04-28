@@ -18,7 +18,6 @@ with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
 with Langkit_Support.Text;       use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handler;
 use Langkit_Support.Token_Data_Handler;
-with Langkit_Support.Tokens;     use Langkit_Support.Tokens;
 
 package body ${_self.ada_api_settings.lib_name}.AST is
 
@@ -264,7 +263,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          Node.Unit.Token_Data.all;
       Sloc_Start, Sloc_End : Source_Location;
 
-      function Get (Index : Token_Index) return Token_Type is
+      function Get (Index : Token_Index) return Token_Raw_Data_Type is
         (Get_Token (TDH, Index));
 
    begin

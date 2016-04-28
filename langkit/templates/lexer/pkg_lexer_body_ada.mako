@@ -17,7 +17,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
    use Token_Vectors, Trivia_Vectors, Integer_Vectors;
 
-   type Token_Type is record
+   type Interface_Token_Type is record
       Id                       : Unsigned_16;
       Text                     : System.Address;
       Text_Length              : size_t;
@@ -25,7 +25,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       Start_Column, End_Column : Unsigned_16;
    end record
       with Convention => C;
-   type Token_Access is access all Token_Type;
+   type Interface_Token_Access is access all Interface_Token_Type;
 
    type Lexer_Type is new System.Address;
 
@@ -55,7 +55,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
            External_Name => "${capi.get_name("free_lexer")}";
 
    function Next_Token (Lexer : Lexer_Type;
-                        Token : Token_Access) return int
+                        Token : Interface_Token_Access) return int
       with Import        => True,
            Convention    => C,
            External_Name => "${capi.get_name("next_token")}";
@@ -73,7 +73,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                                  TDH   : in out Token_Data_Handler)
    is
 
-      Token                 : aliased Token_Type;
+      Token                 : aliased Interface_Token_Type;
       Token_Id              : Token_Kind;
       Text                  : Text_Access;
       Continue              : Boolean := True;

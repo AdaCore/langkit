@@ -458,7 +458,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
      (Token        : ${token_type};
       Sloc_Range_P : ${sloc_range_type}_Ptr)
    is
-      T : Token_Type;
+      T : Token_Raw_Data_Type;
    begin
       Clear_Last_Exception;
       T := Unwrap (Token);
@@ -635,7 +635,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    -- Unwrap --
    ------------
 
-   function Unwrap (Token : ${token_type}) return Token_Type is
+   function Unwrap (Token : ${token_type}) return Token_Raw_Data_Type is
       Unit : constant Analysis_Unit_Interface := Unwrap (Token.Unit);
       TDH  : Token_Data_Handler renames Unit.Token_Data.all;
    begin

@@ -6,7 +6,7 @@
 ${res} := ${pos_name};
 
 declare
-   T : constant Token_Type := Get_Token (Parser.TDH.all, ${res});
+   T : constant Token_Raw_Data_Type := Get_Token (Parser.TDH.all, ${res});
    K : constant Token_Kind := Token_Kind'Enum_Val (T.Id);
 begin
    if K /= ${token_kind} then

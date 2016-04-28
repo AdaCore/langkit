@@ -6,8 +6,8 @@ with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
-with Langkit_Support.Text;   use Langkit_Support.Text;
-with Langkit_Support.Tokens; use Langkit_Support.Tokens;
+with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
+with Langkit_Support.Text;    use Langkit_Support.Text;
 
 with ${get_context().ada_api_settings.lib_name}.Lexer;
 with ${get_context().ada_api_settings.lib_name}.AST.Types.Parsers;

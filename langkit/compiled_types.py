@@ -482,7 +482,7 @@ class SourceLocationRangeType(BasicType):
 class Token(BasicType):
     is_ptr = False
     _name = "Token_Index"
-    _nullexpr = "No_Token"
+    _nullexpr = "No_Token_Index"
 
     @classmethod
     def c_type(cls, c_api_settings):

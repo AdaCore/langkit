@@ -16,12 +16,12 @@ with System;
 with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;
 with Adalog.Eq_Same;
 
-with Langkit_Support.Extensions;         use Langkit_Support.Extensions;
+with Langkit_Support.Extensions;  use Langkit_Support.Extensions;
 with Langkit_Support.Iterators;
 with Langkit_Support.Lexical_Env;
+with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Token_Data_Handler;
 use Langkit_Support.Token_Data_Handler;
-with Langkit_Support.Tokens;             use Langkit_Support.Tokens;
 with Langkit_Support.Vectors;
 
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
@@ -348,7 +348,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
          when Child =>
             Node : ${root_node_type_name};
          when Trivia =>
-            Trivia : Token_Type;
+            Trivia : Token_Raw_Data_Type;
       end case;
    end record;
    --  Variant that holds either an AST node or a token
@@ -373,7 +373,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
    function Get
      (Node  : access ${root_node_value_type}'Class;
       Index : Token_Index)
-      return Token_Type;
+      return Token_Raw_Data_Type;
    --  Get information about the token at Index. Node must be any AST node in
    --  the corresponding analysis unit.
 
@@ -605,7 +605,7 @@ private
    function Get
      (Node  : access ${root_node_value_type}'Class;
       Index : Token_Index)
-      return Token_Type
+      return Token_Raw_Data_Type
    is
      (Get_Token (Node.Unit.Token_Data.all, Index));
 

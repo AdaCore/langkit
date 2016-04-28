@@ -12,8 +12,8 @@ with Interfaces;           use Interfaces;
 with Interfaces.C;         use Interfaces.C;
 with Interfaces.C.Strings; use Interfaces.C.Strings;
 
-with Langkit_Support.Text;   use Langkit_Support.Text;
-with Langkit_Support.Tokens; use Langkit_Support.Tokens;
+with Langkit_Support.Slocs; use Langkit_Support.Slocs;
+with Langkit_Support.Text;  use Langkit_Support.Text;
 
 --  This package defines data types and subprograms to provide the
 --  implementation of the exported C API for analysis primitives.
@@ -350,7 +350,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    function Wrap (S : Unbounded_Wide_Wide_String) return ${text_type};
 
-   function Unwrap (Token : ${token_type}) return Token_Type;
+   function Unwrap (Token : ${token_type}) return Token_Raw_Data_Type;
 
    function Wrap (T : Text_Access) return ${text_type} is
      (if T = null

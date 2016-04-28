@@ -1,7 +1,7 @@
 with Ada.Containers.Vectors;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 
-with Langkit_Support.Tokens; use Langkit_Support.Tokens;
+with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 
 package Langkit_Support.Diagnostics is
 

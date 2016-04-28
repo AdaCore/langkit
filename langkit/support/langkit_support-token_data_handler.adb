@@ -78,11 +78,12 @@ package body Langkit_Support.Token_Data_Handler is
          else Get (TDH.Tokens_To_Trivias, Index));
       J : Natural;
 
-      function Extract (T : Trivia_Node) return Token_Type
+      function Extract (T : Trivia_Node) return Token_Raw_Data_Type
       is (T.T);
 
       function Map_Extract is new Trivia_Vectors.Elements_Arrays.Map_Gen
-        (Token_Type, Token_Vectors.Elements_Arrays.Array_Type, Extract);
+        (Token_Raw_Data_Type,
+         Token_Vectors.Elements_Arrays.Array_Type, Extract);
 
    begin
       if First_Trivia_Index /= -1 then

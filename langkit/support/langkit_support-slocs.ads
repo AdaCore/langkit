@@ -3,10 +3,7 @@ with Ada.Strings.Fixed;
 
 with Interfaces; use Interfaces;
 
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
-with Langkit_Support.Text;    use Langkit_Support.Text;
-
-package Langkit_Support.Tokens is
+package Langkit_Support.Slocs is
 
    type Relative_Position is (Before, Inside, After);
    --  Where some source location is with respect to another/a source location
@@ -21,19 +18,6 @@ package Langkit_Support.Tokens is
       Start_Line, End_Line     : Unsigned_32;
       Start_Column, End_Column : Unsigned_16;
    end record;
-
-   type Token_Type is record
-      Id         : Unsigned_16;
-
-      Text       : Text_Access;
-      --  Text as found in original source file or null depending on the token
-      --  kind (as decided in the lexer specification). For instance: null for
-      --  keywords but actual text for identifiers.
-
-      Sloc_Range : Source_Location_Range;
-   end record;
-
-   type Token_Access is access all Token_Type;
 
    No_Source_Location       : constant Source_Location       := (0, 0);
    No_Source_Location_Range : constant Source_Location_Range := (0, 0, 0, 0);
@@ -73,12 +57,4 @@ package Langkit_Support.Tokens is
      (Image (Start_Sloc (Sloc_Range)) & '-'
       & Image (End_Sloc (Sloc_Range)));
 
-   function Image (T : Token_Type) return String is
-     (if T.Text = null
-      then ""
-      else Image (T.Text.all));
-
-   function Get_Symbol (T : Token_Type) return Symbol_Type is
-      (Symbol_Type (T.Text));
-
-end Langkit_Support.Tokens;
+end Langkit_Support.Slocs;

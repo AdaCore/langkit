@@ -28,10 +28,10 @@ library project Langkit_Support is
       "Langkit_Support.Packrat",
       "Langkit_Support.PP_Utils",
       "Langkit_Support.Relative_Get",
+      "Langkit_Support.Slocs",
       "Langkit_Support.Symbols",
       "Langkit_Support.Token_Data_Handler",
       "Langkit_Support.Text",
-      "Langkit_Support.Tokens",
       "Langkit_Support.Vectors");
 
    for Source_Dirs use ("../../include/langkit_support");

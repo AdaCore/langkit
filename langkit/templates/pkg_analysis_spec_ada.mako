@@ -11,7 +11,6 @@ with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
 with Langkit_Support.Token_Data_Handler;
 use Langkit_Support.Token_Data_Handler;
-with Langkit_Support.Tokens;             use Langkit_Support.Tokens;
 with Langkit_Support.Vectors;
 
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
@@ -112,7 +111,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    function Get_Token
      (Unit  : Analysis_Unit;
       Token : Token_Index)
-      return Token_Type;
+      return Token_Raw_Data_Type;
    --  Return the data associated to a token identifier
 
    procedure Dump_Lexical_Env (Unit : Analysis_Unit);
@@ -205,7 +204,7 @@ private
    function Get_Token
      (Unit  : Analysis_Unit;
       Token : Token_Index)
-      return Token_Type
+      return Token_Raw_Data_Type
    is
      (Get_Token (Unit.TDH, Token));
 

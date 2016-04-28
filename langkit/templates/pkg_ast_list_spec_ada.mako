@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
 with Langkit_Support.Bump_Ptr.Vectors;
-with Langkit_Support.Tokens; use Langkit_Support.Tokens;
+with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 
 --  Generic package to create AST node types that just contain lists of other
 --  AST node types.
