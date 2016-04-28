@@ -1,14 +1,12 @@
 ## vim: filetype=makoada
 
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-
-with Interfaces; use Interfaces;
-
 with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
 
 with ${_self.ada_api_settings.lib_name}.Analysis;
 use ${_self.ada_api_settings.lib_name}.Analysis;
+with ${_self.ada_api_settings.lib_name}.Lexer;
+use ${_self.ada_api_settings.lib_name}.Lexer;
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 
@@ -22,8 +20,8 @@ package ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    type Fail_Info is record
       Pos               : Token_Index := -1;
-      Expected_Token_Id : Unsigned_16;
-      Found_Token_Id    : Unsigned_16;
+      Expected_Token_Id : Token_Kind;
+      Found_Token_Id    : Token_Kind;
    end record;
 
    type Parser_Type is record

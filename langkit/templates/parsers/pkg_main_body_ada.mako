@@ -113,12 +113,14 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
          if Parser.Current_Pos = Parser.Last_Fail.Pos then
             declare
                First_Garbage_Token : Token_Type renames
-                 Get_Token (Parser.TDH.all, Parser.Current_Pos);
-               D : constant Diagnostic :=
+                  Get_Token (Parser.TDH.all, Parser.Current_Pos);
+               Token_Id            : constant Token_Kind :=
+                  Token_Kind'val (First_Garbage_Token.Id);
+               D                   : constant Diagnostic :=
                  (Sloc_Range => First_Garbage_Token.Sloc_Range,
                   Message    => To_Unbounded_Wide_Wide_String (To_Text
                     ("End of input expected, got """
-                     & Token_Text (First_Garbage_Token.Id)
+                     & Token_Text (Token_Id)
                      & """")));
             begin
                Parser.Diagnostics.Append (D);

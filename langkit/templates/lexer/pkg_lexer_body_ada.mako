@@ -74,6 +74,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
    is
 
       Token                 : aliased Token_Type;
+      Token_Id              : Token_Kind;
       Text                  : Text_Access;
       Continue              : Boolean := True;
       Last_Token_Was_Trivia : Boolean := False;
@@ -127,14 +128,15 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
          --  token.
 
          Continue := Next_Token (Lexer, Token'Unrestricted_Access) /= 0;
+         Token_Id := Token_Kind'Enum_Val (Token.Id);
 
-         case Token.Id is
+         case Token_Id is
 
          % if get_context().lexer.token_actions['WithText']:
             ## Token id is part of the class of token types for which we want to
             ## keep the text, but without internalization of the text.
             when ${" | ".join(
-               get_context().lexer.c_token_name(tok)
+               get_context().lexer.ada_token_name(tok)
                for tok in get_context().lexer.token_actions['WithText']
             )} =>
                Text := Add_String (TDH, Bounded_Text);
@@ -147,7 +149,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
             ## Token id is part of the class of token types for which we want to
             ## internalize the text.
             when ${" | ".join(
-               get_context().lexer.c_token_name(tok)
+               get_context().lexer.ada_token_name(tok)
                for tok in get_context().lexer.token_actions['WithSymbol']
             )} =>
                Text := Text_Access (Find (TDH.Symbols, Bounded_Text));
@@ -157,7 +159,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
          % if get_context().lexer.token_actions['WithTrivia']:
             when ${" | ".join(
-               get_context().lexer.c_token_name(tok)
+               get_context().lexer.ada_token_name(tok)
                for tok in get_context().lexer.token_actions['WithTrivia']
             )} =>
                if With_Trivia then
@@ -366,30 +368,5 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       Iconv_Close (State);
       Length := (Output_Index - First_Output_Index) / 4;
    end Decode_Buffer;
-
-begin
-
-   declare
-      type Entry_Type is record
-         Id   : Unsigned_16;
-         Text : Unbounded_String;
-      end record;
-
-      Entries : constant array (Natural range <>) of Entry_Type :=
-        (
-       % for tok in get_context().lexer.tokens_class:
-           (Id   => ${get_context().lexer.c_token_name(tok)},
-            Text => To_Unbounded_String
-              ("${tok.name}"))
-           % if (not loop.last):
-               ,
-           % endif
-       % endfor
-        );
-   begin
-      for E of Entries loop
-         Token_Text_Map.Insert (E.Id, E.Text);
-      end loop;
-   end;
 
 end ${_self.ada_api_settings.lib_name}.Lexer;

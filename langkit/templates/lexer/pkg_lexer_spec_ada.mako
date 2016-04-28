@@ -1,10 +1,6 @@
 ## vim: filetype=makoada
 
-with Ada.Containers;        use Ada.Containers;
-with Ada.Containers.Hashed_Maps;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-
-with Interfaces; use Interfaces;
 
 with Langkit_Support.Token_Data_Handler;
 use Langkit_Support.Token_Data_Handler;
@@ -13,6 +9,21 @@ use Langkit_Support.Token_Data_Handler;
 --  of tokens.
 
 package ${_self.ada_api_settings.lib_name}.Lexer is
+
+   <%
+      tokens = sorted(get_context().lexer.tokens_class,
+                      key=lambda tok: tok.value)
+      lexer = get_context().lexer
+   %>
+
+   type Token_Kind is (
+      ${',\n'.join(lexer.ada_token_name(t) for t in tokens)}
+   );
+
+   for Token_Kind use (
+      ${',\n'.join('{} => {}'.format(lexer.ada_token_name(t), t.value)
+                   for t in tokens)}
+   );
 
    Unknown_Charset : exception;
    --  Raised by Lex_From_* functions when the input charset is not supported
@@ -33,32 +44,22 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
    --  Likewise, but extract tokens from an in-memory buffer. This never raises
    --  an exception.
 
-   function Token_Text (Token_Id : Unsigned_16) return String;
+   function Token_Text (Token_Id : Token_Kind) return String;
    --  Return a human-readable name for some token kind
-
-   ## When generated code needs to deal with token kinds, it could use integer
-   ## literals but this would not be convenient to read. Generate named
-   ## constants for each token kind instead.
-
-   % for tok in sorted(get_context().lexer.tokens_class, \
-                       key=lambda tok: tok.value):
-       ${get_context().lexer.c_token_name(tok)} : constant := ${tok.value};
-   % endfor
 
 private
 
-   function Hash (N : Unsigned_16) return Ada.Containers.Hash_Type is
-     (Ada.Containers.Hash_Type (N));
+   Token_Text_Data : constant array (Token_Kind) of String_Access := (
+      % for tok in get_context().lexer.tokens_class:
+          ${get_context().lexer.ada_token_name(tok)} =>
+             new String'("${tok.name}")
+          % if (not loop.last):
+              ,
+          % endif
+      % endfor
+   );
 
-   package Token_Text_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Unsigned_16,
-      Element_Type    => Unbounded_String,
-      Hash            => Hash,
-      Equivalent_Keys => "=");
-
-   Token_Text_Map : Token_Text_Maps.Map;
-
-   function Token_Text (Token_Id : Unsigned_16) return String is
-     (To_String (Token_Text_Map.Element (Token_Id)));
+   function Token_Text (Token_Id : Token_Kind) return String is
+     (Token_Text_Data (Token_Id).all);
 
 end ${_self.ada_api_settings.lib_name}.Lexer;

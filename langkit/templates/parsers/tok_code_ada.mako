@@ -7,8 +7,9 @@ ${res} := ${pos_name};
 
 declare
    T : constant Token_Type := Get_Token (Parser.TDH.all, ${res});
+   K : constant Token_Kind := Token_Kind'Enum_Val (T.Id);
 begin
-   if T.Id /= ${token_kind} then
+   if K /= ${token_kind} then
        ## If the result is not the one we expect, set pos to error
        ${pos} := -1;
 
@@ -17,12 +18,12 @@ begin
        if Parser.Last_Fail.Pos <= ${pos_name} then
            Parser.Last_Fail.Pos := ${pos_name};
            Parser.Last_Fail.Expected_Token_Id := ${token_kind};
-           Parser.Last_Fail.Found_Token_Id := T.Id;
+           Parser.Last_Fail.Found_Token_Id := K;
        end if;
    else
       ## We don't want to increment the position if we are matching the
       ## termination token (eg. the last token in the token stream).
-      % if token_kind == get_context().lexer.c_token_name('termination'):
+      % if token_kind == get_context().lexer.ada_token_name('termination'):
           ${pos} := ${pos_name};
       ## Else increment the current position
       % else:

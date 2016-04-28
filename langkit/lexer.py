@@ -4,6 +4,7 @@ from collections import defaultdict
 from itertools import count
 
 from langkit.common import TOKEN_PREFIX
+from langkit.compile_context import get_context
 from langkit.names import Name
 from langkit.template_utils import common_renderer
 
@@ -391,6 +392,17 @@ class Lexer(object):
         :rtype: str
         """
         return "{}{}".format(self.prefix, self.token_base_name(token).upper)
+
+    def ada_token_name(self, token):
+        """
+        Helper function to get the name of the Ada enumerator to represent the
+        kind of "token".
+
+        :param TokenAction|Enum|Name|str token: See the token_base_name method.
+        :rtype: str
+        """
+        prefixed_name = get_context().lang_name + self.token_base_name(token)
+        return prefixed_name.camel_with_underscores
 
 
 class Literal(Matcher):
