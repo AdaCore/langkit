@@ -468,8 +468,12 @@
       is
       begin
          return ${decl_type(field.type)}
-           (${type_name} (Node.all).${field.name}
-           ${"'Unrestricted_Access" if field.type.is_storage_value else ""});
+            (${field.type.extract_from_storage_expr(
+               'Node',
+               '{type_name} (Node.all).{field.name}'.format(
+                   type_name=type_name,
+                   field=field
+               ))});
       end ${field.name};
    % endfor
 

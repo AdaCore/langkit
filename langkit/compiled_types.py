@@ -149,14 +149,14 @@ class CompiledType(object):
     Whether this type is handled through pointers only in the generated code
     """
 
-    is_storage_value = False
+    has_special_storage = False
     """
-    Whether this type is stored by value. If this is True, we expect:
-    1. is_ptr to be true.
-    2. storage_type_name to be overloaded to provide the name of the value
-       type.
+    Whether this type uses a special type for storage in Structs and AST nodes.
+    If this is true, the following class methods may be overriden:
 
-    TODO: We should check that those invariants are respected this somewhere.
+    * storage_type_name;
+    * storage_nullexpr;
+    * extract_from_storage_expr.
     """
 
     is_list_type = False
@@ -220,12 +220,26 @@ class CompiledType(object):
     def storage_type_name(cls):
         """
         Return the name of the type that is used to store instances of this
-        type in Structs/ASTNodes. This only needs to be overloaded when the
-        "is_storage_value" attribute is set to True, in which case the storage
-        type and the type passed around in properties and in the public API are
-        not the same.
+        type in Structs and ASTNodes. See documentation for
+        has_special_storage.
+
+        :rtype: str
         """
         return cls.name()
+
+    @classmethod
+    def extract_from_storage_expr(cls, node_expr, base_expr):
+        """
+        Turn a storage value into a public value. See documentation for
+        has_special_storage.
+
+        :param str node_expr: Expression that yields the node that owns the
+            storage value.
+        :param str base_expr: Expression that yields the storage value.
+        :return: An expression that yields the public value.
+        :rtype: str
+        """
+        return base_expr
 
     @classmethod
     def nullexpr(cls):
@@ -239,9 +253,10 @@ class CompiledType(object):
     @classmethod
     def storage_nullexpr(cls):
         """
-        Return the nullexpr that is used for fields of this type in
-        Structs/ASTNodes. Only needed if "is_storage_value" is True. See
-        storage_type_name for more details.
+        Return the nullexpr that is used for fields of this type in Structs and
+        ASTNodes. See documentation for has_special_storage.
+
+        :rtype: str
         """
         return cls.nullexpr()
 
@@ -415,11 +430,16 @@ class LogicVarType(BasicType):
     _nullexpr = "null"
     _storage_nullexpr = "Null_Var_Record"
     is_ptr = False
-    is_storage_value = True
+    has_special_storage = True
 
     @classmethod
     def storage_type_name(cls):
         return names.Name("Logic_Var_Record")
+
+    @classmethod
+    def extract_from_storage_expr(cls, node_expr, base_expr):
+        del node_expr
+        return "{}'Unrestricted_Access".format(base_expr)
 
     @classmethod
     def c_type(cls, c_api_settings):

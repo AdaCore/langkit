@@ -4,8 +4,8 @@ from langkit import names
 from langkit.compiled_types import ASTNode, Struct, BoolType, resolve_type
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, ResolvedExpression, construct,
-    render, PropertyDef, LiteralExpr, UnreachableExpr
+    AbstractExpression, AbstractVariable, LiteralExpr, PropertyDef,
+    ResolvedExpression, Self, UnreachableExpr, construct, render
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
@@ -320,14 +320,14 @@ class FieldAccess(AbstractExpression):
                     for name, value in args
                 ))
 
-            elif self.node_data.type.is_storage_value:
-                # If this is true, the type of field is a ptr but the
-                # storage is not. We want to return an access. IMPORTANT: Note
-                # that we do that *only* if we're not calling a property, which
-                # means we're accessing a field. If we're calling a property
-                # that is stored by value, we don't want to do anything
-                # special.
-                ret += "'Unrestricted_Access"
+            else:
+                # If we reach this point, we know that we are accessing a
+                # Struct field: make sure we return the public API type, which
+                # may be different from the type thas is stored in the Struct.
+                ret = self.node_data.type.extract_from_storage_expr(
+                    Self._name.camel_with_underscores,
+                    ret
+                )
 
             return ret
 
