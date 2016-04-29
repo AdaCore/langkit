@@ -661,6 +661,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       begin
          if E = Root_Env then
             return " <root>";
+         elsif E = null then
+            return " <null>";
          end if;
 
          Env_Ids.Insert (E, Current_Env_Id, C, Inserted);
