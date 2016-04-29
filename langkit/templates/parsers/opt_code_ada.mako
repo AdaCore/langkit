@@ -12,7 +12,8 @@ if ${parser_context.pos_var_name} = -1 then
     % if _self._booleanize:
         ${bool_res} := False;
     % else:
-        ${parser_context.res_var_name} := ${_self.parser.get_type().nullexpr()};
+        ${parser_context.res_var_name} :=
+           ${_self.parser.get_type().storage_nullexpr()};
     % endif
 
     % if _self._is_error:

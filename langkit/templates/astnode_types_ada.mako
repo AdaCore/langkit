@@ -14,7 +14,7 @@
 
 <%def name="field_decl(field)">
    function ${field.name}
-     (Node : ${field.ast_node.name()}) return ${decl_type(field.type)};
+     (Node : ${field.ast_node.name()}) return ${field.type.name()};
    ${ada_doc(field, 6)}
 </%def>
 
@@ -464,16 +464,18 @@
 
    % for field in cls.get_fields(include_inherited=False):
       function ${field.name}
-        (Node : ${cls.name()}) return ${decl_type(field.type)}
+        (Node : ${cls.name()}) return ${field.type.name()}
       is
       begin
-         return ${decl_type(field.type)}
-            (${field.type.extract_from_storage_expr(
-               'Node',
-               '{type_name} (Node.all).{field.name}'.format(
-                   type_name=type_name,
-                   field=field
-               ))});
+         <%
+            field_access = field.type.extract_from_storage_expr(
+               node_expr='Node',
+               base_expr='Node.{}'.format(field.name)
+            )
+            if is_ast_node(field.type):
+               field_access = '{} ({})'.format(field.type.name(), field_access)
+         %>
+         return ${field_access};
       end ${field.name};
    % endfor
 

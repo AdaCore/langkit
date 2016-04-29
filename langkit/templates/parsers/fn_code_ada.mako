@@ -8,13 +8,13 @@ function ${_self.gen_fn_name} (Parser : in out Parser_Type;
 is
    % for name, typ in parser_context.var_defs:
       ${name} : ${decl_type(typ)}
-         ${":= " + typ.nullexpr() if typ.nullexpr() else ""};
+         ${":= " + typ.storage_nullexpr() if typ.storage_nullexpr() else ""};
    % endfor
 
    % if _self.is_left_recursive():
       Mem_Pos : Token_Index := Pos;
       Mem_Res : ${decl_type(_self.get_type())} :=
-         ${_self.get_type().nullexpr()};
+         ${_self.get_type().storage_nullexpr()};
    % endif
 
    M       : ${decl_type(_self.get_type())}_Memos.Memo_Entry :=

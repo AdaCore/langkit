@@ -14,7 +14,7 @@
     ${pos} := -1;
 % endif
 
-${res} := ${_self.get_type().nullexpr()};
+${res} := ${_self.get_type().storage_nullexpr()};
 ${cpos} := ${pos_name};
 
 loop
@@ -54,7 +54,7 @@ loop
    % if _self.revtree_class:
 
       ## If the current result is null, this is the first result. Store it.
-      if ${res} = ${_self.get_type().nullexpr()} then
+      if ${res} = ${_self.get_type().storage_nullexpr()} then
          ${res} := ${_self.get_type().name()} (${parser_context.res_var_name});
 
       ## Else, fold the current and previous results into a new node
@@ -103,7 +103,7 @@ loop
       ## result has been parsed.
       <% parser_type = decl_type(_self.parser.get_type()) %>
 
-      if ${res} = ${_self.get_type().nullexpr()} then
+      if ${res} = ${_self.get_type().storage_nullexpr()} then
          ${res} := List_${parser_type}
            (List_${parser_type}_Alloc.Alloc (Parser.Mem_Pool));
 
