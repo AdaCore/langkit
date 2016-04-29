@@ -140,13 +140,11 @@ class Grammar(object):
         """
         return Defer(rule_name, lambda: self.rules[rule_name])
 
-    def get_unreferenced_rules(self, main_rule_name):
+    def get_unreferenced_rules(self):
         """
         Return a set of names for all rules that are not transitively
         referenced by the main rule.
 
-        :param str main_rule_name: Name of the main rule from which the
-            analysis is performed.
         :rtype: set[str]
         """
         # We'll first build the set of rules that are referenced, then we'll
@@ -180,7 +178,7 @@ class Grammar(object):
             visit_parser(self.rules[rule_name])
 
         # The following will fill "referenced_rules" thanks to recursion
-        visit_rule(main_rule_name)
+        visit_rule(self.main_rule_name)
 
         return set(self.rules) - referenced_rules
 
