@@ -90,7 +90,7 @@ class NoText(TokenAction):
     """
 
     def render(self, lexer):
-        return "=> {};".format(lexer.c_token_name(self.name.upper))
+        return "=> {};".format(lexer.quex_token_name(self.name.upper))
 
 
 class WithText(TokenAction):
@@ -105,7 +105,7 @@ class WithText(TokenAction):
     """
 
     def render(self, lexer):
-        return "=> {}(Lexeme);".format(lexer.c_token_name(self.name.upper))
+        return "=> {}(Lexeme);".format(lexer.quex_token_name(self.name.upper))
 
 
 class WithTrivia(WithText):
@@ -134,7 +134,7 @@ class WithSymbol(TokenAction):
     """
 
     def render(self, lexer):
-        return "=> {}(Lexeme);".format(lexer.c_token_name(self.name.upper))
+        return "=> {}(Lexeme);".format(lexer.quex_token_name(self.name.upper))
 
 
 class LexerTokenMetaclass(type):
@@ -383,7 +383,7 @@ class Lexer(object):
                     "this grammar".format(token)
                 )
 
-    def c_token_name(self, token):
+    def quex_token_name(self, token):
         """
         Helper function to get the name of the C constant to represent the kind
         of "token".
