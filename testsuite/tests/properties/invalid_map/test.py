@@ -34,8 +34,7 @@ def run(name, expr):
         nb_list = Field()
         prop = Property(expr)
 
-    foo_grammar = Grammar()
-    foo_grammar.main_rule_name = 'main_rule'
+    foo_grammar = Grammar('main_rule')
     foo_grammar.add_rules(
         main_rule=Row('example', foo_grammar.list_rule) ^ BarNode,
         list_rule=Row(List(Tok(Token.Number))) ^ ListNode,

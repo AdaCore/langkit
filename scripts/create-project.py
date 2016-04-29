@@ -95,8 +95,7 @@ class {lang_name}Node(ASTNode):
 class ExampleNode({lang_name}Node):
     pass
 
-{lang_name_slug}_grammar = Grammar()
-{lang_name_slug}_grammar.main_rule_name = 'main_rule'
+{lang_name_slug}_grammar = Grammar('main_rule')
 {lang_name_slug}_grammar.add_rules(
     main_rule=Row('example') ^ ExampleNode
 )

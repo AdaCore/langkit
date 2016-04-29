@@ -45,8 +45,7 @@ def run(name, astnode_fn):
     class NullNode(FooNode):
         pass
 
-    foo_grammar = Grammar()
-    foo_grammar.main_rule_name = 'main_rule'
+    foo_grammar = Grammar('main_rule')
     foo_grammar.add_rules(
         main_rule=Or(Row('example') ^ ExampleNode,
                      Row('null') ^ NullNode)

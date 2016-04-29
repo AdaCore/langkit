@@ -37,8 +37,7 @@ def run(abstract_private, concrete_private):
     class ConcreteNode(AbstractNode):
         prop = Property(Literal(True), private=concrete_private)
 
-    foo_grammar = Grammar()
-    foo_grammar.main_rule_name = 'main_rule'
+    foo_grammar = Grammar('main_rule')
     foo_grammar.add_rules(
         main_rule=Row('example') ^ ConcreteNode,
     )

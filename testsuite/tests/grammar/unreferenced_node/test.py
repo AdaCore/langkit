@@ -23,8 +23,7 @@ class UnreferencedNode(FooNode):
     pass
 
 
-foo_grammar = Grammar()
-foo_grammar.main_rule_name = 'main_rule'
+foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=Row('example') ^ ExampleNode
 )

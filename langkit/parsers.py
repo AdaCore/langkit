@@ -105,8 +105,9 @@ class Grammar(object):
     class will automatically resolve forward references when needed.
     """
 
-    def __init__(self):
+    def __init__(self, main_rule_name):
         self.rules = {}
+        self.main_rule_name = main_rule_name
 
     def add_rules(self, **kwargs):
         """

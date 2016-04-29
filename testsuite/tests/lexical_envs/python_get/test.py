@@ -38,7 +38,7 @@ class Block(Stmt):
     env_spec = EnvSpec(add_env=True)
 
 
-foo_grammar = Grammar()
+foo_grammar = Grammar('stmts_rule')
 foo_grammar.add_rules(
     def_rule=Row(
         Tok(Token.Identifier, keep=True),
@@ -54,6 +54,4 @@ foo_grammar.add_rules(
 )
 
 
-build_and_run(foo_grammar, 'script.py',
-              main_rule_name='stmts_rule',
-              library_fields_all_public=True)
+build_and_run(foo_grammar, 'script.py', library_fields_all_public=True)

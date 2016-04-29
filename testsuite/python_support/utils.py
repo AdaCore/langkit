@@ -1,10 +1,9 @@
 import os
 import shutil
 import subprocess
-import sys
 
 from langkit.compile_context import CompileCtx
-from langkit.compiled_types import ASTNode, StructMetaClass, root_grammar_class
+from langkit.compiled_types import ASTNode, StructMetaClass
 from langkit.diagnostics import DiagnosticError
 from langkit.expressions import Self
 from langkit.libmanage import ManageScript
@@ -12,7 +11,7 @@ from langkit.libmanage import ManageScript
 from lexer_example import foo_lexer
 
 
-def prepare_context(grammar, main_rule_name='main_rule',
+def prepare_context(grammar,
                     lexer=foo_lexer,
                     library_fields_all_public=False):
     """
@@ -21,9 +20,6 @@ def prepare_context(grammar, main_rule_name='main_rule',
 
     :param langkit.parsers.Grammar grammar: The language grammar to use for
         this context.
-
-    :param str main_rule_name: Name of the main gramma rule to use for this
-        context.
 
     :param langkit.lexer.Lexer lexer: The language lexer to use for this
         context.
@@ -39,7 +35,6 @@ def prepare_context(grammar, main_rule_name='main_rule',
 
     # Try to emit code
     ctx = CompileCtx(lang_name='Foo',
-                     main_rule_name=main_rule_name,
                      lexer=lexer,
                      grammar=grammar)
     ctx.library_fields_all_public = library_fields_all_public
@@ -47,7 +42,7 @@ def prepare_context(grammar, main_rule_name='main_rule',
     return ctx
 
 
-def emit_and_print_errors(grammar, main_rule_name='main_rule',
+def emit_and_print_errors(grammar,
                           lexer=foo_lexer,
                           library_fields_all_public=False):
     """
@@ -55,8 +50,7 @@ def emit_and_print_errors(grammar, main_rule_name='main_rule',
 
     :rtype: bool
     """
-    ctx = prepare_context(grammar, main_rule_name, lexer,
-                          library_fields_all_public)
+    ctx = prepare_context(grammar, lexer, library_fields_all_public)
 
     try:
         ctx.emit('build', generate_lexer=False)
@@ -71,7 +65,7 @@ def emit_and_print_errors(grammar, main_rule_name='main_rule',
         return True
 
 
-def build_and_run(grammar, py_script, main_rule_name='main_rule',
+def build_and_run(grammar, py_script,
                   lexer=foo_lexer,
                   library_fields_all_public=False):
     """
@@ -81,8 +75,7 @@ def build_and_run(grammar, py_script, main_rule_name='main_rule',
     An exception is raised if any step fails (the script must return code 0).
     """
 
-    ctx = prepare_context(grammar, main_rule_name, lexer,
-                          library_fields_all_public)
+    ctx = prepare_context(grammar, lexer, library_fields_all_public)
 
     class Manage(ManageScript):
         def create_context(self, args):

@@ -51,8 +51,7 @@ def run(name, match_expr):
 
         prop = Property(match_expr)
 
-    foo_grammar = Grammar()
-    foo_grammar.main_rule_name = 'main_rule'
+    foo_grammar = Grammar('main_rule')
     foo_grammar.add_rules(
         main_rule=Row(
             'example',

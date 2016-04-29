@@ -181,7 +181,7 @@ class Verbosity(object):
 class CompileCtx():
     """State holder for native code emission."""
 
-    def __init__(self, lang_name, main_rule_name, lexer, grammar,
+    def __init__(self, lang_name, lexer, grammar,
                  lib_name=None,
                  library_fields_all_public=False,
                  c_symbol_prefix=None,
@@ -192,9 +192,6 @@ class CompileCtx():
 
         :param str lang_name: string (mixed case and underscore: see
             langkit.names.Name) for the Name of the target language.
-
-        :param str main_rule_name: Name for the grammar rule that will be used
-            as an entry point when parsing units.
 
         :param lexer: A lexer for the target language.
         :type lexer: langkit.lexer.Lexer
@@ -230,7 +227,6 @@ class CompileCtx():
         from langkit.python_api import PythonAPISettings
 
         self.lang_name = names.Name(lang_name)
-        self.main_rule_name = main_rule_name
 
         lib_name = (
             names.Name('Lib{}lang'.format(self.lang_name.lower))
@@ -271,6 +267,8 @@ class CompileCtx():
 
         self.grammar = grammar
         ":type: langkit.parsers.Grammar"
+
+        self.main_rule_name = grammar.main_rule_name
 
         self.python_api_settings = (
             PythonAPISettings(lib_name.lower, self.c_api_settings)

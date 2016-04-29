@@ -21,7 +21,7 @@ class Def(FooNode):
     env_spec = EnvSpec(add_env=True, add_to_env=(Self.name, Self))
 
 
-foo_grammar = Grammar()
+foo_grammar = Grammar('stmt_rule')
 foo_grammar.add_rules(
     def_rule=Row(
         Tok(Token.Identifier, keep=True),
@@ -33,6 +33,6 @@ foo_grammar.add_rules(
         empty_valid=True
     )
 )
-assert emit_and_print_errors(foo_grammar, main_rule_name='stmt_rule')
+assert emit_and_print_errors(foo_grammar)
 
 print 'Done'

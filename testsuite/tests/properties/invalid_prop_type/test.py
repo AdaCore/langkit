@@ -26,8 +26,7 @@ class BarNode(FooNode):
     prop_2 = Property(Self.parent.cast(BarCode).prop_1)
 
 
-foo_grammar = Grammar()
-foo_grammar.main_rule_name = 'main_rule'
+foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=Row('example', foo_grammar.rule_2) ^ BarCode,
     rule_2=Row('example') ^ BarNode,

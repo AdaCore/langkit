@@ -33,8 +33,7 @@ def run(name, expr):
     class BarNode(FooNode):
         prop = Property(expr)
 
-    foo_grammar = Grammar()
-    foo_grammar.main_rule_name = 'main_rule'
+    foo_grammar = Grammar('main_rule')
     foo_grammar.add_rules(
         main_rule=Row('example') ^ BarNode,
     )
