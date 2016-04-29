@@ -574,18 +574,18 @@ class CompileCtx():
                 self.main_rule_name, self.grammar.rules.keys()
             )
 
-            check_source_language(
-                False,
-                'Invalid rule name specified for main rule: "{}". {}'.format(
-                    self.main_rule_name,
-                    'Did you mean "{}" ?'.format(close_matches[0])
-                    if close_matches else ""
+            with self.grammar.context():
+                check_source_language(
+                    False,
+                    'Invalid rule name specified for main rule: "{}". '
+                    '{}'.format(
+                        self.main_rule_name,
+                        'Did you mean "{}"?'.format(close_matches[0])
+                        if close_matches else ""
+                    )
                 )
-            )
 
-        unreferenced_rules = self.grammar.get_unreferenced_rules(
-            self.main_rule_name
-        )
+        unreferenced_rules = self.grammar.get_unreferenced_rules()
 
         check_source_language(
             not unreferenced_rules, "The following parsing rules are not "

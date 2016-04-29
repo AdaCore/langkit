@@ -32,6 +32,9 @@ from langkit.compile_context import get_context
 from langkit.compiled_types import (
     CompiledType, BoolType, Token, ASTNode, decl_type
 )
+from langkit.diagnostics import (
+    extract_library_location, context, check_source_language
+)
 from langkit.template_utils import TemplateEnvironment
 from langkit.utils import (Colors, common_ancestor, copy_with, col,
                            type_check_instance)
@@ -108,6 +111,10 @@ class Grammar(object):
     def __init__(self, main_rule_name):
         self.rules = {}
         self.main_rule_name = main_rule_name
+        self.location = extract_library_location()
+
+    def context(self):
+        return context("In definition of grammar", self.location)
 
     def add_rules(self, **kwargs):
         """
