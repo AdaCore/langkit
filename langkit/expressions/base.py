@@ -574,14 +574,7 @@ class GetSymbol(AbstractExpression):
 
         :rtype: BuiltinCallExpr
         """
-        token_index = construct(self.token_expr, Token)
-
-        # We have no compiled type corresponding to the type of this
-        # BuiltinCallExpr (Token_Type). It's no big deal because it is an
-        # internal ResolvedExpression whose type will not be used anyway. So
-        # pass None for the type.
-        token = BuiltinCallExpr("Token", None, [construct(Self), token_index])
-
+        token = construct(self.token_expr, Token)
         return BuiltinCallExpr("Get_Symbol", Symbol, [token])
 
 

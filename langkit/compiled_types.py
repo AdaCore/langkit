@@ -501,8 +501,22 @@ class SourceLocationRangeType(BasicType):
 
 class Token(BasicType):
     is_ptr = False
-    _name = "Token_Index"
-    _nullexpr = "No_Token_Index"
+    _name = "Token_Type"
+    _nullexpr = "No_Token"
+
+    has_special_storage = True
+
+    @classmethod
+    def storage_type_name(cls):
+        return 'Token_Index'
+
+    @classmethod
+    def storage_nullexpr(cls):
+        return 'No_Token_Index'
+
+    @classmethod
+    def extract_from_storage_expr(cls, node_expr, base_expr):
+        return 'Token ({}, {})'.format(node_expr, base_expr)
 
     @classmethod
     def c_type(cls, c_api_settings):
