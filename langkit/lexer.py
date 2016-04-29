@@ -404,6 +404,16 @@ class Lexer(object):
         prefixed_name = get_context().lang_name + self.token_base_name(token)
         return prefixed_name.camel_with_underscores
 
+    @property
+    def sorted_tokens(self):
+        """
+        Return the list of token types sorted by their corresponding numeric
+        values.
+
+        :rtype: list[TokenAction]
+        """
+        return sorted(self.tokens_class, key=lambda t: t.value)
+
 
 class Literal(Matcher):
     """

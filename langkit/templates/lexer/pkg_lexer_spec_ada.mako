@@ -13,9 +13,8 @@ use Langkit_Support.Token_Data_Handler;
 package ${_self.ada_api_settings.lib_name}.Lexer is
 
    <%
-      tokens = sorted(get_context().lexer.tokens_class,
-                      key=lambda tok: tok.value)
       lexer = get_context().lexer
+      tokens = lexer.sorted_tokens
    %>
 
    type Token_Kind is (
