@@ -60,14 +60,14 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
            Convention    => C,
            External_Name => "${capi.get_name("next_token")}";
 
-   ------------------------
-   -- Process_All_Tokens --
-   ------------------------
-
    generic
       With_Trivia : Boolean;
    procedure Process_All_Tokens (Lexer : Lexer_Type;
                                  TDH   : in out Token_Data_Handler);
+
+   ------------------------
+   -- Process_All_Tokens --
+   ------------------------
 
    procedure Process_All_Tokens (Lexer : Lexer_Type;
                                  TDH   : in out Token_Data_Handler)
