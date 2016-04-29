@@ -219,7 +219,7 @@
                 Append (Result,
                         Image (${root_node_type_name} (Node.${field.name})));
              % elif is_token_type(field.type):
-                Append (Result, Image (Get (Node, Node.${field.name})));
+                Append (Result, Image (Token (Node, Node.${field.name})));
              % else:
                 Append (Result, Image (Node.${field.name}));
              % endif
@@ -299,7 +299,7 @@
 
             % elif is_token_type(field.type):
                Put_Line (Level + 1, "${field._name.lower}: "
-                         & Image (Get (Node, Node.${field.name})));
+                         & Image (Token (Node, Node.${field.name})));
 
             % else:
                Put_Line (Level + 1, "${field._name.lower}: "

@@ -20,12 +20,15 @@ with Langkit_Support.Extensions;  use Langkit_Support.Extensions;
 with Langkit_Support.Iterators;
 with Langkit_Support.Lexical_Env;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
+with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Token_Data_Handler;
 use Langkit_Support.Token_Data_Handler;
 with Langkit_Support.Vectors;
 
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
+with ${_self.ada_api_settings.lib_name}.Lexer;
+use ${_self.ada_api_settings.lib_name}.Lexer;
 
 --  This package defines the base ("root") type for AST nodes. All node types
 --  that appear in the AST derive from it.
@@ -340,6 +343,35 @@ package ${_self.ada_api_settings.lib_name}.AST is
    -- Lexical utilities --
    -----------------------
 
+   type Token_Type is private;
+   ${ada_doc('langkit.token_type')}
+
+   No_Token : constant Token_Type;
+
+   function Token
+     (Node  : access ${root_node_value_type}'Class;
+      Index : Token_Index)
+      return Token_Type;
+   --  Create a token from Index, a token index related to Node. This is for
+   --  internal use.
+
+   function Index (Token : Token_Type) return Token_Index;
+   --  Return the index used internally to represent a token for a given
+   --  analysis unit. This is for internal use only. TODO??? Remove this once
+   --  all primitives are available on Token_Type.
+
+   function Data (T : Token_Type) return Token_Data_Type;
+   --  Return the data associated to T
+
+   function Get_Symbol (Token : Token_Type) return Symbol_Type is
+     (Symbol_Type (Data (Token).Text));
+   --  Assuming that Token refers to a token that contains a symbol, return the
+   --  corresponding symbol. This is an internal helper for properties code
+   --  generation.
+
+   function Image (Token : Token_Type) return String;
+   --  Debug helper: return a human-readable text to represent a token
+
    type Child_Or_Trivia is (Child, Trivia);
    --  Discriminator for the Child_Record type
 
@@ -348,7 +380,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
          when Child =>
             Node : ${root_node_type_name};
          when Trivia =>
-            Trivia : Token_Raw_Data_Type;
+            Trivia : Token_Data_Type;
       end case;
    end record;
    --  Variant that holds either an AST node or a token
@@ -364,18 +396,11 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --    will be part of the returned array;
    --  - Nodes and trivias will be lexically ordered.
 
-   function Token_Start (Node : ${root_node_type_name}) return Token_Index;
-   --  Return the index of the first token used to parse Node
+   function Token_Start (Node : ${root_node_type_name}) return Token_Type;
+   --  Return the first token used to parse Node
 
-   function Token_End (Node : ${root_node_type_name}) return Token_Index;
-   --  Return the index of the last token used to parse Node
-
-   function Get
-     (Node  : access ${root_node_value_type}'Class;
-      Index : Token_Index)
-      return Token_Raw_Data_Type;
-   --  Get information about the token at Index. Node must be any AST node in
-   --  the corresponding analysis unit.
+   function Token_End (Node : ${root_node_type_name}) return Token_Type;
+   --  Return the last token used to parse Node
 
    -------------------
    -- Debug helpers --
@@ -597,17 +622,30 @@ private
    --  Implementation helper for the looking up process. TODO??? Do not expose
    --  it in the public API.
 
-   function Token_Start (Node : ${root_node_type_name}) return Token_Index is
-     (Node.Token_Start);
-   function Token_End (Node : ${root_node_type_name}) return Token_Index is
-     (Node.Token_End);
+   -----------------------------------
+   -- Lexical utilities (internals) --
+   -----------------------------------
 
-   function Get
+   type Token_Type is record
+      TDH   : Token_Data_Handler_Access;
+      Token : Token_Index;
+   end record;
+
+   No_Token : constant Token_Type := (null, -1);
+
+   function Token
      (Node  : access ${root_node_value_type}'Class;
       Index : Token_Index)
-      return Token_Raw_Data_Type
+      return Token_Type
    is
-     (Get_Token (Node.Unit.Token_Data.all, Index));
+     ((TDH => Node.Unit.Token_Data, Token => Index));
+
+   function Index (Token : Token_Type) return Token_Index is (Token.Token);
+
+   function Token_Start (Node : ${root_node_type_name}) return Token_Type is
+     ((Node.Unit.Token_Data, Node.Token_Start));
+   function Token_End (Node : ${root_node_type_name}) return Token_Type is
+     ((Node.Unit.Token_Data, Node.Token_End));
 
    ----------------------------------------
    -- Tree traversal (Ada 2012 iterator) --

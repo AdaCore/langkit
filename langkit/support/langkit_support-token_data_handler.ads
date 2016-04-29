@@ -98,7 +98,4 @@ package Langkit_Support.Token_Data_Handler is
       then ""
       else Image (T.Text.all));
 
-   function Get_Symbol (T : Token_Raw_Data_Type) return Symbol_Type is
-      (Symbol_Type (T.Text));
-
 end Langkit_Support.Token_Data_Handler;

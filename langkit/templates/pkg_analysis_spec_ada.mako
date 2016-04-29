@@ -108,12 +108,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    function Root (Unit : Analysis_Unit) return ${root_node_type_name};
    ${ada_doc('langkit.unit_root', 3)}
 
-   function Get_Token
-     (Unit  : Analysis_Unit;
-      Token : Token_Index)
-      return Token_Raw_Data_Type;
-   --  Return the data associated to a token identifier
-
    procedure Dump_Lexical_Env (Unit : Analysis_Unit);
    --  Debug helper: output the lexical envs for given analysis unit
 
@@ -200,12 +194,5 @@ private
 
    function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
      (Unit.AST_Root);
-
-   function Get_Token
-     (Unit  : Analysis_Unit;
-      Token : Token_Index)
-      return Token_Raw_Data_Type
-   is
-     (Get_Token (Unit.TDH, Token));
 
 end ${_self.ada_api_settings.lib_name}.Analysis;

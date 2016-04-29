@@ -403,7 +403,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    ---------------
 
    procedure PP_Trivia (Unit : Analysis_Unit) is
-      Last_Token : constant Token_Index := Token_End (Unit.AST_Root);
+      Last_Token : constant Token_Type := Token_End (Unit.AST_Root);
    begin
       for Tok of Get_Leading_Trivias (Unit.TDH) loop
          Put_Line (Image (Tok.Text.all));
@@ -411,7 +411,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
       PP_Trivia (Unit.AST_Root);
 
-      for Tok of Get_Trivias (Unit.TDH, Last_Token) loop
+      for Tok of Get_Trivias (Unit.TDH, Index (Last_Token)) loop
          Put_Line (Image (Tok.Text.all));
       end loop;
    end PP_Trivia;

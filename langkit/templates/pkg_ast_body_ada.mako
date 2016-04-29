@@ -394,6 +394,31 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end return;
    end Children;
 
+   ----------
+   -- Data --
+   ----------
+
+   function Data (T : Token_Type) return Token_Data_Type is
+      Data : constant Token_Raw_Data_Type :=
+         Token_Vectors.Get (T.TDH.Tokens, Natural (T.Token));
+   begin
+      return (Kind       => Token_Kind'Enum_Val (Data.Id),
+              Text       => Data.Text,
+              Sloc_Range => Data.Sloc_Range);
+   end Data;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Token : Token_Type) return String is
+      D : constant Token_Data_Type := Data (Token);
+   begin
+      return (if D.Text = null
+              then Token_Text (D.Kind)
+              else Image (D.Text.all));
+   end Image;
+
    --------------------------
    -- Children_With_Trivia --
    --------------------------
@@ -413,8 +438,17 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       procedure Append_Trivias (First, Last : Token_Index) is
       begin
          for I in First .. Last loop
-            for T of Get_Trivias (TDH, I) loop
-               Append (Ret_Vec, Child_Record'(Kind => Trivia, Trivia => T));
+            for Raw_Data of Get_Trivias (TDH, I) loop
+               declare
+                  T : constant Child_Record :=
+                    (Kind   => Trivia,
+                     Trivia => (Kind       =>
+                                   Token_Kind'Enum_Val (Raw_Data.Id),
+                                Text       => Raw_Data.Text,
+                                Sloc_Range => Raw_Data.Sloc_Range));
+               begin
+                  Append (Ret_Vec, T);
+               end;
             end loop;
          end loop;
       end Append_Trivias;
@@ -457,7 +491,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       for C of Children_With_Trivia (Node) loop
          case C.Kind is
             when Trivia =>
-               Put_Line (Level + 1, Image (C.Trivia.Text.all));
+               Put_Line (Level + 1, (if C.Trivia.Text = null
+                                     then ""
+                                     else Image (C.Trivia.Text.all)));
             when Child =>
                PP_Trivia (C.Node, Level + 1);
          end case;

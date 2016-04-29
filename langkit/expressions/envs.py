@@ -44,7 +44,7 @@ class EnvGet(AbstractExpression):
         def render_expr(self):
             return (
                 "{} (0)" if self.resolve_unique else "Create ({})"
-            ).format("AST_Envs.Get ({}, Get_Symbol (Get (Self, {})))".format(
+            ).format("AST_Envs.Get ({}, Get_Symbol (Token (Self, {})))".format(
                 self.env_expr.render_expr(), self.token_expr.render_expr()
             ))
 

@@ -2,6 +2,8 @@
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
+with Langkit_Support.Slocs; use Langkit_Support.Slocs;
+with Langkit_Support.Text;  use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handler;
 use Langkit_Support.Token_Data_Handler;
 
@@ -24,6 +26,12 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
       ${',\n'.join('{} => {}'.format(lexer.ada_token_name(t), t.value)
                    for t in tokens)}
    );
+
+   type Token_Data_Type is record
+      Kind       : Token_Kind;
+      Text       : Text_Access;
+      Sloc_Range : Source_Location_Range;
+   end record;
 
    Unknown_Charset : exception;
    --  Raised by Lex_From_* functions when the input charset is not supported

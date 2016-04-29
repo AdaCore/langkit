@@ -64,11 +64,7 @@ documentations = {
         Data type for lexical environments.
     """),
     'langkit.token_type': Template("""
-        Data type for tokens.
-        % if lang != 'python':
-            Tokens always come from AST node and have the same lifetime than
-            the AST node they come from.
-        % endif
+        Reference to a token in an analysis unit.
     """),
     'langkit.text_type': Template("""
         String encoded in UTF-32 (native endianness).
