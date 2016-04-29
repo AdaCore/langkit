@@ -63,6 +63,9 @@ documentations = {
     'langkit.lexical_env_type': Template("""
         Data type for lexical environments.
     """),
+    'langkit.token_kind': Template("""
+        Type for individual tokens.
+    """),
     'langkit.token_type': Template("""
         Reference to a token in an analysis unit.
     """),

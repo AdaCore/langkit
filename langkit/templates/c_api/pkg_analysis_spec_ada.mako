@@ -39,13 +39,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    type ${lexical_env_type} is new System.Address;
    ${ada_c_doc('langkit.lexical_env_type', 3)}
 
-   type ${token_type} is record
-      Unit  : ${analysis_unit_type};
-      Index : int;
-   end record
-     with Convention => C_Pass_By_Copy;
-   ${ada_c_doc('langkit.token_type', 3)}
-
    --  Helper data structures for source location handling
 
    type ${sloc_type} is record
@@ -68,6 +61,17 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    end record
      with Convention => C_Pass_By_Copy;
    ${ada_c_doc('langkit.text_type', 3)}
+
+   type ${token_type} is record
+      Token_Data : System.Address;
+      Index      : int;
+
+      Kind       : int;
+      Text       : ${text_type};
+      Sloc_Range : ${sloc_range_type};
+   end record
+     with Convention => C_Pass_By_Copy;
+   ${ada_c_doc('langkit.token_type', 3)}
 
    type ${diagnostic_type} is record
       Sloc_Range : ${sloc_range_type};
@@ -261,21 +265,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name("node_child")}";
    ${ada_c_doc('langkit.node_child', 3)}
 
-   function ${capi.get_name("token_text")} (Token : ${token_type})
-                                            return ${text_type}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name("token_text")}";
-   ${ada_c_doc('langkit.token_text', 3)}
-
-   procedure ${capi.get_name("token_sloc_range")}
-     (Token        : ${token_type};
-      Sloc_Range_P : ${sloc_range_type}_Ptr)
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name("token_sloc_range")}";
-   ${ada_c_doc('langkit.token_sloc_range', 3)}
-
    function ${capi.get_name("text_to_locale_string")}
      (Text : ${text_type}) return System.Address
       with Export        => True,
@@ -349,8 +338,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
        S.Start_S.Column, S.End_S.Column));
 
    function Wrap (S : Unbounded_Wide_Wide_String) return ${text_type};
-
-   function Unwrap (Token : ${token_type}) return Token_Raw_Data_Type;
 
    function Wrap (T : Text_Access) return ${text_type} is
      (if T = null

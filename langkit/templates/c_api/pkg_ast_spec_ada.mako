@@ -4,6 +4,8 @@
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
 <%namespace name="enum_types"    file="enum_types_ada.mako" />
 
+with Ada.Unchecked_Conversion;
+
 with Interfaces;   use Interfaces;
 with Interfaces.C; use Interfaces.C;
 
@@ -18,6 +20,9 @@ use ${_self.ada_api_settings.lib_name}.Analysis.C;
 --  API.
 
 package ${_self.ada_api_settings.lib_name}.AST.Types.C is
+
+   function Wrap (Token : Token_Type) return ${token_type};
+   function Unwrap (Token : ${token_type}) return Token_Type;
 
    % for enum_type in _self.sorted_types(_self.enum_types):
       ${enum_types.spec(enum_type)}

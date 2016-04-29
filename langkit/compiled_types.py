@@ -121,6 +121,7 @@ def make_renderer(base_renderer=None):
             'lexical_env_type':      CAPIType(capi, 'lexical_env').name,
             'env_element_type':      (env_element.c_type(capi).name
                                       if env_element else None),
+            'token_kind':            CAPIType(capi, 'token_kind').name,
             'token_type':            CAPIType(capi, 'token').name,
             'sloc_type':             CAPIType(capi, 'source_location').name,
             'sloc_range_type':       SourceLocationRangeType.c_type(capi).name,

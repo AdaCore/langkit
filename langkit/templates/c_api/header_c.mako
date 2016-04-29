@@ -47,12 +47,6 @@ typedef enum {
 ${c_doc('langkit.lexical_env_type')}
 typedef void *${lexical_env_type};
 
-${c_doc('langkit.token_type')}
-typedef struct {
-    ${analysis_unit_type} unit;
-    int index;
-} ${token_type};
-
 typedef uint8_t ${bool_type};
 
 % for rec in _self.struct_types:
@@ -84,6 +78,28 @@ typedef struct {
    ${c_doc('langkit.text_type.length')}
     size_t length;
 } ${text_type};
+
+${c_doc('langkit.token_kind')}
+typedef enum {
+   <% lexer = get_context().lexer %>
+   % for i, t in enumerate(lexer.sorted_tokens):
+      ${',' if i > 0 else ''}
+      ${lexer.c_token_name(t)} = ${t.value}
+   % endfor
+} ${token_kind};
+
+${c_doc('langkit.token_type')}
+typedef struct {
+    /* Private data associated to this token.  */
+    void *token_data;
+
+    /* Identifier for this token. This is -1 if this designates no token.  */
+    int index;
+
+    ${token_kind} kind;
+    ${text_type} text;
+    ${sloc_range_type} sloc_range;
+} ${token_type};
 
 
 ${c_doc('langkit.diagnostic_type')}
@@ -222,15 +238,6 @@ extern int
 ${capi.get_name("node_child")}(${node_type} node,
                                unsigned n,
                                ${node_type}* child_p);
-
-${c_doc('langkit.token_text')}
-extern ${text_type}
-${capi.get_name("token_text")}(${token_type} token);
-
-${c_doc('langkit.token_sloc_range')}
-extern void
-${capi.get_name("token_sloc_range")}(${token_type} token,
-                                     ${sloc_range_type} *sloc_range);
 
 ${c_doc('langkit.text_to_locale_string')}
 extern char *

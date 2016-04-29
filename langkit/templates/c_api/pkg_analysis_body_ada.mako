@@ -442,32 +442,6 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          return 0;
    end ${capi.get_name("node_child")};
 
-   function ${capi.get_name("token_text")} (Token : ${token_type})
-                                            return ${text_type}
-   is
-   begin
-      Clear_Last_Exception;
-      return Wrap (Unwrap (Token).Text);
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-         return (System.Null_Address, 0);
-   end ${capi.get_name("token_text")};
-
-   procedure ${capi.get_name("token_sloc_range")}
-     (Token        : ${token_type};
-      Sloc_Range_P : ${sloc_range_type}_Ptr)
-   is
-      T : Token_Raw_Data_Type;
-   begin
-      Clear_Last_Exception;
-      T := Unwrap (Token);
-      Sloc_Range_P.all := Wrap (T.Sloc_Range);
-   exception
-      when Exc : others =>
-         Set_Last_Exception (Exc);
-   end ${capi.get_name("token_sloc_range")};
-
    function ${capi.get_name("text_to_locale_string")}
      (Text : ${text_type}) return System.Address
    is
@@ -630,17 +604,6 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          return Last_Exception;
       end if;
    end ${capi.get_name("get_last_exception")};
-
-   ------------
-   -- Unwrap --
-   ------------
-
-   function Unwrap (Token : ${token_type}) return Token_Raw_Data_Type is
-      Unit : constant Analysis_Unit_Interface := Unwrap (Token.Unit);
-      TDH  : Token_Data_Handler renames Unit.Token_Data.all;
-   begin
-      return Get_Token (TDH, Token_Index (Token.Index));
-   end Unwrap;
 
    ------------
    -- Unwrap --

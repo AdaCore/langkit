@@ -11,6 +11,36 @@ use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 
 package body ${_self.ada_api_settings.lib_name}.AST.Types.C is
 
+   ----------
+   -- Wrap --
+   ----------
+
+   function Wrap (Token : Token_Type) return ${token_type} is
+      function Convert is new Ada.Unchecked_Conversion
+        (Token_Data_Handler_Access, System.Address);
+
+      D : constant Token_Data_Type := Data (Token);
+      K : constant Token_Kind := D.Kind;
+   begin
+      return (Token_Data => Convert (Token.TDH),
+              Index      => int (Index (Token)),
+              Kind       => K'Enum_Rep,
+              Text       => Wrap (D.Text),
+              Sloc_Range => Wrap (D.Sloc_Range));
+   end Wrap;
+
+   ------------
+   -- Unwrap --
+   ------------
+
+   function Unwrap (Token : ${token_type}) return Token_Type is
+      function Convert is new Ada.Unchecked_Conversion
+        (System.Address, Token_Data_Handler_Access);
+   begin
+      return (TDH   => Convert (Token.Token_Data),
+              Token => Token_Index (Token.Index));
+   end Unwrap;
+
    function ${capi.get_name('lexical_env_parent')}
      (Env : ${lexical_env_type})
       return ${lexical_env_type}

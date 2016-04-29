@@ -393,6 +393,17 @@ class Lexer(object):
         """
         return "{}{}".format(self.prefix, self.token_base_name(token).upper)
 
+    def c_token_name(self, token):
+        """
+        Helper function to get the name of the Quex constant to represent the
+        kind of "token".
+
+        :param TokenAction|Enum|Name|str token: See the token_base_name method.
+        :rtype: str
+        """
+        prefixed_name = get_context().lang_name + self.token_base_name(token)
+        return prefixed_name.upper
+
     def ada_token_name(self, token):
         """
         Helper function to get the name of the Ada enumerator to represent the

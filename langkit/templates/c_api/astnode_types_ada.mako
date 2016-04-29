@@ -50,7 +50,7 @@
             % elif is_ast_node(arg_type):
                ${arg_type.name()} (Unwrap (${arg_name}))
             % elif is_token_type(arg_type):
-               Token_Index (${arg_name}.Index)
+               Token (Node, Token_Index ({arg_name}.Index))
             % elif is_symbol_type(arg_type):
                Text_To_Symbol (N.Unit, ${arg_name})
             % else:
@@ -85,6 +85,10 @@
                    ' ({})'.format(actuals)
                    if actuals else ''
                )
+               if not field.is_property:
+                  field_access = field.type.extract_from_storage_expr(
+                     'N', field_access
+                  )
              %>
              Value_P.all :=
                 % if is_enum(field.type):
@@ -97,8 +101,7 @@
                 % elif is_ast_node(field.type):
                     Wrap (${root_node_type_name} (${field_access}))
                 % elif is_token_type(field.type):
-                    (Unit  => Wrap (N.Unit),
-                     Index => int (${field_access}))
+                    Wrap (${field_access})
                 % elif is_symbol_type(field.type):
                     Wrap (${field_access})
                 % elif is_lexical_env(field.type):

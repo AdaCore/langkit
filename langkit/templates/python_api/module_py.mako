@@ -250,18 +250,19 @@ class LexicalEnv(object):
 class Token(ctypes.Structure):
     ${py_doc('langkit.token_type', 4)}
 
-    _fields_ = [("_unit", _analysis_unit),
-                ("_index", ctypes.c_int)]
+    _fields_ = [('_token_data', ctypes.c_void_p),
+                ('_index',      ctypes.c_int),
+                ('_kind',       ctypes.c_int),
+                ('_text',       _text),
+                ('_sloc_range', _SlocRange)]
 
     @property
     def text(self):
-        return _token_text(self).wrap()
+        return self._text.wrap()
 
     @property
     def sloc_range(self):
-        result = _SlocRange()
-        _token_sloc_range(self, ctypes.byref(result))
-        return result.wrap()
+        return self._sloc_range.wrap()
 
     def __repr__(self):
         return "<Token {}>".format(self.text)
@@ -667,14 +668,6 @@ _node_child_count = _import_func(
 _node_child = _import_func(
     '${capi.get_name("node_child")}',
     [_node, ctypes.c_uint, ctypes.POINTER(_node)], ctypes.c_int
-)
-_token_text = _import_func(
-    '${capi.get_name("token_text")}',
-    [Token], _text
-)
-_token_sloc_range = _import_func(
-    '${capi.get_name("token_sloc_range")}',
-    [Token, ctypes.POINTER(_SlocRange)], None
 )
 
 # Lexical environment primitives
