@@ -13,6 +13,7 @@ this is the way it is done for the ada language::
 from __future__ import absolute_import
 
 from contextlib import contextmanager
+import difflib
 from distutils.spawn import find_executable
 from glob import glob
 import itertools
@@ -570,6 +571,20 @@ class CompileCtx():
         self.compiled = True
 
         assert self.grammar, "Set grammar before compiling"
+
+        if not self.grammar.rules.get(self.main_rule_name, None):
+            close_matches = difflib.get_close_matches(
+                self.main_rule_name, self.grammar.rules.keys()
+            )
+
+            check_source_language(
+                False,
+                'Invalid rule name specified for main rule: "{}". {}'.format(
+                    self.main_rule_name,
+                    'Did you mean "{}" ?'.format(close_matches[0])
+                    if close_matches else ""
+                )
+            )
 
         unreferenced_rules = self.grammar.get_unreferenced_rules(
             self.main_rule_name
