@@ -188,6 +188,7 @@ class Parser(object):
 
     # noinspection PyMissingConstructor
     def __init__(self):
+        self.location = None
         self._mod = None
         self.gen_fn_name = gen_name(self.base_name)
         self.grammar = None
@@ -242,6 +243,27 @@ class Parser(object):
         :rtype: Transform
         """
         return Transform(self, transform_fn)
+
+    def set_location(self, location):
+        """
+        Set the source location where this parser is defined. This is useful
+        for error reporting purposes.
+
+        :type location: langkit.diagnostics.Location
+        """
+        self.location = location
+        for c in self.children():
+            c.set_location(self.location)
+
+    def error_context(self):
+        """
+        Helper that will return a error context manager with parameters set
+        for the grammar definition.
+
+        :return:
+        """
+        return context("In definition of grammar rule {}".format(self.name),
+                       self.location)
 
     def set_grammar(self, grammar):
         """
