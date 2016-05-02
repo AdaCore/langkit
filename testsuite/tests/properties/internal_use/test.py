@@ -8,7 +8,7 @@ from langkit.envs import EnvSpec
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, List, Opt, Row, Tok
 
-from lexer_example import Token, foo_lexer
+from lexer_example import Token
 from utils import emit_and_print_errors
 
 
@@ -46,20 +46,24 @@ class Block(Stmt):
     env_spec = EnvSpec(add_env=True)
 
 
-foo_grammar = Grammar('stmts_rule')
-foo_grammar.add_rules(
-    def_rule=Row(
-        Tok(Token.Identifier, keep=True),
-        Opt(Row('(', foo_grammar.stmts_rule, ')')[1])
-    ) ^ Def,
+def lang_def():
+    foo_grammar = Grammar('stmts_rule')
+    foo_grammar.add_rules(
+        def_rule=Row(
+            Tok(Token.Identifier, keep=True),
+            Opt(Row('(', foo_grammar.stmts_rule, ')')[1])
+        ) ^ Def,
 
-    stmt_rule=(
-        foo_grammar.def_rule
-        | Row('{', List(foo_grammar.stmt_rule, empty_valid=True), '}') ^ Block
-    ),
+        stmt_rule=(
+            foo_grammar.def_rule
+            | Row('{',
+                  List(foo_grammar.stmt_rule, empty_valid=True),
+                  '}') ^ Block
+        ),
 
-    stmts_rule=List(foo_grammar.stmt_rule)
-)
+        stmts_rule=List(foo_grammar.stmt_rule)
+    )
+    return foo_grammar
 
-emit_and_print_errors(foo_grammar)
+emit_and_print_errors(lang_def)
 print 'Done'

@@ -2,10 +2,10 @@ from langkit.compiled_types import (
     ASTNode, BoolType, Field, abstract, root_grammar_class
 )
 from langkit.diagnostics import Diagnostics
-from langkit.expressions import Literal, Match, Property, Self
+from langkit.expressions import Literal, Property, Self
 from langkit.parsers import Grammar, Or, Row, Tok
 
-from lexer_example import Token, foo_lexer
+from lexer_example import Token
 from os import path
 from utils import emit_and_print_errors, reset_langkit
 
@@ -51,25 +51,27 @@ def run(name, match_expr):
 
         prop = Property(match_expr)
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=Row(
-            'example',
-            Or(foo_grammar.expression,
-               Row('null') ^ NullNode)
-        ) ^ ExampleNode,
+    def lang_def():
+        foo_grammar = Grammar('main_rule')
+        foo_grammar.add_rules(
+            main_rule=Row(
+                'example',
+                Or(foo_grammar.expression,
+                   Row('null') ^ NullNode)
+            ) ^ ExampleNode,
 
-        number=Tok(Token.Number) ^ Number,
+            number=Tok(Token.Number) ^ Number,
 
-        expression=Or(
-            Row(foo_grammar.number,
-                ',',
-                foo_grammar.expression) ^ Compound,
-            foo_grammar.number
-        ),
-    )
+            expression=Or(
+                Row(foo_grammar.number,
+                    ',',
+                    foo_grammar.expression) ^ Compound,
+                foo_grammar.number
+            ),
+        )
+        return foo_grammar
 
-    emit_and_print_errors(foo_grammar)
+    emit_and_print_errors(lang_def)
     print('')
 
 

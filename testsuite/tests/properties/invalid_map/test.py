@@ -1,8 +1,8 @@
 from langkit.compiled_types import (
-    ASTNode, root_grammar_class, LongType, Field
+    ASTNode, root_grammar_class, Field
 )
 from langkit.diagnostics import Diagnostics
-from langkit.expressions import Property, No, Self
+from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, Row, List, Tok
 
 from lexer_example import Token
@@ -34,12 +34,14 @@ def run(name, expr):
         nb_list = Field()
         prop = Property(expr)
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=Row('example', foo_grammar.list_rule) ^ BarNode,
-        list_rule=Row(List(Tok(Token.Number))) ^ ListNode,
-    )
-    emit_and_print_errors(foo_grammar)
+    def lang_def():
+        foo_grammar = Grammar('main_rule')
+        foo_grammar.add_rules(
+            main_rule=Row('example', foo_grammar.list_rule) ^ BarNode,
+            list_rule=Row(List(Tok(Token.Number))) ^ ListNode,
+        )
+        return foo_grammar
+    emit_and_print_errors(lang_def)
     print('')
 
 

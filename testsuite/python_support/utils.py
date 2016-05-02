@@ -42,27 +42,34 @@ def prepare_context(grammar,
     return ctx
 
 
-def emit_and_print_errors(grammar,
+def emit_and_print_errors(grammar_fn,
                           lexer=foo_lexer,
                           library_fields_all_public=False):
     """
     Compile and emit code for CTX. Return whether this was successful.
 
+    :param () -> langkit.parsers.Grammar grammar_fn: A function returning the
+        grammar to be used.
+
+    :param langkit.lexer.Lexer lexer: The lexer to use along with the grammar.
+
+    :param bool library_fields_all_public: Whether private fields should be
+        exported in code generation (they are not by default).
     :rtype: bool
     """
-    ctx = prepare_context(grammar, lexer, library_fields_all_public)
-
     try:
+        ctx = prepare_context(grammar_fn(), lexer, library_fields_all_public)
         ctx.emit('build', generate_lexer=False)
         # ... and tell about how it went
     except DiagnosticError:
         # If there is a diagnostic error, don't say anything, the diagnostics
         # are enough.
         return False
-
     else:
         print 'Code generation was successful'
         return True
+    finally:
+        reset_langkit()
 
 
 def build_and_run(grammar, py_script,

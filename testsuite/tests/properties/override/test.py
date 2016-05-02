@@ -9,7 +9,7 @@ from langkit.compiled_types import (
     ASTNode, TypeRepo, abstract, root_grammar_class
 )
 from langkit.diagnostics import Diagnostics
-from langkit.expressions import AbstractProperty, No, Property, Self
+from langkit.expressions import AbstractProperty, No, Property
 from langkit.parsers import Grammar, Or, Row
 
 from utils import emit_and_print_errors, reset_langkit
@@ -45,13 +45,15 @@ def run(name, astnode_fn):
     class NullNode(FooNode):
         pass
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=Or(Row('example') ^ ExampleNode,
-                     Row('null') ^ NullNode)
-    )
+    def lang_def():
+        foo_grammar = Grammar('main_rule')
+        foo_grammar.add_rules(
+            main_rule=Or(Row('example') ^ ExampleNode,
+                         Row('null') ^ NullNode)
+        )
+        return foo_grammar
 
-    emit_and_print_errors(foo_grammar)
+    emit_and_print_errors(lang_def)
     print('')
 
 

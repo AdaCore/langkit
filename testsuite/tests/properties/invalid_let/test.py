@@ -1,11 +1,10 @@
 from langkit.compiled_types import (
-    ASTNode, Field, abstract, root_grammar_class
+    ASTNode, root_grammar_class
 )
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import Literal, Property, Let
-from langkit.parsers import Grammar, Or, Row, Tok
+from langkit.parsers import Grammar, Row
 
-from lexer_example import Token, foo_lexer
 from os import path
 from utils import emit_and_print_errors, reset_langkit
 
@@ -30,11 +29,14 @@ def run(name, expr):
     class BarNode(FooNode):
         prop = Property(expr)
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=Row('example') ^ BarNode,
-    )
-    emit_and_print_errors(foo_grammar)
+    def lang_def():
+        foo_grammar = Grammar('main_rule')
+        foo_grammar.add_rules(
+            main_rule=Row('example') ^ BarNode,
+        )
+        return foo_grammar
+
+    emit_and_print_errors(lang_def)
     print('')
 
 

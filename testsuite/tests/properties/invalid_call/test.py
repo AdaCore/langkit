@@ -5,9 +5,8 @@ from langkit.diagnostics import Diagnostics
 from langkit.expressions import Property, No, Self
 from langkit.parsers import Grammar, Row
 
-from lexer_example import foo_lexer
 from os import path
-from utils import emit_and_print_errors, reset_langkit
+from utils import emit_and_print_errors
 
 
 def run(name, expr):
@@ -21,7 +20,6 @@ def run(name, expr):
     Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
     print('== {} =='.format(name))
-    reset_langkit()
 
     @root_grammar_class
     class FooNode(ASTNode):
@@ -31,11 +29,14 @@ def run(name, expr):
         prop_2 = Property(lambda x=LongType: x)
         prop = Property(expr)
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=Row('example') ^ BarNode,
-    )
-    emit_and_print_errors(foo_grammar)
+    def lang_def():
+        foo_grammar = Grammar('main_rule')
+        foo_grammar.add_rules(
+            main_rule=Row('example') ^ BarNode,
+        )
+        return foo_grammar
+
+    emit_and_print_errors(lang_def)
     print('')
 
 
