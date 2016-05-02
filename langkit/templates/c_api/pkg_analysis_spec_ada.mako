@@ -319,6 +319,12 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    --  Free the information contained in Last_Exception and replace it with
    --  newly allocated information from Exc.
 
+   function ${capi.get_name('token_kind_name')} (Kind : int) return chars_ptr
+      with Export => True,
+           Convention => C,
+           External_Name => "${capi.get_name('token_kind_name')}";
+   ${ada_c_doc('langkit.token_kind_name', 3)}
+
    ------------------------
    -- Conversion helpers --
    ------------------------

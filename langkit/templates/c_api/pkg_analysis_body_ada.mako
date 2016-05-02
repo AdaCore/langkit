@@ -19,6 +19,8 @@ with ${_self.ada_api_settings.lib_name}.Analysis;
 use ${_self.ada_api_settings.lib_name}.Analysis;
 with ${_self.ada_api_settings.lib_name}.AST;
 use ${_self.ada_api_settings.lib_name}.AST;
+with ${_self.ada_api_settings.lib_name}.Lexer;
+use ${_self.ada_api_settings.lib_name}.Lexer;
 
 package body ${_self.ada_api_settings.lib_name}.Analysis.C is
 
@@ -604,6 +606,21 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          return Last_Exception;
       end if;
    end ${capi.get_name("get_last_exception")};
+
+   function ${capi.get_name('token_kind_name')} (Kind : int) return chars_ptr
+   is
+      K : Token_Kind;
+   begin
+      begin
+         K := Token_Kind'Enum_Val (Kind);
+      exception
+         when Exc : Constraint_Error =>
+            Set_Last_Exception (Exc);
+            return Null_Ptr;
+      end;
+
+      return New_String (Token_Kind_Name (K));
+   end ${capi.get_name('token_kind_name')};
 
    ------------
    -- Unwrap --

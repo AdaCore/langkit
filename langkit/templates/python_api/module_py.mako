@@ -257,6 +257,14 @@ class Token(ctypes.Structure):
                 ('_sloc_range', _SlocRange)]
 
     @property
+    def kind(self):
+        result = _token_kind_name(self._kind)
+        # The _token_kind_name wrapper is already supposed to handle exceptions
+        # so this should always return a non-null value.
+        assert result
+        return result
+
+    @property
     def text(self):
         return self._text.wrap()
 
@@ -722,6 +730,10 @@ _get_last_exception = _import_func(
    '${capi.get_name("get_last_exception")}',
    [], ctypes.POINTER(_Exception),
    exc_wrap=False
+)
+_token_kind_name = _import_func(
+   "${capi.get_name('token_kind_name')}",
+   [ctypes.c_int], ctypes.c_char_p
 )
 
 

@@ -354,6 +354,17 @@ documentations = {
         current thread. Will be automatically allocated on error and free'd on
         the next error.
     """),
+    'langkit.token_kind_name': Template("""
+        Return a human-readable name for a token kind.
+
+        % if lang == 'c':
+            The returned string is dynamically allocated and the caller must
+            free it when done with it.
+
+            If the given kind is invalid, return NULL and set the last
+            exception accordingly.
+        % endif
+    """),
 }
 
 
