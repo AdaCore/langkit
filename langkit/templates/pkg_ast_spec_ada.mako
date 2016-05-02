@@ -355,11 +355,6 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Create a token from Index, a token index related to Node. This is for
    --  internal use.
 
-   function Index (Token : Token_Type) return Token_Index;
-   --  Return the index used internally to represent a token for a given
-   --  analysis unit. This is for internal use only. TODO??? Remove this once
-   --  all primitives are available on Token_Type.
-
    function Data (T : Token_Type) return Token_Data_Type;
    --  Return the data associated to T
 
@@ -639,8 +634,6 @@ private
       return Token_Type
    is
      ((TDH => Node.Unit.Token_Data, Token => Index));
-
-   function Index (Token : Token_Type) return Token_Index is (Token.Token);
 
    function Token_Start (Node : ${root_node_type_name}) return Token_Type is
      ((Node.Unit.Token_Data, Node.Token_Start));

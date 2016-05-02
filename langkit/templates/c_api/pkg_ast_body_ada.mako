@@ -23,7 +23,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.C is
       K : Token_Kind := D.Kind;
    begin
       return (Token_Data => Convert (Token.TDH),
-              Index      => int (Index (Token)),
+              Index      => int (Token.Token),
               Kind       => K'Enum_Rep,
               Text       => Wrap (D.Text),
               Sloc_Range => Wrap (D.Sloc_Range));
