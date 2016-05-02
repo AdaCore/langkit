@@ -20,7 +20,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.C is
         (Token_Data_Handler_Access, System.Address);
 
       D : constant Token_Data_Type := Data (Token);
-      K : constant Token_Kind := D.Kind;
+      K : Token_Kind := D.Kind;
    begin
       return (Token_Data => Convert (Token.TDH),
               Index      => int (Index (Token)),
