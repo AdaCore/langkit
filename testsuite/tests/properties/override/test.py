@@ -12,7 +12,7 @@ from langkit.diagnostics import Diagnostics
 from langkit.expressions import AbstractProperty, No, Property
 from langkit.parsers import Grammar, Or, Row
 
-from utils import emit_and_print_errors, reset_langkit
+from utils import emit_and_print_errors
 
 
 def run(name, astnode_fn):
@@ -24,7 +24,6 @@ def run(name, astnode_fn):
     Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
     print('== {} =='.format(name))
-    reset_langkit()
 
     T = TypeRepo()
     astnode = astnode_fn(T)

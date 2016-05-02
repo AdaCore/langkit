@@ -2,11 +2,11 @@
 Code generation was successful
 
 == Invalid cast 1 ==
-File "test.py", line 36, in ListNode.prop
+File "test.py", line 35, in ListNode.prop
     Error: One can only cast to an ASTNode subtype
 
 == Invalid cast 2 ==
-File "test.py", line 36, in ListNode.prop
+File "test.py", line 35, in ListNode.prop
     Error: Cannot cast BarNode to ListNode: only (up/down)casting is allowed
 
 Done

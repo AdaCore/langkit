@@ -4,7 +4,7 @@ Code generation was successful
   ConcreteNode.p_prop: public
 
 == abstract: default, concrete: private ==
-File "test.py", line 37, in ConcreteNode.prop
+File "test.py", line 36, in ConcreteNode.prop
     Error: AbstractNode.p_prop is public, so should be ConcreteNode.p_prop
 
 == abstract: default, concrete: public ==
@@ -23,7 +23,7 @@ Code generation was successful
   ConcreteNode.p_prop: private
 
 == abstract: private, concrete: public ==
-File "test.py", line 37, in ConcreteNode.prop
+File "test.py", line 36, in ConcreteNode.prop
     Error: AbstractNode.p_prop is private, so should be ConcreteNode.p_prop
 
 == abstract: public, concrete: default ==
@@ -32,7 +32,7 @@ Code generation was successful
   ConcreteNode.p_prop: public
 
 == abstract: public, concrete: private ==
-File "test.py", line 37, in ConcreteNode.prop
+File "test.py", line 36, in ConcreteNode.prop
     Error: AbstractNode.p_prop is public, so should be ConcreteNode.p_prop
 
 == abstract: public, concrete: public ==

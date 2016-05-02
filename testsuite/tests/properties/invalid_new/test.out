@@ -2,15 +2,15 @@
 Code generation was successful
 
 == Incorrect new 1 ==
-File "test.py", line 34, in BarNode.prop
+File "test.py", line 33, in BarNode.prop
     Error: Values are missing for MyStruct fields: b
 
 == Incorrect new 2 ==
-File "test.py", line 34, in BarNode.prop
+File "test.py", line 33, in BarNode.prop
     Error: Wrong type for field b: expected Integer, got FooNode
 
 == Incorrect new 1 ==
-File "test.py", line 34, in BarNode.prop
+File "test.py", line 33, in BarNode.prop
     Error: Extraneous fields for MyStruct: c
 
 Done

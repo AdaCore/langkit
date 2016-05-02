@@ -7,7 +7,7 @@ from langkit.parsers import Grammar, Or, Row, Tok
 
 from lexer_example import Token
 from os import path
-from utils import emit_and_print_errors, reset_langkit
+from utils import emit_and_print_errors
 
 
 def run(name, match_expr):
@@ -21,7 +21,6 @@ def run(name, match_expr):
     Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
     print('== {} =='.format(name))
-    reset_langkit()
 
     @abstract
     @root_grammar_class

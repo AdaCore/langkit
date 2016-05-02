@@ -8,7 +8,7 @@ from langkit.diagnostics import Diagnostics
 from langkit.expressions import AbstractProperty, Literal, Property
 from langkit.parsers import Grammar, Row
 
-from utils import emit_and_print_errors, reset_langkit
+from utils import emit_and_print_errors
 
 
 def run(abstract_private, concrete_private):
@@ -26,7 +26,6 @@ def run(abstract_private, concrete_private):
         fmt_privacy[abstract_private],
         fmt_privacy[concrete_private]
     )
-    reset_langkit()
     Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
     @root_grammar_class

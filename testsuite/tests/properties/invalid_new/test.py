@@ -6,7 +6,7 @@ from langkit.expressions import Property, New, Literal, No
 from langkit.parsers import Grammar, Row
 
 from os import path
-from utils import emit_and_print_errors, reset_langkit
+from utils import emit_and_print_errors
 
 
 def run(name, expr):
@@ -20,7 +20,6 @@ def run(name, expr):
     Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
     print('== {} =='.format(name))
-    reset_langkit()
 
     class MyStruct(Struct):
         a = Field(type=LongType)
