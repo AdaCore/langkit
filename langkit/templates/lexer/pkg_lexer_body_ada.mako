@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<% lexer = get_context().lexer %>
+
 with Ada.Unchecked_Conversion;
 
 with Interfaces;   use Interfaces;
@@ -83,10 +85,21 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       --  Return a copy of the text in Token.  Do not call this if the token
       --  has no text associated.
 
+      function Sloc_Range return Source_Location_Range is
+        ((Token.Start_Line,
+          Token.End_Line,
+          Token.Start_Column,
+          Token.End_Column));
+      --  Create a sloc range value corresponding to Token
+
       procedure Prepare_For_Trivia
         with Inline_Always;
       --  Append an entry for the current token in the Tokens_To_Trivias
       --  correspondence vector.
+
+      ------------------------
+      -- Prepare_For_Trivia --
+      ------------------------
 
       procedure Prepare_For_Trivia is
       begin
@@ -132,35 +145,30 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
          case Token_Id is
 
-         % if get_context().lexer.token_actions['WithText']:
+         % if lexer.token_actions['WithText']:
             ## Token id is part of the class of token types for which we want to
             ## keep the text, but without internalization of the text.
             when ${" | ".join(
-               get_context().lexer.ada_token_name(tok)
-               for tok in get_context().lexer.token_actions['WithText']
+               lexer.ada_token_name(tok)
+               for tok in lexer.token_actions['WithText']
             )} =>
                Text := Add_String (TDH, Bounded_Text);
-
-               Prepare_For_Trivia;
-
          % endif
 
-         % if get_context().lexer.token_actions['WithSymbol']:
+         % if lexer.token_actions['WithSymbol']:
             ## Token id is part of the class of token types for which we want to
             ## internalize the text.
             when ${" | ".join(
-               get_context().lexer.ada_token_name(tok)
-               for tok in get_context().lexer.token_actions['WithSymbol']
+               lexer.ada_token_name(tok)
+               for tok in lexer.token_actions['WithSymbol']
             )} =>
                Text := Text_Access (Find (TDH.Symbols, Bounded_Text));
-
-               Prepare_For_Trivia;
          % endif
 
-         % if get_context().lexer.token_actions['WithTrivia']:
+         % if lexer.token_actions['WithTrivia']:
             when ${" | ".join(
-               get_context().lexer.ada_token_name(tok)
-               for tok in get_context().lexer.token_actions['WithTrivia']
+               lexer.ada_token_name(tok)
+               for tok in lexer.token_actions['WithTrivia']
             )} =>
                if With_Trivia then
                   Text := Add_String (TDH, Bounded_Text);
@@ -174,12 +182,10 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
                   Append
                     (TDH.Trivias,
-                      (Has_Next => False,
-                       T        => (Id   => Token.Id,
-                                    Text => Text,
-                                    Sloc_Range =>
-                                      (Token.Start_Line,   Token.End_Line,
-                                       Token.Start_Column, Token.End_Column))));
+                     (Has_Next => False,
+                      T        => (Id         => Token.Id,
+                                   Text       => Text,
+                                   Sloc_Range => Sloc_Range)));
 
                   Last_Token_Was_Trivia := True;
                end if;
@@ -190,18 +196,15 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
             ## Else, don't keep the text at all
             when others =>
                Text := null;
-               Prepare_For_Trivia;
 
          end case;
 
          Append
            (TDH.Tokens,
-            (Id   => Token.Id,
-             Text => Text,
-             Sloc_Range => (Token.Start_Line,   Token.End_Line,
-                            Token.Start_Column, Token.End_Column)));
+            (Id => Token.Id, Text => Text, Sloc_Range => Sloc_Range));
+         Prepare_For_Trivia;
 
-      % if get_context().lexer.token_actions['WithTrivia']:
+      % if lexer.token_actions['WithTrivia']:
          <<Dont_Append>>
       % endif
       end loop;
