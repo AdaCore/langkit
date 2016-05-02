@@ -90,11 +90,12 @@ typedef enum {
 
 ${c_doc('langkit.token_type')}
 typedef struct {
-    /* Private data associated to this token.  */
+    /* Private data associated to this token or NULL if this designates no
+       token.  */
     void *token_data;
 
-    /* Identifier for this token. This is -1 if this designates no token.  */
-    int index;
+    /* Internal identifiers for this token.  */
+    int token_index, trivia_index;
 
     ${token_kind} kind;
     ${text_type} text;
@@ -172,6 +173,11 @@ ${capi.get_name("remove_analysis_unit")}(${analysis_context_type} context,
 ${c_doc('langkit.unit_root')}
 extern ${node_type}
 ${capi.get_name("unit_root")}(${analysis_unit_type} unit);
+
+${c_doc('langkit.unit_first_token')}
+extern void
+${capi.get_name('unit_first_token')}(${analysis_unit_type} unit,
+                                     ${token_type} *token);
 
 ${c_doc('langkit.unit_diagnostic_count')}
 extern unsigned
@@ -313,6 +319,11 @@ ${capi.get_name('get_last_exception')}(void);
 ${c_doc('langkit.token_kind_name')}
 extern char *
 ${capi.get_name('token_kind_name')}(${token_kind} kind);
+
+${c_doc('langkit.token_next')}
+extern void
+${capi.get_name('token_next')}(${token_type} *token,
+                               ${token_type} *next_token);
 
 #ifdef __cplusplus
 }

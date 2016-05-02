@@ -14,15 +14,41 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
       function Convert is new Ada.Unchecked_Conversion
         (Token_Data_Handler_Access, System.Address);
 
-      D : constant Token_Data_Type := Data (Token);
-      K : Token_Kind := D.Kind;
    begin
-      return (Token_Data => Convert (Token.TDH),
-              Index      => int (Token.Token),
-              Kind       => K'Enum_Rep,
-              Text       => Wrap (D.Text),
-              Sloc_Range => Wrap (D.Sloc_Range));
+      if Token = No_Token then
+         return (Token_Data => System.Null_Address,
+                 others     => <>);
+      end if;
+
+      declare
+         D : constant Token_Data_Type := Data (Token);
+         K : Token_Kind := D.Kind;
+      begin
+         return (Token_Data   => Convert (Token.TDH),
+                 Token_Index  => int (Token.Token),
+                 Trivia_Index => int (Token.Trivia),
+                 Kind         => K'Enum_Rep,
+                 Text         => Wrap (D.Text),
+                 Sloc_Range   => Wrap (D.Sloc_Range));
+      end;
    end Wrap;
+
+   ------------
+   -- Unwrap --
+   ------------
+
+   function Unwrap (Token : ${token_type}) return Token_Type is
+      use System;
+
+      function Convert is new Ada.Unchecked_Conversion
+        (System.Address, Token_Data_Handler_Access);
+   begin
+      return (if Token.Token_Data = Null_Address
+              then No_Token
+              else (TDH    => Convert (Token.Token_Data),
+                    Token  => Token_Index (Token.Token_Index),
+                    Trivia => Token_Index (Token.Trivia_Index)));
+   end Unwrap;
 
    function ${capi.get_name('lexical_env_parent')}
      (Env : ${lexical_env_type})
@@ -68,17 +94,5 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
       end;
    end ${capi.get_name('lexical_env_get')};
 % endif
-
-   ------------
-   -- Unwrap --
-   ------------
-
-   function Unwrap (Token : ${token_type}) return Token_Type is
-      function Convert is new Ada.Unchecked_Conversion
-        (System.Address, Token_Data_Handler_Access);
-   begin
-      return (TDH   => Convert (Token.Token_Data),
-              Token => Token_Index (Token.Index));
-   end Unwrap;
 
 end ${_self.ada_api_settings.lib_name}.AST.C;

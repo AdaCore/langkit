@@ -108,6 +108,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    function Root (Unit : Analysis_Unit) return ${root_node_type_name};
    ${ada_doc('langkit.unit_root', 3)}
 
+   function First_Token (Unit : Analysis_Unit) return Token_Type;
+   ${ada_doc('langkit.unit_first_token', 3)}
+
    procedure Dump_Lexical_Env (Unit : Analysis_Unit);
    --  Debug helper: output the lexical envs for given analysis unit
 
@@ -194,5 +197,8 @@ private
 
    function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
      (Unit.AST_Root);
+
+   function First_Token (Unit : Analysis_Unit) return Token_Type is
+     (First_Token (Unit.TDH'Access));
 
 end ${_self.ada_api_settings.lib_name}.Analysis;

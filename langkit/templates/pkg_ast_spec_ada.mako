@@ -351,6 +351,16 @@ package ${_self.ada_api_settings.lib_name}.AST is
 
    No_Token : constant Token_Type;
 
+   function First_Token (TDH : Token_Data_Handler_Access) return Token_Type;
+   --  Internal helper. Return a reference to the first token in TDH.
+
+   function "<" (Left, Right : Token_Type) return Boolean;
+   --  Assuming Left and Right belong to the same analysis unit, return whether
+   --  Left came before Right in the source file.
+
+   function Next (Token : Token_Type) return Token_Type;
+   ${ada_doc('langkit.token_next')}
+
    function Data (T : Token_Type) return Token_Data_Type;
    --  Return the data associated to T
 
@@ -618,25 +628,42 @@ private
    -----------------------------------
 
    type Token_Type is record
-      TDH   : Token_Data_Handler_Access;
-      Token : Token_Index;
+      TDH           : Token_Data_Handler_Access;
+      --  Token data handler that owns this token
+
+      Token, Trivia : Token_Index;
+      --  Indices that identify what this token refers to.
+      --
+      --  * If this references a token, then Token is the corresponding index
+      --    in TDH.Tokens and Trivia is No_Token_Index.
+      --
+      --  * If this references a trivia that comes before the first token,
+      --    Token is No_Token_Index while Trivia is the corresponding index in
+      --    TDH.Trivias.
+      --
+      --  * If this references a trivia that comes after some token, Token is
+      --    the index for this token and Trivia is the corresponding index for
+      --    this trivia.
+      --
+      --  * If this references no token, both Token and Trivia are
+      --    No_Token_Index.
    end record;
 
-   No_Token : constant Token_Type := (null, -1);
+   No_Token : constant Token_Type := (null, No_Token_Index, No_Token_Index);
 
    function Token
      (Node  : access ${root_node_value_type}'Class;
       Index : Token_Index)
       return Token_Type
    is
-     ((TDH => Node.Unit.Token_Data, Token => Index));
+     ((TDH => Node.Unit.Token_Data, Token => Index, Trivia => No_Token_Index));
    --  Helper for properties. This is used to turn token indexes as stored in
    --  AST nodes into Token_Type values.
 
    function Token_Start (Node : ${root_node_type_name}) return Token_Type is
-     ((Node.Unit.Token_Data, Node.Token_Start));
+     ((Node.Unit.Token_Data, Node.Token_Start, No_Token_Index));
    function Token_End (Node : ${root_node_type_name}) return Token_Type is
-     ((Node.Unit.Token_Data, Node.Token_End));
+     ((Node.Unit.Token_Data, Node.Token_End, No_Token_Index));
 
    ----------------------------------------
    -- Tree traversal (Ada 2012 iterator) --

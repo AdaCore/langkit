@@ -187,6 +187,21 @@ class AnalysisUnit(object):
                 result = diag.wrap()
                 return result
 
+    class TokenIterator(object):
+        """Iterator over the tokens in an analysis unit."""
+        def __init__(self, first):
+            self.first = first
+
+        def __iter__(self):
+            return self
+
+        def next(self):
+            if not self.first:
+                raise StopIteration()
+            result = self.first
+            self.first = self.first.next
+            return result
+
     def __init__(self, c_value):
         self._c_value = c_value
         _unit_incref(self._c_value)
@@ -211,6 +226,19 @@ class AnalysisUnit(object):
     def root(self):
         ${py_doc('langkit.unit_root', 8)}
         return _wrap_astnode(_unit_root(self._c_value))
+
+    @property
+    def first_token(self):
+        ${py_doc('langkit.unit_first_token', 8)}
+        result = Token()
+        _unit_first_token(self._c_value, ctypes.byref(result))
+        return result.wrap()
+
+    def iter_tokens(self):
+        """
+        Return an iterator that yields all the tokens in this unit.
+        """
+        return self.TokenIterator(self.first_token)
 
     @property
     def diagnostics(self):
@@ -250,11 +278,22 @@ class LexicalEnv(object):
 class Token(ctypes.Structure):
     ${py_doc('langkit.token_type', 4)}
 
-    _fields_ = [('_token_data', ctypes.c_void_p),
-                ('_index',      ctypes.c_int),
-                ('_kind',       ctypes.c_int),
-                ('_text',       _text),
-                ('_sloc_range', _SlocRange)]
+    _fields_ = [('_token_data',   ctypes.c_void_p),
+                ('_token_index',  ctypes.c_int),
+                ('_trivia_index', ctypes.c_int),
+                ('_kind',         ctypes.c_int),
+                ('_text',         _text),
+                ('_sloc_range',   _SlocRange)]
+
+    def wrap(self):
+        return self if self._token_data else None
+
+    @property
+    def next(self):
+        ${py_doc('langkit.token_next', 8)}
+        t = Token()
+        _token_next(ctypes.byref(self), ctypes.byref(t))
+        return t.wrap()
 
     @property
     def kind(self):
@@ -616,6 +655,10 @@ _unit_root = _import_func(
     '${capi.get_name("unit_root")}',
     [_analysis_unit], _node
 )
+_unit_first_token = _import_func(
+    "${capi.get_name('unit_first_token')}",
+    [_analysis_unit, ctypes.POINTER(Token)], None
+)
 _unit_diagnostic_count = _import_func(
     '${capi.get_name("unit_diagnostic_count")}',
     [_analysis_unit], ctypes.c_uint
@@ -734,6 +777,10 @@ _get_last_exception = _import_func(
 _token_kind_name = _import_func(
    "${capi.get_name('token_kind_name')}",
    [ctypes.c_int], ctypes.c_char_p
+)
+_token_next = _import_func(
+    "${capi.get_name('token_next')}",
+    [ctypes.POINTER(Token), ctypes.POINTER(Token)], None
 )
 
 

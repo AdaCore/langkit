@@ -63,12 +63,12 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    ${ada_c_doc('langkit.text_type', 3)}
 
    type ${token_type} is record
-      Token_Data : System.Address;
-      Index      : int;
+      Token_Data                : System.Address;
+      Token_Index, Trivia_Index : int;
 
-      Kind       : int;
-      Text       : ${text_type};
-      Sloc_Range : ${sloc_range_type};
+      Kind                      : int;
+      Text                      : ${text_type};
+      Sloc_Range                : ${sloc_range_type};
    end record
      with Convention => C_Pass_By_Copy;
    ${ada_c_doc('langkit.token_type', 3)}
@@ -161,6 +161,14 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            Convention    => C,
            External_name => "${capi.get_name("unit_root")}";
    ${ada_c_doc('langkit.unit_root', 3)}
+
+   procedure ${capi.get_name('unit_first_token')}
+     (Unit  : ${analysis_unit_type};
+      Token : ${token_type}_Ptr)
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('unit_first_token')}";
+   ${ada_c_doc('langkit.unit_first_token', 3)}
 
    function ${capi.get_name("unit_diagnostic_count")}
      (Unit : ${analysis_unit_type}) return unsigned
@@ -324,6 +332,14 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            Convention => C,
            External_Name => "${capi.get_name('token_kind_name')}";
    ${ada_c_doc('langkit.token_kind_name', 3)}
+
+   procedure ${capi.get_name('token_next')}
+     (Token      : ${token_type}_Ptr;
+      Next_Token : ${token_type}_Ptr)
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('token_next')}";
+   ${ada_c_doc('langkit.token_next', 3)}
 
    ------------------------
    -- Conversion helpers --

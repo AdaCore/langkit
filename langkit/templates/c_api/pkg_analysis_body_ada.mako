@@ -19,6 +19,8 @@ with ${_self.ada_api_settings.lib_name}.Analysis;
 use ${_self.ada_api_settings.lib_name}.Analysis;
 with ${_self.ada_api_settings.lib_name}.AST;
 use ${_self.ada_api_settings.lib_name}.AST;
+with ${_self.ada_api_settings.lib_name}.AST.C;
+use ${_self.ada_api_settings.lib_name}.AST.C;
 with ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer;
 
@@ -180,6 +182,16 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          Set_Last_Exception (Exc);
          return ${node_type} (System.Null_Address);
    end ${capi.get_name("unit_root")};
+
+   procedure ${capi.get_name('unit_first_token')}
+     (Unit  : ${analysis_unit_type};
+      Token : ${token_type}_Ptr)
+   is
+      U : constant Analysis_Unit := Unwrap (Unit);
+      T : constant Token_Type := First_Token (U);
+   begin
+      Token.all := Wrap (T);
+   end ${capi.get_name('unit_first_token')};
 
    function ${capi.get_name("unit_diagnostic_count")}
      (Unit : ${analysis_unit_type}) return unsigned
@@ -621,6 +633,16 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
 
       return New_String (Token_Kind_Name (K));
    end ${capi.get_name('token_kind_name')};
+
+   procedure ${capi.get_name('token_next')}
+     (Token      : ${token_type}_Ptr;
+      Next_Token : ${token_type}_Ptr)
+   is
+      T  : constant Token_Type := Unwrap (Token.all);
+      NT : constant Token_Type := Next (T);
+   begin
+      Next_Token.all := Wrap (NT);
+   end ${capi.get_name('token_next')};
 
    ------------
    -- Unwrap --

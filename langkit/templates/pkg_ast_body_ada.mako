@@ -395,13 +395,117 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end return;
    end Children;
 
+   -----------------
+   -- First_Token --
+   -----------------
+
+   function First_Token (TDH : Token_Data_Handler_Access) return Token_Type is
+      use Token_Vectors, Trivia_Vectors, Integer_Vectors;
+   begin
+      if Length (TDH.Tokens_To_Trivias) = 0
+         or else Get (TDH.Tokens_To_Trivias, 0) = Integer (No_Token_Index)
+      then
+         --  There is no leading trivia: return the first token
+
+         return (if Length (TDH.Tokens) = 0
+                 then No_Token
+                 else (TDH, 0, No_Token_Index));
+
+      else
+         return (TDH, No_Token_Index, 0);
+      end if;
+   end First_Token;
+
+   ---------
+   -- "<" --
+   ---------
+
+   function "<" (Left, Right : Token_Type) return Boolean is
+      pragma Assert (Left.TDH = Right.TDH);
+   begin
+      if Left.Token < Right.Token then
+         return True;
+
+      elsif Left.Token = Right.Token then
+         return Left.Trivia < Right.Trivia;
+
+      else
+         return False;
+      end if;
+   end "<";
+
+   ----------
+   -- Next --
+   ----------
+
+   function Next (Token : Token_Type) return Token_Type is
+   begin
+      if Token.TDH = null then
+         return No_Token;
+      end if;
+
+      declare
+         use Token_Vectors, Trivia_Vectors, Integer_Vectors;
+         TDH : Token_Data_Handler renames Token.TDH.all;
+
+         function Next_Token return Token_Type is
+           (if Token.Token < Token_Index (Last_Index (TDH.Tokens))
+            then (Token.TDH, Token.Token + 1, No_Token_Index)
+            else No_Token);
+         --  Return a reference to the next token (not trivia) or No_Token if
+         --  Token was the last one.
+
+      begin
+         if Token.Trivia /= No_Token_Index then
+            --  Token is a reference to a trivia: take the next trivia if it
+            --  exists, or escalate to the next token otherwise.
+
+            declare
+               Tr : constant Trivia_Node :=
+                  Get (TDH.Trivias, Natural (Token.Trivia));
+            begin
+               return (if Tr.Has_Next
+                       then (Token.TDH, Token.Token, Token.Trivia + 1)
+                       else Next_Token);
+            end;
+
+         else
+            --  Thanks to the guard above, we cannot get to the declare block
+            --  for the No_Token case, so if Token does not refers to a trivia,
+            --  it must be a token.
+
+            pragma Assert (Token.Token /= No_Token_Index);
+
+            --  If there is no trivia, just go to the next token
+
+            if Length (TDH.Tokens_To_Trivias) = 0 then
+               return Next_Token;
+            end if;
+
+            --  If this token has trivia, return a reference to the first one,
+            --  otherwise get the next token.
+
+            declare
+               Tr_Index : constant Token_Index := Token_Index
+                 (Get (TDH.Tokens_To_Trivias, Natural (Token.Token) + 1));
+            begin
+               return (if Tr_Index = No_Token_Index
+                       then Next_Token
+                       else (Token.TDH, Token.Token, Tr_Index));
+            end;
+         end if;
+      end;
+   end Next;
+
    ----------
    -- Data --
    ----------
 
    function Data (T : Token_Type) return Token_Data_Type is
       Data : constant Token_Raw_Data_Type :=
-         Token_Vectors.Get (T.TDH.Tokens, Natural (T.Token));
+        (if T.Trivia = No_Token_Index
+         then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Token))
+         else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Trivia)).T);
    begin
       return (Kind       => Token_Kind'Enum_Val (Data.Id),
               Text       => Data.Text,

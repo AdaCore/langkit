@@ -217,6 +217,9 @@ documentations = {
     'langkit.unit_root': Template("""
         Return the root AST node for this unit, or ${null} if there is none.
     """),
+    'langkit.unit_first_token': Template("""
+        Return a reference to the first token scanned in this unit.
+    """),
     'langkit.unit_diagnostic_count': Template("""
         Return the number of diagnostics associated to this unit.
     """),
@@ -364,6 +367,10 @@ documentations = {
             If the given kind is invalid, return NULL and set the last
             exception accordingly.
         % endif
+    """),
+    'langkit.token_next': Template("""
+        Return a reference to the next token in the corresponding analysis
+        unit.
     """),
 }
 
