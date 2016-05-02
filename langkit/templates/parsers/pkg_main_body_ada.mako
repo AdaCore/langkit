@@ -92,9 +92,9 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
            (Sloc_Range => Last_Token.Sloc_Range,
             Message    => To_Unbounded_Wide_Wide_String (To_Text
               ("Expected """
-               & Token_Text (Parser.Last_Fail.Expected_Token_Id)
+               & Token_Kind_Name (Parser.Last_Fail.Expected_Token_Id)
                & """, got """
-               & Token_Text (Parser.Last_Fail.Found_Token_Id)
+               & Token_Kind_Name (Parser.Last_Fail.Found_Token_Id)
                & """")));
       begin
          Parser.Diagnostics.Append (D);
@@ -120,7 +120,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
                  (Sloc_Range => First_Garbage_Token.Sloc_Range,
                   Message    => To_Unbounded_Wide_Wide_String (To_Text
                     ("End of input expected, got """
-                     & Token_Text (Token_Id)
+                     & Token_Kind_Name (Token_Id)
                      & """")));
             begin
                Parser.Diagnostics.Append (D);

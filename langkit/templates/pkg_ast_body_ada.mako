@@ -415,7 +415,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       D : constant Token_Data_Type := Data (Token);
    begin
       return (if D.Text = null
-              then Token_Text (D.Kind)
+              then Token_Kind_Name (D.Kind)
               else Image (D.Text.all));
    end Image;
 
