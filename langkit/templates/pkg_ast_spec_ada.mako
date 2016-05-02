@@ -348,13 +348,6 @@ package ${_self.ada_api_settings.lib_name}.AST is
 
    No_Token : constant Token_Type;
 
-   function Token
-     (Node  : access ${root_node_value_type}'Class;
-      Index : Token_Index)
-      return Token_Type;
-   --  Create a token from Index, a token index related to Node. This is for
-   --  internal use.
-
    function Data (T : Token_Type) return Token_Data_Type;
    --  Return the data associated to T
 
@@ -634,6 +627,8 @@ private
       return Token_Type
    is
      ((TDH => Node.Unit.Token_Data, Token => Index));
+   --  Helper for properties. This is used to turn token indexes as stored in
+   --  AST nodes into Token_Type values.
 
    function Token_Start (Node : ${root_node_type_name}) return Token_Type is
      ((Node.Unit.Token_Data, Node.Token_Start));
