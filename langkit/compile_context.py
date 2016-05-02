@@ -827,7 +827,8 @@ class CompileCtx():
 
         self.write_ada_module(src_path, "c_api/pkg_analysis",
                               ["Analysis", "C"])
-        self.write_ada_module(src_path, "c_api/pkg_ast", ["AST", "Types", "C"])
+        self.write_ada_module(src_path, "c_api/pkg_ast_types",
+                              ["AST", "Types", "C"])
 
     def emit_python_api(self, python_path):
         """
