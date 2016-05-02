@@ -49,13 +49,29 @@ package Langkit_Support.Token_Data_Handler is
 
    type Token_Data_Handler is record
       Tokens            : Token_Vectors.Vector;
+      --  Sequence of tokens in the same order as found in the source file
+
       Trivias           : Trivia_Vectors.Vector;
-      --  Keep the trivias as a contiguous list of trivia nodes. This is
-      --  basically a list of linked lists, where you can get the next
-      --  element by querying the next index.
+      --  Sequence of trivia in the same order as found in the source file.
+      --  Trivia are stored in a way that is related to the neighbor tokens:
+      --
+      --  * If a token T0 at index I0 is followed by trivias T1, T2, ..., TN,
+      --    then the (I0+1)'th entry in Tokens_To_Trivia will contain an index
+      --    I1. T1 is then to be found in Trivia at index I1.
+      --
+      --    If it's the only trivia before the next token, then Has_Next is
+      --    False for it, otherwise it is true and T2 is present at index I1+1.
+      --    The same goes on for T2, ..., until TN, the last trivia before the
+      --    next token, for which Has_Next is False.
+      --
+      --  * If T0 is not followed by any trivia before the next token, then
+      --    the (I0+1)'th entry in Tokens_To_Trivia is No_Token_Index.
 
       Tokens_To_Trivias : Integer_Vectors.Vector;
-      --  This is the correspondence map between regular tokens and trivias
+      --  This is the correspondence map between regular tokens and trivias:
+      --  see documentation for the Trivias field. Note that the entry at index
+      --  0 stands for the leading trivia, i.e. trivia that come before the
+      --  first token.
 
       Symbols           : Symbol_Table;
       String_Literals   : Text_Vectors.Vector;
