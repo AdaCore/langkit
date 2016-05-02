@@ -22,6 +22,7 @@ not defined in the example, but relied on explicitly.
 
 from __future__ import absolute_import
 
+import difflib
 from copy import copy
 import inspect
 from itertools import chain
@@ -33,7 +34,7 @@ from langkit.compiled_types import (
     CompiledType, BoolType, Token, ASTNode, decl_type
 )
 from langkit.diagnostics import (
-    extract_library_location, context, check_source_language
+    extract_library_location, context, check_source_language, Location
 )
 from langkit.template_utils import TemplateEnvironment
 from langkit.utils import (Colors, common_ancestor, copy_with, col,
@@ -123,14 +124,72 @@ class Grammar(object):
 
         :param dict[str, Parser] kwargs: The rules to add to the grammar.
         """
+        import ast
+        loc = extract_library_location()
+
+        class GetTheCall(ast.NodeVisitor):
+            """
+            Helper visitor that will get the corresponding add_rule call in the
+            source, so that we're then able to extract the precise line where
+            each rule is added.
+            """
+            def __init__(self):
+                self.the_call = None
+
+            def visit_Call(self, call):
+                if (
+                    isinstance(call.func, ast.Attribute)
+                    and call.func.attr == 'add_rules'
+                    # Traceback locations are very imprecise, and python's ast
+                    # doesn't have an end location for nodes, so we'll keep
+                    # taking add_rules call, and the last is necessarily the
+                    # good one.
+                    and call.lineno <= loc.line
+                ):
+                    self.the_call = call
+
+        the_call = GetTheCall()
+        with open(self.location.file) as f:
+            file_ast = ast.parse(f.read(), f.name)
+            the_call.visit(file_ast)
+
+        # We're gonna use the keyword arguments to find back the precise line
+        # where the rule was declared.
+        keywords = {kw.arg: kw.value for kw in the_call.the_call.keywords}
+
         for name, rule in kwargs.items():
-            assert name not in self.rules, (
-                "Rule {} is already present in the grammar".format(name)
-            )
-            self.rules[name] = rule
             rule.set_name(names.Name.from_lower(name))
             rule.set_grammar(self)
+            rule.set_location(Location(loc.file, keywords[name].lineno, ""))
             rule.is_root = True
+
+            with context("In definition of rule '{}'".format(name), loc):
+                check_source_language(
+                    name not in self.rules,
+                    "Rule '{}' is already present in the grammar".format(name)
+                )
+
+            self.rules[name] = rule
+
+    def get_rule(self, rule_name):
+        """
+        Helper to return the rule corresponding to rule_name. The benefit of
+        using this helper is that it will raise a helpful error diagnostic.
+
+        :param str rule_name: The rule to get.
+        """
+        if rule_name not in self.rules:
+            close_matches = difflib.get_close_matches(
+                rule_name, self.rules.keys()
+            )
+            check_source_language(
+                False, "Wrong rule name : '{}'. {}".format(
+                    rule_name,
+                    "Did you mean '{}'?".format(close_matches[0])
+                    if close_matches else ""
+                )
+            )
+        return self.rules[rule_name]
 
     def __getattr__(self, rule_name):
         """
@@ -138,7 +197,7 @@ class Grammar(object):
 
         :param str rule_name: The name of the rule.
         """
-        return Defer(rule_name, lambda: self.rules[rule_name])
+        return Defer(rule_name, lambda: self.get_rule(rule_name))
 
     def get_unreferenced_rules(self):
         """
@@ -175,7 +234,9 @@ class Grammar(object):
             if rule_name in referenced_rules:
                 return
             referenced_rules.add(rule_name)
-            visit_parser(self.rules[rule_name])
+            rule_parser = self.get_rule(rule_name)
+            with rule_parser.error_context():
+                visit_parser(rule_parser)
 
         # The following will fill "referenced_rules" thanks to recursion
         visit_rule(self.main_rule_name)

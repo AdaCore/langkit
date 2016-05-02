@@ -1,13 +1,17 @@
-from langkit.compile_context import CompileCtx
 from langkit.compiled_types import (
     ASTNode, Field, Struct, abstract, env_metadata, root_grammar_class
 )
 from langkit.envs import EnvSpec
-from langkit.expressions import Property, Self
+from langkit.diagnostics import Diagnostics
+from langkit.expressions import Self
 from langkit.parsers import Grammar, List, Opt, Row, Tok
 
-from lexer_example import Token, foo_lexer
-from utils import build_and_run, prepare_context
+from lexer_example import Token
+from os import path
+from utils import build_and_run
+
+
+Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 
 @env_metadata
