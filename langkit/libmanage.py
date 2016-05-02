@@ -366,15 +366,16 @@ class ManageScript(object):
         else:
             cov = None
 
-        self.context = self.create_context(parsed_args)
-        self.context.library_fields_all_public = getattr(
-            parsed_args, 'library_fields_all_public', False
-        )
-
-        # Set the extensions dir on the compile context
-        self.context.extensions_dir = self.dirs.lang_source_dir("extensions")
-
         try:
+            self.context = self.create_context(parsed_args)
+            self.context.library_fields_all_public = getattr(
+                parsed_args, 'library_fields_all_public', False
+            )
+
+            # Set the extensions dir on the compile context
+            self.context.extensions_dir = self.dirs.lang_source_dir(
+                "extensions"
+            )
             parsed_args.func(parsed_args)
         except DiagnosticError:
             if parsed_args.debug:
