@@ -1,11 +1,12 @@
 from langkit import names
 from langkit.compiled_types import (
-    ASTNode, BoolType, LexicalEnvType, LongType, Struct
+    ASTNode, BoolType, LexicalEnvType, LongType, Struct,
+    EquationType
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, LiteralExpr, No, PropertyDef,
-    ResolvedExpression, render, construct,
+    ResolvedExpression, render, construct, BuiltinCallExpr
 )
 from langkit.expressions.envs import EmptyEnv
 from langkit.utils import assert_type
@@ -38,19 +39,33 @@ class BinaryBooleanOperator(AbstractExpression):
 
         :rtype: IfExpr
         """
-        lhs = construct(self.lhs, BoolType, "Operands of binary logic operator"
-                        " must be of boolean type, got {expr_type}")
+        def construct_op(op):
+            return construct(op, lambda t: t in (BoolType, EquationType),
+                             "Operands of binary logic operator must be of "
+                             "boolean type, got {expr_type}")
 
-        rhs = construct(self.rhs, BoolType, "Operands of binary logic operator"
-                        " must be of boolean type, got {expr_type}")
+        lhs, rhs = map(construct_op, [self.lhs, self.rhs])
 
-        if self.kind == self.AND:
-            then = rhs
-            else_then = LiteralExpr('False', BoolType)
+        check_source_language(
+            lhs.type is rhs.type, "Left and right operands to binary logic "
+            "operator should have the same type"
+        )
+
+        if lhs.type is BoolType:
+            # Boolean case
+            if self.kind == self.AND:
+                then = rhs
+                else_then = LiteralExpr('False', BoolType)
+            else:
+                then = LiteralExpr('True', BoolType)
+                else_then = rhs
+            return If.Expr(lhs, then, else_then, BoolType)
         else:
-            then = LiteralExpr('True', BoolType)
-            else_then = rhs
-        return If.Expr(lhs, then, else_then, BoolType)
+            # Equation case
+            return BuiltinCallExpr(
+                names.Name("Logic") + names.Name.from_lower(self.kind),
+                EquationType, [lhs, rhs]
+            )
 
 
 # noinspection PyPep8Naming

@@ -12,6 +12,7 @@
 with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
 
 with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;
+with Adalog.Dynamic_Ops;         use Adalog.Dynamic_Ops;
 
 pragma Warnings (Off, "referenced");
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
