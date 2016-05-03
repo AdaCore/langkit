@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
 <%namespace name="exts" file="extensions.mako" />
+<%namespace name="prop_helpers" file="properties/helpers.mako" />
 
 
 <%def name="public_incomplete_decl(cls)">
@@ -474,6 +475,14 @@
       end ${field.name};
    % endfor
 
+   ## Generate logic binders for the properties who require it. Note that we
+   ## need to generate them before the properties bodies, because they'll be
+   ## used in the bodies.
+   % for prop in cls.get_properties(include_inherited=False):
+   ${prop_helpers.generate_logic_binder(prop)}
+   % endfor
+
+   ## Generate the bodies of properties
    % for prop in cls.get_properties(include_inherited=False):
    ${prop.prop_def}
    % endfor

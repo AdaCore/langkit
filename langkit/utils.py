@@ -347,3 +347,15 @@ def issubtype(type, parent_type):
     :param type parent_type: The supposed parent_type of type.
     """
     return inspect.isclass(type) and issubclass(type, parent_type)
+
+
+class DictProxy(object):
+    """
+    Util class to be able to access dict keys via the attribute notation in
+    Python. Used in the property DSL.
+    """
+    def __init__(self, dct):
+        self.dct = dct
+
+    def __getattr__(self, attr):
+        return self.dct[attr]

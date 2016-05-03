@@ -11,7 +11,8 @@ from langkit.common import get_type, null_constant, is_keyword
 from langkit.diagnostics import extract_library_location, check_source_language
 from langkit.template_utils import common_renderer
 from langkit.utils import (
-    memoized, type_check, col, Colors, common_ancestor, issubtype
+    memoized, type_check, col, Colors, common_ancestor, issubtype,
+    DictProxy
 )
 
 
@@ -1030,6 +1031,7 @@ class StructMetaClass(type):
             field.name = names.Name.from_lower(field_name)
 
         dct['_fields'] = fields
+        dct['fields'] = DictProxy(fields)
 
         # By default, ASTNode subtypes aren't abstract
         dct['abstract'] = False

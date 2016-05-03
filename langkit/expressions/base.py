@@ -839,6 +839,13 @@ class PropertyDef(AbstractNodeData):
         self.in_type = False
         "Recursion guard for the type property"
 
+        self.needs_logic_binder = False
+        """
+        Whether we need to generate a logic binder for this property of not.
+        This will not be set internally, but rather will be set by the
+        expression using this property in a bind expression
+        """
+
         self.prefix = prefix
 
         self.expr = expr
@@ -1272,6 +1279,9 @@ class PropertyDef(AbstractNodeData):
                 cls.compute_property_attributes,
                 cls.construct_and_type_expression,
                 cls.render_property]
+
+    def do_generate_logic_binder(self):
+        self.needs_logic_binder = True
 
 
 # noinspection PyPep8Naming

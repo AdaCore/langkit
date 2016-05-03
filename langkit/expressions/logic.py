@@ -2,6 +2,73 @@ from langkit.compiled_types import LogicVarType, EquationType
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, PropertyDef
 )
+from langkit.expressions.envs import Env
+
+
+class Bind(AbstractExpression):
+    """
+    This expression binds two logic variables A and B, through a property call,
+    so that, in logical terms::
+
+        B = A.property_call()
+
+    Which is expressed in the DSL as::
+
+        Bind(A, B, property)
+    """
+
+    class Expr(ResolvedExpression):
+        def __init__(self, from_var, to_var, bind_property):
+            self.from_var = from_var
+            ":type: ResolvedExpression"
+
+            self.to_var = to_var
+            ":type: ResolvedExpression"
+
+            self.bind_property = bind_property
+            ":type: PropertyDef"
+
+        @property
+        def type(self):
+            return EquationType
+
+        def render_pre(self):
+            return "\n".join([self.from_var.render_pre(),
+                              self.to_var.render_pre()])
+
+        def render_expr(self):
+            return ("{t}_{p}_Bind.Create "
+                    "({l}, {r}, {t}_{p}_Logic_Binder'(Env => {e}))").format(
+                t=self.bind_property.ast_node.name(),
+                p=self.bind_property.name,
+                l=self.from_var.render_expr(),
+                r=self.to_var.render_expr(),
+                e=Env.construct().render_expr(),
+            )
+
+    def __init__(self, from_var, to_var, bind_property):
+        """
+        :param AbstractExpression from_var: An expression resolving to a
+            logical variable that is the source of the bind.
+        :param AbstractExpression to_var: An expression resolving to a
+            logical variable that is the destination of the bind.
+        :param PropertyDef bind_property: The property to apply on the value of
+            from_var that will yield the value to give to to_var.
+        """
+        super(Bind, self).__init__()
+        self.from_var = from_var
+        self.to_var = to_var
+        self.bind_property = bind_property
+
+    def do_prepare(self):
+        self.bind_property.do_generate_logic_binder()
+
+    def construct(self):
+        return Bind.Expr(
+            construct(self.from_var, LogicVarType),
+            construct(self.to_var, LogicVarType),
+            self.bind_property
+        )
 
 
 class Domain(AbstractExpression):
