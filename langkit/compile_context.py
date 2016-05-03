@@ -824,6 +824,7 @@ class CompileCtx():
 
         self.write_ada_module(src_path, "c_api/pkg_analysis",
                               ["Analysis", "C"])
+        self.write_ada_module(src_path, "c_api/pkg_ast", ["AST", "C"])
         self.write_ada_module(src_path, "c_api/pkg_ast_types",
                               ["AST", "Types", "C"])
 

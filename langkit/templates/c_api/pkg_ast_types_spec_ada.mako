@@ -11,9 +11,11 @@ with Interfaces.C; use Interfaces.C;
 
 with ${_self.ada_api_settings.lib_name}.Analysis.C;
 use ${_self.ada_api_settings.lib_name}.Analysis.C;
+with ${_self.ada_api_settings.lib_name}.AST.C;
+use ${_self.ada_api_settings.lib_name}.AST.C;
 
 --  This package defines data types and subprograms to provide the
---  implementation of the exported C API for AST nodes.
+--  implementation of the exported C API for AST nodes subclasses.
 --
 --  Unless one wants to deal with C code, it is very likely that one needs to
 --  use this package. Please refer to the C header if you want to use the C
@@ -21,48 +23,19 @@ use ${_self.ada_api_settings.lib_name}.Analysis.C;
 
 package ${_self.ada_api_settings.lib_name}.AST.Types.C is
 
-   function Wrap (Token : Token_Type) return ${token_type};
-   function Unwrap (Token : ${token_type}) return Token_Type;
-
    % for enum_type in _self.sorted_types(_self.enum_types):
       ${enum_types.spec(enum_type)}
    % endfor
 
    % for array_type in _self.sorted_types(_self.array_types):
-      ${array_types.decl(array_type)}
+      % if array_type.element_type().should_emit_array_type:
+         ${array_types.decl(array_type)}
+      % endif
    % endfor
 
    % for rec in _self.struct_types:
       type ${rec.c_type(capi).name}_Ptr is access ${rec.name()};
    % endfor
-
-   ------------------------------------
-   -- Lexical environment primitives --
-   ------------------------------------
-
-   function ${capi.get_name('lexical_env_parent')}
-     (Env : ${lexical_env_type})
-      return ${lexical_env_type}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('lexical_env_parent')}";
-
-   function ${capi.get_name('lexical_env_node')}
-     (Env : ${lexical_env_type})
-      return ${node_type}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('lexical_env_node')}";
-
-% if env_element_type:
-   function ${capi.get_name('lexical_env_get')}
-     (Env  : ${lexical_env_type};
-      Name : ${text_type})
-      return ${_self.env_element.array_type().name().camel_with_underscores}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('lexical_env_get')}";
-% endif
 
    ---------------------------------------
    -- Kind-specific AST node primitives --
