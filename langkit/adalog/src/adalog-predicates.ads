@@ -29,12 +29,19 @@ with Adalog.Relation_Interface;
 package Adalog.Predicates is
    generic
       type El_Type is private;
+
       with package Var is new Logic_Var
         (Element_Type => El_Type, others => <>);
-      with function Predicate (L : El_Type) return Boolean;
+
+      type Predicate_Type is private;
+
+      with function Call
+        (Self : Predicate_Type; L : El_Type) return Boolean;
+
    package Predicate is
       type Predicate_Logic is record
-         Ref : Var.Var;
+         Ref  : Var.Var;
+         Pred : Predicate_Type;
       end record;
 
       function Call (Inst : in out Predicate_Logic) return Boolean;
@@ -42,9 +49,11 @@ package Adalog.Predicates is
 
       package Impl is new Relation_Interface (Ty => Predicate_Logic);
 
-      function Create (R : Var.Var) return Predicate_Logic;
-      function Create (R : Var.Var) return Rel
-      is (Impl.Dynamic (Create (R)));
+      function Create
+        (R : Var.Var; Pred : Predicate_Type) return Predicate_Logic;
+      function Create
+        (R : Var.Var; Pred : Predicate_Type) return Rel
+      is (Impl.Dynamic (Create (R, Pred)));
 
    end Predicate;
 

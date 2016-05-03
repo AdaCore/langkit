@@ -33,7 +33,7 @@ package body Adalog.Predicates is
 
       function Call (Inst : in out Predicate_Logic) return Boolean is
         (Is_Defined (Inst.Ref)
-         and then Predicate (GetL (Inst.Ref)));
+         and then Call (Inst.Pred, GetL (Inst.Ref)));
 
       ------------
       -- Revert --
@@ -48,9 +48,10 @@ package body Adalog.Predicates is
       -- Create --
       ------------
 
-      function Create (R : Var.Var) return Predicate_Logic is
+      function Create
+        (R : Var.Var; Pred : Predicate_Type) return Predicate_Logic is
       begin
-         return Predicate_Logic'(Ref => R);
+         return Predicate_Logic'(Ref => R, Pred => Pred);
       end Create;
 
    end Predicate;
