@@ -92,7 +92,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    function ${capi.get_name("get_analysis_unit_from_file")}
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
-      Reparse           : int) return ${analysis_unit_type}
+      Reparse           : int;
+      With_Trivia       : int)
+      return ${analysis_unit_type}
    is
    begin
       Clear_Last_Exception;
@@ -103,7 +105,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
            (Ctx,
             Value (Filename),
             Value_Or_Empty (Charset),
-            Reparse /= 0);
+            Reparse /= 0,
+            With_Trivia /= 0);
       begin
          return Wrap (Unit);
       end;
@@ -117,7 +120,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
       Buffer            : chars_ptr;
-      Buffer_Size       : size_t) return ${analysis_unit_type}
+      Buffer_Size       : size_t;
+      With_Trivia       : int)
+      return ${analysis_unit_type}
    is
    begin
       Clear_Last_Exception;
@@ -133,7 +138,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
            (Ctx,
             Value (Filename),
             Value_Or_Empty (Charset),
-            Buffer_Str);
+            Buffer_Str,
+            With_Trivia /= 0);
          return Wrap (Unit);
       end;
    exception

@@ -127,7 +127,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    function ${capi.get_name("get_analysis_unit_from_file")}
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
-      Reparse           : int)
+      Reparse           : int;
+      With_Trivia       : int)
       return ${analysis_unit_type}
       with Export        => True,
            Convention    => C,
@@ -139,7 +140,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
       Buffer            : chars_ptr;
-      Buffer_Size       : size_t)
+      Buffer_Size       : size_t;
+      With_Trivia       : int)
       return ${analysis_unit_type}
       with Export        => True,
            Convention    => C,

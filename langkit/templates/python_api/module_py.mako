@@ -139,17 +139,21 @@ class AnalysisContext(object):
         _destroy_analysis_context(self._c_value)
         super(AnalysisContext, self).__init__()
 
-    def get_from_file(self, filename, charset=None, reparse=False):
+    def get_from_file(self, filename, charset=None, reparse=False,
+                      with_trivia=False):
         ${py_doc('langkit.get_unit_from_file', 8)}
         c_value = _get_analysis_unit_from_file(self._c_value, filename,
-                                               charset or '', reparse)
+                                               charset or '', reparse,
+                                               with_trivia)
         return AnalysisUnit(c_value)
 
-    def get_from_buffer(self, filename, buffer, charset=None):
+    def get_from_buffer(self, filename, buffer, charset=None, reparse=False,
+                        with_trivia=False):
         ${py_doc('langkit.get_unit_from_buffer', 8)}
         c_value = _get_analysis_unit_from_buffer(self._c_value, filename,
                                                  charset or '',
-                                                 buffer, len(buffer))
+                                                 buffer, len(buffer),
+                                                 with_trivia)
         return AnalysisUnit(c_value)
 
     def remove(self, filename):
