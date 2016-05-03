@@ -90,4 +90,10 @@ package Adalog.Operations is
    function "and" (Left : L_Rel.Ty; Right : R_Rel.Ty) return Rel
    is (AImpl.Dynamic (Left and Right)) with Inline_Always;
 
+   function Logic_Or
+     (Left : L_Rel.Ty; Right : R_Rel.Ty) return Rel renames "or";
+
+   function Logic_And
+     (Left : L_Rel.Ty; Right : R_Rel.Ty) return Rel renames "and";
+
 end Adalog.Operations;
