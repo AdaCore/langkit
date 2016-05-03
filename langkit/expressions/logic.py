@@ -139,7 +139,7 @@ class Domain(AbstractExpression):
             ])
 
         def render_expr(self):
-            return self.res_var.name
+            return str(self.res_var.name)
 
     def __init__(self, logic_var_expr, domain):
         """
