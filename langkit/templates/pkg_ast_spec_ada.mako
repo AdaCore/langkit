@@ -137,6 +137,9 @@ package ${_self.ada_api_settings.lib_name}.AST is
    ## Group operation below.
    ${array_types.public_decl(LexicalEnvType.array_type())}
 
+   ## See EnvElement.should_emit_array_type
+   ${array_types.public_decl(EnvElement.array_type())}
+
    function Group is new AST_Envs.Group
      (Index_Type        => Positive,
       Lexical_Env_Array => ${LexicalEnvType.array_type().api_name()});

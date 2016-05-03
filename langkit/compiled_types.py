@@ -92,6 +92,7 @@ def make_renderer(base_renderer=None):
         'is_struct_type':   type_check(Struct),
         'decl_type':        decl_type,
         'LexicalEnvType':   LexicalEnvType,
+        'EnvElement':       EnvElement,
     }
     if get_context():
         capi = get_context().c_api_settings
@@ -1738,6 +1739,12 @@ class EnvElement(Struct):
     value, as well as the metadata associated to this node in the source
     lexical environment.
     """
+
+    # LexicalEnv.get, which is bound in the AST.C generate package, returns
+    # arrayas of EnvElement, so the corresponding array type must be declared
+    # manually there.
+    should_emit_array_type = False
+
     # The type of el will be filled when the root_grammar_class is used
     el = BuiltinField(None, doc="The stored AST node")
 

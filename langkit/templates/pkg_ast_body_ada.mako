@@ -22,6 +22,7 @@ use Langkit_Support.Token_Data_Handler;
 package body ${_self.ada_api_settings.lib_name}.AST is
 
    ${array_types.body(LexicalEnvType.array_type())}
+   ${array_types.body(EnvElement.array_type())}
    ${array_types.body(root_node_array)}
 
    -----------
@@ -652,7 +653,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       function Image (El : Env_Element) return String is
         (Short_Image (El.El));
 
-      function Image is new Env_Element_Vectors.Image (Image);
+      function Image is new AST_Envs.Env_Element_Vectors.Image (Image);
 
    begin
       Put ("<LexEnv (Id" & Env_Id & ", Parent"
