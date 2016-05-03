@@ -1,5 +1,6 @@
 ## vim: filetype=makoada
 
+% if not property.abstract:
 ${"overriding" if property.overriding else ""} function ${property.name}
   (${property.self_arg_name} :
    access ${Self.type.name()}_Type${"" if property.dispatching else "'Class"}
@@ -35,3 +36,4 @@ begin
    ${property.constructed_expr.render_pre()}
    return ${property.constructed_expr.render_expr()};
 end ${property.name};
+% endif

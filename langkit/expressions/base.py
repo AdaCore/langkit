@@ -1230,8 +1230,7 @@ class PropertyDef(AbstractNodeData):
         with self.bind(), Self.bind_type(self.ast_node):
             with names.camel_with_underscores:
                 self.prop_decl = render('properties/decl_ada')
-                self.prop_def = ('' if self.abstract else
-                                 render('properties/def_ada'))
+                self.prop_def = render('properties/def_ada')
 
         base_prop = self.base_property()
         if base_prop and base_prop.type:
