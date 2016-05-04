@@ -1280,7 +1280,7 @@ class Struct(CompiledType):
                         col("class {astnode_name}, file {file} line {line}\n",
                             Colors.WARNING) +
                         "Field {field_name}, "
-                        "Provided type : {ptype}, Inferred type: {itype}"
+                        "Provided type: {ptype}, Inferred type: {itype}"
                     ).format(astnode_name=cls.name(), file=f, line=l,
                              ptype=field.type.name().camel,
                              itype=field_type.name().camel,

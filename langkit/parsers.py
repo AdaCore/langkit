@@ -181,7 +181,7 @@ class Grammar(object):
                 rule_name, self.rules.keys()
             )
             check_source_language(
-                False, "Wrong rule name : '{}'. {}".format(
+                False, "Wrong rule name: '{}'. {}".format(
                     rule_name,
                     "Did you mean '{}'?".format(close_matches[0])
                     if close_matches else ""
@@ -428,7 +428,7 @@ class Parser(object):
         """
 
         if self.name and get_context().verbosity.debug:
-            print "Compiling rule : {0}".format(
+            print "Compiling rule: {0}".format(
                 col(self.gen_fn_name, Colors.HEADER)
             )
 
