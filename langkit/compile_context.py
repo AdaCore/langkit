@@ -467,6 +467,12 @@ class CompileCtx():
         # envs, so we always need to generate the corresponding array type.
         self.array_types.add(LexicalEnvType.array_type())
 
+        # Likewise for the EnvElement array type: LexicalEnv.get returns it.
+        # No need to bind anything if the language specification did not
+        # specify any EnvElement, though.
+        if self.env_element:
+            self.array_types.add(EnvElement.array_type())
+
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a
         # relatively stable order. This is really useful for debugging
