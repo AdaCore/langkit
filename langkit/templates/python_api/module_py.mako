@@ -316,7 +316,10 @@ class Token(ctypes.Structure):
         return self._sloc_range.wrap()
 
     def __repr__(self):
-        return "<Token {}>".format(self.text)
+        return '<Token {}{}>'.format(
+            self.kind,
+            ' {}'.format(repr(self.text)) if self.text else ''
+        )
 
 
 class Sloc(object):
