@@ -959,6 +959,14 @@ class StructMetaClass(type):
                 doc="Return an array that contains the lexical parents (this"
                     " node included). Nearer parents are first in the list."
             )
+            dct["token_start"] = BuiltinField(
+                type=Token,
+                doc="Return the first token used to parse this node."
+            )
+            dct["token_end"] = BuiltinField(
+                type=Token,
+                doc="Return the last token used to parse this node."
+            )
 
         # Get the list of macro classes, and compute the ordered dicts of
         # fields for each of them.
