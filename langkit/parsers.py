@@ -22,8 +22,8 @@ not defined in the example, but relied on explicitly.
 
 from __future__ import absolute_import
 
-import difflib
 from copy import copy
+import difflib
 import inspect
 from itertools import chain
 
