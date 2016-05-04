@@ -467,15 +467,10 @@
         (Node : ${cls.name()}) return ${field.type.name()}
       is
       begin
-         <%
-            field_access = field.type.extract_from_storage_expr(
-               node_expr='Node',
-               base_expr='Node.{}'.format(field.name)
-            )
-            if is_ast_node(field.type):
-               field_access = '{} ({})'.format(field.type.name(), field_access)
-         %>
-         return ${field_access};
+         return ${field.type.extract_from_storage_expr(
+                      node_expr='Node',
+                      base_expr='Node.{}'.format(field.name)
+                  )};
       end ${field.name};
    % endfor
 
