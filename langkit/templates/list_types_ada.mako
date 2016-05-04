@@ -2,7 +2,7 @@
 
 <%def name="public_decl(element_type)">
 
-   <% type = decl_type(element_type) %>
+   <% type = element_type.storage_type_name() %>
 
    type List_${type}_Type is new ${root_node_value_type} with private;
    type List_${type} is access all List_${type}_Type'Class;
@@ -12,7 +12,7 @@
 
 <%def name="private_decl(element_type)">
 
-   <% type = decl_type(element_type) %>
+   <% type = element_type.storage_type_name() %>
 
    package Lists_${type} is new List
      (Node_Type   => ${type}_Type,
@@ -42,7 +42,7 @@
 
 <%def name="body(element_type)">
 
-   <% type = decl_type(element_type) %>
+   <% type = element_type.storage_type_name() %>
 
    ---------
    -- Get --

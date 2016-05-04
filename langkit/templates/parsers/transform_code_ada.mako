@@ -21,7 +21,7 @@ if ${parser_context.pos_var_name} /= -1 then
       ## Set children fields into the created node
       ${res}.${field.name} :=
          % if is_ast_node(field.type):
-            ${decl_type(field.type)} (${arg});
+            ${field.type.storage_type_name()} (${arg});
          % else:
             ${arg};
          % endif

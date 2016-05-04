@@ -47,14 +47,6 @@ class AbstractFieldAccessor(GeneratedFunction):
         self.c_declaration = c_declaration
 
 
-def decl_type(ada_type):
-    """
-    :type ada_type: CompiledType
-    :rtype: str
-    """
-    return str(ada_type.storage_type_name())
-
-
 def c_node_type(capi):
     return CAPIType(capi, 'base_node')
 
@@ -80,19 +72,18 @@ def make_renderer(base_renderer=None):
         base_renderer = common_renderer
 
     template_args = {
-        'is_enum':          type_check(EnumType),
-        'is_long':          type_check(LongType),
-        'is_bool':          type_check(BoolType),
-        'is_ast_node':      type_check(ASTNode),
-        'is_sloc_range':    type_check(SourceLocationRangeType),
-        'is_token_type':    type_check(Token),
-        'is_symbol_type':   type_check(Symbol),
-        'is_array_type':    type_check(ArrayType),
-        'is_lexical_env':   type_check(LexicalEnvType),
-        'is_struct_type':   type_check(Struct),
-        'decl_type':        decl_type,
-        'LexicalEnvType':   LexicalEnvType,
-        'EnvElement':       EnvElement,
+        'is_enum':        type_check(EnumType),
+        'is_long':        type_check(LongType),
+        'is_bool':        type_check(BoolType),
+        'is_ast_node':    type_check(ASTNode),
+        'is_sloc_range':  type_check(SourceLocationRangeType),
+        'is_token_type':  type_check(Token),
+        'is_symbol_type': type_check(Symbol),
+        'is_array_type':  type_check(ArrayType),
+        'is_lexical_env': type_check(LexicalEnvType),
+        'is_struct_type': type_check(Struct),
+        'LexicalEnvType': LexicalEnvType,
+        'EnvElement':     EnvElement,
     }
     if get_context():
         capi = get_context().c_api_settings

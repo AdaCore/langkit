@@ -101,7 +101,7 @@ loop
 
       ## Related to TODO above, we create the list lazily only when the first
       ## result has been parsed.
-      <% parser_type = decl_type(_self.parser.get_type()) %>
+      <% parser_type = _self.parser.get_type().storage_type_name() %>
 
       if ${res} = ${_self.get_type().storage_nullexpr()} then
          ${res} := List_${parser_type}
@@ -112,7 +112,7 @@ loop
       end if;
 
       ## Append the parsed result to the list
-      Lists_${decl_type(_self.parser.get_type())}.Node_Vectors.Append
+      Lists_${parser_type}.Node_Vectors.Append
         (${res}.Vec, ${parser_context.res_var_name});
 
       ## If we are parsing nodes, then set the parent of parsed node to the

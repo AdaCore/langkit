@@ -81,7 +81,7 @@
    %>
    % if fields or ext:
        % for f in fields:
-            ${f.name} : aliased ${decl_type(f.type)}
+            ${f.name} : aliased ${f.type.storage_type_name()}
                := ${f.type.storage_nullexpr()};
             ${ada_doc(f, 12)}
        % endfor

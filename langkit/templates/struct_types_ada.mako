@@ -18,7 +18,7 @@
 
    type ${cls.name()} is record
       % for f in fields:
-      ${f.name} : aliased ${decl_type(f.type)}
+      ${f.name} : aliased ${f.type.storage_type_name()}
          := ${f.type.nullexpr()};
        ${ada_doc(f, 6)}
       % endfor

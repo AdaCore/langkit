@@ -1,24 +1,24 @@
 ## vim: filetype=makoada
 
-${_self.gen_fn_name}_Memo : ${decl_type(_self.get_type())}_Memos.Memo_Type;
+<% ret_type = _self.get_type().storage_type_name() %>
+
+${_self.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
 
 function ${_self.gen_fn_name} (Parser : in out Parser_Type;
                                Pos    : Token_Index)
-                               return ${decl_type(_self.get_type())}
+                               return ${ret_type}
 is
    % for name, typ in parser_context.var_defs:
-      ${name} : ${decl_type(typ)}
+      ${name} : ${typ.storage_type_name()}
          ${":= " + typ.storage_nullexpr() if typ.storage_nullexpr() else ""};
    % endfor
 
    % if _self.is_left_recursive():
       Mem_Pos : Token_Index := Pos;
-      Mem_Res : ${decl_type(_self.get_type())} :=
-         ${_self.get_type().storage_nullexpr()};
+      Mem_Res : ${ret_type} := ${_self.get_type().storage_nullexpr()};
    % endif
 
-   M       : ${decl_type(_self.get_type())}_Memos.Memo_Entry :=
-      Get (${_self.gen_fn_name}_Memo, Pos);
+   M : ${ret_type}_Memos.Memo_Entry := Get (${_self.gen_fn_name}_Memo, Pos);
 
 begin
 

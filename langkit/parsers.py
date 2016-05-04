@@ -30,9 +30,7 @@ from itertools import chain
 from langkit import compiled_types, names
 from langkit.common import gen_name, gen_names
 from langkit.compile_context import get_context
-from langkit.compiled_types import (
-    CompiledType, BoolType, Token, ASTNode, decl_type
-)
+from langkit.compiled_types import ASTNode, BoolType, CompiledType, Token
 from langkit.diagnostics import (
     extract_library_location, context, check_source_language, Location
 )
@@ -605,10 +603,7 @@ class Or(Parser):
             exit_label=gen_name("Exit_Or"),
 
             pos=pos,
-            res=res,
-
-            # Final type of the result of the Or parser
-            typ=decl_type(self.get_type())
+            res=res
         )
 
         code = render('parsers/or_code_ada', t_env)
