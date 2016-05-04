@@ -364,12 +364,6 @@ package ${_self.ada_api_settings.lib_name}.AST is
    function Data (T : Token_Type) return Token_Data_Type;
    --  Return the data associated to T
 
-   function Get_Symbol (Token : Token_Type) return Symbol_Type is
-     (Symbol_Type (Data (Token).Text));
-   --  Assuming that Token refers to a token that contains a symbol, return the
-   --  corresponding symbol. This is an internal helper for properties code
-   --  generation.
-
    function Image (Token : Token_Type) return String;
    --  Debug helper: return a human-readable text to represent a token
 
@@ -664,6 +658,12 @@ private
      ((Node.Unit.Token_Data, Node.Token_Start, No_Token_Index));
    function Token_End (Node : ${root_node_type_name}) return Token_Type is
      ((Node.Unit.Token_Data, Node.Token_End, No_Token_Index));
+
+   function Get_Symbol (Token : Token_Type) return Symbol_Type is
+     (Symbol_Type (Data (Token).Text));
+   --  Assuming that Token refers to a token that contains a symbol, return the
+   --  corresponding symbol. This is an internal helper for properties code
+   --  generation.
 
    ----------------------------------------
    -- Tree traversal (Ada 2012 iterator) --
