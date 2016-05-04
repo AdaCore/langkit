@@ -1,4 +1,8 @@
-from langkit.compiled_types import LogicVarType, EquationType
+from langkit.compiled_types import (
+    LogicVarType, EquationType, BoolType, StructMetaClass
+)
+
+from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, PropertyDef
 )
@@ -53,7 +57,10 @@ class Bind(AbstractExpression):
         :param AbstractExpression to_var: An expression resolving to a
             logical variable that is the destination of the bind.
         :param PropertyDef bind_property: The property to apply on the value of
-            from_var that will yield the value to give to to_var.
+            from_var that will yield the value to give to to_var. For
+            convenience, it can be a property on any subclass of the root
+            ast node class, and can return any subclass of the root ast node
+            class.
         """
         super(Bind, self).__init__()
         self.from_var = from_var
@@ -61,6 +68,20 @@ class Bind(AbstractExpression):
         self.bind_property = bind_property
 
     def do_prepare(self):
+        root_class = StructMetaClass.root_grammar_class
+        check_source_language(
+            self.bind_property.type.matches(root_class),
+            "The property passed to bind must return a subtype of {}".format(
+                root_class.name().camel
+            )
+        )
+
+        check_source_language(
+            self.bind_property.ast_node.matches(root_class),
+            "The property passed to bind must belong to a subtype "
+            "of {}".format(root_class.name().camel)
+        )
+
         self.bind_property.do_generate_logic_binder()
 
     def construct(self):
