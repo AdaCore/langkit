@@ -864,7 +864,8 @@ class PropertyDef(AbstractNodeData):
 
         self.prefix = prefix
 
-        self.expr = expr
+        # Handle the simple cases of int and bool literals here
+        self.expr = unsugar(expr) if isinstance(expr, (bool, int)) else expr
         ":type: AbstractExpression"
 
         self.constructed_expr = None
