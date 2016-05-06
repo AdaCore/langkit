@@ -33,3 +33,28 @@
 
    % endif
 </%def>
+
+<%def name="generate_logic_predicate(prop)">
+   % if prop.needs_logic_predicate:
+
+   <%
+   type_name = "{}_{}_Predicate_Caller".format(prop.ast_node.name(), prop.name)
+   package_name = "{}_{}_Pred".format(prop.ast_node.name(), prop.name)
+   root_class = ctx.root_grammar_class.name()
+   %>
+
+   type ${type_name} is record
+      Env  : Lexical_Env;
+   end record;
+
+   function Call
+     (Self : ${type_name}; Node : ${root_class}) return Boolean is
+   begin
+      return ${prop.name} (${prop.ast_node.name()} (Node), Self.Env);
+   end Call;
+
+   package ${package_name} is
+   new Predicate (${root_class}, Eq_Node.Refs.Raw_Logic_Var, ${type_name});
+
+   % endif
+</%def>

@@ -11,10 +11,11 @@
 
 with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
 
+pragma Warnings (Off, "referenced");
 with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;
 with Adalog.Dynamic_Ops;         use Adalog.Dynamic_Ops;
+with Adalog.Predicates;          use Adalog.Predicates;
 
-pragma Warnings (Off, "referenced");
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
 with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
 with Langkit_Support.Relative_Get;

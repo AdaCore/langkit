@@ -185,3 +185,75 @@ class Domain(AbstractExpression):
                       "to LogicVar must be collection type, got {expr_type}"),
             construct(self.logic_var_expr, LogicVarType)
         )
+
+
+class Predicate(AbstractExpression):
+    """
+    The predicate expression will ensure that a certain property is
+    maintained on a logical variable in all possible solutions, so that the
+    only solutions in the equations are the equations where the property is
+    True.
+    """
+
+    class Expr(ResolvedExpression):
+        def __init__(self, logic_var, pred_property):
+            self.logic_var = logic_var
+            ":type: ResolvedExpression"
+
+            self.pred_property = pred_property
+            ":type: PropertyDef"
+
+        @property
+        def type(self):
+            return EquationType
+
+        def render_pre(self):
+            return self.logic_var.render_pre()
+
+        def render_expr(self):
+            return ("{t}_{p}_Pred.Create "
+                    "({l}, {t}_{p}_Predicate_Caller'(Env => {e}))").format(
+                t=self.pred_property.ast_node.name(),
+                p=self.pred_property.name,
+                l=self.logic_var.render_expr(),
+                e=Env.construct().render_expr(),
+            )
+
+    def __init__(self, logic_var_expr, pred_property):
+        """
+        :param AbstractExpression logic_var_expr: The logic variable on
+            which to apply the predicate.
+        :param AbstractExpression pred_property: The property to use as a
+            predicate. For convenience, it can be a property of any subtype of
+            the root ast node, but it needs to return a boolean.
+        """
+        super(Predicate, self).__init__()
+        self.pred_property = pred_property
+        self.logic_var_expr = logic_var_expr
+
+    def do_prepare(self):
+        check_source_language(
+            isinstance(self.pred_property, PropertyDef),
+            "Needs a property reference, got {}".format(self.pred_property)
+        )
+
+        root_class = StructMetaClass.root_grammar_class
+        check_source_language(
+            self.pred_property.type.matches(BoolType),
+            "The property passed to predicate must return a boolean, "
+            "got {}".format(self.pred_property.type.name().camel)
+        )
+
+        check_source_language(
+            self.pred_property.ast_node.matches(root_class),
+            "The property passed to bind must belong to a subtype "
+            "of {}".format(root_class.name().camel)
+        )
+
+        self.pred_property.do_generate_logic_predicate()
+
+    def construct(self):
+        return Predicate.Expr(
+            construct(self.logic_var_expr, LogicVarType),
+            self.pred_property
+        )

@@ -840,10 +840,11 @@ class PropertyDef(AbstractNodeData):
         "Recursion guard for the type property"
 
         self.needs_logic_binder = False
+        self.needs_logic_predicate = False
         """
-        Whether we need to generate a logic binder for this property of not.
-        This will not be set internally, but rather will be set by the
-        expression using this property in a bind expression
+        Whether we need to generate a logic or predicate binder for this
+        property or not. This will not be set internally, but rather will be
+        set by the expression using this property in a bind expression
         """
 
         self.prefix = prefix
@@ -1286,6 +1287,13 @@ class PropertyDef(AbstractNodeData):
         for the property.
         """
         self.needs_logic_binder = True
+
+    def do_generate_logic_predicate(self):
+        """
+        Helper method, will trigger the emission of a logic predicate object
+        for the property.
+        """
+        self.needs_logic_predicate = True
 
 
 # noinspection PyPep8Naming
