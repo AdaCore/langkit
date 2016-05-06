@@ -21,11 +21,6 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
       ${',\n'.join(lexer.ada_token_name(t) for t in tokens)}
    );
 
-   for Token_Kind use (
-      ${',\n'.join('{} => {}'.format(lexer.ada_token_name(t), t.value)
-                   for t in tokens)}
-   );
-
    type Token_Data_Type is record
       Kind       : Token_Kind;
       Text       : Text_Access;
