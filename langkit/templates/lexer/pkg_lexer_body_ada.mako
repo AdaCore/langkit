@@ -2,6 +2,7 @@
 
 <% lexer = get_context().lexer %>
 
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Conversion;
 
 with Interfaces;   use Interfaces;
@@ -371,5 +372,22 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       Iconv_Close (State);
       Length := (Output_Index - First_Output_Index) / 4;
    end Decode_Buffer;
+
+   Token_Kind_Names : constant array (Token_Kind) of String_Access := (
+      % for tok in get_context().lexer.tokens_class:
+          ${get_context().lexer.ada_token_name(tok)} =>
+             new String'("${tok.name}")
+          % if (not loop.last):
+              ,
+          % endif
+      % endfor
+   );
+
+   ---------------------
+   -- Token_Kind_Name --
+   ---------------------
+
+   function Token_Kind_Name (Token_Id : Token_Kind) return String is
+     (Token_Kind_Names (Token_Id).all);
 
 end ${_self.ada_api_settings.lib_name}.Lexer;
