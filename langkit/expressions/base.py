@@ -14,7 +14,30 @@ from langkit.diagnostics import (
     extract_library_location, check_source_language, check_multiple,
     context, Severity
 )
-from langkit.utils import assert_type, memoized, TypeSet, issubtype
+from langkit.utils import (
+    assert_type, memoized, TypeSet, issubtype, dispatch_on_type
+)
+
+
+def unsugar(expr):
+    """
+    Given a python expession that can be unsugared to an AbstractExpression,
+    return a valid AbstractExpression.
+
+    :param AbstractExpression|bool|int expr: The expression to unsugar.
+    :return: AbstractExpression
+    """
+
+    # WARNING: Since bools are ints in python, bool needs to be before int
+    if isinstance(expr, (bool, int)):
+        expr = Literal(expr)
+
+    check_source_language(
+        isinstance(expr, AbstractExpression),
+        'Invalid abstract expression: {}'.format(type(expr))
+    )
+
+    return expr
 
 
 def construct(expr, expected_type_or_pred=None, custom_msg=None):
@@ -41,18 +64,10 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
     :rtype: ResolvedExpression
     """
 
-    if isinstance(expr, AbstractExpression):
-        ret = expr.construct()
-        ret.location = expr.location
+    expr = unsugar(expr)
 
-    # WARNING: Since bools are ints in python, this check needs to be before
-    # the "is int" check.
-    elif isinstance(expr, bool):
-        ret = LiteralExpr(str(expr), BoolType)
-    elif isinstance(expr, int):
-        ret = LiteralExpr(str(expr), LongType)
-    else:
-        raise TypeError('Invalid abstract expression: {}'.format(type(expr)))
+    ret = expr.construct()
+    ret.location = expr.location
 
     if expected_type_or_pred:
         if isinstance(expected_type_or_pred, type):
@@ -1359,7 +1374,12 @@ class Literal(AbstractExpression):
         self.literal = literal
 
     def construct(self):
-        return construct(self.literal)
+        # WARNING: Since bools are ints in python, bool needs to be before int
+        # in the following table.
+        return dispatch_on_type(type(self.literal), [
+            (bool, lambda _: LiteralExpr(str(self.literal), BoolType)),
+            (int, lambda _:  LiteralExpr(str(self.literal), LongType)),
+        ], exception_msg='Invalid abstract expression type: {}')
 
 
 class LiteralExpr(ResolvedExpression):
