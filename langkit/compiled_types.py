@@ -1510,6 +1510,24 @@ class ASTNode(Struct):
         return cls.__base__
 
     @classmethod
+    @memoized
+    def concrete_subclasses(cls):
+        """
+        Return the list of all (direct or indirect) subclasses for cls that are
+        not abstract, sorted by hierarchical name.
+
+        :rtype: list[ASTNode]
+        """
+        sorted_direct_subclasses = sorted(
+            cls.subclasses, key=lambda subcls: subcls.hierarchical_name()
+        )
+        return sum(
+            ((subcls.concrete_subclasses() if subcls.abstract else [subcls])
+             for subcls in sorted_direct_subclasses),
+            []
+        )
+
+    @classmethod
     def fields_with_accessors(cls):
         """
         Return a list of fields for which we must generate accessors in APIs.

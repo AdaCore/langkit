@@ -187,6 +187,18 @@ package ${_self.ada_api_settings.lib_name}.AST is
    % endfor
      );
 
+   ## Output subranges to materialize abstract classes as sets of their
+   ## concrete subclasses.
+   % for cls in _self.astnode_types:
+      <% subclasses = cls.concrete_subclasses() %>
+      % if cls.abstract and subclasses:
+         subtype ${cls.ada_kind_name()} is
+            ${root_node_kind_name} range
+               ${subclasses[0].ada_kind_name()}
+               .. ${subclasses[-1].ada_kind_name()};
+      % endif
+   % endfor
+
    function Kind (Node : access ${root_node_value_type})
                   return ${root_node_kind_name} is abstract;
    function Kind_Name
