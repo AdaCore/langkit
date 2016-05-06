@@ -2,8 +2,7 @@
 
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
-with Langkit_Support.Token_Data_Handler;
-use Langkit_Support.Token_Data_Handler;
+with Langkit_Support.Token_Data_Handlers;
 
 --  This package provides types and primitives to split text streams into lists
 --  of tokens.
@@ -21,9 +20,18 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
 
    type Token_Data_Type is record
       Kind       : Token_Kind;
+
       Text       : Text_Access;
+      --  Text as found in original source file or null depending on the token
+      --  kind (as decided in the lexer specification). For instance: null for
+      --  keywords but actual text for identifiers.
+
       Sloc_Range : Source_Location_Range;
    end record;
+
+   package Token_Data_Handlers is new Langkit_Support.Token_Data_Handlers
+     (Token_Data_Type);
+   use Token_Data_Handlers;
 
    Unknown_Charset : exception;
    --  Raised by Lex_From_* functions when the input charset is not supported
@@ -46,5 +54,10 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
 
    function Token_Kind_Name (Token_Id : Token_Kind) return String;
    ${ada_doc('langkit.token_kind_name', 3)}
+
+   function Image (T : Token_Data_Type) return String is
+     (if T.Text = null
+      then ""
+      else Image (T.Text.all));
 
 end ${_self.ada_api_settings.lib_name}.Lexer;

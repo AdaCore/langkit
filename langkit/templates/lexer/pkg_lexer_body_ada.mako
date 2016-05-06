@@ -184,7 +184,8 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                   Append
                     (TDH.Trivias,
                      (Has_Next => False,
-                      T        => (Id         => Token.Id,
+                      T        => (Kind       =>
+                                      Token_Kind'Enum_Val (Token.Id),
                                    Text       => Text,
                                    Sloc_Range => Sloc_Range)));
 
@@ -202,7 +203,9 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
          Append
            (TDH.Tokens,
-            (Id => Token.Id, Text => Text, Sloc_Range => Sloc_Range));
+            (Kind       => Token_Kind'Enum_Val (Token.Id),
+             Text       => Text,
+             Sloc_Range => Sloc_Range));
          Prepare_For_Trivia;
 
       % if lexer.token_actions['WithTrivia']:

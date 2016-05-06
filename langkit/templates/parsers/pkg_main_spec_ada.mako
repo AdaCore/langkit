@@ -1,12 +1,12 @@
 ## vim: filetype=makoada
 
 with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
-with Langkit_Support.Token_Data_Handler; use Langkit_Support.Token_Data_Handler;
 
 with ${_self.ada_api_settings.lib_name}.Analysis;
 use ${_self.ada_api_settings.lib_name}.Analysis;
 with ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer;
+use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 

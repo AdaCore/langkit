@@ -9,14 +9,14 @@ with System;
 with Langkit_Support.Bump_Ptr;           use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
-with Langkit_Support.Token_Data_Handler;
-use Langkit_Support.Token_Data_Handler;
 with Langkit_Support.Vectors;
 
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 with ${_self.ada_api_settings.lib_name}.AST;
 use ${_self.ada_api_settings.lib_name}.AST;
+with ${_self.ada_api_settings.lib_name}.Lexer;
+use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 
 --  This package provides types and primitives to analyze source files as
 --  analysis units.

@@ -1,22 +1,10 @@
-with Interfaces; use Interfaces;
-
-with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Vectors;
 
-package Langkit_Support.Token_Data_Handler is
-
-   type Token_Raw_Data_Type is record
-      Id         : Unsigned_16;
-
-      Text       : Text_Access;
-      --  Text as found in original source file or null depending on the token
-      --  kind (as decided in the lexer specification). For instance: null for
-      --  keywords but actual text for identifiers.
-
-      Sloc_Range : Source_Location_Range;
-   end record;
+generic
+   type Token_Data_Type is private;
+package Langkit_Support.Token_Data_Handlers is
 
    --  Trivias are tokens that are not to be taken into account during parsing,
    --  and are marked as so in the lexer definition. Conceptually, we want
@@ -24,13 +12,13 @@ package Langkit_Support.Token_Data_Handler is
    --  is every trivia that is between the current token and the next token.
 
    type Trivia_Node is record
-      T        : Token_Raw_Data_Type;
+      T        : Token_Data_Type;
       Has_Next : Boolean;
    end record;
    --  This defines a node in a trivia linked list
 
    package Token_Vectors is new Langkit_Support.Vectors
-     (Element_Type => Token_Raw_Data_Type);
+     (Element_Type => Token_Data_Type);
    package Text_Vectors is new Langkit_Support.Vectors
      (Element_Type => Text_Access);
    package Trivia_Vectors is new Langkit_Support.Vectors
@@ -92,7 +80,7 @@ package Langkit_Support.Token_Data_Handler is
 
    function Get_Token
      (TDH   : Token_Data_Handler;
-      Index : Token_Index) return Token_Raw_Data_Type
+      Index : Token_Index) return Token_Data_Type
    is
      (Token_Vectors.Get (TDH.Tokens, Natural (Index)));
 
@@ -109,9 +97,4 @@ package Langkit_Support.Token_Data_Handler is
    function Get_Leading_Trivias
      (TDH : Token_Data_Handler) return Token_Vectors.Elements_Array;
 
-   function Image (T : Token_Raw_Data_Type) return String is
-     (if T.Text = null
-      then ""
-      else Image (T.Text.all));
-
-end Langkit_Support.Token_Data_Handler;
+end Langkit_Support.Token_Data_Handlers;

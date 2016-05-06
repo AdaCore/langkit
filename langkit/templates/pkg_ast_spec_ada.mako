@@ -21,14 +21,13 @@ with Langkit_Support.Iterators;
 with Langkit_Support.Lexical_Env;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
-with Langkit_Support.Token_Data_Handler;
-use Langkit_Support.Token_Data_Handler;
 with Langkit_Support.Vectors;
 
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 with ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer;
+use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 
 --  This package defines the base ("root") type for AST nodes. All node types
 --  that appear in the AST derive from it.

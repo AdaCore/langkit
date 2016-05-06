@@ -6,11 +6,10 @@
 ${res} := ${pos_name};
 
 declare
-   T : constant Token_Raw_Data_Type :=
+   T : constant Token_Data_Type :=
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (${res}));
-   K : constant Token_Kind := Token_Kind'Enum_Val (T.Id);
 begin
-   if K /= ${token_kind} then
+   if T.Kind /= ${token_kind} then
        ## If the result is not the one we expect, set pos to error
        ${pos} := -1;
 
@@ -19,7 +18,7 @@ begin
        if Parser.Last_Fail.Pos <= ${pos_name} then
            Parser.Last_Fail.Pos := ${pos_name};
            Parser.Last_Fail.Expected_Token_Id := ${token_kind};
-           Parser.Last_Fail.Found_Token_Id := K;
+           Parser.Last_Fail.Found_Token_Id := T.Kind;
        end if;
    else
       ## We don't want to increment the position if we are matching the

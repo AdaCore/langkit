@@ -2,8 +2,8 @@
 
 with System;
 
-with Langkit_Support.Token_Data_Handler;
-use Langkit_Support.Token_Data_Handler;
+with ${_self.ada_api_settings.lib_name}.Lexer;
+use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 
 --  Internal package used to provide interfaces types that help breaking
 --  circular dependencies between Analysis_Unit and the root AST node

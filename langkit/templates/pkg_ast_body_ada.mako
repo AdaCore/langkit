@@ -16,8 +16,6 @@ with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
 with Langkit_Support.Text;       use Langkit_Support.Text;
-with Langkit_Support.Token_Data_Handler;
-use Langkit_Support.Token_Data_Handler;
 
 package body ${_self.ada_api_settings.lib_name}.AST is
 
@@ -264,7 +262,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          Node.Unit.Token_Data.all;
       Sloc_Start, Sloc_End : Source_Location;
 
-      function Get (Index : Token_Index) return Token_Raw_Data_Type is
+      function Get (Index : Token_Index) return Token_Data_Type is
         (Get_Token (TDH, Index));
 
    begin
@@ -502,14 +500,10 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    ----------
 
    function Data (T : Token_Type) return Token_Data_Type is
-      Data : constant Token_Raw_Data_Type :=
-        (if T.Trivia = No_Token_Index
-         then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Token))
-         else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Trivia)).T);
    begin
-      return (Kind       => Token_Kind'Enum_Val (Data.Id),
-              Text       => Data.Text,
-              Sloc_Range => Data.Sloc_Range);
+      return (if T.Trivia = No_Token_Index
+              then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Token))
+              else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Trivia)).T);
    end Data;
 
    -----------
@@ -543,17 +537,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       procedure Append_Trivias (First, Last : Token_Index) is
       begin
          for I in First .. Last loop
-            for Raw_Data of Get_Trivias (TDH, I) loop
-               declare
-                  T : constant Child_Record :=
-                    (Kind   => Trivia,
-                     Trivia => (Kind       =>
-                                   Token_Kind'Enum_Val (Raw_Data.Id),
-                                Text       => Raw_Data.Text,
-                                Sloc_Range => Raw_Data.Sloc_Range));
-               begin
-                  Append (Ret_Vec, T);
-               end;
+            for D of Get_Trivias (TDH, I) loop
+               Append (Ret_Vec, (Kind => Trivia, Trivia => D));
             end loop;
          end loop;
       end Append_Trivias;

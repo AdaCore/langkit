@@ -86,7 +86,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
    is
 
       procedure Add_Last_Fail_Diagnostic is
-         Last_Token : Token_Raw_Data_Type renames
+         Last_Token : Token_Data_Type renames
             Get_Token (Parser.TDH.all, Parser.Last_Fail.Pos);
          D : constant Diagnostic :=
            (Sloc_Range => Last_Token.Sloc_Range,
@@ -112,15 +112,13 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
          --  some garbage afterwards.
          if Parser.Current_Pos = Parser.Last_Fail.Pos then
             declare
-               First_Garbage_Token : Token_Raw_Data_Type renames
+               First_Garbage_Token : Token_Data_Type renames
                   Get_Token (Parser.TDH.all, Parser.Current_Pos);
-               Token_Id            : constant Token_Kind :=
-                  Token_Kind'val (First_Garbage_Token.Id);
                D                   : constant Diagnostic :=
                  (Sloc_Range => First_Garbage_Token.Sloc_Range,
                   Message    => To_Unbounded_Wide_Wide_String (To_Text
                     ("End of input expected, got """
-                     & Token_Kind_Name (Token_Id)
+                     & Token_Kind_Name (First_Garbage_Token.Kind)
                      & """")));
             begin
                Parser.Diagnostics.Append (D);
