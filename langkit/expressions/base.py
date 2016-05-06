@@ -1281,6 +1281,10 @@ class PropertyDef(AbstractNodeData):
                 cls.render_property]
 
     def do_generate_logic_binder(self):
+        """
+        Helper method, will trigger the emission of a logic binder object
+        for the property.
+        """
         self.needs_logic_binder = True
 
 
