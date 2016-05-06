@@ -165,10 +165,27 @@ package ${_self.ada_api_settings.lib_name}.AST is
    -- Miscellanous operations --
    -----------------------------
 
-   type ${root_node_kind_name} is new Natural;
-   --  Describe the concrete type (aka dynamic type) of an AST node (i.e. from
-   --  which concrete derivation it comes from).
-   --  See ${_self.ada_api_settings.lib_name}.AST for possible values.
+   ## Output enumerators so that all concrete AST_Node subclasses get their own
+   ## kind. Nothing can be an instance of an abstract subclass, so these do not
+   ## need their own kind.
+   type ${root_node_kind_name} is
+     (${get_context().lang_name}_List
+   % for cls in _self.astnode_types:
+      % if not cls.abstract:
+      , ${cls.ada_kind_name()}
+      % endif
+   % endfor
+     );
+   --  AST node concrete types
+
+   for ${root_node_kind_name} use
+     (${get_context().lang_name}_List => 1
+   % for cls in _self.astnode_types:
+      % if not cls.abstract:
+      , ${cls.ada_kind_name()} => ${ctx.node_kind_constants[cls]}
+      % endif
+   % endfor
+     );
 
    function Kind (Node : access ${root_node_value_type})
                   return ${root_node_kind_name} is abstract;

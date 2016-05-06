@@ -180,7 +180,7 @@
       is
          pragma Unreferenced (Node);
       begin
-         return ${cls.name()}_Kind;
+         return ${cls.ada_kind_name()};
       end Kind;
 
       ---------------

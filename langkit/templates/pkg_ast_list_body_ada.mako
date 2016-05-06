@@ -14,7 +14,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
    function Kind (Node : access List_Type) return ${root_node_kind_name} is
       pragma Unreferenced (Node);
    begin
-      return List_Kind;
+      return ${get_context().lang_name}_List;
    end Kind;
 
    ---------------

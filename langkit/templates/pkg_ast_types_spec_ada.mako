@@ -27,20 +27,6 @@ private with ${_self.ada_api_settings.lib_name}.AST.List;
 
 package ${_self.ada_api_settings.lib_name}.AST.Types is
 
-   --  Set of supported values for ${root_node_kind_name} (see AST_Root):
-
-   ## Output constants so that all concrete AST_Node subclasses get their own
-   ## AST_Node_Kind. Nothing can be an instance of an abstract subclass, so
-   ## these do not need their own kind. Note that we start from 2 because 1 is
-   ## reserved for all lists.
-   List_Kind : constant ${root_node_kind_name} := 1;
-   % for cls in _self.astnode_types:
-      % if not cls.abstract:
-         ${cls.name()}_Kind : constant ${root_node_kind_name} :=
-            ${ctx.node_kind_constants[cls]};
-      % endif
-   % endfor
-
    -----------------------
    -- Enumeration types --
    -----------------------

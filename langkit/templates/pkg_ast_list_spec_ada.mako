@@ -18,8 +18,6 @@ package ${_self.ada_api_settings.lib_name}.AST.List is
    --  Note that as this package is instantiated in private parts and is itself
    --  private, there is no real need to create a private part here.
 
-   List_Kind : constant ${root_node_kind_name} := 1;
-
    package Node_Vectors is new Langkit_Support.Bump_Ptr.Vectors
      (Element_Type => Node_Access);
 

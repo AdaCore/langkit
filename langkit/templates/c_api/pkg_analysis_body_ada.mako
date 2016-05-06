@@ -336,11 +336,12 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    -- General AST node primitives --
    ---------------------------------
 
-   Node_Kind_Names : constant array (Positive range <>) of Text_Access :=
-     (new Text_Type'(To_Text ("list"))
+   Node_Kind_Names : constant array (${root_node_kind_name}) of Text_Access :=
+     (${_self.lang_name}_List => new Text_Type'(To_Text ("list"))
       % for astnode in _self.astnode_types:
          % if not astnode.abstract:
-            , new Text_Type'(To_Text ("${astnode.name().camel}"))
+            , ${astnode.ada_kind_name()} =>
+               new Text_Type'(To_Text ("${astnode.name().camel}"))
          % endif
       % endfor
       );
@@ -353,8 +354,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
 
       declare
          N : constant ${root_node_type_name} := Unwrap (Node);
+         K : ${root_node_kind_name} := Kind (N);
       begin
-         return ${node_kind_type} (Kind (N));
+         return ${node_kind_type} (K'Enum_Rep);
       end;
    exception
       when Exc : others =>
@@ -369,7 +371,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       Clear_Last_Exception;
 
       declare
-         Name : Text_Access renames Node_Kind_Names (Natural (Kind));
+         K    : constant ${root_node_kind_name} :=
+            ${root_node_kind_name}'Enum_Val (Kind);
+         Name : Text_Access renames Node_Kind_Names (K);
       begin
          return (Chars => Name.all'Address, Length => Name'Length);
       end;
