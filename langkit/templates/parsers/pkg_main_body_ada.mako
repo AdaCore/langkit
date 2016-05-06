@@ -16,18 +16,18 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    % for enum_type in _self.enum_types:
       package ${enum_type.name()}_Memos is new Langkit_Support.Packrat
-        (${enum_type.name()});
+        (${enum_type.name()}, Token_Index);
       use ${enum_type.name()}_Memos;
    % endfor
 
    % for cls in _self.astnode_types:
       package ${cls.name()}_Memos is new Langkit_Support.Packrat
-        (${cls.name()});
+        (${cls.name()}, Token_Index);
       use ${cls.name()}_Memos;
 
       % if cls in _self.list_types:
          package List_${cls.name()}_Memos is new Langkit_Support.Packrat
-           (List_${cls.name()});
+           (List_${cls.name()}, Token_Index);
          use List_${cls.name()}_Memos;
       % endif
    % endfor

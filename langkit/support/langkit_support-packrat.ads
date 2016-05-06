@@ -1,8 +1,6 @@
-with Langkit_Support.Token_Data_Handler;
-use Langkit_Support.Token_Data_Handler;
-
 generic
    type T is private;
+   type Token_Index is range <>;
    Memo_Size : Positive := 16;
 package Langkit_Support.Packrat is
 

@@ -32,9 +32,9 @@ package body Langkit_Support.Packrat is
    -- Set --
    ---------
 
-   procedure Set (Memo       : in out Memo_Type;
-                  Is_Success : Boolean;
-                  Instance   : T;
+   procedure Set (Memo              : in out Memo_Type;
+                  Is_Success        : Boolean;
+                  Instance          : T;
                   Offset, Final_Pos : Token_Index)
    is
       E : Memo_Entry renames Memo (Entry_Index (Offset));
