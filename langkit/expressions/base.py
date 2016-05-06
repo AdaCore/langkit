@@ -12,7 +12,7 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import (
     extract_library_location, check_source_language, check_multiple,
-    context, Severity
+    context, Severity, DiagnosticError
 )
 from langkit.utils import (
     assert_type, memoized, TypeSet, issubtype, dispatch_on_type
@@ -1379,7 +1379,7 @@ class Literal(AbstractExpression):
         return dispatch_on_type(type(self.literal), [
             (bool, lambda _: LiteralExpr(str(self.literal), BoolType)),
             (int, lambda _:  LiteralExpr(str(self.literal), LongType)),
-        ], exception_msg='Invalid abstract expression type: {}')
+        ], exception=DiagnosticError('Invalid abstract expression type: {}'))
 
 
 class LiteralExpr(ResolvedExpression):

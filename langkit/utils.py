@@ -198,7 +198,7 @@ def type_check_instance(klass):
     return lambda t: isinstance(t, klass)
 
 
-def dispatch_on_type(type, type_to_action_assocs, exception_msg=""):
+def dispatch_on_type(type, type_to_action_assocs, exception=None):
     """
     Dispatch on the type parameter, execute the corresponding action
     depending on the type. Every type in type_to_action_assocs will be
@@ -211,19 +211,18 @@ def dispatch_on_type(type, type_to_action_assocs, exception_msg=""):
         returns something.
     :type type_to_action_assocs: list[(type, (type) -> T)]
 
-    :param str exception_msg: The exception message for the exception that
-    will be raised.
+    :param Exception exception: The exception to raise in case the type is
+        not in the dispatch table.
 
     :rtype: T
     """
-    if not exception_msg:
-        exception_msg = "Error in dispatch_on_type: {} not handled".format(
-            type
-        )
+    exception = exception or Exception(
+        "Error in dispatch_on_type: {} not handled".format(type)
+    )
     for target_type, action in type_to_action_assocs:
         if issubclass(type, target_type):
             return action(type)
-    raise Exception(exception_msg)
+    raise exception
 
 
 def assert_type(obj, typ):

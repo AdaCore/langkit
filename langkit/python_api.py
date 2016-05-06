@@ -46,9 +46,10 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda cls: '{}({{}})'.format(type.name().camel)),
             (ct.Struct, lambda _: '{}'),
             (ct.LexicalEnvType, lambda _: 'LexicalEnv.wrap({})'),
-        ], exception_msg='Unhandled field type in the python binding'
-                         ' (wrapping): {}'.format(type)
-        ).format(value)
+        ], exception=TypeError(
+            'Unhandled field type in the python binding'
+            '(wrapping): {}'.format(type)
+        )).format(value)
 
     def unwrap_value(self, value, type):
         """
@@ -71,9 +72,10 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (ct.Symbol, lambda _: '_text.unwrap({})'),
             (ct.LexicalEnvType, lambda _: '{}.unwrap()'),
-        ], exception_msg='Unhandled field type in the python binding'
-                         ' (unwrapping): {}'.format(type)
-        ).format(value)
+        ], exception=TypeError(
+            'Unhandled field type in the python binding '
+            '(unwrapping): {}'.format(type)
+        )).format(value)
 
     def type_internal_name(self, type):
         """
