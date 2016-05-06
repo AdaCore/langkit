@@ -1061,8 +1061,7 @@ class PropertyDef(AbstractNodeData):
             return
 
         check_source_language(
-            isinstance(self.expr, AbstractExpression)
-            or callable(self.expr),
+            isinstance(self.expr, AbstractExpression) or callable(self.expr),
             "Invalid object passed for expression of property: {}".format(
                 self.expr
             )
