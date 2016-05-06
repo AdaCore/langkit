@@ -87,17 +87,18 @@ def make_renderer(base_renderer=None):
         'EnvElement':     EnvElement,
     }
     if get_context():
-        capi = get_context().c_api_settings
-        env_element = get_context().env_element
+        ctx = get_context()
+        capi = ctx.c_api_settings
+        env_element = ctx.env_element
 
         # Name of the root AST node access type
-        type_name = get_context().root_grammar_class.name()
+        type_name = ctx.root_grammar_class.name()
 
         # Name of the root AST node record type
         value_type = type_name + names.Name("Type")
 
         # Name of the root AST node kind type
-        kind_name = value_type + names.Name("Kind")
+        kind_name = type_name + names.Name("Kind_Type")
 
         template_args.update({
             'root_node_type_name':   type_name,
