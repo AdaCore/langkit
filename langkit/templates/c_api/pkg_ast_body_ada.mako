@@ -16,8 +16,10 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
 
    begin
       if Token = No_Token then
-         return (Token_Data => System.Null_Address,
-                 others     => <>);
+         return (Token_Data   => System.Null_Address,
+                 Token_Index  => -1,
+                 Trivia_Index => -1,
+                 others       => <>);
       end if;
 
       declare
