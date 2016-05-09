@@ -25,7 +25,7 @@ def unsugar(expr):
     return a valid AbstractExpression.
 
     :param AbstractExpression|bool|int expr: The expression to unsugar.
-    :return: AbstractExpression
+    :rtype: AbstractExpression
     """
 
     # WARNING: Since bools are ints in python, bool needs to be before int
