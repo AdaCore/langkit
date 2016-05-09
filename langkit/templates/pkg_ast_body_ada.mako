@@ -414,6 +414,30 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end if;
    end First_Token;
 
+   ----------------
+   -- Last_Token --
+   ----------------
+
+   function Last_Token (TDH : Token_Data_Handler_Access) return Token_Type is
+      use Token_Vectors, Trivia_Vectors, Integer_Vectors;
+   begin
+      if Length (TDH.Tokens_To_Trivias) = 0
+           or else
+         Last_Element (TDH.Tokens_To_Trivias) = Integer (No_Token_Index)
+      then
+         --  There is no trailing trivia: return the last token
+
+         return (if Length (TDH.Tokens) = 0
+                 then No_Token
+                 else (TDH,
+                       Token_Index (Last_Index (TDH.Tokens)),
+                       No_Token_Index));
+
+      else
+         return (TDH, No_Token_Index, 0);
+      end if;
+   end Last_Token;
+
    ---------
    -- "<" --
    ---------
@@ -494,6 +518,79 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          end if;
       end;
    end Next;
+
+   --------------
+   -- Previous --
+   --------------
+
+   function Previous (Token : Token_Type) return Token_Type is
+   begin
+      if Token.TDH = null then
+         return No_Token;
+      end if;
+
+      declare
+         use Token_Vectors, Trivia_Vectors, Integer_Vectors;
+         TDH : Token_Data_Handler renames Token.TDH.all;
+      begin
+         if Token.Trivia = No_Token_Index then
+            --  Token is a regular token, so the previous token is either the
+            --  last trivia of the previous regular token, either the previous
+            --  regular token itself.
+            declare
+               Prev_Trivia : Token_Index;
+            begin
+               --  Get the index of the trivia that is right bofre Token (if
+               --  any).
+               if Length (TDH.Tokens_To_Trivias) = 0 then
+                  Prev_Trivia := No_Token_Index;
+
+               else
+                  Prev_Trivia := Token_Index
+                    (Get (TDH.Tokens_To_Trivias, Natural (Token.Token)));
+                  while Prev_Trivia /= No_Token_Index
+                           and then
+                        Get (TDH.Trivias, Natural (Prev_Trivia)).Has_Next
+                  loop
+                     Prev_Trivia := Prev_Trivia + 1;
+                  end loop;
+               end if;
+
+               --  If there is no such trivia and Token was the first one, then
+               --  this was the start of the token stream: no previous token.
+               if Prev_Trivia = No_Token_Index and then Token.Token <= 0 then
+                  return No_Token;
+               else
+                  return (Token.TDH, Token.Token - 1, Prev_Trivia);
+               end if;
+            end;
+
+         --  Past this point: Token is known to be a trivia
+
+         elsif Token.Trivia = 0 then
+            --  This is the first trivia for some token, so the previous token
+            --  cannot be a trivia.
+            return (if Token.Token = No_Token_Index
+                    then No_Token
+                    else (Token.TDH, Token.Token, No_Token_Index));
+
+         elsif Token.Token = No_Token_Index then
+            --  This is a leading trivia and not the first one, so the previous
+            --  token has to be a trivia.
+            return (Token.TDH, No_Token_Index, Token.Trivia - 1);
+
+         --  Past this point: Token is known to be a trivia *and* it is not a
+         --  leading trivia.
+
+         else
+            return (Token.TDH,
+                    Token.Token,
+                    (if Get (TDH.Trivias, Natural (Token.Trivia - 1)).Has_Next
+                     then Token.Trivia - 1
+                     else No_Token_Index));
+         end if;
+      end;
+   end Previous;
 
    ----------
    -- Data --

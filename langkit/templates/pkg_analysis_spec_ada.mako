@@ -111,6 +111,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    function First_Token (Unit : Analysis_Unit) return Token_Type;
    ${ada_doc('langkit.unit_first_token', 3)}
 
+   function Last_Token (Unit : Analysis_Unit) return Token_Type;
+   ${ada_doc('langkit.unit_last_token', 3)}
+
    procedure Dump_Lexical_Env (Unit : Analysis_Unit);
    --  Debug helper: output the lexical envs for given analysis unit
 
@@ -200,5 +203,8 @@ private
 
    function First_Token (Unit : Analysis_Unit) return Token_Type is
      (First_Token (Unit.TDH'Access));
+
+   function Last_Token (Unit : Analysis_Unit) return Token_Type is
+     (Last_Token (Unit.TDH'Access));
 
 end ${_self.ada_api_settings.lib_name}.Analysis;

@@ -220,6 +220,9 @@ documentations = {
     'langkit.unit_first_token': Template("""
         Return a reference to the first token scanned in this unit.
     """),
+    'langkit.unit_last_token': Template("""
+        Return a reference to the last token scanned in this unit.
+    """),
     'langkit.unit_diagnostic_count': Template("""
         Return the number of diagnostics associated to this unit.
     """),
@@ -370,6 +373,10 @@ documentations = {
     """),
     'langkit.token_next': Template("""
         Return a reference to the next token in the corresponding analysis
+        unit.
+    """),
+    'langkit.token_previous': Template("""
+        Return a reference to the previous token in the corresponding analysis
         unit.
     """),
 }
