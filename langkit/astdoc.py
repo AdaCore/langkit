@@ -61,9 +61,9 @@ def write_astdoc(context, file):
                             'property')
 
             inherit_note = (
-                '' if abs_field.ast_node == typ else
+                '' if abs_field.struct == typ else
                 ' [inherited from {}]'.format(
-                    abs_field.ast_node.name().camel
+                    abs_field.struct.name().camel
                 )
             )
 

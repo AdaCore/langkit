@@ -23,7 +23,7 @@
 <%def name="accessor_body(field)">
 
    <%
-      astnode = field.ast_node
+      struct = field.struct
       accessor_name = capi.get_name(field.accessor_basename)
    %>
 
@@ -71,9 +71,9 @@
          % endif
       % endfor
 
-      if N.all in ${astnode.name()}_Type'Class then
+      if N.all in ${struct.name()}_Type'Class then
          declare
-            Typed_Node : constant ${astnode.name()} := ${astnode.name()} (N);
+            Typed_Node : constant ${struct.name()} := ${struct.name()} (N);
          begin
              <%
                field_access = 'Typed_Node.{}'.format(field.name)

@@ -14,7 +14,7 @@
 
 
 <%def name="field_decl(field)">
-   <% type_name = "{}_Type".format(field.ast_node.name()) %>
+   <% type_name = "{}_Type".format(field.struct.name()) %>
    function ${field.name}
      (Node : access ${type_name}) return ${field.type.name()};
    ${ada_doc(field, 6)}

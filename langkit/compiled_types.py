@@ -583,11 +583,11 @@ class AbstractNodeData(object):
 
         self._name = name
 
-        self.ast_node = None
+        self.struct = None
         """
-        ASTNode subclass that declared this field. Initialized when creating
-        ASTNode subclasses (so left None for other Struct subclasses).
-        :type: ASTNode
+        Struct subclass that declared this field. Initialized when creating
+        Struct subclasses.
+        :type: Struct
         """
 
         self.arguments = []
@@ -662,7 +662,7 @@ class AbstractNodeData(object):
         :rtype: str
         """
         return '{}.{}'.format(
-            self.ast_node.name().camel if self.ast_node else '<unresolved>',
+            self.struct.name().camel if self.struct else '<unresolved>',
             self.name.lower if self._name else '<unresolved>'
         )
 
@@ -693,8 +693,8 @@ class AbstractNodeData(object):
 
         :rtype: names.Name
         """
-        assert self.ast_node
-        return self.ast_node.name() + self.name
+        assert self.struct
+        return self.struct.name() + self.name
 
     @property
     def explicit_arguments(self):
@@ -1045,7 +1045,8 @@ class StructMetaClass(type):
         # Associate each field and property to this ASTNode subclass. Likewise
         # for the environment specification.
         for field in fields.values():
-            field.ast_node = cls
+            field.struct = cls
+
         if env_spec:
             env_spec.ast_node = cls
 

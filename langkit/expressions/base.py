@@ -939,7 +939,7 @@ class PropertyDef(AbstractNodeData):
         return new
 
     def diagnostic_context(self):
-        ctx_message = 'in {}.{}'.format(self.ast_node.name().camel,
+        ctx_message = 'in {}.{}'.format(self.struct.name().camel,
                                         self._name.lower)
         return context(ctx_message, self.location)
 
@@ -1025,7 +1025,7 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: Property|None
         """
-        return self.ast_node.base().get_abstract_fields_dict(
+        return self.struct.base().get_abstract_fields_dict(
             field_class=PropertyDef
         ).get(self._name.lower, None)
 
@@ -1170,9 +1170,9 @@ class PropertyDef(AbstractNodeData):
                 check_overriding_props(subclass)
 
         if self.abstract and not self.abstract_runtime_check:
-            check_overriding_props(self.ast_node)
+            check_overriding_props(self.struct)
 
-            unmatched_types = sorted(type_set.unmatched_types(self.ast_node),
+            unmatched_types = sorted(type_set.unmatched_types(self.struct),
                                      key=lambda cls: cls.hierarchical_name())
 
             check_source_language(
@@ -1237,14 +1237,14 @@ class PropertyDef(AbstractNodeData):
         if self.constructed_expr or self.abstract:
             return
 
-        with self.bind(), Self.bind_type(self.ast_node):
+        with self.bind(), Self.bind_type(self.struct):
             base_prop = self.base_property()
             message = (
                 '{self_prop}: expected type {{expected}}, got'
                 ' {{expr_type}} instead (expected type comes from'
                 ' {base_prop})'.format(
                     self_prop=self.qualname,
-                    base_prop=base_prop.ast_node.name().camel
+                    base_prop=base_prop.struct.name().camel
                 )
             ) if base_prop else None
             self.constructed_expr = construct(self.expr, self.expected_type,
@@ -1256,7 +1256,7 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: basestring
         """
-        with self.bind(), Self.bind_type(self.ast_node):
+        with self.bind(), Self.bind_type(self.struct):
             with names.camel_with_underscores:
                 self.prop_decl = render('properties/decl_ada')
                 self.prop_def = render('properties/def_ada')

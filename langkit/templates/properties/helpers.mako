@@ -4,8 +4,8 @@
    % if prop.needs_logic_binder:
 
    <%
-   type_name = "{}_{}_Logic_Binder".format(prop.ast_node.name(), prop.name)
-   package_name = "{}_{}_Bind".format(prop.ast_node.name(), prop.name)
+   type_name = "{}_{}_Logic_Binder".format(prop.struct.name(), prop.name)
+   package_name = "{}_{}_Bind".format(prop.struct.name(), prop.name)
    root_class = ctx.root_grammar_class.name()
    %>
 
@@ -20,7 +20,7 @@
      (Self : ${type_name}; From : ${root_class}) return ${root_class} is
    begin
       return ${root_class}
-        (${prop.name} (${prop.ast_node.name()} (From), Self.Env));
+        (${prop.name} (${prop.struct.name()} (From), Self.Env));
    end Convert;
 
    ## This package contains the necessary Adalog instantiations, so that we can
@@ -38,8 +38,8 @@
    % if prop.needs_logic_predicate:
 
    <%
-   type_name = "{}_{}_Predicate_Caller".format(prop.ast_node.name(), prop.name)
-   package_name = "{}_{}_Pred".format(prop.ast_node.name(), prop.name)
+   type_name = "{}_{}_Predicate_Caller".format(prop.struct.name(), prop.name)
+   package_name = "{}_{}_Pred".format(prop.struct.name(), prop.name)
    root_class = ctx.root_grammar_class.name()
    %>
 
@@ -50,7 +50,7 @@
    function Call
      (Self : ${type_name}; Node : ${root_class}) return Boolean is
    begin
-      return ${prop.name} (${prop.ast_node.name()} (Node), Self.Env);
+      return ${prop.name} (${prop.struct.name()} (Node), Self.Env);
    end Call;
 
    package ${package_name} is

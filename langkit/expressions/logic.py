@@ -43,7 +43,7 @@ class Bind(AbstractExpression):
         def render_expr(self):
             return ("{t}_{p}_Bind.Create "
                     "({l}, {r}, {t}_{p}_Logic_Binder'(Env => {e}))").format(
-                t=self.bind_property.ast_node.name(),
+                t=self.bind_property.struct.name(),
                 p=self.bind_property.name,
                 l=self.from_var.render_expr(),
                 r=self.to_var.render_expr(),
@@ -77,7 +77,7 @@ class Bind(AbstractExpression):
         )
 
         check_source_language(
-            self.bind_property.ast_node.matches(root_class),
+            self.bind_property.struct.matches(root_class),
             "The property passed to bind must belong to a subtype "
             "of {}".format(root_class.name().camel)
         )
@@ -213,7 +213,7 @@ class Predicate(AbstractExpression):
         def render_expr(self):
             return ("{t}_{p}_Pred.Create "
                     "({l}, {t}_{p}_Predicate_Caller'(Env => {e}))").format(
-                t=self.pred_property.ast_node.name(),
+                t=self.pred_property.struct.name(),
                 p=self.pred_property.name,
                 l=self.logic_var.render_expr(),
                 e=Env.construct().render_expr(),
@@ -245,7 +245,7 @@ class Predicate(AbstractExpression):
         )
 
         check_source_language(
-            self.pred_property.ast_node.matches(root_class),
+            self.pred_property.struct.matches(root_class),
             "The property passed to bind must belong to a subtype "
             "of {}".format(root_class.name().camel)
         )
