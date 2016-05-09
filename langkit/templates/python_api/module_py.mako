@@ -238,6 +238,13 @@ class AnalysisUnit(object):
         _unit_first_token(self._c_value, ctypes.byref(result))
         return result.wrap()
 
+    @property
+    def last_token(self):
+        ${py_doc('langkit.unit_last_token', 8)}
+        result = Token()
+        _unit_last_token(self._c_value, ctypes.byref(result))
+        return result.wrap()
+
     def iter_tokens(self):
         """
         Return an iterator that yields all the tokens in this unit.
@@ -297,6 +304,13 @@ class Token(ctypes.Structure):
         ${py_doc('langkit.token_next', 8)}
         t = Token()
         _token_next(ctypes.byref(self), ctypes.byref(t))
+        return t.wrap()
+
+    @property
+    def previous(self):
+        ${py_doc('langkit.token_previous', 8)}
+        t = Token()
+        _token_previous(ctypes.byref(self), ctypes.byref(t))
         return t.wrap()
 
     @property
@@ -676,6 +690,10 @@ _unit_first_token = _import_func(
     "${capi.get_name('unit_first_token')}",
     [_analysis_unit, ctypes.POINTER(Token)], None
 )
+_unit_last_token = _import_func(
+    "${capi.get_name('unit_last_token')}",
+    [_analysis_unit, ctypes.POINTER(Token)], None
+)
 _unit_diagnostic_count = _import_func(
     '${capi.get_name("unit_diagnostic_count")}',
     [_analysis_unit], ctypes.c_uint
@@ -797,6 +815,10 @@ _token_kind_name = _import_func(
 )
 _token_next = _import_func(
     "${capi.get_name('token_next')}",
+    [ctypes.POINTER(Token), ctypes.POINTER(Token)], None
+)
+_token_previous = _import_func(
+    "${capi.get_name('token_previous')}",
     [ctypes.POINTER(Token), ctypes.POINTER(Token)], None
 )
 
