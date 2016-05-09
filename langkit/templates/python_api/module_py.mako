@@ -315,10 +315,12 @@ class Token(ctypes.Structure):
 
     @property
     def kind(self):
-        result = _token_kind_name(self._kind)
+        name = _token_kind_name(self._kind)
         # The _token_kind_name wrapper is already supposed to handle exceptions
         # so this should always return a non-null value.
-        assert result
+        assert name
+        result = ctypes.c_char_p(ctypes.addressof(name.contents)).value
+        _free(name)
         return result
 
     @property
@@ -811,7 +813,7 @@ _get_last_exception = _import_func(
 )
 _token_kind_name = _import_func(
    "${capi.get_name('token_kind_name')}",
-   [ctypes.c_int], ctypes.c_char_p
+   [ctypes.c_int], ctypes.POINTER(ctypes.c_char)
 )
 _token_next = _import_func(
     "${capi.get_name('token_next')}",
