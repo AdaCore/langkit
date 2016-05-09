@@ -19,21 +19,28 @@ from langkit.utils import (
 )
 
 
-def unsugar(expr):
+def unsugar(expr, ignore_errors=False):
     """
-    Given a python expession that can be unsugared to an AbstractExpression,
+    Given a Python expession that can be unsugared to an AbstractExpression,
     return a valid AbstractExpression.
 
-    :param AbstractExpression|bool|int expr: The expression to unsugar.
+    :param expr: The expression to unsugar.
+    :type expr: None|AbstractExpression|bool|int|() -> AbstractExpression
+
+    :param bool ignore_errors: If True, invalid abstract expressions are
+        returned as-is. Raise a diagnostic error for them otherwise.
+
     :rtype: AbstractExpression
     """
+    if expr is None:
+        return None
 
     # WARNING: Since bools are ints in python, bool needs to be before int
     if isinstance(expr, (bool, int)):
         expr = Literal(expr)
 
     check_source_language(
-        isinstance(expr, AbstractExpression),
+        ignore_errors or isinstance(expr, AbstractExpression),
         'Invalid abstract expression: {}'.format(type(expr))
     )
 
@@ -864,8 +871,7 @@ class PropertyDef(AbstractNodeData):
 
         self.prefix = prefix
 
-        # Handle the simple cases of int and bool literals here
-        self.expr = unsugar(expr) if isinstance(expr, (bool, int)) else expr
+        self.expr = expr
         ":type: AbstractExpression"
 
         self.constructed_expr = None
@@ -1059,7 +1065,7 @@ class PropertyDef(AbstractNodeData):
 
         if not self.expr:
             return
-
+        self.expr = unsugar(self.expr, ignore_errors=True)
         check_source_language(
             isinstance(self.expr, AbstractExpression) or callable(self.expr),
             "Invalid object passed for expression of property: {}".format(
