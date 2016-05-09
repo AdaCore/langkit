@@ -199,6 +199,16 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       Token.all := Wrap (T);
    end ${capi.get_name('unit_first_token')};
 
+   procedure ${capi.get_name('unit_last_token')}
+     (Unit  : ${analysis_unit_type};
+      Token : ${token_type}_Ptr)
+   is
+      U : constant Analysis_Unit := Unwrap (Unit);
+      T : constant Token_Type := Last_Token (U);
+   begin
+      Token.all := Wrap (T);
+   end ${capi.get_name('unit_last_token')};
+
    function ${capi.get_name("unit_diagnostic_count")}
      (Unit : ${analysis_unit_type}) return unsigned
    is
@@ -653,6 +663,16 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    begin
       Next_Token.all := Wrap (NT);
    end ${capi.get_name('token_next')};
+
+   procedure ${capi.get_name('token_previous')}
+     (Token          : ${token_type}_Ptr;
+      Previous_Token : ${token_type}_Ptr)
+   is
+      T  : constant Token_Type := Unwrap (Token.all);
+      PT : constant Token_Type := Previous (T);
+   begin
+      Previous_Token.all := Wrap (PT);
+   end ${capi.get_name('token_previous')};
 
    ------------
    -- Unwrap --

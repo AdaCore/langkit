@@ -172,6 +172,14 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name('unit_first_token')}";
    ${ada_c_doc('langkit.unit_first_token', 3)}
 
+   procedure ${capi.get_name('unit_last_token')}
+     (Unit  : ${analysis_unit_type};
+      Token : ${token_type}_Ptr)
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('unit_last_token')}";
+   ${ada_c_doc('langkit.unit_last_token', 3)}
+
    function ${capi.get_name("unit_diagnostic_count")}
      (Unit : ${analysis_unit_type}) return unsigned
       with Export        => True,
@@ -342,6 +350,14 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            Convention    => C,
            External_name => "${capi.get_name('token_next')}";
    ${ada_c_doc('langkit.token_next', 3)}
+
+   procedure ${capi.get_name('token_previous')}
+     (Token          : ${token_type}_Ptr;
+      Previous_Token : ${token_type}_Ptr)
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('token_previous')}";
+   ${ada_c_doc('langkit.token_previous', 3)}
 
    ------------------------
    -- Conversion helpers --

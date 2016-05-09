@@ -181,6 +181,11 @@ extern void
 ${capi.get_name('unit_first_token')}(${analysis_unit_type} unit,
                                      ${token_type} *token);
 
+${c_doc('langkit.unit_last_token')}
+extern void
+${capi.get_name('unit_last_token')}(${analysis_unit_type} unit,
+                                    ${token_type} *token);
+
 ${c_doc('langkit.unit_diagnostic_count')}
 extern unsigned
 ${capi.get_name("unit_diagnostic_count")}(${analysis_unit_type} unit);
@@ -326,6 +331,11 @@ ${c_doc('langkit.token_next')}
 extern void
 ${capi.get_name('token_next')}(${token_type} *token,
                                ${token_type} *next_token);
+
+${c_doc('langkit.token_previous')}
+extern void
+${capi.get_name('token_previous')}(${token_type} *token,
+                                   ${token_type} *previous_token);
 
 #ifdef __cplusplus
 }
