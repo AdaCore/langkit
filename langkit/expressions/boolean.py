@@ -42,7 +42,7 @@ class BinaryBooleanOperator(AbstractExpression):
         def construct_op(op):
             return construct(op, lambda t: t in (BoolType, EquationType),
                              "Operands of binary logic operator must be of "
-                             "boolean type, got {expr_type}")
+                             "boolean or equation type, got {expr_type}")
 
         lhs, rhs = map(construct_op, [self.lhs, self.rhs])
 
