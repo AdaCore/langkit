@@ -42,8 +42,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    --------------
 
    function Traverse
-     (Node  : ${root_node_type_name};
-      Visit : access function (Node : ${root_node_type_name})
+     (Node  : access ${root_node_value_type}'Class;
+      Visit : access function (Node : access ${root_node_value_type}'Class)
               return Visit_Status)
      return Visit_Status
    is
@@ -90,8 +90,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    --------------
 
    procedure Traverse
-     (Node  : ${root_node_type_name};
-      Visit : access function (Node : ${root_node_type_name})
+     (Node  : access ${root_node_value_type}'Class;
+      Visit : access function (Node : access ${root_node_value_type}'Class)
               return Visit_Status)
    is
       Result_Status : Visit_Status;
@@ -178,12 +178,12 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    --------------
 
    function Traverse
-     (Root : ${root_node_type_name})
+     (Root : access ${root_node_value_type}'Class)
       return Traverse_Iterator
    is
    begin
       return (Ada.Finalization.Limited_Controlled with
-              Node  => Root,
+              Node  => ${root_node_type_name} (Root),
               Stack => Natural_Vectors.Empty_Vector);
    end Traverse;
 
@@ -227,7 +227,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    ----------
 
    function Find
-     (Root      : ${root_node_type_name};
+     (Root      : access ${root_node_value_type}'Class;
       Predicate : ${root_node_type_name}_Predicate)
       return Find_Iterator
    is
@@ -255,7 +255,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    ----------------
 
    function Sloc_Range
-     (Node : ${root_node_type_name};
+     (Node : access ${root_node_value_type}'Class;
       Snap : Boolean := False) return Source_Location_Range
    is
       TDH                  : Token_Data_Handler renames
@@ -288,7 +288,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- Lookup --
    ------------
 
-   function Lookup (Node : ${root_node_type_name};
+   function Lookup (Node : access ${root_node_value_type}'Class;
                     Sloc : Source_Location;
                     Snap : Boolean := False) return ${root_node_type_name}
    is
@@ -303,7 +303,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- Compare --
    -------------
 
-   function Compare (Node : ${root_node_type_name};
+   function Compare (Node : access ${root_node_value_type}'Class;
                      Sloc : Source_Location;
                      Snap : Boolean := False) return Relative_Position is
    begin
@@ -315,7 +315,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -------------------
 
    function Get_Extension
-     (Node : ${root_node_type_name};
+     (Node : access ${root_node_value_type}'Class;
       ID   : Extension_ID;
       Dtor : Extension_Destructor) return Extension_Access
    is
@@ -343,7 +343,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- Free_Extensions --
    ---------------------
 
-   procedure Free_Extensions (Node : access ${root_node_value_type}) is
+   procedure Free_Extensions (Node : access ${root_node_value_type}'Class) is
       procedure Free is new Ada.Unchecked_Deallocation
         (Extension_Type, Extension_Access);
       use Extension_Vectors;
@@ -352,7 +352,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       --  Explicit iteration for perf
       for J in 0 .. Last_Index (Node.Extensions) loop
          Slot := Get (Node.Extensions, J);
-         Slot.Dtor (${root_node_type_name} (Node), Slot.Extension.all);
+         Slot.Dtor (Node, Slot.Extension.all);
          Free (Slot.Extension);
       end loop;
    end Free_Extensions;
@@ -361,11 +361,12 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- Lookup_Relative --
    ---------------------
 
-   procedure Lookup_Relative (Node       : ${root_node_type_name};
-                              Sloc       : Source_Location;
-                              Position   : out Relative_Position;
-                              Node_Found : out ${root_node_type_name};
-                              Snap       : Boolean := False) is
+   procedure Lookup_Relative
+     (Node       : access ${root_node_value_type}'Class;
+      Sloc       : Source_Location;
+      Position   : out Relative_Position;
+      Node_Found : out ${root_node_type_name};
+      Snap       : Boolean := False) is
       Result : constant Relative_Position :=
         Compare (Node, Sloc, Snap);
    begin
@@ -620,7 +621,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    --------------------------
 
    function Children_With_Trivia
-     (Node : ${root_node_type_name}) return Children_Arrays.Array_Type
+     (Node : access ${root_node_value_type}'Class)
+      return Children_Arrays.Array_Type
    is
       use Children_Vectors;
 
@@ -640,8 +642,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          end loop;
       end Append_Trivias;
 
-      function Not_Null
-        (N : ${root_node_type_name}) return Boolean is (N /= null);
+      function Not_Null (N : ${root_node_type_name}) return Boolean is
+        (N /= null);
 
       N_Children : constant ${root_node_type_name}_Arrays.Array_Type
         := ${root_node_type_name}_Arrays.Filter
@@ -672,7 +674,10 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- PP_Trivia --
    ---------------
 
-   procedure PP_Trivia (Node : ${root_node_type_name}; Level : Integer := 0) is
+   procedure PP_Trivia
+     (Node : access ${root_node_value_type}'Class;
+      Level : Integer := 0)
+   is
    begin
       Put_Line (Level, Kind_Name (Node));
       for C of Children_With_Trivia (Node) loop
@@ -694,7 +699,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    --------------------------
 
    procedure Populate_Lexical_Env
-     (Node : ${root_node_type_name}; Root_Env : AST_Envs.Lexical_Env)
+     (Node     : access ${root_node_value_type}'Class;
+      Root_Env : AST_Envs.Lexical_Env)
    is
 
       --  The internal algorithm, as well as the Do_Env_Action implementations,
@@ -728,7 +734,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       --    like in the GNAT compiler.
 
       procedure Populate_Internal
-        (Node        : ${root_node_type_name};
+        (Node        : access ${root_node_value_type}'Class;
          Current_Env : in out Lexical_Env);
 
       -----------------------
@@ -736,7 +742,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       -----------------------
 
       procedure Populate_Internal
-        (Node        : ${root_node_type_name};
+        (Node        : access ${root_node_value_type}'Class;
          Current_Env : in out Lexical_Env)
       is
          Children_Env : Lexical_Env;
@@ -776,7 +782,10 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- Short_Image --
    -----------------
 
-   function Short_Image (Node : ${root_node_type_name}) return String is
+   function Short_Image
+     (Node : access ${root_node_value_type}'Class)
+      return String
+   is
    begin
       return "<" & Kind_Name (Node) & " " & Image (Sloc_Range (Node)) & ">";
    end Short_Image;
@@ -866,7 +875,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    ----------------------
 
    procedure Dump_Lexical_Env
-     (Node : ${root_node_type_name}; Root_Env : AST_Envs.Lexical_Env)
+     (Node     : access ${root_node_value_type}'Class;
+      Root_Env : AST_Envs.Lexical_Env)
    is
       use Address_To_Id_Maps;
 
@@ -927,7 +937,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       --  This procedure implements the main recursive logic of dumping the
       --  environments.
    begin
-      Internal (Node);
+      Internal (${root_node_type_name} (Node));
    end Dump_Lexical_Env;
 
    -------------
@@ -935,7 +945,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -------------
 
    function Parents
-     (Node : access ${root_node_value_type}; Include_Self : Boolean := True)
+     (Node         : access ${root_node_value_type}'Class;
+      Include_Self : Boolean := True)
       return ${root_node_array.name()}
    is
       Count : Natural := 0;

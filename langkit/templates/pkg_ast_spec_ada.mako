@@ -81,14 +81,14 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Access to the arbitrary values stored in AST nodes
 
    type Extension_Destructor is
-     access procedure (Node      : ${root_node_type_name};
+     access procedure (Node      : access ${root_node_value_type}'Class;
                        Extension : Extension_Type)
      with Convention => C;
    --  Type for extension destructors. The parameter are the "Node" the
    --  extension was attached to and the "Extension" itself.
 
    function Get_Extension
-     (Node : ${root_node_type_name};
+     (Node : access ${root_node_value_type}'Class;
       ID   : Extension_ID;
       Dtor : Extension_Destructor) return Extension_Access;
    --  Get (and create if needed) the extension corresponding to ID for Node.
@@ -157,7 +157,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
      ${root_node_type_name}_Vectors.Elements_Arrays;
 
    procedure Populate_Lexical_Env
-     (Node : ${root_node_type_name}; Root_Env : AST_Envs.Lexical_Env);
+     (Node     : access ${root_node_value_type}'Class;
+      Root_Env : AST_Envs.Lexical_Env);
    --  Populate the lexical environment for node and all its children
 
    -----------------------------
@@ -241,7 +242,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  performance hit of creating an array.
 
    function Parents
-     (Node : access ${root_node_value_type}; Include_Self : Boolean := True)
+     (Node         : access ${root_node_value_type}'Class;
+      Include_Self : Boolean := True)
       return ${root_node_array.name()};
    --  Return the list of parents for this node. This node included in the list
    --  iff Include_Self.
@@ -250,8 +252,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Helper type to control the AST node traversal process. See Traverse.
 
    function Traverse
-     (Node  : ${root_node_type_name};
-      Visit : access function (Node : ${root_node_type_name})
+     (Node  : access ${root_node_value_type}'Class;
+      Visit : access function (Node : access ${root_node_value_type}'Class)
                                return Visit_Status)
      return Visit_Status;
    --  Given the parent node for a subtree, traverse all syntactic nodes of
@@ -271,8 +273,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --            original call to Traverse returns Stop.
 
    procedure Traverse
-     (Node  : ${root_node_type_name};
-      Visit : access function (Node : ${root_node_type_name})
+     (Node  : access ${root_node_value_type}'Class;
+      Visit : access function (Node : access ${root_node_value_type}'Class)
               return Visit_Status);
    --  This is the same as Traverse function except that no result is returned
    --  i.e. the Traverse function is called and the result is simply discarded.
@@ -291,7 +293,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
                    Element  : out ${root_node_type_name});
 
    function Traverse
-     (Root : ${root_node_type_name})
+     (Root : access ${root_node_value_type}'Class)
       return Traverse_Iterator;
    --  Return an iterator that yields all AST nodes under Root (included) in a
    --  prefix DFS (depth first search) fasion.
@@ -327,7 +329,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
                    Element  : out ${root_node_type_name});
 
    function Find
-     (Root      : ${root_node_type_name};
+     (Root      : access ${root_node_value_type}'Class;
       Predicate : ${root_node_type_name}_Predicate) return Find_Iterator;
    --  Return an iterator that yields all AST nodes under Root (included) that
    --  satisfy the Pred predicate.
@@ -348,21 +350,21 @@ package ${_self.ada_api_settings.lib_name}.AST is
    -- Source location-related operations --
    ----------------------------------------
 
-   function Sloc_Range (Node : ${root_node_type_name};
+   function Sloc_Range (Node : access ${root_node_value_type}'Class;
                         Snap : Boolean := False) return Source_Location_Range;
    --  Return the source location range corresponding to the set of tokens from
    --  which Node was parsed.
    --
    --  TODO??? Document the Snap formal.
 
-   function Compare (Node : ${root_node_type_name};
+   function Compare (Node : access ${root_node_value_type}'Class;
                      Sloc : Source_Location;
                      Snap : Boolean := False) return Relative_Position;
    --  Compare Sloc to the sloc range of Node.
    --
    --  TODO??? Document the Snap formal.
 
-   function Lookup (Node : ${root_node_type_name};
+   function Lookup (Node : access ${root_node_value_type}'Class;
                     Sloc : Source_Location;
                     Snap : Boolean := False) return ${root_node_type_name};
    --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
@@ -418,17 +420,22 @@ package ${_self.ada_api_settings.lib_name}.AST is
    package Children_Arrays renames Children_Vectors.Elements_Arrays;
 
    function Children_With_Trivia
-     (Node : ${root_node_type_name}) return Children_Arrays.Array_Type;
+     (Node : access ${root_node_value_type}'Class)
+      return Children_Arrays.Array_Type;
    --  Return the children of this node interleaved with Trivia token nodes, so
    --  that:
    --  - Every trivia contained between Node.Start_Token and Node.End_Token - 1
    --    will be part of the returned array;
    --  - Nodes and trivias will be lexically ordered.
 
-   function Token_Start (Node : ${root_node_type_name}) return Token_Type;
+   function Token_Start
+     (Node : access ${root_node_value_type}'Class)
+      return Token_Type;
    --  Return the first token used to parse Node
 
-   function Token_End (Node : ${root_node_type_name}) return Token_Type;
+   function Token_End
+     (Node : access ${root_node_value_type}'Class)
+      return Token_Type;
    --  Return the last token used to parse Node
 
    -------------------
@@ -440,7 +447,9 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Debug helper: return a textual representation of this node and all its
    --  children.
 
-   function Short_Image (Node : ${root_node_type_name}) return String;
+   function Short_Image
+     (Node : access ${root_node_value_type}'Class)
+      return String;
    --  Debug helper: return a short representation of the string, containing
    --  just the kind name and the sloc.
 
@@ -449,13 +458,16 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Debug helper: print to standard output Node and all its children. Level
    --  indicates the indentation level for the output.
 
-   procedure PP_Trivia (Node : ${root_node_type_name}; Level : Integer := 0);
+   procedure PP_Trivia
+     (Node  : access ${root_node_value_type}'Class;
+      Level : Integer := 0);
    --  Debug helper: print to standard output Node and all its children along
    --  with the trivia associated to them. Level indicates the indentation
    --  level for the output.
 
    procedure Dump_Lexical_Env
-     (Node : ${root_node_type_name}; Root_Env : AST_Envs.Lexical_Env);
+     (Node     : access ${root_node_value_type}'Class;
+      Root_Env : AST_Envs.Lexical_Env);
    --  Debug helper: dump the lexical environment of Node, and consequently any
    --  nested lexical environment. Used for debugging/testing purpose. Pass the
    --  root env explicitly so that we can tag it properly in the output.
@@ -541,7 +553,7 @@ private
    end record;
    --  TODO??? Remove this from the public API
 
-   procedure Free_Extensions (Node : access ${root_node_value_type});
+   procedure Free_Extensions (Node : access ${root_node_value_type}'Class);
    --  Implementation helper to free the extensions associatde to Node
 
    function Is_Empty_List
@@ -643,11 +655,12 @@ private
    --  implementation is never supposed to be called. However, we lost the
    --  capacity to detect at compile time that this is not overriden.
 
-   procedure Lookup_Relative (Node       : ${root_node_type_name};
-                              Sloc       : Source_Location;
-                              Position   : out Relative_Position;
-                              Node_Found : out ${root_node_type_name};
-                              Snap       : Boolean := False);
+   procedure Lookup_Relative
+     (Node       : access ${root_node_value_type}'Class;
+      Sloc       : Source_Location;
+      Position   : out Relative_Position;
+      Node_Found : out ${root_node_type_name};
+      Snap       : Boolean := False);
    --  Implementation helper for the looking up process. TODO??? Do not expose
    --  it in the public API.
 
@@ -688,9 +701,16 @@ private
    --  Helper for properties. This is used to turn token indexes as stored in
    --  AST nodes into Token_Type values.
 
-   function Token_Start (Node : ${root_node_type_name}) return Token_Type is
+   function Token_Start
+     (Node : access ${root_node_value_type}'Class)
+      return Token_Type
+   is
      ((Node.Unit.Token_Data, Node.Token_Start, No_Token_Index));
-   function Token_End (Node : ${root_node_type_name}) return Token_Type is
+
+   function Token_End
+     (Node : access ${root_node_value_type}'Class)
+      return Token_Type
+   is
      ((Node.Unit.Token_Data, Node.Token_End, No_Token_Index));
 
    function Get_Symbol (Token : Token_Type) return Symbol_Type is

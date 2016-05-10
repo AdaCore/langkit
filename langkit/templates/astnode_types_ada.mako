@@ -14,8 +14,9 @@
 
 
 <%def name="field_decl(field)">
+   <% type_name = "{}_Type".format(field.ast_node.name()) %>
    function ${field.name}
-     (Node : ${field.ast_node.name()}) return ${field.type.name()};
+     (Node : access ${type_name}) return ${field.type.name()};
    ${ada_doc(field, 6)}
 </%def>
 
@@ -465,7 +466,7 @@
 
    % for field in cls.get_fields(include_inherited=False):
       function ${field.name}
-        (Node : ${cls.name()}) return ${field.type.name()}
+        (Node : access ${type_name}) return ${field.type.name()}
       is
       begin
          return ${field.type.extract_from_storage_expr(
