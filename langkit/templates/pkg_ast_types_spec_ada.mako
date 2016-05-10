@@ -55,7 +55,7 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
    % endfor
 
    % for element_type in _self.sorted_types(_self.list_types):
-   ${list_types.public_decl(element_type)}
+   ${list_types.public_incomplete_decl(element_type)}
    % endfor
 
    -----------------------------------------
@@ -90,6 +90,10 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
 
    % for astnode in no_builtins(_self.astnode_types):
    ${astnode_types.public_decl(astnode)}
+   % endfor
+
+   % for element_type in _self.sorted_types(_self.list_types):
+   ${list_types.public_decl(element_type)}
    % endfor
 
 private

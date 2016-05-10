@@ -1,5 +1,18 @@
 ## vim: filetype=makoada
 
+<%def name="public_incomplete_decl(element_type)">
+
+   <%
+      elt_type = element_type.name()
+      value_type = 'List_{}_Type'.format(elt_type)
+      type_name = 'List_{}'.format(elt_type)
+   %>
+
+   type ${value_type};
+   type ${type_name} is access all ${value_type}'Class;
+
+</%def>
+
 <%def name="public_decl(element_type)">
 
    <%
@@ -9,7 +22,13 @@
    %>
 
    type ${value_type} is new ${root_node_value_type} with private;
-   type ${type_name} is access all ${value_type}'Class;
+
+   function Item
+     (Node  : access ${value_type};
+      Index : Natural)
+      return ${elt_type}
+   is (${elt_type} (Node.Child (Index)));
+   --  Shortcut for: ${type_name} (Child (Node, Index))
 
 </%def>
 
