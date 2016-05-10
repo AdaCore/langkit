@@ -448,6 +448,10 @@ class LexicalEnvType(BasicType):
     should_emit_array_type = False
 
     @classmethod
+    def is_refcounted(cls):
+        return True
+
+    @classmethod
     def c_type(cls, c_api_settings):
         return CAPIType(c_api_settings, 'lexical_env')
 

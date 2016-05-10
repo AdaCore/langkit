@@ -453,7 +453,7 @@
       % endif
 
       % if cls.env_spec._add_env:
-         Ret := AST_Envs.Create (Initial_Env, Self);
+         Ret := AST_Envs.Create (Initial_Env, Self, True);
          Register_Destroyable (Self.Unit, Ret);
          Self.Self_Env := Ret;
       % endif

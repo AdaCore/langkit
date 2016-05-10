@@ -62,15 +62,20 @@ package body Langkit_Support.Lexical_Env is
    function Create
      (Parent     : Lexical_Env;
       Node       : Element_T;
+      Is_Static  : Boolean;
       Default_MD : Element_Metadata := Empty_Metadata) return Lexical_Env
    is
    begin
+      if Parent /= null then
+         Inc_Ref (Parent);
+      end if;
       return new Lexical_Env_Type'
         (Parent          => Parent,
          Node            => Node,
          Referenced_Envs => <>,
          Env             => new Internal_Envs.Map,
-         Default_MD      => Default_MD);
+         Default_MD      => Default_MD,
+         Ref_Count       => (if Is_Static then -1 else 1));
    end Create;
 
    ---------
@@ -186,8 +191,7 @@ package body Langkit_Support.Lexical_Env is
          Last_Parent := null;
          while E /= null loop
             declare
-               New_Last_Parent : constant Lexical_Env :=
-                 Create (null, E.Node, E.Default_MD);
+               New_Last_Parent : constant Lexical_Env := Orphan (E);
             begin
                if First then
                   Env := New_Last_Parent;
@@ -197,8 +201,6 @@ package body Langkit_Support.Lexical_Env is
                end if;
                Last_Parent := New_Last_Parent;
             end;
-            Last_Parent.Referenced_Envs := E.Referenced_Envs;
-            Last_Parent.Env := E.Env;
             E := E.Parent;
          end loop;
       end Duplicate_Parent_Chain;
@@ -210,8 +212,12 @@ package body Langkit_Support.Lexical_Env is
          --  In the following simple cases, there is no need to create any new
          --  environment.
 
-         when 0 => return Empty_Env;
-         when 1 => return Envs (Envs'First);
+         when 0 =>
+            return Empty_Env;
+         when 1 =>
+            Result := Envs (Envs'First);
+            Inc_Ref (Result);
+            return Result;
 
          when others =>
 
@@ -244,12 +250,49 @@ package body Langkit_Support.Lexical_Env is
       procedure Free is
         new Ada.Unchecked_Deallocation (Lexical_Env_Type, Lexical_Env);
    begin
-      for Elts of Self.Env.all loop
-         Env_Element_Vectors.Destroy (Elts);
-      end loop;
-      Lexical_Env_Vectors.Destroy (Self.Referenced_Envs);
-      Destroy (Self.Env);
+      --  Do not free the internal map for dynamically allocated envs as these
+      --  maps are owned by statically allocated ones.
+
+      if Self.Ref_Count = -1 then
+         for Elts of Self.Env.all loop
+            Env_Element_Vectors.Destroy (Elts);
+         end loop;
+         Lexical_Env_Vectors.Destroy (Self.Referenced_Envs);
+         Destroy (Self.Env);
+      end if;
+
       Free (Self);
    end Destroy;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Self : Lexical_Env) is
+   begin
+      if Self.Ref_Count = -1 then
+         return;
+      end if;
+
+      Self.Ref_Count := Self.Ref_Count + 1;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Self : in out Lexical_Env) is
+   begin
+      if Self = null or else Self.Ref_Count = -1 then
+         return;
+      end if;
+
+      Self.Ref_Count := Self.Ref_Count - 1;
+      if Self.Ref_Count = 0 then
+         Dec_Ref (Self.Parent);
+         Destroy (Self);
+      end if;
+      Self := null;
+   end Dec_Ref;
 
 end Langkit_Support.Lexical_Env;

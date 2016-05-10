@@ -112,6 +112,14 @@ package Langkit_Support.Lexical_Env is
 
       Default_MD      : Element_Metadata;
       --  Default metadata for this env instance
+
+      Ref_Count       : Integer;
+      --  For dynamically created lexical environments, this contains the
+      --  number of owners. It is initially set to 1. When it drops to 0, the
+      --  env can be destroyed.
+      --
+      --  For envs created in the Populate_Lexical_Env analysis unit pass, this
+      --  is always -1.
    end record;
 
    Empty_Env : constant Lexical_Env;
@@ -123,9 +131,11 @@ package Langkit_Support.Lexical_Env is
    function Create
      (Parent     : Lexical_Env;
       Node       : Element_T;
+      Is_Static  : Boolean;
       Default_MD : Element_Metadata := Empty_Metadata) return Lexical_Env;
    --  Constructor. Creates a new lexical env, given a parent, an internal data
-   --  env, and a default metadata.
+   --  env, and a default metadata. If Is_Static is false, the caller is the
+   --  only owner of the result (ref-count is 1).
 
    procedure Add
      (Self  : Lexical_Env;
@@ -148,8 +158,9 @@ package Langkit_Support.Lexical_Env is
         Node            => Self.Node,
         Referenced_Envs => Self.Referenced_Envs,
         Env             => Self.Env,
-        Default_MD      => Self.Default_MD));
-   --  Return a copy of Self that has no parent
+        Default_MD      => Self.Default_MD,
+        Ref_Count       => 1));
+   --  Return a dynamically allocated copy of Self that has no parent
 
    generic
       type Index_Type is range <>;
@@ -157,12 +168,23 @@ package Langkit_Support.Lexical_Env is
    function Group (Envs : Lexical_Env_Array) return Lexical_Env;
    --  Return a lexical environment that logically groups together multiple
    --  lexical environments. Note that this does not modify the input
-   --  environments.
+   --  environments, however it returns a new owning reference.
    --
-   --  If this array is empty, Empty_Env is returned.
+   --  If this array is empty, Empty_Env is returned. Note that if Envs'Length
+   --  is greater than 1, the result is dynamically allocated.
 
    procedure Destroy (Self : in out Lexical_Env);
-   --  Deallocate the resources allocated to the Self lexical environment
+   --  Deallocate the resources allocated to the Self lexical environment. Must
+   --  not be used for ref-counted envs.
+
+   procedure Inc_Ref (Self : Lexical_Env);
+   --  If Self is a dynamically allocated lexical env, increment this reference
+   --  count. Do nothing otherwise.
+
+   procedure Dec_Ref (Self : in out Lexical_Env);
+   --  If Self is a dynamically allocated lexical env, decrement this reference
+   --  count and set it to null. Also destroy it if the count drops to 0. Do
+   --  nothing for statically allocated envs.
 
 private
 
@@ -172,7 +194,8 @@ private
       Node            => No_Element,
       Referenced_Envs => <>,
       Env             => Empty_Env_Map'Access,
-      Default_MD      => Empty_Metadata);
+      Default_MD      => Empty_Metadata,
+      Ref_Count       => -1);
    Empty_Env : constant Lexical_Env := Empty_Env_Record'Access;
 
 end Langkit_Support.Lexical_Env;
