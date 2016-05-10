@@ -2,67 +2,81 @@
 
 <%def name="public_decl(element_type)">
 
-   <% type = element_type.storage_type_name() %>
+   <%
+      elt_type = element_type.name()
+      value_type = 'List_{}_Type'.format(elt_type)
+      type_name = 'List_{}'.format(elt_type)
+   %>
 
-   type List_${type}_Type is new ${root_node_value_type} with private;
-   type List_${type} is access all List_${type}_Type'Class;
+   type ${value_type} is new ${root_node_value_type} with private;
+   type ${type_name} is access all ${value_type}'Class;
 
 </%def>
 
 
 <%def name="private_decl(element_type)">
 
-   <% type = element_type.storage_type_name() %>
+   <%
+      elt_type = element_type.name()
+      pkg_name = 'Lists_{}'.format(elt_type)
+      value_type = 'List_{}_Type'.format(elt_type)
+      type_name = 'List_{}'.format(elt_type)
+      access_type = 'List_{}_Access'.format(elt_type)
+   %>
 
-   package Lists_${type} is new List
-     (Node_Type   => ${type}_Type,
-      Node_Access => ${type});
+   package ${pkg_name} is new List
+     (Node_Type   => ${elt_type}_Type,
+      Node_Access => ${elt_type});
 
-   type List_${type}_Type is
-      new Lists_${type}.List_Type with null record;
+   type ${value_type} is
+      new ${pkg_name}.List_Type with null record;
 
-   type List_${type}_Access is access all List_${type}_Type;
+   type ${access_type} is access all ${value_type};
 
-   package List_${type}_Alloc is
-     new Tagged_Alloc (List_${type}_Type);
+   package List_${elt_type}_Alloc is
+     new Tagged_Alloc (${value_type});
 
    ## Helper generated for properties code. Used in CollectionGet's code
    function Get
-     (Node    : List_${type};
+     (Node    : ${type_name};
       Index   : Integer;
       Or_Null : Boolean := False) return ${root_node_type_name};
    --  When Index is positive, return the Index'th element in T. Otherwise,
    --  return the element at index (Size - Index - 1). Index is zero-based.
 
    ## Helper for properties code
-   function Length (Node : List_${type}) return Natural is
+   function Length (Node : ${type_name}) return Natural is
      (Node.Child_Count);
 
 </%def>
 
 <%def name="body(element_type)">
 
-   <% type = element_type.storage_type_name() %>
+   <%
+      elt_type = element_type.name()
+      pkg_name = 'Lists_{}'.format(elt_type)
+      type_name = 'List_{}'.format(elt_type)
+   %>
 
    ---------
    -- Get --
    ---------
 
    function Get
-     (Node    : List_${type};
+     (Node    : ${type_name};
       Index   : Integer;
       Or_Null : Boolean := False) return ${root_node_type_name}
    is
       function Absolute_Get
-        (L : List_${type}; Index : Integer)
+        (L : ${type_name}; Index : Integer)
          return ${root_node_type_name}
       is
         (${root_node_type_name}
-          (Lists_${type}.Node_Vectors.Get_At_Index (L.Vec, Index)));
+          (${pkg_name}.Node_Vectors.Get_At_Index (L.Vec, Index)));
 
       function Relative_Get is new Langkit_Support.Relative_Get
         (Item_Type     => ${root_node_type_name},
-         Sequence_Type => List_${type},
+         Sequence_Type => ${type_name},
          Length        => Length,
          Get           => Absolute_Get);
 
