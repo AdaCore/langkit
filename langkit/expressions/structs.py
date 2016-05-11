@@ -21,7 +21,7 @@ class Cast(AbstractExpression):
     class Expr(ResolvedExpression):
         def __init__(self, expr, astnode, do_raise=False, result_var=None):
             """
-            :type expr: ResolvedExpr
+            :type expr: ResolvedExpression
             :type astnode: ASTNode
             :type do_raise: bool
 
