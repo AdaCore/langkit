@@ -356,6 +356,38 @@ class CollectionGet(AbstractExpression):
     Expression that will get an element from a collection.
     """
 
+    class Expr(ResolvedExpression):
+        def __init__(self, coll_expr, index_expr, or_null):
+            """
+            :type coll_expr: ResolvedExpression
+            :type index_expr: ResolvedExpression
+            :type or_null: ResolvedExpression
+            """
+            res_type = coll_expr.type.element_type()
+            self.result_var = PropertyDef.get().vars.create(
+                'Get_Result', res_type,
+                PropertyDef.get_scope()
+            )
+            self.call_expr = BuiltinCallExpr(
+                'Get', res_type,
+                [coll_expr, index_expr, or_null]
+            )
+
+        @property
+        def type(self):
+            return self.call_expr.type
+
+        def render_pre(self):
+            return ('{}\n'
+                    '{} := {};').format(
+                self.call_expr.render_pre(),
+                self.result_var.name,
+                self.call_expr.render_expr(),
+            )
+
+        def render_expr(self):
+            return self.result_var.name
+
     def __init__(self, coll_expr, index_expr, or_null=True):
         """
         :param AbstractExpression coll_expr: The expression representing the
@@ -372,11 +404,10 @@ class CollectionGet(AbstractExpression):
         self.or_null = or_null
 
     def construct(self):
-        coll_expr = construct(self.coll_expr, lambda t: t.is_collection())
-        return BuiltinCallExpr(
-            "Get", coll_expr.type.element_type(),
-            [coll_expr, construct(self.index_expr, LongType),
-             construct(self.or_null)]
+        return CollectionGet.Expr(
+            construct(self.coll_expr, lambda t: t.is_collection()),
+            construct(self.index_expr, LongType),
+            construct(self.or_null)
         )
 
 
