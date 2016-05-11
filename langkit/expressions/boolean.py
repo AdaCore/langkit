@@ -270,7 +270,9 @@ class If(AbstractExpression):
             self.then = then
             self.else_then = else_then
             self.static_type = rtype
-            self.result_var = PropertyDef.get().vars.create('Result', rtype)
+            self.result_var = PropertyDef.get().vars.create(
+                'Result', rtype, PropertyDef.get_scope()
+            )
 
         def render_pre(self):
             return render('properties/if_ada', expr=self)
@@ -357,8 +359,9 @@ class Then(AbstractExpression):
             self.then_expr = then_expr
             self.default_expr = default_expr
             self.static_type = self.then_expr.type
-            self.result = PropertyDef.get().vars.create("Result_Var",
-                                                        self.type)
+            self.result = PropertyDef.get().vars.create(
+                "Result_Var", self.type, PropertyDef.get_scope()
+            )
 
         def render_pre(self):
             return render('properties/then_ada', then=self)
@@ -390,6 +393,9 @@ class Then(AbstractExpression):
         self.then_expr = self.then_fn(self.var_expr)
 
     def construct(self):
+        # Add var_expr to the scope for this Then expression
+        PropertyDef.get_scope().add(self.var_expr.local_var)
+
         # Accept as a prefix:
         # * any pointer, since it can be checked against "null";
         # * any Struct, since its "Is_Null" field can be checked.

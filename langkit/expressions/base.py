@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from copy import copy
 from functools import partial
 import inspect
+from itertools import count
 
 import types
 
@@ -693,9 +694,11 @@ class Let(AbstractExpression):
 
         :rtype: LetExpr
         """
+        scope = PropertyDef.get_scope()
         var_exprs = map(construct, self.var_exprs)
         for var, expr in zip(self.vars, var_exprs):
             var.set_type(expr.type)
+            scope.add(var.local_var)
         vars = map(construct, self.vars)
 
         return Let.Expr(vars, var_exprs, construct(self.expr))
@@ -967,6 +970,16 @@ class PropertyDef(AbstractNodeData):
         return (cls.__current_properties__[-1]
                 if cls.__current_properties__ else
                 None)
+
+    @classmethod
+    def get_scope(cls):
+        """
+        Return the current local variable scope for the currently bound
+        property.
+
+        :rtype: LocalVars.Scope
+        """
+        return cls.get().vars.current_scope
 
     @contextmanager
     def bind(self):
@@ -1263,6 +1276,10 @@ class PropertyDef(AbstractNodeData):
             self.constructed_expr = construct(self.expr, self.expected_type,
                                               message)
 
+        # Make sure that all the created local variables are associated to a
+        # scope.
+        self.vars.check_scopes()
+
     def render_property(self):
         """
         Render the given property to generated code.
@@ -1473,12 +1490,127 @@ class LocalVars(object):
 
     def __init__(self):
         self.local_vars = {}
+        self.root_scope = LocalVars.Scope(self, None)
+        self.current_scope = self.root_scope
+
+    class Scope(object):
+        """
+        Local variables are organized in a traditional scope hierarchy.
+
+        During properties compilation, scopes are created and variables are put
+        in a specific scope. This will help memory management: when execution
+        goes out of a scope, the ref-count for all all the variables is
+        decremented.
+        """
+
+        COUNT = count(0)
+
+        def __init__(self, vars, parent):
+            """
+            :param LocalVars vars: LocalVars instance for this scope.
+            :param LocalVars.Scope|None parent: Parent scope.
+            """
+            self.index = next(self.COUNT)
+            self.vars = vars
+            self.parent = parent
+            self.sub_scopes = []
+            self.variables = []
+
+        @property
+        def name(self):
+            return names.Name('Scope_{}'.format(self.index))
+
+        @property
+        def finalizer_name(self):
+            """
+            Return the name of the finalization procedure for this scope.
+
+            :rtype: names.Name
+            """
+            return names.Name('Finalizer') + self.name
+
+        def has_refcounted_vars(self, include_children=False):
+            """
+            Return whether this scope contains at least one variable that
+            matters for reference counting.
+
+            :param bool include_children: Whether to account for children in
+                the computation.
+            :rtype: bool
+            """
+            for var in self.variables:
+                if var.type.is_refcounted():
+                    return True
+
+            return include_children and any(s.has_refcounted_vars(True)
+                                            for s in self.sub_scopes)
+
+        def add(self, var):
+            """
+            Associate "var" to this scope. Doing so twice for the same variable
+            is an error.
+
+            :param LocalVars.LocalVar var: Variable to associate.
+            """
+            assert var._scope is None, (
+                'Trying to associate {} to some scope whereas it already has'
+                ' one'.format(var)
+            )
+            self.variables.append(var)
+            var._scope = self
+            import traceback
+            var._scope_tb = ''.join(traceback.format_stack())
+
+        def push(self):
+            """
+            Create a new scope that is a child for the current scope, make it
+            the current scope and return it.
+
+            :rtype: LocalVars.Scope
+            """
+            result = LocalVars.Scope(self.vars, self)
+            self.sub_scopes.append(result)
+            self.vars.current_scope = result
+            return result
+
+        def pop(self):
+            """
+            Set the current scope to the parent of the current scope. Return
+            this parent scope. Doing so when the current scope is the root one
+            is an error.
+
+            :rtype: LocalVars.Scope
+            """
+            parent = self.vars.current_scope.parent
+            assert parent, 'Trying to pop the root scope'
+            self.vars.current_scope = parent
+            return parent
+
+        @contextmanager
+        def new_child(self):
+            """
+            Create a child scope for this block and return a context manager to
+            make it the current scope temporarily.
+            """
+            yield self.push()
+            self.pop()
+
+        @contextmanager
+        def use(self):
+            """
+            Return a context manager to make self the current scope
+            temporarily.
+            """
+            old_scope = self.vars.current_scope
+            self.vars.current_scope = self
+            yield self
+            self.vars.current_scope = old_scope
 
     class LocalVar(object):
         """
         Represents one local variable in a property definition.
         """
-        def __init__(self, vars, name, type=None):
+        def __init__(self, vars, name, type=None, scope=None):
             """
 
             :param LocalVars vars: The LocalVars instance to which this
@@ -1486,10 +1618,23 @@ class LocalVars(object):
             :param langkit.names.Name name: The name of this local variable.
             :param langkit.compiled_types.CompiledType type: Type parameter.
                 The type of this local variable.
+            :param LocalVars.Scope|None scope: If provided, associate the
+                created variable to this scope.
             """
             self.vars = vars
             self.name = name
             self.type = type
+
+            self._scope = None
+            """
+            The scope this variable lives in. During the construct phase, all
+            resolved expression that create local variables must be initialized
+            this using LocalVars.Scope.add.
+
+            :type: LocalVars.Scope
+            """
+            if scope:
+                scope.add(self)
 
         def render(self):
             assert self.type, "Local var must have type before it is rendered"
@@ -1504,7 +1649,7 @@ class LocalVars(object):
                 self.type.name().camel if self.type else '<none>'
             )
 
-    def create(self, name, type):
+    def create(self, name, type, scope=None):
         """
         This getattr override allows you to declare local variables in
         templates via the syntax::
@@ -1520,6 +1665,8 @@ class LocalVars(object):
         :param str|names.Name name: The name of the variable.
         :param langkit.compiled_types.CompiledType type: Type parameter. The
             type of the local variable.
+        :param LocalVars.Scope|None scope: If provided, associate the created
+            variable to this scope.
         """
         name = names.Name.get(name)
 
@@ -1528,7 +1675,7 @@ class LocalVars(object):
         while name in self.local_vars:
             i += 1
             name = orig_name + names.Name(str(i))
-        ret = LocalVars.LocalVar(self, name, type)
+        ret = LocalVars.LocalVar(self, name, type, scope)
         self.local_vars[name] = ret
         return ret
 
@@ -1542,6 +1689,31 @@ class LocalVars(object):
         :param str name: The name of the variable.
         """
         return self.local_vars[name]
+
+    def check_scopes(self):
+        """
+        Check that all variables are associated to a scope. Raise an
+        AssertionError if it is not the case.
+        """
+        for var in self.local_vars.values():
+            assert var._scope, '{} has no scope'.format(var)
+
+    @property
+    def all_scopes(self):
+        """
+        Return the list of all scopes in this repository.
+
+        :rtype: list[LocalVars.Scope]
+        """
+        result = []
+
+        def helper(scope):
+            result.append(scope)
+            for child in scope.sub_scopes:
+                helper(child)
+
+        helper(self.root_scope)
+        return result
 
     def render(self):
         return "\n".join(lv.render() for lv in self.local_vars.values())

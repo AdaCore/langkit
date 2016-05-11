@@ -89,9 +89,11 @@ class EnvBind(AbstractExpression):
 
             # Declare a variable that will hold the value of the
             # bound environment.
-            self.env_var = PropertyDef.get().vars.create("New_Env",
-                                                         LexicalEnvType)
             self.static_type = self.to_eval_expr.type
+            self.env_var = PropertyDef.get().vars.create(
+                "New_Env", LexicalEnvType,
+                PropertyDef.get_scope()
+            )
 
         def render_pre(self):
             # First, compute the environment to bind using the current one and

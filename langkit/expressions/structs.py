@@ -34,9 +34,10 @@ class Cast(AbstractExpression):
             self.static_type = astnode
 
             p = PropertyDef.get()
-            self.expr_var = p.vars.create('Cast_Expr', self.expr.type)
+            scope = PropertyDef.get_scope()
+            self.expr_var = p.vars.create('Cast_Expr', self.expr.type, scope)
             self.result_var = (
-                result_var or p.vars.create('Cast_Result', astnode)
+                result_var or p.vars.create('Cast_Result', astnode, scope)
             )
             assert self.result_var.type == astnode, (
                 'Cast temporaries must have exactly the cast type: {} expected'
@@ -257,7 +258,8 @@ class FieldAccess(AbstractExpression):
             p = PropertyDef.get()
 
             if p:
-                self.prefix_var = p.vars.create('Pfx', self.receiver_expr.type)
+                self.prefix_var = p.vars.create('Pfx', self.receiver_expr.type,
+                                                PropertyDef.get_scope())
             else:
                 self.simple_field_access = True
 
@@ -626,6 +628,11 @@ class Match(AbstractExpression):
 
         :rtype: ResolvedExpression
         """
+        # Add the variables created for this expression to the current scope
+        scope = PropertyDef.get_scope()
+        for _, v, _ in self.matchers:
+            scope.add(v.local_var)
+
         matched_expr = construct(self.matched_expr)
         check_source_language(issubclass(matched_expr.type, ASTNode),
                               'Match expressions can only work on AST nodes')

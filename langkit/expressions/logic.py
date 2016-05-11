@@ -136,7 +136,10 @@ class Domain(AbstractExpression):
             self.logic_var_expr = logic_var_expr
             ":type: ResolvedExpression"
 
-            self.res_var = PropertyDef.get().vars.create("Var", EquationType)
+            self.res_var = PropertyDef.get().vars.create(
+                "Var", EquationType,
+                PropertyDef.get_scope()
+            )
 
         def render_pre(self):
             return "\n".join([
@@ -294,7 +297,8 @@ class SolveEquation(AbstractExpression):
             ":type: ResolvedExpression"
 
             self.eq_var = PropertyDef.get().vars.create(
-                "Equation", EquationType
+                "Equation", EquationType,
+                PropertyDef.get_scope()
             )
 
         def render_pre(self):

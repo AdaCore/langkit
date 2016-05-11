@@ -76,20 +76,27 @@ class CollectionExpression(AbstractExpression):
            constructor.
         3. The element variable as a resolved expression.
         4. The index variable as a resolved expression.
+        5. The inner scope for the iteration.
 
         :rtype: (ResolvedExpression, ResolvedExpression,
-                 ResolvedExpression, ResolvedExpression)
+                 ResolvedExpression, ResolvedExpression,
+                 langkit.expressions.base.LocalVars.Scope)
         """
         collection_expr = construct(
             self.collection, lambda t: t.is_collection(),
             'Map cannot iterate on {expr_type}, which is not a collection'
         )
-        self.element_var.set_type(collection_expr.type.element_type())
 
-        return (collection_expr,
-                construct(self.expr),
-                construct(self.element_var),
-                construct(self.index_var) if self.index_var else None)
+        with PropertyDef.get_scope().new_child() as iter_scope:
+            if self.index_var:
+                PropertyDef.get_scope().add(self.index_var.local_var)
+            self.element_var.set_type(collection_expr.type.element_type())
+
+            return (collection_expr,
+                    construct(self.expr),
+                    construct(self.element_var),
+                    construct(self.index_var) if self.index_var else None,
+                    iter_scope)
 
 
 class Contains(CollectionExpression):
@@ -115,13 +122,17 @@ class Contains(CollectionExpression):
 
         :rtype: QuantifierExpr
         """
-        collection, predicate, element_var, index_var = self.construct_common()
+        (collection,
+         predicate,
+         element_var,
+         index_var,
+         iter_scope) = self.construct_common()
         assert index_var is None
 
-        # "collection" contains "item" if at least one element in "collection"
-        # is equal to "item".
+        # "collection" contains "item" if at least one element in
+        # "collection" is equal to "item".
         return Quantifier.Expr(Quantifier.ANY, collection, predicate,
-                               element_var, index_var)
+                               element_var, index_var, iter_scope)
 
 
 class Map(CollectionExpression):
@@ -136,12 +147,13 @@ class Map(CollectionExpression):
         """
 
         def __init__(self, element_var, index_var, collection, expr,
-                     filter=None, concat=False, take_while=None):
+                     iter_scope, filter=None, concat=False, take_while=None):
             """
             :type element_var: VarExpr
             :type index_var: None|VarExpr
             :type collection: ResolvedExpression
             :type expr: ResolvedExpression
+            :type iter_scope: langkit.expressions.base.LocalVars.Scope
             :type filter: ResolvedExpression
             :type concat: bool
             :type take_while: ResolvedExpression
@@ -153,6 +165,7 @@ class Map(CollectionExpression):
             self.expr = expr
             self.filter = filter
             self.concat = concat
+            self.iter_scope = iter_scope
 
             element_type = (self.expr.type.element_type()
                             if self.concat else
@@ -160,8 +173,10 @@ class Map(CollectionExpression):
             self.static_type = element_type.array_type()
             self.static_type.add_to_context()
 
-            p = PropertyDef.get()
-            self.array_var = p.vars.create('Map', self.type)
+            self.array_var = PropertyDef.get().vars.create(
+                'Map', self.type,
+                iter_scope.parent
+            )
 
         def __repr__(self):
             return "<MapExpr {}: {} -> {}{}>".format(
@@ -214,22 +229,28 @@ class Map(CollectionExpression):
 
         :rtype: MapExpr
         """
-        collection_expr, expr, element_var, index_var = self.construct_common()
+        (collection_expr,
+         expr,
+         element_var,
+         index_var,
+         iter_scope) = self.construct_common()
 
         check_source_language(
             not self.concat or expr.type.is_collection(),
-            'Cannot mapcat with expressions returning {} values'
-            ' (collections expected instead)'.format(expr.type.name())
+            'Cannot mapcat with expressions returning {} values (collections'
+            ' expected instead)'.format(expr.type.name())
         )
 
-        filter_expr = (construct(self.filter_expr, BoolType)
-                       if self.filter_expr else None)
+        with iter_scope.use():
+            filter_expr = (construct(self.filter_expr, BoolType)
+                           if self.filter_expr else None)
 
-        take_while_expr = (construct(self.take_while_expr, BoolType)
-                           if self.take_while_expr else None)
+            take_while_expr = (construct(self.take_while_expr, BoolType)
+                               if self.take_while_expr else None)
 
         return Map.Expr(element_var, index_var, collection_expr, expr,
-                        filter_expr, self.concat, take_while_expr)
+                        iter_scope, filter_expr, self.concat,
+                        take_while_expr)
 
 
 class Quantifier(CollectionExpression):
@@ -240,7 +261,8 @@ class Quantifier(CollectionExpression):
     class Expr(ResolvedExpression):
         static_type = BoolType
 
-        def __init__(self, kind, collection, expr, element_var, index_var):
+        def __init__(self, kind, collection, expr, element_var, index_var,
+                     iter_scope):
             """
             :param str kind: Kind for this quantifier expression. 'all' will
                 check that all items in "collection" fullfill "expr" while
@@ -260,14 +282,22 @@ class Quantifier(CollectionExpression):
 
             :param index_var: Index variable to use in "expr".
             :type index_var: None|ResolvedExpression
+
+            :param iter_scope: Scope for local variables internal to the
+                iteration.
+            :type iter_scope: langkit.expressions.base.LocalVars.Scope
             """
             self.kind = kind
             self.collection = collection
             self.expr = expr
             self.element_var = element_var
             self.index_var = index_var
+            self.iter_scope = iter_scope
 
-            self.result_var = PropertyDef.get().vars.create('Result', BoolType)
+            self.result_var = PropertyDef.get().vars.create(
+                'Quantifier_Result', BoolType,
+                iter_scope.parent
+            )
 
         def render_pre(self):
             return render(
@@ -305,15 +335,20 @@ class Quantifier(CollectionExpression):
 
         :rtype: QuantifierExpr
         """
-        collection_expr, expr, element_var, index_var = self.construct_common()
+        (collection_expr,
+         expr,
+         element_var,
+         index_var,
+         iter_scope) = self.construct_common()
+
         check_source_language(
             expr.type.matches(BoolType),
             "Wrong type for expression in quantifier: expected bool, "
             "got {}".format(expr.type.name().camel)
         )
 
-        return Quantifier.Expr(self.kind, collection_expr, expr, element_var,
-                               index_var)
+        return Quantifier.Expr(self.kind, collection_expr, expr,
+                               element_var, index_var, iter_scope)
 
 
 class CollectionGet(AbstractExpression):
@@ -381,8 +416,10 @@ class CollectionSingleton(AbstractExpression):
             self.expr.type.array_type().add_to_context()
             self.static_type = self.expr.type.array_type()
 
-            self.array_var = PropertyDef.get().vars.create('Singleton',
-                                                           self.type)
+            self.array_var = PropertyDef.get().vars.create(
+                'Singleton', self.type,
+                PropertyDef.get_scope()
+            )
 
         def render_pre(self):
             return self.expr.render_pre() + """
