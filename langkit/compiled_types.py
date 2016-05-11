@@ -1599,7 +1599,7 @@ class ArrayType(CompiledType):
 
     @classmethod
     def nullexpr(cls):
-        null_constant()
+        return null_constant()
 
     @classmethod
     def add_to_context(cls):
