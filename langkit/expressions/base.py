@@ -1496,6 +1496,12 @@ class LocalVars(object):
                 self.type.name().camel_with_underscores
             )
 
+        def __repr__(self):
+            return '<LocalVar {} : {}>'.format(
+                self.name.camel_with_underscores,
+                self.type.name().camel if self.type else '<none>'
+            )
+
     def create(self, name, type):
         """
         This getattr override allows you to declare local variables in
