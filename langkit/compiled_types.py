@@ -206,6 +206,23 @@ class CompiledType(object):
         return False
 
     @classmethod
+    def is_refcounted(cls):
+        """
+        Return whether this type matters for the ref-counting mechanism.
+
+        This returns whether this type is dynamically allocated and thus
+        ref-counted, or whether it owns ref-counted values. "dynamically" in
+        this context means: with a lifetime that is different from the owning
+        analysis unit.
+
+        If it is ref-counted, there must exist Inc_Ref and Dec_Ref primitives.
+        The Dec_Ref primitive must handle correctly (i.e. ignore) null values.
+
+        :rtype: bool
+        """
+        return False
+
+    @classmethod
     def add_to_context(cls):
         """
         If needed, put bits into the global context to implement this compiled
