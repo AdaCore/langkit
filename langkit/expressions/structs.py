@@ -264,8 +264,7 @@ class FieldAccess(AbstractExpression):
             p = PropertyDef.get()
 
             if p:
-                self.result_var = p.vars.create('Internal_Pfx',
-                                                self.receiver_expr.type)
+                self.prefix_var = p.vars.create('Pfx', self.receiver_expr.type)
             else:
                 self.simple_field_access = True
 
@@ -284,14 +283,14 @@ class FieldAccess(AbstractExpression):
             # Property_Error in the case it is.
             return "\n".join([
                 render('properties/null_safety_check_ada',
-                       expr=self.receiver_expr, result_var=self.result_var)
+                       expr=self.receiver_expr, result_var=self.prefix_var)
             ] + [arg.render_pre() for arg in self.arguments])
 
         def render_expr(self):
             if self.simple_field_access:
                 prefix = self.receiver_expr.render()
             else:
-                prefix = self.result_var.name
+                prefix = self.prefix_var.name
             ret = "{}.{}".format(prefix, self.node_data.name)
 
             # If we're calling a property, then pass the currently bound
