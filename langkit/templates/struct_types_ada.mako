@@ -27,13 +27,50 @@
    end record
      with Convention => C;
    ${cls.nullexpr()} : constant ${cls.name()} := (others => <>);
+
+   % if cls.is_refcounted():
+   procedure Inc_Ref (R : ${cls.name()});
+   procedure Dec_Ref (R : in out ${cls.name()});
+   % endif
 </%def>
 
 
 <%def name="body(cls)">
 
+   <% fields = cls.get_fields(include_inherited=False) %>
+
    % for prop in cls.get_properties(include_inherited=False):
    ${prop.prop_def}
    % endfor
+
+   % if cls.is_refcounted():
+
+      -------------
+      -- Inc_Ref --
+      -------------
+
+      procedure Inc_Ref (R : ${cls.name()}) is
+      begin
+         % for f in fields:
+            % if f.type.is_refcounted():
+               Inc_Ref (R.${f.name});
+            % endif
+         % endfor
+      end Inc_Ref;
+
+      -------------
+      -- Dec_Ref --
+      -------------
+
+      procedure Dec_Ref (R : in out ${cls.name()}) is
+      begin
+         % for f in fields:
+            % if f.type.is_refcounted():
+               Dec_Ref (R.${f.name});
+            % endif
+         % endfor
+      end Dec_Ref;
+
+   % endif
 
 </%def>

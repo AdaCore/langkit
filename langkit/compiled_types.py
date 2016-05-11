@@ -1257,6 +1257,14 @@ class Struct(CompiledType):
     is_ptr = False
 
     @classmethod
+    @memoized
+    def is_refcounted(cls):
+        return any(
+            field.type.is_refcounted()
+            for field in cls._fields.values()
+        )
+
+    @classmethod
     def is_builtin(cls):
         """
         Some Structs are considered "built-in", which means that either no
@@ -1552,6 +1560,10 @@ class ASTNode(Struct):
     List of subclasses. Overriden in the root grammar class and its children.
     :type: list[ASTNode]
     """
+
+    @classmethod
+    def is_refcounted(cls):
+        return False
 
     @classmethod
     def base(cls):
