@@ -31,9 +31,18 @@ is
       else Node.Self_Env);
    pragma Warnings (On, "is not referenced");
 
+   Property_Result : ${property.type.name()} := ${property.type.nullexpr()};
+
    ${property.vars.render()}
 begin
    ${property.constructed_expr.render_pre()}
-   return ${property.constructed_expr.render_expr()};
+
+   Property_Result := ${property.constructed_expr.render_expr()};
+   % if property.type.is_refcounted():
+      Inc_Ref (Property_Result);
+   % endif
+
+   return Property_Result;
+
 end ${property.name};
 % endif

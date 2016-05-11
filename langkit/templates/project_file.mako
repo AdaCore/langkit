@@ -99,11 +99,14 @@ library project ${lib_name} is
       case Build_Mode is
          when "dev" =>
             case Enable_Warnings is
-               when "true" => Common_Ada_Cargs := ("-gnatwaeKMR");
+               when "true" => Common_Ada_Cargs := ("-gnatwaeCKMR");
                when others => null;
             end case;
             --  If asked to, enable all warnings and treat them as errors,
             --  except:
+            --    * conditional expressions used in tests that are known to be
+            --      True or False at compile time (C), as this is very common
+            --      in generated properties code;
             --    * variables that could be turned into constants (K), as this
             --      is very common in generated parsers code;
             --    * variables that are assigned and never read (M), as this is
