@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="scopes" file="scopes_ada.mako" />
+
 <%
    element_var = map.element_var.name
    array_var = map.array_var.name
@@ -72,6 +74,7 @@ begin
          % if map.index_var:
             ${map.index_var.name} := ${map.index_var.name} + 1;
          % endif
+         ${scopes.finalize_scope(map.iter_scope)}
       end loop;
 
       ## Then convert the vector into the final array type

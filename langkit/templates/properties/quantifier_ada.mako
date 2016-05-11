@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="scopes" file="scopes_ada.mako" />
+
 <%
    element_var = quantifier.element_var.name
    result_var = quantifier.result_var.name
@@ -40,6 +42,8 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
       % if quantifier.index_var:
          ${quantifier.index_var.name} := ${quantifier.index_var.name} + 1;
       % endif
+
+      ${scopes.finalize_scope(quantifier.iter_scope)}
    end loop;
 </%def>
 
