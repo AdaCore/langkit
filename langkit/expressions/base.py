@@ -636,6 +636,8 @@ class Let(AbstractExpression):
             for var, expr in zip(self.vars, self.var_exprs):
                 result.append(expr.render_pre())
                 result.append('{} := {};'.format(var.name, expr.render_expr()))
+                if var.type.is_refcounted():
+                    result.append('Inc_Ref ({});'.format(var.name))
             result.append(self.expr.render_pre())
             return '\n'.join(result)
 

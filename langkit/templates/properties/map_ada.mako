@@ -29,11 +29,21 @@ begin
                ${map.expr.render_expr()}.Items
             % endif
          loop
+            % if map.type.element_type().is_refcounted():
+               Inc_Ref (Item_To_Append);
+            % endif
             ${vec_pkg}.Append (${vec_var}, Item_To_Append);
          end loop;
       % else:
-         ${vec_pkg}.Append
-           (${vec_var}, ${map.expr.render_expr()});
+         declare
+            Item_To_Append : constant ${map.type.element_type().name()} :=
+               ${map.expr.render_expr()};
+         begin
+            % if map.type.element_type().is_refcounted():
+               Inc_Ref (Item_To_Append);
+            % endif
+            ${vec_pkg}.Append (${vec_var}, Item_To_Append);
+         end;
       % endif
    </%def>
 

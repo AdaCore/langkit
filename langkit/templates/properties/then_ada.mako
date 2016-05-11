@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="helpers" file="helpers.mako" />
+
 ${then.expr.render_pre()}
 ${then.var_expr.name} := ${then.expr.render_expr()};
 if
@@ -19,3 +21,4 @@ else
    ${then.default_expr.render_pre()}
    ${then.result.name} := ${then.default_expr.render_expr()};
 end if;
+${helpers.inc_ref(then.result)}
