@@ -104,6 +104,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  manage yet to put in a private part. Please don't use them.
 
    % if ctx.env_metadata:
+   ${struct_types.public_incomplete_decl(ctx.env_metadata)}
    ${struct_types.public_decl(ctx.env_metadata)}
 
    function Combine

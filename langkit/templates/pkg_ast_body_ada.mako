@@ -1,6 +1,8 @@
 ## vim: filetype=makoada
 
 <%namespace name="array_types"   file="array_types_ada.mako" />
+<%namespace name="struct_types"  file="struct_types_ada.mako" />
+
 <% root_node_array = ctx.root_grammar_class.array_type() %>
 
 with Ada.Containers;        use Ada.Containers;
@@ -1053,6 +1055,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    end Previous;
 
    % if ctx.env_metadata:
+   ${struct_types.body(ctx.env_metadata)}
+
    -------------
    -- Combine --
    -------------
