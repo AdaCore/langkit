@@ -453,7 +453,7 @@ class EquationType(BasicType):
     logic variables.
     """
     _name = "Logic_Equation"
-    _nullexpr = "Null_Rel"
+    _nullexpr = "Null_Logic_Equation"
     is_ptr = False
 
     @classmethod
