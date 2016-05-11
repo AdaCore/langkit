@@ -386,7 +386,8 @@ class CollectionSingleton(AbstractExpression):
 
         def render_pre(self):
             return self.expr.render_pre() + """
-            {array_var} := new {array_type}'(N => 1, Items => (1 => {item}));
+            {array_var} := Create (1);
+            {array_var}.Items (1) := {item};
             """.format(array_var=self.array_var.name,
                        array_type=self.static_type.pointed(),
                        item=self.expr.render_expr())

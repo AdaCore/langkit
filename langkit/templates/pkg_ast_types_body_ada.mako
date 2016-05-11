@@ -10,6 +10,7 @@
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
 with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
+with Ada.Unchecked_Deallocation;
 
 pragma Warnings (Off, "referenced");
 with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;

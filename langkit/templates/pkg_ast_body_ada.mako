@@ -963,8 +963,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end loop;
 
       declare
-         Result : constant ${root_node_array.name()} :=
-           new ${root_node_array.pointed()} (Count);
+         Result : constant ${root_node_array.name()} := Create (Count);
       begin
          Cur := Start;
          for I in Result.Items'Range loop

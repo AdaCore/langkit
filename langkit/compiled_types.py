@@ -1652,6 +1652,10 @@ class ArrayType(CompiledType):
     is_ptr = True
 
     @classmethod
+    def is_refcounted(cls):
+        return True
+
+    @classmethod
     def name(cls):
         """
         Name of the type for general values in the Ada generated code.

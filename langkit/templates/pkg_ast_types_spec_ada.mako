@@ -9,8 +9,6 @@
 <% root_node_array = ctx.root_grammar_class.array_type() %>
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
-with Ada.Unchecked_Deallocation;
-
 pragma Warnings (Off, "referenced");
 with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Slocs;    use Langkit_Support.Slocs;

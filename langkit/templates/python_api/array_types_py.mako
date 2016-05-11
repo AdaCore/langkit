@@ -12,6 +12,7 @@ ${py_doc(cls)}
 
 class ${struct_name}(ctypes.Structure):
     _fields_ = [('n', ctypes.c_int),
+                ('ref_count', ctypes.c_int),
                 ('items', ${element_type} * 1)]
 
 

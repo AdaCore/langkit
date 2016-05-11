@@ -442,7 +442,7 @@
                for El of Names.Items loop
                   ${add_to_env("El", cls.env_spec.add_to_env_value_expr)}
                end loop;
-               Destroy (Names);
+               Dec_Ref (Names);
             end;
 
          % else:

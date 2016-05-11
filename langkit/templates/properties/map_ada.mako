@@ -65,7 +65,7 @@ begin
       end loop;
 
       ## Then convert the vector into the final array type
-      ${array_var} := new ${map.array_var.type.pointed()}
+      ${array_var} := Create
         (Natural (${vec_pkg}.Length (${vec_var})));
       for I in 1 .. ${array_var}.N loop
          ${array_var}.Items (I) := ${vec_pkg}.Get (${vec_var}, I - 1);
@@ -78,7 +78,7 @@ begin
       ## for property writers.
 
       if ${map.collection.render_expr()} = null then
-         ${array_var} := new ${map.array_var.type.pointed()} (0);
+         ${array_var} := Create (0);
       else
          ${build_loop()}
       end if;
