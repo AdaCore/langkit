@@ -260,24 +260,29 @@ class FieldAccess(AbstractExpression):
             if p:
                 self.prefix_var = p.vars.create('Pfx', self.receiver_expr.type,
                                                 PropertyDef.get_scope())
+
+                # Create a variable for all field accesses. In the case of
+                # property, this is needed because the property will return an
+                # owning reference, so we need it to be attached to the scope.
+                # In other cases, this can make debugging easier.
+                self.result_var = p.vars.create('Field_Access_Result',
+                                                self.node_data.type,
+                                                PropertyDef.get_scope())
             else:
                 self.simple_field_access = True
+                self.result_var = None
 
         def __repr__(self):
             return "<FieldAccessExpr {} {} {}>".format(
                 self.receiver_expr, self.node_data, self.type
             )
 
-        def render_pre(self):
-            # Before accessing the field of a record through an access, we must
-            # check that whether this access is null in order to raise a
-            # Property_Error in the case it is.
-            return "\n".join([
-                render('properties/null_safety_check_ada',
-                       expr=self.receiver_expr, result_var=self.prefix_var)
-            ] + [arg.render_pre() for arg in self.arguments])
+        def render_field_access(self):
+            """
+            Render the field access expression itself.
 
-        def render_expr(self):
+            :rtype: str
+            """
             if self.simple_field_access:
                 prefix = self.receiver_expr.render()
             else:
@@ -320,6 +325,30 @@ class FieldAccess(AbstractExpression):
                 )
 
             return ret
+
+        def render_pre(self):
+            # Before accessing the field of a record through an access, we must
+            # check that whether this access is null in order to raise a
+            # Property_Error in the case it is.
+            stmts = [
+                render('properties/null_safety_check_ada',
+                       expr=self.receiver_expr, result_var=self.prefix_var)
+            ] + [arg.render_pre() for arg in self.arguments]
+
+            # If we have a dedicated result variable, compute the field access
+            # right now.
+            if self.result_var:
+                stmts.append('{} := {};'.format(
+                    self.result_var.name,
+                    self.render_field_access()
+                ))
+
+            return '\n'.join(stmts)
+
+        def render_expr(self):
+            return (str(self.result_var.name)
+                    if self.result_var else
+                    self.render_field_access())
 
     def __init__(self, receiver, field, arguments=()):
         """
