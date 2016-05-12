@@ -109,11 +109,12 @@ class EnvBind(AbstractExpression):
             # First, compute the environment to bind using the current one and
             # store it in the "New_Env" local variable.
             result = (
-                '{}\n'
-                '{} := {};'.format(
-                    self.env_expr.render_pre(),
-                    self.env_var.name,
-                    self.env_expr.render_expr()
+                '{env_expr_pre}\n'
+                '{env_var} := {env_expr};\n'
+                'Inc_Ref ({env_var});'.format(
+                    env_expr_pre=self.env_expr.render_pre(),
+                    env_expr=self.env_expr.render_expr(),
+                    env_var=self.env_var.name
                 )
             )
 
