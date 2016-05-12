@@ -26,6 +26,11 @@ class EnvGet(AbstractExpression):
             self.env_expr = env_expr
             self.token_expr = token_expr
             self.resolve_unique = resolve_unique
+            self.result_var = PropertyDef.get().vars.create(
+                'Env_Get_Result', self.type,
+                PropertyDef.get_scope()
+            )
+
             self.type.add_to_context()
 
         @property
@@ -38,15 +43,20 @@ class EnvGet(AbstractExpression):
             )
 
         def render_pre(self):
-            return "{}\n{}".format(self.env_expr.render_pre(),
-                                   self.token_expr.render_pre())
-
-        def render_expr(self):
-            return (
+            result_expr = (
                 "{} (0)" if self.resolve_unique else "Create ({})"
             ).format("AST_Envs.Get ({}, Get_Symbol ({}))".format(
                 self.env_expr.render_expr(), self.token_expr.render_expr()
             ))
+
+            return '\n'.join([
+                self.env_expr.render_pre(),
+                self.token_expr.render_pre(),
+                '{} := {};'.format(self.result_var.name, result_expr),
+            ])
+
+        def render_expr(self):
+            return str(self.result_var.name)
 
         def __repr__(self):
             return '<EnvGet.Expr>'
