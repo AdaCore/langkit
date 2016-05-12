@@ -165,7 +165,8 @@ class EnvOrphan(AbstractExpression):
         return BuiltinCallExpr(
             'AST_Envs.Orphan',
             LexicalEnvType,
-            [construct(self.env_expr, LexicalEnvType)]
+            [construct(self.env_expr, LexicalEnvType)],
+            create_temporary='Orphan_Env'
         )
 
 
