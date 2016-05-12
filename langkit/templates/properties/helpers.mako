@@ -58,3 +58,9 @@
 
    % endif
 </%def>
+
+<%def name="inc_ref(var)">
+   % if var.type.is_refcounted():
+      Inc_Ref (${var.name});
+   % endif
+</%def>
