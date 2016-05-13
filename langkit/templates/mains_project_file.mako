@@ -1,7 +1,7 @@
 with "langkit_support";
 with "${lib_name.lower()}";
 
-project Parse is
+project Mains is
 
    type Build_Mode_Type is ("dev", "prod");
    Build_Mode : Build_Mode_Type := external ("BUILD_MODE", "dev");
@@ -10,7 +10,7 @@ project Parse is
 
    for Source_Dirs use (".");
    for Exec_Dir use "../bin";
-   for Object_Dir use "../obj/parse";
+   for Object_Dir use "../obj/mains";
 
    for Main use ("parse.adb");
 
@@ -26,4 +26,4 @@ project Parse is
       end case;
    end Compiler;
 
-end Parse;
+end Mains;

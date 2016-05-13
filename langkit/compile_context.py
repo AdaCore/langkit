@@ -764,10 +764,10 @@ class CompileCtx():
                                "lexer/quex_interface_body_c",
                                _self=self))
 
-        imain_project_file = os.path.join(file_root, "src", "parse.gpr")
+        imain_project_file = os.path.join(file_root, "src", "mains.gpr")
         with open(imain_project_file, "w") as f:
             f.write(self.render_template(
-                "parse_project_file",
+                "mains_project_file",
                 lib_name=self.ada_api_settings.lib_name,
             ))
 

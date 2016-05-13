@@ -488,8 +488,8 @@ class ManageScript(object):
         self.gprbuild(args, lib_project, True)
 
         if args.verbosity.info:
-            printcol("Building the interactive test main ...", Colors.HEADER)
-        self.gprbuild(args, self.dirs.build_dir('src', 'parse.gpr'), False)
+            printcol("Building the main programs ...", Colors.HEADER)
+        self.gprbuild(args, self.dirs.build_dir('src', 'mains.gpr'), False)
 
         # On Windows, shared libraries (DLL) are looked up in the PATH, just
         # like binaries (it's LD_LIBRARY_PATH on Unix). For this platform,
