@@ -1,3 +1,5 @@
+## vim: ft=makoada
+
 with "langkit_support";
 with "${lib_name.lower()}";
 
@@ -12,7 +14,14 @@ project Mains is
    for Exec_Dir use "../bin";
    for Object_Dir use "../obj/mains";
 
-   for Main use ("parse.adb");
+   for Main use (
+      % for i, main in enumerate(main_programs):
+         % if i > 0:
+            ,
+         % endif
+         "${main}.adb"
+      % endfor
+   );
 
    package Compiler is
       case Build_Mode is

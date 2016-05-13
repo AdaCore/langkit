@@ -397,7 +397,8 @@ class ManageScript(object):
 
         if args.verbosity.info:
             printcol("Generating source for libadalang ...", Colors.HEADER)
-        self.context.emit(file_root=self.dirs.build_dir())
+        self.context.emit(file_root=self.dirs.build_dir(),
+                          main_programs=self.main_programs)
 
         def gnatpp(project_file, glob_pattern):
             self.check_call(args, 'Pretty-printing', [

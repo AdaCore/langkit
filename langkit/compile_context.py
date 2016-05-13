@@ -506,7 +506,7 @@ class CompileCtx():
         from langkit.parsers import render
         return render(*args, **kwargs)
 
-    def emit(self, file_root='.', generate_lexer=True):
+    def emit(self, file_root='.', generate_lexer=True, main_programs=set()):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -517,10 +517,14 @@ class CompileCtx():
         :param bool generate_lexer: (optional) Whether to invoke Quex to
             generate the lexer source code. Will do by default. As this can
             take time, it is useful to disable it during testing.
+
+        :param set[str] main_programs: List of names for programs to build in
+            addition to the generated library. To each X program, there must be
+            a X.adb source file in the $BUILD/src directory.
         """
         self.compile()
         with global_context(self):
-            self._emit(file_root, generate_lexer)
+            self._emit(file_root, generate_lexer, main_programs)
 
     def compile(self):
         with global_context(self):
@@ -651,7 +655,7 @@ class CompileCtx():
 
         errors_checkpoint()
 
-    def _emit(self, file_root, generate_lexer):
+    def _emit(self, file_root, generate_lexer, main_programs):
         """
         Emit native code for all the rules in this grammar as a library:
         a library specification and the corresponding implementation.  Also
@@ -769,6 +773,7 @@ class CompileCtx():
             f.write(self.render_template(
                 "mains_project_file",
                 lib_name=self.ada_api_settings.lib_name,
+                main_programs=main_programs
             ))
 
         self.emit_c_api(src_path, include_path)
