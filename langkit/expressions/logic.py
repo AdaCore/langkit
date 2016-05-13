@@ -2,7 +2,7 @@ from langkit.compiled_types import (
     LogicVarType, EquationType, BoolType, StructMetaClass
 )
 
-from langkit.diagnostics import check_source_language
+from langkit.diagnostics import check_source_language, check_multiple
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, PropertyDef
 )
@@ -69,18 +69,15 @@ class Bind(AbstractExpression):
 
     def do_prepare(self):
         root_class = StructMetaClass.root_grammar_class
-        check_source_language(
-            self.bind_property.type.matches(root_class),
-            "The property passed to bind must return a subtype of {}".format(
-                root_class.name().camel
-            )
-        )
+        check_multiple([
+            (self.bind_property.type.matches(root_class),
+             "The property passed to bind must return a subtype "
+             "of {}".format(root_class.name().camel)),
 
-        check_source_language(
-            self.bind_property.struct.matches(root_class),
+            (self.bind_property.struct.matches(root_class),
             "The property passed to bind must belong to a subtype "
-            "of {}".format(root_class.name().camel)
-        )
+            "of {}".format(root_class.name().camel))
+        ])
 
         self.bind_property.do_generate_logic_binder()
 
