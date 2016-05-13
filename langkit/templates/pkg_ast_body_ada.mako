@@ -228,6 +228,18 @@ package body ${_self.ada_api_settings.lib_name}.AST is
               Predicate   => Predicate);
    end Find;
 
+   function Find
+     (Root      : access ${root_node_value_type}'Class;
+      Predicate : ${root_node_type_name}_Predicate)
+     return ${root_node_type_name}_Arrays.Array_Type
+   is
+      function Consume is new ${root_node_type_name}_Iterators.Consume
+        (${root_node_type_name}_Vectors);
+      I : Find_Iterator := Find (Root, Predicate);
+   begin
+      return Consume (I);
+   end Find;
+
    --------------
    -- Evaluate --
    --------------
