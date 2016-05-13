@@ -1,7 +1,7 @@
 from langkit import names
 from langkit.compiled_types import (
-    ASTNode, BoolType, LexicalEnvType, LongType, Struct,
-    EquationType
+    ASTNode, BoolType, LexicalEnvType, LongType, Struct, EquationType,
+    LogicVarType
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
@@ -136,9 +136,26 @@ class Eq(AbstractExpression):
 
         :rtype: EqExpr
         """
+        def construct_logic_eq(lhs, rhs):
+            if rhs.type == LogicVarType:
+                check_source_language(
+                    rhs.type == LogicVarType or rhs.type.matches(ASTNode),
+                    "Operands to a logic equality operator should be either "
+                    "a logic variable or an ASTNode, got {}".format(rhs.type)
+                )
+                return BuiltinCallExpr("Equals", EquationType, [lhs, rhs])
+            else:
+                return None
+
         from langkit.expressions.structs import Cast
         lhs = construct(self.lhs)
         rhs = construct(self.rhs)
+
+        # We don't care about associacivity in logic eq, so lhs and rhs
+        # might be passed in reverse order.
+        logic = construct_logic_eq(lhs, rhs) or construct_logic_eq(rhs, lhs)
+        if logic:
+            return logic
 
         # Don't use CompiledType.matches since in the generated code, we need
         # both operands to be *exactly* the same types, so handle specifically
