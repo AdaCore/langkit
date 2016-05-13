@@ -303,6 +303,17 @@ class ManageScript(object):
             '--cargs', nargs='*', default=[],
             help='Options to pass as "-cargs" to GPRbuild'
         )
+        subparser.add_argument(
+            '--disable-mains', type=self.parse_mains_list, default=[], nargs=1,
+            help=('Comma-separated list of main programs no to build.'
+                  ' Supported main programs are: {}'.format(
+                      ', '.join(sorted(self.main_programs))
+                  ))
+        )
+        subparser.add_argument(
+            '--disable-all-mains', action='store_true',
+            help='Do not build any main program'
+        )
 
     def create_context(self, args):
         """
@@ -315,6 +326,35 @@ class ManageScript(object):
             line invocation of manage.py.
         """
         raise NotImplementedError()
+
+    @property
+    def main_programs(self):
+        """
+        Return the list of main programs to build in addition to the generated
+        library. Subclasses should override this to add more main programs.
+
+        :rtype: set[str]
+        """
+        return {'parse'}
+
+    def parse_mains_list(self, mains):
+        """
+        Parse a comma-separated list of main programs. Raise a ValueError if
+        one is not a supported main program.
+
+        :param str mains: String to parse.
+        :rtype: set[str]
+        """
+        if not mains:
+            return set()
+
+        supported_mains = self.main_programs
+        result = set(mains.split(','))
+        if not result.issubset(supported_mains):
+            raise ValueError('Invalid main programs: {}'.format(
+                ', '.join(sorted(result - supported_mains))
+            ))
+        return result
 
     @property
     def lib_name(self):
@@ -423,16 +463,22 @@ class ManageScript(object):
         if args.verbosity.info:
             printcol("Generation complete!", Colors.OKGREEN)
 
-    def gprbuild(self, args, project_file, is_library):
+    def gprbuild(self, args, project_file, is_library, mains=None):
         """
         Run GPRbuild on a project file.
 
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
+
         :param str project_file: Path to the project file to pass to GPRbuild.
+
         :param bool is_library: If true, build both relocatable and static
             libraries (depending on modes enabled in "args"). Otherwise, use
             relocatable if available or static mode otherwise.
+
+        :param set[str]|None mains: If provided, list of main programs to
+            build. By default, GPRbuild builds them all, so this arguments
+            makes it possible to build only a subset of them.
         """
 
         base_argv = ['gprbuild', '-m', '-p',
@@ -458,6 +504,8 @@ class ManageScript(object):
         def run(library_type):
             argv = list(base_argv)
             argv.append('-XLIBRARY_TYPE={}'.format(library_type))
+            if mains:
+                argv.extend('{}.adb'.format(main) for main in mains)
             argv.append('-cargs')
             argv.extend(cargs)
             self.check_call(args, 'Build', argv)
@@ -481,6 +529,7 @@ class ManageScript(object):
             line invocation of manage.py.
         """
 
+        # Build the generated library itself
         if args.verbosity.info:
             printcol("Building the generated source code ...", Colors.HEADER)
         lib_project = self.dirs.build_dir(
@@ -488,9 +537,16 @@ class ManageScript(object):
         )
         self.gprbuild(args, lib_project, True)
 
-        if args.verbosity.info:
-            printcol("Building the main programs ...", Colors.HEADER)
-        self.gprbuild(args, self.dirs.build_dir('src', 'mains.gpr'), False)
+        # Then build the main programs, if any
+        disabled_mains = reduce(set.union, args.disable_mains, set())
+        mains = (set()
+                 if args.disable_all_mains else
+                 self.main_programs - disabled_mains)
+        if mains:
+            if args.verbosity.info:
+                printcol("Building the main programs ...", Colors.HEADER)
+            self.gprbuild(args, self.dirs.build_dir('src', 'mains.gpr'), False,
+                          mains)
 
         # On Windows, shared libraries (DLL) are looked up in the PATH, just
         # like binaries (it's LD_LIBRARY_PATH on Unix). For this platform,
