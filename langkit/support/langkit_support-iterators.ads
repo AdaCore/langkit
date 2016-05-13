@@ -29,6 +29,7 @@ package Langkit_Support.Iterators is
    procedure Iterate
      (I    : in out Iterator'Class;
       Proc : access procedure (Element : Element_Type));
+   --  Consume the I iterator completely, calling Proc on all yielded elements
 
    generic
       with package Element_Vectors
