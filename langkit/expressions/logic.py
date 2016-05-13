@@ -2,7 +2,7 @@ from langkit.compiled_types import (
     LogicVarType, EquationType, BoolType, StructMetaClass
 )
 
-from langkit.diagnostics import check_source_language, check_multiple
+from langkit.diagnostics import check_multiple
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, PropertyDef
 )
@@ -75,8 +75,8 @@ class Bind(AbstractExpression):
              "of {}".format(root_class.name().camel)),
 
             (self.bind_property.struct.matches(root_class),
-            "The property passed to bind must belong to a subtype "
-            "of {}".format(root_class.name().camel))
+             "The property passed to bind must belong to a subtype "
+             "of {}".format(root_class.name().camel))
         ])
 
         self.bind_property.do_generate_logic_binder()
@@ -229,23 +229,20 @@ class Predicate(AbstractExpression):
         self.logic_var_expr = logic_var_expr
 
     def do_prepare(self):
-        check_source_language(
-            isinstance(self.pred_property, PropertyDef),
-            "Needs a property reference, got {}".format(self.pred_property)
-        )
-
         root_class = StructMetaClass.root_grammar_class
-        check_source_language(
-            self.pred_property.type.matches(BoolType),
-            "The property passed to predicate must return a boolean, "
-            "got {}".format(self.pred_property.type.name().camel)
-        )
 
-        check_source_language(
-            self.pred_property.struct.matches(root_class),
-            "The property passed to bind must belong to a subtype "
-            "of {}".format(root_class.name().camel)
-        )
+        check_multiple([
+            (isinstance(self.pred_property, PropertyDef),
+             "Needs a property reference, got {}".format(self.pred_property)),
+
+            (self.pred_property.type.matches(BoolType),
+             "The property passed to predicate must return a boolean, "
+             "got {}".format(self.pred_property.type.name().camel)),
+
+            (self.pred_property.struct.matches(root_class),
+             "The property passed to bind must belong to a subtype "
+             "of {}".format(root_class.name().camel))
+        ])
 
         self.pred_property.do_generate_logic_predicate()
 
