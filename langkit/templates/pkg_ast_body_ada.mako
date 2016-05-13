@@ -106,9 +106,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- Next --
    ----------
 
-   procedure Next (It       : in out Traverse_Iterator;
-                   Has_Next : out Boolean;
-                   Element  : out ${root_node_type_name})
+   function Next (It       : in out Traverse_Iterator;
+                  Element  : out ${root_node_type_name}) return Boolean
    is
       use Natural_Vectors;
 
@@ -123,7 +122,6 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          --  children first, then siblings.
 
          Element := It.Node;
-         Has_Next := True;
 
          I := 0;
          loop
@@ -133,7 +131,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
             if Child /= null then
                Append (It.Stack, I + 1);
                It.Node := Child;
-               return;
+               return True;
             end if;
             I := I + 1;
          end loop;
@@ -155,14 +153,14 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
                   Append (It.Stack, I + 1);
                   It.Node := Child;
-                  return;
+                  return True;
                end if;
                I := I + 1;
             end loop;
          end loop;
       end if;
 
-      Has_Next := False;
+      return False;
    end Next;
 
    --------------
@@ -193,25 +191,16 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- Next --
    ----------
 
-   procedure Next (It       : in out Find_Iterator;
-                   Has_Next : out Boolean;
-                   Element  : out ${root_node_type_name})
+   function Next (It       : in out Find_Iterator;
+                  Element  : out ${root_node_type_name}) return Boolean
    is
-      Has_Node : Boolean := True;
    begin
-      loop
-         Next (It.Traverse_It, Has_Node, Element);
-         if Has_Node then
-            if It.Predicate.Evaluate (Element) then
-               Has_Next := True;
-               Element := Element;
-               return;
-            end if;
-         else
-            Has_Next := False;
-            return;
+      while Next (It.Traverse_It, Element) loop
+         if It.Predicate.Evaluate (Element) then
+            return True;
          end if;
       end loop;
+      return False;
    end Next;
 
    --------------

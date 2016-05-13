@@ -8,12 +8,9 @@ package body Langkit_Support.Iterators is
      (I    : in out Iterator'Class;
       Proc : access procedure (Element : Element_Type))
    is
-      Has_Next : Boolean;
       Element  : Element_Type;
    begin
-      loop
-         I.Next (Has_Next, Element);
-         exit when not Has_Next;
+      while I.Next (Element) loop
          Proc (Element);
       end loop;
    end Iterate;

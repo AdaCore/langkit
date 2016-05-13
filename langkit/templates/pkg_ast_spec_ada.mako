@@ -289,9 +289,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Iterator type for Traverse (see below)
 
    overriding
-   procedure Next (It       : in out Traverse_Iterator;
-                   Has_Next : out Boolean;
-                   Element  : out ${root_node_type_name});
+   function Next (It       : in out Traverse_Iterator;
+                  Element  : out ${root_node_type_name}) return Boolean;
 
    function Traverse
      (Root : access ${root_node_value_type}'Class)
@@ -325,9 +324,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Iterator type for Find (see below)
 
    overriding
-   procedure Next (It       : in out Find_Iterator;
-                   Has_Next : out Boolean;
-                   Element  : out ${root_node_type_name});
+   function Next (It       : in out Find_Iterator;
+                  Element  : out ${root_node_type_name}) return Boolean;
 
    function Find
      (Root      : access ${root_node_value_type}'Class;

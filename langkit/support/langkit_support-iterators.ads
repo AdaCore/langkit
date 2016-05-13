@@ -19,13 +19,11 @@ package Langkit_Support.Iterators is
    --  Iterator interface: iterator consumers do not need to mind about
    --  concrete interator implementations.
 
-   procedure Next
+   function Next
      (I        : in out Iterator;
-      Has_Next : out Boolean;
-      Element  : out Element_Type) is abstract;
+      Element  : out Element_Type) return Boolean is abstract;
    --  Get the next iteration element. If there was no element to yield
-   --  anymore, set Has_Next to False. Otherwise, set it to True and set
-   --  Element.
+   --  anymore, return False. Otherwise, return True and set Element.
 
    procedure Iterate
      (I    : in out Iterator'Class;
