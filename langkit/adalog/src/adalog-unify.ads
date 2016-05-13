@@ -116,6 +116,15 @@ package Adalog.Unify is
    function "=" (L : Left_Var.Var; R : Right_Var.Var) return Rel
    is (Unify_LR_Rel.Impl.Dynamic (L = R)) with Inline;
 
+   function Equals (L : Left_Var.Var; R : R_Type) return Rel renames "=";
+
+   function Equals (L : L_Type; R : Right_Var.Var) return Rel renames "=";
+
+   function Equals (L : L_Type; R : R_Type) return Rel renames "=";
+
+   function Equals
+     (L : Left_Var.Var; R : Right_Var.Var) return Rel renames "=";
+
    ------------
    -- Member --
    ------------
