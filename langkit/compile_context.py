@@ -669,7 +669,7 @@ class CompileCtx():
             os.mkdir(file_root)
 
         if self.verbosity.info:
-            printcol("File setup ...", Colors.OKBLUE)
+            printcol("File setup...", Colors.OKBLUE)
 
         for d in ["include",
                   "include/langkit_support",
