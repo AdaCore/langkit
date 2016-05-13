@@ -457,7 +457,7 @@ class ManageScript(object):
                                     '{}.gpr'.format(self.lib_name.lower())),
                 self.dirs.build_dir('include', self.lib_name.lower(), '*.ad*')
             )
-            gnatpp(self.dirs.build_dir('src', 'parse.gpr'),
+            gnatpp(self.dirs.build_dir('src', 'mains.gpr'),
                    self.dirs.build_dir('src', '*.ad*'))
 
         if args.verbosity.info:
