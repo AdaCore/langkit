@@ -1593,10 +1593,6 @@ class BuiltinCallExpr(ResolvedExpression):
         self.exprs = exprs
         self.static_type = type
 
-    @property
-    def type(self):
-        return self.static_type
-
     def render_pre(self):
         return "\n".join(expr.render_pre() for expr in self.exprs)
 
