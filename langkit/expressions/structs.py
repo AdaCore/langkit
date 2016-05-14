@@ -31,7 +31,7 @@ class Cast(AbstractExpression):
             """
             self.do_raise = do_raise
             self.expr = expr
-            self.astnode = astnode
+            self.static_type = astnode
 
             p = PropertyDef.get()
             self.expr_var = p.vars.create('Cast_Expr', self.expr.type)
@@ -46,10 +46,6 @@ class Cast(AbstractExpression):
                 )
             )
 
-        @property
-        def type(self):
-            return self.astnode
-
         def render_pre(self):
             # Before actually downcasting an access to an AST node, add a type
             # check so that we raise a Property_Error if it's wrong.
@@ -59,7 +55,7 @@ class Cast(AbstractExpression):
             return self.result_var.name
 
         def __repr__(self):
-            return '<Cast.Expr {}>'.format(self.astnode.name().camel)
+            return '<Cast.Expr {}>'.format(self.static_type.name().camel)
 
     def __init__(self, expr, astnode, do_raise=False):
         """
@@ -138,12 +134,8 @@ class New(AbstractExpression):
         """
 
         def __init__(self, struct_type, assocs):
-            self.struct_type = struct_type
+            self.static_type = struct_type
             self.assocs = assocs
-
-        @property
-        def type(self):
-            return self.struct_type
 
         def _iter_ordered(self):
             return ((k, self.assocs[k]) for k in sorted(self.assocs))
@@ -160,7 +152,7 @@ class New(AbstractExpression):
             )
 
         def __repr__(self):
-            return '<New.Expr {}>'.format(self.struct_type.name().camel)
+            return '<New.Expr {}>'.format(self.static_type.name().camel)
 
     def __init__(self, struct_type, **field_values):
         """
@@ -249,6 +241,7 @@ class FieldAccess(AbstractExpression):
             """
             self.receiver_expr = receiver_expr
             self.node_data = node_data
+            self.static_type = self.node_data.type
             self.arguments = arguments
             self.simple_field_access = False
 
@@ -267,10 +260,6 @@ class FieldAccess(AbstractExpression):
                 self.prefix_var = p.vars.create('Pfx', self.receiver_expr.type)
             else:
                 self.simple_field_access = True
-
-        @property
-        def type(self):
-            return self.node_data.type
 
         def __repr__(self):
             return "<FieldAccessExpr {} {} {}>".format(
@@ -436,6 +425,8 @@ class IsA(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
+        static_type = BoolType
+
         def __init__(self, expr, astnodes):
             """
             :param ResolvedExpr expr: Expression on which the test is
@@ -444,10 +435,6 @@ class IsA(AbstractExpression):
             """
             self.expr = expr
             self.astnodes = astnodes
-
-        @property
-        def type(self):
-            return BoolType
 
         def render_pre(self):
             return self.expr.render_pre()
