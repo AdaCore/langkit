@@ -23,6 +23,8 @@ class Bind(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
+        static_type = EquationType
+
         def __init__(self, from_var, to_var, bind_property):
             self.from_var = from_var
             ":type: ResolvedExpression"
@@ -32,10 +34,6 @@ class Bind(AbstractExpression):
 
             self.bind_property = bind_property
             ":type: PropertyDef"
-
-        @property
-        def type(self):
-            return EquationType
 
         def render_pre(self):
             return "\n".join([self.from_var.render_pre(),
@@ -129,15 +127,12 @@ class Domain(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
+        static_type = EquationType
 
         def __init__(self, domain, logic_var_expr):
             self.domain = domain
             self.logic_var_expr = logic_var_expr
             self.res_var = PropertyDef.get().vars.create("Var", EquationType)
-
-        @property
-        def type(self):
-            return EquationType
 
         def render_pre(self):
             return "\n".join([
@@ -194,16 +189,14 @@ class Predicate(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
+        static_type = EquationType
+
         def __init__(self, logic_var, pred_property):
             self.logic_var = logic_var
             ":type: ResolvedExpression"
 
             self.pred_property = pred_property
             ":type: PropertyDef"
-
-        @property
-        def type(self):
-            return EquationType
 
         def render_pre(self):
             return self.logic_var.render_pre()
@@ -287,6 +280,7 @@ class SolveEquation(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
+        static_type = BoolType
 
         def __init__(self, equation):
 
@@ -305,10 +299,6 @@ class SolveEquation(AbstractExpression):
 
         def render_expr(self):
             return "Call ({})".format(self.eq_var.name)
-
-        @property
-        def type(self):
-            return BoolType
 
     def __init__(self, equation):
         super(SolveEquation, self).__init__()
