@@ -519,10 +519,6 @@ class AbstractVariable(AbstractExpression):
             self.static_type = assert_type(type, CompiledType)
             self.name = name
 
-        @property
-        def type(self):
-            return self.static_type
-
         def render_expr(self):
             return self.name.camel_with_underscores
 
