@@ -1410,10 +1410,6 @@ class LiteralExpr(ResolvedExpression):
         self.literal = literal
         self.static_type = type
 
-    @property
-    def type(self):
-        return self.static_type
-
     def render_expr(self):
         return self.literal
 
@@ -1435,10 +1431,7 @@ class ArrayExpr(ResolvedExpression):
         """
         self.exprs = exprs
         self.element_type = element_type
-
-    @property
-    def type(self):
-        return self.element_type.array_type()
+        self.static_type = self.element_type.array_type()
 
     def render_pre(self):
         return '\n'.join(e.render_pre() for e in self.exprs)
@@ -1461,11 +1454,7 @@ class UnreachableExpr(ResolvedExpression):
         :param CompiledType expr_type: Type parameter. Type that a usual
             expression would return in this case.
         """
-        self.expr_type = expr_type
-
-    @property
-    def type(self):
-        return self.expr_type
+        self.static_type = expr_type
 
     def render_expr(self):
         return ('raise Program_Error with'
