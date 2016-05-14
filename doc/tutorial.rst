@@ -29,17 +29,17 @@ First, please make sure that the ``langkit`` Python package is available in
 your Python environment (i.e. that Python scripts can import it). Also, please
 install:
 
-  * a GNAT toolchain: the generated library uses the Ada programming language,
-    so you need to be able to build Ada source code;
+* a GNAT toolchain: the generated library uses the Ada programming language, so
+  you need to be able to build Ada source code;
 
-  * `GNATcoll <http://docs.adacore.com/gnatcoll-docs/>`_, an Ada library
-    providing various utilities;
+* `GNATcoll <http://docs.adacore.com/gnatcoll-docs/>`_, an Ada library
+  providing various utilities;
 
-  * `Quex <http://sourceforge.net/projects/quex/files/HISTORY/0.64/>`_ (a lexer
-    generator), version 0.64.8;
+* `Quex <http://sourceforge.net/projects/quex/files/HISTORY/0.64/>`_ (a lexer
+  generator), version 0.64.8;
 
-  * Mako, a template system for Python which should already be installed if you
-    used ``setup.py/easy_install/pip/...`` to install Langkit.
+* Mako, a template system for Python which should already be installed if you
+  used ``setup.py/easy_install/pip/...`` to install Langkit.
 
 
 Getting started
@@ -70,16 +70,16 @@ And check that this skeleton already builds:
 This should generate and then build the analysis library in the ``build`` local
 directory. Check in particular:
 
-  * ``build/include`` and ``build/lib``, which contain the Ada sources, C
-    header files and static/shared libraries for the generated library;
+* ``build/include`` and ``build/lib``, which contain the Ada sources, C header
+  files and static/shared libraries for the generated library;
 
-  * ``build/bin``, which contains a ``parse`` binary, useful to easily run the
-    lexer/parser from the command line; note that it is statically linked with
-    the generated library to ease debugging and testing (you don't have to add
-    ``build/lib`` directory to your ``LD_LIBRARY_PATH``);
+* ``build/bin``, which contains a ``parse`` binary, useful to easily run the
+  lexer/parser from the command line; note that it is statically linked with
+  the generated library to ease debugging and testing (you don't have to add
+  ``build/lib`` directory to your ``LD_LIBRARY_PATH``);
 
-  * ``build/python``, which contains the Python binding for the generated
-    library.
+* ``build/python``, which contains the Python binding for the generated
+  library.
 
 If everything went fine, you should be able to run the ``parse`` test binary:
 
@@ -117,14 +117,14 @@ open ``language/lexer.py``.
 
 This module contains three blocks:
 
-  * an import statement, which pulls all the objects we need to build our lexer
-    from Langkit;
+* an import statement, which pulls all the objects we need to build our lexer
+  from Langkit;
 
-  * a ``Token`` class definition, used to define both the set of token kinds
-    that the lexer will produce and what to do with them (more on that below);
+* a ``Token`` class definition, used to define both the set of token kinds that
+  the lexer will produce and what to do with them (more on that below);
 
-  * the instantiation of a lexer in ``kaleidoscope_lexer`` and adding two
-    lexing rules for it (more on that farther below).
+* the instantiation of a lexer in ``kaleidoscope_lexer`` and adding two lexing
+  rules for it (more on that farther below).
 
 So let's first talk about token kinds. The tokens most lexers yield have a kind
 that determines what kind of word they represent: is it an identifier? an
@@ -168,21 +168,21 @@ class.
 
 Ok, so here we have four kind of tokens:
 
-  * The ``def`` and ``extern`` keywords, for which keeping the text is useless:
-    there is only one possible ``def`` keyword (same for ``external``) so
-    copying the text for it gives no useful information. We use ``NoText``
-    instances to achieve this.
+* The ``def`` and ``extern`` keywords, for which keeping the text is useless:
+  there is only one possible ``def`` keyword (same for ``external``) so copying
+  the text for it gives no useful information. We use ``NoText`` instances to
+  achieve this.
 
-  * Identifiers, which we'll use for function names and variable names so we
-    want to put the corresponding text in a symbol table. We use ``WithSymbol``
-    instances to achieve this.
+* Identifiers, which we'll use for function names and variable names so we want
+  to put the corresponding text in a symbol table. We use ``WithSymbol``
+  instances to achieve this.
 
-  * Decimal literals (``Number``), for which we will keep the associated text
-    so we can later extract the corresponding value later. We use ``WithText``
-    instances to achieve this.
+* Decimal literals (``Number``), for which we will keep the associated text so
+  we can later extract the corresponding value later. We use ``WithText``
+  instances to achieve this.
 
-  * Punctuation and operators, for which keeping the text is useless, just like
-    for keywords.
+* Punctuation and operators, for which keeping the text is useless, just like
+  for keywords.
 
 Do not forget to add ``WithText`` and ``WithSymbol`` to the import statement so
 that you can use them in your lexer specification.
@@ -223,17 +223,17 @@ This kind of construct is very analog to what you can find in other lexer
 generators such as ``flex``: on the left you have what text to match and on the
 right you have what should be done with it:
 
-  * The first ``Pattern`` matches any blank character and discards them, thanks
-    to the ``Ignore`` action.
+* The first ``Pattern`` matches any blank character and discards them, thanks
+  to the ``Ignore`` action.
 
-  * The second one discards comments (everything starting with ``#`` until the
-    end of the line).
+* The second one discards comments (everything starting with ``#`` until the
+  end of the line).
 
-  * The two ``Literal`` matchers hit on the corresponding keywords and
-    associate the corresponding token kinds.
+* The two ``Literal`` matchers hit on the corresponding keywords and associate
+  the corresponding token kinds.
 
-  * The two last ``Pattern`` will respectively match identifiers and numbers,
-    and emit the corresponding token kinds.
+* The two last ``Pattern`` will respectively match identifiers and numbers, and
+  emit the corresponding token kinds.
 
 Only exact input strings trigger ``Literal`` matchers while the input is
 matched against a regular expression with ``Pattern`` matchers. Note that the
@@ -377,11 +377,11 @@ Langkit generates recursive descent parsers using `parser combinators
 <https://en.wikipedia.org/wiki/Parser_combinator>`_. Here are a few fictive
 examples:
 
-  * ``'def'`` matches exactly one ``def`` token;
-  * ``Row('def', Tok(Token.Identifier))`` matches a ``def`` token followed by
-    an identifier token.
-  * ``Or('def', 'extern')`` matches either a ``def`` keyword, either a
-    ``extern`` one (no more, no less).
+* ``'def'`` matches exactly one ``def`` token;
+* ``Row('def', Tok(Token.Identifier))`` matches a ``def`` token followed by an
+  identifier token.
+* ``Or('def', 'extern')`` matches either a ``def`` keyword, either a ``extern``
+  one (no more, no less).
 
 The basic idea is that you use the callables Langkit provides (``Row``, ``Or``,
 etc.) in order to compose in a quite natural way what rules can match. Let's
@@ -462,22 +462,22 @@ that take no argument.
 Let's dive into the richest grammatical element of Kaleidoscope: expressions!
 An expression can be either:
 
-  * A sub-expression nested in parenthesis, to give users more control over how
-    associativity works. Note that we used here the subscript operation to
-    extract the middle result (first one is at index 0, middle one is at index
-    1) of the ``Row`` part.
+* A sub-expression nested in parenthesis, to give users more control over how
+  associativity works. Note that we used here the subscript operation to
+  extract the middle result (first one is at index 0, middle one is at index 1)
+  of the ``Row`` part.
 
-  * Two sub-expressions with an operator in the middle, building a binary
-    expression. This shows how we can turn tokens into enumerators:
+* Two sub-expressions with an operator in the middle, building a binary
+  expression. This shows how we can turn tokens into enumerators:
 
-    .. code-block:: python
+  .. code-block:: python
 
-        Enum('+', Operator('plus'))
+      Enum('+', Operator('plus'))
 
-    This matches a ``+`` token (``Plus`` in our lexer definition) and yields
-    the ``plus`` enumerator from the ``Operator`` enumeration type.
+  This matches a ``+`` token (``Plus`` in our lexer definition) and yields the
+  ``plus`` enumerator from the ``Operator`` enumeration type.
 
-  * The ``prod_expr`` kind of expression: see below.
+* The ``prod_expr`` kind of expression: see below.
 
 .. code-block:: python
 
@@ -763,9 +763,9 @@ Our top-level code looks like this:
 
 Call ``execute`` with a filename and it will:
 
- 1. parse the corresponding script;
- 2. print any lexing/parsing error (and exit if there are errors);
- 3. interpret it (and print messages from execution errors).
+1. parse the corresponding script;
+2. print any lexing/parsing error (and exit if there are errors);
+3. interpret it (and print messages from execution errors).
 
 The ``print_error`` function is a fancy helper to nicely show the user where
 the error occurred. Now that the framework is ready, let's implement the
