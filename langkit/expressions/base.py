@@ -628,10 +628,7 @@ class Let(AbstractExpression):
             self.vars = vars
             self.var_exprs = var_exprs
             self.expr = expr
-
-        @property
-        def type(self):
-            return self.expr.type
+            self.static_type = self.expr.type
 
         def render_pre(self):
             result = []
