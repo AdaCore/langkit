@@ -507,6 +507,15 @@ package ${_self.ada_api_settings.lib_name}.AST is
      (Node : ${root_node_value_type}; C : Children_Cursor)
       return ${root_node_type_name};
 
+   ------------------------------------------------
+   -- Root grammar class properties declarations --
+   ------------------------------------------------
+
+   % for prop in ctx.root_grammar_class.get_properties(include_inherited=False, \
+                                    predicate=library_public_field):
+      ${prop.prop_decl}
+   % endfor
+
    ---------------------------
    -- Adalog instantiations --
    ---------------------------

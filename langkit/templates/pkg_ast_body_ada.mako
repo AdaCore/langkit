@@ -1078,4 +1078,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
    % endif
 
+   ## Generate the bodies of the root grammar class properties
+   % for prop in ctx.root_grammar_class.get_properties(include_inherited=False):
+   ${prop.prop_def}
+   % endfor
+
 end ${_self.ada_api_settings.lib_name}.AST;
