@@ -163,10 +163,6 @@ class Map(CollectionExpression):
             p = PropertyDef.get()
             self.array_var = p.vars.create('Map', self.type)
 
-        @property
-        def type(self):
-            return self.static_type
-
         def __repr__(self):
             return "<MapExpr {}: {} -> {}{}>".format(
                 self.collection,
@@ -242,6 +238,8 @@ class Quantifier(CollectionExpression):
     """
 
     class Expr(ResolvedExpression):
+        static_type = BoolType
+
         def __init__(self, kind, collection, expr, element_var, index_var):
             """
             :param str kind: Kind for this quantifier expression. 'all' will
@@ -270,10 +268,6 @@ class Quantifier(CollectionExpression):
             self.index_var = index_var
 
             self.result_var = PropertyDef.get().vars.create('Result', BoolType)
-
-        @property
-        def type(self):
-            return BoolType
 
         def render_pre(self):
             return render(
@@ -383,19 +377,18 @@ class CollectionSingleton(AbstractExpression):
             :type expr: ResolvedExpression
             """
             self.expr = expr
-            p = PropertyDef.get()
-            self.array_var = p.vars.create('Singleton', self.type)
 
-        @property
-        def type(self):
             self.expr.type.array_type().add_to_context()
-            return self.expr.type.array_type()
+            self.static_type = self.expr.type.array_type()
+
+            self.array_var = PropertyDef.get().vars.create('Singleton',
+                                                           self.type)
 
         def render_pre(self):
             return self.expr.render_pre() + """
             {array_var} := new {array_type}'(N => 1, Items => (1 => {item}));
             """.format(array_var=self.array_var.name,
-                       array_type=self.type.pointed(),
+                       array_type=self.static_type.pointed(),
                        item=self.expr.render_expr())
 
         def render_expr(self):
