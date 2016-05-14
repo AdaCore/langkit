@@ -271,3 +271,50 @@ class GetLogicValue(AbstractExpression):
             "Eq_Node.Refs.GetL", StructMetaClass.root_grammar_class,
             [construct(self.logic_var, LogicVarType)]
         )
+
+
+class SolveEquation(AbstractExpression):
+    """
+    Expression that will call solve on an instance of EquationType,
+    and return whether any solution was found or not. The solutions are not
+    returned, instead, logic variables are bound to their values in the
+    current solution.
+
+    TODO: For the moment, since properties returning equations will
+    reconstruct them everytime, there is no way to get the second solution
+    if there is one. Also you cannot do that manually either since a
+    property exposing equations cannot be public at the moment.
+    """
+
+    class Expr(ResolvedExpression):
+
+        def __init__(self, equation):
+
+            self.equation = equation
+            ":type: ResolvedExpression"
+
+            self.eq_var = PropertyDef.get().vars.create(
+                "Equation", EquationType
+            )
+
+        def render_pre(self):
+            return self.equation.render_pre() + """
+            {eq_var} := {eq_expr};
+            """.format(eq_var=self.eq_var.name,
+                       eq_expr=self.equation.render_expr())
+
+        def render_expr(self):
+            return "Call ({})".format(self.eq_var.name)
+
+        @property
+        def type(self):
+            return BoolType
+
+    def __init__(self, equation):
+        super(SolveEquation, self).__init__()
+
+        self.equation = equation
+        ":type: AbstractExpression"
+
+    def construct(self):
+        return self.Expr(construct(self.equation, EquationType))

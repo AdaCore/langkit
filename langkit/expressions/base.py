@@ -251,7 +251,7 @@ class AbstractExpression(Frozable):
             CollectionGet, CollectionLength, CollectionSingleton
         )
         from langkit.expressions.logic import (
-            GetLogicValue
+            GetLogicValue, SolveEquation
         )
 
         # Using partial allows the user to be able to use keyword arguments
@@ -301,6 +301,7 @@ class AbstractExpression(Frozable):
 
             # Logic handling
             "get_value":      GetLogicValue(self),
+            "solve":          SolveEquation(self)
         }
 
     @memoized
