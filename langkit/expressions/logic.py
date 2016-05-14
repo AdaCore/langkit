@@ -131,7 +131,11 @@ class Domain(AbstractExpression):
 
         def __init__(self, domain, logic_var_expr):
             self.domain = domain
+            ":type: ResolvedExpression"
+
             self.logic_var_expr = logic_var_expr
+            ":type: ResolvedExpression"
+
             self.res_var = PropertyDef.get().vars.create("Var", EquationType)
 
         def render_pre(self):
@@ -139,16 +143,18 @@ class Domain(AbstractExpression):
                 self.domain.render_pre(),
                 self.logic_var_expr.render_pre(), """
                 declare
-                    A : Eq_Node.Raw_Member_Array (1 .. Length ({domain}));
+                    Dom : {domain_type} := {domain};
+                    A   : Eq_Node.Raw_Member_Array (1 .. Length (Dom));
                 begin
-                    for J in 0 .. Length ({domain}) loop
-                        A (J) := Get ({domain}, J);
+                    for J in 0 .. Length (Dom) - 1 loop
+                        A (J + 1) := Get (Dom, J);
                     end loop;
 
                     {res_var} := Member ({logic_var}, A);
                 end;
                 """.format(logic_var=self.logic_var_expr.render_expr(),
                            domain=self.domain.render_expr(),
+                           domain_type=self.domain.type.name(),
                            res_var=self.res_var.name)
             ])
 
