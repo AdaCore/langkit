@@ -250,6 +250,9 @@ class AbstractExpression(Frozable):
         from langkit.expressions.collections import (
             CollectionGet, CollectionLength, CollectionSingleton
         )
+        from langkit.expressions.logic import (
+            GetLogicValue
+        )
 
         # Using partial allows the user to be able to use keyword arguments
         # defined on the expressions constructors.
@@ -295,6 +298,9 @@ class AbstractExpression(Frozable):
             'env_group':      EnvGroupArray(self),
             'env_orphan':     EnvOrphan(self),
             'resolve_unique': partial(EnvGet, self, resolve_unique=True),
+
+            # Logic handling
+            "get_value":      GetLogicValue(self),
         }
 
     @memoized

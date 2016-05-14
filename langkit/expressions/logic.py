@@ -4,7 +4,8 @@ from langkit.compiled_types import (
 
 from langkit.diagnostics import check_multiple
 from langkit.expressions.base import (
-    AbstractExpression, construct, ResolvedExpression, PropertyDef
+    AbstractExpression, construct, ResolvedExpression, PropertyDef,
+    BuiltinCallExpr
 )
 from langkit.expressions.envs import Env
 
@@ -250,4 +251,23 @@ class Predicate(AbstractExpression):
         return Predicate.Expr(
             construct(self.logic_var_expr, LogicVarType),
             self.pred_property
+        )
+
+
+class GetLogicValue(AbstractExpression):
+    """
+    Expression that'll extract the value out of a logic variable. The type is
+    always the root grammar class.
+    """
+
+    def __init__(self, logic_var):
+        super(GetLogicValue, self).__init__()
+
+        self.logic_var = logic_var
+        ":type: AbstractExpression"
+
+    def construct(self):
+        return BuiltinCallExpr(
+            "Eq_Node.Refs.GetL", StructMetaClass.root_grammar_class,
+            [construct(self.logic_var, LogicVarType)]
         )
