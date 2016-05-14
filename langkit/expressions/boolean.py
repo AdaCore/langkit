@@ -100,13 +100,11 @@ class Eq(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
+        static_type = BoolType
+
         def __init__(self, lhs, rhs):
             self.lhs = lhs
             self.rhs = rhs
-
-        @property
-        def type(self):
-            return BoolType
 
         def render_pre(self):
             return '{}\n{}'.format(
@@ -201,14 +199,12 @@ class OrderingTest(AbstractExpression):
     }
 
     class Expr(ResolvedExpression):
+        static_type = BoolType
+
         def __init__(self, operator, lhs, rhs):
             self.operator = operator
             self.lhs = lhs
             self.rhs = rhs
-
-        @property
-        def type(self):
-            return BoolType
 
         def render_pre(self):
             return '{}\n{}'.format(
@@ -273,12 +269,8 @@ class If(AbstractExpression):
             self.cond = cond
             self.then = then
             self.else_then = else_then
-            self.rtype = rtype
+            self.static_type = rtype
             self.result_var = PropertyDef.get().vars.create('Result', rtype)
-
-        @property
-        def type(self):
-            return self.rtype
 
         def render_pre(self):
             return render('properties/if_ada', expr=self)
@@ -320,12 +312,10 @@ class Not(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
+        static_type = BoolType
+
         def __init__(self, expr):
             self.expr = expr
-
-        @property
-        def type(self):
-            return BoolType
 
         def render_pre(self):
             return self.expr.render_pre()
@@ -366,12 +356,9 @@ class Then(AbstractExpression):
             self.var_expr = var_expr
             self.then_expr = then_expr
             self.default_expr = default_expr
+            self.static_type = self.then_expr.type
             self.result = PropertyDef.get().vars.create("Result_Var",
                                                         self.type)
-
-        @property
-        def type(self):
-            return self.then_expr.type
 
         def render_pre(self):
             return render('properties/then_ada', then=self)
