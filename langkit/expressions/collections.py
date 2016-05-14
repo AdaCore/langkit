@@ -157,15 +157,15 @@ class Map(CollectionExpression):
             element_type = (self.expr.type.element_type()
                             if self.concat else
                             self.expr.type)
-            self._type = element_type.array_type()
-            self._type.add_to_context()
+            self.static_type = element_type.array_type()
+            self.static_type.add_to_context()
 
             p = PropertyDef.get()
             self.array_var = p.vars.create('Map', self.type)
 
         @property
         def type(self):
-            return self._type
+            return self.static_type
 
         def __repr__(self):
             return "<MapExpr {}: {} -> {}{}>".format(

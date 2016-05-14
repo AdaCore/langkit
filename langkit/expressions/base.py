@@ -442,6 +442,14 @@ class ResolvedExpression(object):
     lexical scope.
     """
 
+    static_type = None
+    """
+    If subclasses redefine this, then the type property will return this
+    static type value.
+
+    :type: CompiledType
+    """
+
     def render_expr(self):
         """
         Renders the expression itself.
@@ -474,7 +482,12 @@ class ResolvedExpression(object):
 
         :rtype: langkit.compiled_types.CompiledType
         """
-        raise NotImplementedError()
+        if not self.static_type:
+            raise NotImplementedError(
+                "You need to redefine the type property, or to fill the "
+                "static_type class field"
+            )
+        return self.static_type
 
 
 class AbstractVariable(AbstractExpression):
@@ -503,12 +516,12 @@ class AbstractVariable(AbstractExpression):
                 referenced variable.
             :param names.Name name: Name of the referenced variable.
             """
-            self._type = assert_type(type, CompiledType)
+            self.static_type = assert_type(type, CompiledType)
             self.name = name
 
         @property
         def type(self):
-            return self._type
+            return self.static_type
 
         def render_expr(self):
             return self.name.camel_with_underscores
@@ -1402,11 +1415,11 @@ class LiteralExpr(ResolvedExpression):
 
     def __init__(self, literal, type):
         self.literal = literal
-        self._type = type
+        self.static_type = type
 
     @property
     def type(self):
-        return self._type
+        return self.static_type
 
     def render_expr(self):
         return self.literal
@@ -1578,11 +1591,11 @@ class BuiltinCallExpr(ResolvedExpression):
         """
         self.name = names.Name.get(name)
         self.exprs = exprs
-        self._type = type
+        self.static_type = type
 
     @property
     def type(self):
-        return self._type
+        return self.static_type
 
     def render_pre(self):
         return "\n".join(expr.render_pre() for expr in self.exprs)
