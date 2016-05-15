@@ -22,7 +22,7 @@ setup(
     url='https://www.adacore.com',
     description='A Python framework to generate language parsers',
     requires=['Mako', 'coverage'],
-    packages=['langkit'],
+    packages=['langkit', 'langkit.expressions'],
     package_data={'langkit': [
         'adalog/*.adb',  'adalog/*.ads',  'adalog/*.gpr',
         'support/*.adb', 'support/*.ads', 'support/*.gpr',
