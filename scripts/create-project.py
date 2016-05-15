@@ -55,7 +55,6 @@ class Manage(ManageScript):
         from language.parser import {lang_name_slug}_grammar
 
         return CompileCtx(lang_name={lang_name_repr},
-                          main_rule_name='main_rule',
                           lexer={lang_name_slug}_lexer,
                           grammar={lang_name_slug}_grammar)
 
