@@ -24,7 +24,8 @@ setup(
     requires=['Mako', 'coverage'],
     packages=['langkit', 'langkit.expressions'],
     package_data={'langkit': [
-        'adalog/*.adb',  'adalog/*.ads',  'adalog/*.gpr',
+        'adalog/adalog.gpr',
+        'adalog/src/*.adb',  'adalog/src/*.ads',  'adalog/src/*.gpr',
         'support/*.adb', 'support/*.ads', 'support/*.gpr',
         'templates/*.mako', 'templates/*/*.mako'
     ]},
