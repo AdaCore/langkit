@@ -208,5 +208,6 @@ class EnvGroupArray(AbstractExpression):
     def construct(self):
         return BuiltinCallExpr(
             'Group', LexicalEnvType,
-            [construct(self.env_array_expr, LexicalEnvType.array_type())]
+            [construct(self.env_array_expr, LexicalEnvType.array_type())],
+            create_temporary='Group_Env'
         )
