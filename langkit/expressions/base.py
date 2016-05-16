@@ -1183,7 +1183,7 @@ class PropertyDef(AbstractNodeData):
                 check_overriding_props(subclass)
 
         if self.abstract and not self.abstract_runtime_check:
-            check_overriding_props(self.struct)
+            check_overriding_props(assert_type(self.struct, ASTNode))
 
             unmatched_types = sorted(type_set.unmatched_types(self.struct),
                                      key=lambda cls: cls.hierarchical_name())
