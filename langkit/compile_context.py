@@ -12,6 +12,8 @@ this is the way it is done for the ada language::
 
 from __future__ import absolute_import
 
+import inspect
+import lib2to3.main
 from contextlib import contextmanager
 import difflib
 from distutils.spawn import find_executable
@@ -398,6 +400,11 @@ class CompileCtx():
         :type: langkit.compiled_types.EnvElement
         """
 
+        self.annotate_fields_types = False
+        """
+        Whether to run the 2to3 field annotation pass.
+        """
+
     def sorted_types(self, type_set):
         """
         Turn "type_set" into a list of types sorted by name.
@@ -506,7 +513,8 @@ class CompileCtx():
         from langkit.parsers import render
         return render(*args, **kwargs)
 
-    def emit(self, file_root='.', generate_lexer=True, main_programs=set()):
+    def emit(self, file_root='.', generate_lexer=True, main_programs=set(),
+             annotate_fields_types=False):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -521,7 +529,13 @@ class CompileCtx():
         :param set[str] main_programs: List of names for programs to build in
             addition to the generated library. To each X program, there must be
             a X.adb source file in the $BUILD/src directory.
+
+        :param bool annotate_fields_types: Whether to try and annotate the
+            type of fields in the grammar. If this is True, this will
+            actually modify the file in which ASTNode subclasses are
+            defined, and annotate empty field definitions.
         """
+        self.annotate_fields_types = annotate_fields_types
         self.compile()
         with global_context(self):
             self._emit(file_root, generate_lexer, main_programs)
@@ -633,6 +647,17 @@ class CompileCtx():
             " not used by the grammar, and their types not annotated:"
             " {}".format(", ".join(t.name().camel for t in unresolved_types))
         )
+
+        astnodes_files = {
+            path.abspath(inspect.getsourcefile(n)) for n in self.astnode_types
+        }
+
+        if self.annotate_fields_types:
+            lib2to3.main.main(
+                "langkit",
+                ["-f", "annotate_fields_types",
+                 "--no-diff", "-w"] + list(astnodes_files)
+            )
 
         for i, astnode in enumerate(
             (astnode
