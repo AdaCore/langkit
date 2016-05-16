@@ -131,12 +131,40 @@ def render(*args, **kwargs):
     return make_renderer().render(*args, **kwargs)
 
 
+class CompiledTypeMetaclass(type):
+    """
+    Metaclass for every compiled type. This is used to have a comprehensive
+    list of every compiled type, so that you can use a TypeRepo instance to
+    refer to any compiled type.
+    """
+
+    types = []
+    """
+    List of compiled types
+    :type: [CompiledType]
+    """
+
+    def __new__(mcs, name, bases, dct):
+        cls = type.__new__(mcs, name, bases, dct)
+        if not dct.get("_internal", False):
+            mcs.types.append(cls)
+        return cls
+
+
 class CompiledType(object):
     """
     Base class used to describe types in the generated code.
 
     It is intended to be subclassed in order to create now compiled types.
     However, subclasses are not intended to be instantiated.
+    """
+
+    __metaclass__ = CompiledTypeMetaclass
+
+    _internal = True
+    """
+    Whether a type is a real type in code emission, or just an intermediate
+    class used for code factoring purposes in python
     """
 
     is_ptr = True
@@ -848,7 +876,7 @@ def create_macro(attrib_dict):
     return type('macro', (NodeMacro, ), attrib_dict)
 
 
-class StructMetaClass(type):
+class StructMetaClass(CompiledTypeMetaclass):
     """
     Internal metaclass for AST nodes, used to ease fields handling during code
     generation.
@@ -1040,7 +1068,7 @@ class StructMetaClass(type):
         dct['subclasses'] = []
 
         dct['is_type_resolved'] = False
-        cls = type.__new__(mcs, name, bases, dct)
+        cls = CompiledTypeMetaclass.__new__(mcs, name, bases, dct)
 
         # Associate each field and property to this ASTNode subclass. Likewise
         # for the environment specification.
@@ -1805,11 +1833,7 @@ class TypeRepo(object):
 
         :rtype: dict[str, CompiledType]
         """
-        return {
-            t.__name__: t
-            for t in
-            StructMetaClass.struct_types + StructMetaClass.astnode_types
-        }
+        return {t.__name__: t for t in CompiledTypeMetaclass.types}
 
     class Defer(object):
         """
