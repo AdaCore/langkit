@@ -1900,3 +1900,10 @@ def resolve_type(type_or_defer):
         )
         return type_or_defer.get()
     return type_or_defer
+
+
+T = TypeRepo()
+"""
+Default type repository instance, to be used to refer to a type before its
+declaration
+"""
