@@ -403,6 +403,7 @@ class BasicType(CompiledType):
     _nullexpr = None
     _storage_nullexpr = None
     _external = False
+    _internal = True
 
     @classmethod
     def name(cls):
