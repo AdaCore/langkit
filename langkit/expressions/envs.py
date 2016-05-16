@@ -184,7 +184,8 @@ class EnvGroup(AbstractExpression):
         env_exprs = [construct(e, LexicalEnvType) for e in self.env_exprs]
         return BuiltinCallExpr(
             'Group', LexicalEnvType,
-            [ArrayExpr(env_exprs, LexicalEnvType)]
+            [ArrayExpr(env_exprs, LexicalEnvType)],
+            create_temporary='Group_Env'
         )
 
 
