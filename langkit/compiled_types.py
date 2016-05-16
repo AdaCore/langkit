@@ -781,6 +781,10 @@ class AbstractField(AbstractNodeData):
 
     @property
     def type(self):
+        """
+        :rtype: CompiledType
+        """
+        self._type = resolve_type(self._type)
         return self._type
 
     @type.setter
