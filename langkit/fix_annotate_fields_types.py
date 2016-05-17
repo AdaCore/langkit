@@ -14,7 +14,7 @@ def build_attr(prefix, suffix):
 
 # TODO: Add a warning when the default type repo is not imported in the
 # source files. Might be difficult since it can be imported transitively!
-# Semantic analysis of python code is hard!
+# Semantic analysis of Python code is hard!
 
 
 class FixAnnotateFieldsTypes(fixer_base.BaseFix):
@@ -28,7 +28,7 @@ class FixAnnotateFieldsTypes(fixer_base.BaseFix):
     @memoized
     def astnodes(self):
         """
-        Create a map from ast node subclasses names to types.
+        Create a map from AST node subclasses names to types.
 
         :rtype: dict[str, ASTNode]
         """
