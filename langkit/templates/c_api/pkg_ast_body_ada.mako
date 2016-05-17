@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="array_types"   file="array_types_ada.mako" />
+
 with Ada.Unchecked_Conversion;
 
 with Interfaces.C; use Interfaces.C;
@@ -51,6 +53,10 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
                     Token  => Token_Index (Token.Token_Index),
                     Trivia => Token_Index (Token.Trivia_Index)));
    end Unwrap;
+
+   ${array_types.body(get_context().root_grammar_class.array_type())}
+
+   ${array_types.body(LexicalEnvType.array_type())}
 
    function ${capi.get_name('lexical_env_parent')}
      (Env : ${lexical_env_type})

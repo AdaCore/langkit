@@ -3,8 +3,11 @@
 <%def name="decl(cls)">
 
 <%
+   type_name = cls.name().camel
    struct_name = '{}_Struct'.format(pyapi.type_internal_name(cls))
    element_type = pyapi.type_internal_name(cls.element_type())
+   ptr_name = pyapi.type_internal_name(cls)
+   dec_ref = '_{}_dec_ref'.format(type_name)
 %>
 
 ${py_doc(cls)}
@@ -16,10 +19,15 @@ class ${struct_name}(ctypes.Structure):
                 ('items', ${element_type} * 1)]
 
 
-${pyapi.type_internal_name(cls)} = ctypes.POINTER(${struct_name})
+${ptr_name} = ctypes.POINTER(${struct_name})
+
+${dec_ref} = _import_func(
+   '${cls.c_dec_ref(capi)}',
+   [${ptr_name}], None
+)
 
 
-class ${cls.name().camel}(object):
+class ${type_name}(object):
     """
     Wrapper class for arrays of ${cls.element_type().name()}.
     """
@@ -33,13 +41,13 @@ class ${cls.name().camel}(object):
         self._items = ctypes.pointer(items)
 
     def __repr__(self):
-        return '<${cls.name().camel} object at {} {}>'.format(
+        return '<${type_name} object at {} {}>'.format(
             hex(id(self)),
             list(self)
         )
 
     def __del__(self):
-        _free(self._c_value)
+        ${dec_ref}(self._c_value)
         self._c_value = None
         self._length = None
         self._items = None

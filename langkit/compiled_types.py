@@ -1721,6 +1721,16 @@ class ArrayType(CompiledType):
         """
         return names.Name(cls.pkg_vector().camel_with_underscores + '.Vector')
 
+    @classmethod
+    def c_dec_ref(cls, capi):
+        """
+        Name of the C API function to dec-ref an array value.
+
+        :param langkit.c_api.CAPISettings capi: Settings for the C API.
+        :rtype: str
+        """
+        return capi.get_name(cls.api_name() + names.Name('Dec_Ref'))
+
 
 class EnumType(CompiledType):
     """
