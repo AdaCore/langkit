@@ -94,6 +94,7 @@ class CAPISettings(AbstractAPISettings):
         Wrap `name` as a top-level scope symbol.
 
         :type name: Name|basestring
+        :rtype: str
         """
         if isinstance(name, basestring):
             name = names.Name(name)
