@@ -146,8 +146,19 @@ class CompiledTypeMetaclass(type):
 
     def __new__(mcs, name, bases, dct):
         cls = type.__new__(mcs, name, bases, dct)
-        if not dct.get("_internal", False):
+
+        # If dct["_internal"] is not defined, mcs.types will include cls but
+        # cls may inherit an _internal class attribute from its base classes.
+        # This could yield situations where T._internal is True while T is
+        # still available in the type repository.
+        #
+        # This would be highly confusing for debugging and may trigger bugs if
+        # code relies on this attribute at some point. In order to prevent
+        # this, define the attribute no matter what.
+        dct.setdefault("_internal", False)
+        if not dct["_internal"]:
             mcs.types.append(cls)
+
         return cls
 
 
