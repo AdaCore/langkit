@@ -5,9 +5,7 @@ subtype of A's.
 
 import os.path
 
-from langkit.compiled_types import (
-    ASTNode, TypeRepo, abstract, root_grammar_class
-)
+from langkit.compiled_types import ASTNode, T, abstract, root_grammar_class
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import AbstractProperty, No, Property
 from langkit.parsers import Grammar, Or, Row
@@ -25,7 +23,6 @@ def run(name, astnode_fn):
 
     print('== {} =='.format(name))
 
-    T = TypeRepo()
     astnode = astnode_fn(T)
 
     @abstract

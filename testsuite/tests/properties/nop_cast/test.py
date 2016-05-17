@@ -1,4 +1,4 @@
-from langkit.compiled_types import ASTNode, TypeRepo, root_grammar_class
+from langkit.compiled_types import ASTNode, T, root_grammar_class
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, Row
@@ -7,7 +7,6 @@ from os import path
 from utils import emit_and_print_errors
 
 
-T = TypeRepo()
 Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 
