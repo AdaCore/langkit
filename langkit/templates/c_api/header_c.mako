@@ -282,6 +282,11 @@ ${capi.get_name('lexical_env_get')}(${lexical_env_type} env,
                                     ${text_type} name);
 % endif
 
+/* Decrement the ref-count for "env". This deallocates it if the ref-count
+   drops to 0.  */
+extern void
+${capi.get_name('lexical_env_dec_ref')}(${lexical_env_type} env);
+
 /*
  * Kind-specific AST node primitives
  */

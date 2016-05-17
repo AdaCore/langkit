@@ -49,4 +49,10 @@ package ${_self.ada_api_settings.lib_name}.AST.C is
            External_name => "${capi.get_name('lexical_env_get')}";
 % endif
 
+   procedure ${capi.get_name('lexical_env_dec_ref')}
+     (Env : ${lexical_env_type})
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('lexical_env_dec_ref')}";
+
 end ${_self.ada_api_settings.lib_name}.AST.C;

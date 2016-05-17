@@ -103,4 +103,12 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
    end ${capi.get_name('lexical_env_get')};
 % endif
 
+   procedure ${capi.get_name('lexical_env_dec_ref')}
+     (Env : ${lexical_env_type})
+   is
+      E : AST_Envs.Lexical_Env := Unwrap (Env);
+   begin
+      Dec_Ref (E);
+   end ${capi.get_name('lexical_env_dec_ref')};
+
 end ${_self.ada_api_settings.lib_name}.AST.C;

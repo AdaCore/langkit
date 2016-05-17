@@ -285,6 +285,10 @@ class LexicalEnv(object):
         return ${pyapi.wrap_value('result', _self.env_element.array_type())}
 % endif
 
+    def __del__(self):
+        _lexical_env_dec_ref(self._c_value)
+        self._c_value = None
+
 
 class Token(ctypes.Structure):
     ${py_doc('langkit.token_type', 4)}
@@ -774,6 +778,10 @@ _lexical_env_get = _import_func(
     ${pyapi.type_internal_name(_self.env_element.array_type())}
 )
 % endif
+_lexical_env_dec_ref = _import_func(
+   '${capi.get_name("lexical_env_dec_ref")}',
+   [_lexical_env], None
+)
 
 % for astnode in _self.astnode_types:
     % for field in astnode.fields_with_accessors():
