@@ -1025,13 +1025,16 @@ class PropertyDef(AbstractNodeData):
             'specify its return type explicitly.'.format(self.qualname)
         )
 
-        # If the expr has not yet been constructed, try to construct it
-        if not self.constructed_expr:
-            self.construct_and_type_expression()
-
         self.in_type = True
-        ret = self.constructed_expr.type
-        self.in_type = False
+        try:
+            # If the expr has not yet been constructed, try to construct it
+            if not self.constructed_expr:
+                self.construct_and_type_expression()
+
+            ret = self.constructed_expr.type
+        finally:
+            self.in_type = False
+
         return ret
 
     def _add_argument(self, name, type, default_value=None):
