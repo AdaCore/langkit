@@ -338,7 +338,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
    function Find
      (Root      : access ${root_node_value_type}'Class;
       Predicate : ${root_node_type_name}_Predicate)
-     return ${root_node_type_name}_Arrays.Array_Type;
+      return ${root_node_type_name}_Arrays.Array_Type;
 
    type ${root_node_type_name}_Kind_Filter is
       new ${root_node_type_name}_Predicate_Type with
