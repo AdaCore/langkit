@@ -36,9 +36,9 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
    ${enum_types.public_decl(cls)}
    % endfor
 
-   ----------------------------------------------
-   -- Structure types (incomplete declarations --
-   ----------------------------------------------
+   -----------------------------------------------
+   -- Structure types (incomplete declarations) --
+   -----------------------------------------------
 
    % for struct_type in no_builtins(_self.struct_types):
    ${struct_types.public_incomplete_decl(struct_type)}
@@ -80,11 +80,12 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
    % endif
    % endfor
 
-   ---------------------------------------------------
-   -- ASTNode derived types (complete declarations) --
-   ---------------------------------------------------
+   -----------------------------------------------
+   -- ASTNode derived types (full declarations) --
+   -----------------------------------------------
 
-   --  See AST_Root for primitive operations documentations
+   --  See ${_self.ada_api_settings.lib_name}.AST for overriden primitive
+   --  operations documentations.
 
    % for astnode in no_builtins(_self.astnode_types):
    ${astnode_types.public_decl(astnode)}
