@@ -2,7 +2,13 @@
 
 <%def name="decl(cls)">
 
-class ${cls.name().camel}(ctypes.Structure):
+<%
+   type_name = cls.name().camel
+   ptr_name = '{}_Ptr'.format(type_name)
+   dec_ref = '_{}_dec_ref'.format(type_name)
+%>
+
+class ${type_name}(ctypes.Structure):
     ${py_doc(cls, 4)}
     _fields_ = [
     % for field in cls.get_fields():
@@ -16,7 +22,7 @@ class ${cls.name().camel}(ctypes.Structure):
         """
         Return a copy of this structure.
         """
-        return ${cls.name().camel}(
+        return ${type_name}(
             % for field in cls.get_fields():
                 self._${field.name.lower},
             % endfor
@@ -52,5 +58,19 @@ class ${cls.name().camel}(ctypes.Structure):
             ' '.join('{}={}'.format(name, getattr(self, name))
                       for name in field_names)
         )
+
+    % if cls.is_refcounted():
+    def __del__(self):
+        ${dec_ref}(ctypes.byref(self))
+    % endif
+
+% if cls.is_refcounted():
+${ptr_name} = ctypes.POINTER(${type_name})
+
+${dec_ref} = _import_func(
+   '${cls.c_dec_ref(capi)}',
+   [${ptr_name}], None
+)
+% endif
 
 </%def>

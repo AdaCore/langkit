@@ -27,4 +27,19 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.C is
       % endif
    % endfor
 
+   % for rec in _self.struct_types:
+      <%
+         type_name = rec.c_type(capi).name
+         ptr_name = '{}_Ptr'.format(type_name)
+         dec_ref = rec.c_dec_ref(capi)
+      %>
+
+      % if rec.is_refcounted():
+         procedure ${dec_ref} (R : ${ptr_name}) is
+         begin
+            Dec_Ref (R.all);
+         end ${dec_ref};
+      % endif
+   % endfor
+
 end ${_self.ada_api_settings.lib_name}.AST.Types.C;

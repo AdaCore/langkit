@@ -34,7 +34,15 @@ package ${_self.ada_api_settings.lib_name}.AST.Types.C is
    % endfor
 
    % for rec in _self.struct_types:
-      type ${rec.c_type(capi).name}_Ptr is access ${rec.name()};
+      <%
+         type_name = rec.c_type(capi).name
+         ptr_name = '{}_Ptr'.format(type_name)
+      %>
+      type ${ptr_name} is access ${rec.name()};
+
+      % if rec.is_refcounted():
+         procedure ${rec.c_dec_ref(capi)} (R : ${ptr_name});
+      % endif
    % endfor
 
    ---------------------------------------

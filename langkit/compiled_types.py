@@ -1538,6 +1538,16 @@ class Struct(CompiledType):
     def c_type(cls, c_api_settings):
         return CAPIType(c_api_settings, cls.name())
 
+    @classmethod
+    def c_dec_ref(cls, capi):
+        """
+        Name of the C API function to dec-ref structure value.
+
+        :param langkit.c_api.CAPISettings capi: Settings for the C API.
+        :rtype: str
+        """
+        return capi.get_name(cls.name() + names.Name('Dec_Ref'))
+
 
 class ASTNode(Struct):
     """
