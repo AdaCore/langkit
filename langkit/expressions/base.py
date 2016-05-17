@@ -1053,9 +1053,13 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: Property|None
         """
-        return self.struct.base().get_abstract_fields_dict(
-            field_class=PropertyDef
-        ).get(self._name.lower, None)
+        if issubclass(self.struct, ASTNode):
+            struct = assert_type(self.struct, ASTNode)
+            return struct.base().get_abstract_fields_dict(
+                field_class=PropertyDef
+            ).get(self._name.lower, None)
+        else:
+            return None
 
     def prepare_abstract_expression(self):
         """
