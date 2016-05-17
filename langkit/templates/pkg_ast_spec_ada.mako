@@ -513,8 +513,9 @@ package ${_self.ada_api_settings.lib_name}.AST is
    -- Root grammar class properties declarations --
    ------------------------------------------------
 
-   % for prop in ctx.root_grammar_class.get_properties(include_inherited=False, \
-                                    predicate=library_public_field):
+   % for prop in ctx.root_grammar_class.get_properties( \
+         include_inherited=False, \
+         predicate=library_public_field):
       ${prop.prop_decl}
    % endfor
 

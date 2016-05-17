@@ -12,13 +12,13 @@ this is the way it is done for the ada language::
 
 from __future__ import absolute_import
 
-import inspect
-import lib2to3.main
 from contextlib import contextmanager
 import difflib
 from distutils.spawn import find_executable
 from glob import glob
+import inspect
 import itertools
+import lib2to3.main
 import os
 from os import path
 import shutil

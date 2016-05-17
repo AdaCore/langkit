@@ -1,7 +1,7 @@
 from lib2to3 import fixer_base
 from lib2to3.fixer_util import Call, KeywordArg, Name, Attr
-from lib2to3.pytree import Node
 from lib2to3.pygram import python_symbols as syms
+from lib2to3.pytree import Node
 
 from langkit.compiled_types import StructMetaClass
 from langkit.utils import memoized
@@ -13,8 +13,8 @@ def build_attr(prefix, suffix):
     return Node(syms.power, Attr(prefix, suffix))
 
 # TODO: Add a warning when the default type repo is not imported in the
-# source files. Might be difficult since it can be imported transitively !
-# Semantic analysis of python code is hard !
+# source files. Might be difficult since it can be imported transitively!
+# Semantic analysis of python code is hard!
 
 
 class FixAnnotateFieldsTypes(fixer_base.BaseFix):
