@@ -3,6 +3,8 @@
 <%namespace name="scopes"  file="scopes_ada.mako" />
 <%namespace name="helpers" file="helpers.mako" />
 
+## Regular property function
+
 % if not property.abstract:
 ${"overriding" if property.overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
@@ -75,4 +77,27 @@ begin
          raise;
 % endif
 end ${property.name};
+% endif
+
+## Wrapper to return convenient Ada arrays
+
+% if not property.overriding and is_array_type(property.type):
+   function ${property.name}
+     ${helpers.argument_list(property, False)}
+     return ${property.type.api_name()}
+   is
+      Raw    : ${property.type.name()} := ${property.name}
+        (
+           ${property.self_arg_name}
+           % for arg_name, _, _ in property.arguments:
+               , ${arg_name}
+           % endfor
+        );
+      Result : constant ${property.type.api_name()} := Raw.Items;
+   begin
+      ## Just deallocate the array so that the ownership is merely transfered
+      ## to the caller.
+      Free (Raw);
+      return Result;
+   end ${property.name};
 % endif
