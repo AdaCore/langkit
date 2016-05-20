@@ -244,6 +244,24 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       return Consume (I);
    end Find;
 
+   ----------
+   -- Find --
+   ----------
+
+   function Find
+     (Root      : access ${root_node_value_type}'Class;
+      Predicate : ${root_node_type_name}_Predicate)
+      return ${root_node_type_name}
+   is
+      I      : Find_Iterator := Find (Root, Predicate);
+      Result : ${root_node_type_name};
+   begin
+      if not I.Next (Result) then
+         Result := null;
+      end if;
+      return Result;
+   end Find;
+
    --------------
    -- Evaluate --
    --------------

@@ -342,6 +342,13 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Find all AST nodes under Root (included) that satisfy the Pred
    --  predicate and return them as an array of nodes.
 
+   function Find
+     (Root      : access ${root_node_value_type}'Class;
+      Predicate : ${root_node_type_name}_Predicate)
+      return ${root_node_type_name};
+   --  Return the first found AST node under Root (included) that satisfies the
+   --  Pred, or return null if there is no such node.
+
    type ${root_node_type_name}_Kind_Filter is
       new ${root_node_type_name}_Predicate_Type with
    record
