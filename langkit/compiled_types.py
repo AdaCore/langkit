@@ -227,7 +227,8 @@ class CompiledType(object):
         analysis unit.
 
         If it is ref-counted, there must exist Inc_Ref and Dec_Ref primitives.
-        The Dec_Ref primitive must handle correctly (i.e. ignore) null values.
+        The Dec_Ref primitive must handle null values correctly (i.e. ignore
+        them).
 
         :rtype: bool
         """

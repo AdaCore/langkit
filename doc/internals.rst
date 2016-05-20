@@ -29,14 +29,13 @@ deallocation of these at the proper moment, Langkit uses a reference counting
 mechanism. Let's call "ref-counted values" all the values that integrate with
 this mechanism.
 
-Ref-counted values can have any number of "owners". When a ref-counted values
-is created, its number of owners (aka "ref-count") is 1: the creator of the
-value is the only one that owns it. There are multiple operations available to
-work with these values: some will create more owners (incrementing the
-ref-count: inc-ref), some will remove ownership (decrementing the ref-count:
-dec-ref). When the ref-count drops to 0, the value has no owner anymore,
-meaning that no-one can access this value anymore, so the value can be
-deallocated.
+Ref-counted values can have any number of "owners". When a ref-counted value is
+created, its number of owners (aka "ref-count") is 1: the creator of the value
+is the only one that owns it. There are multiple operations available to work
+with these values: some will create more owners (incrementing the ref-count:
+inc-ref), some will remove ownership (decrementing the ref-count: dec-ref).
+When the ref-count drops to 0, the value has no owner anymore, meaning that
+no-one can access this value anymore, so the value can be deallocated.
 
 This mechanism guarantees that properties does not leak memory if one condition
 is met: there must not be any ownership loop in values. This is not possible in
@@ -88,8 +87,7 @@ in the case an operation creates a new ownership, it has to store its result in
 a temporary variable. Langkit will automatically dec-ref this variable when it
 goes out of scope (returning or raising a ``Property_Error``).  Another way to
 put it is: operations that create an ownership for their result must give this
-ownership to the property context. This context will know when to dec-ref this
-value thanks to the *scope mechanism*.
+ownership to their execution context, which we call their *scope*.
 
 Scopes
 ------
@@ -99,5 +97,5 @@ top-level scope is the one that lives as long as the property is evaluated.
 Children scopes are the one introduced to materialize different lifetimes, for
 instance loop scopes, which go out of scope after each iteration.
 
-All local variables must belong to exactly one scope. A block def-refs all
+All local variables must belong to exactly one scope. A block dec-refs all
 variables it contains when the execution flow leaves it.
