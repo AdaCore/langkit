@@ -1,5 +1,18 @@
 ## vim: filetype=makoada
 
+<%def name="argument_list(property, dispatching)">
+  (${property.self_arg_name} :
+   access ${Self.type.name()}_Type${"" if dispatching else "'Class"}
+
+   % for arg_name, arg_type, arg_dv in property.arguments:
+      ; ${arg_name} : ${arg_type.name()}
+      % if arg_dv:
+         := ${arg_dv}
+      % endif
+   % endfor
+  )
+</%def>
+
 <%def name="generate_logic_binder(prop)">
    % if prop.needs_logic_binder:
 

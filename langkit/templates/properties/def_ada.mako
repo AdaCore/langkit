@@ -1,19 +1,11 @@
 ## vim: filetype=makoada
 
-<%namespace name="scopes" file="scopes_ada.mako" />
+<%namespace name="scopes"  file="scopes_ada.mako" />
+<%namespace name="helpers" file="helpers.mako" />
 
 % if not property.abstract:
 ${"overriding" if property.overriding else ""} function ${property.name}
-  (${property.self_arg_name} :
-   access ${Self.type.name()}_Type${"" if property.dispatching else "'Class"}
-
-   % for arg_name, arg_type, arg_dv in property.arguments:
-      ; ${arg_name} : ${arg_type.name()}
-      % if arg_dv:
-         := ${arg_dv}
-      % endif
-   % endfor
-  )
+  ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name()}
 is
    use type AST_Envs.Lexical_Env;

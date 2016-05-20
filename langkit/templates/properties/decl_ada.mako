@@ -1,16 +1,9 @@
 ## vim: filetype=makoada
 
-${"overriding" if property.overriding else ""} function ${property.name}
-  (${property.self_arg_name} :
-   access ${Self.type.name()}_Type${"" if property.dispatching else "'Class"}
+<%namespace name="helpers" file="helpers.mako" />
 
-   % for arg_name, arg_type, arg_dv in property.arguments:
-      ; ${arg_name} : ${arg_type.name()}
-      % if arg_dv:
-         := ${arg_dv}
-      % endif
-   % endfor
-  )
+${"overriding" if property.overriding else ""} function ${property.name}
+   ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name()}
    % if property.abstract:
       % if property.abstract_runtime_check:
