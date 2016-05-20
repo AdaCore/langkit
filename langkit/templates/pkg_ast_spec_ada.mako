@@ -588,6 +588,10 @@ private
    --  Return whether Node is an empty list (so this is wrong for all nodes
    --  that are not lists).
 
+   ${array_types.private_decl(LexicalEnvType.array_type())}
+   ${array_types.private_decl(EnvElement.array_type())}
+   ${array_types.private_decl(root_node_array)}
+
    function Do_Env_Actions
      (Self        : access ${root_node_value_type};
       Current_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env

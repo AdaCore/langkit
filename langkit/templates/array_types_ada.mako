@@ -51,6 +51,11 @@
 
 </%def>
 
+<%def name="private_decl(cls)">
+  procedure Free is new Ada.Unchecked_Deallocation
+    (${cls.pointed()}, ${cls.name()});
+</%def>
+
 <%def name="body(cls)">
 
    <% elt_type = cls.element_type().name() %>
@@ -106,8 +111,6 @@
    -------------
 
    procedure Dec_Ref (T : in out ${cls.name()}) is
-      procedure Free is new Ada.Unchecked_Deallocation
-        (${cls.pointed()}, ${cls.name()});
    begin
       if T = null then
          return;

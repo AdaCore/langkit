@@ -97,6 +97,12 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
 
 private
 
+   % for array_type in _self.sorted_types(_self.array_types):
+   % if array_type.element_type().should_emit_array_type:
+   ${array_types.private_decl(array_type)}
+   % endif
+   % endfor
+
    % for astnode in no_builtins(_self.astnode_types):
    ${astnode_types.private_decl(astnode)}
    % endfor
