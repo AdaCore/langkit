@@ -5,6 +5,8 @@ import inspect
 from itertools import count
 import types
 
+import funcy
+
 from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, ASTNode, BoolType, CompiledType, LexicalEnvType,
@@ -1713,15 +1715,9 @@ class LocalVars(object):
 
         :rtype: list[LocalVars.Scope]
         """
-        result = []
-
-        def helper(scope):
-            result.append(scope)
-            for child in scope.sub_scopes:
-                helper(child)
-
-        helper(self.root_scope)
-        return result
+        def children(s):
+            return s.sub_scopes
+        return funcy.tree_nodes(self.root_scope, children, children)
 
     def render(self):
         return "\n".join(lv.render() for lv in self.local_vars.values())
