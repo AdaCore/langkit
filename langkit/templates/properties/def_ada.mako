@@ -95,8 +95,8 @@ end ${property.name};
         );
       Result : constant ${property.type.api_name()} := Raw.Items;
    begin
-      ## Just deallocate the array so that the ownership is merely transfered
-      ## to the caller.
+      ## Just deallocate the array so that the ownership for each item is
+      ## merely transfered to the caller.
       Free (Raw);
       return Result;
    end ${property.name};

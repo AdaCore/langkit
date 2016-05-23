@@ -32,7 +32,7 @@
    function Create (N : Natural) return ${cls.name()} is
      (new ${cls.pointed()}'(N => N, Ref_Count => 1, Items => <>));
    --  Create a new array for N uninitialized elements and give its only
-   --  ownership to the caller.
+   --  ownership share to the caller.
 
    ## Helper getter generated for properties code. Used in CollectionGet's code
    function Get
@@ -101,8 +101,6 @@
 
    procedure Inc_Ref (T : ${cls.name()}) is
    begin
-      ## The array value already has one ownership for each item: there is no
-      ## no need to add one here.
       T.Ref_Count := T.Ref_Count + 1;
    end Inc_Ref;
 
@@ -116,11 +114,10 @@
          return;
       end if;
 
-      ## The array value has only one ownership for each item: remove this
-      ## owneship only when destroying the array.
-
       if T.Ref_Count = 1 then
          % if cls.element_type().is_refcounted():
+            ## When we destroy the array, owned values will have one less
+            ## owner, so decrement their reference count.
             for Item of T.Items loop
                Dec_Ref (Item);
             end loop;

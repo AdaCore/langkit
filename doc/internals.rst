@@ -29,13 +29,17 @@ deallocation of these at the proper moment, Langkit uses a reference counting
 mechanism. Let's call "ref-counted values" all the values that integrate with
 this mechanism.
 
-Ref-counted values can have any number of "owners". When a ref-counted value is
-created, its number of owners (aka "ref-count") is 1: the creator of the value
-is the only one that owns it. There are multiple operations available to work
-with these values: some will create more owners (incrementing the ref-count:
-inc-ref), some will remove ownership (decrementing the ref-count: dec-ref).
-When the ref-count drops to 0, the value has no owner anymore, meaning that
-no-one can access this value anymore, so the value can be deallocated.
+Ref-counted values can have any number of "owners". We say that each owner has
+a non-null number of ownership shares. The sum of all ownership shares for one
+values is the value's "ref-count".
+
+When a ref-counted value is created, its ref-count is 1: the creator of the
+value is the only one to have an ownership share for it. There are multiple
+operations available to work with these values: some will create more ownership
+shares (incrementing the ref-count: inc-ref), some will remove ownership shares
+(decrementing the ref-count: dec-ref). When the ref-count drops to 0, the
+value has no owner anymore, meaning that no-one can access this value anymore,
+so the value can be deallocated.
 
 This mechanism guarantees that properties does not leak memory if one condition
 is met: there must not be any ownership loop in values. This is not possible in
@@ -73,21 +77,21 @@ Ownership rules
 At this point, the only missing bit to specify how ref-counting works is: to
 what rules does ownership obey?
 
-First, passing arguments to properties does not create new ownership. In other
-words, if property A is called with a ref-counted value B, then A needs to
-inc-ref B in order to get an ownership on it. In this case we say that A
-"borrows" B: it has a reference to it but it does not own it. Second, returning
-values in properties does create ownership: when property A returns, the caller
-has an ownership on its result.
+First, passing arguments to properties does not create new ownership shares. In
+other words, if property A is called with a ref-counted value B, then A needs
+to inc-ref B in order to get an ownership share for it. In this case we say
+that A "borrows" B: it has a reference to it but it does not own it. Second,
+returning values in properties does create a ownership share: when property A
+returns, the caller has a share on its result.
 
 Properties operations (like ``CollectionGet.Expr``) all define whether their
-result is borrowed or a new ownership: one has to read the definition of the
-corresponding ``ResolvedExpression`` in the source code to find out.  However
-in the case an operation creates a new ownership, it has to store its result in
-a temporary variable. Langkit will automatically dec-ref this variable when it
-goes out of scope (returning or raising a ``Property_Error``).  Another way to
-put it is: operations that create an ownership for their result must give this
-ownership to their execution context, which we call their *scope*.
+result is borrowed or yield an ownership share: one has to read the definition
+of the corresponding ``ResolvedExpression`` in the source code to find out.
+However in the case an operation creates a new share, it has to store its
+result in a temporary variable. Langkit will automatically dec-ref this
+variable when it goes out of scope (returning or raising a ``Property_Error``).
+Another way to put it is: operations that create a share for their result must
+give this share to their execution context, which we call their *scope*.
 
 Scopes
 ------
