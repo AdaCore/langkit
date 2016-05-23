@@ -79,7 +79,7 @@ begin
 
       ## Then convert the vector into the final array type
       ${array_var} := Create
-        (Natural (${vec_pkg}.Length (${vec_var})));
+        (Items_Count => Natural (${vec_pkg}.Length (${vec_var})));
       for I in 1 .. ${array_var}.N loop
          ${array_var}.Items (I) := ${vec_pkg}.Get (${vec_var}, I - 1);
       end loop;

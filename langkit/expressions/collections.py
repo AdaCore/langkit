@@ -450,7 +450,7 @@ class CollectionSingleton(AbstractExpression):
 
         def render_pre(self):
             return self.expr.render_pre() + """
-            {array_var} := Create (1);
+            {array_var} := Create (Items_Count => 1);
             {array_var}.Items (1) := {item};
             """.format(array_var=self.array_var.name,
                        array_type=self.static_type.pointed(),

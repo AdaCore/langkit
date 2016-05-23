@@ -29,8 +29,8 @@
    package ${cls.pkg_vector()} is new Langkit_Support.Vectors
      (${elt_type});
 
-   function Create (N : Natural) return ${cls.name()} is
-     (new ${cls.pointed()}'(N => N, Ref_Count => 1, Items => <>));
+   function Create (Items_Count : Natural) return ${cls.name()} is
+     (new ${cls.pointed()}'(N => Items_Count, Ref_Count => 1, Items => <>));
    --  Create a new array for N uninitialized elements and give its only
    --  ownership share to the caller.
 
