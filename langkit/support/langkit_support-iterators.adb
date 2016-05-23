@@ -29,13 +29,12 @@ package body Langkit_Support.Iterators is
          Element_Vectors.Append (V, Element);
       end loop;
 
-      declare
+      return
          Result : constant Element_Vectors.Elements_Array :=
-            Element_Vectors.To_Array (V);
-      begin
+            Element_Vectors.To_Array (V)
+      do
          Element_Vectors.Destroy (V);
-         return Result;
-      end;
+      end return;
    end Consume;
 
 end Langkit_Support.Iterators;
