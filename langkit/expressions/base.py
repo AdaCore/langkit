@@ -1661,10 +1661,9 @@ class LocalVars(object):
 
     def create(self, name, type, scope=None):
         """
-        This getattr override allows you to declare local variables in
-        templates via the syntax::
+        Create a local variables in templates::
 
-            import langkit.compiled_types
+            from langkit.compiled_types import LocalVars
             vars = LocalVars()
             var = vars.create('Index', langkit.compiled_types.LongType)
 
