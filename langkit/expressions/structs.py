@@ -328,7 +328,7 @@ class FieldAccess(AbstractExpression):
 
         def render_pre(self):
             # Before accessing the field of a record through an access, we must
-            # check that whether this access is null in order to raise a
+            # check whether this access is null in order to raise a
             # Property_Error in the case it is.
             stmts = [
                 render('properties/null_safety_check_ada',

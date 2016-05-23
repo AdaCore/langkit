@@ -1507,7 +1507,7 @@ class LocalVars(object):
 
         During properties compilation, scopes are created and variables are put
         in a specific scope. This will help memory management: when execution
-        goes out of a scope, the ref-count for all all the variables is
+        goes out of a scope, the ref-count for all the variables is
         decremented.
         """
 
@@ -1636,7 +1636,7 @@ class LocalVars(object):
             self._scope = None
             """
             The scope this variable lives in. During the construct phase, all
-            resolved expression that create local variables must be initialized
+            resolved expressions that create local variables must initialize
             this using LocalVars.Scope.add.
 
             :type: LocalVars.Scope
