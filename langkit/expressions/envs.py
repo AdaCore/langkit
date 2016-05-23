@@ -104,6 +104,10 @@ class EnvBind(AbstractExpression):
         def render_pre(self):
             # First, compute the environment to bind using the current one and
             # store it in the "New_Env" local variable.
+            #
+            # We need to keep the environment live during the bind operation.
+            # That is why we store this environment in a temporary so that it
+            # is automatically deallocated when leaving the scope.
             result = (
                 '{env_expr_pre}\n'
                 '{env_var} := {env_expr};\n'
