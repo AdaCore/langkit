@@ -173,10 +173,10 @@ class Map(CollectionExpression):
             self.static_type = element_type.array_type()
             self.static_type.add_to_context()
 
-            self.array_var = PropertyDef.get().vars.create(
-                'Map', self.type,
-                iter_scope.parent
+            self.array_var = PropertyDef.get().vars.create_scopeless(
+                'Map', self.type
             )
+            iter_scope.parent.add(self.array_var)
 
         def __repr__(self):
             return "<MapExpr {}: {} -> {}{}>".format(
@@ -294,10 +294,10 @@ class Quantifier(CollectionExpression):
             self.index_var = index_var
             self.iter_scope = iter_scope
 
-            self.result_var = PropertyDef.get().vars.create(
-                'Quantifier_Result', BoolType,
-                iter_scope.parent
+            self.result_var = PropertyDef.get().vars.create_scopeless(
+                'Quantifier_Result', BoolType
             )
+            iter_scope.parent.add(self.result_var)
 
         def render_pre(self):
             return render(
@@ -364,10 +364,8 @@ class CollectionGet(AbstractExpression):
             :type or_null: ResolvedExpression
             """
             res_type = coll_expr.type.element_type()
-            self.result_var = PropertyDef.get().vars.create(
-                'Get_Result', res_type,
-                PropertyDef.get_scope()
-            )
+            self.result_var = PropertyDef.get().vars.create('Get_Result',
+                                                            res_type)
             self.call_expr = BuiltinCallExpr(
                 'Get', res_type,
                 [coll_expr, index_expr, or_null]
@@ -447,10 +445,8 @@ class CollectionSingleton(AbstractExpression):
             self.expr.type.array_type().add_to_context()
             self.static_type = self.expr.type.array_type()
 
-            self.array_var = PropertyDef.get().vars.create(
-                'Singleton', self.type,
-                PropertyDef.get_scope()
-            )
+            self.array_var = PropertyDef.get().vars.create('Singleton',
+                                                           self.type)
 
         def render_pre(self):
             return self.expr.render_pre() + """

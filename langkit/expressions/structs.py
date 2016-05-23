@@ -34,11 +34,9 @@ class Cast(AbstractExpression):
             self.static_type = astnode
 
             p = PropertyDef.get()
-            scope = PropertyDef.get_scope()
-            self.expr_var = p.vars.create('Cast_Expr', self.expr.type, scope)
-            self.result_var = (
-                result_var or p.vars.create('Cast_Result', astnode, scope)
-            )
+            self.expr_var = p.vars.create('Cast_Expr', self.expr.type)
+            self.result_var = (result_var or
+                               p.vars.create('Cast_Result', astnode))
             assert self.result_var.type == astnode, (
                 'Cast temporaries must have exactly the cast type: {} expected'
                 ' but got {} instead'.format(
@@ -258,16 +256,14 @@ class FieldAccess(AbstractExpression):
             p = PropertyDef.get()
 
             if p:
-                self.prefix_var = p.vars.create('Pfx', self.receiver_expr.type,
-                                                PropertyDef.get_scope())
+                self.prefix_var = p.vars.create('Pfx', self.receiver_expr.type)
 
                 # Create a variable for all field accesses. In the case of
                 # property, this is needed because the property will return an
                 # owning reference, so we need it to be attached to the scope.
                 # In other cases, this can make debugging easier.
                 self.result_var = p.vars.create('Field_Access_Result',
-                                                self.node_data.type,
-                                                PropertyDef.get_scope())
+                                                self.node_data.type)
             else:
                 self.simple_field_access = True
                 self.result_var = None

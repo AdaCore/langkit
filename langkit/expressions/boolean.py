@@ -270,9 +270,7 @@ class If(AbstractExpression):
             self.then = then
             self.else_then = else_then
             self.static_type = rtype
-            self.result_var = PropertyDef.get().vars.create(
-                'Result', rtype, PropertyDef.get_scope()
-            )
+            self.result_var = PropertyDef.get().vars.create('Result', rtype)
 
         def render_pre(self):
             return render('properties/if_ada', expr=self)
@@ -359,9 +357,8 @@ class Then(AbstractExpression):
             self.then_expr = then_expr
             self.default_expr = default_expr
             self.static_type = self.then_expr.type
-            self.result = PropertyDef.get().vars.create(
-                "Result_Var", self.type, PropertyDef.get_scope()
-            )
+            self.result = PropertyDef.get().vars.create("Result_Var",
+                                                        self.type)
 
         def render_pre(self):
             return render('properties/then_ada', then=self)

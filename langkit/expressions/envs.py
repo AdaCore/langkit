@@ -26,10 +26,8 @@ class EnvGet(AbstractExpression):
             self.env_expr = env_expr
             self.token_expr = token_expr
             self.resolve_unique = resolve_unique
-            self.result_var = PropertyDef.get().vars.create(
-                'Env_Get_Result', self.type,
-                PropertyDef.get_scope()
-            )
+            self.result_var = PropertyDef.get().vars.create('Env_Get_Result',
+                                                            self.type)
 
             self.type.add_to_context()
 
@@ -100,10 +98,8 @@ class EnvBind(AbstractExpression):
             # Declare a variable that will hold the value of the
             # bound environment.
             self.static_type = self.to_eval_expr.type
-            self.env_var = PropertyDef.get().vars.create(
-                "New_Env", LexicalEnvType,
-                PropertyDef.get_scope()
-            )
+            self.env_var = PropertyDef.get().vars.create("New_Env",
+                                                         LexicalEnvType)
 
         def render_pre(self):
             # First, compute the environment to bind using the current one and

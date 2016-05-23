@@ -541,7 +541,8 @@ class AbstractVariable(AbstractExpression):
         super(AbstractVariable, self).__init__()
         self.local_var = None
         if create_local:
-            self.local_var = PropertyDef.get().vars.create(name, type)
+            self.local_var = PropertyDef.get().vars.create_scopeless(name,
+                                                                     type)
             self._name = self.local_var.name
         else:
             self._name = name
@@ -1620,7 +1621,7 @@ class LocalVars(object):
         """
         Represents one local variable in a property definition.
         """
-        def __init__(self, vars, name, type=None, scope=None):
+        def __init__(self, vars, name, type=None):
             """
 
             :param LocalVars vars: The LocalVars instance to which this
@@ -1628,8 +1629,6 @@ class LocalVars(object):
             :param langkit.names.Name name: The name of this local variable.
             :param langkit.compiled_types.CompiledType type: Type parameter.
                 The type of this local variable.
-            :param LocalVars.Scope|None scope: If provided, associate the
-                created variable to this scope.
             """
             self.vars = vars
             self.name = name
@@ -1643,8 +1642,6 @@ class LocalVars(object):
 
             :type: LocalVars.Scope
             """
-            if scope:
-                scope.add(self)
 
         def render(self):
             assert self.type, "Local var must have type before it is rendered"
@@ -1659,7 +1656,7 @@ class LocalVars(object):
                 self.type.name().camel if self.type else '<none>'
             )
 
-    def create(self, name, type, scope=None):
+    def create(self, name, type):
         """
         Create a local variables in templates::
 
@@ -1671,11 +1668,25 @@ class LocalVars(object):
         string as a name, and create will handle creating a name that is unique
         in the scope.
 
+        The new local variable is automatically associated to the current
+        scope.
+
         :param str|names.Name name: The name of the variable.
         :param langkit.compiled_types.CompiledType type: Type parameter. The
             type of the local variable.
-        :param LocalVars.Scope|None scope: If provided, associate the created
-            variable to this scope.
+        """
+        result = self.create_scopeless(name, type)
+        PropertyDef.get_scope().add(result)
+        return result
+
+    def create_scopeless(self, name, type):
+        """
+        Like "create", but do not assign a scope for the new local variable.
+        The scope will have to be initialized later.
+
+        :param str|names.Name name: The name of the variable.
+        :param langkit.compiled_types.CompiledType type: Type parameter. The
+            type of the local variable.
         """
         name = names.Name.get(name)
 
@@ -1684,7 +1695,7 @@ class LocalVars(object):
         while name in self.local_vars:
             i += 1
             name = orig_name + names.Name(str(i))
-        ret = LocalVars.LocalVar(self, name, type, scope)
+        ret = LocalVars.LocalVar(self, name, type)
         self.local_vars[name] = ret
         return ret
 
@@ -1753,8 +1764,7 @@ class BuiltinCallExpr(ResolvedExpression):
         self.exprs = exprs
         self.static_type = type
         self.result_var = (
-            PropertyDef.get().vars.create(create_temporary, type,
-                                          PropertyDef.get_scope())
+            PropertyDef.get().vars.create(create_temporary, type)
             if create_temporary else
             None
         )
