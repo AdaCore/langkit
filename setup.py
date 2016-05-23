@@ -21,7 +21,7 @@ setup(
     author_email='report@adacore.com',
     url='https://www.adacore.com',
     description='A Python framework to generate language parsers',
-    requires=['Mako', 'coverage'],
+    requires=['Mako', 'coverage', 'PyYAML', 'enum', 'enum34', 'funcy'],
     packages=['langkit', 'langkit.expressions'],
     package_data={'langkit': [
         'adalog/adalog.gpr',
