@@ -3,7 +3,6 @@ from copy import copy
 from functools import partial
 import inspect
 from itertools import count
-
 import types
 
 from langkit import names
