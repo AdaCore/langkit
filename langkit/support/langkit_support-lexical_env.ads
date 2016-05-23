@@ -96,6 +96,10 @@ package Langkit_Support.Lexical_Env is
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Internal_Envs.Map, Internal_Map);
 
+   No_Refcount : constant Integer := -1;
+   --  Special constant for the Ref_Count field below that means: this lexical
+   --  environment is not ref-counted.
+
    type Lexical_Env_Type is record
       Parent          : Lexical_Env := null;
       --  Parent environment for this env. Null by default.
@@ -118,7 +122,7 @@ package Langkit_Support.Lexical_Env is
       --  owners. It is initially set to 1. When it drops to 0, the env can be
       --  destroyed.
       --
-      --  For envs owned by analysis units, it is always -1.
+      --  For envs owned by analysis units, it is always No_Refcount.
    end record;
 
    Empty_Env : constant Lexical_Env;
@@ -194,7 +198,7 @@ private
       Referenced_Envs => <>,
       Env             => Empty_Env_Map'Access,
       Default_MD      => Empty_Metadata,
-      Ref_Count       => -1);
+      Ref_Count       => No_Refcount);
    Empty_Env : constant Lexical_Env := Empty_Env_Record'Access;
 
 end Langkit_Support.Lexical_Env;

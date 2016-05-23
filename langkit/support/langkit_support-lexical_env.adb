@@ -75,7 +75,7 @@ package body Langkit_Support.Lexical_Env is
          Referenced_Envs => <>,
          Env             => new Internal_Envs.Map,
          Default_MD      => Default_MD,
-         Ref_Count       => (if Is_Refcounted then 1 else -1));
+         Ref_Count       => (if Is_Refcounted then 1 else No_Refcount));
    end Create;
 
    ---------
@@ -253,7 +253,7 @@ package body Langkit_Support.Lexical_Env is
       --  Do not free the internal map for ref-counted allocated environments
       --  as all maps are owned by analysis unit owned environments.
 
-      if Self.Ref_Count = -1 then
+      if Self.Ref_Count = No_Refcount then
          for Elts of Self.Env.all loop
             Env_Element_Vectors.Destroy (Elts);
          end loop;
@@ -270,7 +270,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Inc_Ref (Self : Lexical_Env) is
    begin
-      if Self.Ref_Count = -1 then
+      if Self.Ref_Count = No_Refcount then
          return;
       end if;
 
@@ -283,7 +283,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Dec_Ref (Self : in out Lexical_Env) is
    begin
-      if Self = null or else Self.Ref_Count = -1 then
+      if Self = null or else Self.Ref_Count = No_Refcount then
          return;
       end if;
 
