@@ -1271,10 +1271,7 @@ class Struct(CompiledType):
     @classmethod
     @memoized
     def is_refcounted(cls):
-        return any(
-            field.type.is_refcounted()
-            for field in cls._fields.values()
-        )
+        return any(f.type.is_refcounted() for f in cls._fields.values())
 
     @classmethod
     def is_builtin(cls):
