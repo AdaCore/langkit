@@ -60,10 +60,10 @@ package body Langkit_Support.Lexical_Env is
    ------------
 
    function Create
-     (Parent     : Lexical_Env;
-      Node       : Element_T;
-      Is_Static  : Boolean;
-      Default_MD : Element_Metadata := Empty_Metadata) return Lexical_Env
+     (Parent        : Lexical_Env;
+      Node          : Element_T;
+      Is_Refcounted : Boolean;
+      Default_MD    : Element_Metadata := Empty_Metadata) return Lexical_Env
    is
    begin
       if Parent /= null then
@@ -75,7 +75,7 @@ package body Langkit_Support.Lexical_Env is
          Referenced_Envs => <>,
          Env             => new Internal_Envs.Map,
          Default_MD      => Default_MD,
-         Ref_Count       => (if Is_Static then -1 else 1));
+         Ref_Count       => (if Is_Refcounted then 1 else -1));
    end Create;
 
    ---------
@@ -250,8 +250,8 @@ package body Langkit_Support.Lexical_Env is
       procedure Free is
         new Ada.Unchecked_Deallocation (Lexical_Env_Type, Lexical_Env);
    begin
-      --  Do not free the internal map for dynamically allocated envs as these
-      --  maps are owned by statically allocated ones.
+      --  Do not free the internal map for ref-counted allocated environments
+      --  as all maps are owned by analysis unit owned environments.
 
       if Self.Ref_Count = -1 then
          for Elts of Self.Env.all loop

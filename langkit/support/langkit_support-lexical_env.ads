@@ -114,12 +114,11 @@ package Langkit_Support.Lexical_Env is
       --  Default metadata for this env instance
 
       Ref_Count       : Integer;
-      --  For dynamically created lexical environments, this contains the
-      --  number of owners. It is initially set to 1. When it drops to 0, the
-      --  env can be destroyed.
+      --  For ref-counted lexical environments, this contains the number of
+      --  owners. It is initially set to 1. When it drops to 0, the env can be
+      --  destroyed.
       --
-      --  For envs created in the Populate_Lexical_Env analysis unit pass, this
-      --  is always -1.
+      --  For envs owned by analysis units, it is always -1.
    end record;
 
    Empty_Env : constant Lexical_Env;
@@ -129,12 +128,12 @@ package Langkit_Support.Lexical_Env is
    --  represent missing scopes from erroneous trees.
 
    function Create
-     (Parent     : Lexical_Env;
-      Node       : Element_T;
-      Is_Static  : Boolean;
-      Default_MD : Element_Metadata := Empty_Metadata) return Lexical_Env;
+     (Parent        : Lexical_Env;
+      Node          : Element_T;
+      Is_Refcounted : Boolean;
+      Default_MD    : Element_Metadata := Empty_Metadata) return Lexical_Env;
    --  Constructor. Creates a new lexical env, given a parent, an internal data
-   --  env, and a default metadata. If Is_Static is false, the caller is the
+   --  env, and a default metadata. If Is_Refcounted is true, the caller is the
    --  only owner of the result (ref-count is 1).
 
    procedure Add
@@ -175,16 +174,16 @@ package Langkit_Support.Lexical_Env is
 
    procedure Destroy (Self : in out Lexical_Env);
    --  Deallocate the resources allocated to the Self lexical environment. Must
-   --  not be used for ref-counted envs.
+   --  not be used directly for ref-counted envs.
 
    procedure Inc_Ref (Self : Lexical_Env);
-   --  If Self is a dynamically allocated lexical env, increment this reference
-   --  count. Do nothing otherwise.
+   --  If Self is a ref-counted lexical env, increment this reference count. Do
+   --  nothing otherwise.
 
    procedure Dec_Ref (Self : in out Lexical_Env);
-   --  If Self is a dynamically allocated lexical env, decrement this reference
-   --  count and set it to null. Also destroy it if the count drops to 0. Do
-   --  nothing for statically allocated envs.
+   --  If Self is a ref-counted lexical env, decrement this reference count and
+   --  set it to null. Also destroy it if the count drops to 0. Do nothing
+   --  otherwise.
 
 private
 
