@@ -244,11 +244,11 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       return Consume (I);
    end Find;
 
-   ----------
-   -- Find --
-   ----------
+   ----------------
+   -- Find_First --
+   ----------------
 
-   function Find
+   function Find_First
      (Root      : access ${root_node_value_type}'Class;
       Predicate : ${root_node_type_name}_Predicate)
       return ${root_node_type_name}
@@ -260,7 +260,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          Result := null;
       end if;
       return Result;
-   end Find;
+   end Find_First;
 
    --------------
    -- Evaluate --

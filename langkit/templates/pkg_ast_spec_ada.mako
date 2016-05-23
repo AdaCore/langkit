@@ -342,7 +342,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Find all AST nodes under Root (included) that satisfy the Pred
    --  predicate and return them as an array of nodes.
 
-   function Find
+   function Find_First
      (Root      : access ${root_node_value_type}'Class;
       Predicate : ${root_node_type_name}_Predicate)
       return ${root_node_type_name};
