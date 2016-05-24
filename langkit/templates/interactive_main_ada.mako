@@ -149,8 +149,8 @@ procedure Parse is
       Time_After := Clock;
 
       if Has_Diagnostics (Unit) then
-         Put_Line ("Errors while parsing " & File_Name);
          for D of Diagnostics (Unit) loop
+            Put (File_Name & ":");
             Put_Line (To_Pretty_String (D));
          end loop;
 

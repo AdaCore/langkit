@@ -1,5 +1,3 @@
-with Interfaces; use Interfaces;
-
 with Langkit_Support.Text;   use Langkit_Support.Text;
 
 package body Langkit_Support.Diagnostics is
@@ -10,11 +8,13 @@ package body Langkit_Support.Diagnostics is
 
    function To_Pretty_String (D : Diagnostic) return String is
       Sloc        : constant Source_Location := Start_Sloc (D.Sloc_Range);
+      Line        : constant String := Sloc.Line'Img;
+      Column      : constant String := Sloc.Column'Img;
       Sloc_Prefix : constant String :=
         (if Sloc = No_Source_Location
          then ""
-         else ("Line" & Unsigned_32'Image (Sloc.Line)
-               & ", column" & Unsigned_16'Image (Sloc.Column)
+         else (Line (Line'First + 1 .. Line'Last) &
+               ":" & Column (Column'First + 1 .. Column'Last)
                & ": "));
    begin
       return Sloc_Prefix & Image (To_Wide_Wide_String (D.Message));
