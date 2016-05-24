@@ -35,11 +35,13 @@ class Bind(AbstractExpression):
             self.bind_property = bind_property
             ":type: PropertyDef"
 
-        def render_pre(self):
+            super(Bind.Expr, self).__init__()
+
+        def _render_pre(self):
             return "\n".join([self.from_var.render_pre(),
                               self.to_var.render_pre()])
 
-        def render_expr(self):
+        def _render_expr(self):
             return ("{t}_{p}_Bind.Create "
                     "({l}, {r}, {t}_{p}_Logic_Binder'(Env => {e}))").format(
                 t=self.bind_property.struct.name(),
@@ -138,7 +140,9 @@ class Domain(AbstractExpression):
 
             self.res_var = PropertyDef.get().vars.create("Var", EquationType)
 
-        def render_pre(self):
+            super(Domain.Expr, self).__init__()
+
+        def _render_pre(self):
             return "\n".join([
                 self.domain.render_pre(),
                 self.logic_var_expr.render_pre(), """
@@ -158,7 +162,7 @@ class Domain(AbstractExpression):
                            res_var=self.res_var.name)
             ])
 
-        def render_expr(self):
+        def _render_expr(self):
             return str(self.res_var.name)
 
     def __init__(self, logic_var_expr, domain):
@@ -204,10 +208,12 @@ class Predicate(AbstractExpression):
             self.pred_property = pred_property
             ":type: PropertyDef"
 
-        def render_pre(self):
+            super(Predicate.Expr, self).__init__()
+
+        def _render_pre(self):
             return self.logic_var.render_pre()
 
-        def render_expr(self):
+        def _render_expr(self):
             return ("{t}_{p}_Pred.Create "
                     "({l}, {t}_{p}_Predicate_Caller'(Env => {e}))").format(
                 t=self.pred_property.struct.name(),
@@ -296,13 +302,15 @@ class SolveEquation(AbstractExpression):
             self.eq_var = PropertyDef.get().vars.create("Equation",
                                                         EquationType)
 
-        def render_pre(self):
+            super(SolveEquation.Expr, self).__init__()
+
+        def _render_pre(self):
             return self.equation.render_pre() + """
             {eq_var} := {eq_expr};
             """.format(eq_var=self.eq_var.name,
                        eq_expr=self.equation.render_expr())
 
-        def render_expr(self):
+        def _render_expr(self):
             return "Call ({})".format(self.eq_var.name)
 
     def __init__(self, equation):

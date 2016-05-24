@@ -45,12 +45,14 @@ class Cast(AbstractExpression):
                 )
             )
 
-        def render_pre(self):
+            super(Cast.Expr, self).__init__()
+
+        def _render_pre(self):
             # Before actually downcasting an access to an AST node, add a type
             # check so that we raise a Property_Error if it's wrong.
             return render('properties/type_safety_check_ada', expr=self)
 
-        def render_expr(self):
+        def _render_expr(self):
             return self.result_var.name
 
         def __repr__(self):
@@ -136,14 +138,16 @@ class New(AbstractExpression):
             self.static_type = struct_type
             self.assocs = assocs
 
+            super(New.Expr, self).__init__()
+
         def _iter_ordered(self):
             return ((k, self.assocs[k]) for k in sorted(self.assocs))
 
-        def render_pre(self):
+        def _render_pre(self):
             return '\n'.join(expr.render_pre()
                              for _, expr in self._iter_ordered())
 
-        def render_expr(self):
+        def _render_expr(self):
             return '({}, Is_Null => False)'.format(
                 ', '.join('{} => {}'.format(name.camel_with_underscores,
                                             expr.render_expr())
@@ -268,6 +272,8 @@ class FieldAccess(AbstractExpression):
                 self.simple_field_access = True
                 self.result_var = None
 
+            super(FieldAccess.Expr, self).__init__()
+
         def __repr__(self):
             return "<FieldAccessExpr {} {} {}>".format(
                 self.receiver_expr, self.node_data, self.type
@@ -322,7 +328,7 @@ class FieldAccess(AbstractExpression):
 
             return ret
 
-        def render_pre(self):
+        def _render_pre(self):
             # Before accessing the field of a record through an access, we must
             # check whether this access is null in order to raise a
             # Property_Error in the case it is.
@@ -341,7 +347,7 @@ class FieldAccess(AbstractExpression):
 
             return '\n'.join(stmts)
 
-        def render_expr(self):
+        def _render_expr(self):
             return (str(self.result_var.name)
                     if self.result_var else
                     self.render_field_access())
@@ -463,10 +469,12 @@ class IsA(AbstractExpression):
             self.expr = expr
             self.astnodes = astnodes
 
-        def render_pre(self):
+            super(IsA.Expr, self).__init__()
+
+        def _render_pre(self):
             return self.expr.render_pre()
 
-        def render_expr(self):
+        def _render_expr(self):
             return "{}.all in {}".format(
                 self.expr.render_expr(),
                 " | ".join(

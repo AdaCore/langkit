@@ -31,6 +31,8 @@ class EnvGet(AbstractExpression):
 
             self.type.add_to_context()
 
+            super(EnvGet.Expr, self).__init__()
+
         @property
         def type(self):
             """
@@ -40,7 +42,7 @@ class EnvGet(AbstractExpression):
                 EnvElement if self.resolve_unique else EnvElement.array_type()
             )
 
-        def render_pre(self):
+        def _render_pre(self):
             result_expr = (
                 "{} (0)" if self.resolve_unique else "Create ({})"
             ).format("AST_Envs.Get ({}, Get_Symbol ({}))".format(
@@ -53,7 +55,7 @@ class EnvGet(AbstractExpression):
                 '{} := {};'.format(self.result_var.name, result_expr),
             ])
 
-        def render_expr(self):
+        def _render_expr(self):
             return str(self.result_var.name)
 
         def __repr__(self):
@@ -101,7 +103,9 @@ class EnvBind(AbstractExpression):
             self.env_var = PropertyDef.get().vars.create("New_Env",
                                                          LexicalEnvType)
 
-        def render_pre(self):
+            super(EnvBind.Expr, self).__init__()
+
+        def _render_pre(self):
             # First, compute the environment to bind using the current one and
             # store it in the "New_Env" local variable.
             #
@@ -123,7 +127,7 @@ class EnvBind(AbstractExpression):
             with Env.bind_name(self.env_var.name):
                 return '{}\n{}'.format(result, self.to_eval_expr.render_pre())
 
-        def render_expr(self):
+        def _render_expr(self):
             # We just bind the name of the environment placeholder to our
             # variable.
             with Env.bind_name(self.env_var.name):

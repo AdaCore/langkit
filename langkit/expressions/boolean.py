@@ -106,13 +106,15 @@ class Eq(AbstractExpression):
             self.lhs = lhs
             self.rhs = rhs
 
-        def render_pre(self):
+            super(Eq.Expr, self).__init__()
+
+        def _render_pre(self):
             return '{}\n{}'.format(
                 self.lhs.render_pre(),
                 self.rhs.render_pre()
             )
 
-        def render_expr(self):
+        def _render_expr(self):
             return '{} = {}'.format(self.lhs.render_expr(),
                                     self.rhs.render_expr())
 
@@ -206,13 +208,15 @@ class OrderingTest(AbstractExpression):
             self.lhs = lhs
             self.rhs = rhs
 
-        def render_pre(self):
+            super(OrderingTest.Expr, self).__init__()
+
+        def _render_pre(self):
             return '{}\n{}'.format(
                 self.lhs.render_pre(),
                 self.rhs.render_pre()
             )
 
-        def render_expr(self):
+        def _render_expr(self):
             return '{} {} {}'.format(
                 self.lhs.render_expr(),
                 OrderingTest.OPERATOR_IMAGE[self.operator],
@@ -272,10 +276,12 @@ class If(AbstractExpression):
             self.static_type = rtype
             self.result_var = PropertyDef.get().vars.create('Result', rtype)
 
-        def render_pre(self):
+            super(If.Expr, self).__init__()
+
+        def _render_pre(self):
             return render('properties/if_ada', expr=self)
 
-        def render_expr(self):
+        def _render_expr(self):
             return self.result_var.name.camel_with_underscores
 
         def __repr__(self):
@@ -316,11 +322,12 @@ class Not(AbstractExpression):
 
         def __init__(self, expr):
             self.expr = expr
+            super(Not.Expr, self).__init__()
 
-        def render_pre(self):
+        def _render_pre(self):
             return self.expr.render_pre()
 
-        def render_expr(self):
+        def _render_expr(self):
             return 'not ({})'.format(self.expr.render_expr())
 
         def __repr__(self):
@@ -357,14 +364,16 @@ class Then(AbstractExpression):
             self.then_expr = then_expr
             self.default_expr = default_expr
             self.static_type = self.then_expr.type
-            self.result = PropertyDef.get().vars.create("Result_Var",
-                                                        self.type)
+            self.result_var = PropertyDef.get().vars.create("Result_Var",
+                                                            self.type)
 
-        def render_pre(self):
+            super(Then.Expr, self).__init__()
+
+        def _render_pre(self):
             return render('properties/then_ada', then=self)
 
-        def render_expr(self):
-            return self.result.name.camel_with_underscores
+        def _render_expr(self):
+            return self.result_var.name.camel_with_underscores
 
         def __repr__(self):
             return '<Then.Expr>'

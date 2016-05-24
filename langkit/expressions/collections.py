@@ -178,6 +178,8 @@ class Map(CollectionExpression):
             )
             iter_scope.parent.add(self.array_var)
 
+            super(Map.Expr, self).__init__()
+
         def __repr__(self):
             return "<MapExpr {}: {} -> {}{}>".format(
                 self.collection,
@@ -186,10 +188,10 @@ class Map(CollectionExpression):
                 " (if {})".format(self.filter) if self.filter else ""
             )
 
-        def render_pre(self):
+        def _render_pre(self):
             return render('properties/map_ada', map=self, Name=names.Name)
 
-        def render_expr(self):
+        def _render_expr(self):
             return self.array_var.name.camel_with_underscores
 
     def __init__(self, collection, expr, filter_expr=lambda x: None,
@@ -293,19 +295,20 @@ class Quantifier(CollectionExpression):
             self.element_var = element_var
             self.index_var = index_var
             self.iter_scope = iter_scope
-
             self.result_var = PropertyDef.get().vars.create_scopeless(
                 'Quantifier_Result', BoolType
             )
             iter_scope.parent.add(self.result_var)
 
-        def render_pre(self):
+            super(Quantifier.Expr, self).__init__()
+
+        def _render_pre(self):
             return render(
                 'properties/quantifier_ada', quantifier=self,
                 ALL=Quantifier.ALL, ANY=Quantifier.ANY, Name=names.Name
             )
 
-        def render_expr(self):
+        def _render_expr(self):
             return self.result_var.name.camel_with_underscores
 
         def __repr__(self):
@@ -371,11 +374,13 @@ class CollectionGet(AbstractExpression):
                 [coll_expr, index_expr, or_null]
             )
 
+            super(CollectionGet.Expr, self).__init__()
+
         @property
         def type(self):
             return self.call_expr.type
 
-        def render_pre(self):
+        def _render_pre(self):
             return ('{}\n'
                     '{} := {};').format(
                 self.call_expr.render_pre(),
@@ -383,7 +388,7 @@ class CollectionGet(AbstractExpression):
                 self.call_expr.render_expr(),
             )
 
-        def render_expr(self):
+        def _render_expr(self):
             return self.result_var.name
 
     def __init__(self, coll_expr, index_expr, or_null=True):
@@ -448,7 +453,9 @@ class CollectionSingleton(AbstractExpression):
             self.array_var = PropertyDef.get().vars.create('Singleton',
                                                            self.type)
 
-        def render_pre(self):
+            super(CollectionSingleton.Expr, self).__init__()
+
+        def _render_pre(self):
             return self.expr.render_pre() + """
             {array_var} := Create (Items_Count => 1);
             {array_var}.Items (1) := {item};
@@ -456,7 +463,7 @@ class CollectionSingleton(AbstractExpression):
                        array_type=self.static_type.pointed(),
                        item=self.expr.render_expr())
 
-        def render_expr(self):
+        def _render_expr(self):
             return self.array_var.name
 
     def __init__(self, expr):

@@ -442,6 +442,17 @@ class ResolvedExpression(object):
     Resolved expressions are expressions that can be readily rendered to code
     that will correspond to the initial expression, depending on the bound
     lexical scope.
+
+    Code generation for resolved expression happens in two steps:
+
+    * render_pre, which yields a list of statements to "prepare" the value the
+      expression produces;
+    * render_expr, which yields an expression that evaluates to this value.
+
+    Subclasses must override the _render_pre method to implement the first
+    step and override the _render_expr method to implement the second one.
+    This base classe provides wrappers to these method, these create a local
+    variable and make it contain the resulting value.
     """
 
     static_type = None
@@ -452,21 +463,63 @@ class ResolvedExpression(object):
     :type: CompiledType
     """
 
+    def __init__(self, result_var_name=None):
+        """
+        Create a resolve expression.
+
+        :param None|str result_var_name: If provided, create a local variable
+            using this as a base name to hold the result of this expression.
+            In this case, the "type" property must be ready.
+        """
+        self._result_var = (
+            PropertyDef.get().vars.create(result_var_name, self.type)
+            if result_var_name else
+            None
+        )
+
+    def render_pre(self):
+        """
+        Render initial statements that might be needed to the expression.
+
+        :rtype: str
+        """
+        result = self._render_pre()
+        if self._result_var:
+            return '{}\n{} := {};'.format(
+                result,
+                self._result_var.name.camel_with_underscores,
+                self._render_expr()
+            )
+        else:
+            return result
+
     def render_expr(self):
         """
-        Renders the expression itself.
+        Render the expression itself.
+
+        :rtype: str
+        """
+        return (self._result_var.name.camel_with_underscores
+                if self._result_var else
+                self._render_expr())
+
+    def _render_pre(self):
+        """
+        Per-expression kind implementation for render_pre. The default
+        implementation returns no statement.
+
+        :rtype: str
+        """
+        return ''
+
+    def _render_expr(self):
+        """
+        Per-expression kind implementation for render_expr. To be overriden in
+        subclasses.
 
         :rtype: str
         """
         raise NotImplementedError()
-
-    def render_pre(self):
-        """
-        Renders initial statements that might be needed to the expression.
-
-        :rtype: str
-        """
-        return ""
 
     def render(self):
         """
@@ -521,7 +574,9 @@ class AbstractVariable(AbstractExpression):
             self.static_type = assert_type(type, CompiledType)
             self.name = name
 
-        def render_expr(self):
+            super(AbstractVariable.Expr, self).__init__()
+
+        def _render_expr(self):
             return self.name.camel_with_underscores
 
         def __repr__(self):
@@ -633,7 +688,9 @@ class Let(AbstractExpression):
             self.expr = expr
             self.static_type = self.expr.type
 
-        def render_pre(self):
+            super(Let.Expr, self).__init__()
+
+        def _render_pre(self):
             result = []
             for var, expr in zip(self.vars, self.var_exprs):
                 result.append(expr.render_pre())
@@ -643,7 +700,7 @@ class Let(AbstractExpression):
             result.append(self.expr.render_pre())
             return '\n'.join(result)
 
-        def render_expr(self):
+        def _render_expr(self):
             return self.expr.render_expr()
 
         def __repr__(self):
@@ -1438,7 +1495,9 @@ class LiteralExpr(ResolvedExpression):
         self.literal = literal
         self.static_type = type
 
-    def render_expr(self):
+        super(LiteralExpr, self).__init__()
+
+    def _render_expr(self):
         return self.literal
 
     def __repr__(self):
@@ -1461,10 +1520,12 @@ class ArrayExpr(ResolvedExpression):
         self.element_type = element_type
         self.static_type = self.element_type.array_type()
 
-    def render_pre(self):
+        super(ArrayExpr, self).__init__()
+
+    def _render_pre(self):
         return '\n'.join(e.render_pre() for e in self.exprs)
 
-    def render_expr(self):
+    def _render_expr(self):
         return ('({})'.format(', '.join(e.render_expr() for e in self.exprs))
                 if self.exprs else
                 '(1 .. 0 => <>)')
@@ -1483,8 +1544,9 @@ class UnreachableExpr(ResolvedExpression):
             expression would return in this case.
         """
         self.static_type = expr_type
+        super(UnreachableExpr, self).__init__()
 
-    def render_expr(self):
+    def _render_expr(self):
         return ('raise Program_Error with'
                 ' "Executing supposedly unreachable code"')
 
@@ -1768,6 +1830,7 @@ class BuiltinCallExpr(ResolvedExpression):
             if create_temporary else
             None
         )
+        super(BuiltinCallExpr, self).__init__()
 
     def render_call_expr(self):
         """
@@ -1781,14 +1844,14 @@ class BuiltinCallExpr(ResolvedExpression):
             )
         )
 
-    def render_pre(self):
+    def _render_pre(self):
         return '\n'.join(expr.render_pre() for expr in self.exprs) + (
             '\n{} := {};'.format(self.result_var.name, self.render_call_expr())
             if self.result_var else
             ''
         )
 
-    def render_expr(self):
+    def _render_expr(self):
         return (str(self.result_var.name)
                 if self.result_var else
                 self.render_call_expr())
