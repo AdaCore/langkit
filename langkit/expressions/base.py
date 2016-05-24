@@ -1812,49 +1812,29 @@ class BuiltinCallExpr(ResolvedExpression):
     Ada side of things.
     """
 
-    def __init__(self, name, type, exprs, create_temporary=None):
+    def __init__(self, name, type, exprs, result_var_name=None):
         """
         :param names.Name|str name: The name of the procedure to call.
         :param CompiledType|None type: The return type of the function call.
         :param [ResolvedExpression] exprs: A list of expressions that
             represents the arguments to the function call.
-        :param str|None create_temporary: If provided, create a temporary to
-            hold the result of the call. The given value is used as the name
-            for this temporary.
+        :param None|str result_var_name: See ResolvedExpression's constructor.
         """
         self.name = names.Name.get(name)
         self.exprs = exprs
         self.static_type = type
-        self.result_var = (
-            PropertyDef.get().vars.create(create_temporary, type)
-            if create_temporary else
-            None
-        )
-        super(BuiltinCallExpr, self).__init__()
 
-    def render_call_expr(self):
-        """
-        Return code for the call expression itself.
+        super(BuiltinCallExpr, self).__init__(result_var_name)
 
-        :rtype: str
-        """
-        return "{} ({})".format(
-            self.name.camel_with_underscores, ", ".join(
+    def _render_pre(self):
+        return '\n'.join(expr.render_pre() for expr in self.exprs)
+
+    def _render_expr(self):
+        return '{} ({})'.format(
+            self.name.camel_with_underscores, ', '.join(
                 expr.render_expr() for expr in self.exprs
             )
         )
-
-    def _render_pre(self):
-        return '\n'.join(expr.render_pre() for expr in self.exprs) + (
-            '\n{} := {};'.format(self.result_var.name, self.render_call_expr())
-            if self.result_var else
-            ''
-        )
-
-    def _render_expr(self):
-        return (str(self.result_var.name)
-                if self.result_var else
-                self.render_call_expr())
 
     def __repr__(self):
         return '<BuiltinCallExpr {}>'.format(self.name.camel_with_underscores)

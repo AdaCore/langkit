@@ -170,7 +170,7 @@ class EnvOrphan(AbstractExpression):
             'AST_Envs.Orphan',
             LexicalEnvType,
             [construct(self.env_expr, LexicalEnvType)],
-            create_temporary='Orphan_Env'
+            'Orphan_Env'
         )
 
 
@@ -189,7 +189,7 @@ class EnvGroup(AbstractExpression):
         return BuiltinCallExpr(
             'Group', LexicalEnvType,
             [ArrayExpr(env_exprs, LexicalEnvType)],
-            create_temporary='Group_Env'
+            'Group_Env'
         )
 
 
@@ -213,5 +213,5 @@ class EnvGroupArray(AbstractExpression):
         return BuiltinCallExpr(
             'Group', LexicalEnvType,
             [construct(self.env_array_expr, LexicalEnvType.array_type())],
-            create_temporary='Group_Env'
+            'Group_Env'
         )
