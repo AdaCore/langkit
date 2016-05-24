@@ -4,6 +4,7 @@
 <%namespace name="astnode_types" file="astnode_types_py.mako" />
 <%namespace name="enum_types"    file="enum_types_py.mako" />
 <%namespace name="struct_types"  file="struct_types_py.mako" />
+<%namespace name="exts"          file="../extensions.mako" />
 
 
 <% root_astnode_name = _self.root_grammar_class.name().camel %>
@@ -949,3 +950,9 @@ def _field_address(struct, field_name):
             break
     assert field_type is not None
     return struct_addr + field.offset
+
+################################
+# Language specific extensions #
+################################
+
+${exts.include_extension(ctx.ext("python"))}
