@@ -770,6 +770,8 @@ class CompileCtx():
             ("parsers/pkg_main", ["ast", "types", "parsers"], True),
             # Unit for the lexer
             ("lexer/pkg_lexer",  ["lexer"], True),
+            # Unit for debug helpers
+            ("pkg_debug",        ["debug"], True),
         ]
 
         for template_base_name, qual_name, has_body in ada_modules:

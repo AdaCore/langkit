@@ -68,6 +68,8 @@ library project ${lib_name} is
       "${lib_name.lower()}-ast-types-c.ads",
       "${lib_name.lower()}-ast-types-parsers.adb",
       "${lib_name.lower()}-ast-types-parsers.ads",
+      "${lib_name.lower()}-debug.adb",
+      "${lib_name.lower()}-debug.ads",
       "${lib_name.lower()}-init.adb",
       "${lib_name.lower()}-init.ads",
       "${lib_name.lower()}-lexer.adb",
