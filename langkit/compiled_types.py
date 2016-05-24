@@ -1109,7 +1109,8 @@ class StructMetaClass(CompiledTypeMetaclass):
         if env_spec:
             env_spec.ast_node = cls
 
-        assert cls.is_ast_node() or not cls.get_properties(), (
+        check_source_language(
+            cls.is_ast_node() or not cls.get_properties(),
             "Properties are not yet supported on plain structs"
         )
 
