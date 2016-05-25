@@ -22,16 +22,14 @@ class EnvGet(AbstractExpression):
                 env to get from.
             :param ResolvedExpression token_expr: The expression representing
                 the token key.
+            :param bool resolve_unique: See EnvGet's constructor.
             """
             self.env_expr = env_expr
             self.token_expr = token_expr
             self.resolve_unique = resolve_unique
-            self.result_var = PropertyDef.get().vars.create('Env_Get_Result',
-                                                            self.type)
-
             self.type.add_to_context()
 
-            super(EnvGet.Expr, self).__init__()
+            super(EnvGet.Expr, self).__init__('Env_Get_Result')
 
         @property
         def type(self):
@@ -43,20 +41,18 @@ class EnvGet(AbstractExpression):
             )
 
         def _render_pre(self):
-            result_expr = (
-                "{} (0)" if self.resolve_unique else "Create ({})"
-            ).format("AST_Envs.Get ({}, Get_Symbol ({}))".format(
-                self.env_expr.render_expr(), self.token_expr.render_expr()
-            ))
-
-            return '\n'.join([
+            return '{}\n{}'.format(
                 self.env_expr.render_pre(),
                 self.token_expr.render_pre(),
-                '{} := {};'.format(self.result_var.name, result_expr),
-            ])
+            )
 
         def _render_expr(self):
-            return str(self.result_var.name)
+            array_expr = 'AST_Envs.Get ({}, Get_Symbol ({}))'.format(
+                self.env_expr.render_expr(), self.token_expr.render_expr()
+            )
+            return ("{} (0)"
+                    if self.resolve_unique
+                    else "Create ({})").format(array_expr)
 
         def __repr__(self):
             return '<EnvGet.Expr>'
