@@ -548,13 +548,14 @@ class Run(object):
         # "timeout" is not implemented, error is ignored
         p = subprocess.Popen(
             argv, cwd=cwd,
-            stdout=subprocess.PIPE,
+            stdout=subprocess.PIPE if output else None,
             stderr=subprocess.STDOUT,
             env=env
         )
         stdout, _ = p.communicate()
-        with open(output, 'w') as f:
-            f.write(stdout)
+        if output:
+            with open(output, 'w') as f:
+                f.write(stdout)
         self.status = p.returncode
 
 
