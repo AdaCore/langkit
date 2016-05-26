@@ -21,10 +21,6 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Ada.Unchecked_Deallocation;
-
-with GNATCOLL.Refcount;
-
 package Adalog.Abstract_Relation is
 
    ----------------
@@ -54,30 +50,18 @@ package Adalog.Abstract_Relation is
    procedure Reset (Self : in out I_Relation) is abstract;
    pragma Inline (Call);
 
+   procedure Free (Self : in out I_Relation) is abstract;
+   pragma Inline (Free);
+
    type I_Relation_Access is access all I_Relation'Class;
 
-   ---------
-   -- Rel --
-   ---------
+   subtype Relation is I_Relation_Access;
 
-   --  The Rel type is a refcounted wrapper around I_Relation. It allows the
-   --  user to manipulate automatically managed trees that form relations.
+   function Call (Self : in out Relation) return Boolean
+   is (Call (Self.all));
 
-   type Rel_Record is new GNATCOLL.Refcount.Refcounted with record
-      I_Rel : I_Relation_Access;
-   end record;
+   procedure Reset (Self : in out Relation);
 
-   procedure Free is new
-     Ada.Unchecked_Deallocation (I_Relation'Class, I_Relation_Access);
-
-   procedure Free (Self : in out Rel_Record);
-
-   package Ptrs is new GNATCOLL.Refcount.Shared_Pointers (Rel_Record);
-
-   subtype Rel is Ptrs.Ref;
-
-   function Call (Self : in out Rel) return Boolean
-   is (Self.Unchecked_Get.I_Rel.Call);
-   procedure Reset (Self : in out Rel);
+   procedure Free (Self : in out Relation);
 
 end Adalog.Abstract_Relation;

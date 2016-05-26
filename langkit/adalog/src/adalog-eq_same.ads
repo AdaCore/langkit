@@ -83,7 +83,7 @@ package Adalog.Eq_Same is
          Convert, Convert, Refs.Raw_Logic_Var, Refs.Raw_Logic_Var);
 
       function Create (L, R : Refs.Raw_Logic_Var.Var; Data : Converter)
-        return Rel
+        return Relation
       is
         (Impl.Create (L, R, Data, Data));
 

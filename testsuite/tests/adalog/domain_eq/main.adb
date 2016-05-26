@@ -12,7 +12,7 @@ procedure Main is
 begin
    declare
       X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-      R : Rel := Member (X, (1, 2, 3, 4, 5, 6)) or X = 7 or x = 8;
+      R : Relation := Member (X, (1, 2, 3, 4, 5, 6)) or X = 7 or x = 8;
    begin
       while Call (R) loop
          Put_Line ("X =" & GetL (X)'Img);
@@ -22,7 +22,7 @@ begin
    declare
       X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
       Y : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-      R : Rel :=
+      R : Relation :=
         (X = 1 or X = 2 or X = 3 or X = 4 or X = 5 or X = 6)
          and X = Y
          and (Y = 3 or Y = 2 or Y = 1);

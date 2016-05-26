@@ -104,26 +104,26 @@ package Adalog.Unify is
    --  Dynamic wrappers --
    -----------------------
 
-   function "=" (L : Left_Var.Var; R : R_Type) return Rel
+   function "=" (L : Left_Var.Var; R : R_Type) return Relation
    is (Unify_Left.Rel.Impl.Dynamic (L = R)) with Inline;
 
-   function "=" (L : L_Type; R : Right_Var.Var) return Rel
+   function "=" (L : L_Type; R : Right_Var.Var) return Relation
    is (Unify_Right.Rel.Impl.Dynamic (L = R)) with Inline;
 
-   function "=" (L : L_Type; R : R_Type) return Rel
+   function "=" (L : L_Type; R : R_Type) return Relation
    is (Boolean_Relation.Impl.Dynamic (L = R)) with Inline;
 
-   function "=" (L : Left_Var.Var; R : Right_Var.Var) return Rel
+   function "=" (L : Left_Var.Var; R : Right_Var.Var) return Relation
    is (Unify_LR_Rel.Impl.Dynamic (L = R)) with Inline;
 
-   function Equals (L : Left_Var.Var; R : R_Type) return Rel renames "=";
+   function Equals (L : Left_Var.Var; R : R_Type) return Relation renames "=";
 
-   function Equals (L : L_Type; R : Right_Var.Var) return Rel renames "=";
+   function Equals (L : L_Type; R : Right_Var.Var) return Relation renames "=";
 
-   function Equals (L : L_Type; R : R_Type) return Rel renames "=";
+   function Equals (L : L_Type; R : R_Type) return Relation renames "=";
 
    function Equals
-     (L : Left_Var.Var; R : Right_Var.Var) return Rel renames "=";
+     (L : Left_Var.Var; R : Right_Var.Var) return Relation renames "=";
 
    ------------
    -- Member --
@@ -136,6 +136,7 @@ package Adalog.Unify is
 
    function Member
      (R    : Left_Var.Var;
-      Vals : Unify_Left.R_Type_Array) return Rel renames Unify_Left.Member;
+      Vals : Unify_Left.R_Type_Array) return Relation
+      renames Unify_Left.Member;
 
 end Adalog.Unify;

@@ -56,6 +56,7 @@ package Adalog.Unify_One_Side is
 
    function Apply (Self : in out Unify) return Boolean;
    procedure Revert (Self : in out Unify);
+   procedure Free (Self : in out Unify) is null;
 
    package Rel is new Relation.Stateful_Relation (Unify);
 
@@ -66,9 +67,11 @@ package Adalog.Unify_One_Side is
    --  TODO??? Why is member not implemented in terms of
    --  Relation.Stateful_Relation?
 
+   type R_Type_Array_Access is access all R_Type_Array;
+
    type Member_T is record
       Left           : Var.Var;
-      Values         : access R_Type_Array;
+      Values         : R_Type_Array_Access;
       Current_Index  : Positive := 1;
       Changed        : Boolean := False;
       Domain_Checked : Boolean := False;
@@ -76,13 +79,14 @@ package Adalog.Unify_One_Side is
 
    function Call (Self : in out Member_T) return Boolean;
    procedure Reset (Self : in out Member_T);
+   procedure Free (Self : in out Member_T);
 
    package Member_Impl is new Relation_Interface (Member_T);
 
    function Member (R : Var.Var; Vals : R_Type_Array) return Member_T;
 
    function Member
-     (R : Var.Var; Vals : R_Type_Array) return Abstract_Relation.Rel
+     (R : Var.Var; Vals : R_Type_Array) return Abstract_Relation.Relation
    is
      (Member_Impl.Dynamic (Member (R, Vals)));
 

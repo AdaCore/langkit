@@ -62,6 +62,7 @@ package Adalog.Unify_LR is
 
    function Apply (Self : in out Unify_LR) return Boolean;
    procedure Revert (Self : in out Unify_LR);
+   procedure Free (Self : in out Unify_LR) is null;
 
    function Create
      (Left   : Left_Var.Var;
@@ -85,7 +86,7 @@ package Adalog.Unify_LR is
      (Left   : Left_Var.Var;
       Right  : Right_Var.Var;
       L_Data : Left_C_Data;
-      R_Data : Right_C_Data) return Rel
+      R_Data : Right_C_Data) return Adalog.Abstract_Relation.Relation
    is
      (Unify_LR_Rel.Impl.Dynamic (Create (Left, Right, L_Data, R_Data)));
 

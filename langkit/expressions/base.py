@@ -710,10 +710,9 @@ class Let(AbstractExpression):
 
     def __init__(self, lambda_fn):
         """
-        :param () -> AbstractExpression lambda_fn: Function that take an
-            arbitrary number of arguments with default values
-            (AbstractExpression instances) and that returns another
-            AbstractExpression.
+        :param lambda_fn: Function that take an arbitrary number of arguments
+            with default values (AbstractExpression instances) and that returns
+            another AbstractExpression.
         """
         super(Let, self).__init__()
         argspec = inspect.getargspec(lambda_fn)

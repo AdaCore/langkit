@@ -31,6 +31,7 @@ package Adalog.Pure_Relations is
 
    type False_Relation_Rec is null record;
    function Apply (Inst : in out False_Relation_Rec) return Boolean is (False);
+   procedure Free (Inst : in out False_Relation_Rec) is null;
    package False_Relation is new Pure_Relation (Ty => False_Relation_Rec);
 
    -------------------
@@ -39,6 +40,7 @@ package Adalog.Pure_Relations is
 
    type True_Relation_Rec is null record;
    function Apply (Inst : in out True_Relation_Rec) return Boolean is (True);
+   procedure Free (Inst : in out True_Relation_Rec) is null;
    package True_Relation is new Pure_Relation (Ty => True_Relation_Rec);
 
    ----------------------
@@ -51,6 +53,8 @@ package Adalog.Pure_Relations is
 
    function Apply (Inst : in out Boolean_Relation_Rec) return Boolean
    is (Inst.Result);
+
+   procedure Free (Inst : in out Boolean_Relation_Rec) is null;
 
    package Boolean_Relation is
      new Pure_Relation (Ty => Boolean_Relation_Rec);

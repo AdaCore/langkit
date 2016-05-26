@@ -30,4 +30,4 @@ with Adalog.Relation_Interface;
 --  Adalog.Operations that works on Rel instances, so the interface and
 --  Rel wrapper around Rel itself are not used.
 
-package Adalog.Dynamic_Relation is new Adalog.Relation_Interface (Rel);
+package Adalog.Dynamic_Relation is new Adalog.Relation_Interface (Relation);

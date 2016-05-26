@@ -13,7 +13,7 @@ procedure Main is
    use Eq_Int; use Eq_Int.Raw_Impl; use Eq_Int.Refs;
 
    X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-   R : Rel := (Member (X, (1, 2, 3)) or Member (X, (4, 5, 6)));
+   R : Relation := (Member (X, (1, 2, 3)) or Member (X, (4, 5, 6)));
 begin
    while Call (R) loop
       Put_Line ("X =" & GetL (X)'Img);

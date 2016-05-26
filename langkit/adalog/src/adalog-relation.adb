@@ -22,6 +22,11 @@
 ------------------------------------------------------------------------------
 
 package body Adalog.Relation is
+
+   -------------------
+   -- Pure_Relation --
+   -------------------
+
    package body Pure_Relation is
 
       ----------
@@ -37,7 +42,20 @@ package body Adalog.Relation is
          return  Apply (Inst.Rel);
       end Call;
 
+      ----------
+      -- Free --
+      ----------
+
+      procedure Free (Inst : in out Rel) is
+      begin
+         Free (Inst.Rel);
+      end Free;
+
    end Pure_Relation;
+
+   -----------------------
+   -- Stateful_Relation --
+   -----------------------
 
    package body Stateful_Relation is
 
@@ -74,6 +92,15 @@ package body Adalog.Relation is
          Inst.State := Start;
          Revert (Inst.Rel);
       end Reset;
+
+      ----------
+      -- Free --
+      ----------
+
+      procedure Free (Inst : in out Rel) is
+      begin
+         Free (Inst.Rel);
+      end Free;
 
    end Stateful_Relation;
 

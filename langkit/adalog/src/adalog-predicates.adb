@@ -23,6 +23,29 @@
 
 package body Adalog.Predicates is
 
+   ---------------
+   -- Predicate --
+   ---------------
+
+   package body Predicate is
+
+      ----------
+      -- Free --
+      ----------
+
+      pragma Warnings (Off, "parameter");
+      procedure Free (Inst : in out Predicate_Logic) is
+      begin
+         Free (Inst.Pred);
+      end Free;
+      pragma Warnings (On, "parameter");
+
+   end Predicate;
+
+   -------------------
+   -- Dyn_Predicate --
+   -------------------
+
    package body Dyn_Predicate is
 
       use Var;
@@ -43,7 +66,6 @@ package body Adalog.Predicates is
       begin
          null;
       end Revert;
-
    end Dyn_Predicate;
 
 end Adalog.Predicates;

@@ -15,28 +15,31 @@ procedure Main is
 
    function Transform (D : Dummy_Data; I : Integer) return Integer is (I ** 2);
    package Bind is new Eq_Int.Raw_Custom_Bind (Dummy_Data, Transform);
-   function Square (X, Y : Eq_Int.Refs.Raw_Var) return Rel
+   function Square (X, Y : Eq_Int.Refs.Raw_Var) return Relation
    is (Bind.Create (X, Y, D));
 begin
    declare
       X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
       Y : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-      R : Rel := Member (X, (1, 2, 3, 4, 5, 6)) and Square (X, Y);
+      R : Relation := Member (X, (1, 2, 3, 4, 5, 6)) and Square (X, Y);
    begin
       while Call (R) loop
          Put_Line ("X =" & GetL (X)'Img & ", Y =" & GetL (Y)'Img);
       end loop;
+      Free (R);
    end;
 
    declare
       X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
       Y : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
 
-      R : Rel := Member (X, (1, 2, 3, 4, 5, 6)) and Square (X, Y) and (Y = 36);
+      R : Relation := Member (X, (1, 2, 3, 4, 5, 6))
+                      and Square (X, Y) and (Y = 36);
    begin
       while Call (R) loop
          Put_Line ("X =" & GetL (X)'Img & ", Y =" & GetL (Y)'Img);
       end loop;
+      Free (R);
    end;
 
 end Main;

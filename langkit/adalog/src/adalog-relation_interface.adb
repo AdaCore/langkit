@@ -21,15 +21,15 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with GNATCOLL.Refcount; use GNATCOLL.Refcount;
-
 package body Adalog.Relation_Interface is
+
+   pragma Suppress (Accessibility_Check);
 
    ----------
    -- Call --
    ----------
 
-   overriding function Call (Inst : in out Relation) return Boolean is
+   overriding function Call (Inst : in out Rel) return Boolean is
    begin
       return Call (Inst.Inst);
    end Call;
@@ -38,7 +38,7 @@ package body Adalog.Relation_Interface is
    -- Reset --
    -----------
 
-   overriding procedure Reset (Inst : in out Relation) is
+   overriding procedure Reset (Inst : in out Rel) is
    begin
       Reset (Inst.Inst);
    end Reset;
@@ -47,14 +47,19 @@ package body Adalog.Relation_Interface is
    -- Dynamic --
    -------------
 
-   function Dynamic (From : Ty) return Rel
+   function Dynamic (From : Ty) return access I_Relation'Class
    is
-      R : Rel;
-      Inst : constant Relation_Access := new Relation'(Inst => From);
    begin
-      R.Set
-        (Rel_Record'(Refcounted with I_Rel => Inst.all'Unrestricted_Access));
-      return R;
+      return new Rel'(Inst => From);
    end Dynamic;
+
+   ----------
+   -- Free --
+   ----------
+
+   overriding procedure Free (Inst : in out Rel) is
+   begin
+      Free (Inst.Inst);
+   end Free;
 
 end Adalog.Relation_Interface;

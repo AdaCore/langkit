@@ -37,6 +37,8 @@ package Adalog.Predicates is
       with function Call
         (Self : Predicate_Type; L : El_Type) return Boolean is <>;
 
+      with procedure Free (Self : Predicate_Type) is null;
+
    package Predicate is
       use Var;
 
@@ -50,13 +52,16 @@ package Adalog.Predicates is
 
       procedure Reset (Inst : in out Predicate_Logic) is null;
 
+      procedure Free (Inst : in out Predicate_Logic);
+
       package Impl is new Relation_Interface (Ty => Predicate_Logic);
 
       function Create
         (R : Var.Var; Pred : Predicate_Type) return Predicate_Logic
       is (Predicate_Logic'(Ref => R, Pred => Pred));
 
-      function Create (R : Var.Var; Pred : Predicate_Type) return Rel
+      function Create
+        (R : Var.Var; Pred : Predicate_Type) return Abstract_Relation.Relation
       is (Impl.Dynamic (Create (R, Pred)));
 
    end Predicate;
@@ -71,11 +76,12 @@ package Adalog.Predicates is
 
       type Predicate_Logic is record
          Ref : Var.Var;
-         P   : Predicate_Access;
+         P   : access function (L : El_Type) return Boolean;
       end record;
 
       function Apply (Inst : in out Predicate_Logic) return Boolean;
       procedure Revert (Inst : in out Predicate_Logic);
+      procedure Free (Inst : in out Predicate_Logic) is null;
 
       package Impl is new Stateful_Relation (Ty => Predicate_Logic);
 
@@ -88,7 +94,7 @@ package Adalog.Predicates is
 
       function Create
         (R    : Var.Var;
-         Pred : Predicate_Access) return Rel
+         Pred : Predicate_Access) return Abstract_Relation.Relation
       is (Impl.Impl.Dynamic (Create (R, Pred)));
 
    end Dyn_Predicate;

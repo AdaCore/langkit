@@ -22,6 +22,7 @@
 ------------------------------------------------------------------------------
 
 with Adalog.Eq_Same;
+with Adalog.Predicates;        use Adalog.Predicates;
 
 package Adalog.Main_Support is
    type My_Rec is record
@@ -33,5 +34,8 @@ package Adalog.Main_Support is
 
    package Eq_Int is new Eq_Same (Integer);
    package Eq_Rec is new Eq_Same (My_Rec);
+
+   package Pred_Int is
+     new Dyn_Predicate (Integer, Eq_Int.Refs.Raw_Logic_Var);
 
 end Adalog.Main_Support;

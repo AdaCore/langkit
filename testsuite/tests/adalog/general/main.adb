@@ -16,8 +16,6 @@ procedure Main is
 
    function Is_Even (X : Integer) return Boolean is ((X mod 2) = 0);
 
-   package Pred_Int is new Dyn_Predicate (Integer, Eq_Int.Refs.Raw_Logic_Var);
-
    use Eq_Int; use Eq_Int.Raw_Impl;
 
    X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
@@ -29,10 +27,10 @@ procedure Main is
 
    D : Dummy_Data;
 
-   R3 : Rel :=
+   R3 : Relation :=
      (Member (X, (1, 2, 3, 4, 5, 6))
       and Bind.Create (X, Y, D)
-      and Pred_Int.Create (X, Is_Even'Access)
+      and Pred_Int.Create (X, Is_Even'Unrestricted_Access)
       and Member (Y, (12, 18)));
 
    Discard : Boolean;

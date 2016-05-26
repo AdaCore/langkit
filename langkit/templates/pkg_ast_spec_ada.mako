@@ -538,8 +538,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
    Null_Var : constant Logic_Var := null;
    Null_Var_Record : constant Logic_Var_Record := (Reset => True, others => <>);
 
-   subtype Logic_Equation is Rel;
-   Null_Logic_Equation : Logic_Equation renames Ptrs.Null_Ref;
+   subtype Logic_Equation is Relation;
+   Null_Logic_Equation : constant Logic_Equation := null;
 
 private
 

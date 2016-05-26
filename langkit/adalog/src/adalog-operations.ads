@@ -58,6 +58,8 @@ package Adalog.Operations is
    end record;
    function Call (Inst : in out Or_Rec) return Boolean;
    procedure Reset (Inst : in out Or_Rec);
+   procedure Free (Inst : in out Or_Rec);
+
    package Impl is new Relation_Interface (Or_Rec);
 
    ----------------------------------
@@ -72,6 +74,8 @@ package Adalog.Operations is
 
    function Call (Inst : in out And_Rec) return Boolean;
    procedure Reset (Inst : in out And_Rec);
+   procedure Free (Inst : in out And_Rec);
+
    package AImpl is new Relation_Interface (And_Rec);
 
    ----------------------------------------
@@ -81,19 +85,19 @@ package Adalog.Operations is
    function "or" (Left : L_Rel.Ty; Right : R_Rel.Ty) return Or_Rec
    is (Or_Rec'(Left, Right, others => <>)) with Inline_Always;
 
-   function "or" (Left : L_Rel.Ty; Right : R_Rel.Ty) return Rel
+   function "or" (Left : L_Rel.Ty; Right : R_Rel.Ty) return Relation
    is (Impl.Dynamic (Left or Right)) with Inline_Always;
 
    function "and" (Left : L_Rel.Ty; Right : R_Rel.Ty) return And_Rec
    is (And_Rec'(Left, Right, others => <>)) with Inline_Always;
 
-   function "and" (Left : L_Rel.Ty; Right : R_Rel.Ty) return Rel
+   function "and" (Left : L_Rel.Ty; Right : R_Rel.Ty) return Relation
    is (AImpl.Dynamic (Left and Right)) with Inline_Always;
 
    function Logic_Or
-     (Left : L_Rel.Ty; Right : R_Rel.Ty) return Rel renames "or";
+     (Left : L_Rel.Ty; Right : R_Rel.Ty) return Relation renames "or";
 
    function Logic_And
-     (Left : L_Rel.Ty; Right : R_Rel.Ty) return Rel renames "and";
+     (Left : L_Rel.Ty; Right : R_Rel.Ty) return Relation renames "and";
 
 end Adalog.Operations;

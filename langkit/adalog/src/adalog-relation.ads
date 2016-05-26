@@ -21,7 +21,6 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
 with Adalog.Relation_Interface;
 
 --  Internal implementation package, not to be used directly by users a-priori.
@@ -36,6 +35,7 @@ package Adalog.Relation is
    generic
       type Ty is private;
       with function Apply (Inst : in out Ty) return Boolean is <>;
+      with procedure Free (Inst : in out Ty) is <>;
    package Pure_Relation is
       --  This generic package represents a relation that will always
       --  yield the same result, and does not produce any side effects.
@@ -47,6 +47,7 @@ package Adalog.Relation is
 
       function Call (Inst : in out Rel) return Boolean;
       procedure Reset (Inst : in out Rel) is null;
+      procedure Free (Inst : in out Rel);
 
       package Impl is new Relation_Interface (Ty => Rel);
    end Pure_Relation;
@@ -59,6 +60,7 @@ package Adalog.Relation is
       type Ty is private;
       with function Apply (Inst : in out Ty) return Boolean is <>;
       with procedure Revert (Inst : in out Ty) is <>;
+      with procedure Free (Inst : in out Ty) is <>;
    package Stateful_Relation is
 
       --  This package represents a relation that has state,
@@ -73,6 +75,7 @@ package Adalog.Relation is
 
       function Call (Inst : in out Rel) return Boolean;
       procedure Reset (Inst : in out Rel);
+      procedure Free (Inst : in out Rel);
 
       package Impl is new Relation_Interface (Ty => Rel);
    end Stateful_Relation;

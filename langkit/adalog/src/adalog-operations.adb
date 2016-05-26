@@ -111,4 +111,24 @@ package body Adalog.Operations is
       R_Rel.Reset (Inst.Right);
    end Reset;
 
+   ----------
+   -- Free --
+   ----------
+
+   procedure Free (Inst : in out And_Rec) is
+   begin
+      L_Rel.Free (Inst.Left);
+      R_Rel.Free (Inst.Right);
+   end Free;
+
+   ----------
+   -- Free --
+   ----------
+
+   procedure Free (Inst : in out Or_Rec) is
+   begin
+      L_Rel.Free (Inst.Left);
+      R_Rel.Free (Inst.Right);
+   end Free;
+
 end Adalog.Operations;

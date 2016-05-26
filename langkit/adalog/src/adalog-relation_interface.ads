@@ -32,15 +32,19 @@ generic
    type Ty is private;
    with function Call (Inst : in out Ty) return Boolean is <>;
    with procedure Reset (Inst : in out Ty) is <>;
+   with procedure Free (Inst : in out Ty) is <>;
 package Adalog.Relation_Interface is
 
-   type Relation is new I_Relation with record
+   pragma Suppress (Accessibility_Check);
+
+   type Rel is new I_Relation with record
       Inst : Ty;
    end record;
-   type Relation_Access is access all Relation;
+   type Relation_Access is access all Rel;
 
-   overriding function Call (Inst : in out Relation) return Boolean;
-   overriding procedure Reset (Inst : in out Relation);
+   overriding function Call (Inst : in out Rel) return Boolean;
+   overriding procedure Reset (Inst : in out Rel);
+   overriding procedure Free (Inst : in out Rel);
 
-   function Dynamic (From : Ty) return Rel;
+   function Dynamic (From : Ty) return access I_Relation'Class;
 end Adalog.Relation_Interface;
