@@ -112,10 +112,11 @@
              ;
              return 1;
          exception
-            when Property_Error =>
+            when Exc : Property_Error =>
                ## If we reach this handler, it means the expression failed at
                ## some point because of a safety check. Tell the user about
                ## it.
+               Set_Last_Exception (Exc, Is_Fatal => False);
 
                return 0;
          end;

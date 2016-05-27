@@ -47,7 +47,11 @@
             % endfor
             ctypes.byref(result)
         ):
-           raise PropertyError()
+            exc = _get_last_exception()
+            if exc:
+                raise PropertyError(*exc.contents.wrap().args)
+            else:
+                raise PropertyError()
 
         return ${pyapi.wrap_value('result', field.type)}
     % endfor
