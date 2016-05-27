@@ -41,7 +41,7 @@ package body ${_self.ada_api_settings.lib_name}.Debug is
       --  into token records.
       --
       --  We should get rid of this fixing GDB to make it easier to call
-      --  tagged types primitives. This way we will be able to invoke reguler
+      --  tagged types primitives. This way we will be able to invoke regular
       --  AST node primitives directly from GDB to get token records.
 
       type Dummy_Node is tagged record
