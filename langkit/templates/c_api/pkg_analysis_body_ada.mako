@@ -599,7 +599,10 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    -- Set_Last_Exception --
    ------------------------
 
-   procedure Set_Last_Exception (Exc  : Exception_Occurrence) is
+   procedure Set_Last_Exception
+     (Exc      : Exception_Occurrence;
+      Is_Fatal : Boolean := True)
+   is
    begin
       --  If it's the first time, allocate room for the exception information
 
@@ -613,6 +616,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          Free (Last_Exception.Information);
       end if;
 
+      Last_Exception.Is_Fatal := (if Is_Fatal then 1 else 0);
       Last_Exception.Information := New_String (Exception_Information (Exc));
    end Set_Last_Exception;
 

@@ -90,6 +90,11 @@ documentations = {
         information, but depending on possible future Ada runtime improvements,
         this might change.
     """),
+    'langkit.exception_type.is_fatal': Template("""
+        Whether this exception is fatal for this process. If it is fatal, then
+        process sanity is no longer guaranteed by Libadalang. If it is not,
+        performing further processing is safe.
+    """),
     'langkit.exception_type.information': Template("""
         Message and context information associated with this exception.
     """),

@@ -83,6 +83,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    ${ada_c_doc('langkit.diagnostic_type', 3)}
 
    type ${exception_type} is record
+      Is_Fatal    : int;
+      ${ada_c_doc('langkit.exception_type.is_fatal', 6)}
+
       Information : chars_ptr;
       ${ada_c_doc('langkit.exception_type.information', 6)}
    end record;
@@ -333,7 +336,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    procedure Clear_Last_Exception;
    --  Free the information contained in Last_Exception
 
-   procedure Set_Last_Exception (Exc  : Exception_Occurrence);
+   procedure Set_Last_Exception
+     (Exc      : Exception_Occurrence;
+      Is_Fatal : Boolean := True);
    --  Free the information contained in Last_Exception and replace it with
    --  newly allocated information from Exc.
 

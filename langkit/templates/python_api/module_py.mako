@@ -99,7 +99,8 @@ class _Diagnostic(ctypes.Structure):
 
 
 class _Exception(ctypes.Structure):
-    _fields_ = [("information", ctypes.c_char_p)]
+    _fields_ = [("is_fatal", ctypes.c_int),
+                ("information", ctypes.c_char_p)]
 
     def wrap(self):
         return NativeException(self.information)
@@ -635,7 +636,7 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
     def wrapper(*args, **kwargs):
         result = func(*args, **kwargs)
         exc = _get_last_exception()
-        if exc:
+        if exc and exc.contents.is_fatal:
             raise exc.contents.wrap()
         return result
 
