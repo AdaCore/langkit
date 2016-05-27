@@ -1761,17 +1761,6 @@ class LocalVars(object):
         self.local_vars[name] = ret
         return ret
 
-    def __getattr__(self, name):
-        """
-        Returns existing instance of variable called name, so that you can use
-        existing variables via the syntax::
-
-            ivar = var.Index
-
-        :param str name: The name of the variable.
-        """
-        return self.local_vars[name]
-
     def check_scopes(self):
         """
         Check that all variables are associated to a scope. Raise an
