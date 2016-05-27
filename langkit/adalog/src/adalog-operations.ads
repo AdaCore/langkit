@@ -22,82 +22,52 @@
 ------------------------------------------------------------------------------
 
 with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
-with Adalog.Relation_Interface;
 
 --  This package implement high level logical relation operators on other
---  relations, namely `logical and` and `logical or`. It is implemented on
---  generic instances of the Relation_Interface package, so that to use it
---  you must:
---
---  1. Have a/several types that implements the relation protocol.
---
---  2. Instantiate a Relation_Interface package on each.
---
---  3. Instantiate Adalog.Operations between all relation types on which you
---  want to use Operations.
---
---  If you have dynamic relations and you just want to use Or/And on them, see
---  the Adalog.Dynamic_Ops package.
+--  relations, namely `logical and` and `logical or`.
 
-generic
-   with package L_Rel is new Relation_Interface (<>);
-   with package R_Rel is new Relation_Interface (<>);
 package Adalog.Operations is
 
    ---------------------------------
    --  Or relation implementation --
    ---------------------------------
 
-   type L_Type_Array is array (Natural range <>) of L_Rel.Ty;
-   type R_Type_Array is array (Natural range <>) of R_Rel.Ty;
-
-   type Or_Rec is record
-      Left  : L_Rel.Ty;
-      Right : R_Rel.Ty;
+   type Or_Rec is new I_Relation with record
+      Left, Right : Relation;
       State : Integer := 0;
    end record;
-   function Call (Inst : in out Or_Rec) return Boolean;
-   procedure Reset (Inst : in out Or_Rec);
-   procedure Free (Inst : in out Or_Rec);
 
-   package Impl is new Relation_Interface (Or_Rec);
+   overriding function Call (Inst : in out Or_Rec) return Boolean;
+   overriding procedure Reset (Inst : in out Or_Rec);
+   overriding procedure Free (Inst : in out Or_Rec);
 
    ----------------------------------
    --  And relation implementation --
    ----------------------------------
 
-   type And_Rec is record
-      Left  : L_Rel.Ty;
-      Right : R_Rel.Ty;
+   type And_Rec is new I_Relation with record
+      Left, Right : Relation;
       State : Integer := 0;
    end record;
 
-   function Call (Inst : in out And_Rec) return Boolean;
-   procedure Reset (Inst : in out And_Rec);
-   procedure Free (Inst : in out And_Rec);
-
-   package AImpl is new Relation_Interface (And_Rec);
+   overriding function Call (Inst : in out And_Rec) return Boolean;
+   overriding procedure Reset (Inst : in out And_Rec);
+   overriding procedure Free (Inst : in out And_Rec);
 
    ----------------------------------------
    --  Operator overloading constructors --
    ----------------------------------------
 
-   function "or" (Left : L_Rel.Ty; Right : R_Rel.Ty) return Or_Rec
-   is (Or_Rec'(Left, Right, others => <>)) with Inline_Always;
+   function "or" (L, R : Relation) return access I_Relation'Class
+   is (new Or_Rec'(L, R, others => <>)) with Inline_Always;
 
-   function "or" (Left : L_Rel.Ty; Right : R_Rel.Ty) return Relation
-   is (Impl.Dynamic (Left or Right)) with Inline_Always;
-
-   function "and" (Left : L_Rel.Ty; Right : R_Rel.Ty) return And_Rec
-   is (And_Rec'(Left, Right, others => <>)) with Inline_Always;
-
-   function "and" (Left : L_Rel.Ty; Right : R_Rel.Ty) return Relation
-   is (AImpl.Dynamic (Left and Right)) with Inline_Always;
+   function "and" (L, R : Relation) return access I_Relation'Class
+   is (new And_Rec'(L, R, others => <>)) with Inline_Always;
 
    function Logic_Or
-     (Left : L_Rel.Ty; Right : R_Rel.Ty) return Relation renames "or";
+     (L, R : Relation) return access I_Relation'Class renames "or";
 
    function Logic_And
-     (Left : L_Rel.Ty; Right : R_Rel.Ty) return Relation renames "and";
+     (L, R : Relation) return access I_Relation'Class renames "and";
 
 end Adalog.Operations;

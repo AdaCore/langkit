@@ -21,7 +21,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Adalog.Relation; use Adalog.Relation;
+with Adalog.Relations; use Adalog.Relations;
 
 package Adalog.Pure_Relations is
 

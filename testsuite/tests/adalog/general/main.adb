@@ -1,9 +1,10 @@
 with Ada.Text_IO;              use Ada.Text_IO;
 
 with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
-with Adalog.Dynamic_Ops;       use Adalog.Dynamic_Ops;
 with Adalog.Main_Support;      use Adalog.Main_Support;
+with Adalog.Operations;        use Adalog.Operations;
 with Adalog.Predicates;        use Adalog.Predicates;
+with Support;                  use Support;
 
 --  Test a combination of features at the same time:
 --  * Predicates
@@ -20,10 +21,6 @@ procedure Main is
 
    X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
    Y : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
-
-   type Dummy_Data is null record;
-   function Transform (D : Dummy_Data; I : Integer) return Integer is (I * 3);
-   package Bind is new Eq_Int.Raw_Custom_Bind (Dummy_Data, Transform);
 
    D : Dummy_Data;
 

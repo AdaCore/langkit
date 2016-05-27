@@ -88,42 +88,39 @@ package Adalog.Unify is
    ------------------
 
    function "="
-     (L : Left_Var.Var; R : Right_Var.Var) return Unify_LR_Rel.Rel
-   is ((Rel => Create (L, R, Dummy_L, Dummy_R), others => <>)) with Inline;
+     (L : Left_Var.Var; R : Right_Var.Var) return access I_Relation'Class
+   is (new Unify_LR_Rel.Rel'(Rel => Create (L, R, Dummy_L, Dummy_R),
+                             others => <>))
+   with Inline;
 
-   function "=" (L : L_Type; R : R_Type) return Boolean_Relation.Rel
-   is ((Rel => (Result => Equals (L, R)), others => <>)) with Inline;
+   function "=" (L : L_Type; R : R_Type) return access I_Relation'Class
+   is (new Boolean_Relation.Rel'(Rel => (Result => Equals (L, R)),
+                                 others => <>))
+   with Inline;
 
-   function "=" (L : Left_Var.Var; R : R_Type) return Unify_Left.Rel.Rel
-   is ((Rel => Unify_Left.Create (L, R), others => <>)) with Inline;
+   function "=" (L : Left_Var.Var; R : R_Type) return access I_Relation'Class
+   is (new Unify_Left.Rel.Rel'(Rel => Unify_Left.Create (L, R), others => <>))
+   with Inline;
 
-   function "=" (L : L_Type; R : Right_Var.Var) return Unify_Right.Rel.Rel
-   is ((Rel => Unify_Right.Create (R, L), others => <>)) with Inline;
-
-   -----------------------
-   --  Dynamic wrappers --
-   -----------------------
-
-   function "=" (L : Left_Var.Var; R : R_Type) return Relation
-   is (Unify_Left.Rel.Impl.Dynamic (L = R)) with Inline;
-
-   function "=" (L : L_Type; R : Right_Var.Var) return Relation
-   is (Unify_Right.Rel.Impl.Dynamic (L = R)) with Inline;
-
-   function "=" (L : L_Type; R : R_Type) return Relation
-   is (Boolean_Relation.Impl.Dynamic (L = R)) with Inline;
-
-   function "=" (L : Left_Var.Var; R : Right_Var.Var) return Relation
-   is (Unify_LR_Rel.Impl.Dynamic (L = R)) with Inline;
-
-   function Equals (L : Left_Var.Var; R : R_Type) return Relation renames "=";
-
-   function Equals (L : L_Type; R : Right_Var.Var) return Relation renames "=";
-
-   function Equals (L : L_Type; R : R_Type) return Relation renames "=";
+   function "=" (L : L_Type; R : Right_Var.Var) return access I_Relation'Class
+   is (new Unify_Right.Rel.Rel'(Rel => Unify_Right.Create (R, L),
+                                others => <>))
+   with Inline;
 
    function Equals
-     (L : Left_Var.Var; R : Right_Var.Var) return Relation renames "=";
+     (L : Left_Var.Var; R : Right_Var.Var) return access I_Relation'Class
+     renames "=";
+
+   function Equals (L : L_Type; R : R_Type) return access I_Relation'Class
+     renames "=";
+
+   function Equals
+     (L : Left_Var.Var; R : R_Type) return access I_Relation'Class
+      renames "=";
+
+   function Equals
+     (L : L_Type; R : Right_Var.Var) return access I_Relation'Class
+      renames "=";
 
    ------------
    -- Member --
@@ -131,12 +128,7 @@ package Adalog.Unify is
 
    function Member
      (R    : Left_Var.Var;
-      Vals : Unify_Left.R_Type_Array) return Unify_Left.Member_T
-         renames Unify_Left.Member;
-
-   function Member
-     (R    : Left_Var.Var;
       Vals : Unify_Left.R_Type_Array) return Relation
-      renames Unify_Left.Member;
+         renames Unify_Left.Member;
 
 end Adalog.Unify;

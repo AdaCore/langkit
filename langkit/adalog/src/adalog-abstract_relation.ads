@@ -42,7 +42,7 @@ package Adalog.Abstract_Relation is
    --  between two relations A and B, such as for example `A or B`, without
    --  knowing the exact static types of A and B.
 
-   type I_Relation is interface;
+   type I_Relation is abstract tagged null record;
 
    function Call (Inst : in out I_Relation) return Boolean is abstract;
    pragma Inline (Call);
@@ -53,9 +53,9 @@ package Adalog.Abstract_Relation is
    procedure Free (Self : in out I_Relation) is abstract;
    pragma Inline (Free);
 
-   type I_Relation_Access is access all I_Relation'Class;
+   type Relation is access all I_Relation'Class;
 
-   subtype Relation is I_Relation_Access;
+   type Relation_Array is array (Natural range <>) of Relation;
 
    function Call (Self : in out Relation) return Boolean
    is (Call (Self.all));

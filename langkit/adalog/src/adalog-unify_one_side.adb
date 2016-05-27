@@ -106,9 +106,10 @@ package body Adalog.Unify_One_Side is
    -- Member --
    ------------
 
-   function Member (R : Var.Var; Vals : R_Type_Array) return Member_T is
+   function Member
+     (R : Var.Var; Vals : R_Type_Array) return Relation is
    begin
-      return Member_T'(R, new R_Type_Array'(Vals), 1, False, False);
+      return new Member_T'(R, new R_Type_Array'(Vals), 1, False, False);
    end Member;
 
    ----------

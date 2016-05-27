@@ -26,7 +26,7 @@
 
 with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
 with Adalog.Logic_Var;
-with Adalog.Relation;
+with Adalog.Relations;
 
 generic
    type L_Type is private;
@@ -72,22 +72,15 @@ package Adalog.Unify_LR is
    is ((Left  => Left, Right => Right, State => No_Change,
         L_Data => L_Data, R_Data => R_Data));
 
-   package Unify_LR_Rel is new Relation.Stateful_Relation (Unify_LR);
+   package Unify_LR_Rel is new Relations.Stateful_Relation (Unify_LR);
 
    function Create
      (Left   : Left_Var.Var;
       Right  : Right_Var.Var;
       L_Data : Left_C_Data;
-      R_Data : Right_C_Data) return Unify_LR_Rel.Rel
+      R_Data : Right_C_Data) return Relation
    is
-     (Rel => Create (Left, Right, L_Data, R_Data), others => <>);
-
-   function Create
-     (Left   : Left_Var.Var;
-      Right  : Right_Var.Var;
-      L_Data : Left_C_Data;
-      R_Data : Right_C_Data) return Adalog.Abstract_Relation.Relation
-   is
-     (Unify_LR_Rel.Impl.Dynamic (Create (Left, Right, L_Data, R_Data)));
+     (new Unify_LR_Rel.Rel'(Rel => Create (Left, Right, L_Data, R_Data),
+                            others => <>));
 
 end Adalog.Unify_LR;

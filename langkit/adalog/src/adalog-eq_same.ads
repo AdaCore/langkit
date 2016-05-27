@@ -35,19 +35,6 @@ with Adalog.Unify_LR;
 --
 --  * An instantiation of Unify, so that you can do logical equality comparison
 --  between logic references and real instances of the type.
---
---  Since you're gonna want to express more complex logical predicates using
---  logical And/Or operations, you can either:
---
---  1. Use Adalog.Dynamic_Ops for that, together with the dynamic wrappers
---  provided in Unify.
---
---  2. Create your own instantiations of Adalog.Operations, if you need the
---  extra speed.
---
---  Please note that 2. is not without compromises, it will make your code much
---  harder to understand, due to the absence of implicit generic instantiation
---  in Ada, and the size of the generated code might explode.
 
 generic
    type LR_Type is private;

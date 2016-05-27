@@ -21,21 +21,87 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Adalog.Dynamic_Relation;
-with Adalog.Operations;
+package body Adalog.Relations is
 
---  Convenience package, to be able to express high level logical operations
---  such as Or and And between dynamic relations instances.
---
---  You can use it doing something like::
---
---      with Adalog.Dymamic_Ops; use Adalog.Dynamic_Ops;
---
---      A : Rel := ...
---      B : Rel := ...
---
---      C : Rel := A or B;
---
+   -------------------
+   -- Pure_Relation --
+   -------------------
 
-package Adalog.Dynamic_Ops
-is new Adalog.Operations (Adalog.Dynamic_Relation, Adalog.Dynamic_Relation);
+   package body Pure_Relation is
+
+      ----------
+      -- Call --
+      ----------
+
+      function Call (Inst : in out Rel) return Boolean is
+      begin
+         if Inst.Done then
+            return False;
+         end if;
+         Inst.Done := True;
+         return  Apply (Inst.Rel);
+      end Call;
+
+      ----------
+      -- Free --
+      ----------
+
+      procedure Free (Inst : in out Rel) is
+      begin
+         Free (Inst.Rel);
+      end Free;
+
+   end Pure_Relation;
+
+   -----------------------
+   -- Stateful_Relation --
+   -----------------------
+
+   package body Stateful_Relation is
+
+      ----------
+      -- Call --
+      ----------
+
+      function Call (Inst : in out Rel) return Boolean is
+      begin
+         case Inst.State is
+            when Start =>
+               if Apply (Inst.Rel) then
+                  Inst.State := Success;
+                  return True;
+               else
+                  Inst.State := Finish;
+                  return False;
+               end if;
+            when Success =>
+               Revert (Inst.Rel);
+               Inst.State := Finish;
+               return False;
+            when Finish =>
+               return False;
+         end case;
+      end Call;
+
+      -----------
+      -- Reset --
+      -----------
+
+      procedure Reset (Inst : in out Rel) is
+      begin
+         Inst.State := Start;
+         Revert (Inst.Rel);
+      end Reset;
+
+      ----------
+      -- Free --
+      ----------
+
+      procedure Free (Inst : in out Rel) is
+      begin
+         Free (Inst.Rel);
+      end Free;
+
+   end Stateful_Relation;
+
+end Adalog.Relations;

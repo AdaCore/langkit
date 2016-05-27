@@ -1,8 +1,8 @@
 with Ada.Text_IO;              use Ada.Text_IO;
 
 with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
-with Adalog.Dynamic_Ops;       use Adalog.Dynamic_Ops;
 with Adalog.Main_Support;      use Adalog.Main_Support;
+with Adalog.Operations;        use Adalog.Operations;
 with Adalog.Predicates;        use Adalog.Predicates;
 
 --  Test that when a variable has already a domain via the Member primitive, a

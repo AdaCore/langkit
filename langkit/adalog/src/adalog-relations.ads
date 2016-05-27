@@ -21,12 +21,12 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Adalog.Relation_Interface;
-
 --  Internal implementation package, not to be used directly by users a-priori.
 --  TODO??? document the inner workings a bit more.
 
-package Adalog.Relation is
+with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
+
+package Adalog.Relations is
 
    -------------------
    -- Pure_Relation --
@@ -40,16 +40,14 @@ package Adalog.Relation is
       --  This generic package represents a relation that will always
       --  yield the same result, and does not produce any side effects.
 
-      type Rel is record
+      type Rel is new I_Relation with record
          Done : Boolean := False;
          Rel  : Ty;
       end record;
 
-      function Call (Inst : in out Rel) return Boolean;
-      procedure Reset (Inst : in out Rel) is null;
-      procedure Free (Inst : in out Rel);
-
-      package Impl is new Relation_Interface (Ty => Rel);
+      overriding function Call (Inst : in out Rel) return Boolean;
+      overriding procedure Reset (Inst : in out Rel) is null;
+      overriding procedure Free (Inst : in out Rel);
    end Pure_Relation;
 
    -----------------------
@@ -68,16 +66,15 @@ package Adalog.Relation is
 
       type State_Type is (Start, Success, Finish);
 
-      type Rel is record
+      type Rel is new I_Relation with record
          State : State_Type := Start;
          Rel   : Ty;
       end record;
 
-      function Call (Inst : in out Rel) return Boolean;
-      procedure Reset (Inst : in out Rel);
-      procedure Free (Inst : in out Rel);
+      overriding function Call (Inst : in out Rel) return Boolean;
+      overriding procedure Reset (Inst : in out Rel);
+      overriding procedure Free (Inst : in out Rel);
 
-      package Impl is new Relation_Interface (Ty => Rel);
    end Stateful_Relation;
 
-end Adalog.Relation;
+end Adalog.Relations;

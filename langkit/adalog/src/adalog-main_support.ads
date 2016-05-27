@@ -37,5 +37,4 @@ package Adalog.Main_Support is
 
    package Pred_Int is
      new Dyn_Predicate (Integer, Eq_Int.Refs.Raw_Logic_Var);
-
 end Adalog.Main_Support;

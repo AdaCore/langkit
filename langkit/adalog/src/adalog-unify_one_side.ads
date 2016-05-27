@@ -21,10 +21,9 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Adalog.Abstract_Relation;
+with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
 with Adalog.Logic_Var;
-with Adalog.Relation;
-with Adalog.Relation_Interface;
+with Adalog.Relations;
 
 --  Internal implementation package, not to be used directly by users a-priori.
 --  TODO??? document the inner workings a bit more.
@@ -58,7 +57,7 @@ package Adalog.Unify_One_Side is
    procedure Revert (Self : in out Unify);
    procedure Free (Self : in out Unify) is null;
 
-   package Rel is new Relation.Stateful_Relation (Unify);
+   package Rel is new Relations.Stateful_Relation (Unify);
 
    ------------
    -- Member --
@@ -69,7 +68,7 @@ package Adalog.Unify_One_Side is
 
    type R_Type_Array_Access is access all R_Type_Array;
 
-   type Member_T is record
+   type Member_T is new I_Relation with record
       Left           : Var.Var;
       Values         : R_Type_Array_Access;
       Current_Index  : Positive := 1;
@@ -77,17 +76,11 @@ package Adalog.Unify_One_Side is
       Domain_Checked : Boolean := False;
    end record;
 
-   function Call (Self : in out Member_T) return Boolean;
-   procedure Reset (Self : in out Member_T);
-   procedure Free (Self : in out Member_T);
-
-   package Member_Impl is new Relation_Interface (Member_T);
-
-   function Member (R : Var.Var; Vals : R_Type_Array) return Member_T;
+   overriding function Call (Self : in out Member_T) return Boolean;
+   overriding procedure Reset (Self : in out Member_T);
+   overriding procedure Free (Self : in out Member_T);
 
    function Member
-     (R : Var.Var; Vals : R_Type_Array) return Abstract_Relation.Relation
-   is
-     (Member_Impl.Dynamic (Member (R, Vals)));
+     (R : Var.Var; Vals : R_Type_Array) return Relation;
 
 end Adalog.Unify_One_Side;

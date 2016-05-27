@@ -1,5 +1,3 @@
-with Adalog.Dynamic_Ops; use Adalog.Dynamic_Ops;
-
 package body Adalog.Variadic_Operations is
 
    ------------------

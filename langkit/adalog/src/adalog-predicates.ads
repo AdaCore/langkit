@@ -23,8 +23,7 @@
 
 with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
 with Adalog.Logic_Var;
-with Adalog.Relation;          use Adalog.Relation;
-with Adalog.Relation_Interface;
+with Adalog.Relations;          use Adalog.Relations;
 
 package Adalog.Predicates is
    generic
@@ -42,27 +41,22 @@ package Adalog.Predicates is
    package Predicate is
       use Var;
 
-      type Predicate_Logic is record
+      type Predicate_Logic is new I_Relation with record
          Ref  : Var.Var;
          Pred : Predicate_Type;
       end record;
 
-      function Call (Inst : in out Predicate_Logic) return Boolean is
+      overriding function Call
+        (Inst : in out Predicate_Logic) return Boolean
+      is
         (Is_Defined (Inst.Ref) and then Call (Inst.Pred, GetL (Inst.Ref)));
 
-      procedure Reset (Inst : in out Predicate_Logic) is null;
-
-      procedure Free (Inst : in out Predicate_Logic);
-
-      package Impl is new Relation_Interface (Ty => Predicate_Logic);
+      overriding procedure Reset (Inst : in out Predicate_Logic) is null;
+      overriding procedure Free (Inst : in out Predicate_Logic);
 
       function Create
-        (R : Var.Var; Pred : Predicate_Type) return Predicate_Logic
-      is (Predicate_Logic'(Ref => R, Pred => Pred));
-
-      function Create
-        (R : Var.Var; Pred : Predicate_Type) return Abstract_Relation.Relation
-      is (Impl.Dynamic (Create (R, Pred)));
+        (R : Var.Var; Pred : Predicate_Type) return access I_Relation'Class
+      is (new Predicate_Logic'(Ref => R, Pred => Pred));
 
    end Predicate;
 
@@ -86,16 +80,11 @@ package Adalog.Predicates is
       package Impl is new Stateful_Relation (Ty => Predicate_Logic);
 
       function Create
-        (R    : Var.Var;
-         Pred : Predicate_Access)
-         return Impl.Rel
+        (R    : Var.Var; Pred : Predicate_Access)
+         return access I_Relation'Class
       is
-         (Rel => Predicate_Logic'(Ref => R, P => Pred), others => <>);
-
-      function Create
-        (R    : Var.Var;
-         Pred : Predicate_Access) return Abstract_Relation.Relation
-      is (Impl.Impl.Dynamic (Create (R, Pred)));
+        (new Impl.Rel'(Rel => Predicate_Logic'(Ref => R, P => Pred),
+                       others => <>));
 
    end Dyn_Predicate;
 

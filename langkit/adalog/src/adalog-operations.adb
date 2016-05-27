@@ -35,13 +35,13 @@ package body Adalog.Operations is
          when others => goto State_2;
       end case;
 
-      if L_Rel.Call (Inst.Left) then
+      if Inst.Left.Call then
          return True;
       end if;
 
       <<State_1>>
       Inst.State := 1;
-      if R_Rel.Call (Inst.Right) then
+      if Inst.Right.Call then
          return True;
       end if;
 
@@ -57,8 +57,8 @@ package body Adalog.Operations is
    procedure Reset (Inst : in out Or_Rec) is
    begin
       Inst.State := 0;
-      L_Rel.Reset (Inst.Left);
-      R_Rel.Reset (Inst.Right);
+      Inst.Left.Reset;
+      Inst.Right.Reset;
    end Reset;
 
    ----------
@@ -74,12 +74,12 @@ package body Adalog.Operations is
       end case;
 
       <<State_0>>
-      while L_Rel.Call (Inst.Left) loop
+      while Inst.Left.Call loop
          Inst.State := 1;
-         if R_Rel.Call (Inst.Right) then
+         if Inst.Right.Call then
             return True;
          else
-            R_Rel.Reset (Inst.Right);
+            Inst.Right.Reset;
             Inst.State := 0;
          end if;
       end loop;
@@ -87,10 +87,10 @@ package body Adalog.Operations is
 
       <<State_1>>
       Inst.State := 1;
-      if R_Rel.Call (Inst.Right) then
+      if Inst.Right.Call then
          return True;
       else
-         R_Rel.Reset (Inst.Right);
+         Inst.Right.Reset;
          Inst.State := 0;
       end if;
       goto State_0;
@@ -107,8 +107,8 @@ package body Adalog.Operations is
    procedure Reset (Inst : in out And_Rec) is
    begin
       Inst.State := 0;
-      L_Rel.Reset (Inst.Left);
-      R_Rel.Reset (Inst.Right);
+      Inst.Left.Reset;
+      Inst.Right.Reset;
    end Reset;
 
    ----------
@@ -117,8 +117,8 @@ package body Adalog.Operations is
 
    procedure Free (Inst : in out And_Rec) is
    begin
-      L_Rel.Free (Inst.Left);
-      R_Rel.Free (Inst.Right);
+      Inst.Left.Free;
+      Inst.Right.Free;
    end Free;
 
    ----------
@@ -127,8 +127,8 @@ package body Adalog.Operations is
 
    procedure Free (Inst : in out Or_Rec) is
    begin
-      L_Rel.Free (Inst.Left);
-      R_Rel.Free (Inst.Right);
+      Inst.Left.Free;
+      Inst.Right.Free;
    end Free;
 
 end Adalog.Operations;
