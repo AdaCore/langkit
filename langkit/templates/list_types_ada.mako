@@ -106,7 +106,7 @@
       elsif Or_Null then
          return null;
       else
-         raise Property_Error;
+         raise Property_Error with "out-of-bounds AST list access";
       end if;
    end Get;
 

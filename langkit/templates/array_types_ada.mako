@@ -91,7 +91,7 @@
       elsif Or_Null then
          return ${cls.element_type().nullexpr()};
       else
-         raise Property_Error;
+         raise Property_Error with "out-of-bounds array access";
       end if;
    end Get;
 

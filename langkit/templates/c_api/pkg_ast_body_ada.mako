@@ -89,7 +89,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
       --  automatically creating an anonymous unit to embed the root
       --  environment.
       if E.Node = null then
-         raise Property_Error;
+         raise Property_Error with "LexicalEnv.Get on null LexicalEnv";
       end if;
 
       declare

@@ -10,7 +10,7 @@ then
      ${expr.static_type.name()} (${expr.expr_var.name});
 else
    % if expr.do_raise:
-   raise Property_Error;
+   raise Property_Error with "invalid object cast";
    % else:
    ${expr.result_var.name} := null;
    % endif
