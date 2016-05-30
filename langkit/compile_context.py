@@ -912,8 +912,9 @@ class CompileCtx():
         """
         args = [a.lower if isinstance(a, names.Name) else a for a in args]
         if self.extensions_dir:
-            ret = os.path.join(self.extensions_dir, *args)
-            return ret if os.path.isfile(ret) else None
+            ret = path.join(*args)
+            if path.isfile(path.join(self.extensions_dir, ret)):
+                return ret
 
     def set_quex_path(self):
         """

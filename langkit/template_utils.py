@@ -60,24 +60,12 @@ class Renderer(object):
             raise
 
 
-template_cache = {}
+template_lookup = None
+":type: TemplateLookup"
 
 
 def mako_template(file_name):
-    dir_path = path.join(path.dirname(path.realpath(__file__)), "templates")
-    t_path = path.join(dir_path, file_name + ".mako")
-    t = template_cache.get(t_path, None)
-
-    if not t:
-        t = Template(
-            strict_undefined=True, filename=t_path,
-            # We want to correctly resolve both absolute paths, and paths
-            # relative to the base template directory.
-            lookup=TemplateLookup(directories=["/", dir_path])
-        )
-        template_cache[t_path] = t
-
-    return t
+    return template_lookup.get_template("{}.mako".format(file_name))
 
 
 common_renderer = Renderer({

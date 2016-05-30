@@ -4,7 +4,7 @@
 <%namespace name="astnode_types" file="astnode_types_py.mako" />
 <%namespace name="enum_types"    file="enum_types_py.mako" />
 <%namespace name="struct_types"  file="struct_types_py.mako" />
-<%namespace name="exts"          file="../extensions.mako" />
+<%namespace name="exts"          file="/extensions.mako" />
 
 
 <% root_astnode_name = _self.root_grammar_class.name().camel %>

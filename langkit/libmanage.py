@@ -1,15 +1,20 @@
 from __future__ import absolute_import
 
 import argparse
+from funcy import keep
 import glob
 import inspect
-import os.path
+import os
+from os import path
 import pdb
 import pipes
 import shutil
 import subprocess
 import sys
 
+from mako.lookup import TemplateLookup
+
+from langkit import template_utils
 from langkit.compile_context import Verbosity
 from langkit.diagnostics import Diagnostics, DiagnosticError
 from langkit.utils import Colors, col, printcol
@@ -22,26 +27,26 @@ class Directories(object):
 
     def __init__(self, lang_source_dir=None, build_dir=None, install_dir=None):
         self.root_lang_source_dir = lang_source_dir
-        self.root_langkit_source_dir = os.path.dirname(
-            os.path.abspath(__file__)
+        self.root_langkit_source_dir = path.dirname(
+            path.abspath(__file__)
         )
         self.root_build_dir = build_dir
         self.root_install_dir = install_dir
 
     def set_build_dir(self, build_dir):
-        self.root_build_dir = os.path.abspath(build_dir)
+        self.root_build_dir = path.abspath(build_dir)
 
     def set_install_dir(self, install_dir):
-        self.root_install_dir = os.path.abspath(install_dir)
+        self.root_install_dir = path.abspath(install_dir)
 
     def lang_source_dir(self, *args):
-        return os.path.join(self.root_lang_source_dir, *args)
+        return path.join(self.root_lang_source_dir, *args)
 
     def build_dir(self, *args):
-        return os.path.join(self.root_build_dir, *args)
+        return path.join(self.root_build_dir, *args)
 
     def install_dir(self, *args):
-        return os.path.join(self.root_install_dir, *args)
+        return path.join(self.root_install_dir, *args)
 
     def langkit_source_dir(self, *args):
         """
@@ -49,9 +54,9 @@ class Directories(object):
         for langkit.
 
         :param list[str] args: The path components, same semantics as in
-            os.path.join.
+            path.join.
         """
-        return os.path.join(self.root_langkit_source_dir, *args)
+        return path.join(self.root_langkit_source_dir, *args)
 
 
 class Coverage(object):
@@ -113,13 +118,22 @@ class ManageScript(object):
     Whether warnings to build the generated library are enabled by default.
     """
 
+    template_dirs = []
+    """
+    This tuple can be overloaded in subclasses to include new template
+    directories, if users have custom code to render as part of their
+    generated library.
+
+    :type: [str]
+    """
+
     def __init__(self):
 
         self.dirs = Directories(
             # It is assumed that manage.py is at the root of the language
             # definition source directory.
-            lang_source_dir=os.path.dirname(
-                os.path.abspath(inspect.getfile(self.__class__))
+            lang_source_dir=path.dirname(
+                path.abspath(inspect.getfile(self.__class__))
             )
         )
         Diagnostics.set_lang_source_dir(self.dirs.lang_source_dir())
@@ -422,6 +436,15 @@ class ManageScript(object):
             self.context.extensions_dir = self.dirs.lang_source_dir(
                 "extensions"
             )
+            dir_path = path.join(
+                path.dirname(path.realpath(__file__)), "templates"
+            )
+            template_utils.template_lookup = TemplateLookup(
+                directories=[
+                    dir_path, self.context.extensions_dir
+                ] + self.template_dirs,
+                strict_undefined=True
+            )
             parsed_args.func(parsed_args)
         except DiagnosticError:
             if parsed_args.debug:
@@ -561,7 +584,7 @@ class ManageScript(object):
         if os.name == 'nt':
             for dll in glob.glob(self.dirs.build_dir('lib', '*.dll')):
                 shutil.copy(dll,
-                            self.dirs.build_dir('bin', os.path.basename(dll)))
+                            self.dirs.build_dir('bin', path.basename(dll)))
 
         if args.verbosity.info:
             printcol("Compilation complete!", Colors.OKGREEN)
@@ -587,9 +610,9 @@ class ManageScript(object):
 
         for subdir in ('bin', 'include', 'lib', 'share', 'python'):
             install_dir = self.dirs.install_dir(subdir)
-            if os.path.isdir(install_dir):
+            if path.isdir(install_dir):
                 shutil.rmtree(install_dir)
-            assert not os.path.exists(install_dir)
+            assert not path.exists(install_dir)
             shutil.copytree(
                 self.dirs.build_dir(subdir),
                 self.dirs.install_dir(subdir)
@@ -637,10 +660,8 @@ class ManageScript(object):
         """
         env = dict(os.environ)
 
-        def add_path(name, path):
-            old = env.get(name, '')
-            env[name] = ('{}{}{}'.format(path, os.path.pathsep, old)
-                         if old else path)
+        def add_path(name, p):
+            env[name] = path.pathsep.join(keep([p, env.get(name, '')]))
 
         self.setup_environment(add_path)
         return env
