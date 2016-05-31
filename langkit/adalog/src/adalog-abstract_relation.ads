@@ -27,22 +27,23 @@ package Adalog.Abstract_Relation is
    -- I_Relation --
    ----------------
 
-   --  I_Relation is the base dynamic type for a relation. Since in Adalog
-   --  the base for a relation is static and ad-hoc (any type implementing the
-   --  necessary subprograms can be considered a relation), wrappers can be
-   --  created automatically to convert a type implementing the static contract
-   --  into a I_Relation. See Adalog.Dynamic_Relation.
-   --
-   --  Dynamic relations are provided for two reasons:
-   --
-   --  1. For convenience. Creating the necessary generic instantiations for
-   --  complex relation trees can be very tedious.
-   --
-   --  2. For expressivity. Sometimes you want to be able to create a relation
-   --  between two relations A and B, such as for example `A or B`, without
-   --  knowing the exact static types of A and B.
-
    type I_Relation is abstract tagged null record;
+   --  Base type for a type implementing the relation interface. A relation has
+   --  the following properties:
+   --
+   --  - It keeps references to zero or more sub-relations, relations that
+   --    it will expand. For example, an AND relation will have two (or more)
+   --    sub-relations.
+   --
+   --  - It keeps reference to zero or more logical variables, that it will
+   --    bound when solved.
+   --
+   --  - It can be solved, and that implies eventually solving sub relations,
+   --    and eventually binding logic variables.
+   --
+   --  - It keeps the current state of solving, which is necessary since
+   --    relation systems possibly have multiple solutions. This state can
+   --    be reset via the Reset primitive.
 
    function Call (Inst : in out I_Relation) return Boolean is abstract;
    --  Solve the relation system. Iff the solve process did issue a correct
