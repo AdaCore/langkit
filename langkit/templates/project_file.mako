@@ -27,7 +27,6 @@ library project ${lib_name} is
    for Library_Kind use Library_Kind_Param;
    for Interfaces use
      ("adalog.ads",
-      "adalog-abstract_relation.adb",
       "adalog-abstract_relation.ads",
       "adalog-eq_same.ads",
       "adalog-logic_ref.adb",

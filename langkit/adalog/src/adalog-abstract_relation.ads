@@ -55,13 +55,9 @@ package Adalog.Abstract_Relation is
 
    type Relation is access all I_Relation'Class;
 
+   function Call (Self : Relation) return Boolean is (Self.all.Call);
+   --  Shortcut to call the underlying relation, used by langkit
+
    type Relation_Array is array (Natural range <>) of Relation;
-
-   function Call (Self : in out Relation) return Boolean
-   is (Call (Self.all));
-
-   procedure Reset (Self : in out Relation);
-
-   procedure Free (Self : in out Relation);
 
 end Adalog.Abstract_Relation;
