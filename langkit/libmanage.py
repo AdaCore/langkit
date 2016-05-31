@@ -12,9 +12,6 @@ import shutil
 import subprocess
 import sys
 
-from mako.lookup import TemplateLookup
-
-from langkit import template_utils
 from langkit.compile_context import Verbosity
 from langkit.diagnostics import Diagnostics, DiagnosticError
 from langkit.utils import Colors, col, printcol
@@ -116,15 +113,6 @@ class ManageScript(object):
     ENABLE_WARNINGS_DEFAULT = False
     """
     Whether warnings to build the generated library are enabled by default.
-    """
-
-    template_dirs = []
-    """
-    This list can be overloaded in subclasses to include new template
-    directories, if users have custom code to render as part of their
-    generated library.
-
-    :type: [str]
     """
 
     def __init__(self):
@@ -435,15 +423,6 @@ class ManageScript(object):
             # Set the extensions dir on the compile context
             self.context.extensions_dir = self.dirs.lang_source_dir(
                 "extensions"
-            )
-            dir_path = path.join(
-                path.dirname(path.realpath(__file__)), "templates"
-            )
-            template_utils.template_lookup = TemplateLookup(
-                directories=[
-                    dir_path, self.context.extensions_dir
-                ] + self.template_dirs,
-                strict_undefined=True
             )
             parsed_args.func(parsed_args)
         except DiagnosticError:

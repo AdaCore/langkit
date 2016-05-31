@@ -25,14 +25,16 @@ import shutil
 import subprocess
 import sys
 
-from langkit import astdoc, caching, names
+from funcy import keep
+from mako.lookup import TemplateLookup
+
+from langkit import astdoc, caching, names, template_utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.diagnostics import check_source_language, errors_checkpoint, \
     Severity
 from langkit.expressions import PropertyDef
 from langkit.utils import Colors, printcol
-
 
 compile_ctx = None
 
@@ -190,7 +192,8 @@ class CompileCtx():
                  c_symbol_prefix=None,
                  enable_python_api=True,
                  default_charset='utf-8',
-                 verbosity=Verbosity('none')):
+                 verbosity=Verbosity('none'),
+                 template_lookup_extra_dirs=None):
         """Create a new context for code emission.
 
         :param str lang_name: string (mixed case and underscore: see
@@ -226,6 +229,11 @@ class CompileCtx():
 
         :param Verbosity verbosity: Amount of messages to display on standard
             output. None by default.
+
+        :param [str]|None template_lookup_extra_dirs: A list of
+            extra directories to add to the directories used by mako for
+            template lookup. This is useful if you want to render custom
+            code as part of the compilation process.
         """
         from langkit.python_api import PythonAPISettings
 
@@ -405,6 +413,8 @@ class CompileCtx():
         Whether to run the 2to3 field annotation pass.
         """
 
+        self.template_lookup_extra_dirs = template_lookup_extra_dirs or []
+
     def sorted_types(self, type_set):
         """
         Turn "type_set" into a list of types sorted by name.
@@ -535,6 +545,15 @@ class CompileCtx():
             actually modify the file in which ASTNode subclasses are
             defined, and annotate empty field definitions.
         """
+        dir_path = path.join(
+            path.dirname(path.realpath(__file__)), "templates"
+        )
+        template_utils.template_lookup = TemplateLookup(
+            directories=keep([dir_path, self.extensions_dir]
+                             + self.template_lookup_extra_dirs),
+            strict_undefined=True
+        )
+
         self.annotate_fields_types = annotate_fields_types
         self.compile()
         with global_context(self):
