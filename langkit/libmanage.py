@@ -120,7 +120,7 @@ class ManageScript(object):
 
     template_dirs = []
     """
-    This tuple can be overloaded in subclasses to include new template
+    This list can be overloaded in subclasses to include new template
     directories, if users have custom code to render as part of their
     generated library.
 

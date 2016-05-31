@@ -899,11 +899,12 @@ class CompileCtx():
 
     def ext(self, *args):
         """
-        Return an extension file's absolute path, given strings/names
-        arguments, so that you can do::
+        Return an extension path, relative to the extensions dir, given
+        strings/names arguments, only if the extension file exists, so that
+        you can do::
 
             ext('a', 'b', 'c')
-            # returns '$lang_dir/extensions/a/b/c'
+            # returns 'a/b/c'
 
         :param [str|names.Name] args: The list of components to constitute the
                                       extension's path.
