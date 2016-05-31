@@ -45,19 +45,28 @@ package Adalog.Abstract_Relation is
    type I_Relation is abstract tagged null record;
 
    function Call (Inst : in out I_Relation) return Boolean is abstract;
-   pragma Inline (Call);
+   --  Solve the relation system. Iff the solve process did issue a correct
+   --  solution, this will return True, and all logic variables bound by the
+   --  relation will have a value.
 
    procedure Reset (Self : in out I_Relation) is abstract;
-   pragma Inline (Call);
+   --  Reset the state of the relation and all sub-relations
 
    procedure Free (Self : in out I_Relation) is abstract;
-   pragma Inline (Free);
+   --  Frees ressources associated with Self. Relation trees are owning, so
+   --  that when you free one relation, you will free all sub relations. This
+   --  means that a sub-relation cannot be shared in different relation trees.
+   --  This is in line with the relation design, since a relation can have
+   --  state specific to a system, it should not be shared.
 
    type Relation is access all I_Relation'Class;
+   --  Since relations are trees, they're not manipulated by value, but instead
+   --  via this class-wide access type.
 
    function Call (Self : Relation) return Boolean is (Self.all.Call);
    --  Shortcut to call the underlying relation, used by langkit
 
    type Relation_Array is array (Natural range <>) of Relation;
+   --  Some relations will need to keep/provide arrays of sub-relations
 
 end Adalog.Abstract_Relation;
