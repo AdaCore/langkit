@@ -6,7 +6,6 @@ project Adalog is
 
    for Source_Dirs use ("src");
    for Object_Dir use "obj";
-   for Main use ("adalog-main.adb");
 
    package Compiler is
       case Build is
