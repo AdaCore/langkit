@@ -1,9 +1,7 @@
 with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
 
 package Adalog.Variadic_Operations is
-   type Rel_Array is array (Positive range <>) of Rel;
-
-   function Variadic_And (Rels : Rel_Array) return Rel;
-   function Variadic_Or (Rels : Rel_Array) return Rel;
+   function Variadic_And (Rels : Relation_Array) return Relation;
+   function Variadic_Or (Rels : Relation_Array) return Relation;
 
 end Adalog.Variadic_Operations;

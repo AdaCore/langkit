@@ -1,18 +1,20 @@
+with Adalog.Operations; use Adalog.Operations;
+
 package body Adalog.Variadic_Operations is
 
    ------------------
    -- Variadic_And --
    ------------------
 
-   function Variadic_And (Rels : Rel_Array) return Rel is
-      Ret : Rel;
+   function Variadic_And (Rels : Relation_Array) return Relation is
+      Ret : Relation;
    begin
       pragma Assert (Rels'Length > 0);
 
       Ret := Rels (1);
 
       for I in 2 .. Rels'Last loop
-         Ret := Ret and Rels (I);
+         Ret := Relation (Ret and Rels (I));
       end loop;
 
       return Ret;
@@ -22,8 +24,8 @@ package body Adalog.Variadic_Operations is
    -- Variadic_Or --
    -----------------
 
-   function Variadic_Or (Rels : Rel_Array) return Rel is
-      Ret : Rel;
+   function Variadic_Or (Rels : Relation_Array) return Relation is
+      Ret : Relation;
    begin
       pragma Assert (Rels'Length > 0);
 
