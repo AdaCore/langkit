@@ -515,6 +515,10 @@ class EquationType(BasicType):
     def c_type(cls, c_api_settings):
         raise Exception("Cannot expose logic variables to C at the moment")
 
+    @classmethod
+    def is_refcounted(cls):
+        return True
+
 
 class BoolType(BasicType):
     is_ptr = False
