@@ -1076,6 +1076,45 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end if;
    end Previous;
 
+   ----------------------
+   -- Previous_Sibling --
+   ----------------------
+
+   function Previous_Sibling
+     (Node : access ${root_node_value_type}'Class)
+     return ${root_node_type_name}
+   is
+      Sibling, Last_Item : ${root_node_type_name} := null;
+   begin
+      for I in 0 .. Child_Count (Node.Parent) loop
+         Sibling := Child (Node.Parent, I);
+         if Sibling = Node then
+            return Last_Item;
+         end if;
+         Last_Item := Sibling;
+      end loop;
+      return null;
+   end Previous_Sibling;
+
+   ------------------
+   -- Next_Sibling --
+   ------------------
+
+   function Next_Sibling
+     (Node : access ${root_node_value_type}'Class)
+     return ${root_node_type_name}
+   is
+      Sibling     : ${root_node_type_name} := null;
+      Return_Next : Boolean := False;
+   begin
+      for I in 0 .. Child_Count (Node.Parent) loop
+         Sibling := Child (Node.Parent, I);
+         exit when Return_Next;
+         Return_Next := (Sibling = Node);
+      end loop;
+      return Sibling;
+   end Next_Sibling;
+
    % if ctx.env_metadata:
    ${struct_types.body(ctx.env_metadata)}
 
