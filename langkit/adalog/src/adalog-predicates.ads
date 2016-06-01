@@ -56,7 +56,7 @@ package Adalog.Predicates is
 
       function Create
         (R : Var.Var; Pred : Predicate_Type) return access I_Relation'Class
-      is (new Predicate_Logic'(Ref => R, Pred => Pred));
+      is (new Predicate_Logic'(Ref => R, Pred => Pred, others => <>));
 
    end Predicate;
 

@@ -21,53 +21,37 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
+with Ada.Unchecked_Deallocation;
 
---  This package implement high level logical relation operators on other
---  relations, namely `logical and` and `logical or`.
+package body Adalog.Abstract_Relation is
 
-package Adalog.Operations is
+   -------------
+   -- Inc_Ref --
+   -------------
 
-   ---------------------------------
-   --  Or relation implementation --
-   ---------------------------------
+   procedure Inc_Ref (Self : Relation) is
+   begin
+      Self.Ref_Count := Self.Ref_Count + 1;
+   end Inc_Ref;
 
-   type Or_Rec is new I_Relation with record
-      Left, Right : Relation;
-      State : Integer := 0;
-   end record;
+   -------------
+   -- Dec_Ref --
+   -------------
 
-   overriding function Call (Inst : in out Or_Rec) return Boolean;
-   overriding procedure Reset (Inst : in out Or_Rec);
-   overriding procedure Free (Inst : in out Or_Rec);
+   procedure Dec_Ref (Self : in out Relation) is
+      procedure Unchecked_Free
+      is new Ada.Unchecked_Deallocation (I_Relation'Class, Relation);
+   begin
+      if Self = null then
+         return;
+      end if;
 
-   ----------------------------------
-   --  And relation implementation --
-   ----------------------------------
+      Self.Ref_Count := Self.Ref_Count - 1;
+      if Self.Ref_Count <= 0 then
+         Self.Free;
+         Unchecked_Free (Self);
+      end if;
 
-   type And_Rec is new I_Relation with record
-      Left, Right : Relation;
-      State : Integer := 0;
-   end record;
+   end Dec_Ref;
 
-   overriding function Call (Inst : in out And_Rec) return Boolean;
-   overriding procedure Reset (Inst : in out And_Rec);
-   overriding procedure Free (Inst : in out And_Rec);
-
-   ----------------------------------------
-   --  Operator overloading constructors --
-   ----------------------------------------
-
-   function "or" (L, R : Relation) return access I_Relation'Class
-   is (new Or_Rec'(Left => L, Right => R, others => <>)) with Inline_Always;
-
-   function "and" (L, R : Relation) return access I_Relation'Class
-   is (new And_Rec'(Left => L, Right => R, others => <>)) with Inline_Always;
-
-   function Logic_Or
-     (L, R : Relation) return access I_Relation'Class renames "or";
-
-   function Logic_And
-     (L, R : Relation) return access I_Relation'Class renames "and";
-
-end Adalog.Operations;
+end Adalog.Abstract_Relation;
