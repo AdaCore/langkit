@@ -292,28 +292,6 @@ class SolveEquation(AbstractExpression):
     property exposing equations cannot be public at the moment.
     """
 
-    class Expr(ResolvedExpression):
-        static_type = BoolType
-
-        def __init__(self, equation):
-
-            self.equation = equation
-            ":type: ResolvedExpression"
-
-            self.eq_var = PropertyDef.get().vars.create("Equation",
-                                                        EquationType)
-
-            super(SolveEquation.Expr, self).__init__()
-
-        def _render_pre(self):
-            return self.equation.render_pre() + """
-            {eq_var} := {eq_expr};
-            """.format(eq_var=self.eq_var.name,
-                       eq_expr=self.equation.render_expr())
-
-        def _render_expr(self):
-            return "Solve ({})".format(self.eq_var.name)
-
     def __init__(self, equation):
         super(SolveEquation, self).__init__()
 
@@ -321,4 +299,5 @@ class SolveEquation(AbstractExpression):
         ":type: AbstractExpression"
 
     def construct(self):
-        return self.Expr(construct(self.equation, EquationType))
+        return BuiltinCallExpr("Solve", BoolType,
+                               [construct(self.equation, EquationType)])
