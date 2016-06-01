@@ -16,7 +16,7 @@ begin
       X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
       R : Relation := Member (X, (1, 2, 3, 4, 5, 6)) and Member (X, (3, 4, 5));
    begin
-      while R.Call loop
+      while R.Solve loop
          Put_Line ("X =" & GetL (X)'Img);
       end loop;
    end;

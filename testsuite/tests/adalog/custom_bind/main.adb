@@ -16,7 +16,7 @@ begin
       Y : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
       R : Relation := Member (X, (1, 2, 3, 4, 5, 6)) and Square (X, Y);
    begin
-      while R.Call loop
+      while R.Solve loop
          Put_Line ("X =" & GetL (X)'Img & ", Y =" & GetL (Y)'Img);
       end loop;
    end;
@@ -28,7 +28,7 @@ begin
       R : Relation := Member (X, (1, 2, 3, 4, 5, 6))
                       and Square (X, Y) and (Y = 36);
    begin
-      while R.Call loop
+      while R.Solve loop
          Put_Line ("X =" & GetL (X)'Img & ", Y =" & GetL (Y)'Img);
       end loop;
    end;

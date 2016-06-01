@@ -76,7 +76,7 @@ package Adalog.Unify_One_Side is
       Domain_Checked : Boolean := False;
    end record;
 
-   overriding function Call (Self : in out Member_T) return Boolean;
+   overriding function Solve (Self : in out Member_T) return Boolean;
    overriding procedure Reset (Self : in out Member_T);
    overriding procedure Cleanup (Self : in out Member_T);
 

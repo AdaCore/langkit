@@ -14,7 +14,7 @@ begin
       X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
       R : Relation := Member (X, (1, 2, 3, 4, 5, 6)) or X = 7 or x = 8;
    begin
-      while R.Call loop
+      while R.Solve loop
          Put_Line ("X =" & GetL (X)'Img);
       end loop;
    end;
@@ -27,7 +27,7 @@ begin
          and X = Y
          and (Y = 3 or Y = 2 or Y = 1);
    begin
-      while R.Call loop
+      while R.Solve loop
          Put_Line ("X =" & GetL (X)'Img & ", Y =" & GetL (Y)'Img);
       end loop;
    end;

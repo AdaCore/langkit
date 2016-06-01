@@ -46,7 +46,7 @@ package Adalog.Predicates is
          Pred : Predicate_Type;
       end record;
 
-      overriding function Call
+      overriding function Solve
         (Inst : in out Predicate_Logic) return Boolean
       is
         (Is_Defined (Inst.Ref) and then Call (Inst.Pred, GetL (Inst.Ref)));

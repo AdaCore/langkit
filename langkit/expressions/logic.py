@@ -312,7 +312,7 @@ class SolveEquation(AbstractExpression):
                        eq_expr=self.equation.render_expr())
 
         def _render_expr(self):
-            return "Call ({})".format(self.eq_var.name)
+            return "Solve ({})".format(self.eq_var.name)
 
     def __init__(self, equation):
         super(SolveEquation, self).__init__()

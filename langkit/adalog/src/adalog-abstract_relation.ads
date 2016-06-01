@@ -48,7 +48,7 @@ package Adalog.Abstract_Relation is
    --    relation systems possibly have multiple solutions. This state can
    --    be reset via the Reset primitive.
 
-   function Call (Inst : in out I_Relation) return Boolean is abstract;
+   function Solve (Inst : in out I_Relation) return Boolean is abstract;
    --  Solve the relation system. Iff the solve process did issue a correct
    --  solution, this will return True, and all logic variables bound by the
    --  relation will have a value.
@@ -65,8 +65,8 @@ package Adalog.Abstract_Relation is
    --  Since relations are trees, they're not manipulated by value, but instead
    --  via this class-wide access type.
 
-   function Call (Self : Relation) return Boolean is (Self.all.Call);
-   --  Shortcut to call the underlying relation, used by langkit
+   function Solve (Self : Relation) return Boolean is (Self.all.Solve);
+   --  Shortcut to solve the underlying relation, used by langkit
 
    procedure Inc_Ref (Self : Relation);
    procedure Dec_Ref (Self : in out Relation);

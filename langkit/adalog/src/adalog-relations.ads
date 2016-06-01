@@ -45,7 +45,7 @@ package Adalog.Relations is
          Rel  : Ty;
       end record;
 
-      overriding function Call (Inst : in out Rel) return Boolean;
+      overriding function Solve (Inst : in out Rel) return Boolean;
       overriding procedure Reset (Inst : in out Rel) is null;
       overriding procedure Cleanup (Inst : in out Rel);
    end Pure_Relation;
@@ -71,7 +71,7 @@ package Adalog.Relations is
          Rel   : Ty;
       end record;
 
-      overriding function Call (Inst : in out Rel) return Boolean;
+      overriding function Solve (Inst : in out Rel) return Boolean;
       overriding procedure Reset (Inst : in out Rel);
       overriding procedure Cleanup (Inst : in out Rel);
 

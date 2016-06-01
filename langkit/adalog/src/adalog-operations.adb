@@ -27,7 +27,7 @@ package body Adalog.Operations is
    -- Call --
    ----------
 
-   function Call (Inst : in out Or_Rec) return Boolean is
+   function Solve (Inst : in out Or_Rec) return Boolean is
    begin
       case Inst.State is
          when 0 => null;
@@ -35,20 +35,20 @@ package body Adalog.Operations is
          when others => goto State_2;
       end case;
 
-      if Inst.Left.Call then
+      if Inst.Left.Solve then
          return True;
       end if;
 
       <<State_1>>
       Inst.State := 1;
-      if Inst.Right.Call then
+      if Inst.Right.Solve then
          return True;
       end if;
 
       <<State_2>>
       Inst.State := 2;
       return False;
-   end Call;
+   end Solve;
 
    -----------
    -- Reset --
@@ -65,7 +65,7 @@ package body Adalog.Operations is
    -- Call --
    ----------
 
-   function Call (Inst : in out And_Rec) return Boolean is
+   function Solve (Inst : in out And_Rec) return Boolean is
    begin
       case Inst.State is
          when 0 => goto State_0;
@@ -74,9 +74,9 @@ package body Adalog.Operations is
       end case;
 
       <<State_0>>
-      while Inst.Left.Call loop
+      while Inst.Left.Solve loop
          Inst.State := 1;
-         if Inst.Right.Call then
+         if Inst.Right.Solve then
             return True;
          else
             Inst.Right.Reset;
@@ -87,7 +87,7 @@ package body Adalog.Operations is
 
       <<State_1>>
       Inst.State := 1;
-      if Inst.Right.Call then
+      if Inst.Right.Solve then
          return True;
       else
          Inst.Right.Reset;
@@ -98,7 +98,7 @@ package body Adalog.Operations is
       <<State_2>>
       Inst.State := 2;
       return False;
-   end Call;
+   end Solve;
 
    -----------
    -- Reset --
