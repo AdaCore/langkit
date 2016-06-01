@@ -1032,6 +1032,14 @@ class StructMetaClass(CompiledTypeMetaclass):
                 type=Token,
                 doc="Return the last token used to parse this node."
             )
+            dct["previous_sibling"] = BuiltinField(
+                type=None,
+                doc="Return the node's previous sibling, if there is one"
+            )
+            dct["next_sibling"] = BuiltinField(
+                type=None,
+                doc="Return the node's next sibling, if there is one"
+            )
 
         # Get the list of macro classes, and compute the ordered dicts of
         # fields for each of them.
@@ -1126,6 +1134,8 @@ class StructMetaClass(CompiledTypeMetaclass):
         if is_root_grammar_class:
             mcs.root_grammar_class = cls
             fields["parent"].type = cls
+            fields["previous_sibling"].type = cls
+            fields["next_sibling"].type = cls
             fields["parents"].type = cls.array_type()
         elif cls.is_ast_node():
             base.subclasses.append(cls)
