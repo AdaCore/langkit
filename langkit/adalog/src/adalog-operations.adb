@@ -117,8 +117,8 @@ package body Adalog.Operations is
 
    procedure Cleanup (Inst : in out And_Rec) is
    begin
-      Inst.Left.Cleanup;
-      Inst.Right.Cleanup;
+      Dec_Ref (Inst.Left);
+      Dec_Ref (Inst.Right);
    end Cleanup;
 
    ----------
@@ -127,8 +127,32 @@ package body Adalog.Operations is
 
    procedure Cleanup (Inst : in out Or_Rec) is
    begin
-      Inst.Left.Cleanup;
-      Inst.Right.Cleanup;
+      Dec_Ref (Inst.Left);
+      Dec_Ref (Inst.Right);
    end Cleanup;
+
+   --------------
+   -- Logic_Or --
+   --------------
+
+   function Logic_Or
+     (L, R : Relation) return access I_Relation'Class is
+   begin
+      Inc_Ref (L);
+      Inc_Ref (R);
+      return L or R;
+   end Logic_Or;
+
+   ---------------
+   -- Logic_And --
+   ---------------
+
+   function Logic_And
+     (L, R : Relation) return access I_Relation'Class is
+   begin
+      Inc_Ref (L);
+      Inc_Ref (R);
+      return L and R;
+   end Logic_And;
 
 end Adalog.Operations;

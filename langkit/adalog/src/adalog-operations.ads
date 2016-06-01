@@ -65,9 +65,9 @@ package Adalog.Operations is
    is (new And_Rec'(Left => L, Right => R, others => <>)) with Inline_Always;
 
    function Logic_Or
-     (L, R : Relation) return access I_Relation'Class renames "or";
+     (L, R : Relation) return access I_Relation'Class;
 
    function Logic_And
-     (L, R : Relation) return access I_Relation'Class renames "and";
+     (L, R : Relation) return access I_Relation'Class;
 
 end Adalog.Operations;
