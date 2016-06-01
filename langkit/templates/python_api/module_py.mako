@@ -385,7 +385,10 @@ class SlocRange(object):
         return '{}-{}'.format(self.start, self.end)
 
     def __repr__(self):
-        return '<SlocRange {} at {:#x}>'.format(self, id(self))
+        return "<SlocRange {}:{}-{}:{}>".format(
+            self.start.line, self.start.column,
+            self.end.line, self.end.column
+        )
 
 
 class Diagnostic(object):
