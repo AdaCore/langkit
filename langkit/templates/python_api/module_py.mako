@@ -563,6 +563,9 @@ class ${root_astnode_name}(object):
                     if c is not None:
                         yield c
 
+    def __repr__(self):
+        return "<{} {}>".format(self.__class__.__name__, self.sloc_range)
+
 
 class ASTList(${root_astnode_name}):
     # TODO: document this class
