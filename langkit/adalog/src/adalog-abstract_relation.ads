@@ -56,12 +56,10 @@ package Adalog.Abstract_Relation is
    procedure Reset (Self : in out I_Relation) is abstract;
    --  Reset the state of the relation and all sub-relations
 
-   procedure Free (Self : in out I_Relation) is abstract;
-   --  Frees ressources associated with Self. Relation trees are owning, so
-   --  that when you free one relation, you will free all sub relations. This
-   --  means that a sub-relation cannot be shared in different relation trees.
-   --  This is in line with the relation design, since a relation can have
-   --  state specific to a system, it should not be shared.
+   procedure Cleanup (Self : in out I_Relation) is abstract;
+   --  Perform necessary cleanup before free, like releasing references and
+   --  freeing owned resources. This needs to be implemented by I_Relation
+   --  implementers, and it will be called just before freeing Self in Dec_Ref.
 
    type Relation is access all I_Relation'Class;
    --  Since relations are trees, they're not manipulated by value, but instead

@@ -19,7 +19,6 @@ begin
       while R.Call loop
          Put_Line ("X =" & GetL (X)'Img & ", Y =" & GetL (Y)'Img);
       end loop;
-      R.Free;
    end;
 
    declare
@@ -32,7 +31,6 @@ begin
       while R.Call loop
          Put_Line ("X =" & GetL (X)'Img & ", Y =" & GetL (Y)'Img);
       end loop;
-      R.Free;
    end;
 
 end Main;

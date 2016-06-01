@@ -34,10 +34,10 @@ package body Adalog.Predicates is
       ----------
 
       pragma Warnings (Off, "parameter");
-      procedure Free (Inst : in out Predicate_Logic) is
+      procedure Cleanup (Inst : in out Predicate_Logic) is
       begin
          Free (Inst.Pred);
-      end Free;
+      end Cleanup;
       pragma Warnings (On, "parameter");
 
    end Predicate;

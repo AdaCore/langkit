@@ -46,10 +46,10 @@ package body Adalog.Relations is
       -- Free --
       ----------
 
-      procedure Free (Inst : in out Rel) is
+      procedure Cleanup (Inst : in out Rel) is
       begin
          Free (Inst.Rel);
-      end Free;
+      end Cleanup;
 
    end Pure_Relation;
 
@@ -97,10 +97,10 @@ package body Adalog.Relations is
       -- Free --
       ----------
 
-      procedure Free (Inst : in out Rel) is
+      procedure Cleanup (Inst : in out Rel) is
       begin
          Free (Inst.Rel);
-      end Free;
+      end Cleanup;
 
    end Stateful_Relation;
 

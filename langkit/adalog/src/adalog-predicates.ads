@@ -52,7 +52,7 @@ package Adalog.Predicates is
         (Is_Defined (Inst.Ref) and then Call (Inst.Pred, GetL (Inst.Ref)));
 
       overriding procedure Reset (Inst : in out Predicate_Logic) is null;
-      overriding procedure Free (Inst : in out Predicate_Logic);
+      overriding procedure Cleanup (Inst : in out Predicate_Logic);
 
       function Create
         (R : Var.Var; Pred : Predicate_Type) return access I_Relation'Class

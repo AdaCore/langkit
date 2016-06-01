@@ -115,20 +115,20 @@ package body Adalog.Operations is
    -- Free --
    ----------
 
-   procedure Free (Inst : in out And_Rec) is
+   procedure Cleanup (Inst : in out And_Rec) is
    begin
-      Inst.Left.Free;
-      Inst.Right.Free;
-   end Free;
+      Inst.Left.Cleanup;
+      Inst.Right.Cleanup;
+   end Cleanup;
 
    ----------
    -- Free --
    ----------
 
-   procedure Free (Inst : in out Or_Rec) is
+   procedure Cleanup (Inst : in out Or_Rec) is
    begin
-      Inst.Left.Free;
-      Inst.Right.Free;
-   end Free;
+      Inst.Left.Cleanup;
+      Inst.Right.Cleanup;
+   end Cleanup;
 
 end Adalog.Operations;

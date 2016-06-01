@@ -39,7 +39,7 @@ package Adalog.Operations is
 
    overriding function Call (Inst : in out Or_Rec) return Boolean;
    overriding procedure Reset (Inst : in out Or_Rec);
-   overriding procedure Free (Inst : in out Or_Rec);
+   overriding procedure Cleanup (Inst : in out Or_Rec);
 
    ----------------------------------
    --  And relation implementation --
@@ -52,7 +52,7 @@ package Adalog.Operations is
 
    overriding function Call (Inst : in out And_Rec) return Boolean;
    overriding procedure Reset (Inst : in out And_Rec);
-   overriding procedure Free (Inst : in out And_Rec);
+   overriding procedure Cleanup (Inst : in out And_Rec);
 
    ----------------------------------------
    --  Operator overloading constructors --

@@ -122,11 +122,11 @@ package body Adalog.Unify_One_Side is
    -- Free --
    ----------
 
-   procedure Free (Self : in out Member_T) is
+   procedure Cleanup (Self : in out Member_T) is
       procedure Unchecked_Free
       is new Ada.Unchecked_Deallocation (R_Type_Array, R_Type_Array_Access);
    begin
       Unchecked_Free (Self.Values);
-   end Free;
+   end Cleanup;
 
 end Adalog.Unify_One_Side;

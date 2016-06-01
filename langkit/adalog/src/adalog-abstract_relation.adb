@@ -47,8 +47,8 @@ package body Adalog.Abstract_Relation is
       end if;
 
       Self.Ref_Count := Self.Ref_Count - 1;
-      if Self.Ref_Count <= 0 then
-         Self.Free;
+      if Self.Ref_Count = 0 then
+         Self.Cleanup;
          Unchecked_Free (Self);
       end if;
 

@@ -47,7 +47,7 @@ package Adalog.Relations is
 
       overriding function Call (Inst : in out Rel) return Boolean;
       overriding procedure Reset (Inst : in out Rel) is null;
-      overriding procedure Free (Inst : in out Rel);
+      overriding procedure Cleanup (Inst : in out Rel);
    end Pure_Relation;
 
    -----------------------
@@ -73,7 +73,7 @@ package Adalog.Relations is
 
       overriding function Call (Inst : in out Rel) return Boolean;
       overriding procedure Reset (Inst : in out Rel);
-      overriding procedure Free (Inst : in out Rel);
+      overriding procedure Cleanup (Inst : in out Rel);
 
    end Stateful_Relation;
 
