@@ -71,7 +71,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return ${analysis_context_type} (System.Null_Address);
-   end ${capi.get_name("create_analysis_context")};
+   end;
 
    procedure ${capi.get_name("destroy_analysis_context")}
      (Context : ${analysis_context_type})
@@ -87,7 +87,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-   end ${capi.get_name("destroy_analysis_context")};
+   end;
 
    function ${capi.get_name("get_analysis_unit_from_file")}
      (Context           : ${analysis_context_type};
@@ -114,7 +114,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return ${analysis_unit_type} (System.Null_Address);
-   end ${capi.get_name("get_analysis_unit_from_file")};
+   end;
 
    function ${capi.get_name("get_analysis_unit_from_buffer")}
      (Context           : ${analysis_context_type};
@@ -146,7 +146,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return ${analysis_unit_type} (System.Null_Address);
-   end ${capi.get_name("get_analysis_unit_from_buffer")};
+   end;
 
    function ${capi.get_name("remove_analysis_unit")}
      (Context  : ${analysis_context_type};
@@ -170,7 +170,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end ${capi.get_name("remove_analysis_unit")};
+   end;
 
    function ${capi.get_name("unit_root")} (Unit : ${analysis_unit_type})
                                            return ${node_type}
@@ -187,7 +187,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return ${node_type} (System.Null_Address);
-   end ${capi.get_name("unit_root")};
+   end;
 
    procedure ${capi.get_name('unit_first_token')}
      (Unit  : ${analysis_unit_type};
@@ -197,7 +197,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       T : constant Token_Type := First_Token (U);
    begin
       Token.all := Wrap (T);
-   end ${capi.get_name('unit_first_token')};
+   end;
 
    procedure ${capi.get_name('unit_last_token')}
      (Unit  : ${analysis_unit_type};
@@ -207,7 +207,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       T : constant Token_Type := Last_Token (U);
    begin
       Token.all := Wrap (T);
-   end ${capi.get_name('unit_last_token')};
+   end;
 
    function ${capi.get_name("unit_diagnostic_count")}
      (Unit : ${analysis_unit_type}) return unsigned
@@ -224,7 +224,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end ${capi.get_name("unit_diagnostic_count")};
+   end;
 
    function ${capi.get_name("unit_diagnostic")}
      (Unit         : ${analysis_unit_type};
@@ -254,7 +254,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end ${capi.get_name("unit_diagnostic")};
+   end;
 
    function ${capi.get_name("unit_incref")}
      (Unit : ${analysis_unit_type}) return ${analysis_unit_type}
@@ -272,7 +272,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return ${analysis_unit_type} (System.Null_Address);
-   end ${capi.get_name("unit_incref")};
+   end;
 
    procedure ${capi.get_name("unit_decref")} (Unit : ${analysis_unit_type})
    is
@@ -287,7 +287,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-   end ${capi.get_name("unit_decref")};
+   end;
 
    procedure ${capi.get_name("unit_reparse_from_file")}
      (Unit : ${analysis_unit_type}; Charset : chars_ptr)
@@ -303,7 +303,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-   end ${capi.get_name("unit_reparse_from_file")};
+   end;
 
    procedure ${capi.get_name("unit_reparse_from_buffer")}
      (Unit        : ${analysis_unit_type};
@@ -324,7 +324,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-   end ${capi.get_name("unit_reparse_from_buffer")};
+   end;
 
    procedure ${capi.get_name("unit_populate_lexical_env")}
      (Unit : ${analysis_unit_type})
@@ -340,7 +340,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-   end ${capi.get_name("unit_populate_lexical_env")};
+   end;
 
    ---------------------------------
    -- General AST node primitives --
@@ -372,7 +372,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return ${node_kind_type}'First;
-   end ${capi.get_name("node_kind")};
+   end;
 
    function ${capi.get_name("kind_name")} (Kind : ${node_kind_type})
                                            return ${text_type}
@@ -391,7 +391,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return (System.Null_Address, 0);
-   end ${capi.get_name("kind_name")};
+   end;
 
    procedure ${capi.get_name("node_sloc_range")}
      (Node         : ${node_type};
@@ -408,7 +408,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-   end ${capi.get_name("node_sloc_range")};
+   end;
 
    function ${capi.get_name("lookup_in_node")}
      (Node : ${node_type};
@@ -427,7 +427,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return ${node_type} (System.Null_Address);
-   end ${capi.get_name("lookup_in_node")};
+   end;
 
    function ${capi.get_name("node_child_count")} (Node : ${node_type})
                                                   return unsigned
@@ -444,7 +444,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end ${capi.get_name("node_child_count")};
+   end;
 
    function ${capi.get_name("node_child")}
      (Node    : ${node_type};
@@ -474,7 +474,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end ${capi.get_name("node_child")};
+   end;
 
    function ${capi.get_name("text_to_locale_string")}
      (Text : ${text_type}) return System.Address
@@ -542,7 +542,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return System.Null_Address;
-   end ${capi.get_name("text_to_locale_string")};
+   end;
 
    -------------------------
    -- Extensions handling --
@@ -559,7 +559,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
-   end ${capi.get_name("register_extension")};
+   end;
 
    function ${capi.get_name("node_extension")}
      (Node   : ${node_type};
@@ -581,7 +581,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       when Exc : others =>
          Set_Last_Exception (Exc);
          return System.Null_Address;
-   end ${capi.get_name("node_extension")};
+   end;
 
    ----------
    -- Wrap --
@@ -641,7 +641,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       else
          return Last_Exception;
       end if;
-   end ${capi.get_name("get_last_exception")};
+   end;
 
    function ${capi.get_name('token_kind_name')} (Kind : int) return chars_ptr
    is
@@ -656,7 +656,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       end;
 
       return New_String (Token_Kind_Name (K));
-   end ${capi.get_name('token_kind_name')};
+   end;
 
    procedure ${capi.get_name('token_next')}
      (Token      : ${token_type}_Ptr;
@@ -666,7 +666,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       NT : constant Token_Type := Next (T);
    begin
       Next_Token.all := Wrap (NT);
-   end ${capi.get_name('token_next')};
+   end;
 
    procedure ${capi.get_name('token_previous')}
      (Token          : ${token_type}_Ptr;
@@ -676,7 +676,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       PT : constant Token_Type := Previous (T);
    begin
       Previous_Token.all := Wrap (PT);
-   end ${capi.get_name('token_previous')};
+   end;
 
    ------------
    -- Unwrap --
