@@ -694,4 +694,20 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
      return Find (Unit.Token_Data.Symbols, T, False);
    end Unwrap;
 
+
+   procedure ${capi.get_name('destroy_text_type')} (T : in out ${text_type}) is
+      use System;
+   begin
+      if T.Is_Allocated /= 0 and then T.Chars /= System.Null_Address then
+         declare
+            TT : Text_Type (1 .. Natural (T.Length));
+            for TT'Address use T.Chars;
+            TA : Text_Access := TT'Unrestricted_Access;
+         begin
+            Free (TA);
+         end;
+         T.Chars := System.Null_Address;
+      end if;
+   end;
+
 end ${_self.ada_api_settings.lib_name}.Analysis.C;

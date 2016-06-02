@@ -74,6 +74,9 @@ class _text(ctypes.Structure):
         else:
             return None
 
+    def __del__(self):
+        _destroy_text_type(ctypes.byref(self))
+
 class _Sloc(ctypes.Structure):
     _fields_ = [("line", ctypes.c_uint32),
                 ("column", ctypes.c_uint16)]
@@ -666,6 +669,9 @@ _free = _import_func(
     [ctypes.c_void_p], None
 )
 
+_destroy_text_type = _import_func(
+    '${capi.get_name("destroy_text_type")}', [ctypes.POINTER(_text)], None
+)
 
 # Analysis primitives
 _create_analysis_context = _import_func(
