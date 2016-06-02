@@ -43,7 +43,7 @@ class _text(ctypes.Structure):
 
     # Instances can hold buffers that they own. In this case, the buffer must
     # be deallocated when the instance is destroyed. Thus instances will hold
-    # a "chars_buffer" attribute that will be automatically destroyed.
+    # a "text_buffer" attribute that will be automatically destroyed.
     text_buffer = None
 
     @classmethod
