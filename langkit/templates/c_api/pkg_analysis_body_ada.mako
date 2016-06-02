@@ -385,12 +385,13 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
             ${root_node_kind_name}'Enum_Val (Kind);
          Name : Text_Access renames Node_Kind_Names (K);
       begin
-         return (Chars => Name.all'Address, Length => Name'Length);
+         return (Chars => Name.all'Address, Length => Name'Length,
+                 Is_Allocated => 0);
       end;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return (System.Null_Address, 0);
+         return (System.Null_Address, 0, Is_Allocated => 0);
    end;
 
    procedure ${capi.get_name("node_sloc_range")}
@@ -592,7 +593,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       Length : Natural;
    begin
       Get_Wide_Wide_String (S, Chars, Length);
-      return (Chars.all'Address, size_t (Length));
+      return (Chars.all'Address, size_t (Length), 0);
    end Wrap;
 
    ------------------------

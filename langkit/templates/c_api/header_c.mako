@@ -82,6 +82,8 @@ typedef struct {
     uint32_t *chars;
    ${c_doc('langkit.text_type.length')}
     size_t length;
+
+    int is_allocated;
 } ${text_type};
 
 ${c_doc('langkit.token_kind')}

@@ -37,7 +37,8 @@ class _text(ctypes.Structure):
     # side, we have to be careful about converting the length when retrieving
     # the chars.
     _fields_ = [("chars", ctypes.POINTER(ctypes.c_char)),
-                ("length", ctypes.c_size_t)]
+                ("length", ctypes.c_size_t),
+                ("is_allocated", ctypes.c_int),]
 
     encoding = 'utf-32le' if sys.byteorder == 'little' else 'utf-32be'
 

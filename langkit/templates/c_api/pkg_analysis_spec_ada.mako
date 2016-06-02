@@ -58,6 +58,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 
       Length : size_t;
       ${ada_c_doc('langkit.text_type.length', 6)}
+
+      Is_Allocated : int;
    end record
      with Convention => C_Pass_By_Copy;
    ${ada_c_doc('langkit.text_type', 3)}
@@ -386,8 +388,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    function Wrap (T : Text_Access) return ${text_type} is
      (if T = null
-      then (Chars => System.Null_Address, Length => 0)
-      else (Chars => T.all'Address, Length => T.all'Length));
+      then (Chars => System.Null_Address, Length => 0, Is_Allocated => 0)
+      else (Chars => T.all'Address, Length => T.all'Length, Is_Allocated => 0));
+
    function Wrap (T : Symbol_Type) return ${text_type} is
      (Wrap (Text_Access (T)));
 
