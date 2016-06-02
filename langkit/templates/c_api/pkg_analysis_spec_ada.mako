@@ -112,22 +112,22 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    -- Analysis primitives --
    -------------------------
 
-   function ${capi.get_name("create_analysis_context")}
+   function ${capi.get_name('create_analysis_context')}
      (Charset : chars_ptr)
       return ${analysis_context_type}
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("create_analysis_context")}";
+           External_name => "${capi.get_name('create_analysis_context')}";
    ${ada_c_doc('langkit.create_context', 3)}
 
-   procedure ${capi.get_name("destroy_analysis_context")}
+   procedure ${capi.get_name('destroy_analysis_context')}
      (Context : ${analysis_context_type})
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("destroy_analysis_context")}";
+           External_name => "${capi.get_name('destroy_analysis_context')}";
    ${ada_c_doc('langkit.destroy_context', 3)}
 
-   function ${capi.get_name("get_analysis_unit_from_file")}
+   function ${capi.get_name('get_analysis_unit_from_file')}
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
       Reparse           : int;
@@ -136,10 +136,10 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
       with Export        => True,
            Convention    => C,
            External_name =>
-              "${capi.get_name("get_analysis_unit_from_file")}";
+              "${capi.get_name('get_analysis_unit_from_file')}";
    ${ada_c_doc('langkit.get_unit_from_file', 3)}
 
-   function ${capi.get_name("get_analysis_unit_from_buffer")}
+   function ${capi.get_name('get_analysis_unit_from_buffer')}
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
       Buffer            : chars_ptr;
@@ -149,22 +149,22 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
       with Export        => True,
            Convention    => C,
            External_name =>
-              "${capi.get_name("get_analysis_unit_from_buffer")}";
+              "${capi.get_name('get_analysis_unit_from_buffer')}";
    ${ada_c_doc('langkit.get_unit_from_buffer', 3)}
 
-   function ${capi.get_name("remove_analysis_unit")}
+   function ${capi.get_name('remove_analysis_unit')}
      (Context  : ${analysis_context_type};
       Filename : chars_ptr) return int
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("remove_analysis_unit")}";
+           External_name => "${capi.get_name('remove_analysis_unit')}";
    ${ada_c_doc('langkit.remove_unit', 3)}
 
-   function ${capi.get_name("unit_root")} (Unit : ${analysis_unit_type})
+   function ${capi.get_name('unit_root')} (Unit : ${analysis_unit_type})
                                            return ${node_type}
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("unit_root")}";
+           External_name => "${capi.get_name('unit_root')}";
    ${ada_c_doc('langkit.unit_root', 3)}
 
    procedure ${capi.get_name('unit_first_token')}
@@ -183,53 +183,53 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name('unit_last_token')}";
    ${ada_c_doc('langkit.unit_last_token', 3)}
 
-   function ${capi.get_name("unit_diagnostic_count")}
+   function ${capi.get_name('unit_diagnostic_count')}
      (Unit : ${analysis_unit_type}) return unsigned
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("unit_diagnostic_count")}";
+           External_name => "${capi.get_name('unit_diagnostic_count')}";
    ${ada_c_doc('langkit.unit_diagnostic_count', 3)}
 
-   function ${capi.get_name("unit_diagnostic")}
+   function ${capi.get_name('unit_diagnostic')}
      (Unit         : ${analysis_unit_type};
       N            : unsigned;
       Diagnostic_P : ${diagnostic_type}_Ptr) return int
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("unit_diagnostic")}";
+           External_name => "${capi.get_name('unit_diagnostic')}";
    ${ada_c_doc('langkit.unit_diagnostic', 3)}
 
-   function ${capi.get_name("unit_incref")}
+   function ${capi.get_name('unit_incref')}
      (Unit : ${analysis_unit_type}) return ${analysis_unit_type}
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("unit_incref")}";
+           External_name => "${capi.get_name('unit_incref')}";
    ${ada_c_doc('langkit.unit_incref', 3)}
 
-   procedure ${capi.get_name("unit_decref")} (Unit : ${analysis_unit_type})
+   procedure ${capi.get_name('unit_decref')} (Unit : ${analysis_unit_type})
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("unit_decref")}";
+           External_name => "${capi.get_name('unit_decref')}";
    ${ada_c_doc('langkit.unit_decref', 3)}
 
-   procedure ${capi.get_name("unit_reparse_from_file")}
+   procedure ${capi.get_name('unit_reparse_from_file')}
      (Unit : ${analysis_unit_type}; Charset : chars_ptr)
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("unit_reparse_from_file")}";
+           External_name => "${capi.get_name('unit_reparse_from_file')}";
    ${ada_c_doc('langkit.unit_reparse_file', 3)}
 
-   procedure ${capi.get_name("unit_reparse_from_buffer")}
+   procedure ${capi.get_name('unit_reparse_from_buffer')}
      (Unit        : ${analysis_unit_type};
       Charset     : chars_ptr;
       Buffer      : chars_ptr;
       Buffer_Size : size_t)
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("unit_reparse_from_buffer")}";
+           External_name => "${capi.get_name('unit_reparse_from_buffer')}";
    ${ada_c_doc('langkit.unit_reparse_buffer', 3)}
 
-   procedure ${capi.get_name("unit_populate_lexical_env")}
+   procedure ${capi.get_name('unit_populate_lexical_env')}
      (Unit : ${analysis_unit_type})
       with Export        => True,
            Convention    => C,
@@ -240,57 +240,57 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    -- General AST node primitives --
    ---------------------------------
 
-   function ${capi.get_name("node_kind")} (Node : ${node_type})
+   function ${capi.get_name('node_kind')} (Node : ${node_type})
       return ${node_kind_type}
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("node_kind")}";
+           External_name => "${capi.get_name('node_kind')}";
    ${ada_c_doc('langkit.node_kind', 3)}
 
-   function ${capi.get_name("kind_name")} (Kind : ${node_kind_type})
+   function ${capi.get_name('kind_name')} (Kind : ${node_kind_type})
                                            return ${text_type}
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("kind_name")}";
+           External_name => "${capi.get_name('kind_name')}";
    ${ada_c_doc('langkit.kind_name', 3)}
 
-   procedure ${capi.get_name("node_sloc_range")}
+   procedure ${capi.get_name('node_sloc_range')}
      (Node         : ${node_type};
       Sloc_Range_P : ${sloc_range_type}_Ptr)
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("node_sloc_range")}";
+           External_name => "${capi.get_name('node_sloc_range')}";
    ${ada_c_doc('langkit.node_sloc_range', 3)}
 
-   function ${capi.get_name("lookup_in_node")}
+   function ${capi.get_name('lookup_in_node')}
      (Node : ${node_type};
       Sloc : ${sloc_type}_Ptr) return ${node_type}
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("lookup_in_node")}";
+           External_name => "${capi.get_name('lookup_in_node')}";
    ${ada_c_doc('langkit.lookup_in_node', 3)}
 
-   function ${capi.get_name("node_child_count")} (Node : ${node_type})
+   function ${capi.get_name('node_child_count')} (Node : ${node_type})
                                                   return unsigned
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("node_child_count")}";
+           External_name => "${capi.get_name('node_child_count')}";
    ${ada_c_doc('langkit.node_child_count', 3)}
 
-   function ${capi.get_name("node_child")}
+   function ${capi.get_name('node_child')}
      (Node    : ${node_type};
       N       : unsigned;
       Child_P : ${node_type}_Ptr) return int
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("node_child")}";
+           External_name => "${capi.get_name('node_child')}";
    ${ada_c_doc('langkit.node_child', 3)}
 
-   function ${capi.get_name("text_to_locale_string")}
+   function ${capi.get_name('text_to_locale_string')}
      (Text : ${text_type}) return System.Address
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("text_to_locale_string")}";
+           External_name => "${capi.get_name('text_to_locale_string')}";
    ${ada_c_doc('langkit.text_to_locale_string', 3)}
 
 
@@ -300,34 +300,34 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    ${ada_c_doc('langkit.extensions_handling', 3)}
 
-   type ${capi.get_name("node_extension_destructor")} is
+   type ${capi.get_name('node_extension_destructor')} is
       access procedure (Node      : ${node_type};
                         Extension : System.Address)
       with Convention => C;
    ${ada_c_doc('langkit.node_extension_destructor', 3)}
 
-   function ${capi.get_name("register_extension")} (Name : chars_ptr)
+   function ${capi.get_name('register_extension')} (Name : chars_ptr)
       return unsigned
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("register_extension")}";
+           External_name => "${capi.get_name('register_extension')}";
    ${ada_c_doc('langkit.register_extension', 3)}
 
-   function ${capi.get_name("node_extension")}
+   function ${capi.get_name('node_extension')}
      (Node   : ${node_type};
       Ext_Id : unsigned;
-      Dtor   : ${capi.get_name("node_extension_destructor")})
+      Dtor   : ${capi.get_name('node_extension_destructor')})
       return System.Address
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name("node_extension")}";
+           External_name => "${capi.get_name('node_extension')}";
    ${ada_c_doc('langkit.node_extension', 3)}
 
    ----------
    -- Misc --
    ----------
 
-   function ${capi.get_name("get_last_exception")} return ${exception_type}_Ptr
+   function ${capi.get_name('get_last_exception')} return ${exception_type}_Ptr
      with Export        => True,
           Convention    => C,
           External_Name => "${capi.get_name('get_last_exception')}";
@@ -432,7 +432,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
      (${node_type}, ${root_node_type_name});
 
    function Convert is new Ada.Unchecked_Conversion
-     (${capi.get_name("node_extension_destructor")},
+     (${capi.get_name('node_extension_destructor')},
       Extension_Destructor);
    function Convert is new Ada.Unchecked_Conversion
      (chars_ptr, System.Address);
