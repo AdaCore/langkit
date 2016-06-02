@@ -26,6 +26,7 @@
    <%
       type_name = "{}_Type".format(cls.name())
       base_name = cls.base().name()
+      ext = ctx.ext("nodes", cls.name(), "public_decls")
    %>
 
    --
@@ -73,6 +74,7 @@
       ${prop.prop_decl}
    % endfor
 
+   ${exts.include_extension(ext)}
 </%def>
 
 <%def name="node_fields(cls, emit_null=True)">
@@ -166,6 +168,8 @@
 
    # Shortcut for ${cls.name()}_Type
    type_name = '{}_Type'.format(cls.name())
+
+   ext = ctx.ext("nodes", cls.name(), "bodies")
    %>
 
    % if not cls.abstract:
@@ -497,4 +501,5 @@
    ${prop.prop_def}
    % endfor
 
+   ${exts.include_extension(ext)}
 </%def>
