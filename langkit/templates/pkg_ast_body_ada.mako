@@ -5,13 +5,14 @@
 
 <% root_node_array = ctx.root_grammar_class.array_type() %>
 
-with Ada.Containers;        use Ada.Containers;
+with Ada.Characters.Conversions; use Ada.Characters.Conversions;
+with Ada.Containers;             use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Ordered_Maps;
-with Ada.Text_IO;           use Ada.Text_IO;
+with Ada.Text_IO;                use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
-with System.Storage_Elements; use System.Storage_Elements;
+with System.Storage_Elements;    use System.Storage_Elements;
 
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
 with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
@@ -809,10 +810,11 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
    function Short_Image
      (Node : access ${root_node_value_type}'Class)
-      return String
+      return Wide_Wide_String
    is
    begin
-      return "<" & Kind_Name (Node) & " " & Image (Sloc_Range (Node)) & ">";
+      return "<" & To_Wide_Wide_String (Kind_Name (Node))
+             & " " & To_Wide_Wide_String (Image (Sloc_Range (Node))) & ">";
    end Short_Image;
 
    ------------------------
@@ -871,7 +873,11 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       use Sorted_Envs;
 
       function Image (El : Env_Element) return String is
-        (Short_Image (El.El));
+        (To_String (Short_Image (El.El)));
+      -- TODO??? This is slightly hackish, because we're converting a wide
+      -- string back to string. But since we're using this solely for
+      -- test/debug purposes, it should not matter. Still, would be good to
+      -- have Wide_Wide string everywhere at some point.
 
       function Image is new AST_Envs.Env_Element_Vectors.Image (Image);
 

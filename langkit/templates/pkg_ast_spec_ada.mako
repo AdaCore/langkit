@@ -474,7 +474,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
 
    function Short_Image
      (Node : access ${root_node_value_type}'Class)
-      return String;
+      return Wide_Wide_String;
    --  Debug helper: return a short representation of the string, containing
    --  just the kind name and the sloc.
 

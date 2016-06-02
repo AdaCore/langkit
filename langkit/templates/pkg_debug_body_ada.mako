@@ -1,7 +1,8 @@
 ## vim: filetype=makoada
 
-with Ada.Text_IO; use Ada.Text_IO;
+with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
+with Ada.Wide_Wide_Text_IO; use Ada.Wide_Wide_Text_IO;
 
 with System;
 
