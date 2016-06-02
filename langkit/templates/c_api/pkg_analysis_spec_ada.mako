@@ -391,6 +391,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    function Wrap (S : Unbounded_Wide_Wide_String) return ${text_type};
 
+   function Wrap_Alloc (S : Wide_Wide_String) return ${text_type};
+
    function Wrap (T : Text_Access) return ${text_type} is
      (if T = null
       then (Chars => System.Null_Address, Length => 0, Is_Allocated => 0)

@@ -694,6 +694,16 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
      return Find (Unit.Token_Data.Symbols, T, False);
    end Unwrap;
 
+   ----------------
+   -- Wrap_Alloc --
+   ----------------
+
+   function Wrap_Alloc (S : Text_Type) return ${text_type}
+   is
+      T : Text_Access := new Text_Type'(S);
+   begin
+      return ${text_type}'(T.all'Address, T.all'Length, Is_Allocated => 1);
+   end Wrap_Alloc;
 
    procedure ${capi.get_name('destroy_text_type')} (T : in out ${text_type}) is
       use System;
