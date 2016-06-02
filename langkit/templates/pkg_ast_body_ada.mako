@@ -809,11 +809,12 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -----------------
 
    function Short_Image
-     (Node : access ${root_node_value_type}'Class)
+     (Node : access ${root_node_value_type})
       return Wide_Wide_String
    is
+      Self : access ${root_node_value_type}'Class := Node;
    begin
-      return "<" & To_Wide_Wide_String (Kind_Name (Node))
+      return "<" & To_Wide_Wide_String (Kind_Name (Self))
              & " " & To_Wide_Wide_String (Image (Sloc_Range (Node))) & ">";
    end Short_Image;
 
