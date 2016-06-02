@@ -394,6 +394,23 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          return (System.Null_Address, 0, Is_Allocated => 0);
    end;
 
+   function ${capi.get_name('node_short_image')}
+     (Node : ${node_type}) return ${text_type}
+   is
+   begin
+      Clear_Last_Exception;
+      declare
+         N   : constant ${root_node_type_name} := Unwrap (Node);
+         Img : constant Text_Type := Text_Type (N.Short_Image);
+      begin
+         return Wrap_Alloc (Img);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return (System.Null_Address, 0, 0);
+   end;
+
    procedure ${capi.get_name("node_sloc_range")}
      (Node         : ${node_type};
       Sloc_Range_P : ${sloc_range_type}_Ptr)

@@ -434,6 +434,12 @@ class ${root_astnode_name}(object):
         _node_sloc_range(self._c_value, ctypes.byref(result))
         return result.wrap()
 
+    @property
+    def short_image(self):
+        ${py_doc('langkit.node_short_image', 8)}
+        text = _node_short_image(self._c_value)
+        return text.wrap()
+
     def lookup(self, sloc):
         ${py_doc('langkit.lookup_in_node', 8)}
         c_sloc = _unwrap_sloc(sloc)
@@ -568,7 +574,7 @@ class ${root_astnode_name}(object):
                         yield c
 
     def __repr__(self):
-        return "<{} {}>".format(self.__class__.__name__, self.sloc_range)
+        return self.short_image
 
 
 class ASTList(${root_astnode_name}):
@@ -759,6 +765,10 @@ _node_kind = _import_func(
 _kind_name = _import_func(
     '${capi.get_name("kind_name")}',
     [_enum_node_kind], _text
+)
+_node_short_image = _import_func(
+    '${capi.get_name("node_short_image")}',
+    [_node], _text
 )
 _node_sloc_range = _import_func(
     '${capi.get_name("node_sloc_range")}',

@@ -281,6 +281,9 @@ documentations = {
         Get the Nth child AST node in NODE's fields and store it into *CHILD_P.
         Return zero on failure (when N is too big).
     """),
+    'langkit.node_short_image': Template("""
+        Return a representation of NODE as a string.
+    """),
 
     'langkit.token_text': Template("""
         Get the text of the given token.

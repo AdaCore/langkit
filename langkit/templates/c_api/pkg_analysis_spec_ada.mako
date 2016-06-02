@@ -261,6 +261,13 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name('kind_name')}";
    ${ada_c_doc('langkit.kind_name', 3)}
 
+   function ${capi.get_name('node_short_image')} (Node : ${node_type})
+                                           return ${text_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('node_short_image')}";
+   ${ada_c_doc('langkit.node_short_image', 3)}
+
    procedure ${capi.get_name('node_sloc_range')}
      (Node         : ${node_type};
       Sloc_Range_P : ${sloc_range_type}_Ptr)
