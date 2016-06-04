@@ -231,6 +231,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Get the Index'th child of Node, storing it into Result. Store in Exists
    --  whether Node had such a child (if not, the content of Result is
    --  undefined).
+   --  Child indexing is 0-based.
 
    function Child (Node  : access ${root_node_value_type}'Class;
                    Index : Natural) return ${root_node_type_name};

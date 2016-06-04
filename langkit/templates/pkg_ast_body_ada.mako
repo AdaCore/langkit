@@ -412,9 +412,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    is
    begin
       return A : ${root_node_type_name}_Arrays.Array_Type
-                    (0 .. Child_Count (Node))
+                    (0 .. Child_Count (Node) - 1)
       do
-         for I in 0 .. Child_Count (Node) loop
+         for I in 0 .. Child_Count (Node) - 1 loop
             A (I) := Child (Node, I);
          end loop;
       end return;
