@@ -26,6 +26,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    ${array_types.body(EnvElement.array_type())}
    ${array_types.body(root_node_array)}
 
+   function Consume is new ${root_node_type_name}_Iterators.Consume
+     (${root_node_type_name}_Vectors);
+
    -----------
    -- Child --
    -----------
@@ -103,77 +106,6 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       Result_Status := Traverse (Node, Visit);
    end Traverse;
 
-   ----------
-   -- Next --
-   ----------
-
-   function Next (It       : in out Traverse_Iterator;
-                  Element  : out ${root_node_type_name}) return Boolean
-   is
-      use Natural_Vectors;
-
-      Exists : Boolean;
-      Child  : ${root_node_type_name};
-      I      : Natural;
-   begin
-      if It.Node /= null then
-
-         --  We have a next element to yield: put it aside and then look for
-         --  the element we'll yield at the next iteration: first non-null
-         --  children first, then siblings.
-
-         Element := It.Node;
-
-         I := 0;
-         loop
-            It.Node.Get_Child (I, Exists, Child);
-            exit when not Exists;
-
-            if Child /= null then
-               Append (It.Stack, I + 1);
-               It.Node := Child;
-               return True;
-            end if;
-            I := I + 1;
-         end loop;
-
-         --  We could not find non-null children: look for the next non-null
-         --  sibling. If there's none, look for the parent's sibling and so on.
-
-         while Length (It.Stack) > 0 loop
-            I := Pop (It.Stack);
-            It.Node := It.Node.Parent;
-
-            loop
-               It.Node.Get_Child (I, Exists, Child);
-               exit when not Exists;
-
-               if Child /= null then
-                  --  We found a sibling! Remember to look for the next one
-                  --  when we get back to the parent and proceed.
-
-                  Append (It.Stack, I + 1);
-                  It.Node := Child;
-                  return True;
-               end if;
-               I := I + 1;
-            end loop;
-         end loop;
-      end if;
-
-      return False;
-   end Next;
-
-   --------------
-   -- Finalize --
-   --------------
-
-   overriding
-   procedure Finalize (It : in out Traverse_Iterator) is
-   begin
-      Natural_Vectors.Destroy (It.Stack);
-   end Finalize;
-
    --------------
    -- Traverse --
    --------------
@@ -183,9 +115,16 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       return Traverse_Iterator
    is
    begin
-      return (Ada.Finalization.Limited_Controlled with
-              Node  => ${root_node_type_name} (Root),
-              Stack => Natural_Vectors.Empty_Vector);
+      return Create (Root);
+   end Traverse;
+
+   function Traverse
+     (Root : access ${root_node_value_type}'Class)
+      return ${root_node_type_name}_Arrays.Array_Type
+   is
+      T : Traverse_Iterator := Traverse (Root);
+   begin
+      return Consume (T);
    end Traverse;
 
    ----------
@@ -238,8 +177,6 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       Predicate : ${root_node_type_name}_Predicate)
       return ${root_node_type_name}_Arrays.Array_Type
    is
-      function Consume is new ${root_node_type_name}_Iterators.Consume
-        (${root_node_type_name}_Vectors);
       I : Find_Iterator := Find (Root, Predicate);
    begin
       return Consume (I);
@@ -1002,6 +939,17 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          return Result;
       end;
    end Parents;
+
+   ------------
+   -- Parent --
+   ------------
+
+   function Parent
+     (Node : access ${root_node_value_type}'Class) return ${root_node_type_name}
+   is
+   begin
+      return Node.Parent;
+   end Parent;
 
    -------------
    -- Iterate --

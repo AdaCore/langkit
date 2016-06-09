@@ -21,6 +21,7 @@ with Langkit_Support.Iterators;
 with Langkit_Support.Lexical_Env;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
+with Langkit_Support.Tree_Traversal_Iterator;
 with Langkit_Support.Vectors;
 
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
@@ -252,6 +253,10 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Return the list of parents for this node. This node included in the list
    --  iff Include_Self.
 
+   function Parent
+     (Node : access ${root_node_value_type}'Class)
+     return ${root_node_type_name};
+
    type Visit_Status is (Into, Over, Stop);
    --  Helper type to control the AST node traversal process. See Traverse.
 
@@ -286,20 +291,19 @@ package ${_self.ada_api_settings.lib_name}.AST is
    package ${root_node_type_name}_Iterators is new Langkit_Support.Iterators
      (Element_Type => ${root_node_type_name});
 
-   type Traverse_Iterator is limited
+   type Traverse_Iterator is
      new ${root_node_type_name}_Iterators.Iterator
      with private;
-   --  Iterator type for Traverse (see below)
-
-   overriding
-   function Next (It       : in out Traverse_Iterator;
-                  Element  : out ${root_node_type_name}) return Boolean;
 
    function Traverse
      (Root : access ${root_node_value_type}'Class)
       return Traverse_Iterator;
    --  Return an iterator that yields all AST nodes under Root (included) in a
    --  prefix DFS (depth first search) fasion.
+
+   function Traverse
+     (Root : access ${root_node_value_type}'Class)
+      return ${root_node_type_name}_Arrays.Array_Type;
 
    type ${root_node_type_name}_Predicate_Type is interface;
    type ${root_node_type_name}_Predicate is
@@ -639,28 +643,22 @@ private
    -- Tree traversal (internals) --
    --------------------------------
 
-   package Natural_Vectors is new Langkit_Support.Vectors (Natural);
+   function Get_Parent
+     (N : ${root_node_type_name}) return ${root_node_type_name}
+   is (N.Parent);
+   function Children_Count (N : ${root_node_type_name}) return Natural
+   is (N.Child_Count);
+   function Get_Child
+     (N : ${root_node_type_name}; I : Natural) return ${root_node_type_name}
+   is (N.Child (I));
 
-   type Traverse_Iterator is limited
-      new Ada.Finalization.Limited_Controlled
-      and ${root_node_type_name}_Iterators.Iterator with
-   record
-      Node  : ${root_node_type_name};
-      --  Node that is currently being traversed. The next times Next will be
-      --  called, it will process this node, then all its children, then it
-      --  will go to its next sibling.
+   package Traversal_Iterators is new Langkit_Support.Tree_Traversal_Iterator
+     (${root_node_type_name},
+      null,
+      Iterators => ${root_node_type_name}_Iterators);
 
-      Stack : Natural_Vectors.Vector;
-      --  Stack of child indices for the nodes currently being traversed. When
-      --  empty, it means that Node is the root node to explore. Otherwise, the
-      --  top-most (i.e. last) element I tells what's the index for the next
-      --  sibling to traverse (in this case, Node is at index I - 1).
-   end record;
-
-   overriding
-   procedure Initialize (It : in out Traverse_Iterator) is null;
-   overriding
-   procedure Finalize (It : in out Traverse_Iterator);
+   type Traverse_Iterator
+   is new Traversal_Iterators.Traverse_Iterator with null record;
 
    type Find_Iterator is limited
       new Ada.Finalization.Limited_Controlled
