@@ -155,6 +155,7 @@ class Domain(AbstractExpression):
                     end loop;
 
                     {res_var} := Member ({logic_var}, A);
+                    Inc_Ref ({res_var});
                 end;
                 """.format(logic_var=self.logic_var_expr.render_expr(),
                            domain=self.domain.render_expr(),
