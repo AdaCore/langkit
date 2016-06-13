@@ -64,11 +64,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
      with Convention => C_Pass_By_Copy;
    ${ada_c_doc('langkit.text_type', 3)}
 
-   procedure ${capi.get_name('destroy_text')} (T : in out ${text_type})
-     with Export        => True,
-          Convention    => C,
-          External_Name => "${capi.get_name('destroy_text')}";
-
    type ${token_type} is record
       Token_Data                : System.Address;
       Token_Index, Trivia_Index : int;
@@ -114,6 +109,11 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
           External_Name => "${capi.get_name('free')}";
    ${ada_c_doc('langkit.free', 3)}
    --  Helper to free objects in dynamic languages
+
+   procedure ${capi.get_name('destroy_text')} (T : ${text_type}_Ptr)
+     with Export        => True,
+          Convention    => C,
+          External_Name => "${capi.get_name('destroy_text')}";
 
    -------------------------
    -- Analysis primitives --
