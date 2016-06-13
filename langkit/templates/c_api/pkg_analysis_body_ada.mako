@@ -722,7 +722,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       return ${text_type}'(T.all'Address, T.all'Length, Is_Allocated => 1);
    end Wrap_Alloc;
 
-   procedure ${capi.get_name('destroy_text_type')} (T : in out ${text_type}) is
+   procedure ${capi.get_name('destroy_text')} (T : in out ${text_type}) is
       use System;
    begin
       if T.Is_Allocated /= 0 and then T.Chars /= System.Null_Address then

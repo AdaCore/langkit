@@ -75,7 +75,7 @@ class _text(ctypes.Structure):
             return None
 
     def __del__(self):
-        _destroy_text_type(ctypes.byref(self))
+        _destroy_text(ctypes.byref(self))
 
 class _Sloc(ctypes.Structure):
     _fields_ = [("line", ctypes.c_uint32),
@@ -680,8 +680,8 @@ _free = _import_func(
     [ctypes.c_void_p], None
 )
 
-_destroy_text_type = _import_func(
-    '${capi.get_name("destroy_text_type")}', [ctypes.POINTER(_text)], None
+_destroy_text = _import_func(
+    '${capi.get_name("destroy_text")}', [ctypes.POINTER(_text)], None
 )
 
 # Analysis primitives
