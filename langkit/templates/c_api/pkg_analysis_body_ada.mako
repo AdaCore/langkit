@@ -394,8 +394,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          return (System.Null_Address, 0, Is_Allocated => 0);
    end;
 
-   function ${capi.get_name('node_short_image')}
-     (Node : ${node_type}) return ${text_type}
+   function ${capi.get_name('node_short_image')} (Node : ${node_type})
+                                                  return ${text_type}
    is
    begin
       Clear_Last_Exception;

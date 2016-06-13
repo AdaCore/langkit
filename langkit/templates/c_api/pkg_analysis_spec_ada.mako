@@ -262,7 +262,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    ${ada_c_doc('langkit.kind_name', 3)}
 
    function ${capi.get_name('node_short_image')} (Node : ${node_type})
-                                           return ${text_type}
+                                                  return ${text_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('node_short_image')}";
