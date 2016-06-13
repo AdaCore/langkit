@@ -274,6 +274,10 @@ ${c_doc('langkit.free')}
 extern void
 ${capi.get_name("free")}(void *address);
 
+${c_doc('langkit.destroy_text')}
+extern void
+${capi.get_name("destroy_text")}(${text_type} *text);
+
 /* Lexical environment primitives */
 
 ${c_doc('langkit.lexical_env_parent')}
