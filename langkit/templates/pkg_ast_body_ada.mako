@@ -5,11 +5,10 @@
 
 <% root_node_array = ctx.root_grammar_class.array_type() %>
 
-with Ada.Characters.Conversions; use Ada.Characters.Conversions;
-with Ada.Containers;             use Ada.Containers;
+with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Ordered_Maps;
-with Ada.Text_IO;                use Ada.Text_IO;
+with Ada.Text_IO;    use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
 with System.Storage_Elements;    use System.Storage_Elements;
@@ -18,7 +17,6 @@ with Langkit_Support.Extensions; use Langkit_Support.Extensions;
 with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
-with Langkit_Support.Text;       use Langkit_Support.Text;
 
 package body ${_self.ada_api_settings.lib_name}.AST is
 
@@ -858,11 +856,11 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       use Sorted_Envs;
 
       function Image (El : Env_Element) return String is
-        (To_String (Short_Image (El.El)));
+        (Image (Short_Image (El.El)));
       -- TODO??? This is slightly hackish, because we're converting a wide
       -- string back to string. But since we're using this solely for
       -- test/debug purposes, it should not matter. Still, would be good to
-      -- have Wide_Wide string everywhere at some point.
+      -- have Text_Type everywhere at some point.
 
       function Image is new AST_Envs.Env_Element_Vectors.Image (Image);
 

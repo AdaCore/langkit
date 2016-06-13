@@ -21,6 +21,7 @@ with Langkit_Support.Iterators;
 with Langkit_Support.Lexical_Env;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
+with Langkit_Support.Text;        use Langkit_Support.Text;
 with Langkit_Support.Tree_Traversal_Iterator;
 with Langkit_Support.Vectors;
 

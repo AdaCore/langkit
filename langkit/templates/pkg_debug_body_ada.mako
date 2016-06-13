@@ -1,8 +1,7 @@
 ## vim: filetype=makoada
 
-with Ada.Text_IO;           use Ada.Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
-with Ada.Wide_Wide_Text_IO; use Ada.Wide_Wide_Text_IO;
 
 with System;
 
@@ -20,7 +19,7 @@ package body ${_self.ada_api_settings.lib_name}.Debug is
 
    procedure PN (Node : ${root_node_type_name}) is
    begin
-      Put_Line (Node.Short_Image);
+      Put_Line (Image (Node.Short_Image));
    end PN;
 
    --------
