@@ -114,6 +114,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
      with Export        => True,
           Convention    => C,
           External_Name => "${capi.get_name('destroy_text')}";
+   ${ada_c_doc('langkit.destroy_text', 3)}
 
    -------------------------
    -- Analysis primitives --

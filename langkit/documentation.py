@@ -305,6 +305,13 @@ documentations = {
 
         This is a helper to free objects from dynamic languages.
     """),
+    'langkit.destroy_text': Template("""
+        If this text object owns the buffer it references, free this buffer.
+
+        Note that even though this accepts a pointer to a text object, it does
+        not deallocates the text object itself but rather the buffer it
+        references.
+    """),
 
     #
     # Lexical environment primitives
