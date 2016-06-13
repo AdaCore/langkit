@@ -66,11 +66,11 @@ package Adalog.Abstract_Relation is
    --  via this class-wide access type.
 
    function Solve (Self : Relation) return Boolean is (Self.all.Solve);
-   --  Shortcut to solve the underlying relation, used by langkit
+   --  Shortcut to solve the underlying relation, used by Langkit
 
    procedure Inc_Ref (Self : Relation);
    procedure Dec_Ref (Self : in out Relation);
-   --  Reference counting primitives to be used by langkit. A Dec_Ref call
+   --  Reference counting primitives to be used by Langkit. A Dec_Ref call
    --  bringing the reference count to 0 will Destroy the referenced relation
    --  object and put the pointer to null, hence the in out mode.
 
