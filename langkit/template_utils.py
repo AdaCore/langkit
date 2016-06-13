@@ -58,7 +58,7 @@ class Renderer(object):
 
 
 template_lookup = None
-":type: TemplateLookup"
+":type: mako.utils.TemplateLookup"
 
 
 def mako_template(file_name):
