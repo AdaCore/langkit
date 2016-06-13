@@ -29,6 +29,12 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    function Consume is new ${root_node_type_name}_Iterators.Consume
      (${root_node_type_name}_Vectors);
 
+   function Child_Number
+     (Node : access ${root_node_value_type}'Class)
+      return Natural
+      with Pre => Node.Parent /= null;
+   --  Return the 0-based index for Node in its parents' children
+
    -----------
    -- Child --
    -----------
@@ -1072,6 +1078,28 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end if;
    end Previous;
 
+   ------------------
+   -- Child_Number --
+   ------------------
+
+   function Child_Number
+     (Node : access ${root_node_value_type}'Class)
+      return Natural
+   is
+      N : ${root_node_type_name} := null;
+   begin
+      for I in 0 .. Child_Count (Node.Parent) - 1 loop
+         N := Child (Node.Parent, I);
+         if N = Node then
+            return I;
+         end if;
+      end loop;
+
+      --  If we reach this point, then Node isn't a Child of Node.Parent. This
+      --  is not supposed to happen.
+      raise Program_Error;
+   end Child_Number;
+
    ----------------------
    -- Previous_Sibling --
    ----------------------
@@ -1080,16 +1108,11 @@ package body ${_self.ada_api_settings.lib_name}.AST is
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_type_name}
    is
-      Sibling, Last_Item : ${root_node_type_name} := null;
+      N : constant Natural := Child_Number (Node);
    begin
-      for I in 0 .. Child_Count (Node.Parent) loop
-         Sibling := Child (Node.Parent, I);
-         if Sibling = Node then
-            return Last_Item;
-         end if;
-         Last_Item := Sibling;
-      end loop;
-      return null;
+      return (if N = 0
+              then null
+              else Node.Parent.Child (N - 1));
    end Previous_Sibling;
 
    ------------------
@@ -1100,15 +1123,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_type_name}
    is
-      Sibling     : ${root_node_type_name} := null;
-      Return_Next : Boolean := False;
    begin
-      for I in 0 .. Child_Count (Node.Parent) loop
-         Sibling := Child (Node.Parent, I);
-         exit when Return_Next;
-         Return_Next := (Sibling = Node);
-      end loop;
-      return Sibling;
+      --  If Node is the last sibling, then Child will return null
+      return Node.Parent.Child (Child_Number (Node) + 1);
    end Next_Sibling;
 
    % if ctx.env_metadata:
