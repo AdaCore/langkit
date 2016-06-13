@@ -401,7 +401,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       Clear_Last_Exception;
       declare
          N   : constant ${root_node_type_name} := Unwrap (Node);
-         Img : constant Text_Type := Text_Type (N.Short_Image);
+         Img : constant Text_Type := N.Short_Image;
       begin
          return Wrap_Alloc (Img);
       end;

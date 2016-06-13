@@ -10,7 +10,6 @@
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
 pragma Warnings (Off, "referenced");
-with Ada.Characters.Conversions; use Ada.Characters.Conversions;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 
 with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
