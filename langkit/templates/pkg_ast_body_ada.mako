@@ -153,6 +153,47 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       Destroy (It.Predicate);
    end Finalize;
 
+   overriding function Next
+     (It       : in out Local_Find_Iterator;
+      Element  : out ${root_node_type_name}) return Boolean is
+   begin
+      while Next (It.Traverse_It, Element) loop
+         if It.Predicate (Element) then
+            return True;
+         end if;
+      end loop;
+      return False;
+   end Next;
+
+   ----------
+   -- Find --
+   ----------
+
+   function Find
+     (Root      : access ${root_node_value_type}'Class;
+      Predicate : access function (N : ${root_node_type_name}) return Boolean)
+     return Local_Find_Iterator
+   is
+   begin
+      return Ret : Local_Find_Iterator do
+         Ret.Traverse_It := Traverse (Root);
+         --  We still want to provide this functionality, even though it is unsafe.
+         --  TODO: We might be able to make a safe version of this using
+         --  generics. Still would be more verbose though.
+         Ret.Predicate   := Predicate'Unrestricted_Access.all;
+      end return;
+   end Find;
+
+   function Find
+     (Root      : access ${root_node_value_type}'Class;
+      Predicate : access function (N : ${root_node_type_name}) return Boolean)
+     return ${root_node_type_name}_Arrays.Array_Type
+   is
+      I : Local_Find_Iterator := Root.Find (Predicate);
+   begin
+      return Consume (I);
+   end Find;
+
    ----------
    -- Find --
    ----------
