@@ -58,16 +58,18 @@ package Adalog.Operations is
    --  Operator overloading constructors --
    ----------------------------------------
 
+   --  These constructors just borrow their parameters just for the call.
+   --  "Logic_X (L, R)" will return a relation that has one new ownership share
+   --  for both L and R. As for all constructors, the created object has only
+   --  one ownership share which is given to the caller.
+
+   function Logic_Or (L, R : Relation) return access I_Relation'Class;
+   function Logic_And (L, R : Relation) return access I_Relation'Class;
+
    function "or" (L, R : Relation) return access I_Relation'Class
-   is (new Or_Rec'(Left => L, Right => R, others => <>)) with Inline_Always;
+      renames Logic_Or;
 
    function "and" (L, R : Relation) return access I_Relation'Class
-   is (new And_Rec'(Left => L, Right => R, others => <>)) with Inline_Always;
-
-   function Logic_Or
-     (L, R : Relation) return access I_Relation'Class;
-
-   function Logic_And
-     (L, R : Relation) return access I_Relation'Class;
+      renames Logic_And;
 
 end Adalog.Operations;

@@ -64,7 +64,8 @@ class BinaryBooleanOperator(AbstractExpression):
             # Equation case
             return BuiltinCallExpr(
                 names.Name("Logic") + names.Name.from_lower(self.kind),
-                EquationType, [lhs, rhs]
+                EquationType, [lhs, rhs],
+                '{}_Pred'.format(self.kind.capitalize())
             )
 
 
@@ -143,7 +144,8 @@ class Eq(AbstractExpression):
                     "Operands to a logic equality operator should be either "
                     "a logic variable or an ASTNode, got {}".format(rhs.type)
                 )
-                return BuiltinCallExpr("Equals", EquationType, [lhs, rhs])
+                return BuiltinCallExpr("Equals", EquationType, [lhs, rhs],
+                                       "Equals_Pred")
             else:
                 return None
 

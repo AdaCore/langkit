@@ -28,7 +28,7 @@ package Adalog.Abstract_Relation is
    ----------------
 
    type I_Relation is abstract tagged record
-      Ref_Count : Natural := 0;
+      Ref_Count : Natural := 1;
    end record;
 
    --  Base type for a type implementing the relation interface. A relation has

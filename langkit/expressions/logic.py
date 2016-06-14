@@ -4,10 +4,27 @@ from langkit.compiled_types import (
 
 from langkit.diagnostics import check_multiple
 from langkit.expressions.base import (
-    AbstractExpression, construct, ResolvedExpression, PropertyDef,
-    BuiltinCallExpr
+    AbstractExpression, BuiltinCallExpr, LiteralExpr, PropertyDef,
+    ResolvedExpression, construct,
 )
 from langkit.expressions.envs import Env
+
+
+def untyped_literal_expr(expr_str):
+    """
+    Create an untyped LiteralExpr instance for "expr_str" and return it.
+
+    This is a helper for code that generates expressions which have no
+    corresponding CompiledType in Langkit. Materializing such values in
+    ResolvedExpression trees can be useful anayway to leverage BuiltinCallExpr
+    code generation capabilities, in particular temporary creation for the
+    result. We can do this because BuiltinCallExpr does not need its operands'
+    types to be valid.
+
+    :param str expr_str: The generated code for this literal expression.
+    :rtype: LiteralExpr
+    """
+    return LiteralExpr(expr_str, None)
 
 
 class Bind(AbstractExpression):
@@ -21,35 +38,6 @@ class Bind(AbstractExpression):
 
         Bind(A, B, property)
     """
-
-    class Expr(ResolvedExpression):
-        static_type = EquationType
-
-        def __init__(self, from_var, to_var, bind_property):
-            self.from_var = from_var
-            ":type: ResolvedExpression"
-
-            self.to_var = to_var
-            ":type: ResolvedExpression"
-
-            self.bind_property = bind_property
-            ":type: PropertyDef"
-
-            super(Bind.Expr, self).__init__()
-
-        def _render_pre(self):
-            return "\n".join([self.from_var.render_pre(),
-                              self.to_var.render_pre()])
-
-        def _render_expr(self):
-            return ("{t}_{p}_Bind.Create "
-                    "({l}, {r}, {t}_{p}_Logic_Binder'(Env => {e}))").format(
-                t=self.bind_property.struct.name(),
-                p=self.bind_property.name,
-                l=self.from_var.render_expr(),
-                r=self.to_var.render_expr(),
-                e=Env.construct().render_expr(),
-            )
 
     def __init__(self, from_var, to_var, bind_property):
         """
@@ -83,10 +71,20 @@ class Bind(AbstractExpression):
         self.bind_property.do_generate_logic_binder()
 
     def construct(self):
-        return Bind.Expr(
-            construct(self.from_var, LogicVarType),
-            construct(self.to_var, LogicVarType),
-            self.bind_property
+        t = self.bind_property.struct.name()
+        p = self.bind_property.name
+        pred_func = untyped_literal_expr(
+            "{}_{}_Logic_Binder'(Env => {})".format(
+                t, p, construct(Env).render_expr()
+            )
+        )
+
+        return BuiltinCallExpr(
+            "{}_{}_Bind.Create".format(t, p), EquationType,
+            [construct(self.from_var, LogicVarType),
+             construct(self.to_var, LogicVarType),
+             pred_func],
+            "Bind_Result"
         )
 
 
@@ -155,7 +153,6 @@ class Domain(AbstractExpression):
                     end loop;
 
                     {res_var} := Member ({logic_var}, A);
-                    Inc_Ref ({res_var});
                 end;
                 """.format(logic_var=self.logic_var_expr.render_expr(),
                            domain=self.domain.render_expr(),
@@ -199,30 +196,6 @@ class Predicate(AbstractExpression):
     True.
     """
 
-    class Expr(ResolvedExpression):
-        static_type = EquationType
-
-        def __init__(self, logic_var, pred_property):
-            self.logic_var = logic_var
-            ":type: ResolvedExpression"
-
-            self.pred_property = pred_property
-            ":type: PropertyDef"
-
-            super(Predicate.Expr, self).__init__()
-
-        def _render_pre(self):
-            return self.logic_var.render_pre()
-
-        def _render_expr(self):
-            return ("{t}_{p}_Pred.Create "
-                    "({l}, {t}_{p}_Predicate_Caller'(Env => {e}))").format(
-                t=self.pred_property.struct.name(),
-                p=self.pred_property.name,
-                l=self.logic_var.render_expr(),
-                e=Env.construct().render_expr(),
-            )
-
     def __init__(self, logic_var_expr, pred_property):
         """
         :param AbstractExpression logic_var_expr: The logic variable on
@@ -254,9 +227,19 @@ class Predicate(AbstractExpression):
         self.pred_property.do_generate_logic_predicate()
 
     def construct(self):
-        return Predicate.Expr(
-            construct(self.logic_var_expr, LogicVarType),
-            self.pred_property
+        t = self.pred_property.struct.name()
+        p = self.pred_property.name
+        logic_var_expr = construct(self.logic_var_expr, LogicVarType)
+        pred_func = untyped_literal_expr(
+            "{}_{}_Predicate_Caller'(Env => {})".format(
+                t, p, construct(Env).render_expr()
+            )
+        )
+
+        return BuiltinCallExpr(
+            "{}_{}_Pred.Create".format(t, p), EquationType,
+            [logic_var_expr, pred_func],
+            "Pred"
         )
 
 

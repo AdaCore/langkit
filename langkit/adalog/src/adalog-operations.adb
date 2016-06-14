@@ -136,11 +136,14 @@ package body Adalog.Operations is
    --------------
 
    function Logic_Or
-     (L, R : Relation) return access I_Relation'Class is
+     (L, R : Relation) return access I_Relation'Class
+   is
+      Result : access I_Relation'Class :=
+         new Or_Rec'(Left => L, Right => R, others => <>);
    begin
       Inc_Ref (L);
       Inc_Ref (R);
-      return L or R;
+      return Result;
    end Logic_Or;
 
    ---------------
@@ -148,11 +151,14 @@ package body Adalog.Operations is
    ---------------
 
    function Logic_And
-     (L, R : Relation) return access I_Relation'Class is
+     (L, R : Relation) return access I_Relation'Class
+   is
+      Result : access I_Relation'Class :=
+         new And_Rec'(Left => L, Right => R, others => <>);
    begin
       Inc_Ref (L);
       Inc_Ref (R);
-      return L and R;
+      return Result;
    end Logic_And;
 
 end Adalog.Operations;
