@@ -285,9 +285,26 @@ package ${_self.ada_api_settings.lib_name}.AST is
    procedure Traverse
      (Node  : access ${root_node_value_type}'Class;
       Visit : access function (Node : access ${root_node_value_type}'Class)
-              return Visit_Status);
+                               return Visit_Status);
    --  This is the same as Traverse function except that no result is returned
    --  i.e. the Traverse function is called and the result is simply discarded.
+
+   generic
+      type Data_Type is private;
+      Reset_After_Traversal : Boolean := False;
+   function Traverse_With_Data
+     (Node  : access ${root_node_value_type}'Class;
+      Visit : access function (Node : access ${root_node_value_type}'Class;
+                               Data : in out Data_type)
+                               return Visit_Status;
+      Data  : in out Data_Type)
+      return Visit_Status;
+   --  This is the same as the first Traverse function except it accepts an
+   --  argument that is passed to all Visit calls.
+   --
+   --  If Reset_After_Traversal is True, the Data formal is left unchanged when
+   --  Traverse_With_Data returns no matter what Visit does. Visit can change
+   --  it otherwise.
 
    package ${root_node_type_name}_Iterators is new Langkit_Support.Iterators
      (Element_Type => ${root_node_type_name});

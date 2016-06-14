@@ -102,13 +102,53 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    procedure Traverse
      (Node  : access ${root_node_value_type}'Class;
       Visit : access function (Node : access ${root_node_value_type}'Class)
-              return Visit_Status)
+                               return Visit_Status)
    is
       Result_Status : Visit_Status;
       pragma Unreferenced (Result_Status);
    begin
       Result_Status := Traverse (Node, Visit);
    end Traverse;
+
+   ------------------------
+   -- Traverse_With_Data --
+   ------------------------
+
+   function Traverse_With_Data
+     (Node  : access ${root_node_value_type}'Class;
+      Visit : access function (Node : access ${root_node_value_type}'Class;
+                               Data : in out Data_type)
+                               return Visit_Status;
+      Data  : in out Data_Type)
+      return Visit_Status
+   is
+      function Helper (Node : access ${root_node_value_type}'Class)
+                       return Visit_Status;
+
+      ------------
+      -- Helper --
+      ------------
+
+      function Helper (Node : access ${root_node_value_type}'Class)
+                       return Visit_Status
+      is
+      begin
+         return Visit (Node, Data);
+      end Helper;
+
+      Saved_Data : Data_Type;
+      Result     : Visit_Status;
+
+   begin
+      if Reset_After_Traversal then
+         Saved_Data := Data;
+      end if;
+      Result := Traverse (Node, Helper'Access);
+      if Reset_After_Traversal then
+         Data := Saved_Data;
+      end if;
+      return Result;
+   end Traverse_With_Data;
 
    --------------
    -- Traverse --
