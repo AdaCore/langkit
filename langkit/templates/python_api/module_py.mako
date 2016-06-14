@@ -84,6 +84,10 @@ class _Sloc(ctypes.Structure):
     def wrap(self):
         return Sloc(self.line, self.column)
 
+    @classmethod
+    def unwrap(cls, sloc):
+        return _Sloc(sloc.line, sloc.column)
+
 
 class _SlocRange(ctypes.Structure):
     _fields_ = [("start", _Sloc),
@@ -442,7 +446,7 @@ class ${root_astnode_name}(object):
 
     def lookup(self, sloc):
         ${py_doc('langkit.lookup_in_node', 8)}
-        c_sloc = _unwrap_sloc(sloc)
+        c_sloc = _Sloc.unwrap(sloc)
         c_node =_lookup_in_node(self._c_value,
                                 ctypes.byref(c_sloc))
         return _wrap_astnode(c_node)
