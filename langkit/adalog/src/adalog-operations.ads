@@ -34,7 +34,7 @@ package Adalog.Operations is
 
    type Or_Rec is new I_Relation with record
       Left, Right : Relation;
-      State : Integer := 0;
+      State       : Integer := 0;
    end record;
 
    overriding function Solve (Inst : in out Or_Rec) return Boolean;
@@ -47,7 +47,7 @@ package Adalog.Operations is
 
    type And_Rec is new I_Relation with record
       Left, Right : Relation;
-      State : Integer := 0;
+      State       : Integer := 0;
    end record;
 
    overriding function Solve (Inst : in out And_Rec) return Boolean;

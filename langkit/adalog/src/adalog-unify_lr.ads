@@ -57,7 +57,7 @@ package Adalog.Unify_LR is
       Right  : Right_Var.Var;
       L_Data : Left_C_Data;
       R_Data : Right_C_Data;
-      State : LR_State := No_Change;
+      State  : LR_State := No_Change;
    end record;
 
    function Apply (Self : in out Unify_LR) return Boolean;

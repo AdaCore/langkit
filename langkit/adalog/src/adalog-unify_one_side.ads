@@ -43,8 +43,8 @@ package Adalog.Unify_One_Side is
    -----------
 
    type Unify is record
-      Left : Var.Var;
-      Right : R_Type;
+      Left    : Var.Var;
+      Right   : R_Type;
       Changed : Boolean := False;
    end record;
 
