@@ -345,24 +345,25 @@ package ${_self.ada_api_settings.lib_name}.AST is
 
    overriding function Next
      (It       : in out Local_Find_Iterator;
-      Element  : out ${root_node_type_name}) return Boolean;
-
+      Element  : out ${root_node_type_name})
+      return Boolean;
 
    function Find
      (Root      : access ${root_node_value_type}'Class;
       Predicate : access function (N : ${root_node_type_name}) return Boolean)
-     return Local_Find_Iterator;
+      return Local_Find_Iterator;
    --  Return an iterator that yields all AST nodes under Root (included) that
    --  satisfy the Predicate predicate.
 
    function Find
      (Root      : access ${root_node_value_type}'Class;
       Predicate : access function (N : ${root_node_type_name}) return Boolean)
-     return ${root_node_type_name}_Arrays.Array_Type;
+      return ${root_node_type_name}_Arrays.Array_Type;
 
    function Find
      (Root      : access ${root_node_value_type}'Class;
-      Predicate : ${root_node_type_name}_Predicate) return Find_Iterator;
+      Predicate : ${root_node_type_name}_Predicate)
+      return Find_Iterator;
    --  Return an iterator that yields all AST nodes under Root (included) that
    --  satisfy the Predicate predicate. Predicate will be destroyed when
    --  Find_Iterator is exhausted.
@@ -708,7 +709,8 @@ private
       Traverse_It : Traverse_Iterator;
       --  Traverse iterator to fetch all nodes
 
-      Predicate   : access function (N : ${root_node_type_name}) return Boolean;
+      Predicate   : access function (N : ${root_node_type_name})
+                                     return Boolean;
       --  Predicate used to filter the nodes Traverse_It yields
    end record;
    --  Iterator type for Find (see below)
