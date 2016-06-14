@@ -366,6 +366,7 @@ class Sloc(object):
     # TODO: document this class and its methods
 
     def __init__(self, line, column):
+        assert line >= 0 and column >= 0
         self.line = line
         self.column = column
 
