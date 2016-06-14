@@ -338,14 +338,16 @@ package ${_self.ada_api_settings.lib_name}.AST is
      (Root      : access ${root_node_value_type}'Class;
       Predicate : ${root_node_type_name}_Predicate) return Find_Iterator;
    --  Return an iterator that yields all AST nodes under Root (included) that
-   --  satisfy the Pred predicate.
+   --  satisfy the Predicate predicate. Predicate will be destroyed when
+   --  Find_Iterator is exhausted.
 
    function Find
      (Root      : access ${root_node_value_type}'Class;
       Predicate : ${root_node_type_name}_Predicate)
       return ${root_node_type_name}_Arrays.Array_Type;
    --  Find all AST nodes under Root (included) that satisfy the Pred
-   --  predicate and return them as an array of nodes.
+   --  predicate and return them as an array of nodes. Predicate will be
+   --  destroyed by the Find function.
 
    function Find_First
      (Root      : access ${root_node_value_type}'Class;
