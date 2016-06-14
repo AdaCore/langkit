@@ -673,10 +673,7 @@ private
       --  Predicate used to filter the nodes Traverse_It yields
    end record;
 
-   overriding
-   procedure Initialize (It : in out Find_Iterator) is null;
-   overriding
-   procedure Finalize (It : in out Find_Iterator);
+   overriding procedure Finalize (It : in out Find_Iterator);
 
    ---------------------------------------------------
    -- Source location-related operations (interals) --
