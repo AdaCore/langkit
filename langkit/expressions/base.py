@@ -1814,7 +1814,7 @@ class LocalVars(object):
         return new
 
 
-class BuiltinCallExpr(ResolvedExpression):
+class BuiltinCallExpr(BasicExpr):
     """
     Convenience resolved expression that models a call to a function on the
     Ada side of things.
@@ -1829,19 +1829,10 @@ class BuiltinCallExpr(ResolvedExpression):
         :param None|str result_var_name: See ResolvedExpression's constructor.
         """
         self.name = names.Name.get(name)
-        self.exprs = exprs
-        self.static_type = type
-
-        super(BuiltinCallExpr, self).__init__(result_var_name)
-
-    def _render_pre(self):
-        return '\n'.join(expr.render_pre() for expr in self.exprs)
-
-    def _render_expr(self):
-        return '{} ({})'.format(
-            self.name.camel_with_underscores, ', '.join(
-                expr.render_expr() for expr in self.exprs
-            )
+        super(BuiltinCallExpr, self).__init__(
+            '{} ({})'.format(self.name.camel_with_underscores,
+                             ', '.join(['{}'] * len(exprs))),
+            type, exprs, result_var_name
         )
 
     def __repr__(self):
