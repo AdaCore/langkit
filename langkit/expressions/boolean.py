@@ -302,22 +302,6 @@ class Not(AbstractExpression):
     Expression for "not" boolean expressions.
     """
 
-    class Expr(ResolvedExpression):
-        static_type = BoolType
-
-        def __init__(self, expr):
-            self.expr = expr
-            super(Not.Expr, self).__init__()
-
-        def _render_pre(self):
-            return self.expr.render_pre()
-
-        def _render_expr(self):
-            return 'not ({})'.format(self.expr.render_expr())
-
-        def __repr__(self):
-            return '<Not.Expr>'
-
     def __init__(self, expr):
         """
         :param AbstractExpression expr: Operand for the "not" expression.
@@ -326,7 +310,11 @@ class Not(AbstractExpression):
         self.expr = expr
 
     def construct(self):
-        return Not.Expr(construct(self.expr, BoolType))
+        return Not.make_expr(construct(self.expr, BoolType))
+
+    @staticmethod
+    def make_expr(expr):
+        return BasicExpr('not ({})', BoolType, [expr])
 
 
 class Then(AbstractExpression):

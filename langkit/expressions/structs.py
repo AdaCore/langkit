@@ -695,8 +695,9 @@ class Match(AbstractExpression):
             casted = Cast.Expr(matched_expr,
                                match_var.type,
                                result_var=match_var)
-            guard = Not.Expr(Eq.make_expr(casted,
-                                          LiteralExpr('null', casted.type)))
+            guard = Not.make_expr(
+                Eq.make_expr(casted, LiteralExpr('null', casted.type))
+            )
             result = If.Expr(guard, expr, result, rtype)
 
         return result
