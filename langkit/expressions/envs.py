@@ -1,8 +1,10 @@
+from functools import partial
+
 from langkit import names
 from langkit.compiled_types import LexicalEnvType, EnvElement, Token
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BuiltinCallExpr,
-    ResolvedExpression, construct, PropertyDef
+    ResolvedExpression, construct, PropertyDef, BasicExpr
 )
 
 Env = AbstractVariable(names.Name("Current_Env"), type=LexicalEnvType)
@@ -14,48 +16,6 @@ class EnvGet(AbstractExpression):
     """
     Expression for lexical environment get operation.
     """
-
-    class Expr(ResolvedExpression):
-        def __init__(self, env_expr, token_expr, resolve_unique):
-            """
-            :param ResolvedExpression env_expr: The expression representing the
-                env to get from.
-            :param ResolvedExpression token_expr: The expression representing
-                the token key.
-            :param bool resolve_unique: See EnvGet's constructor.
-            """
-            self.env_expr = env_expr
-            self.token_expr = token_expr
-            self.resolve_unique = resolve_unique
-            self.type.add_to_context()
-
-            super(EnvGet.Expr, self).__init__('Env_Get_Result')
-
-        @property
-        def type(self):
-            """
-            :rtype: compiled_types.ArrayType
-            """
-            return (
-                EnvElement if self.resolve_unique else EnvElement.array_type()
-            )
-
-        def _render_pre(self):
-            return '{}\n{}'.format(
-                self.env_expr.render_pre(),
-                self.token_expr.render_pre(),
-            )
-
-        def _render_expr(self):
-            array_expr = 'AST_Envs.Get ({}, Get_Symbol ({}))'.format(
-                self.env_expr.render_expr(), self.token_expr.render_expr()
-            )
-            return ("{} (0)"
-                    if self.resolve_unique
-                    else "Create ({})").format(array_expr)
-
-        def __repr__(self):
-            return '<EnvGet.Expr>'
 
     def __init__(self, env_expr, token_expr, resolve_unique=False):
         """
@@ -76,9 +36,20 @@ class EnvGet(AbstractExpression):
         # array machinery.
 
     def construct(self):
-        return EnvGet.Expr(construct(self.env_expr, LexicalEnvType),
-                           construct(self.token_expr, Token),
-                           self.resolve_unique)
+        array_expr = 'AST_Envs.Get ({}, Get_Symbol ({}))'
+
+        make_expr = partial(
+            BasicExpr, result_var_name="Env_Get_Result",
+            sub_exprs=[construct(self.env_expr, LexicalEnvType),
+                       construct(self.token_expr, Token)]
+        )
+
+        if self.resolve_unique:
+            return make_expr("{} (0)".format(array_expr), EnvElement)
+        else:
+            EnvElement.array_type().add_to_context()
+            return make_expr("Create ({})".format(array_expr),
+                             EnvElement.array_type())
 
 
 class EnvBind(AbstractExpression):
