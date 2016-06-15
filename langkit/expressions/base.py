@@ -1490,11 +1490,16 @@ class LiteralExpr(ResolvedExpression):
     Resolved expression for literals of any type.
     """
 
-    def __init__(self, literal, type):
+    def __init__(self, literal, type, result_var_name=None):
+        """
+        :param str literal: The literal expression.
+        :param CompiledType|None type: The return type of the expression.
+        :param None|str result_var_name: See ResolvedExpression's constructor.
+        """
         self.literal = literal
         self.static_type = type
 
-        super(LiteralExpr, self).__init__()
+        super(LiteralExpr, self).__init__(result_var_name)
 
     def _render_expr(self):
         return self.literal
