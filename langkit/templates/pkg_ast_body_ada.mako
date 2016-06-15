@@ -24,9 +24,6 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    ${array_types.body(EnvElement.array_type())}
    ${array_types.body(root_node_array)}
 
-   function Consume is new ${root_node_type_name}_Iterators.Consume
-     (${root_node_type_name}_Vectors);
-
    function Child_Number
      (Node : access ${root_node_value_type}'Class)
       return Natural
@@ -162,15 +159,6 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       return Create (Root);
    end Traverse;
 
-   function Traverse
-     (Root : access ${root_node_value_type}'Class)
-      return ${root_node_type_name}_Arrays.Array_Type
-   is
-      T : Traverse_Iterator := Traverse (Root);
-   begin
-      return Consume (T);
-   end Traverse;
-
    ----------
    -- Next --
    ----------
@@ -238,20 +226,6 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
    function Find
      (Root      : access ${root_node_value_type}'Class;
-      Predicate : access function (N : ${root_node_type_name}) return Boolean)
-     return ${root_node_type_name}_Arrays.Array_Type
-   is
-      I : Local_Find_Iterator := Root.Find (Predicate);
-   begin
-      return Consume (I);
-   end Find;
-
-   ----------
-   -- Find --
-   ----------
-
-   function Find
-     (Root      : access ${root_node_value_type}'Class;
       Predicate : ${root_node_type_name}_Predicate)
       return Find_Iterator
    is
@@ -259,20 +233,6 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       return (Ada.Finalization.Limited_Controlled with
               Traverse_It => Traverse (Root),
               Predicate   => Predicate);
-   end Find;
-
-   ----------
-   -- Find --
-   ----------
-
-   function Find
-     (Root      : access ${root_node_value_type}'Class;
-      Predicate : ${root_node_type_name}_Predicate)
-      return ${root_node_type_name}_Arrays.Array_Type
-   is
-      I : Find_Iterator := Find (Root, Predicate);
-   begin
-      return Consume (I);
    end Find;
 
    ----------------

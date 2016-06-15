@@ -12,7 +12,12 @@ generic
      (T : Element_Type; Child_Index : Natural) return Element_Type is <>;
    with function Get_Parent (T : Element_Type) return Element_Type is <>;
 
-   with package Iterators is new Langkit_Support.Iterators (Element_Type);
+   with package Element_Vectors
+     is new Langkit_Support.Vectors (Element_Type);
+
+   with package Iterators is new Langkit_Support.Iterators
+     (Element_Type, Element_Vectors);
+
 package Langkit_Support.Tree_Traversal_Iterator is
 
    type Traverse_Iterator is new Ada.Finalization.Controlled

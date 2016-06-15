@@ -307,7 +307,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  it otherwise.
 
    package ${root_node_type_name}_Iterators is new Langkit_Support.Iterators
-     (Element_Type => ${root_node_type_name});
+     (Element_Type => ${root_node_type_name},
+      Element_Vectors => ${root_node_type_name}_Vectors);
 
    type Traverse_Iterator is
      new ${root_node_type_name}_Iterators.Iterator
@@ -318,10 +319,6 @@ package ${_self.ada_api_settings.lib_name}.AST is
       return Traverse_Iterator;
    --  Return an iterator that yields all AST nodes under Root (included) in a
    --  prefix DFS (depth first search) fasion.
-
-   function Traverse
-     (Root : access ${root_node_value_type}'Class)
-      return ${root_node_type_name}_Arrays.Array_Type;
 
    type ${root_node_type_name}_Predicate_Type is interface;
    type ${root_node_type_name}_Predicate is
@@ -374,24 +371,11 @@ package ${_self.ada_api_settings.lib_name}.AST is
 
    function Find
      (Root      : access ${root_node_value_type}'Class;
-      Predicate : access function (N : ${root_node_type_name}) return Boolean)
-      return ${root_node_type_name}_Arrays.Array_Type;
-
-   function Find
-     (Root      : access ${root_node_value_type}'Class;
       Predicate : ${root_node_type_name}_Predicate)
       return Find_Iterator;
    --  Return an iterator that yields all AST nodes under Root (included) that
    --  satisfy the Predicate predicate. Predicate will be destroyed when
    --  Find_Iterator is exhausted.
-
-   function Find
-     (Root      : access ${root_node_value_type}'Class;
-      Predicate : ${root_node_type_name}_Predicate)
-      return ${root_node_type_name}_Arrays.Array_Type;
-   --  Find all AST nodes under Root (included) that satisfy the Pred
-   --  predicate and return them as an array of nodes. Predicate will be
-   --  destroyed by the Find function.
 
    function Find_First
      (Root      : access ${root_node_value_type}'Class;
@@ -701,6 +685,7 @@ private
    package Traversal_Iterators is new Langkit_Support.Tree_Traversal_Iterator
      (${root_node_type_name},
       null,
+      Element_Vectors => ${root_node_type_name}_Vectors,
       Iterators => ${root_node_type_name}_Iterators);
 
    type Traverse_Iterator
