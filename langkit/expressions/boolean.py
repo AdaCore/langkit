@@ -6,7 +6,8 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, LiteralExpr, No, PropertyDef,
-    ResolvedExpression, render, construct, BuiltinCallExpr
+    ResolvedExpression, render, construct, BuiltinCallExpr,
+    BasicExpr
 )
 from langkit.expressions.envs import EmptyEnv
 from langkit.utils import assert_type
@@ -100,27 +101,9 @@ class Eq(AbstractExpression):
     Expression for equality test expression.
     """
 
-    class Expr(ResolvedExpression):
-        static_type = BoolType
-
-        def __init__(self, lhs, rhs):
-            self.lhs = lhs
-            self.rhs = rhs
-
-            super(Eq.Expr, self).__init__()
-
-        def _render_pre(self):
-            return '{}\n{}'.format(
-                self.lhs.render_pre(),
-                self.rhs.render_pre()
-            )
-
-        def _render_expr(self):
-            return '{} = {}'.format(self.lhs.render_expr(),
-                                    self.rhs.render_expr())
-
-        def __repr__(self):
-            return '<Eq.Expr>'
+    @staticmethod
+    def make_expr(lhs, rhs):
+        return BasicExpr('{} = {}', BoolType, [lhs, rhs])
 
     def __init__(self, lhs, rhs):
         """
@@ -182,7 +165,7 @@ class Eq(AbstractExpression):
                 )
             )
 
-        return Eq.Expr(lhs, rhs)
+        return self.make_expr(lhs, rhs)
 
 
 class OrderingTest(AbstractExpression):
