@@ -1532,7 +1532,7 @@ class LiteralExpr(BasicExpr):
                                               self.type.name().camel)
 
 
-class ArrayExpr(ResolvedExpression):
+class ArrayExpr(BasicExpr):
     """
     Resolved expression for an aggregate expression for any type of array.
     """
@@ -1543,19 +1543,11 @@ class ArrayExpr(ResolvedExpression):
             whose types match element_type.
         :param CompiledType element_type: Type for elements in this array.
         """
-        self.exprs = exprs
-        self.element_type = element_type
-        self.static_type = self.element_type.array_type()
-
-        super(ArrayExpr, self).__init__()
-
-    def _render_pre(self):
-        return '\n'.join(e.render_pre() for e in self.exprs)
-
-    def _render_expr(self):
-        return ('({})'.format(', '.join(e.render_expr() for e in self.exprs))
-                if self.exprs else
-                '(1 .. 0 => <>)')
+        super(ArrayExpr, self).__init__(
+            '({})'.format(', '.join(['{}'] * len(exprs)))
+            if exprs else '(1 .. 0 => <>)',
+            element_type.array_type(), exprs
+        )
 
 
 class UnreachableExpr(ResolvedExpression):
