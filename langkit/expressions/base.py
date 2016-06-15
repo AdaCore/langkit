@@ -1485,30 +1485,6 @@ class Literal(AbstractExpression):
         ], exception=DiagnosticError('Invalid abstract expression type: {}'))
 
 
-class LiteralExpr(ResolvedExpression):
-    """
-    Resolved expression for literals of any type.
-    """
-
-    def __init__(self, literal, type, result_var_name=None):
-        """
-        :param str literal: The literal expression.
-        :param CompiledType|None type: The return type of the expression.
-        :param None|str result_var_name: See ResolvedExpression's constructor.
-        """
-        self.literal = literal
-        self.static_type = type
-
-        super(LiteralExpr, self).__init__(result_var_name)
-
-    def _render_expr(self):
-        return self.literal
-
-    def __repr__(self):
-        return '<LiteralExpr {} ({})>'.format(self.literal,
-                                              self.type.name().camel)
-
-
 class BasicExpr(ResolvedExpression):
     """
     A basic resolved expression template, that automatically handles:
@@ -1536,6 +1512,24 @@ class BasicExpr(ResolvedExpression):
 
     def _render_pre(self):
         return '\n'.join(expr.render_pre() for expr in self.sub_exprs)
+
+
+class LiteralExpr(BasicExpr):
+    """
+    Resolved expression for literals of any type.
+    """
+
+    def __init__(self, literal, type, result_var_name=None):
+        """
+        :param str literal: The literal expression.
+        :param CompiledType|None type: The return type of the expression.
+        :param None|str result_var_name: See ResolvedExpression's constructor.
+        """
+        super(LiteralExpr, self).__init__(literal, type, [], result_var_name)
+
+    def __repr__(self):
+        return '<LiteralExpr {} ({})>'.format(self.template,
+                                              self.type.name().camel)
 
 
 class ArrayExpr(ResolvedExpression):
