@@ -1509,6 +1509,35 @@ class LiteralExpr(ResolvedExpression):
                                               self.type.name().camel)
 
 
+class BasicExpr(ResolvedExpression):
+    """
+    A basic resolved expression template, that automatically handles:
+
+    - Passing a list of sub expressions to the constructor, and a type
+    - Doing the pre render of those expressions automatically
+    - Rendering the sub expressions passed as parameters into the holes that
+      are in the template.
+    """
+
+    def __init__(self, template, type, sub_exprs, result_var_name=None):
+        """
+        :param str template: The template string.
+        :param CompiledType type: The return type of the expression.
+        :param None|str result_var_name: See ResolvedExpression's constructor.
+        """
+        self.sub_exprs = sub_exprs
+        self.static_type = type
+        self.template = template
+        super(BasicExpr, self).__init__(result_var_name)
+
+    def _render_expr(self):
+        return self.template.format(*map(ResolvedExpression.render_expr,
+                                         self.sub_exprs))
+
+    def _render_pre(self):
+        return '\n'.join(expr.render_pre() for expr in self.sub_exprs)
+
+
 class ArrayExpr(ResolvedExpression):
     """
     Resolved expression for an aggregate expression for any type of array.
