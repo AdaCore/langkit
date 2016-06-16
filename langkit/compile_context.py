@@ -422,6 +422,15 @@ class CompileCtx():
         :type: list[str]
         """
 
+        self.env_hook_subprogram = None
+        """
+        Name and embedding unit for the subprogram to call as the environment
+        hook, or None if there is None. See the "bind_env_hook" function for
+        details.
+
+        :type: (str, str)|None
+        """
+
     def sorted_types(self, type_set):
         """
         Turn "type_set" into a list of types sorted by name.
@@ -980,3 +989,32 @@ class CompileCtx():
         :param str path: Path to the source file to include.
         """
         self.additional_source_files.append(path)
+
+    def bind_env_hook(self, unit, subp_name):
+        """
+        Define a subprogram to call as the environment hook.
+
+        The environment hook is a subprogram provided by a language
+        specification and that can perform arbitrarily complex computations and
+        changes to a whole analysis context. It can be invoked in environment
+        specifications: see EnvSpec's call_env_hook argument.
+
+        Its intended use case is to implement lexical environment lookups
+        across analysis units: when executed on a node that designates another
+        unit, the hook can fetch this other unit from the analysis context and
+        populate its lexical environment. The logic for determining a file name
+        from an analysis unit name is completely language dependent, hence the
+        need for a hook.
+
+        The subprogram that implements the hook must have the following
+        signature::
+
+            procedure Hook_Func
+              (Unit : Analysis_Unit;
+               Node : <root AST node type>);
+
+        :param str unit: Name of the Ada unit in which this subprogram is
+            defined.
+        :param str subp_name: Name of the subprogram itself.
+        """
+        self.env_hook_subprogram = (unit, subp_name)

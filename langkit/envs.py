@@ -19,7 +19,8 @@ class EnvSpec(object):
                  add_env=False,
                  add_to_env=None,
                  ref_envs=None,
-                 initial_env=None):
+                 initial_env=None,
+                 env_hook_arg=None):
         """
 
         :param bool add_env: Wether to add a new scoped lexical environment.
@@ -45,6 +46,11 @@ class EnvSpec(object):
             will be added to the env passed as initial_env, and the node
             concerned by this env specification will have initial_env as a
             parent indirectly.
+
+        :param AbstractExpression env_hook_arg: Does nothing if left to None.
+            If supplied, it must be an abstract expression that resolves to a
+            node. This expression will be evaluated and passed to the
+            environment hook.
         """
 
         unr_key, unr_value = add_to_env if add_to_env else (None, None)
@@ -79,6 +85,9 @@ class EnvSpec(object):
         self._unresolved_ref_envs = ref_envs
         ":type: AbstractExpression"
 
+        self._unresolved_env_hook_arg = env_hook_arg
+        ":type: AbstractExpression"
+
         # These are the property attributes
 
         self.initial_env = None
@@ -91,6 +100,9 @@ class EnvSpec(object):
         ":type: PropertyDef"
 
         self.ref_envs = None
+        ":type: PropertyDef"
+
+        self.env_hook_arg = None
         ":type: PropertyDef"
 
     def create_properties(self):
@@ -137,6 +149,10 @@ class EnvSpec(object):
         # TODO: what is the expected type for this one?
         self.ref_envs = create_internal_property(
             'Ref_Envs', self._unresolved_ref_envs, None
+        )
+
+        self.env_hook_arg = create_internal_property(
+            'Env_Hook_Arg', self._unresolved_env_hook_arg, node_type
         )
 
         return result
@@ -199,3 +215,23 @@ class EnvSpec(object):
         :rtype: bool
         """
         return bool(self.add_to_env_key)
+
+    @property
+    def env_hook_enabled(self):
+        """
+        Return whether the environment hook must be called.
+
+        :rtype: bool
+        """
+        return bool(self.env_hook_arg)
+
+    @property
+    def env_hook_arg_expr(self):
+        """
+        The expression for the environment hook argument.
+
+        This is not available when "self.env_hook_enabled" is False.
+
+        :rtype: str
+        """
+        return self._render_field_access(self.env_hook_arg)

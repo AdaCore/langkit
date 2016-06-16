@@ -1,7 +1,7 @@
 from functools import partial
 
 from langkit import names
-from langkit.compiled_types import LexicalEnvType, EnvElement, Token
+from langkit.compiled_types import EnvElement, LexicalEnvType, Token
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BuiltinCallExpr,
     ResolvedExpression, construct, PropertyDef, BasicExpr

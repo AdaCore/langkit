@@ -26,6 +26,10 @@ with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
 with ${_self.ada_api_settings.lib_name}.Analysis.Internal;
 pragma Warnings (On, "referenced");
 
+%if _self.env_hook_subprogram:
+with ${_self.env_hook_subprogram[0]};
+%endif
+
 package body ${_self.ada_api_settings.lib_name}.AST.Types is
 
    use Eq_Node, Eq_Node.Raw_Impl;
