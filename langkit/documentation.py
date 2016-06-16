@@ -250,6 +250,9 @@ documentations = {
     'langkit.unit_decref': Template("""
         Decrease the reference count to an analysis unit.
     """),
+    'langkit.unit_context': Template("""
+        Return the context that owns this unit.
+    """),
 
     'langkit.unit_populate_lexical_env': Template("""
         Populate the lexical environments for this analysis unit, according to

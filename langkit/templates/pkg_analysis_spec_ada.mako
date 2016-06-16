@@ -87,6 +87,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    procedure Dec_Ref (Unit : Analysis_Unit);
    ${ada_doc('langkit.unit_decref')}
 
+   function Get_Context (Unit : Analysis_Unit) return Analysis_Context;
+   ${ada_doc('langkit.unit_context')}
+
    procedure Reparse (Unit : Analysis_Unit; Charset : String := "");
    ${ada_doc('langkit.unit_reparse_file', 3)}
 
@@ -200,6 +203,9 @@ private
 
    function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
      (Unit.AST_Root);
+
+   function Get_Context (Unit : Analysis_Unit) return Analysis_Context is
+     (Unit.Context);
 
    function First_Token (Unit : Analysis_Unit) return Token_Type is
      (First_Token (Unit.TDH'Access));
