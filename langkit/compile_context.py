@@ -415,6 +415,13 @@ class CompileCtx():
 
         self.template_lookup_extra_dirs = template_lookup_extra_dirs or []
 
+        self.additional_source_files = []
+        """
+        List of path for file names to include in the generated library.
+
+        :type: list[str]
+        """
+
     def sorted_types(self, type_set):
         """
         Turn "type_set" into a list of types sorted by name.
@@ -743,6 +750,7 @@ class CompileCtx():
             f.write(self.render_template(
                 "project_file",
                 lib_name=self.ada_api_settings.lib_name,
+                os_path=os.path,
                 quex_path=os.environ['QUEX_PATH'],
             ))
 
@@ -763,6 +771,11 @@ class CompileCtx():
         adalog_dir = join(dirname(abspath(__file__)), "adalog")
         for f in glob(join(adalog_dir, "src", "*.ad*")):
             shutil.copy(f, join(include_path, lib_name_low))
+
+        # Copy additional source files from the language specification
+        for filepath in self.additional_source_files:
+            filename = os.path.basename(filepath)
+            shutil.copy(filepath, join(src_path, filename))
 
         with file(os.path.join(share_path, 'ast-types.txt'), 'w') as f:
             astdoc.write_astdoc(self, f)
@@ -959,3 +972,11 @@ class CompileCtx():
             os.path.dirname(os.path.dirname(quex_bin)),
             'share', 'quex'
         )
+
+    def add_source_file(self, path):
+        """
+        Add a source file to be included in the generated library.
+
+        :param str path: Path to the source file to include.
+        """
+        self.additional_source_files.append(path)

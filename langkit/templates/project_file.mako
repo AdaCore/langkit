@@ -70,6 +70,9 @@ library project ${lib_name} is
       "${lib_name.lower()}-init.ads",
       "${lib_name.lower()}-lexer.adb",
       "${lib_name.lower()}-lexer.ads",
+      % for path in ctx.additional_source_files:
+      "${os_path.basename(path)}",
+      % endfor
       "quex_interface.c",
       "quex_interface.h",
       "quex_lexer.c",
