@@ -22,6 +22,8 @@ with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Slocs;      use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
+
+with ${_self.ada_api_settings.lib_name}.Analysis.Internal;
 pragma Warnings (On, "referenced");
 
 package body ${_self.ada_api_settings.lib_name}.AST.Types is
