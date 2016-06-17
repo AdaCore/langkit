@@ -102,6 +102,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    procedure Populate_Lexical_Env (Unit : Analysis_Unit);
    ${ada_doc('langkit.unit_populate_lexical_env')}
 
+   function Get_Filename (Unit : Analysis_Unit) return String;
+   ${ada_doc('langkit.unit_filename')}
+
    function Has_Diagnostics (Unit : Analysis_Unit) return Boolean;
    ${ada_doc('langkit.unit_has_diagnostics', 3)}
 
@@ -211,6 +214,9 @@ private
 
    function Get_Context (Unit : Analysis_Unit) return Analysis_Context is
      (Unit.Context);
+
+   function Get_Filename (Unit : Analysis_Unit) return String is
+     (To_String (Unit.File_Name));
 
    function First_Token (Unit : Analysis_Unit) return Token_Type is
      (First_Token (Unit.TDH'Access));

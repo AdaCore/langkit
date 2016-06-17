@@ -231,6 +231,9 @@ documentations = {
     'langkit.unit_last_token': Template("""
         Return a reference to the last token scanned in this unit.
     """),
+    'langkit.unit_filename': Template("""
+        Return the filename an unit is associated to.
+    """),
     'langkit.unit_diagnostic_count': Template("""
         Return the number of diagnostics associated to this unit.
     """),
