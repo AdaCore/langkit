@@ -128,6 +128,21 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name('create_analysis_context')}";
    ${ada_c_doc('langkit.create_context', 3)}
 
+   function ${capi.get_name('context_incref')}
+     (Context : ${analysis_context_type})
+      return ${analysis_context_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('context_incref')}";
+   ${ada_c_doc('langkit.context_incref', 3)}
+
+   procedure ${capi.get_name('context_decref')}
+     (Context : ${analysis_context_type})
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('context_decref')}";
+   ${ada_c_doc('langkit.context_decref', 3)}
+
    procedure ${capi.get_name('destroy_analysis_context')}
      (Context : ${analysis_context_type})
       with Export        => True,

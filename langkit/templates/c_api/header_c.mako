@@ -153,6 +153,14 @@ ${c_doc('langkit.create_context')}
 extern ${analysis_context_type}
 ${capi.get_name("create_analysis_context")}(const char *charset);
 
+${c_doc('langkit.context_incref')}
+extern ${analysis_context_type}
+${capi.get_name("context_incref")}(${analysis_context_type} context);
+
+${c_doc('langkit.context_decref')}
+extern void
+${capi.get_name("context_decref")}(${analysis_context_type} context);
+
 ${c_doc('langkit.destroy_context')}
 extern void
 ${capi.get_name("destroy_analysis_context")}(

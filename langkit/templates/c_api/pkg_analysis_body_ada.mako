@@ -73,6 +73,24 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          return ${analysis_context_type} (System.Null_Address);
    end;
 
+   function ${capi.get_name('context_incref')}
+     (Context : ${analysis_context_type})
+      return ${analysis_context_type}
+   is
+      C : constant Analysis_Context := Unwrap (Context);
+   begin
+      Inc_Ref (C);
+      return Context;
+   end;
+
+   procedure ${capi.get_name('context_decref')}
+     (Context : ${analysis_context_type})
+   is
+      C : Analysis_Context := Unwrap (Context);
+   begin
+      Dec_Ref (C);
+   end;
+
    procedure ${capi.get_name("destroy_analysis_context")}
      (Context : ${analysis_context_type})
    is
