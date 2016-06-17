@@ -206,6 +206,14 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name('unit_last_token')}";
    ${ada_c_doc('langkit.unit_last_token', 3)}
 
+   function ${capi.get_name('unit_filename')}
+     (Unit : ${analysis_unit_type})
+      return chars_ptr
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('unit_filename')}";
+   ${ada_c_doc('langkit.unit_filename', 3)}
+
    function ${capi.get_name('unit_diagnostic_count')}
      (Unit : ${analysis_unit_type}) return unsigned
       with Export        => True,

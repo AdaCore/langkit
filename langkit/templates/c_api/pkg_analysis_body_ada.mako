@@ -227,6 +227,15 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       Token.all := Wrap (T);
    end;
 
+   function ${capi.get_name('unit_filename')}
+     (Unit : ${analysis_unit_type})
+      return chars_ptr
+   is
+      U : constant Analysis_Unit := Unwrap (Unit);
+   begin
+      return New_String (Get_Filename (U));
+   end;
+
    function ${capi.get_name("unit_diagnostic_count")}
      (Unit : ${analysis_unit_type}) return unsigned
    is

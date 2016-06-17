@@ -249,6 +249,11 @@ documentations = {
     """),
     'langkit.unit_filename': Template("""
         Return the filename an unit is associated to.
+
+        % if lang == 'c':
+            The returned string is dynamically allocated and the caller must
+            free it when done with it.
+        % endif
     """),
     'langkit.unit_diagnostic_count': Template("""
         Return the number of diagnostics associated to this unit.
