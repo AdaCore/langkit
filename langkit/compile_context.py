@@ -516,6 +516,17 @@ class CompileCtx():
         }
         self.astnode_types.sort(key=lambda cls: keys[cls])
 
+        # Check that the environment hook is bound if the language spec uses
+        # it.
+        if self.env_hook_subprogram is None:
+            for t in self.astnode_types:
+                with t.diagnostic_context():
+                    check_source_language(
+                        t.env_spec is None or not t.env_spec.env_hook_enabled,
+                        'Cannot invoke the environment hook if'
+                        ' CompileContext.bind_env_hook has not been called'
+                    )
+
     def compute_properties(self):
         """
         Compute information related to ASTNode's properties. This needs to be a
