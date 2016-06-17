@@ -34,9 +34,9 @@ package body Adalog.Variadic_Operations is
    begin
       pragma Assert (Rels'Length > 0);
 
-      Ret := Rels (1);
+      Ret := Rels (Rels'First);
 
-      for I in 2 .. Rels'Last loop
+      for I in Rels'First + 1 .. Rels'Last loop
          Ret := Relation (Ret and Rels (I));
       end loop;
 
@@ -52,9 +52,9 @@ package body Adalog.Variadic_Operations is
    begin
       pragma Assert (Rels'Length > 0);
 
-      Ret := Rels (1);
+      Ret := Rels (Rels'First);
 
-      for I in 2 .. Rels'Last loop
+      for I in Rels'First + 1 .. Rels'Last loop
          Ret := Ret or Rels (I);
       end loop;
 
