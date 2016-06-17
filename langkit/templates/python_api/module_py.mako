@@ -285,6 +285,12 @@ class AnalysisUnit(object):
         return self.TokenIterator(self.first_token)
 
     @property
+    def filename(self):
+        ${py_doc('langkit.unit_filename', 8)}
+        filename = _unit_filename(self._c_value)
+        return unwrap_str(filename)
+
+    @property
     def diagnostics(self):
         """Diagnostics for this unit."""
         return self.DiagnosticsList(self)
@@ -759,6 +765,10 @@ _unit_first_token = _import_func(
 _unit_last_token = _import_func(
     "${capi.get_name('unit_last_token')}",
     [_analysis_unit, ctypes.POINTER(Token)], None
+)
+_unit_filename = _import_func(
+    "${capi.get_name('unit_filename')}",
+    [_analysis_unit], ctypes.POINTER(ctypes.c_char)
 )
 _unit_diagnostic_count = _import_func(
     '${capi.get_name("unit_diagnostic_count")}',
