@@ -8,7 +8,9 @@ from itertools import count
 from langkit import diagnostics, names
 from langkit.c_api import CAPIType
 from langkit.common import get_type, null_constant, is_keyword
-from langkit.diagnostics import extract_library_location, check_source_language
+from langkit.diagnostics import (
+    check_source_language, context, extract_library_location
+)
 from langkit.template_utils import common_renderer
 from langkit.utils import (
     memoized, type_check, col, Colors, common_ancestor, issubtype,
@@ -152,6 +154,8 @@ class CompiledTypeMetaclass(type):
         if not dct["_internal"]:
             mcs.types.append(cls)
 
+        dct["location"] = extract_library_location()
+
         return cls
 
 
@@ -169,6 +173,13 @@ class CompiledType(object):
     """
     Whether a type is a real type in code emission, or just an intermediate
     class used for code factoring purposes in python
+    """
+
+    location = None
+    """
+    Location of the declaration of this compiled type.
+
+    :type: langkit.diagnostics.Location
     """
 
     is_ptr = True
@@ -204,6 +215,11 @@ class CompiledType(object):
         assert False, (
             'CompiledType subclasses are not meant to be instantiated'
         )
+
+    @classmethod
+    def diagnostic_context(cls):
+        ctx_message = 'in {}'.format(cls.name().camel)
+        return context(ctx_message, cls.location)
 
     @classmethod
     def is_collection(cls):
@@ -995,6 +1011,7 @@ class StructMetaClass(CompiledTypeMetaclass):
                 )
 
         dct["should_emit_array_type"] = not is_root_grammar_class
+        dct["location"] = extract_library_location()
 
         # Here, we'll register fields and properties for the root AST node
         # class. Note that we must not provide implementation for them here (no
