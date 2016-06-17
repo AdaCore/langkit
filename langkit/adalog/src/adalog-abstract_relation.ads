@@ -74,7 +74,7 @@ package Adalog.Abstract_Relation is
    --  bringing the reference count to 0 will Destroy the referenced relation
    --  object and put the pointer to null, hence the in out mode.
 
-   type Relation_Array is array (Natural range <>) of Relation;
+   type Relation_Array is array (Positive range <>) of Relation;
    --  Some relations will need to keep/provide arrays of sub-relations
 
 end Adalog.Abstract_Relation;
