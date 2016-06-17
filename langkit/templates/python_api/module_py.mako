@@ -356,9 +356,7 @@ class Token(ctypes.Structure):
         # The _token_kind_name wrapper is already supposed to handle exceptions
         # so this should always return a non-null value.
         assert name
-        result = ctypes.c_char_p(ctypes.addressof(name.contents)).value
-        _free(name)
-        return result
+        return unwrap_str(name)
 
     @property
     def text(self):
@@ -910,6 +908,15 @@ _token_previous = _import_func(
 #
 # Layering helpers
 #
+
+def unwrap_str(c_char_p_value):
+    """
+    Assuming c_char_p_value is a valid char*, convert it to a native Python
+    string and free the C pointer.
+    """
+    result = ctypes.c_char_p(ctypes.addressof(c_char_p_value.contents)).value
+    _free(c_char_p_value)
+    return result
 
 
 _kind_to_astnode_cls = {
