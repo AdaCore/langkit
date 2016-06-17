@@ -149,6 +149,12 @@ class AnalysisContext(object):
         _destroy_analysis_context(self._c_value)
         super(AnalysisContext, self).__init__()
 
+    def __eq__(self, other):
+        return self._c_value == other._c_value
+
+    def __hash__(self):
+        return hash(self._c_value)
+
     def get_from_file(self, filename, charset=None, reparse=False,
                       with_trivia=False):
         ${py_doc('langkit.get_unit_from_file', 8)}
@@ -223,6 +229,12 @@ class AnalysisUnit(object):
     def __del__(self):
         _unit_decref(self._c_value)
         super(AnalysisUnit, self).__init__()
+
+    def __eq__(self, other):
+        return self._c_value == other._c_value
+
+    def __hash__(self):
+        return hash(self._c_value)
 
     def reparse(self, buffer=None, charset=None):
         ${py_doc('langkit.unit_reparse_generic', 8)}
