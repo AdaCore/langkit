@@ -52,6 +52,12 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
       return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
 
+   procedure Inc_Ref (Context : Analysis_Context);
+   ${ada_doc('langkit.context_incref')}
+
+   procedure Dec_Ref (Context : in out Analysis_Context);
+   ${ada_doc('langkit.context_decref')}
+
    function Get_From_File
      (Context     : Analysis_Context;
       Filename    : String;
@@ -150,6 +156,7 @@ private
       Equivalent_Keys => "=");
 
    type Analysis_Context_Type is record
+      Ref_Count  : Natural;
       Units_Map  : Units_Maps.Map;
       Symbols    : Symbol_Table;
 

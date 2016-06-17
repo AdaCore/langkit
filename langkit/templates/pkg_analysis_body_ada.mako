@@ -71,7 +71,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    is
    begin
       return new Analysis_Context_Type'
-        (Units_Map  => <>,
+        (Ref_Count  => 1,
+         Units_Map  => <>,
          Symbols    => Create,
          Charset    => To_Unbounded_String (Charset),
          Root_Scope => AST_Envs.Create
@@ -79,6 +80,27 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
                           Node          => null,
                           Is_Refcounted => False));
    end Create;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Context : Analysis_Context) is
+   begin
+      Context.Ref_Count := Context.Ref_Count + 1;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Context : in out Analysis_Context) is
+   begin
+      Context.Ref_Count := Context.Ref_Count - 1;
+      if Context.Ref_Count = 0 then
+         Destroy (Context);
+      end if;
+   end Dec_Ref;
 
    --------------
    -- Get_Unit --

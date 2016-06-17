@@ -109,7 +109,11 @@ documentations = {
     'langkit.create_context': Template("""
         Create a new Analysis_Context.
         % if lang != 'python':
-            When done with it, invoke Destroy on it.
+            The returned value has a ref-count set to 1. When done with it,
+            invoke Destroy on it, in which case the ref-count is ignored. If
+            this value is shared with garbage collected languages, use
+            ref-counting primitives instead so that the context is destroyed
+            when nobody references it anymore.
         % endif
 
         Charset will be used as a default charset to decode input sources in
@@ -124,6 +128,18 @@ documentations = {
 
         ${TODO} Passing an unsupported charset here is not guaranteed to raise
         an error right here, but this would be really helpful for users.
+    """),
+    'langkit.context_incref': Template("""
+        Increase the reference count to an analysis context. Useful for
+        bindings to garbage collected languages.
+        % if lang == 'c':
+            Return the reference for convenience.
+        % endif
+    """),
+    'langkit.context_decref': Template("""
+        Decrease the reference count to an analysis context. Useful for
+        bindings to garbage collected languages. Destruction happens when the
+        ref-count reaches 0.
     """),
     'langkit.destroy_context': Template("""
         Invoke Remove on all the units Context contains and free Context. Thus,
