@@ -222,6 +222,9 @@ documentations = {
     'langkit.unit_root': Template("""
         Return the root AST node for this unit, or ${null} if there is none.
     """),
+    'langkit.node_unit': Template("""
+        Return the unit that owns an AST node.
+    """),
     'langkit.unit_first_token': Template("""
         Return a reference to the first token scanned in this unit.
     """),

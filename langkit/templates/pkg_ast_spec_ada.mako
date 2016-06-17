@@ -586,6 +586,11 @@ package ${_self.ada_api_settings.lib_name}.AST is
    subtype Logic_Equation is Relation;
    Null_Logic_Equation : constant Logic_Equation := null;
 
+   function Get_Unit
+     (Node : access ${root_node_value_type}'Class)
+      return Analysis_Unit_Interface;
+   --  Internal helper to get the unit that owns an AST node
+
 private
 
    --------------------------
@@ -837,5 +842,10 @@ private
      (Object : Iterator;
       C      : Children_Cursor)
       return Children_Cursor;
+
+   function Get_Unit
+     (Node : access ${root_node_value_type}'Class)
+      return Analysis_Unit_Interface
+   is (Node.Unit);
 
 end ${_self.ada_api_settings.lib_name}.AST;

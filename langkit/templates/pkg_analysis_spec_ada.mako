@@ -111,6 +111,11 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    function Root (Unit : Analysis_Unit) return ${root_node_type_name};
    ${ada_doc('langkit.unit_root', 3)}
 
+   function Get_Unit
+     (Node : access ${root_node_value_type}'Class)
+      return Analysis_Unit;
+   ${ada_doc('langkit.node_unit', 3)}
+
    function First_Token (Unit : Analysis_Unit) return Token_Type;
    ${ada_doc('langkit.unit_first_token', 3)}
 

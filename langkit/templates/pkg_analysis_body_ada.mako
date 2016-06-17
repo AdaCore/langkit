@@ -9,6 +9,8 @@ with Ada.Unchecked_Deallocation;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 
+with ${get_context().ada_api_settings.lib_name}.Analysis.Internal;
+use ${get_context().ada_api_settings.lib_name}.Analysis.Internal;
 with ${get_context().ada_api_settings.lib_name}.Lexer;
 with ${get_context().ada_api_settings.lib_name}.AST.Types.Parsers;
 use ${get_context().ada_api_settings.lib_name}.AST.Types.Parsers;
@@ -477,5 +479,17 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    begin
       Destroyable_Vectors.Append (Unit.Destroyables, (Object, Destroy));
    end Register_Destroyable_Helper;
+
+   --------------
+   -- Get_Unit --
+   --------------
+
+   function Get_Unit
+     (Node : access ${root_node_value_type}'Class)
+      return Analysis_Unit
+   is
+   begin
+      return Convert (Get_Unit (Node));
+   end Get_Unit;
 
 end ${_self.ada_api_settings.lib_name}.Analysis;
