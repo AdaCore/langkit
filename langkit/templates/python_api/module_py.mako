@@ -451,6 +451,11 @@ class ${root_astnode_name}(object):
         super(${root_astnode_name}, self).__init__()
 
     @property
+    def unit(self):
+        ${py_doc('langkit.node_unit', 8)}
+        return AnalysisUnit(_node_unit(self._c_value))
+
+    @property
     def kind_name(self):
         ${py_doc('langkit.node_kind', 8)}
         return self._kind_name
@@ -764,6 +769,10 @@ _unit_diagnostic_count = _import_func(
 _unit_diagnostic = _import_func(
     '${capi.get_name("unit_diagnostic")}',
     [_analysis_unit, ctypes.c_uint, ctypes.POINTER(_Diagnostic)], ctypes.c_int
+)
+_node_unit = _import_func(
+    '${capi.get_name("node_unit")}',
+    [_node], _analysis_unit
 )
 _unit_incref = _import_func(
     '${capi.get_name("unit_incref")}',
