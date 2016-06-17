@@ -235,6 +235,14 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name('unit_decref')}";
    ${ada_c_doc('langkit.unit_decref', 3)}
 
+   function ${capi.get_name('unit_context')}
+     (Unit : ${analysis_unit_type})
+      return ${analysis_context_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('unit_context')}";
+   ${ada_c_doc('langkit.unit_context', 3)}
+
    procedure ${capi.get_name('unit_reparse_from_file')}
      (Unit : ${analysis_unit_type}; Charset : chars_ptr)
       with Export        => True,

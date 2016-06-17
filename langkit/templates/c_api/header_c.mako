@@ -222,6 +222,10 @@ ${c_doc('langkit.unit_decref')}
 extern void
 ${capi.get_name("unit_decref")}(${analysis_unit_type} unit);
 
+${c_doc('langkit.unit_context')}
+extern ${analysis_context_type}
+${capi.get_name("unit_context")}(${analysis_unit_type} context);
+
 ${c_doc('langkit.unit_reparse_file')}
 extern void
 ${capi.get_name("unit_reparse_from_file")}(${analysis_unit_type} unit,

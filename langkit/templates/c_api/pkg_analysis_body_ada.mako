@@ -307,6 +307,15 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          Set_Last_Exception (Exc);
    end;
 
+   function ${capi.get_name('unit_context')}
+     (Unit : ${analysis_unit_type})
+      return ${analysis_context_type}
+   is
+      U : constant Analysis_Unit := Unwrap (Unit);
+   begin
+      return Wrap (U.Context);
+   end;
+
    procedure ${capi.get_name("unit_reparse_from_file")}
      (Unit : ${analysis_unit_type}; Charset : chars_ptr)
    is
