@@ -143,13 +143,14 @@ class AnalysisContext(object):
 
     __slots__ = ('_c_value', )
 
-    def __init__(self, charset=None):
+    def __init__(self, charset=None, _c_value=None):
         ${py_doc('langkit.create_context', 8)}
-        self._c_value = _create_analysis_context(charset)
+        self._c_value = (_create_analysis_context(charset)
+                         if _c_value is None else
+                         _context_incref(_c_value))
 
     def __del__(self):
-        _destroy_analysis_context(self._c_value)
-        super(AnalysisContext, self).__init__()
+        _context_decref(self._c_value)
 
     def __eq__(self, other):
         return self._c_value == other._c_value
@@ -239,6 +240,12 @@ class AnalysisUnit(object):
 
     def __hash__(self):
         return hash(self._c_value)
+
+    @property
+    def context(self):
+        ${py_doc('langkit.unit_context')}
+        ctx = _unit_context(self._c_value)
+        return AnalysisContext(_c_value=ctx)
 
     def reparse(self, buffer=None, charset=None):
         ${py_doc('langkit.unit_reparse_generic', 8)}
@@ -705,6 +712,14 @@ _create_analysis_context = _import_func(
     '${capi.get_name("create_analysis_context")}',
     [ctypes.c_char_p], _analysis_context
 )
+_context_incref = _import_func(
+    '${capi.get_name("context_incref")}',
+    [_analysis_context], _analysis_context
+)
+_context_decref = _import_func(
+    '${capi.get_name("context_decref")}',
+    [_analysis_context], None
+)
 _destroy_analysis_context = _import_func(
     '${capi.get_name("destroy_analysis_context")}',
     [_analysis_context, ], None
@@ -757,6 +772,10 @@ _unit_incref = _import_func(
 _unit_decref = _import_func(
     '${capi.get_name("unit_decref")}',
     [_analysis_unit], None
+)
+_unit_context = _import_func(
+    '${capi.get_name("unit_context")}',
+    [_analysis_unit], _analysis_context
 )
 _unit_reparse_from_file = _import_func(
     '${capi.get_name("unit_reparse_from_file")}',
