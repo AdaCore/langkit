@@ -5,7 +5,7 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_multiple
 from langkit.expressions.base import (
     AbstractExpression, BuiltinCallExpr, LiteralExpr, PropertyDef,
-    ResolvedExpression, construct,
+    ResolvedExpression, construct, BasicExpr
 )
 from langkit.expressions.envs import Env
 
@@ -284,3 +284,53 @@ class SolveEquation(AbstractExpression):
     def construct(self):
         return BuiltinCallExpr("Solve", BoolType,
                                [construct(self.equation, EquationType)])
+
+
+class LogicBooleanOp(AbstractExpression):
+    """
+    Internal Expression that will combine sub logic expressions via an Or or
+    an And logic operator.
+    """
+
+    KIND_OR = 0
+    KIND_AND = 1
+
+    def __init__(self, equation_array, kind=KIND_OR):
+        """
+        :param AbstractExpression equation_array: An array of equations to
+            logically combine via the or operator.
+        """
+        super(LogicBooleanOp, self).__init__()
+        self.equation_array = equation_array
+        self.kind = kind
+
+    def construct(self):
+        return BasicExpr(
+            "Variadic_{} (Relation_Array ({{}}.Items))".format(
+                "Or" if self.kind == self.KIND_OR else "And"
+            ),
+            EquationType,
+            [construct(self.equation_array, EquationType.array_type())]
+        )
+
+
+class LogicOr(LogicBooleanOp):
+    """
+    Expression that will combine sub logic expressions via an Or logic
+    operator. Use this when you have an unbounded number of sub-equations to
+    bind. The parameter is an array of equations.
+    """
+
+    def __init__(self, equation_array):
+        super(LogicOr, self).__init__(equation_array, LogicBooleanOp.KIND_OR)
+
+
+class LogicAnd(LogicBooleanOp):
+    """
+    Expression that will combine sub logic expressions via an And logic
+    operator. Use this when you have an unbounded number of sub-equations to
+    bind. The parameter is an array of equations.
+    """
+
+    def __init__(self, equation_array):
+        super(LogicAnd, self).__init__(equation_array, LogicBooleanOp.KIND_AND)
