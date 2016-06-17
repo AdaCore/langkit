@@ -274,6 +274,25 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          return 0;
    end;
 
+   function ${capi.get_name('node_unit')}
+     (Node : ${node_type})
+      return ${analysis_unit_type}
+   is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         N : constant ${root_node_type_name} := Unwrap (Node);
+         U : constant Analysis_Unit := Get_Unit (N);
+      begin
+         return Wrap (U);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${analysis_unit_type} (System.Null_Address);
+   end;
+
    function ${capi.get_name("unit_incref")}
      (Unit : ${analysis_unit_type}) return ${analysis_unit_type}
    is

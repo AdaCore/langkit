@@ -214,6 +214,10 @@ ${capi.get_name("unit_diagnostic")}(${analysis_unit_type} unit,
                                     unsigned n,
                                     ${diagnostic_type} *diagnostic_p);
 
+${c_doc('langkit.node_unit')}
+extern ${analysis_unit_type}
+${capi.get_name("node_unit")}(${node_type} node);
+
 ${c_doc('langkit.unit_incref')}
 extern ${analysis_unit_type}
 ${capi.get_name("unit_incref")}(${analysis_unit_type} unit);
