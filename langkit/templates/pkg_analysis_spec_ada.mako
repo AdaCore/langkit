@@ -150,13 +150,13 @@ private
       Equivalent_Keys => "=");
 
    type Analysis_Context_Type is record
-      Units_Map : Units_Maps.Map;
-      Symbols   : Symbol_Table;
+      Units_Map  : Units_Maps.Map;
+      Symbols    : Symbol_Table;
 
-      Charset   : Unbounded_String;
+      Charset    : Unbounded_String;
       --  Default charset to use in analysis units
 
-      Root_Scope      : AST_Envs.Lexical_Env;
+      Root_Scope : AST_Envs.Lexical_Env;
       --  The lexical scope that is shared amongst every compilation unit. Used
       --  to resolve cross file references.
    end record;
