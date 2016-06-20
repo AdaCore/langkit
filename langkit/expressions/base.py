@@ -821,30 +821,19 @@ class Var(AbstractVariable):
 
 class No(AbstractExpression):
     """
-    Expression that returns a null value.
-
-    So far, it is only supported for Struct subclasses.
+    Expression that returns a null value for the given type.
     """
 
     def __init__(self, expr_type):
         """
-        :param langkit.expressions.structs.Struct expr_type: Type parameter.
-            Type for the value this expression creates.
+        :param CompiledType expr_type: Type parameter. Type for the value this
+            expression creates.
         """
         super(No, self).__init__()
         self.expr_type = expr_type
 
     def do_prepare(self):
-        from langkit.expressions.structs import Struct
-
         self.expr_type = resolve_type(self.expr_type)
-
-        check_source_language(
-            issubtype(self.expr_type, Struct),
-            'Invalid type for Null expression: {}'.format(
-                self.expr_type.name().camel
-            )
-        )
 
     def construct(self):
         """
