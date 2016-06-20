@@ -102,7 +102,7 @@ class Cast(AbstractExpression):
 
 class IsNull(AbstractExpression):
     """
-    Abstract expression to test whether an AST node is null.
+    Abstract expression to test the passed expression is null.
     """
 
     def __init__(self, expr):
@@ -119,8 +119,9 @@ class IsNull(AbstractExpression):
 
         :rtype: EqExpr
         """
+        cexpr = construct(self.expr)
         return Eq.make_expr(
-            construct(self.expr, ASTNode), LiteralExpr('null', ASTNode)
+            cexpr, LiteralExpr(cexpr.type.nullexpr(), cexpr.type)
         )
 
 
