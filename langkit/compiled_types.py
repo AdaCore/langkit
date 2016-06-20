@@ -1642,11 +1642,13 @@ class Struct(CompiledType):
         """
         Return a value that can be considered as "null" for this AST node type.
         It indicates the absence of AST node.
+
+        :rtype: str
         """
         if cls.is_ptr:
             return null_constant()
         else:
-            return names.Name('No') + cls.name()
+            return (names.Name('No') + cls.name()).camel_with_underscores
 
     @classmethod
     def doc(cls):
