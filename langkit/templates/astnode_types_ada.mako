@@ -64,6 +64,13 @@
 
    ## Public field getters
 
+   % if not cls.is_env_spec_inherited and cls.env_spec._add_env:
+      overriding
+      function Node_Env
+        (Node : access ${type_name})
+         return AST_Envs.Lexical_Env;
+   % endif
+
    % for field in cls.get_fields(include_inherited=False, \
                                  predicate=library_public_field):
       ${field_decl(field)}
@@ -128,14 +135,6 @@
         (Self        : access ${type_name};
          Current_Env : in out AST_Envs.Lexical_Env)
          return AST_Envs.Lexical_Env;
-
-      % if cls.env_spec._add_env:
-         overriding
-         function Node_Env
-           (Node : access ${type_name})
-            return AST_Envs.Lexical_Env
-         is (Node.Self_Env.Parent);
-      % endif
 
    % endif
 
@@ -474,6 +473,15 @@
 
       return Ret;
    end Do_Env_Actions;
+
+      % if cls.env_spec._add_env:
+         overriding
+         function Node_Env
+           (Node : access ${type_name})
+            return AST_Envs.Lexical_Env
+         is (Node.Self_Env.Parent);
+      % endif
+
    % endif
 
    ## Body of attribute getters

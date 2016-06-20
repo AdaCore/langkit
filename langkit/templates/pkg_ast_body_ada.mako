@@ -686,6 +686,24 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end return;
    end Children_With_Trivia;
 
+   --------------
+   -- Node_Env --
+   --------------
+
+   function Node_Env
+     (Node : access ${root_node_value_type})
+      return AST_Envs.Lexical_Env
+   is (Node.Self_Env);
+
+   ------------------
+   -- Children_Env --
+   ------------------
+
+   function Children_Env
+     (Node : access ${root_node_value_type})
+      return AST_Envs.Lexical_Env
+   is (Node.Self_Env);
+
    ---------------
    -- PP_Trivia --
    ---------------

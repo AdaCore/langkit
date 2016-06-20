@@ -225,6 +225,16 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  TODO??? Hide it somehow: destruction is done automatically when the
    --  owning analysis unit is destroyed itself.
 
+   function Node_Env
+     (Node : access ${root_node_value_type})
+      return AST_Envs.Lexical_Env;
+   ${ada_doc(_self.root_grammar_class._fields['node_env'], 3)}
+
+   function Children_Env
+     (Node : access ${root_node_value_type})
+      return AST_Envs.Lexical_Env;
+   ${ada_doc(_self.root_grammar_class._fields['children_env'], 3)}
+
    -------------------------------
    -- Tree traversal operations --
    -------------------------------
@@ -668,18 +678,6 @@ private
    --  that replacing Current_Env will affect the env that the following
    --  siblings of Self see, while returning a new env will only affect the
    --  environment seen by Self's children.
-
-   function Node_Env
-     (Node : access ${root_node_value_type})
-      return AST_Envs.Lexical_Env
-   is (Node.Self_Env);
-   ${ada_doc(_self.root_grammar_class._fields['node_env'], 3)}
-
-   function Children_Env
-     (Node : access ${root_node_value_type})
-      return AST_Envs.Lexical_Env
-   is (Node.Self_Env);
-   ${ada_doc(_self.root_grammar_class._fields['children_env'], 3)}
 
    --------------------------------
    -- Tree traversal (internals) --
