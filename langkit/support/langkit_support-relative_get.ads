@@ -2,7 +2,7 @@ generic
    type Item_Type is private;
    --  Type for objects to get
 
-   type Sequence_Type is private;
+   type Sequence_Type (<>) is private;
    --  Sequence of such items
 
    with function Length (S : Sequence_Type) return Natural;
