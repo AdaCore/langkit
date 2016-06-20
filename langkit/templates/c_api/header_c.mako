@@ -141,7 +141,9 @@ typedef struct {
 % endfor
 
 % for array_type in _self.sorted_types(_self.array_types):
-    ${array_types.decl(array_type)}
+    % if array_type.element_type()._exposed:
+        ${array_types.decl(array_type)}
+    % endif
 % endfor
 
 

@@ -1,7 +1,7 @@
 ## vim: filetype=makopython
 
 <%def name="decl(cls)">
-
+% if cls.element_type()._exposed:
 <%
    type_name = cls.name().camel
    struct_name = '{}_Struct'.format(pyapi.type_internal_name(cls))
@@ -75,4 +75,5 @@ class ${type_name}(object):
         return ${pyapi.wrap_value('item', elt_type)}
         % endif
 
+% endif
 </%def>

@@ -211,6 +211,13 @@ class CompiledType(object):
     information.
     """
 
+    _exposed = True
+    """
+    Whether the type should be exposed to the C and Python APIs. TODO: This
+    is a workaround for the fact that we don't want to expose every type to
+    the bindings yet. We probably want to remove this flag in the long run.
+    """
+
     def __init__(self):
         assert False, (
             'CompiledType subclasses are not meant to be instantiated'
@@ -442,6 +449,7 @@ class BasicType(CompiledType):
     _storage_nullexpr = None
     _external = False
     _internal = True
+    _exposed = True
 
     @classmethod
     def name(cls):
@@ -497,6 +505,7 @@ class LogicVarType(BasicType):
     _storage_nullexpr = "Null_Var_Record"
     is_ptr = False
     has_special_storage = True
+    _exposed = False
 
     @classmethod
     def storage_type_name(cls):
@@ -526,6 +535,7 @@ class EquationType(BasicType):
     _name = "Logic_Equation"
     _nullexpr = "Null_Logic_Equation"
     is_ptr = False
+    _exposed = False
 
     @classmethod
     def c_type(cls, c_api_settings):
