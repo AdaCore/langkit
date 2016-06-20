@@ -534,7 +534,7 @@ class EquationType(BasicType):
     """
     _name = "Logic_Equation"
     _nullexpr = "Null_Logic_Equation"
-    is_ptr = False
+    is_ptr = True
     _exposed = False
 
     @classmethod
