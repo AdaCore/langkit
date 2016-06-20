@@ -141,17 +141,18 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
       if Created then
          Unit := new Analysis_Unit_Type'
-           (Context      => Context,
-            Ref_Count    => 1,
-            AST_Root     => null,
-            File_Name    => Fname,
-            Charset      => <>,
-            TDH          => <>,
-            Diagnostics  => <>,
-            With_Trivia  => With_Trivia,
-            Rule         => Rule,
-            AST_Mem_Pool => No_Pool,
-            Destroyables => Destroyable_Vectors.Empty_Vector);
+           (Context          => Context,
+            Ref_Count        => 1,
+            AST_Root         => null,
+            File_Name        => Fname,
+            Charset          => <>,
+            TDH              => <>,
+            Diagnostics      => <>,
+            With_Trivia      => With_Trivia,
+            Is_Env_Populated => False,
+            Rule             => Rule,
+            AST_Mem_Pool     => No_Pool,
+            Destroyables     => Destroyable_Vectors.Empty_Vector);
          Initialize (Unit.TDH, Context.Symbols);
          Context.Units_Map.Insert (Fname, Unit);
       else
@@ -452,6 +453,12 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
    procedure Populate_Lexical_Env (Unit : Analysis_Unit) is
    begin
+      --  TODO??? Handle env invalidation when reparsing an unit
+      if Unit.Is_Env_Populated then
+         return;
+      end if;
+      Unit.Is_Env_Populated := True;
+
       Populate_Lexical_Env (Unit.AST_Root, Unit.Context.Root_Scope);
    end Populate_Lexical_Env;
 

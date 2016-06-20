@@ -183,23 +183,28 @@ private
 
    type Analysis_Unit_Type is new Analysis_Unit_Interface_Type with
    record
-      Context      : Analysis_Context;
-      Ref_Count    : Natural;
-      AST_Root     : ${root_node_type_name};
-      File_Name    : Unbounded_String;
-      Charset      : Unbounded_String;
-      TDH          : aliased Token_Data_Handler;
-      Diagnostics  : Diagnostics_Vectors.Vector;
-      With_Trivia  : Boolean;
+      Context          : Analysis_Context;
+      Ref_Count        : Natural;
+      AST_Root         : ${root_node_type_name};
+      File_Name        : Unbounded_String;
+      Charset          : Unbounded_String;
+      TDH              : aliased Token_Data_Handler;
+      Diagnostics      : Diagnostics_Vectors.Vector;
+      With_Trivia      : Boolean;
 
-      Rule         : Grammar_Rule;
+      Is_Env_Populated : Boolean;
+      --  Whether Populate_Lexical_Env was called on this unit. Used not to
+      --  populate multiple times the same unit and hence avoid infinite
+      --  populate recursions for circular dependencies.
+
+      Rule             : Grammar_Rule;
       --  The grammar rule used to parse this unit
 
-      AST_Mem_Pool : Bump_Ptr_Pool;
+      AST_Mem_Pool     : Bump_Ptr_Pool;
       --  This memory pool shall only be used for AST parsing. Stored here
       --  because it is more convenient, but one shall not allocate from it.
 
-      Destroyables : Destroyable_Vectors.Vector;
+      Destroyables     : Destroyable_Vectors.Vector;
       --  Collection of objects to destroy when destroying the analysis unit
    end record;
 
