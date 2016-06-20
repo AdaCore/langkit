@@ -137,6 +137,13 @@ package ${_self.ada_api_settings.lib_name}.AST is
    procedure Inc_Ref (Self : Lexical_Env) renames AST_Envs.Inc_Ref;
    procedure Dec_Ref (Self : in out Lexical_Env) renames AST_Envs.Dec_Ref;
 
+   function Get
+     (A     : AST_Envs.Env_Element_Array;
+      Index : Integer)
+      return Env_Element;
+   --  Simple getter that raises Property_Error on out-of-bound accesses.
+   --  Useful for code generation.
+
    ## Declare arrays of lexical environments here because we need them for the
    ## Group operation below.
    ${array_types.public_decl(LexicalEnvType.array_type())}

@@ -45,7 +45,7 @@ class EnvGet(AbstractExpression):
         )
 
         if self.resolve_unique:
-            return make_expr("{} (0)".format(array_expr), EnvElement)
+            return make_expr("Get ({}, 0)".format(array_expr), EnvElement)
         else:
             EnvElement.array_type().add_to_context()
             return make_expr("Create ({})".format(array_expr),

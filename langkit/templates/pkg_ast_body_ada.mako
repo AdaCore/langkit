@@ -1157,6 +1157,38 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
    % endif
 
+   ---------
+   -- Get --
+   ---------
+
+   function Get
+     (A     : AST_Envs.Env_Element_Array;
+      Index : Integer)
+      return Env_Element
+   is
+      function Length (A : AST_Envs.Env_Element_Array) return Natural
+      is (A'Length);
+
+      function Get
+        (A     : AST_Envs.Env_Element_Array;
+         Index : Integer)
+         return Env_Element
+      is (A (Index));
+
+      function Relative_Get is new Langkit_Support.Relative_Get
+        (Item_Type     => Env_Element,
+         Sequence_Type => AST_Envs.Env_Element_Array,
+         Length        => Length,
+         Get           => Get);
+      Result : Env_Element;
+   begin
+      if Relative_Get (A, Index, Result) then
+         return Result;
+      else
+         raise Property_Error with "out-of-bounds array access";
+      end if;
+   end Get;
+
    ## Generate the bodies of the root grammar class properties
    % for prop in ctx.root_grammar_class.get_properties(include_inherited=False):
    ${prop.prop_def}
