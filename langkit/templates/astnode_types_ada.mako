@@ -417,11 +417,7 @@
       use AST_Envs.Lexical_Env_Vectors;
 
       Ret         : Lexical_Env := null;
-      % if cls.env_spec.initial_env or \
-           cls.env_spec.is_adding_to_env or \
-           cls.env_spec._add_env:
-         Initial_Env : Lexical_Env := Current_Env;
-      % endif
+      Initial_Env : Lexical_Env := Current_Env;
 
       <%def name="add_to_env(key, val)">
          ## Add a new entry to the lexical env, for which the key is
@@ -431,14 +427,15 @@
       </%def>
    begin
 
+      % if cls.env_spec.initial_env:
+         Initial_Env := ${cls.env_spec.initial_env_expr};
+      % endif
+
       % if cls.env_spec.env_hook_enabled:
          ${ctx.env_hook_subprogram[0]}.${ctx.env_hook_subprogram[1]}
            (Analysis.Internal.Convert (Self.Unit),
-            ${cls.env_spec.env_hook_arg_expr});
-      % endif
-
-      % if cls.env_spec.initial_env:
-         Initial_Env := ${cls.env_spec.initial_env_expr};
+            ${cls.env_spec.env_hook_arg_expr},
+            Initial_Env);
       % endif
 
       % if cls.env_spec.is_adding_to_env:

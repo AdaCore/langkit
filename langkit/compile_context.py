@@ -1021,8 +1021,13 @@ class CompileCtx():
         signature::
 
             procedure Hook_Func
-              (Unit : Analysis_Unit;
-               Node : <root AST node type>);
+              (Unit        : Analysis_Unit;
+               Node        : <root AST node type>;
+               Initial_Env : in out Lexical_Env);
+
+        If the hook in invoked on an node that uses the initial_env EnvSpec
+        attribute, the hook can alter it so that it affects the rest of the
+        EnvSpec actions.
 
         :param str unit: Name of the Ada unit in which this subprogram is
             defined.
