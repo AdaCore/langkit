@@ -31,7 +31,9 @@ package body Adalog.Abstract_Relation is
 
    procedure Inc_Ref (Self : Relation) is
    begin
-      Self.Ref_Count := Self.Ref_Count + 1;
+      if Self /= null then
+         Self.Ref_Count := Self.Ref_Count + 1;
+      end if;
    end Inc_Ref;
 
    -------------
