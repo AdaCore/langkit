@@ -17,7 +17,7 @@ from langkit.diagnostics import (
     context, Severity, DiagnosticError
 )
 from langkit.utils import (
-    assert_type, memoized, TypeSet, issubtype, dispatch_on_type
+    assert_type, memoized, TypeSet, dispatch_on_type
 )
 
 
