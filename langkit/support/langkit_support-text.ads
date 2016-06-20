@@ -14,8 +14,8 @@ package Langkit_Support.Text is
    function Image
      (T : Text_Type; With_Quotes : Boolean := False)
       return String;
-   --  Return a Python-style quoted string for T. If With_Quote is false, do
-   --  not output the boundary quotes.
+   --  Return a Python-style escaped string for T. If With_Quote is True, the
+   --  return string will include boundary quotes.
 
    type Text_Access is access all Text_Type;
 
