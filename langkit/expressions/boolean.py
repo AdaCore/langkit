@@ -274,10 +274,10 @@ class If(AbstractExpression):
 
     def __init__(self, cond, then, else_then):
         """
-        :param AbstractExpression cond: A boolean expression.
-        :param AbstractExpression then: If "cond" is evaluated to true, this
+        :param cond: A boolean expression.
+        :param then: If "cond" is evaluated to true, this
             part is returned.
-        :param AbstractExpression else_then: If "cond" is evaluated to false,
+        :param else_then: If "cond" is evaluated to false,
             this part is returned.
         """
         super(If, self).__init__()
