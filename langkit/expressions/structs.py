@@ -97,7 +97,7 @@ class Cast(AbstractExpression):
             'Casting to the same type',
             severity=Severity.warning
         )
-        return Cast.Expr(expr, self.astnode)
+        return Cast.Expr(expr, self.astnode, do_raise=self.do_raise)
 
 
 class IsNull(AbstractExpression):
