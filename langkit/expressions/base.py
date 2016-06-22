@@ -855,6 +855,28 @@ class No(AbstractExpression):
         return LiteralExpr(self.expr_type.nullexpr(), self.expr_type)
 
 
+class EmptyArray(AbstractExpression):
+    """
+    Expression that returns an empty array.
+    """
+
+    def __init__(self, element_type):
+        """
+        :param CompiledType element_type: Type for array items.
+        """
+        super(EmptyArray, self).__init__()
+        self.element_type = element_type
+        self.array_type = None
+
+    def do_prepare(self):
+        self.array_type = resolve_type(self.element_type).array_type()
+        self.array_type.add_to_context()
+
+    def construct(self):
+        return LiteralExpr('Create (0)', self.array_type,
+                           result_var_name='Empty_Array')
+
+
 def render(*args, **kwargs):
     return ct_render(*args, property=PropertyDef.get(), Self=Self, **kwargs)
 
