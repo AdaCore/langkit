@@ -4,6 +4,8 @@
 
 ${then.expr.render_pre()}
 ${then.var_expr.name} := ${then.expr.render_expr()};
+${helpers.inc_ref(then.var_expr)}
+
 if
    <%
       cond_expr = then.var_expr.render_expr()
