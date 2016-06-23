@@ -17,6 +17,8 @@ generic
    type Element_Type is private;
 package Langkit_Support.Bump_Ptr.Vectors is
 
+   subtype Index_Type is Natural;
+
    type Vector is private
      with Iterable =>
        (First       => First,
@@ -41,10 +43,10 @@ package Langkit_Support.Bump_Ptr.Vectors is
      with Inline_Always;
    --  Get the element at Index
 
-   function Get_At_Index (Self : Vector; I : Natural) return Element_Type
+   function Get_At_Index (Self : Vector; I : Index_Type) return Element_Type
      with
        Inline,
-       Pre => I < Length (Self);
+       Pre => I <= Index_Type'First + Length (Self) - 1;
    --  Get the element at Index
 
    function Get_Access (Self : Vector; C : Cursor) return Element_Access

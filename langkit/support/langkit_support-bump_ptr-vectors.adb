@@ -91,11 +91,11 @@ package body Langkit_Support.Bump_Ptr.Vectors is
    -- Get_At_Index --
    ------------------
 
-   function Get_At_Index (Self : Vector; I : Natural) return Element_Type
+   function Get_At_Index (Self : Vector; I : Index_Type) return Element_Type
    is
       function Get_In_Chunk
         (Chunk             : Chunk_Access;
-         Chunk_Start_Index : Natural)
+         Chunk_Start_Index : Index_Type)
          return Element_Type
       is (Chunk.Elements (I - Chunk_Start_Index + 1));
       --  Assuming that 1) Chunk's first element has index Chunk_Start_Index
@@ -107,8 +107,8 @@ package body Langkit_Support.Bump_Ptr.Vectors is
       --  (assuming equiprobable accesses). So let's just check if it's the
       --  case.
       declare
-         Current_Chunk_Start_Index : constant Natural :=
-            Self.Length - Self.Current_Chunk.Length;
+         Current_Chunk_Start_Index : constant Index_Type :=
+            Index_Type'First + Self.Length - Self.Current_Chunk.Length;
       begin
          if I >= Current_Chunk_Start_Index then
             return Get_In_Chunk
@@ -119,7 +119,7 @@ package body Langkit_Support.Bump_Ptr.Vectors is
       --  We had no luck: go through all chunks to find the one that contains
       --  the element at index I.
       declare
-         Chunk_Start_Index : Natural := 0;
+         Chunk_Start_Index : Index_Type := Index_Type'First;
          Current_Chunk     : Chunk_Access := Self.First_Chunk;
       begin
          while Current_Chunk /= null
