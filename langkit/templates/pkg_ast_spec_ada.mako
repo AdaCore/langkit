@@ -165,9 +165,6 @@ package ${_self.ada_api_settings.lib_name}.AST is
    ## since the declarations require AST_Envs.
    ${array_types.public_decl(root_node_array)}
 
-   package ${root_node_type_name}_Arrays renames
-     ${root_node_type_name}_Vectors.Elements_Arrays;
-
    procedure Populate_Lexical_Env
      (Node     : access ${root_node_value_type}'Class;
       Root_Env : AST_Envs.Lexical_Env);

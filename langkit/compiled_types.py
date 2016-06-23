@@ -1757,6 +1757,16 @@ class ArrayType(CompiledType):
         return cls.element_type().name() + names.Name('Vectors')
 
     @classmethod
+    def pkg_array(cls):
+        """
+        Name of the Langkit_Support.Array_Utils package instantiation
+        corresponding to this element_type.
+
+        :rtype: names.Name
+        """
+        return cls.element_type().name() + names.Name('Arrays')
+
+    @classmethod
     def vector(cls):
         """
         Name of the type for vector values.

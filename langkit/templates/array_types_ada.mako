@@ -28,6 +28,7 @@
 
    package ${cls.pkg_vector()} is new Langkit_Support.Vectors
      (${elt_type});
+   package ${cls.pkg_array()} renames ${cls.pkg_vector()}.Elements_Arrays;
 
    function Create (Items_Count : Natural) return ${cls.name()} is
      (new ${cls.pointed()}'(N => Items_Count, Ref_Count => 1, Items => <>));
