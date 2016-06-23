@@ -760,10 +760,17 @@ class Let(AbstractExpression):
         :rtype: LetExpr
         """
         scope = PropertyDef.get_scope()
-        var_exprs = map(construct, self.var_exprs)
-        for var, expr in zip(self.vars, var_exprs):
-            var.set_type(expr.type)
+        var_exprs = []
+        for var, abs_expr in zip(self.vars, self.var_exprs):
+            # First we construct the expression
+            var_expr = construct(abs_expr)
+
+            # Then we bind the type of this variable immediately, so that it is
+            # available to subsequent variable declarations in this let block.
+            var.set_type(var_expr.type)
             scope.add(var.local_var)
+            var_exprs.append(var_expr)
+
         vars = map(construct, self.vars)
 
         return Let.Expr(vars, var_exprs, construct(self.expr))
