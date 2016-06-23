@@ -476,7 +476,7 @@ class IsA(AbstractExpression):
         """
         super(IsA, self).__init__()
         self.expr = expr
-        self.astnodes = [assert_type(a, ASTNode) for a in astnodes]
+        self.astnodes = astnodes
 
     def construct(self):
         """
@@ -486,12 +486,17 @@ class IsA(AbstractExpression):
         :rtype: IsAExpr
         """
         expr = construct(self.expr)
-        for a in self.astnodes:
+        astnodes = [resolve_type(a) for a in self.astnodes]
+        for a in astnodes:
+            check_source_language(
+                issubclass(a, ASTNode),
+                "Expected ASTNode subclass, got {}".format(a)
+            )
             check_source_language(a.matches(expr.type), (
                 'When testing the dynamic subtype of an AST node, the type to'
                 ' check must be a subclass of the value static type.'
             ))
-        return IsA.Expr(expr, self.astnodes)
+        return IsA.Expr(expr, astnodes)
 
 
 class Match(AbstractExpression):
