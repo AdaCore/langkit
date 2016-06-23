@@ -27,7 +27,7 @@ begin
       ${parser_context.res_var_name} := M.Instance;
       return ${parser_context.res_var_name};
    elsif M.State = Failure then
-      Parser.Current_Pos := -1;
+      Parser.Current_Pos := No_Token_Index;
       return ${parser_context.res_var_name};
    end if;
 
@@ -56,7 +56,7 @@ begin
          Mem_Pos := ${parser_context.pos_var_name};
          Mem_Res := ${parser_context.res_var_name};
          Set (${_self.gen_fn_name}_Memo,
-              ${parser_context.pos_var_name} /= -1,
+              ${parser_context.pos_var_name} /= No_Token_Index,
               ${parser_context.res_var_name},
               Pos,
               ${parser_context.pos_var_name});
@@ -70,7 +70,7 @@ begin
    % endif
 
    Set (${_self.gen_fn_name}_Memo,
-        ${parser_context.pos_var_name} /= -1,
+        ${parser_context.pos_var_name} /= No_Token_Index,
         ${parser_context.res_var_name},
         Pos,
         ${parser_context.pos_var_name});

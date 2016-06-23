@@ -6,7 +6,7 @@
 ${parser_context.code}
 
 ## If the parsing was successful then
-if ${parser_context.pos_var_name} /= -1 then
+if ${parser_context.pos_var_name} /= No_Token_Index then
 
    ## Set current position to the out position of the parsed row element
    ${pos} := ${parser_context.pos_var_name};
@@ -19,7 +19,7 @@ if ${parser_context.pos_var_name} /= -1 then
 else
    ## If the parsing was unsuccessful, then set the position accordingly
    ## and then skip the rest of the row parsing.
-   ${pos} := -1;
+   ${pos} := No_Token_Index;
    goto ${exit_label}_0;
 
 end if;

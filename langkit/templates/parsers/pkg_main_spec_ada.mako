@@ -19,7 +19,7 @@ use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 package ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    type Fail_Info is record
-      Pos               : Token_Index := -1;
+      Pos               : Token_Index := No_Token_Index;
       Expected_Token_Id : Token_Kind;
       Found_Token_Id    : Token_Kind;
    end record;

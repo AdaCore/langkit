@@ -4,7 +4,7 @@
 
 ${parser_context.code}
 
-if ${parser_context.pos_var_name} /= -1 then
+if ${parser_context.pos_var_name} /= No_Token_Index then
     ${res} := ${_self.enum_type_inst.enumerator};
 end if;
 

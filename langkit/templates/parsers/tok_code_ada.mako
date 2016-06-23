@@ -11,7 +11,7 @@ declare
 begin
    if T.Kind /= ${token_kind} then
        ## If the result is not the one we expect, set pos to error
-       ${pos} := -1;
+       ${pos} := No_Token_Index;
 
        ## Document this failure so we can have a diagnostic at the end of
        ## parsing.

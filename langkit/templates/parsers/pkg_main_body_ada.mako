@@ -41,8 +41,8 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
       Check_Complete : Boolean := True);
    --  Helper for the user parsing function, to be called after a low-level
    --  parsing function. Check_Complete has the same semantics as in Parse. If
-   --  the parsing failed (Parser.Current_Pos = -1), append corresponding
-   --  diagnostics to Parser.Diagnostics, do nothing instead.
+   --  the parsing failed (Parser.Current_Pos = No_Token_Index), append
+   --  corresponding diagnostics to Parser.Diagnostics, do nothing instead.
 
    ----------------------
    -- Create_From_File --
@@ -102,7 +102,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    begin
 
-      if Parser.Current_Pos = -1 then
+      if Parser.Current_Pos = No_Token_Index then
          Add_Last_Fail_Diagnostic;
       elsif Check_Complete
         and then Parser.Current_Pos /= Last_Token (Parser.TDH.all)

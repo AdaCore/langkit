@@ -2,7 +2,8 @@
 
 --  Start list_code
 
-## If we accept empty lists, then we never want to return -1 as a position
+## If we accept empty lists, then we never want to return No_Token_Index as a
+## position.
 ## TODO: This is weird because:
 ## 1. With those semantics, list(empty_valid=true) is equivalent to Opt(list),
 ##    so it might be better to compile it as such.
@@ -11,7 +12,7 @@
 % if _self.empty_valid:
     ${pos} := ${pos_name};
 % else:
-    ${pos} := -1;
+    ${pos} := No_Token_Index;
 % endif
 
 ${res} := ${_self.get_type().storage_nullexpr()};
@@ -22,7 +23,7 @@ loop
    ${parser_context.code}
 
    ## Stop as soon as we cannot parse list elements anymore
-   exit when ${parser_context.pos_var_name} = -1;
+   exit when ${parser_context.pos_var_name} = No_Token_Index;
 
    ${pos} := ${parser_context.pos_var_name};
    ${cpos} := ${parser_context.pos_var_name};
@@ -128,7 +129,7 @@ loop
    ## Parse the separator, if there is one. The separator is always discarded.
    % if _self.sep:
       ${sep_context.code}
-      if ${sep_context.pos_var_name} /= -1 then
+      if ${sep_context.pos_var_name} /= No_Token_Index then
           ${cpos} := ${sep_context.pos_var_name};
       else
          ## If we didn't successfully parse a separator, exit

@@ -8,7 +8,7 @@ ${parser_context.code}
     ${bool_res} := True;
 % endif
 
-if ${parser_context.pos_var_name} = -1 then
+if ${parser_context.pos_var_name} = No_Token_Index then
     % if _self._booleanize:
         ${bool_res} := False;
     % else:
