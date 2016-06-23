@@ -634,7 +634,7 @@ private
       Unit                   : Analysis_Unit_Interface := null;
       --  Reference to the analysis unit that owns this node
 
-      Token_Start, Token_End : Token_Index  := 0;
+      Token_Start, Token_End : Token_Index  := No_Token_Index;
       Extensions             : Extension_Vectors.Vector;
 
       Self_Env               : AST_Envs.Lexical_Env;

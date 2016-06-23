@@ -148,7 +148,8 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
       % for name in _self.user_rule_names:
          when ${Name.from_lower(name)}_Rule =>
             Result := ${root_node_type_name}
-              (${_self.rules_to_fn_names[name].gen_fn_name} (Parser, 0));
+              (${_self.rules_to_fn_names[name].gen_fn_name}
+                 (Parser, First_Token_Index));
       % endfor
       end case;
       Process_Parsing_Error (Parser, Check_Complete);

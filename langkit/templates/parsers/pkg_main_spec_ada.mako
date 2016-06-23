@@ -25,7 +25,7 @@ package ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
    end record;
 
    type Parser_Type is record
-      Current_Pos : Token_Index := 0;
+      Current_Pos : Token_Index := First_Token_Index;
       Last_Fail   : Fail_Info;
       Diagnostics : Diagnostics_Vectors.Vector;
       Unit        : Analysis_Unit_Interface;

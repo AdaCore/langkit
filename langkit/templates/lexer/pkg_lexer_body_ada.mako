@@ -106,7 +106,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       begin
          if With_Trivia then
             --  By default, the current token will have no trivia
-            Append (TDH.Tokens_To_Trivias, -1);
+            Append (TDH.Tokens_To_Trivias, Integer (No_Token_Index));
 
             --  Reset Last_Token_Was_Trivia so that new trivia is added to the
             --  current token.
@@ -178,7 +178,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                      Last_Element (TDH.Trivias).all.Has_Next := True;
                   else
                      Last_Element (TDH.Tokens_To_Trivias).all :=
-                        Length (TDH.Trivias);
+                        Last_Index (TDH.Trivias) + 1;
                   end if;
 
                   Append

@@ -418,16 +418,19 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       use Token_Vectors, Trivia_Vectors, Integer_Vectors;
    begin
       if Length (TDH.Tokens_To_Trivias) = 0
-         or else Get (TDH.Tokens_To_Trivias, 0) = Integer (No_Token_Index)
+         or else (First_Element (TDH.Tokens_To_Trivias)
+                  = Integer (No_Token_Index))
       then
          --  There is no leading trivia: return the first token
 
          return (if Length (TDH.Tokens) = 0
                  then No_Token
-                 else (TDH, 0, No_Token_Index));
+                 else (TDH,
+                       Token_Index (First_Index (TDH.Tokens)),
+                       No_Token_Index));
 
       else
-         return (TDH, No_Token_Index, 0);
+         return (TDH, No_Token_Index, Token_Index (First_Index (TDH.Trivias)));
       end if;
    end First_Token;
 
@@ -451,7 +454,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
                        No_Token_Index));
 
       else
-         return (TDH, No_Token_Index, 0);
+         return (TDH, No_Token_Index, Token_Index (First_Index (TDH.Trivias)));
       end if;
    end Last_Token;
 
@@ -575,7 +578,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
                --  If there is no such trivia and Token was the first one, then
                --  this was the start of the token stream: no previous token.
-               if Prev_Trivia = No_Token_Index and then Token.Token <= 0 then
+               if Prev_Trivia = No_Token_Index
+                  and then Token.Token <= First_Token_Index
+               then
                   return No_Token;
                else
                   return (Token.TDH, Token.Token - 1, Prev_Trivia);
@@ -584,7 +589,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
          --  Past this point: Token is known to be a trivia
 
-         elsif Token.Trivia = 0 then
+         elsif Token.Trivia = First_Token_Index then
             --  This is the first trivia for some token, so the previous token
             --  cannot be a trivia.
             return (if Token.Token = No_Token_Index
