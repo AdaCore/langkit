@@ -121,7 +121,7 @@ class Eq(AbstractExpression):
         :rtype: EqExpr
         """
         def construct_logic_eq(lhs, rhs):
-            if rhs.type == LogicVarType:
+            if lhs.type == LogicVarType:
                 check_source_language(
                     rhs.type == LogicVarType or rhs.type.matches(ASTNode),
                     "Operands to a logic equality operator should be either "
