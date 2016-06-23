@@ -313,10 +313,15 @@ class AbstractExpression(Frozable):
         built-in ones. Since they're built on regular attrs, we cannot put
         them in attrs or it would cause infinite recursion.
         """
+        from langkit.expressions.structs import IsNull
+        from langkit.expressions.boolean import Not
+
         return {
             'empty': self.length.equals(0),
             'find': lambda filter_expr:
                 self.filter(filter_expr).at(0),
+            'exists': lambda filter_expr:
+                Not(IsNull(self.filter(filter_expr).at(0))),
             'find_or_raise': lambda filter_expr:
                 self.filter(filter_expr).at_or_raise(0),
         }
