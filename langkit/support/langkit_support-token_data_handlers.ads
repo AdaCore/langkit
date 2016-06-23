@@ -28,12 +28,15 @@ package Langkit_Support.Token_Data_Handlers is
 
    use Token_Vectors, Text_Vectors, Trivia_Vectors, Integer_Vectors;
 
-   type Token_Index is new Integer range -1 .. Integer'Last;
+   type Token_Index is new Integer range
+      Token_Vectors.Index_Type'First - 1
+      .. Token_Vectors.Index_Type'Last;
    --  Although we cannot use anything else than Natural as Token_Vectors
    --  indexes, this type will be used outside this package so that typing
    --  helps us fining index misuses.
 
-   No_Token_Index : constant Token_Index := -1;
+   No_Token_Index    : constant Token_Index := Token_Index'First;
+   First_Token_Index : constant Token_Index := Token_Index'First + 1;
 
    type Token_Data_Handler is record
       Tokens            : Token_Vectors.Vector;
@@ -57,9 +60,10 @@ package Langkit_Support.Token_Data_Handlers is
 
       Tokens_To_Trivias : Integer_Vectors.Vector;
       --  This is the correspondence map between regular tokens and trivias:
-      --  see documentation for the Trivias field. Note that the entry at index
-      --  0 stands for the leading trivia, i.e. trivia that come before the
-      --  first token.
+      --  see documentation for the Trivias field. Note that the first entry
+      --  stands for the leading trivia, i.e. trivia that come before the first
+      --  token, then the second entry stands for the trivia that come after
+      --  the first token, and so on.
 
       Symbols           : Symbol_Table;
       String_Literals   : Text_Vectors.Vector;
