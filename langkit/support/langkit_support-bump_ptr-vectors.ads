@@ -72,14 +72,14 @@ package Langkit_Support.Bump_Ptr.Vectors is
 
 private
 
-   type Elements_Array is array (Natural range <>) of Element_Type;
+   type Elements_Array is array (Positive range <>) of Element_Type;
 
    type Chunk;
    type Chunk_Access is access all Chunk;
    pragma No_Strict_Aliasing (Chunk_Access);
 
    type Chunk (Capacity : Natural) is record
-      Elements   : Elements_Array (0 .. Capacity);
+      Elements   : Elements_Array (1 .. Capacity);
       Next_Chunk : Chunk_Access;
       Length     : Natural := 0;
    end record;

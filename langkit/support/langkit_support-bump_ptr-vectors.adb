@@ -72,9 +72,9 @@ package body Langkit_Support.Bump_Ptr.Vectors is
 
       --  At this stage we know the current chunk can contain element, insert
       --  it.
-      Self.Current_Chunk.Elements (Self.Current_Chunk.Length) := Element;
       Self.Current_Chunk.Length := Self.Current_Chunk.Length + 1;
       Self.Length := Self.Length + 1;
+      Self.Current_Chunk.Elements (Self.Current_Chunk.Length) := Element;
    end Append;
 
    ---------
@@ -93,23 +93,44 @@ package body Langkit_Support.Bump_Ptr.Vectors is
 
    function Get_At_Index (Self : Vector; I : Natural) return Element_Type
    is
-      Chunk_Start_Index : Natural := 0;
-      Current_Chunk     : Chunk_Access := Self.First_Chunk;
+      function Get_In_Chunk
+        (Chunk             : Chunk_Access;
+         Chunk_Start_Index : Natural)
+         return Element_Type
+      is (Chunk.Elements (I - Chunk_Start_Index + 1));
+      --  Assuming that 1) Chunk's first element has index Chunk_Start_Index
+      --  and that 2) the I index is inside this chunk, return the element
+      --  corresponding to I.
    begin
-      if I >= Self.Length - Self.Current_Chunk.Length then
-         return Self.Current_Chunk.Elements
-           (I - (Self.Length - Self.Current_Chunk.Length));
-      end if;
+      --  As the size of chunks double for each appened chunk, the element we
+      --  are looking for should be in the current chunk 2 times out of 3
+      --  (assuming equiprobable accesses). So let's just check if it's the
+      --  case.
+      declare
+         Current_Chunk_Start_Index : constant Natural :=
+            Self.Length - Self.Current_Chunk.Length;
+      begin
+         if I >= Current_Chunk_Start_Index then
+            return Get_In_Chunk
+              (Self.Current_Chunk, Current_Chunk_Start_Index);
+         end if;
+      end;
 
-      while Current_Chunk /= null
-        and then I >= Chunk_Start_Index + Current_Chunk.Capacity
-      loop
+      --  We had no luck: go through all chunks to find the one that contains
+      --  the element at index I.
+      declare
+         Chunk_Start_Index : Natural := 0;
+         Current_Chunk     : Chunk_Access := Self.First_Chunk;
+      begin
+         while Current_Chunk /= null
+           and then I >= Chunk_Start_Index + Current_Chunk.Capacity
+         loop
+            Chunk_Start_Index := Chunk_Start_Index + Current_Chunk.Capacity;
+            Current_Chunk := Current_Chunk.Next_Chunk;
+         end loop;
 
-         Chunk_Start_Index := Chunk_Start_Index + Current_Chunk.Capacity;
-         Current_Chunk := Current_Chunk.Next_Chunk;
-      end loop;
-
-      return Current_Chunk.Elements (I - Chunk_Start_Index);
+         return Get_In_Chunk (Current_Chunk, Chunk_Start_Index);
+      end;
    end Get_At_Index;
 
    ----------------
@@ -137,7 +158,7 @@ package body Langkit_Support.Bump_Ptr.Vectors is
 
    function First (Self : Vector) return Cursor is
    begin
-      return Cursor'(Chunk => Self.First_Chunk, Index_In_Chunk => 0);
+      return Cursor'(Chunk => Self.First_Chunk, Index_In_Chunk => 1);
    end First;
 
    ----------
@@ -147,8 +168,8 @@ package body Langkit_Support.Bump_Ptr.Vectors is
    function Next (Self : Vector; C : Cursor) return Cursor is
       pragma Unreferenced (Self);
    begin
-      if C.Index_In_Chunk = C.Chunk.Capacity - 1 then
-         return Cursor'(C.Chunk.Next_Chunk, 0);
+      if C.Index_In_Chunk = C.Chunk.Capacity then
+         return Cursor'(C.Chunk.Next_Chunk, 1);
       else
          return Cursor'(C.Chunk, C.Index_In_Chunk + 1);
       end if;
@@ -161,7 +182,7 @@ package body Langkit_Support.Bump_Ptr.Vectors is
    function Has_Element (Self : Vector; C : Cursor) return Boolean is
       pragma Unreferenced (Self);
    begin
-      return C.Chunk /= null and then C.Index_In_Chunk < C.Chunk.Length;
+      return C.Chunk /= null and then C.Index_In_Chunk <= C.Chunk.Length;
    end Has_Element;
 
 end Langkit_Support.Bump_Ptr.Vectors;
