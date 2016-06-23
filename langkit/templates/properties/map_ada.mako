@@ -80,8 +80,10 @@ begin
       ## Then convert the vector into the final array type
       ${array_var} := Create
         (Items_Count => Natural (${vec_pkg}.Length (${vec_var})));
-      for I in 1 .. ${array_var}.N loop
-         ${array_var}.Items (I) := ${vec_pkg}.Get (${vec_var}, I - 1);
+      for I in ${array_var}.Items'Range loop
+         ${array_var}.Items (I) := ${vec_pkg}.Get
+           (${vec_var},
+            I + ${vec_pkg}.Index_Type'First - ${array_var}.Items'First);
       end loop;
       ${vec_pkg}.Destroy (${vec_var});
    </%def>

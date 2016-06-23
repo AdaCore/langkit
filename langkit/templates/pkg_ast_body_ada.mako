@@ -366,7 +366,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       Slot : Extension_Slot;
    begin
       --  Explicit iteration for perf
-      for J in 0 .. Last_Index (Node.Extensions) loop
+      for J in First_Index (Node.Extensions) .. Last_Index (Node.Extensions)
+      loop
          Slot := Get (Node.Extensions, J);
          Slot.Dtor (Node, Slot.Extension.all);
          Free (Slot.Extension);
@@ -400,11 +401,14 @@ package body ${_self.ada_api_settings.lib_name}.AST is
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_type_name}_Arrays.Array_Type
    is
+      <% array_pkg = '{}_Arrays'.format(root_node_type_name) %>
+
+      First : constant Integer := ${array_pkg}.Index_Type'First;
+      Last  : constant Integer := First + Child_Count (Node) - 1;
    begin
-      return A : ${root_node_type_name}_Arrays.Array_Type
-                    (0 .. Child_Count (Node) - 1)
+      return A : ${array_pkg}.Array_Type (First .. Last)
       do
-         for I in 0 .. Child_Count (Node) - 1 loop
+         for I in First .. Last loop
             A (I) := Child (Node, I);
          end loop;
       end return;
@@ -666,14 +670,17 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       function Not_Null (N : ${root_node_type_name}) return Boolean is
         (N /= null);
 
-      N_Children : constant ${root_node_type_name}_Arrays.Array_Type
+      First_Child : constant ${root_node_type_name}_Arrays.Index_Type :=
+         ${root_node_type_name}_Arrays.Index_Type'First;
+      N_Children  : constant ${root_node_type_name}_Arrays.Array_Type
         := ${root_node_type_name}_Arrays.Filter
           (Children (Node), Not_Null'Access);
    begin
       if N_Children'Length > 0
-        and then Node.Token_Start /= N_Children (0).Token_Start
+        and then Node.Token_Start /= N_Children (First_Child).Token_Start
       then
-         Append_Trivias (Node.Token_Start, N_Children (0).Token_Start - 1);
+         Append_Trivias (Node.Token_Start,
+                         N_Children (First_Child).Token_Start - 1);
       end if;
 
       for I in N_Children'Range loop
