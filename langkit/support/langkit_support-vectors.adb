@@ -14,13 +14,14 @@ package body Langkit_Support.Vectors is
    -------------
 
    procedure Reserve (Self : in out Vector; Capacity : Positive) is
-      Siz : constant size_t :=
-        size_t (Capacity) * El_Size;
+      Siz : constant size_t := size_t (Capacity) * El_Size;
    begin
       if Small_Vector_Capacity > 0 then
          if Self.Capacity = Small_Vector_Capacity then
             Self.E := To_Pointer (Alloc (Siz));
-            for I in 0 .. Self.Size - 1 loop
+            for I in First_Index (Self)
+                     .. First_Index (Self) + Capacity - 1
+            loop
                Self.E.all (I) := Self.SV (I);
             end loop;
          else
@@ -45,25 +46,28 @@ package body Langkit_Support.Vectors is
       if Self.Capacity = Self.Size then
          Reserve (Self, (Self.Capacity * 2) + 1);
       end if;
-
-      if Small_Vector_Capacity = 0 then
-         Self.E.all (Self.Size) := Element;
-      else
-         if Self.Capacity = Small_Vector_Capacity then
-            Self.SV (Self.Size) := Element;
-         else
-            Self.E.all (Self.Size) := Element;
-         end if;
-      end if;
-
       Self.Size := Self.Size + 1;
+
+      declare
+         Index : constant Index_Type := Last_Index (Self);
+      begin
+         if Small_Vector_Capacity = 0 then
+            Self.E.all (Index) := Element;
+         else
+            if Self.Capacity = Small_Vector_Capacity then
+               Self.SV (Index) := Element;
+            else
+               Self.E.all (Index) := Element;
+            end if;
+         end if;
+      end;
    end Append;
 
    ---------
    -- Get --
    ---------
 
-   function Get (Self : Vector; Index : Natural) return Element_Type is
+   function Get (Self : Vector; Index : Index_Type) return Element_Type is
    begin
       if Small_Vector_Capacity = 0 then
          return Self.E (Index);
@@ -81,7 +85,7 @@ package body Langkit_Support.Vectors is
    ----------------
 
    function Get_Access
-     (Self : Vector; Index : Natural) return Element_Access
+     (Self : Vector; Index : Index_Type) return Element_Access
    is
    begin
       if Small_Vector_Capacity = 0 then
@@ -118,9 +122,10 @@ package body Langkit_Support.Vectors is
    ---------
 
    function Pop (Self : in out Vector) return Element_Type is
+      Index : constant Index_Type := Last_Index (Self);
    begin
       Self.Size := Self.Size - 1;
-      return Get (Self, Self.Size);
+      return Get (Self, Index);
    end Pop;
 
    ---------
@@ -128,20 +133,17 @@ package body Langkit_Support.Vectors is
    ---------
 
    procedure Pop (Self : in out Vector) is
-      Discard : Element_Type := Pop (Self);
+      Discard : constant Element_Type := Pop (Self);
    begin
       null;
    end Pop;
 
-   ------------------
-   -- Last_Element --
-   ------------------
+   -------------------
+   -- First_Element --
+   -------------------
 
-   function Last_Element (Self : Vector) return Element_Access
-   is
-   begin
-      return Get_Access (Self, Self.Size - 1);
-   end Last_Element;
+   function First_Element (Self : Vector) return Element_Type
+   is (Get (Self, First_Index (Self)));
 
    ------------------
    -- Last_Element --
@@ -150,15 +152,18 @@ package body Langkit_Support.Vectors is
    function Last_Element (Self : Vector) return Element_Type
    is
    begin
-      return Get (Self, Self.Size - 1);
+      return Get (Self, Last_Index (Self));
    end Last_Element;
 
-   -------------------
-   -- First_Element --
-   -------------------
+   ------------------
+   -- Last_Element --
+   ------------------
 
-   function First_Element (Self : Vector) return Element_Type
-   is (Get (Self, 0));
+   function Last_Element (Self : Vector) return Element_Access
+   is
+   begin
+      return Get_Access (Self, Last_Index (Self));
+   end Last_Element;
 
    ------------
    -- Length --
@@ -196,7 +201,7 @@ package body Langkit_Support.Vectors is
       if Self.Size = 0 then
          return Elements_Arrays.Empty_Array;
       else
-         return Slice (Self, 0, Self.Size - 1);
+         return Slice (Self, First_Index (Self), Last_Index (Self));
       end if;
    end To_Array;
 
@@ -205,14 +210,14 @@ package body Langkit_Support.Vectors is
    -----------
 
    function Image (Self : Vector) return String is
-      function Image (Self : Vector; I : Natural) return String
+      function Image (Self : Vector; I : Index_Type) return String
       is
-        (if I < Length (Self) - 1 then Image (Get (Self, I))
-         & ", " & Image (Self, I + 1)
+        (if I < Last_Index (Self)
+         then Image (Get (Self, I)) & ", " & Image (Self, I + 1)
          else Image (Get (Self, I)));
    begin
       return "[" & (if Self.Size > 0
-                    then Image (Self, 0)
+                    then Image (Self, First_Index (Self))
                     else "") & "]";
    end Image;
 

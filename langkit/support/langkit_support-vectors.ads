@@ -22,6 +22,7 @@ package Langkit_Support.Vectors is
 
    package Elements_Arrays is new Array_Utils (Element_Type);
    subtype Elements_Array is Elements_Arrays.Array_Type;
+   subtype Index_Type is Elements_Arrays.Index_Type;
 
    type Vector is private
      with Iterable =>
@@ -38,12 +39,14 @@ package Langkit_Support.Vectors is
      with Inline_Always;
    --  Appends Element to Self
 
-   function Get (Self : Vector; Index : Natural) return Element_Type
+   function Get (Self : Vector; Index : Index_Type) return Element_Type
      with Inline_Always;
    --  Get the element at Index
 
-   function Get_Access (Self : Vector; Index : Natural) return Element_Access
-     with Inline_Always;
+   function Get_Access
+     (Self : Vector; Index : Index_Type)
+      return Element_Access
+      with Inline_Always;
    --  Get an access to the element at Index
    --  NOTICE: This access is unsafe, and might get invalidated if the Vector
    --  is reallocated. Hence, its lifetime is considered to be as long as the
@@ -72,16 +75,17 @@ package Langkit_Support.Vectors is
      with Inline_Always;
    --  Return the Length of the vector, ie. the number of elements it contains
 
-   function First_Index (Self : Vector) return Natural is (0)
+   function First_Index (Self : Vector) return Index_Type is (Index_Type'First)
      with Inline_Always;
    --  Return the first index, only used for the Iterable aspect
 
    function Last_Index (Self : Vector) return Integer
-   is (Length (Self) - 1)
+   is (First_Index (Self) + Length (Self) - 1)
      with Inline_Always;
-   --  Return the index of the last element in this vector
+   --  Return the index of the last element in this vector or
+   --  First_Index (Self) - 1 if this vector is empty.
 
-   function Next (Self : Vector; N : Natural) return Natural is (N + 1)
+   function Next (Self : Vector; N : Index_Type) return Index_Type is (N + 1)
      with Inline_Always;
    --  Given a vector and an index, return the next index. Only used for the
    --  iterable aspect.
@@ -94,7 +98,7 @@ package Langkit_Support.Vectors is
      with Pre => Length (Self) > 0;
    --  Pop the last element from vector
 
-   function Has_Element (Self : Vector; N : Natural) return Boolean
+   function Has_Element (Self : Vector; N : Index_Type) return Boolean
      with Inline_Always;
    --  Given a vector and an index, return True if the index is in the vector
    --  range. Only used for the iterable aspect.
@@ -116,7 +120,7 @@ package Langkit_Support.Vectors is
 
 private
 
-   subtype Internal_Elements_Array is Elements_Arrays.Array_Type (Natural);
+   subtype Internal_Elements_Array is Elements_Arrays.Array_Type (Index_Type);
    type Elements_Array_Access is access all Internal_Elements_Array;
 
    function To_Pointer is
@@ -126,7 +130,7 @@ private
      (Internal_Elements_Array, Elements_Array_Access);
 
    subtype Small_Array_Type
-     is Elements_Arrays.Array_Type (0 .. Small_Vector_Capacity - 1);
+     is Elements_Arrays.Array_Type (1 .. Small_Vector_Capacity);
 
    type Vector is record
       E        : Elements_Array_Access := null;
@@ -141,7 +145,7 @@ private
      with Inline_Always;
    --  Reserve Capacity elements
 
-   function Has_Element (Self : Vector; N : Natural) return Boolean is
-     (N < Self.Size);
+   function Has_Element (Self : Vector; N : Index_Type) return Boolean is
+     (N <= Last_Index (Self));
 
 end Langkit_Support.Vectors;
