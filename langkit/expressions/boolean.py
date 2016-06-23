@@ -1,7 +1,7 @@
 from langkit import names
 from langkit.compiled_types import (
     ASTNode, BoolType, LexicalEnvType, LongType, Struct, EquationType,
-    LogicVarType
+    LogicVarType, StructMetaclass
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
@@ -127,6 +127,12 @@ class Eq(AbstractExpression):
                     "Operands to a logic equality operator should be either "
                     "a logic variable or an ASTNode, got {}".format(rhs.type)
                 )
+
+                # Cast the ast node type if necessary
+                if (rhs.type.matches(ASTNode)
+                        and rhs.type != StructMetaclass.root_grammar_class):
+                    rhs = Cast.Expr(rhs, StructMetaclass.root_grammar_class)
+
                 return BuiltinCallExpr("Equals", EquationType, [lhs, rhs],
                                        "Equals_Pred")
             else:
