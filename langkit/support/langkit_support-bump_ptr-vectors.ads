@@ -35,6 +35,21 @@ package Langkit_Support.Bump_Ptr.Vectors is
    function Create (P : Bump_Ptr_Pool) return Vector;
    --  Returns a newly created vector using P as it's pool storage
 
+   function Length (Self : Vector) return Natural
+     with Inline_Always;
+   --  Return the Length of the vector, ie. the number of elements it contains
+
+   function First_Index (Self : Vector) return Index_Type is
+     (Index_Type'First)
+      with Inline_Always;
+   --  Return the index of the first element in Self
+
+   function Last_Index (Self : Vector) return Integer is
+     (Index_Type'First + Length (Self) - 1)
+      with Inline_Always;
+   --  Return the index of the last element in Self, or First_Index (Self) - 1
+   --  if Self is empty.
+
    procedure Append (Self : in out Vector; Element : Element_Type)
      with Inline_Always;
    --  Appends Element to Self
@@ -46,17 +61,13 @@ package Langkit_Support.Bump_Ptr.Vectors is
    function Get_At_Index (Self : Vector; I : Index_Type) return Element_Type
      with
        Inline,
-       Pre => I <= Index_Type'First + Length (Self) - 1;
+       Pre => I <= Last_Index (Self);
    --  Get the element at Index
 
    function Get_Access (Self : Vector; C : Cursor) return Element_Access
      with Inline_Always;
    --  Get an access to the element at Index. The lifetime of the access is the
    --  one of the vector.
-
-   function Length (Self : Vector) return Natural
-     with Inline_Always;
-   --  Return the Length of the vector, ie. the number of elements it contains
 
    function First (Self : Vector) return Cursor
      with Inline_Always;
