@@ -38,7 +38,7 @@ package ${_self.ada_api_settings.lib_name}.AST.List is
 
    overriding
    procedure Get_Child (Node   : access List_Type;
-                        Index  : Natural;
+                        Index  : Positive;
                         Exists : out Boolean;
                         Result : out ${root_node_type_name});
 

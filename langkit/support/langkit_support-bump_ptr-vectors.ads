@@ -17,7 +17,7 @@ generic
    type Element_Type is private;
 package Langkit_Support.Bump_Ptr.Vectors is
 
-   subtype Index_Type is Natural;
+   subtype Index_Type is Positive;
 
    type Vector is private
      with Iterable =>

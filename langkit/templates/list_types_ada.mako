@@ -25,7 +25,7 @@
 
    function Item
      (Node  : access ${value_type};
-      Index : Natural)
+      Index : Positive)
       return ${elt_type}
    is (${elt_type} (Node.Child (Index)));
    --  Shortcut for: ${type_name} (Child (Node, Index))
@@ -91,7 +91,8 @@
          return ${root_node_type_name}
       is
         (${root_node_type_name}
-          (${pkg_name}.Node_Vectors.Get_At_Index (L.Vec, Index)));
+          (${pkg_name}.Node_Vectors.Get_At_Index (L.Vec, Index + 1)));
+      --  L.Vec is 1-based but Index is 0-based
 
       function Relative_Get is new Langkit_Support.Relative_Get
         (Item_Type     => ${root_node_type_name},

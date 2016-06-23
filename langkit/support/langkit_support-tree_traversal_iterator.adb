@@ -24,7 +24,7 @@ package body Langkit_Support.Tree_Traversal_Iterator is
 
       Element := It.Node;
 
-      for I in 0 .. Children_Count (It.Node) loop
+      for I in 1 .. Children_Count (It.Node) + 1 loop
          Child := Get_Child (It.Node, I);
 
          if Child /= Null_Value then

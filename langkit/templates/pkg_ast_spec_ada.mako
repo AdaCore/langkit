@@ -244,16 +244,16 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Return the number of children Node has
 
    procedure Get_Child (Node   : access ${root_node_value_type};
-                        Index  : Natural;
+                        Index  : Positive;
                         Exists : out Boolean;
                         Result : out ${root_node_type_name}) is abstract;
    --  Get the Index'th child of Node, storing it into Result. Store in Exists
    --  whether Node had such a child (if not, the content of Result is
    --  undefined).
-   --  Child indexing is 0-based.
+   --  Child indexing is 1-based.
 
    function Child (Node  : access ${root_node_value_type}'Class;
-                   Index : Natural) return ${root_node_type_name};
+                   Index : Positive) return ${root_node_type_name};
    --  Return the Index'th child of Node, or null if Node has no such child
 
    function Children
@@ -829,7 +829,7 @@ private
    function Element_Value
      (Node : ${root_node_value_type}; C : Children_Cursor)
       return ${root_node_type_name} is
-     (C.Node.Child (C.Child_Index - 1));
+     (C.Node.Child (C.Child_Index));
 
    type Iterator is new
       ${root_node_type_name}_Ada2012_Iterators.Reversible_Iterator with

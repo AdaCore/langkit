@@ -26,16 +26,16 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
    function Child_Number
      (Node : access ${root_node_value_type}'Class)
-      return Natural
+      return Positive
       with Pre => Node.Parent /= null;
-   --  Return the 0-based index for Node in its parents' children
+   --  Return the 1-based index for Node in its parents' children
 
    -----------
    -- Child --
    -----------
 
    function Child (Node  : access ${root_node_value_type}'Class;
-                   Index : Natural) return ${root_node_type_name}
+                   Index : Positive) return ${root_node_type_name}
    is
       Result : ${root_node_type_name};
       Exists : Boolean;
@@ -69,7 +69,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
             for I in 1 .. Child_Count (Node) loop
                declare
                   Cur_Child : constant ${root_node_type_name} :=
-                     Child (Node, I - 1);
+                     Child (Node, I);
 
                begin
                   if Cur_Child /= null then
@@ -1120,11 +1120,11 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
    function Child_Number
      (Node : access ${root_node_value_type}'Class)
-      return Natural
+      return Positive
    is
       N : ${root_node_type_name} := null;
    begin
-      for I in 0 .. Child_Count (Node.Parent) - 1 loop
+      for I in 1 .. Child_Count (Node.Parent) loop
          N := Child (Node.Parent, I);
          if N = Node then
             return I;
@@ -1144,9 +1144,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_type_name}
    is
-      N : constant Natural := Child_Number (Node);
+      N : constant Positive := Child_Number (Node);
    begin
-      return (if N = 0
+      return (if N = 1
               then null
               else Node.Parent.Child (N - 1));
    end Previous_Sibling;

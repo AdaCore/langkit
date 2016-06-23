@@ -60,7 +60,7 @@ generic
    with function "=" (L, R : Element_Type) return Boolean is <>;
 package Langkit_Support.Array_Utils is
 
-   subtype Index_Type is Natural;
+   subtype Index_Type is Positive;
 
    type Array_Type is array (Index_Type range <>) of Element_Type;
    --  Base array type provided by this package

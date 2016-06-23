@@ -535,7 +535,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          if N > unsigned (Natural'Last) then
             return 0;
          end if;
-         Get_Child (Nod, Natural (N), Exists, Result);
+         Get_Child (Nod, Natural (N) + 1, Exists, Result);
          if Exists then
             Child_P.all := Wrap (Result);
             return 1;

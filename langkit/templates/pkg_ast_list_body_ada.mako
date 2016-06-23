@@ -65,12 +65,12 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
 
    overriding
    procedure Get_Child (Node   : access List_Type;
-                        Index  : Natural;
+                        Index  : Positive;
                         Exists : out Boolean;
                         Result : out ${root_node_type_name})
    is
    begin
-      if Index >= Length (Node.Vec) then
+      if Index > Node_Vectors.Last_Index (Node.Vec) then
          Exists := False;
       else
          Exists := True;
