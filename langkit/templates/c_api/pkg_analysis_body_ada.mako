@@ -266,7 +266,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       begin
          if N < unsigned (U.Diagnostics.Length) then
             declare
-               D_In  : Diagnostic renames U.Diagnostics (Natural (N));
+               D_In  : Diagnostic renames U.Diagnostics (Natural (N) + 1);
                D_Out : ${diagnostic_type} renames Diagnostic_P.all;
             begin
                D_Out.Sloc_Range := Wrap (D_In.Sloc_Range);

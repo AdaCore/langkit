@@ -17,9 +17,9 @@ package Langkit_Support.Diagnostics is
    function To_Pretty_String (D : Diagnostic) return String;
 
    package Diagnostics_Vectors is new Ada.Containers.Vectors
-     (Index_Type   => Natural,
+     (Index_Type   => Positive,
       Element_Type => Diagnostic);
 
-   type Diagnostics_Array is array (Natural range <>) of Diagnostic;
+   type Diagnostics_Array is array (Positive range <>) of Diagnostic;
 
 end Langkit_Support.Diagnostics;

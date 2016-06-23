@@ -476,8 +476,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    -----------------
 
    function Diagnostics (Unit : Analysis_Unit) return Diagnostics_Array is
-      Result : Diagnostics_Array (0 .. Natural (Unit.Diagnostics.Length) - 1);
-      I      : Natural := 0;
+      Result : Diagnostics_Array (1 .. Natural (Unit.Diagnostics.Length));
+      I      : Natural := 1;
    begin
       for D of Unit.Diagnostics loop
          Result (I) := D;
