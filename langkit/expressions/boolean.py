@@ -154,8 +154,10 @@ class Eq(AbstractExpression):
             elif issubclass(rhs.type, lhs.type):
                 rhs = Cast.Expr(rhs, assert_type(lhs.type, ASTNode))
             else:
-                assert False, '{} and {} values are never equal'.format(
-                    lhs.type.name().camel, rhs.type.name().camel
+                check_source_language(
+                    False, '{} and {} values are never equal'.format(
+                        lhs.type.name().camel, rhs.type.name().camel
+                    )
                 )
         else:
             check_source_language(
