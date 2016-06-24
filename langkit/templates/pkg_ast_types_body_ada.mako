@@ -16,6 +16,7 @@ pragma Warnings (Off, "referenced");
 with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;
 with Adalog.Operations;          use Adalog.Operations;
 with Adalog.Predicates;          use Adalog.Predicates;
+with Adalog.Pure_Relations;      use Adalog.Pure_Relations;
 with Adalog.Variadic_Operations; use Adalog.Variadic_Operations;
 
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;

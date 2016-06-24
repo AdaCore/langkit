@@ -334,3 +334,27 @@ class LogicAnd(LogicBooleanOp):
 
     def __init__(self, equation_array):
         super(LogicAnd, self).__init__(equation_array, LogicBooleanOp.KIND_AND)
+
+
+class LogicTrue(AbstractExpression):
+    """
+    An equation that always return True.
+    """
+
+    def __init__(self):
+        super(LogicTrue, self).__init__()
+
+    def construct(self):
+        return LiteralExpr("True_Rel", type=EquationType)
+
+
+class LogicFalse(AbstractExpression):
+    """
+    An equation that always return False.
+    """
+
+    def __init__(self):
+        super(LogicFalse, self).__init__()
+
+    def construct(self):
+        return LiteralExpr("False_Rel", type=EquationType)

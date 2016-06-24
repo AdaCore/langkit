@@ -21,7 +21,8 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-with Adalog.Relations; use Adalog.Relations;
+with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
+with Adalog.Relations;         use Adalog.Relations;
 
 package Adalog.Pure_Relations is
 
@@ -34,6 +35,9 @@ package Adalog.Pure_Relations is
    procedure Free (Inst : in out False_Relation_Rec) is null;
    package False_Relation is new Pure_Relation (Ty => False_Relation_Rec);
 
+   function False_Rel return Relation
+   is (new False_Relation.Rel'(others => <>));
+
    -------------------
    -- True_Relation --
    -------------------
@@ -42,6 +46,8 @@ package Adalog.Pure_Relations is
    function Apply (Inst : in out True_Relation_Rec) return Boolean is (True);
    procedure Free (Inst : in out True_Relation_Rec) is null;
    package True_Relation is new Pure_Relation (Ty => True_Relation_Rec);
+
+   function True_Rel return Relation is (new True_Relation.Rel'(others => <>));
 
    ----------------------
    -- Boolean_Relation --
