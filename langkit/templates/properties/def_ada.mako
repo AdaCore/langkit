@@ -5,6 +5,7 @@
 
 ## Regular property function
 
+pragma Warnings (Off, "is not referenced");
 % if not property.abstract:
 ${"overriding" if property.overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
@@ -12,7 +13,6 @@ ${"overriding" if property.overriding else ""} function ${property.name}
 is
    use type AST_Envs.Lexical_Env;
 
-   pragma Warnings (Off, "is not referenced");
    ## We declare a variable Self, that has the named class wide access type
    ## that we can use to dispatch on other properties and all.
    Self : ${Self.type.name()} := ${Self.type.name()}
