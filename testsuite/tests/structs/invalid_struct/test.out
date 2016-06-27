@@ -1,0 +1,4 @@
+File "test.py", line 24, in StructB
+    Error: Every ASTNode subclass must derive directly or indirectly from the root grammar class
+
+Done
