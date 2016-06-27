@@ -93,6 +93,9 @@ class Context(object):
         context_stack.append((self.message, self.location))
 
     def __exit__(self, value, typ, traceback):
+        del value
+        del typ
+        del traceback
         context_stack.pop()
 
 
