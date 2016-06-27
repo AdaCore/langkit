@@ -80,6 +80,22 @@ def context(message, location):
         context_stack.pop()
 
 
+class Context(object):
+    """
+    Like "context", but can be used more than once.
+    """
+
+    def __init__(self, message, location):
+        self.message = message
+        self.location = location
+
+    def __enter__(self):
+        context_stack.append((self.message, self.location))
+
+    def __exit__(self, value, typ, traceback):
+        context_stack.pop()
+
+
 class DiagnosticError(Exception):
     pass
 
