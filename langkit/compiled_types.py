@@ -779,6 +779,18 @@ class AbstractNodeData(object):
         """
         return self.arguments
 
+    @staticmethod
+    def fields_dict(fields):
+        """
+        From a list of (name, AbstractNodeData) tuples, return an ordered
+        dict of the same data, sorted by field index. Abstracts the logic of
+        field reordering.
+
+        :type fields: [(str, AbstractNodeData)]
+        :rtype: OrderedDict[str, AbstractNodeData]
+        """
+        return OrderedDict(sorted(fields, key=lambda (_, f): f._index))
+
 
 class AbstractField(AbstractNodeData):
     """
@@ -965,18 +977,6 @@ class StructMetaClass(CompiledTypeMetaclass):
     :type: Struct
     """
 
-    @staticmethod
-    def fields_dict(fields):
-        """
-        From a list of (name, AbstractNodeData) tuples, return an ordered
-        dict of the same data, sorted by field index. Abstracts the logic of
-        field reordering.
-
-        :type fields: [(str, AbstractNodeData)]
-        :rtype: OrderedDict[str, AbstractNodeData]
-        """
-        return OrderedDict(sorted(fields, key=lambda (_, f): f._index))
-
     def __new__(mcs, name, bases, dct):
 
         is_root_grammar_class = False
@@ -1068,7 +1068,7 @@ class StructMetaClass(CompiledTypeMetaclass):
         # fields for each of them.
         macro_classes = dct.get("_macros", [])
         macro_fields = [
-            mcs.fields_dict([
+            AbstractNodeData.fields_dict([
                 (f_n, copy(f_v)) for f_n, f_v in klass.__dict__.items()
                 if isinstance(f_v, AbstractNodeData)
             ]) for klass in macro_classes
@@ -1077,7 +1077,7 @@ class StructMetaClass(CompiledTypeMetaclass):
         # Gather the fields and properties in a dictionary. Recover the order
         # of field declarations.  See the Field class definition for more
         # details.
-        fields = mcs.fields_dict(
+        fields = AbstractNodeData.fields_dict(
             [(f_n, f_v) for f_n, f_v in dct.items()
              if isinstance(f_v, AbstractNodeData)]
         )
