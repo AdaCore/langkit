@@ -1089,7 +1089,7 @@ class StructMetaClass(CompiledTypeMetaclass):
             ):
                 check_source_language(
                     not f_n.startswith('_'),
-                    'Underscode-prefixed field names are not allowed'
+                    'Underscore-prefixed field names are not allowed'
                 )
 
         # Compute lexical environment specification. Since it can be
