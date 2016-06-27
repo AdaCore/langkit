@@ -40,16 +40,22 @@ package body Adalog.Unify_LR is
 
          --  Left is defined, right is not, give right the value of left and
          --  return true.
-         SetL (Self.Right, Convert (Self.L_Data, GetL (Self.Left)));
-         Self.State := Right_Changed;
-         return True;
+         if SetL (Self.Right, Convert (Self.L_Data, GetL (Self.Left))) then
+            Self.State := Right_Changed;
+            return True;
+         else
+            return False;
+         end if;
       end if;
 
       --  Right is defined, left is not, give left the value of right and
       --  return true.
-      SetL (Self.Left, Convert (Self.R_Data, GetL (Self.Right)));
-      Self.State := Left_Changed;
-      return True;
+      if SetL (Self.Left, Convert (Self.R_Data, GetL (Self.Right))) then
+         Self.State := Left_Changed;
+         return True;
+      else
+         return False;
+      end if;
    end Apply;
 
    ------------

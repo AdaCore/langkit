@@ -35,11 +35,15 @@ package body Adalog.Unify_One_Side is
    begin
       if Is_Defined (Self.Left) then
          return Equals (GetL (Self.Left), Self.Right);
-      end if;
+      else
 
-      Self.Changed := True;
-      SetL (Self.Left, Convert (Self.Right));
-      return True;
+         if SetL (Self.Left, Convert (Self.Right)) then
+            Self.Changed := True;
+            return True;
+         else
+            return False;
+         end if;
+      end if;
    end Apply;
 
    ------------
@@ -75,10 +79,19 @@ package body Adalog.Unify_One_Side is
             end loop;
             return False;
          else
-            Self.Current_Index := Self.Current_Index + 1;
-            SetL (Self.Left, Convert (Self.Values (Self.Current_Index - 1)));
-            Self.Changed := True;
-            return True;
+            loop
+               Self.Current_Index := Self.Current_Index + 1;
+               if SetL
+                 (Self.Left, Convert (Self.Values (Self.Current_Index - 1)))
+               then
+                  Self.Changed := True;
+                  return True;
+               end if;
+
+               exit when Self.Current_Index not in Self.Values.all'Range;
+            end loop;
+
+            return False;
          end if;
       else
          if Self.Changed then

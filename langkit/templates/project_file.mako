@@ -32,6 +32,7 @@ library project ${lib_name} is
       "adalog-logic_ref.adb",
       "adalog-logic_ref.ads",
       "adalog-logic_var.ads",
+      "adalog-logic_var_predicate.ads",
       "adalog-operations.adb",
       "adalog-operations.ads",
       "adalog-unify.adb",

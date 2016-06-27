@@ -47,11 +47,27 @@ package body Adalog.Logic_Ref is
    -- SetL --
    ----------
 
-   procedure SetL (Self : in out Var; Data : Element_Type) is
+   function Set_Value (Self : access Var; Data : Element_Type) return Boolean
+   is
+      Old : constant Var := Self.all;
    begin
+      --  First set the value
+
       Self.El := Data;
       Self.Reset := False;
-   end SetL;
+
+      --  Then check if we have pending relations, and if they evaluate to
+      --  True.
+
+      for El of Pred_Sets.Elements (Self.Pending_Relations) loop
+         if not El.Apply then
+            Self.all := Old;
+            return False;
+         end if;
+      end loop;
+
+      return True;
+   end Set_Value;
 
    ----------
    -- GetL --
@@ -67,9 +83,9 @@ package body Adalog.Logic_Ref is
    -- Set --
    ---------
 
-   procedure SetL (Self : in out Ref; Data : Element_Type) is
+   function SetL (Self : in out Ref; Data : Element_Type) return Boolean is
    begin
-      SetL (Self.Unchecked_Get.Content, Data);
+      return Set_Value (Self.Unchecked_Get.Content'Unrestricted_Access, Data);
    end SetL;
 
    ---------
@@ -85,24 +101,13 @@ package body Adalog.Logic_Ref is
    -- Create --
    ------------
 
-   function Create (El : Element_Type) return Ref is
-      R : Ref := Create;
-   begin
-      R.SetL (El);
-      return R;
-   end Create;
-
-   ------------
-   -- Create --
-   ------------
-
    function Create return Ref is
    begin
       return Self : Ref do
          Refs.Set
            (Refs.Ref (Self),
             Refcounted_El'
-              (Refcounted with Content => (El => <>, Reset => True)));
+              (Refcounted with Content => (Reset => True, others => <>)));
       end return;
    end Create;
 
@@ -147,9 +152,9 @@ package body Adalog.Logic_Ref is
    ----------
 
    pragma Warnings (Off);
-   procedure SetL (Self : in out Raw_Var; Data : Element_Type) is
+   function SetL (Self : in out Raw_Var; Data : Element_Type) return Boolean is
    begin
-      SetL (Self.all, Data);
+      return Set_Value (Self, Data);
    end SetL;
    pragma Warnings (On);
 
@@ -168,7 +173,66 @@ package body Adalog.Logic_Ref is
 
    function Create return Raw_Var is
    begin
-      return new Var'(Reset => True, El => <>);
+      return new Var'(Reset => True, others => <>);
    end Create;
+
+   -------------------
+   -- Add_Predicate --
+   -------------------
+
+   procedure Add_Predicate (Self : in out Var; Pred : Var_Predicate) is
+      use Pred_Sets;
+      Dummy : Boolean := Add (Self.Pending_Relations, Pred);
+   begin
+      null;
+   end Add_Predicate;
+
+   ----------------------
+   -- Remove_Predicate --
+   ----------------------
+
+   procedure Remove_Predicate (Self : in out Var; Pred : Var_Predicate) is
+      use Pred_Sets;
+      Dummy : Boolean := Remove (Self.Pending_Relations, Pred);
+   begin
+      null;
+   end Remove_Predicate;
+
+   ----------------------
+   -- Remove_Predicate --
+   ----------------------
+
+   procedure Remove_Predicate (Self : Ref; Pred : Var_Predicate)
+   is
+   begin
+      Remove_Predicate (Self.Unchecked_Get.Content, Pred);
+   end Remove_Predicate;
+
+   -------------------
+   -- Add_Predicate --
+   -------------------
+
+   procedure Add_Predicate (Self : Ref; Pred : Var_Predicate) is
+   begin
+      Add_Predicate (Self.Unchecked_Get.Content, Pred);
+   end Add_Predicate;
+
+   ----------------------
+   -- Remove_Predicate --
+   ----------------------
+
+   procedure Remove_Predicate (Self : Raw_Var; Pred : Var_Predicate) is
+   begin
+      Remove_Predicate (Self.all, Pred);
+   end Remove_Predicate;
+
+   -------------------
+   -- Add_Predicate --
+   -------------------
+
+   procedure Add_Predicate (Self : Raw_Var; Pred : Var_Predicate) is
+   begin
+      Add_Predicate (Self.all, Pred);
+   end Add_Predicate;
 
 end Adalog.Logic_Ref;

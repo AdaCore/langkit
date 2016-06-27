@@ -33,12 +33,39 @@ package body Adalog.Predicates is
       -- Free --
       ----------
 
-      pragma Warnings (Off, "parameter");
-      procedure Cleanup (Inst : in out Predicate_Logic) is
+      procedure Free (Inst : in out Predicate_Logic) is
       begin
+         Remove_Predicate (Inst.Ref, Inst'Unrestricted_Access);
          Free (Inst.Pred);
-      end Cleanup;
-      pragma Warnings (On, "parameter");
+      end Free;
+
+      -----------
+      -- Solve --
+      -----------
+
+      overriding function Apply
+        (Inst : in out Predicate_Logic) return Boolean
+      is
+      begin
+         if Is_Defined (Inst.Ref) then
+            return Call (Inst.Pred, GetL (Inst.Ref));
+         else
+            --  If the variable is not set, then predicate will return True all
+            --  the time, and we register the predicate to be called at a later
+            --  time.
+            Add_Predicate (Inst.Ref, Inst'Unchecked_Access);
+            return True;
+         end if;
+      end Apply;
+
+      -----------
+      -- Reset --
+      -----------
+
+      procedure Revert (Inst : in out Predicate_Logic) is
+      begin
+         Remove_Predicate (Inst.Ref, Inst'Unchecked_Access);
+      end Revert;
 
    end Predicate;
 

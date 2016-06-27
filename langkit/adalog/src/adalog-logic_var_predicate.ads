@@ -21,40 +21,36 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-pragma Warnings (Off);
+with Langkit_Support.Cheap_Sets;
 
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
-with Adalog.Logic_Var_Predicate; use Adalog.Logic_Var_Predicate;
+--  This package defines a support interface for logic variables. Logic
+--  variables can have predicates associated to them. This is the interface
+--  that such predicates must implement. It is quite close to the relation
+--  interface generally, but a distinction is made because the inner workings
+--  should not be the same.
+--
+--  In particular, it is expected that Var_Predicates be idempotent, eg. the
+--  Apply operation should always return the same result for the same value
+--  of the logic variable it is linked to.
+--
+--  It is also expected that predicates keep a reference to the logic var
+--  they're linked to at construction time, which is why operations on
+--  predicates do not take a logic var formal.
 
-generic
-   type Logic_Var_Type is private;
-   type Element_Type is private;
+package Adalog.Logic_Var_Predicate is
+   type Var_Predicate_Type is abstract tagged null record;
 
-   with procedure Reset (Self : in out Logic_Var_Type) is <>;
-   with function Is_Defined (Self : Logic_Var_Type) return Boolean is <>;
+   function Apply
+     (Inst : in out Var_Predicate_Type) return Boolean is abstract;
+   --  Apply the predicate, and return whether it succeeded or not
 
-   with function SetL
-     (Self : in out Logic_Var_Type; Data : Element_Type) return Boolean
-     is <> with Inline => True;
+   type Var_Predicate is access all Var_Predicate_Type'Class;
+   --  Access type that is meant to be used by clients. Predicates are meant to
+   --  be manipulated through accesses.
 
-   with function GetL (Self : Logic_Var_Type) return Element_Type
-     is <> with Inline => True;
+   package Pred_Sets
+   is new Langkit_Support.Cheap_Sets (Var_Predicate, null);
+   --  Logic variables will want to manipulate sets of predicates associated to
+   --  them.
 
-   with function Create return Logic_Var_Type is <>;
-
-   with function Get_Pending_Predicates
-     (Self : Logic_Var_Type) return Pred_Sets.Set is <>;
-   --  Get the predicates associated to this logic variables
-
-   with procedure Add_Predicate (Self : Logic_Var_Type; Pred : Var_Predicate)
-     is <>;
-   --  Add a new predicate to the predicates associated to this logic variable
-
-   with procedure Remove_Predicate
-     (Self : Logic_Var_Type; Pred : Var_Predicate) is <>;
-   --  Remove the predicate Pred from the set of predicates associated to the
-   --  logic variable.
-
-package Adalog.Logic_Var is
-   subtype Var is Logic_Var_Type;
-end Adalog.Logic_Var;
+end Adalog.Logic_Var_Predicate;

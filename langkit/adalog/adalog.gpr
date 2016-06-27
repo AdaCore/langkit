@@ -1,4 +1,5 @@
 with "gnatcoll";
+with "../support/langkit_support";
 
 project Adalog is
    type Build_Mode is ("Debug", "Production");
