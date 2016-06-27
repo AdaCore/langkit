@@ -142,4 +142,21 @@ package body Langkit_Support.Cheap_Sets is
       end if;
    end Destroy;
 
+   --------------
+   -- Elements --
+   --------------
+
+   function Elements (Self : Set) return Elements_Vectors.Elements_Array is
+
+      use Elements_Vectors;
+
+      function Not_Null (E : Element_Type) return Boolean
+      is (E /= No_Element);
+      function Filter_Null is new Elements_Arrays.Filter_Gen (Not_Null);
+   begin
+      return (if Self.Elements = null
+              then Elements_Arrays.Empty_Array
+              else Filter_Null (To_Array (Self.Elements.all)));
+   end Elements;
+
 end Langkit_Support.Cheap_Sets;

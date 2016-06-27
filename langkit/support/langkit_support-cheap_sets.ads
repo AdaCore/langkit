@@ -18,6 +18,8 @@ generic
    with function "=" (L, R : Element_Type) return Boolean is <>;
 package Langkit_Support.Cheap_Sets is
 
+   package Elements_Vectors is new Langkit_Support.Vectors (Element_Type);
+
    type Set is private;
    --  For ease of use in our case, Set is made to take a minimal amount of
    --  space when it is not used (size of an access).
@@ -33,11 +35,13 @@ package Langkit_Support.Cheap_Sets is
    function Has (Self : Set; E : Element_Type) return Boolean;
    --  Return whether E is part of the set
 
+   function Elements (Self : Set) return Elements_Vectors.Elements_Array;
+   --  Return an array of all the elements in the set
+
    procedure Destroy (Self : in out Set);
    --  Destroy the set
 
 private
-   package Elements_Vectors is new Langkit_Support.Vectors (Element_Type);
    type Elements_Vector is access all Elements_Vectors.Vector;
 
    type Set is record
