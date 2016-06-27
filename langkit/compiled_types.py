@@ -980,6 +980,9 @@ class StructMetaClass(CompiledTypeMetaclass):
     def __new__(mcs, name, bases, dct):
 
         is_root_grammar_class = False
+        diag_ctx = diagnostics.Context(
+            'in {}'.format(name), extract_library_location()
+        )
 
         assert len(bases) == 1, (
             "Multiple inheritance for AST nodes is not supported"
@@ -1000,15 +1003,18 @@ class StructMetaClass(CompiledTypeMetaclass):
             # Else, check that it does indeed derives from the root grammar
             # class.
             else:
-                assert issubclass(base, mcs.root_grammar_class), (
-                    "Every ASTNode subclass must derive directly or indirectly"
-                    " from the root grammar class"
-                )
+                with diag_ctx:
+                    check_source_language(
+                        issubclass(base, mcs.root_grammar_class),
+                        "Every ASTNode subclass must derive directly or"
+                        " indirectly from the root grammar class"
+                    )
 
-                assert base != ASTNode, (
-                    "You can have only one class deriving from ASTNode, which"
-                    " will be the root class of your grammar"
-                )
+                    check_source_language(
+                        base != ASTNode,
+                        "You can have only one class deriving from ASTNode,"
+                        " which will be the root class of your grammar"
+                    )
 
         dct["should_emit_array_type"] = not is_root_grammar_class
         dct["location"] = extract_library_location()
@@ -1138,10 +1144,11 @@ class StructMetaClass(CompiledTypeMetaclass):
         if env_spec:
             env_spec.ast_node = cls
 
-        check_source_language(
-            cls.is_ast_node() or not cls.get_properties(),
-            "Properties are not yet supported on plain structs"
-        )
+        with diag_ctx:
+            check_source_language(
+                cls.is_ast_node() or not cls.get_properties(),
+                "Properties are not yet supported on plain structs"
+            )
 
         if cls.is_ast_node():
             mcs.astnode_types.append(cls)
