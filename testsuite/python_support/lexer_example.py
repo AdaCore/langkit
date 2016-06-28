@@ -1,4 +1,3 @@
-from langkit.compiled_types import root_grammar_class, StructMetaClass
 from langkit.lexer import (
     Eof, Ignore, Lexer, LexerToken, Literal, NoText, Pattern, WithSymbol,
     WithText

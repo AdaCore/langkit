@@ -468,12 +468,12 @@ class CompileCtx():
 
         # Get the list of ASTNode types from the Struct metaclass
         from langkit.compiled_types import (
-            EnvElement, LexicalEnvType, Struct, StructMetaClass
+            EnvElement, LexicalEnvType, Struct, StructMetaclass
         )
 
         # Skipping the first element which is ASTNode, because it is not a
         # real type in the generated library.
-        self.astnode_types = list(StructMetaClass.astnode_types)[1:]
+        self.astnode_types = list(StructMetaclass.astnode_types)[1:]
 
         # Here we're skipping Struct because it's not a real type in
         # generated code. We're also putting env_metadata and EnvElement in
@@ -482,18 +482,18 @@ class CompileCtx():
         # TODO: Using a dependency order topological sort wouldn't hurt at
         # some point.
         self.struct_types = [
-            t for t in StructMetaClass.struct_types
-            if t not in [EnvElement, StructMetaClass.env_metadata, Struct]
+            t for t in StructMetaclass.struct_types
+            if t not in [EnvElement, StructMetaclass.env_metadata, Struct]
         ]
         self.struct_types.insert(0, EnvElement)
 
-        if StructMetaClass.env_metadata:
+        if StructMetaclass.env_metadata:
             self.struct_types = (
-                [StructMetaClass.env_metadata] + self.struct_types
+                [StructMetaclass.env_metadata] + self.struct_types
             )
 
-        self.root_grammar_class = StructMetaClass.root_grammar_class
-        self.env_metadata = StructMetaClass.env_metadata
+        self.root_grammar_class = StructMetaclass.root_grammar_class
+        self.env_metadata = StructMetaclass.env_metadata
         self.env_element = EnvElement
 
         # The Group lexical environment operation takes an array of lexical

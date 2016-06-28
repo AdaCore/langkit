@@ -3,7 +3,7 @@ import shutil
 import subprocess
 
 from langkit.compile_context import CompileCtx
-from langkit.compiled_types import ASTNode, StructMetaClass
+from langkit.compiled_types import ASTNode, StructMetaclass
 from langkit.diagnostics import DiagnosticError
 from langkit.expressions import Self
 from langkit.libmanage import ManageScript
@@ -114,8 +114,8 @@ def reset_langkit():
     TODO: this is a hack to workaround another hack. At some point in the
     future, we should get rid of this global state in Langkit.
     """
-    StructMetaClass.root_grammar_class = None
-    StructMetaClass.astnode_types = [ASTNode]
-    StructMetaClass.struct_types = []
-    StructMetaClass.env_metadata = None
+    StructMetaclass.root_grammar_class = None
+    StructMetaclass.astnode_types = [ASTNode]
+    StructMetaclass.struct_types = []
+    StructMetaclass.env_metadata = None
     Self.__dict__['_frozen'] = False

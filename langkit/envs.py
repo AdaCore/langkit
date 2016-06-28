@@ -2,7 +2,7 @@ from itertools import count
 
 from langkit import names
 from langkit.compiled_types import (
-    AbstractNodeData, LexicalEnvType, StructMetaClass, Symbol
+    AbstractNodeData, LexicalEnvType, StructMetaclass, Symbol
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions import Env, FieldAccess, PropertyDef, Self, construct
@@ -128,9 +128,9 @@ class EnvSpec(object):
             return p
 
         # We are doing this when creating ASTNode subclasses, so there's no
-        # context yet. So fetch the root grammar class in StructMetaClass
+        # context yet. So fetch the root grammar class in StructMetaclass
         # instead.
-        node_type = StructMetaClass.root_grammar_class
+        node_type = StructMetaclass.root_grammar_class
 
         self.initial_env = create_internal_property(
             'Initial_Env', self._unresolved_initial_env, LexicalEnvType

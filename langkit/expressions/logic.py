@@ -1,5 +1,5 @@
 from langkit.compiled_types import (
-    LogicVarType, EquationType, BoolType, StructMetaClass
+    LogicVarType, EquationType, BoolType, StructMetaclass
 )
 
 from langkit.diagnostics import check_multiple
@@ -57,7 +57,7 @@ class Bind(AbstractExpression):
         self.bind_property = bind_property
 
     def do_prepare(self):
-        root_class = StructMetaClass.root_grammar_class
+        root_class = StructMetaclass.root_grammar_class
         check_multiple([
             (self.bind_property.type.matches(root_class),
              "The property passed to bind must return a subtype "
@@ -209,7 +209,7 @@ class Predicate(AbstractExpression):
         self.logic_var_expr = logic_var_expr
 
     def do_prepare(self):
-        root_class = StructMetaClass.root_grammar_class
+        root_class = StructMetaclass.root_grammar_class
 
         check_multiple([
             (isinstance(self.pred_property, PropertyDef),
@@ -257,7 +257,7 @@ class GetLogicValue(AbstractExpression):
 
     def construct(self):
         return BuiltinCallExpr(
-            "Eq_Node.Refs.GetL", StructMetaClass.root_grammar_class,
+            "Eq_Node.Refs.GetL", StructMetaclass.root_grammar_class,
             [construct(self.logic_var, LogicVarType)]
         )
 

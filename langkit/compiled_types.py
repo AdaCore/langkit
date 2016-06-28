@@ -400,7 +400,7 @@ class CompiledType(object):
 
         return type(
             '{}ListType'.format(element_type.name().camel),
-            (StructMetaClass.root_grammar_class, ), {
+            (StructMetaclass.root_grammar_class, ), {
                 'is_ptr': True,
 
                 'name': classmethod(lambda cls:
@@ -940,13 +940,13 @@ def create_macro(attrib_dict):
 
 
 # These will be replaced by true class definitions. Before this happens,
-# StructMetaClass will see these None values.
+# StructMetaclass will see these None values.
 Struct = None
 ASTNode = None
 _ = Struct, ASTNode  # Workaround PyCharm useless warnings
 
 
-class StructMetaClass(CompiledTypeMetaclass):
+class StructMetaclass(CompiledTypeMetaclass):
     """
     Internal metaclass for AST nodes, used to ease fields handling during code
     generation.
@@ -1254,7 +1254,7 @@ def root_grammar_class(cls):
     :param ASTNode cls: Type parameter. The ASTNode subclass to decorate.
     """
     assert cls.base() == ASTNode
-    assert StructMetaClass.root_grammar_class == cls, (
+    assert StructMetaclass.root_grammar_class == cls, (
         "You can have only one descendent of ASTNode, and it must be the "
         "root grammar class"
     )
@@ -1286,7 +1286,7 @@ def env_metadata(cls):
     :param Struct cls: Type parameter. The Struct subclass to decorate.
     """
 
-    StructMetaClass.env_metadata = cls
+    StructMetaclass.env_metadata = cls
     assert issubclass(cls, Struct), (
         "The type chosen to be environment metadata must be a struct type"
     )
@@ -1366,7 +1366,7 @@ class Struct(CompiledType):
     :type: dict[str, Field]
     """
 
-    __metaclass__ = StructMetaClass
+    __metaclass__ = StructMetaclass
     is_ptr = False
 
     @classmethod
@@ -1386,10 +1386,10 @@ class Struct(CompiledType):
         """
         return cls in (
             # The root grammar class is emitted separately from the others
-            StructMetaClass.root_grammar_class,
+            StructMetaclass.root_grammar_class,
 
             # The env metadata struct is emitted separately from the others
-            StructMetaClass.env_metadata,
+            StructMetaclass.env_metadata,
 
             # EnvElement is not emitted per se, because it is a generic
             # instantiation from Langkit_Support.Lexical_Env.
