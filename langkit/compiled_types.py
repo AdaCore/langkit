@@ -926,8 +926,19 @@ class NodeMacro(object):
     polymorphic. Here Bar.c and Baz.c can have different types, and their b
     property will also have a different type.
     """
-    pass
 
+    @classmethod
+    def _get_field_copies(cls):
+        """
+        Return a list of copies for all AbstractNodeData class attributes.
+
+        :rtype: list[(str, AbstractNodeData)]
+        """
+        return [
+            (f_n, copy(f_v))
+            for f_n, f_v in cls.__dict__.items()
+            if isinstance(f_v, AbstractNodeData)
+        ]
 
 def create_macro(attrib_dict):
     """
@@ -1052,12 +1063,7 @@ class StructMetaClass(CompiledTypeMetaclass):
         # Get the list of macro classes, and compute the ordered dicts of
         # fields for each of them.
         macro_classes = dct.get("_macros", [])
-        macro_fields = [
-            AbstractNodeData.fields_dict([
-                (f_n, copy(f_v)) for f_n, f_v in klass.__dict__.items()
-                if isinstance(f_v, AbstractNodeData)
-            ]) for klass in macro_classes
-        ]
+        macro_fields = [m._get_field_copies() for m in macro_classes]
 
         # Gather the fields and properties in a dictionary. Recover the order
         # of field declarations.  See the Field class definition for more
