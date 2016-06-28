@@ -1124,18 +1124,25 @@ class StructMetaClass(CompiledTypeMetaclass):
                     'Underscore-prefixed field names are not allowed'
                 )
 
-        # Compute lexical environment specification. Since it can be
-        # specified in macros, we want to make sure that there's only one.
         env_spec = dct.get('env_spec', None)
-        for klass in macro_classes:
-            es = klass.__dict__.get('env_spec', None)
-            assert not (es and env_spec), (
-                "Too many lexical environments specifications defined for "
-                "node {}".format(name)
-            )
-            env_spec = env_spec or es
-        dct['is_env_spec_inherited'] = env_spec is None
-        dct['env_spec'] = env_spec
+        if is_astnode:
+            # Compute lexical environment specification. Since it can be
+            # specified in macros, we want to make sure that there's only one.
+            for klass in macro_classes:
+                es = klass.__dict__.get('env_spec', None)
+                assert not (es and env_spec), (
+                    "Too many lexical environments specifications defined for "
+                    "node {}".format(name)
+                )
+                env_spec = env_spec or es
+            dct['is_env_spec_inherited'] = env_spec is None
+            dct['env_spec'] = env_spec
+        else:
+            with diag_ctx:
+                check_source_language(
+                    env_spec is None,
+                    'Structs cannot define lexical environment specifications'
+                )
 
         # Env specs may need to create properties: add these as fields for this
         # node.
