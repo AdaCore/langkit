@@ -989,11 +989,16 @@ class StructMetaClass(CompiledTypeMetaclass):
         )
         base, = bases
 
-        # We want to check that every type deriving from ASTNode actually
-        # derives from an user defined subclass of ASTNode.
-
-        # First, skip Struct and ASTNode built-ins, and skip subclasses of
-        # Struct.
+        # We want to check various inheritance facts:
+        #
+        # * Every type deriving from Struct must derive from Struct itself (no
+        #   further subclassing).
+        #
+        # * Every type deriving from ASTNode must derive from a single user
+        #   defined subclass of ASTNode: the root grammar class.
+        #
+        # Of course this does not apply to Struct and ASTNode themselves. The
+        # root grammar class also requires special handling.
         if name not in ["Struct", "ASTNode"] and base is not Struct:
             # If we have no root grammar class yet and reach this point,
             # the type necessarily derives from ASTNode. It's the root
