@@ -1203,7 +1203,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
         (A     : AST_Envs.Env_Element_Array;
          Index : Integer)
          return Env_Element
-      is (A (Index));
+      is (A (Index + 1)); --  A is 1-based but Index is 0-based
 
       function Relative_Get is new Langkit_Support.Relative_Get
         (Item_Type     => Env_Element,
