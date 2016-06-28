@@ -939,6 +939,13 @@ def create_macro(attrib_dict):
     return type('macro', (NodeMacro, ), attrib_dict)
 
 
+# These will be replaced by true class definitions. Before this happens,
+# StructMetaClass will see these None values.
+Struct = None
+ASTNode = None
+_ = Struct, ASTNode  # Workaround PyCharm useless warnings
+
+
 class StructMetaClass(CompiledTypeMetaclass):
     """
     Internal metaclass for AST nodes, used to ease fields handling during code
@@ -999,7 +1006,7 @@ class StructMetaClass(CompiledTypeMetaclass):
         #
         # Of course this does not apply to Struct and ASTNode themselves. The
         # root grammar class also requires special handling.
-        if name not in ["Struct", "ASTNode"] and base is not Struct:
+        if Struct and ASTNode and base is not Struct:
             # If we have no root grammar class yet and reach this point,
             # the type necessarily derives from ASTNode. It's the root
             # grammar class.
