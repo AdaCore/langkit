@@ -853,7 +853,13 @@ class No(AbstractExpression):
 
         :rtype: LiteralExpr
         """
-        return LiteralExpr(self.expr_type.nullexpr(), self.expr_type)
+        return LiteralExpr(self.expr_type.nullexpr(), self.expr_type,
+
+                           # We want to create a tmp in pointer cases,
+                           # so that overloading resolution always works.
+                           result_var_name="Null_Value"
+                           if self.expr_type.is_ptr
+                           else None)
 
 
 class EmptyArray(AbstractExpression):
