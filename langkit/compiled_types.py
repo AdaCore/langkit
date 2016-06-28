@@ -1042,53 +1042,12 @@ class StructMetaClass(CompiledTypeMetaclass):
         # Struct, either it's an ASTNode.
         assert is_astnode != is_struct
 
-        dct["should_emit_array_type"] = not is_root_grammar_class
-        dct["location"] = extract_library_location()
-
         # Here, we'll register fields and properties for the root AST node
         # class. Note that we must not provide implementation for them here (no
         # expression) since the implementation comes from the hard-coded root
         # AST node type definition.
         if is_root_grammar_class:
-            dct["node_env"] = BuiltinField(
-                type=LexicalEnvType, is_private=True,
-                doc='For nodes that introduce a new environment, return the'
-                    ' parent lexical environment. Return the "inherited"'
-                    ' environment otherwise.'
-            )
-            dct["children_env"] = BuiltinField(
-                type=LexicalEnvType, is_private=True,
-                doc='For nodes that introduce a new environment, return it.'
-                    ' Return the "inherited" environment otherwise.'
-            )
-
-            dct["parent"] = BuiltinField(
-                type=None,
-                doc="Return the lexical parent for this node. Return null for"
-                    " the root AST node or for AST nodes for which no one has"
-                    " a reference to the parent."
-            )
-            dct["parents"] = BuiltinField(
-                type=None,
-                doc="Return an array that contains the lexical parents (this"
-                    " node included). Nearer parents are first in the list."
-            )
-            dct["token_start"] = BuiltinField(
-                type=Token,
-                doc="Return the first token used to parse this node."
-            )
-            dct["token_end"] = BuiltinField(
-                type=Token,
-                doc="Return the last token used to parse this node."
-            )
-            dct["previous_sibling"] = BuiltinField(
-                type=None,
-                doc="Return the node's previous sibling, if there is one"
-            )
-            dct["next_sibling"] = BuiltinField(
-                type=None,
-                doc="Return the node's next sibling, if there is one"
-            )
+            dct.update(mcs.builtin_properties())
 
         # Get the list of macro classes, and compute the ordered dicts of
         # fields for each of them.
@@ -1150,40 +1109,43 @@ class StructMetaClass(CompiledTypeMetaclass):
             for p in env_spec.create_properties():
                 fields[p._name.lower] = p
 
-        for field_name, field in fields.items():
-            # Remove fields/props as class members: we want them to be
-            # stored in their own dicts.
-            if field_name in dct:
-                dct.pop(field_name)
-            # Store the name of the field in the field
-            field.name = names.Name.from_lower(field_name)
+        # Past this point, the set of fields must not change anymore
+
+        # Remove fields/props as class members: we want them to be stored in
+        # their own dicts.
+        for f_n, f_v in fields.items():
+            dct.pop(f_n, None)
 
         dct['_fields'] = fields
         dct['fields'] = DictProxy(fields)
+        dct['should_emit_array_type'] = not is_root_grammar_class
+        dct['is_type_resolved'] = False
+        dct['location'] = extract_library_location()
 
-        # By default, ASTNode subtypes aren't abstract
+        # By default, ASTNode subtypes aren't abstract. The "abstract"
+        # decorator may change this attribute later.
         dct['abstract'] = False
 
+        # This metaclass will register subclasses automatically
         dct['subclasses'] = []
 
-        dct['is_type_resolved'] = False
         cls = CompiledTypeMetaclass.__new__(mcs, name, bases, dct)
 
-        # Associate each field and property to this ASTNode subclass. Likewise
-        # for the environment specification.
-        for field in fields.values():
-            field.struct = cls
-
+        # Associate each field and property to this ASTNode subclass, and
+        # assign them their name. Likewise for the environment specification.
+        for f_n, f_v in fields.items():
+            f_v.struct = cls
+            f_v.name = names.Name.from_lower(f_n)
         if env_spec:
             env_spec.ast_node = cls
 
         with diag_ctx:
             check_source_language(
-                cls.is_ast_node() or not cls.get_properties(),
+                not is_struct or not cls.get_properties(),
                 "Properties are not yet supported on plain structs"
             )
 
-        if cls.is_ast_node():
+        if is_astnode:
             mcs.astnode_types.append(cls)
         else:
             mcs.struct_types.append(cls)
@@ -1194,10 +1156,59 @@ class StructMetaClass(CompiledTypeMetaclass):
             fields["previous_sibling"].type = cls
             fields["next_sibling"].type = cls
             fields["parents"].type = cls.array_type()
-        elif cls.is_ast_node():
+        elif is_astnode:
             base.subclasses.append(cls)
 
         return cls
+
+    @staticmethod
+    def builtin_properties():
+        """
+        Return the set of properties available for all AST nodes.
+
+        :rtype: dict[str, langkit.expressions.base.PropertyDef]
+        """
+        return {
+            "node_env": BuiltinField(
+                type=LexicalEnvType, is_private=True,
+                doc='For nodes that introduce a new environment, return the'
+                    ' parent lexical environment. Return the "inherited"'
+                    ' environment otherwise.'
+            ),
+            "children_env": BuiltinField(
+                type=LexicalEnvType, is_private=True,
+                doc='For nodes that introduce a new environment, return it.'
+                    ' Return the "inherited" environment otherwise.'
+            ),
+
+            "parent": BuiltinField(
+                type=None,
+                doc="Return the lexical parent for this node. Return null for"
+                    " the root AST node or for AST nodes for which no one has"
+                    " a reference to the parent."
+            ),
+            "parents": BuiltinField(
+                type=None,
+                doc="Return an array that contains the lexical parents (this"
+                    " node included). Nearer parents are first in the list."
+            ),
+            "token_start": BuiltinField(
+                type=Token,
+                doc="Return the first token used to parse this node."
+            ),
+            "token_end": BuiltinField(
+                type=Token,
+                doc="Return the last token used to parse this node."
+            ),
+            "previous_sibling": BuiltinField(
+                type=None,
+                doc="Return the node's previous sibling, if there is one"
+            ),
+            "next_sibling": BuiltinField(
+                type=None,
+                doc="Return the node's next sibling, if there is one"
+            ),
+        }
 
 
 def abstract(cls):
