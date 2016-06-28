@@ -985,8 +985,10 @@ class StructMetaClass(CompiledTypeMetaclass):
     """
 
     def __new__(mcs, name, bases, dct):
-
+        is_astnode = False
+        is_struct = False
         is_root_grammar_class = False
+
         diag_ctx = diagnostics.Context(
             'in {}'.format(name), extract_library_location()
         )
@@ -1006,27 +1008,39 @@ class StructMetaClass(CompiledTypeMetaclass):
         #
         # Of course this does not apply to Struct and ASTNode themselves. The
         # root grammar class also requires special handling.
-        if Struct and ASTNode and base is not Struct:
-            # If we have no root grammar class yet and reach this point,
-            # the type necessarily derives from ASTNode. It's the root
-            # grammar class.
-            if mcs.root_grammar_class is None and base is ASTNode:
-                is_root_grammar_class = True
-            # Else, check that it does indeed derives from the root grammar
-            # class.
-            else:
-                with diag_ctx:
+        with diag_ctx:
+            if not Struct and name == 'Struct':
+                is_struct = True
+            elif not ASTNode and name == 'ASTNode':
+                is_astnode = True
+            elif ASTNode and issubclass(base, ASTNode):
+                is_astnode = True
+                # If we have no root grammar class yet and reach this point,
+                # the type necessarily derives from ASTNode. It's the root
+                # grammar class.
+                if mcs.root_grammar_class is None:
+                    assert base is ASTNode
+                    is_root_grammar_class = True
+
+                else:
+                    # Check that it does indeed derives from the root grammar
+                    # class.
                     check_source_language(
                         issubclass(base, mcs.root_grammar_class),
-                        "Every ASTNode subclass must derive directly or"
-                        " indirectly from the root grammar class"
+                        'You can have only one class deriving from ASTNode,'
+                        ' which will be the root class of your grammar'
+                        ' indirectly from the root grammar class'
                     )
-
-                    check_source_language(
-                        base != ASTNode,
-                        "You can have only one class deriving from ASTNode,"
-                        " which will be the root class of your grammar"
-                    )
+            else:
+                is_struct = True
+                check_source_language(
+                    base is Struct,
+                    'All Struct subclasses must directly derive from Struct'
+                    ' itself'
+                )
+        # There are only two distinct alternatives: either we are defining a
+        # Struct, either it's an ASTNode.
+        assert is_astnode != is_struct
 
         dct["should_emit_array_type"] = not is_root_grammar_class
         dct["location"] = extract_library_location()
