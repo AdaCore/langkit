@@ -779,18 +779,6 @@ class AbstractNodeData(object):
         """
         return self.arguments
 
-    @staticmethod
-    def fields_dict(fields):
-        """
-        From a list of (name, AbstractNodeData) tuples, return an ordered
-        dict of the same data, sorted by field index. Abstracts the logic of
-        field reordering.
-
-        :type fields: [(str, AbstractNodeData)]
-        :rtype: OrderedDict[str, AbstractNodeData]
-        """
-        return OrderedDict(sorted(fields, key=lambda (_, f): f._index))
-
 
 class AbstractField(AbstractNodeData):
     """
@@ -940,6 +928,7 @@ class NodeMacro(object):
             if isinstance(f_v, AbstractNodeData)
         ]
 
+
 def create_macro(attrib_dict):
     """
     Helper to create macro types from a dict of attributes.
@@ -1053,41 +1042,12 @@ class StructMetaClass(CompiledTypeMetaclass):
         # Struct, either it's an ASTNode.
         assert is_astnode != is_struct
 
-        # Here, we'll register fields and properties for the root AST node
-        # class. Note that we must not provide implementation for them here (no
-        # expression) since the implementation comes from the hard-coded root
-        # AST node type definition.
-        if is_root_grammar_class:
-            dct.update(mcs.builtin_properties())
+        dct_fields = mcs.extract_dct_fields(dct)
 
         # Get the list of macro classes, and compute the ordered dicts of
         # fields for each of them.
         macro_classes = dct.get("_macros", [])
         macro_fields = [m._get_field_copies() for m in macro_classes]
-
-        # Gather the fields and properties in a dictionary. Recover the order
-        # of field declarations.  See the Field class definition for more
-        # details.
-        fields = AbstractNodeData.fields_dict(
-            [(f_n, f_v) for f_n, f_v in dct.items()
-             if isinstance(f_v, AbstractNodeData)]
-        )
-
-        # Append the list of fields that we've got from macros. Append them
-        # in order, so that the order of declaration in NodeMacro classes is
-        # respected, as well as the order of macro classes in the _macro field.
-        for fields_dict in macro_fields:
-            fields.update(fields_dict)
-
-        for f_n, f_v in fields.iteritems():
-            with diagnostics.context(
-                'in {}.{}'.format(name, f_n),
-                extract_library_location()
-            ):
-                check_source_language(
-                    not f_n.startswith('_'),
-                    'Underscore-prefixed field names are not allowed'
-                )
 
         env_spec = dct.get('env_spec', None)
         if is_astnode:
@@ -1109,21 +1069,6 @@ class StructMetaClass(CompiledTypeMetaclass):
                     'Structs cannot define lexical environment specifications'
                 )
 
-        # Env specs may need to create properties: add these as fields for this
-        # node.
-        if env_spec:
-            for p in env_spec.create_properties():
-                fields[p._name.lower] = p
-
-        # Past this point, the set of fields must not change anymore
-
-        # Remove fields/props as class members: we want them to be stored in
-        # their own dicts.
-        for f_n, f_v in fields.items():
-            dct.pop(f_n, None)
-
-        dct['_fields'] = fields
-        dct['fields'] = DictProxy(fields)
         dct['should_emit_array_type'] = not is_root_grammar_class
         dct['is_type_resolved'] = False
         dct['location'] = extract_library_location()
@@ -1137,6 +1082,47 @@ class StructMetaClass(CompiledTypeMetaclass):
 
         cls = CompiledTypeMetaclass.__new__(mcs, name, bases, dct)
 
+        # Now we have a class object, register it wherever it needs to be
+        # registered.
+        if is_root_grammar_class:
+            mcs.root_grammar_class = cls
+        elif is_astnode:
+            base.subclasses.append(cls)
+
+        if is_astnode:
+            mcs.astnode_types.append(cls)
+        else:
+            mcs.struct_types.append(cls)
+
+        # This builds a list of fields in a specific order:
+        #
+        # * fields are first ordered by origin: builtins, then fields from
+        #   "dct" and then fields from macro classes in macro order.
+        #
+        # * then, they are ordered by field number (see AbstractnodeData).
+        fields = mcs.merge_fields(
+            ([mcs.builtin_properties()] if is_root_grammar_class else []) +
+            [dct_fields] + macro_fields
+        )
+
+        # "fields" contains all the non-internal fields for this class: check
+        # that they use allowed names.
+        for f_n, f_v in fields.iteritems():
+            with diagnostics.context(
+                'in {}.{}'.format(name, f_n),
+                extract_library_location()
+            ):
+                check_source_language(
+                    not f_n.startswith('_'),
+                    'Underscore-prefixed field names are not allowed'
+                )
+
+        # Env specs may need to create properties: add these as fields for this
+        # node.
+        if env_spec:
+            for p in env_spec.create_properties():
+                fields[p._name.lower] = p
+
         # Associate each field and property to this ASTNode subclass, and
         # assign them their name. Likewise for the environment specification.
         for f_n, f_v in fields.items():
@@ -1145,76 +1131,109 @@ class StructMetaClass(CompiledTypeMetaclass):
         if env_spec:
             env_spec.ast_node = cls
 
+        cls._fields = fields
+        cls.fields = DictProxy(fields)
+
         with diag_ctx:
             check_source_language(
                 not is_struct or not cls.get_properties(),
                 "Properties are not yet supported on plain structs"
             )
 
-        if is_astnode:
-            mcs.astnode_types.append(cls)
-        else:
-            mcs.struct_types.append(cls)
-
-        if is_root_grammar_class:
-            mcs.root_grammar_class = cls
-            fields["parent"].type = cls
-            fields["previous_sibling"].type = cls
-            fields["next_sibling"].type = cls
-            fields["parents"].type = cls.array_type()
-        elif is_astnode:
-            base.subclasses.append(cls)
-
         return cls
 
     @staticmethod
-    def builtin_properties():
+    def extract_dct_fields(dct):
         """
-        Return the set of properties available for all AST nodes.
+        Extract AbstractNodeData instances from "dct" and return them as an
+        ordered dict. See the AbstractNodeData class definition for more
+        details about fields order.
 
-        :rtype: dict[str, langkit.expressions.base.PropertyDef]
+        When this return, "dct" no longer contains these instances.
+
+        :param dict[str, T] dct: Class dictionnary.
+        :rtype: list[(str, AbstractNodeData)]
         """
-        return {
-            "node_env": BuiltinField(
+        fields = [
+            (f_n, f_v) for f_n, f_v in dct.items()
+            if isinstance(f_v, AbstractNodeData)
+        ]
+
+        for f_n, _ in fields:
+            dct.pop(f_n, None)
+
+        return fields
+
+    @classmethod
+    def builtin_properties(mcs):
+        """
+        Return properties available for all AST nodes.
+
+        Note that mcs.root_grammar_class must be defined first.
+
+        :rtype: list[(str, AbstractNodeData)]
+        """
+        assert mcs.root_grammar_class
+        # Note that we must not provide implementation for them here (no
+        # expression) since the implementation comes from the hard-coded root
+        # AST node type definition.
+        return [
+            ("node_env", BuiltinField(
                 type=LexicalEnvType, is_private=True,
                 doc='For nodes that introduce a new environment, return the'
                     ' parent lexical environment. Return the "inherited"'
                     ' environment otherwise.'
-            ),
-            "children_env": BuiltinField(
+            )),
+            ("children_env", BuiltinField(
                 type=LexicalEnvType, is_private=True,
                 doc='For nodes that introduce a new environment, return it.'
                     ' Return the "inherited" environment otherwise.'
-            ),
+            )),
 
-            "parent": BuiltinField(
-                type=None,
+            ("parent", BuiltinField(
+                type=mcs.root_grammar_class,
                 doc="Return the lexical parent for this node. Return null for"
                     " the root AST node or for AST nodes for which no one has"
                     " a reference to the parent."
-            ),
-            "parents": BuiltinField(
-                type=None,
+            )),
+            ("parents", BuiltinField(
+                type=mcs.root_grammar_class.array_type(),
                 doc="Return an array that contains the lexical parents (this"
                     " node included). Nearer parents are first in the list."
-            ),
-            "token_start": BuiltinField(
+            )),
+            ("token_start", BuiltinField(
                 type=Token,
                 doc="Return the first token used to parse this node."
-            ),
-            "token_end": BuiltinField(
+            )),
+            ("token_end", BuiltinField(
                 type=Token,
                 doc="Return the last token used to parse this node."
-            ),
-            "previous_sibling": BuiltinField(
-                type=None,
+            )),
+            ("previous_sibling", BuiltinField(
+                type=mcs.root_grammar_class,
                 doc="Return the node's previous sibling, if there is one"
-            ),
-            "next_sibling": BuiltinField(
-                type=None,
+            )),
+            ("next_sibling", BuiltinField(
+                type=mcs.root_grammar_class,
                 doc="Return the node's next sibling, if there is one"
-            ),
-        }
+            )),
+        ]
+
+    @staticmethod
+    def merge_fields(fields_groups):
+        """
+        Merge groups of AbstractNodeData instances into an OrderedDict.
+
+        The resulting OrderedDict preserves the input order.
+
+        :type fields_groups: list[list[(str, AbstractNodeData)]]
+        :rtype: dict[str, AbstractNodeData]
+        """
+        return OrderedDict(sum(
+            [sorted(group, key=lambda (_, f): f._index)
+             for group in fields_groups],
+            []
+        ))
 
 
 def abstract(cls):
