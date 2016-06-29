@@ -194,7 +194,8 @@ class CompileCtx():
                  enable_python_api=True,
                  default_charset='utf-8',
                  verbosity=Verbosity('none'),
-                 template_lookup_extra_dirs=None):
+                 template_lookup_extra_dirs=None,
+                 env_hook_subprogram=None):
         """Create a new context for code emission.
 
         :param str lang_name: string (mixed case and underscore: see
@@ -235,6 +236,35 @@ class CompileCtx():
             extra directories to add to the directories used by mako for
             template lookup. This is useful if you want to render custom
             code as part of the compilation process.
+
+        :param (str, str)|None env_hook_subprogram: If provided, define a
+            subprogram to call as the environment hook. The first string is the
+            name of the Ada unit in which this subprogram is defined. The
+            second one is the name of the subprogram itself.
+
+            The environment hook is a subprogram provided by a language
+            specification and that can perform arbitrarily complex computations
+            and changes to a whole analysis context. It can be invoked in
+            environment specifications: see EnvSpec's call_env_hook argument.
+
+            Its intended use case is to implement lexical environment lookups
+            across analysis units: when executed on a node that designates
+            another unit, the hook can fetch this other unit from the analysis
+            context and populate its lexical environment. The logic for
+            determining a file name from an analysis unit name is completely
+            language dependent, hence the need for a hook.
+
+            The subprogram that implements the hook must have the following
+            signature::
+
+                procedure Hook_Func
+                  (Unit        : Analysis_Unit;
+                   Node        : <root AST node type>;
+                   Initial_Env : in out Lexical_Env);
+
+            If the hook is invoked on an node that uses the initial_env EnvSpec
+            attribute, the hook can alter it so that it affects the rest of the
+            EnvSpec actions.
         """
         from langkit.python_api import PythonAPISettings
 
@@ -423,14 +453,7 @@ class CompileCtx():
         :type: list[str]
         """
 
-        self.env_hook_subprogram = None
-        """
-        Name and embedding unit for the subprogram to call as the environment
-        hook, or None if there is None. See the "bind_env_hook" function for
-        details.
-
-        :type: (str, str)|None
-        """
+        self.env_hook_subprogram = env_hook_subprogram
 
     def sorted_types(self, type_set):
         """
@@ -1003,37 +1026,3 @@ class CompileCtx():
             os.path.dirname(os.path.dirname(quex_bin)),
             'share', 'quex'
         )
-
-    def bind_env_hook(self, unit, subp_name):
-        """
-        Define a subprogram to call as the environment hook.
-
-        The environment hook is a subprogram provided by a language
-        specification and that can perform arbitrarily complex computations and
-        changes to a whole analysis context. It can be invoked in environment
-        specifications: see EnvSpec's call_env_hook argument.
-
-        Its intended use case is to implement lexical environment lookups
-        across analysis units: when executed on a node that designates another
-        unit, the hook can fetch this other unit from the analysis context and
-        populate its lexical environment. The logic for determining a file name
-        from an analysis unit name is completely language dependent, hence the
-        need for a hook.
-
-        The subprogram that implements the hook must have the following
-        signature::
-
-            procedure Hook_Func
-              (Unit        : Analysis_Unit;
-               Node        : <root AST node type>;
-               Initial_Env : in out Lexical_Env);
-
-        If the hook is invoked on an node that uses the initial_env EnvSpec
-        attribute, the hook can alter it so that it affects the rest of the
-        EnvSpec actions.
-
-        :param str unit: Name of the Ada unit in which this subprogram is
-            defined.
-        :param str subp_name: Name of the subprogram itself.
-        """
-        self.env_hook_subprogram = (unit, subp_name)
