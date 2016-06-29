@@ -129,6 +129,10 @@ package body Adalog.Predicates is
 
    package body Predicate_2 is
 
+      ----------
+      -- Free --
+      ----------
+
       procedure Free (Self : Predicate_Wrapper) is
       begin
          Free (Self.T);
