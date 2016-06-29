@@ -19,7 +19,8 @@ High level overview
 At the top level directory of your language definition, Langkit will search for
 an ``extension`` directory, and will search for extensions inside it. It will
 use the directory structure and file names to determine the purpose of each
-extension file.
+extension file. Moreover, all files in the special ``extension/src`` directory
+will be included in the generated library.
 
 Existing extensions points
 ==========================

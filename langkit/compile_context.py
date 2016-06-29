@@ -582,6 +582,16 @@ class CompileCtx():
             strict_undefined=True
         )
 
+        # Automatically add all source files in the "extensions/src" directory
+        # to the generated library project.
+        if self.extensions_dir:
+            src_dir = path.join(self.extensions_dir, 'src')
+            if path.isdir(src_dir):
+                for filename in os.listdir(src_dir):
+                    filepath = path.join(src_dir, filename)
+                    if path.isdir(filepath):
+                        self.additional_source_files.append(filepath)
+
         self.annotate_fields_types = annotate_fields_types
         self.compile()
         with global_context(self):
@@ -993,14 +1003,6 @@ class CompileCtx():
             os.path.dirname(os.path.dirname(quex_bin)),
             'share', 'quex'
         )
-
-    def add_source_file(self, path):
-        """
-        Add a source file to be included in the generated library.
-
-        :param str path: Path to the source file to include.
-        """
-        self.additional_source_files.append(path)
 
     def bind_env_hook(self, unit, subp_name):
         """
