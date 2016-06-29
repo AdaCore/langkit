@@ -1025,7 +1025,7 @@ class CompileCtx():
                Node        : <root AST node type>;
                Initial_Env : in out Lexical_Env);
 
-        If the hook in invoked on an node that uses the initial_env EnvSpec
+        If the hook is invoked on an node that uses the initial_env EnvSpec
         attribute, the hook can alter it so that it affects the rest of the
         EnvSpec actions.
 
