@@ -200,9 +200,9 @@ class Predicate(AbstractExpression):
         """
         :param AbstractExpression logic_var_expr: The logic variable on
             which to apply the predicate.
-        :param AbstractExpression pred_property: The property to use as a
-            predicate. For convenience, it can be a property of any subtype of
-            the root ast node, but it needs to return a boolean.
+        :param PropertyDef pred_property: The property to use as a predicate.
+            For convenience, it can be a property of any subtype of the root
+            ast node, but it needs to return a boolean.
         """
         super(Predicate, self).__init__()
         self.pred_property = pred_property
