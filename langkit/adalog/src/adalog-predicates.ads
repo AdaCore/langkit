@@ -198,4 +198,51 @@ package Adalog.Predicates is
 
    end N_Predicate;
 
+   -----------------
+   -- Predicate_2 --
+   -----------------
+
+   --  Predicates that will act on two logic variables
+
+   generic
+      type El_Type is private;
+      with package Var is new Logic_Var
+        (Element_Type => El_Type, others => <>);
+
+      type Predicate_Type is private;
+
+      with function Call
+        (Self : Predicate_Type; L, R : El_Type) return Boolean is <>;
+
+      with procedure Free (Self : Predicate_Type) is null;
+
+   package Predicate_2 is
+
+      function Create
+        (L, R : Var.Var; Pred : Predicate_Type) return Relation;
+      --  Return a predicate relation, where Pred is the actual implementation
+      --  of the predicate logic. Pred will be called on the value of L and R
+      --  when appropriate.
+
+   private
+
+      type Predicate_Wrapper is record
+         T    : Predicate_Type;
+         L, R : Var.Var;
+      end record;
+
+      function Call
+        (P : Predicate_Wrapper; Vals : Var.Val_Array) return Boolean
+      is (Call (P.T, Vals (1), Vals (2)));
+
+      procedure Free (Self : Predicate_Wrapper);
+
+      package Predicate_2_Internal is new N_Predicate
+        (El_Type, Var, 2, Predicate_Wrapper, Call, Free);
+
+   end Predicate_2;
+
+   generic package Predicate_1 renames Predicate;
+   --  Renaming for Predicate, to help with code generation
+
 end Adalog.Predicates;

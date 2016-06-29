@@ -127,4 +127,25 @@ package body Adalog.Predicates is
 
    end N_Predicate;
 
+   package body Predicate_2 is
+
+      procedure Free (Self : Predicate_Wrapper) is
+      begin
+         Free (Self.T);
+      end Free;
+
+      ------------
+      -- Create --
+      ------------
+
+      function Create
+        (L, R : Var.Var; Pred : Predicate_Type) return Relation
+      is
+      begin
+         return Predicate_2_Internal.Create
+           ((L, R), Predicate_Wrapper'(Pred, L, R));
+      end Create;
+
+   end Predicate_2;
+
 end Adalog.Predicates;
