@@ -12,8 +12,6 @@ with Support;                  use Support;
 
 procedure Main is
 
-   pragma Warnings (Off, "reference");
-
    use Eq_Int; use Eq_Int.Raw_Impl;
 
    X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
