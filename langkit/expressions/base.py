@@ -13,8 +13,8 @@ from langkit.compiled_types import (
     LongType, get_context, render as ct_render, Symbol, Token, resolve_type
 )
 from langkit.diagnostics import (
-    DiagnosticError, Severity, check_multiple, check_source_language,
-    extract_library_location
+    extract_library_location, check_source_language, check_multiple,
+    Severity, DiagnosticError, check_type
 )
 from langkit.utils import (
     assert_type, memoized, TypeSet, dispatch_on_type
@@ -1247,7 +1247,10 @@ class PropertyDef(AbstractNodeData):
                 function_block = Block()
                 with Block.set_block(function_block):
                     fn = assert_type(self.expr, types.FunctionType)
-                    expr = assert_type(fn(*explicit_args), AbstractExpression)
+                    expr = check_type(
+                        fn(*self.argument_vars), AbstractExpression,
+                        "Properties return value should be an expression"
+                    )
                     function_block.expr = expr
                     self.expr = function_block
 
