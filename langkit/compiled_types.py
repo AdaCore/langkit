@@ -1073,7 +1073,11 @@ class StructMetaclass(CompiledTypeMetaclass):
         # Struct, either it's an ASTNode.
         assert is_astnode != is_struct
 
-        dct_fields = mcs.extract_dct_fields(dct)
+        # Get the fields this class define. Remove them as class members: we
+        # want them to be stored in their own dict (see "cls.fields" below).
+        dct_fields = AbstractNodeData.filter_fields(dct)
+        for f_n, _ in dct_fields:
+            dct.pop(f_n, None)
 
         # Get the list of macro classes, and compute the ordered dicts of
         # fields for each of them.
@@ -1172,25 +1176,6 @@ class StructMetaclass(CompiledTypeMetaclass):
             )
 
         return cls
-
-    @staticmethod
-    def extract_dct_fields(dct):
-        """
-        Extract AbstractNodeData instances from "dct" and return them as an
-        ordered dict. See the AbstractNodeData class definition for more
-        details about fields order.
-
-        When this return, "dct" no longer contains these instances.
-
-        :param dict[str, T] dct: Class dictionnary.
-        :rtype: list[(str, AbstractNodeData)]
-        """
-        fields = AbstractNodeData.filter_fields(dct)
-
-        for f_n, _ in fields:
-            dct.pop(f_n, None)
-
-        return fields
 
     @classmethod
     def builtin_properties(mcs):
