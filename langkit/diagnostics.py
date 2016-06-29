@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 import enum
 from os import path
 import traceback
@@ -60,24 +59,6 @@ context_stack = []
 """
 :type: list[(str, Location)]
 """
-
-
-@contextmanager
-def context(message, location):
-    """
-    Add context for diagnostics. For the moment this context is constituted
-    of a message and a location.
-
-    :param str message: The message to display when displaying the
-    diagnostic, to contextualize the location.
-
-    :param Location location: The location associated to the context.
-    """
-    try:
-        context_stack.append((message, location))
-        yield
-    finally:
-        context_stack.pop()
 
 
 class Context(object):

@@ -32,7 +32,7 @@ from langkit.common import gen_name, gen_names
 from langkit.compile_context import get_context
 from langkit.compiled_types import ASTNode, BoolType, CompiledType, Token
 from langkit.diagnostics import (
-    extract_library_location, context, check_source_language, Location
+    Context, Location, check_source_language, extract_library_location
 )
 from langkit.template_utils import TemplateEnvironment
 from langkit.utils import (Colors, common_ancestor, copy_with, col,
@@ -113,7 +113,7 @@ class Grammar(object):
         self.location = extract_library_location()
 
     def context(self):
-        return context("In definition of grammar", self.location)
+        return Context("In definition of grammar", self.location)
 
     def add_rules(self, **kwargs):
         """
@@ -162,7 +162,7 @@ class Grammar(object):
             rule.set_location(Location(loc.file, keywords[name].lineno, ""))
             rule.is_root = True
 
-            with context("In definition of rule '{}'".format(name), loc):
+            with Context("In definition of rule '{}'".format(name), loc):
                 check_source_language(
                     name not in self.rules,
                     "Rule '{}' is already present in the grammar".format(name)
@@ -322,7 +322,7 @@ class Parser(object):
 
         :return:
         """
-        return context("In definition of grammar rule {}".format(self.name),
+        return Context("In definition of grammar rule {}".format(self.name),
                        self.location)
 
     def set_grammar(self, grammar):

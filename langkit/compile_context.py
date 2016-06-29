@@ -31,8 +31,9 @@ from mako.lookup import TemplateLookup
 from langkit import astdoc, caching, names, template_utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
-from langkit.diagnostics import check_source_language, errors_checkpoint, \
-    Severity
+from langkit.diagnostics import (
+    Severity, check_source_language, errors_checkpoint
+)
 from langkit.expressions import PropertyDef
 from langkit.utils import Colors, printcol
 

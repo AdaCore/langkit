@@ -5,11 +5,11 @@ from copy import copy
 import inspect
 from itertools import count
 
-from langkit import diagnostics, names
+from langkit import names
 from langkit.c_api import CAPIType
 from langkit.common import get_type, null_constant, is_keyword
 from langkit.diagnostics import (
-    check_source_language, context, extract_library_location
+    Context, check_source_language, extract_library_location
 )
 from langkit.template_utils import common_renderer
 from langkit.utils import (
@@ -234,7 +234,7 @@ class CompiledType(object):
     @classmethod
     def diagnostic_context(cls):
         ctx_message = 'in {}'.format(cls.name().camel)
-        return context(ctx_message, cls.location)
+        return Context(ctx_message, cls.location)
 
     @classmethod
     def is_collection(cls):
@@ -1009,7 +1009,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         is_struct = False
         is_root_grammar_class = False
 
-        diag_ctx = diagnostics.Context(
+        diag_ctx = Context(
             'in {}'.format(name), extract_library_location()
         )
 
@@ -1128,7 +1128,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         # "fields" contains all the non-internal fields for this class: check
         # that they use allowed names.
         for f_n, f_v in fields.iteritems():
-            with diagnostics.context(
+            with Context(
                 'in {}.{}'.format(name, f_n),
                 extract_library_location()
             ):

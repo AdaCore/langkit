@@ -13,8 +13,8 @@ from langkit.compiled_types import (
     LongType, get_context, render as ct_render, Symbol, Token, resolve_type
 )
 from langkit.diagnostics import (
-    extract_library_location, check_source_language, check_multiple,
-    context, Severity, DiagnosticError
+    Context, DiagnosticError, Severity, check_multiple, check_source_language,
+    extract_library_location
 )
 from langkit.utils import (
     assert_type, memoized, TypeSet, dispatch_on_type
@@ -1052,7 +1052,7 @@ class PropertyDef(AbstractNodeData):
     def diagnostic_context(self):
         ctx_message = 'in {}.{}'.format(self.struct.name().camel,
                                         self._name.lower)
-        return context(ctx_message, self.location)
+        return Context(ctx_message, self.location)
 
     @classmethod
     def get(cls):
