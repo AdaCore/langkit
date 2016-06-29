@@ -218,6 +218,14 @@ class CompiledType(object):
     the bindings yet. We probably want to remove this flag in the long run.
     """
 
+    null_allowed = False
+    """
+    Whether a client is allowed to create a null value for this type. Note that
+    a type might have a nullexpr and still have null disallowed, because
+    nullexpr might make sense for initialization purposes in the parsers, but
+    not as a real null value.
+    """
+
     def __init__(self):
         assert False, (
             'CompiledType subclasses are not meant to be instantiated'
@@ -475,6 +483,7 @@ class LexicalEnvType(BasicType):
     _nullexpr = "null"
     is_ptr = True
     should_emit_array_type = False
+    null_allowed = True
 
     @classmethod
     def is_refcounted(cls):
@@ -1378,6 +1387,7 @@ class Struct(CompiledType):
 
     __metaclass__ = StructMetaclass
     is_ptr = False
+    null_allowed = True
 
     @classmethod
     @memoized
@@ -1782,6 +1792,7 @@ class ArrayType(CompiledType):
     """
 
     is_ptr = True
+    null_allowed = True
 
     @classmethod
     def is_refcounted(cls):
