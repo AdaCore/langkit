@@ -295,8 +295,7 @@ class FieldAccess(AbstractExpression):
                 prefix = self.prefix_var.name
             ret = "{}.{}".format(prefix, self.node_data.name)
 
-            # If we're calling a property, then pass the currently bound
-            # lexical environment as parameter.
+            # If we're calling a property, then pass the arguments
             if isinstance(self.node_data, PropertyDef):
                 # Sequence of tuples: (formal name, expression) for each
                 # argument to pass.
