@@ -115,7 +115,7 @@ def reset_langkit():
     future, we should get rid of this global state in Langkit.
     """
     StructMetaclass.root_grammar_class = None
-    StructMetaclass.astnode_types = [ASTNode]
+    StructMetaclass.astnode_types = []
     StructMetaclass.struct_types = []
     StructMetaclass.env_metadata = None
     Self.__dict__['_frozen'] = False

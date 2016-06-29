@@ -1133,10 +1133,11 @@ class StructMetaclass(CompiledTypeMetaclass):
         elif is_astnode:
             base.subclasses.append(cls)
 
-        if is_astnode:
-            mcs.astnode_types.append(cls)
-        else:
-            mcs.struct_types.append(cls)
+        if not is_base:
+            if is_struct:
+                mcs.struct_types.append(cls)
+            else:
+                mcs.astnode_types.append(cls)
 
         # This builds a list of fields in a specific order:
         #

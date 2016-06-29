@@ -492,12 +492,10 @@ class CompileCtx():
 
         # Get the list of ASTNode types from the Struct metaclass
         from langkit.compiled_types import (
-            EnvElement, LexicalEnvType, Struct, StructMetaclass
+            EnvElement, LexicalEnvType, StructMetaclass
         )
 
-        # Skipping the first element which is ASTNode, because it is not a
-        # real type in the generated library.
-        self.astnode_types = list(StructMetaclass.astnode_types)[1:]
+        self.astnode_types = list(StructMetaclass.astnode_types)
 
         # Here we're skipping Struct because it's not a real type in
         # generated code. We're also putting env_metadata and EnvElement in
@@ -507,7 +505,7 @@ class CompileCtx():
         # some point.
         self.struct_types = [
             t for t in StructMetaclass.struct_types
-            if t not in [EnvElement, StructMetaclass.env_metadata, Struct]
+            if t not in [EnvElement, StructMetaclass.env_metadata]
         ]
         self.struct_types.insert(0, EnvElement)
 
