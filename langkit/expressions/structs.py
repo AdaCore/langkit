@@ -297,26 +297,14 @@ class FieldAccess(AbstractExpression):
 
             # If we're calling a property, then pass the arguments
             if isinstance(self.node_data, PropertyDef):
-                # Sequence of tuples: (formal name, expression) for each
-                # argument to pass.
 
-                args = []
-
-                # Then add the explicit arguments
-                for actual, (formal_name, formal_type, _) in zip(
-                    self.arguments, self.node_data.explicit_arguments
-                ):
-                    expr = actual.render_expr()
-
-                    # The only case in which actual and formal types can be
-                    # differents is when using object derivation. In this case,
-                    # we have to introduce explicit view conversions in Ada.
-                    if actual.type != formal_type:
-                        expr = '{} ({})'.format(formal_type.name(), expr)
-
-                    args.append((formal_name, expr))
-
-                args.append((PropertyDef.env_arg_name, str(Env._name)))
+                # Create a collection of name => expression for parameters
+                args = [
+                    (formal_name, actual.render_expr())
+                    for actual, (formal_name, _, _) in zip(
+                        self.arguments, self.node_data.explicit_arguments
+                    )
+                ] + [(PropertyDef.env_arg_name, str(Env._name))]
 
                 ret += " ({})".format(', '.join(
                     '{} => {}'.format(name, value)
@@ -398,21 +386,17 @@ class FieldAccess(AbstractExpression):
             )
         )
 
-        arg_exprs = map(construct, self.arguments)
-        exprs_and_formals = zip(arg_exprs, to_get.explicit_arguments)
-
-        for i, (actual, formal) in enumerate(exprs_and_formals, 1):
-            formal_name, formal_type, _ = formal
-            check_source_language(
-                actual.type.matches(formal_type),
-                'Invalid {} actual (#{}) for {}:'
-                ' expected {} but got {}'.format(
-                    formal_name, i,
-                    to_get.qualname,
-                    formal_type.name().camel,
-                    actual.type.name().camel,
-                )
+        arg_exprs = [
+            construct(
+                actual, formal_type,
+                custom_msg='Invalid {} actual (#{}) for {}:'.format(
+                    formal_name, i, to_get.qualname,
+                ) + ' expected {expected} but got {expr_type}'
             )
+            for i, (actual, (formal_name, formal_type, _)) in enumerate(
+                zip(self.arguments, to_get.explicit_arguments), 1
+            )
+        ]
 
         ret = FieldAccess.Expr(receiver_expr, to_get, arg_exprs)
         return ret
