@@ -799,6 +799,18 @@ class AbstractNodeData(object):
         """
         return self.arguments
 
+    @classmethod
+    def filter_fields(cls, mapping):
+        """
+        Return a list of tuples (name, value) for all fields in mapping.
+
+        :type mapping: dict[str, AbstractNodeData]
+        :rtype: list[(str, AbstractNodeData)]
+        """
+        return [(f_n, f_v)
+                for f_n, f_v in mapping.items()
+                if isinstance(f_v, cls)]
+
 
 class AbstractField(AbstractNodeData):
     """
@@ -944,8 +956,7 @@ class NodeMacro(object):
         """
         return [
             (f_n, copy(f_v))
-            for f_n, f_v in cls.__dict__.items()
-            if isinstance(f_v, AbstractNodeData)
+            for f_n, f_v in AbstractNodeData.filter_fields(cls.__dict__)
         ]
 
 
@@ -1174,10 +1185,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         :param dict[str, T] dct: Class dictionnary.
         :rtype: list[(str, AbstractNodeData)]
         """
-        fields = [
-            (f_n, f_v) for f_n, f_v in dct.items()
-            if isinstance(f_v, AbstractNodeData)
-        ]
+        fields = AbstractNodeData.filter_fields(dct)
 
         for f_n, _ in fields:
             dct.pop(f_n, None)
