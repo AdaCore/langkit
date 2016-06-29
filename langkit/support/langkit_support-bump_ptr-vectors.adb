@@ -103,9 +103,9 @@ package body Langkit_Support.Bump_Ptr.Vectors is
       --  corresponding to I.
    begin
       --  As the size of chunks double for each appened chunk, the element we
-      --  are looking for should be in the current chunk 2 times out of 3
-      --  (assuming equiprobable accesses). So let's just check if it's the
-      --  case.
+      --  are looking for should be in the current chunk more than half of the
+      --  times (assuming equiprobable accesses). So let's just check if it's
+      --  the case.
       declare
          Current_Chunk_Start_Index : constant Index_Type :=
             Index_Type'First + Self.Length - Self.Current_Chunk.Length;
