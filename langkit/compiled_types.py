@@ -1016,9 +1016,14 @@ class StructMetaclass(CompiledTypeMetaclass):
     """
 
     def __new__(mcs, name, bases, dct):
+        # The two following booleans are mutually exclusive and at least one
+        # will be True.
         is_astnode = False
         is_struct = False
-        is_root_grammar_class = False
+
+        # The following are also mutually exclusive but they can be all False
+        is_base = False  # Base Struct/ASTNode?
+        is_root_grammar_class = False  # Root grammar class?
 
         diag_ctx = Context(
             'in {}'.format(name), extract_library_location()
@@ -1037,14 +1042,17 @@ class StructMetaclass(CompiledTypeMetaclass):
         # * Every type deriving from ASTNode must derive from a single user
         #   defined subclass of ASTNode: the root grammar class.
         #
-        # Of course this does not apply to Struct and ASTNode themselves. The
-        # root grammar class also requires special handling.
+        # Of course this does not apply to Struct and ASTNode themselves, which
+        # are created before all other classes. The root grammar class also
+        # requires special handling.
+        base_classes = [Struct, ASTNode]
         with diag_ctx:
-            if not Struct and name == 'Struct':
-                is_struct = True
-            elif not ASTNode and name == 'ASTNode':
-                is_astnode = True
-            elif ASTNode and issubclass(base, ASTNode):
+            if not all(base_classes):
+                is_base = True
+                is_struct = Struct is None
+                is_astnode = not is_struct and ASTNode is None
+
+            elif issubclass(base, ASTNode):
                 is_astnode = True
                 # If we have no root grammar class yet and reach this point,
                 # the type necessarily derives from ASTNode. It's the root
@@ -1062,6 +1070,7 @@ class StructMetaclass(CompiledTypeMetaclass):
                         ' which will be the root class of your grammar'
                         ' indirectly from the root grammar class'
                     )
+
             else:
                 is_struct = True
                 check_source_language(
@@ -1069,9 +1078,9 @@ class StructMetaclass(CompiledTypeMetaclass):
                     'All Struct subclasses must directly derive from Struct'
                     ' itself'
                 )
-        # There are only two distinct alternatives: either we are defining a
-        # Struct, either it's an ASTNode.
-        assert is_astnode != is_struct
+        # This is a formal explanation for the top comments:
+        assert sum(1 for b in [is_astnode, is_struct] if b) == 1
+        assert sum(1 for b in [is_base, is_root_grammar_class] if b) <= 1
 
         # Get the fields this class define. Remove them as class members: we
         # want them to be stored in their own dict (see "cls.fields" below).
