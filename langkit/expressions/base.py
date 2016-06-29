@@ -1181,13 +1181,13 @@ class PropertyDef(AbstractNodeData):
         # Resolve it.
         self.expected_type = resolve_type(self.expected_type)
 
-        # Add the implicit lexical env. parameter
-        self._add_argument(PropertyDef.env_arg_name,
-                           LexicalEnvType,
-                           LexicalEnvType.nullexpr())
-
         if not self.expr:
+            # Add the implicit lexical env. parameter
+            self._add_argument(PropertyDef.env_arg_name,
+                               LexicalEnvType,
+                               LexicalEnvType.nullexpr())
             return
+
         self.expr = unsugar(self.expr, ignore_errors=True)
         check_source_language(
             isinstance(self.expr, AbstractExpression) or callable(self.expr),
@@ -1239,7 +1239,6 @@ class PropertyDef(AbstractNodeData):
             # Now that we have placeholder for all explicit arguments (i.e.
             # only the ones the user defined), we can expand the lambda
             # into a real AbstractExpression.
-            explicit_args = self.argument_vars[1:]
 
             # Wrap the expression in a Let block, so that the user can
             # declare local variables via the Var helper.
@@ -1256,6 +1255,11 @@ class PropertyDef(AbstractNodeData):
 
         with self.bind():
             self.expr.prepare()
+
+        # Add the implicit lexical env. parameter
+        self._add_argument(PropertyDef.env_arg_name,
+                           LexicalEnvType,
+                           LexicalEnvType.nullexpr())
 
     def freeze_abstract_expression(self):
         """
@@ -1417,7 +1421,7 @@ class PropertyDef(AbstractNodeData):
         :rtype: list[(names.Name, CompiledType, None|str)]
         """
         # Strip the implicit "Lex_Env" argument
-        return self.arguments[1:]
+        return self.arguments[:-1]
 
     @classmethod
     def compilation_passes(cls):

@@ -300,7 +300,8 @@ class FieldAccess(AbstractExpression):
             if isinstance(self.node_data, PropertyDef):
                 # Sequence of tuples: (formal name, expression) for each
                 # argument to pass.
-                args = [(PropertyDef.env_arg_name, str(Env._name))]
+
+                args = []
 
                 # Then add the explicit arguments
                 for actual, (formal_name, formal_type, _) in zip(
@@ -315,6 +316,8 @@ class FieldAccess(AbstractExpression):
                         expr = '{} ({})'.format(formal_type.name(), expr)
 
                     args.append((formal_name, expr))
+
+                args.append((PropertyDef.env_arg_name, str(Env._name)))
 
                 ret += " ({})".format(', '.join(
                     '{} => {}'.format(name, value)
@@ -398,6 +401,7 @@ class FieldAccess(AbstractExpression):
 
         arg_exprs = map(construct, self.arguments)
         exprs_and_formals = zip(arg_exprs, to_get.explicit_arguments)
+
         for i, (actual, formal) in enumerate(exprs_and_formals, 1):
             formal_name, formal_type, _ = formal
             check_source_language(
