@@ -28,6 +28,10 @@ with Adalog.Relations;           use Adalog.Relations;
 
 package Adalog.Predicates is
 
+   ---------------
+   -- Predicate --
+   ---------------
+
    --  Generic predicate package, that is applied on one logic variable.
    --
    --  Applying a predicate on a logic variable ensures that in all the
@@ -91,31 +95,39 @@ package Adalog.Predicates is
 
    end Predicate;
 
+   -------------------
+   -- Dyn_Predicate --
+   -------------------
+
+   --  Convenience package to create predicates from access to functions. Not
+   --  used by langkit, meant for general purpose use of the library.
+
    generic
       type El_Type is private;
       with package Var is new Logic_Var
         (Element_Type => El_Type, others => <>);
    package Dyn_Predicate is
 
-      type Predicate_Access is access function (L : El_Type) return Boolean;
+      function Create
+        (R    : Var.Var;
+         Pred : access function (L : El_Type) return Boolean)
+         return access I_Relation'Class;
 
-      type Predicate_Logic is record
-         Ref : Var.Var;
-         P   : access function (L : El_Type) return Boolean;
+   private
+
+      type Predicate_Holder is record
+         Pred : access function (L : El_Type) return Boolean;
       end record;
 
-      function Apply (Inst : in out Predicate_Logic) return Boolean;
-      procedure Revert (Inst : in out Predicate_Logic);
-      procedure Free (Inst : in out Predicate_Logic) is null;
+      function Call (Self : Predicate_Holder; L : El_Type) return Boolean
+      is (Self.Pred.all (L));
 
-      package Impl is new Stateful_Relation (Ty => Predicate_Logic);
+      package Internal_Pred is new Predicate (El_Type, Var, Predicate_Holder);
 
       function Create
-        (R    : Var.Var; Pred : Predicate_Access)
+        (R : Var.Var; Pred : access function (L : El_Type) return Boolean)
          return access I_Relation'Class
-      is
-        (new Impl.Rel'(Rel => Predicate_Logic'(Ref => R, P => Pred),
-                       others => <>));
+      is (Internal_Pred.Create (R, (Pred => Pred'Unrestricted_Access.all)));
 
    end Dyn_Predicate;
 

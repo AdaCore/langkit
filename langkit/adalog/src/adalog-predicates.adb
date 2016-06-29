@@ -69,30 +69,4 @@ package body Adalog.Predicates is
 
    end Predicate;
 
-   -------------------
-   -- Dyn_Predicate --
-   -------------------
-
-   package body Dyn_Predicate is
-
-      use Var;
-
-      -----------
-      -- Apply --
-      -----------
-
-      function Apply (Inst : in out Predicate_Logic) return Boolean is
-        (Is_Defined (Inst.Ref)
-         and then Inst.P (GetL (Inst.Ref)));
-
-      ------------
-      -- Revert --
-      ------------
-
-      procedure Revert (Inst : in out Predicate_Logic) is
-      begin
-         null;
-      end Revert;
-   end Dyn_Predicate;
-
 end Adalog.Predicates;
