@@ -154,6 +154,23 @@ def check_multiple(predicates_and_messages, severity=Severity.error):
         check_source_language(predicate, message, severity)
 
 
+def check_type(obj, typ, message=None):
+    """
+    Like utils.assert_type, but produces a client error instead.
+
+    :param Any obj: The object to check.
+    :param T typ: Type parameter. The expected type of obj.
+    :param str|None message: The base message to display if type check fails.
+
+    :rtype: T
+    """
+    try:
+        return assert_type(obj, typ)
+    except AssertionError as e:
+        message = "{}\n{}".format(e.message, message) if message else e.message
+        check_source_language(False, message)
+
+
 def errors_checkpoint():
     """
     If there was a non-blocking error, exit the compilation process.
