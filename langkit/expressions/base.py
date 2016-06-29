@@ -886,7 +886,7 @@ class EmptyArray(AbstractExpression):
         self.array_type.add_to_context()
 
     def construct(self):
-        return LiteralExpr('Create (0)', self.array_type,
+        return LiteralExpr('Create (Items_Count => 0)', self.array_type,
                            result_var_name='Empty_Array')
 
 
