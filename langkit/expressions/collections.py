@@ -375,9 +375,8 @@ class CollectionGet(AbstractExpression):
         self.or_null = or_null
 
     def construct(self):
-        # index_expr yields a 0-based index, while all our Ada collections
-        # expect a 1-based one. However, all the Get primitives are dedicated
-        # to code generation, so they expect 1-based indexes.
+        # index_expr yields a 0-based index and all the Get primitives expect
+        # 0-based indexes, so there is no need to fiddle indexes here.
         index_expr = construct(self.index_expr, LongType)
 
         coll_expr = construct(self.coll_expr, lambda t: t.is_collection())
