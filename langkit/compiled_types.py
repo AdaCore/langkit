@@ -545,6 +545,7 @@ class EquationType(BasicType):
     _nullexpr = "Null_Logic_Equation"
     is_ptr = True
     _exposed = False
+    null_allowed = True
 
     @classmethod
     def c_type(cls, c_api_settings):
