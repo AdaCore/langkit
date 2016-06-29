@@ -431,6 +431,8 @@
       % endif
 
       % if cls.env_spec.env_hook_enabled:
+         ## Initial_Env is passed as an IN OUT parameter, so the hook may
+         ## change it.
          ${ctx.env_hook_subprogram[0]}.${ctx.env_hook_subprogram[1]}
            (Analysis.Internal.Convert (Self.Unit),
             ${cls.env_spec.env_hook_arg_expr},
