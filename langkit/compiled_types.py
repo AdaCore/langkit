@@ -1792,7 +1792,6 @@ class ArrayType(CompiledType):
     """
 
     is_ptr = True
-    null_allowed = True
 
     @classmethod
     def is_refcounted(cls):
