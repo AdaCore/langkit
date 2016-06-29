@@ -40,7 +40,7 @@ package body Adalog.Predicates is
       end Free;
 
       -----------
-      -- Solve --
+      -- Apply --
       -----------
 
       overriding function Apply
@@ -58,9 +58,9 @@ package body Adalog.Predicates is
          end if;
       end Apply;
 
-      -----------
-      -- Reset --
-      -----------
+      ------------
+      -- Revert --
+      ------------
 
       procedure Revert (Inst : in out Predicate_Logic) is
       begin
@@ -68,5 +68,63 @@ package body Adalog.Predicates is
       end Revert;
 
    end Predicate;
+
+   -----------------
+   -- N_Predicate --
+   -----------------
+
+   package body N_Predicate is
+
+      ----------
+      -- Free --
+      ----------
+
+      procedure Free (Inst : in out Predicate_Logic) is
+      begin
+         for Ref of Inst.Refs loop
+            Remove_Predicate (Ref, Inst'Unrestricted_Access);
+         end loop;
+         Free (Inst.Pred);
+      end Free;
+
+      -----------
+      -- Apply --
+      -----------
+
+      overriding function Apply
+        (Inst : in out Predicate_Logic) return Boolean
+      is
+      begin
+         if (for all Ref of Inst.Refs => Is_Defined (Ref)) then
+            declare
+               Vals : Val_Array (1 .. Arity);
+            begin
+               for I in Inst.Refs'Range loop
+                  Vals (I) := GetL (Inst.Refs (I));
+               end loop;
+
+               return Call (Inst.Pred, Vals);
+            end;
+         else
+            for Ref of Inst.Refs loop
+               Add_Predicate (Ref, Inst'Unchecked_Access);
+            end loop;
+
+            return True;
+         end if;
+      end Apply;
+
+      ------------
+      -- Revert --
+      ------------
+
+      procedure Revert (Inst : in out Predicate_Logic) is
+      begin
+         for Ref of Inst.Refs loop
+            Remove_Predicate (Ref, Inst'Unchecked_Access);
+         end loop;
+      end Revert;
+
+   end N_Predicate;
 
 end Adalog.Predicates;

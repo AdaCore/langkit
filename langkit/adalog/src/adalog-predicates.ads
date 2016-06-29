@@ -131,4 +131,71 @@ package Adalog.Predicates is
 
    end Dyn_Predicate;
 
+   -----------------
+   -- N_Predicate --
+   -----------------
+
+   --  N_Predicate is like Predicate, except that instead of being a predicate
+   --  on the value of one logic variable, it is a predicate on the value of
+   --  N logic variables. While this package can be used directly, it is not
+   --  practical, and is mainly done to decouple the logic. Proxy packages
+   --  (See Predicate_2 below) will be added when needed.
+
+   generic
+      type El_Type is private;
+      with package Var is new Logic_Var
+        (Element_Type => El_Type, others => <>);
+
+      Arity : Natural;
+
+      type Predicate_Type is private;
+
+      with function Call
+        (Self : Predicate_Type; Vals : Var.Val_Array) return Boolean is <>;
+
+      with procedure Free (Self : Predicate_Type) is null;
+
+   package N_Predicate is
+
+      function Create
+        (R    : Var.Var_Array;
+         Pred : Predicate_Type) return access I_Relation'Class;
+      --  Return a predicate relation, where Pred is the actual implementation
+      --  of the predicate logic. Pred will be called on the value of R when
+      --  appropriate.
+
+   private
+
+      use Var;
+
+      type Predicate_Logic is new Var_Predicate_Type with record
+         Refs  : Var_Array (1 .. Arity);
+         Pred  : Predicate_Type;
+      end record;
+      --  This is the internal predicate type, that will be stored along the
+      --  variable if necessary. The Apply operation is idempotent, eg. always
+      --  return the same result (provided the provided predicate satisfies
+      --  this invariant).
+
+      function Apply
+        (Inst : in out Predicate_Logic) return Boolean;
+
+      procedure Revert (Inst : in out Predicate_Logic);
+      procedure Free (Inst : in out Predicate_Logic);
+
+      package Impl is new Stateful_Relation (Ty => Predicate_Logic);
+      --  This package contains the I_Relation wrapper that is actually to
+      --  be used by the clients when constructing equations. So as to not
+      --  yield solutions for ever, the implementation is wrapped into a
+      --  Stateful_Relation, that will return evaluation of the predicate
+      --  only once, until it is reverted.
+
+      function Create
+        (R : Var_Array; Pred : Predicate_Type) return access I_Relation'Class
+      is (new Impl.Rel'
+            (Rel    => Predicate_Logic'(Refs => R, Pred => Pred),
+             others => <>));
+
+   end N_Predicate;
+
 end Adalog.Predicates;

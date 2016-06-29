@@ -57,4 +57,11 @@ generic
 
 package Adalog.Logic_Var is
    subtype Var is Logic_Var_Type;
+
+   type Var_Array is array (Natural range <>) of Var;
+   type Val_Array is array (Natural range <>) of Element_Type;
+   --  Array types for array of variables and array of values of this variable,
+   --  for convenience. To be used in other generic packages taking a formal
+   --  Logic_Var package as argument.
+
 end Adalog.Logic_Var;
