@@ -4,7 +4,11 @@
 
    <% elt_type = cls.element_type().name() %>
 
-   type ${cls.api_name()} is array (Positive range <>) of ${elt_type};
+   package ${cls.pkg_vector()} is new Langkit_Support.Vectors
+     (${elt_type});
+   package ${cls.pkg_array()} renames ${cls.pkg_vector()}.Elements_Arrays;
+
+   subtype ${cls.api_name()} is ${cls.pkg_array()}.Array_Type;
    type ${cls.pointed()} (N : Natural) is record
       Ref_Count : Positive;
       Items     : ${cls.api_name()} (1 .. N);
@@ -25,10 +29,6 @@
                              Items     => Copy (Items),
                              Ref_Count => 1));
    % endif
-
-   package ${cls.pkg_vector()} is new Langkit_Support.Vectors
-     (${elt_type});
-   package ${cls.pkg_array()} renames ${cls.pkg_vector()}.Elements_Arrays;
 
    function Create (Items_Count : Natural) return ${cls.name()} is
      (new ${cls.pointed()}'(N => Items_Count, Ref_Count => 1, Items => <>));
