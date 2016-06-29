@@ -8,6 +8,8 @@ generic
    Null_Value : Element_Type;
 
    with function Children_Count (T : Element_Type) return Natural is <>;
+   with function First_Child_Index (T : Element_Type) return Natural is <>;
+   with function Last_Child_Index (T : Element_Type) return Natural is <>;
    with function Get_Child
      (T : Element_Type; Child_Index : Natural) return Element_Type is <>;
    with function Get_Parent (T : Element_Type) return Element_Type is <>;

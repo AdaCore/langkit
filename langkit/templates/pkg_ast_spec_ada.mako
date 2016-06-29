@@ -240,6 +240,18 @@ package ${_self.ada_api_settings.lib_name}.AST is
                          return Natural is abstract;
    --  Return the number of children Node has
 
+   function First_Child_Index
+     (Node : access ${root_node_value_type}'Class)
+      return Natural
+   is (1);
+   --  Return the index of the first child Node has
+
+   function Last_Child_Index
+     (Node : access ${root_node_value_type}'Class)
+      return Natural
+   is (Node.Child_Count);
+   --  Return the index of the last child Node has, or 0 if there is no child
+
    procedure Get_Child (Node   : access ${root_node_value_type};
                         Index  : Positive;
                         Exists : out Boolean;
@@ -683,17 +695,31 @@ private
    function Get_Parent
      (N : ${root_node_type_name}) return ${root_node_type_name}
    is (N.Parent);
+
    function Children_Count (N : ${root_node_type_name}) return Natural
    is (N.Child_Count);
+
+   function First_Child_Index_For_Traverse
+     (N : ${root_node_type_name})
+      return Natural
+   is (N.First_Child_Index);
+
+   function Last_Child_Index_For_Traverse
+     (N : ${root_node_type_name})
+      return Natural
+   is (N.Last_Child_Index);
+
    function Get_Child
      (N : ${root_node_type_name}; I : Natural) return ${root_node_type_name}
    is (N.Child (I));
 
    package Traversal_Iterators is new Langkit_Support.Tree_Traversal_Iterator
-     (${root_node_type_name},
-      null,
-      Element_Vectors => ${root_node_type_name}_Vectors,
-      Iterators => ${root_node_type_name}_Iterators);
+     (Element_type      => ${root_node_type_name},
+      Null_Value        => null,
+      First_Child_Index => First_Child_Index_For_Traverse,
+      Last_Child_Index  => Last_Child_Index_For_Traverse,
+      Element_Vectors   => ${root_node_type_name}_Vectors,
+      Iterators         => ${root_node_type_name}_Iterators);
 
    type Traverse_Iterator
    is new Traversal_Iterators.Traverse_Iterator with null record;

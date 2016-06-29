@@ -1124,7 +1124,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    is
       N : ${root_node_type_name} := null;
    begin
-      for I in 1 .. Child_Count (Node.Parent) loop
+      for I in Node.Parent.First_Child_Index .. Node.Parent.Last_Child_Index
+      loop
          N := Child (Node.Parent, I);
          if N = Node then
             return I;
