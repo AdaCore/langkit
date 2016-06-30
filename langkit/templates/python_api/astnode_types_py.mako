@@ -27,7 +27,7 @@
     % for field in cls.fields_with_accessors():
 
     <%
-      arg_list = ['self'] + [n.lower for n, _, _ in field.explicit_arguments]
+      arg_list = ['self'] + [a.name.lower for a in field.explicit_arguments]
     %>
 
     % if not field.explicit_arguments:

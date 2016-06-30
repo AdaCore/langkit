@@ -8,8 +8,8 @@
    ${c_doc(field)}
    extern int
    ${accessor_name}(${node_type} node,
-                    % for arg_name, arg_type, _ in field.explicit_arguments:
-                       ${arg_type.c_type(capi).name} ${arg_name},
+                    % for arg in field.explicit_arguments:
+                       ${arg.type.c_type(capi).name} ${arg.name},
                     % endfor
                     ${field.type.c_type(capi).name} *value_p);
 

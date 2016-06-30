@@ -7,8 +7,8 @@
    function ${accessor_name}
      (Node    : ${node_type};
 
-      % for arg_name, arg_type, _ in field.explicit_arguments:
-         ${arg_name} : ${arg_type.c_type(capi).name};
+      % for arg in field.explicit_arguments:
+         ${arg.name} : ${arg.type.c_type(capi).name};
       % endfor
 
       Value_P : ${field.type.c_type(capi).name}_Ptr) return int
@@ -30,8 +30,8 @@
    function ${accessor_name}
      (Node    : ${node_type};
 
-      % for arg_name, arg_type, _ in field.explicit_arguments:
-         ${arg_name} : ${arg_type.c_type(capi).name};
+      % for arg in field.explicit_arguments:
+         ${arg.name} : ${arg.type.c_type(capi).name};
       % endfor
 
       Value_P : ${field.type.c_type(capi).name}_Ptr) return int
@@ -39,31 +39,31 @@
       N : constant ${root_node_type_name} := Unwrap (Node);
       ## For each input argument, convert the C-level value into an Ada-level
       ## one.
-      % for arg_name, arg_type, _ in field.explicit_arguments:
-         Unwrapped_${arg_name} : constant ${arg_type.name()} :=
-            % if is_enum(arg_type):
-               ${field.type} (${arg_name})
-            % elif is_bool(arg_type):
-               ${arg_name} /= 0
-            % elif is_long(arg_type):
-               Integer (${arg_name})
-            % elif is_ast_node(arg_type):
-               ${arg_type.name()} (Unwrap (${arg_name}))
-            % elif is_token_type(arg_type):
-               Token (Node, Token_Index ({arg_name}.Index))
-            % elif is_symbol_type(arg_type):
-               Text_To_Symbol (N.Unit, ${arg_name})
+      % for arg in field.explicit_arguments:
+         Unwrapped_${arg.name} : constant ${arg.type.name()} :=
+            % if is_enum(arg.type):
+               ${field.type} (${arg.name})
+            % elif is_bool(arg.type):
+               ${arg.name} /= 0
+            % elif is_long(arg.type):
+               Integer (${arg.name})
+            % elif is_ast_node(arg.type):
+               ${arg.type.name()} (Unwrap (${arg.name}))
+            % elif is_token_type(arg.type):
+               Token (Node, Token_Index ({arg.name}.Index))
+            % elif is_symbol_type(arg.type):
+               Text_To_Symbol (N.Unit, ${arg.name})
             % else:
-               ${arg_name}
+               ${arg.name}
             % endif
          ;
       % endfor
    begin
       Clear_Last_Exception;
 
-      % for arg_name, arg_type, _ in field.explicit_arguments:
-         % if is_token_type(arg_type):
-            if Unwrap (${arg_name}).Unit /= N.Unit then
+      % for arg in field.explicit_arguments:
+         % if is_token_type(arg.type):
+            if Unwrap (${arg.name}).Unit /= N.Unit then
                raise Constraint_Error with
                  ("The input token does not belong to the same unit as"
                   & " the input node");
