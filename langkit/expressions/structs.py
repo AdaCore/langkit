@@ -300,8 +300,8 @@ class FieldAccess(AbstractExpression):
 
                 # Create a collection of name => expression for parameters
                 args = [
-                    (formal_name, actual.render_expr())
-                    for actual, (formal_name, _, _) in zip(
+                    (formal.name, actual.render_expr())
+                    for actual, formal in zip(
                         self.arguments, self.node_data.explicit_arguments
                     )
                 ] + [(PropertyDef.env_arg_name, str(Env._name))]
@@ -388,12 +388,11 @@ class FieldAccess(AbstractExpression):
 
         arg_exprs = [
             construct(
-                actual, formal_type,
+                actual, formal.type,
                 custom_msg='Invalid {} actual (#{}) for {}:'.format(
-                    formal_name, i, to_get.qualname,
+                    formal.name, i, to_get.qualname,
                 ) + ' expected {expected} but got {expr_type}'
-            )
-            for i, (actual, (formal_name, formal_type, _)) in enumerate(
+            ) for i, (actual, formal) in enumerate(
                 zip(self.arguments, to_get.explicit_arguments), 1
             )
         ]
