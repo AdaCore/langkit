@@ -133,12 +133,23 @@ def common_ancestor(*classes):
     """
     Return the bottom-most common parent class for all `classes`.
 
+    Note that this considers only the first parent for each class, as if there
+    was only single inheritance.
+
     :param classes: The classes for which we are searching a common ancestor.
     :type classes: list[types.ClassType]
     :rtype: types.ClassType
     """
     def rmro(klass):
-        return reversed(klass.mro())
+        single_mro = []
+        cls = klass
+        while True:
+            single_mro.append(cls)
+            try:
+                cls = cls.__bases__[0]
+            except IndexError:
+                break
+        return reversed(single_mro)
 
     result = list(takewhile(lambda a: len(set(a)) == 1,
                             zip(*map(rmro, classes))))[-1][0]
