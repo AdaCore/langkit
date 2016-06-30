@@ -2,7 +2,6 @@ from __future__ import absolute_import
 
 from collections import OrderedDict
 from copy import copy
-import inspect
 from itertools import count
 
 from langkit import names
@@ -13,8 +12,7 @@ from langkit.diagnostics import (
 )
 from langkit.template_utils import common_renderer
 from langkit.utils import (
-    memoized, type_check, col, Colors, common_ancestor, issubtype,
-    DictProxy
+    DictProxy, common_ancestor, issubtype, memoized, type_check
 )
 
 
@@ -1482,19 +1480,15 @@ class Struct(CompiledType):
                 # inferred type for checking only (raising an assertion if it
                 # does not correspond).
                 if field.type:
-                    f = inspect.getfile(cls)
-                    l = inspect.getsourcelines(cls)[1]
-                    assert field.type == field_type, (
-                        col("Inferred type for field does not correspond to "
-                            "type provided by the user.\n", Colors.FAIL) +
-                        col("class {astnode_name}, file {file} line {line}\n",
-                            Colors.WARNING) +
-                        "Field {field_name}, "
-                        "Provided type: {ptype}, Inferred type: {itype}"
-                    ).format(astnode_name=cls.name(), file=f, line=l,
-                             ptype=field.type.name().camel,
-                             itype=field_type.name().camel,
-                             field_name=field._name.camel)
+                    with field.diagnostic_context():
+                        check_source_language(
+                            field.type == field_type,
+                            'Expected type {} but type inferenced yielded type'
+                            ' {}'.format(
+                                field.type.name().camel,
+                                field_type.name().camel
+                            )
+                        )
                 else:
                     field.type = field_type
 
