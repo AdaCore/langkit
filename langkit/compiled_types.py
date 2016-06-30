@@ -1179,11 +1179,16 @@ class StructMetaclass(CompiledTypeMetaclass):
         cls._fields = fields
         cls.fields = DictProxy(fields)
 
-        with diag_ctx:
-            check_source_language(
-                not is_struct or not cls.get_properties(),
-                "Properties are not yet supported on plain structs"
-            )
+        for f_n, f_v in fields.iteritems():
+            with Context(
+                'in {}.{}'.format(name, f_n),
+                extract_library_location()
+            ):
+                if is_struct:
+                    check_source_language(
+                        not f_v.is_property,
+                        'Properties are not yet supported on plain structs'
+                    )
 
         return cls
 
