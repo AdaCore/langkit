@@ -1490,7 +1490,10 @@ class Struct(CompiledType):
                 if field.type:
                     with field.diagnostic_context():
                         check_source_language(
-                            field.type == field_type,
+                            # Using matches here allows the user to annotate a
+                            # field with a more general type than the one
+                            # inferred.
+                            field.type.matches(field_type),
                             'Expected type {} but type inferenced yielded type'
                             ' {}'.format(
                                 field.type.name().camel,
