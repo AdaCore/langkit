@@ -805,6 +805,8 @@ class AbstractNodeData(object):
         """
         Return the subset of "self.arguments" that are explicit arguments, that
         is to say the subset that users actually handle in expressions.
+
+        :rtype: list[Argument]
         """
         return self.arguments
 
