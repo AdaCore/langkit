@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 from copy import copy
 from itertools import count
 
@@ -621,6 +621,12 @@ class Symbol(BasicType):
         return CAPIType(c_api_settings, 'text')
 
 
+Argument = namedtuple("Argument", ["name", "type", "default_value"])
+"""
+Helper tuple for arguments of properties
+"""
+
+
 class AbstractNodeData(object):
     """
     This class defines an abstract base class for fields and properties on
@@ -699,7 +705,7 @@ class AbstractNodeData(object):
 
         Note that only Property instances accept other arguments.
 
-        :type: list[(names.Name, CompiledType, None|str)]
+        :type: list[Argument]
         """
 
     def diagnostic_context(self):

@@ -10,7 +10,8 @@ import funcy
 from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, ASTNode, BoolType, CompiledType, LexicalEnvType,
-    LongType, get_context, render as ct_render, Symbol, Token, resolve_type
+    LongType, get_context, render as ct_render, Symbol, Token, resolve_type,
+    Argument
 )
 from langkit.diagnostics import (
     extract_library_location, check_source_language, check_multiple,
@@ -1135,7 +1136,7 @@ class PropertyDef(AbstractNodeData):
         :param CompiledType type: Type argument. Type for this argument.
         :param None|str default_value: Default value for this argument, if any.
         """
-        self.arguments.append((name, type, default_value))
+        self.arguments.append(Argument(name, type, default_value))
         self.argument_vars.append(AbstractVariable(name, type))
 
     def base_property(self):
@@ -1418,7 +1419,7 @@ class PropertyDef(AbstractNodeData):
         Return the subset of "self.arguments" that are to be passed explicitely
         when invoking this property.
 
-        :rtype: list[(names.Name, CompiledType, None|str)]
+        :rtype: list[Argument]
         """
         # Strip the implicit "Lex_Env" argument
         return self.arguments[:-1]
