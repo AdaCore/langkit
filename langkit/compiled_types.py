@@ -704,6 +704,11 @@ class AbstractNodeData(object):
         :type: list[(names.Name, CompiledType, None|str)]
         """
 
+    def diagnostic_context(self):
+        ctx_message = 'in {}.{}'.format(self.struct.name().camel,
+                                        self._name.lower)
+        return Context(ctx_message, self.location)
+
     @property
     def is_private(self):
         """
