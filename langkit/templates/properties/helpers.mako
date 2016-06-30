@@ -61,13 +61,25 @@
    end record;
 
    function Call
-     (Self : ${type_name}; Node : ${root_class}) return Boolean is
+     (Self   : ${type_name};
+      Node_0 : ${root_class}
+     % for i in range(len(prop.explicit_arguments)):
+     ; Node_${i + 1} : ${root_class}
+     % endfor
+     ) return Boolean is
    begin
-      return ${prop.name} (${prop.struct.name()} (Node), Self.Env);
+      return ${prop.name}
+      (
+       ${prop.struct.name()} (Node_0),
+       % for i, formal in enumerate(prop.explicit_arguments):
+       ${formal.type.name()} (Node_${i + 1}),
+       % endfor
+       Self.Env);
    end Call;
 
    package ${package_name} is
-   new Predicate (${root_class}, Eq_Node.Refs.Raw_Logic_Var, ${type_name});
+   new Predicate_${len(prop.explicit_arguments) + 1}
+     (${root_class}, Eq_Node.Refs.Raw_Logic_Var, ${type_name});
 
    % endif
 </%def>

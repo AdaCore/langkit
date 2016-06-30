@@ -196,7 +196,7 @@ class Predicate(AbstractExpression):
     True.
     """
 
-    def __init__(self, logic_var_expr, pred_property):
+    def __init__(self, pred_property, *logic_var_exprs):
         """
         :param AbstractExpression logic_var_expr: The logic variable on
             which to apply the predicate.
@@ -206,7 +206,7 @@ class Predicate(AbstractExpression):
         """
         super(Predicate, self).__init__()
         self.pred_property = pred_property
-        self.logic_var_expr = logic_var_expr
+        self.logic_var_exprs = logic_var_exprs
 
     def do_prepare(self):
         root_class = StructMetaclass.root_grammar_class
@@ -229,17 +229,17 @@ class Predicate(AbstractExpression):
     def construct(self):
         t = self.pred_property.struct.name()
         p = self.pred_property.name
-        logic_var_expr = construct(self.logic_var_expr, LogicVarType)
-        pred_func = untyped_literal_expr(
-            "{}_{}_Predicate_Caller'(Env => {})".format(
+        exprs = [
+            construct(e, LogicVarType) for e in self.logic_var_exprs
+        ] + [
+            untyped_literal_expr("{}_{}_Predicate_Caller'(Env => {})".format(
                 t, p, construct(Env).render_expr()
-            )
-        )
+            ))
+        ]
 
         return BuiltinCallExpr(
-            "{}_{}_Pred.Create".format(t, p), EquationType,
-            [logic_var_expr, pred_func],
-            "Pred"
+            "{}_{}_Pred.Create".format(t, p), EquationType, exprs,
+            result_var_name="Pred"
         )
 
 
