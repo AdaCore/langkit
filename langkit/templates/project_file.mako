@@ -28,6 +28,7 @@ library project ${lib_name} is
    for Interfaces use
      ("adalog.ads",
       "adalog-abstract_relation.ads",
+      "adalog-debug.ads",
       "adalog-eq_same.ads",
       "adalog-logic_ref.adb",
       "adalog-logic_ref.ads",
