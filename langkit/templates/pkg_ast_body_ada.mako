@@ -1225,4 +1225,24 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    ${prop.prop_def}
    % endfor
 
+   --------------------------------
+   -- Assign_Names_To_Logic_Vars --
+   --------------------------------
+
+   procedure Assign_Names_To_Logic_Vars
+    (Node : access ${root_node_value_type}'Class) is
+   begin
+      % for f in ctx.root_grammar_class.get_fields( \
+           include_inherited=False, predicate=lambda f: is_logic_var(f.type) \
+      ):
+         Node.${f.name}.Dbg_Name :=
+           new String'(Image (Node.Short_Image) & ".${f.name}");
+      % endfor
+      for Child of Children (Node) loop
+         if Child /= null then
+            Assign_Names_To_Logic_Vars (Child);
+         end if;
+      end loop;
+   end Assign_Names_To_Logic_Vars;
+
 end ${_self.ada_api_settings.lib_name}.AST;

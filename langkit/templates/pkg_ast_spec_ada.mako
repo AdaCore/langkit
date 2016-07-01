@@ -565,6 +565,11 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Debug helper: Dumps one lexical env. You can supply ids for env and its
    --  parent, so that they will be identified in the output.
 
+   procedure Assign_Names_To_Logic_Vars
+     (Node : access ${root_node_value_type}'Class);
+   --  Debug helper: Assign names to every logical variable in the root node,
+   --  so that we can trace logical variables.
+
    ----------------------------------------
    -- Tree traversal (Ada 2012 iterator) --
    ----------------------------------------

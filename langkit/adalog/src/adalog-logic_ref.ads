@@ -39,6 +39,8 @@ package Adalog.Logic_Ref is
       --  being defined. When the variable will be set, relations will be
       --  evaluated.
       Pending_Relations : Pred_Sets.Set;
+
+      Dbg_Name          : String_Access;
    end record;
 
    procedure Reset (Self : in out Var);

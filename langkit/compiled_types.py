@@ -74,6 +74,7 @@ def make_renderer(base_renderer=None):
 
     template_args = {
         'is_enum':        type_check(EnumType),
+        'is_logic_var':   type_check(LogicVarType),
         'is_long':        type_check(LongType),
         'is_bool':        type_check(BoolType),
         'is_ast_node':    type_check(ASTNode),
