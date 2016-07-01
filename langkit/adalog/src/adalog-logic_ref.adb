@@ -23,6 +23,8 @@
 
 with GNATCOLL.Refcount; use GNATCOLL.Refcount;
 
+with Adalog.Debug;      use Adalog.Debug;
+
 package body Adalog.Logic_Ref is
 
    -----------
@@ -51,6 +53,8 @@ package body Adalog.Logic_Ref is
    is
       Old : constant Var := Self.all;
    begin
+      Trace ("Setting the value of " & Image (Raw_Var (Self)) & " to "
+             & Element_Image (Data));
       --  First set the value
 
       Self.El := Data;

@@ -50,7 +50,9 @@ package body Adalog.Unify_LR is
          --  return true.
          if SetL (Self.Right, Convert (Self.L_Data, GetL (Self.Left))) then
             Self.State := Right_Changed;
-            Trace ("In Unify_LR, propagating right");
+            Trace ("In Unify_LR, propagating right, from "
+                      & Image (Self.Left) & " to "
+                      & Image (Self.Right));
             return True;
          else
             Trace ("In Unify_LR, propagating right failed ! ");
@@ -77,6 +79,9 @@ package body Adalog.Unify_LR is
       --  return true.
       if SetL (Self.Left, Convert (Self.R_Data, GetL (Self.Right))) then
          Self.State := Left_Changed;
+         Trace ("In Unify_LR, propagating left, from "
+                   & Image (Self.Right) & " to "
+                   & Image (Self.Left));
          return True;
       else
          Trace ("In Unify_LR, propagating left failed ! ");
