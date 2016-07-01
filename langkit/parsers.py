@@ -146,8 +146,9 @@ class Grammar(object):
                 ):
                     self.the_call = call
 
+        caller_location = extract_library_location()
         the_call = GetTheCall()
-        with open(self.location.file) as f:
+        with open(caller_location.file) as f:
             file_ast = ast.parse(f.read(), f.name)
             the_call.visit(file_ast)
 
