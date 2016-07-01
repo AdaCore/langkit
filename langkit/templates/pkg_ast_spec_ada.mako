@@ -657,7 +657,6 @@ private
 
       ${astnode_types.node_fields(ctx.root_grammar_class, emit_null=False)}
    end record;
-   --  TODO??? Remove this from the public API
 
    procedure Free_Extensions (Node : access ${root_node_value_type}'Class);
    --  Implementation helper to free the extensions associatde to Node
