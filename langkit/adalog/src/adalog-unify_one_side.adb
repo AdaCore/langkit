@@ -22,6 +22,7 @@
 ------------------------------------------------------------------------------
 
 with Ada.Unchecked_Deallocation;
+with Adalog.Debug; use Adalog.Debug;
 
 package body Adalog.Unify_One_Side is
 
@@ -33,14 +34,24 @@ package body Adalog.Unify_One_Side is
 
    function Apply (Self : in out Unify) return Boolean is
    begin
+      Trace ("In Unify");
       if Is_Defined (Self.Left) then
-         return Equals (GetL (Self.Left), Self.Right);
+
+         Trace ("Left defined");
+
+         return C : Boolean do
+            C := Equals (GetL (Self.Left), Self.Right);
+            Trace ("Returning " & C'Image);
+         end return;
       else
 
          if SetL (Self.Left, Convert (Self.Right)) then
+            Trace ("Setting left worked !");
+
             Self.Changed := True;
             return True;
          else
+            Trace ("Setting left failed !");
             return False;
          end if;
       end if;

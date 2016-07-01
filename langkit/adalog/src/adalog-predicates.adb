@@ -21,6 +21,8 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
+with Adalog.Debug; use Adalog.Debug;
+
 package body Adalog.Predicates is
 
    ---------------
@@ -48,8 +50,15 @@ package body Adalog.Predicates is
       is
       begin
          if Is_Defined (Inst.Ref) then
-            return Call (Inst.Pred, GetL (Inst.Ref));
+            Trace ("In predicate apply, calling predicate");
+            return A : Boolean do
+               A := Call (Inst.Pred, GetL (Inst.Ref));
+               Trace (A'Img);
+            end return;
          else
+            Trace ("In predicate apply, var not defined, deferring"
+                   & "application");
+
             --  If the variable is not set, then predicate will return True all
             --  the time, and we register the predicate to be called at a later
             --  time.
