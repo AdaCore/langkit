@@ -38,12 +38,13 @@ with Adalog.Unify_LR;
 
 generic
    type LR_Type is private;
+   with function Element_Image (E : LR_Type) return String is <>;
 package Adalog.Eq_Same is
 
    function Convert (From : LR_Type) return LR_Type
    is (From) with Inline_Always;
 
-   package Refs is new Logic_Ref (LR_Type);
+   package Refs is new Logic_Ref (LR_Type, Element_Image);
 
    package Refcounted_Impl is new Unify
      (LR_Type, LR_Type,

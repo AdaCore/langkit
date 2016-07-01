@@ -21,14 +21,16 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
+
 with GNATCOLL.Refcount;
 
-with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;
 with Adalog.Logic_Var;
 with Adalog.Logic_Var_Predicate; use Adalog.Logic_Var_Predicate;
 
 generic
    type Element_Type is private;
+   with function Element_Image (E : Element_Type) return String;
 package Adalog.Logic_Ref is
 
    type Var is record
@@ -73,6 +75,10 @@ package Adalog.Logic_Ref is
    procedure Remove_Predicate (Self : Ref; Pred : Var_Predicate);
    procedure Add_Predicate (Self : Ref; Pred : Var_Predicate);
 
+   function Image (Self : Ref) return String is
+     (if Self.Unchecked_Get.Content.Dbg_Name /= null
+      then Self.Unchecked_Get.Content.Dbg_Name.all else "None");
+
    function Create return Ref;
 
    type Raw_Var is access all Var;
@@ -88,6 +94,9 @@ package Adalog.Logic_Ref is
 
    procedure Remove_Predicate (Self : Raw_Var; Pred : Var_Predicate);
    procedure Add_Predicate (Self : Raw_Var; Pred : Var_Predicate);
+
+   function Image (Self : Raw_Var) return String is
+     (if Self.Dbg_Name /= null then Self.Dbg_Name.all else "None");
 
    package Refcounted_Logic_Var is new Adalog.Logic_Var
      (Ref, Element_Type);

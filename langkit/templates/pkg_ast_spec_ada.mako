@@ -608,7 +608,10 @@ package ${_self.ada_api_settings.lib_name}.AST is
    -- Adalog instantiations --
    ---------------------------
 
-   package Eq_Node is new Adalog.Eq_Same (${root_node_type_name});
+   function El_Image (N : ${root_node_type_name}) return String is
+   (if N /= null then Image (N.Short_Image) else "None");
+
+   package Eq_Node is new Adalog.Eq_Same (${root_node_type_name}, El_Image);
    subtype Logic_Var is Eq_Node.Refs.Raw_Var;
    subtype Logic_Var_Record is Eq_Node.Refs.Var;
    Null_Var : constant Logic_Var := null;

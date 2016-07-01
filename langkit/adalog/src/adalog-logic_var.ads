@@ -55,6 +55,8 @@ generic
    --  Remove the predicate Pred from the set of predicates associated to the
    --  logic variable.
 
+   with function Image (Self : Logic_Var_Type) return String is <>;
+
 package Adalog.Logic_Var is
    subtype Var is Logic_Var_Type;
 
