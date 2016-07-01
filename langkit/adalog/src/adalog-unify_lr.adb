@@ -58,6 +58,21 @@ package body Adalog.Unify_LR is
          end if;
       end if;
 
+      if not Is_Defined (Self.Right) then
+         --  TODO??? Another solution, rather than force the users to define
+         --  domains for variables before binding them together, would be to
+         --  defer unification, like it is done for predicates.
+         --
+         --  It is not sure it would be better: The outcome would probably
+         --  be potentially slower solving. However, it might be that some
+         --  equations cannot be expressed easily if we don't have unification
+         --  defer.
+
+         raise Early_Binding_Error
+           with "Variable " & Image (Self.Right) & " and " & Image (Self.Left)
+           & " are not defined yet.";
+      end if;
+
       --  Right is defined, left is not, give left the value of right and
       --  return true.
       if SetL (Self.Left, Convert (Self.R_Data, GetL (Self.Right))) then
