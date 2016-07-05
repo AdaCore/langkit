@@ -1536,7 +1536,7 @@ class BasicExpr(ResolvedExpression):
     def __init__(self, template, type, sub_exprs, result_var_name=None):
         """
         :param str template: The template string.
-        :param CompiledType type: The return type of the expression.
+        :param None|CompiledType type: The return type of the expression.
         :param None|str result_var_name: See ResolvedExpression's constructor.
         """
         self.sub_exprs = sub_exprs
