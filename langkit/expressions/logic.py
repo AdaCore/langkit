@@ -1,3 +1,5 @@
+import funcy
+
 from langkit.compiled_types import (
     LogicVarType, EquationType, BoolType, StructMetaclass
 )
@@ -250,31 +252,38 @@ class Predicate(AbstractExpression):
             a.type for a in self.pred_property.explicit_arguments
         ]
 
-        logic_var_exprs = []
-        closure_exprs = []
+        # Separate logic variable expressions from extra argument expressions
+        logic_var_exprs, closure_exprs = funcy.split_by(
+            lambda e: e.type == LogicVarType, exprs
+        )
 
-        # TODO: Not yet checking that arguments are in the right order
+        check_source_language(
+            len(logic_var_exprs) > 0, "Predicate instantiation should have at "
+            "least one logic variable expression"
+        )
+
+        check_source_language(
+            all(e.type != LogicVarType for e in closure_exprs), "Logic "
+            "variable expressions should be grouped at the beginning, and "
+            "should not appear after non logic variable expressions"
+        )
 
         for i, (expr, arg_type) in enumerate(zip(exprs, prop_types)):
             if expr.type == LogicVarType:
                 check_source_language(
-                    arg_type.matches(root_class),
-                    "Argument #{} of predicate is a logic variable, "
-                    "the corresponding property formal has type {}, "
-                    "but should be a descendent of {}".format(
+                    arg_type.matches(root_class), "Argument #{} of predicate "
+                    "is a logic variable, the corresponding property formal "
+                    "has type {}, but should be a descendent of {}".format(
                         i, arg_type.name().camel, root_class.name().camel
                     )
                 )
-                logic_var_exprs.append(expr)
             else:
                 check_source_language(
-                    expr.type.matches(arg_type),
-                    "Argument #{} of predicate has type {}, "
-                    "should be {}".format(
+                    expr.type.matches(arg_type), "Argument #{} of predicate "
+                    "has type {}, should be {}".format(
                         i, expr.type.name().camel, arg_type.name().camel
                     )
                 )
-                closure_exprs.append(expr)
 
         pred_id = self.pred_property.do_generate_logic_predicate(*[
             e.type for e in closure_exprs
