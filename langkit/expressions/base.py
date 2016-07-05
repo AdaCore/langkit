@@ -974,11 +974,13 @@ class PropertyDef(AbstractNodeData):
         "Recursion guard for the type property"
 
         self.needs_logic_binder = False
-        self.needs_logic_predicate = False
+        self.logic_predicates = []
         """
-        Whether we need to generate a logic or predicate binder for this
-        property or not. This will not be set internally, but rather will be
-        set by the expression using this property in a bind expression
+        The list of logic predicates to generate. First element of the tuple is
+        a list of the args types, second is the unique identifier for this
+        predicate.
+
+        :type: [([CompiledType], str)]
         """
 
         self.prefix = prefix
@@ -1444,12 +1446,48 @@ class PropertyDef(AbstractNodeData):
         """
         self.needs_logic_binder = True
 
-    def do_generate_logic_predicate(self):
+    @memoized
+    def do_generate_logic_predicate(self, *partial_args_types):
         """
         Helper method, will trigger the emission of a logic predicate object
-        for the property.
+        for the property for the given partial argument types.
+
+        :param [CompiledType] partial_args_types: The type of partially applied
+            arguments passed to the logic predicate.
+
+        :return: The identifier for the logic predicate, to be used as a prefix
+            in code generation for every entity related to it.
+        :rtype: str
         """
-        self.needs_logic_predicate = True
+        # We use the length of the list as an id for the logic predicate. If
+        # the method is called again with the same arg types, the same id
+        # will be returned thanks to memoization.
+        pred_num = len(self.logic_predicates)
+
+        # This id will uniquely identify both the generic package and the
+        # closure data structure.
+        pred_id = "{}_{}_{}".format(self.struct.name(), self.name, pred_num)
+
+        # We can use a list because the method is memoized, eg. this won't
+        # be executed twice for the same partial_args_types tuple.
+        self.logic_predicates.append((partial_args_types, pred_id))
+
+        return pred_id
+
+    def get_concrete_node_types(self, partial_args_types):
+        """
+        Helper for emission of logic predicate wrappers. Given partial
+        argument types for trailing arguments that do not correspond to logic
+        variables bound by the predicate, this helper will return the
+        concrete node type for leading arguments that correspond to logic
+        variables bound by the predicate.
+
+        :param [CompiledType] partial_args_types: The type of partially applied
+            arguments passed to the logic predicate.
+        """
+        return [self.struct] + [
+            a.type for a in self.explicit_arguments[:-len(partial_args_types)]
+        ]
 
 
 # noinspection PyPep8Naming

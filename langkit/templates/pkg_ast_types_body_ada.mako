@@ -52,6 +52,10 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types is
    % endfor
 
    % for astnode in no_builtins(_self.astnode_types):
+   ${astnode_types.logic_helpers(astnode)}
+   % endfor
+
+   % for astnode in no_builtins(_self.astnode_types):
    ${astnode_types.body(astnode)}
    % endfor
 

@@ -12,6 +12,21 @@
 
 </%def>
 
+<%def name="logic_helpers(cls)">
+   ## Generate logic/predicate binders for the properties who require it. Note
+   ## that we need to generate them before the properties bodies, because
+   ## they'll be used in the bodies.
+
+   --------------------
+   --  Logic helpers --
+   --------------------
+
+   % for prop in cls.get_properties(include_inherited=False):
+   ${prop_helpers.generate_logic_binder(prop)}
+   ${prop_helpers.generate_logic_predicates(prop)}
+   % endfor
+</%def>
+
 
 <%def name="field_decl(field)">
    <% type_name = "{}_Type".format(field.struct.name()) %>
@@ -498,19 +513,6 @@
                       base_expr='Node.{}'.format(field.name)
                   )};
       end ${field.name};
-   % endfor
-
-   ## Generate logic/predicate binders for the properties who require it. Note
-   ## that we need to generate them before the properties bodies, because
-   ## they'll be used in the bodies.
-
-   --------------------
-   --  Logic helpers --
-   --------------------
-
-   % for prop in cls.get_properties(include_inherited=False):
-   ${prop_helpers.generate_logic_binder(prop)}
-   ${prop_helpers.generate_logic_predicate(prop)}
    % endfor
 
    ## Generate the bodies of properties

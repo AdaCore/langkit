@@ -2,7 +2,7 @@ from langkit.compiled_types import (
     LogicVarType, EquationType, BoolType, StructMetaclass
 )
 
-from langkit.diagnostics import check_multiple
+from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, BuiltinCallExpr, LiteralExpr, PropertyDef,
     ResolvedExpression, construct, BasicExpr
@@ -190,27 +190,44 @@ class Domain(AbstractExpression):
 
 class Predicate(AbstractExpression):
     """
-    The predicate expression will ensure that a certain property is
-    maintained on a logical variable in all possible solutions, so that the
+    The predicate expression will ensure that a certain property is maintained
+    on one or several logical variables in all possible solutions, so that the
     only solutions in the equations are the equations where the property is
     True.
+
+    Expressions that are passed that are not logical variables will be passed
+    as extra arguments to the property, so their types need to match::
+
+        class BaseNode(ASTNode):
+            a = UserField(LogicVarType)
+            b = UserField(LogicVarType)
+
+            @langkit_property(return_type=BoolType)
+            def test_property(other_node=BaseNode, int_arg=LongType):
+                ...
+
+            # This is a valid Predicate instantiation for the above property
+            equation = Property(
+                Predicate(FooNode.fields.test_property, Self.a, Self.b, 12)
+            )
+
     """
 
-    def __init__(self, pred_property, *logic_var_exprs):
+    def __init__(self, pred_property, *exprs):
         """
-        :param AbstractExpression logic_var_expr: The logic variable on
-            which to apply the predicate.
         :param PropertyDef pred_property: The property to use as a predicate.
             For convenience, it can be a property of any subtype of the root
             ast node, but it needs to return a boolean.
+
+        :param [AbstractExpression] exprs: Every argument to pass to the
+            predicate, logical variables first, and extra arguments last.
         """
         super(Predicate, self).__init__()
         self.pred_property = pred_property
-        self.logic_var_exprs = logic_var_exprs
+        self.exprs = exprs
 
     def do_prepare(self):
         root_class = StructMetaclass.root_grammar_class
-
         check_multiple([
             (isinstance(self.pred_property, PropertyDef),
              "Needs a property reference, got {}".format(self.pred_property)),
@@ -224,21 +241,58 @@ class Predicate(AbstractExpression):
              "of {}".format(root_class.name().camel))
         ])
 
-        self.pred_property.do_generate_logic_predicate()
-
     def construct(self):
-        t = self.pred_property.struct.name()
-        p = self.pred_property.name
-        exprs = [
-            construct(e, LogicVarType) for e in self.logic_var_exprs
-        ] + [
-            untyped_literal_expr("{}_{}_Predicate_Caller'(Env => {})".format(
-                t, p, construct(Env).render_expr()
-            ))
+        root_class = StructMetaclass.root_grammar_class
+
+        exprs = [construct(e) for e in self.exprs]
+
+        prop_types = [self.pred_property.struct] + [
+            a.type for a in self.pred_property.explicit_arguments
         ]
 
+        logic_var_exprs = []
+        closure_exprs = []
+
+        # TODO: Not yet checking that arguments are in the right order
+
+        for i, (expr, arg_type) in enumerate(zip(exprs, prop_types)):
+            if expr.type == LogicVarType:
+                check_source_language(
+                    arg_type.matches(root_class),
+                    "Argument #{} of predicate is a logic variable, "
+                    "the corresponding property formal has type {}, "
+                    "but should be a descendent of {}".format(
+                        i, arg_type.name().camel, root_class.name().camel
+                    )
+                )
+                logic_var_exprs.append(expr)
+            else:
+                check_source_language(
+                    expr.type.matches(arg_type),
+                    "Argument #{} of predicate has type {}, "
+                    "should be {}".format(
+                        i, expr.type.name().camel, arg_type.name().camel
+                    )
+                )
+                closure_exprs.append(expr)
+
+        pred_id = self.pred_property.do_generate_logic_predicate(*[
+            e.type for e in closure_exprs
+        ])
+
+        closure_exprs.append(construct(Env))
+
+        logic_var_exprs.append(
+            BasicExpr("{}_Predicate_Caller'({})".format(
+                pred_id, ", ".join(
+                    ["{}" for _ in range(len(closure_exprs) - 1)]
+                    + ["Env => {}"]
+                )
+            ), type=None, sub_exprs=closure_exprs)
+        )
+
         return BuiltinCallExpr(
-            "{}_{}_Pred.Create".format(t, p), EquationType, exprs,
+            "{}_Pred.Create".format(pred_id), EquationType, logic_var_exprs,
             result_var_name="Pred"
         )
 

@@ -47,41 +47,46 @@
    % endif
 </%def>
 
-<%def name="generate_logic_predicate(prop)">
-   % if prop.needs_logic_predicate:
+<%def name="generate_logic_predicates(prop)">
+   % for (args_types, pred_id) in prop.logic_predicates:
 
    <%
-   type_name = "{}_{}_Predicate_Caller".format(prop.struct.name(), prop.name)
-   package_name = "{}_{}_Pred".format(prop.struct.name(), prop.name)
-   root_class = ctx.root_grammar_class.name()
+      type_name = "{}_Predicate_Caller".format(pred_id)
+      package_name = "{}_Pred".format(pred_id)
+      root_class = ctx.root_grammar_class.name()
+      formal_node_types = prop.get_concrete_node_types(args_types)
    %>
 
    type ${type_name} is record
-      Env  : Lexical_Env;
+      % for i, arg_type in enumerate(args_types):
+      Field_${i} : ${arg_type.name()};
+      % endfor
+      Env        : Lexical_Env;
    end record;
 
    function Call
-     (Self   : ${type_name};
-      Node_0 : ${root_class}
-     % for i in range(len(prop.explicit_arguments)):
-     ; Node_${i + 1} : ${root_class}
+     (Self           : ${type_name}
+     % for i, _ in enumerate(formal_node_types):
+     ; Node_${i} : ${root_class}
      % endfor
      ) return Boolean is
    begin
-      return ${prop.name}
-      (
-       ${prop.struct.name()} (Node_0),
-       % for i, formal in enumerate(prop.explicit_arguments):
-       ${formal.type.name()} (Node_${i + 1}),
-       % endfor
-       Self.Env);
+      return ${prop.name} (
+         % for i, formal_type in enumerate(formal_node_types):
+         ${formal_type.name()} (Node_${i}),
+         % endfor
+         % for i, _ in enumerate(args_types):
+         Self.Field_${i},
+         % endfor
+         Self.Env
+      );
    end Call;
 
    package ${package_name} is
-   new Predicate_${len(prop.explicit_arguments) + 1}
+   new Predicate_${len(formal_node_types)}
      (${root_class}, Eq_Node.Refs.Raw_Logic_Var, ${type_name});
 
-   % endif
+   % endfor
 </%def>
 
 <%def name="inc_ref(var)">
