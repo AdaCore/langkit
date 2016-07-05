@@ -64,6 +64,7 @@ package body Adalog.Logic_Ref is
       --  True.
 
       for El of Pred_Sets.Elements (Self.Pending_Relations) loop
+         Trace ("Applying predicate on " & Image (Raw_Var (Self)));
          if not El.Apply then
             Self.all := Old;
             return False;
@@ -199,6 +200,7 @@ package body Adalog.Logic_Ref is
       use Pred_Sets;
       Dummy : Boolean := Remove (Self.Pending_Relations, Pred);
    begin
+      Trace ("In remove predicate");
       null;
    end Remove_Predicate;
 

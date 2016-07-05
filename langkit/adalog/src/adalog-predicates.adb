@@ -56,8 +56,8 @@ package body Adalog.Predicates is
                Trace (A'Img);
             end return;
          else
-            Trace ("In predicate apply, var not defined, deferring"
-                   & "application");
+            Trace ("In predicate apply, var " & Image (Inst.Ref)
+                   & " not defined, deferring application");
 
             --  If the variable is not set, then predicate will return True all
             --  the time, and we register the predicate to be called at a later
