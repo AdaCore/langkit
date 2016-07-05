@@ -133,7 +133,13 @@ package body Langkit_Support.Lexical_Env is
          return
            (if Has_Element (C)
             then Decorate
-              (Env_Element_Vectors.To_Array (Element (C)), Self.Default_MD)
+
+            --  We want to reverse the returned array, so that last inserted
+            --  results are returned first.
+
+              (Reverse_Array
+                (Env_Element_Vectors.To_Array (Element (C))), Self.Default_MD)
+
             else Env_Element_Arrays.Empty_Array);
       end Get_Own_Elements;
 
