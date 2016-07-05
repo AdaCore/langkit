@@ -397,4 +397,17 @@ package body Langkit_Support.Array_Utils is
       return Other_Array;
    end Copy;
 
+   -------------------
+   -- Reverse_Array --
+   -------------------
+
+   function Reverse_Array (In_Array : Array_Type) return Array_Type is
+   begin
+      return Out_Array : Array_Type (In_Array'Range) do
+         for I in 0 .. In_Array'Length - 1 loop
+            Out_Array (Out_Array'Last - I) := In_Array (In_Array'First + I);
+         end loop;
+      end return;
+   end Reverse_Array;
+
 end Langkit_Support.Array_Utils;

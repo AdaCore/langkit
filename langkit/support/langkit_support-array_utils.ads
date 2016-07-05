@@ -83,6 +83,8 @@ package Langkit_Support.Array_Utils is
    None : constant Option_Type := (Has_Element => False);
    --  Constant for the empty Option type
 
+   function Reverse_Array (In_Array : Array_Type) return Array_Type;
+
    ---------
    -- Map --
    ---------
