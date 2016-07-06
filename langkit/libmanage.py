@@ -608,8 +608,11 @@ class ManageScript(object):
         del args  # Unused in this implementation
 
         def add_path(name, path):
-            print('{name}={path}:${name}; export {name}'.format(
-                name=name, path=pipes.quote(path)
+            print('{name}={path}"{sep}${name}"; export {name}'.format(
+                name=name, path=pipes.quote(path),
+                # On Cygwin, PATH keeps the Unix syntax instead of using
+                # the Window path separator.
+                sep=':' if name == 'PATH' else os.path.pathsep,
             ))
         self.setup_environment(add_path)
 
