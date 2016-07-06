@@ -440,6 +440,11 @@
          Add (Initial_Env, ${key}, ${val});
       </%def>
    begin
+      % if cls.base().env_spec:
+         <% base_type_name = "{}_Type".format(cls.base().name()) %>
+         Ret := Do_Env_Actions
+           (${base_type_name} (Self.all)'Access, Current_Env);
+      % endif
 
       % if cls.env_spec.initial_env:
          Initial_Env := ${cls.env_spec.initial_env_expr};
@@ -480,6 +485,7 @@
       % endif
 
       % if cls.env_spec._add_env:
+         pragma Assert (Ret = null, "Env added twice");
          Ret := AST_Envs.Create
            (Parent        => Initial_Env,
             Node          => Self,
