@@ -279,6 +279,7 @@ class AbstractExpression(Frozable):
             'at_or_raise':    partial(CollectionGet, self, or_null=False),
             'contains':       partial(Contains, self),
             'filter':         partial(Map, self, lambda x: x),
+            'filtermap':      partial(Map, self),
             'length':         CollectionLength(self),
             'map':            partial(Map, self),
             'mapcat':         partial(Map, self, concat=True),
