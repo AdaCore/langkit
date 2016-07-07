@@ -59,7 +59,7 @@
    function Get
      (Node    : ${type_name};
       Index   : Integer;
-      Or_Null : Boolean := False) return ${root_node_type_name};
+      Or_Null : Boolean := False) return ${element_type.name()};
    --  When Index is positive, return the Index'th element in T. Otherwise,
    --  return the element at index (Size - Index - 1). Index is zero-based.
 
@@ -84,23 +84,22 @@
    function Get
      (Node    : ${type_name};
       Index   : Integer;
-      Or_Null : Boolean := False) return ${root_node_type_name}
+      Or_Null : Boolean := False) return ${element_type.name()}
    is
       function Absolute_Get
         (L : ${type_name}; Index : Integer)
-         return ${root_node_type_name}
+         return ${element_type.name()}
       is
-        (${root_node_type_name}
-          (${pkg_name}.Node_Vectors.Get_At_Index (L.Vec, Index + 1)));
+        (${pkg_name}.Node_Vectors.Get_At_Index (L.Vec, Index + 1));
       --  L.Vec is 1-based but Index is 0-based
 
       function Relative_Get is new Langkit_Support.Relative_Get
-        (Item_Type     => ${root_node_type_name},
+        (Item_Type     => ${element_type.name()},
          Sequence_Type => ${type_name},
          Length        => Length,
          Get           => Absolute_Get);
 
-      Result : ${root_node_type_name};
+      Result : ${element_type.name()};
    begin
       if Relative_Get (Node, Index, Result) then
          return Result;
