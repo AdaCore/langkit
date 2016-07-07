@@ -1,9 +1,13 @@
 import inspect
 from itertools import count
 
+import types
+
 from langkit import names
 from langkit.compiled_types import BoolType, LongType
-from langkit.diagnostics import check_multiple, check_source_language
+from langkit.diagnostics import (
+    check_multiple, check_source_language, check_type
+)
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, AbstractVariable,
     render, PropertyDef, BuiltinCallExpr
@@ -214,7 +218,9 @@ class Map(CollectionExpression):
         :type take_while_pred: None|(AbstractExpression) -> AbstractExpression
         """
         super(Map, self).__init__(collection, expr)
+
         self.filter_fn = filter_expr
+
         self.take_while_pred = take_while_pred
         self.concat = concat
         self.filter_expr = None
@@ -222,8 +228,18 @@ class Map(CollectionExpression):
 
     def do_prepare(self):
         super(Map, self).do_prepare()
-        self.filter_expr = self.filter_fn(self.element_var)
-        self.take_while_expr = self.take_while_pred(self.element_var)
+
+        self.filter_expr = check_type(
+            self.filter_fn, types.FunctionType,
+            "Filter expression passed to a collection expression must be a "
+            "lambda or a function"
+        )(self.element_var)
+
+        self.take_while_expr = check_type(
+            self.take_while_pred, types.FunctionType,
+            "Take while expression passed to a collection expression must be a"
+            " lambda or a function"
+        )(self.element_var)
 
     def construct(self):
         """
