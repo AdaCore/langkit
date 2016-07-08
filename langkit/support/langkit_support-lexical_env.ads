@@ -37,8 +37,9 @@ package Langkit_Support.Lexical_Env is
    ----------------------
 
    type Env_Element is record
-      El : Element_T;
-      MD : Element_Metadata;
+      El      : Element_T;
+      MD      : Element_Metadata;
+      Is_Null : Boolean := False;
    end record;
    --  Wrapper structure to contain both the 'real' env element that the user
    --  wanted to store, and its associated metadata.

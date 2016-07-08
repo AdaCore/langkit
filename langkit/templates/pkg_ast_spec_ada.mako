@@ -133,7 +133,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
    ## don't have to deal with the AST_Envs suffix.
    subtype Lexical_Env is AST_Envs.Lexical_Env;
    subtype Env_Element is AST_Envs.Env_Element;
-   No_Env_Element : constant Env_Element := (null, No_Metadata);
+   No_Env_Element : constant Env_Element := (null, No_Metadata, True);
    procedure Inc_Ref (Self : Lexical_Env) renames AST_Envs.Inc_Ref;
    procedure Dec_Ref (Self : in out Lexical_Env) renames AST_Envs.Dec_Ref;
 

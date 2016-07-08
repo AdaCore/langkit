@@ -13,7 +13,7 @@ package body Langkit_Support.Lexical_Env is
       (El : Element_T; MD : Element_Metadata) return Env_Element
    is
    begin
-      return Env_Element'(El => El, MD => MD);
+      return Env_Element'(El => El, MD => MD, Is_Null => False);
    end Create;
 
    ------------
@@ -46,7 +46,7 @@ package body Langkit_Support.Lexical_Env is
    is
       function Decorate_Element (El : Env_Element) return Env_Element
       is
-        (Env_Element'(El.El, Combine (El.MD, MD)));
+        (Env_Element'(El.El, Combine (El.MD, MD), Is_Null => False));
 
       function Internal_Decorate
       is new Env_Element_Arrays.Id_Map_Gen (Decorate_Element)
@@ -90,7 +90,7 @@ package body Langkit_Support.Lexical_Env is
    is
       use Internal_Envs;
 
-      Env_El : constant Env_Element := Env_Element'(Value, MD);
+      Env_El : constant Env_Element := Env_Element'(Value, MD, False);
       C      : Cursor;
       Dummy  : Boolean;
    begin
