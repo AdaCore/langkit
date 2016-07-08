@@ -212,7 +212,7 @@ class New(AbstractExpression):
 
         # At this stage, we know that the user has only provided fields that
         # are valid for the struct type.
-        provided_fields = {names.Name.from_lower('f_' + name): construct(
+        provided_fields = {required_fields[name].name: construct(
             value, required_fields[name].type,
             'Wrong type for field {}: expected {{expected}}, '
             'got {{expr_type}}'.format(name)
