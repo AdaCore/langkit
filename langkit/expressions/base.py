@@ -395,6 +395,26 @@ class AbstractExpression(Frozable):
         return OrderingTest(OrderingTest.LE, self, other)
 
     @Frozable.protect
+    def __sub__(self, other):
+        """
+        Return an Arithmetic expression to substract two values.
+
+        :param AbstractExpression other: Right-hand side expression.
+        :rtype: Arithmetic
+        """
+        return Arithmetic(self, other, "-")
+
+    @Frozable.protect
+    def __add__(self, other):
+        """
+        Return an Arithmetic expression to add two values.
+
+        :param AbstractExpression other: Right-hand side expression.
+        :rtype: Arithmetic
+        """
+        return Arithmetic(self, other, "+")
+
+    @Frozable.protect
     def __gt__(self, other):
         """
         Return an OrderingTest expression to compare two values with the
@@ -1948,3 +1968,24 @@ def check_simple_expr(expr):
         " Self, or a Field/Property access on Self, are allowed in"
         " the expressions in a lexical environment specification"
     )
+
+
+class Arithmetic(AbstractExpression):
+    """
+    Arithmetic abstract expression. Used for emission of simple operator
+    expressions like +, -, /, *, ..
+    """
+
+    def __init__(self, l, r, op):
+        """
+        :param AbstractExpression l: Left operand.
+        :param AbstractExpression r: Right operand.
+        :param str op: The operator to use, as a string.
+        """
+        super(Arithmetic, self).__init__()
+        self.l, self.r, self.op = l, r, op
+
+    def construct(self):
+        return BasicExpr("({} %s {})" % self.op,
+                         LongType, [construct(self.l, LongType),
+                                    construct(self.r, LongType)])
