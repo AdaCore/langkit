@@ -433,12 +433,7 @@
       Ret         : Lexical_Env := null;
       Initial_Env : Lexical_Env := Current_Env;
 
-      <%def name="add_to_env(key, val)">
-         ## Add a new entry to the lexical env, for which the key is
-         ## the symbol for retrieved token, and the value is the
-         ## result of the expression for the value.
-         Add (Initial_Env, ${key}, ${val});
-      </%def>
+      <% call_prop = cls.env_spec._render_field_access %>
    begin
       % if cls.base().env_spec:
          <% base_type_name = "{}_Type".format(cls.base().name()) %>
@@ -459,30 +454,27 @@
             Initial_Env);
       % endif
 
-      % if cls.env_spec.is_adding_to_env:
+      % for exprs in cls.env_spec.envs_expressions:
          ## If we have an _add_to_env specification, we generate code to
          ## add elements to the lexical environment.
 
-         % if is_array_type(cls.env_spec.add_to_env_key.type):
+         % if is_array_type(exprs.key.type):
             ## If the supplied expression for the key is an array, we add
             ## a (kn, v) pair for every kn it contains. V stays the same for
             ## every element.
             declare
-               Names : ${cls.env_spec.add_to_env_key.type.name()} :=
-                  ${cls.env_spec.add_to_env_key_expr};
+               Names : ${exprs.key.type.name()} := ${call_prop(exprs.key)};
             begin
                for El of Names.Items loop
-                  ${add_to_env("El", cls.env_spec.add_to_env_value_expr)}
+                  Add (Initial_Env, El, ${call_prop(exprs.val)});
                end loop;
                Dec_Ref (Names);
             end;
 
          % else:
-            ## Else, just add (key, val) pair once
-            ${add_to_env(cls.env_spec.add_to_env_key_expr,
-                         cls.env_spec.add_to_env_value_expr)}
+            Add (Initial_Env, ${call_prop(exprs.key)}, ${call_prop(exprs.val)});
          % endif
-      % endif
+      % endfor
 
       % if cls.env_spec._add_env:
          pragma Assert (Ret = null, "Env added twice");

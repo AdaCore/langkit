@@ -2,7 +2,7 @@ from langkit.compiled_types import (
     ASTNode, Field, Struct, abstract, env_metadata, root_grammar_class
 )
 from langkit.diagnostics import Diagnostics
-from langkit.envs import EnvSpec
+from langkit.envs import EnvSpec, add_to_env
 from langkit.expressions import Self
 from langkit.parsers import Grammar, List, Opt, Row, Tok
 
@@ -33,7 +33,8 @@ class Def(Stmt):
     id = Field()
     body = Field()
 
-    env_spec = EnvSpec(add_env=True, add_to_env=(Self.id.symbol, Self))
+    env_spec = EnvSpec(add_env=True,
+                       add_to_env=add_to_env(Self.id.symbol, Self))
 
 
 class Block(Stmt):
