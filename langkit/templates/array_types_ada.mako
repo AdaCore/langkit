@@ -44,6 +44,9 @@
    --  return the element at index (Size - Index - 1). Index is zero-based. If
    --  the result is ref-counted, a new owning reference is returned.
 
+   ## Helper getter generated for properties code. Used in CollectionGet's code
+   function Concat (L, R : ${cls.name()}) return ${cls.name()};
+
    ## Helper for properties code
    function Length (T : ${cls.name()}) return Natural is (T.N);
 
@@ -95,6 +98,18 @@
          raise Property_Error with "out-of-bounds array access";
       end if;
    end Get;
+
+   ------------
+   -- Concat --
+   ------------
+
+   function Concat (L, R : ${cls.name()}) return ${cls.name()} is
+      use ${cls.pkg_array()};
+      Ret : ${cls.name()} := Create (Length (L) + Length (R));
+   begin
+      Ret.Items := (L.Items & R.Items);
+      return Ret;
+   end Concat;
 
    -------------
    -- Inc_Ref --

@@ -4,7 +4,7 @@ from itertools import count
 import types
 
 from langkit import names
-from langkit.compiled_types import BoolType, LongType
+from langkit.compiled_types import BoolType, LongType, ArrayType
 from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
@@ -466,3 +466,40 @@ class CollectionSingleton(AbstractExpression):
 
     def construct(self):
         return CollectionSingleton.Expr(construct(self.expr))
+
+
+class Concat(AbstractExpression):
+    """
+    Expression that will concatenate two arrays.
+    """
+
+    def __init__(self, array_1, array_2):
+        """
+        :param AbstractExpression array_1: The first array expression.
+        :param AbstractExpression array_2: The second array expression.
+        """
+        super(Concat, self).__init__()
+        self.array_1 = array_1
+        self.array_2 = array_2
+
+    def construct(self):
+        array_1 = construct(self.array_1)
+        array_2 = construct(self.array_2)
+
+        # TODO: We don't use the type param to construct because construct will
+        # try to cast arrays to the base array type. Would be better if
+        # construct handled that correctly.
+        check_type(array_1.type, ArrayType)
+        check_type(array_2.type, ArrayType)
+
+        check_multiple([
+            (array_1.type == array_2.type,
+             "Got different array element types in concat: {} and {}".format(
+                 array_1.type.element_type().name(),
+                 array_2.type.element_type().name()
+             )),
+        ])
+
+        return BuiltinCallExpr(
+            "Concat", array_1.type, [array_1, array_2]
+        )
