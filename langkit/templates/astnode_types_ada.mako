@@ -434,6 +434,26 @@
       Initial_Env : Lexical_Env := Current_Env;
 
       <% call_prop = cls.env_spec._render_field_access %>
+
+      <%def name="add(exprs)">
+         % if is_array_type(exprs.val.type):
+            declare
+               Vals : ${exprs.val.type.name()} := ${call_prop(exprs.val)};
+            begin
+               for Val of Vals.Items loop
+                  Add (${call_prop(exprs.dest_env) if exprs.dest_env else "Initial_Env"},
+                       ${"El" if is_array_type(exprs.key.type) else call_prop(exprs.key)},
+                       Val);
+               end loop;
+               Dec_Ref (Vals:);
+            end;
+         % else:
+            Add (${call_prop(exprs.dest_env) if exprs.dest_env else "Initial_Env"},
+                 ${"El" if is_array_type(exprs.key.type) else call_prop(exprs.key)},
+                 ${call_prop(exprs.val)});
+         % endif
+      </%def>
+
    begin
       % if cls.base().env_spec:
          <% base_type_name = "{}_Type".format(cls.base().name()) %>
@@ -466,13 +486,13 @@
                Names : ${exprs.key.type.name()} := ${call_prop(exprs.key)};
             begin
                for El of Names.Items loop
-                  Add (Initial_Env, El, ${call_prop(exprs.val)});
+                  ${add(exprs)}
                end loop;
                Dec_Ref (Names);
             end;
 
          % else:
-            Add (Initial_Env, ${call_prop(exprs.key)}, ${call_prop(exprs.val)});
+            ${add(exprs)}
          % endif
       % endfor
 

@@ -2,9 +2,7 @@ from collections import namedtuple
 from itertools import count
 
 from langkit import names
-from langkit.compiled_types import (
-    AbstractNodeData, LexicalEnvType, StructMetaclass, Symbol
-)
+from langkit.compiled_types import AbstractNodeData, LexicalEnvType, Symbol, T
 from langkit.diagnostics import check_source_language
 from langkit.expressions import Env, FieldAccess, PropertyDef, Self, construct
 
@@ -138,11 +136,6 @@ class EnvSpec(object):
             result.append(p)
             return p
 
-        # We are doing this when creating ASTNode subclasses, so there's no
-        # context yet. So fetch the root grammar class in StructMetaclass
-        # instead.
-        node_type = StructMetaclass.root_grammar_class
-
         self.initial_env = create_internal_property(
             'Initial_Env', self._unresolved_initial_env, LexicalEnvType
         )
@@ -150,7 +143,9 @@ class EnvSpec(object):
         self.envs_expressions = [
             add_to_env(
                 create_internal_property('Env_Key', exprs.key, None),
-                create_internal_property('Env_Value', exprs.val, node_type)
+                create_internal_property('Env_Value', exprs.val, None),
+                create_internal_property('Env_Dest', exprs.dest_env,
+                                         LexicalEnvType)
             ) for exprs in self._unresolved_envs_expressions
         ]
 
@@ -160,7 +155,7 @@ class EnvSpec(object):
         )
 
         self.env_hook_arg = create_internal_property(
-            'Env_Hook_Arg', self._unresolved_env_hook_arg, node_type
+            'Env_Hook_Arg', self._unresolved_env_hook_arg, T.root_node
         )
 
         return result
@@ -181,6 +176,17 @@ class EnvSpec(object):
                     ' either a symbol or an array of symbol: got {}'
                     ' instead'.format(
                         key_prop.type.name().camel
+                    )
+                )
+
+                check_source_language(
+                    val_prop.type.matches(T.root_node)
+                    or (val_prop.type.is_collection
+                        and val_prop.type.element_type().matches(T.root_node)),
+                    'The val expression in environment specification must be'
+                    ' either a node or an array of nodes: got {}'
+                    ' instead'.format(
+                        val_prop.type.name().camel
                     )
                 )
 
