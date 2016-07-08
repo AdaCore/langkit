@@ -1948,10 +1948,9 @@ def is_simple_expr(expr):
 
     # Only accept FieldAccess. If the designated field is actually a property,
     # only allow argument-less ones.
-    return (
-        expr is Self or (isinstance(expr, FieldAccess) and
-                         expr.receiver is Self and
-                         not expr.arguments)
+    return expr is Self or (
+        isinstance(expr, FieldAccess)
+        and expr.receiver is Self and not expr.arguments
     )
 
 
