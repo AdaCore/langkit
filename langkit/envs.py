@@ -7,11 +7,26 @@ from langkit.diagnostics import check_source_language
 from langkit.expressions import Env, FieldAccess, PropertyDef, Self, construct
 
 
-AddToEnv = namedtuple("AddToEnv", ["key", "val", "dest_env"])
+AddToEnv = namedtuple("AddToEnv", ["key", "val", "dest_env", "is_post"])
 
 
-def add_to_env(key, val, dest_env=None):
-    return AddToEnv(key, val, dest_env)
+def add_to_env(key, val, dest_env=None, is_post=False):
+    """
+    Specify elements to add to the lexical environment.
+
+    :param AbstractExpression key: An abstract expression resolving either
+        to a symbol, or to a list of symbols, specifying the key(s) under which
+        to add elements.
+    :param AbstractExpression val: An abstract expression resolving to a
+        subtype of the root class, or a list of them, specifying the values
+        to add.
+    :param AbstractExpression dest_env: The destination environment in which to
+        add the elements.
+    :param bool is_post: Whether to execute the add_to_env action after
+        children have been treated.
+    :return:
+    """
+    return AddToEnv(key, val, dest_env, is_post)
 
 
 class EnvSpec(object):
@@ -33,12 +48,9 @@ class EnvSpec(object):
             The new environment will be linked to the corresponding AST node
             and will have the AST node's lexical environment as a parent.
 
-        :param add_to_env: Tuple of expressions, the first one returning
-            the name under which the elements must be added, the second one
-            returning the element or elements to add to the environment. For
-            the moment, the element returned by the first expression must be a
-            node with a token property, and the second expression must be a
-            single element of type ASTNode.
+        :param add_to_env: Eiter an AddToEnv named tuple, or a list of them.
+            Used to add elements to the lexical environment. See add_to_env's
+            doc for more details.
         :type add_to_env: AddToEnv|[AddToEnv]
 
         :param AbstractExpression ref_envs: if an AbstractExpression returning
@@ -114,6 +126,8 @@ class EnvSpec(object):
         self.env_hook_arg = None
         ":type: PropertyDef"
 
+        self.has_post_actions = False
+
     def create_properties(self):
         """
         Turn the various abstract expression attributes for this env spec into
@@ -145,9 +159,12 @@ class EnvSpec(object):
                 create_internal_property('Env_Key', exprs.key, None),
                 create_internal_property('Env_Value', exprs.val, None),
                 create_internal_property('Env_Dest', exprs.dest_env,
-                                         LexicalEnvType)
+                                         LexicalEnvType),
+                exprs.is_post
             ) for exprs in self._unresolved_envs_expressions
         ]
+
+        self.has_post_actions = any([e.is_post for e in self.envs_expressions])
 
         # TODO: what is the expected type for this one?
         self.ref_envs = create_internal_property(
@@ -167,7 +184,7 @@ class EnvSpec(object):
 
         :rtype: bool
         """
-        for key_prop, _, _ in self.envs_expressions:
+        for key_prop, val_prop, _, _ in self.envs_expressions:
             with key_prop.diagnostic_context():
                 check_source_language(
                     key_prop.type.matches(Symbol) or

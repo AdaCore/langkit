@@ -817,6 +817,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
                Populate_Internal (Child, Children_Env);
             end if;
          end loop;
+
+         Node.Post_Env_Actions (Current_Env);
       end Populate_Internal;
 
       Env : AST_Envs.Lexical_Env := Root_Env;

@@ -695,6 +695,12 @@ private
    --  siblings of Self see, while returning a new env will only affect the
    --  environment seen by Self's children.
 
+   procedure Post_Env_Actions
+     (Self        : access ${root_node_value_type};
+      Current_Env : in out AST_Envs.Lexical_Env) is null;
+   --  Internal procedure that will execute all post add to env actions for
+   --  Node. This is meant to be called by Populate_Lexical_Env.
+
    --------------------------------
    -- Tree traversal (internals) --
    --------------------------------
