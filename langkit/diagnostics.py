@@ -117,6 +117,16 @@ def format_severity(severity):
     return col(msg, Colors.BOLD + SEVERITY_COLORS[severity])
 
 
+def print_errors(recovered=False):
+    c = context_cache[1] if recovered else context_stack
+    for ctx_msg, ctx_loc in c:
+        print ('File "{file}", line {line}, {msg}'.format(
+            file=col(ctx_loc.file, Colors.CYAN),
+            line=col(ctx_loc.line, Colors.CYAN),
+            msg=ctx_msg
+        ))
+
+
 def check_source_language(predicate, message, severity=Severity.error):
     """
     Check predicates related to the user's input in the input language
@@ -132,12 +142,7 @@ def check_source_language(predicate, message, severity=Severity.error):
     # class declaration, it it's really an instance of Severity instead.
     severity = assert_type(severity, Severity)
     if not predicate:
-        for ctx_msg, ctx_loc in context_stack:
-            print ('File "{file}", line {line}, {msg}'.format(
-                file=col(ctx_loc.file, Colors.CYAN),
-                line=col(ctx_loc.line, Colors.CYAN),
-                msg=ctx_msg
-            ))
+        print_errors()
         print "{}{}: {}".format(
             "    " if context_stack else '',
             format_severity(severity),
