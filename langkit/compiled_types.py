@@ -2102,6 +2102,14 @@ class TypeRepo(object):
         """
         return TypeRepo.Defer(lambda: self.type_dict()[type_name])
 
+    @property
+    def root_node(self):
+        """
+        Shortcut to get the root AST node.
+        :rtype: ASTNode
+        """
+        return StructMetaclass.root_grammar_class
+
 
 def resolve_type(type_or_defer):
     """
