@@ -1129,7 +1129,7 @@ class PropertyDef(AbstractNodeData):
         # to know the type of the Property. Internal consistency with the
         # constructed_expr is checked when we emit the Property.
         if self.expected_type:
-            return self.expected_type
+            return resolve_type(self.expected_type)
 
         check_source_language(
             not self.in_type,
@@ -1147,7 +1147,7 @@ class PropertyDef(AbstractNodeData):
         finally:
             self.in_type = False
 
-        return ret
+        return resolve_type(ret)
 
     def _add_argument(self, name, type, default_value=None):
         """
