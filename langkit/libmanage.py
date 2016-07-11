@@ -13,7 +13,7 @@ import subprocess
 import sys
 
 from langkit.compile_context import Verbosity
-from langkit.diagnostics import Diagnostics, DiagnosticError
+from langkit.diagnostics import Diagnostics, DiagnosticError, print_errors
 from langkit.utils import Colors, col, printcol
 
 
@@ -429,6 +429,12 @@ class ManageScript(object):
             if parsed_args.debug:
                 raise
             print >> sys.stderr, col('Errors, exiting', Colors.FAIL)
+            sys.exit(1)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            print_errors(recovered=True)
+            print >> sys.stderr, col('Internal error ! exiting', Colors.FAIL)
             sys.exit(1)
 
         if cov is not None:
