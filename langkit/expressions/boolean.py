@@ -301,6 +301,12 @@ class If(AbstractExpression):
         """
         then = construct(self.then)
         else_then = construct(self.else_then)
+        check_source_language(
+            then.type.matches(else_then.type),
+            "Mismatching types in If expression: {} and {}".format(
+                then.type, else_then.type
+            )
+        )
         rtype = then.type.unify(else_then.type)
         return If.Expr(construct(self.cond, BoolType), then, else_then, rtype)
 
