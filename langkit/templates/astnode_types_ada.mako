@@ -418,6 +418,51 @@
    % endif
 
    % if not cls.is_env_spec_inherited:
+
+   <%def name="add(exprs)">
+   % if is_array_type(exprs.val.type):
+      declare
+         Vals : ${exprs.val.type.name()} := ${call_prop(exprs.val)};
+      begin
+         for Val of Vals.Items loop
+            Add (${call_prop(exprs.dest_env) \
+                   if exprs.dest_env else "Initial_Env"},
+                 ${"El" if is_array_type(exprs.key.type) \
+                   else call_prop(exprs.key)},
+                 ${root_node_type_name} (Val));
+         end loop;
+         Dec_Ref (Vals);
+      end;
+   % else:
+      Add (${call_prop(exprs.dest_env) \
+             if exprs.dest_env else "Initial_Env"},
+           ${"El" if is_array_type(exprs.key.type) else call_prop(exprs.key)},
+           ${root_node_type_name} (${call_prop(exprs.val)}));
+   % endif
+   </%def>
+
+   <%def name="emit_add_env(exprs)">
+      ## If we have an _add_to_env specification, we generate code to
+      ## add elements to the lexical environment.
+
+      % if is_array_type(exprs.key.type):
+         ## If the supplied expression for the key is an array, we add
+         ## a (kn, v) pair for every kn it contains. V stays the same for
+         ## every element.
+         declare
+            Names : ${exprs.key.type.name()} := ${call_prop(exprs.key)};
+         begin
+            for El of Names.Items loop
+               ${add(exprs)}
+            end loop;
+            Dec_Ref (Names);
+         end;
+
+      % else:
+         ${add(exprs)}
+      % endif
+   </%def>
+
    --------------------
    -- Do_Env_Actions --
    --------------------
@@ -435,24 +480,6 @@
 
       <% call_prop = cls.env_spec._render_field_access %>
 
-      <%def name="add(exprs)">
-         % if is_array_type(exprs.val.type):
-            declare
-               Vals : ${exprs.val.type.name()} := ${call_prop(exprs.val)};
-            begin
-               for Val of Vals.Items loop
-                  Add (${call_prop(exprs.dest_env) if exprs.dest_env else "Initial_Env"},
-                       ${"El" if is_array_type(exprs.key.type) else call_prop(exprs.key)},
-                       Val);
-               end loop;
-               Dec_Ref (Vals:);
-            end;
-         % else:
-            Add (${call_prop(exprs.dest_env) if exprs.dest_env else "Initial_Env"},
-                 ${"El" if is_array_type(exprs.key.type) else call_prop(exprs.key)},
-                 ${call_prop(exprs.val)});
-         % endif
-      </%def>
 
    begin
       % if cls.base().env_spec:
@@ -475,25 +502,7 @@
       % endif
 
       % for exprs in cls.env_spec.envs_expressions:
-         ## If we have an _add_to_env specification, we generate code to
-         ## add elements to the lexical environment.
-
-         % if is_array_type(exprs.key.type):
-            ## If the supplied expression for the key is an array, we add
-            ## a (kn, v) pair for every kn it contains. V stays the same for
-            ## every element.
-            declare
-               Names : ${exprs.key.type.name()} := ${call_prop(exprs.key)};
-            begin
-               for El of Names.Items loop
-                  ${add(exprs)}
-               end loop;
-               Dec_Ref (Names);
-            end;
-
-         % else:
-            ${add(exprs)}
-         % endif
+      ${emit_add_env(exprs)}
       % endfor
 
       % if cls.env_spec._add_env:
