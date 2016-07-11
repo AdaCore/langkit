@@ -39,7 +39,7 @@ class EnvSpec(object):
             the moment, the element returned by the first expression must be a
             node with a token property, and the second expression must be a
             single element of type ASTNode.
-        :type add_to_env: (AbstractExpression, AbstractExpression)
+        :type add_to_env: AddToEnv|[AddToEnv]
 
         :param AbstractExpression ref_envs: if an AbstractExpression returning
             a list of environments is supplied, the topmost environment in the
