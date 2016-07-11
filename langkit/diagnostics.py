@@ -60,6 +60,12 @@ context_stack = []
 :type: list[(str, Location)]
 """
 
+context_cache = (None, None)
+"""
+This will be used to cache the last context stack in case of exception.
+:type: (Exception, list[(str, Location)])
+"""
+
 
 class Context(object):
     """
@@ -73,10 +79,11 @@ class Context(object):
     def __enter__(self):
         context_stack.append((self.message, self.location))
 
-    def __exit__(self, value, typ, traceback):
-        del value
-        del typ
+    def __exit__(self, exc_type, exc_value, traceback):
         del traceback
+        global context_cache
+        if exc_value and context_cache[0] != exc_value:
+            context_cache = (exc_value, context_stack[:])
         context_stack.pop()
 
 
