@@ -69,10 +69,17 @@ This will be used to cache the last context stack in case of exception.
 
 class Context(object):
     """
-    Like "context", but can be used more than once.
+    Add context for diagnostics. For the moment this context is constituted
+    of a message and a location.
     """
 
     def __init__(self, message, location):
+        """
+        :param str message: The message to display when displaying the
+        diagnostic, to contextualize the location.
+
+        :param Location location: The location associated to the context.
+        """
         self.message = message
         self.location = location
 
