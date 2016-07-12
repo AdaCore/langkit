@@ -7,10 +7,11 @@ from langkit.diagnostics import check_source_language
 from langkit.expressions import Env, FieldAccess, PropertyDef, Self, construct
 
 
-AddToEnv = namedtuple("AddToEnv", ["key", "val", "dest_env", "is_post"])
+AddToEnv = namedtuple("AddToEnv", ["key", "val", "dest_env",
+                                   "metadata", "is_post"])
 
 
-def add_to_env(key, val, dest_env=None, is_post=False):
+def add_to_env(key, val, dest_env=None, metadata=None, is_post=False):
     """
     Specify elements to add to the lexical environment.
 
@@ -22,11 +23,12 @@ def add_to_env(key, val, dest_env=None, is_post=False):
         to add.
     :param AbstractExpression dest_env: The destination environment in which to
         add the elements.
+    :param AbstractExpression metadata: Optional expression for metadata.
     :param bool is_post: Whether to execute the add_to_env action after
         children have been treated.
     :return:
     """
-    return AddToEnv(key, val, dest_env, is_post)
+    return AddToEnv(key, val, dest_env, metadata, is_post)
 
 
 class EnvSpec(object):
@@ -160,6 +162,7 @@ class EnvSpec(object):
                 create_internal_property('Env_Value', exprs.val, None),
                 create_internal_property('Env_Dest', exprs.dest_env,
                                          LexicalEnvType),
+                create_internal_property('MD', exprs.metadata, T.env_md),
                 exprs.is_post
             ) for exprs in self._unresolved_envs_expressions
         ]
@@ -184,7 +187,7 @@ class EnvSpec(object):
 
         :rtype: bool
         """
-        for key_prop, val_prop, _, _ in self.envs_expressions:
+        for key_prop, val_prop, _, _, _ in self.envs_expressions:
             with key_prop.diagnostic_context():
                 check_source_language(
                     key_prop.type.matches(Symbol) or

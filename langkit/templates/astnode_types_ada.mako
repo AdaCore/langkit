@@ -434,7 +434,9 @@
                    if exprs.dest_env else "Initial_Env"},
                  ${"El" if is_array_type(exprs.key.type) \
                    else call_prop(exprs.key)},
-                 ${root_node_type_name} (Val));
+                 ${root_node_type_name} (Val),
+                 MD => ${call_prop(exprs.metadata) \
+                 if exprs.metadata else "No_Metadata"});
          end loop;
          Dec_Ref (Vals);
       end;
@@ -442,7 +444,9 @@
       Add (${call_prop(exprs.dest_env) \
              if exprs.dest_env else "Initial_Env"},
            ${"El" if is_array_type(exprs.key.type) else call_prop(exprs.key)},
-           ${root_node_type_name} (${call_prop(exprs.val)}));
+           ${root_node_type_name} (${call_prop(exprs.val)}),
+           MD => ${call_prop(exprs.metadata) \
+           if exprs.metadata else "No_Metadata"});
    % endif
    </%def>
 
