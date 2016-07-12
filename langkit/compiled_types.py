@@ -2110,6 +2110,14 @@ class TypeRepo(object):
         """
         return StructMetaclass.root_grammar_class
 
+    @property
+    def env_md(self):
+        """
+        Shortcut to get the lexical environment metadata type.
+        :rtype: ASTNode
+        """
+        return StructMetaclass.env_metadata
+
 
 def resolve_type(type_or_defer):
     """
