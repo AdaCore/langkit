@@ -60,7 +60,7 @@ context_stack = []
 :type: list[(str, Location)]
 """
 
-context_cache = (None, None)
+context_cache = (None, [])
 """
 This will be used to cache the last context stack in case of exception.
 :type: (Exception, list[(str, Location)])
