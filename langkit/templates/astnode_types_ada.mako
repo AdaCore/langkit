@@ -489,7 +489,6 @@
 
       <% call_prop = cls.env_spec._render_field_access %>
 
-
    begin
       % if cls.base().env_spec:
          <% base_type_name = "{}_Type".format(cls.base().name()) %>
