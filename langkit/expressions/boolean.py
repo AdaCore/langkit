@@ -304,7 +304,7 @@ class If(AbstractExpression):
         check_source_language(
             then.type.matches(else_then.type),
             "Mismatching types in If expression: {} and {}".format(
-                then.type, else_then.type
+                then.type.name().camel, else_then.type.name().camel
             )
         )
         rtype = then.type.unify(else_then.type)
