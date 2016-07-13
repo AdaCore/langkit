@@ -610,7 +610,7 @@ class CompileCtx():
             if path.isdir(src_dir):
                 for filename in os.listdir(src_dir):
                     filepath = path.join(src_dir, filename)
-                    if path.isdir(filepath):
+                    if path.isfile(filepath):
                         self.additional_source_files.append(filepath)
 
         self.annotate_fields_types = annotate_fields_types
