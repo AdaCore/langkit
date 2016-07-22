@@ -1549,7 +1549,7 @@ def Property(expr, doc=None, private=None, type=None):
                        private=private, type=type)
 
 
-def langkit_property(private=None, return_type=None):
+def langkit_property(private=None, return_type=None, abstract=False):
     """
     Decorator to create properties from real python methods. See Property for
     more details.
@@ -1558,9 +1558,11 @@ def langkit_property(private=None, return_type=None):
     :type return_type: CompiledType
     """
     def decorator(expr_fn):
-        return Property(expr=expr_fn,
-                        type=return_type,
-                        private=private, doc=expr_fn.__doc__)
+        return PropertyDef(expr_fn, AbstractNodeData.PREFIX_PROPERTY,
+                           type=return_type,
+                           private=private,
+                           doc=expr_fn.__doc__,
+                           abstract=abstract)
     return decorator
 
 
