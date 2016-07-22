@@ -674,6 +674,12 @@ class Match(AbstractExpression):
         _, expr = constructed_matchers[-1]
         rtype = expr.type
         for _, expr in constructed_matchers:
+            check_source_language(
+                expr.type.matches(rtype), "Wrong type for match expression : "
+                "{}, expected {} or sub/supertype".format(
+                    expr.type.name().camel, rtype.name().camel
+                )
+            )
             rtype = expr.type.unify(rtype)
 
         # This is the expression execution will reach if we have a bug in our
