@@ -57,7 +57,7 @@ def extract_library_location():
 
 context_stack = []
 """
-:type: list[(str, Location)]
+:type: list[(str, Location, str)]
 """
 
 context_cache = (None, [])
@@ -73,18 +73,25 @@ class Context(object):
     of a message and a location.
     """
 
-    def __init__(self, message, location):
+    def __init__(self, message, location, id=""):
         """
         :param str message: The message to display when displaying the
-        diagnostic, to contextualize the location.
+            diagnostic, to contextualize the location.
 
         :param Location location: The location associated to the context.
+
+        :param str id: A string that is meant to uniquely identify a category
+            of diagnostic. Only one message (the latest) will be shown for each
+            category when diagnostics are printed. If id is empty (the default)
+            then the context has no category, and it will be considered
+            unique, and always be shown.
         """
         self.message = message
         self.location = location
+        self.id = id
 
     def __enter__(self):
-        context_stack.append((self.message, self.location))
+        context_stack.append((self.message, self.location, self.id))
 
     def __exit__(self, exc_type, exc_value, traceback):
         del traceback
@@ -126,9 +133,29 @@ def format_severity(severity):
 
 def print_errors(recovered=False):
     c = context_cache[1] if recovered else context_stack
-    for ctx_msg, ctx_loc in c:
-        print ('File "{file}", line {line}, {msg}'.format(
-            file=col(ctx_loc.file, Colors.CYAN),
+    ids = set()
+    msgs = []
+
+    # We'll iterate once on diagnostic contexts, to:
+    # 1. Remove those with null locations.
+    # 2. Only keep one per registered id.
+    for ctx_msg, ctx_loc, id in reversed(c):
+        if ctx_loc and (not id or id not in ids):
+            msgs.append((ctx_msg, ctx_loc))
+            ids.add(id)
+
+    # Then we'll print the context we've kept
+    last_file_info = ''
+    for ctx_msg, ctx_loc in reversed(msgs):
+        # We only want to show the file information one time if it is the same
+        file_info = 'File "{}", '.format(col(ctx_loc.file, Colors.CYAN))
+        if last_file_info == file_info:
+            file_info = '  '
+        else:
+            last_file_info = file_info
+
+        print ('{file_info}line {line}, {msg}'.format(
+            file_info=file_info,
             line=col(ctx_loc.line, Colors.CYAN),
             msg=ctx_msg
         ))
