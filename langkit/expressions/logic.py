@@ -1,7 +1,7 @@
 import funcy
 
 from langkit.compiled_types import (
-    LogicVarType, EquationType, BoolType, StructMetaclass
+    LogicVarType, EquationType, BoolType, T
 )
 
 from langkit.diagnostics import check_multiple, check_source_language
@@ -59,15 +59,14 @@ class Bind(AbstractExpression):
         self.bind_property = bind_property
 
     def do_prepare(self):
-        root_class = StructMetaclass.root_grammar_class
         check_multiple([
-            (self.bind_property.type.matches(root_class),
+            (self.bind_property.type.matches(T.root_node),
              "The property passed to bind must return a subtype "
-             "of {}".format(root_class.name().camel)),
+             "of {}".format(T.root_node.name().camel)),
 
-            (self.bind_property.struct.matches(root_class),
+            (self.bind_property.struct.matches(T.root_node),
              "The property passed to bind must belong to a subtype "
-             "of {}".format(root_class.name().camel))
+             "of {}".format(T.root_node.name().camel))
         ])
 
         self.bind_property.do_generate_logic_binder()
@@ -229,7 +228,6 @@ class Predicate(AbstractExpression):
         self.exprs = exprs
 
     def do_prepare(self):
-        root_class = StructMetaclass.root_grammar_class
         check_multiple([
             (isinstance(self.pred_property, PropertyDef),
              "Needs a property reference, got {}".format(self.pred_property)),
@@ -238,14 +236,12 @@ class Predicate(AbstractExpression):
              "The property passed to predicate must return a boolean, "
              "got {}".format(self.pred_property.type.name().camel)),
 
-            (self.pred_property.struct.matches(root_class),
+            (self.pred_property.struct.matches(T.root_node),
              "The property passed to bind must belong to a subtype "
-             "of {}".format(root_class.name().camel))
+             "of {}".format(T.root_node.name().camel))
         ])
 
     def construct(self):
-        root_class = StructMetaclass.root_grammar_class
-
         exprs = [construct(e) for e in self.exprs]
 
         prop_types = [self.pred_property.struct] + [
@@ -271,10 +267,10 @@ class Predicate(AbstractExpression):
         for i, (expr, arg_type) in enumerate(zip(exprs, prop_types)):
             if expr.type == LogicVarType:
                 check_source_language(
-                    arg_type.matches(root_class), "Argument #{} of predicate "
+                    arg_type.matches(T.root_node), "Argument #{} of predicate "
                     "is a logic variable, the corresponding property formal "
                     "has type {}, but should be a descendent of {}".format(
-                        i, arg_type.name().camel, root_class.name().camel
+                        i, arg_type.name().camel, T.root_node.name().camel
                     )
                 )
             else:
@@ -320,7 +316,7 @@ class GetLogicValue(AbstractExpression):
 
     def construct(self):
         return BuiltinCallExpr(
-            "Eq_Node.Refs.GetL", StructMetaclass.root_grammar_class,
+            "Eq_Node.Refs.GetL", T.root_node,
             [construct(self.logic_var, LogicVarType)]
         )
 
