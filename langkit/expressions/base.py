@@ -10,8 +10,7 @@ import funcy
 from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, ASTNode, BoolType, CompiledType, LexicalEnvType,
-    LongType, get_context, render as ct_render, Symbol, Token, resolve_type,
-    Argument
+    LongType, render as ct_render, Symbol, Token, resolve_type, Argument, T
 )
 from langkit.diagnostics import (
     extract_library_location, check_source_language, check_multiple,
@@ -90,7 +89,7 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
                 if expected_type == ASTNode:
                     # ASTNode does not exist in the generated code: we use it
                     # as a shortcut for the actual root grammar class instead.
-                    expected_type = get_context().root_grammar_class
+                    expected_type = T.root_node
 
                 check_source_language(ret.type.matches(expected_type), (
                     custom_msg.format(expected=expected_type.name().camel,
