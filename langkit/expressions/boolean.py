@@ -1,7 +1,7 @@
 from langkit import names
 from langkit.compiled_types import (
     ASTNode, BoolType, LexicalEnvType, LongType, Struct, EquationType,
-    LogicVarType, StructMetaclass
+    LogicVarType, T
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
@@ -129,9 +129,8 @@ class Eq(AbstractExpression):
                 )
 
                 # Cast the ast node type if necessary
-                if (rhs.type.matches(ASTNode) and
-                        rhs.type != StructMetaclass.root_grammar_class):
-                    rhs = Cast.Expr(rhs, StructMetaclass.root_grammar_class)
+                if (rhs.type.matches(ASTNode) and rhs.type != T.root_node):
+                    rhs = Cast.Expr(rhs, T.root_node)
 
                 return BuiltinCallExpr("Equals", EquationType, [lhs, rhs],
                                        "Equals_Pred")
