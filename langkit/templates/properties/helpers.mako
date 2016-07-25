@@ -19,7 +19,7 @@
    <%
    type_name = "{}_{}_Logic_Binder".format(prop.struct.name(), prop.name)
    package_name = "{}_{}_Bind".format(prop.struct.name(), prop.name)
-   root_class = ctx.root_grammar_class.name()
+   root_class = T.root_node.name()
    %>
 
    ## We generate a custom type which is a functor in the C++ term, eg just a
@@ -53,7 +53,7 @@
    <%
       type_name = "{}_Predicate_Caller".format(pred_id)
       package_name = "{}_Pred".format(pred_id)
-      root_class = ctx.root_grammar_class.name()
+      root_class = T.root_node.name()
       formal_node_types = prop.get_concrete_node_types(args_types)
    %>
 

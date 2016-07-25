@@ -17,7 +17,7 @@ package ${_self.ada_api_settings.lib_name}.AST.C is
    function Wrap (Token : Token_Type) return ${token_type};
    function Unwrap (Token : ${token_type}) return Token_Type;
 
-   ${array_types.decl(get_context().root_grammar_class.array_type())}
+   ${array_types.decl(T.root_node.array_type())}
 
    ------------------------------------
    -- Lexical environment primitives --

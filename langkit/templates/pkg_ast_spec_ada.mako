@@ -4,7 +4,7 @@
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 
-<% root_node_array = ctx.root_grammar_class.array_type() %>
+<% root_node_array = T.root_node.array_type() %>
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
 with Ada.Finalization;
@@ -225,12 +225,12 @@ package ${_self.ada_api_settings.lib_name}.AST is
    function Node_Env
      (Node : access ${root_node_value_type})
       return AST_Envs.Lexical_Env;
-   ${ada_doc(_self.root_grammar_class._fields['node_env'], 3)}
+   ${ada_doc(T.root_node._fields['node_env'], 3)}
 
    function Children_Env
      (Node : access ${root_node_value_type})
       return AST_Envs.Lexical_Env;
-   ${ada_doc(_self.root_grammar_class._fields['children_env'], 3)}
+   ${ada_doc(T.root_node._fields['children_env'], 3)}
 
    -------------------------------
    -- Tree traversal operations --
@@ -598,7 +598,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
    -- Root AST node properties --
    ------------------------------
 
-   % for prop in ctx.root_grammar_class.get_properties( \
+   % for prop in T.root_node.get_properties( \
          include_inherited=False, \
          predicate=library_public_field):
       ${prop.prop_decl}
@@ -658,7 +658,7 @@ private
       --  Hold the environment this node defines, or the parent environment
       --  otherwise.
 
-      ${astnode_types.node_fields(ctx.root_grammar_class, emit_null=False)}
+      ${astnode_types.node_fields(T.root_node, emit_null=False)}
    end record;
 
    procedure Free_Extensions (Node : access ${root_node_value_type}'Class);

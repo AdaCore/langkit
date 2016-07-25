@@ -54,7 +54,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
                     Trivia => Token_Index (Token.Trivia_Index)));
    end Unwrap;
 
-   ${array_types.body(get_context().root_grammar_class.array_type())}
+   ${array_types.body(T.root_node.array_type())}
 
    ${array_types.body(LexicalEnvType.array_type())}
 

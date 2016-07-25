@@ -7,7 +7,7 @@
 <%namespace name="exts"          file="/extensions.mako" />
 
 
-<% root_astnode_name = _self.root_grammar_class.name().camel %>
+<% root_astnode_name = T.root_node.name().camel %>
 
 
 import collections
@@ -444,9 +444,9 @@ class Diagnostic(object):
 
 
 class ${root_astnode_name}(object):
-    ${py_doc(ctx.root_grammar_class, 4)}
+    ${py_doc(T.root_node, 4)}
 
-    ${astnode_types.subclass_decls(ctx.root_grammar_class)}
+    ${astnode_types.subclass_decls(T.root_node)}
 
     def __init__(self, c_value):
         self._c_value = c_value
@@ -620,7 +620,7 @@ class ASTList(${root_astnode_name}):
 
 
 % for astnode in _self.astnode_types:
-    % if astnode != _self.root_grammar_class:
+    % if astnode != T.root_node:
 ${astnode_types.decl(astnode)}
     % endif
 % endfor

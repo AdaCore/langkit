@@ -5,7 +5,7 @@
    <%
       # Parent class for "cls", or None if "cls" is actually the root AST node
       # (if we called .base() on it, it would return ASTNode).
-      parent_cls = cls.base() if ctx.root_grammar_class != cls else None
+      parent_cls = cls.base() if T.root_node != cls else None
 
       # Python expression that yield a tuple that contains the names for all
       # fields that "cls" inherits.

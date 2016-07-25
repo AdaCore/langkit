@@ -106,6 +106,7 @@ def make_renderer(base_renderer=None):
             'root_node_value_type':  value_type,
             'root_node_kind_name':   kind_name,
             'ctx':                   get_context(),
+            'T':                     T,
             'ada_api':               get_context().ada_api_settings,
             'capi':                  capi,
             'bool_type':             BoolType.c_type(capi).name,

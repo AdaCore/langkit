@@ -3,7 +3,7 @@
 <%namespace name="array_types"   file="array_types_ada.mako" />
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 
-<% root_node_array = ctx.root_grammar_class.array_type() %>
+<% root_node_array = T.root_node.array_type() %>
 
 with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
@@ -1223,7 +1223,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    end Get;
 
    ## Generate the bodies of the root grammar class properties
-   % for prop in ctx.root_grammar_class.get_properties(include_inherited=False):
+   % for prop in T.root_node.get_properties(include_inherited=False):
    ${prop.prop_def}
    % endfor
 
@@ -1234,7 +1234,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    procedure Assign_Names_To_Logic_Vars
     (Node : access ${root_node_value_type}'Class) is
    begin
-      % for f in ctx.root_grammar_class.get_fields( \
+      % for f in T.root_node.get_fields( \
            include_inherited=False, predicate=lambda f: is_logic_var(f.type) \
       ):
          Node.${f.name}.Dbg_Name :=
