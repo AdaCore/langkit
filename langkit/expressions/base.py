@@ -1400,10 +1400,9 @@ class PropertyDef(AbstractNodeData):
         with self.bind(), Self.bind_type(self.struct):
             base_prop = self.base_property()
             message = (
-                '{self_prop}: expected type {{expected}}, got'
+                'expected type {{expected}}, got'
                 ' {{expr_type}} instead (expected type comes from'
-                ' {base_prop})'.format(
-                    self_prop=self.qualname,
+                ' overridden base property in {base_prop})'.format(
                     base_prop=base_prop.struct.name().camel
                 )
             ) if base_prop else None
