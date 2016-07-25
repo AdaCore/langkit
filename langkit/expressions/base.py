@@ -15,7 +15,7 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import (
     extract_library_location, check_source_language, check_multiple,
-    Severity, DiagnosticError, check_type
+    Severity, DiagnosticError, check_type, Context
 )
 from langkit.utils import (
     assert_type, memoized, TypeSet, dispatch_on_type
@@ -194,6 +194,10 @@ class AbstractExpression(Frozable):
     You can then call construct on the root of the expression tree to get back
     a resolved tree of ResolvedExpression objects.
     """
+
+    def diagnostic_context(self):
+        ctx_message = 'in {} expression'.format(self.__class__.__name__)
+        return Context(ctx_message, self.location, "abstract_expr")
 
     def __init__(self):
         self.location = extract_library_location()
