@@ -3,14 +3,17 @@ Code generation was successful
 
 == Incorrect call code 1 ==
 File "test.py", line 30, in BarNode.prop
+  line 44, in FieldAccess expression
     Error: Type BarNode has no 'non_exisisting_prop' field or property
 
 == Incorrect call code 2 ==
 File "test.py", line 30, in BarNode.prop
+  line 45, in FieldAccess expression
     Error: Invalid number of arguments in the call to BarNode.p_prop_2: 1 expected but got 2
 
 == Incorrect call code 3 ==
 File "test.py", line 30, in BarNode.prop
+  line 46, in No expression
     Error: Invalid X actual (#1) for BarNode.p_prop_2: expected Integer but got FooNode
 
 Done

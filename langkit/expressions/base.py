@@ -75,44 +75,46 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
     """
 
     expr = unsugar(expr)
+    with expr.diagnostic_context():
 
-    ret = expr.construct()
-    ret.location = expr.location
+        ret = expr.construct()
+        ret.location = expr.location
 
-    if expected_type_or_pred:
-        if isinstance(expected_type_or_pred, type):
-            if not custom_msg:
-                custom_msg = "Expected type {expected}, got {expr_type}"
-            expected_type = assert_type(expected_type_or_pred, CompiledType)
+        if expected_type_or_pred:
+            if isinstance(expected_type_or_pred, type):
+                if not custom_msg:
+                    custom_msg = "Expected type {expected}, got {expr_type}"
+                expected_type = assert_type(expected_type_or_pred,
+                                            CompiledType)
 
-            if expected_type == ASTNode:
-                # ASTNode does not exist in the generated code: we use it as a
-                # shortcut for the actual root grammar class instead.
-                expected_type = get_context().root_grammar_class
+                if expected_type == ASTNode:
+                    # ASTNode does not exist in the generated code: we use it
+                    # as a shortcut for the actual root grammar class instead.
+                    expected_type = get_context().root_grammar_class
 
-            check_source_language(ret.type.matches(expected_type), (
-                custom_msg.format(expected=expected_type.name().camel,
-                                  expr_type=ret.type.name().camel)
-            ))
+                check_source_language(ret.type.matches(expected_type), (
+                    custom_msg.format(expected=expected_type.name().camel,
+                                      expr_type=ret.type.name().camel)
+                ))
 
-            # If the type matches expectation but is incompatible in the
-            # generated code, generate a conversion. This is needed for the
-            # various ASTNode subclasses.
-            if expected_type != ret.type:
-                from langkit.expressions import Cast
-                return Cast.Expr(ret, expected_type)
-        else:
-            if not custom_msg:
-                custom_msg = "Evaluating predicate on {expr_type} failed"
-            assert callable(expected_type_or_pred), (
-                "Expected_type_or_pred must either be a type, or a predicate"
-                " of type (ResolvedExpression) -> bool"
-            )
-            check_source_language(expected_type_or_pred(ret.type), (
-                custom_msg.format(expr_type=ret.type.name().camel)
-            ))
+                # If the type matches expectation but is incompatible in the
+                # generated code, generate a conversion. This is needed for the
+                # various ASTNode subclasses.
+                if expected_type != ret.type:
+                    from langkit.expressions import Cast
+                    return Cast.Expr(ret, expected_type)
+            else:
+                if not custom_msg:
+                    custom_msg = "Evaluating predicate on {expr_type} failed"
+                assert callable(expected_type_or_pred), (
+                    "Expected_type_or_pred must either be a type, or a "
+                    "predicate of type (ResolvedExpression) -> bool"
+                )
+                check_source_language(expected_type_or_pred(ret.type), (
+                    custom_msg.format(expr_type=ret.type.name().camel)
+                ))
 
-    return ret
+        return ret
 
 
 class Frozable(object):
