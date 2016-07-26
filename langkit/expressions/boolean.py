@@ -399,7 +399,7 @@ class Then(AbstractExpression):
 
         # Affect default value to the fallback expression. For the moment,
         # only booleans and structs are handled.
-        if not self.default_val:
+        if self.default_val is None:
             if then_expr.type.matches(BoolType):
                 default_expr = construct(False)
             elif issubclass(then_expr.type, Struct):
