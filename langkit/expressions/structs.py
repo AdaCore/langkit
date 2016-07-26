@@ -696,6 +696,12 @@ class Match(AbstractExpression):
             guard = Not.make_expr(
                 Eq.make_expr(casted, LiteralExpr('null', casted.type))
             )
+            if expr.type != rtype:
+                # We already checked that type matches, so only way this is
+                # true is if expr.type is an ASTNode type derived from
+                # rtype. In that case, we need an explicity upcast.
+                expr = Cast.Expr(expr, rtype)
+
             result = If.Expr(guard, expr, result, rtype)
 
         return result
