@@ -135,7 +135,9 @@ library project ${lib_name} is
             for Default_Switches ("C") use Common_C_Cargs
               & ("-Ofast", "-fno-ree", "-fdisable-rtl-cprop_hardreg",
                  "-fdisable-rtl-sched2");
-            -- Deactivate because of memory usage, see P726-024
+            --  Deactivate because of memory usage, see P726-024. This limits
+            --  the memory usage peaks of GCC 6 based compilers and should
+            --  prevent OOM on 32-bit platforms.
       end case;
    end Compiler;
 
