@@ -129,8 +129,8 @@ class Eq(AbstractExpression):
                 )
 
                 # Cast the ast node type if necessary
-                if (rhs.type.matches(ASTNode)
-                        and rhs.type != StructMetaclass.root_grammar_class):
+                if (rhs.type.matches(ASTNode) and
+                        rhs.type != StructMetaclass.root_grammar_class):
                     rhs = Cast.Expr(rhs, StructMetaclass.root_grammar_class)
 
                 return BuiltinCallExpr("Equals", EquationType, [lhs, rhs],
