@@ -133,9 +133,9 @@ library project ${lib_name} is
             for Default_Switches ("Ada") use
               ("-g", "-Ofast", "-gnatp") & Common_Ada_Cargs;
             for Default_Switches ("C") use Common_C_Cargs
-              & ("-Ofast",
-                 -- Deactivate because of memory usage, see OA26-005
-                 "-fno-ree");
+              & ("-Ofast", "-fno-ree", "-fdisable-rtl-cprop_hardreg",
+                 "-fdisable-rtl-sched2");
+            -- Deactivate because of memory usage, see P726-024
       end case;
    end Compiler;
 
