@@ -90,6 +90,8 @@ library project ${lib_name} is
    for Object_Dir
       use "../../obj/${lib_name.lower()}/" & Library_Kind_Param;
 
+   Target := Libadalang'Target;
+
    package Compiler is
 
       Common_Ada_Cargs := ();
@@ -132,12 +134,20 @@ library project ${lib_name} is
             --  profiling, for instance.
             for Default_Switches ("Ada") use
               ("-g", "-Ofast", "-gnatp") & Common_Ada_Cargs;
-            for Default_Switches ("C") use Common_C_Cargs
-              & ("-Ofast", "-fno-ree", "-fdisable-rtl-cprop_hardreg",
-                 "-fdisable-rtl-sched2");
-            --  Deactivate because of memory usage, see P726-024. This limits
-            --  the memory usage peaks of GCC 6 based compilers and should
-            --  prevent OOM on 32-bit platforms.
+
+            for Default_Switches ("C") use Common_C_Cargs & ("-Ofast");
+
+            case Target is
+               when "x86-linux" | "x86-windows" =>
+                  for Switches ("quex_lexer.c") use Common_C_Cargs
+                    & ("-Ofast", "-fno-ree", "-fdisable-rtl-cprop_hardreg",
+                       "-fdisable-rtl-sched2", "-mno-stv");
+                  --  Deactivate because of memory usage, see P726-024. This
+                  --  limits the memory usage peaks of GCC 6 based compilers
+                  --  and should prevent OOM on 32-bit platforms.
+               when others =>
+                  null;
+            end case;
       end case;
    end Compiler;
 
