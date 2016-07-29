@@ -6,6 +6,7 @@
 
 <% root_node_array = T.root_node.array_type() %>
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
+<% library_private_field = lambda f: not library_public_field(f) %>
 
 with Ada.Finalization;
 with Ada.Iterator_Interfaces;
@@ -626,6 +627,16 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Internal helper to get the unit that owns an AST node
 
 private
+
+   ------------------------------
+   -- Root AST node properties --
+   ------------------------------
+
+   % for prop in T.root_node.get_properties( \
+         include_inherited=False, \
+         predicate=library_private_field):
+      ${prop.prop_decl}
+   % endfor
 
    --------------------------
    -- Extensions internals --

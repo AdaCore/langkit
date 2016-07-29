@@ -18,6 +18,14 @@ with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
 
+pragma Warnings (Off, "referenced");
+with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;
+with Adalog.Operations;          use Adalog.Operations;
+with Adalog.Predicates;          use Adalog.Predicates;
+with Adalog.Pure_Relations;      use Adalog.Pure_Relations;
+with Adalog.Variadic_Operations; use Adalog.Variadic_Operations;
+pragma Warnings (On, "referenced");
+
 package body ${_self.ada_api_settings.lib_name}.AST is
 
    ${array_types.body(LexicalEnvType.array_type())}
