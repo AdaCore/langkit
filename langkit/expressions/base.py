@@ -231,6 +231,9 @@ class AbstractExpression(Frozable):
                 elif isinstance(v, (list, tuple)):
                     explore_objs(v)
 
+                elif isinstance(v, (dict)):
+                    explore_objs(v.items())
+
         if not self.__dict__.get("_is_prepared", False):
             self.do_prepare()
             self.__dict__['_is_prepared'] = True
