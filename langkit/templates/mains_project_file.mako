@@ -26,7 +26,7 @@ project Mains is
    package Compiler is
       case Build_Mode is
          when "dev" =>
-            for Default_Switches ("Ada") use ("-g", "-O0");
+            for Default_Switches ("Ada") use ("-g", "-O0", "-gnata");
 
          when "prod" =>
             --  Debug information is useful even with optimization for

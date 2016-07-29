@@ -49,7 +49,7 @@ library project Langkit_Support is
       case Build_Mode is
          when "dev" =>
             for Default_Switches ("Ada") use
-               Common_Ada_Cargs & ("-g", "-O0", "-gnatwe");
+               Common_Ada_Cargs & ("-g", "-O0", "-gnatwe", "-gnata");
 
          when "prod" =>
             --  Debug information is useful even with optimization for

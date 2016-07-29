@@ -104,7 +104,7 @@ library project ${lib_name} is
       case Build_Mode is
          when "dev" =>
             case Enable_Warnings is
-               when "true" => Common_Ada_Cargs := ("-gnatwaeCKMR");
+               when "true" => Common_Ada_Cargs := ("-gnatwaeCKMR", "-gnata");
                when others => null;
             end case;
             --  If asked to, enable all warnings and treat them as errors,
@@ -120,7 +120,7 @@ library project ${lib_name} is
             --      conversions for AST nodes (A'Class and B'Class are not
             --      compatible even though B derives from A).
 
-            for Default_Switches ("Ada") use ("-g", "-O0") & Common_Ada_Cargs;
+            for Default_Switches ("Ada") use Common_Ada_Cargs & ("-g", "-O0");
 
             for Default_Switches ("C") use Common_C_Cargs & ("-g3", "-O0");
 
@@ -133,7 +133,7 @@ library project ${lib_name} is
             --  Debug information is useful even with optimization for
             --  profiling, for instance.
             for Default_Switches ("Ada") use
-              ("-g", "-Ofast", "-gnatp") & Common_Ada_Cargs;
+               Common_Ada_Cargs & ("-g", "-Ofast", "-gnatp");
 
             for Default_Switches ("C") use Common_C_Cargs & ("-Ofast");
 
