@@ -16,11 +16,6 @@
    ## Generate logic/predicate binders for the properties who require it. Note
    ## that we need to generate them before the properties bodies, because
    ## they'll be used in the bodies.
-
-   --------------------
-   --  Logic helpers --
-   --------------------
-
    % for prop in cls.get_properties(include_inherited=False):
    ${prop_helpers.generate_logic_binder(prop)}
    ${prop_helpers.generate_logic_predicates(prop)}
