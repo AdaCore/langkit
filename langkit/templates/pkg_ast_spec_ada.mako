@@ -628,6 +628,14 @@ package ${_self.ada_api_settings.lib_name}.AST is
 
 private
 
+   function Children
+     (Node : access ${root_node_value_type}'Class)
+     return ${root_node_array.name()};
+   --  Return an array containing all the children of Node.
+   --  This is an alternative to the Child/Child_Count pair, useful if you want
+   --  the convenience of ada arrays, and you don't care about the small
+   --  performance hit of creating an array.
+
    ------------------------------
    -- Root AST node properties --
    ------------------------------

@@ -1242,6 +1242,11 @@ class StructMetaclass(CompiledTypeMetaclass):
                 doc="Return an array that contains the lexical parents (this"
                     " node included). Nearer parents are first in the list."
             )),
+            ("children", BuiltinField(
+                type=mcs.root_grammar_class.array_type(),
+                doc="Return an array that contains the direct lexical "
+                    "children "
+            )),
             ("token_start", BuiltinField(
                 type=Token,
                 doc="Return the first token used to parse this node."

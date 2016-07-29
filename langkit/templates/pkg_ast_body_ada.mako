@@ -422,6 +422,17 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end return;
    end Children;
 
+   function Children
+     (Node : access ${root_node_value_type}'Class)
+     return ${root_node_array.name()}
+   is
+      C : ${root_node_type_name}_Arrays.Array_Type := Children (Node);
+   begin
+      return Ret : ${root_node_array.name()} := Create (C'Length) do
+         Ret.Items := C;
+      end return;
+   end Children;
+
    -----------------
    -- First_Token --
    -----------------
@@ -818,7 +829,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
          --  Call recursively on children. Use the Children_Env if available,
          --  else pass the existing Current_Env.
-         for Child of Children (Node) loop
+         for Child of ${root_node_type_name}_Arrays.Array_Type'
+            (Children (Node))
+         loop
             if Children_Env = null then
                Populate_Internal (Child, Current_Env);
             else
@@ -992,7 +1005,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
               (Env, Get_Env_Id (Env), Get_Env_Id (Env.Parent));
          end if;
 
-         for Child of Children (Current) loop
+         for Child of ${root_node_type_name}_Arrays.Array_Type'
+            (Children (Current))
+         loop
             Internal (Child);
          end loop;
       end Internal;
@@ -1248,7 +1263,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          Node.${f.name}.Dbg_Name :=
            new String'(Image (Node.Short_Image) & ".${f.name}");
       % endfor
-      for Child of Children (Node) loop
+      for Child of ${root_node_type_name}_Arrays.Array_Type'
+         (Children (Node))
+      loop
          if Child /= null then
             Assign_Names_To_Logic_Vars (Child);
          end if;
