@@ -43,12 +43,13 @@ library project Langkit_Support is
    for Object_Dir
       use "../../obj/langkit_support/" & Library_Kind_Param;
 
-   Common_Ada_Cargs := ("-gnatwae", "-gnatyg");
+   Common_Ada_Cargs := ("-gnatwa", "-gnatyg");
 
    package Compiler is
       case Build_Mode is
          when "dev" =>
-            for Default_Switches ("Ada") use Common_Ada_Cargs & ("-g", "-O0");
+            for Default_Switches ("Ada") use
+               Common_Ada_Cargs & ("-g", "-O0", "-gnatwe");
 
          when "prod" =>
             --  Debug information is useful even with optimization for
