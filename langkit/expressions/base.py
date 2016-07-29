@@ -259,7 +259,7 @@ class AbstractExpression(Frozable):
         )
         from langkit.expressions.boolean import Eq, BinaryBooleanOperator, Then
         from langkit.expressions.collections import (
-            CollectionGet, CollectionLength, CollectionSingleton
+            CollectionGet, CollectionLength, CollectionSingleton, Concat
         )
         from langkit.expressions.logic import (
             GetLogicValue, SolveEquation
@@ -293,6 +293,8 @@ class AbstractExpression(Frozable):
             'mapcat':         partial(Map, self, concat=True),
             'take_while':     partial(Map, self, lambda x: x, lambda x: None,
                                       False),
+
+            'concat':         partial(Concat, self),
 
             'singleton':      CollectionSingleton(self),
 
