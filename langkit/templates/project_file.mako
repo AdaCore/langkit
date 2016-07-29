@@ -95,6 +95,10 @@ library project ${lib_name} is
    package Compiler is
 
       Common_Ada_Cargs := ();
+      case Enable_Warnings is
+         when "true" => Common_Ada_Cargs := ("-gnatwaCKMR");
+         when others => null;
+      end case;
 
       Common_C_Cargs :=
         ("-I${quex_path}",
@@ -103,10 +107,6 @@ library project ${lib_name} is
 
       case Build_Mode is
          when "dev" =>
-            case Enable_Warnings is
-               when "true" => Common_Ada_Cargs := ("-gnatwaeCKMR", "-gnata");
-               when others => null;
-            end case;
             --  If asked to, enable all warnings and treat them as errors,
             --  except:
             --    * conditional expressions used in tests that are known to be
@@ -120,7 +120,8 @@ library project ${lib_name} is
             --      conversions for AST nodes (A'Class and B'Class are not
             --      compatible even though B derives from A).
 
-            for Default_Switches ("Ada") use Common_Ada_Cargs & ("-g", "-O0");
+            for Default_Switches ("Ada") use
+               Common_Ada_Cargs & ("-g", "-O0", "-gnatwe", "-gnata");
 
             for Default_Switches ("C") use Common_C_Cargs & ("-g3", "-O0");
 
