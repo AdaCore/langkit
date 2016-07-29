@@ -80,7 +80,10 @@ package body Adalog.Logic_Ref is
 
    function GetL (Self : Var) return Element_Type is
    begin
-      pragma Assert (Self.Reset = False);
+      --  TODO??? We removed an assert about Self.Reset being False, because
+      --  we want to be able to access the variable even if the element is
+      --  unset, eg. null. However, we need to have a definite null value for
+      --  elements, which could even replace the Reset flag altogether maybe.
       return Self.El;
    end GetL;
 
