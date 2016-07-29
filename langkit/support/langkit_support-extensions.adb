@@ -8,11 +8,11 @@ package body Langkit_Support.Extensions is
 
    package Extension_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Unbounded_String,
-      Element_Type    => Extension_Id,
+      Element_Type    => Extension_ID,
       Hash            => Ada.Strings.Unbounded.Hash,
       Equivalent_Keys => "=");
 
-   Next_Extension_Id : Extension_ID := 1;
+   Next_Extension_ID : Extension_ID := 1;
    Extensions        : Extension_Maps.Map;
 
    function Register_Extension (Name : String) return Extension_ID is
@@ -26,9 +26,9 @@ package body Langkit_Support.Extensions is
 
       if Cur = No_Element then
          declare
-            Result : constant Extension_ID := Next_Extension_Id;
+            Result : constant Extension_ID := Next_Extension_ID;
          begin
-            Next_Extension_Id := Next_Extension_Id + 1;
+            Next_Extension_ID := Next_Extension_ID + 1;
             Extensions.Insert (Key, Result);
             return Result;
          end;
