@@ -47,6 +47,8 @@ library project ${lib_name} is
       "adalog-relations.ads",
       "adalog-unify_lr.adb",
       "adalog-unify_lr.ads",
+      "adalog-variadic_operations.adb",
+      "adalog-variadic_operations.ads",
       "${lib_name.lower()}.ads",
       "${lib_name.lower()}-analysis.adb",
       "${lib_name.lower()}-analysis.ads",
