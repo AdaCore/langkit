@@ -21,7 +21,7 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
-private package Adalog.Debug is
+package Adalog.Debug is
    Debug : constant Boolean := False;
 
    procedure Trace (Str : String);

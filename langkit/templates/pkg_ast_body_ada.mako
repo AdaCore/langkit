@@ -20,6 +20,7 @@ with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
 
 pragma Warnings (Off, "referenced");
 with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;
+with Adalog.Debug;
 with Adalog.Operations;          use Adalog.Operations;
 with Adalog.Predicates;          use Adalog.Predicates;
 with Adalog.Pure_Relations;      use Adalog.Pure_Relations;
@@ -1257,19 +1258,22 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    procedure Assign_Names_To_Logic_Vars
     (Node : access ${root_node_value_type}'Class) is
    begin
-      % for f in T.root_node.get_fields( \
-           include_inherited=False, predicate=lambda f: is_logic_var(f.type) \
-      ):
-         Node.${f.name}.Dbg_Name :=
-           new String'(Image (Node.Short_Image) & ".${f.name}");
-      % endfor
-      for Child of ${root_node_type_name}_Arrays.Array_Type'
-         (Children (Node))
-      loop
-         if Child /= null then
-            Assign_Names_To_Logic_Vars (Child);
-         end if;
-      end loop;
+      if Adalog.Debug.Debug then
+         % for f in T.root_node.get_fields( \
+              include_inherited=False, \
+              predicate=lambda f: is_logic_var(f.type) \
+         ):
+            Node.${f.name}.Dbg_Name :=
+              new String'(Image (Node.Short_Image) & ".${f.name}");
+         % endfor
+         for Child of ${root_node_type_name}_Arrays.Array_Type'
+            (Children (Node))
+         loop
+            if Child /= null then
+               Assign_Names_To_Logic_Vars (Child);
+            end if;
+         end loop;
+      end if;
    end Assign_Names_To_Logic_Vars;
 
 end ${_self.ada_api_settings.lib_name}.AST;
