@@ -184,13 +184,30 @@ private
    type Analysis_Unit_Type is new Analysis_Unit_Interface_Type with
    record
       Context          : Analysis_Context;
+      --  The owning context for this analysis unit
+
       Ref_Count        : Natural;
+      --  Ref count for the analysis unit. Note that in the Ada API you'll
+      --  still have to call Inc_Ref/Dec_Ref manually.
+
       AST_Root         : ${root_node_type_name};
+
       File_Name        : Unbounded_String;
+      --  The originating name for this analysis unit. This should be set even
+      --  if the analysis unit was parsed from a buffer.
+
       Charset          : Unbounded_String;
+      --  The parsing charset for this analysis unit, as a string
+
       TDH              : aliased Token_Data_Handler;
+      --  The token data handler that handles all token data during parsing and
+      --  owns it afterwards.
+
       Diagnostics      : Diagnostics_Vectors.Vector;
+      --  The list of diagnostics produced for this analysis unit
+
       With_Trivia      : Boolean;
+      --  Whether Trivia nodes were parsed and included in this analysis unit
 
       Is_Env_Populated : Boolean;
       --  Whether Populate_Lexical_Env was called on this unit. Used not to
