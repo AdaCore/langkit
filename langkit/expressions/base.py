@@ -1276,19 +1276,23 @@ class PropertyDef(AbstractNodeData):
 
             # Wrap the expression in a Let block, so that the user can
             # declare local variables via the Var helper.
-            with self.bind():
-                function_block = Block()
-                with Block.set_block(function_block):
-                    fn = assert_type(self.expr, types.FunctionType)
-                    expr = check_type(
-                        fn(*self.argument_vars), AbstractExpression,
-                        "Properties return value should be an expression"
-                    )
-                    function_block.expr = expr
-                    self.expr = function_block
+            if self.abstract:
+                self.expr = None
+            else:
+                with self.bind():
+                    function_block = Block()
+                    with Block.set_block(function_block):
+                        fn = assert_type(self.expr, types.FunctionType)
+                        expr = check_type(
+                            fn(*self.argument_vars), AbstractExpression,
+                            "Properties return value should be an expression"
+                        )
+                        function_block.expr = expr
+                        self.expr = function_block
 
-        with self.bind():
-            self.expr.prepare()
+        if not self.abstract:
+            with self.bind():
+                self.expr.prepare()
 
         # Add the implicit lexical env. parameter
         self._add_argument(PropertyDef.env_arg_name,
