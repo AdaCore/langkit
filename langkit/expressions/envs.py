@@ -1,7 +1,7 @@
 from functools import partial
 
 from langkit import names
-from langkit.compiled_types import EnvElement, LexicalEnvType, Token
+from langkit.compiled_types import EnvElement, LexicalEnvType, Token, BoolType
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BuiltinCallExpr,
     ResolvedExpression, construct, PropertyDef, BasicExpr
@@ -181,4 +181,27 @@ class EnvGroupArray(AbstractExpression):
             'Group', LexicalEnvType,
             [construct(self.env_array_expr, LexicalEnvType.array_type())],
             'Group_Env'
+        )
+
+
+class IsVisibleFrom(AbstractExpression):
+    """
+    Expression that will return whether an env's associated compilation unit is
+    visible from another env's compilation unit.
+
+    TODO: This is mainly exposed on envs because the CompilationUnit type is
+    not exposed in the DSL yet. We might want to change that eventually if
+    there are other compelling reasons to do it.
+    """
+
+    def __init__(self, base_env, referenced_env):
+        super(IsVisibleFrom, self).__init__()
+        self.base_env = base_env
+        self.referenced_env = referenced_env
+
+    def construct(self):
+        return BuiltinCallExpr(
+            'Is_Visible_From', BoolType,
+            [construct(self.base_env, LexicalEnvType),
+             construct(self.referenced_env, LexicalEnvType)]
         )
