@@ -5,6 +5,7 @@ import inspect
 from itertools import count
 import types
 
+from enum import Enum
 import funcy
 
 from langkit import names
@@ -1562,7 +1563,14 @@ def Property(expr, doc=None, private=None, type=None):
                        private=private, type=type)
 
 
-def langkit_property(private=None, return_type=None, abstract=False):
+class AbstractKind(Enum):
+    concrete = 1
+    abstract = 2
+    abstract_runtime_check = 3
+
+
+def langkit_property(private=None, return_type=None,
+                     kind=AbstractKind.concrete):
     """
     Decorator to create properties from real python methods. See Property for
     more details.
@@ -1571,11 +1579,15 @@ def langkit_property(private=None, return_type=None, abstract=False):
     :type return_type: CompiledType
     """
     def decorator(expr_fn):
-        return PropertyDef(expr_fn, AbstractNodeData.PREFIX_PROPERTY,
-                           type=return_type,
-                           private=private,
-                           doc=expr_fn.__doc__,
-                           abstract=abstract)
+        return PropertyDef(
+            expr_fn, AbstractNodeData.PREFIX_PROPERTY,
+            type=return_type,
+            private=private,
+            doc=expr_fn.__doc__,
+            abstract=kind in [AbstractKind.abstract,
+                              AbstractKind.abstract_runtime_check],
+            abstract_runtime_check=kind == AbstractKind.abstract_runtime_check
+        )
     return decorator
 
 
