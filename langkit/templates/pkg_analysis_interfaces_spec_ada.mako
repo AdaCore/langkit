@@ -39,6 +39,11 @@ package ${_self.ada_api_settings.lib_name}.Analysis_Interfaces is
    --  access types. This is required to we can store these values in the same
    --  place.
 
+   function Is_Referenced
+     (Unit, Referenced : access Analysis_Unit_Interface_Type) return Boolean
+   is abstract;
+   --  Check whether the Referenced unit is referenced from Unit
+
    generic
       type T is private;
       type T_Access is access all T;

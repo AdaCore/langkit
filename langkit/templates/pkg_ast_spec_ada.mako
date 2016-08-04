@@ -628,6 +628,15 @@ package ${_self.ada_api_settings.lib_name}.AST is
 
 private
 
+   use AST_Envs;
+
+   function Is_Visible_From
+     (Env, Referenced : AST_Envs.Lexical_Env) return Boolean
+   is
+     (Is_Referenced (Get_Unit (Env.Node), Get_Unit (Referenced.Node)));
+   --  Check whether Referenced's unit is referenced from Env's unit. Used for
+   --  property generation purposes.
+
    function Children
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_array.name()};

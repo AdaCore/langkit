@@ -7,6 +7,7 @@ with Ada.Strings.Unbounded.Hash;
 with System;
 
 with Langkit_Support.Bump_Ptr;           use Langkit_Support.Bump_Ptr;
+with Langkit_Support.Cheap_Sets;
 with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
 with Langkit_Support.Vectors;
@@ -141,6 +142,15 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    procedure PP_Trivia (Unit : Analysis_Unit);
    --  Debug helper: output a minimal AST with mixed trivias
 
+   procedure Reference_Unit (From, Referenced : Analysis_Unit);
+   --  Set the Referenced unit as being referenced from the From unit. This is
+   --  useful for visibility purposes, and is mainly meant to be used in the
+   --  env hooks.
+
+   function Is_Referenced
+     (Unit, Referenced : Analysis_Unit) return Boolean;
+   --  Check whether the Referenced unit is referenced from Unit
+
 private
 
    type Analysis_Context_Type;
@@ -180,6 +190,9 @@ private
 
    package Destroyable_Vectors is new Langkit_Support.Vectors
      (Destroyable_Type);
+
+   package Analysis_Unit_Sets
+   is new Langkit_Support.Cheap_Sets (Analysis_Unit, null);
 
    type Analysis_Unit_Type is new Analysis_Unit_Interface_Type with
    record
@@ -223,6 +236,10 @@ private
 
       Destroyables     : Destroyable_Vectors.Vector;
       --  Collection of objects to destroy when destroying the analysis unit
+
+      Referenced_Units : Analysis_Unit_Sets.Set;
+      --  Units that are referenced from this one. Useful for
+      --  visibility/computation of the reference graph.
    end record;
 
    overriding
@@ -237,6 +254,16 @@ private
      (Unit    : access Analysis_Unit_Type;
       Object  : System.Address;
       Destroy : Destroy_Procedure);
+
+   overriding function Is_Referenced
+     (Unit, Referenced : access Analysis_Unit_Type) return Boolean;
+   --  Check whether the Referenced unit is referenced from Unit
+
+   function Is_Referenced
+     (Unit, Referenced : Analysis_Unit) return Boolean
+   is
+     (Unit.Is_Referenced (Referenced));
+   --  Check whether the Referenced unit is referenced from Unit
 
    function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
      (Unit.AST_Root);

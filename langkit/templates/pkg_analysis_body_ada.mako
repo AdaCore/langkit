@@ -152,7 +152,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
             Is_Env_Populated => False,
             Rule             => Rule,
             AST_Mem_Pool     => No_Pool,
-            Destroyables     => Destroyable_Vectors.Empty_Vector);
+            Destroyables     => Destroyable_Vectors.Empty_Vector,
+            Referenced_Units => <>);
          Initialize (Unit.TDH, Context.Symbols);
          Context.Units_Map.Insert (Fname, Unit);
       else
@@ -520,5 +521,32 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    begin
       return Convert (Get_Unit (Node));
    end Get_Unit;
+
+   --------------------
+   -- Reference_Unit --
+   --------------------
+
+   procedure Reference_Unit (From, Referenced : Analysis_Unit) is
+      Dummy : Boolean;
+   begin
+      Dummy := Analysis_Unit_Sets.Add (From.Referenced_Units, Referenced);
+   end Reference_Unit;
+
+   -------------------
+   -- Is_Referenced --
+   -------------------
+
+   overriding function Is_Referenced
+     (Unit, Referenced : access Analysis_Unit_Type) return Boolean
+   is
+   begin
+      if Unit = null or else Referenced = null then
+         return False;
+      elsif Unit = Referenced then
+         return True;
+      else
+         return Analysis_Unit_Sets.Has (Unit.Referenced_Units, Referenced);
+      end if;
+   end;
 
 end ${_self.ada_api_settings.lib_name}.Analysis;
