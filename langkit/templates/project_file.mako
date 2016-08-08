@@ -149,7 +149,9 @@ library project ${lib_name} is
                   --  limits the memory usage peaks of GCC 6 based compilers
                   --  and should prevent OOM on 32-bit platforms.
                when others =>
-                  null;
+                  for Switches ("quex_lexer.c") use Common_C_Cargs
+                    & ("-Ofast", "-fno-ree");
+                  --  ... and this prevents OOM on other platforms
             end case;
       end case;
    end Compiler;
