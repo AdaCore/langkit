@@ -1,7 +1,9 @@
 from functools import partial
 
 from langkit import names
-from langkit.compiled_types import EnvElement, LexicalEnvType, Token, BoolType
+from langkit.compiled_types import (
+    EnvElement, LexicalEnvType, Token, BoolType, T
+)
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BuiltinCallExpr,
     ResolvedExpression, construct, PropertyDef, BasicExpr
@@ -205,3 +207,17 @@ class IsVisibleFrom(AbstractExpression):
             [construct(self.base_env, LexicalEnvType),
              construct(self.referenced_env, LexicalEnvType)]
         )
+
+
+class EnvNode(AbstractExpression):
+    """
+    Return the node associated to this environment.
+    """
+
+    def __init__(self, env):
+        super(EnvNode, self).__init__()
+        self.env = env
+
+    def construct(self):
+        return BasicExpr('{}.Node',
+                         T.root_node, [construct(self.env, LexicalEnvType)])

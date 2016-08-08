@@ -256,7 +256,7 @@ class AbstractExpression(Frozable):
         )
         from langkit.expressions.structs import Cast, IsA, IsNull, Match
         from langkit.expressions.envs import (
-            EnvBind, EnvGet, EnvGroupArray, EnvOrphan, IsVisibleFrom
+            EnvBind, EnvGet, EnvGroupArray, EnvOrphan, IsVisibleFrom, EnvNode
         )
         from langkit.expressions.boolean import Eq, BinaryBooleanOperator, Then
         from langkit.expressions.collections import (
@@ -314,6 +314,7 @@ class AbstractExpression(Frozable):
             'env_orphan':      EnvOrphan(self),
             'resolve_unique':  partial(EnvGet, self, resolve_unique=True),
             'is_visible_from': partial(IsVisibleFrom, referenced_env=self),
+            'env_node':        EnvNode(self),
 
             # Logic handling
             "get_value":      GetLogicValue(self),
