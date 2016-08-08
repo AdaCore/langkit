@@ -18,7 +18,6 @@ from distutils.spawn import find_executable
 from glob import glob
 import inspect
 import itertools
-import lib2to3.main
 import os
 from os import path
 import shutil
@@ -736,6 +735,9 @@ class CompileCtx():
         }
 
         if self.annotate_fields_types:
+            # Only import lib2to3 if the users needs it
+            import lib2to3.main
+
             lib2to3.main.main(
                 "langkit",
                 ["-f", "annotate_fields_types",
