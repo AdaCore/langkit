@@ -183,7 +183,7 @@ class ManageScript(object):
                  ' post-mortem PDB session'
         )
 
-        def create_parser(fn):
+        def create_parser(fn, needs_context=False):
             """
             Create a subparser from a function. Uses the name and the docstring
             of the function to document the subparsers.
@@ -199,7 +199,13 @@ class ManageScript(object):
                 # help.
                 help=fn.__doc__.split('\n\n')[0].strip()
             )
-            p.set_defaults(func=fn)
+
+            def internal(*args, **kwargs):
+                if needs_context:
+                    self.set_context(*args, **kwargs)
+                fn(*args, **kwargs)
+
+            p.set_defaults(func=internal)
             return p
 
         ########
@@ -213,7 +219,7 @@ class ManageScript(object):
         ############
 
         self.generate_parser = generate_parser = create_parser(
-            self.do_generate
+            self.do_generate, True
         )
         self.add_generate_args(generate_parser)
 
@@ -221,14 +227,14 @@ class ManageScript(object):
         # Build #
         #########
 
-        self.build_parser = build_parser = create_parser(self.do_build)
+        self.build_parser = build_parser = create_parser(self.do_build, True)
         self.add_build_args(build_parser)
 
         ########
         # Make #
         ########
 
-        self.make_parser = make_parser = create_parser(self.do_make)
+        self.make_parser = make_parser = create_parser(self.do_make, True)
         self.add_generate_args(make_parser)
         self.add_build_args(make_parser)
 
@@ -415,15 +421,6 @@ class ManageScript(object):
             cov = None
 
         try:
-            self.context = self.create_context(parsed_args)
-            self.context.library_fields_all_public = getattr(
-                parsed_args, 'library_fields_all_public', False
-            )
-
-            # Set the extensions dir on the compile context
-            self.context.extensions_dir = self.dirs.lang_source_dir(
-                "extensions"
-            )
             parsed_args.func(parsed_args)
         except DiagnosticError:
             if parsed_args.debug:
@@ -440,6 +437,17 @@ class ManageScript(object):
         if cov is not None:
             cov.stop()
             cov.generate_report()
+
+    def set_context(self, parsed_args):
+        self.context = self.create_context(parsed_args)
+        self.context.library_fields_all_public = getattr(
+            parsed_args, 'library_fields_all_public', False
+        )
+
+        # Set the extensions dir on the compile context
+        self.context.extensions_dir = self.dirs.lang_source_dir(
+            "extensions"
+        )
 
     def do_generate(self, args):
         """
