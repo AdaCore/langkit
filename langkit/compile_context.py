@@ -27,7 +27,7 @@ import sys
 from funcy import keep
 from mako.lookup import TemplateLookup
 
-from langkit import astdoc, caching, names, template_utils
+from langkit import caching, names, template_utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.diagnostics import (
@@ -837,6 +837,7 @@ class CompileCtx():
             shutil.copy(filepath, join(src_path, filename))
 
         with file(os.path.join(share_path, 'ast-types.txt'), 'w') as f:
+            from langkit import astdoc
             astdoc.write_astdoc(self, f)
 
         if self.verbosity.info:
