@@ -92,7 +92,7 @@ library project ${lib_name} is
    for Object_Dir
       use "../../obj/${lib_name.lower()}/" & Library_Kind_Param;
 
-   Target := Libadalang'Target;
+   Target := ${lib_name}'Target;
 
    package Compiler is
 
