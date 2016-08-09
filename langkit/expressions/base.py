@@ -253,9 +253,7 @@ class AbstractExpression(Frozable):
     @memoized
     def attrs(self):
 
-        from langkit.expressions.collections import (
-            Quantifier, Map, Contains
-        )
+        from langkit.expressions.collections import Map, Contains
         from langkit.expressions.structs import Cast, IsA, IsNull, Match
         from langkit.expressions.boolean import Eq, BinaryBooleanOperator, Then
         from langkit.expressions.collections import (
@@ -268,10 +266,6 @@ class AbstractExpression(Frozable):
         # Using partial allows the user to be able to use keyword arguments
         # defined on the expressions constructors.
         return {
-            # Quantifiers
-            'all':            partial(Quantifier, Quantifier.ALL, self),
-            'any':            partial(Quantifier, Quantifier.ANY, self),
-
             # Type handling
             'cast':           partial(Cast, self, do_raise=False),
             'cast_or_raise':  partial(Cast, self, do_raise=True),

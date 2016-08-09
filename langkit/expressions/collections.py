@@ -10,7 +10,7 @@ from langkit.diagnostics import (
 )
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, AbstractVariable,
-    render, PropertyDef, BuiltinCallExpr
+    render, PropertyDef, BuiltinCallExpr, attr_expr, attr_call
 )
 from langkit.utils import assert_type
 
@@ -271,6 +271,8 @@ class Map(CollectionExpression):
                         take_while_expr)
 
 
+@attr_call('all', kind='all')
+@attr_call('any', kind='any')
 class Quantifier(CollectionExpression):
     """
     Expression that tests a predicate over the items of a collection.
@@ -334,15 +336,15 @@ class Quantifier(CollectionExpression):
     ALL = 'all'
     ANY = 'any'
 
-    def __init__(self, kind, collection, predicate):
+    def __init__(self, collection, predicate, kind):
         """
         See CollectionExpression for the other parameters.
 
+        :param AbstractExpression predicate: Boolean expression to evaluate on
+            elements in "collection".
         :param str kind: Quantifier kind. ALL that checks "predicate" holds on
             all elements in "collection" while ANY checks that it holds on at
             least one of them.
-        :param AbstractExpression predicate: Boolean expression to evaluate on
-            elements in "collection".
         """
         super(Quantifier, self).__init__(collection, predicate)
         assert kind in (self.ALL, self.ANY)
