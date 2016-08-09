@@ -341,12 +341,12 @@
          ## tree at all.
          if Langkit_Support.Extensions.Has_Extensions then
             Node.Free_Extensions;
-            % for i, field in enumerate(astnode_fields):
-               if Node.${field.name} /= null then
-                  Destroy (Node.${field.name});
-               end if;
-            % endfor
          end if;
+         % for field in astnode_fields:
+            if Node.${field.name} /= null then
+               Destroy (Node.${field.name});
+            end if;
+         % endfor
       end Destroy;
 
       ---------------------
