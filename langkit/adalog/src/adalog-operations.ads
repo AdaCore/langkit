@@ -40,6 +40,8 @@ package Adalog.Operations is
    overriding function Solve (Inst : in out Or_Rec) return Boolean;
    overriding procedure Reset (Inst : in out Or_Rec);
    overriding procedure Cleanup (Inst : in out Or_Rec);
+   overriding function Children (Inst : Or_Rec) return Relation_Array
+   is ((Inst.Left, Inst.Right));
 
    ----------------------------------
    --  And relation implementation --
@@ -53,6 +55,8 @@ package Adalog.Operations is
    overriding function Solve (Inst : in out And_Rec) return Boolean;
    overriding procedure Reset (Inst : in out And_Rec);
    overriding procedure Cleanup (Inst : in out And_Rec);
+   overriding function Children (Inst : And_Rec) return Relation_Array
+   is ((Inst.Left, Inst.Right));
 
    ----------------------------------------
    --  Operator overloading constructors --
