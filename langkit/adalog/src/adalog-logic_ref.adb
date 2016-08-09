@@ -244,4 +244,13 @@ package body Adalog.Logic_Ref is
       Add_Predicate (Self.all, Pred);
    end Add_Predicate;
 
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Self : in out Var) is
+   begin
+      Pred_Sets.Destroy (Self.Pending_Relations);
+   end Destroy;
+
 end Adalog.Logic_Ref;

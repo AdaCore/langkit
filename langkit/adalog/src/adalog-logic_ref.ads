@@ -49,6 +49,7 @@ package Adalog.Logic_Ref is
    function Is_Defined (Self : Var) return Boolean;
    function Set_Value (Self : access Var; Data : Element_Type) return Boolean;
    function GetL (Self : Var) return Element_Type;
+   procedure Destroy (Self : in out Var);
 
    --  Var predicates functions
 
