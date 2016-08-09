@@ -320,6 +320,10 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       Position : Relative_Position;
       Result   : ${root_node_type_name};
    begin
+      if Sloc = No_Source_Location then
+         return null;
+      end if;
+
       Lookup_Relative (Node, Sloc, Position, Result, Snap);
       return Result;
    end Lookup;
