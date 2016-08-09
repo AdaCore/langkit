@@ -428,6 +428,8 @@ class ManageScript(object):
             print >> sys.stderr, col('Errors, exiting', Colors.FAIL)
             sys.exit(1)
         except Exception:
+            if parsed_args.debug:
+                raise
             import traceback
             traceback.print_exc()
             print_errors(recovered=True)
