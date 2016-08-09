@@ -177,6 +177,9 @@
    # Keep a list of ASTNode fields
    astnode_fields = cls.get_parse_fields(lambda f: is_ast_node(f.type))
 
+   # Keep a list of user fields
+   user_fields = cls.get_user_fields()
+
    # Keep a list of fields that are annotated with repr
    repr_fields = cls.get_parse_fields(lambda f: f.repr)
 
@@ -346,6 +349,11 @@
             if Node.${field.name} /= null then
                Destroy (Node.${field.name});
             end if;
+         % endfor
+         % for field in user_fields:
+            % if is_logic_var(field.type):
+               Eq_Node.Refs.Destroy (Node.${field.name});
+            % endif
          % endfor
       end Destroy;
 
