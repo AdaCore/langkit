@@ -6,7 +6,7 @@ from langkit.compiled_types import (
 )
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BuiltinCallExpr,
-    ResolvedExpression, construct, PropertyDef, BasicExpr
+    ResolvedExpression, construct, PropertyDef, BasicExpr, attr_expr, attr_call
 )
 
 Env = AbstractVariable(names.Name("Current_Env"), type=LexicalEnvType)
@@ -14,6 +14,8 @@ EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
                             type=LexicalEnvType)
 
 
+@attr_call("get")
+@attr_call("resolve_unique", resolve_unique=True)
 class EnvGet(AbstractExpression):
     """
     Expression for lexical environment get operation.
@@ -54,6 +56,7 @@ class EnvGet(AbstractExpression):
                              EnvElement.array_type())
 
 
+@attr_call("eval_in_env")
 class EnvBind(AbstractExpression):
     """
     Expression that will evaluate a subexpression in the context of a
@@ -121,6 +124,7 @@ class EnvBind(AbstractExpression):
                             construct(self.to_eval_expr))
 
 
+@attr_expr("env_orphan")
 class EnvOrphan(AbstractExpression):
     """
     Expression that will create a lexical environment copy with no parent.
@@ -162,6 +166,7 @@ class EnvGroup(AbstractExpression):
         )
 
 
+@attr_expr("env_group")
 class EnvGroupArray(AbstractExpression):
     """
     Expression that will return a lexical environment that logically groups
@@ -186,6 +191,7 @@ class EnvGroupArray(AbstractExpression):
         )
 
 
+@attr_call("is_visible_from")
 class IsVisibleFrom(AbstractExpression):
     """
     Expression that will return whether an env's associated compilation unit is
@@ -196,7 +202,7 @@ class IsVisibleFrom(AbstractExpression):
     there are other compelling reasons to do it.
     """
 
-    def __init__(self, base_env, referenced_env):
+    def __init__(self, referenced_env, base_env):
         super(IsVisibleFrom, self).__init__()
         self.base_env = base_env
         self.referenced_env = referenced_env
@@ -209,6 +215,7 @@ class IsVisibleFrom(AbstractExpression):
         )
 
 
+@attr_expr("env_node")
 class EnvNode(AbstractExpression):
     """
     Return the node associated to this environment.
