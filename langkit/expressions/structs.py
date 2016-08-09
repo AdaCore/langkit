@@ -421,6 +421,7 @@ class FieldAccess(AbstractExpression):
         return "<FieldAccess {} {}>".format(self.receiver, self.field)
 
 
+@attr_call("is_a")
 class IsA(AbstractExpression):
     """
     Expression that is the result of testing the kind of a node.
