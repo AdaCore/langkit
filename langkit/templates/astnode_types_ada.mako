@@ -382,7 +382,7 @@
          ## Look for a child node that contains Sloc (i.e. return the most
          ## precise result).
 
-         % for i, field in enumerate(astnode_fields):
+         % for field in astnode_fields:
             ## Note that we assume here that child nodes are ordered so
             ## that the first one has a sloc range that is before the
             ## sloc range of the second child node, etc.
