@@ -197,6 +197,8 @@ class AbstractExpression(Frozable):
     a resolved tree of ResolvedExpression objects.
     """
 
+    attrs_dict = {}
+
     def diagnostic_context(self):
         ctx_message = 'in {} expression'.format(self.__class__.__name__)
         return Context(ctx_message, self.location, "abstract_expr")
@@ -355,7 +357,19 @@ class AbstractExpression(Frozable):
         try:
             return self.attrs()[attr]
         except KeyError:
-            return self.composed_attrs().get(attr, FieldAccess(self, attr))
+            try:
+                klass, args, kwargs, paramless = (
+                    AbstractExpression.attrs_dict[attr]
+                )
+                if paramless:
+                    # Automatically instantiate paramless attributes
+                    return klass(self, *args, **kwargs)
+                else:
+                    # For attributes with parameters, return a partial
+                    # instantiation.
+                    return partial(klass, self, *args, **kwargs)
+            except KeyError:
+                return self.composed_attrs().get(attr, FieldAccess(self, attr))
 
     @Frozable.protect
     def __or__(self, other):
@@ -475,6 +489,51 @@ class AbstractExpression(Frozable):
         """
         from langkit.expressions.boolean import Eq
         return Eq(self, other)
+
+
+def attr_call(name, *args, **kwargs):
+    """
+    Decorator to create  expression accessible through an attribute call on an
+    AbstractExpression instance, from an abstract expression class. See
+    attr_expr_impl for more details.
+
+    :param name: The name of the attribute.
+    :param args: additional arguments to pass to the class.
+    :param kwargs: additional arguments to pass to the class.
+    """
+    return attr_expr_impl(name, args, kwargs)
+
+
+def attr_expr(name, *args, **kwargs):
+    """
+    Decorator to create  expression accessible through a parameterless
+    attribute on an AbstractExpression instance, from an abstract expression
+    class. See attr_expr_impl for more details.
+
+    :param name: The name of the attribute.
+    :param args: additional arguments to pass to the class.
+    :param kwargs: additional arguments to pass to the class.
+    """
+    return attr_expr_impl(name, args, kwargs, parameterless=True)
+
+
+def attr_expr_impl(name, args, kwargs, parameterless=False):
+    """
+    Implementation for attr_expr and attr_call.
+
+    :param name: The name of the attribute.
+    :param bool parameterless: Whether the attribute should take parameters
+        or not.
+    :param args: additional arguments to pass to the class.
+    :param kwargs: additional arguments to pass to the class.
+    """
+
+    def internal(decorated_class):
+        AbstractExpression.attrs_dict[name] = (decorated_class, args, kwargs,
+                                               parameterless)
+        return decorated_class
+
+    return internal
 
 
 class ResolvedExpression(object):
