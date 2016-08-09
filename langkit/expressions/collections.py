@@ -103,6 +103,7 @@ class CollectionExpression(AbstractExpression):
                     iter_scope)
 
 
+@attr_expr("contains")
 class Contains(CollectionExpression):
     """
     Abstract expression for a membership test expression.
@@ -372,6 +373,8 @@ class Quantifier(CollectionExpression):
                                element_var, index_var, iter_scope)
 
 
+@attr_call("at")
+@attr_call("at_or_raise", or_null=False)
 class CollectionGet(AbstractExpression):
     """
     Expression that will get an element from a collection.
@@ -406,6 +409,7 @@ class CollectionGet(AbstractExpression):
         )
 
 
+@attr_expr("length")
 class CollectionLength(AbstractExpression):
     """
     Expression that will return the length of a collection.
