@@ -5,13 +5,16 @@ from langkit.compiled_types import ASTNode, Struct, BoolType, resolve_type
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, LiteralExpr, PropertyDef,
-    ResolvedExpression, Self, UnreachableExpr, construct, render
+    ResolvedExpression, Self, UnreachableExpr, construct, render, attr_expr,
+    attr_call
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
 from langkit.utils import assert_type, TypeSet
 
 
+@attr_call("cast", do_raise=False)
+@attr_call("cast_or_raise", do_raise=True)
 class Cast(AbstractExpression):
     """
     Expression that is the result of casting an ASTNode subclass value

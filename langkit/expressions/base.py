@@ -254,7 +254,7 @@ class AbstractExpression(Frozable):
     def attrs(self):
 
         from langkit.expressions.collections import Map, Contains
-        from langkit.expressions.structs import Cast, IsA, IsNull, Match
+        from langkit.expressions.structs import IsA, IsNull, Match
         from langkit.expressions.boolean import Eq, BinaryBooleanOperator, Then
         from langkit.expressions.collections import (
             CollectionGet, CollectionLength, CollectionSingleton, Concat
@@ -267,8 +267,6 @@ class AbstractExpression(Frozable):
         # defined on the expressions constructors.
         return {
             # Type handling
-            'cast':           partial(Cast, self, do_raise=False),
-            'cast_or_raise':  partial(Cast, self, do_raise=True),
             'is_a':           partial(IsA, self),
             'symbol':         GetSymbol(self),
 
