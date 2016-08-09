@@ -369,7 +369,8 @@ class LogicBooleanOp(AbstractExpression):
                 "Or" if self.kind == self.KIND_OR else "And"
             ),
             EquationType,
-            [construct(self.equation_array, EquationType.array_type())]
+            [construct(self.equation_array, EquationType.array_type())],
+            result_var_name="Logic_Boolean_Op"
         )
 
 
@@ -404,7 +405,8 @@ class LogicTrue(AbstractExpression):
         super(LogicTrue, self).__init__()
 
     def construct(self):
-        return LiteralExpr("True_Rel", type=EquationType)
+        return LiteralExpr("True_Rel", type=EquationType,
+                           result_var_name="Logic_True")
 
 
 class LogicFalse(AbstractExpression):
@@ -416,4 +418,5 @@ class LogicFalse(AbstractExpression):
         super(LogicFalse, self).__init__()
 
     def construct(self):
-        return LiteralExpr("False_Rel", type=EquationType)
+        return LiteralExpr("False_Rel", type=EquationType,
+                           result_var_name="Logic_False")

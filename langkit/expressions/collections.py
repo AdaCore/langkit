@@ -501,5 +501,5 @@ class Concat(AbstractExpression):
         ])
 
         return BuiltinCallExpr(
-            "Concat", array_1.type, [array_1, array_2]
+            "Concat", array_1.type, [array_1, array_2], "Concat_Result"
         )
