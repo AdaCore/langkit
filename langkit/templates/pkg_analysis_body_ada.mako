@@ -402,9 +402,12 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    procedure Destroy (Unit : Analysis_Unit) is
       Unit_Var : Analysis_Unit := Unit;
    begin
+      Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
+
       if Unit.AST_Root /= null then
          Destroy (Unit.AST_Root);
       end if;
+
       Free (Unit.TDH);
       Free (Unit.AST_Mem_Pool);
       for D of Unit.Destroyables loop
