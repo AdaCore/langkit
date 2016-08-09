@@ -266,9 +266,6 @@ class AbstractExpression(Frozable):
         # Using partial allows the user to be able to use keyword arguments
         # defined on the expressions constructors.
         return {
-            # Type handling
-            'symbol':         GetSymbol(self),
-
             # Other predicate combinators
             'equals':         partial(Eq, self),
             'is_null':        IsNull(self),
@@ -730,6 +727,7 @@ class AbstractVariable(AbstractExpression):
 Self = AbstractVariable(names.Name("Self"))
 
 
+@attr_expr("symbol")
 class GetSymbol(AbstractExpression):
     """
     Abstract expression that gets a symbol out of a token.
