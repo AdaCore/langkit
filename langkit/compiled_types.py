@@ -1559,6 +1559,24 @@ class Struct(CompiledType):
                                        field_class=Field)
 
     @classmethod
+    def get_user_fields(cls, predicate=None, include_inherited=True):
+        """
+        Return the list of all the user fields `cls` has, including its
+        parents'.
+
+        :param predicate: Predicate to filter fields if needed.
+        :type predicate: None|(Field) -> bool
+
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :rtype: list[Field]
+        """
+        return cls.get_abstract_fields(predicate, include_inherited,
+                                       field_class=UserField)
+
+    @classmethod
     def get_fields(cls, predicate=None, include_inherited=True):
         """
         Return the list of all the fields `cls` has, including its parents'.
