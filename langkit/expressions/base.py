@@ -254,8 +254,8 @@ class AbstractExpression(Frozable):
     def attrs(self):
 
         from langkit.expressions.collections import Map, Contains
-        from langkit.expressions.structs import IsNull, Match
-        from langkit.expressions.boolean import Eq, BinaryBooleanOperator, Then
+        from langkit.expressions.structs import Match
+        from langkit.expressions.boolean import BinaryBooleanOperator, Then
         from langkit.expressions.collections import (
             CollectionGet, CollectionLength, CollectionSingleton, Concat
         )
@@ -266,10 +266,6 @@ class AbstractExpression(Frozable):
         # Using partial allows the user to be able to use keyword arguments
         # defined on the expressions constructors.
         return {
-            # Other predicate combinators
-            'equals':         partial(Eq, self),
-            'is_null':        IsNull(self),
-
             # Other containers handling
             'at':             partial(CollectionGet, self),
             'at_or_raise':    partial(CollectionGet, self, or_null=False),

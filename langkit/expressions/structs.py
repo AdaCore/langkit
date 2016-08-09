@@ -103,6 +103,7 @@ class Cast(AbstractExpression):
         return Cast.Expr(expr, self.astnode, do_raise=self.do_raise)
 
 
+@attr_expr("is_null")
 class IsNull(AbstractExpression):
     """
     Abstract expression to test the passed expression is null.

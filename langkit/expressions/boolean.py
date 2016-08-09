@@ -6,8 +6,8 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, LiteralExpr, No, PropertyDef,
-    ResolvedExpression, render, construct, BuiltinCallExpr,
-    BasicExpr
+    ResolvedExpression, render, construct, BuiltinCallExpr, BasicExpr,
+    attr_call
 )
 from langkit.expressions.envs import EmptyEnv
 from langkit.utils import assert_type
@@ -96,6 +96,7 @@ def Or(*args):
     return reduce(lambda a, b: a | b, args)
 
 
+@attr_call("equals")
 class Eq(AbstractExpression):
     """
     Expression for equality test expression.
