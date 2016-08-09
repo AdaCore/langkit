@@ -76,6 +76,8 @@ package Adalog.Abstract_Relation is
    function Solve (Self : Relation) return Boolean is (Self.all.Solve);
    --  Shortcut to solve the underlying relation, used by Langkit
 
+   procedure Print_Relation (Self : Relation);
+
    procedure Inc_Ref (Self : Relation);
    procedure Dec_Ref (Self : in out Relation);
    --  Reference counting primitives to be used by Langkit. A Dec_Ref call

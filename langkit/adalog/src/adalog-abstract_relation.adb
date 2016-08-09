@@ -21,7 +21,11 @@
 --                                                                          --
 ------------------------------------------------------------------------------
 
+with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
+with Ada.Tags;
+with Ada.Text_IO;                use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
+with GNATCOLL.Utils;             use GNATCOLL.Utils;
 
 package body Adalog.Abstract_Relation is
 
@@ -55,5 +59,40 @@ package body Adalog.Abstract_Relation is
       end if;
 
    end Dec_Ref;
+
+   --------------------
+   -- Print_Relation --
+   --------------------
+
+   procedure Print_Relation (Self : Relation) is
+      procedure Internal (R : Relation; Level : Integer);
+      procedure Internal (R : Relation; Level : Integer) is
+      begin
+         if R = null then
+            return;
+         end if;
+
+         for Dummy in 0 .. Level * 4 loop
+            Put (" ");
+         end loop;
+
+         declare
+            Names : constant Unbounded_String_Array
+              := Split (Ada.Tags.Expanded_Name (R.all'Tag), On => '.');
+            Name  : constant String :=
+              (if Names (Names'Last) = "Rel"
+               then To_String (Names (Names'Last - 1))
+               else To_String (Names (Names'Last)));
+         begin
+            Put_Line (Name & " Refcount:" & R.Ref_Count'Image);
+         end;
+
+         for C of R.Children loop
+            Internal (C, Level + 1);
+         end loop;
+      end Internal;
+   begin
+      Internal (Self, 0);
+   end Print_Relation;
 
 end Adalog.Abstract_Relation;
