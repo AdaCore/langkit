@@ -7,7 +7,7 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, BuiltinCallExpr, LiteralExpr, PropertyDef,
-    ResolvedExpression, construct, BasicExpr, attr_expr
+    ResolvedExpression, construct, BasicExpr, auto_attr
 )
 from langkit.expressions.envs import Env
 
@@ -89,7 +89,46 @@ class Bind(AbstractExpression):
         )
 
 
-class Domain(AbstractExpression):
+class DomainExpr(ResolvedExpression):
+    static_type = EquationType
+
+    def __init__(self, domain, logic_var_expr):
+        self.domain = domain
+        ":type: ResolvedExpression"
+
+        self.logic_var_expr = logic_var_expr
+        ":type: ResolvedExpression"
+
+        self.res_var = PropertyDef.get().vars.create("Var", EquationType)
+
+        super(DomainExpr, self).__init__()
+
+    def _render_pre(self):
+        return "\n".join([
+            self.domain.render_pre(),
+            self.logic_var_expr.render_pre(), """
+            declare
+                Dom : {domain_type} := {domain};
+                A   : Eq_Node.Raw_Member_Array (1 .. Length (Dom));
+            begin
+                for J in 0 .. Length (Dom) - 1 loop
+                    A (J + 1) := Get (Dom, J);
+                end loop;
+
+                {res_var} := Member ({logic_var}, A);
+            end;
+            """.format(logic_var=self.logic_var_expr.render_expr(),
+                       domain=self.domain.render_expr(),
+                       domain_type=self.domain.type.name(),
+                       res_var=self.res_var.name)
+        ])
+
+    def _render_expr(self):
+        return str(self.res_var.name)
+
+
+@auto_attr
+def domain(logic_var_expr, domain):
     """
     Define the domain of a logical variable. Several important properties about
     this expression:
@@ -125,68 +164,19 @@ class Domain(AbstractExpression):
     Please note that for the moment equations can exist only on AST nodes,
     so the above examples are invalid, and just meant to illustrate the
     semantics.
+
+    :param AbstractExpression logic_var_expr: An expression
+        that must resolve to an instance of a logic variable.
+    :param AbstractExpression domain: An expression that must resolve to
+        the domain, which needs to be a collection of a type that
+        derives from the root grammar class, or the root grammar class
+        itself.
     """
-
-    class Expr(ResolvedExpression):
-        static_type = EquationType
-
-        def __init__(self, domain, logic_var_expr):
-            self.domain = domain
-            ":type: ResolvedExpression"
-
-            self.logic_var_expr = logic_var_expr
-            ":type: ResolvedExpression"
-
-            self.res_var = PropertyDef.get().vars.create("Var", EquationType)
-
-            super(Domain.Expr, self).__init__()
-
-        def _render_pre(self):
-            return "\n".join([
-                self.domain.render_pre(),
-                self.logic_var_expr.render_pre(), """
-                declare
-                    Dom : {domain_type} := {domain};
-                    A   : Eq_Node.Raw_Member_Array (1 .. Length (Dom));
-                begin
-                    for J in 0 .. Length (Dom) - 1 loop
-                        A (J + 1) := Get (Dom, J);
-                    end loop;
-
-                    {res_var} := Member ({logic_var}, A);
-                end;
-                """.format(logic_var=self.logic_var_expr.render_expr(),
-                           domain=self.domain.render_expr(),
-                           domain_type=self.domain.type.name(),
-                           res_var=self.res_var.name)
-            ])
-
-        def _render_expr(self):
-            return str(self.res_var.name)
-
-    def __init__(self, logic_var_expr, domain):
-        """
-        :param AbstractExpression logic_var_expr: An expression
-            that must resolve to an instance of a logic variable.
-        :param AbstractExpression domain: An expression that must resolve to
-            the domain, which needs to be a collection of a type that
-            derives from the root grammar class, or the root grammar class
-            itself.
-        """
-        super(Domain, self).__init__()
-
-        self.domain = domain
-        ":type: AbstractExpression"
-
-        self.logic_var_expr = logic_var_expr
-        ":type: AbstractExpression"
-
-    def construct(self):
-        return Domain.Expr(
-            construct(self.domain, lambda d: d.is_collection(), "Type given "
-                      "to LogicVar must be collection type, got {expr_type}"),
-            construct(self.logic_var_expr, LogicVarType)
-        )
+    return DomainExpr(
+        construct(domain, lambda d: d.is_collection(), "Type given "
+                  "to LogicVar must be collection type, got {expr_type}"),
+        construct(logic_var_expr, LogicVarType)
+    )
 
 
 class Predicate(AbstractExpression):
