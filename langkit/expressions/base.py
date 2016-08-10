@@ -251,12 +251,6 @@ class AbstractExpression(Frozable):
         raise NotImplementedError()
 
     @memoized
-    def attrs(self):
-        # Using partial allows the user to be able to use keyword arguments
-        # defined on the expressions constructors.
-        return {}
-
-    @memoized
     def composed_attrs(self):
         """
         Helper memoized dict for attributes that are composed on top of
@@ -288,21 +282,18 @@ class AbstractExpression(Frozable):
         from langkit.expressions.structs import FieldAccess
 
         try:
-            return self.attrs()[attr]
+            klass, args, kwargs, paramless = (
+                AbstractExpression.attrs_dict[attr]
+            )
+            if paramless:
+                # Automatically instantiate paramless attributes
+                return klass(self, *args, **kwargs)
+            else:
+                # For attributes with parameters, return a partial
+                # instantiation.
+                return partial(klass, self, *args, **kwargs)
         except KeyError:
-            try:
-                klass, args, kwargs, paramless = (
-                    AbstractExpression.attrs_dict[attr]
-                )
-                if paramless:
-                    # Automatically instantiate paramless attributes
-                    return klass(self, *args, **kwargs)
-                else:
-                    # For attributes with parameters, return a partial
-                    # instantiation.
-                    return partial(klass, self, *args, **kwargs)
-            except KeyError:
-                return self.composed_attrs().get(attr, FieldAccess(self, attr))
+            return self.composed_attrs().get(attr, FieldAccess(self, attr))
 
     @Frozable.protect
     def __or__(self, other):
