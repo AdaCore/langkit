@@ -7,7 +7,7 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, BuiltinCallExpr, LiteralExpr, PropertyDef,
-    ResolvedExpression, construct, BasicExpr
+    ResolvedExpression, construct, BasicExpr, attr_expr
 )
 from langkit.expressions.envs import Env
 
@@ -302,6 +302,7 @@ class Predicate(AbstractExpression):
         )
 
 
+@attr_expr("get_value")
 class GetLogicValue(AbstractExpression):
     """
     Expression that'll extract the value out of a logic variable. The type is
@@ -321,6 +322,7 @@ class GetLogicValue(AbstractExpression):
         )
 
 
+@attr_expr("solve")
 class SolveEquation(AbstractExpression):
     """
     Expression that will call solve on an instance of EquationType,

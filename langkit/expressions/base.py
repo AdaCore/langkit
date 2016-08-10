@@ -254,9 +254,6 @@ class AbstractExpression(Frozable):
     def attrs(self):
         from langkit.expressions.structs import Match
         from langkit.expressions.boolean import BinaryBooleanOperator, Then
-        from langkit.expressions.logic import (
-            GetLogicValue, SolveEquation
-        )
 
         # Using partial allows the user to be able to use keyword arguments
         # defined on the expressions constructors.
@@ -264,10 +261,6 @@ class AbstractExpression(Frozable):
             # Control flow handling
             'match':          partial(Match, self),
             'then':           partial(Then, self),
-
-            # Logic handling
-            "get_value":      GetLogicValue(self),
-            "solve":          SolveEquation(self)
         }
 
     @memoized
