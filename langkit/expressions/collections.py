@@ -435,6 +435,7 @@ class CollectionLength(AbstractExpression):
         )
 
 
+@attr_expr('singleton')
 class CollectionSingleton(AbstractExpression):
     """
     Expression that will return a collection of a single element, given the
@@ -479,6 +480,7 @@ class CollectionSingleton(AbstractExpression):
         return CollectionSingleton.Expr(construct(self.expr))
 
 
+@attr_call('concat')
 class Concat(AbstractExpression):
     """
     Expression that will concatenate two arrays.

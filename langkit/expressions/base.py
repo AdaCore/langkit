@@ -254,7 +254,6 @@ class AbstractExpression(Frozable):
     def attrs(self):
         from langkit.expressions.structs import Match
         from langkit.expressions.boolean import BinaryBooleanOperator, Then
-        from langkit.expressions.collections import CollectionSingleton, Concat
         from langkit.expressions.logic import (
             GetLogicValue, SolveEquation
         )
@@ -262,10 +261,6 @@ class AbstractExpression(Frozable):
         # Using partial allows the user to be able to use keyword arguments
         # defined on the expressions constructors.
         return {
-            'concat':         partial(Concat, self),
-
-            'singleton':      CollectionSingleton(self),
-
             # Control flow handling
             'and_then':       partial(BinaryBooleanOperator,
                                       BinaryBooleanOperator.AND, self),
