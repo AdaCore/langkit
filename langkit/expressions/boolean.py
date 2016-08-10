@@ -13,6 +13,8 @@ from langkit.expressions.envs import EmptyEnv
 from langkit.utils import assert_type
 
 
+@attr_call('and_then', 'and')
+@attr_call('or_else', 'or')
 class BinaryBooleanOperator(AbstractExpression):
     """
     Abstract expression for binary boolean expressions.

@@ -262,11 +262,7 @@ class AbstractExpression(Frozable):
         # defined on the expressions constructors.
         return {
             # Control flow handling
-            'and_then':       partial(BinaryBooleanOperator,
-                                      BinaryBooleanOperator.AND, self),
             'match':          partial(Match, self),
-            'or_else':        partial(BinaryBooleanOperator,
-                                      BinaryBooleanOperator.OR, self),
             'then':           partial(Then, self),
 
             # Logic handling
