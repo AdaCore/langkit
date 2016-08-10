@@ -252,8 +252,6 @@ class AbstractExpression(Frozable):
 
     @memoized
     def attrs(self):
-
-        from langkit.expressions.collections import Map
         from langkit.expressions.structs import Match
         from langkit.expressions.boolean import BinaryBooleanOperator, Then
         from langkit.expressions.collections import CollectionSingleton, Concat
@@ -264,14 +262,6 @@ class AbstractExpression(Frozable):
         # Using partial allows the user to be able to use keyword arguments
         # defined on the expressions constructors.
         return {
-            # Other containers handling
-            'filter':         partial(Map, self, lambda x: x),
-            'filtermap':      partial(Map, self),
-            'map':            partial(Map, self),
-            'mapcat':         partial(Map, self, concat=True),
-            'take_while':     partial(Map, self, lambda x: x, lambda x: None,
-                                      False),
-
             'concat':         partial(Concat, self),
 
             'singleton':      CollectionSingleton(self),

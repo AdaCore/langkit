@@ -140,6 +140,11 @@ class Contains(CollectionExpression):
                                element_var, index_var, iter_scope)
 
 
+@attr_call('filter', lambda x: x)
+@attr_call('filtermap')
+@attr_call('map', filter_expr=lambda x: None)
+@attr_call('mapcat', filter_expr=lambda x: None, concat=True)
+@attr_call('take_while', lambda x: x, lambda x: None, False)
 class Map(CollectionExpression):
     """
     Abstract expression that is the result of a map expression evaluation.
