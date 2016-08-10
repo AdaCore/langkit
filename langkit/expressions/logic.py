@@ -303,8 +303,8 @@ def get_value(logic_var):
     )
 
 
-@attr_expr("solve")
-class SolveEquation(AbstractExpression):
+@auto_attr
+def solve(equation):
     """
     Expression that will call solve on an instance of EquationType,
     and return whether any solution was found or not. The solutions are not
@@ -316,16 +316,8 @@ class SolveEquation(AbstractExpression):
     if there is one. Also you cannot do that manually either since a
     property exposing equations cannot be public at the moment.
     """
-
-    def __init__(self, equation):
-        super(SolveEquation, self).__init__()
-
-        self.equation = equation
-        ":type: AbstractExpression"
-
-    def construct(self):
-        return BuiltinCallExpr("Solve", BoolType,
-                               [construct(self.equation, EquationType)])
+    return BuiltinCallExpr("Solve", BoolType,
+                           [construct(equation, EquationType)])
 
 
 class LogicBooleanOp(AbstractExpression):
