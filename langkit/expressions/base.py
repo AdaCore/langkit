@@ -460,6 +460,41 @@ def attr_expr_impl(name, args, kwargs, parameterless=False):
     return internal
 
 
+def auto_attr(fn):
+    """
+    Helper decorator, that will automatically register an AbstractExpression
+    subclass accessible as an attribute, from a function that takes a number of
+    abstract expressions. This decorator will automatically infer whether
+    it's parameterless or not.
+
+    :param (*[AbstractExpression]) -> ResolvedExpression fn: A function
+        taking a number of abstract expressions as parameters, and returning a
+        resolved expression.
+    """
+    attr_name = fn.__name__
+
+    def construct(self):
+        return fn(*self.sub_expressions)
+
+    def __init__(self, *sub_expressions):
+        AbstractExpression.__init__(self)
+        self.sub_expressions = sub_expressions
+
+    nb_args = len(inspect.getargspec(fn).args)
+
+    assert nb_args > 0
+
+    decorator = (attr_expr if nb_args == 1 else attr_call)
+
+    return decorator(attr_name)(type(
+        '{}Expression'.format(attr_name),
+        (AbstractExpression, ), {
+            'construct': construct,
+            '__init__': __init__
+        }
+    ))
+
+
 class ResolvedExpression(object):
     """
     Resolved expressions are expressions that can be readily rendered to code
