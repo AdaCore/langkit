@@ -292,24 +292,15 @@ class Predicate(AbstractExpression):
         )
 
 
-@attr_expr("get_value")
-class GetLogicValue(AbstractExpression):
+@auto_attr
+def get_value(logic_var):
     """
     Expression that'll extract the value out of a logic variable. The type is
     always the root grammar class.
     """
-
-    def __init__(self, logic_var):
-        super(GetLogicValue, self).__init__()
-
-        self.logic_var = logic_var
-        ":type: AbstractExpression"
-
-    def construct(self):
-        return BuiltinCallExpr(
-            "Eq_Node.Refs.GetL", T.root_node,
-            [construct(self.logic_var, LogicVarType)]
-        )
+    return BuiltinCallExpr(
+        "Eq_Node.Refs.GetL", T.root_node, [construct(logic_var, LogicVarType)]
+    )
 
 
 @attr_expr("solve")
