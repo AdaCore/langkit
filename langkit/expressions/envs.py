@@ -6,8 +6,8 @@ from langkit.compiled_types import (
 )
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BuiltinCallExpr,
-    ResolvedExpression, construct, PropertyDef, BasicExpr, attr_expr,
-    attr_call, auto_attr
+    ResolvedExpression, construct, PropertyDef, BasicExpr, auto_attr,
+    auto_attr_custom
 )
 
 Env = AbstractVariable(names.Name("Current_Env"), type=LexicalEnvType)
@@ -15,46 +15,37 @@ EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
                             type=LexicalEnvType)
 
 
-@attr_call("get")
-@attr_call("resolve_unique", resolve_unique=True)
-class EnvGet(AbstractExpression):
+@auto_attr_custom("get")
+@auto_attr_custom("resolve_unique", resolve_unique=True)
+def env_get(env_expr, token_expr, resolve_unique=False):
     """
     Expression for lexical environment get operation.
+
+    :param AbstractExpression env_expr: Expression that will yield the env
+        to get the element from.
+    :param AbstractExpression token_expr: Expression that will yield the
+        token to use as a key on the env.
+    :param bool resolve_unique: Wether we want an unique result or not.
+        NOTE: For the moment, nothing will be done to ensure that only one
+        result is available. The implementation will just take the first
+        result.
     """
 
-    def __init__(self, env_expr, token_expr, resolve_unique=False):
-        """
-        :param AbstractExpression env_expr: Expression that will yield the env
-            to get the element from.
-        :param AbstractExpression token_expr: Expression that will yield the
-            token to use as a key on the env.
-        :param bool resolve_unique: Wether we want an unique result or not.
-            NOTE: For the moment, nothing will be done to ensure that only one
-            result is available. The implementation will just take the first
-            result.
-        """
-        super(EnvGet, self).__init__()
-        self.env_expr = env_expr
-        self.token_expr = token_expr
-        self.resolve_unique = resolve_unique
-        # TODO: Add a filter here. This will wait further developments in the
-        # array machinery.
+    array_expr = 'AST_Envs.Get ({}, Get_Symbol ({}))'
 
-    def construct(self):
-        array_expr = 'AST_Envs.Get ({}, Get_Symbol ({}))'
+    make_expr = partial(
+        BasicExpr, result_var_name="Env_Get_Result",
+        sub_exprs=[construct(env_expr, LexicalEnvType),
+                   construct(token_expr, Token)]
+    )
 
-        make_expr = partial(
-            BasicExpr, result_var_name="Env_Get_Result",
-            sub_exprs=[construct(self.env_expr, LexicalEnvType),
-                       construct(self.token_expr, Token)]
-        )
+    if resolve_unique:
+        return make_expr("Get ({}, 0)".format(array_expr), EnvElement)
+    else:
+        EnvElement.array_type().add_to_context()
+        return make_expr("Create ({})".format(array_expr),
+                         EnvElement.array_type())
 
-        if self.resolve_unique:
-            return make_expr("Get ({}, 0)".format(array_expr), EnvElement)
-        else:
-            EnvElement.array_type().add_to_context()
-            return make_expr("Create ({})".format(array_expr),
-                             EnvElement.array_type())
 
 class EnvBindExpr(ResolvedExpression):
 
