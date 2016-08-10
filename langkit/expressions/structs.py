@@ -490,6 +490,7 @@ class IsA(AbstractExpression):
         return IsA.Expr(expr, astnodes)
 
 
+@attr_call('match')
 class Match(AbstractExpression):
     """
     Expression that performs computations that depend on a AST node type match.

@@ -333,6 +333,7 @@ class Not(AbstractExpression):
         return BasicExpr('not ({})', BoolType, [expr])
 
 
+@attr_call('then')
 class Then(AbstractExpression):
     """
     Expression for the then boolean combinator that works as follows::

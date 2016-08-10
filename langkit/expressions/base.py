@@ -252,16 +252,9 @@ class AbstractExpression(Frozable):
 
     @memoized
     def attrs(self):
-        from langkit.expressions.structs import Match
-        from langkit.expressions.boolean import BinaryBooleanOperator, Then
-
         # Using partial allows the user to be able to use keyword arguments
         # defined on the expressions constructors.
-        return {
-            # Control flow handling
-            'match':          partial(Match, self),
-            'then':           partial(Then, self),
-        }
+        return {}
 
     @memoized
     def composed_attrs(self):
