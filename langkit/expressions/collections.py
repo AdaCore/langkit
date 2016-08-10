@@ -10,7 +10,8 @@ from langkit.diagnostics import (
 )
 from langkit.expressions.base import (
     AbstractExpression, construct, ResolvedExpression, AbstractVariable,
-    render, PropertyDef, BuiltinCallExpr, attr_expr, attr_call
+    render, PropertyDef, BuiltinCallExpr, attr_expr, attr_call,
+    auto_attr_custom, auto_attr
 )
 from langkit.utils import assert_type
 
@@ -378,61 +379,45 @@ class Quantifier(CollectionExpression):
                                element_var, index_var, iter_scope)
 
 
-@attr_call("at")
-@attr_call("at_or_raise", or_null=False)
-class CollectionGet(AbstractExpression):
+@auto_attr_custom("at")
+@auto_attr_custom("at_or_raise", or_null=False)
+def collection_get(coll_expr, index_expr, or_null=True):
     """
     Expression that will get an element from a collection.
+
+    :param AbstractExpression coll_expr: The expression representing the
+        collection to get from.
+    :param AbstractExpression index_expr: The expression representing the
+        index of the element to get.
+    :param bool or_null: If true, the expression will return null if the
+        index is not valid for the collection. If False, it will raise an
+        exception.
     """
+    # index_expr yields a 0-based index and all the Get primitives expect
+    # 0-based indexes, so there is no need to fiddle indexes here.
+    index_expr = construct(index_expr, LongType)
 
-    def __init__(self, coll_expr, index_expr, or_null=True):
-        """
-        :param AbstractExpression coll_expr: The expression representing the
-            collection to get from.
-        :param AbstractExpression index_expr: The expression representing the
-            index of the element to get.
-        :param bool or_null: If true, the expression will return null if the
-            index is not valid for the collection. If False, it will raise an
-            exception.
-        """
-        super(CollectionGet, self).__init__()
-        self.coll_expr = coll_expr
-        self.index_expr = index_expr
-        self.or_null = or_null
-
-    def construct(self):
-        # index_expr yields a 0-based index and all the Get primitives expect
-        # 0-based indexes, so there is no need to fiddle indexes here.
-        index_expr = construct(self.index_expr, LongType)
-
-        coll_expr = construct(self.coll_expr, lambda t: t.is_collection())
-        or_null = construct(self.or_null)
-        return BuiltinCallExpr(
-            'Get', coll_expr.type.element_type(),
-            [coll_expr, index_expr, or_null],
-            'Get_Result'
-        )
+    coll_expr = construct(coll_expr, lambda t: t.is_collection())
+    or_null = construct(or_null)
+    return BuiltinCallExpr(
+        'Get', coll_expr.type.element_type(),
+        [coll_expr, index_expr, or_null],
+        'Get_Result'
+    )
 
 
-@attr_expr("length")
-class CollectionLength(AbstractExpression):
+@auto_attr
+def length(coll_expr):
     """
     Expression that will return the length of a collection.
+
+    :param AbstractExpression coll_expr: The expression representing the
+        collection to get from.
     """
-
-    def __init__(self, coll_expr):
-        """
-        :param AbstractExpression coll_expr: The expression representing the
-            collection to get from.
-        """
-        super(CollectionLength, self).__init__()
-        self.coll_expr = coll_expr
-
-    def construct(self):
-        return BuiltinCallExpr(
-            "Length", LongType,
-            [construct(self.coll_expr, lambda t: t.is_collection())]
-        )
+    return BuiltinCallExpr(
+        "Length", LongType,
+        [construct(coll_expr, lambda t: t.is_collection())]
+    )
 
 
 @attr_expr('singleton')
