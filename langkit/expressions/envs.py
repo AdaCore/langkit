@@ -125,27 +125,20 @@ class EnvBind(AbstractExpression):
                             construct(self.to_eval_expr))
 
 
-@attr_expr("env_orphan")
-class EnvOrphan(AbstractExpression):
+@auto_attr
+def env_orphan(env_expr):
     """
     Expression that will create a lexical environment copy with no parent.
+
+    :param AbstractExpression env_expr: Expression that will return a
+        lexical environment.
     """
-
-    def __init__(self, env_expr):
-        """
-        :param AbstractExpression env_expr: Expression that will return a
-            lexical environment.
-        """
-        super(EnvOrphan, self).__init__()
-        self.env_expr = env_expr
-
-    def construct(self):
-        return BuiltinCallExpr(
-            'AST_Envs.Orphan',
-            LexicalEnvType,
-            [construct(self.env_expr, LexicalEnvType)],
-            'Orphan_Env'
-        )
+    return BuiltinCallExpr(
+        'AST_Envs.Orphan',
+        LexicalEnvType,
+        [construct(env_expr, LexicalEnvType)],
+        'Orphan_Env'
+    )
 
 
 class EnvGroup(AbstractExpression):
