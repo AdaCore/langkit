@@ -6,7 +6,8 @@ from langkit.compiled_types import (
 )
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BuiltinCallExpr,
-    ResolvedExpression, construct, PropertyDef, BasicExpr, attr_expr, attr_call
+    ResolvedExpression, construct, PropertyDef, BasicExpr, attr_expr,
+    attr_call, auto_attr
 )
 
 Env = AbstractVariable(names.Name("Current_Env"), type=LexicalEnvType)
@@ -215,16 +216,9 @@ class IsVisibleFrom(AbstractExpression):
         )
 
 
-@attr_expr("env_node")
-class EnvNode(AbstractExpression):
+@auto_attr
+def env_node(env):
     """
     Return the node associated to this environment.
     """
-
-    def __init__(self, env):
-        super(EnvNode, self).__init__()
-        self.env = env
-
-    def construct(self):
-        return BasicExpr('{}.Node',
-                         T.root_node, [construct(self.env, LexicalEnvType)])
+    return BasicExpr('{}.Node', T.root_node, [construct(env, LexicalEnvType)])
