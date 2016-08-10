@@ -56,73 +56,65 @@ class EnvGet(AbstractExpression):
             return make_expr("Create ({})".format(array_expr),
                              EnvElement.array_type())
 
+class EnvBindExpr(ResolvedExpression):
 
-@attr_call("eval_in_env")
-class EnvBind(AbstractExpression):
+    def __init__(self, env_expr, to_eval_expr):
+        self.to_eval_expr = to_eval_expr
+        self.env_expr = env_expr
+
+        # Declare a variable that will hold the value of the
+        # bound environment.
+        self.static_type = self.to_eval_expr.type
+        self.env_var = PropertyDef.get().vars.create("New_Env",
+                                                     LexicalEnvType)
+
+        super(EnvBindExpr, self).__init__()
+
+    def _render_pre(self):
+        # First, compute the environment to bind using the current one and
+        # store it in the "New_Env" local variable.
+        #
+        # We need to keep the environment live during the bind operation.
+        # That is why we store this environment in a temporary so that it
+        # is automatically deallocated when leaving the scope.
+        result = (
+            '{env_expr_pre}\n'
+            '{env_var} := {env_expr};\n'
+            'Inc_Ref ({env_var});'.format(
+                env_expr_pre=self.env_expr.render_pre(),
+                env_expr=self.env_expr.render_expr(),
+                env_var=self.env_var.name
+            )
+        )
+
+        # Then we can compute the nested expression with the bound
+        # environment.
+        with Env.bind_name(self.env_var.name):
+            return '{}\n{}'.format(result, self.to_eval_expr.render_pre())
+
+    def _render_expr(self):
+        # We just bind the name of the environment placeholder to our
+        # variable.
+        with Env.bind_name(self.env_var.name):
+            return self.to_eval_expr.render_expr()
+
+    def __repr__(self):
+        return '<EnvBind.Expr>'
+
+
+@auto_attr
+def eval_in_env(env_expr, to_eval_expr):
     """
     Expression that will evaluate a subexpression in the context of a
     particular lexical environment. Not meant to be used directly, but instead
     via the eval_in_env shortcut.
+
+    :param AbstractExpression env_expr: An expression that will return a
+        lexical environment in which we will eval to_eval_expr.
+    :param AbstractExpression to_eval_expr: The expression to eval.
     """
-
-    class Expr(ResolvedExpression):
-        def __init__(self, env_expr, to_eval_expr):
-            self.to_eval_expr = to_eval_expr
-            self.env_expr = env_expr
-
-            # Declare a variable that will hold the value of the
-            # bound environment.
-            self.static_type = self.to_eval_expr.type
-            self.env_var = PropertyDef.get().vars.create("New_Env",
-                                                         LexicalEnvType)
-
-            super(EnvBind.Expr, self).__init__()
-
-        def _render_pre(self):
-            # First, compute the environment to bind using the current one and
-            # store it in the "New_Env" local variable.
-            #
-            # We need to keep the environment live during the bind operation.
-            # That is why we store this environment in a temporary so that it
-            # is automatically deallocated when leaving the scope.
-            result = (
-                '{env_expr_pre}\n'
-                '{env_var} := {env_expr};\n'
-                'Inc_Ref ({env_var});'.format(
-                    env_expr_pre=self.env_expr.render_pre(),
-                    env_expr=self.env_expr.render_expr(),
-                    env_var=self.env_var.name
-                )
-            )
-
-            # Then we can compute the nested expression with the bound
-            # environment.
-            with Env.bind_name(self.env_var.name):
-                return '{}\n{}'.format(result, self.to_eval_expr.render_pre())
-
-        def _render_expr(self):
-            # We just bind the name of the environment placeholder to our
-            # variable.
-            with Env.bind_name(self.env_var.name):
-                return self.to_eval_expr.render_expr()
-
-        def __repr__(self):
-            return '<EnvBind.Expr>'
-
-    def __init__(self, env_expr, to_eval_expr):
-        """
-
-        :param AbstractExpression env_expr: An expression that will return a
-            lexical environment in which we will eval to_eval_expr.
-        :param AbstractExpression to_eval_expr: The expression to eval.
-        """
-        super(EnvBind, self).__init__()
-        self.env_expr = env_expr
-        self.to_eval_expr = to_eval_expr
-
-    def construct(self):
-        return EnvBind.Expr(construct(self.env_expr, LexicalEnvType),
-                            construct(self.to_eval_expr))
+    return EnvBindExpr(construct(env_expr, LexicalEnvType),
+                       construct(to_eval_expr))
 
 
 @auto_attr
