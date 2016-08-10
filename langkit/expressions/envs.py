@@ -167,29 +167,22 @@ class EnvGroup(AbstractExpression):
         )
 
 
-@attr_expr("env_group")
-class EnvGroupArray(AbstractExpression):
+@auto_attr
+def env_group(env_array_expr):
     """
     Expression that will return a lexical environment that logically groups
     together multiple lexical environments from an array of lexical
     environments.
+
+    :param AbstractExpression env_array_expr: Expression that will return
+        an array of lexical environments. If this array is empty, the empty
+        environment is returned.
     """
-
-    def __init__(self, env_array_expr):
-        """
-        :param AbstractExpression env_array_expr: Expression that will return
-            an array of lexical environments. If this array is empty, the empty
-            environment is returned.
-        """
-        super(EnvGroupArray, self).__init__()
-        self.env_array_expr = env_array_expr
-
-    def construct(self):
-        return BuiltinCallExpr(
-            'Group', LexicalEnvType,
-            [construct(self.env_array_expr, LexicalEnvType.array_type())],
-            'Group_Env'
-        )
+    return BuiltinCallExpr(
+        'Group', LexicalEnvType,
+        [construct(env_array_expr, LexicalEnvType.array_type())],
+        'Group_Env'
+    )
 
 
 @auto_attr
