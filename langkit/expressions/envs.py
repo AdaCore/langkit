@@ -170,6 +170,11 @@ def is_visible_from(referenced_env, base_env):
     TODO: This is mainly exposed on envs because the CompilationUnit type is
     not exposed in the DSL yet. We might want to change that eventually if
     there are other compelling reasons to do it.
+
+    :param AbstractExpression base_env: The environment from which we want
+        to check visibility.
+    :param AbstractExpression referenced_env: The environment referenced
+        from base_env, for which we want to check visibility.
     """
     return BuiltinCallExpr(
         'Is_Visible_From', BoolType,
@@ -182,5 +187,7 @@ def is_visible_from(referenced_env, base_env):
 def env_node(env):
     """
     Return the node associated to this environment.
+
+    :param AbstractExpression env: The source environment.
     """
     return BasicExpr('{}.Node', T.root_node, [construct(env, LexicalEnvType)])

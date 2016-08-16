@@ -189,6 +189,8 @@ class ManageScript(object):
             of the function to document the subparsers.
 
             :param (ManageScript, Namespace) -> None fn: The function to use.
+            :param bool needs_context: Whether the executed function needs a
+                CompileCtx created beforehand or not.
             :rtype: argparse.ArgumentParser
             """
             p = subparsers.add_parser(
@@ -420,6 +422,7 @@ class ManageScript(object):
         else:
             cov = None
 
+        # noinspection PyBroadException
         try:
             parsed_args.func(parsed_args)
         except DiagnosticError:

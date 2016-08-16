@@ -1621,6 +1621,7 @@ def langkit_property(private=None, return_type=None,
 
     :type private: bool|None
     :type return_type: CompiledType
+    :type kind: int
     """
     def decorator(expr_fn):
         return PropertyDef(

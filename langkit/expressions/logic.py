@@ -297,6 +297,9 @@ def get_value(logic_var):
     """
     Expression that'll extract the value out of a logic variable. The type is
     always the root grammar class.
+
+    :param AbstractExpression logic_var: The logic var from which we want to
+        extract the value.
     """
     return BuiltinCallExpr(
         "Eq_Node.Refs.GetL", T.root_node, [construct(logic_var, LogicVarType)]
@@ -315,6 +318,8 @@ def solve(equation):
     reconstruct them everytime, there is no way to get the second solution
     if there is one. Also you cannot do that manually either since a
     property exposing equations cannot be public at the moment.
+
+    :param AbstractExpression equation: The equation to solve.
     """
     return BuiltinCallExpr("Solve", BoolType,
                            [construct(equation, EquationType)])

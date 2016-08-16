@@ -95,6 +95,7 @@ class Context(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         del traceback
+        del exc_type
         global context_cache
         if exc_value and context_cache[0] != exc_value:
             context_cache = (exc_value, context_stack[:])
