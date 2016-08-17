@@ -10,8 +10,9 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
    -- Kind --
    ----------
 
-   overriding
-   function Kind (Node : access List_Type) return ${root_node_kind_name} is
+   overriding function Kind
+     (Node : access List_Type) return ${root_node_kind_name}
+   is
       pragma Unreferenced (Node);
    begin
       return ${get_context().lang_name}_List;
@@ -21,8 +22,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
    -- Kind_Name --
    ---------------
 
-   overriding
-   function Kind_Name (Node : access List_Type) return String is
+   overriding function Kind_Name (Node : access List_Type) return String is
       pragma Unreferenced (Node);
    begin
       return "ASTList";
@@ -32,8 +32,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
    -- Image --
    -----------
 
-   overriding
-   function Image (Node : access List_Type) return String is
+   overriding function Image (Node : access List_Type) return String is
       Result : Unbounded_String;
    begin
       Append (Result, '[');
@@ -52,9 +51,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
    -- Child_Count --
    -----------------
 
-   overriding
-   function Child_Count (Node : access List_Type) return Natural
-   is
+   overriding function Child_Count (Node : access List_Type) return Natural is
    begin
       return Length (Node.Vec);
    end Child_Count;
@@ -63,12 +60,11 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
    -- Get_Child --
    ---------------
 
-   overriding
-   procedure Get_Child (Node   : access List_Type;
-                        Index  : Positive;
-                        Exists : out Boolean;
-                        Result : out ${root_node_type_name})
-   is
+   overriding procedure Get_Child
+     (Node   : access List_Type;
+      Index  : Positive;
+      Exists : out Boolean;
+      Result : out ${root_node_type_name}) is
    begin
       if Index > Node_Vectors.Last_Index (Node.Vec) then
          Exists := False;
@@ -83,9 +79,9 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
    -- Print --
    -----------
 
-   overriding
-   procedure Print (Node  : access List_Type;
-                    Level : Natural := 0) is
+   overriding procedure Print
+     (Node  : access List_Type;
+      Level : Natural := 0) is
    begin
       if Length (Node.Vec) = 0 then
          return;
@@ -102,8 +98,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
    -- Lookup_Children --
    ---------------------
 
-   overriding
-   function Lookup_Children
+   overriding function Lookup_Children
      (Node : access List_Type;
       Sloc : Source_Location;
       Snap : Boolean := False)

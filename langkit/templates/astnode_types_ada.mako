@@ -48,25 +48,25 @@
 
    % if not cls.abstract:
 
-      overriding
-      function Kind (Node : access ${type_name}) return ${root_node_kind_name};
-      overriding
-      function Kind_Name (Node : access ${type_name}) return String;
-      overriding
-      function Image (Node : access ${type_name}) return String;
+      overriding function Kind
+        (Node : access ${type_name}) return ${root_node_kind_name};
+      overriding function Kind_Name
+        (Node : access ${type_name}) return String;
+      overriding function Image
+        (Node : access ${type_name}) return String;
 
 
-      overriding
-      function Child_Count (Node : access ${type_name}) return Natural;
-      overriding
-      procedure Get_Child (Node  : access ${type_name};
-                           Index : Positive;
-                           Exists : out Boolean;
-                           Result : out ${root_node_type_name});
+      overriding function Child_Count
+        (Node : access ${type_name}) return Natural;
+      overriding procedure Get_Child
+        (Node  : access ${type_name};
+         Index : Positive;
+         Exists : out Boolean;
+         Result : out ${root_node_type_name});
 
-      overriding
-      procedure Print (Node  : access ${type_name};
-                       Level : Natural := 0);
+      overriding procedure Print
+        (Node  : access ${type_name};
+         Level : Natural := 0);
 
       overriding procedure Destroy
         (Node : access ${cls.name()}_Type);
@@ -75,10 +75,8 @@
    ## Public field getters
 
    % if not cls.is_env_spec_inherited and cls.env_spec._add_env:
-      overriding
-      function Node_Env
-        (Node : access ${type_name})
-         return AST_Envs.Lexical_Env;
+      overriding function Node_Env
+        (Node : access ${type_name}) return AST_Envs.Lexical_Env;
    % endif
 
    % for field in cls.get_fields(include_inherited=False, \
@@ -154,10 +152,10 @@
    % endif
 
    % if not cls.abstract:
-      overriding
-      function Lookup_Children (Node : access ${type_name};
-                                Sloc : Source_Location;
-                                Snap : Boolean := False)
+      overriding function Lookup_Children
+        (Node : access ${type_name};
+         Sloc : Source_Location;
+         Snap : Boolean := False)
         return ${root_node_type_name};
 
       package ${cls.name()}_Alloc is
@@ -195,10 +193,8 @@
       -- Kind --
       ----------
 
-      overriding
-      function Kind
-        (Node : access ${type_name})
-         return ${root_node_kind_name}
+      overriding function Kind
+        (Node : access ${type_name}) return ${root_node_kind_name}
       is
          pragma Unreferenced (Node);
       begin
@@ -209,8 +205,9 @@
       -- Kind_Name --
       ---------------
 
-      overriding
-      function Kind_Name (Node : access ${type_name}) return String is
+      overriding function Kind_Name
+        (Node : access ${type_name}) return String
+      is
          pragma Unreferenced (Node);
       begin
          return "${cls.repr_name()}";
@@ -220,8 +217,9 @@
       -- Image --
       -----------
 
-      overriding
-      function Image (Node : access ${type_name}) return String is
+      overriding function Image
+        (Node : access ${type_name}) return String 
+      is
          Result : Unbounded_String;
       begin
          Append (Result, Kind_Name (Node));
@@ -262,8 +260,9 @@
       -- Child_Count --
       -----------------
 
-      overriding
-      function Child_Count (Node : access ${type_name}) return Natural is
+      overriding function
+        Child_Count (Node : access ${type_name}) return Natural 
+      is
          pragma Unreferenced (Node);
       begin
          return ${len(astnode_fields)};
@@ -273,11 +272,12 @@
       -- Get_Child --
       ---------------
 
-      overriding
-      procedure Get_Child (Node   : access ${type_name};
-                           Index  : Positive;
-                           Exists : out Boolean;
-                           Result : out ${root_node_type_name}) is
+      overriding procedure Get_Child 
+        (Node   : access ${type_name};
+         Index  : Positive;
+         Exists : out Boolean;
+         Result : out ${root_node_type_name})
+      is
          ## Some ASTnodes have no ASTNode child: avoid the "unused parameter"
          ## compilation warning for them.
          % if not astnode_fields:
@@ -301,9 +301,9 @@
       -- Print --
       -----------
 
-      overriding
-      procedure Print (Node  : access ${type_name};
-                       Level : Natural := 0)
+      overriding procedure Print 
+        (Node  : access ${type_name};
+         Level : Natural := 0)
       is
          Nod : constant ${root_node_type_name} :=
             ${root_node_type_name} (Node);
@@ -361,11 +361,10 @@
       -- Lookup_Children --
       ---------------------
 
-      overriding
-      function Lookup_Children (Node : access ${type_name};
-                                Sloc : Source_Location;
-                                Snap : Boolean := False)
-        return ${root_node_type_name}
+      overriding function Lookup_Children
+        (Node : access ${type_name};
+         Sloc : Source_Location;
+         Snap : Boolean := False) return ${root_node_type_name}
       is
          ## For this implementation helper (i.e. internal primitive), we can
          ## assume that all lookups fall into this node's sloc range.
@@ -477,8 +476,7 @@
    -- Do_Env_Actions --
    --------------------
 
-   overriding
-   function Do_Env_Actions
+   overriding function Do_Env_Actions
      (Self        : access ${type_name};
       Current_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
    is
@@ -530,10 +528,8 @@
    end Do_Env_Actions;
 
       % if cls.env_spec._add_env:
-         overriding
-         function Node_Env
-           (Node : access ${type_name})
-            return AST_Envs.Lexical_Env
+         overriding function Node_Env
+           (Node : access ${type_name}) return AST_Envs.Lexical_Env
          is (Node.Self_Env.Parent);
       % endif
 

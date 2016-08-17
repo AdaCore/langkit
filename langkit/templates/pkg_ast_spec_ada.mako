@@ -378,9 +378,9 @@ package ${_self.ada_api_settings.lib_name}.AST is
      with private;
    --  Iterator type for Find (see below)
 
-   overriding
-   function Next (It       : in out Find_Iterator;
-                  Element  : out ${root_node_type_name}) return Boolean;
+   overriding function Next 
+     (It       : in out Find_Iterator;
+      Element  : out ${root_node_type_name}) return Boolean;
 
    type Local_Find_Iterator is limited
       new ${root_node_type_name}_Iterators.Iterator

@@ -25,29 +25,25 @@ package ${_self.ada_api_settings.lib_name}.AST.List is
       Vec : Node_Vectors.Vector;
    end record;
 
-   overriding
-   function Kind (Node : access List_Type) return ${root_node_kind_name};
-   overriding
-   function Kind_Name (Node : access List_Type) return String;
-   overriding
-   function Image (Node : access List_Type) return String;
+   overriding function Kind
+     (Node : access List_Type) return ${root_node_kind_name};
+   overriding function Kind_Name (Node : access List_Type) return String;
+   overriding function Image (Node : access List_Type) return String;
 
-   overriding
-   function Child_Count (Node : access List_Type)
-                         return Natural;
+   overriding function Child_Count
+     (Node : access List_Type) return Natural;
 
-   overriding
-   procedure Get_Child (Node   : access List_Type;
-                        Index  : Positive;
-                        Exists : out Boolean;
-                        Result : out ${root_node_type_name});
+   overriding procedure Get_Child 
+     (Node   : access List_Type;
+      Index  : Positive;
+      Exists : out Boolean;
+      Result : out ${root_node_type_name});
 
-   overriding
-   procedure Print (Node  : access List_Type;
-                    Level : Natural := 0);
+   overriding procedure Print
+     (Node  : access List_Type;
+      Level : Natural := 0);
 
-   overriding
-   function Lookup_Children
+   overriding function Lookup_Children
      (Node : access List_Type;
       Sloc : Source_Location;
       Snap : Boolean := False) return ${root_node_type_name};

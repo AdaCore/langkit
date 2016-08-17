@@ -188,8 +188,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- Finalize --
    --------------
 
-   overriding
-   procedure Finalize (It : in out Find_Iterator) is
+   overriding procedure Finalize (It : in out Find_Iterator) is
    begin
       Destroy (It.Predicate);
    end Finalize;
@@ -198,8 +197,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- Next --
    ----------
 
-   overriding function Next
-     (It       : in out Local_Find_Iterator;
+   overriding function Next (It       : in out Local_Find_Iterator;
       Element  : out ${root_node_type_name}) return Boolean is
    begin
       while Next (It.Traverse_It, Element) loop
@@ -1084,8 +1082,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- First --
    -----------
 
-   overriding
-   function First (Object : Iterator) return Children_Cursor is
+   overriding function First (Object : Iterator) return Children_Cursor is
       Node : ${root_node_type_name} renames Object.Node;
    begin
       return (if Node.Child_Count > 0
@@ -1097,8 +1094,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- Last --
    ----------
 
-   overriding
-   function Last (Object : Iterator) return Children_Cursor is
+   overriding function Last (Object : Iterator) return Children_Cursor is
       Node : ${root_node_type_name} renames Object.Node;
    begin
       return (if Node.Child_Count > 0
@@ -1110,8 +1106,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- Next --
    ----------
 
-   overriding
-   function Next
+   overriding function Next
      (Object : Iterator;
       C      : Children_Cursor)
       return Children_Cursor
@@ -1129,8 +1124,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    -- Previous --
    --------------
 
-   overriding
-   function Previous
+   overriding function Previous
      (Object : Iterator;
       C      : Children_Cursor)
       return Children_Cursor

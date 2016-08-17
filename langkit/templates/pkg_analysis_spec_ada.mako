@@ -242,15 +242,13 @@ private
       --  visibility/computation of the reference graph.
    end record;
 
-   overriding
-   function Token_Data
+   overriding function Token_Data
      (Unit : access Analysis_Unit_Type)
       return Token_Data_Handler_Access
    is
      (Unit.TDH'Access);
 
-   overriding
-   procedure Register_Destroyable_Helper
+   overriding procedure Register_Destroyable_Helper
      (Unit    : access Analysis_Unit_Type;
       Object  : System.Address;
       Destroy : Destroy_Procedure);
