@@ -481,7 +481,6 @@
       Current_Env : in out AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
    is
       use AST_Envs;
-      use AST_Envs.Lexical_Env_Vectors;
 
       Ret         : Lexical_Env := null;
       Initial_Env : Lexical_Env := Current_Env;
@@ -540,7 +539,6 @@
          Current_Env : in out AST_Envs.Lexical_Env)
       is
          use AST_Envs;
-         use AST_Envs.Lexical_Env_Vectors;
          Initial_Env : Lexical_Env := Current_Env;
       begin
          % if cls.env_spec.initial_env:
