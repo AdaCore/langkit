@@ -122,6 +122,12 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  This type and constants are added waiting for a real metadata type
    % endif
 
+   function Can_Reach (El, From : ${root_node_type_name}) return Boolean;
+   --  Return whether El can reach From, from a sequential viewpoint. If
+   --  elements are declared in different units, it will always return True,
+   --  eg. this does not handle general visibility issues, just sequentiality of
+   --  declarations.
+
    package AST_Envs is new Langkit_Support.Lexical_Env
      (Element_T        => ${root_node_type_name},
       Element_Metadata =>

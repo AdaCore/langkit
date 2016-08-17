@@ -1280,4 +1280,24 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end if;
    end Assign_Names_To_Logic_Vars;
 
+   ---------------
+   -- Can_Reach --
+   ---------------
+
+   function Can_Reach (El, From : ${root_node_type_name}) return Boolean
+   is
+   begin
+      --  Since this function is only used to implement sequential semantics in
+      --  envs, we consider that elements coming from different units are
+      --  always visible for each other, and let the user implement language
+      --  specific visibility rules in the DSL.
+      if Get_Unit (El) /= Get_Unit (From) then
+         return True;
+      end if;
+
+       return Compare
+         (Start_Sloc (Sloc_Range (El)),
+          Start_Sloc (Sloc_Range (From))) = After;
+   end Can_Reach;
+
 end ${_self.ada_api_settings.lib_name}.AST;

@@ -29,7 +29,14 @@ generic
    type Element_Metadata is private;
    No_Element     : Element_T;
    Empty_Metadata : Element_Metadata;
+
    with function Combine (L, R : Element_Metadata) return Element_Metadata;
+
+   with function Can_Reach (El, From : Element_T) return Boolean is <>;
+   --  Function that will allow filtering nodes depending on the origin node of
+   --  the request. In practice, this is used to implement sequential semantics
+   --  for lexical envs, as-in, an element declared after another is not yet
+   --  visible.
 package Langkit_Support.Lexical_Env is
 
    ----------------------
@@ -149,11 +156,15 @@ package Langkit_Support.Lexical_Env is
    --  Add Value to the list of values for the key Key, with the metadata MD
 
    function Get
-     (Self : Lexical_Env; Key : Symbol_Type) return Element_Array;
-   --  Get the array of unwrapped elements for this key
+     (Self : Lexical_Env; Key : Symbol_Type;
+      From : Element_T := No_Element) return Element_Array;
+   --  Get the array of unwrapped elements for this key. If From is given, then
+   --  elements will be filtered according to the Can_Reach primitive given
+   --  as parameter for the generic package.
 
    function Get
-     (Self : Lexical_Env; Key : Symbol_Type) return Env_Element_Array;
+     (Self : Lexical_Env; Key : Symbol_Type;
+      From : Element_T := No_Element) return Env_Element_Array;
    --  Get the array of wrapped elements for this key
 
    function Orphan (Self : Lexical_Env) return Lexical_Env is

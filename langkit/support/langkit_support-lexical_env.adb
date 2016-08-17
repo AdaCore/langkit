@@ -109,7 +109,8 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    function Get
-     (Self : Lexical_Env; Key : Symbol_Type) return Env_Element_Array
+     (Self : Lexical_Env; Key : Symbol_Type;
+      From : Element_T := No_Element) return Env_Element_Array
    is
       use Internal_Envs;
       use Env_Element_Arrays;
@@ -149,14 +150,22 @@ package body Langkit_Support.Lexical_Env is
       --  Return the concatenation of Get_Own_Elements for this env and every
       --  parent.
 
+      function Can_Reach_F (El : Env_Element) return Boolean is
+        (Can_Reach (El.El, From));
+
    begin
       if Self = null then
          return Env_Element_Arrays.Empty_Array;
       end if;
-
-      return Get_Elements
-        (Self & Lexical_Env_Vectors.To_Array (Self.Referenced_Envs))
-        & Get (Self.Parent, Key);
+      declare
+         Ret : constant Env_Element_Array := Get_Elements
+           (Self & Lexical_Env_Vectors.To_Array (Self.Referenced_Envs))
+           & Get (Self.Parent, Key);
+      begin
+         --  Only filter if a non null value was given for the From parameter
+         return (if From = No_Element then Ret
+                 else Env_Element_Arrays.Filter (Ret, Can_Reach_F'Access));
+      end;
    end Get;
 
    ---------
@@ -164,9 +173,10 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    function Get
-     (Self : Lexical_Env; Key : Symbol_Type) return Element_Array is
+     (Self : Lexical_Env; Key : Symbol_Type;
+      From : Element_T := No_Element) return Element_Array is
    begin
-      return Unwrap (Get (Self, Key));
+      return Unwrap (Get (Self, Key, From));
    end Get;
 
    -----------
