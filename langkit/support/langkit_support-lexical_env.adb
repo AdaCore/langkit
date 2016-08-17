@@ -129,8 +129,19 @@ package body Langkit_Support.Lexical_Env is
       function Get_Own_Elements
         (Self : Referenced_Env) return Env_Element_Array
       is
-         C : constant Cursor := Self.Env.Env.Find (Key);
+         C : Cursor;
       begin
+         --  If the referenced environment has an origin point, and the client
+         --  passed an origin from the request, see if the environment is
+         --  reachable.
+         if Self.From_Node /= No_Element
+           and then From /= No_Element
+           and then not Can_Reach (Self.From_Node, From)
+         then
+            return Env_Element_Arrays.Empty_Array;
+         end if;
+
+         C := Self.Env.Env.Find (Key);
          return
            (if Has_Element (C)
             then Decorate
@@ -158,6 +169,7 @@ package body Langkit_Support.Lexical_Env is
       if Self = null then
          return Env_Element_Arrays.Empty_Array;
       end if;
+
       declare
          Ret : constant Env_Element_Array := Get_Elements
            (Referenced_Env'(No_Element, Self)
