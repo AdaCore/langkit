@@ -87,8 +87,18 @@ package Langkit_Support.Lexical_Env is
    --  Pointer type for lexical environments. This is the type that shall be
    --  used.
 
-   package Lexical_Env_Vectors is new Langkit_Support.Vectors (Lexical_Env);
-   --  Vectors of lexical environments, used to store referenced environments
+   type Referenced_Env is record
+      From_Node : Element_T;
+      --  The node from which the environment has been referenced
+
+      Env       : Lexical_Env;
+      --  The referenced env
+   end record;
+   --  Represents a referenced env
+
+   package Referenced_Envs_Vectors
+   is new Langkit_Support.Vectors (Referenced_Env);
+   --  Vectors of referenced envs, used to store referenced environments
 
    use Env_Element_Vectors;
 
@@ -115,7 +125,7 @@ package Langkit_Support.Lexical_Env is
       Node            : Element_T;
       --  Node for which this environment was created
 
-      Referenced_Envs : Lexical_Env_Vectors.Vector;
+      Referenced_Envs : Referenced_Envs_Vectors.Vector;
       --  A list of environments referenced by this environment
 
       Env             : Internal_Map := null;
@@ -154,6 +164,16 @@ package Langkit_Support.Lexical_Env is
       Value : Element_T;
       MD    : Element_Metadata := Empty_Metadata);
    --  Add Value to the list of values for the key Key, with the metadata MD
+
+   procedure Reference
+     (Self            : Lexical_Env;
+      To_Reference    : Lexical_Env;
+      Referenced_From : Element_T := No_Element);
+   --  Reference the env To_Reference from Self, making its content accessible
+   --  from self. If Referenced_From is passed, for requests with an origin
+   --  point (from parameter), the content will only be visible if Can_Reach
+   --  (Referenced_From, From) is True. Practically this means that the origin
+   --  point of the request needs to be *after* Referenced_From in the file.
 
    function Get
      (Self : Lexical_Env; Key : Symbol_Type;

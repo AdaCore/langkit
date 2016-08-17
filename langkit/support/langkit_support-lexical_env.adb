@@ -115,10 +115,10 @@ package body Langkit_Support.Lexical_Env is
       use Internal_Envs;
       use Env_Element_Arrays;
 
-      use Lexical_Env_Vectors.Elements_Arrays;
+      use Referenced_Envs_Vectors.Elements_Arrays;
 
       function Get_Own_Elements
-        (Self : Lexical_Env) return Env_Element_Array;
+        (Self : Referenced_Env) return Env_Element_Array;
       --  Return the elements for Key contained by the internal map contained
       --  in this env.
 
@@ -127,9 +127,9 @@ package body Langkit_Support.Lexical_Env is
       ----------------------
 
       function Get_Own_Elements
-        (Self : Lexical_Env) return Env_Element_Array
+        (Self : Referenced_Env) return Env_Element_Array
       is
-         C : constant Cursor := Self.Env.Find (Key);
+         C : constant Cursor := Self.Env.Env.Find (Key);
       begin
          return
            (if Has_Element (C)
@@ -139,13 +139,14 @@ package body Langkit_Support.Lexical_Env is
             --  results are returned first.
 
               (Reverse_Array
-                (Env_Element_Vectors.To_Array (Element (C))), Self.Default_MD)
+                 (Env_Element_Vectors.To_Array (Element (C))),
+               Self.Env.Default_MD)
 
             else Env_Element_Arrays.Empty_Array);
       end Get_Own_Elements;
 
       function Get_Elements
-      is new Lexical_Env_Vectors.Elements_Arrays.Flat_Map_Gen
+      is new Referenced_Envs_Vectors.Elements_Arrays.Flat_Map_Gen
         (Env_Element, Env_Element_Array, Get_Own_Elements);
       --  Return the concatenation of Get_Own_Elements for this env and every
       --  parent.
@@ -159,7 +160,8 @@ package body Langkit_Support.Lexical_Env is
       end if;
       declare
          Ret : constant Env_Element_Array := Get_Elements
-           (Self & Lexical_Env_Vectors.To_Array (Self.Referenced_Envs))
+           (Referenced_Env'(No_Element, Self)
+            & Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
            & Get (Self.Parent, Key);
       begin
          --  Only filter if a non null value was given for the From parameter
@@ -273,7 +275,7 @@ package body Langkit_Support.Lexical_Env is
          for Elts of Self.Env.all loop
             Env_Element_Vectors.Destroy (Elts);
          end loop;
-         Lexical_Env_Vectors.Destroy (Self.Referenced_Envs);
+         Referenced_Envs_Vectors.Destroy (Self.Referenced_Envs);
          Destroy (Self.Env);
       end if;
 
@@ -310,5 +312,19 @@ package body Langkit_Support.Lexical_Env is
       end if;
       Self := null;
    end Dec_Ref;
+
+   ---------------
+   -- Reference --
+   ---------------
+
+   procedure Reference
+     (Self            : Lexical_Env;
+      To_Reference    : Lexical_Env;
+      Referenced_From : Element_T := No_Element)
+   is
+   begin
+      Referenced_Envs_Vectors.Append
+        (Self.Referenced_Envs, Referenced_Env'(Referenced_From, To_Reference));
+   end Reference;
 
 end Langkit_Support.Lexical_Env;
