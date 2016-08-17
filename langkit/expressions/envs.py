@@ -6,7 +6,7 @@ from langkit.compiled_types import (
 )
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BuiltinCallExpr,
-    ResolvedExpression, construct, PropertyDef, BasicExpr, auto_attr,
+    ResolvedExpression, construct, PropertyDef, BasicExpr, auto_attr, Self,
     auto_attr_custom
 )
 
@@ -16,8 +16,9 @@ EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
 
 
 @auto_attr_custom("get")
+@auto_attr_custom("get_sequential", sequential=True)
 @auto_attr_custom("resolve_unique", resolve_unique=True)
-def env_get(env_expr, token_expr, resolve_unique=False):
+def env_get(env_expr, token_expr, resolve_unique=False, sequential=False):
     """
     Expression for lexical environment get operation.
 
@@ -29,15 +30,21 @@ def env_get(env_expr, token_expr, resolve_unique=False):
         NOTE: For the moment, nothing will be done to ensure that only one
         result is available. The implementation will just take the first
         result.
+    :param bool sequential: Whether resolution needs to be sequential or not.
     """
 
-    array_expr = 'AST_Envs.Get ({}, Get_Symbol ({}))'
+    sub_exprs = [construct(env_expr, LexicalEnvType),
+                 construct(token_expr, Token)]
 
-    make_expr = partial(
-        BasicExpr, result_var_name="Env_Get_Result",
-        sub_exprs=[construct(env_expr, LexicalEnvType),
-                   construct(token_expr, Token)]
-    )
+    if sequential:
+        # Pass the From parameter if the user wants sequential semantics
+        array_expr = 'AST_Envs.Get ({}, Get_Symbol ({}), {})'
+        sub_exprs.append(construct(Self, T.root_node))
+    else:
+        array_expr = 'AST_Envs.Get ({}, Get_Symbol ({}))'
+
+    make_expr = partial(BasicExpr, result_var_name="Env_Get_Result",
+                        sub_exprs=sub_exprs)
 
     if resolve_unique:
         return make_expr("Get ({}, 0)".format(array_expr), EnvElement)
