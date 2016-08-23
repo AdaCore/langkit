@@ -424,6 +424,8 @@
 
    % if not cls.is_env_spec_inherited:
 
+   <% call_prop = cls.env_spec._render_field_access %>
+
    <%def name="add(exprs)">
    % if is_array_type(exprs.val.type):
       declare
@@ -484,8 +486,6 @@
 
       Ret         : Lexical_Env := null;
       Initial_Env : Lexical_Env := Current_Env;
-
-      <% call_prop = cls.env_spec._render_field_access %>
 
    begin
       % if cls.base().env_spec:
