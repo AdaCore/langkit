@@ -131,9 +131,11 @@ package body Langkit_Support.Lexical_Env is
       is
          C : Cursor;
       begin
+
          --  If the referenced environment has an origin point, and the client
          --  passed an origin from the request, see if the environment is
          --  reachable.
+
          if Self.From_Node /= No_Element
            and then From /= No_Element
            and then not Can_Reach (Self.From_Node, From)
