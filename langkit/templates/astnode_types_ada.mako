@@ -513,6 +513,18 @@
       % endif
       % endfor
 
+      % if cls.env_spec.ref_envs:
+      declare
+         Envs : ${cls.env_spec.ref_envs.type.name()}
+           := ${call_prop(cls.env_spec.ref_envs)};
+      begin
+         for Lex_Env of Envs.Items loop
+            Reference (Current_Env, Lex_Env, ${root_node_type_name} (Self));
+         end loop;
+         Dec_Ref (Envs);
+      end;
+      % endif
+
       % if cls.env_spec._add_env:
          pragma Assert (Ret = null, "Env added twice");
          Ret := AST_Envs.Create

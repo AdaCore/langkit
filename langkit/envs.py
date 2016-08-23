@@ -73,8 +73,6 @@ class EnvSpec(object):
             environment hook.
         """
 
-        assert ref_envs is None, "Ref envs is not implemented yet!"
-
         self.ast_node = None
         """
         ASTNode subclass associated to this environment specification.
@@ -169,9 +167,8 @@ class EnvSpec(object):
 
         self.has_post_actions = any([e.is_post for e in self.envs_expressions])
 
-        # TODO: what is the expected type for this one?
         self.ref_envs = create_internal_property(
-            'Ref_Envs', self._unresolved_ref_envs, None
+            'Ref_Envs', self._unresolved_ref_envs, LexicalEnvType.array_type()
         )
 
         self.env_hook_arg = create_internal_property(
