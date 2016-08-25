@@ -14,13 +14,8 @@ library project ${lib_name} is
      external ("LIBRARY_TYPE", "relocatable");
 
    type Boolean is ("false", "true");
-   Is_Externally_Built : Boolean :=
-     external ("${lib_name.upper()}_EXTERNALLY_BUILT", "true");
-
    Enable_Warnings : Boolean :=
      external ("${lib_name.upper()}_WARNINGS", "false");
-
-   for Externally_Built use Is_Externally_Built;
 
    for Languages use ("Ada", "C");
    for Library_Name use "${capi.shared_object_basename}";
@@ -86,11 +81,8 @@ library project ${lib_name} is
       "quex_lexer-token_ids.h");
 
    for Source_Dirs use ("../../include/${lib_name.lower()}");
-   for Library_Dir use "../";
-   for Library_ALI_Dir
-      use "../${lib_name.lower()}/" & Library_Kind_Param;
-   for Object_Dir
-      use "../../obj/${lib_name.lower()}/" & Library_Kind_Param;
+   for Library_Dir use "../${lib_name.lower()}." & Library_Kind_Param;
+   for Object_Dir use "../../obj/${lib_name.lower()}." & Library_Kind_Param;
 
    Target := ${lib_name}'Target;
 

@@ -7,12 +7,6 @@ library project Langkit_Support is
    Library_Kind_Param : Library_Kind_Type :=
      external ("LIBRARY_TYPE", "relocatable");
 
-   type Boolean is ("false", "true");
-   Is_Externally_Built : Boolean :=
-     external ("LIBLANG_SUPPORT_EXTERNALLY_BUILT", "true");
-
-   for Externally_Built use Is_Externally_Built;
-
    for Languages use ("Ada");
    for Library_Name use "langkit_support";
    for Library_Kind use Library_Kind_Param;
@@ -37,11 +31,8 @@ library project Langkit_Support is
       "Langkit_Support.Vectors");
 
    for Source_Dirs use ("../../include/langkit_support");
-   for Library_Dir use "../";
-   for Library_ALI_Dir
-      use "../langkit_support/" & Library_Kind_Param;
-   for Object_Dir
-      use "../../obj/langkit_support/" & Library_Kind_Param;
+   for Library_Dir use "../langkit_support." & Library_Kind_Param;
+   for Object_Dir use "../../obj/langkit_support." & Library_Kind_Param;
 
    Common_Ada_Cargs := ("-gnatwa", "-gnatyg");
 

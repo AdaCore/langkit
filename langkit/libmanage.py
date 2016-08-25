@@ -244,7 +244,8 @@ class ManageScript(object):
         # Install #
         ###########
 
-        self.install_parser = install_parser = create_parser(self.do_install)
+        self.install_parser = install_parser = create_parser(self.do_install,
+                                                             True)
         install_parser.add_argument(
             'install-dir',
             help='Installation directory.'
@@ -254,7 +255,7 @@ class ManageScript(object):
         # Setenv #
         ##########
 
-        self.setenv_parser = create_parser(self.do_setenv)
+        self.setenv_parser = create_parser(self.do_setenv, True)
 
         # The create_context method will create the context and set it here
         # only right before executing commands so that coverage computation
@@ -491,6 +492,32 @@ class ManageScript(object):
         if args.verbosity.info:
             printcol("Generation complete!", Colors.OKGREEN)
 
+    def what_to_build(self, args, is_library):
+        """
+        Determine what kind of build to perform.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
+
+        :param str project_file: Path to the project file to pass to
+            GPRbuild/GPRinstall.
+
+        :param bool is_library: If true, build both relocatable and static
+            libraries (depending on modes enabled in "args"). Otherwise, use
+            relocatable if available or static mode otherwise.
+
+        :return: Whether to build in shared mode and whether to build static
+            mode. Only one is True when is_library is False.
+        :rtype: (bool, bool)
+        """
+        # The basic principle is: build shared unless disabled and build static
+        # unless disabled. But for programs, we can build only one mode: in
+        # this case, shared has priority over static.
+        build_shared = args.enable_shared
+        build_static = (args.enable_static and
+                        (is_library or not build_shared))
+        return (build_shared, build_static)
+
     def gprbuild(self, args, project_file, is_library, mains=None):
         """
         Run GPRbuild on a project file.
@@ -508,15 +535,10 @@ class ManageScript(object):
             build. By default, GPRbuild builds them all, so this arguments
             makes it possible to build only a subset of them.
         """
-
         base_argv = ['gprbuild', '-m', '-p',
                      '-j{}'.format(args.jobs),
                      '-P{}'.format(project_file),
-                     '-XBUILD_MODE={}'.format(args.build_mode),
-                     '-XLIBLANG_SUPPORT_EXTERNALLY_BUILT=false',
-                     '-X{}_EXTERNALLY_BUILT=false'.format(
-                         self.lib_name.upper()
-                     )]
+                     '-XBUILD_MODE={}'.format(args.build_mode)]
         if args.enable_warnings:
             base_argv.append(
                 '-X{}_WARNINGS=true'.format(self.lib_name.upper())
@@ -538,12 +560,46 @@ class ManageScript(object):
             argv.extend(cargs)
             self.check_call(args, 'Build', argv)
 
-        # The basic principle is: build shared unless disabled and build static
-        # unless disabled. But for programs, we can build only one mode: in
-        # this case, shared has priority over static.
-        build_shared = args.enable_shared
-        build_static = (args.enable_static and
-                        (is_library or not build_shared))
+        build_shared, build_static = self.what_to_build(args, is_library)
+        if build_shared:
+            run('relocatable')
+        if build_static:
+            run('static')
+
+    def gprinstall(self, args, project_file, is_library):
+        """
+        Run GPRinstall on a project file.
+
+        See gprbuild for arguments description.
+        """
+        base_argv = ['gprinstall', '-p',
+                     '-P{}'.format(project_file),
+                     '--prefix={}'.format(self.dirs.install_dir()),
+                     '--build-var=LIBRARY_TYPE',
+                     '-XBUILD_MODE=prod']
+
+        # If this is a library, install sources in an unique location: there is
+        # no need to have one location per build mode as sources are going to
+        # be exactly the same. If this is a program, no need to install
+        # anything but the executable itself.
+        if is_library:
+            lib_name, _ = os.path.splitext(os.path.basename(project_file))
+            base_argv.append('--sources-subdir={}'.format(os.path.join(
+                'include', lib_name
+            )))
+        else:
+            base_argv.append('--mode=usage')
+
+        if args.verbosity == Verbosity('none'):
+            base_argv.append('-q')
+
+        def run(library_type):
+            argv = list(base_argv)
+            argv.append('--build-name={}'.format(library_type))
+            argv.append('-XLIBRARY_TYPE={}'.format(library_type))
+            self.check_call(args, 'Install', argv)
+
+        build_shared, build_static = self.what_to_build(args, is_library)
         if build_shared:
             run('relocatable')
         if build_static:
@@ -604,17 +660,31 @@ class ManageScript(object):
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
         """
-        del args  # Unused in this implementation
+        lib_name = self.lib_name.lower()
 
-        for subdir in ('bin', 'include', 'lib', 'share', 'python'):
-            install_dir = self.dirs.install_dir(subdir)
-            if path.isdir(install_dir):
-                shutil.rmtree(install_dir)
-            assert not path.exists(install_dir)
-            shutil.copytree(
-                self.dirs.build_dir(subdir),
-                self.dirs.install_dir(subdir)
-            )
+        # Install libraries
+        for prj in ['langkit_support.gpr', lib_name + '.gpr']:
+            self.gprinstall(args, self.dirs.build_dir('lib', 'gnat', prj),
+                            True)
+
+        # Install programs if they are all required.  If some are missing,
+        # installing them is useless (this is in development mode).
+        self.gprinstall(args, self.dirs.build_dir('src', 'mains.gpr'), False)
+
+        # Install the remaining miscellaneous files
+        for fpath in [
+            os.path.join('include', lib_name + '.h'),
+            os.path.join('share', lib_name, 'ast-types.txt'),
+            os.path.join('python', lib_name + '.py'),
+        ]:
+            build_path = self.dirs.build_dir(fpath)
+            install_path = self.dirs.install_dir(fpath)
+
+            subdir = os.path.dirname(install_path)
+            if not path.isdir(subdir):
+                os.makedirs(subdir)
+
+            shutil.copyfile(build_path, install_path)
 
     def do_setenv(self, args):
         """
@@ -648,8 +718,13 @@ class ManageScript(object):
     def setup_environment(self, add_path):
         add_path('PATH', self.dirs.build_dir('bin'))
         add_path('C_INCLUDE_PATH', self.dirs.build_dir('include'))
-        add_path('LIBRARY_PATH', self.dirs.build_dir('lib'))
-        add_path('LD_LIBRARY_PATH', self.dirs.build_dir('lib'))
+
+        for lib in ['langkit_support', self.lib_name.lower()]:
+            add_path('LIBRARY_PATH',
+                     self.dirs.build_dir('lib', lib + '.static'))
+            add_path('LD_LIBRARY_PATH',
+                     self.dirs.build_dir('lib', lib + '.relocatable'))
+
         add_path('GPR_PROJECT_PATH', self.dirs.build_dir('lib', 'gnat'))
         add_path('PYTHONPATH', self.dirs.build_dir('python'))
         add_path('PYTHONPATH', self.dirs.lang_source_dir('python_src'))
