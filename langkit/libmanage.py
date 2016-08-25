@@ -436,7 +436,7 @@ class ManageScript(object):
             import traceback
             traceback.print_exc()
             print_errors(recovered=True)
-            print >> sys.stderr, col('Internal error ! exiting', Colors.FAIL)
+            print >> sys.stderr, col('Internal error! Exiting', Colors.FAIL)
             sys.exit(1)
 
         if cov is not None:
