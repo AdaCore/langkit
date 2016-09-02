@@ -724,6 +724,8 @@ class ManageScript(object):
                      self.dirs.build_dir('lib', lib + '.static'))
             add_path('LD_LIBRARY_PATH',
                      self.dirs.build_dir('lib', lib + '.relocatable'))
+            add_path('PATH',
+                     self.dirs.build_dir('lib', lib + '.relocatable'))
 
         add_path('GPR_PROJECT_PATH', self.dirs.build_dir('lib', 'gnat'))
         add_path('PYTHONPATH', self.dirs.build_dir('python'))
