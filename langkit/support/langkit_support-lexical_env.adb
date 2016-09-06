@@ -289,6 +289,15 @@ package body Langkit_Support.Lexical_Env is
          for Elts of Self.Env.all loop
             Env_Element_Vectors.Destroy (Elts);
          end loop;
+
+         for Ref_Env of Self.Referenced_Envs loop
+            declare
+               Refd_Env : Lexical_Env := Ref_Env.Env;
+            begin
+               Dec_Ref (Refd_Env);
+            end;
+         end loop;
+
          Referenced_Envs_Vectors.Destroy (Self.Referenced_Envs);
          Destroy (Self.Env);
       end if;
@@ -339,6 +348,7 @@ package body Langkit_Support.Lexical_Env is
    begin
       Referenced_Envs_Vectors.Append
         (Self.Referenced_Envs, Referenced_Env'(Referenced_From, To_Reference));
+      Inc_Ref (To_Reference);
    end Reference;
 
 end Langkit_Support.Lexical_Env;
