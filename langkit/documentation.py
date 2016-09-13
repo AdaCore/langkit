@@ -28,60 +28,60 @@ from mako.template import Template
 # Mapping: documentation entity name (str) -> mako.template.Template.  All
 # templates can use the "lang" parameter, which contains "ada", "c" or "python"
 # depending on the binding for which we generate documentation.
-documentations = {
-    'langkit.initialize': Template("""
+documentations = {key: Template(val) for key, val in {
+    'langkit.initialize': """
         Initialize the library. Must be called before anything else from this
         library and from Langkit_Support.
-    """),
+    """,
 
     #
     # Main analysis types
     #
 
-    'langkit.analysis_context_type': Template("""
+    'langkit.analysis_context_type': """
         Context for all source analysis.
-    """),
-    'langkit.analysis_unit_type': Template("""
+    """,
+    'langkit.analysis_unit_type': """
         Context for the analysis of a single compilation unit.
         % if lang != 'python':
             References are ref-counted.
         % endif
-    """),
-    'langkit.grammar_rule_type': Template("""
+    """,
+    'langkit.grammar_rule_type': """
         Gramar rule to use for parsing.
-    """),
-    'langkit.node_type': Template("""
+    """,
+    'langkit.node_type': """
         Data type for all AST nodes. AST nodes are assembled to make up a tree.
         See the AST node primitives below to inspect such trees.
         % if lang != 'python':
             References are ref-counted.
         % endif
-    """),
-    'langkit.node_kind_type': Template("""
+    """,
+    'langkit.node_kind_type': """
         Kind of AST nodes in parse trees.
-    """),
-    'langkit.lexical_env_type': Template("""
+    """,
+    'langkit.lexical_env_type': """
         Data type for lexical environments.
-    """),
-    'langkit.token_kind': Template("""
+    """,
+    'langkit.token_kind': """
         Type for individual tokens.
-    """),
-    'langkit.token_type': Template("""
+    """,
+    'langkit.token_type': """
         Reference to a token in an analysis unit.
-    """),
-    'langkit.text_type': Template("""
+    """,
+    'langkit.text_type': """
         String encoded in UTF-32 (native endianness).
-    """),
-    'langkit.text_type.chars': Template("""
+    """,
+    'langkit.text_type.chars': """
         Address for the content of the string.
-    """),
-    'langkit.text_type.length': Template("""
+    """,
+    'langkit.text_type.length': """
         Size of the string (in characters).
-    """),
-    'langkit.diagnostic_type': Template("""
+    """,
+    'langkit.diagnostic_type': """
         Analysis unit diagnostics.
-    """),
-    'langkit.exception_type': Template("""
+    """,
+    'langkit.exception_type': """
         Holder for native exceptions-related information.  Memory management
         for this and all the fields is handled by the library: one just has to
         make sure not to keep references to it.
@@ -89,24 +89,24 @@ documentations = {
         TODO: For the moment, this structure contains already formatted
         information, but depending on possible future Ada runtime improvements,
         this might change.
-    """),
-    'langkit.exception_type.is_fatal': Template("""
+    """,
+    'langkit.exception_type.is_fatal': """
         Whether this exception is fatal for this process. If it is fatal, then
         process sanity is no longer guaranteed by Libadalang. If it is not,
         performing further processing is safe.
-    """),
-    'langkit.exception_type.information': Template("""
+    """,
+    'langkit.exception_type.information': """
         Message and context information associated with this exception.
-    """),
-    'langkit.property_error': Template("""
+    """,
+    'langkit.property_error': """
         Raised when an error occurs while evaluating a property.
-    """),
+    """,
 
     #
     # Analysis primitives
     #
 
-    'langkit.create_context': Template("""
+    'langkit.create_context': """
         Create a new Analysis_Context.
         % if lang != 'python':
             The returned value has a ref-count set to 1. If you use shared
@@ -127,24 +127,24 @@ documentations = {
 
         ${TODO} Passing an unsupported charset here is not guaranteed to raise
         an error right here, but this would be really helpful for users.
-    """),
-    'langkit.context_incref': Template("""
+    """,
+    'langkit.context_incref': """
         Increase the reference count to an analysis context.
         % if lang == 'c':
             Return the reference for convenience.
         % endif
-    """),
-    'langkit.context_decref': Template("""
+    """,
+    'langkit.context_decref': """
         Decrease the reference count to an analysis context. Destruction
         happens when the ref-count reaches 0.
-    """),
-    'langkit.destroy_context': Template("""
+    """,
+    'langkit.destroy_context': """
         Invoke Remove on all the units Context contains and free Context. Thus,
         any analysis unit it contains may survive if there are still references
         to it elsewhere.
-    """),
+    """,
 
-    'langkit.get_unit_from_file': Template("""
+    'langkit.get_unit_from_file': """
         Create a new analysis unit for Filename or return the existing one if
         any. If Reparse is true and the analysis unit already exists, reparse
         it from Filename.
@@ -170,8 +170,8 @@ documentations = {
 
         When With_Trivia is true, the parsed analysis unit will contain
         trivias. Already existing analysis units are reparsed if needed.
-    """),
-    'langkit.get_unit_from_buffer': Template("""
+    """,
+    'langkit.get_unit_from_buffer': """
         Create a new analysis unit for Filename or return the existing one if
         any. Whether the analysis unit already exists or not, (re)parse it from
         the source code in Buffer.
@@ -190,8 +190,8 @@ documentations = {
 
         When With_Trivia is true, the parsed analysis unit will contain
         trivias. Already existing analysis units are reparsed if needed.
-    """),
-    'langkit.remove_unit': Template("""
+    """,
+    'langkit.remove_unit': """
         Remove the corresponding analysis unit from this context. If someone
         still owns a reference to it, it remains available but becomes
         context-less.
@@ -205,25 +205,25 @@ documentations = {
         % elif lang == 'python':
             If there is no such analysis unit, raise a KeyError exception.
         % endif
-    """),
+    """,
 
-    'langkit.unit_reparse_file': Template("""
+    'langkit.unit_reparse_file': """
         Reparse an analysis unit from the associated file. If Charset is empty
         or ${null}, use the last charset successfuly used for this unit,
         otherwise use it to decode the content of Filename.
 
         If any failure occurs, such as decoding, lexing or parsing
         failure, diagnostic are emitted to explain what happened.
-    """),
-    'langkit.unit_reparse_buffer': Template("""
+    """,
+    'langkit.unit_reparse_buffer': """
         Reparse an analysis unit from a buffer. If Charset is empty or ${null},
         use the last charset successfuly used for this unit, otherwise use it
         to decode the content of Filename.
 
         If any failure occurs, such as decoding, lexing or parsing
         failure, diagnostic are emitted to explain what happened.
-    """),
-    'langkit.unit_reparse_generic': Template("""
+    """,
+    'langkit.unit_reparse_generic': """
         Reparse an analysis unit from a buffer, if provided, or from the
         original file otherwise. If Charset is empty or ${null}, use the last
         charset successfuly used for this unit, otherwise use it to decode the
@@ -231,94 +231,94 @@ documentations = {
 
         If any failure occurs, such as decoding, lexing or parsing
         failure, diagnostic are emitted to explain what happened.
-    """),
-    'langkit.unit_root': Template("""
+    """,
+    'langkit.unit_root': """
         Return the root AST node for this unit, or ${null} if there is none.
-    """),
-    'langkit.node_unit': Template("""
+    """,
+    'langkit.node_unit': """
         Return the unit that owns an AST node.
-    """),
-    'langkit.unit_first_token': Template("""
+    """,
+    'langkit.unit_first_token': """
         Return a reference to the first token scanned in this unit.
-    """),
-    'langkit.unit_last_token': Template("""
+    """,
+    'langkit.unit_last_token': """
         Return a reference to the last token scanned in this unit.
-    """),
-    'langkit.unit_filename': Template("""
+    """,
+    'langkit.unit_filename': """
         Return the filename an unit is associated to.
 
         % if lang == 'c':
             The returned string is dynamically allocated and the caller must
             free it when done with it.
         % endif
-    """),
-    'langkit.unit_diagnostic_count': Template("""
+    """,
+    'langkit.unit_diagnostic_count': """
         Return the number of diagnostics associated to this unit.
-    """),
-    'langkit.unit_diagnostic': Template("""
+    """,
+    'langkit.unit_diagnostic': """
         Get the Nth diagnostic in this unit and store it into *DIAGNOSTIC_P.
         Return zero on failure (when N is too big).
-    """),
-    'langkit.unit_has_diagnostics': Template("""
+    """,
+    'langkit.unit_has_diagnostics': """
         Return whether this unit has associated diagnostics.
-    """),
-    'langkit.unit_diagnostics': Template("""
+    """,
+    'langkit.unit_diagnostics': """
         Return an array that contains the diagnostics associated to this unit.
-    """),
-    'langkit.unit_incref': Template("""
+    """,
+    'langkit.unit_incref': """
         Increase the reference count to an analysis unit.
         % if lang == 'c':
             Return the reference for convenience.
         % endif
-    """),
-    'langkit.unit_decref': Template("""
+    """,
+    'langkit.unit_decref': """
         Decrease the reference count to an analysis unit.
-    """),
-    'langkit.unit_context': Template("""
+    """,
+    'langkit.unit_context': """
         Return the context that owns this unit.
-    """),
+    """,
 
-    'langkit.unit_populate_lexical_env': Template("""
+    'langkit.unit_populate_lexical_env': """
         Populate the lexical environments for this analysis unit, according to
         the specifications given in the language spec.
-    """),
+    """,
 
     #
     # General AST node primitives
     #
 
-    'langkit.node_kind': Template("""
+    'langkit.node_kind': """
         Get the kind of an AST node.
-    """),
-    'langkit.kind_name': Template("""
+    """,
+    'langkit.kind_name': """
         Helper for textual dump: return the name of a node kind. The returned
         string is a copy and thus must be free'd by the caller.
-    """),
-    'langkit.node_sloc_range': Template("""
+    """,
+    'langkit.node_sloc_range': """
         Get the spanning source location range for an AST node.
-    """),
-    'langkit.lookup_in_node': Template("""
+    """,
+    'langkit.lookup_in_node': """
         Return the bottom-most AST node from NODE that contains SLOC, or
         ${null} if there is none.
-    """),
-    'langkit.node_child_count': Template("""
+    """,
+    'langkit.node_child_count': """
         Return the number of AST node in NODE's fields.
-    """),
-    'langkit.node_child': Template("""
+    """,
+    'langkit.node_child': """
         Get the Nth child AST node in NODE's fields and store it into *CHILD_P.
         Return zero on failure (when N is too big).
-    """),
-    'langkit.node_short_image': Template("""
+    """,
+    'langkit.node_short_image': """
         Return a representation of NODE as a string.
-    """),
+    """,
 
-    'langkit.token_text': Template("""
+    'langkit.token_text': """
         Get the text of the given token.
-    """),
-    'langkit.token_sloc_range': Template("""
+    """,
+    'langkit.token_sloc_range': """
         Get the source location range of the given token.
-    """),
-    'langkit.text_to_locale_string': Template("""
+    """,
+    'langkit.text_to_locale_string': """
         Encode some text using the current locale. The result is dynamically
         allocated: it is up to the caller to free it when done with it.
 
@@ -326,32 +326,32 @@ documentations = {
         and diagnostic text: it ignores errors (when the locale does not
         support some characters). Production code should use real conversion
         routines such as libiconv's in order to deal with UTF-32 texts.
-    """),
-    'langkit.free': Template("""
+    """,
+    'langkit.free': """
         Free dynamically allocated memory.
 
         This is a helper to free objects from dynamic languages.
-    """),
-    'langkit.destroy_text': Template("""
+    """,
+    'langkit.destroy_text': """
         If this text object owns the buffer it references, free this buffer.
 
         Note that even though this accepts a pointer to a text object, it does
         not deallocates the text object itself but rather the buffer it
         references.
-    """),
+    """,
 
     #
     # Lexical environment primitives
     #
 
-    'langkit.lexical_env_parent': Template("""
+    'langkit.lexical_env_parent': """
         Get the ENV's parent lexical environment. This returns ${null} for the
         root lexical environment.
-    """),
-    'langkit.lexical_env_node': Template("""
+    """,
+    'langkit.lexical_env_node': """
         Get the AST node for which this environment was created.
-    """),
-    'langkit.lexical_env_get': Template("""
+    """,
+    'langkit.lexical_env_get': """
         Look for elements in ENV corresponding to NAME.
 
         % if lang != 'python':
@@ -359,13 +359,13 @@ documentations = {
         for deallocating it afterwards. The content of the array is owned by
         the corresponding analysis unit, however.
         % endif
-    """),
+    """,
 
     #
     # Extensions handling
     #
 
-    'langkit.extensions_handling': Template("""
+    'langkit.extensions_handling': """
         The following functions makes it possible to attach arbitrary data to
         AST nodes: these are extensions.  Each data is associated with both an
         extension ID and a destructor.  AST nodes can have either none or only
@@ -374,16 +374,16 @@ documentations = {
 
         This mechanism is inteded to ease annotating trees with analysis data
         but also to host node wrappers for language bindings.
-    """),
-    'langkit.node_extension_destructor': Template("""
+    """,
+    'langkit.node_extension_destructor': """
         Type for extension destructors.  The parameter are the "node" the
         extension was attached to and the "extension" itself.
-    """),
-    'langkit.register_extension': Template("""
+    """,
+    'langkit.register_extension': """
         Register an extension and return its identifier.  Multiple calls with
         the same name will return the same identifier.
-    """),
-    'langkit.node_extension': Template("""
+    """,
+    'langkit.node_extension': """
         Create an extension slot in "node".  If this node already contains an
         extension for "ext_id", return the existing slot.  If not, create such
         a slot, associate the "dtor" destructor to it and initialize the slot
@@ -391,18 +391,18 @@ documentations = {
 
         Note that the pointer is not guaranteed to stay valid after further
         calls to this function.
-    """),
+    """,
 
     #
     # Misc
     #
 
-    'langkit.get_last_exception': Template("""
+    'langkit.get_last_exception': """
         Return exception information for the last error that happened in the
         current thread. Will be automatically allocated on error and free'd on
         the next error.
-    """),
-    'langkit.token_kind_name': Template("""
+    """,
+    'langkit.token_kind_name': """
         Return a human-readable name for a token kind.
 
         % if lang == 'c':
@@ -412,21 +412,21 @@ documentations = {
             If the given kind is invalid, return NULL and set the last
             exception accordingly.
         % endif
-    """),
-    'langkit.token_next': Template("""
+    """,
+    'langkit.token_next': """
         Return a reference to the next token in the corresponding analysis
         unit.
-    """),
-    'langkit.token_is_equivalent': Template("""
+    """,
+    'langkit.token_is_equivalent': """
         Return whether L and R are structurally equivalent tokens. This means
         that their position in the stream won't be taken into account, only the
         kind and text of the token.
-    """),
-    'langkit.token_previous': Template("""
+    """,
+    'langkit.token_previous': """
         Return a reference to the previous token in the corresponding analysis
         unit.
-    """),
-}
+    """,
+}.items()}
 
 
 null_names = {
