@@ -651,6 +651,19 @@ package body ${_self.ada_api_settings.lib_name}.AST is
               else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Trivia)).T);
    end Data;
 
+   -------------------
+   -- Is_Equivalent --
+   -------------------
+
+   function Is_Equivalent (L, R : Token_Type) return Boolean is
+      DL : Token_Data_Type := Data (L);
+      DR : Token_Data_Type := Data (R);
+   begin
+      return DL.Kind = DR.Kind
+         and then ((DL.Text = null and DR.Text = null)
+                   or else DL.Text.all = DR.Text.all);
+   end Is_Equivalent;
+
    -----------
    -- Image --
    -----------

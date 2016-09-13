@@ -382,6 +382,11 @@ extern void
 ${capi.get_name('token_previous')}(${token_type} *token,
                                    ${token_type} *previous_token);
 
+${c_doc('langkit.token_is_equivalent')}
+extern void
+${capi.get_name('token_is_equivalent')}(${token_type} *left,
+                                        ${token_type} *right);
+
 #ifdef __cplusplus
 }
 #endif

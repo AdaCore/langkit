@@ -741,6 +741,16 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       Next_Token.all := Wrap (NT);
    end;
 
+   function ${capi.get_name('token_is_equivalent')}
+     (Left  : ${token_type}_Ptr;
+      Right : ${token_type}_Ptr) return ${bool_type}
+   is
+      L  : constant Token_Type := Unwrap (Left.all);
+      R  : constant Token_Type := Unwrap (Right.all);
+   begin
+      return ${bool_type} (Boolean'Pos (Is_Equivalent (L, R)));
+   end;
+
    procedure ${capi.get_name('token_previous')}
      (Token          : ${token_type}_Ptr;
       Previous_Token : ${token_type}_Ptr)

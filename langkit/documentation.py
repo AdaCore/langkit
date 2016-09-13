@@ -417,6 +417,11 @@ documentations = {
         Return a reference to the next token in the corresponding analysis
         unit.
     """),
+    'langkit.token_is_equivalent': Template("""
+        Return whether L and R are structurally equivalent tokens. This means
+        that their position in the stream won't be taken into account, only the
+        kind and text of the token.
+    """),
     'langkit.token_previous': Template("""
         Return a reference to the previous token in the corresponding analysis
         unit.

@@ -493,6 +493,9 @@ package ${_self.ada_api_settings.lib_name}.AST is
    function Data (T : Token_Type) return Token_Data_Type;
    --  Return the data associated to T
 
+   function Is_Equivalent (L, R : Token_Type) return Boolean;
+   ${ada_doc('langkit.token_is_equivalent')}
+
    function Image (Token : Token_Type) return String;
    --  Debug helper: return a human-readable text to represent a token
 
