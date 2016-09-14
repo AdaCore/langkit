@@ -534,6 +534,29 @@ package ${_self.ada_api_settings.lib_name}.AST is
       return Token_Type;
    --  Return the last token used to parse Node
 
+   --------------------
+   -- Token Iterator --
+   --------------------
+
+   type Token_Iterator is private
+      with Iterable => (First       => First_Token,
+                        Next        => Next_Token,
+                        Has_Element => Has_Element,
+                        Element     => Element);
+   --  This type allows iteration on a range of tokens
+
+   function First_Token (Self : Token_Iterator) return Token_Type;
+   function Next_Token
+     (Self : Token_Iterator; Tok : Token_Type) return Token_Type;
+   function Has_Element
+     (Self : Token_Iterator; Tok : Token_Type) return Boolean;
+   function Element (Self : Token_Iterator; Tok : Token_Type) return Token_Type;
+
+   function Token_Range
+     (Node : access ${root_node_value_type}'Class)
+      return Token_Iterator;
+   --  Return an iterator on the range of tokens encompassed by Node
+
    -------------------
    -- Debug helpers --
    -------------------
@@ -874,6 +897,35 @@ private
       return Token_Type
    is
      ((Node.Unit.Token_Data, Node.Token_End, No_Token_Index));
+
+   --------------------
+   -- Token Iterator --
+   --------------------
+
+   type Token_Iterator is record
+      Node : ${root_node_type_name};
+      Last : Token_Index;
+   end record;
+
+   function First_Token (Self : Token_Iterator) return Token_Type
+   is (Token_Start (Self.Node));
+
+   function Next_Token
+     (Self : Token_Iterator; Tok : Token_Type) return Token_Type
+   is (Next (Tok));
+
+   function Has_Element
+     (Self : Token_Iterator; Tok : Token_Type) return Boolean
+   is (Tok.Token <= Self.Last);
+
+   function Element (Self : Token_Iterator; Tok : Token_Type) return Token_Type
+   is (Tok);
+
+   function Token_Range
+     (Node : access ${root_node_value_type}'Class)
+      return Token_Iterator
+   is
+     (Token_Iterator'(${root_node_type_name} (Node), Node.Token_End));
 
    function Get_Symbol (Token : Token_Type) return Symbol_Type is
      (Symbol_Type (Data (Token).Text));
