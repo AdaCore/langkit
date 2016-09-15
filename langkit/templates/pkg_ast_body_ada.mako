@@ -671,9 +671,10 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    function Image (Token : Token_Type) return String is
       D : constant Token_Data_Type := Data (Token);
    begin
-      return (if D.Text = null
-              then Token_Kind_Name (D.Kind)
-              else Image (D.Text.all));
+      return "<Token Kind=" & Token_Kind_Name (D.Kind) & " Text=" &
+        (if D.Text = null
+         then "None"
+         else """" & Image (D.Text.all) & """") & ">";
    end Image;
 
    --------------------------

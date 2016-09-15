@@ -321,8 +321,10 @@
                end if;
 
             % elif is_token_type(field.type):
-               Put_Line (Level + 1, "${field._name.lower}: "
-                         & Image (Token (Node, Node.${field.name})));
+               Put_Line
+                 (Level + 1, "${field._name.lower}: "
+                  & Langkit_Support.Text.Image
+                    (Data (Token (Node, Node.${field.name})).Text.all));
 
             % else:
                Put_Line (Level + 1, "${field._name.lower}: "
