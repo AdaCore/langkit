@@ -218,7 +218,7 @@
       -----------
 
       overriding function Image
-        (Node : access ${type_name}) return String 
+        (Node : access ${type_name}) return String
       is
          Result : Unbounded_String;
       begin
@@ -261,7 +261,7 @@
       -----------------
 
       overriding function
-        Child_Count (Node : access ${type_name}) return Natural 
+        Child_Count (Node : access ${type_name}) return Natural
       is
          pragma Unreferenced (Node);
       begin
@@ -272,7 +272,7 @@
       -- Get_Child --
       ---------------
 
-      overriding procedure Get_Child 
+      overriding procedure Get_Child
         (Node   : access ${type_name};
          Index  : Positive;
          Exists : out Boolean;
@@ -301,7 +301,7 @@
       -- Print --
       -----------
 
-      overriding procedure Print 
+      overriding procedure Print
         (Node  : access ${type_name};
          Level : Natural := 0)
       is
