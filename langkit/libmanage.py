@@ -224,6 +224,10 @@ class ManageScript(object):
             self.do_generate, True
         )
         self.add_generate_args(generate_parser)
+        self.generate_parser.add_argument(
+            '--no-compile-quex', help="Don't compile the quex lexer",
+            action='store_true',
+        )
 
         #########
         # Build #
@@ -467,7 +471,8 @@ class ManageScript(object):
             printcol("Generating source for libadalang ...", Colors.HEADER)
         self.context.emit(file_root=self.dirs.build_dir(),
                           main_programs=self.main_programs,
-                          annotate_fields_types=args.annotate_fields_types)
+                          annotate_fields_types=args.annotate_fields_types,
+                          generate_lexer=args.no_compile_quex)
 
         def gnatpp(project_file, glob_pattern):
             self.check_call(args, 'Pretty-printing', [
