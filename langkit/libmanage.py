@@ -224,10 +224,6 @@ class ManageScript(object):
             self.do_generate, True
         )
         self.add_generate_args(generate_parser)
-        self.generate_parser.add_argument(
-            '--no-compile-quex', help="Don't compile the quex lexer",
-            action='store_true',
-        )
 
         #########
         # Build #
@@ -290,6 +286,10 @@ class ManageScript(object):
             help='Experimental feature. Modify the python files where the '
                  'node types are defined, to annotate empty Field() '
                  'definitions.'
+        )
+        subparser.add_argument(
+            '--no-compile-quex', help="Don't compile the quex lexer",
+            action='store_true',
         )
 
     def add_build_args(self, subparser):
@@ -472,7 +472,7 @@ class ManageScript(object):
         self.context.emit(file_root=self.dirs.build_dir(),
                           main_programs=self.main_programs,
                           annotate_fields_types=args.annotate_fields_types,
-                          generate_lexer=args.no_compile_quex)
+                          generate_lexer=not args.no_compile_quex)
 
         def gnatpp(project_file, glob_pattern):
             self.check_call(args, 'Pretty-printing', [
