@@ -490,7 +490,7 @@
       Initial_Env : Lexical_Env := Current_Env;
 
    begin
-      % if cls.base().env_spec:
+      % if cls.base().env_spec and cls.env_spec.call_parents:
          <% base_type_name = "{}_Type".format(cls.base().name()) %>
          Ret := Do_Env_Actions
            (${base_type_name} (Self.all)'Access, Current_Env);

@@ -43,7 +43,8 @@ class EnvSpec(object):
                  add_to_env=None,
                  ref_envs=None,
                  initial_env=None,
-                 env_hook_arg=None):
+                 env_hook_arg=None,
+                 call_parents=True):
         """
 
         :param bool add_env: Wether to add a new scoped lexical environment.
@@ -127,6 +128,9 @@ class EnvSpec(object):
         ":type: PropertyDef"
 
         self.has_post_actions = False
+
+        self.call_parents = call_parents
+        "Whether to call parents env specs or not"
 
     def create_properties(self):
         """
