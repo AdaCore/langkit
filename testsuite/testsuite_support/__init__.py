@@ -43,9 +43,12 @@ class Testsuite(BaseTestsuite):
         )
 
     def tear_up(self):
-        # Build Adalog so that each testcase do not try to build it in
-        # parallel.
-        p = Run(['gprbuild', '-p', '-q', '-P',
+        # Build Langkit_Support and Adalog so that each testcase does not try
+        # to build it in parallel.
+        p = Run(['gprbuild', '-p', '-q', '-f', '-P',
+                 os.path.join(self.root_dir, '..', 'langkit', 'support',
+                              'langkit_support.gpr')])
+        p = Run(['gprbuild', '-p', '-q', '-f', '-P',
                  os.path.join(self.root_dir, '..', 'langkit', 'adalog',
                               'adalog.gpr')])
         if p.status != 0:
