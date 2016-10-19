@@ -34,10 +34,10 @@ package ${_self.ada_api_settings.lib_name}.AST.List is
      (Node : access List_Type) return Natural;
 
    overriding procedure Get_Child 
-     (Node   : access List_Type;
-      Index  : Positive;
-      Exists : out Boolean;
-      Result : out ${root_node_type_name});
+     (Node            : access List_Type;
+      Index           : Positive;
+      Index_In_Bounds : out Boolean;
+      Result          : out ${root_node_type_name});
 
    overriding procedure Print
      (Node  : access List_Type;

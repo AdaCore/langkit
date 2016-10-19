@@ -59,10 +59,10 @@
       overriding function Child_Count
         (Node : access ${type_name}) return Natural;
       overriding procedure Get_Child
-        (Node  : access ${type_name};
-         Index : Positive;
-         Exists : out Boolean;
-         Result : out ${root_node_type_name});
+        (Node            : access ${type_name};
+         Index           : Positive;
+         Index_In_Bounds : out Boolean;
+         Result          : out ${root_node_type_name});
 
       overriding procedure Print
         (Node  : access ${type_name};
@@ -273,10 +273,10 @@
       ---------------
 
       overriding procedure Get_Child
-        (Node   : access ${type_name};
-         Index  : Positive;
-         Exists : out Boolean;
-         Result : out ${root_node_type_name})
+        (Node            : access ${type_name};
+         Index           : Positive;
+         Index_In_Bounds : out Boolean;
+         Result          : out ${root_node_type_name})
       is
          ## Some ASTnodes have no ASTNode child: avoid the "unused parameter"
          ## compilation warning for them.
@@ -289,10 +289,10 @@
              % for i, field in enumerate(astnode_fields, 1):
                  when ${i} =>
                      Result := ${root_node_type_name} (Node.${field.name});
-                     Exists := True;
+                     Index_In_Bounds := True;
              % endfor
              when others =>
-                Exists := False;
+                Index_In_Bounds := False;
                 Result := null;
          end case;
       end Get_Child;

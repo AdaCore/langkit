@@ -259,14 +259,14 @@ package ${_self.ada_api_settings.lib_name}.AST is
    is (Node.Child_Count);
    --  Return the index of the last child Node has, or 0 if there is no child
 
-   procedure Get_Child (Node   : access ${root_node_value_type};
-                        Index  : Positive;
-                        Exists : out Boolean;
-                        Result : out ${root_node_type_name}) is abstract;
-   --  Get the Index'th child of Node, storing it into Result. Store in Exists
-   --  whether Node had such a child (if not, the content of Result is
-   --  undefined).
-   --  Child indexing is 1-based.
+   procedure Get_Child
+     (Node            : access ${root_node_value_type};
+      Index           : Positive;
+      Index_In_Bounds : out Boolean;
+      Result          : out ${root_node_type_name}) is abstract;
+   --  Get the Index'th child of Node, storing it into Result. Child indexing
+   --  is 1-based. Store in Index_In_Bounds whether Node had such a child; if
+   --  not, the content of Result is undefined.
 
    function Child (Node  : access ${root_node_value_type}'Class;
                    Index : Positive) return ${root_node_type_name};

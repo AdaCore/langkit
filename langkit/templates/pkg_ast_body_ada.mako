@@ -46,11 +46,11 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    function Child (Node  : access ${root_node_value_type}'Class;
                    Index : Positive) return ${root_node_type_name}
    is
-      Result : ${root_node_type_name};
-      Exists : Boolean;
+      Result          : ${root_node_type_name};
+      Index_In_Bounds : Boolean;
    begin
-      Get_Child (Node, Index, Exists, Result);
-      return (if Exists then Result else null);
+      Get_Child (Node, Index, Index_In_Bounds, Result);
+      return (if Index_In_Bounds then Result else null);
    end Child;
 
    --------------
