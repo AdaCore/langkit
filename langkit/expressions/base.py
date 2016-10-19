@@ -1267,22 +1267,11 @@ class PropertyDef(AbstractNodeData):
                                LexicalEnvType.nullexpr())
             return
 
-        self.expr = unsugar(self.expr, ignore_errors=True)
-        check_source_language(
-            isinstance(self.expr, AbstractExpression) or callable(self.expr),
-            "Invalid object passed for expression of property: {}".format(
-                self.expr
-            )
-        )
-
         # If the user passed a lambda or function for the expression,
         # now is the moment to transform it into an abstract expression by
         # calling it.
-        if not isinstance(self.expr, AbstractExpression):
-
-            check_source_language(callable(self.expr), 'Expected either an'
-                                  ' expression or a function')
-
+        if (not isinstance(self.expr, AbstractExpression)
+                and callable(self.expr)):
             argspec = inspect.getargspec(self.expr)
             defaults = argspec.defaults or []
 
@@ -1329,11 +1318,21 @@ class PropertyDef(AbstractNodeData):
                     with Block.set_block(function_block):
                         fn = assert_type(self.expr, types.FunctionType)
                         expr = check_type(
-                            fn(*self.argument_vars), AbstractExpression,
+                            unsugar(fn(*self.argument_vars)),
+                            AbstractExpression,
                             "Properties return value should be an expression"
                         )
                         function_block.expr = expr
                         self.expr = function_block
+        elif not(callable(self.expr)):
+            self.expr = unsugar(self.expr)
+
+        check_source_language(
+            isinstance(self.expr, AbstractExpression) or not(self.expr),
+            "Invalid object passed for expression of property: {}".format(
+                self.expr
+            )
+        )
 
         if not self.abstract:
             with self.bind():
