@@ -1563,9 +1563,11 @@ class PropertyDef(AbstractNodeData):
         :param [CompiledType] partial_args_types: The type of partially applied
             arguments passed to the logic predicate.
         """
-        return [self.struct] + [
-            a.type for a in self.explicit_arguments[:-len(partial_args_types)]
-        ]
+        exp_args = self.explicit_arguments[:len(self.explicit_arguments)
+                                           - len(partial_args_types)]
+
+        ret = [self.struct] + [a.type for a in exp_args]
+        return ret
 
 
 # noinspection PyPep8Naming
