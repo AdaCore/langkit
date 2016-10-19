@@ -504,9 +504,6 @@ class ManageScript(object):
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
 
-        :param str project_file: Path to the project file to pass to
-            GPRbuild/GPRinstall.
-
         :param bool is_library: If true, build both relocatable and static
             libraries (depending on modes enabled in "args"). Otherwise, use
             relocatable if available or static mode otherwise.
@@ -571,11 +568,14 @@ class ManageScript(object):
         if build_static:
             run('static')
 
+    # noinspection PyIncorrectDocstring
     def gprinstall(self, args, project_file, is_library):
         """
         Run GPRinstall on a project file.
 
         See gprbuild for arguments description.
+
+        :type args: argparse.Namespace
         """
         base_argv = ['gprinstall', '-p',
                      '-P{}'.format(project_file),
