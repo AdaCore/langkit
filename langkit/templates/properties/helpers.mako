@@ -62,6 +62,7 @@
       Field_${i} : ${arg_type.name()};
       % endfor
       Env        : Lexical_Env;
+      Dbg_Img    : access String;
    end record;
 
    function Call
@@ -81,6 +82,9 @@
          Self.Env
       );
    end Call;
+
+   function Image (Self : ${type_name}) return String
+   is (if Self.Dbg_Img /= null then Self.Dbg_Img.all else "");
 
    package ${package_name} is
    new Predicate_${len(formal_node_types)}

@@ -37,7 +37,7 @@ package Adalog.Operations is
       State       : Integer := 0;
    end record;
 
-   overriding function Solve (Inst : in out Or_Rec) return Boolean;
+   overriding function Solve_Impl (Inst : in out Or_Rec) return Boolean;
    overriding procedure Reset (Inst : in out Or_Rec);
    overriding procedure Cleanup (Inst : in out Or_Rec);
    overriding function Children (Inst : Or_Rec) return Relation_Array
@@ -52,7 +52,7 @@ package Adalog.Operations is
       State       : Integer := 0;
    end record;
 
-   overriding function Solve (Inst : in out And_Rec) return Boolean;
+   overriding function Solve_Impl (Inst : in out And_Rec) return Boolean;
    overriding procedure Reset (Inst : in out And_Rec);
    overriding procedure Cleanup (Inst : in out And_Rec);
    overriding function Children (Inst : And_Rec) return Relation_Array

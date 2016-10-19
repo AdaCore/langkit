@@ -51,10 +51,11 @@ package body Adalog.Logic_Ref is
 
    function Set_Value (Self : access Var; Data : Element_Type) return Boolean
    is
-      Old : constant Var := Self.all;
+      Old   : aliased constant Var := Self.all;
    begin
       Trace ("Setting the value of " & Image (Raw_Var (Self)) & " to "
              & Element_Image (Data));
+      Trace ("Old value is " & Element_Image (Old.El));
       --  First set the value
 
       Self.El := Data;
@@ -66,7 +67,9 @@ package body Adalog.Logic_Ref is
       for El of Pred_Sets.Elements (Self.Pending_Relations) loop
          Trace ("Applying predicate on " & Image (Raw_Var (Self)));
          if not El.Apply then
+            Trace ("Applying predicate failed");
             Self.all := Old;
+            Trace ("Self element value is now " & Element_Image (Self.El));
             return False;
          end if;
       end loop;

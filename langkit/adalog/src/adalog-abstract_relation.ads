@@ -57,10 +57,13 @@ package Adalog.Abstract_Relation is
    --    relation systems possibly have multiple solutions. This state can
    --    be reset via the Reset primitive.
 
-   function Solve (Inst : in out I_Relation) return Boolean is abstract;
+   function Solve (Inst : in out I_Relation) return Boolean;
    --  Solve the relation system. Iff the solve process did issue a correct
    --  solution, this will return True, and all logic variables bound by the
    --  relation will have a value.
+
+   function Solve_Impl (Inst : in out I_Relation) return Boolean is abstract;
+   --  Solve function that must be implemented by relations
 
    procedure Reset (Self : in out I_Relation) is abstract;
    --  Reset the state of the relation and all sub-relations
@@ -73,10 +76,15 @@ package Adalog.Abstract_Relation is
    function Children (Self : I_Relation) return Relation_Array
    is (Empty_Array);
 
-   function Solve (Self : Relation) return Boolean is (Self.all.Solve);
-   --  Shortcut to solve the underlying relation, used by Langkit
+   function Custom_Image (Self : I_Relation) return String is ("");
+   --  Implementers of relations can overload this function if they want the
+   --  default image provided by the Print_Relation function to be overloaded.
 
-   procedure Print_Relation (Self : Relation);
+   function Solve (Self : Relation) return Boolean;
+   --  Function to solve the toplevel relation, used by Langkit
+
+   procedure Print_Relation
+     (Self : Relation; Current_Relation : Relation := null);
 
    procedure Inc_Ref (Self : Relation);
    procedure Dec_Ref (Self : in out Relation);

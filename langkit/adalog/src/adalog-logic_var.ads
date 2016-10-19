@@ -57,6 +57,8 @@ generic
 
    with function Image (Self : Logic_Var_Type) return String is <>;
 
+   with function Element_Image (Self : Element_Type) return String is <>;
+
 package Adalog.Logic_Var is
    subtype Var is Logic_Var_Type;
 

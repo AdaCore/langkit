@@ -78,10 +78,10 @@ package Adalog.Unify is
    is (Convert (L) = R) with Inline_Always;
 
    package Unify_Left is new Unify_One_Side
-     (L_Type, R_Type, Equals, Convert, Left_Var);
+     (L_Type, R_Type, Equals, Convert, Left_Var, Right_Var.Element_Image);
 
    package Unify_Right is new Unify_One_Side
-     (R_Type, L_Type, Equals, Convert, Right_Var);
+     (R_Type, L_Type, Equals, Convert, Right_Var, Left_Var.Element_Image);
 
    ------------------
    -- Eq predicate --

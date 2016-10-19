@@ -45,7 +45,7 @@ package Adalog.Relations is
          Rel  : Ty;
       end record;
 
-      overriding function Solve (Inst : in out Rel) return Boolean;
+      overriding function Solve_Impl (Inst : in out Rel) return Boolean;
       overriding procedure Reset (Inst : in out Rel) is null;
       overriding procedure Cleanup (Inst : in out Rel);
    end Pure_Relation;
@@ -59,6 +59,7 @@ package Adalog.Relations is
       with function Apply (Inst : in out Ty) return Boolean is <>;
       with procedure Revert (Inst : in out Ty) is <>;
       with procedure Free (Inst : in out Ty) is <>;
+      with function Custom_Image (Inst : Ty) return String is <>;
    package Stateful_Relation is
 
       --  This package represents a relation that has state,
@@ -71,9 +72,12 @@ package Adalog.Relations is
          Rel   : Ty;
       end record;
 
-      overriding function Solve (Inst : in out Rel) return Boolean;
+      overriding function Solve_Impl (Inst : in out Rel) return Boolean;
       overriding procedure Reset (Inst : in out Rel);
       overriding procedure Cleanup (Inst : in out Rel);
+
+      overriding function Custom_Image (Inst : Rel) return String
+      is (Custom_Image (Inst.Rel));
 
    end Stateful_Relation;
 

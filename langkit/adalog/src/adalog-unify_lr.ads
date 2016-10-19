@@ -72,6 +72,11 @@ package Adalog.Unify_LR is
    is ((Left  => Left, Right => Right, State => No_Change,
         L_Data => L_Data, R_Data => R_Data));
 
+   function Custom_Image (Self : Unify_LR) return String
+   is
+     ("<Unify_LR Left: " & Left_Var.Image (Self.Left)
+      & " Right: " & Right_Var.Image (Self.Right) & ">");
+
    package Unify_LR_Rel is new Relations.Stateful_Relation (Unify_LR);
 
    function Create

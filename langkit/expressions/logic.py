@@ -277,11 +277,17 @@ class Predicate(AbstractExpression):
 
         closure_exprs.append(construct(Env))
 
+        # Append the debug image for the predicate
+        closure_exprs.append(LiteralExpr('"{}.{}"'.format(
+            self.pred_property.name.camel_with_underscores,
+            self.pred_property.struct.name().camel_with_underscores
+        ), type=None))
+
         logic_var_exprs.append(
             BasicExpr("{}_Predicate_Caller'({})".format(
                 pred_id, ", ".join(
-                    ["{}" for _ in range(len(closure_exprs) - 1)]
-                    + ["Env => {}"]
+                    ["{}" for _ in range(len(closure_exprs) - 2)]
+                    + ["Env => {}, Dbg_Img => new String'({})"]
                 )
             ), type=None, sub_exprs=closure_exprs)
         )

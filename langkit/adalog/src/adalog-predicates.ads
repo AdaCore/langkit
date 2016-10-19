@@ -53,6 +53,8 @@ package Adalog.Predicates is
 
       with procedure Free (Self : Predicate_Type) is null;
 
+      with function Image (Self : Predicate_Type) return String is <>;
+
    package Predicate is
 
       function Create
@@ -79,6 +81,9 @@ package Adalog.Predicates is
 
       procedure Revert (Inst : in out Predicate_Logic);
       procedure Free (Inst : in out Predicate_Logic);
+
+      function Custom_Image (Inst : Predicate_Logic) return String
+      is ("PREDICATE " & Image (Inst.Pred) & " ON " & Var.Image (Inst.Ref));
 
       package Impl is new Stateful_Relation (Ty => Predicate_Logic);
       --  This package contains the I_Relation wrapper that is actually to
@@ -122,6 +127,8 @@ package Adalog.Predicates is
       function Call (Self : Predicate_Holder; L : El_Type) return Boolean
       is (Self.Pred.all (L));
 
+      function Image (Self : Predicate_Holder) return String is ("");
+
       package Internal_Pred is new Predicate (El_Type, Var, Predicate_Holder);
 
       function Create
@@ -153,6 +160,8 @@ package Adalog.Predicates is
       with function Call
         (Self : Predicate_Type; Vals : Var.Val_Array) return Boolean is <>;
 
+      with function Image (Self : Predicate_Type) return String is <>;
+
       with procedure Free (Self : Predicate_Type) is null;
 
    package N_Predicate is
@@ -182,6 +191,16 @@ package Adalog.Predicates is
 
       procedure Revert (Inst : in out Predicate_Logic);
       procedure Free (Inst : in out Predicate_Logic);
+
+      function Img (Refs : Var_Array) return String
+      is
+        (Var.Image (Refs (Refs'First))
+         & (if Refs'Length > 1
+            then Img (Refs (Refs'First + 1 .. Refs'Last))
+            else ""));
+
+      function Custom_Image (Inst : Predicate_Logic) return String
+      is ("PREDICATE " & Image (Inst.Pred) & " ON " & Img (Inst.Refs));
 
       package Impl is new Stateful_Relation (Ty => Predicate_Logic);
       --  This package contains the I_Relation wrapper that is actually to
@@ -214,6 +233,8 @@ package Adalog.Predicates is
       with function Call
         (Self : Predicate_Type; L, R : El_Type) return Boolean is <>;
 
+      with function Image (Self : Predicate_Type) return String is <>;
+
       with procedure Free (Self : Predicate_Type) is null;
 
    package Predicate_2 is
@@ -235,10 +256,13 @@ package Adalog.Predicates is
         (P : Predicate_Wrapper; Vals : Var.Val_Array) return Boolean
       is (Call (P.T, Vals (1), Vals (2)));
 
+      function Image (Self : Predicate_Wrapper) return String
+      is (Image (Self.T));
+
       procedure Free (Self : Predicate_Wrapper);
 
       package Predicate_2_Internal is new N_Predicate
-        (El_Type, Var, 2, Predicate_Wrapper, Call, Free);
+        (El_Type, Var, 2, Predicate_Wrapper, Call, Image, Free);
 
    end Predicate_2;
 

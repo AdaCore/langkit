@@ -33,14 +33,14 @@ package body Adalog.Relations is
       -- Call --
       ----------
 
-      function Solve (Inst : in out Rel) return Boolean is
+      function Solve_Impl (Inst : in out Rel) return Boolean is
       begin
          if Inst.Done then
             return False;
          end if;
          Inst.Done := True;
          return  Apply (Inst.Rel);
-      end Solve;
+      end Solve_Impl;
 
       ----------
       -- Free --
@@ -63,7 +63,7 @@ package body Adalog.Relations is
       -- Call --
       ----------
 
-      function Solve (Inst : in out Rel) return Boolean is
+      function Solve_Impl (Inst : in out Rel) return Boolean is
       begin
          case Inst.State is
             when Start =>
@@ -81,7 +81,7 @@ package body Adalog.Relations is
             when Finish =>
                return False;
          end case;
-      end Solve;
+      end Solve_Impl;
 
       -----------
       -- Reset --

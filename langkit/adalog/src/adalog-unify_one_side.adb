@@ -73,7 +73,7 @@ package body Adalog.Unify_One_Side is
    -- Call --
    ----------
 
-   function Solve (Self : in out Member_T) return Boolean is
+   function Solve_Impl (Self : in out Member_T) return Boolean is
    begin
       if Self.Current_Index in Self.Values.all'Range then
          if Is_Defined (Self.Left) and then not Self.Changed then
@@ -110,7 +110,7 @@ package body Adalog.Unify_One_Side is
          end if;
          return False;
       end if;
-   end Solve;
+   end Solve_Impl;
 
    -----------
    -- Reset --

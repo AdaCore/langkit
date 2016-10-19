@@ -29,7 +29,7 @@ package body Adalog.Operations is
    -- Call --
    ----------
 
-   function Solve (Inst : in out Or_Rec) return Boolean is
+   function Solve_Impl (Inst : in out Or_Rec) return Boolean is
    begin
       Trace ("In Or solve");
 
@@ -57,7 +57,7 @@ package body Adalog.Operations is
 
       Inst.State := 2;
       return False;
-   end Solve;
+   end Solve_Impl;
 
    -----------
    -- Reset --
@@ -74,7 +74,7 @@ package body Adalog.Operations is
    -- Call --
    ----------
 
-   function Solve (Inst : in out And_Rec) return Boolean is
+   function Solve_Impl (Inst : in out And_Rec) return Boolean is
    begin
 
       Trace ("In And solve");
@@ -115,7 +115,7 @@ package body Adalog.Operations is
       Inst.State := 2;
       Trace ("In And solve: All is false, return false");
       return False;
-   end Solve;
+   end Solve_Impl;
 
    -----------
    -- Reset --

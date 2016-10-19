@@ -34,6 +34,7 @@ generic
    with function Equals (L : L_Type; R : R_Type) return Boolean is <>;
    with function Convert (From : R_Type) return L_Type is <>;
    with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
+   with function R_Image (Self : R_Type) return String is <>;
 package Adalog.Unify_One_Side is
 
    type R_Type_Array is array (Positive range <>) of R_Type;
@@ -57,6 +58,9 @@ package Adalog.Unify_One_Side is
    procedure Revert (Self : in out Unify);
    procedure Free (Self : in out Unify) is null;
 
+   function Custom_Image (Self : Unify) return String
+   is ("<Unify " & Var.Image (Self.Left) & " " & R_Image (Self.Right) & ">");
+
    package Rel is new Relations.Stateful_Relation (Unify);
 
    ------------
@@ -76,7 +80,7 @@ package Adalog.Unify_One_Side is
       Domain_Checked : Boolean := False;
    end record;
 
-   overriding function Solve (Self : in out Member_T) return Boolean;
+   overriding function Solve_Impl (Self : in out Member_T) return Boolean;
    overriding procedure Reset (Self : in out Member_T);
    overriding procedure Cleanup (Self : in out Member_T);
 
