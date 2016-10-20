@@ -1143,6 +1143,15 @@ class StructMetaclass(CompiledTypeMetaclass):
         # registered.
         if is_root_grammar_class:
             mcs.root_grammar_class = cls
+
+            @abstract
+            class BoolNode(cls): pass
+            class BoolNodeTrue(BoolNode): pass
+            class BoolNodeFalse(BoolNode): pass
+
+            for typ in [BoolNode, BoolNodeTrue, BoolNodeFalse]:
+                typ.is_type_resolved = True
+
         elif is_astnode:
             base.subclasses.append(cls)
 
