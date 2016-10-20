@@ -2,6 +2,6 @@ Valid case
 Code generation was successful
 Invalid case
 File "test.py", line 19, in FooNode.b
-    Error: Invalid object passed for expression of property: lol
+    Error: Invalid abstract expression: lol
 
 Done

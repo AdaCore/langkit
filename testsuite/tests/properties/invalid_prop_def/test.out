@@ -3,7 +3,7 @@ Code generation was successful
 
 == Incorrect property definition 1 ==
 File "test.py", line 48, in BarNode.propyprop
-    Error: Invalid object passed for expression of property: ['Lol this is obviously wrong']
+    Error: Invalid abstract expression: ['Lol this is obviously wrong']
 
 == Incorrect property definition 2 ==
 File "test.py", line 53, in BarNode.propyprop
