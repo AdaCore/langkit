@@ -62,7 +62,7 @@
       Field_${i} : ${arg_type.name()};
       % endfor
       Env        : Lexical_Env;
-      Dbg_Img    : access String;
+      Dbg_Img    : String_Access := null;
    end record;
 
    function Call
@@ -86,9 +86,15 @@
    function Image (Self : ${type_name}) return String
    is (if Self.Dbg_Img /= null then Self.Dbg_Img.all else "");
 
+   procedure Free (Self : in out ${type_name}) is
+      procedure Free is new Ada.Unchecked_Deallocation (String, String_Access);
+   begin
+      Free (Self.Dbg_Img);
+   end Free;
+
    package ${package_name} is
    new Predicate_${len(formal_node_types)}
-     (${root_class}, Eq_Node.Refs.Raw_Logic_Var, ${type_name});
+     (${root_class}, Eq_Node.Refs.Raw_Logic_Var, ${type_name}, Free => Free);
 
    % endfor
 </%def>
