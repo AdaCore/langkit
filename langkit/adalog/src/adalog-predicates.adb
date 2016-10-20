@@ -142,7 +142,7 @@ package body Adalog.Predicates is
       -- Free --
       ----------
 
-      procedure Free (Self : Predicate_Wrapper) is
+      procedure Free (Self : in out Predicate_Wrapper) is
       begin
          Free (Self.T);
       end Free;

@@ -51,7 +51,7 @@ package Adalog.Predicates is
       with function Call
         (Self : Predicate_Type; L : El_Type) return Boolean is <>;
 
-      with procedure Free (Self : Predicate_Type) is null;
+      with procedure Free (Self : in out Predicate_Type) is null;
 
       with function Image (Self : Predicate_Type) return String is <>;
 
@@ -162,7 +162,7 @@ package Adalog.Predicates is
 
       with function Image (Self : Predicate_Type) return String is <>;
 
-      with procedure Free (Self : Predicate_Type) is null;
+      with procedure Free (Self : in out Predicate_Type) is null;
 
    package N_Predicate is
 
@@ -235,7 +235,7 @@ package Adalog.Predicates is
 
       with function Image (Self : Predicate_Type) return String is <>;
 
-      with procedure Free (Self : Predicate_Type) is null;
+      with procedure Free (Self : in out Predicate_Type) is null;
 
    package Predicate_2 is
 
@@ -259,7 +259,7 @@ package Adalog.Predicates is
       function Image (Self : Predicate_Wrapper) return String
       is (Image (Self.T));
 
-      procedure Free (Self : Predicate_Wrapper);
+      procedure Free (Self : in out Predicate_Wrapper);
 
       package Predicate_2_Internal is new N_Predicate
         (El_Type, Var, 2, Predicate_Wrapper, Call, Image, Free);
