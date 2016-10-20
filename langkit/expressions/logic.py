@@ -287,7 +287,9 @@ class Predicate(AbstractExpression):
             BasicExpr("{}_Predicate_Caller'({})".format(
                 pred_id, ", ".join(
                     ["{}" for _ in range(len(closure_exprs) - 2)]
-                    + ["Env => {}, Dbg_Img => new String'({})"]
+                    + ["Env => {}, "
+                       "Dbg_Img => (if Debug then new String'({})"
+                       "            else null)"]
                 )
             ), type=None, sub_exprs=closure_exprs)
         )
