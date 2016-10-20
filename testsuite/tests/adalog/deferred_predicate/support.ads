@@ -10,6 +10,8 @@ package Support is
    type Pred is null record;
    function Call (P : Pred; X : Integer) return Boolean is ((X mod 2) = 0);
 
+   function Image (Self : Pred) return String is ("");
+
    package Pred_Int is
      new Predicate (Integer, Eq_Int.Refs.Raw_Logic_Var, Pred);
 
