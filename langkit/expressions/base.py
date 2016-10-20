@@ -1327,13 +1327,6 @@ class PropertyDef(AbstractNodeData):
         elif not(callable(self.expr)):
             self.expr = unsugar(self.expr)
 
-        check_source_language(
-            isinstance(self.expr, AbstractExpression) or not(self.expr),
-            "Invalid object passed for expression of property: {}".format(
-                self.expr
-            )
-        )
-
         if not self.abstract:
             with self.bind():
                 self.expr.prepare()
