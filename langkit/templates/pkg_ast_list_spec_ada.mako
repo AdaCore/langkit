@@ -48,6 +48,12 @@ package ${_self.ada_api_settings.lib_name}.AST.List is
       Sloc : Source_Location;
       Snap : Boolean := False) return ${root_node_type_name};
 
+   overriding function Is_Empty_List
+     (Node : access List_Type)
+      return Boolean
+   is
+     (Child_Count (${root_node_type_name} (Node)) = 0);
+
    overriding procedure Destroy (Node : access List_Type);
 
 end ${_self.ada_api_settings.lib_name}.AST.List;

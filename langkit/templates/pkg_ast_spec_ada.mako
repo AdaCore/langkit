@@ -221,6 +221,12 @@ package ${_self.ada_api_settings.lib_name}.AST is
      (Node : access ${root_node_value_type}) return String is abstract;
    --  Return the concrete kind for Node
 
+   function Is_Empty_List
+     (Node : access ${root_node_value_type}) return Boolean
+   is (False);
+   --  Return whether Node is an empty list (so this is wrong for all nodes
+   --  that are not lists).
+
    procedure Destroy
      (Node : access ${root_node_value_type}) is abstract;
    --  Free the resources allocated to this node and all its children.
@@ -731,13 +737,6 @@ private
 
    procedure Free_Extensions (Node : access ${root_node_value_type}'Class);
    --  Implementation helper to free the extensions associatde to Node
-
-   function Is_Empty_List
-     (Node : access ${root_node_value_type})
-      return Boolean is
-     (False);
-   --  Return whether Node is an empty list (so this is wrong for all nodes
-   --  that are not lists).
 
    ${array_types.private_decl(LexicalEnvType.array_type())}
    ${array_types.private_decl(EnvElement.array_type())}
