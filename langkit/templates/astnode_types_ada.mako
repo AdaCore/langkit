@@ -312,14 +312,16 @@
            (Level, Kind_Name (Nod) & "[" & Image (Sloc_Range (Nod)) & "]");
 
          % for i, field in enumerate(repr_fields):
-            % if field.type.is_ptr:
-               if Node.${field.name} /= null
-                  and then not Is_Empty_List (Node.${field.name})
-               then
+            % if field.type.is_list_type:
+               if Child_Count (Node.${field.name}) > 0 then
                   Put_Line (Level + 1, "${field._name.lower}:");
                   Node.${field.name}.Print (Level + 2);
                end if;
-
+            % elif field.type.is_ptr:
+               if Node.${field.name} /= null then
+                  Put_Line (Level + 1, "${field._name.lower}:");
+                  Node.${field.name}.Print (Level + 2);
+               end if;
             % elif is_token_type(field.type):
                Put_Line
                  (Level + 1, "${field._name.lower}: "

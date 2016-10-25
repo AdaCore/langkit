@@ -15,7 +15,17 @@
     ${pos} := No_Token_Index;
 % endif
 
-${res} := ${_self.get_type().storage_nullexpr()};
+<% parser_type = _self.parser.get_type().storage_type_name() %>
+
+% if _self.revtree_class:
+   ${res} := ${_self.get_type().storage_nullexpr()};
+% else:
+   ${res} := List_${parser_type}
+     (List_${parser_type}_Alloc.Alloc (Parser.Mem_Pool));
+   ${res}.Token_Start := Token_Index'Max (1, ${pos_name} - 1);
+   ${res}.Token_End := ${pos_name};
+% endif
+
 ${cpos} := ${pos_name};
 
 loop
@@ -100,14 +110,7 @@ loop
    ## stored in a vector of nodes, in a flat fashion.
    % else:
 
-      ## Related to TODO above, we create the list lazily only when the first
-      ## result has been parsed.
-      <% parser_type = _self.parser.get_type().storage_type_name() %>
-
-      if ${res} = ${_self.get_type().storage_nullexpr()} then
-         ${res} := List_${parser_type}
-           (List_${parser_type}_Alloc.Alloc (Parser.Mem_Pool));
-
+      if Lists_${parser_type}.Node_Vectors.Length (${res}.Vec) = 0 then
          ${res}.Vec :=
            Lists_${parser_type}.Node_Vectors.Create (Parser.Mem_Pool);
       end if;
@@ -143,10 +146,12 @@ end loop;
 ## node.
 if ${res} /= null then
    ${res}.Unit := Parser.Unit;
-   ${res}.Token_Start := ${pos_name};
-   ${res}.Token_End := (if ${cpos} = ${pos_name}
-                        then ${pos_name}
-                        else ${cpos} - 1);
+   if Lists_${parser_type}.Node_Vectors.Length (${res}.Vec) > 0 then
+      ${res}.Token_Start := ${pos_name};
+      ${res}.Token_End := (if ${cpos} = ${pos_name}
+                           then ${pos_name}
+                           else ${cpos} - 1);
+   end if;
 end if;
 
 

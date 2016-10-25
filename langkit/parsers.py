@@ -1184,7 +1184,8 @@ class Null(Parser):
         if isinstance(typ, ASTNode):
             self.get_type().add_to_context()
         res = gen_name("null_res")
-        code = render('parsers/null_code_ada', _self=self, res=res)
+        code = render('parsers/null_code_ada', _self=self, res=res,
+                      pos_name=pos_name)
 
         return ParserCodeContext(
             pos_name,

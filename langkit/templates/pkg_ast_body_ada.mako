@@ -1006,7 +1006,12 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
       procedure Internal (Current : ${root_node_type_name}) is
       begin
-         if Current = null then
+         if Current = null
+            --  We also want to ignore empty lists, because they happen a lot
+            --  on compilation unit and clutter the output with redundant
+            --  information.
+            or else Is_Empty_List (Current)
+         then
             return;
          end if;
 
