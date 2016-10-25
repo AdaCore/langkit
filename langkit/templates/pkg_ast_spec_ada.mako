@@ -726,6 +726,10 @@ private
       --  Reference to the analysis unit that owns this node
 
       Token_Start, Token_End : Token_Index  := No_Token_Index;
+      --  Reference to the start and end token that constitutes this node, and
+      --  whether this represents an inclusive (from start of start to end of
+      --  end) or exclusive (from end of start to start of end) range.
+
       Extensions             : Extension_Vectors.Vector;
 
       Self_Env               : AST_Envs.Lexical_Env;
@@ -903,7 +907,16 @@ private
      (Node : access ${root_node_value_type}'Class)
       return Token_Type
    is
-     ((Node.Unit.Token_Data, Node.Token_End, No_Token_Index));
+     (if Node.Token_End = No_Token_Index
+      then Token_Start (Node)
+      else (Node.Unit.Token_Data, Node.Token_End, No_Token_Index));
+
+   function Is_Ghost
+     (Node : access ${root_node_value_type}'Class)
+      return Boolean
+   is (Node.Token_End = No_Token_Index);
+   --  Returns whether the node is a ghost node or not, eg. whether it
+   --  corresponds to a real chain of tokens in the source or not.
 
    --------------------
    -- Token Iterator --

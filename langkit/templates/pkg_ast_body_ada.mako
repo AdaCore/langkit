@@ -289,6 +289,20 @@ package body ${_self.ada_api_settings.lib_name}.AST is
         (Get_Token (TDH, Index));
 
    begin
+      --  Snapping: We'll go one token before the start token, and one token
+      --  after the end token, and the sloc range will extend from the end of
+      --  the start token to the start of the end token, including any
+      --  whitespace and trivia that might be surrounding the node.
+      --
+      --  TODO: Only nodes we're gonna try to snap are nodes with default
+      --  anchors. However, we can make the logic more specific, eg:
+      --
+      --  * If the start anchor is beginning, then snap the start sloc.
+      --
+      --  * If the end anchor is ending, then snap the end sloc.
+      --
+      --  This way composite cases can work too.
+
       if Snap then
          declare
             Tok_Start : constant Token_Index :=
@@ -297,12 +311,13 @@ package body ${_self.ada_api_settings.lib_name}.AST is
               Token_Index'Min (Node.Token_End + 1, Last_Token (TDH));
          begin
             Sloc_Start := End_Sloc (Get (Tok_Start).Sloc_Range);
-            Sloc_End :=
-              Start_Sloc (Get (Tok_End).Sloc_Range);
+            Sloc_End := Start_Sloc (Get (Tok_End).Sloc_Range);
          end;
       else
          Sloc_Start := Start_Sloc (Get (Node.Token_Start).Sloc_Range);
-         Sloc_End := End_Sloc (Get (Node.Token_End).Sloc_Range);
+         Sloc_End := (if Node.Token_End /= No_Token_Index
+                      then End_Sloc (Get (Node.Token_End).Sloc_Range)
+                      else Start_Sloc (Get (Node.Token_Start).Sloc_Range));
       end if;
       return Make_Range (Sloc_Start, Sloc_End);
    end Sloc_Range;
@@ -703,14 +718,17 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          end loop;
       end Append_Trivias;
 
-      function Not_Null (N : ${root_node_type_name}) return Boolean is
-        (N /= null);
+      function Filter_Children (N : ${root_node_type_name}) return Boolean is
+         --  Get rid of null nodes
+        (N /= null
+         --  Get rid of nodes with no real existence in the source code
+         and then not N.Is_Ghost);
 
       First_Child : constant ${root_node_type_name}_Arrays.Index_Type :=
          ${root_node_type_name}_Arrays.Index_Type'First;
       N_Children  : constant ${root_node_type_name}_Arrays.Array_Type
         := ${root_node_type_name}_Arrays.Filter
-          (Children (Node), Not_Null'Access);
+          (Children (Node), Filter_Children'Access);
    begin
       if N_Children'Length > 0
         and then Node.Token_Start /= N_Children (First_Child).Token_Start
@@ -1007,10 +1025,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       procedure Internal (Current : ${root_node_type_name}) is
       begin
          if Current = null
-            --  We also want to ignore empty lists, because they happen a lot
-            --  on compilation unit and clutter the output with redundant
-            --  information.
-            or else Is_Empty_List (Current)
+            --  We want to ignore ghost nodes. This includes empty lists, but
+            --  also Opt parsers parsed to absent qualifiers.
+            or else Current.Is_Ghost
          then
             return;
          end if;

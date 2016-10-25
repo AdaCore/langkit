@@ -22,8 +22,9 @@
 % else:
    ${res} := List_${parser_type}
      (List_${parser_type}_Alloc.Alloc (Parser.Mem_Pool));
-   ${res}.Token_Start := Token_Index'Max (1, ${pos_name} - 1);
-   ${res}.Token_End := ${pos_name};
+
+   ${res}.Token_Start := Token_Index'Max (${pos_name}, 1);
+   ${res}.Token_End := No_Token_Index;
 % endif
 
 ${cpos} := ${pos_name};
