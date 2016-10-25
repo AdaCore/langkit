@@ -830,9 +830,9 @@ private
    end record;
    --  Iterator type for Find (see below)
 
-   ---------------------------------------------------
-   -- Source location-related operations (interals) --
-   ---------------------------------------------------
+   ----------------------------------------------------
+   -- Source location-related operations (internals) --
+   ----------------------------------------------------
 
    function Lookup_Children
      (Node : access ${root_node_value_type};
