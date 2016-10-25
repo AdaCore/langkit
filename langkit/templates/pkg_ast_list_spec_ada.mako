@@ -33,7 +33,7 @@ package ${_self.ada_api_settings.lib_name}.AST.List is
    overriding function Child_Count
      (Node : access List_Type) return Natural;
 
-   overriding procedure Get_Child 
+   overriding procedure Get_Child
      (Node            : access List_Type;
       Index           : Positive;
       Index_In_Bounds : out Boolean;
