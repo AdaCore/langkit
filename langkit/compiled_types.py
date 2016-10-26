@@ -1144,13 +1144,25 @@ class StructMetaclass(CompiledTypeMetaclass):
         if is_root_grammar_class:
             mcs.root_grammar_class = cls
 
+            from langkit.expressions import AbstractProperty, Property
+
             @abstract
-            class BoolNode(cls): pass
-            class BoolNodeTrue(BoolNode): pass
-            class BoolNodeFalse(BoolNode): pass
+            class BoolNode(cls):
+                as_bool = AbstractProperty(type=BoolType)
+
+            class BoolNodeTrue(BoolNode):
+                as_bool = Property(True)
+
+            class BoolNodeFalse(BoolNode):
+                as_bool = Property(False)
 
             for typ in [BoolNode, BoolNodeTrue, BoolNodeFalse]:
                 typ.is_type_resolved = True
+
+            BoolType.node = BoolNode
+            BoolNode.true = BoolNodeTrue
+            BoolNode.false = BoolNodeFalse
+            BoolNode._alternatives = [BoolNodeTrue, BoolNodeFalse]
 
         elif is_astnode:
             base.subclasses.append(cls)

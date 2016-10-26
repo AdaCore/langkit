@@ -29,7 +29,10 @@ def run(abstract_private, concrete_private):
     Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
     @root_grammar_class
-    class AbstractNode(ASTNode):
+    class RootNode(ASTNode):
+        pass
+
+    class AbstractNode(RootNode):
         prop = AbstractProperty(BoolType, private=abstract_private)
 
     class ConcreteNode(AbstractNode):
