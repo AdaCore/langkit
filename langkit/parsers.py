@@ -865,7 +865,21 @@ class Opt(Parser):
             Opt(Row(parser, *parsers)).
         """
         Parser.__init__(self)
-        self._booleanize = False
+
+        self._booleanize = None
+        """
+        Three-tuple of types, used to determine how the result will be
+        booleanized:
+
+        * If the first type is an abstract node class, and the two others are
+          derived classes with no fields, then the second will be generated for
+          the True node, and the third for the False node.
+
+        * If the first type is BoolType, then the result is booleanized into a
+          regular boolean.
+        :type: (CompiledType, CompiledType, CompiledType)
+        """
+
         self._is_error = False
         self.contains_anonymous_row = bool(parsers)
         self.parser = Row(parser, *parsers) if parsers else resolve(parser)
@@ -889,7 +903,7 @@ class Opt(Parser):
         """
         return copy_with(self, _is_error=True)
 
-    def as_bool(self):
+    def as_bool(self, dest=None):
         """
         Returns the self parser, modified to return a bool rather than the
         sub-parser result. The result will be true if the parse was
@@ -902,9 +916,20 @@ class Opt(Parser):
 
             Opt("overriding").as_bool()
 
+        :param CompiledType|None dest: If not None, then it is expected that
+            this is either BoolType or an EnumType with qualifier = True. In
+            those cases, the result will be booleanized into the corresponding
+            node classes.
+
         :rtype: Opt
         """
-        new = copy_with(self, _booleanize=True)
+        if dest is None:
+            base, alt_true, alt_false = (BoolType, BoolType, BoolType)
+        else:
+            base = dest
+            alt_true, alt_false = base._alternatives
+
+        new = copy_with(self, _booleanize=(base, alt_true, alt_false))
         if new.contains_anonymous_row:
             # What the sub-parser will match will not be returned, so there is
             # no need to generate an anonymous row type.  Tell so to the
@@ -917,7 +942,9 @@ class Opt(Parser):
         return [self.parser]
 
     def get_type(self):
-        return BoolType if self._booleanize else self.parser.get_type()
+        return (
+            self._booleanize[0] if self._booleanize else self.parser.get_type()
+        )
 
     def generate_code(self, pos_name="pos"):
         parser_context = copy(
@@ -936,8 +963,9 @@ class Opt(Parser):
             code=render('parsers/opt_code_ada', t_env),
             res_var_name=(t_env.bool_res if self._booleanize
                           else parser_context.res_var_name),
-            var_defs=parser_context.var_defs + ([(t_env.bool_res, BoolType)]
-                                                if self._booleanize else [])
+            var_defs=parser_context.var_defs +
+                     ([(t_env.bool_res, self._booleanize[0])]
+                      if self._booleanize else [])
         )
 
     def __getitem__(self, index):
