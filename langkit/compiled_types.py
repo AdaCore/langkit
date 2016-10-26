@@ -4,6 +4,8 @@ from collections import OrderedDict, namedtuple
 from copy import copy
 from itertools import count
 
+from funcy import compact
+
 from langkit import names
 from langkit.c_api import CAPIType
 from langkit.common import get_type, null_constant, is_keyword
@@ -1307,7 +1309,7 @@ def abstract(cls):
     """
     Decorator to tag an ASTNode subclass as abstract.
 
-    :param ASTNode cls: Type parameter. The ASTNode subclass to decorate.
+    :param type cls: Type parameter. The ASTNode subclass to decorate.
     """
     assert issubclass(cls, ASTNode)
     cls.abstract = True
@@ -1963,6 +1965,7 @@ class EnumType(CompiledType):
     """
 
     is_ptr = False
+
     alternatives = []
     """
     The list of alternatives for this EnumType subclass.
@@ -2079,6 +2082,64 @@ class EnvElement(Struct):
     MD = BuiltinField(LongType, doc="The metadata associated to the AST node")
 
 
+class EnumNodeMetaclass(type):
+
+    def __new__(mcs, name, bases, dct):
+        # HACK: We provide the EnumNode mechanism via type derivation,
+        # but the base EnumNode doesn't correspond to anything except a
+        # placeholder type, so we'll ignore it.
+        if name == "__EnumNodeInternal":
+            return type.__new__(mcs, name, bases, dct)
+
+        qualifier = dct.get("qualifier")
+
+        # If the class has True for the qualifier, then auto generate
+        # alternatives and node classes.
+        if qualifier:
+            dct.update({
+                "alternatives": ["present", "absent"],
+            })
+
+        from langkit.expressions import Property, AbstractProperty
+
+        base_enum_dct = compact({
+            "as_bool": AbstractProperty(type=BoolType) if qualifier else None
+        })
+
+        # Generate the abstract base node type
+        basename = names.Name.from_camel(name)
+        base_enum_node = abstract(type(name, (T.root_node, ), base_enum_dct))
+        base_enum_node.is_type_resolved = True
+        base_enum_node._alternatives = []
+
+        for alt in dct["alternatives"]:
+            alt_name = basename + names.Name.from_lower(alt)
+            attr_name = (names.Name("alt") +
+                         names.Name.from_lower(alt)).lower
+
+            # Generate the derived class corresponding to this
+            # alternative.
+            alt_type = type(
+                alt_name.camel, (base_enum_node, ),
+                compact({
+                    "as_bool": Property(alt == "present")
+                    if qualifier else None
+                })
+            )
+
+            # We don't force type resolution for those types since they
+            # have no fields. TODO: Generalize this to all types
+            # without fields.
+            alt_type.is_type_resolved = True
+
+            # Make the alternative derived class accessible from the
+            # root node for the enum.
+            setattr(base_enum_node, attr_name, alt_type)
+            base_enum_node._alternatives.append(alt_type)
+
+        return base_enum_node
+
+
 class TypeRepo(object):
     """
     Repository of types. Used to be able to do early references to not yet
@@ -2162,6 +2223,41 @@ class TypeRepo(object):
         :rtype: ASTNode
         """
         return StructMetaclass.env_metadata
+
+    # noinspection PyPep8Naming
+    @property
+    @memoized
+    def EnumNode(self):
+        """
+        Using this base class, users can create a hierarchy of nodes
+        deriving from the root node that are similar to an enum type. By
+        declaring an EnumNode derived type in the following way::
+
+            class Foo(T.EnumNode):
+                alternatives = ['bar', 'baz']
+
+        The user will get:
+
+        * An abstract node type the base type, deriving from T.root_node,
+          denoted by Foo.
+        * A concrete but empty node type for every alternative
+          of the enum type, that can be denoted by Foo.alt_{alt_name}.
+
+        Instead of providing explicit alternatives, the user can just
+        define the EnumNode as a qualifier node::
+
+            class Foo(T.EnumNode):
+                qualifier = True
+
+        In which case, alternatives will automatically be "present" and
+        "absent", and an as_bool method will be automatically generated.
+        """
+        assert T.root_node
+
+        class __EnumNodeInternal():
+            __metaclass__ = EnumNodeMetaclass
+
+        return __EnumNodeInternal
 
 
 def resolve_type(type_or_defer):
