@@ -8,6 +8,8 @@ ${pos} := ${pos_name};
 ## each row part.
 ${body}
 
+pragma Warnings (Off, "referenced");
 <<${exit_label}_0>>
+pragma Warnings (On, "referenced");
 
 --  End row_code
