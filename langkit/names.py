@@ -91,7 +91,12 @@ class Name(object):
         :type other: Name
         :rtype: Name
         """
-        return Name('{}_{}'.format(self.base_name, other.base_name))
+        if self.base_name == '':
+            return other
+        elif other.base_name == '':
+            return self
+        else:
+            return Name('{}_{}'.format(self.base_name, other.base_name))
 
     @classmethod
     def from_camel_with_underscores(cls, name):
