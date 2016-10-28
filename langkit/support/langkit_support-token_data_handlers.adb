@@ -119,6 +119,9 @@ package body Langkit_Support.Token_Data_Handlers is
       Index : Token_Index) return Token_Vectors.Elements_Arrays.Array_Type
    is
    begin
+      if Index = No_Token_Index then
+         return Token_Vectors.Elements_Arrays.Empty_Array;
+      end if;
       return Internal_Get_Trivias (TDH, Index);
    end Get_Trivias;
 
