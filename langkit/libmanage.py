@@ -547,6 +547,8 @@ class ManageScript(object):
             )
         if args.verbosity == Verbosity('none'):
             base_argv.append('-q')
+        elif args.verbosity == Verbosity('debug'):
+            base_argv.append('-vl')
 
         cargs = []
         # Depending on where this is invoked, the "cargs" option may not be set
