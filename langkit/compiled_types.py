@@ -1778,6 +1778,8 @@ class ASTNode(Struct):
 
     is_ptr = True
     abstract = False
+    is_bool_node = False
+    is_enum_node = False
 
     subclasses = []
     """
@@ -2120,7 +2122,9 @@ class EnumNodeMetaclass(type):
         from langkit.expressions import Property, AbstractProperty
 
         base_enum_dct = compact({
-            "as_bool": AbstractProperty(type=BoolType) if qualifier else None
+            "as_bool": AbstractProperty(type=BoolType) if qualifier else None,
+            "is_bool_node": bool(qualifier),
+            "is_enum_node": True,
         })
 
         # Generate the abstract base node type
