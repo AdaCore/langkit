@@ -28,6 +28,23 @@
    function ${field.name}
      (Node : access ${type_name}) return ${field.type.name()};
    ${ada_doc(field, 6)}
+
+   ## If this field return an enum node, generate a shortcut to get the
+   ## symbolic value.
+   % if is_ast_node(field.type):
+      % if field.type.is_bool_node:
+         function ${field.name}
+           (Node : access ${type_name}'Class)
+            return Boolean
+            with Inline_Always => True;
+
+      % elif field.type.is_enum_node:
+         function ${field.name}
+           (Node : access ${type_name}'Class)
+            return ${field.type.ada_kind_name()}
+            with Inline_Always => True;
+      % endif
+   % endif
 </%def>
 
 
@@ -583,6 +600,22 @@
                       base_expr='Node.{}'.format(field.name)
                   )};
       end ${field.name};
+
+      % if is_ast_node(field.type):
+         % if field.type.is_bool_node:
+            function ${field.name}
+              (Node : access ${type_name}'Class)
+               return Boolean
+            is (Node.${field.name}.all
+                in ${field.type.alt_present.name()}_Type'Class);
+
+         % elif field.type.is_enum_node:
+            function ${field.name}
+              (Node : access ${type_name}'Class)
+               return ${field.type.ada_kind_name()}
+            is (Node.${field.name}.Kind);
+         % endif
+      % endif
    % endfor
 
    ## Generate the bodies of properties
