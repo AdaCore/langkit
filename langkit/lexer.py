@@ -15,12 +15,9 @@ class Matcher(object):
     input will trigger a match.
     """
 
-    def render(self, lexer):
+    def render(self):
         """
         Render method to be overloaded in subclasses.
-
-        :param Lexer lexer: The instance of the lexer from which this render
-          function has been called.
         :rtype: str
         """
         raise NotImplemented()
@@ -239,7 +236,7 @@ class Lexer(object):
             self.name = name
             self.pattern = pattern
 
-        def render(self, lexer):
+        def render(self):
             return "{{{}}}".format(self.name)
 
     def __init__(self, tokens_class):
@@ -438,7 +435,7 @@ class Literal(Matcher):
     def __init__(self, to_match):
         self.to_match = to_match
 
-    def render(self, lexer):
+    def render(self):
         return '"{}"'.format(self.to_match)
 
 
@@ -453,7 +450,7 @@ class Pattern(Matcher):
     def __init__(self, pattern):
         self.pattern = pattern
 
-    def render(self, lexer):
+    def render(self):
         return self.pattern
 
 
@@ -471,7 +468,7 @@ class NoCase(Matcher):
     def __init__(self, to_match):
         self.to_match = to_match
 
-    def render(self, lexer):
+    def render(self):
         return '\C{{{}}}'.format(self.to_match)
 
 
@@ -482,7 +479,7 @@ class Eof(Matcher):
     def __init__(self):
         pass
 
-    def render(self, lexer):
+    def render(self):
         return "<<EOF>>"
 
 
@@ -493,7 +490,7 @@ class Failure(Matcher):
     def __init__(self):
         pass
 
-    def render(self, lexer):
+    def render(self):
         return "on_failure"
 
 
@@ -517,7 +514,7 @@ class RuleAssoc(object):
 
     def render(self, lexer):
         return "{} {}".format(
-            self.matcher.render(lexer),
+            self.matcher.render(),
             self.action.render(lexer)
         )
 
