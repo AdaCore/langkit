@@ -712,6 +712,21 @@ class AbstractNodeData(object):
         :type: list[Argument]
         """
 
+    @property
+    def is_overriding(self):
+        """
+        Return whether this field overrides an inheritted one in a base class.
+
+        :rtype: bool
+        """
+        from langkit.expressions import PropertyDef
+
+        assert self._name and self.struct
+        properties_to_override = [p._name
+                                  for p in self.struct.base().get_properties()]
+        return (isinstance(self, PropertyDef) and
+                self._name in properties_to_override)
+
     def diagnostic_context(self):
         ctx_message = 'in {}.{}'.format(self.struct.name().camel,
                                         self._name.lower)
@@ -1809,14 +1824,16 @@ class ASTNode(Struct):
         """
         Return a list of fields for which we must generate accessors in APIs.
 
-        This list excludes inherited fields so that they are not generated
-        multiple times. This list also excludes private fields unless the
-        context requires them to be public in the generated library.
+        This list excludes inherited/overriden fields so that they are not
+        generated multiple times. This list also excludes private fields unless
+        the context requires them to be public in the generated library.
         """
-        return cls.get_abstract_fields(
-            include_inherited=False,
-            predicate=library_public_field
-        )
+        return [f
+                for f in cls.get_abstract_fields(
+                    include_inherited=False,
+                    predicate=library_public_field
+                )
+                if not f.is_overriding]
 
     @classmethod
     def is_ast_node(cls):
