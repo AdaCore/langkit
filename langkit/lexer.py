@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from collections import defaultdict
 from itertools import count
+import re
 
 from langkit.common import TOKEN_PREFIX
 from langkit.compile_context import get_context
@@ -15,12 +16,20 @@ class Matcher(object):
     input will trigger a match.
     """
 
+    def max_match_length(self):
+        """
+        Return the maximum number of characters this pattern will accept, or
+        raise ValueError if it is unknown.
+        :rtype: int
+        """
+        raise NotImplementedError()
+
     def render(self):
         """
         Render method to be overloaded in subclasses.
         :rtype: str
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 class Pattern(Matcher):
@@ -33,6 +42,15 @@ class Pattern(Matcher):
 
     def __init__(self, pattern):
         self.pattern = pattern
+
+    def max_match_length(self):
+        for c in self.pattern:
+            if re.escape(c) != c and c not in ('.', '\''):
+                raise ValueError(
+                    'Cannot compute the maximum number of characters this'
+                    ' pattern will accept: {}'.format(repr(self.pattern))
+                )
+        return len(self.pattern)
 
     def render(self):
         return self.pattern
@@ -450,6 +468,9 @@ class Literal(Matcher):
     def __init__(self, to_match):
         self.to_match = to_match
 
+    def max_match_length(self):
+        return len(self.to_match)
+
     def render(self):
         return '"{}"'.format(self.to_match)
 
@@ -468,6 +489,9 @@ class NoCase(Matcher):
     def __init__(self, to_match):
         self.to_match = to_match
 
+    def max_match_length(self):
+        return Pattern(self.to_match).max_match_length()
+
     def render(self):
         return '\C{{{}}}'.format(self.to_match)
 
@@ -478,6 +502,9 @@ class Eof(Matcher):
     """
     def __init__(self):
         pass
+
+    def max_match_length(self):
+        return 0
 
     def render(self):
         return "<<EOF>>"
@@ -563,13 +590,23 @@ class Case(RuleAssoc):
         def __init__(self, max_match_len, *alts):
             super(Case.CaseAction, self).__init__()
             self.max_match_len = max_match_len
-            assert all(isinstance(a, Alt) for a in alts), (
-                "Invalid alternative to Case matcher"
-            )
+
+            for i, alt in enumerate(alts):
+                assert isinstance(alt, Alt), (
+                    'Invalid alternative to Case matcher: {}'.format(alt)
+                )
+                assert alt.match_size <= max_match_len, (
+                    'Match size for this Case alternative ({}) cannot be'
+                    ' longer than the Case matcher ({} chars)'.format(
+                        alt.match_size, max_match_len
+                    )
+                )
+
             assert alts[-1].prev_token_cond is None, (
                 "The last alternative to a case matcher "
                 "must have no prev token condition"
             )
+
             self.alts = alts[:-1]
             self.last_alt = alts[-1]
 
@@ -583,8 +620,6 @@ class Case(RuleAssoc):
             )
 
     def __init__(self, matcher, *alts):
-        # TODO: Add check on the matcher to verify that it is constant length,
-        # eg. No +/* patterns. If possible. Might be hard to verify!
         super(Case, self).__init__(
-            matcher, Case.CaseAction(len(matcher.pattern), *alts)
+            matcher, Case.CaseAction(matcher.max_match_length(), *alts)
         )
