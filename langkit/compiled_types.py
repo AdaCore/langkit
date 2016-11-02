@@ -14,7 +14,7 @@ from langkit.diagnostics import (
 )
 from langkit.template_utils import common_renderer
 from langkit.utils import (
-    DictProxy, common_ancestor, issubtype, memoized, type_check
+    DictProxy, assert_type, common_ancestor, issubtype, memoized, type_check
 )
 
 
@@ -722,8 +722,11 @@ class AbstractNodeData(object):
         from langkit.expressions import PropertyDef
 
         assert self._name and self.struct
+        if not issubclass(self.struct, ASTNode):
+            return False
+        parent_cls = assert_type(self.struct, ASTNode).base()
         properties_to_override = [p._name
-                                  for p in self.struct.base().get_properties()]
+                                  for p in parent_cls.get_properties()]
         return (isinstance(self, PropertyDef) and
                 self._name in properties_to_override)
 

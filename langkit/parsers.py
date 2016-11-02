@@ -35,8 +35,8 @@ from langkit.diagnostics import (
     Context, Location, check_source_language, extract_library_location
 )
 from langkit.template_utils import TemplateEnvironment
-from langkit.utils import (Colors, common_ancestor, copy_with, col,
-                           type_check_instance)
+from langkit.utils import (Colors, assert_type, common_ancestor, copy_with,
+                           col, type_check_instance)
 
 
 class GeneratedParser(object):
@@ -917,16 +917,16 @@ class Opt(Parser):
             Opt("overriding").as_bool()
 
         :param CompiledType|None dest: If not None, then it is expected that
-            this is either BoolType or an EnumType with qualifier = True. In
-            those cases, the result will be booleanized into the corresponding
-            node classes.
+            this is an EnumType with qualifier = True. In this cases, the
+            result will be booleanized.
 
         :rtype: Opt
         """
         if dest is None:
             base, alt_true, alt_false = (BoolType, BoolType, BoolType)
         else:
-            base = dest
+            base = assert_type(dest, ASTNode)
+            assert base.is_bool_node
             alt_true, alt_false = base._alternatives
 
         new = copy_with(self, _booleanize=(base, alt_true, alt_false))
@@ -963,9 +963,9 @@ class Opt(Parser):
             code=render('parsers/opt_code_ada', t_env),
             res_var_name=(t_env.bool_res if self._booleanize
                           else parser_context.res_var_name),
-            var_defs=parser_context.var_defs +
-                     ([(t_env.bool_res, self._booleanize[0])]
-                      if self._booleanize else [])
+            var_defs=(parser_context.var_defs +
+                      ([(t_env.bool_res, self._booleanize[0])]
+                       if self._booleanize else []))
         )
 
     def __getitem__(self, index):
