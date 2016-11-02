@@ -537,7 +537,7 @@ class Case(RuleAssoc):
     """
     Special rule association that enables dispatching the action depending
     on the previously parsed token. The canonical example is the one for
-    which this class was added: In the Ada language, a tick character can be
+    which this class was added: in the Ada language, a tick character can be
     used either as the start of a character literal, or as an attribute
     expression.
 
