@@ -23,6 +23,21 @@ class Matcher(object):
         raise NotImplemented()
 
 
+class Pattern(Matcher):
+    """
+    Matcher. This will match a regular expression like pattern. Since the
+    lexer DSL uses Quex underneath, you can find more documentation about
+    the recognized regular expression language here: `Quex pattern language
+       <http://quex.sourceforge.net/doc/html/usage/patterns/context-free.html>`_.
+    """
+
+    def __init__(self, pattern):
+        self.pattern = pattern
+
+    def render(self):
+        return self.pattern
+
+
 class Action(object):
     """
     Base class for an action. An action specificies what to do with a given
@@ -231,10 +246,10 @@ class Lexer(object):
     generate parse trees.
     """
 
-    class PredefPattern(Matcher):
+    class PredefPattern(Pattern):
         def __init__(self, name, pattern):
+            super(Lexer.PredefPattern, self).__init__(pattern)
             self.name = name
-            self.pattern = pattern
 
         def render(self):
             return "{{{}}}".format(self.name)
@@ -437,21 +452,6 @@ class Literal(Matcher):
 
     def render(self):
         return '"{}"'.format(self.to_match)
-
-
-class Pattern(Matcher):
-    """
-    Matcher. This will match a regular expression like pattern. Since the
-    lexer DSL uses Quex underneath, you can find more documentation about
-    the recognized regular expression language here: `Quex pattern language
-       <http://quex.sourceforge.net/doc/html/usage/patterns/context-free.html>`_.
-    """
-
-    def __init__(self, pattern):
-        self.pattern = pattern
-
-    def render(self):
-        return self.pattern
 
 
 class NoCase(Matcher):
