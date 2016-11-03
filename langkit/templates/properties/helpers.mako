@@ -27,6 +27,8 @@
       Env  : Lexical_Env;
    end record;
 
+   No_${type_name} : constant ${type_name} := (Env => null);
+
    function Convert
      (Self : ${type_name}; From : ${root_class}) return ${root_class}
    with Inline_Always;
@@ -43,8 +45,8 @@
    ##    B = PropertyCall (A.Value)
    ##
    ## Which is expressed as Bind (A, B, Property) in the DSL.
-   package ${package_name}
-   is new Eq_Node.Raw_Custom_Bind (${type_name}, Convert);
+   package ${package_name} is new Eq_Node.Raw_Custom_Bind
+     (${type_name}, No_${type_name}, Convert, Equals);
 </%def>
 
 <%def name="generate_logic_predicates(prop)">

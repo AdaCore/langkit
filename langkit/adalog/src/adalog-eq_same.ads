@@ -72,16 +72,35 @@ package Adalog.Eq_Same is
 
    generic
       type Converter is private;
+      No_Data : Converter;
+
       with function Convert (Data : Converter; From : LR_Type) return LR_Type;
+      with function Equals (L, R : LR_Type) return Boolean is <>;
    package Raw_Custom_Bind is
-      package Impl is new Unify_LR
-        (LR_Type, LR_Type, Converter, Converter,
-         Convert, Convert, Refs.Raw_Logic_Var, Refs.Raw_Logic_Var);
+
+      package Impl is new Unify
+        (LR_Type, LR_Type,
+         Converter, Converter, No_Data, No_Data,
+         Convert, Convert, Equals, Refs.Raw_Logic_Var, Refs.Raw_Logic_Var);
 
       function Create (L, R : Refs.Raw_Logic_Var.Var; Data : Converter)
         return Relation
       is
-        (Impl.Create (L, R, Data, Data));
+        (Relation (Impl.Equals (L, R, Data, Data)));
+
+      function Create (L    : Refs.Raw_Logic_Var.Var;
+                       R    : LR_Type;
+                       Data : Converter)
+                             return Relation
+      is
+        (Relation (Impl.Equals (L, R, Data)));
+
+      function Create (L    : LR_Type;
+                       R    : Refs.Raw_Logic_Var.Var;
+                       Data : Converter)
+                             return Relation
+      is
+        (Relation (Impl.Equals (L, R, Data)));
 
    end Raw_Custom_Bind;
 
