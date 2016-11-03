@@ -1108,6 +1108,15 @@ class PropertyDef(AbstractNodeData):
         self._doc = doc
         ":type: str|None"
 
+    @property
+    def uid(self):
+        """
+        Returns a string that uniquely identifies this property.
+
+        :rtype: str
+        """
+        return str(self._index)
+
     def __copy__(self):
         """
         When copying properties, we want to make sure they don't share local

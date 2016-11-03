@@ -72,11 +72,9 @@ class Bind(AbstractExpression):
         get_context().do_generate_logic_binder(self.bind_property)
 
     def construct(self):
-        t = self.bind_property.struct.name()
-        p = self.bind_property.name
         pred_func = untyped_literal_expr(
-            "{}_{}_Logic_Binder'(Env => {})".format(
-                t, p, construct(Env).render_expr()
+            "Logic_Binder_{}'(Env => {})".format(
+                self.bind_property.uid, construct(Env).render_expr()
             )
         )
 
@@ -98,7 +96,7 @@ class Bind(AbstractExpression):
         rhs = construct_operand(self.to_expr)
 
         return BuiltinCallExpr(
-            "{}_{}_Bind.Create".format(t, p), EquationType,
+            "Bind_{}.Create".format(self.bind_property.uid), EquationType,
             [lhs, rhs, pred_func],
             "Bind_Result"
         )

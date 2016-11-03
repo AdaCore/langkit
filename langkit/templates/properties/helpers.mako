@@ -15,9 +15,8 @@
 
 <%def name="generate_logic_binder(conv_prop)">
    <%
-   type_name = "{}_{}_Logic_Binder".format(conv_prop.struct.name(),
-                                           conv_prop.name)
-   package_name = "{}_{}_Bind".format(conv_prop.struct.name(), conv_prop.name)
+   type_name = "Logic_Binder_{}".format(conv_prop.uid)
+   package_name = "Bind_{}".format(conv_prop.uid)
    root_class = T.root_node.name()
    %>
 
