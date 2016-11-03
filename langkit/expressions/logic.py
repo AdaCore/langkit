@@ -73,7 +73,7 @@ class Bind(AbstractExpression):
 
     def construct(self):
         pred_func = untyped_literal_expr(
-            "Logic_Binder_{}'(Env => {})".format(
+            "Logic_Converter_{}'(Env => {})".format(
                 self.bind_property.uid, construct(Env).render_expr()
             )
         )

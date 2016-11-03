@@ -13,10 +13,9 @@
   )
 </%def>
 
-<%def name="generate_logic_binder(conv_prop)">
+<%def name="generate_logic_converter(conv_prop)">
    <%
-   type_name = "Logic_Binder_{}".format(conv_prop.uid)
-   package_name = "Bind_{}".format(conv_prop.uid)
+   type_name = "Logic_Converter_{}".format(conv_prop.uid)
    root_class = T.root_node.name()
    %>
 
@@ -39,14 +38,20 @@
       return ${root_class}
         (${conv_prop.name} (${conv_prop.struct.name()} (From), Self.Env));
    end Convert;
+</%def>
 
+<%def name="generate_logic_binder(conv_prop)">
+   <%
+   package_name = "Bind_{}".format(conv_prop.uid)
+   converter_type_name = "Logic_Converter_{}".format(conv_prop.uid)
+   %>
    ## This package contains the necessary Adalog instantiations, so that we can
    ## create an equation that will bind two logic variables A and B so that::
    ##    B = PropertyCall (A.Value)
    ##
    ## Which is expressed as Bind (A, B, Property) in the DSL.
    package ${package_name} is new Eq_Node.Raw_Custom_Bind
-     (${type_name}, No_${type_name}, Convert, Equals);
+     (${converter_type_name}, No_${converter_type_name}, Convert, Equals);
 </%def>
 
 <%def name="generate_logic_predicates(prop)">

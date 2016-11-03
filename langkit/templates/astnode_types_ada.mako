@@ -30,9 +30,13 @@
    % endfor
 
    ## Generate every registered logic binder
-   % for prop, in _self.logic_binders:
-   ${prop_helpers.generate_logic_binder(prop)}
+   % for el in set(p for (p, ) in _self.logic_binders):
+   % if el:
+      ${prop_helpers.generate_logic_converter(el)}
+   % endif
+   ${prop_helpers.generate_logic_binder(el)}
    % endfor
+
 </%def>
 
 
