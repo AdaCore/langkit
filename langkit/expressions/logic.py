@@ -43,9 +43,9 @@ class Bind(AbstractExpression):
 
     def __init__(self, from_var, to_var, bind_property):
         """
-        :param AbstractExpression from_var: An expression resolving to a
+        :param AbstractExpression from_expr: An expression resolving to a
             logical variable that is the source of the bind.
-        :param AbstractExpression to_var: An expression resolving to a
+        :param AbstractExpression to_expr: An expression resolving to a
             logical variable that is the destination of the bind.
         :param PropertyDef bind_property: The property to apply on the value of
             from_var that will yield the value to give to to_var. For
@@ -54,8 +54,8 @@ class Bind(AbstractExpression):
             class.
         """
         super(Bind, self).__init__()
-        self.from_var = from_var
-        self.to_var = to_var
+        self.from_expr = from_expr
+        self.to_expr = to_expr
         self.bind_property = bind_property
 
     def do_prepare(self):
@@ -80,11 +80,26 @@ class Bind(AbstractExpression):
             )
         )
 
+        def construct_operand(op):
+            from langkit.expressions import Cast
+            expr = construct(op)
+            check_source_language(
+                expr.type == LogicVarType or expr.type.matches(T.root_node),
+                "Operands to a logic equality operator should be either "
+                "a logic variable or an ASTNode, got {}".format(expr.type)
+            )
+            # Cast the ast node type if necessary
+            if (expr.type.matches(T.root_node) and expr.type != T.root_node):
+                expr = Cast.Expr(expr, T.root_node)
+
+            return expr
+
+        lhs = construct_operand(self.from_expr)
+        rhs = construct_operand(self.to_expr)
+
         return BuiltinCallExpr(
             "{}_{}_Bind.Create".format(t, p), EquationType,
-            [construct(self.from_var, LogicVarType),
-             construct(self.to_var, LogicVarType),
-             pred_func],
+            [lhs, rhs, pred_func],
             "Bind_Result"
         )
 
