@@ -772,11 +772,16 @@ class ManageScript(object):
         try:
             subprocess.check_call(argv, env=env)
         except (subprocess.CalledProcessError, OSError) as exc:
-            print '{color}{name} failed:{reset} {exc}'.format(
-                color=Colors.FAIL,
-                name=name,
-                reset=Colors.ENDC,
-                exc=exc
+            print(
+                '{color}{name} failed:{reset}'
+                ' error while running {argv}:'
+                '\n    {exc}'.format(
+                    color=Colors.FAIL,
+                    name=name,
+                    reset=Colors.ENDC,
+                    argv=' '.join(argv),
+                    exc=exc
+                )
             )
             sys.exit(1)
 
