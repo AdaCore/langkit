@@ -29,7 +29,12 @@ procedure Main is
    R3 : Relation :=
      Variadic_And
        ((Variadic_Or
-           ((X = 1, X = 2, X = 3, X = 4, X = 5, X = 6)),
+           ((Equals (X, 1),
+             Equals (X, 2),
+             Equals (X, 3),
+             Equals (X, 4),
+             Equals (X, 5),
+             Equals (X, 6))),
          Bind.Create (X, Y, D),
          Pred_Int.Create (X, Is_Even'Unrestricted_Access),
          Member (Y, (12, 18))));

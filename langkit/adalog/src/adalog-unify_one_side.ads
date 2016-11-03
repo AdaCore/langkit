@@ -31,9 +31,16 @@ with Adalog.Relations;
 generic
    type L_Type is private;
    type R_Type is private;
+
    with function Equals (L : L_Type; R : R_Type) return Boolean is <>;
-   with function Convert (From : R_Type) return L_Type is <>;
+
+   type Right_C_Data is private;
+
+   with function Convert
+     (C_Data : Right_C_Data; From : R_Type) return L_Type is <>;
+
    with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
+
    with function R_Image (Self : R_Type) return String is <>;
 package Adalog.Unify_One_Side is
 
@@ -47,12 +54,13 @@ package Adalog.Unify_One_Side is
       Left    : Var.Var;
       Right   : R_Type;
       Changed : Boolean := False;
+      R_Data  : Right_C_Data;
    end record;
 
    function Create
-     (Left : Var.Var; Right : R_Type) return Unify
+     (Left : Var.Var; Right : R_Type; R_Data : Right_C_Data) return Unify
    is
-     ((Left => Left, Right => Right, Changed => False));
+     ((Left => Left, Right => Right, Changed => False, R_Data => R_Data));
 
    function Apply (Self : in out Unify) return Boolean;
    procedure Revert (Self : in out Unify);
@@ -78,6 +86,7 @@ package Adalog.Unify_One_Side is
       Current_Index  : Positive := 1;
       Changed        : Boolean := False;
       Domain_Checked : Boolean := False;
+      R_Data         : Right_C_Data;
    end record;
 
    overriding function Solve_Impl (Self : in out Member_T) return Boolean;
@@ -85,6 +94,6 @@ package Adalog.Unify_One_Side is
    overriding procedure Cleanup (Self : in out Member_T);
 
    function Member
-     (R : Var.Var; Vals : R_Type_Array) return Relation;
+     (R : Var.Var; Vals : R_Type_Array; R_Data : Right_C_Data) return Relation;
 
 end Adalog.Unify_One_Side;

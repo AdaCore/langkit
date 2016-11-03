@@ -45,7 +45,7 @@ package body Adalog.Unify_One_Side is
          end return;
       else
 
-         if SetL (Self.Left, Convert (Self.Right)) then
+         if SetL (Self.Left, Convert (Self.R_Data, Self.Right)) then
             Trace ("Setting left worked !");
 
             Self.Changed := True;
@@ -84,7 +84,7 @@ package body Adalog.Unify_One_Side is
 
             Self.Domain_Checked := True;
             for V of Self.Values.all loop
-               if GetL (Self.Left) = Convert (V) then
+               if GetL (Self.Left) = Convert (Self.R_Data, V) then
                   return True;
                end if;
             end loop;
@@ -93,7 +93,8 @@ package body Adalog.Unify_One_Side is
             loop
                Self.Current_Index := Self.Current_Index + 1;
                if SetL
-                 (Self.Left, Convert (Self.Values (Self.Current_Index - 1)))
+                 (Self.Left, Convert
+                    (Self.R_Data, Self.Values (Self.Current_Index - 1)))
                then
                   Self.Changed := True;
                   return True;
@@ -131,7 +132,8 @@ package body Adalog.Unify_One_Side is
    ------------
 
    function Member
-     (R : Var.Var; Vals : R_Type_Array) return Relation is
+     (R : Var.Var; Vals : R_Type_Array; R_Data : Right_C_Data) return Relation
+   is
    begin
       return new Member_T'
         (Left           => R,
@@ -139,6 +141,7 @@ package body Adalog.Unify_One_Side is
          Current_Index  => 1,
          Changed        => False,
          Domain_Checked => False,
+         R_Data         => R_Data,
          others         => <>);
    end Member;
 

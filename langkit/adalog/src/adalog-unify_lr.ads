@@ -45,6 +45,8 @@ generic
 
    with package Right_Var is new Logic_Var
      (Element_Type => R_Type, others => <>);
+
+   with function "=" (L, R : R_Type) return Boolean is <>;
 package Adalog.Unify_LR is
 
    --------------

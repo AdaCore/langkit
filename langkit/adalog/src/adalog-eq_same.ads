@@ -41,18 +41,26 @@ generic
    with function Element_Image (E : LR_Type) return String is <>;
 package Adalog.Eq_Same is
 
-   function Convert (From : LR_Type) return LR_Type
+   package Refs is new Logic_Ref (LR_Type, Element_Image);
+
+   type Dummy_Convert_Data is null record;
+   No_Data : constant Dummy_Convert_Data := (null record);
+
+   function Convert
+     (C_Data : Dummy_Convert_Data; From : LR_Type) return LR_Type
    is (From) with Inline_Always;
 
-   package Refs is new Logic_Ref (LR_Type, Element_Image);
+   function Equals (L, R : LR_Type) return Boolean is (L = R);
 
    package Refcounted_Impl is new Unify
      (LR_Type, LR_Type,
+      Dummy_Convert_Data, Dummy_Convert_Data, No_Data, No_Data,
       Left_Var  => Refs.Refcounted_Logic_Var,
       Right_Var => Refs.Refcounted_Logic_Var);
 
    package Raw_Impl is new Unify
      (LR_Type, LR_Type,
+      Dummy_Convert_Data, Dummy_Convert_Data, No_Data, No_Data,
       Left_Var  => Refs.Raw_Logic_Var,
       Right_Var => Refs.Raw_Logic_Var);
 

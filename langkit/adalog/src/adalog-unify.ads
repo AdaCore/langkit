@@ -38,8 +38,18 @@ generic
    type L_Type is private;
    type R_Type is private;
 
-   with function Convert (From : R_Type) return L_Type is <>;
-   with function Convert (From : L_Type) return R_Type is <>;
+   type Left_C_Data is private;
+   type Right_C_Data is private;
+
+   No_L_Data : Left_C_Data;
+   No_R_Data : Right_C_Data;
+
+   with function Convert
+     (C_Data : Right_C_Data; From : R_Type) return L_Type is <>;
+   with function Convert
+     (C_Data : Left_C_Data; From : L_Type) return R_Type is <>;
+
+   with function Equals (L : L_Type; R : R_Type) return Boolean is <>;
 
    with package Left_Var is new Logic_Var
      (Element_Type => L_Type, others => <>);
@@ -53,82 +63,69 @@ package Adalog.Unify is
    --  generic instantiation error.
    procedure What;
 
-   type R_Convert_Data is null record;
-   type L_Convert_Data is null record;
-   Dummy_L : L_Convert_Data;
-   Dummy_R : R_Convert_Data;
-
-   function Convert (Data : R_Convert_Data; From : R_Type) return L_Type
-   is
-     (Convert (From));
-
-   function Convert (Data : L_Convert_Data; From : L_Type) return R_Type
-   is
-     (Convert (From));
+   pragma Warnings (Off, "wrong order");
+   function Equals (L : R_Type; R : L_Type) return Boolean is (Equals (R, L));
+   pragma Warnings (On, "wrong order");
 
    package Simple_Unify is new Adalog.Unify_LR
-     (L_Type, R_Type, L_Convert_Data, R_Convert_Data,
+     (L_Type, R_Type, Left_C_Data, Right_C_Data,
       Convert, Convert, Left_Var, Right_Var);
    use Simple_Unify;
 
-   function Equals (R : R_Type; L : L_Type) return Boolean
-   is (Convert (L) = R) with Inline_Always;
-
-   function Equals (L : L_Type; R : R_Type) return Boolean
-   is (Convert (L) = R) with Inline_Always;
-
    package Unify_Left is new Unify_One_Side
-     (L_Type, R_Type, Equals, Convert, Left_Var, Right_Var.Element_Image);
+     (L_Type, R_Type, Equals, Right_C_Data,
+      Convert, Left_Var, Right_Var.Element_Image);
 
    package Unify_Right is new Unify_One_Side
-     (R_Type, L_Type, Equals, Convert, Right_Var, Left_Var.Element_Image);
+     (R_Type, L_Type, Equals, Left_C_Data,
+      Convert, Right_Var, Left_Var.Element_Image);
 
    ------------------
    -- Eq predicate --
    ------------------
 
-   function "="
-     (L : Left_Var.Var; R : Right_Var.Var) return access I_Relation'Class
-   is (new Unify_LR_Rel.Rel'(Rel => Create (L, R, Dummy_L, Dummy_R),
-                             others => <>))
+   function Equals
+     (L      : Left_Var.Var; R : Right_Var.Var;
+      L_Data : Left_C_Data := No_L_Data;
+      R_Data : Right_C_Data := No_R_Data)
+      return access I_Relation'Class
+   is
+     (new Unify_LR_Rel.Rel'
+        (Rel => Create (L, R, No_L_Data, No_R_Data),
+         others => <>))
    with Inline;
 
-   function "=" (L : L_Type; R : R_Type) return access I_Relation'Class
-   is (new Boolean_Relation.Rel'(Rel => (Result => Equals (L, R)),
-                                 others => <>))
-   with Inline;
-
-   function "=" (L : Left_Var.Var; R : R_Type) return access I_Relation'Class
-   is (new Unify_Left.Rel.Rel'(Rel => Unify_Left.Create (L, R), others => <>))
-   with Inline;
-
-   function "=" (L : L_Type; R : Right_Var.Var) return access I_Relation'Class
-   is (new Unify_Right.Rel.Rel'(Rel => Unify_Right.Create (R, L),
+   function Equals (L : L_Type; R : R_Type) return access I_Relation'Class
+   is
+     (new Boolean_Relation.Rel'(Rel => (Result => Equals (L, R)),
                                 others => <>))
    with Inline;
 
    function Equals
-     (L : Left_Var.Var; R : Right_Var.Var) return access I_Relation'Class
-     renames "=";
-
-   function Equals (L : L_Type; R : R_Type) return access I_Relation'Class
-     renames "=";
-
-   function Equals
-     (L : Left_Var.Var; R : R_Type) return access I_Relation'Class
-      renames "=";
+     (L : Left_Var.Var; R : R_Type; R_Data : Right_C_Data := No_R_Data)
+      return access I_Relation'Class
+   is
+     (new Unify_Left.Rel.Rel'
+        (Rel => Unify_Left.Create (L, R, R_Data), others => <>))
+   with Inline;
 
    function Equals
-     (L : L_Type; R : Right_Var.Var) return access I_Relation'Class
-      renames "=";
+     (L : L_Type; R : Right_Var.Var; L_Data : Left_C_Data := No_L_Data)
+      return access I_Relation'Class
+   is
+     (new Unify_Right.Rel.Rel'
+        (Rel => Unify_Right.Create (R, L, L_Data), others => <>))
+   with Inline;
 
    ------------
    -- Member --
    ------------
 
    function Member
-     (R    : Left_Var.Var;
-      Vals : Unify_Left.R_Type_Array) return Relation
-         renames Unify_Left.Member;
+     (R      : Left_Var.Var;
+      Vals   : Unify_Left.R_Type_Array;
+      R_Data : Right_C_Data := No_R_Data) return Relation
+   is
+      (Unify_Left.Member (R, Vals, R_Data));
 
 end Adalog.Unify;
