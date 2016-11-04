@@ -1509,7 +1509,7 @@ class Struct(CompiledType):
         if not cls.is_type_resolved:
             cls.is_type_resolved = True
 
-            for field_type, field in zip(types, fields):
+            for inferred_type, field in zip(types, fields):
 
                 # At this stage, if the field has a type, it means that the
                 # user assigned it one originally. In this case we will use the
@@ -1521,15 +1521,15 @@ class Struct(CompiledType):
                             # Using matches here allows the user to annotate a
                             # field with a more general type than the one
                             # inferred.
-                            field.type.matches(field_type),
+                            inferred_type.matches(field.type),
                             'Expected type {} but type inferenced yielded type'
                             ' {}'.format(
                                 field.type.name().camel,
-                                field_type.name().camel
+                                inferred_type.name().camel
                             )
                         )
                 else:
-                    field.type = field_type
+                    field.type = inferred_type
 
     @classmethod
     def get_inheritance_chain(cls):
