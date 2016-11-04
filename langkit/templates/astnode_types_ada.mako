@@ -169,12 +169,6 @@
    % endif
 
    % if not cls.abstract:
-      overriding function Lookup_Children
-        (Node : access ${type_name};
-         Sloc : Source_Location;
-         Snap : Boolean := False)
-        return ${root_node_type_name};
-
       package ${cls.name()}_Alloc is
         new Tagged_Alloc (${type_name});
    % endif
@@ -377,69 +371,6 @@
             % endif
          % endfor
       end Destroy;
-
-      ---------------------
-      -- Lookup_Children --
-      ---------------------
-
-      overriding function Lookup_Children
-        (Node : access ${type_name};
-         Sloc : Source_Location;
-         Snap : Boolean := False) return ${root_node_type_name}
-      is
-         ## For this implementation helper (i.e. internal primitive), we can
-         ## assume that all lookups fall into this node's sloc range.
-
-         Nod : constant ${root_node_type_name} :=
-            ${root_node_type_name} (Node);
-         pragma Assert (Compare (Sloc_Range (Nod, Snap), Sloc) = Inside);
-
-         Child : ${root_node_type_name};
-         Pos   : Relative_Position;
-
-         ## Some ASTnodes have no ASTNode child: avoid the "unused parameter"
-         ## compilation warning for them.
-         % if not astnode_fields:
-             pragma Unreferenced (Child);
-             pragma Unreferenced (Pos);
-         % endif
-
-      begin
-         ## Look for a child node that contains Sloc (i.e. return the most
-         ## precise result).
-
-         % for field in astnode_fields:
-            ## Note that we assume here that child nodes are ordered so
-            ## that the first one has a sloc range that is before the
-            ## sloc range of the second child node, etc.
-
-            if Node.${field.name} /= null then
-               Lookup_Relative (${root_node_type_name} (Node.${field.name}),
-                                Sloc, Pos, Child, Snap);
-               case Pos is
-                  when Before =>
-                      ## If this is the first node, Sloc is before it, so
-                      ## we can stop here.  Otherwise, Sloc is between the
-                      ## previous child node and the next one...  so we can
-                      ## stop here, too.
-                      return Nod;
-
-                  when Inside =>
-                      return Child;
-
-                  when After =>
-                      ## Sloc is after the current child node, so see with
-                      ## the next one.
-                      null;
-               end case;
-            end if;
-         % endfor
-
-         ## If we reach this point, we found no children that covers Sloc,
-         ## but Node still covers it (see the assertion).
-
-         return Nod;
-      end Lookup_Children;
 
    % endif
 

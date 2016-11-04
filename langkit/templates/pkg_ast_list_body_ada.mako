@@ -94,36 +94,6 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
       end loop;
    end Print;
 
-   ---------------------
-   -- Lookup_Children --
-   ---------------------
-
-   overriding function Lookup_Children
-     (Node : access List_Type;
-      Sloc : Source_Location;
-      Snap : Boolean := False)
-      return ${root_node_type_name}
-   is
-   begin
-      for Child of Node.Vec loop
-         declare
-            Position : Relative_Position;
-            Result   : ${root_node_type_name};
-         begin
-            Lookup_Relative (Child.all'Access, Sloc, Position, Result, Snap);
-            case Position is
-               when Before =>
-                  return ${root_node_type_name} (Node);
-               when Inside =>
-                  return Result;
-               when After =>
-                  null;
-            end case;
-         end;
-      end loop;
-      return ${root_node_type_name} (Node);
-   end Lookup_Children;
-
    -------------
    -- Destroy --
    -------------

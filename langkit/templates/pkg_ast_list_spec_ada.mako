@@ -1,7 +1,6 @@
 ## vim: filetype=makoada
 
 with Langkit_Support.Bump_Ptr.Vectors;
-with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 
 --  Generic package to create AST node types that just contain lists of other
 --  AST node types.
@@ -42,11 +41,6 @@ package ${_self.ada_api_settings.lib_name}.AST.List is
    overriding procedure Print
      (Node  : access List_Type;
       Level : Natural := 0);
-
-   overriding function Lookup_Children
-     (Node : access List_Type;
-      Sloc : Source_Location;
-      Snap : Boolean := False) return ${root_node_type_name};
 
    overriding function Is_Empty_List
      (Node : access List_Type)

@@ -39,6 +39,18 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       with Pre => Node.Parent /= null;
    --  Return the 1-based index for Node in its parents' children
 
+   function Lookup_Internal
+     (Node : ${root_node_type_name};
+      Sloc : Source_Location;
+      Snap : Boolean := False) return ${root_node_type_name};
+   procedure Lookup_Relative
+     (Node       : ${root_node_type_name};
+      Sloc       : Source_Location;
+      Position   : out Relative_Position;
+      Node_Found : out ${root_node_type_name};
+      Snap       : Boolean := False);
+   --  Implementation helpers for the looking up process
+
    -----------
    -- Child --
    -----------
@@ -337,9 +349,61 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          return null;
       end if;
 
-      Lookup_Relative (Node, Sloc, Position, Result, Snap);
+      Lookup_Relative
+        (${root_node_type_name} (Node), Sloc, Position, Result, Snap);
       return Result;
    end Lookup;
+
+   ---------------------
+   -- Lookup_Internal --
+   ---------------------
+
+   function Lookup_Internal
+     (Node : ${root_node_type_name};
+      Sloc : Source_Location;
+      Snap : Boolean := False) return ${root_node_type_name}
+   is
+      --  For this implementation helper (i.e. internal primitive), we can
+      --  assume that all lookups fall into this node's sloc range.
+      pragma Assert (Compare (Sloc_Range (Node, Snap), Sloc) = Inside);
+
+      Children : constant ${root_node_array.array()} := Node.Children;
+      Pos      : Relative_Position;
+      Result   : ${root_node_type_name};
+   begin
+      --  Look for a child node that contains Sloc (i.e. return the most
+      --  precise result).
+
+      for Child of Children loop
+         --  Note that we assume here that child nodes are ordered so that the
+         --  first one has a sloc range that is before the sloc range of the
+         --  second child node, etc.
+
+         if Child /= null then
+            Lookup_Relative (Child, Sloc, Pos, Result, Snap);
+            case Pos is
+               when Before =>
+                   --  If this is the first node, Sloc is before it, so we can
+                   --  stop here.  Otherwise, Sloc is between the previous
+                   --  child node and the next one...  so we can stop here,
+                   --  too.
+                   return Node;
+
+               when Inside =>
+                   return Result;
+
+               when After =>
+                   --  Sloc is after the current child node, so see with the
+                   --  next one.
+                   null;
+            end case;
+         end if;
+      end loop;
+
+      --  If we reach this point, we found no children that covers Sloc, but
+      --  Node still covers it (see the assertion).
+      return Node;
+   end Lookup_Internal;
 
    -------------
    -- Compare --
@@ -351,6 +415,26 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    begin
       return Compare (Sloc_Range (Node, Snap), Sloc);
    end Compare;
+
+   ---------------------
+   -- Lookup_Relative --
+   ---------------------
+
+   procedure Lookup_Relative
+     (Node       : ${root_node_type_name};
+      Sloc       : Source_Location;
+      Position   : out Relative_Position;
+      Node_Found : out ${root_node_type_name};
+      Snap       : Boolean := False)
+   is
+      Result : constant Relative_Position :=
+        Compare (Node, Sloc, Snap);
+   begin
+      Position := Result;
+      Node_Found := (if Result = Inside
+                     then Lookup_Internal (Node, Sloc, Snap)
+                     else null);
+   end Lookup_Relative;
 
    -------------------
    -- Get_Extension --
@@ -399,25 +483,6 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          Free (Slot.Extension);
       end loop;
    end Free_Extensions;
-
-   ---------------------
-   -- Lookup_Relative --
-   ---------------------
-
-   procedure Lookup_Relative
-     (Node       : access ${root_node_value_type}'Class;
-      Sloc       : Source_Location;
-      Position   : out Relative_Position;
-      Node_Found : out ${root_node_type_name};
-      Snap       : Boolean := False) is
-      Result : constant Relative_Position :=
-        Compare (Node, Sloc, Snap);
-   begin
-      Position := Result;
-      Node_Found := (if Result = Inside
-                     then Node.Lookup_Children (Sloc, Snap)
-                     else null);
-   end Lookup_Relative;
 
    --------------
    -- Children --
