@@ -1943,6 +1943,16 @@ class ArrayType(CompiledType):
         return names.Name(cls.pkg_vector().camel_with_underscores + '.Vector')
 
     @classmethod
+    def array(cls):
+        """
+        Name of the type for array values.
+
+        :rtype: names.Name
+        """
+        return names.Name(cls.pkg_array().camel_with_underscores +
+                          '.Array_Type')
+
+    @classmethod
     def c_dec_ref(cls, capi):
         """
         Name of the C API function to dec-ref an array value.
