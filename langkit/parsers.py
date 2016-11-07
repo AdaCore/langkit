@@ -797,8 +797,10 @@ class List(Parser):
         Parser.compute_fields_types(self)
 
         # If this parser does no folding, it does not contribute itself to
-        # fields typing, so we can stop here.
+        # fields typing, so we can stop here. Just make sure its result type
+        # gets created.
         if not self.revtree_class:
+            _ = self.get_type()
             return
 
         assert len(self.revtree_class.get_parse_fields()) == 2, (
