@@ -51,7 +51,9 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
    -----------------------------------------------------
 
    % for astnode in no_builtins(_self.astnode_types):
+   % if not astnode.is_list_type:
    ${astnode_types.public_incomplete_decl(astnode)}
+   % endif
    % endfor
 
    % for element_type in _self.sorted_types(_self.list_types):
@@ -90,7 +92,9 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
    --  operations documentations.
 
    % for astnode in no_builtins(_self.astnode_types):
+   % if not astnode.is_list_type:
    ${astnode_types.public_decl(astnode)}
+   % endif
    % endfor
 
    % for element_type in _self.sorted_types(_self.list_types):
@@ -106,7 +110,9 @@ private
    % endfor
 
    % for astnode in no_builtins(_self.astnode_types):
+   % if not astnode.is_list_type:
    ${astnode_types.private_decl(astnode)}
+   % endif
    % endfor
 
    % for element_type in _self.sorted_types(_self.list_types):

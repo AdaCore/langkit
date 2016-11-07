@@ -24,12 +24,6 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
       package ${cls.name()}_Memos is new Langkit_Support.Packrat
         (${cls.name()}, Token_Index);
       use ${cls.name()}_Memos;
-
-      % if cls in _self.list_types:
-         package List_${cls.name()}_Memos is new Langkit_Support.Packrat
-           (List_${cls.name()}, Token_Index);
-         use List_${cls.name()}_Memos;
-      % endif
    % endfor
 
    % for parser in _self.generated_parsers:

@@ -699,11 +699,6 @@ class CompileCtx():
             severity=Severity.warning
         )
 
-        # Compute type information, so that it is available for further
-        # compilation stages.
-        self.compute_types()
-        errors_checkpoint()
-
         if self.verbosity.info:
             printcol("Compiling the grammar...", Colors.OKBLUE)
 
@@ -712,6 +707,12 @@ class CompileCtx():
             for r_name, r in self.grammar.rules.items():
                 r.compute_fields_types()
 
+        # Compute type information, so that it is available for further
+        # compilation stages.
+        self.compute_types()
+        errors_checkpoint()
+
+        with names.camel_with_underscores:
             # Compute properties information, so that it is available for
             # further compilation stages.
             self.compute_properties()

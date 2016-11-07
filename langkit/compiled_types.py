@@ -1147,8 +1147,12 @@ class StructMetaclass(CompiledTypeMetaclass):
                 )
 
         dct['should_emit_array_type'] = not is_root_grammar_class
-        dct['is_type_resolved'] = False
         dct['location'] = extract_library_location()
+
+        # List types are resolved by construction: we create list types to
+        # contain specific ASTNode subclasses. All other types are not
+        # resolved, only the grammar will resolve them.
+        dct['is_type_resolved'] = dct.get('is_list_type', False)
 
         # By default, ASTNode subtypes aren't abstract. The "abstract"
         # decorator may change this attribute later.
@@ -1763,6 +1767,7 @@ class ASTNode(Struct):
     abstract = False
     is_bool_node = False
     is_enum_node = False
+    is_list_type = False
 
     subclasses = []
     """
