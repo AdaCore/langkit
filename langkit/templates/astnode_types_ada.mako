@@ -168,11 +168,6 @@
 
    % endif
 
-   % if not cls.abstract:
-      package ${cls.name()}_Alloc is
-        new Tagged_Alloc (${type_name});
-   % endif
-
 </%def>
 
 

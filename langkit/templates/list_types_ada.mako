@@ -55,9 +55,6 @@
 
    type ${access_type} is access all ${value_type};
 
-   package List_${elt_type}_Alloc is
-     new Tagged_Alloc (${value_type});
-
    ## Helper generated for properties code. Used in CollectionGet's code
    function Get
      (Node    : ${type_name};

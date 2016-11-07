@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
-with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
+with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
+with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 
 with ${_self.ada_api_settings.lib_name}.Analysis;
 use ${_self.ada_api_settings.lib_name}.Analysis;

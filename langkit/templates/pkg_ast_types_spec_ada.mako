@@ -12,9 +12,8 @@
 pragma Warnings (Off, "referenced");
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 
-with Langkit_Support.Bump_Ptr; use Langkit_Support.Bump_Ptr;
-with Langkit_Support.Slocs;    use Langkit_Support.Slocs;
-with Langkit_Support.Symbols;  use Langkit_Support.Symbols;
+with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Vectors;
 pragma Warnings (On, "referenced");
 
