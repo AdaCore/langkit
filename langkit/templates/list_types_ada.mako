@@ -36,6 +36,7 @@
 <%def name="private_decl(element_type)">
 
    <%
+      list_type = element_type.list_type()
       elt_type = element_type.name()
       pkg_name = 'Lists_{}'.format(elt_type)
       value_type = 'List_{}_Type'.format(elt_type)
@@ -44,8 +45,10 @@
    %>
 
    package ${pkg_name} is new List
-     (Node_Type   => ${elt_type}_Type,
-      Node_Access => ${elt_type});
+     (Node_Kind      => ${list_type.ada_kind_name()},
+      Node_Kind_Name => "${list_type.repr_name()}",
+      Node_Type      => ${elt_type}_Type,
+      Node_Access    => ${elt_type});
 
    type ${value_type} is
       new ${pkg_name}.List_Type with null record;

@@ -15,7 +15,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
    is
       pragma Unreferenced (Node);
    begin
-      return ${get_context().lang_name}_List;
+      return Node_Kind;
    end Kind;
 
    ---------------
@@ -25,7 +25,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
    overriding function Kind_Name (Node : access List_Type) return String is
       pragma Unreferenced (Node);
    begin
-      return "ASTList";
+      return Node_Kind_Name;
    end Kind_Name;
 
    -----------

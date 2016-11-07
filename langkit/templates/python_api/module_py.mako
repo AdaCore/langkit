@@ -626,7 +626,7 @@ class ASTList(${root_astnode_name}):
 
 
 % for astnode in _self.astnode_types:
-    % if astnode != T.root_node:
+    % if astnode != T.root_node and not astnode.is_list_type:
 ${astnode_types.decl(astnode)}
     % endif
 % endfor
@@ -943,7 +943,8 @@ _kind_to_astnode_cls = {
     1: ASTList,
     % for subclass in _self.astnode_types:
         % if not subclass.abstract:
-    ${_self.node_kind_constants[subclass]}: ${subclass.name()},
+    ${_self.node_kind_constants[subclass]}:
+        ${'ASTList' if subclass.is_list_type else subclass.name()},
         % endif
     % endfor
 }

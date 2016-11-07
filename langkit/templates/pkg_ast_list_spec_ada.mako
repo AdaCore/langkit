@@ -8,6 +8,8 @@ with Langkit_Support.Bump_Ptr.Vectors;
 --  This package is not part of the public API.
 
 private generic
+   Node_Kind      : ${root_node_kind_name};
+   Node_Kind_Name : String;
    type Node_Type is abstract new ${root_node_value_type} with private;
    type Node_Access is access all Node_Type'Class;
 package ${_self.ada_api_settings.lib_name}.AST.List is
