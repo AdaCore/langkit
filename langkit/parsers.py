@@ -394,9 +394,7 @@ class Parser(object):
             return
         get_context().fns.add(self.gen_fn_name)
 
-        t_env.parser_context = (
-            self.generate_code()
-        )
+        t_env.parser_context = self.generate_code()
 
         get_context().generated_parsers.append(GeneratedParser(
             self.gen_fn_name,
