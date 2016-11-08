@@ -15,13 +15,16 @@
     ${pos} := No_Token_Index;
 % endif
 
-<% parser_type = _self.parser.get_type().storage_type_name() %>
+<%
+   # The following variables must be used only if revtree_class is None
+   list_type = _self.get_type()
+   list_pkg = 'Lists_{}'.format(_self.parser.get_type().name())
+%>
 
 % if _self.revtree_class:
    ${res} := ${_self.get_type().storage_nullexpr()};
 % else:
-   ${res} := List_${parser_type}
-     (List_${parser_type}_Alloc.Alloc (Parser.Mem_Pool));
+   ${res} := ${list_type.name()}_Alloc.Alloc (Parser.Mem_Pool);
 
    ${res}.Token_Start := Token_Index'Max (${pos_name}, 1);
    ${res}.Token_End := No_Token_Index;
@@ -111,13 +114,13 @@ loop
    ## stored in a vector of nodes, in a flat fashion.
    % else:
 
-      if Lists_${parser_type}.Node_Vectors.Length (${res}.Vec) = 0 then
+      if ${list_pkg}.Node_Vectors.Length (${res}.Vec) = 0 then
          ${res}.Vec :=
-           Lists_${parser_type}.Node_Vectors.Create (Parser.Mem_Pool);
+           ${list_pkg}.Node_Vectors.Create (Parser.Mem_Pool);
       end if;
 
       ## Append the parsed result to the list
-      Lists_${parser_type}.Node_Vectors.Append
+      ${list_pkg}.Node_Vectors.Append
         (${res}.Vec, ${parser_context.res_var_name});
 
       ## If we are parsing nodes, then set the parent of parsed node to the
@@ -147,7 +150,7 @@ end loop;
 ## node.
 if ${res} /= null then
    ${res}.Unit := Parser.Unit;
-   if Lists_${parser_type}.Node_Vectors.Length (${res}.Vec) > 0 then
+   if ${list_pkg}.Node_Vectors.Length (${res}.Vec) > 0 then
       ${res}.Token_Start := ${pos_name};
       ${res}.Token_End := (if ${cpos} = ${pos_name}
                            then ${pos_name}

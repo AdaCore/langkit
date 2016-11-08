@@ -415,18 +415,22 @@ class CompiledType(object):
             # Make sure the type this list contains is already declared
             cls.element_type().add_to_context()
 
+        def name(cls):
+            return (names.Name('List') + cls.element_type().name()
+                    if cls.is_root_list_type else
+                    cls._user_name())
+
         return type(
             '{}ListType'.format(element_type.name().camel),
             (StructMetaclass.root_grammar_class, ), {
                 'is_ptr': True,
 
-                'name': classmethod(lambda cls:
-                                    names.Name('List') +
-                                    cls.element_type().name()),
+                'name': classmethod(name),
                 'add_to_context': classmethod(add_to_context),
                 'nullexpr': classmethod(lambda cls: null_constant()),
 
                 'is_list_type': True,
+                'is_root_list_type': True,
                 'is_collection': classmethod(lambda cls: True),
                 'element_type': classmethod(lambda cls: element_type),
             }
@@ -1153,7 +1157,10 @@ class StructMetaclass(CompiledTypeMetaclass):
         # List types are resolved by construction: we create list types to
         # contain specific ASTNode subclasses. All other types are not
         # resolved, only the grammar will resolve them.
-        dct['is_type_resolved'] = dct.get('is_list_type', False)
+        dct['is_type_resolved'] = (
+            is_astnode and
+            (base.is_list_type or dct.get('is_list_type', False))
+        )
 
         # By default, ASTNode subtypes aren't abstract. The "abstract"
         # decorator may change this attribute later.
@@ -1200,6 +1207,20 @@ class StructMetaclass(CompiledTypeMetaclass):
                     not f_n.startswith('_'),
                     'Underscore-prefixed field names are not allowed'
                 )
+
+        if is_astnode and base.is_list_type:
+            # AST list types are not allowed to have syntax fields
+            syntax_fields = {f_n: f_v
+                             for f_n, f_v in fields.items()
+                             if not f_v.is_property}
+            with Context('in {}'.format(name), extract_library_location()):
+                check_source_language(
+                    not syntax_fields,
+                    'ASTNode list types are not allowed to have fields'
+                    ' (here: {})'.format(', '.join(syntax_fields))
+                )
+
+            cls.is_root_list_type = False
 
         # Env specs may need to create properties: add these as fields for this
         # node.
@@ -1702,13 +1723,24 @@ class Struct(CompiledType):
                     f.type.add_to_context()
 
     @classmethod
+    def _user_name(cls):
+        """
+        Turn the name of the "cls" class into a Name instance.
+
+        The result is intended to be used for code generation.
+
+        :rtype: names.Name
+        """
+        name = names.Name.from_camel(cls.__name__)
+        return (name + names.Name('Node') if is_keyword(name) else name)
+
+    @classmethod
     def name(cls):
         """
         Return the name that will be used in code generation for this AST node
         type.
         """
-        name = names.Name.from_camel(cls.__name__)
-        return (name + names.Name('Node') if is_keyword(name) else name)
+        return cls._user_name()
 
     @classmethod
     def repr_name(cls):
@@ -1769,6 +1801,7 @@ class ASTNode(Struct):
     is_bool_node = False
     is_enum_node = False
     is_list_type = False
+    is_root_list_type = False
 
     subclasses = []
     """

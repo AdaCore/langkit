@@ -50,13 +50,17 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
    -----------------------------------------------------
 
    % for astnode in no_builtins(_self.astnode_types):
-   % if not astnode.is_list_type:
-   ${astnode_types.public_incomplete_decl(astnode)}
-   % endif
+     % if not astnode.is_list_type:
+       ${astnode_types.public_incomplete_decl(astnode)}
+     % endif
    % endfor
 
-   % for element_type in _self.sorted_types(_self.list_types):
-   ${list_types.public_incomplete_decl(element_type)}
+   % for astnode in _self.astnode_types:
+      % if astnode.is_root_list_type:
+         ${list_types.public_incomplete_decl(astnode.element_type())}
+      % elif astnode.is_list_type:
+         ${astnode_types.public_incomplete_decl(astnode)}
+      % endif
    % endfor
 
    -----------------------------------------
@@ -91,13 +95,17 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
    --  operations documentations.
 
    % for astnode in no_builtins(_self.astnode_types):
-   % if not astnode.is_list_type:
-   ${astnode_types.public_decl(astnode)}
-   % endif
+     % if not astnode.is_list_type:
+       ${astnode_types.public_decl(astnode)}
+     % endif
    % endfor
 
-   % for element_type in _self.sorted_types(_self.list_types):
-   ${list_types.public_decl(element_type)}
+   % for astnode in _self.astnode_types:
+      % if astnode.is_root_list_type:
+         ${list_types.public_decl(astnode.element_type())}
+      % elif astnode.is_list_type:
+         ${astnode_types.public_decl(astnode)}
+      % endif
    % endfor
 
 private
@@ -109,13 +117,17 @@ private
    % endfor
 
    % for astnode in no_builtins(_self.astnode_types):
-   % if not astnode.is_list_type:
-   ${astnode_types.private_decl(astnode)}
-   % endif
+     % if not astnode.is_list_type:
+       ${astnode_types.private_decl(astnode)}
+     % endif
    % endfor
 
-   % for element_type in _self.sorted_types(_self.list_types):
-   ${list_types.private_decl(element_type)}
+   % for astnode in _self.astnode_types:
+      % if astnode.is_root_list_type:
+         ${list_types.private_decl(astnode.element_type())}
+      % elif astnode.is_list_type:
+         ${astnode_types.private_decl(astnode)}
+      % endif
    % endfor
 
 end ${_self.ada_api_settings.lib_name}.AST.Types;

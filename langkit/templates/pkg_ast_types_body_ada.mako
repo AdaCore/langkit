@@ -59,13 +59,17 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types is
    % endfor
 
    % for astnode in no_builtins(_self.astnode_types):
-   % if not astnode.is_list_type:
-   ${astnode_types.body(astnode)}
-   % endif
+     % if not astnode.is_list_type:
+       ${astnode_types.body(astnode)}
+     % endif
    % endfor
 
-   % for element_type in _self.sorted_types(_self.list_types):
-   ${list_types.body(element_type)}
+   % for astnode in _self.astnode_types:
+      % if astnode.is_root_list_type:
+         ${list_types.body(astnode.element_type())}
+      % elif astnode.is_list_type:
+         ${astnode_types.body(astnode)}
+      % endif
    % endfor
 
 end ${_self.ada_api_settings.lib_name}.AST.Types;

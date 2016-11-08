@@ -757,7 +757,8 @@ class List(Parser):
                                  if self.sep else "")
         )
 
-    def __init__(self, parser, sep=None, empty_valid=False, revtree=None):
+    def __init__(self, parser, sep=None, empty_valid=False, revtree=None,
+                 list_cls=None):
         """
         Create a parser that matches a list of elements.
 
@@ -767,8 +768,15 @@ class List(Parser):
         By default, this parser will not match empty sequences but it will if
         `empty_valid` is True.
 
-        If `revtree` is provided, it must be an ASTNode subclass.  It is then
-        used to fold the list into a binary tree.
+        :param ASTNode revtree: If provided, it must be an ASTNode subclass.
+            It is then used to fold the list into a binary tree.
+
+        :param ASTNode list_cls: Type parameter. If provided, it must be a
+            ASTNode.list_type() subclass to be used for the result of this
+            parser.
+
+        Note that revtree and list_cls are exclusive, as having both of them
+        does not make sense.
 
         :type sep: types.Token|string
         :type empty_valid: bool
@@ -782,12 +790,25 @@ class List(Parser):
         if empty_valid:
             assert not self.revtree_class
 
+        self.list_cls = list_cls
+        assert list_cls is None or self.list_cls.is_list_type, (
+            'Invalid list type for List parser: {}'.format(
+                self.list_cls.name()
+            )
+        )
+
+        assert revtree is None or list_cls is None, (
+            'List: the revtree and list_cls arguments are exclusive'
+        )
+
     def children(self):
         return [self.parser]
 
     def get_type(self):
         if self.revtree_class:
             return common_ancestor(self.parser.get_type(), self.revtree_class)
+        elif self.list_cls:
+            return self.list_cls
         else:
             return self.parser.get_type().list_type()
 

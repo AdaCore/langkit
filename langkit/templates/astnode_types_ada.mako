@@ -69,24 +69,28 @@
         (Node : access ${type_name}) return ${root_node_kind_name};
       overriding function Kind_Name
         (Node : access ${type_name}) return String;
-      overriding function Image
-        (Node : access ${type_name}) return String;
 
+      ## No need to regenerate these primitives for list types as the
+      ## inheritted one already fit.
+      % if not cls.is_list_type:
+         overriding function Image
+           (Node : access ${type_name}) return String;
 
-      overriding function Child_Count
-        (Node : access ${type_name}) return Natural;
-      overriding procedure Get_Child
-        (Node            : access ${type_name};
-         Index           : Positive;
-         Index_In_Bounds : out Boolean;
-         Result          : out ${root_node_type_name});
+         overriding function Child_Count
+           (Node : access ${type_name}) return Natural;
+         overriding procedure Get_Child
+           (Node            : access ${type_name};
+            Index           : Positive;
+            Index_In_Bounds : out Boolean;
+            Result          : out ${root_node_type_name});
 
-      overriding procedure Print
-        (Node  : access ${type_name};
-         Level : Natural := 0);
+         overriding procedure Print
+           (Node  : access ${type_name};
+            Level : Natural := 0);
 
-      overriding procedure Destroy
-        (Node : access ${cls.name()}_Type);
+         overriding procedure Destroy
+           (Node : access ${cls.name()}_Type);
+      % endif
    % endif
 
    ## Public field getters
@@ -218,6 +222,10 @@
       begin
          return "${cls.repr_name()}";
       end Kind_Name;
+
+      ## No need to regenerate these primitives for list types as the
+      ## inheritted one already fit.
+      % if not cls.is_list_type:
 
       -----------
       -- Image --
@@ -366,6 +374,8 @@
             % endif
          % endfor
       end Destroy;
+
+      % endif
 
    % endif
 
