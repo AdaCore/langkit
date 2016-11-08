@@ -1128,16 +1128,16 @@ class Transform(Parser):
         )
 
         # Gather field types that come from all child parsers
-        fields_types = (
+        if isinstance(self.parser, Row):
             # There are multiple fields for Row parsers
-            [
-                parser.get_type()
-                for parser in self.parser.parsers
-                if not parser.discard()
-            ]
-            if isinstance(self.parser, Row) else
-            [self.parser.get_type()]
-        )
+            fields_types = [parser.get_type()
+                            for parser in self.parser.parsers
+                            if not parser.discard()]
+        elif isinstance(self.parser, Tok) and not self.parser.keep:
+            fields_types = []
+        else:
+            fields_types = [self.parser.get_type()]
+
         assert all(t for t in fields_types), (
             "Internal error when computing field types for {}:"
             " some are None: {}".format(self.typ, fields_types)

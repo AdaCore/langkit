@@ -59,7 +59,7 @@ def run(name, match_expr):
                    Row('null') ^ NullNode)
             ) ^ ExampleNode,
 
-            number=Tok(Token.Number) ^ Number,
+            number=Tok(Token.Number, keep=True) ^ Number,
 
             expression=Or(
                 Row(foo_grammar.number,
