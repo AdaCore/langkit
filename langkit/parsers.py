@@ -1145,10 +1145,19 @@ class Transform(Parser):
 
         # Then dispatch these types to all the fields distributed amongst the
         # ASTNode hierarchy.
+        remaining_types = list(fields_types)
         for cls in self.typ.get_inheritance_chain():
             fields_count = len(cls.get_parse_fields(include_inherited=False))
-            cls.set_types(fields_types[:fields_count])
-            fields_types = fields_types[fields_count:]
+            cls.set_types(remaining_types[:fields_count])
+            remaining_types = remaining_types[fields_count:]
+        assert not remaining_types, (
+            'Transform parser has {} fields to create a {}, but this ASTnode'
+            ' requires only {} fields'.format(
+                len(fields_types),
+                self.typ.name().camel,
+                len(fields_types) - len(remaining_types)
+            )
+        )
 
         Parser.compute_fields_types(self)
 
