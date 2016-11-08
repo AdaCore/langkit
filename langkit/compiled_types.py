@@ -1093,6 +1093,7 @@ class StructMetaclass(CompiledTypeMetaclass):
                 if mcs.root_grammar_class is None:
                     assert base is ASTNode
                     is_root_grammar_class = True
+                    dct['abstract'] = True
 
                 else:
                     # Check that it does indeed derives from the root grammar
@@ -1156,7 +1157,7 @@ class StructMetaclass(CompiledTypeMetaclass):
 
         # By default, ASTNode subtypes aren't abstract. The "abstract"
         # decorator may change this attribute later.
-        dct['abstract'] = False
+        dct.setdefault('abstract', False)
 
         # This metaclass will register subclasses automatically
         dct['subclasses'] = []
