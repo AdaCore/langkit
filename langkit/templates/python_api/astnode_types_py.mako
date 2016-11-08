@@ -24,6 +24,10 @@
     _kind_name = ${repr(cls.name().camel)}
     % endif
 
+    % if cls.is_list_type:
+    is_list_type = True
+    % endif
+
     % for field in cls.fields_with_accessors():
 
     <%

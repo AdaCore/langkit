@@ -452,6 +452,8 @@ class Diagnostic(object):
 class ${root_astnode_name}(object):
     ${py_doc(T.root_node, 4)}
 
+    is_list_type = False
+
     ${astnode_types.subclass_decls(T.root_node)}
 
     def __init__(self, c_value):
@@ -542,7 +544,7 @@ class ${root_astnode_name}(object):
 
         print >> file, '{}<{}>'.format(indent, self.kind_name)
         indent = indent + '|'
-        if isinstance(self, ASTList):
+        if self.is_list_type:
             for i, value in enumerate(self):
                 print_node("item {}".format(i), value)
         else:
@@ -620,13 +622,8 @@ class ${root_astnode_name}(object):
         return self.short_image
 
 
-class ASTList(${root_astnode_name}):
-    # TODO: document this class
-    _kind_name = 'list'
-
-
 % for astnode in _self.astnode_types:
-    % if astnode != T.root_node and not astnode.is_list_type:
+    % if astnode != T.root_node:
 ${astnode_types.decl(astnode)}
     % endif
 % endfor
@@ -940,11 +937,9 @@ def unwrap_str(c_char_p_value):
 
 
 _kind_to_astnode_cls = {
-    1: ASTList,
     % for subclass in _self.astnode_types:
         % if not subclass.abstract:
-    ${_self.node_kind_constants[subclass]}:
-        ${'ASTList' if subclass.is_list_type else subclass.name()},
+    ${_self.node_kind_constants[subclass]}: ${subclass.name()},
         % endif
     % endfor
 }
