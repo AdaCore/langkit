@@ -633,6 +633,32 @@ def always_make_progress(parser):
     return not isinstance(parser, (Opt, Null))
 
 
+def Pick(*parsers):
+    """
+    Utility around Row and Extract, that will automatically scan a Row, remove
+    tokens and ignored sub parses, and extract the only significant sub-result.
+
+    If there are several significant sub-results, raises an error.
+    """
+    parsers = [resolve(p) for p in parsers if p]
+    pick_parser_idx = -1
+    ignore = (Tok, Discard)
+    for i, p in enumerate(parsers):
+        if (isinstance(p, ignore)
+                or isinstance(p, Opt) and isinstance(p.parser, ignore)):
+            continue
+        check_source_language(
+            pick_parser_idx == -1,
+            "Pick parser can have only one sub-parser that is not a token"
+        )
+        pick_parser_idx = i
+
+    if pick_parser_idx == -1:
+        return Row(*parsers)
+    else:
+        return Row(*parsers)[pick_parser_idx]
+
+
 class Row(Parser):
     """Parser that matches a what sub-parsers match in sequence."""
 
