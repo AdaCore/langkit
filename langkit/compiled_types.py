@@ -1809,6 +1809,19 @@ class ASTNode(Struct):
     :type: list[ASTNode]
     """
 
+    def __new__(cls, *args):
+        # TODO: We might want to find a way to limit that magic to the scope of
+        # the grammar in some way.
+        from langkit.parsers import Row, Opt
+
+        if cls.is_bool_node:
+            # If the node is a boolean node, then we want to parse the
+            # sub-parsers as an optional parser that will be booleanized.
+            return Opt(*args).as_bool(cls)
+        else:
+            # Else, we want to parse the sub-parsers as a row + transform
+            return Row(*args) ^ cls
+
     @classmethod
     def is_refcounted(cls):
         return False
