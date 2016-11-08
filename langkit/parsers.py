@@ -1121,6 +1121,12 @@ class Transform(Parser):
         return self.typ
 
     def compute_fields_types(self):
+        assert not self.typ.is_list_type, (
+            'Transform parsers are not allowed to create lists: only List ones'
+            ' can. Please instead pass {} to the underlying List'
+            ' parser.'.format(self.typ.name().camel)
+        )
+
         # Gather field types that come from all child parsers
         fields_types = (
             # There are multiple fields for Row parsers
