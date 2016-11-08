@@ -947,7 +947,7 @@ class Opt(Parser):
 
         self._is_error = False
         self.contains_anonymous_row = bool(parsers)
-        self.parser = Row(parser, *parsers) if parsers else resolve(parser)
+        self.parser = Pick(parser, *parsers) if parsers else resolve(parser)
 
     def error(self):
         """
