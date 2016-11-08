@@ -783,12 +783,15 @@ class List(Parser):
                                  if self.sep else "")
         )
 
-    def __init__(self, parser, sep=None, empty_valid=False, revtree=None,
-                 list_cls=None):
+    def __init__(self, *parsers, **opts):
         """
         Create a parser that matches a list of elements.
 
-        Each element will be matched by `parser`.  If `sep` is provided, it is
+        `parsers` is one or several sub-parsers. If several are passed, then
+        they're automatically wrapped in a `Pick` parser, so that only one
+        result is kept.
+
+        Each element will be matched by `parsers`.  If `sep` is provided, it is
         a parser that is used to match separators between elements.
 
         By default, this parser will not match empty sequences but it will if
@@ -801,14 +804,29 @@ class List(Parser):
             ASTNode.list_type() subclass to be used for the result of this
             parser.
 
+        :param types.Token|string sep: Parser or string corresponding to the
+            token that is used to match separators between elements.
+
+        :param bool empty_valid: Whether to match empty sequences or not.
+
         Note that revtree and list_cls are exclusive, as having both of them
         does not make sense.
-
-        :type sep: types.Token|string
-        :type empty_valid: bool
         """
+
+        # Get options from opts dict
+        sep = opts.get('sep')
+        empty_valid = opts.get('empty_valid', False)
+        revtree = opts.get('revtree', None)
+        list_cls = opts.get('list_cls', None)
+
         Parser.__init__(self)
-        self.parser = resolve(parser)
+        if len(parsers) == 1:
+            # If one parser, just keep it as the main parser
+            self.parser = resolve(parsers[0])
+        else:
+            # If several, then wrap them in a Pick parser
+            self.parser = Pick(*parsers)
+
         self.sep = resolve(sep) if sep else None
         self.empty_valid = empty_valid
         self.revtree_class = revtree
