@@ -15,6 +15,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
    --  of node (including lists). Likewise for bump ptr. allocators, except
    --  we need them only for non-abstract AST nodes.
 
+   pragma Warnings (Off, "is not referenced");
    % for enum_type in _self.enum_types:
       package ${enum_type.name()}_Memos is new Langkit_Support.Packrat
         (${enum_type.name()}, Token_Index);
@@ -30,6 +31,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
          package ${cls.name()}_Alloc is new Tagged_Alloc (${cls.name()}_Type);
       % endif
    % endfor
+   pragma Warnings (On, "is not referenced");
 
    % for parser in _self.generated_parsers:
    ${parser.spec}
