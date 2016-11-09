@@ -40,9 +40,7 @@ package ${_self.ada_api_settings.lib_name}.AST.List is
       Index_In_Bounds : out Boolean;
       Result          : out ${root_node_type_name});
 
-   overriding procedure Print
-     (Node  : access List_Type;
-      Level : Natural := 0);
+   overriding procedure Print (Node : access List_Type; Prefix : String := "");
 
    overriding function Is_Empty_List
      (Node : access List_Type)

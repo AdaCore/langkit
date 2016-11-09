@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Text_IO;           use Ada.Text_IO;
 
 package body ${_self.ada_api_settings.lib_name}.AST.List is
 
@@ -79,17 +80,19 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
    -- Print --
    -----------
 
-   overriding procedure Print
-     (Node  : access List_Type;
-      Level : Natural := 0) is
+   overriding procedure Print (Node : access List_Type; Prefix : String := "")
+   is
    begin
+      Put (Prefix & Node.Kind_Name & "[" & Image (Node.Sloc_Range) & "]");
       if Length (Node.Vec) = 0 then
+         Put_Line (": <empty list>");
          return;
       end if;
 
+      New_Line;
       for Child of Node.Vec loop
          if Child /= null then
-            Child.Print (Level);
+            Child.Print (Prefix & "|  ");
          end if;
       end loop;
    end Print;

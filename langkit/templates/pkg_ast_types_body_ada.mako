@@ -10,6 +10,7 @@
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
 with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
+with Ada.Text_IO;                use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
 pragma Warnings (Off, "referenced");
@@ -21,7 +22,6 @@ with Adalog.Pure_Relations;      use Adalog.Pure_Relations;
 with Adalog.Variadic_Operations; use Adalog.Variadic_Operations;
 
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
-with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Slocs;      use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;    use Langkit_Support.Symbols;

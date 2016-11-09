@@ -14,7 +14,6 @@ with Ada.Unchecked_Deallocation;
 with System.Storage_Elements;    use System.Storage_Elements;
 
 with Langkit_Support.Extensions; use Langkit_Support.Extensions;
-with Langkit_Support.PP_Utils;   use Langkit_Support.PP_Utils;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
 
@@ -840,19 +839,20 @@ package body ${_self.ada_api_settings.lib_name}.AST is
    ---------------
 
    procedure PP_Trivia
-     (Node : access ${root_node_value_type}'Class;
-      Level : Integer := 0)
+     (Node   : access ${root_node_value_type}'Class;
+      Prefix : String := "")
    is
+      Children_Prefix : constant String := Prefix & "|  ";
    begin
-      Put_Line (Level, Kind_Name (Node));
+      Put_Line (Prefix & Kind_Name (Node));
       for C of Children_With_Trivia (Node) loop
          case C.Kind is
             when Trivia =>
-               Put_Line (Level + 1, (if C.Trivia.Text = null
-                                     then ""
-                                     else Image (C.Trivia.Text.all)));
+               Put_Line (Children_Prefix & (if C.Trivia.Text = null
+                                            then ""
+                                            else Image (C.Trivia.Text.all)));
             when Child =>
-               PP_Trivia (C.Node, Level + 1);
+               C.Node.PP_Trivia (Children_Prefix);
          end case;
       end loop;
    end PP_Trivia;

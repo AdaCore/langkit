@@ -581,17 +581,18 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Debug helper: return a short representation of the string, containing
    --  just the kind name and the sloc.
 
-   procedure Print (Node  : access ${root_node_value_type};
-                    Level : Natural := 0) is abstract;
-   --  Debug helper: print to standard output Node and all its children. Level
-   --  indicates the indentation level for the output.
+   procedure Print (Node   : access ${root_node_value_type};
+                    Prefix : String := "") is abstract;
+   --  Debug helper: print to standard output Node and all its children. Prefix
+   --  is prepended to each output line.
 
    procedure PP_Trivia
      (Node  : access ${root_node_value_type}'Class;
-      Level : Integer := 0);
+      Prefix : String := "");
    --  Debug helper: print to standard output Node and all its children along
-   --  with the trivia associated to them. Level indicates the indentation
-   --  level for the output.
+   --  with the trivia associated to them. Prefix is prepended to each output
+   --  line.
+
 
    procedure Dump_Lexical_Env
      (Node     : access ${root_node_value_type}'Class;

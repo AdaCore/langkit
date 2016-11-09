@@ -114,8 +114,8 @@
             Result          : out ${root_node_type_name});
 
          overriding procedure Print
-           (Node  : access ${type_name};
-            Level : Natural := 0);
+           (Node   : access ${type_name};
+            Prefix : String := "");
 
          overriding procedure Destroy
            (Node : access ${cls.value_type_name()});
@@ -344,34 +344,32 @@
       -----------
 
       overriding procedure Print
-        (Node  : access ${type_name};
-         Level : Natural := 0)
+        (Node   : access ${type_name};
+         Prefix : String := "")
       is
-         Nod : constant ${root_node_type_name} :=
-            ${root_node_type_name} (Node);
+         Attr_Prefix     : constant String := Prefix & "|";
+         Children_Prefix : constant String := Prefix & "|  ";
       begin
          Put_Line
-           (Level, Kind_Name (Nod) & "[" & Image (Sloc_Range (Nod)) & "]");
+           (Prefix & Node.Kind_Name & "[" & Image (Node.Sloc_Range) & "]");
 
          % for i, field in enumerate(repr_fields):
-            % if field.type.is_list_type:
-               if Child_Count (Node.${field.name}) > 0 then
-                  Put_Line (Level + 1, "${field._name.lower}:");
-                  Node.${field.name}.Print (Level + 2);
-               end if;
-            % elif field.type.is_ptr:
+            % if field.type.is_ptr:
+               Put (Attr_Prefix & "${field._name.lower}:");
                if Node.${field.name} /= null then
-                  Put_Line (Level + 1, "${field._name.lower}:");
-                  Node.${field.name}.Print (Level + 2);
+                  New_Line;
+                  Node.${field.name}.Print (Children_Prefix);
+               else
+                  Put_Line (" <null>");
                end if;
             % elif is_token_type(field.type):
                Put_Line
-                 (Level + 1, "${field._name.lower}: "
+                 (Attr_Prefix & "${field._name.lower}: "
                   & Langkit_Support.Text.Image
                     (Data (Token (Node, Node.${field.name})).Text.all));
 
             % else:
-               Put_Line (Level + 1, "${field._name.lower}: "
+               Put_Line (Attr_Prefix & "${field._name.lower}: "
                          & Image (Node.${field.name}));
             % endif
          % endfor
