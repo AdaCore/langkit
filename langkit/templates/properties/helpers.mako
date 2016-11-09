@@ -13,12 +13,11 @@
   )
 </%def>
 
-<%def name="generate_logic_binder(prop)">
-   % if prop.needs_logic_binder:
-
+<%def name="generate_logic_binder(conv_prop)">
    <%
-   type_name = "{}_{}_Logic_Binder".format(prop.struct.name(), prop.name)
-   package_name = "{}_{}_Bind".format(prop.struct.name(), prop.name)
+   type_name = "{}_{}_Logic_Binder".format(conv_prop.struct.name(),
+                                           conv_prop.name)
+   package_name = "{}_{}_Bind".format(conv_prop.struct.name(), conv_prop.name)
    root_class = T.root_node.name()
    %>
 
@@ -30,10 +29,14 @@
    end record;
 
    function Convert
+     (Self : ${type_name}; From : ${root_class}) return ${root_class}
+   with Inline_Always;
+
+   function Convert
      (Self : ${type_name}; From : ${root_class}) return ${root_class} is
    begin
       return ${root_class}
-        (${prop.name} (${prop.struct.name()} (From), Self.Env));
+        (${conv_prop.name} (${conv_prop.struct.name()} (From), Self.Env));
    end Convert;
 
    ## This package contains the necessary Adalog instantiations, so that we can
@@ -43,8 +46,6 @@
    ## Which is expressed as Bind (A, B, Property) in the DSL.
    package ${package_name}
    is new Eq_Node.Raw_Custom_Bind (${type_name}, Convert);
-
-   % endif
 </%def>
 
 <%def name="generate_logic_predicates(prop)">

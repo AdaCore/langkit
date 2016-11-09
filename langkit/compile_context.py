@@ -452,6 +452,16 @@ class CompileCtx():
         :type: list[str]
         """
 
+        self.logic_binders = set()
+        """
+        Set of tuple of properties for which we want to generate logic binders.
+        For the moment, there is just one property that handles the conversion
+        in the bind, but ultimately there will also be a property to check for
+        equality.
+
+        :type: set[(PropertyDef, )]
+        """
+
         self.env_hook_subprogram = env_hook_subprogram
 
     def sorted_types(self, type_set):
@@ -466,6 +476,17 @@ class CompileCtx():
         :rtype: list[langkit.compiled_types.CompiledType]
         """
         return sorted(type_set, key=lambda cls: cls.name())
+
+    def do_generate_logic_binder(self, convert_property=None):
+        """
+        Generate a logic binder with the given conversion property.
+
+        If you call this function several times for the same property, only one
+        binder will be generaed.
+
+        :param PropertyDef convert_property: The conversion property.
+        """
+        self.logic_binders.add((convert_property, ))
 
     @property
     def user_rule_names(self):

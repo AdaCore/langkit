@@ -69,7 +69,7 @@ class Bind(AbstractExpression):
              "of {}".format(T.root_node.name().camel))
         ])
 
-        self.bind_property.do_generate_logic_binder()
+        get_context().do_generate_logic_binder(self.bind_property)
 
     def construct(self):
         t = self.bind_property.struct.name()

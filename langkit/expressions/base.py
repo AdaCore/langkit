@@ -1049,7 +1049,6 @@ class PropertyDef(AbstractNodeData):
         self.in_type = False
         "Recursion guard for the type property"
 
-        self.needs_logic_binder = False
         self.logic_predicates = []
         """
         The list of logic predicates to generate. First element of the tuple is
@@ -1509,13 +1508,6 @@ class PropertyDef(AbstractNodeData):
                 cls.compute_property_attributes,
                 cls.construct_and_type_expression,
                 cls.render_property]
-
-    def do_generate_logic_binder(self):
-        """
-        Helper method, will trigger the emission of a logic binder object
-        for the property.
-        """
-        self.needs_logic_binder = True
 
     @memoized
     def do_generate_logic_predicate(self, *partial_args_types):

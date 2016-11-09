@@ -52,11 +52,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types is
    % endif
    % endfor
 
-   % for astnode in no_builtins(_self.astnode_types):
-   % if not astnode.is_list_type:
-   ${astnode_types.logic_helpers(astnode)}
-   % endif
-   % endfor
+   ${astnode_types.logic_helpers()}
 
    % for astnode in no_builtins(_self.astnode_types):
      % if not astnode.is_list_type:

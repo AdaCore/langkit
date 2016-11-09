@@ -3,7 +3,6 @@
 <%namespace name="exts" file="extensions.mako" />
 <%namespace name="prop_helpers" file="properties/helpers.mako" />
 
-
 <%def name="public_incomplete_decl(cls)">
 
    type ${cls.name()}_Type;
@@ -12,13 +11,22 @@
 
 </%def>
 
-<%def name="logic_helpers(cls)">
+<%def name="logic_helpers()">
+
    ## Generate logic/predicate binders for the properties who require it. Note
    ## that we need to generate them before the properties bodies, because
    ## they'll be used in the bodies.
+   ## TODO: Filtering logic duplicated with pkg_ast_types_body_ada.mako. See if
+   ## we can share in helpers.
+   % for cls in filter(lambda t: not t.is_builtin(), _self.astnode_types):
    % for prop in cls.get_properties(include_inherited=False):
-   ${prop_helpers.generate_logic_binder(prop)}
    ${prop_helpers.generate_logic_predicates(prop)}
+   % endfor
+   % endfor
+
+   ## Generate every registered logic binder
+   % for prop, in _self.logic_binders:
+   ${prop_helpers.generate_logic_binder(prop)}
    % endfor
 </%def>
 
