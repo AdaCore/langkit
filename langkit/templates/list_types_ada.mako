@@ -25,7 +25,9 @@
       type_name = 'List_{}'.format(elt_type)
    %>
 
-   type ${value_type} is new ${root_node_value_type} with private;
+   type ${value_type} is
+      ${'abstract' if element_type.has_abstract_list else ''}
+      new ${root_node_value_type} with private;
 
    function Item
      (Node  : access ${value_type};
@@ -47,13 +49,23 @@
       access_type = 'List_{}_Access'.format(elt_type)
    %>
 
+   ## Hack: if the root list type is abstract, we have no concrete kind for it
+   ## (just a kind subrange). We have to give the List generic a kind anyway,
+   ## so just give one with the knowledge that subclasses will always override
+   ## it.
+   ## TODO: try to remove this hack. Maybe this will naturally go away if we
+   ## manage to get rid of this generic instantiation.
    package ${pkg_name} is new List
-     (Node_Kind      => ${list_type.ada_kind_name()},
+     (Node_Kind      => ${([cls for cls in _self.astnode_types
+                            if not cls.abstract][0].ada_kind_name()
+                          if element_type.has_abstract_list else
+                          list_type.ada_kind_name())},
       Node_Kind_Name => "${list_type.repr_name()}",
       Node_Type      => ${elt_type}_Type,
       Node_Access    => ${elt_type});
 
    type ${value_type} is
+      ${'abstract' if element_type.has_abstract_list else ''}
       new ${pkg_name}.List_Type with null record;
 
    type ${access_type} is access all ${value_type};

@@ -863,7 +863,13 @@ class List(Parser):
         # fields typing, so we can stop here. Just make sure its result type
         # gets created.
         if not self.revtree_class:
-            _ = self.get_type()
+            typ = self.get_type()
+            with self.error_context():
+                check_source_language(
+                    not typ.abstract,
+                    'Please provide a concrete ASTnode subclass as list_cls'
+                    ' ({} is abstract)'.format(typ.name().camel)
+                )
             return
 
         assert len(self.revtree_class.get_parse_fields()) == 2, (

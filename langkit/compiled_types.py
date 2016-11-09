@@ -432,6 +432,7 @@ class CompiledType(object):
                 'name': classmethod(name),
                 'add_to_context': classmethod(add_to_context),
 
+                'abstract': element_type.has_abstract_list,
                 'is_generic_list_type': False,
                 'is_list_type': True,
                 'is_root_list_type': True,
@@ -1438,6 +1439,17 @@ def env_metadata(cls):
     return cls
 
 
+def has_abstract_list(cls):
+    """
+    Decorator to make the automatically generated list type for "cls" (the
+    "root list type") abstract.
+
+    :param ASTNode cls: Type parameter. The AST node type to decorate.
+    """
+    cls.has_abstract_list = True
+    return cls
+
+
 class TypeDeclaration(object):
     """Simple holder for generated type declarations."""
 
@@ -1845,6 +1857,12 @@ class ASTNode(Struct):
     Root grammar class subclass. It is abstract, generated automatically when
     the root grammar class is known. All root list types subclass it.
     :type: ASTNode
+    """
+
+    has_abstract_list = False
+    """
+    Whether the automatically generated list type for this ASTNode (the "root
+    list type") is abstract.
     """
 
     subclasses = []
