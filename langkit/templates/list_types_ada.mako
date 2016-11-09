@@ -34,7 +34,6 @@
       Index : Positive)
       return ${elt_type}
    is (${elt_type} (Node.Child (Index)));
-   --  Shortcut for: ${type_name} (Child (Node, Index))
 
 </%def>
 
