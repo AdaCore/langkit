@@ -28,7 +28,8 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
       use ${cls.name()}_Memos;
 
       % if not cls.abstract:
-         package ${cls.name()}_Alloc is new Tagged_Alloc (${cls.name()}_Type);
+         package ${cls.name()}_Alloc is
+            new Tagged_Alloc (${cls.value_type_name()});
       % endif
    % endfor
    pragma Warnings (On, "is not referenced");

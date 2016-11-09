@@ -71,7 +71,7 @@
          % endif
       % endfor
 
-      if N.all in ${struct.name()}_Type'Class then
+      if N.all in ${struct.value_type_name()}'Class then
          declare
             Typed_Node : constant ${struct.name()} := ${struct.name()} (N);
          begin

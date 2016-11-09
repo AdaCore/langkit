@@ -66,7 +66,7 @@
                           if element_type.has_abstract_list else
                           list_type.ada_kind_name())},
       Node_Kind_Name => "${list_type.repr_name()}",
-      Node_Type      => ${elt_type}_Type,
+      Node_Type      => ${element_type.value_type_name()},
       Node_Access    => ${elt_type});
 
    type ${value_type} is

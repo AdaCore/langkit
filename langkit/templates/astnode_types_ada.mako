@@ -5,8 +5,8 @@
 
 <%def name="public_incomplete_decl(cls)">
 
-   type ${cls.name()}_Type;
-   type ${cls.name()} is access all ${cls.name()}_Type'Class;
+   type ${cls.value_type_name()};
+   type ${cls.name()} is access all ${cls.value_type_name()}'Class;
    ${ada_doc(cls, 3)}
 
 </%def>
@@ -52,7 +52,7 @@
 
 
 <%def name="field_decl(field)">
-   <% type_name = "{}_Type".format(field.struct.name()) %>
+   <% type_name = field.struct.value_type_name() %>
 
    function ${field.name}
      (Node : access ${type_name}) return ${field.type.name()};
@@ -80,7 +80,7 @@
 <%def name="public_decl(cls)">
 
    <%
-      type_name = "{}_Type".format(cls.name())
+      type_name = cls.value_type_name()
       base_name = cls.base().name()
       ext = ctx.ext("nodes", cls.name(), "public_decls")
    %>
@@ -90,7 +90,7 @@
    --
 
    type ${type_name} is ${"abstract" if cls.abstract else "" }
-      new ${base_name}_Type with private;
+      new ${cls.base().value_type_name()} with private;
 
    % if not cls.abstract:
 
@@ -118,7 +118,7 @@
             Level : Natural := 0);
 
          overriding procedure Destroy
-           (Node : access ${cls.name()}_Type);
+           (Node : access ${cls.value_type_name()});
       % endif
    % endif
 
@@ -163,12 +163,12 @@
 <%def name="private_decl(cls)">
 
    <%
-      type_name = "{}_Type".format(cls.name())
+      type_name = cls.value_type_name()
       base_name = cls.base().name()
    %>
 
    type ${type_name} is ${"abstract" if cls.abstract else "" }
-      new ${base_name}_Type with record
+      new ${cls.base().value_type_name()} with record
       ${node_fields(cls)}
    end record;
 
@@ -220,8 +220,7 @@
    # Keep a list of fields that are annotated with repr
    repr_fields = cls.get_parse_fields(lambda f: f.repr)
 
-   # Shortcut for ${cls.name()}_Type
-   type_name = '{}_Type'.format(cls.name())
+   type_name = cls.value_type_name()
 
    ext = ctx.ext("nodes", cls.name(), "bodies")
    %>
@@ -384,7 +383,7 @@
       -------------
 
       overriding procedure Destroy
-        (Node : access ${cls.name()}_Type)
+        (Node : access ${cls.value_type_name()})
       is
       begin
          ## When no extension is registered, we don't need to recurse on the
@@ -475,7 +474,7 @@
 
    begin
       % if cls.base().env_spec and cls.env_spec.call_parents:
-         <% base_type_name = "{}_Type".format(cls.base().name()) %>
+         <% base_type_name = cls.base().value_type_name() %>
          Ret := Do_Env_Actions
            (${base_type_name} (Self.all)'Access, Current_Env);
       % endif
@@ -572,7 +571,7 @@
               (Node : access ${type_name}'Class)
                return Boolean
             is (Node.${field.name}.all
-                in ${field.type.alt_present.name()}_Type'Class);
+                in ${field.type.alt_present.value_type_name()}'Class);
 
          % elif field.type.is_enum_node:
             function ${field.name}

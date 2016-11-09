@@ -2,7 +2,7 @@
 
 <%def name="argument_list(property, dispatching)">
   (${property.self_arg_name} :
-   access ${Self.type.name()}_Type${"" if dispatching else "'Class"}
+   access ${Self.type.value_type_name()}${"" if dispatching else "'Class"}
 
    % for arg_name, arg_type, arg_dv in property.arguments:
       ; ${arg_name} : ${arg_type.name()}
