@@ -374,6 +374,14 @@ class CompileCtx():
         :type: langkit.compiled_types.ASTNode
         """
 
+        self.generic_list_type = None
+        """
+        The root gammar class subclass that is the base class for all
+        automatically generated root list types.
+
+        :type: langkit.compiled_types.ASTNode
+        """
+
         self.env_metadata = None
         """
         The Struct subclass that will be used as the lexical environment
@@ -535,6 +543,7 @@ class CompileCtx():
             )
 
         self.root_grammar_class = StructMetaclass.root_grammar_class
+        self.generic_list_type = self.root_grammar_class.generic_list_type
         self.env_metadata = StructMetaclass.env_metadata
         self.env_element = EnvElement
 

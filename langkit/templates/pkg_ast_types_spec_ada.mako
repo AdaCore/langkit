@@ -49,6 +49,14 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
    -- ASTNode derived types (incomplete declarations) --
    -----------------------------------------------------
 
+   type ${generic_list_value_type} is
+      abstract new ${root_node_value_type}
+      with private;
+   --  Base type for all lists of AST node subclasses
+
+   type ${generic_list_type_name} is
+      access all ${generic_list_value_type}'Class;
+
    % for astnode in no_builtins(_self.astnode_types):
      % if not astnode.is_list_type:
        ${astnode_types.public_incomplete_decl(astnode)}
@@ -115,6 +123,10 @@ private
    ${array_types.private_decl(array_type)}
    % endif
    % endfor
+
+   type ${generic_list_value_type} is
+      abstract new ${root_node_value_type}
+      with null record;
 
    % for astnode in no_builtins(_self.astnode_types):
      % if not astnode.is_list_type:

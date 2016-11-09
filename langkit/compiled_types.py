@@ -103,10 +103,16 @@ def make_renderer(base_renderer=None):
         # Name of the root AST node kind type
         kind_name = type_name + names.Name("Kind_Type")
 
+        # Likewise, for the generic list type
+        glist_type_name = ctx.generic_list_type.name()
+        glist_value_type = ctx.generic_list_type.name() + names.Name("Type")
+
         template_args.update({
             'root_node_type_name':   type_name,
             'root_node_value_type':  value_type,
             'root_node_kind_name':   kind_name,
+            'generic_list_type_name': glist_type_name,
+            'generic_list_value_type': glist_value_type,
             'ctx':                   get_context(),
             'T':                     T,
             'ada_api':               get_context().ada_api_settings,
@@ -422,13 +428,11 @@ class CompiledType(object):
 
         return type(
             '{}ListType'.format(element_type.name().camel),
-            (StructMetaclass.root_grammar_class, ), {
-                'is_ptr': True,
-
+            (StructMetaclass.root_grammar_class.generic_list_type, ), {
                 'name': classmethod(name),
                 'add_to_context': classmethod(add_to_context),
-                'nullexpr': classmethod(lambda cls: null_constant()),
 
+                'is_generic_list_type': False,
                 'is_list_type': True,
                 'is_root_list_type': True,
                 'is_collection': classmethod(lambda cls: True),
@@ -1159,7 +1163,9 @@ class StructMetaclass(CompiledTypeMetaclass):
         # resolved, only the grammar will resolve them.
         dct['is_type_resolved'] = (
             is_astnode and
-            (base.is_list_type or dct.get('is_list_type', False))
+            (base.is_list_type or
+             dct.get('is_list_type', False) or
+             dct.get('is_generic_list_type', False))
         )
 
         # By default, ASTNode subtypes aren't abstract. The "abstract"
@@ -1340,19 +1346,47 @@ def abstract(cls):
     return cls
 
 
-def root_grammar_class(cls):
+def root_grammar_class(generic_list_type=None):
     """
-    Decorator to tag an ASTNode subclass as the root grammar node.
+    Return a decorator to tag an ASTNode subclass as the root grammar node.
 
-    :param ASTNode cls: Type parameter. The ASTNode subclass to decorate.
+    :param None|str generic_list_type: If provided, must be a camel case name
+        to use for the name of the generic list type.
     """
-    assert cls.base() == ASTNode
-    assert StructMetaclass.root_grammar_class == cls, (
-        "You can have only one descendent of ASTNode, and it must be the "
-        "root grammar class"
-    )
-    EnvElement.get_abstract_fields_dict()['el'].type = cls
-    return cls
+
+    def decorator(cls):
+        assert cls.base() == ASTNode
+        assert StructMetaclass.root_grammar_class == cls, (
+            "You can have only one descendent of ASTNode, and it must be the "
+            "root grammar class"
+        )
+        EnvElement.get_abstract_fields_dict()['el'].type = cls
+
+        # Create the subclass for generic list type
+
+        @classmethod
+        def element_type(cls):
+            del cls
+            # The generic list type is not a real list type: only its
+            # subclasses will have a specific element type.
+            raise NotImplementedError()
+
+        generic_list_type_name = (generic_list_type
+                                  if generic_list_type else
+                                  cls.__name__ + 'BaseList')
+
+        cls.generic_list_type = abstract(type(
+            generic_list_type_name,
+            (cls, ),
+            {
+                'nullexpr': classmethod(lambda cls: null_constant()),
+                'is_generic_list_type': True,
+                'element_type': element_type,
+            }
+        ))
+        return cls
+
+    return decorator
 
 
 def env_metadata(cls):
@@ -1479,8 +1513,10 @@ class Struct(CompiledType):
         :rtype: bool
         """
         return cls in (
-            # The root grammar class is emitted separately from the others
+            # The root grammar class and the generic list types are emitted
+            # separately from the others.
             StructMetaclass.root_grammar_class,
+            StructMetaclass.root_grammar_class.generic_list_type,
 
             # The env metadata struct is emitted separately from the others
             StructMetaclass.env_metadata,
@@ -1800,8 +1836,16 @@ class ASTNode(Struct):
     abstract = False
     is_bool_node = False
     is_enum_node = False
+    is_generic_list_type = False
     is_list_type = False
     is_root_list_type = False
+
+    generic_list_type = None
+    """
+    Root grammar class subclass. It is abstract, generated automatically when
+    the root grammar class is known. All root list types subclass it.
+    :type: ASTNode
+    """
 
     subclasses = []
     """
