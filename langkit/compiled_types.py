@@ -422,12 +422,12 @@ class CompiledType(object):
             cls.element_type().add_to_context()
 
         def name(cls):
-            return (names.Name('List') + cls.element_type().name()
+            return (cls.element_type().name() + names.Name('List')
                     if cls.is_root_list_type else
                     cls._user_name())
 
         return type(
-            '{}ListType'.format(element_type.name().camel),
+            '{}List'.format(element_type.name().camel),
             (StructMetaclass.root_grammar_class.generic_list_type, ), {
                 'name': classmethod(name),
                 'add_to_context': classmethod(add_to_context),
@@ -1962,6 +1962,17 @@ class ASTNode(Struct):
         :rtype: str
         """
         return (get_context().lang_name + cls.name()).camel_with_underscores
+
+    @classmethod
+    def value_type_name(cls):
+        """
+        Return the name of the Ada type for the record that implements this AST
+        node. The main type name designates the class-wide access to this
+        record.
+
+        :rtype: str
+        """
+        return (cls.name() + names.Name('Type')).camel_with_underscores
 
 # We tag the ASTNode class as abstract here, because of the circular dependency
 # between the @abstract decorator and the ASTNode class, which is caused by the

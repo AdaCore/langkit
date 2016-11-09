@@ -8,12 +8,15 @@
 
    <%
       elt_type = element_type.name()
-      value_type = 'List_{}_Type'.format(elt_type)
-      type_name = 'List_{}'.format(elt_type)
+
+      list_type = element_type.list_type()
+      value_type = list_type.value_type_name()
+      type_name = list_type.name()
    %>
 
    type ${value_type};
-   type ${type_name} is access all ${value_type}'Class;
+   type ${type_name} is
+      access all ${list_type.value_type_name()}'Class;
 
 </%def>
 
@@ -21,8 +24,10 @@
 
    <%
       elt_type = element_type.name()
-      value_type = 'List_{}_Type'.format(elt_type)
-      type_name = 'List_{}'.format(elt_type)
+
+      list_type = element_type.list_type()
+      value_type = list_type.value_type_name()
+      type_name = list_type.name()
    %>
 
    type ${value_type} is
@@ -40,11 +45,12 @@
 <%def name="private_decl(element_type)">
 
    <%
-      list_type = element_type.list_type()
       elt_type = element_type.name()
       pkg_name = 'Lists_{}'.format(elt_type)
-      value_type = 'List_{}_Type'.format(elt_type)
-      type_name = 'List_{}'.format(elt_type)
+
+      list_type = element_type.list_type()
+      value_type = list_type.value_type_name()
+      type_name = list_type.name()
       access_type = 'List_{}_Access'.format(elt_type)
    %>
 
@@ -88,8 +94,10 @@
    <%
       elt_type = element_type.name()
       pkg_name = 'Lists_{}'.format(elt_type)
-      type_name = 'List_{}'.format(elt_type)
-      value_type = 'List_{}_Type'.format(elt_type)
+
+      list_type = element_type.list_type()
+      value_type = list_type.value_type_name()
+      type_name = list_type.name()
    %>
 
    ---------
