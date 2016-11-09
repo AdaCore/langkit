@@ -27,9 +27,6 @@ typedef void* ${node_type};
 
 ${c_doc('langkit.node_kind_type')}
 typedef enum {
-    /* TODO: do we keep a single node kind for all lists or should we
-       specialize them?  */
-    ${capi.get_name(Name("List"))} = 1,
 % for astnode in _self.astnode_types:
     % if astnode.abstract:
 

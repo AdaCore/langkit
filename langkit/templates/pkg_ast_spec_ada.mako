@@ -185,23 +185,16 @@ package ${_self.ada_api_settings.lib_name}.AST is
    ## kind. Nothing can be an instance of an abstract subclass, so these do not
    ## need their own kind.
    type ${root_node_kind_name} is
-     (${get_context().lang_name}_List
-   % for cls in _self.astnode_types:
-      % if not cls.abstract:
-      , ${cls.ada_kind_name()}
-      % endif
-   % endfor
-     );
+     (${', '.join(cls.ada_kind_name()
+                  for cls in _self.astnode_types
+                  if not cls.abstract)});
    --  AST node concrete types
 
    for ${root_node_kind_name} use
-     (${get_context().lang_name}_List => 1
-   % for cls in _self.astnode_types:
-      % if not cls.abstract:
-      , ${cls.ada_kind_name()} => ${ctx.node_kind_constants[cls]}
-      % endif
-   % endfor
-     );
+     (${', '.join('{} => {}'.format(cls.ada_kind_name(),
+                                    ctx.node_kind_constants[cls])
+                  for cls in _self.astnode_types
+                  if not cls.abstract)});
 
    ## Output subranges to materialize abstract classes as sets of their
    ## concrete subclasses.

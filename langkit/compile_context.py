@@ -771,10 +771,9 @@ class CompileCtx():
              for astnode in self.astnode_types
              if not astnode.abstract),
             # Compute kind constants for all ASTNode concrete subclasses.
-            # Start with 2: the constant 0 is reserved as an
-            # error/uninitialized code and the constant 1 is reserved for all
-            # ASTList nodes.
-            start=2
+            # Start with 1: the constant 0 is reserved as an
+            # error/uninitialized code.
+            start=1
         ):
             self.node_kind_constants[astnode] = i
 

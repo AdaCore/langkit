@@ -402,14 +402,12 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    ---------------------------------
 
    Node_Kind_Names : constant array (${root_node_kind_name}) of Text_Access :=
-     (${_self.lang_name}_List => new Text_Type'(To_Text ("list"))
-      % for astnode in _self.astnode_types:
-         % if not astnode.abstract:
-            , ${astnode.ada_kind_name()} =>
-               new Text_Type'(To_Text ("${astnode.name().camel}"))
-         % endif
-      % endfor
-      );
+     (${', '.join('{} => new Text_Type\'(To_Text ("{}"))'.format(
+                      cls.ada_kind_name(),
+                      cls.name().camel
+                  )
+                  for cls in _self.astnode_types
+                  if not cls.abstract)});
 
    function ${capi.get_name("node_kind")} (Node : ${node_type})
       return ${node_kind_type}
