@@ -51,7 +51,6 @@
       list_type = element_type.list_type()
       value_type = list_type.value_type_name()
       type_name = list_type.name()
-      access_type = 'List_{}_Access'.format(elt_type)
    %>
 
    ## Hack: if the root list type is abstract, we have no concrete kind for it
@@ -72,8 +71,6 @@
    type ${value_type} is
       ${'abstract' if element_type.has_abstract_list else ''}
       new ${pkg_name}.List_Type with null record;
-
-   type ${access_type} is access all ${value_type};
 
    ## Helper generated for properties code. Used in CollectionGet's code
    function Get
