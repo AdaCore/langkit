@@ -42,8 +42,9 @@
 
 <%def name="generate_logic_binder(conv_prop)">
    <%
-   package_name = "Bind_{}".format(conv_prop.uid)
-   converter_type_name = "Logic_Converter_{}".format(conv_prop.uid)
+   cprop_uid = conv_prop.uid if conv_prop else "Default"
+   package_name = "Bind_{}".format(cprop_uid)
+   converter_type_name = "Logic_Converter_{}".format(cprop_uid)
    %>
    ## This package contains the necessary Adalog instantiations, so that we can
    ## create an equation that will bind two logic variables A and B so that::

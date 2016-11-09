@@ -41,41 +41,46 @@ class Bind(AbstractExpression):
         Bind(A, B, property)
     """
 
-    def __init__(self, from_var, to_var, bind_property):
+    def __init__(self, from_expr, to_expr, conv_prop=None):
         """
         :param AbstractExpression from_expr: An expression resolving to a
             logical variable that is the source of the bind.
         :param AbstractExpression to_expr: An expression resolving to a
             logical variable that is the destination of the bind.
-        :param PropertyDef bind_property: The property to apply on the value of
-            from_var that will yield the value to give to to_var. For
-            convenience, it can be a property on any subclass of the root
-            ast node class, and can return any subclass of the root ast node
-            class.
+        :param PropertyDef|None conv_prop: The property to apply on the
+            value of from_expr that will yield the value to give to to_expr. For
+            convenience, it can be a property on any subclass of the root ast
+            node class, and can return any subclass of the root ast node class.
         """
         super(Bind, self).__init__()
         self.from_expr = from_expr
         self.to_expr = to_expr
-        self.bind_property = bind_property
+        self.conv_prop = conv_prop
 
     def do_prepare(self):
-        check_multiple([
-            (self.bind_property.type.matches(T.root_node),
-             "The property passed to bind must return a subtype "
-             "of {}".format(T.root_node.name().camel)),
+        from langkit.compile_context import get_context
 
-            (self.bind_property.struct.matches(T.root_node),
-             "The property passed to bind must belong to a subtype "
-             "of {}".format(T.root_node.name().camel))
-        ])
+        if self.conv_prop:
+            check_multiple([
+                (self.conv_prop.type.matches(T.root_node),
+                 "The property passed to bind must return a subtype "
+                 "of {}".format(T.root_node.name().camel)),
 
-        get_context().do_generate_logic_binder(self.bind_property)
+                (self.conv_prop.struct.matches(T.root_node),
+                 "The property passed to bind must belong to a subtype "
+                 "of {}".format(T.root_node.name().camel))
+            ])
+
+        get_context().do_generate_logic_binder(self.conv_prop)
 
     def construct(self):
+        cprop_uid = (self.conv_prop.uid if self.conv_prop else "Default")
         pred_func = untyped_literal_expr(
             "Logic_Converter_{}'(Env => {})".format(
-                self.bind_property.uid, construct(Env).render_expr()
+                cprop_uid, construct(Env).render_expr()
             )
+            if self.conv_prop
+            else "No_Logic_Converter_Default"
         )
 
         def construct_operand(op):
@@ -96,7 +101,7 @@ class Bind(AbstractExpression):
         rhs = construct_operand(self.to_expr)
 
         return BuiltinCallExpr(
-            "Bind_{}.Create".format(self.bind_property.uid), EquationType,
+            "Bind_{}.Create".format(cprop_uid), EquationType,
             [lhs, rhs, pred_func],
             "Bind_Result"
         )

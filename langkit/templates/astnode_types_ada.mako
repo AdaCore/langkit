@@ -13,9 +13,20 @@
 
 <%def name="logic_helpers()">
 
+   pragma Warnings (Off, "referenced");
    function Equals
      (L, R : ${T.root_node.name()}) return Boolean is (L = R)
    with Inline_Always;
+
+   type Logic_Converter_Default is null record;
+   No_Logic_Converter_Default : constant Logic_Converter_Default :=
+     (null record);
+
+   function Convert
+     (Self : Logic_Converter_Default;
+      From : ${T.root_node.name()}) return ${T.root_node.name()}
+   is (From);
+   pragma Warnings (On, "referenced");
 
    ## Generate logic/predicate binders for the properties who require it. Note
    ## that we need to generate them before the properties bodies, because
@@ -42,6 +53,7 @@
 
 <%def name="field_decl(field)">
    <% type_name = "{}_Type".format(field.struct.name()) %>
+
    function ${field.name}
      (Node : access ${type_name}) return ${field.type.name()};
    ${ada_doc(field, 6)}
