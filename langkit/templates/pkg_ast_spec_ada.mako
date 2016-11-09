@@ -4,9 +4,11 @@
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 
-<% root_node_array = T.root_node.array_type() %>
-<% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
-<% library_private_field = lambda f: not library_public_field(f) %>
+<%
+   root_node_array = T.root_node.array_type()
+   no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts)
+   library_private_field = lambda f: not library_public_field(f)
+%>
 
 with Ada.Finalization;
 with Ada.Iterator_Interfaces;
@@ -42,8 +44,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
    -------------------
 
    type ${root_node_value_type} is abstract tagged private
-     with Default_Iterator => Iterate,
-          Iterator_Element => ${root_node_type_name},
+     with Default_Iterator  => Iterate,
+          Iterator_Element  => ${root_node_type_name},
           Constant_Indexing => Element_Value;
    --  This "by-value" type is public to expose the fact that the various
    --  AST nodes are a hierarchy of tagged types, but it is not intended to be
