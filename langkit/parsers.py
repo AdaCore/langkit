@@ -854,7 +854,14 @@ class List(Parser):
         elif self.list_cls:
             return self.list_cls
         else:
-            return self.parser.get_type().list_type()
+            item_type = self.parser.get_type()
+            with self.error_context():
+                check_source_language(
+                    issubclass(item_type, ASTNode),
+                    'List parsers only accept subparsers that yield AST nodes'
+                    ' ({} provided here)'.format(item_type.name().camel)
+                )
+            return item_type.list_type()
 
     def compute_fields_types(self):
         Parser.compute_fields_types(self)
