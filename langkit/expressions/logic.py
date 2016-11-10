@@ -41,7 +41,7 @@ class Bind(AbstractExpression):
         Bind(A, B, property)
     """
 
-    def __init__(self, from_expr, to_expr, conv_prop=None):
+    def __init__(self, from_expr, to_expr, conv_prop=None, eq_prop=None):
         """
         :param AbstractExpression from_expr: An expression resolving to a
             logical variable that is the source of the bind.
