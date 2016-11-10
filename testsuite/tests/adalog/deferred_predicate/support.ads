@@ -6,7 +6,8 @@ package Support is
    type Dummy_Data is null record;
    No_Data : constant Dummy_Data := (null record);
    function Transform (D : Dummy_Data; I : Integer) return Integer is (I * 3);
-   package Bind is new Eq_Int.Raw_Custom_Bind (Dummy_Data, No_Data, Transform, Eq);
+   package Bind is new Eq_Int.Raw_Custom_Bind
+     (Dummy_Data, No_Data, Transform, Eq);
 
 
    type Pred is null record;
