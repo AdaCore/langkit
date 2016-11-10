@@ -33,11 +33,16 @@ def run(name, expr):
         nb_list = Field()
         prop = Property(expr)
 
+    class NumberNode(FooNode):
+        tok = Field()
+
     def lang_def():
         foo_grammar = Grammar('main_rule')
         foo_grammar.add_rules(
             main_rule=Row('example', foo_grammar.list_rule) ^ BarNode,
-            list_rule=Row(List(Tok(Token.Number))) ^ ListNode,
+            list_rule=Row(
+                List(Tok(Token.Number, keep=True) ^ NumberNode)
+            ) ^ ListNode,
         )
         return foo_grammar
     emit_and_print_errors(lang_def)
