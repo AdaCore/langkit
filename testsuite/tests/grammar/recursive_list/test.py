@@ -10,7 +10,7 @@ from utils import emit_and_print_errors
 
 
 def lang_def():
-    @root_grammar_class
+    @root_grammar_class()
     class FooNode(ASTNode):
         pass
 

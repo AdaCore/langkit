@@ -26,7 +26,7 @@ def run(name, astnode_fn):
     astnode = astnode_fn(T)
 
     @abstract
-    @root_grammar_class
+    @root_grammar_class()
     class FooNode(ASTNode):
         pass
 

@@ -25,7 +25,7 @@ def run(name, *args):
 
     print('== {} =='.format(name))
 
-    @root_grammar_class
+    @root_grammar_class()
     class FooNode(ASTNode):
         pass
 

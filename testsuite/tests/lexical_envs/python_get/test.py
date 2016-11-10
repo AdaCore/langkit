@@ -19,7 +19,7 @@ class Metadata(Struct):
     pass
 
 
-@root_grammar_class
+@root_grammar_class()
 class FooNode(ASTNode):
     pass
 

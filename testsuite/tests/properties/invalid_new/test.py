@@ -25,7 +25,7 @@ def run(name, expr):
         a = Field(type=LongType)
         b = Field(type=LongType)
 
-    @root_grammar_class
+    @root_grammar_class()
     class FooNode(ASTNode):
         pass
 

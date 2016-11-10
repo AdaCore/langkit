@@ -11,7 +11,7 @@ Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 def lang_def():
     @abstract
-    @root_grammar_class
+    @root_grammar_class()
     class FooNode(ASTNode):
         pass
 
