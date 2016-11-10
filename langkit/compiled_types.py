@@ -399,48 +399,6 @@ class CompiledType(object):
         else:
             return cls == formal
 
-    # We want structural equality on lists whose elements have the same types.
-    # Memoization is one way to make sure that, for each CompiledType subclass
-    # X: X.list_type() is X.list_type().
-    @classmethod
-    @memoized
-    def list_type(cls):
-        """
-        Return an ASTNode subclass that represent a list of "cls".
-
-        :rtype: CompiledType
-        """
-        element_type = cls
-
-        def add_to_context(cls):
-            if cls in get_context().types:
-                return
-            get_context().types.add(cls)
-            get_context().list_types.add(cls.element_type())
-
-            # Make sure the type this list contains is already declared
-            cls.element_type().add_to_context()
-
-        def name(cls):
-            return (cls.element_type().name() + names.Name('List')
-                    if cls.is_root_list_type else
-                    cls._user_name())
-
-        return type(
-            '{}List'.format(element_type.name().camel),
-            (StructMetaclass.root_grammar_class.generic_list_type, ), {
-                'name': classmethod(name),
-                'add_to_context': classmethod(add_to_context),
-
-                'abstract': element_type.has_abstract_list,
-                'is_generic_list_type': False,
-                'is_list_type': True,
-                'is_root_list_type': True,
-                'is_collection': classmethod(lambda cls: True),
-                'element_type': classmethod(lambda cls: element_type),
-            }
-        )
-
     # Likewise for array types
     @classmethod
     @memoized
@@ -1973,6 +1931,48 @@ class ASTNode(Struct):
         :rtype: str
         """
         return (cls.name() + names.Name('Type')).camel_with_underscores
+
+    # We want structural equality on lists whose elements have the same types.
+    # Memoization is one way to make sure that, for each CompiledType subclass
+    # X: X.list_type() is X.list_type().
+    @classmethod
+    @memoized
+    def list_type(cls):
+        """
+        Return an ASTNode subclass that represent a list of "cls".
+
+        :rtype: CompiledType
+        """
+        element_type = cls
+
+        def add_to_context(cls):
+            if cls in get_context().types:
+                return
+            get_context().types.add(cls)
+            get_context().list_types.add(cls.element_type())
+
+            # Make sure the type this list contains is already declared
+            cls.element_type().add_to_context()
+
+        def name(cls):
+            return (cls.element_type().name() + names.Name('List')
+                    if cls.is_root_list_type else
+                    cls._user_name())
+
+        return type(
+            '{}List'.format(element_type.name().camel),
+            (StructMetaclass.root_grammar_class.generic_list_type, ), {
+                'name': classmethod(name),
+                'add_to_context': classmethod(add_to_context),
+
+                'abstract': element_type.has_abstract_list,
+                'is_generic_list_type': False,
+                'is_list_type': True,
+                'is_root_list_type': True,
+                'is_collection': classmethod(lambda cls: True),
+                'element_type': classmethod(lambda cls: element_type),
+            }
+        )
 
 # We tag the ASTNode class as abstract here, because of the circular dependency
 # between the @abstract decorator and the ASTNode class, which is caused by the
