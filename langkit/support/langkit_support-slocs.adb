@@ -4,16 +4,24 @@ package body Langkit_Support.Slocs is
    -- Compare --
    -------------
 
-   function Compare (Left, Right : Source_Location) return Relative_Position is
+   function Compare
+     (Reference, Compared : Source_Location)
+      return Relative_Position
+   is
    begin
-      if Right.Line < Left.Line then
+      --  First compare line numbers...
+
+      if Compared.Line < Reference.Line then
          return Before;
-      elsif Left.Line < Right.Line then
+      elsif Reference.Line < Compared.Line then
          return After;
 
-      elsif Right.Column < Left.Column then
+      --  Past this point, we know that both are on the same line, so now
+      --  compare column numbers.
+
+      elsif Compared.Column < Reference.Column then
          return Before;
-      elsif Left.Column < Right.Column then
+      elsif Reference.Column < Compared.Column then
          return After;
       else
          return Inside;

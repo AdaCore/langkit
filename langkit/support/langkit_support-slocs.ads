@@ -37,11 +37,13 @@ package Langkit_Support.Slocs is
        Start_Column => Start_Sloc.Column,
        End_Column   => End_Sloc.Column));
 
-   function Compare (Left, Right : Source_Location) return Relative_Position
-     with Pre => (Left /= No_Source_Location
-                  and then Right /= No_Source_Location);
-   --  Tell where Right is with respect to Left (before, inside = same sloc,
-   --  after).
+   function Compare
+     (Reference, Compared : Source_Location)
+      return Relative_Position
+      with Pre => (Reference /= No_Source_Location
+                   and then Compared /= No_Source_Location);
+   --  Tell where Compared is with respect to Reference (before, inside = same
+   --  sloc, after).
 
    function Compare (Sloc_Range : Source_Location_Range;
                      Sloc       : Source_Location) return Relative_Position
