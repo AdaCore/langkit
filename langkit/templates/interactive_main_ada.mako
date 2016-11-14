@@ -53,6 +53,45 @@ procedure Parse is
    Input_Str : Unbounded_String;
    Lookups : String_Vectors.Vector;
 
+   procedure Register_Lookups is
+   begin
+      loop
+         declare
+            Arg : String := Get_Argument;
+         begin
+            exit when Arg'Length = 0;
+            Lookups.Append (+Arg);
+         end;
+      end loop;
+   end Register_Lookups;
+
+   ---------------------
+   -- Process_Lookups --
+   ---------------------
+
+   procedure Process_Lookups (Node : ${root_node_type_name}) is
+   begin
+      for Lookup_Str of Lookups loop
+         New_Line;
+
+         declare
+            Sep : constant Natural := Index (Lookup_Str, ":");
+
+            Line : Unsigned_32 := Unsigned_32'Value
+              (Slice (Lookup_Str, 1, Sep - 1));
+            Column : Unsigned_16 := Unsigned_16'Value
+              (Slice (Lookup_Str, Sep + 1, Length (Lookup_Str)));
+
+            Sloc : constant Source_Location := (Line, Column);
+            Lookup_Node : ${root_node_type_name} :=
+               Lookup (${root_node_type_name} (Node), (Line, Column));
+         begin
+            Put_Line ("Lookup " & Image (Sloc) & ":");
+            Lookup_Node.Print;
+         end;
+      end loop;
+   end Process_Lookups;
+
    ------------------
    -- Process_Node --
    ------------------
@@ -72,25 +111,7 @@ procedure Parse is
          end if;
       end if;
 
-      for Lookup_Str of Lookups loop
-         New_Line;
-
-         declare
-            Sep : constant Natural := Index (Lookup_Str, ":");
-
-            Line : Unsigned_32 := Unsigned_32'Value
-              (Slice (Lookup_Str, 1, Sep - 1));
-            Column : Unsigned_16 := Unsigned_16'Value
-              (Slice (Lookup_Str, Sep + 1, Length (Lookup_Str)));
-
-            Sloc : constant Source_Location := (Line, Column);
-            Lookup_Res : ${root_node_type_name} :=
-               Lookup (${root_node_type_name} (Res), (Line, Column));
-         begin
-            Put_Line ("Lookup " & Image (Sloc) & ":");
-            Lookup_Res.Print;
-         end;
-      end loop;
+      Process_Lookups (Res);
    end Process_Node;
 
    -----------------
@@ -160,6 +181,8 @@ procedure Parse is
          else
             AST.Print;
          end if;
+
+         Process_Lookups (AST);
       end if;
 
       if Print_Envs then
@@ -236,20 +259,14 @@ begin
       declare
          Ctx : Analysis_Context := Create (Charset.all);
       begin
+         Register_Lookups;
          Process_File (File_Name.all, Ctx);
          Destroy (Ctx);
       end;
 
    else
       Input_Str := +Get_Argument;
-      loop
-         declare
-            Arg : String := Get_Argument;
-         begin
-            exit when Arg'Length = 0;
-            Lookups.Append (+Arg);
-         end;
-      end loop;
+      Register_Lookups;
 
       declare
          Time_Before : constant Time := Clock;
