@@ -406,6 +406,24 @@ class Sloc(object):
     def __nonzero__(self):
         return bool(self.line or self.column)
 
+    def __lt__(self, other):
+        # First compare line numbers...
+        if self.line < other.line:
+            return True
+        elif self.line > other.line:
+            return False
+
+        # Past this point, we know that both are on the same line, so now
+        # compare column numbers.
+        else:
+            return self.column < other.column
+
+    def __eq__(self, other):
+        return self.line == other.line and self.column == other.column
+
+    def __hash__(self):
+        return hash((self.line, self.column))
+
     def __str__(self):
         return '{}:{}'.format(self.line, self.column)
 
@@ -422,6 +440,15 @@ class SlocRange(object):
 
     def __nonzero__(self):
         return bool(self.start or self.end)
+
+    def __lt__(self, other):
+        raise NotImplementedError('SlocRange comparison not supported')
+
+    def __eq__(self, other):
+        return self.start == other.start and self.end == other.end
+
+    def __hash__(self):
+        return hash((self.start, self.end))
 
     def __str__(self):
         return '{}-{}'.format(self.start, self.end)
