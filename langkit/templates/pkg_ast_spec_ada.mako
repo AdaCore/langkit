@@ -722,9 +722,10 @@ private
       --  Reference to the analysis unit that owns this node
 
       Token_Start, Token_End : Token_Index  := No_Token_Index;
-      --  Reference to the start and end token that constitutes this node, and
-      --  whether this represents an inclusive (from start of start to end of
-      --  end) or exclusive (from end of start to start of end) range.
+      --  Reference to the start and end token that constitutes this node.
+      --  If this node is a ghost, Token_Start is the token that this AST node
+      --  relates to and Token_End is No_Token_Index. Otherwise, both tokens
+      --  are inclusive, i.e. they both belong to this node.
 
       Extensions             : Extension_Vectors.Vector;
 
