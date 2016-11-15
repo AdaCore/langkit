@@ -10,11 +10,17 @@ if ${parser_context.pos_var_name} /= No_Token_Index then
    ${res} := ${_self.typ.name()}
      (${_self.typ.name()}_Alloc.Alloc (Parser.Mem_Pool));
 
-   ## Compute and set the sloc range for this AST node
+   ## Compute and set the sloc range for this AST node. Reminders:
+   ##   * pos_name the name for the position of the lexer before this parser
+   ##     runs.
+   ##   * parser_context.pos_var_name is the name for the position of the lexer
+   ##     after this parser runs.
+   ## If they are equal then we know that this parser consumed no token. As a
+   ## result, the result must be a ghost node, i.e. with no token_end.
    ${res}.Unit := Parser.Unit;
    ${res}.Token_Start := ${pos_name};
    ${res}.Token_End := (if ${parser_context.pos_var_name} = ${pos_name}
-                        then ${pos_name}
+                        then No_Token_Index
                         else ${parser_context.pos_var_name} - 1);
 
    % for field, arg in zip(_self.typ.get_parse_fields(), args):
