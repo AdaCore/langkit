@@ -35,13 +35,17 @@ package body Langkit_Support.Slocs is
    function Compare (Sloc_Range : Source_Location_Range;
                      Sloc       : Source_Location) return Relative_Position
    is
-      Real_End_Sloc : Source_Location := End_Sloc (Sloc_Range);
+      Inclusive_End_Sloc : Source_Location := End_Sloc (Sloc_Range);
    begin
-      Real_End_Sloc.Column := Real_End_Sloc.Column - 1;
+      --  End_Sloc returns an exclusive end sloc. Switch to an inclusive
+      --  representation for computation.
+
+      Inclusive_End_Sloc.Column := Inclusive_End_Sloc.Column - 1;
+
       return (case Compare (Start_Sloc (Sloc_Range), Sloc) is
                  when Before => Before,
                  when Inside | After =>
-                   (if Compare (Real_End_Sloc, Sloc) = After
+                   (if Compare (Inclusive_End_Sloc, Sloc) = After
                     then After
                     else Inside));
    end Compare;
