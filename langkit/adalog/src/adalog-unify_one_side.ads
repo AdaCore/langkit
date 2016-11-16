@@ -32,7 +32,7 @@ generic
    type L_Type is private;
    type R_Type is private;
 
-   with function Equals (L : L_Type; R : R_Type) return Boolean is <>;
+   with function Equals (L, R : L_Type) return Boolean is <>;
 
    type Right_C_Data is private;
 

@@ -49,7 +49,8 @@ generic
    with function Convert
      (C_Data : Left_C_Data; From : L_Type) return R_Type is <>;
 
-   with function Equals (L : L_Type; R : R_Type) return Boolean is <>;
+   with function Equals (L, R : L_Type) return Boolean is <>;
+   with function Equals (L, R : R_Type) return Boolean is <>;
 
    with package Left_Var is new Logic_Var
      (Element_Type => L_Type, others => <>);
@@ -63,13 +64,9 @@ package Adalog.Unify is
    --  generic instantiation error.
    procedure What;
 
-   pragma Warnings (Off, "wrong order");
-   function Equals (L : R_Type; R : L_Type) return Boolean is (Equals (R, L));
-   pragma Warnings (On, "wrong order");
-
    package Simple_Unify is new Adalog.Unify_LR
      (L_Type, R_Type, Left_C_Data, Right_C_Data,
-      Convert, Convert, Left_Var, Right_Var);
+      Convert, Convert, Left_Var, Right_Var, Equals);
    use Simple_Unify;
 
    package Unify_Left is new Unify_One_Side
@@ -93,12 +90,6 @@ package Adalog.Unify is
      (new Unify_LR_Rel.Rel'
         (Rel => Create (L, R, No_L_Data, No_R_Data),
          others => <>))
-   with Inline;
-
-   function Equals (L : L_Type; R : R_Type) return access I_Relation'Class
-   is
-     (new Boolean_Relation.Rel'(Rel => (Result => Equals (L, R)),
-                                others => <>))
    with Inline;
 
    function Equals

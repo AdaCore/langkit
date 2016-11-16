@@ -40,7 +40,7 @@ package body Adalog.Unify_One_Side is
          Trace ("Left defined");
 
          return C : Boolean do
-            C := Equals (GetL (Self.Left), Self.Right);
+            C := Equals (GetL (Self.Left), Convert (Self.R_Data, Self.Right));
             Trace ("Returning " & C'Image);
          end return;
       else

@@ -40,7 +40,8 @@ package body Adalog.Unify_LR is
          if Is_Defined (Self.Right) then
             return C : Boolean do
                C :=
-                 Convert (Self.L_Data, GetL (Self.Left)) = GetL (Self.Right);
+                 Equals (Convert (Self.L_Data, GetL (Self.Left)),
+                         GetL (Self.Right));
                Trace ("In Unify_LR, both defined, returning " & C'Image);
             end return;
 

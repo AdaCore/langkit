@@ -27,6 +27,8 @@ with Adalog.Debug;      use Adalog.Debug;
 
 package body Adalog.Logic_Ref is
 
+   pragma Warnings (Off, "always False");
+
    -----------
    -- Reset --
    -----------

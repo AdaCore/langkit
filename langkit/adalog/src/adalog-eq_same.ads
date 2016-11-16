@@ -81,7 +81,8 @@ package Adalog.Eq_Same is
       package Impl is new Unify
         (LR_Type, LR_Type,
          Converter, Converter, No_Data, No_Data,
-         Convert, Convert, Equals, Refs.Raw_Logic_Var, Refs.Raw_Logic_Var);
+         Convert, Convert, Equals, Equals,
+         Refs.Raw_Logic_Var, Refs.Raw_Logic_Var);
 
       function Create (L, R : Refs.Raw_Logic_Var.Var; Data : Converter)
         return Relation
