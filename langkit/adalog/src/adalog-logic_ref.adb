@@ -53,9 +53,11 @@ package body Adalog.Logic_Ref is
    is
       Old   : aliased constant Var := Self.all;
    begin
-      Trace ("Setting the value of " & Image (Raw_Var (Self)) & " to "
-             & Element_Image (Data));
-      Trace ("Old value is " & Element_Image (Old.El));
+      if Debug_State = Trace then
+         Trace ("Setting the value of " & Image (Raw_Var (Self)) & " to "
+                & Element_Image (Data));
+         Trace ("Old value is " & Element_Image (Old.El));
+      end if;
       --  First set the value
 
       Self.El := Data;
@@ -65,11 +67,18 @@ package body Adalog.Logic_Ref is
       --  True.
 
       for El of Pred_Sets.Elements (Self.Pending_Relations) loop
-         Trace ("Applying predicate on " & Image (Raw_Var (Self)));
+         if Debug_State = Trace then
+            Trace ("Applying predicate on " & Image (Raw_Var (Self)));
+         end if;
+
          if not El.Apply then
             Trace ("Applying predicate failed");
             Self.all := Old;
-            Trace ("Self element value is now " & Element_Image (Self.El));
+
+            if Debug_State = Trace then
+               Trace ("Self element value is now " & Element_Image (Self.El));
+            end if;
+
             return False;
          end if;
       end loop;
