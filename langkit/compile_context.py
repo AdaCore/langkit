@@ -485,7 +485,8 @@ class CompileCtx():
         """
         return sorted(type_set, key=lambda cls: cls.name())
 
-    def do_generate_logic_binder(self, convert_property=None):
+    def do_generate_logic_binder(self, convert_property=None,
+                                 eq_property=None):
         """
         Generate a logic binder with the given conversion property.
 
@@ -493,8 +494,9 @@ class CompileCtx():
         binder will be generaed.
 
         :param PropertyDef convert_property: The conversion property.
+        :param PropertyDef eq_property: The equality property.
         """
-        self.logic_binders.add((convert_property, ))
+        self.logic_binders.add((convert_property, eq_property))
 
     @property
     def user_rule_names(self):

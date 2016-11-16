@@ -48,14 +48,24 @@ class Bind(AbstractExpression):
         :param AbstractExpression to_expr: An expression resolving to a
             logical variable that is the destination of the bind.
         :param PropertyDef|None conv_prop: The property to apply on the
-            value of from_expr that will yield the value to give to to_expr. For
-            convenience, it can be a property on any subclass of the root ast
-            node class, and can return any subclass of the root ast node class.
+            value of from_expr that will yield the value to give to to_expr.
+            For convenience, it can be a property on any subclass of the root
+            ast node class, and can return any subclass of the root ast node
+            class.
+        :param PropertyDef|None eq_prop: The property to use to test for
+            equality between the value of the two expressions. For convenience,
+            it can be a property on a subclass of the root ast node class,
+            however:
+
+            1. It needs to take exactly two parameters, the self parameter and
+               another parameter.
+            2. The two parameters must be of exactly the same type.
         """
         super(Bind, self).__init__()
         self.from_expr = from_expr
         self.to_expr = to_expr
         self.conv_prop = conv_prop
+        self.eq_prop = eq_prop
 
     def do_prepare(self):
         from langkit.compile_context import get_context
@@ -71,10 +81,35 @@ class Bind(AbstractExpression):
                  "of {}".format(T.root_node.name().camel))
             ])
 
-        get_context().do_generate_logic_binder(self.conv_prop)
+        get_context().do_generate_logic_binder(self.conv_prop, self.eq_prop)
 
     def construct(self):
+
+        # Those checks are ran in construct, because we need the eq_prop to be
+        # prepared already, which is not certain in do_prepare (order
+        # dependent).
+
+        if self.eq_prop:
+            args = self.eq_prop.explicit_arguments
+            check_multiple([
+                (self.eq_prop.type == BoolType,
+                 "Equality property must return boolean"),
+
+                (self.eq_prop.struct.matches(T.root_node),
+                 "The equality property passed to bind must belong to a "
+                 "subtype of {}".format(T.root_node.name().camel)),
+
+                (len(args) == 1,
+                 "Expected 1 argument for eq_prop, got {}".format(len(args))),
+
+            ])
+            check_source_language(
+                args[0].type == self.eq_prop.struct,
+                "Self and first argument should be of the same type"
+            )
+
         cprop_uid = (self.conv_prop.uid if self.conv_prop else "Default")
+        eprop_uid = (self.eq_prop.uid if self.eq_prop else "Default")
         pred_func = untyped_literal_expr(
             "Logic_Converter_{}'(Env => {})".format(
                 cprop_uid, construct(Env).render_expr()
@@ -101,7 +136,8 @@ class Bind(AbstractExpression):
         rhs = construct_operand(self.to_expr)
 
         return BuiltinCallExpr(
-            "Bind_{}.Create".format(cprop_uid), EquationType,
+            "Bind_{}_{}.Create".format(cprop_uid, eprop_uid),
+            EquationType,
             [lhs, rhs, pred_func],
             "Bind_Result"
         )

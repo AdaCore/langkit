@@ -14,7 +14,7 @@
 <%def name="logic_helpers()">
 
    pragma Warnings (Off, "referenced");
-   function Equals
+   function Eq_Default
      (L, R : ${T.root_node.name()}) return Boolean is (L = R)
    with Inline_Always;
 
@@ -40,14 +40,20 @@
    % endfor
    % endfor
 
-   ## Generate every registered logic binder
-   % for el in set(p for (p, ) in _self.logic_binders):
-   % if el:
-      ${prop_helpers.generate_logic_converter(el)}
-   % endif
-   ${prop_helpers.generate_logic_binder(el)}
+   ## Generate logic converters
+   % for el in set(p for (p, _) in _self.logic_binders if p):
+   ${prop_helpers.generate_logic_converter(el)}
    % endfor
 
+   ## Generate logic equal function wrappers
+   % for el in set(p for (_, p) in _self.logic_binders if p):
+   ${prop_helpers.generate_logic_equal(el)}
+   % endfor
+
+   ## Generate logic binders
+   % for conv_prop, eq_prop in _self.logic_binders:
+   ${prop_helpers.generate_logic_binder(conv_prop, eq_prop)}
+   % endfor
 </%def>
 
 
