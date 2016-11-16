@@ -270,9 +270,10 @@ class BaseTestsuite(object):
         )
 
         self.arg_parser.add_argument(
-            'testcases', nargs='*',
-            help='The list of testcases to run. Run everything is none is'
-                 ' given.'
+            'patterns', nargs='*',
+            help='A list of string patterns that will be used to find'
+                 ' testcases cases to run. If the path of a test matches any'
+                 ' of the patterns, then it is ran. If empty, run all tests.'
         )
         self.add_options()
 
@@ -386,10 +387,12 @@ class BaseTestsuite(object):
 
     def _iter_testcases(self):
         """Yield subdirectory paths for testcases."""
-        for root_dir in self.args.testcases or [self.test_dir]:
-            for root, dirs, files in os.walk(root_dir):
-                if 'test.yaml' in files:
-                    yield root
+        patterns = self.args.patterns
+        for root, dirs, files in os.walk(self.test_dir):
+            testcase = os.path.relpath(root, self.test_dir)
+            matches = (not patterns) or any(p in testcase for p in patterns)
+            if matches and 'test.yaml' in files:
+                yield root
 
     # User hooks
 
@@ -545,18 +548,35 @@ class Run(object):
 
     def __init__(self, argv, cwd=None, timeout=None, output=None, error=None,
                  env=None):
-        # "timeout" is not implemented, error is ignored
+        # "timeout" is not implemented, "error" is ignored
+
+        if output == STDOUT:
+            stdout = None
+        else:
+            stdout = subprocess.PIPE
+
         p = subprocess.Popen(
             argv, cwd=cwd,
-            stdout=subprocess.PIPE if output else None,
+            stdout=stdout,
             stderr=subprocess.STDOUT,
             env=env
         )
         stdout, _ = p.communicate()
-        if output:
+        if output == PIPE:
+            self.out = stdout
+        elif output:
             with open(output, 'w') as f:
                 f.write(stdout)
         self.status = p.returncode
 
 
-STDOUT = None
+class RunOutput(object):
+    def __init__(self, value):
+        self.value = value
+
+    def __repr__(self):
+        return '<RunOutput {}>'.format(self.value)
+
+
+STDOUT = RunOutput('STDOUT')
+PIPE = RunOutput('PIPE')
