@@ -66,8 +66,12 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    ------------
 
    function Create
-     (Charset : String := ${string_repr(_self.default_charset)})
-      return Analysis_Context
+     (Charset : String := ${string_repr(_self.default_charset)}
+      % if _self.default_unit_file_provider:
+         ; Unit_File_Provider : Unit_File_Provider_Access_Cst :=
+             ${'.'.join(_self.default_unit_file_provider)}
+      % endif
+     ) return Analysis_Context
    is
    begin
       return new Analysis_Context_Type'
@@ -78,7 +82,12 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          Root_Scope => AST_Envs.Create
                          (Parent        => null,
                           Node          => null,
-                          Is_Refcounted => False));
+                          Is_Refcounted => False)
+
+         % if _self.default_unit_file_provider:
+         , Unit_File_Provider => Unit_File_Provider
+         % endif
+        );
    end Create;
 
    -------------

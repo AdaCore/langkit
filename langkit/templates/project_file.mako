@@ -69,6 +69,7 @@ library project ${lib_name} is
       "${lib_name.lower()}-init.ads",
       "${lib_name.lower()}-lexer.adb",
       "${lib_name.lower()}-lexer.ads",
+      "${lib_name.lower()}-unit_files.ads",
       % for path in ctx.additional_source_files:
       "${os_path.basename(path)}",
       % endfor

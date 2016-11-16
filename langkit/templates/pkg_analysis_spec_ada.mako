@@ -6,10 +6,10 @@ with Ada.Strings.Unbounded.Hash;
 
 with System;
 
-with Langkit_Support.Bump_Ptr;           use Langkit_Support.Bump_Ptr;
+with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
-with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
-with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
+with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
+with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Vectors;
 
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
@@ -18,6 +18,13 @@ with ${_self.ada_api_settings.lib_name}.AST;
 use ${_self.ada_api_settings.lib_name}.AST;
 with ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
+% if _self.default_unit_file_provider:
+with ${_self.ada_api_settings.lib_name}.Unit_Files;
+use ${_self.ada_api_settings.lib_name}.Unit_Files;
+% endif
+%if _self.default_unit_file_provider:
+with ${_self.default_unit_file_provider[0]};
+%endif
 
 --  This package provides types and primitives to analyze source files as
 --  analysis units.
@@ -49,8 +56,12 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    ${ada_doc('langkit.grammar_rule_type')}
 
    function Create
-     (Charset : String := ${string_repr(_self.default_charset)})
-      return Analysis_Context;
+     (Charset : String := ${string_repr(_self.default_charset)}
+      % if _self.default_unit_file_provider:
+         ; Unit_File_Provider : Unit_File_Provider_Access_Cst :=
+             ${'.'.join(_self.default_unit_file_provider)}
+      % endif
+     ) return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
 
    procedure Inc_Ref (Context : Analysis_Context);
@@ -80,6 +91,13 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
          ${Name.from_lower(_self.main_rule_name)}_Rule)
       return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_buffer', 3)}
+
+   % if _self.default_unit_file_provider:
+   function Unit_File_Provider
+     (Context : Analysis_Context)
+      return Unit_File_Provider_Access_Cst;
+   --  Object to translate unit names to file names
+   % endif
 
    procedure Remove (Context   : Analysis_Context;
                      File_Name : String);
@@ -176,6 +194,11 @@ private
       Root_Scope : AST_Envs.Lexical_Env;
       --  The lexical scope that is shared amongst every compilation unit. Used
       --  to resolve cross file references.
+
+      % if _self.default_unit_file_provider:
+      Unit_File_Provider : Unit_File_Provider_Access_Cst;
+      --  Object to translate unit names to file names
+      % endif
    end record;
 
    type Destroyable_Type is record
@@ -241,6 +264,12 @@ private
       --  Units that are referenced from this one. Useful for
       --  visibility/computation of the reference graph.
    end record;
+
+   % if _self.default_unit_file_provider:
+   function Unit_File_Provider
+     (Context : Analysis_Context)
+      return Unit_File_Provider_Access_Cst is (Context.Unit_File_Provider);
+   % endif
 
    overriding function Token_Data
      (Unit : access Analysis_Unit_Type)

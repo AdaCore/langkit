@@ -194,7 +194,8 @@ class CompileCtx():
                  default_charset='utf-8',
                  verbosity=Verbosity('none'),
                  template_lookup_extra_dirs=None,
-                 env_hook_subprogram=None):
+                 env_hook_subprogram=None,
+                 default_unit_file_provider=None):
         """Create a new context for code emission.
 
         :param str lang_name: string (mixed case and underscore: see
@@ -264,6 +265,16 @@ class CompileCtx():
             If the hook is invoked on an node that uses the initial_env EnvSpec
             attribute, the hook can alter it so that it affects the rest of the
             EnvSpec actions.
+
+        :param (str, str)|None default_unit_file_provider: If provided, define
+            a Langkit_Support.Unit_Files.Unit_File_Provider_Access object. The
+            first string is the name of the Ada unit in which this subprogram
+            is defined. The second one is the name of the object itself. This
+            object will be used as the default unit file provider during the
+            creation of an analysis context.
+
+            If None, this disables altogether the unit file provider mechanism
+            in code generation.
         """
         from langkit.python_api import PythonAPISettings
 
@@ -471,6 +482,7 @@ class CompileCtx():
         """
 
         self.env_hook_subprogram = env_hook_subprogram
+        self.default_unit_file_provider = default_unit_file_provider
 
     def sorted_types(self, type_set):
         """
@@ -892,6 +904,8 @@ class CompileCtx():
             ("pkg_ast_list",     ["ast", "list"], True),
             # Unit for all derived AST nodes
             ("pkg_ast_types",    ["ast", "types"], True),
+            # Unit for the unit files provider interface
+            ("pkg_unit_files",   ["unit_files"], False),
             # Unit for all parsers
             ("parsers/pkg_main", ["ast", "types", "parsers"], True),
             # Unit for the lexer
