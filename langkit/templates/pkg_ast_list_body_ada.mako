@@ -82,8 +82,12 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
 
    overriding procedure Print (Node : access List_Type; Prefix : String := "")
    is
+      Class_Wide_Node : constant ${root_node_type_name} :=
+         ${root_node_type_name} (Node);
    begin
-      Put (Prefix & Node.Kind_Name & "[" & Image (Node.Sloc_Range) & "]");
+      Put
+        (Prefix & Class_Wide_Node.Kind_Name
+         & "[" & Image (Node.Sloc_Range) & "]");
       if Length (Node.Vec) = 0 then
          Put_Line (": <empty list>");
          return;

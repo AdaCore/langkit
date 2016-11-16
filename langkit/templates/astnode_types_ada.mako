@@ -262,11 +262,12 @@
       overriding function Image
         (Node : access ${type_name}) return String
       is
-         Result : Unbounded_String;
+         Class_Wide_Node : constant ${cls.name()} := ${cls.name()} (Node);
+         Result          : Unbounded_String;
       begin
-         Append (Result, Kind_Name (Node));
+         Append (Result, Class_Wide_Node.Kind_Name);
          Append (Result, '[');
-         Append (Result, Image (Sloc_Range (${root_node_type_name} (Node))));
+         Append (Result, Image (Node.Sloc_Range));
          Append (Result, "](");
 
          % for i, field in enumerate(repr_fields):
@@ -347,11 +348,13 @@
         (Node   : access ${type_name};
          Prefix : String := "")
       is
+         Class_Wide_Node : constant ${cls.name()} := ${cls.name()} (Node);
          Attr_Prefix     : constant String := Prefix & "|";
          Children_Prefix : constant String := Prefix & "|  ";
       begin
          Put_Line
-           (Prefix & Node.Kind_Name & "[" & Image (Node.Sloc_Range) & "]");
+           (Prefix & Class_Wide_Node.Kind_Name
+            & "[" & Image (Node.Sloc_Range) & "]");
 
          % for i, field in enumerate(repr_fields):
             % if field.type.is_ptr:
