@@ -3,7 +3,7 @@ import shutil
 import subprocess
 
 from langkit.compile_context import CompileCtx
-from langkit.compiled_types import ASTNode, StructMetaclass
+from langkit.compiled_types import ASTNode, StructMetaclass, T
 from langkit.diagnostics import DiagnosticError
 from langkit.expressions import Self
 from langkit.libmanage import ManageScript
@@ -119,3 +119,5 @@ def reset_langkit():
     StructMetaclass.struct_types = []
     StructMetaclass.env_metadata = None
     Self.__dict__['_frozen'] = False
+
+    T._type_dict = {}

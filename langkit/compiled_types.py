@@ -2295,14 +2295,20 @@ class TypeRepo(object):
     Only struct and ast node types are reachable through the type repository.
     """
 
-    @memoized
+    def __init__(self):
+        self._type_dict = {}
+
     def type_dict(self):
         """
         Returns a dictionnary of names to types.
 
         :rtype: dict[str, CompiledType]
         """
-        return {t.__name__: t for t in CompiledTypeMetaclass.types}
+        if not self._type_dict:
+            self._type_dict = {t.__name__: t
+                               for t in CompiledTypeMetaclass.types}
+
+        return self._type_dict
 
     class Defer(object):
         """
