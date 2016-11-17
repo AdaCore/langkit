@@ -127,6 +127,12 @@ documentations = {key: Template(val) for key, val in {
 
         ${TODO} Passing an unsupported charset here is not guaranteed to raise
         an error right here, but this would be really helpful for users.
+
+        If provided, Unit_File_Provider will be used to query the file name
+        that corresponds to an unit reference during semantic analysis. If it
+        is ${null if lang == 'c' else 'not provided'}, the default one is used
+        instead. It is up to the caller to free resources allocated to it when
+        done with the analysis context.
     """,
     'langkit.context_incref': """
         Increase the reference count to an analysis context.
@@ -394,6 +400,64 @@ documentations = {key: Template(val) for key, val in {
     """,
 
     #
+    # Unit file providers
+    #
+
+    'langkit.unit_file_provider_type': """
+        Interface type for an object that can turn an analysis unit reference
+        represented as an AST node into a file name. This is used get
+        inter-unit analysis working.
+    """,
+    'langkit.unit_file_provider_get_file': """
+        Turn an analysis unit reference represented as an AST node into a file
+        name.
+        % if lang == 'ada':
+            Raise a Property_Error
+        % else:
+            Return ${null}
+        % endif
+        if Node is not a valid unit name representation.
+
+        % if lang == 'c':
+            The result is heap allocated and the caller must free it when done
+            with it.
+        % endif
+    """,
+    'langkit.unit_file_provider_destroy': """
+        Free any resources that needs to be free'd in "data".
+    """,
+
+    'langkit.create_unit_file_provider': """
+        Create an unit file provider. When done with it, the result must be
+        passed to ${capi.get_name('destroy_unit_file_provider')}.
+
+        Pass as "data" a pointer to hold your private data: it will be passed
+        to all callbacks below.
+
+        "destroy" is a callback that is called by
+        ${capi.get_name('destroy_unit_file_provider')} to leave a chance to
+        free resources that "data" may hold.
+
+        "get_file" is a callback. It turns an analysis unit reference
+        represented as an AST node into a file name. It should return ${null}
+        if Node is not a valid unit name representation.  Its result is heap
+        allocated and the caller must free it when done with it.
+    """,
+    'langkit.destroy_unit_file_provider': """
+        Destroy an unit file provider. This calls the "destroy" callback: see
+        ${capi.get_name('create_unit_file_provider')} for more information.
+    """,
+
+    'langkit.unit_file_provider_destroy_type': """
+        Callback type for functions that are called when destroying an unit
+        file provider type.
+    """,
+    'langkit.unit_file_provider_get_file_type': """
+        Callback type for functions that are called to turn an unit reference
+        into a file name.
+    """,
+
+    #
     # Misc
     #
 
@@ -610,6 +674,7 @@ def create_doc_printer(lang, formatter):
         # Tell _render for which binding we are generating documentation
         kwargs.setdefault('lang', lang)
         kwargs['ctx'] = get_context()
+        kwargs['capi'] = get_context().c_api_settings
 
         doc = _render(entity, **kwargs)
         return formatter(doc, column) if doc else ''

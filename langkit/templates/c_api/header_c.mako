@@ -123,6 +123,24 @@ typedef struct {
    const char *information;
 } ${exception_type};
 
+% if _self.default_unit_file_provider:
+/*
+ * Types for unit file providers
+ */
+
+${c_doc('langkit.unit_file_provider_type')}
+typedef void *${unit_file_provider_type};
+
+${c_doc('langkit.unit_file_provider_destroy_type')}
+typedef void (*${unit_file_provider_destroy_type})(void *data);
+
+${c_doc('langkit.unit_file_provider_get_file_type')}
+typedef char *(*${unit_file_provider_get_file_type})(
+   void *data,
+   ${node_type} node
+);
+% endif
+
 /* All the functions below can potentially raise an exception, so
    ${capi.get_name("get_last_exception")} must be checked after them even
    before trying to use the returned value.  */
@@ -150,7 +168,12 @@ typedef struct {
 
 ${c_doc('langkit.create_context')}
 extern ${analysis_context_type}
-${capi.get_name("create_analysis_context")}(const char *charset);
+${capi.get_name("create_analysis_context")}(
+   const char *charset
+   % if _self.default_unit_file_provider:
+   , ${unit_file_provider_type} unit_file_provider
+   % endif
+);
 
 ${c_doc('langkit.context_incref')}
 extern ${analysis_context_type}
@@ -356,6 +379,22 @@ ${capi.get_name("node_extension")}(
     unsigned ext_id,
     ${capi.get_name("node_extension_destructor")} dtor
 );
+
+% if _self.default_unit_file_provider:
+/*
+ * Unit file providers
+ */
+
+extern ${unit_file_provider_type}
+${capi.get_name('create_unit_file_provider')}(
+   void *data,
+   ${unit_file_provider_destroy_type} destroy_func,
+   ${unit_file_provider_get_file_type} get_file_func
+);
+
+extern void
+${capi.get_name('destroy_unit_file_provider')}(void *data);
+% endif
 
 /*
  * Misc

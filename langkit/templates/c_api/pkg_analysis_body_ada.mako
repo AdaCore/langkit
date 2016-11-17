@@ -2,12 +2,15 @@
 
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
 
+with Ada.Finalization;
+
 pragma Warnings (Off, "is an internal GNAT unit");
 with Ada.Strings.Wide_Wide_Unbounded.Aux;
 use Ada.Strings.Wide_Wide_Unbounded.Aux;
 pragma Warnings (On, "is an internal GNAT unit");
 
 with System.Memory;
+use type System.Address;
 
 with GNATCOLL.Iconv;
 
@@ -23,8 +26,28 @@ with ${_self.ada_api_settings.lib_name}.AST.C;
 use ${_self.ada_api_settings.lib_name}.AST.C;
 with ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer;
+with ${_self.ada_api_settings.lib_name}.Unit_Files;
+use ${_self.ada_api_settings.lib_name}.Unit_Files;
 
 package body ${_self.ada_api_settings.lib_name}.Analysis.C is
+
+% if _self.default_unit_file_provider:
+   type C_Unit_File_Provider_Type is
+      new Ada.Finalization.Controlled
+      and Unit_File_Provider_Interface
+   with record
+      Data          : System.Address;
+      Destroy_Func  : ${unit_file_provider_destroy_type};
+      Get_File_Func : ${unit_file_provider_get_file_type};
+   end record;
+
+   overriding procedure Finalize (Provider : in out C_Unit_File_Provider_Type);
+
+   overriding function Get_File
+     (Provider : C_Unit_File_Provider_Type;
+      Node     : ${root_node_type_name})
+      return String;
+% endif
 
    function Value_Or_Empty (S : chars_ptr) return String
    --  If S is null, return an empty string. Return Value (S) otherwise.
@@ -52,20 +75,35 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    -------------------------
 
    function ${capi.get_name("create_analysis_context")}
-     (Charset : chars_ptr)
+     (Charset            : chars_ptr
+      % if _self.default_unit_file_provider:
+      ; Unit_File_Provider : ${unit_file_provider_type}
+      % endif
+     )
       return ${analysis_context_type}
    is
    begin
       Clear_Last_Exception;
 
       declare
-         C : constant String := (if Charset = Null_Ptr
-                                 then ""
-                                 else Value (Charset));
+         C : constant String :=
+           (if Charset = Null_Ptr
+            then ${string_repr(_self.default_charset)}
+            else Value (Charset));
+
+         % if _self.default_unit_file_provider:
+         U : Unit_File_Provider_Access_Cst :=
+           (if System.Address (Unit_File_Provider) = System.Null_Address
+            then ${'.'.join(_self.default_unit_file_provider)}
+            else Unit_File_Provider_Access_Cst (Unwrap (Unit_File_Provider)));
+         % endif
+
       begin
-         return Wrap (if C'Length = 0
-                      then Create
-                      else Create (C));
+         return Wrap (Create (C
+            % if _self.default_unit_file_provider:
+            , U
+            % endif
+         ));
       end;
    exception
       when Exc : others =>
@@ -799,5 +837,65 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          T.Chars := System.Null_Address;
       end if;
    end;
+
+% if _self.default_unit_file_provider:
+   function ${capi.get_name('create_unit_file_provider')}
+     (Data          : System.Address;
+      Destroy_Func  : ${unit_file_provider_destroy_type};
+      Get_File_Func : ${unit_file_provider_get_file_type})
+      return ${unit_file_provider_type}
+   is
+      Result : constant Unit_File_Provider_Access :=
+         new C_Unit_File_Provider_Type'
+           (Ada.Finalization.Controlled with
+            Data          => Data,
+            Destroy_Func  => Destroy_Func,
+            Get_File_Func => Get_File_Func);
+   begin
+      return Wrap (Result);
+   end;
+
+   procedure ${capi.get_name('destroy_unit_file_provider')}
+     (Provider : ${unit_file_provider_type})
+   is
+      P  : Unit_File_Provider_Access := Unwrap (Provider);
+   begin
+      Destroy (P);
+   end;
+
+   --------------
+   -- Finalize --
+   --------------
+
+   overriding procedure Finalize (Provider : in out C_Unit_File_Provider_Type)
+   is
+   begin
+      Provider.Destroy_Func (Provider.Data);
+   end Finalize;
+
+   --------------
+   -- Get_File --
+   --------------
+
+   overriding function Get_File
+     (Provider : C_Unit_File_Provider_Type;
+      Node     : ${root_node_type_name})
+      return String
+   is
+      C_Result : chars_ptr := Provider.Get_File_Func
+        (Provider.Data, Wrap (Node));
+   begin
+      if C_Result = Null_Ptr then
+         raise Property_Error with "invalid AST node for unit name";
+      end if;
+
+      declare
+         Result : constant String := Value (C_Result);
+      begin
+         Free (C_Result);
+         return Result;
+      end;
+   end Get_File;
+% endif
 
 end ${_self.ada_api_settings.lib_name}.Analysis.C;

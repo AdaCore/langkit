@@ -116,12 +116,34 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
           External_Name => "${capi.get_name('destroy_text')}";
    ${ada_c_doc('langkit.destroy_text', 3)}
 
+% if _self.default_unit_file_provider:
+   --  Types for unit file providers
+
+   type ${unit_file_provider_type} is new System.Address;
+   ${ada_c_doc('langkit.unit_file_provider_type', 3)}
+
+   type ${unit_file_provider_destroy_type} is access procedure
+     (Data : System.Address)
+      with Convention => C;
+   ${ada_c_doc('langkit.unit_file_provider_destroy_type', 3)}
+
+   type ${unit_file_provider_get_file_type} is access function
+     (Data : System.Address; Node : ${node_type})
+      return chars_ptr
+      with Convention => C;
+   ${ada_c_doc('langkit.unit_file_provider_get_file_type', 3)}
+% endif
+
    -------------------------
    -- Analysis primitives --
    -------------------------
 
    function ${capi.get_name('create_analysis_context')}
-     (Charset : chars_ptr)
+     (Charset            : chars_ptr
+      % if _self.default_unit_file_provider:
+      ; Unit_File_Provider : ${unit_file_provider_type}
+      % endif
+     )
       return ${analysis_context_type}
       with Export        => True,
            Convention    => C,
@@ -377,6 +399,30 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name('node_extension')}";
    ${ada_c_doc('langkit.node_extension', 3)}
 
+% if _self.default_unit_file_provider:
+   -------------------------
+   -- Unit file providers --
+   -------------------------
+
+   function ${capi.get_name('create_unit_file_provider')}
+     (Data          : System.Address;
+      Destroy_Func  : ${unit_file_provider_destroy_type};
+      Get_File_Func : ${unit_file_provider_get_file_type})
+      return ${unit_file_provider_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('create_unit_file_provider')}";
+   ${ada_c_doc('langkit.create_unit_file_provider', 3)}
+
+   procedure ${capi.get_name('destroy_unit_file_provider')}
+     (Provider : ${unit_file_provider_type})
+      with Export        => True,
+           Convention    => C,
+           External_name =>
+              "${capi.get_name('destroy_unit_file_provider')}";
+   ${ada_c_doc('langkit.destroy_unit_file_provider', 3)}
+% endif
+
    ----------
    -- Misc --
    ----------
@@ -495,6 +541,13 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
      (${root_node_type_name}, ${node_type});
    function Unwrap is new Ada.Unchecked_Conversion
      (${node_type}, ${root_node_type_name});
+
+% if _self.default_unit_file_provider:
+   function Wrap is new Ada.Unchecked_Conversion
+     (Unit_File_Provider_Access, ${unit_file_provider_type});
+   function Unwrap is new Ada.Unchecked_Conversion
+     (${unit_file_provider_type}, Unit_File_Provider_Access);
+% endif
 
    function Convert is new Ada.Unchecked_Conversion
      (${capi.get_name('node_extension_destructor')},

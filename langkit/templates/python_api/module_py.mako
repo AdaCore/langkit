@@ -30,6 +30,8 @@ class _node(ctypes.c_void_p):
 _enum_node_kind = ctypes.c_uint
 class _lexical_env(ctypes.c_void_p):
     pass
+class _unit_file_provider(ctypes.c_void_p):
+    pass
 
 class _text(ctypes.Structure):
     # The chars field really is a uint32_t* but considering it as a char* here
@@ -145,9 +147,16 @@ class AnalysisContext(object):
 
     def __init__(self, charset=None, _c_value=None):
         ${py_doc('langkit.create_context', 8)}
-        self._c_value = (_create_analysis_context(charset)
-                         if _c_value is None else
-                         _context_incref(_c_value))
+        self._c_value = (
+            _create_analysis_context(
+                charset,
+% if _self.default_unit_file_provider:
+                None,
+% endif
+            )
+            if _c_value is None else
+            _context_incref(_c_value)
+        )
 
     def __del__(self):
         _context_decref(self._c_value)
@@ -749,7 +758,12 @@ _destroy_text = _import_func(
 # Analysis primitives
 _create_analysis_context = _import_func(
     '${capi.get_name("create_analysis_context")}',
-    [ctypes.c_char_p], _analysis_context
+    [
+        ctypes.c_char_p,
+% if _self.default_unit_file_provider:
+        _unit_file_provider,
+% endif
+    ], _analysis_context
 )
 _context_incref = _import_func(
     '${capi.get_name("context_incref")}',
