@@ -75,7 +75,7 @@ def copy_with(obj, **kwargs):
     return c
 
 
-class Colors:
+class Colors(object):
     """
     Utility escape sequences to color output in terminal.
     """
@@ -114,6 +114,15 @@ if not sys.stdout.isatty() or not sys.stderr.isatty():
 
 
 def col(msg, color):
+    """
+    Utility function that return a string colored with the proper escape
+    sequences, for VT100 compatible terminals.
+
+    :param str msg: The message to print.
+    :param color: An escape sequence corresponding to the proper color. Pick
+        one in the Colors class.
+    :rtype: str
+    """
     return "{0}{1}{2}".format(color, msg, Colors.ENDC)
 
 
