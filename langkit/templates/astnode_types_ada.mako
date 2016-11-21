@@ -372,11 +372,17 @@
                   Put_Line (" <null>");
                end if;
             % elif is_token_type(field.type):
-               Put_Line
-                 (Attr_Prefix & "${field._name.lower}: "
-                  & Langkit_Support.Text.Image
-                    (Data (Token (Node, Node.${field.name})).Text.all));
-
+               declare
+                  Tok_Text_Ptr : Text_Access :=
+                    Data (Token (Node, Node.${field.name})).Text;
+               begin
+                  Put_Line
+                    (Attr_Prefix & "${field._name.lower}: "
+                     & Langkit_Support.Text.Image
+                       (if Tok_Text_Ptr /= null
+                        then Tok_Text_Ptr.all
+                        else "<no text>"));
+               end;
             % else:
                Put_Line (Attr_Prefix & "${field._name.lower}: "
                          & Image (Node.${field.name}));
