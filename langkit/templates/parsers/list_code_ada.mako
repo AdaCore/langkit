@@ -18,7 +18,8 @@
 <%
    # The following variables must be used only if revtree_class is None
    list_type = _self.get_type()
-   list_pkg = 'Lists_{}'.format(_self.parser.get_type().name())
+   el_type   = list_type.element_type().name()
+   list_pkg = 'Lists_{}'.format(el_type)
 %>
 
 % if _self.revtree_class:
@@ -121,7 +122,7 @@ loop
 
       ## Append the parsed result to the list
       ${list_pkg}.Node_Vectors.Append
-        (${res}.Vec, ${parser_context.res_var_name});
+        (${res}.Vec, ${el_type} (${parser_context.res_var_name}));
 
       ## If we are parsing nodes, then set the parent of parsed node to the
       ## list, and increment its ref count.
