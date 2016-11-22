@@ -488,11 +488,17 @@ class Tok(Parser):
 
     def __init__(self, val, keep=False):
         """
-        Create a parser that matches `tok`.
+        Create a parser that matches a specific token.
+
+        :param TokenAction|str val: Either a reference to a TokenAction that is
+            part of your lexer definition, either a string that will be used to
+            find back the proper TokenAction.
         """
         Parser.__init__(self)
+
         self.val = val
-        ":type: Enum|str"
+        ":type: TokenAction|str"
+
         self.keep = keep
 
     def get_type(self):
