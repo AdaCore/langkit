@@ -18,7 +18,7 @@ package ${_self.ada_api_settings.lib_name}.Unit_Files is
      (Provider : Unit_File_Provider_Interface;
       Node     : ${root_node_type_name})
       return String is abstract;
-   ${ada_doc('langkit.unit_file_provider_get_file', 3)}
+   ${ada_doc('langkit.unit_file_provider_get_file_from_node', 3)}
 
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Unit_File_Provider_Interface'Class, Unit_File_Provider_Access);

@@ -408,7 +408,7 @@ documentations = {key: Template(val) for key, val in {
         represented as an AST node into a file name. This is used get
         inter-unit analysis working.
     """,
-    'langkit.unit_file_provider_get_file': """
+    'langkit.unit_file_provider_get_file_from_node': """
         Turn an analysis unit reference represented as an AST node into a file
         name.
         % if lang == 'ada':
@@ -452,9 +452,9 @@ documentations = {key: Template(val) for key, val in {
         Callback type for functions that are called when destroying an unit
         file provider type.
     """,
-    'langkit.unit_file_provider_get_file_type': """
+    'langkit.unit_file_provider_get_file_from_node_type': """
         Callback type for functions that are called to turn an unit reference
-        into a file name.
+        encoded as an AST node into a file name.
     """,
 
     #

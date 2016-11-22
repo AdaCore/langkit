@@ -127,8 +127,11 @@ def make_renderer(base_renderer=None):
                 CAPIType(capi, 'unit_file_provider').name,
             'unit_file_provider_destroy_type':
                 CAPIType(capi, 'unit_file_provider_destroy_callback').name,
-            'unit_file_provider_get_file_type':
-                CAPIType(capi, 'unit_file_provider_get_file_callback').name,
+            'unit_file_provider_get_file_from_node_type':
+                CAPIType(
+                    capi,
+                    'unit_file_provider_get_file_from_node_callback'
+                ).name,
             'env_element_type':      (env_element.c_type(capi).name
                                       if env_element else None),
             'token_kind':            CAPIType(capi, 'token_kind').name,

@@ -127,11 +127,11 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
       with Convention => C;
    ${ada_c_doc('langkit.unit_file_provider_destroy_type', 3)}
 
-   type ${unit_file_provider_get_file_type} is access function
+   type ${unit_file_provider_get_file_from_node_type} is access function
      (Data : System.Address; Node : ${node_type})
       return chars_ptr
       with Convention => C;
-   ${ada_c_doc('langkit.unit_file_provider_get_file_type', 3)}
+   ${ada_c_doc('langkit.unit_file_provider_get_file_from_node_type', 3)}
 % endif
 
    -------------------------
@@ -405,9 +405,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    -------------------------
 
    function ${capi.get_name('create_unit_file_provider')}
-     (Data          : System.Address;
-      Destroy_Func  : ${unit_file_provider_destroy_type};
-      Get_File_Func : ${unit_file_provider_get_file_type})
+     (Data                    : System.Address;
+      Destroy_Func            : ${unit_file_provider_destroy_type};
+      Get_File_From_Node_Func : ${unit_file_provider_get_file_from_node_type})
       return ${unit_file_provider_type}
       with Export        => True,
            Convention    => C,

@@ -36,9 +36,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       new Ada.Finalization.Controlled
       and Unit_File_Provider_Interface
    with record
-      Data          : System.Address;
-      Destroy_Func  : ${unit_file_provider_destroy_type};
-      Get_File_Func : ${unit_file_provider_get_file_type};
+      Data                    : System.Address;
+      Destroy_Func            : ${unit_file_provider_destroy_type};
+      Get_File_From_Node_Func : ${unit_file_provider_get_file_from_node_type};
    end record;
 
    overriding procedure Finalize (Provider : in out C_Unit_File_Provider_Type);
@@ -840,17 +840,17 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
 
 % if _self.default_unit_file_provider:
    function ${capi.get_name('create_unit_file_provider')}
-     (Data          : System.Address;
-      Destroy_Func  : ${unit_file_provider_destroy_type};
-      Get_File_Func : ${unit_file_provider_get_file_type})
+     (Data                    : System.Address;
+      Destroy_Func            : ${unit_file_provider_destroy_type};
+      Get_File_From_Node_Func : ${unit_file_provider_get_file_from_node_type})
       return ${unit_file_provider_type}
    is
       Result : constant Unit_File_Provider_Access :=
          new C_Unit_File_Provider_Type'
            (Ada.Finalization.Controlled with
-            Data          => Data,
-            Destroy_Func  => Destroy_Func,
-            Get_File_Func => Get_File_Func);
+            Data                    => Data,
+            Destroy_Func            => Destroy_Func,
+            Get_File_From_Node_Func => Get_File_From_Node_Func);
    begin
       return Wrap (Result);
    end;
@@ -882,7 +882,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       Node     : ${root_node_type_name})
       return String
    is
-      C_Result : chars_ptr := Provider.Get_File_Func
+      C_Result : chars_ptr := Provider.Get_File_From_Node_Func
         (Provider.Data, Wrap (Node));
    begin
       if C_Result = Null_Ptr then
