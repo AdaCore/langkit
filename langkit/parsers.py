@@ -34,6 +34,7 @@ from langkit.compiled_types import ASTNode, BoolType, CompiledType, Token
 from langkit.diagnostics import (
     Context, Location, check_source_language, extract_library_location
 )
+from langkit.lexer import WithSymbol
 from langkit.template_utils import TemplateEnvironment
 from langkit.utils import (Colors, assert_type, common_ancestor, copy_with,
                            col, type_check_instance)
@@ -486,18 +487,30 @@ class Tok(Parser):
     def _is_left_recursive(self, rule_name):
         return False
 
-    def __init__(self, val, keep=False):
+    def __init__(self, val, keep=False, match_text=""):
         """
         Create a parser that matches a specific token.
 
         :param TokenAction|str val: Either a reference to a TokenAction that is
             part of your lexer definition, either a string that will be used to
             find back the proper TokenAction.
+
+        :param str match_text: If val is a WithSymbol token action, allows to
+            specify the exact text that should be matched by this parser.
         """
         Parser.__init__(self)
 
         self.val = val
         ":type: TokenAction|str"
+
+        self.match_text = match_text
+        ":type: str"
+
+        check_source_language(
+            not self.match_text or isinstance(self.val, WithSymbol),
+            "Tok matcher has match text, but val is not a WithSymbol instance,"
+            " got {} instead".format(val)
+        )
 
         self.keep = keep
 
@@ -513,6 +526,7 @@ class Tok(Parser):
             'parsers/tok_code_ada',
             _self=self, pos_name=pos_name,
             pos=pos, res=res,
+            match_text=self.match_text,
             token_kind=get_context().lexer.ada_token_name(self.val)
         )
 

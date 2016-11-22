@@ -9,7 +9,12 @@ declare
    T : constant Token_Data_Type :=
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (${res}));
 begin
-   if T.Kind /= ${token_kind} then
+   if
+      T.Kind /= ${token_kind}
+      % if match_text:
+      or else T.Text.all /= "${match_text}"
+      % endif
+   then
        ## If the result is not the one we expect, set pos to error
        ${pos} := No_Token_Index;
 
