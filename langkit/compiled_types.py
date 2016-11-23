@@ -132,6 +132,11 @@ def make_renderer(base_renderer=None):
                     capi,
                     'unit_file_provider_get_file_from_node_callback'
                 ).name,
+            'unit_file_provider_get_file_from_name_type':
+                CAPIType(
+                    capi,
+                    'unit_file_provider_get_file_from_name_callback'
+                ).name,
             'env_element_type':      (env_element.c_type(capi).name
                                       if env_element else None),
             'token_kind':            CAPIType(capi, 'token_kind').name,

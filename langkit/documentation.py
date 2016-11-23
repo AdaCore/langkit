@@ -423,6 +423,21 @@ documentations = {key: Template(val) for key, val in {
             with it.
         % endif
     """,
+    'langkit.unit_file_provider_get_file_from_name': """
+        Turn an analysis unit reference represented as a textual name into a
+        file name.
+        % if lang == 'ada':
+            Raise a Property_Error
+        % else:
+            Return ${null}
+        % endif
+        if Name is not a valid unit name.
+
+        % if lang == 'c':
+            The result is heap allocated and the caller must free it when done
+            with it.
+        % endif
+    """,
     'langkit.unit_file_provider_destroy': """
         Free any resources that needs to be free'd in "data".
     """,
@@ -438,10 +453,13 @@ documentations = {key: Template(val) for key, val in {
         ${capi.get_name('destroy_unit_file_provider')} to leave a chance to
         free resources that "data" may hold.
 
-        "get_file" is a callback. It turns an analysis unit reference
+        "get_file_from_node" is a callback. It turns an analysis unit reference
         represented as an AST node into a file name. It should return ${null}
         if Node is not a valid unit name representation.  Its result is heap
         allocated and the caller must free it when done with it.
+
+        "get_file_from_name" is a callback similar to "get_file_from_node",
+        except it takes an analysis unit reference represented as a string.
     """,
     'langkit.destroy_unit_file_provider': """
         Destroy an unit file provider. This calls the "destroy" callback: see
@@ -453,6 +471,10 @@ documentations = {key: Template(val) for key, val in {
         file provider type.
     """,
     'langkit.unit_file_provider_get_file_from_node_type': """
+        Callback type for functions that are called to turn an unit reference
+        encoded as an AST node into a file name.
+    """,
+    'langkit.unit_file_provider_get_file_from_name_type': """
         Callback type for functions that are called to turn an unit reference
         encoded as an AST node into a file name.
     """,

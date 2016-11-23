@@ -39,6 +39,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       Data                    : System.Address;
       Destroy_Func            : ${unit_file_provider_destroy_type};
       Get_File_From_Node_Func : ${unit_file_provider_get_file_from_node_type};
+      Get_File_From_Name_Func : ${unit_file_provider_get_file_from_name_type};
    end record;
 
    overriding procedure Finalize (Provider : in out C_Unit_File_Provider_Type);
@@ -46,6 +47,11 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    overriding function Get_File
      (Provider : C_Unit_File_Provider_Type;
       Node     : ${root_node_type_name})
+      return String;
+
+   overriding function Get_File
+     (Provider : C_Unit_File_Provider_Type;
+      Name     : Text_Type)
       return String;
 % endif
 
@@ -842,7 +848,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    function ${capi.get_name('create_unit_file_provider')}
      (Data                    : System.Address;
       Destroy_Func            : ${unit_file_provider_destroy_type};
-      Get_File_From_Node_Func : ${unit_file_provider_get_file_from_node_type})
+      Get_File_From_Node_Func : ${unit_file_provider_get_file_from_node_type};
+      Get_File_From_Name_Func : ${unit_file_provider_get_file_from_name_type})
       return ${unit_file_provider_type}
    is
       Result : constant Unit_File_Provider_Access :=
@@ -850,7 +857,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
            (Ada.Finalization.Controlled with
             Data                    => Data,
             Destroy_Func            => Destroy_Func,
-            Get_File_From_Node_Func => Get_File_From_Node_Func);
+            Get_File_From_Node_Func => Get_File_From_Node_Func,
+            Get_File_From_Name_Func => Get_File_From_Name_Func);
    begin
       return Wrap (Result);
    end;
@@ -884,6 +892,31 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    is
       C_Result : chars_ptr := Provider.Get_File_From_Node_Func
         (Provider.Data, Wrap (Node));
+   begin
+      if C_Result = Null_Ptr then
+         raise Property_Error with "invalid AST node for unit name";
+      end if;
+
+      declare
+         Result : constant String := Value (C_Result);
+      begin
+         Free (C_Result);
+         return Result;
+      end;
+   end Get_File;
+
+   --------------
+   -- Get_File --
+   --------------
+
+   overriding function Get_File
+     (Provider : C_Unit_File_Provider_Type;
+      Name     : Text_Type)
+      return String
+   is
+      Name_Access : Text_Access := Name'Unrestricted_Access;
+      C_Result : chars_ptr := Provider.Get_File_From_Name_Func
+        (Provider.Data, Wrap (Name_Access));
    begin
       if C_Result = Null_Ptr then
          raise Property_Error with "invalid AST node for unit name";
