@@ -119,6 +119,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 % if _self.default_unit_file_provider:
    --  Types for unit file providers
 
+   type ${unit_kind_type} is new int;
+   ${ada_c_doc('langkit.unit_kind_type', 3)}
+
    type ${unit_file_provider_type} is new System.Address;
    ${ada_c_doc('langkit.unit_file_provider_type', 3)}
 
@@ -128,13 +131,13 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    ${ada_c_doc('langkit.unit_file_provider_destroy_type', 3)}
 
    type ${unit_file_provider_get_file_from_node_type} is access function
-     (Data : System.Address; Node : ${node_type})
+     (Data : System.Address; Node : ${node_type}; Kind : ${unit_kind_type})
       return chars_ptr
       with Convention => C;
    ${ada_c_doc('langkit.unit_file_provider_get_file_from_node_type', 3)}
 
    type ${unit_file_provider_get_file_from_name_type} is access function
-     (Data : System.Address; Name : ${text_type})
+     (Data : System.Address; Name : ${text_type}; Kind : ${unit_kind_type})
       return chars_ptr
       with Convention => C;
    ${ada_c_doc('langkit.unit_file_provider_get_file_from_name_type', 3)}
@@ -550,6 +553,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
      (${node_type}, ${root_node_type_name});
 
 % if _self.default_unit_file_provider:
+   function Wrap (Kind : Unit_Kind) return ${unit_kind_type} is
+     (Unit_Kind'Pos (Kind));
    function Wrap is new Ada.Unchecked_Conversion
      (Unit_File_Provider_Access, ${unit_file_provider_type});
    function Unwrap is new Ada.Unchecked_Conversion

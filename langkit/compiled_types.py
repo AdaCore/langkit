@@ -123,6 +123,7 @@ def make_renderer(base_renderer=None):
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             c_node_type(capi).name,
             'lexical_env_type':      CAPIType(capi, 'lexical_env').name,
+            'unit_kind_type':        CAPIType(capi, 'unit_kind').name,
             'unit_file_provider_type':
                 CAPIType(capi, 'unit_file_provider').name,
             'unit_file_provider_destroy_type':

@@ -403,6 +403,11 @@ documentations = {key: Template(val) for key, val in {
     # Unit file providers
     #
 
+    'langkit.unit_kind_type': """
+        Specify a kind of analysis unit. Specification units provide an
+        interface to the outer world while body units provide an implementation
+        for the corresponding interface.
+    """,
     'langkit.unit_file_provider_type': """
         Interface type for an object that can turn an analysis unit reference
         represented as an AST node into a file name. This is used get

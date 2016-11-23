@@ -128,6 +128,12 @@ typedef struct {
  * Types for unit file providers
  */
 
+${c_doc('langkit.unit_kind_type')}
+typedef enum {
+   ${capi.get_name('unit_kind_specification')},
+   ${capi.get_name('unit_kind_body')}
+} ${unit_kind_type};
+
 ${c_doc('langkit.unit_file_provider_type')}
 typedef void *${unit_file_provider_type};
 
@@ -137,7 +143,8 @@ typedef void (*${unit_file_provider_destroy_type})(void *data);
 ${c_doc('langkit.unit_file_provider_get_file_from_node_type')}
 typedef char *(*${unit_file_provider_get_file_from_node_type})(
    void *data,
-   ${node_type} node
+   ${node_type} node,
+   ${unit_kind_type} kind
 );
 
 ${c_doc('langkit.unit_file_provider_get_file_from_name_type')}
