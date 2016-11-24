@@ -10,6 +10,7 @@ with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Cheap_Sets;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
+with Langkit_Support.Text;        use Langkit_Support.Text;
 with Langkit_Support.Vectors;
 
 with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
@@ -55,6 +56,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    );
    ${ada_doc('langkit.grammar_rule_type')}
 
+   Invalid_Unit_Name_Error : exception;
+   ${ada_doc('langkit.invalid_unit_name_error')}
+
    function Create
      (Charset : String := ${string_repr(_self.default_charset)}
       % if _self.default_unit_file_provider:
@@ -93,6 +97,19 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    ${ada_doc('langkit.get_unit_from_buffer', 3)}
 
    % if _self.default_unit_file_provider:
+
+   function Get_From_Provider
+     (Context     : Analysis_Context;
+      Name        : Text_Type;
+      Kind        : Unit_Kind;
+      Charset     : String := "";
+      Reparse     : Boolean := False;
+      With_Trivia : Boolean := False;
+      Rule        : Grammar_Rule :=
+         ${Name.from_lower(_self.main_rule_name)}_Rule)
+      return Analysis_Unit;
+   ${ada_doc('langkit.get_unit_from_provider', 3)}
+
    function Unit_File_Provider
      (Context : Analysis_Context)
       return Unit_File_Provider_Access_Cst;

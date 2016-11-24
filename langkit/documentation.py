@@ -98,6 +98,9 @@ documentations = {key: Template(val) for key, val in {
     'langkit.exception_type.information': """
         Message and context information associated with this exception.
     """,
+    'langkit.invalid_unit_name_error': """
+        Raised when an invalid unit name is provided.
+    """,
     'langkit.property_error': """
         Raised when an error occurs while evaluating a property.
     """,
@@ -191,8 +194,43 @@ documentations = {key: Template(val) for key, val in {
         empty then use the last charset used for this unit, or use the
         context's default if creating this unit.
 
-        If any failure occurs, such as decoding, lexing or parsing failure,
-        return an analysis unit anyway: errors are described as diagnostics.
+        If any failure occurs, such as file opening, decoding, lexing or
+        parsing failure, return an analysis unit anyway: errors are described
+        as diagnostics of
+        the returned analysis unit.
+
+        When With_Trivia is true, the parsed analysis unit will contain
+        trivias. Already existing analysis units are reparsed if needed.
+    """,
+    'langkit.get_unit_from_provider': """
+        Create a new analysis unit for Name/Kind or return the existing one if
+        any. If Reparse is true and the analysis unit already exists, reparse
+        it from Filename.
+
+        % if lang != 'python':
+            The result is owned by the context: the caller must increase its
+            ref-count in order to keep a reference to it.
+        % endif
+
+        % if lang == 'ada':
+            Rule controls which grammar rule is used to parse the unit.
+
+            ${TODO} export this feature to the C and Python APIs.
+        % endif
+
+        Use Charset in order to decode the content of Filename. If Charset is
+        empty then use the last charset used for this unit, or use the
+        context's default if creating this unit.
+
+        If the unit name cannot be tuned into a file name,
+        % if lang == 'ada':
+            raise an Invalid_Unit_Name_Error exception.
+        % else:
+            return ${null}.
+        % endif
+        If any other failure occurs, such as file opening, decoding, lexing or
+        parsing failure, return an analysis unit anyway: errors are described
+        as diagnostics of the returned analysis unit.
 
         When With_Trivia is true, the parsed analysis unit will contain
         trivias. Already existing analysis units are reparsed if needed.

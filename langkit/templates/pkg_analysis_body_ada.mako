@@ -304,6 +304,41 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
                        With_Trivia, Rule);
    end Get_From_Buffer;
 
+   % if _self.default_unit_file_provider:
+
+   -----------------------
+   -- Get_From_Provider --
+   -----------------------
+
+   function Get_From_Provider
+     (Context     : Analysis_Context;
+      Name        : Text_Type;
+      Kind        : Unit_Kind;
+      Charset     : String := "";
+      Reparse     : Boolean := False;
+      With_Trivia : Boolean := False;
+      Rule        : Grammar_Rule :=
+         ${Name.from_lower(_self.main_rule_name)}_Rule)
+      return Analysis_Unit
+   is
+   begin
+      declare
+         Filename : constant String :=
+            Context.Unit_File_Provider.Get_File (Name, Kind);
+      begin
+         return Get_From_File
+           (Context, Filename, Charset, Reparse, With_Trivia, Rule);
+      end;
+
+   exception
+      when Property_Error =>
+         raise Invalid_Unit_Name_Error with
+            "Invalid unit name: " & Image (Name, With_Quotes => True)
+            & " (" & Unit_Kind'Image (Kind) & ")";
+   end Get_From_Provider;
+
+   % endif
+
    ------------
    -- Remove --
    ------------
