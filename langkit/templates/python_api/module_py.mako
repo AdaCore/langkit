@@ -130,6 +130,10 @@ class NativeException(Exception):
     """
     pass
 
+class InvalidUnitNameError(Exception):
+    ${py_doc('langkit.invalid_unit_name_error', 4)}
+    pass
+
 class PropertyError(Exception):
     ${py_doc('langkit.property_error', 4)}
     pass

@@ -221,6 +221,18 @@ ${capi.get_name("get_analysis_unit_from_buffer")}(
         size_t buffer_size,
         int with_trivia);
 
+% if _self.default_unit_file_provider:
+${c_doc('langkit.get_unit_from_provider')}
+extern ${analysis_unit_type}
+${capi.get_name("get_analysis_unit_from_provider")}(
+        ${analysis_context_type} context,
+        ${text_type} name,
+        ${unit_kind_type} kind,
+        const char *charset,
+        int reparse,
+        int with_trivia);
+% endif
+
 ${c_doc('langkit.remove_unit')}
 extern int
 ${capi.get_name("remove_analysis_unit")}(${analysis_context_type} context,

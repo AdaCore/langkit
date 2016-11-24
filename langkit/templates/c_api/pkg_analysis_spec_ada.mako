@@ -206,6 +206,22 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
               "${capi.get_name('get_analysis_unit_from_buffer')}";
    ${ada_c_doc('langkit.get_unit_from_buffer', 3)}
 
+   % if _self.default_unit_file_provider:
+      function ${capi.get_name('get_analysis_unit_from_provider')}
+        (Context     : ${analysis_context_type};
+         Name        : ${text_type};
+         Kind        : ${unit_kind_type};
+         Charset     : chars_ptr;
+         Reparse     : int;
+         With_Trivia : int)
+         return ${analysis_unit_type}
+         with Export        => True,
+              Convention    => C,
+              External_name =>
+                 "${capi.get_name('get_analysis_unit_from_provider')}";
+      ${ada_c_doc('langkit.get_unit_from_provider', 6)}
+   % endif
+
    function ${capi.get_name('remove_analysis_unit')}
      (Context  : ${analysis_context_type};
       Filename : chars_ptr) return int
@@ -555,6 +571,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 % if _self.default_unit_file_provider:
    function Wrap (Kind : Unit_Kind) return ${unit_kind_type} is
      (Unit_Kind'Pos (Kind));
+   function Unwrap (Kind : ${unit_kind_type}) return Unit_Kind is
+     (Unit_Kind'Val (Kind));
    function Wrap is new Ada.Unchecked_Conversion
      (Unit_File_Provider_Access, ${unit_file_provider_type});
    function Unwrap is new Ada.Unchecked_Conversion

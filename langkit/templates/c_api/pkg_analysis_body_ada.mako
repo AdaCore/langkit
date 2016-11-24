@@ -212,6 +212,44 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          return ${analysis_unit_type} (System.Null_Address);
    end;
 
+   % if _self.default_unit_file_provider:
+      function ${capi.get_name("get_analysis_unit_from_provider")}
+        (Context     : ${analysis_context_type};
+         Name        : ${text_type};
+         Kind        : ${unit_kind_type};
+         Charset     : chars_ptr;
+         Reparse     : int;
+         With_Trivia : int)
+         return ${analysis_unit_type}
+      is
+      begin
+         Clear_Last_Exception;
+
+         declare
+            Text_Name : Text_Type (1 .. Integer (Name.Length))
+               with Import  => True,
+                    Address => Name.Chars;
+
+            Ctx  : constant Analysis_Context := Unwrap (Context);
+            Unit : constant Analysis_Unit := Get_From_Provider
+              (Ctx,
+               Text_Name,
+               Unwrap (Kind),
+               Value_Or_Empty (Charset),
+               Reparse /= 0,
+               With_Trivia /= 0);
+         begin
+            return Wrap (Unit);
+         end;
+      exception
+         when Invalid_Unit_Name_Error =>
+            return ${analysis_unit_type} (System.Null_Address);
+         when Exc : others =>
+            Set_Last_Exception (Exc);
+            return ${analysis_unit_type} (System.Null_Address);
+      end;
+   % endif
+
    function ${capi.get_name("remove_analysis_unit")}
      (Context  : ${analysis_context_type};
       Filename : chars_ptr) return int
