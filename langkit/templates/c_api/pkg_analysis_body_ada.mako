@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
+<%namespace name="exts" file="../extensions.mako" />
 
 with Ada.Finalization;
 
@@ -28,6 +29,10 @@ with ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer;
 with ${_self.ada_api_settings.lib_name}.Unit_Files;
 use ${_self.ada_api_settings.lib_name}.Unit_Files;
+
+${exts.include_extension(
+   ctx.ext('analysis', 'c_api', 'body_deps')
+)}
 
 package body ${_self.ada_api_settings.lib_name}.Analysis.C is
 
@@ -971,6 +976,10 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          return Result;
       end;
    end Get_File;
+
+   ${exts.include_extension(
+      ctx.ext('analysis', 'c_api', 'unit_file_providers', 'body')
+   )}
 % endif
 
 end ${_self.ada_api_settings.lib_name}.Analysis.C;

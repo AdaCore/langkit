@@ -3,6 +3,7 @@
 <%namespace name="array_types"   file="array_types_c.mako" />
 <%namespace name="astnode_types" file="astnode_types_c.mako" />
 <%namespace name="enum_types"    file="enum_types_c.mako" />
+<%namespace name="exts" file="../extensions.mako" />
 
 #ifndef ${capi.header_guard_id}
 #define ${capi.header_guard_id}
@@ -421,6 +422,10 @@ ${capi.get_name('create_unit_file_provider')}(
 
 extern void
 ${capi.get_name('destroy_unit_file_provider')}(void *data);
+
+${exts.include_extension(
+   ctx.ext('analysis', 'c_api', 'unit_file_providers', 'header')
+)}
 % endif
 
 /*

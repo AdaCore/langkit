@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
+<%namespace name="exts" file="../extensions.mako" />
 
 with Ada.Exceptions;                  use Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
@@ -447,6 +448,10 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name =>
               "${capi.get_name('destroy_unit_file_provider')}";
    ${ada_c_doc('langkit.destroy_unit_file_provider', 3)}
+
+   ${exts.include_extension(
+      ctx.ext('analysis', 'c_api', 'unit_file_providers', 'spec')
+   )}
 % endif
 
    ----------
