@@ -196,7 +196,8 @@ class CompileCtx():
                  verbosity=Verbosity('none'),
                  template_lookup_extra_dirs=None,
                  env_hook_subprogram=None,
-                 default_unit_file_provider=None):
+                 default_unit_file_provider=None,
+                 documentations=None):
         """Create a new context for code emission.
 
         :param str lang_name: string (mixed case and underscore: see
@@ -276,6 +277,11 @@ class CompileCtx():
 
             If None, this disables altogether the unit file provider mechanism
             in code generation.
+
+        :param dict[str, str] documentations: If provided, supply
+            templates to document entities. These will be added to the
+            documentations available in code generation: see
+            langkit.documentation.
         """
         from langkit.python_api import PythonAPISettings
 
@@ -485,9 +491,10 @@ class CompileCtx():
         self.env_hook_subprogram = env_hook_subprogram
         self.default_unit_file_provider = default_unit_file_provider
 
-        self.documentations = langkit.documentation.instantiate_templates(
-            langkit.documentation.base_langkit_docs
-        )
+        docs = dict(langkit.documentation.base_langkit_docs)
+        if documentations:
+            docs.update(documentations)
+        self.documentations = langkit.documentation.instantiate_templates(docs)
         """
         Documentation database. Associate a Mako template for each entity to
         document in the generated library.
