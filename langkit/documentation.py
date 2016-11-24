@@ -16,6 +16,9 @@ to them in code generation.
 Because some documentations must vary depending on the context (for instance,
 the interface of entities can depend on the language binding that exposes
 them), these chunks are implemented as Mako templates.
+
+All templates can use the "lang" parameter, which contains "ada", "c" or
+"python" depending on the binding for which we generate documentation.
 """
 
 from __future__ import absolute_import
@@ -25,10 +28,19 @@ import textwrap
 from mako.template import Template
 
 
-# Mapping: documentation entity name (str) -> mako.template.Template.  All
-# templates can use the "lang" parameter, which contains "ada", "c" or "python"
-# depending on the binding for which we generate documentation.
-documentations = {key: Template(val) for key, val in {
+def instantiate_templates(doc_dict):
+    """
+    Turn a pure text documentation database into a Mako template one.
+
+    :param doc_dict: Documentation database to convert.
+    :type doc_dict: dict[str, str]
+
+    :rtype: dict[str, mako.template.Template]
+    """
+    return {key: Template(val) for key, val in doc_dict.items()}
+
+
+base_langkit_docs = {
     'langkit.initialize': """
         Initialize the library. Must be called before anything else from this
         library and from Langkit_Support.
@@ -555,7 +567,7 @@ documentations = {key: Template(val) for key, val in {
         Return a reference to the previous token in the corresponding analysis
         unit.
     """,
-}.items()}
+}
 
 
 null_names = {
@@ -598,10 +610,11 @@ def split_paragraphs(text):
     return paragraphs
 
 
-def _render(entity, **kwargs):
+def _render(ctx, entity, **kwargs):
     """
     Render a documentation template.
 
+    :param langkit.compile_context.CompileContext: Context for the rendering.
     :param entity: Name for the entity to document, or entity to document.
     :type entity: str|compiled_types.CompiledType
     :param dict kwargs: Additional parameters to pass to the Mako template
@@ -610,10 +623,13 @@ def _render(entity, **kwargs):
     :rtype: str
     """
     if isinstance(entity, str):
+        kwargs['ctx'] = ctx
+        kwargs['capi'] = ctx.c_api_settings
+
         lang = kwargs['lang']
         kwargs['null'] = null_names[lang]
         kwargs['TODO'] = todo_markers[lang]
-        text = documentations[entity].render(**kwargs)
+        text = ctx.documentations[entity].render(**kwargs)
     else:
         text = entity.doc()
     return text
@@ -735,13 +751,12 @@ def create_doc_printer(lang, formatter):
         """
 
         from langkit.compile_context import get_context
+        ctx = get_context()
 
         # Tell _render for which binding we are generating documentation
         kwargs.setdefault('lang', lang)
-        kwargs['ctx'] = get_context()
-        kwargs['capi'] = get_context().c_api_settings
 
-        doc = _render(entity, **kwargs)
+        doc = _render(ctx, entity, **kwargs)
         return formatter(doc, column) if doc else ''
 
     func.__name__ = '{}_doc'.format(lang)

@@ -33,6 +33,7 @@ from langkit.c_api import CAPISettings
 from langkit.diagnostics import (
     Severity, check_source_language, errors_checkpoint
 )
+import langkit.documentation
 from langkit.expressions import PropertyDef
 from langkit.utils import Colors, printcol
 
@@ -483,6 +484,16 @@ class CompileCtx():
 
         self.env_hook_subprogram = env_hook_subprogram
         self.default_unit_file_provider = default_unit_file_provider
+
+        self.documentations = langkit.documentation.instantiate_templates(
+            langkit.documentation.base_langkit_docs
+        )
+        """
+        Documentation database. Associate a Mako template for each entity to
+        document in the generated library.
+
+        :type: dict[str, mako.template.Template]
+        """
 
     def sorted_types(self, type_set):
         """
