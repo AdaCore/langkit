@@ -12,7 +12,7 @@ package ${_self.ada_api_settings.lib_name}.Unit_Files is
    type Unit_Kind is (Unit_Specification, Unit_Body);
    ${ada_doc('langkit.unit_kind_type', 3)}
 
-   type Unit_File_Provider_Interface is interface;
+   type Unit_File_Provider_Interface is limited interface;
    type Unit_File_Provider_Access is
       access Unit_File_Provider_Interface'Class;
    type Unit_File_Provider_Access_Cst is
