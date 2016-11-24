@@ -231,7 +231,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
             --  return an unit anyway with diagnostics indicating what happens.
 
             Add_Diagnostic
-              ("Cannot open source file: " & Exception_Message (Exc));
+              (Exception_Message (Exc));
             return;
 
          when Lexer.Unknown_Charset =>

@@ -171,7 +171,7 @@ procedure Parse is
 
       if Has_Diagnostics (Unit) then
          for D of Diagnostics (Unit) loop
-            Put (File_Name & ":");
+            Put (File_Name & ": ");
             Put_Line (To_Pretty_String (D));
          end loop;
 
