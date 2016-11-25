@@ -212,6 +212,23 @@ class AnalysisContext(object):
                                                  with_trivia)
         return AnalysisUnit(c_value)
 
+% if _self.default_unit_file_provider:
+    def get_from_provider(self, name, kind, charset=None, reparse=False,
+                          with_trivia=False):
+        ${py_doc('langkit.get_unit_from_provider', 8)}
+        _name = _text.unwrap(name)
+        _kind = _unwrap_enum(kind, 'unit_kind', str_to_unit_kind)
+        c_value = _get_analysis_unit_from_provider(self._c_value, _name, _kind,
+                                                   charset or '', reparse,
+                                                   with_trivia)
+        if c_value:
+            return AnalysisUnit(c_value)
+        else:
+            raise InvalidUnitNameError('Invalid unit name: {} ({})'.format(
+                repr(name), kind
+            ))
+% endif
+
     def remove(self, filename):
         ${py_doc('langkit.remove_unit', 8)}
         if not _remove_analysis_unit(self._c_value, filename):
@@ -839,6 +856,15 @@ _get_analysis_unit_from_buffer = _import_func(
      ctypes.c_char_p,    # charset
      ctypes.c_char_p,    # buffer
      ctypes.c_size_t],   # buffer_size
+    _analysis_unit
+)
+_get_analysis_unit_from_provider = _import_func(
+    '${capi.get_name("get_analysis_unit_from_provider")}',
+    [_analysis_context,  # context
+     _text,              # name
+     ctypes.c_int,       # kind
+     ctypes.c_char_p,    # charset
+     ctypes.c_int],      # reparse
     _analysis_unit
 )
 _remove_analysis_unit = _import_func(

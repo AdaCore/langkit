@@ -237,6 +237,8 @@ base_langkit_docs = {
         If the unit name cannot be tuned into a file name,
         % if lang == 'ada':
             raise an Invalid_Unit_Name_Error exception.
+        % elif lang == 'python':
+            raise an InvalidUnitNameError exception.
         % else:
             return ${null}.
         % endif
