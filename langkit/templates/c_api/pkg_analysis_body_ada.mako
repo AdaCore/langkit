@@ -962,7 +962,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       return String
    is
       Name_Access : Text_Access := Name'Unrestricted_Access;
-      C_Result : chars_ptr := Provider.Get_File_From_Name_Func
+      C_Result    : chars_ptr := Provider.Get_File_From_Name_Func
         (Provider.Data, Wrap (Name_Access), Wrap (Kind));
    begin
       if C_Result = Null_Ptr then
