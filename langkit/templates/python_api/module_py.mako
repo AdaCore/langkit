@@ -116,6 +116,18 @@ class _Exception(ctypes.Structure):
         return NativeException(self.information)
 
 
+% if _self.default_unit_file_provider:
+${py_doc('langkit.unit_kind_type')}
+str_to_unit_kind = {
+    'specification': 0,
+    'body': 1,
+}
+
+class _unit_file_provider(ctypes.c_void_p):
+    pass
+% endif
+
+
 class NativeException(Exception):
     """
     Exception raised when the underlying C API reports an error that occurred
@@ -147,20 +159,32 @@ class PropertyError(Exception):
 class AnalysisContext(object):
     ${py_doc('langkit.analysis_context_type', 4)}
 
-    __slots__ = ('_c_value', )
+    __slots__ = ('_c_value', '_unit_file_provider')
 
-    def __init__(self, charset=None, _c_value=None):
+    def __init__(self,
+                 charset=None,
+% if _self.default_unit_file_provider:
+                 unit_file_provider=None,
+% endif
+                 _c_value=None):
         ${py_doc('langkit.create_context', 8)}
+        c_ufp = unit_file_provider._c_value if unit_file_provider else None
         self._c_value = (
             _create_analysis_context(
                 charset,
 % if _self.default_unit_file_provider:
-                None,
+                c_ufp,
 % endif
             )
             if _c_value is None else
             _context_incref(_c_value)
         )
+
+% if _self.default_unit_file_provider:
+        # Keep a reference to the unit file provider so that it is live at
+        # least as long as the analysis context is live.
+        self._unit_file_provider = unit_file_provider
+% endif
 
     def __del__(self):
         _context_decref(self._c_value)
@@ -488,6 +512,25 @@ class Diagnostic(object):
     def __repr__(self):
         return '<Diagnostic {} at {:#x}>'.format(repr(str(self)), id(self))
 
+
+% if _self.default_unit_file_provider:
+
+## TODO: if this is needed some day, also bind create_unit_file_provider to
+## allow Python users to create their own unit file providers.
+class UnitFileProvider(object):
+    ${py_doc('langkit.unit_file_provider_type', 4)}
+
+    def __init__(self, c_value):
+        self._c_value = c_value
+
+    def __del__(self):
+        _destroy_unit_file_provider(self._c_value)
+
+${exts.include_extension(
+   ctx.ext('python_api', 'unit_file_providers', 'methods')
+)}
+
+% endif
 
 class ${root_astnode_name}(object):
     ${py_doc(T.root_node, 4)}
@@ -942,6 +985,17 @@ _node_extension = _import_func(
     [_node, ctypes.c_uint, _node_extension_destructor],
     ctypes.POINTER(ctypes.c_void_p)
 )
+
+% if _self.default_unit_file_provider:
+# Unit file providers
+_destroy_unit_file_provider = _import_func(
+    '${capi.get_name("destroy_unit_file_provider")}',
+    [_unit_file_provider], None
+)
+${exts.include_extension(
+   ctx.ext('python_api', 'unit_file_providers', 'low_level_bindings')
+)}
+% endif
 
 # Misc
 _get_last_exception = _import_func(
