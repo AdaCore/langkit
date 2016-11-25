@@ -17,13 +17,13 @@ package Langkit_Support.Packrat is
    procedure Clear (Memo : in out Memo_Type);
 
    function Get (Memo : Memo_Type; Offset : Token_Index) return Memo_Entry
-     with Inline_Always;
+     with Inline;
 
    procedure Set (Memo              : in out Memo_Type;
                   Is_Success        : Boolean;
                   Instance          : T;
                   Offset, Final_Pos : Token_Index)
-     with Inline_Always;
+     with Inline;
 
 private
 

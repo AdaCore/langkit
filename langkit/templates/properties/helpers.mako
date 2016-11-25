@@ -30,7 +30,7 @@
 
    function Convert
      (Self : ${type_name}; From : ${root_class}) return ${root_class}
-   with Inline_Always;
+   with Inline;
 
    function Convert
      (Self : ${type_name}; From : ${root_class}) return ${root_class} is

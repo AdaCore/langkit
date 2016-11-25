@@ -94,7 +94,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       --  Create a sloc range value corresponding to Token
 
       procedure Prepare_For_Trivia
-        with Inline_Always;
+        with Inline;
       --  Append an entry for the current token in the Tokens_To_Trivias
       --  correspondence vector.
 

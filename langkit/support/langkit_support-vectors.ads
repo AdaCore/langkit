@@ -36,28 +36,28 @@ package Langkit_Support.Vectors is
    type Element_Access is not null access all Element_Type;
 
    procedure Append (Self : in out Vector; Element : Element_Type)
-     with Inline_Always;
+     with Inline;
    --  Appends Element to Self
 
    function Get (Self : Vector; Index : Index_Type) return Element_Type
-     with Inline_Always;
+     with Inline;
    --  Get the element at Index
 
    function Get_Access
      (Self : Vector; Index : Index_Type)
       return Element_Access
-      with Inline_Always;
+      with Inline;
    --  Get an access to the element at Index
    --  NOTICE: This access is unsafe, and might get invalidated if the Vector
    --  is reallocated. Hence, its lifetime is considered to be as long as the
    --  vector is not modified.
 
    procedure Destroy (Self : in out Vector)
-     with Inline_Always;
+     with Inline;
    --  Destroy this vector
 
    procedure Clear (Self : in out Vector)
-     with Inline_Always;
+     with Inline;
    --  Remove every element in this vector.
    --  NOTICE: this function does not actually free the memory of the vector!
 
@@ -72,21 +72,21 @@ package Langkit_Support.Vectors is
    --  NOTICE: Read Get_Access's documentation.
 
    function Length (Self : Vector) return Natural
-     with Inline_Always;
+     with Inline;
    --  Return the Length of the vector, ie. the number of elements it contains
 
    function First_Index (Self : Vector) return Index_Type is (Index_Type'First)
-     with Inline_Always;
+     with Inline;
    --  Return the first index, only used for the Iterable aspect
 
    function Last_Index (Self : Vector) return Integer
    is (First_Index (Self) + Length (Self) - 1)
-     with Inline_Always;
+     with Inline;
    --  Return the index of the last element in this vector or
    --  First_Index (Self) - 1 if this vector is empty.
 
    function Next (Self : Vector; N : Index_Type) return Index_Type is (N + 1)
-     with Inline_Always;
+     with Inline;
    --  Given a vector and an index, return the next index. Only used for the
    --  iterable aspect.
 
@@ -99,7 +99,7 @@ package Langkit_Support.Vectors is
    --  Pop the last element from vector
 
    function Has_Element (Self : Vector; N : Index_Type) return Boolean
-     with Inline_Always;
+     with Inline;
    --  Given a vector and an index, return True if the index is in the vector
    --  range. Only used for the iterable aspect.
 
@@ -142,7 +142,7 @@ private
    Empty_Vector : constant Vector := (E => null, Size => 0, others => <>);
 
    procedure Reserve (Self : in out Vector; Capacity : Positive)
-     with Inline_Always;
+     with Inline;
    --  Reserve Capacity elements
 
    function Has_Element (Self : Vector; N : Index_Type) return Boolean is

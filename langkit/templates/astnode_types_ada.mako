@@ -16,7 +16,7 @@
    pragma Warnings (Off, "referenced");
    function Eq_Default
      (L, R : ${T.root_node.name()}) return Boolean is (L = R)
-   with Inline_Always;
+   with Inline;
 
    type Logic_Converter_Default is null record;
    No_Logic_Converter_Default : constant Logic_Converter_Default :=
@@ -71,13 +71,13 @@
          function ${field.name}
            (Node : access ${type_name}'Class)
             return Boolean
-            with Inline_Always => True;
+            with Inline => True;
 
       % elif field.type.is_enum_node:
          function ${field.name}
            (Node : access ${type_name}'Class)
             return ${field.type.ada_kind_name()}
-            with Inline_Always => True;
+            with Inline => True;
       % endif
    % endif
 </%def>

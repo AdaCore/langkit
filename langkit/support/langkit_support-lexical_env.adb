@@ -24,11 +24,11 @@ package body Langkit_Support.Lexical_Env is
      (Els : Env_Element_Array) return Element_Array
    is
       function Get (Self : Env_Element) return Element_T is (Self.El)
-        with Inline_Always;
+        with Inline;
 
       function Internal_Unwrap is new Env_Element_Arrays.Map_Gen
         (Element_T, Element_Array, Get)
-        with Inline_Always;
+        with Inline;
       --  Internal_Unwrap could be exposed directly, but in order to have a
       --  full subprogram profile available to the users, we wrap the generic
       --  instantiation.
@@ -50,7 +50,7 @@ package body Langkit_Support.Lexical_Env is
 
       function Internal_Decorate
       is new Env_Element_Arrays.Id_Map_Gen (Decorate_Element)
-        with Inline_Always;
+        with Inline;
    begin
       return Internal_Decorate (Els);
    end Decorate;

@@ -48,7 +48,7 @@ package Adalog.Eq_Same is
 
    function Convert
      (C_Data : Dummy_Convert_Data; From : LR_Type) return LR_Type
-   is (From) with Inline_Always;
+   is (From) with Inline;
 
    function Equals (L, R : LR_Type) return Boolean is (L = R);
 

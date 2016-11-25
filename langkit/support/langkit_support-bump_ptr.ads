@@ -41,7 +41,7 @@ package Langkit_Support.Bump_Ptr is
 
    function Allocate
      (Pool : Bump_Ptr_Pool; S : Storage_Offset) return System.Address
-     with Inline_Always;
+     with Inline;
    --  Return the address of a free memory block of size S.
    --  This function is exposed in case you need to alloc raw memory blocks. It
    --  is used underneath by other allocation procedures.
@@ -57,7 +57,7 @@ package Langkit_Support.Bump_Ptr is
    package Alloc is
       function Alloc
         (Pool : Bump_Ptr_Pool) return Element_Access
-        with Inline_Always;
+        with Inline;
    end Alloc;
    --  This generic allocation package can be used to allocate an object of
    --  type Element_T.
@@ -71,7 +71,7 @@ package Langkit_Support.Bump_Ptr is
    package Tagged_Alloc is
       function Alloc
         (Pool : Bump_Ptr_Pool) return access Element_T
-        with Inline_Always;
+        with Inline;
    end Tagged_Alloc;
    --  This generic allocation package can be used to allocate an object
    --  of tagged type Element_T.

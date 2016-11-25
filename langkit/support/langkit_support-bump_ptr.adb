@@ -11,7 +11,7 @@ package body Langkit_Support.Bump_Ptr is
      (Bump_Ptr_Pool_Type, Bump_Ptr_Pool);
 
    function Align (Size, Alignment : Storage_Offset) return Storage_Offset
-     with Inline_Always;
+     with Inline;
 
    -----------
    -- Align --

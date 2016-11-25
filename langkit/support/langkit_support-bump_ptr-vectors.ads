@@ -36,26 +36,26 @@ package Langkit_Support.Bump_Ptr.Vectors is
    --  Returns a newly created vector using P as it's pool storage
 
    function Length (Self : Vector) return Natural
-     with Inline_Always;
+     with Inline;
    --  Return the Length of the vector, ie. the number of elements it contains
 
    function First_Index (Self : Vector) return Index_Type is
      (Index_Type'First)
-      with Inline_Always;
+      with Inline;
    --  Return the index of the first element in Self
 
    function Last_Index (Self : Vector) return Integer is
      (Index_Type'First + Length (Self) - 1)
-      with Inline_Always;
+      with Inline;
    --  Return the index of the last element in Self, or First_Index (Self) - 1
    --  if Self is empty.
 
    procedure Append (Self : in out Vector; Element : Element_Type)
-     with Inline_Always;
+     with Inline;
    --  Appends Element to Self
 
    function Get (Self : Vector; C : Cursor) return Element_Type
-     with Inline_Always;
+     with Inline;
    --  Get the element at Index
 
    function Get_At_Index (Self : Vector; I : Index_Type) return Element_Type
@@ -65,21 +65,21 @@ package Langkit_Support.Bump_Ptr.Vectors is
    --  Get the element at Index
 
    function Get_Access (Self : Vector; C : Cursor) return Element_Access
-     with Inline_Always;
+     with Inline;
    --  Get an access to the element at Index. The lifetime of the access is the
    --  one of the vector.
 
    function First (Self : Vector) return Cursor
-     with Inline_Always;
+     with Inline;
    --  Return the first index, only used for the Iterable aspect
 
    function Next (Self : Vector; C : Cursor) return Cursor
-     with Inline_Always;
+     with Inline;
    --  Given a vector and an index, return the next index. Only used for the
    --  iterable aspect.
 
    function Has_Element (Self : Vector; C : Cursor) return Boolean
-     with Inline_Always;
+     with Inline;
    --  Given a vector and an index, return True if the index is in the vector
    --  range. Only used for the iterable aspect.
 

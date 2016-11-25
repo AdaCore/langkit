@@ -129,7 +129,7 @@ library project ${lib_name} is
             --  Debug information is useful even with optimization for
             --  profiling, for instance.
             for Default_Switches ("Ada") use
-               Common_Ada_Cargs & ("-g", "-Ofast", "-gnatp");
+               Common_Ada_Cargs & ("-g", "-Ofast", "-gnatp", "-gnatn2");
 
             for Default_Switches ("C") use Common_C_Cargs & ("-Ofast");
 

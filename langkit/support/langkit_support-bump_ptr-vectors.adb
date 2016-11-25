@@ -40,7 +40,7 @@ package body Langkit_Support.Bump_Ptr.Vectors is
    procedure Append (Self : in out Vector; Element : Element_Type)
    is
 
-      procedure Init_Chunk (C : in out Chunk) with Inline_Always;
+      procedure Init_Chunk (C : in out Chunk) with Inline;
 
       ----------------
       -- Init_Chunk --

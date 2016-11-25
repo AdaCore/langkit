@@ -34,7 +34,7 @@ package Adalog.Debug is
 
    pragma Warnings (Off, "always");
    function Debug return Boolean is (Debug_State in Trace | Step)
-   with Inline_Always;
+   with Inline;
    pragma Warnings (On, "always");
 
    procedure Trace (Str : String);
