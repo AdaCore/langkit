@@ -217,78 +217,15 @@ package body Langkit_Support.Lexical_Env is
    -----------
 
    function Group (Envs : Lexical_Env_Array) return Lexical_Env is
-
-      procedure Duplicate_Parent_Chain
-        (Env         : in out Lexical_Env;
-         Last_Parent : out Lexical_Env);
-      --  Create a copy of the parent-based chain of lexical environments in
-      --  Env. Update Env to be the inner child of this chain and Last_Parent
-      --  to be the last parent in this chain.
-
-      ----------------------------
-      -- Duplicate_Parent_Chain --
-      ----------------------------
-
-      procedure Duplicate_Parent_Chain
-        (Env         : in out Lexical_Env;
-         Last_Parent : out Lexical_Env)
-      is
-         First : Boolean := True;
-         E     : Lexical_Env := Env;
-      begin
-         Env := null;
-         Last_Parent := null;
-         while E /= null loop
-            declare
-               New_Last_Parent : constant Lexical_Env := Orphan (E);
-            begin
-               if First then
-                  Env := New_Last_Parent;
-                  First := False;
-               else
-                  Last_Parent.Parent := New_Last_Parent;
-               end if;
-               Last_Parent := New_Last_Parent;
-            end;
-            E := E.Parent;
-         end loop;
-      end Duplicate_Parent_Chain;
-
-      Result : Lexical_Env := null;
    begin
-      case Envs'Length is
-
-         --  In the following simple cases, there is no need to create any new
-         --  environment.
-
-         when 0 =>
-            return Empty_Env;
-         when 1 =>
-            Result := Envs (Envs'First);
-            Inc_Ref (Result);
-            return Result;
-
-         when others =>
-
-            --  Create a chain of environents (chain link is the parent link)
-            --  so that:
-            --
-            --  * first environments in Envs are first in the returned chain;
-            --  * parent environments appear after their children in the
-            --    returned chain.
-
-            for Env of reverse Envs loop
-               declare
-                  SE  : Lexical_Env := Env;
-                  SLP : Lexical_Env;
-               begin
-                  Duplicate_Parent_Chain (SE, SLP);
-                  SLP.Parent := Result;
-                  Result := SE;
-               end;
-            end loop;
-            return Result;
-      end case;
+      return N : constant Lexical_Env := new Lexical_Env_Type'
+        (Parent => null, Node => No_Element, Ref_Count => 1,
+         Env => new Internal_Envs.Map, others => <>)
+      do
+         for Env of Envs loop
+            Reference (N, Env, No_Element, True);
+         end loop;
+      end return;
    end Group;
 
    -------------
