@@ -93,6 +93,8 @@ package Langkit_Support.Lexical_Env is
 
       Env       : Lexical_Env;
       --  The referenced env
+
+      Transitive : Boolean := False;
    end record;
    --  Represents a referenced env
 
@@ -168,7 +170,8 @@ package Langkit_Support.Lexical_Env is
    procedure Reference
      (Self            : Lexical_Env;
       To_Reference    : Lexical_Env;
-      Referenced_From : Element_T := No_Element);
+      Referenced_From : Element_T := No_Element;
+      Transitive      : Boolean   := False);
    --  Reference the env To_Reference from Self, making its content accessible
    --  from self. If Referenced_From is passed, for requests with an origin
    --  point (from parameter), the content will only be visible if Can_Reach
@@ -183,8 +186,10 @@ package Langkit_Support.Lexical_Env is
    --  as parameter for the generic package.
 
    function Get
-     (Self : Lexical_Env; Key : Symbol_Type;
-      From : Element_T := No_Element) return Env_Element_Array;
+     (Self : Lexical_Env;
+      Key : Symbol_Type;
+      From : Element_T := No_Element;
+      From_Refd_Env : Boolean := False) return Env_Element_Array;
    --  Get the array of wrapped elements for this key
 
    function Orphan (Self : Lexical_Env) return Lexical_Env is

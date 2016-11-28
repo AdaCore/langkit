@@ -109,27 +109,26 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    function Get
-     (Self : Lexical_Env; Key : Symbol_Type;
-      From : Element_T := No_Element) return Env_Element_Array
+     (Self : Lexical_Env;
+      Key  : Symbol_Type;
+      From : Element_T := No_Element;
+      From_Refd_Env : Boolean := False) return Env_Element_Array
    is
       use Internal_Envs;
       use Env_Element_Arrays;
 
       use Referenced_Envs_Vectors.Elements_Arrays;
 
-      function Get_Own_Elements
+      function Get_Ref_Env_Elements
         (Self : Referenced_Env) return Env_Element_Array;
+
+      function Get_Own_Elements
+        (Self : Lexical_Env) return Env_Element_Array;
       --  Return the elements for Key contained by the internal map contained
       --  in this env.
 
-      ----------------------
-      -- Get_Own_Elements --
-      ----------------------
-
-      function Get_Own_Elements
-        (Self : Referenced_Env) return Env_Element_Array
-      is
-         C : Cursor;
+      function Get_Ref_Env_Elements
+        (Self : Referenced_Env) return Env_Element_Array is
       begin
 
          --  If the referenced environment has an origin point, and the client
@@ -143,7 +142,24 @@ package body Langkit_Support.Lexical_Env is
             return Env_Element_Arrays.Empty_Array;
          end if;
 
-         C := Self.Env.Env.Find (Key);
+         if From_Refd_Env and then Self.Transitive = False then
+            return Env_Element_Arrays.Empty_Array;
+         end if;
+
+         return Get (Self.Env, Key, From, From_Refd_Env => True);
+      end Get_Ref_Env_Elements;
+
+      ----------------------
+      -- Get_Own_Elements --
+      ----------------------
+
+      function Get_Own_Elements
+        (Self : Lexical_Env) return Env_Element_Array
+      is
+         C : Cursor;
+      begin
+
+         C := Self.Env.Find (Key);
          return
            (if Has_Element (C)
             then Decorate
@@ -153,14 +169,14 @@ package body Langkit_Support.Lexical_Env is
 
               (Reverse_Array
                  (Env_Element_Vectors.To_Array (Element (C))),
-               Self.Env.Default_MD)
+               Self.Default_MD)
 
             else Env_Element_Arrays.Empty_Array);
       end Get_Own_Elements;
 
       function Get_Elements
       is new Referenced_Envs_Vectors.Elements_Arrays.Flat_Map_Gen
-        (Env_Element, Env_Element_Array, Get_Own_Elements);
+        (Env_Element, Env_Element_Array, Get_Ref_Env_Elements);
       --  Return the concatenation of Get_Own_Elements for this env and every
       --  parent.
 
@@ -173,9 +189,10 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       declare
-         Ret : constant Env_Element_Array := Get_Elements
-           (Referenced_Env'(No_Element, Self)
-            & Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
+         Ret : constant Env_Element_Array :=
+           Get_Own_Elements (Self)
+           & Get_Elements
+             (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
            & Get (Self.Parent, Key);
       begin
          --  Only filter if a non null value was given for the From parameter
@@ -343,11 +360,13 @@ package body Langkit_Support.Lexical_Env is
    procedure Reference
      (Self            : Lexical_Env;
       To_Reference    : Lexical_Env;
-      Referenced_From : Element_T := No_Element)
+      Referenced_From : Element_T := No_Element;
+      Transitive      : Boolean   := False)
    is
    begin
       Referenced_Envs_Vectors.Append
-        (Self.Referenced_Envs, Referenced_Env'(Referenced_From, To_Reference));
+        (Self.Referenced_Envs, Referenced_Env'(Referenced_From,
+         To_Reference, Transitive));
       Inc_Ref (To_Reference);
    end Reference;
 
