@@ -1,5 +1,10 @@
 package body Langkit_Support.Lexical_Env is
 
+   procedure Inc_Ref (Self : Env_Getter);
+   procedure Dec_Ref (Self : in out Env_Getter);
+   --  Helpers for Env_Getters. TODO: To be removed when we remove ref-counting
+   --  from lexical envs.
+
    function Decorate
      (Els : Env_Element_Array; MD : Element_Metadata) return Env_Element_Array;
    --  From an array of Env_Elements, decorate every element with additional
@@ -60,13 +65,13 @@ package body Langkit_Support.Lexical_Env is
    ------------
 
    function Create
-     (Parent        : Lexical_Env;
+     (Parent        : Env_Getter;
       Node          : Element_T;
       Is_Refcounted : Boolean;
       Default_MD    : Element_Metadata := Empty_Metadata) return Lexical_Env
    is
    begin
-      if Parent /= null then
+      if Parent /= No_Env_Getter then
          Inc_Ref (Parent);
       end if;
       return new Lexical_Env_Type'
@@ -193,7 +198,7 @@ package body Langkit_Support.Lexical_Env is
            Get_Own_Elements (Self)
            & Get_Elements
              (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
-           & Get (Self.Parent, Key);
+           & Get (Get_Env (Self.Parent), Key);
       begin
          --  Only filter if a non null value was given for the From parameter
          return (if From = No_Element then Ret
@@ -219,7 +224,7 @@ package body Langkit_Support.Lexical_Env is
    function Group (Envs : Lexical_Env_Array) return Lexical_Env is
    begin
       return N : constant Lexical_Env := new Lexical_Env_Type'
-        (Parent => null, Node => No_Element, Ref_Count => 1,
+        (Parent => No_Env_Getter, Node => No_Element, Ref_Count => 1,
          Env => new Internal_Envs.Map, others => <>)
       do
          for Env of Envs loop
@@ -306,5 +311,48 @@ package body Langkit_Support.Lexical_Env is
          To_Reference, Transitive));
       Inc_Ref (To_Reference);
    end Reference;
+
+   -------------
+   -- Get_Env --
+   -------------
+
+   function Get_Env (Self : Env_Getter) return Lexical_Env is
+   begin
+      if Self.Dynamic then
+         return Self.Getter_Fn (Self.Getter_State);
+      else
+         return Self.Env;
+      end if;
+   end Get_Env;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Self : Env_Getter) is
+   begin
+      if not Self.Dynamic then
+         Inc_Ref (Self.Env);
+      end if;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Self : in out Env_Getter) is
+   begin
+      if not Self.Dynamic then
+         Dec_Ref (Self.Env);
+      end if;
+   end Dec_Ref;
+
+   -----------------------
+   -- Simple_Env_Getter --
+   -----------------------
+
+   function Simple_Env_Getter (E : Lexical_Env) return Env_Getter
+   is
+     (Env_Getter'(False, Env => E));
 
 end Langkit_Support.Lexical_Env;

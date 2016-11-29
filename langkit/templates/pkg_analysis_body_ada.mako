@@ -80,7 +80,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          Symbols    => Create,
          Charset    => To_Unbounded_String (Charset),
          Root_Scope => AST_Envs.Create
-                         (Parent        => null,
+                         (Parent        => AST_Envs.No_Env_Getter,
                           Node          => null,
                           Is_Refcounted => False)
 

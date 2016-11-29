@@ -130,13 +130,16 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  eg. this does not handle general visibility issues, just sequentiality of
    --  declarations.
 
+   type Dummy_Env_Getter_State is null record;
+
    package AST_Envs is new Langkit_Support.Lexical_Env
      (Element_T        => ${root_node_type_name},
       Element_Metadata =>
          ${ctx.env_metadata.name() if ctx.env_metadata else "Dummy_Metadata" },
       No_Element       => null,
       Empty_Metadata   => No_Metadata,
-      Combine          => Combine);
+      Combine          => Combine,
+      Getter_State_T   => Dummy_Env_Getter_State);
 
    ## The following subtypes are introduced to ease code generation, so we
    ## don't have to deal with the AST_Envs suffix.

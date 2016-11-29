@@ -64,7 +64,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
    is
       E : constant AST_Envs.Lexical_Env := Unwrap (Env);
    begin
-      return Wrap (E.Parent);
+      return Wrap (AST_Envs.Get_Env (E.Parent));
    end ${capi.get_name('lexical_env_parent')};
 
    function ${capi.get_name('lexical_env_node')}

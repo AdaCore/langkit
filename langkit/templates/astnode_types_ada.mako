@@ -526,7 +526,7 @@
       % if cls.env_spec._add_env:
          pragma Assert (Ret = null, "Env added twice");
          Ret := AST_Envs.Create
-           (Parent        => Initial_Env,
+           (Parent        => Simple_Env_Getter (Initial_Env),
             Node          => Self,
             Is_Refcounted => False);
          Register_Destroyable (Self.Unit, Ret);
@@ -539,7 +539,7 @@
       % if cls.env_spec._add_env:
          overriding function Node_Env
            (Node : access ${type_name}) return AST_Envs.Lexical_Env
-         is (Node.Self_Env.Parent);
+         is (AST_Envs.Get_Env (Node.Self_Env.Parent));
       % endif
 
       % if cls.env_spec.has_post_actions:

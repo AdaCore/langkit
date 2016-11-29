@@ -37,6 +37,11 @@ generic
    --  the request. In practice, this is used to implement sequential semantics
    --  for lexical envs, as-in, an element declared after another is not yet
    --  visible.
+
+   type Getter_State_T is private;
+   --  For dynamic env getters, the function pointer is allowed to have a state
+   --  that carries needed data. This is preferred to a tagged type because the
+   --  state has a fixed size here.
 package Langkit_Support.Lexical_Env is
 
    ----------------------
@@ -87,6 +92,19 @@ package Langkit_Support.Lexical_Env is
    --  Pointer type for lexical environments. This is the type that shall be
    --  used.
 
+   type Env_Getter is private;
+   --  This type represents a link to an env. It can be either a simple link
+   --  (just a pointer) or a dynamic link (a function that recomputes the link
+   --  when needed).
+
+   function Get_Env (Self : Env_Getter) return Lexical_Env;
+   --  Returns the environment associated to the Self env getter
+
+   function Simple_Env_Getter (E : Lexical_Env) return Env_Getter;
+   --  Constructs an env getter of the simple variety - pointer to env
+
+   No_Env_Getter : constant Env_Getter;
+
    type Referenced_Env is record
       From_Node : Element_T;
       --  The node from which the environment has been referenced
@@ -121,7 +139,7 @@ package Langkit_Support.Lexical_Env is
    --  environment is not ref-counted.
 
    type Lexical_Env_Type is record
-      Parent          : Lexical_Env := null;
+      Parent          : Env_Getter := No_Env_Getter;
       --  Parent environment for this env. Null by default.
 
       Node            : Element_T;
@@ -152,7 +170,7 @@ package Langkit_Support.Lexical_Env is
    --  represent missing scopes from erroneous trees.
 
    function Create
-     (Parent        : Lexical_Env;
+     (Parent        : Env_Getter;
       Node          : Element_T;
       Is_Refcounted : Boolean;
       Default_MD    : Element_Metadata := Empty_Metadata) return Lexical_Env;
@@ -187,14 +205,14 @@ package Langkit_Support.Lexical_Env is
 
    function Get
      (Self : Lexical_Env;
-      Key : Symbol_Type;
+      Key  : Symbol_Type;
       From : Element_T := No_Element;
       From_Refd_Env : Boolean := False) return Env_Element_Array;
    --  Get the array of wrapped elements for this key
 
    function Orphan (Self : Lexical_Env) return Lexical_Env is
      (new Lexical_Env_Type'(
-        Parent          => null,
+        Parent          => No_Env_Getter,
         Node            => Self.Node,
         Referenced_Envs => Self.Referenced_Envs,
         Env             => Self.Env,
@@ -228,9 +246,22 @@ package Langkit_Support.Lexical_Env is
 
 private
 
+   type Env_Getter (Dynamic : Boolean := False) is record
+      case Dynamic is
+         when True =>
+            Getter_State : Getter_State_T;
+            Getter_Fn    : access
+              function (Self : Getter_State_T) return Lexical_Env;
+         when False =>
+            Env : Lexical_Env;
+      end case;
+   end record;
+
+   No_Env_Getter : constant Env_Getter := (False, null);
+
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Type :=
-     (Parent          => null,
+     (Parent          => No_Env_Getter,
       Node            => No_Element,
       Referenced_Envs => <>,
       Env             => Empty_Env_Map'Access,

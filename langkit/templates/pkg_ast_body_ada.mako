@@ -1027,7 +1027,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
    begin
       Put ("<LexEnv (Id" & Env_Id & ", Parent"
-           & (if Self.Parent /= null then Parent_Env_Id else " null")
+           & (if Self.Parent /= AST_Envs.No_Env_Getter 
+              then Parent_Env_Id else " null")
            & "), ");
 
       if Self.Env.Is_Empty then
@@ -1106,7 +1107,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
             Put ("<" & Kind_Name (Current) & " "
                  & Image (Sloc_Range (Current)) & "> - ");
             Dump_One_Lexical_Env
-              (Env, Get_Env_Id (Env), Get_Env_Id (Env.Parent));
+              (Env, Get_Env_Id (Env),
+               Get_Env_Id (AST_Envs.Get_Env (Env.Parent)));
          end if;
 
          for Child of ${root_node_type_name}_Arrays.Array_Type'
