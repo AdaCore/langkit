@@ -168,7 +168,9 @@ class AnalysisContext(object):
 % endif
                  _c_value=None):
         ${py_doc('langkit.create_context', 8)}
+% if _self.default_unit_file_provider:
         c_ufp = unit_file_provider._c_value if unit_file_provider else None
+% endif
         self._c_value = (
             _create_analysis_context(
                 charset,
@@ -858,6 +860,7 @@ _get_analysis_unit_from_buffer = _import_func(
      ctypes.c_size_t],   # buffer_size
     _analysis_unit
 )
+% if _self.default_unit_file_provider:
 _get_analysis_unit_from_provider = _import_func(
     '${capi.get_name("get_analysis_unit_from_provider")}',
     [_analysis_context,  # context
@@ -867,6 +870,7 @@ _get_analysis_unit_from_provider = _import_func(
      ctypes.c_int],      # reparse
     _analysis_unit
 )
+% endif
 _remove_analysis_unit = _import_func(
     '${capi.get_name("remove_analysis_unit")}',
     [_analysis_context, ctypes.c_char_p], ctypes.c_int
