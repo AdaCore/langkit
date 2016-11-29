@@ -10,7 +10,7 @@ if not os.environ.get('WITHOUT_GNATPYTHON'):
     else:
         with_gnatpython = True
 if not with_gnatpython:
-    from testsuite_support.polyfill import BaseTestsuite, Run
+    from testsuite_support.polyfill import BaseTestsuite, Run, PIPE
 
 
 import testsuite_support.adalog_driver
@@ -43,15 +43,24 @@ class Testsuite(BaseTestsuite):
         )
 
     def tear_up(self):
+
+        def report(p, pname):
+            if p.status != 0:
+                raise RuntimeError(
+                    '{} build failed (GPRbuild returned {})\n{}'.format(
+                        pname, p.status, p.out
+                    )
+                )
+
         # Build Langkit_Support and Adalog so that each testcase does not try
         # to build it in parallel.
-        p = Run(['gprbuild', '-p', '-q', '-f', '-P',
+        p = Run(['gprbuild', '-p', '-f', '-P',
                  os.path.join(self.root_dir, '..', 'langkit', 'support',
-                              'langkit_support.gpr')])
-        p = Run(['gprbuild', '-p', '-q', '-f', '-P',
+                              'langkit_support.gpr')], output=PIPE)
+        report(p, "Langkit support")
+
+        p = Run(['gprbuild', '-p', '-f', '-P',
                  os.path.join(self.root_dir, '..', 'langkit', 'adalog',
-                              'adalog.gpr')])
-        if p.status != 0:
-            raise RuntimeError(
-                'Adalog build failed (GPRbuild returned {})'.format(p.status)
-            )
+                              'adalog.gpr')], output=PIPE)
+        report(p, "Adalog")
+
