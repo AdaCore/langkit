@@ -4,7 +4,7 @@ with_gnatpython = False
 if not os.environ.get('WITHOUT_GNATPYTHON'):
     try:
         from gnatpython.ex import Run
-        from gnatpython.testsuite import Testsuite as BaseTestsuite
+        from gnatpython.testsuite import Testsuite as BaseTestsuite, PIPE
     except ImportError:
         pass
     else:
