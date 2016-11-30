@@ -150,6 +150,10 @@ class PropertyError(Exception):
     ${py_doc('langkit.property_error', 4)}
     pass
 
+${exts.include_extension(
+   ctx.ext('python_api', 'exceptions')
+)}
+
 
 #
 # High-level binding
