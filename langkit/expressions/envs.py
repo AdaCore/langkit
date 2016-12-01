@@ -1,18 +1,76 @@
+from contextlib import contextmanager
 from functools import partial
 
 from langkit import names
 from langkit.compiled_types import (
     EnvElement, LexicalEnvType, Token, BoolType, T
 )
+from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BuiltinCallExpr,
     ResolvedExpression, construct, PropertyDef, BasicExpr, auto_attr, Self,
     auto_attr_custom
 )
 
-Env = AbstractVariable(names.Name("Current_Env"), type=LexicalEnvType)
-EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
-                            type=LexicalEnvType)
+
+class EnvVariable(AbstractVariable):
+    """
+    Singleton abstract variable for the implicit environment parameter.
+    """
+
+    def __init__(self):
+        super(EnvVariable, self).__init__(
+            names.Name("Current_Env"),
+            type=LexicalEnvType
+        )
+        self._is_bound = False
+
+    @property
+    def has_ambient_env(self):
+        """
+        Return whether ambient environment value is available.
+
+        If there is one, this is either the implicit environment argument for
+        the current property, or the currently bound environment (using
+        eval_in_env).
+
+        :rtype: bool
+        """
+        return PropertyDef.get().has_implicit_env or self.is_bound
+
+    @property
+    def is_bound(self):
+        """
+        Return whether Env is bound, i.e. if it can be used in the current
+        context.
+
+        :rtype: bool
+        """
+        return self._is_bound
+
+    @contextmanager
+    def bind(self):
+        """
+        Tag Env as being bound.
+
+        This is used during the "construct" pass to check that all uses of Env
+        are made in a context where it is legal.
+        """
+        saved_is_bound = self._is_bound
+        self._is_bound = True
+        yield
+        self._is_bound = saved_is_bound
+
+    def construct(self):
+        check_source_language(
+            self.has_ambient_env,
+            'This property has no implicit environment parameter: please use'
+            ' the eval_in_env construct to bind an environment first.'
+        )
+        return super(EnvVariable, self).construct()
+
+    def __repr__(self):
+        return '<Env>'
 
 
 @auto_attr_custom("get")
@@ -111,8 +169,9 @@ def eval_in_env(env_expr, to_eval_expr):
         lexical environment in which we will eval to_eval_expr.
     :param AbstractExpression to_eval_expr: The expression to eval.
     """
-    return EnvBindExpr(construct(env_expr, LexicalEnvType),
-                       construct(to_eval_expr))
+    env_resolved_expr = construct(env_expr, LexicalEnvType)
+    with Env.bind():
+        return EnvBindExpr(env_resolved_expr, construct(to_eval_expr))
 
 
 @auto_attr
@@ -198,3 +257,8 @@ def env_node(env):
     :param AbstractExpression env: The source environment.
     """
     return BasicExpr('{}.Node', T.root_node, [construct(env, LexicalEnvType)])
+
+
+Env = EnvVariable()
+EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
+                            type=LexicalEnvType)
