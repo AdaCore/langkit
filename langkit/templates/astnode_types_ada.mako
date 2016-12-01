@@ -472,9 +472,12 @@
       % endif
    </%def>
 
-   <% env_getter = "{}_Initial_Env_Getter_Fn".format(cls.name()) %>
+   <%
+   env_getter = "{}_Initial_Env_Getter_Fn".format(cls.name())
+   has_dyn_env = cls.env_spec.initial_env or cls.env_spec.env_hook_enabled
+   %>
 
-   % if cls.env_spec.initial_env or cls.env_spec.env_hook_enabled:
+   % if has_dyn_env:
    ---------------------------
    -- Initial_Env_Getter_Fn --
    ---------------------------
@@ -514,6 +517,8 @@
       Initial_Env : Lexical_Env := Current_Env;
       G_State     : Env_Getter_State_T :=
         (Node => ${root_node_type_name} (Self));
+
+      G           : Env_Getter;
    begin
       ## Super call
 
@@ -524,7 +529,7 @@
 
       ## initial_env
 
-      % if cls.env_spec.initial_env or cls.env_spec.env_hook_enabled:
+      % if has_dyn_env:
          Initial_Env := ${env_getter} (G_State);
       % endif
 
@@ -553,16 +558,16 @@
       ## add_env
 
       % if cls.env_spec._add_env:
+         G := Simple_Env_Getter (Initial_Env);
+         % if has_dyn_env:
+         if Initial_Env.Node /= null and then Initial_Env.Node.Unit /= Self.Unit
+         then
+            G := Dyn_Env_Getter (${env_getter}'Access, G_State);
+         end if;
+         % endif
+
          Self.Self_Env := AST_Envs.Create
-           (Parent        =>
-              % if cls.env_spec.initial_env or cls.env_spec.env_hook_enabled:
-              (if Initial_Env.Node /= null
-                and then Initial_Env.Node.Unit /= Self.Unit
-               then Dyn_Env_Getter (${env_getter}'Access, G_State)
-               else Simple_Env_Getter (Initial_Env)),
-              % else:
-               Simple_Env_Getter (Initial_Env),
-              % endif
+           (Parent        => G,
             Node          => Self,
             Is_Refcounted => False);
 
