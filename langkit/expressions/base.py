@@ -1482,7 +1482,9 @@ class PropertyDef(AbstractNodeData):
             def with_default(value, default_value):
                 return default_value if value is None else value
             self._is_private = with_default(self._is_private, False)
-            self._has_implicit_env = with_default(self._has_implicit_env, True)
+            self._has_implicit_env = with_default(
+                self._has_implicit_env, False
+            )
 
     def construct_and_type_expression(self):
         """
