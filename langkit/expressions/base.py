@@ -1000,7 +1000,8 @@ class PropertyDef(AbstractNodeData):
     reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
 
     def __init__(self, expr, prefix, name=None, doc=None, private=None,
-                 abstract=False, type=None, abstract_runtime_check=False):
+                 abstract=False, type=None, abstract_runtime_check=False,
+                 has_implicit_env=None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -1042,6 +1043,12 @@ class PropertyDef(AbstractNodeData):
             at once, and second you don't have to find a typing scheme with
             current langkit capabilities in which the parser generate the right
             types for the functionality you want.
+
+        :param bool|None has_implicit_env: Whether this property is passed an
+            implicit "current environment" parameter.  If None, inherit from
+            the overriden property, or False in there is no property to
+            override. Just like `private`, it must always be consistent with
+            base classes.
         """
 
         super(PropertyDef, self).__init__(name=name, private=private)
@@ -1071,6 +1078,7 @@ class PropertyDef(AbstractNodeData):
         self.expected_type = type
         self.abstract = abstract
         self.abstract_runtime_check = abstract_runtime_check
+        self._has_implicit_env = has_implicit_env
 
         self.argument_vars = []
         """
@@ -1238,6 +1246,16 @@ class PropertyDef(AbstractNodeData):
             ).get(self._name.lower, None)
         else:
             return None
+
+    @property
+    def has_implicit_env(self):
+        """
+        Return whether this property is passed an implicit environment param.
+
+        :rtype: bool
+        """
+        assert self._has_implicit_env is not None
+        return self._has_implicit_env
 
     def prepare_abstract_expression(self):
         """
@@ -1421,6 +1439,20 @@ class PropertyDef(AbstractNodeData):
                     )
                 )
 
+            # Likewise for accepting an implicit environment parameter
+            if self._has_implicit_env is None:
+                self._has_implicit_env = base_prop._has_implicit_env
+            else:
+                check_source_language(
+                    self._has_implicit_env == base_prop.has_implicit_env,
+                    '{} has {} implicit environment parameter, so should have'
+                    ' {}'.format(
+                        base_prop.qualname,
+                        'an' if base_prop._has_implicit_env else 'no',
+                        self.qualname,
+                    )
+                )
+
             # We then want to check the consistency of type annotations if they
             # exist.
             if base_prop.expected_type:
@@ -1437,9 +1469,13 @@ class PropertyDef(AbstractNodeData):
                     # If base has a type annotation and not self, then
                     # propagate it.
                     self.expected_type = base_prop.expected_type
-        elif self._is_private is None:
-            # By default, properties are public
-            self._is_private = False
+        else:
+            # By default, properties are public and they accept an implicit
+            # environment parameter.
+            def with_default(value, default_value):
+                return default_value if value is None else value
+            self._is_private = with_default(self._is_private, False)
+            self._has_implicit_env = with_default(self._has_implicit_env, True)
 
     def construct_and_type_expression(self):
         """
@@ -1581,7 +1617,7 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 
 
 # noinspection PyPep8Naming
-def Property(expr, doc=None, private=None, type=None):
+def Property(expr, doc=None, private=None, type=None, has_implicit_env=None):
     """
     Public constructor for concrete properties. You can declare your properties
     on your ast node subclasses directly, like this::
@@ -1599,7 +1635,8 @@ def Property(expr, doc=None, private=None, type=None):
     :rtype: PropertyDef
     """
     return PropertyDef(expr, AbstractNodeData.PREFIX_PROPERTY, doc=doc,
-                       private=private, type=type)
+                       private=private, type=type,
+                       has_implicit_env=has_implicit_env)
 
 
 class AbstractKind(Enum):
@@ -1609,7 +1646,7 @@ class AbstractKind(Enum):
 
 
 def langkit_property(private=None, return_type=None,
-                     kind=AbstractKind.concrete):
+                     kind=AbstractKind.concrete, has_implicit_env=None):
     """
     Decorator to create properties from real python methods. See Property for
     more details.
@@ -1626,7 +1663,8 @@ def langkit_property(private=None, return_type=None,
             doc=expr_fn.__doc__,
             abstract=kind in [AbstractKind.abstract,
                               AbstractKind.abstract_runtime_check],
-            abstract_runtime_check=kind == AbstractKind.abstract_runtime_check
+            abstract_runtime_check=kind == AbstractKind.abstract_runtime_check,
+            has_implicit_env=has_implicit_env,
         )
     return decorator
 
