@@ -886,11 +886,11 @@ package body ${_self.ada_api_settings.lib_name}.AST is
             return;
          end if;
 
-         --  By default (i.e. unless Do_Env_Actions does something special),
+         --  By default (i.e. unless env actions add a new env),
          --  the environment we store in Node is the current one.
          Node.Self_Env := Current_Env;
 
-         Initial_Env := Node.Do_Env_Actions (Current_Env);
+         Initial_Env := Node.Pre_Env_Actions (Current_Env);
 
          --  Call recursively on children
          for C of ${root_node_type_name}_Arrays.Array_Type'(Children (Node))

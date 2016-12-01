@@ -748,7 +748,7 @@ private
    ${array_types.private_decl(EnvElement.array_type())}
    ${array_types.private_decl(root_node_array)}
 
-   function Do_Env_Actions
+   function Pre_Env_Actions
      (Self        : access ${root_node_value_type};
       Current_Env : AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
    is (null);

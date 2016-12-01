@@ -194,7 +194,7 @@
 
    % if not cls.is_env_spec_inherited:
 
-      overriding function Do_Env_Actions
+      overriding function Pre_Env_Actions
         (Self        : access ${type_name};
          Current_Env : AST_Envs.Lexical_Env)
          return AST_Envs.Lexical_Env;
@@ -501,11 +501,11 @@
    end ${env_getter};
 
    % endif
-   --------------------
-   -- Do_Env_Actions --
-   --------------------
+   ---------------------
+   -- Pre_Env_Actions --
+   ---------------------
 
-   overriding function Do_Env_Actions
+   overriding function Pre_Env_Actions
      (Self        : access ${type_name};
       Current_Env : AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
    is
@@ -517,7 +517,7 @@
    begin
       % if cls.base().env_spec and cls.env_spec.call_parents:
          <% base_type_name = cls.base().value_type_name() %>
-         Initial_Env := Do_Env_Actions
+         Initial_Env := Pre_Env_Actions
            (${base_type_name} (Self.all)'Access, Current_Env);
       % endif
 
@@ -565,7 +565,7 @@
       % endif
 
       return Initial_Env;
-   end Do_Env_Actions;
+   end Pre_Env_Actions;
 
    % if cls.env_spec._add_env:
    overriding function Node_Env
