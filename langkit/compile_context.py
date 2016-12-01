@@ -624,10 +624,12 @@ class CompileCtx():
                     with prop.diagnostic_context():
                         pass_fn(prop)
 
-                if astnode.env_spec:
-                    # Env specs generate properties, and have some invariants
-                    # to check after properties have been properly computed.
-                    astnode.env_spec.prepare()
+                # Env specs generate properties, and have some invariants to
+                # check after properties have been properly computed. Perform
+                # these checks only once and at the proper time, though.
+                if (pass_fn == PropertyDef.construct_and_type_expression and
+                        astnode.env_spec):
+                    astnode.env_spec.check_properties()
 
     def render_template(self, *args, **kwargs):
         # Kludge: to avoid circular dependency issues, do not import parsers
