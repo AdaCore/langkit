@@ -271,7 +271,7 @@ class Predicate(AbstractExpression):
         self.pred_property = pred_property
         self.exprs = exprs
 
-    def do_prepare(self):
+    def construct(self):
         check_multiple([
             (isinstance(self.pred_property, PropertyDef),
              "Needs a property reference, got {}".format(self.pred_property)),
@@ -285,7 +285,6 @@ class Predicate(AbstractExpression):
              "of {}".format(T.root_node.name().camel))
         ])
 
-    def construct(self):
         exprs = [construct(e) for e in self.exprs]
 
         prop_types = [self.pred_property.struct] + [
