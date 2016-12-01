@@ -868,39 +868,9 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       Root_Env : AST_Envs.Lexical_Env)
    is
 
-      --  The internal algorithm, as well as the Do_Env_Action implementations,
-      --  use an implicit stack of environment, where the topmost
-      --  environment (Current_Env parameter) is mutable.
-      --
-      --  - We want to be able to replace the topmost env that will be seen by
-      --    subsequent nodes. This is to support constructs such as use clauses
-      --    in ada where you can do stuff like this::
-      --
-      --        declare  -- new LexicalEnv Lex_1 introduced
-      --           A : Integer;
-      --           B : Integer := A; -- Will get A from Lex_1
-      --           use Foo;
-      --           -- We create a new env, Lex_2, from Lex_1, where you can now
-      --           -- reference stuff from foo, and for every subsequent
-      --           -- declaration, Lex_2 will be the lexical environment !
-      --
-      --           C : Integer := D
-      --           -- F was gotten from Foo which is reachable from Lex_2
-      --        begin
-      --           ...
-      --        end;
-      --
-      --    In this example, the topmost env on the stack will be *replaced*
-      --    when we evaluate env actions for the use clause, but the env that
-      --    was previously on the top of the stack *won't change*, so stuff
-      --    from Foo will still not be reachable to declarations/statements
-      --    before the use clause. This allows to decouple env construction and
-      --    symbol resolution in two passes, rather than interleave the two
-      --    like in the GNAT compiler.
-
       procedure Populate_Internal
         (Node        : access ${root_node_value_type}'Class;
-         Current_Env : in out Lexical_Env);
+         Current_Env : Lexical_Env);
 
       -----------------------
       -- Populate_Internal --
@@ -908,7 +878,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
       procedure Populate_Internal
         (Node        : access ${root_node_value_type}'Class;
-         Current_Env : in out Lexical_Env)
+         Current_Env : Lexical_Env)
       is
          Children_Env : Lexical_Env;
       begin
@@ -920,11 +890,8 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          --  the environment we store in Node is the current one.
          Node.Self_Env := Current_Env;
 
-         --  Call Do_Env_Actions on the Node. This might:
-         --  1. Mutate Current_Env, eg. replace it with a new env derived from
-         --     Current_Env.
-         --  2. Return a new env, that will be used as the Current_Env for
-         --     Node's children.
+         --  Call Do_Env_Actions on the Node. This might return a new env, that
+         --  will be used as the Current_Env for Node's children.
          Children_Env := Node.Do_Env_Actions (Current_Env);
 
          --  Call recursively on children. Use the Children_Env if available,
