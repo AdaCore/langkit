@@ -526,6 +526,9 @@
          Initial_Env := ${env_getter} (G_State);
       % endif
 
+      ############################
+      ## Pre add_to_env actions ##
+      ############################
 
       % for exprs in cls.env_spec.envs_expressions:
       % if not exprs.is_post:
@@ -584,6 +587,10 @@
          % if cls.env_spec.initial_env:
             Initial_Env := ${cls.env_spec.initial_env_expr};
          % endif
+
+      #############################
+      ## Post add_to_env actions ##
+      #############################
 
       % for exprs in cls.env_spec.envs_expressions:
       % if exprs.is_post:
