@@ -194,11 +194,12 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       declare
+         Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
          Ret : constant Env_Element_Array :=
            Get_Own_Elements (Self)
            & Get_Elements
              (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
-           & Get (Get_Env (Self.Parent), Key);
+           & Get (Parent_Env, Key);
       begin
          --  Only filter if a non null value was given for the From parameter
          return (if From = No_Element then Ret
@@ -354,5 +355,16 @@ package body Langkit_Support.Lexical_Env is
    function Simple_Env_Getter (E : Lexical_Env) return Env_Getter
    is
      (Env_Getter'(False, Env => E));
+
+   --------------------
+   -- Dyn_Env_Getter --
+   --------------------
+
+   function Dyn_Env_Getter
+     (Fn : Getter_Fn_T; State : Getter_State_T) return Env_Getter
+   is
+   begin
+      return Env_Getter'(True, State, Fn);
+   end Dyn_Env_Getter;
 
 end Langkit_Support.Lexical_Env;

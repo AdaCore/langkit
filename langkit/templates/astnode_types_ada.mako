@@ -472,6 +472,35 @@
       % endif
    </%def>
 
+   <% env_getter = "{}_Initial_Env_Getter_Fn".format(cls.name()) %>
+
+   % if cls.env_spec.initial_env or cls.env_spec.env_hook_enabled:
+   ---------------------------
+   -- Initial_Env_Getter_Fn --
+   ---------------------------
+
+   function ${env_getter}
+     (State : Env_Getter_State_T) return AST_Envs.Lexical_Env
+   is
+      Self : ${cls.name()} := ${cls.name()} (State.Node);
+      Current_Env : Lexical_Env := State.Node.Parent.Self_Env;
+      Initial_Env : Lexical_Env := Current_Env;
+   begin
+      % if cls.env_spec.initial_env:
+      Initial_Env := ${cls.env_spec.initial_env_expr};
+      % endif
+      % if cls.env_spec.env_hook_enabled:
+         ## Initial_Env is passed as an IN OUT parameter, so the hook may
+         ## change it.
+         ${ctx.env_hook_subprogram[0]}.${ctx.env_hook_subprogram[1]}
+           (Analysis.Internal.Convert (Self.Unit),
+            ${cls.env_spec.env_hook_arg_expr},
+            Initial_Env);
+      % endif
+      return Initial_Env;
+   end ${env_getter};
+
+   % endif
    --------------------
    -- Do_Env_Actions --
    --------------------
@@ -484,7 +513,8 @@
 
       Ret         : Lexical_Env := null;
       Initial_Env : Lexical_Env := Current_Env;
-
+      G_State     : Env_Getter_State_T :=
+        (Node => ${root_node_type_name} (Self));
    begin
       % if cls.base().env_spec and cls.env_spec.call_parents:
          <% base_type_name = cls.base().value_type_name() %>
@@ -492,18 +522,10 @@
            (${base_type_name} (Self.all)'Access, Current_Env);
       % endif
 
-      % if cls.env_spec.initial_env:
-         Initial_Env := ${cls.env_spec.initial_env_expr};
+      % if cls.env_spec.initial_env or cls.env_spec.env_hook_enabled:
+         Initial_Env := ${env_getter} (G_State);
       % endif
 
-      % if cls.env_spec.env_hook_enabled:
-         ## Initial_Env is passed as an IN OUT parameter, so the hook may
-         ## change it.
-         ${ctx.env_hook_subprogram[0]}.${ctx.env_hook_subprogram[1]}
-           (Analysis.Internal.Convert (Self.Unit),
-            ${cls.env_spec.env_hook_arg_expr},
-            Initial_Env);
-      % endif
 
       % for exprs in cls.env_spec.envs_expressions:
       % if not exprs.is_post:
@@ -526,7 +548,15 @@
       % if cls.env_spec._add_env:
          pragma Assert (Ret = null, "Env added twice");
          Ret := AST_Envs.Create
-           (Parent        => Simple_Env_Getter (Initial_Env),
+           (Parent        =>
+              % if cls.env_spec.initial_env or cls.env_spec.env_hook_enabled:
+              (if Initial_Env.Node /= null
+                and then Initial_Env.Node.Unit /= Self.Unit
+               then Dyn_Env_Getter (${env_getter}'Access, G_State)
+               else Simple_Env_Getter (Initial_Env)),
+              % else:
+               Simple_Env_Getter (Initial_Env),
+              % endif
             Node          => Self,
             Is_Refcounted => False);
          Register_Destroyable (Self.Unit, Ret);

@@ -97,11 +97,17 @@ package Langkit_Support.Lexical_Env is
    --  (just a pointer) or a dynamic link (a function that recomputes the link
    --  when needed).
 
+   type Getter_Fn_T is access
+     function (Self : Getter_State_T) return Lexical_Env;
+
    function Get_Env (Self : Env_Getter) return Lexical_Env;
    --  Returns the environment associated to the Self env getter
 
    function Simple_Env_Getter (E : Lexical_Env) return Env_Getter;
    --  Constructs an env getter of the simple variety - pointer to env
+
+   function Dyn_Env_Getter
+     (Fn : Getter_Fn_T; State : Getter_State_T) return Env_Getter;
 
    No_Env_Getter : constant Env_Getter;
 
@@ -250,8 +256,7 @@ private
       case Dynamic is
          when True =>
             Getter_State : Getter_State_T;
-            Getter_Fn    : access
-              function (Self : Getter_State_T) return Lexical_Env;
+            Getter_Fn    : Getter_Fn_T;
          when False =>
             Env : Lexical_Env;
       end case;
