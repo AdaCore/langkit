@@ -36,6 +36,13 @@ class Testsuite(BaseTestsuite):
         # Convenience options for developpers
         #
 
+        self.main.add_option(
+            '--disable-tear-up-builds', '-B', action='store_true',
+            help='Disable the automatic build of Langkit_Support and Adalog'
+                 ' during the testsuite tear_up step. This is used to speed up'
+                 ' successive testsuite runs during development.'
+        )
+
         # Tests update
         self.main.add_option(
             '--rewrite', '-r', action='store_true',
@@ -54,12 +61,13 @@ class Testsuite(BaseTestsuite):
 
         # Build Langkit_Support and Adalog so that each testcase does not try
         # to build it in parallel.
-        p = Run(['gprbuild', '-p', '-f', '-P',
-                 os.path.join(self.root_dir, '..', 'langkit', 'support',
-                              'langkit_support.gpr')], output=PIPE)
-        report(p, "Langkit support")
+        if not self.global_env['options'].disable_tear_up_builds:
+            p = Run(['gprbuild', '-p', '-f', '-P',
+                     os.path.join(self.root_dir, '..', 'langkit', 'support',
+                                  'langkit_support.gpr')], output=PIPE)
+            report(p, "Langkit support")
 
-        p = Run(['gprbuild', '-p', '-f', '-P',
-                 os.path.join(self.root_dir, '..', 'langkit', 'adalog',
-                              'adalog.gpr')], output=PIPE)
-        report(p, "Adalog")
+            p = Run(['gprbuild', '-p', '-f', '-P',
+                     os.path.join(self.root_dir, '..', 'langkit', 'adalog',
+                                  'adalog.gpr')], output=PIPE)
+            report(p, "Adalog")
