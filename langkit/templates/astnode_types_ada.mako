@@ -511,14 +511,13 @@
    is
       use AST_Envs;
 
-      Ret         : Lexical_Env := null;
       Initial_Env : Lexical_Env := Current_Env;
       G_State     : Env_Getter_State_T :=
         (Node => ${root_node_type_name} (Self));
    begin
       % if cls.base().env_spec and cls.env_spec.call_parents:
          <% base_type_name = cls.base().value_type_name() %>
-         Ret := Do_Env_Actions
+         Initial_Env := Do_Env_Actions
            (${base_type_name} (Self.all)'Access, Current_Env);
       % endif
 
@@ -549,8 +548,7 @@
       % endif
 
       % if cls.env_spec._add_env:
-         pragma Assert (Ret = null, "Env added twice");
-         Ret := AST_Envs.Create
+         Self.Self_Env := AST_Envs.Create
            (Parent        =>
               % if cls.env_spec.initial_env or cls.env_spec.env_hook_enabled:
               (if Initial_Env.Node /= null
@@ -562,11 +560,11 @@
               % endif
             Node          => Self,
             Is_Refcounted => False);
-         Register_Destroyable (Self.Unit, Ret);
-         Self.Self_Env := Ret;
+
+         Register_Destroyable (Self.Unit, Self.Self_Env);
       % endif
 
-      return Ret;
+      return Initial_Env;
    end Do_Env_Actions;
 
       % if cls.env_spec._add_env:
@@ -584,10 +582,6 @@
          use AST_Envs;
          Initial_Env : Lexical_Env := Current_Env;
       begin
-         % if cls.env_spec.initial_env:
-            Initial_Env := ${cls.env_spec.initial_env_expr};
-         % endif
-
          #############################
          ## Post add_to_env actions ##
          #############################

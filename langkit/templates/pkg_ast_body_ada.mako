@@ -880,7 +880,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
         (Node        : access ${root_node_value_type}'Class;
          Current_Env : Lexical_Env)
       is
-         Children_Env : Lexical_Env;
+         Initial_Env : Lexical_Env := Current_Env;
       begin
          if Node = null then
             return;
@@ -890,23 +890,16 @@ package body ${_self.ada_api_settings.lib_name}.AST is
          --  the environment we store in Node is the current one.
          Node.Self_Env := Current_Env;
 
-         --  Call Do_Env_Actions on the Node. This might return a new env, that
-         --  will be used as the Current_Env for Node's children.
-         Children_Env := Node.Do_Env_Actions (Current_Env);
+         Initial_Env := Node.Do_Env_Actions (Current_Env);
 
          --  Call recursively on children. Use the Children_Env if available,
          --  else pass the existing Current_Env.
-         for Child of ${root_node_type_name}_Arrays.Array_Type'
-            (Children (Node))
+         for C of ${root_node_type_name}_Arrays.Array_Type'(Children (Node))
          loop
-            if Children_Env = null then
-               Populate_Internal (Child, Current_Env);
-            else
-               Populate_Internal (Child, Children_Env);
-            end if;
+            Populate_Internal (C, Node.Self_Env);
          end loop;
 
-         Node.Post_Env_Actions (Current_Env);
+         Node.Post_Env_Actions (Initial_Env);
       end Populate_Internal;
 
       Env : AST_Envs.Lexical_Env := Root_Env;
