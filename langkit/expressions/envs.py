@@ -73,9 +73,17 @@ class EnvVariable(AbstractVariable):
         return '<Env>'
 
 
-@auto_attr_custom("get")
-@auto_attr_custom("get_sequential", sequential=True)
-@auto_attr_custom("resolve_unique", resolve_unique=True)
+def env_get_repr(self):
+    return '<{} {}: {}>'.format(
+        (names.Name('Env') + names.Name.from_lower(self.attr_name)).camel,
+        self.sub_expressions[0],
+        self.sub_expressions[1],
+    )
+
+
+@auto_attr_custom("get", repr_fn=env_get_repr)
+@auto_attr_custom("get_sequential", repr_fn=env_get_repr, sequential=True)
+@auto_attr_custom("resolve_unique", repr_fn=env_get_repr, resolve_unique=True)
 def env_get(env_expr, token_expr, resolve_unique=False, sequential=False):
     """
     Expression for lexical environment get operation.
