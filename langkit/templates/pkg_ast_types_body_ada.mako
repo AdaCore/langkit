@@ -27,6 +27,7 @@ with Langkit_Support.Slocs;      use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;    use Langkit_Support.Symbols;
 
 with ${_self.ada_api_settings.lib_name}.Analysis.Internal;
+with ${_self.ada_api_settings.lib_name}.Analysis;
 pragma Warnings (On, "referenced");
 
 %if _self.env_hook_subprogram:
@@ -41,6 +42,13 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types is
    procedure Register_Destroyable is new
       Analysis_Interfaces.Register_Destroyable
         (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env, AST_Envs.Destroy);
+
+   pragma Warnings (Off, "referenced");
+   function Get_Lex_Env_Data
+     (Node : ${root_node_type_name}) return Lex_Env_Data
+   is (${_self.ada_api_settings.lib_name}.Analysis.Get_Lex_Env_Data
+        (Analysis.Internal.Convert (Node.Unit)));
+   pragma Warnings (On, "referenced");
 
    % for struct_type in no_builtins(_self.struct_types):
    ${struct_types.body(struct_type)}

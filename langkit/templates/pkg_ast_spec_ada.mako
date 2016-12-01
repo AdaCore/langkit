@@ -151,6 +151,9 @@ package ${_self.ada_api_settings.lib_name}.AST is
    procedure Inc_Ref (Self : Lexical_Env) renames AST_Envs.Inc_Ref;
    procedure Dec_Ref (Self : in out Lexical_Env) renames AST_Envs.Dec_Ref;
 
+   type Lex_Env_Data_Type is private;
+   type Lex_Env_Data is access all Lex_Env_Data_Type;
+
    function Get
      (A     : AST_Envs.Env_Element_Array;
       Index : Integer)
@@ -963,5 +966,7 @@ private
      (Node : access ${root_node_value_type}'Class)
       return Analysis_Unit_Interface
    is (Node.Unit);
+
+   type Lex_Env_Data_Type is null record;
 
 end ${_self.ada_api_settings.lib_name}.AST;

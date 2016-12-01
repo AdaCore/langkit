@@ -186,6 +186,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
      (Unit, Referenced : Analysis_Unit) return Boolean;
    --  Check whether the Referenced unit is referenced from Unit
 
+   function Get_Lex_Env_Data
+     (Unit : Analysis_Unit) return Lex_Env_Data;
+
 private
 
    type Analysis_Context_Type;
@@ -280,6 +283,8 @@ private
       Referenced_Units : Analysis_Unit_Sets.Set;
       --  Units that are referenced from this one. Useful for
       --  visibility/computation of the reference graph.
+
+      Lex_Env_Data     : Lex_Env_Data_Type;
    end record;
 
    % if _self.default_unit_file_provider:

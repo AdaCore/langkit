@@ -162,7 +162,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
             Rule             => Rule,
             AST_Mem_Pool     => No_Pool,
             Destroyables     => Destroyable_Vectors.Empty_Vector,
-            Referenced_Units => <>);
+            Referenced_Units => <>,
+            Lex_Env_Data     => <>);
          Initialize (Unit.TDH, Context.Symbols);
          Context.Units_Map.Insert (Fname, Unit);
       else
@@ -595,5 +596,16 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          return Analysis_Unit_Sets.Has (Unit.Referenced_Units, Referenced);
       end if;
    end;
+
+   ----------------------
+   -- Get_Lex_Env_Data --
+   ----------------------
+
+   function Get_Lex_Env_Data
+     (Unit : Analysis_Unit) return Lex_Env_Data
+   is
+   begin
+      return Unit.Lex_Env_Data'Unrestricted_Access;
+   end Get_Lex_Env_Data;
 
 end ${_self.ada_api_settings.lib_name}.Analysis;
