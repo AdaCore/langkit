@@ -1849,7 +1849,7 @@ class ASTNode(Struct):
         # the grammar in some way.
         from langkit.parsers import Row, Opt
 
-        if cls.is_bool_node:
+        if cls.is_bool_node and len(args) > 0:
             # If the node is a boolean node, then we want to parse the
             # sub-parsers as an optional parser that will be booleanized.
             return Opt(*args).as_bool(cls)
