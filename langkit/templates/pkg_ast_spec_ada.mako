@@ -755,18 +755,8 @@ private
    --  Internal procedure that will execute all necessary lexical env actions
    --  for Node. This is meant to be called by Populate_Lexical_Env, and not by
    --  the user.
-   --
-   --  Current_Env is the environment that is the parent scope for Self when
-   --  entering the function. It is an in out parameter because the
-   --  implementation can replace it by a new Lexical_Env derived from
-   --  it.
-   --
-   --  The return value can be either null, or a new Lexical_Env that represent
-   --  a new scope that will be used by Self's children.
-   --  The difference between replacing Current_Env and returning a new env, is
-   --  that replacing Current_Env will affect the env that the following
-   --  siblings of Self see, while returning a new env will only affect the
-   --  environment seen by Self's children.
+   --  The return value is the initial environment to be passed to
+   --  Post_Env_Actions.
 
    procedure Post_Env_Actions
      (Self        : access ${root_node_value_type};

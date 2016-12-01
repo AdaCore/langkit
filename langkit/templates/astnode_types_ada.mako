@@ -567,32 +567,31 @@
       return Initial_Env;
    end Do_Env_Actions;
 
-      % if cls.env_spec._add_env:
-         overriding function Node_Env
-           (Node : access ${type_name}) return AST_Envs.Lexical_Env
-         is (AST_Envs.Get_Env (Node.Self_Env.Parent));
+   % if cls.env_spec._add_env:
+   overriding function Node_Env
+     (Node : access ${type_name}) return AST_Envs.Lexical_Env
+   is (AST_Envs.Get_Env (Node.Self_Env.Parent));
+   % endif
+
+   % if cls.env_spec.has_post_actions:
+   overriding procedure Post_Env_Actions
+     (Self        : access ${type_name};
+      Current_Env : AST_Envs.Lexical_Env)
+   is
+      use AST_Envs;
+      Initial_Env : Lexical_Env := Current_Env;
+   begin
+      #############################
+      ## Post add_to_env actions ##
+      #############################
+
+      % for exprs in cls.env_spec.envs_expressions:
+      % if exprs.is_post:
+      ${emit_add_to_env(exprs)}
       % endif
-
-      % if cls.env_spec.has_post_actions:
-
-      overriding procedure Post_Env_Actions
-        (Self        : access ${type_name};
-         Current_Env : AST_Envs.Lexical_Env)
-      is
-         use AST_Envs;
-         Initial_Env : Lexical_Env := Current_Env;
-      begin
-         #############################
-         ## Post add_to_env actions ##
-         #############################
-
-         % for exprs in cls.env_spec.envs_expressions:
-         % if exprs.is_post:
-         ${emit_add_to_env(exprs)}
-         % endif
-         % endfor
-      end Post_Env_Actions;
-      % endif
+      % endfor
+   end Post_Env_Actions;
+   % endif
 
    % endif
 

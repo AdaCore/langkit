@@ -892,8 +892,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
          Initial_Env := Node.Do_Env_Actions (Current_Env);
 
-         --  Call recursively on children. Use the Children_Env if available,
-         --  else pass the existing Current_Env.
+         --  Call recursively on children
          for C of ${root_node_type_name}_Arrays.Array_Type'(Children (Node))
          loop
             Populate_Internal (C, Node.Self_Env);
