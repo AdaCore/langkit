@@ -1,0 +1,43 @@
+== abstract: default, concrete: default ==
+Code generation was successful
+  AbstractNode.p_prop: implicit env
+  ConcreteNode.p_prop: implicit env
+
+== abstract: default, concrete: implicit env ==
+Code generation was successful
+  AbstractNode.p_prop: implicit env
+  ConcreteNode.p_prop: implicit env
+
+== abstract: default, concrete: no implicit env ==
+File "test.py", line 41, in ConcreteNode.prop
+    Error: AbstractNode.p_prop has an implicit environment parameter, so should have ConcreteNode.p_prop
+
+== abstract: implicit env, concrete: default ==
+Code generation was successful
+  AbstractNode.p_prop: implicit env
+  ConcreteNode.p_prop: implicit env
+
+== abstract: implicit env, concrete: implicit env ==
+Code generation was successful
+  AbstractNode.p_prop: implicit env
+  ConcreteNode.p_prop: implicit env
+
+== abstract: implicit env, concrete: no implicit env ==
+File "test.py", line 41, in ConcreteNode.prop
+    Error: AbstractNode.p_prop has an implicit environment parameter, so should have ConcreteNode.p_prop
+
+== abstract: no implicit env, concrete: default ==
+Code generation was successful
+  AbstractNode.p_prop: no implicit env
+  ConcreteNode.p_prop: no implicit env
+
+== abstract: no implicit env, concrete: implicit env ==
+File "test.py", line 41, in ConcreteNode.prop
+    Error: AbstractNode.p_prop has no implicit environment parameter, so should have ConcreteNode.p_prop
+
+== abstract: no implicit env, concrete: no implicit env ==
+Code generation was successful
+  AbstractNode.p_prop: no implicit env
+  ConcreteNode.p_prop: no implicit env
+
+Done
