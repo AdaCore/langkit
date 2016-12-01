@@ -3,8 +3,8 @@ import os
 with_gnatpython = False
 if not os.environ.get('WITHOUT_GNATPYTHON'):
     try:
-        from gnatpython.ex import Run
-        from gnatpython.testsuite import Testsuite as BaseTestsuite, PIPE
+        from gnatpython.ex import Run, PIPE
+        from gnatpython.testsuite import Testsuite as BaseTestsuite
     except ImportError:
         pass
     else:
@@ -63,4 +63,3 @@ class Testsuite(BaseTestsuite):
                  os.path.join(self.root_dir, '..', 'langkit', 'adalog',
                               'adalog.gpr')], output=PIPE)
         report(p, "Adalog")
-
