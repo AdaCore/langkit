@@ -515,25 +515,28 @@
       G_State     : Env_Getter_State_T :=
         (Node => ${root_node_type_name} (Self));
    begin
+      ## Super call
+
       % if cls.base().env_spec and cls.env_spec.call_parents:
-         <% base_type_name = cls.base().value_type_name() %>
          Initial_Env := Pre_Env_Actions
-           (${base_type_name} (Self.all)'Access, Current_Env);
+           (${cls.base().value_type_name()} (Self.all)'Access, Current_Env);
       % endif
+
+      ## initial_env
 
       % if cls.env_spec.initial_env or cls.env_spec.env_hook_enabled:
          Initial_Env := ${env_getter} (G_State);
       % endif
 
-      ############################
-      ## Pre add_to_env actions ##
-      ############################
+      ## add_to_env
 
       % for exprs in cls.env_spec.envs_expressions:
       % if not exprs.is_post:
       ${emit_add_to_env(exprs)}
       % endif
       % endfor
+
+      ## ref_envs
 
       % if cls.env_spec.ref_envs:
       declare
@@ -546,6 +549,8 @@
          Dec_Ref (Envs);
       end;
       % endif
+
+      ## add_env
 
       % if cls.env_spec._add_env:
          Self.Self_Env := AST_Envs.Create
@@ -567,13 +572,27 @@
       return Initial_Env;
    end Pre_Env_Actions;
 
+   ## If the node class adds an env, then the environement in which node is is
+   ## the parent env.
+
    % if cls.env_spec._add_env:
+
+   --------------
+   -- Node_Env --
+   --------------
+
    overriding function Node_Env
      (Node : access ${type_name}) return AST_Envs.Lexical_Env
    is (AST_Envs.Get_Env (Node.Self_Env.Parent));
    % endif
 
+   ## Emit Post_Env_Actions only if needed
+
    % if cls.env_spec.has_post_actions:
+   ----------------------
+   -- Post_Env_Actions --
+   ----------------------
+
    overriding procedure Post_Env_Actions
      (Self        : access ${type_name};
       Current_Env : AST_Envs.Lexical_Env)
