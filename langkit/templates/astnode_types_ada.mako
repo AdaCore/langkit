@@ -195,8 +195,8 @@
    % if not cls.is_env_spec_inherited:
 
       overriding function Pre_Env_Actions
-        (Self        : access ${type_name};
-         Current_Env : AST_Envs.Lexical_Env)
+        (Self                  : access ${type_name};
+         Current_Env, Root_Env : AST_Envs.Lexical_Env)
          return AST_Envs.Lexical_Env;
 
    % if cls.env_spec.has_post_actions:
@@ -506,8 +506,8 @@
    ---------------------
 
    overriding function Pre_Env_Actions
-     (Self        : access ${type_name};
-      Current_Env : AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
+     (Self                  : access ${type_name};
+      Current_Env, Root_Env : AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
    is
       use AST_Envs;
 
@@ -521,7 +521,8 @@
 
       % if cls.base().env_spec and cls.env_spec.call_parents:
          Initial_Env := Pre_Env_Actions
-           (${cls.base().value_type_name()} (Self.all)'Access, Current_Env);
+           (${cls.base().value_type_name()} (Self.all)'Access,
+            Current_Env, Root_Env);
       % endif
 
       ## initial_env
@@ -557,7 +558,7 @@
       % if cls.env_spec._add_env:
          G := Simple_Env_Getter (Initial_Env);
          % if has_dyn_env:
-         if Initial_Env.Node /= null and then Initial_Env.Node.Unit /= Self.Unit
+         if Initial_Env /= Root_Env and then Initial_Env.Node.Unit /= Self.Unit
          then
             G := Dyn_Env_Getter (${env_getter}'Access, G_State);
          end if;
