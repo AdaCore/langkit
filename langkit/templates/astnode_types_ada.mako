@@ -450,7 +450,7 @@
    % endif
    </%def>
 
-   <%def name="emit_add_env(exprs)">
+   <%def name="emit_add_to_env(exprs)">
       ## If we have an _add_to_env specification, we generate code to
       ## add elements to the lexical environment.
 
@@ -532,7 +532,7 @@
 
       % for exprs in cls.env_spec.envs_expressions:
       % if not exprs.is_post:
-      ${emit_add_env(exprs)}
+      ${emit_add_to_env(exprs)}
       % endif
       % endfor
 
@@ -588,15 +588,15 @@
             Initial_Env := ${cls.env_spec.initial_env_expr};
          % endif
 
-      #############################
-      ## Post add_to_env actions ##
-      #############################
+         #############################
+         ## Post add_to_env actions ##
+         #############################
 
-      % for exprs in cls.env_spec.envs_expressions:
-      % if exprs.is_post:
-      ${emit_add_env(exprs)}
-      % endif
-      % endfor
+         % for exprs in cls.env_spec.envs_expressions:
+         % if exprs.is_post:
+         ${emit_add_to_env(exprs)}
+         % endif
+         % endfor
       end Post_Env_Actions;
       % endif
 
