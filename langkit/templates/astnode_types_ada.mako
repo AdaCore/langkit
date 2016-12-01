@@ -420,6 +420,10 @@
 
    % endif
 
+   ###################################
+   ## Lexical Environments Handling ##
+   ###################################
+
    % if not cls.is_env_spec_inherited:
 
    <% call_prop = cls.env_spec._render_field_access %>
