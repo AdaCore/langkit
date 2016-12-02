@@ -1140,8 +1140,16 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: Property
         """
-        new = PropertyDef(self.expr, self.prefix, self._name, self._doc,
-                          self._is_private, self.abstract, self.expected_type)
+        new = PropertyDef(
+            expr=self.expr,
+            prefix=self.prefix,
+            name=self._name,
+            doc=self._doc,
+            private=self._is_private,
+            abstract=self.abstract,
+            type=self.expected_type,
+            has_implicit_env=self._has_implicit_env
+        )
         new.vars = copy(self.vars)
 
         # Copy is used in the context of macros. In macros, we want to copy
