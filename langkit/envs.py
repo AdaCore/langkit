@@ -145,11 +145,17 @@ class EnvSpec(object):
             if expr is None:
                 return None
 
+            # Set has_implicit_env for these internal properties so that they
+            # can use a default environment that the context gives. This
+            # default will be the Self_Env of the parent node, which is always
+            # the same, regardless of being run in the populate lexical env
+            # pass or later on. See Initial_Env_Getter_Fn functions for the
+            # code that fetches this default environment.
             p = PropertyDef(
                 expr, AbstractNodeData.PREFIX_INTERNAL,
                 name=names.Name('_{}_{}'.format(name,
                                                 next(self.PROPERTY_COUNT))),
-                private=True, type=type
+                private=True, type=type, has_implicit_env=True
             )
             result.append(p)
             return p
