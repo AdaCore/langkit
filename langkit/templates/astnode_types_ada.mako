@@ -489,16 +489,13 @@
       Current_Env : Lexical_Env := State.Node.Parent.Self_Env;
       Initial_Env : Lexical_Env := Current_Env;
    begin
-      % if cls.env_spec.initial_env:
-      Initial_Env := ${cls.env_spec.initial_env_expr};
-      % endif
       % if cls.env_spec.env_hook_enabled:
-         ## Initial_Env is passed as an IN OUT parameter, so the hook may
-         ## change it.
          ${ctx.env_hook_subprogram[0]}.${ctx.env_hook_subprogram[1]}
            (Analysis.Internal.Convert (Self.Unit),
-            ${cls.env_spec.env_hook_arg_expr},
-            Initial_Env);
+            ${cls.env_spec.env_hook_arg_expr});
+      % endif
+      % if cls.env_spec.initial_env:
+      Initial_Env := ${cls.env_spec.initial_env_expr};
       % endif
       return Initial_Env;
    end ${env_getter};
