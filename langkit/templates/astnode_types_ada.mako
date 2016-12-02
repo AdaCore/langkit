@@ -485,7 +485,7 @@
    function ${env_getter}
      (State : Env_Getter_State_T) return AST_Envs.Lexical_Env
    is
-      Self : ${cls.name()} := ${cls.name()} (State.Node);
+      Self        : ${cls.name()} := ${cls.name()} (State.Node);
       Current_Env : Lexical_Env := State.Node.Parent.Self_Env;
       Initial_Env : Lexical_Env := Current_Env;
    begin
