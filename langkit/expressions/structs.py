@@ -361,9 +361,8 @@ class FieldAccess(AbstractExpression):
             )
         )
 
-        to_get = assert_type(
-            receiver_expr.type, Struct
-        ).get_abstract_fields_dict().get(self.field, None)
+        to_get = receiver_expr.type.get_abstract_fields_dict().get(self.field,
+                                                                   None)
         ":type: AbstractNodeField"
 
         # If still not found, there's a problem
