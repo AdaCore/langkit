@@ -446,10 +446,16 @@
       % if is_array_type(exprs.val.type):
       for Val of Vals.Items loop
          Add (Env, Key, ${root_node_type_name} (Val), MD => ${md});
+         if Env = Root_Env or else Env.Node.Unit /= Self.Unit then
+            Get_Lex_Env_Data (Val).Is_Contained_By.Append ((Env, Key));
+         end if;
       end loop;
       Dec_Ref (Vals);
       % else:
       Add (Env, Key, Val, MD => ${md});
+      if Env = Root_Env or else Env.Node.Unit /= Self.Unit then
+         Get_Lex_Env_Data (Val).Is_Contained_By.Append ((Env, Key));
+      end if;
       % endif
    end;
    </%def>
@@ -572,6 +578,13 @@
            (Parent        => G,
             Node          => Self,
             Is_Refcounted => False);
+
+         ## Case 1: This env is gonna be rooted into the env of another unit
+         if Initial_Env /= Root_Env and then Initial_Env.Node.Unit /= Self.Unit
+         then
+            Get_Lex_Env_Data (Initial_Env.Node).Contains.Append
+              (${root_node_type_name} (Self));
+         end if;
 
          Register_Destroyable (Self.Unit, Self.Self_Env);
       % endif
