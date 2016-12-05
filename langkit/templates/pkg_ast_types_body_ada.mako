@@ -45,7 +45,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types is
 
    pragma Warnings (Off, "referenced");
    function Get_Lex_Env_Data
-     (Node : ${root_node_type_name}) return Lex_Env_Data
+     (Node : access ${root_node_value_type}'Class) return Lex_Env_Data
    is (${_self.ada_api_settings.lib_name}.Analysis.Get_Lex_Env_Data
         (Analysis.Internal.Convert (Node.Unit)));
    pragma Warnings (On, "referenced");
