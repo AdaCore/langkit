@@ -24,7 +24,7 @@ package Langkit_Support.Vectors is
    subtype Elements_Array is Elements_Arrays.Array_Type;
    subtype Index_Type is Elements_Arrays.Index_Type;
 
-   type Vector is private
+   type Vector is tagged private
      with Iterable =>
        (First       => First_Index,
         Next        => Next,
@@ -132,18 +132,18 @@ private
    subtype Small_Array_Type
      is Elements_Arrays.Array_Type (1 .. Small_Vector_Capacity);
 
-   type Vector is record
+   type Vector is tagged record
       E        : Elements_Array_Access := null;
       Size     : Natural := 0;
       Capacity : Natural := Small_Vector_Capacity;
       SV       : Small_Array_Type;
    end record;
 
-   Empty_Vector : constant Vector := (E => null, Size => 0, others => <>);
-
    procedure Reserve (Self : in out Vector; Capacity : Positive)
      with Inline;
    --  Reserve Capacity elements
+
+   Empty_Vector : constant Vector := (E => null, Size => 0, others => <>);
 
    function Has_Element (Self : Vector; N : Index_Type) return Boolean is
      (N <= Last_Index (Self));
