@@ -429,29 +429,29 @@
    <% call_prop = cls.env_spec._render_field_access %>
 
    <%def name="add(exprs)">
-   % if is_array_type(exprs.val.type):
-      declare
-         Vals : ${exprs.val.type.name()} := ${call_prop(exprs.val)};
-      begin
-         for Val of Vals.Items loop
-            Add (${call_prop(exprs.dest_env) \
-                   if exprs.dest_env else "Initial_Env"},
-                 ${"El" if is_array_type(exprs.key.type) \
-                   else call_prop(exprs.key)},
-                 ${root_node_type_name} (Val),
-                 MD => ${call_prop(exprs.metadata) \
-                 if exprs.metadata else "No_Metadata"});
-         end loop;
-         Dec_Ref (Vals);
-      end;
-   % else:
-      Add (${call_prop(exprs.dest_env) \
-             if exprs.dest_env else "Initial_Env"},
-           ${"El" if is_array_type(exprs.key.type) else call_prop(exprs.key)},
-           ${root_node_type_name} (${call_prop(exprs.val)}),
-           MD => ${call_prop(exprs.metadata) \
-           if exprs.metadata else "No_Metadata"});
-   % endif
+   <% md = call_prop(exprs.metadata) if exprs.metadata else "No_Metadata" %>
+
+   declare
+      Env : Lexical_Env :=
+        ${call_prop(exprs.dest_env) if exprs.dest_env else "Initial_Env"};
+      Key : Symbol_Type :=
+        ${"El" if is_array_type(exprs.key.type) else call_prop(exprs.key)};
+      % if is_array_type(exprs.val.type):
+      Vals : ${exprs.val.type.name()} := ${call_prop(exprs.val)};
+      % else:
+      Val : ${root_node_type_name} :=
+        ${root_node_type_name} (${call_prop(exprs.val)});
+      % endif
+   begin
+      % if is_array_type(exprs.val.type):
+      for Val of Vals.Items loop
+         Add (Env, Key, ${root_node_type_name} (Val), MD => ${md});
+      end loop;
+      Dec_Ref (Vals);
+      % else:
+      Add (Env, Key, Val, MD => ${md});
+      % endif
+   end;
    </%def>
 
    <%def name="emit_add_to_env(exprs)">
