@@ -201,8 +201,8 @@
 
    % if cls.env_spec.has_post_actions:
       overriding procedure Post_Env_Actions
-        (Self        : access ${type_name};
-         Current_Env : AST_Envs.Lexical_Env);
+        (Self                  : access ${type_name};
+         Current_Env, Root_Env : AST_Envs.Lexical_Env);
    % endif
 
    % endif
@@ -601,8 +601,8 @@
    ----------------------
 
    overriding procedure Post_Env_Actions
-     (Self        : access ${type_name};
-      Current_Env : AST_Envs.Lexical_Env)
+     (Self                  : access ${type_name};
+      Current_Env, Root_Env : AST_Envs.Lexical_Env)
    is
       use AST_Envs;
       Initial_Env : Lexical_Env := Current_Env;
