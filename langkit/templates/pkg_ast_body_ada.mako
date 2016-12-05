@@ -238,6 +238,16 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       end return;
    end Find;
 
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Self : in out Lex_Env_Data_Type) is
+   begin
+      Self.Is_Contained_By.Destroy;
+      Self.Contains.Destroy;
+   end Destroy;
+
    ----------
    -- Find --
    ----------

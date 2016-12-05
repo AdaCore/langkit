@@ -154,6 +154,9 @@ package ${_self.ada_api_settings.lib_name}.AST is
    type Lex_Env_Data_Type is private;
    type Lex_Env_Data is access all Lex_Env_Data_Type;
 
+   procedure Destroy (Self : in out Lex_Env_Data_Type);
+   --  Destroy data associated to lexical environments
+
    function Get
      (A     : AST_Envs.Env_Element_Array;
       Index : Integer)
@@ -967,6 +970,20 @@ private
       return Analysis_Unit_Interface
    is (Node.Unit);
 
-   type Lex_Env_Data_Type is null record;
+   type Containing_Env_Element is record
+      Env : Lexical_Env;
+      Key : Symbol_Type;
+   end record;
+
+   package Containing_Envs is
+   new Langkit_Support.Vectors (Containing_Env_Element);
+
+   package Contained_Nodes is
+   new Langkit_Support.Vectors (Containing_Env_Element);
+
+   type Lex_Env_Data_Type is record
+      Is_Contained_By : Containing_Envs.Vector;
+      Contains        : ${root_node_type_name}_Vectors.Vector;
+   end record;
 
 end ${_self.ada_api_settings.lib_name}.AST;

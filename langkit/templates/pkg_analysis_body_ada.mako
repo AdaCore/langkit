@@ -447,6 +447,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    procedure Destroy (Unit : Analysis_Unit) is
       Unit_Var : Analysis_Unit := Unit;
    begin
+      Destroy (Unit.Lex_Env_Data);
       Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
 
       if Unit.AST_Root /= null then
@@ -460,6 +461,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       end loop;
       Destroyable_Vectors.Destroy (Unit.Destroyables);
       Free (Unit_Var);
+
    end Destroy;
 
    -----------
