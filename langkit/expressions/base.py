@@ -460,7 +460,7 @@ def attr_expr_impl(name, args, kwargs, parameterless=False):
     return internal
 
 
-def auto_attr_custom(name=None, repr_fn=None, *partial_args, **partial_kwargs):
+def auto_attr_custom(name, *partial_args, **partial_kwargs):
     """
     Helper decorator, that will automatically register an AbstractExpression
     subclass accessible as an attribute. Exposes more options than auto_attr.
@@ -468,8 +468,6 @@ def auto_attr_custom(name=None, repr_fn=None, *partial_args, **partial_kwargs):
 
     :param str|None name: The name of the attribute. If None, the name of the
         function will be taken.
-    :param repr_fn: If provided, this must be a function that takes the
-        AbstractExpression as argument to implement a custom __repr__ for it.
     :param [object] partial_args: Arguments to partially apply to the function.
     :param [object] partial_kwargs: Keyword arguments to partially apply to the
         function.
@@ -490,18 +488,13 @@ def auto_attr_custom(name=None, repr_fn=None, *partial_args, **partial_kwargs):
         assert nb_args > 0
 
         decorator = (attr_expr if nb_args == 1 else attr_call)
-        dct = {
-            'attr_name': attr_name,
-            '__init__': __init__,
-            'construct': construct,
-        }
-        if repr_fn:
-            dct['__repr__'] = repr_fn
 
         decorator(attr_name)(type(
             '{}Expression'.format(attr_name),
-            (AbstractExpression, ),
-            dct
+            (AbstractExpression, ), {
+                'construct': construct,
+                '__init__': __init__
+            }
         ))
 
         # We're returning the function because we want to be able to chain
