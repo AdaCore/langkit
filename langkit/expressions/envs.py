@@ -166,9 +166,7 @@ class EnvBindExpr(ResolvedExpression):
         return '<EnvBind.Expr>'
 
 
-@auto_attr_custom(
-    repr_fn=lambda self: '<EvalInEnv {}: {}>'.format(*self.sub_expressions)
-)
+@auto_attr
 def eval_in_env(env_expr, to_eval_expr):
     """
     Expression that will evaluate a subexpression in the context of a
