@@ -344,6 +344,17 @@ class Then(AbstractExpression):
         def __repr__(self):
             return '<Then.Expr>'
 
+    @staticmethod
+    def create_from_exprs(base, then_expr, var_expr):
+        """
+        Create a Then expression without going through a lambda. Used
+        internally to constructs then expressions for the underscore operator.
+        """
+        ret = Then(base, None)
+        ret.then_expr = then_expr
+        ret.var_expr = var_expr
+        return ret
+
     def __init__(self, expr, then_fn, default_val=None):
         """
         :param AbstractExpression expr: The expression to use as a source for
@@ -360,9 +371,10 @@ class Then(AbstractExpression):
         self.var_expr = self.then_expr = None
 
     def do_prepare(self):
-        self.var_expr = AbstractVariable(names.Name("Var_Expr"),
-                                         create_local=True)
-        self.then_expr = self.then_fn(self.var_expr)
+        if not self.then_expr:
+            self.var_expr = AbstractVariable(names.Name("Var_Expr"),
+                                             create_local=True)
+            self.then_expr = self.then_fn(self.var_expr)
 
     def construct(self):
         # Add var_expr to the scope for this Then expression
