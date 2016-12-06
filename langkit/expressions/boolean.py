@@ -1,7 +1,6 @@
 from langkit import names
 from langkit.compiled_types import (
-    ASTNode, BoolType, LexicalEnvType, LongType, Struct, EquationType,
-    LogicVarType, T
+    ASTNode, BoolType, LexicalEnvType, LongType, Struct, EquationType
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
