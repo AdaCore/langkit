@@ -220,26 +220,62 @@ class AbstractExpression(Frozable):
     def prepare(self):
         """
         This method will be called in the top-level construct function, for
-        expressions that have not been prepared yet. When prepare is called,
-        the idea is that AbstractExpressions are not yet frozen so you can
-        still construct new AbstractExpressions, which is not necessarily
-        possible in construct.
+        expressions that have not been prepared yet. It will run a certain
+        number of passes on AbstractExpression trees, before they are frozen.
+
+        This means that if you want to add custom expansions to expression
+        trees, this is a good moment to do it. You can register new passes that
+        will be called on every node, and decide if the pass is called on
+        children first or on the parent first.
+
+        The current passes are:
+        * prepare_pass: A pass that will run the custom do_prepare method on
+          every AbstractExpression in the expression tree, aswell as the first
+          part of the expand_underscores transformation.
+
+        * expand_underscores_2: Second part of the expand_underscores
+          transformation.
         """
-        def explore(obj):
+
+        def prepare_pass(expr):
+            expr.do_prepare()
+            return expr
+
+        passes = [
+            (prepare_pass, True),
+        ]
+
+        def explore(obj, fn, pre=True):
+            """
+            Traversal function. Will traverse the object graph, and call fn on
+            every object that is an AbstractExpression. If fn returns a new
+            AbstractExpression, it will replace the old one in the tree.
+
+            :param obj: The object to visit.
+            :param fn: The fn to apply.
+            :param pre: Whether to explore tree before or after calling fn.
+            """
             if isinstance(obj, AbstractExpression):
-                if not obj.__dict__.get("_is_prepared", False):
-                    obj.do_prepare()
-                    obj.__dict__['_is_prepared'] = True
+                if pre:
+                    obj = fn(obj) or obj
                 for k, v in obj.__dict__.items():
-                    explore(v)
+                    new_v = explore(v, fn)
+                    if new_v:
+                        obj.__dict__[k] = new_v
+                if not pre:
+                    obj = fn(obj) or obj
+                return obj
             elif isinstance(obj, (list, tuple)):
                 for v in obj:
-                    explore(v)
+                    explore(v, fn)
             elif isinstance(obj, (dict)):
                 for v in obj.items():
-                    explore(v)
+                    explore(v, fn)
 
-        explore(self)
+        ret = self
+        for p, order in passes:
+            ret = explore(ret, p, order) or ret
+        return ret
 
     def construct(self):
         """
