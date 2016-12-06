@@ -1,4 +1,4 @@
-== <EnvGet <Env>: <FieldAccess <AbstractVariable Self> tok>> ==
+== <get(<Env>, <FieldAccess <AbstractVariable Self> tok>)> ==
 File "test.py", line 33, in ExampleNode.prop
     Error: This property has no implicit environment parameter: please use the eval_in_env construct to bind an environment first.
 
@@ -7,10 +7,10 @@ File "test.py", line 33, in ExampleNode.prop
   line 47, in FieldAccess expression
     Error: This property has no implicit environment parameter whereas ExampleNode.p_implicit_prop expects one: please use the eval_in_env construct to bind an environment first.
 
-== <EvalInEnv <FieldAccess <AbstractVariable Self> node_env>: <EnvGet <Env>: <FieldAccess <AbstractVariable Self> tok>>> ==
+== <eval_in_env(<FieldAccess <AbstractVariable Self> node_env>, <get(<Env>, <FieldAccess <AbstractVariable Self> tok>)>)> ==
 Code generation was successful
 
-== <EvalInEnv <FieldAccess <AbstractVariable Self> node_env>: <FieldAccess <AbstractVariable Self> implicit_prop>> ==
+== <eval_in_env(<FieldAccess <AbstractVariable Self> node_env>, <FieldAccess <AbstractVariable Self> implicit_prop>)> ==
 Code generation was successful
 
 Done

@@ -530,6 +530,14 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
         def sub_expressions(self):
             return tuple(getattr(self, "expr_{}".format(i))
                          for i in range(self.nb_exprs))
+
+        def __repr__(self):
+            return "<{}{}>".format(
+                self.__class__.__name__,
+                "({})".format(", ".join(str(e) for e in self.sub_expressions))
+                if self.sub_expressions else ""
+            )
+
         nb_args = len(inspect.getargspec(fn).args)
 
         assert nb_args > 0
@@ -537,10 +545,11 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
         decorator = (attr_expr if nb_args == 1 else attr_call)
 
         decorator(attr_name)(type(
-            '{}Expression'.format(attr_name),
+            '{}'.format(attr_name),
             (AbstractExpression, ), {
                 'construct': construct,
                 '__init__': __init__,
+                '__repr__': __repr__,
                 'sub_expressions': sub_expressions,
             }
         ))
