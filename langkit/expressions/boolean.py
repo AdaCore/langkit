@@ -369,6 +369,7 @@ class Then(AbstractExpression):
         self.then_fn = then_fn
         self.default_val = default_val
         self.var_expr = self.then_expr = None
+        self.underscore_then = False
 
     def do_prepare(self):
         if not self.then_expr:

@@ -223,6 +223,43 @@ class AbstractExpression(Frozable):
         """
         pass
 
+    def expand_underscores_1(self):
+        """
+        First pass for underscore expansion. This allows a user to write::
+
+            A._.b
+
+        instead of::
+
+            A.then(lambda real_a: real_a.b)
+        """
+        from langkit.expressions import AbstractVariable, Then, FieldAccess
+
+        for k, v in self.__dict__.items():
+            if isinstance(v, FieldAccess) and v.field == "_":
+                var_expr = AbstractVariable(names.Name("Var_Expr"),
+                                            create_local=True)
+                setattr(self, k, var_expr)
+                t = Then.create_from_exprs(v.receiver, self, var_expr)
+                t.underscore_then = True
+                return t
+
+    def expand_underscores_2(self):
+        """
+        Second pass for underscore expansion. This will hoist further field
+        accesses on an underscore expression, so that a user can write::
+
+            A._.b.c
+        """
+        from langkit.expressions import Then, FieldAccess
+        if (isinstance(self, FieldAccess)
+                and isinstance(self.receiver, Then)
+                and self.receiver.underscore_then):
+            then = self.receiver
+            self.receiver = then.then_expr
+            then.then_expr = self
+            return then
+
     def prepare(self):
         """
         This method will be called in the top-level construct function, for
@@ -244,11 +281,13 @@ class AbstractExpression(Frozable):
         """
 
         def prepare_pass(expr):
+            expr = expr.expand_underscores_1() or expr
             expr.do_prepare()
             return expr
 
         passes = [
             (prepare_pass, True),
+            (lambda expr: expr.expand_underscores_2(), False)
         ]
 
         def explore(obj, fn, pre=True):
