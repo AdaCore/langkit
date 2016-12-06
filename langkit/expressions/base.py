@@ -1398,7 +1398,7 @@ class PropertyDef(AbstractNodeData):
 
         if not self.abstract:
             with self.bind():
-                self.expr.prepare()
+                self.expr = self.expr.prepare() or self.expr
 
         # Add the implicit lexical env. parameter
         self._add_argument(PropertyDef.env_arg_name,
