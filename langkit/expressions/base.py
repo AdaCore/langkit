@@ -522,8 +522,14 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
 
         def __init__(self, *sub_expressions):
             AbstractExpression.__init__(self)
-            self.sub_expressions = sub_expressions
+            self.nb_exprs = len(sub_expressions)
+            for i, expr in enumerate(sub_expressions):
+                setattr(self, "expr_{}".format(i), expr)
 
+        @property
+        def sub_expressions(self):
+            return tuple(getattr(self, "expr_{}".format(i))
+                         for i in range(self.nb_exprs))
         nb_args = len(inspect.getargspec(fn).args)
 
         assert nb_args > 0
@@ -534,7 +540,8 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
             '{}Expression'.format(attr_name),
             (AbstractExpression, ), {
                 'construct': construct,
-                '__init__': __init__
+                '__init__': __init__,
+                'sub_expressions': sub_expressions,
             }
         ))
 
