@@ -408,3 +408,7 @@ class Then(AbstractExpression):
 
         return Then.Expr(expr, construct(self.var_expr), then_expr,
                          default_expr)
+
+    def __repr__(self):
+        return "<Then {}: {} {}>".format(self.expr, self.var_expr,
+                                         self.then_expr)
