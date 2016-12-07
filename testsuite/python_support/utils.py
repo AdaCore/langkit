@@ -114,6 +114,9 @@ def reset_langkit():
     TODO: this is a hack to workaround another hack. At some point in the
     future, we should get rid of this global state in Langkit.
     """
+    from langkit.expressions import Env
+    Env.unfreeze()
+
     StructMetaclass.root_grammar_class = None
     StructMetaclass.astnode_types = []
     StructMetaclass.struct_types = []
