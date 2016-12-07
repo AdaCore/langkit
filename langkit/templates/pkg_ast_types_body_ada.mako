@@ -43,12 +43,10 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types is
       Analysis_Interfaces.Register_Destroyable
         (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env, AST_Envs.Destroy);
 
-   pragma Warnings (Off, "referenced");
    function Get_Lex_Env_Data
      (Node : access ${root_node_value_type}'Class) return Lex_Env_Data
    is (${_self.ada_api_settings.lib_name}.Analysis.Get_Lex_Env_Data
         (Analysis.Internal.Convert (Node.Unit)));
-   pragma Warnings (On, "referenced");
 
    % for struct_type in no_builtins(_self.struct_types):
    ${struct_types.body(struct_type)}
