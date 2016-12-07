@@ -156,7 +156,8 @@ package Langkit_Support.Lexical_Env is
 
       Env             : Internal_Map := null;
       --  Map containing mappings from symbols to elements for this env
-      --  instance. In the generated library, Elements will be AST nodes.
+      --  instance. In the generated library, Elements will be AST nodes. If
+      --  the lexical env is refcounted, then it does not own this env.
 
       Default_MD      : Element_Metadata;
       --  Default metadata for this env instance
@@ -216,14 +217,7 @@ package Langkit_Support.Lexical_Env is
       From_Refd_Env : Boolean := False) return Env_Element_Array;
    --  Get the array of wrapped elements for this key
 
-   function Orphan (Self : Lexical_Env) return Lexical_Env is
-     (new Lexical_Env_Type'(
-        Parent          => No_Env_Getter,
-        Node            => Self.Node,
-        Referenced_Envs => Self.Referenced_Envs,
-        Env             => Self.Env,
-        Default_MD      => Self.Default_MD,
-        Ref_Count       => 1));
+   function Orphan (Self : Lexical_Env) return Lexical_Env;
    --  Return a dynamically allocated copy of Self that has no parent
 
    generic

@@ -119,7 +119,7 @@ package Langkit_Support.Vectors is
    --  will return a string representation of the vector.
 
    function Copy (Self : Vector) return Vector;
-   --  Return newly allocated copy of Self.
+   --  Return newly allocated copy of Self
 
 private
 

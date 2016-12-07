@@ -161,10 +161,12 @@ package body Langkit_Support.Lexical_Env is
       function Get_Own_Elements
         (Self : Lexical_Env) return Env_Element_Array
       is
-         C : Cursor;
+         C : Cursor := Internal_Envs.No_Element;
       begin
+         if Self.Env /= null then
+            C := Self.Env.Find (Key);
+         end if;
 
-         C := Self.Env.Find (Key);
          return
            (if Has_Element (C)
             then Decorate
@@ -223,15 +225,19 @@ package body Langkit_Support.Lexical_Env is
    -----------
 
    function Group (Envs : Lexical_Env_Array) return Lexical_Env is
+      N : constant Lexical_Env :=
+        new Lexical_Env_Type'
+          (Parent          => No_Env_Getter,
+           Node            => No_Element,
+           Referenced_Envs => <>,
+           Env             => null,
+           Default_MD      => Empty_Metadata,
+           Ref_Count       => 1);
    begin
-      return N : constant Lexical_Env := new Lexical_Env_Type'
-        (Parent => No_Env_Getter, Node => No_Element, Ref_Count => 1,
-         Env => new Internal_Envs.Map, others => <>)
-      do
-         for Env of Envs loop
-            Reference (N, Env, No_Element, True);
-         end loop;
-      end return;
+      for Env of Envs loop
+         Reference (N, Env, No_Element, True);
+      end loop;
+      return N;
    end Group;
 
    -------------
@@ -242,6 +248,7 @@ package body Langkit_Support.Lexical_Env is
       procedure Free is
         new Ada.Unchecked_Deallocation (Lexical_Env_Type, Lexical_Env);
    begin
+
       --  Do not free the internal map for ref-counted allocated environments
       --  as all maps are owned by analysis unit owned environments.
 
@@ -249,18 +256,19 @@ package body Langkit_Support.Lexical_Env is
          for Elts of Self.Env.all loop
             Env_Element_Vectors.Destroy (Elts);
          end loop;
-
-         for Ref_Env of Self.Referenced_Envs loop
-            declare
-               Refd_Env : Lexical_Env := Ref_Env.Env;
-            begin
-               Dec_Ref (Refd_Env);
-            end;
-         end loop;
-
-         Referenced_Envs_Vectors.Destroy (Self.Referenced_Envs);
          Destroy (Self.Env);
       end if;
+
+      --  Referenced_Envs on the other hand are always owned by Self
+
+      for Ref_Env of Self.Referenced_Envs loop
+         declare
+            Refd_Env : Lexical_Env := Ref_Env.Env;
+         begin
+            Dec_Ref (Refd_Env);
+         end;
+      end loop;
+      Referenced_Envs_Vectors.Destroy (Self.Referenced_Envs);
 
       Free (Self);
    end Destroy;
@@ -366,5 +374,24 @@ package body Langkit_Support.Lexical_Env is
    begin
       return Env_Getter'(True, State, Fn);
    end Dyn_Env_Getter;
+
+   ------------
+   -- Orphan --
+   ------------
+
+   function Orphan (Self : Lexical_Env) return Lexical_Env is
+   begin
+      for Env of Self.Referenced_Envs loop
+         Inc_Ref (Env.Env);
+      end loop;
+
+      return new Lexical_Env_Type'
+        (Parent          => No_Env_Getter,
+         Node            => Self.Node,
+         Referenced_Envs => Self.Referenced_Envs.Copy,
+         Env             => Self.Env,
+         Default_MD      => Self.Default_MD,
+         Ref_Count       => 1);
+   end Orphan;
 
 end Langkit_Support.Lexical_Env;
