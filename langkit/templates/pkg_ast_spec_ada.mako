@@ -992,9 +992,6 @@ private
    package Containing_Envs is
    new Langkit_Support.Vectors (Containing_Env_Element);
 
-   package Contained_Nodes is
-   new Langkit_Support.Vectors (Containing_Env_Element);
-
    type Lex_Env_Data_Type is record
       Is_Contained_By : Containing_Envs.Vector;
       Contains        : ${root_node_type_name}_Vectors.Vector;
