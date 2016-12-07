@@ -221,4 +221,20 @@ package body Langkit_Support.Vectors is
                     else "") & "]";
    end Image;
 
+   ----------
+   -- Copy --
+   ----------
+
+   function Copy (Self : Vector) return Vector is
+      N : Vector;
+   begin
+      if Self.Length > 0 then
+         N.Reserve (Self.Length);
+      end if;
+      for El of Self loop
+         N.Append (El);
+      end loop;
+      return N;
+   end Copy;
+
 end Langkit_Support.Vectors;

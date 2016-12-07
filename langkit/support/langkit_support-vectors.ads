@@ -118,6 +118,9 @@ package Langkit_Support.Vectors is
    --  returning the representation of an instance of Element_Type as a string,
    --  will return a string representation of the vector.
 
+   function Copy (Self : Vector) return Vector;
+   --  Return newly allocated copy of Self.
+
 private
 
    subtype Internal_Elements_Array is Elements_Arrays.Array_Type (Index_Type);
