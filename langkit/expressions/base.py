@@ -150,7 +150,7 @@ class Frozable(object):
         """
         return self.__dict__.get('_frozen', False)
 
-    def freeze(self):
+    def trigger_freeze(self, value=True):
         """
         Freeze the object and all its frozable components recursively.
         """
@@ -158,18 +158,24 @@ class Frozable(object):
         # AbstractExpression instances can appear in more than one place in
         # expression "trees" (which are more DAGs actually), so avoid
         # unnecessary processing.
-        if self.frozen:
+        if self.frozen and value:
             return
 
         # Deactivate this inspection because we don't want to force every
         # implementer of frozable to call super.
 
         # noinspection PyAttributeOutsideInit
-        self._frozen = True
+        self._frozen = value
 
         for _, val in self.__dict__.items():
             if isinstance(val, Frozable):
                 val.freeze()
+
+    def freeze(self):
+        self.trigger_freeze()
+
+    def unfreeze(self):
+        self.trigger_freeze(False)
 
     @staticmethod
     def protect(func):
