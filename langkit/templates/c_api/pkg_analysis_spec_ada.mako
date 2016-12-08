@@ -324,8 +324,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name('unit_reparse_from_buffer')}";
    ${ada_c_doc('langkit.unit_reparse_buffer', 3)}
 
-   procedure ${capi.get_name('unit_populate_lexical_env')}
+   function ${capi.get_name('unit_populate_lexical_env')}
      (Unit : ${analysis_unit_type})
+      return int
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('unit_populate_lexical_env')}";

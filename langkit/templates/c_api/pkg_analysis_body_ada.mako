@@ -470,8 +470,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          Set_Last_Exception (Exc);
    end;
 
-   procedure ${capi.get_name("unit_populate_lexical_env")}
+   function ${capi.get_name("unit_populate_lexical_env")}
      (Unit : ${analysis_unit_type})
+      return int
    is
    begin
       Clear_Last_Exception;
@@ -480,10 +481,19 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          U : constant Analysis_Unit := Unwrap (Unit);
       begin
          Populate_Lexical_Env (U);
+      exception
+         when Exc : Property_Error =>
+            ## If we reach this handler, it means the expression failed at
+            ## some point because of a safety check. Tell the user about
+            ## it.
+            Set_Last_Exception (Exc, Is_Fatal => False);
+            return 0;
       end;
+      return 1;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
+         return 0;
    end;
 
    ---------------------------------

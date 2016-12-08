@@ -296,7 +296,7 @@ ${capi.get_name("unit_reparse_from_buffer")} (${analysis_unit_type} unit,
                                               size_t buffer_size);
 
 ${c_doc('langkit.unit_populate_lexical_env')}
-extern void
+extern int
 ${capi.get_name("unit_populate_lexical_env")}(${analysis_unit_type} unit);
 
 /*

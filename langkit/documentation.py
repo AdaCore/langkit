@@ -339,6 +339,12 @@ base_langkit_docs = {
     'langkit.unit_populate_lexical_env': """
         Populate the lexical environments for this analysis unit, according to
         the specifications given in the language spec.
+
+        % if lang == 'c':
+            Return 0 on failure and 1 on success.
+        % else:
+            Raise a Property_Error on failure.
+        % endif
     """,
 
     #

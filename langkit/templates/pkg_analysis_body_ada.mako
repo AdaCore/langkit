@@ -504,7 +504,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
    procedure Populate_Lexical_Env (Unit : Analysis_Unit) is
    begin
-      --  TODO??? Handle env invalidation when reparsing an unit
+      --  TODO??? Handle env invalidation when reparsing an unit and when a
+      --  previous call raised a Property_Error.
       if Unit.Is_Env_Populated then
          return;
       end if;

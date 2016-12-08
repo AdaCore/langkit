@@ -317,7 +317,12 @@ class AnalysisUnit(object):
 
     def populate_lexical_env(self):
         ${py_doc('langkit.unit_populate_lexical_env', 8)}
-        _unit_populate_lexical_env(self._c_value)
+        if not _unit_populate_lexical_env(self._c_value):
+            exc = _get_last_exception()
+            if exc:
+                raise PropertyError(*exc.contents.wrap().args)
+            else:
+                raise PropertyError()
 
     @property
     def root(self):
@@ -935,8 +940,7 @@ _unit_reparse_from_buffer = _import_func(
 )
 _unit_populate_lexical_env = _import_func(
     '${capi.get_name("unit_populate_lexical_env")}',
-    [_analysis_unit],
-    None
+    [_analysis_unit], ctypes.c_int
 )
 
 # General AST node primitives
