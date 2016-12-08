@@ -1,0 +1,3 @@
+Calling AnalysisUnit.populate_lexical_env()...
+Got a PropertyError as expected!
+Done.
