@@ -496,7 +496,10 @@
      (State : Env_Getter_State_T) return AST_Envs.Lexical_Env
    is
       Self        : ${cls.name()} := ${cls.name()} (State.Node);
-      Current_Env : Lexical_Env := State.Node.Parent.Self_Env;
+      Current_Env : Lexical_Env :=
+        (if State.Node.Parent /= null
+         then State.Node.Parent.Self_Env
+         else State.Node.Self_Env);
       Initial_Env : Lexical_Env := Current_Env;
    begin
       % if cls.env_spec.env_hook_enabled:
