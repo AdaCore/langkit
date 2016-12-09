@@ -10,6 +10,8 @@ with Interfaces.C; use Interfaces.C;
 
 with System;
 
+with GNAT.Byte_Order_Mark;
+
 with GNATCOLL.Iconv;
 with GNATCOLL.Mmap;    use GNATCOLL.Mmap;
 
@@ -34,6 +36,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
    procedure Decode_Buffer
      (Buffer, Charset : String;
+      Read_BOM        : Boolean;
       Decoded_Buffer  : out Text_Access;
       Length          : out Natural);
    --  Allocate a Text_Type buffer, set it to Decoded_Buffer, decode Buffer
@@ -224,6 +227,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
    procedure Lex_From_Filename
      (Filename, Charset : String;
+      Read_BOM          : Boolean;
       TDH               : in out Token_Data_Handler;
       With_Trivia       : Boolean)
    is
@@ -241,7 +245,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
    begin
       begin
-         Lex_From_Buffer (Buffer, Charset, TDH, With_Trivia);
+         Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH, With_Trivia);
       exception
          when Unknown_Charset | Invalid_Input =>
             Free (Region);
@@ -256,15 +260,17 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
    -- Lex_From_Buffer --
    ---------------------
 
-   procedure Lex_From_Buffer (Buffer, Charset : String;
-                              TDH             : in out Token_Data_Handler;
-                              With_Trivia     : Boolean)
+   procedure Lex_From_Buffer
+     (Buffer, Charset : String;
+      Read_BOM        : Boolean;
+      TDH             : in out Token_Data_Handler;
+      With_Trivia     : Boolean)
    is
       Decoded_Buffer : Text_Access;
       Length         : Natural;
       Lexer          : Lexer_Type;
    begin
-      Decode_Buffer (Buffer, Charset, Decoded_Buffer, Length);
+      Decode_Buffer (Buffer, Charset, Read_BOM, Decoded_Buffer, Length);
       Lexer := Lexer_From_Buffer (Decoded_Buffer.all'Address, size_t (Length));
       if With_Trivia then
          Process_All_Tokens_With_Trivia (Lexer, TDH);
@@ -281,9 +287,11 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
    procedure Decode_Buffer
      (Buffer, Charset : String;
+      Read_BOM        : Boolean;
       Decoded_Buffer  : out Text_Access;
       Length          : out Natural)
    is
+      use GNAT.Byte_Order_Mark;
       use GNATCOLL.Iconv;
 
       --  In the worst case, we have one character per input byte, so the
@@ -292,6 +300,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       Result : Text_Access := new Text_Type (1 .. Buffer'Length + 3);
       State  : Iconv_T;
       Status : Iconv_Result;
+      BOM    : BOM_Kind := Unknown;
 
       Input_Index, Output_Index : Positive;
 
@@ -313,6 +322,18 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
          return;
       end if;
 
+      --  If we have a byte order mark, it overrides the requested Charset
+
+      Input_Index := Buffer'First;
+      if Read_BOM then
+         declare
+            Len : Natural;
+         begin
+            GNAT.Byte_Order_Mark.Read_BOM (Buffer, Len, BOM);
+            Input_Index := Input_Index + Len;
+         end;
+      end if;
+
       --  Create the Iconv converter. We will notice unknown charsets here
 
       declare
@@ -322,8 +343,21 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
            (if Default_Bit_Order = Low_Order_First
             then UTF32LE
             else UTF32BE);
+
+         BOM_Kind_To_Charset : constant
+            array (UTF8_All .. UTF32_BE) of String_Access :=
+           (UTF8_All => UTF8'Unrestricted_Access,
+            UTF16_LE => UTF16LE'Unrestricted_Access,
+            UTF16_BE => UTF16BE'Unrestricted_Access,
+            UTF32_LE => UTF32LE'Unrestricted_Access,
+            UTF32_BE => UTF32BE'Unrestricted_Access);
+
+         Actual_Charset : constant String :=
+           (if BOM in UTF8_All .. UTF32_BE
+            then BOM_Kind_To_Charset (BOM).all
+            else Charset);
       begin
-         State := Iconv_Open (To_Code, Charset);
+         State := Iconv_Open (To_Code, Actual_Charset);
       exception
          when Unsupported_Conversion =>
             Free (Result);
@@ -332,7 +366,6 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
       --  Perform the conversion itself
 
-      Input_Index := Buffer'First;
       Output_Index := First_Output_Index;
       Iconv (State,
              Buffer, Input_Index,

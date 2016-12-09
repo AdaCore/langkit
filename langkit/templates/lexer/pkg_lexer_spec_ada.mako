@@ -41,12 +41,14 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
    --  sequence.
 
    procedure Lex_From_Filename (Filename, Charset : String;
+                                Read_BOM          : Boolean;
                                 TDH               : in out Token_Data_Handler;
                                 With_Trivia       : Boolean);
    --  Extract tokens out of Filename and store them into TDH. Raise a
    --  Name_Error exception if the file could not be open.
 
    procedure Lex_From_Buffer (Buffer, Charset : String;
+                              Read_BOM        : Boolean;
                               TDH             : in out Token_Data_Handler;
                               With_Trivia     : Boolean);
    --  Likewise, but extract tokens from an in-memory buffer. This never raises

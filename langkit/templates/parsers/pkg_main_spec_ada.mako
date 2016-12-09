@@ -36,6 +36,7 @@ package ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    function Create_From_File
      (Filename, Charset : String;
+      Read_BOM          : Boolean;
       Unit              : Analysis_Unit_Interface;
       With_Trivia       : Boolean := False) return Parser_type;
    --  Create a parser to parse the source in Filename, decoding it using
@@ -47,6 +48,7 @@ package ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    function Create_From_Buffer
      (Buffer, Charset : String;
+      Read_BOM        : Boolean;
       Unit            : Analysis_Unit_Interface;
       With_Trivia     : Boolean := False) return Parser_type;
    --  Create a parser to parse the source in Buffer, decoding it using

@@ -52,13 +52,14 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    function Create_From_File
      (Filename, Charset : String;
+      Read_BOM          : Boolean;
       Unit              : Analysis_Unit_Interface;
       With_Trivia       : Boolean := False)
       return Parser_type
    is
       TDH : Token_Data_Handler renames Unit.Token_Data.all;
    begin
-      Lex_From_Filename (Filename, Charset, TDH, With_Trivia);
+      Lex_From_Filename (Filename, Charset, Read_BOM, TDH, With_Trivia);
       return (Unit => Unit, TDH => Unit.Token_Data, others => <>);
    end Create_From_File;
 
@@ -68,13 +69,14 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
 
    function Create_From_Buffer
      (Buffer, Charset : String;
+      Read_BOM        : Boolean;
       Unit            : Analysis_Unit_Interface;
       With_Trivia     : Boolean := False)
       return Parser_type
    is
       TDH : Token_Data_Handler renames Unit.Token_Data.all;
    begin
-      Lex_From_Buffer (Buffer, Charset, TDH, With_Trivia);
+      Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH, With_Trivia);
       return (Unit => Unit, TDH => Unit.Token_Data, others => <>);
    end Create_From_Buffer;
 

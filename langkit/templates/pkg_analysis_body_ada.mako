@@ -31,7 +31,10 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
    procedure Do_Parsing
      (Unit       : Analysis_Unit;
-      Get_Parser : access function (Unit : Analysis_Unit) return Parser_Type);
+      Read_BOM   : Boolean;
+      Get_Parser : access function (Unit     : Analysis_Unit;
+                                    Read_BOM : Boolean)
+                                    return Parser_Type);
    --  Helper for Get_Unit and the public Reparse procedures: parse an analysis
    --  unit using Get_Parser and replace Unit's AST_Root and the diagnostics
    --  with the parsers's output.
@@ -40,7 +43,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
      (Context           : Analysis_Context;
       Filename, Charset : String;
       Reparse           : Boolean;
-      Get_Parser        : access function (Unit : Analysis_Unit)
+      Get_Parser        : access function (Unit     : Analysis_Unit;
+                                           Read_BOM : Boolean)
                                            return Parser_Type;
       With_Trivia       : Boolean;
       Rule              : Grammar_Rule)
@@ -119,7 +123,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
      (Context           : Analysis_Context;
       Filename, Charset : String;
       Reparse           : Boolean;
-      Get_Parser        : access function (Unit : Analysis_Unit)
+      Get_Parser        : access function (Unit     : Analysis_Unit;
+                                           Read_BOM : Boolean)
                                            return Parser_Type;
       With_Trivia       : Boolean;
       Rule              : Grammar_Rule)
@@ -131,6 +136,12 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Cur     : constant Cursor := Context.Units_Map.Find (Fname);
       Created : constant Boolean := Cur = No_Element;
       Unit    : Analysis_Unit;
+
+      Read_BOM : constant Boolean := Charset'Length = 0;
+      --  Unless the caller requested a specific charset for this unit, allow
+      --  the lexer to automatically discover the source file encoding before
+      --  defaulting to the context-specific one. We do this trying to match a
+      --  byte order mark.
 
       Actual_Charset : Unbounded_String;
 
@@ -177,7 +188,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          or else Reparse
          or else (With_Trivia and then not Unit.With_Trivia)
       then
-         Do_Parsing (Unit, Get_Parser);
+         Do_Parsing (Unit, Read_BOM, Get_Parser);
       end if;
 
       return Unit;
@@ -189,7 +200,10 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
    procedure Do_Parsing
      (Unit       : Analysis_Unit;
-      Get_Parser : access function (Unit : Analysis_Unit) return Parser_Type)
+      Read_BOM   : Boolean;
+      Get_Parser : access function (Unit     : Analysis_Unit;
+                                    Read_BOM : Boolean)
+                                    return Parser_Type)
    is
 
       procedure Add_Diagnostic (Message : String);
@@ -225,7 +239,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       declare
          use Ada.Exceptions;
       begin
-         Parser := Get_Parser (Unit);
+         Parser := Get_Parser (Unit, Read_BOM);
       exception
          when Exc : Name_Error =>
             --  This happens when we cannot open the source file for lexing:
@@ -274,8 +288,11 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          ${Name.from_lower(_self.main_rule_name)}_Rule)
       return Analysis_Unit
    is
-      function Get_Parser (Unit : Analysis_Unit) return Parser_Type
-      is (Create_From_File (Filename, To_String (Unit.Charset),
+      function Get_Parser
+        (Unit     : Analysis_Unit;
+         Read_BOM : Boolean)
+         return Parser_Type
+      is (Create_From_File (Filename, To_String (Unit.Charset), Read_BOM,
                             Analysis_Unit_Interface (Unit), With_Trivia));
    begin
       return Get_Unit
@@ -297,8 +314,11 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          ${Name.from_lower(_self.main_rule_name)}_Rule)
       return Analysis_Unit
    is
-      function Get_Parser (Unit : Analysis_Unit) return Parser_Type
-      is (Create_From_Buffer (Buffer, To_String (Unit.Charset),
+      function Get_Parser
+        (Unit     : Analysis_Unit;
+         Read_BOM : Boolean)
+         return Parser_Type
+      is (Create_From_Buffer (Buffer, To_String (Unit.Charset), Read_BOM,
                               Analysis_Unit_Interface (Unit), With_Trivia));
    begin
       return Get_Unit (Context, Filename, Charset, True, Get_Parser'Access,
@@ -413,13 +433,17 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
      (Unit    : Analysis_Unit;
       Charset : String := "")
    is
-      function Get_Parser (Unit : Analysis_Unit) return Parser_Type
+      function Get_Parser
+        (Unit     : Analysis_Unit;
+         Read_BOM : Boolean)
+         return Parser_Type
       is (Create_From_File (To_String (Unit.File_Name),
                             To_String (Unit.Charset),
+                            Read_BOM,
                             Analysis_Unit_Interface (Unit)));
    begin
       Update_Charset (Unit, Charset);
-      Do_parsing (Unit, Get_Parser'Access);
+      Do_parsing (Unit, Charset'Length = 0, Get_Parser'Access);
    end Reparse;
 
    -------------
@@ -431,12 +455,15 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Charset : String := "";
       Buffer  : String)
    is
-      function Get_Parser (Unit : Analysis_Unit) return Parser_Type
-      is (Create_From_Buffer (Buffer, To_String (Unit.Charset),
+      function Get_Parser
+        (Unit     : Analysis_Unit;
+         Read_BOM : Boolean)
+         return Parser_Type
+      is (Create_From_Buffer (Buffer, To_String (Unit.Charset), Read_BOM,
                               Analysis_Unit_Interface (Unit)));
    begin
       Update_Charset (Unit, Charset);
-      Do_parsing (Unit, Get_Parser'Access);
+      Do_parsing (Unit, Charset'Length = 0, Get_Parser'Access);
       Unit.Charset := To_Unbounded_String (Charset);
    end Reparse;
 

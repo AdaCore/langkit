@@ -253,7 +253,9 @@ private
       --  if the analysis unit was parsed from a buffer.
 
       Charset          : Unbounded_String;
-      --  The parsing charset for this analysis unit, as a string
+      --  The parsing charset for this analysis unit, as a string. If the
+      --  charset used actually came from a byte order mark, this is
+      --  nevertheless set to the one the user requested.
 
       TDH              : aliased Token_Data_Handler;
       --  The token data handler that handles all token data during parsing and
