@@ -248,6 +248,18 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       Self.Contains.Destroy;
    end Destroy;
 
+   ---------------------------
+   -- Remove_Exiled_Entries --
+   ---------------------------
+
+   procedure Remove_Exiled_Entries (Self : in out Lex_Env_Data_Type) is
+   begin
+      for El of Self.Is_Contained_By loop
+         AST_Envs.Remove (El.Env, El.Key, El.Node);
+      end loop;
+      Self.Is_Contained_By.Clear;
+   end Remove_Exiled_Entries;
+
    ----------
    -- Find --
    ----------

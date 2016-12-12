@@ -157,6 +157,10 @@ package ${_self.ada_api_settings.lib_name}.AST is
    procedure Destroy (Self : in out Lex_Env_Data_Type);
    --  Destroy data associated to lexical environments
 
+   procedure Remove_Exiled_Entries (Self : in out Lex_Env_Data_Type);
+   --  Remove lex env entries that references some of the unit's nodes, in
+   --  lexical environments not owned by the unit.
+
    function Get
      (A     : AST_Envs.Env_Element_Array;
       Index : Integer)
