@@ -660,6 +660,12 @@
       use AST_Envs;
       Initial_Env : Lexical_Env := Current_Env;
    begin
+      % if cls.base().env_spec and cls.env_spec.call_parents:
+         Post_Env_Actions
+           (${cls.base().value_type_name()} (Self.all)'Access,
+            Current_Env, Root_Env);
+      % endif
+
       #############################
       ## Post add_to_env actions ##
       #############################
