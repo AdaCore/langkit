@@ -39,6 +39,8 @@ package Langkit_Support.Vectors is
      with Inline;
    --  Appends Element to Self
 
+   procedure Remove_At (Self : in out Vector; Index : Index_Type);
+
    function Get (Self : Vector; Index : Index_Type) return Element_Type
      with Inline;
    --  Get the element at Index
