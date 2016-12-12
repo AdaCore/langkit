@@ -484,14 +484,16 @@
       for Val of Vals.Items loop
          Add (Env, Key, ${root_node_type_name} (Val), MD => ${md});
          if Env = Root_Env or else Env.Node.Unit /= Self.Unit then
-            Get_Lex_Env_Data (Val).Is_Contained_By.Append ((Env, Key));
+            Get_Lex_Env_Data (Val).Is_Contained_By.Append
+              ((Env, Key, ${root_node_type_name} (Val)));
          end if;
       end loop;
       Dec_Ref (Vals);
       % else:
       Add (Env, Key, Val, MD => ${md});
       if Env = Root_Env or else Env.Node.Unit /= Self.Unit then
-         Get_Lex_Env_Data (Val).Is_Contained_By.Append ((Env, Key));
+         Get_Lex_Env_Data (Val).Is_Contained_By.Append
+           ((Env, Key, Val));
       end if;
       % endif
    end;

@@ -985,8 +985,9 @@ private
    is (Node.Unit);
 
    type Containing_Env_Element is record
-      Env : Lexical_Env;
-      Key : Symbol_Type;
+      Env  : Lexical_Env;
+      Key  : Symbol_Type;
+      Node : ${root_node_type_name};
    end record;
 
    package Containing_Envs is
