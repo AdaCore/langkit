@@ -56,6 +56,23 @@ is
    % endfor
 
 begin
+   % if property.memoized:
+      case Self.${property.memoization_state_field_name} is
+         when Not_Computed =>
+            null;
+         when Computed =>
+            declare
+               Result : constant ${property.type.name()} :=
+                  Self.${property.memoization_value_field_name};
+            begin
+               Inc_Ref (Result);
+               return Result;
+            end;
+         when Raise_Property_Error =>
+            raise Property_Error;
+      end case;
+   % endif
+
    ${property.constructed_expr.render_pre()}
 
    Property_Result := ${property.constructed_expr.render_expr()};
@@ -63,6 +80,14 @@ begin
       Inc_Ref (Property_Result);
    % endif
    ${scopes.finalize_scope(property.vars.root_scope)}
+
+   % if property.memoized:
+      Self.${property.memoization_state_field_name} := Computed;
+      % if property.type.is_refcounted():
+         Inc_Ref (Property_Result);
+      % endif
+      Self.${property.memoization_value_field_name} := Property_Result;
+   % endif
 
    return Property_Result;
 
@@ -74,6 +99,12 @@ begin
                ${scope.finalizer_name};
             % endif
          % endfor
+
+         % if property.memoized:
+            Self.${property.memoization_state_field_name} :=
+               Raise_Property_Error;
+         % endif
+
          raise;
 % endif
 end ${property.name};

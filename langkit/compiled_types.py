@@ -1609,6 +1609,19 @@ class Struct(CompiledType):
         )
 
     @classmethod
+    def get_memoized_properties(cls, include_inherited=False):
+        """
+        Return the list of all memoized properties `cls` has.
+
+        :param bool include_inherited: If true, include inheritted properties
+            in the returned list. Return only properties that were part of the
+            declaration of this node otherwise.
+
+        :rtype: list[langkit.expressions.base.PropertyDef]
+        """
+        return cls.get_properties(lambda p: p.memoized, include_inherited)
+
+    @classmethod
     def get_parse_fields(cls, predicate=None, include_inherited=True):
         """
         Return the list of all the parse fields `cls` has, including its

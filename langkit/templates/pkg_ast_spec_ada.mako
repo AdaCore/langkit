@@ -233,6 +233,13 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Return whether Node is an empty list (so this is wrong for all nodes
    --  that are not lists).
 
+   procedure Reset_Property_Caches (Node : access ${root_node_value_type})
+      is null;
+   --  Reset the properties memoization caches attached to this node.
+   --
+   --  TODO??? This is an internal implementation detail, please don't use
+   --  this.
+
    procedure Destroy
      (Node : access ${root_node_value_type}) is abstract;
    --  Free the resources allocated to this node and all its children.

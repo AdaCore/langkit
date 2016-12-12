@@ -89,6 +89,7 @@
       type_name = cls.value_type_name()
       base_name = cls.base().name()
       ext = ctx.ext("nodes", cls.name(), "public_decls")
+      memoized_properties = cls.get_memoized_properties(include_inherited=True)
    %>
 
    --
@@ -123,6 +124,11 @@
            (Node   : access ${type_name};
             Prefix : String := "");
 
+         % if memoized_properties:
+            overriding procedure Reset_Property_Caches
+              (Node : access ${type_name});
+         % endif
+
          overriding procedure Destroy
            (Node : access ${cls.value_type_name()});
       % endif
@@ -153,8 +159,9 @@
       fields = cls.get_fields(include_inherited=False,
                               predicate=lambda f: f.should_emit)
       ext = ctx.ext("nodes", cls.name(), "components")
+      memoized_properties = cls.get_memoized_properties()
    %>
-   % if fields or ext:
+   % if fields or ext or memoized_properties:
        % for f in fields:
             ${f.name} : aliased ${f.type.storage_type_name()}
                := ${f.type.storage_nullexpr()};
@@ -164,6 +171,15 @@
    % elif emit_null:
       null;
    % endif
+
+   ## Put all state flags first, and only then cached values not to wast too
+   ## much space with alignment. TODO: put all the flags in a packed array.
+   % for p in memoized_properties:
+      ${p.memoization_state_field_name} : Memoization_State := Not_Computed;
+   % endfor
+   % for p in memoized_properties:
+      ${p.memoization_value_field_name} : ${p.type.name()};
+   % endfor
 </%def>
 
 <%def name="private_decl(cls)">
@@ -229,6 +245,8 @@
    type_name = cls.value_type_name()
 
    ext = ctx.ext("nodes", cls.name(), "bodies")
+
+   memoized_properties = cls.get_memoized_properties(include_inherited=True)
    %>
 
    % if not cls.abstract:
@@ -391,6 +409,22 @@
 
       end Print;
 
+      % if memoized_properties:
+         overriding procedure Reset_Property_Caches
+           (Node : access ${cls.value_type_name()})
+         is
+         begin
+            % for p in memoized_properties:
+               % if p.type.is_refcounted():
+                  if Node.${p.memoization_state_field_name} = Computed then
+                     Dec_Ref (Node.${p.memoization_value_field_name});
+                  end if;
+               % endif
+               Node.${p.memoization_state_field_name} := Not_Computed;
+            % endfor
+         end Reset_Property_Caches;
+      % endif
+
       -------------
       -- Destroy --
       -------------
@@ -404,6 +438,9 @@
          if Langkit_Support.Extensions.Has_Extensions then
             Node.Free_Extensions;
          end if;
+         % if memoized_properties:
+            Node.Reset_Property_Caches;
+         % endif
          % for field in astnode_fields:
             if Node.${field.name} /= null then
                Destroy (Node.${field.name});

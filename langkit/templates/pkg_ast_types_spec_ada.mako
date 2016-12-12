@@ -118,6 +118,15 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
 
 private
 
+   type Memoization_State is
+     (Not_Computed,
+      Computed,
+      Raise_Property_Error);
+   --  Implementation detail for properties memoization. Values describe if the
+   --  property is still to be evaluated (Not_Computed), if its result value is
+   --  already available (Comptuted) or if it is known to raise a
+   --  Property_Error (Raise_Property_Error).
+
    % for array_type in _self.sorted_types(_self.array_types):
    % if array_type.element_type().should_emit_array_type:
    ${array_types.private_decl(array_type)}

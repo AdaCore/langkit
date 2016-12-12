@@ -1716,6 +1716,29 @@ class PropertyDef(AbstractNodeData):
         ret = [self.struct] + [a.type for a in exp_args]
         return ret
 
+    @property
+    def memoization_state_field_name(self):
+        """
+        Assuming this property is memoized, return the name of the boolean
+        field that indicates whether there is already a value that has been
+        computed for this property.
+
+        :rtype: names.Name
+        """
+        assert self.memoized
+        return names.Name('In_Cache') + self.name
+
+    @property
+    def memoization_value_field_name(self):
+        """
+        Assuming this property is memoized, return the name of the field that
+        is used to store the cached value for this property.
+
+        :rtype: names.Name
+        """
+        assert self.memoized
+        return names.Name('Cached') + self.name
+
 
 # noinspection PyPep8Naming
 def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
