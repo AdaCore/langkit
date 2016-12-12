@@ -1604,7 +1604,7 @@ class Struct(CompiledType):
         :rtype: list[langkit.expressions.base.PropertyDef]
         """
         return cls.get_abstract_fields(
-            lambda f: (predicate is None or predicate(f)) and f.is_property,
+            lambda f: f.is_property and (predicate is None or predicate(f)),
             include_inherited
         )
 
