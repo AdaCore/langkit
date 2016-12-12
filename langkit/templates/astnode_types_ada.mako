@@ -482,12 +482,22 @@
    begin
       % if is_array_type(exprs.val.type):
       for Val of Vals.Items loop
+         ## Add the element to the environment
          Add (Env, Key, ${root_node_type_name} (Val), MD => ${md});
+
+         ## If we're adding the element to an env that belongs to a different
+         ## unit, then:
          if Env = Root_Env or else Env.Node.Unit /= Self.Unit then
+            ## Add the env, the key, and the value to the list of entries
+            ## contained in other units, so we can remove them when reparsing
+            ## val's unit.
             Get_Lex_Env_Data (Val).Is_Contained_By.Append
               ((Env, Key, ${root_node_type_name} (Val)));
 
             if Env /= Root_Env then
+               ## Add Val to the list of entries that env's unit contains, so
+               ## that when the unit is reparsed, we can call add_to_env again
+               ## on those nodes.
                Get_Lex_Env_Data (Env.Node).Contains.Append
                  (${root_node_type_name} (Val));
             end if;
