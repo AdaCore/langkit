@@ -1592,7 +1592,7 @@ class Struct(CompiledType):
     @classmethod
     def get_properties(cls, predicate=None, include_inherited=True):
         """
-        Return the list of all the fields `cls` has, including its parents'.
+        Return the list of all the fields `cls` has.
 
         :param predicate: Predicate to filter fields if needed.
         :type predicate: None|(Field) -> bool
