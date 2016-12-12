@@ -17,6 +17,8 @@ use ${get_context().ada_api_settings.lib_name}.AST.Types.Parsers;
 
 package body ${_self.ada_api_settings.lib_name}.Analysis is
 
+   procedure Update_After_Reparse (Unit : Analysis_Unit);
+
    procedure Destroy (Unit : Analysis_Unit);
 
    procedure Free is new Ada.Unchecked_Deallocation
@@ -190,6 +192,11 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          or else (With_Trivia and then not Unit.With_Trivia)
       then
          Do_Parsing (Unit, Read_BOM, Get_Parser);
+      end if;
+
+      --  If we're in a reparse, do necessary updates
+      if Reparse or else (With_Trivia and then not Unit.With_Trivia) then
+         Update_After_Reparse (Unit);
       end if;
 
       return Unit;
@@ -446,6 +453,20 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       end if;
    end Dec_Ref;
 
+   --------------------------
+   -- Update_After_Reparse --
+   --------------------------
+
+   procedure Update_After_Reparse (Unit : Analysis_Unit)
+   is
+   begin
+      if Unit.Is_Env_Populated then
+         Unit.Is_Env_Populated := False;
+         Remove_Exiled_Entries (Unit.Lex_Env_Data);
+         Populate_Lexical_Env (Unit);
+      end if;
+   end Update_After_Reparse;
+
    -------------
    -- Reparse --
    -------------
@@ -465,6 +486,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    begin
       Update_Charset (Unit, Charset);
       Do_parsing (Unit, Charset'Length = 0, Get_Parser'Access);
+      Update_After_Reparse (Unit);
    end Reparse;
 
    -------------
@@ -486,6 +508,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Update_Charset (Unit, Charset);
       Do_parsing (Unit, Charset'Length = 0, Get_Parser'Access);
       Unit.Charset := To_Unbounded_String (Charset);
+      Update_After_Reparse (Unit);
    end Reparse;
 
    -------------
