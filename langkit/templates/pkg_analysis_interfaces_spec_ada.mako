@@ -44,6 +44,10 @@ package ${_self.ada_api_settings.lib_name}.Analysis_Interfaces is
    is abstract;
    --  Check whether the Referenced unit is referenced from Unit
 
+   procedure Set_Filled_Caches (Unit : access Analysis_Unit_Interface_Type)
+   is abstract;
+   --  Tag Unit as having filled caches for properties memoization
+
    generic
       type T is private;
       type T_Access is access all T;

@@ -161,20 +161,21 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
       if Created then
          Unit := new Analysis_Unit_Type'
-           (Context          => Context,
-            Ref_Count        => 1,
-            AST_Root         => null,
-            File_Name        => Fname,
-            Charset          => <>,
-            TDH              => <>,
-            Diagnostics      => <>,
-            With_Trivia      => With_Trivia,
-            Is_Env_Populated => False,
-            Rule             => Rule,
-            AST_Mem_Pool     => No_Pool,
-            Destroyables     => Destroyable_Vectors.Empty_Vector,
-            Referenced_Units => <>,
-            Lex_Env_Data     => <>);
+           (Context           => Context,
+            Ref_Count         => 1,
+            AST_Root          => null,
+            File_Name         => Fname,
+            Charset           => <>,
+            TDH               => <>,
+            Diagnostics       => <>,
+            With_Trivia       => With_Trivia,
+            Is_Env_Populated  => False,
+            Has_Filled_Caches => False,
+            Rule              => Rule,
+            AST_Mem_Pool      => No_Pool,
+            Destroyables      => Destroyable_Vectors.Empty_Vector,
+            Referenced_Units  => <>,
+            Lex_Env_Data      => <>);
          Initialize (Unit.TDH, Context.Symbols);
          Context.Units_Map.Insert (Fname, Unit);
       else
@@ -232,7 +233,13 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          Free (Unit.AST_Mem_Pool);
       end if;
       Unit.AST_Root := null;
+      Unit.Has_Filled_Caches := False;
       Unit.Diagnostics.Clear;
+
+      --  As (re-)loading an unit can change how any AST node property in the
+      --  whole analysis context behaves, we have to invalidate caches. This
+      --  is likely overkill, but kill all caches here as it's easy to do.
+      Reset_Property_Caches (Unit.Context);
 
       --  Now create the parser. This is where lexing occurs, so this is where
       --  we get most "setup" issues: missing input file, bad charset, etc.
@@ -406,6 +413,17 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Destroy (Context.Symbols);
       Free (Context);
    end Destroy;
+
+   ---------------------------
+   -- Reset_Property_Caches --
+   ---------------------------
+
+   procedure Reset_Property_Caches (Context : Analysis_Context) is
+   begin
+      for Unit of Context.Units_Map loop
+         Unit.Reset_Property_Caches;
+      end loop;
+   end Reset_Property_Caches;
 
    -------------
    -- Inc_Ref --
@@ -591,6 +609,16 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Destroyable_Vectors.Append (Unit.Destroyables, (Object, Destroy));
    end Register_Destroyable_Helper;
 
+   -----------------------
+   -- Set_Filled_Caches --
+   -----------------------
+
+   overriding procedure Set_Filled_Caches (Unit : access Analysis_Unit_Type)
+   is
+   begin
+      Unit.Has_Filled_Caches := True;
+   end Set_Filled_Caches;
+
    --------------
    -- Get_Unit --
    --------------
@@ -640,5 +668,31 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    begin
       return Unit.Lex_Env_Data'Unrestricted_Access;
    end Get_Lex_Env_Data;
+
+   ---------------------------
+   -- Reset_Property_Caches --
+   ---------------------------
+
+   procedure Reset_Property_Caches (Unit : access Analysis_Unit_Type) is
+
+      -----------
+      -- Visit --
+      -----------
+
+      function Visit
+        (Node : access ${root_node_value_type}'Class)
+         return Visit_Status
+      is
+      begin
+         Node.Reset_Property_Caches;
+         return Into;
+      end Visit;
+
+   begin
+      if Unit.Has_Filled_Caches and Unit.AST_Root /= null then
+         Unit.AST_Root.Traverse (Visit'Access);
+      end if;
+      Unit.Has_Filled_Caches := False;
+   end Reset_Property_Caches;
 
 end ${_self.ada_api_settings.lib_name}.Analysis;
