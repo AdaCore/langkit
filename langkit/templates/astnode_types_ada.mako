@@ -212,7 +212,8 @@
 
       overriding function Pre_Env_Actions
         (Self                  : access ${type_name};
-         Current_Env, Root_Env : AST_Envs.Lexical_Env)
+         Current_Env, Root_Env : AST_Envs.Lexical_Env;
+         Add_To_Env_Only       : Boolean := False)
          return AST_Envs.Lexical_Env;
 
    % if cls.env_spec.has_post_actions:
@@ -579,7 +580,8 @@
 
    overriding function Pre_Env_Actions
      (Self                  : access ${type_name};
-      Current_Env, Root_Env : AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
+      Current_Env, Root_Env : AST_Envs.Lexical_Env;
+      Add_To_Env_Only       : Boolean := False) return AST_Envs.Lexical_Env
    is
       use AST_Envs;
 
@@ -594,7 +596,7 @@
       % if cls.base().env_spec and cls.env_spec.call_parents:
          Initial_Env := Pre_Env_Actions
            (${cls.base().value_type_name()} (Self.all)'Access,
-            Current_Env, Root_Env);
+            Current_Env, Root_Env, Add_To_Env_Only);
       % endif
 
       ## initial_env
@@ -610,6 +612,11 @@
       ${emit_add_to_env(exprs)}
       % endif
       % endfor
+
+      --  Return early if we only want to run add_to_env actions
+      if Add_To_Env_Only then
+         return Initial_Env;
+      end if;
 
       ## ref_envs
 

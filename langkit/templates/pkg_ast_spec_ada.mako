@@ -767,7 +767,8 @@ private
 
    function Pre_Env_Actions
      (Self                  : access ${root_node_value_type};
-      Current_Env, Root_Env : AST_Envs.Lexical_Env) return AST_Envs.Lexical_Env
+      Current_Env, Root_Env : AST_Envs.Lexical_Env;
+      Add_To_Env_Only       : Boolean := False) return AST_Envs.Lexical_Env
    is (null);
    --  Internal procedure that will execute all necessary lexical env actions
    --  for Node. This is meant to be called by Populate_Lexical_Env, and not by
