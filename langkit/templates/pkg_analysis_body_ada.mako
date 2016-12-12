@@ -225,6 +225,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    begin
       --  If we have an AST_Mem_Pool already, we are reparsing. We want to
       --  destroy it to free all the allocated memory.
+      if Unit.AST_Root /= null then
+         Unit.AST_Root.Destroy;
+      end if;
       if Unit.AST_Mem_Pool /= No_Pool then
          Free (Unit.AST_Mem_Pool);
       end if;
