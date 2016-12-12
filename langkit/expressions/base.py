@@ -1097,7 +1097,7 @@ class PropertyDef(AbstractNodeData):
 
     def __init__(self, expr, prefix, name=None, doc=None, private=None,
                  abstract=False, type=None, abstract_runtime_check=False,
-                 has_implicit_env=None):
+                 has_implicit_env=None, memoized=False):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -1145,6 +1145,9 @@ class PropertyDef(AbstractNodeData):
             the overriden property, or False in there is no property to
             override. Just like `private`, it must always be consistent with
             base classes.
+
+        :param bool memoized: Whether this property must be memoized. Disabled
+            by default.
         """
 
         super(PropertyDef, self).__init__(name=name, private=private)
@@ -1211,6 +1214,8 @@ class PropertyDef(AbstractNodeData):
 
         self._doc = doc
         ":type: str|None"
+
+        self.memoized = memoized
 
     @property
     def uid(self):
@@ -1583,6 +1588,12 @@ class PropertyDef(AbstractNodeData):
                 self._has_implicit_env, False
             )
 
+        check_source_language(
+            not self.memoized or not self.abstract,
+            'A property cannot be both memoized and abstract (memoization'
+            ' is not an inheritted attribute)'
+        )
+
     def construct_and_type_expression(self):
         """
         This pass will construct the resolved expression from the abstract
@@ -1723,7 +1734,8 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 
 
 # noinspection PyPep8Naming
-def Property(expr, doc=None, private=None, type=None, has_implicit_env=None):
+def Property(expr, doc=None, private=None, type=None, has_implicit_env=None,
+             memoized=False):
     """
     Public constructor for concrete properties. You can declare your properties
     on your ast node subclasses directly, like this::
@@ -1742,7 +1754,7 @@ def Property(expr, doc=None, private=None, type=None, has_implicit_env=None):
     """
     return PropertyDef(expr, AbstractNodeData.PREFIX_PROPERTY, doc=doc,
                        private=private, type=type,
-                       has_implicit_env=has_implicit_env)
+                       has_implicit_env=has_implicit_env, memoized=memoized)
 
 
 class AbstractKind(Enum):
@@ -1752,7 +1764,8 @@ class AbstractKind(Enum):
 
 
 def langkit_property(private=None, return_type=None,
-                     kind=AbstractKind.concrete, has_implicit_env=None):
+                     kind=AbstractKind.concrete, has_implicit_env=None,
+                     memoized=False):
     """
     Decorator to create properties from real python methods. See Property for
     more details.
@@ -1770,7 +1783,7 @@ def langkit_property(private=None, return_type=None,
             abstract=kind in [AbstractKind.abstract,
                               AbstractKind.abstract_runtime_check],
             abstract_runtime_check=kind == AbstractKind.abstract_runtime_check,
-            has_implicit_env=has_implicit_env,
+            has_implicit_env=has_implicit_env, memoized=memoized
         )
     return decorator
 
