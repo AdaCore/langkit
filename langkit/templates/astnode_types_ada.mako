@@ -173,7 +173,7 @@
       base_name = cls.base().name()
    %>
 
-   type ${type_name} is ${"abstract" if cls.abstract else "" }
+   type ${type_name} is ${"abstract" if cls.abstract else ""}
       new ${cls.base().value_type_name()} with record
       ${node_fields(cls)}
    end record;
