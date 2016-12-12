@@ -80,6 +80,24 @@ package body Langkit_Support.Vectors is
       end if;
    end Get;
 
+   ---------
+   -- Set --
+   ---------
+
+   procedure Set (Self : in out Vector; Index : Index_Type; E : Element_Type)
+   is
+   begin
+      if Small_Vector_Capacity = 0 then
+         Self.E (Index) := E;
+      else
+         if Self.Capacity = Small_Vector_Capacity then
+            Self.SV (Index) := E;
+         else
+            Self.E (Index) := E;
+         end if;
+      end if;
+   end Set;
+
    ----------------
    -- Get_Access --
    ----------------

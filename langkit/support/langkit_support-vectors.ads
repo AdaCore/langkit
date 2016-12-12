@@ -43,6 +43,10 @@ package Langkit_Support.Vectors is
      with Inline;
    --  Get the element at Index
 
+   procedure Set (Self : in out Vector; Index : Index_Type; E : Element_Type)
+     with Inline;
+   --  Set the element at Index to E
+
    function Get_Access
      (Self : Vector; Index : Index_Type)
       return Element_Access
