@@ -109,6 +109,26 @@ package body Langkit_Support.Lexical_Env is
       Append (Reference (Self.Env.all, C).Element.all, Env_El);
    end Add;
 
+   ------------
+   -- Remove --
+   ------------
+
+   procedure Remove
+     (Self  : Lexical_Env;
+      Key   : Symbol_Type;
+      Value : Element_T)
+   is
+      V : constant Internal_Envs.Reference_Type := Self.Env.Reference (Key);
+   begin
+      --  Get rid of element
+      for I in 1 .. V.Length loop
+         if V.Get (I).El = Value then
+            V.Remove_At (I);
+            exit;
+         end if;
+      end loop;
+   end Remove;
+
    ---------
    -- Get --
    ---------

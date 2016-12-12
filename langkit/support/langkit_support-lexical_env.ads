@@ -192,6 +192,12 @@ package Langkit_Support.Lexical_Env is
       MD    : Element_Metadata := Empty_Metadata);
    --  Add Value to the list of values for the key Key, with the metadata MD
 
+   procedure Remove
+     (Self  : Lexical_Env;
+      Key   : Symbol_Type;
+      Value : Element_T);
+   --  Remove Value from the list of values for the key Key
+
    procedure Reference
      (Self            : Lexical_Env;
       To_Reference    : Lexical_Env;
