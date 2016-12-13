@@ -1754,7 +1754,7 @@ class PropertyDef(AbstractNodeData):
 def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
     """
     Public constructor for abstract properties, where you can pass no
-    expression but must pass a type. See _Property for further documentation.
+    expression but must pass a type. See PropertyDef for further documentation.
 
     :type type: CompiledType
     :type doc: str
