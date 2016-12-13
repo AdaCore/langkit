@@ -464,6 +464,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          Unit.Is_Env_Populated := False;
          Remove_Exiled_Entries (Unit.Lex_Env_Data);
          Populate_Lexical_Env (Unit);
+         Reroot_Foreign_Nodes (Unit.Lex_Env_Data, Unit.Context.Root_Scope);
+
       end if;
    end Update_After_Reparse;
 
