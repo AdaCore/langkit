@@ -894,8 +894,8 @@ private
      (Node : access ${root_node_value_type}'Class)
       return Boolean
    is (Node.Token_End = No_Token_Index);
-   --  Returns whether the node is a ghost node or not, eg. whether it
-   --  corresponds to a real chain of tokens in the source or not.
+   --  Returns whether the node is a ghost node, i.e. whether it corresponds to
+   --  a real chain of tokens in the source.
 
    --------------------
    -- Token Iterator --
