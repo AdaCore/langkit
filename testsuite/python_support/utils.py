@@ -90,6 +90,10 @@ def build_and_run(grammar, py_script,
 
     m = Manage()
 
+    extensions_dir = os.path.abspath('extensions')
+    if os.path.isdir(extensions_dir):
+        ctx.extensions_dir = extensions_dir
+
     # First build the library
     argv = ['-vnone', 'make']
     if ctx.library_fields_all_public:
