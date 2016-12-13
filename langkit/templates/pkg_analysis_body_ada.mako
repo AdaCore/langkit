@@ -461,9 +461,20 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    is
    begin
       if Unit.Is_Env_Populated then
+
+         --  Reset the flag so that Populate_Lexical_Env does its work
          Unit.Is_Env_Populated := False;
+
+         --  First we'll remove old entries referencing the old translation
+         --  unit in foreign lexical envs.
          Remove_Exiled_Entries (Unit.Lex_Env_Data);
+
+         --  Then we'll recreate the lexical env structure for the newly parsed
+         --  unit.
          Populate_Lexical_Env (Unit);
+
+         --  Finally, any entry that was rooted in one of the unit's lex envs
+         --  needs to be re-rooted.
          Reroot_Foreign_Nodes (Unit.Lex_Env_Data, Unit.Context.Root_Scope);
 
       end if;
