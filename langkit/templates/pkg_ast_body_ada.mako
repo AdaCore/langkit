@@ -260,6 +260,24 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       Self.Is_Contained_By.Clear;
    end Remove_Exiled_Entries;
 
+   --------------------------
+   -- Reroot_Foreign_Nodes --
+   --------------------------
+
+   procedure Reroot_Foreign_Nodes
+     (Self : in out Lex_Env_Data_Type; Root_Scope : Lexical_Env)
+   is
+      Els : ${root_node_type_name}_Vectors.Elements_Array
+        := Self.Contains.To_Array;
+      Env : Lexical_Env;
+   begin
+      Self.Is_Contained_By.Clear;
+      for El of Els loop
+         Env := El.Pre_Env_Actions (El.Self_Env, Root_Scope, True);
+         El.Post_Env_Actions (Env, Root_Scope);
+      end loop;
+   end Reroot_Foreign_Nodes;
+
    ----------
    -- Find --
    ----------

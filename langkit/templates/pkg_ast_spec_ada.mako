@@ -161,6 +161,11 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  Remove lex env entries that references some of the unit's nodes, in
    --  lexical environments not owned by the unit.
 
+   procedure Reroot_Foreign_Nodes
+     (Self : in out Lex_Env_Data_Type; Root_Scope : Lexical_Env);
+   --  Re-create entries for nodes that are keyed in one of the unit's lexical
+   --  envs.
+
    function Get
      (A     : AST_Envs.Env_Element_Array;
       Index : Integer)
