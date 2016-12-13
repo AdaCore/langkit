@@ -897,6 +897,13 @@ private
    --  Returns whether the node is a ghost node, i.e. whether it corresponds to
    --  a real chain of tokens in the source.
 
+   function Is_Synthetic
+     (Node : access ${root_node_value_type}'Class)
+      return Boolean
+   is (Node.Token_Start = No_Token_Index);
+   --  Returns whether the node is a synthetic node, i.e. whether it was
+   --  generated for semantic analysis instead of parsing.
+
    --------------------
    -- Token Iterator --
    --------------------
