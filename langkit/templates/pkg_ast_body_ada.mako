@@ -1026,7 +1026,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
 
    begin
       Put ("<LexEnv (Id" & Env_Id & ", Parent"
-           & (if Self.Parent /= AST_Envs.No_Env_Getter 
+           & (if Self.Parent /= AST_Envs.No_Env_Getter
               then Parent_Env_Id else " null")
            & "), ");
 
