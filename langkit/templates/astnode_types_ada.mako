@@ -705,7 +705,8 @@
    % endfor
 
    ## Generate the bodies of properties
-   % for prop in cls.get_properties(include_inherited=False):
+   % for prop in cls.get_properties(predicate=lambda p: not p.external, \
+                                    include_inherited=False):
    ${prop.prop_def}
    % endfor
 

@@ -1097,7 +1097,7 @@ class PropertyDef(AbstractNodeData):
 
     def __init__(self, expr, prefix, name=None, doc=None, private=None,
                  abstract=False, type=None, abstract_runtime_check=False,
-                 has_implicit_env=None, memoized=False):
+                 has_implicit_env=None, memoized=False, external=False):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -1148,6 +1148,12 @@ class PropertyDef(AbstractNodeData):
 
         :param bool memoized: Whether this property must be memoized. Disabled
             by default.
+
+        :param bool external: Whether this property's implementation is
+            provided by the language specification. If true, `expr` must be
+            None and the implementation must be provided in the
+            extensions/nodes/{node_name}/bodies extension file. Note that the
+            engines always generate the public declaration part.
         """
 
         super(PropertyDef, self).__init__(name=name, private=private)
@@ -1216,6 +1222,7 @@ class PropertyDef(AbstractNodeData):
         ":type: str|None"
 
         self.memoized = memoized
+        self.external = external
 
     @property
     def uid(self):
@@ -1242,7 +1249,8 @@ class PropertyDef(AbstractNodeData):
             private=self._is_private,
             abstract=self.abstract,
             type=self.expected_type,
-            has_implicit_env=self._has_implicit_env
+            has_implicit_env=self._has_implicit_env,
+            external=self.external,
         )
         new.vars = copy(self.vars)
 
@@ -1604,13 +1612,27 @@ class PropertyDef(AbstractNodeData):
                 'A memoized property is not allowed to take explicit arguments'
             )
 
+        if self.external:
+            check_source_language(
+                self.expr is None,
+                'An external property cannot have a DSL implementation'
+            )
+            check_source_language(
+                not self.abstract,
+                'An external property cannot be abstract'
+            )
+            check_source_language(
+                not self.memoized,
+                'An external property cannot be memoized'
+            )
+
     def construct_and_type_expression(self):
         """
         This pass will construct the resolved expression from the abstract
         expression, and get type information at the same time.
         """
         # If expr has already been constructed, return
-        if self.constructed_expr or self.abstract:
+        if self.constructed_expr or self.abstract or self.external:
             return
 
         with self.bind(), Self.bind_type(self.struct):
@@ -1748,6 +1770,18 @@ class PropertyDef(AbstractNodeData):
         """
         assert self.memoized
         return names.Name('Cached') + self.name
+
+
+def ExternalProperty(type=None, doc="", **kwargs):
+    """
+    Public constructor for properties whose implementation is provided by the
+    language specification. See PropertyDef for further documentation.
+    :type type: CompiledType
+    :type doc: str
+    :rtype: PropertyDef
+    """
+    return PropertyDef(expr=None, prefix=AbstractNodeData.PREFIX_PROPERTY,
+                       type=type, doc=doc, external=True, **kwargs)
 
 
 # noinspection PyPep8Naming

@@ -6,7 +6,7 @@
 ## Regular property function
 
 pragma Warnings (Off, "is not referenced");
-% if not property.abstract:
+% if not property.abstract and not property.external:
 ${"overriding" if property.overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name()}
