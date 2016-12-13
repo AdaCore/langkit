@@ -73,7 +73,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
      (Charset : String := ${string_repr(_self.default_charset)}
       % if _self.default_unit_file_provider:
          ; Unit_File_Provider : Unit_File_Provider_Access_Cst :=
-             ${'.'.join(_self.default_unit_file_provider)}
+             ${_self.default_unit_file_provider.fqn}
       % endif
      ) return Analysis_Context
    is

@@ -107,7 +107,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          % if _self.default_unit_file_provider:
          U : Unit_File_Provider_Access_Cst :=
            (if System.Address (Unit_File_Provider) = System.Null_Address
-            then ${'.'.join(_self.default_unit_file_provider)}
+            then ${_self.default_unit_file_provider.fqn}
             else Unit_File_Provider_Access_Cst (Unwrap (Unit_File_Provider)));
          % endif
 

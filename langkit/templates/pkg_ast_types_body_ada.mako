@@ -31,7 +31,7 @@ with ${_self.ada_api_settings.lib_name}.Analysis;
 pragma Warnings (On, "referenced");
 
 %if _self.env_hook_subprogram:
-with ${_self.env_hook_subprogram[0]};
+with ${_self.env_hook_subprogram.unit_fqn};
 %endif
 
 package body ${_self.ada_api_settings.lib_name}.AST.Types is

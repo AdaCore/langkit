@@ -540,7 +540,7 @@
       Initial_Env : Lexical_Env := Current_Env;
    begin
       % if cls.env_spec.env_hook_enabled:
-         ${ctx.env_hook_subprogram[0]}.${ctx.env_hook_subprogram[1]}
+         ${ctx.env_hook_subprogram.fqn}
            (Analysis.Internal.Convert (Self.Unit),
             ${cls.env_spec.env_hook_arg_expr});
       % endif

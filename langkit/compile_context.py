@@ -184,6 +184,33 @@ class Verbosity(object):
         ]
 
 
+class LibraryEntity(object):
+    """
+    Reference to an entity in the generated library.
+    """
+    def __init__(self, unit_fqn, entity_name):
+        """
+        Create a reference to an entity in the generated library.
+
+        :param str unit_fqn: Fully qualified name for the unit that contains
+            the referenced entity. For instance: "Libfoolang.My_Unit".
+        :param str entity_name: Simple name for the entity that is referenced.
+        """
+        self.unit_fqn = unit_fqn
+        self.entity_name = entity_name
+
+    @property
+    def fqn(self):
+        """
+        Fully qualified name for the referenced entity.
+
+        For instance: "Libfoolang.My_Unit.My_Entity".
+
+        :rtype: str
+        """
+        return '{}.{}'.format(self.unit_fqn, self.entity_name)
+
+
 class CompileCtx():
     """State holder for native code emission."""
 
@@ -239,10 +266,8 @@ class CompileCtx():
             template lookup. This is useful if you want to render custom
             code as part of the compilation process.
 
-        :param (str, str)|None env_hook_subprogram: If provided, define a
-            subprogram to call as the environment hook. The first string is the
-            name of the Ada unit in which this subprogram is defined. The
-            second one is the name of the subprogram itself.
+        :param LibraryEntity|None env_hook_subprogram: If provided, define a
+            subprogram to call as the environment hook.
 
             The environment hook is a subprogram provided by a language
             specification and that can perform arbitrarily complex computations
@@ -268,20 +293,17 @@ class CompileCtx():
             attribute, the hook can alter it so that it affects the rest of the
             EnvSpec actions.
 
-        :param (str, str)|None default_unit_file_provider: If provided, define
-            a Langkit_Support.Unit_Files.Unit_File_Provider_Access object. The
-            first string is the name of the Ada unit in which this subprogram
-            is defined. The second one is the name of the object itself. This
-            object will be used as the default unit file provider during the
-            creation of an analysis context.
+        :param LibraryEntity|None default_unit_file_provider: If provided,
+            define a Langkit_Support.Unit_Files.Unit_File_Provider_Access
+            object. This object will be used as the default unit file provider
+            during the creation of an analysis context.
 
             If None, this disables altogether the unit file provider mechanism
             in code generation.
 
-        :param dict[str, str] documentations: If provided, supply
-            templates to document entities. These will be added to the
-            documentations available in code generation: see
-            langkit.documentation.
+        :param dict[str, str] documentations: If provided, supply templates to
+            document entities. These will be added to the documentations
+            available in code generation: see langkit.documentation.
         """
         from langkit.python_api import PythonAPISettings
 
