@@ -1588,11 +1588,21 @@ class PropertyDef(AbstractNodeData):
                 self._has_implicit_env, False
             )
 
-        check_source_language(
-            not self.memoized or not self.abstract,
-            'A property cannot be both memoized and abstract (memoization'
-            ' is not an inheritted attribute)'
-        )
+        if self.memoized:
+            check_source_language(
+                not self.abstract,
+                'A memoized property cannot be abstract: memoization is not an'
+                ' inheritted behavior'
+            )
+            check_source_language(
+                not self.has_implicit_env,
+                'A memoized property is not allowed to take an implicit env'
+                ' arguments'
+            )
+            check_source_language(
+                not self.explicit_arguments,
+                'A memoized property is not allowed to take explicit arguments'
+            )
 
     def construct_and_type_expression(self):
         """
