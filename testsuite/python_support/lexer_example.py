@@ -13,6 +13,7 @@ class Token(LexerToken):
     RPar = NoText()
     LBrace = NoText()
     RBrace = NoText()
+    Plus = NoText()
 
     Number = WithText()
     Identifier = WithSymbol()
@@ -31,6 +32,7 @@ foo_lexer.add_rules(
     (Literal(')'),           Token.RPar),
     (Literal('{'),           Token.LBrace),
     (Literal('}'),           Token.RBrace),
+    (Literal('+'),           Token.Plus),
 
     (Pattern('[0-9]+'),      Token.Number),
     (Pattern('[a-zA-Z_]+'),  Token.Identifier),
