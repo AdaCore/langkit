@@ -229,13 +229,14 @@ package body ${_self.ada_api_settings.lib_name}.AST is
      return Local_Find_Iterator
    is
    begin
-      return Ret : Local_Find_Iterator do
-         Ret.Traverse_It := Traverse (Root);
+      return Local_Find_Iterator'
+        (Ada.Finalization.Limited_Controlled with
+         Traverse_It => Traverse (Root),
+
          --  We still want to provide this functionality, even though it is
          --  unsafe. TODO: We might be able to make a safe version of this
          --  using generics. Still would be more verbose though.
-         Ret.Predicate   := Predicate'Unrestricted_Access.all;
-      end return;
+         Predicate   => Predicate'Unrestricted_Access.all);
    end Find;
 
    -------------

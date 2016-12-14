@@ -372,7 +372,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
       Element_Vectors => ${root_node_type_name}_Vectors);
 
    type Traverse_Iterator is
-     new ${root_node_type_name}_Iterators.Iterator
+     limited new ${root_node_type_name}_Iterators.Iterator
      with private;
 
    function Traverse
@@ -820,8 +820,8 @@ private
       Element_Vectors   => ${root_node_type_name}_Vectors,
       Iterators         => ${root_node_type_name}_Iterators);
 
-   type Traverse_Iterator
-   is new Traversal_Iterators.Traverse_Iterator with null record;
+   type Traverse_Iterator is
+      limited new Traversal_Iterators.Traverse_Iterator with null record;
 
    type Find_Iterator is limited
       new Ada.Finalization.Limited_Controlled

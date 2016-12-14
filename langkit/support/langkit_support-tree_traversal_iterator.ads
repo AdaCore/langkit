@@ -22,7 +22,7 @@ generic
 
 package Langkit_Support.Tree_Traversal_Iterator is
 
-   type Traverse_Iterator is new Ada.Finalization.Controlled
+   type Traverse_Iterator is limited new Ada.Finalization.Limited_Controlled
      and Iterators.Iterator with private;
    --  Iterator type for Traverse (see below)
 
@@ -37,7 +37,7 @@ private
 
    package Natural_Vectors is new Langkit_Support.Vectors (Natural);
 
-   type Traverse_Iterator is new Ada.Finalization.Controlled
+   type Traverse_Iterator is limited new Ada.Finalization.Limited_Controlled
      and Iterators.Iterator with
       record
          Node, Parent : Element_Type := Null_Value;

@@ -79,7 +79,8 @@ package body Langkit_Support.Tree_Traversal_Iterator is
    function Create (Root : Element_Type) return Traverse_Iterator is
    begin
       return Traverse_Iterator'
-        (Ada.Finalization.Controlled with Root, Null_Value, others => <>);
+        (Ada.Finalization.Limited_Controlled with
+         Root, Null_Value, others => <>);
    end Create;
 
 end Langkit_Support.Tree_Traversal_Iterator;
