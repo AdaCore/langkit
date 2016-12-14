@@ -133,7 +133,7 @@ class IsNull(AbstractExpression):
 
 class New(AbstractExpression):
     """
-    Abstract expression to create Struct values.
+    Abstract expression to create Struct or ASTNode values.
     """
 
     class StructExpr(ResolvedExpression):
@@ -162,7 +162,26 @@ class New(AbstractExpression):
             )
 
         def __repr__(self):
-            return '<New.StructExpr {}>'.format(self.static_type.name().camel)
+            return '<New.{} {}>'.format(type(self).__name__,
+                                        self.static_type.name().camel)
+
+    class NodeExpr(StructExpr):
+        """
+        Resolved expression to create AST node values.
+        """
+
+        def __init__(self, astnode, assocs):
+            p = PropertyDef.get()
+            self.result_var = p.vars.create('New_Node', astnode)
+
+            super(New.NodeExpr, self).__init__(astnode, assocs)
+
+        def _render_pre(self):
+            return (super(New.NodeExpr, self)._render_pre() +
+                    render('properties/new_astnode_ada', expr=self))
+
+        def _render_expr(self):
+            return self.result_var.name
 
     def __init__(self, struct_type, **field_values):
         """
@@ -185,17 +204,21 @@ class New(AbstractExpression):
             )
         ))
 
-        check_source_language(not issubclass(self.struct_type, ASTNode), (
-            "Invalid type, expected struct type, got {} which is an "
-            "ASTNode".format(
-                self.struct_type.name().camel
-            )
-        ))
-
     def construct(self):
         """
         :rtype: NewExpr
         """
+        if issubclass(self.struct_type, ASTNode):
+            check_source_language(
+                not self.struct_type.is_list_type,
+                'List node synthetization is not supported for now'
+            )
+            check_source_language(
+                PropertyDef.get().memoized,
+                'Node synthetization can only happen inside a memoized'
+                ' property'
+            )
+
         # Make sure the provided set of fields matches the one the struct
         # needs.
         def error_if_not_empty(name_set, message):
@@ -230,7 +253,10 @@ class New(AbstractExpression):
             'got {{expr_type}}'.format(name)
         ) for name, value in self.field_values.items()}
 
-        return New.StructExpr(self.struct_type, provided_fields)
+        expr_cls = (New.NodeExpr
+                    if self.struct_type.is_ast_node() else
+                    New.StructExpr)
+        return expr_cls(self.struct_type, provided_fields)
 
 
 class FieldAccess(AbstractExpression):
