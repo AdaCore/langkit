@@ -320,8 +320,6 @@ class Parser(object):
         """
         Helper that will return a error context manager with parameters set
         for the grammar definition.
-
-        :return:
         """
         return Context("In definition of grammar rule {}".format(self.name),
                        self.location)
