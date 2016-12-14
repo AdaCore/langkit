@@ -643,6 +643,11 @@ class CompileCtx():
         for pass_fn in PropertyDef.compilation_passes():
             for astnode in self.astnode_types:
                 for prop in astnode.get_properties(include_inherited=False):
+                    if self.verbosity.debug:
+                        print 'Running {} on {}'.format(
+                            pass_fn.__name__,
+                            prop.qualname,
+                        )
                     with prop.diagnostic_context():
                         pass_fn(prop)
 
