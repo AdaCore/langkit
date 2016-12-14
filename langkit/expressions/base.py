@@ -1631,6 +1631,8 @@ class PropertyDef(AbstractNodeData):
         This pass will construct the resolved expression from the abstract
         expression, and get type information at the same time.
         """
+        from langkit.expressions.envs import Env
+
         # If expr has already been constructed, return
         if self.constructed_expr or self.abstract or self.external:
             return
@@ -1644,8 +1646,13 @@ class PropertyDef(AbstractNodeData):
                     base_prop=base_prop.struct.name().camel
                 )
             ) if base_prop else None
-            self.constructed_expr = construct(self.expr, self.expected_type,
-                                              message)
+
+            # Reset the Env binding so that this construction does not use a
+            # caller's binding.
+            with Env.bind_default(self):
+                self.constructed_expr = construct(self.expr,
+                                                  self.expected_type,
+                                                  message)
 
         # Make sure that all the created local variables are associated to a
         # scope.

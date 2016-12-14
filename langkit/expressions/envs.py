@@ -18,9 +18,11 @@ class EnvVariable(AbstractVariable):
     Singleton abstract variable for the implicit environment parameter.
     """
 
+    default_name = names.Name("Current_Env")
+
     def __init__(self):
         super(EnvVariable, self).__init__(
-            names.Name("Current_Env"),
+            self.default_name,
             type=LexicalEnvType
         )
         self._is_bound = False
@@ -60,6 +62,25 @@ class EnvVariable(AbstractVariable):
         self._is_bound = True
         yield
         self._is_bound = saved_is_bound
+
+    @contextmanager
+    def bind_default(self, prop):
+        """
+        Context manager to setup the default Env binding for "prop".
+
+        This means: no binding if this property has no implicit env argument,
+        and the default one if it has one.
+
+        :type prop: PropertyDef
+        """
+        if prop.has_implicit_env:
+            with self.bind_name(self.default_name):
+                yield
+        else:
+            saved_is_bound = self._is_bound
+            self._is_bound = False
+            yield
+            self._is_bound = saved_is_bound
 
     def construct(self):
         check_source_language(
