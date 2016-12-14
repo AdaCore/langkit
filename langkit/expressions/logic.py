@@ -70,6 +70,12 @@ class Bind(AbstractExpression):
     def do_prepare(self):
         from langkit.compile_context import get_context
 
+        get_context().do_generate_logic_binder(self.conv_prop, self.eq_prop)
+
+    def construct(self):
+        # We have to wait for the construct pass for the following checks
+        # because they rely on type information, which is not supposed to be
+        # computed before this pass.
         if self.conv_prop:
             check_multiple([
                 (self.conv_prop.type.matches(T.root_node),
@@ -80,10 +86,6 @@ class Bind(AbstractExpression):
                  "The property passed to bind must belong to a subtype "
                  "of {}".format(T.root_node.name().camel))
             ])
-
-        get_context().do_generate_logic_binder(self.conv_prop, self.eq_prop)
-
-    def construct(self):
 
         # Those checks are run in construct, because we need the eq_prop to be
         # prepared already, which is not certain in do_prepare (order
