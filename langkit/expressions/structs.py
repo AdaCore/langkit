@@ -175,6 +175,8 @@ class New(AbstractExpression):
         self.field_values = field_values
 
     def do_prepare(self):
+        self.struct_type = resolve_type(self.struct_type)
+
         check_source_language(issubclass(self.struct_type, Struct), (
             "Invalid type, expected struct type, got {}".format(
                 self.struct_type.name().camel
