@@ -85,7 +85,7 @@ class Bind(AbstractExpression):
 
     def construct(self):
 
-        # Those checks are ran in construct, because we need the eq_prop to be
+        # Those checks are run in construct, because we need the eq_prop to be
         # prepared already, which is not certain in do_prepare (order
         # dependent).
 
