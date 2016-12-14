@@ -111,10 +111,10 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
       elsif Check_Complete
         and then Parser.Current_Pos /= Last_Token (Parser.TDH.all)
       then
-         --  If the fail pos is the current position of the parser, it means
-         --  that the longest parse is the correct result, and that we have
-         --  some garbage afterwards.
-         if Parser.Current_Pos = Parser.Last_Fail.Pos then
+         --  If the fail pos is the current position of the parser or after,
+         --  it means that the longest parse is the correct result, and that we
+         --  have some garbage afterwards.
+         if Parser.Current_Pos >= Parser.Last_Fail.Pos then
             declare
                First_Garbage_Token : Token_Data_Type renames
                   Get_Token (Parser.TDH.all, Parser.Current_Pos);
@@ -127,13 +127,14 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
             begin
                Parser.Diagnostics.Append (D);
             end;
+
          --  Else, the last fail pos is further down the line, and we want to
          --  have the diagnostic of what exactly failed.
          else
-            pragma Assert (Parser.Current_Pos < Parser.Last_Fail.Pos);
             Add_Last_Fail_Diagnostic;
          end if;
       end if;
+
    end Process_Parsing_Error;
 
    -----------
