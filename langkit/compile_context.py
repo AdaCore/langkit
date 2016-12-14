@@ -810,7 +810,8 @@ class CompileCtx(object):
             errors_checkpoint()
 
             for r_name, r in self.grammar.rules.items():
-                r.compile()
+                with r.error_context():
+                    r.compile()
                 self.rules_to_fn_names[r_name] = r
 
         unresolved_types = set([t for t in self.astnode_types

@@ -390,6 +390,12 @@ class Parser(object):
         t_env = TemplateEnvironment()
         t_env._self = self
 
+        check_source_language(
+            self.get_type() is not None and
+                issubclass(self.get_type(), ASTNode),
+            'Grammar rules must yield an AST node'
+        )
+
         # Don't emit code twice for the same parser
         if self.gen_fn_name in get_context().fns:
             return
