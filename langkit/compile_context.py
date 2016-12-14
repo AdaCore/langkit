@@ -1080,7 +1080,7 @@ class CompileCtx(object):
 
     @extensions_dir.setter
     def extensions_dir(self, ext_dir):
-        # only set the extensions dir if this directory exists
+        # Only set the extensions dir if this directory exists
         if os.path.isdir(ext_dir):
             self._extensions_dir = os.path.abspath(ext_dir)
 
