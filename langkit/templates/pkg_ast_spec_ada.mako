@@ -419,8 +419,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  function.
 
    overriding function Next
-     (It       : in out Local_Find_Iterator;
-      Element  : out ${root_node_type_name})
+     (It      : in out Local_Find_Iterator;
+      Element : out ${root_node_type_name})
       return Boolean;
 
    function Find
