@@ -18,14 +18,16 @@ is
    Self : ${Self.type.name()} := ${Self.type.name()}
      (${property.self_arg_name});
 
-   ## Properties are evaluated in the context of a lexical environment. If none
-   ## was passed to the property, we assume that the users want to evaluate it
-   ## in the context of the scope of the node.
-   Current_Env : AST_Envs.Lexical_Env :=
-     (if ${property.env_arg_name} /= null
-      then ${property.env_arg_name}
-      else Node.Self_Env);
-   pragma Warnings (On, "is not referenced");
+   % if property.has_implicit_env:
+      ## Properties are evaluated in the context of a lexical environment. If
+      ## none was passed to the property, we assume that the users want to
+      ## evaluate it in the context of the scope of the node.
+      Current_Env : AST_Envs.Lexical_Env :=
+        (if ${property.env_arg_name} /= null
+         then ${property.env_arg_name}
+         else Node.Self_Env);
+      pragma Warnings (On, "is not referenced");
+   % endif
 
    Property_Result : ${property.type.name()} := ${property.type.nullexpr()};
 

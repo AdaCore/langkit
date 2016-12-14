@@ -33,10 +33,20 @@
    with Inline;
 
    function Convert
-     (Self : ${type_name}; From : ${root_class}) return ${root_class} is
-   begin
+     (Self : ${type_name}; From : ${root_class})
       return ${root_class}
-        (${conv_prop.name} (${conv_prop.struct.name()} (From), Self.Env));
+   is
+      % if not conv_prop.has_implicit_env:
+         pragma Unreferenced (Self);
+      % endif
+   begin
+      return ${root_class} (${conv_prop.name}
+        (${conv_prop.struct.name()} (From)
+         % if conv_prop.has_implicit_env:
+            , Self.Env
+         % endif
+        )
+      );
    end Convert;
 </%def>
 
@@ -91,17 +101,26 @@
      % for i, _ in enumerate(formal_node_types):
      ; Node_${i} : ${root_class}
      % endfor
-     ) return Boolean is
+     ) return Boolean
+   is
+      % if not args_types and not prop.has_implicit_env:
+         pragma Unreferenced (Self);
+      % endif
    begin
-      return ${prop.name} (
-         % for i, formal_type in enumerate(formal_node_types):
-         ${formal_type.name()} (Node_${i}),
-         % endfor
-         % for i, _ in enumerate(args_types):
-         Self.Field_${i},
-         % endfor
-         Self.Env
-      );
+      <%
+         args = [
+            '{} (Node_{})'.format(formal_type.name(), i)
+            for i, formal_type in enumerate(formal_node_types)
+         ] + [
+            'Self.Field_{}'.format(i)
+            for i, _ in enumerate(args_types)
+         ] + (
+            ['Self.Env'] if prop.has_implicit_env else []
+         )
+
+         args_fmt = '({})'.format(', '.join(args)) if args else ''
+      %>
+      return ${prop.name} ${args_fmt};
    end Call;
 
    function Image (Self : ${type_name}) return String

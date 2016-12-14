@@ -1404,10 +1404,6 @@ class PropertyDef(AbstractNodeData):
         self.expected_type = resolve_type(self.expected_type)
 
         if not self.expr:
-            # Add the implicit lexical env. parameter
-            self._add_argument(PropertyDef.env_arg_name,
-                               LexicalEnvType,
-                               LexicalEnvType.nullexpr())
             return
 
         # If the user passed a lambda or function for the expression,
@@ -1473,11 +1469,6 @@ class PropertyDef(AbstractNodeData):
         if not self.abstract:
             with self.bind():
                 self.expr = self.expr.prepare() or self.expr
-
-        # Add the implicit lexical env. parameter
-        self._add_argument(PropertyDef.env_arg_name,
-                           LexicalEnvType,
-                           LexicalEnvType.nullexpr())
 
     def freeze_abstract_expression(self):
         """
@@ -1626,6 +1617,12 @@ class PropertyDef(AbstractNodeData):
                 'An external property cannot be memoized'
             )
 
+        # Add the implicit lexical env. parameter if required
+        if self.has_implicit_env:
+            self._add_argument(PropertyDef.env_arg_name,
+                               LexicalEnvType,
+                               LexicalEnvType.nullexpr())
+
     def construct_and_type_expression(self):
         """
         This pass will construct the resolved expression from the abstract
@@ -1695,7 +1692,9 @@ class PropertyDef(AbstractNodeData):
         :rtype: list[Argument]
         """
         # Strip the implicit "Lex_Env" argument
-        return self.arguments[:-1]
+        return (self.arguments[:-1]
+                if self.is_property and self.has_implicit_env else
+                self.arguments)
 
     @classmethod
     def compilation_passes(cls):

@@ -308,12 +308,15 @@ class FieldAccess(AbstractExpression):
                     for actual, formal in zip(
                         self.arguments, self.node_data.explicit_arguments
                     )
-                ] + [(PropertyDef.env_arg_name, str(Env._name))]
+                ]
+                if self.node_data.has_implicit_env:
+                    args.append((PropertyDef.env_arg_name, str(Env._name)))
 
-                ret += " ({})".format(', '.join(
-                    '{} => {}'.format(name, value)
-                    for name, value in args
-                ))
+                if args:
+                    ret += " ({})".format(', '.join(
+                        '{} => {}'.format(name, value)
+                        for name, value in args
+                    ))
 
             else:
                 # If we reach this point, we know that we are accessing a
