@@ -921,7 +921,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    procedure ${capi.get_name('destroy_unit_file_provider')}
      (Provider : ${unit_file_provider_type})
    is
-      P  : Unit_File_Provider_Access := Unwrap (Provider);
+      P : Unit_File_Provider_Access := Unwrap (Provider);
    begin
       Destroy (P);
    end;
