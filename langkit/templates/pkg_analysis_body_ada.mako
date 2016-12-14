@@ -498,7 +498,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
                             Analysis_Unit_Interface (Unit)));
    begin
       Update_Charset (Unit, Charset);
-      Do_parsing (Unit, Charset'Length = 0, Get_Parser'Access);
+      Do_Parsing (Unit, Charset'Length = 0, Get_Parser'Access);
       Update_After_Reparse (Unit);
    end Reparse;
 
@@ -519,7 +519,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
                               Analysis_Unit_Interface (Unit)));
    begin
       Update_Charset (Unit, Charset);
-      Do_parsing (Unit, Charset'Length = 0, Get_Parser'Access);
+      Do_Parsing (Unit, Charset'Length = 0, Get_Parser'Access);
       Unit.Charset := To_Unbounded_String (Charset);
       Update_After_Reparse (Unit);
    end Reparse;
