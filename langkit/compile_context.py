@@ -211,7 +211,7 @@ class LibraryEntity(object):
         return '{}.{}'.format(self.unit_fqn, self.entity_name)
 
 
-class CompileCtx():
+class CompileCtx(object):
     """State holder for native code emission."""
 
     def __init__(self, lang_name, lexer, grammar,
