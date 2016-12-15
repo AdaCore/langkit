@@ -27,8 +27,8 @@ package Langkit_Support.Tree_Traversal_Iterator is
    --  Iterator type for Traverse (see below)
 
    overriding function Next
-     (It       : in out Traverse_Iterator;
-      Element  : out Element_Type) return Boolean;
+     (It      : in out Traverse_Iterator;
+      Element : out Element_Type) return Boolean;
 
    overriding procedure Finalize (It : in out Traverse_Iterator);
 

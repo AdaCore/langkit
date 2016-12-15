@@ -4,8 +4,8 @@ package body Langkit_Support.Tree_Traversal_Iterator is
    -- Next --
    ----------
 
-   function Next (It       : in out Traverse_Iterator;
-                  Element  : out Element_Type) return Boolean
+   function Next (It      : in out Traverse_Iterator;
+                  Element : out Element_Type) return Boolean
    is
       use Natural_Vectors;
 
