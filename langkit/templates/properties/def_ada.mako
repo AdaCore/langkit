@@ -67,7 +67,9 @@ begin
                Result : constant ${property.type.name()} :=
                   Self.${property.memoization_value_field_name};
             begin
-               Inc_Ref (Result);
+               % if property.type.is_refcounted():
+                  Inc_Ref (Result);
+               % endif
                return Result;
             end;
          when Raise_Property_Error =>
