@@ -360,6 +360,10 @@ package body ${_self.ada_api_settings.lib_name}.AST is
         (Get_Token (TDH, Index));
 
    begin
+      if Node.Is_Synthetic then
+         return No_Source_Location_Range;
+      end if;
+
       --  Snapping: We'll go one token before the start token, and one token
       --  after the end token, and the sloc range will extend from the end of
       --  the start token to the start of the end token, including any
