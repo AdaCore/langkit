@@ -1,0 +1,16 @@
+main.py: Running...
+<SynthNode>
+|name: Token(u'main')
+|items:
+|  <LiteralList>
+|  |item 0:
+|  |  <Literal>
+|  |  |tok: Token(u'1')
+|  |item 1:
+|  |  <Literal>
+|  |  |tok: Token(u'2')
+|  |item 2:
+|  |  <Literal>
+|  |  |tok: Token(u'3')
+main.py: Done.
+Done
