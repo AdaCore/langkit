@@ -802,9 +802,6 @@ private
      (N : ${root_node_type_name}) return ${root_node_type_name}
    is (N.Parent);
 
-   function Children_Count (N : ${root_node_type_name}) return Natural
-   is (N.Child_Count);
-
    function First_Child_Index_For_Traverse
      (N : ${root_node_type_name})
       return Natural

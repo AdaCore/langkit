@@ -7,7 +7,6 @@ generic
    type Element_Type is private;
    Null_Value : Element_Type;
 
-   with function Children_Count (T : Element_Type) return Natural is <>;
    with function First_Child_Index (T : Element_Type) return Natural is <>;
    with function Last_Child_Index (T : Element_Type) return Natural is <>;
    with function Get_Child
