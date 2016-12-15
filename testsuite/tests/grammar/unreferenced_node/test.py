@@ -1,4 +1,4 @@
-from langkit.compiled_types import ASTNode, abstract, root_grammar_class
+from langkit.compiled_types import ASTNode, Field, abstract, root_grammar_class
 from langkit.diagnostics import Diagnostics
 from langkit.parsers import Grammar, Row
 
@@ -19,7 +19,7 @@ def lang_def():
         pass
 
     class UnreferencedNode(FooNode):
-        pass
+        untyped_field = Field()
 
     foo_grammar = Grammar('main_rule')
     foo_grammar.add_rules(
