@@ -893,6 +893,15 @@ private
    --  Helper for properties. This is used to turn token indexes as stored in
    --  AST nodes into Token_Type values.
 
+   function Stored_Token
+     (Node  : access ${root_node_value_type}'Class;
+      Token : Token_Type)
+      return Token_Index;
+   --  Helper for properties. This is used to turn a Token_Type value into a
+   --  Token_Index value that can be stored as a field in Node. This raises a
+   --  Property_Error if Node and Token don't belong to the same analysis unit
+   --  or if Token is actually a Trivia.
+
    function Token_Start
      (Node : access ${root_node_value_type}'Class)
       return Token_Type

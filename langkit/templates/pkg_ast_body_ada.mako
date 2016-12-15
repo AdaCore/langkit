@@ -1184,6 +1184,28 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       return Node.Parent;
    end Parent;
 
+   ------------------
+   -- Stored_Token --
+   ------------------
+
+   function Stored_Token
+     (Node  : access ${root_node_value_type}'Class;
+      Token : Token_Type)
+      return Token_Index
+   is
+   begin
+      if Node.Unit.Token_Data /= Token.TDH then
+         raise Property_Error with
+           ("Cannot associate a token and a node from different analysis"
+            & " units");
+      elsif Token.Trivia /= No_Token_Index then
+         raise Property_Error with
+           ("A node cannot hold trivia");
+      end if;
+
+      return Token.Token;
+   end Stored_Token;
+
    -------------
    -- Iterate --
    -------------

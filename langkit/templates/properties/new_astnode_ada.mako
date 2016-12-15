@@ -13,5 +13,6 @@ ${result}.Unit := Self.Unit;
 ## Keep the token start/end null, as expected for a synthetized node
 
 % for name, fld_expr in expr._iter_ordered():
-   ${result}.${name} := ${fld_expr.render_expr()};
+   ${result}.${name} :=
+      ${fld_expr.type.convert_to_storage_expr(result, fld_expr.render_expr())};
 % endfor

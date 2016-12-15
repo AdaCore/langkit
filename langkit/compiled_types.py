@@ -217,7 +217,8 @@ class CompiledType(object):
 
     * storage_type_name;
     * storage_nullexpr;
-    * extract_from_storage_expr.
+    * extract_from_storage_expr;
+    * convert_to_storage_expr.
     """
 
     is_list_type = False
@@ -336,6 +337,20 @@ class CompiledType(object):
             storage value.
         :param str base_expr: Expression that yields the storage value.
         :return: An expression that yields the public value.
+        :rtype: str
+        """
+        return base_expr
+
+    @classmethod
+    def convert_to_storage_expr(cls, node_expr, base_expr):
+        """
+        Turn a public value into a storage value. See documentation for
+        has_special_storage.
+
+        :param str node_expr: Expression that yields the node that will own the
+            resulting storage value.
+        :param str base_expr: Expression that yields the public value:
+        :return: An expression that yields the storage value.
         :rtype: str
         """
         return base_expr
@@ -510,6 +525,10 @@ class LogicVarType(BasicType):
         return "{}'Unrestricted_Access".format(base_expr)
 
     @classmethod
+    def convert_to_storage_expr(cls, node_expr, base_expr):
+        raise NotImplementedError()
+
+    @classmethod
     def c_type(cls, c_api_settings):
         raise Exception("Cannot expose logic variables to C at the moment")
 
@@ -591,6 +610,10 @@ class Token(BasicType):
     @classmethod
     def extract_from_storage_expr(cls, node_expr, base_expr):
         return 'Token ({}, {})'.format(node_expr, base_expr)
+
+    @classmethod
+    def convert_to_storage_expr(cls, node_expr, base_expr):
+        return 'Stored_Token ({}, {})'.format(node_expr, base_expr)
 
     @classmethod
     def c_type(cls, c_api_settings):
