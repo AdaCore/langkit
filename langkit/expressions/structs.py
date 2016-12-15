@@ -1,7 +1,9 @@
 import inspect
 
 from langkit import names
-from langkit.compiled_types import ASTNode, Struct, BoolType, resolve_type
+from langkit.compiled_types import (
+    ASTNode, BoolType, BuiltinField, Field, Struct, UserField, resolve_type
+)
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, LiteralExpr, PropertyDef,
@@ -202,8 +204,12 @@ class New(AbstractExpression):
             )))
 
         # Create a dict of field names to fields in the struct type
-        required_fields = {f._name.lower: f for f in
-                           self.struct_type.get_fields()}
+        required_fields = {
+            f._name.lower: f
+            for f in self.struct_type.get_abstract_fields()
+            if isinstance(f, (Field, UserField)) and
+                not isinstance(f, BuiltinField)
+        }
 
         error_if_not_empty(
             set(required_fields) - set(self.field_values.keys()),
