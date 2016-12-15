@@ -129,7 +129,7 @@
               (Node : access ${type_name});
          % endif
 
-         overriding procedure Destroy
+         overriding procedure Destroy_Node
            (Node : access ${cls.value_type_name()});
       % endif
    % endif
@@ -426,11 +426,11 @@
          end Reset_Property_Caches;
       % endif
 
-      -------------
-      -- Destroy --
-      -------------
+      ------------------
+      -- Destroy_Node --
+      ------------------
 
-      overriding procedure Destroy
+      overriding procedure Destroy_Node
         (Node : access ${cls.value_type_name()})
       is
       begin
@@ -442,17 +442,12 @@
          % if memoized_properties:
             Node.Reset_Property_Caches;
          % endif
-         % for field in astnode_fields:
-            if Node.${field.name} /= null then
-               Destroy (Node.${field.name});
-            end if;
-         % endfor
          % for field in user_fields:
             % if is_logic_var(field.type):
                Eq_Node.Refs.Destroy (Node.${field.name});
             % endif
          % endfor
-      end Destroy;
+      end Destroy_Node;
 
       % endif
 

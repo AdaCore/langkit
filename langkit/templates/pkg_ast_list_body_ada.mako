@@ -101,16 +101,15 @@ package body ${_self.ada_api_settings.lib_name}.AST.List is
       end loop;
    end Print;
 
-   -------------
-   -- Destroy --
-   -------------
+   ------------------
+   -- Destroy_Node --
+   ------------------
 
-   overriding procedure Destroy (Node : access List_Type) is
+   overriding procedure Destroy_Node (Node : access List_Type) is
    begin
-      Free_Extensions (Node);
-      for N of Node.Vec loop
-         Destroy (N);
-      end loop;
-   end Destroy;
+      if Langkit_Support.Extensions.Has_Extensions then
+         Node.Free_Extensions;
+      end if;
+   end Destroy_Node;
 
 end ${_self.ada_api_settings.lib_name}.AST.List;

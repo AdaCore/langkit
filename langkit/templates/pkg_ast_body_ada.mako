@@ -50,6 +50,22 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       Snap       : Boolean := False);
    --  Implementation helpers for the looking up process
 
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Node : access ${root_node_value_type}'Class) is
+   begin
+      if Node = null then
+         return;
+      end if;
+
+      Node.Destroy_Node;
+      for Child of Node.all loop
+         Destroy (Child);
+      end loop;
+   end Destroy;
+
    -----------
    -- Child --
    -----------

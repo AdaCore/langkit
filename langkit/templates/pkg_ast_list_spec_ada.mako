@@ -48,6 +48,6 @@ package ${_self.ada_api_settings.lib_name}.AST.List is
    is
      (Child_Count (${root_node_type_name} (Node)) = 0);
 
-   overriding procedure Destroy (Node : access List_Type);
+   overriding procedure Destroy_Node (Node : access List_Type);
 
 end ${_self.ada_api_settings.lib_name}.AST.List;

@@ -249,8 +249,15 @@ package ${_self.ada_api_settings.lib_name}.AST is
    --  TODO??? This is an internal implementation detail, please don't use
    --  this.
 
-   procedure Destroy
+   procedure Destroy_Node
      (Node : access ${root_node_value_type}) is abstract;
+   --  Free the resources allocated to this node.
+   --
+   --  This is an internal implementation detail, please don't use this.
+   --  TODO??? Hide it somehow: destruction is done automatically when the
+   --  owning analysis unit is destroyed itself.
+
+   procedure Destroy (Node : access ${root_node_value_type}'Class);
    --  Free the resources allocated to this node and all its children.
    --
    --  This is an internal implementation detail, please don't use this.
