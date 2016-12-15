@@ -136,7 +136,7 @@ class New(AbstractExpression):
     Abstract expression to create Struct values.
     """
 
-    class Expr(ResolvedExpression):
+    class StructExpr(ResolvedExpression):
         """
         Resolved expression to create Struct values.
         """
@@ -145,7 +145,7 @@ class New(AbstractExpression):
             self.static_type = struct_type
             self.assocs = assocs
 
-            super(New.Expr, self).__init__()
+            super(New.StructExpr, self).__init__()
 
         def _iter_ordered(self):
             return ((k, self.assocs[k]) for k in sorted(self.assocs))
@@ -162,7 +162,7 @@ class New(AbstractExpression):
             )
 
         def __repr__(self):
-            return '<New.Expr {}>'.format(self.static_type.name().camel)
+            return '<New.StructExpr {}>'.format(self.static_type.name().camel)
 
     def __init__(self, struct_type, **field_values):
         """
@@ -230,7 +230,7 @@ class New(AbstractExpression):
             'got {{expr_type}}'.format(name)
         ) for name, value in self.field_values.items()}
 
-        return New.Expr(self.struct_type, provided_fields)
+        return New.StructExpr(self.struct_type, provided_fields)
 
 
 class FieldAccess(AbstractExpression):
