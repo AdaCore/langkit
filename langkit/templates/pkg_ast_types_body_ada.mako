@@ -11,6 +11,7 @@
 
 with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
 with Ada.Text_IO;                use Ada.Text_IO;
+with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
 pragma Warnings (Off, "referenced");
@@ -43,6 +44,19 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types is
       Analysis_Interfaces.Register_Destroyable
         (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env, AST_Envs.Destroy);
 
+   pragma Warnings (Off, "referenced");
+   procedure Register_Destroyable
+     (Unit : access Analysis_Unit_Interface_Type'Class;
+      Node : ${root_node_type_name});
+   --  Helper for synthetized nodes. We cannot used the generic
+   --  Register_Destroyable because the root AST node is an abstract types, so
+   --  this is implemented using the untyped (using System.Address)
+   --  implementation helper.
+   pragma Warnings (Off, "referenced");
+
+   procedure Destroy_Synthetic_Node (Node : in out ${root_node_type_name});
+   --  Helper for the Register_Destroyable above
+
    function Get_Lex_Env_Data
      (Node : access ${root_node_value_type}'Class) return Lex_Env_Data
    is (${_self.ada_api_settings.lib_name}.Analysis.Get_Lex_Env_Data
@@ -73,5 +87,34 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types is
          ${astnode_types.body(astnode)}
       % endif
    % endfor
+
+   --------------------------
+   -- Register_Destroyable --
+   --------------------------
+
+   procedure Register_Destroyable
+     (Unit : access Analysis_Unit_Interface_Type'Class;
+      Node : ${root_node_type_name})
+   is
+      procedure Helper is new
+         Analysis_Interfaces.Register_Destroyable
+           (${root_node_value_type}'Class,
+            ${root_node_type_name},
+            Destroy_Synthetic_Node);
+   begin
+      Helper (Unit, Node);
+   end Register_Destroyable;
+
+   ----------------------------
+   -- Destroy_Synthetic_Node --
+   ----------------------------
+
+   procedure Destroy_Synthetic_Node (Node : in out ${root_node_type_name}) is
+      procedure Free is new Ada.Unchecked_Deallocation
+        (${root_node_value_type}'Class, ${root_node_type_name});
+   begin
+      Node.Destroy_Node;
+      Free (Node);
+   end Destroy_Synthetic_Node;
 
 end ${_self.ada_api_settings.lib_name}.AST.Types;

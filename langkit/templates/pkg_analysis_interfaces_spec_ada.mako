@@ -49,7 +49,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis_Interfaces is
    --  Tag Unit as having filled caches for properties memoization
 
    generic
-      type T is private;
+      type T (<>) is limited private;
       type T_Access is access all T;
       with procedure Destroy (Object : in out T_Access);
    procedure Register_Destroyable
