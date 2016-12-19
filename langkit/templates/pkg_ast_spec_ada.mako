@@ -177,8 +177,8 @@ package ${_self.ada_api_settings.lib_name}.AST is
    ## Group operation below.
    ${array_types.public_decl(LexicalEnvType.array_type())}
 
-   ## See EnvElement.should_emit_array_type
-   ${array_types.public_decl(EnvElement.array_type())}
+   ## See ASTNode.env_element
+   ${array_types.public_decl(T.root_node.env_element().array_type())}
 
    function Group is new AST_Envs.Group
      (Index_Type        => Positive,
@@ -774,7 +774,7 @@ private
    --  Implementation helper to free the extensions associatde to Node
 
    ${array_types.private_decl(LexicalEnvType.array_type())}
-   ${array_types.private_decl(EnvElement.array_type())}
+   ${array_types.private_decl(T.root_node.env_element().array_type())}
    ${array_types.private_decl(root_node_array)}
 
    function Pre_Env_Actions

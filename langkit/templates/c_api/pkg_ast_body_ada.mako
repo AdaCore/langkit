@@ -58,6 +58,8 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
 
    ${array_types.body(LexicalEnvType.array_type())}
 
+   ${array_types.body(T.root_node.env_element().array_type())}
+
    function ${capi.get_name('lexical_env_parent')}
      (Env : ${lexical_env_type})
       return ${lexical_env_type}
@@ -79,7 +81,7 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};
       Name : ${text_type})
-      return ${_self.env_element.array_type().name()}
+      return ${T.root_node.env_element().array_type().name()}
    is
       E : constant AST_Envs.Lexical_Env := Unwrap (Env);
    begin

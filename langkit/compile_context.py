@@ -470,14 +470,6 @@ class CompileCtx(object):
         :type: langkit.compiled_types.Struct
         """
 
-        self.env_element = None
-        """
-        Shortcut for langkit.compiled_types.EnvElement. Initialized
-        during the typing pass.
-
-        :type: langkit.compiled_types.EnvElement
-        """
-
         self.annotate_fields_types = False
         """
         Whether to run the 2to3 field annotation pass.
@@ -566,8 +558,9 @@ class CompileCtx(object):
 
         # Get the list of ASTNode types from the Struct metaclass
         from langkit.compiled_types import (
-            EnvElement, LexicalEnvType, StructMetaclass
+            LexicalEnvType, StructMetaclass
         )
+        env_element = StructMetaclass.root_grammar_class.env_element()
 
         self.astnode_types = list(StructMetaclass.astnode_types)
 
@@ -579,9 +572,9 @@ class CompileCtx(object):
         # some point.
         self.struct_types = [
             t for t in StructMetaclass.struct_types
-            if t not in [EnvElement, StructMetaclass.env_metadata]
+            if t not in [StructMetaclass.env_metadata, env_element]
         ]
-        self.struct_types.insert(0, EnvElement)
+        self.struct_types.insert(0, env_element)
 
         if StructMetaclass.env_metadata:
             self.struct_types = (
@@ -591,17 +584,13 @@ class CompileCtx(object):
         self.root_grammar_class = StructMetaclass.root_grammar_class
         self.generic_list_type = self.root_grammar_class.generic_list_type
         self.env_metadata = StructMetaclass.env_metadata
-        self.env_element = EnvElement
 
         # The Group lexical environment operation takes an array of lexical
         # envs, so we always need to generate the corresponding array type.
         self.array_types.add(LexicalEnvType.array_type())
 
         # Likewise for the EnvElement array type: LexicalEnv.get returns it.
-        # No need to bind anything if the language specification did not
-        # specify any EnvElement, though.
-        if self.env_element:
-            self.array_types.add(EnvElement.array_type())
+        self.array_types.add(env_element.array_type())
 
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a

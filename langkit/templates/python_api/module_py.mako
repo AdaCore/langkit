@@ -385,7 +385,8 @@ class LexicalEnv(object):
     def get(self, name):
         ${py_doc('langkit.lexical_env_get', 8)}
         result = _lexical_env_get(self._c_value, _text.unwrap(name))
-        return ${pyapi.wrap_value('result', _self.env_element.array_type())}
+        return ${pyapi.wrap_value('result',
+                                  T.root_node.env_element().array_type())}
 
     def __del__(self):
         _lexical_env_dec_ref(self._c_value)
@@ -983,7 +984,7 @@ _lexical_env_node = _import_func(
 _lexical_env_get = _import_func(
     '${capi.get_name("lexical_env_get")}',
     [_lexical_env, _text],
-    ${pyapi.type_internal_name(_self.env_element.array_type())}
+    ${pyapi.type_internal_name(T.root_node.env_element().array_type())}
 )
 _lexical_env_dec_ref = _import_func(
    '${capi.get_name("lexical_env_dec_ref")}',

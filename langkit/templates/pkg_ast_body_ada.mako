@@ -29,7 +29,7 @@ pragma Warnings (On, "referenced");
 package body ${_self.ada_api_settings.lib_name}.AST is
 
    ${array_types.body(LexicalEnvType.array_type())}
-   ${array_types.body(EnvElement.array_type())}
+   ${array_types.body(T.root_node.env_element().array_type())}
    ${array_types.body(root_node_array)}
 
    function Child_Number

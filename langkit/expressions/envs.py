@@ -3,7 +3,7 @@ from functools import partial
 
 from langkit import names
 from langkit.compiled_types import (
-    EnvElement, LexicalEnvType, Token, BoolType, T
+    LexicalEnvType, Token, BoolType, T
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
@@ -126,11 +126,12 @@ def env_get(env_expr, token_expr, resolve_unique=False, sequential=False):
                         sub_exprs=sub_exprs)
 
     if resolve_unique:
-        return make_expr("Get ({}, 0)".format(array_expr), EnvElement)
+        return make_expr("Get ({}, 0)".format(array_expr),
+                         T.root_node.env_element())
     else:
-        EnvElement.array_type().add_to_context()
+        T.root_node.env_element().array_type().add_to_context()
         return make_expr("Create ({})".format(array_expr),
-                         EnvElement.array_type())
+                         T.root_node.env_element().array_type())
 
 
 class EnvBindExpr(ResolvedExpression):

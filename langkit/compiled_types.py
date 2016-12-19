@@ -87,12 +87,10 @@ def make_renderer(base_renderer=None):
         'is_lexical_env': type_check(LexicalEnvType),
         'is_struct_type': type_check(Struct),
         'LexicalEnvType': LexicalEnvType,
-        'EnvElement':     EnvElement,
     }
     if get_context():
         ctx = get_context()
         capi = ctx.c_api_settings
-        env_element = ctx.env_element
 
         # Name of the root AST node access type
         type_name = ctx.root_grammar_class.name()
@@ -138,8 +136,7 @@ def make_renderer(base_renderer=None):
                     capi,
                     'unit_file_provider_get_file_from_name_callback'
                 ).name,
-            'env_element_type':      (env_element.c_type(capi).name
-                                      if env_element else None),
+            'env_element_type':      T.root_node.env_element().c_type(capi),
             'token_kind':            CAPIType(capi, 'token_kind').name,
             'token_type':            CAPIType(capi, 'token').name,
             'sloc_type':             CAPIType(capi, 'source_location').name,
@@ -1364,7 +1361,6 @@ def root_grammar_class(generic_list_type=None):
             "You can have only one descendent of ASTNode, and it must be the "
             "root grammar class"
         )
-        EnvElement.get_abstract_fields_dict()['el'].type = cls
 
         # Create the subclass for generic list type
 
@@ -1438,9 +1434,6 @@ def env_metadata(cls):
             "Fields of the Struct type chosen to be environment metadata "
             "must have type boolean"
         )
-
-    # Set the type of the EnvElement metadata field to cls
-    EnvElement.get_abstract_fields_dict()['MD'].type = cls
 
     return cls
 
@@ -1541,7 +1534,7 @@ class Struct(CompiledType):
 
             # EnvElement is not emitted per se, because it is a generic
             # instantiation from Langkit_Support.Lexical_Env.
-            EnvElement
+            StructMetaclass.root_grammar_class.env_element()
         )
 
     @classmethod
@@ -2035,6 +2028,33 @@ class ASTNode(Struct):
             }
         )
 
+    @classmethod
+    @memoized
+    def env_element(cls):
+        class EnvElement(Struct):
+            """
+            Denotes the type returned by doing a get operation on a lexical
+            environment. This is a wrapper containing the ast node stored as a
+            value, as well as the metadata associated to this node in the
+            source lexical environment.
+            """
+
+            el = BuiltinField(cls, doc="The stored AST node")
+
+            # The type of MD is initialized to LongType, because by default,
+            # the type for metadata is an integer in Ada.
+            MD = BuiltinField(T.env_md,
+                              doc="The metadata associated to the AST node")
+
+        if cls == T.root_node:
+            # LexicalEnv.get, which is bound in the AST.C generate package,
+            # returns arrays of root node env elements, so the corresponding
+            # array type must be declared manually there.
+            EnvElement.should_emit_array_type = False
+
+        return EnvElement
+
+
 # We tag the ASTNode class as abstract here, because of the circular dependency
 # between the @abstract decorator and the ASTNode class, which is caused by the
 # assert statement that is inside the decorator.
@@ -2257,27 +2277,6 @@ class EnumType(CompiledType):
             )
             for alt in cls.alternatives
         ]
-
-
-class EnvElement(Struct):
-    """
-    Denotes the type returned by doing a get operation on a lexical
-    environment. This is a wrapper containing the ast node stored as a
-    value, as well as the metadata associated to this node in the source
-    lexical environment.
-    """
-
-    # LexicalEnv.get, which is bound in the AST.C generate package, returns
-    # arrays of EnvElement, so the corresponding array type must be declared
-    # manually there.
-    should_emit_array_type = False
-
-    # The type of el will be filled when the root_grammar_class is used
-    el = BuiltinField(None, doc="The stored AST node")
-
-    # The type of MD is initialized to LongType, because by default,
-    # the type for metadata is an integer in Ada.
-    MD = BuiltinField(LongType, doc="The metadata associated to the AST node")
 
 
 class EnumNodeMetaclass(type):

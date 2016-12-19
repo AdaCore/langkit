@@ -20,7 +20,7 @@
    ## to be able to get element arrays starting from 0 and convert them into
    ## arrays starting from 1. We need it to convert from env element arrays,
    ## to our array record type.
-   % if cls.element_type() == ctx.env_element:
+   % if cls.element_type() == T.root_node.env_element():
    function Copy is new AST_Envs.Env_Element_Arrays.Copy
      (Positive, ${cls.api_name()});
 
