@@ -565,9 +565,9 @@ class CompileCtx(object):
         self.astnode_types = list(StructMetaclass.astnode_types)
 
         # Here we're skipping Struct because it's not a real type in
-        # generated code. We're also putting env_metadata and EnvElement in
-        # the beginning and in the right dependency order (the metadata
-        # type before the env element type).
+        # generated code. We're also putting env_metadata and env_element in
+        # the beginning and in the right dependency order (the metadata type
+        # before the env element type).
         # TODO: Using a dependency order topological sort wouldn't hurt at
         # some point.
         self.struct_types = [
@@ -589,7 +589,7 @@ class CompileCtx(object):
         # envs, so we always need to generate the corresponding array type.
         self.array_types.add(LexicalEnvType.array_type())
 
-        # Likewise for the EnvElement array type: LexicalEnv.get returns it.
+        # Likewise for the env_element array type: LexicalEnv.get returns it.
         self.array_types.add(env_element.array_type())
 
         # Sort them in dependency order as required but also then in
