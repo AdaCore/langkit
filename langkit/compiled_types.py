@@ -1532,8 +1532,8 @@ class Struct(CompiledType):
             # The env metadata struct is emitted separately from the others
             StructMetaclass.env_metadata,
 
-            # EnvElement is not emitted per se, because it is a generic
-            # instantiation from Langkit_Support.Lexical_Env.
+            # The root node's env_element is not emitted per se, because it is
+            # a generic instantiation from Langkit_Support.Lexical_Env.
             StructMetaclass.root_grammar_class.env_element()
         )
 
