@@ -2031,28 +2031,30 @@ class ASTNode(Struct):
     @classmethod
     @memoized
     def env_element(cls):
-        class EnvElement(Struct):
-            """
-            Denotes the type returned by doing a get operation on a lexical
-            environment. This is a wrapper containing the ast node stored as a
-            value, as well as the metadata associated to this node in the
-            source lexical environment.
-            """
+        """
+        Denotes the type returned by doing a get operation on a lexical
+        environment. This is a wrapper containing the ast node stored as a
+        value, as well as the metadata associated to this node in the
+        source lexical environment.
+        """
 
-            el = BuiltinField(cls, doc="The stored AST node")
-
-            # The type of MD is initialized to LongType, because by default,
-            # the type for metadata is an integer in Ada.
-            MD = BuiltinField(T.env_md,
-                              doc="The metadata associated to the AST node")
+        env_element_klass = type(
+            'EnvElement{}'.format(cls.name() if cls != T.root_node else ''),
+            (Struct, ), {
+                'el': BuiltinField(cls, doc="The stored AST node"),
+                'MD': BuiltinField(
+                    T.env_md, doc="The metadata associated to the AST node"
+                )
+            }
+        )
 
         if cls == T.root_node:
             # LexicalEnv.get, which is bound in the AST.C generate package,
             # returns arrays of root node env elements, so the corresponding
             # array type must be declared manually there.
-            EnvElement.should_emit_array_type = False
+            env_element_klass.should_emit_array_type = False
 
-        return EnvElement
+        return env_element_klass
 
 
 # We tag the ASTNode class as abstract here, because of the circular dependency
