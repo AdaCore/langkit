@@ -2265,7 +2265,7 @@ class EnvElement(Struct):
     """
 
     # LexicalEnv.get, which is bound in the AST.C generate package, returns
-    # arrayas of EnvElement, so the corresponding array type must be declared
+    # arrays of EnvElement, so the corresponding array type must be declared
     # manually there.
     should_emit_array_type = False
 
