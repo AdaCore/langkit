@@ -430,14 +430,6 @@ class CompileCtx(object):
         :type: langkit.compiled_types.Struct
         """
 
-        self.env_element = None
-        """
-        Shortcut to the EnvElement class, so that it can easily be used in
-        templates.
-
-        :type: langkit.compiled_types.EnvElement
-        """
-
         self.list_types = set()
         """
         Set of all ASTNode subclasses (ASTNode included) for which we
