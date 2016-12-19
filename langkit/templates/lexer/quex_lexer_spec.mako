@@ -21,15 +21,18 @@ token_type {
         end_line   : size_t;
         end_column : uint16_t;
         last_id    : uint16_t;
+        offset     : uint32_t;
     }
 
     take_text {
         if( Begin != LexemeNull ) {
             self.text = Begin;
             self.len = (size_t)(End - Begin);
+            self.offset = (uint32_t)(Begin - analyzer.buffer._memory._front);
         } else {
             self.text = LexemeNull;
             self.len = 0;
+            self.offset = 0;
         }
 
         /* This token copied the text from the chunk into the string,

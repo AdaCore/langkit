@@ -28,6 +28,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       Text_Length              : size_t;
       Start_Line, End_Line     : Unsigned_32;
       Start_Column, End_Column : Unsigned_16;
+      Offset                   : Unsigned_32;
    end record
       with Convention => C;
    type Interface_Token_Access is access all Quex_Token_Type;
@@ -190,7 +191,8 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                       T        => (Kind       =>
                                       Token_Kind'Enum_Val (Token.Id),
                                    Text       => Text,
-                                   Sloc_Range => Sloc_Range)));
+                                   Sloc_Range => Sloc_Range,
+                                   Offset     => Token.Offset)));
 
                   Last_Token_Was_Trivia := True;
                end if;
@@ -208,7 +210,8 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
            (TDH.Tokens,
             (Kind       => Token_Kind'Enum_Val (Token.Id),
              Text       => Text,
-             Sloc_Range => Sloc_Range));
+             Sloc_Range => Sloc_Range,
+             Offset     => Token.Offset));
          Prepare_For_Trivia;
 
       % if lexer.token_actions['WithTrivia']:

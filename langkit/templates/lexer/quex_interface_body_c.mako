@@ -58,6 +58,7 @@ ${capi.get_name("next_token")}(Lexer* lexer, struct token* tok) {
     tok->end_line = lexer->buffer_tk.end_line;
     tok->start_column = lexer->buffer_tk._column_n;
     tok->end_column = lexer->buffer_tk.end_column;
+    tok->offset = lexer->buffer_tk.offset;
 
     return tok->id != 0;
 }

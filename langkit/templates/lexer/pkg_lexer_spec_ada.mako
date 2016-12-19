@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+with Interfaces;          use Interfaces;
+
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handlers;
@@ -27,6 +29,8 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
       --  keywords but actual text for identifiers.
 
       Sloc_Range : Source_Location_Range;
+
+      Offset     : Unsigned_32;
    end record;
 
    package Token_Data_Handlers is new Langkit_Support.Token_Data_Handlers

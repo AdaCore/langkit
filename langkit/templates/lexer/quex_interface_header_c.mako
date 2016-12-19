@@ -17,6 +17,7 @@ struct token {
     /* Source location for this token.  */
     uint32_t start_line, end_line;
     uint16_t start_column, end_column;
+    uint32_t offset;
 };
 
 
