@@ -76,7 +76,6 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
       return Wrap (E.Node);
    end ${capi.get_name('lexical_env_node')};
 
-% if env_element_type:
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};
       Name : ${text_type})
@@ -101,7 +100,6 @@ package body ${_self.ada_api_settings.lib_name}.AST.C is
                         else AST_Envs.Get (E, N));
       end;
    end ${capi.get_name('lexical_env_get')};
-% endif
 
    procedure ${capi.get_name('lexical_env_dec_ref')}
      (Env : ${lexical_env_type})

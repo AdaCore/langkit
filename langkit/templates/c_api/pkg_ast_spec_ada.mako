@@ -39,7 +39,6 @@ package ${_self.ada_api_settings.lib_name}.AST.C is
            Convention    => C,
            External_name => "${capi.get_name('lexical_env_node')}";
 
-% if env_element_type:
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};
       Name : ${text_type})
@@ -47,7 +46,6 @@ package ${_self.ada_api_settings.lib_name}.AST.C is
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('lexical_env_get')}";
-% endif
 
    procedure ${capi.get_name('lexical_env_dec_ref')}
      (Env : ${lexical_env_type})

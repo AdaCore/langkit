@@ -357,12 +357,10 @@ ${c_doc('langkit.lexical_env_node')}
 extern ${node_type}
 ${capi.get_name('lexical_env_node')}(${lexical_env_type} env);
 
-% if env_element_type:
 ${c_doc('langkit.lexical_env_get')}
 extern ${_self.env_element.array_type().c_type(capi).name}
 ${capi.get_name('lexical_env_get')}(${lexical_env_type} env,
                                     ${text_type} name);
-% endif
 
 /* Decrement the ref-count for "env". This deallocates it if the ref-count
    drops to 0.  */
