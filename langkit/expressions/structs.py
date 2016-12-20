@@ -662,10 +662,23 @@ class Match(AbstractExpression):
         """
 
         type_set = TypeSet()
+        env_el = input_type.is_env_element_type
 
-        for i, (t, _, _) in enumerate(self.matchers, 1):
-            t_name = 'default one' if t is None else t.name().camel
-            check_source_language(not type_set.include(t or input_type),
+        if env_el:
+            input_type = input_type.el_type
+
+        for i, (typ, _, _) in enumerate(self.matchers, 1):
+            t_name = 'default one' if typ is None else typ.name().camel
+
+            if env_el:
+                check_source_language(
+                    typ.is_env_element_type,
+                    "Match expression on an env element, should match env "
+                    "element types"
+                )
+                typ = typ.el_type
+
+            check_source_language(not type_set.include(typ or input_type),
                                   'The #{} matcher ({}) is unreachable'
                                   ' as all previous matchers cover all the'
                                   ' nodes it can match'.format(i, t_name),
@@ -678,7 +691,7 @@ class Match(AbstractExpression):
             not mm,
             'The following AST nodes have no handler: {} (all {} subclasses'
             ' require one)'.format(
-                ', '.join(t.name().camel for t in mm),
+                ', '.join(typ.name().camel for typ in mm),
                 input_type.name().camel
             )
         )
