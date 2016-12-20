@@ -1418,6 +1418,9 @@ def env_metadata(cls):
     """
 
     StructMetaclass.env_metadata = cls
+
+    cls.__name__ = "Metadata"  # Every metadata class should be named metadata
+
     assert issubclass(cls, Struct), (
         "The type chosen to be environment metadata must be a struct type"
     )
