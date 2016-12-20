@@ -2428,6 +2428,11 @@ class TypeRepo(object):
         Shortcut to get the lexical environment metadata type.
         :rtype: ASTNode
         """
+        if not StructMetaclass.env_metadata:
+            class Metadata(Struct):
+                pass
+            StructMetaclass.env_metadata = Metadata
+
         return StructMetaclass.env_metadata
 
     # noinspection PyPep8Naming
