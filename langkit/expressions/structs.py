@@ -633,9 +633,10 @@ class Match(AbstractExpression):
 
             if argspec.defaults:
                 match_type = resolve_type(argspec.defaults[0])
+
                 check_source_language(
-                    issubclass(match_type, ASTNode) and
-                    match_type != ASTNode,
+                    issubclass(match_type, T.root_node)
+                    or match_type.is_env_element_type,
                     'Invalid matching type: {}'.format(
                         match_type.name().camel
                     )
