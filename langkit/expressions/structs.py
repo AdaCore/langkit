@@ -2,7 +2,8 @@ import inspect
 
 from langkit import names
 from langkit.compiled_types import (
-    ASTNode, BoolType, BuiltinField, Field, Struct, UserField, resolve_type, T
+    AnalysisUnitType, ASTNode, BoolType, BuiltinField, Field, Struct,
+    UserField, resolve_type, T
 )
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions.base import (
@@ -10,6 +11,7 @@ from langkit.expressions.base import (
     ResolvedExpression, Self, UnreachableExpr, construct, render, attr_expr,
     attr_call
 )
+from langkit.expressions.analysis_units import construct_analysis_unit_property
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
 from langkit.utils import assert_type, TypeSet
@@ -393,6 +395,11 @@ class FieldAccess(AbstractExpression):
         """
 
         receiver_expr = construct(self.receiver)
+
+        if issubclass(receiver_expr.type, AnalysisUnitType):
+            return construct_analysis_unit_property(receiver_expr, self.field,
+                                                    self.arguments)
+
         check_source_language(
             issubclass(receiver_expr.type, Struct),
             '{} values have no field (accessed field was {})'.format(
