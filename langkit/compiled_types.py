@@ -426,6 +426,9 @@ class CompiledType(object):
         :rtype: bool
         """
 
+        if cls.is_env_element_type and formal.is_env_element_type:
+            return cls.el_type.matches(formal.el_type)
+
         if issubclass(formal, ASTNode):
             return issubclass(cls, formal)
         else:
