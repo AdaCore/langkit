@@ -711,10 +711,6 @@ class Match(AbstractExpression):
         check_source_language(issubclass(matched_expr.type, ASTNode),
                               'Match expressions can only work on AST nodes')
 
-        # Yes, the assertion below is what we just checked above, but unlike
-        # check_source_language, assert_type provides type information to
-        # PyCharm's static analyzer.
-        matched_type = assert_type(matched_expr.type, ASTNode)
 
         constructed_matchers = []
 
@@ -738,7 +734,7 @@ class Match(AbstractExpression):
 
         # * all possible input types must have at least one matcher. Also warn
         #   if some matchers are unreachable.
-        self._check_match_coverage(matched_type)
+        self._check_match_coverage(matched_expr.type)
 
         # Compute the return type as the unification of all branches
         _, expr = constructed_matchers[-1]
