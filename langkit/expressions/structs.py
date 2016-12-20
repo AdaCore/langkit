@@ -750,7 +750,9 @@ class Match(AbstractExpression):
                                match_var.type,
                                result_var=match_var)
             guard = Not.make_expr(
-                Eq.make_expr(casted, LiteralExpr('null', casted.type))
+                Eq.make_expr(
+                    casted, LiteralExpr(casted.type.nullexpr(), casted.type)
+                )
             )
             if expr.type != rtype:
                 # We already checked that type matches, so only way this is
