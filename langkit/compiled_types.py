@@ -224,6 +224,11 @@ class CompiledType(object):
     AST nodes).
     """
 
+    is_env_element_type = False
+    """
+    Whether this type represents an env element type.
+    """
+
     should_emit_array_type = True
     """
     Whether the array type for this CompiledType is to be automatically
@@ -2045,7 +2050,8 @@ class ASTNode(Struct):
                 'el': BuiltinField(cls, doc="The stored AST node"),
                 'MD': BuiltinField(
                     T.env_md, doc="The metadata associated to the AST node"
-                )
+                ),
+                'is_env_element_type': True,
             }
         )
 
