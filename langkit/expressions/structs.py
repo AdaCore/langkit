@@ -2,7 +2,7 @@ import inspect
 
 from langkit import names
 from langkit.compiled_types import (
-    ASTNode, BoolType, BuiltinField, Field, Struct, UserField, resolve_type
+    ASTNode, BoolType, BuiltinField, Field, Struct, UserField, resolve_type, T
 )
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions.base import (
@@ -77,10 +77,13 @@ class Cast(AbstractExpression):
         self.do_raise = do_raise
 
     def do_prepare(self):
-        check_source_language(self.astnode.matches(ASTNode), (
-            "One can only cast to an ASTNode subtype"
-        ))
         self.dest_type = resolve_type(self.dest_type)
+
+        check_source_language(
+            self.dest_type.matches(ASTNode)
+            or self.dest_type.matches(T.root_node.env_element()),
+            "One can only cast to an ASTNode subtype or to an env_element"
+        )
 
     def construct(self):
         """

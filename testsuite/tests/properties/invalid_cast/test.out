@@ -3,7 +3,7 @@ Code generation was successful
 
 == Invalid cast 1 ==
 File "test.py", line 35, in ListNode.prop
-    Error: One can only cast to an ASTNode subtype
+    Error: One can only cast to an ASTNode subtype or to an env_element
 
 == Invalid cast 2 ==
 File "test.py", line 35, in ListNode.prop
