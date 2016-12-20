@@ -708,9 +708,10 @@ class Match(AbstractExpression):
             scope.add(var.local_var)
 
         matched_expr = construct(self.matched_expr)
-        check_source_language(issubclass(matched_expr.type, ASTNode),
-                              'Match expressions can only work on AST nodes')
-
+        check_source_language(issubclass(matched_expr.type, ASTNode)
+                              or matched_expr.type.is_env_element_type,
+                              'Match expressions can only work on AST nodes '
+                              'or env elements')
 
         constructed_matchers = []
 
