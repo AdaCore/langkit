@@ -117,7 +117,7 @@ def make_renderer(base_renderer=None):
             'capi':                  capi,
             'bool_type':             BoolType.c_type(capi).name,
             'analysis_context_type': CAPIType(capi, 'analysis_context').name,
-            'analysis_unit_type':    CAPIType(capi, 'analysis_unit').name,
+            'analysis_unit_type':    AnalysisUnitType.c_type(capi).name,
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             c_node_type(capi).name,
             'lexical_env_type':      CAPIType(capi, 'lexical_env').name,
@@ -480,6 +480,22 @@ class BasicType(CompiledType):
     @classmethod
     def c_type(cls, c_api_settings):
         return CAPIType(c_api_settings, cls.name(), external=cls._external)
+
+
+class AnalysisUnitType(BasicType):
+    _name = "Analysis_Unit"
+    _nullexpr = "null"
+    is_ptr = True
+    should_emit_array_type = True
+    null_allowed = True
+
+    @classmethod
+    def is_refcounted(cls):
+        return False
+
+    @classmethod
+    def c_type(cls, c_api_settings):
+        return CAPIType(c_api_settings, 'analysis_unit')
 
 
 class LexicalEnvType(BasicType):
