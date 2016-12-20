@@ -2055,6 +2055,7 @@ class ASTNode(Struct):
                     T.env_md, doc="The metadata associated to the AST node"
                 ),
                 'is_env_element_type': True,
+                'el_type': cls
             }
         )
 
