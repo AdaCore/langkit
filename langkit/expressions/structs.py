@@ -24,10 +24,10 @@ class Cast(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
-        def __init__(self, expr, astnode, do_raise=False, result_var=None):
+        def __init__(self, expr, dest_type, do_raise=False, result_var=None):
             """
             :type expr: ResolvedExpression
-            :type astnode: ASTNode
+            :type dest_type: ASTNode
             :type do_raise: bool
 
             :param ResolvedExpr result_var: If provided, the cast will use it
@@ -36,16 +36,16 @@ class Cast(AbstractExpression):
             """
             self.do_raise = do_raise
             self.expr = expr
-            self.static_type = astnode
+            self.static_type = dest_type
 
             p = PropertyDef.get()
             self.expr_var = p.vars.create('Cast_Expr', self.expr.type)
             self.result_var = (result_var or
-                               p.vars.create('Cast_Result', astnode))
-            assert self.result_var.type == astnode, (
+                               p.vars.create('Cast_Result', dest_type))
+            assert self.result_var.type == dest_type, (
                 'Cast temporaries must have exactly the cast type: {} expected'
                 ' but got {} instead'.format(
-                    astnode.name().camel,
+                    dest_type.name().camel,
                     self.result_var.type.name().camel
                 )
             )
@@ -63,24 +63,24 @@ class Cast(AbstractExpression):
         def __repr__(self):
             return '<Cast.Expr {}>'.format(self.static_type.name().camel)
 
-    def __init__(self, expr, astnode, do_raise=False):
+    def __init__(self, expr, dest_type, do_raise=False):
         """
         :param AbstractExpression expr: Expression on which the cast is
             performed.
-        :param ASTNode astnode: ASTNode subclass to use for the cast.
+        :param ASTNode dest_type: ASTNode subclass to use for the cast.
         :param bool do_raise: Whether the exception should raise an
             exception or return null when the cast is invalid.
         """
         super(Cast, self).__init__()
         self.expr = expr
-        self.astnode = astnode
+        self.dest_type = dest_type
         self.do_raise = do_raise
 
     def do_prepare(self):
-        self.astnode = resolve_type(self.astnode)
         check_source_language(self.astnode.matches(ASTNode), (
             "One can only cast to an ASTNode subtype"
         ))
+        self.dest_type = resolve_type(self.dest_type)
 
     def construct(self):
         """
@@ -91,18 +91,18 @@ class Cast(AbstractExpression):
         """
         expr = construct(
             self.expr,
-            lambda t: self.astnode.matches(t) or t.matches(self.astnode),
+            lambda t: self.dest_type.matches(t) or t.matches(self.dest_type),
             'Cannot cast {{expr_type}} to {}: only (up/down)casting is '
             'allowed'.format(
-                self.astnode.name().camel
+                self.dest_type.name().camel
             )
         )
-        check_source_language(
-            expr.type != self.astnode,
-            'Casting to the same type',
-            severity=Severity.warning
-        )
-        return Cast.Expr(expr, self.astnode, do_raise=self.do_raise)
+
+        check_source_language(expr.type != self.dest_type, (
+            'Casting to the same type'
+        ), severity=Severity.warning)
+
+        return Cast.Expr(expr, self.dest_type, do_raise=self.do_raise)
 
 
 @attr_expr("is_null")
