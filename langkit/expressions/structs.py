@@ -704,8 +704,8 @@ class Match(AbstractExpression):
         """
         # Add the variables created for this expression to the current scope
         scope = PropertyDef.get_scope()
-        for _, v, _ in self.matchers:
-            scope.add(v.local_var)
+        for _, var, _ in self.matchers:
+            scope.add(var.local_var)
 
         matched_expr = construct(self.matched_expr)
         check_source_language(issubclass(matched_expr.type, ASTNode),
@@ -717,20 +717,20 @@ class Match(AbstractExpression):
         # Check (i.e. raise an error if no true) the set of matchers is valid:
 
         # * all matchers must target allowed types, i.e. input type subclasses;
-        for t, v, e in self.matchers:
-            if t is not None:
+        for typ, var, expr in self.matchers:
+            if typ is not None:
                 check_source_language(
-                    t.matches(matched_expr.type),
+                    typ.matches(matched_expr.type),
                     'Cannot match {} (input type is {})'.format(
-                        t.name().camel,
+                        typ.name().camel,
                         matched_expr.type.name().camel
                     )
                 )
             else:
                 # The default matcher (if any) matches the most general type,
                 # which is the input type.
-                v.set_type(matched_expr.type)
-            constructed_matchers.append((construct(v), construct(e)))
+                var.set_type(matched_expr.type)
+            constructed_matchers.append((construct(var), construct(expr)))
 
         # * all possible input types must have at least one matcher. Also warn
         #   if some matchers are unreachable.
