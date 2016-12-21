@@ -9,7 +9,7 @@ with Langkit_Support.Text;    use Langkit_Support.Text;
 with ${ctx.ada_api_settings.lib_name}.Lexer;
 use ${ctx.ada_api_settings.lib_name}.Lexer;
 
-package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
+package body ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
 
    --  Prepare packrat instantiations: one per enum type and onefor each kind
    --  of node (including lists). Likewise for bump ptr. allocators, except
@@ -177,4 +177,4 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
       % endfor
    end Clean_All_Memos;
 
-end ${_self.ada_api_settings.lib_name}.AST.Types.Parsers;
+end ${_self.ada_api_settings.lib_name}.Analysis.Parsers;

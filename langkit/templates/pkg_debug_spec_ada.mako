@@ -3,8 +3,8 @@
 --  This package defines subprograms whose only purpose it to be used from a
 --  debugger. This is supposed to make developpers' life easier.
 
-with ${_self.ada_api_settings.lib_name}.AST;
-use ${_self.ada_api_settings.lib_name}.AST;
+with ${_self.ada_api_settings.lib_name}.Analysis;
+use ${_self.ada_api_settings.lib_name}.Analysis;
 with ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;

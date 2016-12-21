@@ -1,7 +1,9 @@
 ## vim: filetype=makoada
 
+<%namespace name="array_types"   file="array_types_ada.mako" />
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="exts" file="../extensions.mako" />
+<%namespace name="enum_types"    file="enum_types_ada.mako" />
+<%namespace name="exts"          file="../extensions.mako" />
 
 with Ada.Exceptions;                  use Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
@@ -396,6 +398,43 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name('text_to_locale_string')}";
    ${ada_c_doc('langkit.text_to_locale_string', 3)}
 
+   ${array_types.decl(T.root_node.array_type())}
+
+   ------------------------------------
+   -- Lexical environment primitives --
+   ------------------------------------
+
+   ${array_types.decl(LexicalEnvType.array_type())}
+   ${array_types.decl(T.root_node.env_element().array_type())}
+
+   function ${capi.get_name('lexical_env_parent')}
+     (Env : ${lexical_env_type})
+      return ${lexical_env_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('lexical_env_parent')}";
+
+   function ${capi.get_name('lexical_env_node')}
+     (Env : ${lexical_env_type})
+      return ${node_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('lexical_env_node')}";
+
+   function ${capi.get_name('lexical_env_get')}
+     (Env  : ${lexical_env_type};
+      Name : ${text_type})
+      return ${(T.root_node.env_element().array_type().name()
+                .camel_with_underscores)}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('lexical_env_get')}";
+
+   procedure ${capi.get_name('lexical_env_dec_ref')}
+     (Env : ${lexical_env_type})
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('lexical_env_dec_ref')}";
 
    -------------------------
    -- Extensions handling --
@@ -504,6 +543,43 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name('token_previous')}";
    ${ada_c_doc('langkit.token_previous', 3)}
 
+   % for enum_type in _self.sorted_types(_self.enum_types):
+      ${enum_types.spec(enum_type)}
+   % endfor
+
+   % for array_type in _self.sorted_types(_self.array_types):
+      % if array_type.element_type().should_emit_array_type:
+         ${array_types.decl(array_type)}
+      % endif
+   % endfor
+
+   % for rec in _self.struct_types:
+      <%
+         type_name = rec.c_type(capi).name
+         ptr_name = '{}_Ptr'.format(type_name)
+      %>
+      type ${ptr_name} is access ${rec.name()};
+
+      % if rec.is_refcounted():
+         procedure ${rec.c_dec_ref(capi)} (R : ${ptr_name});
+      % endif
+   % endfor
+
+   ---------------------------------------
+   -- Kind-specific AST node primitives --
+   ---------------------------------------
+
+   --  All these primitives return their result through an OUT parameter. They
+   --  return a boolean telling whether the operation was successful (it can
+   --  fail if the node does not have the proper type, for instance). When an
+   --  AST node is returned, its ref-count is left as-is.
+
+   % for astnode in _self.astnode_types:
+       % for field in astnode.fields_with_accessors():
+           ${astnode_types.accessor_decl(field)}
+       % endfor
+   % endfor
+
    ------------------------
    -- Conversion helpers --
    ------------------------
@@ -573,6 +649,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
      (${root_node_type_name}, ${node_type});
    function Unwrap is new Ada.Unchecked_Conversion
      (${node_type}, ${root_node_type_name});
+
+   function Wrap (Token : Token_Type) return ${token_type};
+   function Unwrap (Token : ${token_type}) return Token_Type;
 
 % if _self.default_unit_file_provider:
    function Wrap (Kind : Unit_Kind) return ${unit_kind_type} is

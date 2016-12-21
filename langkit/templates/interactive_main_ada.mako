@@ -20,12 +20,8 @@ with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
 
 with ${_self.ada_api_settings.lib_name}.Analysis;
 use ${_self.ada_api_settings.lib_name}.Analysis;
-with ${_self.ada_api_settings.lib_name}.AST;
-use ${_self.ada_api_settings.lib_name}.AST;
-with ${_self.ada_api_settings.lib_name}.AST.Types;
-use ${_self.ada_api_settings.lib_name}.AST.Types;
-with ${_self.ada_api_settings.lib_name}.AST.Types.Parsers;
-use ${_self.ada_api_settings.lib_name}.AST.Types.Parsers;
+with ${_self.ada_api_settings.lib_name}.Analysis.Parsers;
+use ${_self.ada_api_settings.lib_name}.Analysis.Parsers;
 with ${_self.ada_api_settings.lib_name}.Init;
 use ${_self.ada_api_settings.lib_name}.Init;
 with ${_self.ada_api_settings.lib_name}.Lexer;

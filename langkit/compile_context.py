@@ -927,14 +927,8 @@ class CompileCtx(object):
             ("pkg_analysis_internal", ["analysis", "internal"], False),
             # Unit for analysis primitives
             ("pkg_analysis",     ["analysis"], True),
-            # Unit for the root AST node
-            ("pkg_ast",          ["ast"], True),
-            # Unit for all derived AST nodes
-            ("pkg_ast_types",    ["ast", "types"], True),
-            # Unit for the unit files provider interface
-            ("pkg_unit_files",   ["unit_files"], False),
             # Unit for all parsers
-            ("parsers/pkg_main", ["ast", "types", "parsers"], True),
+            ("parsers/pkg_main", ["analysis", "parsers"], True),
             # Unit for the lexer
             ("lexer/pkg_lexer",  ["lexer"], True),
             # Unit for debug helpers
@@ -1029,9 +1023,6 @@ class CompileCtx(object):
 
         self.write_ada_module(src_path, "c_api/pkg_analysis",
                               ["Analysis", "C"])
-        self.write_ada_module(src_path, "c_api/pkg_ast", ["AST", "C"])
-        self.write_ada_module(src_path, "c_api/pkg_ast_types",
-                              ["AST", "Types", "C"])
 
     def emit_python_api(self, python_path):
         """

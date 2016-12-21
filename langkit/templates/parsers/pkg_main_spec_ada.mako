@@ -3,8 +3,6 @@
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 
-with ${_self.ada_api_settings.lib_name}.Analysis;
-use ${_self.ada_api_settings.lib_name}.Analysis;
 with ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
@@ -17,7 +15,7 @@ use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 --  TODO??? For now, consider that this package is not part of the public API.
 --  Please use the Analysis package to parse source files.
 
-package ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
+package ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
 
    type Fail_Info is record
       Pos               : Token_Index := No_Token_Index;
@@ -72,4 +70,4 @@ package ${_self.ada_api_settings.lib_name}.AST.Types.Parsers is
    --  memos should be stored in Parser_Type. In the end, this should be turned
    --  into a Parser_Type finalizer.
 
-end ${_self.ada_api_settings.lib_name}.AST.Types.Parsers;
+end ${_self.ada_api_settings.lib_name}.Analysis.Parsers;
