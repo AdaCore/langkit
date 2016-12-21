@@ -186,7 +186,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
             AST_Mem_Pool      => No_Pool,
             Destroyables      => Destroyable_Vectors.Empty_Vector,
             Referenced_Units  => <>,
-            Lex_Env_Data      => <>);
+            Lex_Env_Data_Acc  => new Lex_Env_Data_Type);
          Initialize (Unit.TDH, Context.Symbols);
          Context.Units_Map.Insert (Fname, Unit);
       else
@@ -476,7 +476,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
          --  First we'll remove old entries referencing the old translation
          --  unit in foreign lexical envs.
-         Remove_Exiled_Entries (Unit.Lex_Env_Data);
+         Remove_Exiled_Entries (Unit.Lex_Env_Data_Acc.all);
 
          --  Then we'll recreate the lexical env structure for the newly parsed
          --  unit.
@@ -484,7 +484,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
          --  Finally, any entry that was rooted in one of the unit's lex envs
          --  needs to be re-rooted.
-         Reroot_Foreign_Nodes (Unit.Lex_Env_Data, Unit.Context.Root_Scope);
+         Reroot_Foreign_Nodes
+           (Unit.Lex_Env_Data_Acc.all, Unit.Context.Root_Scope);
 
       end if;
    end Update_After_Reparse;
@@ -540,7 +541,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    procedure Destroy (Unit : Analysis_Unit) is
       Unit_Var : Analysis_Unit := Unit;
    begin
-      Destroy (Unit.Lex_Env_Data);
+      Destroy (Unit.Lex_Env_Data_Acc);
       Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
 
       if Unit.AST_Root /= null then
@@ -711,7 +712,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
      (Unit : Analysis_Unit) return Lex_Env_Data
    is
    begin
-      return Unit.Lex_Env_Data'Unrestricted_Access;
+      return Unit.Lex_Env_Data_Acc;
    end Get_Lex_Env_Data;
 
    ---------------------------

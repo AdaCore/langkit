@@ -290,7 +290,7 @@ private
       --  Units that are referenced from this one. Useful for
       --  visibility/computation of the reference graph.
 
-      Lex_Env_Data      : Lex_Env_Data_Type;
+      Lex_Env_Data_Acc  : Lex_Env_Data;
    end record;
 
    % if _self.default_unit_file_provider:

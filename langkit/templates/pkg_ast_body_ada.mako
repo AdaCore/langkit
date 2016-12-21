@@ -268,6 +268,18 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       Self.Contains.Destroy;
    end Destroy;
 
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Self : in out Lex_Env_Data) is
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Lex_Env_Data_Type, Lex_Env_Data);
+   begin
+      Destroy (Self.all);
+      Free (Self);
+   end Destroy;
+
    ---------------------------
    -- Remove_Exiled_Entries --
    ---------------------------
