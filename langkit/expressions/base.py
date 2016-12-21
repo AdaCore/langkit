@@ -781,6 +781,22 @@ class AbstractVariable(AbstractExpression):
 
         self._type = type
 
+    def add_to_scope(self, scope):
+        """
+        Add this already existing variable to "scope".
+
+        This is allowed iff this variable is not registered as a local variable
+        yet and it must already be typed.
+        """
+        assert self.local_var is None
+        assert self._type is not None
+        self.local_var = PropertyDef.get().vars.create_scopeless(
+            self._name,
+            self._type
+        )
+        scope.add(self.local_var)
+        self._name = self.local_var.name
+
     @contextmanager
     def bind_name(self, name):
         """
