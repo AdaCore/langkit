@@ -275,7 +275,8 @@ class FieldAccess(AbstractExpression):
         Resolved expression that represents a field access in generated code.
         """
 
-        def __init__(self, receiver_expr, node_data, arguments):
+        def __init__(self, receiver_expr, node_data, arguments,
+                     implicit_deref=False):
             """
             :param ResolvedExpression receiver_expr: The receiver of the field
                 access.
@@ -285,12 +286,16 @@ class FieldAccess(AbstractExpression):
 
             :param list[ResolvedExpression] arguments: If non-empty, this field
                 access will actually be a primitive call.
+
+            :param bool implicit_deref: Whether the receiver is an env element,
+                and we want to access a field or property of the stored node.
             """
             self.receiver_expr = receiver_expr
             self.node_data = node_data
             self.static_type = self.node_data.type
             self.arguments = arguments
             self.simple_field_access = False
+            self.implicit_deref = implicit_deref
 
             # After EnvSpec.create_properties has been run, expressions in
             # environment specifications only allow field accesses. These are
@@ -336,6 +341,10 @@ class FieldAccess(AbstractExpression):
                 prefix = self.receiver_expr.render()
             else:
                 prefix = self.prefix_var.name
+
+            if self.implicit_deref:
+                prefix = "{}.El".format(prefix)
+
             ret = "{}.{}".format(prefix, self.node_data.name)
 
             # If we're calling a property, then pass the arguments
@@ -394,6 +403,7 @@ class FieldAccess(AbstractExpression):
         :rtype: FieldAccessExpr
         """
 
+        is_deref = False
         receiver_expr = construct(self.receiver)
 
         if issubclass(receiver_expr.type, AnalysisUnitType):
@@ -412,7 +422,15 @@ class FieldAccess(AbstractExpression):
                                                                    None)
         ":type: AbstractNodeField"
 
-        # If still not found, there's a problem
+        # If still not found, maybe the receiver is an env el, in which case we
+        # want to do implicit dereference.
+        if not to_get and receiver_expr.type.is_env_element_type:
+            to_get = receiver_expr.type.el_type.get_abstract_fields_dict().get(
+                self.field, None
+            )
+            is_deref = bool(to_get)
+
+        # If still not found, we have a problem
         check_source_language(
             to_get is not None, "Type {} has no '{}' field or property".format(
                 receiver_expr.type.__name__, self.field
@@ -458,7 +476,7 @@ class FieldAccess(AbstractExpression):
             )
         ]
 
-        ret = FieldAccess.Expr(receiver_expr, to_get, arg_exprs)
+        ret = FieldAccess.Expr(receiver_expr, to_get, arg_exprs, is_deref)
         return ret
 
     def __call__(self, *args):
@@ -677,7 +695,7 @@ class Match(AbstractExpression):
         for i, (typ, _, _) in enumerate(self.matchers, 1):
             t_name = 'default one' if typ is None else typ.name().camel
 
-            if env_el:
+            if env_el and typ:
                 check_source_language(
                     typ.is_env_element_type,
                     "Match expression on an env element, should match env "
