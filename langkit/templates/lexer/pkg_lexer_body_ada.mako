@@ -1,6 +1,6 @@
 ## vim: filetype=makoada
 
-<% lexer = get_context().lexer %>
+<% lexer = ctx.lexer %>
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Conversion;
@@ -413,8 +413,8 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
    end Decode_Buffer;
 
    Token_Kind_Names : constant array (Token_Kind) of String_Access := (
-      % for tok in get_context().lexer.tokens_class:
-          ${get_context().lexer.ada_token_name(tok)} =>
+      % for tok in ctx.lexer.tokens_class:
+          ${ctx.lexer.ada_token_name(tok)} =>
              new String'("${tok.name}")
           % if (not loop.last):
               ,

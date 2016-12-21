@@ -8,7 +8,7 @@ package ${_self.ada_api_settings.lib_name}.Init is
      with Export        => True,
           Convention    => C,
           External_Name =>
-             "${get_context().ada_api_settings.lib_name.lower()}_initialize";
+             "${ctx.ada_api_settings.lib_name.lower()}_initialize";
    ${ada_doc('langkit.initialize', 3)}
 
 end ${_self.ada_api_settings.lib_name}.Init;

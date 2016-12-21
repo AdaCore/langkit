@@ -51,10 +51,10 @@ class GeneratedParser(object):
 
 def render(*args, **kwargs):
     return compiled_types.make_renderer().update({
-        'is_tok':      type_check_instance(Tok),
-        'is_row':      type_check_instance(Row),
-        'is_class':    inspect.isclass,
-        'get_context': get_context
+        'is_tok':   type_check_instance(Tok),
+        'is_row':   type_check_instance(Row),
+        'is_class': inspect.isclass,
+        'ctx':      get_context()
     }).render(*args, **kwargs)
 
 

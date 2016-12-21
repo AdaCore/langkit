@@ -43,7 +43,7 @@ procedure Parse is
    Silent     : aliased Boolean;
    Measure_Time, Do_Print_Trivia : aliased Boolean;
    Rule_Name  : aliased GNAT.Strings.String_Access :=
-      new String'("${get_context().main_rule_name}");
+      new String'("${ctx.main_rule_name}");
    Charset    : aliased GNAT.Strings.String_Access :=
       new String'("iso-8859-1");
    File_Name  : aliased GNAT.Strings.String_Access;

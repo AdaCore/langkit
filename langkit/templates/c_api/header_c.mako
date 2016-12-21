@@ -86,7 +86,7 @@ typedef struct {
 
 ${c_doc('langkit.token_kind')}
 typedef enum {
-   <% lexer = get_context().lexer %>
+   <% lexer = ctx.lexer %>
    % for i, t in enumerate(lexer.sorted_tokens):
       ${',' if i > 0 else ''}
       ${lexer.c_token_name(t)} = ${t.value}

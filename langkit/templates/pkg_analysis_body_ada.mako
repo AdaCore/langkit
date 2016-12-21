@@ -9,11 +9,11 @@ with Ada.Unchecked_Deallocation;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 
-with ${get_context().ada_api_settings.lib_name}.Analysis.Internal;
-use ${get_context().ada_api_settings.lib_name}.Analysis.Internal;
-with ${get_context().ada_api_settings.lib_name}.Lexer;
-with ${get_context().ada_api_settings.lib_name}.AST.Types.Parsers;
-use ${get_context().ada_api_settings.lib_name}.AST.Types.Parsers;
+with ${ctx.ada_api_settings.lib_name}.Analysis.Internal;
+use ${ctx.ada_api_settings.lib_name}.Analysis.Internal;
+with ${ctx.ada_api_settings.lib_name}.Lexer;
+with ${ctx.ada_api_settings.lib_name}.AST.Types.Parsers;
+use ${ctx.ada_api_settings.lib_name}.AST.Types.Parsers;
 
 package body ${_self.ada_api_settings.lib_name}.Analysis is
 

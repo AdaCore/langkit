@@ -12,7 +12,7 @@ with Langkit_Support.Token_Data_Handlers;
 package ${_self.ada_api_settings.lib_name}.Lexer is
 
    <%
-      lexer = get_context().lexer
+      lexer = ctx.lexer
       tokens = lexer.sorted_tokens
    %>
 
