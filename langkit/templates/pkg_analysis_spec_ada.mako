@@ -23,9 +23,6 @@ use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 with ${_self.ada_api_settings.lib_name}.Unit_Files;
 use ${_self.ada_api_settings.lib_name}.Unit_Files;
 % endif
-%if _self.default_unit_file_provider:
-with ${_self.default_unit_file_provider.unit_fqn};
-%endif
 
 --  This package provides types and primitives to analyze source files as
 --  analysis units.
@@ -62,8 +59,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    function Create
      (Charset : String := ${string_repr(_self.default_charset)}
       % if _self.default_unit_file_provider:
-         ; Unit_File_Provider : Unit_File_Provider_Access_Cst :=
-             ${_self.default_unit_file_provider.fqn}
+         ; Unit_File_Provider : Unit_File_Provider_Access_Cst := null
       % endif
      ) return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}

@@ -143,11 +143,13 @@ base_langkit_docs = {
         ${TODO} Passing an unsupported charset here is not guaranteed to raise
         an error right here, but this would be really helpful for users.
 
-        If provided, Unit_File_Provider will be used to query the file name
-        that corresponds to an unit reference during semantic analysis. If it
-        is ${null if lang == 'c' else 'not provided'}, the default one is used
-        instead. It is up to the caller to free resources allocated to it when
-        done with the analysis context.
+        % if ctx.default_unit_file_provider:
+            If provided, Unit_File_Provider will be used to query the file name
+            that corresponds to an unit reference during semantic analysis. If
+            it is ${null}, the default one is used instead. It is up to the
+            caller to free resources allocated to it when done with the
+            analysis context.
+        % endif
     """,
     'langkit.context_incref': """
         Increase the reference count to an analysis context.

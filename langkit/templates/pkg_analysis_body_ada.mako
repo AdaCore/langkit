@@ -15,6 +15,10 @@ with ${ctx.ada_api_settings.lib_name}.Lexer;
 with ${ctx.ada_api_settings.lib_name}.AST.Types.Parsers;
 use ${ctx.ada_api_settings.lib_name}.AST.Types.Parsers;
 
+%if _self.default_unit_file_provider:
+with ${_self.default_unit_file_provider.unit_fqn};
+%endif
+
 package body ${_self.ada_api_settings.lib_name}.Analysis is
 
    procedure Update_After_Reparse (Unit : Analysis_Unit);
@@ -74,11 +78,16 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    function Create
      (Charset : String := ${string_repr(_self.default_charset)}
       % if _self.default_unit_file_provider:
-         ; Unit_File_Provider : Unit_File_Provider_Access_Cst :=
-             ${_self.default_unit_file_provider.fqn}
+         ; Unit_File_Provider : Unit_File_Provider_Access_Cst := null
       % endif
      ) return Analysis_Context
    is
+      % if _self.default_unit_file_provider:
+         P : constant Unit_File_Provider_Access_Cst :=
+           (if Unit_File_Provider = null
+            then ${_self.default_unit_file_provider.fqn}
+            else Unit_File_Provider);
+      % endif
    begin
       return new Analysis_Context_Type'
         (Ref_Count  => 1,
@@ -91,7 +100,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
                           Is_Refcounted => False)
 
          % if _self.default_unit_file_provider:
-         , Unit_File_Provider => Unit_File_Provider
+         , Unit_File_Provider => P
          % endif
         );
    end Create;
