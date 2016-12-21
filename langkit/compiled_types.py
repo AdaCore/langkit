@@ -1157,7 +1157,10 @@ class StructMetaclass(CompiledTypeMetaclass):
                     'Structs cannot define lexical environment specifications'
                 )
 
-        dct['should_emit_array_type'] = not is_root_grammar_class
+        dct['should_emit_array_type'] = (
+            dct.get('should_emit_array_type', True) and
+            not is_root_grammar_class
+        )
         dct['location'] = extract_library_location()
 
         # List types are resolved by construction: we create list types to
