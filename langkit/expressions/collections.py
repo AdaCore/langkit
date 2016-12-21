@@ -4,7 +4,7 @@ from itertools import count
 import types
 
 from langkit import names
-from langkit.compiled_types import BoolType, LongType, ArrayType
+from langkit.compiled_types import BoolType, LongType, ArrayType, get_context
 from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
@@ -39,6 +39,7 @@ class CollectionExpression(AbstractExpression):
         self.collection = collection
         self.expr_fn = expr
         self.expr = None
+        self.list_element_var = None
         self.element_var = None
         self.requires_index = False
         self.index_var = None
@@ -79,26 +80,50 @@ class CollectionExpression(AbstractExpression):
         1. The resolved collection expression.
         2. The resolved expression function passed to CollectionExpression's
            constructor.
-        3. The element variable as a resolved expression.
-        4. The index variable as a resolved expression.
-        5. The inner scope for the iteration.
+        3. If the collection is an AST list, the iteration variable, whose type
+           is the root grammar type. None otherwise.
+        4. The element variable as a resolved expression. In the case of an AST
+           list collection, this is just 3. converted to the specific type.
+        5. The index variable as a resolved expression.
+        6. The inner scope for the iteration.
 
-        :rtype: (ResolvedExpression, ResolvedExpression,
-                 ResolvedExpression, ResolvedExpression,
+        :rtype: (ResolvedExpression,
+                 ResolvedExpression,
+                 ResolvedExpression|None,
+                 ResolvedExpression,
+                 ResolvedExpression,
                  langkit.expressions.base.LocalVars.Scope)
         """
         collection_expr = construct(
             self.collection, lambda t: t.is_collection(),
             'Map cannot iterate on {expr_type}, which is not a collection'
         )
+        self.element_var.set_type(collection_expr.type.element_type())
 
-        with PropertyDef.get_scope().new_child() as iter_scope:
+        current_scope = PropertyDef.get_scope()
+
+        # If we are iterating over an AST list, then we get root grammar typed
+        # values. We need to convert them to the more specific type to get the
+        # rest of the expression machinery work. For this, create a new
+        # variable.
+        if collection_expr.type.is_list_type:
+            self.list_element_var = AbstractVariable(
+                names.Name("List_Item_{}".format(
+                    next(CollectionExpression._counter)
+                )),
+                type=get_context().root_grammar_class
+            )
+            self.element_var.add_to_scope(current_scope)
+
+        with current_scope.new_child() as iter_scope:
             if self.index_var:
                 PropertyDef.get_scope().add(self.index_var.local_var)
-            self.element_var.set_type(collection_expr.type.element_type())
 
             return (collection_expr,
                     construct(self.expr),
+                    (construct(self.list_element_var)
+                     if self.list_element_var else
+                     None),
                     construct(self.element_var),
                     construct(self.index_var) if self.index_var else None,
                     iter_scope)
@@ -130,6 +155,7 @@ class Contains(CollectionExpression):
         """
         (collection,
          predicate,
+         list_element_var,
          element_var,
          index_var,
          iter_scope) = self.construct_common()
@@ -138,7 +164,8 @@ class Contains(CollectionExpression):
         # "collection" contains "item" if at least one element in
         # "collection" is equal to "item".
         return Quantifier.Expr(Quantifier.ANY, collection, predicate,
-                               element_var, index_var, iter_scope)
+                               list_element_var, element_var, index_var,
+                               iter_scope)
 
 
 @attr_call('filter', lambda x: x)
@@ -157,9 +184,11 @@ class Map(CollectionExpression):
         code.
         """
 
-        def __init__(self, element_var, index_var, collection, expr,
-                     iter_scope, filter=None, concat=False, take_while=None):
+        def __init__(self, list_element_var, element_var, index_var,
+                     collection, expr, iter_scope, filter=None, concat=False,
+                     take_while=None):
             """
+            :type list_element_var: VarExpr|None
             :type element_var: VarExpr
             :type index_var: None|VarExpr
             :type collection: ResolvedExpression
@@ -170,6 +199,7 @@ class Map(CollectionExpression):
             :type take_while: ResolvedExpression
             """
             self.take_while = take_while
+            self.list_element_var = list_element_var
             self.element_var = element_var
             self.index_var = index_var
             self.collection = collection
@@ -256,6 +286,7 @@ class Map(CollectionExpression):
         """
         (collection_expr,
          expr,
+         list_element_var,
          element_var,
          index_var,
          iter_scope) = self.construct_common()
@@ -273,9 +304,9 @@ class Map(CollectionExpression):
             take_while_expr = (construct(self.take_while_expr, BoolType)
                                if self.take_while_expr else None)
 
-        return Map.Expr(element_var, index_var, collection_expr, expr,
-                        iter_scope, filter_expr, self.concat,
-                        take_while_expr)
+        return Map.Expr(list_element_var, element_var, index_var,
+                        collection_expr, expr, iter_scope, filter_expr,
+                        self.concat, take_while_expr)
 
 
 @attr_call('all', kind='all')
@@ -288,8 +319,8 @@ class Quantifier(CollectionExpression):
     class Expr(ResolvedExpression):
         static_type = BoolType
 
-        def __init__(self, kind, collection, expr, element_var, index_var,
-                     iter_scope):
+        def __init__(self, kind, collection, expr, list_element_var,
+                     element_var, index_var, iter_scope):
             """
             :param str kind: Kind for this quantifier expression. 'all' will
                 check that all items in "collection" fullfill "expr" while
@@ -304,6 +335,12 @@ class Quantifier(CollectionExpression):
             :param ResolvedExpression expr: A boolean expression to evaluate on
                 the collection's items.
 
+            :param list_element_var: When the collection is an AST list,
+                variable that holds the element we are currently processing
+                during the iteration, typed as root grammar type.  None
+                otherwise.
+            :type: ResolvedExpression|None
+
             :param element_var: Variable to use in "expr".
             :type element_var: ResolvedExpression
 
@@ -317,6 +354,7 @@ class Quantifier(CollectionExpression):
             self.kind = kind
             self.collection = collection
             self.expr = expr
+            self.list_element_var = list_element_var
             self.element_var = element_var
             self.index_var = index_var
             self.iter_scope = iter_scope
@@ -365,6 +403,7 @@ class Quantifier(CollectionExpression):
         """
         (collection_expr,
          expr,
+         list_element_var,
          element_var,
          index_var,
          iter_scope) = self.construct_common()
@@ -376,7 +415,8 @@ class Quantifier(CollectionExpression):
         )
 
         return Quantifier.Expr(self.kind, collection_expr, expr,
-                               element_var, index_var, iter_scope)
+                               list_element_var, element_var, index_var,
+                               iter_scope)
 
 
 @auto_attr_custom("at")

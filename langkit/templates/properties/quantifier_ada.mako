@@ -3,7 +3,11 @@
 <%namespace name="scopes" file="scopes_ada.mako" />
 
 <%
+   list_element_var = (quantifier.list_element_var.name
+                       if quantifier.list_element_var else
+                       None)
    element_var = quantifier.element_var.name
+   iteration_var = list_element_var or element_var
    result_var = quantifier.result_var.name
 %>
 
@@ -16,13 +20,17 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
       ${quantifier.index_var.name} := 0;
    % endif
 
-   for ${element_var} of
+   for ${iteration_var} of
       % if quantifier.collection.type.is_list_type:
          ${quantifier.collection.render_expr()}.Vec
       % else:
          ${quantifier.collection.render_expr()}.Items
       % endif
    loop
+      % if list_element_var:
+         ${element_var} :=
+            ${quantifier.element_var.type.name()} (${list_element_var});
+      % endif
       ${quantifier.expr.render_pre()}
 
       ## Depending on the kind of the quantifier, we want to abort as soon as

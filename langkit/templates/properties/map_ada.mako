@@ -3,7 +3,12 @@
 <%namespace name="scopes" file="scopes_ada.mako" />
 
 <%
+   list_element_var = (map.list_element_var.name
+                       if map.list_element_var else
+                       None)
    element_var = map.element_var.name
+   iteration_var = list_element_var or element_var
+
    array_var = map.array_var.name
 
    vec_var = map.array_var.name + Name('Vec')
@@ -55,13 +60,18 @@ begin
       % endif
 
       ## First, build a vector for all the resulting elements
-      for ${element_var} of
+      for ${iteration_var} of
          % if map.collection.type.is_list_type:
             ${map.collection.render_expr()}.Vec
          % else:
             ${map.collection.render_expr()}.Items
          % endif
       loop
+         % if list_element_var:
+            ${element_var} :=
+               ${map.element_var.type.name()} (${list_element_var});
+         % endif
+
          % if map.filter:
             ${map.filter.render_pre()}
             if ${map.filter.render_expr()} then
