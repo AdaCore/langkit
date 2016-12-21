@@ -697,7 +697,7 @@ package ${_self.ada_api_settings.lib_name}.AST is
    subtype Logic_Equation is Relation;
    Null_Logic_Equation : constant Logic_Equation := null;
 
-   function Get_Unit
+   function Get_Unit_Internal
      (Node : access ${root_node_value_type}'Class)
       return Analysis_Unit_Interface;
    --  Internal helper to get the unit that owns an AST node
@@ -709,7 +709,9 @@ private
    function Is_Visible_From
      (Env, Referenced : AST_Envs.Lexical_Env) return Boolean
    is
-     (Is_Referenced (Get_Unit (Env.Node), Get_Unit (Referenced.Node)));
+     (Is_Referenced
+        (Get_Unit_Internal (Env.Node),
+         Get_Unit_Internal (Referenced.Node)));
    --  Check whether Referenced's unit is referenced from Env's unit. Used for
    --  property generation purposes.
 
@@ -1002,7 +1004,7 @@ private
       C      : Children_Cursor)
       return Children_Cursor;
 
-   function Get_Unit
+   function Get_Unit_Internal
      (Node : access ${root_node_value_type}'Class)
       return Analysis_Unit_Interface
    is (Node.Unit);

@@ -673,7 +673,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       return Analysis_Unit
    is
    begin
-      return Convert (Get_Unit (Node));
+      return Convert (Get_Unit_Internal (Node));
    end Get_Unit;
 
    --------------------

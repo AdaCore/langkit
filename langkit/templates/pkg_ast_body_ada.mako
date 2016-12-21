@@ -1433,7 +1433,7 @@ package body ${_self.ada_api_settings.lib_name}.AST is
       --  envs, we consider that elements coming from different units are
       --  always visible for each other, and let the user implement language
       --  specific visibility rules in the DSL.
-      if Get_Unit (El) /= Get_Unit (From) then
+      if Get_Unit_Internal (El) /= Get_Unit_Internal (From) then
          return True;
       end if;
 
