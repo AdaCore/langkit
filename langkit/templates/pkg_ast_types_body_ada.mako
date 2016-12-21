@@ -62,6 +62,96 @@ package body ${_self.ada_api_settings.lib_name}.AST.Types is
    is (${_self.ada_api_settings.lib_name}.Analysis.Get_Lex_Env_Data
         (Analysis.Internal.Convert (Node.Unit)));
 
+   -----------
+   -- Image --
+   -----------
+
+   overriding function Image
+     (Node : access ${generic_list_value_type}) return String
+   is
+      Result : Unbounded_String;
+   begin
+      Append (Result, '[');
+      for El of Node.Vec loop
+         if Length (Result) > 0 then
+            Append (Result, ", ");
+         end if;
+         Append (Result, El.Image);
+      end loop;
+
+      Append (Result, ']');
+      return To_String (Result);
+   end Image;
+
+   -----------------
+   -- Child_Count --
+   -----------------
+
+   overriding function Child_Count
+     (Node : access ${generic_list_value_type}) return Natural
+   is
+   begin
+      return Node_Bump_Ptr_Vectors.Length (Node.Vec);
+   end Child_Count;
+
+   ---------------
+   -- Get_Child --
+   ---------------
+
+   overriding procedure Get_Child
+     (Node            : access ${generic_list_value_type};
+      Index           : Positive;
+      Index_In_Bounds : out Boolean;
+      Result          : out ${root_node_type_name}) is
+   begin
+      if Index > Node_Bump_Ptr_Vectors.Last_Index (Node.Vec) then
+         Index_In_Bounds := False;
+      else
+         Index_In_Bounds := True;
+         Result := ${root_node_type_name}
+           (Node_Bump_Ptr_Vectors.Get_At_Index (Node.Vec, Index));
+      end if;
+   end Get_Child;
+
+   -----------
+   -- Print --
+   -----------
+
+   overriding procedure Print
+     (Node : access ${generic_list_value_type}; Prefix : String := "")
+   is
+      Class_Wide_Node : constant ${root_node_type_name} :=
+         ${root_node_type_name} (Node);
+   begin
+      Put
+        (Prefix & Class_Wide_Node.Kind_Name
+         & "[" & Image (Node.Sloc_Range) & "]");
+      if Node_Bump_Ptr_Vectors.Length (Node.Vec) = 0 then
+         Put_Line (": <empty list>");
+         return;
+      end if;
+
+      New_Line;
+      for Child of Node.Vec loop
+         if Child /= null then
+            Child.Print (Prefix & "|  ");
+         end if;
+      end loop;
+   end Print;
+
+   ------------------
+   -- Destroy_Node --
+   ------------------
+
+   overriding procedure Destroy_Node
+     (Node : access ${generic_list_value_type})
+   is
+   begin
+      if Langkit_Support.Extensions.Has_Extensions then
+         Node.Free_Extensions;
+      end if;
+   end Destroy_Node;
+
    % for struct_type in no_builtins(_self.struct_types):
    ${struct_types.body(struct_type)}
    % endfor

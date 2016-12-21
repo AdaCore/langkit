@@ -12,12 +12,11 @@
 pragma Warnings (Off, "referenced");
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 
+with Langkit_Support.Bump_Ptr.Vectors;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Vectors;
 pragma Warnings (On, "referenced");
-
-private with ${_self.ada_api_settings.lib_name}.AST.List;
 
 --  This package defines all AST node types except the root one (see the
 --  AST_Root package) along with the corresponding primitives. It also defines
@@ -56,6 +55,30 @@ package ${_self.ada_api_settings.lib_name}.AST.Types is
 
    type ${generic_list_type_name} is
       access all ${generic_list_value_type}'Class;
+
+   overriding function Image
+     (Node : access ${generic_list_value_type}) return String;
+
+   overriding function Child_Count
+     (Node : access ${generic_list_value_type}) return Natural;
+
+   overriding procedure Get_Child
+     (Node            : access ${generic_list_value_type};
+      Index           : Positive;
+      Index_In_Bounds : out Boolean;
+      Result          : out ${root_node_type_name});
+
+   overriding procedure Print
+     (Node : access ${generic_list_value_type}; Prefix : String := "");
+
+   overriding function Is_Empty_List
+     (Node : access ${generic_list_value_type})
+      return Boolean
+   is
+     (Child_Count (${root_node_type_name} (Node)) = 0);
+
+   overriding procedure Destroy_Node
+     (Node : access ${generic_list_value_type});
 
    % for astnode in no_builtins(_self.astnode_types):
      % if not astnode.is_list_type:
@@ -133,9 +156,14 @@ private
    % endif
    % endfor
 
+   package Node_Bump_Ptr_Vectors is new Langkit_Support.Bump_Ptr.Vectors
+     (Element_Type => ${root_node_type_name});
+
    type ${generic_list_value_type} is
       abstract new ${root_node_value_type}
-      with null record;
+   with record
+      Vec : Node_Bump_Ptr_Vectors.Vector;
+   end record;
 
    % for astnode in no_builtins(_self.astnode_types):
      % if not astnode.is_list_type:

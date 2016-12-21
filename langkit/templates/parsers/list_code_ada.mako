@@ -19,7 +19,6 @@
    # The following variables must be used only if revtree_class is None
    list_type = _self.get_type()
    el_type   = list_type.element_type().name()
-   list_pkg = 'Lists_{}'.format(el_type)
 %>
 
 % if _self.revtree_class:
@@ -115,14 +114,14 @@ loop
    ## stored in a vector of nodes, in a flat fashion.
    % else:
 
-      if ${list_pkg}.Node_Vectors.Length (${res}.Vec) = 0 then
-         ${res}.Vec :=
-           ${list_pkg}.Node_Vectors.Create (Parser.Mem_Pool);
+      if Node_Bump_Ptr_Vectors.Length (${res}.Vec) = 0 then
+         ${res}.Vec := Node_Bump_Ptr_Vectors.Create (Parser.Mem_Pool);
       end if;
 
       ## Append the parsed result to the list
-      ${list_pkg}.Node_Vectors.Append
-        (${res}.Vec, ${el_type} (${parser_context.res_var_name}));
+      Node_Bump_Ptr_Vectors.Append
+        (${res}.Vec,
+         ${ctx.root_grammar_class.name()} (${parser_context.res_var_name}));
 
       ## If we are parsing nodes, then set the parent of parsed node to the
       ## list, and increment its ref count.
@@ -151,7 +150,7 @@ end loop;
 ## node.
 if ${res} /= null then
    ${res}.Unit := Parser.Unit;
-   if ${list_pkg}.Node_Vectors.Length (${res}.Vec) > 0 then
+   if Node_Bump_Ptr_Vectors.Length (${res}.Vec) > 0 then
       ${res}.Token_Start := ${pos_name};
       ${res}.Token_End := (if ${cpos} = ${pos_name}
                            then ${pos_name}

@@ -32,7 +32,14 @@
 
    type ${value_type} is
       ${'abstract' if element_type.has_abstract_list else ''}
-      new ${root_node_value_type} with private;
+      new ${generic_list_value_type} with private;
+
+   % if not element_type.has_abstract_list:
+      overriding function Kind
+        (Node : access ${value_type}) return ${root_node_kind_name};
+      overriding function Kind_Name
+        (Node : access ${value_type}) return String;
+   % endif
 
    function Item
      (Node  : access ${value_type};
@@ -46,31 +53,15 @@
 
    <%
       elt_type = element_type.name()
-      pkg_name = 'Lists_{}'.format(elt_type)
 
       list_type = element_type.list_type()
       value_type = list_type.value_type_name()
       type_name = list_type.name()
    %>
 
-   ## Hack: if the root list type is abstract, we have no concrete kind for it
-   ## (just a kind subrange). We have to give the List generic a kind anyway,
-   ## so just give one with the knowledge that subclasses will always override
-   ## it.
-   ## TODO: try to remove this hack. Maybe this will naturally go away if we
-   ## manage to get rid of this generic instantiation.
-   package ${pkg_name} is new List
-     (Node_Kind      => ${([cls for cls in _self.astnode_types
-                            if not cls.abstract][0].ada_kind_name()
-                          if element_type.has_abstract_list else
-                          list_type.ada_kind_name())},
-      Node_Kind_Name => "${list_type.repr_name()}",
-      Node_Type      => ${element_type.value_type_name()},
-      Node_Access    => ${elt_type});
-
    type ${value_type} is
       ${'abstract' if element_type.has_abstract_list else ''}
-      new ${pkg_name}.List_Type with null record;
+      new ${generic_list_value_type} with null record;
 
    ## Helper generated for properties code. Used in CollectionGet's code
    function Get
@@ -90,12 +81,36 @@
 
    <%
       elt_type = element_type.name()
-      pkg_name = 'Lists_{}'.format(elt_type)
-
       list_type = element_type.list_type()
       value_type = list_type.value_type_name()
       type_name = list_type.name()
    %>
+
+   % if not element_type.has_abstract_list:
+
+      ----------
+      -- Kind --
+      ----------
+
+      overriding function Kind
+        (Node : access ${value_type}) return ${root_node_kind_name}
+      is
+      begin
+         return ${list_type.ada_kind_name()};
+      end Kind;
+
+      ---------------
+      -- Kind_Name --
+      ---------------
+
+      overriding function Kind_Name
+        (Node : access ${value_type}) return String
+      is
+      begin
+         return "${list_type.repr_name()}";
+      end Kind_Name;
+
+   % endif
 
    ---------
    -- Get --
@@ -110,7 +125,8 @@
         (L : ${type_name}; Index : Integer)
          return ${element_type.name()}
       is
-        (${pkg_name}.Node_Vectors.Get_At_Index (L.Vec, Index + 1));
+        (${element_type.name()}
+           (Node_Bump_Ptr_Vectors.Get_At_Index (L.Vec, Index + 1)));
       --  L.Vec is 1-based but Index is 0-based
 
       function Length (Node : ${type_name}) return Natural is (Node.Length);
