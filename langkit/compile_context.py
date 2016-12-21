@@ -929,8 +929,6 @@ class CompileCtx(object):
             ("pkg_analysis",     ["analysis"], True),
             # Unit for the root AST node
             ("pkg_ast",          ["ast"], True),
-            # Unit for generic AST lists
-            ("pkg_ast_list",     ["ast", "list"], True),
             # Unit for all derived AST nodes
             ("pkg_ast_types",    ["ast", "types"], True),
             # Unit for the unit files provider interface
