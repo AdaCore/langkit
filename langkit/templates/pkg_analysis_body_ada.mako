@@ -350,8 +350,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
         (Unit     : Analysis_Unit;
          Read_BOM : Boolean)
          return Parser_Type
-      is (Create_From_File (Filename, To_String (Unit.Charset), Read_BOM,
-                            Analysis_Unit_Interface (Unit), With_Trivia));
+      is (Create_From_File (Filename, To_String (Unit.Charset), Read_BOM, Unit,
+                            With_Trivia));
    begin
       return Get_Unit
         (Context, Filename, Charset, Reparse, Get_Parser'Access, With_Trivia,
@@ -376,8 +376,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
         (Unit     : Analysis_Unit;
          Read_BOM : Boolean)
          return Parser_Type
-      is (Create_From_Buffer (Buffer, To_String (Unit.Charset), Read_BOM,
-                              Analysis_Unit_Interface (Unit), With_Trivia));
+      is (Create_From_Buffer (Buffer, To_String (Unit.Charset), Read_BOM, Unit,
+                              With_Trivia));
    begin
       return Get_Unit (Context, Filename, Charset, True, Get_Parser'Access,
                        With_Trivia, Rule);
@@ -537,7 +537,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       is (Create_From_File (To_String (Unit.File_Name),
                             To_String (Unit.Charset),
                             Read_BOM,
-                            Analysis_Unit_Interface (Unit)));
+                            Unit));
    begin
       Update_Charset (Unit, Charset);
       Do_Parsing (Unit, Charset'Length = 0, Get_Parser'Access);
@@ -558,7 +558,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          Read_BOM : Boolean)
          return Parser_Type
       is (Create_From_Buffer (Buffer, To_String (Unit.Charset), Read_BOM,
-                              Analysis_Unit_Interface (Unit)));
+                              Unit));
    begin
       Update_Charset (Unit, Charset);
       Do_Parsing (Unit, Charset'Length = 0, Get_Parser'Access);

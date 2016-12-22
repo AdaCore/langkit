@@ -6,8 +6,6 @@ with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
-with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
-use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 
 --  This package provides types and primitives to parse buffers and files and
 --  get AST out of them.
@@ -27,7 +25,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
       Current_Pos : Token_Index := First_Token_Index;
       Last_Fail   : Fail_Info;
       Diagnostics : Diagnostics_Vectors.Vector;
-      Unit        : Analysis_Unit_Interface;
+      Unit        : Analysis_Unit;
       TDH         : Token_Data_Handler_Access;
       Mem_Pool    : Bump_Ptr_Pool;
    end record;
@@ -35,7 +33,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
    function Create_From_File
      (Filename, Charset : String;
       Read_BOM          : Boolean;
-      Unit              : Analysis_Unit_Interface;
+      Unit              : Analysis_Unit;
       With_Trivia       : Boolean := False) return Parser_type;
    --  Create a parser to parse the source in Filename, decoding it using
    --  Charset. The resulting tokens (and trivia if With_Trivia) are stored
@@ -47,7 +45,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
    function Create_From_Buffer
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
-      Unit            : Analysis_Unit_Interface;
+      Unit            : Analysis_Unit;
       With_Trivia     : Boolean := False) return Parser_type;
    --  Create a parser to parse the source in Buffer, decoding it using
    --  Charset. The resulting tokens (and trivia if With_Trivia) are stored

@@ -103,7 +103,7 @@ loop
          end;
 
          ## Set token data for result
-         ${res}.Unit := Parser.Unit;
+         ${res}.Unit := Analysis_Unit_Interface (Parser.Unit);
          ${res}.Token_Start := ${pos_name};
          ${res}.Token_End := (if ${cpos} = ${pos_name}
                               then ${pos_name}
@@ -149,7 +149,7 @@ end loop;
 ## If we managed to parse a list, compute and set the sloc range for this AST
 ## node.
 if ${res} /= null then
-   ${res}.Unit := Parser.Unit;
+   ${res}.Unit := Analysis_Unit_Interface (Parser.Unit);
    if Node_Bump_Ptr_Vectors.Length (${res}.Vec) > 0 then
       ${res}.Token_Start := ${pos_name};
       ${res}.Token_End := (if ${cpos} = ${pos_name}
