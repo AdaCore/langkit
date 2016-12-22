@@ -638,10 +638,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
      (Analysis_Unit, ${analysis_unit_type});
    function Unwrap is new Ada.Unchecked_Conversion
      (${analysis_unit_type}, Analysis_Unit);
-   function Wrap is new Ada.Unchecked_Conversion
-     (Analysis_Unit_Interface, ${analysis_unit_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${analysis_unit_type}, Analysis_Unit_Interface);
 
    function Wrap is new Ada.Unchecked_Conversion
      (${root_node_type_name}, ${node_type});
