@@ -1321,7 +1321,9 @@ private
       Index : Token_Index)
       return Token_Type
    is
-     ((TDH => Node.Unit.Token_Data, Token => Index, Trivia => No_Token_Index));
+     ((TDH    => Token_Data (Node.Unit),
+       Token  => Index,
+       Trivia => No_Token_Index));
    --  Helper for properties. This is used to turn token indexes as stored in
    --  AST nodes into Token_Type values.
 
@@ -1338,7 +1340,9 @@ private
      (Node : access ${root_node_value_type}'Class)
       return Token_Type
    is
-     ((Node.Unit.Token_Data, Node.Token_Start, No_Token_Index));
+     ((TDH    => Token_Data (Node.Unit),
+       Token  => Node.Token_Start,
+       Trivia => No_Token_Index));
 
    function Token_End
      (Node : access ${root_node_value_type}'Class)
@@ -1346,7 +1350,9 @@ private
    is
      (if Node.Token_End = No_Token_Index
       then Token_Start (Node)
-      else (Node.Unit.Token_Data, Node.Token_End, No_Token_Index));
+      else (TDH    => Token_Data (Node.Unit),
+            Token  => Node.Token_End,
+            Trivia => No_Token_Index));
 
    function Is_Ghost
      (Node : access ${root_node_value_type}'Class)

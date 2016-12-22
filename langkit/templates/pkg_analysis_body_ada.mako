@@ -469,7 +469,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    procedure Reset_Property_Caches (Context : Analysis_Context) is
    begin
       for Unit of Context.Units_Map loop
-         Unit.Reset_Property_Caches;
+         Reset_Property_Caches (Unit);
       end loop;
    end Reset_Property_Caches;
 
