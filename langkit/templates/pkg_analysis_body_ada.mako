@@ -2120,7 +2120,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    end Can_Reach;
 
    procedure Register_Destroyable is new
-      Analysis_Interfaces.Register_Destroyable
+      Analysis_Interfaces.Register_Destroyable_Gen
         (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env, AST_Envs.Destroy);
 
    pragma Warnings (Off, "referenced");
@@ -2266,7 +2266,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Node : ${root_node_type_name})
    is
       procedure Helper is new
-         Analysis_Interfaces.Register_Destroyable
+         Analysis_Interfaces.Register_Destroyable_Gen
            (${root_node_value_type}'Class,
             ${root_node_type_name},
             Destroy_Synthetic_Node);

@@ -6,11 +6,11 @@ with System;
 
 package body ${_self.ada_api_settings.lib_name}.Analysis_Interfaces is
 
-   --------------------------
-   -- Register_Destroyable --
-   --------------------------
+   ------------------------------
+   -- Register_Destroyable_Gen --
+   ------------------------------
 
-   procedure Register_Destroyable
+   procedure Register_Destroyable_Gen
      (Unit   : access Analysis_Unit_Interface_Type'Class;
       Object : T_Access)
    is
@@ -20,6 +20,6 @@ package body ${_self.ada_api_settings.lib_name}.Analysis_Interfaces is
       Unit.Register_Destroyable_Helper
         (Object.all'Address,
          Convert (Destroy'Address));
-   end Register_Destroyable;
+   end Register_Destroyable_Gen;
 
 end ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
