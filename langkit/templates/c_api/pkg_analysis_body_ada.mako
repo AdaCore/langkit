@@ -862,7 +862,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       T : Text_Type (1 .. Natural (Text.Length));
       for T'Address use Text.Chars;
    begin
-     return Find (Unit.Token_Data.Symbols, T, False);
+     return Find (Unit.TDH.Symbols, T, False);
    end Unwrap;
 
    ----------------

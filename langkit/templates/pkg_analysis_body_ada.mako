@@ -1124,8 +1124,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class;
       Snap : Boolean := False) return Source_Location_Range
    is
-      TDH                  : Token_Data_Handler renames
-         Node.Unit.Token_Data.all;
+      TDH                  : Token_Data_Handler renames Node.Unit.TDH;
       Sloc_Start, Sloc_End : Source_Location;
 
       function Get (Index : Token_Index) return Token_Data_Type is
@@ -1603,7 +1602,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       use Children_Vectors;
 
       Ret_Vec : Children_Vectors.Vector;
-      TDH     : Token_Data_Handler renames Node.Unit.Token_Data.all;
+      TDH     : Token_Data_Handler renames Node.Unit.TDH;
 
       procedure Append_Trivias (First, Last : Token_Index);
       --  Append all the trivias of tokens between indices First and Last to
@@ -1968,7 +1967,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       return Token_Index
    is
    begin
-      if Node.Unit.Token_Data /= Token.TDH then
+      if Node.Unit.TDH'Access /= Token.TDH then
          raise Property_Error with
            ("Cannot associate a token and a node from different analysis"
             & " units");
