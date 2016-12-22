@@ -246,10 +246,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    --  useful for visibility purposes, and is mainly meant to be used in the
    --  env hooks.
 
-   function Is_Referenced
-     (Unit, Referenced : Analysis_Unit) return Boolean;
-   --  Check whether the Referenced unit is referenced from Unit
-
    function Get_Lex_Env_Data
      (Unit : Analysis_Unit) return Lex_Env_Data;
 
@@ -1102,10 +1098,6 @@ private
       Object  : System.Address;
       Destroy : Destroy_Procedure);
 
-   overriding function Is_Referenced
-     (Unit, Referenced : access Analysis_Unit_Type) return Boolean;
-   --  Check whether the Referenced unit is referenced from Unit
-
    overriding procedure Set_Filled_Caches (Unit : access Analysis_Unit_Type);
    --  Tag Unit as having filled caches for properties memoization
 
@@ -1113,10 +1105,8 @@ private
    --  If AST_Node is not null, invoke Reset_Property_Caches primitives on all
    --  the nodes it contains.
 
-   function Is_Referenced
-     (Unit, Referenced : Analysis_Unit) return Boolean
-   is
-     (Unit.Is_Referenced (Referenced));
+   overriding function Is_Referenced
+     (Unit, Referenced : access Analysis_Unit_Type) return Boolean;
    --  Check whether the Referenced unit is referenced from Unit
 
    function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
