@@ -50,6 +50,9 @@ with ${_self.default_unit_file_provider.unit_fqn};
 
 package body ${_self.ada_api_settings.lib_name}.Analysis is
 
+   ##  Make logic operations on nodes accessible
+   use Eq_Node, Eq_Node.Raw_Impl;
+
    procedure Update_After_Reparse (Unit : Analysis_Unit);
 
    procedure Destroy (Unit : Analysis_Unit);
@@ -1675,8 +1678,6 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       end loop;
    end PP_Trivia;
 
-   use AST_Envs;
-
    --------------------------
    -- Populate_Lexical_Env --
    --------------------------
@@ -2119,9 +2120,6 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          (Start_Sloc (Sloc_Range (El)),
           Start_Sloc (Sloc_Range (From))) = After;
    end Can_Reach;
-
-   use Eq_Node, Eq_Node.Raw_Impl;
-   ##  Make logic operations on nodes accessible
 
    procedure Register_Destroyable is new
       Analysis_Interfaces.Register_Destroyable

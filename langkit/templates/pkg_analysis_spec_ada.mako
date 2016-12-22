@@ -982,6 +982,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
 
 private
 
+   use AST_Envs;
+
    type Analysis_Context_Type;
    type Analysis_Unit_Type;
 
@@ -1130,8 +1132,6 @@ private
 
    function Get_Filename (Unit : Analysis_Unit) return String is
      (To_String (Unit.File_Name));
-
-   use AST_Envs;
 
    function Is_Visible_From
      (Env, Referenced : AST_Envs.Lexical_Env) return Boolean
