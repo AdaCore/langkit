@@ -745,6 +745,23 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       return Unit.Lex_Env_Data_Acc;
    end Get_Lex_Env_Data;
 
+   ------------------------------
+   -- Register_Destroyable_Gen --
+   ------------------------------
+
+   procedure Register_Destroyable_Gen
+     (Unit : access Analysis_Unit_Type'Class; Object : T_Access)
+   is
+      function Convert is new Ada.Unchecked_Conversion
+        (System.Address, Destroy_Procedure);
+      procedure Destroy_Procedure (Object : in out T_Access) renames Destroy;
+   begin
+      Register_Destroyable_Helper
+        (Unit,
+         Object.all'Address,
+         Convert (Destroy_Procedure'Address));
+   end Register_Destroyable_Gen;
+
    ---------------------------
    -- Reset_Property_Caches --
    ---------------------------
@@ -2119,14 +2136,12 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
           Start_Sloc (Sloc_Range (From))) = After;
    end Can_Reach;
 
-   procedure Register_Destroyable is new
-      Analysis_Interfaces.Register_Destroyable_Gen
-        (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env, AST_Envs.Destroy);
+   procedure Register_Destroyable is new Register_Destroyable_Gen
+     (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env, AST_Envs.Destroy);
 
    pragma Warnings (Off, "referenced");
    procedure Register_Destroyable
-     (Unit : access Analysis_Unit_Interface_Type'Class;
-      Node : ${root_node_type_name});
+     (Unit : access Analysis_Unit_Type'Class; Node : ${root_node_type_name});
    --  Helper for synthetized nodes. We cannot used the generic
    --  Register_Destroyable because the root AST node is an abstract types, so
    --  this is implemented using the untyped (using System.Address)
@@ -2262,14 +2277,12 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    --------------------------
 
    procedure Register_Destroyable
-     (Unit : access Analysis_Unit_Interface_Type'Class;
-      Node : ${root_node_type_name})
+     (Unit : access Analysis_Unit_Type'Class; Node : ${root_node_type_name})
    is
-      procedure Helper is new
-         Analysis_Interfaces.Register_Destroyable_Gen
-           (${root_node_value_type}'Class,
-            ${root_node_type_name},
-            Destroy_Synthetic_Node);
+      procedure Helper is new Register_Destroyable_Gen
+        (${root_node_value_type}'Class,
+         ${root_node_type_name},
+         Destroy_Synthetic_Node);
    begin
       Helper (Unit, Node);
    end Register_Destroyable;

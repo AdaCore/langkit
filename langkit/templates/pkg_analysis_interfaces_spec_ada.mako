@@ -48,14 +48,4 @@ package ${_self.ada_api_settings.lib_name}.Analysis_Interfaces is
    is abstract;
    --  Tag Unit as having filled caches for properties memoization
 
-   generic
-      type T (<>) is limited private;
-      type T_Access is access all T;
-      with procedure Destroy (Object : in out T_Access);
-   procedure Register_Destroyable_Gen
-     (Unit   : access Analysis_Unit_Interface_Type'Class;
-      Object : T_Access);
-   --  Generic procedure to register an object so that it is automatically
-   --  destroyed when Unit is destroyed.
-
 end ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;

@@ -1120,6 +1120,15 @@ private
    --  Check whether Referenced's unit is referenced from Env's unit. Used for
    --  property generation purposes.
 
+   generic
+      type T (<>) is limited private;
+      type T_Access is access all T;
+      with procedure Destroy (Object : in out T_Access);
+   procedure Register_Destroyable_Gen
+     (Unit : access Analysis_Unit_Type'Class; Object : T_Access);
+   --  Generic procedure to register an object so that it is automatically
+   --  destroyed when Unit is destroyed.
+
    function Children
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_array.name()};
