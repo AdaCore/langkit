@@ -35,8 +35,6 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 with Langkit_Support.Tree_Traversal_Iterator;
 with Langkit_Support.Vectors;
 
-with ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
-use ${_self.ada_api_settings.lib_name}.Analysis_Interfaces;
 with ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer;
 use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
@@ -1008,6 +1006,8 @@ private
    procedure Reset_Property_Caches (Context : Analysis_Context);
    --  Call Reset_Property_Caches on all units Context contains
 
+   type Destroy_Procedure is access procedure (Object : System.Address);
+
    type Destroyable_Type is record
       Object  : System.Address;
       --  Object to destroy
@@ -1024,8 +1024,7 @@ private
    package Analysis_Unit_Sets
    is new Langkit_Support.Cheap_Sets (Analysis_Unit, null);
 
-   type Analysis_Unit_Type is new Analysis_Unit_Interface_Type with
-   record
+   type Analysis_Unit_Type is record
       Context           : Analysis_Context;
       --  The owning context for this analysis unit
 
@@ -1087,25 +1086,25 @@ private
       return Unit_File_Provider_Access_Cst is (Context.Unit_File_Provider);
    % endif
 
-   overriding function Token_Data
+   function Token_Data
      (Unit : access Analysis_Unit_Type)
       return Token_Data_Handler_Access
    is
      (Unit.TDH'Access);
 
-   overriding procedure Register_Destroyable_Helper
+   procedure Register_Destroyable_Helper
      (Unit    : access Analysis_Unit_Type;
       Object  : System.Address;
       Destroy : Destroy_Procedure);
 
-   overriding procedure Set_Filled_Caches (Unit : access Analysis_Unit_Type);
+   procedure Set_Filled_Caches (Unit : access Analysis_Unit_Type);
    --  Tag Unit as having filled caches for properties memoization
 
    procedure Reset_Property_Caches (Unit : access Analysis_Unit_Type);
    --  If AST_Node is not null, invoke Reset_Property_Caches primitives on all
    --  the nodes it contains.
 
-   overriding function Is_Referenced
+   function Is_Referenced
      (Unit, Referenced : access Analysis_Unit_Type) return Boolean;
    --  Check whether the Referenced unit is referenced from Unit
 
@@ -1125,7 +1124,7 @@ private
       type T_Access is access all T;
       with procedure Destroy (Object : in out T_Access);
    procedure Register_Destroyable_Gen
-     (Unit : access Analysis_Unit_Type'Class; Object : T_Access);
+     (Unit : access Analysis_Unit_Type; Object : T_Access);
    --  Generic procedure to register an object so that it is automatically
    --  destroyed when Unit is destroyed.
 
