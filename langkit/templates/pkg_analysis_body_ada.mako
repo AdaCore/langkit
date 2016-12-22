@@ -35,8 +35,6 @@ with Adalog.Pure_Relations;      use Adalog.Pure_Relations;
 with Adalog.Variadic_Operations; use Adalog.Variadic_Operations;
 pragma Warnings (On, "referenced");
 
-with ${ctx.ada_api_settings.lib_name}.Analysis.Internal;
-use ${ctx.ada_api_settings.lib_name}.Analysis.Internal;
 with ${ctx.ada_api_settings.lib_name}.Analysis.Parsers;
 use ${ctx.ada_api_settings.lib_name}.Analysis.Parsers;
 with ${ctx.ada_api_settings.lib_name}.Lexer;
@@ -706,7 +704,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       return Analysis_Unit
    is
    begin
-      return Convert (Node.Unit);
+      return Node.Unit;
    end Get_Unit;
 
    --------------------
@@ -2141,7 +2139,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    function Get_Lex_Env_Data
      (Node : access ${root_node_value_type}'Class) return Lex_Env_Data
    is (${_self.ada_api_settings.lib_name}.Analysis.Get_Lex_Env_Data
-        (Analysis.Internal.Convert (Node.Unit)));
+        (Node.Unit));
 
    -----------
    -- Image --

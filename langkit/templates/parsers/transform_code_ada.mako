@@ -17,7 +17,7 @@ if ${parser_context.pos_var_name} /= No_Token_Index then
    ##     after this parser runs.
    ## If they are equal then we know that this parser consumed no token. As a
    ## result, the result must be a ghost node, i.e. with no token_end.
-   ${res}.Unit := Analysis_Unit_Interface (Parser.Unit);
+   ${res}.Unit := Parser.Unit;
    ${res}.Token_Start := ${pos_name};
    ${res}.Token_End := (if ${parser_context.pos_var_name} = ${pos_name}
                         then No_Token_Index

@@ -559,8 +559,7 @@
    begin
       % if cls.env_spec.env_hook_enabled:
          ${ctx.env_hook_subprogram.fqn}
-           (Analysis.Internal.Convert (Self.Unit),
-            ${cls.env_spec.env_hook_arg_expr});
+           (Self.Unit, ${cls.env_spec.env_hook_arg_expr});
       % endif
       % if cls.env_spec.initial_env:
       Initial_Env := ${cls.env_spec.initial_env_expr};

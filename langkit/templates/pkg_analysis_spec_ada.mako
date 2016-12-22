@@ -1159,7 +1159,7 @@ private
    type ${root_node_value_type} is abstract tagged record
       Parent                 : ${root_node_type_name} := null;
 
-      Unit                   : Analysis_Unit_Interface := null;
+      Unit                   : Analysis_Unit := null;
       --  Reference to the analysis unit that owns this node
 
       Token_Start, Token_End : Token_Index  := No_Token_Index;

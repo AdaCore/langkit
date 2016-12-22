@@ -857,9 +857,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    ------------
 
    function Unwrap
-     (Unit : Analysis_Unit_Interface;
-      Text : ${text_type})
-      return Symbol_Type
+     (Unit : Analysis_Unit; Text : ${text_type}) return Symbol_Type
    is
       T : Text_Type (1 .. Natural (Text.Length));
       for T'Address use Text.Chars;
@@ -1072,7 +1070,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       end if;
 
       declare
-         U : constant Analysis_Unit_Interface := E.Node.Unit;
+         U : constant Analysis_Unit := E.Node.Unit;
          N : constant Symbol_Type := Unwrap (U, Name);
       begin
          return Create (if N = null

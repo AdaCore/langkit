@@ -17,15 +17,14 @@ if ${parser_context.pos_var_name} = No_Token_Index then
       % else:
          ${bool_res} := ${base.name()}
            (${alt_false.name()}_Alloc.Alloc (Parser.Mem_Pool));
-         ${bool_res}.Unit := Analysis_Unit_Interface (Parser.Unit);
+         ${bool_res}.Unit := Parser.Unit;
          ${bool_res}.Token_Start := ${pos_name};
          ${bool_res}.Token_End := No_Token_Index;
       % endif
     % elif parser_type.is_list_type:
         ${parser_context.res_var_name} :=
           (${parser_type.storage_type_name()}_Alloc.Alloc (Parser.Mem_Pool));
-        ${parser_context.res_var_name}.Unit :=
-           Analysis_Unit_Interface (Parser.Unit);
+        ${parser_context.res_var_name}.Unit := Parser.Unit;
         ${parser_context.res_var_name}.Token_Start := ${pos_name} - 1;
         ${parser_context.res_var_name}.Token_End := No_Token_Index;
     % else:
@@ -54,7 +53,7 @@ else
    % else:
       ${bool_res} := ${base.name()}
         (${alt_true.name()}_Alloc.Alloc (Parser.Mem_Pool));
-      ${bool_res}.Unit := Analysis_Unit_Interface (Parser.Unit);
+      ${bool_res}.Unit := Parser.Unit;
       ${bool_res}.Token_Start := ${pos_name};
       ${bool_res}.Token_End := No_Token_Index;
    % endif
