@@ -861,11 +861,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    subtype Logic_Equation is Relation;
    Null_Logic_Equation : constant Logic_Equation := null;
 
-   function Get_Unit_Internal
-     (Node : access ${root_node_value_type}'Class)
-      return Analysis_Unit_Interface;
-   --  Internal helper to get the unit that owns an AST node
-
    -----------------------
    -- Enumeration types --
    -----------------------
@@ -1132,13 +1127,6 @@ private
 
    function Get_Filename (Unit : Analysis_Unit) return String is
      (To_String (Unit.File_Name));
-
-   function Is_Visible_From
-     (Env, Referenced : AST_Envs.Lexical_Env) return Boolean
-   is
-     (Is_Referenced
-        (Get_Unit_Internal (Env.Node),
-         Get_Unit_Internal (Referenced.Node)));
    --  Check whether Referenced's unit is referenced from Env's unit. Used for
    --  property generation purposes.
 
@@ -1222,6 +1210,11 @@ private
       Current_Env, Root_Env : AST_Envs.Lexical_Env) is null;
    --  Internal procedure that will execute all post add to env actions for
    --  Node. This is meant to be called by Populate_Lexical_Env.
+
+   function Is_Visible_From
+     (Env, Referenced : AST_Envs.Lexical_Env) return Boolean
+   is
+     (Is_Referenced (Env.Node.Unit, Referenced.Node.Unit));
 
    --------------------------------
    -- Tree traversal (internals) --
@@ -1402,11 +1395,6 @@ private
    --  Assuming that Token refers to a token that contains a symbol, return the
    --  corresponding symbol. This is an internal helper for properties code
    --  generation.
-
-   function Get_Unit_Internal
-     (Node : access ${root_node_value_type}'Class)
-      return Analysis_Unit_Interface
-   is (Node.Unit);
 
    type Containing_Env_Element is record
       Env  : Lexical_Env;

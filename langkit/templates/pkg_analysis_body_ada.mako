@@ -706,7 +706,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       return Analysis_Unit
    is
    begin
-      return Convert (Get_Unit_Internal (Node));
+      return Convert (Node.Unit);
    end Get_Unit;
 
    --------------------
@@ -2112,7 +2112,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       --  envs, we consider that elements coming from different units are
       --  always visible for each other, and let the user implement language
       --  specific visibility rules in the DSL.
-      if Get_Unit_Internal (El) /= Get_Unit_Internal (From) then
+      if El.Unit /= From.Unit then
          return True;
       end if;
 
