@@ -1,0 +1,5 @@
+main.py: Running...
+<Literal 1:1-1:2>.root = <Plus 1:1-1:6>
+<Literal 1:5-1:6>.root = <Plus 1:1-1:6>
+main.py: Done.
+Done
