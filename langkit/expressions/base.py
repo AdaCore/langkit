@@ -10,8 +10,9 @@ import funcy
 
 from langkit import names
 from langkit.compiled_types import (
-    AbstractNodeData, ASTNode, BoolType, CompiledType, LexicalEnvType,
-    LongType, render as ct_render, Symbol, Token, resolve_type, Argument, T
+    AbstractNodeData, Argument, ASTNode, BoolType, CompiledType,
+    LexicalEnvType, LongType, Symbol, Token, render as ct_render, resolve_type,
+    T
 )
 from langkit.diagnostics import (
     extract_library_location, check_source_language, check_multiple,
