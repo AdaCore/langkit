@@ -1930,11 +1930,15 @@ class BasicExpr(ResolvedExpression):
         super(BasicExpr, self).__init__(result_var_name)
 
     def _render_expr(self):
-        return self.template.format(*map(ResolvedExpression.render_expr,
-                                         self.sub_exprs))
+        return self.template.format(*[
+            (expr if isinstance(expr, basestring) else expr.render_expr())
+            for expr in self.sub_exprs
+        ])
 
     def _render_pre(self):
-        return '\n'.join(expr.render_pre() for expr in self.sub_exprs)
+        return '\n'.join(expr.render_pre()
+                         for expr in self.sub_exprs
+                         if not isinstance(expr, basestring))
 
 
 class LiteralExpr(BasicExpr):
@@ -1953,6 +1957,45 @@ class LiteralExpr(BasicExpr):
     def __repr__(self):
         return '<LiteralExpr {} ({})>'.format(self.template,
                                               self.type.name().camel)
+
+
+class FieldAccessExpr(BasicExpr):
+    """
+    Resolved expression for anything that compiles to "{prefix}.{field}" in the
+    generated code.
+
+    Node that this automatically generates a null safety check if prefix is
+    allowed to be null.
+    """
+
+    def __init__(self, prefix_expr, field_name, result_type):
+        """
+        :param ResolvedExpression prefix_expr: The prefix corresponding to this
+            expression.
+        :param str field_name: The name of the field to access.
+        :param CompiledType type: The type of the result.
+        """
+        super(FieldAccessExpr, self).__init__(
+            '{}.{}', result_type, [prefix_expr, field_name]
+        )
+        self.prefix_expr = prefix_expr
+        self.prefix_var = (
+            PropertyDef.get().vars.create('Pfx', self.prefix_expr.type)
+            if result_type.null_allowed else
+            None
+        )
+
+    def _render_pre(self):
+        base = super(FieldAccessExpr, self)._render_pre()
+        if self.prefix_expr.type.null_allowed:
+            return '{}\n{}'.format(
+                base,
+                render('properties/null_safety_check_ada',
+                       expr=self.prefix_expr,
+                       result_var=self.prefix_var)
+            )
+        else:
+            return base
 
 
 class ArrayExpr(BasicExpr):
