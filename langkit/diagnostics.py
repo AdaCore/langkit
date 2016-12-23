@@ -101,6 +101,13 @@ class Context(object):
             context_cache = (exc_value, context_stack[:])
         context_stack.pop()
 
+    def __repr__(self):
+        return (
+            '<diagnostics.Context message={}, location={}, id={}>'.format(
+                self.message, self.location, self.id
+            )
+        )
+
 
 class DiagnosticError(Exception):
     pass
