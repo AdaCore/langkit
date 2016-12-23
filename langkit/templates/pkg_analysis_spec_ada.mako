@@ -1352,9 +1352,9 @@ private
    --  Returns whether the node is a synthetic node, i.e. whether it was
    --  generated for semantic analysis instead of parsing.
 
-   --------------------
-   -- Token Iterator --
-   --------------------
+   --------------------------------
+   -- Token Iterator (internals) --
+   --------------------------------
 
    type Token_Iterator is record
       Node : ${root_node_type_name};
