@@ -1150,7 +1150,6 @@ private
       Extension : Extension_Access;
       Dtor      : Extension_Destructor;
    end record;
-   --  TODO??? Remove this from the public API
 
    package Extension_Vectors is new Langkit_Support.Vectors
      (Element_Type => Extension_Slot);
