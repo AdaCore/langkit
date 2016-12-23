@@ -900,8 +900,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    -- ASTNode derived types (full declarations) --
    -----------------------------------------------
 
-   --  See ${_self.ada_api_settings.lib_name}.AST for overriden primitive
-   --  operations documentations.
+   --  See above for overriden primitive operations documentations
 
    % for astnode in no_builtins(_self.astnode_types):
      % if not astnode.is_list_type:
