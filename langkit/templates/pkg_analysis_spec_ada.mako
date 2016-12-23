@@ -408,21 +408,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    --  Return whether Node is an empty list (so this is wrong for all nodes
    --  that are not lists).
 
-   procedure Destroy_Node
-     (Node : access ${root_node_value_type}) is abstract;
-   --  Free the resources allocated to this node.
-   --
-   --  This is an internal implementation detail, please don't use this.
-   --  TODO??? Hide it somehow: destruction is done automatically when the
-   --  owning analysis unit is destroyed itself.
-
-   procedure Destroy (Node : access ${root_node_value_type}'Class);
-   --  Free the resources allocated to this node and all its children.
-   --
-   --  This is an internal implementation detail, please don't use this.
-   --  TODO??? Hide it somehow: destruction is done automatically when the
-   --  owning analysis unit is destroyed itself.
-
    function Node_Env
      (Node : access ${root_node_value_type})
       return AST_Envs.Lexical_Env;
@@ -879,9 +864,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    is
      (Child_Count (${root_node_type_name} (Node)) = 0);
 
-   overriding procedure Destroy_Node
-     (Node : access ${generic_list_value_type});
-
    % for astnode in no_builtins(_self.astnode_types):
      % if not astnode.is_list_type:
        ${astnode_types.public_incomplete_decl(astnode)}
@@ -1141,6 +1123,13 @@ private
    procedure Reset_Property_Caches (Node : access ${root_node_value_type})
       is null;
    --  Reset the properties memoization caches attached to this node.
+
+   procedure Destroy_Node (Node : access ${root_node_value_type}) is null;
+   --  Free the resources allocated to this node. This is conceptually abstract
+   --  but we can't have private abstract primitives in Ada.
+
+   procedure Destroy (Node : access ${root_node_value_type}'Class);
+   --  Free the resources allocated to this node and all its children.
 
    ------------------------------
    -- Root AST node properties --
@@ -1423,6 +1412,9 @@ private
    with record
       Vec : Node_Bump_Ptr_Vectors.Vector;
    end record;
+
+   overriding procedure Destroy_Node
+     (Node : access ${generic_list_value_type});
 
    % for astnode in no_builtins(_self.astnode_types):
      % if not astnode.is_list_type:

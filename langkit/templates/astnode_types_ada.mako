@@ -124,8 +124,6 @@
            (Node   : access ${type_name};
             Prefix : String := "");
 
-         overriding procedure Destroy_Node
-           (Node : access ${cls.value_type_name()});
       % endif
    % endif
 
@@ -191,10 +189,15 @@
    end record;
 
    % if not cls.abstract and not cls.is_list_type:
+
       % if memoized_properties:
          overriding procedure Reset_Property_Caches
            (Node : access ${type_name});
       % endif
+
+      overriding procedure Destroy_Node
+        (Node : access ${cls.value_type_name()});
+
    % endif
 
    ## Private field getters
