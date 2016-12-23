@@ -648,12 +648,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    -- Lexical utilities --
    -----------------------
 
-   function First_Token (TDH : Token_Data_Handler_Access) return Token_Type;
-   --  Internal helper. Return a reference to the first token in TDH.
-
-   function Last_Token (TDH : Token_Data_Handler_Access) return Token_Type;
-   --  Internal helper. Return a reference to the last token in TDH.
-
    function "<" (Left, Right : Token_Type) return Boolean;
    --  Assuming Left and Right belong to the same analysis unit, return whether
    --  Left came before Right in the source file.
@@ -1294,6 +1288,12 @@ private
    end record;
 
    No_Token : constant Token_Type := (null, No_Token_Index, No_Token_Index);
+
+   function First_Token (TDH : Token_Data_Handler_Access) return Token_Type;
+   --  Internal helper. Return a reference to the first token in TDH.
+
+   function Last_Token (TDH : Token_Data_Handler_Access) return Token_Type;
+   --  Internal helper. Return a reference to the last token in TDH.
 
    function First_Token (Unit : Analysis_Unit) return Token_Type is
      (First_Token (Unit.TDH'Access));
