@@ -1091,14 +1091,14 @@ private
 
    procedure Reset_Property_Caches (Node : access ${root_node_value_type})
       is null;
-   --  Reset the properties memoization caches attached to this node.
+   --  Reset the properties memoization caches attached to this node
 
    procedure Destroy_Node (Node : access ${root_node_value_type}) is null;
    --  Free the resources allocated to this node. This is conceptually abstract
    --  but we can't have private abstract primitives in Ada.
 
    procedure Destroy (Node : access ${root_node_value_type}'Class);
-   --  Free the resources allocated to this node and all its children.
+   --  Free the resources allocated to this node and all its children
 
    ------------------------------
    -- Root AST node properties --
