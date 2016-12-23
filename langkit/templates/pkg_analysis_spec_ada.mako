@@ -321,18 +321,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
 
    --  The following subtypes are introduced to ease code generation, so we
    --  don't have to deal with the AST_Envs suffix.
+
    subtype Lexical_Env is AST_Envs.Lexical_Env;
    subtype Env_Element is AST_Envs.Env_Element;
-   No_Env_Element : constant Env_Element := (null, No_Metadata, True);
-   procedure Inc_Ref (Self : Lexical_Env) renames AST_Envs.Inc_Ref;
-   procedure Dec_Ref (Self : in out Lexical_Env) renames AST_Envs.Dec_Ref;
-
-   function Get
-     (A     : AST_Envs.Env_Element_Array;
-      Index : Integer)
-      return Env_Element;
-   --  Simple getter that raises Property_Error on out-of-bound accesses.
-   --  Useful for code generation.
 
    ## Declare arrays of lexical environments here because we need them for the
    ## Group operation below.
@@ -340,16 +331,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
 
    ## See ASTNode.env_element
    ${array_types.public_decl(T.root_node.env_element().array_type())}
-
-   function Group is new AST_Envs.Group
-     (Index_Type        => Positive,
-      Lexical_Env_Array => ${LexicalEnvType.array_type().api_name()});
-
-   function Group
-     (Envs : ${LexicalEnvType.array_type().name()})
-      return ${LexicalEnvType.name()}
-   is (Group (Envs.Items));
-   --  Convenience wrapper for uniform types handling in code generation
 
    ## Declare arrays of root nodes here since some primitives rely on it and
    ## since the declarations require AST_Envs.
@@ -1141,6 +1122,31 @@ private
 
    package Extension_Vectors is new Langkit_Support.Vectors
      (Element_Type => Extension_Slot);
+
+   --------------------------------------
+   -- Environments handling (internal) --
+   --------------------------------------
+
+   No_Env_Element : constant Env_Element := (null, No_Metadata, True);
+   procedure Inc_Ref (Self : Lexical_Env) renames AST_Envs.Inc_Ref;
+   procedure Dec_Ref (Self : in out Lexical_Env) renames AST_Envs.Dec_Ref;
+
+   function Get
+     (A     : AST_Envs.Env_Element_Array;
+      Index : Integer)
+      return Env_Element;
+   --  Simple getter that raises Property_Error on out-of-bound accesses.
+   --  Useful for code generation.
+
+   function Group is new AST_Envs.Group
+     (Index_Type        => Positive,
+      Lexical_Env_Array => ${LexicalEnvType.array_type().api_name()});
+
+   function Group
+     (Envs : ${LexicalEnvType.array_type().name()})
+      return ${LexicalEnvType.name()}
+   is (Group (Envs.Items));
+   --  Convenience wrapper for uniform types handling in code generation
 
    -------------------------------
    -- Root AST node (internals) --
