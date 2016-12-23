@@ -64,9 +64,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    );
    ${ada_doc('langkit.grammar_rule_type')}
 
-   type Lex_Env_Data_Type is private;
-   type Lex_Env_Data is access all Lex_Env_Data_Type;
-
    type ${root_node_value_type} is abstract tagged private;
    --  This "by-value" type is public to expose the fact that the various
    --  AST nodes are a hierarchy of tagged types, but it is not intended to be
@@ -244,9 +241,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    --  useful for visibility purposes, and is mainly meant to be used in the
    --  env hooks.
 
-   function Get_Lex_Env_Data
-     (Unit : Analysis_Unit) return Lex_Env_Data;
-
    ----------------
    -- Extensions --
    ----------------
@@ -337,21 +331,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    No_Env_Element : constant Env_Element := (null, No_Metadata, True);
    procedure Inc_Ref (Self : Lexical_Env) renames AST_Envs.Inc_Ref;
    procedure Dec_Ref (Self : in out Lexical_Env) renames AST_Envs.Dec_Ref;
-
-   procedure Destroy (Self : in out Lex_Env_Data_Type);
-   --  Destroy data associated to lexical environments
-
-   procedure Destroy (Self : in out Lex_Env_Data);
-   --  Likewise, but also free the memory allocated to Self
-
-   procedure Remove_Exiled_Entries (Self : in out Lex_Env_Data_Type);
-   --  Remove lex env entries that references some of the unit's nodes, in
-   --  lexical environments not owned by the unit.
-
-   procedure Reroot_Foreign_Nodes
-     (Self : in out Lex_Env_Data_Type; Root_Scope : Lexical_Env);
-   --  Re-create entries for nodes that are keyed in one of the unit's lexical
-   --  envs.
 
    function Get
      (A     : AST_Envs.Env_Element_Array;
@@ -1024,6 +1003,36 @@ private
    package Analysis_Unit_Sets
    is new Langkit_Support.Cheap_Sets (Analysis_Unit, null);
 
+   type Containing_Env_Element is record
+      Env  : Lexical_Env;
+      Key  : Symbol_Type;
+      Node : ${root_node_type_name};
+   end record;
+
+   package Containing_Envs is new Langkit_Support.Vectors
+     (Containing_Env_Element);
+
+   type Lex_Env_Data_Type is record
+      Is_Contained_By : Containing_Envs.Vector;
+      Contains        : ${root_node_type_name}_Vectors.Vector;
+   end record;
+   type Lex_Env_Data is access all Lex_Env_Data_Type;
+
+   procedure Destroy (Self : in out Lex_Env_Data_Type);
+   --  Destroy data associated to lexical environments
+
+   procedure Destroy (Self : in out Lex_Env_Data);
+   --  Likewise, but also free the memory allocated to Self
+
+   procedure Remove_Exiled_Entries (Self : in out Lex_Env_Data_Type);
+   --  Remove lex env entries that references some of the unit's nodes, in
+   --  lexical environments not owned by the unit.
+
+   procedure Reroot_Foreign_Nodes
+     (Self : in out Lex_Env_Data_Type; Root_Scope : Lexical_Env);
+   --  Re-create entries for nodes that are keyed in one of the unit's lexical
+   --  envs.
+
    type Analysis_Unit_Type is record
       Context           : Analysis_Context;
       --  The owning context for this analysis unit
@@ -1393,20 +1402,6 @@ private
    --  Assuming that Token refers to a token that contains a symbol, return the
    --  corresponding symbol. This is an internal helper for properties code
    --  generation.
-
-   type Containing_Env_Element is record
-      Env  : Lexical_Env;
-      Key  : Symbol_Type;
-      Node : ${root_node_type_name};
-   end record;
-
-   package Containing_Envs is
-   new Langkit_Support.Vectors (Containing_Env_Element);
-
-   type Lex_Env_Data_Type is record
-      Is_Contained_By : Containing_Envs.Vector;
-      Contains        : ${root_node_type_name}_Vectors.Vector;
-   end record;
 
    type Memoization_State is
      (Not_Computed,
