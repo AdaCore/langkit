@@ -21,8 +21,8 @@ package ${_self.ada_api_settings.lib_name}.Debug is
    --  dispatching primitive whereas these are difficult to call from GDB.
    --  Besides, it removes the Level parameter.
 
-   procedure PTok (Node : ${root_node_type_name}; T : Token_Index);
-   --  "Print Token". Print the data associated to the T token. Node must be in
-   --  the same analysis unit as the token that T represents.
+   procedure PTok (TDH : Token_Data_Handler_Access; T : Token_Index);
+   --  "Print Token". Print the data associated to the T token in the given
+   --  token data handler.
 
 end ${_self.ada_api_settings.lib_name}.Debug;
