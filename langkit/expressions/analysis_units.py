@@ -1,6 +1,9 @@
-from langkit.compiled_types import T
+from langkit.compiled_types import AnalysisUnitType, T
 from langkit.diagnostics import check_source_language
-from langkit.expressions.base import PropertyDef, ResolvedExpression, render
+from langkit.expressions.base import (
+    FieldAccessExpr, PropertyDef, ResolvedExpression, auto_attr, construct,
+    render
+)
 
 
 class AnalysisUnitRoot(ResolvedExpression):
@@ -29,6 +32,24 @@ class AnalysisUnitRoot(ResolvedExpression):
 
     def _render_expr(self):
         return 'Root ({})'.format(self.prefix_var.name)
+
+
+@auto_attr
+def unit(node):
+    """
+    Expression that gets the analysis unit that "node_expr" belongs to.
+
+    :param AbstractExpression node: Node for which we want the embedding
+        analysis unit.
+    :rtype: AbstractExpression
+    """
+    node_expr = construct(node)
+    check_source_language(
+        issubclass(node_expr.type, T.root_node),
+        'The "unit" field is available only for AST nodes; instead we have'
+        ' here a {}'.format(node_expr.type.name().lower)
+    )
+    return FieldAccessExpr(node_expr, 'Unit', AnalysisUnitType)
 
 
 def construct_analysis_unit_property(unit_expr, field_name, arguments):
