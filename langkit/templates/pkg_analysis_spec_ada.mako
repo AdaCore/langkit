@@ -600,7 +600,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
      with private;
    --  Iterator type for Find (see below)
 
-   overriding function Next 
+   overriding function Next
      (It       : in out Find_Iterator;
       Element  : out ${root_node_type_name}) return Boolean;
 
