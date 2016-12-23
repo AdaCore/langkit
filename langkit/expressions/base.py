@@ -497,8 +497,8 @@ class AbstractExpression(Frozable):
 
 def attr_call(name, *args, **kwargs):
     """
-    Decorator to create  expression accessible through an attribute call on an
-    AbstractExpression instance, from an abstract expression class. See
+    Decorator to create an expression accessible through an attribute call on
+    an AbstractExpression instance, from an abstract expression class. See
     attr_expr_impl for more details.
 
     :param name: The name of the attribute.
@@ -510,7 +510,7 @@ def attr_call(name, *args, **kwargs):
 
 def attr_expr(name, *args, **kwargs):
     """
-    Decorator to create  expression accessible through a parameterless
+    Decorator to create an expression accessible through a parameterless
     attribute on an AbstractExpression instance, from an abstract expression
     class. See attr_expr_impl for more details.
 
