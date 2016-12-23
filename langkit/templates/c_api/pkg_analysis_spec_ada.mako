@@ -98,7 +98,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    type ${bool_type} is new Unsigned_8;
 
-   % for type_name in (bool_type, node_type, lexical_env_type, token_type, \
+   % for type_name in (analysis_unit_type, bool_type, node_type, \
+                       lexical_env_type, token_type, \
                        text_type, sloc_type, sloc_range_type, \
                        diagnostic_type, exception_type):
       type ${type_name}_Ptr is access ${type_name};

@@ -47,6 +47,8 @@
                ${arg.name} /= 0
             % elif is_long(arg.type):
                Integer (${arg.name})
+            % elif is_analysis_unit(arg.type):
+               Unwrap (${arg.name});
             % elif is_ast_node(arg.type):
                ${arg.type.name()} (Unwrap (${arg.name}))
             % elif is_token_type(arg.type):
@@ -98,6 +100,8 @@
                     ${bool_type} (Boolean'Pos (${field_access}))
                 % elif is_long(field.type):
                     int (${field_access})
+                % elif is_analysis_unit(field.type):
+                    Wrap (${field_access})
                 % elif is_ast_node(field.type):
                     Wrap (${root_node_type_name} (${field_access}))
                 % elif is_token_type(field.type):
