@@ -1647,11 +1647,24 @@ class PropertyDef(AbstractNodeData):
         from langkit.expressions.envs import Env
 
         # If expr has already been constructed, return
-        if self.constructed_expr or self.abstract or self.external:
+        if self.constructed_expr:
+            return
+
+        base_prop = self.base_property()
+
+        # If we don't have an expression, this have to be an abstract/external
+        # property. In this case, try to get the type from the base property.
+        if self.expr is None:
+            assert self.abstract or self.external
+            if not self.expected_type:
+                check_source_language(
+                    base_prop,
+                    'This property requires an explicit return type'
+                )
+                self.expected_type = base_prop.type
             return
 
         with self.bind(), Self.bind_type(self.struct):
-            base_prop = self.base_property()
             message = (
                 'expected type {{expected}}, got'
                 ' {{expr_type}} instead (expected type comes from'
