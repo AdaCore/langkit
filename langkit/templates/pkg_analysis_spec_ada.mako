@@ -277,9 +277,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    --  Note that the returned access is not guaranteed to stay valid after
    --  subsequent calls to Get_Extension.
 
-   ----------------------------
-   --  Environments handling --
-   ----------------------------
+   ---------------------------
+   -- Environments handling --
+   ---------------------------
 
    --  The following types and operations are implementation details we did not
    --  manage yet to put in a private part. Please don't use them.
@@ -290,8 +290,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
 
    function Combine
      (L, R : ${ctx.env_metadata.name()}) return ${ctx.env_metadata.name()};
-   ## The combine function on environments metadata does a boolean Or on every
-   ## boolean component of the env metadata.
+   --  The combine function on environments metadata does a boolean Or on every
+   --  boolean component of the env metadata.
 
    % else:
    type Dummy_Metadata is new Integer;
@@ -319,8 +319,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
       Combine          => Combine,
       Getter_State_T   => Env_Getter_State_T);
 
-   ## The following subtypes are introduced to ease code generation, so we
-   ## don't have to deal with the AST_Envs suffix.
+   --  The following subtypes are introduced to ease code generation, so we
+   --  don't have to deal with the AST_Envs suffix.
    subtype Lexical_Env is AST_Envs.Lexical_Env;
    subtype Env_Element is AST_Envs.Env_Element;
    No_Env_Element : constant Env_Element := (null, No_Metadata, True);
