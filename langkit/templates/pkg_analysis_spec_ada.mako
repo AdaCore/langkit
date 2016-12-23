@@ -408,13 +408,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    --  Return whether Node is an empty list (so this is wrong for all nodes
    --  that are not lists).
 
-   procedure Reset_Property_Caches (Node : access ${root_node_value_type})
-      is null;
-   --  Reset the properties memoization caches attached to this node.
-   --
-   --  TODO??? This is an internal implementation detail, please don't use
-   --  this.
-
    procedure Destroy_Node
      (Node : access ${root_node_value_type}) is abstract;
    --  Free the resources allocated to this node.
@@ -1144,6 +1137,10 @@ private
    --  This is an alternative to the Child/Child_Count pair, useful if you want
    --  the convenience of ada arrays, and you don't care about the small
    --  performance hit of creating an array.
+
+   procedure Reset_Property_Caches (Node : access ${root_node_value_type})
+      is null;
+   --  Reset the properties memoization caches attached to this node.
 
    ------------------------------
    -- Root AST node properties --

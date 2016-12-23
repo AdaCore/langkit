@@ -124,11 +124,6 @@
            (Node   : access ${type_name};
             Prefix : String := "");
 
-         % if memoized_properties:
-            overriding procedure Reset_Property_Caches
-              (Node : access ${type_name});
-         % endif
-
          overriding procedure Destroy_Node
            (Node : access ${cls.value_type_name()});
       % endif
@@ -187,12 +182,20 @@
    <%
       type_name = cls.value_type_name()
       base_name = cls.base().name()
+      memoized_properties = cls.get_memoized_properties(include_inherited=True)
    %>
 
    type ${type_name} is ${"abstract" if cls.abstract else ""}
       new ${cls.base().value_type_name()} with record
       ${node_fields(cls)}
    end record;
+
+   % if not cls.abstract and not cls.is_list_type:
+      % if memoized_properties:
+         overriding procedure Reset_Property_Caches
+           (Node : access ${type_name});
+      % endif
+   % endif
 
    ## Private field getters
 
