@@ -355,11 +355,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    ## since the declarations require AST_Envs.
    ${array_types.public_decl(root_node_array)}
 
-   procedure Populate_Lexical_Env
-     (Node     : access ${root_node_value_type}'Class;
-      Root_Env : AST_Envs.Lexical_Env);
-   --  Populate the lexical environment for node and all its children
-
    -----------------------------
    -- Miscellanous operations --
    -----------------------------
@@ -1200,6 +1195,11 @@ private
      (Env, Referenced : AST_Envs.Lexical_Env) return Boolean
    is
      (Is_Referenced (Env.Node.Unit, Referenced.Node.Unit));
+
+   procedure Populate_Lexical_Env
+     (Node     : access ${root_node_value_type}'Class;
+      Root_Env : AST_Envs.Lexical_Env);
+   --  Populate the lexical environment for node and all its children
 
    --------------------------------
    -- Tree traversal (internals) --
