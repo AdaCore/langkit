@@ -33,6 +33,7 @@ class PythonAPISettings(AbstractAPISettings):
         """
         value_suffix = '' if from_field_access else '.value'
         return dispatch_on_type(type, [
+            (ct.AnalysisUnitType, lambda _: 'AnalysisUnit({})'),
             (ct.ASTNode, lambda _: '_wrap_astnode({})'),
             (ct.SourceLocationRangeType, lambda _: '_wrap_sloc_range({})'),
             (ct.Token, lambda _: '{}'),
@@ -63,6 +64,7 @@ class PythonAPISettings(AbstractAPISettings):
         :rtype: str
         """
         return dispatch_on_type(type, [
+            (ct.AnalysisUnitType, lambda _: '{}._c_value'),
             (ct.ASTNode, lambda _: '_unwrap_astnode({})'),
             (ct.BoolType, lambda _: 'bool({})'),
             (ct.LongType, lambda _: 'int({})'),
@@ -99,6 +101,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.SourceLocationRangeType, lambda _: wrapped_type('SlocRange')),
             (ct.Token, lambda _: 'Token'),
             (ct.Symbol, lambda _: wrapped_type('text')),
+            (ct.AnalysisUnitType, lambda _: wrapped_type('analysis_unit')),
             (ct.ASTNode, lambda _: wrapped_type('node')),
             (ct.EnumType, lambda _: ctype_type('c_uint')),
             (ct.ArrayType, lambda cls: wrapped_type(cls.name().camel)),
