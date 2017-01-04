@@ -89,6 +89,11 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    --  using Get_Parser to either parse from a file or from a buffer. Return
    --  the resulting analysis unit.
 
+   function Convert
+     (TDH      : Token_Data_Handler;
+      Raw_Data : Lexer.Token_Data_Type) return Token_Data_Type;
+   --  Turn data from TDH and Raw_Data into a user-ready token data record
+
    --------------------
    -- Update_Charset --
    --------------------
@@ -1126,7 +1131,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       TDH                  : Token_Data_Handler renames Node.Unit.TDH;
       Sloc_Start, Sloc_End : Source_Location;
 
-      function Get (Index : Token_Index) return Token_Data_Type is
+      function Get
+        (Index : Token_Index) return Lexer.Token_Data_Type is
         (Get_Token (TDH, Index));
 
    begin
@@ -1553,15 +1559,31 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       end;
    end Previous;
 
+   -------------
+   -- Convert --
+   -------------
+
+   function Convert
+     (TDH      : Token_Data_Handler;
+      Raw_Data : Lexer.Token_Data_Type) return Token_Data_Type is
+      pragma Unreferenced (TDH);
+   begin
+      return (Kind       => Raw_Data.Kind,
+              Text       => Raw_Data.Text,
+              Sloc_Range => Raw_Data.Sloc_Range);
+   end Convert;
+
    ----------
    -- Data --
    ----------
 
    function Data (T : Token_Type) return Token_Data_Type is
+      Raw_Data : constant Lexer.Token_Data_Type :=
+        (if T.Trivia = No_Token_Index
+         then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Token))
+         else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Trivia)).T);
    begin
-      return (if T.Trivia = No_Token_Index
-              then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Token))
-              else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Trivia)).T);
+      return Convert (T.TDH.all, Raw_Data);
    end Data;
 
    -------------------
@@ -1611,7 +1633,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       begin
          for I in First .. Last loop
             for D of Get_Trivias (TDH, I) loop
-               Append (Ret_Vec, (Kind => Trivia, Trivia => D));
+               Append (Ret_Vec, (Kind => Trivia, Trivia => Convert (TDH, D)));
             end loop;
          end loop;
       end Append_Trivias;

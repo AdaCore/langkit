@@ -6,7 +6,7 @@
 ${res} := ${pos_name};
 
 declare
-   T : constant Token_Data_Type :=
+   T : constant Lexer.Token_Data_Type :=
       Token_Vectors.Get (Parser.TDH.Tokens, Natural (${res}));
 begin
    if

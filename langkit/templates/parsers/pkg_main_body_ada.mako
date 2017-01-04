@@ -90,7 +90,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
    is
 
       procedure Add_Last_Fail_Diagnostic is
-         Last_Token : Token_Data_Type renames
+         Last_Token : Lexer.Token_Data_Type renames
             Get_Token (Parser.TDH.all, Parser.Last_Fail.Pos);
          D : constant Diagnostic :=
            (Sloc_Range => Last_Token.Sloc_Range,
@@ -116,7 +116,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
          --  have some garbage afterwards.
          if Parser.Current_Pos >= Parser.Last_Fail.Pos then
             declare
-               First_Garbage_Token : Token_Data_Type renames
+               First_Garbage_Token : Lexer.Token_Data_Type renames
                   Get_Token (Parser.TDH.all, Parser.Current_Pos);
                D                   : constant Diagnostic :=
                  (Sloc_Range => First_Garbage_Token.Sloc_Range,

@@ -624,6 +624,18 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    -- Lexical utilities --
    -----------------------
 
+   type Token_Data_Type is record
+      Kind : Token_Kind;
+      --  Kind for this token
+
+      Text : Text_Access;
+      --  Text as found in the original source file, or null if not available
+
+      Sloc_Range : Source_Location_Range;
+      --  Source location range for this token. Note that the end bound is
+      --  exclusive.
+   end record;
+
    function "<" (Left, Right : Token_Type) return Boolean;
    --  Assuming Left and Right belong to the same analysis unit, return whether
    --  Left came before Right in the source file.

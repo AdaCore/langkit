@@ -6,6 +6,9 @@ with Ada.Unchecked_Conversion;
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
 
+with ${_self.ada_api_settings.lib_name}.Lexer;
+use ${_self.ada_api_settings.lib_name}.Lexer;
+
 package body ${_self.ada_api_settings.lib_name}.Debug is
 
    --------
@@ -38,7 +41,7 @@ package body ${_self.ada_api_settings.lib_name}.Debug is
 
       else
          declare
-            D : constant Token_Data_Type := TDH.Tokens.Get (Index);
+            D : constant Lexer.Token_Data_Type := TDH.Tokens.Get (Index);
          begin
             Put (Token_Kind_Name (D.Kind));
             if D.Text /= null then
