@@ -22,6 +22,11 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
 
    type Token_Data_Type is record
       Kind       : Token_Kind;
+      --  Kind for this token
+
+      Offset     : Unsigned_32;
+      --  Offset of Text in the source buffer associated with the token data
+      --  handler that owns this token. This offset is 1-based.
 
       Text       : Text_Access;
       --  Text as found in original source file or null depending on the token
@@ -29,8 +34,8 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
       --  keywords but actual text for identifiers.
 
       Sloc_Range : Source_Location_Range;
-
-      Offset     : Unsigned_32;
+      --  Source location range for this token. Note that the end bound is
+      --  exclusive.
    end record;
 
    package Token_Data_Handlers is new Langkit_Support.Token_Data_Handlers
