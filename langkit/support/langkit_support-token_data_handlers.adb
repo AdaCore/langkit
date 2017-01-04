@@ -13,10 +13,12 @@ package body Langkit_Support.Token_Data_Handlers is
    ----------------
 
    procedure Initialize
-     (TDH     : out Token_Data_Handler;
-      Symbols : Symbol_Table) is
+     (TDH           : out Token_Data_Handler;
+      Symbols       : Symbol_Table;
+      Source_Buffer : Text_Access := null) is
    begin
-      TDH := (Tokens            => <>,
+      TDH := (Source_Buffer     => Source_Buffer,
+              Tokens            => <>,
               Symbols           => Symbols,
               String_Literals   => <>,
               Tokens_To_Trivias => <>,
@@ -39,8 +41,13 @@ package body Langkit_Support.Token_Data_Handlers is
    -- Reset --
    -----------
 
-   procedure Reset (TDH : out Token_Data_Handler) is
+   procedure Reset
+     (TDH           : out Token_Data_Handler;
+      Source_Buffer : Text_Access) is
    begin
+      Free (TDH.Source_Buffer);
+      TDH.Source_Buffer := Source_Buffer;
+
       Free_String_Literals (TDH);
       Clear (TDH.Tokens);
       Clear (TDH.String_Literals);
@@ -54,6 +61,7 @@ package body Langkit_Support.Token_Data_Handlers is
 
    procedure Free (TDH : in out Token_Data_Handler) is
    begin
+      Free (TDH.Source_Buffer);
       Free_String_Literals (TDH);
       Destroy (TDH.Tokens);
       Destroy (TDH.String_Literals);

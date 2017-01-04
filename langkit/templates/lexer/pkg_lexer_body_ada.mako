@@ -140,11 +140,6 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       end Bounded_Text;
 
    begin
-      --  In the case we are reparsing an analysis unit, we want to get rid of
-      --  the tokens from the old one.
-
-      Reset (TDH);
-
       --  The first entry in the Tokens_To_Trivias map is for leading trivias
       Prepare_For_Trivia;
 
@@ -283,6 +278,21 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
    begin
       Decode_Buffer (Buffer, Charset, Read_BOM, Decoded_Buffer, Length);
       Lexer := Lexer_From_Buffer (Decoded_Buffer.all'Address, size_t (Length));
+
+      --  Preserve a copy of the text buffer in TDH. In the case we are
+      --  reparsing an analysis unit, we want to get rid of the tokens from the
+      --  old one.
+
+      declare
+         Actual_Decoded_Buffer : Text_Type renames Decoded_Buffer
+           (Decoded_Buffer.all'First + Quex_Leading_Characters
+            .. Decoded_Buffer.all'Last - Quex_Trailing_Characters);
+         Rebounded_Buffer : Text_Type (1 .. Actual_Decoded_Buffer'Length)
+            with Address => Actual_Decoded_Buffer'Address;
+      begin
+         Reset (TDH, new Text_Type'(Rebounded_Buffer));
+      end;
+
       if With_Trivia then
          Process_All_Tokens_With_Trivia (Lexer, TDH);
       else

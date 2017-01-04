@@ -39,6 +39,10 @@ package Langkit_Support.Token_Data_Handlers is
    First_Token_Index : constant Token_Index := Token_Index'First + 1;
 
    type Token_Data_Handler is record
+      Source_Buffer     : Text_Access;
+      --  The whole source buffer. It belongs to this token data handler, and
+      --  will be deallocated along with it.
+
       Tokens            : Token_Vectors.Vector;
       --  Sequence of tokens in the same order as found in the source file
 
@@ -72,13 +76,17 @@ package Langkit_Support.Token_Data_Handlers is
    type Token_Data_Handler_Access is access all Token_Data_Handler;
 
    procedure Initialize
-     (TDH     : out Token_Data_Handler;
-      Symbols : Symbol_Table);
+     (TDH           : out Token_Data_Handler;
+      Symbols       : Symbol_Table;
+      Source_Buffer : Text_Access := null);
    --  Create a token data handler that is associated with Symbols
 
-   procedure Reset (TDH : out Token_Data_Handler);
-   --  Remove all tokens and string literals from TDH. Unlike Free, this does
-   --  not deallocate the vectors.
+   procedure Reset
+     (TDH           : out Token_Data_Handler;
+      Source_Buffer : Text_Access);
+   --  Free TDH's source buffer, remove all its tokens and string literals and
+   --  associate another source buffer to it. Unlike Free, this does not
+   --  deallocate the vectors.
    --
    --  This is equivalent to calling Free and then Initialize on TDH except
    --  from the performance point of view: this re-uses allocated resources.
