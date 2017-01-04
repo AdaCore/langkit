@@ -4,6 +4,10 @@ package body Langkit_Support.Token_Data_Handlers is
      (TDH   : Token_Data_Handler;
       Index : Token_Index) return Token_Vectors.Elements_Array;
 
+   procedure Free_String_Literals (TDH : in out Token_Data_Handler);
+   --  Helper for Initialize and Free. Free all the string literals in TDH.
+   --  This preserve the vector itself, though.
+
    ----------------
    -- Initialize --
    ----------------
@@ -19,27 +23,6 @@ package body Langkit_Support.Token_Data_Handlers is
               Trivias           => <>);
    end Initialize;
 
-   -----------
-   -- Reset --
-   -----------
-
-   procedure Reset (TDH : in out Token_Data_Handler) is
-   begin
-      --  Explicit iteration for perf
-      for J in First_Index (TDH.String_Literals)
-               .. Last_Index (TDH.String_Literals)
-      loop
-         declare
-            SL : Text_Access := Get (TDH.String_Literals, J);
-         begin
-            Free (SL);
-         end;
-      end loop;
-
-      Clear (TDH.String_Literals);
-      Clear (TDH.Tokens);
-   end Reset;
-
    ----------------
    -- Add_String --
    ----------------
@@ -52,13 +35,26 @@ package body Langkit_Support.Token_Data_Handlers is
       return S_Access;
    end Add_String;
 
+   -----------
+   -- Reset --
+   -----------
+
+   procedure Reset (TDH : out Token_Data_Handler) is
+   begin
+      Free_String_Literals (TDH);
+      Clear (TDH.Tokens);
+      Clear (TDH.String_Literals);
+      Clear (TDH.Trivias);
+      Clear (TDH.Tokens_To_Trivias);
+   end Reset;
+
    ----------
    -- Free --
    ----------
 
    procedure Free (TDH : in out Token_Data_Handler) is
    begin
-      Reset (TDH);
+      Free_String_Literals (TDH);
       Destroy (TDH.Tokens);
       Destroy (TDH.String_Literals);
       Destroy (TDH.Trivias);
@@ -134,5 +130,25 @@ package body Langkit_Support.Token_Data_Handlers is
    begin
       return Internal_Get_Trivias (TDH, No_Token_Index);
    end Get_Leading_Trivias;
+
+   --------------------------
+   -- Free_String_Literals --
+   --------------------------
+
+   procedure Free_String_Literals (TDH : in out Token_Data_Handler) is
+   begin
+      --  Iterate explicitely on indices rather than using the high-level
+      --  iteration interface for performance.
+
+      for J in First_Index (TDH.String_Literals)
+               .. Last_Index (TDH.String_Literals)
+      loop
+         declare
+            SL : Text_Access := Get (TDH.String_Literals, J);
+         begin
+            Free (SL);
+         end;
+      end loop;
+   end Free_String_Literals;
 
 end Langkit_Support.Token_Data_Handlers;

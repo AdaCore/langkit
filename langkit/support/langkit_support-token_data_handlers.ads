@@ -71,12 +71,21 @@ package Langkit_Support.Token_Data_Handlers is
 
    type Token_Data_Handler_Access is access all Token_Data_Handler;
 
-   procedure Initialize (TDH     : out Token_Data_Handler;
-                         Symbols : Symbol_Table);
+   procedure Initialize
+     (TDH     : out Token_Data_Handler;
+      Symbols : Symbol_Table);
+   --  Create a token data handler that is associated with Symbols
 
-   procedure Reset (TDH : in out Token_Data_Handler);
-   --  Remove all tokens and string literals from TDH. As the ownership for
-   --  symbols is shared, symbols are preserved.
+   procedure Reset (TDH : out Token_Data_Handler);
+   --  Remove all tokens and string literals from TDH. Unlike Free, this does
+   --  not deallocate the vectors.
+   --
+   --  This is equivalent to calling Free and then Initialize on TDH except
+   --  from the performance point of view: this re-uses allocated resources.
+
+   procedure Free (TDH : in out Token_Data_Handler);
+   --  Free all the resources allocated to TDH. After then, one must call
+   --  Initialize again in order to use the TDH.
 
    function Add_String
      (TDH : in out Token_Data_Handler;
@@ -91,8 +100,6 @@ package Langkit_Support.Token_Data_Handlers is
    function Last_Token (TDH : Token_Data_Handler) return Token_Index
    is
      (Token_Index (Token_Vectors.Last_Index (TDH.Tokens)));
-
-   procedure Free (TDH : in out Token_Data_Handler);
 
    function Get_Trivias
      (TDH   : Token_Data_Handler;
