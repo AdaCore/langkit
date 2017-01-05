@@ -70,6 +70,13 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
    function Token_Kind_Name (Token_Id : Token_Kind) return String;
    ${ada_doc('langkit.token_kind_name', 3)}
 
+   function Source_First (T : Token_Data_Type) return Positive is
+     (Positive (T.Offset));
+   function Source_Last (T : Token_Data_Type) return Natural is
+     (Natural (T.Offset + T.Length - 1));
+   --  Return the bounds in T's source buffer for the text corresponding to
+   --  this token.
+
    function Image (T : Token_Data_Type) return String is
      (if T.Text = null
       then ""

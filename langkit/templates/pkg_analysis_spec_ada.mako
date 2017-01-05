@@ -625,13 +625,20 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    -----------------------
 
    type Token_Data_Type is record
-      Kind       : Token_Kind;
+      Kind          : Token_Kind;
       --  Kind for this token
 
-      Text       : Text_Cst_Access;
+      Text          : Text_Cst_Access;
       --  Text as found in the original source file, or null if not available
 
-      Sloc_Range : Source_Location_Range;
+      Source_Buffer : Text_Cst_Access;
+      --  Text for the original source file
+
+      Source_First  : Positive;
+      Source_Last   : Natural;
+      --  Bounds in Source_Buffer for the text corresponding to this token
+
+      Sloc_Range    : Source_Location_Range;
       --  Source location range for this token. Note that the end bound is
       --  exclusive.
    end record;
