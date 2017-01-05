@@ -235,8 +235,8 @@ class New(AbstractExpression):
         required_fields = {
             f._name.lower: f
             for f in self.struct_type.get_abstract_fields()
-            if isinstance(f, (Field, UserField)) and
-                not isinstance(f, BuiltinField)
+            if isinstance(f, (Field, UserField))
+            and not isinstance(f, BuiltinField)
         }
 
         error_if_not_empty(
