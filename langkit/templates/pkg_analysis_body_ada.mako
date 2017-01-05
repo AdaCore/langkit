@@ -2067,28 +2067,27 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       return Node.Parent.Child (Child_Number (Node) + 1);
    end Next_Sibling;
 
-   % if ctx.env_metadata:
-   ${struct_types.body(ctx.env_metadata)}
+   ## Env metadata's body
+
+   ${struct_types.body(T.env_md)}
 
    -------------
    -- Combine --
    -------------
 
    function Combine
-     (L, R : ${ctx.env_metadata.name()}) return ${ctx.env_metadata.name()}
+     (L, R : ${T.env_md.name()}) return ${T.env_md.name()}
    is
-      % if not ctx.env_metadata.get_fields():
+      % if not T.env_md.get_fields():
       pragma Unreferenced (L, R);
       % endif
-      Ret : ${ctx.env_metadata.name()} := (others => False);
+      Ret : ${T.env_md.name()} := (others => False);
    begin
-      % for field in ctx.env_metadata.get_fields():
+      % for field in T.env_md.get_fields():
          Ret.${field.name} := L.${field.name} or R.${field.name};
       % endfor
       return Ret;
    end Combine;
-
-   % endif
 
    ---------
    -- Get --

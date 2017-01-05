@@ -284,21 +284,13 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    --  The following types and operations are implementation details we did not
    --  manage yet to put in a private part. Please don't use them.
 
-   % if ctx.env_metadata:
-   ${struct_types.public_incomplete_decl(ctx.env_metadata)}
-   ${struct_types.public_decl(ctx.env_metadata)}
+   ${struct_types.public_incomplete_decl(T.env_md)}
+   ${struct_types.public_decl(T.env_md)}
 
    function Combine
-     (L, R : ${ctx.env_metadata.name()}) return ${ctx.env_metadata.name()};
+     (L, R : ${T.env_md.name()}) return ${T.env_md.name()};
    --  The combine function on environments metadata does a boolean Or on every
    --  boolean component of the env metadata.
-
-   % else:
-   type Dummy_Metadata is new Integer;
-   No_Metadata : constant Dummy_Metadata := 0;
-   function Combine (L, R : Dummy_Metadata) return Dummy_Metadata is (0);
-   --  This type and constants are added waiting for a real metadata type
-   % endif
 
    function Can_Reach (El, From : ${root_node_type_name}) return Boolean;
    --  Return whether El can reach From, from a sequential viewpoint. If
@@ -312,8 +304,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
 
    package AST_Envs is new Langkit_Support.Lexical_Env
      (Element_T        => ${root_node_type_name},
-      Element_Metadata =>
-         ${ctx.env_metadata.name() if ctx.env_metadata else "Dummy_Metadata" },
+      Element_Metadata => ${T.env_md.name()},
       No_Element       => null,
       Empty_Metadata   => No_Metadata,
       Combine          => Combine,
