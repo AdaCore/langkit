@@ -196,8 +196,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                   Append
                     (TDH.Trivias,
                      (Has_Next => False,
-                      T        => (Kind       =>
-                                      Token_Kind'Enum_Val (Token.Id),
+                      T        => (Kind       => Token_Id,
                                    Text       => Text,
                                    Sloc_Range => Sloc_Range,
                                    Offset     => Token.Offset,
@@ -217,7 +216,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
          Append
            (TDH.Tokens,
-            (Kind       => Token_Kind'Enum_Val (Token.Id),
+            (Kind       => Token_Id,
              Text       => Text,
              Sloc_Range => Sloc_Range,
              Offset     => Token.Offset,
