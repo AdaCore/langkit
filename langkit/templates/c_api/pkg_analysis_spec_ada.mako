@@ -603,13 +603,14 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    function Wrap_Alloc (S : Text_Type) return ${text_type};
 
-   function Wrap (T : Text_Access) return ${text_type} is
+   function Wrap (T : Text_Cst_Access) return ${text_type} is
      (if T = null
       then (Chars => System.Null_Address, Length => 0, Is_Allocated => 0)
       else (Chars => T.all'Address, Length => T.all'Length, Is_Allocated => 0));
-
+   function Wrap (T : Text_Access) return ${text_type} is
+     (Wrap (Text_Cst_Access (T)));
    function Wrap (T : Symbol_Type) return ${text_type} is
-     (Wrap (Text_Access (T)));
+     (Wrap (Text_Cst_Access (T)));
 
    function Unwrap
      (Unit : Analysis_Unit; Text : ${text_type}) return Symbol_Type;

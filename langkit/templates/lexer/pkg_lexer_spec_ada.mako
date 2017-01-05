@@ -32,7 +32,7 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
       --  Number of code points in the source buffer for this token (i.e.
       --  length of the corresponding Text_Type slice).
 
-      Text       : Text_Access;
+      Text       : Text_Cst_Access;
       --  Text as found in original source file or null depending on the token
       --  kind (as decided in the lexer specification). For instance: null for
       --  keywords but actual text for identifiers.

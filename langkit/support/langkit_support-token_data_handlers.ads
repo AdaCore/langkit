@@ -97,7 +97,7 @@ package Langkit_Support.Token_Data_Handlers is
 
    function Add_String
      (TDH : in out Token_Data_Handler;
-      S   : Text_Type) return Text_Access;
+      S   : Text_Type) return Text_Cst_Access;
 
    function Get_Token
      (TDH   : Token_Data_Handler;

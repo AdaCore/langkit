@@ -29,12 +29,13 @@ package body Langkit_Support.Token_Data_Handlers is
    -- Add_String --
    ----------------
 
-   function Add_String (TDH : in out Token_Data_Handler;
-                        S   : Text_Type) return Text_Access is
+   function Add_String
+     (TDH : in out Token_Data_Handler;
+      S   : Text_Type) return Text_Cst_Access is
       S_Access : constant Text_Access := new Text_Type'(S);
    begin
       Append (TDH.String_Literals, S_Access);
-      return S_Access;
+      return Text_Cst_Access (S_Access);
    end Add_String;
 
    -----------

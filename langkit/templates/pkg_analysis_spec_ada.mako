@@ -628,7 +628,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
       Kind : Token_Kind;
       --  Kind for this token
 
-      Text : Text_Access;
+      Text : Text_Cst_Access;
       --  Text as found in the original source file, or null if not available
 
       Sloc_Range : Source_Location_Range;

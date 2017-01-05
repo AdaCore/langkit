@@ -1,3 +1,4 @@
+with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 with System;                  use System;
 with System.Storage_Elements; use System.Storage_Elements;
@@ -57,7 +58,14 @@ package body Langkit_Support.Symbols is
    begin
       while Has_Element (C) loop
          declare
-            To_Free : Symbol_Type := Element (C);
+            --  We keep Symbol_Type to be a constant access everywhere for
+            --  simplification, but we know symbol tables are the only owners
+            --  of these, so stripping the "constant" attribute away here is
+            --  known to be safe.
+
+            function Convert is new Ada.Unchecked_Conversion
+              (Symbol_Type, Text_Access);
+            To_Free : Text_Access := Convert (Element (C));
          begin
             Next (C);
             Free (To_Free);

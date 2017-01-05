@@ -1569,7 +1569,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       pragma Unreferenced (TDH);
    begin
       return (Kind       => Raw_Data.Kind,
-              Text       => Raw_Data.Text,
+              Text       => Text_Cst_Access (Raw_Data.Text),
               Sloc_Range => Raw_Data.Sloc_Range);
    end Convert;
 

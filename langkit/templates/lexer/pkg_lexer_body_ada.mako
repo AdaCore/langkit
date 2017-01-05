@@ -90,7 +90,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
       Token                 : aliased Quex_Token_Type;
       Token_Id              : Token_Kind;
-      Text                  : Text_Access;
+      Text                  : Text_Cst_Access;
       Continue              : Boolean := True;
       Last_Token_Was_Trivia : Boolean := False;
 
@@ -175,7 +175,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                lexer.ada_token_name(tok)
                for tok in lexer.token_actions['WithSymbol']
             )} =>
-               Text := Text_Access (Find (TDH.Symbols, Bounded_Text));
+               Text := Text_Cst_Access (Find (TDH.Symbols, Bounded_Text));
          % endif
 
          % if lexer.token_actions['WithTrivia']:

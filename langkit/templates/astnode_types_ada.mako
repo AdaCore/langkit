@@ -398,7 +398,7 @@
                end if;
             % elif is_token_type(field.type):
                declare
-                  Tok_Text_Ptr : Text_Access :=
+                  Tok_Text_Ptr : Text_Cst_Access :=
                     Data (Token (Node, Node.${field.name})).Text;
                begin
                   Put_Line

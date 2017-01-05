@@ -9,7 +9,7 @@ with Langkit_Support.Text; use Langkit_Support.Text;
 
 package Langkit_Support.Symbols is
 
-   type Symbol_Type is new Text_Access;
+   type Symbol_Type is new Text_Cst_Access;
 
    function Image
      (S           : Symbol_Type;
