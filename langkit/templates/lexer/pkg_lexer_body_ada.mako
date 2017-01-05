@@ -20,6 +20,14 @@ with Langkit_Support.Text;    use Langkit_Support.Text;
 
 package body ${_self.ada_api_settings.lib_name}.Lexer is
 
+   Quex_Leading_Characters : constant := 2;
+   Quex_Trailing_Characters : constant := 1;
+   Quex_Extra_Characters : constant :=
+      Quex_Leading_Characters + Quex_Trailing_Characters;
+   --  Quex requires its input buffer to have two leading reserved bytes and
+   --  one trailing. These are not part of the true payload, but must be
+   --  available anyway.
+
    use Token_Vectors, Trivia_Vectors, Integer_Vectors;
 
    type Quex_Token_Type is record
@@ -300,15 +308,17 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       --  In the worst case, we have one character per input byte, so the
       --  following is supposed to be big enough.
 
-      Result : Text_Access := new Text_Type (1 .. Buffer'Length + 3);
+      Result : Text_Access :=
+         new Text_Type (1 .. Buffer'Length + Quex_Extra_Characters);
       State  : Iconv_T;
       Status : Iconv_Result;
       BOM    : BOM_Kind := Unknown;
 
       Input_Index, Output_Index : Positive;
 
-      First_Output_Index : constant Positive := 1 + 2 * 4;
-      --  Index of the first byte in Output at which Iconv must decode Buffer
+      First_Output_Index : constant Positive :=
+         1 + Quex_Leading_Characters * 4;
+      --  Index of the first byte in Result at which Iconv must decode Buffer
 
       Output : Byte_Sequence (1 .. 4 * Buffer'Size);
       for Output'Address use Result.all'Address;
