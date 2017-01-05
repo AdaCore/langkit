@@ -94,6 +94,11 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       Continue              : Boolean := True;
       Last_Token_Was_Trivia : Boolean := False;
 
+      function Text_Length return Unsigned_32 is
+        (Unsigned_32 (Token.Text_Length));
+      --  Shortcut to get the number of code points in Bounded_Text as an
+      --  Unsigned_32.
+
       function Bounded_Text return Text_Type;
       --  Return a copy of the text in Token.  Do not call this if the token
       --  has no text associated.
@@ -195,7 +200,8 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                                       Token_Kind'Enum_Val (Token.Id),
                                    Text       => Text,
                                    Sloc_Range => Sloc_Range,
-                                   Offset     => Token.Offset)));
+                                   Offset     => Token.Offset,
+                                   Length     => Text_Length)));
 
                   Last_Token_Was_Trivia := True;
                end if;
@@ -214,7 +220,8 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
             (Kind       => Token_Kind'Enum_Val (Token.Id),
              Text       => Text,
              Sloc_Range => Sloc_Range,
-             Offset     => Token.Offset));
+             Offset     => Token.Offset,
+             Length     => Text_Length));
          Prepare_For_Trivia;
 
       % if lexer.token_actions['WithTrivia']:

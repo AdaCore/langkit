@@ -28,6 +28,10 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
       --  Offset of Text in the source buffer associated with the token data
       --  handler that owns this token. This offset is 1-based.
 
+      Length     : Unsigned_32;
+      --  Number of code points in the source buffer for this token (i.e.
+      --  length of the corresponding Text_Type slice).
+
       Text       : Text_Access;
       --  Text as found in original source file or null depending on the token
       --  kind (as decided in the lexer specification). For instance: null for
