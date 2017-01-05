@@ -44,9 +44,7 @@ package body ${_self.ada_api_settings.lib_name}.Debug is
             D : constant Lexer.Token_Data_Type := TDH.Tokens.Get (Index);
          begin
             Put (Token_Kind_Name (D.Kind));
-            if D.Text /= null then
-               Put (" " & Image (D.Text.all, With_Quotes => True));
-            end if;
+            Put (" " & Image (Text (TDH.all, D), With_Quotes => True));
             Put_Line (" [" & Image (D.Sloc_Range) & "]");
          end;
       end if;

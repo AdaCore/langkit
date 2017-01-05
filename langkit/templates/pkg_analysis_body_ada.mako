@@ -616,7 +616,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          Data : constant Lexer.Token_Data_Type :=
             Unit.TDH.Trivias.Get (Natural (Trivia)).T;
       begin
-         Put_Line (Image (Data));
+         Put_Line (Image (Text (Unit.TDH, Data)));
       end Process;
 
       Last_Token : constant Token_Index :=
@@ -1592,17 +1592,27 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       return Convert (Token.TDH.all, Raw_Data (Token));
    end Data;
 
+   ----------
+   -- Text --
+   ----------
+
+   function Text (Token : Token_Type) return Text_Type is
+      RD : constant Lexer.Token_Data_Type := Raw_Data (Token);
+   begin
+      return Token.TDH.Source_Buffer (Source_First (RD) .. Source_Last (RD));
+   end Text;
+
    -------------------
    -- Is_Equivalent --
    -------------------
 
    function Is_Equivalent (L, R : Token_Type) return Boolean is
-      DL : Token_Data_Type := Data (L);
-      DR : Token_Data_Type := Data (R);
+      DL : constant Token_Data_Type := Data (L);
+      DR : constant Token_Data_Type := Data (R);
+      TL : constant Text_Type := Text (L);
+      TR : constant Text_Type := Text (R);
    begin
-      return DL.Kind = DR.Kind
-         and then ((DL.Text = null and DR.Text = null)
-                   or else DL.Text.all = DR.Text.all);
+      return DL.Kind = DR.Kind and then TL = TR;
    end Is_Equivalent;
 
    -----------
@@ -1612,10 +1622,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    function Image (Token : Token_Type) return String is
       D : constant Token_Data_Type := Data (Token);
    begin
-      return "<Token Kind=" & Token_Kind_Name (D.Kind) & " Text=" &
-        (if D.Text = null
-         then "None"
-         else """" & Image (D.Text.all) & """") & ">";
+      return ("<Token Kind=" & Token_Kind_Name (D.Kind) &
+              " Text=" & Image (Text (Token), With_Quotes => True) & ">");
    end Image;
 
    --------------------------
@@ -1715,14 +1723,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       for C of Children_With_Trivia (Node) loop
          case C.Kind is
             when Trivia =>
-               declare
-                  D : constant Token_Data_Type := Data (C.Trivia);
-               begin
-                  Put_Line
-                    (Children_Prefix & (if D.Text = null
-                                        then ""
-                                        else Image (D.Text.all)));
-               end;
+               Put_Line (Children_Prefix & Text (C.Trivia));
             when Child =>
                C.Node.PP_Trivia (Children_Prefix);
          end case;

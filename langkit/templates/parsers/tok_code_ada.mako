@@ -12,7 +12,7 @@ begin
    if
       T.Kind /= ${token_kind}
       % if match_text:
-      or else T.Text.all /= "${match_text}"
+      or else Text (Parser.TDH.all, T) /= "${match_text}"
       % endif
    then
        ## If the result is not the one we expect, set pos to error

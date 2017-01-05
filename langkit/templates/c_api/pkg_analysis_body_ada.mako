@@ -876,6 +876,26 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       return ${text_type}'(T.all'Address, T.all'Length, Is_Allocated => 1);
    end Wrap_Alloc;
 
+   ----------
+   -- Wrap --
+   ----------
+
+   function Wrap
+     (S     : Text_Access;
+      First : Positive;
+      Last  : Natural) return ${text_type}
+   is
+      Substring : Text_Type renames S (First .. Last);
+   begin
+      return (if First > Last
+              then (Chars        => System.Null_Address,
+                    Length       => 0,
+                    Is_Allocated => 0)
+              else (Chars        => S (First)'Address,
+                    Length       => Substring'Length,
+                    Is_Allocated => 0));
+   end Wrap;
+
    procedure ${capi.get_name('destroy_text')} (T : ${text_type}_Ptr) is
       use System;
    begin
@@ -1008,7 +1028,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
                  Token_Index  => int (Token.Token),
                  Trivia_Index => int (Token.Trivia),
                  Kind         => K'Enum_Rep,
-                 Text         => Wrap (D.Text),
+                 Text         => Wrap
+                   (Token.TDH.Source_Buffer, D.Source_First, D.Source_Last),
                  Sloc_Range   => Wrap (D.Sloc_Range));
       end;
    end Wrap;

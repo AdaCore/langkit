@@ -653,12 +653,11 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    function Image (Token : Token_Type) return String;
    --  Debug helper: return a human-readable text to represent a token
 
-   function Text (Token : Token_Type) return Text_Type
-   is (Data (Token).Text.all);
+   function Text (Token : Token_Type) return Text_Type;
    --  Return the text of the token as Text_Type
 
    function Text (Token : Token_Type) return String
-   is (Image (Data (Token).Text.all));
+   is (Image (Text (Token)));
    --  Return the text of the token as String
 
    type Child_Or_Trivia is (Child, Trivia);

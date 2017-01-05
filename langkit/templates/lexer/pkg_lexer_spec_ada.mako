@@ -77,9 +77,17 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
    --  Return the bounds in T's source buffer for the text corresponding to
    --  this token.
 
-   function Image (T : Token_Data_Type) return String is
-     (if T.Text = null
-      then ""
-      else Image (T.Text.all));
+   function Text
+     (TDH : Token_Data_Handler;
+      T   : Token_Data_Type) return Text_Type
+   is (TDH.Source_Buffer.all (Source_First (T) .. Source_Last (T)));
+   --  Return the text associated to T, a token that belongs to TDH
+
+   function Image
+     (TDH : Token_Data_Handler;
+      T   : Token_Data_Type) return String
+   is (Image (Text (TDH, T)));
+   --  Debug helper: return a human-readable representation of T, a token that
+   --  belongs to TDH.
 
 end ${_self.ada_api_settings.lib_name}.Lexer;
