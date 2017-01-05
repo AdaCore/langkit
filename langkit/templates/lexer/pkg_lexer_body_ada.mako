@@ -93,7 +93,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
       Token                 : aliased Quex_Token_Type;
       Token_Id              : Token_Kind;
-      Text                  : Text_Cst_Access;
+      Symbol                : Symbol_Type;
       Continue              : Boolean := True;
       Last_Token_Was_Trivia : Boolean := False;
 
@@ -158,18 +158,9 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
          Continue := Next_Token (Lexer, Token'Unrestricted_Access) /= 0;
          Token_Id := Token_Kind'Enum_Val (Token.Id);
+         Symbol := null;
 
          case Token_Id is
-
-         % if lexer.token_actions['WithText']:
-            ## Token id is part of the class of token types for which we want to
-            ## keep the text, but without internalization of the text.
-            when ${" | ".join(
-               lexer.ada_token_name(tok)
-               for tok in lexer.token_actions['WithText']
-            )} =>
-               Text := Add_String (TDH, Bounded_Text);
-         % endif
 
          % if lexer.token_actions['WithSymbol']:
             ## Token id is part of the class of token types for which we want to
@@ -178,7 +169,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                lexer.ada_token_name(tok)
                for tok in lexer.token_actions['WithSymbol']
             )} =>
-               Text := Text_Cst_Access (Find (TDH.Symbols, Bounded_Text));
+               Symbol := Find (TDH.Symbols, Bounded_Text);
          % endif
 
          % if lexer.token_actions['WithTrivia']:
@@ -187,8 +178,6 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                for tok in lexer.token_actions['WithTrivia']
             )} =>
                if With_Trivia then
-                  Text := Add_String (TDH, Bounded_Text);
-
                   if Last_Token_Was_Trivia then
                      Last_Element (TDH.Trivias).all.Has_Next := True;
                   else
@@ -200,10 +189,10 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                     (TDH.Trivias,
                      (Has_Next => False,
                       T        => (Kind       => Token_Id,
-                                   Text       => Text,
-                                   Sloc_Range => Sloc_Range,
                                    Offset     => Token.Offset,
-                                   Length     => Text_Length)));
+                                   Length     => Text_Length,
+                                   Symbol     => null,
+                                   Sloc_Range => Sloc_Range)));
 
                   Last_Token_Was_Trivia := True;
                end if;
@@ -213,7 +202,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
             ## Else, don't keep the text at all
             when others =>
-               Text := null;
+               null;
 
          end case;
 
@@ -225,14 +214,14 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
          Append
            (TDH.Tokens,
             (Kind       => Token_Id,
-             Text       => Text,
-             Sloc_Range => Sloc_Range,
              Offset     => (if Token_Id = ${termination}
                             then Unsigned_32 (TDH.Source_Buffer.all'Last + 1)
                             else Token.Offset),
              Length     => (if Token_Id = ${termination}
                             then 0
-                            else Text_Length)));
+                            else Text_Length),
+             Symbol     => Symbol,
+             Sloc_Range => Sloc_Range));
          Prepare_For_Trivia;
 
       % if lexer.token_actions['WithTrivia']:

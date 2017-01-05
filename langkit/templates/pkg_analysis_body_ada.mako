@@ -1576,7 +1576,6 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Raw_Data : Lexer.Token_Data_Type) return Token_Data_Type is
    begin
       return (Kind          => Raw_Data.Kind,
-              Text          => Text_Cst_Access (Raw_Data.Text),
               Source_Buffer => Text_Cst_Access (TDH.Source_Buffer),
               Source_First  => Source_First (Raw_Data),
               Source_Last   => Source_Last (Raw_Data),

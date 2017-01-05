@@ -619,9 +619,6 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
       Kind          : Token_Kind;
       --  Kind for this token
 
-      Text          : Text_Cst_Access;
-      --  Text as found in the original source file, or null if not available
-
       Source_Buffer : Text_Cst_Access;
       --  Text for the original source file
 
@@ -1401,7 +1398,7 @@ private
    --  Return the raw token data for T
 
    function Get_Symbol (Token : Token_Type) return Symbol_Type is
-     (Symbol_Type (Data (Token).Text));
+     (Raw_Data (Token).Symbol);
    --  Assuming that Token refers to a token that contains a symbol, return the
    --  corresponding symbol. This is an internal helper for properties code
    --  generation.

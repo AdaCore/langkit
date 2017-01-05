@@ -2,8 +2,9 @@
 
 with Interfaces;          use Interfaces;
 
-with Langkit_Support.Slocs; use Langkit_Support.Slocs;
-with Langkit_Support.Text;  use Langkit_Support.Text;
+with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handlers;
 
 --  This package provides types and primitives to split text streams into lists
@@ -32,10 +33,11 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
       --  Number of code points in the source buffer for this token (i.e.
       --  length of the corresponding Text_Type slice).
 
-      Text       : Text_Cst_Access;
-      --  Text as found in original source file or null depending on the token
-      --  kind (as decided in the lexer specification). For instance: null for
-      --  keywords but actual text for identifiers.
+      Symbol     : Symbol_Type;
+      --  Depending on the token kind (according to the lexer specification),
+      --  this is either null or the symbolization of the token text.
+      --
+      --  For instance: null for keywords but actual text for identifiers.
 
       Sloc_Range : Source_Location_Range;
       --  Source location range for this token. Note that the end bound is
