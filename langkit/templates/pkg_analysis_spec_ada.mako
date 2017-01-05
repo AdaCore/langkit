@@ -1404,6 +1404,12 @@ private
    is
      (Token_Iterator'(${root_node_type_name} (Node), Node.Token_End));
 
+   function Raw_Data (T : Token_Type) return Lexer.Token_Data_Type is
+     (if T.Trivia = No_Token_Index
+      then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Token))
+      else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Trivia)).T);
+   --  Return the raw token data for T
+
    function Get_Symbol (Token : Token_Type) return Symbol_Type is
      (Symbol_Type (Data (Token).Text));
    --  Assuming that Token refers to a token that contains a symbol, return the

@@ -1588,12 +1588,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    ----------
 
    function Data (T : Token_Type) return Token_Data_Type is
-      Raw_Data : constant Lexer.Token_Data_Type :=
-        (if T.Trivia = No_Token_Index
-         then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Token))
-         else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Trivia)).T);
    begin
-      return Convert (T.TDH.all, Raw_Data);
+      return Convert (T.TDH.all, Raw_Data (Token));
    end Data;
 
    -------------------
