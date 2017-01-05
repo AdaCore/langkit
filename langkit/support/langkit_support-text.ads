@@ -18,6 +18,7 @@ package Langkit_Support.Text is
    --  return string will include boundary quotes.
 
    type Text_Access is access all Text_Type;
+   type Text_Cst_Access is access constant Text_Type;
 
    procedure Free is new Ada.Unchecked_Deallocation (Text_Type, Text_Access);
 
