@@ -1587,9 +1587,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    -- Data --
    ----------
 
-   function Data (T : Token_Type) return Token_Data_Type is
+   function Data (Token : Token_Type) return Token_Data_Type is
    begin
-      return Convert (T.TDH.all, Raw_Data (Token));
+      return Convert (Token.TDH.all, Raw_Data (Token));
    end Data;
 
    -------------------

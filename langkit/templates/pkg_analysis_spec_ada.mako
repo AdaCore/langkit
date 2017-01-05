@@ -653,7 +653,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    function Previous (Token : Token_Type) return Token_Type;
    ${ada_doc('langkit.token_previous')}
 
-   function Data (T : Token_Type) return Token_Data_Type;
+   function Data (Token : Token_Type) return Token_Data_Type;
    --  Return the data associated to T
 
    function Is_Equivalent (L, R : Token_Type) return Boolean;
