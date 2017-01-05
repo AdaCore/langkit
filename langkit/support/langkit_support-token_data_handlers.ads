@@ -38,6 +38,9 @@ package Langkit_Support.Token_Data_Handlers is
    No_Token_Index    : constant Token_Index := Token_Index'First;
    First_Token_Index : constant Token_Index := Token_Index'First + 1;
 
+   package Token_Index_Vectors is new Langkit_Support.Vectors
+     (Element_Type => Token_Index);
+
    type Token_Data_Handler is record
       Source_Buffer     : Text_Access;
       --  The whole source buffer. It belongs to this token data handler, and
@@ -111,9 +114,9 @@ package Langkit_Support.Token_Data_Handlers is
 
    function Get_Trivias
      (TDH   : Token_Data_Handler;
-      Index : Token_Index) return Token_Vectors.Elements_Array;
+      Index : Token_Index) return Token_Index_Vectors.Elements_Array;
 
    function Get_Leading_Trivias
-     (TDH : Token_Data_Handler) return Token_Vectors.Elements_Array;
+     (TDH : Token_Data_Handler) return Token_Index_Vectors.Elements_Array;
 
 end Langkit_Support.Token_Data_Handlers;

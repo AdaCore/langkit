@@ -671,17 +671,15 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
          when Child =>
             Node : ${root_node_type_name};
          when Trivia =>
-            Trivia : Token_Data_Type;
+            Trivia : Token_Type;
       end case;
    end record;
    --  Variant that holds either an AST node or a token
 
-   package Children_Vectors is new Langkit_Support.Vectors (Child_Record);
-   package Children_Arrays renames Children_Vectors.Elements_Arrays;
+   type Children_Array is array (Positive range <>) of Child_Record;
 
    function Children_With_Trivia
-     (Node : access ${root_node_value_type}'Class)
-      return Children_Arrays.Array_Type;
+     (Node : access ${root_node_value_type}'Class) return Children_Array;
    --  Return the children of this node interleaved with Trivia token nodes, so
    --  that:
    --  - Every trivia contained between Node.Start_Token and Node.End_Token - 1

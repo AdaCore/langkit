@@ -2,7 +2,7 @@ package body Langkit_Support.Token_Data_Handlers is
 
    function Internal_Get_Trivias
      (TDH   : Token_Data_Handler;
-      Index : Token_Index) return Token_Vectors.Elements_Array;
+      Index : Token_Index) return Token_Index_Vectors.Elements_Array;
 
    procedure Free_String_Literals (TDH : in out Token_Data_Handler);
    --  Helper for Initialize and Free. Free all the string literals in TDH.
@@ -77,7 +77,7 @@ package body Langkit_Support.Token_Data_Handlers is
 
    function Internal_Get_Trivias
      (TDH   : Token_Data_Handler;
-      Index : Token_Index) return Token_Vectors.Elements_Arrays.Array_Type
+      Index : Token_Index) return Token_Index_Vectors.Elements_Array
    is
       subtype Index_Type is Trivia_Vectors.Index_Type;
 
@@ -86,33 +86,28 @@ package body Langkit_Support.Token_Data_Handlers is
          then No_Token_Index
          else Token_Index (Get (TDH.Tokens_To_Trivias,
                                 Index_Type (Index + 1))));
-
-      function Extract (T : Trivia_Node) return Token_Data_Type
-      is (T.T);
-
-      function Map_Extract is new Trivia_Vectors.Elements_Arrays.Map_Gen
-        (Token_Data_Type,
-         Token_Vectors.Elements_Arrays.Array_Type, Extract);
-
-      J : Token_Index;
+      Last_Trivia_Index  : Token_Index := First_Trivia_Index;
 
    begin
       if First_Trivia_Index /= No_Token_Index then
-         J := First_Trivia_Index;
-
-         while Get (TDH.Trivias, Index_Type (J)).Has_Next loop
-            J := J + 1;
+         while Get (TDH.Trivias, Index_Type (Last_Trivia_Index)).Has_Next loop
+            Last_Trivia_Index := Last_Trivia_Index + 1;
          end loop;
 
          declare
-            First : constant Index_Type := Index_Type (First_Trivia_Index);
-            Last  : constant Index_Type := Index_Type (J);
+            Trivia_Count : constant Natural :=
+               Natural (Last_Trivia_Index) - Natural (First_Trivia_Index) + 1;
+            Result       : Token_Index_Vectors.Elements_Array
+              (1 .. Trivia_Count);
          begin
-            return Map_Extract (Slice (TDH.Trivias, First, Last));
+            for Index in First_Trivia_Index .. Last_Trivia_Index loop
+               Result (Index_Type (Index - First_Trivia_Index + 1)) := Index;
+            end loop;
+            return Result;
          end;
       end if;
 
-      return Token_Vectors.Elements_Arrays.Empty_Array;
+      return Token_Index_Vectors.Elements_Arrays.Empty_Array;
    end Internal_Get_Trivias;
 
    -----------------
@@ -121,11 +116,10 @@ package body Langkit_Support.Token_Data_Handlers is
 
    function Get_Trivias
      (TDH   : Token_Data_Handler;
-      Index : Token_Index) return Token_Vectors.Elements_Arrays.Array_Type
-   is
+      Index : Token_Index) return Token_Index_Vectors.Elements_Array is
    begin
       if Index = No_Token_Index then
-         return Token_Vectors.Elements_Arrays.Empty_Array;
+         return Token_Index_Vectors.Elements_Arrays.Empty_Array;
       end if;
       return Internal_Get_Trivias (TDH, Index);
    end Get_Trivias;
@@ -135,7 +129,7 @@ package body Langkit_Support.Token_Data_Handlers is
    -------------------------
 
    function Get_Leading_Trivias
-     (TDH : Token_Data_Handler) return Token_Vectors.Elements_Array is
+     (TDH : Token_Data_Handler) return Token_Index_Vectors.Elements_Array is
    begin
       return Internal_Get_Trivias (TDH, No_Token_Index);
    end Get_Leading_Trivias;

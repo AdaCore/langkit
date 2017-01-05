@@ -611,19 +611,27 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    ---------------
 
    procedure PP_Trivia (Unit : Analysis_Unit) is
+
+      procedure Process (Trivia : Token_Index) is
+         Data : constant Lexer.Token_Data_Type :=
+            Unit.TDH.Trivias.Get (Natural (Trivia)).T;
+      begin
+         Put_Line (Image (Data));
+      end Process;
+
       Last_Token : constant Token_Index :=
          Token_Index (Token_Vectors.Last_Index (Unit.TDH.Tokens) - 1);
       --  Index for the last token in Unit excluding the Termination token
       --  (hence the -1).
    begin
       for Tok of Get_Leading_Trivias (Unit.TDH) loop
-         Put_Line (Image (Tok.Text.all));
+         Process (Tok);
       end loop;
 
       PP_Trivia (Unit.AST_Root);
 
       for Tok of Get_Trivias (Unit.TDH, Last_Token) loop
-         Put_Line (Image (Tok.Text.all));
+         Process (Tok);
       end loop;
    end PP_Trivia;
 
@@ -1617,9 +1625,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    --------------------------
 
    function Children_With_Trivia
-     (Node : access ${root_node_value_type}'Class)
-      return Children_Arrays.Array_Type
+     (Node : access ${root_node_value_type}'Class) return Children_Array
    is
+      package Children_Vectors is new Langkit_Support.Vectors (Child_Record);
       use Children_Vectors;
 
       Ret_Vec : Children_Vectors.Vector;
@@ -1633,7 +1641,10 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       begin
          for I in First .. Last loop
             for D of Get_Trivias (TDH, I) loop
-               Append (Ret_Vec, (Kind => Trivia, Trivia => Convert (TDH, D)));
+               Append (Ret_Vec, (Kind   => Trivia,
+                                 Trivia => (TDH    => Node.Unit.TDH'Access,
+                                            Token  => I,
+                                            Trivia => D)));
             end loop;
          end loop;
       end Append_Trivias;
@@ -1665,7 +1676,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
                           else N_Children (I + 1).Token_Start - 1));
       end loop;
 
-      return A : constant Children_Arrays.Array_Type := To_Array (Ret_Vec) do
+      return A : constant Children_Array :=
+         Children_Array (To_Array (Ret_Vec))
+      do
          --  Don't forget to free Ret_Vec, since its memory is not
          --  automatically managed.
          Destroy (Ret_Vec);
@@ -1704,9 +1717,14 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       for C of Children_With_Trivia (Node) loop
          case C.Kind is
             when Trivia =>
-               Put_Line (Children_Prefix & (if C.Trivia.Text = null
-                                            then ""
-                                            else Image (C.Trivia.Text.all)));
+               declare
+                  D : constant Token_Data_Type := Data (C.Trivia);
+               begin
+                  Put_Line
+                    (Children_Prefix & (if D.Text = null
+                                        then ""
+                                        else Image (D.Text.all)));
+               end;
             when Child =>
                C.Node.PP_Trivia (Children_Prefix);
          end case;
