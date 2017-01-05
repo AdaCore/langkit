@@ -14,7 +14,7 @@ from langkit.expressions.base import (
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
-from langkit.utils import assert_type, TypeSet
+from langkit.utils import TypeSet
 
 
 @attr_call("cast", do_raise=False)
