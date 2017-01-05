@@ -1,6 +1,9 @@
 ## vim: filetype=makoada
 
-<% lexer = ctx.lexer %>
+<%
+   lexer = ctx.lexer
+   termination = lexer.ada_token_name('Termination')
+%>
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Conversion;
@@ -214,13 +217,22 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
          end case;
 
+         --  Special case for the termination token: Quex yields inconsistent
+         --  offsets/sizes. Make sure we get the end of the buffer so that the
+         --  rest of our machinery (in particular source slices) works well
+         --  with it.
+
          Append
            (TDH.Tokens,
             (Kind       => Token_Id,
              Text       => Text,
              Sloc_Range => Sloc_Range,
-             Offset     => Token.Offset,
-             Length     => Text_Length));
+             Offset     => (if Token_Id = ${termination}
+                            then Unsigned_32 (TDH.Source_Buffer.all'Last + 1)
+                            else Token.Offset),
+             Length     => (if Token_Id = ${termination}
+                            then 0
+                            else Text_Length)));
          Prepare_For_Trivia;
 
       % if lexer.token_actions['WithTrivia']:
