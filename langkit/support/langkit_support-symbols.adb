@@ -1,5 +1,5 @@
 with Ada.Unchecked_Deallocation;
-with System; use System;
+with System;                  use System;
 with System.Storage_Elements; use System.Storage_Elements;
 
 package body Langkit_Support.Symbols is
@@ -53,7 +53,7 @@ package body Langkit_Support.Symbols is
 
    procedure Destroy (ST : in out Symbol_Table) is
       use Sets;
-      C       : Cursor := ST.First;
+      C : Cursor := ST.First;
    begin
       while Has_Element (C) loop
          declare
