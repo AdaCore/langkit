@@ -147,6 +147,10 @@ class New(AbstractExpression):
         """
 
         def __init__(self, struct_type, assocs):
+            """
+            :type struct_type: CompiledType
+            :type assocs: {names.Name: ResolvedExpression}
+            """
             self.static_type = struct_type
             self.assocs = assocs
 
