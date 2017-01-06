@@ -139,6 +139,13 @@ def format_severity(severity):
     return col(msg, Colors.BOLD + SEVERITY_COLORS[severity])
 
 
+def get_structured_context(recovered=False):
+    """
+    From the context global structures, return a structured context locations
+    list.
+
+    :rtype: list[(str, Location)]
+    """
     c = context_cache[1] if recovered else context_stack
     ids = set()
     msgs = []
@@ -151,13 +158,17 @@ def format_severity(severity):
             msgs.append((ctx_msg, ctx_loc))
             ids.add(id)
 
+    return msgs
+
+
 def print_context(recovered=False):
     """
     Print the current error context.
     """
+
     # Then we'll print the context we've kept
     last_file_info = ''
-    for ctx_msg, ctx_loc in reversed(msgs):
+    for ctx_msg, ctx_loc in reversed(get_structured_context(recovered)):
         # We only want to show the file information one time if it is the same
         file_info = 'File "{}", '.format(col(ctx_loc.file, Colors.CYAN))
         if last_file_info == file_info:
