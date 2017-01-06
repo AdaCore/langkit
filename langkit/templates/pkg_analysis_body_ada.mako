@@ -1601,6 +1601,30 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       return Token.TDH.Source_Buffer (Source_First (RD) .. Source_Last (RD));
    end Text;
 
+   ----------
+   -- Text --
+   ----------
+
+   function Text (First, Last : Token_Type) return Text_Type is
+      FD : constant Token_Data_Type := Data (First);
+      LD : constant Token_Data_Type := Data (Last);
+   begin
+      if First.TDH /= Last.TDH then
+         raise Constraint_Error;
+      end if;
+      return FD.Source_Buffer.all (FD.Source_First .. LD.Source_Last);
+   end Text;
+
+   ----------
+   -- Text --
+   ----------
+
+   function Text
+     (Node : access ${root_node_value_type}'Class) return Text_Type is
+   begin
+      return Text (Token_Start (Node), Token_End (Node));
+   end Text;
+
    -------------------
    -- Is_Equivalent --
    -------------------

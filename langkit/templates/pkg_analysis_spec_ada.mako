@@ -657,6 +657,17 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    is (Image (Text (Token)));
    --  Return the text of the token as String
 
+   function Text (First, Last : Token_Type) return Text_Type;
+   --  Return the source buffer slice corresponding to the text that spans
+   --  between the First and Last tokens. This returns an empty slice if Last
+   --  actually appears before First. This raises a Constraint_Error if First
+   --  and Last don't belong to the same analysis unit.
+
+   function Text
+     (Node : access ${root_node_value_type}'Class) return Text_Type;
+   --  Shortcut to get the source buffer slice corresponding to the text that
+   --  spans between the first and last tokens of an AST node.
+
    type Child_Or_Trivia is (Child, Trivia);
    --  Discriminator for the Child_Record type
 
