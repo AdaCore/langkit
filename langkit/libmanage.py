@@ -182,6 +182,10 @@ class ManageScript(object):
             help='In case of internal error or diagnostic error, run a'
                  ' post-mortem PDB session'
         )
+        args_parser.add_argument(
+            '--parsable-errors', '-P', action='store_true', default=False,
+            help='Generate error messages parsable by tools'
+        )
 
         def create_parser(fn, needs_context=False):
             """
@@ -560,6 +564,8 @@ class ManageScript(object):
             argv.append('-XLIBRARY_TYPE={}'.format(library_type))
             if mains:
                 argv.extend('{}.adb'.format(main) for main in mains)
+            if args.parsable_errors:
+                argv.append('-gnatef')
             argv.append('-cargs')
             argv.extend(cargs)
             self.check_call(args, 'Build', argv)
