@@ -184,6 +184,18 @@ def print_context(recovered=False):
         ))
 
 
+def get_parsable_location():
+    """
+    Returns an error location in the common tool parsable format::
+
+        {file}:{line}:{column}
+
+    :rtype: str
+    """
+    loc = get_structured_context()[0][1]
+    return "{}:{}:1".format(path.abspath(loc.file), loc.line)
+
+
 def check_source_language(predicate, message, severity=Severity.error):
     """
     Check predicates related to the user's input in the input language
