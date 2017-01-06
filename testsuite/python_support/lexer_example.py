@@ -1,19 +1,18 @@
 from langkit.lexer import (
-    Eof, Ignore, Lexer, LexerToken, Literal, NoText, Pattern, WithSymbol,
-    WithText
+    Eof, Ignore, Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText
 )
 
 
 class Token(LexerToken):
-    Example = NoText()
-    Null = NoText()
+    Example = WithText()
+    Null = WithText()
 
-    Comma = NoText()
-    LPar = NoText()
-    RPar = NoText()
-    LBrace = NoText()
-    RBrace = NoText()
-    Plus = NoText()
+    Comma = WithText()
+    LPar = WithText()
+    RPar = WithText()
+    LBrace = WithText()
+    RBrace = WithText()
+    Plus = WithText()
 
     Number = WithText()
     Identifier = WithSymbol()

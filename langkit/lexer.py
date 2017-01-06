@@ -80,8 +80,8 @@ class TokenAction(Action):
     declaration of a LexerToken subclass, as in::
 
         class MyToken(LexerToken):
-            Identifier = WithText()
-            Keyword = NoText()
+            Identifier = WithSymbol()
+            Keyword = WithText()
     """
     # This counter is used to preserve the order of TokenAction instantiations,
     # which allows us to get the declaration order of token enum kinds.
@@ -107,20 +107,6 @@ class TokenAction(Action):
         :rtype: str
         """
         raise NotImplementedError()
-
-
-class NoText(TokenAction):
-    """
-    TokenAction. The associated token kind will never have any text associated
-    to it::
-
-        class MyToken(LexerToken):
-            # Keyword tokens will never have text associated #with them
-            Keyword = NoText()
-    """
-
-    def render(self, lexer):
-        return "=> {};".format(lexer.quex_token_name(self.name.upper))
 
 
 class WithText(TokenAction):
@@ -205,10 +191,10 @@ class LexerToken(object):
 
     # Built-in termination token. Since it will always be the first token kind,
     # its value will always be zero.
-    Termination = NoText()
+    Termination = WithText()
 
     # Built-in token to represent a lexing failure
-    LexingFailure = NoText()
+    LexingFailure = WithText()
 
 
 class Patterns(object):
@@ -253,10 +239,10 @@ class Lexer(object):
     `add_rules` function::
 
         l.add_rules((
-            (Literal("+"),       NoText(TokenKind.Plus))
-            (Literal("-"),       NoText(TokenKind.Minus))
-            (Literal("*"),       NoText(TokenKind.Times))
-            (Literal("/"),       NoText(TokenKind.Div))
+            (Literal("+"),       WithText(TokenKind.Plus))
+            (Literal("-"),       WithText(TokenKind.Minus))
+            (Literal("*"),       WithText(TokenKind.Times))
+            (Literal("/"),       WithText(TokenKind.Div))
             (l.patterns.integer, WithText(TokenKind.Number))
         ))
 
