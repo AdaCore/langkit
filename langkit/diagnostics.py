@@ -122,6 +122,7 @@ class Severity(enum.IntEnum):
     error = 2
     non_blocking_error = 3
 
+
 SEVERITY_COLORS = {
     Severity.warning:            Colors.YELLOW,
     Severity.error:              Colors.RED,
