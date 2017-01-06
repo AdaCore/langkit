@@ -15,7 +15,7 @@
       with Export        => True,
            Convention    => C,
            External_name => "${accessor_name}";
-   ${ada_doc(field, lang='c')}
+   ${ada_doc(field, 3, lang='c')}
 
 </%def>
 
