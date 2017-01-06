@@ -66,6 +66,11 @@ This will be used to cache the last context stack in case of exception.
 :type: (Exception, list[(str, Location)])
 """
 
+EMIT_PARSABLE_ERRORS = False
+"""
+Whether langkit should emit errors in the standard tool parsable format.
+"""
+
 
 class Context(object):
     """
@@ -207,14 +212,20 @@ def check_source_language(predicate, message, severity=Severity.error):
         be false.
     :param Severity severity: The severity of the diagnostic.
     """
+    global EMIT_PARSABLE_ERRORS
+
     severity = assert_type(severity, Severity)
+
     if not predicate:
-        print_context()
-        print "{}{}: {}".format(
-            "    " if context_stack else '',
-            format_severity(severity),
-            message
-        )
+        if EMIT_PARSABLE_ERRORS:
+            print "{}: {}".format(get_parsable_location(), message)
+        else:
+            print_context()
+            print "{}{}: {}".format(
+                "    " if context_stack else '',
+                format_severity(severity),
+                message
+            )
         if severity == Severity.error:
             raise DiagnosticError()
         elif severity == Severity.non_blocking_error:

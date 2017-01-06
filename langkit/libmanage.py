@@ -388,6 +388,9 @@ class ManageScript(object):
     def run(self, argv=None):
         parsed_args = self.args_parser.parse_args(argv)
 
+        from langkit import diagnostics
+        diagnostics.EMIT_PARSABLE_ERRORS = parsed_args.parsable_errors
+
         # If asked to, setup the exception hook as a last-chance handler to
         # invoke a debugger in case of uncaught exception.
         if parsed_args.debug:
