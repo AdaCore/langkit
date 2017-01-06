@@ -13,7 +13,7 @@ import subprocess
 import sys
 
 from langkit.compile_context import Verbosity
-from langkit.diagnostics import Diagnostics, DiagnosticError, print_errors
+from langkit.diagnostics import Diagnostics, DiagnosticError, print_context
 from langkit.utils import Colors, col, printcol
 
 
@@ -444,7 +444,7 @@ class ManageScript(object):
                 raise
             import traceback
             traceback.print_exc()
-            print_errors(recovered=True)
+            print_context(recovered=True)
             print >> sys.stderr, col('Internal error! Exiting', Colors.FAIL)
             sys.exit(1)
 

@@ -139,7 +139,6 @@ def format_severity(severity):
     return col(msg, Colors.BOLD + SEVERITY_COLORS[severity])
 
 
-def print_errors(recovered=False):
     c = context_cache[1] if recovered else context_stack
     ids = set()
     msgs = []
@@ -152,6 +151,10 @@ def print_errors(recovered=False):
             msgs.append((ctx_msg, ctx_loc))
             ids.add(id)
 
+def print_context(recovered=False):
+    """
+    Print the current error context.
+    """
     # Then we'll print the context we've kept
     last_file_info = ''
     for ctx_msg, ctx_loc in reversed(msgs):
@@ -184,7 +187,7 @@ def check_source_language(predicate, message, severity=Severity.error):
     # class declaration, it it's really an instance of Severity instead.
     severity = assert_type(severity, Severity)
     if not predicate:
-        print_errors()
+        print_context()
         print "{}{}: {}".format(
             "    " if context_stack else '',
             format_severity(severity),
