@@ -207,8 +207,6 @@ def check_source_language(predicate, message, severity=Severity.error):
         be false.
     :param Severity severity: The severity of the diagnostic.
     """
-    # PyCharm's static analyzer thinks Severity.foo is an int because of the
-    # class declaration, it it's really an instance of Severity instead.
     severity = assert_type(severity, Severity)
     if not predicate:
         print_context()
