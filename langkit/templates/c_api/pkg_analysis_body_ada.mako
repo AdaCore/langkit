@@ -881,7 +881,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    ----------
 
    function Wrap
-     (S     : Text_Access;
+     (S     : Text_Cst_Access;
       First : Positive;
       Last  : Natural) return ${text_type}
    is
@@ -1029,7 +1029,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
                  Trivia_Index => int (Token.Trivia),
                  Kind         => K'Enum_Rep,
                  Text         => Wrap
-                   (Token.TDH.Source_Buffer, D.Source_First, D.Source_Last),
+                   (Text_Cst_Access (Token.TDH.Source_Buffer),
+                    D.Source_First,
+                    D.Source_Last),
                  Sloc_Range   => Wrap (D.Sloc_Range));
       end;
    end Wrap;

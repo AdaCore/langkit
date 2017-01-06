@@ -603,7 +603,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    function Wrap_Alloc (S : Text_Type) return ${text_type};
    function Wrap
-     (S     : Text_Access;
+     (S     : Text_Cst_Access;
       First : Positive;
       Last  : Natural) return ${text_type};
 
