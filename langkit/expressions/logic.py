@@ -125,7 +125,7 @@ class Bind(AbstractExpression):
             expr = construct(op)
             check_source_language(
                 expr.type == LogicVarType or expr.type.matches(T.root_node),
-                "Operands to a logic equality operator should be either "
+                "Operands to a logic bind operator should be either "
                 "a logic variable or an ASTNode, got {}".format(expr.type)
             )
             # Cast the ast node type if necessary
