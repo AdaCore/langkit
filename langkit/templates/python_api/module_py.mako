@@ -438,6 +438,21 @@ class Token(ctypes.Structure):
     def text(self):
         return self._text.wrap()
 
+    @classmethod
+    def text_range(cls, first, last):
+        ${py_doc('langkit.token_range_text', 8)}
+        result = _text()
+        if not _token_range_text(
+            ctypes.byref(first), ctypes.byref(last),
+            ctypes.byref(result)
+        ):
+            raise ValueError(
+               "{} and {} don't belong to the same analysis unit".format(
+                  first, last
+               )
+            )
+        return result.wrap() or u''
+
     @property
     def sloc_range(self):
         return self._sloc_range.wrap()
@@ -588,6 +603,14 @@ class ${root_astnode_name}(object):
         result = _SlocRange()
         _node_sloc_range(self._c_value, ctypes.byref(result))
         return result.wrap()
+
+    @property
+    def text(self):
+        """
+        Return the source buffer slice corresponding to the text that spans
+        between the first and the last tokens of `self`.
+        """
+        return Token.text_range(self.token_start, self.token_end)
 
     @property
     def short_image(self):
@@ -1053,6 +1076,11 @@ _token_is_equivalent = _import_func(
 _token_previous = _import_func(
     "${capi.get_name('token_previous')}",
     [ctypes.POINTER(Token), ctypes.POINTER(Token)], None
+)
+_token_range_text = _import_func(
+    "${capi.get_name('token_range_text')}",
+    [ctypes.POINTER(Token), ctypes.POINTER(Token), ctypes.POINTER(_text)],
+    ctypes.c_int
 )
 
 

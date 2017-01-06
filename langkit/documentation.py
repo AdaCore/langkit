@@ -589,6 +589,8 @@ base_langkit_docs = {
             This raises a Constraint_Error
         % elif lang == 'c':
             This returns 0
+        % elif lang == 'python':
+            This raises a ValueError
         % endif
         if First and Last don't belong to the same analysis unit.
         % if lang == 'c':
