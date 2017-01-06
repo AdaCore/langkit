@@ -852,6 +852,23 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       Previous_Token.all := Wrap (PT);
    end;
 
+   function ${capi.get_name('token_range_text')}
+     (First, Last : ${token_type}_Ptr;
+      Text        : ${text_type}_Ptr) return int
+   is
+      FD : constant Token_Data_Type := Data (Unwrap (First.all));
+      LD : constant Token_Data_Type := Data (Unwrap (Last.all));
+   begin
+      if First.Token_Data /= Last.Token_Data then
+         return 0;
+      end if;
+      Text.all := Wrap
+        (FD.Source_Buffer,
+         Positive (FD.Source_First),
+         Natural (LD.Source_Last));
+      return 1;
+   end;
+
    ------------
    -- Unwrap --
    ------------

@@ -658,10 +658,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    --  Return the text of the token as String
 
    function Text (First, Last : Token_Type) return Text_Type;
-   --  Return the source buffer slice corresponding to the text that spans
-   --  between the First and Last tokens. This returns an empty slice if Last
-   --  actually appears before First. This raises a Constraint_Error if First
-   --  and Last don't belong to the same analysis unit.
+   ${ada_doc('langkit.token_range_text')}
 
    function Text
      (Node : access ${root_node_value_type}'Class) return Text_Type;

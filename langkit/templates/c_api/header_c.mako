@@ -448,6 +448,12 @@ extern void
 ${capi.get_name('token_previous')}(${token_type} *token,
                                    ${token_type} *previous_token);
 
+${c_doc('langkit.token_range_text')}
+extern int
+${capi.get_name('token_range_text')}(${token_type} *first,
+                                     ${token_type} *last,
+                                     ${text_type} *result);
+
 ${c_doc('langkit.token_is_equivalent')}
 extern void
 ${capi.get_name('token_is_equivalent')}(${token_type} *left,

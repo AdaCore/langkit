@@ -577,6 +577,24 @@ base_langkit_docs = {
         Return a reference to the previous token in the corresponding analysis
         unit.
     """,
+    'langkit.token_range_text': """
+        Compute the source buffer slice corresponding to the text that spans
+        between the First and Last tokens. This yields an empty slice if Last
+        actually appears before First.
+        % if lang == 'c':
+            Put the result in RESULT.
+        % endif
+
+        % if lang == 'ada':
+            This raises a Constraint_Error
+        % elif lang == 'c':
+            This returns 0
+        % endif
+        if First and Last don't belong to the same analysis unit.
+        % if lang == 'c':
+            Return 1 if successful.
+        % endif
+    """
 }
 
 

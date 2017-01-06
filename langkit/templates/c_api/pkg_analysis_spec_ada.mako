@@ -544,6 +544,14 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name('token_previous')}";
    ${ada_c_doc('langkit.token_previous', 3)}
 
+   function ${capi.get_name('token_range_text')}
+     (First, Last : ${token_type}_Ptr;
+      Text        : ${text_type}_Ptr) return int
+      with Export => True,
+           Convention => C,
+           External_Name => "${capi.get_name('token_range_text')}";
+   ${ada_c_doc('langkit.token_range_text', 3)}
+
    % for enum_type in _self.sorted_types(_self.enum_types):
       ${enum_types.spec(enum_type)}
    % endfor
