@@ -6,6 +6,7 @@ import re
 
 from langkit.common import TOKEN_PREFIX
 from langkit.compile_context import get_context
+from langkit.diagnostics import check_source_language
 from langkit.names import Name
 from langkit.template_utils import common_renderer
 
@@ -394,7 +395,8 @@ class Lexer(object):
             elif token in self.literals_map:
                 return self.literals_map[token].name
             else:
-                raise Exception(
+                check_source_language(
+                    False,
                     "{} token literal is not part of the valid tokens for "
                     "this grammar".format(token)
                 )
