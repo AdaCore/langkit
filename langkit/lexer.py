@@ -38,7 +38,7 @@ class Pattern(Matcher):
     Matcher. This will match a regular expression like pattern. Since the
     lexer DSL uses Quex underneath, you can find more documentation about
     the recognized regular expression language here: `Quex pattern language
-       <http://quex.sourceforge.net/doc/html/usage/patterns/context-free.html>`_.
+     <http://quex.sourceforge.net/doc/html/usage/patterns/context-free.html>`_.
     """
 
     def __init__(self, pattern):
