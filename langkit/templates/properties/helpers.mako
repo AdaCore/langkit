@@ -17,6 +17,7 @@
    <%
    type_name = "Logic_Converter_{}".format(conv_prop.uid)
    root_class = T.root_node.name()
+   sem_n = T.sem_node.name()
    %>
 
    ## We generate a custom type which is a functor in the C++ term, eg just a
@@ -29,34 +30,40 @@
    No_${type_name} : constant ${type_name} := (Env => null);
 
    function Convert
-     (Self : ${type_name}; From : ${root_class}) return ${root_class}
+     (Self : ${type_name}; From : ${sem_n}) return ${sem_n}
    with Inline;
 
    function Convert
-     (Self : ${type_name}; From : ${root_class})
-      return ${root_class}
+     (Self : ${type_name}; From : ${sem_n})
+      return ${sem_n}
    is
       % if not conv_prop.has_implicit_env:
          pragma Unreferenced (Self);
       % endif
+
    begin
-      return ${root_class} (${conv_prop.name}
-        (${conv_prop.struct.name()} (From)
-         % if conv_prop.has_implicit_env:
-            , Self.Env
-         % endif
-        )
-      );
+      return ${sem_n}'
+        (El => ${root_class} (${conv_prop.name}
+          (${conv_prop.struct.name()} (From.El)
+           % if conv_prop.has_implicit_env:
+              , Self.Env
+           % endif
+         )),
+         MD => From.MD,
+         Is_Null => From.Is_Null
+         );
    end Convert;
 </%def>
 
 <%def name="generate_logic_equal(eq_prop)">
    <% struct = eq_prop.struct.name() %>
-   function Eq_${eq_prop.uid} (L, R : ${T.root_node.name()}) return Boolean
+   function Eq_${eq_prop.uid} (L, R : ${T.sem_node.name()}) return Boolean
    is
-     (if L.all in ${struct}_Type'Class
-      and then R.all in ${struct}_Type'Class
-      then ${eq_prop.name} (${struct} (L), ${struct} (R))
+     (if L.El.all in ${struct}_Type'Class
+      and then R.El.all in ${struct}_Type'Class
+      then ${eq_prop.name} (${struct} (L.El), ${struct} (R.El))
+      ## TODO: We probably still want to check some property of equality for
+      ## the metadata.
       else raise Constraint_Error
            with "Wrong type for Eq_${eq_prop.uid} arguments");
 </%def>
@@ -98,8 +105,8 @@
 
    function Call
      (Self           : ${type_name}
-     % for i, _ in enumerate(formal_node_types):
-     ; Node_${i} : ${root_class}
+     % for i in range(len(formal_node_types)):
+     ; Node_${i} : ${T.sem_node.name()}
      % endfor
      ) return Boolean
    is
@@ -109,7 +116,7 @@
    begin
       <%
          args = [
-            '{} (Node_{})'.format(formal_type.name(), i)
+            '{} (Node_{}.El)'.format(formal_type.name(), i)
             for i, formal_type in enumerate(formal_node_types)
          ] + [
             'Self.Field_{}'.format(i)
@@ -134,7 +141,8 @@
 
    package ${package_name} is
    new Predicate_${len(formal_node_types)}
-     (${root_class}, Eq_Node.Refs.Raw_Logic_Var, ${type_name}, Free => Free);
+     (${T.sem_node.name()}, Eq_Node.Refs.Raw_Logic_Var,
+      ${type_name}, Free => Free);
 
    % endfor
 </%def>

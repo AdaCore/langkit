@@ -10,6 +10,7 @@ from langkit.expressions.base import (
     ResolvedExpression, construct, BasicExpr, auto_attr
 )
 from langkit.expressions.envs import Env
+from langkit.names import Name
 
 
 def untyped_literal_expr(expr_str):
@@ -121,16 +122,30 @@ class Bind(AbstractExpression):
         )
 
         def construct_operand(op):
-            from langkit.expressions import Cast
+            from langkit.expressions import Cast, New
             expr = construct(op)
+
             check_source_language(
-                expr.type == LogicVarType or expr.type.matches(T.root_node),
+
+                expr.type == LogicVarType
+                or expr.type.matches(T.root_node)
+                or expr.type.matches(T.root_node.env_element()),
+
                 "Operands to a logic bind operator should be either "
                 "a logic variable or an ASTNode, got {}".format(expr.type)
             )
+
             # Cast the ast node type if necessary
-            if (expr.type.matches(T.root_node) and expr.type != T.root_node):
+            if expr.type.matches(T.root_node) and expr.type != T.root_node:
                 expr = Cast.Expr(expr, T.root_node)
+
+            # If the expression is a root node, implicitly construct an
+            # env_element from it.
+            if expr.type.matches(T.root_node):
+                expr = New.StructExpr(T.root_node.env_element(), {
+                    Name('El'): expr,
+                    Name('MD'): LiteralExpr('<>', None)
+                })
 
             return expr
 
@@ -160,6 +175,10 @@ class DomainExpr(ResolvedExpression):
         super(DomainExpr, self).__init__()
 
     def _render_pre(self):
+        is_node_domain = (
+            self.domain.static_type.element_type().is_env_element_type
+        )
+
         return "\n".join([
             self.domain.render_pre(),
             self.logic_var_expr.render_pre(), """
@@ -168,7 +187,7 @@ class DomainExpr(ResolvedExpression):
                 A   : Eq_Node.Raw_Member_Array (1 .. Length (Dom));
             begin
                 for J in 0 .. Length (Dom) - 1 loop
-                    A (J + 1) := Get (Dom, J);
+                    A (J + 1) := {env_el};
                 end loop;
 
                 {res_var} := Member ({logic_var}, A);
@@ -176,7 +195,9 @@ class DomainExpr(ResolvedExpression):
             """.format(logic_var=self.logic_var_expr.render_expr(),
                        domain=self.domain.render_expr(),
                        domain_type=self.domain.type.name(),
-                       res_var=self.res_var.name)
+                       res_var=self.res_var.name,
+                       env_el="Get (Dom, J)" if is_node_domain
+                       else "(El => Get (Dom, J), others => <>)")
         ])
 
     def _render_expr(self):
@@ -365,7 +386,8 @@ def get_value(logic_var):
         extract the value.
     """
     return BuiltinCallExpr(
-        "Eq_Node.Refs.GetL", T.root_node, [construct(logic_var, LogicVarType)]
+        "Eq_Node.Refs.GetL", T.root_node.env_element(),
+        [construct(logic_var, LogicVarType)]
     )
 
 

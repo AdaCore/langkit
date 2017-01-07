@@ -782,10 +782,10 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    -- Adalog instantiations --
    ---------------------------
 
-   function El_Image (N : ${root_node_type_name}) return String is
-   (if N /= null then Image (N.Short_Image) else "None");
+   function El_Image (N : ${T.sem_node.name()}) return String
+   is (if N.El /= null then Image (N.El.Short_Image) else "None");
 
-   package Eq_Node is new Adalog.Eq_Same (${root_node_type_name}, El_Image);
+   package Eq_Node is new Adalog.Eq_Same (${T.sem_node.name()}, El_Image);
    subtype Logic_Var is Eq_Node.Refs.Raw_Var;
    subtype Logic_Var_Record is Eq_Node.Refs.Var;
    Null_Var : constant Logic_Var := null;

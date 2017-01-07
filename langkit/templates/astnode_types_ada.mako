@@ -15,7 +15,7 @@
 
    pragma Warnings (Off, "referenced");
    function Eq_Default
-     (L, R : ${T.root_node.name()}) return Boolean is (L = R)
+     (L, R : ${T.sem_node.name()}) return Boolean is (L = R)
    with Inline;
 
    type Logic_Converter_Default is null record;
@@ -24,7 +24,7 @@
 
    function Convert
      (Self : Logic_Converter_Default;
-      From : ${T.root_node.name()}) return ${T.root_node.name()}
+      From : ${T.sem_node.name()}) return ${T.sem_node.name()}
    is (From);
    pragma Warnings (On, "referenced");
 
