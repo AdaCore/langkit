@@ -1239,6 +1239,14 @@ class Transform(Parser):
             " some are None: {}".format(self.typ, fields_types)
         )
 
+        nb_transform_values = len(fields_types)
+        nb_fields = len(self.typ.get_parse_fields())
+        check_source_language(
+            nb_transform_values == nb_fields,
+            'Transform parser generates {} values, but {} has {} fields'
+            .format(nb_transform_values, self.typ.name().camel, nb_fields)
+        )
+
         # Then dispatch these types to all the fields distributed amongst the
         # ASTNode hierarchy.
         remaining_types = list(fields_types)
@@ -1246,14 +1254,6 @@ class Transform(Parser):
             fields_count = len(cls.get_parse_fields(include_inherited=False))
             cls.set_types(remaining_types[:fields_count])
             remaining_types = remaining_types[fields_count:]
-        assert not remaining_types, (
-            'Transform parser has {} fields to create a {}, but this ASTnode'
-            ' requires only {} fields'.format(
-                len(fields_types),
-                self.typ.name().camel,
-                len(fields_types) - len(remaining_types)
-            )
-        )
 
         Parser.compute_fields_types(self)
 
