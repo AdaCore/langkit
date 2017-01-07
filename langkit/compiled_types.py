@@ -2475,6 +2475,15 @@ class TypeRepo(object):
 
         return StructMetaclass.env_metadata
 
+    @property
+    def sem_node(self):
+        """
+        This property returns the type used to describe an AST node with
+        semantic information attached. Currently, this is an env_element
+        containing a root_node.
+        """
+        return self.root_node.env_element()
+
     # noinspection PyPep8Naming
     @property
     @memoized
