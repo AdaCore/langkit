@@ -2438,6 +2438,14 @@ class TypeRepo(object):
             """
             return TypeRepo.Defer(lambda: self.get().list_type())
 
+        def env_element(self):
+            """
+            Proxy to the Struct.env_element classmethod.
+
+            :rtype: CompiledType
+            """
+            return TypeRepo.Defer(lambda: self.get().env_element())
+
     def __getattr__(self, type_name):
         """
         Build and return a Defer type that references the above type.
