@@ -1584,7 +1584,7 @@ class Struct(CompiledType):
 
         :type types: list[CompiledType]
         """
-        fields = cls.get_parse_fields(include_inherited=False)
+        fields = cls.get_parse_fields()
 
         check_source_language(
             len(fields) == len(types), "{} has {} fields ({} types given). You"

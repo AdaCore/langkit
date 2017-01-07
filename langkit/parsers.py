@@ -1239,6 +1239,8 @@ class Transform(Parser):
             " some are None: {}".format(self.typ, fields_types)
         )
 
+        # Check that the number of values produced by self and the number of
+        # fields in the destination node are the same.
         nb_transform_values = len(fields_types)
         nb_fields = len(self.typ.get_parse_fields())
         check_source_language(
@@ -1247,14 +1249,10 @@ class Transform(Parser):
             .format(nb_transform_values, self.typ.name().camel, nb_fields)
         )
 
-        # Then dispatch these types to all the fields distributed amongst the
-        # ASTNode hierarchy.
-        remaining_types = list(fields_types)
-        for cls in self.typ.get_inheritance_chain():
-            fields_count = len(cls.get_parse_fields(include_inherited=False))
-            cls.set_types(remaining_types[:fields_count])
-            remaining_types = remaining_types[fields_count:]
+        # Propagate types from self to destination node's fields
+        self.typ.set_types(fields_types)
 
+        # Handle sub-parsers
         Parser.compute_fields_types(self)
 
     def generate_code(self, pos_name="pos"):
