@@ -475,7 +475,10 @@ class ManageScript(object):
         """
 
         if args.verbosity.info:
-            printcol("Generating source for libadalang ...", Colors.HEADER)
+            printcol(
+                "Generating source for {} ...".format(self.lib_name.lower()),
+                Colors.HEADER
+            )
         self.context.emit(file_root=self.dirs.build_dir(),
                           main_programs=self.main_programs,
                           annotate_fields_types=args.annotate_fields_types,
