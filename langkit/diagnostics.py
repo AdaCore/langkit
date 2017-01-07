@@ -154,15 +154,18 @@ def get_structured_context(recovered=False):
     """
     c = context_cache[1] if recovered else context_stack
     ids = set()
+    locs = set()
     msgs = []
 
     # We'll iterate once on diagnostic contexts, to:
     # 1. Remove those with null locations.
     # 2. Only keep one per registered id.
-    for ctx_msg, ctx_loc, id in reversed(c):
-        if ctx_loc and (not id or id not in ids):
-            msgs.append((ctx_msg, ctx_loc))
+    # 3. Only keep one per unique (msg, location) pair.
+    for msg, loc, id in reversed(c):
+        if loc and (not id or id not in ids) and ((msg, loc) not in locs):
+            msgs.append((msg, loc))
             ids.add(id)
+            locs.add((msg, loc))
 
     return msgs
 
