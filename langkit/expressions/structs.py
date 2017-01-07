@@ -215,7 +215,7 @@ class New(AbstractExpression):
 
     def construct(self):
         """
-        :rtype: NewExpr
+        :rtype: StructExpr
         """
         if issubclass(self.struct_type, ASTNode):
             check_source_language(
