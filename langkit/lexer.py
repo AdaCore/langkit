@@ -251,6 +251,11 @@ class Lexer(object):
     """
 
     class PredefPattern(Pattern):
+        """
+        Class for a pattern defined in advance via the add_pattern method on
+        the lexer.
+        """
+
         def __init__(self, name, pattern):
             super(Lexer.PredefPattern, self).__init__(pattern)
             self.name = name
