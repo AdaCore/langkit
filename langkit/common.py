@@ -7,8 +7,6 @@ from langkit import names
 
 LANGUAGE = "ada"
 
-TOKEN_PREFIX = "QUEX_TKN_"
-
 languages_extensions = {
     "ada": "adb",
     "cpp": "cpp",

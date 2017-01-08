@@ -4,7 +4,6 @@ from collections import defaultdict
 from itertools import count
 import re
 
-from langkit.common import TOKEN_PREFIX
 from langkit.compile_context import get_context
 from langkit.diagnostics import check_source_language
 from langkit.names import Name
@@ -273,8 +272,13 @@ class Lexer(object):
         # literal that corresponds to it.
         self.literals_map = {}
 
-        # TODO: Allow configuration of this prefix through __init__
-        self.prefix = TOKEN_PREFIX
+        self.prefix = None
+        """
+        Prefix to use for token names. Will be set to a meaningful value by
+        the compile context.
+
+        :type: str
+        """
 
         # Map from token actions class names to set of token actions with that
         # class.
@@ -409,6 +413,9 @@ class Lexer(object):
         :param TokenAction|Enum|Name|str token: See the token_base_name method.
         :rtype: str
         """
+        assert self.prefix is not None, (
+            "Lexer's prefix needs to be set before emission"
+        )
         return "{}{}".format(self.prefix, self.token_base_name(token).upper)
 
     def c_token_name(self, token):

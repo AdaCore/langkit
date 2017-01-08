@@ -344,6 +344,7 @@ class CompileCtx(object):
         self.rules_to_fn_names = {}
 
         self.lexer = lexer
+        self.lexer.prefix = "{}_TKN_".format(self.lang_name.lower.upper())
         ":type: langkit.lexer.Lexer"
 
         self.grammar = grammar
@@ -996,7 +997,8 @@ class CompileCtx(object):
                                    "--no-mode-transition-check",
                                    "--single-mode-analyzer",
                                    "--token-memory-management-by-user",
-                                   "--token-policy", "single"],
+                                   "--token-policy", "single",
+                                   "--token-id-prefix", self.lexer.prefix],
                                   cwd=src_path)
 
         self.cache.save()
