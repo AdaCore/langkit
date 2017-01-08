@@ -339,10 +339,6 @@ class CompileCtx(object):
         :type: bool
         """
 
-        # Mapping: rule name -> Parser instances.
-        # TODO: why do we need this? The grammar already has such a mapping.
-        self.rules_to_fn_names = {}
-
         self.lexer = lexer
         self.lexer.prefix = "{}_TKN_".format(self.lang_name.lower.upper())
         ":type: langkit.lexer.Lexer"
@@ -547,7 +543,7 @@ class CompileCtx(object):
         from langkit.compiled_types import ASTNode
         return sorted(
             name
-            for name, parser in self.rules_to_fn_names.items()
+            for name, parser in self.grammar.rules.items()
             if issubclass(parser.get_type(), ASTNode)
         )
 
@@ -795,7 +791,6 @@ class CompileCtx(object):
             for r_name, r in self.grammar.rules.items():
                 with r.error_context():
                     r.compile()
-                self.rules_to_fn_names[r_name] = r
 
         unresolved_types = set([t for t in self.astnode_types
                                 if not t.is_type_resolved])
