@@ -112,9 +112,6 @@ def gen_name(var_name):
         it needs to be a lower case with underscores string.
     :rtype: names.Name
     """
-    # This function is mostly used to generate temporary variables in parsing
-    # functions. In these places it's more convenient to give lower case names
-    # as it melts fine with the rest of the Python code.
     if isinstance(var_name, basestring):
         var_name = names.Name.from_lower(var_name)
 
