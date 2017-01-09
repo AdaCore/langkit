@@ -21,7 +21,7 @@ with GNATCOLL.Mmap;    use GNATCOLL.Mmap;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 
-% if ctx.symbol_canonicalizer.unit_fqn:
+% if ctx.symbol_canonicalizer:
 with ${ctx.symbol_canonicalizer.unit_fqn};
 % endif
 
