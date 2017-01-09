@@ -79,15 +79,15 @@ package body Langkit_Support.Text is
               (Result,
                "\u"
                & Byte_Image (Unsigned_8 (W / 16#100#))
-               & Byte_Image (Unsigned_8 (W mod 2#100#)));
+               & Byte_Image (Unsigned_8 (W mod 16#100#)));
          else
             Append
               (Result,
                "\U"
                & Byte_Image (Unsigned_8 (W / 16#100_0000#))
-               & Byte_Image (Unsigned_8 (W / 16#1_0000# mod 2#100#))
-               & Byte_Image (Unsigned_8 (W / 16#100# mod 2#100#))
-               & Byte_Image (Unsigned_8 (W mod 2#100#)));
+               & Byte_Image (Unsigned_8 (W / 16#1_0000# mod 16#100#))
+               & Byte_Image (Unsigned_8 (W / 16#100# mod 16#100#))
+               & Byte_Image (Unsigned_8 (W mod 16#100#)));
          end if;
       end loop;
 
