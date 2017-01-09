@@ -224,6 +224,7 @@ class CompileCtx(object):
                  template_lookup_extra_dirs=None,
                  env_hook_subprogram=None,
                  default_unit_file_provider=None,
+                 symbol_canonicalizer=None,
                  documentations=None):
         """Create a new context for code emission.
 
@@ -300,6 +301,17 @@ class CompileCtx(object):
 
             If None, this disables altogether the unit file provider mechanism
             in code generation.
+
+        :param LibraryEntity|None symbol_canonicalizer: If provided, define a
+            subprogram to call in order to canonicazie symbol identifiers. Such
+            a suprogram must have the following signature::
+
+                function Canonicalize (Name : Text_Type) return Text_Type;
+
+            It takes an identifier name and must return the canonical name for
+            it, so that all equivalent symbols have the same canonical name.
+
+            This can be used, for instance, to implement case insensivity.
 
         :param dict[str, str] documentations: If provided, supply templates to
             document entities. These will be added to the documentations
@@ -493,6 +505,7 @@ class CompileCtx(object):
 
         self.env_hook_subprogram = env_hook_subprogram
         self.default_unit_file_provider = default_unit_file_provider
+        self.symbol_canonicalizer = symbol_canonicalizer
 
         docs = dict(langkit.documentation.base_langkit_docs)
         if documentations:

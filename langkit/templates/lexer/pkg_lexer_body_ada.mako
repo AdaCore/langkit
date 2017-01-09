@@ -21,6 +21,10 @@ with GNATCOLL.Mmap;    use GNATCOLL.Mmap;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 
+% if ctx.symbol_canonicalizer.unit_fqn:
+with ${ctx.symbol_canonicalizer.unit_fqn};
+% endif
+
 package body ${_self.ada_api_settings.lib_name}.Lexer is
 
    Quex_Leading_Characters : constant := 2;
@@ -169,7 +173,16 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                lexer.ada_token_name(tok)
                for tok in lexer.token_actions['WithSymbol']
             )} =>
-               Symbol := Find (TDH.Symbols, Bounded_Text);
+               declare
+                  Symbol_Text : constant Text_Type :=
+                     % if ctx.symbol_canonicalizer:
+                        ${ctx.symbol_canonicalizer.fqn} (Bounded_Text);
+                     % else:
+                        Bounded_Text;
+                     % endif
+               begin
+                  Symbol := Find (TDH.Symbols, Symbol_Text);
+               end;
          % endif
 
          % if lexer.token_actions['WithTrivia']:
