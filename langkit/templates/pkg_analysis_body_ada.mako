@@ -833,8 +833,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       end if;
 
       Node.Destroy_Node;
-      for Child of Node.Children loop
-         Destroy (Child);
+      for I in 1 .. Node.Child_Count loop
+         Destroy (Node.Child (I));
       end loop;
    end Destroy;
 
