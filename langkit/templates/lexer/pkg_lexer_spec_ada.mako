@@ -24,13 +24,8 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
       --  Kind for this token
 
       Source_First : Positive;
-      --  Index of the first character of Text for this token. This index is
-      --  relative to the source buffer in the token data handler that owns
-      --  this tocket.
-
-      Length       : Natural;
-      --  Number of code points in the source buffer for this token (i.e.
-      --  length of the corresponding Text_Type slice).
+      Source_Last  : Natural;
+      --  Bounds in the source buffer corresponding to this token
 
       Symbol       : Symbol_Type;
       --  Depending on the token kind (according to the lexer specification),
@@ -71,17 +66,10 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
    function Token_Kind_Name (Token_Id : Token_Kind) return String;
    ${ada_doc('langkit.token_kind_name', 3)}
 
-   function Source_First (T : Token_Data_Type) return Positive is
-     (T.Source_First);
-   function Source_Last (T : Token_Data_Type) return Natural is
-     (T.Source_First + T.Length - 1);
-   --  Return the bounds in T's source buffer for the text corresponding to
-   --  this token.
-
    function Text
      (TDH : Token_Data_Handler;
       T   : Token_Data_Type) return Text_Type
-   is (TDH.Source_Buffer.all (Source_First (T) .. Source_Last (T)));
+   is (TDH.Source_Buffer.all (T.Source_First .. T.Source_Last));
    --  Return the text associated to T, a token that belongs to TDH
 
    function Image

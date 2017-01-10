@@ -1577,8 +1577,8 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    begin
       return (Kind          => Raw_Data.Kind,
               Source_Buffer => Text_Cst_Access (TDH.Source_Buffer),
-              Source_First  => Source_First (Raw_Data),
-              Source_Last   => Source_Last (Raw_Data),
+              Source_First  => Raw_Data.Source_First,
+              Source_Last   => Raw_Data.Source_LAst,
               Sloc_Range    => Raw_Data.Sloc_Range);
    end Convert;
 
@@ -1598,7 +1598,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    function Text (Token : Token_Type) return Text_Type is
       RD : constant Lexer.Token_Data_Type := Raw_Data (Token);
    begin
-      return Token.TDH.Source_Buffer (Source_First (RD) .. Source_Last (RD));
+      return Token.TDH.Source_Buffer (RD.Source_First .. RD.Source_Last);
    end Text;
 
    ----------

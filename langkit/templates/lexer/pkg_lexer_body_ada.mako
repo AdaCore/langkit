@@ -101,15 +101,14 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       Continue              : Boolean := True;
       Last_Token_Was_Trivia : Boolean := False;
 
-      function Text_Index return Positive is
+      function Source_First return Positive is
         (Natural (Token.Offset) + TDH.Source_First - 1);
       --  Index in TDH.Source_Buffer for the first character corresponding to
       --  the current token.
 
-      function Text_Length return Natural is
-        (Natural (Token.Text_Length));
-      --  Shortcut to get the number of code points in Bounded_Text as an
-      --  Unsigned_32.
+      function Source_Last return Natural is
+        (Source_First + Natural (Token.Text_Length) - 1);
+      --  Likewise, for the last character
 
       function Sloc_Range return Source_Location_Range is
         ((Token.Start_Line,
@@ -162,7 +161,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                for tok in lexer.token_actions['WithSymbol']
             )} =>
                declare
-                  Bounded_Text : Text_Type (1 .. Text_Length)
+                  Bounded_Text : Text_Type (1 .. Natural (Token.Text_Length))
                      with Address => Token.Text;
 
                   Symbol_Text  : constant Text_Type :=
@@ -193,8 +192,8 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                     (TDH.Trivias,
                      (Has_Next => False,
                       T        => (Kind         => Token_Id,
-                                   Source_First => Text_Index,
-                                   Length       => Text_Length,
+                                   Source_First => Source_First,
+                                   Source_Last  => Source_Last,
                                    Symbol       => null,
                                    Sloc_Range   => Sloc_Range)));
 
@@ -220,10 +219,10 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
             (Kind         => Token_Id,
              Source_First => (if Token_Id = ${termination}
                               then TDH.Source_Last + 1
-                              else Text_Index),
-             Length       => (if Token_Id = ${termination}
-                              then 0
-                              else Text_Length),
+                              else Source_First),
+             Source_Last  => (if Token_Id = ${termination}
+                              then TDH.Source_Last
+                              else Source_Last),
              Symbol       => Symbol,
              Sloc_Range   => Sloc_Range));
          Prepare_For_Trivia;
