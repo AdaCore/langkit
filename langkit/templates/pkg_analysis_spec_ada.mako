@@ -615,21 +615,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    -- Lexical utilities --
    -----------------------
 
-   type Token_Data_Type is record
-      Kind          : Token_Kind;
-      --  Kind for this token
-
-      Source_Buffer : Text_Cst_Access;
-      --  Text for the original source file
-
-      Source_First  : Positive;
-      Source_Last   : Natural;
-      --  Bounds in Source_Buffer for the text corresponding to this token
-
-      Sloc_Range    : Source_Location_Range;
-      --  Source location range for this token. Note that the end bound is
-      --  exclusive.
-   end record;
+   type Token_Data_Type is private;
 
    function "<" (Left, Right : Token_Type) return Boolean;
    --  Assuming Left and Right belong to the same analysis unit, return whether
@@ -659,6 +645,16 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
 
    function Text (First, Last : Token_Type) return Text_Type;
    ${ada_doc('langkit.token_range_text')}
+
+   function Kind (Token_Data : Token_Data_Type) return Token_Kind
+      with Inline;
+   --  Kind for this tocket
+
+   function Sloc_Range
+     (Token_Data : Token_Data_Type) return Source_Location_Range
+      with Inline;
+   --  Source location range for this token. Note that the end bound is
+   --  exclusive.
 
    function Text
      (Node : access ${root_node_value_type}'Class) return Text_Type;
@@ -1305,6 +1301,21 @@ private
    end record;
 
    No_Token : constant Token_Type := (null, No_Token_Index, No_Token_Index);
+
+   type Token_Data_Type is record
+      Kind          : Token_Kind;
+      --  See documentation for the Kind accessor
+
+      Source_Buffer : Text_Cst_Access;
+      --  Text for the original source file
+
+      Source_First  : Positive;
+      Source_Last   : Natural;
+      --  Bounds in Source_Buffer for the text corresponding to this token
+
+      Sloc_Range    : Source_Location_Range;
+      --  See documenation for the Sloc_Range accessor
+   end record;
 
    function First_Token (TDH : Token_Data_Handler_Access) return Token_Type;
    --  Internal helper. Return a reference to the first token in TDH.

@@ -1616,6 +1616,26 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    end Text;
 
    ----------
+   -- Kind --
+   ----------
+
+   function Kind (Token_Data : Token_Data_Type) return Token_Kind is
+   begin
+      return Token_Data.Kind;
+   end Kind;
+
+   ----------------
+   -- Sloc_Range --
+   ----------------
+
+   function Sloc_Range
+     (Token_Data : Token_Data_Type) return Source_Location_Range
+   is
+   begin
+      return Token_Data.Sloc_Range;
+   end Sloc_Range;
+
+   ----------
    -- Text --
    ----------
 
