@@ -334,8 +334,8 @@
       -- Child_Count --
       -----------------
 
-      overriding function
-        Child_Count (Node : access ${type_name}) return Natural
+      overriding function Child_Count
+        (Node : access ${type_name}) return Natural
       is
          pragma Unreferenced (Node);
       begin
