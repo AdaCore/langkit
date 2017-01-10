@@ -8,12 +8,10 @@ package body Langkit_Support.Token_Data_Handlers is
    -- Initialize --
    ----------------
 
-   procedure Initialize
-     (TDH           : out Token_Data_Handler;
-      Symbols       : Symbol_Table;
-      Source_Buffer : Text_Access := null) is
+   procedure Initialize (TDH : out Token_Data_Handler; Symbols : Symbol_Table)
+   is
    begin
-      TDH := (Source_Buffer     => Source_Buffer,
+      TDH := (Source_Buffer     => null,
               Tokens            => <>,
               Symbols           => Symbols,
               Tokens_To_Trivias => <>,

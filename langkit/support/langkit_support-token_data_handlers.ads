@@ -77,10 +77,7 @@ package Langkit_Support.Token_Data_Handlers is
 
    type Token_Data_Handler_Access is access all Token_Data_Handler;
 
-   procedure Initialize
-     (TDH           : out Token_Data_Handler;
-      Symbols       : Symbol_Table;
-      Source_Buffer : Text_Access := null);
+   procedure Initialize (TDH : out Token_Data_Handler; Symbols : Symbol_Table);
    --  Create a token data handler that is associated with Symbols
 
    procedure Reset
