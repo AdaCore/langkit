@@ -106,10 +106,6 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       --  Shortcut to get the number of code points in Bounded_Text as an
       --  Unsigned_32.
 
-      function Bounded_Text return Text_Type;
-      --  Return a copy of the text in Token.  Do not call this if the token
-      --  has no text associated.
-
       function Sloc_Range return Source_Location_Range is
         ((Token.Start_Line,
           Token.End_Line,
@@ -138,19 +134,6 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
          end if;
       end Prepare_For_Trivia;
 
-      ------------------
-      -- Bounded_Text --
-      ------------------
-
-      function Bounded_Text return Text_Type
-      is
-         Length : constant Natural := Natural (Token.Text_Length);
-         Buffer : Text_Type (1 .. Length);
-         for Buffer'Address use Token.Text;
-      begin
-         return Buffer;
-      end Bounded_Text;
-
    begin
       --  The first entry in the Tokens_To_Trivias map is for leading trivias
       Prepare_For_Trivia;
@@ -174,7 +157,10 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                for tok in lexer.token_actions['WithSymbol']
             )} =>
                declare
-                  Symbol_Text : constant Text_Type :=
+                  Bounded_Text : Text_Type (1 .. Natural (Text_Length))
+                     with Address => Token.Text;
+
+                  Symbol_Text  : constant Text_Type :=
                      % if ctx.symbol_canonicalizer:
                         ${ctx.symbol_canonicalizer.fqn} (Bounded_Text);
                      % else:
