@@ -54,15 +54,17 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
       Decoded_Buffer  : out Text_Access;
-      Length          : out Natural);
+      Source_First    : out Positive;
+      Source_Last     : out Natural);
    --  Allocate a Text_Type buffer, set it to Decoded_Buffer, decode Buffer
-   --  into it using Charset and set Length to the number of decoded characters
-   --  in Decoded_Buffer. It is up to the caller to deallocate Decoded_Buffer
-   --  when done with it.
+   --  into it using Charset and Source_First/Source_Last to the actual slice
+   --  in Decoded_Buffer that hold the input source text. It is up to the
+   --  caller to deallocate Decoded_Buffer when done with it.
    --
    --  Quex quirk: this actually allocates more than the actual buffer to keep
    --  Quex happy. The two first characters are set to null and there is an
-   --  extra null character at the end of the buffer.
+   --  extra null character at the end of the buffer. See the Quex_*_Characters
+   --  constants above.
 
    function Lexer_From_Buffer (Buffer  : System.Address;
                                Length  : Size_T)
@@ -283,27 +285,20 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       With_Trivia     : Boolean)
    is
       Decoded_Buffer : Text_Access;
-      Length         : Natural;
+      Source_First   : Positive;
+      Source_Last    : Natural;
       Lexer          : Lexer_Type;
    begin
-      Decode_Buffer (Buffer, Charset, Read_BOM, Decoded_Buffer, Length);
-      Lexer := Lexer_From_Buffer (Decoded_Buffer.all'Address, size_t (Length));
+      Decode_Buffer
+        (Buffer, Charset, Read_BOM, Decoded_Buffer, Source_First, Source_Last);
+      Lexer := Lexer_From_Buffer
+        (Decoded_Buffer.all'Address,
+         size_t (Source_Last - Source_First + 1));
 
-      --  Preserve a copy of the text buffer in TDH. In the case we are
-      --  reparsing an analysis unit, we want to get rid of the tokens from the
-      --  old one.
+      --  In the case we are reparsing an analysis unit, we want to get rid of
+      --  the tokens from the old one.
 
-      declare
-         Actual_Decoded_Buffer : Text_Type renames Decoded_Buffer
-           (Decoded_Buffer.all'First + Quex_Leading_Characters
-            .. Decoded_Buffer.all'Last - Quex_Trailing_Characters);
-         Rebounded_Buffer : Text_Type (1 .. Actual_Decoded_Buffer'Length)
-            with Address => Actual_Decoded_Buffer'Address;
-
-         New_Buffer : constant Text_Access := new Text_Type'(Rebounded_Buffer);
-      begin
-         Reset (TDH, New_Buffer, New_Buffer'First, New_Buffer'Last);
-      end;
+      Reset (TDH, Decoded_Buffer, Source_First, Source_Last);
 
       if With_Trivia then
          Process_All_Tokens_With_Trivia (Lexer, TDH);
@@ -311,7 +306,6 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
          Process_All_Tokens_No_Trivia (Lexer, TDH);
       end if;
       Free_Lexer (Lexer);
-      Free (Decoded_Buffer);
    end Lex_From_Buffer;
 
    -------------------
@@ -322,7 +316,8 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
       Decoded_Buffer  : out Text_Access;
-      Length          : out Natural)
+      Source_First    : out Positive;
+      Source_Last     : out Natural)
    is
       use GNAT.Byte_Order_Mark;
       use GNATCOLL.Iconv;
@@ -348,12 +343,13 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
    begin
       Decoded_Buffer := Result;
+      Source_First := Result'First + Quex_Leading_Characters;
 
       --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
       --  them here.
 
       if Buffer'Length = 0 then
-         Length := 0;
+         Source_Last := Source_First - 1;
          return;
       end if;
 
@@ -406,6 +402,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
              Buffer, Input_Index,
              Output (Output_Index .. Output'Last), Output_Index,
              Status);
+      Source_Last := (Output_Index - 1 - Output'First) / 4 + Result'First;
 
       --  Raise an error if the input was invalid
 
@@ -441,7 +438,6 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       end;
 
       Iconv_Close (State);
-      Length := (Output_Index - First_Output_Index) / 4;
    end Decode_Buffer;
 
    Token_Kind_Names : constant array (Token_Kind) of String_Access := (
