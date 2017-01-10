@@ -46,6 +46,15 @@ package Langkit_Support.Token_Data_Handlers is
       --  The whole source buffer. It belongs to this token data handler, and
       --  will be deallocated along with it.
 
+      Source_First      : Positive;
+      Source_Last       : Natural;
+      --  Actual bounds in Source_Buffer for the source text.
+      --
+      --  Because of Quex's hackish way of working, Source_Buffer actually has
+      --  extra elements allocated for the lexer to work properly. These
+      --  elements, at the beginning and at the end of Source_Buffer don't
+      --  actually belong to the sources.
+
       Tokens            : Token_Vectors.Vector;
       --  Sequence of tokens in the same order as found in the source file
 
@@ -82,7 +91,9 @@ package Langkit_Support.Token_Data_Handlers is
 
    procedure Reset
      (TDH           : out Token_Data_Handler;
-      Source_Buffer : Text_Access);
+      Source_Buffer : Text_Access;
+      Source_First  : Positive;
+      Source_Last   : Natural);
    --  Free TDH's source buffer, remove all its tokens and associate another
    --  source buffer to it. Unlike Free, this does not deallocate the vectors.
    --

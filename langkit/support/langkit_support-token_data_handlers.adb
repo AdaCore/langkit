@@ -12,6 +12,8 @@ package body Langkit_Support.Token_Data_Handlers is
    is
    begin
       TDH := (Source_Buffer     => null,
+              Source_First      => <>,
+              Source_Last       => <>,
               Tokens            => <>,
               Symbols           => Symbols,
               Tokens_To_Trivias => <>,
@@ -24,10 +26,15 @@ package body Langkit_Support.Token_Data_Handlers is
 
    procedure Reset
      (TDH           : out Token_Data_Handler;
-      Source_Buffer : Text_Access) is
+      Source_Buffer : Text_Access;
+      Source_First  : Positive;
+      Source_Last   : Natural)
+   is
    begin
       Free (TDH.Source_Buffer);
       TDH.Source_Buffer := Source_Buffer;
+      TDH.Source_First := Source_First;
+      TDH.Source_Last := Source_Last;
 
       Clear (TDH.Tokens);
       Clear (TDH.Trivias);

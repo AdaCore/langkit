@@ -101,8 +101,13 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       Continue              : Boolean := True;
       Last_Token_Was_Trivia : Boolean := False;
 
-      function Text_Length return Unsigned_32 is
-        (Unsigned_32 (Token.Text_Length));
+      function Text_Index return Positive is
+        (Natural (Token.Offset) + TDH.Source_First - 1);
+      --  Index in TDH.Source_Buffer for the first character corresponding to
+      --  the current token.
+
+      function Text_Length return Natural is
+        (Natural (Token.Text_Length));
       --  Shortcut to get the number of code points in Bounded_Text as an
       --  Unsigned_32.
 
@@ -157,7 +162,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                for tok in lexer.token_actions['WithSymbol']
             )} =>
                declare
-                  Bounded_Text : Text_Type (1 .. Natural (Text_Length))
+                  Bounded_Text : Text_Type (1 .. Text_Length)
                      with Address => Token.Text;
 
                   Symbol_Text  : constant Text_Type :=
@@ -187,11 +192,11 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                   Append
                     (TDH.Trivias,
                      (Has_Next => False,
-                      T        => (Kind       => Token_Id,
-                                   Offset     => Token.Offset,
-                                   Length     => Text_Length,
-                                   Symbol     => null,
-                                   Sloc_Range => Sloc_Range)));
+                      T        => (Kind         => Token_Id,
+                                   Source_First => Text_Index,
+                                   Length       => Text_Length,
+                                   Symbol       => null,
+                                   Sloc_Range   => Sloc_Range)));
 
                   Last_Token_Was_Trivia := True;
                end if;
@@ -212,15 +217,15 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
          Append
            (TDH.Tokens,
-            (Kind       => Token_Id,
-             Offset     => (if Token_Id = ${termination}
-                            then Unsigned_32 (TDH.Source_Buffer.all'Last + 1)
-                            else Token.Offset),
-             Length     => (if Token_Id = ${termination}
-                            then 0
-                            else Text_Length),
-             Symbol     => Symbol,
-             Sloc_Range => Sloc_Range));
+            (Kind         => Token_Id,
+             Source_First => (if Token_Id = ${termination}
+                              then TDH.Source_Last + 1
+                              else Text_Index),
+             Length       => (if Token_Id = ${termination}
+                              then 0
+                              else Text_Length),
+             Symbol       => Symbol,
+             Sloc_Range   => Sloc_Range));
          Prepare_For_Trivia;
 
       % if lexer.token_actions['WithTrivia']:
@@ -295,8 +300,10 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
             .. Decoded_Buffer.all'Last - Quex_Trailing_Characters);
          Rebounded_Buffer : Text_Type (1 .. Actual_Decoded_Buffer'Length)
             with Address => Actual_Decoded_Buffer'Address;
+
+         New_Buffer : constant Text_Access := new Text_Type'(Rebounded_Buffer);
       begin
-         Reset (TDH, new Text_Type'(Rebounded_Buffer));
+         Reset (TDH, New_Buffer, New_Buffer'First, New_Buffer'Last);
       end;
 
       if With_Trivia then

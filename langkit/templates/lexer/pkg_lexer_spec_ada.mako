@@ -1,7 +1,5 @@
 ## vim: filetype=makoada
 
-with Interfaces;          use Interfaces;
-
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
@@ -22,24 +20,25 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
    );
 
    type Token_Data_Type is record
-      Kind       : Token_Kind;
+      Kind         : Token_Kind;
       --  Kind for this token
 
-      Offset     : Unsigned_32;
-      --  Offset of Text in the source buffer associated with the token data
-      --  handler that owns this token. This offset is 1-based.
+      Source_First : Positive;
+      --  Index of the first character of Text for this token. This index is
+      --  relative to the source buffer in the token data handler that owns
+      --  this tocket.
 
-      Length     : Unsigned_32;
+      Length       : Natural;
       --  Number of code points in the source buffer for this token (i.e.
       --  length of the corresponding Text_Type slice).
 
-      Symbol     : Symbol_Type;
+      Symbol       : Symbol_Type;
       --  Depending on the token kind (according to the lexer specification),
       --  this is either null or the symbolization of the token text.
       --
       --  For instance: null for keywords but actual text for identifiers.
 
-      Sloc_Range : Source_Location_Range;
+      Sloc_Range   : Source_Location_Range;
       --  Source location range for this token. Note that the end bound is
       --  exclusive.
    end record;
@@ -73,9 +72,9 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
    ${ada_doc('langkit.token_kind_name', 3)}
 
    function Source_First (T : Token_Data_Type) return Positive is
-     (Positive (T.Offset));
+     (T.Source_First);
    function Source_Last (T : Token_Data_Type) return Natural is
-     (Natural (T.Offset + T.Length - 1));
+     (T.Source_First + T.Length - 1);
    --  Return the bounds in T's source buffer for the text corresponding to
    --  this token.
 
