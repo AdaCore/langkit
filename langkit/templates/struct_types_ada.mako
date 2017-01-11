@@ -23,7 +23,12 @@
        ${ada_doc(f, 6)}
       % endfor
       ${exts.include_extension(ext)}
+      % if cls.is_env_metadata:
+      ## Env_Metadata is never null
+      Is_Null : Boolean := False;
+      % else:
       Is_Null : Boolean := True;
+      % endif
    end record
      with Convention => C;
    ${cls.nullexpr()} : constant ${cls.name()} := (others => <>);

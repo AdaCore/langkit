@@ -1444,6 +1444,7 @@ def env_metadata(cls):
     StructMetaclass.env_metadata = cls
 
     cls.__name__ = "Metadata"  # Every metadata class should be named metadata
+    cls.is_env_metadata = True
 
     assert issubclass(cls, Struct), (
         "The type chosen to be environment metadata must be a struct type"
@@ -1535,6 +1536,11 @@ class Struct(CompiledType):
     __metaclass__ = StructMetaclass
     is_ptr = False
     null_allowed = True
+
+    is_env_metadata = False
+    """
+    Whether this struct designates the env metadata struct.
+    """
 
     @classmethod
     @memoized
