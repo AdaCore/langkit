@@ -85,15 +85,25 @@ package Langkit_Support.Lexical_Env is
    function Dyn_Env_Getter
      (Fn : Getter_Fn_T; State : Getter_State_T) return Env_Getter;
 
+   type Env_Rebinding is record
+      Old_Env, New_Env : Env_Getter;
+   end record;
+
+   type Env_Rebindings_Array is array (Positive range <>) of Env_Rebinding;
+
+   type Env_Rebindings (Size : Positive) is record
+      Rebindings : Env_Rebindings_Array (1 .. Size);
+   end record;
 
    ----------------------
    -- Env_Element Type --
    ----------------------
 
    type Env_Element is record
-      El      : Element_T;
-      MD      : Element_Metadata;
-      Is_Null : Boolean := False;
+      El               : Element_T;
+      MD               : Element_Metadata;
+      Parents_Bindings : Env_Rebindings (4);
+      Is_Null          : Boolean := False;
    end record;
    --  Wrapper structure to contain both the 'real' env element that the user
    --  wanted to store, and its associated metadata.
