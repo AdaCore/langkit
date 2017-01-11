@@ -1,8 +1,19 @@
-from langkit.compiled_types import AnalysisUnitType, T
+from langkit import names
+from langkit.compiled_types import AnalysisUnitKind, AnalysisUnitType, T
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    FieldAccessExpr, PropertyDef, ResolvedExpression, auto_attr, construct,
-    render
+    AbstractVariable, FieldAccessExpr, PropertyDef, ResolvedExpression,
+    auto_attr, construct, render
+)
+
+
+UnitSpecification = AbstractVariable(
+    names.Name('Unit_Specification'),
+    type=AnalysisUnitKind
+)
+UnitBody = AbstractVariable(
+    names.Name('Unit_Body'),
+    type=AnalysisUnitKind
 )
 
 
