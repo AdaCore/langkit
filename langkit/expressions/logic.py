@@ -135,13 +135,16 @@ class Bind(AbstractExpression):
                 "a logic variable or an ASTNode, got {}".format(expr.type)
             )
 
-            # Cast the ast node type if necessary
-            if expr.type.matches(T.root_node) and expr.type != T.root_node:
-                expr = Cast.Expr(expr, T.root_node)
+            if expr.type.matches(T.root_node.env_element()):
+                if expr.type is not T.root_node.env_element():
+                    expr = Cast.Expr(expr, T.root_node.env_element())
+            elif expr.type.matches(T.root_node):
+                # Cast the ast node type if necessary
+                if expr.type is not T.root_node:
+                    expr = Cast.Expr(expr, T.root_node)
 
-            # If the expression is a root node, implicitly construct an
-            # env_element from it.
-            if expr.type.matches(T.root_node):
+                # If the expression is a root node, implicitly construct an
+                # env_element from it.
                 expr = New.StructExpr(T.root_node.env_element(), {
                     Name('El'): expr,
                     Name('MD'): LiteralExpr('<>', None)
