@@ -1466,24 +1466,30 @@ class PropertyDef(AbstractNodeData):
 
             # Wrap the expression in a Let block, so that the user can
             # declare local variables via the Var helper.
-            if self.abstract:
-                self.expr = None
-            else:
-                with self.bind():
-                    function_block = Block()
-                    with Block.set_block(function_block):
-                        fn = assert_type(self.expr, types.FunctionType)
+            with self.bind():
+                function_block = Block()
+                with Block.set_block(function_block):
+                    fn = assert_type(self.expr, types.FunctionType)
+                    expr = fn(*self.argument_vars)
+                    if expr is None:
+                        check_source_language(
+                            self.external or self.abstract,
+                            'Unless a property is external or abstract, it'
+                            ' must have an expression'
+                        )
+                        self.expr = None
+                    else:
                         expr = check_type(
-                            unsugar(fn(*self.argument_vars)),
-                            AbstractExpression,
-                            "Properties return value should be an expression"
+                            unsugar(expr), AbstractExpression,
+                            'Properties return value should be an'
+                            ' expression'
                         )
                         function_block.expr = expr
                         self.expr = function_block
         elif not(callable(self.expr)):
             self.expr = unsugar(self.expr)
 
-        if not self.abstract:
+        if self.expr:
             with self.bind():
                 self.expr = self.expr.prepare() or self.expr
 
@@ -1868,7 +1874,7 @@ class AbstractKind(Enum):
 
 def langkit_property(private=None, return_type=None,
                      kind=AbstractKind.concrete, has_implicit_env=None,
-                     memoized=False):
+                     memoized=False, external=False):
     """
     Decorator to create properties from real python methods. See Property for
     more details.
@@ -1886,7 +1892,9 @@ def langkit_property(private=None, return_type=None,
             abstract=kind in [AbstractKind.abstract,
                               AbstractKind.abstract_runtime_check],
             abstract_runtime_check=kind == AbstractKind.abstract_runtime_check,
-            has_implicit_env=has_implicit_env, memoized=memoized
+            has_implicit_env=has_implicit_env,
+            memoized=memoized,
+            external=external,
         )
     return decorator
 
