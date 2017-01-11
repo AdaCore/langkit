@@ -49,7 +49,13 @@
               , Self.Env
            % endif
          )),
-         MD => From.MD,
+         ## We don't propagate metadata for the moment in conversion, because
+         ## attributes of the original entity don't necessarily propagate to the
+         ## new entity.
+         ## TODO: It will be necessary to allow the user to pass along
+         ## metadata, all or some, at some point. Not clear yet how this should
+         ## work, so keeping that for later.
+         MD => No_Metadata,
          Is_Null => From.Is_Null
          );
    end Convert;
