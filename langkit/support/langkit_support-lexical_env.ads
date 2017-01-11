@@ -59,14 +59,23 @@ package Langkit_Support.Lexical_Env is
    -- Env_Getter --
    ----------------
 
-   type Env_Getter is private;
-   --  This type represents a link to an env. It can be either a simple link
-   --  (just a pointer) or a dynamic link (a function that recomputes the link
-   --  when needed).
-
    type Getter_Fn_T is access
      function (Self : Getter_State_T) return Lexical_Env;
 
+   type Env_Getter (Dynamic : Boolean := False) is record
+      case Dynamic is
+         when True =>
+            Getter_State : Getter_State_T;
+            Getter_Fn    : Getter_Fn_T;
+         when False =>
+            Env : Lexical_Env;
+      end case;
+   end record;
+
+   No_Env_Getter : constant Env_Getter := (False, null);
+   --  This type represents a link to an env. It can be either a simple link
+   --  (just a pointer) or a dynamic link (a function that recomputes the link
+   --  when needed).
    function Get_Env (Self : Env_Getter) return Lexical_Env;
    --  Returns the environment associated to the Self env getter
 
@@ -76,7 +85,6 @@ package Langkit_Support.Lexical_Env is
    function Dyn_Env_Getter
      (Fn : Getter_Fn_T; State : Getter_State_T) return Env_Getter;
 
-   No_Env_Getter : constant Env_Getter;
 
    ----------------------
    -- Env_Element Type --
@@ -262,18 +270,6 @@ package Langkit_Support.Lexical_Env is
    --  otherwise.
 
 private
-
-   type Env_Getter (Dynamic : Boolean := False) is record
-      case Dynamic is
-         when True =>
-            Getter_State : Getter_State_T;
-            Getter_Fn    : Getter_Fn_T;
-         when False =>
-            Env : Lexical_Env;
-      end case;
-   end record;
-
-   No_Env_Getter : constant Env_Getter := (False, null);
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Type :=
