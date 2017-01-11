@@ -1176,7 +1176,7 @@ class PropertyDef(AbstractNodeData):
         super(PropertyDef, self).__init__(name=name, private=private)
 
         self.in_type = False
-        "Recursion guard for the type property"
+        "Recursion guard for the construct pass"
 
         self.logic_predicates = []
         """
@@ -1336,23 +1336,11 @@ class PropertyDef(AbstractNodeData):
         if self.expected_type:
             return resolve_type(self.expected_type)
 
-        check_source_language(
-            not self.in_type,
-            'Recursion loop in type inference for property {}. Try to '
-            'specify its return type explicitly.'.format(self.qualname)
-        )
+        # If the expr has not yet been constructed, try to construct it
+        if not self.constructed_expr:
+            self.construct_and_type_expression()
 
-        self.in_type = True
-        try:
-            # If the expr has not yet been constructed, try to construct it
-            if not self.constructed_expr:
-                self.construct_and_type_expression()
-
-            ret = self.constructed_expr.type
-        finally:
-            self.in_type = False
-
-        return resolve_type(ret)
+        return resolve_type(self.constructed_expr.type)
 
     def _add_argument(self, name, type, default_value=None):
         """
@@ -1659,6 +1647,12 @@ class PropertyDef(AbstractNodeData):
 
         base_prop = self.base_property()
 
+        check_source_language(
+            not self.in_type,
+            'Recursion loop in type inference for property {}. Try to '
+            'specify its return type explicitly.'.format(self.qualname)
+        )
+
         # If we don't have an expression, this have to be an abstract/external
         # property. In this case, try to get the type from the base property.
         if self.expr is None:
@@ -1683,9 +1677,13 @@ class PropertyDef(AbstractNodeData):
             # Reset the Env binding so that this construction does not use a
             # caller's binding.
             with Env.bind_default(self):
-                self.constructed_expr = construct(self.expr,
-                                                  self.expected_type,
-                                                  message)
+                self.in_type = True
+                try:
+                    self.constructed_expr = construct(self.expr,
+                                                      self.expected_type,
+                                                      message)
+                finally:
+                    self.in_type = False
 
         # Make sure that all the created local variables are associated to a
         # scope.
