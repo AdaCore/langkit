@@ -1,6 +1,6 @@
 from langkit import names
 from langkit.compiled_types import (
-    ASTNode, BoolType, LexicalEnvType, LongType, Struct, EquationType
+    ASTNode, BoolType, EquationType, LexicalEnvType, LongType, Struct, Symbol
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
@@ -404,6 +404,8 @@ class Then(AbstractExpression):
                 ))
             elif then_expr.type.matches(LexicalEnvType):
                 default_expr = construct(EmptyEnv)
+            elif then_expr.type.matches(Symbol):
+                default_expr = LiteralExpr(Symbol.nullexpr(), Symbol)
             else:
                 # The following is not actually used but PyCharm's typer
                 # requires it.
