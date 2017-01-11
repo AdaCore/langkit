@@ -45,6 +45,40 @@ generic
 package Langkit_Support.Lexical_Env is
 
    ----------------------
+   -- Lexical_Env Type --
+   ----------------------
+
+   type Lexical_Env_Type;
+   --  Value type for lexical envs
+
+   type Lexical_Env is access all Lexical_Env_Type;
+   --  Pointer type for lexical environments. This is the type that shall be
+   --  used.
+
+   ----------------
+   -- Env_Getter --
+   ----------------
+
+   type Env_Getter is private;
+   --  This type represents a link to an env. It can be either a simple link
+   --  (just a pointer) or a dynamic link (a function that recomputes the link
+   --  when needed).
+
+   type Getter_Fn_T is access
+     function (Self : Getter_State_T) return Lexical_Env;
+
+   function Get_Env (Self : Env_Getter) return Lexical_Env;
+   --  Returns the environment associated to the Self env getter
+
+   function Simple_Env_Getter (E : Lexical_Env) return Env_Getter;
+   --  Constructs an env getter of the simple variety - pointer to env
+
+   function Dyn_Env_Getter
+     (Fn : Getter_Fn_T; State : Getter_State_T) return Env_Getter;
+
+   No_Env_Getter : constant Env_Getter;
+
+   ----------------------
    -- Env_Element Type --
    ----------------------
 
@@ -80,36 +114,6 @@ package Langkit_Support.Lexical_Env is
    function Unwrap
      (Els : Env_Element_Array) return Element_Array;
    --  Get and array of unwrapped elements from an array of wrapped elements
-
-   ----------------------
-   -- Lexical_Env Type --
-   ----------------------
-
-   type Lexical_Env_Type;
-   --  Value type for lexical envs
-
-   type Lexical_Env is access all Lexical_Env_Type;
-   --  Pointer type for lexical environments. This is the type that shall be
-   --  used.
-
-   type Env_Getter is private;
-   --  This type represents a link to an env. It can be either a simple link
-   --  (just a pointer) or a dynamic link (a function that recomputes the link
-   --  when needed).
-
-   type Getter_Fn_T is access
-     function (Self : Getter_State_T) return Lexical_Env;
-
-   function Get_Env (Self : Env_Getter) return Lexical_Env;
-   --  Returns the environment associated to the Self env getter
-
-   function Simple_Env_Getter (E : Lexical_Env) return Env_Getter;
-   --  Constructs an env getter of the simple variety - pointer to env
-
-   function Dyn_Env_Getter
-     (Fn : Getter_Fn_T; State : Getter_State_T) return Env_Getter;
-
-   No_Env_Getter : constant Env_Getter;
 
    type Referenced_Env is record
       From_Node : Element_T;
