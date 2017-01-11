@@ -801,7 +801,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    end Reset_Property_Caches;
 
    ${array_types.body(LexicalEnvType.array_type())}
-   ${array_types.body(T.root_node.env_element().array_type())}
+   ${array_types.body(T.root_node.env_el().array_type())}
    ${array_types.body(root_node_array)}
 
    function Child_Number

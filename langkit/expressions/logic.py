@@ -129,15 +129,15 @@ class Bind(AbstractExpression):
 
                 expr.type == LogicVarType
                 or expr.type.matches(T.root_node)
-                or expr.type.matches(T.root_node.env_element()),
+                or expr.type.matches(T.root_node.env_el()),
 
                 "Operands to a logic bind operator should be either "
                 "a logic variable or an ASTNode, got {}".format(expr.type)
             )
 
-            if expr.type.matches(T.root_node.env_element()):
-                if expr.type is not T.root_node.env_element():
-                    expr = Cast.Expr(expr, T.root_node.env_element())
+            if expr.type.matches(T.root_node.env_el()):
+                if expr.type is not T.root_node.env_el():
+                    expr = Cast.Expr(expr, T.root_node.env_el())
             elif expr.type.matches(T.root_node):
                 # Cast the ast node type if necessary
                 if expr.type is not T.root_node:
@@ -145,7 +145,7 @@ class Bind(AbstractExpression):
 
                 # If the expression is a root node, implicitly construct an
                 # env_element from it.
-                expr = New.StructExpr(T.root_node.env_element(), {
+                expr = New.StructExpr(T.root_node.env_el(), {
                     Name('El'): expr,
                     Name('MD'): LiteralExpr('<>', None)
                 })
@@ -389,7 +389,7 @@ def get_value(logic_var):
         extract the value.
     """
     return BuiltinCallExpr(
-        "Eq_Node.Refs.GetL", T.root_node.env_element(),
+        "Eq_Node.Refs.GetL", T.root_node.env_el(),
         [construct(logic_var, LogicVarType)]
     )
 

@@ -137,7 +137,7 @@ def make_renderer(base_renderer=None):
                     capi,
                     'unit_file_provider_get_file_from_name_callback'
                 ).name,
-            'env_element_type':      T.root_node.env_element().c_type(capi),
+            'env_element_type':      T.root_node.env_el().c_type(capi),
             'token_kind':            CAPIType(capi, 'token_kind').name,
             'token_type':            CAPIType(capi, 'token').name,
             'sloc_type':             CAPIType(capi, 'source_location').name,
@@ -1568,7 +1568,7 @@ class Struct(CompiledType):
 
             # The root node's env_element is not emitted per se, because it is
             # a generic instantiation from Langkit_Support.Lexical_Env.
-            StructMetaclass.root_grammar_class.env_element()
+            StructMetaclass.root_grammar_class.env_el()
         )
 
     @classmethod
@@ -2064,7 +2064,7 @@ class ASTNode(Struct):
 
     @classmethod
     @memoized
-    def env_element(cls):
+    def env_el(cls):
         """
         Denotes the type returned by doing a get operation on a lexical
         environment. This is a wrapper containing the ast node stored as a
@@ -2444,13 +2444,13 @@ class TypeRepo(object):
             """
             return TypeRepo.Defer(lambda: self.get().list_type())
 
-        def env_element(self):
+        def env_el(self):
             """
-            Proxy to the Struct.env_element classmethod.
+            Proxy to the Struct.env_el classmethod.
 
             :rtype: CompiledType
             """
-            return TypeRepo.Defer(lambda: self.get().env_element())
+            return TypeRepo.Defer(lambda: self.get().env_el())
 
     def __getattr__(self, type_name):
         """
@@ -2488,7 +2488,7 @@ class TypeRepo(object):
         semantic information attached. Currently, this is an env_element
         containing a root_node.
         """
-        return self.root_node.env_element()
+        return self.root_node.env_el()
 
     # noinspection PyPep8Naming
     @property

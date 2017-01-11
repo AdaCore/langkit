@@ -358,7 +358,7 @@ extern ${node_type}
 ${capi.get_name('lexical_env_node')}(${lexical_env_type} env);
 
 ${c_doc('langkit.lexical_env_get')}
-extern ${T.root_node.env_element().array_type().c_type(capi).name}
+extern ${T.root_node.env_el().array_type().c_type(capi).name}
 ${capi.get_name('lexical_env_get')}(${lexical_env_type} env,
                                     ${text_type} name);
 

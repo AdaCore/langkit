@@ -127,11 +127,11 @@ def env_get(env_expr, token_expr, resolve_unique=False, sequential=False):
 
     if resolve_unique:
         return make_expr("Get ({}, 0)".format(array_expr),
-                         T.root_node.env_element())
+                         T.root_node.env_el())
     else:
-        T.root_node.env_element().array_type().add_to_context()
+        T.root_node.env_el().array_type().add_to_context()
         return make_expr("Create ({})".format(array_expr),
-                         T.root_node.env_element().array_type())
+                         T.root_node.env_el().array_type())
 
 
 class EnvBindExpr(ResolvedExpression):

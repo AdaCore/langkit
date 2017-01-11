@@ -568,7 +568,7 @@ class CompileCtx(object):
 
         # Get the list of ASTNode types from the Struct metaclass
         from langkit.compiled_types import LexicalEnvType, StructMetaclass
-        env_element = StructMetaclass.root_grammar_class.env_element()
+        env_element = StructMetaclass.root_grammar_class.env_el()
 
         self.astnode_types = list(StructMetaclass.astnode_types)
 
@@ -748,7 +748,7 @@ class CompileCtx(object):
             # that matter) and raising an error if some code tries to add to it
             # after the freeze point.
         else:
-            env_element = StructMetaclass.root_grammar_class.env_element()
+            env_element = StructMetaclass.root_grammar_class.env_el()
             self._struct_types = [
                 t for t in StructMetaclass.struct_types
                 if t not in [StructMetaclass.env_metadata, env_element]

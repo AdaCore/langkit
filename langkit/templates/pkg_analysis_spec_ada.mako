@@ -321,7 +321,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    ${array_types.public_decl(LexicalEnvType.array_type())}
 
    ## See ASTNode.env_element
-   ${array_types.public_decl(T.root_node.env_element().array_type())}
+   ${array_types.public_decl(T.root_node.env_el().array_type())}
 
    ## Declare arrays of root nodes here since some primitives rely on it and
    ## since the declarations require AST_Envs.
@@ -1185,7 +1185,7 @@ private
    --  Implementation helper to free the extensions associatde to Node
 
    ${array_types.private_decl(LexicalEnvType.array_type())}
-   ${array_types.private_decl(T.root_node.env_element().array_type())}
+   ${array_types.private_decl(T.root_node.env_el().array_type())}
    ${array_types.private_decl(root_node_array)}
 
    function Pre_Env_Actions

@@ -83,7 +83,7 @@ class Cast(AbstractExpression):
 
         check_source_language(
             self.dest_type.matches(ASTNode)
-            or self.dest_type.matches(T.root_node.env_element()),
+            or self.dest_type.matches(T.root_node.env_el()),
             "One can only cast to an ASTNode subtype or to an env_element"
         )
 

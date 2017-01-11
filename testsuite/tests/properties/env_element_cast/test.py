@@ -30,11 +30,11 @@ class Literal(FooNode):
     tok = Field()
 
     a = AbstractProperty(
-        runtime_check=True, type=FooNode.env_element()
+        runtime_check=True, type=FooNode.env_el()
     )
 
     b = Property(
-        Self.a.cast(BarNode.env_element())
+        Self.a.cast(BarNode.env_el())
     )
 
 
