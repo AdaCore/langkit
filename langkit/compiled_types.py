@@ -80,6 +80,7 @@ def make_renderer(base_renderer=None):
         'is_long':          type_check(LongType),
         'is_bool':          type_check(BoolType),
         'is_analysis_unit': type_check(AnalysisUnitType),
+        'is_analysis_kind': type_check(AnalysisUnitKind),
         'is_ast_node':      type_check(ASTNode),
         'is_sloc_range':    type_check(SourceLocationRangeType),
         'is_token_type':    type_check(Token),
@@ -122,7 +123,7 @@ def make_renderer(base_renderer=None):
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             c_node_type(capi).name,
             'lexical_env_type':      CAPIType(capi, 'lexical_env').name,
-            'unit_kind_type':        CAPIType(capi, 'unit_kind').name,
+            'unit_kind_type':        AnalysisUnitKind.c_type(capi).name,
             'unit_file_provider_type':
                 CAPIType(capi, 'unit_file_provider').name,
             'unit_file_provider_destroy_type':
@@ -497,6 +498,15 @@ class AnalysisUnitType(BasicType):
     @classmethod
     def c_type(cls, c_api_settings):
         return CAPIType(c_api_settings, 'analysis_unit')
+
+
+class AnalysisUnitKind(BasicType):
+    _name = 'Unit_Kind'
+    is_ptr = False
+
+    @classmethod
+    def c_type(cls, c_api_settings):
+        return CAPIType(c_api_settings, 'unit_kind')
 
 
 class LexicalEnvType(BasicType):

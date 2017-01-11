@@ -122,6 +122,17 @@ str_to_unit_kind = {
     'specification': 0,
     'body': 1,
 }
+unit_kind_to_str = {c_val: py_val
+                    for py_val, c_val in str_to_unit_kind.items()}
+
+
+def _unwrap_unit_kind(kind):
+    """
+    Given a string representing an analysis unit kind in the Python API, return
+    the corresponding C API value.
+    """
+    return _unwrap_enum(kind, 'analysis unit kind', str_to_unit_kind)
+
 
 class _unit_file_provider(ctypes.c_void_p):
     pass
@@ -223,7 +234,7 @@ class AnalysisContext(object):
                           with_trivia=False):
         ${py_doc('langkit.get_unit_from_provider', 8)}
         _name = _text.unwrap(name)
-        _kind = _unwrap_enum(kind, 'unit_kind', str_to_unit_kind)
+        _kind = _unwrap_unit_kind(kind)
         c_value = _get_analysis_unit_from_provider(self._c_value, _name, _kind,
                                                    charset or '', reparse,
                                                    with_trivia)
