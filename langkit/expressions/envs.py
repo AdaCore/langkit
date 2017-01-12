@@ -3,13 +3,13 @@ from functools import partial
 
 from langkit import names
 from langkit.compiled_types import (
-    BoolType, LexicalEnvType, T, Token
+    BoolType, LexicalEnvType, Symbol, T, Token
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr,
-    BuiltinCallExpr, PropertyDef, ResolvedExpression, Self, auto_attr,
-    auto_attr_custom, construct
+    BuiltinCallExpr, GetSymbol, PropertyDef, ResolvedExpression, Self,
+    auto_attr, auto_attr_custom, construct
 )
 
 
@@ -112,15 +112,23 @@ def env_get(env_expr, token_expr, resolve_unique=False, sequential=False):
     :param bool sequential: Whether resolution needs to be sequential or not.
     """
 
+    if isinstance(token_expr, AbstractExpression):
+        symbol_expr = GetSymbol(token_expr)
+    else:
+        check_source_language(
+            False,
+            'Invalid key argument for Env.get: {}'.format(repr(token_expr))
+        )
+
     sub_exprs = [construct(env_expr, LexicalEnvType),
-                 construct(token_expr, Token)]
+                 construct(symbol_expr, Symbol)]
 
     if sequential:
         # Pass the From parameter if the user wants sequential semantics
-        array_expr = 'AST_Envs.Get ({}, Get_Symbol ({}), {})'
+        array_expr = 'AST_Envs.Get ({}, {}, {})'
         sub_exprs.append(construct(Self, T.root_node))
     else:
-        array_expr = 'AST_Envs.Get ({}, Get_Symbol ({}))'
+        array_expr = 'AST_Envs.Get ({}, {})'
 
     make_expr = partial(BasicExpr, result_var_name="Env_Get_Result",
                         sub_exprs=sub_exprs)
