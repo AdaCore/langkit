@@ -7,7 +7,7 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr,
+    AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr, BoolType,
     BuiltinCallExpr, GetSymbol, PropertyDef, ResolvedExpression, Self,
     SymbolLiteral, auto_attr, auto_attr_custom, construct
 )
@@ -97,7 +97,8 @@ class EnvVariable(AbstractVariable):
 @auto_attr_custom("get")
 @auto_attr_custom("get_sequential", sequential=True)
 @auto_attr_custom("resolve_unique", resolve_unique=True)
-def env_get(env_expr, token_expr, resolve_unique=False, sequential=False):
+def env_get(env_expr, token_expr, resolve_unique=False, sequential=False,
+            recursive=True):
     """
     Expression for lexical environment get operation.
 
@@ -110,6 +111,8 @@ def env_get(env_expr, token_expr, resolve_unique=False, sequential=False):
         result is available. The implementation will just take the first
         result.
     :param bool sequential: Whether resolution needs to be sequential or not.
+    :param bool recursive: Whether lookup must be performed recursively on
+        parent environments.
     """
 
     if isinstance(token_expr, AbstractExpression):
@@ -127,10 +130,15 @@ def env_get(env_expr, token_expr, resolve_unique=False, sequential=False):
 
     if sequential:
         # Pass the From parameter if the user wants sequential semantics
-        array_expr = 'AST_Envs.Get (Self => {}, Key => {}, From => {})'
+        array_expr = ('AST_Envs.Get'
+                      '  (Self      => {},'
+                      '   Key => {},'
+                      '   From => {},'
+                      '   Recursive => {})')
         sub_exprs.append(construct(Self, T.root_node))
     else:
-        array_expr = 'AST_Envs.Get (Self => {}, Key => {})'
+        array_expr = 'AST_Envs.Get (Self => {}, Key => {}, Recursive => {})'
+    sub_exprs.append(construct(recursive, BoolType))
 
     make_expr = partial(BasicExpr, result_var_name="Env_Get_Result",
                         sub_exprs=sub_exprs)
