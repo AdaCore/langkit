@@ -7,9 +7,9 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractVariable, AbstractExpression, ArrayExpr, BuiltinCallExpr,
-    ResolvedExpression, construct, PropertyDef, BasicExpr, auto_attr, Self,
-    auto_attr_custom
+    AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr,
+    BuiltinCallExpr, PropertyDef, ResolvedExpression, Self, auto_attr,
+    auto_attr_custom, construct
 )
 
 
