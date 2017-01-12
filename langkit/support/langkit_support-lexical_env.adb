@@ -236,9 +236,10 @@ package body Langkit_Support.Lexical_Env is
    function Get
      (Self : Lexical_Env;
       Key  : Symbol_Type;
-      From : Element_T := No_Element) return Element_Array is
+      From : Element_T := No_Element;
+      From_Refd_Env : Boolean := False) return Element_Array is
    begin
-      return Unwrap (Get (Self, Key, From));
+      return Unwrap (Get (Self, Key, From, From_Refd_Env));
    end Get;
 
    -----------

@@ -210,9 +210,10 @@ package Langkit_Support.Lexical_Env is
    --  point of the request needs to be *after* Referenced_From in the file.
 
    function Get
-     (Self : Lexical_Env;
-      Key  : Symbol_Type;
-      From : Element_T := No_Element) return Element_Array;
+     (Self          : Lexical_Env;
+      Key           : Symbol_Type;
+      From          : Element_T := No_Element;
+      From_Refd_Env : Boolean := False) return Element_Array;
    --  Get the array of unwrapped elements for this key. If From is given, then
    --  elements will be filtered according to the Can_Reach primitive given
    --  as parameter for the generic package.
