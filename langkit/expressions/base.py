@@ -9,6 +9,7 @@ from enum import Enum
 import funcy
 
 from langkit import names
+from langkit.common import string_repr
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNode, BoolType, CompiledType,
     LexicalEnvType, LongType, Symbol, Token, render as ct_render, resolve_type,
@@ -865,6 +866,26 @@ class GetSymbol(AbstractExpression):
         """
         token = construct(self.token_expr, Token)
         return BuiltinCallExpr("Get_Symbol", Symbol, [token])
+
+
+class SymbolLiteral(AbstractExpression):
+    """
+    Abstract expression that returns a symbol from a string literal.
+    """
+
+    def __init__(self, name):
+        """
+        :type name: str
+        """
+        super(SymbolLiteral, self).__init__()
+        self.name = name
+
+    def construct(self):
+        return BasicExpr(
+            'Find (Self.Unit.TDH.Symbols, {})',
+            Symbol,
+            [string_repr(self.name)]
+        )
 
 
 class Let(AbstractExpression):
