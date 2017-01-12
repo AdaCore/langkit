@@ -117,8 +117,6 @@ package Langkit_Support.Lexical_Env is
 
       Env       : Lexical_Env;
       --  The referenced env
-
-      Transitive : Boolean := False;
    end record;
    --  Represents a referenced env
 
@@ -152,6 +150,9 @@ package Langkit_Support.Lexical_Env is
       --  Node for which this environment was created
 
       Referenced_Envs : Referenced_Envs_Vectors.Vector;
+      --  A list of environments referenced by this environment
+
+      Transitive_Referenced_Envs : Referenced_Envs_Vectors.Vector;
       --  A list of environments referenced by this environment
 
       Env             : Internal_Map := null;
@@ -213,21 +214,18 @@ package Langkit_Support.Lexical_Env is
      (Self          : Lexical_Env;
       Key           : Symbol_Type;
       From          : Element_T := No_Element;
-      From_Refd_Env : Boolean := False;
       Recursive     : Boolean := True) return Element_Array;
    --  Get the array of unwrapped elements for this Key. If From is given, then
    --  elements will be filtered according to the Can_Reach primitive given
    --  as parameter for the generic package.
    --
-   --  If From_Refd_Env, look for Key in all the referenced environments as
-   --  well. If Recursive, look for Key in all Self's parents as well.
-   --  Otherwise, limit the search to Self.
+   --  If Recursive, look for Key in all Self's parents as well, and in
+   --  referenced envs. Otherwise, limit the search to Self.
 
    function Get
      (Self          : Lexical_Env;
       Key           : Symbol_Type;
       From          : Element_T := No_Element;
-      From_Refd_Env : Boolean := False;
       Recursive     : Boolean := True) return Env_Element_Array;
    --  Get the array of wrapped elements for this key. See above for formal
    --  semantics.
@@ -275,12 +273,13 @@ private
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Type :=
-     (Parent          => No_Env_Getter,
-      Node            => No_Element,
-      Referenced_Envs => <>,
-      Env             => Empty_Env_Map'Access,
-      Default_MD      => Empty_Metadata,
-      Ref_Count       => No_Refcount);
+     (Parent                     => No_Env_Getter,
+      Node                       => No_Element,
+      Referenced_Envs            => <>,
+      Transitive_Referenced_Envs => <>,
+      Env                        => Empty_Env_Map'Access,
+      Default_MD                 => Empty_Metadata,
+      Ref_Count                  => No_Refcount);
    Empty_Env : constant Lexical_Env := Empty_Env_Record'Access;
 
 end Langkit_Support.Lexical_Env;

@@ -78,6 +78,7 @@ package body Langkit_Support.Lexical_Env is
         (Parent          => Parent,
          Node            => Node,
          Referenced_Envs => <>,
+         Transitive_Referenced_Envs => <>,
          Env             => new Internal_Envs.Map,
          Default_MD      => Default_MD,
          Ref_Count       => (if Is_Refcounted then 1 else No_Refcount));
@@ -137,7 +138,6 @@ package body Langkit_Support.Lexical_Env is
      (Self          : Lexical_Env;
       Key           : Symbol_Type;
       From          : Element_T := No_Element;
-      From_Refd_Env : Boolean := False;
       Recursive     : Boolean := True) return Env_Element_Array
    is
       use Internal_Envs;
@@ -168,11 +168,7 @@ package body Langkit_Support.Lexical_Env is
             return Env_Element_Arrays.Empty_Array;
          end if;
 
-         if From_Refd_Env and then Self.Transitive = False then
-            return Env_Element_Arrays.Empty_Array;
-         end if;
-
-         return Get (Self.Env, Key, From, From_Refd_Env => True);
+         return Get (Self.Env, Key, From, Recursive => False);
       end Get_Ref_Env_Elements;
 
       ----------------------
@@ -202,7 +198,7 @@ package body Langkit_Support.Lexical_Env is
             else Env_Element_Arrays.Empty_Array);
       end Get_Own_Elements;
 
-      function Get_Elements
+      function Get_Refd_Elements
       is new Referenced_Envs_Vectors.Elements_Arrays.Flat_Map_Gen
         (Env_Element, Env_Element_Array, Get_Ref_Env_Elements);
       --  Return the concatenation of Get_Own_Elements for this env and every
@@ -220,8 +216,12 @@ package body Langkit_Support.Lexical_Env is
          Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
          Ret : constant Env_Element_Array :=
            Get_Own_Elements (Self)
-           & Get_Elements
-             (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
+           & (if Recursive
+              then Get_Refd_Elements
+                (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
+              else Env_Element_Arrays.Empty_Array)
+           & Get_Refd_Elements
+           (Referenced_Envs_Vectors.To_Array (Self.Transitive_Referenced_Envs))
            & (if Recursive
               then Get (Parent_Env, Key)
               else Env_Element_Arrays.Empty_Array);
@@ -240,10 +240,9 @@ package body Langkit_Support.Lexical_Env is
      (Self : Lexical_Env;
       Key  : Symbol_Type;
       From : Element_T := No_Element;
-      From_Refd_Env : Boolean := False;
       Recursive     : Boolean := True) return Element_Array is
    begin
-      return Unwrap (Get (Self, Key, From, From_Refd_Env, Recursive));
+      return Unwrap (Get (Self, Key, From, Recursive));
    end Get;
 
    -----------
@@ -253,12 +252,13 @@ package body Langkit_Support.Lexical_Env is
    function Group (Envs : Lexical_Env_Array) return Lexical_Env is
       N : constant Lexical_Env :=
         new Lexical_Env_Type'
-          (Parent          => No_Env_Getter,
-           Node            => No_Element,
-           Referenced_Envs => <>,
-           Env             => null,
-           Default_MD      => Empty_Metadata,
-           Ref_Count       => 1);
+          (Parent                     => No_Env_Getter,
+           Node                       => No_Element,
+           Referenced_Envs            => <>,
+           Transitive_Referenced_Envs => <>,
+           Env                        => null,
+           Default_MD                 => Empty_Metadata,
+           Ref_Count                  => 1);
    begin
       for Env of Envs loop
          Reference (N, Env, No_Element, True);
@@ -341,9 +341,15 @@ package body Langkit_Support.Lexical_Env is
       Transitive      : Boolean   := False)
    is
    begin
-      Referenced_Envs_Vectors.Append
-        (Self.Referenced_Envs, Referenced_Env'(Referenced_From,
-         To_Reference, Transitive));
+      if Transitive then
+         Referenced_Envs_Vectors.Append
+           (Self.Transitive_Referenced_Envs,
+            Referenced_Env'(Referenced_From, To_Reference));
+      else
+         Referenced_Envs_Vectors.Append
+           (Self.Referenced_Envs,
+            Referenced_Env'(Referenced_From, To_Reference));
+      end if;
       Inc_Ref (To_Reference);
    end Reference;
 
@@ -412,12 +418,13 @@ package body Langkit_Support.Lexical_Env is
       end loop;
 
       return new Lexical_Env_Type'
-        (Parent          => No_Env_Getter,
-         Node            => Self.Node,
-         Referenced_Envs => Self.Referenced_Envs.Copy,
-         Env             => Self.Env,
-         Default_MD      => Self.Default_MD,
-         Ref_Count       => 1);
+        (Parent                     => No_Env_Getter,
+         Node                       => Self.Node,
+         Referenced_Envs            => Self.Referenced_Envs.Copy,
+         Transitive_Referenced_Envs => Self.Transitive_Referenced_Envs.Copy,
+         Env                        => Self.Env,
+         Default_MD                 => Self.Default_MD,
+         Ref_Count                  => 1);
    end Orphan;
 
 end Langkit_Support.Lexical_Env;
