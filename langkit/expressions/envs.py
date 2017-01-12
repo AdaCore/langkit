@@ -127,10 +127,10 @@ def env_get(env_expr, token_expr, resolve_unique=False, sequential=False):
 
     if sequential:
         # Pass the From parameter if the user wants sequential semantics
-        array_expr = 'AST_Envs.Get ({}, {}, {})'
+        array_expr = 'AST_Envs.Get (Self => {}, Key => {}, From => {})'
         sub_exprs.append(construct(Self, T.root_node))
     else:
-        array_expr = 'AST_Envs.Get ({}, {})'
+        array_expr = 'AST_Envs.Get (Self => {}, Key => {})'
 
     make_expr = partial(BasicExpr, result_var_name="Env_Get_Result",
                         sub_exprs=sub_exprs)
