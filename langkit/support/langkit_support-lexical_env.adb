@@ -6,7 +6,9 @@ package body Langkit_Support.Lexical_Env is
    --  from lexical envs.
 
    function Decorate
-     (Els : Env_Element_Array; MD : Element_Metadata) return Env_Element_Array;
+     (Els              : Env_Element_Array;
+      MD               : Element_Metadata;
+      Parents_Bindings : Env_Rebindings) return Env_Element_Array;
    --  From an array of Env_Elements, decorate every element with additional
    --  Metadata stored in MD.
 
@@ -18,7 +20,8 @@ package body Langkit_Support.Lexical_Env is
       (El : Element_T; MD : Element_Metadata) return Env_Element
    is
    begin
-      return Env_Element'(El => El, MD => MD, Is_Null => False);
+      return Env_Element'
+        (El => El, MD => MD, Parents_Bindings => <>, Is_Null => False);
    end Create;
 
    ------------
@@ -47,11 +50,18 @@ package body Langkit_Support.Lexical_Env is
    --------------
 
    function Decorate
-     (Els : Env_Element_Array; MD : Element_Metadata) return Env_Element_Array
+     (Els              : Env_Element_Array;
+      MD               : Element_Metadata;
+      Parents_Bindings : Env_Rebindings) return Env_Element_Array
    is
       function Decorate_Element (El : Env_Element) return Env_Element
       is
-        (Env_Element'(El.El, Combine (El.MD, MD), Is_Null => False));
+        (Env_Element'
+           (El.El,
+            Combine (El.MD, MD),
+            Parents_Bindings =>
+               Combine (El.Parents_Bindings, Parents_Bindings),
+            Is_Null          => False));
 
       function Internal_Decorate
       is new Env_Element_Arrays.Id_Map_Gen (Decorate_Element)
@@ -80,7 +90,8 @@ package body Langkit_Support.Lexical_Env is
          Referenced_Envs => <>,
          Transitive_Referenced_Envs => <>,
          Env             => new Internal_Envs.Map,
-         Default_MD      => Default_MD,
+         Default_MD                 => Default_MD,
+         Parents_Rebindings         => null,
          Ref_Count       => (if Is_Refcounted then 1 else No_Refcount));
    end Create;
 
@@ -96,7 +107,8 @@ package body Langkit_Support.Lexical_Env is
    is
       use Internal_Envs;
 
-      Env_El : constant Env_Element := Env_Element'(Value, MD, False);
+      Env_El : constant Env_Element :=
+        Env_Element'(Value, MD, null, False);
       C      : Cursor;
       Dummy  : Boolean;
    begin
@@ -193,7 +205,8 @@ package body Langkit_Support.Lexical_Env is
 
               (Reverse_Array
                  (Env_Element_Vectors.To_Array (Element (C))),
-               Self.Default_MD)
+               Self.Default_MD,
+               Self.Parents_Rebindings)
 
             else Env_Element_Arrays.Empty_Array);
       end Get_Own_Elements;
@@ -258,6 +271,7 @@ package body Langkit_Support.Lexical_Env is
            Transitive_Referenced_Envs => <>,
            Env                        => null,
            Default_MD                 => Empty_Metadata,
+           Parents_Rebindings         => null,
            Ref_Count                  => 1);
    begin
       for Env of Envs loop
@@ -428,7 +442,68 @@ package body Langkit_Support.Lexical_Env is
          Transitive_Referenced_Envs => Self.Transitive_Referenced_Envs.Copy,
          Env                        => Self.Env,
          Default_MD                 => Self.Default_MD,
+         Parents_Rebindings         => Self.Parents_Rebindings,
          Ref_Count                  => 1);
    end Orphan;
+
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Self : in out Env_Rebindings) is
+      procedure Unchecked_Free
+      is new Ada.Unchecked_Deallocation (Env_Rebindings_Type, Env_Rebindings);
+   begin
+      if Self /= null then
+         Self.Ref_Count := Self.Ref_Count - 1;
+         if Self.Ref_Count = 0 then
+            Unchecked_Free (Self);
+         end if;
+      end if;
+   end Destroy;
+
+   -------------
+   -- Combine --
+   -------------
+
+   function Combine (L, R : Env_Rebindings) return Env_Rebindings is
+   begin
+      if L = null and then R = null then
+         return null;
+      elsif L = null or else L.Size = 0 then
+         return R;
+      elsif R = null or else R.Size = 0 then
+         return L;
+      end if;
+
+      return Ret : Env_Rebindings do
+         Ret := new Env_Rebindings_Type (L.Size + R.Size);
+
+         for J in 1 .. L.Size loop
+            Ret.Rebindings (J) := L.Rebindings (J);
+         end loop;
+
+         for J in 1 .. R.Size loop
+            Ret.Rebindings (J + L.Size + 1) := R.Rebindings (J);
+         end loop;
+      end return;
+   end Combine;
+
+   -----------------
+   -- Get_New_Env --
+   -----------------
+
+   function Get_New_Env
+     (Self : Env_Rebindings; Old_Env : Env_Getter) return Env_Getter
+   is
+   begin
+      for J in 1 .. Self.Size loop
+         if Get_Env (Old_Env) = Get_Env (Self.Rebindings (J).Old_Env) then
+            return Self.Rebindings (J).New_Env;
+         end if;
+      end loop;
+
+      return No_Env_Getter;
+   end Get_New_Env;
 
 end Langkit_Support.Lexical_Env;

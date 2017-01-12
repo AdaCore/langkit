@@ -124,6 +124,7 @@ def make_renderer(base_renderer=None):
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             c_node_type(capi).name,
             'lexical_env_type':      CAPIType(capi, 'lexical_env').name,
+            'env_rebindings':        CAPIType(capi, 'env_rebindings').name,
             'unit_kind_type':        AnalysisUnitKind.c_type(capi).name,
             'unit_file_provider_type':
                 CAPIType(capi, 'unit_file_provider').name,
@@ -491,10 +492,6 @@ class AnalysisUnitType(BasicType):
     null_allowed = True
 
     @classmethod
-    def is_refcounted(cls):
-        return False
-
-    @classmethod
     def c_type(cls, c_api_settings):
         return CAPIType(c_api_settings, 'analysis_unit')
 
@@ -588,6 +585,31 @@ class EquationType(BasicType):
     @classmethod
     def is_refcounted(cls):
         return True
+
+
+class EnvRebindingsType(BasicType):
+    """
+    An EquationType instance is an equation where logic variables (of type
+    LogicVarType) are involved in logical expressions.
+
+    An equation can be solved, and the variables instances will then be bound
+    to specific values.
+
+    Equations instance will typically be produced by expressions involving
+    logic variables.
+    """
+    _name = "Env_Rebindings"
+    is_ptr = True
+    null_allowed = True
+    _nullexpr = "null"
+
+    @classmethod
+    def c_type(cls, c_api_settings):
+        return CAPIType(c_api_settings, 'env_rebindings')
+
+    @classmethod
+    def is_refcounted(cls):
+        return False
 
 
 class BoolType(BasicType):
@@ -2088,6 +2110,9 @@ class ASTNode(Struct):
                 'el': BuiltinField(cls, doc="The stored AST node"),
                 'MD': BuiltinField(
                     T.env_md, doc="The metadata associated to the AST node"
+                ),
+                'parents_bindings': BuiltinField(
+                    EnvRebindingsType, doc=""
                 ),
                 'is_env_element_type': True,
                 'el_type': cls

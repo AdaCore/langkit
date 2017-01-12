@@ -56,7 +56,8 @@
          ## metadata, all or some, at some point. Not clear yet how this should
          ## work, so keeping that for later.
          MD => No_Metadata,
-         Is_Null => From.Is_Null
+         Is_Null => From.Is_Null,
+         Parents_Bindings => From.Parents_Bindings
          );
    end Convert;
 </%def>

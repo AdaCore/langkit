@@ -62,6 +62,7 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (ct.Struct, lambda _: '{}'),
             (ct.LexicalEnvType, lambda _: 'LexicalEnv.wrap({})'),
+            (ct.EnvRebindingsType, lambda _: 'EnvRebindings.wrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             '(wrapping): {}'.format(type)
@@ -114,6 +115,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.BoolType, lambda _: ctype_type('c_uint8')),
             (ct.LongType, lambda _: ctype_type('c_long')),
             (ct.LexicalEnvType, lambda _: wrapped_type('lexical_env')),
+            (ct.EnvRebindingsType, lambda _: wrapped_type('env_rebindings')),
             (ct.SourceLocationRangeType, lambda _: wrapped_type('SlocRange')),
             (ct.Token, lambda _: 'Token'),
             (ct.Symbol, lambda _: wrapped_type('text')),

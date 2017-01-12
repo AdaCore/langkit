@@ -30,6 +30,8 @@ class _node(ctypes.c_void_p):
 _enum_node_kind = ctypes.c_uint
 class _lexical_env(ctypes.c_void_p):
     pass
+class _env_rebindings(ctypes.c_void_p):
+    pass
 class _unit_file_provider(ctypes.c_void_p):
     pass
 

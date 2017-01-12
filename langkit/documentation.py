@@ -75,6 +75,9 @@ base_langkit_docs = {
     'langkit.lexical_env_type': """
         Data type for lexical environments.
     """,
+    'langkit.env_rebindings': """
+        Data type for env rebindings. For internal use only.
+    """,
     'langkit.token_kind': """
         Type for individual tokens.
     """,
@@ -802,6 +805,7 @@ def create_doc_printer(lang, formatter):
 #     documentation;
 #
 #   * arbitrary keyword arguments to pass to the documentation Mako templates.
+
 
 ada_doc = create_doc_printer('ada', format_ada)
 c_doc = create_doc_printer('c', format_c)

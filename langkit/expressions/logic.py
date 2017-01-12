@@ -147,7 +147,8 @@ class Bind(AbstractExpression):
                 # env_element from it.
                 expr = New.StructExpr(T.root_node.env_el(), {
                     Name('El'): expr,
-                    Name('MD'): LiteralExpr('<>', None)
+                    Name('MD'): LiteralExpr('<>', None),
+                    Name('Parents_Bindings'): LiteralExpr('null', None)
                 })
 
             return expr

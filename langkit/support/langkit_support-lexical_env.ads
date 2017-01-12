@@ -91,9 +91,30 @@ package Langkit_Support.Lexical_Env is
 
    type Env_Rebindings_Array is array (Positive range <>) of Env_Rebinding;
 
-   type Env_Rebindings (Size : Positive) is record
+   type Env_Rebindings_Type (Size : Natural) is record
       Rebindings : Env_Rebindings_Array (1 .. Size);
+      Ref_Count  : Natural := 1;
    end record;
+
+   type Env_Rebindings is access all Env_Rebindings_Type;
+
+   function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings
+   is (new Env_Rebindings_Type'(Bindings'Length,
+                                Rebindings => Bindings,
+                                Ref_Count  => 1));
+   --  Create a new Env_Rebindings from an array of binding pairs
+
+   procedure Destroy (Self : in out Env_Rebindings);
+
+   function Combine (L, R : Env_Rebindings) return Env_Rebindings;
+   --  Return a new Env_Rebindings structure that combines rebindings from both
+   --  L and R. Raises a Constraint_Error if the number of bindings exceeds
+   --  Env_Rebindings_Size.
+
+   function Get_New_Env
+     (Self : Env_Rebindings; Old_Env : Env_Getter) return Env_Getter;
+   --  Return the new env corresponding to Old_Env in Self. Return
+   --  No_Env_Getter if there is no association.
 
    ----------------------
    -- Env_Element Type --
@@ -102,7 +123,7 @@ package Langkit_Support.Lexical_Env is
    type Env_Element is record
       El               : Element_T;
       MD               : Element_Metadata;
-      Parents_Bindings : Env_Rebindings (4);
+      Parents_Bindings : Env_Rebindings := null;
       Is_Null          : Boolean := False;
    end record;
    --  Wrapper structure to contain both the 'real' env element that the user
@@ -184,6 +205,8 @@ package Langkit_Support.Lexical_Env is
 
       Default_MD      : Element_Metadata;
       --  Default metadata for this env instance
+
+      Parents_Rebindings : Env_Rebindings;
 
       Ref_Count       : Integer;
       --  For ref-counted lexical environments, this contains the number of
@@ -289,6 +312,7 @@ private
       Transitive_Referenced_Envs => <>,
       Env                        => Empty_Env_Map'Access,
       Default_MD                 => Empty_Metadata,
+            Parents_Rebindings   => null,
       Ref_Count                  => No_Refcount);
    Empty_Env : constant Lexical_Env := Empty_Env_Record'Access;
 

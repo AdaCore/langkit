@@ -17,6 +17,7 @@ then
    ${expr.result_var.name} :=
      (El => ${ast_node.name()} (${expr.expr_var.name}.El),
       Md => ${expr.expr_var.name}.Md,
+      Parents_Bindings => ${expr.expr_var.name}.Parents_Bindings,
       Is_Null => False);
 % else:
    ${expr.result_var.name} := ${ast_node.name()} (${expr.expr_var.name});
