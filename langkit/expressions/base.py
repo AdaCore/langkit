@@ -18,9 +18,7 @@ from langkit.diagnostics import (
     extract_library_location, check_source_language, check_multiple,
     Severity, DiagnosticError, check_type, Context
 )
-from langkit.utils import (
-    assert_type, memoized, TypeSet, dispatch_on_type
-)
+from langkit.utils import TypeSet, assert_type, dispatch_on_type, memoized
 
 
 def unsugar(expr, ignore_errors=False):
