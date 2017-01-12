@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 from collections import OrderedDict, namedtuple
 from copy import copy
+import difflib
 from itertools import count
 
 from funcy import compact
@@ -2468,7 +2469,22 @@ class TypeRepo(object):
 
         :param str type_name: The name of the rule.
         """
-        return TypeRepo.Defer(lambda: self.type_dict()[type_name])
+        def resolve():
+            type_dict = self.type_dict()
+            try:
+                return type_dict[type_name]
+            except KeyError:
+                close_matches = difflib.get_close_matches(type_name, type_dict)
+                check_source_language(
+                    False,
+                    'Invalid type name: {}{}'.format(
+                        type_name,
+                        ', did you one of the following? {}'.format(
+                            ', '.join(close_matches)
+                        ) if close_matches else ''
+                    )
+                )
+        return TypeRepo.Defer(resolve)
 
     @property
     def root_node(self):
