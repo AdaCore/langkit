@@ -3,7 +3,7 @@ from functools import partial
 
 from langkit import names
 from langkit.compiled_types import (
-    LexicalEnvType, Token, BoolType, T
+    BoolType, LexicalEnvType, T, Token
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
