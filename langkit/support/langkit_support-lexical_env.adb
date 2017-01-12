@@ -134,9 +134,9 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    function Get
-     (Self : Lexical_Env;
-      Key  : Symbol_Type;
-      From : Element_T := No_Element;
+     (Self          : Lexical_Env;
+      Key           : Symbol_Type;
+      From          : Element_T := No_Element;
       From_Refd_Env : Boolean := False) return Env_Element_Array
    is
       use Internal_Envs;
@@ -234,7 +234,8 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    function Get
-     (Self : Lexical_Env; Key : Symbol_Type;
+     (Self : Lexical_Env;
+      Key  : Symbol_Type;
       From : Element_T := No_Element) return Element_Array is
    begin
       return Unwrap (Get (Self, Key, From));
