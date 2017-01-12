@@ -9,7 +9,7 @@ from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr,
     BuiltinCallExpr, GetSymbol, PropertyDef, ResolvedExpression, Self,
-    auto_attr, auto_attr_custom, construct
+    SymbolLiteral, auto_attr, auto_attr_custom, construct
 )
 
 
@@ -103,8 +103,8 @@ def env_get(env_expr, token_expr, resolve_unique=False, sequential=False):
 
     :param AbstractExpression env_expr: Expression that will yield the env
         to get the element from.
-    :param AbstractExpression token_expr: Expression that will yield the
-        token to use as a key on the env.
+    :param AbstractExpression|str token_expr: Expression that will yield the
+        token to use as a key on the env, or a string to turn into a symbol.
     :param bool resolve_unique: Wether we want an unique result or not.
         NOTE: For the moment, nothing will be done to ensure that only one
         result is available. The implementation will just take the first
@@ -114,6 +114,8 @@ def env_get(env_expr, token_expr, resolve_unique=False, sequential=False):
 
     if isinstance(token_expr, AbstractExpression):
         symbol_expr = GetSymbol(token_expr)
+    elif isinstance(token_expr, str):
+        symbol_expr = SymbolLiteral(token_expr)
     else:
         check_source_language(
             False,
