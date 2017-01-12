@@ -137,7 +137,8 @@ package body Langkit_Support.Lexical_Env is
      (Self          : Lexical_Env;
       Key           : Symbol_Type;
       From          : Element_T := No_Element;
-      From_Refd_Env : Boolean := False) return Env_Element_Array
+      From_Refd_Env : Boolean := False;
+      Recursive     : Boolean := True) return Env_Element_Array
    is
       use Internal_Envs;
       use Env_Element_Arrays;
@@ -221,7 +222,9 @@ package body Langkit_Support.Lexical_Env is
            Get_Own_Elements (Self)
            & Get_Elements
              (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
-           & Get (Parent_Env, Key);
+           & (if Recursive
+              then Get (Parent_Env, Key)
+              else Env_Element_Arrays.Empty_Array);
       begin
          --  Only filter if a non null value was given for the From parameter
          return (if From = No_Element then Ret
@@ -237,9 +240,10 @@ package body Langkit_Support.Lexical_Env is
      (Self : Lexical_Env;
       Key  : Symbol_Type;
       From : Element_T := No_Element;
-      From_Refd_Env : Boolean := False) return Element_Array is
+      From_Refd_Env : Boolean := False;
+      Recursive     : Boolean := True) return Element_Array is
    begin
-      return Unwrap (Get (Self, Key, From, From_Refd_Env));
+      return Unwrap (Get (Self, Key, From, From_Refd_Env, Recursive));
    end Get;
 
    -----------
