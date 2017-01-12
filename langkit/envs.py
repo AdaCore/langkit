@@ -4,7 +4,9 @@ from itertools import count
 from langkit import names
 from langkit.compiled_types import AbstractNodeData, LexicalEnvType, Symbol, T
 from langkit.diagnostics import check_source_language
-from langkit.expressions import Env, FieldAccess, PropertyDef, Self, construct
+from langkit.expressions import (
+    Env, FieldAccess, PropertyDef, Self, SymbolLiteral, construct
+)
 
 
 AddToEnv = namedtuple("AddToEnv", ["key", "val", "dest_env",
@@ -15,9 +17,13 @@ def add_to_env(key, val, dest_env=None, metadata=None, is_post=False):
     """
     Specify elements to add to the lexical environment.
 
-    :param AbstractExpression key: An abstract expression resolving either
-        to a symbol, or to a list of symbols, specifying the key(s) under which
-        to add elements.
+    :param AbstractExpression|str key: Specify the key(s) under which to add
+        elements.
+
+        This can be an abstract expression: in this case, it must resolve
+        either to a symbol, or to a list of symbols. Otherwise, it must be a
+        string, which will be turned into a symbol.
+
     :param AbstractExpression val: An abstract expression resolving to a
         subtype of the root class, or a list of them, specifying the values
         to add.
@@ -28,6 +34,8 @@ def add_to_env(key, val, dest_env=None, metadata=None, is_post=False):
         children have been treated.
     :return:
     """
+    if isinstance(key, str):
+        key = SymbolLiteral(key)
     return AddToEnv(key, val, dest_env, metadata, is_post)
 
 
