@@ -556,19 +556,22 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
     def internal(fn):
         attr_name = name or fn.__name__
 
-        def construct(self):
-            return fn(*(self.sub_expressions + partial_args), **partial_kwargs)
-
-        def __init__(self, *sub_expressions):
+        def __init__(self, *sub_expressions, **kwargs):
             AbstractExpression.__init__(self)
             self.nb_exprs = len(sub_expressions)
             for i, expr in enumerate(sub_expressions):
                 setattr(self, "expr_{}".format(i), expr)
+            self.kwargs = kwargs
 
         @property
         def sub_expressions(self):
             return tuple(getattr(self, "expr_{}".format(i))
                          for i in range(self.nb_exprs))
+
+        def construct(self):
+            kwargs = dict(partial_kwargs)
+            kwargs.update(self.kwargs)
+            return fn(*(self.sub_expressions + partial_args), **kwargs)
 
         def __repr__(self):
             return "<{}{}>".format(
