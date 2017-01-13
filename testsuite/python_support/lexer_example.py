@@ -34,5 +34,5 @@ foo_lexer.add_rules(
     (Literal('+'),           Token.Plus),
 
     (Pattern('[0-9]+'),      Token.Number),
-    (Pattern('[a-zA-Z_]+'),  Token.Identifier),
+    (Pattern('[a-zA-Z_][a-zA-Z0-9_]*'), Token.Identifier),
 )
