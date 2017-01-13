@@ -1,6 +1,7 @@
 ## vim: filetype=makocpp
 
 <%namespace name="array_types"   file="array_types_c.mako" />
+<%namespace name="struct_types"  file="struct_types_c.mako" />
 <%namespace name="astnode_types" file="astnode_types_c.mako" />
 <%namespace name="enum_types"    file="enum_types_c.mako" />
 <%namespace name="exts" file="../extensions.mako" />
@@ -47,18 +48,8 @@ typedef void *${lexical_env_type};
 
 typedef uint8_t ${bool_type};
 
-% for rec in _self.struct_types:
-   <% type_name = rec.c_type(capi).name %>
-   typedef struct {
-      % for f in rec.get_fields():
-         ${f.type.c_type(capi).name} ${f.name};
-      % endfor
-      char is_null;
-   } ${type_name};
-
-   /* Decrement the ref-count of all components in "r".  */
-   extern void
-   ${rec.c_dec_ref(capi)}(${type_name} *r);
+% for struct_type in _self.struct_types:
+   ${struct_types.decl(struct_type)}
 % endfor
 
 /* Helper data structures for source location handling.  */
