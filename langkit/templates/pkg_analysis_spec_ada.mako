@@ -322,13 +322,16 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
 
    ## Declare arrays of lexical environments here because we need them for the
    ## Group operation below.
+   ${array_types.public_incomplete_decl(LexicalEnvType.array_type())}
    ${array_types.public_decl(LexicalEnvType.array_type())}
 
    ## See ASTNode.env_element
+   ${array_types.public_incomplete_decl(T.root_node.env_el().array_type())}
    ${array_types.public_decl(T.root_node.env_el().array_type())}
 
    ## Declare arrays of root nodes here since some primitives rely on it and
    ## since the declarations require AST_Envs.
+   ${array_types.public_incomplete_decl(root_node_array)}
    ${array_types.public_decl(root_node_array)}
 
    -----------------------------
@@ -811,6 +814,16 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
 
    % for struct_type in no_builtins(_self.struct_types):
    ${struct_types.public_incomplete_decl(struct_type)}
+   % endfor
+
+   -------------------------------------------
+   -- Array types (incomplete declarations) --
+   -------------------------------------------
+
+   % for array_type in _self.sorted_types(_self.array_types):
+   % if array_type.element_type().should_emit_array_type:
+   ${array_types.public_incomplete_decl(array_type)}
+   % endif
    % endfor
 
    -----------------------------------------------------

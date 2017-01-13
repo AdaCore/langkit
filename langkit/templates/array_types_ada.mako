@@ -1,5 +1,10 @@
 ## vim: filetype=makoada
 
+<%def name="public_incomplete_decl(cls)">
+   type ${cls.pointed()};
+   type ${cls.name()} is access all ${cls.pointed()};
+</%def>
+
 <%def name="public_decl(cls)">
 
    <% elt_type = cls.element_type().name() %>
@@ -13,8 +18,6 @@
       Ref_Count : Positive;
       Items     : ${cls.api_name()} (1 .. N);
    end record;
-
-   type ${cls.name()} is access all ${cls.pointed()};
 
    ## If we are on the env element type, we need a conversion function
    ## to be able to get element arrays starting from 0 and convert them into
