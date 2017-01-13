@@ -7,6 +7,7 @@
    struct_name = '{}_Struct'.format(pyapi.type_internal_name(cls))
    element_type = pyapi.type_internal_name(cls.element_type())
    ptr_name = pyapi.type_internal_name(cls)
+   inc_ref = '_{}_inc_ref'.format(type_name)
    dec_ref = '_{}_dec_ref'.format(type_name)
 %>
 
@@ -21,6 +22,10 @@ class ${struct_name}(ctypes.Structure):
 
 ${ptr_name} = ctypes.POINTER(${struct_name})
 
+${inc_ref} = _import_func(
+   '${cls.c_inc_ref(capi)}',
+   [${ptr_name}], None
+)
 ${dec_ref} = _import_func(
    '${cls.c_dec_ref(capi)}',
    [${ptr_name}], None
@@ -32,13 +37,16 @@ class ${type_name}(object):
     Wrapper class for arrays of ${cls.element_type().name()}.
     """
 
-    def __init__(self, c_value):
+    def __init__(self, c_value, inc_ref=False):
         self._c_value = c_value
         self._length = c_value.contents.n
 
         items_addr = _field_address(c_value.contents, 'items')
         items = ${element_type}.from_address(items_addr)
         self._items = ctypes.pointer(items)
+
+        if inc_ref:
+           ${inc_ref}(self._c_value)
 
     def __repr__(self):
         return '<${type_name} object at {} {}>'.format(
