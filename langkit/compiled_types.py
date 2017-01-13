@@ -2209,6 +2209,16 @@ class ArrayType(CompiledType):
                           '.Array_Type')
 
     @classmethod
+    def c_inc_ref(cls, capi):
+        """
+        Name of the C API function to inc-ref an array value.
+
+        :param langkit.c_api.CAPISettings capi: Settings for the C API.
+        :rtype: str
+        """
+        return capi.get_name(cls.api_name() + names.Name('Inc_Ref'))
+
+    @classmethod
     def c_dec_ref(cls, capi):
         """
         Name of the C API function to dec-ref an array value.

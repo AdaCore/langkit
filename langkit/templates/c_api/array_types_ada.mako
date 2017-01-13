@@ -5,10 +5,16 @@
 <%
    ada_type_name = cls.name().camel_with_underscores
    c_type_name = cls.c_type(capi).name
+   inc_ref = cls.c_inc_ref(capi)
    dec_ref = cls.c_dec_ref(capi)
 %>
 
 type ${c_type_name}_Ptr is access ${ada_type_name};
+
+procedure ${inc_ref} (A : ${ada_type_name})
+   with Export        => True,
+        Convention    => C,
+        External_name => "${inc_ref}";
 
 procedure ${dec_ref} (A : ${ada_type_name})
    with Export        => True,
@@ -22,13 +28,19 @@ procedure ${dec_ref} (A : ${ada_type_name})
 <%
    ada_type_name = cls.name().camel_with_underscores
    c_type_name = cls.c_type(capi).name
+   inc_ref = cls.c_inc_ref(capi)
    dec_ref = cls.c_dec_ref(capi)
 %>
+
+procedure ${inc_ref} (A : ${ada_type_name}) is
+begin
+   Inc_Ref (A);
+end;
 
 procedure ${dec_ref} (A : ${ada_type_name}) is
    A_Var : ${ada_type_name} := A;
 begin
    Dec_Ref (A_Var);
-end ${dec_ref};
+end;
 
 </%def>
