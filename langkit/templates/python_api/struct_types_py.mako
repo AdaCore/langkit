@@ -45,8 +45,11 @@ class ${type_name}(ctypes.Structure):
         % if is_array_type(field.type):
         result = ctypes.cast(result, ${pyapi.type_internal_name(field.type)})
         % endif
+        ## "self" has an ownership share for this field, but we have to create
+        ## a new one for the caller, so both can live (and die) independently.
         return ${pyapi.wrap_value('result', field.type,
-                                  from_field_access=True)}
+                                  from_field_access=True,
+                                  inc_ref=True)}
     % endfor
 
     def __getitem__(self, key):
