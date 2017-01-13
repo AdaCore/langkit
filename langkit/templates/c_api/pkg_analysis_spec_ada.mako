@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
 <%namespace name="array_types"   file="array_types_ada.mako" />
+<%namespace name="struct_types"  file="struct_types_ada.mako" />
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
 <%namespace name="enum_types"    file="enum_types_ada.mako" />
 <%namespace name="exts"          file="../extensions.mako" />
@@ -556,21 +557,13 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
       ${enum_types.spec(enum_type)}
    % endfor
 
+   % for struct_type in _self.sorted_types(_self.struct_types):
+      ${struct_types.decl(struct_type)}
+   % endfor
+
    % for array_type in _self.sorted_types(_self.array_types):
       % if array_type.element_type().should_emit_array_type:
          ${array_types.decl(array_type)}
-      % endif
-   % endfor
-
-   % for rec in _self.struct_types:
-      <%
-         type_name = rec.c_type(capi).name
-         ptr_name = '{}_Ptr'.format(type_name)
-      %>
-      type ${ptr_name} is access ${rec.name()};
-
-      % if rec.is_refcounted():
-         procedure ${rec.c_dec_ref(capi)} (R : ${ptr_name});
       % endif
    % endfor
 
