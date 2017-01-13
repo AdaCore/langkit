@@ -273,6 +273,7 @@ package body Langkit_Support.Lexical_Env is
    procedure Destroy (Self : in out Lexical_Env) is
       procedure Free is
         new Ada.Unchecked_Deallocation (Lexical_Env_Type, Lexical_Env);
+      Refd_Env : Lexical_Env;
    begin
 
       --  Do not free the internal map for ref-counted allocated environments
@@ -288,13 +289,16 @@ package body Langkit_Support.Lexical_Env is
       --  Referenced_Envs on the other hand are always owned by Self
 
       for Ref_Env of Self.Referenced_Envs loop
-         declare
-            Refd_Env : Lexical_Env := Ref_Env.Env;
-         begin
-            Dec_Ref (Refd_Env);
-         end;
+         Refd_Env := Ref_Env.Env;
+         Dec_Ref (Refd_Env);
       end loop;
       Referenced_Envs_Vectors.Destroy (Self.Referenced_Envs);
+
+      for Ref_Env of Self.Transitive_Referenced_Envs loop
+         Refd_Env := Ref_Env.Env;
+         Dec_Ref (Refd_Env);
+      end loop;
+      Referenced_Envs_Vectors.Destroy (Self.Transitive_Referenced_Envs);
 
       Free (Self);
    end Destroy;
