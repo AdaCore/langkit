@@ -843,6 +843,11 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
     return wrapper if exc_wrap else func
 
 
+% for struct_type in _self.struct_types:
+${struct_types.low_level_decl(struct_type)}
+% endfor
+
+
 % for array_type in _self.sorted_types(_self.array_types):
 ${array_types.decl(array_type)}
 % endfor
