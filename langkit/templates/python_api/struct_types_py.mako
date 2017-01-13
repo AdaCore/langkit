@@ -13,7 +13,15 @@ class ${type_name}(ctypes.Structure):
     _fields_ = [
     % for field in cls.get_fields():
         ('_${field.name.lower}',
-         ${pyapi.type_internal_name(field.type)}),
+         ## At this point in the binding, no array type has been emitted yet,
+         ## so use a generic pointer: we will do the conversion later for
+         ## users.
+         % if is_array_type(field.type):
+             ctypes.c_void_p
+         % else:
+            ${pyapi.type_internal_name(field.type)}
+         % endif
+         ),
     % endfor
         ('is_null', ctypes.c_uint8),
     ]
@@ -34,6 +42,9 @@ class ${type_name}(ctypes.Structure):
     def ${field.name.lower}(self):
         ${py_doc(field, 8)}
         result = self._${field.name.lower}
+        % if is_array_type(field.type):
+        result = ctypes.cast(result, ${pyapi.type_internal_name(field.type)})
+        % endif
         return ${pyapi.wrap_value('result', field.type,
                                   from_field_access=True)}
     % endfor
