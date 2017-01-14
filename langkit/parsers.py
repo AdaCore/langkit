@@ -1340,7 +1340,7 @@ class Null(Parser):
 
 
 class Enum(Parser):
-    """Wrapper parser used to returns an enumeration value for an match."""
+    """Wrapper parser used to return an enumeration value for a match."""
 
     def _is_left_recursive(self, rule_name):
         if self.parser:
