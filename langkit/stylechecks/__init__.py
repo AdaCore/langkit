@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 """
 Style-checker engine for the Libadalang project.
 
@@ -520,3 +522,12 @@ def traverse(report, root, excludes):  # pragma: no cover
             traverse(report, path, excludes)
         else:
             check_file(report, path)
+
+
+if __name__ == '__main__':
+    report = Report(enable_colors=os.isatty(sys.stdout.fileno()))
+    if sys.argv[1:]:
+        check_file(report, sys.argv[1])
+        report.output()
+    else:
+        print "Usage: stylechecks.py <file>"
