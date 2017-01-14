@@ -16,19 +16,14 @@
 % endif
 
 <%
-   # The following variables must be used only if revtree_class is None
    list_type = _self.get_type()
    el_type   = list_type.element_type().name()
 %>
 
-% if _self.revtree_class:
-   ${res} := ${_self.get_type().storage_nullexpr()};
-% else:
-   ${res} := ${list_type.name()}_Alloc.Alloc (Parser.Mem_Pool);
+${res} := ${list_type.name()}_Alloc.Alloc (Parser.Mem_Pool);
 
-   ${res}.Token_Start := Token_Index'Max (${pos_name}, 1);
-   ${res}.Token_End := No_Token_Index;
-% endif
+${res}.Token_Start := Token_Index'Max (${pos_name}, 1);
+${res}.Token_End := No_Token_Index;
 
 ${cpos} := ${pos_name};
 
@@ -42,95 +37,22 @@ loop
    ${pos} := ${parser_context.pos_var_name};
    ${cpos} := ${parser_context.pos_var_name};
 
-   ## The revtree option allows to parse a list as a tree of node so that
-   ## for example the following rule, given a simple revtree class having
-   ## two fields::
-   ##
-   ##    List(id, sep=".", revtree=Simple) -> A.B.C.D
-   ##
-   ## will produce the tree::
-   ##
-   ##    Simple(
-   ##       left  = Simple(
-   ##          left  = Simple(
-   ##             left  = A
-   ##             right = B
-   ##          )
-   ##          right = C
-   ##       )
-   ##       right = D
-   ##    )
-   ##
-   ## Algorithmically, the process is simple: Everytime you parse a new
-   ## result, you create a new node, and store the previous result as the
-   ## left field and the new result as the right field. You then store this
-   ## node as the previous result.
+   if Node_Bump_Ptr_Vectors.Length (${res}.Vec) = 0 then
+      ${res}.Vec := Node_Bump_Ptr_Vectors.Create (Parser.Mem_Pool);
+   end if;
 
-   % if _self.revtree_class:
+   ## Append the parsed result to the list
+   Node_Bump_Ptr_Vectors.Append
+     (${res}.Vec,
+      ${ctx.root_grammar_class.name()} (${parser_context.res_var_name}));
 
-      ## If the current result is null, this is the first result. Store it.
-      if ${res} = ${_self.get_type().storage_nullexpr()} then
-         ${res} := ${_self.get_type().name()} (${parser_context.res_var_name});
-
-      ## Else, fold the current and previous results into a new node
-      else
-         declare
-            <% tree_class = _self.revtree_class.name() %>
-
-            ## Create the node which will contain current and previous results
-            New_Res : ${tree_class} := ${tree_class}
-              (${tree_class}_Alloc.Alloc (Parser.Mem_Pool));
-         begin
-            <%
-            field_0, field_1 = list(
-               _self.revtree_class.get_fields(include_inherited=False)
-            )
-            %>
-            ## Set left children of node to the previously accumulated result
-            New_Res.${field_0.name} := ${field_0.type.name()} (${res});
-
-            ## Set right children of node to just parsed result
-            New_Res.${field_1.name} :=
-              ${field_1.type.name()} (${parser_context.res_var_name});
-
-            ## Set the parent of both children to the created node
-            ${res}.Parent := ${root_node_type_name} (New_Res);
-            ${parser_context.res_var_name}.Parent :=
-              ${root_node_type_name} (New_Res);
-
-            ## Store node as previously accumulated result
-            ${res} := ${_self.get_type().name()} (New_Res);
-         end;
-
-         ## Set token data for result
-         ${res}.Unit := Parser.Unit;
-         ${res}.Token_Start := ${pos_name};
-         ${res}.Token_End := (if ${cpos} = ${pos_name}
-                              then ${pos_name}
-                              else ${cpos} - 1);
+   ## If we are parsing nodes, then set the parent of parsed node to the
+   ## list, and increment its ref count.
+   % if is_ast_node (_self.parser.get_type()):
+      if ${parser_context.res_var_name} /= null then
+         ${parser_context.res_var_name}.Parent :=
+           ${root_node_type_name} (${res});
       end if;
-
-   ## This corresponds to the regular case in which a list is parsed and
-   ## stored in a vector of nodes, in a flat fashion.
-   % else:
-
-      if Node_Bump_Ptr_Vectors.Length (${res}.Vec) = 0 then
-         ${res}.Vec := Node_Bump_Ptr_Vectors.Create (Parser.Mem_Pool);
-      end if;
-
-      ## Append the parsed result to the list
-      Node_Bump_Ptr_Vectors.Append
-        (${res}.Vec,
-         ${ctx.root_grammar_class.name()} (${parser_context.res_var_name}));
-
-      ## If we are parsing nodes, then set the parent of parsed node to the
-      ## list, and increment its ref count.
-      % if is_ast_node (_self.parser.get_type()):
-         if ${parser_context.res_var_name} /= null then
-            ${parser_context.res_var_name}.Parent :=
-              ${root_node_type_name} (${res});
-         end if;
-      % endif
    % endif
 
    ## Parse the separator, if there is one. The separator is always discarded.

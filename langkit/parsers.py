@@ -821,9 +821,6 @@ class List(Parser):
         By default, this parser will not match empty sequences but it will if
         `empty_valid` is True.
 
-        :param ASTNode revtree: If provided, it must be an ASTNode subclass.
-            It is then used to fold the list into a binary tree.
-
         :param ASTNode list_cls: Type parameter. If provided, it must be a
             ASTNode.list_type() subclass to be used for the result of this
             parser.
@@ -832,15 +829,11 @@ class List(Parser):
             token that is used to match separators between elements.
 
         :param bool empty_valid: Whether to match empty sequences or not.
-
-        Note that revtree and list_cls are exclusive, as having both of them
-        does not make sense.
         """
 
         # Get options from opts dict
         sep = opts.get('sep')
         empty_valid = opts.get('empty_valid', False)
-        revtree = opts.get('revtree', None)
         list_cls = opts.get('list_cls', None)
 
         Parser.__init__(self)
@@ -853,10 +846,6 @@ class List(Parser):
 
         self.sep = resolve(sep) if sep else None
         self.empty_valid = empty_valid
-        self.revtree_class = revtree
-
-        if empty_valid:
-            assert not self.revtree_class
 
         self.list_cls = list_cls
         assert list_cls is None or self.list_cls.is_list_type, (
@@ -865,17 +854,11 @@ class List(Parser):
             )
         )
 
-        assert revtree is None or list_cls is None, (
-            'List: the revtree and list_cls arguments are exclusive'
-        )
-
     def children(self):
         return [self.parser]
 
     def get_type(self):
-        if self.revtree_class:
-            return common_ancestor(self.parser.get_type(), self.revtree_class)
-        elif self.list_cls:
+        if self.list_cls:
             return self.list_cls
         else:
             item_type = self.parser.get_type()
@@ -890,24 +873,13 @@ class List(Parser):
     def compute_fields_types(self):
         Parser.compute_fields_types(self)
 
-        # If this parser does no folding, it does not contribute itself to
-        # fields typing, so we can stop here. Just make sure its result type
-        # gets created.
-        if not self.revtree_class:
-            typ = self.get_type()
-            with self.error_context():
-                check_source_language(
-                    not typ.abstract,
-                    'Please provide a concrete ASTnode subclass as list_cls'
-                    ' ({} is abstract)'.format(typ.name().camel)
-                )
-            return
-
-        assert len(self.revtree_class.get_parse_fields()) == 2, (
-            "For folding, revtree classes must have two fields"
-        )
-
-        self.revtree_class.set_types([self.get_type(), self.get_type()])
+        typ = self.get_type()
+        with self.error_context():
+            check_source_language(
+                not typ.abstract,
+                'Please provide a concrete ASTnode subclass as list_cls'
+                ' ({} is abstract)'.format(typ.name().camel)
+            )
 
     def generate_code(self, pos_name="pos"):
 
@@ -919,9 +891,6 @@ class List(Parser):
             if self.sep else
             ParserCodeContext(None, None, None, [])
         )
-
-        if self.revtree_class:
-            self.revtree_class.add_to_context()
 
         t_env = TemplateEnvironment(
             pos_name=pos_name,
