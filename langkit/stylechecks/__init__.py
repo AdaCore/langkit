@@ -400,7 +400,7 @@ class PythonLang(LanguageChecker):
         sg = pep8.StyleGuide(
             quiet=True,
             ignore=["W503", "E121", "E123", "E126", "E226", "E24",
-                    "E704", "E402"]
+                    "E704", "E402", "E721"]
         )
         sg.init_report(CustomReport)
         sg.check_files([filename])
