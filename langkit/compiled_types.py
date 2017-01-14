@@ -132,13 +132,11 @@ def make_renderer(base_renderer=None):
             'unit_file_provider_get_file_from_node_type':
                 CAPIType(
                     capi,
-                    'unit_file_provider_get_file_from_node_callback'
-                ).name,
+                    'unit_file_provider_get_file_from_node_callback').name,
             'unit_file_provider_get_file_from_name_type':
                 CAPIType(
                     capi,
-                    'unit_file_provider_get_file_from_name_callback'
-                ).name,
+                    'unit_file_provider_get_file_from_name_callback').name,
             'env_element_type':      T.root_node.env_el().c_type(capi),
             'token_kind':            CAPIType(capi, 'token_kind').name,
             'token_type':            CAPIType(capi, 'token').name,
