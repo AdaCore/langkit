@@ -42,6 +42,7 @@ class Name(Expression):
     designated_unit = ExternalProperty(type=AnalysisUnitType)
     result = Property(Self.designated_unit.root.cast(Expression).result)
 
+
 class Plus(Expression):
     left = Field()
     right = Field()

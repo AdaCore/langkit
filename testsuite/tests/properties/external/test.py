@@ -35,6 +35,7 @@ class Literal(Expression):
 
     result = ExternalProperty()
 
+
 class Plus(Expression):
     left = Field()
     right = Field()
