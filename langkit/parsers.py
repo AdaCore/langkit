@@ -389,8 +389,8 @@ class Parser(object):
         t_env._self = self
 
         check_source_language(
-            self.get_type() is not None and
-                issubclass(self.get_type(), ASTNode),
+            self.get_type() is not None
+            and issubclass(self.get_type(), ASTNode),
             'Grammar rules must yield an AST node'
         )
 
