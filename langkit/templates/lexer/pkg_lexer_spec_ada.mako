@@ -19,6 +19,10 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
       ${',\n'.join(lexer.ada_token_name(t) for t in tokens)}
    );
 
+   % if lexer.track_indent:
+   type Indent_Kind is (Indent, Dedent, Nodent, None);
+   % endif
+
    type Token_Data_Type is record
       Kind         : Token_Kind;
       --  Kind for this token
@@ -36,6 +40,10 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
       Sloc_Range   : Source_Location_Range;
       --  Source location range for this token. Note that the end bound is
       --  exclusive.
+
+      % if lexer.track_indent:
+      Indent       : Indent_Kind := None;
+      % endif
    end record;
 
    package Token_Data_Handlers is new Langkit_Support.Token_Data_Handlers

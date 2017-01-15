@@ -263,7 +263,13 @@ class Lexer(object):
         def render(self):
             return "{{{}}}".format(self.name)
 
-    def __init__(self, tokens_class):
+    def __init__(self, tokens_class, track_indent=False):
+        """
+        :param type tokens_class: The class for the lexer's tokens.
+        :param bool track_indent: Whether to track indentation when lexing or
+            not. If this is true, then the special Layout parsers can be used
+            to do indentation sensitive parsing.
+        """
         self.tokens_class = tokens_class
         assert issubclass(tokens_class, LexerToken)
 
@@ -271,6 +277,7 @@ class Lexer(object):
         self.__patterns = []
         self.rules = []
         self.tokens_set = {el.name for el in self.tokens_class}
+        self.track_indent = track_indent
 
         # This map will keep a mapping from literal matches to token kind
         # values, so that you can find back those values if you have the

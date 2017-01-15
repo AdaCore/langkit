@@ -102,6 +102,10 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       Symbol                : Symbol_Type;
       Continue              : Boolean := True;
       Last_Token_Was_Trivia : Boolean := False;
+      % if lexer.track_indent:
+      Last_Line_Start_Col   : Unsigned_16 := 0;
+      Last_Line             : Unsigned_32 := 0;
+      % endif
 
       function Source_First return Positive is
         (Natural (Token.Offset) + TDH.Source_First - 1);
@@ -197,7 +201,11 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                                    Source_First => Source_First,
                                    Source_Last  => Source_Last,
                                    Symbol       => null,
-                                   Sloc_Range   => Sloc_Range)));
+                                   Sloc_Range   => Sloc_Range
+                                   % if lexer.track_indent:
+                                   , Indent       => None
+                                   % endif
+                                   )));
 
                   Last_Token_Was_Trivia := True;
                end if;
@@ -216,17 +224,38 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
          --  rest of our machinery (in particular source slices) works well
          --  with it.
 
-         Append
-           (TDH.Tokens,
-            (Kind         => Token_Id,
-             Source_First => (if Token_Id = ${termination}
-                              then TDH.Source_Last + 1
-                              else Source_First),
-             Source_Last  => (if Token_Id = ${termination}
-                              then TDH.Source_Last
-                              else Source_Last),
-             Symbol       => Symbol,
-             Sloc_Range   => Sloc_Range));
+         declare
+            T : Token_Data_Type :=
+              (Kind         => Token_Id,
+               Source_First => (if Token_Id = ${termination}
+                                then TDH.Source_Last + 1
+                                else Source_First),
+               Source_Last  => (if Token_Id = ${termination}
+                                then TDH.Source_Last
+                                else Source_Last),
+               Symbol       => Symbol,
+               Sloc_Range   => Sloc_Range
+               % if lexer.track_indent:
+               , Indent       => None
+               % endif
+               );
+         begin
+            % if lexer.track_indent:
+            if Last_Line < Sloc_Range.End_Line then
+               Last_Line := Sloc_Range.End_Line;
+               if Sloc_Range.Start_Column = Last_Line_Start_Col then
+                  T.Indent := Nodent;
+               elsif Sloc_Range.Start_Column < Last_Line_Start_Col then
+                  T.Indent := Dedent;
+               elsif Sloc_Range.Start_Column > Last_Line_Start_Col then
+                  T.Indent := Indent;
+               end if;
+               Last_Line_Start_Col := Sloc_Range.Start_Column;
+            end if;
+            % endif
+            TDH.Tokens.Append (T);
+         end;
+
          Prepare_For_Trivia;
 
       % if lexer.token_actions['WithTrivia']:
