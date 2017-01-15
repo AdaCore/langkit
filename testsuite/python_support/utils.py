@@ -8,11 +8,9 @@ from langkit.diagnostics import DiagnosticError
 from langkit.expressions import Self
 from langkit.libmanage import ManageScript
 
-from lexer_example import foo_lexer
-
 
 def prepare_context(grammar,
-                    lexer=foo_lexer,
+                    lexer=None,
                     library_fields_all_public=False):
     """
     Create a compile context and prepare the build directory for code
@@ -27,6 +25,10 @@ def prepare_context(grammar,
     :param bool library_fields_all_public: Whether private fields should be
         exported in code generation (they are not by default).
     """
+
+    if lexer is None:
+        from lexer_example import foo_lexer
+        lexer = foo_lexer
 
     # Have a clean build directory
     if os.path.exists('build'):
@@ -43,7 +45,7 @@ def prepare_context(grammar,
 
 
 def emit_and_print_errors(grammar_fn,
-                          lexer=foo_lexer,
+                          lexer=None,
                           library_fields_all_public=False):
     """
     Compile and emit code for CTX. Return whether this was successful.
@@ -57,6 +59,11 @@ def emit_and_print_errors(grammar_fn,
         exported in code generation (they are not by default).
     :rtype: bool
     """
+
+    if lexer is None:
+        from lexer_example import foo_lexer
+        lexer = foo_lexer
+
     try:
         ctx = prepare_context(grammar_fn(), lexer, library_fields_all_public)
         ctx.emit('build', generate_lexer=False)
@@ -73,7 +80,7 @@ def emit_and_print_errors(grammar_fn,
 
 
 def build_and_run(grammar, py_script,
-                  lexer=foo_lexer,
+                  lexer=None,
                   library_fields_all_public=False):
     """
     Compile and emit code for CTX and build the generated library. Then run
@@ -81,6 +88,10 @@ def build_and_run(grammar, py_script,
 
     An exception is raised if any step fails (the script must return code 0).
     """
+
+    if lexer is None:
+        from lexer_example import foo_lexer
+        lexer = foo_lexer
 
     ctx = prepare_context(grammar, lexer, library_fields_all_public)
 
