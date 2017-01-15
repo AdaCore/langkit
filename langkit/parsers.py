@@ -1336,8 +1336,7 @@ class Enum(Parser):
 
     def generate_code(self, pos_name="pos"):
 
-        # The sub-parser result will not be used.  We have to notify it if it's
-        # a Row so it does not try to generate an anonymous row type.
+        # If the sub-parser is a row, then its type is self's enum type
         if isinstance(self.parser, Row):
             self.parser.assign_wrapper(self)
 
