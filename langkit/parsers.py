@@ -730,11 +730,6 @@ class Row(Parser):
 
         :param Parser parser: The parser to associate to this row.
         """
-        assert not self.is_root and not self.typ, (
-            "Row parsers do not represent a concrete result. They must be used"
-            " by a parent parser, such as Extract or Transform."
-        )
-
         self.typ = parser.get_type()
 
     def children(self):
