@@ -4,11 +4,6 @@
 
 ## If we accept empty lists, then we never want to return No_Token_Index as a
 ## position.
-## TODO: This is weird because:
-## 1. With those semantics, list(empty_valid=true) is equivalent to Opt(list),
-##    so it might be better to compile it as such.
-## 2. An empty list result should probably result in an empty list, not in a
-##    null result.
 % if _self.empty_valid:
     ${pos} := ${pos_name};
 % else:
