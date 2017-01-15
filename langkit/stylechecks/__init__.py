@@ -525,6 +525,9 @@ def traverse(report, root, excludes):  # pragma: no cover
 
 
 def main(single_file, dirs, excludes):
+    """
+    Global purpose main procedure.
+    """
     report = Report(enable_colors=os.isatty(sys.stdout.fileno()))
     if single_file:
         check_file(report, single_file)
@@ -534,6 +537,25 @@ def main(single_file, dirs, excludes):
     report.output()
 
 
-if __name__ == '__main__':
+def localmain():
+    """
+    Local purpose main procedure, to be used in the testsuite and in the local
+    case when no single file argument is passed.
+    """
     if sys.argv[1:]:
         main(sys.argv[1], None, None)
+    else:
+        LANGKIT_DIR = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
+        os.chdir(LANGKIT_DIR)
+        dirs = (os.path.join(LANGKIT_DIR), )
+        excludes = (
+            os.path.join('langkit', 'adalog', 'obj'), "tmp", "doc",
+            os.path.join('stylechecks', 'tests.py')
+        )
+        main(None, dirs, excludes)
+
+
+if __name__ == '__main__':
+    localmain()
