@@ -15,10 +15,17 @@ use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 
 package ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
 
-   type Fail_Info is record
+   type Fail_Info_Kind is (Token_Fail, Custom_Fail);
+
+   type Fail_Info (Kind : Fail_Info_Kind := Token_Fail) is record
       Pos               : Token_Index := No_Token_Index;
-      Expected_Token_Id : Token_Kind;
-      Found_Token_Id    : Token_Kind;
+      case Kind is
+      when Token_Fail =>
+         Expected_Token_Id : Token_Kind;
+         Found_Token_Id    : Token_Kind;
+      when Custom_Fail =>
+         Custom_Message    : Cst_String;
+      end case;
    end record;
 
    type Parser_Type is record

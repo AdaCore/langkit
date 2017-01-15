@@ -21,9 +21,11 @@ begin
        ## Document this failure so we can have a diagnostic at the end of
        ## parsing.
        if Parser.Last_Fail.Pos <= ${pos_name} then
-           Parser.Last_Fail.Pos := ${pos_name};
-           Parser.Last_Fail.Expected_Token_Id := ${token_kind};
-           Parser.Last_Fail.Found_Token_Id := T.Kind;
+          Parser.Last_Fail :=
+            (Kind => Token_Fail,
+             Pos => ${pos_name},
+             Expected_Token_Id => ${token_kind},
+             Found_Token_Id => T.Kind);
        end if;
    else
       ## We don't want to increment the position if we are matching the

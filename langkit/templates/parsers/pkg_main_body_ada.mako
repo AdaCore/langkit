@@ -93,13 +93,18 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
          Last_Token : Lexer.Token_Data_Type renames
             Get_Token (Parser.TDH.all, Parser.Last_Fail.Pos);
          D : constant Diagnostic :=
-           (Sloc_Range => Last_Token.Sloc_Range,
-            Message    => To_Unbounded_Wide_Wide_String (To_Text
-              ("Expected """
-               & Token_Kind_Name (Parser.Last_Fail.Expected_Token_Id)
-               & """, got """
-               & Token_Kind_Name (Parser.Last_Fail.Found_Token_Id)
-               & """")));
+           (if Parser.Last_Fail.Kind = Token_Fail then
+             (Sloc_Range => Last_Token.Sloc_Range,
+              Message    => To_Unbounded_Wide_Wide_String (To_Text
+                ("Expected """
+                 & Token_Kind_Name (Parser.Last_Fail.Expected_Token_Id)
+                 & """, got """
+                 & Token_Kind_Name (Parser.Last_Fail.Found_Token_Id)
+                 & """")))
+            else
+              (Sloc_Range => Last_Token.Sloc_Range,
+               Message => To_Unbounded_Wide_Wide_String
+                 (To_Text (Parser.Last_Fail.Custom_Message.all))));
       begin
          Parser.Diagnostics.Append (D);
       end Add_Last_Fail_Diagnostic;
