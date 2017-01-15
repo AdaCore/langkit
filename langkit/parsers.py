@@ -843,17 +843,20 @@ class List(Parser):
         self.empty_valid = empty_valid
 
         self.list_cls = list_cls
-        assert list_cls is None or self.list_cls.is_list_type, (
-            'Invalid list type for List parser: {}'.format(
-                self.list_cls.name()
-            )
-        )
 
     def children(self):
         return [self.parser]
 
     def get_type(self):
         if self.list_cls:
+            with self.error_context():
+                check_source_language(
+                    self.list_cls is None or self.list_cls.is_list_type,
+                    'Invalid list type for List parser: {}. '
+                    'Not a list type'.format(
+                        self.list_cls and self.list_cls.name().camel
+                    )
+                )
             return self.list_cls
         else:
             item_type = self.parser.get_type()
