@@ -1000,9 +1000,6 @@ class Opt(Parser):
 
         new = copy_with(self, _booleanize=(base, alt_true, alt_false))
         if new.contains_anonymous_row:
-            # What the sub-parser will match will not be returned, so there is
-            # no need to generate an anonymous row type.  Tell so to the
-            # Row sub-parser.
             assert isinstance(new.parser, Row)
             new.parser.assign_wrapper(new)
         return new
