@@ -524,10 +524,16 @@ def traverse(report, root, excludes):  # pragma: no cover
             check_file(report, path)
 
 
-if __name__ == '__main__':
+def main(single_file, dirs, excludes):
     report = Report(enable_colors=os.isatty(sys.stdout.fileno()))
-    if sys.argv[1:]:
-        check_file(report, sys.argv[1])
-        report.output()
+    if single_file:
+        check_file(report, single_file)
     else:
-        print "Usage: stylechecks.py <file>"
+        for root in dirs:
+            traverse(report, root, excludes)
+    report.output()
+
+
+if __name__ == '__main__':
+    if sys.argv[1:]:
+        main(sys.argv[1], None, None)
