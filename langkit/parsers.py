@@ -750,17 +750,6 @@ class Row(Parser):
         self.args = []
         self.allargs = []
 
-    def assign_wrapper(self, parser):
-        """
-        Associate `parser` as a wrapper for this Row.
-
-        Note that a Row can have at most only one wrapper, so this does nothing
-        if this Row is a root parser.
-
-        :param Parser parser: The parser to associate to this row.
-        """
-        self.typ = parser.get_type()
-
     def children(self):
         return self.parsers
 
@@ -1028,9 +1017,6 @@ class Opt(Parser):
             alt_true, alt_false = base._alternatives
 
         new = copy_with(self, _booleanize=(base, alt_true, alt_false))
-        if new.contains_anonymous_row:
-            assert isinstance(new.parser, Row)
-            new.parser.assign_wrapper(new)
         return new
 
     def children(self):
@@ -1106,8 +1092,6 @@ class Extract(Parser):
         return self.parser.parsers[self.index].get_type()
 
     def generate_code(self, pos_name="pos"):
-        self.parser.assign_wrapper(self)
-
         return copy_with(
             self.parser.gen_code_or_fncall(pos_name),
             res_var_name=self.parser.allargs[self.index]
@@ -1130,9 +1114,6 @@ class Discard(Parser):
         Parser.__init__(self)
 
         parser = resolve(parser)
-        if isinstance(parser, Row):
-            parser.assign_wrapper(self)
-
         self.parser = parser
 
     def children(self):
@@ -1250,9 +1231,6 @@ class Transform(Parser):
 
     def generate_code(self, pos_name="pos"):
 
-        if isinstance(self.parser, Row):
-            self.parser.assign_wrapper(self)
-
         self.typ.add_to_context()
 
         parser_context = self.parser.gen_code_or_fncall(pos_name)
@@ -1361,10 +1339,6 @@ class Enum(Parser):
         return type(self.enum_type_inst)
 
     def generate_code(self, pos_name="pos"):
-
-        # If the sub-parser is a row, then its type is self's enum type
-        if isinstance(self.parser, Row):
-            self.parser.assign_wrapper(self)
 
         self.enum_type_inst.add_to_context()
 
