@@ -11,7 +11,10 @@ declare
 begin
    if
       T.Kind /= ${token_kind}
-      % if match_text:
+      % if _self.matches_symbol:
+      or else T.Symbol /= Parser.Symbol_Literals
+        (${ctx.symbol_literals[match_text]})
+      % elif match_text:
       or else Text (Parser.TDH.all, T) /= "${match_text}"
       % endif
    then
