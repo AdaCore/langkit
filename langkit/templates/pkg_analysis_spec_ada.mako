@@ -936,6 +936,21 @@ private
       Hash            => Ada.Strings.Unbounded.Hash,
       Equivalent_Keys => "=");
 
+   % if ctx.symbol_literals:
+      type Symbol_Literal_Type is (
+         % for i, (sym, name) in enumerate(sorted( \
+                  ctx.symbol_literals.items())):
+            % if i > 0:
+               ,
+            % endif
+            ${name}  -- ${sym}
+         % endfor
+      );
+
+      type Symbol_Literal_Array is array (Symbol_Literal_Type) of Symbol_Type;
+      type Symbol_Literal_Array_Access is access all Symbol_Literal_Array;
+   % endif
+
    type Analysis_Context_Type is record
       Ref_Count  : Natural;
       Units_Map  : Units_Maps.Map;
@@ -951,6 +966,11 @@ private
       % if _self.default_unit_file_provider:
       Unit_File_Provider : Unit_File_Provider_Access_Cst;
       --  Object to translate unit names to file names
+      % endif
+
+      % if ctx.symbol_literals:
+         Symbol_Literals : Symbol_Literal_Array;
+         --  List of pre-computed symbols in the Symbols table
       % endif
    end record;
 

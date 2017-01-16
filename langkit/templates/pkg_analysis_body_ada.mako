@@ -89,6 +89,12 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    --  using Get_Parser to either parse from a file or from a buffer. Return
    --  the resulting analysis unit.
 
+   % if ctx.symbol_literals:
+      function Create_Symbol_Literals
+        (Symbols : Symbol_Table) return Symbol_Literal_Array;
+      --  Create pre-computed symbol literals in Symbols and return them
+   % endif
+
    function Convert
      (TDH      : Token_Data_Handler;
       Raw_Data : Lexer.Token_Data_Type) return Token_Data_Type;
@@ -123,11 +129,12 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
             then ${_self.default_unit_file_provider.fqn}
             else Unit_File_Provider);
       % endif
+      Symbols : constant Symbol_Table := Create;
    begin
       return new Analysis_Context_Type'
         (Ref_Count  => 1,
          Units_Map  => <>,
-         Symbols    => Create,
+         Symbols    => Symbols,
          Charset    => To_Unbounded_String (Charset),
          Root_Scope => AST_Envs.Create
                          (Parent        => AST_Envs.No_Env_Getter,
@@ -137,8 +144,40 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
          % if _self.default_unit_file_provider:
          , Unit_File_Provider => P
          % endif
+         % if ctx.symbol_literals:
+            , Symbol_Literals => Create_Symbol_Literals (Symbols)
+         % endif
         );
    end Create;
+
+   % if ctx.symbol_literals:
+
+      % for sym, name in sorted(ctx.symbol_literals.items()):
+         Text_${name} : aliased constant Text_Type := ${string_repr(sym)};
+      % endfor
+
+      Symbol_Literals_Text : array (Symbol_Literal_Type) of Text_Cst_Access :=
+      (
+         ${', '.join("Text_{}'Access".format(name) for sym, name in \
+                     sorted(ctx.symbol_literals.items()))}
+      );
+
+      ----------------------------
+      -- Create_Symbol_Literals --
+      ----------------------------
+
+      function Create_Symbol_Literals
+        (Symbols : Symbol_Table) return Symbol_Literal_Array
+      is
+         Result : Symbol_Literal_Array;
+      begin
+         for Literal in Symbol_Literal_Type'Range loop
+            Result (Literal) := Find
+              (Symbols, Symbol_Literals_Text (Literal).all);
+         end loop;
+         return Result;
+      end Create_Symbol_Literals;
+   % endif
 
    -------------
    -- Inc_Ref --
