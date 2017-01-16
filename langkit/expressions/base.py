@@ -12,8 +12,8 @@ from langkit import names
 from langkit.common import string_repr
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNode, BoolType, CompiledType,
-    LexicalEnvType, LongType, Symbol, Token, render as ct_render, resolve_type,
-    T
+    LexicalEnvType, LongType, Symbol, T, Token, get_context,
+    render as ct_render, resolve_type
 )
 from langkit.diagnostics import (
     extract_library_location, check_source_language, check_multiple,
@@ -884,6 +884,7 @@ class SymbolLiteral(AbstractExpression):
         self.name = name
 
     def construct(self):
+        get_context().add_symbol_literal(self.name)
         return BasicExpr(
             'Find (Self.Unit.TDH.Symbols, {})',
             Symbol,

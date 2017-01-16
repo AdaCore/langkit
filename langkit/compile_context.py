@@ -20,6 +20,7 @@ import inspect
 import itertools
 import os
 from os import path
+import re
 import shutil
 import subprocess
 import sys
@@ -459,6 +460,39 @@ class CompileCtx(object):
         :type: set[langkit.compiled_types.ArrayType]
         """
 
+        self.symbol_literals = {}
+        """
+        Container for all symbol literals to be used in code generation.
+
+        All "built-in" symbol literals used in parsers and properties are
+        pre-computed in each analysis context so that parsing and properties
+        evaluation does not need to perform symbol table lookups for them.
+
+        Set set of such pre-computed symbols is stored in an array indexed by
+        an enumeration type. This holds a mapping: symbol text -> enumerator,
+        to be used for code generation. See the "Symbol_Literals" array in
+        $.Analysis.Analysis_Context_Type.
+
+        This mapping is not supposed to be directly modified anywhere else than
+        inside this CompileCtx class. See the add_symbol_literal method to add
+        symbols to this mapping.
+
+        :type: dict[str, names.Name]
+        """
+
+        self._symbol_literals = set()
+        """
+        Temporary container for all symbol literal candidates. This is used
+        during the collect "pass" for all symbols. When the set is finalized,
+        call the finalize_symbol_literals method to create the
+        "symbol_literals" mapping.
+
+        This two-pass mechanism is here to make sure we generate deterministic
+        enumeration names.
+
+        :type: set[str]
+        """
+
         #
         # Holders for the Ada generated code chunks
         #
@@ -798,10 +832,13 @@ class CompileCtx(object):
             printcol("Compiling the grammar...", Colors.OKBLUE)
 
         with names.camel_with_underscores:
-            # Compute the type of fields for types used in the grammar
+            # Compute the type of fields for types used in the grammar. Also
+            # register its symbol literals.
             for r_name, r in self.grammar.rules.items():
                 with r.error_context():
                     r.compute_fields_types()
+                for sym in r.symbol_literals:
+                    self.add_symbol_literal(sym)
 
         # Compute type information, so that it is available for further
         # compilation stages.
@@ -813,6 +850,9 @@ class CompileCtx(object):
             # further compilation stages.
             self.compute_properties()
             errors_checkpoint()
+
+            # Past this point, the set of symbol literals is frozen
+            self.finalize_symbol_literals()
 
             for r_name, r in self.grammar.rules.items():
                 with r.error_context():
@@ -1116,3 +1156,33 @@ class CompileCtx(object):
             os.path.dirname(os.path.dirname(quex_bin)),
             'share', 'quex'
         )
+
+    def add_symbol_literal(self, name):
+        """
+        Add "name" to the list of symbol literals.
+
+        This must not be called after finalize_symbol_literals is invoked.
+
+        :type name: str
+        """
+        assert isinstance(self._symbol_literals, set)
+        self._symbol_literals.add(name)
+
+    def finalize_symbol_literals(self):
+        """
+        Collect all symbol literals provided to "add_symbol_literal" and create
+        the "symbol_literals" mapping out of it.
+        """
+        assert isinstance(self._symbol_literals, set)
+        symbols = self._symbol_literals
+        self._symbol_literals = None
+
+        i = 1
+        for name in sorted(symbols):
+            if re.match('[a-z]+', name):
+                enum_name = names.Name.from_lower(name)
+            else:
+                enum_name = names.Name(str(i))
+                i += 1
+            self.symbol_literals[name] = enum_name = (
+                names.Name('Symbol') + enum_name)
