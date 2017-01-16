@@ -388,10 +388,16 @@ class PythonLang(LanguageChecker):
 
     def check(self, report, filename, content, parse):
         self.custom_check(report, filename, content, parse)
-        self.pep8_check(report, filename, content, parse)
+        self.pep8_check(report, filename)
 
-    def pep8_check(self, report, filename, content, parse):
-        import pep8
+    def pep8_check(self, report, filename):
+        """
+        Run pep8 checks on given filename, adding pep8 reports to report.
+        """
+        try:
+            import pep8
+        except ImportError:
+            return
 
         class CustomReport(pep8.BaseReport):
             def error(self, line_number, offset, text, check):
