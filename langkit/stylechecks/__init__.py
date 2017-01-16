@@ -98,7 +98,7 @@ class Report(object):
 
 def iter_lines(content):
     """Return a generator yielding (line no., string) for each line."""
-    return enumerate(content.split('\n'), 1)
+    return enumerate(content.splitlines(), 1)
 
 
 def indent_level(line):
