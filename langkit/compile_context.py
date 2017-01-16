@@ -468,14 +468,15 @@ class CompileCtx(object):
         pre-computed in each analysis context so that parsing and properties
         evaluation does not need to perform symbol table lookups for them.
 
-        Set set of such pre-computed symbols is stored in an array indexed by
-        an enumeration type. This holds a mapping: symbol text -> enumerator,
-        to be used for code generation. See the "Symbol_Literals" array in
-        $.Analysis.Analysis_Context_Type.
+        Set of such pre-computed symbols is stored in the generated library in
+        an array indexed by an enumeration type. Here, this holds a mapping:
+        symbol text -> enumerator, to be used for code generation. See the
+        "Symbol_Literals" array in $.Analysis.Analysis_Context_Type.
 
         This mapping is not supposed to be directly modified anywhere else than
         inside this CompileCtx class. See the add_symbol_literal method to add
-        symbols to this mapping.
+        symbols to this mapping. Note that this mapping will be empty until one
+        calls the finalize_symbol_literals method.
 
         :type: dict[str, names.Name]
         """
