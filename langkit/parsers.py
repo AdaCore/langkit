@@ -478,6 +478,22 @@ class Parser(object):
         """
         raise NotImplementedError()
 
+    @property
+    def symbol_literals(self):
+        """
+        Return a list of strings for all symbol literals used by this parser
+        and all its subparsers.
+
+        Subclasses must override this method to actually include their own
+        symbol literals.
+
+        :rtype: set[str]
+        """
+        result = set()
+        for child in self.children():
+            result.update(child.symbol_literals)
+        return result
+
 
 class Tok(Parser):
     """Parser that matches a specific token."""
@@ -540,6 +556,19 @@ class Tok(Parser):
             code=code,
             var_defs=[(pos, Token), (res, Token)]
         )
+
+    @property
+    def matches_symbol(self):
+        """
+        Return whether this parser matches over a symbol's text.
+
+        :rtype: bool
+        """
+        return self.match_text and isinstance(self.val, WithSymbol)
+
+    @property
+    def symbol_literals(self):
+        return {self.match_text} if self.matches_symbol else set()
 
 
 class Or(Parser):
