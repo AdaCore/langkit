@@ -1,7 +1,7 @@
 Valid case
 Code generation was successful
 Invalid case
-File "test.py", line 19, in FooNode.b
+File "test.py", line 17, in FooNode.b
     Error: Invalid abstract expression: lol
 
 Done

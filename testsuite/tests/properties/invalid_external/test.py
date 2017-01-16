@@ -1,7 +1,7 @@
 from langkit.compiled_types import ASTNode, T, abstract, root_grammar_class
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import ExternalProperty, Property, Self
-from langkit.parsers import Grammar, Row, Or
+from langkit.parsers import Grammar, Row
 
 from os import path
 from utils import emit_and_print_errors

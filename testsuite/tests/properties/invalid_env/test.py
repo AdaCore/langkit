@@ -1,11 +1,10 @@
 from langkit.compiled_types import (
-    ASTNode, root_grammar_class, LongType, Field
+    ASTNode, root_grammar_class, Field
 )
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import Env, Property, Self
-from langkit.parsers import Grammar, Row, List, Tok
+from langkit.parsers import Grammar, Row, Tok
 
-from lexer_example import Token
 from os import path
 from utils import emit_and_print_errors
 

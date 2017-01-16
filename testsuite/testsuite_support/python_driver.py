@@ -2,9 +2,7 @@ import os
 import os.path
 import sys
 
-from testsuite_support.base_driver import (
-    BaseDriver, catch_test_errors, SetupError,
-)
+from testsuite_support.base_driver import BaseDriver, catch_test_errors
 
 
 class PythonDriver(BaseDriver):

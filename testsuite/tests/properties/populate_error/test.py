@@ -1,6 +1,6 @@
 import os.path
 
-from langkit.compiled_types import ASTNode, Struct, root_grammar_class
+from langkit.compiled_types import ASTNode, root_grammar_class
 from langkit.diagnostics import Diagnostics
 from langkit.envs import EnvSpec
 from langkit.expressions import Self

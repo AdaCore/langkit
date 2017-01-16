@@ -1,7 +1,5 @@
 import os
 import os.path
-import pipes
-import subprocess
 
 with_gnatpython = False
 if not os.environ.get('WITHOUT_GNATPYTHON'):

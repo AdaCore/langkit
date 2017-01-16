@@ -3,7 +3,6 @@ from langkit.diagnostics import DiagnosticError, Diagnostics
 from langkit.envs import EnvSpec
 
 from os import path
-from utils import emit_and_print_errors
 
 
 Diagnostics.set_lang_source_dir(path.abspath(__file__))

@@ -3,7 +3,7 @@ import shutil
 import subprocess
 
 from langkit.compile_context import CompileCtx
-from langkit.compiled_types import ASTNode, StructMetaclass, T
+from langkit.compiled_types import StructMetaclass, T
 from langkit.diagnostics import DiagnosticError
 from langkit.expressions import Self
 from langkit.libmanage import ManageScript

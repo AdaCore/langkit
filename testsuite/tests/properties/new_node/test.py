@@ -4,10 +4,10 @@ Test AST node synthetization and a basic use of it in the Python API.
 
 import os.path
 
-from langkit.compiled_types import ASTNode, Field, T, Token, root_grammar_class
+from langkit.compiled_types import ASTNode, Field, Token, root_grammar_class
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import New, Property, Self
-from langkit.parsers import Grammar, List, Or, Row, Tok
+from langkit.parsers import Grammar, List, Row, Tok
 
 from lexer_example import Token as LexToken
 from utils import build_and_run

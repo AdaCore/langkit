@@ -2,8 +2,8 @@ import os.path
 
 from langkit.compiled_types import ASTNode, Field, T, root_grammar_class
 from langkit.diagnostics import Diagnostics
-from langkit.expressions import New, Property, Self
-from langkit.parsers import Grammar, List, Or, Row, Tok
+from langkit.expressions import New, Property
+from langkit.parsers import Grammar, List, Row, Tok
 
 from lexer_example import Token
 from utils import emit_and_print_errors

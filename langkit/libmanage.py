@@ -421,15 +421,13 @@ class ManageScript(object):
         # Compute code coverage in the code generator if asked to
         if parsed_args.func == self.do_generate and parsed_args.coverage:
             try:
-                import coverage
-                del coverage
+                cov = Coverage(self.dirs)
             except Exception as exc:
                 import traceback
                 print >> sys.stderr, 'Coverage not available:'
                 traceback.print_exc(exc)
                 sys.exit(1)
 
-            cov = Coverage(self.dirs)
             cov.start()
         else:
             cov = None

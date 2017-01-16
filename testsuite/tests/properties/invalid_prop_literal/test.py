@@ -1,8 +1,6 @@
-from langkit.compiled_types import (
-    ASTNode, root_grammar_class, Field
-)
+from langkit.compiled_types import ASTNode, root_grammar_class
 from langkit.diagnostics import Diagnostics
-from langkit.expressions import Property, Self
+from langkit.expressions import Property
 from langkit.parsers import Grammar, Row
 
 from os import path

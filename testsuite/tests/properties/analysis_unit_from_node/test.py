@@ -5,11 +5,11 @@ Test getting the analysis unit of a node in the properties DSL.
 import os.path
 
 from langkit.compiled_types import (
-    AnalysisUnitType, ASTNode, Field, LongType, abstract, root_grammar_class
+    ASTNode, Field, abstract, root_grammar_class
 )
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import (
-    AbstractProperty, ExternalProperty, Property, Self
+    Property, Self
 )
 from langkit.parsers import Grammar, Or, Row, Tok
 

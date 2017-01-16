@@ -5,9 +5,7 @@ detected and reported.
 
 import os.path
 
-from langkit.compiled_types import (
-    AnalysisUnitType, ASTNode, Field, abstract, root_grammar_class
-)
+from langkit.compiled_types import ASTNode, root_grammar_class
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, Row

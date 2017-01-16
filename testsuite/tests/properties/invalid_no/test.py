@@ -5,7 +5,6 @@ from langkit.diagnostics import Diagnostics
 from langkit.expressions import Property, No
 from langkit.parsers import Grammar, Row
 
-from lexer_example import foo_lexer
 from os import path
 from utils import emit_and_print_errors
 

@@ -5,14 +5,13 @@ Test that Bind works when binding from env elements.
 import os.path
 
 from langkit.compiled_types import (
-    ASTNode, Field, root_grammar_class, LongType, UserField, LogicVarType
+    ASTNode, Field, root_grammar_class
 )
 from langkit.diagnostics import Diagnostics
-from langkit.expressions import AbstractProperty, Property, Self, Bind
 from langkit.lexer import (
     Eof, Ignore, Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText
 )
-from langkit.parsers import Grammar, Row, Tok, nl, ind, ded, Pick, Or
+from langkit.parsers import Grammar, Row, Tok, nl, ind, ded, Or
 
 from utils import build_and_run
 

@@ -2,12 +2,10 @@ from contextlib import contextmanager
 from functools import partial
 
 from langkit import names
-from langkit.compiled_types import (
-    BoolType, LexicalEnvType, Symbol, T, Token
-)
+from langkit.compiled_types import BoolType, LexicalEnvType, Symbol, T
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr, BoolType,
+    AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr,
     BuiltinCallExpr, GetSymbol, PropertyDef, ResolvedExpression, Self,
     SymbolLiteral, auto_attr, auto_attr_custom, construct
 )
