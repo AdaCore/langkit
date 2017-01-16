@@ -527,7 +527,7 @@ def traverse(report, root, excludes):  # pragma: no cover
         if os.path.isdir(path):
             traverse(report, path, excludes)
         else:
-            check_file(report, path)
+            check_file(report, os.path.relpath(path))
 
 
 def main(single_file, dirs, excludes):
