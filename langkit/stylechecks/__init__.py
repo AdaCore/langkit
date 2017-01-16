@@ -389,6 +389,7 @@ class PythonLang(LanguageChecker):
     def check(self, report, filename, content, parse):
         self.custom_check(report, filename, content, parse)
         self.pep8_check(report, filename)
+        self.pyflakes_check(report, filename, content)
 
     def pep8_check(self, report, filename):
         """
@@ -410,6 +411,48 @@ class PythonLang(LanguageChecker):
         )
         sg.init_report(CustomReport)
         sg.check_files([filename])
+
+    def pyflakes_check(self, report, filename, content):
+        """
+        Run pyflakes on given file with given content. Add pyflakes reports to
+        report.
+        """
+
+        # Make pyflakes checks optional for now
+        if not os.environ.get('RUN_PYFLAKES_CHECKS'):
+            return
+
+        # Just exit silently if pyflakes is not available
+        try:
+            from pyflakes import api, reporter
+        except ImportError:
+            return
+
+        lines_map = [(None, None)]
+        current = True
+        for line in content.splitlines():
+            if line.strip() == "# pyflakes off":
+                current = False
+            elif line.strip() == "# pyflakes on":
+                current = True
+            lines_map.append((current, line))
+
+        class CustomReporter(reporter.Reporter):
+            def syntaxError(self, _, msg, lineno, offset, text):
+                pass
+
+            def unexpectedError(self, filename, msg):
+                pass
+
+            def flake(self, msg):
+                if lines_map[msg.lineno][0]:
+                    report.add(
+                        msg.message % msg.message_args, filename, msg.lineno, 0
+                    )
+
+        api.checkPath(
+            filename, reporter=CustomReporter(sys.stdout, sys.stderr)
+        )
 
     def custom_check(self, report, filename, content, parse):
         pcheck = PackageChecker(report)
