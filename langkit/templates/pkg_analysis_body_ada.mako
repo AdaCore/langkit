@@ -1617,7 +1617,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       return (Kind          => Raw_Data.Kind,
               Source_Buffer => Text_Cst_Access (TDH.Source_Buffer),
               Source_First  => Raw_Data.Source_First,
-              Source_Last   => Raw_Data.Source_LAst,
+              Source_Last   => Raw_Data.Source_Last,
               Sloc_Range    => Raw_Data.Sloc_Range);
    end Convert;
 
