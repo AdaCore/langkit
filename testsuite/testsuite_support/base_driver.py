@@ -1,6 +1,7 @@
 import os
 import os.path
 
+# pyflakes off
 with_gnatpython = False
 if not os.environ.get('WITHOUT_GNATPYTHON'):
     try:
@@ -13,6 +14,7 @@ if not os.environ.get('WITHOUT_GNATPYTHON'):
         with_gnatpython = True
 if not with_gnatpython:
     from testsuite_support.polyfill import fileutils, Run, STDOUT, TestDriver
+# pyflakes on
 
 
 class SetupError(Exception):

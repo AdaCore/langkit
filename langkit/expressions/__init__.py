@@ -13,9 +13,11 @@ notably to define properties on AST nodes.
 
 from __future__ import absolute_import
 
+# pyflakes off
 from langkit.expressions.base import *
 from langkit.expressions.boolean import *
 from langkit.expressions.collections import *
 from langkit.expressions.envs import *
 from langkit.expressions.logic import *
 from langkit.expressions.structs import *
+# pyflakes on
