@@ -13,7 +13,7 @@ use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 --  TODO??? For now, consider that this package is not part of the public API.
 --  Please use the Analysis package to parse source files.
 
-package ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
+private package ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
 
    type Cst_String is access constant String;
 
