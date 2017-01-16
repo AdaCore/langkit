@@ -60,7 +60,13 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
       TDH : Token_Data_Handler_Access renames Token_Data (Unit);
    begin
       Lex_From_Filename (Filename, Charset, Read_BOM, TDH.all, With_Trivia);
-      return (Unit => Unit, TDH => TDH, others => <>);
+      return (Unit            => Unit,
+              TDH             => TDH,
+              % if ctx.symbol_literals:
+              Symbol_Literals =>
+                 Unit.Context.Symbol_Literals'Unrestricted_Access,
+              % endif
+              others          => <>);
    end Create_From_File;
 
    ------------------------
@@ -77,7 +83,13 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
       TDH : Token_Data_Handler_Access renames Token_Data (Unit);
    begin
       Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH.all, With_Trivia);
-      return (Unit => Unit, TDH => TDH, others => <>);
+      return (Unit            => Unit,
+              TDH             => TDH,
+              % if ctx.symbol_literals:
+              Symbol_Literals =>
+                 Unit.Context.Symbol_Literals'Unrestricted_Access,
+              % endif
+              others          => <>);
    end Create_From_Buffer;
 
    ---------------------------

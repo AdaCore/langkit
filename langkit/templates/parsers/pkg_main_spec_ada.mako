@@ -40,12 +40,15 @@ private package ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
    end record;
 
    type Parser_Type is record
-      Current_Pos : Token_Index := First_Token_Index;
-      Last_Fail   : Fail_Info;
-      Diagnostics : Diagnostics_Vectors.Vector;
-      Unit        : Analysis_Unit;
-      TDH         : Token_Data_Handler_Access;
-      Mem_Pool    : Bump_Ptr_Pool;
+      Current_Pos     : Token_Index := First_Token_Index;
+      Last_Fail       : Fail_Info;
+      Diagnostics     : Diagnostics_Vectors.Vector;
+      Unit            : Analysis_Unit;
+      TDH             : Token_Data_Handler_Access;
+      Mem_Pool        : Bump_Ptr_Pool;
+      % if ctx.symbol_literals:
+      Symbol_Literals : Symbol_Literal_Array_Access;
+      % endif
    end record;
 
    function Create_From_File
