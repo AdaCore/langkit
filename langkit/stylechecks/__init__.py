@@ -418,10 +418,6 @@ class PythonLang(LanguageChecker):
         report.
         """
 
-        # Make pyflakes checks optional for now
-        if not os.environ.get('RUN_PYFLAKES_CHECKS'):
-            return
-
         # Just exit silently if pyflakes is not available
         try:
             from pyflakes import api, reporter
