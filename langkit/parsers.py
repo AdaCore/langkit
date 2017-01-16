@@ -700,10 +700,11 @@ def Pick(*parsers):
         if (isinstance(p, ignore)
                 or isinstance(p, Opt) and isinstance(p.parser, ignore)):
             continue
-        check_source_language(
-            pick_parser_idx == -1,
-            "Pick parser can have only one sub-parser that is not a token"
-        )
+        with Context("", extract_library_location()):
+            check_source_language(
+                pick_parser_idx == -1,
+                "Pick parser can have only one sub-parser that is not a token"
+            )
         pick_parser_idx = i
 
     if pick_parser_idx == -1:
