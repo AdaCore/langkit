@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 """
-Style-checker engine for the Libadalang project.
+Style-checker engine for the Langkit project.
 
 This engine, which checks comments and docstrings is meant to be used in
 addition to PEP8/GNAT checks. As a quick-n-dirty script, the details of the
