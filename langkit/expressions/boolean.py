@@ -1,3 +1,5 @@
+import inspect
+
 from langkit import names
 from langkit.compiled_types import (
     ASTNode, BoolType, EquationType, LexicalEnvType, LongType, Struct, Symbol
@@ -391,10 +393,24 @@ class Then(AbstractExpression):
         self.underscore_then = False
 
     def do_prepare(self):
-        if not self.then_expr:
-            self.var_expr = AbstractVariable(names.Name("Var_Expr"),
-                                             create_local=True)
-            self.then_expr = self.then_fn(self.var_expr)
+        # If this Then was created using create_from exprs, there is no lambda
+        # expansion to do.
+        if self.then_expr:
+            return
+
+        argspec = inspect.getargspec(self.then_fn)
+        check_source_language(
+            len(argspec.args) == 1
+            and not argspec.varargs
+            and not argspec.keywords
+            and not argspec.defaults,
+            'Invalid lambda for Then expression: exactly one parameter is'
+            ' required, without a default value'
+        )
+
+        self.var_expr = AbstractVariable(names.Name("Var_Expr"),
+                                         create_local=True)
+        self.then_expr = self.then_fn(self.var_expr)
 
     def construct(self):
         # Add var_expr to the scope for this Then expression
