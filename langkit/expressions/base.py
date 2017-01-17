@@ -1486,7 +1486,8 @@ class PropertyDef(AbstractNodeData):
 
         # If the expr has not yet been constructed, try to construct it
         if not self.constructed_expr:
-            self.construct_and_type_expression()
+            with self.diagnostic_context():
+                self.construct_and_type_expression()
 
         return resolve_type(self.constructed_expr.type)
 
