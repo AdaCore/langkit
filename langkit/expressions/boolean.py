@@ -408,8 +408,9 @@ class Then(AbstractExpression):
             ' required, without a default value'
         )
 
-        self.var_expr = AbstractVariable(names.Name("Var_Expr"),
-                                         create_local=True)
+        self.var_expr = AbstractVariable(
+            names.Name("Var_Expr"), create_local=True,
+            source_name=names.Name(argspec.args[0]))
         self.then_expr = self.then_fn(self.var_expr)
 
     def construct(self):
