@@ -802,7 +802,7 @@ class AbstractVariable(AbstractExpression):
                 self.name.lower
             )
 
-    def __init__(self, name, type=None, create_local=False):
+    def __init__(self, name, type=None, create_local=False, source_name=None):
         """
         :param names.Name name: The name of the PlaceHolder variable.
         :param CompiledType type: The type of the variable. Optional for
@@ -810,6 +810,8 @@ class AbstractVariable(AbstractExpression):
             if create_local is True.
         :param bool create_local: Whether to create a corresponding local
             variable in the current property.
+        :param names.Name|None source_name: If this variables comes from the
+            language specification, hold its original name.
         """
         super(AbstractVariable, self).__init__()
         self.local_var = None
@@ -821,6 +823,7 @@ class AbstractVariable(AbstractExpression):
             self._name = name
 
         self._type = type
+        self.source_name = source_name
 
     def add_to_scope(self, scope):
         """
