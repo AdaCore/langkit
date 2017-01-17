@@ -32,7 +32,8 @@ from langkit.common import gen_name, gen_names
 from langkit.compile_context import get_context
 from langkit.compiled_types import ASTNode, BoolType, CompiledType, Token
 from langkit.diagnostics import (
-    Context, Location, check_source_language, extract_library_location
+    Context, Location, check_source_language, extract_library_location,
+    Severity
 )
 from langkit.lexer import WithSymbol
 from langkit.template_utils import TemplateEnvironment
@@ -701,7 +702,8 @@ def Pick(*parsers):
         with Context("", extract_library_location()):
             check_source_language(
                 pick_parser_idx == -1,
-                "Pick parser can have only one sub-parser that is not a token"
+                "Pick parser can have only one sub-parser that is not a token",
+                Severity.non_blocking_error
             )
         pick_parser_idx = i
 
