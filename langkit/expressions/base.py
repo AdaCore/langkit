@@ -845,6 +845,8 @@ class AbstractVariable(AbstractExpression):
         Cache used to memoize the "construct" method.
         """
 
+        self.ignored = False
+
     def add_to_scope(self, scope):
         """
         Add this already existing variable to "scope".
@@ -1984,7 +1986,9 @@ class PropertyDef(AbstractNodeData):
             for var in (self.constructed_expr.bindings
                         + [construct(arg)
                            for arg in self.explicit_argument_vars])
-            if var.source_name != ignored_name
+            if (var.source_name != ignored_name
+                and (var.abstract_var is None
+                     or not var.abstract_var.ignored))
         }
 
         def mark_vars(expr):
@@ -2565,3 +2569,15 @@ class Arithmetic(AbstractExpression):
         return BasicExpr("({} %s {})" % self.op,
                          LongType, [construct(self.l, LongType),
                                     construct(self.r, LongType)])
+
+
+def ignore(*vars):
+    """
+    Annotate variables in "var" as being intentionally unused.
+
+    This disables the warning on unused bindings for them.
+
+    :type vars: list[AbstractVariable]
+    """
+    for var in vars:
+        var.ignored = True
