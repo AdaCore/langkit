@@ -597,7 +597,8 @@ def localmain():
         dirs = (os.path.join(LANGKIT_DIR), )
         excludes = (
             os.path.join('langkit', 'adalog', 'obj'), "tmp", "doc",
-            os.path.join('stylechecks', 'tests.py')
+            os.path.join('stylechecks', 'tests.py'),
+            'misc'
         )
         main(None, dirs, excludes)
 
