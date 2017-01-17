@@ -11,9 +11,8 @@ from langkit.diagnostics import (
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BuiltinCallExpr, PropertyDef,
     ResolvedExpression, attr_expr, attr_call, auto_attr_custom, auto_attr,
-    construct, render
+    construct, render, unsugar
 )
-from langkit.utils import assert_type
 
 
 class CollectionExpression(AbstractExpression):
@@ -70,7 +69,7 @@ class CollectionExpression(AbstractExpression):
             expr = self.expr_fn(self.index_var, self.element_var)
         else:
             expr = self.expr_fn(self.element_var)
-        self.expr = assert_type(expr, AbstractExpression)
+        self.expr = unsugar(expr)
 
     def construct_common(self):
         """
