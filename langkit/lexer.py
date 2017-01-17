@@ -153,48 +153,36 @@ class WithSymbol(TokenAction):
         return "=> {}(Lexeme);".format(lexer.quex_token_name(self.name.upper))
 
 
-class LexerTokenMetaclass(type):
-    """
-    Internal metaclass for LexerToken. Used to:
-    - Associate names with corresponding token actions;
-    - Allow iteration on the LexerToken class to get back a list of token
-      actions.
-    """
-    def __new__(mcs, name, bases, dct):
-        assert len(bases) == 1, (
-            "Multiple inheritance for LexerToken subclasses is not supported"
-        )
-
-        fields = []
-        for fld_name, fld_value in dct.items():
-            if isinstance(fld_value, TokenAction):
-                fld_value.name = Name.from_camel(fld_name)
-                fields.append(fld_value)
-
-        dct['fields'] = getattr(bases[0], 'fields', []) + fields
-        return type.__new__(mcs, name, bases, dct)
-
-    def __iter__(cls):
-        return (fld for fld in cls.fields)
-
-    def __len__(cls):
-        return len(cls.fields)
-
-
 class LexerToken(object):
     """
     Base class from which your token class must derive. Every member needs to
     be an instanciation of a subclass of TokenAction, specifiying what is done
     with the resulting token.
     """
-    __metaclass__ = LexerTokenMetaclass
-
     # Built-in termination token. Since it will always be the first token kind,
     # its value will always be zero.
     Termination = WithText()
 
     # Built-in token to represent a lexing failure
     LexingFailure = WithText()
+
+    def __init__(self):
+        import inspect
+        self.fields = []
+        for c in inspect.getmro(self.__class__):
+            self.add_tokens(c)
+
+    def add_tokens(self, klass):
+        for fld_name, fld_value in klass.__dict__.items():
+            if isinstance(fld_value, TokenAction):
+                fld_value.name = Name.from_camel(fld_name)
+                self.fields.append(fld_value)
+
+    def __iter__(self):
+        return (fld for fld in self.fields)
+
+    def __len__(self):
+        return len(self.fields)
 
 
 class Patterns(object):
@@ -270,13 +258,13 @@ class Lexer(object):
             not. If this is true, then the special Layout parsers can be used
             to do indentation sensitive parsing.
         """
-        self.tokens_class = tokens_class
-        assert issubclass(tokens_class, LexerToken)
+        self.tokens = tokens_class()
+        assert isinstance(self.tokens, LexerToken)
 
         self.patterns = Patterns()
         self.__patterns = []
         self.rules = []
-        self.tokens_set = {el.name for el in self.tokens_class}
+        self.tokens_set = {el.name for el in self.tokens}
         self.track_indent = track_indent
 
         # This map will keep a mapping from literal matches to token kind
@@ -296,14 +284,14 @@ class Lexer(object):
         # class.
         self.token_actions = defaultdict(set)
 
-        for el in self.tokens_class:
+        for el in self.tokens:
             self.token_actions[type(el).__name__].add(el)
 
         # These are automatic rules, useful for all lexers: handle end of input
         # and invalid tokens.
         self.add_rules(
-            (Eof(),     self.tokens_class.Termination),
-            (Failure(), self.tokens_class.LexingFailure),
+            (Eof(),     self.tokens.Termination),
+            (Failure(), self.tokens.LexingFailure),
         )
 
     def add_patterns(self, *patterns):
@@ -378,7 +366,7 @@ class Lexer(object):
         """
         return common_renderer.render(
             "lexer/quex_lexer_spec",
-            tokens_class=self.tokens_class,
+            tokens=self.tokens,
             patterns=self.__patterns,
             rules=self.rules,
             lexer=self
@@ -390,7 +378,7 @@ class Lexer(object):
 
         :param TokenAction|Enum|Name|str token: Input token. It can be either a
             TokenAction subclass (i.e. a Lexer subclass attribute), an enum
-            value from "self.tokens_class", the token Name or a string (case
+            value from "self.tokens", the token Name or a string (case
             insensitive token name).
         :rtype: Name
         """
@@ -402,7 +390,7 @@ class Lexer(object):
         else:
             assert isinstance(token, str), (
                 "Bad type for {}, supposed to be str|{}".format(
-                    token, self.tokens_class.__name__
+                    token, self.tokens.__name__
                 )
             )
             name = Name.from_lower(token.lower())
@@ -460,7 +448,7 @@ class Lexer(object):
 
         :rtype: list[TokenAction]
         """
-        return sorted(self.tokens_class, key=lambda t: t.value)
+        return sorted(self.tokens, key=lambda t: t.value)
 
 
 class Literal(Matcher):

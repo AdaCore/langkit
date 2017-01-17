@@ -42,7 +42,7 @@ token_type {
 }
 
 token {
-    % for tok in tokens_class:
+    % for tok in tokens:
     ${tok.name.upper} = ${tok.value};
     % endfor
 }

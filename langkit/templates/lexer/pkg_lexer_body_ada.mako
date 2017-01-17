@@ -470,7 +470,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
    end Decode_Buffer;
 
    Token_Kind_Names : constant array (Token_Kind) of String_Access := (
-      % for tok in ctx.lexer.tokens_class:
+      % for tok in ctx.lexer.tokens:
           ${ctx.lexer.ada_token_name(tok)} =>
              new String'("${tok.name}")
           % if (not loop.last):
