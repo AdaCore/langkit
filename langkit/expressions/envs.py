@@ -192,6 +192,10 @@ class EnvBindExpr(ResolvedExpression):
         with Env.bind_name(self.env_var.name):
             return self.to_eval_expr.render_expr()
 
+    @property
+    def subexprs(self):
+        return [self.env_expr, self.to_eval_expr]
+
     def __repr__(self):
         return '<EnvBind.Expr>'
 

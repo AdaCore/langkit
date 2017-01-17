@@ -62,6 +62,10 @@ class Cast(AbstractExpression):
         def _render_expr(self):
             return self.result_var.name
 
+        @property
+        def subexprs(self):
+            return [self.expr]
+
         def __repr__(self):
             return '<Cast.Expr {}>'.format(self.static_type.name().camel)
 
@@ -169,6 +173,10 @@ class New(AbstractExpression):
                                             expr.render_expr())
                           for name, expr in self._iter_ordered())
             )
+
+        @property
+        def subexprs(self):
+            return self.assocs.values()
 
         def __repr__(self):
             return '<New.{} {}>'.format(type(self).__name__,
@@ -381,6 +389,10 @@ class FieldAccess(AbstractExpression):
 
             return ret
 
+        @property
+        def subexprs(self):
+            return [self.receiver_expr] + self.arguments
+
     def __init__(self, receiver, field, arguments=()):
         """
         :param AbstractExpression receiver: Expression on which the field
@@ -532,6 +544,10 @@ class IsA(AbstractExpression):
                     for a in self.astnodes
                 )
             )
+
+        @property
+        def subexprs(self):
+            return [self.expr]
 
         def __repr__(self):
             return '<IsA.Expr {}>'.format(', '.join(

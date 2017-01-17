@@ -956,6 +956,13 @@ class Let(AbstractExpression):
         def _render_expr(self):
             return self.expr.render_expr()
 
+        @property
+        def subexprs(self):
+            return self.var_exprs + [self.expr]
+
+        def _bindings(self):
+            return self.vars
+
         def __repr__(self):
             return '<Let.Expr (vars: {})>'.format(
                 ', '.join(var.name.lower for var in self.vars)
@@ -2005,6 +2012,11 @@ class BasicExpr(ResolvedExpression):
                          for expr in self.operands
                          if not isinstance(expr, basestring))
 
+    @property
+    def subexprs(self):
+        return [op for op in self.operands
+                if isinstance(op, ResolvedExpression)]
+
 
 class LiteralExpr(BasicExpr):
     """
@@ -2061,6 +2073,10 @@ class FieldAccessExpr(BasicExpr):
             )
         else:
             return base
+
+    @property
+    def subexprs(self):
+        return [self.prefix_expr]
 
 
 class ArrayExpr(BasicExpr):

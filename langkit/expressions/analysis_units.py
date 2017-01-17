@@ -44,6 +44,10 @@ class AnalysisUnitRoot(ResolvedExpression):
     def _render_expr(self):
         return 'Root ({})'.format(self.prefix_var.name)
 
+    @property
+    def subexprs(self):
+        return [self.unit_expr]
+
 
 @auto_attr
 def unit(node):

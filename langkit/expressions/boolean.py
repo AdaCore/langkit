@@ -194,6 +194,10 @@ class OrderingTest(AbstractExpression):
                 self.rhs.render_expr()
             )
 
+        @property
+        def subexprs(self):
+            return [self.lhs, self.rhs]
+
         def __repr__(self):
             return '<OrderingTest.Expr {}>'.format(self.operator)
 
@@ -255,6 +259,10 @@ class If(AbstractExpression):
         def _render_expr(self):
             return self.result_var.name.camel_with_underscores
 
+        @property
+        def subexprs(self):
+            return [self.cond, self.then, self.else_then]
+
         def __repr__(self):
             return '<If.Expr>'
 
@@ -308,6 +316,10 @@ class Not(AbstractExpression):
     def make_expr(expr):
         return BasicExpr('not ({})', BoolType, [expr])
 
+    @property
+    def subexprs(self):
+        return [self.expr]
+
 
 @attr_call('then')
 class Then(AbstractExpression):
@@ -340,6 +352,13 @@ class Then(AbstractExpression):
 
         def _render_expr(self):
             return self.result_var.name.camel_with_underscores
+
+        @property
+        def subexprs(self):
+            return [self.expr, self.then_expr, self.default_expr]
+
+        def _bindings(self):
+            return [self.var_expr]
 
         def __repr__(self):
             return '<Then.Expr>'

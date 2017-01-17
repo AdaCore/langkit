@@ -235,6 +235,17 @@ class Map(CollectionExpression):
         def _render_expr(self):
             return self.array_var.name.camel_with_underscores
 
+        @property
+        def subexprs(self):
+            return [expr
+                    for expr in [self.take_while, self.collection, self.expr,
+                                 self.filter]
+                    if expr is not None]
+
+        def _bindings(self):
+            return [var for var in [self.element_var, self.index_var]
+                    if var is not None]
+
     def __init__(self, collection, expr, filter_expr=lambda x: None,
                  concat=False, take_while_pred=lambda x: None):
         """
@@ -374,6 +385,14 @@ class Quantifier(CollectionExpression):
         def _render_expr(self):
             return self.result_var.name.camel_with_underscores
 
+        @property
+        def subexprs(self):
+            return [self.collection, self.expr]
+
+        def _bindings(self):
+            return [var for var in [self.element_var, self.index_var]
+                    if var is not None]
+
         def __repr__(self):
             return '<Quantifier.Expr {}>'.format(self.kind)
 
@@ -492,6 +511,10 @@ class CollectionSingleton(AbstractExpression):
 
         def _render_expr(self):
             return self.array_var.name
+
+        @property
+        def subexprs(self):
+            return [self.expr]
 
     def __init__(self, expr):
         """

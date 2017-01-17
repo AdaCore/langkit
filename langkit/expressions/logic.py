@@ -207,6 +207,10 @@ class DomainExpr(ResolvedExpression):
     def _render_expr(self):
         return str(self.res_var.name)
 
+    @property
+    def subexprs(self):
+        return [self.domain, self.logic_var_expr]
+
 
 @auto_attr
 def domain(logic_var_expr, domain):
