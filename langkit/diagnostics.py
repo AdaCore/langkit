@@ -239,6 +239,16 @@ def check_source_language(predicate, message, severity=Severity.error):
             Diagnostics.has_pending_error = True
 
 
+def warn_if(predicate, message):
+    """
+    Shortcut for check_source_language with severity=Severity.warning.
+
+    Note that the predicated is negated: the warning is emitted if predicate is
+    False.
+    """
+    return check_source_language(not predicate, message, Severity.warning)
+
+
 def check_multiple(predicates_and_messages, severity=Severity.error):
     """
     Helper around check_source_language, check multiple predicates at once.
