@@ -797,10 +797,23 @@ class AbstractVariable(AbstractExpression):
         def _render_expr(self):
             return self.name.camel_with_underscores
 
+        @property
+        def source_name(self):
+            """
+            If it comes from the language specification, return the original
+            source name for this variable. Return None otherwise.
+
+            :rtype: names.Name|None
+            """
+            return (self.abstract_var.source_name
+                    if self.abstract_var and self.abstract_var.source_name else
+                    None)
+
         def __repr__(self):
-            return '<AbstractVariable.Expression {}>'.format(
-                self.name.lower
-            )
+            src_name = self.source_name
+            return '<AbstractVariable.Expression {}{}>'.format(
+                self.name.lower,
+                ' ({})'.format(src_name.lower) if src_name else '')
 
     def __init__(self, name, type=None, create_local=False, source_name=None):
         """
