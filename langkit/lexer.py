@@ -108,6 +108,13 @@ class TokenAction(Action):
         """
         raise NotImplementedError()
 
+    def __call__(self, *args, **kwargs):
+        """
+        Shortcut to create token parsers in the grammar.
+        """
+        from langkit.parsers import Tok
+        return Tok(self, *args, **kwargs)
+
 
 class WithText(TokenAction):
     """
