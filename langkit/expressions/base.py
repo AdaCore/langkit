@@ -809,6 +809,14 @@ class AbstractVariable(AbstractExpression):
                     if self.abstract_var and self.abstract_var.source_name else
                     None)
 
+        @property
+        def ignored(self):
+            """
+            If this comes from the language specification, return whether it is
+            supposed to be ignored. Return False otherwise.
+            """
+            return self.abstract_var.ignored if self.abstract_var else False
+
         def __repr__(self):
             src_name = self.source_name
             return '<AbstractVariable.Expr {}{}>'.format(
@@ -845,7 +853,7 @@ class AbstractVariable(AbstractExpression):
         Cache used to memoize the "construct" method.
         """
 
-        self.ignored = False
+        self.ignored = source_name == names.Name.from_lower('_')
 
     def add_to_scope(self, scope):
         """
@@ -1977,35 +1985,46 @@ class PropertyDef(AbstractNodeData):
     def warn_on_unused_bindings(self):
         """
         Emit warnings for bindings such as variables or arguments, that are not
-        used.
+        used. Also emit warnings for bindings that are used whereas they have
+        been tagged as ignored.
         """
         # Mapping to tell for each variable if it is referenced at least once
-        ignored_name = names.Name.from_lower('_')
-        used_vars = {
+        all_vars = {
             var: False
             for var in (self.constructed_expr.bindings
                         + [construct(arg)
                            for arg in self.explicit_argument_vars])
-            if (var.source_name != ignored_name
-                and (var.abstract_var is None
-                     or not var.abstract_var.ignored))
         }
 
         def mark_vars(expr):
             if isinstance(expr, AbstractVariable.Expr):
-                used_vars[expr] = True
+                all_vars[expr] = True
             for sub in expr.subexprs:
                 mark_vars(sub)
 
         mark_vars(self.constructed_expr)
-        unused_vars = [var for var, is_used in used_vars.items()
-                       if not is_used]
+        unused_vars = [var for var, is_used in all_vars.items()
+                       if not is_used and not var.ignored]
+        wrongly_used_vars = [var for var, is_used in all_vars.items()
+                             if is_used and var.ignored]
+
+        unused_vars.sort(key=lambda var: var.name)
+        wrongly_used_vars.sort(key=lambda var: var.name)
+
+        def format_list(vars):
+            return ', '.join(
+                (var.source_name or var.name).lower
+                for var in vars
+            )
+
         warn_if(
             unused_vars,
             'The following bindings are not used: {}'.format(
-                ', '.join((var.source_name or var.name).lower
-                          for var in sorted(unused_vars,
-                                            key=lambda var: var.name))))
+                format_list(unused_vars)))
+        warn_if(
+            wrongly_used_vars,
+            'The following bindings are used even though they are supposed to'
+            ' be ignored: {}'.format(format_list(wrongly_used_vars)))
 
 
 def ExternalProperty(type=None, doc="", **kwargs):
