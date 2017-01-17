@@ -9,9 +9,9 @@ from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
 from langkit.expressions.base import (
-    AbstractExpression, construct, ResolvedExpression, AbstractVariable,
-    render, PropertyDef, BuiltinCallExpr, attr_expr, attr_call,
-    auto_attr_custom, auto_attr
+    AbstractExpression, AbstractVariable, BuiltinCallExpr, PropertyDef,
+    ResolvedExpression, attr_expr, attr_call, auto_attr_custom, auto_attr,
+    construct, render
 )
 from langkit.utils import assert_type
 
