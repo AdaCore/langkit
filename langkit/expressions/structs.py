@@ -692,7 +692,8 @@ class Match(AbstractExpression):
             match_var = AbstractVariable(
                 names.Name('Match_{}'.format(i)),
                 type=match_type,
-                create_local=True
+                create_local=True,
+                source_name=names.Name.from_lower(argspec.args[0])
             )
             self.matchers.append((match_type, match_var, match_fn(match_var)))
 
