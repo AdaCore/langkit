@@ -959,6 +959,44 @@ class SymbolLiteral(AbstractExpression):
         )
 
 
+class BindingScope(ResolvedExpression):
+    """
+    Resolved expression that materializes new bindings.
+
+    This resolved expression is just an annotation: it is useless from a code
+    generation point of view. It makes it possible to describe the creation of
+    new bindings for some scope.
+    """
+
+    def __init__(self, expr, bindings):
+        """
+        :type expr: ResolvedExpression
+        :type bindings: list[AbstractExpression.Expr]
+        """
+        super(BindingScope, self).__init__()
+        self.expr = expr
+        self.expr_bindings = bindings
+        self.static_type = self.expr.type
+
+    def _render_pre(self):
+        return self.expr._render_pre()
+
+    def _render_expr(self):
+        return self.expr._render_expr()
+
+    @property
+    def subexprs(self):
+        return self.expr.subexprs
+
+    def _bindings(self):
+        return self.expr_bindings
+
+    def __repr__(self):
+        return '<BindingScope ({}): {}>'.format(
+            ', '.join(repr(b) for b in self.expr_bindings),
+            repr(self.expr))
+
+
 class Let(AbstractExpression):
     """
     Abstract expressions that associates names to values from other abstract
