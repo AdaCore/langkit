@@ -19,21 +19,23 @@ Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 @root_grammar_class()
 class FooNode(ASTNode):
-    pass
+    get_num = Property(1)
 
 
 class BarNode(FooNode):
-    pass
+    get_num = Property(2)
 
 
 class Literal(FooNode):
     tok = Field()
 
+    get_num = Property(3)
+
     a = AbstractProperty(runtime_check=True, type=FooNode.env_el())
 
     b = Property(Self.a.match(
-        lambda b=BarNode.env_el(): 12,
-        lambda c=FooNode.env_el(): 12,
+        lambda b=BarNode.env_el(): b.get_num,
+        lambda c=FooNode.env_el(): c.get_num,
     ))
 
 
