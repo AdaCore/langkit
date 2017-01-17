@@ -35,7 +35,7 @@ def run(name, prop_expr):
     class BazNode(FooNode):
         prop = Property(12)
         prop2 = Property(True)
-        prop3 = Property(lambda other=T.BarNode: True)
+        prop3 = Property(lambda _=T.BarNode: True)
         prop4 = Property(lambda other=T.BazNode: Self == other)
 
     def lang_def():
