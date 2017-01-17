@@ -450,6 +450,12 @@ class Lexer(object):
         """
         return sorted(self.tokens, key=lambda t: t.value)
 
+    def __getattr__(self, attr):
+        """
+        Shortcut to get a TokenAction stored in self.tokens.
+        """
+        return getattr(self.tokens, attr)
+
 
 class Literal(Matcher):
     """
