@@ -1009,7 +1009,8 @@ class Let(AbstractExpression):
         # Create the variables this Let expression binds and expand the result
         # expression using them.
         self.vars = [
-            AbstractVariable(names.Name.from_lower(arg), create_local=True)
+            AbstractVariable(names.Name.from_lower(arg), create_local=True,
+                             source_name=names.Name.from_lower(arg))
             for arg in self.var_names
         ]
         self.expr = self.lambda_fn(*self.vars)
