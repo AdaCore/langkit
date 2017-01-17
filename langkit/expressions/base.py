@@ -1424,7 +1424,8 @@ class PropertyDef(AbstractNodeData):
         :param None|str default_value: Default value for this argument, if any.
         """
         self.arguments.append(Argument(name, type, default_value))
-        self.argument_vars.append(AbstractVariable(name, type))
+        self.argument_vars.append(AbstractVariable(name, type,
+                                                   source_name=name))
 
     def base_property(self):
         """
