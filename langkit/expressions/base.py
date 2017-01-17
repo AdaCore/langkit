@@ -778,16 +778,19 @@ class AbstractVariable(AbstractExpression):
         Resolved expression that represents a variable in generated code.
         """
 
-        def __init__(self, type, name):
+        def __init__(self, type, name, abstract_var=None):
             """
             Create a variable reference expression.
 
             :param langkit.compiled_types.CompiledType type: Type for the
                 referenced variable.
             :param names.Name name: Name of the referenced variable.
+            :param AbstractVariable|None source_name: AbstractVariable that
+                compiled to this resolved expression, if any.
             """
             self.static_type = assert_type(type, CompiledType)
             self.name = name
+            self.abstract_var = abstract_var
 
             super(AbstractVariable.Expr, self).__init__()
 
@@ -861,7 +864,7 @@ class AbstractVariable(AbstractExpression):
         self._type = _old_type
 
     def construct(self):
-        return AbstractVariable.Expr(self._type, self._name)
+        return AbstractVariable.Expr(self._type, self._name, self)
 
     @property
     def type(self):
