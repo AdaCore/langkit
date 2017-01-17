@@ -2,7 +2,9 @@ from langkit.compiled_types import (
     ASTNode, BoolType, Field, T, root_grammar_class
 )
 from langkit.diagnostics import Diagnostics
-from langkit.expressions import Let, Property, Self, Var, langkit_property
+from langkit.expressions import (
+    Let, Property, Self, Var, langkit_property, ignore
+)
 from langkit.parsers import Grammar, List, Or, Row
 
 from os import path
@@ -25,7 +27,8 @@ class ExampleList(FooNode):
     items = Field()
 
     @langkit_property()
-    def unused_param(ex_param=T.FooNode):
+    def unused_param(ex_param=T.FooNode, ex_used_param=T.FooNode):
+        ignore(ex_used_param)
         return Self.items.at(0)
 
     @langkit_property()
