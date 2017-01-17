@@ -724,6 +724,41 @@ class ResolvedExpression(object):
             )
         return self.static_type
 
+    @property
+    def subexprs(self):
+        """
+        Return the list of subexpressions used as operands for "self".
+
+        Subclasses must override this property if they have operands.
+
+        :rtype: list[ResolvedExpression]
+        """
+        return []
+
+    @property
+    def bindings(self):
+        """
+        Return the list of variables defined in "self", including in subexprs.
+
+        Subclasses must override the "_bindings" method.
+
+        :rtype: list[AbstractVariable.Expr]
+        """
+        result = self._bindings()
+        for expr in self.subexprs:
+            result.extend(expr.bindings)
+        return result
+
+    def _bindings(self):
+        """
+        Return the list of variables "self" defines.
+
+        Subclasses must override this method if they define variables.
+
+        :rtype: list[AbstractVariable.Expr]
+        """
+        return []
+
 
 class AbstractVariable(AbstractExpression):
     """
