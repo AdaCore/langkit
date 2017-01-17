@@ -695,10 +695,8 @@ def Pick(*parsers):
     """
     parsers = [resolve(p) for p in parsers if p]
     pick_parser_idx = -1
-    ignore = (Tok, Discard)
     for i, p in enumerate(parsers):
-        if (isinstance(p, ignore)
-                or isinstance(p, Opt) and isinstance(p.parser, ignore)):
+        if p.discard():
             continue
         with Context("", extract_library_location()):
             check_source_language(
@@ -971,6 +969,9 @@ class Opt(Parser):
         self._is_error = False
         self.contains_anonymous_row = bool(parsers)
         self.parser = Pick(parser, *parsers) if parsers else resolve(parser)
+
+    def discard(self):
+        return (not self._booleanize) and self.parser.discard()
 
     def error(self):
         """
