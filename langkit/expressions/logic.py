@@ -371,7 +371,7 @@ class Predicate(AbstractExpression):
                        "Dbg_Img => (if Debug then new String'({})"
                        "            else null)"]
                 )
-            ), type=None, sub_exprs=closure_exprs)
+            ), type=None, operands=closure_exprs)
         )
 
         return BuiltinCallExpr(

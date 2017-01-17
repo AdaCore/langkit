@@ -139,7 +139,7 @@ def env_get(env_expr, token_expr, resolve_unique=False, sequential=False,
     sub_exprs.append(construct(recursive, BoolType))
 
     make_expr = partial(BasicExpr, result_var_name="Env_Get_Result",
-                        sub_exprs=sub_exprs)
+                        operands=sub_exprs)
 
     if resolve_unique:
         return make_expr("Get ({}, 0)".format(array_expr),

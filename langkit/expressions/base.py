@@ -1948,13 +1948,13 @@ class BasicExpr(ResolvedExpression):
       are in the template.
     """
 
-    def __init__(self, template, type, sub_exprs, result_var_name=None):
+    def __init__(self, template, type, operands, result_var_name=None):
         """
         :param str template: The template string.
         :param None|CompiledType type: The return type of the expression.
         :param None|str result_var_name: See ResolvedExpression's constructor.
         """
-        self.sub_exprs = sub_exprs
+        self.operands = operands
         self.static_type = type
         self.template = template
         super(BasicExpr, self).__init__(result_var_name)
@@ -1962,12 +1962,12 @@ class BasicExpr(ResolvedExpression):
     def _render_expr(self):
         return self.template.format(*[
             (expr if isinstance(expr, basestring) else expr.render_expr())
-            for expr in self.sub_exprs
+            for expr in self.operands
         ])
 
     def _render_pre(self):
         return '\n'.join(expr.render_pre()
-                         for expr in self.sub_exprs
+                         for expr in self.operands
                          if not isinstance(expr, basestring))
 
 
