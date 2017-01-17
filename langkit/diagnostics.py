@@ -200,8 +200,12 @@ def get_parsable_location():
 
     :rtype: str
     """
-    loc = get_structured_context()[0][1]
-    return "{}:{}:1".format(path.abspath(loc.file), loc.line)
+    ctx = get_structured_context()
+    if ctx:
+        loc = ctx[0][1]
+        return "{}:{}:1".format(path.abspath(loc.file), loc.line)
+    else:
+        return ""
 
 
 def check_source_language(predicate, message, severity=Severity.error):
