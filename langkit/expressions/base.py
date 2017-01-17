@@ -811,7 +811,7 @@ class AbstractVariable(AbstractExpression):
 
         def __repr__(self):
             src_name = self.source_name
-            return '<AbstractVariable.Expression {}{}>'.format(
+            return '<AbstractVariable.Expr {}{}>'.format(
                 self.name.lower,
                 ' ({})'.format(src_name.lower) if src_name else '')
 
