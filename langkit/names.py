@@ -31,7 +31,10 @@ class Name(object):
         return hash(self.base_name)
 
     def __eq__(self, other):
-        return self.base_name == other.base_name
+        return isinstance(other, Name) and self.base_name == other.base_name
+
+    def __ne__(self, other):
+        return not (self == other)
 
     def __lt__(self, other):
         return self.base_name < other.base_name
