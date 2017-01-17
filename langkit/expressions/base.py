@@ -1089,6 +1089,8 @@ class Var(AbstractVariable):
     """
 
     def __init__(self, expr):
+        # TODO: get the original source name. This is unfortunately difficult,
+        # as this information is hidden in the source code of the caller.
         super(Var, self).__init__(names.Name("Block_Var"), create_local=True)
         Block.get().add_var(self, expr)
 
