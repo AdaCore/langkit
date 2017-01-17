@@ -25,7 +25,7 @@ def run(name, match_expr):
     @abstract
     @root_grammar_class()
     class FooNode(ASTNode):
-        pass
+        prop = Property(Literal(0))
 
     @abstract
     class BodyNode(FooNode):
@@ -76,52 +76,52 @@ def run(name, match_expr):
 
 # Incomplete set of matchers
 run('Missing NullNode', lambda: Self.body.match(
-    lambda e=Expression: Literal(0),
+    lambda e=Expression: e.prop,
 ))
 run('Missing Expression', lambda: Self.body.match(
-    lambda e=NullNode: Literal(0),
+    lambda e=NullNode: e.prop,
 ))
 run('Missing Compound', lambda: Self.body.match(
-    lambda e=NullNode: Literal(0),
-    lambda e=Number:   Literal(1),
+    lambda e=NullNode: e.prop,
+    lambda e=Number:   e.prop,
 ))
 
 # Invalid matchers
 run('Invalid type', lambda: Self.body.match(
-    lambda e=NullNode:   Literal(0),
-    lambda e=Expression: Literal(1),
-    lambda e=BoolType:   Literal(1),
+    lambda e=NullNode:   e.prop,
+    lambda e=Expression: e.prop,
+    lambda e=BoolType:   e.prop,
 ))
 run('Irrelevant AST node', lambda: Self.body.match(
-    lambda e=NullNode:   Literal(0),
-    lambda e=Expression: Literal(1),
-    lambda e=FooNode:    Literal(1),
+    lambda e=NullNode:   e.prop,
+    lambda e=Expression: e.prop,
+    lambda e=FooNode:    e.prop,
 ))
 
 # Unreachable matchers
 run('Default case after full coverage', lambda: Self.body.match(
-    lambda e=BodyNode: Literal(0),
+    lambda e=BodyNode: e.prop,
     lambda _:          Literal(1),
 ))
 
 run('Node after default case (1)', lambda: Self.body.match(
     lambda _:          Literal(0),
-    lambda e=BodyNode: Literal(1),
+    lambda e=BodyNode: e.prop,
 ))
 run('Node after default case (2)', lambda: Self.body.match(
     lambda _:        Literal(0),
-    lambda e=Number: Literal(1),
+    lambda e=Number: e.prop,
 ))
 
 run('Node after full coverage (1)', lambda: Self.body.match(
-    lambda e=BodyNode: Literal(0),
-    lambda e=Number:   Literal(1),
+    lambda e=BodyNode: e.prop,
+    lambda e=Number:   e.prop,
 ))
 run('Node after full coverage (2)', lambda: Self.body.match(
-    lambda e=NullNode: Literal(0),
-    lambda e=Number:   Literal(1),
-    lambda e=Compound: Literal(2),
-    lambda e=BodyNode: Literal(3),
+    lambda e=NullNode: e.prop,
+    lambda e=Number:   e.prop,
+    lambda e=Compound: e.prop,
+    lambda e=BodyNode: e.prop,
 ))
 
 print 'Done'
