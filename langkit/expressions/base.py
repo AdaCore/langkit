@@ -16,8 +16,8 @@ from langkit.compiled_types import (
     render as ct_render, resolve_type
 )
 from langkit.diagnostics import (
-    extract_library_location, check_source_language, check_multiple,
-    Severity, DiagnosticError, check_type, Context
+    Context, DiagnosticError, Severity, check_multiple, check_source_language,
+    check_type, extract_library_location, warn_if
 )
 from langkit.utils import TypeSet, assert_type, dispatch_on_type, memoized
 
@@ -1828,6 +1828,9 @@ class PropertyDef(AbstractNodeData):
         # scope.
         self.vars.check_scopes()
 
+        # Warn on unused bindings
+        self.warn_on_unused_bindings()
+
     def render_property(self):
         """
         Render the given property to generated code.
@@ -1949,6 +1952,37 @@ class PropertyDef(AbstractNodeData):
         """
         assert self.memoized
         return names.Name('Cached') + self.name
+
+    def warn_on_unused_bindings(self):
+        """
+        Emit warnings for bindings such as variables or arguments, that are not
+        used.
+        """
+        # Mapping to tell for each variable if it is referenced at least once
+        ignored_name = names.Name.from_lower('_')
+        used_vars = {
+            var: False
+            for var in (self.constructed_expr.bindings
+                        + [construct(arg)
+                           for arg in self.explicit_argument_vars])
+            if var.source_name != ignored_name
+        }
+
+        def mark_vars(expr):
+            if isinstance(expr, AbstractVariable.Expr):
+                used_vars[expr] = True
+            for sub in expr.subexprs:
+                mark_vars(sub)
+
+        mark_vars(self.constructed_expr)
+        unused_vars = [var for var, is_used in used_vars.items()
+                       if not is_used]
+        warn_if(
+            unused_vars,
+            'The following bindings are not used: {}'.format(
+                ', '.join((var.source_name or var.name).lower
+                          for var in sorted(unused_vars,
+                                            key=lambda var: var.name))))
 
 
 def ExternalProperty(type=None, doc="", **kwargs):
