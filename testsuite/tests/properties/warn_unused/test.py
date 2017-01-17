@@ -27,9 +27,11 @@ class ExampleList(FooNode):
     items = Field()
 
     @langkit_property()
-    def unused_param(ex_param=T.FooNode, ex_used_param=T.FooNode):
-        ignore(ex_used_param)
-        return Self.items.at(0)
+    def unused_param(ex_param=T.FooNode,
+                     ex_used_param=T.FooNode,
+                     ex_wrongly_used_param=T.FooNode):
+        ignore(ex_used_param, ex_wrongly_used_param)
+        return ex_wrongly_used_param
 
     @langkit_property()
     def unused_block_var():
