@@ -60,11 +60,12 @@ class CollectionExpression(AbstractExpression):
         self.requires_index = len(argspec.args) == 2
         self.element_var = AbstractVariable(
             names.Name("Item_{}".format(next(CollectionExpression._counter))),
+            source_name=names.Name.from_lower(argspec.args[0])
         )
         if self.requires_index:
             self.index_var = AbstractVariable(
-                names.Name('I'), type=LongType,
-                create_local=True
+                names.Name('I'), type=LongType, create_local=True,
+                source_name=names.Name.from_lower(argspec.args[1])
             )
             expr = self.expr_fn(self.index_var, self.element_var)
         else:
