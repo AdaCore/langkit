@@ -8,9 +8,9 @@ from langkit.compiled_types import (
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions.analysis_units import construct_analysis_unit_property
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, LiteralExpr, PropertyDef,
-    ResolvedExpression, Self, UnreachableExpr, construct, render, attr_expr,
-    attr_call
+    AbstractExpression, AbstractVariable, BindingScope, LiteralExpr,
+    PropertyDef, ResolvedExpression, Self, UnreachableExpr, attr_call,
+    attr_expr, construct, render
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
@@ -819,4 +819,5 @@ class Match(AbstractExpression):
 
             result = If.Expr(guard, expr, result, rtype)
 
-        return result
+        return BindingScope(
+            result, [construct(var) for _, var, _ in self.matchers])
