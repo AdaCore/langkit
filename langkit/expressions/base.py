@@ -838,6 +838,13 @@ class AbstractVariable(AbstractExpression):
         self._type = type
         self.source_name = source_name
 
+        self.construct_cache = {}
+        """
+        :type: dict[(str, CompiledType), AbstractVariable.Expr]
+
+        Cache used to memoize the "construct" method.
+        """
+
     def add_to_scope(self, scope):
         """
         Add this already existing variable to "scope".
@@ -880,7 +887,13 @@ class AbstractVariable(AbstractExpression):
         self._type = _old_type
 
     def construct(self):
-        return AbstractVariable.Expr(self._type, self._name, self)
+        key = (self._name, self._type)
+        try:
+            expr = self.construct_cache[key]
+        except KeyError:
+            expr = AbstractVariable.Expr(self._type, self._name, self)
+            self.construct_cache[key] = expr
+        return expr
 
     @property
     def type(self):
