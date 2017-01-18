@@ -47,6 +47,10 @@ procedure Parse is
    Input_Str : Unbounded_String;
    Lookups : String_Vectors.Vector;
 
+   ----------------------
+   -- Register_Lookups --
+   ----------------------
+
    procedure Register_Lookups is
    begin
       loop
