@@ -86,15 +86,15 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
    generic
       With_Trivia : Boolean;
-   procedure Process_All_Tokens (Lexer : Lexer_Type;
-                                 TDH   : in out Token_Data_Handler);
+   procedure Process_All_Tokens
+     (Lexer : Lexer_Type; TDH : in out Token_Data_Handler);
 
    ------------------------
    -- Process_All_Tokens --
    ------------------------
 
-   procedure Process_All_Tokens (Lexer : Lexer_Type;
-                                 TDH   : in out Token_Data_Handler)
+   procedure Process_All_Tokens
+     (Lexer : Lexer_Type; TDH : in out Token_Data_Handler)
    is
 
       Token                 : aliased Quex_Token_Type;
