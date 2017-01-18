@@ -9,9 +9,6 @@ use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 
 --  This package provides types and primitives to parse buffers and files and
 --  get AST out of them.
---
---  TODO??? For now, consider that this package is not part of the public API.
---  Please use the Analysis package to parse source files.
 
 private package ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
 
