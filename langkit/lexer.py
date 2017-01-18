@@ -87,13 +87,32 @@ class TokenAction(Action):
     # which allows us to get the declaration order of token enum kinds.
     _counter = iter(count(0))
 
-    def __init__(self):
+    def __init__(self, start_ignore_layout=False, end_ignore_layout=False):
+        """
+        Create a new token action. This is meant to be called on subclasses of
+        TokenAction.
+
+        :param bool start_ignore_layout: If True, the token associated with
+            this token action will trigger the start of layout ignore, which
+            means that indent, dedent, and newline tokens will not be emitted
+            by the lexer.
+
+        :param bool end_ignore_layout: If True, the token associated with this
+            token action will trigger the end of layout ignorance.
+
+        Note that layout ignore works in a nested fashion: If the lexer reads 3
+        tokens that starts layout ignore, it will need to read 3 tokens that
+        ends it so that it is taken into account again. The lexer won't handle
+        proper pairing: This is up to the parser's implementer.
+        """
         self._index = next(TokenAction._counter)
 
         self.name = None
         ":type: names.Name"
 
         self.lexer = None
+        self.start_ignore_layout = start_ignore_layout
+        self.end_ignore_layout = end_ignore_layout
 
     @property
     def value(self):
@@ -173,8 +192,14 @@ class LexerToken(object):
     # Built-in token to represent a lexing failure
     LexingFailure = WithText()
 
-    def __init__(self):
+    def __init__(self, track_indent=False):
         import inspect
+
+        if track_indent:
+            self.__class__.Indent = WithText()
+            self.__class__.Dedent = WithText()
+            self.__class__.Newline = WithText()
+
         self.fields = []
         for c in inspect.getmro(self.__class__):
             self.add_tokens(c)
@@ -265,7 +290,7 @@ class Lexer(object):
             not. If this is true, then the special Layout parsers can be used
             to do indentation sensitive parsing.
         """
-        self.tokens = tokens_class()
+        self.tokens = tokens_class(track_indent)
         assert isinstance(self.tokens, LexerToken)
 
         self.patterns = Patterns()
@@ -300,6 +325,11 @@ class Lexer(object):
             (Eof(),     self.tokens.Termination),
             (Failure(), self.tokens.LexingFailure),
         )
+
+        if self.track_indent:
+            self.add_rules(
+                (Literal(r'\n'), self.tokens.Newline),
+            )
 
     def add_patterns(self, *patterns):
         """

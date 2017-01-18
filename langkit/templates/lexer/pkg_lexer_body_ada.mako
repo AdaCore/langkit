@@ -102,8 +102,26 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       Symbol                : Symbol_Type;
       Continue              : Boolean := True;
       Last_Token_Was_Trivia : Boolean := False;
+
+      ## Variables specific to indentation tracking
       % if lexer.track_indent:
-      Last_Line_Start_Col   : Unsigned_16 := 0;
+
+      --  Stack of indentation levels. Used to emit the proper number of dedent
+      --  tokens on dedent.
+      Columns_Stack         : array (1 .. 128) of Unsigned_16 := (others => 0);
+      Columns_Stack_Len     : Natural := 0;
+
+      Ign_Layout_Level      : Integer := 0;
+      --  Whether to ignore layout tokens or not. If 0, Ignore is off, if >0,
+      --  ignore is on.
+
+      function Get_Col return Unsigned_16
+      is (if Columns_Stack_Len > 0
+          then Columns_Stack (Columns_Stack_Len)
+          else 1)
+      with Inline;
+      --  Get the current indent column in the stack
+
       Last_Line             : Unsigned_32 := 0;
       % endif
 
@@ -201,11 +219,7 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
                                    Source_First => Source_First,
                                    Source_Last  => Source_Last,
                                    Symbol       => null,
-                                   Sloc_Range   => Sloc_Range
-                                   % if lexer.track_indent:
-                                   , Indent       => None
-                                   % endif
-                                   )));
+                                   Sloc_Range   => Sloc_Range)));
 
                   Last_Token_Was_Trivia := True;
                end if;
@@ -219,42 +233,132 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
 
          end case;
 
+         % if not lexer.track_indent:
          --  Special case for the termination token: Quex yields inconsistent
          --  offsets/sizes. Make sure we get the end of the buffer so that the
          --  rest of our machinery (in particular source slices) works well
          --  with it.
 
-         declare
-            T : Token_Data_Type :=
-              (Kind         => Token_Id,
-               Source_First => (if Token_Id = ${termination}
-                                then TDH.Source_Last + 1
-                                else Source_First),
-               Source_Last  => (if Token_Id = ${termination}
-                                then TDH.Source_Last
-                                else Source_Last),
-               Symbol       => Symbol,
-               Sloc_Range   => Sloc_Range
-               % if lexer.track_indent:
-               , Indent       => None
-               % endif
-               );
-         begin
-            % if lexer.track_indent:
-            if Last_Line < Sloc_Range.End_Line then
+         TDH.Tokens.Append
+           ((Kind         => Token_Id,
+             Source_First => (if Token_Id = ${termination}
+                              then TDH.Source_Last + 1
+                              else Source_First),
+             Source_Last  => (if Token_Id = ${termination}
+                              then TDH.Source_Last
+                              else Source_Last),
+             Symbol       => Symbol,
+             Sloc_Range   => Sloc_Range));
+
+         ##  This whole section is only emitted if the user chose to track
+         ##  indentation in the lexer. It has complex machinery to emit
+         ##  Indent/Dedent tokens, but only when in a zone of the code where
+         ##  layout is not ignored.
+         % else:
+
+         --  If the token is termination, emit the missing dedent tokens
+         if Token_Id = ${termination} then
+            while Get_Col > 1 loop
+               TDH.Tokens.Append
+                 ((Kind         => ${lexer.ada_token_name('Dedent')},
+                   Source_First => TDH.Source_Last + 1,
+                   Source_Last  => TDH.Source_Last,
+                   Symbol       => null,
+                   Sloc_Range   => Sloc_Range));
+               Columns_Stack_Len := Columns_Stack_Len - 1;
+            end loop;
+         end if;
+
+         <%
+            end_ilayout_toks = (
+               " | ".join(lexer.ada_token_name(t)
+               for t in lexer.tokens if t.end_ignore_layout)
+            )
+            start_ilayout_toks = (
+               " | ".join(lexer.ada_token_name(t) 
+               for t in lexer.tokens if t.start_ignore_layout)
+            )
+         %>
+
+         --  If we're reading a token that triggers the end of layout ignore ..
+         % if end_ilayout_toks:
+         if Token_Id in ${end_ilayout_toks} then
+            --  Decrement the ignore stack ..
+            Ign_Layout_Level := Ign_Layout_Level - 1;
+
+            --  If we're back to 0 (we don't ignore layout anymore), make sure
+            --  layout will be taken into account starting on next line.
+            if Ign_Layout_Level = 0 then
                Last_Line := Sloc_Range.End_Line;
-               if Sloc_Range.Start_Column = Last_Line_Start_Col then
-                  T.Indent := Nodent;
-               elsif Sloc_Range.Start_Column < Last_Line_Start_Col then
-                  T.Indent := Dedent;
-               elsif Sloc_Range.Start_Column > Last_Line_Start_Col then
-                  T.Indent := Indent;
-               end if;
-               Last_Line_Start_Col := Sloc_Range.Start_Column;
             end if;
-            % endif
-            TDH.Tokens.Append (T);
-         end;
+         end if;
+         % endif
+
+         --  If we don't ignore layout, and the token is the first on a new
+         --  line, and it is not a newline token, then:
+         if Ign_Layout_Level <= 0
+            and then Last_Line < Sloc_Range.Start_Line
+            and then Token_Id /= ${lexer.ada_token_name('Newline')}
+         then
+
+            --  Update the last line variable
+            Last_Line := Sloc_Range.End_Line;
+
+            declare
+               T : Token_Data_Type :=
+                 (Kind         => Token_Id,
+                  Source_First => Source_First + 1,
+                  Source_Last  => Source_First,
+                  Symbol       => null,
+                  Sloc_Range   =>
+                    (Sloc_Range.Start_Line, Sloc_Range.Start_Line,
+                     Sloc_Range.Start_Column, Sloc_Range.Start_Column));
+            begin
+               if Sloc_Range.Start_Column < Get_Col then
+                  --  Emit every necessary dedent token if the line is
+                  -- dedented, and pop values from the stack.
+                  while Sloc_Range.Start_Column < Get_Col loop
+                     T.Kind := ${lexer.ada_token_name('Dedent')};
+                     TDH.Tokens.Append (T);
+                     Columns_Stack_Len := Columns_Stack_Len - 1;
+                  end loop;
+               elsif Sloc_Range.Start_Column > Get_Col then
+                  --  Emit a single indent token, and put the new value on the
+                  --  indent stack.
+                  T.Kind := ${lexer.ada_token_name('Indent')};
+                  TDH.Tokens.Append (T);
+                  Columns_Stack_Len := Columns_Stack_Len + 1;
+                  Columns_Stack (Columns_Stack_Len) := Sloc_Range.Start_Column;
+               end if;
+            end;
+
+         end if;
+
+         % if start_ilayout_toks:
+         --  If we're reading a token that triggers the start of layout ignore,
+         --  increment the ignore level.
+         if Token_Id in ${start_ilayout_toks} then
+            Ign_Layout_Level := Ign_Layout_Level + 1;
+         end if;
+         % endif
+
+         --  If we're in ignore layout mode, we don't want to emit newline
+         --  tokens either.
+         if Token_Id /= ${lexer.ada_token_name('Newline')}
+            or else Ign_Layout_Level <= 0
+         then
+            TDH.Tokens.Append
+              ((Kind         => Token_Id,
+                Source_First => (if Token_Id = ${termination}
+                                 then TDH.Source_Last + 1
+                                 else Source_First),
+                Source_Last  => (if Token_Id = ${termination}
+                                 then TDH.Source_Last
+                                 else Source_Last),
+                Symbol       => Symbol,
+                Sloc_Range   => Sloc_Range));
+         end if;
+         % endif
 
          Prepare_For_Trivia;
 

@@ -14,15 +14,6 @@ private package ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
 
    type Cst_String is access constant String;
 
-   Fail_Newline_Str : aliased constant String := "Expected new line";
-   Fail_Newline     : constant Cst_String := Fail_Newline_Str'Access;
-   Fail_Indent_Str  : aliased constant String := "Expected indent";
-   Fail_Indent      : constant Cst_String := Fail_Indent_Str'Access;
-   Fail_Dedent_Str  : aliased constant String := "Expected dedent";
-   Fail_Dedent      : constant Cst_String := Fail_Dedent_Str'Access;
-   Fail_Nodent_Str  : aliased constant String := "Expected nodent";
-   Fail_Nodent      : constant Cst_String := Fail_Dedent_Str'Access;
-
    type Fail_Info_Kind is (Token_Fail, Custom_Fail);
 
    type Fail_Info (Kind : Fail_Info_Kind := Token_Fail) is record

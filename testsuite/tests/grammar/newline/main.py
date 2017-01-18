@@ -16,16 +16,16 @@ def process(text):
 process("""
 1
 2
-""")
+""".strip())
 process("1 2")
 process("""
 1
    2
-""")
+""".strip())
 
 process("""
 1
 2
    3
 4
-""")
+""".strip())

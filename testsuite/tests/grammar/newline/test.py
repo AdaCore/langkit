@@ -11,7 +11,7 @@ from langkit.diagnostics import Diagnostics
 from langkit.lexer import (
     Eof, Ignore, Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText
 )
-from langkit.parsers import Grammar, Row, Tok, nl, ind, ded, Or
+from langkit.parsers import Grammar, Row, Tok, Or
 
 from utils import build_and_run
 
@@ -32,7 +32,7 @@ class Token(LexerToken):
 
 foo_lexer = Lexer(Token, track_indent=True)
 foo_lexer.add_rules(
-    (Pattern(r'[ \n\r\t]+'), Ignore()),
+    (Pattern(r'[ \r\t]+'), Ignore()),
     (Eof(),                  Token.Termination),
 
     (Literal("example"),     Token.Example),
@@ -48,6 +48,7 @@ foo_lexer.add_rules(
     (Pattern('[0-9]+'),      Token.Number),
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*'), Token.Identifier),
 )
+L = foo_lexer
 
 Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
@@ -82,10 +83,13 @@ A = foo_grammar
 
 foo_grammar.add_rules(
     lit=Row(Tok(Token.Number, keep=True)) ^ Literal,
-    nl=NewLineNode(A.lit, nl(), A.lit),
-    ind=IndentNode(A.lit, nl(), ind(), A.lit),
+    nl=NewLineNode(A.lit, L.Newline(), A.lit),
+    ind=IndentNode(A.lit, L.Newline(), L.Indent(), A.lit, L.Dedent()),
     comp=CompositeNode(
-        A.lit, nl(), A.lit, ind(), A.lit, nl(), ded(), A.lit
+        A.lit, L.Newline(),
+        A.lit, L.Newline(), L.Indent(),
+        A.lit, L.Newline(), L.Dedent(),
+        A.lit
     ),
     main_rule=Or(A.comp, A.ind, A.nl)
 )

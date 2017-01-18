@@ -41,9 +41,6 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
       --  Source location range for this token. Note that the end bound is
       --  exclusive.
 
-      % if lexer.track_indent:
-      Indent       : Indent_Kind := None;
-      % endif
    end record;
 
    package Token_Data_Handlers is new Langkit_Support.Token_Data_Handlers
