@@ -24,7 +24,6 @@ if ${parser_context.pos_var_name} /= No_Token_Index then
                         else ${parser_context.pos_var_name} - 1);
 
    % for field, arg in zip(_self.typ.get_parse_fields(), args):
-
       ## Set children fields into the created node
       ${res}.${field.name} :=
          % if is_ast_node(field.type):
@@ -32,13 +31,6 @@ if ${parser_context.pos_var_name} /= No_Token_Index then
          % else:
             ${arg};
          % endif
-
-      ## Set the parent backlink if needed
-      % if is_ast_node(field.type):
-         if ${arg} /= null then
-            ${arg}.Parent := ${root_node_type_name} (${res});
-         end if;
-      % endif
    % endfor
 
 end if;

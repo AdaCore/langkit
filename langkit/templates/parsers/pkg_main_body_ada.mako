@@ -176,6 +176,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
       end case;
       Process_Parsing_Error (Parser, Check_Complete);
       Clean_All_Memos;
+      Set_Parents (Result, null);
       return Result;
    end Parse;
 

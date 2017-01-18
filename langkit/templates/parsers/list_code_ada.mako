@@ -41,15 +41,6 @@ loop
      (${res}.Vec,
       ${ctx.root_grammar_class.name()} (${parser_context.res_var_name}));
 
-   ## If we are parsing nodes, then set the parent of parsed node to the
-   ## list, and increment its ref count.
-   % if is_ast_node (_self.parser.get_type()):
-      if ${parser_context.res_var_name} /= null then
-         ${parser_context.res_var_name}.Parent :=
-           ${root_node_type_name} (${res});
-      end if;
-   % endif
-
    ## Parse the separator, if there is one. The separator is always discarded.
    % if _self.sep:
       ${sep_context.code}

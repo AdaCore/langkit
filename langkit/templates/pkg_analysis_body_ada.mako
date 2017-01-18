@@ -861,6 +861,25 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Snap       : Boolean := False);
    --  Implementation helpers for the looking up process
 
+   -----------------
+   -- Set_Parents --
+   -----------------
+
+   procedure Set_Parents
+     (Node, Parent : access ${root_node_value_type}'Class)
+   is
+   begin
+      if Node = null then
+         return;
+      end if;
+
+      Node.Parent := ${root_node_type_name} (Parent);
+
+      for I in 1 .. Node.Child_Count loop
+         Set_Parents (Node.Child (I), Node);
+      end loop;
+   end Set_Parents;
+
    -------------
    -- Destroy --
    -------------

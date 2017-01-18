@@ -1141,6 +1141,10 @@ private
       is null;
    --  Reset the properties memoization caches attached to this node
 
+   procedure Set_Parents (Node, Parent : access ${root_node_value_type}'Class);
+   --  Set Node.Parent to Parent, and initialize recursively the parent of all
+   --  child nodes.
+
    procedure Destroy_Node (Node : access ${root_node_value_type}) is null;
    --  Free the resources allocated to this node. This is conceptually abstract
    --  but we can't have private abstract primitives in Ada.
