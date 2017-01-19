@@ -320,6 +320,25 @@ class Map(CollectionExpression):
                         self.concat, take_while_expr)
 
 
+@auto_attr
+def as_array(list_expr):
+    """
+    Turn an AST list node into an array for the same elements.
+
+    This is basically a shortcut to a map operation with the identity function.
+
+    :param AbstractExpression list_expr: The AST list to convert.
+    :rtype: ResolvedExpression
+    """
+    result = construct(Map(list_expr, lambda x: x))
+    root_list_type = get_context().root_grammar_class.list_type()
+    check_source_language(
+        issubclass(result.collection, root_list_type),
+        '.as_array input must be an AST list'
+    )
+    return result
+
+
 @attr_call('all', kind='all')
 @attr_call('any', kind='any')
 class Quantifier(CollectionExpression):
