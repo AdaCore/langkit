@@ -296,6 +296,14 @@ class If(AbstractExpression):
             )
         )
         rtype = then.type.unify(else_then.type)
+
+        # If then/else_then have actually subtypes of the unified result type,
+        # we need to perform a conversion for the Ada code generation.
+        if then != rtype:
+            then = BuiltinCallExpr(rtype.name(), rtype, [then])
+        if else_then != rtype:
+            else_then = BuiltinCallExpr(rtype.name(), rtype, [else_then])
+
         return If.Expr(construct(self.cond, BoolType), then, else_then, rtype)
 
 
