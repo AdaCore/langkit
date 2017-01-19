@@ -767,6 +767,18 @@ class ${root_astnode_name}(object):
     def __repr__(self):
         return self.short_image
 
+    @property
+    def tokens(self):
+        """
+        Return an iterator on the range of tokens that self encompasses.
+        """
+        start = self.token_start
+        end = self.token_end
+        while not start == end:
+            yield start
+            start = start.next
+        yield end
+
 
 % for astnode in _self.astnode_types:
     % if astnode != T.root_node:
