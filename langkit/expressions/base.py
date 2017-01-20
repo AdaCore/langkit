@@ -2296,6 +2296,12 @@ class LiteralExpr(BasicExpr):
         :param None|str result_var_name: See ResolvedExpression's constructor.
         """
         super(LiteralExpr, self).__init__(literal, type, [], result_var_name)
+        self.literal = literal
+
+    @property
+    def subexprs(self):
+        return {'0-type': self.static_type,
+                '1-literal': self.literal}
 
     def __repr__(self):
         return '<LiteralExpr {} ({})>'.format(self.template,
@@ -2362,6 +2368,12 @@ class ArrayExpr(BasicExpr):
             if exprs else '(1 .. 0 => <>)',
             element_type.array_type(), exprs
         )
+        self.element_type = element_type
+
+    @property
+    def subexprs(self):
+        return {'0-elt_type': self.element_type,
+                '2-elements': self.operands}
 
 
 class UnreachableExpr(ResolvedExpression):
@@ -2648,6 +2660,12 @@ class BuiltinCallExpr(BasicExpr):
                              ', '.join(['{}'] * len(exprs))),
             type, exprs, result_var_name
         )
+
+    @property
+    def subexprs(self):
+        return {'0-type': self.type,
+                '1-name': self.name,
+                '2-args': self.operands}
 
     def __repr__(self):
         return '<BuiltinCallExpr {}>'.format(self.name.camel_with_underscores)

@@ -367,9 +367,9 @@ class Then(AbstractExpression):
 
         @property
         def subexprs(self):
-            return {'prefix': self.expr,
-                    'then': self.then_expr,
-                    'default': self.default_expr}
+            return {'0-prefix': self.expr,
+                    '1-then': self.then_expr,
+                    '2-default': self.default_expr}
 
         def _bindings(self):
             return [self.var_expr]
