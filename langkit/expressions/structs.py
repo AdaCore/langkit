@@ -64,7 +64,7 @@ class Cast(AbstractExpression):
 
         @property
         def subexprs(self):
-            return [self.expr]
+            return {'expr': self.expr, 'type': self.static_type.name()}
 
         def __repr__(self):
             return '<Cast.Expr {}>'.format(self.static_type.name().camel)
@@ -176,7 +176,9 @@ class New(AbstractExpression):
 
         @property
         def subexprs(self):
-            return self.assocs.values()
+            result = dict(self.assocs)
+            result['_type'] = self.static_type.name()
+            return result
 
         def __repr__(self):
             return '<New.{} {}>'.format(type(self).__name__,
@@ -391,7 +393,11 @@ class FieldAccess(AbstractExpression):
 
         @property
         def subexprs(self):
-            return [self.receiver_expr] + self.arguments
+            result = {'0-prefix': self.receiver_expr,
+                      '1-field': self.node_data.qualname}
+            if self.arguments:
+                result['2-args'] = self.arguments
+            return result
 
     def __init__(self, receiver, field, arguments=()):
         """
@@ -547,7 +553,8 @@ class IsA(AbstractExpression):
 
         @property
         def subexprs(self):
-            return [self.expr]
+            return {'expr': self.expr,
+                    'types': [astnode.name() for astnode in self.astnodes]}
 
         def __repr__(self):
             return '<IsA.Expr {}>'.format(', '.join(

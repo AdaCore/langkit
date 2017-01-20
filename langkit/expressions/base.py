@@ -727,13 +727,38 @@ class ResolvedExpression(object):
     @property
     def subexprs(self):
         """
-        Return the list of subexpressions used as operands for "self".
+        A JSON-like datastructure to describe this expression.
+
+        Leaves of this datastructure are: strings, CompiledType subclasses and
+        ResolvedExpression instances (for operands).
 
         Subclasses must override this property if they have operands.
+        """
+        return []
+
+    @property
+    def flat_subexprs(self):
+        """
+        Like "subexprs", but return a flat list of ResovedExpression.
 
         :rtype: list[ResolvedExpression]
         """
-        return []
+        def mapcat(seq, map_fn):
+            return sum([map_fn(v) for v in seq], [])
+
+        def explore(values):
+            if values is None:
+                return []
+            elif isinstance(values, list):
+                return mapcat(values, explore)
+            elif isinstance(values, dict):
+                return mapcat(values.values(), explore)
+            elif isinstance(values, ResolvedExpression):
+                return [values]
+            else:
+                return []
+
+        return explore(self.subexprs)
 
     @property
     def bindings(self):
@@ -745,7 +770,7 @@ class ResolvedExpression(object):
         :rtype: list[AbstractVariable.Expr]
         """
         result = self._bindings()
-        for expr in self.subexprs:
+        for expr in self.flat_subexprs:
             result.extend(expr.bindings)
         return result
 
@@ -996,7 +1021,8 @@ class BindingScope(ResolvedExpression):
 
     @property
     def subexprs(self):
-        return self.expr.subexprs
+        return {'0-bindings': self.expr_bindings,
+                '1-expr': self.expr}
 
     def _bindings(self):
         return self.expr_bindings
@@ -1038,7 +1064,9 @@ class Let(AbstractExpression):
 
         @property
         def subexprs(self):
-            return self.var_exprs + [self.expr]
+            return {'vars': {v.name: e
+                             for v, e in zip(self.vars, self.var_exprs)},
+                    'expr': self.expr}
 
         def _bindings(self):
             return self.vars
@@ -2000,7 +2028,7 @@ class PropertyDef(AbstractNodeData):
         def mark_vars(expr):
             if isinstance(expr, AbstractVariable.Expr):
                 all_vars[expr] = True
-            for sub in expr.subexprs:
+            for sub in expr.flat_subexprs:
                 mark_vars(sub)
 
         mark_vars(self.constructed_expr)
@@ -2207,6 +2235,7 @@ class FieldAccessExpr(BasicExpr):
             '{}.{}', result_type, [prefix_expr, field_name]
         )
         self.prefix_expr = prefix_expr
+        self.field_name = field_name
         self.prefix_var = (
             PropertyDef.get().vars.create('Pfx', self.prefix_expr.type)
             if result_type.null_allowed else
@@ -2227,7 +2256,7 @@ class FieldAccessExpr(BasicExpr):
 
     @property
     def subexprs(self):
-        return [self.prefix_expr]
+        return {'prefix': self.prefix_expr, 'field': self.field_name}
 
 
 class ArrayExpr(BasicExpr):

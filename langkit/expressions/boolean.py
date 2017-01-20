@@ -198,7 +198,7 @@ class OrderingTest(AbstractExpression):
 
         @property
         def subexprs(self):
-            return [self.lhs, self.rhs]
+            return {'op': self.operator, 'lhs': self.lhs, 'rhs': self.rhs}
 
         def __repr__(self):
             return '<OrderingTest.Expr {}>'.format(self.operator)
@@ -263,7 +263,9 @@ class If(AbstractExpression):
 
         @property
         def subexprs(self):
-            return [self.cond, self.then, self.else_then]
+            return {'0-cond': self.cond,
+                    '1-then': self.then,
+                    '2-else': self.else_then}
 
         def __repr__(self):
             return '<If.Expr>'
@@ -365,7 +367,9 @@ class Then(AbstractExpression):
 
         @property
         def subexprs(self):
-            return [self.expr, self.then_expr, self.default_expr]
+            return {'prefix': self.expr,
+                    'then': self.then_expr,
+                    'default': self.default_expr}
 
         def _bindings(self):
             return [self.var_expr]

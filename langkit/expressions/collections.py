@@ -237,10 +237,12 @@ class Map(CollectionExpression):
 
         @property
         def subexprs(self):
-            return [expr
-                    for expr in [self.take_while, self.collection, self.expr,
-                                 self.filter]
-                    if expr is not None]
+            result = {'collection': self.collection, 'expr': self.expr}
+            if self.take_while:
+                result['take_while'] = self.take_while
+            if self.filter:
+                result['filter'] = self.filter
+            return result
 
         def _bindings(self):
             return [var for var in [self.element_var, self.index_var]
@@ -406,7 +408,9 @@ class Quantifier(CollectionExpression):
 
         @property
         def subexprs(self):
-            return [self.collection, self.expr]
+            return {'kind': self.kind,
+                    'collection': self.collection,
+                    'expr': self.expr}
 
         def _bindings(self):
             return [var for var in [self.element_var, self.index_var]

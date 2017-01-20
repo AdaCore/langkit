@@ -209,7 +209,7 @@ class DomainExpr(ResolvedExpression):
 
     @property
     def subexprs(self):
-        return [self.domain, self.logic_var_expr]
+        return {'domain': self.domain, 'logic_var_expr': self.logic_var_expr}
 
 
 @auto_attr
