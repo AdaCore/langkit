@@ -725,12 +725,93 @@ class ResolvedExpression(object):
         return self.static_type
 
     @property
+    def ir_dump(self):
+        """
+        Return a textual representation of this resolved expression tree.
+
+        :rtype: str
+        """
+        return '\n'.join(self._ir_dump(self.subexprs))
+
+    @classmethod
+    def _ir_dump(cls, json_like):
+        """
+        Helper for "ir_dump". Return text representation as a list of lines.
+
+        :rtype: list[str]
+        """
+        max_cols = 72
+        result = []
+
+        def one_line_subdumps(subdumps):
+            return all(len(d) == 1 for d in subdumps)
+
+        if isinstance(json_like, list):
+            subdumps = [cls._ir_dump(elt) for elt in json_like]
+            if one_line_subdumps(subdumps):
+                one_liner = '[{}]'.format(', '.join(
+                    d[0] for d in subdumps
+                ))
+                if len(one_liner) <= max_cols:
+                    return [one_liner]
+            for elt in json_like:
+                subdump = cls._ir_dump(elt)
+                result.append('*  {}'.format(subdump[0]))
+                result.extend('|  {}'.format(line) for line in subdump[1:])
+
+        elif isinstance(json_like, dict):
+            keys = sorted(json_like)
+            subdumps = [cls._ir_dump(json_like[key])
+                        for key in sorted(json_like)]
+            items = zip(keys, subdumps)
+            if one_line_subdumps(subdumps):
+                one_liner = '{{{}}}'.format(
+                    ', '.join('{}={}'.format(key, d[0]) for key, d in items)
+                )
+                if len(one_liner) <= max_cols:
+                    return [one_liner]
+            for key, d in zip(keys, subdumps):
+                if len(d) == 1 and len(d[0]) <= max_cols:
+                    result.append('{}: {}'.format(key, d[0]))
+                else:
+                    result.append('{}:'.format(key))
+                    result.extend('|  {}'.format(line) for line in d)
+
+        elif isinstance(json_like, ResolvedExpression):
+            class_name = getattr(json_like, 'pretty_class_name',
+                                 type(json_like).__name__)
+            subdump = cls._ir_dump(json_like.subexprs)
+
+            if len(subdump) == 1:
+                one_liner = '{}{}'.format(
+                    class_name, subdump[0]
+                )
+                if len(one_liner) <= max_cols:
+                    return [one_liner]
+            result.append('{}('.format(class_name))
+            result.extend('|  {}'.format(line) for line in subdump)
+            result.append(')')
+
+        elif (issubclass(type(json_like), type)
+                and issubclass(json_like, CompiledType)):
+            return cls._ir_dump(json_like.name())
+
+        elif isinstance(json_like, names.Name):
+            result.append(json_like.camel_with_underscores)
+
+        else:
+            result.append(str(json_like))
+
+        return result
+
+    @property
     def subexprs(self):
         """
         A JSON-like datastructure to describe this expression.
 
         Leaves of this datastructure are: strings, CompiledType subclasses and
-        ResolvedExpression instances (for operands).
+        ResolvedExpression instances (for operands). This is used both for
+        expression tree traversal and for IR dump.
 
         Subclasses must override this property if they have operands.
         """
