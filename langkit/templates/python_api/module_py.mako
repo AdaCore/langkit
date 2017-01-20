@@ -12,6 +12,7 @@
 
 import collections
 import ctypes
+import json
 import os
 import sys
 
@@ -486,6 +487,12 @@ class Token(ctypes.Structure):
             ' {}'.format(repr(self.text)) if self.text else ''
         )
 
+    def to_data(self):
+        """
+        Return a dict representation of this Token.
+        """
+        return {"kind": "Token", "token_kind": self.kind, "text": self.text}
+
 
 class Sloc(object):
     # TODO: document this class and its methods
@@ -778,6 +785,25 @@ class ${root_astnode_name}(object):
             yield start
             start = start.next
         yield end
+
+    def to_data(self):
+        """
+        Return a nested python data-structure, constituted only of standard
+        data types (dicts, lists, strings, ints, etc), and representing the
+        portion of the AST corresponding to this node.
+        """
+        if self.is_list_type:
+            return [i.to_data() for i in self if i is not None]
+        else:
+            return {n: v.to_data()
+                    for n, v in self.iter_fields(with_properties=False)
+                    if v is not None}
+
+    def to_json(self):
+        """
+        Return a JSON representation of this node.
+        """
+        return json.dumps(self.to_data())
 
 
 % for astnode in _self.astnode_types:
