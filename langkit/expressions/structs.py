@@ -9,8 +9,8 @@ from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions.analysis_units import construct_analysis_unit_property
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BindingScope, LiteralExpr, Let,
-    PropertyDef, ResolvedExpression, Self, UnreachableExpr, attr_call,
-    attr_expr, construct, render
+    PropertyDef, ResolvedExpression, UnreachableExpr, attr_call, attr_expr,
+    construct, render
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
@@ -388,8 +388,7 @@ class FieldAccess(AbstractExpression):
                 # Struct field: make sure we return the public API type, which
                 # may be different from the type thas is stored in the Struct.
                 ret = self.node_data.type.extract_from_storage_expr(
-                    Self._name.camel_with_underscores,
-                    ret
+                    prefix, ret
                 )
 
             return ret
