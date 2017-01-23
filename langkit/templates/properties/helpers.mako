@@ -4,10 +4,10 @@
   (${property.self_arg_name} :
    access ${Self.type.value_type_name()}${"" if dispatching else "'Class"}
 
-   % for arg_name, arg_type, arg_dv in property.arguments:
-      ; ${arg_name} : ${arg_type.name()}
-      % if arg_dv:
-         := ${arg_dv}
+   % for arg in property.arguments:
+      ; ${arg.name} : ${arg.type.name()}
+      % if arg.default_value:
+         := ${arg.default_value}
       % endif
    % endfor
   )

@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict
 from copy import copy
 import difflib
 from itertools import count
@@ -683,10 +683,23 @@ class Symbol(BasicType):
         return CAPIType(c_api_settings, 'text')
 
 
-Argument = namedtuple("Argument", ["name", "type", "default_value"])
-"""
-Helper tuple for arguments of properties
-"""
+class Argument(object):
+    """
+    Holder for properties arguments.
+    """
+
+    def __init__(self, name, type, default_value):
+        from langkit.expressions.base import AbstractVariable
+        self.var = AbstractVariable(name, type, source_name=name)
+        self.default_value = default_value
+
+    @property
+    def type(self):
+        return self.var.type
+
+    @property
+    def name(self):
+        return self.var._name
 
 
 class AbstractNodeData(object):

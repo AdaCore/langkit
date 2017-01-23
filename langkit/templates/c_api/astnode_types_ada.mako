@@ -82,8 +82,8 @@
              <%
                field_access = 'Typed_Node.{}'.format(field.name)
 
-               actuals = ', '.join('{} => Unwrapped_{}'.format(a, a)
-                                   for a, _, _ in field.explicit_arguments)
+               actuals = ', '.join('{0.name} => Unwrapped_{0.name}'.format(a)
+                                   for a in field.explicit_arguments)
                field_access = '{}{}'.format(
                    field_access,
                    ' ({})'.format(actuals)

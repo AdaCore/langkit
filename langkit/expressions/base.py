@@ -1459,13 +1459,6 @@ class PropertyDef(AbstractNodeData):
         self.abstract_runtime_check = abstract_runtime_check
         self._has_implicit_env = has_implicit_env
 
-        self.argument_vars = []
-        """
-        For each argument additional to Self, this is the AbstractVariable
-        corresponding to this argument. Note that this is computed in the
-        "prepare" pass.
-        """
-
         self.overriding = False
         """
         Whether this property is overriding or not. This is put to False by
@@ -1604,15 +1597,13 @@ class PropertyDef(AbstractNodeData):
         """
         Helper to add an argument to this property.
 
-        This basically just fills the .arguments and the .argument_vars lists.
+        This basically just fills the .arguments list.
 
         :param str names.Name: Name for this argument.
         :param CompiledType type: Type argument. Type for this argument.
         :param None|str default_value: Default value for this argument, if any.
         """
         self.arguments.append(Argument(name, type, default_value))
-        self.argument_vars.append(AbstractVariable(name, type,
-                                                   source_name=name))
 
     def base_property(self):
         """
@@ -2001,6 +1992,17 @@ class PropertyDef(AbstractNodeData):
         :rtype: list[Argument]
         """
         return self._explicit_arguments_slice(self.arguments)
+
+    @property
+    def argument_vars(self):
+        """
+        For each argument additional to Self, return the AbstractVariable
+        corresponding to this argument. Note that this is available only after
+        the "prepare" pass.
+
+        :rtype: list[AbstractVariable]
+        """
+        return [arg.var for arg in self.arguments]
 
     @property
     def explicit_argument_vars(self):

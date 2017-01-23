@@ -125,8 +125,8 @@ end ${property.name};
       Raw    : ${property.type.name()} := ${property.name}
         (
            ${property.self_arg_name}
-           % for arg_name, _, _ in property.arguments:
-               , ${arg_name}
+           % for arg in property.arguments:
+               , ${arg.name}
            % endfor
         );
       Result : constant ${property.type.api_name()} := Raw.Items;

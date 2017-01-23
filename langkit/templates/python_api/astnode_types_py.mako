@@ -46,8 +46,8 @@
         ## takes care of type checking so we should keep memory safety.
         if not _${field.accessor_basename.lower}(
             self._c_value,
-            % for n, t, _ in field.explicit_arguments:
-            ${pyapi.unwrap_value(n.lower, t)},
+            % for arg in field.explicit_arguments:
+            ${pyapi.unwrap_value(arg.name.lower, arg.type)},
             % endfor
             ctypes.byref(result)
         ):
