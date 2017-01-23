@@ -159,6 +159,11 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
       return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_buffer', 3)}
 
+   function Has_Unit
+     (Context       : Analysis_Context;
+      Unit_Filename : String) return Boolean;
+   --  Returns whether Context contains an unit correponding to Unit_Filename
+
    % if _self.default_unit_file_provider:
 
    function Get_From_Provider

@@ -285,6 +285,17 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       return Unit;
    end Get_Unit;
 
+   --------------
+   -- Has_Unit --
+   --------------
+
+   function Has_Unit
+     (Context       : Analysis_Context;
+      Unit_Filename : String) return Boolean is
+   begin
+      return Context.Units_Map.Contains (To_Unbounded_String (Unit_Filename));
+   end Has_Unit;
+
    ----------------
    -- Do_Parsing --
    ----------------
