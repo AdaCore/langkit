@@ -8,7 +8,7 @@ from langkit.compiled_types import (
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions.analysis_units import construct_analysis_unit_property
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, BindingScope, LiteralExpr,
+    AbstractExpression, AbstractVariable, BindingScope, LiteralExpr, Let,
     PropertyDef, ResolvedExpression, Self, UnreachableExpr, attr_call,
     attr_expr, construct, render
 )
@@ -770,6 +770,16 @@ class Match(AbstractExpression):
                               'Match expressions can only work on AST nodes '
                               'or env elements')
 
+        # Create a local variable so that in the generated code, we don't have
+        # to re-compute the prefix for each type check.
+        matched_abstract_var = AbstractVariable(
+            names.Name('Match_Prefix'),
+            type=matched_expr.type,
+            create_local=True
+        )
+        PropertyDef.get_scope().add(matched_abstract_var.local_var)
+        matched_var = construct(matched_abstract_var)
+
         constructed_matchers = []
 
         # Check (i.e. raise an error if no true) the set of matchers is valid:
@@ -814,7 +824,7 @@ class Match(AbstractExpression):
         # appropriate order, so that in the end the first matchers are tested
         # first.
         for match_var, expr in reversed(constructed_matchers):
-            casted = Cast.Expr(matched_expr,
+            casted = Cast.Expr(matched_var,
                                match_var.type,
                                result_var=match_var)
             guard = Not.make_expr(
@@ -830,5 +840,9 @@ class Match(AbstractExpression):
 
             result = If.Expr(guard, expr, result, rtype)
 
-        return BindingScope(
-            result, [construct(var) for _, var, _ in self.matchers])
+        return Let.Expr(
+            [matched_var],
+            [matched_expr],
+            BindingScope(result,
+                         [construct(var) for _, var, _ in self.matchers])
+        )
