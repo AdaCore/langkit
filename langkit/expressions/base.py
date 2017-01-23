@@ -2205,7 +2205,7 @@ def langkit_property(private=None, return_type=None,
                      kind=AbstractKind.concrete, has_implicit_env=None,
                      memoized=False, external=False):
     """
-    Decorator to create properties from real python methods. See Property for
+    Decorator to create properties from real Python methods. See Property for
     more details.
 
     :type private: bool|None
