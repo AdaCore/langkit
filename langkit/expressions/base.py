@@ -1439,9 +1439,6 @@ class PropertyDef(AbstractNodeData):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
-            * A function that will take the Self placeholder as parameter and
-              return the constructed AbstractExpression. This is useful to
-              reference classes that are not yet defined.
             * A function that takes one or more arguments with default values
               which are CompiledType subclasses. This is the way one can write
               properties that take parameters.
