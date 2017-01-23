@@ -36,7 +36,7 @@
 
       Value_P : ${field.type.c_type(capi).name}_Ptr) return int
    is
-      N : constant ${root_node_type_name} := Unwrap (Node);
+      Unwrapped_Node : constant ${root_node_type_name} := Unwrap (Node);
       ## For each input argument, convert the C-level value into an Ada-level
       ## one.
       % for arg in field.explicit_arguments:
@@ -56,7 +56,7 @@
             % elif is_token_type(arg.type):
                Token (Node, Token_Index ({arg.name}.Index))
             % elif is_symbol_type(arg.type):
-               Text_To_Symbol (N.Unit, ${arg.name})
+               Text_To_Symbol (Unwrapped_Node.Unit, ${arg.name})
             % else:
                ${arg.name}
             % endif
@@ -67,7 +67,7 @@
 
       % for arg in field.explicit_arguments:
          % if is_token_type(arg.type):
-            if Unwrap (${arg.name}).Unit /= N.Unit then
+            if Unwrap (${arg.name}).Unit /= Unwrapped_Node.Unit then
                raise Constraint_Error with
                  ("The input token does not belong to the same unit as"
                   & " the input node");
@@ -75,9 +75,10 @@
          % endif
       % endfor
 
-      if N.all in ${struct.value_type_name()}'Class then
+      if Unwrapped_Node.all in ${struct.value_type_name()}'Class then
          declare
-            Typed_Node : constant ${struct.name()} := ${struct.name()} (N);
+            Typed_Node : constant ${struct.name()} :=
+               ${struct.name()} (Unwrapped_Node);
          begin
              <%
                field_access = 'Typed_Node.{}'.format(field.name)
@@ -91,7 +92,7 @@
                )
                if not field.is_property:
                   field_access = field.type.extract_from_storage_expr(
-                     'N', field_access
+                     'Unwrapped_Node', field_access
                   )
              %>
              Value_P.all :=
