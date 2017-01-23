@@ -3,7 +3,6 @@ from copy import copy
 from functools import partial
 import inspect
 from itertools import count
-import types
 
 from enum import Enum
 import funcy
@@ -48,6 +47,71 @@ def unsugar(expr, ignore_errors=False):
     )
 
     return expr
+
+
+def expand_abstract_fn(fn):
+    """
+    Expand a function used to describe a Langkit properties into an
+    AbstractExpression tree with arguments substitued with AbstractVariable
+    instances.
+
+    Return a couple (fn_arguments, fn_expr) where fn_arguments is a list of
+    Argument instances (for the properties arguments) and fn_expr is an
+    AbstractExpression for the body of the property, or None if there is no
+    such body.
+    """
+    fn_arguments = []
+    fn_expr = None
+
+    argspec = inspect.getargspec(fn)
+    defaults = argspec.defaults or []
+
+    check_multiple([
+        (not argspec.varargs or not argspec.keywords, 'Invalid'
+         ' function signature: no *args nor **kwargs allowed'),
+
+        (len(argspec.args) == len(defaults), 'All parameters '
+         'must have an associated type as a default value')
+    ])
+
+    # Check that all parameters have declared types in default arguments
+    for kw, default in zip(argspec.args, defaults):
+        # The type could be an early reference to a not yet declared type,
+        # resolve it.
+        default = resolve_type(default)
+
+        check_source_language(
+            kw.lower() not in PropertyDef.reserved_arg_lower_names,
+            'Cannot define reserved arguments ({})'.format(
+                ', '.join(PropertyDef.reserved_arg_lower_names)
+            )
+        )
+        check_source_language(
+            issubclass(default, CompiledType),
+            'A valid langkit CompiledType is required for '
+            'parameter {} (got {})'.format(kw, default)
+        )
+
+        fn_arguments.append(Argument(names.Name.from_lower(kw), default, None))
+
+    # Now that we have placeholder for all arguments, we can expand the lambda
+    # into a real AbstractExpression.
+
+    # Wrap the expression in a Block, so that the user can declare local
+    # variables via the Var helper.
+    function_block = Block()
+    with Block.set_block(function_block):
+        expr = fn(*[arg.var for arg in fn_arguments])
+        if expr is not None:
+            expr = check_type(
+                unsugar(expr), AbstractExpression,
+                'Expected an abstract expression, but got instead a'
+                ' {expr_type}'
+            )
+            function_block.expr = expr
+            fn_expr = function_block
+
+    return (fn_arguments, fn_expr)
 
 
 def construct(expr, expected_type_or_pred=None, custom_msg=None):
@@ -1666,64 +1730,17 @@ class PropertyDef(AbstractNodeData):
         # calling it.
         if (not isinstance(self.expr, AbstractExpression)
                 and callable(self.expr)):
-            argspec = inspect.getargspec(self.expr)
-            defaults = argspec.defaults or []
-
-            check_multiple([
-                (not argspec.varargs or not argspec.keywords, 'Invalid'
-                 ' function signature: no *args nor **kwargs allowed'),
-
-                (len(argspec.args) == len(defaults), 'All parameters '
-                 'must have an associated type as a default value')
-            ])
-
-            # This is a function for a property that takes parameters: check
-            # that all parameters have declared types in default arguments.
-            for kw, default in zip(argspec.args, defaults):
-                # The type could be an early reference to a not yet declared
-                # type, resolve it.
-                default = resolve_type(default)
-
-                check_source_language(
-                    kw.lower() not in PropertyDef.reserved_arg_lower_names,
-                    'Cannot define reserved arguments ({})'.format(
-                        ', '.join(PropertyDef.reserved_arg_lower_names)
-                    )
-                )
-                check_source_language(
-                    issubclass(default, CompiledType),
-                    'A valid langkit CompiledType is required for '
-                    'parameter {} (got {})'.format(kw, default)
-                )
-
-                self._add_argument(names.Name.from_lower(kw), default)
-
-            # Now that we have placeholder for all explicit arguments (i.e.
-            # only the ones the user defined), we can expand the lambda
-            # into a real AbstractExpression.
-
-            # Wrap the expression in a Let block, so that the user can
-            # declare local variables via the Var helper.
             with self.bind():
-                function_block = Block()
-                with Block.set_block(function_block):
-                    fn = assert_type(self.expr, types.FunctionType)
-                    expr = fn(*self.argument_vars)
-                    if expr is None:
-                        check_source_language(
-                            self.external or self.abstract,
-                            'Unless a property is external or abstract, it'
-                            ' must have an expression'
-                        )
-                        self.expr = None
-                    else:
-                        expr = check_type(
-                            unsugar(expr), AbstractExpression,
-                            'Properties return value should be an'
-                            ' expression'
-                        )
-                        function_block.expr = expr
-                        self.expr = function_block
+                fn_arguments, fn_expr = expand_abstract_fn(self.expr)
+                check_source_language(
+                    fn_expr is not None or self.external or self.abstract,
+                    'Unless a property is external or abstract, it must'
+                    ' have an expression'
+                )
+                self.expr = fn_expr
+                for arg in fn_arguments:
+                    self.arguments.append(arg)
+
         elif not(callable(self.expr)):
             self.expr = unsugar(self.expr)
 
