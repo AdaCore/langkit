@@ -948,6 +948,8 @@ class AbstractVariable(AbstractExpression):
         Resolved expression that represents a variable in generated code.
         """
 
+        pretty_class_name = 'Var'
+
         def __init__(self, type, name, abstract_var=None):
             """
             Create a variable reference expression.
@@ -1186,6 +1188,8 @@ class Let(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
+        pretty_class_name = 'Let'
+
         def __init__(self, vars, var_exprs, expr):
             self.vars = vars
             self.var_exprs = var_exprs

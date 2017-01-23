@@ -183,6 +183,7 @@ class Map(CollectionExpression):
         Resolved expression that represents a map expression in the generated
         code.
         """
+        pretty_class_name = 'Map'
 
         def __init__(self, list_element_var, element_var, index_var,
                      collection, expr, iter_scope, filter=None, concat=False,
@@ -350,6 +351,7 @@ class Quantifier(CollectionExpression):
 
     class Expr(ResolvedExpression):
         static_type = BoolType
+        pretty_class_name = 'Quantifier'
 
         def __init__(self, kind, collection, expr, list_element_var,
                      element_var, index_var, iter_scope):
@@ -510,6 +512,8 @@ class CollectionSingleton(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
+        pretty_class_name = 'ArraySingleton'
+
         def __init__(self, expr):
             """
             :type expr: ResolvedExpression

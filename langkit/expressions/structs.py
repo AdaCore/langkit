@@ -26,6 +26,8 @@ class Cast(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
+        pretty_class_name = 'Cast'
+
         def __init__(self, expr, dest_type, do_raise=False, result_var=None):
             """
             :type expr: ResolvedExpression
@@ -288,6 +290,7 @@ class FieldAccess(AbstractExpression):
         """
         Resolved expression that represents a field access in generated code.
         """
+        pretty_class_name = 'FieldAccess'
 
         def __init__(self, receiver_expr, node_data, arguments,
                      implicit_deref=False):
@@ -527,6 +530,7 @@ class IsA(AbstractExpression):
 
     class Expr(ResolvedExpression):
         static_type = BoolType
+        pretty_class_name = 'IsA'
 
         def __init__(self, expr, astnodes):
             """

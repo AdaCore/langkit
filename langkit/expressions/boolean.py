@@ -175,6 +175,7 @@ class OrderingTest(AbstractExpression):
 
     class Expr(ResolvedExpression):
         static_type = BoolType
+        pretty_class_name = 'OrdTest'
 
         def __init__(self, operator, lhs, rhs):
             self.operator = operator
@@ -236,6 +237,8 @@ class If(AbstractExpression):
         """
         Resolved expression for a conditional expression.
         """
+
+        pretty_class_name = 'If'
 
         def __init__(self, cond, then, else_then, rtype):
             """
@@ -348,6 +351,8 @@ class Then(AbstractExpression):
     """
 
     class Expr(ResolvedExpression):
+        pretty_name = 'Then'
+
         def __init__(self, expr, var_expr, then_expr, default_expr):
             self.expr = expr
             self.var_expr = var_expr
