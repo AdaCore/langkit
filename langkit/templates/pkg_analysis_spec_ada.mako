@@ -777,6 +777,9 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    --  Debug helper: Assign names to every logical variable in the root node,
    --  so that we can trace logical variables.
 
+   procedure Assign_Names_To_Logic_Vars_Impl
+     (Node : access ${root_node_value_type}) is null;
+
    ------------------------------
    -- Root AST node properties --
    ------------------------------

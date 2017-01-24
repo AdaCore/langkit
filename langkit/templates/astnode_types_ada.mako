@@ -90,6 +90,11 @@
       base_name = cls.base().name()
       ext = ctx.ext("nodes", cls.name(), "public_decls")
       memoized_properties = cls.get_memoized_properties(include_inherited=True)
+
+      logic_vars = cls.get_fields(
+         include_inherited=True,
+         predicate=lambda f: is_logic_var(f.type)
+      )
    %>
 
    --
@@ -125,6 +130,13 @@
             Prefix : String := "");
 
       % endif
+   % endif
+
+   % if logic_vars:
+   procedure Assign_Names_To_Logic_Vars_Impl
+     (Node : access ${type_name});
+   --  Debug helper: Assign names to every logical variable in the root node,
+   --  so that we can trace logical variables.
    % endif
 
    ## Public field getters
@@ -254,6 +266,11 @@
    ext = ctx.ext("nodes", cls.name(), "bodies")
 
    memoized_properties = cls.get_memoized_properties(include_inherited=True)
+
+   logic_vars = cls.get_fields(
+      include_inherited=True,
+      predicate=lambda f: is_logic_var(f.type)
+   )
    %>
 
    % if not cls.abstract:
@@ -449,6 +466,18 @@
 
       % endif
 
+   % endif
+
+   % if logic_vars:
+   procedure Assign_Names_To_Logic_Vars_Impl
+     (Node : access ${type_name})
+   is
+   begin
+      % for f in logic_vars:
+      Node.${f.name}.Dbg_Name :=
+        new String'(Image (Node.Short_Image) & ".${f.name}");
+      % endfor
+   end Assign_Names_To_Logic_Vars_Impl;
    % endif
 
    ###################################
