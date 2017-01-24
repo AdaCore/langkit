@@ -317,7 +317,7 @@ class AnalysisUnit(object):
 
     @property
     def context(self):
-        ${py_doc('langkit.unit_context')}
+        ${py_doc('langkit.unit_context', 8)}
         ctx = _unit_context(self._c_value)
         return AnalysisContext(_c_value=ctx)
 
