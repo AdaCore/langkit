@@ -64,15 +64,14 @@ if __name__ == '__main__':
 
 
 LEXER_TEMPLATE = '''\
-from langkit.lexer import Eof, Lexer, LexerToken, Literal, NoText
+from langkit.lexer import Lexer, LexerToken, Literal, WithText
 
 
 class Token(LexerToken):
-    Example = NoText()
+    Example = WithText()
 
 {lang_name_slug}_lexer = Lexer(Token)
 {lang_name_slug}_lexer.add_rules(
-    (Eof(),              Token.Termination),
     (Literal("example"), Token.Example),
 )
 '''
