@@ -1469,8 +1469,7 @@ private
       else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Trivia)).T);
    --  Return the raw token data for T
 
-   function Get_Symbol (Token : Token_Type) return Symbol_Type is
-     (Raw_Data (Token).Symbol);
+   function Get_Symbol (Token : Token_Type) return Symbol_Type;
    --  Assuming that Token refers to a token that contains a symbol, return the
    --  corresponding symbol. This is an internal helper for properties code
    --  generation.

@@ -1646,6 +1646,25 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       end;
    end Previous;
 
+   ----------------
+   -- Get_Symbol --
+   ----------------
+
+   function Get_Symbol (Token : Token_Type) return Symbol_Type is
+      subtype Token_Data_Reference is
+         Token_Data_Handlers.Token_Vectors.Element_Access;
+
+      Token_Data : constant Token_Data_Reference :=
+        (if Token.Trivia = No_Token_Index
+         then Token_Data_Reference
+           (Token.TDH.Tokens.Get_Access (Natural (Token.Token)))
+         else Token_Data_Reference'
+           (Token.TDH.Trivias.Get_Access
+              (Natural (Token.Trivia) - 1).T'Access));
+   begin
+      return Force_Symbol (Token.TDH.all, Token_Data.all);
+   end Get_Symbol;
+
    -------------
    -- Convert --
    -------------
