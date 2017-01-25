@@ -2,12 +2,12 @@ from contextlib import contextmanager
 from functools import partial
 
 from langkit import names
-from langkit.compiled_types import BoolType, LexicalEnvType, Symbol, T
+from langkit.compiled_types import BoolType, LexicalEnvType, Symbol, T, Token
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr,
     BuiltinCallExpr, GetSymbol, PropertyDef, ResolvedExpression, Self,
-    SymbolLiteral, auto_attr, auto_attr_custom, construct
+    auto_attr, auto_attr_custom, construct
 )
 
 
@@ -95,15 +95,15 @@ class EnvVariable(AbstractVariable):
 @auto_attr_custom("get")
 @auto_attr_custom("get_sequential", sequential=True)
 @auto_attr_custom("resolve_unique", resolve_unique=True)
-def env_get(env_expr, token_expr, resolve_unique=False, sequential=False,
+def env_get(env_expr, symbol_expr, resolve_unique=False, sequential=False,
             recursive=True):
     """
     Expression for lexical environment get operation.
 
     :param AbstractExpression env_expr: Expression that will yield the env
         to get the element from.
-    :param AbstractExpression|str token_expr: Expression that will yield the
-        token to use as a key on the env, or a string to turn into a symbol.
+    :param AbstractExpression|str symbol_expr: Expression that will yield the
+        symbol to use as a key on the env, or a string to turn into a symbol.
     :param bool resolve_unique: Wether we want an unique result or not.
         NOTE: For the moment, nothing will be done to ensure that only one
         result is available. The implementation will just take the first
@@ -113,18 +113,21 @@ def env_get(env_expr, token_expr, resolve_unique=False, sequential=False,
         parent environments.
     """
 
-    if isinstance(token_expr, AbstractExpression):
-        symbol_expr = GetSymbol(token_expr)
-    elif isinstance(token_expr, str):
-        symbol_expr = SymbolLiteral(token_expr)
-    else:
+    if not isinstance(symbol_expr, (AbstractExpression, str)):
         check_source_language(
             False,
-            'Invalid key argument for Env.get: {}'.format(repr(token_expr))
+            'Invalid key argument for Env.get: {}'.format(repr(symbol_expr))
         )
 
-    sub_exprs = [construct(env_expr, LexicalEnvType),
-                 construct(symbol_expr, Symbol)]
+    sym_expr = construct(symbol_expr)
+    if sym_expr.type == Token:
+        sym_expr = GetSymbol.construct_static(sym_expr)
+    check_source_language(
+        sym_expr.type == Symbol,
+        "Wrong type for symbol expr: {}".format(sym_expr.type)
+    )
+
+    sub_exprs = [construct(env_expr, LexicalEnvType), sym_expr]
 
     if sequential:
         # Pass the From parameter if the user wants sequential semantics
