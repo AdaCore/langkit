@@ -84,4 +84,10 @@ package ${_self.ada_api_settings.lib_name}.Lexer is
    --  Debug helper: return a human-readable representation of T, a token that
    --  belongs to TDH.
 
+   function Force_Symbol
+     (TDH : Token_Data_Handler;
+      T   : in out Token_Data_Type) return Symbol_Type;
+   --  If T has a symbol, return it. Otherwise, force its symbolization and
+   --  return the symbol.
+
 end ${_self.ada_api_settings.lib_name}.Lexer;

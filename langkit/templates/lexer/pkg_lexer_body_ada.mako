@@ -590,4 +590,23 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
    function Token_Kind_Name (Token_Id : Token_Kind) return String is
      (Token_Kind_Names (Token_Id).all);
 
+   ------------------
+   -- Force_Symbol --
+   ------------------
+
+   function Force_Symbol
+     (TDH : Token_Data_Handler;
+      T   : in out Token_Data_Type) return Symbol_Type is
+   begin
+      if T.Symbol = null then
+         declare
+            Text : Text_Type renames
+               TDH.Source_Buffer (T.Source_First ..  T.Source_Last);
+         begin
+            T.Symbol := Find (TDH.Symbols, Text);
+         end;
+      end if;
+      return T.Symbol;
+   end Force_Symbol;
+
 end ${_self.ada_api_settings.lib_name}.Lexer;
