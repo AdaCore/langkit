@@ -643,13 +643,13 @@
 
       % if cls.env_spec.ref_envs:
       declare
-         Envs : ${cls.env_spec.ref_envs.type.name()}
+         To_Ref_Envs : ${cls.env_spec.ref_envs.type.name()}
            := ${call_prop(cls.env_spec.ref_envs)};
       begin
-         for Lex_Env of Envs.Items loop
-            Reference (Current_Env, Lex_Env, ${root_node_type_name} (Self));
+         for To_Ref_Env of To_Ref_Envs.Items loop
+            Reference (Current_Env, To_Ref_Env, ${root_node_type_name} (Self));
          end loop;
-         Dec_Ref (Envs);
+         Dec_Ref (To_Ref_Envs);
       end;
       % endif
 
