@@ -333,10 +333,12 @@ def as_array(list_expr):
     :param AbstractExpression list_expr: The AST list to convert.
     :rtype: ResolvedExpression
     """
-    result = construct(Map(list_expr, lambda x: x))
+    abstract_result = list_expr.map(lambda x: x)
+    abstract_result.prepare()
+    result = construct(abstract_result)
     root_list_type = get_context().root_grammar_class.list_type()
     check_source_language(
-        issubclass(result.collection, root_list_type),
+        issubclass(result.collection.type, root_list_type),
         '.as_array input must be an AST list'
     )
     return result
