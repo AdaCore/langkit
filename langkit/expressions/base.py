@@ -2399,6 +2399,33 @@ class ArrayExpr(BasicExpr):
                 '2-elements': self.operands}
 
 
+class TokenTextEq(BasicExpr):
+    """
+    Resolved expression to test equality of the text of two tokens.
+    """
+    def __init__(self, left, right):
+        """
+        :type left: ResolvedExpression
+        :type right: ResolvedExpression
+        """
+        super(TokenTextEq, self).__init__(
+            template="Text_Type'(Text ({})) = Text_Type'(Text ({}))",
+            type=BoolType,
+            operands=[left, right])
+
+
+@auto_attr
+def text_equals(left, right):
+    """
+    Expression to test equality of the text of two tokens.
+
+    :param AbstractExpression left: Expression that must resolve to a token,
+        whose text will be used for the test.
+    :param AbstractExpression right: Likewise.
+    """
+    return TokenTextEq(construct(left, Token), construct(right, Token))
+
+
 class UnreachableExpr(ResolvedExpression):
     """
     Resolved expression that just raises an error.
