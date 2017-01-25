@@ -23,7 +23,9 @@ def make_lang_def(lit):
 
 print 'Valid case'
 emit_and_print_errors(make_lang_def(12))
-print 'Invalid case'
+print 'Valid case'
 emit_and_print_errors(make_lang_def("lol"))
+print 'Invalid case'
+emit_and_print_errors(make_lang_def(12.90))
 print('')
 print 'Done'

@@ -40,6 +40,8 @@ def unsugar(expr, ignore_errors=False):
     # WARNING: Since bools are ints in python, bool needs to be before int
     if isinstance(expr, (bool, int)):
         expr = Literal(expr)
+    elif isinstance(expr, str):
+        expr = SymbolLiteral(expr)
 
     check_source_language(
         ignore_errors or isinstance(expr, AbstractExpression),
