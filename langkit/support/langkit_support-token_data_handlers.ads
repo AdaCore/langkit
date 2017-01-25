@@ -12,7 +12,7 @@ package Langkit_Support.Token_Data_Handlers is
    --  is every trivia that is between the current token and the next token.
 
    type Trivia_Node is record
-      T        : Token_Data_Type;
+      T        : aliased Token_Data_Type;
       Has_Next : Boolean;
    end record;
    --  This defines a node in a trivia linked list
