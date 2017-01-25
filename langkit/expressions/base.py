@@ -1122,7 +1122,11 @@ class GetSymbol(AbstractExpression):
         :rtype: BuiltinCallExpr
         """
         token = construct(self.token_expr, Token)
-        return BuiltinCallExpr("Get_Symbol", Symbol, [token])
+        return self.construct_static(token)
+
+    @staticmethod
+    def construct_static(token_expr):
+        return BuiltinCallExpr("Get_Symbol", Symbol, [token_expr])
 
 
 class SymbolLiteral(AbstractExpression):
