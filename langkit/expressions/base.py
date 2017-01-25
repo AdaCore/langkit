@@ -408,6 +408,9 @@ class AbstractExpression(Frozable):
             'empty': self.length.equals(0),
             'find': lambda filter_expr:
                 self.filter(filter_expr).at(0),
+            'keep': lambda klass:
+                self.filtermap(filter_expr=lambda e: e.is_a(klass),
+                               expr=lambda e: e.cast(klass)),
             'exists': lambda filter_expr:
                 Not(IsNull(self.filter(filter_expr).at(0))),
             'find_or_raise': lambda filter_expr:
