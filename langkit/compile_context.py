@@ -639,7 +639,7 @@ class CompileCtx(object):
                         ' CompileContext.bind_env_hook has not been called'
                     )
 
-    def compute_properties(self):
+    def compute_properties(self, compile_only=False):
         """
         Compute information related to ASTNode's properties. This needs to be a
         global analysis because we want to compute which properties need to be
@@ -647,7 +647,7 @@ class CompileCtx(object):
         node, but by whether the parent has a property with the same name.
         """
 
-        for pass_fn in PropertyDef.compilation_passes():
+        for pass_fn in PropertyDef.compilation_passes(compile_only):
             for astnode in self.astnode_types:
                 for prop in astnode.get_properties(include_inherited=False):
                     if self.verbosity.debug:
@@ -675,7 +675,7 @@ class CompileCtx(object):
         return render(*args, **kwargs)
 
     def emit(self, file_root='.', generate_lexer=True, main_programs=set(),
-             annotate_fields_types=False):
+             annotate_fields_types=False, compile_only=False):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -716,13 +716,15 @@ class CompileCtx(object):
                         self.additional_source_files.append(filepath)
 
         self.annotate_fields_types = annotate_fields_types
-        self.compile()
+        self.compile(compile_only=compile_only)
+        if compile_only:
+            return
         with global_context(self):
             self._emit(file_root, generate_lexer, main_programs)
 
-    def compile(self):
+    def compile(self, compile_only=False):
         with global_context(self):
-            self._compile()
+            self._compile(compile_only)
 
     def write_ada_module(self, out_dir, template_base_name, qual_name,
                          has_body=True):
@@ -793,7 +795,7 @@ class CompileCtx(object):
 
         return self._struct_types
 
-    def _compile(self):
+    def _compile(self, compile_only=False):
         """
         Compile the language specification: perform legality checks and type
         inference.
@@ -849,15 +851,11 @@ class CompileCtx(object):
         with names.camel_with_underscores:
             # Compute properties information, so that it is available for
             # further compilation stages.
-            self.compute_properties()
+            self.compute_properties(compile_only=compile_only)
             errors_checkpoint()
 
             # Past this point, the set of symbol literals is frozen
             self.finalize_symbol_literals()
-
-            for r_name, r in self.grammar.rules.items():
-                with r.error_context():
-                    r.compile()
 
         unresolved_types = set([t for t in self.astnode_types
                                 if not t.is_type_resolved])
@@ -871,6 +869,14 @@ class CompileCtx(object):
         astnodes_files = {
             path.abspath(inspect.getsourcefile(n)) for n in self.astnode_types
         }
+
+        if compile_only:
+            return
+
+        with names.camel_with_underscores:
+            for r_name, r in self.grammar.rules.items():
+                with r.error_context():
+                    r.compile()
 
         if self.annotate_fields_types:
             # Only import lib2to3 if the users needs it

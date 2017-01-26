@@ -295,6 +295,11 @@ class ManageScript(object):
             '--no-compile-quex', help="Don't compile the quex lexer",
             action='store_true',
         )
+        subparser.add_argument(
+            '--check-only', help="Only check the input for errors, don't"
+            "generate the code",
+            action='store_true'
+        )
 
     def add_build_args(self, subparser):
         """
@@ -480,7 +485,11 @@ class ManageScript(object):
         self.context.emit(file_root=self.dirs.build_dir(),
                           main_programs=self.main_programs,
                           annotate_fields_types=args.annotate_fields_types,
-                          generate_lexer=not args.no_compile_quex)
+                          generate_lexer=not args.no_compile_quex,
+                          compile_only=args.check_only)
+
+        if args.check_only:
+            return
 
         def gnatpp(project_file, glob_pattern):
             self.check_call(args, 'Pretty-printing', [
