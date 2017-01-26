@@ -183,6 +183,11 @@ class ManageScript(object):
                  ' post-mortem PDB session'
         )
         args_parser.add_argument(
+            '--profile', action='store_true',
+            help='Run cProfile and langkit, and generate a data file '
+            '"langkit.prof"'
+        )
+        args_parser.add_argument(
             '--parsable-errors', '-P', action='store_true', default=False,
             help='Generate error messages parsable by tools'
         )
@@ -396,6 +401,13 @@ class ManageScript(object):
         from langkit import diagnostics
         diagnostics.EMIT_PARSABLE_ERRORS = parsed_args.parsable_errors
 
+        if parsed_args.profile:
+            import cProfile
+            import pstats
+
+            pr = cProfile.Profile()
+            pr.enable()
+
         # If asked to, setup the exception hook as a last-chance handler to
         # invoke a debugger in case of uncaught exception.
         if parsed_args.debug:
@@ -453,6 +465,11 @@ class ManageScript(object):
             print_context(recovered=True)
             print >> sys.stderr, col('Internal error! Exiting', Colors.FAIL)
             sys.exit(1)
+        finally:
+            if parsed_args.profile:
+                pr.disable()
+                ps = pstats.Stats(pr)
+                ps.dump_stats('langkit.prof')
 
         if cov is not None:
             cov.stop()
