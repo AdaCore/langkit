@@ -2780,9 +2780,29 @@ class Arithmetic(AbstractExpression):
         self.l, self.r, self.op = l, r, op
 
     def construct(self):
-        return BasicExpr("({} %s {})" % self.op,
-                         LongType, [construct(self.l, LongType),
-                                    construct(self.r, LongType)])
+        l = construct(self.l)
+        r = construct(self.r)
+
+        if l.type == Symbol and r.type == Symbol:
+            return BasicExpr(
+                'Find (Self.Unit.TDH.Symbols, ({}.all & {}.all))',
+                Symbol,
+                [l, r]
+            )
+
+        check_source_language(
+            l.type == r.type, "Incompatible types for {}: {} and {}".format(
+                self.op, l.type.name().camel, r.type.name().camel
+            )
+        )
+
+        check_source_language(
+            l.type in (Symbol, LongType), "Invalid type for {}: {}".format(
+                self.op, l.type.name().camel
+            )
+        )
+
+        return BasicExpr("({} %s {})" % self.op, LongType, [l, r])
 
 
 def ignore(*vars):
