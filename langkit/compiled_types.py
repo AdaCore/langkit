@@ -675,7 +675,7 @@ class Token(BasicType):
 
 
 class Symbol(BasicType):
-    is_ptr = False
+    is_ptr = True
     _name = "Symbol_Type"
     _nullexpr = "null"
 
