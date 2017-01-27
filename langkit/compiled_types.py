@@ -1151,6 +1151,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         # No matter what, reset all caches so that subclass don't "magically"
         # inherit their parent's.
         dct['_cached_user_name'] = None
+        dct['_abstract_fields_dict_cache'] = {}
 
         # We want to check various inheritance facts:
         #
@@ -1637,6 +1638,16 @@ class Struct(CompiledType):
     :type: None|names.Name
     """
 
+    _abstract_fields_dict_cache = {}
+    """
+    Cache for the get_abstract_fields_dict class method.
+
+    For each couple of parameters (include_inherited : bool, field_class :
+    AbsractNodeData
+
+    :type: dict[(bool, AbstractNodeData), dict[str, AbstractField]]
+    """
+
     @classmethod
     @memoized
     def is_refcounted(cls):
@@ -1866,20 +1877,37 @@ class Struct(CompiledType):
 
         :rtype: dict[str, AbstractNodeData]
         """
+        assert issubclass(field_class, AbstractNodeData)
 
-        def get_fields(klass):
-            return OrderedDict(
+        # First, see if we have a cached result for this
+        key = (include_inherited, field_class)
+        try:
+            return cls._abstract_fields_dict_cache[key]
+        except KeyError:
+            pass
+
+        # No cached result, we have to compute it
+        if field_class == AbstractNodeData:
+            # If we don't filter by class (i.e.  if we want the most general
+            # class field: AbstractNodeData), do the base class recursion.
+            if include_inherited and cls.is_ast_node():
+                result = OrderedDict()
+                for base_class in cls.get_inheritance_chain():
+                    result.update(base_class._fields)
+            else:
+                result = OrderedDict(cls._fields)
+
+        # Otherwise, just rely on the potentially already cached whole list of
+        # fields and do filtering.
+        else:
+            all_fields = cls.get_abstract_fields_dict(include_inherited)
+            result = OrderedDict(
                 filter(lambda (k, v): isinstance(v, field_class),
-                       klass._fields.items())
+                       all_fields.items())
             )
 
-        if include_inherited and cls.is_ast_node():
-            fields = OrderedDict()
-            for base_class in cls.get_inheritance_chain():
-                fields.update(get_fields(base_class))
-            return fields
-        else:
-            return get_fields(cls)
+        cls._abstract_fields_dict_cache[key] = result
+        return result
 
     @classmethod
     def is_typed(cls):
