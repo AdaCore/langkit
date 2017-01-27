@@ -26,7 +26,7 @@ with Langkit_Support.Text;  use Langkit_Support.Text;
 --  use this package. Please refer to the C header if you want to use the C
 --  API.
 
-package ${_self.ada_api_settings.lib_name}.Analysis.C is
+package ${ctx.ada_api_settings.lib_name}.Analysis.C is
 
    type ${analysis_context_type} is new System.Address;
    ${ada_c_doc('langkit.analysis_context_type', 3)}
@@ -121,7 +121,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
           External_Name => "${capi.get_name('destroy_text')}";
    ${ada_c_doc('langkit.destroy_text', 3)}
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
    --  Types for unit file providers
 
    type ${unit_kind_type} is new int;
@@ -154,7 +154,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    function ${capi.get_name('create_analysis_context')}
      (Charset            : chars_ptr
-      % if _self.default_unit_file_provider:
+      % if ctx.default_unit_file_provider:
       ; Unit_File_Provider : ${unit_file_provider_type}
       % endif
      )
@@ -211,7 +211,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
               "${capi.get_name('get_analysis_unit_from_buffer')}";
    ${ada_c_doc('langkit.get_unit_from_buffer', 3)}
 
-   % if _self.default_unit_file_provider:
+   % if ctx.default_unit_file_provider:
       function ${capi.get_name('get_analysis_unit_from_provider')}
         (Context     : ${analysis_context_type};
          Name        : ${text_type};
@@ -467,7 +467,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_name => "${capi.get_name('node_extension')}";
    ${ada_c_doc('langkit.node_extension', 3)}
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
    -------------------------
    -- Unit file providers --
    -------------------------
@@ -553,15 +553,15 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
            External_Name => "${capi.get_name('token_range_text')}";
    ${ada_c_doc('langkit.token_range_text', 3)}
 
-   % for enum_type in _self.sorted_types(_self.enum_types):
+   % for enum_type in ctx.sorted_types(ctx.enum_types):
       ${enum_types.spec(enum_type)}
    % endfor
 
-   % for struct_type in _self.sorted_types(_self.struct_types):
+   % for struct_type in ctx.sorted_types(ctx.struct_types):
       ${struct_types.decl(struct_type)}
    % endfor
 
-   % for array_type in _self.sorted_types(_self.array_types):
+   % for array_type in ctx.sorted_types(ctx.array_types):
       % if array_type.element_type().should_emit_array_type:
          ${array_types.decl(array_type)}
       % endif
@@ -576,7 +576,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    --  fail if the node does not have the proper type, for instance). When an
    --  AST node is returned, its ref-count is left as-is.
 
-   % for astnode in _self.astnode_types:
+   % for astnode in ctx.astnode_types:
        % for field in astnode.fields_with_accessors():
            ${astnode_types.accessor_decl(field)}
        % endfor
@@ -654,7 +654,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
    function Wrap (Token : Token_Type) return ${token_type};
    function Unwrap (Token : ${token_type}) return Token_Type;
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
    function Wrap (Kind : Unit_Kind) return ${unit_kind_type} is
      (Unit_Kind'Pos (Kind));
    function Unwrap (Kind : ${unit_kind_type}) return Unit_Kind is
@@ -673,4 +673,4 @@ package ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    pragma Warnings (Off, "possible aliasing problem for type");
 
-end ${_self.ada_api_settings.lib_name}.Analysis.C;
+end ${ctx.ada_api_settings.lib_name}.Analysis.C;

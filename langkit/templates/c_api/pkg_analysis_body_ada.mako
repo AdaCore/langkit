@@ -22,18 +22,18 @@ with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Extensions;  use Langkit_Support.Extensions;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
-with ${_self.ada_api_settings.lib_name}.Analysis;
-use ${_self.ada_api_settings.lib_name}.Analysis;
-with ${_self.ada_api_settings.lib_name}.Lexer;
-use ${_self.ada_api_settings.lib_name}.Lexer;
+with ${ctx.ada_api_settings.lib_name}.Analysis;
+use ${ctx.ada_api_settings.lib_name}.Analysis;
+with ${ctx.ada_api_settings.lib_name}.Lexer;
+use ${ctx.ada_api_settings.lib_name}.Lexer;
 
 ${exts.include_extension(
    ctx.ext('analysis', 'c_api', 'body_deps')
 )}
 
-package body ${_self.ada_api_settings.lib_name}.Analysis.C is
+package body ${ctx.ada_api_settings.lib_name}.Analysis.C is
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
    type C_Unit_File_Provider_Type is
       new Ada.Finalization.Controlled
       and Unit_File_Provider_Interface
@@ -86,7 +86,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
 
    function ${capi.get_name("create_analysis_context")}
      (Charset            : chars_ptr
-      % if _self.default_unit_file_provider:
+      % if ctx.default_unit_file_provider:
       ; Unit_File_Provider : ${unit_file_provider_type}
       % endif
      )
@@ -98,17 +98,17 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       declare
          C : constant String :=
            (if Charset = Null_Ptr
-            then ${string_repr(_self.default_charset)}
+            then ${string_repr(ctx.default_charset)}
             else Value (Charset));
 
-         % if _self.default_unit_file_provider:
+         % if ctx.default_unit_file_provider:
          U : Unit_File_Provider_Access_Cst :=
             Unit_File_Provider_Access_Cst (Unwrap (Unit_File_Provider));
          % endif
 
       begin
          return Wrap (Create (C
-            % if _self.default_unit_file_provider:
+            % if ctx.default_unit_file_provider:
             , U
             % endif
          ));
@@ -212,7 +212,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
          return ${analysis_unit_type} (System.Null_Address);
    end;
 
-   % if _self.default_unit_file_provider:
+   % if ctx.default_unit_file_provider:
       function ${capi.get_name("get_analysis_unit_from_provider")}
         (Context     : ${analysis_context_type};
          Name        : ${text_type};
@@ -500,7 +500,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
                       cls.ada_kind_name(),
                       cls.name().camel
                   )
-                  for cls in _self.astnode_types
+                  for cls in ctx.astnode_types
                   if not cls.abstract)});
 
    function ${capi.get_name("node_kind")} (Node : ${node_type})
@@ -929,7 +929,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
       end if;
    end;
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
    function ${capi.get_name('create_unit_file_provider')}
      (Data                    : System.Address;
       Destroy_Func            : ${unit_file_provider_destroy_type};
@@ -1132,20 +1132,20 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.C is
    -- Kind-specific AST node primitives --
    ---------------------------------------
 
-   % for astnode in _self.astnode_types:
+   % for astnode in ctx.astnode_types:
        % for field in astnode.fields_with_accessors():
            ${astnode_types.accessor_body(field)}
        % endfor
    % endfor
 
-   % for struct_type in _self.sorted_types(_self.struct_types):
+   % for struct_type in ctx.sorted_types(ctx.struct_types):
       ${struct_types.body(struct_type)}
    % endfor
 
-   % for array_type in _self.sorted_types(_self.array_types):
+   % for array_type in ctx.sorted_types(ctx.array_types):
       % if array_type.element_type().should_emit_array_type:
          ${array_types.body(array_type)}
       % endif
    % endfor
 
-end ${_self.ada_api_settings.lib_name}.Analysis.C;
+end ${ctx.ada_api_settings.lib_name}.Analysis.C;
