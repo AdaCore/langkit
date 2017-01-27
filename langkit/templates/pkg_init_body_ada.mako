@@ -2,7 +2,7 @@
 
 with GNATCOLL.Iconv;
 
-package body ${_self.ada_api_settings.lib_name}.Init is
+package body ${ctx.ada_api_settings.lib_name}.Init is
 
    ----------------
    -- Initialize --
@@ -21,4 +21,4 @@ package body ${_self.ada_api_settings.lib_name}.Init is
       end if;
    end Initialize;
 
-end ${_self.ada_api_settings.lib_name}.Init;
+end ${ctx.ada_api_settings.lib_name}.Init;
