@@ -1,4 +1,4 @@
 ## vim: filetype=makoada
 
-${res} := ${_self.gen_fn_name}(Parser, ${pos_name});
+${res} := ${parser.gen_fn_name}(Parser, ${pos_name});
 ${pos} := Parser.Current_Pos;

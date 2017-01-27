@@ -11,7 +11,7 @@ declare
 begin
    if
       T.Kind /= ${token_kind}
-      % if _self.matches_symbol:
+      % if parser.matches_symbol:
       or else T.Symbol /= Parser.Symbol_Literals
         (${ctx.symbol_literals[match_text]})
       % elif match_text:

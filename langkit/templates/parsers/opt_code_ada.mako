@@ -5,13 +5,13 @@
 ${parser_context.code}
 
 <%
-parser_type = _self.parser.get_type()
-if _self._booleanize:
-   base, alt_true, alt_false = _self._booleanize
+parser_type = parser.parser.get_type()
+if parser._booleanize:
+   base, alt_true, alt_false = parser._booleanize
 %>
 
 if ${parser_context.pos_var_name} = No_Token_Index then
-    % if _self._booleanize:
+    % if parser._booleanize:
       % if is_bool(base):
          ${bool_res} := False;
       % else:
@@ -32,12 +32,12 @@ if ${parser_context.pos_var_name} = No_Token_Index then
            ${parser_type.storage_nullexpr()};
     % endif
 
-    % if _self._is_error:
+    % if parser._is_error:
         ## Emit a diagnostic informing the user that the sub parser has not
         ## succeeded.
-        <% missing_item = (_self.parser.val
-                           if is_tok(_self.parser) else
-                           repr(_self.parser)) %>
+        <% missing_item = (parser.parser.val
+                           if is_tok(parser.parser) else
+                           repr(parser.parser)) %>
         Parser.Diagnostics.Append
           ((Get_Token (Parser.TDH.all, ${pos_name}).Sloc_Range,
             To_Unbounded_Wide_Wide_String (To_Text
@@ -46,7 +46,7 @@ if ${parser_context.pos_var_name} = No_Token_Index then
 
     ${parser_context.pos_var_name} := ${pos_name};
 
-% if _self._booleanize:
+% if parser._booleanize:
 else
    % if is_bool (base):
       ${bool_res} := True;

@@ -1,24 +1,24 @@
 ## vim: filetype=makoada
 
-<% ret_type = _self.get_type().storage_type_name() %>
+<% ret_type = parser.get_type().storage_type_name() %>
 
-${_self.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
+${parser.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
 
-function ${_self.gen_fn_name} (Parser : in out Parser_Type;
-                               Pos    : Token_Index)
-                               return ${ret_type}
+function ${parser.gen_fn_name} (Parser : in out Parser_Type;
+                                Pos    : Token_Index)
+                                return ${ret_type}
 is
    % for name, typ in parser_context.var_defs:
       ${name} : ${typ.storage_type_name()}
          ${":= " + typ.storage_nullexpr() if typ.storage_nullexpr() else ""};
    % endfor
 
-   % if _self.is_left_recursive():
+   % if parser.is_left_recursive():
       Mem_Pos : Token_Index := Pos;
-      Mem_Res : ${ret_type} := ${_self.get_type().storage_nullexpr()};
+      Mem_Res : ${ret_type} := ${parser.get_type().storage_nullexpr()};
    % endif
 
-   M : ${ret_type}_Memos.Memo_Entry := Get (${_self.gen_fn_name}_Memo, Pos);
+   M : ${ret_type}_Memos.Memo_Entry := Get (${parser.gen_fn_name}_Memo, Pos);
 
 begin
 
@@ -31,8 +31,8 @@ begin
       return ${parser_context.res_var_name};
    end if;
 
-   % if _self.is_left_recursive():
-       Set (${_self.gen_fn_name}_Memo,
+   % if parser.is_left_recursive():
+       Set (${parser.gen_fn_name}_Memo,
             False,
             ${parser_context.res_var_name},
             Pos,
@@ -51,11 +51,11 @@ begin
    -- END MAIN COMBINATORS CODE --
    -------------------------------
 
-   % if _self.is_left_recursive():
+   % if parser.is_left_recursive():
       if ${parser_context.pos_var_name} > Mem_Pos then
          Mem_Pos := ${parser_context.pos_var_name};
          Mem_Res := ${parser_context.res_var_name};
-         Set (${_self.gen_fn_name}_Memo,
+         Set (${parser.gen_fn_name}_Memo,
               ${parser_context.pos_var_name} /= No_Token_Index,
               ${parser_context.res_var_name},
               Pos,
@@ -69,17 +69,17 @@ begin
       end if;
    % endif
 
-   Set (${_self.gen_fn_name}_Memo,
+   Set (${parser.gen_fn_name}_Memo,
         ${parser_context.pos_var_name} /= No_Token_Index,
         ${parser_context.res_var_name},
         Pos,
         ${parser_context.pos_var_name});
 
-   % if _self.is_left_recursive():
+   % if parser.is_left_recursive():
        <<No_Memo>>
    % endif
 
    Parser.Current_Pos := ${parser_context.pos_var_name};
 
    return ${parser_context.res_var_name};
-end ${_self.gen_fn_name};
+end ${parser.gen_fn_name};

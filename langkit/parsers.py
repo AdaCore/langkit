@@ -387,7 +387,7 @@ class Parser(object):
         Emit code for this parser as a function into the global context.
         """
         t_env = TemplateEnvironment()
-        t_env._self = self
+        t_env.parser = self
 
         check_source_language(
             self.get_type() is not None
@@ -450,7 +450,7 @@ class Parser(object):
             pos, res = gen_names("fncall_pos", "fncall_res")
             fncall_block = render(
                 'parsers/fn_call_ada',
-                _self=self, pos_name=pos_name,
+                parser=self, pos_name=pos_name,
                 pos=pos, res=res
             )
 
@@ -545,7 +545,7 @@ class Tok(Parser):
         pos, res = gen_names("tk_pos", "tk_res")
         code = render(
             'parsers/tok_code_ada',
-            _self=self, pos_name=pos_name,
+            parser=self, pos_name=pos_name,
             pos=pos, res=res,
             match_text=self.match_text,
             token_kind=get_context().lexer.ada_token_name(self.val)
@@ -642,7 +642,7 @@ class Or(Parser):
     def generate_code(self, pos_name="pos"):
         pos, res = gen_names('or_pos', 'or_res')
         t_env = TemplateEnvironment(
-            _self=self,
+            parser=self,
 
             # List of ParserCodeContext instances for the sub-parsers,
             # encapsulating their results.
@@ -760,7 +760,7 @@ class Row(Parser):
 
     def generate_code(self, pos_name="pos"):
         t_env = TemplateEnvironment(pos_name=pos_name)
-        t_env._self = self
+        t_env.parser = self
 
         t_env.pos, t_env.res = gen_names("row_pos", "row_res")
         decls = [(t_env.pos, Token)]
@@ -911,7 +911,7 @@ class List(Parser):
 
         t_env = TemplateEnvironment(
             pos_name=pos_name,
-            _self=self,
+            parser=self,
             pos=gen_name("lst_pos"),
             res=gen_name("lst_res"),
             cpos=cpos,
@@ -1038,7 +1038,7 @@ class Opt(Parser):
 
         t_env = TemplateEnvironment(
             pos_name=pos_name,
-            _self=self,
+            parser=self,
             bool_res=gen_name("opt_bool_res"),
             parser_context=parser_context
         )
@@ -1241,7 +1241,7 @@ class Transform(Parser):
         ":type: ParserCodeContext"
 
         t_env = TemplateEnvironment(
-            _self=self,
+            parser=self,
             # The template needs the compiler context to retrieve the types of
             # the tree fields (required by get_types()).
             parser_context=parser_context,
@@ -1296,7 +1296,7 @@ class Null(Parser):
         if isinstance(typ, ASTNode):
             self.get_type().add_to_context()
         res = gen_name("null_res")
-        code = render('parsers/null_code_ada', _self=self, res=res,
+        code = render('parsers/null_code_ada', parser=self, res=res,
                       pos_name=pos_name)
 
         return ParserCodeContext(
@@ -1358,7 +1358,7 @@ class Enum(Parser):
         )
 
         env = TemplateEnvironment(
-            _self=self,
+            parser=self,
             res=gen_name("enum_res"),
             parser_context=parser_context
 

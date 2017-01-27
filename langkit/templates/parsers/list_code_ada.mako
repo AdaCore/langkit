@@ -4,14 +4,14 @@
 
 ## If we accept empty lists, then we never want to return No_Token_Index as a
 ## position.
-% if _self.empty_valid:
+% if parser.empty_valid:
     ${pos} := ${pos_name};
 % else:
     ${pos} := No_Token_Index;
 % endif
 
 <%
-   list_type = _self.get_type()
+   list_type = parser.get_type()
    el_type   = list_type.element_type().name()
 %>
 
@@ -42,7 +42,7 @@ loop
       ${ctx.root_grammar_class.name()} (${parser_context.res_var_name}));
 
    ## Parse the separator, if there is one. The separator is always discarded.
-   % if _self.sep:
+   % if parser.sep:
       ${sep_context.code}
       if ${sep_context.pos_var_name} /= No_Token_Index then
           ${cpos} := ${sep_context.pos_var_name};

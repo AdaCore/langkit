@@ -3,12 +3,12 @@
 --  Start or_code
 
 ${pos} := No_Token_Index;
-${res} := ${_self.get_type().storage_nullexpr()};
+${res} := ${parser.get_type().storage_nullexpr()};
 % for ctx in results:
     ${ctx.code}
     if ${ctx.pos_var_name} /= No_Token_Index then
         ${pos} := ${ctx.pos_var_name};
-        ${res} := ${_self.get_type().storage_type_name()}
+        ${res} := ${parser.get_type().storage_type_name()}
           (${ctx.res_var_name});
         goto ${exit_label};
     end if;
