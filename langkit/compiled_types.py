@@ -1285,10 +1285,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         # "fields" contains all the non-internal fields for this class: check
         # that they use allowed names.
         for f_n, f_v in fields.iteritems():
-            with Context(
-                'in {}.{}'.format(name, f_n),
-                extract_library_location()
-            ):
+            with mcs.field_context(name, f_n):
                 check_source_language(
                     not f_n.startswith('_'),
                     'Underscore-prefixed field names are not allowed'
@@ -1299,7 +1296,7 @@ class StructMetaclass(CompiledTypeMetaclass):
             syntax_fields = {f_n: f_v
                              for f_n, f_v in fields.items()
                              if not f_v.is_property}
-            with Context('in {}'.format(name), extract_library_location()):
+            with mcs.class_context(name):
                 check_source_language(
                     not syntax_fields,
                     'ASTNode list types are not allowed to have fields'
@@ -1326,10 +1323,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         cls.fields = DictProxy(fields)
 
         for f_n, f_v in fields.iteritems():
-            with Context(
-                'in {}.{}'.format(name, f_n),
-                extract_library_location()
-            ):
+            with mcs.field_context(name, f_n):
                 if is_struct:
                     check_source_language(
                         not f_v.is_property,
@@ -1420,6 +1414,28 @@ class StructMetaclass(CompiledTypeMetaclass):
              for group in fields_groups],
             []
         ))
+
+    @staticmethod
+    def class_context(class_name):
+        """
+        Return a diagnostic context for the "class_name" class.
+
+        :type class_name: str
+        :rtype: Context
+        """
+        return Context('in {}'.format(class_name), extract_library_location())
+
+    @staticmethod
+    def field_context(class_name, field_name):
+        """
+        Return a diagnostic context for the "field_name" field/property.
+
+        :type class_name: str
+        :type field_name: str
+        :rtype: Context
+        """
+        return Context('in {}.{}'.format(class_name, field_name),
+                       extract_library_location())
 
 
 def abstract(cls):
