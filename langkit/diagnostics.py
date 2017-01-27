@@ -1,5 +1,6 @@
 import enum
 from os import path
+import os.path
 import traceback
 
 from langkit.utils import Colors, assert_type, col
@@ -13,6 +14,7 @@ class Diagnostics(object):
     """
     lang_source_dir = "<invalid dir>"
     has_pending_error = False
+    _is_under_langkit_cache = {}
 
     @classmethod
     def set_lang_source_dir(cls, lang_source_dir):
@@ -21,6 +23,22 @@ class Diagnostics(object):
         :type lang_source_dir: str
         """
         cls.lang_source_dir = lang_source_dir
+        cls._is_under_langkit_cache = {}
+
+    @classmethod
+    def is_under_langkit(cls, path):
+        """
+        Return wether the "path" file belongs to Langkit.
+
+        :type path: str
+        :rtype: bool
+        """
+        try:
+            return cls._is_under_langkit_cache[path]
+        except KeyError:
+            result = Diagnostics.lang_source_dir in os.path.abspath(path)
+            cls._is_under_langkit_cache[path] = result
+            return result
 
 
 class Location(object):
@@ -50,7 +68,7 @@ def extract_library_location():
     """
     l = [Location(t[0], t[1], t[3])
          for t in traceback.extract_stack()
-         if Diagnostics.lang_source_dir in path.abspath(t[0])
+         if Diagnostics.is_under_langkit(t[0])
          and "manage.py" not in t[0]]
     return l[-1] if l else None
 
