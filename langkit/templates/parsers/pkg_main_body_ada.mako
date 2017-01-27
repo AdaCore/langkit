@@ -6,8 +6,6 @@ with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Packrat;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 
-with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
-
 package body ${ada_lib_name}.Analysis.Parsers is
 
    --  Prepare packrat instantiations: one per enum type and onefor each kind
