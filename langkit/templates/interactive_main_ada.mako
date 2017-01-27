@@ -18,12 +18,12 @@ with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;              use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
 
-with ${_self.ada_api_settings.lib_name}.Analysis;
-use ${_self.ada_api_settings.lib_name}.Analysis;
-with ${_self.ada_api_settings.lib_name}.Init;
-use ${_self.ada_api_settings.lib_name}.Init;
-with ${_self.ada_api_settings.lib_name}.Lexer;
-use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
+with ${ctx.ada_api_settings.lib_name}.Analysis;
+use ${ctx.ada_api_settings.lib_name}.Analysis;
+with ${ctx.ada_api_settings.lib_name}.Init;
+use ${ctx.ada_api_settings.lib_name}.Init;
+with ${ctx.ada_api_settings.lib_name}.Lexer;
+use ${ctx.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 
 procedure Parse is
 
