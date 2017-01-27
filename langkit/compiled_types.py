@@ -177,7 +177,8 @@ class CompiledTypeMetaclass(type):
         if not dct["_internal"]:
             mcs.types.append(cls)
 
-        dct["location"] = extract_library_location()
+        if 'location' not in dct:
+            dct["location"] = extract_library_location()
 
         return cls
 
@@ -1139,9 +1140,11 @@ class StructMetaclass(CompiledTypeMetaclass):
         is_base = False  # Base Struct/ASTNode?
         is_root_grammar_class = False  # Root grammar class?
 
-        diag_ctx = Context(
-            'in {}'.format(name), extract_library_location()
-        )
+        location = extract_library_location()
+        diag_ctx = Context('in {}'.format(name), location)
+
+        def field_ctx(field_name):
+            return Context('in {}.{}'.format(name, field_name), location)
 
         assert len(bases) == 1, (
             "Multiple inheritance for AST nodes is not supported"
@@ -1237,7 +1240,7 @@ class StructMetaclass(CompiledTypeMetaclass):
             dct.get('should_emit_array_type', True) and
             not is_root_grammar_class
         )
-        dct['location'] = extract_library_location()
+        dct['location'] = location
 
         # List types are resolved by construction: we create list types to
         # contain specific ASTNode subclasses. All other types are not
@@ -1286,7 +1289,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         # "fields" contains all the non-internal fields for this class: check
         # that they use allowed names.
         for f_n, f_v in fields.iteritems():
-            with mcs.field_context(name, f_n):
+            with field_ctx(f_n):
                 check_source_language(
                     not f_n.startswith('_'),
                     'Underscore-prefixed field names are not allowed'
@@ -1297,7 +1300,7 @@ class StructMetaclass(CompiledTypeMetaclass):
             syntax_fields = {f_n: f_v
                              for f_n, f_v in fields.items()
                              if not f_v.is_property}
-            with mcs.class_context(name):
+            with diag_ctx:
                 check_source_language(
                     not syntax_fields,
                     'ASTNode list types are not allowed to have fields'
@@ -1316,7 +1319,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         if is_astnode:
             inherited_fields = base.get_abstract_fields_dict()
             for f_n, f_v in fields.items():
-                with mcs.field_context(name, f_n):
+                with field_ctx(f_n):
                     homonym_fld = inherited_fields.get(f_n)
                     if homonym_fld:
                         check_source_language(
@@ -1339,7 +1342,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         cls.fields = DictProxy(fields)
 
         for f_n, f_v in fields.iteritems():
-            with mcs.field_context(name, f_n):
+            with field_ctx(f_n):
                 if is_struct:
                     check_source_language(
                         not f_v.is_property,
@@ -1430,28 +1433,6 @@ class StructMetaclass(CompiledTypeMetaclass):
              for group in fields_groups],
             []
         ))
-
-    @staticmethod
-    def class_context(class_name):
-        """
-        Return a diagnostic context for the "class_name" class.
-
-        :type class_name: str
-        :rtype: Context
-        """
-        return Context('in {}'.format(class_name), extract_library_location())
-
-    @staticmethod
-    def field_context(class_name, field_name):
-        """
-        Return a diagnostic context for the "field_name" field/property.
-
-        :type class_name: str
-        :type field_name: str
-        :rtype: Context
-        """
-        return Context('in {}.{}'.format(class_name, field_name),
-                       extract_library_location())
 
 
 def abstract(cls):
