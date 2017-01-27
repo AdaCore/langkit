@@ -130,6 +130,12 @@ class IsNull(AbstractExpression):
         super(IsNull, self).__init__()
         self.expr = expr
 
+    @staticmethod
+    def construct_static(cexpr):
+        return Eq.make_expr(
+            cexpr, LiteralExpr(cexpr.type.nullexpr(), cexpr.type)
+        )
+
     def construct(self):
         """
         Construct a resolved expression for this.
@@ -137,9 +143,7 @@ class IsNull(AbstractExpression):
         :rtype: EqExpr
         """
         cexpr = construct(self.expr)
-        return Eq.make_expr(
-            cexpr, LiteralExpr(cexpr.type.nullexpr(), cexpr.type)
-        )
+        return self.construct_static(cexpr)
 
 
 class New(AbstractExpression):
