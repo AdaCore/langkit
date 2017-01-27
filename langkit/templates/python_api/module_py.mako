@@ -119,7 +119,7 @@ class _Exception(ctypes.Structure):
         return NativeException(self.information)
 
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
 ${py_doc('langkit.unit_kind_type')}
 str_to_unit_kind = {
     'specification': 0,
@@ -181,18 +181,18 @@ class AnalysisContext(object):
 
     def __init__(self,
                  charset=None,
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
                  unit_file_provider=None,
 % endif
                  _c_value=None):
         ${py_doc('langkit.create_context', 8)}
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
         c_ufp = unit_file_provider._c_value if unit_file_provider else None
 % endif
         self._c_value = (
             _create_analysis_context(
                 charset,
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
                 c_ufp,
 % endif
             )
@@ -200,7 +200,7 @@ class AnalysisContext(object):
             _context_incref(_c_value)
         )
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
         # Keep a reference to the unit file provider so that it is live at
         # least as long as the analysis context is live.
         self._unit_file_provider = unit_file_provider
@@ -232,7 +232,7 @@ class AnalysisContext(object):
                                                  with_trivia)
         return AnalysisUnit(c_value)
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
     def get_from_provider(self, name, kind, charset=None, reparse=False,
                           with_trivia=False):
         ${py_doc('langkit.get_unit_from_provider', 8)}
@@ -575,7 +575,7 @@ class Diagnostic(object):
         return '<Diagnostic {} at {:#x}>'.format(repr(str(self)), id(self))
 
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
 
 ## TODO: if this is needed some day, also bind create_unit_file_provider to
 ## allow Python users to create their own unit file providers.
@@ -806,7 +806,7 @@ class ${root_astnode_name}(object):
         return json.dumps(self.to_data())
 
 
-% for astnode in _self.astnode_types:
+% for astnode in ctx.astnode_types:
     % if astnode != T.root_node:
 ${astnode_types.decl(astnode)}
     % endif
@@ -814,7 +814,7 @@ ${astnode_types.decl(astnode)}
 
 UNINITIALIZED = 'uninitialized'
 
-% for enum_type in _self.sorted_types(_self.enum_types):
+% for enum_type in ctx.sorted_types(ctx.enum_types):
 ${enum_types.decl(enum_type)}
 % endfor
 
@@ -841,7 +841,7 @@ def _unwrap_enum(py_value, type_name, translator):
         raise ValueError('Invalid {}: {}'.format(type_name, py_value))
 
 
-% for struct_type in _self.struct_types:
+% for struct_type in ctx.struct_types:
 ${struct_types.decl(struct_type)}
 % endfor
 
@@ -883,12 +883,12 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
     return wrapper if exc_wrap else func
 
 
-% for struct_type in _self.struct_types:
+% for struct_type in ctx.struct_types:
 ${struct_types.low_level_decl(struct_type)}
 % endfor
 
 
-% for array_type in _self.sorted_types(_self.array_types):
+% for array_type in ctx.sorted_types(ctx.array_types):
 ${array_types.decl(array_type)}
 % endfor
 
@@ -913,7 +913,7 @@ _create_analysis_context = _import_func(
     '${capi.get_name("create_analysis_context")}',
     [
         ctypes.c_char_p,
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
         _unit_file_provider,
 % endif
     ], _analysis_context
@@ -947,7 +947,7 @@ _get_analysis_unit_from_buffer = _import_func(
      ctypes.c_size_t],   # buffer_size
     _analysis_unit
 )
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
 _get_analysis_unit_from_provider = _import_func(
     '${capi.get_name("get_analysis_unit_from_provider")}',
     [_analysis_context,  # context
@@ -1070,7 +1070,7 @@ _lexical_env_dec_ref = _import_func(
    [_lexical_env], None
 )
 
-% for astnode in _self.astnode_types:
+% for astnode in ctx.astnode_types:
     % for field in astnode.fields_with_accessors():
 _${field.accessor_basename.lower} = _import_func(
     '${capi.get_name(field.accessor_basename)}',
@@ -1100,7 +1100,7 @@ _node_extension = _import_func(
     ctypes.POINTER(ctypes.c_void_p)
 )
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
 # Unit file providers
 _destroy_unit_file_provider = _import_func(
     '${capi.get_name("destroy_unit_file_provider")}',
@@ -1155,9 +1155,9 @@ def unwrap_str(c_char_p_value):
 
 
 _kind_to_astnode_cls = {
-    % for subclass in _self.astnode_types:
+    % for subclass in ctx.astnode_types:
         % if not subclass.abstract:
-    ${_self.node_kind_constants[subclass]}: ${subclass.name()},
+    ${ctx.node_kind_constants[subclass]}: ${subclass.name()},
         % endif
     % endfor
 }
