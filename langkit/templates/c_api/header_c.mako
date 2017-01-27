@@ -29,7 +29,7 @@ typedef void* ${node_type};
 
 ${c_doc('langkit.node_kind_type')}
 typedef enum {
-% for astnode in _self.astnode_types:
+% for astnode in ctx.astnode_types:
     % if astnode.abstract:
 
         /* ${astnode.name()} (abstract)  */
@@ -51,7 +51,7 @@ typedef void *${lexical_env_type};
 
 typedef uint8_t ${bool_type};
 
-% for struct_type in _self.struct_types:
+% for struct_type in ctx.struct_types:
    ${struct_types.decl(struct_type)}
 % endfor
 
@@ -118,7 +118,7 @@ typedef struct {
    const char *information;
 } ${exception_type};
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
 /*
  * Types for unit file providers
  */
@@ -160,11 +160,11 @@ typedef char *(*${unit_file_provider_get_file_from_name_type})(
  */
 
 
-% for enum_type in _self.sorted_types(_self.enum_types):
+% for enum_type in ctx.sorted_types(ctx.enum_types):
     ${enum_types.decl(enum_type)}
 % endfor
 
-% for array_type in _self.sorted_types(_self.array_types):
+% for array_type in ctx.sorted_types(ctx.array_types):
     % if array_type.element_type()._exposed:
         ${array_types.decl(array_type)}
     % endif
@@ -179,7 +179,7 @@ ${c_doc('langkit.create_context')}
 extern ${analysis_context_type}
 ${capi.get_name("create_analysis_context")}(
    const char *charset
-   % if _self.default_unit_file_provider:
+   % if ctx.default_unit_file_provider:
    , ${unit_file_provider_type} unit_file_provider
    % endif
 );
@@ -216,7 +216,7 @@ ${capi.get_name("get_analysis_unit_from_buffer")}(
         size_t buffer_size,
         int with_trivia);
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
 ${c_doc('langkit.get_unit_from_provider')}
 extern ${analysis_unit_type}
 ${capi.get_name("get_analysis_unit_from_provider")}(
@@ -370,7 +370,7 @@ ${capi.get_name('lexical_env_dec_ref')}(${lexical_env_type} env);
    if the node does not have the proper type, for instance).  When an AST node
    is returned, its ref-count is left as-is.  */
 
-% for astnode in _self.astnode_types:
+% for astnode in ctx.astnode_types:
     % for field in astnode.fields_with_accessors():
         ${astnode_types.accessor_decl(field)}
     % endfor
@@ -399,7 +399,7 @@ ${capi.get_name("node_extension")}(
     ${capi.get_name("node_extension_destructor")} dtor
 );
 
-% if _self.default_unit_file_provider:
+% if ctx.default_unit_file_provider:
 /*
  * Unit file providers
  */
