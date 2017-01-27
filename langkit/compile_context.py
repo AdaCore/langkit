@@ -759,7 +759,6 @@ class CompileCtx(object):
                             ("" if template_base_name.endswith("/") else "_"),
                             kind
                         ),
-                        _self=self
                     )
                 )
 
