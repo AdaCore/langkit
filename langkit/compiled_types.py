@@ -1311,6 +1311,21 @@ class StructMetaclass(CompiledTypeMetaclass):
             for p in env_spec.create_properties():
                 fields[p._name.lower] = p
 
+        # Make sure the homonym fields/properties are overriding ones
+        if is_astnode:
+            inherited_fields = base.get_abstract_fields_dict()
+            for f_n, f_v in fields.items():
+                with mcs.field_context(name, f_n):
+                    homonym_fld = inherited_fields.get(f_n)
+                    if homonym_fld:
+                        check_source_language(
+                            f_v.is_property and homonym_fld.is_property,
+                            '"{}" must be renamed as it conflicts with'
+                            ' {}'.format(
+                                f_n, homonym_fld.qualname
+                            )
+                        )
+
         # Associate each field and property to this ASTNode subclass, and
         # assign them their name. Likewise for the environment specification.
         for f_n, f_v in fields.items():
