@@ -1409,9 +1409,13 @@ class EmptyArray(AbstractExpression):
         self.array_type = resolve_type(self.element_type).array_type()
         self.array_type.add_to_context()
 
-    def construct(self):
-        return LiteralExpr('Create (Items_Count => 0)', self.array_type,
+    @staticmethod
+    def construct_static(array_type):
+        return LiteralExpr('Create (Items_Count => 0)', array_type,
                            result_var_name='Empty_Array')
+
+    def construct(self):
+        return self.construct_static(self.array_type)
 
 
 def render(*args, **kwargs):
