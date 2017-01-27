@@ -3,14 +3,14 @@
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 
-with ${_self.ada_api_settings.lib_name}.Lexer;
-use ${_self.ada_api_settings.lib_name}.Lexer;
-use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
+with ${ctx.ada_api_settings.lib_name}.Lexer;
+use ${ctx.ada_api_settings.lib_name}.Lexer;
+use ${ctx.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 
 --  This package provides types and primitives to parse buffers and files and
 --  get AST out of them.
 
-private package ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
+private package ${ctx.ada_api_settings.lib_name}.Analysis.Parsers is
 
    type Cst_String is access constant String;
 
@@ -77,4 +77,4 @@ private package ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
    --  memos should be stored in Parser_Type. In the end, this should be turned
    --  into a Parser_Type finalizer.
 
-end ${_self.ada_api_settings.lib_name}.Analysis.Parsers;
+end ${ctx.ada_api_settings.lib_name}.Analysis.Parsers;

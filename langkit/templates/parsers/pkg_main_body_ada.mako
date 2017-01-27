@@ -9,20 +9,20 @@ with Langkit_Support.Text;    use Langkit_Support.Text;
 with ${ctx.ada_api_settings.lib_name}.Lexer;
 use ${ctx.ada_api_settings.lib_name}.Lexer;
 
-package body ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
+package body ${ctx.ada_api_settings.lib_name}.Analysis.Parsers is
 
    --  Prepare packrat instantiations: one per enum type and onefor each kind
    --  of node (including lists). Likewise for bump ptr. allocators, except
    --  we need them only for non-abstract AST nodes.
 
    pragma Warnings (Off, "is not referenced");
-   % for enum_type in _self.enum_types:
+   % for enum_type in ctx.enum_types:
       package ${enum_type.name()}_Memos is new Langkit_Support.Packrat
         (${enum_type.name()}, Token_Index);
       use ${enum_type.name()}_Memos;
    % endfor
 
-   % for cls in _self.astnode_types:
+   % for cls in ctx.astnode_types:
       package ${cls.name()}_Memos is new Langkit_Support.Packrat
         (${cls.name()}, Token_Index);
       use ${cls.name()}_Memos;
@@ -34,7 +34,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
    % endfor
    pragma Warnings (On, "is not referenced");
 
-   % for parser in _self.generated_parsers:
+   % for parser in ctx.generated_parsers:
    ${parser.spec}
    % endfor
 
@@ -167,10 +167,10 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
       Result : ${root_node_type_name};
    begin
       case Rule is
-      % for name in _self.user_rule_names:
+      % for name in ctx.user_rule_names:
          when ${Name.from_lower(name)}_Rule =>
             Result := ${root_node_type_name}
-              (${_self.grammar.rules[name].gen_fn_name}
+              (${ctx.grammar.rules[name].gen_fn_name}
                  (Parser, First_Token_Index));
       % endfor
       end case;
@@ -180,7 +180,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
       return Result;
    end Parse;
 
-   % for parser in _self.generated_parsers:
+   % for parser in ctx.generated_parsers:
    ${parser.body}
    % endfor
 
@@ -190,9 +190,9 @@ package body ${_self.ada_api_settings.lib_name}.Analysis.Parsers is
 
    procedure Clean_All_Memos is
    begin
-      % for fn in _self.fns:
+      % for fn in ctx.fns:
          Clear (${fn}_Memo);
       % endfor
    end Clean_All_Memos;
 
-end ${_self.ada_api_settings.lib_name}.Analysis.Parsers;
+end ${ctx.ada_api_settings.lib_name}.Analysis.Parsers;
