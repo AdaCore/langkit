@@ -35,9 +35,9 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 with Langkit_Support.Tree_Traversal_Iterator;
 with Langkit_Support.Vectors;
 
-with ${_self.ada_api_settings.lib_name}.Lexer;
-use ${_self.ada_api_settings.lib_name}.Lexer;
-use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
+with ${ctx.ada_api_settings.lib_name}.Lexer;
+use ${ctx.ada_api_settings.lib_name}.Lexer;
+use ${ctx.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 
 --  This package provides types and primitives to analyze source files as
 --  analysis units.
@@ -46,7 +46,7 @@ use ${_self.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 --  analysis context with Create, then get analysis units out of it using
 --  Get_From_File and/or Get_From_Buffer.
 
-package ${_self.ada_api_settings.lib_name}.Analysis is
+package ${ctx.ada_api_settings.lib_name}.Analysis is
 
    type Analysis_Context is private;
    ${ada_doc('langkit.analysis_context_type', 3)}
@@ -59,7 +59,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    --  can be passed this value.
 
    type Grammar_Rule is (
-      % for i, name in enumerate(_self.user_rule_names):
+      % for i, name in enumerate(ctx.user_rule_names):
          % if i > 0:
             ,
          % endif
@@ -124,8 +124,8 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    ---------------------------------
 
    function Create
-     (Charset : String := ${string_repr(_self.default_charset)}
-      % if _self.default_unit_file_provider:
+     (Charset : String := ${string_repr(ctx.default_charset)}
+      % if ctx.default_unit_file_provider:
          ; Unit_File_Provider : Unit_File_Provider_Access_Cst := null
       % endif
      ) return Analysis_Context;
@@ -144,7 +144,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
       Reparse     : Boolean := False;
       With_Trivia : Boolean := False;
       Rule        : Grammar_Rule :=
-         ${Name.from_lower(_self.main_rule_name)}_Rule)
+         ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_file', 3)}
 
@@ -155,7 +155,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
       Buffer      : String;
       With_Trivia : Boolean := False;
       Rule        : Grammar_Rule :=
-         ${Name.from_lower(_self.main_rule_name)}_Rule)
+         ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_buffer', 3)}
 
@@ -164,7 +164,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
       Unit_Filename : String) return Boolean;
    --  Returns whether Context contains an unit correponding to Unit_Filename
 
-   % if _self.default_unit_file_provider:
+   % if ctx.default_unit_file_provider:
 
    function Get_From_Provider
      (Context     : Analysis_Context;
@@ -174,7 +174,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
       Reparse     : Boolean := False;
       With_Trivia : Boolean := False;
       Rule        : Grammar_Rule :=
-         ${Name.from_lower(_self.main_rule_name)}_Rule)
+         ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_provider', 3)}
 
@@ -349,19 +349,19 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    ## need their own kind.
    type ${root_node_kind_name} is
      (${', '.join(cls.ada_kind_name()
-                  for cls in _self.astnode_types
+                  for cls in ctx.astnode_types
                   if not cls.abstract)});
    --  AST node concrete types
 
    for ${root_node_kind_name} use
      (${', '.join('{} => {}'.format(cls.ada_kind_name(),
                                     ctx.node_kind_constants[cls])
-                  for cls in _self.astnode_types
+                  for cls in ctx.astnode_types
                   if not cls.abstract)});
 
    ## Output subranges to materialize abstract classes as sets of their
    ## concrete subclasses.
-   % for cls in _self.astnode_types:
+   % for cls in ctx.astnode_types:
       <% subclasses = cls.concrete_subclasses() %>
       % if cls.abstract and subclasses:
          subtype ${cls.ada_kind_name()} is
@@ -813,7 +813,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    function Image (Value : Boolean) return String is
      (if Value then "True" else "False");
 
-   % for cls in _self.sorted_types(_self.enum_types):
+   % for cls in ctx.sorted_types(ctx.enum_types):
    ${enum_types.public_decl(cls)}
    % endfor
 
@@ -821,7 +821,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    -- Structure types (incomplete declarations) --
    -----------------------------------------------
 
-   % for struct_type in no_builtins(_self.struct_types):
+   % for struct_type in no_builtins(ctx.struct_types):
    ${struct_types.public_incomplete_decl(struct_type)}
    % endfor
 
@@ -829,7 +829,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    -- Array types (incomplete declarations) --
    -------------------------------------------
 
-   % for array_type in _self.sorted_types(_self.array_types):
+   % for array_type in ctx.sorted_types(ctx.array_types):
    % if array_type.element_type().should_emit_array_type:
    ${array_types.public_incomplete_decl(array_type)}
    % endif
@@ -868,13 +868,13 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    is
      (Child_Count (${root_node_type_name} (Node)) = 0);
 
-   % for astnode in no_builtins(_self.astnode_types):
+   % for astnode in no_builtins(ctx.astnode_types):
      % if not astnode.is_list_type:
        ${astnode_types.public_incomplete_decl(astnode)}
      % endif
    % endfor
 
-   % for astnode in _self.astnode_types:
+   % for astnode in ctx.astnode_types:
       % if astnode.is_root_list_type:
          ${list_types.public_incomplete_decl(astnode.element_type())}
       % elif astnode.is_list_type:
@@ -886,7 +886,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    -- Structure types (full declarations) --
    -----------------------------------------
 
-   % for struct_type in no_builtins(_self.struct_types):
+   % for struct_type in no_builtins(ctx.struct_types):
    ${struct_types.public_decl(struct_type)}
    % endfor
 
@@ -900,7 +900,7 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
    --  TODO??? This is likely to change in the near future: we would like to
    --  have here pure Ada arrays instead.
 
-   % for array_type in _self.sorted_types(_self.array_types):
+   % for array_type in ctx.sorted_types(ctx.array_types):
    % if array_type.element_type().should_emit_array_type:
    ${array_types.public_decl(array_type)}
    % endif
@@ -912,13 +912,13 @@ package ${_self.ada_api_settings.lib_name}.Analysis is
 
    --  See above for overriden primitive operations documentations
 
-   % for astnode in no_builtins(_self.astnode_types):
+   % for astnode in no_builtins(ctx.astnode_types):
      % if not astnode.is_list_type:
        ${astnode_types.public_decl(astnode)}
      % endif
    % endfor
 
-   % for astnode in _self.astnode_types:
+   % for astnode in ctx.astnode_types:
       % if astnode.is_root_list_type:
          ${list_types.public_decl(astnode.element_type())}
       % elif astnode.is_list_type:
@@ -971,7 +971,7 @@ private
       --  The lexical scope that is shared amongst every compilation unit. Used
       --  to resolve cross file references.
 
-      % if _self.default_unit_file_provider:
+      % if ctx.default_unit_file_provider:
       Unit_File_Provider : Unit_File_Provider_Access_Cst;
       --  Object to translate unit names to file names
       % endif
@@ -1089,7 +1089,7 @@ private
       Lex_Env_Data_Acc  : Lex_Env_Data;
    end record;
 
-   % if _self.default_unit_file_provider:
+   % if ctx.default_unit_file_provider:
    function Unit_File_Provider
      (Context : Analysis_Context)
       return Unit_File_Provider_Access_Cst is (Context.Unit_File_Provider);
@@ -1483,7 +1483,7 @@ private
    --  already available (Comptuted) or if it is known to raise a
    --  Property_Error (Raise_Property_Error).
 
-   % for array_type in _self.sorted_types(_self.array_types):
+   % for array_type in ctx.sorted_types(ctx.array_types):
    % if array_type.element_type().should_emit_array_type:
    ${array_types.private_decl(array_type)}
    % endif
@@ -1501,13 +1501,13 @@ private
    overriding procedure Destroy_Node
      (Node : access ${generic_list_value_type});
 
-   % for astnode in no_builtins(_self.astnode_types):
+   % for astnode in no_builtins(ctx.astnode_types):
      % if not astnode.is_list_type:
        ${astnode_types.private_decl(astnode)}
      % endif
    % endfor
 
-   % for astnode in _self.astnode_types:
+   % for astnode in ctx.astnode_types:
       % if astnode.is_root_list_type:
          ${list_types.private_decl(astnode.element_type())}
       % elif astnode.is_list_type:
@@ -1515,4 +1515,4 @@ private
       % endif
    % endfor
 
-end ${_self.ada_api_settings.lib_name}.Analysis;
+end ${ctx.ada_api_settings.lib_name}.Analysis;

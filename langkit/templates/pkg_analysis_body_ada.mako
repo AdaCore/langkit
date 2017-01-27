@@ -39,14 +39,14 @@ with ${ctx.ada_api_settings.lib_name}.Analysis.Parsers;
 use ${ctx.ada_api_settings.lib_name}.Analysis.Parsers;
 with ${ctx.ada_api_settings.lib_name}.Lexer;
 
-%if _self.env_hook_subprogram:
-with ${_self.env_hook_subprogram.unit_fqn};
+%if ctx.env_hook_subprogram:
+with ${ctx.env_hook_subprogram.unit_fqn};
 %endif
-%if _self.default_unit_file_provider:
-with ${_self.default_unit_file_provider.unit_fqn};
+%if ctx.default_unit_file_provider:
+with ${ctx.default_unit_file_provider.unit_fqn};
 %endif
 
-package body ${_self.ada_api_settings.lib_name}.Analysis is
+package body ${ctx.ada_api_settings.lib_name}.Analysis is
 
    ##  Make logic operations on nodes accessible
    use Eq_Node, Eq_Node.Raw_Impl;
@@ -117,16 +117,16 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
    ------------
 
    function Create
-     (Charset : String := ${string_repr(_self.default_charset)}
-      % if _self.default_unit_file_provider:
+     (Charset : String := ${string_repr(ctx.default_charset)}
+      % if ctx.default_unit_file_provider:
          ; Unit_File_Provider : Unit_File_Provider_Access_Cst := null
       % endif
      ) return Analysis_Context
    is
-      % if _self.default_unit_file_provider:
+      % if ctx.default_unit_file_provider:
          P : constant Unit_File_Provider_Access_Cst :=
            (if Unit_File_Provider = null
-            then ${_self.default_unit_file_provider.fqn}
+            then ${ctx.default_unit_file_provider.fqn}
             else Unit_File_Provider);
       % endif
       Symbols : constant Symbol_Table := Create;
@@ -141,7 +141,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
                           Node          => null,
                           Is_Refcounted => False)
 
-         % if _self.default_unit_file_provider:
+         % if ctx.default_unit_file_provider:
          , Unit_File_Provider => P
          % endif
          % if ctx.symbol_literals:
@@ -396,7 +396,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Reparse     : Boolean := False;
       With_Trivia : Boolean := False;
       Rule        : Grammar_Rule :=
-         ${Name.from_lower(_self.main_rule_name)}_Rule)
+         ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit
    is
       function Get_Parser
@@ -422,7 +422,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Buffer      : String;
       With_Trivia : Boolean := False;
       Rule        : Grammar_Rule :=
-         ${Name.from_lower(_self.main_rule_name)}_Rule)
+         ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit
    is
       function Get_Parser
@@ -436,7 +436,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
                        With_Trivia, Rule);
    end Get_From_Buffer;
 
-   % if _self.default_unit_file_provider:
+   % if ctx.default_unit_file_provider:
 
    -----------------------
    -- Get_From_Provider --
@@ -450,7 +450,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Reparse     : Boolean := False;
       With_Trivia : Boolean := False;
       Rule        : Grammar_Rule :=
-         ${Name.from_lower(_self.main_rule_name)}_Rule)
+         ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit
    is
    begin
@@ -2329,7 +2329,7 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
    function Get_Lex_Env_Data
      (Node : access ${root_node_value_type}'Class) return Lex_Env_Data
-   is (${_self.ada_api_settings.lib_name}.Analysis.Get_Lex_Env_Data
+   is (${ctx.ada_api_settings.lib_name}.Analysis.Get_Lex_Env_Data
         (Node.Unit));
 
    -----------
@@ -2422,11 +2422,11 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       end if;
    end Destroy_Node;
 
-   % for struct_type in no_builtins(_self.struct_types):
+   % for struct_type in no_builtins(ctx.struct_types):
    ${struct_types.body(struct_type)}
    % endfor
 
-   % for array_type in _self.sorted_types(_self.array_types):
+   % for array_type in ctx.sorted_types(ctx.array_types):
    % if array_type.element_type().should_emit_array_type:
    ${array_types.body(array_type)}
    % endif
@@ -2434,13 +2434,13 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
 
    ${astnode_types.logic_helpers()}
 
-   % for astnode in no_builtins(_self.astnode_types):
+   % for astnode in no_builtins(ctx.astnode_types):
      % if not astnode.is_list_type:
        ${astnode_types.body(astnode)}
      % endif
    % endfor
 
-   % for astnode in _self.astnode_types:
+   % for astnode in ctx.astnode_types:
       % if astnode.is_root_list_type:
          ${list_types.body(astnode.element_type())}
       % elif astnode.is_list_type:
@@ -2475,4 +2475,4 @@ package body ${_self.ada_api_settings.lib_name}.Analysis is
       Free (Node);
    end Destroy_Synthetic_Node;
 
-end ${_self.ada_api_settings.lib_name}.Analysis;
+end ${ctx.ada_api_settings.lib_name}.Analysis;
