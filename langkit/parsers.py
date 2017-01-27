@@ -148,9 +148,8 @@ class Grammar(object):
                 ):
                     self.the_call = call
 
-        caller_location = extract_library_location()
         the_call = GetTheCall()
-        with open(caller_location.file) as f:
+        with open(loc.file) as f:
             file_ast = ast.parse(f.read(), f.name)
             the_call.visit(file_ast)
 
@@ -694,12 +693,13 @@ def Pick(*parsers):
 
     If there are several significant sub-results, raises an error.
     """
+    location = extract_library_location()
     parsers = [resolve(p) for p in parsers if p]
     pick_parser_idx = -1
     for i, p in enumerate(parsers):
         if p.discard():
             continue
-        with Context("", extract_library_location()):
+        with Context("", location):
             check_source_language(
                 pick_parser_idx == -1,
                 "Pick parser can have only one sub-parser that is not a token",
