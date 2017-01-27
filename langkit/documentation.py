@@ -677,6 +677,9 @@ def get_available_width(indent_level):
     return 79 - indent_level
 
 
+text_wrapper = textwrap.TextWrapper(drop_whitespace=True)
+
+
 def format_text(text, column):
     """
     Format some text as mere indented text.
@@ -685,13 +688,12 @@ def format_text(text, column):
     :param int column: Indentation level for the result.
     :rtype: str
     """
-    available_width = get_available_width(column)
+    text_wrapper.available_width = get_available_width(column)
     lines = []
     for i, paragraph in enumerate(split_paragraphs(text)):
         if i > 0:
             lines.append('')
-        for line in textwrap.wrap(paragraph, available_width,
-                                  drop_whitespace=True):
+        for line in text_wrapper.wrap(paragraph):
             lines.append(' ' * column + line)
 
     return '\n'.join(lines)
