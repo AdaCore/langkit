@@ -784,6 +784,13 @@ class AbstractNodeData(object):
         :type: list[Argument]
         """
 
+        self._cached_name = None
+        """
+        Cache for the name property.
+
+        :type: None|names.Name
+        """
+
     @property
     def is_overriding(self):
         """
@@ -841,15 +848,17 @@ class AbstractNodeData(object):
         """
         :rtype: names.Name
         """
-        assert self._name
+        if not self._cached_name:
+            assert self._name
 
-        # If this is an internal property, the name has an underscore prefix
-        # that we want to get rid of for code generation.
-        radix = (names.Name(self._name.base_name[1:])
-                 if self.is_internal else
-                 self._name)
+            # If this is an internal property, the name has an underscore
+            # prefix that we want to get rid of for code generation.
+            radix = (names.Name(self._name.base_name[1:])
+                     if self.is_internal else
+                     self._name)
 
-        return self.prefix + radix if self.prefix else radix
+            self._cached_name = self.prefix + radix if self.prefix else radix
+        return self._cached_name
 
     @property
     def qualname(self):
@@ -1138,6 +1147,10 @@ class StructMetaclass(CompiledTypeMetaclass):
             "Multiple inheritance for AST nodes is not supported"
         )
         base, = bases
+
+        # No matter what, reset all caches so that subclass don't "magically"
+        # inherit their parent's.
+        dct['_cached_user_name'] = None
 
         # We want to check various inheritance facts:
         #
@@ -1587,6 +1600,12 @@ class Struct(CompiledType):
     Whether this struct designates the env metadata struct.
     """
 
+    _cached_user_name = None
+    """
+    Cache for the _user_name method.
+    :type: None|names.Name
+    """
+
     @classmethod
     @memoized
     def is_refcounted(cls):
@@ -1870,8 +1889,11 @@ class Struct(CompiledType):
 
         :rtype: names.Name
         """
-        name = names.Name.from_camel(cls.__name__)
-        return (name + names.Name('Node') if is_keyword(name) else name)
+        if not cls._cached_user_name:
+            name = names.Name.from_camel(cls.__name__)
+            cls._cached_user_name = (name + names.Name('Node')
+                                     if is_keyword(name) else name)
+        return cls._cached_user_name
 
     @classmethod
     def name(cls):
