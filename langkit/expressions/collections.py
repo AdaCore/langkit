@@ -507,6 +507,7 @@ def length(coll_expr):
 
 
 @attr_expr('singleton')
+@attr_expr('to_array', coerce_null=True)
 class CollectionSingleton(AbstractExpression):
     """
     Expression that will return a collection of a single element, given the
@@ -545,16 +546,28 @@ class CollectionSingleton(AbstractExpression):
         def subexprs(self):
             return [self.expr]
 
-    def __init__(self, expr):
+    def __init__(self, expr, coerce_null=False):
         """
         :param AbstractExpression expr: The expression representing the
             single element to create the collection from.
         """
         super(CollectionSingleton, self).__init__()
         self.expr = expr
+        self.coerce_null = coerce_null
 
     def construct(self):
-        return CollectionSingleton.Expr(construct(self.expr))
+        from langkit.expressions import If, IsNull, EmptyArray
+        expr = construct(self.expr)
+        ret = CollectionSingleton.Expr(expr)
+        if self.coerce_null:
+            return If.Expr(
+                IsNull.construct_static(expr),
+                EmptyArray.construct_static(expr.type.array_type()),
+                ret,
+                ret.type
+            )
+        else:
+            return ret
 
 
 @attr_call('concat')
