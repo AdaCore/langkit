@@ -798,13 +798,13 @@ def create_doc_printer(lang, formatter):
 # The following are functions which return formatted source code documentation
 # for an entity. Their arguments are:
 #
-#   * an entity (string or compiled_types.CompiledType subclass) from which the
-#     documentation is retreived;
+#   * An entity (string or compiled_types.CompiledType subclass) from which the
+#     documentation is retreived.
 #
-#   * a column number (zero if not provided) used to indent the generated
-#     documentation;
+#   * A column number (zero if not provided) used to indent the generated
+#     documentation.
 #
-#   * arbitrary keyword arguments to pass to the documentation Mako templates.
+#   * Arbitrary keyword arguments to pass to the documentation Mako templates.
 
 
 ada_doc = create_doc_printer('ada', format_ada)
