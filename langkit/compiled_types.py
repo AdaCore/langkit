@@ -1776,7 +1776,7 @@ class Struct(CompiledType):
             the returned list. Return only fields that were part of the
             declaration of this node otherwise.
 
-        :rtype: list[Field]
+        :rtype: list[UserField]
         """
         return cls.get_abstract_fields(predicate, include_inherited,
                                        field_class=UserField)
@@ -1813,7 +1813,7 @@ class Struct(CompiledType):
 
         :param type field_class: The field class to use to filter fields.
 
-        :rtype: list[AbstractField]
+        :rtype: list[AbstractNodeData]
         """
         return filter(
             predicate or (lambda f: True),
@@ -1833,7 +1833,7 @@ class Struct(CompiledType):
 
         :param type field_class: The field class to use to filter fields.
 
-        :rtype: dict[str, AbstractField]
+        :rtype: dict[str, AbstractNodeData]
         """
 
         def get_fields(klass):
