@@ -34,24 +34,24 @@
    ## TODO: Filtering logic duplicated with pkg_ast_types_body_ada.mako. See if
    ## we can share in helpers.
 
-   % for cls in filter(lambda t: not t.is_builtin(), _self.astnode_types):
+   % for cls in filter(lambda t: not t.is_builtin(), ctx.astnode_types):
    % for prop in cls.get_properties(include_inherited=False):
    ${prop_helpers.generate_logic_predicates(prop)}
    % endfor
    % endfor
 
    ## Generate logic converters
-   % for el in set(p for (p, _) in _self.logic_binders if p):
+   % for el in set(p for (p, _) in ctx.logic_binders if p):
    ${prop_helpers.generate_logic_converter(el)}
    % endfor
 
    ## Generate logic equal function wrappers
-   % for el in set(p for (_, p) in _self.logic_binders if p):
+   % for el in set(p for (_, p) in ctx.logic_binders if p):
    ${prop_helpers.generate_logic_equal(el)}
    % endfor
 
    ## Generate logic binders
-   % for conv_prop, eq_prop in _self.logic_binders:
+   % for conv_prop, eq_prop in ctx.logic_binders:
    ${prop_helpers.generate_logic_binder(conv_prop, eq_prop)}
    % endfor
 </%def>
