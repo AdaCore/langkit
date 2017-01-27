@@ -2540,8 +2540,6 @@ class LocalVars(object):
             )
             self.variables.append(var)
             var._scope = self
-            import traceback
-            var._scope_tb = ''.join(traceback.format_stack())
 
         def push(self):
             """
