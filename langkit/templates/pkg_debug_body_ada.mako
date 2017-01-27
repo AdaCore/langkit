@@ -6,10 +6,9 @@ with Ada.Unchecked_Conversion;
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
 
-with ${ctx.ada_api_settings.lib_name}.Lexer;
-use ${ctx.ada_api_settings.lib_name}.Lexer;
+with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 
-package body ${ctx.ada_api_settings.lib_name}.Debug is
+package body ${ada_lib_name}.Debug is
 
    --------
    -- PN --
@@ -50,4 +49,4 @@ package body ${ctx.ada_api_settings.lib_name}.Debug is
       end if;
    end PTok;
 
-end ${ctx.ada_api_settings.lib_name}.Debug;
+end ${ada_lib_name}.Debug;

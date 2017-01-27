@@ -35,9 +35,8 @@ with Adalog.Pure_Relations;      use Adalog.Pure_Relations;
 with Adalog.Variadic_Operations; use Adalog.Variadic_Operations;
 pragma Warnings (On, "referenced");
 
-with ${ctx.ada_api_settings.lib_name}.Analysis.Parsers;
-use ${ctx.ada_api_settings.lib_name}.Analysis.Parsers;
-with ${ctx.ada_api_settings.lib_name}.Lexer;
+with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;
+with ${ada_lib_name}.Lexer;
 
 %if ctx.env_hook_subprogram:
 with ${ctx.env_hook_subprogram.unit_fqn};
@@ -46,7 +45,7 @@ with ${ctx.env_hook_subprogram.unit_fqn};
 with ${ctx.default_unit_file_provider.unit_fqn};
 %endif
 
-package body ${ctx.ada_api_settings.lib_name}.Analysis is
+package body ${ada_lib_name}.Analysis is
 
    ##  Make logic operations on nodes accessible
    use Eq_Node, Eq_Node.Raw_Impl;
@@ -2329,8 +2328,7 @@ package body ${ctx.ada_api_settings.lib_name}.Analysis is
 
    function Get_Lex_Env_Data
      (Node : access ${root_node_value_type}'Class) return Lex_Env_Data
-   is (${ctx.ada_api_settings.lib_name}.Analysis.Get_Lex_Env_Data
-        (Node.Unit));
+   is (${ada_lib_name}.Analysis.Get_Lex_Env_Data (Node.Unit));
 
    -----------
    -- Image --
@@ -2475,4 +2473,4 @@ package body ${ctx.ada_api_settings.lib_name}.Analysis is
       Free (Node);
    end Destroy_Synthetic_Node;
 
-end ${ctx.ada_api_settings.lib_name}.Analysis;
+end ${ada_lib_name}.Analysis;

@@ -6,10 +6,9 @@ with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Packrat;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 
-with ${ctx.ada_api_settings.lib_name}.Lexer;
-use ${ctx.ada_api_settings.lib_name}.Lexer;
+with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 
-package body ${ctx.ada_api_settings.lib_name}.Analysis.Parsers is
+package body ${ada_lib_name}.Analysis.Parsers is
 
    --  Prepare packrat instantiations: one per enum type and onefor each kind
    --  of node (including lists). Likewise for bump ptr. allocators, except
@@ -195,4 +194,4 @@ package body ${ctx.ada_api_settings.lib_name}.Analysis.Parsers is
       % endfor
    end Clean_All_Memos;
 
-end ${ctx.ada_api_settings.lib_name}.Analysis.Parsers;
+end ${ada_lib_name}.Analysis.Parsers;

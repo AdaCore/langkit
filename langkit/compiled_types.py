@@ -115,6 +115,7 @@ def make_renderer(base_renderer=None):
             'generic_list_type_name': glist_type_name,
             'generic_list_value_type': glist_value_type,
             'ctx':                   get_context(),
+            'ada_lib_name':          get_context().ada_api_settings.lib_name,
             'T':                     T,
             'ada_api':               get_context().ada_api_settings,
             'capi':                  capi,

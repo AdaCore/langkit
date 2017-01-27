@@ -2,13 +2,13 @@
 
 --  This package provides the library initialization routines
 
-package ${ctx.ada_api_settings.lib_name}.Init is
+package ${ada_lib_name}.Init is
 
    procedure Initialize
      with Export        => True,
           Convention    => C,
           External_Name =>
-             "${ctx.ada_api_settings.lib_name.lower()}_initialize";
+             "${ada_lib_name.lower()}_initialize";
    ${ada_doc('langkit.initialize', 3)}
 
-end ${ctx.ada_api_settings.lib_name}.Init;
+end ${ada_lib_name}.Init;

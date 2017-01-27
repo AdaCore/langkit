@@ -35,9 +35,8 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 with Langkit_Support.Tree_Traversal_Iterator;
 with Langkit_Support.Vectors;
 
-with ${ctx.ada_api_settings.lib_name}.Lexer;
-use ${ctx.ada_api_settings.lib_name}.Lexer;
-use ${ctx.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
+with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
+use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 --  This package provides types and primitives to analyze source files as
 --  analysis units.
@@ -46,7 +45,7 @@ use ${ctx.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
 --  analysis context with Create, then get analysis units out of it using
 --  Get_From_File and/or Get_From_Buffer.
 
-package ${ctx.ada_api_settings.lib_name}.Analysis is
+package ${ada_lib_name}.Analysis is
 
    type Analysis_Context is private;
    ${ada_doc('langkit.analysis_context_type', 3)}
@@ -1515,4 +1514,4 @@ private
       % endif
    % endfor
 
-end ${ctx.ada_api_settings.lib_name}.Analysis;
+end ${ada_lib_name}.Analysis;

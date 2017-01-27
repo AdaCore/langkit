@@ -8,7 +8,7 @@ with Langkit_Support.Token_Data_Handlers;
 --  This package provides types and primitives to split text streams into lists
 --  of tokens.
 
-package ${ctx.ada_api_settings.lib_name}.Lexer is
+package ${ada_lib_name}.Lexer is
 
    <%
       lexer = ctx.lexer
@@ -90,4 +90,4 @@ package ${ctx.ada_api_settings.lib_name}.Lexer is
    --  If T has a symbol, return it. Otherwise, force its symbolization and
    --  return the symbol.
 
-end ${ctx.ada_api_settings.lib_name}.Lexer;
+end ${ada_lib_name}.Lexer;

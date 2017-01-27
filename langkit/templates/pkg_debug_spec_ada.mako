@@ -3,13 +3,11 @@
 --  This package defines subprograms whose only purpose it to be used from a
 --  debugger. This is supposed to make developpers' life easier.
 
-with ${ctx.ada_api_settings.lib_name}.Analysis;
-use ${ctx.ada_api_settings.lib_name}.Analysis;
-with ${ctx.ada_api_settings.lib_name}.Lexer;
-use ${ctx.ada_api_settings.lib_name}.Lexer;
-use ${ctx.ada_api_settings.lib_name}.Lexer.Token_Data_Handlers;
+with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
+use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
-package ${ctx.ada_api_settings.lib_name}.Debug is
+package ${ada_lib_name}.Debug is
 
    procedure PN (Node : ${root_node_type_name});
    --  "Print Node".  Shortcut for Put_Line (Node.Short_Image). This is useful
@@ -25,4 +23,4 @@ package ${ctx.ada_api_settings.lib_name}.Debug is
    --  "Print Token". Print the data associated to the T token in the given
    --  token data handler.
 
-end ${ctx.ada_api_settings.lib_name}.Debug;
+end ${ada_lib_name}.Debug;

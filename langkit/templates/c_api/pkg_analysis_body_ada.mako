@@ -22,16 +22,14 @@ with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Extensions;  use Langkit_Support.Extensions;
 with Langkit_Support.Text;        use Langkit_Support.Text;
 
-with ${ctx.ada_api_settings.lib_name}.Analysis;
-use ${ctx.ada_api_settings.lib_name}.Analysis;
-with ${ctx.ada_api_settings.lib_name}.Lexer;
-use ${ctx.ada_api_settings.lib_name}.Lexer;
+with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
+with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
 
 ${exts.include_extension(
    ctx.ext('analysis', 'c_api', 'body_deps')
 )}
 
-package body ${ctx.ada_api_settings.lib_name}.Analysis.C is
+package body ${ada_lib_name}.Analysis.C is
 
 % if ctx.default_unit_file_provider:
    type C_Unit_File_Provider_Type is
@@ -1148,4 +1146,4 @@ package body ${ctx.ada_api_settings.lib_name}.Analysis.C is
       % endif
    % endfor
 
-end ${ctx.ada_api_settings.lib_name}.Analysis.C;
+end ${ada_lib_name}.Analysis.C;
