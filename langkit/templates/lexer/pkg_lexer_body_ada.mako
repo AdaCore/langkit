@@ -25,7 +25,7 @@ with Langkit_Support.Text;    use Langkit_Support.Text;
 with ${ctx.symbol_canonicalizer.unit_fqn};
 % endif
 
-package body ${_self.ada_api_settings.lib_name}.Lexer is
+package body ${ctx.ada_api_settings.lib_name}.Lexer is
 
    Quex_Leading_Characters : constant := 2;
    Quex_Trailing_Characters : constant := 1;
@@ -609,4 +609,4 @@ package body ${_self.ada_api_settings.lib_name}.Lexer is
       return T.Symbol;
    end Force_Symbol;
 
-end ${_self.ada_api_settings.lib_name}.Lexer;
+end ${ctx.ada_api_settings.lib_name}.Lexer;
