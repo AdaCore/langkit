@@ -1,9 +1,10 @@
 --  Internal implementation package, not to be used directly by users a-priori.
 --  TODO??? document the inner workings a bit more.
 
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
 
-package Adalog.Relations is
+package Langkit_Support.Adalog.Relations is
 
    -------------------
    -- Pure_Relation --
@@ -58,4 +59,4 @@ package Adalog.Relations is
 
    end Stateful_Relation;
 
-end Adalog.Relations;
+end Langkit_Support.Adalog.Relations;

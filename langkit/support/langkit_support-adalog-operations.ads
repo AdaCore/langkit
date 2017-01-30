@@ -1,9 +1,10 @@
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
 
 --  This package implement high level logical relation operators on other
 --  relations, namely `logical and` and `logical or`.
 
-package Adalog.Operations is
+package Langkit_Support.Adalog.Operations is
 
    ---------------------------------
    --  Or relation implementation --
@@ -53,4 +54,4 @@ package Adalog.Operations is
    function "and" (L, R : Relation) return access I_Relation'Class
       renames Logic_And;
 
-end Adalog.Operations;
+end Langkit_Support.Adalog.Operations;

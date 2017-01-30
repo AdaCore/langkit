@@ -1,3 +1,5 @@
+with "gnatcoll";
+
 project Langkit_Support is
 
    for Languages use ("Ada");

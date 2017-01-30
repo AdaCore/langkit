@@ -1,8 +1,10 @@
-with Adalog.Abstract_Relation;  use Adalog.Abstract_Relation;
-with Adalog.Logic_Var;
-with Adalog.Pure_Relations;     use Adalog.Pure_Relations;
-with Adalog.Unify_LR;
-with Adalog.Unify_One_Side;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Logic_Var;
+with Langkit_Support.Adalog.Pure_Relations;
+use Langkit_Support.Adalog.Pure_Relations;
+with Langkit_Support.Adalog.Unify_LR;
+with Langkit_Support.Adalog.Unify_One_Side;
 
 --  This package makes the unification algorithms of Adalog accessible under
 --  the form of equality operators, and a membership function. Equality works
@@ -35,7 +37,7 @@ generic
    with package Right_Var is new Logic_Var
      (Element_Type => R_Type, others => <>);
 
-package Adalog.Unify is
+package Langkit_Support.Adalog.Unify is
 
    --  TODO HACK FIXME??? P418-022 Removing the body for this package causes a
    --  generic instantiation error.
@@ -96,4 +98,4 @@ package Adalog.Unify is
    is
       (Unify_Left.Member (R, Vals, R_Data));
 
-end Adalog.Unify;
+end Langkit_Support.Adalog.Unify;

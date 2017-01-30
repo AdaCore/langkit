@@ -1,9 +1,10 @@
 --  This package represents the unification logic for the case where both
 --  operands are logic variables. See Adalog.Unify for more details.
 
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
-with Adalog.Logic_Var;
-with Adalog.Relations;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Logic_Var;
+with Langkit_Support.Adalog.Relations;
 
 generic
    type L_Type is private;
@@ -24,7 +25,7 @@ generic
      (Element_Type => R_Type, others => <>);
 
    with function Equals (L, R : R_Type) return Boolean is <>;
-package Adalog.Unify_LR is
+package Langkit_Support.Adalog.Unify_LR is
 
    --------------
    -- Unify_LR --
@@ -67,4 +68,4 @@ package Adalog.Unify_LR is
      (new Unify_LR_Rel.Rel'(Rel => Create (Left, Right, L_Data, R_Data),
                             others => <>));
 
-end Adalog.Unify_LR;
+end Langkit_Support.Adalog.Unify_LR;

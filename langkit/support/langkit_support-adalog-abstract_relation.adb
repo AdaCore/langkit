@@ -1,13 +1,13 @@
-with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Tags;
-with Ada.Text_IO;                use Ada.Text_IO;
+with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
-with GNATCOLL.Utils;             use GNATCOLL.Utils;
+with GNATCOLL.Utils; use GNATCOLL.Utils;
 
-with Adalog.Debug;               use Adalog.Debug;
+with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
-package body Adalog.Abstract_Relation is
+package body Langkit_Support.Adalog.Abstract_Relation is
 
    Current_Solving_Relation : Relation := null;
    --  NOTE??? We don't want to require a solving context or whatever for the
@@ -163,4 +163,4 @@ package body Adalog.Abstract_Relation is
       end;
    end Solve;
 
-end Adalog.Abstract_Relation;
+end Langkit_Support.Adalog.Abstract_Relation;

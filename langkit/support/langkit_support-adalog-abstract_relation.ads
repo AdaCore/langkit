@@ -1,4 +1,4 @@
-package Adalog.Abstract_Relation is
+package Langkit_Support.Adalog.Abstract_Relation is
 
    ----------------
    -- I_Relation --
@@ -69,4 +69,4 @@ package Adalog.Abstract_Relation is
    --  bringing the reference count to 0 will Destroy the referenced relation
    --  object and put the pointer to null, hence the in out mode.
 
-end Adalog.Abstract_Relation;
+end Langkit_Support.Adalog.Abstract_Relation;

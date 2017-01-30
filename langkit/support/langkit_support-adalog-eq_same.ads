@@ -1,7 +1,8 @@
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
-with Adalog.Logic_Ref;
-with Adalog.Unify;
-with Adalog.Unify_LR;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Logic_Ref;
+with Langkit_Support.Adalog.Unify;
+with Langkit_Support.Adalog.Unify_LR;
 
 --  Convenience wrapper generic package that, from a type implementing
 --  equality, will instantiate all the needed stuff to create logical
@@ -16,7 +17,7 @@ with Adalog.Unify_LR;
 generic
    type LR_Type is private;
    with function Element_Image (E : LR_Type) return String is <>;
-package Adalog.Eq_Same is
+package Langkit_Support.Adalog.Eq_Same is
 
    package Refs is new Logic_Ref (LR_Type, Element_Image);
 
@@ -93,4 +94,4 @@ package Adalog.Eq_Same is
          Refs.Refcounted_Logic_Var, Refs.Refcounted_Logic_Var);
    end Refcounted_Custom_Bind;
 
-end Adalog.Eq_Same;
+end Langkit_Support.Adalog.Eq_Same;

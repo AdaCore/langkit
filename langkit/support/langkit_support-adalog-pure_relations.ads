@@ -1,7 +1,9 @@
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
-with Adalog.Relations;         use Adalog.Relations;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Relations;
+use Langkit_Support.Adalog.Relations;
 
-package Adalog.Pure_Relations is
+package Langkit_Support.Adalog.Pure_Relations is
 
    --------------------
    -- False_Relation --
@@ -42,4 +44,4 @@ package Adalog.Pure_Relations is
    package Boolean_Relation is
      new Pure_Relation (Ty => Boolean_Relation_Rec);
 
-end Adalog.Pure_Relations;
+end Langkit_Support.Adalog.Pure_Relations;

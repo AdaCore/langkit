@@ -14,7 +14,7 @@ with Langkit_Support.Cheap_Sets;
 --  they're linked to at construction time, which is why operations on
 --  predicates do not take a logic var formal.
 
-package Adalog.Logic_Var_Predicate is
+package Langkit_Support.Adalog.Logic_Var_Predicate is
    type Var_Predicate_Type is abstract tagged null record;
 
    function Apply
@@ -30,4 +30,4 @@ package Adalog.Logic_Var_Predicate is
    --  Logic variables will want to manipulate sets of predicates associated to
    --  them.
 
-end Adalog.Logic_Var_Predicate;
+end Langkit_Support.Adalog.Logic_Var_Predicate;

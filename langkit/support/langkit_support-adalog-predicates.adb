@@ -1,6 +1,6 @@
-with Adalog.Debug; use Adalog.Debug;
+with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
-package body Adalog.Predicates is
+package body Langkit_Support.Adalog.Predicates is
 
    ---------------
    -- Predicate --
@@ -138,4 +138,4 @@ package body Adalog.Predicates is
 
    end Predicate_2;
 
-end Adalog.Predicates;
+end Langkit_Support.Adalog.Predicates;

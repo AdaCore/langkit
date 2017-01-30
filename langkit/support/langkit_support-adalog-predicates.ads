@@ -1,9 +1,12 @@
-with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;
-with Adalog.Logic_Var;
-with Adalog.Logic_Var_Predicate; use Adalog.Logic_Var_Predicate;
-with Adalog.Relations;           use Adalog.Relations;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Logic_Var;
+with Langkit_Support.Adalog.Logic_Var_Predicate;
+use Langkit_Support.Adalog.Logic_Var_Predicate;
+with Langkit_Support.Adalog.Relations;
+use Langkit_Support.Adalog.Relations;
 
-package Adalog.Predicates is
+package Langkit_Support.Adalog.Predicates is
 
    ---------------
    -- Predicate --
@@ -246,4 +249,4 @@ package Adalog.Predicates is
    generic package Predicate_1 renames Predicate;
    --  Renaming for Predicate, to help with code generation
 
-end Adalog.Predicates;
+end Langkit_Support.Adalog.Predicates;

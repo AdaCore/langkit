@@ -1,6 +1,7 @@
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
-with Adalog.Logic_Var;
-with Adalog.Relations;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Logic_Var;
+with Langkit_Support.Adalog.Relations;
 
 --  Internal implementation package, not to be used directly by users a-priori.
 --  TODO??? document the inner workings a bit more.
@@ -19,7 +20,7 @@ generic
    with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
 
    with function R_Image (Self : R_Type) return String is <>;
-package Adalog.Unify_One_Side is
+package Langkit_Support.Adalog.Unify_One_Side is
 
    type R_Type_Array is array (Positive range <>) of R_Type;
 
@@ -73,4 +74,4 @@ package Adalog.Unify_One_Side is
    function Member
      (R : Var.Var; Vals : R_Type_Array; R_Data : Right_C_Data) return Relation;
 
-end Adalog.Unify_One_Side;
+end Langkit_Support.Adalog.Unify_One_Side;

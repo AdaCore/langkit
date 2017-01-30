@@ -1,8 +1,8 @@
 with GNATCOLL.Refcount; use GNATCOLL.Refcount;
 
-with Adalog.Debug;      use Adalog.Debug;
+with Langkit_Support.Adalog.Debug;      use Langkit_Support.Adalog.Debug;
 
-package body Adalog.Logic_Ref is
+package body Langkit_Support.Adalog.Logic_Ref is
 
    pragma Warnings (Off, "always False");
 
@@ -244,4 +244,4 @@ package body Adalog.Logic_Ref is
       Pred_Sets.Destroy (Self.Pending_Relations);
    end Destroy;
 
-end Adalog.Logic_Ref;
+end Langkit_Support.Adalog.Logic_Ref;

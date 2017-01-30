@@ -1,6 +1,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
 
-package body Adalog.Debug is
+package body Langkit_Support.Adalog.Debug is
 
    -----------
    -- Trace --
@@ -13,4 +13,4 @@ package body Adalog.Debug is
       end if;
    end Trace;
 
-end Adalog.Debug;
+end Langkit_Support.Adalog.Debug;

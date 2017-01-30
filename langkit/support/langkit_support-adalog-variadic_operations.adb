@@ -1,6 +1,6 @@
-with Adalog.Operations; use Adalog.Operations;
+with Langkit_Support.Adalog.Operations; use Langkit_Support.Adalog.Operations;
 
-package body Adalog.Variadic_Operations is
+package body Langkit_Support.Adalog.Variadic_Operations is
 
    ------------------
    -- Variadic_And --
@@ -58,4 +58,4 @@ package body Adalog.Variadic_Operations is
       return Ret;
    end Variadic_Or;
 
-end Adalog.Variadic_Operations;
+end Langkit_Support.Adalog.Variadic_Operations;

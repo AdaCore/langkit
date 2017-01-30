@@ -1,14 +1,15 @@
-with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with GNATCOLL.Refcount;
 
-with Adalog.Logic_Var;
-with Adalog.Logic_Var_Predicate; use Adalog.Logic_Var_Predicate;
+with Langkit_Support.Adalog.Logic_Var;
+with Langkit_Support.Adalog.Logic_Var_Predicate;
+use Langkit_Support.Adalog.Logic_Var_Predicate;
 
 generic
    type Element_Type is private;
    with function Element_Image (E : Element_Type) return String;
-package Adalog.Logic_Ref is
+package Langkit_Support.Adalog.Logic_Ref is
 
    type Var is record
       Reset             : Boolean := True;
@@ -80,4 +81,4 @@ package Adalog.Logic_Ref is
      (Ref, Element_Type);
    package Raw_Logic_Var is new Adalog.Logic_Var (Raw_Var, Element_Type);
 
-end Adalog.Logic_Ref;
+end Langkit_Support.Adalog.Logic_Ref;

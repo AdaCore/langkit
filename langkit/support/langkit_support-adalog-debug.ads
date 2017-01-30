@@ -1,4 +1,4 @@
-package Adalog.Debug is
+package Langkit_Support.Adalog.Debug is
    type Debug_State_Type is (None, Trace, Step);
 
    Debug_State : constant Debug_State_Type := None;
@@ -16,4 +16,4 @@ package Adalog.Debug is
 
    procedure Trace (Str : String);
    --  Will output a string to stdout only if Debug is True
-end Adalog.Debug;
+end Langkit_Support.Adalog.Debug;

@@ -1,4 +1,4 @@
-package body Adalog.Relations is
+package body Langkit_Support.Adalog.Relations is
 
    -------------------
    -- Pure_Relation --
@@ -81,4 +81,4 @@ package body Adalog.Relations is
 
    end Stateful_Relation;
 
-end Adalog.Relations;
+end Langkit_Support.Adalog.Relations;

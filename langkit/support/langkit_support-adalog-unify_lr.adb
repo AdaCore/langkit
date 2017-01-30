@@ -1,6 +1,6 @@
-with Adalog.Debug; use Adalog.Debug;
+with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
-package body Adalog.Unify_LR is
+package body Langkit_Support.Adalog.Unify_LR is
    use Left_Var; use Right_Var;
 
    -----------
@@ -80,4 +80,4 @@ package body Adalog.Unify_LR is
       end case;
       Self.State := No_Change;
    end Revert;
-end Adalog.Unify_LR;
+end Langkit_Support.Adalog.Unify_LR;

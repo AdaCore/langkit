@@ -1,6 +1,6 @@
-with Adalog.Debug; use Adalog.Debug;
+with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
-package body Adalog.Operations is
+package body Langkit_Support.Adalog.Operations is
 
    ----------
    -- Call --
@@ -155,4 +155,4 @@ package body Adalog.Operations is
       return Result;
    end Logic_And;
 
-end Adalog.Operations;
+end Langkit_Support.Adalog.Operations;

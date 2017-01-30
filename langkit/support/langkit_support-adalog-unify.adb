@@ -1,4 +1,4 @@
-package body Adalog.Unify is
+package body Langkit_Support.Adalog.Unify is
 
    --  TODO HACK FIXME??? P418-022 Removing the body for this package causes a
    --  generic instantiation error.
@@ -7,4 +7,4 @@ package body Adalog.Unify is
       null;
    end What;
 
-end Adalog.Unify;
+end Langkit_Support.Adalog.Unify;

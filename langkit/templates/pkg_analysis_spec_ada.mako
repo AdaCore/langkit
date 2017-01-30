@@ -19,8 +19,9 @@ with Ada.Unchecked_Deallocation;
 
 with System;
 
-with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;
-with Adalog.Eq_Same;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Eq_Same;
 
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Bump_Ptr.Vectors;
@@ -796,7 +797,8 @@ package ${ada_lib_name}.Analysis is
    function El_Image (N : ${T.sem_node.name()}) return String
    is (if N.El /= null then Image (N.El.Short_Image) else "None");
 
-   package Eq_Node is new Adalog.Eq_Same (${T.sem_node.name()}, El_Image);
+   package Eq_Node is new Langkit_Support.Adalog.Eq_Same
+     (${T.sem_node.name()}, El_Image);
    subtype Logic_Var is Eq_Node.Refs.Raw_Var;
    subtype Logic_Var_Record is Eq_Node.Refs.Var;
    Null_Var : constant Logic_Var := null;

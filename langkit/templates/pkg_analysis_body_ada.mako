@@ -27,12 +27,18 @@ with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 
 pragma Warnings (Off, "referenced");
-with Adalog.Abstract_Relation;   use Adalog.Abstract_Relation;
-with Adalog.Debug;               use Adalog.Debug;
-with Adalog.Operations;          use Adalog.Operations;
-with Adalog.Predicates;          use Adalog.Predicates;
-with Adalog.Pure_Relations;      use Adalog.Pure_Relations;
-with Adalog.Variadic_Operations; use Adalog.Variadic_Operations;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Debug;
+use Langkit_Support.Adalog.Debug;
+with Langkit_Support.Adalog.Operations;
+use Langkit_Support.Adalog.Operations;
+with Langkit_Support.Adalog.Predicates;
+use Langkit_Support.Adalog.Predicates;
+with Langkit_Support.Adalog.Pure_Relations;
+use Langkit_Support.Adalog.Pure_Relations;
+with Langkit_Support.Adalog.Variadic_Operations;
+use Langkit_Support.Adalog.Variadic_Operations;
 pragma Warnings (On, "referenced");
 
 with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;

@@ -1,7 +1,7 @@
 with Ada.Unchecked_Deallocation;
-with Adalog.Debug; use Adalog.Debug;
+with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
-package body Adalog.Unify_One_Side is
+package body Langkit_Support.Adalog.Unify_One_Side is
 
    use Var;
 
@@ -133,4 +133,4 @@ package body Adalog.Unify_One_Side is
       Unchecked_Free (Self.Values);
    end Cleanup;
 
-end Adalog.Unify_One_Side;
+end Langkit_Support.Adalog.Unify_One_Side;

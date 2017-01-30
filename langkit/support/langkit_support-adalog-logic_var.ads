@@ -1,7 +1,9 @@
 pragma Warnings (Off);
 
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
-with Adalog.Logic_Var_Predicate; use Adalog.Logic_Var_Predicate;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Logic_Var_Predicate;
+use Langkit_Support.Adalog.Logic_Var_Predicate;
 
 generic
    type Logic_Var_Type is private;
@@ -36,7 +38,7 @@ generic
 
    with function Element_Image (Self : Element_Type) return String is <>;
 
-package Adalog.Logic_Var is
+package Langkit_Support.Adalog.Logic_Var is
    subtype Var is Logic_Var_Type;
 
    type Var_Array is array (Natural range <>) of Var;
@@ -45,4 +47,4 @@ package Adalog.Logic_Var is
    --  for convenience. To be used in other generic packages taking a formal
    --  Logic_Var package as argument.
 
-end Adalog.Logic_Var;
+end Langkit_Support.Adalog.Logic_Var;
