@@ -230,6 +230,12 @@ package ${ada_lib_name}.Analysis is
    function Last_Token (Unit : Analysis_Unit) return Token_Type;
    ${ada_doc('langkit.unit_last_token', 3)}
 
+   function Token_Count (Unit : Analysis_Unit) return Natural;
+   ${ada_doc('langkit.unit_token_count', 3)}
+
+   function Trivia_Count (Unit : Analysis_Unit) return Natural;
+   ${ada_doc('langkit.unit_trivia_count', 3)}
+
    procedure Dump_Lexical_Env (Unit : Analysis_Unit);
    --  Debug helper: output the lexical envs for given analysis unit
 
@@ -1382,6 +1388,12 @@ private
 
    function Last_Token (Unit : Analysis_Unit) return Token_Type is
      (Last_Token (Unit.TDH'Access));
+
+   function Token_Count (Unit : Analysis_Unit) return Natural is
+     (Unit.TDH.Tokens.Length);
+
+   function Trivia_Count (Unit : Analysis_Unit) return Natural is
+     (Unit.TDH.Trivias.Length);
 
    function Token
      (Node  : access ${root_node_value_type}'Class;

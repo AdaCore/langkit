@@ -307,6 +307,13 @@ base_langkit_docs = {
     'langkit.unit_last_token': """
         Return a reference to the last token scanned in this unit.
     """,
+    'langkit.unit_token_count': """
+        Return the number of tokens in this unit.
+    """,
+    'langkit.unit_trivia_count': """
+        Return the number of trivias in this unit. This is 0 for units that
+        were parsed with trivia analysis disabled.
+    """,
     'langkit.unit_filename': """
         Return the filename an unit is associated to.
 
