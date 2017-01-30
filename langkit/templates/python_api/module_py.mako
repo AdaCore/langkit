@@ -357,6 +357,16 @@ class AnalysisUnit(object):
         _unit_last_token(self._c_value, ctypes.byref(result))
         return result.wrap()
 
+    @property
+    def token_count(self):
+        ${py_doc('langkit.unit_token_count', 8)}
+        return _unit_token_count(self._c_value)
+
+    @property
+    def trivia_count(self):
+        ${py_doc('langkit.unit_trivia_count', 8)}
+        return _unit_trivia_count(self._c_value)
+
     def iter_tokens(self):
         """
         Return an iterator that yields all the tokens in this unit.
@@ -973,6 +983,14 @@ _unit_first_token = _import_func(
 _unit_last_token = _import_func(
     "${capi.get_name('unit_last_token')}",
     [_analysis_unit, ctypes.POINTER(Token)], None
+)
+_unit_token_count = _import_func(
+    "${capi.get_name('unit_token_count')}",
+    [_analysis_unit], ctypes.c_int
+)
+_unit_trivia_count = _import_func(
+    "${capi.get_name('unit_trivia_count')}",
+    [_analysis_unit], ctypes.c_int
 )
 _unit_filename = _import_func(
     "${capi.get_name('unit_filename')}",
