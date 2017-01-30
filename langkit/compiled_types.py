@@ -65,6 +65,7 @@ def library_public_field(field):
     return not field.is_private or get_context().library_fields_all_public
 
 
+@memoized
 def make_renderer(base_renderer=None):
     """
     Create a template renderer with common helpers.
