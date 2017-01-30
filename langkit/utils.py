@@ -179,6 +179,11 @@ def memoized(func):
     """
     cache = {}
 
+    if not getattr(memoized, "caches", None):
+        memoized.caches = []
+
+    memoized.caches.append(cache)
+
     def wrapper(*args, **kwargs):
         key = (args, tuple(kwargs.items()))
         try:
@@ -189,7 +194,15 @@ def memoized(func):
             result = result
         return result
 
+    wrapper.reset_cache = lambda: cache.clear()
+
     return wrapper
+
+
+def reset_memoized():
+    if getattr(memoized, "caches", None):
+        for cache in memoized.caches:
+            cache.clear()
 
 
 def type_check_exact(klass):

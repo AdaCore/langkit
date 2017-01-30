@@ -139,3 +139,6 @@ def reset_langkit():
     Self.__dict__['_frozen'] = False
 
     T._type_dict = {}
+
+    from langkit.utils import reset_memoized
+    reset_memoized()
