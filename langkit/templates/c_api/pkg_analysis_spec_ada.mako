@@ -258,6 +258,20 @@ package ${ada_lib_name}.Analysis.C is
            External_name => "${capi.get_name('unit_last_token')}";
    ${ada_c_doc('langkit.unit_last_token', 3)}
 
+   function ${capi.get_name('unit_token_count')}
+     (Unit : ${analysis_unit_type}) return int
+      with Export        => True,
+           Convention    => C,
+           External_Name => "${capi.get_name('unit_token_count')}";
+   ${ada_c_doc('langkit.unit_token_count', 3)}
+
+   function ${capi.get_name('unit_trivia_count')}
+     (Unit : ${analysis_unit_type}) return int
+      with Export        => True,
+           Convention    => C,
+           External_Name => "${capi.get_name('unit_trivia_count')}";
+   ${ada_c_doc('langkit.unit_trivia_count', 3)}
+
    function ${capi.get_name('unit_filename')}
      (Unit : ${analysis_unit_type})
       return chars_ptr

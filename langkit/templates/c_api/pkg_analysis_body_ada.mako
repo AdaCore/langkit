@@ -309,6 +309,22 @@ package body ${ada_lib_name}.Analysis.C is
       Token.all := Wrap (T);
    end;
 
+   function ${capi.get_name('unit_token_count')}
+     (Unit : ${analysis_unit_type}) return int
+   is
+      U : constant Analysis_Unit := Unwrap (Unit);
+   begin
+      return int (Token_Count (U));
+   end;
+
+   function ${capi.get_name('unit_trivia_count')}
+     (Unit : ${analysis_unit_type}) return int
+   is
+      U : constant Analysis_Unit := Unwrap (Unit);
+   begin
+      return int (Trivia_Count (U));
+   end;
+
    function ${capi.get_name('unit_filename')}
      (Unit : ${analysis_unit_type})
       return chars_ptr
