@@ -452,6 +452,7 @@ class Token(ctypes.Structure):
 
     @property
     def kind(self):
+        ${py_doc('langkit.token_kind', 8)}
         name = _token_kind_name(self._kind)
         # The _token_kind_name wrapper is already supposed to handle exceptions
         # so this should always return a non-null value.
