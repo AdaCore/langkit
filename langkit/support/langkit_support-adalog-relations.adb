@@ -16,7 +16,7 @@ package body Langkit_Support.Adalog.Relations is
             return False;
          end if;
          Inst.Done := True;
-         return  Apply (Inst.Rel);
+         return Apply (Inst.Rel);
       end Solve_Impl;
 
       ----------
