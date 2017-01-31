@@ -1104,15 +1104,22 @@ package body ${ada_lib_name}.Analysis is
       Predicate : access function (N : ${root_node_type_name}) return Boolean)
      return Local_Find_Iterator
    is
+      Dummy : ${root_node_type_name};
+      Ignore : Boolean;
    begin
-      return Local_Find_Iterator'
-        (Ada.Finalization.Limited_Controlled with
-         Traverse_It => Traverse (Root),
+      return Ret : Local_Find_Iterator
+        := Local_Find_Iterator'
+          (Ada.Finalization.Limited_Controlled with
+           Traverse_It => Traverse (Root),
 
-         --  We still want to provide this functionality, even though it is
-         --  unsafe. TODO: We might be able to make a safe version of this
-         --  using generics. Still would be more verbose though.
-         Predicate   => Predicate'Unrestricted_Access.all);
+           --  We still want to provide this functionality, even though it is
+           --  unsafe. TODO: We might be able to make a safe version of this
+           --  using generics. Still would be more verbose though.
+           Predicate   => Predicate'Unrestricted_Access.all)
+      do
+         Ignore := Next (Ret.Traverse_It, Dummy);
+
+      end return;
    end Find;
 
    -------------
@@ -1176,10 +1183,16 @@ package body ${ada_lib_name}.Analysis is
       Predicate : ${root_node_type_name}_Predicate)
       return Find_Iterator
    is
+      Dummy : ${root_node_type_name};
+      Ignore : Boolean;
    begin
-      return (Ada.Finalization.Limited_Controlled with
-              Traverse_It => Traverse (Root),
-              Predicate   => Predicate);
+      return Ret : Find_Iterator :=
+        (Ada.Finalization.Limited_Controlled with
+         Traverse_It => Traverse (Root),
+         Predicate   => Predicate)
+      do
+         Ignore := Next (Ret.Traverse_It, Dummy);
+      end return;
    end Find;
 
    ----------------
@@ -1193,7 +1206,11 @@ package body ${ada_lib_name}.Analysis is
    is
       I      : Find_Iterator := Find (Root, Predicate);
       Result : ${root_node_type_name};
+      Dummy : ${root_node_type_name};
+      Ignore : Boolean;
    begin
+      Ignore := Next (I.Traverse_It, Dummy);
+      --  Ignore first result
       if not I.Next (Result) then
          Result := null;
       end if;
