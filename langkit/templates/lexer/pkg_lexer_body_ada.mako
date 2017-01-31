@@ -135,10 +135,10 @@ package body ${ada_lib_name}.Lexer is
       --  Likewise, for the last character
 
       function Sloc_Range return Source_Location_Range is
-        ((Token.Start_Line,
-          Token.End_Line,
-          Token.Start_Column,
-          Token.End_Column));
+        ((Line_Number (Token.Start_Line),
+          Line_Number (Token.End_Line),
+          Column_Number (Token.Start_Column),
+          Column_Number (Token.End_Column)));
       --  Create a sloc range value corresponding to Token
 
       procedure Prepare_For_Trivia

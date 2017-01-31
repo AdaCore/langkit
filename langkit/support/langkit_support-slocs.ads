@@ -1,22 +1,23 @@
 with Ada.Strings; use Ada.Strings;
 with Ada.Strings.Fixed;
 
-with Interfaces; use Interfaces;
-
 package Langkit_Support.Slocs is
+
+   type Line_Number is mod 2 ** 32;
+   type Column_Number is mod 2 ** 16;
 
    type Relative_Position is (Before, Inside, After);
    --  Where some source location is with respect to another/a source location
    --  range.
 
    type Source_Location is record
-      Line   : Unsigned_32;
-      Column : Unsigned_16;
+      Line   : Line_Number;
+      Column : Column_Number;
    end record;
 
    type Source_Location_Range is record
-      Start_Line, End_Line     : Unsigned_32;
-      Start_Column, End_Column : Unsigned_16;
+      Start_Line, End_Line     : Line_Number;
+      Start_Column, End_Column : Column_Number;
    end record;
 
    No_Source_Location       : constant Source_Location       := (0, 0);
@@ -52,8 +53,8 @@ package Langkit_Support.Slocs is
    --  Tell where Sloc is with respect to Sloc_Range
 
    function Image (Sloc : Source_Location) return String is
-     (Ada.Strings.Fixed.Trim (Unsigned_32'Image (Sloc.Line), Left) & ':'
-      & Ada.Strings.Fixed.Trim (Unsigned_16'Image (Sloc.Column), Left));
+     (Ada.Strings.Fixed.Trim (Line_Number'Image (Sloc.Line), Left) & ':'
+      & Ada.Strings.Fixed.Trim (Column_Number'Image (Sloc.Column), Left));
 
    function Image (Sloc_Range : Source_Location_Range) return String is
      (Image (Start_Sloc (Sloc_Range)) & '-'

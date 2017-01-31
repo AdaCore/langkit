@@ -603,16 +603,18 @@ package ${ada_lib_name}.Analysis.C is
    --  The following conversion helpers are use by the various C bindings
 
    function Wrap (S : Source_Location) return ${sloc_type} is
-     ((S.Line, S.Column));
+     ((Unsigned_32 (S.Line), Unsigned_16 (S.Column)));
    function Unwrap (S : ${sloc_type}) return Source_Location is
-     ((S.Line, S.Column));
+     ((Line_Number (S.Line), Column_Number (S.Column)));
 
    function Wrap (S : Source_Location_Range) return ${sloc_range_type} is
-     ((Start_S => (S.Start_Line, S.Start_Column),
-       End_S   => (S.End_Line,   S.End_Column)));
+     ((Start_S => (Unsigned_32 (S.Start_Line), Unsigned_16 (S.Start_Column)),
+       End_S   => (Unsigned_32 (S.End_Line),   Unsigned_16 (S.End_Column))));
    function Unwrap (S : ${sloc_range_type}) return Source_Location_Range is
-     ((S.Start_S.Line, S.End_S.Line,
-       S.Start_S.Column, S.End_S.Column));
+     ((Line_Number (S.Start_S.Line),
+       Line_Number (S.End_S.Line),
+       Column_Number (S.Start_S.Column),
+       Column_Number (S.End_S.Column)));
 
    function Wrap (S : Unbounded_Wide_Wide_String) return ${text_type};
 

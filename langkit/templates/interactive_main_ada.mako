@@ -73,9 +73,9 @@ procedure Parse is
          declare
             Sep : constant Natural := Index (Lookup_Str, ":");
 
-            Line : Unsigned_32 := Unsigned_32'Value
+            Line : Line_Number := Line_Number'Value
               (Slice (Lookup_Str, 1, Sep - 1));
-            Column : Unsigned_16 := Unsigned_16'Value
+            Column : Column_Number := Column_Number'Value
               (Slice (Lookup_Str, Sep + 1, Length (Lookup_Str)));
 
             Sloc : constant Source_Location := (Line, Column);
