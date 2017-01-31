@@ -77,6 +77,10 @@ package ${ada_lib_name}.Analysis is
    type ${root_node_type_name} is access all ${root_node_value_type}'Class;
    --  Most generic AST node type
 
+   function Is_Null
+     (Node : access ${root_node_value_type}'Class) return Boolean
+   is (Node = null);
+
    Property_Error : exception;
    ${ada_doc('langkit.property_error', 3)}
 
