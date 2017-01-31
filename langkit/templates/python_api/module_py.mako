@@ -459,6 +459,18 @@ class Token(ctypes.Structure):
         return unwrap_str(name)
 
     @property
+    def is_trivia(self):
+        ${py_doc('langkit.token_is_trivia', 8)}
+        return self._trivia_index != 0
+
+    @property
+    def index(self):
+        ${py_doc('langkit.token_index', 8)}
+        return (self._token_index - 1
+                if self._trivia_index == 0 else
+                self._trivia_index - 1)
+
+    @property
     def text(self):
         return self._text.wrap()
 
