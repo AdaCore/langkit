@@ -948,6 +948,8 @@ class AbstractVariable(AbstractExpression):
     - Calling construct on the PlaceHolder.
     """
 
+    unused_count = count(1)
+
     class Expr(ResolvedExpression):
         """
         Resolved expression that represents a variable in generated code.
@@ -1012,6 +1014,11 @@ class AbstractVariable(AbstractExpression):
             language specification, hold its original name.
         """
         super(AbstractVariable, self).__init__()
+
+        if name.lower == '_':
+            i = next(self.unused_count)
+            name = names.Name('Unused_{}'.format(i))
+
         self.local_var = None
         if create_local:
             self.local_var = PropertyDef.get().vars.create_scopeless(name,
