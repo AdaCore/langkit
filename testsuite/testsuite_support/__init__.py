@@ -68,8 +68,3 @@ class Testsuite(BaseTestsuite):
                      os.path.join(self.root_dir, '..', 'langkit', 'support',
                                   'langkit_support.gpr')], output=PIPE)
             report(p, "Langkit support")
-
-            p = Run(['gprbuild', '-p', '-f', '-P',
-                     os.path.join(self.root_dir, '..', 'langkit', 'adalog',
-                                  'adalog.gpr')], output=PIPE)
-            report(p, "Adalog")
