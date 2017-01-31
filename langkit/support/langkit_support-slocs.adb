@@ -5,8 +5,7 @@ package body Langkit_Support.Slocs is
    -------------
 
    function Compare
-     (Reference, Compared : Source_Location)
-      return Relative_Position
+     (Reference, Compared : Source_Location) return Relative_Position
    is
    begin
       --  First compare line numbers...
@@ -32,8 +31,9 @@ package body Langkit_Support.Slocs is
    -- Compare --
    -------------
 
-   function Compare (Sloc_Range : Source_Location_Range;
-                     Sloc       : Source_Location) return Relative_Position
+   function Compare
+     (Sloc_Range : Source_Location_Range;
+      Sloc       : Source_Location) return Relative_Position
    is
       Inclusive_End_Sloc : Source_Location := End_Sloc (Sloc_Range);
    begin
