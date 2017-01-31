@@ -19,6 +19,11 @@ package body Langkit_Support.Adalog.Relations is
          return Apply (Inst.Rel);
       end Solve_Impl;
 
+      overriding procedure Reset (Inst : in out Rel) is
+      begin
+         Inst.Done := False;
+      end Reset;
+
       ----------
       -- Free --
       ----------

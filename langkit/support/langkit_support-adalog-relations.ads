@@ -24,7 +24,7 @@ package Langkit_Support.Adalog.Relations is
       end record;
 
       overriding function Solve_Impl (Inst : in out Rel) return Boolean;
-      overriding procedure Reset (Inst : in out Rel) is null;
+      overriding procedure Reset (Inst : in out Rel);
       overriding procedure Cleanup (Inst : in out Rel);
    end Pure_Relation;
 
