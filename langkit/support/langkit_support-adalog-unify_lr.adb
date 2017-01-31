@@ -29,8 +29,12 @@ package body Langkit_Support.Adalog.Unify_LR is
          if SetL (Self.Right, Convert (Self.L_Data, GetL (Self.Left))) then
             Self.State := Right_Changed;
             Trace ("In Unify_LR, propagating right, from "
-                      & Image (Self.Left) & " to "
-                      & Image (Self.Right));
+                   & Image (Self.Left) & " to "
+                   & Image (Self.Right));
+            Trace ("In Unify_LR, From value is : "
+                   & Element_Image (GetL (Self.Left)));
+            Trace ("In Unify_LR, To value is : "
+                   & Element_Image (GetL (Self.Right)));
             return True;
          else
             Trace ("In Unify_LR, propagating right failed ! ");
