@@ -606,7 +606,20 @@ base_langkit_docs = {
         % if lang == 'c':
             Return 1 if successful.
         % endif
-    """
+    """,
+    'langkit.token_is_trivia': """
+        Return whether this token is a trivia. If it's not, it's a regular
+        token.
+    """,
+    'langkit.token_index': """
+        % if lang == 'ada':
+            One-based
+        % else:
+            Zero-based
+        % endif
+        index for this token/trivia. Tokens and trivias get their own index
+        space.
+    """,
 }
 
 

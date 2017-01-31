@@ -669,6 +669,14 @@ package ${ada_lib_name}.Analysis is
       with Inline;
    --  Kind for this tocket
 
+   function Is_Trivia (Token_Data : Token_Data_Type) return Boolean
+      with Inline;
+   ${ada_doc('langkit.token_is_trivia', 3)}
+
+   function Index (Token_Data : Token_Data_Type) return Token_Index
+      with Inline;
+   ${ada_doc('langkit.token_index', 3)}
+
    function Sloc_Range
      (Token_Data : Token_Data_Type) return Source_Location_Range
       with Inline;
@@ -1365,6 +1373,12 @@ private
    type Token_Data_Type is record
       Kind          : Token_Kind;
       --  See documentation for the Kind accessor
+
+      Is_Trivia     : Boolean;
+      --  See documentation for the Is_Trivia accessor
+
+      Index         : Token_Index;
+      --  See documentation for the Index accessor
 
       Source_Buffer : Text_Cst_Access;
       --  Text for the original source file

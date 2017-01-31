@@ -102,6 +102,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Convert
      (TDH      : Token_Data_Handler;
+      Token    : Token_Type;
       Raw_Data : Lexer.Token_Data_Type) return Token_Data_Type;
    --  Turn data from TDH and Raw_Data into a user-ready token data record
 
@@ -1676,9 +1677,14 @@ package body ${ada_lib_name}.Analysis is
 
    function Convert
      (TDH      : Token_Data_Handler;
+      Token    : Token_Type;
       Raw_Data : Lexer.Token_Data_Type) return Token_Data_Type is
    begin
       return (Kind          => Raw_Data.Kind,
+              Is_Trivia     => Token.Trivia /= No_Token_Index,
+              Index         => (if Token.Trivia = No_Token_Index
+                                then Token.Token
+                                else Token.Trivia),
               Source_Buffer => Text_Cst_Access (TDH.Source_Buffer),
               Source_First  => Raw_Data.Source_First,
               Source_Last   => Raw_Data.Source_Last,
@@ -1691,7 +1697,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Data (Token : Token_Type) return Token_Data_Type is
    begin
-      return Convert (Token.TDH.all, Raw_Data (Token));
+      return Convert (Token.TDH.all, Token, Raw_Data (Token));
    end Data;
 
    ----------
@@ -1726,6 +1732,24 @@ package body ${ada_lib_name}.Analysis is
    begin
       return Token_Data.Kind;
    end Kind;
+
+   ---------------
+   -- Is_Trivia --
+   ---------------
+
+   function Is_Trivia (Token_Data : Token_Data_Type) return Boolean is
+   begin
+      return Token_Data.Is_Trivia;
+   end Is_Trivia;
+
+   -----------
+   -- Index --
+   -----------
+
+   function Index (Token_Data : Token_Data_Type) return Token_Index is
+   begin
+      return Token_Data.Index;
+   end Index;
 
    ----------------
    -- Sloc_Range --
