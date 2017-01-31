@@ -607,6 +607,9 @@ base_langkit_docs = {
             Return 1 if successful.
         % endif
     """,
+    'langkit.token_kind': """
+        Kind for this token.
+    """,
     'langkit.token_is_trivia': """
         Return whether this token is a trivia. If it's not, it's a regular
         token.
