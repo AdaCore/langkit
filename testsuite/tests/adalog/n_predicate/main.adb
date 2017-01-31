@@ -1,10 +1,13 @@
-with Ada.Text_IO;              use Ada.Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
 
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
-with Adalog.Main_Support;      use Adalog.Main_Support;
-with Adalog.Operations;        use Adalog.Operations;
-with Adalog.Predicates;        use Adalog.Predicates;
-with Support;                  use Support;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Main_Support;
+use Langkit_Support.Adalog.Main_Support;
+with Langkit_Support.Adalog.Operations; use Langkit_Support.Adalog.Operations;
+with Langkit_Support.Adalog.Predicates; use Langkit_Support.Adalog.Predicates;
+
+with Support; use Support;
 
 --  Test a combination of features at the same time:
 --  * Predicates

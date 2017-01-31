@@ -1,5 +1,7 @@
-with Adalog.Abstract_Relation; use Adalog.Abstract_Relation;
-with Adalog.Main_Support;      use Adalog.Main_Support;
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
+with Langkit_Support.Adalog.Main_Support;
+use Langkit_Support.Adalog.Main_Support;
 
 package Support is
    function Eq (A, B : Integer) return Boolean is (A = B);

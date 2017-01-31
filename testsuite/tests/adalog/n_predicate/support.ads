@@ -1,5 +1,6 @@
-with Adalog.Main_Support; use Adalog.Main_Support;
-with Adalog.Predicates;   use Adalog.Predicates;
+with Langkit_Support.Adalog.Main_Support;
+use Langkit_Support.Adalog.Main_Support;
+with Langkit_Support.Adalog.Predicates; use Langkit_Support.Adalog.Predicates;
 
 package Support is
    function Eq (A, B : Integer) return Boolean is (A = B);

@@ -22,7 +22,7 @@ class AdalogDriver(BaseDriver):
         source = self.test_env.get('main_source', 'main.adb')
         with open(self.working_dir('p.gpr'), 'w') as f:
             f.write("""
-            with "{adalog}";
+            with "{langkit_support}";
 
             project P is
                 for Languages use ("Ada");
@@ -32,10 +32,12 @@ class AdalogDriver(BaseDriver):
             end P;
             """.format(
                 main_source=source,
-                adalog=os.path.join(self.testsuite_dir, "..", "langkit",
-                                    "adalog", "adalog.gpr")
+                langkit_support=os.path.join(
+                    self.testsuite_dir, "..",
+                    "langkit", "support", "langkit_support.gpr"
+                )
             ))
 
-        self.run_and_check(['gprbuild', '-p', '-P', 'p.gpr',
-                            '-cargs', '-O0', '-g'])
+        self.run_and_check(['gprbuild', '-p', '-P', 'p.gpr', '-cargs', '-O0',
+                            '-g'])
         self.run_and_check(['./{}'.format(source[:-4])])
