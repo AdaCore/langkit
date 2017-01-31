@@ -43,7 +43,7 @@ procedure Parse is
    Print_Envs : aliased Boolean;
 
    Input_Str : Unbounded_String;
-   Lookups : String_Vectors.Vector;
+   Lookups   : String_Vectors.Vector;
 
    ----------------------
    -- Register_Lookups --
