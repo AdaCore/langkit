@@ -487,7 +487,8 @@ class Token(ctypes.Structure):
 
         Note that this does not actually compares the token data.
         """
-        return (self._token_data == other._token_data
+        return (other is not None
+                and self._token_data == other._token_data
                 and self._token_index == other._token_index
                 and self._trivia_index == other._trivia_index)
 
