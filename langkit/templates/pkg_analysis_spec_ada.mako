@@ -66,7 +66,7 @@ package ${ada_lib_name}.Analysis is
          ${Name.from_lower(name)}_Rule
       % endfor
    );
-   ${ada_doc('langkit.grammar_rule_type')}
+   ${ada_doc('langkit.grammar_rule_type', 3)}
 
    type ${root_node_value_type} is abstract tagged private;
    --  This "by-value" type is public to expose the fact that the various
@@ -81,7 +81,7 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.property_error', 3)}
 
    type Token_Type is private;
-   ${ada_doc('langkit.token_type')}
+   ${ada_doc('langkit.token_type', 3)}
 
    No_Token : constant Token_Type;
 
@@ -93,7 +93,7 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.unit_kind_type', 3)}
 
    Invalid_Unit_Name_Error : exception;
-   ${ada_doc('langkit.invalid_unit_name_error')}
+   ${ada_doc('langkit.invalid_unit_name_error', 3)}
 
    type Unit_File_Provider_Interface is limited interface;
    type Unit_File_Provider_Access is
@@ -132,10 +132,10 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.create_context', 3)}
 
    procedure Inc_Ref (Context : Analysis_Context);
-   ${ada_doc('langkit.context_incref')}
+   ${ada_doc('langkit.context_incref', 3)}
 
    procedure Dec_Ref (Context : in out Analysis_Context);
-   ${ada_doc('langkit.context_decref')}
+   ${ada_doc('langkit.context_decref', 3)}
 
    function Get_From_File
      (Context     : Analysis_Context;
@@ -192,13 +192,13 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.destroy_context', 3)}
 
    procedure Inc_Ref (Unit : Analysis_Unit);
-   ${ada_doc('langkit.unit_incref')}
+   ${ada_doc('langkit.unit_incref', 3)}
 
    procedure Dec_Ref (Unit : Analysis_Unit);
-   ${ada_doc('langkit.unit_decref')}
+   ${ada_doc('langkit.unit_decref', 3)}
 
    function Get_Context (Unit : Analysis_Unit) return Analysis_Context;
-   ${ada_doc('langkit.unit_context')}
+   ${ada_doc('langkit.unit_context', 3)}
 
    procedure Reparse (Unit : Analysis_Unit; Charset : String := "");
    ${ada_doc('langkit.unit_reparse_file', 3)}
@@ -210,10 +210,10 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.unit_reparse_buffer', 3)}
 
    procedure Populate_Lexical_Env (Unit : Analysis_Unit);
-   ${ada_doc('langkit.unit_populate_lexical_env')}
+   ${ada_doc('langkit.unit_populate_lexical_env', 3)}
 
    function Get_Filename (Unit : Analysis_Unit) return String;
-   ${ada_doc('langkit.unit_filename')}
+   ${ada_doc('langkit.unit_filename', 3)}
 
    function Has_Diagnostics (Unit : Analysis_Unit) return Boolean;
    ${ada_doc('langkit.unit_has_diagnostics', 3)}
@@ -641,16 +641,16 @@ package ${ada_lib_name}.Analysis is
    --  Left came before Right in the source file.
 
    function Next (Token : Token_Type) return Token_Type;
-   ${ada_doc('langkit.token_next')}
+   ${ada_doc('langkit.token_next', 3)}
 
    function Previous (Token : Token_Type) return Token_Type;
-   ${ada_doc('langkit.token_previous')}
+   ${ada_doc('langkit.token_previous', 3)}
 
    function Data (Token : Token_Type) return Token_Data_Type;
    --  Return the data associated to T
 
    function Is_Equivalent (L, R : Token_Type) return Boolean;
-   ${ada_doc('langkit.token_is_equivalent')}
+   ${ada_doc('langkit.token_is_equivalent', 3)}
 
    function Image (Token : Token_Type) return String;
    --  Debug helper: return a human-readable text to represent a token
@@ -663,7 +663,7 @@ package ${ada_lib_name}.Analysis is
    --  Return the text of the token as String
 
    function Text (First, Last : Token_Type) return Text_Type;
-   ${ada_doc('langkit.token_range_text')}
+   ${ada_doc('langkit.token_range_text', 3)}
 
    function Kind (Token_Data : Token_Data_Type) return Token_Kind
       with Inline;
