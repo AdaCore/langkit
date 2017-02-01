@@ -405,6 +405,7 @@ class AbstractExpression(Frozable):
         """
         from langkit.expressions.structs import IsNull
         from langkit.expressions.boolean import Not
+        from langkit.expressions.logic import All, Any
 
         return {
             'empty': self.length.equals(0),
@@ -413,6 +414,8 @@ class AbstractExpression(Frozable):
             'keep': lambda klass:
                 self.filtermap(filter_expr=lambda e: e.is_a(klass),
                                expr=lambda e: e.cast(klass)),
+            'logic_all': lambda e: All(self.map(e)),
+            'logic_any': lambda e: Any(self.map(e)),
             'exists': lambda filter_expr:
                 Not(IsNull(self.filter(filter_expr).at(0))),
             'find_or_raise': lambda filter_expr:
