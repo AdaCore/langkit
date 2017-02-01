@@ -1104,7 +1104,7 @@ package body ${ada_lib_name}.Analysis is
       Predicate : access function (N : ${root_node_type_name}) return Boolean)
      return Local_Find_Iterator
    is
-      Dummy : ${root_node_type_name};
+      Dummy  : ${root_node_type_name};
       Ignore : Boolean;
    begin
       return Ret : Local_Find_Iterator
@@ -1163,8 +1163,8 @@ package body ${ada_lib_name}.Analysis is
    procedure Reroot_Foreign_Nodes
      (Self : in out Lex_Env_Data_Type; Root_Scope : Lexical_Env)
    is
-      Els : ${root_node_type_name}_Vectors.Elements_Array
-        := Self.Contains.To_Array;
+      Els : ${root_node_type_name}_Vectors.Elements_Array :=
+         Self.Contains.To_Array;
       Env : Lexical_Env;
    begin
       Self.Is_Contained_By.Clear;
@@ -1183,7 +1183,7 @@ package body ${ada_lib_name}.Analysis is
       Predicate : ${root_node_type_name}_Predicate)
       return Find_Iterator
    is
-      Dummy : ${root_node_type_name};
+      Dummy  : ${root_node_type_name};
       Ignore : Boolean;
    begin
       return Ret : Find_Iterator :=
@@ -1206,7 +1206,7 @@ package body ${ada_lib_name}.Analysis is
    is
       I      : Find_Iterator := Find (Root, Predicate);
       Result : ${root_node_type_name};
-      Dummy : ${root_node_type_name};
+      Dummy  : ${root_node_type_name};
       Ignore : Boolean;
    begin
       Ignore := Next (I.Traverse_It, Dummy);
