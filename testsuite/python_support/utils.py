@@ -7,6 +7,7 @@ from langkit.compiled_types import StructMetaclass, T
 from langkit.diagnostics import DiagnosticError
 from langkit.expressions import Self
 from langkit.libmanage import ManageScript
+from langkit.utils import reset_memoized
 
 
 def prepare_context(grammar,
@@ -140,5 +141,4 @@ def reset_langkit():
 
     T._type_dict = {}
 
-    from langkit.utils import reset_memoized
     reset_memoized()
