@@ -755,7 +755,7 @@ package body ${ada_lib_name}.Analysis is
    --------------------------
 
    procedure Register_Destroyable_Helper
-     (Unit    : access Analysis_Unit_Type;
+     (Unit    : Analysis_Unit;
       Object  : System.Address;
       Destroy : Destroy_Procedure)
    is
@@ -767,7 +767,7 @@ package body ${ada_lib_name}.Analysis is
    -- Set_Filled_Caches --
    -----------------------
 
-   procedure Set_Filled_Caches (Unit : access Analysis_Unit_Type)
+   procedure Set_Filled_Caches (Unit : Analysis_Unit)
    is
    begin
       Unit.Has_Filled_Caches := True;
@@ -800,7 +800,7 @@ package body ${ada_lib_name}.Analysis is
    -------------------
 
    function Is_Referenced
-     (Unit, Referenced : access Analysis_Unit_Type) return Boolean
+     (Unit, Referenced : Analysis_Unit) return Boolean
    is
    begin
       if Unit = null or else Referenced = null then
@@ -828,7 +828,7 @@ package body ${ada_lib_name}.Analysis is
    ------------------------------
 
    procedure Register_Destroyable_Gen
-     (Unit : access Analysis_Unit_Type; Object : T_Access)
+     (Unit : Analysis_Unit; Object : T_Access)
    is
       function Convert is new Ada.Unchecked_Conversion
         (System.Address, Destroy_Procedure);
@@ -844,7 +844,7 @@ package body ${ada_lib_name}.Analysis is
    -- Reset_Property_Caches --
    ---------------------------
 
-   procedure Reset_Property_Caches (Unit : access Analysis_Unit_Type) is
+   procedure Reset_Property_Caches (Unit : Analysis_Unit) is
 
       -----------
       -- Visit --
@@ -2363,7 +2363,7 @@ package body ${ada_lib_name}.Analysis is
 
    pragma Warnings (Off, "referenced");
    procedure Register_Destroyable
-     (Unit : access Analysis_Unit_Type; Node : ${root_node_type_name});
+     (Unit : Analysis_Unit; Node : ${root_node_type_name});
    --  Helper for synthetized nodes. We cannot used the generic
    --  Register_Destroyable because the root AST node is an abstract types, so
    --  this is implemented using the untyped (using System.Address)
@@ -2498,7 +2498,7 @@ package body ${ada_lib_name}.Analysis is
    --------------------------
 
    procedure Register_Destroyable
-     (Unit : access Analysis_Unit_Type; Node : ${root_node_type_name})
+     (Unit : Analysis_Unit; Node : ${root_node_type_name})
    is
       procedure Helper is new Register_Destroyable_Gen
         (${root_node_value_type}'Class,

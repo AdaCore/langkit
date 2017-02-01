@@ -1114,26 +1114,23 @@ private
       return Unit_File_Provider_Access_Cst is (Context.Unit_File_Provider);
    % endif
 
-   function Token_Data
-     (Unit : access Analysis_Unit_Type)
-      return Token_Data_Handler_Access
-   is
-     (Unit.TDH'Access);
+   function Token_Data (Unit : Analysis_Unit) return Token_Data_Handler_Access
+   is (Unit.TDH'Access);
 
    procedure Register_Destroyable_Helper
-     (Unit    : access Analysis_Unit_Type;
+     (Unit    : Analysis_Unit;
       Object  : System.Address;
       Destroy : Destroy_Procedure);
 
-   procedure Set_Filled_Caches (Unit : access Analysis_Unit_Type);
+   procedure Set_Filled_Caches (Unit : Analysis_Unit);
    --  Tag Unit as having filled caches for properties memoization
 
-   procedure Reset_Property_Caches (Unit : access Analysis_Unit_Type);
+   procedure Reset_Property_Caches (Unit : Analysis_Unit);
    --  If AST_Node is not null, invoke Reset_Property_Caches primitives on all
    --  the nodes it contains.
 
    function Is_Referenced
-     (Unit, Referenced : access Analysis_Unit_Type) return Boolean;
+     (Unit, Referenced : Analysis_Unit) return Boolean;
    --  Check whether the Referenced unit is referenced from Unit
 
    function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
@@ -1152,7 +1149,7 @@ private
       type T_Access is access all T;
       with procedure Destroy (Object : in out T_Access);
    procedure Register_Destroyable_Gen
-     (Unit : access Analysis_Unit_Type; Object : T_Access);
+     (Unit : Analysis_Unit; Object : T_Access);
    --  Generic procedure to register an object so that it is automatically
    --  destroyed when Unit is destroyed.
 
