@@ -1206,7 +1206,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         assert sum(1 for b in [is_astnode, is_struct] if b) == 1
         assert sum(1 for b in [is_base, is_root_grammar_class] if b) <= 1
 
-        # Get the fields this class define. Remove them as class members: we
+        # Get the fields this class defines. Remove them as class members: we
         # want them to be stored in their own dict (see "cls.fields" below).
         dct_fields = AbstractNodeData.filter_fields(dct)
         for f_n, _ in dct_fields:
@@ -2448,14 +2448,14 @@ class EnumNodeMetaclass(type):
         if name == "__EnumNodeInternal":
             return type.__new__(mcs, name, bases, dct)
 
-        qualifier = dct.get("qualifier")
+        qualifier = dct.pop("qualifier", False)
 
         # If the class has True for the qualifier, then auto generate
-        # alternatives and node classes.
-        if qualifier:
-            dct.update({
-                "alternatives": ["present", "absent"],
-            })
+        # alternatives and node classes. Else, take them from the
+        # 'alternatives' field.
+        alternatives = (
+            ["present", "absent"] if qualifier else dct.pop('alternatives')
+        )
 
         from langkit.expressions import Property, AbstractProperty
 
@@ -2465,13 +2465,16 @@ class EnumNodeMetaclass(type):
             "is_enum_node": True,
         })
 
+        # Add other supplied fields to the base class dict
+        base_enum_dct.update(dct)
+
         # Generate the abstract base node type
         basename = names.Name.from_camel(name)
         base_enum_node = abstract(type(name, (T.root_node, ), base_enum_dct))
         base_enum_node.is_type_resolved = True
         base_enum_node._alternatives = []
 
-        for alt in dct["alternatives"]:
+        for alt in alternatives:
             alt_name = basename + names.Name.from_lower(alt)
             attr_name = (names.Name("alt") +
                          names.Name.from_lower(alt)).lower
