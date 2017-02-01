@@ -542,7 +542,9 @@ class IsA(AbstractExpression):
             :param [ASTNode] astnodes: ASTNode subclasses to use for the test.
             """
             self.expr = expr
-            self.astnodes = astnodes
+            self.astnodes = [a.el_type
+                             if a.is_env_element_type
+                             else a for a in astnodes]
 
             super(IsA.Expr, self).__init__()
 
@@ -550,7 +552,10 @@ class IsA(AbstractExpression):
             return self.expr.render_pre()
 
         def _render_expr(self):
-            return "{}.all in {}".format(
+            target = ("{}.El.all"
+                      if self.expr.type.is_env_element_type
+                      else "{}.all")
+            return (target + " in {}").format(
                 self.expr.render_expr(),
                 " | ".join(
                     "{}_Type'Class".format(a.name().camel_with_underscores)
@@ -589,8 +594,8 @@ class IsA(AbstractExpression):
         astnodes = [resolve_type(a) for a in self.astnodes]
         for a in astnodes:
             check_source_language(
-                issubclass(a, ASTNode),
-                "Expected ASTNode subclass, got {}".format(a)
+                issubclass(a, ASTNode) or a.is_env_element_type,
+                "Expected ASTNode subclass or env_element, got {}".format(a)
             )
             check_source_language(a.matches(expr.type), (
                 'When testing the dynamic subtype of an AST node, the type to'
