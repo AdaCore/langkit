@@ -447,7 +447,7 @@ class LogicBooleanOp(AbstractExpression):
         )
 
 
-class LogicOr(LogicBooleanOp):
+class Any(LogicBooleanOp):
     """
     Expression that will combine sub logic expressions via an Or logic
     operator. Use this when you have an unbounded number of sub-equations to
@@ -455,10 +455,10 @@ class LogicOr(LogicBooleanOp):
     """
 
     def __init__(self, equation_array):
-        super(LogicOr, self).__init__(equation_array, LogicBooleanOp.KIND_OR)
+        super(Any, self).__init__(equation_array, LogicBooleanOp.KIND_OR)
 
 
-class LogicAnd(LogicBooleanOp):
+class All(LogicBooleanOp):
     """
     Expression that will combine sub logic expressions via an And logic
     operator. Use this when you have an unbounded number of sub-equations to
@@ -466,7 +466,7 @@ class LogicAnd(LogicBooleanOp):
     """
 
     def __init__(self, equation_array):
-        super(LogicAnd, self).__init__(equation_array, LogicBooleanOp.KIND_AND)
+        super(All, self).__init__(equation_array, LogicBooleanOp.KIND_AND)
 
 
 class LogicTrue(AbstractExpression):
