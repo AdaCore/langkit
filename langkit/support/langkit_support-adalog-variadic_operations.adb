@@ -1,4 +1,6 @@
 with Langkit_Support.Adalog.Operations; use Langkit_Support.Adalog.Operations;
+with Langkit_Support.Adalog.Pure_Relations;
+use Langkit_Support.Adalog.Pure_Relations;
 
 package body Langkit_Support.Adalog.Variadic_Operations is
 
@@ -9,7 +11,9 @@ package body Langkit_Support.Adalog.Variadic_Operations is
    function Variadic_And (Rels : Relation_Array) return Relation is
       Ret, Old_Ret : Relation;
    begin
-      pragma Assert (Rels'Length > 0);
+      if Rels'Length = 0 then
+         return True_Rel;
+      end if;
 
       Ret := Rels (Rels'First);
       Inc_Ref (Ret);
@@ -43,8 +47,9 @@ package body Langkit_Support.Adalog.Variadic_Operations is
    function Variadic_Or (Rels : Relation_Array) return Relation is
       Ret, Old_Ret : Relation;
    begin
-      --  See Variadic_Or for documentation of the memory management
-      pragma Assert (Rels'Length > 0);
+      if Rels'Length = 0 then
+         return False_Rel;
+      end if;
 
       Ret := Rels (Rels'First);
       Inc_Ref (Ret);
