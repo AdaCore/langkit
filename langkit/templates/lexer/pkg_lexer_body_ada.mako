@@ -108,21 +108,21 @@ package body ${ada_lib_name}.Lexer is
 
       --  Stack of indentation levels. Used to emit the proper number of dedent
       --  tokens on dedent.
-      Columns_Stack         : array (1 .. 128) of Unsigned_16 := (others => 0);
-      Columns_Stack_Len     : Natural := 0;
+      Columns_Stack     : array (1 .. 128) of Column_Number := (others => 0);
+      Columns_Stack_Len : Natural := 0;
 
-      Ign_Layout_Level      : Integer := 0;
+      Ign_Layout_Level  : Integer := 0;
       --  Whether to ignore layout tokens or not. If 0, Ignore is off, if >0,
       --  ignore is on.
 
-      function Get_Col return Unsigned_16
+      function Get_Col return Column_Number
       is (if Columns_Stack_Len > 0
           then Columns_Stack (Columns_Stack_Len)
           else 1)
       with Inline;
       --  Get the current indent column in the stack
 
-      Last_Line             : Unsigned_32 := 0;
+      Last_Line : Line_Number := 0;
       % endif
 
       function Source_First return Positive is
