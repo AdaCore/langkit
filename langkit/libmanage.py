@@ -266,6 +266,11 @@ class ManageScript(object):
 
         self.setenv_parser = create_parser(self.do_setenv, True)
 
+        self.setenv_parser.add_argument(
+            '--json', '-J', action='store_true',
+            help='Output necessary env keys to json'
+        )
+
         # The create_context method will create the context and set it here
         # only right before executing commands so that coverage computation
         # will apply to create_context.
@@ -737,7 +742,7 @@ class ManageScript(object):
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
         """
-        del args  # Unused in this implementation
+        env_dict = {}
 
         def add_path(name, path):
             print('{name}={path}"{sep}${name}"; export {name}'.format(
@@ -746,7 +751,15 @@ class ManageScript(object):
                 # the Window path separator.
                 sep=':' if name == 'PATH' else os.path.pathsep,
             ))
-        self.setup_environment(add_path)
+
+        def json(name, path):
+            env_dict[name] = path
+
+        self.setup_environment(json if args.json else add_path)
+
+        if json:
+            import json
+            print json.dumps(env_dict)
 
     def do_help(self, args):
         """
