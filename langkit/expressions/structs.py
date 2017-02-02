@@ -817,8 +817,8 @@ class Match(AbstractExpression):
         rtype = expr.type
         for _, expr in constructed_matchers:
             check_source_language(
-                expr.type.matches(rtype), "Wrong type for match expression : "
-                "{}, expected {} or sub/supertype".format(
+                expr.type.matches(rtype), "Wrong type for match result"
+                " expression: got {} but expected {} or sub/supertype".format(
                     expr.type.name().camel, rtype.name().camel
                 )
             )
