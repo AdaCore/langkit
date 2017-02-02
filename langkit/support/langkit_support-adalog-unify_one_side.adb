@@ -17,8 +17,16 @@ package body Langkit_Support.Adalog.Unify_One_Side is
          Trace ("Left defined");
 
          return C : Boolean do
-            C := Equals (GetL (Self.Left), Convert (Self.R_Data, Self.Right));
-            Trace ("Returning " & C'Image);
+            declare
+               R_Val : constant L_Type := Convert (Self.R_Data, Self.Right);
+            begin
+               Trace (L_Image (R_Val));
+               Trace (L_Image (GetL (Self.Left)));
+
+               C := Equals
+                 (GetL (Self.Left), R_Val);
+               Trace ("Returning " & C'Image);
+            end;
          end return;
       else
 

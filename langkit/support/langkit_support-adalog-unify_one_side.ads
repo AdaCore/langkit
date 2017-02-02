@@ -20,6 +20,7 @@ generic
    with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
 
    with function R_Image (Self : R_Type) return String is <>;
+   with function L_Image (Self : L_Type) return String is <>;
 package Langkit_Support.Adalog.Unify_One_Side is
 
    type R_Type_Array is array (Positive range <>) of R_Type;

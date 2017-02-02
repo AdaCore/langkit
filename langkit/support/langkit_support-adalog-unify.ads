@@ -50,11 +50,11 @@ package Langkit_Support.Adalog.Unify is
 
    package Unify_Left is new Unify_One_Side
      (L_Type, R_Type, Equals, Right_C_Data,
-      Convert, Left_Var, Right_Var.Element_Image);
+      Convert, Left_Var, Right_Var.Element_Image, Left_Var.Element_Image);
 
    package Unify_Right is new Unify_One_Side
      (R_Type, L_Type, Equals, Left_C_Data,
-      Convert, Right_Var, Left_Var.Element_Image);
+      Convert, Right_Var, Left_Var.Element_Image, Right_Var.Element_Image);
 
    ------------------
    -- Eq predicate --
