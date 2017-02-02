@@ -310,6 +310,11 @@ class ManageScript(object):
             "generate the code",
             action='store_true'
         )
+        subparser.add_argument(
+            '--no-property-checks',
+            help="Don't generate runtime checks for properties",
+            action='store_true'
+        )
 
     def add_build_args(self, subparser):
         """
@@ -508,7 +513,8 @@ class ManageScript(object):
                           main_programs=self.main_programs,
                           annotate_fields_types=args.annotate_fields_types,
                           generate_lexer=not args.no_compile_quex,
-                          compile_only=args.check_only)
+                          compile_only=args.check_only,
+                          no_property_checks=args.no_property_checks)
 
         if args.check_only:
             return

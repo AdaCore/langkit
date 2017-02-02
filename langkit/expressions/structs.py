@@ -348,12 +348,15 @@ class FieldAccess(AbstractExpression):
             )
 
         def _render_pre(self):
+            from langkit.compile_context import get_context
             # Before accessing the field of a record through an access, we must
             # check whether this access is null in order to raise a
             # Property_Error in the case it is.
             return '{}\n{}'.format(
                 render('properties/null_safety_check_ada',
-                       expr=self.receiver_expr, result_var=self.prefix_var),
+                       expr=self.receiver_expr, result_var=self.prefix_var)
+                if not get_context().no_property_checks
+                else '',
                 '\n'.join(arg.render_pre() for arg in self.arguments)
             )
 

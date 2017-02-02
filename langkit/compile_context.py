@@ -675,7 +675,8 @@ class CompileCtx(object):
         return render(*args, **kwargs)
 
     def emit(self, file_root='.', generate_lexer=True, main_programs=set(),
-             annotate_fields_types=False, compile_only=False):
+             annotate_fields_types=False, compile_only=False,
+             no_property_checks=False):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -704,6 +705,8 @@ class CompileCtx(object):
                              + self.template_lookup_extra_dirs),
             strict_undefined=True
         )
+
+        self.no_property_checks = no_property_checks
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
