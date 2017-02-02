@@ -58,6 +58,10 @@ package ${ada_lib_name}.Analysis is
    --  Special value to mean the absence of analysis unit. No analysis units
    --  can be passed this value.
 
+   No_Analysis_Context : constant Analysis_Context;
+   --  Special value to mean the absence of analysis unit. No analysis units
+   --  can be passed this value.
+
    type Grammar_Rule is (
       % for i, name in enumerate(ctx.user_rule_names):
          % if i > 0:
@@ -955,7 +959,8 @@ private
    type Analysis_Context is access all Analysis_Context_Type;
    type Analysis_Unit is access all Analysis_Unit_Type;
 
-   No_Analysis_Unit : constant Analysis_Unit := null;
+   No_Analysis_Unit    : constant Analysis_Unit := null;
+   No_Analysis_Context : constant Analysis_Context := null;
 
    package Units_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Unbounded_String,
