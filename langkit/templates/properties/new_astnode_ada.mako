@@ -10,6 +10,9 @@ Register_Destroyable (Self.Unit, ${root_node_type_name} (${result}));
 ${result}.Parent := ${root_node_type_name} (Self);
 ${result}.Unit := Self.Unit;
 
+## The node's env is the same as the parent
+${result}.Self_Env := Self.Self_Env;
+
 ## Keep the token start/end null, as expected for a synthetized node
 
 % for name, fld_expr in expr._iter_ordered():
