@@ -23,8 +23,13 @@ package body Langkit_Support.Adalog.Unify_One_Side is
                Trace (L_Image (R_Val));
                Trace (L_Image (GetL (Self.Left)));
 
-               C := Equals
-                 (GetL (Self.Left), R_Val);
+               if Invert_Equals then
+                  C := Equals
+                    (R_Val, GetL (Self.Left));
+               else
+                  C := Equals
+                    (GetL (Self.Left), R_Val);
+               end if;
                Trace ("Returning " & C'Image);
             end;
          end return;
