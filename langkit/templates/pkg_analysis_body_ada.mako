@@ -50,6 +50,9 @@ with ${ctx.env_hook_subprogram.unit_fqn};
 %if ctx.default_unit_file_provider:
 with ${ctx.default_unit_file_provider.unit_fqn};
 %endif
+%if ctx.symbol_canonicalizer:
+with ${ctx.symbol_canonicalizer.unit_fqn};
+%endif
 
 package body ${ada_lib_name}.Analysis is
 

@@ -1152,12 +1152,16 @@ class SymbolLiteral(AbstractExpression):
         self.name = name
 
     def construct(self):
-        get_context().add_symbol_literal(self.name)
-        return BasicExpr(
-            'Find (Self.Unit.TDH.Symbols, {})',
-            Symbol,
-            [string_repr(self.name)]
-        )
+        ctx = get_context()
+
+        ctx.add_symbol_literal(self.name)
+
+        operand = string_repr(self.name)
+        if ctx.symbol_canonicalizer:
+            operand = '{} ({})'.format(ctx.symbol_canonicalizer.fqn, operand)
+
+        return BasicExpr('Find (Self.Unit.TDH.Symbols, {})',
+                         Symbol, [operand])
 
 
 class BindingScope(ResolvedExpression):
