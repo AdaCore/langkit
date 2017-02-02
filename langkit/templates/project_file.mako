@@ -53,6 +53,18 @@ library project ${lib_name} is
 
    package Compiler is
 
+      --  If asked to, enable all warnings and treat them as errors, except:
+      --    * conditional expressions used in tests that are known to be True
+      --      or False at compile time (C), as this is very common in generated
+      --      properties code;
+      --    * variables that could be turned into constants (K), as this is
+      --      very common in generated parsers code;
+      --    * variables that are assigned and never read (M), as this is also
+      --      common in generated parsers code;
+      --    * redundant constructs (R), as we do have redundant conversions for
+      --      AST nodes (A'Class and B'Class are not compatible even though B
+      --      derives from A).
+
       Common_Ada_Cargs := ();
       case Enable_Warnings is
          when "true" => Common_Ada_Cargs := ("-gnatwaCKMR");
@@ -66,18 +78,6 @@ library project ${lib_name} is
 
       case Build_Mode is
          when "dev" =>
-            --  If asked to, enable all warnings and treat them as errors,
-            --  except:
-            --    * conditional expressions used in tests that are known to be
-            --      True or False at compile time (C), as this is very common
-            --      in generated properties code;
-            --    * variables that could be turned into constants (K), as this
-            --      is very common in generated parsers code;
-            --    * variables that are assigned and never read (M), as this is
-            --      also common in generated parsers code;
-            --    * redundant constructs (R), as we do have redundant
-            --      conversions for AST nodes (A'Class and B'Class are not
-            --      compatible even though B derives from A).
 
             for Default_Switches ("Ada") use
                Common_Ada_Cargs & ("-g", "-O0", "-gnatwe", "-gnata");
