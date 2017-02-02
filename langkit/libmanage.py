@@ -519,6 +519,7 @@ class ManageScript(object):
                 '-P{}'.format(project_file),
                 '-XLIBRARY_TYPE=relocatable',
                 '-rnb',
+                '--insert-blank-lines',
             ] + glob.glob(glob_pattern))
 
         if hasattr(args, 'pretty_print') and args.pretty_print:
