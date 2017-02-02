@@ -603,7 +603,14 @@ package body ${ada_lib_name}.Lexer is
             Text : Text_Type renames
                TDH.Source_Buffer (T.Source_First ..  T.Source_Last);
          begin
-            T.Symbol := Find (TDH.Symbols, Text);
+            T.Symbol := Find
+              (TDH.Symbols,
+               % if ctx.symbol_canonicalizer:
+                  ${ctx.symbol_canonicalizer.fqn} (Text)
+               % else:
+                  Text
+               % endif
+               );
          end;
       end if;
       return T.Symbol;
