@@ -191,6 +191,10 @@ class ManageScript(object):
             '--parsable-errors', '-P', action='store_true', default=False,
             help='Generate error messages parsable by tools'
         )
+        args_parser.add_argument(
+            '--no-path', action='store_true', default=False,
+            help='Do not include path in file names in error messages'
+        )
 
         def create_parser(fn, needs_context=False):
             """
@@ -606,7 +610,7 @@ class ManageScript(object):
             argv.append('-XLIBRARY_TYPE={}'.format(library_type))
             if mains:
                 argv.extend('{}.adb'.format(main) for main in mains)
-            if args.parsable_errors:
+            if args.parsable_errors and not args.no_path:
                 argv.append('-gnatef')
             argv.append('-cargs')
             argv.extend(cargs)
