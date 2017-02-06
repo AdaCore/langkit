@@ -721,6 +721,16 @@ package body ${ada_lib_name}.Analysis is
    end Populate_Lexical_Env;
 
    ---------------------
+   -- Pre_Env_Actions --
+   ---------------------
+
+   function Pre_Env_Actions
+     (Self                  : access ${root_node_value_type};
+      Current_Env, Root_Env : AST_Envs.Lexical_Env;
+      Add_To_Env_Only       : Boolean := False) return AST_Envs.Lexical_Env
+   is (null);
+
+   ---------------------
    -- Has_Diagnostics --
    ---------------------
 
