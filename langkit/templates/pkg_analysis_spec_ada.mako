@@ -1383,18 +1383,6 @@ private
    function Last_Token (TDH : Token_Data_Handler_Access) return Token_Type;
    --  Internal helper. Return a reference to the last token in TDH.
 
-   function First_Token (Unit : Analysis_Unit) return Token_Type is
-     (First_Token (Unit.TDH'Access));
-
-   function Last_Token (Unit : Analysis_Unit) return Token_Type is
-     (Last_Token (Unit.TDH'Access));
-
-   function Token_Count (Unit : Analysis_Unit) return Natural is
-     (Unit.TDH.Tokens.Length);
-
-   function Trivia_Count (Unit : Analysis_Unit) return Natural is
-     (Unit.TDH.Trivias.Length);
-
    function Token
      (Node  : access ${root_node_value_type}'Class;
       Index : Token_Index)

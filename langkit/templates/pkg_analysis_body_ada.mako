@@ -810,6 +810,34 @@ package body ${ada_lib_name}.Analysis is
      (Unit.AST_Root);
 
    -----------------
+   -- First_Token --
+   -----------------
+
+   function First_Token (Unit : Analysis_Unit) return Token_Type is
+     (First_Token (Unit.TDH'Access));
+
+   ----------------
+   -- Last_Token --
+   ----------------
+
+   function Last_Token (Unit : Analysis_Unit) return Token_Type is
+     (Last_Token (Unit.TDH'Access));
+
+   -----------------
+   -- Token_Count --
+   -----------------
+
+   function Token_Count (Unit : Analysis_Unit) return Natural is
+     (Unit.TDH.Tokens.Length);
+
+   ------------------
+   -- Trivia_Count --
+   ------------------
+
+   function Trivia_Count (Unit : Analysis_Unit) return Natural is
+     (Unit.TDH.Trivias.Length);
+
+   -----------------
    -- Get_Context --
    -----------------
 
