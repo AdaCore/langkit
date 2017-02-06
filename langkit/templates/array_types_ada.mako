@@ -27,14 +27,10 @@
    function Copy is new AST_Envs.Env_Element_Arrays.Copy
      (Positive, ${cls.api_name()});
 
-   function Create (Items : AST_Envs.Env_Element_Array) return ${cls.name()}
-   is (new ${cls.pointed()}'(N         => Items'Length,
-                             Items     => Copy (Items),
-                             Ref_Count => 1));
+   function Create (Items : AST_Envs.Env_Element_Array) return ${cls.name()};
    % endif
 
-   function Create (Items_Count : Natural) return ${cls.name()} is
-     (new ${cls.pointed()}'(N => Items_Count, Ref_Count => 1, Items => <>));
+   function Create (Items_Count : Natural) return ${cls.name()};
    --  Create a new array for N uninitialized elements and give its only
    --  ownership share to the caller.
 
@@ -51,7 +47,7 @@
    function Concat (L, R : ${cls.name()}) return ${cls.name()};
 
    ## Helper for properties code
-   function Length (T : ${cls.name()}) return Natural is (T.N);
+   function Length (T : ${cls.name()}) return Natural;
 
    procedure Inc_Ref (T : ${cls.name()});
    procedure Dec_Ref (T : in out ${cls.name()});
@@ -123,6 +119,12 @@
       T.Ref_Count := T.Ref_Count + 1;
    end Inc_Ref;
 
+   ------------
+   -- Length --
+   ------------
+
+   function Length (T : ${cls.name()}) return Natural is (T.N);
+
    -------------
    -- Dec_Ref --
    -------------
@@ -148,4 +150,17 @@
       end if;
    end Dec_Ref;
 
+   ------------
+   -- Create --
+   ------------
+
+   function Create (Items_Count : Natural) return ${cls.name()} is
+     (new ${cls.pointed()}'(N => Items_Count, Ref_Count => 1, Items => <>));
+
+   % if cls.element_type() == T.root_node.env_el():
+   function Create (Items : AST_Envs.Env_Element_Array) return ${cls.name()}
+   is (new ${cls.pointed()}'(N         => Items'Length,
+                             Items     => Copy (Items),
+                             Ref_Count => 1));
+   % endif
 </%def>
