@@ -420,15 +420,11 @@ package ${ada_lib_name}.Analysis is
    --  Return the number of children Node has
 
    function First_Child_Index
-     (Node : access ${root_node_value_type}'Class)
-      return Natural
-   is (1);
+     (Node : access ${root_node_value_type}'Class) return Natural;
    --  Return the index of the first child Node has
 
    function Last_Child_Index
-     (Node : access ${root_node_value_type}'Class)
-      return Natural
-   is (Node.Child_Count);
+     (Node : access ${root_node_value_type}'Class) return Natural;
    --  Return the index of the last child Node has, or 0 if there is no child
 
    procedure Get_Child

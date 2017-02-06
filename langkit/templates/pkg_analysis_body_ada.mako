@@ -2348,6 +2348,22 @@ package body ${ada_lib_name}.Analysis is
       end;
    end Parents;
 
+   -----------------------
+   -- First_Child_Index --
+   -----------------------
+
+   function First_Child_Index
+     (Node : access ${root_node_value_type}'Class) return Natural
+   is (1);
+
+   ----------------------
+   -- Last_Child_Index --
+   ----------------------
+
+   function Last_Child_Index
+     (Node : access ${root_node_value_type}'Class) return Natural
+   is (Node.Child_Count);
+
    ------------
    -- Parent --
    ------------
