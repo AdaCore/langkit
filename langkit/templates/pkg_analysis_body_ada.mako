@@ -2397,6 +2397,22 @@ package body ${ada_lib_name}.Analysis is
       return Token.Token;
    end Stored_Token;
 
+   --------------
+   -- Is_Ghost --
+   --------------
+
+   function Is_Ghost
+     (Node : access ${root_node_value_type}'Class) return Boolean
+   is (Node.Token_End = No_Token_Index);
+
+   ------------------
+   -- Is_Synthetic --
+   ------------------
+
+   function Is_Synthetic
+     (Node : access ${root_node_value_type}'Class) return Boolean
+   is (Node.Token_Start = No_Token_Index);
+
    -----------------
    -- Token_Start --
    -----------------
