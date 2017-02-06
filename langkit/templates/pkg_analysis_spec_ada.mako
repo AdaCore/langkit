@@ -1416,30 +1416,7 @@ private
       Last : Token_Index;
    end record;
 
-   function First_Token (Self : Token_Iterator) return Token_Type
-   is (Token_Start (Self.Node));
-
-   function Next_Token
-     (Self : Token_Iterator; Tok : Token_Type) return Token_Type
-   is (Next (Tok));
-
-   function Has_Element
-     (Self : Token_Iterator; Tok : Token_Type) return Boolean
-   is (Tok.Token <= Self.Last);
-
-   function Element (Self : Token_Iterator; Tok : Token_Type) return Token_Type
-   is (Tok);
-
-   function Token_Range
-     (Node : access ${root_node_value_type}'Class)
-      return Token_Iterator
-   is
-     (Token_Iterator'(${root_node_type_name} (Node), Node.Token_End));
-
-   function Raw_Data (T : Token_Type) return Lexer.Token_Data_Type is
-     (if T.Trivia = No_Token_Index
-      then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Token))
-      else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Trivia)).T);
+   function Raw_Data (T : Token_Type) return Lexer.Token_Data_Type;
    --  Return the raw token data for T
 
    function Get_Symbol (Token : Token_Type) return Symbol_Type;
