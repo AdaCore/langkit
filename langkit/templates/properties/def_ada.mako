@@ -6,7 +6,17 @@
 ## Regular property function
 
 pragma Warnings (Off, "is not referenced");
-% if not property.abstract and not property.external:
+
+% if property.abstract_runtime_check:
+
+${"overriding" if property.overriding else ""} function ${property.name}
+  ${helpers.argument_list(property, property.dispatching)}
+   return ${property.type.name()}
+is (raise Property_Error
+    with "Property ${property.name} not implemented on type "
+    & Kind_Name (${Self.type.name()} (${property.self_arg_name})));
+
+% elif not property.abstract and not property.external:
 ${"overriding" if property.overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name()}

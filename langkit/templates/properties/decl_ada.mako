@@ -7,14 +7,8 @@
 ${"overriding" if property.overriding else ""} function ${property.name}
    ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name()}
-   % if property.abstract:
-      % if property.abstract_runtime_check:
-      is (raise Property_Error
-          with "Property ${property.name} not implemented on type "
-          & Kind_Name (${Self.type.name()} (${property.self_arg_name})))
-      % else:
-      is abstract
-      % endif
+   % if property.abstract and not property.abstract_runtime_check:
+   is abstract
    % endif
    ;
 ${ada_doc(property, 0)}
