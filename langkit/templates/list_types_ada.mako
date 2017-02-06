@@ -69,9 +69,7 @@
    --  return the element at index (Size - Index - 1). Index is zero-based.
 
    ## Helper for properties code
-   function Length (Node : access ${value_type}'Class) return Natural is
-     (Node.Child_Count);
-
+   function Length (Node : access ${value_type}'Class) return Natural;
 </%def>
 
 <%def name="body(element_type)">
@@ -155,4 +153,10 @@
      (Node  : access ${value_type}; Index : Positive) return ${elt_type}
    is (${elt_type} (Node.Child (Index)));
 
+   ------------
+   -- Length --
+   ------------
+
+   function Length (Node : access ${value_type}'Class) return Natural
+   is (Node.Child_Count);
 </%def>
