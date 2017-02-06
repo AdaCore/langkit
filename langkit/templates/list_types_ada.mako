@@ -42,10 +42,7 @@
    % endif
 
    function Item
-     (Node  : access ${value_type};
-      Index : Positive)
-      return ${elt_type}
-   is (${elt_type} (Node.Child (Index)));
+     (Node  : access ${value_type}; Index : Positive) return ${elt_type};
 
 </%def>
 
@@ -149,5 +146,13 @@
          raise Property_Error with "out-of-bounds AST list access";
       end if;
    end Get;
+
+   ----------
+   -- Item --
+   ----------
+
+   function Item
+     (Node  : access ${value_type}; Index : Positive) return ${elt_type}
+   is (${elt_type} (Node.Child (Index)));
 
 </%def>
