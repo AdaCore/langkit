@@ -2236,6 +2236,32 @@ package body ${ada_lib_name}.Analysis is
       return Token.Token;
    end Stored_Token;
 
+   -----------------
+   -- Token_Start --
+   -----------------
+
+   function Token_Start
+     (Node : access ${root_node_value_type}'Class)
+      return Token_Type
+   is
+     ((TDH    => Token_Data (Node.Unit),
+       Token  => Node.Token_Start,
+       Trivia => No_Token_Index));
+
+   ---------------
+   -- Token_End --
+   ---------------
+
+   function Token_End
+     (Node : access ${root_node_value_type}'Class)
+      return Token_Type
+   is
+     (if Node.Token_End = No_Token_Index
+      then Token_Start (Node)
+      else (TDH    => Token_Data (Node.Unit),
+            Token  => Node.Token_End,
+            Trivia => No_Token_Index));
+
    ------------------
    -- Child_Number --
    ------------------

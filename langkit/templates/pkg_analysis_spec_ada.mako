@@ -1426,24 +1426,6 @@ private
    --  Property_Error if Node and Token don't belong to the same analysis unit
    --  or if Token is actually a Trivia.
 
-   function Token_Start
-     (Node : access ${root_node_value_type}'Class)
-      return Token_Type
-   is
-     ((TDH    => Token_Data (Node.Unit),
-       Token  => Node.Token_Start,
-       Trivia => No_Token_Index));
-
-   function Token_End
-     (Node : access ${root_node_value_type}'Class)
-      return Token_Type
-   is
-     (if Node.Token_End = No_Token_Index
-      then Token_Start (Node)
-      else (TDH    => Token_Data (Node.Unit),
-            Token  => Node.Token_End,
-            Trivia => No_Token_Index));
-
    function Is_Ghost
      (Node : access ${root_node_value_type}'Class)
       return Boolean
