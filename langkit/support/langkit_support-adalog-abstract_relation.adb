@@ -140,7 +140,6 @@ package body Langkit_Support.Adalog.Abstract_Relation is
 
          if Is_Current then
             Put (ASCII.ESC & "[0m");
-
          end if;
       end Internal;
    begin
