@@ -731,6 +731,15 @@ package body ${ada_lib_name}.Analysis is
    is (null);
 
    ---------------------
+   -- Is_Visible_From --
+   ---------------------
+
+   function Is_Visible_From
+     (Env, Referenced : AST_Envs.Lexical_Env) return Boolean
+   is
+     (Is_Referenced (Env.Node.Unit, Referenced.Node.Unit));
+
+   ---------------------
    -- Has_Diagnostics --
    ---------------------
 
