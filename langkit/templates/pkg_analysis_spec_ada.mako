@@ -1113,8 +1113,8 @@ private
       Lex_Env_Data_Acc  : Lex_Env_Data;
    end record;
 
-   function Token_Data (Unit : Analysis_Unit) return Token_Data_Handler_Access
-   is (Unit.TDH'Access);
+   function Token_Data
+     (Unit : Analysis_Unit) return Token_Data_Handler_Access;
 
    procedure Register_Destroyable_Helper
      (Unit    : Analysis_Unit;

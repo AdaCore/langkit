@@ -795,6 +795,13 @@ package body ${ada_lib_name}.Analysis is
       return Unit_File_Provider_Access_Cst is (Context.Unit_File_Provider);
    % endif
 
+   ----------------
+   -- Token_Data --
+   ----------------
+
+   function Token_Data (Unit : Analysis_Unit) return Token_Data_Handler_Access
+   is (Unit.TDH'Access);
+
    -----------------------
    -- Set_Filled_Caches --
    -----------------------
