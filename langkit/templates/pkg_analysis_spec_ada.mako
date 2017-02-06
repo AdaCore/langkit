@@ -392,8 +392,7 @@ package ${ada_lib_name}.Analysis is
    --  Return the concrete kind for Node
 
    function Is_Empty_List
-     (Node : access ${root_node_value_type}) return Boolean
-   is (False);
+     (Node : access ${root_node_value_type}) return Boolean;
    --  Return whether Node is an empty list (so this is wrong for all nodes
    --  that are not lists).
 
@@ -886,10 +885,7 @@ package ${ada_lib_name}.Analysis is
      (Node : access ${generic_list_value_type}; Prefix : String := "");
 
    overriding function Is_Empty_List
-     (Node : access ${generic_list_value_type})
-      return Boolean
-   is
-     (Child_Count (${root_node_type_name} (Node)) = 0);
+     (Node : access ${generic_list_value_type}) return Boolean;
 
    % for astnode in no_builtins(ctx.astnode_types):
      % if not astnode.is_list_type:
