@@ -1132,17 +1132,6 @@ private
      (Unit, Referenced : Analysis_Unit) return Boolean;
    --  Check whether the Referenced unit is referenced from Unit
 
-   function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
-     (Unit.AST_Root);
-
-   function Get_Context (Unit : Analysis_Unit) return Analysis_Context is
-     (Unit.Context);
-
-   function Get_Filename (Unit : Analysis_Unit) return String is
-     (To_String (Unit.File_Name));
-   --  Check whether Referenced's unit is referenced from Env's unit. Used for
-   --  property generation purposes.
-
    generic
       type T (<>) is limited private;
       type T_Access is access all T;

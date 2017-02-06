@@ -802,6 +802,27 @@ package body ${ada_lib_name}.Analysis is
    function Token_Data (Unit : Analysis_Unit) return Token_Data_Handler_Access
    is (Unit.TDH'Access);
 
+   ----------
+   -- Root --
+   ----------
+
+   function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
+     (Unit.AST_Root);
+
+   -----------------
+   -- Get_Context --
+   -----------------
+
+   function Get_Context (Unit : Analysis_Unit) return Analysis_Context is
+     (Unit.Context);
+
+   ------------------
+   -- Get_Filename --
+   ------------------
+
+   function Get_Filename (Unit : Analysis_Unit) return String is
+     (To_String (Unit.File_Name));
+
    -----------------------
    -- Set_Filled_Caches --
    -----------------------
