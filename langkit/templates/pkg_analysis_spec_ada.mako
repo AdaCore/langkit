@@ -1270,22 +1270,16 @@ private
    --------------------------------
 
    function Get_Parent
-     (N : ${root_node_type_name}) return ${root_node_type_name}
-   is (N.Parent);
+     (N : ${root_node_type_name}) return ${root_node_type_name};
 
    function First_Child_Index_For_Traverse
-     (N : ${root_node_type_name})
-      return Natural
-   is (N.First_Child_Index);
+     (N : ${root_node_type_name}) return Natural;
 
    function Last_Child_Index_For_Traverse
-     (N : ${root_node_type_name})
-      return Natural
-   is (N.Last_Child_Index);
+     (N : ${root_node_type_name}) return Natural;
 
    function Get_Child
-     (N : ${root_node_type_name}; I : Natural) return ${root_node_type_name}
-   is (N.Child (I));
+     (N : ${root_node_type_name}; I : Natural) return ${root_node_type_name};
 
    package Traversal_Iterators is new Langkit_Support.Tree_Traversal_Iterator
      (Element_type      => ${root_node_type_name},

@@ -1148,6 +1148,38 @@ package body ${ada_lib_name}.Analysis is
       return Create (Root);
    end Traverse;
 
+   ----------------
+   -- Get_Parent --
+   ----------------
+
+   function Get_Parent
+     (N : ${root_node_type_name}) return ${root_node_type_name}
+   is (N.Parent);
+
+   ------------------------------------
+   -- First_Child_Index_For_Traverse --
+   ------------------------------------
+
+   function First_Child_Index_For_Traverse
+     (N : ${root_node_type_name}) return Natural
+   is (N.First_Child_Index);
+
+   -----------------------------------
+   -- Last_Child_Index_For_Traverse --
+   -----------------------------------
+
+   function Last_Child_Index_For_Traverse
+     (N : ${root_node_type_name}) return Natural
+   is (N.Last_Child_Index);
+
+   ---------------
+   -- Get_Child --
+   ---------------
+
+   function Get_Child
+     (N : ${root_node_type_name}; I : Natural) return ${root_node_type_name}
+   is (N.Child (I));
+
    ----------
    -- Next --
    ----------
