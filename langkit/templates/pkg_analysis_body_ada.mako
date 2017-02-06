@@ -785,6 +785,16 @@ package body ${ada_lib_name}.Analysis is
       Destroyable_Vectors.Append (Unit.Destroyables, (Object, Destroy));
    end Register_Destroyable_Helper;
 
+   % if ctx.default_unit_file_provider:
+   ------------------------
+   -- Unit_File_Provider --
+   ------------------------
+
+   function Unit_File_Provider
+     (Context : Analysis_Context)
+      return Unit_File_Provider_Access_Cst is (Context.Unit_File_Provider);
+   % endif
+
    -----------------------
    -- Set_Filled_Caches --
    -----------------------

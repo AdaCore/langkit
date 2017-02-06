@@ -1113,12 +1113,6 @@ private
       Lex_Env_Data_Acc  : Lex_Env_Data;
    end record;
 
-   % if ctx.default_unit_file_provider:
-   function Unit_File_Provider
-     (Context : Analysis_Context)
-      return Unit_File_Provider_Access_Cst is (Context.Unit_File_Provider);
-   % endif
-
    function Token_Data (Unit : Analysis_Unit) return Token_Data_Handler_Access
    is (Unit.TDH'Access);
 
