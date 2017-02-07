@@ -2439,6 +2439,14 @@ package body ${ada_lib_name}.Analysis is
             Token  => Node.Token_End,
             Trivia => No_Token_Index));
 
+   -------------
+   -- Is_Null --
+   -------------
+
+   function Is_Null
+     (Node : access ${root_node_value_type}'Class) return Boolean
+   is (Node = null);
+
    ------------------
    -- Child_Number --
    ------------------
