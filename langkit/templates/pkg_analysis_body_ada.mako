@@ -2552,6 +2552,15 @@ package body ${ada_lib_name}.Analysis is
       end if;
    end Get;
 
+   -----------
+   -- Group --
+   -----------
+
+   function Group
+     (Envs : ${LexicalEnvType.array_type().name()})
+      return ${LexicalEnvType.name()}
+   is (Group (Envs.Items));
+
    ## Generate the bodies of the root grammar class properties
    % for prop in T.root_node.get_properties(include_inherited=False):
    ${prop.prop_def}

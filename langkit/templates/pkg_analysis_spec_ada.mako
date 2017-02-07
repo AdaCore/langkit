@@ -1200,8 +1200,7 @@ private
 
    function Group
      (Envs : ${LexicalEnvType.array_type().name()})
-      return ${LexicalEnvType.name()}
-   is (Group (Envs.Items));
+      return ${LexicalEnvType.name()};
    --  Convenience wrapper for uniform types handling in code generation
 
    -------------------------------
