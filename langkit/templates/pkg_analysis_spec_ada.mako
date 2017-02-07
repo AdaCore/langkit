@@ -825,8 +825,7 @@ package ${ada_lib_name}.Analysis is
    -- Enumeration types --
    -----------------------
 
-   function Image (Value : Boolean) return String is
-     (if Value then "True" else "False");
+   function Image (Value : Boolean) return String;
 
    % for cls in ctx.sorted_types(ctx.enum_types):
    ${enum_types.public_decl(cls)}

@@ -2808,4 +2808,11 @@ package body ${ada_lib_name}.Analysis is
       Free (Node);
    end Destroy_Synthetic_Node;
 
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Value : Boolean) return String
+   is (if Value then "True" else "False");
+
 end ${ada_lib_name}.Analysis;
