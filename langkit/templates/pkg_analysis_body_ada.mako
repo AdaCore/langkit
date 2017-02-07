@@ -2439,6 +2439,18 @@ package body ${ada_lib_name}.Analysis is
             Token  => Node.Token_End,
             Trivia => No_Token_Index));
 
+   -----------
+   -- Token --
+   -----------
+
+   function Token
+     (Node  : access ${root_node_value_type}'Class;
+      Index : Token_Index) return Token_Type
+   is
+     ((TDH    => Token_Data (Node.Unit),
+       Token  => Index,
+       Trivia => No_Token_Index));
+
    -------------
    -- Is_Null --
    -------------

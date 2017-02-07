@@ -1368,12 +1368,7 @@ private
 
    function Token
      (Node  : access ${root_node_value_type}'Class;
-      Index : Token_Index)
-      return Token_Type
-   is
-     ((TDH    => Token_Data (Node.Unit),
-       Token  => Index,
-       Trivia => No_Token_Index));
+      Index : Token_Index) return Token_Type;
    --  Helper for properties. This is used to turn token indexes as stored in
    --  AST nodes into Token_Type values.
 
