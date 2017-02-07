@@ -660,8 +660,7 @@ package ${ada_lib_name}.Analysis is
    function Text (Token : Token_Type) return Text_Type;
    --  Return the text of the token as Text_Type
 
-   function Text (Token : Token_Type) return String
-   is (Image (Text (Token)));
+   function Text (Token : Token_Type) return String;
    --  Return the text of the token as String
 
    function Text (First, Last : Token_Type) return Text_Type;

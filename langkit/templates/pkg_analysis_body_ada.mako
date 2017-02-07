@@ -1919,6 +1919,13 @@ package body ${ada_lib_name}.Analysis is
    end Text;
 
    ----------
+   -- Text --
+   ----------
+
+   function Text (Token : Token_Type) return String
+   is (Image (Text (Token)));
+
+   ----------
    -- Kind --
    ----------
 
