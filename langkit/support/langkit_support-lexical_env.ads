@@ -2,7 +2,6 @@ with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Unchecked_Deallocation;
 
-with Langkit_Support.Array_Utils;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Vectors;
 
@@ -142,12 +141,9 @@ package Langkit_Support.Lexical_Env is
    --  Vectors used to store collections of environment elements, as values of
    --  a lexical environment map. We want to use vectors internally.
 
-   package Element_Arrays is new Langkit_Support.Array_Utils (Element_T);
-   subtype Element_Array is Element_Arrays.Array_Type;
-   --  Arrays of unwraped raw elements stored in the environment maps
+   type Element_Array is array (Positive range <>) of Element_T;
 
-   package Env_Element_Arrays renames Env_Element_Vectors.Elements_Arrays;
-   subtype Env_Element_Array is Env_Element_Arrays.Array_Type;
+   subtype Env_Element_Array is Env_Element_Vectors.Elements_Array;
    --  Arrays of wrapped elements stored in the environment maps
 
    function Unwrap

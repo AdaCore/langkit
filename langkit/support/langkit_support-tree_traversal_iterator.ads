@@ -13,11 +13,8 @@ generic
      (T : Element_Type; Child_Index : Natural) return Element_Type is <>;
    with function Get_Parent (T : Element_Type) return Element_Type is <>;
 
-   with package Element_Vectors
-     is new Langkit_Support.Vectors (Element_Type);
-
    with package Iterators is new Langkit_Support.Iterators
-     (Element_Type, Element_Vectors);
+     (Element_Type);
 
 package Langkit_Support.Tree_Traversal_Iterator is
 

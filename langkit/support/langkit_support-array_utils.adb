@@ -89,12 +89,13 @@ package body Langkit_Support.Array_Utils is
    function Unique_Gen
      (In_Array : Array_Type) return Array_Type
    is
-      Keep : Bool_Array (In_Array'Range) := (others => True);
-      Count : Natural := 0;
+      Keep  : Bool_Array (In_Array'Range) := (others => True);
+      Count : Integer := 0;
+      Idx   : Index_Type;
    begin
       for I in In_Array'Range loop
 
-         A : for J in In_Array'First .. I - 1 loop
+         A : for J in In_Array'First .. Index_Type'Pred (I) loop
             if In_Array (I) = In_Array (J) then
                Keep (I) := False;
                Count := Count - 1;
@@ -106,15 +107,16 @@ package body Langkit_Support.Array_Utils is
          Count := Count + 1;
       end loop;
 
-      return Ret_Array : Array_Type (In_Array'First
-                                     .. In_Array'First + (Count - 1))
+      return Ret_Array : Array_Type
+        (In_Array'First
+         .. Index_Type (Integer (In_Array'First) + (Count - 1)))
       do
-         Count := In_Array'First;
+         Idx := In_Array'First;
 
          for J in In_Array'Range loop
             if Keep (J) then
-               Ret_Array (Count) := In_Array (J);
-               Count := Count + 1;
+               Ret_Array (Idx) := In_Array (J);
+               Idx := Idx + 1;
             end if;
          end loop;
       end return;
@@ -132,7 +134,8 @@ package body Langkit_Support.Array_Utils is
    function Filter_Gen (In_Array : Array_Type) return Array_Type
    is
       Pred_Array : Bool_Array (In_Array'Range);
-      Keep_Count : Natural := 0;
+      Keep_Count : Integer := 0;
+      Idx        : Index_Type;
    begin
       for J in In_Array'Range loop
          Pred_Array (J) := Predicate (In_Array (J));
@@ -145,15 +148,16 @@ package body Langkit_Support.Array_Utils is
          return Empty_Array;
       end if;
 
-      return Ret_Array : Array_Type (In_Array'First
-                                     .. In_Array'First + (Keep_Count - 1))
+      return Ret_Array : Array_Type
+        (In_Array'First
+         .. Index_Type (Integer (In_Array'First) + (Keep_Count - 1)))
       do
-         Keep_Count := In_Array'First;
+         Idx := In_Array'First;
 
          for J in In_Array'Range loop
             if Pred_Array (J) then
-               Ret_Array (Keep_Count) := In_Array (J);
-               Keep_Count := Keep_Count + 1;
+               Ret_Array (Idx) := In_Array (J);
+               Idx := Idx + 1;
             end if;
          end loop;
       end return;
@@ -405,7 +409,8 @@ package body Langkit_Support.Array_Utils is
    begin
       return Out_Array : Array_Type (In_Array'Range) do
          for I in 0 .. In_Array'Length - 1 loop
-            Out_Array (Out_Array'Last - I) := In_Array (In_Array'First + I);
+            Out_Array (Index_Type (Integer (Out_Array'Last) - I))
+              := In_Array (Index_Type (Integer (In_Array'First) + I));
          end loop;
       end return;
    end Reverse_Array;

@@ -2280,14 +2280,17 @@ class ArrayType(CompiledType):
         return cls.element_type().name() + names.Name('Vectors')
 
     @classmethod
-    def pkg_array(cls):
+    def index_type(cls):
         """
-        Name of the Langkit_Support.Array_Utils package instantiation
-        corresponding to this element_type.
+        Name of the Index type for this array type.
 
         :rtype: names.Name
         """
-        return cls.element_type().name() + names.Name('Arrays')
+        return "{}.{}".format(
+            (cls.element_type().name()
+             + names.Name('Vectors')).camel_with_underscores,
+            "Index_Type"
+        )
 
     @classmethod
     def vector(cls):
@@ -2305,8 +2308,7 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return names.Name(cls.pkg_array().camel_with_underscores +
-                          '.Array_Type')
+        return cls.api_name()
 
     @classmethod
     def c_inc_ref(cls, capi):

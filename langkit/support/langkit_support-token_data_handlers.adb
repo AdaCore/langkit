@@ -90,7 +90,7 @@ package body Langkit_Support.Token_Data_Handlers is
          end;
       end if;
 
-      return Token_Index_Vectors.Elements_Arrays.Empty_Array;
+      return Token_Index_Vectors.Empty_Array;
    end Internal_Get_Trivias;
 
    -----------------
@@ -102,7 +102,7 @@ package body Langkit_Support.Token_Data_Handlers is
       Index : Token_Index) return Token_Index_Vectors.Elements_Array is
    begin
       if Index = No_Token_Index then
-         return Token_Index_Vectors.Elements_Arrays.Empty_Array;
+         return Token_Index_Vectors.Empty_Array;
       end if;
       return Internal_Get_Trivias (TDH, Index);
    end Get_Trivias;

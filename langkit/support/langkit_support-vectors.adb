@@ -229,7 +229,7 @@ package body Langkit_Support.Vectors is
    is
    begin
       if Self.Size = 0 then
-         return Elements_Arrays.Empty_Array;
+         return Empty_Array;
       else
          return Slice (Self, First_Index (Self), Last_Index (Self));
       end if;

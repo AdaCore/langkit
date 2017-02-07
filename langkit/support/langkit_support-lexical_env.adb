@@ -1,4 +1,9 @@
+with Langkit_Support.Array_Utils;
+
 package body Langkit_Support.Lexical_Env is
+
+   package Env_Element_Arrays is new Langkit_Support.Array_Utils
+     (Env_Element, Positive, Env_Element_Array);
 
    procedure Inc_Ref (Self : Env_Getter);
    procedure Dec_Ref (Self : in out Env_Getter);
@@ -142,6 +147,9 @@ package body Langkit_Support.Lexical_Env is
       end loop;
    end Remove;
 
+   package Referenced_Envs_Arrays is new Langkit_Support.Array_Utils
+     (Referenced_Env, Positive, Referenced_Envs_Vectors.Elements_Array);
+
    ---------
    -- Get --
    ---------
@@ -155,7 +163,7 @@ package body Langkit_Support.Lexical_Env is
       use Internal_Envs;
       use Env_Element_Arrays;
 
-      use Referenced_Envs_Vectors.Elements_Arrays;
+      use Referenced_Envs_Arrays;
 
       function Get_Ref_Env_Elements
         (Self : Referenced_Env) return Env_Element_Array;
@@ -212,7 +220,7 @@ package body Langkit_Support.Lexical_Env is
       end Get_Own_Elements;
 
       function Get_Refd_Elements
-      is new Referenced_Envs_Vectors.Elements_Arrays.Flat_Map_Gen
+      is new Referenced_Envs_Arrays.Flat_Map_Gen
         (Env_Element, Env_Element_Array, Get_Ref_Env_Elements);
       --  Return the concatenation of Get_Own_Elements for this env and every
       --  parent.

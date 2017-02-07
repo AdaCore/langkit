@@ -9,11 +9,8 @@
 
    <% elt_type = cls.element_type().name() %>
 
-   package ${cls.pkg_vector()} is new Langkit_Support.Vectors
-     (${elt_type});
-   package ${cls.pkg_array()} renames ${cls.pkg_vector()}.Elements_Arrays;
-
-   subtype ${cls.api_name()} is ${cls.pkg_array()}.Array_Type;
+   type ${cls.api_name()}
+     is array (Positive range <>) of ${cls.element_type().name()};
    type ${cls.pointed()} (N : Natural) is record
       Ref_Count : Positive;
       Items     : ${cls.api_name()} (1 .. N);
@@ -24,9 +21,6 @@
    ## arrays starting from 1. We need it to convert from env element arrays,
    ## to our array record type.
    % if cls.element_type() == T.root_node.env_el():
-   function Copy is new AST_Envs.Env_Element_Arrays.Copy
-     (Positive, ${cls.api_name()});
-
    function Create (Items : AST_Envs.Env_Element_Array) return ${cls.name()};
    % endif
 
@@ -62,6 +56,8 @@
 <%def name="body(cls)">
 
    <% elt_type = cls.element_type().name() %>
+
+   package ${cls.pkg_vector()} is new Langkit_Support.Vectors (${elt_type});
 
    ---------
    -- Get --
@@ -103,7 +99,7 @@
    ------------
 
    function Concat (L, R : ${cls.name()}) return ${cls.name()} is
-      use ${cls.pkg_array()};
+      use ${cls.pkg_vector()};
       Ret : ${cls.name()} := Create (Length (L) + Length (R));
    begin
       Ret.Items := (L.Items & R.Items);
@@ -160,7 +156,7 @@
    % if cls.element_type() == T.root_node.env_el():
    function Create (Items : AST_Envs.Env_Element_Array) return ${cls.name()}
    is (new ${cls.pointed()}'(N         => Items'Length,
-                             Items     => Copy (Items),
+                             Items     => ${cls.api_name()} (Items),
                              Ref_Count => 1));
    % endif
 </%def>

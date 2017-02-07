@@ -9,12 +9,9 @@
 --  cursor to preserve an iteration state.
 
 with Ada.Unchecked_Deallocation;
-with Langkit_Support.Vectors;
 
 generic
    type Element_Type is private;
-   with package Element_Vectors
-     is new Langkit_Support.Vectors (Element_Type);
 package Langkit_Support.Iterators is
 
    type Iterator is limited interface;
@@ -33,8 +30,10 @@ package Langkit_Support.Iterators is
       Proc : access procedure (Element : Element_Type));
    --  Consume the I iterator completely, calling Proc on all yielded elements
 
+   type Elements_Array is array (Positive range <>) of Element_Type;
+
    function Consume
-     (I : Iterator'Class) return Element_Vectors.Elements_Array;
+     (I : Iterator'Class) return Elements_Array;
    --  Consume the I iterator completely, putting the results in an array and
    --  returning it.
 

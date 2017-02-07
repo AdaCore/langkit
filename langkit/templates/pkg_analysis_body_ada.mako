@@ -22,6 +22,7 @@ with Ada.Unchecked_Deallocation;
 
 with System.Storage_Elements;    use System.Storage_Elements;
 
+with Langkit_Support.Array_Utils;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Text;    use Langkit_Support.Text;
@@ -55,6 +56,26 @@ with ${ctx.symbol_canonicalizer.unit_fqn};
 %endif
 
 package body ${ada_lib_name}.Analysis is
+
+   ${array_types.body(root_node_array)}
+
+   procedure Destroy (Self : in out Lex_Env_Data_Type);
+   --  Destroy data associated to lexical environments
+
+   package Containing_Envs is new Langkit_Support.Vectors
+     (Containing_Env_Element);
+
+   type Lex_Env_Data_Type is record
+      Is_Contained_By : Containing_Envs.Vector;
+      Contains        : ${root_node_type_name}_Vectors.Vector;
+   end record;
+
+   ## Utility package
+   package ${root_node_type_name}_Arrays
+   is new Langkit_Support.Array_Utils
+     (${root_node_type_name},
+      ${root_node_array.pkg_vector()}.Index_Type,
+      ${root_node_array.pkg_vector()}.Elements_Array);
 
    ##  Make logic operations on nodes accessible
    use Eq_Node, Eq_Node.Raw_Impl;
@@ -580,7 +601,7 @@ package body ${ada_lib_name}.Analysis is
 
          --  First we'll remove old entries referencing the old translation
          --  unit in foreign lexical envs.
-         Remove_Exiled_Entries (Unit.Lex_Env_Data_Acc.all);
+         Remove_Exiled_Entries (Unit.Lex_Env_Data_Acc);
 
          --  Then we'll recreate the lexical env structure for the newly parsed
          --  unit.
@@ -589,7 +610,7 @@ package body ${ada_lib_name}.Analysis is
          --  Finally, any entry that was rooted in one of the unit's lex envs
          --  needs to be re-rooted.
          Reroot_Foreign_Nodes
-           (Unit.Lex_Env_Data_Acc.all, Unit.Context.Root_Scope);
+           (Unit.Lex_Env_Data_Acc, Unit.Context.Root_Scope);
 
       end if;
    end Update_After_Reparse;
@@ -964,7 +985,6 @@ package body ${ada_lib_name}.Analysis is
 
    ${array_types.body(LexicalEnvType.array_type())}
    ${array_types.body(T.root_node.env_el().array_type())}
-   ${array_types.body(root_node_array)}
 
    function Child_Number
      (Node : access ${root_node_value_type}'Class)
@@ -1276,7 +1296,7 @@ package body ${ada_lib_name}.Analysis is
    -- Remove_Exiled_Entries --
    ---------------------------
 
-   procedure Remove_Exiled_Entries (Self : in out Lex_Env_Data_Type) is
+   procedure Remove_Exiled_Entries (Self : Lex_Env_Data) is
    begin
       for El of Self.Is_Contained_By loop
          AST_Envs.Remove (El.Env, El.Key, El.Node);
@@ -1289,7 +1309,7 @@ package body ${ada_lib_name}.Analysis is
    --------------------------
 
    procedure Reroot_Foreign_Nodes
-     (Self : in out Lex_Env_Data_Type; Root_Scope : Lexical_Env)
+     (Self : Lex_Env_Data; Root_Scope : Lexical_Env)
    is
       Els : ${root_node_type_name}_Vectors.Elements_Array :=
          Self.Contains.To_Array;
@@ -1567,14 +1587,13 @@ package body ${ada_lib_name}.Analysis is
 
    function Children
      (Node : access ${root_node_value_type}'Class)
-     return ${root_node_type_name}_Arrays.Array_Type
+     return ${root_node_array.api_name()}
    is
-      <% array_pkg = '{}_Arrays'.format(root_node_type_name) %>
-
-      First : constant Integer := ${array_pkg}.Index_Type'First;
+      First : constant Integer
+        := ${root_node_array.index_type()}'First;
       Last  : constant Integer := First + Child_Count (Node) - 1;
    begin
-      return A : ${array_pkg}.Array_Type (First .. Last)
+      return A : ${root_node_array.api_name()} (First .. Last)
       do
          for I in First .. Last loop
             A (I) := Child (Node, I);
@@ -1586,7 +1605,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_array.name()}
    is
-      C : ${root_node_type_name}_Arrays.Array_Type := Children (Node);
+      C : ${root_node_array.api_name()} := Children (Node);
    begin
       return Ret : ${root_node_array.name()} := Create (C'Length) do
          Ret.Items := C;
@@ -2032,11 +2051,14 @@ package body ${ada_lib_name}.Analysis is
          --  Get rid of nodes with no real existence in the source code
          and then not N.Is_Ghost);
 
-      First_Child : constant ${root_node_type_name}_Arrays.Index_Type :=
-         ${root_node_type_name}_Arrays.Index_Type'First;
-      N_Children  : constant ${root_node_type_name}_Arrays.Array_Type
-        := ${root_node_type_name}_Arrays.Filter
-          (Children (Node), Filter_Children'Access);
+      First_Child : constant ${root_node_array.index_type()} :=
+         ${root_node_array.index_type()}'First;
+      N_Children  : constant ${root_node_array.api_name()}
+        := ${root_node_array.api_name()}
+             (${root_node_type_name}_Arrays.Filter
+              (${root_node_array.pkg_vector()}.Elements_Array
+                (${root_node_array.api_name()}'(Children (Node))),
+               Filter_Children'Access));
    begin
       if N_Children'Length > 0
         and then Node.Token_Start /= N_Children (First_Child).Token_Start
@@ -2135,7 +2157,7 @@ package body ${ada_lib_name}.Analysis is
          Initial_Env := Node.Pre_Env_Actions (Current_Env, Root_Env);
 
          --  Call recursively on children
-         for C of ${root_node_type_name}_Arrays.Array_Type'(Children (Node))
+         for C of ${root_node_array.api_name()}'(Children (Node))
          loop
             Populate_Internal (C, Node.Self_Env);
          end loop;
@@ -2312,9 +2334,7 @@ package body ${ada_lib_name}.Analysis is
                Get_Env_Id (AST_Envs.Get_Env (Env.Parent)));
          end if;
 
-         for Child of ${root_node_type_name}_Arrays.Array_Type'
-            (Children (Current))
-         loop
+         for Child of ${root_node_array.api_name()}'(Children (Current)) loop
             Internal (Child);
          end loop;
       end Internal;
@@ -2600,9 +2620,7 @@ package body ${ada_lib_name}.Analysis is
            new String'(Image (Node.Short_Image) & ".${f.name}");
       % endfor
       Assign_Names_To_Logic_Vars_Impl (Node);
-      for Child of ${root_node_type_name}_Arrays.Array_Type'
-         (Children (Node))
-      loop
+      for Child of ${root_node_array.api_name()}'(Children (Node)) loop
          if Child /= null then
             Assign_Names_To_Logic_Vars (Child);
          end if;

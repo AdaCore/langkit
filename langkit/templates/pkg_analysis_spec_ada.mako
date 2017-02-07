@@ -441,7 +441,7 @@ package ${ada_lib_name}.Analysis is
 
    function Children
      (Node : access ${root_node_value_type}'Class)
-     return ${root_node_type_name}_Arrays.Array_Type;
+     return ${root_node_array.api_name()};
    --  Return an array containing all the children of Node.
    --  This is an alternative to the Child/Child_Count pair, useful if you want
    --  the convenience of Ada arrays, and you don't care about the small
@@ -507,8 +507,7 @@ package ${ada_lib_name}.Analysis is
    --  it otherwise.
 
    package ${root_node_type_name}_Iterators is new Langkit_Support.Iterators
-     (Element_Type => ${root_node_type_name},
-      Element_Vectors => ${root_node_type_name}_Vectors);
+     (Element_Type => ${root_node_type_name});
 
    type Traverse_Iterator is
      limited new ${root_node_type_name}_Iterators.Iterator
@@ -1021,27 +1020,18 @@ private
       Node : ${root_node_type_name};
    end record;
 
-   package Containing_Envs is new Langkit_Support.Vectors
-     (Containing_Env_Element);
-
-   type Lex_Env_Data_Type is record
-      Is_Contained_By : Containing_Envs.Vector;
-      Contains        : ${root_node_type_name}_Vectors.Vector;
-   end record;
+   type Lex_Env_Data_Type;
    type Lex_Env_Data is access all Lex_Env_Data_Type;
-
-   procedure Destroy (Self : in out Lex_Env_Data_Type);
-   --  Destroy data associated to lexical environments
 
    procedure Destroy (Self : in out Lex_Env_Data);
    --  Likewise, but also free the memory allocated to Self
 
-   procedure Remove_Exiled_Entries (Self : in out Lex_Env_Data_Type);
+   procedure Remove_Exiled_Entries (Self : Lex_Env_Data);
    --  Remove lex env entries that references some of the unit's nodes, in
    --  lexical environments not owned by the unit.
 
    procedure Reroot_Foreign_Nodes
-     (Self : in out Lex_Env_Data_Type; Root_Scope : Lexical_Env);
+     (Self : Lex_Env_Data; Root_Scope : Lexical_Env);
    --  Re-create entries for nodes that are keyed in one of the unit's lexical
    --  envs.
 
@@ -1277,7 +1267,6 @@ private
       Null_Value        => null,
       First_Child_Index => First_Child_Index_For_Traverse,
       Last_Child_Index  => Last_Child_Index_For_Traverse,
-      Element_Vectors   => ${root_node_type_name}_Vectors,
       Iterators         => ${root_node_type_name}_Iterators);
 
    type Traverse_Iterator is

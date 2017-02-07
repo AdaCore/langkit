@@ -57,15 +57,16 @@
 
 generic
    type Element_Type is private;
+   type Index_Type is range <>;
+
+   type Array_Type is array (Index_Type range <>) of Element_Type;
+
    with function "=" (L, R : Element_Type) return Boolean is <>;
 package Langkit_Support.Array_Utils is
 
-   subtype Index_Type is Positive;
-
-   type Array_Type is array (Index_Type range <>) of Element_Type;
-   --  Base array type provided by this package
-
-   Empty_Array : constant Array_Type (1 .. 0) := (others => <>);
+   Empty_Array : constant Array_Type
+     (Index_Type'Succ (Index_Type'First) .. Index_Type'First)
+       := (others => <>);
    --  Constant for the empty array
 
    type Option_Type (Has_Element : Boolean) is record
