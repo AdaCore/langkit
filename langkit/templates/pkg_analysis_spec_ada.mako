@@ -810,8 +810,7 @@ package ${ada_lib_name}.Analysis is
    -- Adalog instantiations --
    ---------------------------
 
-   function El_Image (N : ${T.sem_node.name()}) return String
-   is (if N.El /= null then Image (N.El.Short_Image) else "None");
+   function El_Image (N : ${T.sem_node.name()}) return String;
 
    package Eq_Node is new Langkit_Support.Adalog.Eq_Same
      (${T.sem_node.name()}, El_Image);
