@@ -232,7 +232,8 @@ def get_parsable_location():
         return ""
 
 
-def check_source_language(predicate, message, severity=Severity.error):
+def check_source_language(predicate, message, severity=Severity.error,
+                          do_raise=True):
     """
     Check predicates related to the user's input in the input language
     definition. Show error messages and eventually terminate if those error
@@ -257,7 +258,7 @@ def check_source_language(predicate, message, severity=Severity.error):
                 format_severity(severity),
                 message
             )
-        if severity == Severity.error:
+        if severity == Severity.error and do_raise:
             raise DiagnosticError()
         elif severity == Severity.non_blocking_error:
             Diagnostics.has_pending_error = True
