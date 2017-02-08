@@ -58,7 +58,7 @@ class Location(object):
         return 'File "{}", line {}'.format(self.file, self.line)
 
 
-def extract_library_location():
+def extract_library_location(stack=None):
     """
     Use traceback to extract the location of the definition of an entity in
     the language definition using langkit. This relies on
@@ -66,10 +66,12 @@ def extract_library_location():
 
     :rtype: Location
     """
+    stack = stack or traceback.extract_stack()
     l = [Location(t[0], t[1], t[3])
-         for t in traceback.extract_stack()
+         for t in stack
          if Diagnostics.is_under_langkit(t[0])
          and "manage.py" not in t[0]]
+
     return l[-1] if l else None
 
 
