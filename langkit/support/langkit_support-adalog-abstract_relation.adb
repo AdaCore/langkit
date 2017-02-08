@@ -94,8 +94,8 @@ package body Langkit_Support.Adalog.Abstract_Relation is
          procedure Start_Line;
          procedure Start_Line is
          begin
-            for Dummy in 0 .. Level * 4 loop
-               Put (" ");
+            for Dummy in 1 .. (Level * 2) loop
+               Put ("| ");
             end loop;
          end Start_Line;
 
