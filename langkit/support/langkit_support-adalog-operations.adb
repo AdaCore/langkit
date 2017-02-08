@@ -1,129 +1,89 @@
 with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
+with Langkit_Support.Adalog.Pure_Relations;
+use Langkit_Support.Adalog.Pure_Relations;
 
 package body Langkit_Support.Adalog.Operations is
 
-   ----------
-   -- Call --
-   ----------
-
-   function Solve_Impl (Inst : in out Or_Rec) return Boolean is
-   begin
-      Trace ("In Or solve");
-
-      case Inst.State is
-         when 0 => null;
-         when 1 => goto State_1;
-         when others => goto State_2;
-      end case;
-
-      if Inst.Left.Solve then
-         Trace ("In Or solve: First alternative is True, return True");
-         return True;
-      end if;
-
-      <<State_1>>
-      Inst.State := 1;
-      if Inst.Right.Solve then
-         Trace ("In Or solve: Second alternative is True, return True");
-         return True;
-      end if;
-
-      <<State_2>>
-
-      Trace ("In Or solve: All is false, return False");
-
-      Inst.State := 2;
-      return False;
-   end Solve_Impl;
-
    -----------
    -- Reset --
    -----------
 
-   procedure Reset (Inst : in out Or_Rec) is
+   overriding procedure Reset (Inst : in out Base_Aggregate_Rel) is
    begin
-      Inst.State := 0;
-      Inst.Left.Reset;
-      Inst.Right.Reset;
+      for R of Inst.Sub_Rels loop
+         R.Reset;
+      end loop;
+      Inst.State := 1;
    end Reset;
 
-   ----------
-   -- Call --
-   ----------
+   -------------
+   -- Cleanup --
+   -------------
 
-   function Solve_Impl (Inst : in out And_Rec) return Boolean is
+   overriding procedure Cleanup (Inst : in out Base_Aggregate_Rel) is
    begin
+      for R of Inst.Sub_Rels loop
+         Dec_Ref (R);
+      end loop;
+   end Cleanup;
 
-      Trace ("In And solve");
+   ------------------
+   -- Custom_Image --
+   ------------------
 
-      case Inst.State is
-         when 0 => goto State_0;
-         when 1 => goto State_1;
-         when others => goto State_2;
-      end case;
+   overriding function Custom_Image (Inst : Any) return String
+   is ("<Any>");
 
-      <<State_0>>
-      while Inst.Left.Solve loop
-         Trace ("In And solve: Left is True, try Right");
-         Inst.State := 1;
-         if Inst.Right.Solve then
-            Trace ("In And solve: Right is True, return True");
+   ------------------
+   -- Custom_Image --
+   ------------------
+
+   overriding function Custom_Image (Inst : All_Rel) return String
+   is ("<All>");
+
+   ----------------
+   -- Solve_Impl --
+   ----------------
+
+   overriding function Solve_Impl (Inst : in out Any) return Boolean is
+   begin
+      while Inst.State <= Inst.N loop
+         if Inst.Sub_Rels (Inst.State).Solve then
             return True;
+         end if;
+         Inst.State := Inst.State + 1;
+      end loop;
+      return False;
+   end Solve_Impl;
+
+   ----------------
+   -- Solve_Impl --
+   ----------------
+
+   overriding function Solve_Impl (Inst : in out All_Rel) return Boolean is
+   begin
+      if Inst.State = Inst.N + 1 then
+         Inst.State := Inst.N;
+      end if;
+
+      while Inst.State <= Inst.N loop
+         if Inst.Sub_Rels (Inst.State).Solve then
+            Trace ("Solving rel " & Inst.State'Image
+                   & " succeeded, moving on to next rel");
+            Inst.State := Inst.State + 1;
          else
-            Trace ("In And solve: Right is False, will try left again");
-            Inst.Right.Reset;
-            Inst.State := 0;
+            if Inst.State = 1 then
+               return False;
+            else
+               Trace ("Solving rel " & Inst.State'Image
+                      & " failed, let's reset and try previous rel again");
+               Inst.Sub_Rels (Inst.State).Reset;
+               Inst.State := Inst.State - 1;
+            end if;
          end if;
       end loop;
-      goto State_2;
-
-      <<State_1>>
-      Inst.State := 1;
-      if Inst.Right.Solve then
-         Trace ("In And solve: Right is True, return True");
-         return True;
-      else
-         Inst.Right.Reset;
-         Inst.State := 0;
-      end if;
-      goto State_0;
-
-      <<State_2>>
-      Inst.State := 2;
-      Trace ("In And solve: All is false, return false");
-      return False;
+      return True;
    end Solve_Impl;
-
-   -----------
-   -- Reset --
-   -----------
-
-   procedure Reset (Inst : in out And_Rec) is
-   begin
-      Inst.State := 0;
-      Inst.Left.Reset;
-      Inst.Right.Reset;
-   end Reset;
-
-   ----------
-   -- Free --
-   ----------
-
-   procedure Cleanup (Inst : in out And_Rec) is
-   begin
-      Dec_Ref (Inst.Left);
-      Dec_Ref (Inst.Right);
-   end Cleanup;
-
-   ----------
-   -- Free --
-   ----------
-
-   procedure Cleanup (Inst : in out Or_Rec) is
-   begin
-      Dec_Ref (Inst.Left);
-      Dec_Ref (Inst.Right);
-   end Cleanup;
 
    --------------
    -- Logic_Or --
@@ -132,12 +92,8 @@ package body Langkit_Support.Adalog.Operations is
    function Logic_Or
      (L, R : Relation) return access I_Relation'Class
    is
-      Result : constant access I_Relation'Class :=
-         new Or_Rec'(Left => L, Right => R, others => <>);
    begin
-      Inc_Ref (L);
-      Inc_Ref (R);
-      return Result;
+      return Logic_Any ((L, R));
    end Logic_Or;
 
    ---------------
@@ -147,12 +103,48 @@ package body Langkit_Support.Adalog.Operations is
    function Logic_And
      (L, R : Relation) return access I_Relation'Class
    is
-      Result : constant access I_Relation'Class :=
-         new And_Rec'(Left => L, Right => R, others => <>);
    begin
-      Inc_Ref (L);
-      Inc_Ref (R);
-      return Result;
+      return Logic_All ((L, R));
    end Logic_And;
+
+   ---------------
+   -- Logic_Any --
+   ---------------
+
+   function Logic_Any (Rels : Relation_Array) return access I_Relation'Class
+   is
+   begin
+      if Rels'Length = 0 then
+         return False_Rel;
+      end if;
+      for Rel of Rels loop
+         Inc_Ref (Rel);
+      end loop;
+
+      return new Any'(Ref_Count => 1,
+                      N         => Rels'Length,
+                      Sub_Rels  => Rels,
+                      State     => <>);
+   end Logic_Any;
+
+   ---------------
+   -- Logic_All --
+   ---------------
+
+   function Logic_All (Rels : Relation_Array) return access I_Relation'Class is
+   begin
+      if Rels'Length = 0 then
+         return True_Rel;
+      end if;
+
+      for Rel of Rels loop
+         Inc_Ref (Rel);
+      end loop;
+
+      return new All_Rel'(Ref_Count => 1,
+                          N         => Rels'Length,
+                          Sub_Rels  => Rels,
+                          State     => <>);
+   end Logic_All;
 
 end Langkit_Support.Adalog.Operations;

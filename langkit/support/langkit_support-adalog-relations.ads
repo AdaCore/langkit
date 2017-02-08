@@ -14,6 +14,7 @@ package Langkit_Support.Adalog.Relations is
       type Ty is private;
       with function Apply (Inst : in out Ty) return Boolean is <>;
       with procedure Free (Inst : in out Ty) is <>;
+      with function Custom_Image (Inst : Ty) return String is <>;
    package Pure_Relation is
       --  This generic package represents a relation that will always
       --  yield the same result, and does not produce any side effects.
@@ -26,6 +27,7 @@ package Langkit_Support.Adalog.Relations is
       overriding function Solve_Impl (Inst : in out Rel) return Boolean;
       overriding procedure Reset (Inst : in out Rel);
       overriding procedure Cleanup (Inst : in out Rel);
+      overriding function Custom_Image (Inst : Rel) return String;
    end Pure_Relation;
 
    -----------------------

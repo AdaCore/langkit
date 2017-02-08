@@ -6,35 +6,35 @@ use Langkit_Support.Adalog.Abstract_Relation;
 
 package Langkit_Support.Adalog.Operations is
 
-   ---------------------------------
-   --  Or relation implementation --
-   ---------------------------------
-
-   type Or_Rec is new I_Relation with record
-      Left, Right : Relation;
-      State       : Integer := 0;
+   type Base_Aggregate_Rel (N : Positive) is abstract new I_Relation
+     with record
+      Sub_Rels    : Relation_Array (1 .. N);
+      State       : Positive := 1;
    end record;
 
-   overriding function Solve_Impl (Inst : in out Or_Rec) return Boolean;
-   overriding procedure Reset (Inst : in out Or_Rec);
-   overriding procedure Cleanup (Inst : in out Or_Rec);
-   overriding function Children (Inst : Or_Rec) return Relation_Array
-   is ((Inst.Left, Inst.Right));
+   overriding procedure Reset (Inst : in out Base_Aggregate_Rel);
+   overriding procedure Cleanup (Inst : in out Base_Aggregate_Rel);
+   overriding function Children
+     (Inst : Base_Aggregate_Rel) return Relation_Array
+   is (Inst.Sub_Rels);
 
-   ----------------------------------
-   --  And relation implementation --
-   ----------------------------------
+   ----------
+   --  Any --
+   ----------
 
-   type And_Rec is new I_Relation with record
-      Left, Right : Relation;
-      State       : Integer := 0;
-   end record;
+   type Any is new Base_Aggregate_Rel with null record;
 
-   overriding function Solve_Impl (Inst : in out And_Rec) return Boolean;
-   overriding procedure Reset (Inst : in out And_Rec);
-   overriding procedure Cleanup (Inst : in out And_Rec);
-   overriding function Children (Inst : And_Rec) return Relation_Array
-   is ((Inst.Left, Inst.Right));
+   overriding function Solve_Impl (Inst : in out Any) return Boolean;
+   overriding function Custom_Image (Inst : Any) return String;
+
+   ----------
+   --  All --
+   ----------
+
+   type All_Rel is new Base_Aggregate_Rel with null record;
+
+   overriding function Solve_Impl (Inst : in out All_Rel) return Boolean;
+   overriding function Custom_Image (Inst : All_Rel) return String;
 
    ----------------------------------------
    --  Operator overloading constructors --
@@ -52,6 +52,9 @@ package Langkit_Support.Adalog.Operations is
       renames Logic_Or;
 
    function "and" (L, R : Relation) return access I_Relation'Class
-      renames Logic_And;
+                   renames Logic_And;
+
+   function Logic_Any (Rels : Relation_Array) return access I_Relation'Class;
+   function Logic_All (Rels : Relation_Array) return access I_Relation'Class;
 
 end Langkit_Support.Adalog.Operations;

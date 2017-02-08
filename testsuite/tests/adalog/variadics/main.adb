@@ -6,8 +6,6 @@ with Langkit_Support.Adalog.Main_Support;
 use Langkit_Support.Adalog.Main_Support;
 with Langkit_Support.Adalog.Operations; use Langkit_Support.Adalog.Operations;
 with Langkit_Support.Adalog.Predicates; use Langkit_Support.Adalog.Predicates;
-with Langkit_Support.Adalog.Variadic_Operations;
-use Langkit_Support.Adalog.Variadic_Operations;
 
 with Support; use Support;
 
@@ -30,8 +28,8 @@ procedure Main is
    D : Dummy_Data;
 
    R3 : Relation :=
-     Variadic_And
-       ((Variadic_Or
+     Logic_All
+       ((Logic_Any
            ((Equals (X, 1),
              Equals (X, 2),
              Equals (X, 3),

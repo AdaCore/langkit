@@ -33,6 +33,16 @@ package body Langkit_Support.Adalog.Relations is
          Free (Inst.Rel);
       end Cleanup;
 
+      ------------------
+      -- Custom_Image --
+      ------------------
+
+      overriding function Custom_Image (Inst : Rel) return String
+      is
+      begin
+         return Custom_Image (Inst.Rel);
+      end Custom_Image;
+
    end Pure_Relation;
 
    -----------------------

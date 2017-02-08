@@ -438,8 +438,8 @@ class LogicBooleanOp(AbstractExpression):
 
     def construct(self):
         return BasicExpr(
-            "Variadic_{} (Relation_Array ({{}}.Items))".format(
-                "Or" if self.kind == self.KIND_OR else "And"
+            "Logic_{} (Relation_Array ({{}}.Items))".format(
+                "Any" if self.kind == self.KIND_OR else "All"
             ),
             EquationType,
             [construct(self.equation_array, EquationType.array_type())],
