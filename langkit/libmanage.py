@@ -13,7 +13,10 @@ import subprocess
 import sys
 
 from langkit.compile_context import Verbosity
-from langkit.diagnostics import Diagnostics, DiagnosticError, print_context
+from langkit.diagnostics import (
+    Diagnostics, DiagnosticError, extract_library_location, Location,
+    Context, check_source_language
+)
 from langkit.utils import Colors, col, printcol
 
 
@@ -467,12 +470,20 @@ class ManageScript(object):
                 raise
             print >> sys.stderr, col('Errors, exiting', Colors.FAIL)
             sys.exit(1)
-        except Exception:
+        except Exception, e:
             if parsed_args.debug:
                 raise
             import traceback
-            traceback.print_exc()
-            print_context(recovered=True)
+            ex_type, ex, tb = sys.exc_info()
+            if e.args[0] == 'invalid syntax':
+                loc = Location(e.filename, e.lineno, "")
+            else:
+                loc = extract_library_location(traceback.extract_tb(tb))
+            with Context("", loc, "recovery"):
+                check_source_language(False, str(e), do_raise=False)
+            if parsed_args.verbosity.debug:
+                traceback.print_exc()
+
             print >> sys.stderr, col('Internal error! Exiting', Colors.FAIL)
             sys.exit(1)
         finally:
