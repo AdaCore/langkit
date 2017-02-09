@@ -36,7 +36,7 @@ package body Langkit_Support.Adalog.Operations is
    -- Custom_Image --
    ------------------
 
-   overriding function Custom_Image (Self : Any) return String
+   overriding function Custom_Image (Self : Any_Rel) return String
    is ("<Any>");
 
    ------------------
@@ -50,7 +50,7 @@ package body Langkit_Support.Adalog.Operations is
    -- Solve_Impl --
    ----------------
 
-   overriding function Solve_Impl (Self : in out Any) return Boolean is
+   overriding function Solve_Impl (Self : in out Any_Rel) return Boolean is
    begin
       while Self.State <= Self.N loop
          if Self.Sub_Rels (Self.State).Solve then
@@ -121,7 +121,7 @@ package body Langkit_Support.Adalog.Operations is
       function Process (Rel : Relation) return Relation_Array
       is
         (if Rel.all in False_Relation.Rel'Class then Empty_Array
-         elsif Rel.all in Any'Class then Any (Rel.all).Sub_Rels
+         elsif Rel.all in Any_Rel'Class then Any_Rel (Rel.all).Sub_Rels
          else (1 => Rel));
 
       function Process_Rels is new Rel_Arrays_Utils.Id_Flat_Map_Gen (Process);
@@ -141,10 +141,10 @@ package body Langkit_Support.Adalog.Operations is
          return Keep_Rels (1);
       end if;
 
-      return new Any'(Ref_Count => 1,
-                      N         => Keep_Rels'Length,
-                      Sub_Rels  => Keep_Rels,
-                      State     => <>);
+      return new Any_Rel'(Ref_Count => 1,
+                          N         => Keep_Rels'Length,
+                          Sub_Rels  => Keep_Rels,
+                          State     => <>);
    end Logic_Any;
 
    ---------------

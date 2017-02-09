@@ -18,14 +18,14 @@ package Langkit_Support.Adalog.Operations is
      (Self : Base_Aggregate_Rel) return Relation_Array
    is (Self.Sub_Rels);
 
-   ----------
-   --  Any --
-   ----------
+   -------------
+   -- Any_Rel --
+   -------------
 
-   type Any is new Base_Aggregate_Rel with null record;
+   type Any_Rel is new Base_Aggregate_Rel with null record;
 
-   overriding function Solve_Impl (Self : in out Any) return Boolean;
-   overriding function Custom_Image (Self : Any) return String;
+   overriding function Solve_Impl (Self : in out Any_Rel) return Boolean;
+   overriding function Custom_Image (Self : Any_Rel) return String;
 
    ----------
    --  All --
