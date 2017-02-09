@@ -121,6 +121,7 @@ package body Langkit_Support.Adalog.Operations is
       function Process (Rel : Relation) return Relation_Array
       is
         (if Rel.all in False_Relation.Rel'Class then Empty_Array
+         elsif Rel.all in Any'Class then Any (Rel.all).Sub_Rels
          else (1 => Rel));
 
       function Process_Rels is new Rel_Arrays_Utils.Id_Flat_Map_Gen (Process);
