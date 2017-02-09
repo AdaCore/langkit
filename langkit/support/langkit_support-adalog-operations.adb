@@ -137,6 +137,10 @@ package body Langkit_Support.Adalog.Operations is
          Inc_Ref (Rel);
       end loop;
 
+      if Keep_Rels'Length = 1 then
+         return Keep_Rels (1);
+      end if;
+
       return new Any'(Ref_Count => 1,
                       N         => Keep_Rels'Length,
                       Sub_Rels  => Keep_Rels,
@@ -167,6 +171,10 @@ package body Langkit_Support.Adalog.Operations is
       for Rel of Keep_Rels loop
          Inc_Ref (Rel);
       end loop;
+
+      if Keep_Rels'Length = 1 then
+         return Keep_Rels (1);
+      end if;
 
       return new All_Rel'(Ref_Count => 1,
                           N         => Keep_Rels'Length,
