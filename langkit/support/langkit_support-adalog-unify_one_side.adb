@@ -135,9 +135,9 @@ package body Langkit_Support.Adalog.Unify_One_Side is
          others         => <>);
    end Member;
 
-   ----------
-   -- Free --
-   ----------
+   -------------
+   -- Cleanup --
+   -------------
 
    procedure Cleanup (Self : in out Member_T) is
       procedure Unchecked_Free
