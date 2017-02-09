@@ -73,6 +73,7 @@ package Langkit_Support.Adalog.Unify_One_Side is
    overriding function Solve_Impl (Self : in out Member_T) return Boolean;
    overriding procedure Reset (Self : in out Member_T);
    overriding procedure Cleanup (Self : in out Member_T);
+   overriding function Custom_Image (Self : Member_T) return String;
 
    function Member
      (R : Var.Var; Vals : R_Type_Array; R_Data : Right_C_Data) return Relation;

@@ -1,4 +1,6 @@
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Unchecked_Deallocation;
+
 with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
 package body Langkit_Support.Adalog.Unify_One_Side is
@@ -145,5 +147,25 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    begin
       Unchecked_Free (Self.Values);
    end Cleanup;
+
+   overriding function Custom_Image (Self : Member_T) return String is
+      Res : Unbounded_String;
+   begin
+      Res := To_Unbounded_String ("Member ");
+
+      Append (Res, Image (Self.Left));
+      Append (Res, " {");
+
+      for I in Self.Values.all'Range loop
+         Append (Res, R_Image (Self.Values.all (I)));
+         if I /= Self.Values.all'Last then
+            Append (Res, ", ");
+         end if;
+      end loop;
+
+      Append (Res, "}");
+
+      return To_String (Res);
+   end Custom_Image;
 
 end Langkit_Support.Adalog.Unify_One_Side;
