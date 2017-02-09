@@ -147,18 +147,28 @@ package body Langkit_Support.Adalog.Operations is
    ---------------
 
    function Logic_All (Rels : Relation_Array) return access I_Relation'Class is
+
+      function Process (Rel : Relation) return Relation_Array
+      is
+        (if Rel.all in True_Relation.Rel'Class then Empty_Array
+         else (1 => Rel));
+
+      function Process_Rels is new Rel_Arrays_Utils.Id_Flat_Map_Gen (Process);
+
+      Keep_Rels : constant Relation_Array := Process_Rels (Rels);
+
    begin
-      if Rels'Length = 0 then
+      if Keep_Rels'Length = 0 then
          return True_Rel;
       end if;
 
-      for Rel of Rels loop
+      for Rel of Keep_Rels loop
          Inc_Ref (Rel);
       end loop;
 
       return new All_Rel'(Ref_Count => 1,
-                          N         => Rels'Length,
-                          Sub_Rels  => Rels,
+                          N         => Keep_Rels'Length,
+                          Sub_Rels  => Keep_Rels,
                           State     => <>);
    end Logic_All;
 
