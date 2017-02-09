@@ -10,37 +10,37 @@ package body Langkit_Support.Adalog.Relations is
       -- Call --
       ----------
 
-      function Solve_Impl (Inst : in out Rel) return Boolean is
+      function Solve_Impl (Self : in out Rel) return Boolean is
       begin
-         if Inst.Done then
+         if Self.Done then
             return False;
          end if;
-         Inst.Done := True;
-         return Apply (Inst.Rel);
+         Self.Done := True;
+         return Apply (Self.Rel);
       end Solve_Impl;
 
-      overriding procedure Reset (Inst : in out Rel) is
+      overriding procedure Reset (Self : in out Rel) is
       begin
-         Inst.Done := False;
+         Self.Done := False;
       end Reset;
 
       ----------
       -- Free --
       ----------
 
-      procedure Cleanup (Inst : in out Rel) is
+      procedure Cleanup (Self : in out Rel) is
       begin
-         Free (Inst.Rel);
+         Free (Self.Rel);
       end Cleanup;
 
       ------------------
       -- Custom_Image --
       ------------------
 
-      overriding function Custom_Image (Inst : Rel) return String
+      overriding function Custom_Image (Self : Rel) return String
       is
       begin
-         return Custom_Image (Inst.Rel);
+         return Custom_Image (Self.Rel);
       end Custom_Image;
 
    end Pure_Relation;
@@ -55,20 +55,20 @@ package body Langkit_Support.Adalog.Relations is
       -- Call --
       ----------
 
-      function Solve_Impl (Inst : in out Rel) return Boolean is
+      function Solve_Impl (Self : in out Rel) return Boolean is
       begin
-         case Inst.State is
+         case Self.State is
             when Start =>
-               if Apply (Inst.Rel) then
-                  Inst.State := Success;
+               if Apply (Self.Rel) then
+                  Self.State := Success;
                   return True;
                else
-                  Inst.State := Finish;
+                  Self.State := Finish;
                   return False;
                end if;
             when Success =>
-               Revert (Inst.Rel);
-               Inst.State := Finish;
+               Revert (Self.Rel);
+               Self.State := Finish;
                return False;
             when Finish =>
                return False;
@@ -79,19 +79,19 @@ package body Langkit_Support.Adalog.Relations is
       -- Reset --
       -----------
 
-      procedure Reset (Inst : in out Rel) is
+      procedure Reset (Self : in out Rel) is
       begin
-         Inst.State := Start;
-         Revert (Inst.Rel);
+         Self.State := Start;
+         Revert (Self.Rel);
       end Reset;
 
       ----------
       -- Free --
       ----------
 
-      procedure Cleanup (Inst : in out Rel) is
+      procedure Cleanup (Self : in out Rel) is
       begin
-         Free (Inst.Rel);
+         Free (Self.Rel);
       end Cleanup;
 
    end Stateful_Relation;

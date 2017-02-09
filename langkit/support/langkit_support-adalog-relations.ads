@@ -12,9 +12,9 @@ package Langkit_Support.Adalog.Relations is
 
    generic
       type Ty is private;
-      with function Apply (Inst : in out Ty) return Boolean is <>;
-      with procedure Free (Inst : in out Ty) is <>;
-      with function Custom_Image (Inst : Ty) return String is <>;
+      with function Apply (Self : in out Ty) return Boolean is <>;
+      with procedure Free (Self : in out Ty) is <>;
+      with function Custom_Image (Self : Ty) return String is <>;
    package Pure_Relation is
       --  This generic package represents a relation that will always
       --  yield the same result, and does not produce any side effects.
@@ -24,10 +24,10 @@ package Langkit_Support.Adalog.Relations is
          Rel  : Ty;
       end record;
 
-      overriding function Solve_Impl (Inst : in out Rel) return Boolean;
-      overriding procedure Reset (Inst : in out Rel);
-      overriding procedure Cleanup (Inst : in out Rel);
-      overriding function Custom_Image (Inst : Rel) return String;
+      overriding function Solve_Impl (Self : in out Rel) return Boolean;
+      overriding procedure Reset (Self : in out Rel);
+      overriding procedure Cleanup (Self : in out Rel);
+      overriding function Custom_Image (Self : Rel) return String;
    end Pure_Relation;
 
    -----------------------
@@ -36,10 +36,10 @@ package Langkit_Support.Adalog.Relations is
 
    generic
       type Ty is private;
-      with function Apply (Inst : in out Ty) return Boolean is <>;
-      with procedure Revert (Inst : in out Ty) is <>;
-      with procedure Free (Inst : in out Ty) is <>;
-      with function Custom_Image (Inst : Ty) return String is <>;
+      with function Apply (Self : in out Ty) return Boolean is <>;
+      with procedure Revert (Self : in out Ty) is <>;
+      with procedure Free (Self : in out Ty) is <>;
+      with function Custom_Image (Self : Ty) return String is <>;
    package Stateful_Relation is
 
       --  This package represents a relation that has state,
@@ -52,12 +52,12 @@ package Langkit_Support.Adalog.Relations is
          Rel   : Ty;
       end record;
 
-      overriding function Solve_Impl (Inst : in out Rel) return Boolean;
-      overriding procedure Reset (Inst : in out Rel);
-      overriding procedure Cleanup (Inst : in out Rel);
+      overriding function Solve_Impl (Self : in out Rel) return Boolean;
+      overriding procedure Reset (Self : in out Rel);
+      overriding procedure Cleanup (Self : in out Rel);
 
-      overriding function Custom_Image (Inst : Rel) return String
-      is (Custom_Image (Inst.Rel));
+      overriding function Custom_Image (Self : Rel) return String
+      is (Custom_Image (Self.Rel));
 
    end Stateful_Relation;
 
