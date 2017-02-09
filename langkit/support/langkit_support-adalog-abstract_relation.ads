@@ -34,12 +34,12 @@ package Langkit_Support.Adalog.Abstract_Relation is
    --    relation systems possibly have multiple solutions. This state can
    --    be reset via the Reset primitive.
 
-   function Solve (Inst : in out I_Relation) return Boolean;
+   function Solve (Self : in out I_Relation) return Boolean;
    --  Solve the relation system. Iff the solve process did issue a correct
    --  solution, this will return True, and all logic variables bound by the
    --  relation will have a value.
 
-   function Solve_Impl (Inst : in out I_Relation) return Boolean is abstract;
+   function Solve_Impl (Self : in out I_Relation) return Boolean is abstract;
    --  Solve function that must be implemented by relations
 
    procedure Reset (Self : in out I_Relation) is abstract;
