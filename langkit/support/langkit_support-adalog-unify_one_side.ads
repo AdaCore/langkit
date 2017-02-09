@@ -48,7 +48,7 @@ package Langkit_Support.Adalog.Unify_One_Side is
    procedure Free (Self : in out Unify) is null;
 
    function Custom_Image (Self : Unify) return String
-   is ("<Unify " & Var.Image (Self.Left) & " " & R_Image (Self.Right) & ">");
+   is ("Unify " & Var.Image (Self.Left) & " {" & R_Image (Self.Right) & "}");
 
    package Rel is new Relations.Stateful_Relation (Unify);
 

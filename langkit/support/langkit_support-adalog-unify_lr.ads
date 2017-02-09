@@ -54,8 +54,8 @@ package Langkit_Support.Adalog.Unify_LR is
 
    function Custom_Image (Self : Unify_LR) return String
    is
-     ("<Unify_LR Left: " & Left_Var.Image (Self.Left)
-      & " Right: " & Right_Var.Image (Self.Right) & ">");
+     ("Bind " & Left_Var.Image (Self.Left)
+      & " <=> " & Right_Var.Image (Self.Right));
 
    package Unify_LR_Rel is new Relations.Stateful_Relation (Unify_LR);
 
