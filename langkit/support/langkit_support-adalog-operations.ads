@@ -36,9 +36,9 @@ package Langkit_Support.Adalog.Operations is
    overriding function Solve_Impl (Self : in out All_Rel) return Boolean;
    overriding function Custom_Image (Self : All_Rel) return String;
 
-   ----------------------------------------
-   --  Operator overloading constructors --
-   ----------------------------------------
+   -------------------
+   --  Constructors --
+   -------------------
 
    --  These constructors just borrow their parameters just for the call.
    --  "Logic_X (L, R)" will return a relation that has one new ownership share
