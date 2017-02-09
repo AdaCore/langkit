@@ -57,13 +57,13 @@ package Langkit_Support.Adalog.Predicates is
       --  this invariant).
 
       function Apply
-        (Inst : in out Predicate_Logic) return Boolean;
+        (Self : in out Predicate_Logic) return Boolean;
 
-      procedure Revert (Inst : in out Predicate_Logic);
-      procedure Free (Inst : in out Predicate_Logic);
+      procedure Revert (Self : in out Predicate_Logic);
+      procedure Free (Self : in out Predicate_Logic);
 
-      function Custom_Image (Inst : Predicate_Logic) return String
-      is ("PREDICATE " & Image (Inst.Pred) & " ON " & Var.Image (Inst.Ref));
+      function Custom_Image (Self : Predicate_Logic) return String
+      is ("PREDICATE " & Image (Self.Pred) & " ON " & Var.Image (Self.Ref));
 
       package Impl is new Stateful_Relation (Ty => Predicate_Logic);
       --  This package contains the I_Relation wrapper that is actually to
@@ -167,10 +167,10 @@ package Langkit_Support.Adalog.Predicates is
       --  this invariant).
 
       function Apply
-        (Inst : in out Predicate_Logic) return Boolean;
+        (Self : in out Predicate_Logic) return Boolean;
 
-      procedure Revert (Inst : in out Predicate_Logic);
-      procedure Free (Inst : in out Predicate_Logic);
+      procedure Revert (Self : in out Predicate_Logic);
+      procedure Free (Self : in out Predicate_Logic);
 
       function Img (Refs : Var_Array) return String
       is
@@ -179,8 +179,8 @@ package Langkit_Support.Adalog.Predicates is
             then Img (Refs (Refs'First + 1 .. Refs'Last))
             else ""));
 
-      function Custom_Image (Inst : Predicate_Logic) return String
-      is ("PREDICATE " & Image (Inst.Pred) & " ON " & Img (Inst.Refs));
+      function Custom_Image (Self : Predicate_Logic) return String
+      is ("PREDICATE " & Image (Self.Pred) & " ON " & Img (Self.Refs));
 
       package Impl is new Stateful_Relation (Ty => Predicate_Logic);
       --  This package contains the I_Relation wrapper that is actually to

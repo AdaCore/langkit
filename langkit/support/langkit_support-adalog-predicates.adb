@@ -12,10 +12,10 @@ package body Langkit_Support.Adalog.Predicates is
       -- Free --
       ----------
 
-      procedure Free (Inst : in out Predicate_Logic) is
+      procedure Free (Self : in out Predicate_Logic) is
       begin
-         Remove_Predicate (Inst.Ref, Inst'Unrestricted_Access);
-         Free (Inst.Pred);
+         Remove_Predicate (Self.Ref, Self'Unrestricted_Access);
+         Free (Self.Pred);
       end Free;
 
       -----------
@@ -23,23 +23,23 @@ package body Langkit_Support.Adalog.Predicates is
       -----------
 
       overriding function Apply
-        (Inst : in out Predicate_Logic) return Boolean
+        (Self : in out Predicate_Logic) return Boolean
       is
       begin
-         if Is_Defined (Inst.Ref) then
+         if Is_Defined (Self.Ref) then
             Trace ("In predicate apply, calling predicate");
             return A : Boolean do
-               A := Call (Inst.Pred, GetL (Inst.Ref));
+               A := Call (Self.Pred, GetL (Self.Ref));
                Trace (A'Img);
             end return;
          else
-            Trace ("In predicate apply, var " & Image (Inst.Ref)
+            Trace ("In predicate apply, var " & Image (Self.Ref)
                    & " not defined, deferring application");
 
             --  If the variable is not set, then predicate will return True all
             --  the time, and we register the predicate to be called at a later
             --  time.
-            Add_Predicate (Inst.Ref, Inst'Unchecked_Access);
+            Add_Predicate (Self.Ref, Self'Unchecked_Access);
             return True;
          end if;
       end Apply;
@@ -48,9 +48,9 @@ package body Langkit_Support.Adalog.Predicates is
       -- Revert --
       ------------
 
-      procedure Revert (Inst : in out Predicate_Logic) is
+      procedure Revert (Self : in out Predicate_Logic) is
       begin
-         Remove_Predicate (Inst.Ref, Inst'Unchecked_Access);
+         Remove_Predicate (Self.Ref, Self'Unchecked_Access);
       end Revert;
 
    end Predicate;
@@ -65,12 +65,12 @@ package body Langkit_Support.Adalog.Predicates is
       -- Free --
       ----------
 
-      procedure Free (Inst : in out Predicate_Logic) is
+      procedure Free (Self : in out Predicate_Logic) is
       begin
-         for Ref of Inst.Refs loop
-            Remove_Predicate (Ref, Inst'Unrestricted_Access);
+         for Ref of Self.Refs loop
+            Remove_Predicate (Ref, Self'Unrestricted_Access);
          end loop;
-         Free (Inst.Pred);
+         Free (Self.Pred);
       end Free;
 
       -----------
@@ -78,22 +78,22 @@ package body Langkit_Support.Adalog.Predicates is
       -----------
 
       overriding function Apply
-        (Inst : in out Predicate_Logic) return Boolean
+        (Self : in out Predicate_Logic) return Boolean
       is
       begin
-         if (for all Ref of Inst.Refs => Is_Defined (Ref)) then
+         if (for all Ref of Self.Refs => Is_Defined (Ref)) then
             declare
                Vals : Val_Array (1 .. Arity);
             begin
-               for I in Inst.Refs'Range loop
-                  Vals (I) := GetL (Inst.Refs (I));
+               for I in Self.Refs'Range loop
+                  Vals (I) := GetL (Self.Refs (I));
                end loop;
 
-               return Call (Inst.Pred, Vals);
+               return Call (Self.Pred, Vals);
             end;
          else
-            for Ref of Inst.Refs loop
-               Add_Predicate (Ref, Inst'Unchecked_Access);
+            for Ref of Self.Refs loop
+               Add_Predicate (Ref, Self'Unchecked_Access);
             end loop;
 
             return True;
@@ -104,10 +104,10 @@ package body Langkit_Support.Adalog.Predicates is
       -- Revert --
       ------------
 
-      procedure Revert (Inst : in out Predicate_Logic) is
+      procedure Revert (Self : in out Predicate_Logic) is
       begin
-         for Ref of Inst.Refs loop
-            Remove_Predicate (Ref, Inst'Unchecked_Access);
+         for Ref of Self.Refs loop
+            Remove_Predicate (Ref, Self'Unchecked_Access);
          end loop;
       end Revert;
 
