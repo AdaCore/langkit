@@ -12,11 +12,11 @@ package Langkit_Support.Adalog.Operations is
       State       : Positive := 1;
    end record;
 
-   overriding procedure Reset (Inst : in out Base_Aggregate_Rel);
-   overriding procedure Cleanup (Inst : in out Base_Aggregate_Rel);
+   overriding procedure Reset (Self : in out Base_Aggregate_Rel);
+   overriding procedure Cleanup (Self : in out Base_Aggregate_Rel);
    overriding function Children
-     (Inst : Base_Aggregate_Rel) return Relation_Array
-   is (Inst.Sub_Rels);
+     (Self : Base_Aggregate_Rel) return Relation_Array
+   is (Self.Sub_Rels);
 
    ----------
    --  Any --
@@ -24,8 +24,8 @@ package Langkit_Support.Adalog.Operations is
 
    type Any is new Base_Aggregate_Rel with null record;
 
-   overriding function Solve_Impl (Inst : in out Any) return Boolean;
-   overriding function Custom_Image (Inst : Any) return String;
+   overriding function Solve_Impl (Self : in out Any) return Boolean;
+   overriding function Custom_Image (Self : Any) return String;
 
    ----------
    --  All --
@@ -33,8 +33,8 @@ package Langkit_Support.Adalog.Operations is
 
    type All_Rel is new Base_Aggregate_Rel with null record;
 
-   overriding function Solve_Impl (Inst : in out All_Rel) return Boolean;
-   overriding function Custom_Image (Inst : All_Rel) return String;
+   overriding function Solve_Impl (Self : in out All_Rel) return Boolean;
+   overriding function Custom_Image (Self : All_Rel) return String;
 
    ----------------------------------------
    --  Operator overloading constructors --

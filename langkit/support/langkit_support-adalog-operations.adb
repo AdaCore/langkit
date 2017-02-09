@@ -13,21 +13,21 @@ package body Langkit_Support.Adalog.Operations is
    -- Reset --
    -----------
 
-   overriding procedure Reset (Inst : in out Base_Aggregate_Rel) is
+   overriding procedure Reset (Self : in out Base_Aggregate_Rel) is
    begin
-      for R of Inst.Sub_Rels loop
+      for R of Self.Sub_Rels loop
          R.Reset;
       end loop;
-      Inst.State := 1;
+      Self.State := 1;
    end Reset;
 
    -------------
    -- Cleanup --
    -------------
 
-   overriding procedure Cleanup (Inst : in out Base_Aggregate_Rel) is
+   overriding procedure Cleanup (Self : in out Base_Aggregate_Rel) is
    begin
-      for R of Inst.Sub_Rels loop
+      for R of Self.Sub_Rels loop
          Dec_Ref (R);
       end loop;
    end Cleanup;
@@ -36,27 +36,27 @@ package body Langkit_Support.Adalog.Operations is
    -- Custom_Image --
    ------------------
 
-   overriding function Custom_Image (Inst : Any) return String
+   overriding function Custom_Image (Self : Any) return String
    is ("<Any>");
 
    ------------------
    -- Custom_Image --
    ------------------
 
-   overriding function Custom_Image (Inst : All_Rel) return String
+   overriding function Custom_Image (Self : All_Rel) return String
    is ("<All>");
 
    ----------------
    -- Solve_Impl --
    ----------------
 
-   overriding function Solve_Impl (Inst : in out Any) return Boolean is
+   overriding function Solve_Impl (Self : in out Any) return Boolean is
    begin
-      while Inst.State <= Inst.N loop
-         if Inst.Sub_Rels (Inst.State).Solve then
+      while Self.State <= Self.N loop
+         if Self.Sub_Rels (Self.State).Solve then
             return True;
          end if;
-         Inst.State := Inst.State + 1;
+         Self.State := Self.State + 1;
       end loop;
       return False;
    end Solve_Impl;
@@ -65,25 +65,25 @@ package body Langkit_Support.Adalog.Operations is
    -- Solve_Impl --
    ----------------
 
-   overriding function Solve_Impl (Inst : in out All_Rel) return Boolean is
+   overriding function Solve_Impl (Self : in out All_Rel) return Boolean is
    begin
-      if Inst.State = Inst.N + 1 then
-         Inst.State := Inst.N;
+      if Self.State = Self.N + 1 then
+         Self.State := Self.N;
       end if;
 
-      while Inst.State <= Inst.N loop
-         if Inst.Sub_Rels (Inst.State).Solve then
-            Trace ("Solving rel " & Inst.State'Image
+      while Self.State <= Self.N loop
+         if Self.Sub_Rels (Self.State).Solve then
+            Trace ("Solving rel " & Self.State'Image
                    & " succeeded, moving on to next rel");
-            Inst.State := Inst.State + 1;
+            Self.State := Self.State + 1;
          else
-            if Inst.State = 1 then
+            if Self.State = 1 then
                return False;
             else
-               Trace ("Solving rel " & Inst.State'Image
+               Trace ("Solving rel " & Self.State'Image
                       & " failed, let's reset and try previous rel again");
-               Inst.Sub_Rels (Inst.State).Reset;
-               Inst.State := Inst.State - 1;
+               Self.Sub_Rels (Self.State).Reset;
+               Self.State := Self.State - 1;
             end if;
          end if;
       end loop;
