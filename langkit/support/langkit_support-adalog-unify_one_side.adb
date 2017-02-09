@@ -61,9 +61,9 @@ package body Langkit_Support.Adalog.Unify_One_Side is
       end if;
    end Revert;
 
-   ----------
-   -- Call --
-   ----------
+   ----------------
+   -- Solve_Impl --
+   ----------------
 
    function Solve_Impl (Self : in out Member_T) return Boolean is
    begin

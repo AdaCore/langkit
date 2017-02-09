@@ -129,9 +129,9 @@ package body Langkit_Support.Cheap_Sets is
       return Find (Self, E, False);
    end Has;
 
-   ----------
-   -- Free --
-   ----------
+   -------------
+   -- Destroy --
+   -------------
 
    procedure Destroy (Self : in out Set) is
       procedure Unchecked_Free is new Ada.Unchecked_Deallocation

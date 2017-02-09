@@ -6,9 +6,9 @@ package body Langkit_Support.Adalog.Relations is
 
    package body Pure_Relation is
 
-      ----------
-      -- Call --
-      ----------
+      ----------------
+      -- Solve_Impl --
+      ----------------
 
       function Solve_Impl (Self : in out Rel) return Boolean is
       begin
@@ -24,9 +24,9 @@ package body Langkit_Support.Adalog.Relations is
          Self.Done := False;
       end Reset;
 
-      ----------
-      -- Free --
-      ----------
+      -------------
+      -- Cleanup --
+      -------------
 
       procedure Cleanup (Self : in out Rel) is
       begin
@@ -51,9 +51,9 @@ package body Langkit_Support.Adalog.Relations is
 
    package body Stateful_Relation is
 
-      ----------
-      -- Call --
-      ----------
+      ----------------
+      -- Solve_Impl --
+      ----------------
 
       function Solve_Impl (Self : in out Rel) return Boolean is
       begin
@@ -85,9 +85,9 @@ package body Langkit_Support.Adalog.Relations is
          Revert (Self.Rel);
       end Reset;
 
-      ----------
-      -- Free --
-      ----------
+      -------------
+      -- Cleanup --
+      -------------
 
       procedure Cleanup (Self : in out Rel) is
       begin

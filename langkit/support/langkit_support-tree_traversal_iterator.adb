@@ -72,9 +72,9 @@ package body Langkit_Support.Tree_Traversal_Iterator is
       Natural_Vectors.Destroy (It.Stack);
    end Finalize;
 
-   --------------
-   -- Traverse --
-   --------------
+   ------------
+   -- Create --
+   ------------
 
    function Create (Root : Element_Type) return Traverse_Iterator is
    begin

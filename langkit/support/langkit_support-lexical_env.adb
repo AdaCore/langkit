@@ -101,7 +101,7 @@ package body Langkit_Support.Lexical_Env is
    end Create;
 
    ---------
-   -- Set --
+   -- Add --
    ---------
 
    procedure Add

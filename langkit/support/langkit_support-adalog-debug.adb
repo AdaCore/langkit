@@ -24,9 +24,9 @@ package body Langkit_Support.Adalog.Debug is
       return Debug_Enabled and then Runtime_Debug_State in Trace | Step;
    end Debug;
 
-   --------------------
-   -- Set_Debug_Mode --
-   --------------------
+   ---------------------
+   -- Set_Debug_State --
+   ---------------------
 
    procedure Set_Debug_State (Val : Debug_State_Type) is
    begin

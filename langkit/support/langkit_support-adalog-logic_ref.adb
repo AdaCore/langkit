@@ -24,9 +24,9 @@ package body Langkit_Support.Adalog.Logic_Ref is
       return not Self.Reset;
    end Is_Defined;
 
-   ----------
-   -- SetL --
-   ----------
+   ---------------
+   -- Set_Value --
+   ---------------
 
    function Set_Value (Self : access Var; Data : Element_Type) return Boolean
    is
@@ -78,18 +78,18 @@ package body Langkit_Support.Adalog.Logic_Ref is
       return Self.El;
    end GetL;
 
-   ---------
-   -- Set --
-   ---------
+   ----------
+   -- SetL --
+   ----------
 
    function SetL (Self : in out Ref; Data : Element_Type) return Boolean is
    begin
       return Set_Value (Self.Unchecked_Get.Content'Unrestricted_Access, Data);
    end SetL;
 
-   ---------
-   -- Get --
-   ---------
+   ----------
+   -- GetL --
+   ----------
 
    function GetL (Self : Ref) return Element_Type is
    begin
