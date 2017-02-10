@@ -25,16 +25,23 @@ generic
    type Element_Type is private;
 
    with procedure Reset (Self : in out Logic_Var_Type) is <>;
+   --  Reset the logic variable to an undefined state with no value
+
    with function Is_Defined (Self : Logic_Var_Type) return Boolean is <>;
+   --  Checks whether the logic variable has a value or not
 
    with function Set_Value
      (Self : in out Logic_Var_Type; Data : Element_Type) return Boolean
      is <> with Inline => True;
+   --  Set the value of the logic variable to Data. Low level function, not for
+   --  use by clients.
 
    with function Get_Value (Self : Logic_Var_Type) return Element_Type
      is <> with Inline => True;
+   --  Get the value stored in Self
 
    with function Create return Logic_Var_Type is <>;
+   --  Return a new logic variable
 
    with function Get_Pending_Predicates
      (Self : Logic_Var_Type) return Pred_Sets.Set is <>;
@@ -50,8 +57,10 @@ generic
    --  logic variable.
 
    with function Image (Self : Logic_Var_Type) return String is <>;
+   --  Return a string image of Self
 
    with function Element_Image (Self : Element_Type) return String is <>;
+   --  Return a string image of Self
 
 package Langkit_Support.Adalog.Logic_Var is
    subtype Var is Logic_Var_Type;
