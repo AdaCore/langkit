@@ -131,8 +131,17 @@ package Langkit_Support.Adalog.Logic_Ref is
    function Image (Self : Raw_Var) return String is
      (Image (Self.all));
 
+   ------------------------------------
+   -- Formal packages instantiations --
+   ------------------------------------
+
+   --  Refcounted one
+
    package Refcounted_Logic_Var is new Adalog.Logic_Var
      (Ref, Element_Type);
+
+   --  Raw one
+
    package Raw_Logic_Var is new Adalog.Logic_Var (Raw_Var, Element_Type);
 
 end Langkit_Support.Adalog.Logic_Ref;
