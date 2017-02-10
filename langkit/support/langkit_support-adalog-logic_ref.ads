@@ -28,6 +28,8 @@ package Langkit_Support.Adalog.Logic_Ref is
    function Set_Value (Self : access Var; Data : Element_Type) return Boolean;
    function GetL (Self : Var) return Element_Type;
    procedure Destroy (Self : in out Var);
+   function Image (Self : Var) return String is
+     (if Self.Dbg_Name /= null then Self.Dbg_Name.all else "None");
 
    --  Var predicates functions
 
@@ -55,8 +57,7 @@ package Langkit_Support.Adalog.Logic_Ref is
    procedure Add_Predicate (Self : Ref; Pred : Var_Predicate);
 
    function Image (Self : Ref) return String is
-     (if Self.Unchecked_Get.Content.Dbg_Name /= null
-      then Self.Unchecked_Get.Content.Dbg_Name.all else "None");
+     (Image (Self.Unchecked_Get.Content));
 
    function Create return Ref;
 
@@ -75,7 +76,7 @@ package Langkit_Support.Adalog.Logic_Ref is
    procedure Add_Predicate (Self : Raw_Var; Pred : Var_Predicate);
 
    function Image (Self : Raw_Var) return String is
-     (if Self.Dbg_Name /= null then Self.Dbg_Name.all else "None");
+     (Image (Self.all));
 
    package Refcounted_Logic_Var is new Adalog.Logic_Var
      (Ref, Element_Type);
