@@ -40,8 +40,8 @@ package Langkit_Support.Adalog.Logic_Ref is
       --  Whether this variable is set or not. Reset is True when the variable
       --  has no value.
 
-      El                : Element_Type;
-      --  The value of this logic variable, when it is set.
+      Value             : Element_Type;
+      --  The value of this logic variable, when it is set
 
       Pending_Relations : Pred_Sets.Set;
       --  List of relations which applications are pending on this variable

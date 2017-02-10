@@ -35,11 +35,11 @@ package body Langkit_Support.Adalog.Logic_Ref is
       if Debug_State = Trace then
          Trace ("Setting the value of " & Image (Self) & " to "
                 & Element_Image (Data));
-         Trace ("Old value is " & Element_Image (Old.El));
+         Trace ("Old value is " & Element_Image (Old.Value));
       end if;
       --  First set the value
 
-      Self.El := Data;
+      Self.Value := Data;
       Self.Reset := False;
 
       --  Then check if we have pending relations, and if they evaluate to
@@ -55,7 +55,8 @@ package body Langkit_Support.Adalog.Logic_Ref is
             Self := Old;
 
             if Debug_State = Trace then
-               Trace ("Self element value is now " & Element_Image (Self.El));
+               Trace ("Self element value is now "
+                      & Element_Image (Self.Value));
             end if;
 
             return False;
@@ -75,7 +76,7 @@ package body Langkit_Support.Adalog.Logic_Ref is
       --  we want to be able to access the variable even if the element is
       --  unset, eg. null. However, we need to have a definite null value for
       --  elements, which could even replace the Reset flag altogether maybe.
-      return Self.El;
+      return Self.Value;
    end GetL;
 
    ----------
