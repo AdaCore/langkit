@@ -5,6 +5,21 @@ use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Logic_Var_Predicate;
 use Langkit_Support.Adalog.Logic_Var_Predicate;
 
+--  This package is meant to be used as a generic formal package, representing
+--  the interface to a logic variable. It is used so that the interface and the
+--  implementation of a logic variable can be decoupled. In practice this is
+--  only used so we can have two different implementations that vary only in
+--  terms of memory management:
+--
+--  - One is a refcounted, controlled-object based logic variable, so its
+--  memory management is automatic.
+--
+--  - The other is a naked access, so memory management is left to the user.
+--
+--  As many things in Adalog, this choices hinges on the hypothesis that Adalog
+--  could be used directly, and not in a code generation context, which is
+--  still unclear.
+
 generic
    type Logic_Var_Type is private;
    type Element_Type is private;
@@ -40,6 +55,8 @@ generic
 
 package Langkit_Support.Adalog.Logic_Var is
    subtype Var is Logic_Var_Type;
+   --  Subtype so that the variable type is visible from the outside, since
+   --  formals are not visible.
 
    type Var_Array is array (Natural range <>) of Var;
    type Val_Array is array (Natural range <>) of Element_Type;
