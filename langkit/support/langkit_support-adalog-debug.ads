@@ -9,10 +9,8 @@ package Langkit_Support.Adalog.Debug is
 
    Debug_Enabled : constant Boolean := True;
 
-   pragma Warnings (Off, "always");
    function Debug return Boolean
    with Inline;
-   pragma Warnings (On, "always");
 
    procedure Set_Debug_State (Val : Debug_State_Type);
    function Debug_State return Debug_State_Type;
