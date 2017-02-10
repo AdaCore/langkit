@@ -18,16 +18,25 @@ generic
    with function Equals (L, R : L_Type) return Boolean is <>;
 
    type R_Convert_Data is private;
+   --  Private type containing data associated to the Conversion function. Not
+   --  necessary but useful if your conversion function has state.
 
    with function Convert
      (C_Data : R_Convert_Data; From : R_Type) return L_Type is <>;
+   --  Conversion function, to get an L_Type from an R_Type
 
    with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
+   --  Logic variable formal package
 
    with function R_Image (Self : R_Type) return String is <>;
    with function L_Image (Self : L_Type) return String is <>;
+   --  Images functions for element types. Used for debugging
 
    Invert_Equals : Boolean := False;
+   --  By default, equality on L and R value are done via Equals (Convert (R),
+   --  L) If this is passed, it will be done by Equals (L, Convert (R)). This
+   --  can be useful if order is important in your equality function.
+
 package Langkit_Support.Adalog.Unify_One_Side is
 
    type R_Type_Array is array (Positive range <>) of R_Type;
