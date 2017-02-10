@@ -11,7 +11,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    -- Apply --
    -----------
 
-   function Apply (Self : in out Unify) return Boolean is
+   function Apply (Self : in out Unify_Rec) return Boolean is
    begin
       Trace ("In Unify");
       if Is_Defined (Self.Left) then
@@ -53,7 +53,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    -- Revert --
    ------------
 
-   procedure Revert (Self : in out Unify) is
+   procedure Revert (Self : in out Unify_Rec) is
    begin
       if Self.Changed then
          Reset (Self.Left);
@@ -124,7 +124,9 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    ------------
 
    function Member
-     (R : Var.Var; Vals : R_Type_Array; R_Data : Right_C_Data) return Relation
+     (R      : Var.Var;
+      Vals   : R_Type_Array;
+      R_Data : R_Convert_Data) return Relation
    is
    begin
       return new Member_T'

@@ -76,16 +76,14 @@ package Langkit_Support.Adalog.Unify is
      (L : Left_Var.Var; R : R_Type; R_Data : Right_C_Data := No_R_Data)
       return access Base_Relation'Class
    is
-     (new Unify_Left.Rel.Rel'
-        (Rel => Unify_Left.Create (L, R, R_Data), others => <>))
+     (Unify_Left.Create (L, R, R_Data))
    with Inline;
 
    function Equals
      (L : L_Type; R : Right_Var.Var; L_Data : Left_C_Data := No_L_Data)
       return access Base_Relation'Class
    is
-     (new Unify_Right.Rel.Rel'
-        (Rel => Unify_Right.Create (R, L, L_Data), others => <>))
+     (Unify_Right.Create (R, L, L_Data))
    with Inline;
 
    ------------

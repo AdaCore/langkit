@@ -4,7 +4,12 @@ with Langkit_Support.Adalog.Logic_Var;
 with Langkit_Support.Adalog.Relations;
 
 --  Internal implementation package, not to be used directly by users a-priori.
---  TODO??? document the inner workings a bit more.
+--  This package implements what we call "one side" simple relations, which
+--  means:
+--
+--  1. They're simple because they're not composed of several sub-relations.
+--  2. They're "one side" because only one logic variable is involved.
+--
 
 generic
    type L_Type is private;
@@ -12,10 +17,10 @@ generic
 
    with function Equals (L, R : L_Type) return Boolean is <>;
 
-   type Right_C_Data is private;
+   type R_Convert_Data is private;
 
    with function Convert
-     (C_Data : Right_C_Data; From : R_Type) return L_Type is <>;
+     (C_Data : R_Convert_Data; From : R_Type) return L_Type is <>;
 
    with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
 
@@ -31,35 +36,68 @@ package Langkit_Support.Adalog.Unify_One_Side is
    -- Unify --
    -----------
 
-   type Unify is record
-      Left    : Var.Var;
-      Right   : R_Type;
-      Changed : Boolean := False;
-      R_Data  : Right_C_Data;
-   end record;
+   --  Unify is a simple relation that will ensure that the logic variable
+   --  it binds is equal to a certain value. It is like a version of "Member"
+   --  above, but restricted to a length 1 domain.
 
+   type Unify is new Base_Relation with private;
    function Create
-     (Left : Var.Var; Right : R_Type; R_Data : Right_C_Data) return Unify
-   is
-     ((Left => Left, Right => Right, Changed => False, R_Data => R_Data));
-
-   function Apply (Self : in out Unify) return Boolean;
-   procedure Revert (Self : in out Unify);
-   procedure Free (Self : in out Unify) is null;
-
-   function Custom_Image (Self : Unify) return String
-   is ("Unify " & Var.Image (Self.Left) & " {" & R_Image (Self.Right) & "}");
-
-   package Rel is new Relations.Stateful_Relation (Unify);
+     (Left : Var.Var; Right : R_Type; R_Data : R_Convert_Data) return Relation;
 
    ------------
    -- Member --
    ------------
 
+   --  Member is a simple relation that ensures that the value of a logic
+   --  variable is in a certain domain.
+
    --  TODO??? Why is member not implemented in terms of
    --  Relation.Stateful_Relation?
 
    type R_Type_Array_Access is access all R_Type_Array;
+   type Member_T is new Base_Relation with private;
+
+   function Member
+     (R      : Var.Var;
+      Vals   : R_Type_Array;
+      R_Data : R_Convert_Data) return Relation;
+
+   overriding function Solve_Impl (Self : in out Member_T) return Boolean;
+   overriding procedure Reset (Self : in out Member_T);
+   overriding procedure Cleanup (Self : in out Member_T);
+   overriding function Custom_Image (Self : Member_T) return String;
+
+private
+
+   -----------
+   -- Unify --
+   -----------
+
+   type Unify_Rec is record
+      Left    : Var.Var;
+      Right   : R_Type;
+      Changed : Boolean := False;
+      R_Data  : R_Convert_Data;
+   end record;
+
+   function Create
+     (Left : Var.Var; Right : R_Type; R_Data : R_Convert_Data) return Unify_Rec
+   is
+     ((Left => Left, Right => Right, Changed => False, R_Data => R_Data));
+
+   function Apply (Self : in out Unify_Rec) return Boolean;
+   procedure Revert (Self : in out Unify_Rec);
+   procedure Free (Self : in out Unify_Rec) is null;
+
+   function Custom_Image (Self : Unify_Rec) return String
+   is ("Unify " & Var.Image (Self.Left) & " {" & R_Image (Self.Right) & "}");
+
+   package Rel is new Relations.Stateful_Relation (Unify_Rec);
+   type Unify is new Rel.Rel with null record;
+
+   function Create
+     (Left : Var.Var; Right : R_Type; R_Data : R_Convert_Data) return Relation
+   is (new Unify'(Rel => Create (Left, Right, R_Data), others => <>));
 
    type Member_T is new Base_Relation with record
       Left           : Var.Var;
@@ -67,15 +105,7 @@ package Langkit_Support.Adalog.Unify_One_Side is
       Current_Index  : Positive := 1;
       Changed        : Boolean := False;
       Domain_Checked : Boolean := False;
-      R_Data         : Right_C_Data;
+      R_Data         : R_Convert_Data;
    end record;
-
-   overriding function Solve_Impl (Self : in out Member_T) return Boolean;
-   overriding procedure Reset (Self : in out Member_T);
-   overriding procedure Cleanup (Self : in out Member_T);
-   overriding function Custom_Image (Self : Member_T) return String;
-
-   function Member
-     (R : Var.Var; Vals : R_Type_Array; R_Data : Right_C_Data) return Relation;
 
 end Langkit_Support.Adalog.Unify_One_Side;
