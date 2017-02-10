@@ -28,12 +28,12 @@ package body Langkit_Support.Adalog.Logic_Ref is
    -- Set_Value --
    ---------------
 
-   function Set_Value (Self : access Var; Data : Element_Type) return Boolean
+   function Set_Value (Self : in out Var; Data : Element_Type) return Boolean
    is
-      Old   : aliased constant Var := Self.all;
+      Old   : aliased constant Var := Self;
    begin
       if Debug_State = Trace then
-         Trace ("Setting the value of " & Image (Raw_Var (Self)) & " to "
+         Trace ("Setting the value of " & Image (Self) & " to "
                 & Element_Image (Data));
          Trace ("Old value is " & Element_Image (Old.El));
       end if;
@@ -47,12 +47,12 @@ package body Langkit_Support.Adalog.Logic_Ref is
 
       for El of Pred_Sets.Elements (Self.Pending_Relations) loop
          if Debug_State = Trace then
-            Trace ("Applying predicate on " & Image (Raw_Var (Self)));
+            Trace ("Applying predicate on " & Image (Self));
          end if;
 
          if not El.Apply then
             Trace ("Applying predicate failed");
-            Self.all := Old;
+            Self := Old;
 
             if Debug_State = Trace then
                Trace ("Self element value is now " & Element_Image (Self.El));
@@ -84,7 +84,7 @@ package body Langkit_Support.Adalog.Logic_Ref is
 
    function SetL (Self : in out Ref; Data : Element_Type) return Boolean is
    begin
-      return Set_Value (Self.Unchecked_Get.Content'Unrestricted_Access, Data);
+      return Set_Value (Self.Unchecked_Get.Content, Data);
    end SetL;
 
    ----------
@@ -153,7 +153,7 @@ package body Langkit_Support.Adalog.Logic_Ref is
    pragma Warnings (Off);
    function SetL (Self : in out Raw_Var; Data : Element_Type) return Boolean is
    begin
-      return Set_Value (Self, Data);
+      return Set_Value (Self.all, Data);
    end SetL;
    pragma Warnings (On);
 
