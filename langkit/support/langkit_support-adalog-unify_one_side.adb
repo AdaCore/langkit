@@ -148,6 +148,10 @@ package body Langkit_Support.Adalog.Unify_One_Side is
       Unchecked_Free (Self.Values);
    end Cleanup;
 
+   ------------------
+   -- Custom_Image --
+   ------------------
+
    overriding function Custom_Image (Self : Member_T) return String is
       Res : Unbounded_String;
    begin
