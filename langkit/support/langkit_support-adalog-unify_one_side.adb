@@ -37,7 +37,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
          end return;
       else
 
-         if SetL (Self.Left, Convert (Self.R_Data, Self.Right)) then
+         if Set_Value (Self.Left, Convert (Self.R_Data, Self.Right)) then
             Trace ("Setting left worked !");
 
             Self.Changed := True;
@@ -84,7 +84,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
          else
             loop
                Self.Current_Index := Self.Current_Index + 1;
-               if SetL
+               if Set_Value
                  (Self.Left, Convert
                     (Self.R_Data, Self.Values (Self.Current_Index - 1)))
                then

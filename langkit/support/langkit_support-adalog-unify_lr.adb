@@ -26,7 +26,9 @@ package body Langkit_Support.Adalog.Unify_LR is
 
          --  Left is defined, right is not, give right the value of left and
          --  return true.
-         if SetL (Self.Right, Convert (Self.L_Data, GetL (Self.Left))) then
+         if
+           Set_Value (Self.Right, Convert (Self.L_Data, Get_Value (Self.Left)))
+         then
             Self.State := Right_Changed;
             Trace ("In Unify_LR, propagating right, from "
                    & Image (Self.Left) & " to "
@@ -59,7 +61,9 @@ package body Langkit_Support.Adalog.Unify_LR is
 
       --  Right is defined, left is not, give left the value of right and
       --  return true.
-      if SetL (Self.Left, Convert (Self.R_Data, GetL (Self.Right))) then
+      if
+         Set_Value (Self.Left, Convert (Self.R_Data, Get_Value (Self.Right)))
+      then
          Self.State := Left_Changed;
          Trace ("In Unify_LR, propagating left, from "
                    & Image (Self.Right) & " to "

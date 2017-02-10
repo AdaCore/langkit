@@ -27,7 +27,7 @@ generic
    with procedure Reset (Self : in out Logic_Var_Type) is <>;
    with function Is_Defined (Self : Logic_Var_Type) return Boolean is <>;
 
-   with function SetL
+   with function Set_Value
      (Self : in out Logic_Var_Type; Data : Element_Type) return Boolean
      is <> with Inline => True;
 

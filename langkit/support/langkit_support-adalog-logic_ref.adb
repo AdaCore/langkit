@@ -79,14 +79,16 @@ package body Langkit_Support.Adalog.Logic_Ref is
       return Self.Value;
    end GetL;
 
-   ----------
-   -- SetL --
-   ----------
+   ---------------
+   -- Set_Value --
+   ---------------
 
-   function SetL (Self : in out Ref; Data : Element_Type) return Boolean is
+   function Set_Value
+     (Self : in out Ref; Data : Element_Type) return Boolean
+   is
    begin
       return Set_Value (Self.Unchecked_Get.Content, Data);
-   end SetL;
+   end Set_Value;
 
    ----------
    -- GetL --
@@ -147,15 +149,17 @@ package body Langkit_Support.Adalog.Logic_Ref is
       return Is_Defined (Self.all);
    end Is_Defined;
 
-   ----------
-   -- SetL --
-   ----------
+   ---------------
+   -- Set_Value --
+   ---------------
 
    pragma Warnings (Off);
-   function SetL (Self : in out Raw_Var; Data : Element_Type) return Boolean is
+   function Set_Value
+     (Self : in out Raw_Var; Data : Element_Type) return Boolean
+   is
    begin
       return Set_Value (Self.all, Data);
-   end SetL;
+   end Set_Value;
    pragma Warnings (On);
 
    ----------
