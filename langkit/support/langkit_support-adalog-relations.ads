@@ -19,7 +19,7 @@ package Langkit_Support.Adalog.Relations is
       --  This generic package represents a relation that will always
       --  yield the same result, and does not produce any side effects.
 
-      type Rel is new I_Relation with record
+      type Rel is new Base_Relation with record
          Done : Boolean := False;
          Rel  : Ty;
       end record;
@@ -47,7 +47,7 @@ package Langkit_Support.Adalog.Relations is
 
       type State_Type is (Start, Success, Finish);
 
-      type Rel is new I_Relation with record
+      type Rel is new Base_Relation with record
          State : State_Type := Start;
          Rel   : Ty;
       end record;

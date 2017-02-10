@@ -61,7 +61,7 @@ package Langkit_Support.Adalog.Unify_One_Side is
 
    type R_Type_Array_Access is access all R_Type_Array;
 
-   type Member_T is new I_Relation with record
+   type Member_T is new Base_Relation with record
       Left           : Var.Var;
       Values         : R_Type_Array_Access;
       Current_Index  : Positive := 1;

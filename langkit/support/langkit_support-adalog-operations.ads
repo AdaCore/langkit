@@ -6,7 +6,7 @@ use Langkit_Support.Adalog.Abstract_Relation;
 
 package Langkit_Support.Adalog.Operations is
 
-   type Base_Aggregate_Rel (N : Positive) is abstract new I_Relation
+   type Base_Aggregate_Rel (N : Positive) is abstract new Base_Relation
      with record
       Sub_Rels    : Relation_Array (1 .. N);
       State       : Positive := 1;
@@ -45,16 +45,18 @@ package Langkit_Support.Adalog.Operations is
    --  for both L and R. As for all constructors, the created object has only
    --  one ownership share which is given to the caller.
 
-   function Logic_Or (L, R : Relation) return access I_Relation'Class;
-   function Logic_And (L, R : Relation) return access I_Relation'Class;
+   function Logic_Or (L, R : Relation) return access Base_Relation'Class;
+   function Logic_And (L, R : Relation) return access Base_Relation'Class;
 
-   function "or" (L, R : Relation) return access I_Relation'Class
+   function "or" (L, R : Relation) return access Base_Relation'Class
       renames Logic_Or;
 
-   function "and" (L, R : Relation) return access I_Relation'Class
+   function "and" (L, R : Relation) return access Base_Relation'Class
                    renames Logic_And;
 
-   function Logic_Any (Rels : Relation_Array) return access I_Relation'Class;
-   function Logic_All (Rels : Relation_Array) return access I_Relation'Class;
+   function Logic_Any
+     (Rels : Relation_Array) return access Base_Relation'Class;
+   function Logic_All
+     (Rels : Relation_Array) return access Base_Relation'Class;
 
 end Langkit_Support.Adalog.Operations;

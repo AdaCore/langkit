@@ -1,14 +1,17 @@
+--  This file contains the base class representing a logic relation. Equations
+--  systems are basically a tree of Base_Relation subclasses instances.
+
 package Langkit_Support.Adalog.Abstract_Relation is
 
-   ----------------
-   -- I_Relation --
-   ----------------
+   -------------------
+   -- Base_Relation --
+   -------------------
 
-   type I_Relation is abstract tagged record
+   type Base_Relation is abstract tagged record
       Ref_Count : Natural := 1;
    end record;
 
-   type Relation is access all I_Relation'Class;
+   type Relation is access all Base_Relation'Class;
    --  Since relations are trees, they're not manipulated by value, but instead
    --  via this class-wide access type.
 
@@ -34,26 +37,27 @@ package Langkit_Support.Adalog.Abstract_Relation is
    --    relation systems possibly have multiple solutions. This state can
    --    be reset via the Reset primitive.
 
-   function Solve (Self : in out I_Relation) return Boolean;
+   function Solve (Self : in out Base_Relation) return Boolean;
    --  Solve the relation system. Iff the solve process did issue a correct
    --  solution, this will return True, and all logic variables bound by the
    --  relation will have a value.
 
-   function Solve_Impl (Self : in out I_Relation) return Boolean is abstract;
+   function Solve_Impl
+     (Self : in out Base_Relation) return Boolean is abstract;
    --  Solve function that must be implemented by relations
 
-   procedure Reset (Self : in out I_Relation) is abstract;
+   procedure Reset (Self : in out Base_Relation) is abstract;
    --  Reset the state of the relation and all sub-relations
 
-   procedure Cleanup (Self : in out I_Relation) is abstract;
+   procedure Cleanup (Self : in out Base_Relation) is abstract;
    --  Perform necessary cleanup before free, like releasing references and
-   --  freeing owned resources. This needs to be implemented by I_Relation
+   --  freeing owned resources. This needs to be implemented by Base_Relation
    --  implementers, and it will be called just before freeing Self in Dec_Ref.
 
-   function Children (Self : I_Relation) return Relation_Array
+   function Children (Self : Base_Relation) return Relation_Array
    is (Empty_Array);
 
-   function Custom_Image (Self : I_Relation) return String is ("");
+   function Custom_Image (Self : Base_Relation) return String is ("");
    --  Implementers of relations can overload this function if they want the
    --  default image provided by the Print_Relation function to be overloaded.
 

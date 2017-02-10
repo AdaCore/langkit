@@ -19,7 +19,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
    -- Solve --
    -----------
 
-   function Solve (Self : in out I_Relation) return Boolean is
+   function Solve (Self : in out Base_Relation) return Boolean is
       procedure Wait;
 
       --  Wait for user input
@@ -43,7 +43,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
          Wait;
       end if;
 
-      return Res : constant Boolean := I_Relation'Class (Self).Solve_Impl do
+      return Res : constant Boolean := Base_Relation'Class (Self).Solve_Impl do
          Trace (Res'Image);
          Wait;
       end return;
@@ -66,7 +66,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
 
    procedure Dec_Ref (Self : in out Relation) is
       procedure Unchecked_Free
-      is new Ada.Unchecked_Deallocation (I_Relation'Class, Relation);
+      is new Ada.Unchecked_Deallocation (Base_Relation'Class, Relation);
    begin
       if Self = null then
          return;
