@@ -394,7 +394,7 @@ def get_value(logic_var):
         extract the value.
     """
     return BuiltinCallExpr(
-        "Eq_Node.Refs.GetL", T.root_node.env_el(),
+        "Eq_Node.Refs.Get_Value", T.root_node.env_el(),
         [construct(logic_var, LogicVarType)]
     )
 

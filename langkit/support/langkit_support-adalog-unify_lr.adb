@@ -17,8 +17,8 @@ package body Langkit_Support.Adalog.Unify_LR is
          if Is_Defined (Self.Right) then
             return C : Boolean do
                C :=
-                 Equals (Convert (Self.L_Data, GetL (Self.Left)),
-                         GetL (Self.Right));
+                 Equals (Convert (Self.L_Data, Get_Value (Self.Left)),
+                         Get_Value (Self.Right));
                Trace ("In Unify_LR, both defined, returning " & C'Image);
             end return;
 
@@ -34,9 +34,9 @@ package body Langkit_Support.Adalog.Unify_LR is
                    & Image (Self.Left) & " to "
                    & Image (Self.Right));
             Trace ("In Unify_LR, From value is : "
-                   & Element_Image (GetL (Self.Left)));
+                   & Element_Image (Get_Value (Self.Left)));
             Trace ("In Unify_LR, To value is : "
-                   & Element_Image (GetL (Self.Right)));
+                   & Element_Image (Get_Value (Self.Right)));
             return True;
          else
             Trace ("In Unify_LR, propagating right failed ! ");

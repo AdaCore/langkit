@@ -31,7 +31,7 @@ generic
      (Self : in out Logic_Var_Type; Data : Element_Type) return Boolean
      is <> with Inline => True;
 
-   with function GetL (Self : Logic_Var_Type) return Element_Type
+   with function Get_Value (Self : Logic_Var_Type) return Element_Type
      is <> with Inline => True;
 
    with function Create return Logic_Var_Type is <>;

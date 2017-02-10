@@ -23,14 +23,14 @@ package body Langkit_Support.Adalog.Unify_One_Side is
                R_Val : constant L_Type := Convert (Self.R_Data, Self.Right);
             begin
                Trace (L_Image (R_Val));
-               Trace (L_Image (GetL (Self.Left)));
+               Trace (L_Image (Get_Value (Self.Left)));
 
                if Invert_Equals then
                   C := Equals
-                    (R_Val, GetL (Self.Left));
+                    (R_Val, Get_Value (Self.Left));
                else
                   C := Equals
-                    (GetL (Self.Left), R_Val);
+                    (Get_Value (Self.Left), R_Val);
                end if;
                Trace ("Returning " & C'Image);
             end;
@@ -76,7 +76,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
 
             Self.Domain_Checked := True;
             for V of Self.Values.all loop
-               if GetL (Self.Left) = Convert (Self.R_Data, V) then
+               if Get_Value (Self.Left) = Convert (Self.R_Data, V) then
                   return True;
                end if;
             end loop;

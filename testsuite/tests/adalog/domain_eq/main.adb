@@ -18,7 +18,7 @@ begin
         Member (X, (1, 2, 3, 4, 5, 6)) or Equals (X, 7) or Equals (X, 8);
    begin
       while R.Solve loop
-         Put_Line ("X =" & GetL (X)'Img);
+         Put_Line ("X =" & Get_Value (X)'Img);
       end loop;
    end;
 
@@ -38,7 +38,7 @@ begin
               Equals (Y, 1));
    begin
       while R.Solve loop
-         Put_Line ("X =" & GetL (X)'Img & ", Y =" & GetL (Y)'Img);
+         Put_Line ("X =" & Get_Value (X)'Img & ", Y =" & Get_Value (Y)'Img);
       end loop;
    end;
 end Main;

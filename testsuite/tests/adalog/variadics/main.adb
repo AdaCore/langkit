@@ -46,6 +46,6 @@ procedure Main is
 
 begin
    while R3.Solve loop
-      Put_Line ("X =" & GetL (X)'Img & ", Y =" & GetL (Y)'Img);
+      Put_Line ("X =" & Get_Value (X)'Img & ", Y =" & Get_Value (Y)'Img);
    end loop;
 end Main;

@@ -29,7 +29,7 @@ package body Langkit_Support.Adalog.Predicates is
          if Is_Defined (Self.Ref) then
             Trace ("In predicate apply, calling predicate");
             return A : Boolean do
-               A := Call (Self.Pred, GetL (Self.Ref));
+               A := Call (Self.Pred, Get_Value (Self.Ref));
                Trace (A'Img);
             end return;
          else
@@ -86,7 +86,7 @@ package body Langkit_Support.Adalog.Predicates is
                Vals : Val_Array (1 .. Arity);
             begin
                for I in Self.Refs'Range loop
-                  Vals (I) := GetL (Self.Refs (I));
+                  Vals (I) := Get_Value (Self.Refs (I));
                end loop;
 
                return Call (Self.Pred, Vals);

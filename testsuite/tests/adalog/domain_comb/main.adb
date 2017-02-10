@@ -21,7 +21,7 @@ begin
       R : Relation := Member (X, (1, 2, 3, 4, 5, 6)) and Member (X, (3, 4, 5));
    begin
       while R.Solve loop
-         Put_Line ("X =" & GetL (X)'Img);
+         Put_Line ("X =" & Get_Value (X)'Img);
       end loop;
    end;
 

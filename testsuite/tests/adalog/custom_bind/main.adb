@@ -22,7 +22,7 @@ begin
       R : Relation := Member (X, (1, 2, 3, 4, 5, 6)) and Square (X, Y);
    begin
       while R.Solve loop
-         Put_Line ("X =" & GetL (X)'Img & ", Y =" & GetL (Y)'Img);
+         Put_Line ("X =" & Get_Value (X)'Img & ", Y =" & Get_Value (Y)'Img);
       end loop;
    end;
 
@@ -34,7 +34,7 @@ begin
                       and Square (X, Y) and Equals (Y, 36);
    begin
       while R.Solve loop
-         Put_Line ("X =" & GetL (X)'Img & ", Y =" & GetL (Y)'Img);
+         Put_Line ("X =" & Get_Value (X)'Img & ", Y =" & Get_Value (Y)'Img);
       end loop;
    end;
 

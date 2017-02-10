@@ -66,18 +66,18 @@ package body Langkit_Support.Adalog.Logic_Ref is
       return True;
    end Set_Value;
 
-   ----------
-   -- GetL --
-   ----------
+   ---------------
+   -- Get_Value --
+   ---------------
 
-   function GetL (Self : Var) return Element_Type is
+   function Get_Value (Self : Var) return Element_Type is
    begin
       --  TODO??? We removed an assert about Self.Reset being False, because
       --  we want to be able to access the variable even if the element is
       --  unset, eg. null. However, we need to have a definite null value for
       --  elements, which could even replace the Reset flag altogether maybe.
       return Self.Value;
-   end GetL;
+   end Get_Value;
 
    ---------------
    -- Set_Value --
@@ -90,14 +90,14 @@ package body Langkit_Support.Adalog.Logic_Ref is
       return Set_Value (Self.Unchecked_Get.Content, Data);
    end Set_Value;
 
-   ----------
-   -- GetL --
-   ----------
+   ---------------
+   -- Get_Value --
+   ---------------
 
-   function GetL (Self : Ref) return Element_Type is
+   function Get_Value (Self : Ref) return Element_Type is
    begin
-      return GetL (Self.Unchecked_Get.Content);
-   end GetL;
+      return Get_Value (Self.Unchecked_Get.Content);
+   end Get_Value;
 
    ------------
    -- Create --
@@ -162,14 +162,14 @@ package body Langkit_Support.Adalog.Logic_Ref is
    end Set_Value;
    pragma Warnings (On);
 
-   ----------
-   -- GetL --
-   ----------
+   ---------------
+   -- Get_Value --
+   ---------------
 
-   function GetL (Self : Raw_Var) return Element_Type is
+   function Get_Value (Self : Raw_Var) return Element_Type is
    begin
-      return GetL (Self.all);
-   end GetL;
+      return Get_Value (Self.all);
+   end Get_Value;
 
    ------------
    -- Create --

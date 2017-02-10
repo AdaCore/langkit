@@ -31,6 +31,6 @@ procedure Main is
 
 begin
    while R3.Solve loop
-      Put_Line ("X =" & GetL (X)'Img);
+      Put_Line ("X =" & Get_Value (X)'Img);
    end loop;
 end Main;

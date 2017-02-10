@@ -62,7 +62,7 @@ package Langkit_Support.Adalog.Logic_Ref is
    procedure Reset (Self : in out Var);
    function Is_Defined (Self : Var) return Boolean;
    function Set_Value (Self : in out Var; Data : Element_Type) return Boolean;
-   function GetL (Self : Var) return Element_Type;
+   function Get_Value (Self : Var) return Element_Type;
    procedure Destroy (Self : in out Var);
    function Image (Self : Var) return String is
      (if Self.Dbg_Name /= null then Self.Dbg_Name.all else "None");
@@ -92,8 +92,8 @@ package Langkit_Support.Adalog.Logic_Ref is
 
    procedure Reset (Self : in out Ref);
    function Is_Defined (Self : Ref) return Boolean;
-   function GetL (Self : Ref) return Element_Type;
    function Set_Value (Self : in out Ref; Data : Element_Type) return Boolean;
+   function Get_Value (Self : Ref) return Element_Type;
 
    function Get_Pending_Predicates (Self : Ref) return Pred_Sets.Set
    is (Get_Pending_Predicates (Self.Unchecked_Get.Content));
@@ -119,7 +119,7 @@ package Langkit_Support.Adalog.Logic_Ref is
    function Is_Defined (Self : Raw_Var) return Boolean;
    function Set_Value
      (Self : in out Raw_Var; Data : Element_Type) return Boolean;
-   function GetL (Self : Raw_Var) return Element_Type;
+   function Get_Value (Self : Raw_Var) return Element_Type;
    function Create return Raw_Var;
 
    function Get_Pending_Predicates (Self : Raw_Var) return Pred_Sets.Set
