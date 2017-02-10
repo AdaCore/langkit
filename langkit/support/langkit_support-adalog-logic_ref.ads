@@ -11,6 +11,17 @@ generic
    with function Element_Image (E : Element_Type) return String;
 package Langkit_Support.Adalog.Logic_Ref is
 
+   ------------------------------
+   -- Base logic variable type --
+   ------------------------------
+
+   --  This type implements the common logic for a logic variable, and the
+   --  common needed operations. See Adalog.Logic_Var for the documentation
+   --  of those operations.
+
+   --  This type, however, has by-value semantics, where we want the end
+   --  implementations to have by-reference semantics.
+
    type Var is record
       Reset             : Boolean := True;
       El                : Element_Type;
@@ -23,6 +34,10 @@ package Langkit_Support.Adalog.Logic_Ref is
       Dbg_Name          : String_Access;
    end record;
 
+   -------------------------------
+   -- Base primitive operations --
+   -------------------------------
+
    procedure Reset (Self : in out Var);
    function Is_Defined (Self : Var) return Boolean;
    function Set_Value (Self : in out Var; Data : Element_Type) return Boolean;
@@ -31,12 +46,21 @@ package Langkit_Support.Adalog.Logic_Ref is
    function Image (Self : Var) return String is
      (if Self.Dbg_Name /= null then Self.Dbg_Name.all else "None");
 
-   --  Var predicates functions
+   ------------------------------
+   -- Var predicates functions --
+   ------------------------------
 
    procedure Add_Predicate (Self : in out Var; Pred : Var_Predicate);
    function Get_Pending_Predicates (Self : Var) return Pred_Sets.Set
    is (Self.Pending_Relations);
    procedure Remove_Predicate (Self : in out Var; Pred : Var_Predicate);
+
+   --------------------------------------
+   -- Referenced counted variable type --
+   --------------------------------------
+
+   --  This type is a reference counted logic variable type, to use if you
+   --  don't care about performance and want automatic deallocation.
 
    type Refcounted_El is new GNATCOLL.Refcount.Refcounted with record
       Content : Var;
@@ -60,6 +84,14 @@ package Langkit_Support.Adalog.Logic_Ref is
      (Image (Self.Unchecked_Get.Content));
 
    function Create return Ref;
+
+   -----------------------
+   -- Raw variable type --
+   -----------------------
+
+   --  This type is a reference to a logic variable implemented with a simple
+   --  unsafe access. To use if you want maximum performance and are ready
+   --  to manage your memory manually.
 
    type Raw_Var is access all Var;
    procedure Reset (Self : in out Raw_Var);
