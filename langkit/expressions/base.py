@@ -2659,6 +2659,7 @@ class LocalVars(object):
         :param str|names.Name name: The name of the variable.
         :param langkit.compiled_types.CompiledType type: Type parameter. The
             type of the local variable.
+        :rtype: LocalVars.LocalVar
         """
         result = self.create_scopeless(name, type)
         PropertyDef.get_scope().add(result)
@@ -2672,6 +2673,7 @@ class LocalVars(object):
         :param str|names.Name name: The name of the variable.
         :param langkit.compiled_types.CompiledType type: Type parameter. The
             type of the local variable.
+        :rtype: LocalVars.LocalVar
         """
         name = names.Name.get(name)
 
