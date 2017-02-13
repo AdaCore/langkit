@@ -31,9 +31,9 @@ class Literal(FooNode):
     tok = Field()
 
     a = AbstractProperty(runtime_check=True, type=FooNode.env_el())
-    var = UserField(LogicVarType, is_private=True)
+    var = UserField(LogicVarType, is_public=False)
 
-    b = Property(Bind(Self.var, Self.a), private=True)
+    b = Property(Bind(Self.var, Self.a), public=False)
 
 
 foo_grammar = Grammar('main_rule')

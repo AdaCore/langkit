@@ -23,12 +23,12 @@ def run(name, prop_expr):
 
     @root_grammar_class()
     class FooNode(ASTNode):
-        ref_var = UserField(LogicVarType, is_private=True)
-        type_var = UserField(LogicVarType, is_private=True)
+        ref_var = UserField(LogicVarType, is_public=False)
+        type_var = UserField(LogicVarType, is_public=False)
 
     class BarNode(FooNode):
 
-        @langkit_property(private=True)
+        @langkit_property(public=False)
         def main_prop():
             return Bind(Self.type_var, Self.ref_var, eq_prop=prop)
 

@@ -11,7 +11,7 @@ from langkit.parsers import Grammar, Row
 from utils import emit_and_print_errors
 
 
-def run(abstract_private, concrete_private):
+def run(abstract_public, concrete_public):
     """
     Emit and print the errors we get for the below grammar for the given
     privacy levels.
@@ -19,12 +19,12 @@ def run(abstract_private, concrete_private):
 
     fmt_privacy = {
         None: 'default',
-        True: 'private',
-        False: 'public',
+        True: 'public',
+        False: 'private',
     }
     print '== abstract: {}, concrete: {} =='.format(
-        fmt_privacy[abstract_private],
-        fmt_privacy[concrete_private]
+        fmt_privacy[abstract_public],
+        fmt_privacy[concrete_public]
     )
     Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
@@ -33,10 +33,10 @@ def run(abstract_private, concrete_private):
         pass
 
     class AbstractNode(RootNode):
-        prop = AbstractProperty(BoolType, private=abstract_private)
+        prop = AbstractProperty(BoolType, public=abstract_public)
 
     class ConcreteNode(AbstractNode):
-        prop = Property(Literal(True), private=concrete_private)
+        prop = Property(Literal(True), public=concrete_public)
 
     def lang_def():
         foo_grammar = Grammar('main_rule')
@@ -48,7 +48,7 @@ def run(abstract_private, concrete_private):
     if emit_and_print_errors(lang_def):
         for fld in (AbstractNode._fields['prop'],
                     ConcreteNode._fields['prop']):
-            print '  {}: {}'.format(fld.qualname, fmt_privacy[fld.is_private])
+            print '  {}: {}'.format(fld.qualname, fmt_privacy[fld.is_public])
     print('')
 
 

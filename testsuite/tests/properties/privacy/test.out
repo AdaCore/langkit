@@ -3,30 +3,21 @@ Code generation was successful
   AbstractNode.p_prop: public
   ConcreteNode.p_prop: public
 
-== abstract: default, concrete: private ==
-File "test.py", line 39, in ConcreteNode.prop
-    Error: AbstractNode.p_prop is public, so should be ConcreteNode.p_prop
-
 == abstract: default, concrete: public ==
 Code generation was successful
   AbstractNode.p_prop: public
   ConcreteNode.p_prop: public
 
-== abstract: private, concrete: default ==
-Code generation was successful
-  AbstractNode.p_prop: private
-  ConcreteNode.p_prop: private
-
-== abstract: private, concrete: private ==
-Code generation was successful
-  AbstractNode.p_prop: private
-  ConcreteNode.p_prop: private
-
-== abstract: private, concrete: public ==
+== abstract: default, concrete: private ==
 File "test.py", line 39, in ConcreteNode.prop
-    Error: AbstractNode.p_prop is private, so should be ConcreteNode.p_prop
+    Error: AbstractNode.p_prop is public, so should be ConcreteNode.p_prop
 
 == abstract: public, concrete: default ==
+Code generation was successful
+  AbstractNode.p_prop: public
+  ConcreteNode.p_prop: public
+
+== abstract: public, concrete: public ==
 Code generation was successful
   AbstractNode.p_prop: public
   ConcreteNode.p_prop: public
@@ -35,9 +26,18 @@ Code generation was successful
 File "test.py", line 39, in ConcreteNode.prop
     Error: AbstractNode.p_prop is public, so should be ConcreteNode.p_prop
 
-== abstract: public, concrete: public ==
+== abstract: private, concrete: default ==
 Code generation was successful
-  AbstractNode.p_prop: public
-  ConcreteNode.p_prop: public
+  AbstractNode.p_prop: private
+  ConcreteNode.p_prop: private
+
+== abstract: private, concrete: public ==
+File "test.py", line 39, in ConcreteNode.prop
+    Error: AbstractNode.p_prop is private, so should be ConcreteNode.p_prop
+
+== abstract: private, concrete: private ==
+Code generation was successful
+  AbstractNode.p_prop: private
+  ConcreteNode.p_prop: private
 
 Done

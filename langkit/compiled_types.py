@@ -62,7 +62,7 @@ def library_public_field(field):
     :param AbstractNodeData field: Field to test.
     :rtype: bool
     """
-    return not field.is_private or get_context().library_fields_all_public
+    return field.is_public or get_context().library_fields_all_public
 
 
 @memoized
@@ -743,22 +743,22 @@ class AbstractNodeData(object):
     :type: names.Name|None
     """
 
-    def __init__(self, name=None, private=False):
+    def __init__(self, name=None, public=True):
         """
         :param names.Name|None name: Name for this field. Most of the time,
             this is initially unknown at field creation, so it is filled only
             at Struct creation time.
 
-        :param bool|None private: Whether this AbstractNodeData instance is
-            supposed to be private or not.
+        :param bool|None public: Whether this AbstractNodeData instance is
+            supposed to be public or not.
 
             In the context of properties only, None is also allowed: in this
             case, inherit vibility from parents. If there is no property to
-            override and None is passed, make the property public. This is
+            override and None is passed, make the property private. This is
             computed in the "compute" pass.
         """
         self._index = next(self._counter)
-        self._is_private = private
+        self._is_public = public
 
         self.location = extract_library_location()
 
@@ -821,13 +821,25 @@ class AbstractNodeData(object):
         return Context(ctx_message, self.location)
 
     @property
-    def is_private(self):
+    def is_public(self):
         """
         Whether this field is private.
         :rtype: bool
         """
-        assert self._is_private is not None
-        return self._is_private
+        assert self._is_public is not None
+        return self._is_public
+
+    @property
+    def is_private(self):
+        """
+        Whether this field is public.
+
+        This is a shortcut for::
+            not self.is_public
+
+        :rtype: bool
+        """
+        return not self.is_public
 
     @property
     def is_internal(self):
@@ -966,7 +978,7 @@ class AbstractField(AbstractNodeData):
         if not self.concrete:
             raise NotImplementedError()
 
-        super(AbstractField, self).__init__(private=False)
+        super(AbstractField, self).__init__(public=True)
 
         self.repr = repr
         self._name = None
@@ -1020,7 +1032,7 @@ class UserField(AbstractField):
     Node type, will be ignored by the parsing code.
     """
 
-    def __init__(self, type, repr=False, doc=None, is_private=False):
+    def __init__(self, type, repr=False, doc=None, is_public=True):
         """
         See inherited doc. In this version we just ensure that a type is
         passed because it is mandatory for data fields. We also set repr to
@@ -1031,7 +1043,7 @@ class UserField(AbstractField):
         :type doc: str
         """
         super(UserField, self).__init__(repr, doc, type)
-        self._is_private = is_private
+        self._is_public = is_public
 
     concrete = True
 
@@ -1387,13 +1399,13 @@ class StructMetaclass(CompiledTypeMetaclass):
         # AST node type definition.
         return [
             ("node_env", BuiltinField(
-                type=LexicalEnvType, is_private=True,
+                type=LexicalEnvType, is_public=False,
                 doc='For nodes that introduce a new environment, return the'
                     ' parent lexical environment. Return the "inherited"'
                     ' environment otherwise.'
             )),
             ("children_env", BuiltinField(
-                type=LexicalEnvType, is_private=True,
+                type=LexicalEnvType, is_public=False,
                 doc='For nodes that introduce a new environment, return it.'
                     ' Return the "inherited" environment otherwise.'
             )),
@@ -2475,7 +2487,9 @@ class EnumNodeMetaclass(type):
         from langkit.expressions import Property, AbstractProperty
 
         base_enum_dct = compact({
-            "as_bool": AbstractProperty(type=BoolType) if qualifier else None,
+            "as_bool":
+                AbstractProperty(type=BoolType, public=True)
+                if qualifier else None,
             "is_bool_node": bool(qualifier),
             "is_enum_node": True,
         })

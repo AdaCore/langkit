@@ -1464,7 +1464,7 @@ class PropertyDef(AbstractNodeData):
     reserved_arg_names = (self_arg_name, env_arg_name)
     reserved_arg_lower_names = [n.lower for n in reserved_arg_names]
 
-    def __init__(self, expr, prefix, name=None, doc=None, private=None,
+    def __init__(self, expr, prefix, name=None, doc=None, public=None,
                  abstract=False, type=None, abstract_runtime_check=False,
                  has_implicit_env=None, memoized=False, external=False):
         """
@@ -1483,7 +1483,7 @@ class PropertyDef(AbstractNodeData):
             that implements this property in code generation.
         :param names.Name|None name: See AbstractNodeData's constructor.
         :param str|None doc: User documentation for this property.
-        :param bool|None private: See AbstractNodeData's constructor.
+        :param bool|None public: See AbstractNodeData's constructor.
         :param bool abstract: Whether this property is abstract or not. If this
             is True, then expr can be None.
 
@@ -1509,7 +1509,7 @@ class PropertyDef(AbstractNodeData):
         :param bool|None has_implicit_env: Whether this property is passed an
             implicit "current environment" parameter.  If None, inherit from
             the overriden property, or False in there is no property to
-            override. Just like `private`, it must always be consistent with
+            override. Just like `public`, it must always be consistent with
             base classes.
 
         :param bool memoized: Whether this property must be memoized. Disabled
@@ -1522,7 +1522,7 @@ class PropertyDef(AbstractNodeData):
             engines always generate the public declaration part.
         """
 
-        super(PropertyDef, self).__init__(name=name, private=private)
+        super(PropertyDef, self).__init__(name=name, public=public)
 
         self.in_type = False
         "Recursion guard for the construct pass"
@@ -1605,7 +1605,7 @@ class PropertyDef(AbstractNodeData):
             prefix=self.prefix,
             name=self._name,
             doc=self._doc,
-            private=self._is_private,
+            public=self._is_public,
             abstract=self.abstract,
             type=self.expected_type,
             has_implicit_env=self._has_implicit_env,
@@ -1841,14 +1841,14 @@ class PropertyDef(AbstractNodeData):
 
             # Inherit the privacy level or check that it's consistent with the
             # base property.
-            if self._is_private is None:
-                self._is_private = base_prop.is_private
+            if self._is_public is None:
+                self._is_public = base_prop.is_public
             else:
                 check_source_language(
-                    self._is_private == base_prop.is_private,
+                    self._is_public == base_prop.is_public,
                     "{} is {}, so should be {}".format(
                         base_prop.qualname,
-                        'private' if base_prop.is_private else 'public',
+                        'public' if base_prop.is_public else 'private',
                         self.qualname,
                     )
                 )
@@ -1888,7 +1888,7 @@ class PropertyDef(AbstractNodeData):
             # environment parameter.
             def with_default(value, default_value):
                 return default_value if value is None else value
-            self._is_private = with_default(self._is_private, False)
+            self._is_public = with_default(self._is_public, True)
             self._has_implicit_env = with_default(
                 self._has_implicit_env, False
             )
@@ -2223,7 +2223,7 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 
 
 # noinspection PyPep8Naming
-def Property(expr, doc=None, private=None, type=None, has_implicit_env=None,
+def Property(expr, doc=None, public=None, type=None, has_implicit_env=None,
              memoized=False):
     """
     Public constructor for concrete properties. You can declare your properties
@@ -2238,11 +2238,11 @@ def Property(expr, doc=None, private=None, type=None, has_implicit_env=None,
     :type expr: AbstractExpression|function
     :type type: CompiledType
     :type doc: str
-    :type private: bool|None
+    :type public: bool|None
     :rtype: PropertyDef
     """
     return PropertyDef(expr, AbstractNodeData.PREFIX_PROPERTY, doc=doc,
-                       private=private, type=type,
+                       public=public, type=type,
                        has_implicit_env=has_implicit_env, memoized=memoized)
 
 
@@ -2252,14 +2252,14 @@ class AbstractKind(Enum):
     abstract_runtime_check = 3
 
 
-def langkit_property(private=None, return_type=None,
+def langkit_property(public=None, return_type=None,
                      kind=AbstractKind.concrete, has_implicit_env=None,
                      memoized=False, external=False):
     """
     Decorator to create properties from real Python methods. See Property for
     more details.
 
-    :type private: bool|None
+    :type public: bool|None
     :type return_type: CompiledType
     :type kind: int
     """
@@ -2267,7 +2267,7 @@ def langkit_property(private=None, return_type=None,
         return PropertyDef(
             expr_fn, AbstractNodeData.PREFIX_PROPERTY,
             type=return_type,
-            private=private,
+            public=public,
             doc=expr_fn.__doc__,
             abstract=kind in [AbstractKind.abstract,
                               AbstractKind.abstract_runtime_check],
