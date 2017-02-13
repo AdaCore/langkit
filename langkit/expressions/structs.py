@@ -330,7 +330,7 @@ class FieldAccess(AbstractExpression):
             # we need it to be attached to the scope. In other cases, this can
             # make debugging easier.
             super(FieldAccess.Expr, self).__init__(
-                None if self.simple_field_access else 'Field_Access_Result'
+                None if self.simple_field_access else 'Fld'
             )
 
         def __repr__(self):
