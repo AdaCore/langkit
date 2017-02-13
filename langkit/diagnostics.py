@@ -243,6 +243,8 @@ def check_source_language(predicate, message, severity=Severity.error,
     :param str message: The base message to display if predicate happens to
         be false.
     :param Severity severity: The severity of the diagnostic.
+    :param bool do_raise: If True, raise a DiagnosticError if predicate happens
+        to be false.
     """
     global EMIT_PARSABLE_ERRORS
 
