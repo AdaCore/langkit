@@ -848,9 +848,9 @@ package ${ada_lib_name}.Analysis is
    % endif
    % endfor
 
-   -----------------------------------------------------
-   -- ASTNode derived types (incomplete declarations) --
-   -----------------------------------------------------
+   ------------------------------------------------------
+   -- AST node derived types (incomplete declarations) --
+   ------------------------------------------------------
 
    type ${generic_list_value_type} is
       abstract new ${root_node_value_type}
@@ -916,9 +916,9 @@ package ${ada_lib_name}.Analysis is
    % endif
    % endfor
 
-   -----------------------------------------------
-   -- ASTNode derived types (full declarations) --
-   -----------------------------------------------
+   ------------------------------------------------
+   -- AST node derived types (full declarations) --
+   ------------------------------------------------
 
    --  See above for overriden primitive operations documentations
 
