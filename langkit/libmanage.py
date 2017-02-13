@@ -486,12 +486,19 @@ class ManageScript(object):
                 raise
             import traceback
             ex_type, ex, tb = sys.exc_info()
+
+            # If we have a syntax error, we know for sure the last stack frame
+            # points to the code that must be fixed. Otherwise, point to the
+            # top-most stack frame that does not belong to Langkit.
             if e.args[0] == 'invalid syntax':
                 loc = Location(e.filename, e.lineno, "")
             else:
                 loc = extract_library_location(traceback.extract_tb(tb))
             with Context("", loc, "recovery"):
                 check_source_language(False, str(e), do_raise=False)
+
+            # Keep Langkit bug "pretty" for users: display the Python stack
+            # trace only when requested.
             if parsed_args.verbosity.debug:
                 traceback.print_exc()
 
