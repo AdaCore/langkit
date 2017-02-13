@@ -2635,6 +2635,16 @@ class LocalVars(object):
                 self.type.name().camel_with_underscores
             )
 
+        @property
+        def ref_expr(self):
+            """
+            Return a resolved expression that references "self".
+            :rtype: AbstractVariable.Expr
+            """
+            assert self.type, ('Local variables must have a type before turned'
+                               ' into a resolved expression.')
+            return AbstractVariable.Expr(self.type, self.name)
+
         def __repr__(self):
             return '<LocalVar {} : {}>'.format(
                 self.name.camel_with_underscores,
