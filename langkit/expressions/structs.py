@@ -339,7 +339,6 @@ class FieldAccess(AbstractExpression):
             )
 
         def _render_pre(self):
-            from langkit.compile_context import get_context
             # Before accessing the field of a record through an access, we must
             # check whether this access is null in order to raise a
             # Property_Error in the case it is.
