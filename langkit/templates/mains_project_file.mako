@@ -10,7 +10,10 @@ project Mains is
 
    for Languages use ("Ada");
 
-   for Source_Dirs use (".");
+   <% all_source_dirs = source_dirs | {'.'} %>
+   for Source_Dirs use (
+      ${', '.join(string_repr(sdir) for sdir in all_source_dirs)}
+   );
    for Exec_Dir use "../bin";
    for Object_Dir use "../obj/mains";
 

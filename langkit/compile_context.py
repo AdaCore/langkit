@@ -674,9 +674,9 @@ class CompileCtx(object):
         from langkit.parsers import render
         return render(*args, **kwargs)
 
-    def emit(self, file_root='.', generate_lexer=True, main_programs=set(),
-             annotate_fields_types=False, compile_only=False,
-             no_property_checks=False):
+    def emit(self, file_root='.', generate_lexer=True, main_source_dirs=set(),
+             main_programs=set(), annotate_fields_types=False,
+             compile_only=False, no_property_checks=False):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -687,6 +687,10 @@ class CompileCtx(object):
         :param bool generate_lexer: (optional) Whether to invoke Quex to
             generate the lexer source code. Will do by default. As this can
             take time, it is useful to disable it during testing.
+
+        :param set[str] main_source_dirs: List of source directories to use in
+            the project file for mains. Source directories must be relative to
+            the mains project file directory (i.e. $BUILD/src).
 
         :param set[str] main_programs: List of names for programs to build in
             addition to the generated library. To each X program, there must be
@@ -723,7 +727,8 @@ class CompileCtx(object):
         if compile_only:
             return
         with global_context(self):
-            self._emit(file_root, generate_lexer, main_programs)
+            self._emit(file_root, generate_lexer, main_source_dirs,
+                       main_programs)
 
     def compile(self, compile_only=False):
         with global_context(self):
@@ -910,7 +915,8 @@ class CompileCtx(object):
 
         errors_checkpoint()
 
-    def _emit(self, file_root, generate_lexer, main_programs):
+    def _emit(self, file_root, generate_lexer, main_source_dirs,
+              main_programs):
         """
         Emit native code for all the rules in this grammar as a library:
         a library specification and the corresponding implementation.  Also
@@ -1029,6 +1035,7 @@ class CompileCtx(object):
             f.write(self.render_template(
                 "mains_project_file",
                 lib_name=self.ada_api_settings.lib_name,
+                source_dirs=main_source_dirs,
                 main_programs=main_programs
             ))
 

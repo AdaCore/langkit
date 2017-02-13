@@ -376,6 +376,17 @@ class ManageScript(object):
         raise NotImplementedError()
 
     @property
+    def main_source_dirs(self):
+        """
+        Return a potentially empty set of source directories to use in the
+        project file for mains. Source directories must be either absolute or
+        relative to the language directory.
+
+        :rtype: set[str]
+        """
+        return set()
+
+    @property
     def main_programs(self):
         """
         Return the list of main programs to build in addition to the generated
@@ -520,7 +531,19 @@ class ManageScript(object):
                 "Generating source for {} ...".format(self.lib_name.lower()),
                 Colors.HEADER
             )
+
+        # Get source directories for the mains project file that are relative
+        # to the generated project file (i.e. $BUILD_DIR/src/mains.gpr).
+        main_source_dirs = {
+            os.path.relpath(
+                self.dirs.lang_source_dir(sdir),
+                self.dirs.build_dir('src')
+            )
+            for sdir in self.main_source_dirs
+        }
+
         self.context.emit(file_root=self.dirs.build_dir(),
+                          main_source_dirs=main_source_dirs,
                           main_programs=self.main_programs,
                           annotate_fields_types=args.annotate_fields_types,
                           generate_lexer=not args.no_compile_quex,
