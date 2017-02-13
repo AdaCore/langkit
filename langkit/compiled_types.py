@@ -847,6 +847,15 @@ class AbstractNodeData(object):
     def type(self, type):
         raise NotImplementedError()
 
+    def c_type_or_error(self, capi):
+        """
+        Within a diagnostic context for this field, return its C API type.
+
+        :rtype: CAPIType
+        """
+        with self.diagnostic_context():
+            return self.type.c_type(capi)
+
     @property
     def name(self):
         """

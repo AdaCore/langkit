@@ -11,6 +11,6 @@
                     % for arg in field.explicit_arguments:
                        ${arg.type.c_type(capi).name} ${arg.name},
                     % endfor
-                    ${field.type.c_type(capi).name} *value_p);
+                    ${field.c_type_or_error(capi).name} *value_p);
 
 </%def>
