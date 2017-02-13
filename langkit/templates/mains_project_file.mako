@@ -15,12 +15,8 @@ project Mains is
    for Object_Dir use "../obj/mains";
 
    for Main use (
-      % for i, main in enumerate(main_programs):
-         % if i > 0:
-            ,
-         % endif
-         "${main}.adb"
-      % endfor
+      ${', '.join(string_repr('{}.adb'.format(main))
+                  for main in main_programs)}
    );
 
    package Compiler is
