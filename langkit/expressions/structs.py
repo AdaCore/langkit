@@ -346,9 +346,7 @@ class FieldAccess(AbstractExpression):
             return '{}\n{}\n{}'.format(
                 self.receiver_expr.render_pre(),
                 render('properties/null_safety_check_ada',
-                       prefix=self.receiver_expr)
-                if not get_context().no_property_checks
-                else '',
+                       prefix=self.receiver_expr),
                 '\n'.join(arg.render_pre() for arg in self.arguments)
             )
 

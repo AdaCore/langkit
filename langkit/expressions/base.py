@@ -2388,8 +2388,6 @@ class FieldAccessExpr(BasicExpr):
                 base,
                 render('properties/null_safety_check_ada',
                        prefix=self.prefix_expr)
-                if not get_context().no_property_checks
-                else ''
             )
         else:
             return base
