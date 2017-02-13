@@ -561,7 +561,9 @@ class LogicVarType(BasicType):
 
     @classmethod
     def c_type(cls, c_api_settings):
-        raise Exception("Cannot expose logic variables to C at the moment")
+        check_source_language(
+            False, "Cannot expose logic variables to C at the moment"
+        )
 
 
 class EquationType(BasicType):
