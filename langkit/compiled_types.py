@@ -2309,13 +2309,10 @@ class ArrayType(CompiledType):
         """
         Name of the Index type for this array type.
 
-        :rtype: names.Name
+        :rtype: str
         """
-        return "{}.{}".format(
-            (cls.element_type().name()
-             + names.Name('Vectors')).camel_with_underscores,
-            "Index_Type"
-        )
+        pkg_vector_name = cls.element_type().name() + names.Name('Vectors')
+        return '{}.Index_Type'.format(pkg_vector_name.camel_with_underscores)
 
     @classmethod
     def vector(cls):
