@@ -7,8 +7,9 @@ def write_astdoc(context, file):
     """
     Generate a synthetic text documentation about AST nodes and types.
 
-    :param CompileContext context: Compile contxt from which types to document
-        are retreived.
+    :param context: Compile context to provide the AST nodes to document.
+    :type context: langkit.compile_context.CompileCtx
+
     :param file file: Output file for the documentation.
     """
     i = 0
