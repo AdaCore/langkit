@@ -318,28 +318,19 @@ class FieldAccess(AbstractExpression):
             self.simple_field_access = False
             self.implicit_deref = implicit_deref
 
-            # After EnvSpec.create_properties has been run, expressions in
-            # environment specifications only allow field accesses. These are
-            # not evaluated in a property context, so they cannot create local
-            # variables.
-            #
-            # TODO: in this context, it would still be useful to emit a null
-            # check so that we raise a special exception instead of a
-            # Storage_Error.
-
+            # When calling environment properties, the call itself happens are
+            # outside a property. We cannot create a variable in this context,
+            # and the field access is not supposed to require a "render_pre"
+            # step.
             p = PropertyDef.get()
-
-            if p:
-                self.prefix_var = p.vars.create('Pfx', self.receiver_expr.type)
-            else:
-                self.simple_field_access = True
+            self.simple_field_access = not p
 
             # Create a variable for all field accesses in properties. This is
             # needed because the property will return an owning reference, so
             # we need it to be attached to the scope. In other cases, this can
             # make debugging easier.
             super(FieldAccess.Expr, self).__init__(
-                'Field_Access_Result' if p else None
+                None if self.simple_field_access else 'Field_Access_Result'
             )
 
         def __repr__(self):
@@ -352,9 +343,10 @@ class FieldAccess(AbstractExpression):
             # Before accessing the field of a record through an access, we must
             # check whether this access is null in order to raise a
             # Property_Error in the case it is.
-            return '{}\n{}'.format(
+            return '{}\n{}\n{}'.format(
+                self.receiver_expr.render_pre(),
                 render('properties/null_safety_check_ada',
-                       expr=self.receiver_expr, result_var=self.prefix_var)
+                       prefix=self.receiver_expr)
                 if not get_context().no_property_checks
                 else '',
                 '\n'.join(arg.render_pre() for arg in self.arguments)
@@ -364,7 +356,7 @@ class FieldAccess(AbstractExpression):
             if self.simple_field_access:
                 prefix = self.receiver_expr.render()
             else:
-                prefix = self.prefix_var.name
+                prefix = self.receiver_expr.render_expr()
 
             if self.implicit_deref:
                 prefix = "{}.El".format(prefix)

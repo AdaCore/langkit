@@ -2380,11 +2380,6 @@ class FieldAccessExpr(BasicExpr):
         )
         self.prefix_expr = prefix_expr
         self.field_name = field_name
-        self.prefix_var = (
-            PropertyDef.get().vars.create('Pfx', self.prefix_expr.type)
-            if result_type.null_allowed else
-            None
-        )
 
     def _render_pre(self):
         base = super(FieldAccessExpr, self)._render_pre()
@@ -2392,8 +2387,7 @@ class FieldAccessExpr(BasicExpr):
             return '{}\n{}'.format(
                 base,
                 render('properties/null_safety_check_ada',
-                       expr=self.prefix_expr,
-                       result_var=self.prefix_var)
+                       prefix=self.prefix_expr)
                 if not get_context().no_property_checks
                 else ''
             )

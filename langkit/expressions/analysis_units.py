@@ -33,12 +33,12 @@ class AnalysisUnitRoot(ResolvedExpression):
 
     def _render_pre(self):
         from langkit.compile_context import get_context
-        return '{}\n{}'.format(
+        return '{}\n{} := {};\n{}'.format(
             self.unit_expr.render_pre(),
+            self.prefix_var.name, self.unit_expr.render_expr(),
             render(
                 'properties/null_safety_check_ada',
-                expr=self.unit_expr,
-                result_var=self.prefix_var
+                prefix=self.prefix_var.ref_expr,
             ) if not get_context().no_property_checks else ''
         )
 
