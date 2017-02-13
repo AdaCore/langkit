@@ -700,6 +700,10 @@ class CompileCtx(object):
             type of fields in the grammar. If this is True, this will
             actually modify the file in which ASTNode subclasses are
             defined, and annotate empty field definitions.
+
+        :param bool no_property_checks: If True, do not emit safety checks in
+        the generated code for properties. Namely, this disables null checks on
+        field access.
         """
         dir_path = path.join(
             path.dirname(path.realpath(__file__)), "templates"
