@@ -585,7 +585,9 @@ class EquationType(BasicType):
 
     @classmethod
     def c_type(cls, c_api_settings):
-        raise Exception("Cannot expose equations to C at the moment")
+        check_source_language(
+            False, "Cannot expose equations to C at the moment"
+        )
 
     @classmethod
     def is_refcounted(cls):
