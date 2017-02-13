@@ -481,7 +481,7 @@ class ManageScript(object):
                 raise
             print >> sys.stderr, col('Errors, exiting', Colors.FAIL)
             sys.exit(1)
-        except Exception, e:
+        except Exception as e:
             if parsed_args.debug:
                 raise
             import traceback
