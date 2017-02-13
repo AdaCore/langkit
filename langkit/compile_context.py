@@ -991,7 +991,7 @@ class CompileCtx(object):
             filename = os.path.basename(filepath)
             shutil.copy(filepath, join(src_path, filename))
 
-        with file(os.path.join(share_path, 'ast-types.txt'), 'w') as f:
+        with open(os.path.join(share_path, 'ast-types.html'), 'w') as f:
             from langkit import astdoc
             astdoc.write_astdoc(self, f)
 
