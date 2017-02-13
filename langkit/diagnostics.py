@@ -60,9 +60,11 @@ class Location(object):
 
 def extract_library_location(stack=None):
     """
-    Use traceback to extract the location of the definition of an entity in
-    the language definition using langkit. This relies on
-    LangSourceDir.lang_source_dir being set.
+    Extract the location of the definition of an entity in the language
+    specification from a stack trace. Use `traceback.extract_stack()` if no
+    stack is provided.
+
+    This relies on `Diagnostics.set_lang_source_dir` being called.
 
     :rtype: Location
     """
