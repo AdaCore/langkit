@@ -98,7 +98,10 @@ package body ${ada_lib_name}.Lexer is
    is
 
       Token                 : aliased Quex_Token_Type;
-      Token_Id              : Token_Kind;
+      Token_Id              : Token_Kind := ${termination};
+      % if lexer.track_indent:
+      Prev_Id               : Token_Kind := ${termination};
+      % endif
       Symbol                : Symbol_Type;
       Continue              : Boolean := True;
       Last_Token_Was_Trivia : Boolean := False;
@@ -122,7 +125,6 @@ package body ${ada_lib_name}.Lexer is
       with Inline;
       --  Get the current indent column in the stack
 
-      Last_Line : Line_Number := 0;
       % endif
 
       function Source_First return Positive is
@@ -172,6 +174,12 @@ package body ${ada_lib_name}.Lexer is
          --  token.
 
          Continue := Next_Token (Lexer, Token'Unrestricted_Access) /= 0;
+
+         % if lexer.track_indent:
+         --  Update the previous token id variable
+         Prev_Id := Token_Id;
+         % endif
+
          Token_Id := Token_Kind'Enum_Val (Token.Id);
          Symbol := null;
 
@@ -285,28 +293,18 @@ package body ${ada_lib_name}.Lexer is
          if Token_Id in ${end_ilayout_toks} then
             --  Decrement the ignore stack ..
             Ign_Layout_Level := Ign_Layout_Level - 1;
-
-            --  If we're back to 0 (we don't ignore layout anymore), make sure
-            --  layout will be taken into account starting on next line.
-            if Ign_Layout_Level = 0 then
-               Last_Line := Sloc_Range.End_Line;
-            end if;
          end if;
          % endif
 
          --  If we don't ignore layout, and the token is the first on a new
          --  line, and it is not a newline token, then:
          if Ign_Layout_Level <= 0
-            and then Last_Line < Sloc_Range.Start_Line
+            and then Prev_Id = ${lexer.ada_token_name('Newline')}
             and then Token_Id /= ${lexer.ada_token_name('Newline')}
          then
-
-            --  Update the last line variable
-            Last_Line := Sloc_Range.End_Line;
-
             declare
                T : Token_Data_Type :=
-                 (Kind         => Token_Id,
+                 (Kind         => <>,
                   Source_First => Source_First + 1,
                   Source_Last  => Source_First,
                   Symbol       => null,
