@@ -7,6 +7,12 @@ package body Langkit_Support.Adalog.Unify_One_Side is
 
    use Var;
 
+   function Create
+     (Left   : Var.Var;
+      Right  : R_Type;
+      R_Data : R_Convert_Data) return Unify_Rec;
+   --  Helper for the public Create function
+
    -----------
    -- Apply --
    -----------
@@ -118,6 +124,29 @@ package body Langkit_Support.Adalog.Unify_One_Side is
       end if;
       Self.Current_Index := 1;
    end Reset;
+
+   ------------
+   -- Create --
+   ------------
+
+   function Create
+     (Left : Var.Var; Right : R_Type; R_Data : R_Convert_Data) return Unify_Rec
+   is
+   begin
+      return (Left    => Left,
+              Right   => Right,
+              Changed => False,
+              R_Data  => R_Data);
+   end Create;
+
+   function Create
+     (Left   : Var.Var;
+      Right  : R_Type;
+      R_Data : R_Convert_Data) return Relation
+   is
+   begin
+      return new Unify'(Rel => Create (Left, Right, R_Data), others => <>);
+   end Create;
 
    ------------
    -- Member --

@@ -89,11 +89,6 @@ private
       R_Data  : R_Convert_Data;
    end record;
 
-   function Create
-     (Left : Var.Var; Right : R_Type; R_Data : R_Convert_Data) return Unify_Rec
-   is
-     ((Left => Left, Right => Right, Changed => False, R_Data => R_Data));
-
    function Apply (Self : in out Unify_Rec) return Boolean;
    procedure Revert (Self : in out Unify_Rec);
    procedure Free (Self : in out Unify_Rec) is null;
@@ -103,10 +98,6 @@ private
 
    package Rel is new Relations.Stateful_Relation (Unify_Rec);
    type Unify is new Rel.Rel with null record;
-
-   function Create
-     (Left : Var.Var; Right : R_Type; R_Data : R_Convert_Data) return Relation
-   is (new Unify'(Rel => Create (Left, Right, R_Data), others => <>));
 
    type Member_T is new Base_Relation with record
       Left           : Var.Var;
