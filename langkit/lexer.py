@@ -283,12 +283,17 @@ class Lexer(object):
         def render(self):
             return "{{{}}}".format(self.name)
 
-    def __init__(self, tokens_class, track_indent=False):
+    def __init__(self, tokens_class, track_indent=False, pre_rules=[]):
         """
         :param type tokens_class: The class for the lexer's tokens.
         :param bool track_indent: Whether to track indentation when lexing or
             not. If this is true, then the special Layout parsers can be used
             to do indentation sensitive parsing.
+
+        :param pre_rules: A list of rules to add before the built-in new-line
+            rule, if track_indent is True. If track_indent is false, adding
+            rules this way is the same as calling add_rules.
+        :type pre_rules: list[(Matcher, Action)|RuleAssoc]
         """
         self.tokens = tokens_class(track_indent)
         assert isinstance(self.tokens, LexerToken)
@@ -325,6 +330,8 @@ class Lexer(object):
             (Eof(),     self.tokens.Termination),
             (Failure(), self.tokens.LexingFailure),
         )
+
+        self.add_rules(*pre_rules)
 
         if self.track_indent:
             self.add_rules(
