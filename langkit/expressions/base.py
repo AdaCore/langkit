@@ -1889,11 +1889,11 @@ class PropertyDef(AbstractNodeData):
                     # propagate it.
                     self.expected_type = base_prop.expected_type
         else:
-            # By default, properties are public and they accept an implicit
+            # By default, properties are private and they accept an implicit
             # environment parameter.
             def with_default(value, default_value):
                 return default_value if value is None else value
-            self._is_public = with_default(self._is_public, True)
+            self._is_public = with_default(self._is_public, False)
             self._has_implicit_env = with_default(
                 self._has_implicit_env, False
             )
