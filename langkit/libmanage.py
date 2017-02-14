@@ -770,7 +770,7 @@ class ManageScript(object):
         # Install the remaining miscellaneous files
         for fpath in [
             os.path.join('include', lib_name + '.h'),
-            os.path.join('share', lib_name, 'ast-types.txt'),
+            os.path.join('share', lib_name, 'ast-types.html'),
             os.path.join('python', lib_name + '.py'),
         ]:
             build_path = self.dirs.build_dir(fpath)
