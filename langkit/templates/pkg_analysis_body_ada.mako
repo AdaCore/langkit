@@ -2598,6 +2598,10 @@ package body ${ada_lib_name}.Analysis is
       return ${LexicalEnvType.name()}
    is (Group (Envs.Items));
 
+   % for astnode in ctx.astnode_types:
+       ${astnode_types.body_decl(astnode)}
+   % endfor
+
    ## Generate the bodies of the root grammar class properties
    % for prop in T.root_node.get_properties(include_inherited=False):
    ${prop.prop_def}

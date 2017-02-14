@@ -1149,7 +1149,9 @@ private
    % for prop in T.root_node.get_properties( \
          include_inherited=False, \
          predicate=library_private_field):
-      ${prop.prop_decl}
+      % if prop.dispatching:
+         ${prop.prop_decl}
+      % endif
    % endfor
 
    --------------------------

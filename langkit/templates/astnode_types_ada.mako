@@ -223,7 +223,9 @@
 
    % for prop in cls.get_properties(include_inherited=False, \
                                     predicate=library_private_field):
-      ${prop.prop_decl}
+      % if prop.dispatching:
+         ${prop.prop_decl}
+      % endif
    % endfor
 
    % if not cls.is_env_spec_inherited:
@@ -240,6 +242,29 @@
          Current_Env, Root_Env : AST_Envs.Lexical_Env);
    % endif
 
+   % endif
+
+</%def>
+
+
+<%def name="body_decl(cls)">
+
+   <%
+      library_private_field = lambda f: not library_public_field(f)
+      props = cls.get_properties(
+         include_inherited=False,
+         predicate=lambda f: not library_public_field(f) and not f.dispatching
+      )
+   %>
+
+   % if props:
+      --
+      --  Private and non-dispatching primitives for ${cls.name()}
+      --
+
+      % for prop in props:
+         ${prop.prop_decl}
+      % endfor
    % endif
 
 </%def>
