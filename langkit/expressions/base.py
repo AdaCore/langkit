@@ -1499,12 +1499,17 @@ class PropertyDef(AbstractNodeData):
         :param abstract_runtime_check: If the property is abstract, whether the
             implementation by subclasses requirement must be checked at compile
             time, or at runtime. If true, you can have an abstract property
-            that is not implemented by all subclasses. In the absence of
-            interface types in Langkit, this is helpful to develop features
-            faster, because first you don't have to make every implementation
-            at once, and second you don't have to find a typing scheme with
-            current langkit capabilities in which the parser generate the right
-            types for the functionality you want.
+            that is not implemented by all subclasses.
+
+            In the absence of interface types in Langkit, this is helpful to
+            develop features faster, because first you don't have to make every
+            implementation at once, and second you don't have to find a typing
+            scheme with current langkit capabilities in which the parser
+            generate the right types for the functionality you want.
+
+            Note that for abstract properties that are private, this is
+            automatically enabled, as abstract private primitives are not
+            allowed in Ada.
 
         :param bool|None has_implicit_env: Whether this property is passed an
             implicit "current environment" parameter.  If None, inherit from
@@ -1922,6 +1927,10 @@ class PropertyDef(AbstractNodeData):
                 not self.memoized,
                 'An external property cannot be memoized'
             )
+
+        # See abstract_runtime_check documentation in __init__
+        if self.is_private and self.abstract:
+            self.abstract_runtime_check = True
 
         # Add the implicit lexical env. parameter if required
         if self.has_implicit_env:
