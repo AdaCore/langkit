@@ -1,6 +1,12 @@
 ## vim: filetype=makoada
 
-## This templates assumes that "prefix.render_pre()" was already output above.
+## This templates requires two parameters:
+##  * prefix: which is the ResolvedExpression on which the null check must be
+##    performed. This assumes that "prefix.render_pre()" was already output
+##    above.
+##  * implicit_deref: whether the null check works on an implicitely
+##    dereferenced env element. In this case, the null check is performed on
+##    the wrapped element, not on the wrapping one.
 
 % if not ctx.no_property_checks:
 
@@ -8,7 +14,7 @@
    <%
       if prefix.type.is_ptr:
          operand = prefix.render_expr()
-      elif prefix.type.is_env_element_type and prefix.type.el_type.is_ptr:
+      elif implicit_deref:
          operand = '{}.El'.format(prefix.render_expr())
       else:
          operand = None

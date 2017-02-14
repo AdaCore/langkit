@@ -36,7 +36,8 @@ class AnalysisUnitRoot(ResolvedExpression):
             self.unit_expr.render_pre(),
             self.prefix_var.name, self.unit_expr.render_expr(),
             render('properties/null_safety_check_ada',
-                   prefix=self.prefix_var.ref_expr)
+                   prefix=self.prefix_var.ref_expr,
+                   implicit_deref=False)
         )
 
     def _render_expr(self):

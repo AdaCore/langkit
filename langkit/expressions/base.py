@@ -2396,7 +2396,8 @@ class FieldAccessExpr(BasicExpr):
             return '{}\n{}'.format(
                 base,
                 render('properties/null_safety_check_ada',
-                       prefix=self.prefix_expr)
+                       prefix=self.prefix_expr,
+                       implicit_deref=False)
             )
         else:
             return base
