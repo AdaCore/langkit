@@ -108,6 +108,27 @@ def field_ref(field):
     )
 
 
+ASTDOC_CSS = """
+html { background-color: rgb(8, 8, 8); color: rgb(248, 248, 242); }
+.kw  { color: rgb(255, 95, 135); font-weight: bold; }
+.priv  { color: rgb(255, 130, 20); font-weight: bold; }
+.def { color: rgb(138, 226, 52); font-weight: bold; }
+.ref { color: rgb(102, 217, 239); }
+.ref-link { color: rgb(102, 217, 239); text-decoration: underline; }
+.disabled { color: rgb(117, 113, 94); font-style: italic;}
+""".strip()
+
+
+ASTDOC_HTML = """<html>
+<head>
+    <title>{lang_name} - AST documentation</title>
+    <style type="text/css">{css}</style>
+</head>
+<body>
+    <h1>{lang_name} - AST documentation</h1>
+"""
+
+
 def write_astdoc(context, file):
     """
     Generate a synthetic HTML documentation about AST nodes and types.
@@ -117,23 +138,9 @@ def write_astdoc(context, file):
 
     :param file file: Output file for the documentation.
     """
-    print >> file, '''<html>
-<head>
-    <title>{lang_name} - AST documentation</title>
-    <style type="text/css">{css}</style>
-</head>
-<body>
-    <h1>{lang_name} - AST documentation</h1>'''.format(
+    print >> file, ASTDOC_HTML.format(
         lang_name=context.lang_name.camel,
-        css='''
-html { background-color: rgb(8, 8, 8); color: rgb(248, 248, 242); }
-.kw  { color: rgb(255, 95, 135); font-weight: bold; }
-.priv  { color: rgb(255, 130, 20); font-weight: bold; }
-.def { color: rgb(138, 226, 52); font-weight: bold; }
-.ref { color: rgb(102, 217, 239); }
-.ref-link { color: rgb(102, 217, 239); text-decoration: underline; }
-.disabled { color: rgb(117, 113, 94); font-style: italic;}
-'''
+        css=ASTDOC_CSS
     )
 
     if context.enum_types:
