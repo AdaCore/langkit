@@ -90,14 +90,15 @@ package body Langkit_Support.Lexical_Env is
          Inc_Ref (Parent);
       end if;
       return new Lexical_Env_Type'
-        (Parent          => Parent,
-         Node            => Node,
-         Referenced_Envs => <>,
+        (Parent                     => Parent,
+         Node                       => Node,
+         Referenced_Envs            => <>,
          Transitive_Referenced_Envs => <>,
-         Env             => new Internal_Envs.Map,
+         Env                        => new Internal_Envs.Map,
          Default_MD                 => Default_MD,
          Parents_Rebindings         => null,
-         Ref_Count       => (if Is_Refcounted then 1 else No_Refcount));
+         Ref_Count                  => (if Is_Refcounted then 1
+                                        else No_Refcount));
    end Create;
 
    ---------
