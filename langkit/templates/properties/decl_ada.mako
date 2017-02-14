@@ -15,7 +15,9 @@ ${ada_doc(property, 0)}
 
 ## Wrapper to return convenient Ada arrays
 
-% if not property.overriding and is_array_type(property.type):
+% if property.is_public \
+      and not property.overriding \
+      and is_array_type(property.type):
    function ${property.name}
      ${helpers.argument_list(property, False)}
      return ${property.type.api_name()};
