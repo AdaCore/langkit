@@ -359,8 +359,6 @@ class FieldAccess(AbstractExpression):
             if self.implicit_deref:
                 prefix = "{}.El".format(prefix)
 
-            ret = "{}.{}".format(prefix, self.node_data.name)
-
             # If we're calling a property, then pass the arguments
             if isinstance(self.node_data, PropertyDef):
 
@@ -374,6 +372,17 @@ class FieldAccess(AbstractExpression):
                 if self.node_data.has_implicit_env:
                     args.append((PropertyDef.env_arg_name, str(Env._name)))
 
+                # Private non-dispatching properties are declared in
+                # $.Analysis.Body, so they are not genuine Ada primitives, so
+                # dot notation is not available for them.
+                dot_notation = (self.node_data.is_public
+                                or self.node_data.dispatching)
+                if dot_notation:
+                    ret = '{}.{}'.format(prefix, self.node_data.name)
+                else:
+                    ret = str(self.node_data.name)
+                    args.insert(0, ('Node', prefix))
+
                 if args:
                     ret += " ({})".format(', '.join(
                         '{} => {}'.format(name, value)
@@ -385,7 +394,7 @@ class FieldAccess(AbstractExpression):
                 # Struct field: make sure we return the public API type, which
                 # may be different from the type thas is stored in the Struct.
                 ret = self.node_data.type.extract_from_storage_expr(
-                    prefix, ret
+                    prefix, '{}.{}'.format(prefix, self.node_data.name)
                 )
 
             return ret
