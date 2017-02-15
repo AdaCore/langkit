@@ -1,16 +1,16 @@
 == abstract: default, concrete: default ==
 Code generation was successful
-  AbstractNode.p_prop: public
-  ConcreteNode.p_prop: public
+  AbstractNode.p_prop: private
+  ConcreteNode.p_prop: private
 
 == abstract: default, concrete: public ==
-Code generation was successful
-  AbstractNode.p_prop: public
-  ConcreteNode.p_prop: public
+File "test.py", line 39, in ConcreteNode.prop
+    Error: AbstractNode.p_prop is private, so should be ConcreteNode.p_prop
 
 == abstract: default, concrete: private ==
-File "test.py", line 39, in ConcreteNode.prop
-    Error: AbstractNode.p_prop is public, so should be ConcreteNode.p_prop
+Code generation was successful
+  AbstractNode.p_prop: private
+  ConcreteNode.p_prop: private
 
 == abstract: public, concrete: default ==
 Code generation was successful

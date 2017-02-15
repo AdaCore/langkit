@@ -27,7 +27,7 @@ class FooNode(ASTNode):
 
 @abstract
 class Expression(FooNode):
-    result = AbstractProperty(type=LongType)
+    result = AbstractProperty(type=LongType, public=True)
 
 
 class Literal(Expression):

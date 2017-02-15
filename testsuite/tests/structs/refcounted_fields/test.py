@@ -35,7 +35,8 @@ class ListDecl(FooNode):
     to_struct = Property(
         New(Names,
             label=Self.label,
-            name_list=Self.name_list.map(lambda n: n))
+            name_list=Self.name_list.map(lambda n: n)),
+        public=True
     )
 
 

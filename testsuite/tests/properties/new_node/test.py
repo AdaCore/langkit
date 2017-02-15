@@ -36,6 +36,7 @@ class LiteralSequence(FooNode):
 
     prop = Property(
         New(SynthNode, name=Self.name, items=Self.items),
+        public=True,
         memoized=True
     )
 
