@@ -23,8 +23,8 @@ def run(name, prop_expr):
 
     @root_grammar_class()
     class FooNode(ASTNode):
-        ref_var = UserField(LogicVarType, is_public=False)
-        type_var = UserField(LogicVarType, is_public=False)
+        ref_var = UserField(LogicVarType, public=False)
+        type_var = UserField(LogicVarType, public=False)
 
     class BarNode(FooNode):
 

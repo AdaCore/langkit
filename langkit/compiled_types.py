@@ -1032,7 +1032,7 @@ class UserField(AbstractField):
     Node type, will be ignored by the parsing code.
     """
 
-    def __init__(self, type, repr=False, doc=None, is_public=True):
+    def __init__(self, type, repr=False, doc=None, public=True):
         """
         See inherited doc. In this version we just ensure that a type is
         passed because it is mandatory for data fields. We also set repr to
@@ -1046,7 +1046,7 @@ class UserField(AbstractField):
             APIs.
         """
         super(UserField, self).__init__(repr, doc, type)
-        self._is_public = is_public
+        self._is_public = public
 
     concrete = True
 
@@ -1402,13 +1402,13 @@ class StructMetaclass(CompiledTypeMetaclass):
         # AST node type definition.
         return [
             ("node_env", BuiltinField(
-                type=LexicalEnvType, is_public=False,
+                type=LexicalEnvType, public=False,
                 doc='For nodes that introduce a new environment, return the'
                     ' parent lexical environment. Return the "inherited"'
                     ' environment otherwise.'
             )),
             ("children_env", BuiltinField(
-                type=LexicalEnvType, is_public=False,
+                type=LexicalEnvType, public=False,
                 doc='For nodes that introduce a new environment, return it.'
                     ' Return the "inherited" environment otherwise.'
             )),
