@@ -1396,6 +1396,8 @@ class StructMetaclass(CompiledTypeMetaclass):
 
         :rtype: list[(str, AbstractNodeData)]
         """
+        from langkit.expressions import PropertyDef
+
         assert mcs.root_grammar_class
         # Note that we must not provide implementation for them here (no
         # expression) since the implementation comes from the hard-coded root
@@ -1429,12 +1431,14 @@ class StructMetaclass(CompiledTypeMetaclass):
                 doc="Return an array that contains the direct lexical "
                     "children "
             )),
-            ("token_start", BuiltinField(
-                type=Token,
+            ("token_start", PropertyDef(
+                expr=None, prefix=None, type=Token,
+                public=True, external=True,
                 doc="Return the first token used to parse this node."
             )),
-            ("token_end", BuiltinField(
-                type=Token,
+            ("token_end", PropertyDef(
+                expr=None, prefix=None, type=Token,
+                public=True, external=True,
                 doc="Return the last token used to parse this node."
             )),
             ("previous_sibling", BuiltinField(

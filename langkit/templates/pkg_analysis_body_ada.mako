@@ -1413,18 +1413,19 @@ package body ${ada_lib_name}.Analysis is
       if Snap then
          declare
             Tok_Start : constant Token_Index :=
-              Token_Index'Max (Node.Token_Start - 1, 0);
+              Token_Index'Max (Node.Token_Start_Index - 1, 0);
             Tok_End : constant Token_Index :=
-              Token_Index'Min (Node.Token_End + 1, Last_Token (TDH));
+              Token_Index'Min (Node.Token_End_Index + 1, Last_Token (TDH));
          begin
             Sloc_Start := End_Sloc (Get (Tok_Start).Sloc_Range);
             Sloc_End := Start_Sloc (Get (Tok_End).Sloc_Range);
          end;
       else
-         Sloc_Start := Start_Sloc (Get (Node.Token_Start).Sloc_Range);
-         Sloc_End := (if Node.Token_End /= No_Token_Index
-                      then End_Sloc (Get (Node.Token_End).Sloc_Range)
-                      else Start_Sloc (Get (Node.Token_Start).Sloc_Range));
+         Sloc_Start := Start_Sloc (Get (Node.Token_Start_Index).Sloc_Range);
+         Sloc_End :=
+           (if Node.Token_End_Index /= No_Token_Index
+            then End_Sloc (Get (Node.Token_End_Index).Sloc_Range)
+            else Start_Sloc (Get (Node.Token_Start_Index).Sloc_Range));
       end if;
       return Make_Range (Sloc_Start, Sloc_End);
    end Sloc_Range;
@@ -1838,7 +1839,7 @@ package body ${ada_lib_name}.Analysis is
    -----------------
 
    function First_Token (Self : Token_Iterator) return Token_Type
-   is (Token_Start (Self.Node));
+   is (Self.Node.Token_Start);
 
    ----------------
    -- Next_Token --
@@ -1871,7 +1872,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class)
       return Token_Iterator
    is
-     (Token_Iterator'(${root_node_type_name} (Node), Node.Token_End));
+     (Token_Iterator'(${root_node_type_name} (Node), Node.Token_End_Index));
 
    --------------
    -- Raw_Data --
@@ -1987,7 +1988,7 @@ package body ${ada_lib_name}.Analysis is
    function Text
      (Node : access ${root_node_value_type}'Class) return Text_Type is
    begin
-      return Text (Token_Start (Node), Token_End (Node));
+      return Text (Node.Token_Start, Node.Token_End);
    end Text;
 
    -------------------
@@ -2059,18 +2060,19 @@ package body ${ada_lib_name}.Analysis is
                Filter_Children'Access));
    begin
       if N_Children'Length > 0
-        and then Node.Token_Start /= N_Children (First_Child).Token_Start
+        and then (Node.Token_Start_Index
+                    /= N_Children (First_Child).Token_Start_Index)
       then
-         Append_Trivias (Node.Token_Start,
-                         N_Children (First_Child).Token_Start - 1);
+         Append_Trivias (Node.Token_Start_Index,
+                         N_Children (First_Child).Token_Start_Index - 1);
       end if;
 
       for I in N_Children'Range loop
          Append (Ret_Vec, Child_Record'(Child, N_Children (I)));
-         Append_Trivias (N_Children (I).Token_End,
+         Append_Trivias (N_Children (I).Token_End_Index,
                          (if I = N_Children'Last
-                          then Node.Token_End - 1
-                          else N_Children (I + 1).Token_Start - 1));
+                          then Node.Token_End_Index - 1
+                          else N_Children (I + 1).Token_Start_Index - 1));
       end loop;
 
       return A : constant Children_Array :=
@@ -2428,7 +2430,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Is_Ghost
      (Node : access ${root_node_value_type}'Class) return Boolean
-   is (Node.Token_End = No_Token_Index);
+   is (Node.Token_End_Index = No_Token_Index);
 
    ------------------
    -- Is_Synthetic --
@@ -2436,7 +2438,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Is_Synthetic
      (Node : access ${root_node_value_type}'Class) return Boolean
-   is (Node.Token_Start = No_Token_Index);
+   is (Node.Token_Start_Index = No_Token_Index);
 
    -----------------
    -- Token_Start --
@@ -2445,7 +2447,7 @@ package body ${ada_lib_name}.Analysis is
    function Token_Start
      (Node : access ${root_node_value_type}'Class)
       return Token_Type
-   is (Node.Token (Node.Token_Start));
+   is (Node.Token (Node.Token_Start_Index));
 
    ---------------
    -- Token_End --
@@ -2455,9 +2457,9 @@ package body ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class)
       return Token_Type
    is
-     (if Node.Token_End = No_Token_Index
+     (if Node.Token_End_Index = No_Token_Index
       then Node.Token_Start
-      else Node.Token (Node.Token_End));
+      else Node.Token (Node.Token_End_Index));
 
    -----------
    -- Token --

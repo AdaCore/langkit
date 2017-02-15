@@ -715,16 +715,6 @@ package ${ada_lib_name}.Analysis is
    --    will be part of the returned array;
    --  - Nodes and trivias will be lexically ordered.
 
-   function Token_Start
-     (Node : access ${root_node_value_type}'Class)
-      return Token_Type;
-   --  Return the first token used to parse Node
-
-   function Token_End
-     (Node : access ${root_node_value_type}'Class)
-      return Token_Type;
-   --  Return the last token used to parse Node
-
    --------------------
    -- Token Iterator --
    --------------------
@@ -1206,11 +1196,12 @@ private
       Unit                   : Analysis_Unit := null;
       --  Reference to the analysis unit that owns this node
 
-      Token_Start, Token_End : Token_Index  := No_Token_Index;
-      --  Reference to the start and end token that constitutes this node.
-      --  If this node is a ghost, Token_Start is the token that this AST node
-      --  relates to and Token_End is No_Token_Index. Otherwise, both tokens
-      --  are inclusive, i.e. they both belong to this node.
+      Token_Start_Index      : Token_Index  := No_Token_Index;
+      Token_End_Index        : Token_Index  := No_Token_Index;
+      --  Reference to the start and end token that constitutes this node. If
+      --  this node is a ghost, Token_Start_Index is the token that this AST
+      --  node relates to and Token_End_Index is No_Token_Index. Otherwise,
+      --  both tokens are inclusive, i.e. they both belong to this node.
 
       Extensions             : Extension_Vectors.Vector;
 

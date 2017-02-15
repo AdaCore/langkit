@@ -17,8 +17,8 @@
 
 ${res} := ${list_type.name()}_Alloc.Alloc (Parser.Mem_Pool);
 
-${res}.Token_Start := Token_Index'Max (${pos_name}, 1);
-${res}.Token_End := No_Token_Index;
+${res}.Token_Start_Index := Token_Index'Max (${pos_name}, 1);
+${res}.Token_End_Index := No_Token_Index;
 
 ${cpos} := ${pos_name};
 
@@ -56,10 +56,10 @@ end loop;
 
 ${res}.Unit := Parser.Unit;
 if Node_Bump_Ptr_Vectors.Length (${res}.Vec) > 0 then
-   ${res}.Token_Start := ${pos_name};
-   ${res}.Token_End := (if ${cpos} = ${pos_name}
-                        then ${pos_name}
-                        else ${cpos} - 1);
+   ${res}.Token_Start_Index := ${pos_name};
+   ${res}.Token_End_Index := (if ${cpos} = ${pos_name}
+                              then ${pos_name}
+                              else ${cpos} - 1);
 end if;
 
 
