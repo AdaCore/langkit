@@ -1,0 +1,4 @@
+A
+B null
+C
+D null example
