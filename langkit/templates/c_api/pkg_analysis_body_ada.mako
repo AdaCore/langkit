@@ -555,6 +555,22 @@ package body ${ada_lib_name}.Analysis.C is
          return (System.Null_Address, 0, Is_Allocated => 0);
    end;
 
+   function ${capi.get_name('node_is_ghost')} (Node : ${node_type}) return int
+   is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         N : constant ${root_node_type_name} := Unwrap (Node);
+      begin
+         return Boolean'Pos (N.Is_Ghost);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
+   end;
+
    function ${capi.get_name('node_short_image')} (Node : ${node_type})
                                                   return ${text_type}
    is

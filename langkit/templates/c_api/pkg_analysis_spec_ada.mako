@@ -368,6 +368,11 @@ package ${ada_lib_name}.Analysis.C is
            External_name => "${capi.get_name('kind_name')}";
    ${ada_c_doc('langkit.kind_name', 3)}
 
+   function ${capi.get_name('node_is_ghost')} (Node : ${node_type}) return int
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('node_is_ghost')}";
+
    function ${capi.get_name('node_short_image')} (Node : ${node_type})
                                                   return ${text_type}
       with Export        => True,

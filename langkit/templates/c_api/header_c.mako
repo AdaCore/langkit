@@ -313,6 +313,10 @@ ${c_doc('langkit.kind_name')}
 extern ${text_type}
 ${capi.get_name("kind_name")}(${node_kind_type} kind);
 
+${c_doc('langkit.node_is_ghost')}
+extern int
+${capi.get_name("node_is_ghost")}(${node_type} node);
+
 ${c_doc('langkit.node_short_image')}
 extern ${text_type}
 ${capi.get_name("node_short_image")}(${node_type} node);
