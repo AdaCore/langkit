@@ -1041,6 +1041,9 @@ class UserField(AbstractField):
 
         :type type: CompiledType
         :type doc: str
+
+        :param bool is_public: Whether this field is public in the generated
+            APIs.
         """
         super(UserField, self).__init__(repr, doc, type)
         self._is_public = is_public
