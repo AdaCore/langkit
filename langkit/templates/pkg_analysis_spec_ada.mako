@@ -338,6 +338,7 @@ package ${ada_lib_name}.Analysis is
    subtype Lexical_Env is AST_Envs.Lexical_Env;
    subtype Env_Element is AST_Envs.Env_Element;
    subtype Env_Rebindings is AST_Envs.Env_Rebindings;
+   Empty_Env : Lexical_Env renames AST_Envs.Empty_Env;
 
    ## Declare arrays of lexical environments here because we need them for the
    ## Group operation below.

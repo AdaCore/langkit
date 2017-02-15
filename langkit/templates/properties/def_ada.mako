@@ -33,7 +33,7 @@ is
       ## none was passed to the property, we assume that the users want to
       ## evaluate it in the context of the scope of the node.
       Current_Env : AST_Envs.Lexical_Env :=
-        (if ${property.env_arg_name} /= null
+        (if ${property.env_arg_name} /= Empty_Env
          then ${property.env_arg_name}
          else Node.Self_Env);
       pragma Warnings (On, "is not referenced");

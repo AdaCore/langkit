@@ -510,7 +510,7 @@ class AnalysisUnitKind(BasicType):
 
 class LexicalEnvType(BasicType):
     _name = "Lexical_Env"
-    _nullexpr = "null"
+    _nullexpr = "Empty_Env"
     is_ptr = True
     should_emit_array_type = False
     null_allowed = True
