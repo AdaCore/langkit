@@ -642,6 +642,11 @@ class ${root_astnode_name}(object):
         return self._kind_name
 
     @property
+    def is_ghost(self):
+        ${py_doc('langkit.node_is_ghost', 8)}
+        return bool(_node_is_ghost(self._c_value))
+
+    @property
     def sloc_range(self):
         ${py_doc('langkit.node_sloc_range', 8)}
         result = _SlocRange()
@@ -1061,6 +1066,10 @@ _node_kind = _import_func(
 _kind_name = _import_func(
     '${capi.get_name("kind_name")}',
     [_enum_node_kind], _text
+)
+_node_is_ghost = _import_func(
+    '${capi.get_name("node_is_ghost")}',
+    [_node], ctypes.c_int
 )
 _node_short_image = _import_func(
     '${capi.get_name("node_short_image")}',
