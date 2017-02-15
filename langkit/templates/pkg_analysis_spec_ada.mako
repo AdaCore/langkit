@@ -397,8 +397,7 @@ package ${ada_lib_name}.Analysis is
 
    function Is_Ghost
      (Node : access ${root_node_value_type}'Class) return Boolean;
-   --  Returns whether the node is a ghost node, i.e. whether it corresponds to
-   --  a real chain of tokens in the source.
+   ${ada_doc('langkit.node_is_ghost', 3)}
 
    function Node_Env
      (Node : access ${root_node_value_type})

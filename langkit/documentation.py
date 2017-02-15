@@ -370,6 +370,11 @@ base_langkit_docs = {
         Helper for textual dump: return the name of a node kind. The returned
         string is a copy and thus must be free'd by the caller.
     """,
+    'langkit.node_is_ghost': """
+        Return whether the node is a ghost node. In other words, return False
+        if it correspondins to a real chain of tokens in the source, True
+        otherwise.
+    """,
     'langkit.node_sloc_range': """
         Get the spanning source location range for an AST node.
     """,
