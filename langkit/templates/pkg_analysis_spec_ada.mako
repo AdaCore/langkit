@@ -395,6 +395,11 @@ package ${ada_lib_name}.Analysis is
    --  Return whether Node is an empty list (so this is wrong for all nodes
    --  that are not lists).
 
+   function Is_Ghost
+     (Node : access ${root_node_value_type}'Class) return Boolean;
+   --  Returns whether the node is a ghost node, i.e. whether it corresponds to
+   --  a real chain of tokens in the source.
+
    function Node_Env
      (Node : access ${root_node_value_type})
       return AST_Envs.Lexical_Env;
@@ -1369,11 +1374,6 @@ private
    --  Token_Index value that can be stored as a field in Node. This raises a
    --  Property_Error if Node and Token don't belong to the same analysis unit
    --  or if Token is actually a Trivia.
-
-   function Is_Ghost
-     (Node : access ${root_node_value_type}'Class) return Boolean;
-   --  Returns whether the node is a ghost node, i.e. whether it corresponds to
-   --  a real chain of tokens in the source.
 
    function Is_Synthetic
      (Node : access ${root_node_value_type}'Class) return Boolean;
