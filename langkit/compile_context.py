@@ -1050,6 +1050,15 @@ class CompileCtx(object):
                 os.mkdir(python_path)
             self.emit_python_api(python_path)
 
+            playground_file = os.path.join(file_root, "bin", "playground")
+            with open(playground_file, "w") as f:
+                f.write(self.render_template(
+                    "python_api/playground_py",
+                    module_name=self.python_api_settings.module_name
+                ))
+
+            os.chmod(playground_file, 0o775)
+
         # Add any sources in $lang_path/extensions/support if it exists
         if self.ext('support'):
             for f in glob(join(self.ext('support'), "*.ad*")):
