@@ -408,6 +408,7 @@ class AbstractExpression(Frozable):
         from langkit.expressions.logic import All, Any
 
         return {
+            '_or': lambda alt: self.then(lambda e: e, default_val=alt),
             'empty': self.length.equals(0),
             'find': lambda filter_expr:
                 self.filter(filter_expr).at(0),
