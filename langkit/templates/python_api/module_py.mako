@@ -659,7 +659,8 @@ class ${root_astnode_name}(object):
         Return the source buffer slice corresponding to the text that spans
         between the first and the last tokens of `self`.
         """
-        return Token.text_range(self.token_start, self.token_end)
+        return ('' if self.is_ghost else
+                Token.text_range(self.token_start, self.token_end))
 
     @property
     def short_image(self):
