@@ -199,17 +199,14 @@ class New(AbstractExpression):
         """
 
         def __init__(self, astnode, assocs):
-            p = PropertyDef.get()
-            self.result_var = p.vars.create('New_Node', astnode)
-
-            super(New.NodeExpr, self).__init__(astnode, assocs)
+            super(New.NodeExpr, self).__init__(astnode, assocs, 'New_Node')
 
         def _render_pre(self):
             return (super(New.NodeExpr, self)._render_pre() +
                     render('properties/new_astnode_ada', expr=self))
 
         def _render_expr(self):
-            return self.result_var.name
+            return self._result_var.name
 
     def __init__(self, struct_type, **field_values):
         """
