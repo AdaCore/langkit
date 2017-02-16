@@ -782,7 +782,7 @@ class ManageScript(object):
 
             shutil.copyfile(build_path, install_path)
 
-    def do_setenv(self, args):
+    def do_setenv(self, args, output_file=sys.stdout):
         """
         Unless --json is passed, display Bourne shell commands that setup
         environment in order to make libadalang available. Otherwise, return a
@@ -790,16 +790,20 @@ class ManageScript(object):
 
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
+        :param file output_file: File to which this should write the shell
+            commands.
         """
         env_dict = {}
 
         def add_path(name, path):
-            print('{name}={path}"{sep}${name}"; export {name}'.format(
-                name=name, path=pipes.quote(path),
-                # On Cygwin, PATH keeps the Unix syntax instead of using
-                # the Window path separator.
-                sep=':' if name == 'PATH' else os.path.pathsep,
-            ))
+            output_file.write(
+                '{name}={path}"{sep}${name}"; export {name}\n'.format(
+                    name=name, path=pipes.quote(path),
+                    # On Cygwin, PATH keeps the Unix syntax instead of using
+                    # the Window path separator.
+                    sep=':' if name == 'PATH' else os.path.pathsep,
+                )
+            )
 
         def json(name, path):
             env_dict[name] = path
@@ -808,7 +812,7 @@ class ManageScript(object):
 
         if json:
             import json
-            print json.dumps(env_dict)
+            output_file.write(json.dumps(env_dict))
 
     def do_help(self, args):
         """
