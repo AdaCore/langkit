@@ -37,13 +37,10 @@ def process_file(file_name):
 
 
 if __name__ == '__main__':
-    if len(args.files) == 1:
-        u = process_file(args.files[0])
-    else:
-        units = {}
-        for file_path in args.files:
-            u = process_file(file_path)
-            units[file_path] = u
+    units = {}
+    for file_path in args.files:
+        u = process_file(file_path)
+        units[file_path] = u
 
 print HEADER
 c = load_default_config()
