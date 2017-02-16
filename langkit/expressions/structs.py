@@ -785,6 +785,10 @@ class Match(AbstractExpression):
                               or matched_expr.type.is_env_element_type,
                               'Match expressions can only work on AST nodes '
                               'or env elements')
+        matched_expr = NullCheckExpr(
+            matched_expr,
+            implicit_deref=matched_expr.type.is_env_element_type
+        )
 
         # Create a local variable so that in the generated code, we don't have
         # to re-compute the prefix for each type check.
