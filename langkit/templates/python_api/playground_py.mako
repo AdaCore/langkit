@@ -15,7 +15,7 @@ HEADER = """
 The file(s) passed as argument have been put into the u variable, or units if
 there are multiple.
 
-Enjoy !
+Enjoy!
 """.strip()
 
 c = mdl.AnalysisContext('utf-8')
