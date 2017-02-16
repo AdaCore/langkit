@@ -2389,7 +2389,7 @@ class FieldAccessExpr(BasicExpr):
     Resolved expression for anything that compiles to "{prefix}.{field}" in the
     generated code.
 
-    Node that this automatically generates a null safety check if prefix is
+    Note that this automatically generates a null safety check if prefix is
     allowed to be null.
     """
 
