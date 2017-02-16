@@ -398,7 +398,7 @@ class Quantifier(CollectionExpression):
 
             super(Quantifier.Expr, self).__init__('Quantifier_Result',
                                                   scopeless_result_var=True)
-            iter_scope.parent.add(self._result_var)
+            iter_scope.parent.add(self.result_var)
 
         def _render_pre(self):
             return render(
@@ -407,7 +407,7 @@ class Quantifier(CollectionExpression):
             )
 
         def _render_expr(self):
-            return self._result_var.name.camel_with_underscores
+            return self.result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):

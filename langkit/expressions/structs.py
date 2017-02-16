@@ -50,11 +50,11 @@ class Cast(AbstractExpression):
             )
             if result_var:
                 self._result_var = result_var
-            assert self._result_var.type == dest_type, (
+            assert self.result_var.type == dest_type, (
                 'Cast temporaries must have exactly the cast type: {} expected'
                 ' but got {} instead'.format(
                     dest_type.name().camel,
-                    self._result_var.type.name().camel
+                    self.result_var.type.name().camel
                 )
             )
 
@@ -64,7 +64,7 @@ class Cast(AbstractExpression):
             return render('properties/type_safety_check_ada', expr=self)
 
         def _render_expr(self):
-            return self._result_var.name
+            return self.result_var.name
 
         @property
         def subexprs(self):
@@ -206,7 +206,7 @@ class New(AbstractExpression):
                     render('properties/new_astnode_ada', expr=self))
 
         def _render_expr(self):
-            return self._result_var.name
+            return self.result_var.name
 
     def __init__(self, struct_type, **field_values):
         """

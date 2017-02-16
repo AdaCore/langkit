@@ -14,18 +14,18 @@ if ${source} = null
    ${source}.all in ${ast_node.value_type_name()}'Class
 then
 % if is_env_el:
-   ${expr._result_var.name} :=
+   ${expr.result_var.name} :=
      (El => ${ast_node.name()} (${expr.expr_var.name}.El),
       Md => ${expr.expr_var.name}.Md,
       Parents_Bindings => ${expr.expr_var.name}.Parents_Bindings,
       Is_Null => False);
 % else:
-   ${expr._result_var.name} := ${ast_node.name()} (${expr.expr_var.name});
+   ${expr.result_var.name} := ${ast_node.name()} (${expr.expr_var.name});
 % endif
 else
    % if expr.do_raise:
    raise Property_Error with "invalid object cast";
    % else:
-   ${expr._result_var.name} := ${expr.static_type.nullexpr()};
+   ${expr.result_var.name} := ${expr.static_type.nullexpr()};
    % endif
 end if;

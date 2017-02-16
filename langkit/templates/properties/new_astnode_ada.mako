@@ -1,6 +1,6 @@
 ## vim: filetype=makoada
 
-<% result = expr._result_var.name %>
+<% result = expr.result_var.name %>
 
 ${result} := new ${expr.static_type.value_type_name()};
 Register_Destroyable (Self.Unit, ${root_node_type_name} (${result}));

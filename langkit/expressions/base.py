@@ -734,6 +734,17 @@ class ResolvedExpression(object):
         else:
             self._result_var = None
 
+    @property
+    def result_var(self):
+        """
+        Return the local variable used to store the result of this expression,
+        if any. Note that if the result is not null, the caller can assume that
+        the "render_expr" method only returns the result variable name.
+
+        :rtype: LocalVars.LocalVar|None
+        """
+        return self._result_var
+
     def render_pre(self):
         """
         Render initial statements that might be needed to the expression.
@@ -741,10 +752,10 @@ class ResolvedExpression(object):
         :rtype: str
         """
         result = self._render_pre()
-        if self._result_var:
+        if self.result_var:
             return '{}\n{} := {};'.format(
                 result,
-                self._result_var.name.camel_with_underscores,
+                self.result_var.name.camel_with_underscores,
                 self._render_expr()
             )
         else:
@@ -756,8 +767,8 @@ class ResolvedExpression(object):
 
         :rtype: str
         """
-        return (self._result_var.name.camel_with_underscores
-                if self._result_var else
+        return (self.result_var.name.camel_with_underscores
+                if self.result_var else
                 self._render_expr())
 
     def _render_pre(self):

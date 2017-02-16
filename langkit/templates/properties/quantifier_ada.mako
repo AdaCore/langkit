@@ -8,7 +8,7 @@
                        None)
    element_var = quantifier.element_var.name
    iteration_var = list_element_var or element_var
-   result_var = quantifier._result_var.name
+   result_var = quantifier.result_var.name
 %>
 
 ${quantifier.collection.render_pre()}

@@ -261,7 +261,7 @@ class If(AbstractExpression):
             return render('properties/if_ada', expr=self)
 
         def _render_expr(self):
-            return self._result_var.name.camel_with_underscores
+            return self.result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):
@@ -365,7 +365,7 @@ class Then(AbstractExpression):
             return render('properties/then_ada', then=self)
 
         def _render_expr(self):
-            return self._result_var.name.camel_with_underscores
+            return self.result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):
