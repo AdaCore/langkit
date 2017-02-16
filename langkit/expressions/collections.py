@@ -394,12 +394,11 @@ class Quantifier(CollectionExpression):
             self.element_var = element_var
             self.index_var = index_var
             self.iter_scope = iter_scope
-            self.result_var = PropertyDef.get().vars.create_scopeless(
-                'Quantifier_Result', BoolType
-            )
-            iter_scope.parent.add(self.result_var)
+            self.static_type = BoolType
 
-            super(Quantifier.Expr, self).__init__()
+            super(Quantifier.Expr, self).__init__('Quantifier_Result',
+                                                  scopeless_result_var=True)
+            iter_scope.parent.add(self._result_var)
 
         def _render_pre(self):
             return render(
@@ -408,7 +407,7 @@ class Quantifier(CollectionExpression):
             )
 
         def _render_expr(self):
-            return self.result_var.name.camel_with_underscores
+            return self._result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):
