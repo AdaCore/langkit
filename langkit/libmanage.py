@@ -4,6 +4,7 @@ import argparse
 from funcy import keep
 import glob
 import inspect
+import json
 import os
 from os import path
 import pdb
@@ -805,13 +806,12 @@ class ManageScript(object):
                 )
             )
 
-        def json(name, path):
+        def add_json(name, path):
             env_dict[name] = path
 
-        self.setup_environment(json if args.json else add_path)
+        self.setup_environment(add_json if args.json else add_path)
 
         if json:
-            import json
             output_file.write(json.dumps(env_dict))
 
     def do_help(self, args):
