@@ -9,8 +9,8 @@ from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions.analysis_units import construct_analysis_unit_property
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BindingScope, LiteralExpr, Let,
-    PropertyDef, ResolvedExpression, UnreachableExpr, attr_call, attr_expr,
-    construct, render
+    NullCheckExpr, PropertyDef, ResolvedExpression, UnreachableExpr, attr_call,
+    attr_expr, construct, render
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
@@ -293,6 +293,9 @@ class FieldAccess(AbstractExpression):
     class Expr(ResolvedExpression):
         """
         Resolved expression that represents a field access in generated code.
+
+        Note that this automatically generates a check for null nodes, unless
+        this is a simple field access.
         """
         pretty_class_name = 'FieldAccess'
 
@@ -311,19 +314,25 @@ class FieldAccess(AbstractExpression):
             :param bool implicit_deref: Whether the receiver is an env element,
                 and we want to access a field or property of the stored node.
             """
-            self.receiver_expr = receiver_expr
-            self.node_data = node_data
-            self.static_type = self.node_data.type
-            self.arguments = arguments
-            self.simple_field_access = False
-            self.implicit_deref = implicit_deref
-
             # When calling environment properties, the call itself happens are
             # outside a property. We cannot create a variable in this context,
             # and the field access is not supposed to require a "render_pre"
             # step.
             p = PropertyDef.get()
             self.simple_field_access = not p
+
+            if not self.simple_field_access:
+                var_name = None if receiver_expr.result_var else 'Pfx'
+                self.receiver_expr = NullCheckExpr(receiver_expr,
+                                                   implicit_deref,
+                                                   result_var_name=var_name)
+            else:
+                self.receiver_expr = receiver_expr
+
+            self.node_data = node_data
+            self.static_type = self.node_data.type
+            self.arguments = arguments
+            self.implicit_deref = implicit_deref
 
             # Create a variable for all field accesses in properties. This is
             # needed because the property will return an owning reference, so
@@ -342,11 +351,8 @@ class FieldAccess(AbstractExpression):
             # Before accessing the field of a record through an access, we must
             # check whether this access is null in order to raise a
             # Property_Error in the case it is.
-            return '{}\n{}\n{}'.format(
+            return '{}\n{}'.format(
                 self.receiver_expr.render_pre(),
-                render('properties/null_safety_check_ada',
-                       prefix=self.receiver_expr,
-                       implicit_deref=self.implicit_deref),
                 '\n'.join(arg.render_pre() for arg in self.arguments)
             )
 
