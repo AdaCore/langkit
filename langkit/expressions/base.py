@@ -716,19 +716,23 @@ class ResolvedExpression(object):
     :type: CompiledType
     """
 
-    def __init__(self, result_var_name=None):
+    def __init__(self, result_var_name=None, scopeless_result_var=False):
         """
         Create a resolve expression.
 
         :param None|str result_var_name: If provided, create a local variable
             using this as a base name to hold the result of this expression.
             In this case, the "type" property must be ready.
+        :param bool scopeless_result_var: Whether the result variable must be
+            scopeless. This has no effect if "result_var_name" is None.
         """
-        self._result_var = (
-            PropertyDef.get().vars.create(result_var_name, self.type)
-            if result_var_name else
-            None
-        )
+        if result_var_name:
+            create_var = (PropertyDef.get().vars.create_scopeless
+                          if scopeless_result_var else
+                          PropertyDef.get().vars.create)
+            self._result_var = create_var(result_var_name, self.type)
+        else:
+            self._result_var = None
 
     def render_pre(self):
         """
