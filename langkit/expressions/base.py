@@ -2401,22 +2401,10 @@ class FieldAccessExpr(BasicExpr):
         :param CompiledType type: The type of the result.
         """
         super(FieldAccessExpr, self).__init__(
-            '{}.{}', result_type, [prefix_expr, field_name]
+            '{}.{}', result_type, [NullCheckExpr(prefix_expr), field_name]
         )
         self.prefix_expr = prefix_expr
         self.field_name = field_name
-
-    def _render_pre(self):
-        base = super(FieldAccessExpr, self)._render_pre()
-        if self.prefix_expr.type.null_allowed:
-            return '{}\n{}'.format(
-                base,
-                render('properties/null_safety_check_ada',
-                       prefix=self.prefix_expr,
-                       implicit_deref=False)
-            )
-        else:
-            return base
 
     @property
     def subexprs(self):
