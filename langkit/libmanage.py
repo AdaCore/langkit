@@ -784,8 +784,9 @@ class ManageScript(object):
 
     def do_setenv(self, args):
         """
-        Display Bourne shell commands that setup environment in order to make
-        libadalang available.
+        Unless --json is passed, display Bourne shell commands that setup
+        environment in order to make libadalang available. Otherwise, return a
+        JSON document that describe this environment.
 
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
