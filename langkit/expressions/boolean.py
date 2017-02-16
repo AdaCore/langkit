@@ -254,15 +254,14 @@ class If(AbstractExpression):
             self.then = then
             self.else_then = else_then
             self.static_type = rtype
-            self.result_var = PropertyDef.get().vars.create('Result', rtype)
 
-            super(If.Expr, self).__init__()
+            super(If.Expr, self).__init__('Result')
 
         def _render_pre(self):
             return render('properties/if_ada', expr=self)
 
         def _render_expr(self):
-            return self.result_var.name.camel_with_underscores
+            return self._result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):
