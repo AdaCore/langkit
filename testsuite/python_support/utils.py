@@ -112,6 +112,10 @@ def build_and_run(grammar, py_script,
         argv.append('--library-fields-all-public')
     m.run(argv)
 
+    # Write a "setenv" script to make developper investigation convenient
+    with open('setenv.sh', 'w') as f:
+        m.write_setenv(f)
+
     # Then execute a script with it. Note that in order to use the generated
     # library, we have to use the special Python interpreter the testsuite
     # provides us. See the corresponding code in
