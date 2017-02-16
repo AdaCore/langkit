@@ -358,16 +358,14 @@ class Then(AbstractExpression):
             self.then_expr = then_expr
             self.default_expr = default_expr
             self.static_type = self.then_expr.type
-            self.result_var = PropertyDef.get().vars.create("Result_Var",
-                                                            self.type)
 
-            super(Then.Expr, self).__init__()
+            super(Then.Expr, self).__init__('Result_Var')
 
         def _render_pre(self):
             return render('properties/then_ada', then=self)
 
         def _render_expr(self):
-            return self.result_var.name.camel_with_underscores
+            return self._result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):
