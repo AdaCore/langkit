@@ -26,7 +26,10 @@ for node, prop in [
 
     (expr, 'p_cast_null_node'),
 
+    (expr, 'p_match_null_node'),
+
     (iden, 'p_deref_env_element'),
+    (iden, 'p_match_env_element'),
 ]:
     try:
         result = getattr(node, prop)

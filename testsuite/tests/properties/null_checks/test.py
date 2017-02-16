@@ -31,6 +31,15 @@ class FooNode(ASTNode):
 
     cast_null_node = Property(Self.null_node.cast(T.Name), public=True)
 
+    match_null_node = Property(
+        Self.null_node.match(
+            lambda l=T.Literal: l,
+            lambda n=T.Name: n,
+            lambda others: others
+        ),
+        public=True
+    )
+
 
 @abstract
 class Expression(FooNode):
@@ -46,6 +55,14 @@ class Name(Expression):
 
     env_element = Property(Self.children_env.get(Self.tok.symbol).at(0))
     deref_env_element = Property(Self.env_element.null_node, public=True)
+    match_env_element = Property(
+        Self.env_element.match(
+            lambda l=T.Literal.env_el(): l.el,
+            lambda n=T.Name.env_el(): n.el,
+            lambda others: others.el
+        ),
+        public=True
+    )
 
 
 class Plus(Expression):

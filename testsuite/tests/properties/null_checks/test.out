@@ -5,6 +5,8 @@ main.py: Running...
 <Plus 1:1-1:12>.p_deref_null_node: PropertyError
 <Plus 1:1-1:12>.p_null_node_unit: PropertyError
 <Plus 1:1-1:12>.p_cast_null_node: None
+<Plus 1:1-1:12>.p_match_null_node: PropertyError
 <Name 1:1-1:2>.p_deref_env_element: PropertyError
+<Name 1:1-1:2>.p_match_env_element: PropertyError
 main.py: Done.
 Done
