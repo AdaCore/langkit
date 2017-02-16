@@ -21,7 +21,7 @@ Enjoy!
 c = mdl.AnalysisContext('utf-8')
 
 parser = argparse.ArgumentParser(
-    description="Libadalang playground. Analyze files passed as argument"
+    description="${module_name} playground. Analyze files passed as arguments."
 )
 parser.add_argument('files', nargs='+', help='Files')
 parser.add_argument('--semres', action='store_true')
