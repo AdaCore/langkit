@@ -783,36 +783,25 @@ class ManageScript(object):
 
             shutil.copyfile(build_path, install_path)
 
-    def do_setenv(self, args, output_file=sys.stdout):
+    def do_setenv(self, args):
         """
         Unless --json is passed, display Bourne shell commands that setup
-        environment in order to make libadalang available. Otherwise, return a
-        JSON document that describe this environment.
+        environment in order to make the generated library available.
+        Otherwise, return a JSON document that describe this environment.
 
         :param argparse.Namespace args: The arguments parsed from the command
             line invocation of manage.py.
-        :param file output_file: File to which this should write the shell
-            commands.
         """
-        env_dict = {}
+        if args.json:
+            result = {}
 
-        def add_path(name, path):
-            output_file.write(
-                '{name}={path}"{sep}${name}"; export {name}\n'.format(
-                    name=name, path=pipes.quote(path),
-                    # On Cygwin, PATH keeps the Unix syntax instead of using
-                    # the Window path separator.
-                    sep=':' if name == 'PATH' else os.path.pathsep,
-                )
-            )
+            def add_json(name, path):
+                result[name] = path
 
-        def add_json(name, path):
-            env_dict[name] = path
-
-        self.setup_environment(add_json if args.json else add_path)
-
-        if json:
-            output_file.write(json.dumps(env_dict))
+            self.setup_environment(add_json)
+            print json.dumps(result)
+        else:
+            self.write_setenv()
 
     def do_help(self, args):
         """
@@ -852,6 +841,25 @@ class ManageScript(object):
 
         self.setup_environment(add_path)
         return env
+
+    def write_setenv(self, output_file):
+        """
+        Display Bourne shell commands that setup environment in order to make
+        the generated library available.
+
+        :param file output_file: File to which this should write the shell
+            commands.
+        """
+        def add_path(name, path):
+            output_file.write(
+                '{name}={path}"{sep}${name}"; export {name}\n'.format(
+                    name=name, path=pipes.quote(path),
+                    # On Cygwin, PATH keeps the Unix syntax instead of using
+                    # the Window path separator.
+                    sep=':' if name == 'PATH' else os.path.pathsep,
+                )
+            )
+        self.setup_environment(add_path)
 
     def check_call(self, args, name, argv, env=None):
         """
