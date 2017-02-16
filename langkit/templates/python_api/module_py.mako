@@ -384,6 +384,10 @@ class AnalysisUnit(object):
         """Diagnostics for this unit."""
         return self.DiagnosticsList(self)
 
+    @classmethod
+    def wrap(cls, c_value):
+        return cls(c_value) if c_value else None
+
 
 class LexicalEnv(object):
     ${py_doc('langkit.lexical_env_type', 4)}

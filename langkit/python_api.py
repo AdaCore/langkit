@@ -44,7 +44,7 @@ class PythonAPISettings(AbstractAPISettings):
 
         value_suffix = '' if from_field_access else '.value'
         return dispatch_on_type(type, [
-            (ct.AnalysisUnitType, lambda _: 'AnalysisUnit({})'),
+            (ct.AnalysisUnitType, lambda _: 'AnalysisUnit.wrap({})'),
             (ct.AnalysisUnitKind, lambda _: 'unit_kind_to_str[{}]'),
             (ct.ASTNode, lambda _: '_wrap_astnode({})'),
             (ct.SourceLocationRangeType, lambda _: '_wrap_sloc_range({})'),
