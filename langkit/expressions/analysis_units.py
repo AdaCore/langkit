@@ -2,8 +2,8 @@ from langkit import names
 from langkit.compiled_types import AnalysisUnitKind, AnalysisUnitType, T
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractVariable, FieldAccessExpr, PropertyDef, ResolvedExpression,
-    auto_attr, construct, render
+    AbstractVariable, FieldAccessExpr, NullCheckExpr, ResolvedExpression,
+    auto_attr, construct
 )
 
 
@@ -20,28 +20,22 @@ UnitBody = AbstractVariable(
 class AnalysisUnitRoot(ResolvedExpression):
     """
     Construct that takes an analysis unit and that returns its root node.
+
+    Note that this automatically generates a check for null analysis units.
     """
 
     def __init__(self, unit_expr):
         super(AnalysisUnitRoot, self).__init__()
 
         self.static_type = T.root_node
-        self.unit_expr = unit_expr
-        self.prefix_var = PropertyDef.get().vars.create(
-            'Unit', self.unit_expr.type
-        )
+        var_name = None if unit_expr.result_var else 'Unit'
+        self.unit_expr = NullCheckExpr(unit_expr, result_var_name=var_name)
 
     def _render_pre(self):
-        return '{}\n{} := {};\n{}'.format(
-            self.unit_expr.render_pre(),
-            self.prefix_var.name, self.unit_expr.render_expr(),
-            render('properties/null_safety_check_ada',
-                   prefix=self.prefix_var.ref_expr,
-                   implicit_deref=False)
-        )
+        return self.unit_expr.render_pre()
 
     def _render_expr(self):
-        return 'Root ({})'.format(self.prefix_var.name)
+        return 'Root ({})'.format(self.unit_expr.render_expr())
 
     @property
     def subexprs(self):
