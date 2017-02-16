@@ -2764,6 +2764,46 @@ class BuiltinCallExpr(BasicExpr):
         return '<BuiltinCallExpr {}>'.format(self.name.camel_with_underscores)
 
 
+class NullCheckExpr(ResolvedExpression):
+    """
+    Expression that raises a PropertyError when the input is a null pointer.
+    Just return the input otherwise.
+
+    Note that the check is not performed at all when property checks are
+    disabled context-wide.
+    """
+
+    def __init__(self, expr, implicit_deref=False, result_var_name=None):
+        """
+        :param ResolvedExpression expr: Expression to evaluate.
+        :param bool implicit_deref: If expr is an env element, perform the
+            check on the embedded AST node instead.
+        """
+        self.expr = expr
+        self.implicit_deref = implicit_deref
+        super(NullCheckExpr, self).__init__(result_var_name)
+
+    @property
+    def type(self):
+        return self.expr.type
+
+    def _render_pre(self):
+        return '{}\n{}'.format(self.expr.render_pre(),
+                               render('properties/null_check_ada',
+                                      expr=self.expr,
+                                      implicit_deref=self.implicit_deref))
+
+    def _render_expr(self):
+        return self.expr.render_expr()
+
+    @property
+    def subexprs(self):
+        return {'expr': self.expr}
+
+    def __repr__(self):
+        return '<NullCheckExpr>'
+
+
 def is_simple_expr(expr):
     """
     Helper method to check that the expression is a simple expression,
