@@ -158,15 +158,16 @@ class New(AbstractExpression):
         Resolved expression to create Struct values.
         """
 
-        def __init__(self, struct_type, assocs):
+        def __init__(self, struct_type, assocs, result_var_name=None):
             """
             :type struct_type: CompiledType
             :type assocs: {names.Name: ResolvedExpression}
+            :type result_var_name: str|None
             """
             self.static_type = struct_type
             self.assocs = assocs
 
-            super(New.StructExpr, self).__init__()
+            super(New.StructExpr, self).__init__(result_var_name)
 
         def _iter_ordered(self):
             return ((k, self.assocs[k]) for k in sorted(self.assocs))
