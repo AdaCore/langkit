@@ -44,17 +44,19 @@ class Cast(AbstractExpression):
 
             p = PropertyDef.get()
             self.expr_var = p.vars.create('Cast_Expr', self.expr.type)
-            self.result_var = (result_var or
-                               p.vars.create('Cast_Result', dest_type))
-            assert self.result_var.type == dest_type, (
+
+            super(Cast.Expr, self).__init__(
+                result_var_name=(None if result_var else 'Cast_Result')
+            )
+            if result_var:
+                self._result_var = result_var
+            assert self._result_var.type == dest_type, (
                 'Cast temporaries must have exactly the cast type: {} expected'
                 ' but got {} instead'.format(
                     dest_type.name().camel,
-                    self.result_var.type.name().camel
+                    self._result_var.type.name().camel
                 )
             )
-
-            super(Cast.Expr, self).__init__()
 
         def _render_pre(self):
             # Before actually downcasting an access to an AST node, add a type
@@ -62,7 +64,7 @@ class Cast(AbstractExpression):
             return render('properties/type_safety_check_ada', expr=self)
 
         def _render_expr(self):
-            return self.result_var.name
+            return self._result_var.name
 
         @property
         def subexprs(self):
