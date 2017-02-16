@@ -789,6 +789,30 @@ package ${ada_lib_name}.Analysis is
    procedure Assign_Names_To_Logic_Vars_Impl
      (Node : access ${root_node_value_type}) is null;
 
+   ------------------------------------------------------
+   -- AST node derived types (incomplete declarations) --
+   ------------------------------------------------------
+
+   type ${generic_list_value_type};
+   --  Base type for all lists of AST node subclasses
+
+   type ${generic_list_type_name} is
+      access all ${generic_list_value_type}'Class;
+
+   % for astnode in no_builtins(ctx.astnode_types):
+     % if not astnode.is_list_type:
+       ${astnode_types.public_incomplete_decl(astnode)}
+     % endif
+   % endfor
+
+   % for astnode in ctx.astnode_types:
+      % if astnode.is_root_list_type:
+         ${list_types.public_incomplete_decl(astnode.element_type())}
+      % elif astnode.is_list_type:
+         ${astnode_types.public_incomplete_decl(astnode)}
+      % endif
+   % endfor
+
    ------------------------------
    -- Root AST node properties --
    ------------------------------
@@ -843,17 +867,10 @@ package ${ada_lib_name}.Analysis is
    % endif
    % endfor
 
-   ------------------------------------------------------
-   -- AST node derived types (incomplete declarations) --
-   ------------------------------------------------------
-
    type ${generic_list_value_type} is
       abstract new ${root_node_value_type}
       with private;
    --  Base type for all lists of AST node subclasses
-
-   type ${generic_list_type_name} is
-      access all ${generic_list_value_type}'Class;
 
    overriding function Image
      (Node : access ${generic_list_value_type}) return String;
@@ -872,20 +889,6 @@ package ${ada_lib_name}.Analysis is
 
    overriding function Is_Empty_List
      (Node : access ${generic_list_value_type}) return Boolean;
-
-   % for astnode in no_builtins(ctx.astnode_types):
-     % if not astnode.is_list_type:
-       ${astnode_types.public_incomplete_decl(astnode)}
-     % endif
-   % endfor
-
-   % for astnode in ctx.astnode_types:
-      % if astnode.is_root_list_type:
-         ${list_types.public_incomplete_decl(astnode.element_type())}
-      % elif astnode.is_list_type:
-         ${astnode_types.public_incomplete_decl(astnode)}
-      % endif
-   % endfor
 
    -----------------------------------------
    -- Structure types (full declarations) --
