@@ -677,6 +677,37 @@ class CompileCtx(object):
 
         return (forwards, backwards)
 
+    def warn_unused_private_properties(self):
+        """
+        Check that all private properties are actually used: if one is not,
+        it is useless, so emit a warning for it.
+        """
+
+        forwards, _ = self.properties_callgraphs()
+
+        # Compute the set of properties that are transitively called by a
+        # public property. Assume that internal properties are used.
+        reachable_by_public = set()
+        queue = {p for p in forwards if p.is_public or p.is_internal}
+        while queue:
+            prop = queue.pop()
+            reachable_by_public.add(prop)
+            queue.update(p for p in forwards[prop]
+                         if p not in reachable_by_public)
+
+        # The unused private properties are the ones that are not part of this
+        # set.
+        unreachable_private = set(forwards) - reachable_by_public
+        assert all(p.is_private for p in unreachable_private)
+        check_source_language(
+            not unreachable_private,
+            'The following private properties are unused (unreachable from'
+            ' private properties): {}'.format(
+                ', '.join(sorted(p.qualname for p in unreachable_private))
+            ),
+            severity=Severity.warning
+        )
+
     def compute_properties(self, compile_only=False):
         """
         Compute information related to ASTNode's properties. This needs to be a
@@ -914,6 +945,8 @@ class CompileCtx(object):
             " not used by the grammar, and their types not annotated:"
             " {}".format(", ".join(t.name().camel for t in unresolved_types))
         )
+
+        self.warn_unused_private_properties()
 
         astnodes_files = {
             path.abspath(inspect.getsourcefile(n)) for n in self.astnode_types
