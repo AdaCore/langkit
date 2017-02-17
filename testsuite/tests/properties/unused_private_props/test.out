@@ -1,3 +1,6 @@
-Warning: The following private properties are unused (unreachable from private properties): Expression.p_result, Name.p_designated_unit, Name.p_result, Plus.p_result
+File "test.py", line 27, in FooNode.as_expr
+    Warning: This private property is unused
+File "test.py", line 34, in Expression.result
+    Warning: This private abstraction is unused
 Code generation was successful
 Done

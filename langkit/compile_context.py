@@ -683,30 +683,58 @@ class CompileCtx(object):
         it is useless, so emit a warning for it.
         """
 
-        forwards, _ = self.properties_callgraphs()
+        forwards_strict, _ = self.properties_callgraphs()
+
+        # Compute the callgraph with flattenned subclassing information:
+        # consider only root properties.
+        forwards = {}
+        for prop, called in forwards_strict.items():
+            root = prop.root_property
+            forwards.setdefault(root, set())
+            forwards[root].update(c.root_property for c in called)
 
         # Compute the set of properties that are transitively called by a
         # public property. Assume that internal properties are used.
+
+        # The first is for strict analysis while the second one simplifies
+        # properties to their root.
+        reachable_by_public_strict = set()
         reachable_by_public = set()
-        queue = {p for p in forwards if p.is_public or p.is_internal}
-        while queue:
-            prop = queue.pop()
-            reachable_by_public.add(prop)
-            queue.update(p for p in forwards[prop]
-                         if p not in reachable_by_public)
+
+        def compute_reachable(reachable_set, forward_map):
+            queue = {p for p in forward_map if p.is_public or p.is_internal}
+            while queue:
+                prop = queue.pop()
+                reachable_set.add(prop)
+                queue.update(p for p in forward_map[prop]
+                             if p not in reachable_set)
+        compute_reachable(reachable_by_public_strict, forwards_strict)
+        compute_reachable(reachable_by_public, forwards)
 
         # The unused private properties are the ones that are not part of this
         # set.
-        unreachable_private = set(forwards) - reachable_by_public
-        assert all(p.is_private for p in unreachable_private)
-        check_source_language(
-            not unreachable_private,
-            'The following private properties are unused (unreachable from'
-            ' private properties): {}'.format(
-                ', '.join(sorted(p.qualname for p in unreachable_private))
-            ),
-            severity=Severity.warning
+        unreachable_private_strict = (
+            set(forwards_strict) - reachable_by_public_strict
         )
+        unreachable_private = set(forwards) - reachable_by_public
+        assert all(p.is_private for p in unreachable_private_strict)
+
+        # Now determine the set of unused abstraction: it's all root properties
+        # that are unused in the strict analysis but used in the other one.
+        unused_abstractions = {
+            p.root_property for p in
+            (unreachable_private_strict - unreachable_private)
+        }
+
+        def warn(unused_set, message):
+            sorted_set = sorted((p.qualname, p) for p in unused_set)
+            for _, p in sorted_set:
+                with p.diagnostic_context():
+                    check_source_language(False, message,
+                                          severity=Severity.warning)
+
+        warn(unreachable_private, 'This private property is unused')
+        warn(unused_abstractions, 'This private abstraction is unused')
 
     def compute_properties(self, compile_only=False):
         """
