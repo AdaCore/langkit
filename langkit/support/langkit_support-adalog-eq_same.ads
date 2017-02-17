@@ -2,7 +2,6 @@ with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Logic_Ref;
 with Langkit_Support.Adalog.Unify;
-with Langkit_Support.Adalog.Unify_LR;
 
 --  Convenience wrapper generic package that, from a type implementing
 --  equality, will instantiate all the needed stuff to create logical
@@ -30,19 +29,12 @@ package Langkit_Support.Adalog.Eq_Same is
 
    function Equals (L, R : LR_Type) return Boolean is (L = R);
 
-   package Refcounted_Impl is new Unify
-     (LR_Type, LR_Type,
-      Dummy_Convert_Data, Dummy_Convert_Data, No_Data, No_Data,
-      Left_Var  => Refs.Refcounted_Logic_Var,
-      Right_Var => Refs.Refcounted_Logic_Var);
-
    package Raw_Impl is new Unify
      (LR_Type, LR_Type,
       Dummy_Convert_Data, Dummy_Convert_Data, No_Data, No_Data,
       Left_Var  => Refs.Raw_Logic_Var,
       Right_Var => Refs.Raw_Logic_Var);
 
-   subtype Refcounted_Member_Array is Refcounted_Impl.Unify_Left.R_Type_Array;
    subtype Raw_Member_Array is Raw_Impl.Unify_Left.R_Type_Array;
 
    --  This package can be used to provide custom bind operations, with a
@@ -82,16 +74,5 @@ package Langkit_Support.Adalog.Eq_Same is
         (Relation (Impl.Equals (L, R, Data)));
 
    end Raw_Custom_Bind;
-
-   generic
-      type Converter is private;
-      with function Convert (Data : Converter; From : LR_Type) return LR_Type;
-   package Refcounted_Custom_Bind is
-      package Impl is new Unify_LR
-        (LR_Type, LR_Type,
-         Converter, Converter,
-         Convert, Convert,
-         Refs.Refcounted_Logic_Var, Refs.Refcounted_Logic_Var);
-   end Refcounted_Custom_Bind;
 
 end Langkit_Support.Adalog.Eq_Same;

@@ -1,7 +1,5 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
-with GNATCOLL.Refcount;
-
 with Langkit_Support.Adalog.Logic_Var;
 with Langkit_Support.Adalog.Logic_Var_Predicate;
 use Langkit_Support.Adalog.Logic_Var_Predicate;
@@ -76,36 +74,6 @@ package Langkit_Support.Adalog.Logic_Ref is
    is (Self.Pending_Relations);
    procedure Remove_Predicate (Self : in out Var; Pred : Var_Predicate);
 
-   --------------------------------------
-   -- Referenced counted variable type --
-   --------------------------------------
-
-   --  This type is a reference counted logic variable type, to use if you
-   --  don't care about performance and want automatic deallocation.
-
-   type Refcounted_El is new GNATCOLL.Refcount.Refcounted with record
-      Content : Var;
-   end record;
-
-   package Refs is new GNATCOLL.Refcount.Shared_Pointers (Refcounted_El);
-   type Ref is new Refs.Ref with null record;
-
-   procedure Reset (Self : in out Ref);
-   function Is_Defined (Self : Ref) return Boolean;
-   function Set_Value (Self : in out Ref; Data : Element_Type) return Boolean;
-   function Get_Value (Self : Ref) return Element_Type;
-
-   function Get_Pending_Predicates (Self : Ref) return Pred_Sets.Set
-   is (Get_Pending_Predicates (Self.Unchecked_Get.Content));
-
-   procedure Remove_Predicate (Self : Ref; Pred : Var_Predicate);
-   procedure Add_Predicate (Self : Ref; Pred : Var_Predicate);
-
-   function Image (Self : Ref) return String is
-     (Image (Self.Unchecked_Get.Content));
-
-   function Create return Ref;
-
    -----------------------
    -- Raw variable type --
    -----------------------
@@ -134,13 +102,6 @@ package Langkit_Support.Adalog.Logic_Ref is
    ------------------------------------
    -- Formal packages instantiations --
    ------------------------------------
-
-   --  Refcounted one
-
-   package Refcounted_Logic_Var is new Adalog.Logic_Var
-     (Ref, Element_Type);
-
-   --  Raw one
 
    package Raw_Logic_Var is new Adalog.Logic_Var (Raw_Var, Element_Type);
 

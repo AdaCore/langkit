@@ -1,5 +1,3 @@
-with GNATCOLL.Refcount; use GNATCOLL.Refcount;
-
 with Langkit_Support.Adalog.Debug;      use Langkit_Support.Adalog.Debug;
 
 package body Langkit_Support.Adalog.Logic_Ref is
@@ -79,56 +77,6 @@ package body Langkit_Support.Adalog.Logic_Ref is
       return Self.Value;
    end Get_Value;
 
-   ---------------
-   -- Set_Value --
-   ---------------
-
-   function Set_Value
-     (Self : in out Ref; Data : Element_Type) return Boolean
-   is
-   begin
-      return Set_Value (Self.Unchecked_Get.Content, Data);
-   end Set_Value;
-
-   ---------------
-   -- Get_Value --
-   ---------------
-
-   function Get_Value (Self : Ref) return Element_Type is
-   begin
-      return Get_Value (Self.Unchecked_Get.Content);
-   end Get_Value;
-
-   ------------
-   -- Create --
-   ------------
-
-   function Create return Ref is
-   begin
-      return Self : Ref do
-         Refs.Set
-           (Refs.Ref (Self),
-            Refcounted_El'
-              (Refcounted with Content => (Reset => True, others => <>)));
-      end return;
-   end Create;
-
-   -----------
-   -- Reset --
-   -----------
-
-   procedure Reset (Self : in out Ref) is
-   begin
-      Reset (Self.Unchecked_Get.Content);
-   end Reset;
-
-   ----------------
-   -- Is_Defined --
-   ----------------
-
-   function Is_Defined (Self : Ref) return Boolean is
-     (Is_Defined (Self.Unchecked_Get.Content));
-
    -----------
    -- Reset --
    -----------
@@ -202,25 +150,6 @@ package body Langkit_Support.Adalog.Logic_Ref is
       Trace ("In remove predicate");
       null;
    end Remove_Predicate;
-
-   ----------------------
-   -- Remove_Predicate --
-   ----------------------
-
-   procedure Remove_Predicate (Self : Ref; Pred : Var_Predicate)
-   is
-   begin
-      Remove_Predicate (Self.Unchecked_Get.Content, Pred);
-   end Remove_Predicate;
-
-   -------------------
-   -- Add_Predicate --
-   -------------------
-
-   procedure Add_Predicate (Self : Ref; Pred : Var_Predicate) is
-   begin
-      Add_Predicate (Self.Unchecked_Get.Content, Pred);
-   end Add_Predicate;
 
    ----------------------
    -- Remove_Predicate --
