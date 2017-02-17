@@ -1,6 +1,5 @@
 """
-Test that garbage tokens left after the main parsing rule completes does not
-crash. It used to!
+Tests that it is possible to call a property of type T on an EnvElement[T].
 """
 
 import os.path
