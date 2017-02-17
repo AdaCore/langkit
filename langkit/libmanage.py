@@ -842,7 +842,7 @@ class ManageScript(object):
         self.setup_environment(add_path)
         return env
 
-    def write_setenv(self, output_file):
+    def write_setenv(self, output_file=sys.stdout):
         """
         Display Bourne shell commands that setup environment in order to make
         the generated library available.
