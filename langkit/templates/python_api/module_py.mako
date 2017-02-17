@@ -840,6 +840,10 @@ class ${root_astnode_name}(object):
         return json.dumps(self.to_data())
 
     def is_a(self, *types):
+        """
+        Shortcut for isinstance(self, types).
+        :rtype: bool
+        """
         return isinstance(self, tuple(types))
 
 % for astnode in ctx.astnode_types:
