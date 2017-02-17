@@ -42,6 +42,37 @@ class Bind(AbstractExpression):
         Bind(A, B, property)
     """
 
+    class Expr(BuiltinCallExpr):
+        def __init__(self, conv_prop, eq_prop, cprop_uid, eprop_uid, lhs, rhs,
+                     pred_func):
+            self.conv_prop = conv_prop
+            self.eq_prop = eq_prop
+            self.cprop_uid = cprop_uid
+            self.eprop_uid = eprop_uid
+            self.lhs = lhs
+            self.rhs = rhs
+            self.pred_func = pred_func
+
+            super(Bind.Expr, self).__init__(
+                'Bind_{}_{}.Create'.format(cprop_uid, eprop_uid),
+                EquationType,
+                [lhs, rhs, pred_func],
+                'Bind_Result'
+            )
+
+        @property
+        def subexprs(self):
+            return {'conv_prop': self.conv_prop,
+                    'eq_prop':   self.eq_prop,
+                    'cprop_uid': self.cprop_uid,
+                    'eprop_uid': self.eprop_uid,
+                    'lhs':       self.lhs,
+                    'rhs':       self.rhs,
+                    'pred_func': self.pred_func}
+
+        def __repr__(self):
+            return '<Bind.Expr>'
+
     def __init__(self, from_expr, to_expr, conv_prop=None, eq_prop=None):
         """
         :param AbstractExpression from_expr: An expression resolving to a
@@ -156,12 +187,8 @@ class Bind(AbstractExpression):
         lhs = construct_operand(self.from_expr)
         rhs = construct_operand(self.to_expr)
 
-        return BuiltinCallExpr(
-            "Bind_{}_{}.Create".format(cprop_uid, eprop_uid),
-            EquationType,
-            [lhs, rhs, pred_func],
-            "Bind_Result"
-        )
+        return Bind.Expr(self.conv_prop, self.eq_prop, cprop_uid, eprop_uid,
+                         lhs, rhs, pred_func)
 
 
 class DomainExpr(ResolvedExpression):
