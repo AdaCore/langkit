@@ -1,9 +1,21 @@
 import enum
-from os import path
 import os.path
 import traceback
 
 from langkit.utils import Colors, assert_type, col
+
+
+class DiagnosticStyle(enum.Enum):
+    """Format for diagnostics that Langkit emits: location and text."""
+
+    default = 'default'
+    """Human-readable tracebacks."""
+
+    gnu_full = 'gnu-full'
+    """Standard GNU format with full paths."""
+
+    gnu_base = 'gnu-base'
+    """Standard GNU format with basenames."""
 
 
 class Diagnostics(object):
@@ -15,6 +27,13 @@ class Diagnostics(object):
     lang_source_dir = "<invalid dir>"
     has_pending_error = False
     _is_under_langkit_cache = {}
+
+    style = DiagnosticStyle.default
+    """
+    DiagnosticStyle instance to select the diagnostic representation format.
+
+    :type: DiagnosticStyle
+    """
 
     @classmethod
     def set_lang_source_dir(cls, lang_source_dir):
@@ -39,6 +58,14 @@ class Diagnostics(object):
             result = Diagnostics.lang_source_dir in os.path.abspath(path)
             cls._is_under_langkit_cache[path] = result
             return result
+
+    @classmethod
+    def set_style(cls, style):
+        """
+        Set the diagnostic output format.
+        :type style: DiagnosticStyle
+        """
+        cls.style = style
 
 
 class Location(object):
@@ -86,11 +113,6 @@ context_cache = (None, [])
 """
 This will be used to cache the last context stack in case of exception.
 :type: (Exception, list[(str, Location)])
-"""
-
-EMIT_PARSABLE_ERRORS = False
-"""
-Whether langkit should emit errors in the standard tool parsable format.
 """
 
 
@@ -195,7 +217,10 @@ def get_structured_context(recovered=False):
 def print_context(recovered=False):
     """
     Print the current error context.
+
+    Note that this makes sense only when `DiagnosticStyle.default` is enabled.
     """
+    assert Diagnostics.style == DiagnosticStyle.default
 
     # Then we'll print the context we've kept
     last_file_info = ''
@@ -220,12 +245,20 @@ def get_parsable_location():
 
         {file}:{line}:{column}
 
+    Depending on the diagnostic style enabled, `file` will be a base name or a
+    full path. Note that this should not be run when `DiagnosticStyle.default`
+    is enabled.
+
     :rtype: str
     """
+    assert Diagnostics.style != DiagnosticStyle.default
     ctx = get_structured_context()
     if ctx:
         loc = ctx[0][1]
-        return "{}:{}:1".format(path.abspath(loc.file), loc.line)
+        path = (os.path.abspath(loc.file)
+                if Diagnostics.style == DiagnosticStyle.gnu_full else
+                os.path.basename(loc.file))
+        return "{}:{}:1".format(path, loc.line)
     else:
         return ""
 
@@ -244,12 +277,10 @@ def check_source_language(predicate, message, severity=Severity.error,
     :param bool do_raise: If True, raise a DiagnosticError if predicate happens
         to be false.
     """
-    global EMIT_PARSABLE_ERRORS
-
     severity = assert_type(severity, Severity)
 
     if not predicate:
-        if EMIT_PARSABLE_ERRORS:
+        if Diagnostics.style != DiagnosticStyle.default:
             print "{}: {}".format(get_parsable_location(), message)
         else:
             print_context()

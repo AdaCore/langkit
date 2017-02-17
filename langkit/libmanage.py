@@ -15,8 +15,8 @@ import sys
 
 from langkit.compile_context import Verbosity
 from langkit.diagnostics import (
-    Diagnostics, DiagnosticError, extract_library_location, Location,
-    Context, check_source_language
+    Context, Diagnostics, DiagnosticError, DiagnosticStyle, Location,
+    check_source_language, extract_library_location
 )
 from langkit.utils import Colors, col, printcol
 
@@ -192,8 +192,9 @@ class ManageScript(object):
             '"langkit.prof"'
         )
         args_parser.add_argument(
-            '--parsable-errors', '-P', action='store_true', default=False,
-            help='Generate error messages parsable by tools'
+            '--diagnostic-style', '-D', type=DiagnosticStyle,
+            default=DiagnosticStyle.default,
+            help='Style for error messages'
         )
 
         def create_parser(fn, needs_context=False):
@@ -423,8 +424,7 @@ class ManageScript(object):
     def run(self, argv=None):
         parsed_args = self.args_parser.parse_args(argv)
 
-        from langkit import diagnostics
-        diagnostics.EMIT_PARSABLE_ERRORS = parsed_args.parsable_errors
+        Diagnostics.set_style(parsed_args.diagnostic_style)
 
         if parsed_args.profile:
             import cProfile
@@ -648,7 +648,7 @@ class ManageScript(object):
             argv.append('-XLIBRARY_TYPE={}'.format(library_type))
             if mains:
                 argv.extend('{}.adb'.format(main) for main in mains)
-            if args.parsable_errors:
+            if Diagnostics.style == DiagnosticStyle.gnu_full:
                 argv.append('-gnatef')
             argv.append('-cargs')
             argv.extend(cargs)
