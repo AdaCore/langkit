@@ -316,6 +316,28 @@ class Predicate(AbstractExpression):
 
     """
 
+    class Expr(BuiltinCallExpr):
+        def __init__(self, pred_property, pred_id, logic_var_exprs):
+            self.pred_property = pred_property
+            self.pred_id = pred_id
+            self.logic_var_exprs = logic_var_exprs
+
+            super(Predicate.Expr, self).__init__(
+                "{}_Pred.Create".format(pred_id),
+                EquationType,
+                logic_var_exprs,
+                result_var_name="Pred"
+            )
+
+        @property
+        def subexprs(self):
+            return {'pred': self.pred_property,
+                    'pred_id': self.pred_id,
+                    'logic_var_exprs': self.logic_var_exprs}
+
+        def __repr__(self):
+            return '<Predicate.Expr {}>'.format(self.pred_id)
+
     def __init__(self, pred_property, *exprs):
         """
         :param PropertyDef pred_property: The property to use as a predicate.
@@ -405,10 +427,7 @@ class Predicate(AbstractExpression):
             ), type=None, operands=closure_exprs)
         )
 
-        return BuiltinCallExpr(
-            "{}_Pred.Create".format(pred_id), EquationType, logic_var_exprs,
-            result_var_name="Pred"
-        )
+        return Predicate.Expr(self.pred_property, pred_id, logic_var_exprs)
 
 
 @auto_attr
