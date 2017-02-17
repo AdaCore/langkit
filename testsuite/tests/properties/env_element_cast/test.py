@@ -37,6 +37,8 @@ class Literal(FooNode):
         Self.a.cast(BarNode.env_el())
     )
 
+    c = Property(Self.b.el, public=True)
+
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(

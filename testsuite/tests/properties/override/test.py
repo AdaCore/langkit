@@ -32,7 +32,7 @@ def run(name, astnode_fn):
 
     @abstract
     class MiddleNode(FooNode):
-        get_random_node = AbstractProperty(type=T.MiddleNode)
+        get_random_node = AbstractProperty(type=T.MiddleNode, public=True)
 
     class ExampleNode(MiddleNode):
         get_random_node = Property(No(astnode))

@@ -26,10 +26,10 @@ def run(expr):
     class ExampleNode(FooNode):
         tok = Field()
 
-        implicit_prop = Property(Self, has_implicit_env=True)
-        explicit_prop = Property(Self, has_implicit_env=False)
+        implicit_prop = Property(Self, has_implicit_env=True, public=True)
+        explicit_prop = Property(Self, has_implicit_env=False, public=True)
 
-        prop = Property(expr, has_implicit_env=False)
+        prop = Property(expr, has_implicit_env=False, public=True)
 
     def lang_def():
         foo_grammar = Grammar('main_rule')

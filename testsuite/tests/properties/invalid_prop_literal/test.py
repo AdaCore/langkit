@@ -14,7 +14,7 @@ def make_lang_def(lit):
     def lang_def():
         @root_grammar_class()
         class FooNode(ASTNode):
-            b = Property(lit)
+            b = Property(lit, public=True)
 
         foo_grammar = Grammar('main_rule')
         foo_grammar.add_rules(main_rule=Row('example') ^ FooNode)

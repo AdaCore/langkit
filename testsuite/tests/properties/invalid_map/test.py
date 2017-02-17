@@ -31,7 +31,7 @@ def run(name, expr):
 
     class ListNode(FooNode):
         nb_list = Field()
-        prop = Property(expr)
+        prop = Property(expr, public=True)
 
     class NumberNode(FooNode):
         tok = Field()

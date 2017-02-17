@@ -30,10 +30,13 @@ class Literal(FooNode):
 
     a = AbstractProperty(runtime_check=True, type=FooNode.env_el())
 
-    b = Property(Self.a.match(
-        lambda b=BarNode.env_el(): b.prop,
-        lambda c=FooNode.env_el(): c.prop,
-    ))
+    b = Property(
+        Self.a.match(
+            lambda b=BarNode.env_el(): b.prop,
+            lambda c=FooNode.env_el(): c.prop,
+        ),
+        public=True
+    )
 
 
 foo_grammar = Grammar('main_rule')

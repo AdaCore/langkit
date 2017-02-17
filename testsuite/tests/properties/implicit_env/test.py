@@ -34,7 +34,8 @@ def run(abstract_has_implicit_env, concrete_has_implicit_env):
 
     class AbstractNode(RootNode):
         prop = AbstractProperty(BoolType,
-                                has_implicit_env=abstract_has_implicit_env)
+                                has_implicit_env=abstract_has_implicit_env,
+                                public=True)
 
     class ConcreteNode(AbstractNode):
         prop = Property(Literal(True),

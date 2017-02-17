@@ -6,11 +6,11 @@ File "test.py", line 36, in ExampleList.unused_block_var
     Warning: The following bindings are not used: block_var
 File "test.py", line 44, in ExampleList.unused_let_var
     Warning: The following bindings are not used: ex_list
-File "test.py", line 49, in ExampleList.unused_loop_var
+File "test.py", line 50, in ExampleList.unused_loop_var
     Warning: The following bindings are not used: ex_item
-File "test.py", line 53, in ExampleList.unused_then_var
+File "test.py", line 55, in ExampleList.unused_then_var
     Warning: The following bindings are not used: ex_items
-File "test.py", line 65, in ExampleList.unused_match_var
+File "test.py", line 68, in ExampleList.unused_match_var
     Warning: The following bindings are not used: ex
 Code generation was successful
 Done

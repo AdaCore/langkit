@@ -20,20 +20,20 @@ class FooNode(ASTNode):
 
 
 class Example(FooNode):
-    prop = Property(True)
+    prop = Property(True, public=True)
 
 
 class ExampleList(FooNode):
     items = Field()
 
-    @langkit_property()
+    @langkit_property(public=True)
     def unused_param(ex_param=T.FooNode,
                      ex_used_param=T.FooNode,
                      ex_wrongly_used_param=T.FooNode):
         ignore(ex_used_param, ex_wrongly_used_param)
         return ex_wrongly_used_param
 
-    @langkit_property()
+    @langkit_property(public=True)
     def unused_block_var():
         ex_var = Var(Self)
         # The whole point of this is to test that ex_var is properly flagged by
@@ -41,16 +41,18 @@ class ExampleList(FooNode):
         del ex_var
         return Self.items
 
-    @langkit_property()
+    @langkit_property(public=True)
     def unused_let_var():
         return Let(lambda ex_list=Self.items: Self.items)
 
     unused_loop_var = Property(
-        Self.items.map(lambda ex_item: True)
+        Self.items.map(lambda ex_item: True),
+        public=True
     )
 
     unused_then_var = Property(
-        Self.items.then(lambda ex_items: Self.items.at(0))
+        Self.items.then(lambda ex_items: Self.items.at(0)),
+        public=True
     )
 
     unused_match_var = Property(
@@ -63,6 +65,7 @@ class ExampleList(FooNode):
             )
         ),
         type=BoolType.array_type(),
+        public=True
     )
 
 

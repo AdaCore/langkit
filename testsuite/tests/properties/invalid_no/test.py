@@ -26,7 +26,7 @@ def run(name, expr):
         pass
 
     class BarNode(FooNode):
-        prop = Property(expr)
+        prop = Property(expr, public=True)
 
     def lang_def():
         foo_grammar = Grammar('main_rule')

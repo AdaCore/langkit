@@ -16,7 +16,7 @@ class FooNode(ASTNode):
 
 
 class ExampleNode(FooNode):
-    prop = Property(Self.cast(T.ExampleNode))
+    prop = Property(Self.cast(T.ExampleNode), public=True)
 
 
 def lang_def():

@@ -25,7 +25,7 @@ def run(name, match_expr):
     @abstract
     @root_grammar_class()
     class FooNode(ASTNode):
-        prop = Property(Literal(0))
+        prop = Property(Literal(0), public=True)
 
     @abstract
     class BodyNode(FooNode):

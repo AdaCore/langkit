@@ -2,7 +2,7 @@ from langkit.compiled_types import (
     ASTNode, root_grammar_class, LogicVarType, UserField, T
 )
 from langkit.diagnostics import Diagnostics
-from langkit.expressions import Property, Bind, Self, langkit_property
+from langkit.expressions import Bind, Let, Property, Self, langkit_property
 from langkit.parsers import Grammar, Row, Or
 
 from os import path
@@ -32,11 +32,13 @@ def run(name, prop_expr):
         def main_prop():
             return Bind(Self.type_var, Self.ref_var, eq_prop=prop)
 
+        wrapper = Property(Let(lambda _=Self.main_prop: Self), public=True)
+
     class BazNode(FooNode):
-        prop = Property(12)
-        prop2 = Property(True)
-        prop3 = Property(lambda _=T.BarNode: True)
-        prop4 = Property(lambda other=T.BazNode: Self == other)
+        prop = Property(12, public=True)
+        prop2 = Property(True, public=True)
+        prop3 = Property(lambda _=T.BarNode: True, public=True)
+        prop4 = Property(lambda other=T.BazNode: Self == other, public=True)
 
     def lang_def():
         foo_grammar = Grammar('main_rule')

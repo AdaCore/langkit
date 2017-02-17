@@ -5,7 +5,7 @@ from langkit.compiled_types import (
     ASTNode, BoolType, root_grammar_class
 )
 from langkit.diagnostics import Diagnostics
-from langkit.expressions import AbstractProperty, Literal, Property
+from langkit.expressions import AbstractProperty, Literal, Property, Self
 from langkit.parsers import Grammar, Row
 
 from utils import emit_and_print_errors
@@ -35,8 +35,12 @@ def run(abstract_public, concrete_public):
     class AbstractNode(RootNode):
         prop = AbstractProperty(BoolType, public=abstract_public)
 
+        public_prop = Property(Self.prop, public=True)
+
     class ConcreteNode(AbstractNode):
         prop = Property(Literal(True), public=concrete_public)
+
+        public_prop = Property(Self.prop, public=True)
 
     def lang_def():
         foo_grammar = Grammar('main_rule')
