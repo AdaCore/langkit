@@ -1572,18 +1572,12 @@ class PropertyDef(AbstractNodeData):
         self.abstract_runtime_check = abstract_runtime_check
         self._has_implicit_env = has_implicit_env
 
-        self.overriding = False
+        self.overriding_properties = set()
         """
-        Whether this property is overriding or not. This is put to False by
-        default, and the information is inferred during the compute phase.
-        """
+        Set of properties that override "self".
 
-        self.dispatching = self.abstract
-        """
-        Whether this property is dispatching or not. Initial value of that is
-        self.abstract, because every abstract property is dispatching. For
-        other dispatching properties (non abstract base properties, overriding
-        properties), this information is inferred during the compute phase.
+        This is inferred during the "compute" pass.
+        :type: set[PropertyDef]|None
         """
 
         self.prop_decl = None
@@ -1603,6 +1597,32 @@ class PropertyDef(AbstractNodeData):
 
         self.memoized = memoized
         self.external = external
+
+    @property
+    def overriding(self):
+        """
+        Whether this property is overriding or not.
+
+        This the information is inferred during the compute phase.
+
+        :rtype: bool
+        """
+        return self.base_property is not None
+
+    @property
+    def dispatching(self):
+        """
+        Whether this property is dispatching or not.  This is True as soon as
+        the property is abstract or the property is overriden in AST node
+        subclasses or the property overrides another one.
+
+        This is inferred during the "compute" pass.
+
+        :rtype: bool
+        """
+        return (self.abstract
+                or self.base_property
+                or self.overriding_properties)
 
     @property
     def uid(self):
@@ -1856,9 +1876,7 @@ class PropertyDef(AbstractNodeData):
             # overriding, and the base property is dispatching (This
             # information can be missing at this stage for non abstract base
             # properties).
-            self.overriding = True
-            self.dispatching = True
-            self.base_property.dispatching = True
+            self.base_property.overriding_properties.add(self)
 
             # Inherit the privacy level or check that it's consistent with the
             # base property.
