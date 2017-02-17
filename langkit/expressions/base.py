@@ -1744,7 +1744,7 @@ class PropertyDef(AbstractNodeData):
         """
         Get the base property for this property, if it exists.
 
-        :rtype: Property|None
+        :rtype: PropertyDef|None
         """
         if issubclass(self.struct, ASTNode):
             struct = assert_type(self.struct, ASTNode)
