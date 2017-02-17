@@ -1718,6 +1718,8 @@ class PropertyDef(AbstractNodeData):
         """
         self.arguments.append(Argument(name, type, default_value))
 
+    @property
+    @memoized
     def base_property(self):
         """
         Get the base property for this property, if it exists.
@@ -1818,8 +1820,6 @@ class PropertyDef(AbstractNodeData):
           and inherited properties.
         * Property overriding completeness checking.
         """
-        base_prop = self.base_property()
-
         type_set = TypeSet()
 
         def check_overriding_props(klass):
@@ -1851,59 +1851,65 @@ class PropertyDef(AbstractNodeData):
                 severity=Severity.non_blocking_error
             )
 
-        if base_prop:
+        if self.base_property:
             # If we have a base property, then this property is dispatching and
             # overriding, and the base property is dispatching (This
             # information can be missing at this stage for non abstract base
             # properties).
             self.overriding = True
             self.dispatching = True
-            base_prop.dispatching = True
+            self.base_property.dispatching = True
 
             # Inherit the privacy level or check that it's consistent with the
             # base property.
             if self._is_public is None:
-                self._is_public = base_prop.is_public
+                self._is_public = self.base_property.is_public
             else:
                 check_source_language(
-                    self._is_public == base_prop.is_public,
+                    self._is_public == self.base_property.is_public,
                     "{} is {}, so should be {}".format(
-                        base_prop.qualname,
-                        'public' if base_prop.is_public else 'private',
+                        self.base_property.qualname,
+                        ('public'
+                            if self.base_property.is_public else
+                            'private'),
                         self.qualname,
                     )
                 )
 
             # Likewise for accepting an implicit environment parameter
             if self._has_implicit_env is None:
-                self._has_implicit_env = base_prop._has_implicit_env
+                self._has_implicit_env = self.base_property._has_implicit_env
             else:
                 check_source_language(
-                    self._has_implicit_env == base_prop.has_implicit_env,
+                    (self._has_implicit_env
+                        == self.base_property.has_implicit_env),
                     '{} has {} implicit environment parameter, so should have'
                     ' {}'.format(
-                        base_prop.qualname,
-                        'an' if base_prop._has_implicit_env else 'no',
+                        self.base_property.qualname,
+                        'an' if self.base_property._has_implicit_env else 'no',
                         self.qualname,
                     )
                 )
 
             # We then want to check the consistency of type annotations if they
             # exist.
-            if base_prop.expected_type:
+            if self.base_property.expected_type:
                 if self.expected_type:
                     check_source_language(
-                        self.expected_type.matches(base_prop.expected_type),
+                        self.expected_type.matches(
+                            self.base_property.expected_type),
                         '{} returns {} whereas it overrides {}, which returns'
                         ' {}. The former should match the latter.'.format(
-                            self.qualname, self.expected_type.name().camel,
-                            base_prop.qualname, base_prop.type.name().camel
+                            self.qualname,
+                            self.expected_type.name().camel,
+                            self.base_property.qualname,
+                            self.base_property.type.name().camel
                         )
                     )
                 else:
                     # If base has a type annotation and not self, then
                     # propagate it.
-                    self.expected_type = base_prop.expected_type
+                    self.expected_type = self.base_property.expected_type
         else:
             # By default, properties are private and they accept an implicit
             # environment parameter.
@@ -1965,8 +1971,6 @@ class PropertyDef(AbstractNodeData):
         if self.constructed_expr:
             return
 
-        base_prop = self.base_property()
-
         check_source_language(
             not self.in_type,
             'Recursion loop in type inference for property {}. Try to '
@@ -1979,10 +1983,10 @@ class PropertyDef(AbstractNodeData):
             assert self.abstract or self.external
             if not self.expected_type:
                 check_source_language(
-                    base_prop,
+                    self.base_property,
                     'This property requires an explicit return type'
                 )
-                self.expected_type = base_prop.type
+                self.expected_type = self.base_property.type
             return
 
         with self.bind(), Self.bind_type(self.struct):
@@ -1990,9 +1994,9 @@ class PropertyDef(AbstractNodeData):
                 'expected type {{expected}}, got'
                 ' {{expr_type}} instead (expected type comes from'
                 ' overridden base property in {base_prop})'.format(
-                    base_prop=base_prop.struct.name().camel
+                    base_prop=self.base_property.struct.name().camel
                 )
-            ) if base_prop else None
+            ) if self.base_property else None
 
             # Reset the Env binding so that this construction does not use a
             # caller's binding.
@@ -2023,17 +2027,17 @@ class PropertyDef(AbstractNodeData):
                 self.prop_decl = render('properties/decl_ada')
                 self.prop_def = render('properties/def_ada')
 
-        base_prop = self.base_property()
-        if base_prop and base_prop.type:
+        if self.base_property and self.base_property.type:
             # TODO: We need to make sure Properties are rendered in the proper
             # order (base classes first), to make sure that this check is
             # always effectful.
             check_source_language(
-                self.type.matches(base_prop.type),
+                self.type.matches(self.base_property.type),
                 "{} returns {} whereas it overrides {}, which returns {}."
                 " The former should match the latter.".format(
                     self.qualname, self.type.name().camel,
-                    base_prop.qualname, base_prop.type.name().camel
+                    self.base_property.qualname,
+                    self.base_property.type.name().camel
                 )
             )
 
