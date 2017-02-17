@@ -839,6 +839,8 @@ class ${root_astnode_name}(object):
         """
         return json.dumps(self.to_data())
 
+    def is_a(self, *types):
+        return isinstance(self, tuple(types))
 
 % for astnode in ctx.astnode_types:
     % if astnode != T.root_node:
