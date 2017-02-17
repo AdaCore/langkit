@@ -35,7 +35,7 @@ from langkit.diagnostics import (
     Severity, check_source_language, errors_checkpoint
 )
 import langkit.documentation
-from langkit.expressions import PropertyDef
+from langkit.expressions import PropertyDef, FieldAccess
 from langkit.utils import Colors, printcol
 
 compile_ctx = None
@@ -638,6 +638,44 @@ class CompileCtx(object):
                         'Cannot invoke the environment hook if'
                         ' CompileContext.bind_env_hook has not been called'
                     )
+
+    def properties_callgraphs(self):
+        """
+        Return forwards and backwards callgraphs for all properties.
+
+        This takes care of overriding properties. In other words, if C calls A
+        and B overrides A, then we consider that C calls both A and B.
+
+        :rtype: (dict[PropertyDef, set[PropertyDef]],
+                 dict[PropertyDef, set[PropertyDef]])
+        """
+        forwards = {}
+        backwards = {}
+
+        for astnode in self.astnode_types:
+            for prop in astnode.get_properties(include_inherited=False):
+                forwards.setdefault(prop, set())
+
+                def add_forward(from_prop, to_prop):
+                    backwards.setdefault(to_prop, set())
+                    forwards[from_prop].add(to_prop)
+                    backwards[to_prop].add(from_prop)
+                    for over_prop in to_prop.overriding_properties:
+                        add_forward(from_prop, over_prop)
+
+                def traverse_expr(expr):
+                    if isinstance(expr, FieldAccess.Expr):
+                        called = expr.node_data
+                        if called.is_property:
+                            add_forward(prop, called)
+
+                    for subexpr in expr.flat_subexprs:
+                        traverse_expr(subexpr)
+
+                if prop.constructed_expr:
+                    traverse_expr(prop.constructed_expr)
+
+        return (forwards, backwards)
 
     def compute_properties(self, compile_only=False):
         """
