@@ -35,7 +35,7 @@ from langkit.diagnostics import (
     Severity, check_source_language, errors_checkpoint
 )
 import langkit.documentation
-from langkit.expressions import PropertyDef, FieldAccess
+from langkit.expressions import Bind, FieldAccess, Predicate, PropertyDef
 from langkit.utils import Colors, printcol
 
 compile_ctx = None
@@ -644,7 +644,9 @@ class CompileCtx(object):
         Return forwards and backwards callgraphs for all properties.
 
         This takes care of overriding properties. In other words, if C calls A
-        and B overrides A, then we consider that C calls both A and B.
+        and B overrides A, then we consider that C calls both A and B. Note
+        that this considers references to properties in logic expressions as
+        calls.
 
         :rtype: (dict[PropertyDef, set[PropertyDef]],
                  dict[PropertyDef, set[PropertyDef]])
@@ -668,6 +670,13 @@ class CompileCtx(object):
                         called = expr.node_data
                         if called.is_property:
                             add_forward(prop, called)
+                    elif isinstance(expr, Bind.Expr):
+                        if expr.conv_prop:
+                            add_forward(prop, expr.conv_prop)
+                        if expr.eq_prop:
+                            add_forward(prop, expr.eq_prop)
+                    elif isinstance(expr, Predicate.Expr):
+                        add_forward(prop, expr.pred_property)
 
                     for subexpr in expr.flat_subexprs:
                         traverse_expr(subexpr)
