@@ -1,0 +1,3 @@
+Warning: The following private properties are unused (unreachable from private properties): Expression.p_result, Name.p_designated_unit, Name.p_result, Plus.p_result
+Code generation was successful
+Done
