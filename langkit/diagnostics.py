@@ -200,22 +200,18 @@ def print_context(recovered=False):
     # Then we'll print the context we've kept
     last_file_info = ''
     for ctx_msg, ctx_loc in reversed(get_structured_context(recovered)):
-        if EMIT_PARSABLE_ERRORS:
-            print "{}:{}: {}".format(ctx_loc.file, ctx_loc.line, ctx_msg)
+        # We only want to show the file information one time if it is the same
+        file_info = 'File "{}", '.format(col(ctx_loc.file, Colors.CYAN))
+        if last_file_info == file_info:
+            file_info = '  '
         else:
-            # We only want to show the file information one time if it is the
-            # same.
-            file_info = 'File "{}", '.format(col(ctx_loc.file, Colors.CYAN))
-            if last_file_info == file_info:
-                file_info = '  '
-            else:
-                last_file_info = file_info
+            last_file_info = file_info
 
-            print ('{file_info}line {line}, {msg}'.format(
-                file_info=file_info,
-                line=col(ctx_loc.line, Colors.CYAN),
-                msg=ctx_msg
-            ))
+        print ('{file_info}line {line}, {msg}'.format(
+            file_info=file_info,
+            line=col(ctx_loc.line, Colors.CYAN),
+            msg=ctx_msg
+        ))
 
 
 def get_parsable_location():
