@@ -1755,6 +1755,20 @@ class PropertyDef(AbstractNodeData):
             return None
 
     @property
+    @memoized
+    def root_property(self):
+        """
+        Return the ultimate base property for "self", or "self" is it has no
+        base property.
+
+        :rtype: PropertyDef
+        """
+        result = self
+        while result.base_property:
+            result = result.base_property
+        return result
+
+    @property
     def has_implicit_env(self):
         """
         Return whether this property is passed an implicit environment param.
