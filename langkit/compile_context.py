@@ -13,7 +13,6 @@ this is the way it is done for the ada language::
 from __future__ import absolute_import
 
 from contextlib import contextmanager
-import difflib
 from distutils.spawn import find_executable
 from glob import glob
 import inspect
@@ -901,27 +900,13 @@ class CompileCtx(object):
 
         assert self.grammar, "Set grammar before compiling"
 
-        if not self.grammar.rules.get(self.main_rule_name, None):
-            close_matches = difflib.get_close_matches(
-                self.main_rule_name, self.grammar.rules.keys()
-            )
-
-            with self.grammar.context():
-                check_source_language(
-                    False,
-                    'Invalid rule name specified for main rule: "{}". '
-                    '{}'.format(
-                        self.main_rule_name,
-                        'Did you mean "{}"?'.format(close_matches[0])
-                        if close_matches else ""
-                    )
-                )
-
         from langkit.parsers import Parser
 
         pass_manager = PassManager()
         pass_manager.add(
             MajorStepPass('Compiling the grammar'),
+            GlobalPass('check main parsing rule',
+                       self.grammar.check_main_rule),
             GlobalPass('warn on unreferenced parsing rules',
                        self.grammar.warn_unreferenced_parsing_rules),
             GrammarRulePass('compute fields types',

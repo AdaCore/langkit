@@ -257,6 +257,28 @@ class Grammar(object):
             severity=Severity.warning
         )
 
+    def check_main_rule(self, context):
+        """
+        Emit an error if the main parsing rule is missing.
+
+        :type context: langkit.compile_context.CompileCtx
+        """
+        if not self.rules.get(self.main_rule_name, None):
+            close_matches = difflib.get_close_matches(
+                self.main_rule_name, self.rules.keys()
+            )
+
+            with self.context():
+                check_source_language(
+                    False,
+                    'Invalid rule name specified for main rule: "{}". '
+                    '{}'.format(
+                        self.main_rule_name,
+                        'Did you mean "{}"?'.format(close_matches[0])
+                        if close_matches else ""
+                    )
+                )
+
 
 class Parser(object):
     """Base class for parsers building blocks."""
