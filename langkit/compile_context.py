@@ -35,7 +35,7 @@ from langkit.diagnostics import (
     Severity, check_source_language, errors_checkpoint
 )
 import langkit.documentation
-from langkit.expressions import Bind, FieldAccess, Predicate, PropertyDef
+from langkit.expressions import PropertyDef
 from langkit.utils import Colors, printcol
 
 compile_ctx = None
@@ -666,18 +666,10 @@ class CompileCtx(object):
                         add_forward(from_prop, over_prop)
 
                 def traverse_expr(expr):
-                    if isinstance(expr, FieldAccess.Expr):
-                        called = expr.node_data
-                        if called.is_property:
-                            add_forward(prop, called)
-                    elif isinstance(expr, Bind.Expr):
-                        if expr.conv_prop:
-                            add_forward(prop, expr.conv_prop)
-                        if expr.eq_prop:
-                            add_forward(prop, expr.eq_prop)
-                    elif isinstance(expr, Predicate.Expr):
-                        add_forward(prop, expr.pred_property)
-
+                    for ref_prop in expr.flat_subexprs(
+                        lambda e: isinstance(e, PropertyDef)
+                    ):
+                        add_forward(prop, ref_prop)
                     for subexpr in expr.flat_subexprs():
                         traverse_expr(subexpr)
 
