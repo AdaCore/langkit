@@ -82,11 +82,11 @@ class Bind(AbstractExpression):
         :param PropertyDef|None conv_prop: The property to apply on the
             value of from_expr that will yield the value to give to to_expr.
             For convenience, it can be a property on any subclass of the root
-            ast node class, and can return any subclass of the root ast node
+            AST node class, and can return any subclass of the root AST node
             class.
         :param PropertyDef|None eq_prop: The property to use to test for
             equality between the value of the two expressions. For convenience,
-            it can be a property on a subclass of the root ast node class,
+            it can be a property on a subclass of the root AST node class,
             however:
 
             1. It needs to take exactly two parameters, the self parameter and
@@ -170,7 +170,7 @@ class Bind(AbstractExpression):
                 if expr.type is not T.root_node.env_el():
                     expr = Cast.Expr(expr, T.root_node.env_el())
             elif expr.type.matches(T.root_node):
-                # Cast the ast node type if necessary
+                # Cast the AST node type if necessary
                 if expr.type is not T.root_node:
                     expr = Cast.Expr(expr, T.root_node)
 
@@ -342,7 +342,7 @@ class Predicate(AbstractExpression):
         """
         :param PropertyDef pred_property: The property to use as a predicate.
             For convenience, it can be a property of any subtype of the root
-            ast node, but it needs to return a boolean.
+            AST node, but it needs to return a boolean.
 
         :param [AbstractExpression] exprs: Every argument to pass to the
             predicate, logical variables first, and extra arguments last.

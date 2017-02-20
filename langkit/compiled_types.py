@@ -2207,7 +2207,7 @@ class ASTNode(Struct):
     def env_el(cls):
         """
         Denotes the type returned by doing a get operation on a lexical
-        environment. This is a wrapper containing the ast node stored as a
+        environment. This is a wrapper containing the AST node stored as a
         value, as well as the metadata associated to this node in the
         source lexical environment.
         """
@@ -2548,7 +2548,7 @@ class TypeRepo(object):
         class B(ASTNode):
             pass
 
-    Only struct and ast node types are reachable through the type repository.
+    Only Struct and AST node types are reachable through the type repository.
     """
 
     def __init__(self):

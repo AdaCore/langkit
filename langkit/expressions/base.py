@@ -2295,7 +2295,7 @@ def Property(expr, doc=None, public=None, type=None, has_implicit_env=None,
              memoized=False):
     """
     Public constructor for concrete properties. You can declare your properties
-    on your ast node subclasses directly, like this::
+    on your AST node subclasses directly, like this::
 
         class SubNode(ASTNode):
             my_field = Field()
