@@ -929,13 +929,11 @@ class CompileCtx(object):
                 for sym in r.symbol_literals:
                     self.add_symbol_literal(sym)
 
-        # Compute type information, so that it is available for further
-        # compilation stages.
-        self.compute_types()
-
         pass_manager = PassManager()
         pass_manager.add(
+            GlobalPass('compute types', CompileCtx.compute_types),
             errors_checkpoint_pass,
+
             PropertyPass('prepare abstract expression',
                          PropertyDef.prepare_abstract_expression),
             PropertyPass('freeze abstract expression',
