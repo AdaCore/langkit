@@ -417,9 +417,11 @@ class Parser(object):
         for child in self.children():
             child.compute_fields_types()
 
-    def compile(self):
+    def compile(self, context):
         """
         Emit code for this parser as a function into the global context.
+
+        :param langkit.compile_context.CompileCtx context: Global context.
         """
         t_env = TemplateEnvironment()
         t_env.parser = self
@@ -431,13 +433,13 @@ class Parser(object):
         )
 
         # Don't emit code twice for the same parser
-        if self.gen_fn_name in get_context().fns:
+        if self.gen_fn_name in context.fns:
             return
-        get_context().fns.add(self.gen_fn_name)
+        context.fns.add(self.gen_fn_name)
 
         t_env.parser_context = self.generate_code()
 
-        get_context().generated_parsers.append(GeneratedParser(
+        context.generated_parsers.append(GeneratedParser(
             self.gen_fn_name,
             render('parsers/fn_profile_ada', t_env),
             render('parsers/fn_code_ada', t_env)))
@@ -466,8 +468,9 @@ class Parser(object):
         :param str|names.Name pos_name: The name of the position variable.
         :rtype: ParserCodeContext
         """
+        context = get_context()
 
-        if self.name and get_context().verbosity.debug:
+        if self.name and context.verbosity.debug:
             print "Compiling rule: {0}".format(
                 col(self.gen_fn_name, Colors.HEADER)
             )
@@ -478,7 +481,7 @@ class Parser(object):
 
             # The call to compile will add the declaration and the definition
             # (body) of the function to the compile context.
-            self.compile()
+            self.compile(context)
 
             # Generate a call to the previously compiled function, and return
             # the context corresponding to this call.

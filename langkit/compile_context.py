@@ -944,21 +944,25 @@ class CompileCtx(object):
         with names.camel_with_underscores:
             pass_manager.run(self)
 
-        astnodes_files = {
-            path.abspath(inspect.getsourcefile(n)) for n in self.astnode_types
-        }
-
         if compile_only:
             return
 
+        pass_manager = PassManager()
+        pass_manager.add(
+            GrammarRulePass('compile grammar rule', Parser.compile),
+        )
+
         with names.camel_with_underscores:
-            for r_name, r in self.grammar.rules.items():
-                with r.diagnostic_context():
-                    r.compile()
+            pass_manager.run(self)
 
         if self.annotate_fields_types:
             # Only import lib2to3 if the users needs it
             import lib2to3.main
+
+            astnodes_files = {
+                path.abspath(inspect.getsourcefile(n))
+                for n in self.astnode_types
+            }
 
             lib2to3.main.main(
                 "langkit",
