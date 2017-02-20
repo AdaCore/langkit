@@ -924,7 +924,7 @@ class CompileCtx(object):
             # Compute the type of fields for types used in the grammar. Also
             # register its symbol literals.
             for r_name, r in self.grammar.rules.items():
-                with r.error_context():
+                with r.diagnostic_context():
                     r.compute_fields_types()
                 for sym in r.symbol_literals:
                     self.add_symbol_literal(sym)
@@ -982,7 +982,7 @@ class CompileCtx(object):
 
         with names.camel_with_underscores:
             for r_name, r in self.grammar.rules.items():
-                with r.error_context():
+                with r.diagnostic_context():
                     r.compile()
 
         if self.annotate_fields_types:

@@ -235,7 +235,7 @@ class Grammar(object):
                 return
             referenced_rules.add(rule_name)
             rule_parser = self.get_rule(rule_name)
-            with rule_parser.error_context():
+            with rule_parser.diagnostic_context():
                 visit_parser(rule_parser)
 
         # The following will fill "referenced_rules" thanks to recursion
@@ -316,10 +316,10 @@ class Parser(object):
         for c in self.children():
             c.set_location(self.location)
 
-    def error_context(self):
+    def diagnostic_context(self):
         """
-        Helper that will return a error context manager with parameters set
-        for the grammar definition.
+        Helper that will return a diagnostic context manager with parameters
+        set for the grammar definition.
         """
         return Context("In definition of grammar rule {}".format(self.name),
                        self.location)
@@ -868,7 +868,7 @@ class List(Parser):
 
     def get_type(self):
         if self.list_cls:
-            with self.error_context():
+            with self.diagnostic_context():
                 check_source_language(
                     self.list_cls is None or self.list_cls.is_list_type,
                     'Invalid list type for List parser: {}. '
@@ -879,7 +879,7 @@ class List(Parser):
             return self.list_cls
         else:
             item_type = self.parser.get_type()
-            with self.error_context():
+            with self.diagnostic_context():
                 check_source_language(
                     issubclass(item_type, ASTNode),
                     'List parsers only accept subparsers that yield AST nodes'
@@ -891,7 +891,7 @@ class List(Parser):
         Parser.compute_fields_types(self)
 
         typ = self.get_type()
-        with self.error_context():
+        with self.diagnostic_context():
             check_source_language(
                 not typ.abstract,
                 'Please provide a concrete ASTnode subclass as list_cls'
