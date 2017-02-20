@@ -905,9 +905,16 @@ class ResolvedExpression(object):
         """
         return []
 
-    def flat_subexprs(self):
+    def flat_subexprs(
+        self, filter=lambda expr: isinstance(expr, ResolvedExpression)
+    ):
         """
-        Like "subexprs", but return a flat list of ResovedExpression.
+        Wrapper around "subexprs" to return a flat list of items matching
+        "filter". By default, get all ResolvedExpressions.
+
+        :param filter: Predicate to test whether a subexpression should be
+            returned.
+        :type filter: (T) -> bool
 
         :rtype: list[ResolvedExpression]
         """
@@ -921,7 +928,7 @@ class ResolvedExpression(object):
                 return mapcat(values, explore)
             elif isinstance(values, dict):
                 return mapcat(values.values(), explore)
-            elif isinstance(values, ResolvedExpression):
+            elif filter(values):
                 return [values]
             else:
                 return []
