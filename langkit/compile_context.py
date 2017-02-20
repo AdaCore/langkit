@@ -937,12 +937,12 @@ class CompileCtx(object):
                        CompileCtx.finalize_symbol_literals),
             GlobalPass('check resolved ASTnode subclasses',
                        CompileCtx.check_resolved_astnodes),
+            GlobalPass('warn on unused private properties',
+                       CompileCtx.warn_unused_private_properties),
         )
 
         with names.camel_with_underscores:
             pass_manager.run(self)
-
-        self.warn_unused_private_properties()
 
         astnodes_files = {
             path.abspath(inspect.getsourcefile(n)) for n in self.astnode_types
