@@ -37,7 +37,7 @@ from langkit.diagnostics import (
 import langkit.documentation
 from langkit.expressions import PropertyDef
 from langkit.passes import (
-    PassManager, ASTNodePass, PropertyPass, errors_checkpoint_pass
+    ASTNodePass, GlobalPass, PassManager, PropertyPass, errors_checkpoint_pass
 )
 from langkit.utils import Colors, printcol
 
@@ -953,13 +953,16 @@ class CompileCtx(object):
             pass_manager.add(PropertyPass('render property',
                                           PropertyDef.render_property))
 
-        pass_manager.add(errors_checkpoint_pass)
+        pass_manager.add(
+            errors_checkpoint_pass,
+
+            # Past this point, the set of symbol literals is frozen
+            GlobalPass('finalize symbol literals',
+                       CompileCtx.finalize_symbol_literals),
+        )
 
         with names.camel_with_underscores:
             pass_manager.run(self)
-
-        # Past this point, the set of symbol literals is frozen
-        self.finalize_symbol_literals()
 
         unresolved_types = set([t for t in self.astnode_types
                                 if not t.is_type_resolved])
