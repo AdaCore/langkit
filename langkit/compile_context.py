@@ -37,7 +37,8 @@ from langkit.diagnostics import (
 import langkit.documentation
 from langkit.expressions import PropertyDef
 from langkit.passes import (
-    ASTNodePass, GlobalPass, PassManager, PropertyPass, errors_checkpoint_pass
+    ASTNodePass, GlobalPass, GrammarRulePass, PassManager, PropertyPass,
+    errors_checkpoint_pass
 )
 from langkit.utils import Colors, printcol
 
@@ -920,17 +921,14 @@ class CompileCtx(object):
         if self.verbosity.info:
             printcol("Compiling the grammar...", Colors.OKBLUE)
 
-        with names.camel_with_underscores:
-            # Compute the type of fields for types used in the grammar. Also
-            # register its symbol literals.
-            for r_name, r in self.grammar.rules.items():
-                with r.diagnostic_context():
-                    r.compute_fields_types()
-                for sym in r.symbol_literals:
-                    self.add_symbol_literal(sym)
+        from langkit.parsers import Parser
 
         pass_manager = PassManager()
         pass_manager.add(
+            GrammarRulePass('compute fields types',
+                            lambda r, context, name: r.compute_fields_types()),
+            GrammarRulePass('register parsers symbol literals',
+                            Parser.add_symbol_literals),
             GlobalPass('compute types', CompileCtx.compute_types),
             errors_checkpoint_pass,
 
