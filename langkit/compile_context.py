@@ -935,19 +935,12 @@ class CompileCtx(object):
             # Past this point, the set of symbol literals is frozen
             GlobalPass('finalize symbol literals',
                        CompileCtx.finalize_symbol_literals),
+            GlobalPass('check resolved ASTnode subclasses',
+                       CompileCtx.check_resolved_astnodes),
         )
 
         with names.camel_with_underscores:
             pass_manager.run(self)
-
-        unresolved_types = set([t for t in self.astnode_types
-                                if not t.is_type_resolved])
-        check_source_language(
-            not unresolved_types,
-            "The following ASTNode subclasses are not type resolved. They are"
-            " not used by the grammar, and their types not annotated:"
-            " {}".format(", ".join(t.name().camel for t in unresolved_types))
-        )
 
         self.warn_unused_private_properties()
 
@@ -1288,3 +1281,16 @@ class CompileCtx(object):
                 enum_name = names.Name(str(i))
                 i += 1
             self.symbol_literals[name] = names.Name('Symbol') + enum_name
+
+    def check_resolved_astnodes(self):
+        """
+        Emit an error if some ASTNode subclasses are not type resolved.
+        """
+        unresolved_types = set([t for t in self.astnode_types
+                                if not t.is_type_resolved])
+        check_source_language(
+            not unresolved_types,
+            "The following ASTNode subclasses are not type resolved. They are"
+            " not used by the grammar, and their types not annotated:"
+            " {}".format(", ".join(t.name().camel for t in unresolved_types))
+        )
