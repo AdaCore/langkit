@@ -302,7 +302,7 @@ class ManageScript(object):
         )
         subparser.add_argument(
             '--annotate-fields-types', action='store_true',
-            help='Experimental feature. Modify the python files where the '
+            help='Experimental feature. Modify the Python files where the '
                  'node types are defined, to annotate empty Field() '
                  'definitions.'
         )
