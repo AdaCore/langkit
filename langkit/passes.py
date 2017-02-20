@@ -35,8 +35,15 @@ class PassManager(object):
         """
         assert not self.frozen, 'Invalid attempt to run the pipeline twice'
         self.frozen = True
+
         for p in self.passes:
-            if not p.disabled:
+            if p.disabled:
+                continue
+            if isinstance(p, StopPipeline):
+                printcol('Stopping pipeline execution: {}'.format(p.name),
+                         Colors.OKBLUE)
+                return
+            else:
                 p.run(context)
 
 
@@ -186,6 +193,16 @@ class PropertyPass(AbstractPass):
                             self.name, prop.qualname
                         ))
                     self.pass_fn(prop, context)
+
+
+class StopPipeline(AbstractPass):
+    """
+    Dummy concrete pass to abort the execution of a pipeline.
+
+    Used with the "disabled" attribute, this is useful to conditionnaly limit
+    the set of passes to be executed.
+    """
+    pass
 
 
 errors_checkpoint_pass = GlobalPass('errors checkpoint',

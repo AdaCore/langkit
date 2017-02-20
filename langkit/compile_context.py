@@ -35,7 +35,7 @@ import langkit.documentation
 from langkit.expressions import PropertyDef
 from langkit.passes import (
     ASTNodePass, GlobalPass, GrammarRulePass, MajorStepPass, PassManager,
-    PropertyPass, errors_checkpoint_pass
+    PropertyPass, StopPipeline, errors_checkpoint_pass
 )
 from langkit.utils import Colors, printcol
 
@@ -932,16 +932,9 @@ class CompileCtx(object):
                        CompileCtx.check_resolved_astnodes),
             GlobalPass('warn on unused private properties',
                        CompileCtx.warn_unused_private_properties),
-        )
 
-        with names.camel_with_underscores:
-            pass_manager.run(self)
+            StopPipeline('compile only', disabled=not compile_only),
 
-        if compile_only:
-            return
-
-        pass_manager = PassManager()
-        pass_manager.add(
             GrammarRulePass('compile grammar rule', Parser.compile),
             GlobalPass('annotate fields types',
                        CompileCtx.annotate_fields_types,
