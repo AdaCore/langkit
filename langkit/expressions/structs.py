@@ -408,7 +408,7 @@ class FieldAccess(AbstractExpression):
         @property
         def subexprs(self):
             result = {'0-prefix': self.receiver_expr,
-                      '1-field': self.node_data.qualname}
+                      '1-field': self.node_data}
             if self.arguments:
                 result['2-args'] = self.arguments
             return result
