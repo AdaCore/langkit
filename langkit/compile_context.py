@@ -36,7 +36,9 @@ from langkit.diagnostics import (
 )
 import langkit.documentation
 from langkit.expressions import PropertyDef
-from langkit.passes import PassManager, ASTNodePass, PropertyPass
+from langkit.passes import (
+    PassManager, ASTNodePass, PropertyPass, errors_checkpoint_pass
+)
 from langkit.utils import Colors, printcol
 
 compile_ctx = None
@@ -930,35 +932,34 @@ class CompileCtx(object):
         # Compute type information, so that it is available for further
         # compilation stages.
         self.compute_types()
-        errors_checkpoint()
+
+        pass_manager = PassManager()
+        pass_manager.add(
+            errors_checkpoint_pass,
+            PropertyPass('prepare abstract expression',
+                         PropertyDef.prepare_abstract_expression),
+            PropertyPass('freeze abstract expression',
+                         PropertyDef.freeze_abstract_expression),
+            PropertyPass('compute property attributes',
+                         PropertyDef.compute_property_attributes),
+            PropertyPass('construct and type expression',
+                         PropertyDef.construct_and_type_expression),
+            ASTNodePass('check env spec properties',
+                        lambda context, astnode:
+                            astnode.env_spec
+                            and astnode.env_spec.check_properties()),
+        )
+        if not compile_only:
+            pass_manager.add(PropertyPass('render property',
+                                          PropertyDef.render_property))
+
+        pass_manager.add(errors_checkpoint_pass)
 
         with names.camel_with_underscores:
-            pass_manager = PassManager()
-
-            pass_manager.add(
-                PropertyPass('prepare abstract expression',
-                             PropertyDef.prepare_abstract_expression),
-                PropertyPass('freeze abstract expression',
-                             PropertyDef.freeze_abstract_expression),
-                PropertyPass('compute property attributes',
-                             PropertyDef.compute_property_attributes),
-                PropertyPass('construct and type expression',
-                             PropertyDef.construct_and_type_expression),
-                ASTNodePass('check env spec properties',
-                            lambda context, astnode:
-                                astnode.env_spec
-                                and astnode.env_spec.check_properties()),
-            )
-            if not compile_only:
-                pass_manager.add(PropertyPass('render property',
-                                              PropertyDef.render_property))
-
             pass_manager.run(self)
 
-            errors_checkpoint()
-
-            # Past this point, the set of symbol literals is frozen
-            self.finalize_symbol_literals()
+        # Past this point, the set of symbol literals is frozen
+        self.finalize_symbol_literals()
 
         unresolved_types = set([t for t in self.astnode_types
                                 if not t.is_type_resolved])

@@ -4,6 +4,8 @@ Helpers to manage compilation passes.
 
 from __future__ import absolute_import
 
+from langkit.diagnostics import errors_checkpoint
+
 
 class PassManager(object):
     """
@@ -155,3 +157,7 @@ class PropertyPass(AbstractPass):
                             self.name, prop.qualname
                         ))
                     self.pass_fn(prop, context)
+
+
+errors_checkpoint_pass = GlobalPass('errors checkpoint',
+                                    lambda _: errors_checkpoint())
