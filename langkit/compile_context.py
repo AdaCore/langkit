@@ -909,6 +909,7 @@ class CompileCtx(object):
             GlobalPass('compute types', CompileCtx.compute_types),
             errors_checkpoint_pass,
 
+            MajorStepPass('Compiling properties'),
             PropertyPass('prepare abstract expression',
                          PropertyDef.prepare_abstract_expression),
             PropertyPass('freeze abstract expression',
