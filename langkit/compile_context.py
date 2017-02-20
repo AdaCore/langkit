@@ -904,31 +904,24 @@ class CompileCtx(object):
                        self.grammar.warn_unreferenced_parsing_rules),
             GrammarRulePass('compute fields types',
                             lambda r, context: r.compute_fields_types()),
-            GrammarRulePass('register parsers symbol literals',
-                            Parser.add_symbol_literals),
             GlobalPass('compute types', CompileCtx.compute_types),
             errors_checkpoint_pass,
 
             MajorStepPass('Compiling properties'),
-            PropertyPass('prepare abstract expression',
+            PropertyPass('prepare abstract expressions',
                          PropertyDef.prepare_abstract_expression),
-            PropertyPass('freeze abstract expression',
+            PropertyPass('freeze abstract expressions',
                          PropertyDef.freeze_abstract_expression),
             PropertyPass('compute property attributes',
                          PropertyDef.compute_property_attributes),
-            PropertyPass('construct and type expression',
+            PropertyPass('construct and type expressions',
                          PropertyDef.construct_and_type_expression),
             ASTNodePass('check env spec properties',
                         lambda context, astnode:
                             astnode.env_spec
                             and astnode.env_spec.check_properties()),
-            PropertyPass('render property', PropertyDef.render_property,
-                         disabled=compile_only),
             errors_checkpoint_pass,
 
-            # Past this point, the set of symbol literals is frozen
-            GlobalPass('finalize symbol literals',
-                       CompileCtx.finalize_symbol_literals),
             GlobalPass('check resolved ASTnode subclasses',
                        CompileCtx.check_resolved_astnodes),
             GlobalPass('warn on unused private properties',
@@ -936,7 +929,16 @@ class CompileCtx(object):
 
             StopPipeline('compile only', disabled=not compile_only),
 
+            MajorStepPass('Prepare code emission'),
+
+            GrammarRulePass('register parsers symbol literals',
+                            Parser.add_symbol_literals),
+            # Past this point, the set of symbol literals is frozen
+            GlobalPass('finalize symbol literals',
+                       CompileCtx.finalize_symbol_literals),
+
             GrammarRulePass('compile grammar rule', Parser.compile),
+            PropertyPass('render property', PropertyDef.render_property),
             GlobalPass('annotate fields types',
                        CompileCtx.annotate_fields_types,
                        disabled=not annotate_fields_types),
