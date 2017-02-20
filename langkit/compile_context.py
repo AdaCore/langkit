@@ -945,25 +945,13 @@ class CompileCtx(object):
         pass_manager = PassManager()
         pass_manager.add(
             GrammarRulePass('compile grammar rule', Parser.compile),
+            GlobalPass('annotate fields types',
+                       CompileCtx.annotate_fields_types,
+                       disabled=not annotate_fields_types),
         )
 
         with names.camel_with_underscores:
             pass_manager.run(self)
-
-        if annotate_fields_types:
-            # Only import lib2to3 if the users needs it
-            import lib2to3.main
-
-            astnodes_files = {
-                path.abspath(inspect.getsourcefile(n))
-                for n in self.astnode_types
-            }
-
-            lib2to3.main.main(
-                "langkit",
-                ["-f", "annotate_fields_types",
-                 "--no-diff", "-w"] + list(astnodes_files)
-            )
 
         for i, astnode in enumerate(
             (astnode
@@ -1292,4 +1280,23 @@ class CompileCtx(object):
             "The following ASTNode subclasses are not type resolved. They are"
             " not used by the grammar, and their types not annotated:"
             " {}".format(", ".join(t.name().camel for t in unresolved_types))
+        )
+
+    def annotate_fields_types(self):
+        """
+        Modify the Python files where the node types are defined, to annotate
+        empty Field() definitions.
+        """
+        # Only import lib2to3 if the users needs it
+        import lib2to3.main
+
+        astnodes_files = {
+            path.abspath(inspect.getsourcefile(n))
+            for n in self.astnode_types
+        }
+
+        lib2to3.main.main(
+            "langkit",
+            ["-f", "annotate_fields_types",
+             "--no-diff", "-w"] + list(astnodes_files)
         )
