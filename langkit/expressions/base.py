@@ -2134,23 +2134,6 @@ class PropertyDef(AbstractNodeData):
         """
         return self._explicit_arguments_slice(self.argument_vars)
 
-    @classmethod
-    def compilation_passes(cls, compile_only=False):
-        """
-        Return the list of compilation passes to run for properties.
-
-        :rtype: list[(PropertyDef) -> None]
-        """
-        ret = [cls.prepare_abstract_expression,
-               cls.freeze_abstract_expression,
-               cls.compute_property_attributes,
-               cls.construct_and_type_expression]
-
-        if not compile_only:
-            ret.append(cls.render_property)
-
-        return ret
-
     @memoized
     def do_generate_logic_predicate(self, *partial_args_types):
         """

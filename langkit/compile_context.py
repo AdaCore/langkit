@@ -36,6 +36,7 @@ from langkit.diagnostics import (
 )
 import langkit.documentation
 from langkit.expressions import PropertyDef
+from langkit.passes import PassManager, ASTNodePass, PropertyPass
 from langkit.utils import Colors, printcol
 
 compile_ctx = None
@@ -737,32 +738,6 @@ class CompileCtx(object):
         warn(unreachable_private, 'This private property is unused')
         warn(unused_abstractions, 'This private abstraction is unused')
 
-    def compute_properties(self, compile_only=False):
-        """
-        Compute information related to ASTNode's properties. This needs to be a
-        global analysis because we want to compute which properties need to be
-        dispatching, and this is determined not only by the context of one
-        node, but by whether the parent has a property with the same name.
-        """
-
-        for pass_fn in PropertyDef.compilation_passes(compile_only):
-            for astnode in self.astnode_types:
-                for prop in astnode.get_properties(include_inherited=False):
-                    if self.verbosity.debug:
-                        print 'Running {} on {}'.format(
-                            pass_fn.__name__,
-                            prop.qualname,
-                        )
-                    with prop.diagnostic_context():
-                        pass_fn(prop, self)
-
-                # Env specs generate properties, and have some invariants to
-                # check after properties have been properly computed. Perform
-                # these checks only once and at the proper time, though.
-                if (pass_fn == PropertyDef.construct_and_type_expression and
-                        astnode.env_spec):
-                    astnode.env_spec.check_properties()
-
     def render_template(self, *args, **kwargs):
         # Kludge: to avoid circular dependency issues, do not import parsers
         # until needed.
@@ -958,9 +933,28 @@ class CompileCtx(object):
         errors_checkpoint()
 
         with names.camel_with_underscores:
-            # Compute properties information, so that it is available for
-            # further compilation stages.
-            self.compute_properties(compile_only=compile_only)
+            pass_manager = PassManager()
+
+            pass_manager.add(
+                PropertyPass('prepare abstract expression',
+                             PropertyDef.prepare_abstract_expression),
+                PropertyPass('freeze abstract expression',
+                             PropertyDef.freeze_abstract_expression),
+                PropertyPass('compute property attributes',
+                             PropertyDef.compute_property_attributes),
+                PropertyPass('construct and type expression',
+                             PropertyDef.construct_and_type_expression),
+                ASTNodePass('check env spec properties',
+                            lambda context, astnode:
+                                astnode.env_spec
+                                and astnode.env_spec.check_properties()),
+            )
+            if not compile_only:
+                pass_manager.add(PropertyPass('render property',
+                                              PropertyDef.render_property))
+
+            pass_manager.run(self)
+
             errors_checkpoint()
 
             # Past this point, the set of symbol literals is frozen
