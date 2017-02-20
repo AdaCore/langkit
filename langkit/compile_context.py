@@ -1308,5 +1308,4 @@ class CompileCtx(object):
             else:
                 enum_name = names.Name(str(i))
                 i += 1
-            self.symbol_literals[name] = enum_name = (
-                names.Name('Symbol') + enum_name)
+            self.symbol_literals[name] = names.Name('Symbol') + enum_name
