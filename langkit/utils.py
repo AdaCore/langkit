@@ -139,7 +139,7 @@ def printcol(msg, color):
 
     # Colored messages are used to show the user how the compilation process is
     # going, so flushing on a regular basis matters. When \n-based flushing is
-    # disable (because of a pipe, for instance), force flushing here.
+    # disabled (because of a pipe, for instance), force flushing here.
     sys.stdout.flush()
 
 
