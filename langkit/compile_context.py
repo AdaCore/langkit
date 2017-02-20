@@ -363,8 +363,6 @@ class CompileCtx(object):
         self.grammar = grammar
         ":type: langkit.parsers.Grammar"
 
-        self.main_rule_name = grammar.main_rule_name
-
         self.python_api_settings = (
             PythonAPISettings(lib_name.lower, self.c_api_settings)
             if enable_python_api else None
@@ -556,6 +554,15 @@ class CompileCtx(object):
 
         :type: dict[str, mako.template.Template]
         """
+
+    @property
+    def main_rule_name(self):
+        """
+        Shortcut for "self.grammar.main_rule_name".
+
+        :rtype: str
+        """
+        return self.grammar.main_rule_name
 
     def sorted_types(self, type_set):
         """
