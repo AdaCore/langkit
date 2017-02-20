@@ -905,7 +905,6 @@ class ResolvedExpression(object):
         """
         return []
 
-    @property
     def flat_subexprs(self):
         """
         Like "subexprs", but return a flat list of ResovedExpression.
@@ -939,7 +938,7 @@ class ResolvedExpression(object):
         :rtype: list[AbstractVariable.Expr]
         """
         result = self._bindings()
-        for expr in self.flat_subexprs:
+        for expr in self.flat_subexprs():
             result.extend(expr.bindings)
         return result
 
@@ -2227,7 +2226,7 @@ class PropertyDef(AbstractNodeData):
                 # must not be considered as uses for this analysis: skip them.
                 expr = expr.expr
 
-            for sub in expr.flat_subexprs:
+            for sub in expr.flat_subexprs():
                 mark_vars(sub)
 
         mark_vars(self.constructed_expr)

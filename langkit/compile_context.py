@@ -678,7 +678,7 @@ class CompileCtx(object):
                     elif isinstance(expr, Predicate.Expr):
                         add_forward(prop, expr.pred_property)
 
-                    for subexpr in expr.flat_subexprs:
+                    for subexpr in expr.flat_subexprs():
                         traverse_expr(subexpr)
 
                 if prop.constructed_expr:
