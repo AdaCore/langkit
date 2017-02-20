@@ -30,9 +30,7 @@ from mako.lookup import TemplateLookup
 from langkit import caching, names, template_utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
-from langkit.diagnostics import (
-    Severity, check_source_language, errors_checkpoint
-)
+from langkit.diagnostics import Severity, check_source_language
 import langkit.documentation
 from langkit.expressions import PropertyDef
 from langkit.passes import (
@@ -948,30 +946,20 @@ class CompileCtx(object):
             GlobalPass('annotate fields types',
                        CompileCtx.annotate_fields_types,
                        disabled=not annotate_fields_types),
+            GlobalPass('compute ASTNode kind constants',
+                       CompileCtx.compute_node_kind_constants),
+
+            # Now that all Struct subclasses referenced by the grammar have
+            # been typed, iterate over all declared subclasses to register the
+            # ones that are unreachable from the grammar.  TODO: this kludge
+            # will eventually disappear as part of OC22-016.
+            GlobalPass('add structs to context',
+                       CompileCtx.add_structs_to_context),
+            errors_checkpoint_pass,
         )
 
         with names.camel_with_underscores:
             pass_manager.run(self)
-
-        for i, astnode in enumerate(
-            (astnode
-             for astnode in self.astnode_types
-             if not astnode.abstract),
-            # Compute kind constants for all ASTNode concrete subclasses.
-            # Start with 1: the constant 0 is reserved as an
-            # error/uninitialized code.
-            start=1
-        ):
-            self.node_kind_constants[astnode] = i
-
-        # Now that all Struct subclasses referenced by the grammar have been
-        # typed, iterate over all declared subclasses to register the ones that
-        # are unreachable from the grammar.  TODO: this kludge will eventually
-        # disappear as part of OC22-016.
-        for t in self.struct_types + self.astnode_types:
-            t.add_to_context()
-
-        errors_checkpoint()
 
     def _emit(self, file_root, generate_lexer, main_source_dirs,
               main_programs):
@@ -1300,3 +1288,25 @@ class CompileCtx(object):
             ["-f", "annotate_fields_types",
              "--no-diff", "-w"] + list(astnodes_files)
         )
+
+    def compute_node_kind_constants(self):
+        """
+        Compute kind constants for all ASTNode concrete subclasses.
+        """
+        for i, astnode in enumerate(
+            (astnode
+             for astnode in self.astnode_types
+             if not astnode.abstract),
+            # Start with 1: the constant 0 is reserved as an
+            # error/uninitialized code.
+            start=1
+        ):
+            self.node_kind_constants[astnode] = i
+
+    def add_structs_to_context(self):
+        """
+        Make sure all Struct subclasses (including ASTNode ones) are added to
+        the context.
+        """
+        for t in self.struct_types + self.astnode_types:
+            t.add_to_context()
