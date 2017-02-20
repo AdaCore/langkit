@@ -515,11 +515,6 @@ class CompileCtx(object):
         :type: langkit.compiled_types.Struct
         """
 
-        self.annotate_fields_types = False
-        """
-        Whether to run the 2to3 field annotation pass.
-        """
-
         self.template_lookup_extra_dirs = template_lookup_extra_dirs or []
 
         self.additional_source_files = []
@@ -808,17 +803,17 @@ class CompileCtx(object):
                     if path.isfile(filepath) and not filename.startswith("."):
                         self.additional_source_files.append(filepath)
 
-        self.annotate_fields_types = annotate_fields_types
-        self.compile(compile_only=compile_only)
+        self.compile(compile_only=compile_only,
+                     annotate_fields_types=annotate_fields_types)
         if compile_only:
             return
         with global_context(self):
             self._emit(file_root, generate_lexer, main_source_dirs,
                        main_programs)
 
-    def compile(self, compile_only=False):
+    def compile(self, compile_only=False, annotate_fields_types=False):
         with global_context(self):
-            self._compile(compile_only)
+            self._compile(compile_only, annotate_fields_types)
 
     def write_ada_module(self, out_dir, template_base_name, qual_name,
                          has_body=True):
@@ -888,7 +883,7 @@ class CompileCtx(object):
 
         return self._struct_types
 
-    def _compile(self, compile_only=False):
+    def _compile(self, compile_only=False, annotate_fields_types=False):
         """
         Compile the language specification: perform legality checks and type
         inference.
@@ -955,7 +950,7 @@ class CompileCtx(object):
         with names.camel_with_underscores:
             pass_manager.run(self)
 
-        if self.annotate_fields_types:
+        if annotate_fields_types:
             # Only import lib2to3 if the users needs it
             import lib2to3.main
 
