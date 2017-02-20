@@ -36,7 +36,8 @@ class PassManager(object):
         assert not self.frozen, 'Invalid attempt to run the pipeline twice'
         self.frozen = True
         for p in self.passes:
-            p.run(context)
+            if not p.disabled:
+                p.run(context)
 
 
 class AbstractPass(object):
@@ -46,11 +47,15 @@ class AbstractPass(object):
     Subclasses are required only to override the "run" method.
     """
 
-    def __init__(self, name):
+    def __init__(self, name, disabled=False):
         """
         :param str name: Informative name for users to be used in logging.
+        :param bool disabled: If True, do not run this pass. This makes it
+            convenient to selectively disable passes in big PassManager.add
+            calls.
         """
         self.name = name
+        self.disabled = disabled
 
     def run(self, context):
         raise NotImplementedError()
@@ -77,14 +82,16 @@ class GlobalPass(AbstractPass):
     Concrete pass to run on the context itself.
     """
 
-    def __init__(self, name, pass_fn):
+    def __init__(self, name, pass_fn, disabled=False):
         """
         :param str name: See AbstractPass.
 
         :param pass_fn: Function to be run when executing the pass.
         :type (langkit.compile_context.CompileCtx) -> None
+
+        :param bool disabled: See AbstractPass.
         """
-        super(GlobalPass, self).__init__(name)
+        super(GlobalPass, self).__init__(name, disabled)
         self.pass_fn = pass_fn
 
     def run(self, context):
@@ -98,7 +105,7 @@ class GrammarRulePass(AbstractPass):
     Concrete pass to run on each grammar rule.
     """
 
-    def __init__(self, name, pass_fn):
+    def __init__(self, name, pass_fn, disabled=False):
         """
         :param str name: See AbstractPass.
 
@@ -108,8 +115,10 @@ class GrammarRulePass(AbstractPass):
         :type (langkit.compile_context.CompileCtx,
                str,
                langkit.parsers.Parser) -> None
+
+        :param bool disabled: See AbstractPass.
         """
-        super(GrammarRulePass, self).__init__(name)
+        super(GrammarRulePass, self).__init__(name, disabled)
         self.pass_fn = pass_fn
 
     def run(self, context):
@@ -125,7 +134,7 @@ class ASTNodePass(AbstractPass):
     Concrete pass to run on each ASTNode subclass.
     """
 
-    def __init__(self, name, pass_fn):
+    def __init__(self, name, pass_fn, disabled=False):
         """
         :param str name: See AbstractPass.
 
@@ -134,8 +143,10 @@ class ASTNodePass(AbstractPass):
             ASTnode subclass.
         :type (langkit.compile_context.CompileCtx,
                langkit.compile_context.ASTNode) -> None
+
+        :param bool disabled: See AbstractPass.
         """
-        super(ASTNodePass, self).__init__(name)
+        super(ASTNodePass, self).__init__(name, disabled)
         self.pass_fn = pass_fn
 
     def run(self, context):
@@ -152,7 +163,7 @@ class PropertyPass(AbstractPass):
     Concrete pass to run on each PropertyDef instance.
     """
 
-    def __init__(self, name, pass_fn):
+    def __init__(self, name, pass_fn, disabled=False):
         """
         :param str name: See AbstractPass.
 
@@ -161,8 +172,10 @@ class PropertyPass(AbstractPass):
             instance and the context.
         :type (langkit.expressions.base.PropertyDef,
                langkit.compile_context.CompileCtx) -> None
+
+        :param bool disabled: See AbstractPass.
         """
-        super(PropertyPass, self).__init__(name)
+        super(PropertyPass, self).__init__(name, disabled)
         self.pass_fn = pass_fn
 
     def run(self, context):

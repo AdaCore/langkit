@@ -928,12 +928,8 @@ class CompileCtx(object):
                         lambda context, astnode:
                             astnode.env_spec
                             and astnode.env_spec.check_properties()),
-        )
-        if not compile_only:
-            pass_manager.add(PropertyPass('render property',
-                                          PropertyDef.render_property))
-
-        pass_manager.add(
+            PropertyPass('render property', PropertyDef.render_property,
+                         disabled=compile_only),
             errors_checkpoint_pass,
 
             # Past this point, the set of symbol literals is frozen
