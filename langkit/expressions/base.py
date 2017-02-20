@@ -897,9 +897,10 @@ class ResolvedExpression(object):
         """
         A JSON-like datastructure to describe this expression.
 
-        Leaves of this datastructure are: strings, CompiledType subclasses and
-        ResolvedExpression instances (for operands). This is used both for
-        expression tree traversal and for IR dump.
+        Leaves of this datastructure are: strings, CompiledType subclasses,
+        AbtsractNodeData instances and ResolvedExpression instances (for
+        operands). This is used both for expression tree traversal and for IR
+        dump.
 
         Subclasses must override this property if they have operands.
         """
