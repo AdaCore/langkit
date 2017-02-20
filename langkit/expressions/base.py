@@ -1729,7 +1729,7 @@ class PropertyDef(AbstractNodeData):
         # If the expr has not yet been constructed, try to construct it
         if not self.constructed_expr:
             with self.diagnostic_context():
-                self.construct_and_type_expression()
+                self.construct_and_type_expression(get_context())
 
         return resolve_type(self.constructed_expr.type)
 
@@ -1785,7 +1785,7 @@ class PropertyDef(AbstractNodeData):
         assert self._has_implicit_env is not None
         return self._has_implicit_env
 
-    def prepare_abstract_expression(self):
+    def prepare_abstract_expression(self, context):
         """
         Run the "prepare" pass on the expression associated to this property.
 
@@ -1803,6 +1803,7 @@ class PropertyDef(AbstractNodeData):
         After this pass, the expression tree is ready for the "construct" pass,
         which can yield a ResolvedExpression tree.
 
+        :type context: langkit.compile_context.CompileCtx
         :rtype: None
         """
 
@@ -1840,7 +1841,7 @@ class PropertyDef(AbstractNodeData):
             with self.bind():
                 self.expr = self.expr.prepare() or self.expr
 
-    def freeze_abstract_expression(self):
+    def freeze_abstract_expression(self, context):
         """
         Run the "freeze" pass on the expression associated to this property.
 
@@ -1848,11 +1849,13 @@ class PropertyDef(AbstractNodeData):
         AbstractExpressions trees out of the overloaded operators of the
         AbstractExpression instances in self.expr. See Frozable for more
         details.
+
+        :type context: langkit.compile_context.CompileCtx
         """
         if self.expr:
             self.expr.freeze()
 
-    def compute_property_attributes(self):
+    def compute_property_attributes(self, context):
         """
         Compute various property attributes, notably:
         * Information related to dispatching for properties.
@@ -1860,6 +1863,8 @@ class PropertyDef(AbstractNodeData):
           type or privacy, consistency of annotations between base property
           and inherited properties.
         * Property overriding completeness checking.
+
+        :type context: langkit.compile_context.CompileCtx
         """
         type_set = TypeSet()
 
@@ -1999,10 +2004,12 @@ class PropertyDef(AbstractNodeData):
                                LexicalEnvType,
                                LexicalEnvType.nullexpr())
 
-    def construct_and_type_expression(self):
+    def construct_and_type_expression(self, context):
         """
         This pass will construct the resolved expression from the abstract
         expression, and get type information at the same time.
+
+        :type context: langkit.compile_context.CompileCtx
         """
         from langkit.expressions.envs import Env
 
@@ -2055,10 +2062,11 @@ class PropertyDef(AbstractNodeData):
         # Warn on unused bindings
         self.warn_on_unused_bindings()
 
-    def render_property(self):
+    def render_property(self, context):
         """
         Render the given property to generated code.
 
+        :type context: langkit.compile_context.CompileCtx
         :rtype: basestring
         """
         with self.bind(), Self.bind_type(self.struct):

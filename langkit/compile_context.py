@@ -754,7 +754,7 @@ class CompileCtx(object):
                             prop.qualname,
                         )
                     with prop.diagnostic_context():
-                        pass_fn(prop)
+                        pass_fn(prop, self)
 
                 # Env specs generate properties, and have some invariants to
                 # check after properties have been properly computed. Perform
