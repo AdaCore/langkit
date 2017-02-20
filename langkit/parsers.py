@@ -243,6 +243,20 @@ class Grammar(object):
 
         return set(self.rules) - referenced_rules
 
+    def warn_unreferenced_parsing_rules(self, context):
+        """
+        Emit a warning for unreferenced parsing rules.
+
+        :type context: langkit.compile_context.CompileCtx
+        """
+        unreferenced_rules = self.get_unreferenced_rules()
+
+        check_source_language(
+            not unreferenced_rules, "The following parsing rules are not "
+            "used: {}".format(", ".join(sorted(unreferenced_rules))),
+            severity=Severity.warning
+        )
+
 
 class Parser(object):
     """Base class for parsers building blocks."""

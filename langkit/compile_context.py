@@ -910,19 +910,13 @@ class CompileCtx(object):
                     )
                 )
 
-        unreferenced_rules = self.grammar.get_unreferenced_rules()
-
-        check_source_language(
-            not unreferenced_rules, "The following parsing rules are not "
-            "used: {}".format(", ".join(sorted(unreferenced_rules))),
-            severity=Severity.warning
-        )
-
         from langkit.parsers import Parser
 
         pass_manager = PassManager()
         pass_manager.add(
             MajorStepPass('Compiling the grammar'),
+            GlobalPass('warn on unreferenced parsing rules',
+                       self.grammar.warn_unreferenced_parsing_rules),
             GrammarRulePass('compute fields types',
                             lambda r, context, name: r.compute_fields_types()),
             GrammarRulePass('register parsers symbol literals',
