@@ -530,12 +530,11 @@ class Parser(object):
             result.update(child.symbol_literals)
         return result
 
-    def add_symbol_literals(self, context, name):
+    def add_symbol_literals(self, context):
         """
         Register symbols literals used by this parser to "context".
 
         :type context: langkit.compile_context.CompileCtx
-        :param str name: Name for this parsing rule.
         """
         for sym in self.symbol_literals:
             context.add_symbol_literal(sym)

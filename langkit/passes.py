@@ -110,10 +110,9 @@ class GrammarRulePass(AbstractPass):
         :param str name: See AbstractPass.
 
         :param pass_fn: Function to be run when executing the pass. Called once
-            per grammar rule. This function must take the context, the rule
-            name and the rule parser itself.
+            per grammar rule. This function must take the context and the rule
+            parser itself.
         :type (langkit.compile_context.CompileCtx,
-               str,
                langkit.parsers.Parser) -> None
 
         :param bool disabled: See AbstractPass.
@@ -126,7 +125,7 @@ class GrammarRulePass(AbstractPass):
             with rule.diagnostic_context():
                 if context.verbosity.debug:
                     print('Grammar pass {} on {}'.format(self.name, name))
-                self.pass_fn(rule, context, name)
+                self.pass_fn(rule, context)
 
 
 class ASTNodePass(AbstractPass):
