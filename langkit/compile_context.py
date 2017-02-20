@@ -37,8 +37,8 @@ from langkit.diagnostics import (
 import langkit.documentation
 from langkit.expressions import PropertyDef
 from langkit.passes import (
-    ASTNodePass, GlobalPass, GrammarRulePass, PassManager, PropertyPass,
-    errors_checkpoint_pass
+    ASTNodePass, GlobalPass, GrammarRulePass, MajorStepPass, PassManager,
+    PropertyPass, errors_checkpoint_pass
 )
 from langkit.utils import Colors, printcol
 
@@ -918,13 +918,11 @@ class CompileCtx(object):
             severity=Severity.warning
         )
 
-        if self.verbosity.info:
-            printcol("Compiling the grammar...", Colors.OKBLUE)
-
         from langkit.parsers import Parser
 
         pass_manager = PassManager()
         pass_manager.add(
+            MajorStepPass('Compiling the grammar'),
             GrammarRulePass('compute fields types',
                             lambda r, context, name: r.compute_fields_types()),
             GrammarRulePass('register parsers symbol literals',

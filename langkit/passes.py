@@ -5,6 +5,7 @@ Helpers to manage compilation passes.
 from __future__ import absolute_import
 
 from langkit.diagnostics import errors_checkpoint
+from langkit.utils import Colors, printcol
 
 
 class PassManager(object):
@@ -53,6 +54,22 @@ class AbstractPass(object):
 
     def run(self, context):
         raise NotImplementedError()
+
+
+class MajorStepPass(AbstractPass):
+    """
+    Dummy concrete pass that just prints a message.
+
+    This is useful to display global compilation progression to users.
+    """
+
+    def __init__(self, message):
+        super(MajorStepPass, self).__init__(None)
+        self.message = message
+
+    def run(self, context):
+        if context.verbosity.info:
+            printcol('{}...'.format(self.message), Colors.OKBLUE)
 
 
 class GlobalPass(AbstractPass):
