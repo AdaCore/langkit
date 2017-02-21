@@ -102,8 +102,6 @@ class GlobalPass(AbstractPass):
         self.pass_fn = pass_fn
 
     def run(self, context):
-        if context.verbosity.debug:
-            print('Global pass {}'.format(self.name))
         self.pass_fn(context)
 
 
@@ -130,8 +128,6 @@ class GrammarRulePass(AbstractPass):
     def run(self, context):
         for name, rule in context.grammar.rules.items():
             with rule.diagnostic_context():
-                if context.verbosity.debug:
-                    print('Grammar pass {} on {}'.format(self.name, name))
                 self.pass_fn(rule, context)
 
 
@@ -158,9 +154,6 @@ class ASTNodePass(AbstractPass):
     def run(self, context):
         for astnode in context.astnode_types:
             with astnode.diagnostic_context():
-                if context.verbosity.debug:
-                    print('ASTNode pass {} on {}'.format(self.name,
-                                                         astnode.name().camel))
                 self.pass_fn(context, astnode)
 
 
@@ -188,10 +181,6 @@ class PropertyPass(AbstractPass):
         for astnode in context.astnode_types:
             for prop in astnode.get_properties(include_inherited=False):
                 with prop.diagnostic_context():
-                    if context.verbosity.debug:
-                        print('Property pass {} on {}'.format(
-                            self.name, prop.qualname
-                        ))
                     self.pass_fn(prop, context)
 
 

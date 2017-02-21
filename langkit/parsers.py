@@ -37,8 +37,8 @@ from langkit.diagnostics import (
 )
 from langkit.lexer import WithSymbol
 from langkit.template_utils import TemplateEnvironment
-from langkit.utils import (Colors, assert_type, common_ancestor, copy_with,
-                           col, type_check_instance)
+from langkit.utils import (assert_type, common_ancestor, copy_with,
+                           type_check_instance)
 
 
 class GeneratedParser(object):
@@ -469,11 +469,6 @@ class Parser(object):
         :rtype: ParserCodeContext
         """
         context = get_context()
-
-        if self.name and context.verbosity.debug:
-            print "Compiling rule: {0}".format(
-                col(self.gen_fn_name, Colors.HEADER)
-            )
 
         # Users must be able to run parsers that implement a named rule, so
         # generate dedicated functions for them.
