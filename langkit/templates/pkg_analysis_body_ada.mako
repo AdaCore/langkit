@@ -200,8 +200,19 @@ package body ${ada_lib_name}.Analysis is
          Result : Symbol_Literal_Array;
       begin
          for Literal in Symbol_Literal_Type'Range loop
-            Result (Literal) := Find
-              (Symbols, Symbol_Literals_Text (Literal).all);
+            declare
+               Raw_Text : Text_Type renames
+                  Symbol_Literals_Text (Literal).all;
+               Text     : constant Text_Type :=
+                  % if ctx.symbol_canonicalizer:
+                     ${ctx.symbol_canonicalizer.fqn} (Raw_Text)
+                  % else:
+                     Raw_Text
+                  % endif
+               ;
+            begin
+               Result (Literal) := Find (Symbols, Text);
+            end;
          end loop;
          return Result;
       end Create_Symbol_Literals;
