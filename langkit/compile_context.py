@@ -1246,11 +1246,20 @@ class CompileCtx(object):
 
         i = 1
         for name in sorted(symbols):
-            if re.match('[a-z]+', name):
-                enum_name = names.Name.from_lower(name)
-            else:
+            lower_name = name.lower()
+            candidate_name = None
+            if re.match('[a-zA-Z]+', lower_name):
+                candidate_name = names.Name.from_lower(lower_name)
+
+            # If we have no candidate or if the candidate is already used, fall
+            # back to an unique number.
+            if (candidate_name is None or candidate_name in
+                    self.symbol_literals):
                 enum_name = names.Name(str(i))
                 i += 1
+            else:
+                enum_name = candidate_name
+
             self.symbol_literals[name] = names.Name('Symbol') + enum_name
 
     def check_resolved_astnodes(self):
