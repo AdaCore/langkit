@@ -2316,6 +2316,20 @@ package body ${ada_lib_name}.Analysis is
       --  Retrieve the Id for a lexical env. Assign one if none was yet
       --  assigned.
 
+      --------------------------
+      -- Explore_Parent_Chain --
+      --------------------------
+
+      procedure Explore_Parent_Chain (Env : Lexical_Env) is
+      begin
+         if Env /= null then
+            Dump_One_Lexical_Env
+              (Env, Get_Env_Id (Env),
+               Get_Env_Id (AST_Envs.Get_Env (Env.Parent)));
+            Explore_Parent_Chain (AST_Envs.Get_Env (Env.Parent));
+         end if;
+      end Explore_Parent_Chain;
+
       --------------
       -- Internal --
       --------------
@@ -2323,6 +2337,8 @@ package body ${ada_lib_name}.Analysis is
       Env : Lexical_Env := null;
 
       procedure Internal (Current : ${root_node_type_name}) is
+         Explore_Parent : Boolean := False;
+         Parent : Lexical_Env;
       begin
          if Current = null
             --  We want to ignore ghost nodes. This includes empty lists, but
@@ -2340,9 +2356,17 @@ package body ${ada_lib_name}.Analysis is
             Env := Current.Self_Env;
             Put ("<" & Kind_Name (Current) & " "
                  & Image (Sloc_Range (Current)) & "> - ");
-            Dump_One_Lexical_Env
-              (Env, Get_Env_Id (Env),
-               Get_Env_Id (AST_Envs.Get_Env (Env.Parent)));
+
+            Parent := Ast_Envs.Get_Env (Env.Parent);
+
+            Explore_Parent :=
+              not (Parent = null or else Env_Ids.Contains (Parent));
+
+            Dump_One_Lexical_Env (Env, Get_Env_Id (Env), Get_Env_Id (Parent));
+
+            if Explore_Parent then
+               Explore_Parent_Chain (Parent);
+            end if;
          end if;
 
          for Child of ${root_node_array.api_name()}'(Children (Current)) loop
