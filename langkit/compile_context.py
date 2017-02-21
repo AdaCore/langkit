@@ -751,7 +751,7 @@ class CompileCtx(object):
 
     def emit(self, file_root='.', generate_lexer=True, main_source_dirs=set(),
              main_programs=set(), annotate_fields_types=False,
-             compile_only=False, no_property_checks=False):
+             check_only=False, no_property_checks=False):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -776,9 +776,12 @@ class CompileCtx(object):
             actually modify the file in which ASTNode subclasses are
             defined, and annotate empty field definitions.
 
+        :param bool check_only: If true, only perform validity checks: stop
+            before code emission. This is useful for IDE hooks.
+
         :param bool no_property_checks: If True, do not emit safety checks in
-        the generated code for properties. Namely, this disables null checks on
-        field access.
+            the generated code for properties. Namely, this disables null
+            checks on field access.
         """
         dir_path = path.join(
             path.dirname(path.realpath(__file__)), "templates"
@@ -801,17 +804,17 @@ class CompileCtx(object):
                     if path.isfile(filepath) and not filename.startswith("."):
                         self.additional_source_files.append(filepath)
 
-        self.compile(compile_only=compile_only,
+        self.compile(check_only=check_only,
                      annotate_fields_types=annotate_fields_types)
-        if compile_only:
+        if check_only:
             return
         with global_context(self):
             self._emit(file_root, generate_lexer, main_source_dirs,
                        main_programs)
 
-    def compile(self, compile_only=False, annotate_fields_types=False):
+    def compile(self, check_only=False, annotate_fields_types=False):
         with global_context(self):
-            self._compile(compile_only, annotate_fields_types)
+            self._compile(check_only, annotate_fields_types)
 
     def write_ada_module(self, out_dir, template_base_name, qual_name,
                          has_body=True):
@@ -881,7 +884,7 @@ class CompileCtx(object):
 
         return self._struct_types
 
-    def _compile(self, compile_only=False, annotate_fields_types=False):
+    def _compile(self, check_only=False, annotate_fields_types=False):
         """
         Compile the language specification: perform legality checks and type
         inference.
@@ -927,7 +930,7 @@ class CompileCtx(object):
             GlobalPass('warn on unused private properties',
                        CompileCtx.warn_unused_private_properties),
 
-            StopPipeline('compile only', disabled=not compile_only),
+            StopPipeline('check only', disabled=not check_only),
 
             MajorStepPass('Prepare code emission'),
 

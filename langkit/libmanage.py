@@ -555,7 +555,7 @@ class ManageScript(object):
                           main_programs=self.main_programs,
                           annotate_fields_types=args.annotate_fields_types,
                           generate_lexer=not args.no_compile_quex,
-                          compile_only=args.check_only,
+                          check_only=args.check_only,
                           no_property_checks=args.no_property_checks)
 
         if args.check_only:
