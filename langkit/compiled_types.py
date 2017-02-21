@@ -530,9 +530,9 @@ class LogicVarType(BasicType):
     that can take a specific value when it is bound to a specific Equation, and
     that equation is solved for a certain problem set.
 
-    It is a special type in langkit at this point, in that its value is
+    It is a special type in Langkit at this point, in that its value is
     initially undefined, and is mutated after the solve of an equation to a
-    specific value. It is thus the only type in langkit for the moment for
+    specific value. It is thus the only type in Langkit for the moment for
     which variables of the type can be mutated after creation.
 
     TODO: For the moment a logic variable is necessarily a holder around an
