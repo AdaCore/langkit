@@ -8,7 +8,6 @@ from enum import Enum
 import funcy
 
 from langkit import names
-from langkit.common import string_repr
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNode, BoolType, CompiledType,
     LexicalEnvType, LongType, Symbol, T, Token, get_context,
@@ -1167,6 +1166,28 @@ class SymbolLiteral(AbstractExpression):
     Abstract expression that returns a symbol from a string literal.
     """
 
+    class Expr(ResolvedExpression):
+
+        def __init__(self, name):
+            super(SymbolLiteral.Expr, self).__init__()
+
+            self.name = name
+            self.static_type = Symbol
+
+            get_context().add_symbol_literal(self.name)
+
+        def _render_expr(self):
+            return 'Self.Unit.Context.Symbol_Literals ({})'.format(
+                get_context().symbol_literals[self.name]
+            )
+
+        def _render_pre(self):
+            return ''
+
+        @property
+        def subexprs(self):
+            return {'name': self.name}
+
     def __init__(self, name):
         """
         :type name: str
@@ -1175,16 +1196,7 @@ class SymbolLiteral(AbstractExpression):
         self.name = name
 
     def construct(self):
-        ctx = get_context()
-
-        ctx.add_symbol_literal(self.name)
-
-        operand = string_repr(self.name)
-        if ctx.symbol_canonicalizer:
-            operand = '{} ({})'.format(ctx.symbol_canonicalizer.fqn, operand)
-
-        return BasicExpr('Find (Self.Unit.TDH.Symbols, {})',
-                         Symbol, [operand])
+        return self.Expr(self.name)
 
 
 class BindingScope(ResolvedExpression):
