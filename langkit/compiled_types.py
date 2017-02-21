@@ -2236,6 +2236,17 @@ class ASTNode(Struct):
 
         return env_element_klass
 
+    @classmethod
+    def check_resolved(cls):
+        """
+        Emit a non-fatal error if this ASTNode subclass is not type resolved.
+        """
+        check_source_language(
+            cls.is_type_resolved,
+            'Unresolved ASTNode subclass. Use it in the grammar or provide a'
+            ' type annotation for all its fields'
+        )
+
 
 # We tag the ASTNode class as abstract here, because of the circular dependency
 # between the @abstract decorator and the ASTNode class, which is caused by the

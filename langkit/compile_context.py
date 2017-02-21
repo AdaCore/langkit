@@ -919,16 +919,16 @@ class CompileCtx(object):
                          PropertyDef.compute_property_attributes),
             PropertyPass('construct and type expressions',
                          PropertyDef.construct_and_type_expression),
+
             ASTNodePass('check env spec properties',
                         lambda context, astnode:
                             astnode.env_spec
                             and astnode.env_spec.check_properties()),
-            errors_checkpoint_pass,
-
-            GlobalPass('check resolved ASTnode subclasses',
-                       CompileCtx.check_resolved_astnodes),
+            ASTNodePass('check resolved ASTnode subclasses',
+                        lambda _, astnode: astnode.check_resolved()),
             GlobalPass('warn on unused private properties',
                        CompileCtx.warn_unused_private_properties),
+            errors_checkpoint_pass,
 
             StopPipeline('check only', disabled=not check_only),
 
@@ -1264,19 +1264,6 @@ class CompileCtx(object):
                 enum_name = candidate_name
 
             self.symbol_literals[name] = names.Name('Symbol') + enum_name
-
-    def check_resolved_astnodes(self):
-        """
-        Emit an error if some ASTNode subclasses are not type resolved.
-        """
-        unresolved_types = set([t for t in self.astnode_types
-                                if not t.is_type_resolved])
-        check_source_language(
-            not unresolved_types,
-            "The following ASTNode subclasses are not type resolved. They are"
-            " not used by the grammar, and their types not annotated:"
-            " {}".format(", ".join(t.name().camel for t in unresolved_types))
-        )
 
     def annotate_fields_types(self):
         """

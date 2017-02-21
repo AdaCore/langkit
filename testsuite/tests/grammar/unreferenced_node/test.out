@@ -1,2 +1,3 @@
-Error: The following ASTNode subclasses are not type resolved. They are not used by the grammar, and their types not annotated: UnreferencedNode
+File "test.py", line 21, in UnreferencedNode
+    Error: Unresolved ASTNode subclass. Use it in the grammar or provide a type annotation for all its fields
 Done
