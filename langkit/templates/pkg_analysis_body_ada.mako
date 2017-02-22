@@ -180,14 +180,14 @@ package body ${ada_lib_name}.Analysis is
 
    % if ctx.symbol_literals:
 
-      % for sym, name in sorted(ctx.symbol_literals.items()):
+      % for sym, name in ctx.sorted_symbol_literals:
          Text_${name} : aliased constant Text_Type := ${string_repr(sym)};
       % endfor
 
       Symbol_Literals_Text : array (Symbol_Literal_Type) of Text_Cst_Access :=
       (
          ${', '.join("Text_{}'Access".format(name) for sym, name in \
-                     sorted(ctx.symbol_literals.items()))}
+                     ctx.sorted_symbol_literals)}
       );
 
       ----------------------------

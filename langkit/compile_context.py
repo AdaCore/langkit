@@ -1237,6 +1237,16 @@ class CompileCtx(object):
         assert isinstance(self._symbol_literals, set)
         self._symbol_literals.add(name)
 
+    @property
+    def sorted_symbol_literals(self):
+        """
+        Return the list of symbol literals sorted in enumeration order.
+
+        :rtype: list[(str, str)]
+        """
+        return sorted(self.symbol_literals.items(),
+                      key=lambda (s, n): n)
+
     def finalize_symbol_literals(self):
         """
         Collect all symbol literals provided to "add_symbol_literal" and create

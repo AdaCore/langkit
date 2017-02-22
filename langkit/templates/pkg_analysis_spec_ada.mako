@@ -955,12 +955,13 @@ private
 
    % if ctx.symbol_literals:
       type Symbol_Literal_Type is (
-         % for i, (sym, name) in enumerate(sorted( \
-                  ctx.symbol_literals.items())):
-            % if i > 0:
-               ,
-            % endif
-            ${name}  -- ${sym}
+         <%
+            sym_items = ctx.sorted_symbol_literals
+            last_i = len(sym_items) - 1
+         %>
+         % for i, (sym, name) in enumerate(sym_items):
+            ${name}${',' if i < last_i else ''}
+            -- ${sym}
          % endfor
       );
 
