@@ -608,6 +608,34 @@ class ManageScript(object):
                         (is_library or not build_shared))
         return (build_shared, build_static)
 
+    def gpr_scenario_vars(self, args, build_mode=None,
+                          library_type='relocatable'):
+        """
+        Return the project scenario variables to pass to GPRbuild.
+
+        :param argparse.Namespace args: The arguments parsed from the command
+            line invocation of manage.py.
+
+        :param str|None build_mode: Build mode to use. If left to None, use the
+            one selected in `args`.
+
+        :param str library_type: Library flavor to use. Must be "relocatable"
+            or "static".
+        """
+        if build_mode is None:
+            build_mode = args.build_mode
+
+        result = ['-XBUILD_MODE={}'.format(build_mode),
+                  '-XLIBRARY_TYPE={}'.format(library_type)]
+
+        enable_warnings = getattr(args, 'enable_warnings', False)
+        if enable_warnings:
+            result.append(
+                '-X{}_WARNINGS=true'.format(self.lib_name.upper())
+            )
+
+        return result
+
     def gprbuild(self, args, project_file, is_library, mains=None):
         """
         Run GPRbuild on a project file.
@@ -627,12 +655,7 @@ class ManageScript(object):
         """
         base_argv = ['gprbuild', '-m', '-p',
                      '-j{}'.format(args.jobs),
-                     '-P{}'.format(project_file),
-                     '-XBUILD_MODE={}'.format(args.build_mode)]
-        if args.enable_warnings:
-            base_argv.append(
-                '-X{}_WARNINGS=true'.format(self.lib_name.upper())
-            )
+                     '-P{}'.format(project_file)]
         if args.verbosity == Verbosity('none'):
             base_argv.append('-q')
         elif args.verbosity == Verbosity('debug'):
@@ -645,7 +668,8 @@ class ManageScript(object):
 
         def run(library_type):
             argv = list(base_argv)
-            argv.append('-XLIBRARY_TYPE={}'.format(library_type))
+            argv.extend(self.gpr_scenario_vars(args,
+                                               library_type=library_type))
             if mains:
                 argv.extend('{}.adb'.format(main) for main in mains)
             if Diagnostics.style == DiagnosticStyle.gnu_full:
@@ -672,8 +696,7 @@ class ManageScript(object):
         base_argv = ['gprinstall', '-p',
                      '-P{}'.format(project_file),
                      '--prefix={}'.format(self.dirs.install_dir()),
-                     '--build-var=LIBRARY_TYPE',
-                     '-XBUILD_MODE=prod']
+                     '--build-var=LIBRARY_TYPE']
 
         # If this is a library, install sources in an unique location: there is
         # no need to have one location per build mode as sources are going to
@@ -693,7 +716,7 @@ class ManageScript(object):
         def run(library_type):
             argv = list(base_argv)
             argv.append('--build-name={}'.format(library_type))
-            argv.append('-XLIBRARY_TYPE={}'.format(library_type))
+            argv.extend(self.gpr_scenario_vars(args, 'prod', library_type))
             self.check_call(args, 'Install', argv)
 
         build_shared, build_static = self.what_to_build(args, is_library)
