@@ -562,13 +562,11 @@ class ManageScript(object):
             return
 
         def gnatpp(project_file, glob_pattern):
-            self.check_call(args, 'Pretty-printing', [
-                'gnatpp',
-                '-P{}'.format(project_file),
-                '-XLIBRARY_TYPE=relocatable',
-                '-rnb',
-                '--insert-blank-lines',
-            ] + glob.glob(glob_pattern))
+            argv = ['gnatpp', '-P{}'.format(project_file), '-rnb',
+                    '--insert-blank-lines']
+            argv += self.gpr_scenario_vars(args, 'prod', 'relocatable')
+            argv += glob.glob(glob_pattern)
+            self.check_call(args, 'Pretty-printing', argv)
 
         if hasattr(args, 'pretty_print') and args.pretty_print:
             if args.verbosity.info:
