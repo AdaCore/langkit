@@ -40,8 +40,9 @@ class PassManager(object):
             if p.disabled:
                 continue
             if isinstance(p, StopPipeline):
-                printcol('Stopping pipeline execution: {}'.format(p.name),
-                         Colors.OKBLUE)
+                if context.verbosity.info:
+                    printcol('Stopping pipeline execution: {}'.format(p.name),
+                             Colors.OKBLUE)
                 return
             else:
                 p.run(context)
