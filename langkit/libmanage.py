@@ -817,7 +817,12 @@ class ManageScript(object):
             result = {}
 
             def add_json(name, path):
-                result[name] = path
+                try:
+                    result[name] = '{}{}{}'.format(
+                        result[name], os.path.pathsep, path
+                    )
+                except KeyError:
+                    result[name] = path
 
             self.setup_environment(add_json)
             print json.dumps(result)
