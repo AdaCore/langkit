@@ -19,7 +19,6 @@ import inspect
 import itertools
 import os
 from os import path
-import re
 import shutil
 import subprocess
 import sys
@@ -1249,15 +1248,27 @@ class CompileCtx(object):
 
         i = 1
         for name in sorted(symbols):
-            lower_name = name.lower()
-            candidate_name = None
-            if re.match('[a-zA-Z]+', lower_name):
-                candidate_name = names.Name.from_lower(lower_name)
+            # Create a candidate name for this symbol: replace all
+            # non-alphabetic characters with underscores and remove
+            # leading/trailing/consecutive underscores.
+            candidate_lower_name = ''
+            last_is_alpha = False
+            for c in name.lower():
+                if 'a' <= c <= 'z':
+                    candidate_lower_name += c
+                    last_is_alpha = True
+                else:
+                    if last_is_alpha:
+                        candidate_lower_name += '_'
+                    last_is_alpha = False
+
+            candidate_name = names.Name.from_lower(
+                candidate_lower_name.strip('_')
+            )
 
             # If we have no candidate or if the candidate is already used, fall
             # back to an unique number.
-            if (candidate_name is None or candidate_name in
-                    self.symbol_literals):
+            if not candidate_name or candidate_name in self.symbol_literals:
                 enum_name = names.Name(str(i))
                 i += 1
             else:
