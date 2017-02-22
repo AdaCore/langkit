@@ -304,6 +304,19 @@ def env_node(env):
     return BasicExpr('{}.Node', T.root_node, [construct(env, LexicalEnvType)])
 
 
+@auto_attr
+def env_parent(env):
+    """
+    Return this env's parent env.
+
+    :param AbstractExpression env: The source environment.
+    """
+    return BasicExpr(
+        'AST_Envs.Get_Env ({}.Parent)',
+        T.LexicalEnvType, [construct(env, LexicalEnvType)]
+    )
+
+
 Env = EnvVariable()
 EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
                             type=LexicalEnvType)
