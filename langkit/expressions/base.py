@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from contextlib import contextmanager
 from copy import copy
 from functools import partial
@@ -659,7 +662,7 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
         decorator = (attr_expr if nb_args == 1 else attr_call)
 
         decorator(attr_name)(type(
-            '{}'.format(attr_name),
+            b'{}'.format(attr_name),
             (AbstractExpression, ), {
                 'construct': construct,
                 '__init__': __init__,
