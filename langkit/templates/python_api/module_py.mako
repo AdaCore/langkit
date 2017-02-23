@@ -684,14 +684,19 @@ class ${root_astnode_name}(object):
         return _node_child_count(self._c_value)
 
     def __getitem__(self, key):
-        """Return the Nth ${root_astnode_name} child this node has.
+        """
+        Return the Nth ${root_astnode_name} child this node has.
 
-        Raise an IndexError if "key" is out of range.
+        This handles negative indexes the same way Python lists do. Raise an
+        IndexError if "key" is out of range.
         """
         if not isinstance(key, int):
             msg = ('${root_astnode_name} children are integer-indexed'
                    ' (got {})').format(type(key))
             raise TypeError(msg)
+
+        if key < 0:
+            key += len(self)
 
         result = _node()
         success = _node_child(self._c_value, key, ctypes.byref(result))
