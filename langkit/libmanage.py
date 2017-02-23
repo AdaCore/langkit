@@ -1,4 +1,5 @@
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import argparse
 from funcy import keep
@@ -466,7 +467,7 @@ class ManageScript(object):
                 cov = Coverage(self.dirs)
             except Exception as exc:
                 import traceback
-                print >> sys.stderr, 'Coverage not available:'
+                print('Coverage not available:', file=sys.stderr)
                 traceback.print_exc(exc)
                 sys.exit(1)
 
@@ -480,7 +481,7 @@ class ManageScript(object):
         except DiagnosticError:
             if parsed_args.debug:
                 raise
-            print >> sys.stderr, col('Errors, exiting', Colors.FAIL)
+            print(col('Errors, exiting', Colors.FAIL), file=sys.stderr)
             sys.exit(1)
         except Exception as e:
             if parsed_args.debug:
@@ -503,7 +504,7 @@ class ManageScript(object):
             if parsed_args.verbosity.debug:
                 traceback.print_exc()
 
-            print >> sys.stderr, col('Internal error! Exiting', Colors.FAIL)
+            print(col('Internal error! Exiting', Colors.FAIL), file=sys.stderr)
             sys.exit(1)
         finally:
             if parsed_args.profile:
@@ -826,7 +827,7 @@ class ManageScript(object):
                     result[name] = path
 
             self.setup_environment(add_json)
-            print json.dumps(result)
+            print(json.dumps(result))
         else:
             self.write_setenv()
 
