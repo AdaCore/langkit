@@ -1,4 +1,5 @@
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from collections import defaultdict
 from itertools import count
@@ -432,7 +433,7 @@ class Lexer(object):
             assert token in self.tokens_set
             return token
         else:
-            assert isinstance(token, str), (
+            assert isinstance(token, basestring), (
                 "Bad type for {}, supposed to be str|{}".format(
                     token, self.tokens.__name__
                 )
