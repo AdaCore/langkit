@@ -1,4 +1,5 @@
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from collections import OrderedDict
 from copy import copy
@@ -450,7 +451,7 @@ class CompiledType(object):
         """
         element_type = cls
         return type(
-            '{}ArrayType'.format(element_type.name().camel), (ArrayType, ), {
+            b'{}ArrayType'.format(element_type.name().camel), (ArrayType, ), {
                 'element_type': classmethod(lambda cls: element_type),
             }
         )
@@ -1111,7 +1112,7 @@ def create_macro(attrib_dict):
     :param dict attrib_dict: The attributes to put on the macro class.
     :rtype: NodeMacro
     """
-    return type('macro', (NodeMacro, ), attrib_dict)
+    return type(b'macro', (NodeMacro, ), attrib_dict)
 
 
 # These will be replaced by true class definitions. Before this happens,
@@ -1505,7 +1506,7 @@ def root_grammar_class(generic_list_type=None):
 
         generic_list_type_name = (generic_list_type
                                   if generic_list_type else
-                                  cls.__name__ + 'BaseList')
+                                  cls.__name__ + b'BaseList')
 
         cls.generic_list_type = abstract(type(
             generic_list_type_name,
@@ -1547,7 +1548,7 @@ def env_metadata(cls):
 
     StructMetaclass.env_metadata = cls
 
-    cls.__name__ = "Metadata"  # Every metadata class should be named metadata
+    cls.__name__ = b'Metadata'  # Every metadata class should be named metadata
     cls.is_env_metadata = True
 
     assert issubclass(cls, Struct), (
@@ -2188,7 +2189,7 @@ class ASTNode(Struct):
                     cls._user_name())
 
         return type(
-            '{}List'.format(element_type.name().camel),
+            b'{}List'.format(element_type.name().camel),
             (StructMetaclass.root_grammar_class.generic_list_type, ), {
                 'name': classmethod(name),
                 'add_to_context': classmethod(add_to_context),
@@ -2213,8 +2214,8 @@ class ASTNode(Struct):
         """
 
         env_element_klass = type(
-            'EnvElement{}'.format(cls.name().camel
-                                  if cls != T.root_node else ''),
+            b'EnvElement{}'.format(cls.name().camel
+                                   if cls != T.root_node else ''),
             (Struct, ), {
                 'el': BuiltinField(cls, doc="The stored AST node"),
                 'MD': BuiltinField(
