@@ -386,6 +386,9 @@ class PythonLang(LanguageChecker):
                            '(?P<remaining>.*)')
     from_import_re = re.compile('^from (?P<name>[a-zA-Z0-9_.]+) import.*')
 
+    future_expected = {'absolute_import', 'division', 'print_function',
+                       'unicode_literals'}
+
     def check(self, report, filename, content, parse):
         self.custom_check(report, filename, content, parse)
         if os.path.exists(filename):
@@ -475,6 +478,12 @@ class PythonLang(LanguageChecker):
             except (SyntaxError, TypeError) as exc:
                 report.add('Could not parse: {}'.format(exc))
             else:
+
+                def node_lineno(node):
+                    return getattr(node, 'lineno', 0) + 1
+
+                future_seen = set()
+
                 for node in ast.walk(root):
                     try:
                         docstring = ast.get_docstring(node)
@@ -483,10 +492,23 @@ class PythonLang(LanguageChecker):
                     else:
                         if docstring:
                             check_text(report, filename, self,
-                                       getattr(node, 'lineno', 0) + 1,
+                                       node_lineno(node),
                                        docstring,
                                        False)
 
+                    if (isinstance(node, ast.ImportFrom)
+                        and node.module == '__future__'
+                    ):
+                        future_seen.update(alias.name for alias in node.names)
+
+                report.set_context(filename, 1)
+                if not future_seen:
+                    report.add('Missing __future__ imports')
+                elif future_seen != self.future_expected:
+                    report.add('Missing __future__ imports: {}'.format(
+                        ', '.join(sorted(name for name in
+                                         self.future_expected - future_seen))
+                    ))
 
 class MakoLang(LanguageChecker):
     comment_start = '##'
