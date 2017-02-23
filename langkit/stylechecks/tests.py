@@ -28,32 +28,42 @@ testcases = (
     # Line-wrapping testing
     #
 
-    Testcase('line_wrap_1.py',
-             '''
-             {}
-             '''.format('a' * 80),
-             []),
-    Testcase('line_wrap_2.py',
-             '''
-             {}
-             '''.format('a' * 81),
-             [(1, 'Too long line')]),
-    Testcase('line_wrap_3.py',
-             '''
-             print("http://{}")
-             '''.format('a' * 81),
-             []),
+    Testcase('line_wrap_1.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
+
+        {}
+    '''.format('a' * 80), []),
+    Testcase('line_wrap_2.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
+        {}
+    '''.format('a' * 81), [(4, 0, 'Too long line')]),
+    Testcase('line_wrap_3.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
+        print("http://{}")
+    '''.format('a' * 81), []),
 
     #
     # Comment box testing
     #
 
     Testcase('comment_box.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         #######
         # Box #
         #######
     ''', []),
     Testcase('comment_box_space.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         ########
         # Box  #
         ########
@@ -64,21 +74,33 @@ testcases = (
         ---------
     ''', []),
     Testcase('comment_box_middle_line_shorter.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         #######
         # Box#
         #######
-    ''', [(2, 'Badly formatted comment box')]),
+    ''', [(5, 0, 'Badly formatted comment box')]),
     Testcase('comment_box_last_line_shorter.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         #######
         # Box #
         ######
-    ''', [(1, 'First and last lines are not identical in comment box')]),
+    ''', [(4, 0, 'First and last lines are not identical in comment box')]),
     Testcase('comment_box_space.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         ########
         # Box ##
         ########
-    ''', [(2, 'Badly formatted comment box')]),
+    ''', [(5, 0, 'Badly formatted comment box')]),
     Testcase('comment_fake_box.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         #
         # Header comment
         #
@@ -89,39 +111,54 @@ testcases = (
     #
 
     Testcase('package_1.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         import foo
     ''', []),
     Testcase('package_2.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         import bar
         import foo
     ''', []),
     Testcase('package_3.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         import foo
         import bar
-    ''', [(2, 'Imported package "foo" must appear after "bar"')]),
+    ''', [(5, 0, 'Imported package "foo" must appear after "bar"')]),
     Testcase('package_3.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         import foo
 
         import bar
     ''', []),
     Testcase('package_3.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         import foo
         import bar as zoo
-    ''', [(2, 'Imported package "foo" must appear after "bar"')]),
+    ''', [(5, 0, 'Imported package "foo" must appear after "bar"')]),
 
     Testcase('package_4.adb', '''
         with Foo;
         with Bar; use Bar;
-    ''', [(2, 'Imported package "Foo" must appear after "Bar"')]),
+    ''', [(2, 0, 'Imported package "Foo" must appear after "Bar"')]),
     Testcase('package_5.adb', '''
         with Foo;
         with ${blah};
         with Bar;
-    ''', [(3, 'Imported package "Foo" must appear after "Bar"')]),
+    ''', [(3, 0, 'Imported package "Foo" must appear after "Bar"')]),
     Testcase('package_6.adb', '''
         with AB;
         with Aa;
-    ''', [(2, 'Imported package "AB" must appear after "Aa"')]),
+    ''', [(2, 0, 'Imported package "AB" must appear after "Aa"')]),
 
     #
     # Mako-specific testing
@@ -132,73 +169,115 @@ testcases = (
         import foo
         import ${blah}
         import bar
-    ''', [(4, 'Imported package "foo" must appear after "bar"')]),
+    ''', [(4, 0, 'Imported package "foo" must appear after "bar"')]),
     Testcase('makoada_1.mako', '''
         ## vim: ft=makoada
         with Foo;
         with ${blah};
         with Bar;
-    ''', [(4, 'Imported package "Foo" must appear after "Bar"')]),
+    ''', [(4, 0, 'Imported package "Foo" must appear after "Bar"')]),
 
     #
     # Comments testing
     #
 
     Testcase('comment_single_1.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a single-line comment
     ''', []),
     Testcase('comment_single_2.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a single-line comment.
-    ''', [(1, 'Single-line comment must not have a final period')]),
+    ''', [(4, 0, 'Single-line comment must not have a final period')]),
     Testcase('comment_single_3.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a single-line comment...
     ''', []),
     Testcase('comment_single_4.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a single-line comment!
     ''', []),
     Testcase('comment_single_5.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         foo # This a trailing single-line comment.
             # This is an autonomous single-line comment.
-    ''', [(1, 'Single-line comment must not have a final period'),
-          (2, 'Single-line comment must not have a final period')]),
+    ''', [(4, 0, 'Single-line comment must not have a final period'),
+          (5, 0, 'Single-line comment must not have a final period')]),
     Testcase('comment_single_6.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # Invalid !
-    ''', [(1, 'Extra space before double punctuation')]),
+    ''', [(4, 0, 'Extra space before double punctuation')]),
 
     Testcase('comment_multi_1.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a multi-line comment.
         # Yes?
     ''', []),
     Testcase('comment_multi_2.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a multi-line comment.
         # Yes
-    ''', [(2, 'Multi-line comment must have a final period')]),
+    ''', [(5, 0, 'Multi-line comment must have a final period')]),
     Testcase('comment_multi_3.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a multi-line comment.
         #
         # But with an empty line.
     ''', []),
     Testcase('comment_multi_4.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a multi-line comment
         #
         # But with an empty line.
-    ''', [(1, 'Multi-line comment must have a final period')]),
+    ''', [(4, 0, 'Multi-line comment must have a final period')]),
     Testcase('comment_multi_5.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a multi-line comment.
         #
         # But with an empty line
-    ''', [(3, 'Multi-line comment must have a final period')]),
+    ''', [(6, 0, 'Multi-line comment must have a final period')]),
     Testcase('comment_multi_6.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a multi-line comment::
         #
         #     Blah : Invalid ! No dot, free style
     ''', []),
     Testcase('comment_multi_7.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a multi-line comment::
         #
         # No dot, free style
-    ''', [(3, 'Multi-line comment must have a final period')]),
+    ''', [(6, 0, 'Multi-line comment must have a final period')]),
     Testcase('comment_multi_8.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a multi-line comment::
         #
         #     Blah : Invalid ! No dot, free style
@@ -206,18 +285,27 @@ testcases = (
         # and it is correctly formatted.
     ''', []),
     Testcase('comment_multi_9.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a multi-line comment::
         #
         #     Blah : Invalid ! No dot, free style
         #
         # and it is badly formatted
-    ''', [(5, 'Multi-line comment must have a final period')]),
+    ''', [(8, 0, 'Multi-line comment must have a final period')]),
     Testcase('comment_multi_10.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a multi-line comment:
         #
         # >>> Blah : Invalid ! No dot, free style
     ''', []),
     Testcase('comment_multi_11.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         # This is a multi-line comment:
         #
         # >>> Blah : Invalid ! No dot, free style
@@ -233,23 +321,38 @@ testcases = (
     # track of line numbers when getting docstrings out of AST nodes.
 
     Testcase('docstring_single_1.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         def foo():
             """This is a single-line docstring."""
     ''', []),
     Testcase('docstring_single_2.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         def foo():
             """This is a single-line docstring"""
-    ''', [(2, 'Docstring sentences must end with periods')]),
+    ''', [(5, 0, 'Docstring sentences must end with periods')]),
     Testcase('docstring_single_3.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         def foo():
             """This is a single-line docstring..."""
     ''', []),
     Testcase('docstring_single_4.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         def foo():
             """This is a single-line docstring!"""
     ''', []),
 
     Testcase('docstring_multi_1.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         def foo():
             """
             This is a multi-line docstring.
@@ -257,13 +360,19 @@ testcases = (
             """
     ''', []),
     Testcase('docstring_multi_2.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         def foo():
             """
             This is a multi-line docstring.
             Yes
             """
-    ''', [(3, 'Docstring sentences must end with periods')]),
+    ''', [(6, 0, 'Docstring sentences must end with periods')]),
     Testcase('docstring_multi_3.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         def foo():
             """
             This is a multi-line docstring.
@@ -272,22 +381,31 @@ testcases = (
             """
     ''', []),
     Testcase('docstring_multi_4.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         def foo():
             """
             This is a multi-line docstring
 
             But with an empty line.
             """
-    ''', [(2, 'Docstring sentences must end with periods')]),
+    ''', [(5, 0, 'Docstring sentences must end with periods')]),
     Testcase('docstring_multi_5.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         def foo():
             """
             This is a multi-line docstring.
 
             But with an empty line
             """
-    ''', [(4, 'Docstring sentences must end with periods')]),
+    ''', [(7, 0, 'Docstring sentences must end with periods')]),
     Testcase('docstring_multi_6.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         def foo():
             """
             This is a multi-line docstring::
@@ -296,14 +414,20 @@ testcases = (
             """
     ''', []),
     Testcase('docstring_multi_7.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         def foo():
             """
             This is a multi-line docstring::
 
             No dot, free style
             """
-    ''', [(4, 'Docstring sentences must end with periods')]),
+    ''', [(7, 0, 'Docstring sentences must end with periods')]),
     Testcase('docstring_multi_8.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         """
         This is a multi-line docstring:
 
@@ -311,6 +435,9 @@ testcases = (
         """
     ''', []),
     Testcase('docstring_multi_9.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         """
         This is a multi-line docstring:
 
@@ -320,6 +447,9 @@ testcases = (
         """
     ''', []),
     Testcase('docstring_multi_10.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         """
         Documenting some function.
 
@@ -328,6 +458,9 @@ testcases = (
         """
     ''', []),
     Testcase('docstring_multi_11.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         """
         Documenting some function.
 
@@ -339,14 +472,20 @@ testcases = (
         """
     ''', []),
     Testcase('docstring_multi_12.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         """
         Documenting some function.
 
         :param arg: Argument
         :type arg: str
         """
-    ''', [(3, 'Docstring sentences must end with periods')]),
+    ''', [(6, 0, 'Docstring sentences must end with periods')]),
     Testcase('docstring_multi_13.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
         """
         Documenting some function.
 
@@ -355,13 +494,36 @@ testcases = (
         """
     ''', []),
     Testcase('docstring_multi_14.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+
+
         """
         Documenting some function.
 
         :param str arg: Long description for this argument which is supposed to
             be a string
         """
-    ''', [(4, 'Docstring sentences must end with periods')]),
+    ''', [(7, 0, 'Docstring sentences must end with periods')]),
+
+    #
+    # "from __future__ testing
+    #
+
+    Testcase('future_1.py', '''
+        dummy = 1
+    ''', [(1, 0, 'Missing __future__ imports')]),
+    Testcase('future_2.py', '''
+        from __future__ import (
+            absolute_import, print_function, unicode_literals
+        )
+        dummy = 1
+    ''', [(1, 0, 'Missing __future__ imports: division')]),
+    Testcase('future_3.py', '''
+        from __future__ import (absolute_import, division, print_function,
+                                unicode_literals)
+        dummy = 1
+    ''', []),
 )
 
 
