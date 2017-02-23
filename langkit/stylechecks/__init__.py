@@ -9,6 +9,9 @@ algoritms are not decently commented: in order to see what this is supposed to
 handle, have a look at the testsuite in the stylechecks.tests module.
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import ast
 import os
 import os.path
@@ -140,7 +143,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
         docstring.
     """
 
-    lines = text.split('\n')
+    lines = text.split(b'\n')
     chars = set(lines[0])
     if len(chars) == 1 and chars == set(lang.comment_start):
         # This is a comment box
@@ -153,7 +156,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
         # Each line must start and end with language comment start
         for i, line in enumerate(lines[1:-1], 1):
             report.set_context(filename, first_line + i)
-            if (not line.endswith(' ' + lang.comment_start) or
+            if (not line.endswith(b' ' + lang.comment_start) or
                     len(lines[0]) != len(line)):
                 report.add('Badly formatted comment box')
         return
@@ -195,7 +198,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
                 else:
                     return
 
-            ends = ('.', '?', '!', ':', '...', '::')
+            ends = (b'.', b'?', b'!', b':', b'...', b'::')
 
             if is_comment:
                 if ((self.lines_count > 1 or not is_last) and
@@ -209,8 +212,8 @@ def check_text(report, filename, lang, first_line, text, is_comment):
                 elif (is_last and
                         self.lines_count == 1 and
                         self.first_block and
-                        self.last_end == '.' and
-                        len([c for c in self.last_line if c == '.']) == 1):
+                        self.last_end == b'.' and
+                        len([c for c in self.last_line if c == b'.']) == 1):
                     report.add('Single-line comment must not have a final'
                                ' period')
             elif (not self.is_sphinx and
@@ -223,7 +226,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
 
     def has_prompt(line):
         """Return whether "line" starts with a Python prompt."""
-        return line.lstrip().startswith('>>> ')
+        return line.lstrip().startswith(b'>>> ')
 
     s = State()
 
@@ -231,7 +234,7 @@ def check_text(report, filename, lang, first_line, text, is_comment):
         empty_line = not line.strip()
 
         if s.quote_indent is not None:
-            if line.startswith(' ' * s.quote_indent) or empty_line:
+            if line.startswith(b' ' * s.quote_indent) or empty_line:
                 continue
             else:
                 s.quote_indent = None
@@ -240,10 +243,10 @@ def check_text(report, filename, lang, first_line, text, is_comment):
                 continue
             s.is_prompt = False
 
-        if line.startswith(':type') or line.startswith(':rtype:'):
+        if line.startswith(b':type') or line.startswith(b':rtype:'):
             s.end_block(False)
             s.is_sphinx = True
-        elif line.startswith(':param'):
+        elif line.startswith(b':param'):
             s.end_block(False)
         elif has_prompt(line):
             s.is_prompt = True
@@ -258,11 +261,11 @@ def check_text(report, filename, lang, first_line, text, is_comment):
         if punctuation_re.search(line):
             report.add('Extra space before double punctuation')
 
-        if line.endswith('::'):
-            s.last_end = '::'
+        if line.endswith(b'::'):
+            s.last_end = b'::'
             s.quote_indent = indent_level(line) + 1
-        elif line.endswith('...'):
-            s.last_end = '...'
+        elif line.endswith(b'...'):
+            s.last_end = b'...'
         elif not empty_line:
             s.last_end = line[-1:]
         s.last_line = line
@@ -298,7 +301,7 @@ def check_generic(report, filename, content, lang):
         """
         check_text(report, filename, lang,
                    comment_first_line,
-                   '\n'.join(comment_block),
+                   b'\n'.join(comment_block),
                    True)
         comment_block[:] = []
 
@@ -314,7 +317,7 @@ def check_generic(report, filename, content, lang):
     for i, line in iter_lines(content):
         report.set_context(filename, i)
 
-        if len(line) > 80 and 'http://' not in line:
+        if len(line) > 80 and b'http://' not in line:
             report.add('Too long line')
         comment_start = line.find(lang.comment_start)
 
@@ -364,8 +367,8 @@ class LanguageChecker(object):
 
 
 class AdaLang(LanguageChecker):
-    comment_start = '--'
-    with_re = re.compile('^with (?P<name>[a-zA-Z0-9_.]+);.*')
+    comment_start = b'--'
+    with_re = re.compile(b'^with (?P<name>[a-zA-Z0-9_.]+);.*')
 
     def check(self, report, filename, content, parse):
         pcheck = PackageChecker(report)
@@ -380,11 +383,11 @@ class AdaLang(LanguageChecker):
 
 
 class PythonLang(LanguageChecker):
-    comment_start = '#'
-    import_re = re.compile('^import (?P<name>[a-zA-Z0-9_.]+)'
-                           '( as [a-zA-Z0-9_.]+)?'
-                           '(?P<remaining>.*)')
-    from_import_re = re.compile('^from (?P<name>[a-zA-Z0-9_.]+) import.*')
+    comment_start = b'#'
+    import_re = re.compile(b'^import (?P<name>[a-zA-Z0-9_.]+)'
+                           b'( as [a-zA-Z0-9_.]+)?'
+                           b'(?P<remaining>.*)')
+    from_import_re = re.compile(b'^from (?P<name>[a-zA-Z0-9_.]+) import.*')
 
     future_expected = {'absolute_import', 'division', 'print_function',
                        'unicode_literals'}
@@ -431,9 +434,9 @@ class PythonLang(LanguageChecker):
         lines_map = [(None, None)]
         current = True
         for line in content.splitlines():
-            if line.strip() == "# pyflakes off":
+            if line.strip() == b"# pyflakes off":
                 current = False
-            elif line.strip() == "# pyflakes on":
+            elif line.strip() == b"# pyflakes on":
                 current = True
             lines_map.append((current, line))
 
@@ -497,8 +500,7 @@ class PythonLang(LanguageChecker):
                                        False)
 
                     if (isinstance(node, ast.ImportFrom)
-                        and node.module == '__future__'
-                    ):
+                            and node.module == '__future__'):
                         future_seen.update(alias.name for alias in node.names)
 
                 report.set_context(filename, 1)
@@ -510,8 +512,9 @@ class PythonLang(LanguageChecker):
                                          self.future_expected - future_seen))
                     ))
 
+
 class MakoLang(LanguageChecker):
-    comment_start = '##'
+    comment_start = b'##'
 
     def check(self, report, filename, content, parse):
         first_line = content.split('\n', 1)[0]
@@ -619,9 +622,9 @@ def localmain():
         os.chdir(LANGKIT_DIR)
         dirs = (os.path.join(LANGKIT_DIR), )
         excludes = (
-            os.path.join('langkit', 'adalog', 'obj'), "tmp", "doc",
-            os.path.join('stylechecks', 'tests.py'),
-            'misc'
+            os.path.join(b'langkit', b'adalog', b'obj'), b'tmp', b'doc',
+            os.path.join(b'stylechecks', b'tests.py'),
+            b'misc'
         )
         main(None, dirs, excludes)
 
