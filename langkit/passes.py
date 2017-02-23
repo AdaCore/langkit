@@ -2,7 +2,8 @@
 Helpers to manage compilation passes.
 """
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from langkit.diagnostics import errors_checkpoint
 from langkit.utils import Colors, printcol

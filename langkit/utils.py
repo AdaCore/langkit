@@ -4,7 +4,8 @@ library for langkit, aggregating general python utilities that we could not
 find in the standard library.
 """
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from copy import copy
 from itertools import takewhile
@@ -105,7 +106,7 @@ class Colors(object):
             value = getattr(cls, name)
             if (all(c.isalpha() for c in name) and
                     name.upper() == name and
-                    isinstance(value, str)):
+                    isinstance(value, basestring)):
                 setattr(cls, name, '')
 
 
@@ -135,7 +136,7 @@ def printcol(msg, color):
     :return: The color-escaped string, resetting the color to blank at the end.
     :rtype: basestring
     """
-    print col(msg, color)
+    print(col(msg, color))
 
     # Colored messages are used to show the user how the compilation process is
     # going, so flushing on a regular basis matters. When \n-based flushing is

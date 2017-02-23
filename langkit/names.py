@@ -1,4 +1,5 @@
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 
 class Name(object):
@@ -22,6 +23,8 @@ class Name(object):
         :param str mixed_with_underscores: Name in the mixed case and
             underscore format.
         """
+        if isinstance(mixed_with_underscores, unicode):
+            mixed_with_underscores = mixed_with_underscores.encode('ascii')
         self.base_name = mixed_with_underscores
 
     def __len__(self):
@@ -58,7 +61,7 @@ class Name(object):
 
         :rtype: str
         """
-        return self.base_name.replace('_', '')
+        return self.base_name.replace(b'_', b'')
 
     @property
     def lower(self):

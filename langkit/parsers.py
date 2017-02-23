@@ -20,7 +20,8 @@ declared for if_stmt, and for the `expression` and `statements` rule, that are
 not defined in the example, but relied on explicitly.
 """
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from copy import copy
 import difflib
@@ -95,7 +96,7 @@ def resolve(parser):
         return parser
     elif isinstance(parser, Token):
         return Tok(parser)
-    elif isinstance(parser, str):
+    elif isinstance(parser, basestring):
         return Tok(parser)
     else:
         raise Exception("Cannot resolve parser {}".format(parser))

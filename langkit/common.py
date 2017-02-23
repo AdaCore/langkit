@@ -1,4 +1,5 @@
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from collections import defaultdict
 import itertools
@@ -73,6 +74,8 @@ def string_repr(string):
     :param str string: The string to represent.
     :return: A string literal representation of string.
     """
+    if isinstance(string, unicode):
+        string = string.encode('ascii')
     return '"{0}"'.format(repr(string)[1:-1].replace('"', r'""'))
 
 

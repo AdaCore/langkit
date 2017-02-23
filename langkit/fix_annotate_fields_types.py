@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from lib2to3 import fixer_base
 from lib2to3.fixer_util import Call, KeywordArg, Name, Attr
 from lib2to3.pygram import python_symbols as syms
