@@ -404,7 +404,7 @@ def create_testcase(tc):
 
         def fmt_records(records):
             return (
-                '\n'.join('  {}:{}: {}'.format(*rec) for rec in records)
+                '\n'.join('  {}:{}:{}: {}'.format(*rec) for rec in records)
                 if records else
                 '  <no report>'
             )
