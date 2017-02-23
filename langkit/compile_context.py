@@ -10,7 +10,8 @@ this is the way it is done for the ada language::
     context.emit(...)
 """
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from contextlib import contextmanager
 from distutils.spawn import find_executable
@@ -127,7 +128,7 @@ class Verbosity(object):
             this level or the corresponding integer constant.
         :type level: str|int
         """
-        if isinstance(level, str):
+        if isinstance(level, basestring):
             if level not in self.NAMES:
                 raise ValueError('Invalid verbosity level: {}'.format(level))
             self.level = self._get(level)
