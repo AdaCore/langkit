@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import enum
 import os.path
 import traceback
@@ -281,14 +284,14 @@ def check_source_language(predicate, message, severity=Severity.error,
 
     if not predicate:
         if Diagnostics.style != DiagnosticStyle.default:
-            print "{}: {}".format(get_parsable_location(), message)
+            print("{}: {}".format(get_parsable_location(), message))
         else:
             print_context()
-            print "{}{}: {}".format(
+            print("{}{}: {}".format(
                 "    " if context_stack else '',
                 format_severity(severity),
                 message
-            )
+            ))
         if severity == Severity.error and do_raise:
             raise DiagnosticError()
         elif severity == Severity.non_blocking_error:
