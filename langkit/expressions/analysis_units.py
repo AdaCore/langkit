@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit import names
 from langkit.compiled_types import AnalysisUnitKind, AnalysisUnitType, T
 from langkit.diagnostics import check_source_language

@@ -11,7 +11,8 @@ notably to define properties on AST nodes.
   code for properties in the generated library.
 """
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 # pyflakes off
 from langkit.expressions.base import *

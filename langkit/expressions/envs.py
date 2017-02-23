@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from contextlib import contextmanager
 from functools import partial
 
@@ -113,7 +116,7 @@ def env_get(env_expr, symbol_expr, resolve_unique=False, sequential=False,
         parent environments.
     """
 
-    if not isinstance(symbol_expr, (AbstractExpression, str)):
+    if not isinstance(symbol_expr, (AbstractExpression, basestring)):
         check_source_language(
             False,
             'Invalid key argument for Env.get: {}'.format(repr(symbol_expr))
