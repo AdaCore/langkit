@@ -388,8 +388,9 @@ class PythonLang(LanguageChecker):
 
     def check(self, report, filename, content, parse):
         self.custom_check(report, filename, content, parse)
-        self.pep8_check(report, filename)
-        self.pyflakes_check(report, filename, content)
+        if os.path.exists(filename):
+            self.pep8_check(report, filename)
+            self.pyflakes_check(report, filename, content)
 
     def pep8_check(self, report, filename):
         """
