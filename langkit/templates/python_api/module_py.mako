@@ -1,5 +1,8 @@
 ## vim: filetype=makopython
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 <%namespace name="array_types"   file="array_types_py.mako" />
 <%namespace name="astnode_types" file="astnode_types_py.mako" />
 <%namespace name="enum_types"    file="enum_types_py.mako" />
@@ -726,15 +729,15 @@ class ${root_astnode_name}(object):
 
         def print_node(name, value):
             if isinstance(value, ${root_astnode_name}):
-                print >> file, '{}{}:'.format(indent, name)
+                print('{}{}:'.format(indent, name), file=file)
                 value.dump(indent + '  ', file)
             elif isinstance(value, Token):
-                print >> file, '{}{}: Token({})'.format(indent, name,
-                                                        repr(value.text))
+                print('{}{}: Token({})'.format(indent, name, repr(value.text)),
+                      file=file)
             else:
-                print >> file, '{}{}: {}'.format(indent, name, value)
+                print('{}{}: {}'.format(indent, name, value), file=file)
 
-        print >> file, '{}<{}>'.format(indent, self.kind_name)
+        print('{}<{}>'.format(indent, self.kind_name), file=file)
         indent = indent + '|'
         if self.is_list_type:
             for i, value in enumerate(self):
@@ -876,7 +879,7 @@ def _unwrap_enum(py_value, type_name, translator):
     :param dict[str, int] translator: A mapping that provides the low-level
         values for all high-level ones.
     """
-    if not isinstance(py_value, str):
+    if not isinstance(py_value, basestring):
         raise TypeError('str expected but got {} instead'.format(
             type(py_value)
         ))
