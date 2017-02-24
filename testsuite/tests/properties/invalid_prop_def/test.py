@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, root_grammar_class, NodeMacro, LongType
 )
@@ -73,4 +76,4 @@ class Macro6(NodeMacro):
     propyprop = Property(lambda a=NodeMacro: a)
 run("Incorrect property definition 6", Macro6)
 
-print 'Done'
+print('Done')

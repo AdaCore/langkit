@@ -2,6 +2,9 @@
 Tests that it is possible to call a property of type T on an EnvElement[T].
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os.path
 
 from langkit.compiled_types import ASTNode, Field, root_grammar_class, LongType
@@ -44,4 +47,4 @@ foo_grammar.add_rules(
     main_rule=Row(Tok(Token.Number, keep=True)) ^ Literal,
 )
 build_and_run(foo_grammar, 'main.py')
-print 'Done'
+print('Done')

@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, root_grammar_class, LongType
 )
@@ -41,4 +44,4 @@ def run(name, expr):
 
 run("Correct code", lambda: No(FooNode))
 run("Incorrect No usage", lambda: No(LongType))
-print 'Done'
+print('Done')

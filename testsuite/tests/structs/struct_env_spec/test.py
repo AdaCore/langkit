@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import ASTNode, Struct, root_grammar_class
 from langkit.diagnostics import DiagnosticError, Diagnostics
 from langkit.envs import EnvSpec
@@ -19,5 +22,5 @@ try:
 except DiagnosticError:
     pass
 
-print ''
-print 'Done'
+print('')
+print('Done')

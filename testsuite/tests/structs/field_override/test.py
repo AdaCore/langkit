@@ -2,6 +2,9 @@
 Test the handling of analysis units in the properties DSL.
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os.path
 
 from langkit.compiled_types import (
@@ -37,5 +40,5 @@ try:
     run()
 except DiagnosticError:
     pass
-print ''
-print 'Done'
+print('')
+print('Done')

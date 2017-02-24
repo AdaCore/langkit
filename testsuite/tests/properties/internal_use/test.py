@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from os import path
 
 from langkit.compiled_types import (
@@ -69,4 +72,4 @@ def lang_def():
     return foo_grammar
 
 emit_and_print_errors(lang_def)
-print 'Done'
+print('Done')

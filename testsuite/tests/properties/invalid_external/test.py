@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import ASTNode, T, abstract, root_grammar_class
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import ExternalProperty, Property, Self
@@ -47,4 +50,4 @@ run("Invalid abstract",
 
 run("Invalid memoized",
     lambda: ExternalProperty(memoized=True))
-print 'Done'
+print('Done')

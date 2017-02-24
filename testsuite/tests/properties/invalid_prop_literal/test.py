@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import ASTNode, root_grammar_class
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import Property
@@ -21,11 +24,11 @@ def make_lang_def(lit):
         return foo_grammar
     return lang_def
 
-print 'Valid case'
+print('Valid case')
 emit_and_print_errors(make_lang_def(12))
-print 'Valid case'
-emit_and_print_errors(make_lang_def("lol"))
-print 'Invalid case'
+print('Valid case')
+emit_and_print_errors(make_lang_def('lol'))
+print('Invalid case')
 emit_and_print_errors(make_lang_def(12.90))
 print('')
-print 'Done'
+print('Done')

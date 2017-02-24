@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, root_grammar_class, LongType, Field
 )
@@ -54,4 +57,4 @@ def run(name, expr):
 run("Correct code", lambda: Self.parent.cast(BarNode))
 run("Invalid cast 1", lambda: Self.parent.cast(LongType))
 run("Invalid cast 2", lambda: Self.bar_node_parent.cast(ListNode))
-print 'Done'
+print('Done')

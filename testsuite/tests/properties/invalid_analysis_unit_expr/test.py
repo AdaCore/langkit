@@ -3,6 +3,9 @@ Test that invalid uses of analysis unit in the properties DSL are properly
 detected and reported.
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os.path
 
 from langkit.compiled_types import ASTNode, root_grammar_class
@@ -33,4 +36,4 @@ def run(name, prop):
 
 
 run('Invalid field', Self.unit.foobar)
-print 'Done'
+print('Done')

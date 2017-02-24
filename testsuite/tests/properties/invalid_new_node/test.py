@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os.path
 
 from langkit.compiled_types import ASTNode, Field, T, root_grammar_class
@@ -49,4 +52,4 @@ def run(name, prop_fn, prop_memoized):
 
 run("Not memoized", lambda: New(T.EmptyNode), False)
 run("List synthetization", lambda: New(T.LiteralList), True)
-print 'Done'
+print('Done')

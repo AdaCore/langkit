@@ -2,6 +2,9 @@
 Test getting the analysis unit of a node in the properties DSL.
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os.path
 
 from langkit.compiled_types import (
@@ -48,4 +51,4 @@ foo_grammar.add_rules(
     atom=Row(Tok(Token.Number, keep=True)) ^ Literal,
 )
 build_and_run(foo_grammar, 'main.py')
-print 'Done'
+print('Done')

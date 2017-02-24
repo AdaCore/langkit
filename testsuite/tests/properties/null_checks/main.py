@@ -1,4 +1,7 @@
-print 'main.py: Running...'
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
+print('main.py: Running...')
 
 
 import sys
@@ -37,4 +40,4 @@ for node, prop in [
         result = 'PropertyError'
     print('{}.{}: {}'.format(node, prop, result))
 
-print 'main.py: Done.'
+print('main.py: Done.')

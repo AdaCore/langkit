@@ -3,6 +3,9 @@ Test the handling of negative indexes in the Python binding of AST nodes child
 getters.
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os.path
 
 from langkit.compiled_types import ASTNode, Field, T, root_grammar_class
@@ -31,4 +34,4 @@ foo_grammar.add_rules(
     name=Name(Tok(Token.Identifier, keep=True)),
 )
 build_and_run(foo_grammar, 'main.py')
-print 'Done'
+print('Done')

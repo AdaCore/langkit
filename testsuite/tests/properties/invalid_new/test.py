@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, root_grammar_class, LongType, Field, Struct
 )
@@ -47,4 +50,4 @@ run("Incorrect new 1", lambda: New(MyStruct, a=Literal(12)))
 run("Incorrect new 2", lambda: New(MyStruct, a=Literal(12), b=No(FooNode)))
 run("Incorrect new 1", lambda: New(MyStruct, a=Literal(12), b=Literal(15),
                                    c=Literal(19)))
-print 'Done'
+print('Done')

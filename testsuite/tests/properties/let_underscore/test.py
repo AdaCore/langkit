@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, root_grammar_class
 )
@@ -24,4 +27,4 @@ class BarNode(FooNode):
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(main_rule=BarNode('example'))
 build_and_run(foo_grammar, 'main.py')
-print 'Done'
+print('Done')

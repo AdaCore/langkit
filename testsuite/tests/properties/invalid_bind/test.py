@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, root_grammar_class, LogicVarType, UserField, T
 )
@@ -59,4 +62,4 @@ run("Incorrect bind eq_prop 1", "BazNode.fields.prop")
 run("Incorrect bind eq_prop 2", "BazNode.fields.prop2")
 run("Incorrect bind eq_prop 3", "BazNode.fields.prop3")
 run("Correct bind eq_prop", "BazNode.fields.prop4")
-print 'Done'
+print('Done')

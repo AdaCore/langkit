@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import libfoolang
 
 ctx = libfoolang.AnalysisContext()
@@ -6,9 +9,9 @@ ctx = libfoolang.AnalysisContext()
 def process(text):
     u = ctx.get_from_buffer('main.txt', text)
     if u.diagnostics:
-        print "Found errors:"
+        print("Found errors:")
         for d in u.diagnostics:
-            print "", d
+            print("", d)
     else:
         u.root.dump()
 

@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, root_grammar_class, Field
 )
@@ -53,4 +56,4 @@ run("Correct code", lambda: Self.nb_list.map(lambda x: x))
 run("Incorrect map code 1", lambda: Self.nb_list.map(lambda x, y, z: x))
 run("Incorrect map code 2", lambda: Self.nb_list.map(lambda x=12: x))
 run("Incorrect map code 3", lambda: Self.nb_list.map(lambda x, *y: x))
-print 'Done'
+print('Done')

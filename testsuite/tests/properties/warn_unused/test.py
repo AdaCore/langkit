@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, BoolType, Field, T, root_grammar_class
 )
@@ -82,4 +85,4 @@ def lang_def():
 
 
 emit_and_print_errors(lang_def)
-print 'Done'
+print('Done')

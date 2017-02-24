@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, BoolType, Field, abstract, root_grammar_class
 )
@@ -124,4 +127,4 @@ run('Node after full coverage (2)', lambda: Self.body.match(
     lambda e=BodyNode: e.prop,
 ))
 
-print 'Done'
+print('Done')

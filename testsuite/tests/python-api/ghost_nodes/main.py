@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import libfoolang
 
 
@@ -10,4 +13,4 @@ for node in unit.root.findall(lambda _: True):
     ))
     assert not node.text or not node.is_ghost
 
-print 'Done.'
+print('Done.')

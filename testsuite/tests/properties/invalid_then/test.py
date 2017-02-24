@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, Field, abstract, root_grammar_class
 )
@@ -48,4 +51,4 @@ run('No argument', Self.name.then(lambda: Self))
 run('Two arguments', Self.name.then(lambda x, y: x.foo(y)))
 run('Default value', Self.name.then(lambda name=None: name))
 
-print 'Done'
+print('Done')

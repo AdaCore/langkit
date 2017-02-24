@@ -1,4 +1,7 @@
-print 'main.py: Running...'
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
+print('main.py: Running...')
 
 
 import sys
@@ -15,6 +18,6 @@ if u.diagnostics:
 
 u.populate_lexical_env()
 for node in u.root.findall(lambda _: True):
-    print '{}.root = {}'.format(node, node.p_root_node)
+    print('{}.root = {}'.format(node, node.p_root_node))
 
-print 'main.py: Done.'
+print('main.py: Done.')

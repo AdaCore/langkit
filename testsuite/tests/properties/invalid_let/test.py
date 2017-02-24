@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, root_grammar_class
 )
@@ -43,4 +46,4 @@ run("Correct code", lambda: Let(lambda a=Literal(1): a))
 run("Missing var value", lambda: Let(lambda a: a))
 run("Invalid args", lambda: Let(lambda a=Literal(1), *b, **c: a))
 
-print 'Done'
+print('Done')

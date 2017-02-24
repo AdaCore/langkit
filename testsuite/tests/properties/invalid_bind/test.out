@@ -1,16 +1,16 @@
 == Incorrect bind eq_prop 1 ==
-File "test.py", line 31, in BarNode.main_prop
-  line 33, in Bind expression
+File "test.py", line 34, in BarNode.main_prop
+  line 36, in Bind expression
     Error: Equality property must return boolean
 
 == Incorrect bind eq_prop 2 ==
-File "test.py", line 31, in BarNode.main_prop
-  line 33, in Bind expression
+File "test.py", line 34, in BarNode.main_prop
+  line 36, in Bind expression
     Error: Expected 1 argument for eq_prop, got 0
 
 == Incorrect bind eq_prop 3 ==
-File "test.py", line 31, in BarNode.main_prop
-  line 33, in Bind expression
+File "test.py", line 34, in BarNode.main_prop
+  line 36, in Bind expression
     Error: Self and first argument should be of the same type
 
 == Correct bind eq_prop ==

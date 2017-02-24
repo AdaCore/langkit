@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, root_grammar_class, Field
 )
@@ -17,7 +20,7 @@ def run(expr):
 
     Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
-    print '== {} =='.format(expr)
+    print('== {} =='.format(expr))
 
     @root_grammar_class()
     class FooNode(ASTNode):
@@ -46,4 +49,4 @@ run(Env.get(Self.tok))
 run(Self.implicit_prop)
 run(Self.node_env.eval_in_env(Env.get(Self.tok)))
 run(Self.node_env.eval_in_env(Self.implicit_prop))
-print 'Done'
+print('Done')

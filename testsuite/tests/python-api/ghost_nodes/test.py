@@ -2,6 +2,9 @@
 Test the handling of analysis units in the properties DSL.
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os.path
 
 from langkit.compiled_types import ASTNode, Field, T, root_grammar_class
@@ -44,4 +47,4 @@ foo_grammar.add_rules(
     ),
 )
 build_and_run(foo_grammar, 'main.py')
-print 'Done'
+print('Done')

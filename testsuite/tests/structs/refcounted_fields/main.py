@@ -1,4 +1,7 @@
-print 'main.py: Running...'
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
+print('main.py: Running...')
 
 
 import sys
@@ -25,11 +28,11 @@ u.populate_lexical_env()
 name_lists = [name_list.p_to_struct
               for name_list in u.root.findall(libfoolang.ListDecl)]
 
-print 'Name lists:'
+print('Name lists:')
 for nl in name_lists:
-    print '  * {}: [{}]'.format(
+    print('  * {}: [{}]'.format(
         nl.f_label.f_tok.text,
         ', '.join(n.f_tok.text for n in nl.f_name_list)
-    )
+    ))
 
-print 'main.py: Done.'
+print('main.py: Done.')

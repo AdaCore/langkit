@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import ASTNode, abstract, root_grammar_class
 from langkit.diagnostics import Diagnostics
 from langkit.parsers import Grammar, Row
@@ -27,4 +30,4 @@ def lang_def():
 
 
 emit_and_print_errors(lang_def)
-print 'Done'
+print('Done')

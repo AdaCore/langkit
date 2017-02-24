@@ -3,6 +3,9 @@ Test that when a property B overrides a property A, B's return type must be a
 subtype of A's.
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os.path
 
 from langkit.compiled_types import ASTNode, T, abstract, root_grammar_class
@@ -58,4 +61,4 @@ run('FooNode', lambda T: T.FooNode)
 run('MiddleNode', lambda T: T.MiddleNode)
 run('NullNode', lambda T: T.NullNode)
 
-print 'Done'
+print('Done')

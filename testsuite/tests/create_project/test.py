@@ -3,6 +3,9 @@ Test that the "create-project.py" script creates a valid Langkit project by
 generating it and building it.
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os.path
 import subprocess
 import sys
@@ -23,4 +26,4 @@ manage_py = os.path.join('mylang', 'manage.py')
 python(create_project_py, 'Mylang')
 python(manage_py, '-vnone', 'make')
 
-print 'Done'
+print('Done')

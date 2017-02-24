@@ -1,14 +1,14 @@
 == FooNode ==
-File "test.py", line 38, in ExampleNode.get_random_node
-  line 38, in No expression
+File "test.py", line 41, in ExampleNode.get_random_node
+  line 41, in No expression
     Error: expected type MiddleNode, got FooNode instead (expected type comes from overridden base property in MiddleNode)
 
 == MiddleNode ==
 Code generation was successful
 
 == NullNode ==
-File "test.py", line 38, in ExampleNode.get_random_node
-  line 38, in No expression
+File "test.py", line 41, in ExampleNode.get_random_node
+  line 41, in No expression
     Error: expected type MiddleNode, got NullNode instead (expected type comes from overridden base property in MiddleNode)
 
 Done

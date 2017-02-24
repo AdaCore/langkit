@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import itertools
 import os.path
 
@@ -22,10 +25,10 @@ def run(abstract_public, concrete_public):
         True: 'public',
         False: 'private',
     }
-    print '== abstract: {}, concrete: {} =='.format(
+    print('== abstract: {}, concrete: {} =='.format(
         fmt_privacy[abstract_public],
         fmt_privacy[concrete_public]
-    )
+    ))
     Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
     @root_grammar_class()
@@ -52,7 +55,7 @@ def run(abstract_public, concrete_public):
     if emit_and_print_errors(lang_def):
         for fld in (AbstractNode._fields['prop'],
                     ConcreteNode._fields['prop']):
-            print '  {}: {}'.format(fld.qualname, fmt_privacy[fld.is_public])
+            print('  {}: {}'.format(fld.qualname, fmt_privacy[fld.is_public]))
     print('')
 
 
@@ -60,4 +63,4 @@ privacy_levels = (None, True, False)
 for p1, p2 in itertools.product(privacy_levels, privacy_levels):
     run(p1, p2)
 
-print 'Done'
+print('Done')

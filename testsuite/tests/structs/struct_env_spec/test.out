@@ -1,4 +1,4 @@
-File "test.py", line 17, in StructA
+File "test.py", line 20, in StructA
     Error: Structs cannot define lexical environment specifications
 
 Done

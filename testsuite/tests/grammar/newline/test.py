@@ -2,6 +2,9 @@
 Test that Bind works when binding from env elements.
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os.path
 
 from langkit.compiled_types import (
@@ -94,4 +97,4 @@ foo_grammar.add_rules(
     main_rule=Or(A.comp, A.ind, A.nl)
 )
 build_and_run(foo_grammar, 'main.py', lexer=foo_lexer)
-print 'Done'
+print('Done')

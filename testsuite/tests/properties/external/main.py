@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import sys
 
 import libfoolang
@@ -13,5 +16,5 @@ if u.diagnostics:
     sys.exit(1)
 
 u.populate_lexical_env()
-print 'Evaluating {}'.format(text)
-print 'result = {}'.format(u.root.p_result)
+print('Evaluating {}'.format(text))
+print('result = {}'.format(u.root.p_result))

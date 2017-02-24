@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import itertools
 import os.path
 
@@ -22,10 +25,10 @@ def run(abstract_has_implicit_env, concrete_has_implicit_env):
         True: 'implicit env',
         False: 'no implicit env',
     }
-    print '== abstract: {}, concrete: {} =='.format(
+    print('== abstract: {}, concrete: {} =='.format(
         fmt_value[abstract_has_implicit_env],
         fmt_value[concrete_has_implicit_env]
-    )
+    ))
     Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
     @root_grammar_class()
@@ -51,8 +54,8 @@ def run(abstract_has_implicit_env, concrete_has_implicit_env):
     if emit_and_print_errors(lang_def):
         for fld in (AbstractNode._fields['prop'],
                     ConcreteNode._fields['prop']):
-            print '  {}: {}'.format(fld.qualname,
-                                    fmt_value[fld.has_implicit_env])
+            print('  {}: {}'.format(fld.qualname,
+                                    fmt_value[fld.has_implicit_env]))
     print('')
 
 
@@ -60,4 +63,4 @@ attribute_values = (None, True, False)
 for p1, p2 in itertools.product(attribute_values, attribute_values):
     run(p1, p2)
 
-print 'Done'
+print('Done')

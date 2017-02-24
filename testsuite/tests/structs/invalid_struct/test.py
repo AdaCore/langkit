@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from langkit.compiled_types import (
     ASTNode, Field, LongType, Struct, root_grammar_class
 )
@@ -23,5 +26,5 @@ try:
 except DiagnosticError:
     pass
 
-print ''
-print 'Done'
+print('')
+print('Done')

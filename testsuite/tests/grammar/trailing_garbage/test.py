@@ -3,6 +3,9 @@ Test that garbage tokens left after the main parsing rule completes does not
 crash. It used to!
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os.path
 
 from langkit.compiled_types import ASTNode, Field, root_grammar_class
@@ -30,4 +33,4 @@ foo_grammar.add_rules(
     main_rule=Row(Tok(Token.Number, keep=True)) ^ Literal,
 )
 build_and_run(foo_grammar, 'main.py')
-print 'Done'
+print('Done')
