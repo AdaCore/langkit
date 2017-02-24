@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import os
 import shutil
 import subprocess
@@ -74,7 +77,7 @@ def emit_and_print_errors(grammar_fn,
         # are enough.
         return False
     else:
-        print 'Code generation was successful'
+        print('Code generation was successful')
         return True
     finally:
         reset_langkit()
