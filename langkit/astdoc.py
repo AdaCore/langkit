@@ -1,7 +1,21 @@
 from __future__ import absolute_import
 from langkit import compiled_types, documentation, expressions
+from langkit.diagnostics import check_source_language, Severity
 from langkit.utils import dispatch_on_type
 
+try:
+    from docutils.core import publish_parts
+except ImportError:
+    check_source_language(
+        False,
+        "Missing docutils to properly render sphinx doc. Install the "
+        "docutils package",
+        severity=Severity.warning
+    )
+
+    # Provide a stub implementation for publish_parts
+    def publish_parts(x, *args, **kwargs):
+        return {'html_body': x}
 
 
 def escape(text):
@@ -12,14 +26,43 @@ def escape(text):
     return text
 
 
+def trim_docstring_lines(docstring):
+    """
+    This function will return a trimmed version of the docstring, removing
+    whitespace at the beginning of lines depending on the offset of the first
+    line.
+
+    :type docstring: str
+    """
+
+    # Remove leading newline if needed
+    docstring = docstring.lstrip('\n')
+
+    # Compute the offset
+    offset = len(docstring) - len(docstring.lstrip(' '))
+
+    # Check that the docstring is properly formed
+    check_source_language(
+        not docstring[offset].isspace(), "Malformed docstring"
+    )
+
+    # Trim every line of the computed offset value
+    return '\n'.join(
+        line[offset:]
+        for line in docstring.splitlines()
+    )
+
+
 def format_doc(entity):
     doc = entity.doc()
     if doc:
-        doc = doc.strip().replace('\n', '<br/>')
-        doc = '<p class="doc">{}</p>'.format(doc)
+        doc = trim_docstring_lines(doc)
+        ret = '<div class="doc">{}</div>'.format(
+            publish_parts(doc, writer_name='html')['html_body']
+        )
+        return ret
     else:
-        doc = '<p class="disabled">No documentation</p>'.format(doc)
-    return doc
+        return '<div class="disabled">No documentation</div>'.format(doc)
 
 
 def print_struct(context, file, struct):
