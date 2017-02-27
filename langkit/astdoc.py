@@ -120,6 +120,7 @@ html {
 .ref { color: rgb(102, 217, 239); }
 .ref-link { color: rgb(102, 217, 239); text-decoration: underline; }
 .disabled { color: rgb(117, 113, 94); font-style: italic;}
+dt { font-family: monospace; }
 """.strip()
 
 
