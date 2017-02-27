@@ -687,7 +687,8 @@
       % if cls.env_spec._add_env:
          G := Simple_Env_Getter (Initial_Env);
          % if has_dyn_env:
-         if Initial_Env /= Root_Env and then Initial_Env.Node.Unit /= Self.Unit
+         if Initial_Env not in Root_Env | Empty_Env 
+            and then Initial_Env.Node.Unit /= Self.Unit
          then
             G := Dyn_Env_Getter (${env_getter}'Access, G_State);
          end if;
