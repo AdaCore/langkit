@@ -109,7 +109,11 @@ def field_ref(field):
 
 
 ASTDOC_CSS = """
-html { background-color: rgb(8, 8, 8); color: rgb(248, 248, 242); }
+html {
+    background-color: rgb(8, 8, 8);
+    color: rgb(248, 248, 242);
+    font-family: sans-serif;
+}
 .kw  { color: rgb(255, 95, 135); font-weight: bold; }
 .priv  { color: rgb(255, 130, 20); font-weight: bold; }
 .def { color: rgb(138, 226, 52); font-weight: bold; }
