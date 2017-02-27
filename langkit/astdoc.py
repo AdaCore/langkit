@@ -1,6 +1,7 @@
 from __future__ import absolute_import
+from langkit import compiled_types, documentation, expressions
+from langkit.utils import dispatch_on_type
 
-from langkit import compiled_types, documentation
 
 
 def escape(text):
@@ -65,9 +66,10 @@ def print_field(context, file, struct, field):
     if field.is_private:
         prefixes.append('<span class="priv">private</span>')
     prefixes.append('<span class="kw">{}</span>'.format(
-        'field'
-        if isinstance(field, compiled_types.Field) else
-        'property'
+        dispatch_on_type(type(field), (
+            (compiled_types.AbstractField, lambda _: 'field'),
+            (expressions.PropertyDef, lambda _: 'property')
+        )),
     ))
 
     inherit_note = (
