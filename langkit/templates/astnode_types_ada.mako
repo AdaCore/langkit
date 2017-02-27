@@ -535,7 +535,9 @@
 
          ## If we're adding the element to an env that belongs to a different
          ## unit, then:
-         if Env = Root_Env or else Env.Node.Unit /= Self.Unit then
+         if Env /= Empty_Env
+            and then (Env = Root_Env or else Env.Node.Unit /= Self.Unit)
+         then
             ## Add the env, the key, and the value to the list of entries
             ## contained in other units, so we can remove them when reparsing
             ## val's unit.
@@ -554,7 +556,9 @@
       Dec_Ref (Vals);
       % else:
       Add (Env, Key, Val, MD => ${md});
-      if Env = Root_Env or else Env.Node.Unit /= Self.Unit then
+      if Env /= Empty_Env
+         and then (Env = Root_Env or else Env.Node.Unit /= Self.Unit)
+      then
          Get_Lex_Env_Data (Val).Is_Contained_By.Append
            ((Env, Key, Val));
 
