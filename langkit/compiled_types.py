@@ -2709,6 +2709,21 @@ class TypeRepo(object):
 
         return __EnumNodeInternal
 
+    @property
+    @memoized
+    def env_assoc(self):
+        """
+        EnvAssoc type, used to add associations of key and value to the lexical
+        environments, via the add_to_env primitive.
+        """
+        assert T.root_node
+
+        class EnvAssoc(Struct):
+            key = UserField(type=Symbol)
+            val = UserField(type=T.root_node)
+
+        return EnvAssoc
+
 
 def resolve_type(type_or_defer):
     """
