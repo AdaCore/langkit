@@ -51,10 +51,6 @@ typedef void *${lexical_env_type};
 
 typedef uint8_t ${bool_type};
 
-% for struct_type in ctx.struct_types:
-   ${struct_types.decl(struct_type)}
-% endfor
-
 /* Helper data structures for source location handling.  */
 
 typedef struct {
@@ -117,6 +113,10 @@ typedef struct {
    ${c_doc('langkit.exception_type.information')}
    const char *information;
 } ${exception_type};
+
+% for struct_type in ctx.struct_types:
+   ${struct_types.decl(struct_type)}
+% endfor
 
 % if ctx.default_unit_file_provider:
 /*
