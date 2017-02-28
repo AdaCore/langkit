@@ -21,8 +21,8 @@ class PythonDriver(BaseDriver):
         self.check_file('test.py')
 
         # Make the common Python modules available from the testcase script
-        self.add_path('PYTHONPATH', self.support_dir)
-        self.add_path('PYTHONPATH', self.langkit_root_dir)
+        self.add_path(u'PYTHONPATH', self.support_dir)
+        self.add_path(u'PYTHONPATH', self.langkit_root_dir)
 
     @catch_test_errors
     def run(self):
@@ -30,7 +30,7 @@ class PythonDriver(BaseDriver):
         # another spawned script could: provide the path to the interpreter in
         # the environment so it can use it.
         derived_env = dict(os.environ)
-        derived_env['PYTHON_INTERPRETER'] = self.python_interpreter
+        derived_env[b'PYTHON_INTERPRETER'] = self.python_interpreter
 
         self.run_and_check([sys.executable, 'test.py'], derived_env)
 

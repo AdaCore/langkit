@@ -165,7 +165,7 @@ class BaseDriver(TestDriver):
 
     @property
     def python_interpreter(self):
-        return self.global_env['options'].with_python or 'python'
+        return self.global_env['options'].with_python or b'python'
 
     def check_file(self, filename):
         """
@@ -210,9 +210,9 @@ class BaseDriver(TestDriver):
         :param str env_var: Name of the environment variable to define/extend.
         :param str path: Path to prepend.
         """
-        path_list = os.environ.get(env_var, '')
+        path_list = os.environ.get(env_var, b'')
         if path_list:
-            path_list = '{}{}{}'.format(
+            path_list = b'{}{}{}'.format(
                 path, os.path.pathsep, path_list
             )
         else:
