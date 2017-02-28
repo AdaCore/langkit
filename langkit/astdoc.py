@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 from langkit import compiled_types, documentation, expressions
 from langkit.diagnostics import check_source_language, Severity
 from langkit.utils import dispatch_on_type
