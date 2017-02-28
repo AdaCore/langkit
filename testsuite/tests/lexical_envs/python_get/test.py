@@ -2,11 +2,11 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from langkit.compiled_types import (
-    ASTNode, Field, Struct, abstract, env_metadata, root_grammar_class
+    ASTNode, Field, Struct, abstract, env_metadata, root_grammar_class, T
 )
 from langkit.diagnostics import Diagnostics
 from langkit.envs import EnvSpec, add_to_env
-from langkit.expressions import Self
+from langkit.expressions import Self, New
 from langkit.parsers import Grammar, List, Opt, Row, Tok
 
 from lexer_example import Token
@@ -36,8 +36,10 @@ class Def(Stmt):
     id = Field()
     body = Field()
 
-    env_spec = EnvSpec(add_env=True,
-                       add_to_env=add_to_env(Self.id.symbol, Self))
+    env_spec = EnvSpec(
+        add_env=True,
+        add_to_env=add_to_env(New(T.env_assoc, key=Self.id.symbol, val=Self))
+    )
 
 
 class Block(Stmt):

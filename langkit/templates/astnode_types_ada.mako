@@ -513,84 +513,50 @@
 
    <% call_prop = cls.env_spec._render_field_access %>
 
-   <%def name="add(exprs)">
-   <% md = call_prop(exprs.metadata) if exprs.metadata else "No_Metadata" %>
-
-   declare
-      Env : Lexical_Env :=
-        ${call_prop(exprs.dest_env) if exprs.dest_env else "Initial_Env"};
-      Key : Symbol_Type :=
-        ${"El" if is_array_type(exprs.key.type) else call_prop(exprs.key)};
-      % if is_array_type(exprs.val.type):
-      Vals : ${exprs.val.type.name()} := ${call_prop(exprs.val)};
-      % else:
-      Val : ${root_node_type_name} :=
-        ${root_node_type_name} (${call_prop(exprs.val)});
-      % endif
-   begin
-      % if is_array_type(exprs.val.type):
-      for Val of Vals.Items loop
-         ## Add the element to the environment
-         Add (Env, Key, ${root_node_type_name} (Val), MD => ${md});
-
-         ## If we're adding the element to an env that belongs to a different
-         ## unit, then:
-         if Env /= Empty_Env
-            and then (Env = Root_Env or else Env.Node.Unit /= Self.Unit)
-         then
-            ## Add the env, the key, and the value to the list of entries
-            ## contained in other units, so we can remove them when reparsing
-            ## val's unit.
-            Get_Lex_Env_Data (Val).Is_Contained_By.Append
-              ((Env, Key, ${root_node_type_name} (Val)));
-
-            if Env /= Root_Env then
-               ## Add Val to the list of entries that env's unit contains, so
-               ## that when the unit is reparsed, we can call add_to_env again
-               ## on those nodes.
-               Get_Lex_Env_Data (Env.Node).Contains.Append
-                 (${root_node_type_name} (Val));
-            end if;
-         end if;
-      end loop;
-      Dec_Ref (Vals);
-      % else:
-      Add (Env, Key, Val, MD => ${md});
-      if Env /= Empty_Env
-         and then (Env = Root_Env or else Env.Node.Unit /= Self.Unit)
-      then
-         Get_Lex_Env_Data (Val).Is_Contained_By.Append
-           ((Env, Key, Val));
-
-         if Env /= Root_Env then
-            Get_Lex_Env_Data (Env.Node).Contains.Append
-              (${root_node_type_name} (Val));
-         end if;
-      end if;
-      % endif
-   end;
-   </%def>
-
    <%def name="emit_add_to_env(exprs)">
       ## If we have an _add_to_env specification, we generate code to
       ## add elements to the lexical environment.
 
-      % if is_array_type(exprs.key.type):
-         ## If the supplied expression for the key is an array, we add
-         ## a (kn, v) pair for every kn it contains. V stays the same for
-         ## every element.
-         declare
-            Names : ${exprs.key.type.name()} := ${call_prop(exprs.key)};
-         begin
-            for El of Names.Items loop
-               ${add(exprs)}
-            end loop;
-            Dec_Ref (Names);
-         end;
+      <% md = call_prop(exprs.metadata) if exprs.metadata else "No_Metadata" %>
 
-      % else:
-         ${add(exprs)}
-      % endif
+      declare
+         Env : Lexical_Env :=
+           ${call_prop(exprs.dest_env) if exprs.dest_env else "Initial_Env"};
+
+         ${"Mappings" if is_array_type(exprs.mappings.type) else "B"} :
+           ${exprs.mappings.type.name()} := ${call_prop(exprs.mappings)};
+      begin
+         % if is_array_type(exprs.mappings.type):
+         for B of mappings.Items loop
+         % endif
+            ## Add the element to the environment
+            Add (Env, B.F_Key, ${root_node_type_name} (B.F_Val), MD => ${md});
+
+            ## If we're adding the element to an env that belongs to a different
+            ## unit, then:
+            if Env /= Empty_Env
+               and then (Env = Root_Env or else Env.Node.Unit /= Self.Unit)
+            then
+               ## Add the env, the key, and the value to the list of entries
+               ## contained in other units, so we can remove them when reparsing
+               ## val's unit.
+               Get_Lex_Env_Data (B.F_Val).Is_Contained_By.Append
+                 ((Env, B.F_Key, ${root_node_type_name} (B.F_Val)));
+
+               if Env /= Root_Env then
+                  ## Add Val to the list of entries that env's unit contains, so
+                  ## that when the unit is reparsed, we can call add_to_env
+                  ## again on those nodes.
+                  Get_Lex_Env_Data (Env.Node).Contains.Append
+                    (${root_node_type_name} (B.F_Val));
+               end if;
+            end if;
+         
+         % if is_array_type(exprs.mappings.type):
+         end loop;
+         Dec_Ref (Mappings);
+         % endif
+      end;
    </%def>
 
    <%

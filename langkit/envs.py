@@ -5,27 +5,25 @@ from collections import namedtuple
 from itertools import count
 
 from langkit import names
-from langkit.compiled_types import AbstractNodeData, LexicalEnvType, Symbol, T
+from langkit.compiled_types import AbstractNodeData, LexicalEnvType, T
 from langkit.diagnostics import check_source_language
 from langkit.expressions import (
     Env, FieldAccess, PropertyDef, Self, construct
 )
 
 
-AddToEnv = namedtuple("AddToEnv", ["key", "val", "dest_env",
+AddToEnv = namedtuple("AddToEnv", ["mappings", "dest_env",
                                    "metadata", "is_post"])
 
 
-def add_to_env(key, val, dest_env=None, metadata=None, is_post=False):
+def add_to_env(mappings, dest_env=None, metadata=None, is_post=False):
     """
     Specify elements to add to the lexical environment.
 
-    :param AbstractExpression key: Specify the key(s) under which to add
-        elements.
+    :param AbstractExpression mappings: One or several mappings of key to value
+        to add to the environment. Must be either of type T.env_assoc, or
+        T.env_assoc.array_type().
 
-    :param AbstractExpression val: An abstract expression resolving to a
-        subtype of the root class, or a list of them, specifying the values
-        to add.
     :param AbstractExpression dest_env: The destination environment in which to
         add the elements.
     :param AbstractExpression metadata: Optional expression for metadata.
@@ -33,7 +31,7 @@ def add_to_env(key, val, dest_env=None, metadata=None, is_post=False):
         children have been treated.
     :return:
     """
-    return AddToEnv(key, val, dest_env, metadata, is_post)
+    return AddToEnv(mappings, dest_env, metadata, is_post)
 
 
 class EnvSpec(object):
@@ -171,8 +169,7 @@ class EnvSpec(object):
 
         self.envs_expressions = [
             add_to_env(
-                create_internal_property('Env_Key', exprs.key, None),
-                create_internal_property('Env_Value', exprs.val, None),
+                create_internal_property('Env_Mappings', exprs.mappings, None),
                 create_internal_property('Env_Dest', exprs.dest_env,
                                          LexicalEnvType),
                 create_internal_property('MD', exprs.metadata, T.env_md),
@@ -201,26 +198,15 @@ class EnvSpec(object):
 
         :rtype: bool
         """
-        for key_prop, val_prop, _, _, _ in self.envs_expressions:
-            with key_prop.diagnostic_context():
+        for bindings_prop, _, _, _ in self.envs_expressions:
+            with bindings_prop.diagnostic_context():
                 check_source_language(
-                    key_prop.type.matches(Symbol) or
-                    key_prop.type.matches(Symbol.array_type()),
-                    'The key expression in environment specification must be'
-                    ' either a symbol or an array of symbol: got {}'
-                    ' instead'.format(
-                        key_prop.type.name().camel
-                    )
-                )
-
-                check_source_language(
-                    val_prop.type.matches(T.root_node)
-                    or (val_prop.type.is_collection
-                        and val_prop.type.element_type().matches(T.root_node)),
-                    'The val expression in environment specification must be'
-                    ' either a node or an array of nodes: got {}'
-                    ' instead'.format(
-                        val_prop.type.name().camel
+                    bindings_prop.type.matches(T.env_assoc) or
+                    bindings_prop.type.matches(T.env_assoc.array_type()),
+                    'The bindings expression in environment specification '
+                    ' must be either an env_assoc or an array of env_assocs: '
+                    'got {} instead'.format(
+                        bindings_prop.type.name().camel
                     )
                 )
 
