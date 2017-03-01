@@ -80,7 +80,7 @@ base_langkit_docs = {
         Data type for env rebindings. For internal use only.
     """,
     'langkit.token_kind': """
-        Type for individual tokens.
+        Kind for this token.
     """,
     'langkit.token_type': """
         Reference to a token in an analysis unit.
@@ -612,9 +612,6 @@ base_langkit_docs = {
         % if lang == 'c':
             Return 1 if successful.
         % endif
-    """,
-    'langkit.token_kind': """
-        Kind for this token.
     """,
     'langkit.token_is_trivia': """
         Return whether this token is a trivia. If it's not, it's a regular
