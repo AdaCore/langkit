@@ -813,16 +813,6 @@ package ${ada_lib_name}.Analysis is
       % endif
    % endfor
 
-   ------------------------------
-   -- Root AST node properties --
-   ------------------------------
-
-   % for prop in T.root_node.get_properties( \
-         include_inherited=False, \
-         predicate=library_public_field):
-      ${prop.prop_decl}
-   % endfor
-
    ---------------------------
    -- Adalog instantiations --
    ---------------------------
@@ -847,6 +837,16 @@ package ${ada_lib_name}.Analysis is
 
    % for cls in ctx.sorted_types(ctx.enum_types):
    ${enum_types.public_decl(cls)}
+   % endfor
+
+   ------------------------------
+   -- Root AST node properties --
+   ------------------------------
+
+   % for prop in T.root_node.get_properties( \
+         include_inherited=False, \
+         predicate=library_public_field):
+      ${prop.prop_decl}
    % endfor
 
    -----------------------------------------------
