@@ -264,7 +264,7 @@ def write_astdoc(context, file):
     ), file=file)
 
     if context.enum_types:
-        print >> file, '<h2>Enumeration types</h2>'
+        print('<h2>Enumeration types</h2>', file=file)
 
         for enum_type in context.enum_types:
             print('enum {}:'.format(enum_type.name().camel), file=file)
