@@ -76,6 +76,9 @@ base_langkit_docs = {
     'langkit.lexical_env_type': """
         Data type for lexical environments.
     """,
+    'langkit.equation_type': """
+        Data type for equation types. For internal use only.
+    """,
     'langkit.env_rebindings_type': """
         Data type for env rebindings. For internal use only.
     """,

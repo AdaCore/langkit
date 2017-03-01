@@ -57,6 +57,8 @@
                Token (Node, Token_Index ({arg.name}.Index))
             % elif is_symbol_type(arg.type):
                Text_To_Symbol (Unwrapped_Node.Unit, ${arg.name})
+            % elif is_equation_type(arg.type):
+               Unwrap (${arg.name})
             % else:
                ${arg.name}
             % endif
@@ -114,6 +116,8 @@
                 % elif is_symbol_type(field.type):
                     Wrap (${field_access})
                 % elif is_lexical_env(field.type):
+                    Wrap (${field_access})
+                % elif is_equation_type(field.type):
                     Wrap (${field_access})
                 % else:
                     ${field_access}

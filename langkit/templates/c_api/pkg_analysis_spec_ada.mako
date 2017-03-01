@@ -43,6 +43,9 @@ package ${ada_lib_name}.Analysis.C is
    type ${lexical_env_type} is new System.Address;
    ${ada_c_doc('langkit.lexical_env_type', 3)}
 
+   type ${equation_type} is new System.Address;
+   ${ada_c_doc('langkit.equation_type', 3)}
+
    --  Helper data structures for source location handling
 
    type ${sloc_type} is record
@@ -100,7 +103,7 @@ package ${ada_lib_name}.Analysis.C is
    type ${bool_type} is new Unsigned_8;
 
    % for type_name in (analysis_unit_type, bool_type, node_type, \
-                       lexical_env_type, token_type, \
+                       lexical_env_type, equation_type, token_type, \
                        text_type, sloc_type, sloc_range_type, \
                        diagnostic_type, exception_type):
       type ${type_name}_Ptr is access ${type_name};
@@ -656,6 +659,11 @@ package ${ada_lib_name}.Analysis.C is
      (AST_Envs.Lexical_Env, ${lexical_env_type});
    function Unwrap is new Ada.Unchecked_Conversion
      (${lexical_env_type}, AST_Envs.Lexical_Env);
+
+   function Wrap is new Ada.Unchecked_Conversion
+     (Logic_Equation, ${equation_type});
+   function Unwrap is new Ada.Unchecked_Conversion
+     (${equation_type}, Logic_Equation);
 
    function Wrap is new Ada.Unchecked_Conversion
      (Analysis_Context, ${analysis_context_type});

@@ -43,6 +43,9 @@ typedef enum {
 % endfor
 } ${node_kind_type};
 
+${c_doc('langkit.equation_type')}
+typedef void *${equation_type};
+
 ${c_doc('langkit.env_rebindings_type')}
 typedef void *${env_rebindings};
 

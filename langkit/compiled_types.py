@@ -90,6 +90,7 @@ def make_renderer(base_renderer=None):
         'is_symbol_type':   type_check(Symbol),
         'is_array_type':    type_check(ArrayType),
         'is_lexical_env':   type_check(LexicalEnvType),
+        'is_equation_type': type_check(EquationType),
         'is_struct_type':   type_check(Struct),
         'LexicalEnvType':   LexicalEnvType,
     }
@@ -127,6 +128,7 @@ def make_renderer(base_renderer=None):
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             c_node_type(capi).name,
             'lexical_env_type':      CAPIType(capi, 'lexical_env').name,
+            'equation_type':         EquationType.c_type(capi).name,
             'env_rebindings':        CAPIType(capi, 'env_rebindings').name,
             'unit_kind_type':        AnalysisUnitKind.c_type(capi).name,
             'unit_file_provider_type':
@@ -586,9 +588,7 @@ class EquationType(BasicType):
 
     @classmethod
     def c_type(cls, c_api_settings):
-        check_source_language(
-            False, "Cannot expose equations to C at the moment"
-        )
+        return CAPIType(c_api_settings, 'equation_type')
 
     @classmethod
     def is_refcounted(cls):
