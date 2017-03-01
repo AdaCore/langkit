@@ -11,8 +11,18 @@ package body ${ada_lib_name}.Analysis.Parsers is
    --  Prepare packrat instantiations: one per enum type and onefor each kind
    --  of node (including lists). Likewise for bump ptr. allocators, except
    --  we need them only for non-abstract AST nodes.
+   --
+   --  In the Tagged_Alloc instanciations, there are unchecked conversions to
+   --  wrap System.Address values from a low-level allocator. All read/writes
+   --  for the pointed values are made through values of the same access types
+   --  (i.e. AST node access). Thus, strict aliasing issues should not arise
+   --  for these.
+   --
+   --  See <https://gcc.gnu.org/onlinedocs/gnat_ugn/
+   --       Optimization-and-Strict-Aliasing.html>.
 
    pragma Warnings (Off, "is not referenced");
+   pragma Warnings (Off, "possible aliasing problem for type");
    % for enum_type in ctx.enum_types:
       package ${enum_type.name()}_Memos is new Langkit_Support.Packrat
         (${enum_type.name()}, Token_Index);
@@ -30,6 +40,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
       % endif
    % endfor
    pragma Warnings (On, "is not referenced");
+   pragma Warnings (On, "possible aliasing problem for type");
 
    % for parser in ctx.generated_parsers:
    ${parser.spec}
