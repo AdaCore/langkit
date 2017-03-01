@@ -34,6 +34,8 @@ class _node(ctypes.c_void_p):
 _enum_node_kind = ctypes.c_uint
 class _lexical_env(ctypes.c_void_p):
     pass
+class _equation_type(ctypes.c_void_p):
+    pass
 class _env_rebindings(ctypes.c_void_p):
     pass
 class _unit_file_provider(ctypes.c_void_p):
@@ -422,6 +424,21 @@ class LexicalEnv(object):
     def __del__(self):
         _lexical_env_dec_ref(self._c_value)
         self._c_value = None
+
+
+class Equation(object):
+    ${py_doc('langkit.equation_type', 4)}
+
+    def __init__(self, c_value):
+        self._c_value = c_value
+
+    @classmethod
+    def unwrap(cls, value):
+        return 0 if value is None else value._c_value
+
+    @classmethod
+    def wrap(cls, c_value):
+        return cls(c_value) if c_value else None
 
 
 class Token(ctypes.Structure):
