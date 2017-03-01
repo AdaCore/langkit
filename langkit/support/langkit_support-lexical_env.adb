@@ -156,10 +156,10 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    function Get
-     (Self          : Lexical_Env;
-      Key           : Symbol_Type;
-      From          : Element_T := No_Element;
-      Recursive     : Boolean := True) return Env_Element_Array
+     (Self      : Lexical_Env;
+      Key       : Symbol_Type;
+      From      : Element_T := No_Element;
+      Recursive : Boolean := True) return Env_Element_Array
    is
       use Internal_Envs;
       use Env_Element_Arrays;
@@ -259,10 +259,10 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    function Get
-     (Self : Lexical_Env;
-      Key  : Symbol_Type;
-      From : Element_T := No_Element;
-      Recursive     : Boolean := True) return Element_Array is
+     (Self      : Lexical_Env;
+      Key       : Symbol_Type;
+      From      : Element_T := No_Element;
+      Recursive : Boolean := True) return Element_Array is
    begin
       return Unwrap (Get (Self, Key, From, Recursive));
    end Get;

@@ -98,7 +98,7 @@ package Langkit_Support.Lexical_Env is
    type Env_Rebindings is access all Env_Rebindings_Type;
 
    function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings
-   is (new Env_Rebindings_Type'(Bindings'Length,
+   is (new Env_Rebindings_Type'(Size       => Bindings'Length,
                                 Rebindings => Bindings,
                                 Ref_Count  => 1));
    --  Create a new Env_Rebindings from an array of binding pairs
@@ -182,10 +182,10 @@ package Langkit_Support.Lexical_Env is
    --  environment is not ref-counted.
 
    type Lexical_Env_Type is record
-      Parent          : Env_Getter := No_Env_Getter;
+      Parent : Env_Getter := No_Env_Getter;
       --  Parent environment for this env. Null by default.
 
-      Node            : Element_T;
+      Node : Element_T;
       --  Node for which this environment was created
 
       Referenced_Envs : Referenced_Envs_Vectors.Vector;
@@ -194,17 +194,17 @@ package Langkit_Support.Lexical_Env is
       Transitive_Referenced_Envs : Referenced_Envs_Vectors.Vector;
       --  A list of environments referenced by this environment
 
-      Env             : Internal_Map := null;
+      Env : Internal_Map := null;
       --  Map containing mappings from symbols to elements for this env
       --  instance. In the generated library, Elements will be AST nodes. If
       --  the lexical env is refcounted, then it does not own this env.
 
-      Default_MD      : Element_Metadata;
+      Default_MD : Element_Metadata;
       --  Default metadata for this env instance
 
       Parents_Rebindings : Env_Rebindings;
 
-      Ref_Count       : Integer;
+      Ref_Count : Integer;
       --  For ref-counted lexical environments, this contains the number of
       --  owners. It is initially set to 1. When it drops to 0, the env can be
       --  destroyed.
@@ -252,10 +252,10 @@ package Langkit_Support.Lexical_Env is
    --  point of the request needs to be *after* Referenced_From in the file.
 
    function Get
-     (Self          : Lexical_Env;
-      Key           : Symbol_Type;
-      From          : Element_T := No_Element;
-      Recursive     : Boolean := True) return Element_Array;
+     (Self      : Lexical_Env;
+      Key       : Symbol_Type;
+      From      : Element_T := No_Element;
+      Recursive : Boolean := True) return Element_Array;
    --  Get the array of unwrapped elements for this Key. If From is given, then
    --  elements will be filtered according to the Can_Reach primitive given
    --  as parameter for the generic package.
@@ -264,10 +264,10 @@ package Langkit_Support.Lexical_Env is
    --  referenced envs. Otherwise, limit the search to Self.
 
    function Get
-     (Self          : Lexical_Env;
-      Key           : Symbol_Type;
-      From          : Element_T := No_Element;
-      Recursive     : Boolean := True) return Env_Element_Array;
+     (Self      : Lexical_Env;
+      Key       : Symbol_Type;
+      From      : Element_T := No_Element;
+      Recursive : Boolean := True) return Env_Element_Array;
    --  Get the array of wrapped elements for this key. See above for formal
    --  semantics.
 
@@ -308,7 +308,7 @@ private
       Transitive_Referenced_Envs => <>,
       Env                        => Empty_Env_Map'Access,
       Default_MD                 => Empty_Metadata,
-            Parents_Rebindings   => null,
+      Parents_Rebindings         => null,
       Ref_Count                  => No_Refcount);
    Empty_Env : constant Lexical_Env := Empty_Env_Record'Access;
 
