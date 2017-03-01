@@ -21,7 +21,8 @@ All templates can use the "lang" parameter, which contains "ada", "c" or
 "python" depending on the binding for which we generate documentation.
 """
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import textwrap
 
@@ -822,7 +823,7 @@ def create_doc_printer(lang, formatter):
         doc = _render(ctx, entity, **kwargs)
         return formatter(doc, column) if doc else ''
 
-    func.__name__ = '{}_doc'.format(lang)
+    func.__name__ = b'{}_doc'.format(lang)
     return func
 
 # The following are functions which return formatted source code documentation
