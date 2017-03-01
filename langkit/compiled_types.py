@@ -127,9 +127,9 @@ def make_renderer(base_renderer=None):
             'analysis_unit_type':    AnalysisUnitType.c_type(capi).name,
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             c_node_type(capi).name,
-            'lexical_env_type':      CAPIType(capi, 'lexical_env').name,
+            'lexical_env_type':      LexicalEnvType.c_type(capi).name,
             'equation_type':         EquationType.c_type(capi).name,
-            'env_rebindings':        CAPIType(capi, 'env_rebindings').name,
+            'env_rebindings':        EnvRebindingsType.c_type(capi).name,
             'unit_kind_type':        AnalysisUnitKind.c_type(capi).name,
             'unit_file_provider_type':
                 CAPIType(capi, 'unit_file_provider').name,
