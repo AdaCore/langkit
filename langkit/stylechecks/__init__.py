@@ -569,6 +569,18 @@ def check_file(report, filename):  # pragma: no cover
     check_file_content(report, filename, content)
 
 
+def excludes_match(path, excludes):
+    """
+    Return whether at least one item in `excludes` matches the `path`.
+
+    :type path: str
+    :type excludes: list[str]
+    :rtype: bool
+    """
+    return any(path.endswith(os.path.sep + e)
+               for e in excludes)
+
+
 def traverse(report, root, excludes):  # pragma: no cover
     """
     Perform generic and language-specific style checks.
@@ -581,12 +593,7 @@ def traverse(report, root, excludes):  # pragma: no cover
     """
     for item in sorted(os.listdir(root)):
         path = os.path.join(root, item)
-        to_exclude = False
-        for e in excludes:
-            if e in path:
-                to_exclude = True
-                break
-        if to_exclude:
+        if excludes_match(path, excludes):
             continue
 
         if os.path.isdir(path):
