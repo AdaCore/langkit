@@ -1,4 +1,5 @@
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 from langkit import compiled_types, documentation, expressions
 from langkit.diagnostics import check_source_language, Severity
@@ -85,7 +86,7 @@ def print_struct(context, file, struct):
                      astnode_ref(base))
     else:
         kind = 'struct'
-    print >> file, (
+    print(
         '<dt id="{name}">'
         '<span class="kw">{kind}</span>'
         ' <span class="def">{name}</span>'
@@ -93,16 +94,17 @@ def print_struct(context, file, struct):
             name=struct.name().camel,
             kind=kind,
             descr=' : {}'.format(' '.join(descr)) if descr else ''
-        )
+        ),
+        file=file
     )
-    print >> file, '<dd>{}'.format(format_doc(struct))
+    print('<dd>{}'.format(format_doc(struct)), file=file)
 
-    print >> file, '<dl>'
+    print('<dl>', file=file)
     for f in fields:
         print_field(context, file, struct, f)
 
-    print >> file, '</dl>'
-    print >> file, '</dd>'
+    print('</dl>', file=file)
+    print('</dd>', file=file)
 
 
 def print_field(context, file, struct, field):
@@ -121,7 +123,7 @@ def print_field(context, file, struct, field):
         ' [inherited from {}]'.format(field_ref(field))
     )
 
-    print >> file, (
+    print(
         '<dt>{prefixes}'
         ' <span class="def" id="{node}-{field}">{field}</span>'
         ' : {type}{inherit_note}</dt>'.format(
@@ -134,11 +136,12 @@ def print_field(context, file, struct, field):
                 field.type.name().camel
             ),
             inherit_note=inherit_note
-        )
+        ),
+        file=file
     )
     # Don't repeat the documentation for inheritted fields
     if field.struct == struct:
-        print >> file, '<dd>{}</dd>'.format(format_doc(field))
+        print('<dd>{}</dd>'.format(format_doc(field)), file=file)
 
 
 def astnode_ref(node):
@@ -190,36 +193,34 @@ def write_astdoc(context, file):
 
     :param file file: Output file for the documentation.
     """
-    print >> file, ASTDOC_HTML.format(
-        lang_name=context.lang_name.camel,
-        css=ASTDOC_CSS
-    )
+    print(ASTDOC_HTML.format(lang_name=context.lang_name.camel,
+                             css=ASTDOC_CSS),
+          file=file)
 
     if context.enum_types:
         print >> file, '<h2>Enumeration types</h2>'
 
         for enum_type in context.enum_types:
-            print >> file, 'enum {}:'.format(enum_type.name().camel)
+            print('enum {}:'.format(enum_type.name().camel), file=file)
             doc = enum_type.doc()
             if doc:
-                print >> file, documentation.format_text(doc, 4)
-            print >> file, '    {}'.format(
-                ' '.join(enum_type.alternatives)
-            )
-            print >> file, ''
+                print(documentation.format_text(doc, 4), file=file)
+            print('    {}'.format(' '.join(enum_type.alternatives)),
+                  file=file)
+            print('', file=file)
 
     if context.struct_types:
-        print >> file, '<h2>Structure types</h2>'
+        print('<h2>Structure types</h2>', file=file)
 
-        print >> file, '<dl>'
+        print('<dl>', file=file)
         for struct_type in context.struct_types:
             print_struct(context, file, struct_type)
-        print >> file, '</dl>'
+        print('</dl>', file=file)
 
-    print >> file, '<h2>AST node types</h2>'
+    print('<h2>AST node types</h2>', file=file)
 
-    print >> file, '<dl>'
+    print('<dl>', file=file)
     for typ in context.astnode_types:
         print_struct(context, file, typ)
-    print >> file, '</dl>'
-    print >> file, '</body></html>'
+    print('</dl>', file=file)
+    print('</body></html>', file=file)
