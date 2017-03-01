@@ -645,9 +645,7 @@ class ManageScript(object):
 
         :param str project_file: Path to the project file to pass to GPRbuild.
 
-        :param bool is_library: If true, build both relocatable and static
-            libraries (depending on modes enabled in "args"). Otherwise, use
-            static if available or relocatable mode otherwise.
+        :param bool is_library: See the "what_to_build" method.
 
         :param set[str]|None mains: If provided, list of main programs to
             build. By default, GPRbuild builds them all, so this arguments
