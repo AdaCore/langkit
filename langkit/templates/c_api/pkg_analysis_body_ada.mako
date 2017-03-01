@@ -1059,7 +1059,6 @@ package body ${ada_lib_name}.Analysis.C is
    function Wrap (Token : Token_Type) return ${token_type} is
       function Convert is new Ada.Unchecked_Conversion
         (Token_Data_Handler_Access, System.Address);
-
    begin
       if Token = No_Token then
          return (Token_Data   => System.Null_Address,
@@ -1091,8 +1090,20 @@ package body ${ada_lib_name}.Analysis.C is
    function Unwrap (Token : ${token_type}) return Token_Type is
       use System;
 
+      --  The following unchecked conversion makes it possible to restore the
+      --  Ada type of token data handler accesses from the C API. All
+      --  read/writes for the pointed values are made in Ada through values of
+      --  the same access type. Thus, strict aliasing issues should not arise
+      --  for these.
+      --
+      --  See <https://gcc.gnu.org/onlinedocs/gnat_ugn/
+      --       Optimization-and-Strict-Aliasing.html>.
+
+      pragma Warnings (Off, "possible aliasing problem for type");
       function Convert is new Ada.Unchecked_Conversion
         (System.Address, Token_Data_Handler_Access);
+      pragma Warnings (On, "possible aliasing problem for type");
+
    begin
       return (if Token.Token_Data = Null_Address
               then No_Token
