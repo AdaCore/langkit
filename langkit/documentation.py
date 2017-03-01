@@ -76,7 +76,7 @@ base_langkit_docs = {
     'langkit.lexical_env_type': """
         Data type for lexical environments.
     """,
-    'langkit.env_rebindings': """
+    'langkit.env_rebindings_type': """
         Data type for env rebindings. For internal use only.
     """,
     'langkit.token_kind': """
