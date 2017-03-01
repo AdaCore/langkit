@@ -597,14 +597,7 @@ class EquationType(BasicType):
 
 class EnvRebindingsType(BasicType):
     """
-    An EquationType instance is an equation where logic variables (of type
-    LogicVarType) are involved in logical expressions.
-
-    An equation can be solved, and the variables instances will then be bound
-    to specific values.
-
-    Equations instance will typically be produced by expressions involving
-    logic variables.
+    Data type for environment rebinding.
     """
     _name = "Env_Rebindings"
     is_ptr = True
