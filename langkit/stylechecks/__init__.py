@@ -629,9 +629,15 @@ def localmain():
         os.chdir(LANGKIT_DIR)
         dirs = (os.path.join(LANGKIT_DIR), )
         excludes = (
-            os.path.join(b'langkit', b'adalog', b'obj'), b'tmp', b'doc',
+            b'__pycache__',
+            b'.git',
+            b'doc',
+            os.path.join(b'langkit', b'support', b'obj'),
+            b'misc',
+            b'out',
             os.path.join(b'stylechecks', b'tests.py'),
-            b'misc'
+            os.path.join(b'testsuite', b'out'),
+            b'tmp',
         )
         main(None, dirs, excludes)
 
