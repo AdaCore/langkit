@@ -110,7 +110,7 @@ def print_struct(context, file, struct):
 def print_field(context, file, struct, field):
     prefixes = []
     if field.is_private:
-        prefixes.append('<span class="priv">private</span>')
+        prefixes.append('<span class="private">private</span>')
     prefixes.append('<span class="kw">{}</span>'.format(
         dispatch_on_type(type(field), (
             (compiled_types.AbstractField, lambda _: 'field'),
@@ -118,13 +118,16 @@ def print_field(context, file, struct, field):
         )),
     ))
 
+    is_inherit = not field.struct == struct
+
     inherit_note = (
-        '' if field.struct == struct else
         ' [inherited from {}]'.format(field_ref(field))
+        if is_inherit else ''
     )
 
+    print('<div class="node_wrapper">', file=file)
     print(
-        '<dt>{prefixes}'
+        '<dt {inherit_class}>{prefixes}'
         ' <span class="def" id="{node}-{field}">{field}</span>'
         ' : {type}{inherit_note}</dt>'.format(
             prefixes=' '.join(prefixes),
@@ -135,13 +138,16 @@ def print_field(context, file, struct, field):
                 if field.type in context.astnode_types else
                 field.type.name().camel
             ),
-            inherit_note=inherit_note
+            inherit_note=inherit_note,
+            inherit_class='class="inherited" ' if is_inherit else ""
         ),
         file=file
     )
     # Don't repeat the documentation for inheritted fields
     if field.struct == struct:
         print('<dd>{}</dd>'.format(format_doc(field)), file=file)
+
+    print('</div>', file=file)
 
 
 def astnode_ref(node):
@@ -164,14 +170,64 @@ html {
     font-family: sans-serif;
 }
 .kw  { color: rgb(255, 95, 135); font-weight: bold; }
-.priv  { color: rgb(255, 130, 20); font-weight: bold; }
+.private  { color: rgb(255, 130, 20); font-weight: bold; }
 .def { color: rgb(138, 226, 52); font-weight: bold; }
 .ref { color: rgb(102, 217, 239); }
 .ref-link { color: rgb(102, 217, 239); text-decoration: underline; }
 .disabled { color: rgb(117, 113, 94); font-style: italic;}
 .doc { width: 600px; }
 dt { font-family: monospace; }
+
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    padding-top: 60px;
+    width: 250px;
+}
+
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s
+}
+
+#main {
+    padding: 20px;
+    margin-left: 250px;
+}
+
+@media screen and (max-height: 450px) {
+    .sidenav {padding-top: 15px;}
+    .sidenav a {font-size: 18px;}
+}
 """.strip()
+
+ASTDOC_JS = """
+<script>
+function trigger_elements(cat) {
+    var btn = document.getElementById('btn_show_' + cat);
+    nodes = [...document.querySelectorAll('.' + cat)].map(
+        (el) => el.parentElement.parentElement
+    )
+    if (btn.text === "Show " + cat) {
+        btn.text = "Hide " + cat;
+        nodes.forEach((n) => { n.style.display = "block"; })
+    } else {
+        btn.text = "Show " + cat;
+        nodes.forEach((n) => { n.style.display = "none"; })
+    }
+}
+</script>
+"""
 
 
 ASTDOC_HTML = """<html>
@@ -180,6 +236,14 @@ ASTDOC_HTML = """<html>
     <style type="text/css">{css}</style>
 </head>
 <body>
+    {js}
+    <div id="mySidenav" class="sidenav">
+      <a id="btn_show_inherited" href="javascript:void(0)"
+       onclick="trigger_elements('inherited')">Hide inherited</a>
+      <a id="btn_show_private" href="javascript:void(0)"
+       onclick="trigger_elements('private')">Hide private</a>
+    </div>
+    <div id="main">
     <h1>{lang_name} - AST documentation</h1>
 """
 
@@ -193,9 +257,11 @@ def write_astdoc(context, file):
 
     :param file file: Output file for the documentation.
     """
-    print(ASTDOC_HTML.format(lang_name=context.lang_name.camel,
-                             css=ASTDOC_CSS),
-          file=file)
+    print(ASTDOC_HTML.format(
+        lang_name=context.lang_name.camel,
+        css=ASTDOC_CSS,
+        js=ASTDOC_JS
+    ), file=file)
 
     if context.enum_types:
         print >> file, '<h2>Enumeration types</h2>'
@@ -223,4 +289,4 @@ def write_astdoc(context, file):
     for typ in context.astnode_types:
         print_struct(context, file, typ)
     print('</dl>', file=file)
-    print('</body></html>', file=file)
+    print('</div></body></html>', file=file)
