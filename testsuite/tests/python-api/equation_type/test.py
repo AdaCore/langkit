@@ -10,7 +10,8 @@ import os.path
 import sys
 
 from langkit.compiled_types import (
-    ASTNode, EquationType, Field, Token as TokenType, root_grammar_class
+    ASTNode, EquationType, Field, Token as TokenType, UserField,
+    root_grammar_class
 )
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import langkit_property
@@ -33,6 +34,8 @@ def run_test(title, run_main):
 
     @root_grammar_class()
     class FooNode(ASTNode):
+        eq_field = UserField(type=EquationType, public=True)
+
         @langkit_property(public=True, return_type=EquationType)
         def eq(eq=EquationType):
             return eq
