@@ -34,8 +34,6 @@ class _node(ctypes.c_void_p):
 _enum_node_kind = ctypes.c_uint
 class _lexical_env(ctypes.c_void_p):
     pass
-class _equation_type(ctypes.c_void_p):
-    pass
 class _env_rebindings(ctypes.c_void_p):
     pass
 
@@ -429,6 +427,9 @@ class Equation(object):
 
     def __init__(self, c_value):
         self._c_value = c_value
+
+    class _c_type(ctypes.c_void_p):
+        pass
 
     @classmethod
     def unwrap(cls, value):
