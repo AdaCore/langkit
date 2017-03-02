@@ -475,6 +475,31 @@ package body Langkit_Support.Lexical_Env is
    -- Combine --
    -------------
 
+   function Combine (L, R : Env_Rebindings_Type) return Env_Rebindings_Type is
+   begin
+      if L = No_Env_Rebindings and then R = No_Env_Rebindings then
+         return No_Env_Rebindings;
+      elsif L = No_Env_Rebindings or else L.Size = 0 then
+         return R;
+      elsif R = No_Env_Rebindings or else R.Size = 0 then
+         return L;
+      end if;
+
+      return Ret : Env_Rebindings_Type (L.Size + R.Size) do
+         for J in 1 .. L.Size loop
+            Ret.Rebindings (J) := L.Rebindings (J);
+         end loop;
+
+         for J in 1 .. R.Size loop
+            Ret.Rebindings (J + L.Size + 1) := R.Rebindings (J);
+         end loop;
+      end return;
+   end Combine;
+
+   -------------
+   -- Combine --
+   -------------
+
    function Combine (L, R : Env_Rebindings) return Env_Rebindings is
    begin
       if L = null and then R = null then
@@ -485,17 +510,7 @@ package body Langkit_Support.Lexical_Env is
          return L;
       end if;
 
-      return Ret : Env_Rebindings do
-         Ret := new Env_Rebindings_Type (L.Size + R.Size);
-
-         for J in 1 .. L.Size loop
-            Ret.Rebindings (J) := L.Rebindings (J);
-         end loop;
-
-         for J in 1 .. R.Size loop
-            Ret.Rebindings (J + L.Size + 1) := R.Rebindings (J);
-         end loop;
-      end return;
+      return new Env_Rebindings_Type'(Combine (L.all, R.all));
    end Combine;
 
    -----------------
