@@ -741,6 +741,35 @@ class CompileCtx(object):
         warn(unreachable_private, 'This private property is unused')
         warn(unused_abstractions, 'This private abstraction is unused')
 
+    def error_on_forbidden_public_types(self):
+        """
+        If "library_fields_all_public" is False, emit non-blocking errors for
+        all types that are exposed in the public API whereas they should not.
+        """
+        if self.library_fields_all_public:
+            return
+
+        def check_type(field, t, type_use):
+            check_source_language(
+                fv.is_private or t._exposed,
+                '{} is {}, which is forbidden in public API'.format(
+                    type_use, t.name().camel
+                ),
+                do_raise=False
+            )
+
+        for struct in self.struct_types + self.astnode_types:
+            for _, fv in sorted(
+                struct.get_abstract_fields_dict(include_inherited=False)
+                .items()
+            ):
+                with fv.diagnostic_context():
+                    check_type(fv, fv.type,
+                               'return type' if fv.is_property else 'type')
+                    for arg in fv.explicit_arguments:
+                        check_type(fv, arg.type,
+                                   '"{}" argument'.format(arg.name))
+
     def render_template(self, *args, **kwargs):
         # Kludge: to avoid circular dependency issues, do not import parsers
         # until needed.
@@ -929,6 +958,8 @@ class CompileCtx(object):
                         lambda _, astnode: astnode.check_resolved()),
             GlobalPass('warn on unused private properties',
                        CompileCtx.warn_unused_private_properties),
+            GlobalPass('error on forbidden public types',
+                       CompileCtx.error_on_forbidden_public_types),
             errors_checkpoint_pass,
 
             StopPipeline('check only', disabled=not check_only),
