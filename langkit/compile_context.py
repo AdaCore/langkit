@@ -332,10 +332,11 @@ class CompileCtx(object):
         self.ada_api_settings = AdaAPISettings(
             lib_name.camel_with_underscores
         )
-        self.c_api_settings = CAPISettings(lib_name.lower,
-                                           (self.lang_name.lower
-                                            if c_symbol_prefix is None else
-                                            c_symbol_prefix))
+        self.c_api_settings = CAPISettings(
+            self, lib_name.lower,
+            (self.lang_name.lower
+             if c_symbol_prefix is None else c_symbol_prefix)
+        )
 
         self.library_fields_all_public = library_fields_all_public
 

@@ -49,9 +49,11 @@ class CAPISettings(AbstractAPISettings):
 
     LIB_NAME_RE = re.compile('[a-zA-Z][a-zA-Z0-9_-]+')
 
-    def __init__(self, lib_name, symbol_prefix=''):
+    def __init__(self, ctx, lib_name, symbol_prefix=''):
         """
         Create C API generation settings.
+
+        :param CompileCtx ctx: Compile context for this C API.
 
         :param str lib_name: Name of the generated library.  This will be used
         to build the name of header files, library (static and shared object)
@@ -65,6 +67,7 @@ class CAPISettings(AbstractAPISettings):
         if not self.LIB_NAME_RE.match(lib_name):
             raise ValueError('Invalid library name: {}'.format(lib_name))
 
+        self.context = ctx
         self.lib_name = lib_name
         self.symbol_prefix = symbol_prefix
 
