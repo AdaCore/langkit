@@ -25,8 +25,6 @@ import sys
 #
 
 
-class _analysis_context(ctypes.c_void_p):
-    pass
 class _analysis_unit(ctypes.c_void_p):
     pass
 class _node(ctypes.c_void_p):
@@ -254,6 +252,9 @@ class AnalysisContext(object):
         ${py_doc('langkit.remove_unit', 8)}
         if not _remove_analysis_unit(self._c_value, filename):
             raise KeyError('No such unit: {}'.format(filename))
+
+    class _c_type(ctypes.c_void_p):
+        pass
 
 
 class AnalysisUnit(object):
@@ -980,51 +981,51 @@ _create_analysis_context = _import_func(
 % if ctx.default_unit_file_provider:
         _unit_file_provider,
 % endif
-    ], _analysis_context
+    ], AnalysisContext._c_type
 )
 _context_incref = _import_func(
     '${capi.get_name("context_incref")}',
-    [_analysis_context], _analysis_context
+    [AnalysisContext._c_type], AnalysisContext._c_type
 )
 _context_decref = _import_func(
     '${capi.get_name("context_decref")}',
-    [_analysis_context], None
+    [AnalysisContext._c_type], None
 )
 _destroy_analysis_context = _import_func(
     '${capi.get_name("destroy_analysis_context")}',
-    [_analysis_context, ], None
+    [AnalysisContext._c_type, ], None
 )
 _get_analysis_unit_from_file = _import_func(
     '${capi.get_name("get_analysis_unit_from_file")}',
-    [_analysis_context,  # context
-     ctypes.c_char_p,    # filename
-     ctypes.c_char_p,    # charset
-     ctypes.c_int],      # reparse
+    [AnalysisContext._c_type,  # context
+     ctypes.c_char_p,          # filename
+     ctypes.c_char_p,          # charset
+     ctypes.c_int],            # reparse
     _analysis_unit
 )
 _get_analysis_unit_from_buffer = _import_func(
     '${capi.get_name("get_analysis_unit_from_buffer")}',
-    [_analysis_context,  # context
-     ctypes.c_char_p,    # filename
-     ctypes.c_char_p,    # charset
-     ctypes.c_char_p,    # buffer
-     ctypes.c_size_t],   # buffer_size
+    [AnalysisContext._c_type,  # context
+     ctypes.c_char_p,          # filename
+     ctypes.c_char_p,          # charset
+     ctypes.c_char_p,          # buffer
+     ctypes.c_size_t],         # buffer_size
     _analysis_unit
 )
 % if ctx.default_unit_file_provider:
 _get_analysis_unit_from_provider = _import_func(
     '${capi.get_name("get_analysis_unit_from_provider")}',
-    [_analysis_context,  # context
-     _text,              # name
-     ctypes.c_int,       # kind
-     ctypes.c_char_p,    # charset
-     ctypes.c_int],      # reparse
+    [AnalysisContext._c_type,  # context
+     _text,                    # name
+     ctypes.c_int,             # kind
+     ctypes.c_char_p,          # charset
+     ctypes.c_int],            # reparse
     _analysis_unit
 )
 % endif
 _remove_analysis_unit = _import_func(
     '${capi.get_name("remove_analysis_unit")}',
-    [_analysis_context, ctypes.c_char_p], ctypes.c_int
+    [AnalysisContext._c_type, ctypes.c_char_p], ctypes.c_int
 )
 _unit_root = _import_func(
     '${capi.get_name("unit_root")}',
@@ -1072,7 +1073,7 @@ _unit_decref = _import_func(
 )
 _unit_context = _import_func(
     '${capi.get_name("unit_context")}',
-    [_analysis_unit], _analysis_context
+    [_analysis_unit], AnalysisContext._c_type
 )
 _unit_reparse_from_file = _import_func(
     '${capi.get_name("unit_reparse_from_file")}',
