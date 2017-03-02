@@ -1077,13 +1077,13 @@ _unit_context = _import_func(
 )
 _unit_reparse_from_file = _import_func(
     '${capi.get_name("unit_reparse_from_file")}',
-    [_analysis_unit,    # context
+    [_analysis_unit,    # unit
      ctypes.c_char_p],  # charset
     ctypes.c_int
 )
 _unit_reparse_from_buffer = _import_func(
     '${capi.get_name("unit_reparse_from_buffer")}',
-    [_analysis_unit,    # context
+    [_analysis_unit,    # unit
      ctypes.c_char_p,   # charset
      ctypes.c_char_p,   # buffer
      ctypes.c_size_t],  # buffer_size
