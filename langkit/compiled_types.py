@@ -247,9 +247,9 @@ class CompiledType(object):
 
     _exposed = True
     """
-    Whether the type should be exposed to the C and Python APIs. TODO: This
-    is a workaround for the fact that we don't want to expose every type to
-    the bindings yet. We probably want to remove this flag in the long run.
+    Whether the type should be exposed to the C and Python APIs. Note that all
+    types are exposed anyway when the current context has the
+    "library_all_fields_public" attribute set to True.
     """
 
     null_allowed = False
