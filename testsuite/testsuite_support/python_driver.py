@@ -21,8 +21,8 @@ class PythonDriver(BaseDriver):
         self.check_file('test.py')
 
         # Make the common Python modules available from the testcase script
-        self.add_path(u'PYTHONPATH', self.support_dir)
-        self.add_path(u'PYTHONPATH', self.langkit_root_dir)
+        self.add_path(b'PYTHONPATH', self.support_dir)
+        self.add_path(b'PYTHONPATH', self.langkit_root_dir)
 
     @catch_test_errors
     def run(self):

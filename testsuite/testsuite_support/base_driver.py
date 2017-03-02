@@ -216,7 +216,8 @@ class BaseDriver(TestDriver):
                 path, os.path.pathsep, path_list
             )
         else:
-            path_list = path
+            path_list = bytes(path)
+
         os.environ[env_var] = path_list
 
     #
