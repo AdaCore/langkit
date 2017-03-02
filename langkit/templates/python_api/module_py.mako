@@ -10,7 +10,11 @@ from __future__ import (absolute_import, division, print_function,
 <%namespace name="exts"          file="/extensions.mako" />
 
 
-<% root_astnode_name = T.root_node.name().camel %>
+<%
+    root_astnode_name = T.root_node.name().camel
+    c_node = '{}._c_type'.format(root_astnode_name)
+    c_node_enum = '{}._c_enum_type'.format(root_astnode_name)
+%>
 
 
 import collections
@@ -25,9 +29,6 @@ import sys
 #
 
 
-class _node(ctypes.c_void_p):
-    pass
-_enum_node_kind = ctypes.c_uint
 class _env_rebindings(ctypes.c_void_p):
     pass
 
@@ -339,7 +340,7 @@ class AnalysisUnit(object):
     @property
     def root(self):
         ${py_doc('langkit.unit_root', 8)}
-        return _wrap_astnode(_unit_root(self._c_value))
+        return ${root_astnode_name}.wrap(_unit_root(self._c_value))
 
     @property
     def first_token(self):
@@ -402,7 +403,7 @@ class LexicalEnv(object):
 
     @property
     def node(self):
-        return _wrap_astnode(_lexical_env_node(self._c_value))
+        return ${root_astnode_name}.wrap(_lexical_env_node(self._c_value))
 
     def get(self, name):
         ${py_doc('langkit.lexical_env_get', 8)}
@@ -699,7 +700,7 @@ class ${root_astnode_name}(object):
         c_sloc = _Sloc.unwrap(sloc)
         c_node =_lookup_in_node(self._c_value,
                                 ctypes.byref(c_sloc))
-        return _wrap_astnode(c_node)
+        return ${root_astnode_name}.wrap(c_node)
 
     def __len__(self):
         """Return the number of ${root_astnode_name} children this node has."""
@@ -720,12 +721,12 @@ class ${root_astnode_name}(object):
         if key < 0:
             key += len(self)
 
-        result = _node()
+        result = self._c_type()
         success = _node_child(self._c_value, key, ctypes.byref(result))
         if not success:
             raise IndexError('child index out of range')
         else:
-            return _wrap_astnode(result)
+            return ${root_astnode_name}.wrap(result)
 
     def iter_fields(self, with_fields=True, with_properties=True):
         """Iterate through all the fields this node contains
@@ -872,6 +873,61 @@ class ${root_astnode_name}(object):
         :rtype: bool
         """
         return isinstance(self, tuple(types))
+
+    class _c_type(ctypes.c_void_p):
+        pass
+    _c_enum_type = ctypes.c_uint
+
+    @classmethod
+    def wrap(cls, c_value):
+        """
+        Internal helper to wrap a low-level ASTnode value into an instance of
+        the the appropriate high-level ASTNode subclass.
+        """
+        if not c_value:
+            return None
+
+        # First, look if we already built a wrapper for this node so that we
+        # only have one wrapper per node.
+        c_pyobj_p = _node_extension(c_value, _node_extension_id,
+                                    _node_ext_dtor_c)
+        c_pyobj_p = ctypes.cast(
+            c_pyobj_p,
+            ctypes.POINTER(ctypes.py_object)
+        )
+        if c_pyobj_p.contents:
+            return c_pyobj_p.contents.value
+        else:
+            # Create a new wrapper for this node...
+            kind = _node_kind(c_value)
+            py_obj = _kind_to_astnode_cls[kind](c_value)
+
+            # .. and store it in our extension.
+            c_pyobj_p[0] = ctypes.py_object(py_obj)
+
+            # We want to increment its ref count so that the wrapper will be
+            # alive as long as the extension references it.
+            ctypes.pythonapi.Py_IncRef(ctypes.py_object(py_obj))
+
+            return py_obj
+
+    @classmethod
+    def unwrap(cls, py_value):
+        """
+        Internal helper to unwrap a high-level ASTNode instance into a
+        low-level value. Raise a TypeError if the input value has unexpected
+        type.
+        """
+        if py_value is None:
+            return None
+        if not isinstance(py_value, ${root_astnode_name}):
+            raise TypeError(
+                '${root_astnode_name} expected but got {} instead'.format(
+                    type(py_value)
+                )
+            )
+        return py_value._c_value
+
 
 % for astnode in ctx.astnode_types:
     % if astnode != T.root_node:
@@ -1031,7 +1087,7 @@ _remove_analysis_unit = _import_func(
 )
 _unit_root = _import_func(
     '${capi.get_name("unit_root")}',
-    [AnalysisUnit._c_type], _node
+    [AnalysisUnit._c_type], ${c_node}
 )
 _unit_first_token = _import_func(
     "${capi.get_name('unit_first_token')}",
@@ -1064,7 +1120,7 @@ _unit_diagnostic = _import_func(
 )
 _node_unit = _import_func(
     '${capi.get_name("node_unit")}',
-    [_node], AnalysisUnit._c_type
+    [${c_node}], AnalysisUnit._c_type
 )
 _unit_incref = _import_func(
     '${capi.get_name("unit_incref")}',
@@ -1100,35 +1156,35 @@ _unit_populate_lexical_env = _import_func(
 # General AST node primitives
 _node_kind = _import_func(
     '${capi.get_name("node_kind")}',
-    [_node], _enum_node_kind
+    [${c_node}], ${c_node_enum}
 )
 _kind_name = _import_func(
     '${capi.get_name("kind_name")}',
-    [_enum_node_kind], _text
+    [${c_node_enum}], _text
 )
 _node_is_ghost = _import_func(
     '${capi.get_name("node_is_ghost")}',
-    [_node], ctypes.c_int
+    [${c_node}], ctypes.c_int
 )
 _node_short_image = _import_func(
     '${capi.get_name("node_short_image")}',
-    [_node], _text
+    [${c_node}], _text
 )
 _node_sloc_range = _import_func(
     '${capi.get_name("node_sloc_range")}',
-    [_node, ctypes.POINTER(_SlocRange)], None
+    [${c_node}, ctypes.POINTER(_SlocRange)], None
 )
 _lookup_in_node = _import_func(
     '${capi.get_name("lookup_in_node")}',
-    [_node, ctypes.POINTER(_Sloc)], _node
+    [${c_node}, ctypes.POINTER(_Sloc)], ${c_node}
 )
 _node_child_count = _import_func(
     '${capi.get_name("node_child_count")}',
-    [_node], ctypes.c_uint
+    [${c_node}], ctypes.c_uint
 )
 _node_child = _import_func(
     '${capi.get_name("node_child")}',
-    [_node, ctypes.c_uint, ctypes.POINTER(_node)], ctypes.c_int
+    [${c_node}, ctypes.c_uint, ctypes.POINTER(${c_node})], ctypes.c_int
 )
 
 # Lexical environment primitives
@@ -1138,7 +1194,7 @@ _lexical_env_parent = _import_func(
 )
 _lexical_env_node = _import_func(
     '${capi.get_name("lexical_env_node")}',
-    [LexicalEnv._c_type], _node
+    [LexicalEnv._c_type], ${c_node}
 )
 _lexical_env_get = _import_func(
     '${capi.get_name("lexical_env_get")}',
@@ -1154,7 +1210,7 @@ _lexical_env_dec_ref = _import_func(
     % for field in astnode.fields_with_accessors():
 _${field.accessor_basename.lower} = _import_func(
     '${capi.get_name(field.accessor_basename)}',
-    [_node,
+    [${c_node},
      % for arg in field.explicit_arguments:
         ${pyapi.type_internal_name(arg.type)},
      % endfor
@@ -1172,11 +1228,11 @@ _register_extension = _import_func(
 )
 _node_extension_destructor = ctypes.CFUNCTYPE(
     ctypes.c_void_p,
-    _node, ctypes.c_void_p
+    ${c_node}, ctypes.c_void_p
 )
 _node_extension = _import_func(
     '${capi.get_name("node_extension")}',
-    [_node, ctypes.c_uint, _node_extension_destructor],
+    [${c_node}, ctypes.c_uint, _node_extension_destructor],
     ctypes.POINTER(ctypes.c_void_p)
 )
 
@@ -1272,54 +1328,6 @@ def _node_ext_dtor_py(c_node, c_pyobj):
 
 
 _node_ext_dtor_c = _node_extension_destructor(_node_ext_dtor_py)
-
-
-def _wrap_astnode(c_value):
-    """
-    Internal helper to wrap a low-level ASTnode value into an instance of the
-    the appropriate high-level ASTNode subclass.
-    """
-    if not c_value:
-        return None
-
-    # First, look if we already built a wrapper for this node so that we only
-    # have one wrapper per node.
-    c_pyobj_p = _node_extension(c_value, _node_extension_id, _node_ext_dtor_c)
-    c_pyobj_p = ctypes.cast(
-        c_pyobj_p,
-        ctypes.POINTER(ctypes.py_object)
-    )
-    if c_pyobj_p.contents:
-        return c_pyobj_p.contents.value
-    else:
-        # Create a new wrapper for this node...
-        kind = _node_kind(c_value)
-        py_obj = _kind_to_astnode_cls[kind](c_value)
-
-        # .. and store it in our extension.
-        c_pyobj_p[0] = ctypes.py_object(py_obj)
-
-        # We want to increment its ref count so that the wrapper will be alive
-        # as long as the extension references it.
-        ctypes.pythonapi.Py_IncRef(ctypes.py_object(py_obj))
-
-        return py_obj
-
-
-def _unwrap_astnode(py_value):
-    """
-    Internal helper to unwrap a high-level ASTNode instance into a low-level
-    value. Raise a TypeError if the input value has unexpected type.
-    """
-    if py_value is None:
-        return None
-    if not isinstance(py_value, ${root_astnode_name}):
-        raise TypeError(
-            '${root_astnode_name} expected but got {} instead'.format(
-                type(py_value)
-            )
-        )
-    return py_value._c_value
 
 
 def _field_address(struct, field_name):
