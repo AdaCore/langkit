@@ -1634,6 +1634,7 @@ class Struct(CompiledType):
     __metaclass__ = StructMetaclass
     is_ptr = False
     null_allowed = True
+    _exposed = True
 
     is_env_metadata = False
     """
