@@ -28,8 +28,6 @@ import sys
 class _node(ctypes.c_void_p):
     pass
 _enum_node_kind = ctypes.c_uint
-class _lexical_env(ctypes.c_void_p):
-    pass
 class _env_rebindings(ctypes.c_void_p):
     pass
 
@@ -398,13 +396,6 @@ class LexicalEnv(object):
     def __init__(self, c_value):
         self._c_value = c_value
 
-    def unwrap(self):
-        return self._c_value
-
-    @classmethod
-    def wrap(self, c_value):
-        return LexicalEnv(c_value) if c_value else None
-
     @property
     def parent(self):
         return LexicalEnv.wrap(_lexical_env_parent(self._c_value))
@@ -422,6 +413,16 @@ class LexicalEnv(object):
     def __del__(self):
         _lexical_env_dec_ref(self._c_value)
         self._c_value = None
+
+    class _c_type(ctypes.c_void_p):
+        pass
+
+    def unwrap(self):
+        return self._c_value
+
+    @classmethod
+    def wrap(self, c_value):
+        return LexicalEnv(c_value) if c_value else None
 
 
 class Equation(object):
@@ -1133,20 +1134,20 @@ _node_child = _import_func(
 # Lexical environment primitives
 _lexical_env_parent = _import_func(
     '${capi.get_name("lexical_env_parent")}',
-    [_lexical_env], _lexical_env
+    [LexicalEnv._c_type], LexicalEnv._c_type
 )
 _lexical_env_node = _import_func(
     '${capi.get_name("lexical_env_node")}',
-    [_lexical_env], _node
+    [LexicalEnv._c_type], _node
 )
 _lexical_env_get = _import_func(
     '${capi.get_name("lexical_env_get")}',
-    [_lexical_env, _text],
+    [LexicalEnv._c_type, _text],
     ${pyapi.type_internal_name(T.root_node.env_el().array_type())}
 )
 _lexical_env_dec_ref = _import_func(
    '${capi.get_name("lexical_env_dec_ref")}',
-   [_lexical_env], None
+   [LexicalEnv._c_type], None
 )
 
 % for astnode in ctx.astnode_types:

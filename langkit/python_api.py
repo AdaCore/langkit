@@ -117,7 +117,7 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (ct.BoolType, lambda _: ctype_type('c_uint8')),
             (ct.LongType, lambda _: ctype_type('c_long')),
-            (ct.LexicalEnvType, lambda _: wrapped_type('lexical_env')),
+            (ct.LexicalEnvType, lambda _: 'LexicalEnv._c_type'),
             (ct.EquationType, lambda _: 'Equation._c_type'),
             (ct.EnvRebindingsType, lambda _: wrapped_type('env_rebindings')),
             (ct.SourceLocationRangeType, lambda _: wrapped_type('SlocRange')),
