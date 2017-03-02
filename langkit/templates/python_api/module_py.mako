@@ -38,8 +38,6 @@ class _equation_type(ctypes.c_void_p):
     pass
 class _env_rebindings(ctypes.c_void_p):
     pass
-class _unit_file_provider(ctypes.c_void_p):
-    pass
 
 class _text(ctypes.Structure):
     # The chars field really is a uint32_t* but considering it as a char* here
