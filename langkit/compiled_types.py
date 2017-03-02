@@ -771,15 +771,8 @@ class AbstractNodeData(object):
         which take at least a mandatory Self argument and return the
         corresponding data.
 
-        This is a list that describes all other arguments. For each argument,
-        this contains a tuple for:
-
-          * the name of the argument;
-          * its type;
-          * its default value as a string, or None if there is no default
-            value.
-
-        Note that only Property instances accept other arguments.
+        This is a list that describes all other arguments. Note that only
+        Property instances accept other arguments.
 
         :type: list[Argument]
         """
