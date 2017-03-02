@@ -25,8 +25,6 @@ import sys
 #
 
 
-class _analysis_unit(ctypes.c_void_p):
-    pass
 class _node(ctypes.c_void_p):
     pass
 _enum_node_kind = ctypes.c_uint
@@ -385,6 +383,9 @@ class AnalysisUnit(object):
     def diagnostics(self):
         """Diagnostics for this unit."""
         return self.DiagnosticsList(self)
+
+    class _c_type(ctypes.c_void_p):
+        pass
 
     @classmethod
     def wrap(cls, c_value):
@@ -1001,7 +1002,7 @@ _get_analysis_unit_from_file = _import_func(
      ctypes.c_char_p,          # filename
      ctypes.c_char_p,          # charset
      ctypes.c_int],            # reparse
-    _analysis_unit
+    AnalysisUnit._c_type
 )
 _get_analysis_unit_from_buffer = _import_func(
     '${capi.get_name("get_analysis_unit_from_buffer")}',
@@ -1010,7 +1011,7 @@ _get_analysis_unit_from_buffer = _import_func(
      ctypes.c_char_p,          # charset
      ctypes.c_char_p,          # buffer
      ctypes.c_size_t],         # buffer_size
-    _analysis_unit
+    AnalysisUnit._c_type
 )
 % if ctx.default_unit_file_provider:
 _get_analysis_unit_from_provider = _import_func(
@@ -1020,7 +1021,7 @@ _get_analysis_unit_from_provider = _import_func(
      ctypes.c_int,             # kind
      ctypes.c_char_p,          # charset
      ctypes.c_int],            # reparse
-    _analysis_unit
+    AnalysisUnit._c_type
 )
 % endif
 _remove_analysis_unit = _import_func(
@@ -1029,69 +1030,70 @@ _remove_analysis_unit = _import_func(
 )
 _unit_root = _import_func(
     '${capi.get_name("unit_root")}',
-    [_analysis_unit], _node
+    [AnalysisUnit._c_type], _node
 )
 _unit_first_token = _import_func(
     "${capi.get_name('unit_first_token')}",
-    [_analysis_unit, ctypes.POINTER(Token)], None
+    [AnalysisUnit._c_type, ctypes.POINTER(Token)], None
 )
 _unit_last_token = _import_func(
     "${capi.get_name('unit_last_token')}",
-    [_analysis_unit, ctypes.POINTER(Token)], None
+    [AnalysisUnit._c_type, ctypes.POINTER(Token)], None
 )
 _unit_token_count = _import_func(
     "${capi.get_name('unit_token_count')}",
-    [_analysis_unit], ctypes.c_int
+    [AnalysisUnit._c_type], ctypes.c_int
 )
 _unit_trivia_count = _import_func(
     "${capi.get_name('unit_trivia_count')}",
-    [_analysis_unit], ctypes.c_int
+    [AnalysisUnit._c_type], ctypes.c_int
 )
 _unit_filename = _import_func(
     "${capi.get_name('unit_filename')}",
-    [_analysis_unit], ctypes.POINTER(ctypes.c_char)
+    [AnalysisUnit._c_type], ctypes.POINTER(ctypes.c_char)
 )
 _unit_diagnostic_count = _import_func(
     '${capi.get_name("unit_diagnostic_count")}',
-    [_analysis_unit], ctypes.c_uint
+    [AnalysisUnit._c_type], ctypes.c_uint
 )
 _unit_diagnostic = _import_func(
     '${capi.get_name("unit_diagnostic")}',
-    [_analysis_unit, ctypes.c_uint, ctypes.POINTER(_Diagnostic)], ctypes.c_int
+    [AnalysisUnit._c_type, ctypes.c_uint, ctypes.POINTER(_Diagnostic)],
+    ctypes.c_int
 )
 _node_unit = _import_func(
     '${capi.get_name("node_unit")}',
-    [_node], _analysis_unit
+    [_node], AnalysisUnit._c_type
 )
 _unit_incref = _import_func(
     '${capi.get_name("unit_incref")}',
-    [_analysis_unit], _analysis_unit
+    [AnalysisUnit._c_type], AnalysisUnit._c_type
 )
 _unit_decref = _import_func(
     '${capi.get_name("unit_decref")}',
-    [_analysis_unit], None
+    [AnalysisUnit._c_type], None
 )
 _unit_context = _import_func(
     '${capi.get_name("unit_context")}',
-    [_analysis_unit], AnalysisContext._c_type
+    [AnalysisUnit._c_type], AnalysisContext._c_type
 )
 _unit_reparse_from_file = _import_func(
     '${capi.get_name("unit_reparse_from_file")}',
-    [_analysis_unit,    # unit
-     ctypes.c_char_p],  # charset
+    [AnalysisUnit._c_type,    # unit
+     ctypes.c_char_p],        # charset
     ctypes.c_int
 )
 _unit_reparse_from_buffer = _import_func(
     '${capi.get_name("unit_reparse_from_buffer")}',
-    [_analysis_unit,    # unit
-     ctypes.c_char_p,   # charset
-     ctypes.c_char_p,   # buffer
-     ctypes.c_size_t],  # buffer_size
+    [AnalysisUnit._c_type, # unit
+     ctypes.c_char_p,      # charset
+     ctypes.c_char_p,      # buffer
+     ctypes.c_size_t],     # buffer_size
     None
 )
 _unit_populate_lexical_env = _import_func(
     '${capi.get_name("unit_populate_lexical_env")}',
-    [_analysis_unit], ctypes.c_int
+    [AnalysisUnit._c_type], ctypes.c_int
 )
 
 # General AST node primitives

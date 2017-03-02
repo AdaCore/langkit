@@ -123,7 +123,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.SourceLocationRangeType, lambda _: wrapped_type('SlocRange')),
             (ct.Token, lambda _: 'Token'),
             (ct.Symbol, lambda _: wrapped_type('text')),
-            (ct.AnalysisUnitType, lambda _: wrapped_type('analysis_unit')),
+            (ct.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),
             (ct.AnalysisUnitKind, lambda _: ctype_type('c_uint')),
             (ct.ASTNode, lambda _: wrapped_type('node')),
             (ct.EnumType, lambda _: ctype_type('c_uint')),
