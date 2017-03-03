@@ -124,14 +124,14 @@ class BaseDriver(TestDriver):
     def langkit_root_dir(self):
         """Return the absolute path to the repository root directory."""
         return os.path.abspath(
-            os.path.join(self.testsuite_dir, '..')
+            os.path.join(self.testsuite_dir, b'..')
         )
 
     @property
     def testsuite_dir(self):
         """Return the absolute path to the testsuite root directory."""
         result = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                              '..')
+                              b'..')
         return os.path.abspath(result)
 
     @property
@@ -210,13 +210,16 @@ class BaseDriver(TestDriver):
         :param str env_var: Name of the environment variable to define/extend.
         :param str path: Path to prepend.
         """
+        assert isinstance(env_var, str)
+        assert isinstance(path, str)
         path_list = os.environ.get(env_var, b'')
+        assert isinstance(path_list, str)
         if path_list:
             path_list = b'{}{}{}'.format(
                 path, os.path.pathsep, path_list
             )
         else:
-            path_list = bytes(path)
+            path_list = path
 
         os.environ[env_var] = path_list
 

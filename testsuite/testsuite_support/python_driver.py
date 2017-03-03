@@ -39,4 +39,4 @@ class PythonDriver(BaseDriver):
         """
         Return the absolute path to the directory for support Python modules.
         """
-        return os.path.join(self.testsuite_dir, 'python_support')
+        return os.path.join(self.testsuite_dir, b'python_support')
