@@ -78,17 +78,6 @@ class _text(ctypes.Structure):
     def __del__(self):
         _destroy_text(ctypes.byref(self))
 
-class _Sloc(ctypes.Structure):
-    _fields_ = [("line", ctypes.c_uint32),
-                ("column", ctypes.c_uint16)]
-
-    def wrap(self):
-        return Sloc(self.line, self.column)
-
-    @classmethod
-    def unwrap(cls, sloc):
-        return _Sloc(sloc.line, sloc.column)
-
 
 class _Exception(ctypes.Structure):
     _fields_ = [("is_fatal", ctypes.c_int),
@@ -462,6 +451,17 @@ class Sloc(object):
     def __repr__(self):
         return '<Sloc {} at {:#x}>'.format(self, id(self))
 
+    class _c_type(ctypes.Structure):
+        _fields_ = [("line", ctypes.c_uint32),
+                    ("column", ctypes.c_uint16)]
+
+        def wrap(self):
+            return Sloc(self.line, self.column)
+
+        @classmethod
+        def unwrap(cls, sloc):
+            return cls(sloc.line, sloc.column)
+
 
 class SlocRange(object):
     # TODO: document this class and its methods
@@ -493,8 +493,8 @@ class SlocRange(object):
 
 
     class _c_type(ctypes.Structure):
-        _fields_ = [("start", _Sloc),
-                    ("end", _Sloc)]
+        _fields_ = [("start", Sloc._c_type),
+                    ("end", Sloc._c_type)]
 
         def wrap(self):
             return SlocRange(self.start.wrap(), self.end.wrap())
@@ -696,7 +696,7 @@ class ${root_astnode_name}(object):
 
     def lookup(self, sloc):
         ${py_doc('langkit.lookup_in_node', 8)}
-        c_sloc = _Sloc.unwrap(sloc)
+        c_sloc = Sloc._c_type.unwrap(sloc)
         c_node =_lookup_in_node(self._c_value,
                                 ctypes.byref(c_sloc))
         return ${root_astnode_name}.wrap(c_node)
@@ -1175,7 +1175,7 @@ _node_sloc_range = _import_func(
 )
 _lookup_in_node = _import_func(
     '${capi.get_name("lookup_in_node")}',
-    [${c_node}, ctypes.POINTER(_Sloc)], ${c_node}
+    [${c_node}, ctypes.POINTER(Sloc._c_type)], ${c_node}
 )
 _node_child_count = _import_func(
     '${capi.get_name("node_child_count")}',
