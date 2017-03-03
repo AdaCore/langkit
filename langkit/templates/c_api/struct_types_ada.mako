@@ -8,6 +8,9 @@
    dec_ref = cls.c_dec_ref(capi)
 %>
 
+## Define the C type name as an alias for the Ada one for convenience in code
+## generation.
+subtype ${c_type_name} is ${ada_type_name};
 type ${c_type_name}_Ptr is access ${ada_type_name};
 
 % if cls.is_refcounted():
