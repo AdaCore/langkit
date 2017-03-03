@@ -17,7 +17,7 @@ from langkit.expressions import (
 from langkit.expressions.analysis_units import construct_analysis_unit_property
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
-from langkit.utils import TypeSet
+from langkit.utils import TypeSet, memoized
 
 
 @attr_call("cast", do_raise=False)
@@ -350,15 +350,59 @@ class FieldAccess(AbstractExpression):
                 self.receiver_expr, self.node_data, self.type
             )
 
+        @property
+        @memoized
+        def prefix(self):
+            """
+            Compute the prefix expression, render it and return it.
+
+            :rtype: str
+            """
+            if self.simple_field_access:
+                prefix = self.receiver_expr.render()
+            else:
+                prefix = self.receiver_expr.render_expr()
+
+            return prefix
+
+        @property
+        @memoized
+        def env_bind_expr(self):
+            """
+            If this expressions needs to pass an env binding parameter along,
+            compute its value.
+
+            :rtype: str
+            """
+
+            # Env rebinding can come from two sources here:
+            # - From the property context, if we're already in a property call.
+            # - From the env element, if we're calling the property on an env
+            #   element.
+
+            l = r = None
+
+            # First try to get env rebindings from the calling property
+            if PropertyDef.get() and PropertyDef.get().uses_envs:
+                l = str(PropertyDef.env_rebinding_name)
+
+            # Then try to get env rebindings from the env element
+            if self.implicit_deref:
+                r = '{}.Parents_Bindings'.format(self.prefix)
+
+            # Combine if necessary
+            if l and r:
+                return "AST_Envs.Combine ({}, {})".format(l, r)
+
+            # If only one exists, return it. If both are None, return None
+            return l or r
+
         def _render_pre(self):
             exprs = [self.receiver_expr] + self.arguments
             return '\n'.join(e.render_pre() for e in exprs)
 
         def _render_expr(self):
-            if self.simple_field_access:
-                prefix = self.receiver_expr.render()
-            else:
-                prefix = self.receiver_expr.render_expr()
+            prefix = self.prefix
 
             if self.implicit_deref:
                 prefix = "{}.El".format(prefix)
@@ -373,8 +417,17 @@ class FieldAccess(AbstractExpression):
                         self.arguments, self.node_data.explicit_arguments
                     )
                 ]
+
+                # If the property has an implicit env argument, then pass it
+                # along.
                 if self.node_data.has_implicit_env:
                     args.append((PropertyDef.env_arg_name, str(Env._name)))
+
+                # If the called property uses environments, it will need and
+                # env rebindings parameter.
+                if self.node_data.uses_envs and self.env_bind_expr:
+                    args.append((str(PropertyDef.env_rebinding_name),
+                                 self.env_bind_expr))
 
                 # Private non-dispatching properties are declared in
                 # $.Analysis.Body, so they are not genuine Ada primitives, so
