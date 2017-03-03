@@ -11,5 +11,6 @@ Build and run:
 --------------
 main.py: Running...
 u.root.p_eq(None) = None
+u.root.p_eq(u.root.f_eq_field): result has type <type 'NoneType'>
 main.py: Done.
 Done
