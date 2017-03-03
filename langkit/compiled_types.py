@@ -131,7 +131,7 @@ def make_renderer(base_renderer=None):
             'lexical_env_type':      LexicalEnvType.c_type(capi).name,
             'logic_var_type':        LogicVarType.c_type(capi).name,
             'equation_type':         EquationType.c_type(capi).name,
-            'env_rebindings':        EnvRebindingsType.c_type(capi).name,
+            'env_rebindings_type':   EnvRebindingsType.c_type(capi).name,
             'unit_kind_type':        AnalysisUnitKind.c_type(capi).name,
             'unit_file_provider_type':
                 CAPIType(capi, 'unit_file_provider').name,
@@ -607,7 +607,7 @@ class EnvRebindingsType(BasicType):
 
     @classmethod
     def c_type(cls, c_api_settings):
-        return CAPIType(c_api_settings, 'env_rebindings')
+        return CAPIType(c_api_settings, 'env_rebindings_type')
 
     @classmethod
     def is_refcounted(cls):

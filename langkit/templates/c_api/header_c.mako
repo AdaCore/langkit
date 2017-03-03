@@ -55,7 +55,7 @@ typedef void *${equation_type};
 % endif
 
 ${c_doc('langkit.env_rebindings_type')}
-typedef void *${env_rebindings};
+typedef void *${env_rebindings_type};
 
 typedef uint8_t ${bool_type};
 
