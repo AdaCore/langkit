@@ -364,6 +364,8 @@ class AnalysisUnit(object):
 class LexicalEnv(object):
     ${py_doc('langkit.lexical_env_type', 4)}
 
+    _exposed = False
+
     def __init__(self, c_value):
         self._c_value = c_value
 
@@ -421,12 +423,14 @@ class BasePointerBinding(object):
 
 class LogicVar(BasePointerBinding):
     ${py_doc('langkit.logic_var_type', 4)}
-    pass
+
+    _exposed = False
 
 
 class Equation(BasePointerBinding):
     ${py_doc('langkit.equation_type', 4)}
-    pass
+
+    _exposed = False
 % endif
 
 
@@ -778,8 +782,10 @@ class ${root_astnode_name}(object):
         else:
             for name, value in self.iter_fields(with_properties=False):
                 # Remove the f_ prefix to have the same behavior as the Ada
-                # dumper.
-                print_node(name[2:], value)
+                # dumper. Also filter out non-exposed types to keep the same
+                # output with debug builds.
+                if getattr(value, '_exposed', True):
+                    print_node(name[2:], value)
 
     def findall(self, ast_type_or_pred, **kwargs):
         """
