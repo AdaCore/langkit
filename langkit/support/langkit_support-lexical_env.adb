@@ -160,13 +160,10 @@ package body Langkit_Support.Lexical_Env is
       Key               : Symbol_Type;
       From              : Element_T := No_Element;
       Recursive         : Boolean := True;
-      Parent_Rebindings : Env_Rebindings_Type := No_Env_Rebindings)
+      Parent_Rebindings : Env_Rebindings := null)
       return Env_Element_Array
    is
-      Current_Rebindings : constant Env_Rebindings_Type :=
-        (if Self /= null and then Self.Parents_Rebindings /= null
-         then Combine (Self.Parents_Rebindings.all, Parent_Rebindings)
-         else Parent_Rebindings);
+      Current_Rebindings : Env_Rebindings;
 
       use Internal_Envs;
       use Env_Element_Arrays;
@@ -208,7 +205,8 @@ package body Langkit_Support.Lexical_Env is
         (Self : Lexical_Env) return Env_Element_Array
       is
          C : Cursor := Internal_Envs.No_Element;
-         Env : constant Lexical_Env := Get_New_Env (Current_Rebindings, Self);
+         Env : constant Lexical_Env :=
+           Get_New_Env (Current_Rebindings, Self);
       begin
          if Env.Env /= null then
             C := Env.Env.Find (Key);
@@ -224,7 +222,7 @@ package body Langkit_Support.Lexical_Env is
               (Reverse_Array
                  (Env_Element_Vectors.To_Array (Element (C))),
                Env.Default_MD,
-               Env.Parents_Rebindings)
+               Current_Rebindings)
 
             else Env_Element_Arrays.Empty_Array);
       end Get_Own_Elements;
@@ -242,6 +240,9 @@ package body Langkit_Support.Lexical_Env is
       if Self = null then
          return Env_Element_Arrays.Empty_Array;
       end if;
+
+      Current_Rebindings :=
+        Combine (Self.Parents_Rebindings, Parent_Rebindings);
 
       declare
          Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
@@ -273,7 +274,7 @@ package body Langkit_Support.Lexical_Env is
       Key               : Symbol_Type;
       From              : Element_T := No_Element;
       Recursive         : Boolean := True;
-      Parent_Rebindings : Env_Rebindings_Type := No_Env_Rebindings)
+      Parent_Rebindings : Env_Rebindings := null)
       return Element_Array is
    begin
       return Unwrap (Get (Self, Key, From, Recursive, Parent_Rebindings));
@@ -530,9 +531,13 @@ package body Langkit_Support.Lexical_Env is
    -----------------
 
    function Get_New_Env
-     (Self : Env_Rebindings_Type; Old_Env : Lexical_Env) return Lexical_Env
+     (Self : Env_Rebindings; Old_Env : Lexical_Env) return Lexical_Env
    is
    begin
+      if Self = null then
+         return Old_Env;
+      end if;
+
       for J in 1 .. Self.Size loop
          if Old_Env = Get_Env (Self.Rebindings (J).Old_Env) then
             return Get_Env (Self.Rebindings (J).New_Env);

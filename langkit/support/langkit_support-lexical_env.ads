@@ -114,7 +114,7 @@ package Langkit_Support.Lexical_Env is
    --  Env_Rebindings_Size.
 
    function Get_New_Env
-     (Self : Env_Rebindings_Type; Old_Env : Lexical_Env) return Lexical_Env;
+     (Self : Env_Rebindings; Old_Env : Lexical_Env) return Lexical_Env;
    --  Return the new env corresponding to Old_Env in Self. Return
    --  No_Env_Getter if there is no association.
 
@@ -259,7 +259,7 @@ package Langkit_Support.Lexical_Env is
       Key               : Symbol_Type;
       From              : Element_T := No_Element;
       Recursive         : Boolean := True;
-      Parent_Rebindings : Env_Rebindings_Type := No_Env_Rebindings)
+      Parent_Rebindings : Env_Rebindings := null)
       return Element_Array;
    --  Get the array of unwrapped elements for this Key. If From is given, then
    --  elements will be filtered according to the Can_Reach primitive given
@@ -273,7 +273,7 @@ package Langkit_Support.Lexical_Env is
       Key               : Symbol_Type;
       From              : Element_T := No_Element;
       Recursive         : Boolean := True;
-      Parent_Rebindings : Env_Rebindings_Type := No_Env_Rebindings)
+      Parent_Rebindings : Env_Rebindings := null)
       return Env_Element_Array;
    --  Get the array of wrapped elements for this key. See above for formal
    --  semantics.
