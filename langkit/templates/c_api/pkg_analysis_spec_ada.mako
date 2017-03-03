@@ -49,6 +49,9 @@ package ${ada_lib_name}.Analysis.C is
    type ${equation_type} is new System.Address;
    ${ada_c_doc('langkit.equation_type', 3)}
 
+   type ${env_rebindings_type} is new System.Address;
+   ${ada_c_doc('langkit.env_rebindings_type', 3)}
+
    --  Helper data structures for source location handling
 
    type ${sloc_type} is record
@@ -107,8 +110,8 @@ package ${ada_lib_name}.Analysis.C is
 
    % for type_name in (analysis_unit_type, bool_type, node_type, \
                        lexical_env_type, logic_var_type, equation_type, \
-                       token_type, text_type, sloc_type, sloc_range_type, \
-                       diagnostic_type, exception_type):
+                       env_rebindings_type, token_type, text_type, sloc_type, \
+                       sloc_range_type, diagnostic_type, exception_type):
       type ${type_name}_Ptr is access ${type_name};
    % endfor
 
@@ -672,6 +675,11 @@ package ${ada_lib_name}.Analysis.C is
      (Logic_Equation, ${equation_type});
    function Unwrap is new Ada.Unchecked_Conversion
      (${equation_type}, Logic_Equation);
+
+   function Wrap is new Ada.Unchecked_Conversion
+     (Env_Rebindings, ${env_rebindings_type});
+   function Unwrap is new Ada.Unchecked_Conversion
+     (${env_rebindings_type}, Env_Rebindings);
 
    function Wrap is new Ada.Unchecked_Conversion
      (Analysis_Context, ${analysis_context_type});
