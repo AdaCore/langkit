@@ -27,7 +27,9 @@
       accessor_name = capi.get_name(field.accessor_basename)
 
       def simple_wrapping(t):
-         return is_equation_type(t) or is_logic_var_type(t)
+         return (is_lexical_env(t)
+                 or is_equation_type(t)
+                 or is_logic_var_type(t))
    %>
 
    function ${accessor_name}
@@ -117,8 +119,6 @@
                 % elif is_token_type(field.type):
                     Wrap (${field_access})
                 % elif is_symbol_type(field.type):
-                    Wrap (${field_access})
-                % elif is_lexical_env(field.type):
                     Wrap (${field_access})
                 % elif simple_wrapping(field.type):
                     Wrap (${field_access})
