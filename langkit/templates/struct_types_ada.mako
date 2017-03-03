@@ -30,7 +30,7 @@
       Is_Null : Boolean := True;
       % endif
    end record
-     with Convention => C;
+     with Convention => C_Pass_By_Copy;
    ${cls.nullexpr()} : constant ${cls.name()} := (others => <>);
 
    % if cls.is_refcounted():
