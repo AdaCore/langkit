@@ -888,10 +888,17 @@ class CompileCtx(object):
         # generated code. We're also putting env_metadata and env_element in
         # the beginning and in the right dependency order (the metadata type
         # before the env element type).
+        #
         # TODO: Using a dependency order topological sort wouldn't hurt at
         # some point.
-        from langkit.compiled_types import StructMetaclass, T
+
+        from langkit.compiled_types import StructMetaclass
+
         if self._struct_types:
+            # TODO: A better solution at some point would be having a
+            # "freezable list" for struct_types (and every list of types for
+            # that matter) and raising an error if some code tries to add to it
+            # after the freeze point.
             assert (
                 len(self._struct_types) == len(StructMetaclass.struct_types)
             ), (
@@ -899,18 +906,15 @@ class CompileCtx(object):
                 "were added"
             )
 
-            # TODO: A better solution at some point would be having a
-            # "freezable list" for struct_types (and every list of types for
-            # that matter) and raising an error if some code tries to add to it
-            # after the freeze point.
         else:
             env_element = StructMetaclass.root_grammar_class.env_el()
+            env_md = StructMetaclass.env_metadata
             self._struct_types = [
                 t for t in StructMetaclass.struct_types
-                if t not in [StructMetaclass.env_metadata, env_element]
+                if t not in [env_md, env_element]
             ]
             self._struct_types.insert(0, env_element)
-            self._struct_types.insert(0, T.env_md)
+            self._struct_types.insert(0, env_md)
 
         return self._struct_types
 
