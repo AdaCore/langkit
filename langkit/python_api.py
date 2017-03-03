@@ -99,6 +99,7 @@ class PythonAPISettings(AbstractAPISettings):
                 type.c_type(self.c_api_settings).name,
                 type.name().camel
             )),
+            (ct.Struct, lambda _: '{}'),
             (ct.Symbol, lambda _: '_text.unwrap({})'),
             (ct.LexicalEnvType, lambda _: 'LexicalEnv.unwrap({})'),
             (ct.LogicVarType, lambda _: 'LogicVar.unwrap({})'),
