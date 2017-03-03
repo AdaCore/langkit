@@ -14,7 +14,7 @@ from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNode, BoolType, CompiledType,
     LexicalEnvType, LongType, Symbol, T, Token, get_context,
-    render as ct_render, resolve_type
+    render as ct_render, resolve_type, EnvRebindingsType
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, check_multiple, check_source_language,
@@ -1497,6 +1497,7 @@ class PropertyDef(AbstractNodeData):
     # Reserved names for arguments in generated subprograms
     self_arg_name = names.Name('Node')
     env_arg_name = names.Name('Lex_Env')
+    env_rebinding_name = names.Name('Envs_Rebindings')
 
     # Collections for these
     reserved_arg_names = (self_arg_name, env_arg_name)
@@ -1504,7 +1505,8 @@ class PropertyDef(AbstractNodeData):
 
     def __init__(self, expr, prefix, name=None, doc=None, public=None,
                  abstract=False, type=None, abstract_runtime_check=False,
-                 has_implicit_env=None, memoized=False, external=False):
+                 has_implicit_env=None, memoized=False, external=False,
+                 uses_envs=None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -1563,6 +1565,10 @@ class PropertyDef(AbstractNodeData):
             None and the implementation must be provided in the
             extensions/nodes/{node_name}/bodies extension file. Note that the
             engines always generate the public declaration part.
+
+        :param bool uses_envs: Whether this property uses lexical environments
+            at all or not. If it does, then it will have an extra parameter for
+            env rebindings.
         """
 
         super(PropertyDef, self).__init__(name=name, public=public)
@@ -1619,6 +1625,7 @@ class PropertyDef(AbstractNodeData):
 
         self.memoized = memoized
         self.external = external
+        self.uses_envs = uses_envs
 
     @property
     def overriding(self):
@@ -1950,6 +1957,14 @@ class PropertyDef(AbstractNodeData):
                     )
                 )
 
+            if self.uses_envs is None:
+                self.uses_envs = self.base_property.uses_envs
+            else:
+                check_source_language(
+                    self.uses_envs == self.base_property.uses_envs,
+                    "Different uses env parameter with base property"
+                )
+
             # We then want to check the consistency of type annotations if they
             # exist.
             if self.base_property.expected_type:
@@ -1978,6 +1993,11 @@ class PropertyDef(AbstractNodeData):
             self._has_implicit_env = with_default(
                 self._has_implicit_env, False
             )
+
+            # Uses env will be True by default for internal properties, False
+            # for external properties.
+            if self.uses_envs is None:
+                self.uses_envs = True
 
         if self.memoized:
             check_source_language(
@@ -2018,6 +2038,13 @@ class PropertyDef(AbstractNodeData):
             self._add_argument(PropertyDef.env_arg_name,
                                LexicalEnvType,
                                LexicalEnvType.nullexpr(),
+                               False)
+
+        if self.uses_envs:
+            # Add the env rebindings parameter
+            self._add_argument(PropertyDef.env_rebinding_name,
+                               EnvRebindingsType,
+                               EnvRebindingsType.nullexpr(),
                                False)
 
     def construct_and_type_expression(self, context):
@@ -2300,7 +2327,7 @@ class AbstractKind(Enum):
 
 def langkit_property(public=None, return_type=None,
                      kind=AbstractKind.concrete, has_implicit_env=None,
-                     memoized=False, external=False):
+                     memoized=False, external=False, uses_envs=None):
     """
     Decorator to create properties from real Python methods. See Property for
     more details.
@@ -2321,6 +2348,7 @@ def langkit_property(public=None, return_type=None,
             has_implicit_env=has_implicit_env,
             memoized=memoized,
             external=external,
+            uses_envs=uses_envs
         )
     return decorator
 

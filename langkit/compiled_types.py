@@ -785,6 +785,8 @@ class AbstractNodeData(object):
         :type: None|names.Name
         """
 
+        self.uses_envs = False
+
     @property
     def is_overriding(self):
         """
@@ -1421,12 +1423,12 @@ class StructMetaclass(CompiledTypeMetaclass):
             )),
             ("token_start", PropertyDef(
                 expr=None, prefix=None, type=Token,
-                public=True, external=True,
+                public=True, external=True, uses_envs=False,
                 doc="Return the first token used to parse this node."
             )),
             ("token_end", PropertyDef(
                 expr=None, prefix=None, type=Token,
-                public=True, external=True,
+                public=True, external=True, uses_envs=False,
                 doc="Return the last token used to parse this node."
             )),
             ("previous_sibling", BuiltinField(
