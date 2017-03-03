@@ -581,13 +581,25 @@ package ${ada_lib_name}.Analysis.C is
            External_Name => "${capi.get_name('token_range_text')}";
    ${ada_c_doc('langkit.token_range_text', 3)}
 
+   -----------------------
+   -- Enumeration types --
+   -----------------------
+
    % for enum_type in ctx.sorted_types(ctx.enum_types):
       ${enum_types.spec(enum_type)}
    % endfor
 
+   ------------------
+   -- Struct types --
+   ------------------
+
    % for struct_type in ctx.sorted_types(ctx.struct_types):
       ${struct_types.decl(struct_type)}
    % endfor
+
+   -----------------
+   -- Array types --
+   -----------------
 
    % for array_type in ctx.sorted_types(ctx.array_types):
       % if array_type.element_type().should_emit_array_type:
