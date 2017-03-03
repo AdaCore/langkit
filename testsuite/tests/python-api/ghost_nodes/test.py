@@ -1,5 +1,5 @@
 """
-Test the handling of analysis units in the properties DSL.
+Test that the "is_ghost" AST node predicate works in the Python API.
 """
 
 from __future__ import (absolute_import, division, print_function,

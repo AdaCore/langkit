@@ -2,7 +2,7 @@
 Test that EnvRebindingsType bindings in the Python API are properly working.
 
 TODO: I don't know right now how to create non-null env rebindings values (if
-that’s even possible?), so this testcase does not cover all cases. We should
+that's even possible?), so this testcase does not cover all cases. We should
 test that some day.
 """
 

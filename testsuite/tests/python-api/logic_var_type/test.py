@@ -1,6 +1,5 @@
 """
-Test that property checks are properly emitted when null checks should trigger
-them.
+Test that LogiVarType bindings in the Python API are properly working.
 """
 
 from __future__ import (absolute_import, division, print_function,
