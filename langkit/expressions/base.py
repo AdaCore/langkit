@@ -1748,7 +1748,7 @@ class PropertyDef(AbstractNodeData):
 
         return resolve_type(self.constructed_expr.type)
 
-    def _add_argument(self, name, type, default_value=None):
+    def _add_argument(self, name, type, default_value=None, is_explicit=True):
         """
         Helper to add an argument to this property.
 
@@ -1758,7 +1758,7 @@ class PropertyDef(AbstractNodeData):
         :param CompiledType type: Type argument. Type for this argument.
         :param None|str default_value: Default value for this argument, if any.
         """
-        self.arguments.append(Argument(name, type, default_value))
+        self.arguments.append(Argument(name, type, default_value, is_explicit))
 
     @property
     @memoized
@@ -2017,7 +2017,8 @@ class PropertyDef(AbstractNodeData):
         if self.has_implicit_env:
             self._add_argument(PropertyDef.env_arg_name,
                                LexicalEnvType,
-                               LexicalEnvType.nullexpr())
+                               LexicalEnvType.nullexpr(),
+                               False)
 
     def construct_and_type_expression(self, context):
         """
@@ -2114,10 +2115,9 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: list[Argument]
         """
-        # Strip the implicit "Lex_Env" argument
-        return (self.arguments[:-1]
-                if self.is_property and self.has_implicit_env else
-                self.arguments)
+        expl, impl = funcy.split_by(lambda a: a.is_explicit, self.arguments)
+        assert all(not a.is_explicit for a in impl)
+        return expl
 
     @memoized
     def do_generate_logic_predicate(self, *partial_args_types):
