@@ -9,12 +9,12 @@ from langkit.compiled_types import (
     UserField, resolve_type, T
 )
 from langkit.diagnostics import Severity, check_source_language
-from langkit.expressions.analysis_units import construct_analysis_unit_property
-from langkit.expressions.base import (
+from langkit.expressions import (
     AbstractExpression, AbstractVariable, BindingScope, LiteralExpr, Let,
     NullCheckExpr, PropertyDef, ResolvedExpression, UnreachableExpr, attr_call,
     attr_expr, construct, render
 )
+from langkit.expressions.analysis_units import construct_analysis_unit_property
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
 from langkit.utils import TypeSet
