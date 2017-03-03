@@ -29,8 +29,8 @@ u.populate_lexical_env()
 print_title('Testing LexicalEnv (un)wrapping')
 try:
     res_none = u.root.p_env_id(None)
-except ValueError as exc:
-    res_none = '<ValueError: {}>'.format(exc)
+except TypeError as exc:
+    res_none = '<TypeError: {}>'.format(exc)
 res_field = u.root.p_env_id(u.root.children_env)
 print('u.root.p_env id(None) = {}'.format(res_none))
 print('u.root.p_env id(u.root.children_env): result has type {}'.format(
