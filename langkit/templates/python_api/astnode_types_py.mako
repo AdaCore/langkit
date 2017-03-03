@@ -40,7 +40,14 @@
     def ${field.name.lower}(${', '.join(arg_list)}):
         ${py_doc(field, 8)}
         ## Declare a variable of the type
-        result = ${pyapi.type_internal_name(field.type)}()
+        result = ${pyapi.type_internal_name(field.type)}(
+        % if is_struct(field.type) and not is_ast_node(field.type):
+            % for fld in field.type.get_fields():
+            ${fld.name.lower}=None,
+            % endfor
+            _uninitialized=True
+        % endif
+        )
 
         ## Get it via the C field accessor. Note that "unwrap_value" already
         ## takes care of type checking so we should keep memory safety.

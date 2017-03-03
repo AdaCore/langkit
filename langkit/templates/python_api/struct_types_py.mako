@@ -26,13 +26,36 @@ class ${type_name}(ctypes.Structure):
         ('is_null', ctypes.c_uint8),
     ]
 
+    def __init__(self,
+        % for field in cls.get_fields():
+        ${field.name.lower},
+        % endfor
+        _uninitialized=False
+    ):
+        if _uninitialized:
+            super(${type_name}, self).__init__()
+            return
+
+        super(${type_name}, self).__init__(
+        % for field in cls.get_fields():
+            _${field.name.lower}=${
+                pyapi.unwrap_value(field.name.lower, field.type)
+            },
+        % endfor
+        )
+
     def copy(self):
         """
         Return a copy of this structure.
         """
         return ${type_name}(
             % for field in cls.get_fields():
-                self._${field.name.lower},
+            <%
+                fld = 'self._{}'.format(field.name.lower)
+                copy = pyapi.wrap_value(fld, field.type,
+                                        from_field_access=True,
+                                        inc_ref=True)
+            %>${copy},
             % endfor
         )
 

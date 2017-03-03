@@ -84,6 +84,7 @@ def make_renderer(base_renderer=None):
         'is_bool':                type_check(BoolType),
         'is_analysis_unit':       type_check(AnalysisUnitType),
         'is_analysis_kind':       type_check(AnalysisUnitKind),
+        'is_struct':              type_check(Struct),
         'is_ast_node':            type_check(ASTNode),
         'is_sloc_range':          type_check(SourceLocationRangeType),
         'is_token_type':          type_check(Token),
