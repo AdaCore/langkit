@@ -54,7 +54,6 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ASTNode, lambda _: '{}.wrap({{}})'.format(
                 self.context.root_grammar_class.name().camel
             )),
-            (ct.SourceLocationRangeType, lambda _: '_wrap_sloc_range({})'),
             (ct.Token, lambda _: '{}'),
             (ct.Symbol, lambda _: '{}.wrap()'),
             (ct.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
@@ -128,7 +127,6 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.LexicalEnvType, lambda _: 'LexicalEnv._c_type'),
             (ct.EquationType, lambda _: 'Equation._c_type'),
             (ct.EnvRebindingsType, lambda _: wrapped_type('env_rebindings')),
-            (ct.SourceLocationRangeType, lambda _: wrapped_type('SlocRange')),
             (ct.Token, lambda _: 'Token'),
             (ct.Symbol, lambda _: wrapped_type('text')),
             (ct.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),
