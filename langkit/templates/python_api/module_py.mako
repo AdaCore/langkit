@@ -435,6 +435,95 @@ class Equation(object):
         return cls(c_value) if c_value else None
 
 
+class Sloc(object):
+    # TODO: document this class and its methods
+
+    def __init__(self, line, column):
+        assert line >= 0 and column >= 0
+        self.line = line
+        self.column = column
+
+    def __nonzero__(self):
+        return bool(self.line or self.column)
+
+    def __lt__(self, other):
+        # First compare line numbers...
+        if self.line < other.line:
+            return True
+        elif self.line > other.line:
+            return False
+
+        # Past this point, we know that both are on the same line, so now
+        # compare column numbers.
+        else:
+            return self.column < other.column
+
+    def __eq__(self, other):
+        return self.line == other.line and self.column == other.column
+
+    def __hash__(self):
+        return hash((self.line, self.column))
+
+    def __str__(self):
+        return '{}:{}'.format(self.line, self.column)
+
+    def __repr__(self):
+        return '<Sloc {} at {:#x}>'.format(self, id(self))
+
+
+class SlocRange(object):
+    # TODO: document this class and its methods
+
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+
+    def __nonzero__(self):
+        return bool(self.start or self.end)
+
+    def __lt__(self, other):
+        raise NotImplementedError('SlocRange comparison not supported')
+
+    def __eq__(self, other):
+        return self.start == other.start and self.end == other.end
+
+    def __hash__(self):
+        return hash((self.start, self.end))
+
+    def __str__(self):
+        return '{}-{}'.format(self.start, self.end)
+
+    def __repr__(self):
+        return "<SlocRange {}:{}-{}:{}>".format(
+            self.start.line, self.start.column,
+            self.end.line, self.end.column
+        )
+
+
+class Diagnostic(object):
+    ${py_doc('langkit.diagnostic_type', 4)}
+
+    def __init__(self, sloc_range, message):
+        self.sloc_range = sloc_range
+        self.message = message
+
+    def __str__(self):
+        return ('{}: {}'.format(self.sloc_range, self.message)
+                if self.sloc_range else
+                self.message)
+
+    def __repr__(self):
+        return '<Diagnostic {} at {:#x}>'.format(repr(str(self)), id(self))
+
+
+    class _c_type(ctypes.Structure):
+        _fields_ = [("sloc_range", _SlocRange),
+                    ("message", _text)]
+
+        def wrap(self):
+            return Diagnostic(self.sloc_range.wrap(), self.message.wrap())
+
+
 class Token(ctypes.Structure):
     ${py_doc('langkit.token_type', 4)}
 
@@ -534,95 +623,6 @@ class Token(ctypes.Structure):
         Return a dict representation of this Token.
         """
         return {"kind": "Token", "token_kind": self.kind, "text": self.text}
-
-
-class Sloc(object):
-    # TODO: document this class and its methods
-
-    def __init__(self, line, column):
-        assert line >= 0 and column >= 0
-        self.line = line
-        self.column = column
-
-    def __nonzero__(self):
-        return bool(self.line or self.column)
-
-    def __lt__(self, other):
-        # First compare line numbers...
-        if self.line < other.line:
-            return True
-        elif self.line > other.line:
-            return False
-
-        # Past this point, we know that both are on the same line, so now
-        # compare column numbers.
-        else:
-            return self.column < other.column
-
-    def __eq__(self, other):
-        return self.line == other.line and self.column == other.column
-
-    def __hash__(self):
-        return hash((self.line, self.column))
-
-    def __str__(self):
-        return '{}:{}'.format(self.line, self.column)
-
-    def __repr__(self):
-        return '<Sloc {} at {:#x}>'.format(self, id(self))
-
-
-class SlocRange(object):
-    # TODO: document this class and its methods
-
-    def __init__(self, start, end):
-        self.start = start
-        self.end = end
-
-    def __nonzero__(self):
-        return bool(self.start or self.end)
-
-    def __lt__(self, other):
-        raise NotImplementedError('SlocRange comparison not supported')
-
-    def __eq__(self, other):
-        return self.start == other.start and self.end == other.end
-
-    def __hash__(self):
-        return hash((self.start, self.end))
-
-    def __str__(self):
-        return '{}-{}'.format(self.start, self.end)
-
-    def __repr__(self):
-        return "<SlocRange {}:{}-{}:{}>".format(
-            self.start.line, self.start.column,
-            self.end.line, self.end.column
-        )
-
-
-class Diagnostic(object):
-    ${py_doc('langkit.diagnostic_type', 4)}
-
-    def __init__(self, sloc_range, message):
-        self.sloc_range = sloc_range
-        self.message = message
-
-    def __str__(self):
-        return ('{}: {}'.format(self.sloc_range, self.message)
-                if self.sloc_range else
-                self.message)
-
-    def __repr__(self):
-        return '<Diagnostic {} at {:#x}>'.format(repr(str(self)), id(self))
-
-
-    class _c_type(ctypes.Structure):
-        _fields_ = [("sloc_range", _SlocRange),
-                    ("message", _text)]
-
-        def wrap(self):
-            return Diagnostic(self.sloc_range.wrap(), self.message.wrap())
 
 
 % if ctx.default_unit_file_provider:
