@@ -62,7 +62,7 @@
             % elif is_token_type(arg.type):
                Token (Node, Token_Index ({arg.name}.Index))
             % elif is_symbol_type(arg.type):
-               Text_To_Symbol (Unwrapped_Node.Unit, ${arg.name})
+               Unwrap (Unwrapped_Node.Unit, ${arg.name})
             % elif simple_wrapping(arg.type):
                Unwrap (${arg.name})
             % else:
