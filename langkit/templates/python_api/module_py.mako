@@ -397,12 +397,12 @@ class LexicalEnv(object):
     @classmethod
     def wrap(self, c_value):
         return LexicalEnv(c_value) if c_value else None
-% endif
 
 
-% if ctx.library_fields_all_public:
-class Equation(object):
-    ${py_doc('langkit.equation_type', 4)}
+class BasePointerBinding(object):
+    """
+    Base class for dummy type bindings around mere pointers.
+    """
 
     def __init__(self, c_value):
         self._c_value = c_value
@@ -417,6 +417,16 @@ class Equation(object):
     @classmethod
     def wrap(cls, c_value):
         return cls(c_value) if c_value else None
+
+
+class LogicVar(BasePointerBinding):
+    ${py_doc('langkit.logic_var_type', 4)}
+    pass
+
+
+class Equation(BasePointerBinding):
+    ${py_doc('langkit.equation_type', 4)}
+    pass
 % endif
 
 
