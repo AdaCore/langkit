@@ -398,6 +398,7 @@ class LexicalEnv(object):
         return LexicalEnv(c_value) if c_value else None
 
 
+% if ctx.library_fields_all_public:
 class Equation(object):
     ${py_doc('langkit.equation_type', 4)}
 
@@ -414,6 +415,7 @@ class Equation(object):
     @classmethod
     def wrap(cls, c_value):
         return cls(c_value) if c_value else None
+% endif
 
 
 class Sloc(object):

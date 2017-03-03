@@ -43,8 +43,10 @@ typedef enum {
 % endfor
 } ${node_kind_type};
 
+% if ctx.library_fields_all_public:
 ${c_doc('langkit.equation_type')}
 typedef void *${equation_type};
+% endif
 
 ${c_doc('langkit.env_rebindings_type')}
 typedef void *${env_rebindings};
