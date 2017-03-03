@@ -5,7 +5,9 @@ from contextlib import contextmanager
 from functools import partial
 
 from langkit import names
-from langkit.compiled_types import BoolType, LexicalEnvType, Symbol, T, Token
+from langkit.compiled_types import (
+    BoolType, LexicalEnvType, Symbol, T, Token, EnvRebindingsType
+)
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr,
@@ -319,6 +321,19 @@ def env_parent(env):
         T.LexicalEnvType, [construct(env, LexicalEnvType)]
     )
 
+
+def make_combine(l_rebindings, r_rebindings):
+    return BasicExpr('AST_Envs.Combine ({}, {})',
+                     EnvRebindingsType, [l_rebindings, r_rebindings])
+
+
+@auto_attr
+def combine(l_rebindings, r_rebindings):
+    """
+    Combine the two env rebindings given as arguments.
+    """
+    return make_combine(construct(l_rebindings, EnvRebindingsType),
+                        construct(r_rebindings, EnvRebindingsType))
 
 Env = EnvVariable()
 EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
