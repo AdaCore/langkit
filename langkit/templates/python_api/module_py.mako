@@ -98,15 +98,6 @@ class _SlocRange(ctypes.Structure):
         return SlocRange(self.start.wrap(), self.end.wrap())
 
 
-class _Diagnostic(ctypes.Structure):
-    _fields_ = [("sloc_range", _SlocRange),
-                ("message", _text)]
-
-    def wrap(self):
-        return Diagnostic(self.sloc_range.wrap(),
-                          self.message.wrap())
-
-
 class _Exception(ctypes.Structure):
     _fields_ = [("is_fatal", ctypes.c_int),
                 ("information", ctypes.c_char_p)]
@@ -276,7 +267,7 @@ class AnalysisUnit(object):
                     type(key))
                 raise TypeError(msg)
 
-            diag = _Diagnostic()
+            diag = Diagnostic._c_type()
             success = _unit_diagnostic(self.unit._c_value, key,
                                        ctypes.byref(diag))
             if not success:
@@ -624,6 +615,14 @@ class Diagnostic(object):
 
     def __repr__(self):
         return '<Diagnostic {} at {:#x}>'.format(repr(str(self)), id(self))
+
+
+    class _c_type(ctypes.Structure):
+        _fields_ = [("sloc_range", _SlocRange),
+                    ("message", _text)]
+
+        def wrap(self):
+            return Diagnostic(self.sloc_range.wrap(), self.message.wrap())
 
 
 % if ctx.default_unit_file_provider:
@@ -1115,7 +1114,7 @@ _unit_diagnostic_count = _import_func(
 )
 _unit_diagnostic = _import_func(
     '${capi.get_name("unit_diagnostic")}',
-    [AnalysisUnit._c_type, ctypes.c_uint, ctypes.POINTER(_Diagnostic)],
+    [AnalysisUnit._c_type, ctypes.c_uint, ctypes.POINTER(Diagnostic._c_type)],
     ctypes.c_int
 )
 _node_unit = _import_func(
