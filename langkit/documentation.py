@@ -82,6 +82,12 @@ base_langkit_docs = {
     'langkit.env_rebindings_type': """
         Data type for env rebindings. For internal use only.
     """,
+    'langkit.sloc_type': """
+        Location in a source file. Line and column numbers are one based.
+    """,
+    'langkit.sloc_range_type': """
+        Location of a span of text in a source file.
+    """,
     'langkit.token_kind': """
         Kind for this token.
     """,

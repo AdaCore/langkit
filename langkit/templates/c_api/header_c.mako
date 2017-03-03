@@ -56,11 +56,13 @@ typedef uint8_t ${bool_type};
 
 /* Helper data structures for source location handling.  */
 
+${c_doc('langkit.sloc_type')}
 typedef struct {
     uint32_t line;
     uint16_t column;
 } ${sloc_type};
 
+${c_doc('langkit.sloc_range_type')}
 typedef struct {
     ${sloc_type} start;
     ${sloc_type} end;
