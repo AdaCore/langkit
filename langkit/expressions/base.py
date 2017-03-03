@@ -2106,19 +2106,6 @@ class PropertyDef(AbstractNodeData):
     def doc(self):
         return self._doc
 
-    def _explicit_arguments_slice(self, arg_array):
-        """
-        Return the subset of "arg_array" corresponding to arguments that must
-        be passed explicitely when invoking this property.
-
-        :type arg_array: list[T]
-        :rtype: list[T]
-        """
-        # Strip the implicit "Lex_Env" argument
-        return (arg_array[:-1]
-                if self.is_property and self.has_implicit_env else
-                arg_array)
-
     @property
     def explicit_arguments(self):
         """
@@ -2127,27 +2114,10 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: list[Argument]
         """
-        return self._explicit_arguments_slice(self.arguments)
-
-    @property
-    def argument_vars(self):
-        """
-        For each argument additional to Self, return the AbstractVariable
-        corresponding to this argument. Note that this is available only after
-        the "prepare" pass.
-
-        :rtype: list[AbstractVariable]
-        """
-        return [arg.var for arg in self.arguments]
-
-    @property
-    def explicit_argument_vars(self):
-        """
-        Like "explicit_arguments", but for AbstractVariable instances.
-
-        :rtype: list[AbstractVariable]
-        """
-        return self._explicit_arguments_slice(self.argument_vars)
+        # Strip the implicit "Lex_Env" argument
+        return (self.arguments[:-1]
+                if self.is_property and self.has_implicit_env else
+                self.arguments)
 
     @memoized
     def do_generate_logic_predicate(self, *partial_args_types):
@@ -2225,10 +2195,10 @@ class PropertyDef(AbstractNodeData):
         """
         # Mapping to tell for each variable if it is referenced at least once
         all_vars = {
-            var: False
-            for var in (self.constructed_expr.bindings
-                        + [construct(arg)
-                           for arg in self.explicit_argument_vars])
+            arg: False
+            for arg in (self.constructed_expr.bindings
+                        + [construct(arg.var)
+                           for arg in self.explicit_arguments])
         }
 
         def mark_vars(expr):
