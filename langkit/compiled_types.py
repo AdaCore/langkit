@@ -78,21 +78,22 @@ def make_renderer(base_renderer=None):
         base_renderer = common_renderer
 
     template_args = {
-        'is_enum':          type_check(EnumType),
-        'is_logic_var':     type_check(LogicVarType),
-        'is_long':          type_check(LongType),
-        'is_bool':          type_check(BoolType),
-        'is_analysis_unit': type_check(AnalysisUnitType),
-        'is_analysis_kind': type_check(AnalysisUnitKind),
-        'is_ast_node':      type_check(ASTNode),
-        'is_sloc_range':    type_check(SourceLocationRangeType),
-        'is_token_type':    type_check(Token),
-        'is_symbol_type':   type_check(Symbol),
-        'is_array_type':    type_check(ArrayType),
-        'is_lexical_env':   type_check(LexicalEnvType),
-        'is_equation_type': type_check(EquationType),
-        'is_struct_type':   type_check(Struct),
-        'LexicalEnvType':   LexicalEnvType,
+        'is_enum':           type_check(EnumType),
+        'is_logic_var':      type_check(LogicVarType),
+        'is_long':           type_check(LongType),
+        'is_bool':           type_check(BoolType),
+        'is_analysis_unit':  type_check(AnalysisUnitType),
+        'is_analysis_kind':  type_check(AnalysisUnitKind),
+        'is_ast_node':       type_check(ASTNode),
+        'is_sloc_range':     type_check(SourceLocationRangeType),
+        'is_token_type':     type_check(Token),
+        'is_symbol_type':    type_check(Symbol),
+        'is_array_type':     type_check(ArrayType),
+        'is_lexical_env':    type_check(LexicalEnvType),
+        'is_logic_var_type': type_check(LogicVarType),
+        'is_equation_type':  type_check(EquationType),
+        'is_struct_type':    type_check(Struct),
+        'LexicalEnvType':    LexicalEnvType,
     }
     if get_context():
         ctx = get_context()
@@ -128,6 +129,7 @@ def make_renderer(base_renderer=None):
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             c_node_type(capi).name,
             'lexical_env_type':      LexicalEnvType.c_type(capi).name,
+            'logic_var_type':        LogicVarType.c_type(capi).name,
             'equation_type':         EquationType.c_type(capi).name,
             'env_rebindings':        EnvRebindingsType.c_type(capi).name,
             'unit_kind_type':        AnalysisUnitKind.c_type(capi).name,
@@ -565,9 +567,7 @@ class LogicVarType(BasicType):
 
     @classmethod
     def c_type(cls, c_api_settings):
-        check_source_language(
-            False, "Cannot expose logic variables to C at the moment"
-        )
+        return CAPIType(c_api_settings, 'logic_var_type')
 
 
 class EquationType(BasicType):

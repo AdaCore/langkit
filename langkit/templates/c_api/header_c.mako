@@ -47,6 +47,9 @@ typedef enum {
 ${c_doc('langkit.lexical_env_type')}
 typedef void *${lexical_env_type};
 
+${c_doc('langkit.logic_var_type')}
+typedef void *${logic_var_type};
+
 ${c_doc('langkit.equation_type')}
 typedef void *${equation_type};
 % endif

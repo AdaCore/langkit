@@ -25,6 +25,9 @@
    <%
       struct = field.struct
       accessor_name = capi.get_name(field.accessor_basename)
+
+      def simple_wrapping(t):
+         return is_equation_type(t) or is_logic_var_type(t)
    %>
 
    function ${accessor_name}
@@ -57,7 +60,7 @@
                Token (Node, Token_Index ({arg.name}.Index))
             % elif is_symbol_type(arg.type):
                Text_To_Symbol (Unwrapped_Node.Unit, ${arg.name})
-            % elif is_equation_type(arg.type):
+            % elif simple_wrapping(arg.type):
                Unwrap (${arg.name})
             % else:
                ${arg.name}
@@ -117,7 +120,7 @@
                     Wrap (${field_access})
                 % elif is_lexical_env(field.type):
                     Wrap (${field_access})
-                % elif is_equation_type(field.type):
+                % elif simple_wrapping(field.type):
                     Wrap (${field_access})
                 % else:
                     ${field_access}

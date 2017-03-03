@@ -74,7 +74,10 @@ base_langkit_docs = {
         Kind of AST nodes in parse trees.
     """,
     'langkit.lexical_env_type': """
-        Data type for lexical environments.
+        Data type for lexical environments. For internal use only.
+    """,
+    'langkit.logic_var_type': """
+        Data type for logic variables. For internal use only.
     """,
     'langkit.equation_type': """
         Data type for equation types. For internal use only.
