@@ -391,12 +391,15 @@ class LexicalEnv(object):
     class _c_type(ctypes.c_void_p):
         pass
 
-    def unwrap(self):
-        return self._c_value
+    @classmethod
+    def unwrap(cls, value):
+        if value is None:
+            raise ValueError('None is not an allowed LexicalEnv value')
+        return value._c_value
 
     @classmethod
-    def wrap(self, c_value):
-        return LexicalEnv(c_value) if c_value else None
+    def wrap(cls, c_value):
+        return cls(c_value) if c_value else None
 
 
 class BasePointerBinding(object):

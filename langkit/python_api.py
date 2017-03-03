@@ -100,7 +100,7 @@ class PythonAPISettings(AbstractAPISettings):
                 type.name().camel
             )),
             (ct.Symbol, lambda _: '_text.unwrap({})'),
-            (ct.LexicalEnvType, lambda _: '{}.unwrap()'),
+            (ct.LexicalEnvType, lambda _: 'LexicalEnv.unwrap({})'),
             (ct.LogicVarType, lambda _: 'LogicVar.unwrap({})'),
             (ct.EquationType, lambda _: 'Equation.unwrap({})'),
         ], exception=TypeError(
