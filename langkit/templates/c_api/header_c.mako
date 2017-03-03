@@ -44,15 +44,15 @@ typedef enum {
 } ${node_kind_type};
 
 % if ctx.library_fields_all_public:
+${c_doc('langkit.lexical_env_type')}
+typedef void *${lexical_env_type};
+
 ${c_doc('langkit.equation_type')}
 typedef void *${equation_type};
 % endif
 
 ${c_doc('langkit.env_rebindings_type')}
 typedef void *${env_rebindings};
-
-${c_doc('langkit.lexical_env_type')}
-typedef void *${lexical_env_type};
 
 typedef uint8_t ${bool_type};
 
@@ -360,6 +360,7 @@ ${c_doc('langkit.destroy_text')}
 extern void
 ${capi.get_name("destroy_text")}(${text_type} *text);
 
+% if ctx.library_fields_all_public:
 /* Lexical environment primitives */
 
 ${c_doc('langkit.lexical_env_parent')}
@@ -379,6 +380,7 @@ ${capi.get_name('lexical_env_get')}(${lexical_env_type} env,
    drops to 0.  */
 extern void
 ${capi.get_name('lexical_env_dec_ref')}(${lexical_env_type} env);
+% endif
 
 /*
  * Kind-specific AST node primitives

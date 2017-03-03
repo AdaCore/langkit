@@ -363,6 +363,7 @@ class AnalysisUnit(object):
         return cls(c_value) if c_value else None
 
 
+% if ctx.library_fields_all_public:
 class LexicalEnv(object):
     ${py_doc('langkit.lexical_env_type', 4)}
 
@@ -396,6 +397,7 @@ class LexicalEnv(object):
     @classmethod
     def wrap(self, c_value):
         return LexicalEnv(c_value) if c_value else None
+% endif
 
 
 % if ctx.library_fields_all_public:
@@ -1188,6 +1190,7 @@ _node_child = _import_func(
     [${c_node}, ctypes.c_uint, ctypes.POINTER(${c_node})], ctypes.c_int
 )
 
+% if ctx.library_fields_all_public:
 # Lexical environment primitives
 _lexical_env_parent = _import_func(
     '${capi.get_name("lexical_env_parent")}',
@@ -1206,6 +1209,7 @@ _lexical_env_dec_ref = _import_func(
    '${capi.get_name("lexical_env_dec_ref")}',
    [LexicalEnv._c_type], None
 )
+% endif
 
 % for astnode in ctx.astnode_types:
     % for field in astnode.fields_with_accessors():

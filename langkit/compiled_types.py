@@ -517,6 +517,7 @@ class LexicalEnvType(BasicType):
     is_ptr = True
     should_emit_array_type = False
     null_allowed = True
+    _exposed = False
 
     @classmethod
     def is_refcounted(cls):
