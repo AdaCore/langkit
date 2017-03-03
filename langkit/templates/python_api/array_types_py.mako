@@ -1,7 +1,7 @@
 ## vim: filetype=makopython
 
 <%def name="decl(cls)">
-% if cls.element_type()._exposed:
+% if cls.element_type()._exposed or ctx.library_fields_all_public:
 <%
    type_name = cls.name().camel
    struct_name = '{}_Struct'.format(pyapi.type_internal_name(cls))
