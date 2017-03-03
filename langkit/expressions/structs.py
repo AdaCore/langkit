@@ -351,11 +351,8 @@ class FieldAccess(AbstractExpression):
             )
 
         def _render_pre(self):
-            # Property_Error in the case it is.
-            return '{}\n{}'.format(
-                self.receiver_expr.render_pre(),
-                '\n'.join(arg.render_pre() for arg in self.arguments)
-            )
+            exprs = [self.receiver_expr] + self.arguments
+            return '\n'.join(e.render_pre() for e in exprs)
 
         def _render_expr(self):
             if self.simple_field_access:
