@@ -2,11 +2,12 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from langkit.compiled_types import (
-    ASTNode, Field, Struct, abstract, env_metadata, root_grammar_class, T
+    ASTNode, Field, LexicalEnvType, Struct, T, abstract, env_metadata,
+    root_grammar_class
 )
 from langkit.diagnostics import Diagnostics
 from langkit.envs import EnvSpec, add_to_env
-from langkit.expressions import Self, New
+from langkit.expressions import Self, New, langkit_property
 from langkit.parsers import Grammar, List, Opt, Row, Tok
 
 from lexer_example import Token
@@ -24,7 +25,9 @@ class Metadata(Struct):
 
 @root_grammar_class()
 class FooNode(ASTNode):
-    pass
+    @langkit_property(public=True, return_type=LexicalEnvType)
+    def env_id(env=LexicalEnvType):
+        return env
 
 
 @abstract
