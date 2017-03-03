@@ -90,14 +90,6 @@ class _Sloc(ctypes.Structure):
         return _Sloc(sloc.line, sloc.column)
 
 
-class _SlocRange(ctypes.Structure):
-    _fields_ = [("start", _Sloc),
-                ("end", _Sloc)]
-
-    def wrap(self):
-        return SlocRange(self.start.wrap(), self.end.wrap())
-
-
 class _Exception(ctypes.Structure):
     _fields_ = [("is_fatal", ctypes.c_int),
                 ("information", ctypes.c_char_p)]
@@ -500,6 +492,14 @@ class SlocRange(object):
         )
 
 
+    class _c_type(ctypes.Structure):
+        _fields_ = [("start", _Sloc),
+                    ("end", _Sloc)]
+
+        def wrap(self):
+            return SlocRange(self.start.wrap(), self.end.wrap())
+
+
 class Diagnostic(object):
     ${py_doc('langkit.diagnostic_type', 4)}
 
@@ -517,7 +517,7 @@ class Diagnostic(object):
 
 
     class _c_type(ctypes.Structure):
-        _fields_ = [("sloc_range", _SlocRange),
+        _fields_ = [("sloc_range", SlocRange._c_type),
                     ("message", _text)]
 
         def wrap(self):
@@ -532,7 +532,7 @@ class Token(ctypes.Structure):
                 ('_trivia_index', ctypes.c_int),
                 ('_kind',         ctypes.c_int),
                 ('_text',         _text),
-                ('_sloc_range',   _SlocRange)]
+                ('_sloc_range',   SlocRange._c_type)]
 
     def wrap(self):
         return self if self._token_data else None
@@ -675,7 +675,7 @@ class ${root_astnode_name}(object):
     @property
     def sloc_range(self):
         ${py_doc('langkit.node_sloc_range', 8)}
-        result = _SlocRange()
+        result = SlocRange._c_type()
         _node_sloc_range(self._c_value, ctypes.byref(result))
         return result.wrap()
 
@@ -1171,7 +1171,7 @@ _node_short_image = _import_func(
 )
 _node_sloc_range = _import_func(
     '${capi.get_name("node_sloc_range")}',
-    [${c_node}, ctypes.POINTER(_SlocRange)], None
+    [${c_node}, ctypes.POINTER(SlocRange._c_type)], None
 )
 _lookup_in_node = _import_func(
     '${capi.get_name("lookup_in_node")}',
