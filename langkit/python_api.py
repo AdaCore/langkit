@@ -103,6 +103,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.LexicalEnvType, lambda _: 'LexicalEnv.unwrap({})'),
             (ct.LogicVarType, lambda _: 'LogicVar.unwrap({})'),
             (ct.EquationType, lambda _: 'Equation.unwrap({})'),
+            (ct.EnvRebindingsType, lambda _: 'EnvRebindings.unwrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding '
             '(unwrapping): {}'.format(type)
@@ -129,7 +130,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.LexicalEnvType, lambda _: 'LexicalEnv._c_type'),
             (ct.LogicVarType, lambda _: 'LogicVar._c_type'),
             (ct.EquationType, lambda _: 'Equation._c_type'),
-            (ct.EnvRebindingsType, lambda _: wrapped_type('env_rebindings')),
+            (ct.EnvRebindingsType, lambda _: 'EnvRebindings._c_type'),
             (ct.Token, lambda _: 'Token'),
             (ct.Symbol, lambda _: wrapped_type('text')),
             (ct.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),

@@ -29,9 +29,6 @@ import sys
 #
 
 
-class _env_rebindings(ctypes.c_void_p):
-    pass
-
 class _text(ctypes.Structure):
     # The chars field really is a uint32_t* but considering it as a char* here
     # is more convenient for conversion in this binding layer. On the other
@@ -943,6 +940,24 @@ class ${root_astnode_name}(object):
                 )
             )
         return py_value._c_value
+
+
+class EnvRebindings(object):
+    ${py_doc('langkit.env_rebindings_type', 4)}
+
+    def __init__(self, c_value):
+        self._c_value = c_value
+
+    class _c_type(ctypes.c_void_p):
+        pass
+
+    @classmethod
+    def unwrap(cls, value):
+        return 0 if value is None else value._c_value
+
+    @classmethod
+    def wrap(cls, c_value):
+        return cls(c_value) if c_value else None
 
 
 % for astnode in ctx.astnode_types:
