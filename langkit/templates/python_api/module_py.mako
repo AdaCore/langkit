@@ -417,7 +417,7 @@ class Equation(object):
 
 
 class Sloc(object):
-    # TODO: document this class and its methods
+    ${py_doc('langkit.sloc_type', 4)}
 
     def __init__(self, line, column):
         assert line >= 0 and column >= 0
@@ -464,7 +464,7 @@ class Sloc(object):
 
 
 class SlocRange(object):
-    # TODO: document this class and its methods
+    ${py_doc('langkit.sloc_range_type', 4)}
 
     def __init__(self, start, end):
         self.start = start
