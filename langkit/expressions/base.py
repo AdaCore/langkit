@@ -2116,7 +2116,9 @@ class PropertyDef(AbstractNodeData):
         :rtype: list[Argument]
         """
         expl, impl = funcy.split_by(lambda a: a.is_explicit, self.arguments)
-        assert all(not a.is_explicit for a in impl)
+        assert all(not a.is_explicit and a.default_value for a in impl), (
+            "Only implicit arguments can follow implicit arguments"
+        )
         return expl
 
     @memoized
