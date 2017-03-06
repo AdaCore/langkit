@@ -31,21 +31,21 @@ ${exts.include_extension(
 
 package body ${ada_lib_name}.Analysis.C is
 
-% if ctx.default_unit_file_provider:
-   type C_Unit_File_Provider_Type is
+% if ctx.default_unit_provider:
+   type C_Unit_Provider_Type is
       new Ada.Finalization.Controlled
-      and Unit_File_Provider_Interface
+      and Unit_Provider_Interface
    with record
       Data                    : System.Address;
-      Destroy_Func            : ${unit_file_provider_destroy_type};
-      Get_Unit_From_Node_Func : ${unit_file_provider_get_unit_from_node_type};
-      Get_Unit_From_Name_Func : ${unit_file_provider_get_unit_from_name_type};
+      Destroy_Func            : ${unit_provider_destroy_type};
+      Get_Unit_From_Node_Func : ${unit_provider_get_unit_from_node_type};
+      Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type};
    end record;
 
-   overriding procedure Finalize (Provider : in out C_Unit_File_Provider_Type);
+   overriding procedure Finalize (Provider : in out C_Unit_Provider_Type);
 
    overriding function Get_Unit
-     (Provider    : C_Unit_File_Provider_Type;
+     (Provider    : C_Unit_Provider_Type;
       Context     : Analysis_Context;
       Node        : ${root_node_type_name};
       Kind        : Unit_Kind;
@@ -54,7 +54,7 @@ package body ${ada_lib_name}.Analysis.C is
       With_Trivia : Boolean := False) return Analysis_Unit;
 
    overriding function Get_Unit
-     (Provider    : C_Unit_File_Provider_Type;
+     (Provider    : C_Unit_Provider_Type;
       Context     : Analysis_Context;
       Name        : Text_Type;
       Kind        : Unit_Kind;
@@ -90,8 +90,8 @@ package body ${ada_lib_name}.Analysis.C is
 
    function ${capi.get_name("create_analysis_context")}
      (Charset            : chars_ptr
-      % if ctx.default_unit_file_provider:
-      ; Unit_File_Provider : ${unit_file_provider_type}
+      % if ctx.default_unit_provider:
+      ; Unit_Provider : ${unit_provider_type}
       % endif
      )
       return ${analysis_context_type}
@@ -105,14 +105,14 @@ package body ${ada_lib_name}.Analysis.C is
             then ${string_repr(ctx.default_charset)}
             else Value (Charset));
 
-         % if ctx.default_unit_file_provider:
-         U : Unit_File_Provider_Access_Cst :=
-            Unit_File_Provider_Access_Cst (Unwrap (Unit_File_Provider));
+         % if ctx.default_unit_provider:
+         U : Unit_Provider_Access_Cst :=
+            Unit_Provider_Access_Cst (Unwrap (Unit_Provider));
          % endif
 
       begin
          return Wrap (Create (C
-            % if ctx.default_unit_file_provider:
+            % if ctx.default_unit_provider:
             , U
             % endif
          ));
@@ -216,7 +216,7 @@ package body ${ada_lib_name}.Analysis.C is
          return ${analysis_unit_type} (System.Null_Address);
    end;
 
-   % if ctx.default_unit_file_provider:
+   % if ctx.default_unit_provider:
       function ${capi.get_name("get_analysis_unit_from_provider")}
         (Context     : ${analysis_context_type};
          Name        : ${text_type};
@@ -965,16 +965,16 @@ package body ${ada_lib_name}.Analysis.C is
       end if;
    end;
 
-% if ctx.default_unit_file_provider:
-   function ${capi.get_name('create_unit_file_provider')}
+% if ctx.default_unit_provider:
+   function ${capi.get_name('create_unit_provider')}
      (Data                    : System.Address;
-      Destroy_Func            : ${unit_file_provider_destroy_type};
-      Get_Unit_From_Node_Func : ${unit_file_provider_get_unit_from_node_type};
-      Get_Unit_From_Name_Func : ${unit_file_provider_get_unit_from_name_type})
-      return ${unit_file_provider_type}
+      Destroy_Func            : ${unit_provider_destroy_type};
+      Get_Unit_From_Node_Func : ${unit_provider_get_unit_from_node_type};
+      Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type})
+      return ${unit_provider_type}
    is
-      Result : constant Unit_File_Provider_Access :=
-         new C_Unit_File_Provider_Type'
+      Result : constant Unit_Provider_Access :=
+         new C_Unit_Provider_Type'
            (Ada.Finalization.Controlled with
             Data                    => Data,
             Destroy_Func            => Destroy_Func,
@@ -984,10 +984,10 @@ package body ${ada_lib_name}.Analysis.C is
       return Wrap (Result);
    end;
 
-   procedure ${capi.get_name('destroy_unit_file_provider')}
-     (Provider : ${unit_file_provider_type})
+   procedure ${capi.get_name('destroy_unit_provider')}
+     (Provider : ${unit_provider_type})
    is
-      P : Unit_File_Provider_Access := Unwrap (Provider);
+      P : Unit_Provider_Access := Unwrap (Provider);
    begin
       Destroy (P);
    end;
@@ -996,7 +996,7 @@ package body ${ada_lib_name}.Analysis.C is
    -- Finalize --
    --------------
 
-   overriding procedure Finalize (Provider : in out C_Unit_File_Provider_Type)
+   overriding procedure Finalize (Provider : in out C_Unit_Provider_Type)
    is
    begin
       Provider.Destroy_Func (Provider.Data);
@@ -1007,7 +1007,7 @@ package body ${ada_lib_name}.Analysis.C is
    --------------
 
    overriding function Get_Unit
-     (Provider    : C_Unit_File_Provider_Type;
+     (Provider    : C_Unit_Provider_Type;
       Context     : Analysis_Context;
       Node        : ${root_node_type_name};
       Kind        : Unit_Kind;
@@ -1035,7 +1035,7 @@ package body ${ada_lib_name}.Analysis.C is
    --------------
 
    overriding function Get_Unit
-     (Provider    : C_Unit_File_Provider_Type;
+     (Provider    : C_Unit_Provider_Type;
       Context     : Analysis_Context;
       Name        : Text_Type;
       Kind        : Unit_Kind;
@@ -1060,7 +1060,7 @@ package body ${ada_lib_name}.Analysis.C is
    end Get_Unit;
 
    ${exts.include_extension(
-      ctx.ext('analysis', 'c_api', 'unit_file_providers', 'body')
+      ctx.ext('analysis', 'c_api', 'unit_providers', 'body')
    )}
 % endif
 

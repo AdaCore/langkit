@@ -135,18 +135,15 @@ def make_renderer(base_renderer=None):
             'equation_type':         EquationType.c_type(capi).name,
             'env_rebindings_type':   EnvRebindingsType.c_type(capi).name,
             'unit_kind_type':        AnalysisUnitKind.c_type(capi).name,
-            'unit_file_provider_type':
-                CAPIType(capi, 'unit_file_provider').name,
-            'unit_file_provider_destroy_type':
-                CAPIType(capi, 'unit_file_provider_destroy_callback').name,
-            'unit_file_provider_get_unit_from_node_type':
-                CAPIType(
-                    capi,
-                    'unit_file_provider_get_unit_from_node_callback').name,
-            'unit_file_provider_get_unit_from_name_type':
-                CAPIType(
-                    capi,
-                    'unit_file_provider_get_unit_from_name_callback').name,
+            'unit_provider_type':    CAPIType(capi, 'unit_provider').name,
+            'unit_provider_destroy_type':
+                CAPIType(capi, 'unit_provider_destroy_callback').name,
+            'unit_provider_get_unit_from_node_type':
+                CAPIType(capi,
+                         'unit_provider_get_unit_from_node_callback').name,
+            'unit_provider_get_unit_from_name_type':
+                CAPIType(capi,
+                         'unit_provider_get_unit_from_name_callback').name,
             'env_element_type':      T.root_node.env_el().c_type(capi),
             'token_kind':            CAPIType(capi, 'token_kind').name,
             'token_type':            CAPIType(capi, 'token').name,

@@ -159,12 +159,11 @@ base_langkit_docs = {
         ${TODO} Passing an unsupported charset here is not guaranteed to raise
         an error right here, but this would be really helpful for users.
 
-        % if ctx.default_unit_file_provider:
-            If provided, Unit_File_Provider will be used to query the file name
-            that corresponds to an unit reference during semantic analysis. If
-            it is ${null}, the default one is used instead. It is up to the
-            caller to free resources allocated to it when done with the
-            analysis context.
+        % if ctx.default_unit_provider:
+            If provided, Unit_Provider will be used to query the file name that
+            corresponds to an unit reference during semantic analysis. If it is
+            ${null}, the default one is used instead. It is up to the caller to
+            free resources allocated to it when done with the analysis context.
         % endif
     """,
     'langkit.context_incref': """
@@ -488,7 +487,7 @@ base_langkit_docs = {
     """,
 
     #
-    # Unit file providers
+    # Unit providers
     #
 
     'langkit.unit_kind_type': """
@@ -496,12 +495,12 @@ base_langkit_docs = {
         interface to the outer world while body units provide an implementation
         for the corresponding interface.
     """,
-    'langkit.unit_file_provider_type': """
+    'langkit.unit_provider_type': """
         Interface type for an object that can turn an analysis unit reference
         represented as an AST node into a file name. This is used get
         inter-unit analysis working.
     """,
-    'langkit.unit_file_provider_get_unit_from_node': """
+    'langkit.unit_provider_get_unit_from_node': """
         Fetch and return the analysis unit referenced by the input AST node.
         % if lang == 'ada':
             Raise a Property_Error
@@ -510,7 +509,7 @@ base_langkit_docs = {
         % endif
         if Node is not a valid unit name representation.
     """,
-    'langkit.unit_file_provider_get_unit_from_name': """
+    'langkit.unit_provider_get_unit_from_name': """
         Fetch and return the analysis unit referenced by the input unit name.
         % if lang == 'ada':
             Raise a Property_Error
@@ -519,20 +518,20 @@ base_langkit_docs = {
         % endif
         if Name is not a valid unit name.
     """,
-    'langkit.unit_file_provider_destroy': """
+    'langkit.unit_provider_destroy': """
         Free any resources that needs to be free'd in "data".
     """,
 
-    'langkit.create_unit_file_provider': """
-        Create an unit file provider. When done with it, the result must be
-        passed to ${capi.get_name('destroy_unit_file_provider')}.
+    'langkit.create_unit_provider': """
+        Create an unit provider. When done with it, the result must be passed
+        to ${capi.get_name('destroy_unit_provider')}.
 
         Pass as "data" a pointer to hold your private data: it will be passed
         to all callbacks below.
 
         "destroy" is a callback that is called by
-        ${capi.get_name('destroy_unit_file_provider')} to leave a chance to
-        free resources that "data" may hold.
+        ${capi.get_name('destroy_unit_provider')} to leave a chance to free
+        resources that "data" may hold.
 
         "get_unit_from_node" is a callback. It turns an analysis unit reference
         represented as an AST node into an analysis unit. It should return
@@ -541,20 +540,20 @@ base_langkit_docs = {
         "get_unit_from_name" is a callback similar to "get_unit_from_node",
         except it takes an analysis unit reference represented as a string.
     """,
-    'langkit.destroy_unit_file_provider': """
-        Destroy an unit file provider. This calls the "destroy" callback: see
-        ${capi.get_name('create_unit_file_provider')} for more information.
+    'langkit.destroy_unit_provider': """
+        Destroy an unit provider. This calls the "destroy" callback: see
+        ${capi.get_name('create_unit_provider')} for more information.
     """,
 
-    'langkit.unit_file_provider_destroy_type': """
+    'langkit.unit_provider_destroy_type': """
         Callback type for functions that are called when destroying an unit
         file provider type.
     """,
-    'langkit.unit_file_provider_get_unit_from_node_type': """
+    'langkit.unit_provider_get_unit_from_node_type': """
         Callback type for functions that are called to turn an unit reference
         encoded as an AST node into an analysis unit.
     """,
-    'langkit.unit_file_provider_get_unit_from_name_type': """
+    'langkit.unit_provider_get_unit_from_name_type': """
         Callback type for functions that are called to turn an unit reference
         encoded as an unit name into an analysis unit.
     """,

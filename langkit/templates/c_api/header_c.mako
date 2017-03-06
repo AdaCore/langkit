@@ -128,9 +128,9 @@ typedef struct {
    ${struct_types.decl(struct_type)}
 % endfor
 
-% if ctx.default_unit_file_provider:
+% if ctx.default_unit_provider:
 /*
- * Types for unit file providers
+ * Types for unit providers
  */
 
 ${c_doc('langkit.unit_kind_type')}
@@ -139,14 +139,14 @@ typedef enum {
    ${capi.get_name('unit_kind_body')}
 } ${unit_kind_type};
 
-${c_doc('langkit.unit_file_provider_type')}
-typedef void *${unit_file_provider_type};
+${c_doc('langkit.unit_provider_type')}
+typedef void *${unit_provider_type};
 
-${c_doc('langkit.unit_file_provider_destroy_type')}
-typedef void (*${unit_file_provider_destroy_type})(void *data);
+${c_doc('langkit.unit_provider_destroy_type')}
+typedef void (*${unit_provider_destroy_type})(void *data);
 
-${c_doc('langkit.unit_file_provider_get_unit_from_node_type')}
-typedef ${analysis_unit_type} (*${unit_file_provider_get_unit_from_node_type})(
+${c_doc('langkit.unit_provider_get_unit_from_node_type')}
+typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_node_type})(
    void *data,
    ${analysis_context_type} context,
    ${node_type} node,
@@ -156,8 +156,8 @@ typedef ${analysis_unit_type} (*${unit_file_provider_get_unit_from_node_type})(
    int with_trivia
 );
 
-${c_doc('langkit.unit_file_provider_get_unit_from_name_type')}
-typedef ${analysis_unit_type} (*${unit_file_provider_get_unit_from_name_type})(
+${c_doc('langkit.unit_provider_get_unit_from_name_type')}
+typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
    void *data,
    ${analysis_context_type} context,
    ${text_type} name,
@@ -198,8 +198,8 @@ ${c_doc('langkit.create_context')}
 extern ${analysis_context_type}
 ${capi.get_name("create_analysis_context")}(
    const char *charset
-   % if ctx.default_unit_file_provider:
-   , ${unit_file_provider_type} unit_file_provider
+   % if ctx.default_unit_provider:
+   , ${unit_provider_type} unit_provider
    % endif
 );
 
@@ -235,7 +235,7 @@ ${capi.get_name("get_analysis_unit_from_buffer")}(
         size_t buffer_size,
         int with_trivia);
 
-% if ctx.default_unit_file_provider:
+% if ctx.default_unit_provider:
 ${c_doc('langkit.get_unit_from_provider')}
 extern ${analysis_unit_type}
 ${capi.get_name("get_analysis_unit_from_provider")}(
@@ -432,24 +432,24 @@ ${capi.get_name("node_extension")}(
     ${capi.get_name("node_extension_destructor")} dtor
 );
 
-% if ctx.default_unit_file_provider:
+% if ctx.default_unit_provider:
 /*
- * Unit file providers
+ * Unit providers
  */
 
-extern ${unit_file_provider_type}
-${capi.get_name('create_unit_file_provider')}(
+extern ${unit_provider_type}
+${capi.get_name('create_unit_provider')}(
    void *data,
-   ${unit_file_provider_destroy_type} destroy_func,
-   ${unit_file_provider_get_unit_from_node_type} get_unit_from_node_func,
-   ${unit_file_provider_get_unit_from_name_type} get_unit_from_name_func
+   ${unit_provider_destroy_type} destroy_func,
+   ${unit_provider_get_unit_from_node_type} get_unit_from_node_func,
+   ${unit_provider_get_unit_from_name_type} get_unit_from_name_func
 );
 
 extern void
-${capi.get_name('destroy_unit_file_provider')}(void *data);
+${capi.get_name('destroy_unit_provider')}(void *data);
 
 ${exts.include_extension(
-   ctx.ext('analysis', 'c_api', 'unit_file_providers', 'header')
+   ctx.ext('analysis', 'c_api', 'unit_providers', 'header')
 )}
 % endif
 

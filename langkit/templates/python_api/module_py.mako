@@ -84,7 +84,7 @@ class _Exception(ctypes.Structure):
         return NativeException(self.information)
 
 
-% if ctx.default_unit_file_provider:
+% if ctx.default_unit_provider:
 ${py_doc('langkit.unit_kind_type')}
 str_to_unit_kind = {
     'specification': 0,
@@ -102,7 +102,7 @@ def _unwrap_unit_kind(kind):
     return _unwrap_enum(kind, 'analysis unit kind', str_to_unit_kind)
 
 
-class _unit_file_provider(ctypes.c_void_p):
+class _unit_provider(ctypes.c_void_p):
     pass
 % endif
 
@@ -142,33 +142,33 @@ ${exts.include_extension(
 class AnalysisContext(object):
     ${py_doc('langkit.analysis_context_type', 4)}
 
-    __slots__ = ('_c_value', '_unit_file_provider')
+    __slots__ = ('_c_value', '_unit_provider')
 
     def __init__(self,
                  charset=None,
-% if ctx.default_unit_file_provider:
-                 unit_file_provider=None,
+% if ctx.default_unit_provider:
+                 unit_provider=None,
 % endif
                  _c_value=None):
         ${py_doc('langkit.create_context', 8)}
-% if ctx.default_unit_file_provider:
-        c_ufp = unit_file_provider._c_value if unit_file_provider else None
+% if ctx.default_unit_provider:
+        c_unit_provider = unit_provider._c_value if unit_provider else None
 % endif
         self._c_value = (
             _create_analysis_context(
                 charset,
-% if ctx.default_unit_file_provider:
-                c_ufp,
+% if ctx.default_unit_provider:
+                c_unit_provider,
 % endif
             )
             if _c_value is None else
             _context_incref(_c_value)
         )
 
-% if ctx.default_unit_file_provider:
-        # Keep a reference to the unit file provider so that it is live at
-        # least as long as the analysis context is live.
-        self._unit_file_provider = unit_file_provider
+% if ctx.default_unit_provider:
+        # Keep a reference to the unit provider so that it is live at least as
+        # long as the analysis context is live.
+        self._unit_provider = unit_provider
 % endif
 
     def __del__(self):
@@ -197,7 +197,7 @@ class AnalysisContext(object):
                                                  with_trivia)
         return AnalysisUnit(c_value)
 
-% if ctx.default_unit_file_provider:
+% if ctx.default_unit_provider:
     def get_from_provider(self, name, kind, charset=None, reparse=False,
                           with_trivia=False):
         ${py_doc('langkit.get_unit_from_provider', 8)}
@@ -643,21 +643,21 @@ class Token(ctypes.Structure):
         return {"kind": "Token", "token_kind": self.kind, "text": self.text}
 
 
-% if ctx.default_unit_file_provider:
+% if ctx.default_unit_provider:
 
-## TODO: if this is needed some day, also bind create_unit_file_provider to
-## allow Python users to create their own unit file providers.
-class UnitFileProvider(object):
-    ${py_doc('langkit.unit_file_provider_type', 4)}
+## TODO: if this is needed some day, also bind create_unit_provider to allow
+## Python users to create their own unit providers.
+class UnitProvider(object):
+    ${py_doc('langkit.unit_provider_type', 4)}
 
     def __init__(self, c_value):
         self._c_value = c_value
 
     def __del__(self):
-        _destroy_unit_file_provider(self._c_value)
+        _destroy_unit_provider(self._c_value)
 
 ${exts.include_extension(
-   ctx.ext('python_api', 'unit_file_providers', 'methods')
+   ctx.ext('python_api', 'unit_providers', 'methods')
 )}
 
 % endif
@@ -1073,8 +1073,8 @@ _create_analysis_context = _import_func(
     '${capi.get_name("create_analysis_context")}',
     [
         ctypes.c_char_p,
-% if ctx.default_unit_file_provider:
-        _unit_file_provider,
+% if ctx.default_unit_provider:
+        _unit_provider,
 % endif
     ], AnalysisContext._c_type
 )
@@ -1107,7 +1107,7 @@ _get_analysis_unit_from_buffer = _import_func(
      ctypes.c_size_t],         # buffer_size
     AnalysisUnit._c_type
 )
-% if ctx.default_unit_file_provider:
+% if ctx.default_unit_provider:
 _get_analysis_unit_from_provider = _import_func(
     '${capi.get_name("get_analysis_unit_from_provider")}',
     [AnalysisContext._c_type,  # context
@@ -1275,14 +1275,14 @@ _node_extension = _import_func(
     ctypes.POINTER(ctypes.c_void_p)
 )
 
-% if ctx.default_unit_file_provider:
-# Unit file providers
-_destroy_unit_file_provider = _import_func(
-    '${capi.get_name("destroy_unit_file_provider")}',
-    [_unit_file_provider], None
+% if ctx.default_unit_provider:
+# Unit providers
+_destroy_unit_provider = _import_func(
+    '${capi.get_name("destroy_unit_provider")}',
+    [_unit_provider], None
 )
 ${exts.include_extension(
-   ctx.ext('python_api', 'unit_file_providers', 'low_level_bindings')
+   ctx.ext('python_api', 'unit_providers', 'low_level_bindings')
 )}
 % endif
 

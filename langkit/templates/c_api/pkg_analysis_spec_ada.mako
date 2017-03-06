@@ -130,21 +130,21 @@ package ${ada_lib_name}.Analysis.C is
           External_Name => "${capi.get_name('destroy_text')}";
    ${ada_c_doc('langkit.destroy_text', 3)}
 
-% if ctx.default_unit_file_provider:
-   --  Types for unit file providers
+% if ctx.default_unit_provider:
+   --  Types for unit providers
 
    type ${unit_kind_type} is new int;
    ${ada_c_doc('langkit.unit_kind_type', 3)}
 
-   type ${unit_file_provider_type} is new System.Address;
-   ${ada_c_doc('langkit.unit_file_provider_type', 3)}
+   type ${unit_provider_type} is new System.Address;
+   ${ada_c_doc('langkit.unit_provider_type', 3)}
 
-   type ${unit_file_provider_destroy_type} is access procedure
+   type ${unit_provider_destroy_type} is access procedure
      (Data : System.Address)
       with Convention => C;
-   ${ada_c_doc('langkit.unit_file_provider_destroy_type', 3)}
+   ${ada_c_doc('langkit.unit_provider_destroy_type', 3)}
 
-   type ${unit_file_provider_get_unit_from_node_type} is access function
+   type ${unit_provider_get_unit_from_node_type} is access function
      (Data        : System.Address;
       Context     : ${analysis_context_type};
       Node        : ${node_type};
@@ -153,9 +153,9 @@ package ${ada_lib_name}.Analysis.C is
       Reparse     : int;
       With_Trivia : int) return ${analysis_unit_type}
       with Convention => C;
-   ${ada_c_doc('langkit.unit_file_provider_get_unit_from_node_type', 3)}
+   ${ada_c_doc('langkit.unit_provider_get_unit_from_node_type', 3)}
 
-   type ${unit_file_provider_get_unit_from_name_type} is access function
+   type ${unit_provider_get_unit_from_name_type} is access function
      (Data        : System.Address;
       Context     : ${analysis_context_type};
       Name        : ${text_type};
@@ -164,7 +164,7 @@ package ${ada_lib_name}.Analysis.C is
       Reparse     : int;
       With_Trivia : int) return ${analysis_unit_type}
       with Convention => C;
-   ${ada_c_doc('langkit.unit_file_provider_get_unit_from_name_type', 3)}
+   ${ada_c_doc('langkit.unit_provider_get_unit_from_name_type', 3)}
 % endif
 
    -------------------------
@@ -173,8 +173,8 @@ package ${ada_lib_name}.Analysis.C is
 
    function ${capi.get_name('create_analysis_context')}
      (Charset            : chars_ptr
-      % if ctx.default_unit_file_provider:
-      ; Unit_File_Provider : ${unit_file_provider_type}
+      % if ctx.default_unit_provider:
+      ; Unit_Provider : ${unit_provider_type}
       % endif
      )
       return ${analysis_context_type}
@@ -230,7 +230,7 @@ package ${ada_lib_name}.Analysis.C is
               "${capi.get_name('get_analysis_unit_from_buffer')}";
    ${ada_c_doc('langkit.get_unit_from_buffer', 3)}
 
-   % if ctx.default_unit_file_provider:
+   % if ctx.default_unit_provider:
       function ${capi.get_name('get_analysis_unit_from_provider')}
         (Context     : ${analysis_context_type};
          Name        : ${text_type};
@@ -505,32 +505,32 @@ package ${ada_lib_name}.Analysis.C is
            External_name => "${capi.get_name('node_extension')}";
    ${ada_c_doc('langkit.node_extension', 3)}
 
-% if ctx.default_unit_file_provider:
-   -------------------------
-   -- Unit file providers --
-   -------------------------
+% if ctx.default_unit_provider:
+   --------------------
+   -- Unit providers --
+   --------------------
 
-   function ${capi.get_name('create_unit_file_provider')}
+   function ${capi.get_name('create_unit_provider')}
      (Data                    : System.Address;
-      Destroy_Func            : ${unit_file_provider_destroy_type};
-      Get_Unit_From_Node_Func : ${unit_file_provider_get_unit_from_node_type};
-      Get_Unit_From_Name_Func : ${unit_file_provider_get_unit_from_name_type})
-      return ${unit_file_provider_type}
+      Destroy_Func            : ${unit_provider_destroy_type};
+      Get_Unit_From_Node_Func : ${unit_provider_get_unit_from_node_type};
+      Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type})
+      return ${unit_provider_type}
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name('create_unit_file_provider')}";
-   ${ada_c_doc('langkit.create_unit_file_provider', 3)}
+           External_name => "${capi.get_name('create_unit_provider')}";
+   ${ada_c_doc('langkit.create_unit_provider', 3)}
 
-   procedure ${capi.get_name('destroy_unit_file_provider')}
-     (Provider : ${unit_file_provider_type})
+   procedure ${capi.get_name('destroy_unit_provider')}
+     (Provider : ${unit_provider_type})
       with Export        => True,
            Convention    => C,
            External_name =>
-              "${capi.get_name('destroy_unit_file_provider')}";
-   ${ada_c_doc('langkit.destroy_unit_file_provider', 3)}
+              "${capi.get_name('destroy_unit_provider')}";
+   ${ada_c_doc('langkit.destroy_unit_provider', 3)}
 
    ${exts.include_extension(
-      ctx.ext('analysis', 'c_api', 'unit_file_providers', 'spec')
+      ctx.ext('analysis', 'c_api', 'unit_providers', 'spec')
    )}
 % endif
 
@@ -721,15 +721,15 @@ package ${ada_lib_name}.Analysis.C is
    function Wrap (Token : Token_Type) return ${token_type};
    function Unwrap (Token : ${token_type}) return Token_Type;
 
-% if ctx.default_unit_file_provider:
+% if ctx.default_unit_provider:
    function Wrap (Kind : Unit_Kind) return ${unit_kind_type} is
      (Unit_Kind'Pos (Kind));
    function Unwrap (Kind : ${unit_kind_type}) return Unit_Kind is
      (Unit_Kind'Val (Kind));
    function Wrap is new Ada.Unchecked_Conversion
-     (Unit_File_Provider_Access, ${unit_file_provider_type});
+     (Unit_Provider_Access, ${unit_provider_type});
    function Unwrap is new Ada.Unchecked_Conversion
-     (${unit_file_provider_type}, Unit_File_Provider_Access);
+     (${unit_provider_type}, Unit_Provider_Access);
 % endif
 
    function Convert is new Ada.Unchecked_Conversion

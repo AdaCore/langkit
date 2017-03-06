@@ -46,8 +46,8 @@ with ${ada_lib_name}.Lexer;
 %if ctx.env_hook_subprogram:
 with ${ctx.env_hook_subprogram.unit_fqn};
 %endif
-%if ctx.default_unit_file_provider:
-with ${ctx.default_unit_file_provider.unit_fqn};
+%if ctx.default_unit_provider:
+with ${ctx.default_unit_provider.unit_fqn};
 %endif
 %if ctx.symbol_canonicalizer:
 with ${ctx.symbol_canonicalizer.unit_fqn};
@@ -146,16 +146,16 @@ package body ${ada_lib_name}.Analysis is
 
    function Create
      (Charset : String := ${string_repr(ctx.default_charset)}
-      % if ctx.default_unit_file_provider:
-         ; Unit_File_Provider : Unit_File_Provider_Access_Cst := null
+      % if ctx.default_unit_provider:
+         ; Unit_Provider : Unit_Provider_Access_Cst := null
       % endif
      ) return Analysis_Context
    is
-      % if ctx.default_unit_file_provider:
-         P : constant Unit_File_Provider_Access_Cst :=
-           (if Unit_File_Provider = null
-            then ${ctx.default_unit_file_provider.fqn}
-            else Unit_File_Provider);
+      % if ctx.default_unit_provider:
+         P : constant Unit_Provider_Access_Cst :=
+           (if Unit_Provider = null
+            then ${ctx.default_unit_provider.fqn}
+            else Unit_Provider);
       % endif
       Symbols : constant Symbol_Table := Create;
    begin
@@ -169,8 +169,8 @@ package body ${ada_lib_name}.Analysis is
                           Node          => null,
                           Is_Refcounted => False)
 
-         % if ctx.default_unit_file_provider:
-         , Unit_File_Provider => P
+         % if ctx.default_unit_provider:
+         , Unit_Provider => P
          % endif
          % if ctx.symbol_literals:
             , Symbol_Literals => Create_Symbol_Literals (Symbols)
@@ -475,7 +475,7 @@ package body ${ada_lib_name}.Analysis is
                        With_Trivia, Rule);
    end Get_From_Buffer;
 
-   % if ctx.default_unit_file_provider:
+   % if ctx.default_unit_provider:
 
    -----------------------
    -- Get_From_Provider --
@@ -491,7 +491,7 @@ package body ${ada_lib_name}.Analysis is
       return Analysis_Unit
    is
    begin
-      return Context.Unit_File_Provider.Get_Unit
+      return Context.Unit_Provider.Get_Unit
         (Context, Name, Kind, Charset, Reparse, With_Trivia);
 
    exception
@@ -808,14 +808,14 @@ package body ${ada_lib_name}.Analysis is
       Destroyable_Vectors.Append (Unit.Destroyables, (Object, Destroy));
    end Register_Destroyable_Helper;
 
-   % if ctx.default_unit_file_provider:
-   ------------------------
-   -- Unit_File_Provider --
-   ------------------------
+   % if ctx.default_unit_provider:
+   -------------------
+   -- Unit_Provider --
+   -------------------
 
-   function Unit_File_Provider
+   function Unit_Provider
      (Context : Analysis_Context)
-      return Unit_File_Provider_Access_Cst is (Context.Unit_File_Provider);
+      return Unit_Provider_Access_Cst is (Context.Unit_Provider);
    % endif
 
    ----------------

@@ -92,9 +92,9 @@ package ${ada_lib_name}.Analysis is
 
    No_Token : constant Token_Type;
 
-   -------------------------
-   -- Unit file providers --
-   -------------------------
+   --------------------
+   -- Unit providers --
+   --------------------
 
    type Unit_Kind is (Unit_Specification, Unit_Body);
    ${ada_doc('langkit.unit_kind_type', 3)}
@@ -102,35 +102,35 @@ package ${ada_lib_name}.Analysis is
    Invalid_Unit_Name_Error : exception;
    ${ada_doc('langkit.invalid_unit_name_error', 3)}
 
-   type Unit_File_Provider_Interface is limited interface;
-   type Unit_File_Provider_Access is
-      access Unit_File_Provider_Interface'Class;
-   type Unit_File_Provider_Access_Cst is
-      access constant Unit_File_Provider_Interface'Class;
-   ${ada_doc('langkit.unit_file_provider_type', 3)}
+   type Unit_Provider_Interface is limited interface;
+   type Unit_Provider_Access is
+      access Unit_Provider_Interface'Class;
+   type Unit_Provider_Access_Cst is
+      access constant Unit_Provider_Interface'Class;
+   ${ada_doc('langkit.unit_provider_type', 3)}
 
    function Get_Unit
-     (Provider    : Unit_File_Provider_Interface;
+     (Provider    : Unit_Provider_Interface;
       Context     : Analysis_Context;
       Node        : ${root_node_type_name};
       Kind        : Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False;
       With_Trivia : Boolean := False) return Analysis_Unit is abstract;
-   ${ada_doc('langkit.unit_file_provider_get_unit_from_node', 3)}
+   ${ada_doc('langkit.unit_provider_get_unit_from_node', 3)}
 
    function Get_Unit
-     (Provider    : Unit_File_Provider_Interface;
+     (Provider    : Unit_Provider_Interface;
       Context     : Analysis_Context;
       Name        : Text_Type;
       Kind        : Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False;
       With_Trivia : Boolean := False) return Analysis_Unit is abstract;
-   ${ada_doc('langkit.unit_file_provider_get_unit_from_name', 3)}
+   ${ada_doc('langkit.unit_provider_get_unit_from_name', 3)}
 
    procedure Destroy is new Ada.Unchecked_Deallocation
-     (Unit_File_Provider_Interface'Class, Unit_File_Provider_Access);
+     (Unit_Provider_Interface'Class, Unit_Provider_Access);
 
    ---------------------------------
    -- Analysis context primitives --
@@ -138,8 +138,8 @@ package ${ada_lib_name}.Analysis is
 
    function Create
      (Charset : String := ${string_repr(ctx.default_charset)}
-      % if ctx.default_unit_file_provider:
-         ; Unit_File_Provider : Unit_File_Provider_Access_Cst := null
+      % if ctx.default_unit_provider:
+         ; Unit_Provider : Unit_Provider_Access_Cst := null
       % endif
      ) return Analysis_Context;
    ${ada_doc('langkit.create_context', 3)}
@@ -177,7 +177,7 @@ package ${ada_lib_name}.Analysis is
       Unit_Filename : String) return Boolean;
    --  Returns whether Context contains an unit correponding to Unit_Filename
 
-   % if ctx.default_unit_file_provider:
+   % if ctx.default_unit_provider:
 
    function Get_From_Provider
      (Context     : Analysis_Context;
@@ -189,9 +189,9 @@ package ${ada_lib_name}.Analysis is
       return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_provider', 3)}
 
-   function Unit_File_Provider
+   function Unit_Provider
      (Context : Analysis_Context)
-      return Unit_File_Provider_Access_Cst;
+      return Unit_Provider_Access_Cst;
    --  Object to translate unit names to file names
    % endif
 
@@ -985,8 +985,8 @@ private
       --  The lexical scope that is shared amongst every compilation unit. Used
       --  to resolve cross file references.
 
-      % if ctx.default_unit_file_provider:
-      Unit_File_Provider : Unit_File_Provider_Access_Cst;
+      % if ctx.default_unit_provider:
+      Unit_Provider : Unit_Provider_Access_Cst;
       --  Object to translate unit names to file names
       % endif
 

@@ -225,7 +225,7 @@ class CompileCtx(object):
                  verbosity=Verbosity('none'),
                  template_lookup_extra_dirs=None,
                  env_hook_subprogram=None,
-                 default_unit_file_provider=None,
+                 default_unit_provider=None,
                  symbol_canonicalizer=None,
                  documentations=None):
         """Create a new context for code emission.
@@ -296,13 +296,13 @@ class CompileCtx(object):
             attribute, the hook can alter it so that it affects the rest of the
             EnvSpec actions.
 
-        :param LibraryEntity|None default_unit_file_provider: If provided,
-            define a Langkit_Support.Unit_Files.Unit_File_Provider_Access
-            object. This object will be used as the default unit file provider
-            during the creation of an analysis context.
+        :param LibraryEntity|None default_unit_provider: If provided, define a
+            Langkit_Support.Unit_Files.Unit_Provider_Access object. This object
+            will be used as the default unit provider during the creation of an
+            analysis context.
 
-            If None, this disables altogether the unit file provider mechanism
-            in code generation.
+            If None, this disables altogether the unit provider mechanism in
+            code generation.
 
         :param LibraryEntity|None symbol_canonicalizer: If provided, define a
             subprogram to call in order to canonicazie symbol identifiers. Such
@@ -534,7 +534,7 @@ class CompileCtx(object):
         """
 
         self.env_hook_subprogram = env_hook_subprogram
-        self.default_unit_file_provider = default_unit_file_provider
+        self.default_unit_provider = default_unit_provider
         self.symbol_canonicalizer = symbol_canonicalizer
 
         docs = dict(langkit.documentation.base_langkit_docs)
