@@ -1,6 +1,8 @@
 --  vim: ft=ada
 
-overriding function P_Result (Node : access Literal_Type; Envs_Rebindings : Env_Rebindings := null) return Integer is
+overriding function P_Result
+  (Node            : access Literal_Type;
+   Envs_Rebindings : Env_Rebindings := null) return Integer is
 begin
     return Integer'Value (Text (F_Tok (Node)));
 end P_Result;

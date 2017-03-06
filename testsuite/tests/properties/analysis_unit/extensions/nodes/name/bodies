@@ -1,7 +1,8 @@
 --  vim: ft=ada
 
 function P_Designated_Unit
-  (Node : access Name_Type'Class; Envs_Rebindings : Env_Rebindings := null) return Analysis_Unit
+  (Node            : access Name_Type'Class;
+   Envs_Rebindings : Env_Rebindings := null) return Analysis_Unit
 is
     Filename : constant String := Text (F_Tok (Node)) & ".txt";
     Context  : constant Analysis_Context := Node.Unit.Context;
