@@ -1947,8 +1947,8 @@ class PropertyDef(AbstractNodeData):
                 self._has_implicit_env = self.base_property._has_implicit_env
             else:
                 check_source_language(
-                    (self._has_implicit_env
-                        == self.base_property.has_implicit_env),
+                    self._has_implicit_env
+                    == self.base_property.has_implicit_env,
                     '{} has {} implicit environment parameter, so should have'
                     ' {}'.format(
                         self.base_property.qualname,
