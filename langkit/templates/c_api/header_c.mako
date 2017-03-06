@@ -148,6 +148,7 @@ typedef void (*${unit_file_provider_destroy_type})(void *data);
 ${c_doc('langkit.unit_file_provider_get_file_from_node_type')}
 typedef char *(*${unit_file_provider_get_file_from_node_type})(
    void *data,
+   ${analysis_context_type} context,
    ${node_type} node,
    ${unit_kind_type} kind
 );
@@ -155,6 +156,7 @@ typedef char *(*${unit_file_provider_get_file_from_node_type})(
 ${c_doc('langkit.unit_file_provider_get_file_from_name_type')}
 typedef char *(*${unit_file_provider_get_file_from_name_type})(
    void *data,
+   ${analysis_context_type} context,
    ${text_type} name,
    ${unit_kind_type} kind
 );

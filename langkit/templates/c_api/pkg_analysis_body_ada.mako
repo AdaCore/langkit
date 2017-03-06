@@ -1009,10 +1009,8 @@ package body ${ada_lib_name}.Analysis.C is
       Kind     : Unit_Kind)
       return String
    is
-      pragma Unreferenced (Context);
-
       C_Result : chars_ptr := Provider.Get_File_From_Node_Func
-        (Provider.Data, Wrap (Node), Wrap (Kind));
+        (Provider.Data, Context, Wrap (Node), Wrap (Kind));
    begin
       if C_Result = Null_Ptr then
          raise Property_Error with "invalid AST node for unit name";
@@ -1037,11 +1035,9 @@ package body ${ada_lib_name}.Analysis.C is
       Kind     : Unit_Kind)
       return String
    is
-      pragma Unreferenced (Context);
-
       Name_Access : Text_Access := Name'Unrestricted_Access;
       C_Result    : chars_ptr := Provider.Get_File_From_Name_Func
-        (Provider.Data, Wrap (Name_Access), Wrap (Kind));
+        (Provider.Data, Context, Wrap (Name_Access), Wrap (Kind));
    begin
       if C_Result = Null_Ptr then
          raise Property_Error with "invalid AST node for unit name";
