@@ -569,7 +569,7 @@ class ManageScript(object):
             argv += glob.glob(glob_pattern)
             self.check_call(args, 'Pretty-printing', argv)
 
-        if hasattr(args, 'pretty_print') and args.pretty_print:
+        if getattr(args, 'pretty_print', False):
             if args.verbosity.info:
                 printcol("Pretty-printing sources for Libadalang ...",
                          Colors.HEADER)
