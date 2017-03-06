@@ -13,6 +13,7 @@ this is the way it is done for the ada language::
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+from collections import defaultdict
 from contextlib import contextmanager
 from distutils.spawn import find_executable
 from glob import glob
@@ -697,10 +698,9 @@ class CompileCtx(object):
 
         # Compute the callgraph with flattened subclassing information:
         # consider only root properties.
-        forwards = {}
+        forwards = defaultdict(set)
         for prop, called in forwards_strict.items():
             root = prop.root_property
-            forwards.setdefault(root, set())
             forwards[root].update(c.root_property for c in called)
 
         # Compute the set of properties that are transitively called by a
