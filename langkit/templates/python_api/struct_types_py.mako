@@ -1,5 +1,36 @@
 ## vim: filetype=makopython
 
+<%def name="base_decl()">
+
+class _BaseStruct(object):
+    """
+    Mixin for Adda struct wrappers.
+    """
+
+    def __getitem__(self, key):
+      if not isinstance(key, int):
+         raise TypeError('Tuples items are indexed by integers, not {}'.format(
+            type(key)
+         ))
+
+      # Do not expose the "is_null" internal field
+      fields = self._fields_[:-1]
+      if 0 <= key < len(fields):
+         field_name = fields[key][0]
+         return getattr(self, field_name[1:])
+      else:
+         raise IndexError('There is no {}th field'.format(key))
+
+    def __repr__(self):
+        field_names = [name[1:] for name, _ in self._fields_[:-1]]
+        return '<{} {}>'.format(
+            type(self).__name__,
+            ' '.join('{}={}'.format(name, getattr(self, name))
+                      for name in field_names)
+        )
+
+</%def>
+
 <%def name="decl(cls)">
 
 <%
@@ -8,7 +39,7 @@
    dec_ref = '_{}_dec_ref'.format(type_name)
 %>
 
-class ${type_name}(ctypes.Structure):
+class ${type_name}(ctypes.Structure, _BaseStruct):
     ${py_doc(cls, 4)}
     _fields_ = [
     % for field in cls.get_fields():
@@ -74,27 +105,6 @@ class ${type_name}(ctypes.Structure):
                                   from_field_access=True,
                                   inc_ref=True)}
     % endfor
-
-    def __getitem__(self, key):
-      if not isinstance(key, int):
-         raise TypeError('Tuples items are indexed by integers, not {}'.format(
-            type(key)
-         ))
-      ## Do not expose the "is_null" internal field
-      fields = self._fields_[:-1]
-      if 0 <= key < len(fields):
-         field_name = fields[key][0]
-         return getattr(self, field_name[1:])
-      else:
-         raise IndexError('There is no {}th field'.format(key))
-
-    def __repr__(self):
-        field_names = [name[1:] for name, _ in self._fields_[:-1]]
-        return '<{} {}>'.format(
-            type(self).__name__,
-            ' '.join('{}={}'.format(name, getattr(self, name))
-                      for name in field_names)
-        )
 
     % if cls.is_refcounted():
     def __del__(self):

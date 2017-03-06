@@ -1034,6 +1034,8 @@ def _unwrap_enum(py_value, type_name, translator):
         raise ValueError('Invalid {}: {}'.format(type_name, py_value))
 
 
+${struct_types.base_decl()}
+
 % for struct_type in ctx.struct_types:
 ${struct_types.decl(struct_type)}
 % endfor
