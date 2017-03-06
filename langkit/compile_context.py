@@ -1217,7 +1217,9 @@ class CompileCtx(object):
             except ImportError:
                 check_source_language(
                     False,
-                    "Yapf not available, using autopep8 to pretty-print python"
+                    "Yapf not available, using autopep8 to pretty-print "
+                    "python",
+                    severity=Severity.warning
                 )
 
             try:
@@ -1225,7 +1227,9 @@ class CompileCtx(object):
                 return fix_code(code)
             except ImportError:
                 check_source_language(
-                    False, "autopep8 not available, cannot pretty-print python"
+                    False,
+                    "autopep8 not available, cannot pretty-print python",
+                    severity=Severity.warning
                 )
                 return code
 
