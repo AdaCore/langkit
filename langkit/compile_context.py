@@ -1120,7 +1120,10 @@ class CompileCtx(object):
                 main_programs=main_programs
             ))
 
+        # Emit C API
         self.emit_c_api(src_path, include_path)
+
+        # Emit python API
         if self.python_api_settings:
             python_path = path.join(file_root, "python")
             if not path.exists(python_path):
