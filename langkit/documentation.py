@@ -501,35 +501,23 @@ base_langkit_docs = {
         represented as an AST node into a file name. This is used get
         inter-unit analysis working.
     """,
-    'langkit.unit_file_provider_get_file_from_node': """
-        Turn an analysis unit reference represented as an AST node into a file
-        name.
+    'langkit.unit_file_provider_get_unit_from_node': """
+        Fetch and return the analysis unit referenced by the input AST node.
         % if lang == 'ada':
             Raise a Property_Error
         % else:
             Return ${null}
         % endif
         if Node is not a valid unit name representation.
-
-        % if lang == 'c':
-            The result is heap allocated and the caller must free it when done
-            with it.
-        % endif
     """,
-    'langkit.unit_file_provider_get_file_from_name': """
-        Turn an analysis unit reference represented as a textual name into a
-        file name.
+    'langkit.unit_file_provider_get_unit_from_name': """
+        Fetch and return the analysis unit referenced by the input unit name.
         % if lang == 'ada':
             Raise a Property_Error
         % else:
             Return ${null}
         % endif
         if Name is not a valid unit name.
-
-        % if lang == 'c':
-            The result is heap allocated and the caller must free it when done
-            with it.
-        % endif
     """,
     'langkit.unit_file_provider_destroy': """
         Free any resources that needs to be free'd in "data".
@@ -546,12 +534,11 @@ base_langkit_docs = {
         ${capi.get_name('destroy_unit_file_provider')} to leave a chance to
         free resources that "data" may hold.
 
-        "get_file_from_node" is a callback. It turns an analysis unit reference
-        represented as an AST node into a file name. It should return ${null}
-        if Node is not a valid unit name representation.  Its result is heap
-        allocated and the caller must free it when done with it.
+        "get_unit_from_node" is a callback. It turns an analysis unit reference
+        represented as an AST node into an analysis unit. It should return
+        ${null} if Node is not a valid unit name representation.
 
-        "get_file_from_name" is a callback similar to "get_file_from_node",
+        "get_unit_from_name" is a callback similar to "get_unit_from_node",
         except it takes an analysis unit reference represented as a string.
     """,
     'langkit.destroy_unit_file_provider': """
@@ -563,13 +550,13 @@ base_langkit_docs = {
         Callback type for functions that are called when destroying an unit
         file provider type.
     """,
-    'langkit.unit_file_provider_get_file_from_node_type': """
+    'langkit.unit_file_provider_get_unit_from_node_type': """
         Callback type for functions that are called to turn an unit reference
-        encoded as an AST node into a file name.
+        encoded as an AST node into an analysis unit.
     """,
-    'langkit.unit_file_provider_get_file_from_name_type': """
+    'langkit.unit_file_provider_get_unit_from_name_type': """
         Callback type for functions that are called to turn an unit reference
-        encoded as an AST node into a file name.
+        encoded as an unit name into an analysis unit.
     """,
 
     #

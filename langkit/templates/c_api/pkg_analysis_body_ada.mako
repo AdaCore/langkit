@@ -38,25 +38,29 @@ package body ${ada_lib_name}.Analysis.C is
    with record
       Data                    : System.Address;
       Destroy_Func            : ${unit_file_provider_destroy_type};
-      Get_File_From_Node_Func : ${unit_file_provider_get_file_from_node_type};
-      Get_File_From_Name_Func : ${unit_file_provider_get_file_from_name_type};
+      Get_Unit_From_Node_Func : ${unit_file_provider_get_unit_from_node_type};
+      Get_Unit_From_Name_Func : ${unit_file_provider_get_unit_from_name_type};
    end record;
 
    overriding procedure Finalize (Provider : in out C_Unit_File_Provider_Type);
 
-   overriding function Get_File
-     (Provider : C_Unit_File_Provider_Type;
-      Context  : Analysis_Context;
-      Node     : ${root_node_type_name};
-      Kind     : Unit_Kind)
-      return String;
+   overriding function Get_Unit
+     (Provider    : C_Unit_File_Provider_Type;
+      Context     : Analysis_Context;
+      Node        : ${root_node_type_name};
+      Kind        : Unit_Kind;
+      Charset     : String := "";
+      Reparse     : Boolean := False;
+      With_Trivia : Boolean := False) return Analysis_Unit;
 
-   overriding function Get_File
-     (Provider : C_Unit_File_Provider_Type;
-      Context  : Analysis_Context;
-      Name     : Text_Type;
-      Kind     : Unit_Kind)
-      return String;
+   overriding function Get_Unit
+     (Provider    : C_Unit_File_Provider_Type;
+      Context     : Analysis_Context;
+      Name        : Text_Type;
+      Kind        : Unit_Kind;
+      Charset     : String := "";
+      Reparse     : Boolean := False;
+      With_Trivia : Boolean := False) return Analysis_Unit;
 % endif
 
    function Value_Or_Empty (S : chars_ptr) return String
@@ -965,8 +969,8 @@ package body ${ada_lib_name}.Analysis.C is
    function ${capi.get_name('create_unit_file_provider')}
      (Data                    : System.Address;
       Destroy_Func            : ${unit_file_provider_destroy_type};
-      Get_File_From_Node_Func : ${unit_file_provider_get_file_from_node_type};
-      Get_File_From_Name_Func : ${unit_file_provider_get_file_from_name_type})
+      Get_Unit_From_Node_Func : ${unit_file_provider_get_unit_from_node_type};
+      Get_Unit_From_Name_Func : ${unit_file_provider_get_unit_from_name_type})
       return ${unit_file_provider_type}
    is
       Result : constant Unit_File_Provider_Access :=
@@ -974,8 +978,8 @@ package body ${ada_lib_name}.Analysis.C is
            (Ada.Finalization.Controlled with
             Data                    => Data,
             Destroy_Func            => Destroy_Func,
-            Get_File_From_Node_Func => Get_File_From_Node_Func,
-            Get_File_From_Name_Func => Get_File_From_Name_Func);
+            Get_Unit_From_Node_Func => Get_Unit_From_Node_Func,
+            Get_Unit_From_Name_Func => Get_Unit_From_Name_Func);
    begin
       return Wrap (Result);
    end;
@@ -999,57 +1003,61 @@ package body ${ada_lib_name}.Analysis.C is
    end Finalize;
 
    --------------
-   -- Get_File --
+   -- Get_Unit --
    --------------
 
-   overriding function Get_File
-     (Provider : C_Unit_File_Provider_Type;
-      Context  : Analysis_Context;
-      Node     : ${root_node_type_name};
-      Kind     : Unit_Kind)
-      return String
+   overriding function Get_Unit
+     (Provider    : C_Unit_File_Provider_Type;
+      Context     : Analysis_Context;
+      Node        : ${root_node_type_name};
+      Kind        : Unit_Kind;
+      Charset     : String := "";
+      Reparse     : Boolean := False;
+      With_Trivia : Boolean := False) return Analysis_Unit
    is
-      C_Result : chars_ptr := Provider.Get_File_From_Node_Func
-        (Provider.Data, Context, Wrap (Node), Wrap (Kind));
+      C_Charset   : chars_ptr := (if Charset'Length = 0
+                                  then Null_Ptr
+                                  else New_String (Charset));
+
+      C_Result : ${analysis_unit_type} := Provider.Get_Unit_From_Node_Func
+        (Provider.Data, Context, Wrap (Node), Wrap (Kind), C_Charset,
+         Boolean'Pos (Reparse), Boolean'Pos (With_Trivia));
    begin
-      if C_Result = Null_Ptr then
+      Free (C_Charset);
+      if C_Result = ${analysis_unit_type} (System.Null_Address) then
          raise Property_Error with "invalid AST node for unit name";
       end if;
-
-      declare
-         Result : constant String := Value (C_Result);
-      begin
-         Free (C_Result);
-         return Result;
-      end;
-   end Get_File;
+      return Unwrap (C_Result);
+   end Get_Unit;
 
    --------------
-   -- Get_File --
+   -- Get_Unit --
    --------------
 
-   overriding function Get_File
-     (Provider : C_Unit_File_Provider_Type;
-      Context  : Analysis_Context;
-      Name     : Text_Type;
-      Kind     : Unit_Kind)
-      return String
+   overriding function Get_Unit
+     (Provider    : C_Unit_File_Provider_Type;
+      Context     : Analysis_Context;
+      Name        : Text_Type;
+      Kind        : Unit_Kind;
+      Charset     : String := "";
+      Reparse     : Boolean := False;
+      With_Trivia : Boolean := False) return Analysis_Unit
    is
       Name_Access : Text_Access := Name'Unrestricted_Access;
-      C_Result    : chars_ptr := Provider.Get_File_From_Name_Func
-        (Provider.Data, Context, Wrap (Name_Access), Wrap (Kind));
+      C_Charset   : chars_ptr := (if Charset'Length = 0
+                                  then Null_Ptr
+                                  else New_String (Charset));
+
+      C_Result    : ${analysis_unit_type} := Provider.Get_Unit_From_Name_Func
+        (Provider.Data, Context, Wrap (Name_Access), Wrap (Kind), C_Charset,
+         Boolean'Pos (Reparse), Boolean'Pos (With_Trivia));
    begin
-      if C_Result = Null_Ptr then
+      Free (C_Charset);
+      if C_Result = ${analysis_unit_type} (System.Null_Address) then
          raise Property_Error with "invalid AST node for unit name";
       end if;
-
-      declare
-         Result : constant String := Value (C_Result);
-      begin
-         Free (C_Result);
-         return Result;
-      end;
-   end Get_File;
+      return Unwrap (C_Result);
+   end Get_Unit;
 
    ${exts.include_extension(
       ctx.ext('analysis', 'c_api', 'unit_file_providers', 'body')

@@ -109,21 +109,25 @@ package ${ada_lib_name}.Analysis is
       access constant Unit_File_Provider_Interface'Class;
    ${ada_doc('langkit.unit_file_provider_type', 3)}
 
-   function Get_File
-     (Provider : Unit_File_Provider_Interface;
-      Context  : Analysis_Context;
-      Node     : ${root_node_type_name};
-      Kind     : Unit_Kind)
-      return String is abstract;
-   ${ada_doc('langkit.unit_file_provider_get_file_from_node', 3)}
+   function Get_Unit
+     (Provider    : Unit_File_Provider_Interface;
+      Context     : Analysis_Context;
+      Node        : ${root_node_type_name};
+      Kind        : Unit_Kind;
+      Charset     : String := "";
+      Reparse     : Boolean := False;
+      With_Trivia : Boolean := False) return Analysis_Unit is abstract;
+   ${ada_doc('langkit.unit_file_provider_get_unit_from_node', 3)}
 
-   function Get_File
-     (Provider : Unit_File_Provider_Interface;
-      Context  : Analysis_Context;
-      Name     : Text_Type;
-      Kind     : Unit_Kind)
-      return String is abstract;
-   ${ada_doc('langkit.unit_file_provider_get_file_from_name', 3)}
+   function Get_Unit
+     (Provider    : Unit_File_Provider_Interface;
+      Context     : Analysis_Context;
+      Name        : Text_Type;
+      Kind        : Unit_Kind;
+      Charset     : String := "";
+      Reparse     : Boolean := False;
+      With_Trivia : Boolean := False) return Analysis_Unit is abstract;
+   ${ada_doc('langkit.unit_file_provider_get_unit_from_name', 3)}
 
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Unit_File_Provider_Interface'Class, Unit_File_Provider_Access);
@@ -181,9 +185,7 @@ package ${ada_lib_name}.Analysis is
       Kind        : Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False;
-      With_Trivia : Boolean := False;
-      Rule        : Grammar_Rule :=
-         ${Name.from_lower(ctx.main_rule_name)}_Rule)
+      With_Trivia : Boolean := False)
       return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_provider', 3)}
 

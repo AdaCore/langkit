@@ -144,23 +144,27 @@ package ${ada_lib_name}.Analysis.C is
       with Convention => C;
    ${ada_c_doc('langkit.unit_file_provider_destroy_type', 3)}
 
-   type ${unit_file_provider_get_file_from_node_type} is access function
-     (Data    : System.Address;
-      Context : Analysis_Context;
-      Node    : ${node_type};
-      Kind    : ${unit_kind_type})
-      return chars_ptr
+   type ${unit_file_provider_get_unit_from_node_type} is access function
+     (Data        : System.Address;
+      Context     : Analysis_Context;
+      Node        : ${node_type};
+      Kind        : ${unit_kind_type};
+      Charset     : chars_ptr;
+      Reparse     : int;
+      With_Trivia : int) return ${analysis_unit_type}
       with Convention => C;
-   ${ada_c_doc('langkit.unit_file_provider_get_file_from_node_type', 3)}
+   ${ada_c_doc('langkit.unit_file_provider_get_unit_from_node_type', 3)}
 
-   type ${unit_file_provider_get_file_from_name_type} is access function
-     (Data    : System.Address;
-      Context : Analysis_Context;
-      Name    : ${text_type};
-      Kind    : ${unit_kind_type})
-      return chars_ptr
+   type ${unit_file_provider_get_unit_from_name_type} is access function
+     (Data        : System.Address;
+      Context     : Analysis_Context;
+      Name        : ${text_type};
+      Kind        : ${unit_kind_type};
+      Charset     : chars_ptr;
+      Reparse     : int;
+      With_Trivia : int) return ${analysis_unit_type}
       with Convention => C;
-   ${ada_c_doc('langkit.unit_file_provider_get_file_from_name_type', 3)}
+   ${ada_c_doc('langkit.unit_file_provider_get_unit_from_name_type', 3)}
 % endif
 
    -------------------------
@@ -509,8 +513,8 @@ package ${ada_lib_name}.Analysis.C is
    function ${capi.get_name('create_unit_file_provider')}
      (Data                    : System.Address;
       Destroy_Func            : ${unit_file_provider_destroy_type};
-      Get_File_From_Node_Func : ${unit_file_provider_get_file_from_node_type};
-      Get_File_From_Name_Func : ${unit_file_provider_get_file_from_name_type})
+      Get_Unit_From_Node_Func : ${unit_file_provider_get_unit_from_node_type};
+      Get_Unit_From_Name_Func : ${unit_file_provider_get_unit_from_name_type})
       return ${unit_file_provider_type}
       with Export        => True,
            Convention    => C,

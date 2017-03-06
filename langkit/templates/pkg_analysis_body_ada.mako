@@ -487,19 +487,12 @@ package body ${ada_lib_name}.Analysis is
       Kind        : Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False;
-      With_Trivia : Boolean := False;
-      Rule        : Grammar_Rule :=
-         ${Name.from_lower(ctx.main_rule_name)}_Rule)
+      With_Trivia : Boolean := False)
       return Analysis_Unit
    is
    begin
-      declare
-         Filename : constant String :=
-            Context.Unit_File_Provider.Get_File (Context, Name, Kind);
-      begin
-         return Get_From_File
-           (Context, Filename, Charset, Reparse, With_Trivia, Rule);
-      end;
+      return Context.Unit_File_Provider.Get_Unit
+        (Context, Name, Kind, Charset, Reparse, With_Trivia);
 
    exception
       when Property_Error =>
