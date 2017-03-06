@@ -2009,12 +2009,8 @@ class PropertyDef(AbstractNodeData):
         else:
             # By default, properties are private and they accept an implicit
             # environment parameter.
-            def with_default(value, default_value):
-                return default_value if value is None else value
-            self._is_public = with_default(self._is_public, False)
-            self._has_implicit_env = with_default(
-                self._has_implicit_env, False
-            )
+            self._is_public = bool(self._is_public)
+            self._has_implicit_env = bool(self._has_implicit_env)
 
             # Uses env will be True by default for internal properties, False
             # for external properties.
