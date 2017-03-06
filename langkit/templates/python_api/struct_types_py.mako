@@ -101,17 +101,6 @@ class ${type_name}(ctypes.Structure):
         ${dec_ref}(ctypes.byref(self))
     % endif
 
-</%def>
-
-
-<%def name="low_level_decl(cls)">
-
-<%
-   type_name = cls.name().camel
-   ptr_name = '{}_Ptr'.format(type_name)
-   dec_ref = '_{}_dec_ref'.format(type_name)
-%>
-
 % if cls.is_refcounted():
 ${ptr_name} = ctypes.POINTER(${type_name})
 
