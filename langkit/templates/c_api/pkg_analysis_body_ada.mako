@@ -1020,7 +1020,7 @@ package body ${ada_lib_name}.Analysis.C is
                                   else New_String (Charset));
 
       C_Result : ${analysis_unit_type} := Provider.Get_Unit_From_Node_Func
-        (Provider.Data, Context, Wrap (Node), Wrap (Kind), C_Charset,
+        (Provider.Data, Wrap (Context), Wrap (Node), Wrap (Kind), C_Charset,
          Boolean'Pos (Reparse), Boolean'Pos (With_Trivia));
    begin
       Free (C_Charset);
@@ -1049,8 +1049,8 @@ package body ${ada_lib_name}.Analysis.C is
                                   else New_String (Charset));
 
       C_Result    : ${analysis_unit_type} := Provider.Get_Unit_From_Name_Func
-        (Provider.Data, Context, Wrap (Name_Access), Wrap (Kind), C_Charset,
-         Boolean'Pos (Reparse), Boolean'Pos (With_Trivia));
+        (Provider.Data, Wrap (Context), Wrap (Name_Access), Wrap (Kind),
+         C_Charset, Boolean'Pos (Reparse), Boolean'Pos (With_Trivia));
    begin
       Free (C_Charset);
       if C_Result = ${analysis_unit_type} (System.Null_Address) then

@@ -146,7 +146,7 @@ package ${ada_lib_name}.Analysis.C is
 
    type ${unit_file_provider_get_unit_from_node_type} is access function
      (Data        : System.Address;
-      Context     : Analysis_Context;
+      Context     : ${analysis_context_type};
       Node        : ${node_type};
       Kind        : ${unit_kind_type};
       Charset     : chars_ptr;
@@ -157,7 +157,7 @@ package ${ada_lib_name}.Analysis.C is
 
    type ${unit_file_provider_get_unit_from_name_type} is access function
      (Data        : System.Address;
-      Context     : Analysis_Context;
+      Context     : ${analysis_context_type};
       Name        : ${text_type};
       Kind        : ${unit_kind_type};
       Charset     : chars_ptr;
