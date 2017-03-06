@@ -542,9 +542,9 @@ class ManageScript(object):
             self.check_call(args, 'Pretty-printing', [
                 'gnatpp', '-P{}'.format(project_file), '-rnb',
                 '--insert-blank-lines',
-                self.gpr_scenario_vars(args, 'prod', 'relocatable'),
-                glob.glob(glob_pattern),
-            ])
+            ] + self.gpr_scenario_vars(args, 'prod', 'relocatable')
+              + glob.glob(glob_pattern)
+            )
 
         if args.verbosity.info:
             printcol(
