@@ -695,7 +695,7 @@ class CompileCtx(object):
 
         forwards_strict, _ = self.properties_callgraphs()
 
-        # Compute the callgraph with flattenned subclassing information:
+        # Compute the callgraph with flattened subclassing information:
         # consider only root properties.
         forwards = {}
         for prop, called in forwards_strict.items():
