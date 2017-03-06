@@ -25,8 +25,41 @@ import sys
 
 
 #
-# Basic types for the low-level binding
+# Low-level binding - First part
 #
+
+so_ext = {
+    'win32':  'dll',
+    'darwin': 'dylib',
+}.get(sys.platform, 'so')
+_c_lib = ctypes.cdll.LoadLibrary(
+    "lib${c_api.shared_object_basename}.{}".format(so_ext)
+)
+
+
+def _import_func(name, argtypes, restype, exc_wrap=True):
+    """
+    Import "name" from the C library, set its arguments/return types and return
+    the binding.
+
+    :param bool exc_wrap: If True, wrap the returned function to check for
+      exceptions.
+    """
+    func = getattr(_c_lib, name)
+    func.argtypes = argtypes
+    func.restype = restype
+
+    # Wrapper for "func" that raises a NativeException in case of internal
+    # error.
+
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        exc = _get_last_exception()
+        if exc and exc.contents.is_fatal:
+            raise exc.contents._wrap()
+        return result
+
+    return wrapper if exc_wrap else func
 
 
 class _text(ctypes.Structure):
@@ -1006,42 +1039,8 @@ ${struct_types.decl(struct_type)}
 % endfor
 
 #
-# Rest of the low-level binding
+# Low-level binding - Second part
 #
-
-so_ext = {
-    'win32':  'dll',
-    'darwin': 'dylib',
-}.get(sys.platform, 'so')
-_c_lib = ctypes.cdll.LoadLibrary(
-    "lib${c_api.shared_object_basename}.{}".format(so_ext)
-)
-
-
-def _import_func(name, argtypes, restype, exc_wrap=True):
-    """
-    Import "name" from the C library, set its arguments/return types and return
-    the binding.
-
-    :param bool exc_wrap: If True, wrap the returned function to check for
-      exceptions.
-    """
-    func = getattr(_c_lib, name)
-    func.argtypes = argtypes
-    func.restype = restype
-
-    # Wrapper for "func" that raises a NativeException in case of internal
-    # error.
-
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        exc = _get_last_exception()
-        if exc and exc.contents.is_fatal:
-            raise exc.contents._wrap()
-        return result
-
-    return wrapper if exc_wrap else func
-
 
 % for struct_type in ctx.struct_types:
 ${struct_types.low_level_decl(struct_type)}
