@@ -111,6 +111,7 @@ package ${ada_lib_name}.Analysis is
 
    function Get_File
      (Provider : Unit_File_Provider_Interface;
+      Context  : Analysis_Context;
       Node     : ${root_node_type_name};
       Kind     : Unit_Kind)
       return String is abstract;
@@ -118,6 +119,7 @@ package ${ada_lib_name}.Analysis is
 
    function Get_File
      (Provider : Unit_File_Provider_Interface;
+      Context  : Analysis_Context;
       Name     : Text_Type;
       Kind     : Unit_Kind)
       return String is abstract;

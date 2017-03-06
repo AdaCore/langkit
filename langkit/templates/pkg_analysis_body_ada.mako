@@ -495,7 +495,7 @@ package body ${ada_lib_name}.Analysis is
    begin
       declare
          Filename : constant String :=
-            Context.Unit_File_Provider.Get_File (Name, Kind);
+            Context.Unit_File_Provider.Get_File (Context, Name, Kind);
       begin
          return Get_From_File
            (Context, Filename, Charset, Reparse, With_Trivia, Rule);

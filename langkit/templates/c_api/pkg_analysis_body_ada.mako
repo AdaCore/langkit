@@ -46,12 +46,14 @@ package body ${ada_lib_name}.Analysis.C is
 
    overriding function Get_File
      (Provider : C_Unit_File_Provider_Type;
+      Context  : Analysis_Context;
       Node     : ${root_node_type_name};
       Kind     : Unit_Kind)
       return String;
 
    overriding function Get_File
      (Provider : C_Unit_File_Provider_Type;
+      Context  : Analysis_Context;
       Name     : Text_Type;
       Kind     : Unit_Kind)
       return String;
@@ -1002,10 +1004,13 @@ package body ${ada_lib_name}.Analysis.C is
 
    overriding function Get_File
      (Provider : C_Unit_File_Provider_Type;
+      Context  : Analysis_Context;
       Node     : ${root_node_type_name};
       Kind     : Unit_Kind)
       return String
    is
+      pragma Unreferenced (Context);
+
       C_Result : chars_ptr := Provider.Get_File_From_Node_Func
         (Provider.Data, Wrap (Node), Wrap (Kind));
    begin
@@ -1027,10 +1032,13 @@ package body ${ada_lib_name}.Analysis.C is
 
    overriding function Get_File
      (Provider : C_Unit_File_Provider_Type;
+      Context  : Analysis_Context;
       Name     : Text_Type;
       Kind     : Unit_Kind)
       return String
    is
+      pragma Unreferenced (Context);
+
       Name_Access : Text_Access := Name'Unrestricted_Access;
       C_Result    : chars_ptr := Provider.Get_File_From_Name_Func
         (Provider.Data, Wrap (Name_Access), Wrap (Kind));
