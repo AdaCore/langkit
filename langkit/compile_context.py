@@ -1207,7 +1207,7 @@ class CompileCtx(object):
         """
         def pretty_print(code):
             if self.verbosity.debug:
-                printcol('Pretty printing python code', Colors.OKBLUE)
+                printcol('Pretty printing Python code', Colors.OKBLUE)
             if not self.pretty_print:
                 return code
 
@@ -1218,7 +1218,7 @@ class CompileCtx(object):
                 check_source_language(
                     False,
                     "Yapf not available, using autopep8 to pretty-print "
-                    "python",
+                    "Python code",
                     severity=Severity.warning
                 )
 
@@ -1228,7 +1228,7 @@ class CompileCtx(object):
             except ImportError:
                 check_source_language(
                     False,
-                    "autopep8 not available, cannot pretty-print python",
+                    "autopep8 not available, cannot pretty-print Python code",
                     severity=Severity.warning
                 )
                 return code
