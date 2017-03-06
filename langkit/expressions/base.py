@@ -1984,6 +1984,28 @@ class PropertyDef(AbstractNodeData):
                     # If base has a type annotation and not self, then
                     # propagate it.
                     self.expected_type = self.base_property.expected_type
+
+            args = self.explicit_arguments
+            base_args = self.base_property.explicit_arguments
+            check_source_language(
+                len(args) == len(base_args),
+                "Derived and base properties don't have the same number"
+                " of arguments, base has {}, derived has {}".format(
+                    len(base_args), len(args)
+                )
+            )
+
+            for i, (arg, base_arg) in enumerate(zip(args, base_args)):
+                check_source_language(
+                    arg.var.type == base_arg.var.type,
+                    "Argument #{} doesn't have the same type as in base "
+                    "property. Base has {}, derived has {}".format(
+                        i + 1,
+                        arg.var.type.name().camel,
+                        base_arg.var.type.name().camel
+                    )
+                )
+
         else:
             # By default, properties are private and they accept an implicit
             # environment parameter.
