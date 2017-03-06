@@ -530,6 +530,10 @@ class ManageScript(object):
             "extensions"
         )
 
+        # Context needs to know if we want to pretty print the generated
+        # code or not.
+        self.context.pretty_print = getattr(parsed_args, 'pretty_print', False)
+
     def do_generate(self, args):
         """
         Generate source code for libadalang.

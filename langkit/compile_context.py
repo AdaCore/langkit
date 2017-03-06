@@ -548,6 +548,11 @@ class CompileCtx(object):
         :type: dict[str, mako.template.Template]
         """
 
+        self.pretty_print = False
+        """
+        Whether to pretty print the generated code or not.
+        """
+
     @property
     def main_rule_name(self):
         """
