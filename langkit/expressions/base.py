@@ -2161,8 +2161,11 @@ class PropertyDef(AbstractNodeData):
         :rtype: list[Argument]
         """
         expl, impl = funcy.split_by(lambda a: a.is_explicit, self.arguments)
-        assert all(not a.is_explicit and a.default_value for a in impl), (
-            "Only implicit arguments can follow implicit arguments"
+        assert all(a.default_value for a in impl), (
+            "All implicit arguments must have default values"
+        )
+        assert all(not a.is_explicit for a in impl), (
+            "All explicit arguments must come before implicit ones"
         )
         return expl
 
