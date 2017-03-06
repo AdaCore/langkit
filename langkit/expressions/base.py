@@ -2260,11 +2260,13 @@ class PropertyDef(AbstractNodeData):
         warn_if(
             unused_vars,
             'The following bindings are not used: {}'.format(
-                format_list(unused_vars)))
+                format_list(unused_vars))
+        )
         warn_if(
             wrongly_used_vars,
             'The following bindings are used even though they are supposed to'
-            ' be ignored: {}'.format(format_list(wrongly_used_vars)))
+            ' be ignored: {}'.format(format_list(wrongly_used_vars))
+        )
 
 
 def ExternalProperty(type=None, doc="", **kwargs):
