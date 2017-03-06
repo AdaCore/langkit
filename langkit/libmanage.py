@@ -544,7 +544,7 @@ class ManageScript(object):
 
         def gnatpp(project_file, glob_pattern):
             """
-            Helper function to pretty-print files from a gpr project.
+            Helper function to pretty-print files from a GPR project.
             """
             self.check_call(args, 'Pretty-printing', [
                 'gnatpp', '-P{}'.format(project_file), '-rnb',
