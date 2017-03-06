@@ -1205,15 +1205,40 @@ class CompileCtx(object):
         :param str python_path: The directory in which the Python module will
             be generated.
         """
+        def pretty_print(code):
+            if self.verbosity.debug:
+                printcol('Pretty printing python code', Colors.OKBLUE)
+            if not self.pretty_print:
+                return code
+
+            try:
+                from yapf.yapflib.yapf_api import FormatCode
+                return FormatCode(code)[0]
+            except ImportError:
+                check_source_language(
+                    False,
+                    "Yapf not available, using autopep8 to pretty-print python"
+                )
+
+            try:
+                from autopep8 import fix_code
+                return fix_code(code)
+            except ImportError:
+                check_source_language(
+                    False, "autopep8 not available, cannot pretty-print python"
+                )
+                return code
+
         module_filename = "{}.py".format(self.python_api_settings.module_name)
 
         with names.camel:
             with open(os.path.join(python_path, module_filename), "w") as f:
-                f.write(self.render_template(
+                code = pretty_print(self.render_template(
                     "python_api/module_py", _self=self,
                     c_api=self.c_api_settings,
                     pyapi=self.python_api_settings,
                 ))
+                f.write(code)
 
     @property
     def extensions_dir(self):
