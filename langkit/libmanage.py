@@ -282,6 +282,11 @@ class ManageScript(object):
         # will apply to create_context.
         self.context = None
 
+        # This will be set in the run method, when we have parsed arguments
+        # from the command line.
+        self.verbosity = None
+        ":type: Verbosity"
+
     def add_generate_args(self, subparser):
         """
         Add arguments to tune code generation to "subparser".
@@ -433,6 +438,9 @@ class ManageScript(object):
 
             pr = cProfile.Profile()
             pr.enable()
+
+        # Set the verbosity
+        self.verbosity = parsed_args.verbosity
 
         # If asked to, setup the exception hook as a last-chance handler to
         # invoke a debugger in case of uncaught exception.
