@@ -949,3 +949,10 @@ class ManageScript(object):
             printcol('Executing: {}'.format(
                 ' '.join(pipes.quote(arg) for arg in argv)
             ), Colors.CYAN)
+
+    def log_info(self, msg, color):
+        """
+        If verbosity level is info, log a message with given color.
+        """
+        if self.verbosity.info:
+            printcol(msg, color)
