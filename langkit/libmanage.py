@@ -554,11 +554,10 @@ class ManageScript(object):
               + glob.glob(glob_pattern)
             )
 
-        if args.verbosity.info:
-            printcol(
-                "Generating source for {} ...".format(self.lib_name.lower()),
-                Colors.HEADER
-            )
+        self.log_info(
+            "Generating source for {} ...".format(self.lib_name.lower()),
+            Colors.HEADER
+        )
 
         # Get source directories for the mains project file that are relative
         # to the generated project file (i.e. $BUILD_DIR/src/mains.gpr).
@@ -582,9 +581,8 @@ class ManageScript(object):
             return
 
         if getattr(args, 'pretty_print', False):
-            if args.verbosity.info:
-                printcol("Pretty-printing sources for Libadalang ...",
-                         Colors.HEADER)
+            self.log_info("Pretty-printing sources for Libadalang ...",
+                          Colors.HEADER)
             gnatpp(
                 self.dirs.build_dir('lib', 'gnat',
                                     '{}.gpr'.format(self.lib_name.lower())),
@@ -593,8 +591,7 @@ class ManageScript(object):
             gnatpp(self.dirs.build_dir('src', 'mains.gpr'),
                    self.dirs.build_dir('src', '*.ad*'))
 
-        if args.verbosity.info:
-            printcol("Generation complete!", Colors.OKGREEN)
+        self.log_info("Generation complete!", Colors.OKGREEN)
 
     def what_to_build(self, args, is_library):
         """
@@ -744,8 +741,8 @@ class ManageScript(object):
         """
 
         # Build the generated library itself
-        if args.verbosity.info:
-            printcol("Building the generated source code ...", Colors.HEADER)
+        self.log_info("Building the generated source code", Colors.HEADER)
+
         lib_project = self.dirs.build_dir(
             'lib', 'gnat', '{}.gpr'.format(self.lib_name.lower())
         )
@@ -757,8 +754,7 @@ class ManageScript(object):
                  if args.disable_all_mains else
                  self.main_programs - disabled_mains)
         if mains:
-            if args.verbosity.info:
-                printcol("Building the main programs ...", Colors.HEADER)
+            self.log_info("Building the main programs ...", Colors.HEADER)
             self.gprbuild(args, self.dirs.build_dir('src', 'mains.gpr'), False,
                           mains)
 
@@ -770,8 +766,7 @@ class ManageScript(object):
                 shutil.copy(dll,
                             self.dirs.build_dir('bin', path.basename(dll)))
 
-        if args.verbosity.info:
-            printcol("Compilation complete!", Colors.OKGREEN)
+        self.log_info("Compilation complete!", Colors.OKGREEN)
 
     def do_make(self, args):
         """
