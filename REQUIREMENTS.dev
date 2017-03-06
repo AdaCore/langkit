@@ -9,3 +9,4 @@ sphinx-rtd-theme==0.1.9
 funcy==1.7.1
 docutils==0.12
 autopep8==1.2.4
+yapf==0.16.0
