@@ -49,13 +49,13 @@ class PythonAPISettings(AbstractAPISettings):
 
         value_suffix = '' if from_field_access else '.value'
         return dispatch_on_type(type, [
-            (ct.AnalysisUnitType, lambda _: 'AnalysisUnit.wrap({})'),
+            (ct.AnalysisUnitType, lambda _: 'AnalysisUnit._wrap({})'),
             (ct.AnalysisUnitKind, lambda _: 'unit_kind_to_str[{}]'),
-            (ct.ASTNode, lambda _: '{}.wrap({{}})'.format(
+            (ct.ASTNode, lambda _: '{}._wrap({{}})'.format(
                 self.context.root_grammar_class.name().camel
             )),
             (ct.Token, lambda _: '{}'),
-            (ct.Symbol, lambda _: '{}.wrap()'),
+            (ct.Symbol, lambda _: '{}._wrap()'),
             (ct.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (ct.LongType, lambda _: '{{}}{}'.format(value_suffix)),
             (ct.EnumType, lambda _: '{}_to_str[{{}}{}]'.format(
@@ -67,10 +67,10 @@ class PythonAPISettings(AbstractAPISettings):
                 inc_ref
             )),
             (ct.Struct, lambda _: '{}'),
-            (ct.LexicalEnvType, lambda _: 'LexicalEnv.wrap({})'),
-            (ct.LogicVarType, lambda _: 'LogicVar.wrap({})'),
-            (ct.EquationType, lambda _: 'Equation.wrap({})'),
-            (ct.EnvRebindingsType, lambda _: 'EnvRebindings.wrap({})'),
+            (ct.LexicalEnvType, lambda _: 'LexicalEnv._wrap({})'),
+            (ct.LogicVarType, lambda _: 'LogicVar._wrap({})'),
+            (ct.EquationType, lambda _: 'Equation._wrap({})'),
+            (ct.EnvRebindingsType, lambda _: 'EnvRebindings._wrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             '(wrapping): {}'.format(type)
@@ -90,7 +90,7 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (ct.AnalysisUnitType, lambda _: '{}._c_value'),
             (ct.AnalysisUnitKind, lambda _: '_unwrap_unit_kind({})'),
-            (ct.ASTNode, lambda _: '{}.unwrap({{}})'.format(
+            (ct.ASTNode, lambda _: '{}._unwrap({{}})'.format(
                 self.context.root_grammar_class.name().camel
             )),
             (ct.BoolType, lambda _: 'bool({})'),
@@ -101,11 +101,11 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (ct.ArrayType, lambda cls: '{}._c_value'),
             (ct.Struct, lambda _: '{}'),
-            (ct.Symbol, lambda _: '_text.unwrap({})'),
-            (ct.LexicalEnvType, lambda _: 'LexicalEnv.unwrap({})'),
-            (ct.LogicVarType, lambda _: 'LogicVar.unwrap({})'),
-            (ct.EquationType, lambda _: 'Equation.unwrap({})'),
-            (ct.EnvRebindingsType, lambda _: 'EnvRebindings.unwrap({})'),
+            (ct.Symbol, lambda _: '_text._unwrap({})'),
+            (ct.LexicalEnvType, lambda _: 'LexicalEnv._unwrap({})'),
+            (ct.LogicVarType, lambda _: 'LogicVar._unwrap({})'),
+            (ct.EquationType, lambda _: 'Equation._unwrap({})'),
+            (ct.EnvRebindingsType, lambda _: 'EnvRebindings._unwrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding '
             '(unwrapping): {}'.format(type)

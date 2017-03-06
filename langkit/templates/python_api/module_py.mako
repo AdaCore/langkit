@@ -46,7 +46,7 @@ class _text(ctypes.Structure):
     text_buffer = None
 
     @classmethod
-    def unwrap(cls, value):
+    def _unwrap(cls, value):
         if isinstance(value, str):
             value = value.decode('ascii')
         elif not isinstance(value, unicode):
@@ -63,7 +63,7 @@ class _text(ctypes.Structure):
         result.text_buffer = text_buffer
         return result
 
-    def wrap(self):
+    def _wrap(self):
         if self.length > 0:
             # self.length tells how much UTF-32 chars there are in self.chars
             # but self.chars is a char* so we have to fetch 4 times more bytes
@@ -80,7 +80,7 @@ class _Exception(ctypes.Structure):
     _fields_ = [("is_fatal", ctypes.c_int),
                 ("information", ctypes.c_char_p)]
 
-    def wrap(self):
+    def _wrap(self):
         return NativeException(self.information)
 
 
@@ -201,7 +201,7 @@ class AnalysisContext(object):
     def get_from_provider(self, name, kind, charset=None, reparse=False,
                           with_trivia=False):
         ${py_doc('langkit.get_unit_from_provider', 8)}
-        _name = _text.unwrap(name)
+        _name = _text._unwrap(name)
         _kind = _unwrap_unit_kind(kind)
         c_value = _get_analysis_unit_from_provider(self._c_value, _name, _kind,
                                                    charset or '', reparse,
@@ -251,7 +251,7 @@ class AnalysisUnit(object):
             if not success:
                 raise IndexError('diagnostic index out of range')
             else:
-                result = diag.wrap()
+                result = diag._wrap()
                 return result
 
     class TokenIterator(object):
@@ -302,28 +302,28 @@ class AnalysisUnit(object):
         if not _unit_populate_lexical_env(self._c_value):
             exc = _get_last_exception()
             if exc:
-                raise PropertyError(*exc.contents.wrap().args)
+                raise PropertyError(*exc.contents._wrap().args)
             else:
                 raise PropertyError()
 
     @property
     def root(self):
         ${py_doc('langkit.unit_root', 8)}
-        return ${root_astnode_name}.wrap(_unit_root(self._c_value))
+        return ${root_astnode_name}._wrap(_unit_root(self._c_value))
 
     @property
     def first_token(self):
         ${py_doc('langkit.unit_first_token', 8)}
         result = Token()
         _unit_first_token(self._c_value, ctypes.byref(result))
-        return result.wrap()
+        return result._wrap()
 
     @property
     def last_token(self):
         ${py_doc('langkit.unit_last_token', 8)}
         result = Token()
         _unit_last_token(self._c_value, ctypes.byref(result))
-        return result.wrap()
+        return result._wrap()
 
     @property
     def token_count(self):
@@ -356,7 +356,7 @@ class AnalysisUnit(object):
         pass
 
     @classmethod
-    def wrap(cls, c_value):
+    def _wrap(cls, c_value):
         return cls(c_value) if c_value else None
 
 
@@ -371,15 +371,15 @@ class LexicalEnv(object):
 
     @property
     def parent(self):
-        return LexicalEnv.wrap(_lexical_env_parent(self._c_value))
+        return LexicalEnv._wrap(_lexical_env_parent(self._c_value))
 
     @property
     def node(self):
-        return ${root_astnode_name}.wrap(_lexical_env_node(self._c_value))
+        return ${root_astnode_name}._wrap(_lexical_env_node(self._c_value))
 
     def get(self, name):
         ${py_doc('langkit.lexical_env_get', 8)}
-        result = _lexical_env_get(self._c_value, _text.unwrap(name))
+        result = _lexical_env_get(self._c_value, _text._unwrap(name))
         return ${pyapi.wrap_value('result',
                                   T.root_node.env_el().array_type())}
 
@@ -391,13 +391,13 @@ class LexicalEnv(object):
         pass
 
     @classmethod
-    def unwrap(cls, value):
+    def _unwrap(cls, value):
         if value is None:
             raise TypeError('None is not an allowed LexicalEnv value')
         return value._c_value
 
     @classmethod
-    def wrap(cls, c_value):
+    def _wrap(cls, c_value):
         return cls(c_value) if c_value else None
 
 
@@ -413,11 +413,11 @@ class BasePointerBinding(object):
         pass
 
     @classmethod
-    def unwrap(cls, value):
+    def _unwrap(cls, value):
         return 0 if value is None else value._c_value
 
     @classmethod
-    def wrap(cls, c_value):
+    def _wrap(cls, c_value):
         return cls(c_value) if c_value else None
 
 
@@ -473,11 +473,11 @@ class Sloc(object):
         _fields_ = [("line", ctypes.c_uint32),
                     ("column", ctypes.c_uint16)]
 
-        def wrap(self):
+        def _wrap(self):
             return Sloc(self.line, self.column)
 
         @classmethod
-        def unwrap(cls, sloc):
+        def _unwrap(cls, sloc):
             return cls(sloc.line, sloc.column)
 
 
@@ -514,8 +514,8 @@ class SlocRange(object):
         _fields_ = [("start", Sloc._c_type),
                     ("end", Sloc._c_type)]
 
-        def wrap(self):
-            return SlocRange(self.start.wrap(), self.end.wrap())
+        def _wrap(self):
+            return SlocRange(self.start._wrap(), self.end._wrap())
 
 
 class Diagnostic(object):
@@ -538,8 +538,8 @@ class Diagnostic(object):
         _fields_ = [("sloc_range", SlocRange._c_type),
                     ("message", _text)]
 
-        def wrap(self):
-            return Diagnostic(self.sloc_range.wrap(), self.message.wrap())
+        def _wrap(self):
+            return Diagnostic(self.sloc_range._wrap(), self.message._wrap())
 
 
 class Token(ctypes.Structure):
@@ -552,7 +552,7 @@ class Token(ctypes.Structure):
                 ('_text',         _text),
                 ('_sloc_range',   SlocRange._c_type)]
 
-    def wrap(self):
+    def _wrap(self):
         return self if self._token_data else None
 
     @property
@@ -560,7 +560,7 @@ class Token(ctypes.Structure):
         ${py_doc('langkit.token_next', 8)}
         t = Token()
         _token_next(ctypes.byref(self), ctypes.byref(t))
-        return t.wrap()
+        return t._wrap()
 
     def is_equivalent(self, other):
         ${py_doc('langkit.token_is_equivalent', 8)}
@@ -573,7 +573,7 @@ class Token(ctypes.Structure):
         ${py_doc('langkit.token_previous', 8)}
         t = Token()
         _token_previous(ctypes.byref(self), ctypes.byref(t))
-        return t.wrap()
+        return t._wrap()
 
     @property
     def kind(self):
@@ -582,7 +582,7 @@ class Token(ctypes.Structure):
         # The _token_kind_name wrapper is already supposed to handle exceptions
         # so this should always return a non-null value.
         assert name
-        return unwrap_str(name)
+        return _unwrap_str(name)
 
     @property
     def is_trivia(self):
@@ -598,7 +598,7 @@ class Token(ctypes.Structure):
 
     @property
     def text(self):
-        return self._text.wrap()
+        return self._text._wrap()
 
     @classmethod
     def text_range(cls, first, last):
@@ -613,11 +613,11 @@ class Token(ctypes.Structure):
                   first, last
                )
             )
-        return result.wrap() or u''
+        return result._wrap() or u''
 
     @property
     def sloc_range(self):
-        return self._sloc_range.wrap()
+        return self._sloc_range._wrap()
 
     def __eq__(self, other):
         """
@@ -695,7 +695,7 @@ class ${root_astnode_name}(object):
         ${py_doc('langkit.node_sloc_range', 8)}
         result = SlocRange._c_type()
         _node_sloc_range(self._c_value, ctypes.byref(result))
-        return result.wrap()
+        return result._wrap()
 
     @property
     def text(self):
@@ -710,14 +710,14 @@ class ${root_astnode_name}(object):
     def short_image(self):
         ${py_doc('langkit.node_short_image', 8)}
         text = _node_short_image(self._c_value)
-        return text.wrap()
+        return text._wrap()
 
     def lookup(self, sloc):
         ${py_doc('langkit.lookup_in_node', 8)}
-        c_sloc = Sloc._c_type.unwrap(sloc)
+        c_sloc = Sloc._c_type._unwrap(sloc)
         c_node =_lookup_in_node(self._c_value,
                                 ctypes.byref(c_sloc))
-        return ${root_astnode_name}.wrap(c_node)
+        return ${root_astnode_name}._wrap(c_node)
 
     def __len__(self):
         """Return the number of ${root_astnode_name} children this node has."""
@@ -743,7 +743,7 @@ class ${root_astnode_name}(object):
         if not success:
             raise IndexError('child index out of range')
         else:
-            return ${root_astnode_name}.wrap(result)
+            return ${root_astnode_name}._wrap(result)
 
     def iter_fields(self, with_fields=True, with_properties=True):
         """Iterate through all the fields this node contains
@@ -898,7 +898,7 @@ class ${root_astnode_name}(object):
     _c_enum_type = ctypes.c_uint
 
     @classmethod
-    def wrap(cls, c_value):
+    def _wrap(cls, c_value):
         """
         Internal helper to wrap a low-level ASTnode value into an instance of
         the the appropriate high-level ASTNode subclass.
@@ -931,7 +931,7 @@ class ${root_astnode_name}(object):
             return py_obj
 
     @classmethod
-    def unwrap(cls, py_value):
+    def _unwrap(cls, py_value):
         """
         Internal helper to unwrap a high-level ASTNode instance into a
         low-level value. Raise a TypeError if the input value has unexpected
@@ -958,11 +958,11 @@ class EnvRebindings(object):
         pass
 
     @classmethod
-    def unwrap(cls, value):
+    def _unwrap(cls, value):
         return 0 if value is None else value._c_value
 
     @classmethod
-    def wrap(cls, c_value):
+    def _wrap(cls, c_value):
         return cls(c_value) if c_value else None
 
 
@@ -1037,7 +1037,7 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
         result = func(*args, **kwargs)
         exc = _get_last_exception()
         if exc and exc.contents.is_fatal:
-            raise exc.contents.wrap()
+            raise exc.contents._wrap()
         return result
 
     return wrapper if exc_wrap else func
@@ -1319,7 +1319,7 @@ _token_range_text = _import_func(
 # Layering helpers
 #
 
-def unwrap_str(c_char_p_value):
+def _unwrap_str(c_char_p_value):
     """
     Assuming c_char_p_value is a valid char*, convert it to a native Python
     string and free the C pointer.

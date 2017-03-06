@@ -60,7 +60,7 @@
         ):
             exc = _get_last_exception()
             if exc:
-                raise PropertyError(*exc.contents.wrap().args)
+                raise PropertyError(*exc.contents._wrap().args)
             else:
                 raise PropertyError()
 
