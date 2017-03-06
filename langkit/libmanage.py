@@ -167,11 +167,6 @@ class ManageScript(object):
             help='Disable the generation (and testing) of shared libraries'
         )
         args_parser.add_argument(
-            '--bindings', '-b', nargs='+', choices=('python', ),
-            default=['python'],
-            help='Bindings to generate (by default: only Python)'
-        )
-        args_parser.add_argument(
             '--verbosity', '-v', nargs='?',
             type=Verbosity,
             choices=Verbosity.choices(),
