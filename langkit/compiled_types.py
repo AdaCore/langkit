@@ -1630,7 +1630,6 @@ class Struct(CompiledType):
     __metaclass__ = StructMetaclass
     is_ptr = False
     null_allowed = True
-    _exposed = True
 
     is_env_metadata = False
     """
@@ -1652,6 +1651,10 @@ class Struct(CompiledType):
 
     :type: dict[(bool, AbstractNodeData), dict[str, AbstractField]]
     """
+
+    # ASTNode subclasses are exposed by default, and a compile pass will tag
+    # all Struct subclasses that are exposed through the public API.
+    _exposed = False
 
     @classmethod
     @memoized
@@ -2048,6 +2051,8 @@ class ASTNode(Struct):
     :type: list[ASTNode]
     """
 
+    _exposed = True
+
     def __new__(cls, *args):
         # TODO: We might want to find a way to limit that magic to the scope of
         # the grammar in some way.
@@ -2251,6 +2256,10 @@ class ArrayType(CompiledType):
     """
 
     is_ptr = True
+
+    # A compile pass will tag all array types that are exposed through the
+    # public API.
+    _exposed = False
 
     @classmethod
     def is_refcounted(cls):

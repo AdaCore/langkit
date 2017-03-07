@@ -746,38 +746,6 @@ class CompileCtx(object):
         warn(unreachable_private, 'This private property is unused')
         warn(unused_abstractions, 'This private abstraction is unused')
 
-    def error_on_forbidden_public_types(self):
-        """
-        If "library_fields_all_public" is False, emit non-blocking errors for
-        all types that are exposed in the public API whereas they should not.
-        """
-        if self.library_fields_all_public:
-            return
-
-        def check_type(field, t, type_use):
-            check_source_language(
-                fv.is_private or t._exposed,
-                '{} is {}, which is forbidden in public API'.format(
-                    type_use, t.name().camel
-                ),
-                severity=Severity.non_blocking_error
-            )
-
-        for struct in self.struct_types + self.astnode_types:
-            if not struct._exposed:
-                continue
-
-            for _, fv in sorted(
-                struct.get_abstract_fields_dict(include_inherited=False)
-                .items()
-            ):
-                with fv.diagnostic_context():
-                    check_type(fv, fv.type,
-                               'return type' if fv.is_property else 'type')
-                    for arg in fv.explicit_arguments:
-                        check_type(fv, arg.type,
-                                   '"{}" argument'.format(arg.name))
-
     def render_template(self, *args, **kwargs):
         # Kludge: to avoid circular dependency issues, do not import parsers
         # until needed.
@@ -970,8 +938,9 @@ class CompileCtx(object):
                         lambda _, astnode: astnode.check_resolved()),
             GlobalPass('warn on unused private properties',
                        CompileCtx.warn_unused_private_properties),
-            GlobalPass('error on forbidden public types',
-                       CompileCtx.error_on_forbidden_public_types),
+            ASTNodePass('expose public structs and arrays types in APIs',
+                        CompileCtx.expose_public_api_types,
+                        auto_context=False),
             errors_checkpoint_pass,
 
             StopPipeline('check only', disabled=not check_only),
@@ -1403,3 +1372,62 @@ class CompileCtx(object):
         """
         for t in self.struct_types + self.astnode_types:
             t.add_to_context()
+
+    def expose_public_api_types(self, astnode):
+        """
+        Tag all struct and array types referenced by the public API as exposed.
+        This also emits non-blocking errors for all types that are exposed in
+        the public API whereas they should not.
+        """
+        from langkit.compiled_types import ArrayType, Struct
+
+        # All code must ignore _exposed attributes when the following is true
+        if self.library_fields_all_public:
+            return
+
+        def expose(t, for_field, type_use, traceback):
+            """
+            Recursively tag "t" and all the types it references as exposed.
+            """
+            if t._exposed:
+                return
+
+            if issubclass(t, Struct) and not t.is_ast_node():
+                for f in t.get_abstract_fields(include_inherited=False):
+                    expose(f.type, f, 'type', traceback + [f.qualname])
+
+            elif issubclass(t, ArrayType):
+                expose(t.element_type(), for_field, 'element type',
+                       traceback + ['array of {}'.format(t.name().camel)])
+
+            else:
+                # Only struct and array types have their "_exposed" attribute
+                # inferred. We consider all other ones to have a static value,
+                # so complain if we reach a type that must not be exposed.
+                with for_field.diagnostic_context():
+                    text_tb = (
+                        ' (from: {})'.format(
+                            ' -> '.join(traceback[:-1])
+                        ) if len(traceback) > 1 else ''
+                    )
+                    check_source_language(
+                        t._exposed,
+                        "{} is {}, which is forbidden in public API{}".format(
+                            type_use, t.name().camel, text_tb
+                        ),
+                        severity=Severity.non_blocking_error
+                    )
+                return
+
+            t._exposed = True
+
+        for f in astnode.get_abstract_fields(
+            predicate=lambda f: f.is_public,
+            include_inherited=False
+        ):
+            expose(f.type, f,
+                   'return type' if f.is_property else 'type',
+                   [f.qualname])
+            for arg in f.explicit_arguments:
+                expose(arg.type, f, '"{}" argument'.format(arg.name),
+                       [f.qualname])

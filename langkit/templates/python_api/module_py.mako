@@ -1076,7 +1076,7 @@ ${struct_types.decl(struct_type)}
 
 ${array_types.base_decl()}
 % for array_type in ctx.sorted_types(ctx.array_types):
-    % if array_type.element_type()._exposed or ctx.library_fields_all_public:
+    % if array_type._exposed or ctx.library_fields_all_public:
 ${array_types.decl(array_type)}
     % endif
 % endfor
