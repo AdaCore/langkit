@@ -980,6 +980,34 @@ class ${root_astnode_name}(object):
             )
         return py_value._c_value
 
+    def _eval_field(self, c_result, c_accessor, *c_args):
+        """
+        Internal helper to evaluate low-level field accessors/properties.
+
+        This calls "c_accessor" on this node with the input arguments and puts
+        the result in "c_result". This raises a PropertyError if the evaluation
+        failed. Return "c_result" for convenience.
+        """
+        args = (self._c_value, ) + c_args + (ctypes.byref(c_result), )
+        if not c_accessor(*args):
+            exc = _get_last_exception()
+            if exc:
+                raise PropertyError(*exc.contents._wrap().args)
+            else:
+                raise PropertyError()
+        return c_result
+
+    def _eval_astnode_field(self, c_accessor):
+        """
+        Internal helper. Wrapper around _eval_field for fields that return an
+        AST node and that accept no explicit argument. This is useful as it's
+        the most common case of field, so using this wrapper reduces generated
+        code length.
+        """
+        return ${root_astnode_name}._wrap(
+            self._eval_field(${root_astnode_name}._c_type(), c_accessor)
+        )
+
 
 class EnvRebindings(object):
     ${py_doc('langkit.env_rebindings_type', 4)}

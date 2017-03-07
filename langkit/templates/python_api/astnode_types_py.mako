@@ -39,32 +39,38 @@
     % endif
     def ${field.name.lower}(${', '.join(arg_list)}):
         ${py_doc(field, 8)}
-        ## Declare a variable of the type
-        result = ${pyapi.type_internal_name(field.type)}(
-        % if is_struct(field.type) and not is_ast_node(field.type):
-            % for fld in field.type.get_fields():
-            ${fld.name.lower}=None,
-            % endfor
-            _uninitialized=True
+        <% c_accessor = '_{}'.format(field.accessor_basename.lower) %>
+
+        % if is_ast_node(field.type) and not field.explicit_arguments:
+        return self._eval_astnode_field(${c_accessor})
+
+        % else:
+        <%
+            # Expression to create a holder for the C result
+            c_result_args = (
+                (['{}=None'.format(fld.name.lower)
+                  for fld in field.type.get_fields()]
+                 + ['_uninitialized=True'])
+                if is_struct(field.type) and not is_ast_node(field.type) else
+                []
+            )
+            c_result_constructor = '{}({})'.format(
+                pyapi.type_internal_name(field.type),
+                ', '.join(c_result_args)
+            )
+
+            # Expression for the C value for field evaluation
+            eval_args = [c_result_constructor, c_accessor] + [
+                pyapi.unwrap_value(arg.name.lower, arg.type)
+                for arg in field.explicit_arguments
+            ]
+            c_result = 'self._eval_field({})'.format(', '.join(eval_args))
+
+            # What comes next is the unwrapping of this C result for the
+            # caller.
+        %>
+        return ${pyapi.wrap_value(c_result, field.type)}
         % endif
-        )
-
-        ## Get it via the C field accessor. Note that "unwrap_value" already
-        ## takes care of type checking so we should keep memory safety.
-        if not _${field.accessor_basename.lower}(
-            self._c_value,
-            % for arg in field.explicit_arguments:
-            ${pyapi.unwrap_value(arg.name.lower, arg.type)},
-            % endfor
-            ctypes.byref(result)
-        ):
-            exc = _get_last_exception()
-            if exc:
-                raise PropertyError(*exc.contents._wrap().args)
-            else:
-                raise PropertyError()
-
-        return ${pyapi.wrap_value('result', field.type)}
     % endfor
 </%def>
 
