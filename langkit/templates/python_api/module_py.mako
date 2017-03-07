@@ -1072,6 +1072,7 @@ ${struct_types.decl(struct_type)}
 # Low-level binding - Second part
 #
 
+${array_types.base_decl()}
 % for array_type in ctx.sorted_types(ctx.array_types):
 ${array_types.decl(array_type)}
 % endfor

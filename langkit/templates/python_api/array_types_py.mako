@@ -1,16 +1,10 @@
 ## vim: filetype=makopython
 
-<%def name="decl(cls)">
-% if cls.element_type()._exposed or ctx.library_fields_all_public:
-<%
-   type_name = cls.name().camel
-   c_element_type = pyapi.type_internal_name(cls.element_type())
-%>
+<%def name="base_decl()">
 
-
-class ${type_name}(object):
+class _BaseArray(object):
     """
-    Wrapper class for arrays of ${cls.element_type().name()}.
+    Base class for Ada arrays bindings.
     """
 
     def __init__(self, c_value, inc_ref=False):
@@ -25,7 +19,8 @@ class ${type_name}(object):
            self._inc_ref(self._c_value)
 
     def __repr__(self):
-        return '<${type_name} object at {} {}>'.format(
+        return '<{} object at {} {}>'.format(
+            type(self).__name__,
             hex(id(self)),
             list(self)
         )
@@ -48,6 +43,25 @@ class ${type_name}(object):
             raise IndexError()
 
         return self._unwrap_item(self._items[key])
+
+    @staticmethod
+    def _unwrap_item(item):
+        raise NotImplementedError()
+
+</%def>
+
+<%def name="decl(cls)">
+% if cls.element_type()._exposed or ctx.library_fields_all_public:
+<%
+   type_name = cls.name().camel
+   c_element_type = pyapi.type_internal_name(cls.element_type())
+%>
+
+
+class ${type_name}(_BaseArray):
+    """
+    Wrapper class for arrays of ${cls.element_type().name()}.
+    """
 
     @staticmethod
     def _unwrap_item(item):
