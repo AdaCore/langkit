@@ -11,8 +11,6 @@
    dec_ref = '_{}_dec_ref'.format(type_name)
 %>
 
-${py_doc(cls)}
-
 
 class ${struct_name}(ctypes.Structure):
     _fields_ = [('n', ctypes.c_int),
