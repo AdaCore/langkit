@@ -140,6 +140,11 @@ class _unit_provider(ctypes.c_void_p):
 % endif
 
 
+#
+# High-level binding
+#
+
+
 class NativeException(Exception):
     """
     Exception raised when the underlying C API reports an error that occurred
@@ -165,11 +170,6 @@ class PropertyError(Exception):
 ${exts.include_extension(
    ctx.ext('python_api', 'exceptions')
 )}
-
-
-#
-# High-level binding
-#
 
 
 class AnalysisContext(object):
