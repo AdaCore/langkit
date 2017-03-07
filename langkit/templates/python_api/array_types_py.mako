@@ -51,12 +51,11 @@ class _BaseArray(object):
 </%def>
 
 <%def name="decl(cls)">
-% if cls.element_type()._exposed or ctx.library_fields_all_public:
+
 <%
    type_name = cls.api_name().camel
    c_element_type = pyapi.type_internal_name(cls.element_type())
 %>
-
 
 class ${type_name}(_BaseArray):
     """
@@ -91,5 +90,4 @@ class ${type_name}(_BaseArray):
     _dec_ref = staticmethod(_import_func('${cls.c_dec_ref(capi)}',
                             [_c_type], None))
 
-% endif
 </%def>
