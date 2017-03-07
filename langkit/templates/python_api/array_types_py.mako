@@ -4,7 +4,7 @@
 % if cls.element_type()._exposed or ctx.library_fields_all_public:
 <%
    type_name = cls.name().camel
-   element_type = pyapi.type_internal_name(cls.element_type())
+   c_element_type = pyapi.type_internal_name(cls.element_type())
 %>
 
 
@@ -18,7 +18,7 @@ class ${type_name}(object):
         self._length = c_value.contents.n
 
         items_addr = _field_address(c_value.contents, 'items')
-        items = ${element_type}.from_address(items_addr)
+        items = self._c_element_type.from_address(items_addr)
         self._items = ctypes.pointer(items)
 
         if inc_ref:
@@ -47,7 +47,10 @@ class ${type_name}(object):
         elif not (0 <= key < self._length):
             raise IndexError()
 
-        item = self._items[key]
+        return self._unwrap_item(self._items[key])
+
+    @staticmethod
+    def _unwrap_item(item):
         ## In the case of array of Structure instances, array[index] returns a
         ## reference to the record. Thus, in order to keep memory safety, we
         ## must copy the record itself so that the array can be deallocated
@@ -59,10 +62,12 @@ class ${type_name}(object):
         return ${pyapi.wrap_value('item', elt_type)}
         % endif
 
+    _c_element_type = ${c_element_type}
+
     class _c_struct(ctypes.Structure):
         _fields_ = [('n', ctypes.c_int),
                     ('ref_count', ctypes.c_int),
-                    ('items', ${element_type} * 1)]
+                    ('items', ${c_element_type} * 1)]
 
 
     _c_type = ctypes.POINTER(_c_struct)
