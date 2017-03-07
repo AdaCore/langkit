@@ -13,6 +13,7 @@ this is the way it is done for the ada language::
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import ast
 from collections import defaultdict
 from contextlib import contextmanager
 from distutils.spawn import find_executable
@@ -1177,6 +1178,25 @@ class CompileCtx(object):
         :param str python_path: The directory in which the Python module will
             be generated.
         """
+
+        def strip_white_lines(code):
+            tree = ast.parse(code)
+            # Create an assoc of lines to a boolean flag indicating whether the
+            # line is in a multiline string literal or not.
+            lines = [[l, False] for l in code.splitlines()]
+
+            # Find all the strings in the AST
+            for s in (a for a in ast.walk(tree) if isinstance(a, ast.Str)):
+                end_line = s.lineno
+                start_line = end_line - len(s.s.splitlines()) + 1
+                for l in range(start_line + 1, end_line):
+                    lines[l - 1][1] = True
+
+            return "\n".join(
+                l[0] for l in lines
+                if (not all(c.isspace() for c in l[0])) or l[1]
+            )
+
         def pretty_print(code):
             if self.verbosity.debug:
                 printcol('Pretty printing Python code', Colors.OKBLUE)
@@ -1209,11 +1229,11 @@ class CompileCtx(object):
 
         with names.camel:
             with open(os.path.join(python_path, module_filename), "w") as f:
-                code = self.render_template(
+                code = strip_white_lines(self.render_template(
                     "python_api/module_py", _self=self,
                     c_api=self.c_api_settings,
                     pyapi=self.python_api_settings,
-                )
+                ))
 
                 # If pretty-printing failed, write the original code anyway in
                 # order to ease debugging.
