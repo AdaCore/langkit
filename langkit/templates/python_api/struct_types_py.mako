@@ -4,7 +4,7 @@
 
 class _BaseStruct(object):
     """
-    Mixin for Adda struct wrappers.
+    Mixin for Ada struct wrappers.
     """
 
     def __getitem__(self, key):
