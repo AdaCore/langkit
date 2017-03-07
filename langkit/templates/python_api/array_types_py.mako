@@ -53,7 +53,7 @@ class _BaseArray(object):
 <%def name="decl(cls)">
 % if cls.element_type()._exposed or ctx.library_fields_all_public:
 <%
-   type_name = cls.name().camel
+   type_name = cls.api_name().camel
    c_element_type = pyapi.type_internal_name(cls.element_type())
 %>
 
