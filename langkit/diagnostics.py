@@ -342,4 +342,5 @@ def errors_checkpoint():
     If there was a non-blocking error, exit the compilation process.
     """
     if Diagnostics.has_pending_error:
+        Diagnostics.has_pending_error = False
         raise DiagnosticError()
