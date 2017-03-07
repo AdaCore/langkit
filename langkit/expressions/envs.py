@@ -335,6 +335,22 @@ def combine(l_rebindings, r_rebindings):
     return make_combine(construct(l_rebindings, EnvRebindingsType),
                         construct(r_rebindings, EnvRebindingsType))
 
+
+@auto_attr
+def rebind_env(env, to_rebind, rebind_to):
+    """
+    Returns a new environment based on `env` where `to_rebind` is rebound to
+    `rebind_to`.
+    """
+    return BuiltinCallExpr(
+        'Rebind_Env', LexicalEnvType,
+        [construct(env, LexicalEnvType),
+         construct(to_rebind, LexicalEnvType),
+         construct(rebind_to, LexicalEnvType)],
+        'Rebound_Env'
+    )
+
+
 Env = EnvVariable()
 EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
                             type=LexicalEnvType)
