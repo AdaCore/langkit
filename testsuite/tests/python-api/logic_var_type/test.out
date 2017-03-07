@@ -6,7 +6,6 @@ File "test.py", line 39, in FooNode.var
     Error: "V" argument is LogicVar, which is forbidden in public API
 File "test.py", line 36, in FooNode.var_field
     Error: type is LogicVar, which is forbidden in public API
-Code generation was successful
 Build and run:
 --------------
 main.py: Running...

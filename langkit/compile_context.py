@@ -760,7 +760,7 @@ class CompileCtx(object):
                 '{} is {}, which is forbidden in public API'.format(
                     type_use, t.name().camel
                 ),
-                do_raise=False
+                severity=Severity.non_blocking_error
             )
 
         for struct in self.struct_types + self.astnode_types:

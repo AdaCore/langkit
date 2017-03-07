@@ -6,7 +6,6 @@ File "test.py", line 39, in FooNode.eq
     Error: "Eq" argument is LogicEquation, which is forbidden in public API
 File "test.py", line 36, in FooNode.eq_field
     Error: type is LogicEquation, which is forbidden in public API
-Code generation was successful
 Build and run:
 --------------
 main.py: Running...
