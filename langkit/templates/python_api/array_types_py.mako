@@ -4,30 +4,8 @@
 % if cls.element_type()._exposed or ctx.library_fields_all_public:
 <%
    type_name = cls.name().camel
-   struct_name = '{}_Struct'.format(pyapi.type_internal_name(cls))
    element_type = pyapi.type_internal_name(cls.element_type())
-   ptr_name = pyapi.type_internal_name(cls)
-   inc_ref = '_{}_inc_ref'.format(type_name)
-   dec_ref = '_{}_dec_ref'.format(type_name)
 %>
-
-
-class ${struct_name}(ctypes.Structure):
-    _fields_ = [('n', ctypes.c_int),
-                ('ref_count', ctypes.c_int),
-                ('items', ${element_type} * 1)]
-
-
-${ptr_name} = ctypes.POINTER(${struct_name})
-
-${inc_ref} = _import_func(
-   '${cls.c_inc_ref(capi)}',
-   [${ptr_name}], None
-)
-${dec_ref} = _import_func(
-   '${cls.c_dec_ref(capi)}',
-   [${ptr_name}], None
-)
 
 
 class ${type_name}(object):
@@ -44,7 +22,7 @@ class ${type_name}(object):
         self._items = ctypes.pointer(items)
 
         if inc_ref:
-           ${inc_ref}(self._c_value)
+           self._inc_ref(self._c_value)
 
     def __repr__(self):
         return '<${type_name} object at {} {}>'.format(
@@ -53,7 +31,7 @@ class ${type_name}(object):
         )
 
     def __del__(self):
-        ${dec_ref}(self._c_value)
+        self._dec_ref(self._c_value)
         self._c_value = None
         self._length = None
         self._items = None
@@ -80,6 +58,19 @@ class ${type_name}(object):
         % else:
         return ${pyapi.wrap_value('item', elt_type)}
         % endif
+
+    class _c_struct(ctypes.Structure):
+        _fields_ = [('n', ctypes.c_int),
+                    ('ref_count', ctypes.c_int),
+                    ('items', ${element_type} * 1)]
+
+
+    _c_type = ctypes.POINTER(_c_struct)
+
+    _inc_ref = staticmethod(_import_func('${cls.c_inc_ref(capi)}',
+                            [_c_type], None))
+    _dec_ref = staticmethod(_import_func('${cls.c_dec_ref(capi)}',
+                            [_c_type], None))
 
 % endif
 </%def>

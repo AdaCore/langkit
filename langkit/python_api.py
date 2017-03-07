@@ -141,6 +141,6 @@ class PythonAPISettings(AbstractAPISettings):
                 self.context.root_grammar_class.name().camel
             )),
             (ct.EnumType, lambda _: ctype_type('c_uint')),
-            (ct.ArrayType, lambda cls: wrapped_type(cls.name().camel)),
+            (ct.ArrayType, lambda cls: '{}._c_type'.format(cls.name().camel)),
             (ct.Struct, lambda _: type.name().camel),
         ])
