@@ -96,7 +96,7 @@ package body Langkit_Support.Lexical_Env is
          Transitive_Referenced_Envs => <>,
          Env                        => new Internal_Envs.Map,
          Default_MD                 => Default_MD,
-         Parents_Rebindings         => null,
+         Parents_Rebinding          => No_Env_Rebinding,
          Ref_Count                  => (if Is_Refcounted then 1
                                         else No_Refcount));
    end Create;
@@ -242,7 +242,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       Current_Rebindings :=
-        Combine (Self.Parents_Rebindings, Parent_Rebindings);
+        Append (Parent_Rebindings, Self.Parents_Rebinding);
 
       declare
          Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
@@ -293,7 +293,7 @@ package body Langkit_Support.Lexical_Env is
            Transitive_Referenced_Envs => <>,
            Env                        => null,
            Default_MD                 => Empty_Metadata,
-           Parents_Rebindings         => null,
+           Parents_Rebinding          => No_Env_Rebinding,
            Ref_Count                  => 1);
    begin
       for Env of Envs loop
@@ -301,6 +301,40 @@ package body Langkit_Support.Lexical_Env is
       end loop;
       return N;
    end Group;
+
+   ----------------
+   -- Rebind_Env --
+   ----------------
+
+   function Rebind_Env
+     (Base_Env             : Lexical_Env;
+      To_Rebind, Rebind_To : Env_Getter) return Lexical_Env
+   is
+      N : constant Lexical_Env :=
+        new Lexical_Env_Type'
+          (Parent                     => No_Env_Getter,
+           Node                       => No_Element,
+           Referenced_Envs            => <>,
+           Transitive_Referenced_Envs => <>,
+           Env                        => null,
+           Default_MD                 => Empty_Metadata,
+           Parents_Rebinding          => No_Env_Rebinding,
+           Ref_Count                  => 1);
+   begin
+      Reference (N, Base_Env, No_Element, True);
+      N.Parents_Rebinding := (To_Rebind, Rebind_To);
+      return N;
+   end Rebind_Env;
+
+   function Rebind_Env
+     (Base_Env             : Lexical_Env;
+      To_Rebind, Rebind_To : Lexical_Env) return Lexical_Env
+   is
+   begin
+      return Rebind_Env
+        (Base_Env,
+         Simple_Env_Getter (To_Rebind), Simple_Env_Getter (Rebind_To));
+   end Rebind_Env;
 
    -------------
    -- Destroy --
@@ -464,7 +498,7 @@ package body Langkit_Support.Lexical_Env is
          Transitive_Referenced_Envs => Self.Transitive_Referenced_Envs.Copy,
          Env                        => Self.Env,
          Default_MD                 => Self.Default_MD,
-         Parents_Rebindings         => Self.Parents_Rebindings,
+         Parents_Rebinding          => Self.Parents_Rebinding,
          Ref_Count                  => 1);
    end Orphan;
 
@@ -525,6 +559,18 @@ package body Langkit_Support.Lexical_Env is
 
       return new Env_Rebindings_Type'(Combine (L.all, R.all));
    end Combine;
+
+   ------------
+   -- Append --
+   ------------
+
+   function Append
+     (Self : Env_Rebindings; Binding : Env_Rebinding) return Env_Rebindings
+   is
+   begin
+      return (if Binding = No_Env_Rebinding then Self
+              else Create (Self.Rebindings & Binding));
+   end Append;
 
    -----------------
    -- Get_New_Env --

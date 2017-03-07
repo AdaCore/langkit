@@ -88,6 +88,8 @@ package Langkit_Support.Lexical_Env is
       Old_Env, New_Env : Env_Getter;
    end record;
 
+   No_Env_Rebinding : Env_Rebinding := (No_Env_Getter, No_Env_Getter);
+
    type Env_Rebindings_Array is array (Positive range <>) of Env_Rebinding;
 
    type Env_Rebindings_Type (Size : Natural) is record
@@ -112,6 +114,9 @@ package Langkit_Support.Lexical_Env is
    --  Return a new Env_Rebindings structure that combines rebindings from both
    --  L and R. Raises a Constraint_Error if the number of bindings exceeds
    --  Env_Rebindings_Size.
+
+   function Append
+     (Self : Env_Rebindings; Binding : Env_Rebinding) return Env_Rebindings;
 
    function Get_New_Env
      (Self : Env_Rebindings; Old_Env : Lexical_Env) return Lexical_Env;
@@ -205,7 +210,7 @@ package Langkit_Support.Lexical_Env is
       Default_MD : Element_Metadata;
       --  Default metadata for this env instance
 
-      Parents_Rebindings : Env_Rebindings := null;
+      Parents_Rebinding : Env_Rebinding := No_Env_Rebinding;
 
       Ref_Count : Integer;
       --  For ref-counted lexical environments, this contains the number of
@@ -292,6 +297,15 @@ package Langkit_Support.Lexical_Env is
    --  If this array is empty, Empty_Env is returned. Note that if Envs'Length
    --  is greater than 1, the result is dynamically allocated.
 
+   function Rebind_Env
+     (Base_Env             : Lexical_Env;
+      To_Rebind, Rebind_To : Env_Getter) return Lexical_Env;
+   function Rebind_Env
+     (Base_Env             : Lexical_Env;
+      To_Rebind, Rebind_To : Lexical_Env) return Lexical_Env;
+   --  Returns a new env based on Base_Env, where To_Rebind is rebound to
+   --  Rebind_To.
+
    procedure Destroy (Self : in out Lexical_Env);
    --  Deallocate the resources allocated to the Self lexical environment. Must
    --  not be used directly for ref-counted envs.
@@ -315,7 +329,7 @@ private
       Transitive_Referenced_Envs => <>,
       Env                        => Empty_Env_Map'Access,
       Default_MD                 => Empty_Metadata,
-      Parents_Rebindings         => null,
+      Parents_Rebinding          => No_Env_Rebinding,
       Ref_Count                  => No_Refcount);
    Empty_Env : constant Lexical_Env := Empty_Env_Record'Access;
 
