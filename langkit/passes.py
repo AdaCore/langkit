@@ -138,7 +138,7 @@ class ASTNodePass(AbstractPass):
     Concrete pass to run on each ASTNode subclass.
     """
 
-    def __init__(self, name, pass_fn, disabled=False):
+    def __init__(self, name, pass_fn, disabled=False, auto_context=True):
         """
         :param str name: See AbstractPass.
 
@@ -149,13 +149,20 @@ class ASTNodePass(AbstractPass):
                langkit.compile_context.ASTNode) -> None
 
         :param bool disabled: See AbstractPass.
+
+        :param bool auto_context: If True, setup a diagnostic context for the
+            current AST node.
         """
         super(ASTNodePass, self).__init__(name, disabled)
         self.pass_fn = pass_fn
+        self.auto_context = auto_context
 
     def run(self, context):
         for astnode in context.astnode_types:
-            with astnode.diagnostic_context():
+            if self.auto_context:
+                with astnode.diagnostic_context():
+                    self.pass_fn(context, astnode)
+            else:
                 self.pass_fn(context, astnode)
 
 
