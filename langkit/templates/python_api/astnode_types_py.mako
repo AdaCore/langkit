@@ -1,18 +1,17 @@
 ## vim: filetype=makopython
 
 <%def name="subclass_decls(cls)">
+    <%
+        # Parent class for "cls", or None if "cls" is actually the root AST node
+        # (if we called .base() on it, it would return ASTNode).
+        parent_cls = cls.base() if T.root_node != cls else None
 
-   <%
-      # Parent class for "cls", or None if "cls" is actually the root AST node
-      # (if we called .base() on it, it would return ASTNode).
-      parent_cls = cls.base() if T.root_node != cls else None
-
-      # Python expression that yield a tuple that contains the names for all
-      # fields that "cls" inherits.
-      parent_fields = ('{}._field_names'.format(parent_cls.name().camel)
-                       if parent_cls else
-                       '()')
-   %>
+        # Python expression that yield a tuple that contains the names for all
+        # fields that "cls" inherits.
+        parent_fields = ('{}._field_names'.format(parent_cls.name().camel)
+                         if parent_cls else
+                         '()')
+    %>
 
     % for field in cls.fields_with_accessors():
 
