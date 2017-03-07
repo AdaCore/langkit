@@ -1416,8 +1416,9 @@ def _field_address(struct, field_name):
     assert field_type is not None
     return struct_addr + field.offset
 
-################################
+
+#
 # Language specific extensions #
-################################
+#
 
 ${exts.include_extension(ctx.ext("python"))}
