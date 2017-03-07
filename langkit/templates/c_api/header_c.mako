@@ -125,7 +125,9 @@ typedef struct {
 } ${exception_type};
 
 % for struct_type in ctx.struct_types:
-   ${struct_types.decl(struct_type)}
+    % if struct_type._exposed or ctx.library_fields_all_public:
+        ${struct_types.decl(struct_type)}
+    % endif
 % endfor
 
 % if ctx.default_unit_provider:

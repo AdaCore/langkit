@@ -1065,7 +1065,9 @@ def _unwrap_enum(py_value, type_name, translator):
 ${struct_types.base_decl()}
 
 % for struct_type in ctx.struct_types:
+    % if struct_type._exposed or ctx.library_fields_all_public:
 ${struct_types.decl(struct_type)}
+    % endif
 % endfor
 
 #
