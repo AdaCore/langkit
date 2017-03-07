@@ -14,20 +14,6 @@
                        '()')
    %>
 
-    _field_names = ${parent_fields} + (
-        % for field in cls.fields_with_accessors():
-        "${field.name.lower}",
-        % endfor
-    )
-
-    % if not cls.abstract:
-    _kind_name = ${repr(cls.name().camel)}
-    % endif
-
-    % if cls.is_list_type:
-    is_list_type = True
-    % endif
-
     % for field in cls.fields_with_accessors():
 
     <%
@@ -72,6 +58,20 @@
         return ${pyapi.wrap_value(c_result, field.type)}
         % endif
     % endfor
+
+    _field_names = ${parent_fields} + (
+        % for field in cls.fields_with_accessors():
+        "${field.name.lower}",
+        % endfor
+    )
+
+    % if not cls.abstract:
+    _kind_name = ${repr(cls.name().camel)}
+    % endif
+
+    % if cls.is_list_type:
+    is_list_type = True
+    % endif
 </%def>
 
 <%def name="decl(cls)">
