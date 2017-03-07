@@ -554,7 +554,7 @@ class ManageScript(object):
             )
 
         self.log_info(
-            "Generating source for {} ...".format(self.lib_name.lower()),
+            "Generating source for {}...".format(self.lib_name.lower()),
             Colors.HEADER
         )
 
@@ -580,7 +580,7 @@ class ManageScript(object):
             return
 
         if getattr(args, 'pretty_print', False):
-            self.log_info("Pretty-printing sources for Libadalang ...",
+            self.log_info("Pretty-printing sources for Libadalang...",
                           Colors.HEADER)
             gnatpp(
                 self.dirs.build_dir('lib', 'gnat',
@@ -753,7 +753,7 @@ class ManageScript(object):
                  if args.disable_all_mains else
                  self.main_programs - disabled_mains)
         if mains:
-            self.log_info("Building the main programs ...", Colors.HEADER)
+            self.log_info("Building the main programs...", Colors.HEADER)
             self.gprbuild(args, self.dirs.build_dir('src', 'mains.gpr'), False,
                           mains)
 
