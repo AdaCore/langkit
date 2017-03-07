@@ -764,6 +764,9 @@ class CompileCtx(object):
             )
 
         for struct in self.struct_types + self.astnode_types:
+            if not struct._exposed:
+                continue
+
             for _, fv in sorted(
                 struct.get_abstract_fields_dict(include_inherited=False)
                 .items()
