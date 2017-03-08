@@ -326,6 +326,10 @@ package body Langkit_Support.Lexical_Env is
       return N;
    end Rebind_Env;
 
+   ----------------
+   -- Rebind_Env --
+   ----------------
+
    function Rebind_Env
      (Base_Env             : Lexical_Env;
       To_Rebind, Rebind_To : Lexical_Env) return Lexical_Env
@@ -568,8 +572,12 @@ package body Langkit_Support.Lexical_Env is
      (Self : Env_Rebindings; Binding : Env_Rebinding) return Env_Rebindings
    is
    begin
-      return (if Binding = No_Env_Rebinding then Self
-              else Create (Self.Rebindings & Binding));
+      return (if Binding = No_Env_Rebinding
+              then Self
+              else Create
+                (if Self /= null
+                 then Self.Rebindings & Binding
+                 else (1 => Binding)));
    end Append;
 
    -----------------
