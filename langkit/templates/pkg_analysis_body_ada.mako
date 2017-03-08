@@ -2199,7 +2199,7 @@ package body ${ada_lib_name}.Analysis is
      (Hash_Type (To_Integer (S.all'Address)));
 
    package Address_To_Id_Maps is new Ada.Containers.Hashed_Maps
-     (Lexical_Env, Positive, Hash, "=");
+     (Lexical_Env, Integer, Hash, "=");
 
    -----------------
    -- Sorted_Envs --
@@ -2295,6 +2295,9 @@ package body ${ada_lib_name}.Analysis is
          Inserted : Boolean;
       begin
          if E = Root_Env then
+            --  Insert root env with a special Id so that we only print it
+            --  once.
+            Env_Ids.Insert (E, -1, C, Inserted);
             return " <root>";
          elsif E = null then
             return " <null>";
@@ -2333,11 +2336,7 @@ package body ${ada_lib_name}.Analysis is
          Explore_Parent : Boolean := False;
          Parent : Lexical_Env;
       begin
-         if Current = null
-            --  We want to ignore ghost nodes. This includes empty lists, but
-            --  also Opt parsers parsed to absent qualifiers.
-            or else Current.Is_Ghost
-         then
+         if Current = null then
             return;
          end if;
 
