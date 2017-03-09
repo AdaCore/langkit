@@ -1623,6 +1623,24 @@ class PropertyDef(AbstractNodeData):
         self.external = external
         self.uses_envs = uses_envs
 
+    def property_set(self):
+        """
+        Return all properties associated with this property in terms of
+        overriding hierarchy.
+
+        :rtype: list[PropertyDef]
+        """
+        def internal(prop):
+            ret = [prop]
+            for p in prop.overriding_properties:
+                ret.extend(internal(p))
+            return ret
+
+        return (
+            self.base_property.property_set()
+            if self.base_property else internal(self)
+        )
+
     @property
     def overriding(self):
         """
