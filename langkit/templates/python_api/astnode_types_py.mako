@@ -1,6 +1,6 @@
 ## vim: filetype=makopython
 
-<%def name="accessor_body(field)">
+<%def name="accessor_body(field, with_implicit_args)">
 
         <% c_accessor = '_{}'.format(field.accessor_basename.lower) %>
 
@@ -23,11 +23,25 @@
             )
 
             # Expression for the C value for field evaluation
-            eval_args = [c_result_constructor, c_accessor] + [
+            explicit_args = [
                 pyapi.unwrap_value(arg.name.lower, arg.type)
                 for arg in field.explicit_arguments
-            ] + [arg.type.py_nullexpr()
-                 for arg in field.exposed_implicit_arguments]
+            ]
+            implicit_args = [
+                # If we must use implicit args, unwrap them from the "kwargs"
+                # local variable, otherwise just use default values for them.
+                (pyapi.unwrap_value(
+                    'kwargs.get({}, {})'.format(
+                        repr(arg.name.lower),
+                        arg.type.py_nullexpr()
+                    ),
+                    arg.type
+                 ) if with_implicit_args else
+                     pyapi.unwrap_value(arg.type.py_nullexpr(), arg.type))
+                for arg in field.exposed_implicit_arguments
+            ]
+            eval_args = ([c_result_constructor, c_accessor]
+                         + explicit_args + implicit_args)
             c_result = 'self._eval_field({})'.format(', '.join(eval_args))
 
             # What comes next is the unwrapping of this C result for the
@@ -64,13 +78,9 @@
     def ${field.name.lower}(${', '.join(arg_list)}):
         ${py_doc(field, 8)}
         % if field.exposed_implicit_arguments:
-            <% passed_args = arg_list[1:] + [
-                arg.type.py_nullexpr()
-                for arg in field.exposed_implicit_arguments
-               ] %>
-        return self._${field.name.lower}(${', '.join(passed_args)})
+        return self._${field.name.lower}(${', '.join(arg_list[1:])})
         % else:
-        ${accessor_body(field)}
+        ${accessor_body(field, False)}
         % endif
     % endfor
 
@@ -78,9 +88,10 @@
 
     % for field in cls.fields_with_accessors():
         % if field.exposed_implicit_arguments:
-    <% arg_list = ['self'] + [a.name.lower for a in field.exposed_arguments] %>
-    def _${field.name.lower}(${', '.join(arg_list)}):
-        ${accessor_body(field)}
+    <% arg_list = ['self'] + [a.name.lower
+                              for a in field.explicit_arguments] %>
+    def _${field.name.lower}(${', '.join(arg_list)}, **kwargs):
+        ${accessor_body(field, True)}
         % endif
     % endfor
 
