@@ -372,6 +372,8 @@ class CompiledType(object):
         Return a string to be used in code generation for "null" expressions.
 
         Must be overriden in subclasses.
+
+        :rtype: str
         """
         raise NotImplementedError()
 
