@@ -920,16 +920,13 @@ class ResolvedExpression(object):
 
         :rtype: list[ResolvedExpression]
         """
-        def mapcat(seq, map_fn):
-            return sum([map_fn(v) for v in seq], [])
-
         def explore(values):
             if values is None:
                 return []
             elif isinstance(values, list):
-                return mapcat(values, explore)
+                return funcy.mapcat(explore, values)
             elif isinstance(values, dict):
-                return mapcat(values.values(), explore)
+                return funcy.mapcat(explore, values.values())
             elif filter(values):
                 return [values]
             else:
