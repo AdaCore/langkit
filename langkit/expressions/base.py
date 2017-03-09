@@ -2154,12 +2154,6 @@ class PropertyDef(AbstractNodeData):
 
     @property
     def explicit_arguments(self):
-        """
-        Return the subset of "self.arguments" that are to be passed explicitely
-        when invoking this property.
-
-        :rtype: list[Argument]
-        """
         expl, impl = funcy.split_by(lambda a: a.is_explicit, self.arguments)
         assert all(a.default_value for a in impl), (
             "All implicit arguments must have default values"
