@@ -961,6 +961,15 @@ class AbstractNodeData(object):
         """
         return self.arguments
 
+    @property
+    def exposed_arguments(self):
+        """
+        Shortcut for explicit_arguments + exposed_implicit_arguments.
+
+        :rtype: list[Argument]
+        """
+        return self.explicit_arguments + self.exposed_implicit_arguments
+
     @classmethod
     def filter_fields(cls, mapping):
         """

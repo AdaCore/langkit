@@ -6,10 +6,10 @@
    function ${accessor_name}
      (Node    : ${node_type};
 
-      % for arg in field.explicit_arguments + field.exposed_implicit_arguments:
+      % for arg in field.exposed_arguments:
          ${arg.name} : ${arg.type.c_type(capi).name};
-
       % endfor
+
       Value_P : ${field.type.c_type(capi).name}_Ptr) return int
 </%def>
 

@@ -1294,7 +1294,7 @@ _lexical_env_dec_ref = _import_func(
 _${field.accessor_basename.lower} = _import_func(
     '${capi.get_name(field.accessor_basename)}',
     [${c_node},
-     % for arg in field.explicit_arguments + field.exposed_implicit_arguments:
+     % for arg in field.exposed_arguments:
         ${pyapi.type_internal_name(arg.type)},
      % endfor
      ctypes.POINTER(${pyapi.type_internal_name(field.type)})],
