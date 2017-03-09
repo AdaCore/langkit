@@ -1,29 +1,7 @@
 ## vim: filetype=makopython
 
-<%def name="subclass_decls(cls)">
-    <%
-        # Parent class for "cls", or None if "cls" is actually the root AST node
-        # (if we called .base() on it, it would return ASTNode).
-        parent_cls = cls.base() if T.root_node != cls else None
+<%def name="accessor_body(field)">
 
-        # Python expression that yield a tuple that contains the names for all
-        # fields that "cls" inherits.
-        parent_fields = ('{}._field_names'.format(parent_cls.name().camel)
-                         if parent_cls else
-                         '()')
-    %>
-
-    % for field in cls.fields_with_accessors():
-
-    <%
-      arg_list = ['self'] + [a.name.lower for a in field.explicit_arguments]
-    %>
-
-    % if not field.explicit_arguments:
-    @property
-    % endif
-    def ${field.name.lower}(${', '.join(arg_list)}):
-        ${py_doc(field, 8)}
         <% c_accessor = '_{}'.format(field.accessor_basename.lower) %>
 
         % if is_ast_node(field.type) and not field.explicit_arguments:
@@ -57,6 +35,34 @@
         %>
         return ${pyapi.wrap_value(c_result, field.type)}
         % endif
+
+</%def>
+
+<%def name="subclass_decls(cls)">
+    <%
+        # Parent class for "cls", or None if "cls" is actually the root AST node
+        # (if we called .base() on it, it would return ASTNode).
+        parent_cls = cls.base() if T.root_node != cls else None
+
+        # Python expression that yield a tuple that contains the names for all
+        # fields that "cls" inherits.
+        parent_fields = ('{}._field_names'.format(parent_cls.name().camel)
+                         if parent_cls else
+                         '()')
+    %>
+
+    % for field in cls.fields_with_accessors():
+
+    <%
+      arg_list = ['self'] + [a.name.lower for a in field.explicit_arguments]
+    %>
+
+    % if not field.explicit_arguments:
+    @property
+    % endif
+    def ${field.name.lower}(${', '.join(arg_list)}):
+        ${py_doc(field, 8)}
+        ${accessor_body(field)}
     % endfor
 
     _field_names = ${parent_fields} + (
