@@ -851,8 +851,7 @@ class ResolvedExpression(object):
 
         elif isinstance(json_like, dict):
             keys = sorted(json_like)
-            subdumps = [cls._ir_dump(json_like[key])
-                        for key in sorted(json_like)]
+            subdumps = [cls._ir_dump(json_like[key]) for key in keys]
             items = zip(keys, subdumps)
             if one_line_subdumps(subdumps):
                 one_liner = '{{{}}}'.format(
