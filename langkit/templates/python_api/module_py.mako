@@ -62,6 +62,21 @@ def _import_func(name, argtypes, restype, exc_wrap=True):
     return wrapper if exc_wrap else func
 
 
+class _Exception(ctypes.Structure):
+    _fields_ = [("is_fatal", ctypes.c_int),
+                ("information", ctypes.c_char_p)]
+
+    def _wrap(self):
+        return NativeException(self.information)
+
+
+_get_last_exception = _import_func(
+   '${capi.get_name("get_last_exception")}',
+   [], ctypes.POINTER(_Exception),
+   exc_wrap=False
+)
+
+
 class _text(ctypes.Structure):
     # The chars field really is a uint32_t* but considering it as a char* here
     # is more convenient for conversion in this binding layer. On the other
@@ -107,14 +122,6 @@ class _text(ctypes.Structure):
 
     def __del__(self):
         _destroy_text(ctypes.byref(self))
-
-
-class _Exception(ctypes.Structure):
-    _fields_ = [("is_fatal", ctypes.c_int),
-                ("information", ctypes.c_char_p)]
-
-    def _wrap(self):
-        return NativeException(self.information)
 
 
 % if ctx.default_unit_provider:
@@ -1316,11 +1323,6 @@ ${exts.include_extension(
 % endif
 
 # Misc
-_get_last_exception = _import_func(
-   '${capi.get_name("get_last_exception")}',
-   [], ctypes.POINTER(_Exception),
-   exc_wrap=False
-)
 _token_kind_name = _import_func(
    "${capi.get_name('token_kind_name')}",
    [ctypes.c_int], ctypes.POINTER(ctypes.c_char)
