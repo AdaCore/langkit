@@ -188,7 +188,7 @@ class New(AbstractExpression):
 
         @property
         def subexprs(self):
-            result = dict(self.assocs)
+            result = {str(k): v for k, v in self.assocs.items()}
             result['_type'] = self.static_type.name()
             return result
 
