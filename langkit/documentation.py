@@ -437,6 +437,9 @@ base_langkit_docs = {
     # Lexical environment primitives
     #
 
+    'langkit.lexical_env_empty': """
+        Return the empty lexical environment constant.
+    """,
     'langkit.lexical_env_parent': """
         Get the ENV's parent lexical environment. This returns ${null} for the
         root lexical environment.

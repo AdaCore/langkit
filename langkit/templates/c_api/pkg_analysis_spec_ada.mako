@@ -447,6 +447,11 @@ package ${ada_lib_name}.Analysis.C is
    ${array_types.decl(LexicalEnvType.array_type())}
    ${array_types.decl(T.root_node.env_el().array_type())}
 
+   function ${capi.get_name('lexical_env_empty')} return ${lexical_env_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('lexical_env_empty')}";
+
    function ${capi.get_name('lexical_env_parent')}
      (Env : ${lexical_env_type})
       return ${lexical_env_type}

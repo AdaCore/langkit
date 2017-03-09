@@ -1130,6 +1130,12 @@ package body ${ada_lib_name}.Analysis.C is
 
    ${array_types.body(T.root_node.env_el().array_type())}
 
+   function ${capi.get_name('lexical_env_empty')} return ${lexical_env_type}
+   is
+   begin
+      return Wrap (Empty_Env);
+   end;
+
    function ${capi.get_name('lexical_env_parent')}
      (Env : ${lexical_env_type})
       return ${lexical_env_type}

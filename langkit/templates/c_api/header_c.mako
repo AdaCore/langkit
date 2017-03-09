@@ -377,6 +377,10 @@ ${capi.get_name("destroy_text")}(${text_type} *text);
 % if ctx.library_fields_all_public:
 /* Lexical environment primitives */
 
+${c_doc('langkit.lexical_env_empty')}
+extern ${lexical_env_type}
+${capi.get_name('lexical_env_empty')}(void);
+
 ${c_doc('langkit.lexical_env_parent')}
 extern ${lexical_env_type}
 ${capi.get_name('lexical_env_parent')}(${lexical_env_type} env);
