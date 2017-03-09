@@ -48,7 +48,8 @@
             eval_args = [c_result_constructor, c_accessor] + [
                 pyapi.unwrap_value(arg.name.lower, arg.type)
                 for arg in field.explicit_arguments
-            ]
+            ] + [arg.type.py_nullexpr()
+                 for arg in field.exposed_implicit_arguments]
             c_result = 'self._eval_field({})'.format(', '.join(eval_args))
 
             # What comes next is the unwrapping of this C result for the

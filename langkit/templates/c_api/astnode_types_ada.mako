@@ -5,8 +5,10 @@
 
    function ${accessor_name}
      (Node    : ${node_type};
-      % for arg in field.explicit_arguments:
+
+      % for arg in field.explicit_arguments + field.exposed_implicit_arguments:
          ${arg.name} : ${arg.type.c_type(capi).name};
+
       % endfor
       Value_P : ${field.type.c_type(capi).name}_Ptr) return int
 </%def>
@@ -37,6 +39,12 @@
 
    ${accessor_profile(field)}
    is
+      % if field.exposed_implicit_arguments:
+         pragma Unreferenced
+           (${', '.join(arg.name.camel_with_underscores
+                        for arg in field.exposed_implicit_arguments)});
+      % endif
+
       Unwrapped_Node : constant ${root_node_type_name} := Unwrap (Node);
       ## For each input argument, convert the C-level value into an Ada-level
       ## one.

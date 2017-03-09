@@ -9,7 +9,7 @@ ${c_doc(field)}
 extern int ${accessor_name}(
     ${node_type} node,
 
-    % for arg in field.explicit_arguments:
+    % for arg in field.explicit_arguments + field.exposed_implicit_arguments:
         ${arg.type.c_type(capi).name} ${arg.name},
     % endfor
 
