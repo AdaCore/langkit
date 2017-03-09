@@ -51,18 +51,37 @@
                          '()')
     %>
 
+    ## First, emit public properties/methods for field accessors. Accessors
+    ## with no implicit argument will implement C calls themselves, but those
+    ## with some will just delegate to the private methods below.
+
     % for field in cls.fields_with_accessors():
-
-    <%
-      arg_list = ['self'] + [a.name.lower for a in field.explicit_arguments]
-    %>
-
+    <% arg_list = ['self'] + [a.name.lower
+                              for a in field.explicit_arguments] %>
     % if not field.explicit_arguments:
     @property
     % endif
     def ${field.name.lower}(${', '.join(arg_list)}):
         ${py_doc(field, 8)}
+        % if field.exposed_implicit_arguments:
+            <% passed_args = arg_list[1:] + [
+                arg.type.py_nullexpr()
+                for arg in field.exposed_implicit_arguments
+               ] %>
+        return self._${field.name.lower}(${', '.join(passed_args)})
+        % else:
         ${accessor_body(field)}
+        % endif
+    % endfor
+
+    ## Then, for properties with implicit arguments, emit private methods
+
+    % for field in cls.fields_with_accessors():
+        % if field.exposed_implicit_arguments:
+    <% arg_list = ['self'] + [a.name.lower for a in field.exposed_arguments] %>
+    def _${field.name.lower}(${', '.join(arg_list)}):
+        ${accessor_body(field)}
+        % endif
     % endfor
 
     _field_names = ${parent_fields} + (
