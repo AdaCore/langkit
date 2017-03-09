@@ -1077,7 +1077,7 @@ def _unwrap_enum(py_value, type_name, translator):
         raise ValueError('Invalid {}: {}'.format(type_name, py_value))
 
 
-${struct_types.base_decl()}
+${struct_types.base_decls()}
 
 % for struct_type in ctx.struct_types:
     % if struct_type._exposed or ctx.library_fields_all_public:

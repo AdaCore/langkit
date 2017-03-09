@@ -1,6 +1,6 @@
 ## vim: filetype=makopython
 
-<%def name="base_decl()">
+<%def name="base_decls()">
 
 class _BaseStruct(object):
     """
@@ -29,6 +29,38 @@ class _BaseStruct(object):
                       for name in field_names)
         )
 
+
+class _BaseEnvElement(_BaseStruct):
+    """
+    Specialized mixin for env elements.
+    """
+
+    def __getattr__(self, name):
+        """
+        Evaluate the "name" attribute on the wrapped AST node. This
+        automatically passes parents environment rebindings.
+        """
+        node = self.el
+        unbound_public_method = getattr(type(node), name)
+
+        # If there is no private method for this accessor, it means there are
+        # no implicit arguments to pass, so just return it.
+        try:
+            unbound_private_method = getattr(type(node), '_' + name)
+        except AttributeError:
+            return getattr(node, name)
+
+        def bound_method(*args, **kwargs):
+            kwargs[${repr(PropertyDef.env_rebinding_name.lower)}] = \
+                self.parents_bindings
+            return unbound_private_method(node, *args, **kwargs)
+
+        # If the public method is actually a property, the caller will not
+        # expect a callable to be returned: in this case, call it right now.
+        return (bound_method()
+                if isinstance(unbound_public_method, property) else
+                bound_method)
+
 </%def>
 
 <%def name="decl(cls)">
@@ -37,9 +69,14 @@ class _BaseStruct(object):
    type_name = cls.name().camel
    ptr_name = '{}_Ptr'.format(type_name)
    dec_ref = '_{}_dec_ref'.format(type_name)
+
+   base_classes = ['ctypes.Structure',
+                   '_BaseEnvElement'
+                       if cls.is_env_element_type else
+                       '_BaseStruct']
 %>
 
-class ${type_name}(ctypes.Structure, _BaseStruct):
+class ${type_name}(${', '.join(base_classes)}):
     ${py_doc(cls, 4)}
     _fields_ = [
     % for field in cls.get_fields():
