@@ -378,6 +378,18 @@ class CompiledType(object):
         raise NotImplementedError()
 
     @classmethod
+    def py_nullexpr(cls):
+        """
+        Return a string to be used in Python code gen for "null" expressions.
+
+        Must be overridden in subclasses... for which we need the Python null
+        expression.
+
+        :rtype: str
+        """
+        raise NotImplementedError()
+
+    @classmethod
     def storage_nullexpr(cls):
         """
         Return the nullexpr that is used for fields of this type in Structs and
@@ -530,6 +542,10 @@ class LexicalEnvType(BasicType):
     def c_type(cls, c_api_settings):
         return CAPIType(c_api_settings, 'lexical_env')
 
+    @classmethod
+    def py_nullexpr(cls):
+        return 'LexicalEnv.Empty'
+
 
 class LogicVarType(BasicType):
     """
@@ -613,6 +629,10 @@ class EnvRebindingsType(BasicType):
     @classmethod
     def is_refcounted(cls):
         return False
+
+    @classmethod
+    def py_nullexpr(cls):
+        return 'None'
 
 
 class BoolType(BasicType):
