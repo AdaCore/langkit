@@ -677,27 +677,26 @@ class CompileCtx(object):
         forwards = {}
         backwards = {}
 
-        for astnode in self.astnode_types:
-            for prop in astnode.get_properties(include_inherited=False):
-                forwards.setdefault(prop, set())
+        for prop in self.all_properties(include_inherited=False):
+            forwards.setdefault(prop, set())
 
-                def add_forward(from_prop, to_prop):
-                    backwards.setdefault(to_prop, set())
-                    forwards[from_prop].add(to_prop)
-                    backwards[to_prop].add(from_prop)
-                    for over_prop in to_prop.overriding_properties:
-                        add_forward(from_prop, over_prop)
+            def add_forward(from_prop, to_prop):
+                backwards.setdefault(to_prop, set())
+                forwards[from_prop].add(to_prop)
+                backwards[to_prop].add(from_prop)
+                for over_prop in to_prop.overriding_properties:
+                    add_forward(from_prop, over_prop)
 
-                def traverse_expr(expr):
-                    for ref_prop in expr.flat_subexprs(
-                        lambda e: isinstance(e, PropertyDef)
-                    ):
-                        add_forward(prop, ref_prop)
-                    for subexpr in expr.flat_subexprs():
-                        traverse_expr(subexpr)
+            def traverse_expr(expr):
+                for ref_prop in expr.flat_subexprs(
+                    lambda e: isinstance(e, PropertyDef)
+                ):
+                    add_forward(prop, ref_prop)
+                for subexpr in expr.flat_subexprs():
+                    traverse_expr(subexpr)
 
-                if prop.constructed_expr:
-                    traverse_expr(prop.constructed_expr)
+            if prop.constructed_expr:
+                traverse_expr(prop.constructed_expr)
 
         return (forwards, backwards)
 
