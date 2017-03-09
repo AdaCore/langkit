@@ -74,6 +74,8 @@ def make_renderer(base_renderer=None):
     :param Renderer base_renderer: The renderer to base the resulting
         renderer on.
     """
+    from langkit.expressions import PropertyDef
+
     if base_renderer is None:
         base_renderer = common_renderer
 
@@ -96,6 +98,7 @@ def make_renderer(base_renderer=None):
         'is_env_rebindings_type': type_check(EnvRebindingsType),
         'is_struct_type':         type_check(Struct),
         'LexicalEnvType':         LexicalEnvType,
+        'PropertyDef':            PropertyDef,
     }
     if get_context():
         ctx = get_context()
