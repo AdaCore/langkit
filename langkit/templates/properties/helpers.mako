@@ -6,8 +6,8 @@
 
    % for arg in property.arguments:
       ; ${arg.name} : ${arg.type.name()}
-      % if arg.default_value:
-         := ${arg.default_value}
+      % if not arg.is_explicit:
+         := ${arg.type.nullexpr()}
       % endif
    % endfor
   )

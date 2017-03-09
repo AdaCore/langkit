@@ -96,7 +96,7 @@ def expand_abstract_fn(fn):
             'parameter {} (got {})'.format(kw, default)
         )
 
-        fn_arguments.append(Argument(names.Name.from_lower(kw), default, None))
+        fn_arguments.append(Argument(names.Name.from_lower(kw), default))
 
     # Now that we have placeholder for all arguments, we can expand the lambda
     # into a real AbstractExpression.
@@ -1755,7 +1755,7 @@ class PropertyDef(AbstractNodeData):
 
         return resolve_type(self.constructed_expr.type)
 
-    def _add_argument(self, name, type, default_value=None, is_explicit=True):
+    def _add_argument(self, name, type, is_explicit=True):
         """
         Helper to add an argument to this property.
 
@@ -1763,9 +1763,8 @@ class PropertyDef(AbstractNodeData):
 
         :param str names.Name: Name for this argument.
         :param CompiledType type: Type argument. Type for this argument.
-        :param None|str default_value: Default value for this argument, if any.
         """
-        self.arguments.append(Argument(name, type, default_value, is_explicit))
+        self.arguments.append(Argument(name, type, is_explicit))
 
     @property
     @memoized
@@ -2055,14 +2054,12 @@ class PropertyDef(AbstractNodeData):
         if self.has_implicit_env:
             self._add_argument(PropertyDef.env_arg_name,
                                LexicalEnvType,
-                               LexicalEnvType.nullexpr(),
                                False)
 
         if self.uses_envs:
             # Add the env rebindings parameter
             self._add_argument(PropertyDef.env_rebinding_name,
                                EnvRebindingsType,
-                               EnvRebindingsType.nullexpr(),
                                False)
 
     def construct_and_type_expression(self, context):
@@ -2155,9 +2152,6 @@ class PropertyDef(AbstractNodeData):
     @property
     def exposed_implicit_arguments(self):
         _, impl = funcy.split_by(lambda a: a.is_explicit, self.arguments)
-        assert all(a.default_value for a in impl), (
-            "All implicit arguments must have default values"
-        )
         return [a for a in impl if a.type._exposed]
 
     @property

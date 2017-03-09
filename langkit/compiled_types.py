@@ -689,10 +689,9 @@ class Argument(object):
     Holder for properties arguments.
     """
 
-    def __init__(self, name, type, default_value, is_explicit=True):
+    def __init__(self, name, type, is_explicit=True):
         from langkit.expressions.base import AbstractVariable
         self.var = AbstractVariable(name, type, source_name=name)
-        self.default_value = default_value
         self.is_explicit = is_explicit
 
     @property
