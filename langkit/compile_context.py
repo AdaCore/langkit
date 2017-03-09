@@ -650,6 +650,18 @@ class CompileCtx(object):
                         ' CompileContext.bind_env_hook has not been called'
                     )
 
+    def all_properties(self, *args, **kwargs):
+        """
+        Returns an iterator on all the properties. *args and **kwargs are
+        forwarded to the call to get_properties that is done on every astnode
+        type.
+
+        :rtype: seq[PropertyDef]
+        """
+        for astnode in self.astnode_types:
+            for prop in astnode.get_properties(*args, **kwargs):
+                yield prop
+
     def properties_callgraphs(self):
         """
         Return forwards and backwards callgraphs for all properties.
