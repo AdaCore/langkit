@@ -699,6 +699,56 @@ class CompileCtx(object):
 
         return (forwards, backwards)
 
+    def compute_uses_env_attribute(self):
+        """
+        Pass that will compute the `uses_envs` attribute for every property.
+        This will determine whether it is necessary to pass along env
+        rebindings or not.
+        """
+
+        from langkit.expressions import EnvGetExpr
+
+        _, backwards = self.properties_callgraphs()
+
+        def uses_env(expr):
+            """
+            Return true if expr or any of its sub-expressions uses the lexical
+            environments.
+            """
+            return expr and (isinstance(expr, EnvGetExpr) or any(
+                uses_env(e) for e in expr.flat_subexprs()
+            ))
+
+        def propagate(prop):
+            """
+            Propagate the `uses_envs` attribute to callers.
+            """
+            for p in prop.property_set():
+                p.set_uses_env()
+
+            for bw_link in backwards.get(prop, set()):
+                if not bw_link.uses_envs:
+                    propagate(bw_link)
+
+        def infer_uses_env_attribute(prop):
+            """
+            For a given property, infer whether it uses lexical environments or
+            not based on its implementation. Propagate to base and derived
+            properties.
+            """
+            if uses_env(prop.constructed_expr):
+                for p in prop.property_set():
+                    p.set_uses_env()
+
+        # Compute the uses_env attribute for every property
+        for prop in self.all_properties(lambda p: not p.abstract, False):
+            infer_uses_env_attribute(prop)
+
+        # Propagate computed attribute
+        for prop in self.all_properties(lambda p: not p.base_property
+                                        and p.uses_envs, False):
+            propagate(prop)
+
     def warn_unused_private_properties(self):
         """
         Check that all private properties are actually used: if one is not,
@@ -940,7 +990,8 @@ class CompileCtx(object):
                          PropertyDef.compute_property_attributes),
             PropertyPass('construct and type expressions',
                          PropertyDef.construct_and_type_expression),
-
+            GlobalPass('Compute uses envs attribute',
+                       CompileCtx.compute_uses_env_attribute),
             ASTNodePass('check env spec properties',
                         lambda context, astnode:
                             astnode.env_spec

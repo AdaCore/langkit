@@ -1621,7 +1621,18 @@ class PropertyDef(AbstractNodeData):
 
         self.memoized = memoized
         self.external = external
-        self.uses_envs = uses_envs
+        if self.external:
+            check_source_language(
+                uses_envs is not None,
+                "Need to specify uses_env for external properties"
+            )
+            self.uses_envs = uses_envs
+        else:
+            check_source_language(
+                uses_envs is None,
+                "Cannot specify uses_env for external properties"
+            )
+            self.uses_envs = False
 
     def property_set(self):
         """
@@ -1970,14 +1981,6 @@ class PropertyDef(AbstractNodeData):
                     )
                 )
 
-            if self.uses_envs is None:
-                self.uses_envs = self.base_property.uses_envs
-            else:
-                check_source_language(
-                    self.uses_envs == self.base_property.uses_envs,
-                    "Different uses env parameter with base property"
-                )
-
             # We then want to check the consistency of type annotations if they
             # exist.
             if self.base_property.expected_type:
@@ -2025,11 +2028,6 @@ class PropertyDef(AbstractNodeData):
             self._is_public = bool(self._is_public)
             self._has_implicit_env = bool(self._has_implicit_env)
 
-            # Uses env will be True by default for internal properties, False
-            # for external properties.
-            if self.uses_envs is None:
-                self.uses_envs = True
-
         if self.memoized:
             check_source_language(
                 not self.abstract,
@@ -2070,11 +2068,13 @@ class PropertyDef(AbstractNodeData):
                                LexicalEnvType,
                                False)
 
-        if self.uses_envs:
+    def set_uses_env(self):
+        if not self.uses_envs:
             # Add the env rebindings parameter
             self._add_argument(PropertyDef.env_rebinding_name,
                                EnvRebindingsType,
                                False)
+            self.uses_envs = True
 
     def construct_and_type_expression(self, context):
         """
