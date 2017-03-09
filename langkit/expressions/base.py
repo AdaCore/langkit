@@ -2153,11 +2153,16 @@ class PropertyDef(AbstractNodeData):
         return self._doc
 
     @property
-    def explicit_arguments(self):
-        expl, impl = funcy.split_by(lambda a: a.is_explicit, self.arguments)
+    def exposed_implicit_arguments(self):
+        _, impl = funcy.split_by(lambda a: a.is_explicit, self.arguments)
         assert all(a.default_value for a in impl), (
             "All implicit arguments must have default values"
         )
+        return [a for a in impl if a.type._exposed]
+
+    @property
+    def explicit_arguments(self):
+        expl, impl = funcy.split_by(lambda a: a.is_explicit, self.arguments)
         assert all(not a.is_explicit for a in impl), (
             "All explicit arguments must come before implicit ones"
         )

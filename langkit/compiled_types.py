@@ -921,6 +921,16 @@ class AbstractNodeData(object):
         return self.struct.name() + self.name
 
     @property
+    def exposed_implicit_arguments(self):
+        """
+        Return the subset of "self.arguments" that are implicit arguments for
+        which the type is exposed in public APIs.
+
+        :rtype: list[Argument]
+        """
+        return []
+
+    @property
     def explicit_arguments(self):
         """
         Return the subset of "self.arguments" that are explicit arguments, that
