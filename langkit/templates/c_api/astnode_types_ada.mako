@@ -1,22 +1,24 @@
 ## vim: filetype=makoada
 
-<%def name="accessor_decl(field)">
-
+<%def name="accessor_profile(field)">
    <% accessor_name = capi.get_name(field.accessor_basename) %>
 
    function ${accessor_name}
      (Node    : ${node_type};
-
       % for arg in field.explicit_arguments:
          ${arg.name} : ${arg.type.c_type(capi).name};
       % endfor
-
       Value_P : ${field.type.c_type(capi).name}_Ptr) return int
+</%def>
+
+<%def name="accessor_decl(field)">
+   <% accessor_name = capi.get_name(field.accessor_basename) %>
+
+   ${accessor_profile(field)}
       with Export        => True,
            Convention    => C,
            External_name => "${accessor_name}";
    ${ada_doc(field, 3, lang='c')}
-
 </%def>
 
 
@@ -33,14 +35,7 @@
                  or is_env_rebindings_type(t))
    %>
 
-   function ${accessor_name}
-     (Node    : ${node_type};
-
-      % for arg in field.explicit_arguments:
-         ${arg.name} : ${arg.type.c_type(capi).name};
-      % endfor
-
-      Value_P : ${field.type.c_type(capi).name}_Ptr) return int
+   ${accessor_profile(field)}
    is
       Unwrapped_Node : constant ${root_node_type_name} := Unwrap (Node);
       ## For each input argument, convert the C-level value into an Ada-level
