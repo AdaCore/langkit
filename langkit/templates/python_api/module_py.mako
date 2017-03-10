@@ -385,7 +385,7 @@ class AnalysisUnit(object):
     def filename(self):
         ${py_doc('langkit.unit_filename', 8)}
         filename = _unit_filename(self._c_value)
-        return unwrap_str(filename)
+        return _unwrap_str(filename)
 
     @property
     def diagnostics(self):
