@@ -97,14 +97,6 @@ class EnvVariable(AbstractVariable):
         return '<Env>'
 
 
-class EnvGetExpr(BasicExpr):
-    """
-    Introducing an empty subclass just to be able to find Env.get expressions
-    easily in the expression tree.
-    """
-    pass
-
-
 @auto_attr_custom("get")
 @auto_attr_custom("get_sequential", sequential=True)
 @auto_attr_custom("resolve_unique", resolve_unique=True)
@@ -125,6 +117,10 @@ def env_get(env_expr, symbol_expr, resolve_unique=False, sequential=False,
     :param bool recursive: Whether lookup must be performed recursively on
         parent environments.
     """
+
+    current_prop = PropertyDef.get()
+    if current_prop:
+        current_prop.set_uses_env()
 
     if not isinstance(symbol_expr, (AbstractExpression, basestring)):
         check_source_language(
@@ -154,7 +150,7 @@ def env_get(env_expr, symbol_expr, resolve_unique=False, sequential=False,
         array_expr = 'AST_Envs.Get (Self => {}, Key => {}, Recursive => {})'
     sub_exprs.append(construct(recursive, BoolType))
 
-    make_expr = partial(EnvGetExpr, result_var_name="Env_Get_Result",
+    make_expr = partial(BasicExpr, result_var_name="Env_Get_Result",
                         operands=sub_exprs)
 
     if resolve_unique:

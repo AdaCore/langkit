@@ -1666,6 +1666,8 @@ class PropertyDef(AbstractNodeData):
             )
             self.uses_envs = False
 
+        self.env_rebinding_arg = None
+
     def property_set(self):
         """
         Return all properties associated with this property in terms of
@@ -2101,16 +2103,21 @@ class PropertyDef(AbstractNodeData):
                                False)
 
     def set_uses_env(self):
-        if not self.uses_envs:
-            # Add the env rebindings parameter
-            self._add_argument(PropertyDef.env_rebinding_name,
-                               EnvRebindingsType,
-                               False)
-            self.uses_envs = True
         """
         Set this property as using environments, which will trigger the
         addition of the env rebinding implicit parameter.
         """
+        def internal(prop):
+            if not prop.uses_envs:
+                # Add the env rebindings parameter
+                prop._add_argument(PropertyDef.env_rebinding_name,
+                                   EnvRebindingsType,
+                                   False)
+                prop.env_rebinding_arg = prop.arguments[-1]
+                prop.uses_envs = True
+
+        for prop in self.property_set():
+            internal(prop)
 
     def construct_and_type_expression(self, context):
         """

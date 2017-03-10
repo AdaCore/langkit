@@ -706,18 +706,7 @@ class CompileCtx(object):
         rebindings or not.
         """
 
-        from langkit.expressions import EnvGetExpr
-
         _, backwards = self.properties_callgraphs()
-
-        def uses_env(expr):
-            """
-            Return true if expr or any of its sub-expressions uses the lexical
-            environments.
-            """
-            return expr and (isinstance(expr, EnvGetExpr) or any(
-                uses_env(e) for e in expr.flat_subexprs()
-            ))
 
         def propagate(prop):
             """
@@ -729,20 +718,6 @@ class CompileCtx(object):
             for bw_link in backwards.get(prop, set()):
                 if not bw_link.uses_envs:
                     propagate(bw_link)
-
-        def infer_uses_env_attribute(prop):
-            """
-            For a given property, infer whether it uses lexical environments or
-            not based on its implementation. Propagate to base and derived
-            properties.
-            """
-            if uses_env(prop.constructed_expr):
-                for p in prop.property_set():
-                    p.set_uses_env()
-
-        # Compute the uses_env attribute for every property
-        for prop in self.all_properties(lambda p: not p.abstract, False):
-            infer_uses_env_attribute(prop)
 
         # Propagate computed attribute
         for prop in self.all_properties(lambda p: not p.base_property
