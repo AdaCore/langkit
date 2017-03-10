@@ -355,6 +355,30 @@ def rebind_env(env, to_rebind, rebind_to):
     )
 
 
+@auto_attr
+def make_env_el(node):
+    """
+    Construct an env element from node, including context (env rebindings).
+    """
+    from langkit.expressions import New
+    from langkit.compiled_types import Metadata
+
+    p = PropertyDef.get()
+    check_source_language(p, "make_env_el has to be used in a property")
+    p.set_uses_env()
+
+    # TODO: Kludge, constructing this just to get the type. To remove when we
+    # have a proper typing pass.
+    node_expr = construct(node, T.root_node)
+
+    return New(
+        node_expr.type.env_el(),
+        MD=New(Metadata, dottable_subp=True, implicit_deref=False),
+        el=node,
+        parents_bindings=p.env_rebinding_arg.var
+    )
+
+
 Env = EnvVariable()
 EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
                             type=LexicalEnvType)
