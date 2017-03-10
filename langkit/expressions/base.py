@@ -2107,6 +2107,10 @@ class PropertyDef(AbstractNodeData):
                                EnvRebindingsType,
                                False)
             self.uses_envs = True
+        """
+        Set this property as using environments, which will trigger the
+        addition of the env rebinding implicit parameter.
+        """
 
     def construct_and_type_expression(self, context):
         """
