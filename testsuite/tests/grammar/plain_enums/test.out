@@ -1,0 +1,14 @@
+main.py: Running...
+<Nodes>
+|nodes:
+|  <EnumNodeList>
+|  |item 0:
+|  |  <EnumNode>
+|  |  |my_enum: e_example
+|  |  |has_plus: True
+|  |item 1:
+|  |  <EnumNode>
+|  |  |my_enum: e_null
+|  |  |has_plus: False
+main.py: Done.
+Done
