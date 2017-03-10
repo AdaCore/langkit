@@ -834,16 +834,32 @@ class ResolvedExpression(object):
         result = []
 
         def one_line_subdumps(subdumps):
+            """
+            Return whether all dumps in "subdumps" are one-line long.
+            """
             return all(len(d) == 1 for d in subdumps)
+
+        # Adopt a specific dump format depending on the type of "json_like".
+        # If each case below, first try to return a one-line dump that fits in
+        # the column limit. If it does not, fall back to a multi-line dump.
 
         if isinstance(json_like, list):
             subdumps = [cls._ir_dump(elt) for elt in json_like]
+
+            # One-line format: [A, B, ...]
             if one_line_subdumps(subdumps):
                 one_liner = '[{}]'.format(', '.join(
                     d[0] for d in subdumps
                 ))
                 if len(one_liner) <= max_cols:
                     return [one_liner]
+
+            # Multi-line format::
+            #
+            #     * Aaaaaa...
+            #     | aaaa
+            #     * Bbbbbbbbbbb
+            #     ...
             for elt in json_like:
                 subdump = cls._ir_dump(elt)
                 result.append('*  {}'.format(subdump[0]))
@@ -853,12 +869,21 @@ class ResolvedExpression(object):
             keys = sorted(json_like)
             subdumps = [cls._ir_dump(json_like[key]) for key in keys]
             items = zip(keys, subdumps)
+
+            # One-line format: {A=a, B=b, ...}
             if one_line_subdumps(subdumps):
                 one_liner = '{{{}}}'.format(
                     ', '.join('{}={}'.format(key, d[0]) for key, d in items)
                 )
                 if len(one_liner) <= max_cols:
                     return [one_liner]
+
+            # Multi-line format::
+            #
+            #     A: aaaa
+            #     B:
+            #     |  bbbbbbbb...
+            #     |  bbbbb
             for key, d in zip(keys, subdumps):
                 if len(d) == 1 and len(d[0]) <= max_cols:
                     result.append('{}: {}'.format(key, d[0]))
@@ -871,12 +896,19 @@ class ResolvedExpression(object):
                                  type(json_like).__name__)
             subdump = cls._ir_dump(json_like.subexprs)
 
+            # One-line format: ResolvedExpressionName(...)
             if len(subdump) == 1:
                 one_liner = '{}{}'.format(
                     class_name, subdump[0]
                 )
                 if len(one_liner) <= max_cols:
                     return [one_liner]
+
+            # Multi-line format::
+            #
+            #     ResolvedExpressionName(
+            #     |  ...
+            #     )
             result.append('{}('.format(class_name))
             result.extend('|  {}'.format(line) for line in subdump)
             result.append(')')
