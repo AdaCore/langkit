@@ -125,9 +125,15 @@ def print_field(context, file, struct, field):
         if is_inherited else ''
     )
 
-    print('<div class="node_wrapper">', file=file)
+    div_classes = ['node_wrapper']
+    if is_inherited:
+        div_classes.append('field_inherited')
+    if field.is_private:
+        div_classes.append('field_private')
+
+    print('<div class="{}">'.format(' '.join(div_classes)), file=file)
     print(
-        '<dt {inherit_class}>{prefixes}'
+        '<dt>{prefixes}'
         ' <span class="def" id="{node}-{field}">{field}</span>'
         ' : {type}{inherit_note}</dt>'.format(
             prefixes=' '.join(prefixes),
@@ -138,8 +144,7 @@ def print_field(context, file, struct, field):
                 if field.type in context.astnode_types else
                 field.type.name().camel
             ),
-            inherit_note=inherit_note,
-            inherit_class='class="inherited" ' if is_inherited else ""
+            inherit_note=inherit_note
         ),
         file=file
     )
@@ -215,9 +220,7 @@ ASTDOC_JS = """
 <script>
 function trigger_elements(cat) {
     var btn = document.getElementById('btn_show_' + cat);
-    nodes = [...document.querySelectorAll('.' + cat)].map(
-        (el) => el.parentElement.parentElement
-    )
+    nodes = [...document.querySelectorAll('.field_' + cat)]
     if (btn.text === "Show " + cat) {
         btn.text = "Hide " + cat;
         nodes.forEach((n) => { n.style.display = "block"; })
