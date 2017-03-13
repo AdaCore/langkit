@@ -118,11 +118,11 @@ def print_field(context, file, struct, field):
         )),
     ))
 
-    is_inherit = not field.struct == struct
+    is_inherited = field.struct != struct
 
     inherit_note = (
         ' [inherited from {}]'.format(field_ref(field))
-        if is_inherit else ''
+        if is_inherited else ''
     )
 
     print('<div class="node_wrapper">', file=file)
@@ -139,7 +139,7 @@ def print_field(context, file, struct, field):
                 field.type.name().camel
             ),
             inherit_note=inherit_note,
-            inherit_class='class="inherited" ' if is_inherit else ""
+            inherit_class='class="inherited" ' if is_inherited else ""
         ),
         file=file
     )
