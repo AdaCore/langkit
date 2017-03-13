@@ -361,7 +361,6 @@ def make_env_el(node):
     Construct an env element from node, including context (env rebindings).
     """
     from langkit.expressions import New
-    from langkit.compiled_types import Metadata
 
     p = PropertyDef.get()
     check_source_language(p, "make_env_el has to be used in a property")
@@ -373,7 +372,7 @@ def make_env_el(node):
 
     return New(
         node_expr.type.env_el(),
-        MD=New(Metadata, dottable_subp=True, implicit_deref=False),
+        MD=New(T.env_md, dottable_subp=True, implicit_deref=False),
         el=node,
         parents_bindings=p.env_rebinding_arg.var
     )
