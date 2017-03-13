@@ -840,7 +840,7 @@ class ResolvedExpression(object):
             return all(len(d) == 1 for d in subdumps)
 
         # Adopt a specific dump format depending on the type of "json_like".
-        # If each case below, first try to return a one-line dump that fits in
+        # In each case below, first try to return a one-line dump that fits in
         # the column limit. If it does not, fall back to a multi-line dump.
 
         if isinstance(json_like, list):
