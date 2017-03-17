@@ -354,16 +354,23 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name('unit_filename')}
-     (Unit : ${analysis_unit_type}) return chars_ptr
-   is
-      U : constant Analysis_Unit := Unwrap (Unit);
+     (Unit : ${analysis_unit_type}) return chars_ptr is
    begin
-      return New_String (Get_Filename (U));
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+      begin
+         return New_String (Get_Filename (U));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return Null_Ptr;
    end;
 
    function ${capi.get_name("unit_diagnostic_count")}
-     (Unit : ${analysis_unit_type}) return unsigned
-   is
+     (Unit : ${analysis_unit_type}) return unsigned is
    begin
       Clear_Last_Exception;
 
