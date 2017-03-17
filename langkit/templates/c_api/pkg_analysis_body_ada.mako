@@ -464,11 +464,19 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name('unit_context')}
-     (Unit : ${analysis_unit_type}) return ${analysis_context_type}
-   is
-      U : constant Analysis_Unit := Unwrap (Unit);
+     (Unit : ${analysis_unit_type}) return ${analysis_context_type} is
    begin
-      return Wrap (U.Context);
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+      begin
+         return Wrap (U.Context);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${analysis_context_type} (System.Null_Address);
    end;
 
    procedure ${capi.get_name("unit_reparse_from_file")}
