@@ -161,9 +161,7 @@ package body ${ada_lib_name}.Analysis.C is
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
       Reparse           : int;
-      With_Trivia       : int)
-      return ${analysis_unit_type}
-   is
+      With_Trivia       : int) return ${analysis_unit_type} is
    begin
       Clear_Last_Exception;
 
@@ -189,9 +187,7 @@ package body ${ada_lib_name}.Analysis.C is
       Filename, Charset : chars_ptr;
       Buffer            : chars_ptr;
       Buffer_Size       : size_t;
-      With_Trivia       : int)
-      return ${analysis_unit_type}
-   is
+      With_Trivia       : int) return ${analysis_unit_type} is
    begin
       Clear_Last_Exception;
 
@@ -223,9 +219,7 @@ package body ${ada_lib_name}.Analysis.C is
          Kind        : ${unit_kind_type};
          Charset     : chars_ptr;
          Reparse     : int;
-         With_Trivia : int)
-         return ${analysis_unit_type}
-      is
+         With_Trivia : int) return ${analysis_unit_type} is
       begin
          Clear_Last_Exception;
 
@@ -256,8 +250,7 @@ package body ${ada_lib_name}.Analysis.C is
 
    function ${capi.get_name("remove_analysis_unit")}
      (Context  : ${analysis_context_type};
-      Filename : chars_ptr) return int
-   is
+      Filename : chars_ptr) return int is
    begin
       Clear_Last_Exception;
 
@@ -278,9 +271,8 @@ package body ${ada_lib_name}.Analysis.C is
          return 0;
    end;
 
-   function ${capi.get_name("unit_root")} (Unit : ${analysis_unit_type})
-                                           return ${node_type}
-   is
+   function ${capi.get_name("unit_root")}
+     (Unit : ${analysis_unit_type}) return ${node_type} is
    begin
       Clear_Last_Exception;
 
@@ -332,8 +324,7 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name('unit_filename')}
-     (Unit : ${analysis_unit_type})
-      return chars_ptr
+     (Unit : ${analysis_unit_type}) return chars_ptr
    is
       U : constant Analysis_Unit := Unwrap (Unit);
    begin
@@ -388,9 +379,7 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name('node_unit')}
-     (Node : ${node_type})
-      return ${analysis_unit_type}
-   is
+     (Node : ${node_type}) return ${analysis_unit_type} is
    begin
       Clear_Last_Exception;
 
@@ -407,8 +396,7 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name("unit_incref")}
-     (Unit : ${analysis_unit_type}) return ${analysis_unit_type}
-   is
+     (Unit : ${analysis_unit_type}) return ${analysis_unit_type} is
    begin
       Clear_Last_Exception;
 
@@ -424,8 +412,7 @@ package body ${ada_lib_name}.Analysis.C is
          return ${analysis_unit_type} (System.Null_Address);
    end;
 
-   procedure ${capi.get_name("unit_decref")} (Unit : ${analysis_unit_type})
-   is
+   procedure ${capi.get_name("unit_decref")} (Unit : ${analysis_unit_type}) is
    begin
       Clear_Last_Exception;
 
@@ -440,8 +427,7 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name('unit_context')}
-     (Unit : ${analysis_unit_type})
-      return ${analysis_context_type}
+     (Unit : ${analysis_unit_type}) return ${analysis_context_type}
    is
       U : constant Analysis_Unit := Unwrap (Unit);
    begin
@@ -449,8 +435,7 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    procedure ${capi.get_name("unit_reparse_from_file")}
-     (Unit : ${analysis_unit_type}; Charset : chars_ptr)
-   is
+     (Unit : ${analysis_unit_type}; Charset : chars_ptr) is
    begin
       Clear_Last_Exception;
 
@@ -468,8 +453,7 @@ package body ${ada_lib_name}.Analysis.C is
      (Unit        : ${analysis_unit_type};
       Charset     : chars_ptr;
       Buffer      : chars_ptr;
-      Buffer_Size : size_t)
-   is
+      Buffer_Size : size_t) is
    begin
       Clear_Last_Exception;
 
@@ -486,9 +470,7 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name("unit_populate_lexical_env")}
-     (Unit : ${analysis_unit_type})
-      return int
-   is
+     (Unit : ${analysis_unit_type}) return int is
    begin
       Clear_Last_Exception;
 
@@ -523,9 +505,8 @@ package body ${ada_lib_name}.Analysis.C is
                   for cls in ctx.astnode_types
                   if not cls.abstract)});
 
-   function ${capi.get_name("node_kind")} (Node : ${node_type})
-      return ${node_kind_type}
-   is
+   function ${capi.get_name("node_kind")}
+     (Node : ${node_type}) return ${node_kind_type} is
    begin
       Clear_Last_Exception;
 
@@ -541,9 +522,8 @@ package body ${ada_lib_name}.Analysis.C is
          return ${node_kind_type}'First;
    end;
 
-   function ${capi.get_name("kind_name")} (Kind : ${node_kind_type})
-                                           return ${text_type}
-   is
+   function ${capi.get_name("kind_name")}
+     (Kind : ${node_kind_type}) return ${text_type} is
    begin
       Clear_Last_Exception;
 
@@ -577,9 +557,8 @@ package body ${ada_lib_name}.Analysis.C is
          return 0;
    end;
 
-   function ${capi.get_name('node_short_image')} (Node : ${node_type})
-                                                  return ${text_type}
-   is
+   function ${capi.get_name('node_short_image')}
+     (Node : ${node_type}) return ${text_type} is
    begin
       Clear_Last_Exception;
       declare
@@ -596,8 +575,7 @@ package body ${ada_lib_name}.Analysis.C is
 
    procedure ${capi.get_name("node_sloc_range")}
      (Node         : ${node_type};
-      Sloc_Range_P : ${sloc_range_type}_Ptr)
-   is
+      Sloc_Range_P : ${sloc_range_type}_Ptr) is
    begin
       Clear_Last_Exception;
 
@@ -613,8 +591,7 @@ package body ${ada_lib_name}.Analysis.C is
 
    function ${capi.get_name("lookup_in_node")}
      (Node : ${node_type};
-      Sloc : ${sloc_type}_Ptr) return ${node_type}
-   is
+      Sloc : ${sloc_type}_Ptr) return ${node_type} is
    begin
       Clear_Last_Exception;
 
@@ -630,9 +607,8 @@ package body ${ada_lib_name}.Analysis.C is
          return ${node_type} (System.Null_Address);
    end;
 
-   function ${capi.get_name("node_child_count")} (Node : ${node_type})
-                                                  return unsigned
-   is
+   function ${capi.get_name("node_child_count")}
+     (Node : ${node_type}) return unsigned is
    begin
       Clear_Last_Exception;
 
@@ -650,8 +626,7 @@ package body ${ada_lib_name}.Analysis.C is
    function ${capi.get_name("node_child")}
      (Node    : ${node_type};
       N       : unsigned;
-      Child_P : ${node_type}_Ptr) return int
-   is
+      Child_P : ${node_type}_Ptr) return int is
    begin
       Clear_Last_Exception;
 
@@ -678,8 +653,7 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name("text_to_locale_string")}
-     (Text : ${text_type}) return System.Address
-   is
+     (Text : ${text_type}) return System.Address is
    begin
       Clear_Last_Exception;
 
@@ -749,9 +723,8 @@ package body ${ada_lib_name}.Analysis.C is
    -- Extensions handling --
    -------------------------
 
-   function ${capi.get_name("register_extension")} (Name : chars_ptr)
-      return unsigned
-   is
+   function ${capi.get_name("register_extension")}
+     (Name : chars_ptr) return unsigned is
    begin
       Clear_Last_Exception;
 
@@ -766,8 +739,7 @@ package body ${ada_lib_name}.Analysis.C is
      (Node   : ${node_type};
       Ext_Id : unsigned;
       Dtor   : ${capi.get_name("node_extension_destructor")})
-      return System.Address
-   is
+      return System.Address is
    begin
       Clear_Last_Exception;
 
@@ -802,8 +774,7 @@ package body ${ada_lib_name}.Analysis.C is
 
    procedure Set_Last_Exception
      (Exc      : Exception_Occurrence;
-      Is_Fatal : Boolean := True)
-   is
+      Is_Fatal : Boolean := True) is
    begin
       --  If it's the first time, allocate room for the exception information
 
@@ -923,8 +894,7 @@ package body ${ada_lib_name}.Analysis.C is
    -- Wrap_Alloc --
    ----------------
 
-   function Wrap_Alloc (S : Text_Type) return ${text_type}
-   is
+   function Wrap_Alloc (S : Text_Type) return ${text_type} is
       T : Text_Access := new Text_Type'(S);
    begin
       return ${text_type}'(T.all'Address, T.all'Length, Is_Allocated => 1);
@@ -1130,34 +1100,30 @@ package body ${ada_lib_name}.Analysis.C is
 
    ${array_types.body(T.root_node.env_el().array_type())}
 
-   function ${capi.get_name('lexical_env_empty')} return ${lexical_env_type}
-   is
+   function ${capi.get_name('lexical_env_empty')} return ${lexical_env_type} is
    begin
       return Wrap (Empty_Env);
    end;
 
    function ${capi.get_name('lexical_env_parent')}
-     (Env : ${lexical_env_type})
-      return ${lexical_env_type}
+     (Env : ${lexical_env_type}) return ${lexical_env_type}
    is
       E : constant AST_Envs.Lexical_Env := Unwrap (Env);
    begin
       return Wrap (AST_Envs.Get_Env (E.Parent));
-   end ${capi.get_name('lexical_env_parent')};
+   end;
 
    function ${capi.get_name('lexical_env_node')}
-     (Env : ${lexical_env_type})
-      return ${node_type}
+     (Env : ${lexical_env_type}) return ${node_type}
    is
       E : constant AST_Envs.Lexical_Env := Unwrap (Env);
    begin
       return Wrap (E.Node);
-   end ${capi.get_name('lexical_env_node')};
+   end;
 
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};
-      Name : ${text_type})
-      return ${T.root_node.env_el().array_type().name()}
+      Name : ${text_type}) return ${T.root_node.env_el().array_type().name()}
    is
       E : constant AST_Envs.Lexical_Env := Unwrap (Env);
    begin
@@ -1177,7 +1143,7 @@ package body ${ada_lib_name}.Analysis.C is
                         then (1 .. 0 => <>)
                         else AST_Envs.Get (E, N));
       end;
-   end ${capi.get_name('lexical_env_get')};
+   end;
 
    procedure ${capi.get_name('lexical_env_dec_ref')}
      (Env : ${lexical_env_type})
@@ -1185,7 +1151,7 @@ package body ${ada_lib_name}.Analysis.C is
       E : AST_Envs.Lexical_Env := Unwrap (Env);
    begin
       Dec_Ref (E);
-   end ${capi.get_name('lexical_env_dec_ref')};
+   end;
 
    ---------------------------------------
    -- Kind-specific AST node primitives --
