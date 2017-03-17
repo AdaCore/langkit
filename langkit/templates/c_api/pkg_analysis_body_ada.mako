@@ -289,38 +289,68 @@ package body ${ada_lib_name}.Analysis.C is
 
    procedure ${capi.get_name('unit_first_token')}
      (Unit  : ${analysis_unit_type};
-      Token : ${token_type}_Ptr)
-   is
-      U : constant Analysis_Unit := Unwrap (Unit);
-      T : constant Token_Type := First_Token (U);
+      Token : ${token_type}_Ptr) is
    begin
-      Token.all := Wrap (T);
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+         T : constant Token_Type := First_Token (U);
+      begin
+         Token.all := Wrap (T);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end;
 
    procedure ${capi.get_name('unit_last_token')}
      (Unit  : ${analysis_unit_type};
-      Token : ${token_type}_Ptr)
-   is
-      U : constant Analysis_Unit := Unwrap (Unit);
-      T : constant Token_Type := Last_Token (U);
+      Token : ${token_type}_Ptr) is
    begin
-      Token.all := Wrap (T);
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+         T : constant Token_Type := Last_Token (U);
+      begin
+         Token.all := Wrap (T);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end;
 
    function ${capi.get_name('unit_token_count')}
-     (Unit : ${analysis_unit_type}) return int
-   is
-      U : constant Analysis_Unit := Unwrap (Unit);
+     (Unit : ${analysis_unit_type}) return int is
    begin
-      return int (Token_Count (U));
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+      begin
+         return int (Token_Count (U));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return -1;
    end;
 
    function ${capi.get_name('unit_trivia_count')}
-     (Unit : ${analysis_unit_type}) return int
-   is
-      U : constant Analysis_Unit := Unwrap (Unit);
+     (Unit : ${analysis_unit_type}) return int is
    begin
-      return int (Trivia_Count (U));
+      Clear_Last_Exception;
+
+      declare
+         U : constant Analysis_Unit := Unwrap (Unit);
+      begin
+         return int (Trivia_Count (U));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return -1;
    end;
 
    function ${capi.get_name('unit_filename')}
