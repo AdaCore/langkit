@@ -892,16 +892,6 @@ package body ${ada_lib_name}.Analysis.C is
          Set_Last_Exception (Exc);
    end;
 
-   function ${capi.get_name('token_is_equivalent')}
-     (Left  : ${token_type}_Ptr;
-      Right : ${token_type}_Ptr) return ${bool_type}
-   is
-      L  : constant Token_Type := Unwrap (Left.all);
-      R  : constant Token_Type := Unwrap (Right.all);
-   begin
-      return ${bool_type} (Boolean'Pos (Is_Equivalent (L, R)));
-   end;
-
    procedure ${capi.get_name('token_previous')}
      (Token          : ${token_type}_Ptr;
       Previous_Token : ${token_type}_Ptr)
@@ -923,17 +913,43 @@ package body ${ada_lib_name}.Analysis.C is
      (First, Last : ${token_type}_Ptr;
       Text        : ${text_type}_Ptr) return int
    is
-      FD : constant Token_Data_Type := Data (Unwrap (First.all));
-      LD : constant Token_Data_Type := Data (Unwrap (Last.all));
    begin
-      if First.Token_Data /= Last.Token_Data then
+      Clear_Last_Exception;
+      declare
+         FD : constant Token_Data_Type := Data (Unwrap (First.all));
+         LD : constant Token_Data_Type := Data (Unwrap (Last.all));
+      begin
+         if First.Token_Data /= Last.Token_Data then
+            return 0;
+         end if;
+         Text.all := Wrap
+           (FD.Source_Buffer,
+            Positive (FD.Source_First),
+            Natural (LD.Source_Last));
+         return 1;
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
          return 0;
-      end if;
-      Text.all := Wrap
-        (FD.Source_Buffer,
-         Positive (FD.Source_First),
-         Natural (LD.Source_Last));
-      return 1;
+   end;
+
+   function ${capi.get_name('token_is_equivalent')}
+     (Left  : ${token_type}_Ptr;
+      Right : ${token_type}_Ptr) return ${bool_type}
+   is
+   begin
+      Clear_Last_Exception;
+         declare
+         L  : constant Token_Type := Unwrap (Left.all);
+         R  : constant Token_Type := Unwrap (Right.all);
+      begin
+         return ${bool_type} (Boolean'Pos (Is_Equivalent (L, R)));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return 0;
    end;
 
    ------------

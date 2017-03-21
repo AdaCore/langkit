@@ -572,14 +572,6 @@ package ${ada_lib_name}.Analysis.C is
            External_name => "${capi.get_name('token_next')}";
    ${ada_c_doc('langkit.token_next', 3)}
 
-   function ${capi.get_name('token_is_equivalent')}
-     (Left  : ${token_type}_Ptr;
-      Right : ${token_type}_Ptr) return ${bool_type}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('token_is_equivalent')}";
-   ${ada_c_doc('langkit.token_is_equivalent', 3)}
-
    procedure ${capi.get_name('token_previous')}
      (Token          : ${token_type}_Ptr;
       Previous_Token : ${token_type}_Ptr)
@@ -595,6 +587,14 @@ package ${ada_lib_name}.Analysis.C is
            Convention => C,
            External_Name => "${capi.get_name('token_range_text')}";
    ${ada_c_doc('langkit.token_range_text', 3)}
+
+   function ${capi.get_name('token_is_equivalent')}
+     (Left  : ${token_type}_Ptr;
+      Right : ${token_type}_Ptr) return ${bool_type}
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('token_is_equivalent')}";
+   ${ada_c_doc('langkit.token_is_equivalent', 3)}
 
    -----------------------
    -- Enumeration types --
