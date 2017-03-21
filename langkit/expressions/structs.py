@@ -369,7 +369,7 @@ class FieldAccess(AbstractExpression):
         @memoized
         def env_bind_expr(self):
             """
-            If this expressions needs to pass an env binding parameter along,
+            If this expression needs to pass an env binding parameter along,
             compute its value.
 
             :rtype: str
