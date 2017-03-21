@@ -879,10 +879,17 @@ package body ${ada_lib_name}.Analysis.C is
      (Token      : ${token_type}_Ptr;
       Next_Token : ${token_type}_Ptr)
    is
-      T  : constant Token_Type := Unwrap (Token.all);
-      NT : constant Token_Type := Next (T);
    begin
-      Next_Token.all := Wrap (NT);
+      Clear_Last_Exception;
+      declare
+         T  : constant Token_Type := Unwrap (Token.all);
+         NT : constant Token_Type := Next (T);
+      begin
+         Next_Token.all := Wrap (NT);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end;
 
    function ${capi.get_name('token_is_equivalent')}
@@ -899,10 +906,17 @@ package body ${ada_lib_name}.Analysis.C is
      (Token          : ${token_type}_Ptr;
       Previous_Token : ${token_type}_Ptr)
    is
-      T  : constant Token_Type := Unwrap (Token.all);
-      PT : constant Token_Type := Previous (T);
    begin
-      Previous_Token.all := Wrap (PT);
+      Clear_Last_Exception;
+      declare
+         T  : constant Token_Type := Unwrap (Token.all);
+         PT : constant Token_Type := Previous (T);
+      begin
+         Previous_Token.all := Wrap (PT);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end;
 
    function ${capi.get_name('token_range_text')}
