@@ -393,9 +393,9 @@ class FieldAccess(AbstractExpression):
             # Combine if necessary
             if l and r:
                 return "AST_Envs.Combine ({}, {})".format(l, r)
-
-            # If only one exists, return it. If both are None, return None
-            return l or r
+            else:
+                # If only one exists, return it. If both are None, return None
+                return l or r
 
         def _render_pre(self):
             exprs = [self.receiver_expr] + self.arguments
