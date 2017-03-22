@@ -795,6 +795,9 @@ class Row(Parser):
         self.args = []
         self.allargs = []
 
+    def discard(self):
+        return all(p.discard() for p in self.parsers)
+
     def children(self):
         return self.parsers
 
