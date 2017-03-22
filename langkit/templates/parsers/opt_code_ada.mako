@@ -21,13 +21,13 @@ if ${parser_context.pos_var_name} = No_Token_Index then
          ${bool_res}.Token_Start_Index := ${pos_name};
          ${bool_res}.Token_End_Index := No_Token_Index;
       % endif
-    % elif parser_type.is_list_type:
+    % elif parser_type and parser_type.is_list_type:
         ${parser_context.res_var_name} :=
           (${parser_type.storage_type_name()}_Alloc.Alloc (Parser.Mem_Pool));
         ${parser_context.res_var_name}.Unit := Parser.Unit;
         ${parser_context.res_var_name}.Token_Start_Index := ${pos_name} - 1;
         ${parser_context.res_var_name}.Token_End_Index := No_Token_Index;
-    % else:
+    % elif parser_type:
         ${parser_context.res_var_name} :=
            ${parser_type.storage_nullexpr()};
     % endif
