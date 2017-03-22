@@ -170,8 +170,9 @@ procedure Parse is
             Put (File_Name & ": ");
             Put_Line (To_Pretty_String (D));
          end loop;
+      end if;
 
-      elsif not Silent then
+      if (not Silent) and then Root (Unit) /= null then
          if Do_Print_Trivia then
             PP_Trivia (Unit);
          else
