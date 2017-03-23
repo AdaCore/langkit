@@ -9,6 +9,7 @@
    dec_ref = cls.c_dec_ref(capi)
 %>
 
+subtype ${c_type_name} is ${ada_type_name};
 type ${c_type_name}_Ptr is access ${ada_type_name};
 
 procedure ${inc_ref} (A : ${ada_type_name})
