@@ -1203,51 +1203,83 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name('lexical_env_parent')}
-     (Env : ${lexical_env_type}) return ${lexical_env_type}
-   is
-      E : constant AST_Envs.Lexical_Env := Unwrap (Env);
+     (Env : ${lexical_env_type}) return ${lexical_env_type} is
    begin
-      return Wrap (AST_Envs.Get_Env (E.Parent));
+      Clear_Last_Exception;
+
+      declare
+         E : constant AST_Envs.Lexical_Env := Unwrap (Env);
+      begin
+         return Wrap (AST_Envs.Get_Env (E.Parent));
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${lexical_env_type} (System.Null_Address);
    end;
 
    function ${capi.get_name('lexical_env_node')}
-     (Env : ${lexical_env_type}) return ${node_type}
-   is
-      E : constant AST_Envs.Lexical_Env := Unwrap (Env);
+     (Env : ${lexical_env_type}) return ${node_type} is
    begin
-      return Wrap (E.Node);
+      Clear_Last_Exception;
+
+      declare
+         E : constant AST_Envs.Lexical_Env := Unwrap (Env);
+      begin
+         return Wrap (E.Node);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${node_type} (System.Null_Address);
    end;
 
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};
       Name : ${text_type}) return ${T.root_node.env_el().array_type().name()}
    is
-      E : constant AST_Envs.Lexical_Env := Unwrap (Env);
    begin
-      --  TODO??? The root environment is not tied to any node, so we cannot
-      --  get a symbol to look it up. We should probably solve this
-      --  automatically creating an anonymous unit to embed the root
-      --  environment.
-      if E.Node = null then
-         raise Property_Error with "LexicalEnv.Get on null LexicalEnv";
-      end if;
+      Clear_Last_Exception;
 
       declare
-         U : constant Analysis_Unit := E.Node.Unit;
-         N : constant Symbol_Type := Unwrap (U, Name);
+         E : constant AST_Envs.Lexical_Env := Unwrap (Env);
       begin
-         return Create (if N = null
-                        then (1 .. 0 => <>)
-                        else AST_Envs.Get (E, N));
+         --  TODO??? The root environment is not tied to any node, so we cannot
+         --  get a symbol to look it up. We should probably solve this
+         --  automatically creating an anonymous unit to embed the root
+         --  environment.
+         if E.Node = null then
+            raise Property_Error with "LexicalEnv.Get on null LexicalEnv";
+         end if;
+
+         declare
+            U : constant Analysis_Unit := E.Node.Unit;
+            N : constant Symbol_Type := Unwrap (U, Name);
+         begin
+            return Create (if N = null
+                           then (1 .. 0 => <>)
+                           else AST_Envs.Get (E, N));
+         end;
       end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return null;
    end;
 
    procedure ${capi.get_name('lexical_env_dec_ref')}
-     (Env : ${lexical_env_type})
-   is
-      E : AST_Envs.Lexical_Env := Unwrap (Env);
+     (Env : ${lexical_env_type}) is
    begin
-      Dec_Ref (E);
+      Clear_Last_Exception;
+
+      declare
+         E : AST_Envs.Lexical_Env := Unwrap (Env);
+      begin
+         Dec_Ref (E);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end;
 
    ---------------------------------------
