@@ -1,6 +1,7 @@
 Testing LexicalEnv (un)wrapping
 ===============================
-u.root.p_env id(None) = <TypeError: None is not an allowed LexicalEnv value>
+u.root.p_env_id(None) = <TypeError: None is not an allowed LexicalEnv value>
+u.root.p_env_id(42) = <TypeError: LexicalEnv instance expected, got <type 'int'> instead>
 u.root.p_env id(u.root.children_env): result has type <class 'libfoolang.LexicalEnv'>
 Testing LexicalEnv.get()
 ========================

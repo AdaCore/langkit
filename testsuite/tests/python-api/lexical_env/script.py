@@ -27,12 +27,20 @@ if u.diagnostics:
 u.populate_lexical_env()
 
 print_title('Testing LexicalEnv (un)wrapping')
+
 try:
     res_none = u.root.p_env_id(None)
 except TypeError as exc:
     res_none = '<TypeError: {}>'.format(exc)
+print('u.root.p_env_id(None) = {}'.format(res_none))
+
+try:
+    res_int = u.root.p_env_id(42)
+except TypeError as exc:
+    res_int = '<TypeError: {}>'.format(exc)
+print('u.root.p_env_id(42) = {}'.format(res_int))
+
 res_field = u.root.p_env_id(u.root.children_env)
-print('u.root.p_env id(None) = {}'.format(res_none))
 print('u.root.p_env id(u.root.children_env): result has type {}'.format(
     type(res_field)
 ))
