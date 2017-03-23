@@ -539,7 +539,15 @@ class NoCase(Matcher):
         return Pattern(self.to_match).max_match_length()
 
     def render(self):
-        return '\C{{{}}}'.format(self.to_match)
+        return '\C{%s}' % self.to_match
+
+
+class NoCaseLit(NoCase):
+    """
+    Same as NoCase, but for literal patterns.
+    """
+    def render(self):
+        return '\C{"%s"}' % self.to_match
 
 
 class Eof(Matcher):
