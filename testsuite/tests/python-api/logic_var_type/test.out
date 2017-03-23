@@ -10,6 +10,7 @@ Build and run:
 --------------
 main.py: Running...
 u.root.p_var(None) = None
+u.root.p_var(42) = <TypeError: LogicVar instance expected, got <type 'int'> instead>
 u.root.p_var(root.f_var_field): result has type <class 'libfoolang.LogicVar'>
 main.py: Done.
 Done
