@@ -1025,23 +1025,38 @@ package body ${ada_lib_name}.Analysis.C is
       Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type})
       return ${unit_provider_type}
    is
-      Result : constant Unit_Provider_Access :=
-         new C_Unit_Provider_Type'
-           (Ada.Finalization.Controlled with
-            Data                    => Data,
-            Destroy_Func            => Destroy_Func,
-            Get_Unit_From_Node_Func => Get_Unit_From_Node_Func,
-            Get_Unit_From_Name_Func => Get_Unit_From_Name_Func);
    begin
-      return Wrap (Result);
+      Clear_Last_Exception;
+      declare
+         Result : constant Unit_Provider_Access :=
+            new C_Unit_Provider_Type'
+              (Ada.Finalization.Controlled with
+               Data                    => Data,
+               Destroy_Func            => Destroy_Func,
+               Get_Unit_From_Node_Func => Get_Unit_From_Node_Func,
+               Get_Unit_From_Name_Func => Get_Unit_From_Name_Func);
+      begin
+         return Wrap (Result);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return ${unit_provider_type} (System.Null_Address);
    end;
 
    procedure ${capi.get_name('destroy_unit_provider')}
      (Provider : ${unit_provider_type})
    is
-      P : Unit_Provider_Access := Unwrap (Provider);
    begin
-      Destroy (P);
+      Clear_Last_Exception;
+      declare
+         P : Unit_Provider_Access := Unwrap (Provider);
+      begin
+         Destroy (P);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end;
 
    --------------
