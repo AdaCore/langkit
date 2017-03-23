@@ -88,7 +88,7 @@ class PythonAPISettings(AbstractAPISettings):
         :rtype: str
         """
         return dispatch_on_type(type, [
-            (ct.AnalysisUnitType, lambda _: '{}._c_value'),
+            (ct.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({})'),
             (ct.AnalysisUnitKind, lambda _: '_unwrap_unit_kind({})'),
             (ct.ASTNode, lambda _: '{}._unwrap({{}})'.format(
                 self.context.root_grammar_class.name().camel

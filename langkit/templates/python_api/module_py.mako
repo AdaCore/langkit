@@ -404,6 +404,15 @@ class AnalysisUnit(object):
     def _wrap(cls, c_value):
         return cls(c_value) if c_value else None
 
+    @classmethod
+    def _unwrap(cls, value):
+        if value is None:
+            return 0
+        elif not isinstance(value, cls):
+            _raise_type_error(cls.__name__, value)
+        else:
+            return value._c_value
+
 
 % if ctx.library_fields_all_public:
 class LexicalEnv(object):
