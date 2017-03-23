@@ -1,5 +1,6 @@
 main.py: Running...
-u.root.p_sym(None) = <TypeError: String or unicode object expected but got <type 'NoneType'> instead>
+u.root.p_sym(None) = <TypeError: string or unicode instance expected, got <type 'NoneType'> instead>
+u.root.p_sym(42) = <TypeError: string or unicode instance expected, got <type 'int'> instead>
 u.root.p_sym(u.root.f_tok.symbol) = my_ident
 u.root.p_sym("no_such_symbol") = None
 main.py: Done.

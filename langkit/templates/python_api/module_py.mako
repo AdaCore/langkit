@@ -70,6 +70,12 @@ class _Exception(ctypes.Structure):
         return NativeException(self.information)
 
 
+def _raise_type_error(expected_type_name, actual_value):
+    raise TypeError('{} instance expected, got {} instead'.format(
+        expected_type_name, type(actual_value)
+    ))
+
+
 _get_last_exception = _import_func(
    '${capi.get_name("get_last_exception")}',
    [], ctypes.POINTER(_Exception),
@@ -98,8 +104,7 @@ class _text(ctypes.Structure):
         if isinstance(value, str):
             value = value.decode('ascii')
         elif not isinstance(value, unicode):
-            raise TypeError('String or unicode object expected but got {}'
-                            ' instead'.format(type(value)))
+            _raise_type_error('string or unicode', value)
 
         text = value.encode(cls.encoding)
         text_buffer = ctypes.create_string_buffer(text)
