@@ -112,17 +112,14 @@ package body ${ada_lib_name}.Analysis.Parsers is
       procedure Add_Last_Fail_Diagnostic is
          Last_Token : Lexer.Token_Data_Type renames
             Get_Token (Parser.TDH.all, Parser.Last_Fail.Pos);
-         Found_Token_Str : constant String
-           := Token_Kind_Literal (Parser.Last_Fail.Found_Token_Id);
          D : constant Diagnostic :=
            (if Parser.Last_Fail.Kind = Token_Fail then
              (Sloc_Range => Last_Token.Sloc_Range,
               Message    => To_Unbounded_Wide_Wide_String (To_Text
-                ("Expected '"
-                 & Token_Kind_Literal (Parser.Last_Fail.Expected_Token_Id)
-                 & "', got "
-                 & (if Found_Token_Str /= "" then "'" & Found_Token_Str & "'"
-                    else Token_Kind_Name (Parser.Last_Fail.Found_Token_Id))
+                ("Expected "
+                 & Token_Error_Image (Parser.Last_Fail.Expected_Token_Id)
+                 & ", got "
+                 & Token_Error_Image (Parser.Last_Fail.Found_Token_Id)
                  )))
             else
               (Sloc_Range => Last_Token.Sloc_Range,
