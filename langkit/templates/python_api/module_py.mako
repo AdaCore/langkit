@@ -439,6 +439,8 @@ class LexicalEnv(object):
     def _unwrap(cls, value):
         if value is None:
             raise TypeError('None is not an allowed LexicalEnv value')
+        elif not isinstance(value, cls):
+            _raise_type_error('LexicalEnv', value)
         return value._c_value
 
     @classmethod
