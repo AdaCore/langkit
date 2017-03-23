@@ -96,6 +96,10 @@ def expand_abstract_fn(fn):
             'parameter {} (got {})'.format(kw, default)
         )
 
+        # Make sure this type is known to the context, for code generation
+        # purposes.
+        default.add_to_context()
+
         fn_arguments.append(Argument(names.Name.from_lower(kw), default))
 
     # Now that we have placeholder for all arguments, we can expand the lambda
