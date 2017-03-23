@@ -44,6 +44,13 @@ class _BaseArray(object):
 
         return self._unwrap_item(self._items[key])
 
+    @classmethod
+    def _unwrap(cls, value):
+        if not isinstance(value, cls):
+            _raise_type_error(cls.__name__, value)
+        else:
+            return value._c_value
+
     @staticmethod
     def _unwrap_item(item):
         raise NotImplementedError()
