@@ -299,7 +299,6 @@ class Parser(object):
         Return a representation of the parser suitable for generated code's
         error messages. Default implementation is to just use __repr__.
         """
-        print("DAFUQ")
         return repr(self)
 
     @property
