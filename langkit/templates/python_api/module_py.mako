@@ -469,7 +469,12 @@ class BasePointerBinding(object):
 
     @classmethod
     def _unwrap(cls, value):
-        return 0 if value is None else value._c_value
+        if value is None:
+            return 0
+        elif not isinstance(value, cls):
+            _raise_type_error(cls.__name__, value)
+        else:
+            return value._c_value
 
     @classmethod
     def _wrap(cls, c_value):
