@@ -34,13 +34,24 @@ procedure ${dec_ref} (A : ${ada_type_name})
 
 procedure ${inc_ref} (A : ${ada_type_name}) is
 begin
+   Clear_Last_Exception;
    Inc_Ref (A);
+exception
+   when Exc : others =>
+      Set_Last_Exception (Exc);
 end;
 
 procedure ${dec_ref} (A : ${ada_type_name}) is
-   A_Var : ${ada_type_name} := A;
 begin
-   Dec_Ref (A_Var);
+   Clear_Last_Exception;
+   declare
+      A_Var : ${ada_type_name} := A;
+   begin
+      Dec_Ref (A_Var);
+   end;
+exception
+   when Exc : others =>
+      Set_Last_Exception (Exc);
 end;
 
 </%def>
