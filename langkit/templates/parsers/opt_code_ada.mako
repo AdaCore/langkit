@@ -35,13 +35,10 @@ if ${parser_context.pos_var_name} = No_Token_Index then
     % if parser._is_error:
         ## Emit a diagnostic informing the user that the sub parser has not
         ## succeeded.
-        <% missing_item = (parser.parser.val
-                           if is_tok(parser.parser) else
-                           repr(parser.parser)) %>
         Parser.Diagnostics.Append
           ((Get_Token (Parser.TDH.all, ${pos_name}).Sloc_Range,
             To_Unbounded_Wide_Wide_String (To_Text
-            ("Missing '${missing_item}'"))));
+            ("Missing '${parser.parser.error_repr}'"))));
     % endif
 
     ${parser_context.pos_var_name} := ${pos_name};
