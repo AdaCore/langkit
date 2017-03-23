@@ -33,7 +33,11 @@ procedure ${dec_ref} (R : ${c_type_name}_Ptr)
 % if cls.is_refcounted():
 procedure ${dec_ref} (R : ${c_type_name}_Ptr) is
 begin
+   Clear_Last_Exception;
    Dec_Ref (R.all);
+exception
+   when Exc : others =>
+      Set_Last_Exception (Exc);
 end ${dec_ref};
 % endif
 
