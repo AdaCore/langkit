@@ -1,5 +1,8 @@
 main.py: Running...
-=== main.txt ===
 result = 6
+unit.root.eval_unit(None) = <PropertyError: raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : dereferencing a null access
+>
+unit.root.eval_unit(42) = <TypeError: AnalysisUnit instance expected, got <type 'int'> instead>
+unit.root.eval_unit(unit) = 6
 main.py: Done.
 Done

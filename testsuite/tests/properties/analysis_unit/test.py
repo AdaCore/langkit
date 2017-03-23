@@ -8,11 +8,11 @@ from __future__ import (absolute_import, division, print_function,
 import os.path
 
 from langkit.compiled_types import (
-    AnalysisUnitType, ASTNode, Field, LongType, abstract, root_grammar_class
+    AnalysisUnitType, ASTNode, Field, LongType, T, abstract, root_grammar_class
 )
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import (
-    AbstractProperty, ExternalProperty, Property, Self
+    AbstractProperty, ExternalProperty, Property, Self, langkit_property
 )
 from langkit.parsers import Grammar, Or, Row, Tok
 
@@ -25,7 +25,9 @@ Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 @root_grammar_class()
 class FooNode(ASTNode):
-    pass
+    @langkit_property(public=True)
+    def eval_unit(u=AnalysisUnitType):
+        return u.root.cast(T.Expression).result
 
 
 @abstract
