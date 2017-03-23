@@ -996,18 +996,25 @@ package body ${ada_lib_name}.Analysis.C is
    end Wrap;
 
    procedure ${capi.get_name('destroy_text')} (T : ${text_type}_Ptr) is
-      use System;
    begin
-      if T.Is_Allocated /= 0 and then T.Chars /= System.Null_Address then
-         declare
-            TT : Text_Type (1 .. Natural (T.Length));
-            for TT'Address use T.Chars;
-            TA : Text_Access := TT'Unrestricted_Access;
-         begin
-            Free (TA);
-         end;
-         T.Chars := System.Null_Address;
-      end if;
+      Clear_Last_Exception;
+      declare
+         use System;
+      begin
+         if T.Is_Allocated /= 0 and then T.Chars /= System.Null_Address then
+            declare
+               TT : Text_Type (1 .. Natural (T.Length));
+               for TT'Address use T.Chars;
+               TA : Text_Access := TT'Unrestricted_Access;
+            begin
+               Free (TA);
+            end;
+            T.Chars := System.Null_Address;
+         end if;
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
    end;
 
 % if ctx.default_unit_provider:
