@@ -294,6 +294,15 @@ class Parser(object):
         self._name = names.Name("")
 
     @property
+    def error_repr(self):
+        """
+        Return a representation of the parser suitable for generated code's
+        error messages. Default implementation is to just use __repr__.
+        """
+        print("DAFUQ")
+        return repr(self)
+
+    @property
     def base_name(self):
         """
         Return a simple name (names.Name instance) for this parser.
@@ -542,6 +551,10 @@ class Parser(object):
 class Tok(Parser):
     """Parser that matches a specific token."""
 
+    @property
+    def error_repr(self):
+        return '{}'.format(self.val)
+
     def __repr__(self):
         return "Tok({0})".format(repr(self.val))
 
@@ -759,6 +772,10 @@ def Pick(*parsers):
 
 class Row(Parser):
     """Parser that matches a what sub-parsers match in sequence."""
+
+    @property
+    def error_repr(self):
+        return " ".join(m.error_repr for m in self.parsers)
 
     def _is_left_recursive(self, rule_name):
         for parser in self.parsers:
@@ -986,6 +1003,10 @@ class Opt(Parser):
     otherwise.
     """
 
+    @property
+    def error_repr(self):
+        return "[{}]".format(self.parser.error_repr)
+
     def _is_left_recursive(self, rule_name):
         return self.parser._is_left_recursive(rule_name)
 
@@ -1121,6 +1142,10 @@ class Extract(Parser):
     def _is_left_recursive(self, rule_name):
         return self.parser._is_left_recursive(rule_name)
 
+    @property
+    def error_repr(self):
+        return self.parser.error_repr
+
     def __repr__(self):
         return "{0} >> {1}".format(self.parser, self.index)
 
@@ -1180,6 +1205,10 @@ class Discard(Parser):
 
 class Defer(Parser):
     """Stub parser used to implement forward references."""
+
+    @property
+    def error_repr(self):
+        return self.name
 
     @property
     def parser(self):
