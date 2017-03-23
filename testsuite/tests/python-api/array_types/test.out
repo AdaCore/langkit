@@ -1,0 +1,7 @@
+main.py: Running...
+u.root.p_count(None) = <TypeError: ExampleArray instance expected, got <type 'NoneType'> instead>
+u.root.p_count(42) = <TypeError: ExampleArray instance expected, got <type 'int'> instead>
+u.root.p_count(u.root.p_all_items) = <TypeError: ExampleArray instance expected, got <class 'libfoolang.FooNodeArray'> instead>
+u.root.p_count(u.root.p_example_items) = 2
+main.py: Done.
+Done
