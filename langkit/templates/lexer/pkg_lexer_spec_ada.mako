@@ -16,7 +16,7 @@ package ${ada_lib_name}.Lexer is
    %>
 
    type Token_Kind is (
-      ${',\n'.join(lexer.ada_token_name(t) for t in tokens)}
+      ${',\n'.join(t.ada_name for t in tokens)}
    );
 
    % if lexer.track_indent:

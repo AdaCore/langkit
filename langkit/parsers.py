@@ -596,6 +596,10 @@ class Tok(Parser):
 
     def generate_code(self, pos_name="pos"):
 
+        token = (get_context().lexer.get_token(self.val)
+                 if isinstance(self.val, basestring)
+                 else self.val)
+
         # Generate the code to match the token of kind 'token_kind', and return
         # the corresponding context.
         pos, res = gen_names("tk_pos", "tk_res")
@@ -604,7 +608,7 @@ class Tok(Parser):
             parser=self, pos_name=pos_name,
             pos=pos, res=res,
             match_text=self.match_text,
-            token_kind=get_context().lexer.ada_token_name(self.val)
+            token_kind=token.ada_name
         )
 
         return ParserCodeContext(

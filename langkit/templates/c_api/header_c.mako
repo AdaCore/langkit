@@ -89,7 +89,7 @@ typedef enum {
    <% lexer = ctx.lexer %>
    % for i, t in enumerate(lexer.sorted_tokens):
       ${',' if i > 0 else ''}
-      ${lexer.c_token_name(t)} = ${t.value}
+      ${t.c_name} = ${t.value}
    % endfor
 } ${token_kind};
 

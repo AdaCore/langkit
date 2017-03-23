@@ -2,7 +2,7 @@
 
 <%
    lexer = ctx.lexer
-   termination = lexer.ada_token_name('Termination')
+   termination = lexer.Termination.ada_name
 %>
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
@@ -189,7 +189,7 @@ package body ${ada_lib_name}.Lexer is
             ## Token id is part of the class of token types for which we want to
             ## internalize the text.
             when ${" | ".join(
-               lexer.ada_token_name(tok)
+               tok.ada_name
                for tok in lexer.token_actions['WithSymbol']
             )} =>
                declare
@@ -209,7 +209,7 @@ package body ${ada_lib_name}.Lexer is
 
          % if lexer.token_actions['WithTrivia']:
             when ${" | ".join(
-               lexer.ada_token_name(tok)
+               tok.ada_name
                for tok in lexer.token_actions['WithTrivia']
             )} =>
                if With_Trivia then
@@ -268,7 +268,7 @@ package body ${ada_lib_name}.Lexer is
          if Token_Id = ${termination} then
             while Get_Col > 1 loop
                TDH.Tokens.Append
-                 ((Kind         => ${lexer.ada_token_name('Dedent')},
+                 ((Kind         => ${lexer.Dedent.ada_name},
                    Source_First => TDH.Source_Last + 1,
                    Source_Last  => TDH.Source_Last,
                    Symbol       => null,
@@ -279,11 +279,11 @@ package body ${ada_lib_name}.Lexer is
 
          <%
             end_ilayout_toks = (
-               " | ".join(lexer.ada_token_name(t)
+               " | ".join(t.ada_name
                for t in lexer.tokens if t.end_ignore_layout)
             )
             start_ilayout_toks = (
-               " | ".join(lexer.ada_token_name(t) 
+               " | ".join(t.ada_name
                for t in lexer.tokens if t.start_ignore_layout)
             )
          %>
@@ -299,8 +299,8 @@ package body ${ada_lib_name}.Lexer is
          --  If we don't ignore layout, and the token is the first on a new
          --  line, and it is not a newline token, then:
          if Ign_Layout_Level <= 0
-            and then Prev_Id = ${lexer.ada_token_name('Newline')}
-            and then Token_Id /= ${lexer.ada_token_name('Newline')}
+            and then Prev_Id = ${lexer.Newline.ada_name}
+            and then Token_Id /= ${lexer.Newline.ada_name}
          then
             declare
                T : Token_Data_Type :=
@@ -316,14 +316,14 @@ package body ${ada_lib_name}.Lexer is
                   --  Emit every necessary dedent token if the line is
                   -- dedented, and pop values from the stack.
                   while Sloc_Range.Start_Column < Get_Col loop
-                     T.Kind := ${lexer.ada_token_name('Dedent')};
+                     T.Kind := ${lexer.Dedent.ada_name};
                      TDH.Tokens.Append (T);
                      Columns_Stack_Len := Columns_Stack_Len - 1;
                   end loop;
                elsif Sloc_Range.Start_Column > Get_Col then
                   --  Emit a single indent token, and put the new value on the
                   --  indent stack.
-                  T.Kind := ${lexer.ada_token_name('Indent')};
+                  T.Kind := ${lexer.Indent.ada_name};
                   TDH.Tokens.Append (T);
                   Columns_Stack_Len := Columns_Stack_Len + 1;
                   Columns_Stack (Columns_Stack_Len) := Sloc_Range.Start_Column;
@@ -342,7 +342,7 @@ package body ${ada_lib_name}.Lexer is
 
          --  If we're in ignore layout mode, we don't want to emit newline
          --  tokens either.
-         if Token_Id /= ${lexer.ada_token_name('Newline')}
+         if Token_Id /= ${lexer.Newline.ada_name}
             or else Ign_Layout_Level <= 0
          then
             TDH.Tokens.Append
@@ -573,7 +573,7 @@ package body ${ada_lib_name}.Lexer is
 
    Token_Kind_Names : constant array (Token_Kind) of String_Access := (
       % for tok in ctx.lexer.tokens:
-          ${ctx.lexer.ada_token_name(tok)} =>
+          ${tok.ada_name} =>
              new String'("${tok.name}")
           % if (not loop.last):
               ,

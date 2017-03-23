@@ -33,7 +33,7 @@ begin
    else
       ## We don't want to increment the position if we are matching the
       ## termination token (eg. the last token in the token stream).
-      % if token_kind == ctx.lexer.ada_token_name('termination'):
+      % if token_kind == ctx.lexer.Termination.ada_name:
           ${pos} := ${pos_name};
       ## Else increment the current position
       % else:

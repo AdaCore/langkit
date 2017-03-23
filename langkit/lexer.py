@@ -135,6 +135,28 @@ class TokenAction(Action):
         from langkit.parsers import Tok
         return Tok(self, *args, **kwargs)
 
+    @property
+    def base_name(self):
+        return self.name
+
+    @property
+    def ada_name(self):
+        pname = get_context().lang_name + self.base_name
+        return pname.camel_with_underscores
+
+    @property
+    def c_name(self):
+        prefixed_name = get_context().lang_name + self.base_name
+        return prefixed_name.upper
+
+    @property
+    def quex_name(self):
+        pfx = get_context().lexer.prefix
+        assert pfx is not None, (
+            "Lexer's prefix needs to be set before emission"
+        )
+        return "{}{}".format(pfx, self.base_name.upper)
+
 
 class WithText(TokenAction):
     """
@@ -148,7 +170,7 @@ class WithText(TokenAction):
     """
 
     def render(self, lexer):
-        return "=> {}(Lexeme);".format(lexer.quex_token_name(self.name.upper))
+        return "=> {}(Lexeme);".format(self.quex_name)
 
 
 class WithTrivia(WithText):
@@ -177,7 +199,7 @@ class WithSymbol(TokenAction):
     """
 
     def render(self, lexer):
-        return "=> {}(Lexeme);".format(lexer.quex_token_name(self.name.upper))
+        return "=> {}(Lexeme);".format(self.quex_name)
 
 
 class LexerToken(object):
@@ -372,7 +394,7 @@ class Lexer(object):
         either:
           - A tuple of a Matcher and an Action to execute on this matcher. This
             is the common case;
-          - An instance of a class derived from `MatcherAssoc`. This is used to
+          - An instance of a class derived from `RuleAssoc`. This is used to
             implement custom matching behaviour, such as in the case of `Case`.
 
         Please note that the order of addition matters. It will determine which
@@ -394,8 +416,14 @@ class Lexer(object):
 
             self.rules.append(rule_assoc)
 
-            m, a = self.rules[-1].matcher, self.rules[-1].action
-            if isinstance(m, Literal):
+            m, a = rule_assoc.matcher, rule_assoc.action
+
+            if isinstance(m, (Literal, NoCaseLit)):
+                # If the action is a case action, we'll take the send action of
+                # the default alternative.
+                if isinstance(a, Case.CaseAction):
+                    a = a.default_alt.send
+
                 # Add a mapping from the literal representation of the token to
                 # itself, so that we can find tokens via their literal
                 # representation.
@@ -417,7 +445,7 @@ class Lexer(object):
             lexer=self
         )
 
-    def token_base_name(self, token):
+    def get_token(self, literal):
         """
         Helper function to get the name of a token.
 
@@ -427,63 +455,19 @@ class Lexer(object):
             insensitive token name).
         :rtype: Name
         """
-        if isinstance(token, TokenAction):
-            return token.name
-        elif isinstance(token, Name):
-            assert token in self.tokens_set
-            return token
-        else:
-            assert isinstance(token, basestring), (
-                "Bad type for {}, supposed to be str|{}".format(
-                    token, self.tokens.__name__
-                )
+        assert isinstance(literal, basestring), (
+            "Bad type for {}, supposed to be str|{}".format(
+                literal, self.tokens.__name__
             )
-            name = Name.from_lower(token.lower())
-            if name in self.tokens_set:
-                return name
-            elif token in self.literals_map:
-                return self.literals_map[token].name
-            else:
-                check_source_language(
-                    False,
-                    "{} token literal is not part of the valid tokens for "
-                    "this grammar".format(token)
-                )
-
-    def quex_token_name(self, token):
-        """
-        Helper function to get the name of the C constant to represent the kind
-        of "token".
-
-        :param TokenAction|Enum|Name|str token: See the token_base_name method.
-        :rtype: str
-        """
-        assert self.prefix is not None, (
-            "Lexer's prefix needs to be set before emission"
         )
-        return "{}{}".format(self.prefix, self.token_base_name(token).upper)
-
-    def c_token_name(self, token):
-        """
-        Helper function to get the name of the Quex constant to represent the
-        kind of "token".
-
-        :param TokenAction|Enum|Name|str token: See the token_base_name method.
-        :rtype: str
-        """
-        prefixed_name = get_context().lang_name + self.token_base_name(token)
-        return prefixed_name.upper
-
-    def ada_token_name(self, token):
-        """
-        Helper function to get the name of the Ada enumerator to represent the
-        kind of "token".
-
-        :param TokenAction|Enum|Name|str token: See the token_base_name method.
-        :rtype: str
-        """
-        prefixed_name = get_context().lang_name + self.token_base_name(token)
-        return prefixed_name.camel_with_underscores
+        if literal in self.literals_map:
+            return self.literals_map[literal]
+        else:
+            check_source_language(
+                False,
+                "{} token literal is not part of the valid tokens for "
+                "this grammar".format(literal)
+            )
 
     @property
     def sorted_tokens(self):
@@ -646,29 +630,32 @@ class Case(RuleAssoc):
             self.max_match_len = max_match_len
 
             for i, alt in enumerate(alts):
-                assert isinstance(alt, Alt), (
+                check_source_language(
+                    isinstance(alt, Alt),
                     'Invalid alternative to Case matcher: {}'.format(alt)
                 )
-                assert alt.match_size <= max_match_len, (
+                check_source_language(
+                    alt.match_size <= max_match_len,
                     'Match size for this Case alternative ({}) cannot be'
                     ' longer than the Case matcher ({} chars)'.format(
                         alt.match_size, max_match_len
                     )
                 )
 
-            assert alts[-1].prev_token_cond is None, (
+            check_source_language(
+                alts[-1].prev_token_cond is None,
                 "The last alternative to a case matcher "
                 "must have no prev token condition"
             )
 
             self.alts = alts[:-1]
-            self.last_alt = alts[-1]
+            self.default_alt = alts[-1]
 
         def render(self, lexer):
             return common_renderer.render(
                 "lexer/case_action",
                 alts=self.alts,
-                last_alt=self.last_alt,
+                default_alt=self.default_alt,
                 max_match_len=self.max_match_len,
                 lexer=lexer
             )
