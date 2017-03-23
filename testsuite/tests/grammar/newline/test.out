@@ -6,7 +6,7 @@
 |  <Literal>
 |  |tok: Token(u'2')
 Found errors:
- 1:3-1:4: Expected "Newline", got "Number"
+ 1:3-1:4: Expected '\n', got Number
 <IndentNode>
 |lit_1:
 |  <Literal>
