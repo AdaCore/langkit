@@ -871,6 +871,10 @@ package ${ada_lib_name}.Analysis is
    % endif
    % endfor
 
+   -----------------------
+   -- Generic list type --
+   -----------------------
+
    type ${generic_list_value_type} is
       abstract new ${root_node_value_type}
       with private;
