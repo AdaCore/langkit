@@ -843,16 +843,6 @@ package ${ada_lib_name}.Analysis is
    ${enum_types.public_decl(cls)}
    % endfor
 
-   ------------------------------
-   -- Root AST node properties --
-   ------------------------------
-
-   % for prop in T.root_node.get_properties( \
-         include_inherited=False, \
-         predicate=library_public_field):
-      ${prop.prop_decl}
-   % endfor
-
    -----------------------------------------------
    -- Structure types (incomplete declarations) --
    -----------------------------------------------
@@ -869,6 +859,16 @@ package ${ada_lib_name}.Analysis is
    % if array_type.element_type().should_emit_array_type:
    ${array_types.public_incomplete_decl(array_type)}
    % endif
+   % endfor
+
+   ------------------------------
+   -- Root AST node properties --
+   ------------------------------
+
+   % for prop in T.root_node.get_properties( \
+         include_inherited=False, \
+         predicate=library_public_field):
+      ${prop.prop_decl}
    % endfor
 
    -----------------------
