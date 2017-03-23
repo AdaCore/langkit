@@ -74,6 +74,9 @@ package ${ada_lib_name}.Lexer is
    function Token_Kind_Literal (Token_Id : Token_Kind) return String;
    --  Return the literal corresponding to this token kind
 
+   function Token_Error_Image (Token_Id : Token_Kind) return String;
+   --  Return a string repr of token kind suitable in error messages
+
    function Text
      (TDH : Token_Data_Handler;
       T   : Token_Data_Type) return Text_Type

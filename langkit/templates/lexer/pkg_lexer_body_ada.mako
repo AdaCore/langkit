@@ -608,6 +608,18 @@ package body ${ada_lib_name}.Lexer is
    function Token_Kind_Literal (Token_Id : Token_Kind) return String is
      (Token_Kind_To_Literals (Token_Id).all);
 
+   -----------------------
+   -- Token_Error_Image --
+   -----------------------
+
+   function Token_Error_Image (Token_Id : Token_Kind) return String is
+      Literal : constant String := Token_Kind_Literal (Token_Id);
+   begin
+      return (if Literal /= ""
+              then "'" & Literal & "'"
+              else Token_Kind_Name (Token_Id));
+   end Token_Error_Image;
+
    ------------------
    -- Force_Symbol --
    ------------------
