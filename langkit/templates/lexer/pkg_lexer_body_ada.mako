@@ -581,12 +581,32 @@ package body ${ada_lib_name}.Lexer is
       % endfor
    );
 
+   Token_Kind_To_Literals : constant array (Token_Kind) of String_Access := (
+   <% already_seen_set = set() %>
+
+   % for lit, tok in ctx.lexer.literals_map.items():
+      % if tok.ada_name not in already_seen_set:
+       ${tok.ada_name} => new String'("${lit}")
+       <% already_seen_set.add(tok.ada_name) %>
+           ,
+      % endif
+   % endfor
+      others => new String'("")
+   );
+
    ---------------------
    -- Token_Kind_Name --
    ---------------------
 
    function Token_Kind_Name (Token_Id : Token_Kind) return String is
      (Token_Kind_Names (Token_Id).all);
+
+   ------------------------
+   -- Token_Kind_Literal --
+   ------------------------
+
+   function Token_Kind_Literal (Token_Id : Token_Kind) return String is
+     (Token_Kind_To_Literals (Token_Id).all);
 
    ------------------
    -- Force_Symbol --

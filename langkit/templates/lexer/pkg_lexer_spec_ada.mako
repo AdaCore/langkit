@@ -71,6 +71,9 @@ package ${ada_lib_name}.Lexer is
    function Token_Kind_Name (Token_Id : Token_Kind) return String;
    ${ada_doc('langkit.token_kind_name', 3)}
 
+   function Token_Kind_Literal (Token_Id : Token_Kind) return String;
+   --  Return the literal corresponding to this token kind
+
    function Text
      (TDH : Token_Data_Handler;
       T   : Token_Data_Type) return Text_Type
