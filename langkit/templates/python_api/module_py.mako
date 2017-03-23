@@ -1008,13 +1008,10 @@ class ${root_astnode_name}(object):
         """
         if py_value is None:
             return None
-        if not isinstance(py_value, ${root_astnode_name}):
-            raise TypeError(
-                '${root_astnode_name} expected but got {} instead'.format(
-                    type(py_value)
-                )
-            )
-        return py_value._c_value
+        elif not isinstance(py_value, ${root_astnode_name}):
+            _raise_type_error(${repr(root_astnode_name)}, py_value)
+        else:
+            return py_value._c_value
 
     def _eval_field(self, c_result, c_accessor, *c_args):
         """
