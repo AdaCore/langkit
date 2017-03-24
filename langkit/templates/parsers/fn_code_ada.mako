@@ -2,8 +2,6 @@
 
 <% ret_type = parser.get_type().storage_type_name() %>
 
-${parser.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
-
 function ${parser.gen_fn_name} (Parser : in out Parser_Type;
                                 Pos    : Token_Index)
                                 return ${ret_type}

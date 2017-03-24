@@ -42,6 +42,12 @@ package body ${ada_lib_name}.Analysis.Parsers is
    pragma Warnings (On, "is not referenced");
    pragma Warnings (On, "possible aliasing problem for type");
 
+   % for parser in ctx.fns:
+   <% ret_type = parser.get_type().storage_type_name() %>
+   ${parser.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
+   % endfor
+
+
    % for parser in ctx.generated_parsers:
    ${parser.spec}
    % endfor
