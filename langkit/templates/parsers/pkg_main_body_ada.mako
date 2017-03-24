@@ -77,6 +77,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
       TDH : Token_Data_Handler_Access renames Token_Data (Unit);
    begin
       Lex_From_Filename (Filename, Charset, Read_BOM, TDH.all, With_Trivia);
+      Clean_All_Memos;
       return (Unit            => Unit,
               TDH             => TDH,
               % if ctx.symbol_literals:
@@ -100,6 +101,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
       TDH : Token_Data_Handler_Access renames Token_Data (Unit);
    begin
       Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH.all, With_Trivia);
+      Clean_All_Memos;
       return (Unit            => Unit,
               TDH             => TDH,
               % if ctx.symbol_literals:
@@ -191,7 +193,6 @@ package body ${ada_lib_name}.Analysis.Parsers is
       % endfor
       end case;
       Process_Parsing_Error (Parser, Check_Complete);
-      Clean_All_Memos;
       Set_Parents (Result, null);
       return Result;
    end Parse;

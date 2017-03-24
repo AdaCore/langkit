@@ -421,7 +421,6 @@ package body ${ada_lib_name}.Analysis is
 
       Unit.AST_Root := Parse (Parser, Rule => Unit.Rule);
       Unit.Diagnostics := Parser.Diagnostics;
-      Clean_All_Memos;
    end Do_Parsing;
 
    -------------------
