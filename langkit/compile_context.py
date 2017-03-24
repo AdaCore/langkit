@@ -373,7 +373,7 @@ class CompileCtx(object):
         Set of names (names.Name instances) for all generated parser
         functions. This is used to avoid generating these multiple times.
 
-        :type: set[names.Name]
+        :type: set[parsers.Parser]
         """
 
         self.types = set()

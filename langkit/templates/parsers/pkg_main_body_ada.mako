@@ -198,7 +198,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
    procedure Clean_All_Memos is
    begin
       % for fn in ctx.fns:
-         Clear (${fn}_Memo);
+         Clear (${fn.gen_fn_name}_Memo);
       % endfor
    end Clean_All_Memos;
 

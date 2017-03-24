@@ -442,9 +442,9 @@ class Parser(object):
         )
 
         # Don't emit code twice for the same parser
-        if self.gen_fn_name in context.fns:
+        if self in context.fns:
             return
-        context.fns.add(self.gen_fn_name)
+        context.fns.add(self)
 
         t_env.parser_context = self.generate_code()
 
