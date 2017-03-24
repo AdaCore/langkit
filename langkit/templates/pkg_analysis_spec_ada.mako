@@ -977,6 +977,10 @@ private
       type Symbol_Literal_Array_Access is access all Symbol_Literal_Array;
    % endif
 
+   type Analysis_Context_Private_Part_Type;
+   type Analysis_Context_Private_Part
+   is access all Analysis_Context_Private_Part_Type;
+
    type Analysis_Context_Type is record
       Ref_Count  : Natural;
       Units_Map  : Units_Maps.Map;
@@ -998,6 +1002,8 @@ private
          Symbol_Literals : Symbol_Literal_Array;
          --  List of pre-computed symbols in the Symbols table
       % endif
+
+      Private_Part : Analysis_Context_Private_Part;
    end record;
 
    procedure Reset_Property_Caches (Context : Analysis_Context);

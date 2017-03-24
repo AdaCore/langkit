@@ -55,6 +55,10 @@ with ${ctx.symbol_canonicalizer.unit_fqn};
 
 package body ${ada_lib_name}.Analysis is
 
+   type Analysis_Context_Private_Part_Type is record
+      null;
+   end record;
+
    ${array_types.body(root_node_array)}
 
    procedure Destroy (Self : in out Lex_Env_Data_Type);
@@ -176,6 +180,8 @@ package body ${ada_lib_name}.Analysis is
          % if ctx.symbol_literals:
             , Symbol_Literals => Create_Symbol_Literals (Symbols)
          % endif
+         , Private_Part =>
+           new Analysis_Context_Private_Part_Type'(others => <>)
         );
    end Create;
 
@@ -548,6 +554,9 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Destroy (Context : in out Analysis_Context) is
       Std_Unit : Analysis_Unit := Get_From_File (Context, "standard.ads");
+
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Analysis_Context_Private_Part_Type, Analysis_Context_Private_Part);
    begin
 
       --  TODO: This is a hack to make sure that we don't deallocate standard
@@ -564,6 +573,7 @@ package body ${ada_lib_name}.Analysis is
       Dec_Ref (Std_Unit);
 
       Destroy (Context.Symbols);
+      Free (Context.Private_Part);
       Free (Context);
    end Destroy;
 
