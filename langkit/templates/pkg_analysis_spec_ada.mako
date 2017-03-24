@@ -999,8 +999,8 @@ private
       % endif
 
       % if ctx.symbol_literals:
-         Symbol_Literals : Symbol_Literal_Array;
-         --  List of pre-computed symbols in the Symbols table
+      Symbol_Literals : Symbol_Literal_Array;
+      --  List of pre-computed symbols in the Symbols table
       % endif
 
       Private_Part : Analysis_Context_Private_Part;
