@@ -77,7 +77,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
       TDH : Token_Data_Handler_Access renames Token_Data (Unit);
    begin
       Lex_From_Filename (Filename, Charset, Read_BOM, TDH.all, With_Trivia);
-      Clean_All_Memos;
+      Reset (Parser);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
       % if ctx.symbol_literals:
@@ -100,7 +100,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
       TDH : Token_Data_Handler_Access renames Token_Data (Unit);
    begin
       Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH.all, With_Trivia);
-      Clean_All_Memos;
+      Reset (Parser);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
       % if ctx.symbol_literals:
@@ -199,15 +199,16 @@ package body ${ada_lib_name}.Analysis.Parsers is
    ${parser.body}
    % endfor
 
-   ---------------------
-   -- Clean_All_Memos --
-   ---------------------
+   -----------
+   -- Reset --
+   -----------
 
-   procedure Clean_All_Memos is
+   procedure Reset (Parser : in out Parser_Type) is
+      pragma Unreferenced (Parser);
    begin
       % for fn in ctx.fns:
          Clear (${fn.gen_fn_name}_Memo);
       % endfor
-   end Clean_All_Memos;
+   end Reset;
 
 end ${ada_lib_name}.Analysis.Parsers;

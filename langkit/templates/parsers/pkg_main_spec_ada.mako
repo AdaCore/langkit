@@ -77,10 +77,8 @@ private package ${ada_lib_name}.Analysis.Parsers is
    --  consider the case when the parser could not consume all the input tokens
    --  as an error.
 
-   procedure Clean_All_Memos;
-   --  TODO??? We want to allow multiple parsers to run at the same time so
-   --  memos should be stored in Parser_Type. In the end, this should be turned
-   --  into a Parser_Type finalizer.
+   procedure Reset (Parser : in out Parser_Type);
+   --  Reset the parser so that it is ready to parse again
 
 private
 
