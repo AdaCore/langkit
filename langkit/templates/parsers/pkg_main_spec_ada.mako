@@ -26,6 +26,8 @@ private package ${ada_lib_name}.Analysis.Parsers is
       end case;
    end record;
 
+   type Parser_Private_Part is private;
+
    type Parser_Type is record
       Current_Pos     : Token_Index := First_Token_Index;
       Last_Fail       : Fail_Info;
@@ -36,6 +38,8 @@ private package ${ada_lib_name}.Analysis.Parsers is
       % if ctx.symbol_literals:
       Symbol_Literals : Symbol_Literal_Array_Access;
       % endif
+
+      Private_Part    : Parser_Private_Part;
    end record;
 
    function Create_From_File
@@ -75,5 +79,10 @@ private package ${ada_lib_name}.Analysis.Parsers is
    --  TODO??? We want to allow multiple parsers to run at the same time so
    --  memos should be stored in Parser_Type. In the end, this should be turned
    --  into a Parser_Type finalizer.
+
+private
+
+   type Parser_Private_Part_Type;
+   type Parser_Private_Part is access all Parser_Private_Part_Type;
 
 end ${ada_lib_name}.Analysis.Parsers;
