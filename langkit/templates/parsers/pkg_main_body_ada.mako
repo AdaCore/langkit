@@ -119,8 +119,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
                 ("Expected "
                  & Token_Error_Image (Parser.Last_Fail.Expected_Token_Id)
                  & ", got "
-                 & Token_Error_Image (Parser.Last_Fail.Found_Token_Id)
-                 )))
+                 & Token_Error_Image (Parser.Last_Fail.Found_Token_Id))))
             else
               (Sloc_Range => Last_Token.Sloc_Range,
                Message => To_Unbounded_Wide_Wide_String
