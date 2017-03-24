@@ -67,49 +67,47 @@ package body ${ada_lib_name}.Analysis.Parsers is
    -- Create_From_File --
    ----------------------
 
-   function Create_From_File
+   procedure Init_Parser_From_File
      (Filename, Charset : String;
       Read_BOM          : Boolean;
       Unit              : Analysis_Unit;
-      With_Trivia       : Boolean := False)
-      return Parser_type
+      With_Trivia       : Boolean := False;
+      Parser            : in out Parser_Type)
    is
       TDH : Token_Data_Handler_Access renames Token_Data (Unit);
    begin
       Lex_From_Filename (Filename, Charset, Read_BOM, TDH.all, With_Trivia);
       Clean_All_Memos;
-      return (Unit            => Unit,
-              TDH             => TDH,
-              % if ctx.symbol_literals:
-              Symbol_Literals =>
-                 Unit.Context.Symbol_Literals'Unrestricted_Access,
-              % endif
-              others          => <>);
-   end Create_From_File;
+      Parser.Unit := Unit;
+      Parser.TDH := TDH;
+      % if ctx.symbol_literals:
+      Parser.Symbol_Literals :=
+         Unit.Context.Symbol_Literals'Unrestricted_Access;
+      % endif
+   end Init_Parser_From_File;
 
    ------------------------
    -- Create_From_Buffer --
    ------------------------
 
-   function Create_From_Buffer
+   procedure Init_Parser_From_Buffer
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
       Unit            : Analysis_Unit;
-      With_Trivia     : Boolean := False)
-      return Parser_type
+      With_Trivia     : Boolean := False;
+      Parser          : in out Parser_Type)
    is
       TDH : Token_Data_Handler_Access renames Token_Data (Unit);
    begin
       Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH.all, With_Trivia);
       Clean_All_Memos;
-      return (Unit            => Unit,
-              TDH             => TDH,
-              % if ctx.symbol_literals:
-              Symbol_Literals =>
-                 Unit.Context.Symbol_Literals'Unrestricted_Access,
-              % endif
-              others          => <>);
-   end Create_From_Buffer;
+      Parser.Unit := Unit;
+      Parser.TDH := TDH;
+      % if ctx.symbol_literals:
+      Parser.Symbol_Literals :=
+         Unit.Context.Symbol_Literals'Unrestricted_Access;
+      % endif
+   end Init_Parser_From_Buffer;
 
    ---------------------------
    -- Process_Parsing_Error --

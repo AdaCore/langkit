@@ -42,24 +42,26 @@ private package ${ada_lib_name}.Analysis.Parsers is
       Private_Part    : Parser_Private_Part;
    end record;
 
-   function Create_From_File
+   procedure Init_Parser_From_File
      (Filename, Charset : String;
       Read_BOM          : Boolean;
       Unit              : Analysis_Unit;
-      With_Trivia       : Boolean := False) return Parser_type;
-   --  Create a parser to parse the source in Filename, decoding it using
+      With_Trivia       : Boolean := False;
+      Parser            : in out Parser_Type);
+   --  Init a parser to parse the source in Filename, decoding it using
    --  Charset. The resulting tokens (and trivia if With_Trivia) are stored
    --  into TDH.
    --
    --  This can raise Lexer.Unknown_Charset or Lexer.Invalid_Input exceptions
    --  if the lexer has trouble decoding the input.
 
-   function Create_From_Buffer
+   procedure Init_Parser_From_Buffer
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
       Unit            : Analysis_Unit;
-      With_Trivia     : Boolean := False) return Parser_type;
-   --  Create a parser to parse the source in Buffer, decoding it using
+      With_Trivia     : Boolean := False;
+      Parser          : in out Parser_Type);
+   --  Init a parser to parse the source in Buffer, decoding it using
    --  Charset. The resulting tokens (and trivia if With_Trivia) are stored
    --  into TDH.
    --

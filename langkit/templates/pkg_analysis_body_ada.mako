@@ -93,27 +93,28 @@ package body ${ada_lib_name}.Analysis is
    --  Unit.Charset field to Charset.
 
    procedure Do_Parsing
-     (Unit       : Analysis_Unit;
-      Read_BOM   : Boolean;
-      Get_Parser : access function (Unit     : Analysis_Unit;
-                                    Read_BOM : Boolean)
-                                    return Parser_Type);
+     (Unit        : Analysis_Unit;
+      Read_BOM    : Boolean;
+      Init_Parser : access procedure (Unit     : Analysis_Unit;
+                                      Read_BOM : Boolean;
+                                      Parser   : in out Parser_Type));
    --  Helper for Get_Unit and the public Reparse procedures: parse an analysis
-   --  unit using Get_Parser and replace Unit's AST_Root and the diagnostics
+   --  unit using Init_Parser and replace Unit's AST_Root and the diagnostics
    --  with the parsers's output.
 
    function Get_Unit
      (Context           : Analysis_Context;
       Filename, Charset : String;
       Reparse           : Boolean;
-      Get_Parser        : access function (Unit     : Analysis_Unit;
-                                           Read_BOM : Boolean)
-                                           return Parser_Type;
+      Init_Parser       :
+        access procedure (Unit     : Analysis_Unit;
+                          Read_BOM : Boolean;
+                          Parser   : in out Parser_Type);
       With_Trivia       : Boolean;
       Rule              : Grammar_Rule)
       return Analysis_Unit;
    --  Helper for Get_From_File and Get_From_Buffer: do all the common work
-   --  using Get_Parser to either parse from a file or from a buffer. Return
+   --  using Init_Parser to either parse from a file or from a buffer. Return
    --  the resulting analysis unit.
 
    % if ctx.symbol_literals:
@@ -247,9 +248,10 @@ package body ${ada_lib_name}.Analysis is
      (Context           : Analysis_Context;
       Filename, Charset : String;
       Reparse           : Boolean;
-      Get_Parser        : access function (Unit     : Analysis_Unit;
-                                           Read_BOM : Boolean)
-                                           return Parser_Type;
+      Init_Parser       :
+        access procedure (Unit     : Analysis_Unit;
+                          Read_BOM : Boolean;
+                          Parser   : in out Parser_Type);
       With_Trivia       : Boolean;
       Rule              : Grammar_Rule)
       return Analysis_Unit
@@ -313,7 +315,7 @@ package body ${ada_lib_name}.Analysis is
          or else Reparse
          or else (With_Trivia and then not Unit.With_Trivia)
       then
-         Do_Parsing (Unit, Read_BOM, Get_Parser);
+         Do_Parsing (Unit, Read_BOM, Init_Parser);
       end if;
 
       --  If we're in a reparse, do necessary updates
@@ -340,11 +342,12 @@ package body ${ada_lib_name}.Analysis is
    ----------------
 
    procedure Do_Parsing
-     (Unit       : Analysis_Unit;
-      Read_BOM   : Boolean;
-      Get_Parser : access function (Unit     : Analysis_Unit;
-                                    Read_BOM : Boolean)
-                                    return Parser_Type)
+     (Unit        : Analysis_Unit;
+      Read_BOM    : Boolean;
+      Init_Parser :
+        access procedure (Unit     : Analysis_Unit;
+                          Read_BOM : Boolean;
+                          Parser   : in out Parser_Type))
    is
 
       procedure Add_Diagnostic (Message : String);
@@ -389,7 +392,7 @@ package body ${ada_lib_name}.Analysis is
       declare
          use Ada.Exceptions;
       begin
-         Parser := Get_Parser (Unit, Read_BOM);
+         Init_Parser (Unit, Read_BOM, Parser);
       exception
          when Exc : Name_Error =>
             --  This happens when we cannot open the source file for lexing:
@@ -437,15 +440,19 @@ package body ${ada_lib_name}.Analysis is
          ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit
    is
-      function Get_Parser
+      procedure Init_Parser
         (Unit     : Analysis_Unit;
-         Read_BOM : Boolean)
-         return Parser_Type
-      is (Create_From_File (Filename, To_String (Unit.Charset), Read_BOM, Unit,
-                            With_Trivia));
+         Read_BOM : Boolean;
+         Parser   : in out Parser_Type)
+      is
+      begin
+         Init_Parser_From_File
+           (Filename, To_String (Unit.Charset), Read_BOM, Unit,
+            With_Trivia, Parser);
+      end Init_Parser;
    begin
       return Get_Unit
-        (Context, Filename, Charset, Reparse, Get_Parser'Access, With_Trivia,
+        (Context, Filename, Charset, Reparse, Init_Parser'Access, With_Trivia,
          Rule);
    end Get_From_File;
 
@@ -463,14 +470,18 @@ package body ${ada_lib_name}.Analysis is
          ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit
    is
-      function Get_Parser
+      procedure Init_Parser
         (Unit     : Analysis_Unit;
-         Read_BOM : Boolean)
-         return Parser_Type
-      is (Create_From_Buffer (Buffer, To_String (Unit.Charset), Read_BOM, Unit,
-                              With_Trivia));
+         Read_BOM : Boolean;
+         Parser   : in out Parser_Type)
+      is
+      begin
+         Init_Parser_From_Buffer
+           (Buffer, To_String (Unit.Charset), Read_BOM, Unit,
+            With_Trivia, Parser);
+      end Init_Parser;
    begin
-      return Get_Unit (Context, Filename, Charset, True, Get_Parser'Access,
+      return Get_Unit (Context, Filename, Charset, True, Init_Parser'Access,
                        With_Trivia, Rule);
    end Get_From_Buffer;
 
@@ -624,17 +635,20 @@ package body ${ada_lib_name}.Analysis is
      (Unit    : Analysis_Unit;
       Charset : String := "")
    is
-      function Get_Parser
+      procedure Init_Parser
         (Unit     : Analysis_Unit;
-         Read_BOM : Boolean)
-         return Parser_Type
-      is (Create_From_File (To_String (Unit.File_Name),
-                            To_String (Unit.Charset),
-                            Read_BOM,
-                            Unit));
+         Read_BOM : Boolean;
+         Parser   : in out Parser_Type)
+      is
+      begin
+         Init_Parser_From_File
+           (To_String (Unit.File_Name),
+            To_String (Unit.Charset),
+            Read_BOM, Unit, Unit.With_Trivia, Parser);
+      end Init_Parser;
    begin
       Update_Charset (Unit, Charset);
-      Do_Parsing (Unit, Charset'Length = 0, Get_Parser'Access);
+      Do_Parsing (Unit, Charset'Length = 0, Init_Parser'Access);
       Update_After_Reparse (Unit);
    end Reparse;
 
@@ -647,15 +661,19 @@ package body ${ada_lib_name}.Analysis is
       Charset : String := "";
       Buffer  : String)
    is
-      function Get_Parser
+      procedure Init_Parser
         (Unit     : Analysis_Unit;
-         Read_BOM : Boolean)
-         return Parser_Type
-      is (Create_From_Buffer (Buffer, To_String (Unit.Charset), Read_BOM,
-                              Unit));
+         Read_BOM : Boolean;
+         Parser   : in out Parser_Type)
+      is
+      begin
+         Init_Parser_From_Buffer
+           (Buffer, To_String (Unit.Charset), Read_BOM,
+            Unit, Unit.With_Trivia, Parser);
+      end Init_Parser;
    begin
       Update_Charset (Unit, Charset);
-      Do_Parsing (Unit, Charset'Length = 0, Get_Parser'Access);
+      Do_Parsing (Unit, Charset'Length = 0, Init_Parser'Access);
       Unit.Charset := To_Unbounded_String (Charset);
       Update_After_Reparse (Unit);
    end Reparse;
