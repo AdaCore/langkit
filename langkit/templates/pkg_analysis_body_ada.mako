@@ -56,7 +56,9 @@ with ${ctx.symbol_canonicalizer.unit_fqn};
 package body ${ada_lib_name}.Analysis is
 
    type Analysis_Context_Private_Part_Type is record
-      null;
+      Parser : Parser_Type;
+      --  Main parser type. TODO: If we want to parse in several tasks, we'll
+      --  replace that by an array of parsers.
    end record;
 
    ${array_types.body(root_node_array)}
@@ -573,7 +575,11 @@ package body ${ada_lib_name}.Analysis is
       Dec_Ref (Std_Unit);
 
       Destroy (Context.Symbols);
+
+      --  Free resources associated to the private part
+      Destroy (Context.Private_Part.Parser);
       Free (Context.Private_Part);
+
       Free (Context);
    end Destroy;
 
