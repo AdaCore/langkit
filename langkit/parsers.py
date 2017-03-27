@@ -426,12 +426,14 @@ class Parser(object):
         for child in self.children():
             child.compute_fields_types()
 
-    def compile(self, context):
+    def compile(self):
         """
         Emit code for this parser as a function into the global context.
 
         :param langkit.compile_context.CompileCtx context: Global context.
         """
+        context = get_context()
+
         t_env = TemplateEnvironment()
         t_env.parser = self
 
@@ -477,15 +479,13 @@ class Parser(object):
         :param str|names.Name pos_name: The name of the position variable.
         :rtype: ParserCodeContext
         """
-        context = get_context()
-
         # Users must be able to run parsers that implement a named rule, so
         # generate dedicated functions for them.
         if self.is_root:
 
             # The call to compile will add the declaration and the definition
             # (body) of the function to the compile context.
-            self.compile(context)
+            self.compile()
 
             # Generate a call to the previously compiled function, and return
             # the context corresponding to this call.
@@ -537,12 +537,13 @@ class Parser(object):
             result.update(child.symbol_literals)
         return result
 
-    def add_symbol_literals(self, context):
+    def add_symbol_literals(self):
         """
         Register symbols literals used by this parser to "context".
 
         :type context: langkit.compile_context.CompileCtx
         """
+        context = get_context()
         for sym in self.symbol_literals:
             context.add_symbol_literal(sym)
 

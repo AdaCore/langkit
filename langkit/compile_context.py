@@ -952,7 +952,7 @@ class CompileCtx(object):
             GlobalPass('warn on unreferenced parsing rules',
                        self.grammar.warn_unreferenced_parsing_rules),
             GrammarRulePass('compute fields types',
-                            lambda r, context: r.compute_fields_types()),
+                            lambda p: p.compute_fields_types()),
             GlobalPass('compute types', CompileCtx.compute_types),
             errors_checkpoint_pass,
 

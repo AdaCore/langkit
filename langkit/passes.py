@@ -130,7 +130,7 @@ class GrammarRulePass(AbstractPass):
     def run(self, context):
         for name, rule in context.grammar.rules.items():
             with rule.diagnostic_context():
-                self.pass_fn(rule, context)
+                self.pass_fn(rule)
 
 
 class ASTNodePass(AbstractPass):
