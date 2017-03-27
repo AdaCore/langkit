@@ -378,8 +378,6 @@ package body ${ada_lib_name}.Analysis is
              Message    => To_Unbounded_Wide_Wide_String (To_Text (Message))));
       end Add_Diagnostic;
 
-      Parser : Parser_Type;
-
    begin
       --  If we have an AST_Mem_Pool already, we are reparsing. We want to
       --  destroy it to free all the allocated memory.
@@ -406,7 +404,7 @@ package body ${ada_lib_name}.Analysis is
       declare
          use Ada.Exceptions;
       begin
-         Init_Parser (Unit, Read_BOM, Parser);
+         Init_Parser (Unit, Read_BOM, Unit.Context.Private_Part.Parser);
       exception
          when Exc : Name_Error =>
             --  This happens when we cannot open the source file for lexing:
@@ -434,10 +432,11 @@ package body ${ada_lib_name}.Analysis is
       --  get.
 
       Unit.AST_Mem_Pool := Create;
-      Parser.Mem_Pool := Unit.AST_Mem_Pool;
+      Unit.Context.Private_Part.Parser.Mem_Pool := Unit.AST_Mem_Pool;
 
-      Unit.AST_Root := Parse (Parser, Rule => Unit.Rule);
-      Unit.Diagnostics := Parser.Diagnostics;
+      Unit.AST_Root :=
+        Parse (Unit.Context.Private_Part.Parser, Rule => Unit.Rule);
+      Unit.Diagnostics := Unit.Context.Private_Part.Parser.Diagnostics;
    end Do_Parsing;
 
    -------------------

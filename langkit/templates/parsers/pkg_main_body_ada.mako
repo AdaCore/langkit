@@ -43,13 +43,12 @@ package body ${ada_lib_name}.Analysis.Parsers is
    pragma Warnings (On, "possible aliasing problem for type");
 
    type Parser_Private_Part_Type is record
-      null;
+      % for parser in ctx.fns:
+      <% ret_type = parser.get_type().storage_type_name() %>
+      ${parser.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
+      % endfor
    end record;
 
-   % for parser in ctx.fns:
-   <% ret_type = parser.get_type().storage_type_name() %>
-   ${parser.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
-   % endfor
 
    % for parser in ctx.generated_parsers:
    ${parser.spec}
@@ -140,6 +139,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
    begin
 
       if Parser.Current_Pos = No_Token_Index then
+
          Add_Last_Fail_Diagnostic;
       elsif Check_Complete
         and then Parser.Current_Pos /= Last_Token (Parser.TDH.all)
@@ -204,10 +204,19 @@ package body ${ada_lib_name}.Analysis.Parsers is
    -----------
 
    procedure Reset (Parser : in out Parser_Type) is
-      pragma Unreferenced (Parser);
+      New_Parser : Parser_Type;
+      --  We create this new parser instance to leverage creation of default
+      --  values, so as to not repeat them.
    begin
+      --  We just keep the private part, to not have to reallocate it
+      New_Parser.Private_Part := Parser.Private_Part;
+
+      --  And then reset everything else
+      Parser := New_Parser;
+
+      --  Reset the memo tables in the private part
       % for fn in ctx.fns:
-         Clear (${fn.gen_fn_name}_Memo);
+         Clear (Parser.Private_Part.${fn.gen_fn_name}_Memo);
       % endfor
    end Reset;
 

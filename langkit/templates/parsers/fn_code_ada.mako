@@ -1,6 +1,9 @@
 ## vim: filetype=makoada
 
-<% ret_type = parser.get_type().storage_type_name() %>
+<%
+ret_type = parser.get_type().storage_type_name()
+memo = "Parser.Private_Part.{}_Memo".format(parser.gen_fn_name)
+%>
 
 function ${parser.gen_fn_name} (Parser : in out Parser_Type;
                                 Pos    : Token_Index)
@@ -16,7 +19,8 @@ is
       Mem_Res : ${ret_type} := ${parser.get_type().storage_nullexpr()};
    % endif
 
-   M : ${ret_type}_Memos.Memo_Entry := Get (${parser.gen_fn_name}_Memo, Pos);
+   M : ${ret_type}_Memos.Memo_Entry :=
+     Get (${memo}, Pos);
 
 begin
 
@@ -30,7 +34,7 @@ begin
    end if;
 
    % if parser.is_left_recursive():
-       Set (${parser.gen_fn_name}_Memo,
+       Set (${memo},
             False,
             ${parser_context.res_var_name},
             Pos,
@@ -53,7 +57,7 @@ begin
       if ${parser_context.pos_var_name} > Mem_Pos then
          Mem_Pos := ${parser_context.pos_var_name};
          Mem_Res := ${parser_context.res_var_name};
-         Set (${parser.gen_fn_name}_Memo,
+         Set (${memo},
               ${parser_context.pos_var_name} /= No_Token_Index,
               ${parser_context.res_var_name},
               Pos,
@@ -67,7 +71,7 @@ begin
       end if;
    % endif
 
-   Set (${parser.gen_fn_name}_Memo,
+   Set (${memo},
         ${parser_context.pos_var_name} /= No_Token_Index,
         ${parser_context.res_var_name},
         Pos,
