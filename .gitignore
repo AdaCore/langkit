@@ -48,3 +48,6 @@ nosetests.xml
 out
 testsuite/out
 testsuite/tmp
+
+# Custom dev files
+misc
