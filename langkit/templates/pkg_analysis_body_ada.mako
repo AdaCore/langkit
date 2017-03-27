@@ -165,8 +165,9 @@ package body ${ada_lib_name}.Analysis is
             else Unit_Provider);
       % endif
       Symbols : constant Symbol_Table := Create;
+      Ret : Analysis_Context;
    begin
-      return new Analysis_Context_Type'
+      Ret := new Analysis_Context_Type'
         (Ref_Count  => 1,
          Units_Map  => <>,
          Symbols    => Symbols,
@@ -174,17 +175,22 @@ package body ${ada_lib_name}.Analysis is
          Root_Scope => AST_Envs.Create
                          (Parent        => AST_Envs.No_Env_Getter,
                           Node          => null,
-                          Is_Refcounted => False)
+                          Is_Refcounted => False),
 
          % if ctx.default_unit_provider:
-         , Unit_Provider => P
+         Unit_Provider => P,
          % endif
+
          % if ctx.symbol_literals:
-            , Symbol_Literals => Create_Symbol_Literals (Symbols)
+         Symbol_Literals => Create_Symbol_Literals (Symbols),
          % endif
-         , Private_Part =>
-           new Analysis_Context_Private_Part_Type'(others => <>)
+
+         Private_Part =>
+         new Analysis_Context_Private_Part_Type'(others => <>)
         );
+
+      Initialize (Ret.Private_Part.Parser);
+      return Ret;
    end Create;
 
    % if ctx.symbol_literals:
