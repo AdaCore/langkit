@@ -7,9 +7,9 @@ package Langkit_Support.Packrat is
    type Memo_State is (No_Result, Failure, Success);
 
    type Memo_Entry is record
-      State             : Memo_State;
+      State             : Memo_State := No_Result;
       Instance          : T;
-      Offset, Final_Pos : Token_Index;
+      Offset, Final_Pos : Token_Index := Token_Index'First;
    end record;
 
    type Memo_Type is private;
