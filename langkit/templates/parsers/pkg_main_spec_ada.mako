@@ -80,7 +80,11 @@ private package ${ada_lib_name}.Analysis.Parsers is
    procedure Reset (Parser : in out Parser_Type);
    --  Reset the parser so that it is ready to parse again
 
-   procedure Destroy (Parser : in out Parser_Type) is null;
+   procedure Initialize (Parser : in out Parser_Type);
+   --  Destroy resources associated with the parser
+
+   procedure Destroy (Parser : in out Parser_Type);
+   --  Destroy resources associated with the parser
 
 private
 

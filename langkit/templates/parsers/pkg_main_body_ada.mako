@@ -211,4 +211,24 @@ package body ${ada_lib_name}.Analysis.Parsers is
       % endfor
    end Reset;
 
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Parser : in out Parser_Type) is
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Parser_Private_Part_Type, Parser_Private_Part);
+   begin
+      Free (Parser.Private_Part);
+   end Destroy;
+
+   ----------------
+   -- Initialize --
+   ----------------
+
+   procedure Initialize (Parser : in out Parser_Type) is
+   begin
+      Parser.Private_Part := new Parser_Private_Part_Type'(others => <>);
+   end Initialize;
+
 end ${ada_lib_name}.Analysis.Parsers;
