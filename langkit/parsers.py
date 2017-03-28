@@ -1211,9 +1211,10 @@ class Defer(Parser):
         """
         Create a stub parser.
 
-        `rule_name` must be the name of the deferred parser (used for
-        pretty-printing).  `parser_fn` must be a callable that returns the
-        referenced parser.
+        :param str rule_name: the name of the deferred parser (used for
+            pretty-printing).
+        :param callable parser_fn: must be a callable that returns the
+            referenced parser.
         """
         Parser.__init__(self)
         self.rule_name = rule_name
