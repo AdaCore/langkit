@@ -2427,9 +2427,7 @@ package body ${ada_lib_name}.Analysis is
          if not State.Env_Ids.Contains (Current.Self_Env) then
             Env := Current.Self_Env;
             Parent := Ast_Envs.Get_Env (Env.Parent);
-
-            Explore_Parent :=
-              not (Parent = null or else Env_Ids.Contains (Parent));
+            Explore_Parent := not State.Env_Ids.Contains (Parent);
 
             Dump_One_Lexical_Env
               (Env, Get_Env_Id (Env, State), Get_Env_Id (Parent, State));
