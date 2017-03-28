@@ -9,7 +9,7 @@ function ${parser.gen_fn_name} (Parser : in out Parser_Type;
                                 Pos    : Token_Index)
                                 return ${ret_type}
 is
-   % for name, typ in parser_context.var_defs:
+   % for name, typ in var_context:
       ${name} : ${typ.storage_type_name()}
          ${":= " + typ.storage_nullexpr() if typ.storage_nullexpr() else ""};
    % endfor
