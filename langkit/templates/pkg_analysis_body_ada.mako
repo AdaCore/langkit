@@ -135,6 +135,38 @@ package body ${ada_lib_name}.Analysis is
       Raw_Data : Lexer.Token_Data_Type) return Token_Data_Type;
    --  Turn data from TDH and Raw_Data into a user-ready token data record
 
+   ------------------------
+   -- Address_To_Id_Maps --
+   ------------------------
+
+   --  Those maps are used to give unique ids to lexical envs while pretty
+   --  printing them.
+
+   function Hash (S : Lexical_Env) return Hash_Type is
+     (Hash_Type (To_Integer (S.all'Address)));
+
+   package Address_To_Id_Maps is new Ada.Containers.Hashed_Maps
+     (Lexical_Env, Integer, Hash, "=");
+
+   type Dump_Lexical_Env_State is record
+      Env_Ids : Address_to_Id_Maps.Map;
+      --  Mapping: Lexical_Env -> Integer, used to remember which unique Ids we
+      --  assigned to the lexical environments we found.
+
+      Next_Id : Positive := 1;
+      --  Id to assign to the next unknown lexical environment
+
+      Root_Env : Lexical_Env;
+      --  Lexical environment we consider a root (this is the Root_Scope from
+      --  the current analysis context), or null if unknown.
+   end record;
+   --  Holder for the state of lexical environment dumpers
+
+   function Get_Env_Id
+     (E : Lexical_Env; State : in out Dump_Lexical_Env_State) return String;
+   --  If E is known, return its unique Id from State. Otherwise, assign it a
+   --  new unique Id and return it.
+
    --------------------
    -- Update_Charset --
    --------------------
@@ -2226,19 +2258,6 @@ package body ${ada_lib_name}.Analysis is
              & " " & To_Text (Image (Sloc_Range (Node))) & ">";
    end Short_Image;
 
-   ------------------------
-   -- Address_To_Id_Maps --
-   ------------------------
-
-   --  Those maps are used to give unique ids to lexical envs while pretty
-   --  printing them.
-
-   function Hash (S : Lexical_Env) return Hash_Type is
-     (Hash_Type (To_Integer (S.all'Address)));
-
-   package Address_To_Id_Maps is new Ada.Containers.Hashed_Maps
-     (Lexical_Env, Integer, Hash, "=");
-
    -----------------
    -- Sorted_Envs --
    -----------------
@@ -2270,6 +2289,40 @@ package body ${ada_lib_name}.Analysis is
       return Ret_Env;
    end To_Sorted_Env;
 
+   ----------------
+   -- Get_Env_Id --
+   ----------------
+
+   function Get_Env_Id
+     (E : Lexical_Env; State : in out Dump_Lexical_Env_State) return String
+   is
+      C        : Address_To_Id_Maps.Cursor;
+      Inserted : Boolean;
+   begin
+      if E = null then
+         return "$null";
+
+      elsif E = State.Root_Env then
+         --  Insert root env with a special Id so that we only print it once
+         State.Env_Ids.Insert (E, -1, C, Inserted);
+         return "$root";
+      end if;
+
+      State.Env_Ids.Insert (E, State.Next_Id, C, Inserted);
+      if Inserted then
+         State.Next_Id := State.Next_Id + 1;
+      end if;
+
+      --  Return the string representation of the given index, without the
+      --  leading whitespace.
+      declare
+         Result : constant String := Address_To_Id_Maps.Element (C)'Img;
+      begin
+         return '$' & (if Result (Result'First) = ' '
+                       then Result (Result'First + 1 .. Result'Last)
+                       else Result);
+      end;
+   end Get_Env_Id;
 
    ----------
    -- Dump --
@@ -2341,43 +2394,7 @@ package body ${ada_lib_name}.Analysis is
    is
       use Address_To_Id_Maps;
 
-      Env_Ids        : Address_To_Id_Maps.Map;
-      Current_Env_Id : Positive := 1;
-
-      ----------------
-      -- Get_Env_Id --
-      ----------------
-
-      function Get_Env_Id (E : Lexical_Env) return String is
-         C        : Address_To_Id_Maps.Cursor;
-         Inserted : Boolean;
-      begin
-         if E = Root_Env then
-            --  Insert root env with a special Id so that we only print it
-            --  once.
-            Env_Ids.Insert (E, -1, C, Inserted);
-            return "$root";
-         elsif E = null then
-            return "$null";
-         end if;
-
-         Env_Ids.Insert (E, Current_Env_Id, C, Inserted);
-         if Inserted then
-            Current_Env_Id := Current_Env_Id + 1;
-         end if;
-
-         --  Return the string representation of the given index, without the
-         --  leading whitespace.
-         declare
-            Result : constant String := Address_To_Id_Maps.Element (C)'Img;
-         begin
-            return '$' & (if Result (Result'First) = ' '
-                          then Result (Result'First + 1 .. Result'Last)
-                          else Result);
-         end;
-      end Get_Env_Id;
-      --  Retrieve the Id for a lexical env. Assign one if none was yet
-      --  assigned.
+      State : Dump_Lexical_Env_State := (Root_Env => Root_Env, others => <>);
 
       --------------------------
       -- Explore_Parent_Chain --
@@ -2387,8 +2404,8 @@ package body ${ada_lib_name}.Analysis is
       begin
          if Env /= null then
             Dump_One_Lexical_Env
-              (Env, Get_Env_Id (Env),
-               Get_Env_Id (AST_Envs.Get_Env (Env.Parent)));
+              (Env, Get_Env_Id (Env, State),
+               Get_Env_Id (AST_Envs.Get_Env (Env.Parent), State));
             Explore_Parent_Chain (AST_Envs.Get_Env (Env.Parent));
          end if;
       end Explore_Parent_Chain;
@@ -2411,14 +2428,15 @@ package body ${ada_lib_name}.Analysis is
          --  we'll only dump environments at the site of their creation, and
          --  not in any subsequent link. We use the Env_Ids map to check which
          --  envs we have already seen or not.
-         if not Env_Ids.Contains (Current.Self_Env) then
+         if not State.Env_Ids.Contains (Current.Self_Env) then
             Env := Current.Self_Env;
             Parent := Ast_Envs.Get_Env (Env.Parent);
 
             Explore_Parent :=
               not (Parent = null or else Env_Ids.Contains (Parent));
 
-            Dump_One_Lexical_Env (Env, Get_Env_Id (Env), Get_Env_Id (Parent));
+            Dump_One_Lexical_Env
+              (Env, Get_Env_Id (Env, State), Get_Env_Id (Parent, State));
 
             if Explore_Parent then
                Explore_Parent_Chain (Parent);
