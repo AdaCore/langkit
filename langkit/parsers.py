@@ -1283,26 +1283,17 @@ class Transform(Parser):
         self.typ.add_to_context()
 
         parser_context = self.parser.generate_code(pos_name)
-        ":type: ParserCodeContext"
+        self.init_vars(self.parser.pos_var)
 
-        t_env = TemplateEnvironment(
+        return ParserCodeContext(self.pos_var, self.res_var, code=render(
+            'parsers/transform_code_ada',
             parser=self,
-            # The template needs the compiler context to retrieve the types of
-            # the tree fields (required by get_types()).
             parser_context=parser_context,
-            args=(
-                keep(self.parser.subresults)
-                if isinstance(self.parser, Row) else
-                [parser_context.res_var_name]
-            ),
-            res=VarDef(gen_name("transform_res"), self.get_type())
-        )
-
-        return copy_with(
-            parser_context,
-            res_var_name=t_env.res,
-            code=render('parsers/transform_code_ada', t_env, pos_name=pos_name)
-        )
+            args=(keep(self.parser.subresults)
+                  if isinstance(self.parser, Row) else
+                  [parser_context.res_var_name]),
+            pos_name=pos_name
+        ))
 
 
 class Null(Parser):
