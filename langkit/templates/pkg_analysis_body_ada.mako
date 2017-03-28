@@ -2392,8 +2392,6 @@ package body ${ada_lib_name}.Analysis is
      (Node     : access ${root_node_value_type}'Class;
       Root_Env : AST_Envs.Lexical_Env)
    is
-      use Address_To_Id_Maps;
-
       State : Dump_Lexical_Env_State := (Root_Env => Root_Env, others => <>);
 
       --------------------------
