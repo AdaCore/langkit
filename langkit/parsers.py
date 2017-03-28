@@ -821,10 +821,12 @@ class Row(Parser):
         return None
 
     def generate_code(self, pos_name="pos"):
+        self.init_vars(gen_res_var=False)
+
         t_env = TemplateEnvironment(
             pos_name=pos_name,
             parser=self,
-            pos=VarDef("row_pos", Token),
+            pos=self.pos_var,
             exit_label=gen_name("row_exit_label")
         )
 
