@@ -344,6 +344,15 @@ class Parser(object):
         self.is_root = False
         self._name = names.Name("")
 
+    def init_vars(self, pos_var=None, res_var=None):
+        self.pos_var = (pos_var or VarDef(
+            "{}_pos".format(self.__class__.__name__.lower()), Token
+        ))
+
+        self.res_var = (res_var or VarDef(
+            "{}_res".format(self.__class__.__name__.lower()), self.get_type()
+        ))
+
     @property
     def error_repr(self):
         """
