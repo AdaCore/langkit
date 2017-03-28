@@ -1062,20 +1062,17 @@ class Opt(Parser):
     def generate_code(self, pos_name="pos"):
         parser_context = self.parser.generate_code(pos_name)
 
-        t_env = TemplateEnvironment(
-            pos_name=pos_name,
-            parser=self,
-            bool_res=(VarDef("opt_bool_res", type=self._booleanize[0])
-                      if self._booleanize else None),
-            parser_context=parser_context
+        self.init_vars(
+            self.parser.pos_var,
+            res_var=None if self._booleanize else self.parser.res_var
         )
 
-        return copy_with(
-            parser_context,
-            code=render('parsers/opt_code_ada', t_env),
-            res_var_name=(t_env.bool_res.name if self._booleanize
-                          else parser_context.res_var_name),
-        )
+        return ParserCodeContext(self.pos_var, self.res_var, code=render(
+            'parsers/opt_code_ada',
+            pos_name=pos_name,
+            parser=self,
+            parser_context=parser_context
+        ))
 
     def __getitem__(self, index):
         """Same as Row.__getitem__:

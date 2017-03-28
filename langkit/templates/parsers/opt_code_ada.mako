@@ -13,13 +13,13 @@ if parser._booleanize:
 if ${parser_context.pos_var_name} = No_Token_Index then
     % if parser._booleanize:
       % if is_bool(base):
-         ${bool_res} := False;
+         ${parser.res_var} := False;
       % else:
-         ${bool_res} := ${base.name()}
+         ${parser.res_var} := ${base.name()}
            (${alt_false.name()}_Alloc.Alloc (Parser.Mem_Pool));
-         ${bool_res}.Unit := Parser.Unit;
-         ${bool_res}.Token_Start_Index := ${pos_name};
-         ${bool_res}.Token_End_Index := No_Token_Index;
+         ${parser.res_var}.Unit := Parser.Unit;
+         ${parser.res_var}.Token_Start_Index := ${pos_name};
+         ${parser.res_var}.Token_End_Index := No_Token_Index;
       % endif
     % elif parser_type and parser_type.is_list_type:
         ${parser_context.res_var_name} :=
@@ -46,13 +46,13 @@ if ${parser_context.pos_var_name} = No_Token_Index then
 % if parser._booleanize:
 else
    % if is_bool (base):
-      ${bool_res} := True;
+      ${parser.res_var} := True;
    % else:
-      ${bool_res} := ${base.name()}
+      ${parser.res_var} := ${base.name()}
         (${alt_true.name()}_Alloc.Alloc (Parser.Mem_Pool));
-      ${bool_res}.Unit := Parser.Unit;
-      ${bool_res}.Token_Start_Index := ${pos_name};
-      ${bool_res}.Token_End_Index := No_Token_Index;
+      ${parser.res_var}.Unit := Parser.Unit;
+      ${parser.res_var}.Token_Start_Index := ${pos_name};
+      ${parser.res_var}.Token_End_Index := No_Token_Index;
    % endif
 % endif
 
