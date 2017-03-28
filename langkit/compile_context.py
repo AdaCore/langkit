@@ -555,6 +555,12 @@ class CompileCtx(object):
         Whether to pretty print the generated code or not.
         """
 
+        self.parsers_varcontext_stack = []
+        """
+        Holder for the stack of variables contexts used in parsers code
+        emission.
+        """
+
     @property
     def main_rule_name(self):
         """

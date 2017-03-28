@@ -23,6 +23,7 @@ not defined in the example, but relied on explicitly.
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+from contextlib import contextmanager
 from copy import copy
 import difflib
 import inspect
@@ -40,6 +41,63 @@ from langkit.lexer import WithSymbol
 from langkit.template_utils import TemplateEnvironment
 from langkit.utils import (assert_type, common_ancestor, copy_with,
                            type_check_instance)
+
+
+def var_context():
+    """
+    Returns the var context for the current parser.
+
+    :rtype: VarContext
+    """
+    return get_context().parsers_varcontext_stack[-1]
+
+
+@contextmanager
+def add_var_context():
+    """
+    Context manager that will push a variable context into the stack when
+    compiling a parser.
+    """
+    vc = []
+    get_context().parsers_varcontext_stack.append(vc)
+    yield vc
+    get_context().parsers_varcontext_stack.pop()
+
+
+class VarDef(object):
+    """
+    Holder object for a variable definiton in parsers. Creating a variable
+    definition requires a context to exist already, because the variable will
+    be automatically added to the current variable context when created.
+    """
+
+    def __init__(self, base_name, type):
+        self.name = gen_name(base_name)
+        self.type = type
+
+        # Add this variable to the current var context
+        var_context().append(self)
+
+    def __getitem__(self, i):
+        """
+        Helper, will allow users to destructures var defs into name and type,
+        like::
+
+            name, type = var
+
+        Which in turns will allow iteration on the var context like::
+
+            for name, type in var_context:
+                ...
+        """
+        return [self.name, self.type][i]
+
+    def __unicode__(self):
+        """
+        Helper, expand var defs to their name when converted to strings,
+        allows easy use of VarDef instances in code generation.
+        """
+        return unicode(self.name)
 
 
 class GeneratedParser(object):
