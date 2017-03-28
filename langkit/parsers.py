@@ -1232,17 +1232,14 @@ class Defer(Parser):
 
         # Generate a call to the previously compiled function, and return
         # the context corresponding to this call.
-        pos, res = (
-            VarDef("fncall_pos", Token),
-            VarDef("fncall_res", self.get_type())
-        )
+        self.init_vars()
 
-        return ParserCodeContext(pos, res, render(
+        return ParserCodeContext(self.pos_var, self.res_var, render(
             'parsers/fn_call_ada',
             parser=self,
             pos_name=pos_name,
-            pos=pos,
-            res=res
+            pos=self.pos_var,
+            res=self.res_var
         ))
 
 
