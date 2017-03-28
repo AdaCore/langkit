@@ -712,10 +712,7 @@ class Or(Parser):
             self.is_processing_type = False
 
     def generate_code(self, pos_name="pos"):
-        pos, res = (
-            VarDef("or_pos", Token),
-            VarDef("or_res", self.get_type())
-        )
+        self.init_vars()
 
         t_env = TemplateEnvironment(
             parser=self,
@@ -731,8 +728,8 @@ class Or(Parser):
             # has matched).
             exit_label=gen_name("Exit_Or"),
 
-            pos=pos,
-            res=res
+            pos=self.pos_var,
+            res=self.res_var
         )
 
         return ParserCodeContext(t_env.pos, t_env.res, render(
