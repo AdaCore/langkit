@@ -2308,8 +2308,6 @@ package body ${ada_lib_name}.Analysis is
          Put_Line ("}>");
       end if;
    end Dump_One_Lexical_Env;
-   --  This procedure dumps *one* lexical environment
-
 
    ----------------------
    -- Dump_Lexical_Env --
