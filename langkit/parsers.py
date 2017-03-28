@@ -619,15 +619,13 @@ class Tok(Parser):
 
         # Generate the code to match the token of kind 'token_kind', and return
         # the corresponding context.
-        pos, res = (
-            VarDef("tk_pos", Token),
-            VarDef("tk_res", self.get_type())
-        )
+        self.init_vars()
 
-        return ParserCodeContext(pos, res, render(
+        return ParserCodeContext(self.pos_var, self.res_var, render(
             'parsers/tok_code_ada',
             parser=self, pos_name=pos_name,
-            pos=pos, res=res,
+            pos=self.pos_var,
+            res=self.res_var,
             match_text=self.match_text,
             token_kind=token.ada_name
         ))
