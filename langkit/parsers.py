@@ -945,11 +945,7 @@ class List(Parser):
         cpos = VarDef("lst_cpos", Token)
 
         parser_context = self.parser.generate_code(cpos)
-        sep_context = (
-            self.sep.generate_code(cpos)
-            if self.sep else
-            ParserCodeContext(None, None, None)
-        )
+        sep_context = self.sep.generate_code(cpos) if self.sep else None
 
         return ParserCodeContext(self.pos_var, self.res_var, render(
             'parsers/list_code_ada',
