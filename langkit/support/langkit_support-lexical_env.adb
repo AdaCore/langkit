@@ -246,18 +246,26 @@ package body Langkit_Support.Lexical_Env is
 
       declare
          Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
+
+         Own_Elts   : constant Env_Element_Array :=
+            Get_Own_Elements (Self);
+         Refd_Elts  : constant Env_Element_Array :=
+           (if Recursive
+            then Get_Refd_Elements
+              (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
+            else Env_Element_Arrays.Empty_Array);
+         TRefd_Elts : constant Env_Element_Array :=
+            Get_Refd_Elements
+              (Referenced_Envs_Vectors.To_Array
+                 (Self.Transitive_Referenced_Envs));
+         Parent_Elts : constant Env_Element_Array :=
+           (if Recursive
+            then Get
+              (Parent_Env, Key, Parent_Rebindings => Parent_Rebindings)
+            else Env_Element_Arrays.Empty_Array);
+
          Ret : constant Env_Element_Array :=
-           Get_Own_Elements (Self)
-           & (if Recursive
-              then Get_Refd_Elements
-                (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
-              else Env_Element_Arrays.Empty_Array)
-           & Get_Refd_Elements
-           (Referenced_Envs_Vectors.To_Array (Self.Transitive_Referenced_Envs))
-           & (if Recursive
-              then Get
-                (Parent_Env, Key, Parent_Rebindings => Parent_Rebindings)
-              else Env_Element_Arrays.Empty_Array);
+            Own_Elts & Refd_Elts & TRefd_Elts & Parent_Elts;
       begin
          --  Only filter if a non null value was given for the From parameter
          return (if From = No_Element then Ret
