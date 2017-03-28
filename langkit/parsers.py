@@ -871,23 +871,14 @@ class Row(Parser):
             exit_label=gen_name("row_exit_label")
         )
 
-        t_env.subresults = self.subresults = [
+        self.subresults = [
             VarDef("row_subres_{0}".format(i), p.get_type())
             if not p.discard() else None
             for i, p in enumerate(self.parsers)
         ]
 
-        bodies = []
-        for (parser, subresult) in zip(self.parsers, t_env.subresults):
-            t_subenv = TemplateEnvironment(
-                t_env, parser=parser, subresult=subresult,
-                parser_context=parser.gen_code_or_fncall(t_env.pos)
-            )
-
-            bodies.append(render('parsers/row_submatch_ada', t_subenv))
-
         return ParserCodeContext(t_env.pos, None, render(
-            'parsers/row_code_ada', t_env, body='\n'.join(bodies)
+            'parsers/row_code_ada', t_env
         ))
 
     def __getitem__(self, index):
