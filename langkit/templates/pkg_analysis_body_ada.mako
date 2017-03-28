@@ -2295,10 +2295,12 @@ package body ${ada_lib_name}.Analysis is
       if Env_Id'Length /= 0 then
          Put (Env_Id & " = ");
       end if;
-      Put ("LexEnv (Parent="
-           & (if Self.Parent /= AST_Envs.No_Env_Getter
-              then Parent_Env_Id else "null")
-           & "):");
+      Put ("LexEnv(Parent=" & (if Self.Parent /= AST_Envs.No_Env_Getter
+                               then Parent_Env_Id else "null"));
+      if Self.Node /= null then
+         Put (", Node=" & Image (Self.Node.Short_Image));
+      end if;
+      Put ("):");
 
       if Self.Env.Is_Empty then
          Put_Line (" <empty>");
@@ -2395,9 +2397,6 @@ package body ${ada_lib_name}.Analysis is
          --  envs we have already seen or not.
          if not Env_Ids.Contains (Current.Self_Env) then
             Env := Current.Self_Env;
-            Put ("<" & Kind_Name (Current) & " "
-                 & Image (Sloc_Range (Current)) & "> - ");
-
             Parent := Ast_Envs.Get_Env (Env.Parent);
 
             Explore_Parent :=
