@@ -951,18 +951,13 @@ class List(Parser):
             ParserCodeContext(None, None, None)
         )
 
-        t_env = TemplateEnvironment(
+        return ParserCodeContext(self.pos_var, self.res_var, render(
+            'parsers/list_code_ada',
             pos_name=pos_name,
             parser=self,
-            pos=self.pos_var,
-            res=self.res_var,
             cpos=cpos,
             parser_context=parser_context,
             sep_context=sep_context
-        )
-
-        return ParserCodeContext(t_env.pos, t_env.res, render(
-            'parsers/list_code_ada', t_env
         ))
 
 
