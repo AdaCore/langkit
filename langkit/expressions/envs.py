@@ -141,7 +141,7 @@ def env_get(env_expr, symbol_expr, resolve_unique=False, sequential=False,
     if sequential:
         # Pass the From parameter if the user wants sequential semantics
         array_expr = ('AST_Envs.Get'
-                      '  (Self      => {},'
+                      '  (Self => {},'
                       '   Key => {},'
                       '   From => {},'
                       '   Recursive => {})')
