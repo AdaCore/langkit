@@ -2412,11 +2412,9 @@ package body ${ada_lib_name}.Analysis is
       -- Internal --
       --------------
 
-      Env : Lexical_Env := null;
-
       procedure Internal (Current : ${root_node_type_name}) is
          Explore_Parent : Boolean := False;
-         Parent         : Lexical_Env;
+         Env, Parent    : Lexical_Env;
       begin
          if Current = null then
             return;
