@@ -509,7 +509,7 @@ class Parser(object):
         context.fns.add(self)
 
         with add_var_context() as var_context:
-            t_env.parser_context = self.generate_code()
+            t_env.parser_context = self.generate_code("pos")
             t_env.var_context = var_context
 
             context.generated_parsers.append(GeneratedParser(
@@ -527,14 +527,11 @@ class Parser(object):
         """
         raise NotImplementedError()
 
-    def generate_code(self, pos_name="pos"):
+    def generate_code(self, pos_name):
         """
         Return generated code for this parser into the global context.
 
         Subclasses must override this method.
-
-        :param str pos_name: The name of the position variable, which is the
-            position of the current token in the lexer stream.
         """
         raise NotImplementedError()
 
@@ -611,7 +608,7 @@ class Tok(Parser):
     def get_type(self):
         return Token
 
-    def generate_code(self, pos_name="pos"):
+    def generate_code(self, pos_name):
 
         token = (get_context().lexer.get_token(self.val)
                  if isinstance(self.val, basestring)
@@ -709,7 +706,7 @@ class Or(Parser):
         finally:
             self.is_processing_type = False
 
-    def generate_code(self, pos_name="pos"):
+    def generate_code(self, pos_name):
         self.init_vars()
 
         t_env = TemplateEnvironment(
@@ -820,7 +817,7 @@ class Row(Parser):
         # A Row parser never yields a concrete result itself
         return None
 
-    def generate_code(self, pos_name="pos"):
+    def generate_code(self, pos_name):
         # We pass in a dummy object for res_var, because Rows have no result
         self.init_vars(res_var=object())
 
@@ -938,7 +935,7 @@ class List(Parser):
                 ' ({} is abstract)'.format(typ.name().camel)
             )
 
-    def generate_code(self, pos_name="pos"):
+    def generate_code(self, pos_name):
 
         self.get_type().add_to_context()
         self.init_vars()
@@ -1059,7 +1056,7 @@ class Opt(Parser):
             self._booleanize[0] if self._booleanize else self.parser.get_type()
         )
 
-    def generate_code(self, pos_name="pos"):
+    def generate_code(self, pos_name):
         parser_context = self.parser.generate_code(pos_name)
 
         self.init_vars(
@@ -1120,7 +1117,7 @@ class Extract(Parser):
     def get_type(self):
         return self.parser.parsers[self.index].get_type()
 
-    def generate_code(self, pos_name="pos"):
+    def generate_code(self, pos_name):
         parser_context = self.parser.generate_code(pos_name)
         self.init_vars(
             self.parser.pos_var, self.parser.subresults[self.index]
@@ -1155,7 +1152,7 @@ class Discard(Parser):
         # Discard parsers return nothing!
         return None
 
-    def generate_code(self, pos_name="pos"):
+    def generate_code(self, pos_name):
         return self.parser.generate_code(pos_name)
 
 
@@ -1202,7 +1199,7 @@ class Defer(Parser):
     def get_type(self):
         return self.parser.get_type()
 
-    def generate_code(self, pos_name="pos"):
+    def generate_code(self, pos_name):
         # The call to compile will add the declaration and the definition
         # (body) of the function to the compile context.
         self.parser.compile()
@@ -1278,7 +1275,7 @@ class Transform(Parser):
         # Handle sub-parsers
         Parser.compute_fields_types(self)
 
-    def generate_code(self, pos_name="pos"):
+    def generate_code(self, pos_name):
 
         self.typ.add_to_context()
 
@@ -1324,7 +1321,7 @@ class Null(Parser):
     def __repr__(self):
         return "Null"
 
-    def generate_code(self, pos_name="pos"):
+    def generate_code(self, pos_name):
         typ = self.get_type()
         if isinstance(typ, ASTNode):
             self.get_type().add_to_context()
@@ -1370,7 +1367,7 @@ class Enum(Parser):
     def get_type(self):
         return type(self.enum_type_inst)
 
-    def generate_code(self, pos_name="pos"):
+    def generate_code(self, pos_name):
 
         self.enum_type_inst.add_to_context()
 
