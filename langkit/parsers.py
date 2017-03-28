@@ -725,12 +725,9 @@ class Or(Parser):
             # Generate a name for the exit label (when one of the sub-parsers
             # has matched).
             exit_label=gen_name("Exit_Or"),
-
-            pos=self.pos_var,
-            res=self.res_var
         )
 
-        return ParserCodeContext(t_env.pos, t_env.res, render(
+        return ParserCodeContext(self.pos_var, self.res_var, render(
             'parsers/or_code_ada', t_env
         ))
 

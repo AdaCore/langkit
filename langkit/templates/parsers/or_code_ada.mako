@@ -2,13 +2,13 @@
 
 --  Start or_code
 
-${pos} := No_Token_Index;
-${res} := ${parser.get_type().storage_nullexpr()};
+${parser.pos_var} := No_Token_Index;
+${parser.res_var} := ${parser.get_type().storage_nullexpr()};
 % for ctx in results:
     ${ctx.code}
     if ${ctx.pos_var_name} /= No_Token_Index then
-        ${pos} := ${ctx.pos_var_name};
-        ${res} := ${parser.get_type().storage_type_name()}
+        ${parser.pos_var} := ${ctx.pos_var_name};
+        ${parser.res_var} := ${parser.get_type().storage_type_name()}
           (${ctx.res_var_name});
         goto ${exit_label};
     end if;
