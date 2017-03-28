@@ -821,13 +821,8 @@ class Row(Parser):
         return None
 
     def generate_code(self, pos_name="pos"):
-        self.init_vars(gen_res_var=False)
-
-        t_env = TemplateEnvironment(
-            pos_name=pos_name,
-            parser=self,
-            exit_label=gen_name("row_exit_label")
-        )
+        # We pass in a dummy object for res_var, because Rows have no result
+        self.init_vars(res_var=object())
 
         self.subresults = [
             VarDef("row_subres_{0}".format(i), p.get_type())
@@ -836,7 +831,10 @@ class Row(Parser):
         ]
 
         return ParserCodeContext(self.pos_var, None, render(
-            'parsers/row_code_ada', t_env
+            'parsers/row_code_ada',
+            pos_name=pos_name,
+            parser=self,
+            exit_label=gen_name("row_exit_label")
         ))
 
     def __getitem__(self, index):
