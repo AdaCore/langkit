@@ -624,8 +624,6 @@ class Tok(Parser):
         return ParserCodeContext(self.pos_var, self.res_var, render(
             'parsers/tok_code_ada',
             parser=self, pos_name=pos_name,
-            pos=self.pos_var,
-            res=self.res_var,
             match_text=self.match_text,
             token_kind=token.ada_name
         ))

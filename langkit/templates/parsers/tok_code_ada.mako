@@ -3,11 +3,11 @@
 --  Start tok_code
 
 ## Get the current token
-${res} := ${pos_name};
+${parser.res_var} := ${pos_name};
 
 declare
    T : constant Lexer.Token_Data_Type :=
-      Token_Vectors.Get (Parser.TDH.Tokens, Natural (${res}));
+      Token_Vectors.Get (Parser.TDH.Tokens, Natural (${parser.res_var}));
 begin
    if
       T.Kind /= ${token_kind}
@@ -19,7 +19,7 @@ begin
       % endif
    then
        ## If the result is not the one we expect, set pos to error
-       ${pos} := No_Token_Index;
+       ${parser.pos_var} := No_Token_Index;
 
        ## Document this failure so we can have a diagnostic at the end of
        ## parsing.
@@ -34,10 +34,10 @@ begin
       ## We don't want to increment the position if we are matching the
       ## termination token (eg. the last token in the token stream).
       % if token_kind == ctx.lexer.Termination.ada_name:
-          ${pos} := ${pos_name};
+          ${parser.pos_var} := ${pos_name};
       ## Else increment the current position
       % else:
-          ${pos} := ${pos_name} + 1;
+          ${parser.pos_var} := ${pos_name} + 1;
       % endif
    end if;
 end;
