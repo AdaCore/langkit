@@ -2500,7 +2500,7 @@ package body ${ada_lib_name}.Analysis is
                Dump_One_Lexical_Env
                  (Self           => E,
                   Env_Id         => Id_Str,
-                  Parent_Env_Id  => '$' & Stripped_Image (Id + 1),
+                  Parent_Env_Id  => '@' & Stripped_Image (Id + 1),
                   Dump_Addresses => True);
             end if;
          end;
