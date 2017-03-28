@@ -527,52 +527,11 @@ class Parser(object):
         """
         raise NotImplementedError()
 
-    def gen_code_or_fncall(self, pos_name="pos"):
-        """
-        Return generated code for this parser into the global context.
-
-        `pos_name` is the name of a variable that contains the position of the
-        next token in the lexer.
-
-        Either the "parsing code" is returned, either it is emitted in a
-        dedicated function and a call to it is returned instead.  This method
-        relies on the subclasses-defined `generated_code` for "parsing code"
-        generation.
-
-        :param str|names.Name pos_name: The name of the position variable.
-        :rtype: ParserCodeContext
-        """
-        # Users must be able to run parsers that implement a named rule, so
-        # generate dedicated functions for them.
-        if self.is_root:
-
-            # The call to compile will add the declaration and the definition
-            # (body) of the function to the compile context.
-            self.compile()
-
-            # Generate a call to the previously compiled function, and return
-            # the context corresponding to this call.
-            pos, res = (
-                VarDef("fncall_pos", Token),
-                VarDef("fncall_res", self.get_type())
-            )
-
-            return ParserCodeContext(pos, res, render(
-                'parsers/fn_call_ada',
-                parser=self, pos_name=pos_name,
-                pos=pos,
-                res=res
-            ))
-
-        else:
-            return self.generate_code(pos_name)
-
     def generate_code(self, pos_name="pos"):
         """
         Return generated code for this parser into the global context.
 
-        Subclasses must override this method.  It is a low-level routine used
-        by the `gen_code_or_fncall` method.  See above for arguments meaning.
+        Subclasses must override this method.
 
         :param str pos_name: The name of the position variable, which is the
             position of the current token in the lexer stream.
@@ -766,7 +725,7 @@ class Or(Parser):
             # List of ParserCodeContext instances for the sub-parsers,
             # encapsulating their results.
             results=[
-                m.gen_code_or_fncall(pos_name)
+                m.generate_code(pos_name)
                 for m in self.parsers
             ],
 
@@ -999,9 +958,9 @@ class List(Parser):
             VarDef("lst_cpos", Token),
         )
 
-        parser_context = self.parser.gen_code_or_fncall(cpos)
+        parser_context = self.parser.generate_code(cpos)
         sep_context = (
-            self.sep.gen_code_or_fncall(cpos)
+            self.sep.generate_code(cpos)
             if self.sep else
             ParserCodeContext(None, None, None)
         )
@@ -1124,7 +1083,7 @@ class Opt(Parser):
         )
 
     def generate_code(self, pos_name="pos"):
-        parser_context = self.parser.gen_code_or_fncall(pos_name)
+        parser_context = self.parser.generate_code(pos_name)
 
         t_env = TemplateEnvironment(
             pos_name=pos_name,
@@ -1189,7 +1148,7 @@ class Extract(Parser):
 
     def generate_code(self, pos_name="pos"):
         return copy_with(
-            self.parser.gen_code_or_fncall(pos_name),
+            self.parser.generate_code(pos_name),
             res_var_name=self.parser.subresults[self.index]
         )
 
@@ -1220,7 +1179,7 @@ class Discard(Parser):
         return None
 
     def generate_code(self, pos_name="pos"):
-        return self.parser.gen_code_or_fncall(pos_name)
+        return self.parser.generate_code(pos_name)
 
 
 class Defer(Parser):
@@ -1266,7 +1225,24 @@ class Defer(Parser):
         return self.parser.get_type()
 
     def generate_code(self, pos_name="pos"):
-        return self.parser.gen_code_or_fncall(pos_name=pos_name)
+        # The call to compile will add the declaration and the definition
+        # (body) of the function to the compile context.
+        self.parser.compile()
+
+        # Generate a call to the previously compiled function, and return
+        # the context corresponding to this call.
+        pos, res = (
+            VarDef("fncall_pos", Token),
+            VarDef("fncall_res", self.get_type())
+        )
+
+        return ParserCodeContext(pos, res, render(
+            'parsers/fn_call_ada',
+            parser=self,
+            pos_name=pos_name,
+            pos=pos,
+            res=res
+        ))
 
 
 class Transform(Parser):
@@ -1333,7 +1309,7 @@ class Transform(Parser):
 
         self.typ.add_to_context()
 
-        parser_context = self.parser.gen_code_or_fncall(pos_name)
+        parser_context = self.parser.generate_code(pos_name)
         ":type: ParserCodeContext"
 
         t_env = TemplateEnvironment(
@@ -1435,7 +1411,7 @@ class Enum(Parser):
         self.enum_type_inst.add_to_context()
 
         parser_context = (
-            copy(self.parser.gen_code_or_fncall(pos_name))
+            copy(self.parser.generate_code(pos_name))
             if self.parser
             else ParserCodeContext(
                 pos_var_name=pos_name,

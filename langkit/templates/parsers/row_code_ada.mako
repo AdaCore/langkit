@@ -8,7 +8,7 @@ ${pos} := ${pos_name};
 ## each row part.
 % for (subp, subres) in zip(parser.parsers, parser.subresults):
 
-<% parser_context = subp.gen_code_or_fncall(pos) %>
+<% parser_context = subp.generate_code(pos) %>
 
 ## Parse the element
 ${parser_context.code}
