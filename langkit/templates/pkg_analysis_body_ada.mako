@@ -23,6 +23,7 @@ with Ada.Unchecked_Deallocation;
 with System.Storage_Elements;    use System.Storage_Elements;
 
 with Langkit_Support.Array_Utils;
+with Langkit_Support.Images;  use Langkit_Support.Images;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Text;    use Langkit_Support.Text;
@@ -2313,15 +2314,7 @@ package body ${ada_lib_name}.Analysis is
          State.Next_Id := State.Next_Id + 1;
       end if;
 
-      --  Return the string representation of the given index, without the
-      --  leading whitespace.
-      declare
-         Result : constant String := Address_To_Id_Maps.Element (C)'Img;
-      begin
-         return '$' & (if Result (Result'First) = ' '
-                       then Result (Result'First + 1 .. Result'Last)
-                       else Result);
-      end;
+      return '$' & Stripped_Image (Address_To_Id_Maps.Element (C));
    end Get_Env_Id;
 
    ----------
