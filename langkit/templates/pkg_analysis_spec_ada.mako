@@ -782,7 +782,8 @@ package ${ada_lib_name}.Analysis is
      (Self           : AST_Envs.Lexical_Env;
       Env_Id         : String := "";
       Parent_Env_Id  : String := "";
-      Dump_Addresses : Boolean := False);
+      Dump_Addresses : Boolean := False;
+      Dump_Content   : Boolean := True);
    --  Debug helper: Dumps one lexical env. You can supply ids for env and its
    --  parent, so that they will be identified in the output.
 

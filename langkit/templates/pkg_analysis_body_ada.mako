@@ -2326,7 +2326,8 @@ package body ${ada_lib_name}.Analysis is
      (Self           : AST_Envs.Lexical_Env;
       Env_Id         : String := "";
       Parent_Env_Id  : String := "";
-      Dump_Addresses : Boolean := False)
+      Dump_Addresses : Boolean := False;
+      Dump_Content   : Boolean := True)
    is
       use Sorted_Envs;
 
@@ -2368,7 +2369,11 @@ package body ${ada_lib_name}.Analysis is
          New_Arg;
          Put ("0x" & System.Address_Image (Self.all'Address));
       end if;
-      Put_Line ("):");
+      Put (")");
+      if not Dump_Content then
+         return;
+      end if;
+      Put_Line (":");
 
       if Self.Env.Is_Empty then
          Put_Line ("    <empty>");
