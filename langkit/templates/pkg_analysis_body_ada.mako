@@ -2331,12 +2331,15 @@ package body ${ada_lib_name}.Analysis is
    is
       use Sorted_Envs;
 
-      function Image (El : Env_Element) return String is
-        (Image (Short_Image (El.El)));
+      function Short_Image
+        (N : access ${root_node_value_type}'Class) return String
+      is (Image (N.Short_Image));
       -- TODO??? This is slightly hackish, because we're converting a wide
       -- string back to string. But since we're using this solely for
       -- test/debug purposes, it should not matter. Still, would be good to
       -- have Text_Type everywhere at some point.
+
+      function Image (El : Env_Element) return String is (Short_Image (El.El));
 
       function Image is new AST_Envs.Env_Element_Vectors.Image (Image);
 
@@ -2350,6 +2353,27 @@ package body ${ada_lib_name}.Analysis is
             Put (", ");
          end if;
       end New_Arg;
+
+      ---------------------
+      -- Dump_Referenced --
+      ---------------------
+
+      procedure Dump_Referenced
+        (Name : String; Refs : AST_Envs.Referenced_Envs_Vectors.Vector) is
+      begin
+         if Refs.Length > 0 then
+            Put_Line ("    " & Name & ":");
+            for R of Refs loop
+               Put ("      ");
+               Put (Short_Image (R.From_Node) & ": ");
+               Dump_One_Lexical_Env
+                 (Self           => R.Env,
+                  Dump_Addresses => Dump_Addresses,
+                  Dump_Content   => False);
+               New_Line;
+            end loop;
+         end if;
+      end Dump_Referenced;
 
    begin
       if Env_Id'Length /= 0 then
@@ -2374,6 +2398,10 @@ package body ${ada_lib_name}.Analysis is
          return;
       end if;
       Put_Line (":");
+
+      Dump_Referenced ("Referenced", Self.Referenced_Envs);
+      Dump_Referenced
+        ("Transitive referenced", Self.Transitive_Referenced_Envs);
 
       if Self.Env.Is_Empty then
          Put_Line ("    <empty>");
