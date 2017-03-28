@@ -23,4 +23,8 @@ package ${ada_lib_name}.Debug is
    --  "Print Token". Print the data associated to the T token in the given
    --  token data handler.
 
+   procedure PEnv (Env : Lexical_Env);
+   --  "Print lexical Environment". Print the content of Env and all its parent
+   --  chain.
+
 end ${ada_lib_name}.Debug;

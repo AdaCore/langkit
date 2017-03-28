@@ -49,4 +49,13 @@ package body ${ada_lib_name}.Debug is
       end if;
    end PTok;
 
+   ----------
+   -- PEnv --
+   ----------
+
+   procedure PEnv (Env : Lexical_Env) is
+   begin
+      Dump_Lexical_Env_Parent_Chain (Env);
+   end PEnv;
+
 end ${ada_lib_name}.Debug;
