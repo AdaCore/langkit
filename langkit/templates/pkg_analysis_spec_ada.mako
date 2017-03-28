@@ -785,6 +785,9 @@ package ${ada_lib_name}.Analysis is
    --  Debug helper: Dumps one lexical env. You can supply ids for env and its
    --  parent, so that they will be identified in the output.
 
+   procedure Dump_Lexical_Env_Parent_Chain (Env : AST_Envs.Lexical_Env);
+   --  Debug helper: dump a lexical env as all its parents
+
    procedure Assign_Names_To_Logic_Vars
      (Node : access ${root_node_value_type}'Class);
    --  Debug helper: Assign names to every logical variable in the root node,

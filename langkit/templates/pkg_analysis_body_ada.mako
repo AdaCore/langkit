@@ -2440,6 +2440,33 @@ package body ${ada_lib_name}.Analysis is
       Internal (${root_node_type_name} (Node));
    end Dump_Lexical_Env;
 
+   -----------------------------------
+   -- Dump_Lexical_Env_Parent_Chain --
+   -----------------------------------
+
+   procedure Dump_Lexical_Env_Parent_Chain (Env : AST_Envs.Lexical_Env) is
+      Id : Positive := 1;
+      E  : Lexical_Env := Env;
+   begin
+      if E = null then
+         Put_Line ("<null>");
+      end if;
+
+      while E /= null loop
+         declare
+            Id_Str : constant String := '$' & Stripped_Image (Id);
+         begin
+            if E = null then
+               Put_Line (Id_Str & " = <null>");
+            else
+               Dump_One_Lexical_Env (E, Id_Str, '$' & Stripped_Image (Id + 1));
+            end if;
+         end;
+         Id := Id + 1;
+         E := AST_Envs.Get_Env (E.Parent);
+      end loop;
+   end Dump_Lexical_Env_Parent_Chain;
+
    -------------
    -- Parents --
    -------------
