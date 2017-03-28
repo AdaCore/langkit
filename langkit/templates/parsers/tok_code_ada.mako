@@ -3,7 +3,7 @@
 --  Start tok_code
 
 ## Get the current token
-${parser.res_var} := ${pos_name};
+${parser.res_var} := ${start_pos};
 
 declare
    T : constant Lexer.Token_Data_Type :=
@@ -23,10 +23,10 @@ begin
 
        ## Document this failure so we can have a diagnostic at the end of
        ## parsing.
-       if Parser.Last_Fail.Pos <= ${pos_name} then
+       if Parser.Last_Fail.Pos <= ${start_pos} then
           Parser.Last_Fail :=
             (Kind => Token_Fail,
-             Pos => ${pos_name},
+             Pos => ${start_pos},
              Expected_Token_Id => ${token_kind},
              Found_Token_Id => T.Kind);
        end if;
@@ -34,10 +34,10 @@ begin
       ## We don't want to increment the position if we are matching the
       ## termination token (eg. the last token in the token stream).
       % if token_kind == ctx.lexer.Termination.ada_name:
-          ${parser.pos_var} := ${pos_name};
+          ${parser.pos_var} := ${start_pos};
       ## Else increment the current position
       % else:
-          ${parser.pos_var} := ${pos_name} + 1;
+          ${parser.pos_var} := ${start_pos} + 1;
       % endif
    end if;
 end;

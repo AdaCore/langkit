@@ -2,7 +2,7 @@
 
 --  Start row_code
 
-${parser.pos_var} := ${pos_name};
+${parser.pos_var} := ${start_pos};
 
 ## This is the main body of the row, which is the concatenation of the code for
 ## each row part.

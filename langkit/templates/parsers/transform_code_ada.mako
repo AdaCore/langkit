@@ -11,16 +11,16 @@ if ${parser.pos_var} /= No_Token_Index then
      (${parser.typ.name()}_Alloc.Alloc (Parser.Mem_Pool));
 
    ## Compute and set the sloc range for this AST node. Reminders:
-   ##   * pos_name the name for the position of the lexer before this parser
+   ##   * start_pos the name for the position of the lexer before this parser
    ##     runs.
    ##   * parser.pos_var is the name for the position of the lexer
    ##     after this parser runs.
    ## If they are equal then we know that this parser consumed no token. As a
    ## result, the result must be a ghost node, i.e. with no token_end.
    ${parser.res_var}.Unit := Parser.Unit;
-   ${parser.res_var}.Token_Start_Index := ${pos_name};
+   ${parser.res_var}.Token_Start_Index := ${start_pos};
    ${parser.res_var}.Token_End_Index :=
-     (if ${parser.pos_var} = ${pos_name}
+     (if ${parser.pos_var} = ${start_pos}
       then No_Token_Index
       else ${parser.pos_var} - 1);
 
