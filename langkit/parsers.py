@@ -941,11 +941,8 @@ class List(Parser):
     def generate_code(self, pos_name="pos"):
 
         self.get_type().add_to_context()
-        pos, res, cpos = (
-            VarDef("lst_pos", Token),
-            VarDef("lst_res", self.get_type()),
-            VarDef("lst_cpos", Token),
-        )
+        self.init_vars()
+        cpos = VarDef("lst_cpos", Token)
 
         parser_context = self.parser.generate_code(cpos)
         sep_context = (
@@ -957,8 +954,8 @@ class List(Parser):
         t_env = TemplateEnvironment(
             pos_name=pos_name,
             parser=self,
-            pos=pos,
-            res=res,
+            pos=self.pos_var,
+            res=self.res_var,
             cpos=cpos,
             parser_context=parser_context,
             sep_context=sep_context
