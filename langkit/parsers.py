@@ -826,7 +826,6 @@ class Row(Parser):
         t_env = TemplateEnvironment(
             pos_name=pos_name,
             parser=self,
-            pos=self.pos_var,
             exit_label=gen_name("row_exit_label")
         )
 
@@ -836,7 +835,7 @@ class Row(Parser):
             for i, p in enumerate(self.parsers)
         ]
 
-        return ParserCodeContext(t_env.pos, None, render(
+        return ParserCodeContext(self.pos_var, None, render(
             'parsers/row_code_ada', t_env
         ))
 
