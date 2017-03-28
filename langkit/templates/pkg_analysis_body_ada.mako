@@ -2276,7 +2276,8 @@ package body ${ada_lib_name}.Analysis is
    ----------
 
    procedure Dump_One_Lexical_Env
-     (Self          : AST_Envs.Lexical_Env; Env_Id : String := "";
+     (Self          : AST_Envs.Lexical_Env;
+      Env_Id        : String := "";
       Parent_Env_Id : String := "")
    is
       use Sorted_Envs;
