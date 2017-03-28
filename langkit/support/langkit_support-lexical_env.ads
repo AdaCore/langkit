@@ -200,7 +200,11 @@ package Langkit_Support.Lexical_Env is
       --  A list of environments referenced by this environment
 
       Transitive_Referenced_Envs : Referenced_Envs_Vectors.Vector;
-      --  A list of environments referenced by this environment
+      --  A list of environments referenced by this environment. Unlike
+      --  Referenced_Envs, Transitive_Referenced_Envs are *always* explored
+      --  when calling Get, whether the "Recursive" parameter is True or not.
+      --  They're used to create new environments that are the concatenation
+      --  of other environments.
 
       Env : Internal_Map := null;
       --  Map containing mappings from symbols to elements for this env
