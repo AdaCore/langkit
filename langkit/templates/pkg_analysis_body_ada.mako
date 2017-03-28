@@ -2368,12 +2368,11 @@ package body ${ada_lib_name}.Analysis is
          New_Arg;
          Put ("0x" & System.Address_Image (Self.all'Address));
       end if;
-      Put ("):");
+      Put_Line ("):");
 
       if Self.Env.Is_Empty then
-         Put_Line (" <empty>");
+         Put_Line ("    <empty>");
       else
-         New_Line;
          for El in To_Sorted_Env (Self.Env.all).Iterate loop
             Put ("    ");
             Put_Line (Langkit_Support.Text.Image (Key (El).all) & ": "
