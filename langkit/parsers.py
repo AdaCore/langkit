@@ -336,7 +336,6 @@ class Grammar(object):
 class Parser(object):
     """Base class for parsers building blocks."""
 
-    # noinspection PyMissingConstructor
     def __init__(self):
         self.location = None
         self._mod = None
