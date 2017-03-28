@@ -864,18 +864,18 @@ class Row(Parser):
         return None
 
     def generate_code(self, pos_name="pos"):
-        t_env = TemplateEnvironment(pos_name=pos_name)
-        t_env.parser = self
-
-        t_env.pos = VarDef("row_pos", Token)
+        t_env = TemplateEnvironment(
+            pos_name=pos_name,
+            parser=self,
+            pos=VarDef("row_pos", Token),
+            exit_label=gen_name("row_exit_label")
+        )
 
         t_env.subresults = self.subresults = [
             VarDef("row_subres_{0}".format(i), p.get_type())
             if not p.discard() else None
             for i, p in enumerate(self.parsers)
         ]
-
-        t_env.exit_label = gen_name("row_exit_label")
 
         bodies = []
         for (parser, subresult) in zip(self.parsers, t_env.subresults):
