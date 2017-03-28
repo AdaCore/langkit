@@ -1238,8 +1238,6 @@ class Defer(Parser):
             'parsers/fn_call_ada',
             parser=self,
             pos_name=pos_name,
-            pos=self.pos_var,
-            res=self.res_var
         ))
 
 
