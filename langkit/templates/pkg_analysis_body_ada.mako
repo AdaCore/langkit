@@ -2315,7 +2315,7 @@ package body ${ada_lib_name}.Analysis is
          State.Next_Id := State.Next_Id + 1;
       end if;
 
-      return '$' & Stripped_Image (Address_To_Id_Maps.Element (C));
+      return '@' & Stripped_Image (Address_To_Id_Maps.Element (C));
    end Get_Env_Id;
 
    ----------
@@ -2492,7 +2492,7 @@ package body ${ada_lib_name}.Analysis is
 
       while E /= null loop
          declare
-            Id_Str : constant String := '$' & Stripped_Image (Id);
+            Id_Str : constant String := '@' & Stripped_Image (Id);
          begin
             if E = null then
                Put_Line (Id_Str & " = <null>");
