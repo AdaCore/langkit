@@ -2292,22 +2292,25 @@ package body ${ada_lib_name}.Analysis is
       function Image is new AST_Envs.Env_Element_Vectors.Image (Image);
 
    begin
-      Put ("<LexEnv (Id" & Env_Id & ", Parent"
+      if Env_Id'Length /= 0 then
+         Put (Env_Id & " = ");
+      end if;
+      Put ("LexEnv (Parent="
            & (if Self.Parent /= AST_Envs.No_Env_Getter
-              then Parent_Env_Id else " null")
-           & "), ");
+              then Parent_Env_Id else "null")
+           & "):");
 
       if Self.Env.Is_Empty then
-         Put_Line ("empty>");
+         Put_Line (" <empty>");
       else
-         Put_Line ("{");
+         New_Line;
          for El in To_Sorted_Env (Self.Env.all).Iterate loop
             Put ("    ");
             Put_Line (Langkit_Support.Text.Image (Key (El).all) & ": "
                  & Image (Element (El)));
          end loop;
-         Put_Line ("}>");
       end if;
+      New_Line;
    end Dump_One_Lexical_Env;
 
    ----------------------
@@ -2335,16 +2338,25 @@ package body ${ada_lib_name}.Analysis is
             --  Insert root env with a special Id so that we only print it
             --  once.
             Env_Ids.Insert (E, -1, C, Inserted);
-            return " <root>";
+            return "$root";
          elsif E = null then
-            return " <null>";
+            return "$null";
          end if;
 
          Env_Ids.Insert (E, Current_Env_Id, C, Inserted);
          if Inserted then
             Current_Env_Id := Current_Env_Id + 1;
          end if;
-         return Address_To_Id_Maps.Element (C)'Img;
+
+         --  Return the string representation of the given index, without the
+         --  leading whitespace.
+         declare
+            Result : constant String := Address_To_Id_Maps.Element (C)'Img;
+         begin
+            return '$' & (if Result (Result'First) = ' '
+                          then Result (Result'First + 1 .. Result'Last)
+                          else Result);
+         end;
       end Get_Env_Id;
       --  Retrieve the Id for a lexical env. Assign one if none was yet
       --  assigned.
