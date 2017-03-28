@@ -2291,14 +2291,30 @@ package body ${ada_lib_name}.Analysis is
 
       function Image is new AST_Envs.Env_Element_Vectors.Image (Image);
 
+      First_Arg : Boolean := True;
+
+      procedure New_Arg is
+      begin
+         if First_Arg then
+            First_Arg := False;
+         else
+            Put (", ");
+         end if;
+      end New_Arg;
+
    begin
       if Env_Id'Length /= 0 then
          Put (Env_Id & " = ");
       end if;
-      Put ("LexEnv(Parent=" & (if Self.Parent /= AST_Envs.No_Env_Getter
-                               then Parent_Env_Id else "null"));
+      Put ("LexEnv(");
+      if Parent_Env_Id'Length > 0 then
+         New_Arg;
+         Put ("Parent=" & (if Self.Parent /= AST_Envs.No_Env_Getter
+                           then Parent_Env_Id else "null"));
+      end if;
       if Self.Node /= null then
-         Put (", Node=" & Image (Self.Node.Short_Image));
+         New_Arg;
+         Put ("Node=" & Image (Self.Node.Short_Image));
       end if;
       Put ("):");
 
