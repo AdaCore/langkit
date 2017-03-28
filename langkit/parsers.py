@@ -26,6 +26,7 @@ from __future__ import (absolute_import, division, print_function,
 from contextlib import contextmanager
 from copy import copy
 import difflib
+from funcy import keep
 import inspect
 
 from langkit import compiled_types, names
@@ -851,8 +852,6 @@ class Row(Parser):
         self.typ = None
 
         self.components_need_inc_ref = True
-        self.args = []
-        self.allargs = []
 
     def discard(self):
         return all(p.discard() for p in self.parsers)
@@ -870,18 +869,13 @@ class Row(Parser):
 
         t_env.pos = VarDef("row_pos", Token)
 
-        t_env.subresults = [
+        t_env.subresults = self.subresults = [
             VarDef("row_subres_{0}".format(i), p.get_type())
             if not p.discard() else None
             for i, p in enumerate(self.parsers)
         ]
 
         t_env.exit_label = gen_name("row_exit_label")
-
-        self.args = [r for r, m in zip(t_env.subresults, self.parsers)
-                     if not m.discard()]
-
-        self.allargs = [r for r, m in zip(t_env.subresults, self.parsers)]
 
         bodies = []
         for (parser, subresult) in zip(self.parsers, t_env.subresults):
@@ -1197,7 +1191,7 @@ class Extract(Parser):
     def generate_code(self, pos_name="pos"):
         return copy_with(
             self.parser.gen_code_or_fncall(pos_name),
-            res_var_name=self.parser.allargs[self.index]
+            res_var_name=self.parser.subresults[self.index]
         )
 
 
@@ -1349,7 +1343,7 @@ class Transform(Parser):
             # the tree fields (required by get_types()).
             parser_context=parser_context,
             args=(
-                self.parser.args
+                keep(self.parser.subresults)
                 if isinstance(self.parser, Row) else
                 [parser_context.res_var_name]
             ),
