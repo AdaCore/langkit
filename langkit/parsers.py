@@ -1124,9 +1124,12 @@ class Extract(Parser):
         return self.parser.parsers[self.index].get_type()
 
     def generate_code(self, pos_name="pos"):
-        return copy_with(
-            self.parser.generate_code(pos_name),
-            res_var_name=self.parser.subresults[self.index]
+        parser_context = self.parser.generate_code(pos_name)
+        self.init_vars(
+            self.parser.pos_var, self.parser.subresults[self.index]
+        )
+        return ParserCodeContext(
+            self.pos_var, self.res_var, code=parser_context.code
         )
 
 
