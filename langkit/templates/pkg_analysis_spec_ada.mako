@@ -779,9 +779,10 @@ package ${ada_lib_name}.Analysis is
    --  root env explicitly so that we can tag it properly in the output.
 
    procedure Dump_One_Lexical_Env
-     (Self          : AST_Envs.Lexical_Env;
-      Env_Id        : String := "";
-      Parent_Env_Id : String := "");
+     (Self           : AST_Envs.Lexical_Env;
+      Env_Id         : String := "";
+      Parent_Env_Id  : String := "";
+      Dump_Addresses : Boolean := False);
    --  Debug helper: Dumps one lexical env. You can supply ids for env and its
    --  parent, so that they will be identified in the output.
 

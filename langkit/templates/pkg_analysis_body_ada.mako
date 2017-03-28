@@ -20,6 +20,7 @@ with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
+with System.Address_Image;
 with System.Storage_Elements;    use System.Storage_Elements;
 
 with Langkit_Support.Array_Utils;
@@ -2322,9 +2323,10 @@ package body ${ada_lib_name}.Analysis is
    ----------
 
    procedure Dump_One_Lexical_Env
-     (Self          : AST_Envs.Lexical_Env;
-      Env_Id        : String := "";
-      Parent_Env_Id : String := "")
+     (Self           : AST_Envs.Lexical_Env;
+      Env_Id         : String := "";
+      Parent_Env_Id  : String := "";
+      Dump_Addresses : Boolean := False)
    is
       use Sorted_Envs;
 
@@ -2361,6 +2363,10 @@ package body ${ada_lib_name}.Analysis is
       if Self.Node /= null then
          New_Arg;
          Put ("Node=" & Image (Self.Node.Short_Image));
+      end if;
+      if Dump_Addresses then
+         New_Arg;
+         Put ("0x" & System.Address_Image (Self.all'Address));
       end if;
       Put ("):");
 
@@ -2459,7 +2465,11 @@ package body ${ada_lib_name}.Analysis is
             if E = null then
                Put_Line (Id_Str & " = <null>");
             else
-               Dump_One_Lexical_Env (E, Id_Str, '$' & Stripped_Image (Id + 1));
+               Dump_One_Lexical_Env
+                 (Self           => E,
+                  Env_Id         => Id_Str,
+                  Parent_Env_Id  => '$' & Stripped_Image (Id + 1),
+                  Dump_Addresses => True);
             end if;
          end;
          Id := Id + 1;
