@@ -26,17 +26,17 @@ begin
 
    if M.State = Success then
       Parser.Current_Pos := M.Final_Pos;
-      ${parser_context.res_var_name} := M.Instance;
-      return ${parser_context.res_var_name};
+      ${parser.res_var} := M.Instance;
+      return ${parser.res_var};
    elsif M.State = Failure then
       Parser.Current_Pos := No_Token_Index;
-      return ${parser_context.res_var_name};
+      return ${parser.res_var};
    end if;
 
    % if parser.is_left_recursive():
        Set (${memo},
             False,
-            ${parser_context.res_var_name},
+            ${parser.res_var},
             Pos,
             Mem_Pos);
 
@@ -56,16 +56,16 @@ begin
    % if parser.is_left_recursive():
       if ${parser.pos_var} > Mem_Pos then
          Mem_Pos := ${parser.pos_var};
-         Mem_Res := ${parser_context.res_var_name};
+         Mem_Res := ${parser.res_var};
          Set (${memo},
               ${parser.pos_var} /= No_Token_Index,
-              ${parser_context.res_var_name},
+              ${parser.res_var},
               Pos,
               ${parser.pos_var});
          goto Try_Again;
 
       elsif Mem_Pos > Pos then
-         ${parser_context.res_var_name} := Mem_Res;
+         ${parser.res_var} := Mem_Res;
          ${parser.pos_var} := Mem_Pos;
          goto No_Memo;
       end if;
@@ -73,7 +73,7 @@ begin
 
    Set (${memo},
         ${parser.pos_var} /= No_Token_Index,
-        ${parser_context.res_var_name},
+        ${parser.res_var},
         Pos,
         ${parser.pos_var});
 
@@ -83,5 +83,5 @@ begin
 
    Parser.Current_Pos := ${parser.pos_var};
 
-   return ${parser_context.res_var_name};
+   return ${parser.res_var};
 end ${parser.gen_fn_name};
