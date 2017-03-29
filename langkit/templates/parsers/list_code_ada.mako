@@ -27,10 +27,10 @@ loop
    ${parser_context.code}
 
    ## Stop as soon as we cannot parse list elements anymore
-   exit when ${parser_context.pos_var_name} = No_Token_Index;
+   exit when ${parser.parser.pos_var} = No_Token_Index;
 
-   ${parser.pos_var} := ${parser_context.pos_var_name};
-   ${cpos} := ${parser_context.pos_var_name};
+   ${parser.pos_var} := ${parser.parser.pos_var};
+   ${cpos} := ${parser.pos_var};
 
    if Node_Bump_Ptr_Vectors.Length (${parser.res_var}.Vec) = 0 then
       ${parser.res_var}.Vec := Node_Bump_Ptr_Vectors.Create (Parser.Mem_Pool);
