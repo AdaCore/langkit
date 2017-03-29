@@ -2,7 +2,7 @@
 
 --  Start opt_code
 
-${parser_context.code}
+${code}
 
 <%
 parser_type = parser.parser.get_type()
@@ -10,7 +10,7 @@ if parser._booleanize:
    base, alt_true, alt_false = parser._booleanize
 %>
 
-if ${parser_context.pos_var_name} = No_Token_Index then
+if ${parser.parser.pos_var} = No_Token_Index then
     % if parser._booleanize:
       % if is_bool(base):
          ${parser.res_var} := False;
@@ -22,13 +22,13 @@ if ${parser_context.pos_var_name} = No_Token_Index then
          ${parser.res_var}.Token_End_Index := No_Token_Index;
       % endif
     % elif parser_type and parser_type.is_list_type:
-        ${parser_context.res_var_name} :=
+        ${parser.parser.res_var} :=
           (${parser_type.storage_type_name()}_Alloc.Alloc (Parser.Mem_Pool));
-        ${parser_context.res_var_name}.Unit := Parser.Unit;
-        ${parser_context.res_var_name}.Token_Start_Index := ${start_pos} - 1;
-        ${parser_context.res_var_name}.Token_End_Index := No_Token_Index;
+        ${parser.parser.res_var}.Unit := Parser.Unit;
+        ${parser.parser.res_var}.Token_Start_Index := ${start_pos} - 1;
+        ${parser.parser.res_var}.Token_End_Index := No_Token_Index;
     % elif parser_type:
-        ${parser_context.res_var_name} :=
+        ${parser.parser.res_var} :=
            ${parser_type.storage_nullexpr()};
     % endif
 
@@ -41,7 +41,7 @@ if ${parser_context.pos_var_name} = No_Token_Index then
             ("Missing '${parser.parser.error_repr}'"))));
     % endif
 
-    ${parser_context.pos_var_name} := ${start_pos};
+    ${parser.parser.pos_var} := ${start_pos};
 
 % if parser._booleanize:
 else

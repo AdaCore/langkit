@@ -1083,7 +1083,7 @@ class Opt(Parser):
             'parsers/opt_code_ada',
             start_pos=start_pos,
             parser=self,
-            parser_context=parser_context
+            code=parser_context.code
         ))
 
     def __getitem__(self, index):
