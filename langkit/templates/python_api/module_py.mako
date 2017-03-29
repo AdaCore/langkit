@@ -456,13 +456,14 @@ class LexicalEnv(object):
     def _wrap(cls, c_value):
         return cls(c_value) if c_value else None
 
-    _lexical_env_empty = _import_func(
-        '${capi.get_name("lexical_env_empty")}',
-        [], _c_type
-    )
-
-    Empty = _lexical_env_empty()
+    Empty = None
     ${py_doc('langkit.lexical_env_empty', 4)}
+
+_lexical_env_empty = _import_func(
+    '${capi.get_name("lexical_env_empty")}',
+    [], LexicalEnv._c_type
+)
+LexicalEnv.Empty = LexicalEnv._wrap(_lexical_env_empty())
 
 
 class BasePointerBinding(object):
