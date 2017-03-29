@@ -1,13 +1,13 @@
 ## vim: filetype=makoada
 
 % if parser.get_type().is_list_type:
-   ${res} :=
+   ${parser.res_var} :=
     (${parser.get_type().storage_type_name()}_Alloc.Alloc (Parser.Mem_Pool));
-   ${res}.Unit := Parser.Unit;
+   ${parser.res_var}.Unit := Parser.Unit;
 
-   ${res}.Token_Start_Index := Token_Index'Max (1, ${start_pos} - 1);
-   ${res}.Token_End_Index := No_Token_Index;
+   ${parser.res_var}.Token_Start_Index := Token_Index'Max (1, ${start_pos} - 1);
+   ${parser.res_var}.Token_End_Index := No_Token_Index;
 
 % else:
-   ${res} := ${parser.get_type().storage_nullexpr()};
+   ${parser.res_var} := ${parser.get_type().storage_nullexpr()};
 % endif
