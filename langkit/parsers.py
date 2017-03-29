@@ -517,7 +517,9 @@ class Parser(object):
         context.fns.add(self)
 
         with add_var_context() as var_context:
-            t_env.parser_context = self.generate_code("pos")
+            t_env.parser_context = self.generate_code(
+                VarDef("pos", Token, create=False)
+            )
             t_env.var_context = var_context
 
             context.generated_parsers.append(GeneratedParser(
@@ -540,6 +542,9 @@ class Parser(object):
         Return generated code for this parser into the global context.
 
         Subclasses must override this method.
+
+        :param VarDef start_pos: The variable refering to the start position
+            for this parser.
         """
         raise NotImplementedError()
 
