@@ -502,9 +502,6 @@ class Parser(object):
         """
         context = get_context()
 
-        t_env = TemplateEnvironment()
-        t_env.parser = self
-
         check_source_language(
             self.get_type() is not None
             and issubclass(self.get_type(), ASTNode),
@@ -517,10 +514,14 @@ class Parser(object):
         context.fns.add(self)
 
         with add_var_context() as var_context:
-            t_env.parser_context = self.generate_code(
-                VarDef("pos", Token, create=False)
+            t_env = TemplateEnvironment(
+                parser=self,
+                code=self.generate_code(
+                    VarDef("pos", Token, create=False)
+                ).code,
+                var_context=var_context
+
             )
-            t_env.var_context = var_context
 
             context.generated_parsers.append(GeneratedParser(
                 self.gen_fn_name,

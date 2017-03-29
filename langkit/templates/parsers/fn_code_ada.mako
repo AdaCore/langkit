@@ -47,7 +47,7 @@ begin
    -- MAIN COMBINATORS CODE --
    ---------------------------
 
-   ${parser_context.code}
+   ${code}
 
    -------------------------------
    -- END MAIN COMBINATORS CODE --
