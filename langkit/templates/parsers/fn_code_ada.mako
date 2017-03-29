@@ -54,34 +54,34 @@ begin
    -------------------------------
 
    % if parser.is_left_recursive():
-      if ${parser_context.pos_var_name} > Mem_Pos then
-         Mem_Pos := ${parser_context.pos_var_name};
+      if ${parser.pos_var} > Mem_Pos then
+         Mem_Pos := ${parser.pos_var};
          Mem_Res := ${parser_context.res_var_name};
          Set (${memo},
-              ${parser_context.pos_var_name} /= No_Token_Index,
+              ${parser.pos_var} /= No_Token_Index,
               ${parser_context.res_var_name},
               Pos,
-              ${parser_context.pos_var_name});
+              ${parser.pos_var});
          goto Try_Again;
 
       elsif Mem_Pos > Pos then
          ${parser_context.res_var_name} := Mem_Res;
-         ${parser_context.pos_var_name} := Mem_Pos;
+         ${parser.pos_var} := Mem_Pos;
          goto No_Memo;
       end if;
    % endif
 
    Set (${memo},
-        ${parser_context.pos_var_name} /= No_Token_Index,
+        ${parser.pos_var} /= No_Token_Index,
         ${parser_context.res_var_name},
         Pos,
-        ${parser_context.pos_var_name});
+        ${parser.pos_var});
 
    % if parser.is_left_recursive():
        <<No_Memo>>
    % endif
 
-   Parser.Current_Pos := ${parser_context.pos_var_name};
+   Parser.Current_Pos := ${parser.pos_var};
 
    return ${parser_context.res_var_name};
 end ${parser.gen_fn_name};
