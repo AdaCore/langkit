@@ -830,9 +830,19 @@ package body ${ada_lib_name}.Analysis is
    ---------------------
 
    function Is_Visible_From
-     (Referenced_Env, Base_Env : AST_Envs.Lexical_Env) return Boolean
-   is
-     (Is_Referenced (Base_Env.Node.Unit, Referenced_Env.Node.Unit));
+     (Referenced_Env, Base_Env : AST_Envs.Lexical_Env) return Boolean is
+      Referenced_Node : constant ${root_node_type_name} := Referenced_Env.Node;
+      Base_Node       : constant ${root_node_type_name} := Base_Env.Node;
+   begin
+      if Referenced_Node = null then
+         raise Property_Error with
+            "referenced environment does not belong to any analysis unit";
+      elsif Base_Node = null then
+         raise Property_Error with
+            "base environment does not belong to any analysis unit";
+      end if;
+      return Is_Referenced (Base_Node.Unit, Referenced_Node.Unit);
+   end Is_Visible_From;
 
    ---------------------
    -- Has_Diagnostics --

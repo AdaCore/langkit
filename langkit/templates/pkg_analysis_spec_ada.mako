@@ -1261,6 +1261,10 @@ private
 
    function Is_Visible_From
      (Referenced_Env, Base_Env : AST_Envs.Lexical_Env) return Boolean;
+   --  Return whether the unit that Referenced_Env belongs to is visible from
+   --  the unit that Base_Env belongs to. If at least one of these two lexical
+   --  environments does not belong to a particular analysis unit, this raises
+   --  a Property_Error.
 
    procedure Populate_Lexical_Env
      (Node     : access ${root_node_value_type}'Class;
