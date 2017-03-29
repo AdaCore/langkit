@@ -1260,7 +1260,7 @@ private
    --  Node. This is meant to be called by Populate_Lexical_Env.
 
    function Is_Visible_From
-     (Env, Referenced : AST_Envs.Lexical_Env) return Boolean;
+     (Referenced_Env, Base_Env : AST_Envs.Lexical_Env) return Boolean;
 
    procedure Populate_Lexical_Env
      (Node     : access ${root_node_value_type}'Class;

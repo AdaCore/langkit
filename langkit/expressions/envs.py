@@ -298,8 +298,8 @@ def is_visible_from(referenced_env, base_env):
     """
     return BuiltinCallExpr(
         'Is_Visible_From', BoolType,
-        [construct(base_env, LexicalEnvType),
-         construct(referenced_env, LexicalEnvType)]
+        [construct(referenced_env, LexicalEnvType),
+         construct(base_env, LexicalEnvType)]
     )
 
 
