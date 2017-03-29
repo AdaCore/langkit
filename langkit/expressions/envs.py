@@ -287,9 +287,9 @@ def is_visible_from(referenced_env, base_env):
     Expression that will return whether an env's associated compilation unit is
     visible from another env's compilation unit.
 
-    TODO: This is mainly exposed on envs because the CompilationUnit type is
-    not exposed in the DSL yet. We might want to change that eventually if
-    there are other compelling reasons to do it.
+    TODO: This is mainly exposed on envs because the AnalysisUnit type is not
+    exposed in the DSL yet. We might want to change that eventually if there
+    are other compelling reasons to do it.
 
     :param AbstractExpression base_env: The environment from which we want
         to check visibility.
