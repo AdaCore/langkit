@@ -964,8 +964,8 @@ class List(Parser):
             start_pos=start_pos,
             parser=self,
             cpos=cpos,
-            parser_context=parser_context,
-            sep_context=sep_context
+            code=parser_context.code,
+            sep_code=sep_context.code if sep_context else ""
         ))
 
 

@@ -24,7 +24,7 @@ ${cpos} := ${start_pos};
 
 loop
    ## Parse one list element
-   ${parser_context.code}
+   ${code}
 
    ## Stop as soon as we cannot parse list elements anymore
    exit when ${parser.parser.pos_var} = No_Token_Index;
@@ -39,13 +39,13 @@ loop
    ## Append the parsed result to the list
    Node_Bump_Ptr_Vectors.Append
      (${parser.res_var}.Vec,
-      ${ctx.root_grammar_class.name()} (${parser_context.res_var_name}));
+      ${ctx.root_grammar_class.name()} (${parser.parser.res_var}));
 
    ## Parse the separator, if there is one. The separator is always discarded.
    % if parser.sep:
-      ${sep_context.code}
-      if ${sep_context.pos_var_name} /= No_Token_Index then
-          ${cpos} := ${sep_context.pos_var_name};
+      ${sep_code}
+      if ${parser.sep.pos_var} /= No_Token_Index then
+          ${cpos} := ${parser.sep.pos_var};
       else
          ## If we didn't successfully parse a separator, exit
          exit;
