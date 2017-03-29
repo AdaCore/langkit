@@ -2343,7 +2343,7 @@ package body ${ada_lib_name}.Analysis is
 
       function Short_Image
         (N : access ${root_node_value_type}'Class) return String
-      is (Image (N.Short_Image));
+      is (if N = null then "<null>" else Image (N.Short_Image));
       -- TODO??? This is slightly hackish, because we're converting a wide
       -- string back to string. But since we're using this solely for
       -- test/debug purposes, it should not matter. Still, would be good to
