@@ -479,9 +479,9 @@ class Parser(object):
         Parsers are combined to create new and more complex parsers.  They make
         up a parser tree.  Return a list of children for this parser.
 
-        Subclasses should override this method if they have children.
+        Subclasses must override this method.
         """
-        return []
+        raise NotImplementedError()
 
     def compute_fields_types(self):
         """
@@ -577,6 +577,9 @@ class Parser(object):
 
 class Tok(Parser):
     """Parser that matches a specific token."""
+
+    def children(self):
+        return []
 
     @property
     def error_repr(self):
@@ -915,7 +918,7 @@ class List(Parser):
         self.list_cls = list_cls
 
     def children(self):
-        return [self.parser]
+        return keep([self.parser, self.sep])
 
     def get_type(self):
         if self.list_cls:
@@ -1172,6 +1175,11 @@ class Discard(Parser):
 
 class Defer(Parser):
     """Stub parser used to implement forward references."""
+
+    def children(self):
+        # We don't resolve the Defer's pointed parser here, because that would
+        # transform the parser tree into a graph.
+        return []
 
     @property
     def error_repr(self):
