@@ -474,7 +474,6 @@ class Parser(object):
         """
         raise NotImplementedError()
 
-    # noinspection PyMethodMayBeStatic
     def children(self):
         """
         Parsers are combined to create new and more complex parsers.  They make
