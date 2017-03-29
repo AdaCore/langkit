@@ -729,8 +729,8 @@ class Or(Parser):
 
             # List of ParserCodeContext instances for the sub-parsers,
             # encapsulating their results.
-            results=[
-                m.generate_code(start_pos)
+            subparsers_codes=[
+                m.generate_code(start_pos).code
                 for m in self.parsers
             ],
 
