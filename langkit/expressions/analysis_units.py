@@ -65,22 +65,22 @@ def unit(node):
 
 
 @auto_attr
-def is_referenced_from(base_unit, referenced_unit):
+def is_referenced_from(referenced_unit, base_unit):
     """
     Expression to compute whether an analysis unit is referenced from another
     unit.
 
-    :param AbstractExpression base_unit: The unit from which we want to check
-        the reference.
     :param AbstractExpression referenced_unit: The unit that may be referenced
         from base_unit.
+    :param AbstractExpression base_unit: The unit from which we want to check
+        the reference.
 
     :rtype: ResolvedExpression
     """
     return BuiltinCallExpr(
-        'Is_Referenced', BoolType,
-        [construct(base_unit, AnalysisUnitType),
-         construct(referenced_unit, AnalysisUnitType)]
+        'Is_Referenced_From', BoolType,
+        [construct(referenced_unit, AnalysisUnitType),
+         construct(base_unit, AnalysisUnitType)]
     )
 
 

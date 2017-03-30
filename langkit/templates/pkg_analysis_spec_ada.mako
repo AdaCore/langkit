@@ -1124,8 +1124,8 @@ private
    --  If AST_Node is not null, invoke Reset_Property_Caches primitives on all
    --  the nodes it contains.
 
-   function Is_Referenced
-     (Unit, Referenced : Analysis_Unit) return Boolean;
+   function Is_Referenced_From
+     (Referenced, Unit : Analysis_Unit) return Boolean;
    --  Check whether the Referenced unit is referenced from Unit
 
    generic

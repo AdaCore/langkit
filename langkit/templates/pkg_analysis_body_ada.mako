@@ -841,7 +841,7 @@ package body ${ada_lib_name}.Analysis is
          raise Property_Error with
             "base environment does not belong to any analysis unit";
       end if;
-      return Is_Referenced (Base_Node.Unit, Referenced_Node.Unit);
+      return Is_Referenced_From (Referenced_Node.Unit, Base_Node.Unit);
    end Is_Visible_From;
 
    ---------------------
@@ -996,12 +996,12 @@ package body ${ada_lib_name}.Analysis is
       Dummy := Analysis_Unit_Sets.Add (From.Referenced_Units, Referenced);
    end Reference_Unit;
 
-   -------------------
-   -- Is_Referenced --
-   -------------------
+   ------------------------
+   -- Is_Referenced_From --
+   ------------------------
 
-   function Is_Referenced
-     (Unit, Referenced : Analysis_Unit) return Boolean
+   function Is_Referenced_From
+     (Referenced, Unit : Analysis_Unit) return Boolean
    is
    begin
       if Unit = null or else Referenced = null then
@@ -1011,7 +1011,7 @@ package body ${ada_lib_name}.Analysis is
       else
          return Analysis_Unit_Sets.Has (Unit.Referenced_Units, Referenced);
       end if;
-   end;
+   end Is_Referenced_From;
 
    ----------------------
    -- Get_Lex_Env_Data --
