@@ -2,11 +2,12 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from langkit import names
-from langkit.compiled_types import AnalysisUnitKind, AnalysisUnitType, T
+from langkit.compiled_types import (AnalysisUnitKind, AnalysisUnitType,
+                                    BoolType, T)
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractVariable, FieldAccessExpr, NullCheckExpr, ResolvedExpression,
-    auto_attr, construct
+    AbstractVariable, BuiltinCallExpr, FieldAccessExpr, NullCheckExpr,
+    ResolvedExpression, auto_attr, construct
 )
 
 
@@ -61,6 +62,26 @@ def unit(node):
         ' here a {}'.format(node_expr.type.name().lower)
     )
     return FieldAccessExpr(node_expr, 'Unit', AnalysisUnitType)
+
+
+@auto_attr
+def is_referenced_from(base_unit, referenced_unit):
+    """
+    Expression to compute whether an analysis unit is referenced from another
+    unit.
+
+    :param AbstractExpression base_unit: The unit from which we want to check
+        the reference.
+    :param AbstractExpression referenced_unit: The unit that may be referenced
+        from base_unit.
+
+    :rtype: ResolvedExpression
+    """
+    return BuiltinCallExpr(
+        'Is_Referenced', BoolType,
+        [construct(base_unit, AnalysisUnitType),
+         construct(referenced_unit, AnalysisUnitType)]
+    )
 
 
 def construct_analysis_unit_property(unit_expr, field_name, arguments):
