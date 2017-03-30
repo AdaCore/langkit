@@ -35,4 +35,12 @@ for (arg1_str, arg1), (arg2_str, arg2) in [
         arg1_str, arg2_str, result
     ))
 
+# Make sure lexical environments are collected before the context/units so we
+# don't have use-after-free patterns for the former. This is acceptable as
+# lexical environments are internal.
+del empty, non_empty
+del arg1, arg2, result
+import gc
+gc.collect()
+
 print('main.py: Done.')
