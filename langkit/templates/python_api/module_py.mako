@@ -397,6 +397,9 @@ class AnalysisUnit(object):
         """Diagnostics for this unit."""
         return self.DiagnosticsList(self)
 
+    def __repr__(self):
+        return '<AnalysisUnit {}>'.format(repr(self.filename))
+
     class _c_type(ctypes.c_void_p):
         pass
 
