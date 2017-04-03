@@ -5,6 +5,15 @@
 
 ## Regular property function
 
+<%
+   qualname = property.qualname
+   box = '{bar}\n-- {name} --\n{bar}'.format(
+      name=qualname,
+      bar='-' * (len(qualname) + 6)
+   )
+%>
+${box}
+
 pragma Warnings (Off, "is not referenced");
 
 % if property.abstract_runtime_check:
