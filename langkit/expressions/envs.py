@@ -363,10 +363,11 @@ def make_env_el(node):
     p.set_uses_env()
 
     node_expr = construct(node, T.root_node)
+    md_expr = New.StructExpr(T.env_md, {f.name: construct(False)
+                                        for f in T.env_md.get_fields()})
     return New.StructExpr(
         node_expr.type.env_el(),
-        {names.Name('md'): New(T.env_md, dottable_subp=True,
-                               implicit_deref=False),
+        {names.Name('md'): md_expr,
          names.Name('el'): node_expr,
          names.Name('parents_bindings'): construct(p.env_rebinding_arg.var)}
     )
