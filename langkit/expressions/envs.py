@@ -362,15 +362,13 @@ def make_env_el(node):
     check_source_language(p, "make_env_el has to be used in a property")
     p.set_uses_env()
 
-    # TODO: Kludge, constructing this just to get the type. To remove when we
-    # have a proper typing pass.
     node_expr = construct(node, T.root_node)
-
-    return New(
+    return New.StructExpr(
         node_expr.type.env_el(),
-        MD=New(T.env_md, dottable_subp=True, implicit_deref=False),
-        el=node,
-        parents_bindings=p.env_rebinding_arg.var
+        {names.Name('md'): New(T.env_md, dottable_subp=True,
+                               implicit_deref=False),
+         names.Name('el'): node_expr,
+         names.Name('parents_bindings'): construct(p.env_rebinding_arg.var)}
     )
 
 
