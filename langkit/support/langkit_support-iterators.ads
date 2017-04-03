@@ -32,8 +32,7 @@ package Langkit_Support.Iterators is
 
    type Elements_Array is array (Positive range <>) of Element_Type;
 
-   function Consume
-     (I : Iterator'Class) return Elements_Array;
+   function Consume (I : Iterator'Class) return Elements_Array;
    --  Consume the I iterator completely, putting the results in an array and
    --  returning it.
 

@@ -21,9 +21,7 @@ package body Langkit_Support.Iterators is
    -- Consume --
    -------------
 
-   function Consume
-     (I : Iterator'Class) return Elements_Array
-   is
+   function Consume (I : Iterator'Class) return Elements_Array is
       package Element_Vectors
       is new Langkit_Support.Vectors (Element_Type);
 
