@@ -1376,8 +1376,7 @@ class Transform(Parser):
             parser=self,
             parser_context=parser_context,
             args=(keep(self.parser.subresults)
-                  if isinstance(self.parser, Row) else
-                  [parser_context.res_var_name]),
+                  if isinstance(self.parser, Row) else [self.parser.res_var]),
             start_pos=start_pos
         ))
 
