@@ -8,20 +8,20 @@ ${parser.pos_var} := ${start_pos};
 ## each row part.
 % for (subp, subres) in zip(parser.parsers, parser.subresults):
 
-<% parser_context = subp.generate_code(parser.pos_var) %>
+<% code = subp.generate_code(parser.pos_var).code %>
 
 ## Parse the element
-${parser_context.code}
+${code}
 
 ## If the parsing was successful then
-if ${parser_context.pos_var_name} /= No_Token_Index then
+if ${subp.pos_var} /= No_Token_Index then
 
    ## Set current position to the out position of the parsed row element
-   ${parser.pos_var} := ${parser_context.pos_var_name};
+   ${parser.pos_var} := ${subp.pos_var};
 
    ## Store the result if it is not discarded
    % if not subp.discard():
-      ${subres} := ${parser_context.res_var_name};
+      ${subres} := ${subp.res_var};
    % endif
 
 else
