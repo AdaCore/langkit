@@ -2,7 +2,7 @@
 
 --  Start opt_code
 
-${code}
+${parser.parser.generate_code()}
 
 <%
 parser_type = parser.parser.get_type()

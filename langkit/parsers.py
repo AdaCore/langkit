@@ -1075,11 +1075,7 @@ class Opt(Parser):
         )
 
     def generate_code(self):
-        return render(
-            'parsers/opt_code_ada',
-            parser=self,
-            code=self.parser.generate_code()
-        )
+        return self.render('opt_code_ada')
 
     def __getitem__(self, index):
         """Same as Row.__getitem__:
