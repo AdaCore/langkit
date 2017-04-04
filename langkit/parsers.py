@@ -1342,7 +1342,7 @@ class Null(Parser):
         typ = self.get_type()
         if isinstance(typ, ASTNode):
             self.get_type().add_to_context()
-        return render('parsers/null_code_ada', parser=self)
+        return self.render('null_code_ada')
 
     def get_type(self):
         return (
