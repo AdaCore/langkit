@@ -824,8 +824,6 @@ class Row(Parser):
         # method) while no wrapper has been assigned.
         self.typ = None
 
-        self.components_need_inc_ref = True
-
     def discard(self):
         return all(p.discard() for p in self.parsers)
 
@@ -1115,7 +1113,6 @@ class Extract(Parser):
         self.parser = parser
         self.index = index
         assert isinstance(self.parser, Row)
-        self.parser.components_need_inc_ref = False
 
     def children(self):
         return [self.parser]
