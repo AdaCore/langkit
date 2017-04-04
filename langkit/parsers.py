@@ -963,14 +963,7 @@ class List(Parser):
 
     def generate_code(self):
         self.get_type().add_to_context()
-        sep_context = self.sep.generate_code() if self.sep else None
-        return render(
-            'parsers/list_code_ada',
-            parser=self,
-            cpos=self.cpos,
-            code=self.parser.generate_code(),
-            sep_code=sep_context if sep_context else ""
-        )
+        return self.render('list_code_ada')
 
 
 class Opt(Parser):
