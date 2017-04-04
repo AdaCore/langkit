@@ -835,16 +835,13 @@ class Row(Parser):
         return None
 
     def create_vars_before(self):
-        self.subresults = [
-            VarDef("row_subres_{0}".format(i), p.get_type())
-            if not p.discard() else None
-            for i, p in enumerate(self.parsers)
-        ]
-
         # We pass in a dummy object for res_var, because Rows have no result
         self.init_vars(res_var=object())
-
         return self.pos_var
+
+    def create_vars_after(self, pos_var):
+        self.subresults = [p.res_var if not p.discard() else None
+                           for p in self.parsers]
 
     def generate_code(self):
         return self.render('row_code_ada', exit_label=gen_name("Exit_Row"))
@@ -1294,7 +1291,6 @@ class Transform(Parser):
     def generate_code(self):
 
         self.typ.add_to_context()
-        # TODO: get rid of subresults
         return self.render(
             'transform_code_ada',
             args=(keep(self.parser.subresults)

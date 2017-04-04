@@ -6,7 +6,7 @@ ${parser.pos_var} := ${parser.start_pos};
 
 ## This is the main body of the row, which is the concatenation of the code for
 ## each row part.
-% for (subp, subres) in zip(parser.parsers, parser.subresults):
+% for subp in parser.parsers:
 
 <% code = subp.generate_code() %>
 
@@ -18,11 +18,6 @@ if ${subp.pos_var} /= No_Token_Index then
 
    ## Set current position to the out position of the parsed row element
    ${parser.pos_var} := ${subp.pos_var};
-
-   ## Store the result if it is not discarded
-   % if not subp.discard():
-      ${subres} := ${subp.res_var};
-   % endif
 
 else
    ## If the parsing was unsuccessful, then set the position accordingly
