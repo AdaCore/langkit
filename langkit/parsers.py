@@ -982,18 +982,14 @@ class List(Parser):
         self.init_vars()
 
     def generate_code(self, start_pos):
-
         self.get_type().add_to_context()
-
-        parser_context = self.parser.generate_code(self.cpos)
         sep_context = self.sep.generate_code(self.cpos) if self.sep else None
-
         return render(
             'parsers/list_code_ada',
             start_pos=start_pos,
             parser=self,
             cpos=self.cpos,
-            code=parser_context,
+            code=self.parser.generate_code(self.cpos),
             sep_code=sep_context if sep_context else ""
         )
 
@@ -1107,13 +1103,11 @@ class Opt(Parser):
         )
 
     def generate_code(self, start_pos):
-        parser_context = self.parser.generate_code(start_pos)
-
         return render(
             'parsers/opt_code_ada',
             start_pos=start_pos,
             parser=self,
-            code=parser_context
+            code=self.parser.generate_code(start_pos)
         )
 
     def __getitem__(self, index):
@@ -1336,12 +1330,10 @@ class Transform(Parser):
     def generate_code(self, start_pos):
 
         self.typ.add_to_context()
-
-        parser_context = self.parser.generate_code(start_pos)
         return render(
             'parsers/transform_code_ada',
             parser=self,
-            parser_context=parser_context,
+            code=self.parser.generate_code(start_pos),
             args=(keep(self.parser.subresults)
                   if isinstance(self.parser, Row) else [self.parser.res_var]),
             start_pos=start_pos
