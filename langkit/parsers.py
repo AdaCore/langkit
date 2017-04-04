@@ -1375,7 +1375,7 @@ class Enum(Parser):
         )
 
     def children(self):
-        return []
+        return keep([self.parser])
 
     def get_type(self):
         return type(self.enum_type_inst)
