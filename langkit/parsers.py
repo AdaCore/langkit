@@ -896,11 +896,6 @@ class List(Parser):
         :param bool empty_valid: Whether to match empty sequences or not.
         """
 
-        # Get options from opts dict
-        sep = opts.get('sep')
-        empty_valid = opts.get('empty_valid', False)
-        list_cls = opts.get('list_cls', None)
-
         Parser.__init__(self)
         if len(parsers) == 1:
             # If one parser, just keep it as the main parser
@@ -909,10 +904,10 @@ class List(Parser):
             # If several, then wrap them in a Pick parser
             self.parser = Pick(*parsers)
 
+        sep = opts.get('sep')
         self.sep = resolve(sep) if sep else None
-        self.empty_valid = empty_valid
-
-        self.list_cls = list_cls
+        self.empty_valid = opts.get('empty_valid', False)
+        self.list_cls = opts.get('list_cls', None)
 
     def children(self):
         return keep([self.parser, self.sep])
