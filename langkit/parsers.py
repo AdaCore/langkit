@@ -653,17 +653,10 @@ class Tok(Parser):
         self.init_vars()
 
     def generate_code(self):
-
         token = (get_context().lexer.get_token(self.val)
                  if isinstance(self.val, basestring)
                  else self.val)
-
-        return render(
-            'parsers/tok_code_ada',
-            parser=self,
-            match_text=self.match_text,
-            token_kind=token.ada_name
-        )
+        return self.render('tok_code_ada', token_kind=token.ada_name)
 
     @property
     def matches_symbol(self):
