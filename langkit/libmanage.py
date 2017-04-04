@@ -174,6 +174,11 @@ class ManageScript(object):
             const=Verbosity('debug'),
             help='Verbosity level'
         )
+        args_parser.add_argument(
+            '--full-error-traces', action='store_true', default=False,
+            help='Always show full error traces, whatever the verbosity level'
+                 ' (default: disabled)'
+        )
 
         # Don't enable this by default so that errors will not make automated
         # tasks hang.
@@ -510,7 +515,7 @@ class ManageScript(object):
 
             # Keep Langkit bug "pretty" for users: display the Python stack
             # trace only when requested.
-            if parsed_args.verbosity.debug:
+            if parsed_args.verbosity.debug or parsed_args.full_error_traces:
                 traceback.print_exc()
 
             print(col('Internal error! Exiting', Colors.FAIL), file=sys.stderr)
