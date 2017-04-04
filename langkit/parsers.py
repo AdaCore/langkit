@@ -562,6 +562,15 @@ class Parser(object):
         """
         raise NotImplementedError()
 
+    def render(self, template_name, **kwargs):
+        """
+        Shortcut for render for parsers, passing the parsers sub-path for
+        templates, and self as "parser" in the template context.
+        """
+        return render(
+            "parsers/{}".format(template_name), parser=self, **kwargs
+        )
+
     @property
     def symbol_literals(self):
         """
