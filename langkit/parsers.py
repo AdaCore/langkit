@@ -1297,10 +1297,9 @@ class Transform(Parser):
     def generate_code(self):
 
         self.typ.add_to_context()
-        return render(
-            'parsers/transform_code_ada',
-            parser=self,
-            code=self.parser.generate_code(),
+        # TODO: get rid of subresults
+        return self.render(
+            'transform_code_ada',
             args=(keep(self.parser.subresults)
                   if isinstance(self.parser, Row) else [self.parser.res_var]),
         )
