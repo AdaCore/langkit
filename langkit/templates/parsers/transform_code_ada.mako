@@ -2,7 +2,7 @@
 
 --  Start transform_code
 
-${parser_context.code}
+${parser_context}
 
 if ${parser.pos_var} /= No_Token_Index then
 

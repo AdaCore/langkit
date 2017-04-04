@@ -8,7 +8,7 @@ ${parser.pos_var} := ${start_pos};
 ## each row part.
 % for (subp, subres) in zip(parser.parsers, parser.subresults):
 
-<% code = subp.generate_code(parser.pos_var).code %>
+<% code = subp.generate_code(parser.pos_var) %>
 
 ## Parse the element
 ${code}
