@@ -1389,8 +1389,7 @@ class Enum(Parser):
 
     def generate_code(self):
         self.enum_type_inst.add_to_context()
-        env = TemplateEnvironment(parser=self)
-        return render('parsers/enum_code_ada', env)
+        return self.render('enum_code_ada')
 
 
 _ = Discard
