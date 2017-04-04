@@ -913,25 +913,23 @@ class List(Parser):
         return keep([self.parser, self.sep])
 
     def get_type(self):
-        if self.list_cls:
-            with self.diagnostic_context():
+        with self.diagnostic_context():
+            if self.list_cls:
+                ret = self.list_cls
                 check_source_language(
-                    self.list_cls is None or self.list_cls.is_list_type,
+                    ret.is_list_type,
                     'Invalid list type for List parser: {}. '
-                    'Not a list type'.format(
-                        self.list_cls and self.list_cls.name().camel
-                    )
+                    'Not a list type'.format(ret.name().camel)
                 )
-            return self.list_cls
-        else:
-            item_type = self.parser.get_type()
-            with self.diagnostic_context():
+                return ret
+            else:
+                item_type = self.parser.get_type()
                 check_source_language(
                     issubclass(item_type, ASTNode),
                     'List parsers only accept subparsers that yield AST nodes'
                     ' ({} provided here)'.format(item_type.name().camel)
                 )
-            return item_type.list_type()
+                return item_type.list_type()
 
     def compute_fields_types(self):
         Parser.compute_fields_types(self)
