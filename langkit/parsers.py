@@ -849,11 +849,7 @@ class Row(Parser):
         return self.pos_var
 
     def generate_code(self):
-        return render(
-            'parsers/row_code_ada',
-            parser=self,
-            exit_label=gen_name("row_exit_label")
-        )
+        return self.render('row_code_ada', exit_label=gen_name("Exit_Row"))
 
     def __getitem__(self, index):
         """
