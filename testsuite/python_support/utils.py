@@ -110,7 +110,7 @@ def build_and_run(grammar, py_script,
         ctx.extensions_dir = extensions_dir
 
     # First build the library
-    argv = ['-vnone', 'make']
+    argv = ['--full-error-traces', '-vnone', 'make']
     if ctx.library_fields_all_public:
         argv.append('--library-fields-all-public')
     m.run(argv)
