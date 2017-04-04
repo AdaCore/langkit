@@ -43,7 +43,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
    pragma Warnings (On, "possible aliasing problem for type");
 
    type Parser_Private_Part_Type is record
-      % for parser in ctx.fns:
+      % for parser in sorted(ctx.fns):
       <% ret_type = parser.get_type().storage_type_name() %>
       ${parser.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
       % endfor
@@ -215,7 +215,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
       Parser := New_Parser;
 
       --  Reset the memo tables in the private part
-      % for fn in ctx.fns:
+      % for fn in sorted(ctx.fns):
          Clear (Parser.Private_Part.${fn.gen_fn_name}_Memo);
       % endfor
    end Reset;
