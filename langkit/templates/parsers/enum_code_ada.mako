@@ -2,10 +2,14 @@
 
 --  Start enum_code
 
-${parser_context.code}
+${parser.parser.generate_code(parser.pos_var) if parser.parser else ""}
 
-if ${parser_context.pos_var_name} /= No_Token_Index then
+% if parser.parser:
+if ${parser.pos_var} /= No_Token_Index then
     ${res} := ${parser.enum_type_inst.enumerator};
 end if;
+% else
+    ${res} := ${parser.enum_type_inst.enumerator};
+% endif
 
 --  End enum_code

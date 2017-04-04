@@ -24,7 +24,6 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 from contextlib import contextmanager
-from copy import copy
 import difflib
 from funcy import keep
 import inspect
@@ -1456,6 +1455,11 @@ class Enum(Parser):
 
         self.enum_type_inst = enum_type_inst
 
+    def create_vars_after(self, start_pos):
+        self.init_vars(
+            pos_var=self.parser.pos_var if self.parser else start_pos
+        )
+
     def children(self):
         return []
 
@@ -1463,31 +1467,11 @@ class Enum(Parser):
         return type(self.enum_type_inst)
 
     def generate_code(self, start_pos):
-
         self.enum_type_inst.add_to_context()
-
-        parser_context = (
-            copy(self.parser.generate_code(start_pos))
-            if self.parser
-            else ParserCodeContext(
-                pos_var_name=start_pos,
-                res_var_name="",
-                code="",
-            )
-        )
-
-        env = TemplateEnvironment(
-            parser=self,
-            res=VarDef(gen_name("enum_res"), self.get_type()),
-            parser_context=parser_context
-
-        )
-
-        return copy_with(
-            parser_context,
-            res_var_name=env.res,
-            code=render('parsers/enum_code_ada', env),
-        )
+        env = TemplateEnvironment(parser=self)
+        return ParserCodeContext(self.pos_var, self.res_var, code=render(
+            'parsers/enum_code_ada', env
+        ))
 
 
 _ = Discard
