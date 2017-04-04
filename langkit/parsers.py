@@ -109,7 +109,9 @@ class VarDef(object):
 
 
 class GeneratedParser(object):
-    """Simple holder for generated parsers."""
+    """
+    Simple holder for generated parsers.
+    """
 
     def __init__(self, name, spec, body):
         self.name = name
@@ -342,7 +344,9 @@ class Grammar(object):
 
 
 class Parser(object):
-    """Base class for parsers building blocks."""
+    """
+    Base class for parsers building blocks.
+    """
 
     def __init__(self):
         self.location = None
@@ -610,7 +614,9 @@ class Parser(object):
 
 
 class Tok(Parser):
-    """Parser that matches a specific token."""
+    """
+    Parser that matches a specific token.
+    """
 
     def children(self):
         return []
@@ -820,7 +826,9 @@ def Pick(*parsers):
 
 
 class Row(Parser):
-    """Parser that matches a what sub-parsers match in sequence."""
+    """
+    Parser that matches a what sub-parsers match in sequence.
+    """
 
     @property
     def error_repr(self):
@@ -899,7 +907,9 @@ class Row(Parser):
 
 
 class List(Parser):
-    """Parser that matches a list.  A sub-parser matches list items."""
+    """
+    Parser that matches a list.  A sub-parser matches list items.
+    """
 
     def _is_left_recursive(self, rule_name):
         res = self.parser._is_left_recursive(rule_name)
@@ -1192,7 +1202,9 @@ class Extract(Parser):
 
 
 class Discard(Parser):
-    """Wrapper parser used to discard the match."""
+    """
+    Wrapper parser used to discard the match.
+    """
 
     def discard(self):
         return True
@@ -1224,7 +1236,9 @@ class Discard(Parser):
 
 
 class Defer(Parser):
-    """Stub parser used to implement forward references."""
+    """
+    Stub parser used to implement forward references.
+    """
 
     def children(self):
         # We don't resolve the Defer's pointed parser here, because that would
@@ -1289,7 +1303,9 @@ class Defer(Parser):
 
 
 class Transform(Parser):
-    """Wrapper parser for a Row parser used to instantiate an AST node."""
+    """
+    Wrapper parser for a Row parser used to instantiate an AST node.
+    """
 
     def _is_left_recursive(self, rule_name):
         return self.parser._is_left_recursive(rule_name)
@@ -1368,7 +1384,9 @@ class Transform(Parser):
 
 
 class Null(Parser):
-    """Parser that matches the empty sequence and that yields no AST node."""
+    """
+    Parser that matches the empty sequence and that yields no AST node.
+    """
 
     def __init__(self, result_type):
         """
@@ -1415,7 +1433,9 @@ class Null(Parser):
 
 
 class Enum(Parser):
-    """Wrapper parser used to return an enumeration value for a match."""
+    """
+    Wrapper parser used to return an enumeration value for a match.
+    """
 
     def _is_left_recursive(self, rule_name):
         if self.parser:
