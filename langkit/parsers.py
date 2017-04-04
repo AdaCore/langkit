@@ -1226,7 +1226,7 @@ class Defer(Parser):
 
         # Generate a call to the previously compiled function, and return
         # the context corresponding to this call.
-        return render('parsers/fn_call_ada', parser=self)
+        return self.render('fn_call_ada')
 
 
 class Transform(Parser):
