@@ -743,21 +743,7 @@ class Or(Parser):
         self.init_vars()
 
     def generate_code(self):
-
-        t_env = TemplateEnvironment(
-            parser=self,
-
-            subparsers_codes=[
-                m.generate_code()
-                for m in self.parsers
-            ],
-
-            # Generate a name for the exit label (when one of the sub-parsers
-            # has matched).
-            exit_label=gen_name("Exit_Or"),
-        )
-
-        return render('parsers/or_code_ada', t_env)
+        return self.render('or_code_ada', exit_label=gen_name("Exit_Or"))
 
 
 def always_make_progress(parser):
