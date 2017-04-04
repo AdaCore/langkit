@@ -2,13 +2,13 @@
 
 --  Start row_code
 
-${parser.pos_var} := ${start_pos};
+${parser.pos_var} := ${parser.start_pos};
 
 ## This is the main body of the row, which is the concatenation of the code for
 ## each row part.
 % for (subp, subres) in zip(parser.parsers, parser.subresults):
 
-<% code = subp.generate_code(parser.pos_var) %>
+<% code = subp.generate_code() %>
 
 ## Parse the element
 ${code}

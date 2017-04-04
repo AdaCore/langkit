@@ -5,7 +5,7 @@
 ## If we accept empty lists, then we never want to return No_Token_Index as a
 ## position.
 % if parser.empty_valid:
-    ${parser.pos_var} := ${start_pos};
+    ${parser.pos_var} := ${parser.start_pos};
 % else:
     ${parser.pos_var} := No_Token_Index;
 % endif
@@ -17,10 +17,10 @@
 
 ${parser.res_var} := ${list_type.name()}_Alloc.Alloc (Parser.Mem_Pool);
 
-${parser.res_var}.Token_Start_Index := Token_Index'Max (${start_pos}, 1);
+${parser.res_var}.Token_Start_Index := Token_Index'Max (${parser.start_pos}, 1);
 ${parser.res_var}.Token_End_Index := No_Token_Index;
 
-${cpos} := ${start_pos};
+${cpos} := ${parser.start_pos};
 
 loop
    ## Parse one list element
@@ -56,9 +56,10 @@ end loop;
 
 ${parser.res_var}.Unit := Parser.Unit;
 if Node_Bump_Ptr_Vectors.Length (${parser.res_var}.Vec) > 0 then
-   ${parser.res_var}.Token_Start_Index := ${start_pos};
+   ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
    ${parser.res_var}.Token_End_Index :=
-     (if ${cpos} = ${start_pos} then ${start_pos} else ${cpos} - 1);
+     (if ${cpos} = ${parser.start_pos}
+      then ${parser.start_pos} else ${cpos} - 1);
 end if;
 
 

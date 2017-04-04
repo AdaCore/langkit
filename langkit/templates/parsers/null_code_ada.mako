@@ -5,7 +5,8 @@
     (${parser.get_type().storage_type_name()}_Alloc.Alloc (Parser.Mem_Pool));
    ${parser.res_var}.Unit := Parser.Unit;
 
-   ${parser.res_var}.Token_Start_Index := Token_Index'Max (1, ${start_pos} - 1);
+   ${parser.res_var}.Token_Start_Index
+     := Token_Index'Max (1, ${parser.start_pos} - 1);
    ${parser.res_var}.Token_End_Index := No_Token_Index;
 
 % else:

@@ -2,7 +2,7 @@
 
 --  Start enum_code
 
-${parser.parser.generate_code(parser.pos_var) if parser.parser else ""}
+${parser.parser.generate_code() if parser.parser else ""}
 
 % if parser.parser:
 if ${parser.pos_var} /= No_Token_Index then

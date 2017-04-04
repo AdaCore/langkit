@@ -343,6 +343,7 @@ class Parser(object):
         It leverages two callbacks that can be implemented by Parser
         subclasses: create_vars_before and create_vars_after.
         """
+        self.start_pos = start_pos
         children_start_pos = self.create_vars_before() or start_pos
         for c in self.children():
             c.traverse_create_vars(children_start_pos)
@@ -533,7 +534,7 @@ class Parser(object):
             self.traverse_create_vars(pos_var)
             t_env = TemplateEnvironment(
                 parser=self,
-                code=self.generate_code(pos_var),
+                code=self.generate_code(),
                 var_context=var_context
 
             )
@@ -553,14 +554,11 @@ class Parser(object):
         """
         raise NotImplementedError()
 
-    def generate_code(self, start_pos):
+    def generate_code(self):
         """
         Return generated code for this parser into the global context.
 
         Subclasses must override this method.
-
-        :param VarDef start_pos: The variable refering to the start position
-            for this parser.
         """
         raise NotImplementedError()
 
@@ -645,7 +643,7 @@ class Tok(Parser):
     def create_vars_after(self, start_pos):
         self.init_vars()
 
-    def generate_code(self, start_pos):
+    def generate_code(self):
 
         token = (get_context().lexer.get_token(self.val)
                  if isinstance(self.val, basestring)
@@ -654,7 +652,6 @@ class Tok(Parser):
         return render(
             'parsers/tok_code_ada',
             parser=self,
-            start_pos=start_pos,
             match_text=self.match_text,
             token_kind=token.ada_name
         )
@@ -743,13 +740,13 @@ class Or(Parser):
     def create_vars_after(self, start_pos):
         self.init_vars()
 
-    def generate_code(self, start_pos):
+    def generate_code(self):
 
         t_env = TemplateEnvironment(
             parser=self,
 
             subparsers_codes=[
-                m.generate_code(start_pos)
+                m.generate_code()
                 for m in self.parsers
             ],
 
@@ -863,10 +860,9 @@ class Row(Parser):
 
         return self.pos_var
 
-    def generate_code(self, start_pos):
+    def generate_code(self):
         return render(
             'parsers/row_code_ada',
-            start_pos=start_pos,
             parser=self,
             exit_label=gen_name("row_exit_label")
         )
@@ -981,15 +977,14 @@ class List(Parser):
     def create_vars_after(self, start_pos):
         self.init_vars()
 
-    def generate_code(self, start_pos):
+    def generate_code(self):
         self.get_type().add_to_context()
-        sep_context = self.sep.generate_code(self.cpos) if self.sep else None
+        sep_context = self.sep.generate_code() if self.sep else None
         return render(
             'parsers/list_code_ada',
-            start_pos=start_pos,
             parser=self,
             cpos=self.cpos,
-            code=self.parser.generate_code(self.cpos),
+            code=self.parser.generate_code(),
             sep_code=sep_context if sep_context else ""
         )
 
@@ -1102,12 +1097,11 @@ class Opt(Parser):
             res_var=None if self._booleanize else self.parser.res_var
         )
 
-    def generate_code(self, start_pos):
+    def generate_code(self):
         return render(
             'parsers/opt_code_ada',
-            start_pos=start_pos,
             parser=self,
-            code=self.parser.generate_code(start_pos)
+            code=self.parser.generate_code()
         )
 
     def __getitem__(self, index):
@@ -1161,8 +1155,8 @@ class Extract(Parser):
             self.parser.pos_var, self.parser.subresults[self.index]
         )
 
-    def generate_code(self, start_pos):
-        return self.parser.generate_code(start_pos)
+    def generate_code(self):
+        return self.parser.generate_code()
 
 
 class Discard(Parser):
@@ -1195,8 +1189,8 @@ class Discard(Parser):
     def create_vars_after(self, start_pos):
         self.init_vars(self.parser.pos_var, self.parser.res_var)
 
-    def generate_code(self, start_pos):
-        return self.parser.generate_code(start_pos)
+    def generate_code(self):
+        return self.parser.generate_code()
 
 
 class Defer(Parser):
@@ -1252,14 +1246,14 @@ class Defer(Parser):
     def create_vars_after(self, start_pos):
         self.init_vars()
 
-    def generate_code(self, start_pos):
+    def generate_code(self):
         # The call to compile will add the declaration and the definition
         # (body) of the function to the compile context.
         self.parser.compile()
 
         # Generate a call to the previously compiled function, and return
         # the context corresponding to this call.
-        return render('parsers/fn_call_ada', parser=self, start_pos=start_pos)
+        return render('parsers/fn_call_ada', parser=self)
 
 
 class Transform(Parser):
@@ -1327,16 +1321,15 @@ class Transform(Parser):
     def create_vars_after(self, start_pos):
         self.init_vars(self.parser.pos_var)
 
-    def generate_code(self, start_pos):
+    def generate_code(self):
 
         self.typ.add_to_context()
         return render(
             'parsers/transform_code_ada',
             parser=self,
-            code=self.parser.generate_code(start_pos),
+            code=self.parser.generate_code(),
             args=(keep(self.parser.subresults)
                   if isinstance(self.parser, Row) else [self.parser.res_var]),
-            start_pos=start_pos
         )
 
 
@@ -1373,13 +1366,11 @@ class Null(Parser):
     def create_vars_after(self, start_pos):
         self.init_vars(start_pos)
 
-    def generate_code(self, start_pos):
+    def generate_code(self):
         typ = self.get_type()
         if isinstance(typ, ASTNode):
             self.get_type().add_to_context()
-        return render(
-            'parsers/null_code_ada', parser=self, start_pos=start_pos
-        )
+        return render('parsers/null_code_ada', parser=self)
 
     def get_type(self):
         return (
@@ -1424,7 +1415,7 @@ class Enum(Parser):
     def get_type(self):
         return type(self.enum_type_inst)
 
-    def generate_code(self, start_pos):
+    def generate_code(self):
         self.enum_type_inst.add_to_context()
         env = TemplateEnvironment(parser=self)
         return render('parsers/enum_code_ada', env)
