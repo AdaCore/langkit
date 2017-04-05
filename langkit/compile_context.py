@@ -1162,7 +1162,9 @@ class CompileCtx(object):
         # Emit GDB helpers initialization script
         with open(os.path.join(file_root, 'gdbinit'), 'w') as f:
             f.write(self.render_template(
-                'gdb', langkit_path=os.path.dirname(os.path.dirname(__file__))
+                'gdb',
+                langkit_path=os.path.dirname(os.path.dirname(__file__)),
+                lib_name=self.ada_api_settings.lib_name.lower()
             ))
 
         # Add any sources in $lang_path/extensions/support if it exists
