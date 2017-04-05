@@ -1159,6 +1159,12 @@ class CompileCtx(object):
 
             os.chmod(playground_file, 0o775)
 
+        # Emit GDB helpers initialization script
+        with open(os.path.join(file_root, 'gdbinit'), 'w') as f:
+            f.write(self.render_template(
+                'gdb', langkit_path=os.path.dirname(os.path.dirname(__file__))
+            ))
+
         # Add any sources in $lang_path/extensions/support if it exists
         if self.ext('support'):
             for f in glob(join(self.ext('support'), "*.ad*")):
