@@ -12,35 +12,38 @@ class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
     Holder for all pretty printers.
     """
 
-    def append(self, subprinter):
-        self.subprinters.append(subprinter)
+    def __init__(self, context):
+        super(GDBPrettyPrinters, self).__init__(context.lib_name, [])
+        self.context = context
 
-    def __call__(self, val):
+    def append(self, printer_cls):
+        self.subprinters.append(GDBSubprinter(printer_cls, self.context))
+
+    def __call__(self, value):
         """
-        If there is one enabled pretty-printer that matches `val`, return an
+        If there is one enabled pretty-printer that matches `value`, return an
         instance of PrettyPrinter tied to this value. Return None otherwise.
         """
         for printer in self.subprinters:
-            if printer.enabled and printer.matches(val):
-                return printer.instantiate(val)
+            if printer.enabled and printer.matches(value):
+                return printer.instantiate(value)
         return None
 
 
 class GDBSubprinter(gdb.printing.SubPrettyPrinter):
     """Holder for PrettyPrinter subclasses."""
 
-    def __init__(self, cls, **kwargs):
-        self.cls = cls
-        for key, value in kwargs.iteritems():
-            setattr(self, key, value)
+    def __init__(self, cls, context):
         super(GDBSubprinter, self).__init__(cls.name)
+        self.cls = cls
+        self.context = context
 
     def matches(self, value):
         """Return whether this pretty-printer matches `value`, a GDB value."""
-        return self.cls.matches(value, self)
+        return self.cls.matches(value, self.context)
 
-    def instantiate(self, val):
-        return self.cls(val, self)
+    def instantiate(self, value):
+        return self.cls(value, self.context)
 
 
 class BasePrinter(object):
@@ -58,18 +61,14 @@ class BasePrinter(object):
     Subclasses must override this attribute.
     """
 
-    def __init__(self, value, subprinter):
-        self.subprinter = subprinter
+    def __init__(self, value, context):
+        self.context = context
         self.value = value
 
     @classmethod
-    def matches(cls, value, subprinter):
+    def matches(cls, value, context):
         """
         Return whether this pretty-printer matches `value`, a GDB value.
-
-        :param GDBSubprinter subprinter: The GDBSubprinter instance that does
-        this query.
-        :rtype: bool
         """
         raise NotImplementedError()
 
@@ -83,16 +82,16 @@ class ASTNodePrinter(BasePrinter):
     """
 
     @classmethod
-    def matches(cls, value, subprinter):
+    def matches(cls, value, context):
         return (value.type.code == gdb.TYPE_CODE_PTR
                 and value.type.target().code == gdb.TYPE_CODE_STRUCT
                 and (value.type.target().name
-                     in subprinter.astnode_struct_names))
+                     in context.astnode_struct_names))
 
     @property
     def kind(self):
         tag = record_to_tag(self.value.dereference())
-        return self.subprinter.tags_mapping.get(tag, '???')
+        return self.context.tags_mapping.get(tag, '???')
 
     def to_string(self):
         return '<{}>'.format(self.kind)
