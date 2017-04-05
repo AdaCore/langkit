@@ -1164,7 +1164,9 @@ class CompileCtx(object):
             f.write(self.render_template(
                 'gdb',
                 langkit_path=os.path.dirname(os.path.dirname(__file__)),
-                lib_name=self.ada_api_settings.lib_name.lower()
+                lib_name=self.ada_api_settings.lib_name.lower(),
+                astnode_names={node.name().lower
+                               for node in self.astnode_types}
             ))
 
         # Add any sources in $lang_path/extensions/support if it exists

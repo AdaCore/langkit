@@ -4,6 +4,8 @@ from __future__ import (absolute_import, division, print_function,
 import gdb
 import gdb.printing
 
+from langkit.gdb.utils import record_to_tag
+
 
 class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
     """
@@ -73,3 +75,24 @@ class BasePrinter(object):
 
     def to_string(self):
         raise NotImplementedError()
+
+
+class ASTNodePrinter(BasePrinter):
+    """
+    Pretty-printer for AST nodes.
+    """
+
+    @classmethod
+    def matches(cls, value, subprinter):
+        return (value.type.code == gdb.TYPE_CODE_PTR
+                and value.type.target().code == gdb.TYPE_CODE_STRUCT
+                and (value.type.target().name
+                     in subprinter.astnode_struct_names))
+
+    @property
+    def kind(self):
+        tag = record_to_tag(self.value.dereference())
+        return self.subprinter.tags_mapping.get(tag, '???')
+
+    def to_string(self):
+        return '<{}>'.format(self.kind)
