@@ -5,7 +5,6 @@
 
 ## Regular property function
 
-pragma Warnings (Off, "is not referenced");
 
 % if property.abstract_runtime_check:
 
@@ -18,6 +17,7 @@ is (raise Property_Error
 
 % elif not property.abstract and not property.external:
 --# property-start ${property.qualname}
+pragma Warnings (Off, "is not referenced");
 ${"overriding" if property.overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name()}
@@ -37,8 +37,8 @@ is
         (if ${property.env_arg_name} /= Empty_Env
          then ${property.env_arg_name}
          else Node.Self_Env);
-      pragma Warnings (On, "is not referenced");
    % endif
+   pragma Warnings (On, "is not referenced");
 
    Property_Result : ${property.type.name()} := ${property.type.nullexpr()};
 
