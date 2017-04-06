@@ -97,6 +97,9 @@ class AnalysisUnitPrinter(BasePrinter):
         )
 
     def to_string(self):
+        if not self.value:
+            return 'null'
+
         unit = AnalysisUnit(self.value.dereference())
         filename = unit.filename
         return '<AnalysisUnit{}>'.format(' {}'.format(filename)
