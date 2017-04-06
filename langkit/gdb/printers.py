@@ -146,3 +146,64 @@ class ASTNodePrinter(BasePrinter):
             tdh.token(start).sloc_range.start,
             tdh.token(end).sloc_range.end
         )
+
+
+class ArrayPrettyPrinter(BasePrinter):
+    """
+    Pretty-printer for array nodes from properties.
+    """
+
+    name = 'Array'
+
+    @staticmethod
+    def typename_prefix(context):
+        return '{}__analysis__'.format(context.lib_name)
+
+    typename_suffix = '_array_record'
+
+    @classmethod
+    def element_typename(cls, struct_typename, context):
+        """
+        Given the name of the structure that implements this array, return the
+        type name for the element that this array contains. Return None if this
+        is not an array.
+        """
+        prefix = cls.typename_prefix(context)
+        suffix = cls.typename_suffix
+
+        if (struct_typename.startswith(prefix)
+                and struct_typename.endswith(suffix)):
+            return struct_typename[len(prefix):-len(suffix)]
+
+    @property
+    def length(self):
+        return int(self.value['n'])
+
+    @classmethod
+    def matches(cls, value, context):
+        if (value.type.code != gdb.TYPE_CODE_PTR
+                or value.type.target().code != gdb.TYPE_CODE_STRUCT):
+            return False
+
+        return bool(cls.element_typename(value.type.target().name, context))
+
+    def display_hint(self):
+        return 'array'
+
+    def to_string(self):
+        return '{} array of length {}'.format(
+            self.element_typename(self.value.type.target().name, self.context),
+            self.length
+        )
+
+    def children(self):
+        if self.length <= 0:
+            return
+
+        # For some reason, GDB thinks all access to "items" elements are
+        # out-of-bounds, even though the bounds information seems correct. Do
+        # some casting anyway to avoid noisy and useless warnings.
+        items = self.value['items']
+        items = items.cast(items.type.target().array(1, self.length))
+        for i in range(1, self.length + 1):
+            yield ('[{}]'.format(i), items[i])
