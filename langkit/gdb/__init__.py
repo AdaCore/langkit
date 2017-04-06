@@ -27,6 +27,7 @@ def setup(lib_name, astnode_names):
 
     gdb_printers = printers.GDBPrettyPrinters(context)
     for printer in [
+        printers.AnalysisUnitPrinter,
         printers.ASTNodePrinter,
     ]:
         gdb_printers.append(printer)

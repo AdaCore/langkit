@@ -80,6 +80,29 @@ class BasePrinter(object):
         raise NotImplementedError()
 
 
+class AnalysisUnitPrinter(BasePrinter):
+    """
+    Pretty-printer for AST nodes.
+    """
+
+    name = 'AnalysisUnit'
+
+    @classmethod
+    def matches(cls, value, context):
+        return (
+            value.type.code == gdb.TYPE_CODE_PTR
+            and value.type.target().code == gdb.TYPE_CODE_STRUCT
+            and (value.type.target().name ==
+                 '{}__analysis__analysis_unit_type'.format(context.lib_name))
+        )
+
+    def to_string(self):
+        unit = AnalysisUnit(self.value.dereference())
+        filename = unit.filename
+        return '<AnalysisUnit{}>'.format(' {}'.format(filename)
+                                         if filename else '')
+
+
 class ASTNodePrinter(BasePrinter):
     """
     Pretty-printer for AST nodes.
