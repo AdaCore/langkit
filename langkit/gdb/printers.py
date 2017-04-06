@@ -108,6 +108,8 @@ class ASTNodePrinter(BasePrinter):
     Pretty-printer for AST nodes.
     """
 
+    name = 'ASTNode'
+
     @classmethod
     def matches(cls, value, context):
         return (value.type.code == gdb.TYPE_CODE_PTR
