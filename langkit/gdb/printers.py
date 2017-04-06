@@ -1,8 +1,19 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import os.path
+
 import gdb
 import gdb.printing
+
+try:
+    from gnatdbg.strings import UnboundedStringPrinter
+except ImportError:
+    fetch_unbounded_string = None
+else:
+    fetch_unbounded_string = (
+        lambda value: UnboundedStringPrinter(value).get_string_value()
+    )
 
 from langkit.gdb.tdh import TDH
 from langkit.gdb.utils import record_to_tag, tagged_field
@@ -94,10 +105,25 @@ class ASTNodePrinter(BasePrinter):
         tag = record_to_tag(self.value.dereference())
         return self.context.tags_mapping.get(tag, '???')
 
+    @property
+    def filename(self):
+        return (
+            eval(fetch_unbounded_string(
+                tagged_field(self.value, 'unit')['file_name']
+            )) if fetch_unbounded_string else None
+        )
+
     def to_string(self):
+        filename = self.filename
+        if filename:
+            filename = os.path.basename(filename)
+
         tdh = TDH(tagged_field(self.value, 'unit')['tdh'])
         start = int(tagged_field(self.value, 'token_start_index'))
         end = int(tagged_field(self.value, 'token_end_index'))
-        return '<{} {}-{}>'.format(self.kind,
-                                   tdh.token(start).sloc_range.start,
-                                   tdh.token(end).sloc_range.end)
+        return '<{} {}{}-{}>'.format(
+            self.kind,
+            '{}:'.format(filename) if filename else '',
+            tdh.token(start).sloc_range.start,
+            tdh.token(end).sloc_range.end
+        )
