@@ -6,16 +6,8 @@ import os.path
 import gdb
 import gdb.printing
 
-try:
-    from gnatdbg.strings import UnboundedStringPrinter
-except ImportError:
-    fetch_unbounded_string = None
-else:
-    fetch_unbounded_string = (
-        lambda value: UnboundedStringPrinter(value).get_string_value()
-    )
-
 from langkit.gdb.tdh import TDH
+from langkit.gdb.units import AnalysisUnit
 from langkit.gdb.utils import record_to_tag, tagged_field
 
 
@@ -106,15 +98,11 @@ class ASTNodePrinter(BasePrinter):
         return self.context.tags_mapping.get(tag, '???')
 
     @property
-    def filename(self):
-        return (
-            eval(fetch_unbounded_string(
-                tagged_field(self.value, 'unit')['file_name']
-            )) if fetch_unbounded_string else None
-        )
+    def unit(self):
+        return AnalysisUnit(tagged_field(self.value, 'unit'))
 
     def to_string(self):
-        filename = self.filename
+        filename = self.unit.filename
         if filename:
             filename = os.path.basename(filename)
 
