@@ -127,6 +127,9 @@ class ASTNodePrinter(BasePrinter):
         return AnalysisUnit(tagged_field(self.value, 'unit'))
 
     def to_string(self):
+        if not self.value:
+            return 'null'
+
         filename = self.unit.filename
         if filename:
             filename = os.path.basename(filename)
