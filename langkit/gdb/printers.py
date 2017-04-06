@@ -4,7 +4,8 @@ from __future__ import (absolute_import, division, print_function,
 import gdb
 import gdb.printing
 
-from langkit.gdb.utils import record_to_tag
+from langkit.gdb.tdh import TDH
+from langkit.gdb.utils import record_to_tag, tagged_field
 
 
 class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
@@ -94,4 +95,9 @@ class ASTNodePrinter(BasePrinter):
         return self.context.tags_mapping.get(tag, '???')
 
     def to_string(self):
-        return '<{}>'.format(self.kind)
+        tdh = TDH(tagged_field(self.value, 'unit')['tdh'])
+        start = int(tagged_field(self.value, 'token_start_index'))
+        end = int(tagged_field(self.value, 'token_end_index'))
+        return '<{} {}-{}>'.format(self.kind,
+                                   tdh.token(start).sloc_range.start,
+                                   tdh.token(end).sloc_range.end)
