@@ -17,15 +17,25 @@ def current_line_no(context):
         return frame.find_sal().line
 
 
-class StateCommand(gdb.Command):
+class BaseCommand(gdb.Command):
+    """
+    Factorize common code for our commands.
+    """
+
+    def __init__(self, context, basename, command_class,
+                 completer_class=gdb.COMPLETE_NONE):
+        super(BaseCommand, self).__init__(
+            '{}{}'.format(context.prefix, basename),
+            command_class, completer_class
+        )
+        self.context = context
+
+
+class StateCommand(BaseCommand):
     """Display the state of the currently running property."""
 
     def __init__(self, context):
-        super(StateCommand, self).__init__(
-            '{}state'.format(context.prefix),
-            gdb.COMMAND_DATA, gdb.COMPLETE_NONE
-        )
-        self.context = context
+        super(StateCommand, self).__init__(context, 'state', gdb.COMMAND_DATA)
 
     def invoke(self, arg, from_tty):
         line_no = current_line_no(self.context)
@@ -39,7 +49,7 @@ class StateCommand(gdb.Command):
         print('from {}'.format(p.dsl_sloc))
 
 
-class BreakCommand(gdb.Command):
+class BreakCommand(BaseCommand):
     """But a breakpoint on a property. Takes a case-insensitive property
 qualified name. For instance::
 
@@ -47,11 +57,8 @@ qualified name. For instance::
 """
 
     def __init__(self, context):
-        super(BreakCommand, self).__init__(
-            '{}break'.format(context.prefix),
-            gdb.COMMAND_BREAKPOINTS, gdb.COMPLETE_NONE
-        )
-        self.context = context
+        super(BreakCommand, self).__init__(context, 'break',
+                                           gdb.COMMAND_BREAKPOINTS)
 
     def invoke(self, arg, from_tty):
         lower_prop = arg.strip().lower()
