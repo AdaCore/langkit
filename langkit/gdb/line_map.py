@@ -99,7 +99,7 @@ class LineMap(object):
                 if scope_stack:
                     raise ParseError(line_no, 'property-start directive not'
                                      ' allowed inside another property')
-                p = Property(LineRange(d.line_no, None), d.name)
+                p = Property(LineRange(d.line_no, None), d.name, d.dsl_sloc)
                 self.properties.append(p)
                 scope_stack.append(p)
 
@@ -174,9 +174,10 @@ class Scope(object):
 
 
 class Property(Scope):
-    def __init__(self, line_range, name):
+    def __init__(self, line_range, name, dsl_sloc):
         super(Property, self).__init__(line_range, name)
         self.name = name
+        self.dsl_sloc = dsl_sloc
 
 
 class Directive(object):
@@ -212,13 +213,15 @@ class Directive(object):
 
 
 class PropertyStart(Directive):
-    def __init__(self, name, line_no):
+    def __init__(self, name, dsl_sloc, line_no):
         super(PropertyStart, self).__init__(line_no)
         self.name = name
+        self.dsl_sloc = dsl_sloc
 
     @classmethod
     def parse(cls, line_no, args):
-        return cls(args, line_no)
+        name, dsl_sloc = args.split(None, 1)
+        return cls(name, dsl_sloc, line_no)
 
 
 class ScopeStart(Directive):

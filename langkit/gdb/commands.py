@@ -36,3 +36,4 @@ class StateCommand(gdb.Command):
             return
 
         print('Running {}'.format(p.name))
+        print('from {}'.format(p.dsl_sloc))
