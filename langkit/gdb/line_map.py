@@ -117,6 +117,12 @@ class LineMap(object):
                 if scope_stack:
                     scope_stack[-1].events.append(ended_scope)
 
+            elif d.is_a(BindDirective):
+                if not scope_stack:
+                    raise ParseError(line_no, 'no scope for binding')
+                scope_stack[-1].events.append(Bind(d.line_no, d.dsl_name,
+                                                   d.gen_name))
+
             else:
                 raise NotImplementedError('Unknown directive: {}'.format(d))
 
@@ -193,6 +199,16 @@ class Event(object):
         return '<Event line {}>'.format(self.line_no)
 
 
+class Bind(Event):
+    def __init__(self, line_no, dsl_name, gen_name):
+        super(Bind, self).__init__(line_no, dsl_name)
+        self.dsl_name = dsl_name
+        self.gen_name = gen_name
+
+    def __repr__(self):
+        return '<Bind {}, line {}>'.format(self.dsl_name, self.line_no)
+
+
 class Directive(object):
     """
     Holder for GDB helper directives as parsed from source files.
@@ -243,6 +259,18 @@ class ScopeStart(Directive):
         return cls(line_no)
 
 
+class BindDirective(Directive):
+    def __init__(self, dsl_name, gen_name, line_no):
+        super(BindDirective, self).__init__(line_no)
+        self.dsl_name = dsl_name
+        self.gen_name = gen_name
+
+    @classmethod
+    def parse(cls, line_no, args):
+        dsl_name, gen_name = args.split(None, 1)
+        return cls(dsl_name, gen_name, line_no)
+
+
 class End(Directive):
     @classmethod
     def parse(cls, line_no, args):
@@ -252,5 +280,6 @@ class End(Directive):
 Directive.name_to_cls.update({
     'property-start': PropertyStart,
     'scope-start': ScopeStart,
+    'bind': BindDirective,
     'end': End,
 })
