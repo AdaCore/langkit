@@ -167,7 +167,7 @@ def make_renderer(base_renderer=None):
             'exception_type':        CAPIType(capi, 'exception').name,
             'library_public_field':  library_public_field,
             'gdb_helper':
-                gdb_helper if ctx.gdb_helpers else lambda *args: '',
+                gdb_helper if ctx.gdb_helpers_prefix else lambda *args: '',
         })
     return base_renderer.update(template_args)
 

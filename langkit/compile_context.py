@@ -799,7 +799,8 @@ class CompileCtx(object):
 
     def emit(self, file_root='.', generate_lexer=True, main_source_dirs=set(),
              main_programs=set(), annotate_fields_types=False,
-             check_only=False, no_property_checks=False, gdb_helpers=False):
+             check_only=False, no_property_checks=False,
+             gdb_helpers_prefix=None):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -831,8 +832,10 @@ class CompileCtx(object):
             the generated code for properties. Namely, this disables null
             checks on field access.
 
-        :param bool gdb_helpers: If True, generate GDB helpers to help
-            debugging of the generated library.
+        :param str|None gdb_helpers_prefix: If provided, it must be the prefix
+            to used for the name of GDB helper commands. In this case, create
+            GDB helpers to help debugging of the generated library. If left to
+            None, nothing is done with respect to GDB helpers.
         """
         dir_path = path.join(
             path.dirname(path.realpath(__file__)), "templates"
@@ -844,7 +847,7 @@ class CompileCtx(object):
         )
 
         self.no_property_checks = no_property_checks
-        self.gdb_helpers = gdb_helpers
+        self.gdb_helpers_prefix = gdb_helpers_prefix
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
@@ -1164,14 +1167,15 @@ class CompileCtx(object):
             os.chmod(playground_file, 0o775)
 
         # Emit GDB helpers initialization script
-        if self.gdb_helpers:
+        if self.gdb_helpers_prefix:
             with open(os.path.join(file_root, 'gdbinit'), 'w') as f:
                 f.write(self.render_template(
                     'gdb',
                     langkit_path=os.path.dirname(os.path.dirname(__file__)),
                     lib_name=self.ada_api_settings.lib_name.lower(),
                     astnode_names={node.name().lower
-                                   for node in self.astnode_types}
+                                   for node in self.astnode_types},
+                    prefix=self.gdb_helpers_prefix,
                 ))
 
         # Add any sources in $lang_path/extensions/support if it exists

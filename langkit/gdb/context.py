@@ -13,15 +13,18 @@ class Context(object):
     Holder for generated library-specific information.
     """
 
-    def __init__(self, lib_name, astnode_names):
+    def __init__(self, lib_name, astnode_names, prefix):
         """
         :param str lib_name: Lower-case name for the generated library.
 
         :param astnode_names: Set of lower-case names for all AST node types.
         :type ast_node_names: set[str]
+
+        :param str prefix: Prefix to use for command names.
         """
         self.lib_name = lib_name
         self.astnode_names = astnode_names
+        self.prefix = prefix
 
         self.astnode_struct_names = self._astnode_struct_names()
         self.tags_mapping = self._tags_mapping()
