@@ -16,7 +16,7 @@ is (raise Property_Error
     & Kind_Name (${Self.type.name()} (${property.self_arg_name})));
 
 % elif not property.abstract and not property.external:
---# property-start ${property.qualname}
+${gdb_helper('property-start', property.qualname)}
 pragma Warnings (Off, "is not referenced");
 ${"overriding" if property.overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
@@ -124,7 +124,7 @@ begin
          raise;
 % endif
 end ${property.name};
---# property-end ${property.qualname}
+${gdb_helper('property-end', property.qualname)}
 % endif
 
 ## Wrapper to return convenient Ada arrays

@@ -66,6 +66,16 @@ def library_public_field(field):
     return field.is_public or get_context().library_fields_all_public
 
 
+def gdb_helper(*args):
+    """
+    Format given arguments into a special Ada comment for GDB helpers.
+
+    :param list[str] args: Elements of the special comment.
+    :rtype: str
+    """
+    return '--# {}'.format(' '.join(args))
+
+
 @memoized
 def make_renderer(base_renderer=None):
     """
@@ -156,6 +166,8 @@ def make_renderer(base_renderer=None):
             'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
             'exception_type':        CAPIType(capi, 'exception').name,
             'library_public_field':  library_public_field,
+            'gdb_helper':
+                gdb_helper if ctx.gdb_helpers else lambda *args: '',
         })
     return base_renderer.update(template_args)
 
