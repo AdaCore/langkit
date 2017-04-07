@@ -8,6 +8,7 @@ from __future__ import (absolute_import, division, print_function,
 import gdb
 
 from langkit.gdb import printers
+from langkit.gdb.commands import StateCommand
 from langkit.gdb.context import Context
 
 
@@ -38,6 +39,8 @@ def setup(lib_name, astnode_names, prefix):
     gdb.events.new_objfile.connect(
         lambda event: handle_new_objfile(event.new_objfile, lib_name)
     )
+
+    StateCommand(context)
 
 
 def handle_new_objfile(objfile, lib_name):

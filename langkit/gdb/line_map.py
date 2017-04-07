@@ -118,6 +118,20 @@ class LineMap(object):
             raise ParseError(line_no, 'end of scope expected before end of'
                                       ' file')
 
+    def lookup_property(self, line_no):
+        """
+        Look for a property that covers the given source line number. Return
+        None if there is no such property.
+
+        :param int line_no: Line number to lookup.
+        :rtype: None|Property
+        """
+        for p in self.properties:
+            if line_no < p.line_range.first_line:
+                break
+            elif line_no in p.line_range:
+                return p
+
 
 class LineRange(object):
     """
