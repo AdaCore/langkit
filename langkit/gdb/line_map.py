@@ -115,7 +115,7 @@ class LineMap(object):
                 ended_scope = scope_stack.pop()
                 ended_scope.line_range.last_line = d.line_no
                 if scope_stack:
-                    scope_stack[-1].subscopes.append(ended_scope)
+                    scope_stack[-1].events.append(ended_scope)
 
             else:
                 raise NotImplementedError('Unknown directive: {}'.format(d))
@@ -163,7 +163,11 @@ class Scope(object):
     def __init__(self, line_range, label=None):
         self.line_range = line_range
         self.label = label
-        self.subscopes = []
+        self.events = []
+
+    @property
+    def subscopes(self):
+        return [e for e in self.events if isinstance(e, Scope)]
 
     def __repr__(self):
         return '<{}{} {}>'.format(
@@ -178,6 +182,15 @@ class Property(Scope):
         super(Property, self).__init__(line_range, name)
         self.name = name
         self.dsl_sloc = dsl_sloc
+
+
+class Event(object):
+    def __init__(self, line_no, entity=None):
+        self.line_no = line_no
+        self.entity = entity
+
+    def __repr__(self):
+        return '<Event line {}>'.format(self.line_no)
 
 
 class Directive(object):

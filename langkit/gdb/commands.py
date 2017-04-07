@@ -69,7 +69,8 @@ qualified name. For instance::
             print('No such property: {}'.format(arg.strip()))
             return
 
-        if not prop.subscopes:
+        scopes = prop.subscopes
+        if not scopes:
             print('{} has no code'.format(prop.name))
             return
 
@@ -77,5 +78,5 @@ qualified name. For instance::
         # we skip the prologue (all variable declarations).
         gdb.Breakpoint('{}:{}'.format(
             self.context.line_map.filename,
-            prop.subscopes[0].line_range.first_line
+            scopes[0].line_range.first_line
         ))
