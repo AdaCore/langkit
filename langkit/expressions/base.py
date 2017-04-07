@@ -722,7 +722,8 @@ class ResolvedExpression(object):
     :type: CompiledType
     """
 
-    def __init__(self, result_var_name=None, scopeless_result_var=False):
+    def __init__(self, result_var_name=None, scopeless_result_var=False,
+                 abstract_expr=None):
         """
         Create a resolve expression.
 
@@ -731,6 +732,9 @@ class ResolvedExpression(object):
             In this case, the "type" property must be ready.
         :param bool scopeless_result_var: Whether the result variable must be
             scopeless. This has no effect if "result_var_name" is None.
+        :param AbstractExpression|None abstract_expr: For resolved expressions
+            that implement an abstract expression, this must be the original
+            abstract expression.
         """
         if result_var_name:
             create_var = (PropertyDef.get().vars.create_scopeless
@@ -739,6 +743,8 @@ class ResolvedExpression(object):
             self._result_var = create_var(result_var_name, self.type)
         else:
             self._result_var = None
+
+        self.abstract_expr = abstract_expr
 
     @property
     def result_var(self):
@@ -1017,7 +1023,7 @@ class AbstractVariable(AbstractExpression):
 
         pretty_class_name = 'Var'
 
-        def __init__(self, type, name, abstract_var=None):
+        def __init__(self, type, name, abstract_var=None, abstract_expr=None):
             """
             Create a variable reference expression.
 
@@ -1026,12 +1032,16 @@ class AbstractVariable(AbstractExpression):
             :param names.Name name: Name of the referenced variable.
             :param AbstractVariable|None source_name: AbstractVariable that
                 compiled to this resolved expression, if any.
+            :param AbstractExpression|None abstract_expr: See
+                ResolvedExpression's constructor.
             """
             self.static_type = assert_type(type, CompiledType)
             self.name = name
             self.abstract_var = abstract_var
 
-            super(AbstractVariable.Expr, self).__init__()
+            super(AbstractVariable.Expr, self).__init__(
+                abstract_expr=abstract_expr
+            )
 
         def _render_expr(self):
             return self.name.camel_with_underscores
@@ -1145,7 +1155,8 @@ class AbstractVariable(AbstractExpression):
         try:
             expr = self.construct_cache[key]
         except KeyError:
-            expr = AbstractVariable.Expr(self._type, self._name, self)
+            expr = AbstractVariable.Expr(self._type, self._name, self,
+                                         abstract_expr=self)
             self.construct_cache[key] = expr
         return expr
 
@@ -1189,11 +1200,12 @@ class GetSymbol(AbstractExpression):
         :rtype: BuiltinCallExpr
         """
         token = construct(self.token_expr, Token)
-        return self.construct_static(token)
+        return self.construct_static(token, abstract_expr=self)
 
     @staticmethod
-    def construct_static(token_expr):
-        return BuiltinCallExpr("Get_Symbol", Symbol, [token_expr])
+    def construct_static(token_expr, abstract_expr=None):
+        return BuiltinCallExpr("Get_Symbol", Symbol, [token_expr],
+                               abstract_expr=abstract_expr)
 
 
 class SymbolLiteral(AbstractExpression):
@@ -1203,8 +1215,10 @@ class SymbolLiteral(AbstractExpression):
 
     class Expr(ResolvedExpression):
 
-        def __init__(self, name):
-            super(SymbolLiteral.Expr, self).__init__()
+        def __init__(self, name, abstract_expr=None):
+            super(SymbolLiteral.Expr, self).__init__(
+                abstract_expr=abstract_expr
+            )
 
             self.name = name
             self.static_type = Symbol
@@ -1231,7 +1245,7 @@ class SymbolLiteral(AbstractExpression):
         self.name = name
 
     def construct(self):
-        return self.Expr(self.name)
+        return self.Expr(self.name, abstract_expr=self)
 
 
 class BindingScope(ResolvedExpression):
@@ -1243,12 +1257,13 @@ class BindingScope(ResolvedExpression):
     new bindings for some scope.
     """
 
-    def __init__(self, expr, bindings):
+    def __init__(self, expr, bindings, abstract_expr=None):
         """
         :type expr: ResolvedExpression
         :type bindings: list[AbstractExpression.Expr]
+        :type abstract_expr: None|AbstractExpression
         """
-        super(BindingScope, self).__init__()
+        super(BindingScope, self).__init__(abstract_expr=abstract_expr)
         self.expr = expr
         self.expr_bindings = bindings
         self.static_type = self.expr.type
@@ -1283,13 +1298,13 @@ class Let(AbstractExpression):
     class Expr(ResolvedExpression):
         pretty_class_name = 'Let'
 
-        def __init__(self, vars, var_exprs, expr):
+        def __init__(self, vars, var_exprs, expr, abstract_expr=None):
             self.vars = vars
             self.var_exprs = var_exprs
             self.expr = expr
             self.static_type = self.expr.type
 
-            super(Let.Expr, self).__init__()
+            super(Let.Expr, self).__init__(abstract_expr=abstract_expr)
 
         def _render_pre(self):
             result = []
@@ -1379,7 +1394,8 @@ class Let(AbstractExpression):
 
         vars = map(construct, self.vars)
 
-        return Let.Expr(vars, var_exprs, construct(self.expr))
+        return Let.Expr(vars, var_exprs, construct(self.expr),
+                        abstract_expr=self)
 
 
 class Block(Let):
@@ -1473,7 +1489,9 @@ class No(AbstractExpression):
                            # so that overloading resolution always works.
                            result_var_name="Null_Value"
                            if self.expr_type.is_ptr
-                           else None)
+                           else None,
+
+                           abstract_expr=self)
 
 
 class EmptyArray(AbstractExpression):
@@ -1494,12 +1512,13 @@ class EmptyArray(AbstractExpression):
         self.array_type.add_to_context()
 
     @staticmethod
-    def construct_static(array_type):
+    def construct_static(array_type, abstract_expr=None):
         return LiteralExpr('Create (Items_Count => 0)', array_type,
-                           result_var_name='Empty_Array')
+                           result_var_name='Empty_Array',
+                           abstract_expr=abstract_expr)
 
     def construct(self):
-        return self.construct_static(self.array_type)
+        return self.construct_static(self.array_type, abstract_expr=self)
 
 
 def render(*args, **kwargs):
@@ -2443,8 +2462,10 @@ class Literal(AbstractExpression):
         # WARNING: Since bools are ints in python, bool needs to be before int
         # in the following table.
         return dispatch_on_type(type(self.literal), [
-            (bool, lambda _: LiteralExpr(str(self.literal), BoolType)),
-            (int, lambda _:  LiteralExpr(str(self.literal), LongType)),
+            (bool, lambda _: LiteralExpr(str(self.literal), BoolType,
+                                         abstract_expr=self)),
+            (int, lambda _:  LiteralExpr(str(self.literal), LongType,
+                                         abstract_expr=self)),
         ], exception=DiagnosticError('Invalid abstract expression type: {}'))
 
 
@@ -2458,16 +2479,20 @@ class BasicExpr(ResolvedExpression):
       are in the template.
     """
 
-    def __init__(self, template, type, operands, result_var_name=None):
+    def __init__(self, template, type, operands, result_var_name=None,
+                 abstract_expr=None):
         """
         :param str template: The template string.
         :param None|CompiledType type: The return type of the expression.
         :param None|str result_var_name: See ResolvedExpression's constructor.
+        :param AbstractExpression|None abstract_expr: See ResolvedExpression's
+            constructor.
         """
         self.operands = operands
         self.static_type = type
         self.template = template
-        super(BasicExpr, self).__init__(result_var_name)
+        super(BasicExpr, self).__init__(result_var_name,
+                                        abstract_expr=abstract_expr)
 
     def _render_expr(self):
         return self.template.format(*[
@@ -2491,13 +2516,17 @@ class LiteralExpr(BasicExpr):
     Resolved expression for literals of any type.
     """
 
-    def __init__(self, literal, type, result_var_name=None):
+    def __init__(self, literal, type, result_var_name=None,
+                 abstract_expr=None):
         """
         :param str literal: The literal expression.
         :param CompiledType|None type: The return type of the expression.
         :param None|str result_var_name: See ResolvedExpression's constructor.
+        :param AbstractExpression|None abstract_expr: See ResolvedExpression's
+            constructor.
         """
-        super(LiteralExpr, self).__init__(literal, type, [], result_var_name)
+        super(LiteralExpr, self).__init__(literal, type, [], result_var_name,
+                                          abstract_expr=abstract_expr)
         self.literal = literal
 
     @property
@@ -2519,15 +2548,19 @@ class FieldAccessExpr(BasicExpr):
     allowed to be null.
     """
 
-    def __init__(self, prefix_expr, field_name, result_type):
+    def __init__(self, prefix_expr, field_name, result_type,
+                 abstract_expr=None):
         """
         :param ResolvedExpression prefix_expr: The prefix corresponding to this
             expression.
         :param str field_name: The name of the field to access.
         :param CompiledType type: The type of the result.
+        :param AbstractExpression|None abstract_expr: See ResolvedExpression's
+            constructor.
         """
         super(FieldAccessExpr, self).__init__(
-            '{}.{}', result_type, [NullCheckExpr(prefix_expr), field_name]
+            '{}.{}', result_type, [NullCheckExpr(prefix_expr), field_name],
+            abstract_expr=abstract_expr,
         )
         self.prefix_expr = prefix_expr
         self.field_name = field_name
@@ -2542,16 +2575,19 @@ class ArrayExpr(BasicExpr):
     Resolved expression for an aggregate expression for any type of array.
     """
 
-    def __init__(self, exprs, element_type):
+    def __init__(self, exprs, element_type, abstract_expr=None):
         """
         :param list[ResolvedExpression] exprs: List of resolved expression
             whose types match element_type.
         :param CompiledType element_type: Type for elements in this array.
+        :param AbstractExpression|None abstract_expr: See ResolvedExpression's
+            constructor.
         """
         super(ArrayExpr, self).__init__(
             '({})'.format(', '.join(['{}'] * len(exprs)))
             if exprs else '(1 .. 0 => <>)',
-            element_type.array_type(), exprs
+            element_type.array_type(), exprs,
+            abstract_expr=abstract_expr,
         )
         self.element_type = element_type
 
@@ -2565,15 +2601,19 @@ class TokenTextEq(BasicExpr):
     """
     Resolved expression to test equality of the text of two tokens.
     """
-    def __init__(self, left, right):
+    def __init__(self, left, right, abstract_expr=None):
         """
         :type left: ResolvedExpression
         :type right: ResolvedExpression
+        :param AbstractExpression|None abstract_expr: See ResolvedExpression's
+            constructor.
         """
         super(TokenTextEq, self).__init__(
             template="Text_Type'(Text ({})) = Text_Type'(Text ({}))",
             type=BoolType,
-            operands=[left, right])
+            operands=[left, right],
+            abstract_expr=abstract_expr
+        )
 
 
 @auto_attr
@@ -2868,19 +2908,22 @@ class BuiltinCallExpr(BasicExpr):
     Ada side of things.
     """
 
-    def __init__(self, name, type, exprs, result_var_name=None):
+    def __init__(self, name, type, exprs, result_var_name=None,
+                 abstract_expr=None):
         """
         :param names.Name|str name: The name of the procedure to call.
         :param CompiledType|None type: The return type of the function call.
         :param [ResolvedExpression] exprs: A list of expressions that
             represents the arguments to the function call.
         :param None|str result_var_name: See ResolvedExpression's constructor.
+        :param AbstractExpression|None abstract_expr: See ResolvedExpression's
+            constructor.
         """
         self.name = names.Name.get(name)
         super(BuiltinCallExpr, self).__init__(
             '{} ({})'.format(self.name.camel_with_underscores,
                              ', '.join(['{}'] * len(exprs))),
-            type, exprs, result_var_name
+            type, exprs, result_var_name, abstract_expr=abstract_expr
         )
 
     @property
@@ -3004,7 +3047,8 @@ class Arithmetic(AbstractExpression):
             )
         )
 
-        return BasicExpr("({} %s {})" % self.op, LongType, [l, r])
+        return BasicExpr("({} %s {})" % self.op, LongType, [l, r],
+                         abstract_expr=self)
 
 
 def ignore(*vars):
