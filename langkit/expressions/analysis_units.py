@@ -28,8 +28,8 @@ class AnalysisUnitRoot(ResolvedExpression):
     Note that this automatically generates a check for null analysis units.
     """
 
-    def __init__(self, unit_expr):
-        super(AnalysisUnitRoot, self).__init__()
+    def __init__(self, unit_expr, abstract_expr=None):
+        super(AnalysisUnitRoot, self).__init__(abstract_expr=abstract_expr)
 
         self.static_type = T.root_node
         var_name = None if unit_expr.result_var else 'Unit'
@@ -61,7 +61,8 @@ def unit(self, node):
         'The "unit" field is available only for AST nodes; instead we have'
         ' here a {}'.format(node_expr.type.name().lower)
     )
-    return FieldAccessExpr(node_expr, 'Unit', AnalysisUnitType)
+    return FieldAccessExpr(node_expr, 'Unit', AnalysisUnitType,
+                           abstract_expr=self)
 
 
 @auto_attr
@@ -80,7 +81,8 @@ def is_referenced_from(self, referenced_unit, base_unit):
     return BuiltinCallExpr(
         'Is_Referenced_From', BoolType,
         [construct(referenced_unit, AnalysisUnitType),
-         construct(base_unit, AnalysisUnitType)]
+         construct(base_unit, AnalysisUnitType)],
+        abstract_expr=self
     )
 
 

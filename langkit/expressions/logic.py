@@ -196,7 +196,7 @@ class Bind(AbstractExpression):
 class DomainExpr(ResolvedExpression):
     static_type = EquationType
 
-    def __init__(self, domain, logic_var_expr):
+    def __init__(self, domain, logic_var_expr, abstract_expr=None):
         self.domain = domain
         ":type: ResolvedExpression"
 
@@ -205,7 +205,7 @@ class DomainExpr(ResolvedExpression):
 
         self.res_var = PropertyDef.get().vars.create("Var", EquationType)
 
-        super(DomainExpr, self).__init__()
+        super(DomainExpr, self).__init__(abstract_expr=abstract_expr)
 
     def _render_pre(self):
         is_node_domain = (
@@ -289,7 +289,8 @@ def domain(self, logic_var_expr, domain):
     return DomainExpr(
         construct(domain, lambda d: d.is_collection(), "Type given "
                   "to LogicVar must be collection type, got {expr_type}"),
-        construct(logic_var_expr, LogicVarType)
+        construct(logic_var_expr, LogicVarType),
+        abstract_expr=self,
     )
 
 
@@ -443,7 +444,8 @@ def get_value(self, logic_var):
     """
     return BuiltinCallExpr(
         "Eq_Node.Refs.Get_Value", T.root_node.env_el(),
-        [construct(logic_var, LogicVarType)]
+        [construct(logic_var, LogicVarType)],
+        abstract_expr=self,
     )
 
 
@@ -463,7 +465,8 @@ def solve(self, equation):
     :param AbstractExpression equation: The equation to solve.
     """
     return BuiltinCallExpr("Solve", BoolType,
-                           [construct(equation, EquationType)])
+                           [construct(equation, EquationType)],
+                           abstract_expr=self)
 
 
 class LogicBooleanOp(AbstractExpression):

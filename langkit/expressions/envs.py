@@ -151,7 +151,7 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
     sub_exprs.append(construct(recursive, BoolType))
 
     make_expr = partial(BasicExpr, result_var_name="Env_Get_Result",
-                        operands=sub_exprs)
+                        operands=sub_exprs, abstract_expr=self)
 
     if resolve_unique:
         return make_expr("Get ({}, 0)".format(array_expr),
@@ -164,7 +164,7 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
 
 class EnvBindExpr(ResolvedExpression):
 
-    def __init__(self, env_expr, to_eval_expr):
+    def __init__(self, env_expr, to_eval_expr, abstract_expr=None):
         self.to_eval_expr = to_eval_expr
         self.env_expr = env_expr
 
@@ -174,7 +174,7 @@ class EnvBindExpr(ResolvedExpression):
         self.env_var = PropertyDef.get().vars.create("New_Env",
                                                      LexicalEnvType)
 
-        super(EnvBindExpr, self).__init__()
+        super(EnvBindExpr, self).__init__(abstract_expr=abstract_expr)
 
     def _render_pre(self):
         # First, compute the environment to bind using the current one and
@@ -225,7 +225,8 @@ def eval_in_env(self, env_expr, to_eval_expr):
     """
     env_resolved_expr = construct(env_expr, LexicalEnvType)
     with Env.bind():
-        return EnvBindExpr(env_resolved_expr, construct(to_eval_expr))
+        return EnvBindExpr(env_resolved_expr, construct(to_eval_expr),
+                           abstract_expr=self)
 
 
 @auto_attr
@@ -240,7 +241,8 @@ def env_orphan(self, env_expr):
         'AST_Envs.Orphan',
         LexicalEnvType,
         [construct(env_expr, LexicalEnvType)],
-        'Orphan_Env'
+        'Orphan_Env',
+        abstract_expr=self,
     )
 
 
@@ -277,7 +279,8 @@ def env_group(self, env_array_expr):
     return BuiltinCallExpr(
         'Group', LexicalEnvType,
         [construct(env_array_expr, LexicalEnvType.array_type())],
-        'Group_Env'
+        'Group_Env',
+        abstract_expr=self,
     )
 
 
@@ -295,7 +298,8 @@ def is_visible_from(self, referenced_env, base_env):
     return BuiltinCallExpr(
         'Is_Visible_From', BoolType,
         [construct(referenced_env, LexicalEnvType),
-         construct(base_env, LexicalEnvType)]
+         construct(base_env, LexicalEnvType)],
+        abstract_expr=self,
     )
 
 
@@ -306,7 +310,8 @@ def env_node(self, env):
 
     :param AbstractExpression env: The source environment.
     """
-    return BasicExpr('{}.Node', T.root_node, [construct(env, LexicalEnvType)])
+    return BasicExpr('{}.Node', T.root_node, [construct(env, LexicalEnvType)],
+                     abstract_expr=self)
 
 
 @auto_attr
@@ -318,13 +323,15 @@ def env_parent(self, env):
     """
     return BasicExpr(
         'AST_Envs.Get_Env ({}.Parent)',
-        T.LexicalEnvType, [construct(env, LexicalEnvType)]
+        T.LexicalEnvType, [construct(env, LexicalEnvType)],
+        abstract_expr=self,
     )
 
 
-def make_combine(l_rebindings, r_rebindings):
+def make_combine(self, l_rebindings, r_rebindings):
     return BasicExpr('AST_Envs.Combine ({}, {})',
-                     EnvRebindingsType, [l_rebindings, r_rebindings])
+                     EnvRebindingsType, [l_rebindings, r_rebindings],
+                     abstract_expr=self)
 
 
 @auto_attr
@@ -332,7 +339,8 @@ def combine(self, l_rebindings, r_rebindings):
     """
     Combine the two env rebindings given as arguments.
     """
-    return make_combine(construct(l_rebindings, EnvRebindingsType),
+    return make_combine(self,
+                        construct(l_rebindings, EnvRebindingsType),
                         construct(r_rebindings, EnvRebindingsType))
 
 
@@ -347,7 +355,8 @@ def rebind_env(self, env, to_rebind, rebind_to):
         [construct(env, LexicalEnvType),
          construct(to_rebind, LexicalEnvType),
          construct(rebind_to, LexicalEnvType)],
-        'Rebound_Env'
+        'Rebound_Env',
+        abstract_expr=self,
     )
 
 
@@ -369,7 +378,8 @@ def make_env_el(self, node):
         node_expr.type.env_el(),
         {names.Name('md'): md_expr,
          names.Name('el'): node_expr,
-         names.Name('parents_bindings'): construct(p.env_rebinding_arg.var)}
+         names.Name('parents_bindings'): construct(p.env_rebinding_arg.var)},
+        abstract_expr=self,
     )
 
 

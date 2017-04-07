@@ -190,7 +190,7 @@ class Map(CollectionExpression):
 
         def __init__(self, list_element_var, element_var, index_var,
                      collection, expr, iter_scope, filter=None, concat=False,
-                     take_while=None):
+                     take_while=None, abstract_expr=None):
             """
             :type list_element_var: VarExpr|None
             :type element_var: VarExpr
@@ -201,6 +201,7 @@ class Map(CollectionExpression):
             :type filter: ResolvedExpression
             :type concat: bool
             :type take_while: ResolvedExpression
+            :type abstract_expr: AbstractExpression|None
             """
             self.take_while = take_while
             self.list_element_var = list_element_var
@@ -223,7 +224,7 @@ class Map(CollectionExpression):
             )
             iter_scope.parent.add(self.array_var)
 
-            super(Map.Expr, self).__init__()
+            super(Map.Expr, self).__init__(abstract_expr=abstract_expr)
 
         def __repr__(self):
             return "<MapExpr {}: {} -> {}{}>".format(
@@ -359,7 +360,7 @@ class Quantifier(CollectionExpression):
         pretty_class_name = 'Quantifier'
 
         def __init__(self, kind, collection, expr, list_element_var,
-                     element_var, index_var, iter_scope):
+                     element_var, index_var, iter_scope, abstract_expr=None):
             """
             :param str kind: Kind for this quantifier expression. 'all' will
                 check that all items in "collection" fullfill "expr" while
@@ -389,6 +390,9 @@ class Quantifier(CollectionExpression):
             :param iter_scope: Scope for local variables internal to the
                 iteration.
             :type iter_scope: langkit.expressions.base.LocalVars.Scope
+
+            :param AbstractExpression|None abstract_expr: See
+                ResolvedExpression's constructor.
             """
             self.kind = kind
             self.collection = collection
@@ -400,7 +404,8 @@ class Quantifier(CollectionExpression):
             self.static_type = BoolType
 
             super(Quantifier.Expr, self).__init__('Quantifier_Result',
-                                                  scopeless_result_var=True)
+                                                  scopeless_result_var=True,
+                                                  abstract_expr=abstract_expr)
             iter_scope.parent.add(self.result_var)
 
         def _render_pre(self):
@@ -490,7 +495,8 @@ def collection_get(self, coll_expr, index_expr, or_null=True):
     return BuiltinCallExpr(
         'Get', coll_expr.type.element_type(),
         [coll_expr, index_expr, or_null],
-        'Get_Result'
+        'Get_Result',
+        abstract_expr=self,
     )
 
 
@@ -504,7 +510,8 @@ def length(self, coll_expr):
     """
     return BuiltinCallExpr(
         "Length", LongType,
-        [construct(coll_expr, lambda t: t.is_collection())]
+        [construct(coll_expr, lambda t: t.is_collection())],
+        abstract_expr=self,
     )
 
 
@@ -519,7 +526,7 @@ class CollectionSingleton(AbstractExpression):
     class Expr(ResolvedExpression):
         pretty_class_name = 'ArraySingleton'
 
-        def __init__(self, expr):
+        def __init__(self, expr, abstract_expr=None):
             """
             :type expr: ResolvedExpression
             """
@@ -531,7 +538,9 @@ class CollectionSingleton(AbstractExpression):
             self.array_var = PropertyDef.get().vars.create('Singleton',
                                                            self.type)
 
-            super(CollectionSingleton.Expr, self).__init__()
+            super(CollectionSingleton.Expr, self).__init__(
+                abstract_expr=abstract_expr
+            )
 
         def _render_pre(self):
             return self.expr.render_pre() + """

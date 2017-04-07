@@ -180,12 +180,14 @@ class OrderingTest(AbstractExpression):
         static_type = BoolType
         pretty_class_name = 'OrdTest'
 
-        def __init__(self, operator, lhs, rhs):
+        def __init__(self, operator, lhs, rhs, abstract_expr=None):
             self.operator = operator
             self.lhs = lhs
             self.rhs = rhs
 
-            super(OrderingTest.Expr, self).__init__()
+            super(OrderingTest.Expr, self).__init__(
+                abstract_expr=abstract_expr
+            )
 
         def _render_pre(self):
             return '{}\n{}'.format(
@@ -243,7 +245,7 @@ class If(AbstractExpression):
 
         pretty_class_name = 'If'
 
-        def __init__(self, cond, then, else_then, rtype):
+        def __init__(self, cond, then, else_then, rtype, abstract_expr=None):
             """
             :param ResolvedExpression cond: A boolean expression.
             :param ResolvedExpression then: If "cond" is evaluated to true,
@@ -252,13 +254,16 @@ class If(AbstractExpression):
                 false, this part is returned.
             :param langkit.compiled_types.CompiledType rtype: Type parameter.
                 The type that is returned by then and else_then.
+            :param AbstractExpression|None abstract_expr: See
+                ResolvedExpression's constructor.
             """
             self.cond = cond
             self.then = then
             self.else_then = else_then
             self.static_type = rtype
 
-            super(If.Expr, self).__init__('Result')
+            super(If.Expr, self).__init__('Result',
+                                          abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return render('properties/if_ada', expr=self)
@@ -355,14 +360,16 @@ class Then(AbstractExpression):
     class Expr(ResolvedExpression):
         pretty_name = 'Then'
 
-        def __init__(self, expr, var_expr, then_expr, default_expr):
+        def __init__(self, expr, var_expr, then_expr, default_expr,
+                     abstract_expr=None):
             self.expr = expr
             self.var_expr = var_expr
             self.then_expr = then_expr
             self.default_expr = default_expr
             self.static_type = self.then_expr.type
 
-            super(Then.Expr, self).__init__('Result_Var')
+            super(Then.Expr, self).__init__('Result_Var',
+                                            abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return render('properties/then_ada', then=self)

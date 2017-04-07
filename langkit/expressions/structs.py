@@ -31,7 +31,8 @@ class Cast(AbstractExpression):
     class Expr(ResolvedExpression):
         pretty_class_name = 'Cast'
 
-        def __init__(self, expr, dest_type, do_raise=False, result_var=None):
+        def __init__(self, expr, dest_type, do_raise=False, result_var=None,
+                     abstract_expr=None):
             """
             :type expr: ResolvedExpression
             :type dest_type: ASTNode
@@ -40,6 +41,8 @@ class Cast(AbstractExpression):
             :param ResolvedExpr result_var: If provided, the cast will use it
                 to store the cast result. Otherwise, a dedicated variable is
                 created for this.
+            :param AbstractExpression|None abstract_expr: See
+                ResolvedExpression's constructor.
             """
             self.do_raise = do_raise
             self.expr = expr
@@ -49,7 +52,8 @@ class Cast(AbstractExpression):
             self.expr_var = p.vars.create('Cast_Expr', self.expr.type)
 
             super(Cast.Expr, self).__init__(
-                result_var_name=(None if result_var else 'Cast_Result')
+                result_var_name=(None if result_var else 'Cast_Result'),
+                abstract_expr=abstract_expr,
             )
             if result_var:
                 self._result_var = result_var
@@ -118,7 +122,8 @@ class Cast(AbstractExpression):
             'Casting to the same type'
         ), severity=Severity.warning)
 
-        return Cast.Expr(expr, self.dest_type, do_raise=self.do_raise)
+        return Cast.Expr(expr, self.dest_type, do_raise=self.do_raise,
+                         abstract_expr=self)
 
 
 @attr_expr("is_null")
@@ -161,16 +166,20 @@ class New(AbstractExpression):
         Resolved expression to create Struct values.
         """
 
-        def __init__(self, struct_type, assocs, result_var_name=None):
+        def __init__(self, struct_type, assocs, result_var_name=None,
+                     abstract_expr=None):
             """
             :type struct_type: CompiledType
             :type assocs: {names.Name: ResolvedExpression}
             :type result_var_name: str|None
+            :param AbstractExpression|None abstract_expr: See
+                ResolvedExpression's constructor.
             """
             self.static_type = struct_type
             self.assocs = assocs
 
-            super(New.StructExpr, self).__init__(result_var_name)
+            super(New.StructExpr, self).__init__(result_var_name,
+                                                 abstract_expr=abstract_expr)
 
         def _iter_ordered(self):
             return ((k, self.assocs[k]) for k in sorted(self.assocs))
@@ -201,8 +210,9 @@ class New(AbstractExpression):
         Resolved expression to create AST node values.
         """
 
-        def __init__(self, astnode, assocs):
-            super(New.NodeExpr, self).__init__(astnode, assocs, 'New_Node')
+        def __init__(self, astnode, assocs, abstract_expr=None):
+            super(New.NodeExpr, self).__init__(astnode, assocs, 'New_Node',
+                                               abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return (super(New.NodeExpr, self)._render_pre() +
@@ -284,7 +294,7 @@ class New(AbstractExpression):
         expr_cls = (New.NodeExpr
                     if self.struct_type.is_ast_node() else
                     New.StructExpr)
-        return expr_cls(self.struct_type, provided_fields)
+        return expr_cls(self.struct_type, provided_fields, abstract_expr=self)
 
 
 class FieldAccess(AbstractExpression):
@@ -303,7 +313,7 @@ class FieldAccess(AbstractExpression):
         pretty_class_name = 'FieldAccess'
 
         def __init__(self, receiver_expr, node_data, arguments,
-                     implicit_deref=False):
+                     implicit_deref=False, abstract_expr=None):
             """
             :param ResolvedExpression receiver_expr: The receiver of the field
                 access.
@@ -316,6 +326,9 @@ class FieldAccess(AbstractExpression):
 
             :param bool implicit_deref: Whether the receiver is an env element,
                 and we want to access a field or property of the stored node.
+
+            :param AbstractExpression|None abstract_expr: See
+                ResolvedExpression's constructor.
             """
             # When calling environment properties, the call itself happens are
             # outside a property. We cannot create a variable in this context,
@@ -342,7 +355,8 @@ class FieldAccess(AbstractExpression):
             # we need it to be attached to the scope. In other cases, this can
             # make debugging easier.
             super(FieldAccess.Expr, self).__init__(
-                None if self.simple_field_access else 'Fld'
+                None if self.simple_field_access else 'Fld',
+                abstract_expr=abstract_expr,
             )
 
         def __repr__(self):
@@ -563,7 +577,8 @@ class FieldAccess(AbstractExpression):
             )
         ]
 
-        ret = FieldAccess.Expr(receiver_expr, to_get, arg_exprs, is_deref)
+        ret = FieldAccess.Expr(receiver_expr, to_get, arg_exprs, is_deref,
+                               abstract_expr=self)
         return ret
 
     def __call__(self, *args):
@@ -594,18 +609,20 @@ class IsA(AbstractExpression):
         static_type = BoolType
         pretty_class_name = 'IsA'
 
-        def __init__(self, expr, astnodes):
+        def __init__(self, expr, astnodes, abstract_expr=None):
             """
             :param ResolvedExpr expr: Expression on which the test is
                 performed.
             :param [ASTNode] astnodes: ASTNode subclasses to use for the test.
+            :param AbstractExpression|None abstract_expr: See
+                ResolvedExpression's constructor.
             """
             self.expr = expr
             self.astnodes = [a.el_type
                              if a.is_env_element_type
                              else a for a in astnodes]
 
-            super(IsA.Expr, self).__init__()
+            super(IsA.Expr, self).__init__(abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return self.expr.render_pre()
@@ -660,7 +677,7 @@ class IsA(AbstractExpression):
                 'When testing the dynamic subtype of an AST node, the type to'
                 ' check must be a subclass of the value static type.'
             ))
-        return IsA.Expr(expr, astnodes)
+        return IsA.Expr(expr, astnodes, abstract_expr=self)
 
 
 @attr_call('match')
@@ -915,5 +932,6 @@ class Match(AbstractExpression):
             [matched_var],
             [matched_expr],
             BindingScope(result,
-                         [construct(var) for _, var, _ in self.matchers])
+                         [construct(var) for _, var, _ in self.matchers]),
+            abstract_expr=self
         )

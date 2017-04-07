@@ -2625,7 +2625,8 @@ def text_equals(self, left, right):
         whose text will be used for the test.
     :param AbstractExpression right: Likewise.
     """
-    return TokenTextEq(construct(left, Token), construct(right, Token))
+    return TokenTextEq(construct(left, Token), construct(right, Token),
+                       abstract_expr=self)
 
 
 class UnreachableExpr(ResolvedExpression):
