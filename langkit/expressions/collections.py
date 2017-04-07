@@ -327,7 +327,7 @@ class Map(CollectionExpression):
 
 
 @auto_attr
-def as_array(list_expr):
+def as_array(self, list_expr):
     """
     Turn an AST list node into an array for the same elements.
 
@@ -469,7 +469,7 @@ class Quantifier(CollectionExpression):
 
 @auto_attr_custom("at")
 @auto_attr_custom("at_or_raise", or_null=False)
-def collection_get(coll_expr, index_expr, or_null=True):
+def collection_get(self, coll_expr, index_expr, or_null=True):
     """
     Expression that will get an element from a collection.
 
@@ -495,7 +495,7 @@ def collection_get(coll_expr, index_expr, or_null=True):
 
 
 @auto_attr
-def length(coll_expr):
+def length(self, coll_expr):
     """
     Expression that will return the length of a collection.
 

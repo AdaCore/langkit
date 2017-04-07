@@ -650,7 +650,7 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
         def construct(self):
             kwargs = dict(partial_kwargs)
             kwargs.update(self.kwargs)
-            return fn(*(self.sub_expressions + partial_args), **kwargs)
+            return fn(self, *(self.sub_expressions + partial_args), **kwargs)
 
         def __repr__(self):
             return "<{}{}>".format(
@@ -661,9 +661,9 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
 
         nb_args = len(inspect.getargspec(fn).args)
 
-        assert nb_args > 0
+        assert nb_args > 1
 
-        decorator = (attr_expr if nb_args == 1 else attr_call)
+        decorator = (attr_expr if nb_args == 2 else attr_call)
 
         decorator(attr_name)(type(
             b'{}'.format(attr_name),
@@ -2617,7 +2617,7 @@ class TokenTextEq(BasicExpr):
 
 
 @auto_attr
-def text_equals(left, right):
+def text_equals(self, left, right):
     """
     Expression to test equality of the text of two tokens.
 

@@ -100,8 +100,8 @@ class EnvVariable(AbstractVariable):
 @auto_attr_custom("get")
 @auto_attr_custom("get_sequential", sequential=True)
 @auto_attr_custom("resolve_unique", resolve_unique=True)
-def env_get(env_expr, symbol_expr, resolve_unique=False, sequential=False,
-            recursive=True):
+def env_get(self, env_expr, symbol_expr, resolve_unique=False,
+            sequential=False, recursive=True):
     """
     Expression for lexical environment get operation.
 
@@ -213,7 +213,7 @@ class EnvBindExpr(ResolvedExpression):
 
 
 @auto_attr
-def eval_in_env(env_expr, to_eval_expr):
+def eval_in_env(self, env_expr, to_eval_expr):
     """
     Expression that will evaluate a subexpression in the context of a
     particular lexical environment. Not meant to be used directly, but instead
@@ -229,7 +229,7 @@ def eval_in_env(env_expr, to_eval_expr):
 
 
 @auto_attr
-def env_orphan(env_expr):
+def env_orphan(self, env_expr):
     """
     Expression that will create a lexical environment copy with no parent.
 
@@ -264,7 +264,7 @@ class EnvGroup(AbstractExpression):
 
 
 @auto_attr
-def env_group(env_array_expr):
+def env_group(self, env_array_expr):
     """
     Expression that will return a lexical environment that logically groups
     together multiple lexical environments from an array of lexical
@@ -282,7 +282,7 @@ def env_group(env_array_expr):
 
 
 @auto_attr
-def is_visible_from(referenced_env, base_env):
+def is_visible_from(self, referenced_env, base_env):
     """
     Expression that will return whether an env's associated compilation unit is
     visible from another env's compilation unit.
@@ -300,7 +300,7 @@ def is_visible_from(referenced_env, base_env):
 
 
 @auto_attr
-def env_node(env):
+def env_node(self, env):
     """
     Return the node associated to this environment.
 
@@ -310,7 +310,7 @@ def env_node(env):
 
 
 @auto_attr
-def env_parent(env):
+def env_parent(self, env):
     """
     Return this env's parent env.
 
@@ -328,7 +328,7 @@ def make_combine(l_rebindings, r_rebindings):
 
 
 @auto_attr
-def combine(l_rebindings, r_rebindings):
+def combine(self, l_rebindings, r_rebindings):
     """
     Combine the two env rebindings given as arguments.
     """
@@ -337,7 +337,7 @@ def combine(l_rebindings, r_rebindings):
 
 
 @auto_attr
-def rebind_env(env, to_rebind, rebind_to):
+def rebind_env(self, env, to_rebind, rebind_to):
     """
     Returns a new environment based on `env` where `to_rebind` is rebound to
     `rebind_to`.
@@ -352,7 +352,7 @@ def rebind_env(env, to_rebind, rebind_to):
 
 
 @auto_attr
-def make_env_el(node):
+def make_env_el(self, node):
     """
     Construct an env element from node, including context (env rebindings).
     """

@@ -242,7 +242,7 @@ class DomainExpr(ResolvedExpression):
 
 
 @auto_attr
-def domain(logic_var_expr, domain):
+def domain(self, logic_var_expr, domain):
     """
     Define the domain of a logical variable. Several important properties about
     this expression:
@@ -433,7 +433,7 @@ class Predicate(AbstractExpression):
 
 
 @auto_attr
-def get_value(logic_var):
+def get_value(self, logic_var):
     """
     Expression that'll extract the value out of a logic variable. The type is
     always the root grammar class.
@@ -448,7 +448,7 @@ def get_value(logic_var):
 
 
 @auto_attr
-def solve(equation):
+def solve(self, equation):
     """
     Expression that will call solve on an instance of EquationType,
     and return whether any solution was found or not. The solutions are not

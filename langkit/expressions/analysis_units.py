@@ -47,7 +47,7 @@ class AnalysisUnitRoot(ResolvedExpression):
 
 
 @auto_attr
-def unit(node):
+def unit(self, node):
     """
     Expression that gets the analysis unit that "node_expr" belongs to.
 
@@ -65,7 +65,7 @@ def unit(node):
 
 
 @auto_attr
-def is_referenced_from(referenced_unit, base_unit):
+def is_referenced_from(self, referenced_unit, base_unit):
     """
     Expression to compute whether an analysis unit is referenced from another
     unit.
