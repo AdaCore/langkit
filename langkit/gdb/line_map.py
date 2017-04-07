@@ -112,7 +112,7 @@ class LineMap(object):
                     scope_stack[-1].subscopes.append(ended_scope)
 
             else:
-                assert False
+                raise NotImplementedError('Unknown directive: {}'.format(d))
 
         if scope_stack:
             raise ParseError(line_no, 'end of scope expected before end of'
