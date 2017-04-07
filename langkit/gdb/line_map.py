@@ -25,6 +25,14 @@ class LineMap(object):
     def __init__(self, context):
         self.context = context
 
+        self.filename = None
+        """
+        :type: str|None
+
+        Absolute path for the "$-analysis.adb" file, or None if we haven't
+        found it.
+        """
+
         self.properties = []
         """
         :type: list[Property]
@@ -51,13 +59,13 @@ class LineMap(object):
         if not has_unit_sym:
             return result
 
-        analysis_body = has_unit_sym.symtab.fullname()
-        with open(analysis_body, 'r') as f:
+        result.filename = has_unit_sym.symtab.fullname()
+        with open(result.filename, 'r') as f:
             try:
                 cls._parse_file(result, f)
             except ParseError as exc:
                 print('Error while parsing directives in {}:'.format(
-                    analysis_body
+                    result.filename
                 ))
                 print(str(exc))
 
