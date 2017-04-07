@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import gdb
 
+from langkit.gdb.line_map import LineMap
 from langkit.gdb.utils import ptr_to_int, system_address
 from langkit.names import Name
 
@@ -24,6 +25,8 @@ class Context(object):
 
         self.astnode_struct_names = self._astnode_struct_names()
         self.tags_mapping = self._tags_mapping()
+
+        self.line_map = LineMap.parse(self)
 
     def _astnode_struct_names(self):
         """

@@ -124,7 +124,7 @@ begin
          raise;
 % endif
 end ${property.name};
-${gdb_helper('property-end', property.qualname)}
+${gdb_helper('end', property.qualname)}
 % endif
 
 ## Wrapper to return convenient Ada arrays
