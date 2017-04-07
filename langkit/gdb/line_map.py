@@ -103,6 +103,12 @@ class LineMap(object):
                 self.properties.append(p)
                 scope_stack.append(p)
 
+            elif d.is_a(ScopeStart):
+                if not scope_stack:
+                    raise ParseError(line_no, 'scope-start directive not'
+                                              ' allowed outside a property')
+                scope_stack.append(Scope(LineRange(d.line_no, None)))
+
             elif d.is_a(End):
                 if not scope_stack:
                     raise ParseError(line_no, 'no scope to end')
@@ -215,6 +221,12 @@ class PropertyStart(Directive):
         return cls(args, line_no)
 
 
+class ScopeStart(Directive):
+    @classmethod
+    def parse(cls, line_no, args):
+        return cls(line_no)
+
+
 class End(Directive):
     @classmethod
     def parse(cls, line_no, args):
@@ -223,5 +235,6 @@ class End(Directive):
 
 Directive.name_to_cls.update({
     'property-start': PropertyStart,
+    'scope-start': ScopeStart,
     'end': End,
 })

@@ -27,6 +27,7 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
          ${quantifier.collection.render_expr()}.Items
       % endif
    loop
+      ${scopes.start_scope(quantifier.iter_scope)}
       % if list_element_var:
          ${element_var} :=
             ${quantifier.element_var.type.name()} (${list_element_var});

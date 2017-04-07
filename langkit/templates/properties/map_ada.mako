@@ -67,6 +67,7 @@ begin
             ${map.collection.render_expr()}.Items
          % endif
       loop
+         ${scopes.start_scope(map.iter_scope)}
          % if list_element_var:
             ${element_var} :=
                ${map.element_var.type.name()} (${list_element_var});

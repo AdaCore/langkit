@@ -88,6 +88,7 @@ begin
       end case;
    % endif
 
+   ${scopes.start_scope(property.vars.root_scope)}
    ${property.constructed_expr.render_pre()}
 
    Property_Result := ${property.constructed_expr.render_expr()};
