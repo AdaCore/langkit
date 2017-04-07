@@ -148,6 +148,46 @@ class ASTNodePrinter(BasePrinter):
         )
 
 
+class LexicalEnvPrinter(BasePrinter):
+    """
+    Pretty-printer for lexical environments.
+    """
+
+    name = 'LexicalEnv'
+
+    @classmethod
+    def matches(cls, value, context):
+        return (
+            value.type.code == gdb.TYPE_CODE_PTR
+            and value.type.target().code == gdb.TYPE_CODE_STRUCT
+            and (
+                value.type.target().name
+                == '{}__analysis__ast_envs__lexical_env_type'.format(
+                    context.lib_name
+                )
+            )
+        )
+
+    @property
+    def node(self):
+        return self.value['node']
+
+    def to_string(self):
+        if not self.value:
+            return 'null'
+
+        empty_env = gdb.lookup_global_symbol(
+            '{}__analysis__ast_envs__empty_env'.format(self.context.lib_name)
+        )
+
+        if self.value == empty_env.value():
+            return '<LexicalEnv empty>'
+        elif self.node:
+            return '<LexicalEnv for {}>'.format(self.node)
+        else:
+            return '<LexicalEnv synthetic>'
+
+
 class ArrayPrettyPrinter(BasePrinter):
     """
     Pretty-printer for array nodes from properties.
