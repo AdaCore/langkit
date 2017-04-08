@@ -30,6 +30,7 @@ def setup(lib_name, astnode_names, prefix):
         printers.AnalysisUnitPrinter,
         printers.ASTNodePrinter,
         printers.LexicalEnvPrinter,
+        printers.EnvElementPrinter,
         printers.ArrayPrettyPrinter
     ]:
         gdb_printers.append(printer)

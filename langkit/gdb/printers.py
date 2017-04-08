@@ -188,6 +188,34 @@ class LexicalEnvPrinter(BasePrinter):
             return '<LexicalEnv synthetic>'
 
 
+class EnvElementPrinter(BasePrinter):
+    """
+    Pretty-printer for environment elements.
+    """
+
+    name = 'EnvElement'
+
+    @classmethod
+    def matches(cls, value, context):
+        return (
+            value.type.code == gdb.TYPE_CODE_STRUCT
+            and (
+                value.type.name
+                == '{}__analysis__ast_envs__env_element'.format(
+                    context.lib_name
+                )
+            )
+        )
+
+    @property
+    def node(self):
+        return self.value['el']
+
+    def to_string(self):
+        return ('<EnvElement for {}>'.format(self.node)
+                if self.node else 'null')
+
+
 class ArrayPrettyPrinter(BasePrinter):
     """
     Pretty-printer for array nodes from properties.
