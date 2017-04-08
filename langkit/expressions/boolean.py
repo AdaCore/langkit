@@ -9,9 +9,9 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_source_language
 from langkit.expressions.analysis_units import AnalysisUnitType
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, LiteralExpr, No, PropertyDef,
-    ResolvedExpression, render, construct, BuiltinCallExpr, BasicExpr,
-    attr_call
+    AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
+    BuiltinCallExpr, LiteralExpr, No, PropertyDef, ResolvedExpression,
+    attr_call, construct, render
 )
 from langkit.expressions.envs import EmptyEnv
 from langkit.utils import assert_type
@@ -361,11 +361,12 @@ class Then(AbstractExpression):
         pretty_name = 'Then'
 
         def __init__(self, expr, var_expr, then_expr, default_expr,
-                     abstract_expr=None):
+                     then_scope, abstract_expr=None):
             self.expr = expr
             self.var_expr = var_expr
             self.then_expr = then_expr
             self.default_expr = default_expr
+            self.then_scope = then_scope
             self.static_type = self.then_expr.type
 
             super(Then.Expr, self).__init__('Result_Var',
@@ -438,9 +439,6 @@ class Then(AbstractExpression):
         self.then_expr = self.then_fn(self.var_expr)
 
     def construct(self):
-        # Add var_expr to the scope for this Then expression
-        PropertyDef.get_scope().add(self.var_expr.local_var)
-
         # Accept as a prefix:
         # * any pointer, since it can be checked against "null";
         # * any Struct, since its "Is_Null" field can be checked.
@@ -448,7 +446,13 @@ class Then(AbstractExpression):
                          lambda cls: cls.is_ptr or issubclass(cls, Struct))
         self.var_expr.set_type(expr.type)
 
-        then_expr = construct(self.then_expr)
+        # Create a then-expr specific scope to restrict the span of the "then"
+        # variable in the debugger.
+        with PropertyDef.get_scope().new_child() as then_scope:
+            then_scope.add(self.var_expr.local_var)
+            then_expr = construct(self.then_expr)
+            var_expr = construct(self.var_expr)
+        then_expr = BindingScope(then_expr, [var_expr], scope=then_scope)
 
         # Affect default value to the fallback expression. For the moment,
         # only booleans and structs are handled.
@@ -483,7 +487,7 @@ class Then(AbstractExpression):
             default_expr = construct(self.default_val, then_expr.type)
 
         return Then.Expr(expr, construct(self.var_expr), then_expr,
-                         default_expr)
+                         default_expr, then_scope)
 
     def __repr__(self):
         return "<Then {}: {} {}>".format(self.expr, self.var_expr,
