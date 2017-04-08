@@ -18,6 +18,17 @@ from langkit.expressions.base import (
 )
 
 
+def collection_expr_identity(x):
+    return x
+
+
+def collection_expr_none(x):
+    return None
+
+
+builtin_collection_functions = (collection_expr_identity, collection_expr_none)
+
+
 class CollectionExpression(AbstractExpression):
     """
     Base class to provide common code for abstract expressions working on
@@ -60,10 +71,17 @@ class CollectionExpression(AbstractExpression):
              'for arguments')
         ])
 
+        # Get the name of the loop variable from the DSL. But don't when we
+        # have a "default" one, such as for using the ".filter" combinator. In
+        # this case, it's up to ".filter"'s special implementation to get the
+        # name from the filter function.
+        source_name = (None if self.expr_fn == collection_expr_identity else
+                       names.Name.from_lower(argspec.args[0]))
+
         self.requires_index = len(argspec.args) == 2
         self.element_var = AbstractVariable(
             names.Name("Item_{}".format(next(CollectionExpression._counter))),
-            source_name=names.Name.from_lower(argspec.args[0])
+            source_name=source_name
         )
         if self.requires_index:
             self.index_var = AbstractVariable(
@@ -171,11 +189,11 @@ class Contains(CollectionExpression):
                                iter_scope)
 
 
-@attr_call('filter', lambda x: x)
+@attr_call('filter', collection_expr_identity)
 @attr_call('filtermap')
-@attr_call('map', filter_expr=lambda x: None)
-@attr_call('mapcat', filter_expr=lambda x: None, concat=True)
-@attr_call('take_while', lambda x: x, lambda x: None, False)
+@attr_call('map', filter_expr=collection_expr_none)
+@attr_call('mapcat', filter_expr=collection_expr_none, concat=True)
+@attr_call('take_while', collection_expr_identity, collection_expr_none, False)
 class Map(CollectionExpression):
     """
     Abstract expression that is the result of a map expression evaluation.
@@ -253,8 +271,8 @@ class Map(CollectionExpression):
             return [var for var in [self.element_var, self.index_var]
                     if var is not None]
 
-    def __init__(self, collection, expr, filter_expr=lambda x: None,
-                 concat=False, take_while_pred=lambda x: None):
+    def __init__(self, collection, expr, filter_expr=collection_expr_none,
+                 concat=False, take_while_pred=collection_expr_none):
         """
         See CollectionExpression for the other parameters.
 
@@ -295,6 +313,18 @@ class Map(CollectionExpression):
             "Take while expression passed to a collection expression must be a"
             " lambda or a function"
         )(self.element_var)
+
+        # If the element transformation function is actually the built-in
+        # identity function, try instead to get the source name of the loop
+        # variable from the other functions.
+        if self.element_var.source_name is None:
+            for fn in (self.filter_fn, self.take_while_pred):
+                if fn not in builtin_collection_functions:
+                    argspec = inspect.getargspec(fn)
+                    self.element_var.source_name = names.Name.from_lower(
+                        argspec.args[0]
+                    )
+                    break
 
     def construct(self):
         """
