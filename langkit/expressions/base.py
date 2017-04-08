@@ -1260,7 +1260,7 @@ class BindingScope(ResolvedExpression):
     def __init__(self, expr, bindings, abstract_expr=None):
         """
         :type expr: ResolvedExpression
-        :type bindings: list[AbstractExpression.Expr]
+        :type bindings: list[AbstractVariable.Expr]
         :type abstract_expr: None|AbstractExpression
         """
         super(BindingScope, self).__init__(abstract_expr=abstract_expr)
