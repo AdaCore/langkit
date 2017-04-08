@@ -843,10 +843,11 @@ class Match(AbstractExpression):
 
         :rtype: ResolvedExpression
         """
+        outer_scope = PropertyDef.get_scope()
+
         # Add the variables created for this expression to the current scope
-        scope = PropertyDef.get_scope()
         for _, var, _ in self.matchers:
-            scope.add(var.local_var)
+            outer_scope.add(var.local_var)
 
         matched_expr = construct(self.matched_expr)
         check_source_language(issubclass(matched_expr.type, ASTNode)
@@ -865,7 +866,7 @@ class Match(AbstractExpression):
             type=matched_expr.type,
             create_local=True
         )
-        PropertyDef.get_scope().add(matched_abstract_var.local_var)
+        outer_scope.add(matched_abstract_var.local_var)
         matched_var = construct(matched_abstract_var)
 
         constructed_matchers = []
