@@ -26,15 +26,15 @@ ${"overriding" if property.overriding else ""} function ${property.name}
 is
    use type AST_Envs.Lexical_Env;
 
-   % for arg in property.explicit_arguments:
-   ${gdb_helper('bind', arg.name.lower, arg.name.camel_with_underscores)}
-   % endfor
-
    ## We declare a variable Self, that has the named class wide access type
    ## that we can use to dispatch on other properties and all.
    Self : ${Self.type.name()} := ${Self.type.name()}
      (${property.self_arg_name});
    ${gdb_helper('bind', 'self', 'Self')}
+
+   % for arg in property.explicit_arguments:
+   ${gdb_helper('bind', arg.name.lower, arg.name.camel_with_underscores)}
+   % endfor
 
    % if property.has_implicit_env:
       ## Properties are evaluated in the context of a lexical environment. If
