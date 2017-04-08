@@ -12,7 +12,7 @@ def analysis_line_no(context, frame):
     """
     current_file = frame.function().symtab.fullname()
     return (frame.find_sal().line
-            if current_file == context.line_map.filename else None)
+            if current_file == context.debug_info.filename else None)
 
 
 class State(object):
@@ -23,7 +23,7 @@ class State(object):
     def __init__(self, prop):
         self.property = prop
         """
-        :type: langkit.gdb.line_map.Property
+        :type: langkit.gdb.debug_info.Property
         The property currently running.
         """
 
@@ -45,12 +45,12 @@ class State(object):
         :type frame: gdb.Frame
         :rtype: None|State
         """
-        from langkit.gdb.line_map import Event, Scope
+        from langkit.gdb.debug_info import Event, Scope
 
         line_no = analysis_line_no(context, frame)
 
         # First, look for the currently running property
-        prop = context.line_map.lookup_property(line_no) if line_no else None
+        prop = context.debug_info.lookup_property(line_no) if line_no else None
         if prop is None:
             return None
 
@@ -93,7 +93,7 @@ class ScopeState(object):
 
         self.scope = scope
         """
-        :type: langkit.gdb.line_map.Scope
+        :type: langkit.gdb.debug_info.Scope
         The scope of interest.
         """
 

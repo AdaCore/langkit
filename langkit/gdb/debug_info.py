@@ -18,10 +18,9 @@ class ParseError(Exception):
         )
 
 
-class LineMap(object):
+class DebugInfo(object):
     """
-    Data structure for the mapping from generated library source lines and
-    variables to the properties DSL level.
+    Holder for all info that maps generated code to the properties DSL level.
     """
 
     def __init__(self, context):
@@ -45,10 +44,10 @@ class LineMap(object):
         """
         Try to parse the $-analysis.adb source file to extract mapping
         information from its GDB helpers directives. Print error messages on
-        standard output if anything goes wrong, but always return a LineMap
+        standard output if anything goes wrong, but always return a DebugInfo
         instance anyway.
 
-        :rtype: LineMap
+        :rtype: DebugInfo
         """
 
         result = cls(context)

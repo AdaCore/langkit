@@ -82,7 +82,7 @@ qualified name. For instance::
 
     def invoke(self, arg, from_tty):
         lower_prop = arg.strip().lower()
-        for prop in self.context.line_map.properties:
+        for prop in self.context.debug_info.properties:
             if prop.name.lower() == lower_prop:
                 break
         else:
@@ -97,6 +97,6 @@ qualified name. For instance::
         # Break on the first line of the property's first inner scope so that
         # we skip the prologue (all variable declarations).
         gdb.Breakpoint('{}:{}'.format(
-            self.context.line_map.filename,
+            self.context.debug_info.filename,
             scopes[0].line_range.first_line
         ))
