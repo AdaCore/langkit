@@ -1079,7 +1079,8 @@ class AbstractVariable(AbstractExpression):
             global abstract variables where you will use bind_type. Mandatory
             if create_local is True.
         :param bool create_local: Whether to create a corresponding local
-            variable in the current property.
+            variable in the current property. If True, the variable is created
+            scopeless.
         :param names.Name|None source_name: If this variables comes from the
             language specification, hold its original name.
         """
