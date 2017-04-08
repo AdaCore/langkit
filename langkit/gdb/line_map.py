@@ -8,6 +8,8 @@ from __future__ import (absolute_import, division, print_function,
 
 import gdb
 
+from langkit.gdb.state import Binding
+
 
 class ParseError(Exception):
     def __init__(self, line_no, message):
@@ -195,6 +197,15 @@ class Event(object):
         self.line_no = line_no
         self.entity = entity
 
+    def apply_on_state(self, scope_state):
+        """
+        Modify the input state according to the effect this event has. All
+        subclasses must override this.
+
+        :type scope_state: langkit.gdb.state.ScopeState
+        """
+        raise NotImplementedError()
+
     def __repr__(self):
         return '<Event line {}>'.format(self.line_no)
 
@@ -204,6 +215,11 @@ class Bind(Event):
         super(Bind, self).__init__(line_no, dsl_name)
         self.dsl_name = dsl_name
         self.gen_name = gen_name
+
+    def apply_on_state(self, scope_state):
+        scope_state.bindings.append(
+            Binding(self.dsl_name, self.gen_name)
+        )
 
     def __repr__(self):
         return '<Bind {}, line {}>'.format(self.dsl_name, self.line_no)

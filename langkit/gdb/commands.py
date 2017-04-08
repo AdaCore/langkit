@@ -27,13 +27,24 @@ class StateCommand(BaseCommand):
         super(StateCommand, self).__init__(context, 'state', gdb.COMMAND_DATA)
 
     def invoke(self, arg, from_tty):
-        state = State.decode(self.context, gdb.selected_frame())
+        frame = gdb.selected_frame()
+        state = State.decode(self.context, frame)
         if state is None:
             print('Selected frame is not in a property.')
             return
 
         print('Running {}'.format(state.property.name))
         print('from {}'.format(state.property.dsl_sloc))
+
+        for scope_state in state.scopes:
+            if scope_state.bindings:
+                print('')
+                for b in scope_state.bindings:
+                    # Read the value associated to this binding. Switching to
+                    # lower-case is required since GDB ignores case insentivity
+                    # for Ada from the Python API.
+                    value = frame.read_var(b.gen_name.lower())
+                    print('{} = {}'.format(b.dsl_name, value))
 
 
 class BreakCommand(BaseCommand):
