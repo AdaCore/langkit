@@ -2338,13 +2338,13 @@ class PropertyDef(AbstractNodeData):
         }
 
         def mark_vars(expr):
-            if isinstance(expr, AbstractVariable.Expr):
-                all_vars[expr] = True
-
-            elif isinstance(expr, BindingScope):
+            if isinstance(expr, BindingScope):
                 # BindingScope has bindings themselves as operands, but they
                 # must not be considered as uses for this analysis: skip them.
                 expr = expr.expr
+
+            if isinstance(expr, AbstractVariable.Expr):
+                all_vars[expr] = True
 
             for sub in expr.flat_subexprs():
                 mark_vars(sub)
