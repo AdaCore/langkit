@@ -68,6 +68,17 @@ begin
          % endif
       loop
          ${scopes.start_scope(map.iter_scope)}
+         % if map.element_var:
+            ${gdb_helper('bind',
+                         map.element_var.source_name.lower,
+                         iteration_var.camel_with_underscores)}
+         % endif
+         % if map.index_var:
+            ${gdb_helper('bind',
+                         map.index_var.source_name.lower,
+                         map.index_var.name.camel_with_underscores)}
+         % endif
+
          % if list_element_var:
             ${element_var} :=
                ${map.element_var.type.name()} (${list_element_var});
