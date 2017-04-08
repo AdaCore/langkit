@@ -985,7 +985,8 @@ class ResolvedExpression(object):
 
         :rtype: list[AbstractVariable.Expr]
         """
-        result = self._bindings()
+        # Do a copy to avoid mutating the expression own's data structures
+        result = list(self._bindings())
         for expr in self.flat_subexprs():
             result.extend(expr.bindings)
         return result
