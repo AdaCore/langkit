@@ -844,11 +844,6 @@ class Match(AbstractExpression):
         :rtype: ResolvedExpression
         """
         outer_scope = PropertyDef.get_scope()
-
-        # Add the variables created for this expression to the current scope
-        for _, var, _ in self.matchers:
-            outer_scope.add(var.local_var)
-
         matched_expr = construct(self.matched_expr)
         check_source_language(issubclass(matched_expr.type, ASTNode)
                               or matched_expr.type.is_env_element_type,
@@ -887,16 +882,22 @@ class Match(AbstractExpression):
                 # The default matcher (if any) matches the most general type,
                 # which is the input type.
                 var.set_type(matched_expr.type)
-            constructed_matchers.append((construct(var), construct(expr)))
+
+            # Create a scope so that match_var is contained in this branch as
+            # is not exposed outside in the debug info.
+            with outer_scope.new_child() as inner_scope:
+                inner_scope.add(var.local_var)
+                constructed_matchers.append((construct(var), construct(expr),
+                                             inner_scope))
 
         # * all possible input types must have at least one matcher. Also warn
         #   if some matchers are unreachable.
         self._check_match_coverage(matched_expr.type)
 
         # Compute the return type as the unification of all branches
-        _, expr = constructed_matchers[-1]
+        _, expr, _ = constructed_matchers[-1]
         rtype = expr.type
-        for _, expr in constructed_matchers:
+        for _, expr, _ in constructed_matchers:
             check_source_language(
                 expr.type.matches(rtype), "Wrong type for match result"
                 " expression: got {} but expected {} or sub/supertype".format(
@@ -912,7 +913,7 @@ class Match(AbstractExpression):
         # Wrap this "failing" expression with all the cases to match in the
         # appropriate order, so that in the end the first matchers are tested
         # first.
-        for match_var, expr in reversed(constructed_matchers):
+        for match_var, expr, inner_scope in reversed(constructed_matchers):
             casted = Cast.Expr(matched_var,
                                match_var.type,
                                result_var=match_var)
@@ -927,12 +928,9 @@ class Match(AbstractExpression):
                 # rtype. In that case, we need an explicity upcast.
                 expr = Cast.Expr(expr, rtype)
 
-            result = If.Expr(guard, expr, result, rtype)
+            expr_with_scope = BindingScope(expr, [match_var],
+                                           scope=inner_scope)
+            result = If.Expr(guard, expr_with_scope, result, rtype)
 
-        return Let.Expr(
-            [matched_var],
-            [matched_expr],
-            BindingScope(result,
-                         [construct(var) for _, var, _ in self.matchers]),
-            abstract_expr=self
-        )
+        return Let.Expr([matched_var], [matched_expr], result,
+                        abstract_expr=self)
