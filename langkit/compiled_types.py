@@ -79,6 +79,19 @@ def gdb_helper(*args):
             if get_context().gdb_helpers_prefix else '')
 
 
+def gdb_bind_var(var):
+    """
+    Output a GDB helper directive to bind a variable. This does nothing if GDB
+    helpers are disabled or if the variable has no source name.
+
+    :param ResolvedExpression var: The variable to bind.
+    :rtype: str
+    """
+    return (gdb_helper('bind', var.abstract_var.source_name.lower,
+                       var.name.camel_with_underscores)
+            if var.abstract_var and var.abstract_var.source_name else '')
+
+
 @memoized
 def make_renderer(base_renderer=None):
     """
