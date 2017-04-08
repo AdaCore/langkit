@@ -21,12 +21,30 @@ class BaseCommand(gdb.Command):
 
 
 class StateCommand(BaseCommand):
-    """Display the state of the currently running property."""
+    """Display the state of the currently running property.
+
+This command may be followed by a "/X" flag, where X is one or several of:
+
+    * s: to print the name of the Ada variables that hold DSL values.
+"""
 
     def __init__(self, context):
         super(StateCommand, self).__init__(context, 'state', gdb.COMMAND_DATA)
 
     def invoke(self, arg, from_tty):
+        with_locs = False
+
+        if arg:
+            if not arg.startswith('/'):
+                print('Invalid argument')
+                return
+
+            for c in arg[1:]:
+                if c == 's':
+                    with_locs = True
+                else:
+                    print('Invalid flag: {}'.format(repr(c)))
+
         frame = gdb.selected_frame()
         state = State.decode(self.context, frame)
         if state is None:
@@ -44,7 +62,11 @@ class StateCommand(BaseCommand):
                     # lower-case is required since GDB ignores case insentivity
                     # for Ada from the Python API.
                     value = frame.read_var(b.gen_name.lower())
-                    print('{} = {}'.format(b.dsl_name, value))
+                    print('{}{} = {}'.format(
+                        b.dsl_name,
+                        ' ({})'.format(b.gen_name) if with_locs else '',
+                        value
+                    ))
 
 
 class BreakCommand(BaseCommand):
