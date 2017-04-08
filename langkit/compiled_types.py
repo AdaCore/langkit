@@ -183,6 +183,7 @@ def make_renderer(base_renderer=None):
             'exception_type':        CAPIType(capi, 'exception').name,
             'library_public_field':  library_public_field,
             'gdb_helper':            gdb_helper,
+            'gdb_bind_var':          gdb_bind_var,
         })
     return base_renderer.update(template_args)
 
