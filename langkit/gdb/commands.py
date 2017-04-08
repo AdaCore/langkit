@@ -3,18 +3,7 @@ from __future__ import (absolute_import, division, print_function,
 
 import gdb
 
-
-def current_line_no(context):
-    """
-    If the current frame is in the $-analysis.adb file, return its currently
-    executed line number. Return None otherwise.
-
-    :rtype: int|None
-    """
-    frame = gdb.selected_frame()
-    current_file = frame.function().symtab.fullname()
-    if current_file == context.line_map.filename:
-        return frame.find_sal().line
+from langkit.gdb.state import State
 
 
 class BaseCommand(gdb.Command):
@@ -38,15 +27,13 @@ class StateCommand(BaseCommand):
         super(StateCommand, self).__init__(context, 'state', gdb.COMMAND_DATA)
 
     def invoke(self, arg, from_tty):
-        line_no = current_line_no(self.context)
-        p = (self.context.line_map.lookup_property(line_no)
-             if line_no else None)
-        if p is None:
+        state = State.decode(self.context, gdb.selected_frame())
+        if state is None:
             print('Selected frame is not in a property.')
             return
 
-        print('Running {}'.format(p.name))
-        print('from {}'.format(p.dsl_sloc))
+        print('Running {}'.format(state.property.name))
+        print('from {}'.format(state.property.dsl_sloc))
 
 
 class BreakCommand(BaseCommand):
