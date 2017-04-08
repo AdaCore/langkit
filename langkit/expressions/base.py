@@ -14,7 +14,7 @@ from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNode, BoolType, CompiledType,
     EnvRebindingsType, LexicalEnvType, LongType, Symbol, T, Token,
-    gdb_bind_var, get_context, render as ct_render, resolve_type
+    get_context, render as ct_render, resolve_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, check_multiple, check_source_language,
@@ -1270,10 +1270,7 @@ class BindingScope(ResolvedExpression):
         self.static_type = self.expr.type
 
     def _render_pre(self):
-        return '\n'.join(
-            [gdb_bind_var(binding) for binding in self.expr_bindings]
-            + [self.expr._render_pre()]
-        )
+        return render('properties/binding_scope', expr=self)
 
     def _render_expr(self):
         return self.expr._render_expr()
