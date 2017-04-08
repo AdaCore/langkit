@@ -70,10 +70,13 @@ def gdb_helper(*args):
     """
     Format given arguments into a special Ada comment for GDB helpers.
 
+    This does nothing if GDB helpers are disabled for the current context.
+
     :param list[str] args: Elements of the special comment.
     :rtype: str
     """
-    return '--# {}'.format(' '.join(args))
+    return ('--# {}'.format(' '.join(args))
+            if get_context().gdb_helpers_prefix else '')
 
 
 @memoized
@@ -166,8 +169,7 @@ def make_renderer(base_renderer=None):
             'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
             'exception_type':        CAPIType(capi, 'exception').name,
             'library_public_field':  library_public_field,
-            'gdb_helper':
-                gdb_helper if ctx.gdb_helpers_prefix else lambda *args: '',
+            'gdb_helper':            gdb_helper,
         })
     return base_renderer.update(template_args)
 
