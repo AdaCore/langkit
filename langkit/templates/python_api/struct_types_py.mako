@@ -14,20 +14,33 @@ class _BaseStruct(object):
          ))
 
       # Do not expose the "is_null" internal field
-      fields = self._fields_[:-1]
+      fields = self._c_type._fields_[:-1]
       if 0 <= key < len(fields):
-         field_name = fields[key][0]
-         return getattr(self, field_name[1:])
+         field_name, _ = fields[key]
+         return getattr(self, field_name)
       else:
          raise IndexError('There is no {}th field'.format(key))
 
     def __repr__(self):
-        field_names = [name[1:] for name, _ in self._fields_[:-1]]
+        field_names = [name for name, _ in self._c_type._fields_[:-1]]
         return '<{} {}>'.format(
             type(self).__name__,
             ' '.join('{}={}'.format(name, getattr(self, name))
                       for name in field_names)
         )
+
+    # There is no need here to override __del__ as all structure fields already
+    # override their own __del__ operators, so structure fields will
+    # automatically deallocate themselves when their own Python ref-count will
+    # reach 0.
+
+    # Subclasses will override this to a subclass of ctypes.Structure
+    _c_type = None
+
+    # If subclasses implement a ref-counted struct, they will override these
+    # two to the inc_ref/dec_ref functions.
+    _inc_ref = None
+    _dec_ref = None
 
 
 class _BaseEnvElement(_BaseStruct):
@@ -67,94 +80,97 @@ class _BaseEnvElement(_BaseStruct):
 
 <%
    type_name = cls.name().camel
-   ptr_name = '{}_Ptr'.format(type_name)
-   dec_ref = '_{}_dec_ref'.format(type_name)
-
-   base_classes = ['ctypes.Structure',
-                   '_BaseEnvElement'
-                       if cls.is_entity_type else
-                       '_BaseStruct']
+   base_classes = ['_BaseEnvElement'
+                   if cls.is_entity_type else
+                   '_BaseStruct']
 %>
 
 class ${type_name}(${', '.join(base_classes)}):
     ${py_doc(cls, 4)}
-    _fields_ = [
-    % for field in cls.get_fields():
-        ('_${field.name.lower}',
-         ## At this point in the binding, no array type has been emitted yet,
-         ## so use a generic pointer: we will do the conversion later for
-         ## users.
-         % if is_array_type(field.type):
-             ctypes.c_void_p
-         % else:
-            ${pyapi.type_internal_name(field.type)}
-         % endif
-         ),
-    % endfor
-        ('is_null', ctypes.c_uint8),
-    ]
 
-    def __init__(self,
-        % for field in cls.get_fields():
-        ${field.name.lower},
+    <% field_names = [f.name.lower for f in cls.get_fields()] %>
+
+    __slots__ = (${', '.join(map(repr, field_names))})
+
+    def __init__(self, ${', '.join(field_names)}):
+        % for f in field_names:
+        self._${f} = ${f}
         % endfor
-        _uninitialized=False
-    ):
-        if _uninitialized:
-            super(${type_name}, self).__init__()
-            return
-
-        super(${type_name}, self).__init__(
-        % for field in cls.get_fields():
-            _${field.name.lower}=${
-                pyapi.unwrap_value(field.name.lower, field.type)
-            },
-        % endfor
-        )
-
-    def copy(self):
-        """
-        Return a copy of this structure.
-        """
-        return ${type_name}(
-            % for field in cls.get_fields():
-            <%
-                fld = 'self._{}'.format(field.name.lower)
-                copy = pyapi.wrap_value(fld, field.type,
-                                        from_field_access=True,
-                                        inc_ref=True)
-            %>${copy},
-            % endfor
-        )
+        % if not field_names:
+        pass
+        % endif
 
     % for field in cls.get_fields():
 
     @property
     def ${field.name.lower}(self):
         ${py_doc(field, 8)}
-        result = self._${field.name.lower}
-        % if is_array_type(field.type):
-        result = ctypes.cast(result, ${pyapi.type_internal_name(field.type)})
-        % endif
-        ## "self" has an ownership share for this field, but we have to create
-        ## a new one for the caller, so both can live (and die) independently.
-        return ${pyapi.wrap_value('result', field.type,
-                                  from_field_access=True,
-                                  inc_ref=True)}
+        return self._${field.name.lower}
     % endfor
 
+    class _c_type(ctypes.Structure):
+        _fields_ = [
+        % for field in cls.get_fields():
+            ('${field.name.lower}',
+             ## At this point in the binding, no array type has been emitted
+             ## yet, so use a generic pointer: we will do the conversion later
+             ## for users.
+             % if is_array_type(field.type):
+                 ctypes.c_void_p
+             % else:
+                ${pyapi.type_internal_name(field.type)}
+             % endif
+             ),
+        % endfor
+            ('is_null', ctypes.c_uint8),
+        ]
+
+    @classmethod
+    def _wrap(cls, c_value, inc_ref=False):
+        result = cls(
+            % for field in cls.get_fields():
+            <%
+                fld = 'c_value.{}'.format(field.name.lower)
+                if is_array_type(field.type):
+                    fld = 'ctypes.cast({}, {})'.format(
+                        fld,
+                        pyapi.type_internal_name(field.type)
+                    )
+                copy = pyapi.wrap_value(fld, field.type,
+                                        from_field_access=True)
+            %>${copy},
+            % endfor
+        )
+        if cls._inc_ref and inc_ref:
+            cls._inc_ref(ctypes.byref(c_value))
+        return result
+
+    @classmethod
+    def _unwrap(cls, value):
+        if not isinstance(value, cls):
+            _raise_type_error(cls.__name__, value)
+
+        result = cls._c_type(
+            % for f in cls.get_fields():
+            <%
+                f_access = 'value.{}'.format(f.name.lower)
+                unwrapped = pyapi.unwrap_value(f_access, f.type)
+            %>
+            ${f.name.lower}=${(
+                'ctypes.cast({}, ctypes.c_void_p)'.format(unwrapped)
+                if is_array_type(f.type) else unwrapped
+            )},
+            % endfor
+            is_null=False
+        )
+        return result
+
     % if cls.is_refcounted():
-    def __del__(self):
-        ${dec_ref}(ctypes.byref(self))
+    _c_ptr_type = ctypes.POINTER(_c_type)
+    _inc_ref = staticmethod(_import_func('${cls.c_inc_ref(capi)}',
+                            [_c_ptr_type], None))
+    _dec_ref = staticmethod(_import_func('${cls.c_dec_ref(capi)}',
+                            [_c_ptr_type], None))
     % endif
-
-% if cls.is_refcounted():
-${ptr_name} = ctypes.POINTER(${type_name})
-
-${dec_ref} = _import_func(
-   '${cls.c_dec_ref(capi)}',
-   [${ptr_name}], None
-)
-% endif
 
 </%def>

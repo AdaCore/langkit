@@ -1,5 +1,5 @@
 main.py: Running...
-u.root.p_entity(None) = <ArgumentError: argument 2: <type 'exceptions.TypeError'>: expected Entity instance instead of NoneType>
+u.root.p_entity(None) = <TypeError: Entity instance expected, got <type 'NoneType'> instead>
 u.root.p_entity(entity) = <Entity f_node=<Example 1:1-1:9> f_comes_from_source=True>
 main.py: Done.
 Done

@@ -10,16 +10,8 @@
         % else:
         <%
             # Expression to create a holder for the C result
-            c_result_args = (
-                (['{}=None'.format(fld.name.lower)
-                  for fld in field.type.get_fields()]
-                 + ['_uninitialized=True'])
-                if is_struct(field.type) and not is_ast_node(field.type) else
-                []
-            )
-            c_result_constructor = '{}({})'.format(
+            c_result_constructor = '{}()'.format(
                 pyapi.type_internal_name(field.type),
-                ', '.join(c_result_args)
             )
 
             # Expression for the C value for field evaluation

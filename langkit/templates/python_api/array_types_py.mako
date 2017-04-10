@@ -61,7 +61,8 @@ class _BaseArray(object):
 
 <%
    type_name = cls.api_name().camel
-   c_element_type = pyapi.type_internal_name(cls.element_type())
+   element_type = cls.element_type()
+   c_element_type = pyapi.type_internal_name(element_type)
 %>
 
 class ${type_name}(_BaseArray):
@@ -71,16 +72,7 @@ class ${type_name}(_BaseArray):
 
     @staticmethod
     def _unwrap_item(item):
-        ## In the case of array of Structure instances, array[index] returns a
-        ## reference to the record. Thus, in order to keep memory safety, we
-        ## must copy the record itself so that the array can be deallocated
-        ## while the user still has a reference to a record.
-        <% elt_type = cls.element_type() %>
-        % if is_struct_type(elt_type) and not is_ast_node(elt_type):
-        return item.copy()
-        % else:
-        return ${pyapi.wrap_value('item', elt_type)}
-        % endif
+        return ${pyapi.wrap_value('item', element_type, inc_ref=True)}
 
     _c_element_type = ${c_element_type}
 

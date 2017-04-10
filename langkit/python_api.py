@@ -42,7 +42,8 @@ class PythonAPISettings(AbstractAPISettings):
         # TODO: handle all types
         assert (not inc_ref
                 or not type.is_refcounted()
-                or issubclass(type, ct.ArrayType)), (
+                or issubclass(type, (ct.ArrayType, ct.Struct,
+                                     ct.LexicalEnvType))), (
             'Incrementing ref-count of {} in the Python API is not handled'
             ' yet'.format(type.name())
         )
@@ -66,7 +67,10 @@ class PythonAPISettings(AbstractAPISettings):
                 type.api_name().camel,
                 inc_ref
             )),
-            (ct.Struct, lambda _: '{}._wrap({{}})'.format(type.name().camel)),
+            (ct.Struct, lambda _: '{}._wrap({{}}, inc_ref={})'.format(
+                type.name().camel,
+                inc_ref
+            )),
             (ct.LexicalEnvType, lambda _: 'LexicalEnv._wrap({})'),
             (ct.LogicVarType, lambda _: 'LogicVar._wrap({})'),
             (ct.EquationType, lambda _: 'Equation._wrap({})'),
