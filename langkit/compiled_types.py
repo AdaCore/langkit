@@ -2276,7 +2276,7 @@ class ASTNode(Struct):
         information.
         """
 
-        env_element_klass = type(
+        entity_klass = type(
             b'EnvElement{}'.format(cls.name().camel
                                    if cls != T.root_node else ''),
             (Struct, ), {
@@ -2296,9 +2296,9 @@ class ASTNode(Struct):
             # LexicalEnv.get, which is bound in the AST.C generate package,
             # returns arrays of root node env elements, so the corresponding
             # array type must be declared manually there.
-            env_element_klass.should_emit_array_type = False
+            entity_klass.should_emit_array_type = False
 
-        return env_element_klass
+        return entity_klass
 
     @classmethod
     def check_resolved(cls):
