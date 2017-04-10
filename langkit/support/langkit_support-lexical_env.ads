@@ -97,8 +97,6 @@ package Langkit_Support.Lexical_Env is
       Ref_Count  : Natural := 1;
    end record;
 
-   No_Env_Rebindings : aliased Env_Rebindings_Type := (0, others => <>);
-
    type Env_Rebindings is access all Env_Rebindings_Type;
 
    function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings
@@ -114,10 +112,9 @@ package Langkit_Support.Lexical_Env is
    --  Decrement Self's reference count. Also destroy it if the count drops to
    --  0. Do nothing in Self is null.
 
-   function Combine (L, R : Env_Rebindings_Type) return Env_Rebindings_Type;
    function Combine (L, R : Env_Rebindings) return Env_Rebindings;
-   --  Return a new Env_Rebindings structure that combines rebindings from both
-   --  L and R. Raises a Constraint_Error if the number of bindings exceeds
+   --  Return a new Env_Rebindings that combines rebindings from both L and R.
+   --  Raises a Constraint_Error if the number of bindings exceeds
    --  Env_Rebindings_Size.
 
    function Append
