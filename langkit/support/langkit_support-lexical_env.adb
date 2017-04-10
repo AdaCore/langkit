@@ -289,6 +289,8 @@ package body Langkit_Support.Lexical_Env is
          Ret : constant Env_Element_Array :=
             Own_Elts & Refd_Elts & TRefd_Elts & Parent_Elts;
       begin
+         Dec_Ref (Current_Rebindings);
+
          --  Only filter if a non null value was given for the From parameter
          return (if From = No_Element then Ret
                  else Env_Element_Arrays.Filter (Ret, Can_Reach_F'Access));
