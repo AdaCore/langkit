@@ -325,7 +325,7 @@ package ${ada_lib_name}.Analysis is
    --  declarations.
 
    type Env_Getter_State_T is record
-      Node        : ${root_node_type_name};
+      Node : ${root_node_type_name};
    end record;
 
    package AST_Envs is new Langkit_Support.Lexical_Env
