@@ -13,6 +13,10 @@ typedef struct {
    char is_null;
 } ${type_name};
 
+/* Increment the ref-count of all components in "r".  */
+extern void
+${cls.c_inc_ref(capi)}(${type_name} *r);
+
 /* Decrement the ref-count of all components in "r".  */
 extern void
 ${cls.c_dec_ref(capi)}(${type_name} *r);

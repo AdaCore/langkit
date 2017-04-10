@@ -66,7 +66,7 @@ class PythonAPISettings(AbstractAPISettings):
                 type.api_name().camel,
                 inc_ref
             )),
-            (ct.Struct, lambda _: '{}'),
+            (ct.Struct, lambda _: '{}._wrap({{}})'.format(type.name().camel)),
             (ct.LexicalEnvType, lambda _: 'LexicalEnv._wrap({})'),
             (ct.LogicVarType, lambda _: 'LogicVar._wrap({})'),
             (ct.EquationType, lambda _: 'Equation._wrap({})'),
@@ -102,7 +102,9 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda cls: '{}._unwrap({{}})'.format(
                 cls.api_name().camel
             )),
-            (ct.Struct, lambda _: '{}'),
+            (ct.Struct, lambda _: '{}._unwrap({{}})'.format(
+                type.name().camel
+            )),
             (ct.Symbol, lambda _: '_text._unwrap({})'),
             (ct.LexicalEnvType, lambda _: 'LexicalEnv._unwrap({})'),
             (ct.LogicVarType, lambda _: 'LogicVar._unwrap({})'),
@@ -145,5 +147,5 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.EnumType, lambda _: ctype_type('c_uint')),
             (ct.ArrayType, lambda cls:
                 '{}._c_type'.format(cls.api_name().camel)),
-            (ct.Struct, lambda _: type.name().camel),
+            (ct.Struct, lambda _: '{}._c_type'.format(type.name().camel)),
         ])

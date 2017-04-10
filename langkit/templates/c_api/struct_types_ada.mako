@@ -5,6 +5,7 @@
 <%
    ada_type_name = cls.name().camel_with_underscores
    c_type_name = cls.c_type(capi).name
+   inc_ref = cls.c_inc_ref(capi)
    dec_ref = cls.c_dec_ref(capi)
 %>
 
@@ -14,6 +15,10 @@ subtype ${c_type_name} is ${ada_type_name};
 type ${c_type_name}_Ptr is access ${ada_type_name};
 
 % if cls.is_refcounted():
+procedure ${inc_ref} (R : ${c_type_name}_Ptr)
+   with Export        => True,
+        Convention    => C,
+        External_name => "${inc_ref}";
 procedure ${dec_ref} (R : ${c_type_name}_Ptr)
    with Export        => True,
         Convention    => C,
@@ -27,10 +32,20 @@ procedure ${dec_ref} (R : ${c_type_name}_Ptr)
 <%
    ada_type_name = cls.name().camel_with_underscores
    c_type_name = cls.c_type(capi).name
+   inc_ref = cls.c_inc_ref(capi)
    dec_ref = cls.c_dec_ref(capi)
 %>
 
 % if cls.is_refcounted():
+procedure ${inc_ref} (R : ${c_type_name}_Ptr) is
+begin
+   Clear_Last_Exception;
+   Inc_Ref (R.all);
+exception
+   when Exc : others =>
+      Set_Last_Exception (Exc);
+end ${inc_ref};
+
 procedure ${dec_ref} (R : ${c_type_name}_Ptr) is
 begin
    Clear_Last_Exception;
