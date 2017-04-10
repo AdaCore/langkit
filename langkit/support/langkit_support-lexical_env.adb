@@ -10,6 +10,10 @@ package body Langkit_Support.Lexical_Env is
    --  Helpers for Env_Getters. TODO: To be removed when we remove ref-counting
    --  from lexical envs.
 
+   procedure Inc_Ref (Self : Env_Rebinding);
+   procedure Dec_Ref (Self : in out Env_Rebinding);
+   --  Helpers for ref-counting handling of Env_Rebindings_Type
+
    function Decorate
      (Els              : Env_Element_Array;
       MD               : Element_Metadata;
@@ -474,6 +478,26 @@ package body Langkit_Support.Lexical_Env is
       end if;
    end Dec_Ref;
 
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Self : Env_Rebinding) is
+   begin
+      Inc_Ref (Self.Old_Env);
+      Inc_Ref (Self.New_Env);
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Self : in out Env_Rebinding) is
+   begin
+      Dec_Ref (Self.Old_Env);
+      Dec_Ref (Self.New_Env);
+   end Dec_Ref;
+
    -----------------------
    -- Simple_Env_Getter --
    -----------------------
@@ -551,8 +575,10 @@ package body Langkit_Support.Lexical_Env is
       if L = null and then R = null then
          return null;
       elsif L = null or else L.Size = 0 then
+         Inc_Ref (R);
          return R;
       elsif R = null or else R.Size = 0 then
+         Inc_Ref (L);
          return L;
       end if;
 
@@ -561,9 +587,11 @@ package body Langkit_Support.Lexical_Env is
 
       for J in 1 .. L.Size loop
          Result.Rebindings (J) := L.Rebindings (J);
+         Inc_Ref (Result.Rebindings (J));
       end loop;
       for J in 1 .. R.Size loop
          Result.Rebindings (J + L.Size + 1) := R.Rebindings (J);
+         Inc_Ref (Result.Rebindings (J));
       end loop;
 
       return Result;
