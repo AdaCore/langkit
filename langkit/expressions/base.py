@@ -122,7 +122,8 @@ def expand_abstract_fn(fn):
     return (fn_arguments, fn_expr)
 
 
-def construct(expr, expected_type_or_pred=None, custom_msg=None):
+def construct(expr, expected_type_or_pred=None, custom_msg=None,
+              downcast=True):
     """
     Construct a ResolvedExpression from an object that is a valid expression in
     the Property DSL.
@@ -142,6 +143,9 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None):
         respectively.If expected_type_or_pred is a predicate, only {expr_type}
         will be provided, and putting an {expected} template hole will result
         in an error.
+
+    :param bool downcast: If the type of expr is a subtype of the passed
+        expected_type, and this param is True, then generate a downcast.
 
     :rtype: ResolvedExpression
     """
