@@ -266,9 +266,9 @@ def dispatch_on_type(type, type_to_action_assocs, exception=None):
 
 def assert_type(obj, typ):
     """
-    Ensure that obj is a subtype or subclass of type, depending on whether
-    obj is a type or an instance. Return obj. This allows a few things
-    compared to regular asserts:
+    Ensure that obj is a subclass or instance of type, depending on whether obj
+    is a type or an instance. Return obj. This allows a few things compared to
+    regular asserts:
 
     1. The type of the return is correctly inferred by Pycharm.
     2. You can use a "fluent interface" style for style checks, using::
