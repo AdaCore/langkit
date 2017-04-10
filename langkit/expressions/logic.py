@@ -177,7 +177,7 @@ class Bind(AbstractExpression):
                     expr = Cast.Expr(expr, T.root_node)
 
                 # If the expression is a root node, implicitly construct an
-                # env_element from it.
+                # entity from it.
                 expr = New.StructExpr(T.root_node.entity(), {
                     Name('El'): expr,
                     Name('MD'): LiteralExpr('<>', None),
