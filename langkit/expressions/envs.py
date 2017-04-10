@@ -371,7 +371,9 @@ def make_env_el(self, node):
     check_source_language(p, "make_env_el has to be used in a property")
     p.set_uses_env()
 
-    node_expr = construct(node, T.root_node)
+    # We want to keep original type of node, so no downcast
+    node_expr = construct(node, T.root_node, downcast=False)
+
     md_expr = New.StructExpr(T.env_md, {f.name: construct(False)
                                         for f in T.env_md.get_fields()})
     return New.StructExpr(
