@@ -1049,8 +1049,10 @@ class ${root_astnode_name}(object):
 class EnvRebindings(object):
     ${py_doc('langkit.env_rebindings_type', 4)}
 
-    def __init__(self, c_value):
+    def __init__(self, c_value, inc_ref=False):
         self._c_value = c_value
+        if inc_ref:
+           self._inc_ref(self._c_value)
 
     class _c_type(ctypes.c_void_p):
         pass
@@ -1067,6 +1069,13 @@ class EnvRebindings(object):
     @classmethod
     def _wrap(cls, c_value):
         return cls(c_value) if c_value else None
+
+    _inc_ref = staticmethod(
+        _import_func('${EnvRebindingsType.c_inc_ref(capi)}', [_c_type], None)
+    )
+    _dec_ref = staticmethod(
+        _import_func('${EnvRebindingsType.c_dec_ref(capi)}', [_c_type], None)
+    )
 
 
 % for astnode in ctx.astnode_types:
