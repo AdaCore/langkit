@@ -70,7 +70,7 @@ This command may be followed by a "/X" flag, where X is one or several of:
 
 
 class BreakCommand(BaseCommand):
-    """But a breakpoint on a property. Takes a case-insensitive property
+    """Put a breakpoint on a property. Takes a case-insensitive property
 qualified name. For instance::
 
     *break MyNode.p_property
