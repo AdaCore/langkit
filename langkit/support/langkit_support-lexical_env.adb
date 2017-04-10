@@ -33,6 +33,24 @@ package body Langkit_Support.Lexical_Env is
         (El => El, MD => MD, Parents_Bindings => <>, Is_Null => False);
    end Create;
 
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Self : Env_Element) is
+   begin
+      Inc_Ref (Self.Parents_Bindings);
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Self : in out Env_Element) is
+   begin
+      Dec_Ref (Self.Parents_Bindings);
+   end Dec_Ref;
+
    ------------
    -- Unwrap --
    ------------

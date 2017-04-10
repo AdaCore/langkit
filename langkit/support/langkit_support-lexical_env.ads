@@ -140,6 +140,12 @@ package Langkit_Support.Lexical_Env is
    --  Constructor that returns an Env_Element from an Element_T and an
    --  Element_Metadata instances.
 
+   procedure Inc_Ref (Self : Env_Element);
+   --  Increment the reference count of items in Self
+
+   procedure Dec_Ref (Self : in out Env_Element);
+   --  Decrement the reference count of items in Self
+
    ------------------------------------------
    --  Arrays of elements and env elements --
    ------------------------------------------
