@@ -155,11 +155,11 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
 
     if resolve_unique:
         return make_expr("Get ({}, 0)".format(array_expr),
-                         T.root_node.env_el())
+                         T.root_node.entity())
     else:
-        T.root_node.env_el().array_type().add_to_context()
+        T.root_node.entity().array_type().add_to_context()
         return make_expr("Create ({})".format(array_expr),
-                         T.root_node.env_el().array_type())
+                         T.root_node.entity().array_type())
 
 
 class EnvBindExpr(ResolvedExpression):
@@ -377,7 +377,7 @@ def make_env_el(self, node):
     md_expr = New.StructExpr(T.env_md, {f.name: construct(False)
                                         for f in T.env_md.get_fields()})
     return New.StructExpr(
-        node_expr.type.env_el(),
+        node_expr.type.entity(),
         {names.Name('md'): md_expr,
          names.Name('el'): node_expr,
          names.Name('parents_bindings'): construct(p.env_rebinding_arg.var)},

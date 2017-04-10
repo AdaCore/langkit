@@ -34,12 +34,12 @@ class Literal(FooNode):
 
     get_num = Property(3)
 
-    a = AbstractProperty(runtime_check=True, type=FooNode.env_el())
+    a = AbstractProperty(runtime_check=True, type=FooNode.entity())
 
     b = Property(
         Self.a.match(
-            lambda b=BarNode.env_el(): b.get_num,
-            lambda c=FooNode.env_el(): c.get_num,
+            lambda b=BarNode.entity(): b.get_num,
+            lambda c=FooNode.entity(): c.get_num,
         ),
         public=True
     )

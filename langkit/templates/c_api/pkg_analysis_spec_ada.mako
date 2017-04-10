@@ -445,7 +445,7 @@ package ${ada_lib_name}.Analysis.C is
    ------------------------------------
 
    ${array_types.decl(LexicalEnvType.array_type())}
-   ${array_types.decl(T.root_node.env_el().array_type())}
+   ${array_types.decl(T.root_node.entity().array_type())}
 
    function ${capi.get_name('lexical_env_empty')} return ${lexical_env_type}
       with Export        => True,
@@ -469,7 +469,7 @@ package ${ada_lib_name}.Analysis.C is
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};
       Name : ${text_type})
-      return ${(T.root_node.env_el().array_type().name()
+      return ${(T.root_node.entity().array_type().name()
                 .camel_with_underscores)}
       with Export        => True,
            Convention    => C,

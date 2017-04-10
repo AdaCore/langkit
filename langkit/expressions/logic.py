@@ -162,15 +162,15 @@ class Bind(AbstractExpression):
 
                 expr.type == LogicVarType
                 or expr.type.matches(T.root_node)
-                or expr.type.matches(T.root_node.env_el()),
+                or expr.type.matches(T.root_node.entity()),
 
                 "Operands to a logic bind operator should be either "
                 "a logic variable or an ASTNode, got {}".format(expr.type)
             )
 
-            if expr.type.matches(T.root_node.env_el()):
-                if expr.type is not T.root_node.env_el():
-                    expr = Cast.Expr(expr, T.root_node.env_el())
+            if expr.type.matches(T.root_node.entity()):
+                if expr.type is not T.root_node.entity():
+                    expr = Cast.Expr(expr, T.root_node.entity())
             elif expr.type.matches(T.root_node):
                 # Cast the AST node type if necessary
                 if expr.type is not T.root_node:
@@ -178,7 +178,7 @@ class Bind(AbstractExpression):
 
                 # If the expression is a root node, implicitly construct an
                 # env_element from it.
-                expr = New.StructExpr(T.root_node.env_el(), {
+                expr = New.StructExpr(T.root_node.entity(), {
                     Name('El'): expr,
                     Name('MD'): LiteralExpr('<>', None),
                     Name('Parents_Bindings'): LiteralExpr('null', None)
@@ -220,7 +220,7 @@ class DomainExpr(ResolvedExpression):
                 A   : Eq_Node.Raw_Member_Array (1 .. Length (Dom));
             begin
                 for J in 0 .. Length (Dom) - 1 loop
-                    A (J + 1) := {env_el};
+                    A (J + 1) := {entity};
                 end loop;
 
                 {res_var} := Member ({logic_var}, A);
@@ -229,7 +229,7 @@ class DomainExpr(ResolvedExpression):
                        domain=self.domain.render_expr(),
                        domain_type=self.domain.type.name(),
                        res_var=self.res_var.name,
-                       env_el="Get (Dom, J)" if is_node_domain
+                       entity="Get (Dom, J)" if is_node_domain
                        else "(El => Get (Dom, J), others => <>)")
         ])
 
@@ -443,7 +443,7 @@ def get_value(self, logic_var):
         extract the value.
     """
     return BuiltinCallExpr(
-        "Eq_Node.Refs.Get_Value", T.root_node.env_el(),
+        "Eq_Node.Refs.Get_Value", T.root_node.entity(),
         [construct(logic_var, LogicVarType)],
         abstract_expr=self,
     )

@@ -173,7 +173,7 @@ def make_renderer(base_renderer=None):
             'unit_provider_get_unit_from_name_type':
                 CAPIType(capi,
                          'unit_provider_get_unit_from_name_callback').name,
-            'env_element_type':      T.root_node.env_el().c_type(capi),
+            'env_element_type':      T.root_node.entity().c_type(capi),
             'token_kind':            CAPIType(capi, 'token_kind').name,
             'token_type':            CAPIType(capi, 'token').name,
             'sloc_type':             CAPIType(capi, 'source_location').name,
@@ -1753,7 +1753,7 @@ class Struct(CompiledType):
 
             # The root node's env_element is not emitted per se, because it is
             # a generic instantiation from Langkit_Support.Lexical_Env.
-            StructMetaclass.root_grammar_class.env_el()
+            StructMetaclass.root_grammar_class.entity()
         )
 
     @classmethod
@@ -2271,12 +2271,10 @@ class ASTNode(Struct):
 
     @classmethod
     @memoized
-    def env_el(cls):
+    def entity(cls):
         """
-        Denotes the type returned by doing a get operation on a lexical
-        environment. This is a wrapper containing the AST node stored as a
-        value, as well as the metadata associated to this node in the
-        source lexical environment.
+        Return the entity type, which is a node type with assorted semantic
+        information.
         """
 
         env_element_klass = type(
@@ -2683,13 +2681,13 @@ class TypeRepo(object):
             """
             return TypeRepo.Defer(lambda: self.get().list_type())
 
-        def env_el(self):
+        def entity(self):
             """
-            Proxy to the Struct.env_el classmethod.
+            Proxy to the Struct.entity classmethod.
 
             :rtype: CompiledType
             """
-            return TypeRepo.Defer(lambda: self.get().env_el())
+            return TypeRepo.Defer(lambda: self.get().entity())
 
     def __getattr__(self, type_name):
         """
@@ -2738,11 +2736,10 @@ class TypeRepo(object):
     @property
     def sem_node(self):
         """
-        This property returns the type used to describe an AST node with
-        semantic information attached. Currently, this is an env_element
-        containing a root_node.
+        This property returns the root type used to describe an AST node with
+        semantic information attached.
         """
-        return self.root_node.env_el()
+        return self.root_node.entity()
 
     # noinspection PyPep8Naming
     @property

@@ -1068,7 +1068,7 @@ package body ${ada_lib_name}.Analysis is
    end Reset_Property_Caches;
 
    ${array_types.body(LexicalEnvType.array_type())}
-   ${array_types.body(T.root_node.env_el().array_type())}
+   ${array_types.body(T.root_node.entity().array_type())}
 
    function Child_Number
      (Node : access ${root_node_value_type}'Class)

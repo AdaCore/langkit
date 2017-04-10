@@ -31,12 +31,12 @@ class BarNode(FooNode):
 class Literal(FooNode):
     tok = Field()
 
-    a = AbstractProperty(runtime_check=True, type=FooNode.env_el())
+    a = AbstractProperty(runtime_check=True, type=FooNode.entity())
 
     b = Property(
         Self.a.match(
-            lambda b=BarNode.env_el(): b.prop,
-            lambda c=FooNode.env_el(): c.prop,
+            lambda b=BarNode.entity(): b.prop,
+            lambda c=FooNode.entity(): c.prop,
         ),
         public=True
     )

@@ -60,8 +60,8 @@ class Name(Expression):
     deref_env_element = Property(Self.env_element.null_node, public=True)
     match_env_element = Property(
         Self.env_element.match(
-            lambda l=T.Literal.env_el(): l.el,
-            lambda n=T.Name.env_el(): n.el,
+            lambda l=T.Literal.entity(): l.el,
+            lambda n=T.Name.entity(): n.el,
             lambda others: others.el
         ),
         public=True

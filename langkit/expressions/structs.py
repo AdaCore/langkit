@@ -98,7 +98,7 @@ class Cast(AbstractExpression):
 
         check_source_language(
             self.dest_type.matches(ASTNode)
-            or self.dest_type.matches(T.root_node.env_el()),
+            or self.dest_type.matches(T.root_node.entity()),
             "One can only cast to an ASTNode subtype or to an env_element"
         )
 
@@ -803,15 +803,15 @@ class Match(AbstractExpression):
         """
 
         type_set = TypeSet()
-        env_el = input_type.is_env_element_type
+        is_entity = input_type.is_env_element_type
 
-        if env_el:
+        if is_entity:
             input_type = input_type.el_type
 
         for i, (typ, _, _) in enumerate(self.matchers, 1):
             t_name = 'default one' if typ is None else typ.name().camel
 
-            if env_el and typ:
+            if is_entity and typ:
                 check_source_language(
                     typ.is_env_element_type,
                     "Match expression on an env element, should match env "
