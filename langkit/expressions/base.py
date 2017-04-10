@@ -176,7 +176,7 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
                 # If the type matches expectation but is incompatible in the
                 # generated code, generate a conversion. This is needed for the
                 # various ASTNode subclasses.
-                if expected_type != ret.type:
+                if downcast and expected_type != ret.type:
                     from langkit.expressions import Cast
                     return Cast.Expr(ret, expected_type)
             else:
