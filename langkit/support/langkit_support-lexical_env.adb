@@ -559,6 +559,9 @@ package body Langkit_Support.Lexical_Env is
    begin
       if Self /= null then
          Self.Ref_Count := Self.Ref_Count - 1;
+         for R of Self.Rebindings loop
+            Dec_Ref (R);
+         end loop;
          if Self.Ref_Count = 0 then
             Unchecked_Free (Self);
          end if;
