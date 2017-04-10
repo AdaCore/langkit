@@ -99,7 +99,7 @@ class Cast(AbstractExpression):
         check_source_language(
             self.dest_type.matches(ASTNode)
             or self.dest_type.matches(T.root_node.entity()),
-            "One can only cast to an ASTNode subtype or to an env_element"
+            "One can only cast to an ASTNode subtype or to an entity"
         )
 
     def construct(self):
@@ -671,7 +671,7 @@ class IsA(AbstractExpression):
         for a in astnodes:
             check_source_language(
                 issubclass(a, ASTNode) or a.is_entity_type,
-                "Expected ASTNode subclass or env_element, got {}".format(a)
+                "Expected ASTNode subclass or entity, got {}".format(a)
             )
             check_source_language(a.matches(expr.type), (
                 'When testing the dynamic subtype of an AST node, the type to'
