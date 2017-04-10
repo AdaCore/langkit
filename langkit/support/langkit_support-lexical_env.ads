@@ -107,7 +107,9 @@ package Langkit_Support.Lexical_Env is
                                 Ref_Count  => 1));
    --  Create a new Env_Rebindings from an array of binding pairs
 
-   procedure Destroy (Self : in out Env_Rebindings);
+   procedure Dec_Ref (Self : in out Env_Rebindings);
+   --  Decrement Self's reference count. Also destroy it if the count drops to
+   --  0. Do nothing in Self is null.
 
    function Combine (L, R : Env_Rebindings_Type) return Env_Rebindings_Type;
    function Combine (L, R : Env_Rebindings) return Env_Rebindings;

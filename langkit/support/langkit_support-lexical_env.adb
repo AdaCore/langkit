@@ -515,10 +515,10 @@ package body Langkit_Support.Lexical_Env is
    end Orphan;
 
    -------------
-   -- Destroy --
+   -- Dec_Ref --
    -------------
 
-   procedure Destroy (Self : in out Env_Rebindings) is
+   procedure Dec_Ref (Self : in out Env_Rebindings) is
       procedure Unchecked_Free
       is new Ada.Unchecked_Deallocation (Env_Rebindings_Type, Env_Rebindings);
    begin
@@ -528,7 +528,7 @@ package body Langkit_Support.Lexical_Env is
             Unchecked_Free (Self);
          end if;
       end if;
-   end Destroy;
+   end Dec_Ref;
 
    -------------
    -- Combine --
