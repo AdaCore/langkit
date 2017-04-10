@@ -1067,8 +1067,16 @@ class EnvRebindings(object):
             return value._c_value
 
     @classmethod
-    def _wrap(cls, c_value):
-        return cls(c_value) if c_value else None
+    def _wrap(cls, c_value, inc_ref=False):
+        if c_value:
+            if inc_ref:
+                cls._inc_ref(c_value)
+            return cls(c_value)
+        else:
+            return None
+
+    def __del__(self):
+        self._dec_ref(self._c_value)
 
     _inc_ref = staticmethod(
         _import_func('${EnvRebindingsType.c_inc_ref(capi)}', [_c_type], None)

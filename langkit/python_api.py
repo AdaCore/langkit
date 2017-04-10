@@ -43,7 +43,8 @@ class PythonAPISettings(AbstractAPISettings):
         assert (not inc_ref
                 or not type.is_refcounted()
                 or issubclass(type, (ct.ArrayType, ct.Struct,
-                                     ct.LexicalEnvType))), (
+                                     ct.LexicalEnvType,
+                                     ct.EnvRebindingsType))), (
             'Incrementing ref-count of {} in the Python API is not handled'
             ' yet'.format(type.name())
         )
@@ -74,7 +75,8 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.LexicalEnvType, lambda _: 'LexicalEnv._wrap({})'),
             (ct.LogicVarType, lambda _: 'LogicVar._wrap({})'),
             (ct.EquationType, lambda _: 'Equation._wrap({})'),
-            (ct.EnvRebindingsType, lambda _: 'EnvRebindings._wrap({})'),
+            (ct.EnvRebindingsType, lambda _:
+                'EnvRebindings._wrap({{}}, inc_ref={})'.format(inc_ref)),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             '(wrapping): {}'.format(type)

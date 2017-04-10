@@ -659,7 +659,7 @@ class EnvRebindingsType(BasicType):
 
     @classmethod
     def is_refcounted(cls):
-        return False
+        return True
 
     @classmethod
     def py_nullexpr(cls):
