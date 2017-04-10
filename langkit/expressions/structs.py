@@ -324,7 +324,7 @@ class FieldAccess(AbstractExpression):
             :param list[ResolvedExpression] arguments: If non-empty, this field
                 access will actually be a primitive call.
 
-            :param bool implicit_deref: Whether the receiver is an env element,
+            :param bool implicit_deref: Whether the receiver is an entity,
                 and we want to access a field or property of the stored node.
 
             :param AbstractExpression|None abstract_expr: See
@@ -391,8 +391,7 @@ class FieldAccess(AbstractExpression):
 
             # Env rebinding can come from two sources here:
             # - From the property context, if we're already in a property call.
-            # - From the env element, if we're calling the property on an env
-            #   element.
+            # - From the entity, if we're calling the property on an entity.
 
             l = r = None
 
@@ -400,7 +399,7 @@ class FieldAccess(AbstractExpression):
             if PropertyDef.get() and PropertyDef.get().uses_envs:
                 l = str(PropertyDef.env_rebinding_name)
 
-            # Then try to get env rebindings from the env element
+            # Then try to get env rebindings from the entity
             if self.implicit_deref:
                 r = '{}.Parents_Bindings'.format(self.prefix)
 
@@ -523,7 +522,7 @@ class FieldAccess(AbstractExpression):
                                                                    None)
         ":type: AbstractNodeField"
 
-        # If still not found, maybe the receiver is an env el, in which case we
+        # If still not found, maybe the receiver is an entity, in which case we
         # want to do implicit dereference.
         if not to_get and receiver_expr.type.is_entity_type:
             to_get = receiver_expr.type.el_type.get_abstract_fields_dict().get(
@@ -814,8 +813,8 @@ class Match(AbstractExpression):
             if is_entity and typ:
                 check_source_language(
                     typ.is_entity_type,
-                    "Match expression on an env element, should match env "
-                    "element types"
+                    "Match expression on an entity, should match entity "
+                    "types"
                 )
                 typ = typ.el_type
 
@@ -848,7 +847,7 @@ class Match(AbstractExpression):
         check_source_language(issubclass(matched_expr.type, ASTNode)
                               or matched_expr.type.is_entity_type,
                               'Match expressions can only work on AST nodes '
-                              'or env elements')
+                              'or entities')
         matched_expr = NullCheckExpr(
             matched_expr,
             implicit_deref=matched_expr.type.is_entity_type

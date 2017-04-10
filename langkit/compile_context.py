@@ -912,7 +912,7 @@ class CompileCtx(object):
         # Here we're skipping Struct because it's not a real type in
         # generated code. We're also putting env_metadata and entity in
         # the beginning and in the right dependency order (the metadata type
-        # before the env element type).
+        # before the entity type).
         #
         # TODO: Using a dependency order topological sort wouldn't hurt at
         # some point.

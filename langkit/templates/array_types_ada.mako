@@ -16,9 +16,9 @@
       Items     : ${cls.api_name()} (1 .. N);
    end record;
 
-   ## If we are on the env element type, we need a conversion function
+   ## If we are on the entity type, we need a conversion function
    ## to be able to get element arrays starting from 0 and convert them into
-   ## arrays starting from 1. We need it to convert from env element arrays,
+   ## arrays starting from 1. We need it to convert from entity arrays,
    ## to our array record type.
    % if cls.element_type() == T.root_node.entity():
    function Create (Items : AST_Envs.Env_Element_Array) return ${cls.name()};
