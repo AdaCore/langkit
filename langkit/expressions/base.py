@@ -14,7 +14,7 @@ from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNode, BoolType, CompiledType,
     EnvRebindingsType, LexicalEnvType, LongType, Symbol, T, Token,
-    get_context, render as ct_render, resolve_type
+    gdb_bind_var, get_context, render as ct_render, resolve_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, check_multiple, check_source_language,
@@ -1329,6 +1329,7 @@ class Let(AbstractExpression):
             for var, expr in zip(self.vars, self.var_exprs):
                 result.append(expr.render_pre())
                 result.append('{} := {};'.format(var.name, expr.render_expr()))
+                result.append(gdb_bind_var(var))
                 if var.type.is_refcounted():
                     result.append('Inc_Ref ({});'.format(var.name))
             result.append(self.expr.render_pre())
