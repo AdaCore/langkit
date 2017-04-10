@@ -620,7 +620,7 @@ class CompileCtx(object):
 
         # Get the list of ASTNode types from the Struct metaclass
         from langkit.compiled_types import LexicalEnvType, StructMetaclass
-        env_element = StructMetaclass.root_grammar_class.entity()
+        entity = StructMetaclass.root_grammar_class.entity()
 
         self.astnode_types = list(StructMetaclass.astnode_types)
 
@@ -632,8 +632,8 @@ class CompileCtx(object):
         # envs, so we always need to generate the corresponding array type.
         self.array_types.add(LexicalEnvType.array_type())
 
-        # Likewise for the env_element array type: LexicalEnv.get returns it.
-        self.array_types.add(env_element.array_type())
+        # Likewise for the entity array type: LexicalEnv.get returns it.
+        self.array_types.add(entity.array_type())
 
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a
@@ -910,7 +910,7 @@ class CompileCtx(object):
     @property
     def struct_types(self):
         # Here we're skipping Struct because it's not a real type in
-        # generated code. We're also putting env_metadata and env_element in
+        # generated code. We're also putting env_metadata and entity in
         # the beginning and in the right dependency order (the metadata type
         # before the env element type).
         #
@@ -932,13 +932,13 @@ class CompileCtx(object):
             )
 
         else:
-            env_element = StructMetaclass.root_grammar_class.entity()
+            entity = StructMetaclass.root_grammar_class.entity()
             env_md = StructMetaclass.env_metadata
             self._struct_types = [
                 t for t in StructMetaclass.struct_types
-                if t not in [env_md, env_element]
+                if t not in [env_md, entity]
             ]
-            self._struct_types.insert(0, env_element)
+            self._struct_types.insert(0, entity)
             self._struct_types.insert(0, env_md)
 
         return self._struct_types
