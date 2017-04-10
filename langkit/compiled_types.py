@@ -173,7 +173,6 @@ def make_renderer(base_renderer=None):
             'unit_provider_get_unit_from_name_type':
                 CAPIType(capi,
                          'unit_provider_get_unit_from_name_callback').name,
-            'env_element_type':      T.root_node.entity().c_type(capi),
             'token_kind':            CAPIType(capi, 'token_kind').name,
             'token_type':            CAPIType(capi, 'token').name,
             'sloc_type':             CAPIType(capi, 'source_location').name,
