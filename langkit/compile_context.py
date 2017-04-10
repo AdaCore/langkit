@@ -1290,16 +1290,16 @@ class CompileCtx(object):
 
         with names.camel:
             with open(os.path.join(python_path, module_filename), "w") as f:
-                code = strip_white_lines(self.render_template(
+                code = self.render_template(
                     "python_api/module_py", _self=self,
                     c_api=self.c_api_settings,
                     pyapi=self.python_api_settings,
-                ))
+                )
 
                 # If pretty-printing failed, write the original code anyway in
                 # order to ease debugging.
                 try:
-                    pp_code = pretty_print(code)
+                    pp_code = pretty_print(strip_white_lines(code))
                 except SyntaxError:
                     f.write(code)
                     raise
