@@ -1750,7 +1750,7 @@ class Struct(CompiledType):
             # The env metadata struct is emitted separately from the others
             T.env_md,
 
-            # The root node's env_element is not emitted per se, because it is
+            # The root node's entity type is not emitted per se, because it is
             # a generic instantiation from Langkit_Support.Lexical_Env.
             StructMetaclass.root_grammar_class.entity()
         )
