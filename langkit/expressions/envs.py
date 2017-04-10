@@ -361,14 +361,14 @@ def rebind_env(self, env, to_rebind, rebind_to):
 
 
 @auto_attr
-def make_env_el(self, node):
+def as_entity(self, node):
     """
     Construct an env element from node, including context (env rebindings).
     """
     from langkit.expressions import New
 
     p = PropertyDef.get()
-    check_source_language(p, "make_env_el has to be used in a property")
+    check_source_language(p, "as_entity has to be used in a property")
     p.set_uses_env()
 
     # We want to keep original type of node, so no downcast
