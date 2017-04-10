@@ -107,6 +107,9 @@ package Langkit_Support.Lexical_Env is
                                 Ref_Count  => 1));
    --  Create a new Env_Rebindings from an array of binding pairs
 
+   procedure Inc_Ref (Self : Env_Rebindings);
+   --  Increment Self's reference count. Do nothing if Self is null.
+
    procedure Dec_Ref (Self : in out Env_Rebindings);
    --  Decrement Self's reference count. Also destroy it if the count drops to
    --  0. Do nothing in Self is null.

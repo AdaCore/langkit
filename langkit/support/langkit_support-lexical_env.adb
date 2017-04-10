@@ -515,6 +515,17 @@ package body Langkit_Support.Lexical_Env is
    end Orphan;
 
    -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Self : Env_Rebindings) is
+   begin
+      if Self /= null then
+         Self.Ref_Count := Self.Ref_Count + 1;
+      end if;
+   end Inc_Ref;
+
+   -------------
    -- Dec_Ref --
    -------------
 
