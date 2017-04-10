@@ -1,9 +1,9 @@
 ## vim: filetype=makoada
 
 <%
-is_env_el = expr.static_type.is_env_element_type
-ast_node = expr.static_type.el_type if is_env_el else expr.static_type
-source = str(expr.expr_var.name) + (".El" if is_env_el else "")
+is_entity = expr.static_type.is_entity_type
+ast_node = expr.static_type.el_type if is_entity else expr.static_type
+source = str(expr.expr_var.name) + (".El" if is_entity else "")
 %>
 
 ${expr.expr.render_pre()}
@@ -13,7 +13,7 @@ if ${source} = null
      or else
    ${source}.all in ${ast_node.value_type_name()}'Class
 then
-% if is_env_el:
+% if is_entity:
    ${expr.result_var.name} :=
      (El => ${ast_node.name()} (${expr.expr_var.name}.El),
       Md => ${expr.expr_var.name}.Md,

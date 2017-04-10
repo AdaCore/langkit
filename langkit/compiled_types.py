@@ -263,9 +263,9 @@ class CompiledType(object):
     AST nodes).
     """
 
-    is_env_element_type = False
+    is_entity_type = False
     """
-    Whether this type represents an env element type.
+    Whether this type represents an entity type.
     """
 
     should_emit_array_type = True
@@ -479,7 +479,7 @@ class CompiledType(object):
         :rtype: bool
         """
 
-        if cls.is_env_element_type and formal.is_env_element_type:
+        if cls.is_entity_type and formal.is_entity_type:
             return cls.el_type.matches(formal.el_type)
 
         if issubclass(formal, ASTNode):
@@ -2287,7 +2287,7 @@ class ASTNode(Struct):
                 'parents_bindings': BuiltinField(
                     EnvRebindingsType, doc=""
                 ),
-                'is_env_element_type': True,
+                'is_entity_type': True,
                 'el_type': cls
             }
         )

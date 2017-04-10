@@ -525,7 +525,7 @@ class FieldAccess(AbstractExpression):
 
         # If still not found, maybe the receiver is an env el, in which case we
         # want to do implicit dereference.
-        if not to_get and receiver_expr.type.is_env_element_type:
+        if not to_get and receiver_expr.type.is_entity_type:
             to_get = receiver_expr.type.el_type.get_abstract_fields_dict().get(
                 self.field, None
             )
@@ -619,7 +619,7 @@ class IsA(AbstractExpression):
             """
             self.expr = expr
             self.astnodes = [a.el_type
-                             if a.is_env_element_type
+                             if a.is_entity_type
                              else a for a in astnodes]
 
             super(IsA.Expr, self).__init__(abstract_expr=abstract_expr)
@@ -629,7 +629,7 @@ class IsA(AbstractExpression):
 
         def _render_expr(self):
             target = ("{}.El.all"
-                      if self.expr.type.is_env_element_type
+                      if self.expr.type.is_entity_type
                       else "{}.all")
             return (target + " in {}").format(
                 self.expr.render_expr(),
@@ -670,7 +670,7 @@ class IsA(AbstractExpression):
         astnodes = [resolve_type(a) for a in self.astnodes]
         for a in astnodes:
             check_source_language(
-                issubclass(a, ASTNode) or a.is_env_element_type,
+                issubclass(a, ASTNode) or a.is_entity_type,
                 "Expected ASTNode subclass or env_element, got {}".format(a)
             )
             check_source_language(a.matches(expr.type), (
@@ -776,7 +776,7 @@ class Match(AbstractExpression):
 
                 check_source_language(
                     issubclass(match_type, T.root_node)
-                    or match_type.is_env_element_type,
+                    or match_type.is_entity_type,
                     'Invalid matching type: {}'.format(
                         match_type.name().camel
                     )
@@ -803,7 +803,7 @@ class Match(AbstractExpression):
         """
 
         type_set = TypeSet()
-        is_entity = input_type.is_env_element_type
+        is_entity = input_type.is_entity_type
 
         if is_entity:
             input_type = input_type.el_type
@@ -813,7 +813,7 @@ class Match(AbstractExpression):
 
             if is_entity and typ:
                 check_source_language(
-                    typ.is_env_element_type,
+                    typ.is_entity_type,
                     "Match expression on an env element, should match env "
                     "element types"
                 )
@@ -846,12 +846,12 @@ class Match(AbstractExpression):
         outer_scope = PropertyDef.get_scope()
         matched_expr = construct(self.matched_expr)
         check_source_language(issubclass(matched_expr.type, ASTNode)
-                              or matched_expr.type.is_env_element_type,
+                              or matched_expr.type.is_entity_type,
                               'Match expressions can only work on AST nodes '
                               'or env elements')
         matched_expr = NullCheckExpr(
             matched_expr,
-            implicit_deref=matched_expr.type.is_env_element_type
+            implicit_deref=matched_expr.type.is_entity_type
         )
 
         # Create a local variable so that in the generated code, we don't have

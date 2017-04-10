@@ -72,7 +72,7 @@ class _BaseEnvElement(_BaseStruct):
 
    base_classes = ['ctypes.Structure',
                    '_BaseEnvElement'
-                       if cls.is_env_element_type else
+                       if cls.is_entity_type else
                        '_BaseStruct']
 %>
 

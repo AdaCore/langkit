@@ -209,7 +209,7 @@ class DomainExpr(ResolvedExpression):
 
     def _render_pre(self):
         is_node_domain = (
-            self.domain.static_type.element_type().is_env_element_type
+            self.domain.static_type.element_type().is_entity_type
         )
 
         return "\n".join([
