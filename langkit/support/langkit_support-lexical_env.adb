@@ -608,12 +608,16 @@ package body Langkit_Support.Lexical_Env is
      (Self : Env_Rebindings; Binding : Env_Rebinding) return Env_Rebindings
    is
    begin
-      return (if Binding = No_Env_Rebinding
-              then Self
-              else Create
-                (if Self /= null
-                 then Self.Rebindings & Binding
-                 else (1 => Binding)));
+      if Binding = No_Env_Rebinding then
+         Inc_Ref (Self);
+         return Self;
+
+      else
+         return Create
+           (if Self /= null
+            then Self.Rebindings & Binding
+            else (1 => Binding));
+      end if;
    end Append;
 
    -----------------
