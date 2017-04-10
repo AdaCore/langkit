@@ -1467,10 +1467,42 @@ class Var(AbstractVariable):
     """
 
     def __init__(self, expr):
-        # TODO: get the original source name. This is unfortunately difficult,
-        # as this information is hidden in the source code of the caller.
         super(Var, self).__init__(names.Name("Block_Var"), create_local=True)
         Block.get().add_var(self, expr)
+
+        # TODO: the following is a hack, that will likely only disappear when
+        # we'll move the DSL from Python to a true DSL.
+        #
+        # The source name of block variable is available only as the name of
+        # the local variable that will hold this instance in the caller's stack
+        # frame. So for now, keep this stack frame in memory so we can find
+        # which local variable holds it at prepare time.
+        stack = inspect.getouterframes(inspect.currentframe())
+        self._creator_stack_frame = (stack[1][0]
+                                     if stack and len(stack) > 1 else None)
+
+        # Break the reference loop for this stack frame
+        del stack
+
+    def do_prepare(self):
+        super(Var, self).do_prepare()
+
+        # If the information is available, find the source name for this
+        # variable from the creator's stack frame.
+        if self._creator_stack_frame:
+            local_names = set(name for name, value
+                              in self._creator_stack_frame.f_locals.iteritems()
+                              if value is self)
+
+            # If we have multiple local variables that point to self, take the
+            # first one in sorted order to keep our output stable across runs.
+            if local_names:
+                self.source_name = names.Name.from_lower(
+                    sorted(local_names)[0]
+                )
+
+            # Let the frame object be reclaimed
+            self._creator_stack_frame = None
 
 
 class No(AbstractExpression):
