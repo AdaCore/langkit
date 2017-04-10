@@ -1,5 +1,5 @@
 """
-Test that Bind works when binding from env elements.
+Test the newline and related parsers
 """
 
 from __future__ import (absolute_import, division, print_function,
