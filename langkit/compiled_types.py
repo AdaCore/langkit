@@ -2294,7 +2294,7 @@ class ASTNode(Struct):
 
         if cls == T.root_node:
             # LexicalEnv.get, which is bound in the AST.C generate package,
-            # returns arrays of root node env elements, so the corresponding
+            # returns arrays of root node entities, so the corresponding
             # array type must be declared manually there.
             entity_klass.should_emit_array_type = False
 
