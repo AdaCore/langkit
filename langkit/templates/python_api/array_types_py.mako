@@ -89,7 +89,6 @@ class ${type_name}(_BaseArray):
                     ('ref_count', ctypes.c_int),
                     ('items', ${c_element_type} * 1)]
 
-
     _c_type = ctypes.POINTER(_c_struct)
 
     _inc_ref = staticmethod(_import_func('${cls.c_inc_ref(capi)}',
