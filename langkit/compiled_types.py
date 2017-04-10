@@ -124,6 +124,7 @@ def make_renderer(base_renderer=None):
         'is_env_rebindings_type': type_check(EnvRebindingsType),
         'is_struct_type':         type_check(Struct),
         'LexicalEnvType':         LexicalEnvType,
+        'EnvRebindingsType':      EnvRebindingsType,
         'PropertyDef':            PropertyDef,
     }
     if get_context():
