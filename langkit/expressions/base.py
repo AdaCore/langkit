@@ -2967,7 +2967,7 @@ class NullCheckExpr(ResolvedExpression):
     def __init__(self, expr, implicit_deref=False, result_var_name=None):
         """
         :param ResolvedExpression expr: Expression to evaluate.
-        :param bool implicit_deref: If expr is an env element, perform the
+        :param bool implicit_deref: If expr is an entity, perform the
             check on the embedded AST node instead.
         """
         self.expr = expr

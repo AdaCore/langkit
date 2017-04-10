@@ -363,7 +363,7 @@ def rebind_env(self, env, to_rebind, rebind_to):
 @auto_attr
 def as_entity(self, node):
     """
-    Construct an env element from node, including context (env rebindings).
+    Construct an entity from node, including context (env rebindings).
     """
     from langkit.expressions import New
 
