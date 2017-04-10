@@ -538,6 +538,22 @@ package body Langkit_Support.Lexical_Env is
          Ref_Count                  => 1);
    end Orphan;
 
+   ------------
+   -- Create --
+   ------------
+
+   function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings is
+      Result : constant Env_Rebindings := new Env_Rebindings_Type'
+        (Size       => Bindings'Length,
+         Rebindings => Bindings,
+         Ref_Count  => 1);
+   begin
+      for R of Bindings loop
+         Inc_Ref (R);
+      end loop;
+      return Result;
+   end Create;
+
    -------------
    -- Inc_Ref --
    -------------

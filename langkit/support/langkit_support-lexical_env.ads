@@ -99,10 +99,7 @@ package Langkit_Support.Lexical_Env is
 
    type Env_Rebindings is access all Env_Rebindings_Type;
 
-   function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings
-   is (new Env_Rebindings_Type'(Size       => Bindings'Length,
-                                Rebindings => Bindings,
-                                Ref_Count  => 1));
+   function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings;
    --  Create a new Env_Rebindings from an array of binding pairs
 
    procedure Inc_Ref (Self : Env_Rebindings);
