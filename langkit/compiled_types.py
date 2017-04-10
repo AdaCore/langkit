@@ -665,6 +665,26 @@ class EnvRebindingsType(BasicType):
     def py_nullexpr(cls):
         return 'None'
 
+    @classmethod
+    def c_inc_ref(cls, capi):
+        """
+        Name of the C API function to inc-ref an env rebindings value.
+
+        :param langkit.c_api.CAPISettings capi: Settings for the C API.
+        :rtype: str
+        """
+        return capi.get_name(cls.name() + names.Name('Inc_Ref'))
+
+    @classmethod
+    def c_dec_ref(cls, capi):
+        """
+        Name of the C API function to dec-ref an env rebindings value.
+
+        :param langkit.c_api.CAPISettings capi: Settings for the C API.
+        :rtype: str
+        """
+        return capi.get_name(cls.name() + names.Name('Dec_Ref'))
+
 
 class BoolType(BasicType):
     is_ptr = False

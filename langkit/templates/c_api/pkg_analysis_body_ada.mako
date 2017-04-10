@@ -1282,6 +1282,36 @@ package body ${ada_lib_name}.Analysis.C is
          Set_Last_Exception (Exc);
    end;
 
+   procedure ${capi.get_name('env_rebindings_inc_ref')}
+     (Self : ${env_rebindings_type}) is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         E : constant AST_Envs.Env_Rebindings := Unwrap (Self);
+      begin
+         Inc_Ref (E);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
+   procedure ${capi.get_name('env_rebindings_dec_ref')}
+     (Self : ${env_rebindings_type}) is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         E : AST_Envs.Env_Rebindings := Unwrap (Self);
+      begin
+         Dec_Ref (E);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
    ---------------------------------------
    -- Kind-specific AST node primitives --
    ---------------------------------------
