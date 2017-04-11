@@ -247,7 +247,7 @@ package body Langkit_Support.Lexical_Env is
          end if;
 
          return Get (Self.Env, Key, From, Recursive => False,
-                     Rebindings => Rebindings);
+                     Rebindings => Current_Rebindings);
       end Get_Ref_Env_Elements;
 
       ----------------------
@@ -312,7 +312,7 @@ package body Langkit_Support.Lexical_Env is
                  (Self.Transitive_Referenced_Envs));
          Parent_Elts : constant Env_Element_Array :=
            (if Recursive
-            then Get (Parent_Env, Key, Rebindings => Rebindings)
+            then Get (Parent_Env, Key, Rebindings => Current_Rebindings)
             else Env_Element_Arrays.Empty_Array);
 
          Ret : constant Env_Element_Array :=
