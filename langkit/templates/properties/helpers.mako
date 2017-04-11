@@ -41,6 +41,9 @@
       return ${sem_n}'
         (El => ${root_class} (${conv_prop.name}
           (${conv_prop.struct.name()} (From.El)
+           % if conv_prop.uses_envs:
+              , From.Info
+           % endif
            % if conv_prop.has_implicit_env:
               , Self.Env
            % endif

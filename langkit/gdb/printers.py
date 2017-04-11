@@ -144,7 +144,7 @@ class ASTNodePrinter(BasePrinter):
             self.kind,
             '{}:'.format(filename) if filename else '',
             tdh.token(start).sloc_range.start,
-            tdh.token(end).sloc_range.end
+            tdh.token(end).sloc_range.end if end else None
         )
 
 
