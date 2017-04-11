@@ -63,7 +63,7 @@ package Langkit_Support.Adalog.Predicates is
       procedure Free (Self : in out Predicate_Logic);
 
       function Custom_Image (Self : Predicate_Logic) return String
-      is ("PREDICATE " & Image (Self.Pred) & " ON " & Var.Image (Self.Ref));
+      is ("Predicate " & Image (Self.Pred) & " on " & Var.Image (Self.Ref));
 
       package Impl is new Stateful_Relation (Ty => Predicate_Logic);
       --  This package contains the Base_Relation that is actually to
