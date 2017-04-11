@@ -1,5 +1,5 @@
 == Invalid field ==
 File "test.py", line 28, in Example.result
-    Error: Invalid property for analysis unit: foobar
+    Error: AnalysisUnit values have no field (accessed field was foobar)
 
 Done
