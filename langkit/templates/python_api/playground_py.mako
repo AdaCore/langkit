@@ -3,9 +3,12 @@
 ## vim: filetype=makopython
 
 import argparse
+
 from IPython import embed
 from IPython.terminal.ipapp import load_default_config
-import ${module_name} as mdl
+
+import ${module_name}
+import ${module_name} as ${ctx.short_name.lower if ctx.short_name else 'mdl'}
 
 HEADER = """
 --
@@ -18,7 +21,7 @@ there are multiple.
 Enjoy!
 """.strip()
 
-ctx = mdl.AnalysisContext('utf-8')
+ctx = ${module_name}.AnalysisContext('utf-8')
 
 parser = argparse.ArgumentParser(
     description="${module_name} playground. Analyze files passed as arguments."
