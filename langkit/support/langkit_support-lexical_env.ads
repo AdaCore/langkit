@@ -134,6 +134,12 @@ package Langkit_Support.Lexical_Env is
 
    No_Entity_Info : constant Entity_Info := (Empty_Metadata, null, True);
 
+   procedure Inc_Ref (Self : Entity_Info);
+   --  Increment the reference count of items in Self
+
+   procedure Dec_Ref (Self : in out Entity_Info);
+   --  Decrement the reference count of items in Self
+
    type Env_Element is record
       El               : Element_T;
       MD               : Element_Metadata;

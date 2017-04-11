@@ -21,6 +21,24 @@ package body Langkit_Support.Lexical_Env is
    --  From an array of Env_Elements, decorate every element with additional
    --  Metadata stored in MD.
 
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Self : Entity_Info) is
+   begin
+      Inc_Ref (Self.Parents_Bindings);
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Self : in out Entity_Info) is
+   begin
+      Dec_Ref (Self.Parents_Bindings);
+   end Dec_Ref;
+
    ------------
    -- Create --
    ------------
