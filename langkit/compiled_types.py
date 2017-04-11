@@ -2120,6 +2120,12 @@ class Struct(CompiledType):
         """
         return capi.get_name(cls.name() + names.Name('Dec_Ref'))
 
+    @classmethod
+    def py_nullexpr(cls):
+        return '{}({})'.format(cls.name().camel, ', '.join(
+            f.type.py_nullexpr() for f in cls.get_fields()
+        ))
+
 
 class ASTNode(Struct):
     """
@@ -2364,6 +2370,10 @@ class ASTNode(Struct):
             'Unresolved ASTNode subclass. Use it in the grammar or provide a'
             ' type annotation for all its fields'
         )
+
+    @classmethod
+    def py_nullexpr(cls):
+        return 'None'
 
 
 # We tag the ASTNode class as abstract here, because of the circular dependency
