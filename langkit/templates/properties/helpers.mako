@@ -29,14 +29,10 @@
 
    No_${type_name} : constant ${type_name} := (Env => null);
 
-   function Convert
-     (Self : ${type_name}; From : ${sem_n}) return ${sem_n}
-   with Inline;
+   function Convert (Self : ${type_name}; From : ${sem_n}) return ${sem_n}
+      with Inline;
 
-   function Convert
-     (Self : ${type_name}; From : ${sem_n})
-      return ${sem_n}
-   is
+   function Convert (Self : ${type_name}; From : ${sem_n}) return ${sem_n} is
       % if not conv_prop.has_implicit_env:
          pragma Unreferenced (Self);
       % endif
@@ -64,8 +60,7 @@
 
 <%def name="generate_logic_equal(eq_prop)">
    <% struct = eq_prop.struct.name() %>
-   function Eq_${eq_prop.uid} (L, R : ${T.sem_node.name()}) return Boolean
-   is
+   function Eq_${eq_prop.uid} (L, R : ${T.sem_node.name()}) return Boolean is
      (if L.El.all in ${struct}_Type'Class
       and then R.El.all in ${struct}_Type'Class
       then ${eq_prop.name} (${struct} (L.El), ${struct} (R.El))
@@ -146,8 +141,7 @@
       Free (Self.Dbg_Img);
    end Free;
 
-   package ${package_name} is
-   new Predicate_${len(formal_node_types)}
+   package ${package_name} is new Predicate_${len(formal_node_types)}
      (${T.sem_node.name()}, Eq_Node.Refs.Raw_Logic_Var,
       ${type_name}, Free => Free);
 
