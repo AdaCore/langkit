@@ -1,5 +1,5 @@
 """
-Test the newline and related parsers
+Test the newline and related parsers.
 """
 
 from __future__ import (absolute_import, division, print_function,
