@@ -917,7 +917,7 @@ class CompileCtx(object):
         # TODO: Using a dependency order topological sort wouldn't hurt at
         # some point.
 
-        from langkit.compiled_types import StructMetaclass
+        from langkit.compiled_types import StructMetaclass, T
 
         if self._struct_types:
             # TODO: A better solution at some point would be having a
@@ -932,14 +932,12 @@ class CompileCtx(object):
             )
 
         else:
-            entity = StructMetaclass.root_grammar_class.entity()
-            env_md = StructMetaclass.env_metadata
-            self._struct_types = [
+            builtin_types = [T.env_md, T.entity_info, T.sem_node]
+            struct_types = [
                 t for t in StructMetaclass.struct_types
-                if t not in [env_md, entity]
+                if t not in [T.env_md, T.sem_node, T.entity_info]
             ]
-            self._struct_types.insert(0, entity)
-            self._struct_types.insert(0, env_md)
+            self._struct_types = builtin_types + struct_types
 
         return self._struct_types
 
