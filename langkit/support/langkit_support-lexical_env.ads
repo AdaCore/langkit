@@ -130,7 +130,8 @@ package Langkit_Support.Lexical_Env is
       MD         : Element_Metadata;
       Rebindings : Env_Rebindings := null;
       Is_Null    : Boolean := False;
-   end record;
+   end record
+      with Convention => C_Pass_By_Copy;
 
    No_Entity_Info : constant Entity_Info := (Empty_Metadata, null, True);
 
