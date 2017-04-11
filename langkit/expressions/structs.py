@@ -397,24 +397,20 @@ class FieldAccess(AbstractExpression):
 
             # First try to get entity info from the calling property
             if PropertyDef.get() and PropertyDef.get().uses_envs:
-                l = '{}.Rebindings'.format(PropertyDef.entity_info_name)
+                l = str(PropertyDef.entity_info_name)
 
             # Then try to get env rebindings from the entity
             if self.implicit_deref:
-                r = '{}.Info.Rebindings'.format(self.prefix)
+                r = self.prefix
 
             # If we have two input rebindings, combine them. Otherwise, return
             # the non-null one (if any).
             if l and r:
-                rebinding = 'AST_Envs.Combine ({}, {})'.format(l, r)
+                return 'AST_Envs.Combine ({}, {})'.format(l, r)
             elif l or r:
-                rebinding = l or r
+                return l or r
             else:
                 return None
-
-            return ('(MD         => No_Metadata,'
-                    ' Rebindings => {},'
-                    ' Is_Null    => False)').format(rebinding)
 
         def _render_pre(self):
             exprs = [self.receiver_expr] + self.arguments
