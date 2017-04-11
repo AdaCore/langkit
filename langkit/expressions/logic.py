@@ -101,12 +101,30 @@ class Bind(AbstractExpression):
         self.conv_prop = conv_prop
         self.eq_prop = eq_prop
 
-    def do_prepare(self):
-        from langkit.compile_context import get_context
+    def resolve_props(self):
+        from langkit.expressions import FieldAccess
 
-        get_context().do_generate_logic_binder(self.conv_prop, self.eq_prop)
+        def resolve(name, prop):
+            if not prop:
+                return
+            check_source_language(
+                isinstance(prop, (FieldAccess, PropertyDef)),
+                "{} must be either a FieldAccess resolving to a property, or"
+                " a direct reference to a property".format(name)
+            )
+            if isinstance(prop, FieldAccess):
+                return prop.resolve_field()
+            else:
+                return prop
+
+        self.eq_prop = resolve('eq_prop', self.eq_prop)
+        self.conv_prop = resolve('conv_prop', self.conv_prop)
 
     def construct(self):
+        from langkit.compile_context import get_context
+        self.resolve_props()
+        get_context().do_generate_logic_binder(self.conv_prop, self.eq_prop)
+
         # We have to wait for the construct pass for the following checks
         # because they rely on type information, which is not supposed to be
         # computed before this pass.
