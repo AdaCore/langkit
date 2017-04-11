@@ -5,8 +5,8 @@ import inspect
 
 from langkit import names
 from langkit.compiled_types import (
-    AnalysisUnitType, ASTNode, BoolType, BuiltinField, EnvRebindingsType,
-    Field, Struct, UserField, resolve_type, T
+    AnalysisUnitType, ASTNode, BoolType, BuiltinField, Field, Struct,
+    UserField, resolve_type, T
 )
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions import (
@@ -383,10 +383,10 @@ class FieldAccess(AbstractExpression):
         @memoized
         def entity_info_expr(self):
             """
-            If this expression needs to pass an env binding parameter along,
-            compute its value.
+            Return the value of the entity info parameter along, compute its
+            value. Return None otherwise.
 
-            :rtype: str
+            :rtype: str|None
             """
 
             # Env rebinding can come from two sources here:
@@ -410,7 +410,7 @@ class FieldAccess(AbstractExpression):
             elif l or r:
                 rebinding = l or r
             else:
-                rebinding = EnvRebindingsType.nullexpr()
+                return None
 
             return ('(MD         => No_Metadata,'
                     ' Rebindings => {},'
