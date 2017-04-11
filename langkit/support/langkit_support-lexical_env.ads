@@ -133,6 +133,9 @@ package Langkit_Support.Lexical_Env is
 
    No_Entity_Info : constant Entity_Info := (Empty_Metadata, null, True);
 
+   function Combine (L, R : Entity_Info) return Entity_Info;
+   --  Return a new Entity_Info that combines info from both L and R
+
    procedure Inc_Ref (Self : Entity_Info);
    --  Increment the reference count of items in Self
 

@@ -22,6 +22,17 @@ package body Langkit_Support.Lexical_Env is
    --  Metadata stored in MD.
 
    -------------
+   -- Combine --
+   -------------
+
+   function Combine (L, R : Entity_Info) return Entity_Info is
+   begin
+      return (MD         => Combine (L.MD, R.MD),
+              Rebindings => Combine (L.Rebindings, R.Rebindings),
+              Is_Null    => False);
+   end Combine;
+
+   -------------
    -- Inc_Ref --
    -------------
 
