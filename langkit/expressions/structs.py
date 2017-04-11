@@ -381,7 +381,7 @@ class FieldAccess(AbstractExpression):
 
         @property
         @memoized
-        def env_bind_expr(self):
+        def entity_info_expr(self):
             """
             If this expression needs to pass an env binding parameter along,
             compute its value.
@@ -444,9 +444,9 @@ class FieldAccess(AbstractExpression):
 
                 # If the called property uses environments, it will need and
                 # env rebindings parameter.
-                if self.node_data.uses_envs and self.env_bind_expr:
+                if self.node_data.uses_envs and self.entity_info_expr:
                     args.append((str(PropertyDef.entity_info_name),
-                                 self.env_bind_expr))
+                                 self.entity_info_expr))
 
                 # Private non-dispatching properties are declared in
                 # $.Analysis.Body, so they are not genuine Ada primitives, so
