@@ -1240,6 +1240,13 @@ class StructMetaclass(CompiledTypeMetaclass):
     :type: Struct
     """
 
+    entity_info = None
+    """
+    Struct subclass to contain all entity information, except the node itself.
+
+    :type: Struct
+    """
+
     def __new__(mcs, name, bases, dct):
         # The two following booleans are mutually exclusive and at least one
         # will be True.
@@ -2300,21 +2307,22 @@ class ASTNode(Struct):
         )
 
     @classmethod
-    @memoized
     def entity_info(cls):
         """
         Return the entity info type, which is a record that contains semantic
         information which, when added to an AST node, makes an entity.
         """
-        return type(
-            b'EntityInfo',
-            (Struct, ), {
+        # This is manual memoization. It is necessary because memoization does
+        # not play well with class method when we want the memoization to be
+        # common to the whole class hierarchy.
+        if not StructMetaclass.entity_info:
+            StructMetaclass.entity_info = type(b'EntityInfo', (Struct, ), {
                 'MD': BuiltinField(
                     T.env_md, doc='The metadata associated to the AST node'
                 ),
                 'parents_bindings': BuiltinField(EnvRebindingsType, doc=""),
-            }
-        )
+            })
+        return StructMetaclass.entity_info
 
     @classmethod
     @memoized
