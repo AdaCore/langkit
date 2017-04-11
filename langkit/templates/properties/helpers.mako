@@ -144,8 +144,11 @@
    end Free;
 
    package ${package_name} is new Predicate_${len(formal_node_types)}
-     (${T.entity.name()}, Eq_Node.Refs.Raw_Logic_Var,
-      ${type_name}, Free => Free);
+     (El_Type        => ${T.entity.name()},
+      Var            => Eq_Node.Refs.Raw_Logic_Var,
+      Predicate_Type => ${type_name},
+      Free           => Free,
+      Image          => Image);
 
    % endfor
 </%def>
