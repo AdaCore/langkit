@@ -4,6 +4,7 @@ from __future__ import (absolute_import, division, print_function,
 import os
 import shutil
 import subprocess
+import sys
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import StructMetaclass, T
@@ -109,8 +110,9 @@ def build_and_run(grammar, py_script,
     if os.path.isdir(extensions_dir):
         ctx.extensions_dir = extensions_dir
 
-    # First build the library
-    argv = ['--full-error-traces', '-vnone', 'make']
+    # First build the library. Forward all test.py's arguments to the libmanage
+    # call so that manual testcase runs can pass "-g", for instance.
+    argv = sys.argv[1:] + ['--full-error-traces', '-vnone', 'make']
     if ctx.library_fields_all_public:
         argv.append('--library-fields-all-public')
     m.run(argv)
