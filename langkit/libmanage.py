@@ -175,7 +175,7 @@ class ManageScript(object):
             help='Verbosity level'
         )
         args_parser.add_argument(
-            '--full-error-traces', action='store_true', default=False,
+            '--full-error-traces', '-E', action='store_true', default=False,
             help='Always show full error traces, whatever the verbosity level'
                  ' (default: disabled)'
         )
