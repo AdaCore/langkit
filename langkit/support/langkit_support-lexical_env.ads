@@ -110,9 +110,7 @@ package Langkit_Support.Lexical_Env is
    --  0. Do nothing in Self is null.
 
    function Combine (L, R : Env_Rebindings) return Env_Rebindings;
-   --  Return a new Env_Rebindings that combines rebindings from both L and R.
-   --  Raises a Constraint_Error if the number of bindings exceeds
-   --  Env_Rebindings_Size.
+   --  Return a new Env_Rebindings that combines rebindings from both L and R
 
    function Append
      (Self : Env_Rebindings; Binding : Env_Rebinding) return Env_Rebindings;
