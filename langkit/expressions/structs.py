@@ -492,44 +492,55 @@ class FieldAccess(AbstractExpression):
         self.receiver = receiver
         self.field = field
         self.arguments = arguments
+        self.is_deref = False
 
-    def construct(self):
+    def resolve_field(self):
         """
-        Constructs a resolved expression that is the result of:
+        Resolve the field that should be accessed, by:
 
-        - Resolving the receiver;
+        - Constructing the receiver;
         - Getting its corresponding field.
 
-        :rtype: FieldAccessExpr
+        :rtype: AbstractNodeData
         """
-
-        is_deref = False
-        receiver_expr = construct(self.receiver)
+        self.receiver_expr = construct(self.receiver)
+        pfx_type = self.receiver_expr.type
 
         check_source_language(
-            issubclass(receiver_expr.type, Struct),
+            issubclass(pfx_type, Struct),
             '{} values have no field (accessed field was {})'.format(
-                receiver_expr.type.name().camel,
+                pfx_type.name().camel,
                 self.field
             )
         )
 
-        to_get = receiver_expr.type.get_abstract_fields_dict().get(self.field,
-                                                                   None)
+        self.to_get = pfx_type.get_abstract_fields_dict().get(self.field, None)
         ":type: AbstractNodeField"
 
         # If still not found, maybe the receiver is an entity, in which case we
         # want to do implicit dereference.
-        if not to_get and receiver_expr.type.is_entity_type:
-            to_get = receiver_expr.type.el_type.get_abstract_fields_dict().get(
+        if not self.to_get and pfx_type.is_entity_type:
+            self.to_get = pfx_type.el_type.get_abstract_fields_dict().get(
                 self.field, None
             )
-            is_deref = bool(to_get)
+            self.is_deref = bool(self.to_get)
+
+        return self.to_get
+
+    def construct(self):
+        """
+        Constructs the resolved expression corresponding to this field access.
+        It can be either a field access or a property call.
+
+        :rtype: FieldAccessExpr
+        """
+
+        to_get = self.resolve_field()
 
         # If still not found, we have a problem
         check_source_language(
             to_get is not None, "Type {} has no '{}' field or property".format(
-                receiver_expr.type.__name__, self.field
+                self.receiver_expr.type.__name__, self.field
             )
         )
 
@@ -572,8 +583,10 @@ class FieldAccess(AbstractExpression):
             )
         ]
 
-        ret = FieldAccess.Expr(receiver_expr, to_get, arg_exprs, is_deref,
-                               abstract_expr=self)
+        ret = FieldAccess.Expr(
+            self.receiver_expr, to_get, arg_exprs, self.is_deref,
+            abstract_expr=self
+        )
         return ret
 
     def __call__(self, *args):

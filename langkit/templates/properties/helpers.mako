@@ -67,8 +67,6 @@
      (if L.El.all in ${struct}_Type'Class
       and then R.El.all in ${struct}_Type'Class
       then ${eq_prop.name} (${struct} (L.El), ${struct} (R.El))
-      ## TODO: We probably still want to check some property of equality for
-      ## the metadata.
       else raise Constraint_Error
            with "Wrong type for Eq_${eq_prop.uid} arguments");
 </%def>
