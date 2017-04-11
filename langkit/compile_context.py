@@ -219,7 +219,7 @@ class CompileCtx(object):
     """State holder for native code emission."""
 
     def __init__(self, lang_name, lexer, grammar,
-                 lib_name=None,
+                 lib_name=None, short_name=None,
                  library_fields_all_public=False,
                  c_symbol_prefix=None,
                  enable_python_api=True,
@@ -246,6 +246,11 @@ class CompileCtx(object):
             "Lib<lang_name>lang". It is used for the filenames, package names,
             etc.  in the generated library.
         :type lib_name: str or None
+
+        :param str|None short_name: If provided, must be a string (mixed case
+            and underscore: see langkit.names.Name). It will be used where
+            a short name for the library is requested, for instance for the
+            shortcut module name in the generated playground script.
 
         :param bool library_fields_all_public: Whether private fields are
             exposed anyway in the various generated APIs. Doing so is useful
@@ -330,6 +335,7 @@ class CompileCtx(object):
             if lib_name is None else
             names.Name(lib_name)
         )
+        self.short_name = names.Name(short_name) if short_name else None
 
         self.ada_api_settings = AdaAPISettings(
             lib_name.camel_with_underscores
