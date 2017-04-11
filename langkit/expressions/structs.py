@@ -191,9 +191,9 @@ class New(AbstractExpression):
                 (names.Name('is_null'), construct(False))
             ]
             return '({})'.format(
-                ', '.join('{} => {}'.format(name.camel_with_underscores,
-                                            expr.render_expr())
-                          for name, expr in fields)
+                ', '.join('{} => {}'.format(
+                    name.camel_with_underscores, expr.render_expr()
+                ) for name, expr in fields)
             )
 
         @property
