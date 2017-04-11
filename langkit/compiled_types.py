@@ -2301,6 +2301,23 @@ class ASTNode(Struct):
 
     @classmethod
     @memoized
+    def entity_info(cls):
+        """
+        Return the entity info type, which is a record that contains semantic
+        information which, when added to an AST node, makes an entity.
+        """
+        return type(
+            b'EntityInfo',
+            (Struct, ), {
+                'MD': BuiltinField(
+                    T.env_md, doc='The metadata associated to the AST node'
+                ),
+                'parents_bindings': BuiltinField(EnvRebindingsType, doc=""),
+            }
+        )
+
+    @classmethod
+    @memoized
     def entity(cls):
         """
         Return the entity type, which is a node type with assorted semantic
@@ -2311,13 +2328,9 @@ class ASTNode(Struct):
             b'EnvElement{}'.format(cls.name().camel
                                    if cls != T.root_node else ''),
             (Struct, ), {
-                'el': BuiltinField(cls, doc="The stored AST node"),
-                'MD': BuiltinField(
-                    T.env_md, doc="The metadata associated to the AST node"
-                ),
-                'parents_bindings': BuiltinField(
-                    EnvRebindingsType, doc=""
-                ),
+                'el': BuiltinField(cls, doc='The stored AST node'),
+                'info': BuiltinField(cls.entity_info(),
+                                     doc='Entity info for this node'),
                 'is_entity_type': True,
                 'el_type': cls
             }
