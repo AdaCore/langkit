@@ -16,7 +16,8 @@ from langkit.diagnostics import (
 )
 from langkit.template_utils import common_renderer
 from langkit.utils import (
-    DictProxy, assert_type, common_ancestor, issubtype, memoized, type_check
+    DictProxy, assert_type, common_ancestor, issubtype, memoized,
+    not_implemented_error, type_check
 )
 
 
@@ -356,7 +357,7 @@ class CompiledType(object):
 
         :rtype: names.Name
         """
-        raise NotImplementedError()
+        raise not_implemented_error(cls, cls.name)
 
     @classmethod
     def storage_type_name(cls):
@@ -406,7 +407,7 @@ class CompiledType(object):
 
         :rtype: str
         """
-        raise NotImplementedError()
+        raise not_implemented_error(cls, cls.nullexpr)
 
     @classmethod
     def py_nullexpr(cls):
@@ -418,7 +419,7 @@ class CompiledType(object):
 
         :rtype: str
         """
-        raise NotImplementedError()
+        raise not_implemented_error(cls, cls.py_nullexpr)
 
     @classmethod
     def storage_nullexpr(cls):
@@ -448,7 +449,7 @@ class CompiledType(object):
 
         :param CAPISettings c_api_settings: The settings for the C API.
         """
-        raise NotImplementedError()
+        raise not_implemented_error(cls, cls.c_type)
 
     @classmethod
     def unify(cls, other):
@@ -611,7 +612,7 @@ class LogicVarType(BasicType):
 
     @classmethod
     def convert_to_storage_expr(cls, node_expr, base_expr):
-        raise NotImplementedError()
+        raise not_implemented_error(cls, cls.convert_to_storage_expr)
 
     @classmethod
     def c_type(cls, c_api_settings):
@@ -917,11 +918,11 @@ class AbstractNodeData(object):
         Type of the abstract node field.
         :rtype: langkit.compiled_types.CompiledType
         """
-        raise NotImplementedError()
+        raise not_implemented_error(self, type(self).type)
 
     @type.setter
     def type(self, type):
-        raise NotImplementedError()
+        raise not_implemented_error(self, type(self).type)
 
     def c_type_or_error(self, capi):
         """
@@ -978,7 +979,7 @@ class AbstractNodeData(object):
         Documentation for the abstract node field.
         :rtype: str
         """
-        raise NotImplementedError()
+        raise not_implemented_error(self, type(self).doc)
 
     @property
     def accessor_basename(self):
@@ -1586,10 +1587,9 @@ def root_grammar_class(generic_list_type=None):
 
         @classmethod
         def element_type(cls):
-            del cls
             # The generic list type is not a real list type: only its
             # subclasses will have a specific element type.
-            raise NotImplementedError()
+            raise not_implemented_error(cls, cls.element_type)
 
         generic_list_type_name = (generic_list_type
                                   if generic_list_type else
