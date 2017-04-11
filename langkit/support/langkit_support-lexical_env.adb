@@ -149,7 +149,7 @@ package body Langkit_Support.Lexical_Env is
          Transitive_Referenced_Envs => <>,
          Env                        => new Internal_Envs.Map,
          Default_MD                 => Default_MD,
-         Parents_Rebinding          => No_Env_Rebinding,
+         Rebinding                  => No_Env_Rebinding,
          Ref_Count                  => (if Is_Refcounted then 1
                                         else No_Refcount));
    end Create;
@@ -295,7 +295,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       Current_Rebindings :=
-        Append (Parent_Rebindings, Self.Parents_Rebinding);
+        Append (Parent_Rebindings, Self.Rebinding);
 
       declare
          Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
@@ -356,7 +356,7 @@ package body Langkit_Support.Lexical_Env is
            Transitive_Referenced_Envs => <>,
            Env                        => null,
            Default_MD                 => Empty_Metadata,
-           Parents_Rebinding          => No_Env_Rebinding,
+           Rebinding                  => No_Env_Rebinding,
            Ref_Count                  => 1);
    begin
       for Env of Envs loop
@@ -381,11 +381,11 @@ package body Langkit_Support.Lexical_Env is
            Transitive_Referenced_Envs => <>,
            Env                        => null,
            Default_MD                 => Empty_Metadata,
-           Parents_Rebinding          => No_Env_Rebinding,
+           Rebinding                  => No_Env_Rebinding,
            Ref_Count                  => 1);
    begin
       Reference (N, Base_Env, No_Element, True);
-      N.Parents_Rebinding := (To_Rebind, Rebind_To);
+      N.Rebinding := (To_Rebind, Rebind_To);
       return N;
    end Rebind_Env;
 
@@ -585,7 +585,7 @@ package body Langkit_Support.Lexical_Env is
          Transitive_Referenced_Envs => Self.Transitive_Referenced_Envs.Copy,
          Env                        => Self.Env,
          Default_MD                 => Self.Default_MD,
-         Parents_Rebinding          => Self.Parents_Rebinding,
+         Rebinding                  => Self.Rebinding,
          Ref_Count                  => 1);
    end Orphan;
 

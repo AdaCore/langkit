@@ -234,7 +234,7 @@ package Langkit_Support.Lexical_Env is
       Default_MD : Element_Metadata;
       --  Default metadata for this env instance
 
-      Parents_Rebinding : Env_Rebinding := No_Env_Rebinding;
+      Rebinding : Env_Rebinding := No_Env_Rebinding;
 
       Ref_Count : Integer;
       --  For ref-counted lexical environments, this contains the number of
@@ -353,7 +353,7 @@ private
       Transitive_Referenced_Envs => <>,
       Env                        => Empty_Env_Map'Access,
       Default_MD                 => Empty_Metadata,
-      Parents_Rebinding          => No_Env_Rebinding,
+      Rebinding                  => No_Env_Rebinding,
       Ref_Count                  => No_Refcount);
    Empty_Env : constant Lexical_Env := Empty_Env_Record'Access;
 
