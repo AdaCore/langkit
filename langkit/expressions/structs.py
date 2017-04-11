@@ -5,8 +5,8 @@ import inspect
 
 from langkit import names
 from langkit.compiled_types import (
-    AnalysisUnitType, ASTNode, BoolType, BuiltinField, Field, Struct,
-    UserField, resolve_type, T
+    AnalysisUnitType, ASTNode, BoolType, BuiltinField, EnvRebindingsType,
+    Field, Struct, UserField, resolve_type, T
 )
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions import (
@@ -395,20 +395,26 @@ class FieldAccess(AbstractExpression):
 
             l = r = None
 
-            # First try to get env rebindings from the calling property
+            # First try to get entity info from the calling property
             if PropertyDef.get() and PropertyDef.get().uses_envs:
-                l = str(PropertyDef.env_rebinding_name)
+                l = '{}.Rebindings'.format(PropertyDef.entity_info_name)
 
             # Then try to get env rebindings from the entity
             if self.implicit_deref:
                 r = '{}.Info.Rebindings'.format(self.prefix)
 
-            # Combine if necessary
+            # If we have two input rebindings, combine them. Otherwise, return
+            # the non-null one (if any).
             if l and r:
-                return "AST_Envs.Combine ({}, {})".format(l, r)
+                rebinding = 'AST_Envs.Combine ({}, {})'.format(l, r)
+            elif l or r:
+                rebinding = l or r
             else:
-                # If only one exists, return it. If both are None, return None
-                return l or r
+                rebinding = EnvRebindingsType.nullexpr()
+
+            return ('(MD         => No_Metadata,'
+                    ' Rebindings => {},'
+                    ' Is_Null    => False)').format(rebinding)
 
         def _render_pre(self):
             exprs = [self.receiver_expr] + self.arguments
@@ -439,7 +445,7 @@ class FieldAccess(AbstractExpression):
                 # If the called property uses environments, it will need and
                 # env rebindings parameter.
                 if self.node_data.uses_envs and self.env_bind_expr:
-                    args.append((str(PropertyDef.env_rebinding_name),
+                    args.append((str(PropertyDef.entity_info_name),
                                  self.env_bind_expr))
 
                 # Private non-dispatching properties are declared in

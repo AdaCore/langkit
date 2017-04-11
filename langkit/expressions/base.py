@@ -13,8 +13,8 @@ import funcy
 from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNode, BoolType, CompiledType,
-    EnvRebindingsType, LexicalEnvType, LongType, Symbol, T, Token,
-    gdb_bind_var, get_context, render as ct_render, resolve_type
+    LexicalEnvType, LongType, Symbol, T, Token, gdb_bind_var, get_context,
+    render as ct_render, resolve_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, check_multiple, check_source_language,
@@ -1600,6 +1600,7 @@ class PropertyDef(AbstractNodeData):
     self_arg_name = names.Name('Node')
     env_arg_name = names.Name('Lex_Env')
     env_rebinding_name = names.Name('Envs_Rebindings')
+    entity_info_name = names.Name('E_Info')
 
     # Collections for these
     reserved_arg_names = (self_arg_name, env_arg_name)
@@ -1740,7 +1741,7 @@ class PropertyDef(AbstractNodeData):
             )
             self.uses_envs = False
 
-        self.env_rebinding_arg = None
+        self.entity_info_arg = None
 
     def property_set(self):
         """
@@ -2183,11 +2184,10 @@ class PropertyDef(AbstractNodeData):
         """
         def internal(prop):
             if not prop.uses_envs:
-                # Add the env rebindings parameter
-                prop._add_argument(PropertyDef.env_rebinding_name,
-                                   EnvRebindingsType,
-                                   False)
-                prop.env_rebinding_arg = prop.arguments[-1]
+                # Add the entity info argument
+                prop._add_argument(PropertyDef.entity_info_name,
+                                   T.entity_info, False)
+                prop.entity_info_arg = prop.arguments[-1]
                 prop.uses_envs = True
 
         for prop in self.property_set():
