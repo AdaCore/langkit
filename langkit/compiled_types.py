@@ -2785,6 +2785,14 @@ class TypeRepo(object):
         return StructMetaclass.env_metadata
 
     @property
+    def entity_info(self):
+        """
+        Shortcut to get the entity information type.
+        :rtype: Struct
+        """
+        return StructMetaclass.root_grammar_class.entity_info()
+
+    @property
     def sem_node(self):
         """
         This property returns the root type used to describe an AST node with
