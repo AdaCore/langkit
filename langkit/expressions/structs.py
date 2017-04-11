@@ -68,7 +68,7 @@ class Cast(AbstractExpression):
         def _render_pre(self):
             # Before actually downcasting an access to an AST node, add a type
             # check so that we raise a Property_Error if it's wrong.
-            return render('properties/type_safety_check_ada', expr=self)
+            return render('properties/cast_ada', expr=self)
 
         def _render_expr(self):
             return self.result_var.name
