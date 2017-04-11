@@ -77,7 +77,7 @@ def gdb_helper(*args):
     :rtype: str
     """
     return ('--# {}'.format(' '.join(args))
-            if get_context().gdb_helpers_prefix else '')
+            if get_context().gdb_helpers else '')
 
 
 def gdb_bind_var(var):

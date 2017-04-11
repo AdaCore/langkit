@@ -327,10 +327,8 @@ class ManageScript(object):
             action='store_true'
         )
         subparser.add_argument(
-            '--gdb-helpers-prefix',
-            help='Prefix for GDB helper commands. If it is provided, create'
-                 ' GDB helpers for the generated library. Nothing is done with'
-                 ' respect to GDB helpers otherwise.'
+            '--gdb-helpers', action='store_true',
+            help='Create GDB helpers for the generated library.'
         )
 
     def add_build_args(self, subparser):
@@ -586,7 +584,7 @@ class ManageScript(object):
                           generate_lexer=not args.no_compile_quex,
                           check_only=args.check_only,
                           no_property_checks=args.no_property_checks,
-                          gdb_helpers_prefix=args.gdb_helpers_prefix)
+                          gdb_helpers=args.gdb_helpers)
 
         if args.check_only:
             return
