@@ -123,6 +123,7 @@ class Bind(AbstractExpression):
     def construct(self):
         from langkit.compile_context import get_context
         self.resolve_props()
+
         get_context().do_generate_logic_binder(self.conv_prop, self.eq_prop)
 
         # We have to wait for the construct pass for the following checks
@@ -157,8 +158,14 @@ class Bind(AbstractExpression):
                  "Expected 1 argument for eq_prop, got {}".format(len(args))),
 
             ])
+            other_type = args[0].type
+
+            # If we want to compare entities, check the wrapped node type
+            if other_type.is_entity_type:
+                other_type = other_type.el_type
+
             check_source_language(
-                args[0].type == self.eq_prop.struct,
+                other_type == self.eq_prop.struct,
                 "Self and first argument should be of the same type"
             )
 
