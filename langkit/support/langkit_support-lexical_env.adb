@@ -48,7 +48,9 @@ package body Langkit_Support.Lexical_Env is
    is
    begin
       return Env_Element'
-        (El => El, MD => MD, Parents_Bindings => <>, Is_Null => False);
+        (El      => El,
+         Info    => (MD => MD, Parents_Bindings => null, Is_Null => False),
+         Is_Null => False);
    end Create;
 
    -------------
@@ -57,7 +59,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Inc_Ref (Self : Env_Element) is
    begin
-      Inc_Ref (Self.Parents_Bindings);
+      Inc_Ref (Self.Info.Parents_Bindings);
    end Inc_Ref;
 
    -------------
@@ -66,7 +68,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Dec_Ref (Self : in out Env_Element) is
    begin
-      Dec_Ref (Self.Parents_Bindings);
+      Dec_Ref (Self.Info.Parents_Bindings);
    end Dec_Ref;
 
    ------------
@@ -102,11 +104,12 @@ package body Langkit_Support.Lexical_Env is
       function Decorate_Element (El : Env_Element) return Env_Element
       is
         (Env_Element'
-           (El.El,
-            Combine (El.MD, MD),
-            Parents_Bindings =>
-               Combine (El.Parents_Bindings, Parents_Bindings),
-            Is_Null          => False));
+           (El      => El.El,
+            Info    => (MD               => Combine (El.Info.MD, MD),
+                        Parents_Bindings => Combine
+                          (El.Info.Parents_Bindings, Parents_Bindings),
+                        Is_Null          => False),
+            Is_Null => False));
 
       function Internal_Decorate
       is new Env_Element_Arrays.Id_Map_Gen (Decorate_Element)
@@ -154,7 +157,7 @@ package body Langkit_Support.Lexical_Env is
       use Internal_Envs;
 
       Env_El : constant Env_Element :=
-        Env_Element'(Value, MD, null, False);
+        Env_Element'(Value, (MD, null, False), False);
       C      : Cursor;
       Dummy  : Boolean;
    begin

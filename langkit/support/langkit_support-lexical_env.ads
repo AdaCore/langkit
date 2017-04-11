@@ -141,10 +141,9 @@ package Langkit_Support.Lexical_Env is
    --  Decrement the reference count of items in Self
 
    type Env_Element is record
-      El               : Element_T;
-      MD               : Element_Metadata;
-      Parents_Bindings : Env_Rebindings := null;
-      Is_Null          : Boolean := False;
+      El      : Element_T;
+      Info    : Entity_Info;
+      Is_Null : Boolean := False;
    end record;
    --  Wrapper structure to contain both the 'real' env element that the user
    --  wanted to store, and its associated metadata.

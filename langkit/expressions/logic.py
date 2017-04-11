@@ -180,8 +180,10 @@ class Bind(AbstractExpression):
                 # entity from it.
                 expr = New.StructExpr(T.root_node.entity(), {
                     Name('El'): expr,
-                    Name('MD'): LiteralExpr('<>', None),
-                    Name('Parents_Bindings'): LiteralExpr('null', None)
+                    Name('Info'): New.StructExpr(T.root_node.entity_info(), {
+                        Name('MD'): LiteralExpr('<>', None),
+                        Name('Parents_Bindings'): LiteralExpr('null', None),
+                    }),
                 })
 
             return expr

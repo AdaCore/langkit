@@ -401,7 +401,7 @@ class FieldAccess(AbstractExpression):
 
             # Then try to get env rebindings from the entity
             if self.implicit_deref:
-                r = '{}.Parents_Bindings'.format(self.prefix)
+                r = '{}.Info.Parents_Bindings'.format(self.prefix)
 
             # Combine if necessary
             if l and r:
