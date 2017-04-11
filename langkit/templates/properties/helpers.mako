@@ -71,7 +71,7 @@
    function Eq_${eq_prop.uid} (L, R : ${T.entity.name()}) return Boolean is
 
      (if L.El.all in ${struct}_Type'Class
-      and then R.El.all in ${struct}_Type'Class
+         and then R.El.all in ${struct}_Type'Class
 
       % if is_entity:
       then ${eq_prop.name}
