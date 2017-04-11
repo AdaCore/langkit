@@ -2775,7 +2775,7 @@ class TypeRepo(object):
     def env_md(self):
         """
         Shortcut to get the lexical environment metadata type.
-        :rtype: ASTNode
+        :rtype: Struct
         """
         if not StructMetaclass.env_metadata:
             class Metadata(Struct):
