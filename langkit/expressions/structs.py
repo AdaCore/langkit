@@ -406,7 +406,7 @@ class FieldAccess(AbstractExpression):
             # If we have two input rebindings, combine them. Otherwise, return
             # the non-null one (if any).
             if l and r:
-                return 'AST_Envs.Combine ({}, {})'.format(l, r)
+                return 'AST_Envs.Combine ({}, {}.Info)'.format(l, r)
             elif l or r:
                 return l or r
             else:
