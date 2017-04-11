@@ -83,8 +83,10 @@
    ##
    ## Which is expressed as Bind (A, B, Property) in the DSL.
    package ${package_name} is new Eq_Node.Raw_Custom_Bind
-     (${converter_type_name}, No_${converter_type_name},
-      Convert, Eq_${eprop_uid});
+     (Converter => ${converter_type_name},
+      No_Data   => No_${converter_type_name},
+      Convert   => Convert,
+      Equals    => Eq_${eprop_uid});
 </%def>
 
 <%def name="generate_logic_predicates(prop)">
