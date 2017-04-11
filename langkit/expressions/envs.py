@@ -374,13 +374,10 @@ def as_entity(self, node):
     # We want to keep original type of node, so no downcast
     node_expr = construct(node, T.root_node, downcast=False)
 
-    md_expr = New.StructExpr(T.env_md, {f.name: construct(False)
-                                        for f in T.env_md.get_fields()})
     return New.StructExpr(
         node_expr.type.entity(),
-        {names.Name('MD'): md_expr,
-         names.Name('El'): node_expr,
-         names.Name('Rebindings'): construct(p.env_rebinding_arg.var)},
+        {names.Name('El'): node_expr,
+         names.Name('Info'): construct(p.entity_info_arg.var)},
         abstract_expr=self,
     )
 
