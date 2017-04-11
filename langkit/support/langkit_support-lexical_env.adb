@@ -209,11 +209,11 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    function Get
-     (Self              : Lexical_Env;
-      Key               : Symbol_Type;
-      From              : Element_T := No_Element;
-      Recursive         : Boolean := True;
-      Parent_Rebindings : Env_Rebindings := null)
+     (Self       : Lexical_Env;
+      Key        : Symbol_Type;
+      From       : Element_T := No_Element;
+      Recursive  : Boolean := True;
+      Rebindings : Env_Rebindings := null)
       return Env_Element_Array
    is
       Current_Rebindings : Env_Rebindings;
@@ -247,7 +247,7 @@ package body Langkit_Support.Lexical_Env is
          end if;
 
          return Get (Self.Env, Key, From, Recursive => False,
-                     Parent_Rebindings => Parent_Rebindings);
+                     Rebindings => Rebindings);
       end Get_Ref_Env_Elements;
 
       ----------------------
@@ -294,8 +294,7 @@ package body Langkit_Support.Lexical_Env is
          return Env_Element_Arrays.Empty_Array;
       end if;
 
-      Current_Rebindings :=
-        Append (Parent_Rebindings, Self.Rebinding);
+      Current_Rebindings := Append (Rebindings, Self.Rebinding);
 
       declare
          Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
@@ -313,8 +312,7 @@ package body Langkit_Support.Lexical_Env is
                  (Self.Transitive_Referenced_Envs));
          Parent_Elts : constant Env_Element_Array :=
            (if Recursive
-            then Get
-              (Parent_Env, Key, Parent_Rebindings => Parent_Rebindings)
+            then Get (Parent_Env, Key, Rebindings => Rebindings)
             else Env_Element_Arrays.Empty_Array);
 
          Ret : constant Env_Element_Array :=
@@ -333,14 +331,14 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    function Get
-     (Self              : Lexical_Env;
-      Key               : Symbol_Type;
-      From              : Element_T := No_Element;
-      Recursive         : Boolean := True;
-      Parent_Rebindings : Env_Rebindings := null)
+     (Self       : Lexical_Env;
+      Key        : Symbol_Type;
+      From       : Element_T := No_Element;
+      Recursive  : Boolean := True;
+      Rebindings : Env_Rebindings := null)
       return Element_Array is
    begin
-      return Unwrap (Get (Self, Key, From, Recursive, Parent_Rebindings));
+      return Unwrap (Get (Self, Key, From, Recursive, Rebindings));
    end Get;
 
    -----------

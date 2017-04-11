@@ -284,11 +284,11 @@ package Langkit_Support.Lexical_Env is
    --  point of the request needs to be *after* Referenced_From in the file.
 
    function Get
-     (Self              : Lexical_Env;
-      Key               : Symbol_Type;
-      From              : Element_T := No_Element;
-      Recursive         : Boolean := True;
-      Parent_Rebindings : Env_Rebindings := null)
+     (Self       : Lexical_Env;
+      Key        : Symbol_Type;
+      From       : Element_T := No_Element;
+      Recursive  : Boolean := True;
+      Rebindings : Env_Rebindings := null)
       return Element_Array;
    --  Get the array of unwrapped elements for this Key. If From is given, then
    --  elements will be filtered according to the Can_Reach primitive given
@@ -298,11 +298,11 @@ package Langkit_Support.Lexical_Env is
    --  referenced envs. Otherwise, limit the search to Self.
 
    function Get
-     (Self              : Lexical_Env;
-      Key               : Symbol_Type;
-      From              : Element_T := No_Element;
-      Recursive         : Boolean := True;
-      Parent_Rebindings : Env_Rebindings := null)
+     (Self       : Lexical_Env;
+      Key        : Symbol_Type;
+      From       : Element_T := No_Element;
+      Recursive  : Boolean := True;
+      Rebindings : Env_Rebindings := null)
       return Env_Element_Array;
    --  Get the array of wrapped elements for this key. See above for formal
    --  semantics.
