@@ -1466,7 +1466,7 @@ class CompileCtx(object):
         This also emits non-blocking errors for all types that are exposed in
         the public API whereas they should not.
         """
-        from langkit.compiled_types import ArrayType, Struct
+        from langkit.compiled_types import ArrayType, Struct, StructMetaclass
 
         # All code must ignore _exposed attributes when the following is true
         if self.library_fields_all_public:
@@ -1507,6 +1507,9 @@ class CompileCtx(object):
                 return
 
             t._exposed = True
+
+        # Expose builtin types that we want in the public APIs
+        expose(StructMetaclass.entity_info, None, None, [])
 
         for f in astnode.get_abstract_fields(
             predicate=lambda f: f.is_public,
