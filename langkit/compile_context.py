@@ -1179,7 +1179,8 @@ class CompileCtx(object):
                     lib_name=lib_name,
                     astnode_names={node.name().lower
                                    for node in self.astnode_types},
-                    prefix=self.short_name.lower or self.lib_name,
+                    prefix=(self.short_name.lower
+                            if self.short_name else lib_name),
                 ))
 
         # Add any sources in $lang_path/extensions/support if it exists
