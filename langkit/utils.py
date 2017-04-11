@@ -397,3 +397,19 @@ class DictProxy(object):
 
     def __getattr__(self, attr):
         return self.dct[attr]
+
+
+def not_implemented_error(self_or_cls, method):
+    """
+    Return a NotImplementedError instance to explain that `self or_cls` must
+    override method `method`.
+
+    :param self or_cls: Class that does not implement `method`, or the instance
+        of such a class.
+    :param method: Method object for the method that should be overriden.
+    :rtype: NotImplementedError
+    """
+    cls = self_or_cls if inspect.isclass(self_or_cls) else type(self_or_cls)
+    return NotImplementedError('{} must override method {}'.format(
+        cls.__name__, method.__name__
+    ))
