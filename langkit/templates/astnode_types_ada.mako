@@ -14,9 +14,8 @@
 <%def name="logic_helpers()">
 
    pragma Warnings (Off, "referenced");
-   function Eq_Default
-     (L, R : ${T.sem_node.name()}) return Boolean is (L = R)
-   with Inline;
+   function Eq_Default (L, R : ${T.sem_node.name()}) return Boolean is (L = R)
+      with Inline;
 
    type Logic_Converter_Default is null record;
    No_Logic_Converter_Default : constant Logic_Converter_Default :=
