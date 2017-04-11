@@ -71,19 +71,16 @@ def gdb_helper(*args):
     """
     Format given arguments into a special Ada comment for GDB helpers.
 
-    This does nothing if GDB helpers are disabled for the current context.
-
     :param list[str] args: Elements of the special comment.
     :rtype: str
     """
-    return ('--# {}'.format(' '.join(args))
-            if get_context().gdb_helpers else '')
+    return '--# {}'.format(' '.join(args))
 
 
 def gdb_bind_var(var):
     """
-    Output a GDB helper directive to bind a variable. This does nothing if GDB
-    helpers are disabled or if the variable has no source name.
+    Output a GDB helper directive to bind a variable. This does nothing if the
+    variable has no source name.
 
     :param ResolvedExpression var: The variable to bind.
     :rtype: str
