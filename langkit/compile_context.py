@@ -932,10 +932,10 @@ class CompileCtx(object):
             )
 
         else:
-            builtin_types = [T.env_md, T.entity_info, T.sem_node]
+            builtin_types = [T.env_md, T.entity_info, T.entity]
             struct_types = [
                 t for t in StructMetaclass.struct_types
-                if t not in [T.env_md, T.sem_node, T.entity_info]
+                if t not in [T.env_md, T.entity, T.entity_info]
             ]
             self._struct_types = builtin_types + struct_types
 

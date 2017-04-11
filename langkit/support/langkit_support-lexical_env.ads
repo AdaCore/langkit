@@ -127,9 +127,9 @@ package Langkit_Support.Lexical_Env is
    ----------------------
 
    type Entity_Info is record
-      MD               : Element_Metadata;
-      Parents_Bindings : Env_Rebindings := null;
-      Is_Null          : Boolean := False;
+      MD         : Element_Metadata;
+      Rebindings : Env_Rebindings := null;
+      Is_Null    : Boolean := False;
    end record;
 
    No_Entity_Info : constant Entity_Info := (Empty_Metadata, null, True);

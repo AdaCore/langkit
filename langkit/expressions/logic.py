@@ -182,7 +182,7 @@ class Bind(AbstractExpression):
                     Name('El'): expr,
                     Name('Info'): New.StructExpr(T.root_node.entity_info(), {
                         Name('MD'): LiteralExpr('<>', None),
-                        Name('Parents_Bindings'): LiteralExpr('null', None),
+                        Name('Rebindings'): LiteralExpr('null', None),
                     }),
                 })
 

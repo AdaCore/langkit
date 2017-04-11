@@ -2322,7 +2322,7 @@ class ASTNode(Struct):
                 'MD': BuiltinField(
                     T.env_md, doc='The metadata associated to the AST node'
                 ),
-                'parents_bindings': BuiltinField(EnvRebindingsType, doc=""),
+                'rebindings': BuiltinField(EnvRebindingsType, doc=""),
             })
         return StructMetaclass.entity_info
 
@@ -2795,7 +2795,7 @@ class TypeRepo(object):
         return StructMetaclass.root_grammar_class.entity_info()
 
     @property
-    def sem_node(self):
+    def entity(self):
         """
         This property returns the root type used to describe an AST node with
         semantic information attached.

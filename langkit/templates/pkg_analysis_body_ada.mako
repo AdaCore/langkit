@@ -2807,7 +2807,7 @@ package body ${ada_lib_name}.Analysis is
    -- El_Image --
    --------------
 
-   function El_Image (N : ${T.sem_node.name()}) return String
+   function El_Image (N : ${T.entity.name()}) return String
    is (if N.El /= null then Image (N.El.Short_Image) else "None");
 
    ---------------

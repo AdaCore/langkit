@@ -14,7 +14,7 @@
 <%def name="logic_helpers()">
 
    pragma Warnings (Off, "referenced");
-   function Eq_Default (L, R : ${T.sem_node.name()}) return Boolean is (L = R)
+   function Eq_Default (L, R : ${T.entity.name()}) return Boolean is (L = R)
       with Inline;
 
    type Logic_Converter_Default is null record;
@@ -23,7 +23,7 @@
 
    function Convert
      (Self : Logic_Converter_Default;
-      From : ${T.sem_node.name()}) return ${T.sem_node.name()}
+      From : ${T.entity.name()}) return ${T.entity.name()}
    is (From);
    pragma Warnings (On, "referenced");
 

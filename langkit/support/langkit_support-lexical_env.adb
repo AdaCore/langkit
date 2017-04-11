@@ -15,9 +15,9 @@ package body Langkit_Support.Lexical_Env is
    --  Helpers for ref-counting handling of Env_Rebindings_Type
 
    function Decorate
-     (Els              : Env_Element_Array;
-      MD               : Element_Metadata;
-      Parents_Bindings : Env_Rebindings) return Env_Element_Array;
+     (Els        : Env_Element_Array;
+      MD         : Element_Metadata;
+      Rebindings : Env_Rebindings) return Env_Element_Array;
    --  From an array of Env_Elements, decorate every element with additional
    --  Metadata stored in MD.
 
@@ -27,7 +27,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Inc_Ref (Self : Entity_Info) is
    begin
-      Inc_Ref (Self.Parents_Bindings);
+      Inc_Ref (Self.Rebindings);
    end Inc_Ref;
 
    -------------
@@ -36,7 +36,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Dec_Ref (Self : in out Entity_Info) is
    begin
-      Dec_Ref (Self.Parents_Bindings);
+      Dec_Ref (Self.Rebindings);
    end Dec_Ref;
 
    ------------
@@ -49,7 +49,7 @@ package body Langkit_Support.Lexical_Env is
    begin
       return Env_Element'
         (El      => El,
-         Info    => (MD => MD, Parents_Bindings => null, Is_Null => False),
+         Info    => (MD => MD, Rebindings => null, Is_Null => False),
          Is_Null => False);
    end Create;
 
@@ -59,7 +59,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Inc_Ref (Self : Env_Element) is
    begin
-      Inc_Ref (Self.Info.Parents_Bindings);
+      Inc_Ref (Self.Info.Rebindings);
    end Inc_Ref;
 
    -------------
@@ -68,7 +68,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Dec_Ref (Self : in out Env_Element) is
    begin
-      Dec_Ref (Self.Info.Parents_Bindings);
+      Dec_Ref (Self.Info.Rebindings);
    end Dec_Ref;
 
    ------------
@@ -97,18 +97,17 @@ package body Langkit_Support.Lexical_Env is
    --------------
 
    function Decorate
-     (Els              : Env_Element_Array;
-      MD               : Element_Metadata;
-      Parents_Bindings : Env_Rebindings) return Env_Element_Array
+     (Els        : Env_Element_Array;
+      MD         : Element_Metadata;
+      Rebindings : Env_Rebindings) return Env_Element_Array
    is
       function Decorate_Element (El : Env_Element) return Env_Element
       is
         (Env_Element'
            (El      => El.El,
-            Info    => (MD               => Combine (El.Info.MD, MD),
-                        Parents_Bindings => Combine
-                          (El.Info.Parents_Bindings, Parents_Bindings),
-                        Is_Null          => False),
+            Info    => (MD         => Combine (El.Info.MD, MD),
+                        Rebindings => Combine (El.Info.Rebindings, Rebindings),
+                        Is_Null    => False),
             Is_Null => False));
 
       function Internal_Decorate

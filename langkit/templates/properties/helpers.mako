@@ -17,7 +17,7 @@
    <%
    type_name = "Logic_Converter_{}".format(conv_prop.uid)
    root_class = T.root_node.name()
-   sem_n = T.sem_node.name()
+   sem_n = T.entity.name()
    %>
 
    ## We generate a custom type which is a functor in the C++ term, eg just a
@@ -51,16 +51,16 @@
          ## TODO: It will be necessary to allow the user to pass along
          ## metadata, all or some, at some point. Not clear yet how this should
          ## work, so keeping that for later.
-         Info    => (MD               => No_Metadata,
-                     Parents_Bindings => From.Info.Parents_Bindings,
-                     Is_Null          => From.Info.Is_Null),
+         Info    => (MD         => No_Metadata,
+                     Rebindings => From.Info.Rebindings,
+                     Is_Null    => From.Info.Is_Null),
          Is_Null => From.Is_Null);
    end Convert;
 </%def>
 
 <%def name="generate_logic_equal(eq_prop)">
    <% struct = eq_prop.struct.name() %>
-   function Eq_${eq_prop.uid} (L, R : ${T.sem_node.name()}) return Boolean is
+   function Eq_${eq_prop.uid} (L, R : ${T.entity.name()}) return Boolean is
      (if L.El.all in ${struct}_Type'Class
       and then R.El.all in ${struct}_Type'Class
       then ${eq_prop.name} (${struct} (L.El), ${struct} (R.El))
@@ -108,7 +108,7 @@
    function Call
      (Self           : ${type_name}
      % for i in range(len(formal_node_types)):
-     ; Node_${i} : ${T.sem_node.name()}
+     ; Node_${i} : ${T.entity.name()}
      % endfor
      ) return Boolean
    is
@@ -142,7 +142,7 @@
    end Free;
 
    package ${package_name} is new Predicate_${len(formal_node_types)}
-     (${T.sem_node.name()}, Eq_Node.Refs.Raw_Logic_Var,
+     (${T.entity.name()}, Eq_Node.Refs.Raw_Logic_Var,
       ${type_name}, Free => Free);
 
    % endfor

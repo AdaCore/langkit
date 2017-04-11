@@ -65,7 +65,7 @@ class _BaseEnvElement(_BaseStruct):
 
         def bound_method(*args, **kwargs):
             kwargs[${repr(PropertyDef.env_rebinding_name.lower)}] = \
-                self.parents_bindings
+                self.rebindings
             return unbound_private_method(node, *args, **kwargs)
 
         # If the public method is actually a property, the caller will not

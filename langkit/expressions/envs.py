@@ -378,9 +378,9 @@ def as_entity(self, node):
                                         for f in T.env_md.get_fields()})
     return New.StructExpr(
         node_expr.type.entity(),
-        {names.Name('md'): md_expr,
-         names.Name('el'): node_expr,
-         names.Name('parents_bindings'): construct(p.env_rebinding_arg.var)},
+        {names.Name('MD'): md_expr,
+         names.Name('El'): node_expr,
+         names.Name('Rebindings'): construct(p.env_rebinding_arg.var)},
         abstract_expr=self,
     )
 
