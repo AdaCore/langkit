@@ -698,6 +698,10 @@ class BoolType(BasicType):
         # uint8_t.
         return CAPIType(c_api_settings, 'bool')
 
+    @classmethod
+    def py_nullexpr(cls):
+        return 'False'
+
 
 class LongType(BasicType):
     is_ptr = False
