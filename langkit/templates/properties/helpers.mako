@@ -64,9 +64,12 @@
 <%def name="generate_logic_equal(eq_prop)">
    <% struct = eq_prop.struct.name() %>
    function Eq_${eq_prop.uid} (L, R : ${T.entity.name()}) return Boolean is
+
      (if L.El.all in ${struct}_Type'Class
       and then R.El.all in ${struct}_Type'Class
+
       then ${eq_prop.name} (${struct} (L.El), ${struct} (R.El))
+
       else raise Constraint_Error
            with "Wrong type for Eq_${eq_prop.uid} arguments");
 </%def>
