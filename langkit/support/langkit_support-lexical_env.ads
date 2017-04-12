@@ -79,6 +79,12 @@ package Langkit_Support.Lexical_Env is
    function Get_Env (Self : Env_Getter) return Lexical_Env;
    --  Return the environment associated to the Self env getter
 
+   procedure Inc_Ref (Self : Env_Getter);
+   --  Shortcut to run Inc_Ref of the potentially embedded lexical environment
+
+   procedure Dec_Ref (Self : in out Env_Getter);
+   --  Shortcut to run Dec_Ref of the potentially embedded lexical environment
+
    --------------------
    -- Env_Rebindings --
    --------------------
@@ -90,6 +96,12 @@ package Langkit_Support.Lexical_Env is
    --  one).
 
    No_Env_Rebinding : constant Env_Rebinding;
+
+   procedure Inc_Ref (Self : Env_Rebinding);
+   --  Shortcut to run Inc_Ref on both embedded Env_Getter values
+
+   procedure Dec_Ref (Self : in out Env_Rebinding);
+   --  Shortcut to run Dec_Ref on both embedded Env_Getter values
 
    type Env_Rebindings_Array is array (Positive range <>) of Env_Rebinding;
 

@@ -5,15 +5,6 @@ package body Langkit_Support.Lexical_Env is
    package Env_Element_Arrays is new Langkit_Support.Array_Utils
      (Env_Element, Positive, Env_Element_Array);
 
-   procedure Inc_Ref (Self : Env_Getter);
-   procedure Dec_Ref (Self : in out Env_Getter);
-   --  Helpers for Env_Getters. TODO: To be removed when we remove ref-counting
-   --  from lexical envs.
-
-   procedure Inc_Ref (Self : Env_Rebinding);
-   procedure Dec_Ref (Self : in out Env_Rebinding);
-   --  Helpers for ref-counting handling of Env_Rebindings_Type
-
    function Decorate
      (Els        : Env_Element_Array;
       MD         : Element_Metadata;
