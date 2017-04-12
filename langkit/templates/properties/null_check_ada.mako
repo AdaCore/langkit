@@ -19,3 +19,9 @@
    % endif
 
 % endif
+
+## The laws of ref-counting tells us to create an ownership share for our
+## result.
+% if expr.type.is_refcounted():
+   Inc_Ref (${expr.render_expr()});
+% endif
