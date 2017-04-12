@@ -119,9 +119,9 @@ package Langkit_Support.Lexical_Env is
    --  Return the new env corresponding to Old_Env in Self. Return Old_Env if
    --  there is no association.
 
-   ----------------------
-   -- Env_Element Type --
-   ----------------------
+   --------------
+   -- Entities --
+   --------------
 
    type Entity_Info is record
       MD         : Element_Metadata;
@@ -149,8 +149,7 @@ package Langkit_Support.Lexical_Env is
    --  Wrapper structure to contain both the 'real' env element that the user
    --  wanted to store, and its associated metadata.
 
-   function Create
-     (El : Element_T; MD : Element_Metadata) return Env_Element;
+   function Create (El : Element_T; MD : Element_Metadata) return Env_Element;
    --  Constructor that returns an Env_Element from an Element_T and an
    --  Element_Metadata instances.
 
@@ -173,8 +172,7 @@ package Langkit_Support.Lexical_Env is
    subtype Env_Element_Array is Env_Element_Vectors.Elements_Array;
    --  Arrays of wrapped elements stored in the environment maps
 
-   function Unwrap
-     (Els : Env_Element_Array) return Element_Array;
+   function Unwrap (Els : Env_Element_Array) return Element_Array;
    --  Get and array of unwrapped elements from an array of wrapped elements
 
    type Referenced_Env is record
@@ -186,14 +184,14 @@ package Langkit_Support.Lexical_Env is
    end record;
    --  Represents a referenced env
 
-   package Referenced_Envs_Vectors
-   is new Langkit_Support.Vectors (Referenced_Env);
+   package Referenced_Envs_Vectors is new Langkit_Support.Vectors
+     (Referenced_Env);
    --  Vectors of referenced envs, used to store referenced environments
 
    use Env_Element_Vectors;
 
    package Internal_Envs is new Ada.Containers.Hashed_Maps
-     (Symbol_Type,
+     (Key_Type        => Symbol_Type,
       Element_Type    => Env_Element_Vectors.Vector,
       Hash            => Hash,
       Equivalent_Keys => "=");
