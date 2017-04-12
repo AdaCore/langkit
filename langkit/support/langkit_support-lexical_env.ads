@@ -205,12 +205,36 @@ package Langkit_Support.Lexical_Env is
    -- Lexical environment representation --
    ----------------------------------------
 
+   type Entity_Resolver is access
+      function (Ref : Env_Element) return Env_Element;
+   --  Callback type for the lazy entity resolution mechanism. Such functions
+   --  must take a "reference" entity (e.g. a name) and return the referenced
+   --  entity.
+
+   type Internal_Map_Element is record
+      Element : Element_T;
+      --  If Resolver is null, this is the element that lexical env lookup must
+      --  return. Otherwise, it is the argument to pass to Resolver in order to
+      --  get the result.
+
+      MD : Element_Metadata;
+      --  Metadata associated to Element
+
+      Resolver : Entity_Resolver;
+   end record;
+
+   package Internal_Map_Element_Vectors is new Langkit_Support.Vectors
+     (Internal_Map_Element);
+
+   subtype Internal_Map_Element_Array is
+      Internal_Map_Element_Vectors.Elements_Array;
+
    package Internal_Envs is new Ada.Containers.Hashed_Maps
      (Key_Type        => Symbol_Type,
-      Element_Type    => Env_Element_Vectors.Vector,
+      Element_Type    => Internal_Map_Element_Vectors.Vector,
       Hash            => Hash,
       Equivalent_Keys => "=",
-      "="             => Env_Element_Vectors."=");
+      "="             => Internal_Map_Element_Vectors."=");
 
    type Internal_Map is access all Internal_Envs.Map;
    --  Internal maps of Symbols to vectors of elements
@@ -273,10 +297,11 @@ package Langkit_Support.Lexical_Env is
    --  only owner of the result (ref-count is 1).
 
    procedure Add
-     (Self  : Lexical_Env;
-      Key   : Symbol_Type;
-      Value : Element_T;
-      MD    : Element_Metadata := Empty_Metadata);
+     (Self     : Lexical_Env;
+      Key      : Symbol_Type;
+      Value    : Element_T;
+      MD       : Element_Metadata := Empty_Metadata;
+      Resolver : Entity_Resolver := null);
    --  Add Value to the list of values for the key Key, with the metadata MD
 
    procedure Remove

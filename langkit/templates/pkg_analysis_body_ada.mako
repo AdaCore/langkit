@@ -2283,9 +2283,9 @@ package body ${ada_lib_name}.Analysis is
 
    package Sorted_Envs is new Ada.Containers.Ordered_Maps
      (Symbol_Type,
-      Element_Type    => AST_Envs.Env_Element_Vectors.Vector,
+      Element_Type    => AST_Envs.Internal_Map_Element_Vectors.Vector,
       "<"             => "<",
-      "="             => AST_Envs.Env_Element_Vectors."=");
+      "="             => AST_Envs.Internal_Map_Element_Vectors."=");
 
    -------------------
    -- To_Sorted_Env --
@@ -2349,9 +2349,11 @@ package body ${ada_lib_name}.Analysis is
       -- test/debug purposes, it should not matter. Still, would be good to
       -- have Text_Type everywhere at some point.
 
-      function Image (El : Env_Element) return String is (Short_Image (El.El));
+      function Image (El : Internal_Map_Element) return String is
+        (Short_Image (El.Element));
 
-      function Image is new AST_Envs.Env_Element_Vectors.Image (Image);
+      function Image is new AST_Envs.Internal_Map_Element_Vectors.Image
+        (Image);
 
       First_Arg : Boolean := True;
 

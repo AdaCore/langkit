@@ -4,9 +4,11 @@ package body Langkit_Support.Lexical_Env is
 
    package Env_Element_Arrays is new Langkit_Support.Array_Utils
      (Env_Element, Positive, Env_Element_Array);
+   package Internal_Map_Element_Arrays is new Langkit_Support.Array_Utils
+     (Internal_Map_Element, Positive, Internal_Map_Element_Array);
 
    function Decorate
-     (Els        : Env_Element_Array;
+     (Elts       : Internal_Map_Element_Array;
       MD         : Element_Metadata;
       Rebindings : Env_Rebindings) return Env_Element_Array;
    --  From an array of Env_Elements, decorate every element with additional
@@ -296,17 +298,17 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    procedure Add
-     (Self  : Lexical_Env;
-      Key   : Symbol_Type;
-      Value : Element_T;
-      MD    : Element_Metadata := Empty_Metadata)
+     (Self     : Lexical_Env;
+      Key      : Symbol_Type;
+      Value    : Element_T;
+      MD       : Element_Metadata := Empty_Metadata;
+      Resolver : Entity_Resolver := null)
    is
       use Internal_Envs;
 
-      Env_El : constant Env_Element :=
-        Env_Element'(Value, (MD, null, False), False);
-      C      : Cursor;
-      Dummy  : Boolean;
+      Element : constant Internal_Map_Element := (Value, MD, Resolver);
+      C       : Cursor;
+      Dummy   : Boolean;
    begin
       --  See Empty_Env's documentation
 
@@ -314,8 +316,9 @@ package body Langkit_Support.Lexical_Env is
          return;
       end if;
 
-      Self.Env.Insert (Key, Env_Element_Vectors.Empty_Vector, C, Dummy);
-      Reference (Self.Env.all, C).Element.Append (Env_El);
+      Self.Env.Insert
+        (Key, Internal_Map_Element_Vectors.Empty_Vector, C, Dummy);
+      Reference (Self.Env.all, C).Element.Append (Element);
    end Add;
 
    ------------
@@ -331,7 +334,7 @@ package body Langkit_Support.Lexical_Env is
    begin
       --  Get rid of element
       for I in 1 .. V.Length loop
-         if V.Get (I).El = Value then
+         if V.Get (I).Element = Value then
             V.Remove_At (I);
             exit;
          end if;
@@ -430,7 +433,8 @@ package body Langkit_Support.Lexical_Env is
             --  We want to reverse the returned array, so that last inserted
             --  results are returned first.
             then Decorate
-              (Reverse_Array (Env_Element_Vectors.To_Array (Element (C))),
+              (Internal_Map_Element_Arrays.Reverse_Array
+                 (Internal_Map_Element_Vectors.To_Array (Element (C))),
                Env.Default_MD,
                Current_Rebindings)
 
@@ -581,7 +585,7 @@ package body Langkit_Support.Lexical_Env is
 
       if Self.Ref_Count = No_Refcount then
          for Elts of Self.Env.all loop
-            Env_Element_Vectors.Destroy (Elts);
+            Internal_Map_Element_Vectors.Destroy (Elts);
          end loop;
          Destroy (Self.Env);
       end if;
@@ -639,24 +643,33 @@ package body Langkit_Support.Lexical_Env is
    --------------
 
    function Decorate
-     (Els        : Env_Element_Array;
+     (Elts       : Internal_Map_Element_Array;
       MD         : Element_Metadata;
       Rebindings : Env_Rebindings) return Env_Element_Array
    is
-      function Decorate_Element (El : Env_Element) return Env_Element
-      is
-        (Env_Element'
-           (El      => El.El,
-            Info    => (MD         => Combine (El.Info.MD, MD),
-                        Rebindings => Combine (El.Info.Rebindings, Rebindings),
-                        Is_Null    => False),
-            Is_Null => False));
+      function Create_Entity (Elt : Internal_Map_Element)
+         return Env_Element;
+      --  Transform an element from the environment into an entity
 
-      function Internal_Decorate
-      is new Env_Element_Arrays.Id_Map_Gen (Decorate_Element)
-        with Inline;
+      function Create_Entity (Elt : Internal_Map_Element) return Env_Element
+      is
+         Result : constant Env_Element :=
+           (El      => Elt.Element,
+            Info    => (MD         => Combine (Elt.MD, MD),
+                        Rebindings => Rebindings,
+                        Is_Null    => False),
+            Is_Null => False);
+      begin
+         Inc_Ref (Result.Info.Rebindings);
+         return Result;
+      end Create_Entity;
+
+      function Internal_Decorate is new Internal_Map_Element_Arrays.Map_Gen
+        (Out_Type       => Env_Element,
+         Out_Array_Type => Env_Element_Array,
+         Transform      => Create_Entity) with Inline;
    begin
-      return Internal_Decorate (Els);
+      return Internal_Decorate (Elts);
    end Decorate;
 
 end Langkit_Support.Lexical_Env;
