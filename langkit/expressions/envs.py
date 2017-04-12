@@ -136,22 +136,19 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
         "Wrong type for symbol expr: {}".format(sym_expr.type)
     )
 
-    sub_exprs = [construct(env_expr, LexicalEnvType), sym_expr]
+    args = [('Self', construct(env_expr, LexicalEnvType)),
+            ('Key', sym_expr),
+            ('Recursive', construct(recursive, BoolType))]
 
+    # Pass the From parameter if the user wants sequential semantics
     if sequential:
-        # Pass the From parameter if the user wants sequential semantics
-        array_expr = ('AST_Envs.Get'
-                      '  (Self => {},'
-                      '   Key => {},'
-                      '   From => {},'
-                      '   Recursive => {})')
-        sub_exprs.append(construct(Self, T.root_node))
-    else:
-        array_expr = 'AST_Envs.Get (Self => {}, Key => {}, Recursive => {})'
-    sub_exprs.append(construct(recursive, BoolType))
+        args.append(('From', construct(Self, T.root_node)))
 
+    array_expr = 'AST_Envs.Get ({})'.format(', '.join('{} => {{}}'.format(n)
+                                                      for n, _ in args))
     make_expr = partial(BasicExpr, result_var_name="Env_Get_Result",
-                        operands=sub_exprs, abstract_expr=self)
+                        operands=[e for _, e in args],
+                        abstract_expr=self)
 
     if resolve_unique:
         return make_expr("Get ({}, 0)".format(array_expr),
