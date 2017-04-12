@@ -210,7 +210,7 @@ class EnvSpec(object):
 
         :rtype: bool
         """
-        for bindings_prop, _, _, _, _ in self.envs_expressions:
+        for bindings_prop, _, _, _, resolver in self.envs_expressions:
             with bindings_prop.diagnostic_context():
                 check_source_language(
                     bindings_prop.type.matches(T.env_assoc) or
@@ -221,6 +221,20 @@ class EnvSpec(object):
                         bindings_prop.type.name().camel
                     )
                 )
+                if resolver:
+                    check_source_language(
+                        resolver.type.matches(T.entity),
+                        'Entity resolver properties must return entities'
+                    )
+                    check_source_language(
+                        not resolver.has_implicit_env,
+                        'Entity resolver properties must not use implicit'
+                        ' environments'
+                    )
+                    check_source_language(
+                        resolver.uses_envs,
+                        'Entity resolver properties must use environments'
+                    )
 
     def _render_field_access(self, p):
         """
