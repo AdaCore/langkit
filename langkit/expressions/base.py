@@ -2265,6 +2265,22 @@ class PropertyDef(AbstractNodeData):
         # Warn on unused bindings
         self.warn_on_unused_bindings()
 
+    def check_overriding_types(self, context):
+        """
+        Check that the return type of this property and the return type of the
+        base property that self overrides are the same, if applicable.
+        """
+        if self.base_property and self.base_property.type:
+            check_source_language(
+                self.type.matches(self.base_property.type),
+                "{} returns {} whereas it overrides {}, which returns {}."
+                " The former should match the latter.".format(
+                    self.qualname, self.type.name().camel,
+                    self.base_property.qualname,
+                    self.base_property.type.name().camel
+                )
+            )
+
     def render_property(self, context):
         """
         Render the given property to generated code.
@@ -2280,20 +2296,6 @@ class PropertyDef(AbstractNodeData):
                 self.untyped_wrapper_decl = render(
                     'properties/untyped_wrapper_decl_ada'
                 ) if self.requires_untyped_wrapper else ''
-
-        if self.base_property and self.base_property.type:
-            # TODO: We need to make sure Properties are rendered in the proper
-            # order (base classes first), to make sure that this check is
-            # always effectful.
-            check_source_language(
-                self.type.matches(self.base_property.type),
-                "{} returns {} whereas it overrides {}, which returns {}."
-                " The former should match the latter.".format(
-                    self.qualname, self.type.name().camel,
-                    self.base_property.qualname,
-                    self.base_property.type.name().camel
-                )
-            )
 
     def doc(self):
         return self._doc
