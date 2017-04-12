@@ -299,6 +299,9 @@ class If(AbstractExpression):
 
         :rtype: IfExpr
         """
+        from langkit.expressions import Cast
+        from langkit.compiled_types import T
+
         then = construct(self.then)
         else_then = construct(self.else_then)
         rtype = then.type.unify(
@@ -308,10 +311,10 @@ class If(AbstractExpression):
 
         # If then/else_then have actually subtypes of the unified result type,
         # we need to perform a conversion for the Ada code generation.
-        if then != rtype:
-            then = BuiltinCallExpr(rtype.name(), rtype, [then])
-        if else_then != rtype:
-            else_then = BuiltinCallExpr(rtype.name(), rtype, [else_then])
+        if then.type != rtype:
+            then = Cast.Expr(then, rtype)
+        if else_then.type != rtype:
+            else_then = Cast.Expr(else_then, rtype)
 
         return If.Expr(construct(self.cond, BoolType), then, else_then, rtype)
 
