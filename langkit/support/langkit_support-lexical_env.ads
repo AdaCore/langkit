@@ -116,8 +116,8 @@ package Langkit_Support.Lexical_Env is
 
    function Get_New_Env
      (Self : Env_Rebindings; Old_Env : Lexical_Env) return Lexical_Env;
-   --  Return the new env corresponding to Old_Env in Self. Return
-   --  No_Env_Getter if there is no association.
+   --  Return the new env corresponding to Old_Env in Self. Return Old_Env if
+   --  there is no association.
 
    ----------------------
    -- Env_Element Type --
