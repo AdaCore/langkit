@@ -289,23 +289,13 @@ package Langkit_Support.Lexical_Env is
       From       : Element_T := No_Element;
       Recursive  : Boolean := True;
       Rebindings : Env_Rebindings := null)
-      return Element_Array;
-   --  Get the array of unwrapped elements for this Key. If From is given, then
+      return Env_Element_Array;
+   --  Get the array of entities for this Key. If From is given, then
    --  elements will be filtered according to the Can_Reach primitive given
    --  as parameter for the generic package.
    --
    --  If Recursive, look for Key in all Self's parents as well, and in
    --  referenced envs. Otherwise, limit the search to Self.
-
-   function Get
-     (Self       : Lexical_Env;
-      Key        : Symbol_Type;
-      From       : Element_T := No_Element;
-      Recursive  : Boolean := True;
-      Rebindings : Env_Rebindings := null)
-      return Env_Element_Array;
-   --  Get the array of wrapped elements for this key. See above for formal
-   --  semantics.
 
    function Orphan (Self : Lexical_Env) return Lexical_Env;
    --  Return a dynamically allocated copy of Self that has no parent

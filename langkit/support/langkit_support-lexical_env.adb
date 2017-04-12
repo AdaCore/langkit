@@ -326,21 +326,6 @@ package body Langkit_Support.Lexical_Env is
       end;
    end Get;
 
-   ---------
-   -- Get --
-   ---------
-
-   function Get
-     (Self       : Lexical_Env;
-      Key        : Symbol_Type;
-      From       : Element_T := No_Element;
-      Recursive  : Boolean := True;
-      Rebindings : Env_Rebindings := null)
-      return Element_Array is
-   begin
-      return Unwrap (Get (Self, Key, From, Recursive, Rebindings));
-   end Get;
-
    -----------
    -- Group --
    -----------
