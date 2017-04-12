@@ -257,9 +257,8 @@ package body Langkit_Support.Lexical_Env is
       function Get_Own_Elements
         (Self : Lexical_Env) return Env_Element_Array
       is
-         C : Cursor := Internal_Envs.No_Element;
-         Env : constant Lexical_Env :=
-           Get_New_Env (Current_Rebindings, Self);
+         C   : Cursor := Internal_Envs.No_Element;
+         Env : constant Lexical_Env := Get_New_Env (Current_Rebindings, Self);
       begin
          if Env.Env /= null then
             C := Env.Env.Find (Key);
@@ -267,13 +266,11 @@ package body Langkit_Support.Lexical_Env is
 
          return
            (if Has_Element (C)
-            then Decorate
 
             --  We want to reverse the returned array, so that last inserted
             --  results are returned first.
-
-              (Reverse_Array
-                 (Env_Element_Vectors.To_Array (Element (C))),
+            then Decorate
+              (Reverse_Array (Env_Element_Vectors.To_Array (Element (C))),
                Env.Default_MD,
                Current_Rebindings)
 
