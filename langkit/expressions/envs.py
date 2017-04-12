@@ -11,8 +11,8 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr,
-    BuiltinCallExpr, GetSymbol, PropertyDef, ResolvedExpression, Self,
-    auto_attr, auto_attr_custom, construct
+    BuiltinCallExpr, FieldAccessExpr, GetSymbol, PropertyDef,
+    ResolvedExpression, Self, auto_attr, auto_attr_custom, construct
 )
 
 
@@ -138,7 +138,12 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
 
     args = [('Self', construct(env_expr, LexicalEnvType)),
             ('Key', sym_expr),
-            ('Recursive', construct(recursive, BoolType))]
+            ('Recursive', construct(recursive, BoolType)),
+            ('Rebindings', FieldAccessExpr(
+                construct(current_prop.entity_info_arg.var),
+                'Rebindings',
+                EnvRebindingsType
+            ))]
 
     # Pass the From parameter if the user wants sequential semantics
     if sequential:
