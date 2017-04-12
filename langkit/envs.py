@@ -12,11 +12,12 @@ from langkit.expressions import (
 )
 
 
-AddToEnv = namedtuple("AddToEnv", ["mappings", "dest_env",
-                                   "metadata", "is_post"])
+AddToEnv = namedtuple("AddToEnv", ["mappings", "dest_env", "metadata",
+                                   "is_post", "resolver"])
 
 
-def add_to_env(mappings, dest_env=None, metadata=None, is_post=False):
+def add_to_env(mappings, dest_env=None, metadata=None, is_post=False,
+               resolver=None):
     """
     Specify elements to add to the lexical environment.
 
@@ -29,9 +30,13 @@ def add_to_env(mappings, dest_env=None, metadata=None, is_post=False):
     :param AbstractExpression metadata: Optional expression for metadata.
     :param bool is_post: Whether to execute the add_to_env action after
         children have been treated.
+    :param PropertyDef|None resolver: Optional property that returns an AST
+        node. If provided, the lexical environment lookup that will try to
+        return the given mappings will first run this property on all nodes and
+        return its result instead.
     :return:
     """
-    return AddToEnv(mappings, dest_env, metadata, is_post)
+    return AddToEnv(mappings, dest_env, metadata, is_post, resolver)
 
 
 class EnvSpec(object):
@@ -173,9 +178,16 @@ class EnvSpec(object):
                 create_internal_property('Env_Dest', exprs.dest_env,
                                          LexicalEnvType),
                 create_internal_property('MD', exprs.metadata, T.env_md),
-                exprs.is_post
+                exprs.is_post,
+                resolver=exprs.resolver,
             ) for exprs in self._unresolved_envs_expressions
         ]
+
+        # Ask for the creation of untyped wrappers for all properties used as
+        # entity resolvers.
+        for exprs in self._unresolved_envs_expressions:
+            if exprs.resolver:
+                exprs.resolver.require_untyped_wrapper()
 
         self.has_post_actions = any([e.is_post for e in self.envs_expressions])
 
@@ -198,7 +210,7 @@ class EnvSpec(object):
 
         :rtype: bool
         """
-        for bindings_prop, _, _, _ in self.envs_expressions:
+        for bindings_prop, _, _, _, _ in self.envs_expressions:
             with bindings_prop.diagnostic_context():
                 check_source_language(
                     bindings_prop.type.matches(T.env_assoc) or
