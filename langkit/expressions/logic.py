@@ -107,15 +107,16 @@ class Bind(AbstractExpression):
         def resolve(name, prop):
             if not prop:
                 return
+            if isinstance(prop, FieldAccess):
+                prop = prop.resolve_field()
+
             check_source_language(
-                isinstance(prop, (FieldAccess, PropertyDef)),
+                isinstance(prop, PropertyDef),
                 "{} must be either a FieldAccess resolving to a property, or"
                 " a direct reference to a property".format(name)
             )
-            if isinstance(prop, FieldAccess):
-                return prop.resolve_field()
-            else:
-                return prop
+
+            return prop
 
         self.eq_prop = resolve('eq_prop', self.eq_prop)
         self.conv_prop = resolve('conv_prop', self.conv_prop)
