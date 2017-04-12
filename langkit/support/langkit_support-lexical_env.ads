@@ -79,20 +79,24 @@ package Langkit_Support.Lexical_Env is
    function Get_Env (Self : Env_Getter) return Lexical_Env;
    --  Return the environment associated to the Self env getter
 
+   --------------------
+   -- Env_Rebindings --
+   --------------------
+
    type Env_Rebinding is record
       Old_Env, New_Env : Env_Getter;
    end record;
+   --  Mapping from one lexical environment (the old one) to another (the new
+   --  one).
 
    No_Env_Rebinding : constant Env_Rebinding;
 
    type Env_Rebindings_Array is array (Positive range <>) of Env_Rebinding;
 
-   type Env_Rebindings_Type (Size : Natural) is record
-      Rebindings : Env_Rebindings_Array (1 .. Size);
-      Ref_Count  : Natural := 1;
-   end record;
-
+   type Env_Rebindings_Type (<>) is private;
    type Env_Rebindings is access all Env_Rebindings_Type;
+   --  Set of mappings from one lexical environment to another. This is used to
+   --  temporarily substitute lexical environment during symbol lookup.
 
    function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings;
    --  Create a new Env_Rebindings from an array of binding pairs
@@ -340,7 +344,12 @@ private
       end case;
    end record;
 
-   No_Env_Getter : constant Env_Getter := (False, null);
+   type Env_Rebindings_Type (Size : Natural) is record
+      Rebindings : Env_Rebindings_Array (1 .. Size);
+      Ref_Count  : Natural := 1;
+   end record;
+
+   No_Env_Getter    : constant Env_Getter := (False, null);
    No_Env_Rebinding : constant Env_Rebinding := (No_Env_Getter, No_Env_Getter);
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
