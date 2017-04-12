@@ -18,6 +18,7 @@
    type_name = "Logic_Converter_{}".format(conv_prop.uid)
    root_class = T.root_node.name()
    sem_n = T.entity.name()
+   returns_entity = conv_prop.type.is_entity_type
    %>
 
    ## We generate a custom type which is a functor in the C++ term, eg just a
@@ -32,7 +33,20 @@
 
    function Convert (Self : ${type_name}; From : ${sem_n}) return ${sem_n} is
       pragma Unreferenced (Self);
+
+      % if returns_entity:
+      Ret : ${conv_prop.type.name()};
+      % endif
+
    begin
+      % if returns_entity:
+      Ret := ${conv_prop.name}
+        (${conv_prop.struct.name()} (From.El), From.Info);
+      return
+        (El => ${root_class} (Ret.El),
+         Info => Ret.Info,
+         Is_Null => Ret.Is_Null);
+      % else:
       return ${sem_n}'
         (El => ${root_class} (${conv_prop.name}
           (${conv_prop.struct.name()} (From.El)
@@ -40,16 +54,12 @@
               , From.Info
            % endif
          )),
-         ## We don't propagate metadata for the moment in conversion, because
-         ## attributes of the original entity don't necessarily propagate to the
-         ## new entity.
-         ## TODO: It will be necessary to allow the user to pass along
-         ## metadata, all or some, at some point. Not clear yet how this should
-         ## work, so keeping that for later.
+
          Info    => (MD         => No_Metadata,
                      Rebindings => From.Info.Rebindings,
                      Is_Null    => From.Info.Is_Null),
          Is_Null => From.Is_Null);
+      % endif
    end Convert;
 </%def>
 
