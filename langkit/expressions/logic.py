@@ -148,7 +148,10 @@ class Bind(AbstractExpression):
 
                 (self.conv_prop.struct.matches(T.root_node),
                  "The property passed to bind must belong to a subtype "
-                 "of {}".format(T.root_node.name().camel))
+                 "of {}".format(T.root_node.name().camel)),
+
+                (not self.conv_prop.has_implicit_env,
+                 "Property passed to bind must not have an implicit env"),
             ])
 
         # Those checks are run in construct, because we need the eq_prop to be
@@ -182,10 +185,9 @@ class Bind(AbstractExpression):
 
         cprop_uid = (self.conv_prop.uid if self.conv_prop else "Default")
         eprop_uid = (self.eq_prop.uid if self.eq_prop else "Default")
+
         pred_func = untyped_literal_expr(
-            "Logic_Converter_{}'(Env => {})".format(
-                cprop_uid, construct(Env).render_expr()
-            )
+            "Logic_Converter_{}'(null record)".format(cprop_uid)
             if self.conv_prop
             else "No_Logic_Converter_Default"
         )

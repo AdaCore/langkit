@@ -23,29 +23,21 @@
    ## We generate a custom type which is a functor in the C++ term, eg just a
    ## function with state. The state it needs to keep is the lexical env at the
    ## site where the logic binder is generated.
-   type ${type_name} is record
-      Env  : Lexical_Env;
-   end record;
+   type ${type_name} is null record;
 
-   No_${type_name} : constant ${type_name} := (Env => null);
+   No_${type_name} : constant ${type_name} := (null record);
 
    function Convert (Self : ${type_name}; From : ${sem_n}) return ${sem_n}
       with Inline;
 
    function Convert (Self : ${type_name}; From : ${sem_n}) return ${sem_n} is
-      % if not conv_prop.has_implicit_env:
-         pragma Unreferenced (Self);
-      % endif
-
+      pragma Unreferenced (Self);
    begin
       return ${sem_n}'
         (El => ${root_class} (${conv_prop.name}
           (${conv_prop.struct.name()} (From.El)
            % if conv_prop.uses_envs:
               , From.Info
-           % endif
-           % if conv_prop.has_implicit_env:
-              , Self.Env
            % endif
          )),
          ## We don't propagate metadata for the moment in conversion, because
