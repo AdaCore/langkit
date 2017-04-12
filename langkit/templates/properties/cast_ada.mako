@@ -14,6 +14,9 @@ if ${source} = null
    ${source}.all in ${ast_node.value_type_name()}'Class
 then
 % if is_entity:
+   ## We are about to create a new reference to the input expr's env rebinding,
+   ## so create a new ownership share for it.
+   Inc_Ref (${expr.expr_var.name}.Info.Rebindings);
    ${expr.result_var.name} :=
      (El      => ${ast_node.name()} (${expr.expr_var.name}.El),
       Info    => (MD         => ${expr.expr_var.name}.Info.Md,
