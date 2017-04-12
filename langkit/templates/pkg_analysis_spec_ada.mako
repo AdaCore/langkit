@@ -1216,6 +1216,15 @@ private
    -- Root AST node (internals) --
    -------------------------------
 
+   type Memoization_State is
+     (Not_Computed,
+      Computed,
+      Raise_Property_Error);
+   --  Implementation detail for properties memoization. Values describe if the
+   --  property is still to be evaluated (Not_Computed), if its result value is
+   --  already available (Comptuted) or if it is known to raise a
+   --  Property_Error (Raise_Property_Error).
+
    type ${root_node_value_type} is abstract tagged record
       Parent                 : ${root_node_type_name} := null;
 
@@ -1416,15 +1425,6 @@ private
    --  Assuming that Token refers to a token that contains a symbol, return the
    --  corresponding symbol. This is an internal helper for properties code
    --  generation.
-
-   type Memoization_State is
-     (Not_Computed,
-      Computed,
-      Raise_Property_Error);
-   --  Implementation detail for properties memoization. Values describe if the
-   --  property is still to be evaluated (Not_Computed), if its result value is
-   --  already available (Comptuted) or if it is known to raise a
-   --  Property_Error (Raise_Property_Error).
 
    % for array_type in ctx.sorted_types(ctx.array_types):
    % if array_type.element_type().should_emit_array_type:
