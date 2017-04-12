@@ -1743,6 +1743,8 @@ class PropertyDef(AbstractNodeData):
 
         self.entity_info_arg = None
 
+        self._requires_untyped_wrapper = False
+
     def property_set(self):
         """
         Return all properties associated with this property in terms of
@@ -2192,6 +2194,18 @@ class PropertyDef(AbstractNodeData):
 
         for prop in self.property_set():
             internal(prop)
+
+    def require_untyped_wrapper(self):
+        """
+        Tag this property as requiring an untyped wrapper function. This
+        wrapper is a function that takes Self and an Entity_Info record as
+        parameters and that return an entity.
+        """
+        self._requires_untyped_wrapper = True
+
+    @property
+    def requires_untyped_wrapper(self):
+        return self._requires_untyped_wrapper
 
     def construct_and_type_expression(self, context):
         """
