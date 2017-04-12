@@ -131,7 +131,6 @@ class Bind(AbstractExpression):
         # because they rely on type information, which is not supposed to be
         # computed before this pass.
         if self.conv_prop:
-
             return_type = self.conv_prop.type
             if return_type.is_entity_type:
                 return_type = return_type.el_type
@@ -170,6 +169,10 @@ class Bind(AbstractExpression):
 
                 (len(args) == 1,
                  "Expected 1 argument for eq_prop, got {}".format(len(args))),
+
+                (not self.eq_prop.has_implicit_env,
+                 "Equality property passed to bind must not have an implicit"
+                 " env"),
 
             ])
             other_type = args[0].type
