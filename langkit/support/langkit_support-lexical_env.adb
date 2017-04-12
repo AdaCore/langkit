@@ -653,15 +653,21 @@ package body Langkit_Support.Lexical_Env is
 
       function Create_Entity (Elt : Internal_Map_Element) return Env_Element
       is
-         Result : constant Env_Element :=
+         Resolved : Env_Element;
+         Result   : constant Env_Element :=
            (El      => Elt.Element,
             Info    => (MD         => Combine (Elt.MD, MD),
                         Rebindings => Rebindings,
                         Is_Null    => False),
             Is_Null => False);
       begin
-         Inc_Ref (Result.Info.Rebindings);
-         return Result;
+         if Elt.Resolver = null then
+            Inc_Ref (Result.Info.Rebindings);
+            return Result;
+         else
+            Resolved := Elt.Resolver.all (Result);
+            return Resolved;
+         end if;
       end Create_Entity;
 
       function Internal_Decorate is new Internal_Map_Element_Arrays.Map_Gen
