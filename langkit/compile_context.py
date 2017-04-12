@@ -732,8 +732,10 @@ class CompileCtx(object):
                     propagate(bw_link)
 
         # Propagate computed attribute
-        for prop in self.all_properties(lambda p: not p.base_property
-                                        and p.uses_envs, False):
+        for prop in self.all_properties(
+            lambda p: not p.base_property and p.uses_envs,
+            include_inherited=False
+        ):
             propagate(prop)
 
     def warn_unused_private_properties(self):
