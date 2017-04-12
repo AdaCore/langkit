@@ -339,10 +339,9 @@ class FieldAccess(AbstractExpression):
             self.simple_field_access = not p
 
             if not self.simple_field_access:
-                var_name = None if receiver_expr.result_var else 'Pfx'
                 self.receiver_expr = NullCheckExpr(receiver_expr,
                                                    implicit_deref,
-                                                   result_var_name=var_name)
+                                                   result_var_name='Pfx')
             else:
                 self.receiver_expr = receiver_expr
 
