@@ -254,6 +254,10 @@
          include_inherited=False,
          predicate=lambda f: not library_public_field(f) and not f.dispatching
       )
+      untyped_wrappers = cls.get_properties(
+         include_inherited=False,
+         predicate=lambda f: f.requires_untyped_wrapper
+      )
    %>
 
    % if props:
@@ -263,6 +267,16 @@
 
       % for prop in props:
          ${prop.prop_decl}
+      % endfor
+   % endif
+
+   % if untyped_wrappers:
+      --
+      --  Untyped wrappers for ${cls.name()}
+      --
+
+      % for prop in props:
+         ${prop.untyped_wrapper_decl}
       % endfor
    % endif
 
@@ -529,7 +543,15 @@
          for B of mappings.Items loop
          % endif
             ## Add the element to the environment
-            Add (Env, B.F_Key, ${root_node_type_name} (B.F_Val), MD => ${md});
+            Add (Self  => Env,
+                 Key   => B.F_Key,
+                 Value => ${root_node_type_name} (B.F_Val),
+                 MD    => ${md}
+
+                 % if exprs.resolver:
+                 , Resolver => ${exprs.resolver.name}'Access
+                 % endif
+            );
 
             ## If we're adding the element to an env that belongs to a different
             ## unit, then:

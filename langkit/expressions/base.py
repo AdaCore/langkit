@@ -2277,6 +2277,10 @@ class PropertyDef(AbstractNodeData):
                 self.prop_decl = render('properties/decl_ada')
                 self.prop_def = render('properties/def_ada')
 
+                self.untyped_wrapper_decl = render(
+                    'properties/untyped_wrapper_decl_ada'
+                ) if self.requires_untyped_wrapper else ''
+
         if self.base_property and self.base_property.type:
             # TODO: We need to make sure Properties are rendered in the proper
             # order (base classes first), to make sure that this check is
