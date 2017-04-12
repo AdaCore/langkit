@@ -183,12 +183,6 @@ class EnvSpec(object):
             ) for exprs in self._unresolved_envs_expressions
         ]
 
-        # Ask for the creation of untyped wrappers for all properties used as
-        # entity resolvers.
-        for exprs in self._unresolved_envs_expressions:
-            if exprs.resolver:
-                exprs.resolver.require_untyped_wrapper()
-
         self.has_post_actions = any([e.is_post for e in self.envs_expressions])
 
         self.ref_envs = create_internal_property(
@@ -222,6 +216,10 @@ class EnvSpec(object):
                     )
                 )
                 if resolver:
+                    # Ask for the creation of untyped wrappers for all
+                    # properties used as entity resolvers.
+                    resolver.require_untyped_wrapper()
+
                     check_source_language(
                         resolver.type.matches(T.entity),
                         'Entity resolver properties must return entities'
