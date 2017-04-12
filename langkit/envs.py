@@ -223,6 +223,7 @@ class EnvSpec(object):
                     check_source_language(
                         resolver.type.matches(T.entity),
                         'Entity resolver properties must return entities'
+                        ' (got {})'.format(resolver.type.name().camel)
                     )
                     check_source_language(
                         not resolver.has_implicit_env,
