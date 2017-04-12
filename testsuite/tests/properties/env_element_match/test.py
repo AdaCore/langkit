@@ -1,6 +1,5 @@
 """
-Test that garbage tokens left after the main parsing rule completes does not
-crash. It used to!
+Check that match expression on entity types works properly.
 """
 
 from __future__ import (absolute_import, division, print_function,
