@@ -230,10 +230,6 @@ class EnvSpec(object):
                         'Entity resolver properties must not use implicit'
                         ' environments'
                     )
-                    check_source_language(
-                        resolver.uses_envs,
-                        'Entity resolver properties must use environments'
-                    )
 
     def _render_field_access(self, p):
         """
