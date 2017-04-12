@@ -12,6 +12,199 @@ package body Langkit_Support.Lexical_Env is
    --  From an array of Env_Elements, decorate every element with additional
    --  Metadata stored in MD.
 
+   -----------------------
+   -- Simple_Env_Getter --
+   -----------------------
+
+   function Simple_Env_Getter (E : Lexical_Env) return Env_Getter
+   is
+     (Env_Getter'(False, Env => E));
+
+   --------------------
+   -- Dyn_Env_Getter --
+   --------------------
+
+   function Dyn_Env_Getter
+     (Fn : Getter_Fn_T; State : Getter_State_T) return Env_Getter
+   is
+   begin
+      return Env_Getter'(True, State, Fn);
+   end Dyn_Env_Getter;
+
+   -------------
+   -- Get_Env --
+   -------------
+
+   function Get_Env (Self : Env_Getter) return Lexical_Env is
+   begin
+      if Self.Dynamic then
+         return Self.Getter_Fn (Self.Getter_State);
+      else
+         return Self.Env;
+      end if;
+   end Get_Env;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Self : Env_Getter) is
+   begin
+      if not Self.Dynamic then
+         Inc_Ref (Self.Env);
+      end if;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Self : in out Env_Getter) is
+   begin
+      if not Self.Dynamic then
+         Dec_Ref (Self.Env);
+      end if;
+   end Dec_Ref;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Self : Env_Rebinding) is
+   begin
+      Inc_Ref (Self.Old_Env);
+      Inc_Ref (Self.New_Env);
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Self : in out Env_Rebinding) is
+   begin
+      Dec_Ref (Self.Old_Env);
+      Dec_Ref (Self.New_Env);
+   end Dec_Ref;
+
+   ------------
+   -- Create --
+   ------------
+
+   function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings is
+      Result : constant Env_Rebindings := new Env_Rebindings_Type'
+        (Size       => Bindings'Length,
+         Rebindings => Bindings,
+         Ref_Count  => 1);
+   begin
+      for R of Bindings loop
+         Inc_Ref (R);
+      end loop;
+      return Result;
+   end Create;
+
+   -------------
+   -- Inc_Ref --
+   -------------
+
+   procedure Inc_Ref (Self : Env_Rebindings) is
+   begin
+      if Self /= null then
+         Self.Ref_Count := Self.Ref_Count + 1;
+      end if;
+   end Inc_Ref;
+
+   -------------
+   -- Dec_Ref --
+   -------------
+
+   procedure Dec_Ref (Self : in out Env_Rebindings) is
+      procedure Unchecked_Free
+      is new Ada.Unchecked_Deallocation (Env_Rebindings_Type, Env_Rebindings);
+   begin
+      if Self /= null then
+         Self.Ref_Count := Self.Ref_Count - 1;
+         if Self.Ref_Count = 0 then
+            for R of Self.Rebindings loop
+               Dec_Ref (R);
+            end loop;
+            Unchecked_Free (Self);
+         end if;
+      end if;
+   end Dec_Ref;
+
+   -------------
+   -- Combine --
+   -------------
+
+   function Combine (L, R : Env_Rebindings) return Env_Rebindings is
+      Result : Env_Rebindings;
+   begin
+      if L = null and then R = null then
+         return null;
+      elsif L = null or else L.Size = 0 then
+         Inc_Ref (R);
+         return R;
+      elsif R = null or else R.Size = 0 then
+         Inc_Ref (L);
+         return L;
+      end if;
+
+      Result := new Env_Rebindings_Type (L.Size + R.Size);
+      Result.Ref_Count := 1;
+
+      for J in 1 .. L.Size loop
+         Result.Rebindings (J) := L.Rebindings (J);
+         Inc_Ref (Result.Rebindings (J));
+      end loop;
+      for J in 1 .. R.Size loop
+         Result.Rebindings (J + L.Size + 1) := R.Rebindings (J);
+         Inc_Ref (Result.Rebindings (J));
+      end loop;
+
+      return Result;
+   end Combine;
+
+   ------------
+   -- Append --
+   ------------
+
+   function Append
+     (Self : Env_Rebindings; Binding : Env_Rebinding) return Env_Rebindings
+   is
+   begin
+      if Binding = No_Env_Rebinding then
+         Inc_Ref (Self);
+         return Self;
+
+      else
+         return Create
+           (if Self /= null
+            then Self.Rebindings & Binding
+            else (1 => Binding));
+      end if;
+   end Append;
+
+   -----------------
+   -- Get_New_Env --
+   -----------------
+
+   function Get_New_Env
+     (Self : Env_Rebindings; Old_Env : Lexical_Env) return Lexical_Env
+   is
+   begin
+      if Self = null then
+         return Old_Env;
+      end if;
+
+      for J in 1 .. Self.Size loop
+         if Old_Env = Get_Env (Self.Rebindings (J).Old_Env) then
+            return Get_Env (Self.Rebindings (J).New_Env);
+         end if;
+      end loop;
+
+      return Old_Env;
+   end Get_New_Env;
+
    -------------
    -- Combine --
    -------------
@@ -45,8 +238,7 @@ package body Langkit_Support.Lexical_Env is
    -- Create --
    ------------
 
-   function Create
-      (El : Element_T; MD : Element_Metadata) return Env_Element
+   function Create (El : Element_T; MD : Element_Metadata) return Env_Element
    is
    begin
       return Env_Element'
@@ -72,31 +264,6 @@ package body Langkit_Support.Lexical_Env is
    begin
       Dec_Ref (Self.Info.Rebindings);
    end Dec_Ref;
-
-   --------------
-   -- Decorate --
-   --------------
-
-   function Decorate
-     (Els        : Env_Element_Array;
-      MD         : Element_Metadata;
-      Rebindings : Env_Rebindings) return Env_Element_Array
-   is
-      function Decorate_Element (El : Env_Element) return Env_Element
-      is
-        (Env_Element'
-           (El      => El.El,
-            Info    => (MD         => Combine (El.Info.MD, MD),
-                        Rebindings => Combine (El.Info.Rebindings, Rebindings),
-                        Is_Null    => False),
-            Is_Null => False));
-
-      function Internal_Decorate
-      is new Env_Element_Arrays.Id_Map_Gen (Decorate_Element)
-        with Inline;
-   begin
-      return Internal_Decorate (Els);
-   end Decorate;
 
    ------------
    -- Create --
@@ -173,6 +340,29 @@ package body Langkit_Support.Lexical_Env is
 
    package Referenced_Envs_Arrays is new Langkit_Support.Array_Utils
      (Referenced_Env, Positive, Referenced_Envs_Vectors.Elements_Array);
+
+   ---------------
+   -- Reference --
+   ---------------
+
+   procedure Reference
+     (Self            : Lexical_Env;
+      To_Reference    : Lexical_Env;
+      Referenced_From : Element_T := No_Element;
+      Transitive      : Boolean   := False)
+   is
+   begin
+      if Transitive then
+         Referenced_Envs_Vectors.Append
+           (Self.Transitive_Referenced_Envs,
+            Referenced_Env'(Referenced_From, To_Reference));
+      else
+         Referenced_Envs_Vectors.Append
+           (Self.Referenced_Envs,
+            Referenced_Env'(Referenced_From, To_Reference));
+      end if;
+      Inc_Ref (To_Reference);
+   end Reference;
 
    ---------
    -- Get --
@@ -294,6 +484,27 @@ package body Langkit_Support.Lexical_Env is
                  else Env_Element_Arrays.Filter (Ret, Can_Reach_F'Access));
       end;
    end Get;
+
+   ------------
+   -- Orphan --
+   ------------
+
+   function Orphan (Self : Lexical_Env) return Lexical_Env is
+   begin
+      for Env of Self.Referenced_Envs loop
+         Inc_Ref (Env.Env);
+      end loop;
+
+      return new Lexical_Env_Type'
+        (Parent                     => No_Env_Getter,
+         Node                       => Self.Node,
+         Referenced_Envs            => Self.Referenced_Envs.Copy,
+         Transitive_Referenced_Envs => Self.Transitive_Referenced_Envs.Copy,
+         Env                        => Self.Env,
+         Default_MD                 => Self.Default_MD,
+         Rebinding                  => Self.Rebinding,
+         Ref_Count                  => 1);
+   end Orphan;
 
    -----------
    -- Group --
@@ -423,241 +634,29 @@ package body Langkit_Support.Lexical_Env is
       Self := null;
    end Dec_Ref;
 
-   ---------------
-   -- Reference --
-   ---------------
+   --------------
+   -- Decorate --
+   --------------
 
-   procedure Reference
-     (Self            : Lexical_Env;
-      To_Reference    : Lexical_Env;
-      Referenced_From : Element_T := No_Element;
-      Transitive      : Boolean   := False)
+   function Decorate
+     (Els        : Env_Element_Array;
+      MD         : Element_Metadata;
+      Rebindings : Env_Rebindings) return Env_Element_Array
    is
+      function Decorate_Element (El : Env_Element) return Env_Element
+      is
+        (Env_Element'
+           (El      => El.El,
+            Info    => (MD         => Combine (El.Info.MD, MD),
+                        Rebindings => Combine (El.Info.Rebindings, Rebindings),
+                        Is_Null    => False),
+            Is_Null => False));
+
+      function Internal_Decorate
+      is new Env_Element_Arrays.Id_Map_Gen (Decorate_Element)
+        with Inline;
    begin
-      if Transitive then
-         Referenced_Envs_Vectors.Append
-           (Self.Transitive_Referenced_Envs,
-            Referenced_Env'(Referenced_From, To_Reference));
-      else
-         Referenced_Envs_Vectors.Append
-           (Self.Referenced_Envs,
-            Referenced_Env'(Referenced_From, To_Reference));
-      end if;
-      Inc_Ref (To_Reference);
-   end Reference;
-
-   -------------
-   -- Get_Env --
-   -------------
-
-   function Get_Env (Self : Env_Getter) return Lexical_Env is
-   begin
-      if Self.Dynamic then
-         return Self.Getter_Fn (Self.Getter_State);
-      else
-         return Self.Env;
-      end if;
-   end Get_Env;
-
-   -------------
-   -- Inc_Ref --
-   -------------
-
-   procedure Inc_Ref (Self : Env_Getter) is
-   begin
-      if not Self.Dynamic then
-         Inc_Ref (Self.Env);
-      end if;
-   end Inc_Ref;
-
-   -------------
-   -- Dec_Ref --
-   -------------
-
-   procedure Dec_Ref (Self : in out Env_Getter) is
-   begin
-      if not Self.Dynamic then
-         Dec_Ref (Self.Env);
-      end if;
-   end Dec_Ref;
-
-   -------------
-   -- Inc_Ref --
-   -------------
-
-   procedure Inc_Ref (Self : Env_Rebinding) is
-   begin
-      Inc_Ref (Self.Old_Env);
-      Inc_Ref (Self.New_Env);
-   end Inc_Ref;
-
-   -------------
-   -- Dec_Ref --
-   -------------
-
-   procedure Dec_Ref (Self : in out Env_Rebinding) is
-   begin
-      Dec_Ref (Self.Old_Env);
-      Dec_Ref (Self.New_Env);
-   end Dec_Ref;
-
-   -----------------------
-   -- Simple_Env_Getter --
-   -----------------------
-
-   function Simple_Env_Getter (E : Lexical_Env) return Env_Getter
-   is
-     (Env_Getter'(False, Env => E));
-
-   --------------------
-   -- Dyn_Env_Getter --
-   --------------------
-
-   function Dyn_Env_Getter
-     (Fn : Getter_Fn_T; State : Getter_State_T) return Env_Getter
-   is
-   begin
-      return Env_Getter'(True, State, Fn);
-   end Dyn_Env_Getter;
-
-   ------------
-   -- Orphan --
-   ------------
-
-   function Orphan (Self : Lexical_Env) return Lexical_Env is
-   begin
-      for Env of Self.Referenced_Envs loop
-         Inc_Ref (Env.Env);
-      end loop;
-
-      return new Lexical_Env_Type'
-        (Parent                     => No_Env_Getter,
-         Node                       => Self.Node,
-         Referenced_Envs            => Self.Referenced_Envs.Copy,
-         Transitive_Referenced_Envs => Self.Transitive_Referenced_Envs.Copy,
-         Env                        => Self.Env,
-         Default_MD                 => Self.Default_MD,
-         Rebinding                  => Self.Rebinding,
-         Ref_Count                  => 1);
-   end Orphan;
-
-   ------------
-   -- Create --
-   ------------
-
-   function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings is
-      Result : constant Env_Rebindings := new Env_Rebindings_Type'
-        (Size       => Bindings'Length,
-         Rebindings => Bindings,
-         Ref_Count  => 1);
-   begin
-      for R of Bindings loop
-         Inc_Ref (R);
-      end loop;
-      return Result;
-   end Create;
-
-   -------------
-   -- Inc_Ref --
-   -------------
-
-   procedure Inc_Ref (Self : Env_Rebindings) is
-   begin
-      if Self /= null then
-         Self.Ref_Count := Self.Ref_Count + 1;
-      end if;
-   end Inc_Ref;
-
-   -------------
-   -- Dec_Ref --
-   -------------
-
-   procedure Dec_Ref (Self : in out Env_Rebindings) is
-      procedure Unchecked_Free
-      is new Ada.Unchecked_Deallocation (Env_Rebindings_Type, Env_Rebindings);
-   begin
-      if Self /= null then
-         Self.Ref_Count := Self.Ref_Count - 1;
-         if Self.Ref_Count = 0 then
-            for R of Self.Rebindings loop
-               Dec_Ref (R);
-            end loop;
-            Unchecked_Free (Self);
-         end if;
-      end if;
-   end Dec_Ref;
-
-   -------------
-   -- Combine --
-   -------------
-
-   function Combine (L, R : Env_Rebindings) return Env_Rebindings is
-      Result : Env_Rebindings;
-   begin
-      if L = null and then R = null then
-         return null;
-      elsif L = null or else L.Size = 0 then
-         Inc_Ref (R);
-         return R;
-      elsif R = null or else R.Size = 0 then
-         Inc_Ref (L);
-         return L;
-      end if;
-
-      Result := new Env_Rebindings_Type (L.Size + R.Size);
-      Result.Ref_Count := 1;
-
-      for J in 1 .. L.Size loop
-         Result.Rebindings (J) := L.Rebindings (J);
-         Inc_Ref (Result.Rebindings (J));
-      end loop;
-      for J in 1 .. R.Size loop
-         Result.Rebindings (J + L.Size + 1) := R.Rebindings (J);
-         Inc_Ref (Result.Rebindings (J));
-      end loop;
-
-      return Result;
-   end Combine;
-
-   ------------
-   -- Append --
-   ------------
-
-   function Append
-     (Self : Env_Rebindings; Binding : Env_Rebinding) return Env_Rebindings
-   is
-   begin
-      if Binding = No_Env_Rebinding then
-         Inc_Ref (Self);
-         return Self;
-
-      else
-         return Create
-           (if Self /= null
-            then Self.Rebindings & Binding
-            else (1 => Binding));
-      end if;
-   end Append;
-
-   -----------------
-   -- Get_New_Env --
-   -----------------
-
-   function Get_New_Env
-     (Self : Env_Rebindings; Old_Env : Lexical_Env) return Lexical_Env
-   is
-   begin
-      if Self = null then
-         return Old_Env;
-      end if;
-
-      for J in 1 .. Self.Size loop
-         if Old_Env = Get_Env (Self.Rebindings (J).Old_Env) then
-            return Get_Env (Self.Rebindings (J).New_Env);
-         end if;
-      end loop;
-
-      return Old_Env;
-   end Get_New_Env;
+      return Internal_Decorate (Els);
+   end Decorate;
 
 end Langkit_Support.Lexical_Env;
