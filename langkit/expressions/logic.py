@@ -131,8 +131,18 @@ class Bind(AbstractExpression):
         # because they rely on type information, which is not supposed to be
         # computed before this pass.
         if self.conv_prop:
+
+            return_type = self.conv_prop.type
+            if return_type.is_entity_type:
+                return_type = return_type.el_type
+                check_source_language(
+                    self.conv_prop.uses_envs,
+                    "If conv prop returns an entity type, it should take an"
+                    " entity type in (eg. use entity info)"
+                )
+
             check_multiple([
-                (self.conv_prop.type.matches(T.root_node),
+                (return_type.matches(T.root_node),
                  "The property passed to bind must return a subtype "
                  "of {}".format(T.root_node.name().camel)),
 
