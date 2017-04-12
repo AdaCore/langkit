@@ -381,6 +381,7 @@ def as_entity(self, node):
         {names.Name('El'): node_expr,
          names.Name('Info'): construct(p.entity_info_arg.var)},
         abstract_expr=self,
+        result_var_name=names.Name.from_lower("as_entity")
     )
 
 
