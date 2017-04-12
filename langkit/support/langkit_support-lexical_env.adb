@@ -82,27 +82,6 @@ package body Langkit_Support.Lexical_Env is
       Dec_Ref (Self.Info.Rebindings);
    end Dec_Ref;
 
-   ------------
-   -- Unwrap --
-   ------------
-
-   function Unwrap
-     (Els : Env_Element_Array) return Element_Array
-   is
-      function Get (Self : Env_Element) return Element_T is (Self.El)
-        with Inline;
-
-      function Internal_Unwrap is new Env_Element_Arrays.Map_Gen
-        (Element_T, Element_Array, Get)
-        with Inline;
-      --  Internal_Unwrap could be exposed directly, but in order to have a
-      --  full subprogram profile available to the users, we wrap the generic
-      --  instantiation.
-
-   begin
-      return Internal_Unwrap (Els);
-   end Unwrap;
-
    --------------
    -- Decorate --
    --------------

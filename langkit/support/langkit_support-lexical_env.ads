@@ -172,9 +172,6 @@ package Langkit_Support.Lexical_Env is
    subtype Env_Element_Array is Env_Element_Vectors.Elements_Array;
    --  Arrays of wrapped elements stored in the environment maps
 
-   function Unwrap (Els : Env_Element_Array) return Element_Array;
-   --  Get and array of unwrapped elements from an array of wrapped elements
-
    type Referenced_Env is record
       From_Node : Element_T;
       --  The node from which the environment has been referenced
