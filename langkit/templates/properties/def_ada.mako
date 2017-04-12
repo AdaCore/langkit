@@ -108,7 +108,7 @@ begin
       Self.${property.memoization_state_field_name} := Computed;
       % if property.type.is_refcounted():
          Inc_Ref (Property_Result);
-         Self.Unit.Set_Filled_Caches;
+         Set_Filled_Caches (Self.Unit);
       % endif
       Self.${property.memoization_value_field_name} := Property_Result;
    % endif
