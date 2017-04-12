@@ -185,13 +185,12 @@ package Langkit_Support.Lexical_Env is
      (Referenced_Env);
    --  Vectors of referenced envs, used to store referenced environments
 
-   use Env_Element_Vectors;
-
    package Internal_Envs is new Ada.Containers.Hashed_Maps
      (Key_Type        => Symbol_Type,
       Element_Type    => Env_Element_Vectors.Vector,
       Hash            => Hash,
-      Equivalent_Keys => "=");
+      Equivalent_Keys => "=",
+      "="             => Env_Element_Vectors."=");
 
    type Internal_Map is access all Internal_Envs.Map;
    --  Internal maps of Symbols to vectors of elements

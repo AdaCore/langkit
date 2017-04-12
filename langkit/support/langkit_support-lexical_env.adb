@@ -157,7 +157,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       Self.Env.Insert (Key, Env_Element_Vectors.Empty_Vector, C, Dummy);
-      Append (Reference (Self.Env.all, C).Element.all, Env_El);
+      Reference (Self.Env.all, C).Element.Append (Env_El);
    end Add;
 
    ------------
@@ -273,6 +273,8 @@ package body Langkit_Support.Lexical_Env is
       Current_Rebindings := Append (Rebindings, Self.Rebinding);
 
       declare
+         use type Env_Element_Array;
+
          Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
 
          Own_Elts   : constant Env_Element_Array :=
