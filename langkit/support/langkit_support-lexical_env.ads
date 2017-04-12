@@ -171,9 +171,9 @@ package Langkit_Support.Lexical_Env is
    procedure Dec_Ref (Self : in out Env_Element);
    --  Decrement the reference count of items in Self
 
-   ------------------------------------------
-   --  Arrays of elements and env elements --
-   ------------------------------------------
+   -------------------------------------
+   -- Arrays of elements and entities --
+   -------------------------------------
 
    package Env_Element_Vectors is new Langkit_Support.Vectors (Env_Element);
    --  Vectors used to store collections of environment elements, as values of
@@ -183,6 +183,10 @@ package Langkit_Support.Lexical_Env is
 
    subtype Env_Element_Array is Env_Element_Vectors.Elements_Array;
    --  Arrays of wrapped elements stored in the environment maps
+
+   -----------------------------
+   -- Referenced environments --
+   -----------------------------
 
    type Referenced_Env is record
       From_Node : Element_T;
@@ -196,6 +200,10 @@ package Langkit_Support.Lexical_Env is
    package Referenced_Envs_Vectors is new Langkit_Support.Vectors
      (Referenced_Env);
    --  Vectors of referenced envs, used to store referenced environments
+
+   ----------------------------------------
+   -- Lexical environment representation --
+   ----------------------------------------
 
    package Internal_Envs is new Ada.Containers.Hashed_Maps
      (Key_Type        => Symbol_Type,
