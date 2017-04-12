@@ -1,0 +1,5 @@
+main.py: Running...
+result = <FooNodeArray [<Example 1:1-1:8>]>
+Both C arrays are equal? True
+main.py: Done.
+Done
