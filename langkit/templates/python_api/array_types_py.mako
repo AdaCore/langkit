@@ -19,11 +19,7 @@ class _BaseArray(object):
            self._inc_ref(self._c_value)
 
     def __repr__(self):
-        return '<{} object at {} {}>'.format(
-            type(self).__name__,
-            hex(id(self)),
-            list(self)
-        )
+        return '<{} {}>'.format(type(self).__name__, list(self))
 
     def __del__(self):
         self._dec_ref(self._c_value)
