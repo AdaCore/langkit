@@ -11,7 +11,6 @@ from langkit.expressions.base import (
     AbstractExpression, BuiltinCallExpr, LiteralExpr, PropertyDef,
     ResolvedExpression, construct, BasicExpr, auto_attr
 )
-from langkit.expressions.envs import Env
 from langkit.names import Name
 
 
@@ -407,8 +406,11 @@ class Predicate(AbstractExpression):
              "got {}".format(self.pred_property.type.name().camel)),
 
             (self.pred_property.struct.matches(T.root_node),
-             "The property passed to bind must belong to a subtype "
-             "of {}".format(T.root_node.name().camel))
+             "The property passed to predicate must belong to a subtype "
+             "of {}".format(T.root_node.name().camel)),
+
+            (not self.pred_property.has_implicit_env,
+             "The property passed to predicate must not have an implicit env")
         ])
 
         exprs = [construct(e) for e in self.exprs]
@@ -454,8 +456,6 @@ class Predicate(AbstractExpression):
             e.type for e in closure_exprs
         ])
 
-        closure_exprs.append(construct(Env))
-
         # Append the debug image for the predicate
         closure_exprs.append(LiteralExpr('"{}.{}"'.format(
             self.pred_property.name.camel_with_underscores,
@@ -465,9 +465,8 @@ class Predicate(AbstractExpression):
         logic_var_exprs.append(
             BasicExpr("{}_Predicate_Caller'({})".format(
                 pred_id, ", ".join(
-                    ["{}" for _ in range(len(closure_exprs) - 2)]
-                    + ["Env => {}, "
-                       "Dbg_Img => (if Debug then new String'({})"
+                    ["{}" for _ in range(len(closure_exprs) - 1)]
+                    + ["Dbg_Img => (if Debug then new String'({})"
                        "            else null)"]
                 )
             ), type=None, operands=closure_exprs)

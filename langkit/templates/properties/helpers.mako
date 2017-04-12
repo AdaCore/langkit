@@ -113,7 +113,6 @@
       % for i, arg_type in enumerate(args_types):
       Field_${i} : ${arg_type.name()};
       % endfor
-      Env        : Lexical_Env;
       Dbg_Img    : String_Access := null;
    end record;
 
@@ -124,9 +123,7 @@
      % endfor
      ) return Boolean
    is
-      % if not args_types and not prop.has_implicit_env:
-         pragma Unreferenced (Self);
-      % endif
+      pragma Unreferenced (Self);
    begin
       <%
          args = [
@@ -135,10 +132,7 @@
          ] + [
             'Self.Field_{}'.format(i)
             for i, _ in enumerate(args_types)
-         ] + (
-            ['Self.Env'] if prop.has_implicit_env else []
-         )
-
+         ]
          args_fmt = '({})'.format(', '.join(args)) if args else ''
       %>
       return ${prop.name} ${args_fmt};
