@@ -262,7 +262,7 @@ class If(AbstractExpression):
             self.else_then = else_then
             self.static_type = rtype
 
-            super(If.Expr, self).__init__('Result',
+            super(If.Expr, self).__init__('If_Result',
                                           abstract_expr=abstract_expr)
 
         def _render_pre(self):
