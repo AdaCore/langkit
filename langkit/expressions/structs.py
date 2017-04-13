@@ -908,13 +908,11 @@ class Match(AbstractExpression):
         _, expr, _ = constructed_matchers[-1]
         rtype = expr.type
         for _, expr, _ in constructed_matchers:
-            check_source_language(
-                expr.type.matches(rtype), "Wrong type for match result"
-                " expression: got {} but expected {} or sub/supertype".format(
-                    expr.type.name().camel, rtype.name().camel
-                )
+            rtype = expr.type.unify(
+                rtype,
+                'Mismatching types in Match expression: got {cls} but expected'
+                ' {other} or sub/supertype'
             )
-            rtype = expr.type.unify(rtype)
 
         # This is the expression execution will reach if we have a bug in our
         # code (i.e. if matchers did not cover all cases).
