@@ -7,6 +7,11 @@ package body Langkit_Support.Lexical_Env is
    package Internal_Map_Element_Arrays is new Langkit_Support.Array_Utils
      (Internal_Map_Element, Positive, Internal_Map_Element_Array);
 
+   function Get_New_Env
+     (Self : Env_Rebindings; Old_Env : Lexical_Env) return Lexical_Env;
+   --  Return the new env corresponding to Old_Env in Self. Return Old_Env if
+   --  there is no association.
+
    function Decorate
      (Elts       : Internal_Map_Element_Array;
       MD         : Element_Metadata;
@@ -185,27 +190,6 @@ package body Langkit_Support.Lexical_Env is
             else (1 => Binding));
       end if;
    end Append;
-
-   -----------------
-   -- Get_New_Env --
-   -----------------
-
-   function Get_New_Env
-     (Self : Env_Rebindings; Old_Env : Lexical_Env) return Lexical_Env
-   is
-   begin
-      if Self = null then
-         return Old_Env;
-      end if;
-
-      for J in 1 .. Self.Size loop
-         if Old_Env = Get_Env (Self.Rebindings (J).Old_Env) then
-            return Get_Env (Self.Rebindings (J).New_Env);
-         end if;
-      end loop;
-
-      return Old_Env;
-   end Get_New_Env;
 
    -------------
    -- Combine --
@@ -638,6 +622,27 @@ package body Langkit_Support.Lexical_Env is
       end if;
       Self := null;
    end Dec_Ref;
+
+   -----------------
+   -- Get_New_Env --
+   -----------------
+
+   function Get_New_Env
+     (Self : Env_Rebindings; Old_Env : Lexical_Env) return Lexical_Env
+   is
+   begin
+      if Self = null then
+         return Old_Env;
+      end if;
+
+      for J in 1 .. Self.Size loop
+         if Old_Env = Get_Env (Self.Rebindings (J).Old_Env) then
+            return Get_Env (Self.Rebindings (J).New_Env);
+         end if;
+      end loop;
+
+      return Old_Env;
+   end Get_New_Env;
 
    --------------
    -- Decorate --
