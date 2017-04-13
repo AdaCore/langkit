@@ -384,9 +384,12 @@ package body Langkit_Support.Lexical_Env is
       function Get_Ref_Env_Elements
         (Self : Referenced_Env) return Env_Element_Array;
 
-      function Get_Own_Elements (Self : Lexical_Env) return Env_Element_Array;
+      function Get_Own_Elements
+        (Self       : Lexical_Env;
+         Rebindings : Env_Rebindings) return Env_Element_Array;
       --  Return the elements for Key contained by the internal map contained
-      --  in this env.
+      --  in the Self environment. Decorate each element with its own metadata
+      --  and with the given Rebindings.
 
       --------------------------
       -- Get_Ref_Env_Elements --
@@ -415,7 +418,9 @@ package body Langkit_Support.Lexical_Env is
       -- Get_Own_Elements --
       ----------------------
 
-      function Get_Own_Elements (Self : Lexical_Env) return Env_Element_Array
+      function Get_Own_Elements
+        (Self       : Lexical_Env;
+         Rebindings : Env_Rebindings) return Env_Element_Array
       is
          C : Cursor := Internal_Envs.No_Element;
       begin
@@ -432,7 +437,7 @@ package body Langkit_Support.Lexical_Env is
               (Internal_Map_Element_Arrays.Reverse_Array
                  (Internal_Map_Element_Vectors.To_Array (Element (C))),
                Self.Default_MD,
-               Current_Rebindings)
+               Rebindings)
 
             else Env_Element_Arrays.Empty_Array);
       end Get_Own_Elements;
@@ -463,7 +468,7 @@ package body Langkit_Support.Lexical_Env is
          Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
 
          Own_Elts   : constant Env_Element_Array :=
-            Get_Own_Elements (Own_Lookup_Env);
+            Get_Own_Elements (Own_Lookup_Env, Popped_Rebindings);
          Refd_Elts  : constant Env_Element_Array :=
            (if Recursive
             then Get_Refd_Elements
