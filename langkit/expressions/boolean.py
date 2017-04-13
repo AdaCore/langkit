@@ -301,13 +301,10 @@ class If(AbstractExpression):
         """
         then = construct(self.then)
         else_then = construct(self.else_then)
-        check_source_language(
-            then.type.matches(else_then.type),
-            "Mismatching types in If expression: {} and {}".format(
-                then.type.name().camel, else_then.type.name().camel
-            )
+        rtype = then.type.unify(
+            else_then.type,
+            'Mismatching types in If expression: {cls} and {other}'
         )
-        rtype = then.type.unify(else_then.type)
 
         # If then/else_then have actually subtypes of the unified result type,
         # we need to perform a conversion for the Ada code generation.
