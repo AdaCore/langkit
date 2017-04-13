@@ -4,6 +4,10 @@ package body Langkit_Support.Lexical_Env is
 
    package Env_Element_Arrays is new Langkit_Support.Array_Utils
      (Env_Element, Positive, Env_Element_Array);
+
+   package Referenced_Envs_Arrays is new Langkit_Support.Array_Utils
+     (Referenced_Env, Positive, Referenced_Envs_Vectors.Elements_Array);
+
    package Internal_Map_Element_Arrays is new Langkit_Support.Array_Utils
      (Internal_Map_Element, Positive, Internal_Map_Element_Array);
 
@@ -334,9 +338,6 @@ package body Langkit_Support.Lexical_Env is
          end if;
       end loop;
    end Remove;
-
-   package Referenced_Envs_Arrays is new Langkit_Support.Array_Utils
-     (Referenced_Env, Positive, Referenced_Envs_Vectors.Elements_Array);
 
    ---------------
    -- Reference --
