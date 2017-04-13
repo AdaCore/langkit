@@ -387,27 +387,17 @@ class FieldAccess(AbstractExpression):
             :rtype: str|None
             """
 
-            # Env rebinding can come from two sources here:
-            # - From the property context, if we're already in a property call.
-            # - From the entity, if we're calling the property on an entity.
-
-            l = r = None
-
-            # First try to get entity info from the calling property
-            if PropertyDef.get() and PropertyDef.get().uses_envs:
-                l = str(PropertyDef.entity_info_name)
-
-            # Then try to get env rebindings from the entity
+            # Entity info can come from one of two sources:
             if self.implicit_deref:
-                r = self.prefix
-
-            # If we have two input rebindings, combine them. Otherwise, return
-            # the non-null one (if any).
-            if l and r:
-                return 'AST_Envs.Combine ({}, {}.Info)'.format(l, r)
-            elif l or r:
-                return l or r
+                # From the entity, if we're calling the property on an entity
+                return '{}.Info'.format(self.prefix)
+            elif PropertyDef.get() and PropertyDef.get().uses_envs:
+                # From the property context, if we are in a property that
+                # uses_env and calling the property on an AST node.
+                return str(PropertyDef.entity_info_name)
             else:
+                # Just use the default (empty) entity info if we have none of
+                # the above.
                 return None
 
         def _render_pre(self):
