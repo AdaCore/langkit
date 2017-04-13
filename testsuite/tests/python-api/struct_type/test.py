@@ -26,7 +26,7 @@ class FooNode(ASTNode):
     pass
 
 
-class Entity(Struct):
+class Thing(Struct):
     node = Field(type=T.Example)
     comes_from_source = Field(type=BoolType)
 
@@ -34,8 +34,8 @@ class Entity(Struct):
 class Example(FooNode):
     tok = Field(type=TokenType)
 
-    @langkit_property(public=True, return_type=Entity)
-    def entity_id(e=Entity):
+    @langkit_property(public=True, return_type=Thing)
+    def entity_id(e=Thing):
         return e
 
 

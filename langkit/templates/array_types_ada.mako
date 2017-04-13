@@ -21,7 +21,7 @@
    ## arrays starting from 1. We need it to convert from entity arrays,
    ## to our array record type.
    % if cls.element_type() == T.root_node.entity():
-   function Create (Items : AST_Envs.Env_Element_Array) return ${cls.name()};
+   function Create (Items : AST_Envs.Entity_Array) return ${cls.name()};
    % endif
 
    function Create (Items_Count : Natural) return ${cls.name()};
@@ -154,7 +154,7 @@
      (new ${cls.pointed()}'(N => Items_Count, Ref_Count => 1, Items => <>));
 
    % if cls.element_type() == T.root_node.entity():
-   function Create (Items : AST_Envs.Env_Element_Array) return ${cls.name()}
+   function Create (Items : AST_Envs.Entity_Array) return ${cls.name()}
    is (new ${cls.pointed()}'(N         => Items'Length,
                              Items     => ${cls.api_name()} (Items),
                              Ref_Count => 1));

@@ -2738,25 +2738,25 @@ package body ${ada_lib_name}.Analysis is
    ---------
 
    function Get
-     (A     : AST_Envs.Env_Element_Array;
+     (A     : AST_Envs.Entity_Array;
       Index : Integer)
-      return Env_Element
+      return Entity
    is
-      function Length (A : AST_Envs.Env_Element_Array) return Natural
+      function Length (A : AST_Envs.Entity_Array) return Natural
       is (A'Length);
 
       function Get
-        (A     : AST_Envs.Env_Element_Array;
+        (A     : AST_Envs.Entity_Array;
          Index : Integer)
-         return Env_Element
+         return Entity
       is (A (Index + 1)); --  A is 1-based but Index is 0-based
 
       function Relative_Get is new Langkit_Support.Relative_Get
-        (Item_Type     => Env_Element,
-         Sequence_Type => AST_Envs.Env_Element_Array,
+        (Item_Type     => Entity,
+         Sequence_Type => AST_Envs.Entity_Array,
          Length        => Length,
          Get           => Get);
-      Result : Env_Element;
+      Result : Entity;
    begin
       if Relative_Get (A, Index, Result) then
          return Result;

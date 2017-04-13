@@ -42,7 +42,7 @@ class _BaseStruct(object):
     _dec_ref = None
 
 
-class _BaseEnvElement(_BaseStruct):
+class _BaseEntity(_BaseStruct):
     """
     Specialized mixin for env elements.
     """
@@ -79,7 +79,7 @@ class _BaseEnvElement(_BaseStruct):
 
 <%
    type_name = cls.name().camel
-   base_classes = ['_BaseEnvElement'
+   base_classes = ['_BaseEntity'
                    if cls.is_entity_type else
                    '_BaseStruct']
 %>

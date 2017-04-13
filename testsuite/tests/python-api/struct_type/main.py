@@ -17,12 +17,12 @@ if u.diagnostics:
     sys.exit(1)
 
 u.populate_lexical_env()
-entity = libfoolang.Entity(f_node=u.root, f_comes_from_source=True)
+thing = libfoolang.Thing(f_node=u.root, f_comes_from_source=True)
 try:
     res_none = u.root.p_entity_id(None)
 except Exception as exc:
     res_none = '<{}: {}>'.format(type(exc).__name__, exc)
-res_entity = u.root.p_entity_id(entity)
+thing = u.root.p_entity_id(thing)
 print('u.root.p_entity(None) = {}'.format(res_none))
-print('u.root.p_entity(entity) = {}'.format(res_entity))
+print('u.root.p_entity(entity) = {}'.format(thing))
 print('main.py: Done.')

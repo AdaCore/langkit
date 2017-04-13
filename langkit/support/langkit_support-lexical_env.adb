@@ -2,8 +2,8 @@ with Langkit_Support.Array_Utils;
 
 package body Langkit_Support.Lexical_Env is
 
-   package Env_Element_Arrays is new Langkit_Support.Array_Utils
-     (Env_Element, Positive, Env_Element_Array);
+   package Entity_Arrays is new Langkit_Support.Array_Utils
+     (Entity, Positive, Entity_Array);
 
    package Referenced_Envs_Arrays is new Langkit_Support.Array_Utils
      (Referenced_Env, Positive, Referenced_Envs_Vectors.Elements_Array);
@@ -29,8 +29,8 @@ package body Langkit_Support.Lexical_Env is
    function Decorate
      (Elts       : Internal_Map_Element_Array;
       MD         : Element_Metadata;
-      Rebindings : Env_Rebindings) return Env_Element_Array;
-   --  From an array of Env_Elements, decorate every element with additional
+      Rebindings : Env_Rebindings) return Entity_Array;
+   --  From an array of Entitys, decorate every element with additional
    --  Metadata stored in MD.
 
    -----------------------
@@ -237,10 +237,10 @@ package body Langkit_Support.Lexical_Env is
    -- Create --
    ------------
 
-   function Create (El : Element_T; MD : Element_Metadata) return Env_Element
+   function Create (El : Element_T; MD : Element_Metadata) return Entity
    is
    begin
-      return Env_Element'
+      return Entity'
         (El      => El,
          Info    => (MD => MD, Rebindings => null));
    end Create;
@@ -249,7 +249,7 @@ package body Langkit_Support.Lexical_Env is
    -- Inc_Ref --
    -------------
 
-   procedure Inc_Ref (Self : Env_Element) is
+   procedure Inc_Ref (Self : Entity) is
    begin
       Inc_Ref (Self.Info.Rebindings);
    end Inc_Ref;
@@ -258,7 +258,7 @@ package body Langkit_Support.Lexical_Env is
    -- Dec_Ref --
    -------------
 
-   procedure Dec_Ref (Self : in out Env_Element) is
+   procedure Dec_Ref (Self : in out Entity) is
    begin
       Dec_Ref (Self.Info.Rebindings);
    end Dec_Ref;
@@ -370,23 +370,23 @@ package body Langkit_Support.Lexical_Env is
       From       : Element_T := No_Element;
       Recursive  : Boolean := True;
       Rebindings : Env_Rebindings := null)
-      return Env_Element_Array
+      return Entity_Array
    is
       Current_Rebindings : Env_Rebindings;
 
       use Internal_Envs;
-      use Env_Element_Arrays;
+      use Entity_Arrays;
 
       use Referenced_Envs_Arrays;
 
       function Get_Refd_Elements
-        (Self : Referenced_Env) return Env_Element_Array;
+        (Self : Referenced_Env) return Entity_Array;
       --  If we can determine that From can reach Self.From_Node, return the
       --  lookup of Key in Self. Otherwise, return an empty array.
 
       function Get_Own_Elements
         (Self       : Lexical_Env;
-         Rebindings : Env_Rebindings) return Env_Element_Array;
+         Rebindings : Env_Rebindings) return Entity_Array;
       --  Return the elements for Key contained by the internal map contained
       --  in the Self environment. Decorate each element with its own metadata
       --  and with the given Rebindings.
@@ -396,7 +396,7 @@ package body Langkit_Support.Lexical_Env is
       -----------------------
 
       function Get_Refd_Elements
-        (Self : Referenced_Env) return Env_Element_Array is
+        (Self : Referenced_Env) return Entity_Array is
       begin
 
          --  If the referenced environment has an origin point, and the client
@@ -407,7 +407,7 @@ package body Langkit_Support.Lexical_Env is
            and then From /= No_Element
            and then not Can_Reach (Self.From_Node, From)
          then
-            return Env_Element_Arrays.Empty_Array;
+            return Entity_Arrays.Empty_Array;
          end if;
 
          return Get (Self.Env, Key, From, Recursive => False,
@@ -420,7 +420,7 @@ package body Langkit_Support.Lexical_Env is
 
       function Get_Own_Elements
         (Self       : Lexical_Env;
-         Rebindings : Env_Rebindings) return Env_Element_Array
+         Rebindings : Env_Rebindings) return Entity_Array
       is
          C : Cursor := Internal_Envs.No_Element;
       begin
@@ -439,15 +439,15 @@ package body Langkit_Support.Lexical_Env is
                Self.Default_MD,
                Rebindings)
 
-            else Env_Element_Arrays.Empty_Array);
+            else Entity_Arrays.Empty_Array);
       end Get_Own_Elements;
 
       function Get_Refd_Elements is new Referenced_Envs_Arrays.Flat_Map_Gen
-        (Env_Element, Env_Element_Array, Get_Refd_Elements);
+        (Entity, Entity_Array, Get_Refd_Elements);
       --  Return the concatenation of Get_Refd_Elements for this env and
       --  every parent.
 
-      function Can_Reach_F (El : Env_Element) return Boolean is
+      function Can_Reach_F (El : Entity) return Boolean is
         (Can_Reach (El.El, From));
 
       Popped_Rebindings : Env_Rebindings;
@@ -455,7 +455,7 @@ package body Langkit_Support.Lexical_Env is
 
    begin
       if Self = null then
-         return Env_Element_Arrays.Empty_Array;
+         return Entity_Arrays.Empty_Array;
       end if;
 
       Current_Rebindings := Append (Rebindings, Self.Rebinding);
@@ -463,27 +463,27 @@ package body Langkit_Support.Lexical_Env is
         (Current_Rebindings, Self, Popped_Rebindings, Own_Lookup_Env);
 
       declare
-         use type Env_Element_Array;
+         use type Entity_Array;
 
          Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
 
-         Own_Elts   : constant Env_Element_Array :=
+         Own_Elts   : constant Entity_Array :=
             Get_Own_Elements (Own_Lookup_Env, Popped_Rebindings);
-         Refd_Elts  : constant Env_Element_Array :=
+         Refd_Elts  : constant Entity_Array :=
            (if Recursive
             then Get_Refd_Elements
               (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
-            else Env_Element_Arrays.Empty_Array);
-         TRefd_Elts : constant Env_Element_Array :=
+            else Entity_Arrays.Empty_Array);
+         TRefd_Elts : constant Entity_Array :=
             Get_Refd_Elements
               (Referenced_Envs_Vectors.To_Array
                  (Self.Transitive_Referenced_Envs));
-         Parent_Elts : constant Env_Element_Array :=
+         Parent_Elts : constant Entity_Array :=
            (if Recursive
             then Get (Parent_Env, Key, Rebindings => Popped_Rebindings)
-            else Env_Element_Arrays.Empty_Array);
+            else Entity_Arrays.Empty_Array);
 
-         Ret : constant Env_Element_Array :=
+         Ret : constant Entity_Array :=
             Own_Elts & Refd_Elts & TRefd_Elts & Parent_Elts;
       begin
          Dec_Ref (Current_Rebindings);
@@ -491,7 +491,7 @@ package body Langkit_Support.Lexical_Env is
 
          --  Only filter if a non null value was given for the From parameter
          return (if From = No_Element then Ret
-                 else Env_Element_Arrays.Filter (Ret, Can_Reach_F'Access));
+                 else Entity_Arrays.Filter (Ret, Can_Reach_F'Access));
       end;
    end Get;
 
@@ -731,16 +731,16 @@ package body Langkit_Support.Lexical_Env is
    function Decorate
      (Elts       : Internal_Map_Element_Array;
       MD         : Element_Metadata;
-      Rebindings : Env_Rebindings) return Env_Element_Array
+      Rebindings : Env_Rebindings) return Entity_Array
    is
       function Create_Entity (Elt : Internal_Map_Element)
-         return Env_Element;
+         return Entity;
       --  Transform an element from the environment into an entity
 
-      function Create_Entity (Elt : Internal_Map_Element) return Env_Element
+      function Create_Entity (Elt : Internal_Map_Element) return Entity
       is
-         Resolved : Env_Element;
-         Result   : constant Env_Element :=
+         Resolved : Entity;
+         Result   : constant Entity :=
            (El      => Elt.Element,
             Info    => (MD         => Combine (Elt.MD, MD),
                         Rebindings => Rebindings));
@@ -755,8 +755,8 @@ package body Langkit_Support.Lexical_Env is
       end Create_Entity;
 
       function Internal_Decorate is new Internal_Map_Element_Arrays.Map_Gen
-        (Out_Type       => Env_Element,
-         Out_Array_Type => Env_Element_Array,
+        (Out_Type       => Entity,
+         Out_Array_Type => Entity_Array,
          Transform      => Create_Entity) with Inline;
    begin
       return Internal_Decorate (Elts);

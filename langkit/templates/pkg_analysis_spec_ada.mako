@@ -341,7 +341,7 @@ package ${ada_lib_name}.Analysis is
 
    subtype Lexical_Env is AST_Envs.Lexical_Env;
    subtype Entity_Info is AST_Envs.Entity_Info;
-   subtype Env_Element is AST_Envs.Env_Element;
+   subtype Entity is AST_Envs.Entity;
    subtype Env_Rebindings is AST_Envs.Env_Rebindings;
    Empty_Env : Lexical_Env renames AST_Envs.Empty_Env;
    No_Entity_Info : Entity_Info renames AST_Envs.No_Entity_Info;
@@ -351,7 +351,7 @@ package ${ada_lib_name}.Analysis is
    ${array_types.public_incomplete_decl(LexicalEnvType.array_type())}
    ${array_types.public_decl(LexicalEnvType.array_type())}
 
-   ## See ASTNode.env_element
+   ## See ASTNode.entity
    ${array_types.public_incomplete_decl(T.root_node.entity().array_type())}
    ${array_types.public_decl(T.root_node.entity().array_type())}
 
@@ -1191,15 +1191,15 @@ private
    -- Environments handling (internal) --
    --------------------------------------
 
-   No_Env_Element : constant Env_Element := (null, No_Entity_Info);
+   No_Entity : constant Entity := (null, No_Entity_Info);
 
    procedure Inc_Ref (Self : Lexical_Env) renames AST_Envs.Inc_Ref;
    procedure Dec_Ref (Self : in out Lexical_Env) renames AST_Envs.Dec_Ref;
 
    function Get
-     (A     : AST_Envs.Env_Element_Array;
+     (A     : AST_Envs.Entity_Array;
       Index : Integer)
-      return Env_Element;
+      return Entity;
    --  Simple getter that raises Property_Error on out-of-bound accesses.
    --  Useful for code generation.
 

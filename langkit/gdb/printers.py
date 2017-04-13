@@ -188,12 +188,12 @@ class LexicalEnvPrinter(BasePrinter):
             return '<LexicalEnv synthetic>'
 
 
-class EnvElementPrinter(BasePrinter):
+class EntityPrinter(BasePrinter):
     """
     Pretty-printer for environment elements.
     """
 
-    name = 'EnvElement'
+    name = 'Entity'
 
     @classmethod
     def matches(cls, value, context):
@@ -212,7 +212,7 @@ class EnvElementPrinter(BasePrinter):
         return self.value['el']
 
     def to_string(self):
-        return ('<EnvElement for {}>'.format(self.node)
+        return ('<Entity for {}>'.format(self.node)
                 if self.node else 'null')
 
 

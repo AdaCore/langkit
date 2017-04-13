@@ -2355,8 +2355,7 @@ class ASTNode(Struct):
         """
 
         entity_klass = type(
-            b'EnvElement{}'.format(cls.name().camel
-                                   if cls != T.root_node else ''),
+            b'Entity{}'.format(cls.name().camel if cls != T.root_node else ''),
             (Struct, ), {
                 'el': BuiltinField(cls, doc='The stored AST node'),
                 'info': BuiltinField(cls.entity_info(),

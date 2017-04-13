@@ -147,34 +147,34 @@ package Langkit_Support.Lexical_Env is
    procedure Dec_Ref (Self : in out Entity_Info);
    --  Decrement the reference count of items in Self
 
-   type Env_Element is record
+   type Entity is record
       El      : Element_T;
       Info    : Entity_Info;
    end record;
    --  Wrapper structure to contain both the 'real' env element that the user
    --  wanted to store, and its associated metadata.
 
-   function Create (El : Element_T; MD : Element_Metadata) return Env_Element;
-   --  Constructor that returns an Env_Element from an Element_T and an
+   function Create (El : Element_T; MD : Element_Metadata) return Entity;
+   --  Constructor that returns an Entity from an Element_T and an
    --  Element_Metadata instances.
 
-   procedure Inc_Ref (Self : Env_Element);
+   procedure Inc_Ref (Self : Entity);
    --  Increment the reference count of items in Self
 
-   procedure Dec_Ref (Self : in out Env_Element);
+   procedure Dec_Ref (Self : in out Entity);
    --  Decrement the reference count of items in Self
 
    -------------------------------------
    -- Arrays of elements and entities --
    -------------------------------------
 
-   package Env_Element_Vectors is new Langkit_Support.Vectors (Env_Element);
+   package Entity_Vectors is new Langkit_Support.Vectors (Entity);
    --  Vectors used to store collections of environment elements, as values of
    --  a lexical environment map. We want to use vectors internally.
 
    type Element_Array is array (Positive range <>) of Element_T;
 
-   subtype Env_Element_Array is Env_Element_Vectors.Elements_Array;
+   subtype Entity_Array is Entity_Vectors.Elements_Array;
    --  Arrays of wrapped elements stored in the environment maps
 
    -----------------------------
@@ -199,7 +199,7 @@ package Langkit_Support.Lexical_Env is
    ----------------------------------------
 
    type Entity_Resolver is access
-      function (Ref : Env_Element) return Env_Element;
+      function (Ref : Entity) return Entity;
    --  Callback type for the lazy entity resolution mechanism. Such functions
    --  must take a "reference" entity (e.g. a name) and return the referenced
    --  entity.
@@ -320,7 +320,7 @@ package Langkit_Support.Lexical_Env is
       From       : Element_T := No_Element;
       Recursive  : Boolean := True;
       Rebindings : Env_Rebindings := null)
-      return Env_Element_Array;
+      return Entity_Array;
    --  Get the array of entities for this Key. If From is given, then
    --  elements will be filtered according to the Can_Reach primitive given
    --  as parameter for the generic package.
