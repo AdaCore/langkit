@@ -7,10 +7,20 @@ package body Langkit_Support.Lexical_Env is
    package Internal_Map_Element_Arrays is new Langkit_Support.Array_Utils
      (Internal_Map_Element, Positive, Internal_Map_Element_Array);
 
-   function Get_New_Env
-     (Self : Env_Rebindings; Old_Env : Lexical_Env) return Lexical_Env;
-   --  Return the new env corresponding to Old_Env in Self. Return Old_Env if
-   --  there is no association.
+   procedure Pop_Rebinding
+     (Rebindings        : Env_Rebindings;
+      Old_Env           : Lexical_Env;
+      Popped_Rebindings : out Env_Rebindings;
+      New_Env           : out Lexical_Env);
+   --  Look for a pair in Rebindings whose Old_Env field is "Old_Env".
+   --
+   --  If there is one, return its New_Env field in "New_Env", and create in
+   --  "Popped_Rebindings" a set of rebindings that excludes this pair.
+   --  Otherwise, forward "Old_Env" to "New_Env" and forward "Rebindings" to
+   --  "Popped_Rebindings".
+   --
+   --  In all cases, "Popped_Rebindings" contains upon return a new ownership
+   --  share.
 
    function Decorate
      (Elts       : Internal_Map_Element_Array;
@@ -406,11 +416,10 @@ package body Langkit_Support.Lexical_Env is
 
       function Get_Own_Elements (Self : Lexical_Env) return Env_Element_Array
       is
-         C   : Cursor := Internal_Envs.No_Element;
-         Env : constant Lexical_Env := Get_New_Env (Current_Rebindings, Self);
+         C : Cursor := Internal_Envs.No_Element;
       begin
-         if Env.Env /= null then
-            C := Env.Env.Find (Key);
+         if Self.Env /= null then
+            C := Self.Env.Find (Key);
          end if;
 
          return
@@ -421,7 +430,7 @@ package body Langkit_Support.Lexical_Env is
             then Decorate
               (Internal_Map_Element_Arrays.Reverse_Array
                  (Internal_Map_Element_Vectors.To_Array (Element (C))),
-               Env.Default_MD,
+               Self.Default_MD,
                Current_Rebindings)
 
             else Env_Element_Arrays.Empty_Array);
@@ -435,12 +444,17 @@ package body Langkit_Support.Lexical_Env is
       function Can_Reach_F (El : Env_Element) return Boolean is
         (Can_Reach (El.El, From));
 
+      Popped_Rebindings : Env_Rebindings;
+      Own_Lookup_Env    : Lexical_Env;
+
    begin
       if Self = null then
          return Env_Element_Arrays.Empty_Array;
       end if;
 
       Current_Rebindings := Append (Rebindings, Self.Rebinding);
+      Pop_Rebinding
+        (Current_Rebindings, Self, Popped_Rebindings, Own_Lookup_Env);
 
       declare
          use type Env_Element_Array;
@@ -448,7 +462,7 @@ package body Langkit_Support.Lexical_Env is
          Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
 
          Own_Elts   : constant Env_Element_Array :=
-            Get_Own_Elements (Self);
+            Get_Own_Elements (Own_Lookup_Env);
          Refd_Elts  : constant Env_Element_Array :=
            (if Recursive
             then Get_Refd_Elements
@@ -460,13 +474,14 @@ package body Langkit_Support.Lexical_Env is
                  (Self.Transitive_Referenced_Envs));
          Parent_Elts : constant Env_Element_Array :=
            (if Recursive
-            then Get (Parent_Env, Key, Rebindings => Current_Rebindings)
+            then Get (Parent_Env, Key, Rebindings => Popped_Rebindings)
             else Env_Element_Arrays.Empty_Array);
 
          Ret : constant Env_Element_Array :=
             Own_Elts & Refd_Elts & TRefd_Elts & Parent_Elts;
       begin
          Dec_Ref (Current_Rebindings);
+         Dec_Ref (Popped_Rebindings);
 
          --  Only filter if a non null value was given for the From parameter
          return (if From = No_Element then Ret
@@ -623,26 +638,85 @@ package body Langkit_Support.Lexical_Env is
       Self := null;
    end Dec_Ref;
 
-   -----------------
-   -- Get_New_Env --
-   -----------------
+   -------------------
+   -- Pop_Rebinding --
+   -------------------
 
-   function Get_New_Env
-     (Self : Env_Rebindings; Old_Env : Lexical_Env) return Lexical_Env
+   procedure Pop_Rebinding
+     (Rebindings        : Env_Rebindings;
+      Old_Env           : Lexical_Env;
+      Popped_Rebindings : out Env_Rebindings;
+      New_Env           : out Lexical_Env)
    is
+      Popped_Index : Natural := 0;
    begin
-      if Self = null then
-         return Old_Env;
+      --  By default, return the input
+
+      New_Env := Old_Env;
+      Popped_Rebindings := Rebindings;
+      Inc_Ref (Popped_Rebindings);
+
+      if Rebindings = null then
+         return;
       end if;
 
-      for J in 1 .. Self.Size loop
-         if Old_Env = Get_Env (Self.Rebindings (J).Old_Env) then
-            return Get_Env (Self.Rebindings (J).New_Env);
-         end if;
+      --  Look in reverse order as if there is a rebinding that we match, we
+      --  want to get the last one only.
+
+      for J in reverse 1 .. Rebindings.Size loop
+         declare
+            R         : Env_Rebinding renames Rebindings.Rebindings (J);
+            R_Old_Env : constant Lexical_Env := Get_Env (R.Old_Env);
+         begin
+            if Old_Env = R_Old_Env then
+               Popped_Index := J;
+               New_Env := Get_Env (R.New_Env);
+               exit;
+            end if;
+         end;
       end loop;
 
-      return Old_Env;
-   end Get_New_Env;
+      if Popped_Index /= 0 then
+         --  Undo the above Inc_Ref, as we will not return the same set of
+         --  rebindings.
+         Dec_Ref (Popped_Rebindings);
+
+         if Rebindings.Size = 1 then
+            --  We are going to remove the only rebinding Rebindings had, so we
+            --  return the "null" value for rebindings.
+            Popped_Rebindings := null;
+            return;
+         end if;
+
+         --  Create the new rebindings set
+
+         Popped_Rebindings := new Env_Rebindings_Type (Rebindings.Size - 1);
+         Popped_Rebindings.Ref_Count := 1;
+
+         declare
+            procedure Copy (To, From : Positive);
+
+            ----------
+            -- Copy --
+            ----------
+
+            procedure Copy (To, From : Positive) is
+               Dest : Env_Rebinding renames Popped_Rebindings.Rebindings (To);
+            begin
+               Dest := Rebindings.Rebindings (From);
+               Inc_Ref (Dest);
+            end Copy;
+
+         begin
+            for I in 1 .. Popped_Index - 1 loop
+               Copy (I, I);
+            end loop;
+            for I in Popped_Index + 1 .. Rebindings.Size loop
+               Copy (I - 1, I);
+            end loop;
+         end;
+      end if;
+   end Pop_Rebinding;
 
    --------------
    -- Decorate --
