@@ -67,7 +67,7 @@ class EnvSpec(object):
         :param AbstractExpression ref_envs: if an AbstractExpression returning
             a list of environments is supplied, the topmost environment in the
             environment resolution will be altered to include the list of
-            environments as referenced environments. TODO: Not yet implemented!
+            environments as referenced environments.
 
         :param AbstractExpression initial_env: If supplied, this env will be
             used as the lexical environment to execute the rest of the actions.
