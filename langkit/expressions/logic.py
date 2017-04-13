@@ -11,7 +11,6 @@ from langkit.expressions.base import (
     AbstractExpression, BuiltinCallExpr, LiteralExpr, PropertyDef,
     ResolvedExpression, construct, BasicExpr, auto_attr
 )
-from langkit.names import Name
 
 
 def untyped_literal_expr(expr_str):
