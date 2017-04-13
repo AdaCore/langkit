@@ -440,7 +440,7 @@ class Then(AbstractExpression):
     def construct(self):
         # Accept as a prefix:
         # * any pointer, since it can be checked against "null";
-        # * any Struct, since its "Is_Null" field can be checked.
+        # * any Struct, since structs are nullable.
         expr = construct(self.expr,
                          lambda cls: cls.is_ptr or issubclass(cls, Struct))
         self.var_expr.set_type(expr.type)
