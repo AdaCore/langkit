@@ -449,23 +449,34 @@ class CompiledType(object):
         raise not_implemented_error(cls, cls.c_type)
 
     @classmethod
-    def unify(cls, other):
+    def unify(cls, other, error_msg=None):
         """
-        Assuming "cls" and "other" are types that match, return the most
-        general type to cover both. An AssertionError is raised if they don't
-        match.
+        If "cls" and "other" are types that match, return the most general type
+        to cover both. Create an error diagnostic if they don't match.
 
         :param CompiledType cls: Type parameter.
         :param CompiledType other: Type parameter.
+        :param str|None error_msg: Diagnostic message for mismatching types. If
+            None, a generic one is used, otherwise, we call .format on it with
+            the `cls` and `other` keys being the names of mismatching types.
         :rtype: CompiledType
         """
-        assert cls.matches(other)
-        if issubclass(other, ASTNode):
-            return common_ancestor(cls, other)
-        elif other.is_entity_type:
+
+        # ASTNode subclasses (and thus entities) always can be unified: just
+        # take the most recent common ancestor.
+        if cls.is_entity_type and other.is_entity_type:
             return common_ancestor(cls.el_type, other.el_type).entity()
-        else:
-            return cls
+        elif issubclass(cls, ASTNode) and issubclass(other, ASTNode):
+            return common_ancestor(cls, other)
+
+        # Otherwise, we require a strict subtyping relation
+        check_source_language(
+            cls.matches(other),
+            (error_msg or 'Mismatching types: {cls} and {other}').format(
+                cls=cls.name().camel, other=other.name().camel
+            )
+        )
+        return cls
 
     @classmethod
     def matches(cls, formal):
