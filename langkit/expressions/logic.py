@@ -195,36 +195,26 @@ class Bind(AbstractExpression):
         )
 
         def construct_operand(op):
-            from langkit.expressions import Cast, New
+            from langkit.expressions import Cast, construct_as_entity
             expr = construct(op)
+
+            if expr.type.matches(T.root_node):
+                expr = construct_as_entity(self, expr)
 
             check_source_language(
 
                 expr.type == LogicVarType
-                or expr.type.matches(T.root_node)
                 or expr.type.matches(T.root_node.entity()),
 
                 "Operands to a logic bind operator should be either "
-                "a logic variable or an ASTNode, got {}".format(expr.type)
+                "a logic variable or an entity, got {}".format(expr.type)
             )
 
-            if expr.type.matches(T.root_node.entity()):
-                if expr.type is not T.root_node.entity():
-                    expr = Cast.Expr(expr, T.root_node.entity())
-            elif expr.type.matches(T.root_node):
-                # Cast the AST node type if necessary
-                if expr.type is not T.root_node:
-                    expr = Cast.Expr(expr, T.root_node)
-
-                # If the expression is a root node, implicitly construct an
-                # entity from it.
-                expr = New.StructExpr(T.root_node.entity(), {
-                    Name('El'): expr,
-                    Name('Info'): New.StructExpr(T.root_node.entity_info(), {
-                        Name('MD'): LiteralExpr('<>', None),
-                        Name('Rebindings'): LiteralExpr('null', None),
-                    }),
-                })
+            if (
+                expr.type.matches(T.root_node.entity())
+                and expr.type is not T.root_node.entity()
+            ):
+                expr = Cast.Expr(expr, T.root_node.entity())
 
             return expr
 
