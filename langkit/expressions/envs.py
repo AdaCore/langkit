@@ -362,27 +362,45 @@ def rebind_env(self, env, to_rebind, rebind_to):
     )
 
 
+def construct_as_entity(abstract_expr, node_expr):
+    """
+    Helper function to create a resolved as_entity expression.
+
+    :rtype: ResolvedExpression
+    """
+    from langkit.expressions import New, If, IsNull, No
+    PropertyDef.get().set_uses_env()
+
+    return If.Expr(
+        IsNull.construct_static(node_expr),
+        No.construct_static(node_expr.type.entity()),
+        New.StructExpr(
+            node_expr.type.entity(), {
+                names.Name('El'): node_expr,
+                names.Name('Info'): construct(
+                    PropertyDef.get().entity_info_arg.var
+                )
+            },
+            result_var_name=names.Name.from_lower("as_entity"),
+            abstract_expr=abstract_expr,
+        ),
+        node_expr.type.entity()
+    )
+
+
 @auto_attr
 def as_entity(self, node):
     """
     Construct an entity from node, including context (env rebindings).
     """
-    from langkit.expressions import New
 
     p = PropertyDef.get()
     check_source_language(p, "as_entity has to be used in a property")
-    p.set_uses_env()
 
     # We want to keep original type of node, so no downcast
     node_expr = construct(node, T.root_node, downcast=False)
 
-    return New.StructExpr(
-        node_expr.type.entity(),
-        {names.Name('El'): node_expr,
-         names.Name('Info'): construct(p.entity_info_arg.var)},
-        abstract_expr=self,
-        result_var_name=names.Name.from_lower("as_entity")
-    )
+    return construct_as_entity(self, node_expr)
 
 
 Env = EnvVariable()
