@@ -462,6 +462,8 @@ class CompiledType(object):
         assert cls.matches(other)
         if issubclass(other, ASTNode):
             return common_ancestor(cls, other)
+        elif other.is_entity_type:
+            return common_ancestor(cls.el_type, other.el_type).entity()
         else:
             return cls
 
