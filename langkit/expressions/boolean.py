@@ -300,7 +300,6 @@ class If(AbstractExpression):
         :rtype: IfExpr
         """
         from langkit.expressions import Cast
-        from langkit.compiled_types import T
 
         then = construct(self.then)
         else_then = construct(self.else_then)
