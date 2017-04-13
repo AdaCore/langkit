@@ -65,6 +65,19 @@ package body Langkit_Support.Lexical_Env is
       end if;
    end Get_Env;
 
+   -------------------
+   -- Is_Equivalent --
+   -------------------
+
+   function Is_Equivalent (L, R : Env_Getter) return Boolean is
+   begin
+      if L.Dynamic or else R.Dynamic then
+         raise Constraint_Error with "trying to compare dynamic env getters";
+      else
+         return L.Env = R.Env;
+      end if;
+   end Is_Equivalent;
+
    -------------
    -- Inc_Ref --
    -------------

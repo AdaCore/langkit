@@ -79,6 +79,11 @@ package Langkit_Support.Lexical_Env is
    function Get_Env (Self : Env_Getter) return Lexical_Env;
    --  Return the environment associated to the Self env getter
 
+   function Is_Equivalent (L, R : Env_Getter) return Boolean;
+   --  If at least one of L and R is a dynamic env getter, raise a
+   --  Constraint_Error. Otherwise, return whether the pointed environments are
+   --  equal.
+
    procedure Inc_Ref (Self : Env_Getter);
    --  Shortcut to run Inc_Ref of the potentially embedded lexical environment
 
