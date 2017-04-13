@@ -72,22 +72,29 @@
    %>
 
    function Eq_${eq_prop.uid} (L, R : ${T.entity.name()}) return Boolean is
+   begin
+      --  If any node pointer is null, then use that for equality
+      if L.El = null or else R.El = null then
+         return L.El = R.El;
+      end if;
 
-     (if L.El.all in ${struct}_Type'Class
-         and then R.El.all in ${struct}_Type'Class
+     return (if L.El.all in ${struct}_Type'Class
+             and then R.El.all in ${struct}_Type'Class
 
-      % if is_entity:
-      then ${eq_prop.name}
-        (${struct} (L.El),
-        (El => ${struct} (R.El),
-         Info => R.Info),
-        ${ent_info} => L.Info)
-      % else:
-      then ${eq_prop.name} (${struct} (L.El), ${struct} (R.El))
-      % endif
+          % if is_entity:
+          then ${eq_prop.name}
+            (${struct} (L.El),
+            (El => ${struct} (R.El),
+             Info => R.Info),
+            ${ent_info} => L.Info)
+          % else:
+          then ${eq_prop.name} (${struct} (L.El), ${struct} (R.El))
+          % endif
 
-      else raise Constraint_Error
-           with "Wrong type for Eq_${eq_prop.uid} arguments");
+          else raise Constraint_Error
+               with "Wrong type for Eq_${eq_prop.uid} arguments");
+   end Eq_${eq_prop.uid};
+
 </%def>
 
 <%def name="generate_logic_binder(conv_prop, eq_prop)">
