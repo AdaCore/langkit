@@ -383,6 +383,8 @@ package body Langkit_Support.Lexical_Env is
 
       function Get_Ref_Env_Elements
         (Self : Referenced_Env) return Env_Element_Array;
+      --  If we can determine that From can reach Self.From_Node, return the
+      --  lookup of Key in Self. Otherwise, return an empty array.
 
       function Get_Own_Elements
         (Self       : Lexical_Env;
@@ -444,8 +446,8 @@ package body Langkit_Support.Lexical_Env is
 
       function Get_Refd_Elements is new Referenced_Envs_Arrays.Flat_Map_Gen
         (Env_Element, Env_Element_Array, Get_Ref_Env_Elements);
-      --  Return the concatenation of Get_Own_Elements for this env and every
-      --  parent.
+      --  Return the concatenation of Get_Ref_Env_Elements for this env and
+      --  every parent.
 
       function Can_Reach_F (El : Env_Element) return Boolean is
         (Can_Reach (El.El, From));
