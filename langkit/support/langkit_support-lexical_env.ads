@@ -133,11 +133,10 @@ package Langkit_Support.Lexical_Env is
    type Entity_Info is record
       MD         : Element_Metadata;
       Rebindings : Env_Rebindings := null;
-      Is_Null    : Boolean := False;
    end record
       with Convention => C_Pass_By_Copy;
 
-   No_Entity_Info : constant Entity_Info := (Empty_Metadata, null, True);
+   No_Entity_Info : constant Entity_Info := (Empty_Metadata, null);
 
    function Combine (L, R : Entity_Info) return Entity_Info;
    --  Return a new Entity_Info that combines info from both L and R
@@ -151,7 +150,6 @@ package Langkit_Support.Lexical_Env is
    type Env_Element is record
       El      : Element_T;
       Info    : Entity_Info;
-      Is_Null : Boolean := False;
    end record;
    --  Wrapper structure to contain both the 'real' env element that the user
    --  wanted to store, and its associated metadata.

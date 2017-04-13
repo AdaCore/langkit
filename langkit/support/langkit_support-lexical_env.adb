@@ -212,8 +212,7 @@ package body Langkit_Support.Lexical_Env is
    function Combine (L, R : Entity_Info) return Entity_Info is
    begin
       return (MD         => Combine (L.MD, R.MD),
-              Rebindings => Combine (L.Rebindings, R.Rebindings),
-              Is_Null    => False);
+              Rebindings => Combine (L.Rebindings, R.Rebindings));
    end Combine;
 
    -------------
@@ -243,8 +242,7 @@ package body Langkit_Support.Lexical_Env is
    begin
       return Env_Element'
         (El      => El,
-         Info    => (MD => MD, Rebindings => null, Is_Null => False),
-         Is_Null => False);
+         Info    => (MD => MD, Rebindings => null));
    end Create;
 
    -------------
@@ -745,9 +743,7 @@ package body Langkit_Support.Lexical_Env is
          Result   : constant Env_Element :=
            (El      => Elt.Element,
             Info    => (MD         => Combine (Elt.MD, MD),
-                        Rebindings => Rebindings,
-                        Is_Null    => False),
-            Is_Null => False);
+                        Rebindings => Rebindings));
       begin
          if Elt.Resolver = null then
             Inc_Ref (Result.Info.Rebindings);

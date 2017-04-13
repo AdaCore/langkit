@@ -40,25 +40,26 @@
 
    begin
       % if returns_entity:
-      Ret := ${conv_prop.name}
-        (${conv_prop.struct.name()} (From.El), From.Info);
-      return
-        (El => ${root_class} (Ret.El),
-         Info => Ret.Info,
-         Is_Null => Ret.Is_Null);
-      % else:
-      return ${sem_n}'
-        (El => ${root_class} (${conv_prop.name}
-          (${conv_prop.struct.name()} (From.El)
-           % if conv_prop.uses_envs:
-              , From.Info
-           % endif
-         )),
 
-         Info    => (MD         => No_Metadata,
-                     Rebindings => From.Info.Rebindings,
-                     Is_Null    => From.Info.Is_Null),
-         Is_Null => From.Is_Null);
+         Ret := ${conv_prop.name}
+           (${conv_prop.struct.name()} (From.El), From.Info);
+         return
+           (El      => ${root_class} (Ret.El),
+            Info    => Ret.Info);
+
+      % else:
+
+         return ${sem_n}'
+           (El      => ${root_class} (${conv_prop.name}
+             (${conv_prop.struct.name()} (From.El)
+              % if conv_prop.uses_envs:
+                 , From.Info
+              % endif
+            )),
+
+            Info    => (MD         => No_Metadata,
+                        Rebindings => From.Info.Rebindings));
+
       % endif
    end Convert;
 </%def>
@@ -79,8 +80,7 @@
       then ${eq_prop.name}
         (${struct} (L.El),
         (El => ${struct} (R.El),
-         Info => R.Info,
-         Is_Null => R.Is_Null),
+         Info => R.Info),
         ${ent_info} => L.Info)
       % else:
       then ${eq_prop.name} (${struct} (L.El), ${struct} (R.El))

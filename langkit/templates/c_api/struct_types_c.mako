@@ -10,7 +10,6 @@ typedef struct {
     % for f in cls.get_fields():
         ${f.type.c_type(capi).name} ${f.name};
     % endfor
-   char is_null;
 } ${type_name};
 
 /* Increment the ref-count of all components in "r".  */

@@ -14,24 +14,29 @@
    <%
       fields = cls.get_fields(include_inherited=False)
       ext = ctx.ext("nodes", cls.name(), "components")
+      extensions = exts.include_extension(ext)
    %>
 
    type ${cls.name()} is record
-      % for f in fields:
-      ${f.name} : aliased ${f.type.storage_type_name()}
-         := ${f.type.nullexpr()};
-       ${ada_doc(f, 6)}
-      % endfor
-      ${exts.include_extension(ext)}
-      % if cls.is_env_metadata:
-      ## Env_Metadata is never null
-      Is_Null : Boolean := False;
+
+      % if fields or extensions:
+         % for f in fields:
+            ${f.name} : aliased ${f.type.storage_type_name()}
+               := ${f.type.nullexpr()};
+             ${ada_doc(f, 6)}
+            ${extensions}
+         % endfor
       % else:
-      Is_Null : Boolean := True;
+         null;
       % endif
    end record
      with Convention => C_Pass_By_Copy;
-   ${cls.nullexpr()} : constant ${cls.name()} := (others => <>);
+   ${cls.nullexpr()} : constant ${cls.name()} :=
+   % if fields or extensions:
+   (others => <>);
+   % else:
+   (null record);
+   % endif
 
    % if cls.is_refcounted():
    procedure Inc_Ref (R : ${cls.name()});

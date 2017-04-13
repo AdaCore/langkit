@@ -1191,7 +1191,7 @@ private
    -- Environments handling (internal) --
    --------------------------------------
 
-   No_Env_Element : constant Env_Element := (null, No_Entity_Info, True);
+   No_Env_Element : constant Env_Element := (null, No_Entity_Info);
 
    procedure Inc_Ref (Self : Lexical_Env) renames AST_Envs.Inc_Ref;
    procedure Dec_Ref (Self : in out Lexical_Env) renames AST_Envs.Dec_Ref;

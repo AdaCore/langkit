@@ -187,9 +187,7 @@ class New(AbstractExpression):
                              for _, expr in self._iter_ordered())
 
         def _render_expr(self):
-            fields = list(self._iter_ordered()) + [
-                (names.Name('is_null'), construct(False))
-            ]
+            fields = list(self._iter_ordered())
             return '({})'.format(
                 ', '.join('{} => {}'.format(
                     name.camel_with_underscores, expr.render_expr()

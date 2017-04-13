@@ -13,8 +13,7 @@ class _BaseStruct(object):
             type(key)
          ))
 
-      # Do not expose the "is_null" internal field
-      fields = self._c_type._fields_[:-1]
+      fields = self._c_type._fields_
       if 0 <= key < len(fields):
          field_name, _ = fields[key]
          return getattr(self, field_name)
@@ -22,7 +21,7 @@ class _BaseStruct(object):
          raise IndexError('There is no {}th field'.format(key))
 
     def __repr__(self):
-        field_names = [name for name, _ in self._c_type._fields_[:-1]]
+        field_names = [name for name, _ in self._c_type._fields_]
         return '<{} {}>'.format(
             type(self).__name__,
             ' '.join('{}={}'.format(name, getattr(self, name))
@@ -122,7 +121,6 @@ class ${type_name}(${', '.join(base_classes)}):
              % endif
              ),
         % endfor
-            ('is_null', ctypes.c_uint8),
         ]
 
     @classmethod
@@ -161,7 +159,6 @@ class ${type_name}(${', '.join(base_classes)}):
                 if is_array_type(f.type) else unwrapped
             )},
             % endfor
-            is_null=False
         )
         return result
 

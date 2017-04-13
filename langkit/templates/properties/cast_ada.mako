@@ -20,9 +20,7 @@ then
    ${expr.result_var.name} :=
      (El      => ${ast_node.name()} (${expr.expr_var.name}.El),
       Info    => (MD         => ${expr.expr_var.name}.Info.Md,
-                  Rebindings => ${expr.expr_var.name}.Info.Rebindings,
-                  Is_Null    => False),
-      Is_Null => False);
+                  Rebindings => ${expr.expr_var.name}.Info.Rebindings));
 % else:
    ${expr.result_var.name} := ${ast_node.name()} (${expr.expr_var.name});
 % endif
