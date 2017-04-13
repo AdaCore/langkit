@@ -1528,21 +1528,25 @@ class No(AbstractExpression):
             )
         )
 
+    @staticmethod
+    def construct_static(expr_type, abstract_expr=None):
+        return LiteralExpr(expr_type.nullexpr(), expr_type,
+
+                           # We want to create a tmp in pointer cases,
+                           # so that overloading resolution always works.
+                           result_var_name="Null_Value"
+                           if expr_type.is_ptr
+                           else None,
+
+                           abstract_expr=abstract_expr)
+
     def construct(self):
         """
         Construct a resolved expression for this.
 
         :rtype: LiteralExpr
         """
-        return LiteralExpr(self.expr_type.nullexpr(), self.expr_type,
-
-                           # We want to create a tmp in pointer cases,
-                           # so that overloading resolution always works.
-                           result_var_name="Null_Value"
-                           if self.expr_type.is_ptr
-                           else None,
-
-                           abstract_expr=self)
+        return self.construct_static(self.expr_type, self)
 
 
 class EmptyArray(AbstractExpression):
