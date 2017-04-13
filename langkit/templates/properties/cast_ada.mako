@@ -8,6 +8,9 @@ source = str(expr.expr_var.name) + (".El" if is_entity else "")
 
 ${expr.expr.render_pre()}
 ${expr.expr_var.name} := ${expr.expr.render_expr()};
+% if expr.expr.type.is_refcounted():
+   Inc_Ref (${expr.expr_var.name});
+% endif
 
 if ${source} = null
      or else
