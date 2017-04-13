@@ -120,6 +120,32 @@ package body Langkit_Support.Lexical_Env is
       Dec_Ref (Self.New_Env);
    end Dec_Ref;
 
+   -------------------
+   -- Is_Equivalent --
+   -------------------
+
+   function Is_Equivalent (L, R : Env_Rebindings) return Boolean is
+      function Is_Equivalent (L, R : Env_Rebinding) return Boolean is
+        (Is_Equivalent (L.Old_Env, R.Old_Env)
+         and then Is_Equivalent (L.New_Env, R.New_Env));
+   begin
+      if L = null or else R = null then
+         return L = R;
+      end if;
+
+      if L.Size /= R.Size then
+         return False;
+      end if;
+
+      for I in 1 .. L.Size loop
+         if not Is_Equivalent (L.Rebindings (I), R.Rebindings (I)) then
+            return False;
+         end if;
+      end loop;
+
+      return True;
+   end Is_Equivalent;
+
    ------------
    -- Create --
    ------------

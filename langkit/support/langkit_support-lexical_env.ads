@@ -115,6 +115,11 @@ package Langkit_Support.Lexical_Env is
    --  Set of mappings from one lexical environment to another. This is used to
    --  temporarily substitute lexical environment during symbol lookup.
 
+   function Is_Equivalent (L, R : Env_Rebindings) return Boolean;
+   --  Return whether we can consider L and R as being the same set of env
+   --  rebindings. Raise a Constraint_Error if this involves comparing
+   --  synthetic environment or dynamic env getters.
+
    function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings;
    --  Create a new Env_Rebindings from an array of binding pairs
 
