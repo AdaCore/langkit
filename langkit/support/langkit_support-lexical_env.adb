@@ -389,10 +389,13 @@ package body Langkit_Support.Lexical_Env is
       function Get_Ref_Env_Elements
         (Self : Referenced_Env) return Env_Element_Array;
 
-      function Get_Own_Elements
-        (Self : Lexical_Env) return Env_Element_Array;
+      function Get_Own_Elements (Self : Lexical_Env) return Env_Element_Array;
       --  Return the elements for Key contained by the internal map contained
       --  in this env.
+
+      --------------------------
+      -- Get_Ref_Env_Elements --
+      --------------------------
 
       function Get_Ref_Env_Elements
         (Self : Referenced_Env) return Env_Element_Array is
@@ -417,8 +420,7 @@ package body Langkit_Support.Lexical_Env is
       -- Get_Own_Elements --
       ----------------------
 
-      function Get_Own_Elements
-        (Self : Lexical_Env) return Env_Element_Array
+      function Get_Own_Elements (Self : Lexical_Env) return Env_Element_Array
       is
          C   : Cursor := Internal_Envs.No_Element;
          Env : constant Lexical_Env := Get_New_Env (Current_Rebindings, Self);
@@ -441,8 +443,7 @@ package body Langkit_Support.Lexical_Env is
             else Env_Element_Arrays.Empty_Array);
       end Get_Own_Elements;
 
-      function Get_Refd_Elements
-      is new Referenced_Envs_Arrays.Flat_Map_Gen
+      function Get_Refd_Elements is new Referenced_Envs_Arrays.Flat_Map_Gen
         (Env_Element, Env_Element_Array, Get_Ref_Env_Elements);
       --  Return the concatenation of Get_Own_Elements for this env and every
       --  parent.
