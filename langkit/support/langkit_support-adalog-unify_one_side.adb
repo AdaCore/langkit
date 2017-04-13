@@ -27,16 +27,15 @@ package body Langkit_Support.Adalog.Unify_One_Side is
          return C : Boolean do
             declare
                R_Val : constant L_Type := Convert (Self.R_Data, Self.Right);
+               L_Val : constant L_Type := Get_Value (Self.Left);
             begin
                Trace (L_Image (R_Val));
-               Trace (L_Image (Get_Value (Self.Left)));
+               Trace (L_Image (L_Val));
 
                if Invert_Equals then
-                  C := Equals
-                    (R_Val, Get_Value (Self.Left));
+                  C := Equals (R_Val, L_Val);
                else
-                  C := Equals
-                    (Get_Value (Self.Left), R_Val);
+                  C := Equals (L_Val, R_Val);
                end if;
                Trace ("Returning " & C'Image);
             end;
