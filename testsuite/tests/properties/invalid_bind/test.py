@@ -41,7 +41,10 @@ def run(name, prop_expr):
         prop = Property(12, public=True)
         prop2 = Property(True, public=True)
         prop3 = Property(lambda _=T.BarNode: True, public=True)
-        prop4 = Property(lambda other=T.BazNode: Self == other, public=True)
+        prop4 = Property(
+            lambda other=T.BazNode.entity(): Self.as_entity == other,
+            public=True
+        )
 
     def lang_def():
         foo_grammar = Grammar('main_rule')

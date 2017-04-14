@@ -67,7 +67,6 @@
 <%def name="generate_logic_equal(eq_prop)">
    <%
    struct = eq_prop.struct.name()
-   is_entity = eq_prop.explicit_arguments[0].type.is_entity_type
    ent_info = eq_prop.entity_info_name
    %>
 
@@ -78,21 +77,19 @@
          return L.El = R.El;
       end if;
 
-     return (if L.El.all in ${struct}_Type'Class
-             and then R.El.all in ${struct}_Type'Class
+      --  If both args are of the proper AST node type
+      if L.El.all in ${struct}_Type'Class
+         and then R.El.all in ${struct}_Type'Class
+      then
+         --  Then call the equality property on it
+         return ${eq_prop.name}
+          (${struct} (L.El),
+           (El => ${struct} (R.El), Info => R.Info),
+           ${ent_info} => L.Info);
+      end if;
 
-          % if is_entity:
-          then ${eq_prop.name}
-            (${struct} (L.El),
-            (El => ${struct} (R.El),
-             Info => R.Info),
-            ${ent_info} => L.Info)
-          % else:
-          then ${eq_prop.name} (${struct} (L.El), ${struct} (R.El))
-          % endif
-
-          else raise Constraint_Error
-               with "Wrong type for Eq_${eq_prop.uid} arguments");
+      --  Else raise an error
+      raise Constraint_Error with "Wrong type for Eq_${eq_prop.uid} arguments";
    end Eq_${eq_prop.uid};
 
 </%def>

@@ -162,16 +162,15 @@ class Bind(AbstractExpression):
                 (not self.eq_prop.has_implicit_env,
                  "Equality property passed to bind must not have an implicit"
                  " env"),
-
             ])
+
             other_type = args[0].type
-
-            # If we want to compare entities, check the wrapped node type
-            if other_type.is_entity_type:
-                other_type = other_type.el_type
-
             check_source_language(
-                other_type == self.eq_prop.struct,
+                other_type.is_entity_type,
+                "First arg of equality property should be an entity type"
+            )
+            check_source_language(
+                other_type.el_type == self.eq_prop.struct,
                 "Self and first argument should be of the same type"
             )
 

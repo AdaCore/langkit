@@ -11,7 +11,7 @@ File "test.py", line 34, in BarNode.main_prop
 == Incorrect bind eq_prop 3 ==
 File "test.py", line 34, in BarNode.main_prop
   line 36, in Bind expression
-    Error: Self and first argument should be of the same type
+    Error: First arg of equality property should be an entity type
 
 == Correct bind eq_prop ==
 Code generation was successful
