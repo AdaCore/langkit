@@ -22,7 +22,7 @@ package Langkit_Support.Adalog.Refcounted_Eq_Same is
      (LR_Type, LR_Type,
       Dummy_Convert_Data, Dummy_Convert_Data, No_Data, No_Data,
       Left_Var  => Refs.Refcounted_Logic_Var,
-  Right_Var => Refs.Refcounted_Logic_Var);
+      Right_Var => Refs.Refcounted_Logic_Var);
 
    subtype Refcounted_Member_Array is Refcounted_Impl.Unify_Left.R_Type_Array;
 
