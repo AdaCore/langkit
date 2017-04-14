@@ -326,6 +326,11 @@ class ManageScript(object):
             help="Don't generate runtime checks for properties",
             action='store_true'
         )
+        subparser.add_argument(
+            '--enable-warning', '-w', dest="enabled_warnings",
+            action='append', default=[],
+            help='Enable a warning by name'
+        )
 
     def add_build_args(self, subparser):
         """
@@ -579,6 +584,7 @@ class ManageScript(object):
                           annotate_fields_types=args.annotate_fields_types,
                           generate_lexer=not args.no_compile_quex,
                           check_only=args.check_only,
+                          enabled_warnings=args.enabled_warnings,
                           no_property_checks=args.no_property_checks)
 
         if args.check_only:
