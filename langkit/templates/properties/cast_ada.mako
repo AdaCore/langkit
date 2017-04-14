@@ -3,7 +3,6 @@
 <%
 is_entity = expr.static_type.is_entity_type
 ast_node = expr.static_type.el_type if is_entity else expr.static_type
-source = str(expr.expr_var.name) + (".El" if is_entity else "")
 %>
 
 <%def name="generate_cast()">
@@ -27,14 +26,23 @@ ${expr.expr_var.name} := ${expr.expr.render_expr()};
    Inc_Ref (${expr.expr_var.name});
 % endif
 
-if ${source} = null
-   or else ${source}.all in ${ast_node.value_type_name()}'Class
-then
+% if expr.is_downcast:
+   ## If we know statically that this is a downcast, then no need to generate
+   ## checking code.
    ${generate_cast()}
-else
-   % if expr.do_raise:
-   raise Property_Error with "invalid object cast";
-   % else:
-   ${expr.result_var.name} := ${expr.static_type.nullexpr()};
-   % endif
-end if;
+% else:
+
+   <% source = str(expr.expr_var.name) + (".El" if is_entity else "") %>
+
+   if ${source} = null
+      or else ${source}.all in ${ast_node.value_type_name()}'Class
+   then
+      ${generate_cast()}
+   else
+      % if expr.do_raise:
+      raise Property_Error with "invalid object cast";
+      % else:
+      ${expr.result_var.name} := ${expr.static_type.nullexpr()};
+      % endif
+   end if;
+% endif
