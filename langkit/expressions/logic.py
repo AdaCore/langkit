@@ -233,6 +233,13 @@ class DomainExpr(ResolvedExpression):
             self.domain.static_type.element_type().is_entity_type
         )
 
+        # Below, the call to Dec_Ref is here because:
+        #
+        # 1. Dom has an ownership share for each of its elements.
+        # 2. The call to member is borrowing this ownership share only for the
+        #    time of the call.
+        # 3. Calls to Get create ownership shares.
+
         return "\n".join([
             self.domain.render_pre(),
             self.logic_var_expr.render_pre(), """
@@ -245,6 +252,10 @@ class DomainExpr(ResolvedExpression):
                 end loop;
 
                 {res_var} := Member ({logic_var}, A);
+
+                for J in 1 .. Length (Dom) loop
+                    Dec_Ref (A (J));
+                end loop;
             end;
             """.format(logic_var=self.logic_var_expr.render_expr(),
                        domain=self.domain.render_expr(),
