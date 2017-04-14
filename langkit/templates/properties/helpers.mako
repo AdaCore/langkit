@@ -175,7 +175,7 @@
    begin
       % for i, arg_type in enumerate(args_types):
          % if arg_type.is_refcounted():
-            Dec_Ref (Field_${i});
+            Dec_Ref (Self.Field_${i});
          % endif
       % endfor
       Free (Self.Dbg_Img);
