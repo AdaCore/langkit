@@ -68,7 +68,7 @@ package Langkit_Support.Adalog.Unify is
       return access Base_Relation'Class
    is
      (new Unify_LR_Rel.Rel'
-        (Rel => Create (L, R, No_L_Data, No_R_Data),
+        (Rel    => Create (L, R, No_L_Data, No_R_Data),
          others => <>))
    with Inline;
 
