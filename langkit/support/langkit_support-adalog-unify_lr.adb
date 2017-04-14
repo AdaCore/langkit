@@ -39,7 +39,7 @@ package body Langkit_Support.Adalog.Unify_LR is
                    & Element_Image (Get_Value (Self.Right)));
             return True;
          else
-            Trace ("In Unify_LR, propagating right failed ! ");
+            Trace ("In Unify_LR, propagating right failed! ");
             return False;
          end if;
       end if;
