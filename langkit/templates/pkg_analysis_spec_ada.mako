@@ -346,6 +346,9 @@ package ${ada_lib_name}.Analysis is
    Empty_Env : Lexical_Env renames AST_Envs.Empty_Env;
    No_Entity_Info : Entity_Info renames AST_Envs.No_Entity_Info;
 
+   procedure Inc_Ref (E : Entity) renames AST_Envs.Inc_Ref;
+   procedure Dec_Ref (E : in out Entity) renames AST_Envs.Dec_Ref;
+
    ## Declare arrays of lexical environments here because we need them for the
    ## Group operation below.
    ${array_types.public_incomplete_decl(LexicalEnvType.array_type())}
