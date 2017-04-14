@@ -173,6 +173,11 @@
    procedure Free (Self : in out ${type_name}) is
       procedure Free is new Ada.Unchecked_Deallocation (String, String_Access);
    begin
+      % for i, arg_type in enumerate(args_types):
+         % if arg_type.is_refcounted():
+            Dec_Ref (Field_${i});
+         % endif
+      % endfor
       Free (Self.Dbg_Img);
    end Free;
 
