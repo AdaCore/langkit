@@ -43,10 +43,7 @@
 </%def>
 
 <%def name="generate_logic_equal(eq_prop)">
-   <%
-   struct = eq_prop.struct.name()
-   ent_info = eq_prop.entity_info_name
-   %>
+   <% struct = eq_prop.struct.name() %>
 
    function Eq_${eq_prop.uid} (L, R : ${T.entity.name()}) return Boolean is
    begin
@@ -63,7 +60,7 @@
          return ${eq_prop.name}
           (${struct} (L.El),
            (El => ${struct} (R.El), Info => R.Info),
-           ${ent_info} => L.Info);
+           ${eq_prop.entity_info_name} => L.Info);
       end if;
 
       --  Else raise an error
