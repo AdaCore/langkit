@@ -109,6 +109,30 @@
       Dbg_Img    : String_Access := null;
    end record;
 
+   ------------
+   -- Create --
+   ------------
+
+   function Create (
+      % for i, arg_type in enumerate(args_types):
+         Field_${i} : ${arg_type.name()};
+      % endfor
+      Dbg_Img : String_Access := null
+   ) return ${type_name} is
+   begin
+      % for i, arg_type in enumerate(args_types):
+         % if arg_type.is_refcounted():
+            Inc_Ref (Field_${i});
+         % endif
+      % endfor
+      return ${type_name}'(
+         % for i, arg_type in enumerate(args_types):
+            Field_${i} => Field_${i},
+         % endfor
+         Dbg_Img => Dbg_Img
+      );
+   end Create;
+
    ----------
    -- Call --
    ----------
