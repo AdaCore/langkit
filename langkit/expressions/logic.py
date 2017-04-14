@@ -184,11 +184,11 @@ class Bind(AbstractExpression):
         )
 
         def construct_operand(op):
-            from langkit.expressions import Cast, construct_as_entity
+            from langkit.expressions import Cast, AsEntityExpr
             expr = construct(op)
 
             if expr.type.matches(T.root_node):
-                expr = construct_as_entity(self, expr)
+                expr = AsEntityExpr(expr, 'Ent')
 
             check_source_language(
 

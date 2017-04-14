@@ -362,30 +362,62 @@ def rebind_env(self, env, to_rebind, rebind_to):
     )
 
 
-def construct_as_entity(abstract_expr, node_expr):
-    """
-    Helper function to create a resolved as_entity expression.
+class AsEntityExpr(ResolvedExpression):
 
-    :rtype: ResolvedExpression
-    """
-    from langkit.expressions import New, If, IsNull, No
-    PropertyDef.get().set_uses_env()
+    def __init__(self, node_expr, result_var_name=None, abstract_expr=None):
+        """
+        :param ResolvedExpression node_expr: The node to turn into an entity.
+        :param result_var_name: See ResolvedExpression's constructor.
+        :param abstract expr: See ResolvedExpression's constructor.
+        """
+        from langkit.expressions import New, If, IsNull, No
 
-    return If.Expr(
-        IsNull.construct_static(node_expr),
-        No.construct_static(node_expr.type.entity()),
-        New.StructExpr(
-            node_expr.type.entity(), {
-                names.Name('El'): node_expr,
-                names.Name('Info'): construct(
-                    PropertyDef.get().entity_info_arg.var
-                )
-            },
-            result_var_name=names.Name.from_lower("as_entity"),
-            abstract_expr=abstract_expr,
-        ),
-        node_expr.type.entity()
-    )
+        p = PropertyDef.get()
+        p.set_uses_env()
+
+        # Create a variable to hold the input node so we can reference it
+        # multiple times in the sub-expression.
+        self.node_expr = node_expr
+        self.node_var = p.vars.create('Node_For_Entity',
+                                      node_expr.type).ref_expr
+
+        self.subexpr = If.Expr(
+            IsNull.construct_static(self.node_var),
+            No.construct_static(node_expr.type.entity()),
+            New.StructExpr(
+                node_expr.type.entity(), {
+                    names.Name('El'): self.node_var,
+                    names.Name('Info'): construct(
+                        PropertyDef.get().entity_info_arg.var
+                    )
+                },
+                result_var_name=names.Name.from_lower("as_entity"),
+                abstract_expr=abstract_expr,
+            ),
+            node_expr.type.entity()
+        )
+
+        self.static_type = self.subexpr.type
+
+        super(AsEntityExpr, self).__init__(result_var_name=result_var_name,
+                                           abstract_expr=abstract_expr)
+
+    def _render_pre(self):
+        return '{}\n{} := {};\n{}'.format(
+            self.node_expr.render_pre(),
+            self.node_var.name,
+            self.node_expr.render_expr(),
+            self.subexpr.render_pre()
+        )
+
+    def _render_expr(self):
+        return self.subexpr.render_expr()
+
+    @property
+    def subexprs(self):
+        return {'0-node-var': self.node_var,
+                '1-node-expr': self.node_expr,
+                '2-subexpr': self.subexpr}
 
 
 @auto_attr
@@ -400,7 +432,7 @@ def as_entity(self, node):
     # We want to keep original type of node, so no downcast
     node_expr = construct(node, T.root_node, downcast=False)
 
-    return construct_as_entity(self, node_expr)
+    return AsEntityExpr(node_expr, abstract_expr=self)
 
 
 Env = EnvVariable()
