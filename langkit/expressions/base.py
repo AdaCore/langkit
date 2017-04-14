@@ -2285,6 +2285,13 @@ class PropertyDef(AbstractNodeData):
                 )
             )
 
+    def check_return_types(self, context):
+        warn_if(
+            self.type.matches(T.root_node),
+            "{} returns a node type".format(self.qualname),
+            warning_name="prop_only_entities"
+        )
+
     def render_property(self, context):
         """
         Render the given property to generated code.

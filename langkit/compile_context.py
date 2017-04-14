@@ -988,6 +988,8 @@ class CompileCtx(object):
                          PropertyDef.construct_and_type_expression),
             PropertyPass('check_overriding_types',
                          PropertyDef.check_overriding_types),
+            PropertyPass('check_properties_return_types',
+                         PropertyDef.check_return_types),
             GlobalPass('Compute uses envs attribute',
                        CompileCtx.compute_uses_env_attribute),
             ASTNodePass('check env spec properties',
