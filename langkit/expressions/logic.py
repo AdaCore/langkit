@@ -475,6 +475,7 @@ def get_value(self, logic_var):
     return BuiltinCallExpr(
         "Eq_Node.Refs.Get_Value", T.root_node.entity(),
         [construct(logic_var, LogicVarType)],
+        result_var_name='Eq_Solution',
         abstract_expr=self,
     )
 
