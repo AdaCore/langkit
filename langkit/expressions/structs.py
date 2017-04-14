@@ -78,6 +78,10 @@ class Cast(AbstractExpression):
         def __repr__(self):
             return '<Cast.Expr {}>'.format(self.static_type.name().camel)
 
+        @property
+        def is_downcast(self):
+            return self.expr.type.matches(self.static_type)
+
     def __init__(self, expr, dest_type, do_raise=False):
         """
         :param AbstractExpression expr: Expression on which the cast is
