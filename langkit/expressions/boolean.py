@@ -4,7 +4,8 @@ import inspect
 
 from langkit import names
 from langkit.compiled_types import (
-    ASTNode, BoolType, EquationType, LexicalEnvType, LongType, Struct, Symbol
+    ASTNode, BoolType, EquationType, LexicalEnvType, LongType, Struct, Symbol,
+    T
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.analysis_units import AnalysisUnitType
@@ -108,9 +109,21 @@ class Eq(AbstractExpression):
     Expression for equality test expression.
     """
 
+    @classmethod
+    def make_expr(cls, lhs, rhs):
+        return (cls.make_expr_for_entities(lhs, rhs)
+                if lhs.type.is_entity_type else
+                BasicExpr('{} = {}', BoolType, [lhs, rhs]))
+
     @staticmethod
-    def make_expr(lhs, rhs):
-        return BasicExpr('{} = {}', BoolType, [lhs, rhs])
+    def make_expr_for_entities(lhs, rhs):
+        from langkit.expressions.structs import Cast
+
+        if lhs.type != T.entity:
+            lhs = Cast.Expr(lhs, T.entity)
+        if rhs.type != T.entity:
+            rhs = Cast.Expr(rhs, T.entity)
+        return BasicExpr('Is_Equivalent ({}, {})', BoolType, [lhs, rhs])
 
     def __init__(self, lhs, rhs):
         """
@@ -139,6 +152,14 @@ class Eq(AbstractExpression):
                 )
             )
 
+        def check_never_equal(can_be_equal):
+            check_source_language(
+                can_be_equal,
+                '{} and {} values are never equal'.format(
+                    lhs.type.name().camel, rhs.type.name().camel
+                )
+            )
+
         # Don't use CompiledType.matches since in the generated code, we need
         # both operands to be *exactly* the same types, so handle specifically
         # each case.
@@ -153,11 +174,18 @@ class Eq(AbstractExpression):
             elif issubclass(rhs.type, lhs.type):
                 rhs = Cast.Expr(rhs, assert_type(lhs.type, ASTNode))
             else:
-                check_source_language(
-                    False, '{} and {} values are never equal'.format(
-                        lhs.type.name().camel, rhs.type.name().camel
-                    )
-                )
+                check_never_equal(False)
+
+        # Likewise for entities. Moreover, we need to use a special comparison
+        # predicate for them.
+        elif lhs.type.is_entity_type:
+            check_type_compatibility(rhs.type.is_entity_type)
+            check_never_equal(
+                issubclass(lhs.type.el_type, rhs.type.el_type)
+                or issubclass(rhs.type.el_type, lhs.type.el_type)
+            )
+            return self.make_expr_for_entities(lhs, rhs)
+
         else:
             check_type_compatibility(lhs.type == rhs.type)
 
