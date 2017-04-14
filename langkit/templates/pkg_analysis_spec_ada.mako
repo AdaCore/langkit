@@ -831,7 +831,10 @@ package ${ada_lib_name}.Analysis is
    function El_Image (N : ${T.entity.name()}) return String;
 
    package Eq_Node is new Langkit_Support.Adalog.Eq_Same
-     (${T.entity.name()}, El_Image);
+     (LR_Type       => ${T.entity.name()},
+      Element_Image => El_Image,
+      Inc_Ref       => AST_Envs.Inc_Ref,
+      Dec_Ref       => AST_Envs.Dec_Ref);
    subtype Logic_Var is Eq_Node.Refs.Raw_Var;
    subtype Logic_Var_Record is Eq_Node.Refs.Var;
    Null_Var : constant Logic_Var := null;
