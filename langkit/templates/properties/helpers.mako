@@ -18,7 +18,6 @@
    type_name = "Logic_Converter_{}".format(conv_prop.uid)
    root_class = T.root_node.name()
    sem_n = T.entity.name()
-   returns_entity = conv_prop.type.is_entity_type
    %>
 
    ## We generate a custom type which is a functor in the C++ term, eg just a
@@ -33,34 +32,13 @@
 
    function Convert (Self : ${type_name}; From : ${sem_n}) return ${sem_n} is
       pragma Unreferenced (Self);
-
-      % if returns_entity:
       Ret : ${conv_prop.type.name()};
-      % endif
-
    begin
-      % if returns_entity:
-
          Ret := ${conv_prop.name}
            (${conv_prop.struct.name()} (From.El), From.Info);
          return
            (El      => ${root_class} (Ret.El),
             Info    => Ret.Info);
-
-      % else:
-
-         return ${sem_n}'
-           (El      => ${root_class} (${conv_prop.name}
-             (${conv_prop.struct.name()} (From.El)
-              % if conv_prop.uses_envs:
-                 , From.Info
-              % endif
-            )),
-
-            Info    => (MD         => No_Metadata,
-                        Rebindings => From.Info.Rebindings));
-
-      % endif
    end Convert;
 </%def>
 
