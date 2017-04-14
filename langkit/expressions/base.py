@@ -750,6 +750,14 @@ class ResolvedExpression(object):
 
         self.abstract_expr = abstract_expr
 
+        self._render_pre_called = False
+        """
+        Safety guard: except for variables, it is highly suspicious for
+        render_pre to be called more than once for a given resolved expression.
+        This will happen if we start using such an expression multiple times in
+        the expression tree.
+        """
+
     @property
     def result_var(self):
         """
@@ -767,6 +775,11 @@ class ResolvedExpression(object):
 
         :rtype: str
         """
+        assert not self._render_pre_called, (
+            '{}.render_pre can be called only once'.format(type(self).__name__)
+        )
+        self._render_pre_called = not isinstance(self, AbstractVariable.Expr)
+
         result = self._render_pre()
         if self.result_var:
             return '{}\n{} := {};'.format(
