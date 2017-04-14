@@ -1,4 +1,6 @@
-with Langkit_Support.Adalog.Debug;      use Langkit_Support.Adalog.Debug;
+with Ada.Unchecked_Deallocation;
+
+with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
 package body Langkit_Support.Adalog.Logic_Ref is
 
@@ -174,8 +176,11 @@ package body Langkit_Support.Adalog.Logic_Ref is
    -------------
 
    procedure Destroy (Self : in out Var) is
+      procedure Destroy is new Ada.Unchecked_Deallocation
+        (String, String_Access);
    begin
       Pred_Sets.Destroy (Self.Pending_Relations);
+      Destroy (Self.Dbg_Name);
    end Destroy;
 
 end Langkit_Support.Adalog.Logic_Ref;
