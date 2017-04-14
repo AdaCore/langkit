@@ -385,7 +385,13 @@ private
             Getter_State : Getter_State_T;
             Getter_Fn    : Getter_Fn_T;
          when False =>
-            Env : Lexical_Env;
+            Is_Refcounted : Boolean;
+            --  Whether Env is ref-counted. When it's not, we can avoid calling
+            --  Dec_Ref at destruction time: This is useful because at analysis
+            --  unit destruction time, this may be a dangling access to an
+            --  environment from another unit.
+
+            Env           : Lexical_Env;
       end case;
    end record;
 
@@ -394,7 +400,7 @@ private
       Rebindings : Env_Rebindings_Array (1 .. Size);
    end record;
 
-   No_Env_Getter    : constant Env_Getter := (False, null);
+   No_Env_Getter    : constant Env_Getter := (False, False, null);
    No_Env_Rebinding : constant Env_Rebinding := (No_Env_Getter, No_Env_Getter);
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
