@@ -30,7 +30,7 @@ package body Langkit_Support.Lexical_Env is
      (Elts       : Internal_Map_Element_Array;
       MD         : Element_Metadata;
       Rebindings : Env_Rebindings) return Entity_Array;
-   --  From an array of Entitys, decorate every element with additional
+   --  From an array of entities, decorate every element with additional
    --  Metadata stored in MD.
 
    -----------------------
