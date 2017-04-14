@@ -168,6 +168,9 @@ package Langkit_Support.Lexical_Env is
    --  Constructor that returns an Entity from an Element_T and an
    --  Element_Metadata instances.
 
+   function Is_Equivalent (L, R : Entity) return Boolean;
+   --  Return whether we can consider that L and R are equivalent entities
+
    procedure Inc_Ref (Self : Entity);
    --  Increment the reference count of items in Self
 

@@ -284,6 +284,26 @@ package body Langkit_Support.Lexical_Env is
          Info    => (MD => MD, Rebindings => null));
    end Create;
 
+   -------------------
+   -- Is_Equivalent --
+   -------------------
+
+   function Is_Equivalent (L, R : Entity) return Boolean is
+   begin
+      if L.El /= R.El then
+         return False;
+      end if;
+
+      --  All null element are equals, regardless of their entity info
+      if L.El = No_Element then
+         return True;
+      end if;
+
+      --  For all other cases, make sure the entity info is equivalent
+      return L.Info.MD = R.Info.MD and then Is_Equivalent (L.Info.Rebindings,
+                                                            R.Info.Rebindings);
+   end Is_Equivalent;
+
    -------------
    -- Inc_Ref --
    -------------
