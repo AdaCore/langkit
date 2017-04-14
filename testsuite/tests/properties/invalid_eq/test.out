@@ -1,0 +1,19 @@
+== Correct code ==
+Code generation was successful
+
+== Boolean <-> ASTNode ==
+File "test.py", line 31, in Example.prop
+  line 31, in Eq expression
+    Error: Incompatible types for equality: Boolean and Example
+
+== ASTNode <-> Boolean ==
+File "test.py", line 31, in Example.prop
+  line 31, in Eq expression
+    Error: Incompatible types for equality: Example and Boolean
+
+== Long <-> Boolean ==
+File "test.py", line 31, in Example.prop
+  line 31, in Eq expression
+    Error: Incompatible types for equality: Integer and Boolean
+
+Done
