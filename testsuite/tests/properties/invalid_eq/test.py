@@ -1,9 +1,9 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from langkit.compiled_types import ASTNode, root_grammar_class
+from langkit.compiled_types import ASTNode, T, root_grammar_class
 from langkit.diagnostics import Diagnostics
-from langkit.expressions import Literal, Property, Self
+from langkit.expressions import Env, Literal, No, Property, Self
 from langkit.parsers import Grammar, Tok
 
 from lexer_example import Token
@@ -28,7 +28,10 @@ def run(name, lhs, rhs):
         pass
 
     class Example(FooNode):
-        prop = Property(lhs.equals(rhs), public=True)
+        prop = Property(lhs.equals(rhs), has_implicit_env=True, public=True)
+
+    class Lit(FooNode):
+        pass
 
     def lang_def():
         foo_grammar = Grammar('main_rule')
@@ -41,8 +44,52 @@ def run(name, lhs, rhs):
     print('')
 
 
-run('Correct code', Self, Self.parent)
-run('Boolean <-> ASTNode', Literal(True), Self)
-run('ASTNode <-> Boolean', Self, Literal(True))
-run('Long <-> Boolean', Literal(0), Literal(True))
+def bool_expr():
+    return Literal(True)
+
+
+def int_expr():
+    return Literal(0)
+
+
+def example_expr():
+    return Self
+
+
+def example_entity():
+    return Env.get('foo').at(0).cast(T.Example.entity())
+
+
+def lit_expr():
+    return No(T.Lit)
+
+
+def lit_entity():
+    return Env.get('foo').at(0).cast(T.Lit.entity())
+
+
+def foo_expr():
+    return Self.parent
+
+
+def foo_entity():
+    return Env.get('foo').at(0)
+
+
+run('Correct: Boolean <-> Boolean', bool_expr(), bool_expr())
+run('Correct: ASTNode <-> ASTNode', foo_expr(), foo_expr())
+run('Correct: ASTNode <-> ASTNode (subclass)', foo_expr(), example_expr())
+run('Correct: Entity <-> Entity', foo_entity(), foo_entity())
+run('Correct: Entity <-> Entity (subclass)', foo_entity(), example_entity())
+
+run('Boolean <-> ASTNode', bool_expr(), foo_expr())
+run('ASTNode <-> Boolean', foo_expr(), bool_expr())
+run('ASTNode <-> Entity', foo_expr(), foo_entity())
+run('Boolean <-> Entity', bool_expr(), foo_entity())
+run('ASTNode <-> Boolean', foo_expr(), bool_expr())
+run('Long <-> Boolean', int_expr(), bool_expr())
+
+run('ASTNode <-> ASTNode (never equal)', example_expr(), lit_expr())
+run('Entity <-> Entity (never equal)', example_entity(), lit_entity())
+
 print('Done')
