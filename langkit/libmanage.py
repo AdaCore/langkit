@@ -115,7 +115,7 @@ class ManageScript(object):
 
     BUILD_MODES = ('dev', 'prod')
 
-    ENABLE_WARNINGS_DEFAULT = False
+    ENABLE_BUILD_WARNINGS_DEFAULT = False
     """
     Whether warnings to build the generated library are enabled by default.
     """
@@ -344,15 +344,15 @@ class ManageScript(object):
             help='Selects a preset for build options'
         )
         subparser.add_argument(
-            '--enable-warnings', '-w',
-            action='store_true', dest='enable_warnings',
-            default=self.ENABLE_WARNINGS_DEFAULT,
+            '--enable-build-warnings', '-w',
+            action='store_true', dest='enable_build_warnings',
+            default=self.ENABLE_BUILD_WARNINGS_DEFAULT,
             help='Enable warnings to build the generated library'
         )
         subparser.add_argument(
-            '--disable-warnings', '-W',
-            action='store_false', dest='enable_warnings',
-            default=self.ENABLE_WARNINGS_DEFAULT,
+            '--disable-build-warnings', '-W',
+            action='store_false', dest='enable_build_warnings',
+            default=self.ENABLE_BUILD_WARNINGS_DEFAULT,
             help='Disable warnings to build the generated library'
         )
         subparser.add_argument(
@@ -641,8 +641,8 @@ class ManageScript(object):
                   '-XLIBRARY_TYPE={}'.format(library_type),
                   '-XXMLADA_BUILD={}'.format(library_type)]
 
-        enable_warnings = getattr(args, 'enable_warnings', False)
-        if enable_warnings:
+        enable_build_warnings = getattr(args, 'enable_build_warnings', False)
+        if enable_build_warnings:
             result.append(
                 '-X{}_WARNINGS=true'.format(self.lib_name.upper())
             )
