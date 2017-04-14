@@ -2641,7 +2641,8 @@ class FieldAccessExpr(BasicExpr):
             constructor.
         """
         super(FieldAccessExpr, self).__init__(
-            '{}.{}', result_type, [NullCheckExpr(prefix_expr), field_name],
+            '{}.{}', result_type,
+            [NullCheckExpr(prefix_expr, result_var_name='Pfx'), field_name],
             abstract_expr=abstract_expr,
         )
         self.prefix_expr = prefix_expr
