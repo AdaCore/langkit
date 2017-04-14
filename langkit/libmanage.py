@@ -344,13 +344,13 @@ class ManageScript(object):
             help='Selects a preset for build options'
         )
         subparser.add_argument(
-            '--enable-build-warnings', '-w',
+            '--enable-build-warnings',
             action='store_true', dest='enable_build_warnings',
             default=self.ENABLE_BUILD_WARNINGS_DEFAULT,
             help='Enable warnings to build the generated library'
         )
         subparser.add_argument(
-            '--disable-build-warnings', '-W',
+            '--disable-build-warnings',
             action='store_false', dest='enable_build_warnings',
             default=self.ENABLE_BUILD_WARNINGS_DEFAULT,
             help='Disable warnings to build the generated library'
