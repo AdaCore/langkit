@@ -627,7 +627,9 @@
       G_State     : Env_Getter_State_T :=
         (Node => ${root_node_type_name} (Self));
 
+      % if cls.env_spec._add_env:
       G           : Env_Getter;
+      % endif
    begin
       ## Super call
 
