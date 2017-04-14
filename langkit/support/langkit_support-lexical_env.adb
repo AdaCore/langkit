@@ -151,15 +151,22 @@ package body Langkit_Support.Lexical_Env is
    ------------
 
    function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings is
-      Result : constant Env_Rebindings := new Env_Rebindings_Type'
-        (Size       => Bindings'Length,
-         Rebindings => Bindings,
-         Ref_Count  => 1);
    begin
-      for R of Bindings loop
-         Inc_Ref (R);
-      end loop;
-      return Result;
+      if Bindings'Length = 0 then
+         return null;
+      end if;
+
+      declare
+         Result : constant Env_Rebindings := new Env_Rebindings_Type'
+           (Size       => Bindings'Length,
+            Rebindings => Bindings,
+            Ref_Count  => 1);
+      begin
+         for R of Bindings loop
+            Inc_Ref (R);
+         end loop;
+         return Result;
+      end;
    end Create;
 
    -------------
