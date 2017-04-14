@@ -131,10 +131,20 @@ class Eq(AbstractExpression):
         lhs = construct(self.lhs)
         rhs = construct(self.rhs)
 
+        def check_type_compatibility(is_valid):
+            check_source_language(
+                is_valid,
+                'Incompatible types for equality: {} and {}'.format(
+                    lhs.type.name().camel, rhs.type.name().camel
+                )
+            )
+
         # Don't use CompiledType.matches since in the generated code, we need
         # both operands to be *exactly* the same types, so handle specifically
         # each case.
         if issubclass(lhs.type, ASTNode):
+            check_type_compatibility(issubclass(rhs.type, ASTNode))
+
             # Handle checks between two subclasses without explicit casts. In
             # order to help users to detect dubious checks, forbid operands
             # that can never be equal because they have no subclass in common.
@@ -149,12 +159,7 @@ class Eq(AbstractExpression):
                     )
                 )
         else:
-            check_source_language(
-                lhs.type == rhs.type,
-                'Incompatible types for equality: {} and {}'.format(
-                    lhs.type.name().camel, rhs.type.name().camel
-                )
-            )
+            check_type_compatibility(lhs.type == rhs.type)
 
         return self.make_expr(lhs, rhs)
 
