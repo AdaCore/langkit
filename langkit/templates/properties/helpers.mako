@@ -38,11 +38,11 @@
       pragma Unreferenced (Self);
       Ret : ${conv_prop.type.name()};
    begin
-         Ret := ${conv_prop.name}
-           (${conv_prop.struct.name()} (From.El), From.Info);
-         return
-           (El      => ${root_class} (Ret.El),
-            Info    => Ret.Info);
+      ## Here, we just forward the return value from conv_prop to our caller,
+      ## so there is nothing to do regarding ref-counting.
+      Ret := ${conv_prop.name}
+        (${conv_prop.struct.name()} (From.El), From.Info);
+      return (El => ${root_class} (Ret.El), Info => Ret.Info);
    end Convert;
 </%def>
 
