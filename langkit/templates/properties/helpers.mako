@@ -17,7 +17,7 @@
    <%
    type_name = "Logic_Converter_{}".format(conv_prop.uid)
    root_class = T.root_node.name()
-   sem_n = T.entity.name()
+   entity = T.entity.name()
    %>
 
    ## We generate a custom type which is a functor in the C++ term, eg just a
@@ -27,14 +27,14 @@
 
    No_${type_name} : constant ${type_name} := (null record);
 
-   function Convert (Self : ${type_name}; From : ${sem_n}) return ${sem_n}
+   function Convert (Self : ${type_name}; From : ${entity}) return ${entity}
       with Inline;
 
    -------------
    -- Convert --
    -------------
 
-   function Convert (Self : ${type_name}; From : ${sem_n}) return ${sem_n} is
+   function Convert (Self : ${type_name}; From : ${entity}) return ${entity} is
       pragma Unreferenced (Self);
       Ret : ${conv_prop.type.name()};
    begin
