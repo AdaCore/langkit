@@ -25,6 +25,10 @@ generic
      (Element_Type => R_Type, others => <>);
 
    with function Equals (L, R : R_Type) return Boolean is <>;
+
+   with procedure L_Dec_Ref (L : in out L_Type);
+   with procedure R_Dec_Ref (R : in out R_Type);
+
 package Langkit_Support.Adalog.Unify_LR is
 
    --------------

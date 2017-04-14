@@ -8,6 +8,9 @@ package body Langkit_Support.Adalog.Unify_LR is
    -----------
 
    function Apply (Self : in out Unify_LR) return Boolean is
+      L : L_Type;
+      R : R_Type;
+      B : Boolean;
    begin
       Trace ("In Unify_LR");
 
@@ -15,33 +18,39 @@ package body Langkit_Support.Adalog.Unify_LR is
 
          --  Both values are defined, return true if they are equal
          if Is_Defined (Self.Right) then
-            return C : Boolean do
-               C :=
-                 Equals (Convert (Self.L_Data, Get_Value (Self.Left)),
-                         Get_Value (Self.Right));
-               Trace ("In Unify_LR, both defined, returning " & C'Image);
-            end return;
-
+            L := Get_Value (Self.Left);
+            R := Get_Value (Self.Right);
+            B := Equals (Convert (Self.L_Data, L), R);
+            L_Dec_Ref (L);
+            R_Dec_Ref (R);
+            Trace ("In Unify_LR, both defined, returning " & B'Image);
+            return B;
          end if;
 
          --  Left is defined, right is not, give right the value of left and
          --  return true.
-         if
-           Set_Value (Self.Right, Convert (Self.L_Data, Get_Value (Self.Left)))
-         then
+         L := Get_Value (Self.Left);
+         R := Get_Value (Self.Right);
+         declare
+            LC : R_Type := Convert (Self.L_Data, L);
+         begin
+            B := Set_Value (Self.Right, LC);
+            R_Dec_Ref (LC);
+         end;
+
+         if B then
             Self.State := Right_Changed;
             Trace ("In Unify_LR, propagating right, from "
                    & Image (Self.Left) & " to "
                    & Image (Self.Right));
-            Trace ("In Unify_LR, From value is : "
-                   & Element_Image (Get_Value (Self.Left)));
-            Trace ("In Unify_LR, To value is : "
-                   & Element_Image (Get_Value (Self.Right)));
-            return True;
+            Trace ("In Unify_LR, From value is : " & Element_Image (L));
+            Trace ("In Unify_LR, To value is : " & Element_Image (R));
          else
             Trace ("In Unify_LR, propagating right failed! ");
-            return False;
          end if;
+         L_Dec_Ref (L);
+         R_Dec_Ref (R);
+         return B;
       end if;
 
       if not Is_Defined (Self.Right) then
@@ -61,9 +70,16 @@ package body Langkit_Support.Adalog.Unify_LR is
 
       --  Right is defined, left is not, give left the value of right and
       --  return true.
-      if
-         Set_Value (Self.Left, Convert (Self.R_Data, Get_Value (Self.Right)))
-      then
+      R := Get_Value (Self.Right);
+      declare
+         RC : L_Type := Convert (Self.R_Data, R);
+      begin
+         B := Set_Value (Self.Left, RC);
+         R_Dec_Ref (R);
+         L_Dec_Ref (RC);
+      end;
+
+      if B then
          Self.State := Left_Changed;
          Trace ("In Unify_LR, propagating left, from "
                    & Image (Self.Right) & " to "

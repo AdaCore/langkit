@@ -37,6 +37,11 @@ generic
    with package Right_Var is new Logic_Var
      (Element_Type => R_Type, others => <>);
 
+   with procedure L_Inc_Ref (L : L_Type);
+   with procedure R_Inc_Ref (R : R_Type);
+   with procedure L_Dec_Ref (L : in out L_Type);
+   with procedure R_Dec_Ref (R : in out R_Type);
+
 package Langkit_Support.Adalog.Unify is
 
    --  TODO HACK FIXME??? P418-022 Removing the body for this package causes a
@@ -45,17 +50,25 @@ package Langkit_Support.Adalog.Unify is
 
    package Simple_Unify is new Adalog.Unify_LR
      (L_Type, R_Type, Left_C_Data, Right_C_Data,
-      Convert, Convert, Left_Var, Right_Var, Equals);
+      Convert, Convert, Left_Var, Right_Var, Equals,
+      L_Dec_Ref, R_Dec_Ref);
    use Simple_Unify;
 
    package Unify_Left is new Unify_One_Side
      (L_Type, R_Type, Equals, Right_C_Data,
-      Convert, Left_Var, Right_Var.Element_Image, Left_Var.Element_Image);
+      Convert, Left_Var, Right_Var.Element_Image, Left_Var.Element_Image,
+      Invert_Equals => False,
+      R_Inc_Ref     => R_Inc_Ref,
+      L_Dec_Ref     => L_Dec_Ref,
+      R_Dec_Ref     => R_Dec_Ref);
 
    package Unify_Right is new Unify_One_Side
      (R_Type, L_Type, Equals, Left_C_Data,
       Convert, Right_Var, Left_Var.Element_Image, Right_Var.Element_Image,
-      Invert_Equals => True);
+      Invert_Equals => True,
+      R_Inc_Ref     => L_Inc_Ref,
+      L_Dec_Ref     => R_Dec_Ref,
+      R_Dec_Ref     => L_Dec_Ref);
 
    ------------------
    -- Eq predicate --

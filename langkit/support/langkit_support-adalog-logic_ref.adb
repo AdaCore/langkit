@@ -30,21 +30,24 @@ package body Langkit_Support.Adalog.Logic_Ref is
 
    function Set_Value (Self : in out Var; Data : Element_Type) return Boolean
    is
-      Old   : aliased constant Var := Self;
+      Old : Var := Self;
    begin
+      Inc_Ref (Old.Value);
+
       if Debug_State = Trace then
          Trace ("Setting the value of " & Image (Self) & " to "
                 & Element_Image (Data));
          Trace ("Old value is " & Element_Image (Old.Value));
       end if;
-      --  First set the value
 
+      --  First set the value
+      Dec_Ref (Self.Value);
       Self.Value := Data;
+      Inc_Ref (Self.Value);
       Self.Reset := False;
 
       --  Then check if we have pending relations, and if they evaluate to
       --  True.
-
       for El of Pred_Sets.Elements (Self.Pending_Relations) loop
          if Debug_State = Trace then
             Trace ("Applying predicate on " & Image (Self));
@@ -52,17 +55,22 @@ package body Langkit_Support.Adalog.Logic_Ref is
 
          if not El.Apply then
             Trace ("Applying predicate failed");
+
+            Dec_Ref (Self.Value);
             Self := Old;
+            Inc_Ref (Self.Value);
 
             if Debug_State = Trace then
                Trace ("Self element value is now "
                       & Element_Image (Self.Value));
             end if;
 
+            Dec_Ref (Old.Value);
             return False;
          end if;
       end loop;
 
+      Dec_Ref (Old.Value);
       return True;
    end Set_Value;
 
@@ -72,6 +80,7 @@ package body Langkit_Support.Adalog.Logic_Ref is
 
    function Get_Value (Self : Var) return Element_Type is
    begin
+      Inc_Ref (Self.Value);
       --  TODO??? We removed an assert about Self.Reset being False, because
       --  we want to be able to access the variable even if the element is
       --  unset, eg. null. However, we need to have a definite null value for
@@ -179,6 +188,7 @@ package body Langkit_Support.Adalog.Logic_Ref is
       procedure Destroy is new Ada.Unchecked_Deallocation
         (String, String_Access);
    begin
+      Dec_Ref (Self.Value);
       Pred_Sets.Destroy (Self.Pending_Relations);
       Destroy (Self.Dbg_Name);
    end Destroy;

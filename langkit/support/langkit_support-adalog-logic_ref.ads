@@ -19,6 +19,8 @@ use Langkit_Support.Adalog.Logic_Var_Predicate;
 
 generic
    type Element_Type is private;
+   with procedure Inc_Ref (E : Element_Type);
+   with procedure Dec_Ref (E : in out Element_Type);
    with function Element_Image (E : Element_Type) return String;
 package Langkit_Support.Adalog.Logic_Ref is
 
@@ -103,6 +105,7 @@ package Langkit_Support.Adalog.Logic_Ref is
    -- Formal packages instantiations --
    ------------------------------------
 
-   package Raw_Logic_Var is new Adalog.Logic_Var (Raw_Var, Element_Type);
+   package Raw_Logic_Var is new Adalog.Logic_Var
+     (Raw_Var, Element_Type, Inc_Ref, Dec_Ref);
 
 end Langkit_Support.Adalog.Logic_Ref;

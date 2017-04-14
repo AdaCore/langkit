@@ -7,6 +7,9 @@ generic
    with function Element_Image (E : LR_Type) return String is <>;
 package Langkit_Support.Adalog.Refcounted_Eq_Same is
 
+   procedure Inc_Ref (E : LR_Type) is null;
+   procedure Dec_Ref (E : in out LR_Type) is null;
+
    package Refs is new Refcounted_Logic_Ref (LR_Type, Element_Image);
 
    type Dummy_Convert_Data is null record;
@@ -22,7 +25,11 @@ package Langkit_Support.Adalog.Refcounted_Eq_Same is
      (LR_Type, LR_Type,
       Dummy_Convert_Data, Dummy_Convert_Data, No_Data, No_Data,
       Left_Var  => Refs.Refcounted_Logic_Var,
-      Right_Var => Refs.Refcounted_Logic_Var);
+      Right_Var => Refs.Refcounted_Logic_Var,
+      L_Inc_Ref => Inc_Ref,
+      R_Inc_Ref => Inc_Ref,
+      L_Dec_Ref => Dec_Ref,
+      R_Dec_Ref => Dec_Ref);
 
    subtype Refcounted_Member_Array is Refcounted_Impl.Unify_Left.R_Type_Array;
 
@@ -34,6 +41,8 @@ package Langkit_Support.Adalog.Refcounted_Eq_Same is
         (LR_Type, LR_Type,
          Converter, Converter,
          Convert, Convert,
-         Refs.Refcounted_Logic_Var, Refs.Refcounted_Logic_Var);
+         Refs.Refcounted_Logic_Var, Refs.Refcounted_Logic_Var,
+         L_Dec_Ref => Dec_Ref,
+         R_Dec_Ref => Dec_Ref);
    end Refcounted_Custom_Bind;
 end Langkit_Support.Adalog.Refcounted_Eq_Same;

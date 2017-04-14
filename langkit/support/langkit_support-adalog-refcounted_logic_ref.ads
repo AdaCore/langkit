@@ -14,8 +14,11 @@ generic
    with function Element_Image (E : Element_Type) return String;
 package Langkit_Support.Adalog.Refcounted_Logic_Ref is
 
-   package LRef is
-   new Langkit_Support.Adalog.Logic_Ref (Element_Type, Element_Image);
+   procedure Inc_Ref (E : Element_Type) is null;
+   procedure Dec_Ref (E : in out Element_Type) is null;
+
+   package LRef is new Langkit_Support.Adalog.Logic_Ref
+     (Element_Type, Inc_Ref, Dec_Ref, Element_Image);
 
    --------------------------------------
    -- Referenced counted variable type --
@@ -30,6 +33,9 @@ package Langkit_Support.Adalog.Refcounted_Logic_Ref is
 
    package Refs is new GNATCOLL.Refcount.Shared_Pointers (Refcounted_El);
    type Ref is new Refs.Ref with null record;
+
+   procedure Inc_Ref (Self : Ref) is null;
+   procedure Dec_Ref (Self : in out Ref) is null;
 
    procedure Reset (Self : in out Ref);
    function Is_Defined (Self : Ref) return Boolean;
@@ -50,6 +56,6 @@ package Langkit_Support.Adalog.Refcounted_Logic_Ref is
    --  Refcounted one
 
    package Refcounted_Logic_Var is new Adalog.Logic_Var
-     (Ref, Element_Type);
+     (Ref, Element_Type, Inc_Ref, Dec_Ref);
 
 end Langkit_Support.Adalog.Refcounted_Logic_Ref;

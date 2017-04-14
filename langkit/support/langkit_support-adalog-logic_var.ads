@@ -24,6 +24,9 @@ generic
    type Logic_Var_Type is private;
    type Element_Type is private;
 
+   with procedure Inc_Ref (E : Element_Type);
+   with procedure Dec_Ref (E : in out Element_Type);
+
    with procedure Reset (Self : in out Logic_Var_Type) is <>;
    --  Reset the logic variable to an undefined state with no value
 

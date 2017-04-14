@@ -37,6 +37,10 @@ generic
    --  L) If this is passed, it will be done by Equals (L, Convert (R)). This
    --  can be useful if order is important in your equality function.
 
+   with procedure R_Inc_Ref (R : R_Type);
+   with procedure L_Dec_Ref (L : in out L_Type);
+   with procedure R_Dec_Ref (R : in out R_Type);
+
 package Langkit_Support.Adalog.Unify_One_Side is
 
    type R_Type_Array is array (Positive range <>) of R_Type;

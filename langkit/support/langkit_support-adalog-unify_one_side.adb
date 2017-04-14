@@ -26,8 +26,8 @@ package body Langkit_Support.Adalog.Unify_One_Side is
 
          return C : Boolean do
             declare
-               R_Val : constant L_Type := Convert (Self.R_Data, Self.Right);
-               L_Val : constant L_Type := Get_Value (Self.Left);
+               R_Val : L_Type := Convert (Self.R_Data, Self.Right);
+               L_Val : L_Type := Get_Value (Self.Left);
             begin
                Trace (L_Image (R_Val));
                Trace (L_Image (L_Val));
@@ -38,19 +38,25 @@ package body Langkit_Support.Adalog.Unify_One_Side is
                   C := Equals (L_Val, R_Val);
                end if;
                Trace ("Returning " & C'Image);
+               L_Dec_Ref (R_Val);
+               L_Dec_Ref (L_Val);
             end;
          end return;
       else
 
-         if Set_Value (Self.Left, Convert (Self.R_Data, Self.Right)) then
-            Trace ("Setting left worked !");
-
-            Self.Changed := True;
-            return True;
-         else
-            Trace ("Setting left failed !");
-            return False;
-         end if;
+         declare
+            R_Val : L_Type := Convert (Self.R_Data, Self.Right);
+            B     : constant Boolean := Set_Value (Self.Left, R_Val);
+         begin
+            L_Dec_Ref (R_Val);
+            if B then
+               Trace ("Setting left worked !");
+               Self.Changed := True;
+            else
+               Trace ("Setting left failed !");
+            end if;
+            return B;
+         end;
       end if;
    end Apply;
 
@@ -81,21 +87,34 @@ package body Langkit_Support.Adalog.Unify_One_Side is
 
             Self.Domain_Checked := True;
             for V of Self.Values.all loop
-               if Get_Value (Self.Left) = Convert (Self.R_Data, V) then
-                  return True;
-               end if;
+               declare
+                  L     : L_Type := Get_Value (Self.Left);
+                  R_Val : L_Type := Convert (Self.R_Data, V);
+                  B     : constant Boolean := L = R_Val;
+               begin
+                  L_Dec_Ref (L);
+                  L_Dec_Ref (R_Val);
+                  if B then
+                     return True;
+                  end if;
+               end;
             end loop;
             return False;
          else
             loop
                Self.Current_Index := Self.Current_Index + 1;
-               if Set_Value
-                 (Self.Left, Convert
-                    (Self.R_Data, Self.Values (Self.Current_Index - 1)))
-               then
-                  Self.Changed := True;
-                  return True;
-               end if;
+
+               declare
+                  R_Val : L_Type := Convert
+                    (Self.R_Data, Self.Values (Self.Current_Index - 1));
+                  B     : constant Boolean := Set_Value (Self.Left, R_Val);
+               begin
+                  L_Dec_Ref (R_Val);
+                  if B then
+                     Self.Changed := True;
+                     return True;
+                  end if;
+               end;
 
                exit when Self.Current_Index not in Self.Values.all'Range;
             end loop;
@@ -132,6 +151,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
      (Left : Var.Var; Right : R_Type; R_Data : R_Convert_Data) return Unify_Rec
    is
    begin
+      R_Inc_Ref (Right);
       return (Left    => Left,
               Right   => Right,
               Changed => False,
@@ -144,6 +164,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
       R_Data : R_Convert_Data) return Relation
    is
    begin
+      R_Inc_Ref (Right);
       return new Unify'(Rel => Create (Left, Right, R_Data), others => <>);
    end Create;
 
@@ -157,6 +178,9 @@ package body Langkit_Support.Adalog.Unify_One_Side is
       R_Data : R_Convert_Data) return Relation
    is
    begin
+      for V of Vals loop
+         R_Inc_Ref (V);
+      end loop;
       return new Member_T'
         (Left           => R,
          Values         => new R_Type_Array'(Vals),
@@ -175,6 +199,9 @@ package body Langkit_Support.Adalog.Unify_One_Side is
       procedure Unchecked_Free
       is new Ada.Unchecked_Deallocation (R_Type_Array, R_Type_Array_Access);
    begin
+      for V of Self.Values.all loop
+         R_Dec_Ref (V);
+      end loop;
       Unchecked_Free (Self.Values);
    end Cleanup;
 

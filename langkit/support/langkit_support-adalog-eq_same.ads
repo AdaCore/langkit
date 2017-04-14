@@ -20,9 +20,7 @@ generic
    with procedure Dec_Ref (E : in out LR_Type) is null;
 package Langkit_Support.Adalog.Eq_Same is
 
-   pragma Unreferenced (Dec_Ref);
-
-   package Refs is new Logic_Ref (LR_Type, Element_Image);
+   package Refs is new Logic_Ref (LR_Type, Inc_Ref, Dec_Ref, Element_Image);
 
    type Dummy_Convert_Data is null record;
    No_Data : constant Dummy_Convert_Data := (null record);
@@ -37,7 +35,11 @@ package Langkit_Support.Adalog.Eq_Same is
      (LR_Type, LR_Type,
       Dummy_Convert_Data, Dummy_Convert_Data, No_Data, No_Data,
       Left_Var  => Refs.Raw_Logic_Var,
-      Right_Var => Refs.Raw_Logic_Var);
+      Right_Var => Refs.Raw_Logic_Var,
+      L_Inc_Ref => Inc_Ref,
+      R_Inc_Ref => Inc_Ref,
+      L_Dec_Ref => Dec_Ref,
+      R_Dec_Ref => Dec_Ref);
 
    subtype Raw_Member_Array is Raw_Impl.Unify_Left.R_Type_Array;
 
@@ -56,7 +58,11 @@ package Langkit_Support.Adalog.Eq_Same is
         (LR_Type, LR_Type,
          Converter, Converter, No_Data, No_Data,
          Convert, Convert, Equals, Equals,
-         Refs.Raw_Logic_Var, Refs.Raw_Logic_Var);
+         Refs.Raw_Logic_Var, Refs.Raw_Logic_Var,
+         L_Inc_Ref => Inc_Ref,
+         R_Inc_Ref => Inc_Ref,
+         L_Dec_Ref => Dec_Ref,
+         R_Dec_Ref => Dec_Ref);
 
       function Create (L, R : Refs.Raw_Logic_Var.Var; Data : Converter)
         return Relation
