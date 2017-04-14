@@ -6,16 +6,7 @@ ast_node = expr.static_type.el_type if is_entity else expr.static_type
 source = str(expr.expr_var.name) + (".El" if is_entity else "")
 %>
 
-${expr.expr.render_pre()}
-${expr.expr_var.name} := ${expr.expr.render_expr()};
-% if expr.expr.type.is_refcounted():
-   Inc_Ref (${expr.expr_var.name});
-% endif
-
-if ${source} = null
-     or else
-   ${source}.all in ${ast_node.value_type_name()}'Class
-then
+<%def name="generate_cast()">
 % if is_entity:
    ## We are about to create a new reference to the input expr's env rebinding,
    ## so create a new ownership share for it.
@@ -27,6 +18,19 @@ then
 % else:
    ${expr.result_var.name} := ${ast_node.name()} (${expr.expr_var.name});
 % endif
+</%def>
+
+${expr.expr.render_pre()}
+${expr.expr_var.name} := ${expr.expr.render_expr()};
+
+% if expr.expr.type.is_refcounted():
+   Inc_Ref (${expr.expr_var.name});
+% endif
+
+if ${source} = null
+   or else ${source}.all in ${ast_node.value_type_name()}'Class
+then
+   ${generate_cast()}
 else
    % if expr.do_raise:
    raise Property_Error with "invalid object cast";
