@@ -16,7 +16,12 @@ with Langkit_Support.Adalog.Unify;
 generic
    type LR_Type is private;
    with function Element_Image (E : LR_Type) return String is <>;
+   with procedure Inc_Ref (E : LR_Type) is null;
+   with procedure Dec_Ref (E : in out LR_Type) is null;
 package Langkit_Support.Adalog.Eq_Same is
+
+   pragma Unreferenced (Inc_Ref);
+   pragma Unreferenced (Dec_Ref);
 
    package Refs is new Logic_Ref (LR_Type, Element_Image);
 
