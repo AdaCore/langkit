@@ -14,7 +14,8 @@
 <%def name="logic_helpers()">
 
    pragma Warnings (Off, "referenced");
-   function Eq_Default (L, R : ${T.entity.name()}) return Boolean is (L = R)
+   function Eq_Default (L, R : ${T.entity.name()}) return Boolean is
+     (Is_Equivalent (L, R))
       with Inline;
 
    type Logic_Converter_Default is null record;
