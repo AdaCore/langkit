@@ -30,6 +30,10 @@
    function Convert (Self : ${type_name}; From : ${sem_n}) return ${sem_n}
       with Inline;
 
+   -------------
+   -- Convert --
+   -------------
+
    function Convert (Self : ${type_name}; From : ${sem_n}) return ${sem_n} is
       pragma Unreferenced (Self);
       Ret : ${conv_prop.type.name()};
@@ -105,6 +109,10 @@
       Dbg_Img    : String_Access := null;
    end record;
 
+   ----------
+   -- Call --
+   ----------
+
    function Call
      (Self           : ${type_name}
      % for i in range(len(formal_node_types)):
@@ -127,8 +135,16 @@
       return ${prop.name} ${args_fmt};
    end Call;
 
+   -----------
+   -- Image --
+   -----------
+
    function Image (Self : ${type_name}) return String
    is (if Self.Dbg_Img /= null then Self.Dbg_Img.all else "");
+
+   ----------
+   -- Free --
+   ----------
 
    procedure Free (Self : in out ${type_name}) is
       procedure Free is new Ada.Unchecked_Deallocation (String, String_Access);
