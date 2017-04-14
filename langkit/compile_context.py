@@ -816,7 +816,8 @@ class CompileCtx(object):
 
     def emit(self, file_root='.', generate_lexer=True, main_source_dirs=set(),
              main_programs=set(), annotate_fields_types=False,
-             check_only=False, no_property_checks=False):
+             check_only=False, no_property_checks=False,
+             enabled_warnings=[]):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -847,6 +848,8 @@ class CompileCtx(object):
         :param bool no_property_checks: If True, do not emit safety checks in
             the generated code for properties. Namely, this disables null
             checks on field access.
+
+        :param [str] enabled_warnings: A list of enabled warnings.
         """
         dir_path = path.join(
             path.dirname(path.realpath(__file__)), "templates"
@@ -858,6 +861,7 @@ class CompileCtx(object):
         )
 
         self.no_property_checks = no_property_checks
+        self.enabled_warnings = enabled_warnings
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
