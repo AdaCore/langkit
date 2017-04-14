@@ -20,7 +20,6 @@ generic
    with procedure Dec_Ref (E : in out LR_Type) is null;
 package Langkit_Support.Adalog.Eq_Same is
 
-   pragma Unreferenced (Inc_Ref);
    pragma Unreferenced (Dec_Ref);
 
    package Refs is new Logic_Ref (LR_Type, Element_Image);
@@ -30,7 +29,7 @@ package Langkit_Support.Adalog.Eq_Same is
 
    function Convert
      (C_Data : Dummy_Convert_Data; From : LR_Type) return LR_Type
-   is (From) with Inline;
+      with Inline;
 
    function Equals (L, R : LR_Type) return Boolean is (L = R);
 
