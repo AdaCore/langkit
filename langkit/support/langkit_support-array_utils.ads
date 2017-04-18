@@ -146,7 +146,7 @@ package Langkit_Support.Array_Utils is
 
    function Filter
      (In_Array : Array_Type;
-      Pred : access function
+      Pred     : access function
         (E : Element_Type) return Boolean) return Array_Type;
    --  Returns a new array that contains every element in In_Array for which
    --  Predicate returns true.
