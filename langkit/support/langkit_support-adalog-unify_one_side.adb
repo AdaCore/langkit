@@ -72,6 +72,15 @@ package body Langkit_Support.Adalog.Unify_One_Side is
       end if;
    end Revert;
 
+   ----------
+   -- Free --
+   ----------
+
+   procedure Free (Self : in out Unify_Rec) is
+   begin
+      R_Dec_Ref (Self.Right);
+   end Free;
+
    ----------------
    -- Solve_Impl --
    ----------------

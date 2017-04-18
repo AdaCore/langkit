@@ -95,7 +95,7 @@ private
 
    function Apply (Self : in out Unify_Rec) return Boolean;
    procedure Revert (Self : in out Unify_Rec);
-   procedure Free (Self : in out Unify_Rec) is null;
+   procedure Free (Self : in out Unify_Rec);
 
    function Custom_Image (Self : Unify_Rec) return String
    is ("Unify " & Var.Image (Self.Left) & " {" & R_Image (Self.Right) & "}");
