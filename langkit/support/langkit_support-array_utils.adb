@@ -66,6 +66,60 @@ package body Langkit_Support.Array_Utils is
       return Filter_Internal (In_Array);
    end Filter;
 
+   -------------------
+   -- Partition_Gen --
+   -------------------
+
+   procedure Partition_Gen
+     (In_Array       : in out Array_Type;
+      Last_Satisfied : out Extended_Index)
+   is
+      Current : Index_Type := In_Array'First;
+   begin
+      --  By default, assume all elements satisfy the predicate, hence the last
+      --  that satisfies it is also the last array item.
+
+      Last_Satisfied := In_Array'Last;
+      if In_Array'Length = 0 then
+         return;
+      end if;
+
+      --  Go through all array items from lower indexes to upper ones
+
+      loop
+         --  Each time we meet an element that does not satisfied the
+         --  predicate, swap it with the last array item, excluding the ones we
+         --  already inspected.
+
+         if Predicate (In_Array (Current)) then
+            Current := Current + 1;
+         else
+            declare
+               Item : constant Element_Type := In_Array (Current);
+            begin
+               In_Array (Current) := In_Array (Last_Satisfied);
+               In_Array (Last_Satisfied) := Item;
+               Last_Satisfied := Last_Satisfied - 1;
+            end;
+         end if;
+         exit when Current > Last_Satisfied;
+      end loop;
+   end Partition_Gen;
+
+   ---------------
+   -- Partition --
+   ---------------
+
+   procedure Partition
+     (In_Array       : in out Array_Type;
+      Predicate      : access function (E : Element_Type) return Boolean;
+      Last_Satisfied : out Extended_Index)
+   is
+      procedure Partition_Internal is new Partition_Gen (Predicate.all);
+   begin
+      Partition_Internal (In_Array, Last_Satisfied);
+   end Partition;
+
    --------------
    -- Contains --
    --------------

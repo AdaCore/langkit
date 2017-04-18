@@ -64,6 +64,8 @@ generic
    with function "=" (L, R : Element_Type) return Boolean is <>;
 package Langkit_Support.Array_Utils is
 
+   subtype Extended_Index is Index_Type'Base;
+
    Empty_Array : constant Array_Type
      (Index_Type'Succ (Index_Type'First) .. Index_Type'First)
        := (others => <>);
@@ -151,6 +153,33 @@ package Langkit_Support.Array_Utils is
    --  Returns a new array that contains every element in In_Array for which
    --  Predicate returns true.
    --  This version takes an access Predicate parameter.
+
+   ---------------
+   -- Partition --
+   ---------------
+
+   generic
+      with function Predicate (E : Element_Type) return Boolean;
+   procedure Partition_Gen
+     (In_Array       : in out Array_Type;
+      Last_Satisfied : out Extended_Index);
+   --  Swap elements in In_Array and set Last_Satisfied so that upon return,
+   --  all elements in the slice::
+   --
+   --    In_Array ('First .. Last_Satisfied)
+   --
+   --  do satisfy the given Predicate and all the others don't.
+
+   procedure Partition
+     (In_Array       : in out Array_Type;
+      Predicate      : access function (E : Element_Type) return Boolean;
+      Last_Satisfied : out Extended_Index);
+   --  Swap elements in In_Array and set Last_Satisfied so that upon return,
+   --  all elements in the slice::
+   --
+   --    In_Array ('First .. Last_Satisfied)
+   --
+   --  do satisfy the given Predicate and all the others don't.
 
    generic
       with function "=" (L, R : Element_Type) return Boolean;
