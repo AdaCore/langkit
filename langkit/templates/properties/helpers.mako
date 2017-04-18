@@ -138,7 +138,7 @@
    ----------
 
    function Call
-     (Self           : ${type_name}
+     (Self       : ${type_name}
      % for i in range(len(formal_node_types)):
      ; Node_${i} : ${T.entity.name()}
      % endfor
