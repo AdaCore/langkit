@@ -164,7 +164,8 @@ package body Langkit_Support.Adalog.Unify_One_Side is
       R_Data : R_Convert_Data) return Relation
    is
    begin
-      R_Inc_Ref (Right);
+      --  Don't inc-ref Right here as the call to Create below will do it for
+      --  us.
       return new Unify'(Rel => Create (Left, Right, R_Data), others => <>);
    end Create;
 
