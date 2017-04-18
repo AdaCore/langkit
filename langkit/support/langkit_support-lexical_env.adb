@@ -551,15 +551,23 @@ package body Langkit_Support.Lexical_Env is
             then Get (Parent_Env, Key, Rebindings => Popped_Rebindings)
             else Entity_Arrays.Empty_Array);
 
-         Ret : constant Entity_Array :=
+         Ret : Entity_Array :=
             Own_Elts & Refd_Elts & TRefd_Elts & Parent_Elts;
+         Last_That_Can_Reach : Integer := Ret'Last;
       begin
          Dec_Ref (Current_Rebindings);
          Dec_Ref (Popped_Rebindings);
 
          --  Only filter if a non null value was given for the From parameter
-         return (if From = No_Element then Ret
-                 else Entity_Arrays.Filter (Ret, Can_Reach_F'Access));
+
+         if From /= No_Element then
+            Partition (Ret, Can_Reach_F'Access, Last_That_Can_Reach);
+            for I in Last_That_Can_Reach + 1 .. Ret'Last loop
+               Dec_Ref (Ret (I));
+            end loop;
+         end if;
+
+         return Ret (Ret'First .. Last_That_Can_Reach);
       end;
    end Get;
 
