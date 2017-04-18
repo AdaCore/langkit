@@ -370,10 +370,6 @@ class Not(AbstractExpression):
     def make_expr(expr):
         return BasicExpr('not ({})', BoolType, [expr])
 
-    @property
-    def subexprs(self):
-        return [self.expr]
-
 
 @attr_call('then')
 class Then(AbstractExpression):
