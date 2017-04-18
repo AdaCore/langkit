@@ -9,9 +9,9 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions import (
-    AbstractExpression, AbstractVariable, BindingScope, LiteralExpr, Let,
-    NullCheckExpr, PropertyDef, ResolvedExpression, UnreachableExpr, attr_call,
-    attr_expr, construct, render
+    AbstractExpression, AbstractVariable, BasicExpr, BindingScope, LiteralExpr,
+    Let, NullCheckExpr, PropertyDef, ResolvedExpression, UnreachableExpr,
+    attr_call, attr_expr, construct, render
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
@@ -142,10 +142,20 @@ class IsNull(AbstractExpression):
         super(IsNull, self).__init__()
         self.expr = expr
 
+    @classmethod
+    def construct_static(cls, cexpr):
+        return (
+            cls.construct_node(cexpr)
+            if cexpr.type.is_ast_node or cexpr.type.is_entity_type else
+            Eq.make_expr(cexpr, LiteralExpr(cexpr.type.nullexpr(), cexpr.type))
+        )
+
     @staticmethod
-    def construct_static(cexpr):
-        return Eq.make_expr(
-            cexpr, LiteralExpr(cexpr.type.nullexpr(), cexpr.type)
+    def construct_node(cexpr):
+        return BasicExpr(
+            '{} = null'.format('{}.El'
+                               if cexpr.type.is_entity_type else '{}'),
+            BoolType, [cexpr]
         )
 
     def construct(self):
