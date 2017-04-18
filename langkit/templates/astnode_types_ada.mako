@@ -25,7 +25,12 @@
    function Convert
      (Self : Logic_Converter_Default;
       From : ${T.entity.name()}) return ${T.entity.name()}
-   is (From);
+   is
+      pragma Unreferenced (Self);
+   begin
+      Inc_Ref (From);
+      return From;
+   end Convert;
    pragma Warnings (On, "referenced");
 
    ## Generate logic/predicate binders for the properties who require it. Note
