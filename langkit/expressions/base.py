@@ -2694,6 +2694,10 @@ class FieldAccessExpr(BasicExpr):
 class ArrayExpr(BasicExpr):
     """
     Resolved expression for an aggregate expression for any type of array.
+
+    Note that the result does *not* match the array compiled types known in
+    Langkit: it's a true Ada array instead of the discriminated record we call
+    "array" in Langkit.
     """
 
     def __init__(self, exprs, element_type, abstract_expr=None):
@@ -2707,7 +2711,7 @@ class ArrayExpr(BasicExpr):
         super(ArrayExpr, self).__init__(
             '({})'.format(', '.join(['{}'] * len(exprs)))
             if exprs else '(1 .. 0 => <>)',
-            element_type.array_type(), exprs,
+            NoCompiledType, exprs,
             abstract_expr=abstract_expr,
         )
         self.element_type = element_type
