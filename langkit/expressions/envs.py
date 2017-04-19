@@ -176,7 +176,11 @@ class EnvBindExpr(ResolvedExpression):
         self.env_var = PropertyDef.get().vars.create("New_Env",
                                                      LexicalEnvType)
 
-        super(EnvBindExpr, self).__init__(abstract_expr=abstract_expr)
+        # This expression does not create itself the result value: to_eval_expr
+        # does. Hence, relying on to_eval_expr's result variable to make sure
+        # there is no ref-counting issue is fine.
+        super(EnvBindExpr, self).__init__(skippable_refcount=True,
+                                          abstract_expr=abstract_expr)
 
     def _render_pre(self):
         # First, compute the environment to bind using the current one and
