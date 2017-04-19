@@ -9,8 +9,8 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions import (
-    AbstractExpression, AbstractVariable, BasicExpr, BindingScope, LiteralExpr,
-    Let, NullCheckExpr, PropertyDef, ResolvedExpression, UnreachableExpr,
+    AbstractExpression, AbstractVariable, BasicExpr, BindingScope, Let,
+    NullCheckExpr, NullExpr, PropertyDef, ResolvedExpression, UnreachableExpr,
     attr_call, attr_expr, construct, render
 )
 from langkit.expressions.boolean import Eq, If, Not
@@ -147,7 +147,7 @@ class IsNull(AbstractExpression):
         return (
             cls.construct_node(cexpr)
             if cexpr.type.is_ast_node or cexpr.type.is_entity_type else
-            Eq.make_expr(cexpr, LiteralExpr(cexpr.type.nullexpr(), cexpr.type))
+            Eq.make_expr(cexpr, NullExpr(cexpr.type))
         )
 
     @staticmethod
@@ -927,11 +927,7 @@ class Match(AbstractExpression):
             casted = Cast.Expr(matched_var,
                                match_var.type,
                                result_var=match_var)
-            guard = Not.make_expr(
-                Eq.make_expr(
-                    casted, LiteralExpr(casted.type.nullexpr(), casted.type)
-                )
-            )
+            guard = Not.make_expr(Eq.make_expr(casted, NullExpr(casted.type)))
             if expr.type != rtype:
                 # We already checked that type matches, so only way this is
                 # true is if expr.type is an ASTNode type derived from

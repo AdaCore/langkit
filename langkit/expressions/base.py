@@ -2644,6 +2644,17 @@ class LiteralExpr(BasicExpr):
                                               self.type.name().camel)
 
 
+class NullExpr(LiteralExpr):
+    """
+    Resolved expression for the null expression corresponding to some type.
+    """
+
+    def __init__(self, type, abstract_expr=None):
+        super(NullExpr, self).__init__(type.nullexpr(), type,
+                                       skippable_refcount=True,
+                                       abstract_expr=abstract_expr)
+
+
 class FieldAccessExpr(BasicExpr):
     """
     Resolved expression for anything that compiles to "{prefix}.{field}" in the

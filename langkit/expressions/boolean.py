@@ -11,8 +11,8 @@ from langkit.diagnostics import check_source_language
 from langkit.expressions.analysis_units import AnalysisUnitType
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
-    BuiltinCallExpr, LiteralExpr, No, PropertyDef, ResolvedExpression,
-    attr_call, construct, render
+    BuiltinCallExpr, LiteralExpr, No, NullExpr, PropertyDef,
+    ResolvedExpression, attr_call, construct, render
 )
 from langkit.expressions.envs import EmptyEnv
 from langkit.utils import assert_type
@@ -497,7 +497,7 @@ class Then(AbstractExpression):
             elif then_expr.type.matches(LexicalEnvType):
                 default_expr = construct(EmptyEnv)
             elif then_expr.type.matches(Symbol):
-                default_expr = LiteralExpr(Symbol.nullexpr(), Symbol)
+                default_expr = NullExpr(Symbol)
             elif then_expr.type.matches(AnalysisUnitType):
                 default_expr = construct(No(AnalysisUnitType))
             else:
