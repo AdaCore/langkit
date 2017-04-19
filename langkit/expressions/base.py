@@ -841,8 +841,8 @@ class ResolvedExpression(object):
         """
         if not self.static_type:
             raise NotImplementedError(
-                "You need to redefine the type property, or to fill the "
-                "static_type class field"
+                '{} must redefine the type property, or to fill the'
+                ' static_type class field'.format(self)
             )
         return self.static_type
 
