@@ -2637,8 +2637,10 @@ class LiteralExpr(BasicExpr):
                 '1-literal': self.literal}
 
     def __repr__(self):
-        return '<LiteralExpr {} ({})>'.format(self.template,
-                                              self.type.name().camel)
+        return '<LiteralExpr {} ({})>'.format(
+            self.template,
+            self.type.name().camel if self.static_type else '<no type>'
+        )
 
 
 class NullExpr(LiteralExpr):
