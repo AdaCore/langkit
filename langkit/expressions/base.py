@@ -2554,7 +2554,7 @@ class Literal(AbstractExpression):
         self.literal = literal
 
     def construct(self):
-        # WARNING: Since bools are ints in python, bool needs to be before int
+        # WARNING: Since bools are ints in Python, bool needs to be before int
         # in the following table.
         return dispatch_on_type(type(self.literal), [
             (bool, lambda _: LiteralExpr(str(self.literal), BoolType,
