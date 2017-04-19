@@ -2686,6 +2686,10 @@ class FieldAccessExpr(BasicExpr):
     def subexprs(self):
         return {'prefix': self.prefix_expr, 'field': self.field_name}
 
+    def __repr__(self):
+        return '<FieldAccessExpr {} ({})>'.format(self.field_name,
+                                                  self.type.name().camel)
+
 
 class ArrayExpr(BasicExpr):
     """
