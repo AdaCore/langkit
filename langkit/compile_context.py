@@ -1095,13 +1095,6 @@ class CompileCtx(object):
                 source_dir=lngk_support_dir
             ))
 
-        # Copy adalog files. TODO: This is kludgeish to the extreme, and is
-        # only a workaround the fact you can't with regular projects from
-        # library projects.
-        adalog_dir = join(dirname(abspath(__file__)), "adalog")
-        for f in glob(join(adalog_dir, "src", "*.ad*")):
-            shutil.copy(f, join(include_path, lib_name_low))
-
         # Copy additional source files from the language specification
         for filepath in self.additional_source_files:
             filename = os.path.basename(filepath)
