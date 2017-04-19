@@ -364,7 +364,7 @@ def rebind_env(self, env, to_rebind, rebind_to):
 
 class AsEntityExpr(ResolvedExpression):
 
-    def __init__(self, node_expr, result_var_name=None, abstract_expr=None):
+    def __init__(self, node_expr, result_var_name, abstract_expr=None):
         """
         :param ResolvedExpression node_expr: The node to turn into an entity.
         :param result_var_name: See ResolvedExpression's constructor.
@@ -432,7 +432,7 @@ def as_entity(self, node):
     # We want to keep original type of node, so no downcast
     node_expr = construct(node, T.root_node, downcast=False)
 
-    return AsEntityExpr(node_expr, abstract_expr=self)
+    return AsEntityExpr(node_expr, 'Ent', abstract_expr=self)
 
 
 Env = EnvVariable()
