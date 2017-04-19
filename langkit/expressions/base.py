@@ -1556,6 +1556,7 @@ class No(AbstractExpression):
                            if expr_type.is_ptr
                            else None,
 
+                           skippable_refcount=True,
                            abstract_expr=abstract_expr)
 
     def construct(self):
@@ -2580,11 +2581,12 @@ class BasicExpr(ResolvedExpression):
     """
 
     def __init__(self, template, type, operands, result_var_name=None,
-                 abstract_expr=None):
+                 skippable_refcount=False, abstract_expr=None):
         """
         :param str template: The template string.
         :param None|CompiledType type: The return type of the expression.
         :param None|str result_var_name: See ResolvedExpression's constructor.
+        :param bool skippable_refcount: See ResolvedExpression's constructor.
         :param AbstractExpression|None abstract_expr: See ResolvedExpression's
             constructor.
         """
@@ -2592,6 +2594,7 @@ class BasicExpr(ResolvedExpression):
         self.static_type = type
         self.template = template
         super(BasicExpr, self).__init__(result_var_name,
+                                        skippable_refcount=skippable_refcount,
                                         abstract_expr=abstract_expr)
 
     def _render_expr(self):
@@ -2617,7 +2620,7 @@ class LiteralExpr(BasicExpr):
     """
 
     def __init__(self, literal, type, result_var_name=None,
-                 abstract_expr=None):
+                 skippable_refcount=False, abstract_expr=None):
         """
         :param str literal: The literal expression.
         :param CompiledType|None type: The return type of the expression.
@@ -2625,8 +2628,10 @@ class LiteralExpr(BasicExpr):
         :param AbstractExpression|None abstract_expr: See ResolvedExpression's
             constructor.
         """
-        super(LiteralExpr, self).__init__(literal, type, [], result_var_name,
-                                          abstract_expr=abstract_expr)
+        super(LiteralExpr, self).__init__(
+            literal, type, [], result_var_name,
+            skippable_refcount=skippable_refcount, abstract_expr=abstract_expr
+        )
         self.literal = literal
 
     @property
