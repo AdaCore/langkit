@@ -190,23 +190,47 @@ class New(AbstractExpression):
             self.static_type = struct_type
             self.assocs = assocs
 
-            super(New.StructExpr, self).__init__(result_var_name,
-                                                 abstract_expr=abstract_expr)
+            super(New.StructExpr, self).__init__(
+                result_var_name or 'New_Node',
+                abstract_expr=abstract_expr
+            )
 
         def _iter_ordered(self):
             return ((k, self.assocs[k]) for k in sorted(self.assocs))
 
+        def _render_fields(self):
+            """
+            Helper to return the elaboration of structure fields plus the
+            ref-counting adjustment to create new ownership shares.
+
+            :rtype: str
+            """
+            fields = list(self._iter_ordered())
+
+            return '\n'.join(
+                # Evaluate expressions for all operands
+                [expr.render_pre() for _, expr in fields]
+
+                # Only then, create ownership shares for the returned record
+                + ['Inc_Ref ({});'.format(expr.render_expr())
+                   for _, expr in fields
+                   if expr.type.is_refcounted()]
+            )
+
         def _render_pre(self):
-            return '\n'.join(expr.render_pre()
-                             for _, expr in self._iter_ordered())
+            record_expr = '({})'.format(', '.join(
+                '{} => {}'.format(name.camel_with_underscores,
+                                  expr.render_expr())
+                for name, expr in self._iter_ordered()
+            ))
+
+            return '{}\n{}'.format(
+                self._render_fields(),
+                '{} := {};'.format(self.result_var.name, record_expr)
+            )
 
         def _render_expr(self):
-            fields = list(self._iter_ordered())
-            return '({})'.format(
-                ', '.join('{} => {}'.format(
-                    name.camel_with_underscores, expr.render_expr()
-                ) for name, expr in fields)
-            )
+            return self.result_var.name
 
         @property
         def subexprs(self):
@@ -228,8 +252,8 @@ class New(AbstractExpression):
                                                abstract_expr=abstract_expr)
 
         def _render_pre(self):
-            return (super(New.NodeExpr, self)._render_pre() +
-                    render('properties/new_astnode_ada', expr=self))
+            return (super(New.NodeExpr, self)._render_fields()
+                    + render('properties/new_astnode_ada', expr=self))
 
         def _render_expr(self):
             return self.result_var.name
