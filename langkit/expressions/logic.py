@@ -3,7 +3,7 @@ from __future__ import (absolute_import, division, print_function,
 import funcy
 
 from langkit.compiled_types import (
-    LogicVarType, EquationType, BoolType, T
+    BoolType, EquationType, LogicVarType, NoCompiledType, T
 )
 
 from langkit.diagnostics import check_multiple, check_source_language
@@ -27,7 +27,7 @@ def untyped_literal_expr(expr_str):
     :param str expr_str: The generated code for this literal expression.
     :rtype: LiteralExpr
     """
-    return LiteralExpr(expr_str, None)
+    return LiteralExpr(expr_str, NoCompiledType)
 
 
 class Bind(AbstractExpression):
@@ -450,14 +450,14 @@ class Predicate(AbstractExpression):
         closure_exprs.append(LiteralExpr('"{}.{}"'.format(
             self.pred_property.name.camel_with_underscores,
             self.pred_property.struct.name().camel_with_underscores
-        ), type=None))
+        ), NoCompiledType))
 
         logic_var_exprs.append(
             BasicExpr("Create ({})".format(", ".join(
                 ["{}" for _ in range(len(closure_exprs) - 1)]
                 + ["Dbg_Img => (if Debug then new String'({})"
                    "            else null)"]
-            )), type=None, operands=closure_exprs)
+            )), NoCompiledType, operands=closure_exprs)
         )
 
         return Predicate.Expr(self.pred_property, pred_id, logic_var_exprs)

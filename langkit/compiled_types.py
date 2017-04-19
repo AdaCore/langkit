@@ -516,6 +516,17 @@ class CompiledType(object):
         )
 
 
+class NoCompiledType(CompiledType):
+    """
+    Special CompiledType subclass to mean the absence of type. This is useful
+    in special resolved expressions.
+    """
+
+    @classmethod
+    def is_refcounted(cls):
+        raise NotImplementedError()
+
+
 class BasicType(CompiledType):
     """
     Base class used to describe simple types that do not need declaration code
