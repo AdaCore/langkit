@@ -1291,7 +1291,6 @@ class BindingScope(ResolvedExpression):
             instance will materialize scope entry/finalization in the generated
             code.
         """
-        super(BindingScope, self).__init__(abstract_expr=abstract_expr)
         self.expr = expr
         self.expr_bindings = bindings
         self.static_type = self.expr.type
@@ -1299,16 +1298,14 @@ class BindingScope(ResolvedExpression):
 
         # Create a local variable that belong to the outer scope so that at
         # finalization time, our result is still live.
-        # TODO: do not create a local variable when there is no scope or when
-        # the type is not ref-counted.
-        self.scope_result_var = PropertyDef.get().vars.create('Scope_Result',
-                                                              self.expr.type)
+        super(BindingScope, self).__init__(result_var_name='Scope_Result',
+                                           abstract_expr=abstract_expr)
 
     def _render_pre(self):
         return render('properties/binding_scope', expr=self)
 
     def _render_expr(self):
-        return self.scope_result_var.name
+        return self.result_var.name
 
     @property
     def subexprs(self):
