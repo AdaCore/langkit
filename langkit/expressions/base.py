@@ -13,8 +13,8 @@ import funcy
 from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNode, BoolType, CompiledType,
-    LexicalEnvType, LongType, Symbol, T, Token, gdb_bind_var, get_context,
-    render as ct_render, resolve_type
+    LexicalEnvType, LongType, NoCompiledType, Symbol, T, Token, gdb_bind_var,
+    get_context, render as ct_render, resolve_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, check_multiple, check_source_language,
@@ -784,6 +784,15 @@ class ResolvedExpression(object):
             '{}.render_pre can be called only once'.format(type(self).__name__)
         )
         self._render_pre_called = not isinstance(self, AbstractVariable.Expr)
+
+        assert (self.skippable_refcount
+                or self.type is NoCompiledType
+                or not self.type.is_refcounted()
+                or self._result_var), (
+            'ResolvedExpression instances that return ref-counted values must'
+            ' store their result in a local variable (this {} does'
+            ' not).'.format(self)
+        )
 
         result = self._render_pre()
         if self.result_var:
