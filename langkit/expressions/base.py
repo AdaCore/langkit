@@ -1063,7 +1063,7 @@ class AbstractVariable(AbstractExpression):
             self.abstract_var = abstract_var
 
             super(AbstractVariable.Expr, self).__init__(
-                abstract_expr=abstract_expr
+                skippable_refcount=True, abstract_expr=abstract_expr
             )
 
         def _render_expr(self):
