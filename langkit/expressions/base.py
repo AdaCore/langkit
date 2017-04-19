@@ -1337,7 +1337,11 @@ class Let(AbstractExpression):
             self.expr = expr
             self.static_type = self.expr.type
 
-            super(Let.Expr, self).__init__(abstract_expr=abstract_expr)
+            # This expression does not create itself the result value: expr
+            # does. Hence, relying on expr's result variable to make sure there
+            # is no ref-counting issue is fine.
+            super(Let.Expr, self).__init__(skippable_refcount=True,
+                                           abstract_expr=abstract_expr)
 
         def _render_pre(self):
             result = []
