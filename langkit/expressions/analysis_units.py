@@ -36,7 +36,10 @@ def unit(self, node):
         'The "unit" field is available only for AST nodes; instead we have'
         ' here a {}'.format(node_expr.type.name().lower)
     )
+    # From the point of view of properties, analysis units are not ref-counted,
+    # so we must not inc-ref here.
     return FieldAccessExpr(node_expr, 'Unit', AnalysisUnitType,
+                           do_explicit_incref=False,
                            abstract_expr=self)
 
 

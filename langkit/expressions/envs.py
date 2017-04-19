@@ -142,7 +142,8 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
             ('Rebindings', FieldAccessExpr(
                 construct(current_prop.entity_info_arg.var),
                 'Rebindings',
-                EnvRebindingsType
+                EnvRebindingsType,
+                do_explicit_incref=True
             ))]
 
     # Pass the From parameter if the user wants sequential semantics

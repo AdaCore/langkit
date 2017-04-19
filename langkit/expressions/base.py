@@ -2677,12 +2677,15 @@ class FieldAccessExpr(BasicExpr):
     """
 
     def __init__(self, prefix_expr, field_name, result_type,
-                 abstract_expr=None):
+                 do_explicit_incref, abstract_expr=None):
         """
         :param ResolvedExpression prefix_expr: The prefix corresponding to this
             expression.
         :param str field_name: The name of the field to access.
         :param CompiledType type: The type of the result.
+        :param bool do_explicit_incref: If True, perform an inc-ref on the
+            result of the field access. This must be True for field accesses
+            that do not automatically perform it.
         :param AbstractExpression|None abstract_expr: See ResolvedExpression's
             constructor.
         """
@@ -2694,6 +2697,13 @@ class FieldAccessExpr(BasicExpr):
         )
         self.prefix_expr = prefix_expr
         self.field_name = field_name
+        self.do_explicit_incref = do_explicit_incref
+
+    def render_pre(self):
+        result = super(FieldAccessExpr, self).render_pre()
+        return ('{}\nInc_Ref ({});'.format(result, self.result_var.name)
+                if self.do_explicit_incref and self.type.is_refcounted() else
+                result)
 
     @property
     def subexprs(self):
