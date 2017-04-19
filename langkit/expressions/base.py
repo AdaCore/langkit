@@ -2562,12 +2562,12 @@ class Literal(AbstractExpression):
     def construct(self):
         # WARNING: Since bools are ints in Python, bool needs to be before int
         # in the following table.
-        return dispatch_on_type(type(self.literal), [
-            (bool, lambda _: LiteralExpr(str(self.literal), BoolType,
-                                         abstract_expr=self)),
-            (int, lambda _:  LiteralExpr(str(self.literal), LongType,
-                                         abstract_expr=self)),
+        lit_str, rtype = dispatch_on_type(type(self.literal), [
+            (bool, lambda _: (str(self.literal), BoolType)),
+            (int, lambda _:  (str(self.literal), LongType)),
         ], exception=DiagnosticError('Invalid abstract expression type: {}'))
+        return LiteralExpr(lit_str, rtype, skippable_refcount=True,
+                           abstract_expr=self)
 
 
 class BasicExpr(ResolvedExpression):
