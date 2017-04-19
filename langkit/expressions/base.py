@@ -727,7 +727,7 @@ class ResolvedExpression(object):
     """
 
     def __init__(self, result_var_name=None, scopeless_result_var=False,
-                 abstract_expr=None):
+                 skippable_refcount=False, abstract_expr=None):
         """
         Create a resolve expression.
 
@@ -736,6 +736,9 @@ class ResolvedExpression(object):
             In this case, the "type" property must be ready.
         :param bool scopeless_result_var: Whether the result variable must be
             scopeless. This has no effect if "result_var_name" is None.
+        :param bool skippable_refcount: If True, this resolved expression can
+            omit having a result variable even though its result is
+            ref-counted. This makes it possible to simplify the generated code.
         :param AbstractExpression|None abstract_expr: For resolved expressions
             that implement an abstract expression, this must be the original
             abstract expression.
@@ -747,6 +750,8 @@ class ResolvedExpression(object):
             self._result_var = create_var(result_var_name, self.type)
         else:
             self._result_var = None
+
+        self.skippable_refcount = skippable_refcount
 
         self.abstract_expr = abstract_expr
 
