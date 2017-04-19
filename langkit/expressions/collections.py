@@ -563,23 +563,20 @@ class CollectionSingleton(AbstractExpression):
             self.expr.type.array_type().add_to_context()
             self.static_type = self.expr.type.array_type()
 
-            self.array_var = PropertyDef.get().vars.create('Singleton',
-                                                           self.type)
-
             super(CollectionSingleton.Expr, self).__init__(
+                result_var_name='Singleton',
                 abstract_expr=abstract_expr
             )
 
         def _render_pre(self):
             return self.expr.render_pre() + """
-            {array_var} := Create (Items_Count => 1);
-            {array_var}.Items (1) := {item};
-            """.format(array_var=self.array_var.name,
-                       array_type=self.static_type.pointed(),
+            {result_var} := Create (Items_Count => 1);
+            {result_var}.Items (1) := {item};
+            """.format(result_var=self.result_var.name,
                        item=self.expr.render_expr())
 
         def _render_expr(self):
-            return self.array_var.name
+            return self.result_var.name
 
         @property
         def subexprs(self):
