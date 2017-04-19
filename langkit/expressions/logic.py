@@ -224,9 +224,8 @@ class DomainExpr(ResolvedExpression):
         self.logic_var_expr = logic_var_expr
         ":type: ResolvedExpression"
 
-        self.res_var = PropertyDef.get().vars.create("Var", EquationType)
-
-        super(DomainExpr, self).__init__(abstract_expr=abstract_expr)
+        super(DomainExpr, self).__init__(result_var_name='Var',
+                                         abstract_expr=abstract_expr)
 
     def _render_pre(self):
         is_node_domain = (
@@ -260,13 +259,13 @@ class DomainExpr(ResolvedExpression):
             """.format(logic_var=self.logic_var_expr.render_expr(),
                        domain=self.domain.render_expr(),
                        domain_type=self.domain.type.name(),
-                       res_var=self.res_var.name,
+                       res_var=self.result_var.name,
                        entity="Get (Dom, J)" if is_node_domain
                        else "(El => Get (Dom, J), others => <>)")
         ])
 
     def _render_expr(self):
-        return str(self.res_var.name)
+        return str(self.result_var.name)
 
     @property
     def subexprs(self):
