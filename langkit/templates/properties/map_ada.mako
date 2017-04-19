@@ -9,9 +9,9 @@
    element_var = map.element_var.name
    iteration_var = list_element_var or element_var
 
-   array_var = map.array_var.name
+   array_var = map.result_var.name
 
-   vec_var = map.array_var.name + Name('Vec')
+   vec_var = map.result_var.name + Name('Vec')
    vec_pkg = map.type.pkg_vector()
 %>
 

@@ -237,12 +237,10 @@ class Map(CollectionExpression):
             self.static_type = element_type.array_type()
             self.static_type.add_to_context()
 
-            self.array_var = PropertyDef.get().vars.create_scopeless(
-                'Map', self.type
-            )
-            iter_scope.parent.add(self.array_var)
-
-            super(Map.Expr, self).__init__(abstract_expr=abstract_expr)
+            super(Map.Expr, self).__init__(result_var_name='Map',
+                                           scopeless_result_var=True,
+                                           abstract_expr=abstract_expr)
+            iter_scope.parent.add(self.result_var)
 
         def __repr__(self):
             return "<MapExpr {}: {} -> {}{}>".format(
@@ -256,7 +254,7 @@ class Map(CollectionExpression):
             return render('properties/map_ada', map=self, Name=names.Name)
 
         def _render_expr(self):
-            return self.array_var.name.camel_with_underscores
+            return self.result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):
