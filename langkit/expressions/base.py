@@ -3068,7 +3068,8 @@ class NullCheckExpr(ResolvedExpression):
     disabled context-wide.
     """
 
-    def __init__(self, expr, implicit_deref=False, result_var_name=None):
+    def __init__(self, expr, implicit_deref=False, result_var_name=None,
+                 scopeless_result_var=False):
         """
         :param ResolvedExpression expr: Expression to evaluate.
         :param bool implicit_deref: If expr is an entity, perform the
@@ -3076,7 +3077,8 @@ class NullCheckExpr(ResolvedExpression):
         """
         self.expr = expr
         self.implicit_deref = implicit_deref
-        super(NullCheckExpr, self).__init__(result_var_name)
+        super(NullCheckExpr, self).__init__(result_var_name,
+                                            scopeless_result_var)
 
     @property
     def type(self):
