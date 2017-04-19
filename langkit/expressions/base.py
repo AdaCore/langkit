@@ -2761,7 +2761,7 @@ class UnreachableExpr(ResolvedExpression):
             expression would return in this case.
         """
         self.static_type = expr_type
-        super(UnreachableExpr, self).__init__()
+        super(UnreachableExpr, self).__init__(skippable_refcount=True)
 
     def _render_expr(self):
         return ('raise Program_Error with'
