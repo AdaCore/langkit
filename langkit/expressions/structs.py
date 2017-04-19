@@ -861,20 +861,19 @@ class Match(AbstractExpression):
                               or matched_expr.type.is_entity_type,
                               'Match expressions can only work on AST nodes '
                               'or entities')
-        matched_expr = NullCheckExpr(
-            matched_expr,
-            implicit_deref=matched_expr.type.is_entity_type
-        )
 
         # Create a local variable so that in the generated code, we don't have
-        # to re-compute the prefix for each type check.
-        matched_abstract_var = AbstractVariable(
-            names.Name('Match_Prefix'),
-            type=matched_expr.type,
-            create_local=True
+        # to re-compute the prefix for each type check. This is also required
+        # for proper ref-counting.
+        matched_expr = NullCheckExpr(
+            matched_expr,
+            implicit_deref=matched_expr.type.is_entity_type,
+            result_var_name='Match_Prefix',
+            scopeless_result_var=True
         )
-        outer_scope.add(matched_abstract_var.local_var)
-        matched_var = construct(matched_abstract_var)
+        matched_expr_var = matched_expr.result_var
+        outer_scope.add(matched_expr_var)
+        matched_var = matched_expr_var.ref_expr
 
         constructed_matchers = []
 
