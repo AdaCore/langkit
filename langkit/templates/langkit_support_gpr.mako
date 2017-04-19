@@ -1,3 +1,5 @@
+## vim: ft=makoada
+
 with "gnatcoll";
 
 library project Langkit_Support is
@@ -47,7 +49,7 @@ library project Langkit_Support is
       "Langkit_Support.Text",
       "Langkit_Support.Vectors");
 
-   for Source_Dirs use ("../../include/langkit_support");
+   for Source_Dirs use (${string_repr(source_dir)});
    for Library_Dir use "../langkit_support." & Library_Kind_Param;
    for Object_Dir use "../../obj/langkit_support." & Library_Kind_Param;
 

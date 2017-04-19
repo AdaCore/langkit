@@ -19,7 +19,6 @@ from contextlib import contextmanager
 from distutils.spawn import find_executable
 from glob import glob
 import inspect
-import itertools
 import os
 from os import path
 import shutil
@@ -1061,7 +1060,6 @@ class CompileCtx(object):
             printcol("File setup...", Colors.OKBLUE)
 
         for d in ["include",
-                  "include/langkit_support",
                   "include/{}".format(lib_name_low),
                   "share",
                   "share/{}".format(lib_name_low),
@@ -1088,16 +1086,14 @@ class CompileCtx(object):
                 quex_path=os.environ['QUEX_PATH'],
             ))
 
-        # Copy langkit_support sources files to the include prefix and
-        # create its own project file.
+        # Create the project file we will use to build Langkit_support
         from os.path import dirname, abspath, join
         lngk_support_dir = join(dirname(abspath(__file__)), "support")
-
-        for f in itertools.chain(glob(join(lngk_support_dir, "*.adb")),
-                                 glob(join(lngk_support_dir, "*.ads"))):
-            shutil.copy(f, join(include_path, "langkit_support"))
-        shutil.copy(join(lngk_support_dir, "langkit_support_installed.gpr"),
-                    join(lib_path, "gnat", "langkit_support.gpr"))
+        with open(join(lib_path, 'gnat', 'langkit_support.gpr'), 'w') as f:
+            f.write(self.render_template(
+                'langkit_support_gpr',
+                source_dir=lngk_support_dir
+            ))
 
         # Copy adalog files. TODO: This is kludgeish to the extreme, and is
         # only a workaround the fact you can't with regular projects from
