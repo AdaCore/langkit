@@ -2412,6 +2412,14 @@ package body ${ada_lib_name}.Analysis is
          Put (Env_Id & " = ");
       end if;
       Put ("LexEnv(");
+      if Self = Empty_Env then
+         New_Arg;
+         Put ("Empty");
+      end if;
+      if Self.Ref_Count /= AST_Envs.No_Refcount then
+         New_Arg;
+         Put ("Synthetic");
+      end if;
       if Parent_Env_Id'Length > 0 then
          New_Arg;
          Put ("Parent=" & (if Self.Parent /= AST_Envs.No_Env_Getter
