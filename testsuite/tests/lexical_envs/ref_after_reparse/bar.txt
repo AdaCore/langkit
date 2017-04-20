@@ -1,0 +1,4 @@
+bar(d e) {
+    (foo)
+    a d
+}

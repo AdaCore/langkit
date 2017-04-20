@@ -1,0 +1,13 @@
+main.py: Running...
+After first parsing:
+In foo:
+   <Ref a foo.txt:3:5-3:6> resolves to <Decl a foo.txt:1:5-1:6>
+In bar:
+   <Ref a bar.txt:3:5-3:6> resolves to <Decl a foo.txt:1:5-1:6>
+   <Ref d bar.txt:3:7-3:8> resolves to <Decl d bar.txt:1:5-1:6>
+After reparsing foo:
+In bar:
+   <Ref a bar.txt:3:5-3:6> resolves to <Decl a foo.txt:1:5-1:6>
+   <Ref d bar.txt:3:7-3:8> resolves to <Decl d bar.txt:1:5-1:6>
+main.py: Done.
+Done
