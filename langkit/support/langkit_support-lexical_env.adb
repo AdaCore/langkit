@@ -421,8 +421,8 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Reference
      (Self            : Lexical_Env;
-      To_Reference    : Lexical_Env;
-      Referenced_From : Element_T := No_Element) is
+      Referenced_From : Element_T;
+      To_Reference    : Lexical_Env) is
    begin
       Referenced_Envs_Vectors.Append
         (Self.Referenced_Envs,

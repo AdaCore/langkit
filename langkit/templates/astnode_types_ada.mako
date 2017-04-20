@@ -671,7 +671,7 @@
            := ${call_prop(cls.env_spec.ref_envs)};
       begin
          for To_Ref_Env of To_Ref_Envs.Items loop
-            Reference (Current_Env, To_Ref_Env, ${root_node_type_name} (Self));
+            Reference (Current_Env, ${root_node_type_name} (Self), To_Ref_Env);
          end loop;
          Dec_Ref (To_Ref_Envs);
       end;
