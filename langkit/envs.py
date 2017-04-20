@@ -49,7 +49,8 @@ class EnvSpec(object):
     def __init__(self,
                  add_env=False,
                  add_to_env=None,
-                 ref_envs=None,
+                 ref_env_resolver=None,
+                 ref_env_nodes=None,
                  initial_env=None,
                  env_hook_arg=None,
                  call_parents=True):
@@ -64,10 +65,16 @@ class EnvSpec(object):
             doc for more details.
         :type add_to_env: AddToEnv|[AddToEnv]
 
-        :param AbstractExpression ref_envs: if an AbstractExpression returning
-            a list of environments is supplied, the topmost environment in the
-            environment resolution will be altered to include the list of
-            environments as referenced environments.
+        :param PropertyDef|None ref_env_resolver: Property that takes no
+            argument (explicit or implicit) and that returns a lexical
+            environment. To be used with ref_env_nodes.
+
+        :param AbstractExpression|None ref_env_nodes: If not none, it must be
+            an abstract expression that returns an array of AST nodes. In this
+            case, ref_env_resolver must also be provided.  The topmost
+            environment in the environment resolution will be altered to
+            include this list of nodes associated with ref_env_nodes to resolve
+            referenced environments.
 
         :param AbstractExpression initial_env: If supplied, this env will be
             used as the lexical environment to execute the rest of the actions.
@@ -118,8 +125,14 @@ class EnvSpec(object):
                 else add_to_env
             )
 
-        self._unresolved_ref_envs = ref_envs
-        ":type: AbstractExpression"
+        check_source_language(
+            (ref_env_resolver and ref_env_nodes)
+            or (not ref_env_resolver and not ref_env_nodes),
+            'ref_env_resolver and ref_env_nodes must be both provided, or they'
+            ' must be both missing'
+        )
+        self.ref_env_resolver = ref_env_resolver
+        self._unresolved_ref_env_nodes = ref_env_nodes
 
         self._unresolved_env_hook_arg = env_hook_arg
         ":type: AbstractExpression"
@@ -129,7 +142,7 @@ class EnvSpec(object):
         self.initial_env = None
         ":type: PropertyDef"
 
-        self.ref_envs = None
+        self.ref_env_nodes = None
         ":type: PropertyDef"
 
         self.env_hook_arg = None
@@ -185,9 +198,13 @@ class EnvSpec(object):
 
         self.has_post_actions = any([e.is_post for e in self.envs_expressions])
 
-        self.ref_envs = create_internal_property(
-            'Ref_Envs', self._unresolved_ref_envs, LexicalEnvType.array_type()
-        )
+        self.ref_env_nodes = None
+        if self._unresolved_ref_env_nodes:
+            self.ref_env_nodes = create_internal_property(
+                'Ref_Env_Nodes',
+                self._unresolved_ref_env_nodes,
+                T.root_node.array_type()
+            )
 
         self.env_hook_arg = create_internal_property(
             'Env_Hook_Arg', self._unresolved_env_hook_arg, T.root_node
@@ -204,6 +221,23 @@ class EnvSpec(object):
 
         :rtype: bool
         """
+        if self.ref_env_resolver:
+            if isinstance(self.ref_env_resolver, T.Defer):
+                self.ref_env_resolver = self.ref_env_resolver.get()
+            self.ref_env_resolver.require_untyped_wrapper()
+
+            check_source_language(
+                self.ref_env_resolver.type.matches(LexicalEnvType),
+                'Referenced environment resolver must return a lexical'
+                ' environment (not {})'.format(
+                    self.ref_env_resolver.type.name().camel
+                )
+            )
+            check_source_language(
+                not self.ref_env_resolver.explicit_arguments,
+                'Referenced environment resolver must take no argument'
+            )
+
         for bindings_prop, _, _, _, resolver in self.envs_expressions:
             with bindings_prop.diagnostic_context():
                 check_source_language(

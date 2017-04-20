@@ -2404,8 +2404,10 @@ package body ${ada_lib_name}.Analysis is
             for R of Refs loop
                Put ("      ");
                Put (Short_Image (R.From_Node) & ": ");
+
                Dump_One_Lexical_Env
-                 (Self           => R.Env,
+                 (Self           => R.Resolver.all
+                                      ((R.From_Node, No_Entity_Info)),
                   Dump_Addresses => Dump_Addresses,
                   Dump_Content   => False);
                New_Line;

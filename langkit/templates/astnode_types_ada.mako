@@ -665,16 +665,17 @@
 
       ## ref_envs
 
-      % if cls.env_spec.ref_envs:
-      declare
-         To_Ref_Envs : ${cls.env_spec.ref_envs.type.name()}
-           := ${call_prop(cls.env_spec.ref_envs)};
-      begin
-         for To_Ref_Env of To_Ref_Envs.Items loop
-            Reference (Current_Env, ${root_node_type_name} (Self), To_Ref_Env);
-         end loop;
-         Dec_Ref (To_Ref_Envs);
-      end;
+      % if cls.env_spec.ref_env_resolver:
+         declare
+            Ref_Env_Nodes : ${cls.env_spec.ref_env_nodes.type.name()} :=
+               ${call_prop(cls.env_spec.ref_env_nodes)};
+         begin
+            for N of Ref_Env_Nodes.Items loop
+               Reference (Current_Env, N,
+                          ${cls.env_spec.ref_env_resolver.name}'Access);
+            end loop;
+            Dec_Ref (Ref_Env_Nodes);
+         end;
       % endif
 
       ## add_env

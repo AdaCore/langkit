@@ -422,12 +422,10 @@ package body Langkit_Support.Lexical_Env is
    procedure Reference
      (Self            : Lexical_Env;
       Referenced_From : Element_T;
-      To_Reference    : Lexical_Env) is
+      Resolver        : Lexical_Env_Resolver) is
    begin
       Referenced_Envs_Vectors.Append
-        (Self.Referenced_Envs,
-         Referenced_Env'(Referenced_From, To_Reference));
-      Inc_Ref (To_Reference);
+        (Self.Referenced_Envs, Referenced_Env'(Referenced_From, Resolver));
    end Reference;
 
    --------------------------
@@ -484,7 +482,10 @@ package body Langkit_Support.Lexical_Env is
       -----------------------
 
       function Get_Refd_Elements
-        (Self : Referenced_Env) return Entity_Array is
+        (Self : Referenced_Env) return Entity_Array
+      is
+         Ent : constant Entity := (Self.From_Node, No_Entity_Info);
+         Env : Lexical_Env;
       begin
 
          --  If the client passed an origin from the request, see if the
@@ -495,7 +496,25 @@ package body Langkit_Support.Lexical_Env is
             return Entity_Arrays.Empty_Array;
          end if;
 
-         return Recurse (Self.Env);
+         Env := Self.Resolver.all (Ent);
+
+         begin
+            --  Make sure that whether Recurse suceeds or raises an exception,
+            --  we always Dec_Ref the returned environment so we don't leak in
+            --  case of error.
+
+            declare
+               Result : constant Entity_Array := Recurse (Env);
+            begin
+               Dec_Ref (Env);
+               return Result;
+            end;
+
+         exception
+            when others =>
+               Dec_Ref (Env);
+               raise;
+         end;
       end Get_Refd_Elements;
 
       ----------------------
@@ -596,10 +615,6 @@ package body Langkit_Support.Lexical_Env is
 
    function Orphan (Self : Lexical_Env) return Lexical_Env is
    begin
-      for Env of Self.Referenced_Envs loop
-         Inc_Ref (Env.Env);
-      end loop;
-
       return new Lexical_Env_Type'
         (Parent                     => No_Env_Getter,
          Node                       => Self.Node,
@@ -700,12 +715,9 @@ package body Langkit_Support.Lexical_Env is
          Destroy (Self.Env);
       end if;
 
-      --  Referenced_Envs on the other hand are always owned by Self
+      --  (Transitive) referenced envs, on the other hand, are always owned by
+      --  Self.
 
-      for Ref_Env of Self.Referenced_Envs loop
-         Refd_Env := Ref_Env.Env;
-         Dec_Ref (Refd_Env);
-      end loop;
       Referenced_Envs_Vectors.Destroy (Self.Referenced_Envs);
 
       for Ref_Env of Self.Transitive_Referenced_Envs loop

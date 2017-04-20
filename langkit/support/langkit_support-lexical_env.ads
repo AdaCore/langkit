@@ -194,12 +194,17 @@ package Langkit_Support.Lexical_Env is
    -- Referenced environments --
    -----------------------------
 
+   type Lexical_Env_Resolver is access
+      function (Ref : Entity) return Lexical_Env;
+   --  Callback type for the lazy referenced env resolution mechanism
+
    type Referenced_Env is record
       From_Node : Element_T;
       --  The node from which the environment has been referenced
 
-      Env       : Lexical_Env;
-      --  The referenced env
+      Resolver  : Lexical_Env_Resolver;
+      --  A function that takes From_Node and resolves to the environment that
+      --  is referenced.
    end record;
    --  Represents a referenced env
 
@@ -321,7 +326,7 @@ package Langkit_Support.Lexical_Env is
    procedure Reference
      (Self            : Lexical_Env;
       Referenced_From : Element_T;
-      To_Reference    : Lexical_Env);
+      Resolver        : Lexical_Env_Resolver);
    --  Reference the env To_Reference from Self, making its content accessible
    --  from self. For requests with an origin point (From parameter), the
    --  content will only be visible if Can_Reach (Referenced_From, From) is
