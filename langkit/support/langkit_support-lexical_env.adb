@@ -616,21 +616,30 @@ package body Langkit_Support.Lexical_Env is
    -----------
 
    function Group (Envs : Lexical_Env_Array) return Lexical_Env is
-      N : constant Lexical_Env :=
-        new Lexical_Env_Type'
-          (Parent                     => No_Env_Getter,
-           Node                       => No_Element,
-           Referenced_Envs            => <>,
-           Transitive_Referenced_Envs => <>,
-           Env                        => null,
-           Default_MD                 => Empty_Metadata,
-           Rebinding                  => No_Env_Rebinding,
-           Ref_Count                  => 1);
+      N : Lexical_Env;
    begin
-      for Env of Envs loop
-         Transitive_Reference (N, Env);
-      end loop;
-      return N;
+      case Envs'Length is
+      when 0 =>
+         return Empty_Env;
+      when 1 =>
+         N := Envs (Envs'First);
+         Inc_Ref (N);
+         return N;
+      when others =>
+         N := new Lexical_Env_Type'
+           (Parent                     => No_Env_Getter,
+            Node                       => No_Element,
+            Referenced_Envs            => <>,
+            Transitive_Referenced_Envs => <>,
+            Env                        => null,
+            Default_MD                 => Empty_Metadata,
+            Rebinding                  => No_Env_Rebinding,
+            Ref_Count                  => 1);
+         for Env of Envs loop
+            Transitive_Reference (N, Env);
+         end loop;
+         return N;
+      end case;
    end Group;
 
    ----------------
