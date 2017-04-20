@@ -217,6 +217,8 @@ package Langkit_Support.Lexical_Env is
    --  must take a "reference" entity (e.g. a name) and return the referenced
    --  entity.
 
+   package Lexical_Env_Vectors is new Langkit_Support.Vectors (Lexical_Env);
+
    type Internal_Map_Element is record
       Element : Element_T;
       --  If Resolver is null, this is the element that lexical env lookup must
@@ -262,7 +264,7 @@ package Langkit_Support.Lexical_Env is
       Referenced_Envs : Referenced_Envs_Vectors.Vector;
       --  A list of environments referenced by this environment
 
-      Transitive_Referenced_Envs : Referenced_Envs_Vectors.Vector;
+      Transitive_Referenced_Envs : Lexical_Env_Vectors.Vector;
       --  A list of environments referenced by this environment. Unlike
       --  Referenced_Envs, Transitive_Referenced_Envs are *always* explored
       --  when calling Get, whether the "Recursive" parameter is True or not.

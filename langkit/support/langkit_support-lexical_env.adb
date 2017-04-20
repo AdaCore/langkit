@@ -5,6 +5,9 @@ package body Langkit_Support.Lexical_Env is
    package Entity_Arrays is new Langkit_Support.Array_Utils
      (Entity, Positive, Entity_Array);
 
+   package Lexical_Env_Arrays is new Langkit_Support.Array_Utils
+     (Lexical_Env, Positive, Lexical_Env_Vectors.Elements_Array);
+
    package Referenced_Envs_Arrays is new Langkit_Support.Array_Utils
      (Referenced_Env, Positive, Referenced_Envs_Vectors.Elements_Array);
 
@@ -435,9 +438,7 @@ package body Langkit_Support.Lexical_Env is
      (Self            : Lexical_Env;
       To_Reference    : Lexical_Env) is
    begin
-      Referenced_Envs_Vectors.Append
-        (Self.Transitive_Referenced_Envs,
-         Referenced_Env'(No_Element, To_Reference));
+      Self.Transitive_Referenced_Envs.Append (To_Reference);
       Inc_Ref (To_Reference);
    end Transitive_Reference;
 
@@ -460,10 +461,16 @@ package body Langkit_Support.Lexical_Env is
 
       use Referenced_Envs_Arrays;
 
+      function Recurse (Self : Lexical_Env) return Entity_Array is
+        (Get (Self, Key, From, Recursive => False,
+              Rebindings => Current_Rebindings));
+      --  Recursively call Get with the same arguments except Self (set to the
+      --  Self we have here) and Recursive (set to False).
+
       function Get_Refd_Elements
         (Self : Referenced_Env) return Entity_Array;
       --  If we can determine that From can reach Self.From_Node, return the
-      --  lookup of Key in Self. Otherwise, return an empty array.
+      --  recursive lookup of Key in Self. Otherwise, return an empty array.
 
       function Get_Own_Elements
         (Self       : Lexical_Env;
@@ -491,8 +498,7 @@ package body Langkit_Support.Lexical_Env is
             return Entity_Arrays.Empty_Array;
          end if;
 
-         return Get (Self.Env, Key, From, Recursive => False,
-                     Rebindings => Current_Rebindings);
+         return Recurse (Self.Env);
       end Get_Refd_Elements;
 
       ----------------------
@@ -523,10 +529,14 @@ package body Langkit_Support.Lexical_Env is
             else Entity_Arrays.Empty_Array);
       end Get_Own_Elements;
 
+      function Get_Concat is new Lexical_Env_Arrays.Flat_Map_Gen
+        (Entity, Entity_Array, Recurse);
+      --  Return the concatenation of Recurse for all lexical envs in the input
+      --  array.
+
       function Get_Refd_Elements is new Referenced_Envs_Arrays.Flat_Map_Gen
         (Entity, Entity_Array, Get_Refd_Elements);
-      --  Return the concatenation of Get_Refd_Elements for this env and
-      --  every parent.
+      --  Likewise, but calling Get_Refd_Elements instead of Recurse
 
       function Can_Reach_F (El : Entity) return Boolean is
         (Can_Reach (El.El, From));
@@ -555,17 +565,16 @@ package body Langkit_Support.Lexical_Env is
             then Get_Refd_Elements
               (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
             else Entity_Arrays.Empty_Array);
-         TRefd_Elts : constant Entity_Array :=
-            Get_Refd_Elements
-              (Referenced_Envs_Vectors.To_Array
-                 (Self.Transitive_Referenced_Envs));
+         Trans_Refd_Elts : constant Entity_Array :=
+            Get_Concat
+              (Lexical_Env_Vectors.To_Array (Self.Transitive_Referenced_Envs));
          Parent_Elts : constant Entity_Array :=
            (if Recursive
             then Get (Parent_Env, Key, Rebindings => Popped_Rebindings)
             else Entity_Arrays.Empty_Array);
 
          Ret : Entity_Array :=
-            Own_Elts & Refd_Elts & TRefd_Elts & Parent_Elts;
+            Own_Elts & Refd_Elts & Trans_Refd_Elts & Parent_Elts;
          Last_That_Can_Reach : Integer := Ret'Last;
       begin
          Dec_Ref (Current_Rebindings);
@@ -694,10 +703,10 @@ package body Langkit_Support.Lexical_Env is
       Referenced_Envs_Vectors.Destroy (Self.Referenced_Envs);
 
       for Ref_Env of Self.Transitive_Referenced_Envs loop
-         Refd_Env := Ref_Env.Env;
+         Refd_Env := Ref_Env;
          Dec_Ref (Refd_Env);
       end loop;
-      Referenced_Envs_Vectors.Destroy (Self.Transitive_Referenced_Envs);
+      Lexical_Env_Vectors.Destroy (Self.Transitive_Referenced_Envs);
 
       Free (Self);
    end Destroy;

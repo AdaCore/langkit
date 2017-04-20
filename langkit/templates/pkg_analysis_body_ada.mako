@@ -2387,6 +2387,26 @@ package body ${ada_lib_name}.Analysis is
          end if;
       end Dump_Referenced;
 
+      ---------------------------
+      -- Dump_Trans_Referenced --
+      ---------------------------
+
+      procedure Dump_Trans_Referenced
+        (Name : String; Refs : AST_Envs.Lexical_Env_Vectors.Vector) is
+      begin
+         if Refs.Length > 0 then
+            Put_Line ("    " & Name & ":");
+            for R of Refs loop
+               Put ("      ");
+               Dump_One_Lexical_Env
+                 (Self           => R,
+                  Dump_Addresses => Dump_Addresses,
+                  Dump_Content   => False);
+               New_Line;
+            end loop;
+         end if;
+      end Dump_Trans_Referenced;
+
    begin
       if Env_Id'Length /= 0 then
          Put (Env_Id & " = ");
@@ -2412,7 +2432,7 @@ package body ${ada_lib_name}.Analysis is
       Put_Line (":");
 
       Dump_Referenced ("Referenced", Self.Referenced_Envs);
-      Dump_Referenced
+      Dump_Trans_Referenced
         ("Transitive referenced", Self.Transitive_Referenced_Envs);
 
       if Self.Env.Is_Empty then
