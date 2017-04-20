@@ -417,6 +417,7 @@ package body Langkit_Support.Lexical_Env is
    is
    begin
       if Transitive then
+         pragma Assert (Self.Ref_Count /= No_Refcount);
          Referenced_Envs_Vectors.Append
            (Self.Transitive_Referenced_Envs,
             Referenced_Env'(Referenced_From, To_Reference));
