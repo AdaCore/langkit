@@ -371,7 +371,9 @@ def as_array(self, list_expr):
     root_list_type = get_context().root_grammar_class.list_type()
     check_source_language(
         issubclass(result.collection.type, root_list_type),
-        '.as_array input must be an AST list'
+        '.as_array input must be an AST list (here: {})'.format(
+            result.collection.type.name().camel
+        )
     )
     return result
 
