@@ -487,13 +487,10 @@ package body Langkit_Support.Lexical_Env is
         (Self : Referenced_Env) return Entity_Array is
       begin
 
-         --  If the referenced environment has an origin point, and the client
-         --  passed an origin from the request, see if the environment is
-         --  reachable.
+         --  If the client passed an origin from the request, see if the
+         --  environment is reachable.
 
-         if Self.From_Node /= No_Element
-           and then From /= No_Element
-           and then not Can_Reach (Self.From_Node, From)
+         if From /= No_Element and then not Can_Reach (Self.From_Node, From)
          then
             return Entity_Arrays.Empty_Array;
          end if;
