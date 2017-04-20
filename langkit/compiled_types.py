@@ -2768,6 +2768,24 @@ class TypeRepo(object):
             """
             return TypeRepo.Defer(lambda: self.get().entity())
 
+        @property
+        def fields(self):
+            """
+            Proxy to return the fields of a Struct.
+
+            :rtype: DictProxy
+            """
+            return TypeRepo.DeferWithAttributes(lambda: self.get().fields)
+
+    # TODO: merge this inside Defer (not sure it's a good design choice at the
+    # moment).
+    class DeferWithAttributes(Defer):
+        """
+        Like Defer, but also support random attribute access.
+        """
+        def __getattr__(self, name):
+            return TypeRepo.Defer(lambda: getattr(self.get(), name))
+
     def __getattr__(self, type_name):
         """
         Build and return a Defer type that references the above type.
