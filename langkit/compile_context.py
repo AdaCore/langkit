@@ -1487,7 +1487,7 @@ class CompileCtx(object):
             if t._exposed:
                 return
 
-            if issubclass(t, Struct) and not t.is_ast_node():
+            if issubclass(t, Struct) and not t.is_ast_node:
                 for f in t.get_abstract_fields(include_inherited=False):
                     expose(f.type, f, 'type', traceback + [f.qualname])
 

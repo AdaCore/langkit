@@ -111,7 +111,6 @@ def make_renderer(base_renderer=None):
         'is_analysis_unit':       type_check(AnalysisUnitType),
         'is_analysis_kind':       type_check(AnalysisUnitKind),
         'is_struct':              type_check(Struct),
-        'is_ast_node':            type_check(ASTNode),
         'is_sloc_range':          type_check(SourceLocationRangeType),
         'is_token_type':          type_check(Token),
         'is_symbol_type':         type_check(Symbol),
@@ -260,6 +259,11 @@ class CompiledType(object):
     """
     Whether this type represents an instantiation of ASTList (i.e. a list of
     AST nodes).
+    """
+
+    is_ast_node = False
+    """
+    Whether this type represents an AST node type.
     """
 
     is_entity_type = False
@@ -1811,16 +1815,6 @@ class Struct(CompiledType):
         )
 
     @classmethod
-    def is_ast_node(cls):
-        """
-        Helper for issubclass(cls, ASTNode), to determine if a subclass is a
-        struct or an astnode descendent.
-
-        :rtype: bool
-        """
-        return False
-
-    @classmethod
     def set_types(cls, types):
         """
         Associate `types` (a list of CompiledType) to fields in `cls` . It is
@@ -2023,7 +2017,7 @@ class Struct(CompiledType):
         if field_class == AbstractNodeData:
             # If we don't filter by class (i.e.  if we want the most general
             # class field: AbstractNodeData), do the base class recursion.
-            if include_inherited and cls.is_ast_node():
+            if include_inherited and cls.is_ast_node:
                 result = OrderedDict()
                 for base_class in cls.get_inheritance_chain():
                     result.update(base_class._fields)
@@ -2173,6 +2167,8 @@ class ASTNode(Struct):
     is_list_type = False
     is_root_list_type = False
 
+    is_ast_node = True
+
     generic_list_type = None
     """
     Root grammar class subclass. It is abstract, generated automatically when
@@ -2256,10 +2252,6 @@ class ASTNode(Struct):
                     predicate=library_public_field
                 )
                 if not f.is_overriding]
-
-    @classmethod
-    def is_ast_node(cls):
-        return True
 
     @classmethod
     def c_type(cls, c_api_settings):

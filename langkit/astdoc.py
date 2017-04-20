@@ -68,7 +68,7 @@ def format_doc(entity):
 
 
 def print_struct(context, file, struct):
-    is_astnode = struct.is_ast_node()
+    is_astnode = struct.is_ast_node
     base = struct.base() if is_astnode else None
     fields = list(struct.get_abstract_fields())
 

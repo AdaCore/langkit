@@ -4,7 +4,7 @@
 
         <% c_accessor = '_{}'.format(field.accessor_basename.lower) %>
 
-        % if is_ast_node(field.type) and not field.exposed_arguments:
+        % if field.type.is_ast_node and not field.exposed_arguments:
         return self._eval_astnode_field(${c_accessor})
 
         % else:

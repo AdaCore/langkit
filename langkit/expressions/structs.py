@@ -329,7 +329,7 @@ class New(AbstractExpression):
         ) for name, value in self.field_values.items()}
 
         expr_cls = (New.NodeExpr
-                    if self.struct_type.is_ast_node() else
+                    if self.struct_type.is_ast_node else
                     New.StructExpr)
         return expr_cls(self.struct_type, provided_fields, abstract_expr=self)
 

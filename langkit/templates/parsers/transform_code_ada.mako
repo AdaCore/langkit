@@ -27,7 +27,7 @@ if ${parser.pos_var} /= No_Token_Index then
    % for field, arg in zip(parser.typ.get_parse_fields(), args):
       ## Set children fields into the created node
       ${parser.res_var}.${field.name} :=
-         % if is_ast_node(field.type):
+         % if field.type.is_ast_node:
             ${field.type.storage_type_name()} (${arg});
          % else:
             ${arg};

@@ -71,7 +71,7 @@
 
    ## If this field return an enum node, generate a shortcut to get the
    ## symbolic value.
-   % if is_ast_node(field.type):
+   % if field.type.is_ast_node:
       % if field.type.is_bool_node:
          function ${field.name}
            (Node : access ${type_name}'Class)
@@ -297,7 +297,7 @@
 
    <%
    # Keep a list of ASTNode fields
-   astnode_fields = cls.get_parse_fields(lambda f: is_ast_node(f.type))
+   astnode_fields = cls.get_parse_fields(lambda f: f.type.is_ast_node)
 
    # Keep a list of user fields
    user_fields = cls.get_user_fields()
@@ -371,7 +371,7 @@
                  if Node.${field.name} /= null then
              % endif
 
-             % if is_ast_node(field.type):
+             % if field.type.is_ast_node:
                 Append (Result,
                         Image (${root_node_type_name} (Node.${field.name})));
              % elif is_token_type(field.type):
@@ -761,7 +761,7 @@
                   )};
       end ${field.name};
 
-      % if is_ast_node(field.type):
+      % if field.type.is_ast_node:
          % if field.type.is_bool_node:
             function ${field.name}
               (Node : access ${type_name}'Class)

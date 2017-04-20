@@ -60,7 +60,7 @@
                Unwrap (${arg.name})
             % elif is_analysis_kind(arg.type):
                Unit_Kind'Val (${arg.name})
-            % elif is_ast_node(arg.type):
+            % elif arg.type.is_ast_node:
                ${arg.type.name()} (Unwrap (${arg.name}))
             % elif is_token_type(arg.type):
                Token (Node, Token_Index ({arg.name}.Index))
@@ -118,7 +118,7 @@
                     Wrap (${field_access})
                 % elif is_analysis_kind(field.type):
                     Unit_Kind'Pos (${field_access})
-                % elif is_ast_node(field.type):
+                % elif field.type.is_ast_node:
                     Wrap (${root_node_type_name} (${field_access}))
                 % elif is_token_type(field.type):
                     Wrap (${field_access})
