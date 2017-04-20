@@ -365,7 +365,7 @@ def as_array(self, list_expr):
     :param AbstractExpression list_expr: The AST list to convert.
     :rtype: ResolvedExpression
     """
-    abstract_result = list_expr.map(lambda x: x)
+    abstract_result = Map(list_expr, expr=collection_expr_identity)
     abstract_result.prepare()
     result = construct(abstract_result)
     root_list_type = get_context().root_grammar_class.list_type()
