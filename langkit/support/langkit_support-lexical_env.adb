@@ -26,6 +26,13 @@ package body Langkit_Support.Lexical_Env is
    --  In all cases, "Popped_Rebindings" contains upon return a new ownership
    --  share.
 
+   procedure Transitive_Reference
+     (Self            : Lexical_Env;
+      To_Reference    : Lexical_Env)
+      with Pre => Self.Ref_Count /= No_Refcount;
+   --  Reference the env To_Reference from Self, making its content accessible
+   --  from Self. This is available only for ref-counted lexical environments.
+
    function Decorate
      (Elts       : Internal_Map_Element_Array;
       MD         : Element_Metadata;
@@ -412,22 +419,27 @@ package body Langkit_Support.Lexical_Env is
    procedure Reference
      (Self            : Lexical_Env;
       To_Reference    : Lexical_Env;
-      Referenced_From : Element_T := No_Element;
-      Transitive      : Boolean   := False)
-   is
+      Referenced_From : Element_T := No_Element) is
    begin
-      if Transitive then
-         pragma Assert (Self.Ref_Count /= No_Refcount);
-         Referenced_Envs_Vectors.Append
-           (Self.Transitive_Referenced_Envs,
-            Referenced_Env'(Referenced_From, To_Reference));
-      else
-         Referenced_Envs_Vectors.Append
-           (Self.Referenced_Envs,
-            Referenced_Env'(Referenced_From, To_Reference));
-      end if;
+      Referenced_Envs_Vectors.Append
+        (Self.Referenced_Envs,
+         Referenced_Env'(Referenced_From, To_Reference));
       Inc_Ref (To_Reference);
    end Reference;
+
+   --------------------------
+   -- Transitive_Reference --
+   --------------------------
+
+   procedure Transitive_Reference
+     (Self            : Lexical_Env;
+      To_Reference    : Lexical_Env) is
+   begin
+      Referenced_Envs_Vectors.Append
+        (Self.Transitive_Referenced_Envs,
+         Referenced_Env'(No_Element, To_Reference));
+      Inc_Ref (To_Reference);
+   end Transitive_Reference;
 
    ---------
    -- Get --
@@ -610,7 +622,7 @@ package body Langkit_Support.Lexical_Env is
            Ref_Count                  => 1);
    begin
       for Env of Envs loop
-         Reference (N, Env, No_Element, True);
+         Transitive_Reference (N, Env);
       end loop;
       return N;
    end Group;
@@ -634,7 +646,7 @@ package body Langkit_Support.Lexical_Env is
            Rebinding                  => No_Env_Rebinding,
            Ref_Count                  => 1);
    begin
-      Reference (N, Base_Env, No_Element, True);
+      Transitive_Reference (N, Base_Env);
       N.Rebinding := (To_Rebind, Rebind_To);
       return N;
    end Rebind_Env;
