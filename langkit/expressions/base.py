@@ -2246,6 +2246,20 @@ class PropertyDef(AbstractNodeData):
     def requires_untyped_wrapper(self):
         return self._requires_untyped_wrapper
 
+    @property
+    def untyped_wrapper_rtype(self):
+        """
+        Assuming this property requires an untyped wrapper, return the return
+        type of this wrapper.
+        """
+        assert self.requires_untyped_wrapper
+        if self.type.is_entity_type:
+            return T.entity
+        elif self.type.is_ast_node:
+            return T.root_node
+        else:
+            return self.type
+
     def construct_and_type_expression(self, context):
         """
         This pass will construct the resolved expression from the abstract
