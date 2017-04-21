@@ -110,8 +110,8 @@ class EnvSpec(object):
     def __init__(self,
                  add_env=False,
                  add_to_env=None,
-                 ref_envs=None,
-                 post_ref_envs=None,
+                 ref_envs=[],
+                 post_ref_envs=[],
                  initial_env=None,
                  env_hook_arg=None,
                  call_parents=True):
@@ -126,13 +126,14 @@ class EnvSpec(object):
             doc for more details.
         :type add_to_env: AddToEnv|[AddToEnv]
 
-        :param RefEnvs|None ref_envs: If this env spec introduces referenced
-            environments, this must be a RefEnvs instance to describe how to
-            compute the environments to reference. This will register
-            referenced environments to this node' "self" environment.
+        :param RefEnvs|list[RefEnvs] ref_envs: If this env spec introduces
+            referenced environments, this must be a RefEnvs instance (or a list
+            of them) to describe how to compute the environments to reference.
+            This will register referenced environments to this node' "self"
+            environment.
 
-        :param RefEnvs|None ref_envs: Like ref_envs, but evaluated after after
-            the children have been processed.
+        :param RefEnvs|list[RefEnvs] ref_envs: Like ref_envs, but evaluated
+            after after the children have been processed.
 
         :param AbstractExpression initial_env: If supplied, this env will be
             used as the lexical environment to execute the rest of the actions.
@@ -183,8 +184,11 @@ class EnvSpec(object):
                 else add_to_env
             )
 
-        self.ref_envs = ref_envs
-        self.post_ref_envs = post_ref_envs
+        self.ref_envs = ([ref_envs]
+                         if isinstance(ref_envs, RefEnvs) else ref_envs)
+        self.post_ref_envs = ([post_ref_envs]
+                              if isinstance(post_ref_envs, RefEnvs)
+                              else post_ref_envs)
 
         self._unresolved_env_hook_arg = env_hook_arg
         ":type: AbstractExpression"
@@ -247,10 +251,10 @@ class EnvSpec(object):
 
         self.has_post_actions = any([e.is_post for e in self.envs_expressions])
 
-        if self.ref_envs:
-            self.ref_envs.create_nodes_property(create_internal_property)
-        if self.post_ref_envs:
-            self.post_ref_envs.create_nodes_property(create_internal_property)
+        for ref_envs in self.ref_envs:
+            ref_envs.create_nodes_property(create_internal_property)
+        for ref_envs in self.post_ref_envs:
+            ref_envs.create_nodes_property(create_internal_property)
 
         self.env_hook_arg = create_internal_property(
             'Env_Hook_Arg', self._unresolved_env_hook_arg, T.root_node
@@ -267,10 +271,10 @@ class EnvSpec(object):
 
         :rtype: bool
         """
-        if self.ref_envs:
-            self.ref_envs.check_resolver()
-        if self.post_ref_envs:
-            self.post_ref_envs.check_resolver()
+        for ref_envs in self.ref_envs:
+            ref_envs.check_resolver()
+        for ref_envs in self.post_ref_envs:
+            ref_envs.check_resolver()
 
         for bindings_prop, _, _, _, resolver in self.envs_expressions:
             with bindings_prop.diagnostic_context():

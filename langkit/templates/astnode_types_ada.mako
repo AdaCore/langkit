@@ -586,16 +586,18 @@
       end;
    </%def>
 
-   <%def name="emit_ref_envs(ref_envs)">
-      declare
-         Ref_Env_Nodes : ${ref_envs.nodes_property.type.name()} :=
-            ${call_prop(ref_envs.nodes_property)};
-      begin
-         for N of Ref_Env_Nodes.Items loop
-            Reference (Self.Self_Env, N, ${ref_envs.resolver.name}'Access);
-         end loop;
-         Dec_Ref (Ref_Env_Nodes);
-      end;
+   <%def name="emit_ref_envs(ref_envs_list)">
+      % for ref_envs in ref_envs_list:
+         declare
+            Ref_Env_Nodes : ${ref_envs.nodes_property.type.name()} :=
+               ${call_prop(ref_envs.nodes_property)};
+         begin
+            for N of Ref_Env_Nodes.Items loop
+               Reference (Self.Self_Env, N, ${ref_envs.resolver.name}'Access);
+            end loop;
+            Dec_Ref (Ref_Env_Nodes);
+         end;
+      % endfor
    </%def>
 
    <%
@@ -697,9 +699,7 @@
 
       ## ref_envs
 
-      % if cls.env_spec.ref_envs:
-         ${emit_ref_envs(cls.env_spec.ref_envs)}
-      % endif
+      ${emit_ref_envs(cls.env_spec.ref_envs)}
 
       return Initial_Env;
    end Pre_Env_Actions;
@@ -748,9 +748,7 @@
       % endif
       % endfor
 
-      % if cls.env_spec.post_ref_envs:
-         ${emit_ref_envs(cls.env_spec.post_ref_envs)}
-      % endif
+      ${emit_ref_envs(cls.env_spec.post_ref_envs)}
    end Post_Env_Actions;
    % endif
 
