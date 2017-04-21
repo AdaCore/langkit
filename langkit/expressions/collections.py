@@ -368,7 +368,7 @@ def as_array(self, list_expr):
     abstract_result = Map(list_expr, expr=collection_expr_identity)
     abstract_result.prepare()
     result = construct(abstract_result)
-    root_list_type = get_context().root_grammar_class.list_type()
+    root_list_type = get_context().generic_list_type
     check_source_language(
         issubclass(result.collection.type, root_list_type),
         '.as_array input must be an AST list (here: {})'.format(
