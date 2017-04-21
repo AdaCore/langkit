@@ -1040,12 +1040,6 @@ private
    package Analysis_Unit_Sets
    is new Langkit_Support.Cheap_Sets (Analysis_Unit, null);
 
-   type Containing_Env_Element is record
-      Env  : Lexical_Env;
-      Key  : Symbol_Type;
-      Node : ${root_node_type_name};
-   end record;
-
    type Lex_Env_Data_Type;
    type Lex_Env_Data is access all Lex_Env_Data_Type;
 

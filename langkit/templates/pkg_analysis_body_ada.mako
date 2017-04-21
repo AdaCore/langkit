@@ -68,6 +68,12 @@ package body ${ada_lib_name}.Analysis is
    procedure Destroy (Self : in out Lex_Env_Data_Type);
    --  Destroy data associated to lexical environments
 
+   type Containing_Env_Element is record
+      Env  : Lexical_Env;
+      Key  : Symbol_Type;
+      Node : ${root_node_type_name};
+   end record;
+
    package Containing_Envs is new Langkit_Support.Vectors
      (Containing_Env_Element);
 
