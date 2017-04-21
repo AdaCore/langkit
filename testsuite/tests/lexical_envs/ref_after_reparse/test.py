@@ -10,7 +10,7 @@ import os.path
 
 from langkit.compiled_types import ASTNode, Field, T, root_grammar_class
 from langkit.diagnostics import Diagnostics
-from langkit.envs import EnvSpec, add_to_env
+from langkit.envs import EnvSpec, RefEnvs, add_to_env
 from langkit.expressions import Env, New, Self, langkit_property
 from langkit.parsers import Grammar, List, Row, Tok
 
@@ -36,6 +36,10 @@ class Name(FooNode):
     @langkit_property(has_implicit_env=True)
     def ambiant_entity():
         return Env.get(Self.sym).at(0)
+
+    @langkit_property(has_implicit_env=True)
+    def designated_env():
+        return Self.unit.root.node_env.get(Self.sym).at(0).children_env
 
     @langkit_property(public=True)
     def entity():
@@ -65,7 +69,8 @@ class Decl(FooNode):
 class Using(FooNode):
     name = Field()
     env_spec = EnvSpec(
-        ref_envs=Self.name.ambiant_entity.children_env.singleton
+        ref_envs=[RefEnvs(Name.fields.designated_env,
+                          Self.name.cast(FooNode).to_array)]
     )
 
 
