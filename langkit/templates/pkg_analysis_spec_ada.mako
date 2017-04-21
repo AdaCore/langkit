@@ -1100,6 +1100,8 @@ private
       --  visibility/computation of the reference graph.
 
       Lex_Env_Data_Acc  : Lex_Env_Data;
+      --  Lexical environment metadata for elements in this units' environments
+      --  that belong to other units.
    end record;
 
    function Token_Data
