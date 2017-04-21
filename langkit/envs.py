@@ -27,10 +27,8 @@ class RefEnvs(object):
             (explicit or implicit) and that returns a lexical environment.
 
         :param AbstractExpression|None nodes_expr: Abstract expression that
-            returns an array of AST nodes. The topmost environment in the
-            environment resolution will be altered to include this list of
-            nodes associated with "resolver" to resolve referenced
-            environments.
+            returns an array of AST nodes. Each node will be given to the above
+            resolver in order to get corresponding referenced lexical envs.
         """
         assert resolver
         assert nodes_expr
@@ -130,7 +128,8 @@ class EnvSpec(object):
 
         :param RefEnvs|None ref_envs: If this env spec introduces referenced
             environments, this must be a RefEnvs instance to describe how to
-            compute the environments to reference.
+            compute the environments to reference. This will register
+            referenced environments to this node' "self" environment.
 
         :param RefEnvs|None ref_envs: Like ref_envs, but evaluated after after
             the children have been processed.

@@ -592,7 +592,7 @@
             ${call_prop(ref_envs.nodes_property)};
       begin
          for N of Ref_Env_Nodes.Items loop
-            Reference (Initial_Env, N, ${ref_envs.resolver.name}'Access);
+            Reference (Self.Self_Env, N, ${ref_envs.resolver.name}'Access);
          end loop;
          Dec_Ref (Ref_Env_Nodes);
       end;
@@ -675,12 +675,6 @@
          return Initial_Env;
       end if;
 
-      ## ref_envs
-
-      % if cls.env_spec.ref_envs:
-         ${emit_ref_envs(cls.env_spec.ref_envs)}
-      % endif
-
       ## add_env
 
       % if cls.env_spec._add_env:
@@ -699,6 +693,12 @@
             Is_Refcounted => False);
 
          Register_Destroyable (Self.Unit, Self.Self_Env);
+      % endif
+
+      ## ref_envs
+
+      % if cls.env_spec.ref_envs:
+         ${emit_ref_envs(cls.env_spec.ref_envs)}
       % endif
 
       return Initial_Env;
