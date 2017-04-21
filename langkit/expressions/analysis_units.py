@@ -31,11 +31,19 @@ def unit(self, node):
     :rtype: AbstractExpression
     """
     node_expr = construct(node)
+
+    # Automatically extract AST nodes from entities
+    if node_expr.type.is_entity_type:
+        node_expr = FieldAccessExpr(node_expr, 'El', node_expr.type.el_type,
+                                    do_explicit_incref=True)
+
+    # Make sure that in the end, the prefix is an AST node
     check_source_language(
         issubclass(node_expr.type, T.root_node),
         'The "unit" field is available only for AST nodes; instead we have'
         ' here a {}'.format(node_expr.type.name().lower)
     )
+
     # From the point of view of properties, analysis units are not ref-counted,
     # so we must not inc-ref here.
     return FieldAccessExpr(node_expr, 'Unit', AnalysisUnitType,
