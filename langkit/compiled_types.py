@@ -1225,6 +1225,25 @@ def create_macro(attrib_dict):
     return type(b'macro', (NodeMacro, ), attrib_dict)
 
 
+class FieldsDictProxy(DictProxy):
+    """
+    Specialization of DictProxy for the fields of structures, to raise
+    user-friendly diagnostic in case of unknown field.
+    """
+
+    def __init__(self, dct, struct):
+        super(FieldsDictProxy, self).__init__(dct)
+        self.struct = struct
+
+    def __getattr__(self, attr):
+        check_source_language(
+            attr in self.dct,
+            '{} has no {} field/property'.format(self.struct.name().camel,
+                                                 attr)
+        )
+        return self.dct[attr]
+
+
 # These will be replaced by true class definitions. Before this happens,
 # StructMetaclass will see these None values.
 Struct = None
@@ -1486,7 +1505,7 @@ class StructMetaclass(CompiledTypeMetaclass):
             env_spec.ast_node = cls
 
         cls._fields = fields
-        cls.fields = DictProxy(fields)
+        cls.fields = FieldsDictProxy(fields, cls)
 
         for f_n, f_v in fields.iteritems():
             with field_ctx(f_n):
