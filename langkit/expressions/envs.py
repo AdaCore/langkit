@@ -101,7 +101,7 @@ class EnvVariable(AbstractVariable):
 @auto_attr_custom("get_sequential", sequential=True)
 @auto_attr_custom("resolve_unique", resolve_unique=True)
 def env_get(self, env_expr, symbol_expr, resolve_unique=False,
-            sequential=False, recursive=True):
+            sequential=False, sequential_from=Self, recursive=True):
     """
     Expression for lexical environment get operation.
 
@@ -114,6 +114,8 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
         result is available. The implementation will just take the first
         result.
     :param bool sequential: Whether resolution needs to be sequential or not.
+    :param AbstractExpression sequential_from: If resolution needs to be
+        sequential, must be an expression to use as the reference node.
     :param bool recursive: Whether lookup must be performed recursively on
         parent environments.
     """
@@ -148,7 +150,7 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
 
     # Pass the From parameter if the user wants sequential semantics
     if sequential:
-        args.append(('From', construct(Self, T.root_node)))
+        args.append(('From', construct(sequential_from, T.root_node)))
 
     array_expr = 'AST_Envs.Get ({})'.format(', '.join('{} => {{}}'.format(n)
                                                       for n, _ in args))
