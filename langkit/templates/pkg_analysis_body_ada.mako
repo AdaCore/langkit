@@ -103,6 +103,7 @@ package body ${ada_lib_name}.Analysis is
    --  envs.
 
    procedure Update_After_Reparse (Unit : Analysis_Unit);
+   --  Update stale lexical environment data after the reparsing of Unit
 
    ## Utility package
    package ${root_node_type_name}_Arrays

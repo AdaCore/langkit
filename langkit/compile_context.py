@@ -763,13 +763,15 @@ class CompileCtx(object):
         def compute_reachable(reachable_set, forward_map):
             queue = {p for p in forward_map if p.is_public or p.is_internal}
 
-            # Don't forget to tag properties used as entity resolvers as
+            # Don't forget to tag properties used as entity/env resolvers as
             # reachable.
             for astnode in self.astnode_types:
                 if astnode.env_spec:
                     for exprs in astnode.env_spec.envs_expressions:
                         if exprs.resolver:
                             queue.add(exprs.resolver)
+                    if astnode.env_spec.ref_env_resolver:
+                        queue.add(astnode.env_spec.ref_env_resolver)
 
             while queue:
                 prop = queue.pop()
