@@ -546,7 +546,7 @@
            ${exprs.mappings.type.name()} := ${call_prop(exprs.mappings)};
       begin
          % if is_array_type(exprs.mappings.type):
-         for B of mappings.Items loop
+         for B of Mappings.Items loop
          % endif
             ## Add the element to the environment
             Add (Self  => Env,
