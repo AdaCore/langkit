@@ -82,6 +82,17 @@ package body ${ada_lib_name}.Analysis is
       Contains        : ${root_node_type_name}_Vectors.Vector;
    end record;
 
+   procedure Remove_Exiled_Entries (Self : Lex_Env_Data);
+   --  Remove lex env entries that references some of the unit's nodes, in
+   --  lexical environments not owned by the unit.
+
+   procedure Reroot_Foreign_Nodes
+     (Self : Lex_Env_Data; Root_Scope : Lexical_Env);
+   --  Re-create entries for nodes that are keyed in one of the unit's lexical
+   --  envs.
+
+   procedure Update_After_Reparse (Unit : Analysis_Unit);
+
    ## Utility package
    package ${root_node_type_name}_Arrays
    is new Langkit_Support.Array_Utils
@@ -91,8 +102,6 @@ package body ${ada_lib_name}.Analysis is
 
    ##  Make logic operations on nodes accessible
    use Eq_Node, Eq_Node.Raw_Impl;
-
-   procedure Update_After_Reparse (Unit : Analysis_Unit);
 
    procedure Destroy (Unit : Analysis_Unit);
 
@@ -659,6 +668,36 @@ package body ${ada_lib_name}.Analysis is
          Destroy (Unit);
       end if;
    end Dec_Ref;
+
+   ---------------------------
+   -- Remove_Exiled_Entries --
+   ---------------------------
+
+   procedure Remove_Exiled_Entries (Self : Lex_Env_Data) is
+   begin
+      for El of Self.Is_Contained_By loop
+         AST_Envs.Remove (El.Env, El.Key, El.Node);
+      end loop;
+      Self.Is_Contained_By.Clear;
+   end Remove_Exiled_Entries;
+
+   --------------------------
+   -- Reroot_Foreign_Nodes --
+   --------------------------
+
+   procedure Reroot_Foreign_Nodes
+     (Self : Lex_Env_Data; Root_Scope : Lexical_Env)
+   is
+      Els : ${root_node_type_name}_Vectors.Elements_Array :=
+         Self.Contains.To_Array;
+      Env : Lexical_Env;
+   begin
+      Self.Is_Contained_By.Clear;
+      for El of Els loop
+         Env := El.Pre_Env_Actions (El.Self_Env, Root_Scope, True);
+         El.Post_Env_Actions (Env, Root_Scope);
+      end loop;
+   end Reroot_Foreign_Nodes;
 
    --------------------------
    -- Update_After_Reparse --
@@ -1381,36 +1420,6 @@ package body ${ada_lib_name}.Analysis is
       Destroy (Self.all);
       Free (Self);
    end Destroy;
-
-   ---------------------------
-   -- Remove_Exiled_Entries --
-   ---------------------------
-
-   procedure Remove_Exiled_Entries (Self : Lex_Env_Data) is
-   begin
-      for El of Self.Is_Contained_By loop
-         AST_Envs.Remove (El.Env, El.Key, El.Node);
-      end loop;
-      Self.Is_Contained_By.Clear;
-   end Remove_Exiled_Entries;
-
-   --------------------------
-   -- Reroot_Foreign_Nodes --
-   --------------------------
-
-   procedure Reroot_Foreign_Nodes
-     (Self : Lex_Env_Data; Root_Scope : Lexical_Env)
-   is
-      Els : ${root_node_type_name}_Vectors.Elements_Array :=
-         Self.Contains.To_Array;
-      Env : Lexical_Env;
-   begin
-      Self.Is_Contained_By.Clear;
-      for El of Els loop
-         Env := El.Pre_Env_Actions (El.Self_Env, Root_Scope, True);
-         El.Post_Env_Actions (Env, Root_Scope);
-      end loop;
-   end Reroot_Foreign_Nodes;
 
    ----------
    -- Find --

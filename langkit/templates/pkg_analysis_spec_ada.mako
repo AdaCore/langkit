@@ -1046,15 +1046,6 @@ private
    procedure Destroy (Self : in out Lex_Env_Data);
    --  Likewise, but also free the memory allocated to Self
 
-   procedure Remove_Exiled_Entries (Self : Lex_Env_Data);
-   --  Remove lex env entries that references some of the unit's nodes, in
-   --  lexical environments not owned by the unit.
-
-   procedure Reroot_Foreign_Nodes
-     (Self : Lex_Env_Data; Root_Scope : Lexical_Env);
-   --  Re-create entries for nodes that are keyed in one of the unit's lexical
-   --  envs.
-
    type Analysis_Unit_Type is record
       Context           : Analysis_Context;
       --  The owning context for this analysis unit
