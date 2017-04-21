@@ -586,6 +586,18 @@
       end;
    </%def>
 
+   <%def name="emit_ref_envs(ref_envs)">
+      declare
+         Ref_Env_Nodes : ${ref_envs.nodes_property.type.name()} :=
+            ${call_prop(ref_envs.nodes_property)};
+      begin
+         for N of Ref_Env_Nodes.Items loop
+            Reference (Initial_Env, N, ${ref_envs.resolver.name}'Access);
+         end loop;
+         Dec_Ref (Ref_Env_Nodes);
+      end;
+   </%def>
+
    <%
    env_getter = "{}_Initial_Env_Getter_Fn".format(cls.name())
    has_dyn_env = cls.env_spec.initial_env or cls.env_spec.env_hook_enabled
@@ -665,17 +677,8 @@
 
       ## ref_envs
 
-      % if cls.env_spec.ref_env_resolver:
-         declare
-            Ref_Env_Nodes : ${cls.env_spec.ref_env_nodes.type.name()} :=
-               ${call_prop(cls.env_spec.ref_env_nodes)};
-         begin
-            for N of Ref_Env_Nodes.Items loop
-               Reference (Current_Env, N,
-                          ${cls.env_spec.ref_env_resolver.name}'Access);
-            end loop;
-            Dec_Ref (Ref_Env_Nodes);
-         end;
+      % if cls.env_spec.ref_envs:
+         ${emit_ref_envs(cls.env_spec.ref_envs)}
       % endif
 
       ## add_env

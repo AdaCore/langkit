@@ -770,8 +770,8 @@ class CompileCtx(object):
                     for exprs in astnode.env_spec.envs_expressions:
                         if exprs.resolver:
                             queue.add(exprs.resolver)
-                    if astnode.env_spec.ref_env_resolver:
-                        queue.add(astnode.env_spec.ref_env_resolver)
+                    if astnode.env_spec.ref_envs:
+                        queue.add(astnode.env_spec.ref_envs.resolver)
 
             while queue:
                 prop = queue.pop()

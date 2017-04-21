@@ -16,6 +16,69 @@ AddToEnv = namedtuple("AddToEnv", ["mappings", "dest_env", "metadata",
                                    "is_post", "resolver"])
 
 
+class RefEnvs(object):
+    """
+    Couple of a property and an expression to evaluate referenced envs.
+    """
+
+    def __init__(self, resolver, nodes_expr):
+        """
+        :param PropertyDef|None resolver: Property that takes no argument
+            (explicit or implicit) and that returns a lexical environment.
+
+        :param AbstractExpression|None nodes_expr: Abstract expression that
+            returns an array of AST nodes. The topmost environment in the
+            environment resolution will be altered to include this list of
+            nodes associated with "resolver" to resolve referenced
+            environments.
+        """
+        assert resolver
+        assert nodes_expr
+
+        self.resolver = resolver
+        ":type: PropertyDef"
+
+        self.nodes_expr = nodes_expr
+        ":type: AbstractExpression"
+
+        self.nodes_property = None
+        """
+        :type: PropertyDef
+
+        This holds the property that returns a list of nodes to pass to the
+        resolver. It is None before the property is built.
+        """
+
+    def create_nodes_property(self, create_internal_property):
+        """
+        Create the property that returns the list of nodes to resolve into
+        referenced lexical envs.
+        """
+        self.nodes_property = create_internal_property(
+            'Ref_Env_Nodes', self.nodes_expr, T.root_node.array_type()
+        )
+
+    def check_resolver(self):
+        """
+        Check that the resolver property is conforming.
+        """
+        if isinstance(self.resolver, T.Defer):
+            self.resolver = self.resolver.get()
+        self.resolver.require_untyped_wrapper()
+
+        check_source_language(
+            self.resolver.type.matches(LexicalEnvType),
+            'Referenced environment resolver must return a lexical'
+            ' environment (not {})'.format(
+                self.resolver.type.name().camel
+            )
+        )
+        check_source_language(
+            not self.resolver.explicit_arguments,
+            'Referenced environment resolver must take no argument'
+        )
+
+
 def add_to_env(mappings, dest_env=None, metadata=None, is_post=False,
                resolver=None):
     """
@@ -49,8 +112,7 @@ class EnvSpec(object):
     def __init__(self,
                  add_env=False,
                  add_to_env=None,
-                 ref_env_resolver=None,
-                 ref_env_nodes=None,
+                 ref_envs=None,
                  initial_env=None,
                  env_hook_arg=None,
                  call_parents=True):
@@ -65,16 +127,9 @@ class EnvSpec(object):
             doc for more details.
         :type add_to_env: AddToEnv|[AddToEnv]
 
-        :param PropertyDef|None ref_env_resolver: Property that takes no
-            argument (explicit or implicit) and that returns a lexical
-            environment. To be used with ref_env_nodes.
-
-        :param AbstractExpression|None ref_env_nodes: If not none, it must be
-            an abstract expression that returns an array of AST nodes. In this
-            case, ref_env_resolver must also be provided.  The topmost
-            environment in the environment resolution will be altered to
-            include this list of nodes associated with ref_env_nodes to resolve
-            referenced environments.
+        :param RefEnvs|None ref_envs: If this env spec introduces referenced
+            environments, this must be a RefEnvs instance to describe how to
+            compute the environments to reference.
 
         :param AbstractExpression initial_env: If supplied, this env will be
             used as the lexical environment to execute the rest of the actions.
@@ -125,14 +180,7 @@ class EnvSpec(object):
                 else add_to_env
             )
 
-        check_source_language(
-            (ref_env_resolver and ref_env_nodes)
-            or (not ref_env_resolver and not ref_env_nodes),
-            'ref_env_resolver and ref_env_nodes must be both provided, or they'
-            ' must be both missing'
-        )
-        self.ref_env_resolver = ref_env_resolver
-        self._unresolved_ref_env_nodes = ref_env_nodes
+        self.ref_envs = ref_envs
 
         self._unresolved_env_hook_arg = env_hook_arg
         ":type: AbstractExpression"
@@ -140,9 +188,6 @@ class EnvSpec(object):
         # These are the property attributes
 
         self.initial_env = None
-        ":type: PropertyDef"
-
-        self.ref_env_nodes = None
         ":type: PropertyDef"
 
         self.env_hook_arg = None
@@ -198,13 +243,8 @@ class EnvSpec(object):
 
         self.has_post_actions = any([e.is_post for e in self.envs_expressions])
 
-        self.ref_env_nodes = None
-        if self._unresolved_ref_env_nodes:
-            self.ref_env_nodes = create_internal_property(
-                'Ref_Env_Nodes',
-                self._unresolved_ref_env_nodes,
-                T.root_node.array_type()
-            )
+        if self.ref_envs:
+            self.ref_envs.create_nodes_property(create_internal_property)
 
         self.env_hook_arg = create_internal_property(
             'Env_Hook_Arg', self._unresolved_env_hook_arg, T.root_node
@@ -221,22 +261,8 @@ class EnvSpec(object):
 
         :rtype: bool
         """
-        if self.ref_env_resolver:
-            if isinstance(self.ref_env_resolver, T.Defer):
-                self.ref_env_resolver = self.ref_env_resolver.get()
-            self.ref_env_resolver.require_untyped_wrapper()
-
-            check_source_language(
-                self.ref_env_resolver.type.matches(LexicalEnvType),
-                'Referenced environment resolver must return a lexical'
-                ' environment (not {})'.format(
-                    self.ref_env_resolver.type.name().camel
-                )
-            )
-            check_source_language(
-                not self.ref_env_resolver.explicit_arguments,
-                'Referenced environment resolver must take no argument'
-            )
+        if self.ref_envs:
+            self.ref_envs.check_resolver()
 
         for bindings_prop, _, _, _, resolver in self.envs_expressions:
             with bindings_prop.diagnostic_context():
