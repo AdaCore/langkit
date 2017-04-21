@@ -747,6 +747,10 @@
       ${emit_add_to_env(exprs)}
       % endif
       % endfor
+
+      % if cls.env_spec.post_ref_envs:
+         ${emit_ref_envs(cls.env_spec.post_ref_envs)}
+      % endif
    end Post_Env_Actions;
    % endif
 
