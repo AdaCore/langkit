@@ -774,6 +774,31 @@ class ResolvedExpression(object):
         """
         return self._result_var
 
+    def create_result_var(self, name):
+        """
+        If this property already has a result variable, return it as a resolved
+        expression. Otherwise, create one and return it.
+
+        :param str name: Camel with underscores-formatted name for the result
+            variable.
+        :rtype: AbstractVariable.Expr
+        """
+        assert not self._render_pre_called, (
+            'Trying to create a result variable while the expression has been'
+            ' rendered'
+        )
+
+        # If this is already a variable, we don't need to create another
+        # variable to hold the same value: just return it.
+        if isinstance(self, AbstractVariable.Expr):
+            return self
+
+        # Otherwise, create a result variable if it does not exist yet
+        elif not self._result_var:
+            self._result_var = PropertyDef.get().vars.create(name, self.type)
+
+        return self.result_var.ref_expr
+
     def render_pre(self):
         """
         Render initial statements that might be needed to the expression.
