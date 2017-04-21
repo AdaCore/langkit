@@ -23,6 +23,13 @@ class RefEnvs(object):
 
     def __init__(self, resolver, nodes_expr):
         """
+        All nodes that nodes_expr yields must belong to the same analysis unit
+        as the AST node that triggers this RefEnvs. Besides, the lexical
+        environment to which these referenced environments are added must also
+        belong to the same analysis unit. Attempts to add referenced
+        environments that do not respect these rules will trigger a
+        Property_Error.
+
         :param PropertyDef|None resolver: Property that takes no argument
             (explicit or implicit) and that returns a lexical environment.
 
