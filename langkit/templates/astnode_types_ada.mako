@@ -281,7 +281,7 @@
       --  Untyped wrappers for ${cls.name()}
       --
 
-      % for prop in props:
+      % for prop in untyped_wrappers:
          ${prop.untyped_wrapper_decl}
       % endfor
    % endif
