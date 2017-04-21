@@ -595,8 +595,14 @@ class CollectionSingleton(AbstractExpression):
 
     def construct(self):
         from langkit.expressions import If, IsNull, EmptyArray
+
         expr = construct(self.expr)
-        ret = CollectionSingleton.Expr(expr)
+        expr_var = expr.create_result_var('To_Array_Prefix')
+
+        # Use "expr" only for first evaluation, and then use expr_var to refer
+        # to the result. We do this to avoid resolved expression sharing in the
+        # expression tree.
+        ret = CollectionSingleton.Expr(expr_var if self.coerce_null else expr)
         if self.coerce_null:
             return If.Expr(
                 IsNull.construct_static(expr),
