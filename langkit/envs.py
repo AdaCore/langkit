@@ -29,6 +29,7 @@ class RefEnvs(object):
         :param AbstractExpression|None nodes_expr: Abstract expression that
             returns an array of AST nodes. Each node will be given to the above
             resolver in order to get corresponding referenced lexical envs.
+            In this array, null nodes are allowed: they are simply discarded.
         """
         assert resolver
         assert nodes_expr

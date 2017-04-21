@@ -593,7 +593,10 @@
                ${call_prop(ref_envs.nodes_property)};
          begin
             for N of Ref_Env_Nodes.Items loop
-               Reference (Self.Self_Env, N, ${ref_envs.resolver.name}'Access);
+               if N /= null then
+                  Reference (Self.Self_Env, N,
+                             ${ref_envs.resolver.name}'Access);
+               end if;
             end loop;
             Dec_Ref (Ref_Env_Nodes);
          end;
