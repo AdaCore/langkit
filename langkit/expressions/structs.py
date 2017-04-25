@@ -915,12 +915,9 @@ class Match(AbstractExpression):
         matched_expr = NullCheckExpr(
             matched_expr,
             implicit_deref=matched_expr.type.is_entity_type,
-            result_var_name='Match_Prefix',
-            scopeless_result_var=True
+            result_var_name='Match_Prefix'
         )
-        matched_expr_var = matched_expr.result_var
-        outer_scope.add(matched_expr_var)
-        matched_var = matched_expr_var.ref_expr
+        matched_var = matched_expr.result_var.ref_expr
 
         constructed_matchers = []
 
