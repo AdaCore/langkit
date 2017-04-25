@@ -24,8 +24,6 @@ setup(
     requires=['Mako', 'coverage', 'PyYAML', 'enum', 'enum34', 'funcy'],
     packages=['langkit', 'langkit.expressions'],
     package_data={'langkit': [
-        'adalog/adalog.gpr',
-        'adalog/src/*.adb',  'adalog/src/*.ads',  'adalog/src/*.gpr',
         'support/*.adb', 'support/*.ads', 'support/*.gpr',
         'templates/*.mako', 'templates/*/*.mako'
     ]},
