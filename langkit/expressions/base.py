@@ -1099,6 +1099,7 @@ class AbstractVariable(AbstractExpression):
             self.static_type = assert_type(type, CompiledType)
             self.name = name
             self.abstract_var = abstract_var
+            self._ignored = False
 
             super(AbstractVariable.Expr, self).__init__(
                 skippable_refcount=True, abstract_expr=abstract_expr
@@ -1125,7 +1126,15 @@ class AbstractVariable(AbstractExpression):
             If this comes from the language specification, return whether it is
             supposed to be ignored. Return False otherwise.
             """
-            return self.abstract_var.ignored if self.abstract_var else False
+            return self._ignored or (self.abstract_var.ignored
+                                     if self.abstract_var else False)
+
+        def set_ignored(self):
+            """
+            Ignore this resolved variable in the context of the unused bindings
+            warning machinery.
+            """
+            self._ignored = True
 
         def __repr__(self):
             src_name = self.source_name
