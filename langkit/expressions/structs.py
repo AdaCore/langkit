@@ -437,11 +437,14 @@ class FieldAccess(AbstractExpression):
                 # the above.
                 return None
 
-        def _render_pre(self):
-            exprs = [self.receiver_expr] + self.arguments
-            return '\n'.join(e.render_pre() for e in exprs)
+        @property
+        def field_access_expr(self):
+            """
+            Return the code for the expression that evaluates the actual field
+            access.
 
-        def _render_expr(self):
+            :rtype: str
+            """
             prefix = self.prefix
 
             if self.implicit_deref:
@@ -495,6 +498,27 @@ class FieldAccess(AbstractExpression):
                 )
 
             return ret
+
+        def _render_pre(self):
+            sub_exprs = [self.receiver_expr] + self.arguments
+            result = [e.render_pre() for e in sub_exprs]
+
+            if self.result_var:
+                # If we return to a result var, we need to make sure we create
+                # a new ownership share for the result of the field access.
+                # Property calls already do that, but we must inc-ref ourselves
+                # for other cases.
+                result.append('{} := {};'.format(self.result_var.name,
+                                                 self.field_access_expr))
+                if (self.type.is_refcounted() and
+                        self.node_data.access_needs_incref):
+                    result.append('Inc_Ref ({});'.format(self.result_var.name))
+
+            return '\n'.join(result)
+
+        def _render_expr(self):
+            return (self.result_var.name
+                    if self.result_var else self.field_access_expr)
 
         @property
         def subexprs(self):
