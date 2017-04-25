@@ -818,21 +818,20 @@ class ResolvedExpression(object):
             ' not).'.format(self)
         )
 
-        result = self._render_pre()
+        pre = self._render_pre()
+        expr = str(self._render_expr())
 
         # Some expressions build their result directly inside the result
         # variable, and thus their _render_pre() method will only return the
         # name of the result variable. In such cases, there is no need to
         # add a tautological assignment (X:=X), which would hamper generated
         # code reading anyway.
-        if self.result_var and result != str(self.result_var.name):
+        if self.result_var and expr != str(self.result_var.name):
             return '{}\n{} := {};'.format(
-                result,
-                self.result_var.name.camel_with_underscores,
-                self._render_expr()
+                pre, self.result_var.name.camel_with_underscores, expr,
             )
         else:
-            return result
+            return pre
 
     def render_expr(self):
         """
