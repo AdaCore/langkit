@@ -9,8 +9,7 @@ algoritms are not decently commented: in order to see what this is supposed to
 handle, have a look at the testsuite in the stylechecks.tests module.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import ast
 import os
@@ -389,8 +388,7 @@ class PythonLang(LanguageChecker):
                            b'(?P<remaining>.*)')
     from_import_re = re.compile(b'^from (?P<name>[a-zA-Z0-9_.]+) import.*')
 
-    future_expected = {'absolute_import', 'division', 'print_function',
-                       'unicode_literals'}
+    future_expected = {'absolute_import', 'division', 'print_function'}
 
     def check(self, report, filename, content, parse):
         self.custom_check(report, filename, content, parse)

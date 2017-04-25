@@ -3,8 +3,7 @@ Test that garbage tokens left after the main parsing rule completes does not
 crash. It used to!
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import os.path
 

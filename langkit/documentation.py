@@ -21,8 +21,7 @@ All templates can use the "lang" parameter, which contains "ada", "c" or
 "python" depending on the binding for which we generate documentation.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import textwrap
 

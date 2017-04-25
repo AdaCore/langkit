@@ -2,8 +2,7 @@
 Test getting the analysis unit of a node in the properties DSL.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import os.path
 

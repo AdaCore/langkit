@@ -1,5 +1,4 @@
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 from langkit import compiled_types, documentation, expressions
 from langkit.diagnostics import check_source_language, Severity

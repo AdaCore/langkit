@@ -2,7 +2,7 @@
 Code generation was successful
 
 == Incorrect No usage ==
-File "test.py", line 32, in BarNode.prop
+File "test.py", line 31, in BarNode.prop
     Error: Invalid type for Null expression: Integer
 
 Done

@@ -2,8 +2,7 @@
 Test that EquationType bindings in the Python API are properly working.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import os.path
 import sys

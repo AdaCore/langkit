@@ -3,8 +3,7 @@ Test that automatic default values are provided for Then expressions that
 return analysis units.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import os.path
 

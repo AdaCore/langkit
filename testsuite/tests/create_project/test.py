@@ -3,8 +3,7 @@ Test that the "create-project.py" script creates a valid Langkit project by
 generating it and building it.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import os.path
 import subprocess

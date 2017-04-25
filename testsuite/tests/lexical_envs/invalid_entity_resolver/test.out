@@ -1,9 +1,9 @@
 == Bad return type ==
-File "test.py", line 39, in Ref
-  line 39, in Ref._env_mappings_1
+File "test.py", line 38, in Ref
+  line 38, in Ref._env_mappings_1
     Error: Entity resolver properties must return entities (got EntityArrayAccess)
 == Has implicit env ==
-File "test.py", line 39, in Ref
-  line 39, in Ref._env_mappings_3
+File "test.py", line 38, in Ref
+  line 38, in Ref._env_mappings_3
     Error: Entity resolver properties must not use implicit environments
 Done

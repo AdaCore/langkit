@@ -3,8 +3,7 @@ Test that the referenced envs link that cross analysis units stay valid after
 reparsing.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import os.path
 

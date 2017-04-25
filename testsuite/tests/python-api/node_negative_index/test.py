@@ -3,8 +3,7 @@ Test the handling of negative indexes in the Python binding of AST nodes child
 getters.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import os.path
 

@@ -6,8 +6,7 @@ that's even possible?), so this testcase does not cover all cases. We should
 test that some day.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import os.path
 

@@ -2,8 +2,7 @@
 Test AST node synthetization and a basic use of it in the Python API.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import os.path
 

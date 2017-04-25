@@ -3,8 +3,7 @@ Nose-based testcases to make sure the stylechecker works as intended. It is
 also a way to make it explicit how it is intended to work...
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
 import os

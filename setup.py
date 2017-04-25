@@ -2,8 +2,7 @@
 
 """Setup configuration file for the Langkit framework."""
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 from distutils.core import setup
 import os

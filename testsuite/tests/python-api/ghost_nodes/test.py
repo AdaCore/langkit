@@ -2,8 +2,7 @@
 Test that the "is_ghost" AST node predicate works in the Python API.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import os.path
 

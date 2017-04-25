@@ -3,8 +3,7 @@ Data structures for mapping from generated library source lines to the
 properties DSL level.
 """
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 import gdb
 
