@@ -470,7 +470,7 @@ class FieldAccess(AbstractExpression):
                                  self.entity_info_expr))
 
                 # Private non-dispatching properties are declared in
-                # $.Analysis.Body, so they are not genuine Ada primitives, so
+                # $.Analysis' body, so they are not genuine Ada primitives, so
                 # dot notation is not available for them.
                 dot_notation = (self.node_data.is_public
                                 or self.node_data.dispatching)
