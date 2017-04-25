@@ -839,7 +839,7 @@ class AbstractNodeData(object):
     :type: names.Name|None
     """
 
-    def __init__(self, name=None, public=True):
+    def __init__(self, name=None, public=True, access_needs_incref=False):
         """
         :param names.Name|None name: Name for this field. Most of the time,
             this is initially unknown at field creation, so it is filled only
@@ -852,6 +852,10 @@ class AbstractNodeData(object):
             case, inherit vibility from parents. If there is no property to
             override and None is passed, make the property private. This is
             computed in the "compute" pass.
+
+        :param bool access_needs_incref: If True, field access evaluation does
+            not create an ownership share: callers must call Inc_Ref
+            themselves. See the eponym property.
         """
         self._index = next(self._counter)
         self._is_public = public
@@ -887,6 +891,7 @@ class AbstractNodeData(object):
         """
 
         self.uses_envs = False
+        self._access_needs_incref = access_needs_incref
 
     @property
     def is_overriding(self):
@@ -1062,6 +1067,17 @@ class AbstractNodeData(object):
                 for f_n, f_v in mapping.items()
                 if isinstance(f_v, cls)]
 
+    @property
+    def access_needs_incref(self):
+        """
+        Return whether field access evaluation does not create an ownership
+        share. In this case, users must call Inc_Ref themselves. This returns
+        always False for node data whose type is not ref-counted.
+
+        :rtype: bool
+        """
+        return self.type.is_refcounted() and self._access_needs_incref
+
 
 class AbstractField(AbstractNodeData):
     """
@@ -1076,19 +1092,23 @@ class AbstractField(AbstractNodeData):
 
     prefix = AbstractNodeData.PREFIX_FIELD
 
-    def __init__(self, repr=True, doc=None, type=None):
+    def __init__(self, repr=True, doc=None, type=None,
+                 access_needs_incref=False):
         """
         Create an AST node field.
 
         :param bool repr: If true, the field will be displayed when
             pretty-printing the embedding AST node.
         :param str|None doc: User documentation for this field.
+        :param bool access_needs_incref: See AbstractNodeData's constructor.
         """
 
         if not self.concrete:
             raise NotImplementedError()
 
-        super(AbstractField, self).__init__(public=True)
+        super(AbstractField, self).__init__(
+            public=True, access_needs_incref=access_needs_incref
+        )
 
         self.repr = repr
         self._name = None
@@ -1142,7 +1162,8 @@ class UserField(AbstractField):
     Node type, will be ignored by the parsing code.
     """
 
-    def __init__(self, type, repr=False, doc=None, public=True):
+    def __init__(self, type, repr=False, doc=None, public=True,
+                 access_needs_incref=False):
         """
         See inherited doc. In this version we just ensure that a type is
         passed because it is mandatory for data fields. We also set repr to
@@ -1154,8 +1175,12 @@ class UserField(AbstractField):
 
         :param bool is_public: Whether this field is public in the generated
             APIs.
+
+        :param bool access_needs_incref: See AbstractNodeData's constructor.
         """
-        super(UserField, self).__init__(repr, doc, type)
+        super(UserField, self).__init__(
+            repr, doc, type, access_needs_incref=access_needs_incref
+        )
         self._is_public = public
 
     concrete = True
