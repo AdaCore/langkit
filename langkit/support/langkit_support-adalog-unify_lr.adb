@@ -8,22 +8,25 @@ package body Langkit_Support.Adalog.Unify_LR is
    -----------
 
    function Apply (Self : in out Unify_LR) return Boolean is
-      L : L_Type;
-      R : R_Type;
-      B : Boolean;
+      L  : L_Type;
+      R  : R_Type;
+      B  : Boolean;
       LC : R_Type;
    begin
       Trace ("In Unify_LR");
 
       if Is_Defined (Self.Left) then
 
+         L := Get_Value (Self.Left);
+         R := Get_Value (Self.Right);
+         LC := Convert (Self.L_Data, L);
+
          --  Both values are defined, return true if they are equal
          if Is_Defined (Self.Right) then
-            L := Get_Value (Self.Left);
-            R := Get_Value (Self.Right);
-            B := Equals (Convert (Self.L_Data, L), R);
+            B := Equals (LC, R);
             L_Dec_Ref (L);
             R_Dec_Ref (R);
+            R_Dec_Ref (LC);
             Trace ("In Unify_LR, Left value is : " & Element_Image (L));
             Trace ("In Unify_LR, Right value is : " & Element_Image (R));
             Trace ("In Unify_LR, both defined, returning " & B'Image);
@@ -32,9 +35,6 @@ package body Langkit_Support.Adalog.Unify_LR is
 
          --  Left is defined, right is not, give right the value of left and
          --  return true.
-         L := Get_Value (Self.Left);
-         R := Get_Value (Self.Right);
-         LC := Convert (Self.L_Data, L);
          B := Set_Value (Self.Right, LC);
 
          if B then
