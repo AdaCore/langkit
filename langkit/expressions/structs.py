@@ -981,5 +981,8 @@ class Match(AbstractExpression):
                                            scope=inner_scope)
             result = If.Expr(guard, expr_with_scope, result, rtype)
 
-        return Let.Expr([matched_var], [matched_expr], result,
+        dummy_var = PropertyDef.get().vars.create('Dummy', matched_expr.type)
+        dummy_resolved_var = dummy_var.ref_expr
+        dummy_resolved_var.set_ignored()
+        return Let.Expr([dummy_resolved_var], [matched_expr], result,
                         abstract_expr=self)
