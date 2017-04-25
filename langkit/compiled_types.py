@@ -1564,6 +1564,10 @@ class StructMetaclass(CompiledTypeMetaclass):
         # expression) since the implementation comes from the hard-coded root
         # AST node type definition.
         return [
+            # The following fields return LexicalEnvType values, which are
+            # ref-counted. However these specific envs are owned by the
+            # analysis unit, so they are not ref-counted.
+
             ("node_env", BuiltinField(
                 type=LexicalEnvType, public=False,
                 doc='For nodes that introduce a new environment, return the'
@@ -1582,6 +1586,9 @@ class StructMetaclass(CompiledTypeMetaclass):
                     " the root AST node or for AST nodes for which no one has"
                     " a reference to the parent."
             )),
+
+            # The following builtin fields are implemented as a property, so
+            # there is no need for an additional inc-ref.
             ("parents", BuiltinField(
                 type=mcs.root_grammar_class.array_type(),
                 doc="Return an array that contains the lexical parents (this"
@@ -2388,7 +2395,9 @@ class ASTNode(Struct):
                 'MD': BuiltinField(
                     T.env_md, doc='The metadata associated to the AST node'
                 ),
-                'rebindings': BuiltinField(EnvRebindingsType, doc=""),
+                'rebindings': BuiltinField(EnvRebindingsType,
+                                           access_needs_incref=True,
+                                           doc=""),
             })
         return StructMetaclass.entity_info
 
@@ -2405,6 +2414,7 @@ class ASTNode(Struct):
             (Struct, ), {
                 'el': BuiltinField(cls, doc='The stored AST node'),
                 'info': BuiltinField(cls.entity_info(),
+                                     access_needs_incref=True,
                                      doc='Entity info for this node'),
                 'is_entity_type': True,
                 'el_type': cls
