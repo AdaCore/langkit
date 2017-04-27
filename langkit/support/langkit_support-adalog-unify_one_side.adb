@@ -19,7 +19,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
 
    function Apply (Self : in out Unify_Rec) return Boolean is
    begin
-      Trace ("In Unify");
+      Trace ("In Unify_One_Side");
       if Is_Defined (Self.Left) then
 
          Trace ("Left defined");
