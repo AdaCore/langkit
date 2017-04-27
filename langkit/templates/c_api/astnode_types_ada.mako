@@ -7,7 +7,8 @@
      (Node    : ${node_type};
 
       % for arg in field.exposed_arguments:
-         ${arg.name} : ${arg.type.c_type(capi).name};
+         ${arg.name} : ${'access constant ' if arg.type.is_ada_record else ''}
+                       ${arg.type.c_type(capi).name};
       % endfor
 
       Value_P : ${field.type.c_type(capi).name}_Ptr) return int
@@ -49,27 +50,33 @@
       ## For each input argument, convert the C-level value into an Ada-level
       ## one.
       % for arg in field.explicit_arguments:
+         <%
+            arg_ref = arg.name
+
+            if arg.type.is_ada_record:
+               arg_ref = '{}.all'.format(arg_ref)
+         %>
          Unwrapped_${arg.name} : constant ${arg.type.name()} :=
             % if is_enum(arg.type):
-               ${field.type} (${arg.name})
+               ${field.type} (${arg_ref})
             % elif is_bool(arg.type):
-               ${arg.name} /= 0
+               ${arg_ref} /= 0
             % elif is_long(arg.type):
-               Integer (${arg.name})
+               Integer (${arg_ref})
             % elif is_analysis_unit(arg.type):
-               Unwrap (${arg.name})
+               Unwrap (${arg_ref})
             % elif is_analysis_kind(arg.type):
-               Unit_Kind'Val (${arg.name})
+               Unit_Kind'Val (${arg_ref})
             % elif arg.type.is_ast_node:
-               ${arg.type.name()} (Unwrap (${arg.name}))
+               ${arg.type.name()} (Unwrap (${arg_ref}))
             % elif is_token_type(arg.type):
-               Token (Node, Token_Index ({arg.name}.Index))
+               Token (Node, Token_Index ({arg_ref}.Index))
             % elif is_symbol_type(arg.type):
-               Unwrap (Unwrapped_Node.Unit, ${arg.name})
+               Unwrap (Unwrapped_Node.Unit, ${arg_ref})
             % elif simple_wrapping(arg.type):
-               Unwrap (${arg.name})
+               Unwrap (${arg_ref})
             % else:
-               ${arg.name}
+               ${arg_ref}
             % endif
          ;
       % endfor
@@ -78,7 +85,7 @@
 
       % for arg in field.explicit_arguments:
          % if is_token_type(arg.type):
-            if Unwrap (${arg.name}).Unit /= Unwrapped_Node.Unit then
+            if Unwrap (${arg_ref}).Unit /= Unwrapped_Node.Unit then
                raise Constraint_Error with
                  ("The input token does not belong to the same unit as"
                   & " the input node");

@@ -293,6 +293,12 @@ class CompiledType(object):
     not as a real null value.
     """
 
+    is_ada_record = False
+    """
+    Whether the type used in the C API is implemented as an Ada record. If so,
+    we must pass them by reference in for C API interface functions.
+    """
+
     def __init__(self):
         assert False, (
             'CompiledType subclasses are not meant to be instantiated'

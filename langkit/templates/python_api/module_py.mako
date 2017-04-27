@@ -1339,7 +1339,12 @@ _${field.accessor_basename.lower} = _import_func(
     '${capi.get_name(field.accessor_basename)}',
     [${c_node},
      % for arg in field.exposed_arguments:
-        ${pyapi.type_internal_name(arg.type)},
+        <%
+            type_expr = pyapi.type_internal_name(arg.type)
+            if arg.type.is_ada_record:
+                type_expr = 'ctypes.POINTER({})'.format(type_expr)
+        %>
+        ${type_expr},
      % endfor
      ctypes.POINTER(${pyapi.type_internal_name(field.type)})],
     ctypes.c_int

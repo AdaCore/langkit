@@ -15,21 +15,25 @@
             )
 
             # Expression for the C value for field evaluation
+            def unwrap_arg(arg_type, arg_expr):
+               return pyapi.unwrap_value(arg_expr, arg_type)
+
             explicit_args = [
-                pyapi.unwrap_value(arg.name.lower, arg.type)
+                unwrap_arg(arg.type, arg.name.lower)
                 for arg in field.explicit_arguments
             ]
             implicit_args = [
                 # If we must use implicit args, unwrap them from the "kwargs"
                 # local variable, otherwise just use default values for them.
-                (pyapi.unwrap_value(
+                unwrap_arg(
+                    arg.type,
                     'kwargs.get({}, {})'.format(
                         repr(arg.name.lower),
                         arg.type.py_nullexpr()
-                    ),
-                    arg.type
-                 ) if with_implicit_args else
-                     pyapi.unwrap_value(arg.type.py_nullexpr(), arg.type))
+                    )
+                 ) if with_implicit_args else unwrap_arg(
+                    arg.type, arg.type.py_nullexpr()
+                )
                 for arg in field.exposed_implicit_arguments
             ]
             eval_args = ([c_result_constructor, c_accessor]
