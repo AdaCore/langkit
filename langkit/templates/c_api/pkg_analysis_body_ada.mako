@@ -1236,8 +1236,8 @@ package body ${ada_lib_name}.Analysis.C is
 
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};
-      Name : ${text_type}) return ${T.root_node.entity().array_type().name()}
-   is
+      Name : ${text_type})
+      return ${T.root_node.entity().array_type().name()} is
    begin
       Clear_Last_Exception;
 
