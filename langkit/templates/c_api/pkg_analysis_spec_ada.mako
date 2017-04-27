@@ -158,7 +158,7 @@ package ${ada_lib_name}.Analysis.C is
    type ${unit_provider_get_unit_from_name_type} is access function
      (Data        : System.Address;
       Context     : ${analysis_context_type};
-      Name        : access constant ${text_type};
+      Name        : ${text_type};
       Kind        : ${unit_kind_type};
       Charset     : chars_ptr;
       Reparse     : int;
@@ -233,7 +233,7 @@ package ${ada_lib_name}.Analysis.C is
    % if ctx.default_unit_provider:
       function ${capi.get_name('get_analysis_unit_from_provider')}
         (Context     : ${analysis_context_type};
-         Name        : access constant ${text_type};
+         Name        : ${text_type};
          Kind        : ${unit_kind_type};
          Charset     : chars_ptr;
          Reparse     : int;
@@ -432,7 +432,7 @@ package ${ada_lib_name}.Analysis.C is
    ${ada_c_doc('langkit.node_child', 3)}
 
    function ${capi.get_name('text_to_locale_string')}
-     (Text : access constant ${text_type}) return System.Address
+     (Text : ${text_type}) return System.Address
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('text_to_locale_string')}";
@@ -467,8 +467,7 @@ package ${ada_lib_name}.Analysis.C is
            External_name => "${capi.get_name('lexical_env_node')}";
 
    function ${capi.get_name('lexical_env_get')}
-     (Env  : ${lexical_env_type};
-      Name : access constant ${text_type})
+     (Env : ${lexical_env_type}; Name : ${text_type})
       return ${(T.root_node.entity().array_type().name())}
       with Export        => True,
            Convention    => C,
