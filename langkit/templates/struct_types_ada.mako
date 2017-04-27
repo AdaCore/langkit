@@ -30,7 +30,7 @@
          null;
       % endif
    end record
-     with Convention => C_Pass_By_Copy;
+     with Convention => C;
    ${cls.nullexpr()} : constant ${cls.name()} :=
    % if fields or extensions:
    (others => <>);

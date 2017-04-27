@@ -1838,6 +1838,8 @@ class Struct(CompiledType):
     :type: dict[(bool, AbstractNodeData), dict[str, AbstractField]]
     """
 
+    is_ada_record = True
+
     # ASTNode subclasses are exposed by default, and a compile pass will tag
     # all Struct subclasses that are exposed through the public API.
     _exposed = False
@@ -2225,6 +2227,7 @@ class ASTNode(Struct):
     is_generic_list_type = False
     is_list_type = False
     is_root_list_type = False
+    is_ada_record = False
 
     is_ast_node = True
 
