@@ -289,7 +289,7 @@ package body ${ada_lib_name}.Analysis.C is
 
    procedure ${capi.get_name('unit_first_token')}
      (Unit  : ${analysis_unit_type};
-      Token : ${token_type}_Ptr) is
+      Token : access ${token_type}) is
    begin
       Clear_Last_Exception;
 
@@ -306,7 +306,7 @@ package body ${ada_lib_name}.Analysis.C is
 
    procedure ${capi.get_name('unit_last_token')}
      (Unit  : ${analysis_unit_type};
-      Token : ${token_type}_Ptr) is
+      Token : access ${token_type}) is
    begin
       Clear_Last_Exception;
 
@@ -388,7 +388,7 @@ package body ${ada_lib_name}.Analysis.C is
    function ${capi.get_name("unit_diagnostic")}
      (Unit         : ${analysis_unit_type};
       N            : unsigned;
-      Diagnostic_P : ${diagnostic_type}_Ptr) return int
+      Diagnostic_P : access ${diagnostic_type}) return int
    is
    begin
       Clear_Last_Exception;
@@ -620,7 +620,7 @@ package body ${ada_lib_name}.Analysis.C is
 
    procedure ${capi.get_name("node_sloc_range")}
      (Node         : ${node_type};
-      Sloc_Range_P : ${sloc_range_type}_Ptr) is
+      Sloc_Range_P : access ${sloc_range_type}) is
    begin
       Clear_Last_Exception;
 
@@ -671,7 +671,7 @@ package body ${ada_lib_name}.Analysis.C is
    function ${capi.get_name("node_child")}
      (Node    : ${node_type};
       N       : unsigned;
-      Child_P : ${node_type}_Ptr) return int is
+      Child_P : access ${node_type}) return int is
    begin
       Clear_Last_Exception;
 
@@ -877,7 +877,7 @@ package body ${ada_lib_name}.Analysis.C is
 
    procedure ${capi.get_name('token_next')}
      (Token      : ${token_type}_Ptr;
-      Next_Token : ${token_type}_Ptr)
+      Next_Token : access ${token_type})
    is
    begin
       Clear_Last_Exception;
@@ -894,7 +894,7 @@ package body ${ada_lib_name}.Analysis.C is
 
    procedure ${capi.get_name('token_previous')}
      (Token          : ${token_type}_Ptr;
-      Previous_Token : ${token_type}_Ptr)
+      Previous_Token : access ${token_type})
    is
    begin
       Clear_Last_Exception;
@@ -911,7 +911,7 @@ package body ${ada_lib_name}.Analysis.C is
 
    function ${capi.get_name('token_range_text')}
      (First, Last : ${token_type}_Ptr;
-      Text        : ${text_type}_Ptr) return int
+      Text        : access ${text_type}) return int
    is
    begin
       Clear_Last_Exception;
@@ -995,7 +995,7 @@ package body ${ada_lib_name}.Analysis.C is
                     Is_Allocated => 0));
    end Wrap;
 
-   procedure ${capi.get_name('destroy_text')} (T : ${text_type}_Ptr) is
+   procedure ${capi.get_name('destroy_text')} (T : access ${text_type}) is
    begin
       Clear_Last_Exception;
       declare

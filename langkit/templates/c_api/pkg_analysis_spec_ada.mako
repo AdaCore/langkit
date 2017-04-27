@@ -124,7 +124,7 @@ package ${ada_lib_name}.Analysis.C is
    ${ada_c_doc('langkit.free', 3)}
    --  Helper to free objects in dynamic languages
 
-   procedure ${capi.get_name('destroy_text')} (T : ${text_type}_Ptr)
+   procedure ${capi.get_name('destroy_text')} (T : access ${text_type})
      with Export        => True,
           Convention    => C,
           External_Name => "${capi.get_name('destroy_text')}";
@@ -263,7 +263,7 @@ package ${ada_lib_name}.Analysis.C is
 
    procedure ${capi.get_name('unit_first_token')}
      (Unit  : ${analysis_unit_type};
-      Token : ${token_type}_Ptr)
+      Token : access ${token_type})
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('unit_first_token')}";
@@ -271,7 +271,7 @@ package ${ada_lib_name}.Analysis.C is
 
    procedure ${capi.get_name('unit_last_token')}
      (Unit  : ${analysis_unit_type};
-      Token : ${token_type}_Ptr)
+      Token : access ${token_type})
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('unit_last_token')}";
@@ -309,7 +309,7 @@ package ${ada_lib_name}.Analysis.C is
    function ${capi.get_name('unit_diagnostic')}
      (Unit         : ${analysis_unit_type};
       N            : unsigned;
-      Diagnostic_P : ${diagnostic_type}_Ptr) return int
+      Diagnostic_P : access ${diagnostic_type}) return int
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('unit_diagnostic')}";
@@ -401,7 +401,7 @@ package ${ada_lib_name}.Analysis.C is
 
    procedure ${capi.get_name('node_sloc_range')}
      (Node         : ${node_type};
-      Sloc_Range_P : ${sloc_range_type}_Ptr)
+      Sloc_Range_P : access ${sloc_range_type})
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('node_sloc_range')}";
@@ -425,7 +425,7 @@ package ${ada_lib_name}.Analysis.C is
    function ${capi.get_name('node_child')}
      (Node    : ${node_type};
       N       : unsigned;
-      Child_P : ${node_type}_Ptr) return int
+      Child_P : access ${node_type}) return int
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('node_child')}";
@@ -576,7 +576,7 @@ package ${ada_lib_name}.Analysis.C is
 
    procedure ${capi.get_name('token_next')}
      (Token      : ${token_type}_Ptr;
-      Next_Token : ${token_type}_Ptr)
+      Next_Token : access ${token_type})
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('token_next')}";
@@ -584,7 +584,7 @@ package ${ada_lib_name}.Analysis.C is
 
    procedure ${capi.get_name('token_previous')}
      (Token          : ${token_type}_Ptr;
-      Previous_Token : ${token_type}_Ptr)
+      Previous_Token : access ${token_type})
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('token_previous')}";
@@ -592,7 +592,7 @@ package ${ada_lib_name}.Analysis.C is
 
    function ${capi.get_name('token_range_text')}
      (First, Last : ${token_type}_Ptr;
-      Text        : ${text_type}_Ptr) return int
+      Text        : access ${text_type}) return int
       with Export => True,
            Convention => C,
            External_Name => "${capi.get_name('token_range_text')}";
