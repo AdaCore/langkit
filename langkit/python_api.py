@@ -71,7 +71,8 @@ class PythonAPISettings(AbstractAPISettings):
                 type.name().camel,
                 inc_ref
             )),
-            (ct.LexicalEnvType, lambda _: 'LexicalEnv._wrap({})'),
+            (ct.LexicalEnvType, lambda _:
+                'LexicalEnv._wrap({{}}, inc_ref={})'.format(inc_ref)),
             (ct.LogicVarType, lambda _: 'LogicVar._wrap({})'),
             (ct.EquationType, lambda _: 'Equation._wrap({})'),
             (ct.EnvRebindingsType, lambda _:

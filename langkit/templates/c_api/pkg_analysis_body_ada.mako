@@ -1267,6 +1267,21 @@ package body ${ada_lib_name}.Analysis.C is
          return null;
    end;
 
+   procedure ${capi.get_name('lexical_env_inc_ref')}
+     (Env : ${lexical_env_type}) is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         E : constant AST_Envs.Lexical_Env := Unwrap (Env);
+      begin
+         Inc_Ref (E);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
    procedure ${capi.get_name('lexical_env_dec_ref')}
      (Env : ${lexical_env_type}) is
    begin

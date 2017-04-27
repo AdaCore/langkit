@@ -394,6 +394,9 @@ extern ${T.root_node.entity().array_type().c_type(capi).name}
 ${capi.get_name('lexical_env_get')}(${lexical_env_type} env,
                                     ${text_type} *name);
 
+extern void
+${capi.get_name('lexical_env_inc_ref')}(${lexical_env_type} env);
+
 /* Decrement the ref-count for "env". This deallocates it if the ref-count
    drops to 0.  */
 extern void

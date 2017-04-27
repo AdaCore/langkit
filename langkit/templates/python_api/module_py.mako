@@ -424,8 +424,10 @@ class LexicalEnv(object):
 
     _exposed = False
 
-    def __init__(self, c_value):
+    def __init__(self, c_value, inc_ref=False):
         self._c_value = c_value
+        if inc_ref:
+            self._inc_ref(self._c_value)
 
     @property
     def parent(self):
@@ -449,6 +451,10 @@ class LexicalEnv(object):
     class _c_type(ctypes.c_void_p):
         pass
 
+    _inc_ref = staticmethod(_import_func(
+        '${capi.get_name("lexical_env_inc_ref")}',
+        [_c_type], None
+    ))
     _dec_ref = staticmethod(_import_func(
         '${capi.get_name("lexical_env_dec_ref")}',
         [_c_type], None
@@ -463,8 +469,8 @@ class LexicalEnv(object):
         return value._c_value
 
     @classmethod
-    def _wrap(cls, c_value):
-        return cls(c_value) if c_value else None
+    def _wrap(cls, c_value, inc_ref=False):
+        return cls(c_value, inc_ref) if c_value else None
 
     Empty = None
     ${py_doc('langkit.lexical_env_empty', 4)}
