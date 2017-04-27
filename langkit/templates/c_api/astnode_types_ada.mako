@@ -11,7 +11,7 @@
                        ${arg.type.c_type(capi).name};
       % endfor
 
-      Value_P : ${field.type.c_type(capi).name}_Ptr) return int
+      Value_P : access ${field.type.c_type(capi).name}) return int
 </%def>
 
 <%def name="accessor_decl(field)">
