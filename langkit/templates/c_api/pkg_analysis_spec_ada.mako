@@ -85,7 +85,7 @@ package ${ada_lib_name}.Analysis.C is
       Text                      : ${text_type};
       Sloc_Range                : ${sloc_range_type};
    end record
-     with Convention => C_Pass_By_Copy;
+     with Convention => C;
    ${ada_c_doc('langkit.token_type', 3)}
 
    type ${diagnostic_type} is record

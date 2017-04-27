@@ -758,6 +758,7 @@ class Token(BasicType):
     is_ptr = False
     _name = "Token_Type"
     _nullexpr = "No_Token"
+    is_ada_record = True
 
     has_special_storage = True
 
