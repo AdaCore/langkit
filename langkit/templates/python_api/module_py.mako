@@ -248,9 +248,10 @@ class AnalysisContext(object):
         ${py_doc('langkit.get_unit_from_provider', 8)}
         _name = _text._unwrap(name)
         _kind = _unwrap_unit_kind(kind)
-        c_value = _get_analysis_unit_from_provider(self._c_value, _name, _kind,
-                                                   charset or '', reparse,
-                                                   with_trivia)
+        c_value = _get_analysis_unit_from_provider(
+            self._c_value, ctypes.byref(_name), _kind, charset or '', reparse,
+            with_trivia
+        )
         if c_value:
             return AnalysisUnit(c_value)
         else:
@@ -436,7 +437,8 @@ class LexicalEnv(object):
 
     def get(self, name):
         ${py_doc('langkit.lexical_env_get', 8)}
-        result = _lexical_env_get(self._c_value, _text._unwrap(name))
+        result = _lexical_env_get(self._c_value,
+                                  ctypes.byref(_text._unwrap(name)))
         return ${pyapi.wrap_value('result',
                                   T.root_node.entity().array_type())}
 
@@ -1199,7 +1201,7 @@ _get_analysis_unit_from_buffer = _import_func(
 _get_analysis_unit_from_provider = _import_func(
     '${capi.get_name("get_analysis_unit_from_provider")}',
     [AnalysisContext._c_type,  # context
-     _text,                    # name
+     ctypes.POINTER(_text),    # name
      ctypes.c_int,             # kind
      ctypes.c_char_p,          # charset
      ctypes.c_int],            # reparse
@@ -1324,7 +1326,7 @@ _lexical_env_node = _import_func(
 )
 _lexical_env_get = _import_func(
     '${capi.get_name("lexical_env_get")}',
-    [LexicalEnv._c_type, _text],
+    [LexicalEnv._c_type, ctypes.POINTER(_text)],
     ${pyapi.type_internal_name(T.root_node.entity().array_type())}
 )
 _lexical_env_dec_ref = _import_func(

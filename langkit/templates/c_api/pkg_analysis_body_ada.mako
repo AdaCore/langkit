@@ -215,7 +215,7 @@ package body ${ada_lib_name}.Analysis.C is
    % if ctx.default_unit_provider:
       function ${capi.get_name("get_analysis_unit_from_provider")}
         (Context     : ${analysis_context_type};
-         Name        : ${text_type};
+         Name        : access constant ${text_type};
          Kind        : ${unit_kind_type};
          Charset     : chars_ptr;
          Reparse     : int;
@@ -698,7 +698,7 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name("text_to_locale_string")}
-     (Text : ${text_type}) return System.Address is
+     (Text : access constant ${text_type}) return System.Address is
    begin
       Clear_Last_Exception;
 
@@ -1110,13 +1110,14 @@ package body ${ada_lib_name}.Analysis.C is
       Reparse     : Boolean := False;
       With_Trivia : Boolean := False) return Analysis_Unit
    is
-      Name_Access : Text_Access := Name'Unrestricted_Access;
-      C_Charset   : chars_ptr := (if Charset'Length = 0
-                                  then Null_Ptr
-                                  else New_String (Charset));
+      Name_Access  : Text_Access := Name'Unrestricted_Access;
+      Wrapped_Name : aliased constant ${text_type} := Wrap (Name_Access);
+      C_Charset    : chars_ptr := (if Charset'Length = 0
+                                   then Null_Ptr
+                                   else New_String (Charset));
 
       C_Result    : ${analysis_unit_type} := Provider.Get_Unit_From_Name_Func
-        (Provider.Data, Wrap (Context), Wrap (Name_Access), Wrap (Kind),
+        (Provider.Data, Wrap (Context), Wrapped_Name'Access, Wrap (Kind),
          C_Charset, Boolean'Pos (Reparse), Boolean'Pos (With_Trivia));
    begin
       Free (C_Charset);
@@ -1236,7 +1237,7 @@ package body ${ada_lib_name}.Analysis.C is
 
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};
-      Name : ${text_type})
+      Name : access constant ${text_type})
       return ${T.root_node.entity().array_type().name()} is
    begin
       Clear_Last_Exception;
@@ -1254,7 +1255,7 @@ package body ${ada_lib_name}.Analysis.C is
 
          declare
             U : constant Analysis_Unit := E.Node.Unit;
-            N : constant Symbol_Type := Unwrap (U, Name);
+            N : constant Symbol_Type := Unwrap (U, Name.all);
          begin
             return Create (if N = null
                            then (1 .. 0 => <>)

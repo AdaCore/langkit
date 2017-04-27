@@ -787,6 +787,9 @@ class Symbol(BasicType):
     _name = "Symbol_Type"
     _nullexpr = "null"
 
+    # See below: symbols are represented in the C API as text records
+    is_ada_record = True
+
     @classmethod
     def c_type(cls, c_api_settings):
         return CAPIType(c_api_settings, 'text')

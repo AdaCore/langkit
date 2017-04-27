@@ -162,7 +162,7 @@ ${c_doc('langkit.unit_provider_get_unit_from_name_type')}
 typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
    void *data,
    ${analysis_context_type} context,
-   ${text_type} name,
+   ${text_type} *name,
    ${unit_kind_type} kind,
    const char *charset,
    int reparse,
@@ -242,7 +242,7 @@ ${c_doc('langkit.get_unit_from_provider')}
 extern ${analysis_unit_type}
 ${capi.get_name("get_analysis_unit_from_provider")}(
         ${analysis_context_type} context,
-        ${text_type} name,
+        ${text_type} *name,
         ${unit_kind_type} kind,
         const char *charset,
         int reparse,
@@ -364,7 +364,7 @@ ${capi.get_name("node_child")}(${node_type} node,
 
 ${c_doc('langkit.text_to_locale_string')}
 extern char *
-${capi.get_name("text_to_locale_string")}(${text_type} text);
+${capi.get_name("text_to_locale_string")}(${text_type} *text);
 
 ${c_doc('langkit.free')}
 extern void
@@ -392,7 +392,7 @@ ${capi.get_name('lexical_env_node')}(${lexical_env_type} env);
 ${c_doc('langkit.lexical_env_get')}
 extern ${T.root_node.entity().array_type().c_type(capi).name}
 ${capi.get_name('lexical_env_get')}(${lexical_env_type} env,
-                                    ${text_type} name);
+                                    ${text_type} *name);
 
 /* Decrement the ref-count for "env". This deallocates it if the ref-count
    drops to 0.  */
