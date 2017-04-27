@@ -443,11 +443,16 @@ class LexicalEnv(object):
                                   T.root_node.entity().array_type())}
 
     def __del__(self):
-        _lexical_env_dec_ref(self._c_value)
+        self._dec_ref(self._c_value)
         self._c_value = None
 
     class _c_type(ctypes.c_void_p):
         pass
+
+    _dec_ref = staticmethod(_import_func(
+        '${capi.get_name("lexical_env_dec_ref")}',
+        [_c_type], None
+    ))
 
     @classmethod
     def _unwrap(cls, value):
@@ -1328,10 +1333,6 @@ _lexical_env_get = _import_func(
     '${capi.get_name("lexical_env_get")}',
     [LexicalEnv._c_type, ctypes.POINTER(_text)],
     ${pyapi.type_internal_name(T.root_node.entity().array_type())}
-)
-_lexical_env_dec_ref = _import_func(
-   '${capi.get_name("lexical_env_dec_ref")}',
-   [LexicalEnv._c_type], None
 )
 % endif
 
