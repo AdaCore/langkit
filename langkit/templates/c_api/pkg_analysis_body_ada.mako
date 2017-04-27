@@ -636,13 +636,13 @@ package body ${ada_lib_name}.Analysis.C is
 
    function ${capi.get_name("lookup_in_node")}
      (Node : ${node_type};
-      Sloc : ${sloc_type}_Ptr) return ${node_type} is
+      Sloc : ${sloc_type}) return ${node_type} is
    begin
       Clear_Last_Exception;
 
       declare
          N : constant ${root_node_type_name} := Unwrap (Node);
-         S : constant Source_Location := Unwrap (Sloc.all);
+         S : constant Source_Location := Unwrap (Sloc);
       begin
          return Wrap (Lookup (N, S));
       end;
@@ -876,13 +876,13 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    procedure ${capi.get_name('token_next')}
-     (Token      : ${token_type}_Ptr;
+     (Token      : ${token_type};
       Next_Token : access ${token_type})
    is
    begin
       Clear_Last_Exception;
       declare
-         T  : constant Token_Type := Unwrap (Token.all);
+         T  : constant Token_Type := Unwrap (Token);
          NT : constant Token_Type := Next (T);
       begin
          Next_Token.all := Wrap (NT);
@@ -893,13 +893,13 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    procedure ${capi.get_name('token_previous')}
-     (Token          : ${token_type}_Ptr;
+     (Token          : ${token_type};
       Previous_Token : access ${token_type})
    is
    begin
       Clear_Last_Exception;
       declare
-         T  : constant Token_Type := Unwrap (Token.all);
+         T  : constant Token_Type := Unwrap (Token);
          PT : constant Token_Type := Previous (T);
       begin
          Previous_Token.all := Wrap (PT);
@@ -910,14 +910,14 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name('token_range_text')}
-     (First, Last : ${token_type}_Ptr;
+     (First, Last : ${token_type};
       Text        : access ${text_type}) return int
    is
    begin
       Clear_Last_Exception;
       declare
-         FD : constant Token_Data_Type := Data (Unwrap (First.all));
-         LD : constant Token_Data_Type := Data (Unwrap (Last.all));
+         FD : constant Token_Data_Type := Data (Unwrap (First));
+         LD : constant Token_Data_Type := Data (Unwrap (Last));
       begin
          if First.Token_Data /= Last.Token_Data then
             return 0;
@@ -935,14 +935,14 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name('token_is_equivalent')}
-     (Left  : ${token_type}_Ptr;
-      Right : ${token_type}_Ptr) return ${bool_type}
+     (Left  : ${token_type};
+      Right : ${token_type}) return ${bool_type}
    is
    begin
       Clear_Last_Exception;
          declare
-         L  : constant Token_Type := Unwrap (Left.all);
-         R  : constant Token_Type := Unwrap (Right.all);
+         L  : constant Token_Type := Unwrap (Left);
+         R  : constant Token_Type := Unwrap (Right);
       begin
          return ${bool_type} (Boolean'Pos (Is_Equivalent (L, R)));
       end;

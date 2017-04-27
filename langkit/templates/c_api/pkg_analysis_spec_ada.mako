@@ -409,7 +409,7 @@ package ${ada_lib_name}.Analysis.C is
 
    function ${capi.get_name('lookup_in_node')}
      (Node : ${node_type};
-      Sloc : ${sloc_type}_Ptr) return ${node_type}
+      Sloc : ${sloc_type}) return ${node_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('lookup_in_node')}";
@@ -575,7 +575,7 @@ package ${ada_lib_name}.Analysis.C is
    ${ada_c_doc('langkit.token_kind_name', 3)}
 
    procedure ${capi.get_name('token_next')}
-     (Token      : ${token_type}_Ptr;
+     (Token      : ${token_type};
       Next_Token : access ${token_type})
       with Export        => True,
            Convention    => C,
@@ -583,7 +583,7 @@ package ${ada_lib_name}.Analysis.C is
    ${ada_c_doc('langkit.token_next', 3)}
 
    procedure ${capi.get_name('token_previous')}
-     (Token          : ${token_type}_Ptr;
+     (Token          : ${token_type};
       Previous_Token : access ${token_type})
       with Export        => True,
            Convention    => C,
@@ -591,7 +591,7 @@ package ${ada_lib_name}.Analysis.C is
    ${ada_c_doc('langkit.token_previous', 3)}
 
    function ${capi.get_name('token_range_text')}
-     (First, Last : ${token_type}_Ptr;
+     (First, Last : ${token_type};
       Text        : access ${text_type}) return int
       with Export => True,
            Convention => C,
@@ -599,8 +599,8 @@ package ${ada_lib_name}.Analysis.C is
    ${ada_c_doc('langkit.token_range_text', 3)}
 
    function ${capi.get_name('token_is_equivalent')}
-     (Left  : ${token_type}_Ptr;
-      Right : ${token_type}_Ptr) return ${bool_type}
+     (Left  : ${token_type};
+      Right : ${token_type}) return ${bool_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('token_is_equivalent')}";
