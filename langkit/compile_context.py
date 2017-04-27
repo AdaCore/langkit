@@ -1133,7 +1133,7 @@ class CompileCtx(object):
         with names.camel_with_underscores:
             write_ada_file(
                 path.join(file_root, "src"), ADA_BODY, ["parse"],
-                self.render_template("interactive_main_ada", _self=self)
+                self.render_template("main_parse_ada", _self=self)
             )
 
         with names.lower:
