@@ -2635,6 +2635,9 @@ class Literal(AbstractExpression):
         return LiteralExpr(lit_str, rtype, skippable_refcount=True,
                            abstract_expr=self)
 
+    def __repr__(self):
+        return '<Literal {}>'.format(self.literal)
+
 
 class BasicExpr(ResolvedExpression):
     """
