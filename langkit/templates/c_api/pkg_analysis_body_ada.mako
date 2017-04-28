@@ -1327,6 +1327,40 @@ package body ${ada_lib_name}.Analysis.C is
          Set_Last_Exception (Exc);
    end;
 
+   -------------------------
+   -- Equation primitives --
+   -------------------------
+
+   procedure ${capi.get_name('equation_inc_ref')}
+     (Self : ${equation_type}) is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         E : constant Logic_Equation := Unwrap (Self);
+      begin
+         Inc_Ref (E);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
+   procedure ${capi.get_name('equation_dec_ref')}
+     (Self : ${equation_type}) is
+   begin
+      Clear_Last_Exception;
+
+      declare
+         E : Logic_Equation := Unwrap (Self);
+      begin
+         Dec_Ref (E);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+   end;
+
    ---------------------------------------
    -- Kind-specific AST node primitives --
    ---------------------------------------

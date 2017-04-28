@@ -491,6 +491,22 @@ package ${ada_lib_name}.Analysis.C is
            External_name => "${capi.get_name('env_rebindings_dec_ref')}";
 
    -------------------------
+   -- Equation primitives --
+   -------------------------
+
+   procedure ${capi.get_name('equation_inc_ref')}
+     (Self : ${equation_type})
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('equation_inc_ref')}";
+
+   procedure ${capi.get_name('equation_dec_ref')}
+     (Self : ${equation_type})
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('equation_dec_ref')}";
+
+   -------------------------
    -- Extensions handling --
    -------------------------
 

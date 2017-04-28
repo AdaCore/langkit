@@ -401,6 +401,13 @@ ${capi.get_name('lexical_env_inc_ref')}(${lexical_env_type} env);
    drops to 0.  */
 extern void
 ${capi.get_name('lexical_env_dec_ref')}(${lexical_env_type} env);
+
+/* Equation primitives */
+extern void
+${capi.get_name('equation_inc_ref')}(${equation_type} self);
+
+extern void
+${capi.get_name('equation_dec_ref')}(${equation_type} self);
 % endif
 
 /*
