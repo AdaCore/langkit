@@ -5,6 +5,8 @@ properties DSL level.
 
 from __future__ import absolute_import, division, print_function
 
+import shlex
+
 import gdb
 
 from langkit.gdb.state import Binding
@@ -88,11 +90,13 @@ class DebugInfo(object):
             if not line.startswith('--#'):
                 continue
             line = line[3:].strip()
-            chunks = line.split(None, 1)
-            if len(chunks) == 0:
+            args = shlex.split(line)
+
+            try:
+                name = args.pop(0)
+            except IndexError:
                 raise ParseError(line_no, 'directive name is missing')
-            name = chunks[0]
-            args = chunks[1] if len(chunks) > 1 else ''
+
             d = Directive.parse(line_no, name, args)
 
             if d.is_a(PropertyStart):
@@ -245,7 +249,7 @@ class Directive(object):
         :param int line_no: Line number on which this directive appears in the
             source file.
         :param str name: Name of the directive.
-        :param str args: Arguments for this directive.
+        :param list[str] args: Arguments for this directive.
         :rtype: Directive
         """
         try:
@@ -263,7 +267,7 @@ class PropertyStart(Directive):
 
     @classmethod
     def parse(cls, line_no, args):
-        name, dsl_sloc = args.split(None, 1)
+        name, dsl_sloc = args
         return cls(name, dsl_sloc, line_no)
 
 
@@ -281,7 +285,7 @@ class BindDirective(Directive):
 
     @classmethod
     def parse(cls, line_no, args):
-        dsl_name, gen_name = args.split(None, 1)
+        dsl_name, gen_name = args
         return cls(dsl_name, gen_name, line_no)
 
 

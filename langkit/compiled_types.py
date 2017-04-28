@@ -4,6 +4,7 @@ from collections import OrderedDict
 from copy import copy
 import difflib
 from itertools import count
+import pipes
 
 from funcy import compact
 
@@ -73,7 +74,7 @@ def gdb_helper(*args):
     :param list[str] args: Elements of the special comment.
     :rtype: str
     """
-    return '--# {}'.format(' '.join(args))
+    return '--# {}'.format(' '.join(pipes.quote(a) for a in args))
 
 
 def gdb_bind_var(var):
