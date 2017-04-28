@@ -27,9 +27,6 @@ class Renderer(object):
     def __init__(self, template_env=None, **kwargs):
         self.env = TemplateEnvironment(template_env or {})
         self.env.update(kwargs)
-        # "self" is a reserved name in Mako, so our variables cannot use it.
-        # TODO??? don't use "_self" at all in templates. Use more specific
-        # names instead.
 
     def update(self, env):
         return Renderer(self.env, **env)

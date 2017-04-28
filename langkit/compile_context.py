@@ -1131,19 +1131,17 @@ class CompileCtx(object):
         with names.camel_with_underscores:
             write_ada_file(
                 path.join(file_root, "src"), ADA_BODY, ["parse"],
-                self.render_template("main_parse_ada", _self=self)
+                self.render_template("main_parse_ada")
             )
 
         with names.lower:
             # ... and the Quex C interface
             write_cpp_file(path.join(src_path, "quex_interface.h"),
                            self.render_template(
-                               "lexer/quex_interface_header_c",
-                               _self=self))
+                               "lexer/quex_interface_header_c"))
             write_cpp_file(path.join(src_path, "quex_interface.c"),
                            self.render_template(
-                               "lexer/quex_interface_body_c",
-                               _self=self))
+                               "lexer/quex_interface_body_c"))
 
         imain_project_file = os.path.join(file_root, "src", "mains.gpr")
         with open(imain_project_file, "w") as f:
@@ -1228,7 +1226,7 @@ class CompileCtx(object):
         :param str src_path: The source path.
         """
         def render(template_name):
-            return self.render_template(template_name, _self=self)
+            return self.render_template(template_name)
 
         with names.lower:
             write_cpp_file(
@@ -1299,7 +1297,7 @@ class CompileCtx(object):
         with names.camel:
             with open(os.path.join(python_path, module_filename), "w") as f:
                 code = self.render_template(
-                    "python_api/module_py", _self=self,
+                    "python_api/module_py",
                     c_api=self.c_api_settings,
                     pyapi=self.python_api_settings,
                 )
