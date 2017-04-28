@@ -195,6 +195,36 @@ class LexicalEnvPrinter(BasePrinter):
             return '<LexicalEnv synthetic>'
 
 
+class EnvGetterPrinter(BasePrinter):
+    """
+    Pretty-printer for env getters.
+    """
+
+    name = 'Env_Getter'
+
+    @classmethod
+    def matches(cls, value, context):
+        return (
+            value.type.code == gdb.TYPE_CODE_STRUCT
+            and (
+                value.type.name
+                == '{}__analysis__ast_envs__env_getter'.format(
+                    context.lib_name
+                )
+            )
+        )
+
+    def to_string(self):
+        if self.value['dynamic']:
+            return '<EnvGetter dynamic>'
+        else:
+            # With GNAT encodings, GDB exposes the variant part as a field that
+            # is an union.
+            union = self.value['dynamic___XVN']
+            variant = union['O']
+            return str(variant['env'])
+
+
 class ReferencedEnvPrinter(BasePrinter):
     """
     Pretty-printer for referenced environments.
