@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
+from collections import OrderedDict
+
 
 def analysis_line_no(context, frame):
     """
@@ -102,6 +104,13 @@ class ScopeState(object):
         Bindings that are live in this state.
         """
 
+        self.expressions = OrderedDict()
+        """
+        :type: dict[str, ExpressionEvaluation]
+        Expressions that are currently being evaluated or that are evaluated in
+        this state.
+        """
+
 
 class Binding(object):
     """
@@ -121,3 +130,40 @@ class Binding(object):
         :type: str
         Name of the variable in the Ada generated code.
         """
+
+
+class ExpressionEvaluation(object):
+    """
+    Describe the state of evaluation of an expression.
+    """
+
+    STATE_START = 'start'
+    """
+    State of an expression whose evaluation has been started, but hasn't been
+    completed yet.
+    """
+
+    STATE_DONE = 'done'
+    """
+    State of an expression whose evaluation has been completed. Its result is
+    available for use in the result variable, if there is one.
+    """
+
+    def __init__(self, expr_id, expr_repr, result_var=None, expr_loc=None):
+        self.expr_id = expr_id
+        self.expr_repr = expr_repr
+        self.result_var = result_var
+        self.expr_loc = expr_loc
+
+        self.state = self.STATE_START
+
+    def set_done(self):
+        self.state = self.STATE_DONE
+
+    @property
+    def is_started(self):
+        return self.state == self.STATE_START
+
+    @property
+    def is_done(self):
+        return self.state == self.STATE_DONE

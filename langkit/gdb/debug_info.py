@@ -9,7 +9,7 @@ import shlex
 
 import gdb
 
-from langkit.gdb.state import Binding
+from langkit.gdb.state import Binding, ExpressionEvaluation
 
 
 class ParseError(Exception):
@@ -127,6 +127,18 @@ class DebugInfo(object):
                 scope_stack[-1].events.append(Bind(d.line_no, d.dsl_name,
                                                    d.gen_name))
 
+            elif d.is_a(ExprStartDirective):
+                if not scope_stack:
+                    raise ParseError(line_no, 'no scope for expression')
+                scope_stack[-1].events.append(ExprStart(
+                    d.line_no, d.expr_id, d.expr_repr, d.result_var, d.expr_loc
+                ))
+
+            elif d.is_a(ExprDoneDirective):
+                if not scope_stack:
+                    raise ParseError(line_no, 'no scope for expression')
+                scope_stack[-1].events.append(ExprDone(d.line_no, d.expr_id))
+
             else:
                 raise NotImplementedError('Unknown directive: {}'.format(d))
 
@@ -227,6 +239,39 @@ class Bind(Event):
         return '<Bind {}, line {}>'.format(self.dsl_name, self.line_no)
 
 
+class ExprStart(Event):
+    def __init__(self, line_no, expr_id, expr_repr, result_var, expr_loc):
+        super(ExprStart, self).__init__(line_no)
+        self.expr_id = expr_id
+        self.expr_repr = expr_repr
+        self.result_var = result_var
+        self.expr_loc = None if expr_loc == 'None' else expr_loc
+
+    def apply_on_state(self, scope_state):
+        assert self.expr_id not in scope_state.expressions
+        scope_state.expressions[self.expr_id] = ExpressionEvaluation(
+            self.expr_id,
+            self.expr_repr,
+            self.result_var,
+            self.expr_loc
+        )
+
+    def __repr__(self):
+        return '<ExprStart {}, line {}>'.format(self.expr_id, self.line_no)
+
+
+class ExprDone(Event):
+    def __init__(self, line_no, expr_id):
+        super(ExprDone, self).__init__(line_no)
+        self.expr_id = expr_id
+
+    def apply_on_state(self, scope_state):
+        scope_state.expressions[self.expr_id].set_done()
+
+    def __repr__(self):
+        return '<ExprDone {}, line {}>'.format(self.expr_id, self.line_no)
+
+
 class Directive(object):
     """
     Holder for GDB helper directives as parsed from source files.
@@ -295,9 +340,36 @@ class End(Directive):
         return cls(line_no)
 
 
+class ExprStartDirective(Directive):
+    def __init__(self, expr_id, expr_repr, result_var, expr_loc, line_no):
+        super(ExprStartDirective, self).__init__(line_no)
+        self.expr_id = expr_id
+        self.expr_repr = expr_repr
+        self.result_var = result_var
+        self.expr_loc = expr_loc
+
+    @classmethod
+    def parse(cls, line_no, args):
+        expr_id, expr_repr, result_var, expr_loc = args
+        return cls(expr_id, expr_repr, result_var, expr_loc, line_no)
+
+
+class ExprDoneDirective(Directive):
+    def __init__(self, expr_id, line_no):
+        super(ExprDoneDirective, self).__init__(line_no)
+        self.expr_id = expr_id
+
+    @classmethod
+    def parse(cls, line_no, args):
+        expr_id, = args
+        return cls(expr_id, line_no)
+
+
 Directive.name_to_cls.update({
     'property-start': PropertyStart,
     'scope-start': ScopeStart,
     'bind': BindDirective,
     'end': End,
+    'expr-start': ExprStartDirective,
+    'expr-done': ExprDoneDirective,
 })
