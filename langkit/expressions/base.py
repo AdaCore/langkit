@@ -1615,6 +1615,10 @@ class No(AbstractExpression):
         """
         return self.construct_static(self.expr_type, self)
 
+    def __repr__(self):
+        expr_type = resolve_type(self.expr_type)
+        return '<No {}>'.format(expr_type.name().camel)
+
 
 class EmptyArray(AbstractExpression):
     """
