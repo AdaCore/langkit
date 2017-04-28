@@ -29,6 +29,7 @@ def setup(lib_name, astnode_names, prefix):
         printers.AnalysisUnitPrinter,
         printers.ASTNodePrinter,
         printers.LexicalEnvPrinter,
+        printers.ReferencedEnvPrinter,
         printers.EntityPrinter,
         printers.ArrayPrettyPrinter,
         printers.LangkitVectorPrinter,

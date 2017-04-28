@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import os.path
+import re
 
 import gdb
 import gdb.printing
@@ -192,6 +193,47 @@ class LexicalEnvPrinter(BasePrinter):
             return '<LexicalEnv root>'.format(self.node)
         else:
             return '<LexicalEnv synthetic>'
+
+
+class ReferencedEnvPrinter(BasePrinter):
+    """
+    Pretty-printer for referenced environments.
+    """
+
+    name = 'Referenced_Env'
+
+    @classmethod
+    def matches(cls, value, context):
+        return (
+            value.type.code == gdb.TYPE_CODE_STRUCT
+            and (
+                value.type.name
+                == '{}__analysis__ast_envs__referenced_env'.format(
+                    context.lib_name
+                )
+            )
+        )
+
+    @property
+    def resolver_name(self):
+        """
+        If we can determine the name of the property for this resolver, return
+        it. Return None otherwise.
+        """
+        resolver = self.value['resolver']
+        m = re.match(r'0x[a-f0-9]+ <.*\.([a-z_]+)>', str(resolver))
+        if m:
+            return m.group(1)
+
+    def to_string(self):
+        from_node = self.value['from_node']
+        resolver = self.value['resolver']
+
+        resolver_name = self.resolver_name
+        if resolver_name:
+            return '{}.{}'.format(from_node, resolver_name)
+        else:
+            return '{} ({})'.format(resolver, from_node)
 
 
 class EntityPrinter(BasePrinter):
