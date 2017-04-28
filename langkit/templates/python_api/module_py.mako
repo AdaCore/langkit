@@ -1,5 +1,13 @@
 ## vim: filetype=makopython
 
+"""
+Python binding of the ${ctx.lib_name.camel} API.
+
+Please consider all exported entities whose names that start with an underscore
+("_") as internal implementation details. They are not meant to be used
+directly.
+"""
+
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
@@ -316,6 +324,11 @@ class AnalysisUnit(object):
             return result
 
     def __init__(self, c_value):
+        """
+        This constructor is an implementation detail, and is not meant to be
+        used directly. Please use AnalysisContext.get_from_* methods to create
+        analysis unit instances instead.
+        """
         self._c_value = c_value
         _unit_incref(self._c_value)
 
@@ -756,6 +769,10 @@ class UnitProvider(object):
     ${py_doc('langkit.unit_provider_type', 4)}
 
     def __init__(self, c_value):
+        """
+        This constructor is an implementation detail, and is not meant to be
+        used directly.
+        """
         self._c_value = c_value
 
     def __del__(self):
@@ -775,6 +792,11 @@ class ${root_astnode_name}(object):
     ${astnode_types.subclass_decls(T.root_node)}
 
     def __init__(self, c_value):
+        """
+        This constructor is an implementation detail, and is not meant to be
+        used directly. For now, the creation of AST nodes can happen only as
+        part of the parsing of an analysis unit.
+        """
         self._c_value = c_value
 
     def __del__(self):
@@ -1082,6 +1104,10 @@ class EnvRebindings(object):
     ${py_doc('langkit.env_rebindings_type', 4)}
 
     def __init__(self, c_value, inc_ref=False):
+        """
+        This constructor is an implementation detail, and is not meant to be
+        used directly.
+        """
         self._c_value = c_value
         if inc_ref:
            self._inc_ref(self._c_value)
