@@ -13,7 +13,7 @@ from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNode, BoolType, CompiledType,
     LexicalEnvType, LongType, NoCompiledType, Symbol, T, Token, gdb_bind_var,
-    get_context, render as ct_render, resolve_type
+    gdb_helper, get_context, render as ct_render, resolve_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, check_multiple, check_source_language,
@@ -725,6 +725,12 @@ class ResolvedExpression(object):
     :type: CompiledType
     """
 
+    expr_count = iter(count(1))
+    """
+    Generator of unique identifiers for expressions in GDB helpers. See
+    render_pre.
+    """
+
     def __init__(self, result_var_name=None, scopeless_result_var=False,
                  skippable_refcount=False, abstract_expr=None):
         """
@@ -827,11 +833,31 @@ class ResolvedExpression(object):
         # add a tautological assignment (X:=X), which would hamper generated
         # code reading anyway.
         if self.result_var and expr != str(self.result_var.name):
-            return '{}\n{} := {};'.format(
+            result = '{}\n{} := {};'.format(
                 pre, self.result_var.name.camel_with_underscores, expr,
             )
         else:
-            return pre
+            result = pre
+
+        # If this resolved expression materialize the computation of an
+        # abstract expression and its result is stored in a variable, make it
+        # visible to the GDB helpers.
+        if self.abstract_expr and self.result_var:
+            unique_id = str(next(self.expr_count))
+
+            loc = self.abstract_expr.location
+            loc_str = '{}:{}'.format(loc.file, loc.line) if loc else 'None'
+
+            result = '{}\n{}\n{}'.format(
+                gdb_helper('expr-start', unique_id,
+                           str(self.abstract_expr),
+                           self.result_var.name.camel_with_underscores,
+                           loc_str),
+                result,
+                gdb_helper('expr-done', unique_id),
+            )
+
+        return result
 
     def render_expr(self):
         """
