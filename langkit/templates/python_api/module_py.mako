@@ -487,8 +487,15 @@ class BasePointerBinding(object):
     Base class for dummy type bindings around mere pointers.
     """
 
-    def __init__(self, c_value):
+    def __init__(self, c_value, inc_ref=False):
         self._c_value = c_value
+        if inc_ref and self._inc_ref:
+            self._inc_ref(c_value)
+
+    def __del__(self):
+        if self._dec_ref:
+            self._dec_ref(self._c_value)
+        self._c_value = None
 
     class _c_type(ctypes.c_void_p):
         pass
@@ -503,8 +510,11 @@ class BasePointerBinding(object):
             return value._c_value
 
     @classmethod
-    def _wrap(cls, c_value):
-        return cls(c_value) if c_value else None
+    def _wrap(cls, c_value, inc_ref=False):
+        return cls(c_value, inc_ref) if c_value else None
+
+    _inc_ref = None
+    _dec_ref = None
 
 
 class LogicVar(BasePointerBinding):
