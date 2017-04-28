@@ -328,18 +328,16 @@ class CompileCtx(object):
 
         self.lang_name = names.Name(lang_name)
 
-        lib_name = (
+        self.lib_name = (
             names.Name('Lib{}lang'.format(self.lang_name.lower))
             if lib_name is None else
             names.Name(lib_name)
         )
         self.short_name = names.Name(short_name) if short_name else None
 
-        self.ada_api_settings = AdaAPISettings(
-            lib_name.camel_with_underscores
-        )
+        self.ada_api_settings = AdaAPISettings(self)
         self.c_api_settings = CAPISettings(
-            self, lib_name.lower,
+            self,
             (self.lang_name.lower
              if c_symbol_prefix is None else c_symbol_prefix)
         )
@@ -368,7 +366,7 @@ class CompileCtx(object):
         ":type: langkit.parsers.Grammar"
 
         self.python_api_settings = (
-            PythonAPISettings(lib_name.lower, self.c_api_settings)
+            PythonAPISettings(self, self.c_api_settings)
             if enable_python_api else None
         )
 

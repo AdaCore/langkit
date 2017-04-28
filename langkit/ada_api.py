@@ -13,8 +13,12 @@ class AdaAPISettings(AbstractAPISettings):
 
     KEYWORDS = common.keywords['ada']
 
-    def __init__(self, lib_name):
-        self.lib_name = lib_name
+    def __init__(self, ctx):
+        self.context = ctx
+
+    @property
+    def lib_name(self):
+        return self.context.lib_name.camel_with_underscores
 
     @classmethod
     def escape(cls, name, suffix):

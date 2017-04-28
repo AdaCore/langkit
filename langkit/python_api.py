@@ -10,13 +10,13 @@ class PythonAPISettings(AbstractAPISettings):
 
     name = 'python'
 
-    def __init__(self, module_name, c_api_settings):
+    def __init__(self, ctx, c_api_settings):
+        self.context = ctx
         self.c_api_settings = c_api_settings
-        self.module_name = module_name
 
     @property
-    def context(self):
-        return self.c_api_settings.context
+    def module_name(self):
+        return self.context.lib_name.lower
 
     def get_enum_alternative(self, type_name, alt_name, suffix):
         return alt_name.upper
