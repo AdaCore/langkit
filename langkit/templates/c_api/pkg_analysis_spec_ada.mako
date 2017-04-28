@@ -724,14 +724,14 @@ package ${ada_lib_name}.Analysis.C is
      (${logic_var_type}, Logic_Var);
 
    function Wrap is new Ada.Unchecked_Conversion
-     (Logic_Equation, ${equation_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${equation_type}, Logic_Equation);
-
-   function Wrap is new Ada.Unchecked_Conversion
      (Env_Rebindings, ${env_rebindings_type});
    function Unwrap is new Ada.Unchecked_Conversion
      (${env_rebindings_type}, Env_Rebindings);
+
+   function Wrap is new Ada.Unchecked_Conversion
+     (Logic_Equation, ${equation_type});
+   function Unwrap is new Ada.Unchecked_Conversion
+     (${equation_type}, Logic_Equation);
 
    function Wrap is new Ada.Unchecked_Conversion
      (Analysis_Context, ${analysis_context_type});
