@@ -52,7 +52,7 @@ class PythonAPISettings(AbstractAPISettings):
         value_suffix = '' if from_field_access else '.value'
         return dispatch_on_type(type, [
             (ct.AnalysisUnitType, lambda _: 'AnalysisUnit._wrap({})'),
-            (ct.AnalysisUnitKind, lambda _: 'unit_kind_to_str[{}]'),
+            (ct.AnalysisUnitKind, lambda _: '_unit_kind_to_str[{}]'),
             (ct.ASTNode, lambda _: '{}._wrap({{}})'.format(
                 self.context.root_grammar_class.name().camel
             )),

@@ -28,12 +28,12 @@ import sys
 # Low-level binding - First part
 #
 
-so_ext = {
+_so_ext = {
     'win32':  'dll',
     'darwin': 'dylib',
 }.get(sys.platform, 'so')
 _c_lib = ctypes.cdll.LoadLibrary(
-    "lib${c_api.shared_object_basename}.{}".format(so_ext)
+    "lib${c_api.shared_object_basename}.{}".format(_so_ext)
 )
 
 
@@ -131,12 +131,12 @@ class _text(ctypes.Structure):
 
 % if ctx.default_unit_provider:
 ${py_doc('langkit.unit_kind_type')}
-str_to_unit_kind = {
+_str_to_unit_kind = {
     'specification': 0,
     'body': 1,
 }
-unit_kind_to_str = {c_val: py_val
-                    for py_val, c_val in str_to_unit_kind.items()}
+_unit_kind_to_str = {c_val: py_val
+                     for py_val, c_val in _str_to_unit_kind.items()}
 
 
 def _unwrap_unit_kind(kind):
@@ -144,7 +144,7 @@ def _unwrap_unit_kind(kind):
     Given a string representing an analysis unit kind in the Python API, return
     the corresponding C API value.
     """
-    return _unwrap_enum(kind, 'analysis unit kind', str_to_unit_kind)
+    return _unwrap_enum(kind, 'analysis unit kind', _str_to_unit_kind)
 
 
 class _unit_provider(ctypes.c_void_p):
