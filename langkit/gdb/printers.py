@@ -8,6 +8,7 @@ import gdb.printing
 from langkit.gdb.tdh import TDH
 from langkit.gdb.units import AnalysisUnit
 from langkit.gdb.utils import record_to_tag, tagged_field
+from langkit.utils import memoized
 
 
 class GDBPrettyPrinters(gdb.printing.PrettyPrinter):
@@ -278,5 +279,98 @@ class ArrayPrettyPrinter(BasePrinter):
         # some casting anyway to avoid noisy and useless warnings.
         items = self.value['items']
         items = items.cast(items.type.target().array(1, self.length))
+        for i in range(1, self.length + 1):
+            yield ('[{}]'.format(i), items[i])
+
+
+class LangkitVectorPrinter(BasePrinter):
+    """
+    Pretty-printer for all Langkit vectors instantiations.
+    """
+
+    name = 'Langkit_Vectors'
+
+    def __init__(self, value, context):
+        self.context = context
+        self.value = value
+
+    @classmethod
+    def matches(cls, value, context):
+        return (value.type.code == gdb.TYPE_CODE_STRUCT
+                and value.type.name.endswith('__vector')
+                and (set(f.name for f in value.type.fields())
+                     == {'_tag', 'e', 'size', 'capacity', 'sv'}))
+
+    @property
+    @memoized
+    def fields(self):
+        """
+        Return a mapping: (field name -> field value) for all fields in this
+        vector record.
+        """
+        return {f.name: self.value[f.name]
+                for f in self.value.type.fields()}
+
+    @property
+    def element_type(self):
+        """
+        Return the type of elements this vector contains.
+        """
+        array_access_type = self.fields['e'].type
+
+        # Peel the typedef and then the access type
+        assert (array_access_type.code == gdb.TYPE_CODE_TYPEDEF
+                and array_access_type.name.endswith('__elements_array_access')
+                and array_access_type.target().code == gdb.TYPE_CODE_PTR)
+        array_type = array_access_type.target().target()
+
+        # Peel the typedef and then the array type
+        assert (array_type.code == gdb.TYPE_CODE_TYPEDEF
+                and array_type.name.endswith('__internal_elements_array')
+                and array_type.target().code == gdb.TYPE_CODE_ARRAY)
+        return array_type.target().target()
+
+    @property
+    def package(self):
+        """
+        Return the name of the instantiation package for this vector.
+        """
+        type_name = self.value.type.name
+        suffix = '__vector'
+        assert type_name.endswith(suffix)
+        return type_name[:-len(suffix)]
+
+    @property
+    def length(self):
+        return int(self.fields['size'])
+
+    def display_hint(self):
+        return 'array'
+
+    def to_string(self):
+        return '{} vector of length {}'.format(self.element_type.name,
+                                               self.length)
+
+    def children(self):
+        if self.length <= 0:
+            return
+
+        symbol_name = '{}__small_vector_capacity'.format(self.package)
+        symbol = gdb.lookup_global_symbol(symbol_name)
+        small_vector_capacity = int(symbol.value())
+
+        if self.length <= small_vector_capacity:
+            items = self.fields['sv']
+        else:
+            items = self.fields['e'].dereference()
+
+            array_type = items.type
+            if array_type.code == gdb.TYPE_CODE_TYPEDEF:
+                array_type = array_type.target()
+
+            # Rectify the bound information for the array of elements, as GDB
+            # lost it some way during the dereference.
+            items = items.cast(array_type.target().array(1, self.length))
+
         for i in range(1, self.length + 1):
             yield ('[{}]'.format(i), items[i])
