@@ -171,6 +171,10 @@ class LexicalEnvPrinter(BasePrinter):
     def node(self):
         return self.value['node']
 
+    @property
+    def ref_count(self):
+        return self.value['ref_count']
+
     def to_string(self):
         if not self.value:
             return 'null'
@@ -183,6 +187,8 @@ class LexicalEnvPrinter(BasePrinter):
             return '<LexicalEnv empty>'
         elif self.node:
             return '<LexicalEnv for {}>'.format(self.node)
+        elif self.ref_count == -1:
+            return '<LexicalEnv root>'.format(self.node)
         else:
             return '<LexicalEnv synthetic>'
 
