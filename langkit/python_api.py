@@ -43,7 +43,8 @@ class PythonAPISettings(AbstractAPISettings):
                 or not type.is_refcounted()
                 or issubclass(type, (ct.ArrayType, ct.Struct,
                                      ct.LexicalEnvType,
-                                     ct.EnvRebindingsType))), (
+                                     ct.EnvRebindingsType,
+                                     ct.EquationType))), (
             'Incrementing ref-count of {} in the Python API is not handled'
             ' yet'.format(type.name())
         )
@@ -74,7 +75,8 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.LexicalEnvType, lambda _:
                 'LexicalEnv._wrap({{}}, inc_ref={})'.format(inc_ref)),
             (ct.LogicVarType, lambda _: 'LogicVar._wrap({})'),
-            (ct.EquationType, lambda _: 'Equation._wrap({})'),
+            (ct.EquationType, lambda _:
+                'Equation._wrap({{}}, inc_ref={})'.format(inc_ref)),
             (ct.EnvRebindingsType, lambda _:
                 'EnvRebindings._wrap({{}}, inc_ref={})'.format(inc_ref)),
         ], exception=TypeError(

@@ -527,6 +527,15 @@ class Equation(BasePointerBinding):
     ${py_doc('langkit.equation_type', 4)}
 
     _exposed = False
+
+    _inc_ref = staticmethod(_import_func(
+        '${capi.get_name("equation_inc_ref")}',
+        [BasePointerBinding._c_type], None
+    ))
+    _dec_ref = staticmethod(_import_func(
+        '${capi.get_name("equation_dec_ref")}',
+        [BasePointerBinding._c_type], None
+    ))
 % endif
 
 
