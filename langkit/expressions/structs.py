@@ -142,12 +142,14 @@ class IsNull(AbstractExpression):
         self.expr = expr
 
     @classmethod
-    def construct_static(cls, cexpr):
-        return (
+    def construct_static(cls, cexpr, abstract_expr=None):
+        result = (
             cls.construct_node(cexpr)
             if cexpr.type.is_ast_node or cexpr.type.is_entity_type else
             Eq.make_expr(cexpr, NullExpr(cexpr.type))
         )
+        result.abstract_expr = abstract_expr
+        return result
 
     @staticmethod
     def construct_node(cexpr):
@@ -164,7 +166,7 @@ class IsNull(AbstractExpression):
         :rtype: EqExpr
         """
         cexpr = construct(self.expr)
-        return self.construct_static(cexpr)
+        return self.construct_static(cexpr, abstract_expr=self)
 
 
 class New(AbstractExpression):
