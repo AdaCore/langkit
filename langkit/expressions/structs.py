@@ -168,6 +168,9 @@ class IsNull(AbstractExpression):
         cexpr = construct(self.expr)
         return self.construct_static(cexpr, abstract_expr=self)
 
+    def __repr__(self):
+        return '<IsNull>'
+
 
 class New(AbstractExpression):
     """
