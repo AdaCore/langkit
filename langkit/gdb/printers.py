@@ -114,7 +114,7 @@ class ASTNodePrinter(BasePrinter):
 
     name = 'ASTNode'
 
-    tag_re = re.compile(r'0x[0-9a-f]+ <.*> \(([a-z._]+)\)')
+    tag_re = re.compile(r'0x[0-9a-f]+ <([a-z_]+).*>( \(.*\))?')
 
     @classmethod
     def matches(cls, value, context):
@@ -129,7 +129,7 @@ class ASTNodePrinter(BasePrinter):
         tag = tagged_field(self.value.dereference(), '_tag')
         m = self.tag_re.match(str(tag))
         if m:
-            record_type_name = m.group(1).replace('.', '__')
+            record_type_name = m.group(1)
             result = (
                 self.context.astnode_struct_names.get(record_type_name).camel
             )
