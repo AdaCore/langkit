@@ -45,7 +45,8 @@ def setup(lib_name, astnode_names, prefix):
 
     for cmd_cls in [
         commands.StateCommand,
-        commands.BreakCommand
+        commands.BreakCommand,
+        commands.OutCommand,
     ]:
         cmd_cls(context)
 

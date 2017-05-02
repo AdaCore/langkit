@@ -4,7 +4,7 @@ from collections import namedtuple
 
 import gdb
 
-from langkit.gdb.debug_info import DSLLocation, ExprStart, Scope
+from langkit.gdb.debug_info import DSLLocation, ExprDone, ExprStart, Scope
 
 
 class BaseCommand(gdb.Command):
@@ -217,3 +217,85 @@ class BreakCommand(BaseCommand):
             m, = matches
             gdb.Breakpoint('{}:{}'.format(self.context.debug_info.filename,
                                           m.line_no))
+
+
+class OutCommand(BaseCommand):
+    """Continue execution until the end of the evaluation of the current
+sub-expression.
+    """
+
+    def __init__(self, context):
+        super(OutCommand, self).__init__(context, 'out', gdb.COMMAND_RUNNING)
+
+    def invoke(self, arg, from_tty):
+        if arg:
+            print('This command takes no argument')
+            return
+
+        # Look for the expression that is being evaluated currently
+        state = self.context.decode_state()
+        scope_state, current_expr = self.lookup_current_expr(state)
+        if not current_expr:
+            print('Not evaluating any expression currently')
+            return
+
+        # Look for the point in the generated library where its evaluation will
+        # be done.
+        until_line_no = None
+        for e in scope_state.scope.events:
+            if isinstance(e, ExprDone) and e.expr_id == current_expr.expr_id:
+                until_line_no = e.line_no
+        if until_line_no is None:
+            print('ERROR: cannot find the end of evaluation for expression {}.'
+                  ' Code generation may have a bug.'.format(current_expr))
+            return
+
+        # Now go there! When we land in the expected place, also be useful and
+        # display the value we got.
+        gdb.execute('until {}'.format(until_line_no))
+        frame = gdb.selected_frame()
+        new_state = self.context.decode_state(frame)
+        new_expr = self.lookup_expr(new_state, current_expr.expr_id)
+
+        # Do some sanity checks first...
+
+        def error(msg):
+            print('ERROR: {}: something went wrong...'.format(msg))
+
+        if new_state.property != state.property:
+            return error('we landed in another property')
+        if new_expr is None:
+            return error('cannot find back the same expression')
+        if not new_expr.is_done:
+            return error('the expression is not evaluated yet')
+
+        print('{} evaluated to: {}'.format(
+            current_expr.expr_repr, frame.read_var(new_expr.result_var.lower())
+        ))
+
+    def lookup_current_expr(self, state):
+        """
+        If `state` represents the current evaluation of an expression, return
+        this expression and its scope state. Return (None, None) otherwise.
+
+        :param State state: State to look into.
+        :rtype: (None, None)|(langkit.gdb.state.ScopeState,
+                              langkit.gdb.state.ExpressionEvaluation)
+        """
+        for scope_state in reversed(state.scopes):
+            for e in reversed(scope_state.expressions.values()):
+                if e.is_started:
+                    return scope_state, e
+        return (None, None)
+
+    def lookup_expr(self, state, expr_id):
+        """
+        Look for the ExpressionEvaluation instance in `state` whose id is
+        `expr_id`.
+
+        :rtype: langkit.gdb.state.ExpressionEvaluation|None
+        """
+        for scope_state in state.scopes:
+            for e in scope_state.expressions.values():
+                if e.expr_id == expr_id:
+                    return e
