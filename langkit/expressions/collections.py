@@ -351,7 +351,7 @@ class Map(CollectionExpression):
 
         return Map.Expr(list_element_var, element_var, index_var,
                         collection_expr, expr, iter_scope, filter_expr,
-                        self.concat, take_while_expr)
+                        self.concat, take_while_expr, abstract_expr=self)
 
     def __repr__(self):
         name = None
