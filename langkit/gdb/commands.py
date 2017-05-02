@@ -88,7 +88,7 @@ class StatePrinter(object):
             for b in scope_state.bindings:
                 print_info('{}{} = {}'.format(
                     b.dsl_name,
-                    ' ({})'.format(b.gen_name) if self.with_locs else '',
+                    self.loc_image(b.gen_name),
                     self.value_image(b.gen_name)
                 ))
 
@@ -97,8 +97,9 @@ class StatePrinter(object):
                 if e.is_started:
                     last_started = e
                 elif e.is_done:
-                    print_info('{} -> {}'.format(
+                    print_info('{}{} -> {}'.format(
                         e.expr_repr,
+                        self.loc_image(e.result_var),
                         self.value_image(e.result_var)
                     ))
             if last_started:
@@ -107,6 +108,15 @@ class StatePrinter(object):
                 ))
                 if last_started.expr_loc:
                     print_info('from {}'.format(last_started.expr_loc))
+
+    def loc_image(self, var_name):
+        """
+        If `self.with_locs`, return the name of the Ada variable that holds the
+        DSL value.
+
+        :rtype: str
+        """
+        return ' ({})'.format(var_name) if self.with_locs else ''
 
     def value_image(self, var_name):
         """
