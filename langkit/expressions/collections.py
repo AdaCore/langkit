@@ -353,6 +353,16 @@ class Map(CollectionExpression):
                         collection_expr, expr, iter_scope, filter_expr,
                         self.concat, take_while_expr)
 
+    def __repr__(self):
+        name = None
+        if self.expr_fn == collection_expr_identity:
+            name = ('TakeWhile'
+                    if self.filter_fn == collection_expr_none else
+                    'Filter')
+        if not name:
+            name = 'MapCat' if self.concat else 'Map'
+        return '<{}>'.format(name)
+
 
 @auto_attr
 def as_array(self, list_expr):
