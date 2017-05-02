@@ -131,7 +131,7 @@ class DebugInfo(object):
                 if not scope_stack:
                     raise ParseError(line_no, 'no scope for expression')
                 scope_stack[-1].events.append(ExprStart(
-                    d.line_no, d.expr_id, d.expr_repr, d.result_var, d.expr_loc
+                    d.line_no, d.expr_id, d.expr_repr, d.result_var, d.dsl_sloc
                 ))
 
             elif d.is_a(ExprDoneDirective):
@@ -159,6 +159,57 @@ class DebugInfo(object):
                 break
             elif line_no in p.line_range:
                 return p
+
+
+class DSLLocation(object):
+    """
+    Source location in the DSL.
+    """
+
+    def __init__(self, filename, line_no):
+        self.filename = filename
+        self.line_no = line_no
+
+    @classmethod
+    def parse(cls, dsl_sloc):
+        """
+        If `dsl_sloc` is "None", return None. Otherwise, create a DSLLocation
+        instance out of a string of the form "filename:line_no".
+
+        :type dsl_sloc: str
+        :rtype: DSLLocation
+        """
+        if dsl_sloc == 'None':
+            return None
+
+        try:
+            filename, line_no = dsl_sloc.split(':', 1)
+        except ValueError:
+            raise ValueError('Invalid DSL location: {}'.format(dsl_sloc))
+
+        try:
+            line_no = int(line_no)
+        except ValueError:
+            raise ValueError('Invalid line number: {}'.format(line_no))
+
+        return cls(filename, line_no)
+
+    def matches(self, other):
+        """
+        Return whether `self` designates a file at least as much specifically
+        as `other`. In practice, both must have the same line number and the
+        filename from `other` must be a suffix for the one in `self`.
+
+        :rtype: bool
+        """
+        return (self.line_no == other.line_no
+                and self.filename.endswith(other.filename))
+
+    def __str__(self):
+        return '{}:{}'.format(self.filename, self.line_no)
+
+    def __repr__(self):
+        return '<DSLLocation {}>'.format(self)
 
 
 class LineRange(object):
@@ -240,12 +291,12 @@ class Bind(Event):
 
 
 class ExprStart(Event):
-    def __init__(self, line_no, expr_id, expr_repr, result_var, expr_loc):
+    def __init__(self, line_no, expr_id, expr_repr, result_var, dsl_sloc):
         super(ExprStart, self).__init__(line_no)
         self.expr_id = expr_id
         self.expr_repr = expr_repr
         self.result_var = result_var
-        self.expr_loc = None if expr_loc == 'None' else expr_loc
+        self.dsl_sloc = None if dsl_sloc == 'None' else dsl_sloc
 
     def apply_on_state(self, scope_state):
         assert self.expr_id not in scope_state.expressions
@@ -253,7 +304,7 @@ class ExprStart(Event):
             self.expr_id,
             self.expr_repr,
             self.result_var,
-            self.expr_loc
+            self.dsl_sloc
         )
 
     def __repr__(self):
@@ -313,7 +364,7 @@ class PropertyStart(Directive):
     @classmethod
     def parse(cls, line_no, args):
         name, dsl_sloc = args
-        return cls(name, dsl_sloc, line_no)
+        return cls(name, DSLLocation.parse(dsl_sloc), line_no)
 
 
 class ScopeStart(Directive):
@@ -341,17 +392,18 @@ class End(Directive):
 
 
 class ExprStartDirective(Directive):
-    def __init__(self, expr_id, expr_repr, result_var, expr_loc, line_no):
+    def __init__(self, expr_id, expr_repr, result_var, dsl_sloc, line_no):
         super(ExprStartDirective, self).__init__(line_no)
         self.expr_id = expr_id
         self.expr_repr = expr_repr
         self.result_var = result_var
-        self.expr_loc = expr_loc
+        self.dsl_sloc = dsl_sloc
 
     @classmethod
     def parse(cls, line_no, args):
-        expr_id, expr_repr, result_var, expr_loc = args
-        return cls(expr_id, expr_repr, result_var, expr_loc, line_no)
+        expr_id, expr_repr, result_var, dsl_sloc = args
+        return cls(expr_id, expr_repr, result_var, DSLLocation.parse(dsl_sloc),
+                   line_no)
 
 
 class ExprDoneDirective(Directive):

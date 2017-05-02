@@ -149,11 +149,11 @@ class ExpressionEvaluation(object):
     available for use in the result variable, if there is one.
     """
 
-    def __init__(self, expr_id, expr_repr, result_var=None, expr_loc=None):
+    def __init__(self, expr_id, expr_repr, result_var=None, dsl_sloc=None):
         self.expr_id = expr_id
         self.expr_repr = expr_repr
         self.result_var = result_var
-        self.expr_loc = expr_loc
+        self.dsl_sloc = dsl_sloc
 
         self.state = self.STATE_START
 
@@ -169,5 +169,5 @@ class ExpressionEvaluation(object):
         return self.state == self.STATE_DONE
 
     def __repr__(self):
-        return '<ExpressionEvaluation {}, line {}>'.format(self.expr_id,
-                                                           self.line_no)
+        return '<ExpressionEvaluation {}, {}>'.format(self.expr_id,
+                                                      self.dsl_sloc)

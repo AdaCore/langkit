@@ -106,8 +106,8 @@ class StatePrinter(object):
                 print_info('Currently evaluating {}'.format(
                     last_started.expr_repr
                 ))
-                if last_started.expr_loc:
-                    print_info('from {}'.format(last_started.expr_loc))
+                if last_started.dsl_sloc:
+                    print_info('from {}'.format(last_started.dsl_sloc))
 
     def loc_image(self, var_name):
         """
