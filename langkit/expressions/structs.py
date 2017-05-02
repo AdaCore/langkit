@@ -740,6 +740,12 @@ class IsA(AbstractExpression):
             ))
         return IsA.Expr(expr, astnodes, abstract_expr=self)
 
+    def __repr__(self):
+        return '<IsA {}>'.format(', '.join(
+            resolve_type(n).name().camel
+            for n in self.astnodes
+        ))
+
 
 @attr_call('match')
 class Match(AbstractExpression):
