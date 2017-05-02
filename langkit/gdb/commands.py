@@ -31,7 +31,7 @@ This command may be followed by a "/X" flag, where X is one or several of:
         super(StateCommand, self).__init__(context, 'state', gdb.COMMAND_DATA)
 
     def invoke(self, arg, from_tty):
-        with_locs = False
+        printer = StatePrinter(self.context)
 
         if arg:
             if not arg.startswith('/'):
@@ -40,20 +40,37 @@ This command may be followed by a "/X" flag, where X is one or several of:
 
             for c in arg[1:]:
                 if c == 's':
-                    with_locs = True
+                    printer.with_locs = True
                 else:
                     print('Invalid flag: {}'.format(repr(c)))
+                    return
 
-        frame = gdb.selected_frame()
-        state = State.decode(self.context, frame)
-        if state is None:
+        printer.run()
+
+
+class StatePrinter(object):
+    """
+    Helper class to embed code to display the state of the currently running
+    property.
+    """
+
+    def __init__(self, context):
+        self.context = context
+
+        self.frame = gdb.selected_frame()
+        self.state = State.decode(self.context, self.frame)
+
+        self.with_locs = False
+
+    def run(self):
+        if self.state is None:
             print('Selected frame is not in a property.')
             return
 
-        print('Running {}'.format(state.property.name))
-        print('from {}'.format(state.property.dsl_sloc))
+        print('Running {}'.format(self.state.property.name))
+        print('from {}'.format(self.state.property.dsl_sloc))
 
-        for scope_state in state.scopes:
+        for scope_state in self.state.scopes:
             is_first = [True]
 
             def print_info(*args, **kwargs):
@@ -66,10 +83,10 @@ This command may be followed by a "/X" flag, where X is one or several of:
                 # Read the value associated to this binding. Switching
                 # to lower-case is required since GDB ignores case
                 # insentivity for Ada from the Python API.
-                value = frame.read_var(b.gen_name.lower())
+                value = self.frame.read_var(b.gen_name.lower())
                 print_info('{}{} = {}'.format(
                     b.dsl_name,
-                    ' ({})'.format(b.gen_name) if with_locs else '',
+                    ' ({})'.format(b.gen_name) if self.with_locs else '',
                     value
                 ))
 
@@ -80,7 +97,7 @@ This command may be followed by a "/X" flag, where X is one or several of:
                 elif e.is_done:
                     print_info('{} -> {}'.format(
                         e.expr_repr,
-                        frame.read_var(e.result_var.lower())
+                        self.frame.read_var(e.result_var.lower())
                     ))
             if last_started:
                 print_info('Currently evaluating {}'.format(
