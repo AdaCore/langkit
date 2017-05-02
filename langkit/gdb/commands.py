@@ -144,7 +144,15 @@ qualified name. For instance::
                                            gdb.COMMAND_BREAKPOINTS)
 
     def invoke(self, arg, from_tty):
-        lower_prop = arg.strip().lower()
+        spec = arg.strip()
+        self.break_on_property(spec)
+
+    def break_on_property(self, qualname):
+        """
+        Try to put a breakpoint on a property whose qualified name is
+        `qualname`. Display a message for the user if that is not possible.
+        """
+        lower_prop = qualname.lower()
         if not lower_prop:
             print('Missing breakpoint specification')
             return
@@ -153,7 +161,7 @@ qualified name. For instance::
             if prop.name.lower() == lower_prop:
                 break
         else:
-            print('No such property: {}'.format(arg.strip()))
+            print('No such property: {}'.format(qualname))
             return
 
         scopes = prop.subscopes
