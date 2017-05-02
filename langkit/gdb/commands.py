@@ -54,18 +54,40 @@ This command may be followed by a "/X" flag, where X is one or several of:
         print('from {}'.format(state.property.dsl_sloc))
 
         for scope_state in state.scopes:
-            if scope_state.bindings:
-                print('')
-                for b in scope_state.bindings:
-                    # Read the value associated to this binding. Switching to
-                    # lower-case is required since GDB ignores case insentivity
-                    # for Ada from the Python API.
-                    value = frame.read_var(b.gen_name.lower())
-                    print('{}{} = {}'.format(
-                        b.dsl_name,
-                        ' ({})'.format(b.gen_name) if with_locs else '',
-                        value
+            is_first = [True]
+
+            def print_info(*args, **kwargs):
+                if is_first[0]:
+                    print('')
+                    is_first[0] = False
+                print(*args, **kwargs)
+
+            for b in scope_state.bindings:
+                # Read the value associated to this binding. Switching
+                # to lower-case is required since GDB ignores case
+                # insentivity for Ada from the Python API.
+                value = frame.read_var(b.gen_name.lower())
+                print_info('{}{} = {}'.format(
+                    b.dsl_name,
+                    ' ({})'.format(b.gen_name) if with_locs else '',
+                    value
+                ))
+
+            last_started = None
+            for e in scope_state.expressions.values():
+                if e.is_started:
+                    last_started = e
+                elif e.is_done:
+                    print_info('{} -> {}'.format(
+                        e.expr_repr,
+                        frame.read_var(e.result_var.lower())
                     ))
+            if last_started:
+                print_info('Currently evaluating {}'.format(
+                    last_started.expr_repr
+                ))
+                if last_started.expr_loc:
+                    print_info('from {}'.format(last_started.expr_loc))
 
 
 class BreakCommand(BaseCommand):
