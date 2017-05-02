@@ -167,3 +167,7 @@ class ExpressionEvaluation(object):
     @property
     def is_done(self):
         return self.state == self.STATE_DONE
+
+    def __repr__(self):
+        return '<ExpressionEvaluation {}, line {}>'.format(self.expr_id,
+                                                           self.line_no)
