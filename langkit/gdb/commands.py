@@ -1,7 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
+from collections import namedtuple
+
 import gdb
 
+from langkit.gdb.debug_info import DSLLocation, ExprStart, Scope
 from langkit.gdb.state import State
 
 
@@ -133,10 +136,13 @@ class StatePrinter(object):
 
 
 class BreakCommand(BaseCommand):
-    """Put a breakpoint on a property. Takes a case-insensitive property
-qualified name. For instance::
+    """Put a breakpoint on a property. One of the following forms is allowed:
 
-    *break MyNode.p_property
+    * A case-insensitive property qualified name; for instance::
+          break MyNode.p_property
+
+    * A DSL source location; for instance, in spec.py, line 128::
+          break spec.py:128
 """
 
     def __init__(self, context):
@@ -145,7 +151,11 @@ qualified name. For instance::
 
     def invoke(self, arg, from_tty):
         spec = arg.strip()
-        self.break_on_property(spec)
+
+        if ':' in spec:
+            self.break_on_dsl_sloc(spec)
+        else:
+            self.break_on_property(spec)
 
     def break_on_property(self, qualname):
         """
@@ -175,3 +185,36 @@ qualified name. For instance::
             self.context.debug_info.filename,
             scopes[0].line_range.first_line
         ))
+
+    def break_on_dsl_sloc(self, dsl_sloc):
+        """
+        Try to put a breakpoint on code that maps to the given DSL source
+        location. Display a message for the user if that is not possible.
+        """
+        dsl_sloc = DSLLocation.parse(dsl_sloc)
+
+        Match = namedtuple('Match', 'prop dsl_sloc line_no')
+        matches = []
+
+        def process_scope(prop, scope):
+            for e in scope.events:
+                if isinstance(e, Scope):
+                    process_scope(prop, e)
+                elif (isinstance(e, ExprStart)
+                      and e.dsl_sloc
+                      and e.dsl_sloc.matches(dsl_sloc)):
+                    matches.append(Match(prop, e.dsl_sloc, e.line_no))
+
+        for prop in self.context.debug_info.properties:
+            process_scope(prop, prop)
+
+        if not matches:
+            print('No match for {}'.format(dsl_sloc))
+        elif len(matches) > 1:
+            print('Multiple matches for {}:'.format(dsl_sloc))
+            for m in matches:
+                print('  In {}, {}'.format(m.prop.name, m.dsl_sloc))
+        else:
+            m, = matches
+            gdb.Breakpoint('{}:{}'.format(self.context.debug_info.filename,
+                                          m.line_no))
