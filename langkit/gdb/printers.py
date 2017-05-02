@@ -8,7 +8,7 @@ import gdb.printing
 
 from langkit.gdb.tdh import TDH
 from langkit.gdb.units import AnalysisUnit
-from langkit.gdb.utils import record_to_tag, tagged_field
+from langkit.gdb.utils import tagged_field
 from langkit.utils import memoized
 
 
@@ -114,6 +114,8 @@ class ASTNodePrinter(BasePrinter):
 
     name = 'ASTNode'
 
+    tag_re = re.compile(r'0x[0-9a-f]+ <.*> \(([a-z._]+)\)')
+
     @classmethod
     def matches(cls, value, context):
         return (value.type.code == gdb.TYPE_CODE_PTR
@@ -123,8 +125,13 @@ class ASTNodePrinter(BasePrinter):
 
     @property
     def kind(self):
-        tag = record_to_tag(self.value.dereference())
-        return self.context.tags_mapping.get(tag, '???')
+        result = None
+        tag = tagged_field(self.value.dereference(), '_tag')
+        m = self.tag_re.match(str(tag))
+        if m:
+            record_type_name = m.group(1).replace('.', '__')
+            result = self.context.astnode_struct_names.get(record_type_name)
+        return result or '???'
 
     @property
     def unit(self):
