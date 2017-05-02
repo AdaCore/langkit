@@ -24,6 +24,7 @@ class StateCommand(BaseCommand):
 
 This command may be followed by a "/X" flag, where X is one or several of:
 
+    * f: display the full image of values (no ellipsis);
     * s: to print the name of the Ada variables that hold DSL values.
 """
 
@@ -39,7 +40,9 @@ This command may be followed by a "/X" flag, where X is one or several of:
                 return
 
             for c in arg[1:]:
-                if c == 's':
+                if c == 'f':
+                    printer.with_ellipsis = False
+                elif c == 's':
                     printer.with_locs = True
                 else:
                     print('Invalid flag: {}'.format(repr(c)))
@@ -54,12 +57,15 @@ class StatePrinter(object):
     property.
     """
 
+    ellipsis_limit = 50
+
     def __init__(self, context):
         self.context = context
 
         self.frame = gdb.selected_frame()
         self.state = State.decode(self.context, self.frame)
 
+        self.with_ellipsis = True
         self.with_locs = False
 
     def run(self):
@@ -80,14 +86,10 @@ class StatePrinter(object):
                 print(*args, **kwargs)
 
             for b in scope_state.bindings:
-                # Read the value associated to this binding. Switching
-                # to lower-case is required since GDB ignores case
-                # insentivity for Ada from the Python API.
-                value = self.frame.read_var(b.gen_name.lower())
                 print_info('{}{} = {}'.format(
                     b.dsl_name,
                     ' ({})'.format(b.gen_name) if self.with_locs else '',
-                    value
+                    self.value_image(b.gen_name)
                 ))
 
             last_started = None
@@ -97,7 +99,7 @@ class StatePrinter(object):
                 elif e.is_done:
                     print_info('{} -> {}'.format(
                         e.expr_repr,
-                        self.frame.read_var(e.result_var.lower())
+                        self.value_image(e.result_var)
                     ))
             if last_started:
                 print_info('Currently evaluating {}'.format(
@@ -105,6 +107,19 @@ class StatePrinter(object):
                 ))
                 if last_started.expr_loc:
                     print_info('from {}'.format(last_started.expr_loc))
+
+    def value_image(self, var_name):
+        """
+        Return the image of the value contained in the `var_name` variable.
+
+        :rtype: str
+        """
+        # Switching to lower-case is required since GDB ignores case
+        # insentivity for Ada from the Python API.
+        value = str(self.frame.read_var(var_name.lower()))
+        if self.with_ellipsis and len(value) > self.ellipsis_limit:
+            value = '{}...'.format(value[:self.ellipsis_limit])
+        return value
 
 
 class BreakCommand(BaseCommand):
