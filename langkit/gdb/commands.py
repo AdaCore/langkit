@@ -256,6 +256,7 @@ sub-expression.
         frame = gdb.selected_frame()
         new_state = self.context.decode_state(frame)
         new_expr = self.lookup_expr(new_state, current_expr.expr_id)
+        _, new_current_expr = self.lookup_current_expr(new_state)
 
         # Do some sanity checks first...
 
@@ -272,6 +273,8 @@ sub-expression.
         print('{} evaluated to: {}'.format(
             current_expr.expr_repr, frame.read_var(new_expr.result_var.lower())
         ))
+        if new_current_expr:
+            print('Now evaluating {}'.format(new_current_expr.expr_repr))
 
     def lookup_current_expr(self, state):
         """
