@@ -655,7 +655,8 @@ class FieldAccess(AbstractExpression):
         return FieldAccess(self.receiver, self.field, args)
 
     def __repr__(self):
-        return "<FieldAccess {} {}>".format(self.receiver, self.field)
+        return "<FieldAccess .{}{}>".format(self.field,
+                                            '(...)' if self.arguments else '')
 
 
 @attr_call("is_a")
