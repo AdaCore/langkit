@@ -156,9 +156,11 @@ class ExpressionEvaluation(object):
         self.dsl_sloc = dsl_sloc
 
         self.state = self.STATE_START
+        self.done_at_line = None
 
-    def set_done(self):
+    def set_done(self, line_no):
         self.state = self.STATE_DONE
+        self.done_at_line = line_no
 
     @property
     def is_started(self):

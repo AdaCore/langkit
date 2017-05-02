@@ -317,7 +317,7 @@ class ExprDone(Event):
         self.expr_id = expr_id
 
     def apply_on_state(self, scope_state):
-        scope_state.expressions[self.expr_id].set_done()
+        scope_state.expressions[self.expr_id].set_done(self.line_no)
 
     def __repr__(self):
         return '<ExprDone {}, line {}>'.format(self.expr_id, self.line_no)
