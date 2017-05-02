@@ -5,7 +5,6 @@ from collections import namedtuple
 import gdb
 
 from langkit.gdb.debug_info import DSLLocation, ExprStart, Scope
-from langkit.gdb.state import State
 
 
 class BaseCommand(gdb.Command):
@@ -66,7 +65,7 @@ class StatePrinter(object):
         self.context = context
 
         self.frame = gdb.selected_frame()
-        self.state = State.decode(self.context, self.frame)
+        self.state = self.context.decode_state(self.frame)
 
         self.with_ellipsis = True
         self.with_locs = False

@@ -1,6 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
+import gdb
+
 from langkit.gdb.debug_info import DebugInfo
+from langkit.gdb.state import State
 from langkit.names import Name
 
 
@@ -36,3 +39,17 @@ class Context(object):
                 Name.from_camel_with_underscores(name)
             for name in self.astnode_names
         }
+
+    def decode_state(self, frame=None):
+        """
+        Shortcut for::
+
+            State.decode(self, frame)
+
+        If `frame` is None, use the selected frame.
+
+        :rtype: State
+        """
+        if frame is None:
+            frame = gdb.selected_frame()
+        return State.decode(self, frame)
