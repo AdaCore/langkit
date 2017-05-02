@@ -430,11 +430,6 @@ package ${ada_lib_name}.Analysis is
       return AST_Envs.Lexical_Env;
    ${ada_doc(T.root_node._fields['node_env'], 3)}
 
-   function Children_Env
-     (Node : access ${root_node_value_type})
-      return AST_Envs.Lexical_Env;
-   ${ada_doc(T.root_node._fields['children_env'], 3)}
-
    function Get_Unit
      (Node : access ${root_node_value_type}'Class)
       return Analysis_Unit;

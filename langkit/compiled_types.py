@@ -1589,8 +1589,9 @@ class StructMetaclass(CompiledTypeMetaclass):
                     ' parent lexical environment. Return the "inherited"'
                     ' environment otherwise.'
             )),
-            ("children_env", BuiltinField(
-                type=LexicalEnvType, public=False,
+            ("children_env", PropertyDef(
+                expr=None, prefix=None, type=LexicalEnvType,
+                public=False, external=True, uses_envs=False,
                 doc='For nodes that introduce a new environment, return it.'
                     ' Return the "inherited" environment otherwise.'
             )),

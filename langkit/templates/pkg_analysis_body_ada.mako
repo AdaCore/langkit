@@ -2265,15 +2265,6 @@ package body ${ada_lib_name}.Analysis is
       return AST_Envs.Lexical_Env
    is (Node.Self_Env);
 
-   ------------------
-   -- Children_Env --
-   ------------------
-
-   function Children_Env
-     (Node : access ${root_node_value_type})
-      return AST_Envs.Lexical_Env
-   is (Node.Self_Env);
-
    ---------------
    -- PP_Trivia --
    ---------------
@@ -2893,6 +2884,15 @@ package body ${ada_lib_name}.Analysis is
    % for astnode in ctx.astnode_types:
        ${astnode_types.body_decl(astnode)}
    % endfor
+
+   ------------------
+   -- Children_Env --
+   ------------------
+
+   function Children_Env
+     (Node : access ${root_node_value_type}'Class)
+      return Lexical_Env
+   is (Node.Self_Env);
 
    ## Generate the bodies of the root grammar class properties
    % for prop in T.root_node.get_properties(include_inherited=False):
