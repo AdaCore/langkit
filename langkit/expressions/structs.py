@@ -682,7 +682,8 @@ class IsA(AbstractExpression):
                              if a.is_entity_type
                              else a for a in astnodes]
 
-            super(IsA.Expr, self).__init__(abstract_expr=abstract_expr)
+            super(IsA.Expr, self).__init__(result_var_name='Is_A',
+                                           abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return self.expr.render_pre()
