@@ -288,7 +288,7 @@ class EntityPrinter(BasePrinter):
             value.type.code == gdb.TYPE_CODE_STRUCT
             and (
                 value.type.name
-                == '{}__analysis__ast_envs__env_element'.format(
+                == '{}__analysis__ast_envs__entity'.format(
                     context.lib_name
                 )
             )
