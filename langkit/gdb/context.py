@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.gdb.debug_info import DebugInfo
+from langkit.names import Name
 
 
 class Context(object):
@@ -31,6 +32,7 @@ class Context(object):
         record names, as GDB will see them, to user-friendly ASTNode names.
         """
         return {
-            '{}__analysis__{}_type'.format(self.lib_name, name): name
+            '{}__analysis__{}_type'.format(self.lib_name, name.lower()):
+                Name.from_camel_with_underscores(name)
             for name in self.astnode_names
         }

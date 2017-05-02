@@ -130,7 +130,9 @@ class ASTNodePrinter(BasePrinter):
         m = self.tag_re.match(str(tag))
         if m:
             record_type_name = m.group(1).replace('.', '__')
-            result = self.context.astnode_struct_names.get(record_type_name)
+            result = (
+                self.context.astnode_struct_names.get(record_type_name).camel
+            )
         return result or '???'
 
     @property
