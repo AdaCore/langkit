@@ -1417,11 +1417,9 @@ class Let(AbstractExpression):
         def _render_pre(self):
             result = []
             for var, expr in zip(self.vars, self.var_exprs):
-                result.append(expr.render_pre())
-                result.append('{} := {};'.format(var.name, expr.render_expr()))
-                result.append(gdb_bind_var(var))
-                if var.type.is_refcounted():
-                    result.append('Inc_Ref ({});'.format(var.name))
+                result.extend([expr.render_pre(),
+                               assign_var(var, expr.render_expr()),
+                               gdb_bind_var(var)])
             result.extend([
                 self.expr.render_pre(),
                 assign_var(self.result_var.ref_expr, self.expr.render_expr()),
