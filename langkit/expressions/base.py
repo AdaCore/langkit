@@ -1151,6 +1151,84 @@ class VariableExpr(ResolvedExpression):
             ' ({})'.format(src_name.lower) if src_name else '')
 
 
+class UnreachableExpr(ResolvedExpression):
+    """
+    Resolved expression that just raises an error.
+
+    This is useful to use as a placeholder for unreachable code.
+    """
+
+    def __init__(self, expr_type):
+        """
+        :param CompiledType expr_type: Type parameter. Type that a usual
+            expression would return in this case.
+        """
+        self.static_type = expr_type
+        super(UnreachableExpr, self).__init__(skippable_refcount=True)
+
+    def _render_expr(self):
+        return ('raise Program_Error with'
+                ' "Executing supposedly unreachable code"')
+
+    def __repr__(self):
+        return '<UnreachableExpr (for {} expr)>'.format(
+            self.type.name().camel
+        )
+
+
+class LiteralExpr(ResolvedExpression):
+    """
+    Resolved expression for literals of any type.
+
+    The pecularity of literals is that they don't require any pre-computation
+    (render_pre) are not required to live in local variables.  Because of this
+    last characteristics, if the type at hand is ref-counted, then the literal
+    must be a ref-counting "insensitive" value, for instance a null one.
+    """
+
+    def __init__(self, literal, expr_type):
+        """
+        :param str literal: The literal expression.
+        :param CompiledType|None type: The return type of the expression.
+        """
+        self.static_type = expr_type
+        self.literal = literal
+
+        super(LiteralExpr, self).__init__(skippable_refcount=True)
+
+    def _render_expr(self):
+        return self.literal
+
+    @property
+    def subexprs(self):
+        return {'0-type': self.static_type,
+                '1-literal': self.literal}
+
+    def __repr__(self):
+        return '<LiteralExpr {} ({})>'.format(
+            self.literal,
+            self.static_type.name().camel if self.static_type else '<no type>'
+        )
+
+
+class ComputingExpr(ResolvedExpression):
+    """
+    Base class for resolved expressions that do computations.
+
+    These expressions are the only ones visible for GDB helpers. As such, they
+    are required to store their result into a result variable, and thus
+    subclasses only need to override the "_render_pre" method, which is
+    supposed to initialize the result variable with the expression evaluation.
+    """
+
+    def __init__(self, result_var_name, abstract_expr=None):
+        super(ComputingExpr, self).__init__(result_var_name,
+                                            abstract_expr=abstract_expr)
+
+    def _render_expr(self):
+        return self.result_var.name.camel_with_underscores
+
+
 class AbstractVariable(AbstractExpression):
     """
     Abstract expression that is an entry point into the expression DSL.
@@ -2609,7 +2687,7 @@ class Literal(AbstractExpression):
             (bool, lambda _: (str(self.literal), BoolType)),
             (int, lambda _:  (str(self.literal), LongType)),
         ], exception=DiagnosticError('Invalid abstract expression type: {}'))
-        return LiteralExpr(lit_str, rtype, abstract_expr=self)
+        return LiteralExpr(lit_str, rtype)
 
     def __repr__(self):
         return '<Literal {}>'.format(self.literal)
@@ -2655,36 +2733,6 @@ class BasicExpr(ResolvedExpression):
     def subexprs(self):
         return [op for op in self.operands
                 if isinstance(op, ResolvedExpression)]
-
-
-class LiteralExpr(BasicExpr):
-    """
-    Resolved expression for literals of any type.
-    """
-
-    def __init__(self, literal, type, result_var_name=None,
-                 abstract_expr=None):
-        """
-        :param str literal: The literal expression.
-        :param CompiledType|None type: The return type of the expression.
-        :param None|str result_var_name: See ResolvedExpression's constructor.
-        :param AbstractExpression|None abstract_expr: See ResolvedExpression's
-            constructor.
-        """
-        super(LiteralExpr, self).__init__(literal, type, [], result_var_name,
-                                          abstract_expr=abstract_expr)
-        self.literal = literal
-
-    @property
-    def subexprs(self):
-        return {'0-type': self.static_type,
-                '1-literal': self.literal}
-
-    def __repr__(self):
-        return '<LiteralExpr {} ({})>'.format(
-            self.template,
-            self.type.name().camel if self.static_type else '<no type>'
-        )
 
 
 class NullExpr(BasicExpr):
@@ -2847,31 +2895,6 @@ def text_equals(self, left, right):
     """
     return TokenTextEq(construct(left, Token), construct(right, Token),
                        abstract_expr=self)
-
-
-class UnreachableExpr(ResolvedExpression):
-    """
-    Resolved expression that just raises an error.
-
-    This is useful to use as a placeholder for unreachable code.
-    """
-
-    def __init__(self, expr_type):
-        """
-        :param CompiledType expr_type: Type parameter. Type that a usual
-            expression would return in this case.
-        """
-        self.static_type = expr_type
-        super(UnreachableExpr, self).__init__(skippable_refcount=True)
-
-    def _render_expr(self):
-        return ('raise Program_Error with'
-                ' "Executing supposedly unreachable code"')
-
-    def __repr__(self):
-        return '<UnreachableExpr (for {} expr)>'.format(
-            self.type.name().camel
-        )
 
 
 class LocalVars(object):
