@@ -1850,7 +1850,7 @@ class PropertyDef(AbstractNodeData):
     def __init__(self, expr, prefix, name=None, doc=None, public=None,
                  abstract=False, type=None, abstract_runtime_check=False,
                  has_implicit_env=None, memoized=False, external=False,
-                 uses_envs=None):
+                 uses_envs=None, force_dispatching=False):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -1913,6 +1913,9 @@ class PropertyDef(AbstractNodeData):
         :param bool uses_envs: Whether this property uses lexical environments
             at all or not. If it does, then it will have an extra parameter for
             env rebindings.
+
+        :param bool force_dispatching: Force making this property a dispatching
+            one. Useful for externally defined properties.
         """
 
         super(PropertyDef, self).__init__(name=name, public=public)
@@ -1986,6 +1989,8 @@ class PropertyDef(AbstractNodeData):
 
         self._requires_untyped_wrapper = False
 
+        self.force_dispatching = force_dispatching
+
     def property_set(self):
         """
         Return all properties associated with this property in terms of
@@ -2026,7 +2031,8 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: bool
         """
-        return (self.abstract
+        return (self.force_dispatching
+                or self.abstract
                 or self.base_property
                 or self.overriding_properties)
 
