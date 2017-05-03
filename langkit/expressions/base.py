@@ -1381,25 +1381,24 @@ class SymbolLiteral(AbstractExpression):
     Abstract expression that returns a symbol from a string literal.
     """
 
-    class Expr(ResolvedExpression):
+    class Expr(ComputingExpr):
 
         def __init__(self, name, abstract_expr=None):
-            super(SymbolLiteral.Expr, self).__init__(
-                abstract_expr=abstract_expr
-            )
-
-            self.name = name
             self.static_type = Symbol
-
+            self.name = name
             get_context().add_symbol_literal(self.name)
 
-        def _render_expr(self):
-            return 'Self.Unit.Context.Symbol_Literals ({})'.format(
-                get_context().symbol_literals[self.name]
+            super(SymbolLiteral.Expr, self).__init__(
+                'Sym', abstract_expr=abstract_expr
             )
 
         def _render_pre(self):
-            return ''
+            return assign_var(
+                self.result_var,
+                'Self.Unit.Context.Symbol_Literals ({})'.format(
+                    get_context().symbol_literals[self.name]
+                )
+            )
 
         @property
         def subexprs(self):
