@@ -10,8 +10,8 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr, CallExpr,
-    FieldAccessExpr, GetSymbol, PropertyDef, ResolvedExpression, Self,
-    auto_attr, auto_attr_custom, construct
+    FieldAccessExpr, GetSymbol, NullExpr, PropertyDef,
+    ResolvedExpression, Self, auto_attr, auto_attr_custom, construct
 )
 from langkit.expressions.utils import assign_var
 
@@ -369,8 +369,7 @@ def make_as_entity(node_expr, abstract_expr=None):
     Helper for as_entity. Takes a resolved expression instead of an abstract
     one.
     """
-    from langkit.expressions import New, If, IsNull, No
-
+    from langkit.expressions import If, IsNull, New
     p = PropertyDef.get()
     p.set_uses_env()
 
@@ -380,7 +379,7 @@ def make_as_entity(node_expr, abstract_expr=None):
 
     return If.Expr(
         IsNull.construct_static(node_expr),
-        No.construct_static(node_expr.type.entity()),
+        NullExpr(node_expr.type.entity()),
         New.StructExpr(
             node_expr.type.entity(), {
                 names.Name('El'): node_var,

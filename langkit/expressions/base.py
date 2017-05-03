@@ -1597,54 +1597,6 @@ class Var(AbstractVariable):
             self._creator_stack_frame = None
 
 
-class No(AbstractExpression):
-    """
-    Expression that returns a null value for the given type.
-    """
-
-    def __init__(self, expr_type):
-        """
-        :param CompiledType expr_type: Type parameter. Type for the value this
-            expression creates.
-        """
-        super(No, self).__init__()
-        self.expr_type = expr_type
-
-    def do_prepare(self):
-        self.expr_type = resolve_type(self.expr_type)
-        check_source_language(
-            self.expr_type.null_allowed,
-            "Invalid type for Null expression: {}".format(
-                self.expr_type.name().camel
-            )
-        )
-
-    @staticmethod
-    def construct_static(expr_type, abstract_expr=None):
-        return LiteralExpr(expr_type.nullexpr(), expr_type,
-
-                           # We want to create a tmp in pointer cases,
-                           # so that overloading resolution always works.
-                           result_var_name="Null_Value"
-                           if expr_type.is_ptr
-                           else None,
-
-                           skippable_refcount=True,
-                           abstract_expr=abstract_expr)
-
-    def construct(self):
-        """
-        Construct a resolved expression for this.
-
-        :rtype: LiteralExpr
-        """
-        return self.construct_static(self.expr_type, self)
-
-    def __repr__(self):
-        expr_type = resolve_type(self.expr_type)
-        return '<No {}>'.format(expr_type.name().camel)
-
-
 class EmptyArray(AbstractExpression):
     """
     Expression that returns an empty array.
@@ -2740,15 +2692,56 @@ class LiteralExpr(BasicExpr):
         )
 
 
-class NullExpr(LiteralExpr):
+class NullExpr(BasicExpr):
     """
     Resolved expression for the null expression corresponding to some type.
     """
 
     def __init__(self, type, abstract_expr=None):
-        super(NullExpr, self).__init__(type.nullexpr(), type,
-                                       skippable_refcount=True,
-                                       abstract_expr=abstract_expr)
+        super(NullExpr, self).__init__(
+            type.nullexpr(), type, [],
+            abstract_expr=abstract_expr,
+
+            # Store the value in a local variable so that Ada overloading
+            # resolution still work when the value is used as a function call
+            # argument.
+            result_var_name="Null_Value"
+        )
+
+
+class No(AbstractExpression):
+    """
+    Expression that returns a null value for the given type.
+    """
+
+    def __init__(self, expr_type):
+        """
+        :param CompiledType expr_type: Type parameter. Type for the value this
+            expression creates.
+        """
+        super(No, self).__init__()
+        self.expr_type = expr_type
+
+    def do_prepare(self):
+        self.expr_type = resolve_type(self.expr_type)
+        check_source_language(
+            self.expr_type.null_allowed,
+            "Invalid type for Null expression: {}".format(
+                self.expr_type.name().camel
+            )
+        )
+
+    def construct(self):
+        """
+        Construct a resolved expression for this.
+
+        :rtype: LiteralExpr
+        """
+        return NullExpr(self.expr_type, self)
+
+    def __repr__(self):
+        expr_type = resolve_type(self.expr_type)
+        return '<No {}>'.format(expr_type.name().camel)
 
 
 class FieldAccessExpr(BasicExpr):
