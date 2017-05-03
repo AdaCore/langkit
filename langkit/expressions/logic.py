@@ -559,8 +559,7 @@ class LogicTrue(AbstractExpression):
         super(LogicTrue, self).__init__()
 
     def construct(self):
-        return LiteralExpr("True_Rel", type=EquationType,
-                           result_var_name="Logic_True")
+        return CallExpr('True_Rel', EquationType, [], 'Logic_True')
 
 
 class LogicFalse(AbstractExpression):
@@ -572,5 +571,4 @@ class LogicFalse(AbstractExpression):
         super(LogicFalse, self).__init__()
 
     def construct(self):
-        return LiteralExpr("False_Rel", type=EquationType,
-                           result_var_name="Logic_False")
+        return CallExpr('False_Rel', EquationType, [], 'Logic_False')
