@@ -236,10 +236,9 @@ class Map(CollectionExpression):
             self.static_type = element_type.array_type()
             self.static_type.add_to_context()
 
-            super(Map.Expr, self).__init__(result_var_name='Map',
-                                           scopeless_result_var=True,
-                                           abstract_expr=abstract_expr)
-            iter_scope.parent.add(self.result_var)
+            with iter_scope.parent.use():
+                super(Map.Expr, self).__init__(result_var_name='Map',
+                                               abstract_expr=abstract_expr)
 
         def __repr__(self):
             return "<MapExpr {}: {} -> {}{}>".format(
