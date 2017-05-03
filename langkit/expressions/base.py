@@ -3153,11 +3153,14 @@ class CallExpr(BasicExpr):
             constructor.
         """
         self.name = names.Name.get(name)
-        super(CallExpr, self).__init__(
-            '{} ({})'.format(self.name.camel_with_underscores,
-                             ', '.join(['{}'] * len(exprs))),
-            type, exprs, result_var_name, abstract_expr=abstract_expr
+
+        template = ('{name} ({args})' if exprs else '{name}').format(
+            name=self.name.camel_with_underscores,
+            args=', '.join(['{}'] * len(exprs))
         )
+
+        super(CallExpr, self).__init__(template, type, exprs, result_var_name,
+                                       abstract_expr=abstract_expr)
 
     @property
     def subexprs(self):
