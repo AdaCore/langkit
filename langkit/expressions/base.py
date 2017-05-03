@@ -2688,7 +2688,7 @@ class Literal(AbstractExpression):
         return '<Literal {}>'.format(self.literal)
 
 
-class BasicExpr(ResolvedExpression):
+class BasicExpr(ComputingExpr):
     """
     A basic resolved expression template, that automatically handles:
 
@@ -2713,16 +2713,17 @@ class BasicExpr(ResolvedExpression):
         super(BasicExpr, self).__init__(result_var_name,
                                         abstract_expr=abstract_expr)
 
-    def _render_expr(self):
-        return self.template.format(*[
-            (expr if isinstance(expr, basestring) else expr.render_expr())
-            for expr in self.operands
-        ])
-
     def _render_pre(self):
-        return '\n'.join(expr.render_pre()
-                         for expr in self.operands
-                         if not isinstance(expr, basestring))
+        expr = self.template.format(*[
+            (e if isinstance(e, basestring) else e.render_expr())
+            for e in self.operands
+        ])
+        return '\n'.join(
+            [e.render_pre()
+             for e in self.operands
+             if not isinstance(e, basestring)]
+            + [assign_var(self.result_var.ref_expr, expr)]
+        )
 
     @property
     def subexprs(self):
