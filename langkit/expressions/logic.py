@@ -353,7 +353,8 @@ class Predicate(AbstractExpression):
     """
 
     class Expr(CallExpr):
-        def __init__(self, pred_property, pred_id, logic_var_exprs):
+        def __init__(self, pred_property, pred_id, logic_var_exprs,
+                     abstract_expr=None):
             self.pred_property = pred_property
             self.pred_id = pred_id
             self.logic_var_exprs = logic_var_exprs
@@ -361,6 +362,7 @@ class Predicate(AbstractExpression):
             super(Predicate.Expr, self).__init__(
                 'Pred', '{}_Pred.Create'.format(pred_id),
                 EquationType, logic_var_exprs,
+                abstract_expr=abstract_expr
             )
 
         @property
@@ -459,7 +461,8 @@ class Predicate(AbstractExpression):
             )), operands=closure_exprs)
         )
 
-        return Predicate.Expr(self.pred_property, pred_id, logic_var_exprs)
+        return Predicate.Expr(self.pred_property, pred_id, logic_var_exprs,
+                              abstract_expr=self)
 
 
 @auto_attr
