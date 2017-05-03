@@ -1616,9 +1616,9 @@ class EmptyArray(AbstractExpression):
 
     @staticmethod
     def construct_static(array_type, abstract_expr=None):
-        return LiteralExpr('Create (Items_Count => 0)', array_type,
-                           result_var_name='Empty_Array',
-                           abstract_expr=abstract_expr)
+        return CallExpr('Create', array_type, ['Items_Count => 0'],
+                        result_var_name='Empty_Array',
+                        abstract_expr=abstract_expr)
 
     def construct(self):
         return self.construct_static(self.array_type, abstract_expr=self)
