@@ -1099,7 +1099,7 @@ class VariableExpr(ResolvedExpression):
         :param langkit.compiled_types.CompiledType type: Type for the
             referenced variable.
         :param names.Name name: Name of the referenced variable.
-        :param AbstractVariable|None source_name: AbstractVariable that
+        :param AbstractVariable|None abstract_var: AbstractVariable that
             compiled to this resolved expression, if any.
         """
         self.static_type = assert_type(type, CompiledType)
