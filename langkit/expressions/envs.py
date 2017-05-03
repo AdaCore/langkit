@@ -262,7 +262,8 @@ class EnvGroup(AbstractExpression):
         return BasicExpr(
             'Group ({})'.format(arg_template), LexicalEnvType,
             env_exprs,
-            'Group_Env'
+            'Group_Env',
+            abstract_expr=self
         )
 
 
