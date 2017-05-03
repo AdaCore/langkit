@@ -3240,6 +3240,7 @@ class Arithmetic(AbstractExpression):
         r = construct(self.r)
 
         if l.type == Symbol and r.type == Symbol:
+            assert self.op == '&'
             return BasicExpr(
                 'Find (Self.Unit.TDH.Symbols, ({}.all & {}.all))',
                 Symbol,
