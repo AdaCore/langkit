@@ -1176,33 +1176,40 @@ class LiteralExpr(ResolvedExpression):
     """
     Resolved expression for literals of any type.
 
-    The pecularity of literals is that they don't require any pre-computation
-    (render_pre) are not required to live in local variables.  Because of this
-    last characteristics, if the type at hand is ref-counted, then the literal
-    must be a ref-counting "insensitive" value, for instance a null one.
+    The pecularity of literals is that they are not required to live in local
+    variables. Because of this, if the type at hand is ref-counted, then the
+    literal must be a ref-counting "insensitive" value, for instance a null
+    value or an Ada aggregate.
     """
 
-    def __init__(self, literal, expr_type):
+    def __init__(self, template, expr_type, operands=[]):
         """
-        :param str literal: The literal expression.
-        :param CompiledType|None type: The return type of the expression.
+        :param str template: String template for the expression. Rendering will
+            interpolate it with the operands' render_expr methods evaluation.
+        :param CompiledType type: The return type of the expression.
+        :param list[ResolvedExpression] operand: Operands for this expression.
         """
         self.static_type = expr_type
-        self.literal = literal
+        self.template = template
+        self.operands = operands
 
         super(LiteralExpr, self).__init__(skippable_refcount=True)
 
+    def _render_pre(self):
+        return '\n'.join(o.render_pre() for o in self.operands)
+
     def _render_expr(self):
-        return self.literal
+        return self.template.format(*[o.render_expr() for o in self.operands])
 
     @property
     def subexprs(self):
         return {'0-type': self.static_type,
-                '1-literal': self.literal}
+                '1-template': self.template,
+                '2-operands': self.operands}
 
     def __repr__(self):
         return '<LiteralExpr {} ({})>'.format(
-            self.literal,
+            self.template,
             self.static_type.name().camel if self.static_type else '<no type>'
         )
 
