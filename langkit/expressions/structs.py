@@ -154,6 +154,7 @@ class IsNull(AbstractExpression):
     @staticmethod
     def construct_node(cexpr):
         return BasicExpr(
+            'Is_Null',
             '{} = null'.format('{}.El'
                                if cexpr.type.is_entity_type else '{}'),
             BoolType, [cexpr]

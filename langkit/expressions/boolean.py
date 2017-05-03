@@ -114,7 +114,7 @@ class Eq(AbstractExpression):
     def make_expr(cls, lhs, rhs):
         return (cls.make_expr_for_entities(lhs, rhs)
                 if lhs.type.is_entity_type else
-                BasicExpr('{} = {}', BoolType, [lhs, rhs]))
+                BasicExpr('Is_Equal', '{} = {}', BoolType, [lhs, rhs]))
 
     @staticmethod
     def make_expr_for_entities(lhs, rhs):
@@ -124,7 +124,8 @@ class Eq(AbstractExpression):
             lhs = Cast.Expr(lhs, T.entity)
         if rhs.type != T.entity:
             rhs = Cast.Expr(rhs, T.entity)
-        return BasicExpr('Is_Equivalent ({}, {})', BoolType, [lhs, rhs])
+        return BasicExpr('Is_Equiv', 'Is_Equivalent ({}, {})', BoolType,
+                         [lhs, rhs])
 
     def __init__(self, lhs, rhs):
         """
@@ -369,7 +370,7 @@ class Not(AbstractExpression):
 
     @staticmethod
     def make_expr(expr):
-        return BasicExpr('not ({})', BoolType, [expr])
+        return BasicExpr('Not_Val', 'not ({})', BoolType, [expr])
 
 
 @attr_call('then')

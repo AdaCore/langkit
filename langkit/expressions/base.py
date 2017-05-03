@@ -2698,12 +2698,12 @@ class BasicExpr(ResolvedExpression):
       are in the template.
     """
 
-    def __init__(self, template, type, operands, result_var_name=None,
+    def __init__(self, result_var_name, template, type, operands,
                  abstract_expr=None):
         """
+        :param str result_var_name: See ResolvedExpression's constructor.
         :param str template: The template string.
         :param None|CompiledType type: The return type of the expression.
-        :param None|str result_var_name: See ResolvedExpression's constructor.
         :param AbstractExpression|None abstract_expr: See ResolvedExpression's
             constructor.
         """
@@ -2737,13 +2737,8 @@ class NullExpr(BasicExpr):
 
     def __init__(self, type, abstract_expr=None):
         super(NullExpr, self).__init__(
-            type.nullexpr(), type, [],
+            'Null_Value', type.nullexpr(), type, [],
             abstract_expr=abstract_expr,
-
-            # Store the value in a local variable so that Ada overloading
-            # resolution still work when the value is used as a function call
-            # argument.
-            result_var_name="Null_Value"
         )
 
 
@@ -2805,9 +2800,8 @@ class FieldAccessExpr(BasicExpr):
             constructor.
         """
         super(FieldAccessExpr, self).__init__(
-            '{}.{}', result_type,
+            'Fld', '{}.{}', result_type,
             [NullCheckExpr(prefix_expr, result_var_name='Pfx'), field_name],
-            result_var_name='Fld',
             abstract_expr=abstract_expr,
         )
         self.prefix_expr = prefix_expr
@@ -2841,9 +2835,8 @@ class TokenTextEq(BasicExpr):
             constructor.
         """
         super(TokenTextEq, self).__init__(
-            template="Text_Type'(Text ({})) = Text_Type'(Text ({}))",
-            type=BoolType,
-            operands=[left, right],
+            'Is_Equal', "Text_Type'(Text ({})) = Text_Type'(Text ({}))",
+            BoolType, [left, right],
             abstract_expr=abstract_expr
         )
 
@@ -3133,8 +3126,7 @@ class CallExpr(BasicExpr):
             args=', '.join(['{}'] * len(exprs))
         )
 
-        super(CallExpr, self).__init__(template, type, exprs,
-                                       result_var_name=result_var_name,
+        super(CallExpr, self).__init__(result_var_name, template, type, exprs,
                                        abstract_expr=abstract_expr)
 
     @property
@@ -3242,8 +3234,8 @@ class Arithmetic(AbstractExpression):
         if l.type == Symbol and r.type == Symbol:
             assert self.op == '&'
             return BasicExpr(
-                'Find (Self.Unit.TDH.Symbols, ({}.all & {}.all))',
-                Symbol,
+                'Sym_Concat',
+                'Find (Self.Unit.TDH.Symbols, ({}.all & {}.all))', Symbol,
                 [l, r]
             )
 
@@ -3259,7 +3251,8 @@ class Arithmetic(AbstractExpression):
             )
         )
 
-        return BasicExpr("({} %s {})" % self.op, LongType, [l, r],
+        return BasicExpr('Arith_Result', '({} %s {})' % self.op, LongType,
+                         [l, r],
                          abstract_expr=self)
 
 

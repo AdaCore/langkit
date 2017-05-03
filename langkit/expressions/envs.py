@@ -154,7 +154,7 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
 
     array_expr = 'AST_Envs.Get ({})'.format(', '.join('{} => {{}}'.format(n)
                                                       for n, _ in args))
-    make_expr = partial(BasicExpr, result_var_name="Env_Get_Result",
+    make_expr = partial(BasicExpr, 'Env_Get_Result',
                         operands=[e for _, e in args],
                         abstract_expr=self)
 
@@ -259,12 +259,9 @@ class EnvGroup(AbstractExpression):
     def construct(self):
         env_exprs = [construct(e, LexicalEnvType) for e in self.env_exprs]
         arg_template = array_aggr(['{}' for _ in env_exprs])
-        return BasicExpr(
-            'Group ({})'.format(arg_template), LexicalEnvType,
-            env_exprs,
-            'Group_Env',
-            abstract_expr=self
-        )
+        return BasicExpr('Group_Env', 'Group ({})'.format(arg_template),
+                         LexicalEnvType, env_exprs,
+                         abstract_expr=self)
 
 
 @auto_attr
@@ -307,7 +304,8 @@ def env_node(self, env):
 
     :param AbstractExpression env: The source environment.
     """
-    return BasicExpr('{}.Node', T.root_node, [construct(env, LexicalEnvType)],
+    return BasicExpr('Env_Node', '{}.Node', T.root_node,
+                     [construct(env, LexicalEnvType)],
                      abstract_expr=self)
 
 
@@ -319,14 +317,14 @@ def env_parent(self, env):
     :param AbstractExpression env: The source environment.
     """
     return BasicExpr(
-        'AST_Envs.Get_Env ({}.Parent)',
-        T.LexicalEnvType, [construct(env, LexicalEnvType)],
+        'Parent', 'AST_Envs.Get_Env ({}.Parent)', T.LexicalEnvType,
+        [construct(env, LexicalEnvType)],
         abstract_expr=self,
     )
 
 
 def make_combine(self, l_rebindings, r_rebindings):
-    return BasicExpr('AST_Envs.Combine ({}, {})',
+    return BasicExpr('Combined', 'AST_Envs.Combine ({}, {})',
                      EnvRebindingsType, [l_rebindings, r_rebindings],
                      abstract_expr=self)
 

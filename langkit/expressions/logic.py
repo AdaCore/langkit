@@ -521,12 +521,12 @@ class LogicBooleanOp(AbstractExpression):
 
     def construct(self):
         return BasicExpr(
+            'Logic_Boolean_Op',
             "Logic_{} (Relation_Array ({{}}.Items))".format(
                 "Any" if self.kind == self.KIND_OR else "All"
             ),
             EquationType,
             [construct(self.equation_array, EquationType.array_type())],
-            result_var_name="Logic_Boolean_Op",
             abstract_expr=self
         )
 
