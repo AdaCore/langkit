@@ -441,10 +441,10 @@ class Quantifier(CollectionExpression):
             self.iter_scope = iter_scope
             self.static_type = BoolType
 
-            super(Quantifier.Expr, self).__init__('Quantifier_Result',
-                                                  scopeless_result_var=True,
-                                                  abstract_expr=abstract_expr)
-            iter_scope.parent.add(self.result_var)
+            with iter_scope.parent.use():
+                super(Quantifier.Expr, self).__init__(
+                    'Quantifier_Result', abstract_expr=abstract_expr
+                )
 
         def _render_pre(self):
             return render(
