@@ -67,12 +67,14 @@ class BinaryBooleanOperator(AbstractExpression):
                 then = LiteralExpr('True', BoolType)
                 else_then = rhs
             return If.Expr(lhs, then, else_then, BoolType)
+
         else:
             # Equation case
+            kind_name = self.kind.capitalize()
             return CallExpr(
-                names.Name("Logic") + names.Name.from_lower(self.kind),
+                '{}_Pred'.format(kind_name), 'Logic_{}'.format(kind_name),
                 EquationType, [lhs, rhs],
-                '{}_Pred'.format(self.kind.capitalize())
+                abstract_expr=self
             )
 
 

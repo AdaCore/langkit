@@ -1379,7 +1379,7 @@ class GetSymbol(AbstractExpression):
 
     @staticmethod
     def construct_static(token_expr, abstract_expr=None):
-        return CallExpr("Get_Symbol", Symbol, [token_expr],
+        return CallExpr('Sym', 'Get_Symbol', Symbol, [token_expr],
                         abstract_expr=abstract_expr)
 
 
@@ -1689,8 +1689,8 @@ class EmptyArray(AbstractExpression):
 
     @staticmethod
     def construct_static(array_type, abstract_expr=None):
-        return CallExpr('Create', array_type, ['Items_Count => 0'],
-                        result_var_name='Empty_Array',
+        return CallExpr('Empty_Array', 'Create', array_type,
+                        ['Items_Count => 0'],
                         abstract_expr=abstract_expr)
 
     def construct(self):
@@ -3116,14 +3116,13 @@ class CallExpr(BasicExpr):
     Ada side of things.
     """
 
-    def __init__(self, name, type, exprs, result_var_name=None,
-                 abstract_expr=None):
+    def __init__(self, result_var_name, name, type, exprs, abstract_expr=None):
         """
+        :param None|str result_var_name: See ResolvedExpression's constructor.
         :param names.Name|str name: The name of the procedure to call.
-        :param CompiledType|None type: The return type of the function call.
+        :param CompiledType type: The return type of the function call.
         :param [ResolvedExpression] exprs: A list of expressions that
             represents the arguments to the function call.
-        :param None|str result_var_name: See ResolvedExpression's constructor.
         :param AbstractExpression|None abstract_expr: See ResolvedExpression's
             constructor.
         """
@@ -3134,7 +3133,8 @@ class CallExpr(BasicExpr):
             args=', '.join(['{}'] * len(exprs))
         )
 
-        super(CallExpr, self).__init__(template, type, exprs, result_var_name,
+        super(CallExpr, self).__init__(template, type, exprs,
+                                       result_var_name=result_var_name,
                                        abstract_expr=abstract_expr)
 
     @property

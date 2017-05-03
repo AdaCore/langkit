@@ -55,10 +55,9 @@ class Bind(AbstractExpression):
             self.pred_func = pred_func
 
             super(Bind.Expr, self).__init__(
+                'Bind_Result',
                 'Bind_{}_{}.Create'.format(cprop_uid, eprop_uid),
-                EquationType,
-                [lhs, rhs, pred_func],
-                'Bind_Result'
+                EquationType, [lhs, rhs, pred_func],
             )
 
         @property
@@ -359,10 +358,8 @@ class Predicate(AbstractExpression):
             self.logic_var_exprs = logic_var_exprs
 
             super(Predicate.Expr, self).__init__(
-                "{}_Pred.Create".format(pred_id),
-                EquationType,
-                logic_var_exprs,
-                result_var_name="Pred"
+                'Pred', '{}_Pred.Create'.format(pred_id),
+                EquationType, logic_var_exprs,
             )
 
         @property
@@ -474,9 +471,8 @@ def get_value(self, logic_var):
         extract the value.
     """
     return CallExpr(
-        "Eq_Node.Refs.Get_Value", T.root_node.entity(),
+        'Eq_Solution', 'Eq_Node.Refs.Get_Value', T.root_node.entity(),
         [construct(logic_var, LogicVarType)],
-        result_var_name='Eq_Solution',
         abstract_expr=self,
     )
 
@@ -496,7 +492,7 @@ def solve(self, equation):
 
     :param AbstractExpression equation: The equation to solve.
     """
-    return CallExpr("Solve", BoolType,
+    return CallExpr('Solve_Success', 'Solve', BoolType,
                     [construct(equation, EquationType)],
                     abstract_expr=self)
 
@@ -561,7 +557,7 @@ class LogicTrue(AbstractExpression):
         super(LogicTrue, self).__init__()
 
     def construct(self):
-        return CallExpr('True_Rel', EquationType, [], 'Logic_True')
+        return CallExpr('Logic_True', 'True_Rel', EquationType, [])
 
 
 class LogicFalse(AbstractExpression):
@@ -573,4 +569,4 @@ class LogicFalse(AbstractExpression):
         super(LogicFalse, self).__init__()
 
     def construct(self):
-        return CallExpr('False_Rel', EquationType, [], 'Logic_False')
+        return CallExpr('Logic_False', 'False_Rel', EquationType, [])

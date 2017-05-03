@@ -241,13 +241,9 @@ def env_orphan(self, env_expr):
     :param AbstractExpression env_expr: Expression that will return a
         lexical environment.
     """
-    return CallExpr(
-        'AST_Envs.Orphan',
-        LexicalEnvType,
-        [construct(env_expr, LexicalEnvType)],
-        'Orphan_Env',
-        abstract_expr=self,
-    )
+    return CallExpr('Orphan_Env', 'AST_Envs.Orphan', LexicalEnvType,
+                    [construct(env_expr, LexicalEnvType)],
+                    abstract_expr=self)
 
 
 class EnvGroup(AbstractExpression):
@@ -281,12 +277,9 @@ def env_group(self, env_array_expr):
         an array of lexical environments. If this array is empty, the empty
         environment is returned.
     """
-    return CallExpr(
-        'Group', LexicalEnvType,
-        [construct(env_array_expr, LexicalEnvType.array_type())],
-        'Group_Env',
-        abstract_expr=self,
-    )
+    return CallExpr('Group_Env', 'Group', LexicalEnvType,
+                    [construct(env_array_expr, LexicalEnvType.array_type())],
+                    abstract_expr=self)
 
 
 @auto_attr
@@ -300,12 +293,10 @@ def is_visible_from(self, referenced_env, base_env):
     :param AbstractExpression referenced_env: The environment referenced
         from base_env, for which we want to check visibility.
     """
-    return CallExpr(
-        'Is_Visible_From', BoolType,
-        [construct(referenced_env, LexicalEnvType),
-         construct(base_env, LexicalEnvType)],
-        abstract_expr=self,
-    )
+    return CallExpr('Is_Visible', 'Is_Visible_From', BoolType,
+                    [construct(referenced_env, LexicalEnvType),
+                     construct(base_env, LexicalEnvType)],
+                    abstract_expr=self)
 
 
 @auto_attr
@@ -355,14 +346,11 @@ def rebind_env(self, env, to_rebind, rebind_to):
     Returns a new environment based on `env` where `to_rebind` is rebound to
     `rebind_to`.
     """
-    return CallExpr(
-        'Rebind_Env', LexicalEnvType,
-        [construct(env, LexicalEnvType),
-         construct(to_rebind, LexicalEnvType),
-         construct(rebind_to, LexicalEnvType)],
-        'Rebound_Env',
-        abstract_expr=self,
-    )
+    return CallExpr('Rebound_Env', 'Rebind_Env', LexicalEnvType,
+                    [construct(env, LexicalEnvType),
+                     construct(to_rebind, LexicalEnvType),
+                     construct(rebind_to, LexicalEnvType)],
+                    abstract_expr=self)
 
 
 def make_as_entity(node_expr, abstract_expr=None):

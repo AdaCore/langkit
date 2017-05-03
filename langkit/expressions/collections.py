@@ -530,12 +530,9 @@ def collection_get(self, coll_expr, index_expr, or_null=True):
 
     coll_expr = construct(coll_expr, lambda t: t.is_collection())
     or_null = construct(or_null)
-    return CallExpr(
-        'Get', coll_expr.type.element_type(),
-        [coll_expr, index_expr, or_null],
-        'Get_Result',
-        abstract_expr=self,
-    )
+    return CallExpr('Get_Result', 'Get', coll_expr.type.element_type(),
+                    [coll_expr, index_expr, or_null],
+                    abstract_expr=self)
 
 
 @auto_attr
@@ -546,11 +543,9 @@ def length(self, coll_expr):
     :param AbstractExpression coll_expr: The expression representing the
         collection to get from.
     """
-    return CallExpr(
-        "Length", LongType,
-        [construct(coll_expr, lambda t: t.is_collection())],
-        abstract_expr=self,
-    )
+    return CallExpr('Len', 'Length', LongType,
+                    [construct(coll_expr, lambda t: t.is_collection())],
+                    abstract_expr=self)
 
 
 @attr_expr('singleton')
@@ -655,6 +650,6 @@ class Concat(AbstractExpression):
              )),
         ])
 
-        return CallExpr(
-            "Concat", array_1.type, [array_1, array_2], "Concat_Result"
-        )
+        return CallExpr('Concat_Result', 'Concat', array_1.type,
+                        [array_1, array_2],
+                        abstract_expr=self)
