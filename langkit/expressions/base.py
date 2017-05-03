@@ -1092,7 +1092,7 @@ class VariableExpr(ResolvedExpression):
 
     pretty_class_name = 'Var'
 
-    def __init__(self, type, name, abstract_var=None, abstract_expr=None):
+    def __init__(self, type, name, abstract_var=None):
         """
         Create a variable reference expression.
 
@@ -1101,17 +1101,13 @@ class VariableExpr(ResolvedExpression):
         :param names.Name name: Name of the referenced variable.
         :param AbstractVariable|None source_name: AbstractVariable that
             compiled to this resolved expression, if any.
-        :param AbstractExpression|None abstract_expr: See
-            ResolvedExpression's constructor.
         """
         self.static_type = assert_type(type, CompiledType)
         self.name = name
         self.abstract_var = abstract_var
         self._ignored = False
 
-        super(VariableExpr, self).__init__(
-            skippable_refcount=True, abstract_expr=abstract_expr
-        )
+        super(VariableExpr, self).__init__(skippable_refcount=True)
 
     def _render_expr(self):
         return self.name.camel_with_underscores
@@ -1328,8 +1324,7 @@ class AbstractVariable(AbstractExpression):
         try:
             expr = self.construct_cache[key]
         except KeyError:
-            expr = VariableExpr(self._type, self._name, self,
-                                abstract_expr=self)
+            expr = VariableExpr(self._type, self._name, self)
             self.construct_cache[key] = expr
         return expr
 
