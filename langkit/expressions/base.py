@@ -1468,7 +1468,7 @@ class Let(AbstractExpression):
     names available.
     """
 
-    class Expr(ResolvedExpression):
+    class Expr(ComputingExpr):
         pretty_class_name = 'Let'
 
         def __init__(self, vars, var_exprs, expr, abstract_expr=None):
@@ -1494,9 +1494,6 @@ class Let(AbstractExpression):
                 assign_var(self.result_var.ref_expr, self.expr.render_expr()),
             ])
             return '\n'.join(result)
-
-        def _render_expr(self):
-            return self.expr.render_expr()
 
         @property
         def subexprs(self):
