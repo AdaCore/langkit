@@ -1415,7 +1415,7 @@ class SymbolLiteral(AbstractExpression):
         return self.Expr(self.name, abstract_expr=self)
 
 
-class BindingScope(ResolvedExpression):
+class BindingScope(ComputingExpr):
     """
     Resolved expression that materializes new bindings.
 
@@ -1441,14 +1441,11 @@ class BindingScope(ResolvedExpression):
 
         # Create a local variable that belong to the outer scope so that at
         # finalization time, our result is still live.
-        super(BindingScope, self).__init__(result_var_name='Scope_Result',
+        super(BindingScope, self).__init__('Scope_Result',
                                            abstract_expr=abstract_expr)
 
     def _render_pre(self):
         return render('properties/binding_scope', expr=self)
-
-    def _render_expr(self):
-        return self.result_var.name
 
     @property
     def subexprs(self):
