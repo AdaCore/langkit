@@ -28,3 +28,15 @@ def assign_var(var, expr):
     :rtype: str
     """
     return '{} := {}; {}'.format(var.name, expr, inc_ref(var))
+
+
+def array_aggr(exprs):
+    """
+    Shortcut to format an array aggregate expression.
+
+    :type exprs: list[str]
+    :rtype: str
+    """
+    return ('({})'.format(', '.join(['{}'] * len(exprs)))
+            if exprs else
+            '(1 .. 0 => <>)')

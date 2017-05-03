@@ -9,11 +9,11 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr, CallExpr,
-    FieldAccessExpr, GetSymbol, NullExpr, PropertyDef,
-    ResolvedExpression, Self, auto_attr, auto_attr_custom, construct
+    AbstractVariable, AbstractExpression, BasicExpr, CallExpr, FieldAccessExpr,
+    GetSymbol, NullExpr, PropertyDef, ResolvedExpression, Self, auto_attr,
+    auto_attr_custom, construct
 )
-from langkit.expressions.utils import assign_var
+from langkit.expressions.utils import array_aggr, assign_var
 
 
 class EnvVariable(AbstractVariable):
@@ -252,7 +252,7 @@ def env_orphan(self, env_expr):
 
 class EnvGroup(AbstractExpression):
     """
-    Expression that will return a lexical environment thata logically groups
+    Expression that will return a lexical environment that logically groups
     together multiple lexical environments.
     """
 
@@ -262,9 +262,10 @@ class EnvGroup(AbstractExpression):
 
     def construct(self):
         env_exprs = [construct(e, LexicalEnvType) for e in self.env_exprs]
-        return CallExpr(
-            'Group', LexicalEnvType,
-            [ArrayExpr(env_exprs, LexicalEnvType)],
+        arg_template = array_aggr(['{}' for _ in env_exprs])
+        return BasicExpr(
+            'Group ({})'.format(arg_template), LexicalEnvType,
+            env_exprs,
             'Group_Env'
         )
 

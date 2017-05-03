@@ -2822,37 +2822,6 @@ class FieldAccessExpr(BasicExpr):
                                                   self.type.name().camel)
 
 
-class ArrayExpr(BasicExpr):
-    """
-    Resolved expression for an aggregate expression for any type of array.
-
-    Note that the result does *not* match the array compiled types known in
-    Langkit: it's a true Ada array instead of the discriminated record we call
-    "array" in Langkit.
-    """
-
-    def __init__(self, exprs, element_type, abstract_expr=None):
-        """
-        :param list[ResolvedExpression] exprs: List of resolved expression
-            whose types match element_type.
-        :param CompiledType element_type: Type for elements in this array.
-        :param AbstractExpression|None abstract_expr: See ResolvedExpression's
-            constructor.
-        """
-        super(ArrayExpr, self).__init__(
-            '({})'.format(', '.join(['{}'] * len(exprs)))
-            if exprs else '(1 .. 0 => <>)',
-            NoCompiledType, exprs,
-            abstract_expr=abstract_expr,
-        )
-        self.element_type = element_type
-
-    @property
-    def subexprs(self):
-        return {'0-elt_type': self.element_type,
-                '2-elements': self.operands}
-
-
 class TokenTextEq(BasicExpr):
     """
     Resolved expression to test equality of the text of two tokens.
