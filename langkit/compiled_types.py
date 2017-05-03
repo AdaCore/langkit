@@ -1583,8 +1583,10 @@ class StructMetaclass(CompiledTypeMetaclass):
             # ref-counted. However these specific envs are owned by the
             # analysis unit, so they are not ref-counted.
 
-            ("node_env", BuiltinField(
-                type=LexicalEnvType, public=False,
+            ("node_env", PropertyDef(
+                expr=None, prefix=None, type=LexicalEnvType,
+                public=False, external=True, uses_envs=False,
+                force_dispatching=True,
                 doc='For nodes that introduce a new environment, return the'
                     ' parent lexical environment. Return the "inherited"'
                     ' environment otherwise.'

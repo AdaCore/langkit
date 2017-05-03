@@ -2256,15 +2256,6 @@ package body ${ada_lib_name}.Analysis is
       end return;
    end Children_With_Trivia;
 
-   --------------
-   -- Node_Env --
-   --------------
-
-   function Node_Env
-     (Node : access ${root_node_value_type})
-      return AST_Envs.Lexical_Env
-   is (Node.Self_Env);
-
    ---------------
    -- PP_Trivia --
    ---------------
@@ -2892,6 +2883,15 @@ package body ${ada_lib_name}.Analysis is
    function Children_Env
      (Node : access ${root_node_value_type}'Class)
       return Lexical_Env
+   is (Node.Self_Env);
+
+   --------------
+   -- Node_Env --
+   --------------
+
+   function Node_Env
+     (Node : access ${root_node_value_type})
+      return AST_Envs.Lexical_Env
    is (Node.Self_Env);
 
    ## Generate the bodies of the root grammar class properties

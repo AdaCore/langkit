@@ -425,11 +425,6 @@ package ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class) return Boolean;
    ${ada_doc('langkit.node_is_ghost', 3)}
 
-   function Node_Env
-     (Node : access ${root_node_value_type})
-      return AST_Envs.Lexical_Env;
-   ${ada_doc(T.root_node._fields['node_env'], 3)}
-
    function Get_Unit
      (Node : access ${root_node_value_type}'Class)
       return Analysis_Unit;

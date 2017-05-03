@@ -146,11 +146,6 @@
 
    ## Public field getters
 
-   % if not cls.is_env_spec_inherited and cls.env_spec._add_env:
-      overriding function Node_Env
-        (Node : access ${type_name}) return AST_Envs.Lexical_Env;
-   % endif
-
    % for field in cls.get_fields(include_inherited=False, \
                                  predicate=library_public_field):
       ${field_decl(field)}
@@ -245,6 +240,11 @@
       overriding procedure Post_Env_Actions
         (Self                  : access ${type_name};
          Current_Env, Root_Env : AST_Envs.Lexical_Env);
+   % endif
+
+   % if cls.env_spec._add_env:
+      overriding function Node_Env
+        (Node : access ${type_name}) return AST_Envs.Lexical_Env;
    % endif
 
    % endif
