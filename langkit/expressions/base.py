@@ -731,16 +731,14 @@ class ResolvedExpression(object):
     render_pre.
     """
 
-    def __init__(self, result_var_name=None, scopeless_result_var=False,
-                 skippable_refcount=False, abstract_expr=None):
+    def __init__(self, result_var_name=None, skippable_refcount=False,
+                 abstract_expr=None):
         """
         Create a resolve expression.
 
         :param None|str result_var_name: If provided, create a local variable
             using this as a base name to hold the result of this expression.
             In this case, the "type" property must be ready.
-        :param bool scopeless_result_var: Whether the result variable must be
-            scopeless. This has no effect if "result_var_name" is None.
         :param bool skippable_refcount: If True, this resolved expression can
             omit having a result variable even though its result is
             ref-counted. This makes it possible to simplify the generated code.
@@ -749,10 +747,8 @@ class ResolvedExpression(object):
             abstract expression.
         """
         if result_var_name:
-            create_var = (PropertyDef.get().vars.create_scopeless
-                          if scopeless_result_var else
-                          PropertyDef.get().vars.create)
-            self._result_var = create_var(result_var_name, self.type)
+            self._result_var = PropertyDef.get().vars.create(result_var_name,
+                                                             self.type)
         else:
             self._result_var = None
 
@@ -3180,8 +3176,7 @@ class NullCheckExpr(ResolvedExpression):
     disabled context-wide.
     """
 
-    def __init__(self, expr, implicit_deref=False, result_var_name=None,
-                 scopeless_result_var=False):
+    def __init__(self, expr, implicit_deref=False, result_var_name=None):
         """
         :param ResolvedExpression expr: Expression to evaluate.
         :param bool implicit_deref: If expr is an entity, perform the
@@ -3189,8 +3184,7 @@ class NullCheckExpr(ResolvedExpression):
         """
         self.expr = expr
         self.implicit_deref = implicit_deref
-        super(NullCheckExpr, self).__init__(result_var_name,
-                                            scopeless_result_var)
+        super(NullCheckExpr, self).__init__(result_var_name)
 
     @property
     def type(self):
