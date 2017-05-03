@@ -45,7 +45,7 @@ class Bind(AbstractExpression):
 
     class Expr(CallExpr):
         def __init__(self, conv_prop, eq_prop, cprop_uid, eprop_uid, lhs, rhs,
-                     pred_func):
+                     pred_func, abstract_expr=None):
             self.conv_prop = conv_prop
             self.eq_prop = eq_prop
             self.cprop_uid = cprop_uid
@@ -58,6 +58,7 @@ class Bind(AbstractExpression):
                 'Bind_Result',
                 'Bind_{}_{}.Create'.format(cprop_uid, eprop_uid),
                 EquationType, [lhs, rhs, pred_func],
+                abstract_expr=abstract_expr
             )
 
         @property
@@ -212,7 +213,7 @@ class Bind(AbstractExpression):
         rhs = construct_operand(self.to_expr)
 
         return Bind.Expr(self.conv_prop, self.eq_prop, cprop_uid, eprop_uid,
-                         lhs, rhs, pred_func)
+                         lhs, rhs, pred_func, abstract_expr=self)
 
 
 class DomainExpr(ResolvedExpression):
