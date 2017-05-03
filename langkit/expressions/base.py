@@ -19,6 +19,7 @@ from langkit.diagnostics import (
     Context, DiagnosticError, Severity, check_multiple, check_source_language,
     check_type, extract_library_location, warn_if
 )
+from langkit.expressions.utils import assign_var
 from langkit.utils import TypeSet, assert_type, dispatch_on_type, memoized
 
 
@@ -1410,7 +1411,7 @@ class Let(AbstractExpression):
             # This expression does not create itself the result value: expr
             # does. Hence, relying on expr's result variable to make sure there
             # is no ref-counting issue is fine.
-            super(Let.Expr, self).__init__(skippable_refcount=True,
+            super(Let.Expr, self).__init__('Let_Result',
                                            abstract_expr=abstract_expr)
 
         def _render_pre(self):
@@ -1421,7 +1422,10 @@ class Let(AbstractExpression):
                 result.append(gdb_bind_var(var))
                 if var.type.is_refcounted():
                     result.append('Inc_Ref ({});'.format(var.name))
-            result.append(self.expr.render_pre())
+            result.extend([
+                self.expr.render_pre(),
+                assign_var(self.result_var.ref_expr, self.expr.render_expr()),
+            ])
             return '\n'.join(result)
 
         def _render_expr(self):
