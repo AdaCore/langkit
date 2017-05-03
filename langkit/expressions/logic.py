@@ -446,10 +446,10 @@ class Predicate(AbstractExpression):
         ])
 
         # Append the debug image for the predicate
-        closure_exprs.append(LiteralExpr('"{}.{}"'.format(
+        closure_exprs.append(untyped_literal_expr('"{}.{}"'.format(
             self.pred_property.name.camel_with_underscores,
             self.pred_property.struct.name().camel_with_underscores
-        ), NoCompiledType))
+        )))
 
         logic_var_exprs.append(
             BasicExpr("Create ({})".format(", ".join(
