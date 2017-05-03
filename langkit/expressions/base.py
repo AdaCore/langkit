@@ -2609,8 +2609,7 @@ class Literal(AbstractExpression):
             (bool, lambda _: (str(self.literal), BoolType)),
             (int, lambda _:  (str(self.literal), LongType)),
         ], exception=DiagnosticError('Invalid abstract expression type: {}'))
-        return LiteralExpr(lit_str, rtype, skippable_refcount=True,
-                           abstract_expr=self)
+        return LiteralExpr(lit_str, rtype, abstract_expr=self)
 
     def __repr__(self):
         return '<Literal {}>'.format(self.literal)
@@ -2666,7 +2665,7 @@ class LiteralExpr(BasicExpr):
     """
 
     def __init__(self, literal, type, result_var_name=None,
-                 skippable_refcount=False, abstract_expr=None):
+                 abstract_expr=None):
         """
         :param str literal: The literal expression.
         :param CompiledType|None type: The return type of the expression.
@@ -2674,10 +2673,8 @@ class LiteralExpr(BasicExpr):
         :param AbstractExpression|None abstract_expr: See ResolvedExpression's
             constructor.
         """
-        super(LiteralExpr, self).__init__(
-            literal, type, [], result_var_name,
-            skippable_refcount=skippable_refcount, abstract_expr=abstract_expr
-        )
+        super(LiteralExpr, self).__init__(literal, type, [], result_var_name,
+                                          abstract_expr=abstract_expr)
         self.literal = literal
 
     @property
