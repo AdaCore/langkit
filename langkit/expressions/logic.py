@@ -526,7 +526,8 @@ class LogicBooleanOp(AbstractExpression):
             ),
             EquationType,
             [construct(self.equation_array, EquationType.array_type())],
-            result_var_name="Logic_Boolean_Op"
+            result_var_name="Logic_Boolean_Op",
+            abstract_expr=self
         )
 
 
