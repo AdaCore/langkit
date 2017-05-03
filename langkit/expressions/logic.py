@@ -12,7 +12,7 @@ from langkit.expressions.base import (
 )
 
 
-def untyped_literal_expr(expr_str):
+def untyped_literal_expr(expr_str, operands=[]):
     """
     Create an untyped LiteralExpr instance for "expr_str" and return it.
 
@@ -23,10 +23,12 @@ def untyped_literal_expr(expr_str):
     We can do this because CallExpr does not need its operands' types to be
     valid.
 
-    :param str expr_str: The generated code for this literal expression.
+    :param str expr_str: Template code for this literal expression.
+    :param list[ResolvedExpression] operands: Operand for this literal
+        expression.
     :rtype: LiteralExpr
     """
-    return LiteralExpr(expr_str, NoCompiledType)
+    return LiteralExpr(expr_str, NoCompiledType, operands)
 
 
 class Bind(AbstractExpression):
@@ -452,11 +454,11 @@ class Predicate(AbstractExpression):
         )))
 
         logic_var_exprs.append(
-            BasicExpr("Create ({})".format(", ".join(
+            untyped_literal_expr("Create ({})".format(", ".join(
                 ["{}" for _ in range(len(closure_exprs) - 1)]
                 + ["Dbg_Img => (if Debug then new String'({})"
                    "            else null)"]
-            )), NoCompiledType, operands=closure_exprs)
+            )), operands=closure_exprs)
         )
 
         return Predicate.Expr(self.pred_property, pred_id, logic_var_exprs)
