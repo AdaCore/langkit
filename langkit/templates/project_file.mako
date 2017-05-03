@@ -37,6 +37,7 @@ library project ${lib_name} is
       % for path in ctx.additional_source_files:
       "${os_path.basename(path)}",
       % endfor
+      "gdb.c",
       "quex_interface.c",
       "quex_interface.h",
       "quex_lexer.c",
@@ -82,7 +83,8 @@ library project ${lib_name} is
             for Default_Switches ("Ada") use
                Common_Ada_Cargs & ("-g", "-O0", "-gnatwe", "-gnata");
 
-            for Default_Switches ("C") use Common_C_Cargs & ("-g3", "-O0");
+            for Default_Switches ("C") use
+               Common_C_Cargs & ("-g3", "-O0", "-DDEBUG=1");
 
             for Switches ("quex_lexer.c") use Common_C_Cargs & ("-g0", "-O0");
             --  This file is *huge* and the debugging information for it harms

@@ -1172,10 +1172,11 @@ class CompileCtx(object):
             os.chmod(playground_file, 0o775)
 
         # Emit GDB helpers initialization script
-        with open(os.path.join(file_root, 'gdbinit'), 'w') as f:
+        gdbinit_path = os.path.join(file_root, 'gdbinit.py')
+        with open(gdbinit_path, 'w') as f:
             lib_name = self.ada_api_settings.lib_name.lower()
             f.write(self.render_template(
-                'gdb',
+                'gdb_py',
                 langkit_path=os.path.dirname(os.path.dirname(__file__)),
                 lib_name=lib_name,
                 astnode_names={node.name().camel_with_underscores
@@ -1183,6 +1184,9 @@ class CompileCtx(object):
                 prefix=(self.short_name.lower
                         if self.short_name else lib_name),
             ))
+        with open(os.path.join(src_path, 'gdb.c'), 'w') as f:
+            f.write(self.render_template('gdb_c', gdbinit_path=gdbinit_path,
+                                         os_name=os.name))
 
         # Add any sources in $lang_path/extensions/support if it exists
         if self.ext('support'):
