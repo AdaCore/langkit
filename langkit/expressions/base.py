@@ -786,7 +786,7 @@ class ResolvedExpression(object):
 
         :param str name: Camel with underscores-formatted name for the result
             variable.
-        :rtype: AbstractVariable.Expr
+        :rtype: VariableExpr
         """
         assert not self._render_pre_called, (
             'Trying to create a result variable while the expression has been'
@@ -795,7 +795,7 @@ class ResolvedExpression(object):
 
         # If this is already a variable, we don't need to create another
         # variable to hold the same value: just return it.
-        if isinstance(self, AbstractVariable.Expr):
+        if isinstance(self, VariableExpr):
             return self
 
         # Otherwise, create a result variable if it does not exist yet
@@ -813,7 +813,7 @@ class ResolvedExpression(object):
         assert not self._render_pre_called, (
             '{}.render_pre can be called only once'.format(type(self).__name__)
         )
-        self._render_pre_called = not isinstance(self, AbstractVariable.Expr)
+        self._render_pre_called = not isinstance(self, VariableExpr)
 
         assert (self.skippable_refcount
                 or self.type is NoCompiledType
@@ -1069,7 +1069,7 @@ class ResolvedExpression(object):
 
         Subclasses must override the "_bindings" method.
 
-        :rtype: list[AbstractVariable.Expr]
+        :rtype: list[VariableExpr]
         """
         # Do a copy to avoid mutating the expression own's data structures
         result = list(self._bindings())
@@ -1083,9 +1083,75 @@ class ResolvedExpression(object):
 
         Subclasses must override this method if they define variables.
 
-        :rtype: list[AbstractVariable.Expr]
+        :rtype: list[VariableExpr]
         """
         return []
+
+
+class VariableExpr(ResolvedExpression):
+    """
+    Resolved expression that is just a reference to an already computed value.
+    """
+
+    pretty_class_name = 'Var'
+
+    def __init__(self, type, name, abstract_var=None, abstract_expr=None):
+        """
+        Create a variable reference expression.
+
+        :param langkit.compiled_types.CompiledType type: Type for the
+            referenced variable.
+        :param names.Name name: Name of the referenced variable.
+        :param AbstractVariable|None source_name: AbstractVariable that
+            compiled to this resolved expression, if any.
+        :param AbstractExpression|None abstract_expr: See
+            ResolvedExpression's constructor.
+        """
+        self.static_type = assert_type(type, CompiledType)
+        self.name = name
+        self.abstract_var = abstract_var
+        self._ignored = False
+
+        super(VariableExpr, self).__init__(
+            skippable_refcount=True, abstract_expr=abstract_expr
+        )
+
+    def _render_expr(self):
+        return self.name.camel_with_underscores
+
+    @property
+    def source_name(self):
+        """
+        If it comes from the language specification, return the original
+        source name for this variable. Return None otherwise.
+
+        :rtype: names.Name|None
+        """
+        return (self.abstract_var.source_name
+                if self.abstract_var and self.abstract_var.source_name else
+                None)
+
+    @property
+    def ignored(self):
+        """
+        If this comes from the language specification, return whether it is
+        supposed to be ignored. Return False otherwise.
+        """
+        return self._ignored or (self.abstract_var.ignored
+                                 if self.abstract_var else False)
+
+    def set_ignored(self):
+        """
+        Ignore this resolved variable in the context of the unused bindings
+        warning machinery.
+        """
+        self._ignored = True
+
+    def __repr__(self):
+        src_name = self.source_name
+        return '<VariableExpr {}{}>'.format(
+            self.name.lower,
+            ' ({})'.format(src_name.lower) if src_name else '')
 
 
 class AbstractVariable(AbstractExpression):
@@ -1102,71 +1168,6 @@ class AbstractVariable(AbstractExpression):
     """
 
     unused_count = count(1)
-
-    class Expr(ResolvedExpression):
-        """
-        Resolved expression that represents a variable in generated code.
-        """
-
-        pretty_class_name = 'Var'
-
-        def __init__(self, type, name, abstract_var=None, abstract_expr=None):
-            """
-            Create a variable reference expression.
-
-            :param langkit.compiled_types.CompiledType type: Type for the
-                referenced variable.
-            :param names.Name name: Name of the referenced variable.
-            :param AbstractVariable|None source_name: AbstractVariable that
-                compiled to this resolved expression, if any.
-            :param AbstractExpression|None abstract_expr: See
-                ResolvedExpression's constructor.
-            """
-            self.static_type = assert_type(type, CompiledType)
-            self.name = name
-            self.abstract_var = abstract_var
-            self._ignored = False
-
-            super(AbstractVariable.Expr, self).__init__(
-                skippable_refcount=True, abstract_expr=abstract_expr
-            )
-
-        def _render_expr(self):
-            return self.name.camel_with_underscores
-
-        @property
-        def source_name(self):
-            """
-            If it comes from the language specification, return the original
-            source name for this variable. Return None otherwise.
-
-            :rtype: names.Name|None
-            """
-            return (self.abstract_var.source_name
-                    if self.abstract_var and self.abstract_var.source_name else
-                    None)
-
-        @property
-        def ignored(self):
-            """
-            If this comes from the language specification, return whether it is
-            supposed to be ignored. Return False otherwise.
-            """
-            return self._ignored or (self.abstract_var.ignored
-                                     if self.abstract_var else False)
-
-        def set_ignored(self):
-            """
-            Ignore this resolved variable in the context of the unused bindings
-            warning machinery.
-            """
-            self._ignored = True
-
-        def __repr__(self):
-            src_name = self.source_name
-            return '<AbstractVariable.Expr {}{}>'.format(
-                self.name.lower,
-                ' ({})'.format(src_name.lower) if src_name else '')
 
     def __init__(self, name, type=None, create_local=False, source_name=None):
         """
@@ -1199,7 +1200,7 @@ class AbstractVariable(AbstractExpression):
 
         self.construct_cache = {}
         """
-        :type: dict[(str, CompiledType), AbstractVariable.Expr]
+        :type: dict[(str, CompiledType), VariableExpr]
 
         Cache used to memoize the "construct" method.
         """
@@ -1252,8 +1253,8 @@ class AbstractVariable(AbstractExpression):
         try:
             expr = self.construct_cache[key]
         except KeyError:
-            expr = AbstractVariable.Expr(self._type, self._name, self,
-                                         abstract_expr=self)
+            expr = VariableExpr(self._type, self._name, self,
+                                abstract_expr=self)
             self.construct_cache[key] = expr
         return expr
 
@@ -1357,7 +1358,7 @@ class BindingScope(ResolvedExpression):
     def __init__(self, expr, bindings, scope=None, abstract_expr=None):
         """
         :type expr: ResolvedExpression
-        :type bindings: list[AbstractVariable.Expr]
+        :type bindings: list[VariableExpr]
         :type abstract_expr: None|AbstractExpression
 
         :param LocalVars.Scope|None scope: If provided, this BindingScope
@@ -2523,7 +2524,7 @@ class PropertyDef(AbstractNodeData):
                 # must not be considered as uses for this analysis: skip them.
                 expr = expr.expr
 
-            if isinstance(expr, AbstractVariable.Expr):
+            if isinstance(expr, VariableExpr):
                 all_vars[expr] = True
 
             for sub in expr.flat_subexprs():
@@ -3045,11 +3046,11 @@ class LocalVars(object):
         def ref_expr(self):
             """
             Return a resolved expression that references "self".
-            :rtype: AbstractVariable.Expr
+            :rtype: VariableExpr
             """
             assert self.type, ('Local variables must have a type before turned'
                                ' into a resolved expression.')
-            return AbstractVariable.Expr(self.type, self.name)
+            return VariableExpr(self.type, self.name)
 
         def __repr__(self):
             return '<LocalVar {} : {}>'.format(
