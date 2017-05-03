@@ -9,9 +9,9 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr,
-    BuiltinCallExpr, FieldAccessExpr, GetSymbol, PropertyDef,
-    ResolvedExpression, Self, auto_attr, auto_attr_custom, construct
+    AbstractVariable, AbstractExpression, ArrayExpr, BasicExpr, CallExpr,
+    FieldAccessExpr, GetSymbol, PropertyDef, ResolvedExpression, Self,
+    auto_attr, auto_attr_custom, construct
 )
 from langkit.expressions.utils import assign_var
 
@@ -241,7 +241,7 @@ def env_orphan(self, env_expr):
     :param AbstractExpression env_expr: Expression that will return a
         lexical environment.
     """
-    return BuiltinCallExpr(
+    return CallExpr(
         'AST_Envs.Orphan',
         LexicalEnvType,
         [construct(env_expr, LexicalEnvType)],
@@ -262,7 +262,7 @@ class EnvGroup(AbstractExpression):
 
     def construct(self):
         env_exprs = [construct(e, LexicalEnvType) for e in self.env_exprs]
-        return BuiltinCallExpr(
+        return CallExpr(
             'Group', LexicalEnvType,
             [ArrayExpr(env_exprs, LexicalEnvType)],
             'Group_Env'
@@ -280,7 +280,7 @@ def env_group(self, env_array_expr):
         an array of lexical environments. If this array is empty, the empty
         environment is returned.
     """
-    return BuiltinCallExpr(
+    return CallExpr(
         'Group', LexicalEnvType,
         [construct(env_array_expr, LexicalEnvType.array_type())],
         'Group_Env',
@@ -299,7 +299,7 @@ def is_visible_from(self, referenced_env, base_env):
     :param AbstractExpression referenced_env: The environment referenced
         from base_env, for which we want to check visibility.
     """
-    return BuiltinCallExpr(
+    return CallExpr(
         'Is_Visible_From', BoolType,
         [construct(referenced_env, LexicalEnvType),
          construct(base_env, LexicalEnvType)],
@@ -354,7 +354,7 @@ def rebind_env(self, env, to_rebind, rebind_to):
     Returns a new environment based on `env` where `to_rebind` is rebound to
     `rebind_to`.
     """
-    return BuiltinCallExpr(
+    return CallExpr(
         'Rebind_Env', LexicalEnvType,
         [construct(env, LexicalEnvType),
          construct(to_rebind, LexicalEnvType),

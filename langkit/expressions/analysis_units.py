@@ -5,8 +5,8 @@ from langkit.compiled_types import (AnalysisUnitKind, AnalysisUnitType,
                                     BoolType, T)
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractVariable, BuiltinCallExpr, FieldAccessExpr, NullCheckExpr,
-    auto_attr, auto_attr_custom, construct
+    AbstractVariable, CallExpr, FieldAccessExpr, NullCheckExpr, auto_attr,
+    auto_attr_custom, construct
 )
 
 
@@ -63,7 +63,7 @@ def is_referenced_from(self, referenced_unit, base_unit):
 
     :rtype: ResolvedExpression
     """
-    return BuiltinCallExpr(
+    return CallExpr(
         'Is_Referenced_From', BoolType,
         [construct(referenced_unit, AnalysisUnitType),
          construct(base_unit, AnalysisUnitType)],
@@ -84,6 +84,6 @@ def analysis_unit_root(self, unit):
         this property evaluation.
     """
     unit_expr = construct(unit, AnalysisUnitType)
-    return BuiltinCallExpr(
+    return CallExpr(
         'Root', T.root_node, [NullCheckExpr(unit_expr)], abstract_expr=self
     )

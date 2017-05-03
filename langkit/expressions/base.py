@@ -1292,15 +1292,15 @@ class GetSymbol(AbstractExpression):
         """
         Construct a resolved expression for this.
 
-        :rtype: BuiltinCallExpr
+        :rtype: CallExpr
         """
         token = construct(self.token_expr, Token)
         return self.construct_static(token, abstract_expr=self)
 
     @staticmethod
     def construct_static(token_expr, abstract_expr=None):
-        return BuiltinCallExpr("Get_Symbol", Symbol, [token_expr],
-                               abstract_expr=abstract_expr)
+        return CallExpr("Get_Symbol", Symbol, [token_expr],
+                        abstract_expr=abstract_expr)
 
 
 class SymbolLiteral(AbstractExpression):
@@ -3135,7 +3135,7 @@ class LocalVars(object):
         return new
 
 
-class BuiltinCallExpr(BasicExpr):
+class CallExpr(BasicExpr):
     """
     Convenience resolved expression that models a call to a function on the
     Ada side of things.
@@ -3153,7 +3153,7 @@ class BuiltinCallExpr(BasicExpr):
             constructor.
         """
         self.name = names.Name.get(name)
-        super(BuiltinCallExpr, self).__init__(
+        super(CallExpr, self).__init__(
             '{} ({})'.format(self.name.camel_with_underscores,
                              ', '.join(['{}'] * len(exprs))),
             type, exprs, result_var_name, abstract_expr=abstract_expr
@@ -3166,7 +3166,7 @@ class BuiltinCallExpr(BasicExpr):
                 '2-args': self.operands}
 
     def __repr__(self):
-        return '<BuiltinCallExpr {}>'.format(self.name.camel_with_underscores)
+        return '<CallExpr {}>'.format(self.name.camel_with_underscores)
 
 
 class NullCheckExpr(ResolvedExpression):

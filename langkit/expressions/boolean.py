@@ -9,9 +9,9 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_source_language
 from langkit.expressions.analysis_units import AnalysisUnitType
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
-    BuiltinCallExpr, LiteralExpr, No, NullExpr, PropertyDef,
-    ResolvedExpression, attr_call, construct, render
+    AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
+    LiteralExpr, No, NullExpr, PropertyDef, ResolvedExpression, attr_call,
+    construct, render
 )
 from langkit.expressions.envs import EmptyEnv
 from langkit.utils import assert_type
@@ -69,7 +69,7 @@ class BinaryBooleanOperator(AbstractExpression):
             return If.Expr(lhs, then, else_then, BoolType)
         else:
             # Equation case
-            return BuiltinCallExpr(
+            return CallExpr(
                 names.Name("Logic") + names.Name.from_lower(self.kind),
                 EquationType, [lhs, rhs],
                 '{}_Pred'.format(self.kind.capitalize())

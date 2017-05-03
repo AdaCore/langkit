@@ -7,8 +7,8 @@ from langkit.compiled_types import (
 
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
-    AbstractExpression, BuiltinCallExpr, LiteralExpr, PropertyDef,
-    ResolvedExpression, construct, BasicExpr, auto_attr
+    AbstractExpression, CallExpr, LiteralExpr, PropertyDef, ResolvedExpression,
+    construct, BasicExpr, auto_attr
 )
 
 
@@ -18,10 +18,10 @@ def untyped_literal_expr(expr_str):
 
     This is a helper for code that generates expressions which have no
     corresponding CompiledType in Langkit. Materializing such values in
-    ResolvedExpression trees can be useful anayway to leverage BuiltinCallExpr
-    code generation capabilities, in particular temporary creation for the
-    result. We can do this because BuiltinCallExpr does not need its operands'
-    types to be valid.
+    ResolvedExpression trees can be useful anayway to leverage CallExpr code
+    generation capabilities, in particular temporary creation for the result.
+    We can do this because CallExpr does not need its operands' types to be
+    valid.
 
     :param str expr_str: The generated code for this literal expression.
     :rtype: LiteralExpr
@@ -41,7 +41,7 @@ class Bind(AbstractExpression):
         Bind(A, B, property)
     """
 
-    class Expr(BuiltinCallExpr):
+    class Expr(CallExpr):
         def __init__(self, conv_prop, eq_prop, cprop_uid, eprop_uid, lhs, rhs,
                      pred_func):
             self.conv_prop = conv_prop
@@ -350,7 +350,7 @@ class Predicate(AbstractExpression):
 
     """
 
-    class Expr(BuiltinCallExpr):
+    class Expr(CallExpr):
         def __init__(self, pred_property, pred_id, logic_var_exprs):
             self.pred_property = pred_property
             self.pred_id = pred_id
@@ -471,7 +471,7 @@ def get_value(self, logic_var):
     :param AbstractExpression logic_var: The logic var from which we want to
         extract the value.
     """
-    return BuiltinCallExpr(
+    return CallExpr(
         "Eq_Node.Refs.Get_Value", T.root_node.entity(),
         [construct(logic_var, LogicVarType)],
         result_var_name='Eq_Solution',
@@ -494,9 +494,9 @@ def solve(self, equation):
 
     :param AbstractExpression equation: The equation to solve.
     """
-    return BuiltinCallExpr("Solve", BoolType,
-                           [construct(equation, EquationType)],
-                           abstract_expr=self)
+    return CallExpr("Solve", BoolType,
+                    [construct(equation, EquationType)],
+                    abstract_expr=self)
 
 
 class LogicBooleanOp(AbstractExpression):

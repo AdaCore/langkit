@@ -11,7 +11,7 @@ from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, BuiltinCallExpr, PropertyDef,
+    AbstractExpression, AbstractVariable, CallExpr, PropertyDef,
     ResolvedExpression, attr_expr, attr_call, auto_attr_custom, auto_attr,
     construct, render, unsugar
 )
@@ -530,7 +530,7 @@ def collection_get(self, coll_expr, index_expr, or_null=True):
 
     coll_expr = construct(coll_expr, lambda t: t.is_collection())
     or_null = construct(or_null)
-    return BuiltinCallExpr(
+    return CallExpr(
         'Get', coll_expr.type.element_type(),
         [coll_expr, index_expr, or_null],
         'Get_Result',
@@ -546,7 +546,7 @@ def length(self, coll_expr):
     :param AbstractExpression coll_expr: The expression representing the
         collection to get from.
     """
-    return BuiltinCallExpr(
+    return CallExpr(
         "Length", LongType,
         [construct(coll_expr, lambda t: t.is_collection())],
         abstract_expr=self,
@@ -655,6 +655,6 @@ class Concat(AbstractExpression):
              )),
         ])
 
-        return BuiltinCallExpr(
+        return CallExpr(
             "Concat", array_1.type, [array_1, array_2], "Concat_Result"
         )
