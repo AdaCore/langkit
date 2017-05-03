@@ -13,6 +13,7 @@ from langkit.expressions.base import (
     BuiltinCallExpr, FieldAccessExpr, GetSymbol, PropertyDef,
     ResolvedExpression, Self, auto_attr, auto_attr_custom, construct
 )
+from langkit.expressions.utils import assign_var
 
 
 class EnvVariable(AbstractVariable):
@@ -178,10 +179,7 @@ class EnvBindExpr(ResolvedExpression):
         self.env_var = PropertyDef.get().vars.create("New_Env",
                                                      LexicalEnvType)
 
-        # This expression does not create itself the result value: to_eval_expr
-        # does. Hence, relying on to_eval_expr's result variable to make sure
-        # there is no ref-counting issue is fine.
-        super(EnvBindExpr, self).__init__(skippable_refcount=True,
+        super(EnvBindExpr, self).__init__('Env_Bind_Result',
                                           abstract_expr=abstract_expr)
 
     def _render_pre(self):
@@ -191,26 +189,24 @@ class EnvBindExpr(ResolvedExpression):
         # We need to keep the environment live during the bind operation.
         # That is why we store this environment in a temporary so that it
         # is automatically deallocated when leaving the scope.
-        result = (
-            '{env_expr_pre}\n'
-            '{env_var} := {env_expr};\n'
-            'Inc_Ref ({env_var});'.format(
-                env_expr_pre=self.env_expr.render_pre(),
-                env_expr=self.env_expr.render_expr(),
-                env_var=self.env_var.name
-            )
-        )
+        result = [
+            self.env_expr.render_pre(),
+            assign_var(self.env_var.ref_expr, self.env_expr.render_expr()),
+        ]
 
         # Then we can compute the nested expression with the bound
         # environment.
         with Env.bind_name(self.env_var.name):
-            return '{}\n{}'.format(result, self.to_eval_expr.render_pre())
+            result.extend([
+                self.to_eval_expr.render_pre(),
+                assign_var(self.result_var.ref_expr,
+                           self.to_eval_expr.render_expr())
+            ])
+
+        return '\n'.join(result)
 
     def _render_expr(self):
-        # We just bind the name of the environment placeholder to our
-        # variable.
-        with Env.bind_name(self.env_var.name):
-            return self.to_eval_expr.render_expr()
+        return self.result_var.name
 
     @property
     def subexprs(self):
