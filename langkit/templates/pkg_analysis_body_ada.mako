@@ -2881,8 +2881,8 @@ package body ${ada_lib_name}.Analysis is
    ------------------
 
    function Children_Env
-     (Node : access ${root_node_value_type}'Class)
-      return Lexical_Env
+     (Node : access ${root_node_value_type}'Class;
+      E_Info : Entity_Info := No_Entity_Info) return Lexical_Env
    is (Node.Self_Env);
 
    --------------
