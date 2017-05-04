@@ -1981,7 +1981,7 @@ class PropertyDef(AbstractNodeData):
         else:
             check_source_language(
                 uses_envs is None,
-                "Cannot specify uses_env for external properties"
+                "Cannot specify uses_env for internal properties"
             )
             self.uses_envs = False
 
