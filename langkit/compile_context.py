@@ -781,19 +781,25 @@ class CompileCtx(object):
         compute_reachable(reachable_by_public_strict, forwards_strict)
         compute_reachable(reachable_by_public, forwards)
 
+        # Get properties that were explicitly marked as "no-warning" by the
+        # user.
+        ignore_props = set(self.all_properties(lambda p: not p.warn_on_unused))
+
         # The unused private properties are the ones that are not part of this
         # set.
         unreachable_private_strict = (
             set(forwards_strict) - reachable_by_public_strict
         )
-        unreachable_private = set(forwards) - reachable_by_public
+        unreachable_private = (
+            (set(forwards) - reachable_by_public) - ignore_props
+        )
         assert all(p.is_private for p in unreachable_private_strict)
 
         # Now determine the set of unused abstraction: it's all root properties
         # that are unused in the strict analysis but used in the other one.
         unused_abstractions = {
             p.root_property for p in
-            (unreachable_private_strict - unreachable_private)
+            (unreachable_private_strict - unreachable_private) - ignore_props
         }
 
         def warn(unused_set, message):
