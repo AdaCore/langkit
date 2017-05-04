@@ -8,12 +8,14 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions import (
-    AbstractExpression, AbstractVariable, BasicExpr, BindingScope, Let,
-    NullCheckExpr, NullExpr, PropertyDef, ResolvedExpression, UnreachableExpr,
-    attr_call, attr_expr, construct, render
+    AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
+    ComputingExpr, Let, NullCheckExpr, NullExpr, PropertyDef,
+    ResolvedExpression, UnreachableExpr, attr_call, attr_expr, construct,
+    render
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
+from langkit.expressions.utils import assign_var
 from langkit.utils import TypeSet, memoized
 
 
@@ -178,7 +180,7 @@ class New(AbstractExpression):
     Abstract expression to create Struct or ASTNode values.
     """
 
-    class StructExpr(ResolvedExpression):
+    class StructExpr(ComputingExpr):
         """
         Resolved expression to create Struct values.
         """
@@ -196,7 +198,7 @@ class New(AbstractExpression):
             self.assocs = assocs
 
             super(New.StructExpr, self).__init__(
-                result_var_name or 'New_Node',
+                result_var_name or 'New_Struct',
                 abstract_expr=abstract_expr
             )
 
@@ -231,11 +233,8 @@ class New(AbstractExpression):
 
             return '{}\n{}'.format(
                 self._render_fields(),
-                '{} := {};'.format(self.result_var.name, record_expr)
+                assign_var(self.result_var.ref_expr, record_expr)
             )
-
-        def _render_expr(self):
-            return self.result_var.name
 
         @property
         def subexprs(self):
@@ -259,9 +258,6 @@ class New(AbstractExpression):
         def _render_pre(self):
             return (super(New.NodeExpr, self)._render_fields()
                     + render('properties/new_astnode_ada', expr=self))
-
-        def _render_expr(self):
-            return self.result_var.name
 
     def __init__(self, struct_type, **field_values):
         """
