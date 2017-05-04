@@ -2699,17 +2699,21 @@ class BasicExpr(ComputingExpr):
     """
 
     def __init__(self, result_var_name, template, type, operands,
-                 abstract_expr=None):
+                 requires_incref=True, abstract_expr=None):
         """
         :param str result_var_name: See ResolvedExpression's constructor.
         :param str template: The template string.
         :param None|CompiledType type: The return type of the expression.
+        :param bool requires_incref: Whether the computation in `template`
+            returns a value that must be inc-ref'd to be stored in the result
+            variable.
         :param AbstractExpression|None abstract_expr: See ResolvedExpression's
             constructor.
         """
-        self.operands = operands
-        self.static_type = type
         self.template = template
+        self.static_type = type
+        self.operands = operands
+        self.requires_incref = requires_incref
         super(BasicExpr, self).__init__(result_var_name,
                                         abstract_expr=abstract_expr)
 
@@ -2722,7 +2726,8 @@ class BasicExpr(ComputingExpr):
             [e.render_pre()
              for e in self.operands
              if not isinstance(e, basestring)]
-            + [assign_var(self.result_var.ref_expr, expr)]
+            + [assign_var(self.result_var.ref_expr, expr,
+                          self.requires_incref)]
         )
 
     @property

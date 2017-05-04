@@ -15,19 +15,22 @@ def inc_ref(var):
     return 'Inc_Ref ({});'.format(var.name) if var.type.is_refcounted() else ''
 
 
-def assign_var(var, expr):
+def assign_var(var, expr, requires_incref=True):
     """
     Shortcut for expression rendering.
 
-    Return Ada code to assign the given `expr` to the given `var`.  If `var` is
-    a ref-counted variable, also emit code to inc-ref it. The result is a
-    sequence of Ada statements, including trailing semi-colon.
+    Return Ada code to assign the given `expr` to the given `var`.  If
+    `requires_incref` is True and `var` is a ref-counted variable, also emit
+    code to inc-ref it. The result is a sequence of Ada statements, including
+    trailing semi-colon.
 
     :type var: langkit.expressions.VariableExpr
     :type expr: str
+    :type requires_incref: bool
     :rtype: str
     """
-    return '{} := {}; {}'.format(var.name, expr, inc_ref(var))
+    return '{} := {}; {}'.format(var.name, expr,
+                                 inc_ref(var) if requires_incref else '')
 
 
 def array_aggr(exprs):
