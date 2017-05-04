@@ -49,9 +49,12 @@ package body Langkit_Support.Lexical_Env is
 
    function Simple_Env_Getter (E : Lexical_Env) return Env_Getter
    is
-     (Env_Getter'(Dynamic       => False,
-                  Is_Refcounted => E.Ref_Count /= No_Refcount,
-                  Env           => E));
+   begin
+      Inc_Ref (E);
+      return Env_Getter'(Dynamic       => False,
+                         Is_Refcounted => E.Ref_Count /= No_Refcount,
+                         Env           => E);
+   end Simple_Env_Getter;
 
    --------------------
    -- Dyn_Env_Getter --
@@ -73,6 +76,9 @@ package body Langkit_Support.Lexical_Env is
       if Self.Dynamic then
          return Self.Getter_Fn (Self.Getter_State);
       else
+         if Self.Env /= null then
+            Inc_Ref (Self.Env);
+         end if;
          return Self.Env;
       end if;
    end Get_Env;
