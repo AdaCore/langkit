@@ -128,6 +128,9 @@ class Cast(AbstractExpression):
         return Cast.Expr(expr, self.dest_type, do_raise=self.do_raise,
                          abstract_expr=self)
 
+    def __repr__(self):
+        return '<Cast to {}>'.format(resolve_type(self.dest_type).name().camel)
+
 
 @attr_expr("is_null")
 class IsNull(AbstractExpression):
