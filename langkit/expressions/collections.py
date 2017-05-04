@@ -11,7 +11,7 @@ from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, CallExpr, PropertyDef,
+    AbstractExpression, AbstractVariable, CallExpr, ComputingExpr, PropertyDef,
     ResolvedExpression, attr_expr, attr_call, auto_attr_custom, auto_attr,
     construct, render, unsugar
 )
@@ -198,7 +198,7 @@ class Map(CollectionExpression):
     Abstract expression that is the result of a map expression evaluation.
     """
 
-    class Expr(ResolvedExpression):
+    class Expr(ComputingExpr):
         """
         Resolved expression that represents a map expression in the generated
         code.
@@ -237,7 +237,7 @@ class Map(CollectionExpression):
             self.static_type.add_to_context()
 
             with iter_scope.parent.use():
-                super(Map.Expr, self).__init__(result_var_name='Map',
+                super(Map.Expr, self).__init__('Map_Result',
                                                abstract_expr=abstract_expr)
 
         def __repr__(self):
@@ -250,9 +250,6 @@ class Map(CollectionExpression):
 
         def _render_pre(self):
             return render('properties/map_ada', map=self, Name=names.Name)
-
-        def _render_expr(self):
-            return self.result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):
