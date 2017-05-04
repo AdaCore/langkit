@@ -266,7 +266,7 @@ class If(AbstractExpression):
     Abstract expression for a conditional expression.
     """
 
-    class Expr(ResolvedExpression):
+    class Expr(ComputingExpr):
         """
         Resolved expression for a conditional expression.
         """
@@ -295,9 +295,6 @@ class If(AbstractExpression):
 
         def _render_pre(self):
             return render('properties/if_ada', expr=self)
-
-        def _render_expr(self):
-            return self.result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):
