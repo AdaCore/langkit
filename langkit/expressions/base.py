@@ -2741,9 +2741,19 @@ class NullExpr(BasicExpr):
     Resolved expression for the null expression corresponding to some type.
     """
 
+    # Note that this is a BasicExpr subclass instead of a LiteralExpr one
+    # because we want the null value to be an identifier, so that the Ada
+    # overloading resolution works when such expressions are passed as
+    # subprogram arguments.
+
     def __init__(self, type, abstract_expr=None):
         super(NullExpr, self).__init__(
             'Null_Value', type.nullexpr(), type, [],
+
+            # Ref-counting is correct, but not needed for null values, so avoid
+            # generating it to reduce code bloat.
+            requires_incref=False,
+
             abstract_expr=abstract_expr,
         )
 
