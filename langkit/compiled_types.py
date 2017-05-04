@@ -536,6 +536,10 @@ class NoCompiledType(CompiledType):
     def is_refcounted(cls):
         raise NotImplementedError()
 
+    @classmethod
+    def name(cls):
+        return names.Name('No_Compiled_Type')
+
 
 class BasicType(CompiledType):
     """
