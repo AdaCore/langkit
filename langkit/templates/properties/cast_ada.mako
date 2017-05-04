@@ -7,13 +7,9 @@ ast_node = expr.static_type.el_type if is_entity else expr.static_type
 
 <%def name="generate_cast()">
 % if is_entity:
-   ## We are about to create a new reference to the input expr's env rebinding,
-   ## so create a new ownership share for it.
-   Inc_Ref (${expr.expr_var.name}.Info.Rebindings);
-   ${expr.result_var.name} :=
-     (El      => ${ast_node.name()} (${expr.expr_var.name}.El),
-      Info    => (MD         => ${expr.expr_var.name}.Info.Md,
-                  Rebindings => ${expr.expr_var.name}.Info.Rebindings));
+   ${expr.result_var.name} := Create
+     (El   => ${ast_node.name()} (${expr.expr_var.name}.El),
+      Info => ${expr.expr_var.name}.Info);
 % else:
    ${expr.result_var.name} := ${ast_node.name()} (${expr.expr_var.name});
 % endif

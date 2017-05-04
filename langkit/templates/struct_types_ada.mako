@@ -39,8 +39,14 @@
    % endif
 
    % if cls.is_refcounted():
-   procedure Inc_Ref (R : ${cls.name()});
-   procedure Dec_Ref (R : in out ${cls.name()});
+      procedure Inc_Ref (R : ${cls.name()});
+      procedure Dec_Ref (R : in out ${cls.name()});
+   % endif
+
+   % if cls.is_entity_type:
+      function Create
+         (El : ${cls.el_type.name()}; Info : Entity_Info)
+          return ${cls.name()};
    % endif
 </%def>
 
@@ -80,6 +86,22 @@
             % endif
          % endfor
       end Dec_Ref;
+
+   % endif
+
+   % if cls.is_entity_type:
+
+      ------------
+      -- Create --
+      ------------
+
+      function Create
+         (El : ${cls.el_type.name()}; Info : Entity_Info)
+          return ${cls.name()} is
+       begin
+         Inc_Ref (Info.Rebindings);
+         return (El => El, Info => Info);
+       end Create;
 
    % endif
 

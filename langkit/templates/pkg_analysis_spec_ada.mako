@@ -348,6 +348,9 @@ package ${ada_lib_name}.Analysis is
 
    procedure Inc_Ref (E : Entity) renames AST_Envs.Inc_Ref;
    procedure Dec_Ref (E : in out Entity) renames AST_Envs.Dec_Ref;
+   function Create
+     (El : ${root_node_type_name}; Info : Entity_Info)
+      return Entity;
 
    ## Declare arrays of lexical environments here because we need them for the
    ## Group operation below.

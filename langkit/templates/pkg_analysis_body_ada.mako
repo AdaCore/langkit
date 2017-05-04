@@ -2889,6 +2889,18 @@ package body ${ada_lib_name}.Analysis is
           Start_Sloc (Sloc_Range (From))) = After;
    end Can_Reach;
 
+   ------------
+   -- Create --
+   ------------
+
+   function Create
+      (El : ${root_node_type_name}; Info : Entity_Info)
+       return Entity is
+    begin
+      Inc_Ref (Info.Rebindings);
+      return (El => El, Info => Info);
+    end Create;
+
    procedure Register_Destroyable is new Register_Destroyable_Gen
      (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env, AST_Envs.Destroy);
 
