@@ -332,9 +332,9 @@ def env_parent(self, env):
 
 
 def make_combine(self, l_rebindings, r_rebindings):
-    return BasicExpr('Combined', 'AST_Envs.Combine ({}, {})',
-                     EnvRebindingsType, [l_rebindings, r_rebindings],
-                     abstract_expr=self)
+    return CallExpr('Combined', 'AST_Envs.Combine', EnvRebindingsType,
+                    [l_rebindings, r_rebindings],
+                    abstract_expr=self)
 
 
 @auto_attr
