@@ -154,8 +154,13 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
 
     array_expr = 'AST_Envs.Get ({})'.format(', '.join('{} => {{}}'.format(n)
                                                       for n, _ in args))
+
+    # In both cases below, the BasicExpr template is going to be a function
+    # call that returns a new ownership share, so there is no need for an
+    # inc-ref for the storage in the result variable.
     make_expr = partial(BasicExpr, 'Env_Get_Result',
                         operands=[e for _, e in args],
+                        requires_incref=False,
                         abstract_expr=self)
 
     if resolve_unique:
