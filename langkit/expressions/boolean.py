@@ -10,8 +10,8 @@ from langkit.diagnostics import check_source_language
 from langkit.expressions.analysis_units import AnalysisUnitType
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
-    ComputingExpr, LiteralExpr, No, NullExpr, PropertyDef, ResolvedExpression,
-    attr_call, construct, render
+    ComputingExpr, LiteralExpr, No, NullExpr, PropertyDef, attr_call,
+    construct, render
 )
 from langkit.expressions.envs import EmptyEnv
 from langkit.utils import assert_type
@@ -377,7 +377,7 @@ class Then(AbstractExpression):
     otherwise.
     """
 
-    class Expr(ResolvedExpression):
+    class Expr(ComputingExpr):
         pretty_name = 'Then'
 
         def __init__(self, expr, var_expr, then_expr, default_expr,
@@ -394,9 +394,6 @@ class Then(AbstractExpression):
 
         def _render_pre(self):
             return render('properties/then_ada', then=self)
-
-        def _render_expr(self):
-            return self.result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):
