@@ -11,7 +11,8 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import (
-    AbstractProperty, EmptyArray, ExternalProperty, Property, Self
+    AbstractProperty, EmptyArray, ExternalProperty, Property, Self,
+    langkit_property
 )
 from langkit.parsers import Grammar, Or, Tok
 
@@ -27,6 +28,11 @@ class FooNode(ASTNode):
     # This property is private and only called by unused properties, so it is
     # unused itself.
     as_expr = Property(Self.cast(T.Expression))
+
+    # This property is unused but the user asked explicitly to not warn
+    @langkit_property(warn_on_unused=False)
+    def as_expr_2():
+        return Self.cast(T.Expression)
 
 
 @abstract
