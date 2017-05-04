@@ -1850,7 +1850,7 @@ class PropertyDef(AbstractNodeData):
     def __init__(self, expr, prefix, name=None, doc=None, public=None,
                  abstract=False, type=None, abstract_runtime_check=False,
                  has_implicit_env=None, memoized=False, external=False,
-                 uses_envs=None, force_dispatching=False):
+                 uses_envs=None, force_dispatching=False, warn_on_unused=True):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -1916,6 +1916,9 @@ class PropertyDef(AbstractNodeData):
 
         :param bool force_dispatching: Force making this property a dispatching
             one. Useful for externally defined properties.
+
+        :param bool warn_on_unused: Wether to warn on unused or not. Defaults
+            to True.
         """
 
         super(PropertyDef, self).__init__(name=name, public=public)
@@ -1986,10 +1989,9 @@ class PropertyDef(AbstractNodeData):
             self.uses_envs = False
 
         self.entity_info_arg = None
-
         self._requires_untyped_wrapper = False
-
         self.force_dispatching = force_dispatching
+        self.warn_on_unused = warn_on_unused
 
     def property_set(self):
         """
