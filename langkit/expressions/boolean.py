@@ -111,13 +111,14 @@ class Eq(AbstractExpression):
     """
 
     @classmethod
-    def make_expr(cls, lhs, rhs):
-        return (cls.make_expr_for_entities(lhs, rhs)
+    def make_expr(cls, lhs, rhs, abstract_expr=None):
+        return (cls.make_expr_for_entities(lhs, rhs, abstract_expr)
                 if lhs.type.is_entity_type else
-                BasicExpr('Is_Equal', '{} = {}', BoolType, [lhs, rhs]))
+                BasicExpr('Is_Equal', '{} = {}', BoolType, [lhs, rhs],
+                          abstract_expr=abstract_expr))
 
     @staticmethod
-    def make_expr_for_entities(lhs, rhs):
+    def make_expr_for_entities(lhs, rhs, abstract_expr=None):
         from langkit.expressions.structs import Cast
 
         if lhs.type != T.entity:
@@ -125,7 +126,8 @@ class Eq(AbstractExpression):
         if rhs.type != T.entity:
             rhs = Cast.Expr(rhs, T.entity)
         return CallExpr('Is_Equiv', 'Is_Equivalent', BoolType,
-                        [lhs, rhs])
+                        [lhs, rhs],
+                        abstract_expr=abstract_expr)
 
     def __init__(self, lhs, rhs):
         """
@@ -186,12 +188,12 @@ class Eq(AbstractExpression):
                 issubclass(lhs.type.el_type, rhs.type.el_type)
                 or issubclass(rhs.type.el_type, lhs.type.el_type)
             )
-            return self.make_expr_for_entities(lhs, rhs)
+            return self.make_expr_for_entities(lhs, rhs, self)
 
         else:
             check_type_compatibility(lhs.type == rhs.type)
 
-        return self.make_expr(lhs, rhs)
+        return self.make_expr(lhs, rhs, self)
 
 
 class OrderingTest(AbstractExpression):
