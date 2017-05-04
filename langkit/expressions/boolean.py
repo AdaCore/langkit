@@ -10,8 +10,8 @@ from langkit.diagnostics import check_source_language
 from langkit.expressions.analysis_units import AnalysisUnitType
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
-    LiteralExpr, No, NullExpr, PropertyDef, ResolvedExpression, attr_call,
-    construct, render
+    ComputingExpr, LiteralExpr, No, NullExpr, PropertyDef, ResolvedExpression,
+    attr_call, construct, render
 )
 from langkit.expressions.envs import EmptyEnv
 from langkit.utils import assert_type
@@ -213,8 +213,7 @@ class OrderingTest(AbstractExpression):
         GE: '>=',
     }
 
-    class Expr(ResolvedExpression):
-        static_type = BoolType
+    class Expr(BasicExpr):
         pretty_class_name = 'OrdTest'
 
         def __init__(self, operator, lhs, rhs, abstract_expr=None):
@@ -222,21 +221,13 @@ class OrderingTest(AbstractExpression):
             self.lhs = lhs
             self.rhs = rhs
 
+            template = '{{}} {} {{}}'.format(
+                OrderingTest.OPERATOR_IMAGE[self.operator]
+            )
+
             super(OrderingTest.Expr, self).__init__(
+                'Comp_Result', template, BoolType, [lhs, rhs],
                 abstract_expr=abstract_expr
-            )
-
-        def _render_pre(self):
-            return '{}\n{}'.format(
-                self.lhs.render_pre(),
-                self.rhs.render_pre()
-            )
-
-        def _render_expr(self):
-            return '{} {} {}'.format(
-                self.lhs.render_expr(),
-                OrderingTest.OPERATOR_IMAGE[self.operator],
-                self.rhs.render_expr()
             )
 
         @property
