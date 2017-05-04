@@ -880,6 +880,9 @@ class ResolvedExpression(object):
         Per-expression kind implementation for render_expr. To be overriden in
         subclasses.
 
+        Note that the returned expression must be idempotent: each evaluation
+        must return the exact same result for the exact same context.
+
         :rtype: str
         """
         raise NotImplementedError()
