@@ -10,8 +10,8 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractVariable, AbstractExpression, BasicExpr, CallExpr, FieldAccessExpr,
-    GetSymbol, LiteralExpr, NullExpr, PropertyDef, ResolvedExpression, Self,
+    AbstractVariable, AbstractExpression, BasicExpr, CallExpr, ComputingExpr,
+    FieldAccessExpr, GetSymbol, LiteralExpr, NullExpr, PropertyDef, Self,
     auto_attr, auto_attr_custom, construct
 )
 from langkit.expressions.utils import array_aggr, assign_var
@@ -173,16 +173,15 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
                          T.root_node.entity().array_type())
 
 
-class EnvBindExpr(ResolvedExpression):
+class EnvBindExpr(ComputingExpr):
 
     def __init__(self, env_expr, to_eval_expr, abstract_expr=None):
         self.to_eval_expr = to_eval_expr
         self.env_expr = env_expr
-
-        # Declare a variable that will hold the value of the
-        # bound environment.
         self.static_type = self.to_eval_expr.type
-        self.env_var = PropertyDef.get().vars.create("New_Env",
+
+        # Declare a variable that will hold the value of the bound environment
+        self.env_var = PropertyDef.get().vars.create('Bound_Env',
                                                      LexicalEnvType)
 
         super(EnvBindExpr, self).__init__('Env_Bind_Result',
@@ -210,9 +209,6 @@ class EnvBindExpr(ResolvedExpression):
             ])
 
         return '\n'.join(result)
-
-    def _render_expr(self):
-        return self.result_var.name
 
     @property
     def subexprs(self):
