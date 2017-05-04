@@ -10,8 +10,8 @@ from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
     ComputingExpr, Let, NullCheckExpr, NullExpr, PropertyDef,
-    ResolvedExpression, UnreachableExpr, attr_call, attr_expr, construct,
-    render
+    ResolvedExpression, SavedExpr, SequenceExpr, UnreachableExpr, attr_call,
+    attr_expr, construct, render
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.envs import Env
@@ -983,9 +983,7 @@ class Match(AbstractExpression):
         # appropriate order, so that in the end the first matchers are tested
         # first.
         for match_var, expr, inner_scope in reversed(constructed_matchers):
-            casted = Cast.Expr(matched_var,
-                               match_var.type,
-                               result_var=match_var)
+            casted = SavedExpr('Match', Cast.Expr(matched_var, match_var.type))
             guard = Not.make_expr(Eq.make_expr(casted, NullExpr(casted.type)))
             if expr.type != rtype:
                 # We already checked that type matches, so only way this is
@@ -993,12 +991,13 @@ class Match(AbstractExpression):
                 # rtype. In that case, we need an explicity upcast.
                 expr = Cast.Expr(expr, rtype)
 
-            expr_with_scope = BindingScope(expr, [match_var],
-                                           scope=inner_scope)
+            expr_with_scope = BindingScope(
+                Let.Expr([match_var],
+                         [casted.result_var.ref_expr],
+                         expr),
+                [],
+                scope=inner_scope
+            )
             result = If.Expr(guard, expr_with_scope, result, rtype)
 
-        dummy_var = PropertyDef.get().vars.create('Dummy', matched_expr.type)
-        dummy_resolved_var = dummy_var.ref_expr
-        dummy_resolved_var.set_ignored()
-        return Let.Expr([dummy_resolved_var], [matched_expr], result,
-                        abstract_expr=self)
+        return SequenceExpr(matched_expr, result, abstract_expr=self)
