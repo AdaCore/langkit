@@ -2818,17 +2818,11 @@ class FieldAccessExpr(BasicExpr):
         super(FieldAccessExpr, self).__init__(
             'Fld', '{}.{}', result_type,
             [NullCheckExpr(prefix_expr, result_var_name='Pfx'), field_name],
+            requires_incref=do_explicit_incref,
             abstract_expr=abstract_expr,
         )
         self.prefix_expr = prefix_expr
         self.field_name = field_name
-        self.do_explicit_incref = do_explicit_incref
-
-    def render_pre(self):
-        result = super(FieldAccessExpr, self).render_pre()
-        return ('{}\nInc_Ref ({});'.format(result, self.result_var.name)
-                if self.do_explicit_incref and self.type.is_refcounted() else
-                result)
 
     @property
     def subexprs(self):
