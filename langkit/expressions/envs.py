@@ -5,13 +5,14 @@ from functools import partial
 
 from langkit import names
 from langkit.compiled_types import (
-    BoolType, LexicalEnvType, Symbol, T, Token, EnvRebindingsType
+    BoolType, EnvRebindingsType, LexicalEnvType, NoCompiledType, Symbol, T,
+    Token
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, BasicExpr, CallExpr, FieldAccessExpr,
-    GetSymbol, NullExpr, PropertyDef, ResolvedExpression, Self, auto_attr,
-    auto_attr_custom, construct
+    GetSymbol, LiteralExpr, NullExpr, PropertyDef, ResolvedExpression, Self,
+    auto_attr, auto_attr_custom, construct
 )
 from langkit.expressions.utils import array_aggr, assign_var
 
@@ -263,10 +264,11 @@ class EnvGroup(AbstractExpression):
 
     def construct(self):
         env_exprs = [construct(e, LexicalEnvType) for e in self.env_exprs]
-        arg_template = array_aggr(['{}' for _ in env_exprs])
-        return BasicExpr('Group_Env', 'Group ({})'.format(arg_template),
-                         LexicalEnvType, env_exprs,
-                         abstract_expr=self)
+        array_arg = LiteralExpr(array_aggr(['{}' for _ in env_exprs]),
+                                NoCompiledType, env_exprs)
+        return CallExpr('Group_Env', 'Group', LexicalEnvType,
+                        [array_arg],
+                        abstract_expr=self)
 
 
 @auto_attr
