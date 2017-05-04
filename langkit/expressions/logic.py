@@ -8,7 +8,7 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, LiteralExpr, PropertyDef, ResolvedExpression,
-    construct, auto_attr
+    construct, auto_attr, render
 )
 
 
@@ -230,41 +230,7 @@ class DomainExpr(ResolvedExpression):
                                          abstract_expr=abstract_expr)
 
     def _render_pre(self):
-        is_node_domain = (
-            self.domain.static_type.element_type().is_entity_type
-        )
-
-        # Below, the call to Dec_Ref is here because:
-        #
-        # 1. Dom has an ownership share for each of its elements.
-        # 2. The call to member is borrowing this ownership share only for the
-        #    time of the call.
-        # 3. Calls to Get create ownership shares.
-
-        return "\n".join([
-            self.domain.render_pre(),
-            self.logic_var_expr.render_pre(), """
-            declare
-                Dom : {domain_type} := {domain};
-                A   : Eq_Node.Raw_Member_Array (1 .. Length (Dom));
-            begin
-                for J in 0 .. Length (Dom) - 1 loop
-                    A (J + 1) := {entity};
-                end loop;
-
-                {res_var} := Member ({logic_var}, A);
-
-                for J in 1 .. Length (Dom) loop
-                    Dec_Ref (A (J));
-                end loop;
-            end;
-            """.format(logic_var=self.logic_var_expr.render_expr(),
-                       domain=self.domain.render_expr(),
-                       domain_type=self.domain.type.name(),
-                       res_var=self.result_var.name,
-                       entity="Get (Dom, J)" if is_node_domain
-                       else "(El => Get (Dom, J), others => <>)")
-        ])
+        return render('properties/domain_ada', expr=self)
 
     def _render_expr(self):
         return str(self.result_var.name)
