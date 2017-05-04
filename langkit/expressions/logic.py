@@ -7,7 +7,7 @@ from langkit.compiled_types import (
 
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
-    AbstractExpression, CallExpr, LiteralExpr, PropertyDef, ResolvedExpression,
+    AbstractExpression, CallExpr, ComputingExpr, LiteralExpr, PropertyDef,
     construct, auto_attr, render
 )
 
@@ -216,7 +216,7 @@ class Bind(AbstractExpression):
                          lhs, rhs, pred_func, abstract_expr=self)
 
 
-class DomainExpr(ResolvedExpression):
+class DomainExpr(ComputingExpr):
     static_type = EquationType
 
     def __init__(self, domain, logic_var_expr, abstract_expr=None):
@@ -226,14 +226,11 @@ class DomainExpr(ResolvedExpression):
         self.logic_var_expr = logic_var_expr
         ":type: ResolvedExpression"
 
-        super(DomainExpr, self).__init__(result_var_name='Var',
+        super(DomainExpr, self).__init__('Domain_Equation',
                                          abstract_expr=abstract_expr)
 
     def _render_pre(self):
         return render('properties/domain_ada', expr=self)
-
-    def _render_expr(self):
-        return str(self.result_var.name)
 
     @property
     def subexprs(self):
