@@ -8,7 +8,7 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, LiteralExpr, PropertyDef, ResolvedExpression,
-    construct, BasicExpr, auto_attr
+    construct, auto_attr
 )
 
 
@@ -520,15 +520,19 @@ class LogicBooleanOp(AbstractExpression):
         self.kind = kind
 
     def construct(self):
-        return BasicExpr(
-            'Logic_Boolean_Op',
-            "Logic_{} (Relation_Array ({{}}.Items))".format(
-                "Any" if self.kind == self.KIND_OR else "All"
-            ),
-            EquationType,
-            [construct(self.equation_array, EquationType.array_type())],
-            abstract_expr=self
+        # The equation constructor takes an Ada array as a paramater, not our
+        # access to record: unwrap it.
+        relation_array = untyped_literal_expr(
+            'Relation_Array ({}.Items)',
+            [construct(self.equation_array, EquationType.array_type())]
         )
+        constructor = 'Logic_{}'.format(
+            'Any' if self.kind == self.KIND_OR else 'All'
+        )
+
+        return CallExpr('Logic_Boolean_Op', constructor, EquationType,
+                        [relation_array],
+                        abstract_expr=self)
 
 
 class Any(LogicBooleanOp):
