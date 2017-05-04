@@ -195,6 +195,9 @@ class Eq(AbstractExpression):
 
         return self.make_expr(lhs, rhs, self)
 
+    def __repr__(self):
+        return '<Eq>'
+
 
 class OrderingTest(AbstractExpression):
     """
