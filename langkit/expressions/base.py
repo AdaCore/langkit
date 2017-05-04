@@ -1235,6 +1235,53 @@ class ComputingExpr(ResolvedExpression):
         return self.result_var.name.camel_with_underscores
 
 
+class SavedExpr(ResolvedExpression):
+    """
+    Wrapper expression that will make sure we have a result variable for the
+    input expression. This makes it easier to re-use the result of an
+    expression multiple times, as we forbid tree sharing.
+
+    If the input expression has no result variable, we create one for it,
+    otherwise we re-use it.
+    """
+
+    def __init__(self, result_var_name, expr, abstract_expr=None):
+        self.expr = expr
+        self.static_type = expr.type
+
+        if expr.result_var:
+            self.exposed_result_var = expr.result_var
+            result_var_name = None
+
+        super(SavedExpr, self).__init__(result_var_name,
+                                        skippable_refcount=True,
+                                        abstract_expr=abstract_expr)
+
+        if result_var_name:
+            self.exposed_result_var = self._result_var
+
+    @property
+    def result_var(self):
+        return self.exposed_result_var
+
+    def _render_pre(self):
+        result = [self.expr.render_pre()]
+        if self._result_var:
+            result.append(assign_var(self._result_var.ref_expr,
+                                     self.expr.render_expr()))
+        return '\n'.join(result)
+
+    def _render_expr(self):
+        return self.exposed_result_var.name.camel_with_underscores
+
+    @property
+    def subexprs(self):
+        return {'expr': self.expr}
+
+    def __repr__(self):
+        return '<SavedExpr>'
+
+
 class SequenceExpr(ResolvedExpression):
     """
     Expression to evaluate a first expression, then a second one.
