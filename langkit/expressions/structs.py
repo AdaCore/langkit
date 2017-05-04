@@ -233,7 +233,11 @@ class New(AbstractExpression):
 
             return '{}\n{}'.format(
                 self._render_fields(),
-                assign_var(self.result_var.ref_expr, record_expr)
+
+                # We must not inc-ref the resulting record as we already
+                # inc-ref'd manually all the ref-counted members.
+                assign_var(self.result_var.ref_expr, record_expr,
+                           requires_incref=False)
             )
 
         @property
@@ -667,7 +671,7 @@ class IsA(AbstractExpression):
     Expression that is the result of testing the kind of a node.
     """
 
-    class Expr(ResolvedExpression):
+    class Expr(ComputingExpr):
         static_type = BoolType
         pretty_class_name = 'IsA'
 
@@ -680,26 +684,25 @@ class IsA(AbstractExpression):
                 ResolvedExpression's constructor.
             """
             self.expr = expr
-            self.astnodes = [a.el_type
-                             if a.is_entity_type
-                             else a for a in astnodes]
+            self.astnodes = [a.el_type if a.is_entity_type else a
+                             for a in astnodes]
 
-            super(IsA.Expr, self).__init__(result_var_name='Is_A',
-                                           abstract_expr=abstract_expr)
+            super(IsA.Expr, self).__init__('Is_A', abstract_expr=abstract_expr)
 
         def _render_pre(self):
-            return self.expr.render_pre()
-
-        def _render_expr(self):
-            target = ("{}.El.all"
-                      if self.expr.type.is_entity_type
-                      else "{}.all")
-            return (target + " in {}").format(
-                self.expr.render_expr(),
-                " | ".join(
+            target = ('{}.El.all'
+                      if self.expr.type.is_entity_type else
+                      '{}.all').format(self.expr.render_expr())
+            result_expr = '{} in {}'.format(
+                target,
+                ' | '.join(
                     "{}_Type'Class".format(a.name().camel_with_underscores)
                     for a in self.astnodes
                 )
+            )
+            return '{}\n{}'.format(
+                self.expr.render_pre(),
+                assign_var(self.result_var.ref_expr, result_expr)
             )
 
         @property
