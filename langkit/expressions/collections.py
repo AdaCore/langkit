@@ -12,8 +12,8 @@ from langkit.diagnostics import (
 )
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, CallExpr, ComputingExpr, PropertyDef,
-    ResolvedExpression, attr_expr, attr_call, auto_attr_custom, auto_attr,
-    construct, render, unsugar
+    attr_expr, attr_call, auto_attr_custom, auto_attr, construct, render,
+    unsugar
 )
 
 
@@ -550,7 +550,7 @@ class CollectionSingleton(AbstractExpression):
     single element.
     """
 
-    class Expr(ResolvedExpression):
+    class Expr(ComputingExpr):
         pretty_class_name = 'ArraySingleton'
 
         def __init__(self, expr, abstract_expr=None):
@@ -563,8 +563,7 @@ class CollectionSingleton(AbstractExpression):
             self.static_type = self.expr.type.array_type()
 
             super(CollectionSingleton.Expr, self).__init__(
-                result_var_name='Singleton',
-                abstract_expr=abstract_expr
+                'Singleton', abstract_expr=abstract_expr
             )
 
         def _render_pre(self):
@@ -573,9 +572,6 @@ class CollectionSingleton(AbstractExpression):
             {result_var}.Items (1) := {item};
             """.format(result_var=self.result_var.name,
                        item=self.expr.render_expr())
-
-        def _render_expr(self):
-            return self.result_var.name
 
         @property
         def subexprs(self):
