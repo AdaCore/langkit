@@ -2773,7 +2773,8 @@ class AbstractKind(Enum):
 
 def langkit_property(public=None, return_type=None,
                      kind=AbstractKind.concrete, has_implicit_env=None,
-                     memoized=False, external=False, uses_envs=None):
+                     memoized=False, external=False, uses_envs=None,
+                     warn_on_unused=True):
     """
     Decorator to create properties from real Python methods. See Property for
     more details.
@@ -2794,7 +2795,8 @@ def langkit_property(public=None, return_type=None,
             has_implicit_env=has_implicit_env,
             memoized=memoized,
             external=external,
-            uses_envs=uses_envs
+            uses_envs=uses_envs,
+            warn_on_unused=warn_on_unused,
         )
     return decorator
 
