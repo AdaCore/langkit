@@ -1569,6 +1569,11 @@ class Let(AbstractExpression):
         pretty_class_name = 'Let'
 
         def __init__(self, vars, var_exprs, expr, abstract_expr=None):
+            """
+            :type vars: list[VariableExpr]
+            :type vars_exprs: list[ResolvedExpression]
+            :type expr: ResolvedExpression
+            """
             self.vars = vars
             self.var_exprs = var_exprs
             self.expr = expr
