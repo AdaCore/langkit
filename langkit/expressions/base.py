@@ -2426,21 +2426,30 @@ class PropertyDef(AbstractNodeData):
                                LexicalEnvType,
                                False)
 
+        # If this property has been explicitly marked as using entity info,
+        # then set the relevant internal data.
+        if self.uses_envs:
+            self.set_uses_env()
+
+    @memoized
+    def _set_uses_env(self):
+        """
+        Internal helper for set_uses_env. Uses memoized so it is called only
+        once on each property.
+        """
+        # Add the entity info argument
+        self._add_argument(PropertyDef.entity_info_name, T.entity_info, False)
+        self.entity_info_arg = self.arguments[-1]
+        self.uses_envs = True
+
     def set_uses_env(self):
         """
         Set this property as using environments, which will trigger the
         addition of the env rebinding implicit parameter.
         """
-        def internal(prop):
-            if not prop.uses_envs:
-                # Add the entity info argument
-                prop._add_argument(PropertyDef.entity_info_name,
-                                   T.entity_info, False)
-                prop.entity_info_arg = prop.arguments[-1]
-                prop.uses_envs = True
 
         for prop in self.property_set():
-            internal(prop)
+            prop._set_uses_env()
 
     def require_untyped_wrapper(self):
         """
