@@ -2890,8 +2890,8 @@ package body ${ada_lib_name}.Analysis is
    --------------
 
    function Node_Env
-     (Node : access ${root_node_value_type})
-      return AST_Envs.Lexical_Env
+     (Node : access ${root_node_value_type};
+      E_Info : Entity_Info := No_Entity_Info) return AST_Envs.Lexical_Env
    is (Node.Self_Env);
 
    ## Generate the bodies of the root grammar class properties

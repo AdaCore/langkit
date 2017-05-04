@@ -244,7 +244,8 @@
 
    % if cls.env_spec._add_env:
       overriding function Node_Env
-        (Node : access ${type_name}) return AST_Envs.Lexical_Env;
+        (Node : access ${type_name};
+         E_Info : Entity_Info := No_Entity_Info) return AST_Envs.Lexical_Env;
    % endif
 
    % endif
@@ -725,7 +726,8 @@
    --------------
 
    overriding function Node_Env
-     (Node : access ${type_name}) return AST_Envs.Lexical_Env
+     (Node : access ${type_name};
+      E_Info : Entity_Info := No_Entity_Info) return AST_Envs.Lexical_Env
    is (AST_Envs.Get_Env (Node.Self_Env.Parent));
    % endif
 

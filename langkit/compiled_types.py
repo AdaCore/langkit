@@ -1585,7 +1585,7 @@ class StructMetaclass(CompiledTypeMetaclass):
 
             ("node_env", PropertyDef(
                 expr=None, prefix=None, type=LexicalEnvType,
-                public=False, external=True, uses_envs=False,
+                public=False, external=True, uses_envs=True,
                 force_dispatching=True,
                 doc='For nodes that introduce a new environment, return the'
                     ' parent lexical environment. Return the "inherited"'
