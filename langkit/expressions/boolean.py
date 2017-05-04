@@ -124,8 +124,8 @@ class Eq(AbstractExpression):
             lhs = Cast.Expr(lhs, T.entity)
         if rhs.type != T.entity:
             rhs = Cast.Expr(rhs, T.entity)
-        return BasicExpr('Is_Equiv', 'Is_Equivalent ({}, {})', BoolType,
-                         [lhs, rhs])
+        return CallExpr('Is_Equiv', 'Is_Equivalent', BoolType,
+                        [lhs, rhs])
 
     def __init__(self, lhs, rhs):
         """
