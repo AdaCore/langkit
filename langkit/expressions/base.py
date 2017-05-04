@@ -3111,8 +3111,9 @@ class LocalVars(object):
 
 class CallExpr(BasicExpr):
     """
-    Convenience resolved expression that models a call to a function on the
-    Ada side of things.
+    Convenience resolved expression that models a call to a function on the Ada
+    side of things. This assumes that for ref-counted types, function calls
+    return a new ownership share to the caller.
     """
 
     def __init__(self, result_var_name, name, type, exprs, abstract_expr=None):
@@ -3133,6 +3134,7 @@ class CallExpr(BasicExpr):
         )
 
         super(CallExpr, self).__init__(result_var_name, template, type, exprs,
+                                       requires_incref=False,
                                        abstract_expr=abstract_expr)
 
     @property
