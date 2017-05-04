@@ -1235,6 +1235,46 @@ class ComputingExpr(ResolvedExpression):
         return self.result_var.name.camel_with_underscores
 
 
+class SequenceExpr(ResolvedExpression):
+    """
+    Expression to evaluate a first expression, then a second one.
+
+    The result of this compound expression is the result of the second one.
+    This makes it easier to express computations where an expression needs to
+    be repeated multiple times later on (as we forbid tree sharing).
+    """
+
+    def __init__(self, pre_expr, post_expr, abstract_expr=None):
+        """
+        This expression will evaluate `pre_expr`, then `post_expr`, and will
+        then return the result of `post_expr`.
+        """
+        self.pre_expr = pre_expr
+        self.post_expr = post_expr
+        self.static_type = post_expr.type
+
+        # This expression completely delegates the work of managing the result
+        # value to `post_expr`, so we can safely avoid all ref-counting
+        # activity here.
+        super(SequenceExpr, self).__init__(skippable_refcount=True,
+                                           abstract_expr=abstract_expr)
+
+    def _render_pre(self):
+        return '{}\n{}'.format(self.pre_expr.render_pre(),
+                               self.post_expr.render_pre())
+
+    def _render_expr(self):
+        return self.post_expr.render_expr()
+
+    @property
+    def subexprs(self):
+        return {'0-pre': self.pre_expr,
+                '1-post': self.post_expr}
+
+    def __repr__(self):
+        return '<SequenceExpr>'
+
+
 class AbstractVariable(AbstractExpression):
     """
     Abstract expression that is an entry point into the expression DSL.
