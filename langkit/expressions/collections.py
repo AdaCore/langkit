@@ -390,7 +390,7 @@ class Quantifier(CollectionExpression):
     Expression that tests a predicate over the items of a collection.
     """
 
-    class Expr(ResolvedExpression):
+    class Expr(ComputingExpr):
         static_type = BoolType
         pretty_class_name = 'Quantifier'
 
@@ -448,9 +448,6 @@ class Quantifier(CollectionExpression):
                 'properties/quantifier_ada', quantifier=self,
                 ALL=Quantifier.ALL, ANY=Quantifier.ANY, Name=names.Name
             )
-
-        def _render_expr(self):
-            return self.result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):
