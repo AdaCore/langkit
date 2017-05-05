@@ -1725,6 +1725,9 @@ class Block(Let):
     def do_prepare(self):
         pass
 
+    def __repr__(self):
+        return '<Block>'
+
 
 class Var(AbstractVariable):
     """
