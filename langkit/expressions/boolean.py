@@ -371,6 +371,9 @@ class Not(AbstractExpression):
     def make_expr(expr):
         return BasicExpr('Not_Val', 'not ({})', BoolType, [expr])
 
+    def __repr__(self):
+        return '<Not>'
+
 
 @attr_call('then')
 class Then(AbstractExpression):
