@@ -612,6 +612,9 @@ class CollectionSingleton(AbstractExpression):
         else:
             return ret
 
+    def __repr__(self):
+        return '<CollectionSingleton>'
+
 
 @attr_call('concat')
 class Concat(AbstractExpression):
