@@ -1801,6 +1801,11 @@ class EmptyArray(AbstractExpression):
     def construct(self):
         return self.construct_static(self.array_type, abstract_expr=self)
 
+    def __repr__(self):
+        return '<EmptyArray of {}>'.format(
+            resolve_type(self.element_type).name().camel
+        )
+
 
 def render(*args, **kwargs):
     return ct_render(*args, property=PropertyDef.get(), Self=Self, **kwargs)
