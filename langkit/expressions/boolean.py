@@ -348,6 +348,9 @@ class If(AbstractExpression):
 
         return If.Expr(construct(self.cond, BoolType), then, else_then, rtype)
 
+    def __repr__(self):
+        return '<If>'
+
 
 class Not(AbstractExpression):
     """
