@@ -1472,6 +1472,9 @@ class GetSymbol(AbstractExpression):
         return CallExpr('Sym', 'Get_Symbol', Symbol, [token_expr],
                         abstract_expr=abstract_expr)
 
+    def __repr__(self):
+        return '<GetSymbol>'
+
 
 class SymbolLiteral(AbstractExpression):
     """
