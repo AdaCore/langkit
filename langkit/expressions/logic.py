@@ -215,6 +215,9 @@ class Bind(AbstractExpression):
         return Bind.Expr(self.conv_prop, self.eq_prop, cprop_uid, eprop_uid,
                          lhs, rhs, pred_func, abstract_expr=self)
 
+    def __repr__(self):
+        return '<Bind>'
+
 
 class DomainExpr(ComputingExpr):
     static_type = EquationType
