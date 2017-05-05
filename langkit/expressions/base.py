@@ -1514,6 +1514,9 @@ class SymbolLiteral(AbstractExpression):
     def construct(self):
         return self.Expr(self.name, abstract_expr=self)
 
+    def __repr__(self):
+        return '<Symbol {}>'.format(self.name)
+
 
 class BindingScope(ComputingExpr):
     """
