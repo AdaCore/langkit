@@ -110,7 +110,7 @@ class Cast(AbstractExpression):
         Construct a resolved expression that is the result of casting a AST
         node.
 
-        :rtype: CastExpr
+        :rtype: Cast.Expr
         """
         expr = construct(
             self.expr,
