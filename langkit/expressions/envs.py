@@ -266,6 +266,9 @@ class EnvGroup(AbstractExpression):
                         [array_arg],
                         abstract_expr=self)
 
+    def __repr__(self):
+        return '<EnvGroup>'
+
 
 @auto_attr
 def env_group(self, env_array_expr):
