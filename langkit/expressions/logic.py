@@ -430,6 +430,9 @@ class Predicate(AbstractExpression):
         return Predicate.Expr(self.pred_property, pred_id, logic_var_exprs,
                               abstract_expr=self)
 
+    def __repr__(self):
+        return '<Predicate on {}>'.format(self.pred_property.qualname)
+
 
 @auto_attr
 def get_value(self, logic_var):
