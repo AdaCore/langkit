@@ -187,6 +187,9 @@ class Contains(CollectionExpression):
                                list_element_var, element_var, index_var,
                                iter_scope)
 
+    def __repr__(self):
+        return '<Contains>'
+
 
 @attr_call('filter', collection_expr_identity)
 @attr_call('filtermap')
