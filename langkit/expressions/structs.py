@@ -41,12 +41,8 @@ class Cast(AbstractExpression):
                 ResolvedExpression's constructor.
             """
             self.do_raise = do_raise
-            self.expr = expr
+            self.expr = SavedExpr('Cast_Expr', expr)
             self.static_type = dest_type
-
-            p = PropertyDef.get()
-            self.expr_var = p.vars.create('Cast_Expr', self.expr.type)
-
             super(Cast.Expr, self).__init__('Cast_Result',
                                             abstract_expr=abstract_expr)
 
