@@ -1586,7 +1586,10 @@ class Let(AbstractExpression):
                                            abstract_expr=abstract_expr)
 
         def _render_pre(self):
-            result = []
+            # Start and end a debug info scope around the whole expression so
+            # that the bindings we create in this Let expression die when
+            # leaving its evaluation in a debugger.
+            result = [gdb_helper('scope-start')]
             for var, expr in zip(self.vars, self.var_exprs):
                 result.extend([expr.render_pre(),
                                assign_var(var, expr.render_expr()),
@@ -1594,6 +1597,7 @@ class Let(AbstractExpression):
             result.extend([
                 self.expr.render_pre(),
                 assign_var(self.result_var.ref_expr, self.expr.render_expr()),
+                gdb_helper('end')
             ])
             return '\n'.join(result)
 
