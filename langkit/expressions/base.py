@@ -1679,6 +1679,9 @@ class Let(AbstractExpression):
         return Let.Expr(vars, var_exprs, construct(self.expr),
                         abstract_expr=self)
 
+    def __repr__(self):
+        return '<Let {}>'.format(', '.join(self.var_names))
+
 
 class Block(Let):
     """
