@@ -6,7 +6,7 @@
 
 <%def name="finalize_scope(scope)">
    ${gdb_helper('end')}
-   % if scope.has_refcounted_vars():
+   % if scope and scope.has_refcounted_vars():
       ${scope.finalizer_name};
    % endif
 </%def>
