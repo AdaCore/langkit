@@ -318,6 +318,9 @@ class New(AbstractExpression):
                     New.StructExpr)
         return expr_cls(self.struct_type, provided_fields, abstract_expr=self)
 
+    def __repr__(self):
+        return '<New {}>'.format(resolve_type(self.struct_type).name().camel)
+
 
 class FieldAccess(AbstractExpression):
     """
