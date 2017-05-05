@@ -895,21 +895,17 @@ class Match(AbstractExpression):
         :rtype: ResolvedExpression
         """
         outer_scope = PropertyDef.get_scope()
-        matched_expr = construct(self.matched_expr)
-        check_source_language(issubclass(matched_expr.type, ASTNode)
-                              or matched_expr.type.is_entity_type,
-                              'Match expressions can only work on AST nodes '
-                              'or entities')
 
         # Create a local variable so that in the generated code, we don't have
         # to re-compute the prefix for each type check. This is also required
         # for proper ref-counting.
-        matched_expr = NullCheckExpr(
-            matched_expr,
-            implicit_deref=matched_expr.type.is_entity_type,
-            result_var_name='Match_Prefix'
-        )
+        matched_expr = SavedExpr('Match_Prefix', construct(self.matched_expr))
         matched_var = matched_expr.result_var.ref_expr
+
+        check_source_language(issubclass(matched_expr.type, ASTNode)
+                              or matched_expr.type.is_entity_type,
+                              'Match expressions can only work on AST nodes '
+                              'or entities')
 
         constructed_matchers = []
 
@@ -976,4 +972,9 @@ class Match(AbstractExpression):
             )
             result = If.Expr(guard, expr_with_scope, result, rtype)
 
-        return SequenceExpr(matched_expr, result, abstract_expr=self)
+        return SequenceExpr(
+            NullCheckExpr(matched_expr,
+                          implicit_deref=matched_expr.type.is_entity_type),
+            result,
+            abstract_expr=self
+        )
