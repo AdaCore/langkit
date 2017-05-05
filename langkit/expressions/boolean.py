@@ -77,6 +77,9 @@ class BinaryBooleanOperator(AbstractExpression):
                 abstract_expr=self
             )
 
+    def __repr__(self):
+        return '<{}>'.format(self.kind.capitalize())
+
 
 # noinspection PyPep8Naming
 def And(*args):
