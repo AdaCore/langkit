@@ -28,7 +28,8 @@ ${expr.expr.render_pre()}
    ${generate_cast(operand_expr)}
 
 % else:
-
+   ## Before actually downcasting an access to an AST node, add a type
+   ## check so that we raise a Property_Error if it's wrong.
    if ${node_expr} = null
       or else ${node_expr}.all in ${ast_node.value_type_name()}'Class
    then

@@ -47,8 +47,6 @@ class Cast(AbstractExpression):
                                             abstract_expr=abstract_expr)
 
         def _render_pre(self):
-            # Before actually downcasting an access to an AST node, add a type
-            # check so that we raise a Property_Error if it's wrong.
             return render('properties/cast_ada', expr=self)
 
         @property
