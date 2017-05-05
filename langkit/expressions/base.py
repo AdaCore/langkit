@@ -3384,6 +3384,9 @@ class Arithmetic(AbstractExpression):
                          [l, r],
                          abstract_expr=self)
 
+    def __repr__(self):
+        return '<Op {}>'.format(self.op)
+
 
 def ignore(*vars):
     """
