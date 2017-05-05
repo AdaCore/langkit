@@ -2912,7 +2912,7 @@ class FieldAccessExpr(BasicExpr):
         """
         super(FieldAccessExpr, self).__init__(
             'Fld', '{}.{}', result_type,
-            [NullCheckExpr(prefix_expr, result_var_name='Pfx'), field_name],
+            [NullCheckExpr(prefix_expr), field_name],
             requires_incref=do_explicit_incref,
             abstract_expr=abstract_expr,
         )
