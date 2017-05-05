@@ -27,7 +27,7 @@ class Cast(AbstractExpression):
     to another subclass.
     """
 
-    class Expr(ResolvedExpression):
+    class Expr(ComputingExpr):
         pretty_class_name = 'Cast'
 
         def __init__(self, expr, dest_type, do_raise=False,
@@ -50,9 +50,6 @@ class Cast(AbstractExpression):
             # Before actually downcasting an access to an AST node, add a type
             # check so that we raise a Property_Error if it's wrong.
             return render('properties/cast_ada', expr=self)
-
-        def _render_expr(self):
-            return self.result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):
