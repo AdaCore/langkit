@@ -981,3 +981,6 @@ class Match(AbstractExpression):
             result,
             abstract_expr=self
         )
+
+    def __repr__(self):
+        return '<Match>'
