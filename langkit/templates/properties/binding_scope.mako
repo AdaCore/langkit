@@ -2,9 +2,7 @@
 
 <%namespace name="scopes" file="scopes_ada.mako" />
 
-% if expr.scope:
 ${scopes.start_scope(expr.scope)}
-% endif
 
 % for binding in expr.expr_bindings:
    ${gdb_bind_var(binding)}
@@ -16,6 +14,4 @@ ${expr.result_var.name} := ${expr.expr.render_expr()};
    Inc_Ref (${expr.result_var.name});
 % endif
 
-% if expr.scope:
 ${scopes.finalize_scope(expr.scope)}
-% endif
