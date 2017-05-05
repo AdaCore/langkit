@@ -643,3 +643,6 @@ class Concat(AbstractExpression):
         return CallExpr('Concat_Result', 'Concat', array_1.type,
                         [array_1, array_2],
                         abstract_expr=self)
+
+    def __repr__(self):
+        return '<Concat>'
