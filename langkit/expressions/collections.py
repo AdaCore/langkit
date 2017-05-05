@@ -506,6 +506,9 @@ class Quantifier(CollectionExpression):
                                list_element_var, element_var, index_var,
                                iter_scope)
 
+    def __repr__(self):
+        return '<{}Quantifier>'.format(self.kind.capitalize())
+
 
 @auto_attr_custom("at")
 @auto_attr_custom("at_or_raise", or_null=False)
