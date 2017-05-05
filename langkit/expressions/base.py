@@ -3263,7 +3263,8 @@ class NullCheckExpr(ResolvedExpression):
         """
         self.expr = expr
         self.implicit_deref = implicit_deref
-        super(NullCheckExpr, self).__init__(result_var_name)
+        super(NullCheckExpr, self).__init__(result_var_name,
+                                            skippable_refcount=True)
 
     @property
     def type(self):
