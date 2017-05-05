@@ -488,6 +488,10 @@ class LogicBooleanOp(AbstractExpression):
         self.equation_array = equation_array
         self.kind = kind
 
+    @property
+    def kind_name(self):
+        return 'Any' if self.kind == self.KIND_OR else 'All'
+
     def construct(self):
         # The equation constructor takes an Ada array as a paramater, not our
         # access to record: unwrap it.
@@ -495,13 +499,13 @@ class LogicBooleanOp(AbstractExpression):
             'Relation_Array ({}.Items)',
             [construct(self.equation_array, EquationType.array_type())]
         )
-        constructor = 'Logic_{}'.format(
-            'Any' if self.kind == self.KIND_OR else 'All'
-        )
 
-        return CallExpr('Logic_Boolean_Op', constructor, EquationType,
-                        [relation_array],
+        return CallExpr('Logic_Boolean_Op', 'Logic_{}'.format(self.kind_name),
+                        EquationType, [relation_array],
                         abstract_expr=self)
+
+    def __repr__(self):
+        return '<Logic{}>'.format(self.kind_name)
 
 
 class Any(LogicBooleanOp):
