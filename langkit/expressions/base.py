@@ -3270,10 +3270,7 @@ class NullCheckExpr(ResolvedExpression):
         return self.expr.type
 
     def _render_pre(self):
-        return '{}\n{}'.format(self.expr.render_pre(),
-                               render('properties/null_check_ada',
-                                      expr=self.expr,
-                                      implicit_deref=self.implicit_deref))
+        return render('properties/null_check_ada', expr=self)
 
     def _render_expr(self):
         return self.expr.render_expr()
