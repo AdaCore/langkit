@@ -30,16 +30,13 @@ class Cast(AbstractExpression):
     class Expr(ResolvedExpression):
         pretty_class_name = 'Cast'
 
-        def __init__(self, expr, dest_type, do_raise=False, result_var=None,
+        def __init__(self, expr, dest_type, do_raise=False,
                      abstract_expr=None):
             """
             :type expr: ResolvedExpression
             :type dest_type: ASTNode
             :type do_raise: bool
 
-            :param ResolvedExpr result_var: If provided, the cast will use it
-                to store the cast result. Otherwise, a dedicated variable is
-                created for this.
             :param AbstractExpression|None abstract_expr: See
                 ResolvedExpression's constructor.
             """
@@ -50,19 +47,8 @@ class Cast(AbstractExpression):
             p = PropertyDef.get()
             self.expr_var = p.vars.create('Cast_Expr', self.expr.type)
 
-            super(Cast.Expr, self).__init__(
-                result_var_name=(None if result_var else 'Cast_Result'),
-                abstract_expr=abstract_expr,
-            )
-            if result_var:
-                self._result_var = result_var
-            assert self.result_var.type == dest_type, (
-                'Cast temporaries must have exactly the cast type: {} expected'
-                ' but got {} instead'.format(
-                    dest_type.name().camel,
-                    self.result_var.type.name().camel
-                )
-            )
+            super(Cast.Expr, self).__init__('Cast_Result',
+                                            abstract_expr=abstract_expr)
 
         def _render_pre(self):
             # Before actually downcasting an access to an AST node, add a type
@@ -70,7 +56,7 @@ class Cast(AbstractExpression):
             return render('properties/cast_ada', expr=self)
 
         def _render_expr(self):
-            return self.result_var.name
+            return self.result_var.name.camel_with_underscores
 
         @property
         def subexprs(self):
