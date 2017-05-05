@@ -905,7 +905,7 @@ class AbstractNodeData(object):
         :type: None|names.Name
         """
 
-        self.uses_envs = False
+        self.uses_entity_info = False
         self._access_needs_incref = access_needs_incref
 
     @property
@@ -1585,7 +1585,7 @@ class StructMetaclass(CompiledTypeMetaclass):
 
             ("node_env", PropertyDef(
                 expr=None, prefix=None, type=LexicalEnvType,
-                public=False, external=True, uses_envs=True,
+                public=False, external=True, uses_entity_info=True,
                 force_dispatching=True, warn_on_unused=False,
                 doc='For nodes that introduce a new environment, return the'
                     ' parent lexical environment. Return the "inherited"'
@@ -1593,7 +1593,7 @@ class StructMetaclass(CompiledTypeMetaclass):
             )),
             ("children_env", PropertyDef(
                 expr=None, prefix=None, type=LexicalEnvType,
-                public=False, external=True, uses_envs=True,
+                public=False, external=True, uses_entity_info=True,
                 warn_on_unused=False,
                 doc='For nodes that introduce a new environment, return it.'
                     ' Return the "inherited" environment otherwise.'
@@ -1620,12 +1620,12 @@ class StructMetaclass(CompiledTypeMetaclass):
             )),
             ("token_start", PropertyDef(
                 expr=None, prefix=None, type=Token,
-                public=True, external=True, uses_envs=False,
+                public=True, external=True, uses_entity_info=False,
                 doc="Return the first token used to parse this node."
             )),
             ("token_end", PropertyDef(
                 expr=None, prefix=None, type=Token,
-                public=True, external=True, uses_envs=False,
+                public=True, external=True, uses_entity_info=False,
                 doc="Return the last token used to parse this node."
             )),
             ("previous_sibling", BuiltinField(

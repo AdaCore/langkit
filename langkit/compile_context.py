@@ -707,29 +707,29 @@ class CompileCtx(object):
 
         return (forwards, backwards)
 
-    def compute_uses_env_attribute(self):
+    def compute_uses_entity_info_attr(self):
         """
-        Pass that will compute the `uses_envs` attribute for every property.
-        This will determine whether it is necessary to pass along env
-        rebindings or not.
+        Pass that will compute the `uses_entity_info` attribute for every
+        property.  This will determine whether it is necessary to pass along
+        entity information or not.
         """
 
         _, backwards = self.properties_callgraphs()
 
         def propagate(prop):
             """
-            Propagate the `uses_envs` attribute to callers.
+            Propagate the `uses_entity_info` attribute to callers.
             """
             for p in prop.property_set():
-                p.set_uses_env()
+                p.set_uses_entity_info()
 
             for bw_link in backwards.get(prop, set()):
-                if not bw_link.uses_envs:
+                if not bw_link.uses_entity_info:
                     propagate(bw_link)
 
         # Propagate computed attribute
         for prop in self.all_properties(
-            lambda p: not p.base_property and p.uses_envs,
+            lambda p: not p.base_property and p.uses_entity_info,
             include_inherited=False
         ):
             propagate(prop)
@@ -1002,7 +1002,7 @@ class CompileCtx(object):
             PropertyPass('check_properties_return_types',
                          PropertyDef.check_return_types),
             GlobalPass('Compute uses envs attribute',
-                       CompileCtx.compute_uses_env_attribute),
+                       CompileCtx.compute_uses_entity_info_attr),
             ASTNodePass('check env spec properties',
                         lambda context, astnode:
                             astnode.env_spec

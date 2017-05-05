@@ -37,13 +37,15 @@ class Expression(FooNode):
 class Literal(Expression):
     tok = Field()
 
-    result = ExternalProperty(uses_envs=False)
+    result = ExternalProperty(uses_entity_info=False)
 
 
 class Name(Expression):
     tok = Field()
 
-    designated_unit = ExternalProperty(type=AnalysisUnitType, uses_envs=False)
+    designated_unit = ExternalProperty(
+        type=AnalysisUnitType, uses_entity_info=False
+    )
     result = Property(Self.designated_unit.root.cast(Expression).result)
 
 

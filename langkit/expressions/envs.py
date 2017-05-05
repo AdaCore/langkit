@@ -123,7 +123,7 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
 
     current_prop = PropertyDef.get()
     if current_prop:
-        current_prop.set_uses_env()
+        current_prop.set_uses_entity_info()
 
     if not isinstance(symbol_expr, (AbstractExpression, basestring)):
         check_source_language(
@@ -366,7 +366,7 @@ def make_as_entity(node_expr, abstract_expr=None):
     """
     from langkit.expressions import If, IsNull, New
     p = PropertyDef.get()
-    p.set_uses_env()
+    p.set_uses_entity_info()
 
     # Create a variable to hold the input node so we can reference it
     # multiple times in the sub-expression.

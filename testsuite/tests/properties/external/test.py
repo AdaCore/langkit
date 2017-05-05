@@ -35,7 +35,7 @@ class Expression(FooNode):
 class Literal(Expression):
     tok = Field()
 
-    result = ExternalProperty(uses_envs=False)
+    result = ExternalProperty(uses_entity_info=False)
 
 
 class Plus(Expression):

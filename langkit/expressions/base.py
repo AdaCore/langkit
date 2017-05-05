@@ -1850,7 +1850,8 @@ class PropertyDef(AbstractNodeData):
     def __init__(self, expr, prefix, name=None, doc=None, public=None,
                  abstract=False, type=None, abstract_runtime_check=False,
                  has_implicit_env=None, memoized=False, external=False,
-                 uses_envs=None, force_dispatching=False, warn_on_unused=True):
+                 uses_entity_info=None, force_dispatching=False,
+                 warn_on_unused=True):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -1910,9 +1911,9 @@ class PropertyDef(AbstractNodeData):
             extensions/nodes/{node_name}/bodies extension file. Note that the
             engines always generate the public declaration part.
 
-        :param bool uses_envs: Whether this property uses lexical environments
-            at all or not. If it does, then it will have an extra parameter for
-            env rebindings.
+        :param bool uses_entity_info: Whether this property uses lexical
+            environments at all or not. If it does, then it will have an extra
+            parameter for env rebindings.
 
         :param bool force_dispatching: Force making this property a dispatching
             one. Useful for externally defined properties.
@@ -1977,16 +1978,16 @@ class PropertyDef(AbstractNodeData):
         self.external = external
         if self.external:
             check_source_language(
-                uses_envs is not None,
-                "Need to specify uses_env for external properties"
+                uses_entity_info is not None,
+                "Need to specify uses_entity_info for external properties"
             )
-            self.uses_envs = uses_envs
+            self.uses_entity_info = uses_entity_info
         else:
             check_source_language(
-                uses_envs is None,
-                "Cannot specify uses_env for internal properties"
+                uses_entity_info is None,
+                "Cannot specify uses_entity_info for internal properties"
             )
-            self.uses_envs = False
+            self.uses_entity_info = False
 
         self.entity_info_arg = None
         self._requires_untyped_wrapper = False
@@ -2430,28 +2431,28 @@ class PropertyDef(AbstractNodeData):
 
         # If this property has been explicitly marked as using entity info,
         # then set the relevant internal data.
-        if self.uses_envs:
-            self.set_uses_env()
+        if self.uses_entity_info:
+            self.set_uses_entity_info()
 
     @memoized
-    def _set_uses_env(self):
+    def _set_uses_entity_info(self):
         """
-        Internal helper for set_uses_env. Uses memoized so it is called only
-        once on each property.
+        Internal helper for set_uses_entity_info. Uses memoized so it is called
+        only once on each property.
         """
         # Add the entity info argument
         self._add_argument(PropertyDef.entity_info_name, T.entity_info, False)
         self.entity_info_arg = self.arguments[-1]
-        self.uses_envs = True
+        self.uses_entity_info = True
 
-    def set_uses_env(self):
+    def set_uses_entity_info(self):
         """
         Set this property as using environments, which will trigger the
         addition of the env rebinding implicit parameter.
         """
 
         for prop in self.property_set():
-            prop._set_uses_env()
+            prop._set_uses_entity_info()
 
     def require_untyped_wrapper(self):
         """
@@ -2773,7 +2774,8 @@ class AbstractKind(Enum):
 
 def langkit_property(public=None, return_type=None,
                      kind=AbstractKind.concrete, has_implicit_env=None,
-                     memoized=False, external=False, uses_envs=None,
+                     memoized=False, external=False,
+                     uses_entity_info=None,
                      warn_on_unused=True):
     """
     Decorator to create properties from real Python methods. See Property for
@@ -2795,7 +2797,7 @@ def langkit_property(public=None, return_type=None,
             has_implicit_env=has_implicit_env,
             memoized=memoized,
             external=external,
-            uses_envs=uses_envs,
+            uses_entity_info=uses_entity_info,
             warn_on_unused=warn_on_unused,
         )
     return decorator

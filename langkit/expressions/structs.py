@@ -416,9 +416,9 @@ class FieldAccess(AbstractExpression):
             if self.implicit_deref:
                 # From the entity, if we're calling the property on an entity
                 return '{}.Info'.format(self.prefix)
-            elif PropertyDef.get() and PropertyDef.get().uses_envs:
+            elif PropertyDef.get() and PropertyDef.get().uses_entity_info:
                 # From the property context, if we are in a property that
-                # uses_env and calling the property on an AST node.
+                # uses_entity_info and calling the property on an AST node.
                 return str(PropertyDef.entity_info_name)
             else:
                 # Just use the default (empty) entity info if we have none of
@@ -456,7 +456,7 @@ class FieldAccess(AbstractExpression):
 
                 # If the called property uses environments, it will need and
                 # env rebindings parameter.
-                if self.node_data.uses_envs and self.entity_info_expr:
+                if self.node_data.uses_entity_info and self.entity_info_expr:
                     args.append((str(PropertyDef.entity_info_name),
                                  self.entity_info_expr))
 
