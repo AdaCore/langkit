@@ -365,11 +365,13 @@ class Not(AbstractExpression):
         self.expr = expr
 
     def construct(self):
-        return Not.make_expr(construct(self.expr, BoolType))
+        return Not.make_expr(construct(self.expr, BoolType),
+                             abstract_expr=self)
 
     @staticmethod
-    def make_expr(expr):
-        return BasicExpr('Not_Val', 'not ({})', BoolType, [expr])
+    def make_expr(expr, abstract_expr=None):
+        return BasicExpr('Not_Val', 'not ({})', BoolType, [expr],
+                         abstract_expr=abstract_expr)
 
     def __repr__(self):
         return '<Not>'
