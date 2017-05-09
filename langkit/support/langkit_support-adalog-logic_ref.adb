@@ -34,7 +34,7 @@ package body Langkit_Support.Adalog.Logic_Ref is
    begin
       Inc_Ref (Old.Value);
 
-      if Debug_State = Trace then
+      if Debug.Debug then
          Trace ("Setting the value of " & Image (Self) & " to "
                 & Element_Image (Data));
          Trace ("Old value is " & Element_Image (Old.Value));
@@ -49,7 +49,7 @@ package body Langkit_Support.Adalog.Logic_Ref is
       --  Then check if we have pending relations, and if they evaluate to
       --  True.
       for El of Pred_Sets.Elements (Self.Pending_Relations) loop
-         if Debug_State = Trace then
+         if Debug.Debug then
             Trace ("Applying predicate on " & Image (Self));
          end if;
 
@@ -60,7 +60,7 @@ package body Langkit_Support.Adalog.Logic_Ref is
             Self := Old;
             Inc_Ref (Self.Value);
 
-            if Debug_State = Trace then
+            if Debug.Debug then
                Trace ("Self element value is now "
                       & Element_Image (Self.Value));
             end if;
