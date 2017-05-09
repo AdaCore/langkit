@@ -5,6 +5,7 @@ from collections import namedtuple
 import gdb
 
 from langkit.gdb.debug_info import DSLLocation, ExprDone, ExprStart, Scope
+from langkit.gdb.utils import expr_repr, name_repr, prop_repr
 
 
 class BaseCommand(gdb.Command):
@@ -75,7 +76,7 @@ class StatePrinter(object):
             print('Selected frame is not in a property.')
             return
 
-        print('Running {}'.format(self.state.property.name))
+        print('Running {}'.format(prop_repr(self.state.property)))
         print('from {}'.format(self.state.property.dsl_sloc))
 
         for scope_state in self.state.scopes:
@@ -89,7 +90,7 @@ class StatePrinter(object):
 
             for b in scope_state.bindings:
                 print_info('{}{} = {}'.format(
-                    b.dsl_name,
+                    name_repr(b),
                     self.loc_image(b.gen_name),
                     self.value_image(b.gen_name)
                 ))
@@ -108,14 +109,14 @@ class StatePrinter(object):
             done_exprs.sort(key=lambda e: e.done_at_line)
             for e in done_exprs:
                 print_info('{}{} -> {}'.format(
-                    e.expr_repr,
+                    expr_repr(e),
                     self.loc_image(e.result_var),
                     self.value_image(e.result_var)
                 ))
 
             if last_started:
                 print_info('Currently evaluating {}'.format(
-                    last_started.expr_repr
+                    expr_repr(last_started)
                 ))
                 if last_started.dsl_sloc:
                     print_info('from {}'.format(last_started.dsl_sloc))
@@ -281,11 +282,12 @@ sub-expression.
 
         print('')
         print('{} evaluated to: {}'.format(
-            current_expr.expr_repr, frame.read_var(new_expr.result_var.lower())
+            expr_repr(current_expr),
+            frame.read_var(new_expr.result_var.lower())
         ))
         if new_current_expr:
             print('')
-            print('Now evaluating {}'.format(new_current_expr.expr_repr))
+            print('Now evaluating {}'.format(expr_repr(new_current_expr)))
 
     def lookup_current_expr(self, state):
         """

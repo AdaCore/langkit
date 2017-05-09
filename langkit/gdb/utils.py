@@ -2,6 +2,8 @@ from __future__ import absolute_import, division, print_function
 
 import gdb
 
+from langkit.utils import Colors, col
+
 
 system_address = gdb.lookup_type('system__address')
 
@@ -38,3 +40,30 @@ def record_to_tag(record_value):
     tag as a Python integer.
     """
     return ptr_to_int(tagged_field(record_value, '_tag'))
+
+
+def expr_repr(expr):
+    """
+    Return a colored repr for an expression.
+
+    :type: langkit.gdb.state.ExpressionEvaluation
+    """
+    return col(expr.expr_repr, Colors.CYAN)
+
+
+def name_repr(expr):
+    """
+    Return a colored repr for a binding name.
+
+    :type: langkit.gdb.state.Binding
+    """
+    return col(expr.dsl_name, Colors.GREEN)
+
+
+def prop_repr(prop):
+    """
+    Return a colored repr for a property name.
+
+    :type: langkit.gdb.debug_info.Property
+    """
+    return col(col(prop.name, Colors.RED), Colors.BOLD)
