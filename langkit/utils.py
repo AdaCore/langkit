@@ -7,10 +7,14 @@ find in the standard library.
 from __future__ import absolute_import, division, print_function
 
 from copy import copy
-from itertools import takewhile
-
 import inspect
+from itertools import takewhile
 import sys
+
+try:
+    import gdb
+except ImportError:
+    gdb = None
 
 
 class StructEq(object):
@@ -109,7 +113,9 @@ class Colors(object):
                 setattr(cls, name, '')
 
 
-if not sys.stdout.isatty() or not sys.stderr.isatty():
+# Keep colors when we are running under GDB. Otherwise, disable colors as soon
+# as one of stdout or stderr is not a TTY.
+if not gdb and (not sys.stdout.isatty() or not sys.stderr.isatty()):
     Colors.disable_colors()
 
 
