@@ -279,10 +279,12 @@ sub-expression.
         if not new_expr.is_done:
             return error('the expression is not evaluated yet')
 
+        print('')
         print('{} evaluated to: {}'.format(
             current_expr.expr_repr, frame.read_var(new_expr.result_var.lower())
         ))
         if new_current_expr:
+            print('')
             print('Now evaluating {}'.format(new_current_expr.expr_repr))
 
     def lookup_current_expr(self, state):
