@@ -296,10 +296,11 @@ sub-expression.
         :rtype: (None, None)|(langkit.gdb.state.ScopeState,
                               langkit.gdb.state.ExpressionEvaluation)
         """
-        for scope_state in reversed(state.scopes):
-            for e in reversed(scope_state.expressions.values()):
-                if e.is_started:
-                    return scope_state, e
+        if state:
+            for scope_state in reversed(state.scopes):
+                for e in reversed(scope_state.expressions.values()):
+                    if e.is_started:
+                        return scope_state, e
         return (None, None)
 
     def lookup_expr(self, state, expr_id):
