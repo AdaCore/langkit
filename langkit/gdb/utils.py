@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 import gdb
 
 
-system_address = gdb.lookup_type('system.address')
+system_address = gdb.lookup_type('system__address')
 
 
 def ptr_to_int(ptr_value):
