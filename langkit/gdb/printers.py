@@ -228,9 +228,12 @@ class EnvGetterPrinter(BasePrinter):
             return '<EnvGetter dynamic>'
         else:
             # With GNAT encodings, GDB exposes the variant part as a field that
-            # is an union.
-            union = self.value['dynamic___XVN']
-            variant = union['O']
+            # is an union. Sometimes it's half-decoded...
+            try:
+                union = self.value['dynamic___XVN']
+                variant = union['O']
+            except gdb.error:
+                variant = self.value['S']
             return str(variant['env'])
 
 
