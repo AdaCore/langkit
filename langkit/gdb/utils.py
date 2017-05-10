@@ -46,7 +46,8 @@ def expr_repr(expr):
     """
     Return a colored repr for an expression.
 
-    :type: langkit.gdb.state.ExpressionEvaluation
+    :type expr: langkit.gdb.state.ExpressionEvaluation
+    :rtype: str
     """
     return col(expr.expr_repr, Colors.CYAN)
 
@@ -55,7 +56,8 @@ def name_repr(expr):
     """
     Return a colored repr for a binding name.
 
-    :type: langkit.gdb.state.Binding
+    :type expr: langkit.gdb.state.Binding
+    :rtype: str
     """
     return col(expr.dsl_name, Colors.GREEN)
 
@@ -64,6 +66,7 @@ def prop_repr(prop):
     """
     Return a colored repr for a property name.
 
-    :type: langkit.gdb.debug_info.Property
+    :type prop: langkit.gdb.debug_info.Property
+    :rtype: str
     """
     return col(col(prop.name, Colors.RED), Colors.BOLD)
