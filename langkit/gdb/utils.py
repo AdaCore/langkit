@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import gdb
 
+from langkit.names import Name
 from langkit.utils import Colors, col
 
 
@@ -70,3 +71,15 @@ def prop_repr(prop):
     :rtype: str
     """
     return col(col(prop.name, Colors.RED), Colors.BOLD)
+
+
+def adaify_name(name):
+    """
+    Turn a symbol name like a__b into an Ada-like name such as A.B.
+
+    :type name: str
+    :rtype: str
+    """
+    chunks = name.split('__')
+    return '.'.join(Name.from_lower(c).camel_with_underscores
+                    for c in chunks)

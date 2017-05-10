@@ -8,7 +8,7 @@ import gdb.printing
 
 from langkit.gdb.tdh import TDH
 from langkit.gdb.units import AnalysisUnit
-from langkit.gdb.utils import tagged_field
+from langkit.gdb.utils import adaify_name, tagged_field
 from langkit.utils import memoized
 
 
@@ -350,7 +350,8 @@ class ArrayPrettyPrinter(BasePrinter):
 
     def to_string(self):
         return '{} array of length {}'.format(
-            self.element_typename(self.value.type.target().name, self.context),
+            adaify_name(self.element_typename(self.value.type.target().name,
+                                              self.context)),
             self.length
         )
 
