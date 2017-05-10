@@ -430,8 +430,10 @@ class LangkitVectorPrinter(BasePrinter):
         return 'array'
 
     def to_string(self):
-        return '{} vector of length {}'.format(self.element_type.name,
-                                               self.length)
+        return '{} vector of length {}'.format(
+            adaify_name(self.context, self.element_type.name),
+            self.length
+        )
 
     def children(self):
         if self.length <= 0:
