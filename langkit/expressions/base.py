@@ -1437,9 +1437,9 @@ class AbstractVariable(AbstractExpression):
             self.local_var.type = type
 
     def __repr__(self):
-        return "<AbstractVariable {}>".format(
-            self._name.camel_with_underscores
-        )
+        return "<Var {}>".format(self.source_name.lower
+                                 if self.source_name else
+                                 self._name.camel_with_underscores)
 
 
 Self = AbstractVariable(names.Name("Self"))
