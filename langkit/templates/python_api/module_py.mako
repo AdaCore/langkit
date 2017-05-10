@@ -755,6 +755,20 @@ class Token(ctypes.Structure):
             ' {}'.format(repr(self.text)) if self.text else ''
         )
 
+    def __lt__(self, other):
+        """
+        Consider that None comes before all tokens. Then, sort by unit, token
+        index, and trivia index.
+        """
+        if other is None:
+            return False
+        if self._token_data != other._token_data:
+            raise ValueError('{} and {} come from different units'.format(
+                self, other
+            ))
+        return (other is not None
+                and self._identity_tuple < other._identity_tuple)
+
     def to_data(self):
         """
         Return a dict representation of this Token.
