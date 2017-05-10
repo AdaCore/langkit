@@ -588,6 +588,21 @@ base_langkit_docs = {
         Return a reference to the previous token in the corresponding analysis
         unit.
     """,
+    'langkit.token_range_until': """
+        Return ${'an iterator on' if lang == 'python' else ''} the list of
+        tokens that spans between
+        % if lang == 'python':
+            `self` and `other`
+        % else:
+            the two input tokens
+        % endif
+        (included). This returns an empty list if the first token appears after
+        the other one in the source code.
+        % if lang == 'python':
+            Raise a ValueError if both tokens come from different analysis
+            units.
+        % endif
+    """,
     'langkit.token_is_equivalent': """
         Return whether L and R are structurally equivalent tokens. This means
         that their position in the stream won't be taken into account, only the

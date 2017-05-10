@@ -687,6 +687,21 @@ class Token(ctypes.Structure):
         _token_previous(ctypes.byref(self), ctypes.byref(t))
         return t._wrap()
 
+    def range_until(self, other):
+        ${py_doc('langkit.token_range_until', 8)}
+        if other is not None and self._token_data != other._token_data:
+            raise ValueError('{} and {} come from different analysis'
+                             ' units'.format(self, other))
+
+        if other < self:
+            return
+
+        yield self
+        current = self
+        while current < other:
+            current = current.next
+            yield current
+
     def is_equivalent(self, other):
         ${py_doc('langkit.token_is_equivalent', 8)}
         return bool(_token_is_equivalent(
