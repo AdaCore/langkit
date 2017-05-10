@@ -680,18 +680,18 @@ class Token(ctypes.Structure):
         _token_next(ctypes.byref(self), ctypes.byref(t))
         return t._wrap()
 
-    def is_equivalent(self, other):
-        ${py_doc('langkit.token_is_equivalent', 8)}
-        return bool(_token_is_equivalent(
-            ctypes.byref(self), ctypes.byref(other))
-        )
-
     @property
     def previous(self):
         ${py_doc('langkit.token_previous', 8)}
         t = Token()
         _token_previous(ctypes.byref(self), ctypes.byref(t))
         return t._wrap()
+
+    def is_equivalent(self, other):
+        ${py_doc('langkit.token_is_equivalent', 8)}
+        return bool(_token_is_equivalent(
+            ctypes.byref(self), ctypes.byref(other))
+        )
 
     @property
     def kind(self):

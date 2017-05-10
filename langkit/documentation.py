@@ -584,14 +584,14 @@ base_langkit_docs = {
         Return a reference to the next token in the corresponding analysis
         unit.
     """,
+    'langkit.token_previous': """
+        Return a reference to the previous token in the corresponding analysis
+        unit.
+    """,
     'langkit.token_is_equivalent': """
         Return whether L and R are structurally equivalent tokens. This means
         that their position in the stream won't be taken into account, only the
         kind and text of the token.
-    """,
-    'langkit.token_previous': """
-        Return a reference to the previous token in the corresponding analysis
-        unit.
     """,
     'langkit.token_range_text': """
         Compute the source buffer slice corresponding to the text that spans
