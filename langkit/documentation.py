@@ -595,8 +595,8 @@ base_langkit_docs = {
     """,
     'langkit.token_range_text': """
         Compute the source buffer slice corresponding to the text that spans
-        between the First and Last tokens. This yields an empty slice if Last
-        actually appears before First.
+        between the First and Last tokens (both included). This yields an empty
+        slice if Last actually appears before First.
         % if lang == 'c':
             Put the result in RESULT.
         % endif
