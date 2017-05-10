@@ -1,5 +1,5 @@
 """
-Test that LogiVarType bindings in the Python API are properly working.
+Test getting the filename corresponding to an analysis unit.
 """
 
 from __future__ import absolute_import, division, print_function
