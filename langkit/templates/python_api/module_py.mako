@@ -765,9 +765,10 @@ class Token(ctypes.Structure):
         return hash(self._identity_tuple)
 
     def __repr__(self):
-        return '<Token {}{}>'.format(
+        return '<Token {}{} at {}>'.format(
             self.kind,
-            ' {}'.format(repr(self.text)) if self.text else ''
+            ' {}'.format(repr(self.text)) if self.text else '',
+            self.sloc_range
         )
 
     def __lt__(self, other):
