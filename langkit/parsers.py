@@ -729,9 +729,15 @@ class Or(Parser):
                 res = common_ancestor(*types)
             else:
                 typs = list(types)
+                ref_type = typs[0]
 
-                assert all(type(t) == type(typs[0]) for t in typs)
-                res = typs[0]
+                check_source_language(
+                    all(t == ref_type for t in typs),
+                    'Alternatives yield incompatible types: {}'.format(
+                        ', '.join(sorted(t.name().camel for t in typs))
+                    )
+                )
+                res = ref_type
 
             self.cached_type = res
             return res
