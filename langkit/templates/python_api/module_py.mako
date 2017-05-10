@@ -744,9 +744,10 @@ class Token(ctypes.Structure):
         Note that this does not actually compares the token data.
         """
         return (other is not None
-                and self._token_data == other._token_data
-                and self._token_index == other._token_index
-                and self._trivia_index == other._trivia_index)
+                and self._identity_tuple == other._identity_tuple)
+
+    def __hash__(self):
+        return hash(self._identity_tuple)
 
     def __repr__(self):
         return '<Token {}{}>'.format(
@@ -759,6 +760,16 @@ class Token(ctypes.Structure):
         Return a dict representation of this Token.
         """
         return {"kind": "Token", "token_kind": self.kind, "text": self.text}
+
+    @property
+    def _identity_tuple(self):
+        """
+        Return a tuple that return a tuple that contains "identity" information
+        for this token. Think of it as a database primary key.
+
+        This property is for internal use only.
+        """
+        return (self._token_data, self._token_index, self._trivia_index)
 
 
 % if ctx.default_unit_provider:
