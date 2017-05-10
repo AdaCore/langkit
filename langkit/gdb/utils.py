@@ -73,13 +73,17 @@ def prop_repr(prop):
     return col(col(prop.name, Colors.RED), Colors.BOLD)
 
 
-def adaify_name(name):
+def adaify_name(context, name):
     """
     Turn a symbol name like a__b into an Ada-like name such as A.B.
+    Also strip the $LIB_NAME.Analysis prefix, if present.
 
     :type name: str
     :rtype: str
     """
+    pfx = context.analysis_prefix
+    if name.startswith(pfx):
+        name = name[len(pfx):]
     chunks = name.split('__')
     return '.'.join(Name.from_lower(c).camel_with_underscores
                     for c in chunks)

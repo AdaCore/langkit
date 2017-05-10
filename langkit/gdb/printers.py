@@ -346,7 +346,8 @@ class ArrayPrettyPrinter(BasePrinter):
 
     def to_string(self):
         return '{} array of length {}'.format(
-            adaify_name(self.element_typename(self.value.type.target().name,
+            adaify_name(self.context,
+                        self.element_typename(self.value.type.target().name,
                                               self.context)),
             self.length
         )
