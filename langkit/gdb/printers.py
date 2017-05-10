@@ -313,10 +313,6 @@ class ArrayPrettyPrinter(BasePrinter):
 
     name = 'Array'
 
-    @staticmethod
-    def typename_prefix(context):
-        return '{}__analysis__'.format(context.lib_name)
-
     typename_suffix = '_array_record'
 
     @classmethod
@@ -326,7 +322,7 @@ class ArrayPrettyPrinter(BasePrinter):
         type name for the element that this array contains. Return None if this
         is not an array.
         """
-        prefix = cls.typename_prefix(context)
+        prefix = context.analysis_prefix
         suffix = cls.typename_suffix
 
         if (struct_typename.startswith(prefix)

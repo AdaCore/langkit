@@ -53,3 +53,13 @@ class Context(object):
         if frame is None:
             frame = gdb.selected_frame()
         return State.decode(self, frame)
+
+    @property
+    def analysis_prefix(self):
+        """
+        Return the prefix for symbols defined in the $.Analysis unit. For
+        instance: "libfoolang__analysis__".
+
+        :rtype: str
+        """
+        return '{}__analysis__'.format(self.lib_name)
