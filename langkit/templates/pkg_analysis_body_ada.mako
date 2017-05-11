@@ -137,6 +137,14 @@ package body ${ada_lib_name}.Analysis is
    --  unit using Init_Parser and replace Unit's AST_Root and the diagnostics
    --  with the parsers's output.
 
+   function Create_Unit
+     (Context           : Analysis_Context;
+      Filename, Charset : String;
+      With_Trivia       : Boolean;
+      Rule              : Grammar_Rule) return Analysis_Unit
+      with Pre => not Has_Unit (Context, Filename);
+   --  Create a new analysis unit and register it in Context
+
    function Get_Unit
      (Context           : Analysis_Context;
       Filename, Charset : String;
@@ -315,6 +323,39 @@ package body ${ada_lib_name}.Analysis is
       end if;
    end Dec_Ref;
 
+   -----------------
+   -- Create_Unit --
+   -----------------
+
+   function Create_Unit
+     (Context           : Analysis_Context;
+      Filename, Charset : String;
+      With_Trivia       : Boolean;
+      Rule              : Grammar_Rule) return Analysis_Unit
+   is
+      Fname : constant Unbounded_String := To_Unbounded_String (Filename);
+      Unit  : Analysis_Unit := new Analysis_Unit_Type'
+        (Context           => Context,
+         Ref_Count         => 1,
+         AST_Root          => null,
+         File_Name         => Fname,
+         Charset           => <>,
+         TDH               => <>,
+         Diagnostics       => <>,
+         With_Trivia       => With_Trivia,
+         Is_Env_Populated  => False,
+         Has_Filled_Caches => False,
+         Rule              => Rule,
+         AST_Mem_Pool      => No_Pool,
+         Destroyables      => Destroyable_Vectors.Empty_Vector,
+         Referenced_Units  => <>,
+         Lex_Env_Data_Acc  => new Lex_Env_Data_Type);
+   begin
+      Initialize (Unit.TDH, Context.Symbols);
+      Context.Units_Map.Insert (Fname, Unit);
+      return Unit;
+   end Create_Unit;
+
    --------------
    -- Get_Unit --
    --------------
@@ -361,24 +402,7 @@ package body ${ada_lib_name}.Analysis is
       --  Create the Analysis_Unit if needed
 
       if Created then
-         Unit := new Analysis_Unit_Type'
-           (Context           => Context,
-            Ref_Count         => 1,
-            AST_Root          => null,
-            File_Name         => Fname,
-            Charset           => <>,
-            TDH               => <>,
-            Diagnostics       => <>,
-            With_Trivia       => With_Trivia,
-            Is_Env_Populated  => False,
-            Has_Filled_Caches => False,
-            Rule              => Rule,
-            AST_Mem_Pool      => No_Pool,
-            Destroyables      => Destroyable_Vectors.Empty_Vector,
-            Referenced_Units  => <>,
-            Lex_Env_Data_Acc  => new Lex_Env_Data_Type);
-         Initialize (Unit.TDH, Context.Symbols);
-         Context.Units_Map.Insert (Fname, Unit);
+         Unit := Create_Unit (Context, Filename, Charset, With_Trivia, Rule);
       else
          Unit := Element (Cur);
       end if;
