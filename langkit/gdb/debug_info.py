@@ -84,6 +84,7 @@ class DebugInfo(object):
         """
         self.properties = []
         scope_stack = []
+        expr_stack = []
 
         for line_no, line in enumerate(f, 1):
             line = line.strip()
@@ -127,6 +128,13 @@ class DebugInfo(object):
                     assert len(ended_scope.subscopes) == 1, (
                         'Properties can have only one sub-scope'
                     )
+                    assert not expr_stack, (
+                        'Some expressions are not done when leaving property'
+                        ' {}: {}'.format(
+                            ended_scope.name,
+                            ', '.join(expr_stack)
+                        )
+                    )
 
             elif d.is_a(BindDirective):
                 if not scope_stack:
@@ -137,14 +145,23 @@ class DebugInfo(object):
             elif d.is_a(ExprStartDirective):
                 if not scope_stack:
                     raise ParseError(line_no, 'no scope for expression')
-                scope_stack[-1].events.append(ExprStart(
-                    d.line_no, d.expr_id, d.expr_repr, d.result_var, d.dsl_sloc
-                ))
+                start_event = ExprStart(d.line_no, d.expr_id, d.expr_repr,
+                                        d.result_var, d.dsl_sloc)
+                scope_stack[-1].events.append(start_event)
+                expr_stack.append(start_event)
 
             elif d.is_a(ExprDoneDirective):
                 if not scope_stack:
                     raise ParseError(line_no, 'no scope for expression')
-                scope_stack[-1].events.append(ExprDone(d.line_no, d.expr_id))
+                done_event = ExprDone(d.line_no, d.expr_id)
+                start_event = expr_stack.pop()
+                assert start_event.expr_id == done_event.expr_id, (
+                    'Mismatching ExprStart/ExprStop events: {} and {}'.format(
+                        start_event, done_event
+                    )
+                )
+                start_event._done_event = done_event
+                scope_stack[-1].events.append(done_event)
 
             else:
                 raise NotImplementedError('Unknown directive: {}'.format(d))
@@ -319,6 +336,18 @@ class ExprStart(Event):
         self.expr_repr = expr_repr
         self.result_var = result_var
         self.dsl_sloc = None if dsl_sloc == 'None' else dsl_sloc
+
+        self._done_event = None
+
+    @property
+    def done_event(self):
+        """
+        Return the ExprDone event that corresponds to `self`.
+
+        :rtype: ExprDone
+        """
+        assert self._done_event
+        return self._done_event
 
     def apply_on_state(self, scope_state):
         assert self.expr_id not in scope_state.expressions

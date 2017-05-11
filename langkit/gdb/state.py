@@ -225,6 +225,10 @@ class ExpressionEvaluation(object):
     def dsl_sloc(self):
         return self.start_event.dsl_sloc
 
+    @property
+    def done_event(self):
+        return self.start_event.done_event
+
     def set_done(self, line_no):
         self.state = self.STATE_DONE
         self.done_at_line = line_no
