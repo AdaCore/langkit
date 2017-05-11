@@ -148,6 +148,8 @@ class DebugInfo(object):
                 start_event = ExprStart(d.line_no, d.expr_id, d.expr_repr,
                                         d.result_var, d.dsl_sloc)
                 scope_stack[-1].events.append(start_event)
+                if expr_stack:
+                    expr_stack[-1].sub_expr_start.append(start_event)
                 expr_stack.append(start_event)
 
             elif d.is_a(ExprDoneDirective):
@@ -337,7 +339,20 @@ class ExprStart(Event):
         self.result_var = result_var
         self.dsl_sloc = None if dsl_sloc == 'None' else dsl_sloc
 
+        self.sub_expr_start = []
+        """
+        :type: list[ExprStart]
+
+        List of ExprStart events that occur before the ExprDone corresponding
+        to `self`.
+        """
+
         self._done_event = None
+        """
+        :type: ExprDone
+
+        Done event corresponding to this ExprStart event.
+        """
 
     @property
     def done_event(self):
