@@ -244,7 +244,10 @@ sub-expression.
 
         # Look for the expression that is being evaluated currently
         state = self.context.decode_state()
-        scope_state, current_expr = self.lookup_current_expr(state)
+        if not state:
+            print('Selected frame is not in a property.')
+
+        scope_state, current_expr = state.lookup_current_expr()
         if not current_expr:
             print('Not evaluating any expression currently')
             return
@@ -266,7 +269,10 @@ sub-expression.
         frame = gdb.selected_frame()
         new_state = self.context.decode_state(frame)
         new_expr = self.lookup_expr(new_state, current_expr.expr_id)
-        _, new_current_expr = self.lookup_current_expr(new_state)
+        if new_state:
+            _, new_current_expr = new_state.lookup_current_expr()
+        else:
+            new_current_expr = None
 
         # Do some sanity checks first...
 
@@ -288,22 +294,6 @@ sub-expression.
         if new_current_expr:
             print('')
             print('Now evaluating {}'.format(expr_repr(new_current_expr)))
-
-    def lookup_current_expr(self, state):
-        """
-        If `state` represents the current evaluation of an expression, return
-        this expression and its scope state. Return (None, None) otherwise.
-
-        :param State state: State to look into.
-        :rtype: (None, None)|(langkit.gdb.state.ScopeState,
-                              langkit.gdb.state.ExpressionEvaluation)
-        """
-        if state:
-            for scope_state in reversed(state.scopes):
-                for e in reversed(scope_state.expressions.values()):
-                    if e.is_started:
-                        return scope_state, e
-        return (None, None)
 
     def lookup_expr(self, state, expr_id):
         """

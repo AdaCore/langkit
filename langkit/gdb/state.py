@@ -68,6 +68,20 @@ class State(object):
         """
         return self.scopes[-1]
 
+    def lookup_current_expr(self):
+        """
+        Return the innermost currently evaluating expression and its scope
+        state. Return (None, None) if there is no evaluating expression.
+
+        :rtype: (None, None)|(langkit.gdb.state.ScopeState,
+                              langkit.gdb.state.ExpressionEvaluation)
+        """
+        for scope_state in reversed(self.scopes):
+            for e in reversed(scope_state.expressions.values()):
+                if e.is_started:
+                    return scope_state, e
+        return (None, None)
+
     @classmethod
     def decode(cls, context, frame):
         """
