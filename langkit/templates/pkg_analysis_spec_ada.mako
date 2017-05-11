@@ -189,6 +189,19 @@ package ${ada_lib_name}.Analysis is
       return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_provider', 3)}
 
+   function Get_With_Error
+     (Context     : Analysis_Context;
+      Filename    : String;
+      Error       : String;
+      Charset     : String := "";
+      With_Trivia : Boolean := False;
+      Rule        : Grammar_Rule :=
+         ${Name.from_lower(ctx.main_rule_name)}_Rule)
+      return Analysis_Unit;
+   --  If an Unit for Filename already exists, return it unchanged. Otherwise,
+   --  create an empty analysis unit for Filename with a diagnostic that
+   --  contains the Error message.
+
    function Unit_Provider
      (Context : Analysis_Context)
       return Unit_Provider_Access_Cst;

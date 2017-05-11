@@ -611,6 +611,41 @@ package body ${ada_lib_name}.Analysis is
 
    % endif
 
+   --------------------
+   -- Get_With_Error --
+   --------------------
+
+   function Get_With_Error
+     (Context     : Analysis_Context;
+      Filename    : String;
+      Error       : String;
+      Charset     : String := "";
+      With_Trivia : Boolean := False;
+      Rule        : Grammar_Rule :=
+         ${Name.from_lower(ctx.main_rule_name)}_Rule)
+      return Analysis_Unit
+   is
+      use Units_Maps;
+
+      Fname : constant Unbounded_String := To_Unbounded_String (Filename);
+      Cur   : constant Cursor := Context.Units_Map.Find (Fname);
+   begin
+      if Cur = No_Element then
+         declare
+            Unit : constant Analysis_Unit :=
+               Create_Unit (Context, Filename, Charset, With_Trivia, Rule);
+            Msg  : constant Text_Type := To_Text (Error);
+         begin
+            Unit.Diagnostics.Append
+              ((Sloc_Range => No_Source_Location_Range,
+                Message    => To_Unbounded_Wide_Wide_String (Msg)));
+            return Unit;
+         end;
+      else
+         return Element (Cur);
+      end if;
+   end Get_With_Error;
+
    ------------
    -- Remove --
    ------------
