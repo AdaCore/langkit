@@ -37,6 +37,12 @@ class State(object):
         nested scope.
         """
 
+        self.started_expressions = []
+        """
+        :type: list[ExpressionEvaluation]
+        Stack of expressions that are being evaluated.
+        """
+
     @classmethod
     def decode(cls, context, frame):
         """
@@ -161,6 +167,9 @@ class ExpressionEvaluation(object):
         self.result_var = result_var
         self.dsl_sloc = dsl_sloc
 
+        self.parent_expr = None
+        self.sub_exprs = []
+
         self.state = self.STATE_START
         self.done_at_line = None
 
@@ -175,6 +184,15 @@ class ExpressionEvaluation(object):
     @property
     def is_done(self):
         return self.state == self.STATE_DONE
+
+    def append_sub_expr(self, expr):
+        """
+        Append `expr` to the list of sub-expressions for `self`. Also set
+        `self` as the parent of `expr`.
+        """
+        assert expr.parent_expr is None
+        self.sub_exprs.append(expr)
+        expr.parent_expr = self
 
     def __repr__(self):
         return '<ExpressionEvaluation {}, {}>'.format(self.expr_id,

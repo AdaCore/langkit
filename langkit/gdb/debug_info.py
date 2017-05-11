@@ -300,12 +300,16 @@ class ExprStart(Event):
 
     def apply_on_state(self, scope_state):
         assert self.expr_id not in scope_state.expressions
-        scope_state.expressions[self.expr_id] = ExpressionEvaluation(
+        expr = ExpressionEvaluation(
             self.expr_id,
             self.expr_repr,
             self.result_var,
             self.dsl_sloc
         )
+        scope_state.expressions[self.expr_id] = expr
+        if scope_state.state.started_expressions:
+            scope_state.state.started_expressions[-1].append_sub_expr(expr)
+        scope_state.state.started_expressions.append(expr)
 
     def __repr__(self):
         return '<ExprStart {}, line {}>'.format(self.expr_id, self.line_no)
@@ -317,7 +321,14 @@ class ExprDone(Event):
         self.expr_id = expr_id
 
     def apply_on_state(self, scope_state):
-        scope_state.expressions[self.expr_id].set_done(self.line_no)
+        expr = scope_state.expressions[self.expr_id]
+
+        pop = scope_state.state.started_expressions.pop()
+        assert pop == expr, (
+            'Expressions are not properly nested: {} is done before {}'
+            ' is'.format(expr, pop)
+        )
+        expr.set_done(self.line_no)
 
     def __repr__(self):
         return '<ExprDone {}, line {}>'.format(self.expr_id, self.line_no)
