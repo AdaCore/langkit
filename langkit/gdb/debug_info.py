@@ -120,6 +120,13 @@ class DebugInfo(object):
                 ended_scope.line_range.last_line = d.line_no
                 if scope_stack:
                     scope_stack[-1].events.append(ended_scope)
+                else:
+                    assert isinstance(ended_scope, Property), (
+                        'Top-level scopes must all be properties'
+                    )
+                    assert len(ended_scope.subscopes) == 1, (
+                        'Properties can have only one sub-scope'
+                    )
 
             elif d.is_a(BindDirective):
                 if not scope_stack:
