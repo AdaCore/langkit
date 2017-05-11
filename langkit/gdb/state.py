@@ -57,7 +57,7 @@ class State(object):
 
         # Create the result, add the property root scope
         result = cls(prop)
-        root_scope_state = ScopeState(None, prop)
+        root_scope_state = ScopeState(result, None, prop)
         result.scopes.append(root_scope_state)
 
         def build_scope_state(scope_state):
@@ -72,7 +72,8 @@ class State(object):
                     if event.line_range.first_line > line_no:
                         break
                     elif line_no in event.line_range:
-                        sub_scope_state = ScopeState(scope_state, event)
+                        sub_scope_state = ScopeState(result, scope_state,
+                                                     event)
                         result.scopes.append(sub_scope_state)
                         build_scope_state(sub_scope_state)
                         break
@@ -86,7 +87,12 @@ class ScopeState(object):
     Holder for the execution state of a specific scope in a property.
     """
 
-    def __init__(self, parent, scope):
+    def __init__(self, state, parent, scope):
+        self.state = state
+        """
+        :type: State
+        """
+
         self.parent = parent
         """
         :type: None|ScopeState
