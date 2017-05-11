@@ -249,6 +249,21 @@ class Scope(object):
     def subscopes(self):
         return [e for e in self.events if isinstance(e, Scope)]
 
+    def iter_events(self, recursive=True):
+        """
+        Iterate through all events in this scope and, if `recursive`, all
+        sub-scopes. Events are yielded in source order.
+
+        :rtype: iter[Event]
+        """
+        for e in self.events:
+            if isinstance(e, Scope):
+                if recursive:
+                    for sub_e in e.iter_events():
+                        yield sub_e
+            else:
+                yield e
+
     def __repr__(self):
         return '<{}{} {}>'.format(
             type(self).__name__,
