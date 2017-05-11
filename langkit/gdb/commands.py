@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
+import itertools
 
 import gdb
 
@@ -227,6 +228,61 @@ class BreakCommand(BaseCommand):
             m, = matches
             gdb.Breakpoint('{}:{}'.format(self.context.debug_info.filename,
                                           m.line_no))
+
+
+class NextCommand(BaseCommand):
+    """Continue execution until reaching another expression."""
+
+    def __init__(self, context):
+        super(NextCommand, self).__init__(context, 'next', gdb.COMMAND_RUNNING)
+
+    def invoke(self, arg, from_tty):
+        if arg:
+            print('This command takes no argument')
+            return
+
+        state = self.context.decode_state()
+        if not state:
+            print('Selected frame is not in a property.')
+
+        scope_state, current_expr = state.lookup_current_expr()
+
+        if current_expr is None:
+            # There are only two possible causes for no currently evaluating
+            # expressions: either the property just started (root expression
+            # evaluation is ahead), either it is about to return (root expr.
+            # eval. is behind).
+            events = itertools.ifilter(
+                lambda e: isinstance(e, ExprStart),
+                state.property_scope.scope.iter_events()
+            )
+            root_expr = next(iter(events))
+            if state.line_no < root_expr.line_no:
+                # The first expression is ahead: resume execution until we
+                # reach it.
+                gdb.execute('until {}'.format(root_expr.line_no))
+            else:
+                print('Cannot resume execution: {} is about to return'.format(
+                    state.property.name
+                ))
+
+        else:
+            # Depending on the control flow behavior of the currently running
+            # expression, the next step can be either its parent expression or
+            # any of its sub-expressions.
+            next_slocs_candidates = []
+
+            # First look for the point where the current expression terminates
+            # its evaluation.
+            next_slocs_candidates.append(current_expr.done_event.line_no)
+
+            # Now look for the starting point for all sub-expressions
+            for subexpr in current_expr.start_event.sub_expr_start:
+                next_slocs_candidates.append(subexpr.line_no)
+
+            # TODO: create one breakpoint per next sloc candidate and continue
+            # execution until we reach one.
+            print(next_slocs_candidates)
 
 
 class OutCommand(BaseCommand):
