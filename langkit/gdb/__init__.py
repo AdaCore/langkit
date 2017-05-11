@@ -12,6 +12,18 @@ from langkit.gdb.context import Context
 
 setup_done = False
 gdb_printers = None
+global_context = None
+
+
+def get_current_gdb_context():
+    """
+    This function is meant to be called from a running gdb instance. It will
+    return the relevant Context instance depending on the code being executed.
+
+    :rtype: Context
+    """
+    global global_context
+    return global_context
 
 
 def setup(lib_name, astnode_names, prefix):
@@ -19,10 +31,11 @@ def setup(lib_name, astnode_names, prefix):
     Register helpers in GDB internals. This should be run when the generated
     library is actually loaded in GDB.
     """
-    global setup_done, gdb_printers
+    global setup_done, gdb_printers, global_context
     setup_done = True
 
     context = Context(lib_name, astnode_names, prefix)
+    global_context = context
 
     gdb_printers = printers.GDBPrettyPrinters(context)
     for printer in [
