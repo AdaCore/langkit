@@ -50,6 +50,24 @@ class State(object):
         this state was decoded.
         """
 
+    @property
+    def property_scope(self):
+        """
+        Return the ScopeState associated to the running property.
+
+        :rtype: ScopeState
+        """
+        return self.scopes[0]
+
+    @property
+    def innermost_scope(self):
+        """
+        Return the ScopeState associated to the innermost activated scope.
+
+        :rtype: ScopeState
+        """
+        return self.scopes[-1]
+
     @classmethod
     def decode(cls, context, frame):
         """
