@@ -322,12 +322,7 @@ class ExprStart(Event):
 
     def apply_on_state(self, scope_state):
         assert self.expr_id not in scope_state.expressions
-        expr = ExpressionEvaluation(
-            self.expr_id,
-            self.expr_repr,
-            self.result_var,
-            self.dsl_sloc
-        )
+        expr = ExpressionEvaluation(self)
         scope_state.expressions[self.expr_id] = expr
         if scope_state.state.started_expressions:
             scope_state.state.started_expressions[-1].append_sub_expr(expr)

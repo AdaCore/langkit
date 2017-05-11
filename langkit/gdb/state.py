@@ -200,17 +200,30 @@ class ExpressionEvaluation(object):
     available for use in the result variable, if there is one.
     """
 
-    def __init__(self, expr_id, expr_repr, result_var=None, dsl_sloc=None):
-        self.expr_id = expr_id
-        self.expr_repr = expr_repr
-        self.result_var = result_var
-        self.dsl_sloc = dsl_sloc
+    def __init__(self, start_event):
+        self.start_event = start_event
 
         self.parent_expr = None
         self.sub_exprs = []
 
         self.state = self.STATE_START
         self.done_at_line = None
+
+    @property
+    def expr_id(self):
+        return self.start_event.expr_id
+
+    @property
+    def expr_repr(self):
+        return self.start_event.expr_repr
+
+    @property
+    def result_var(self):
+        return self.start_event.result_var
+
+    @property
+    def dsl_sloc(self):
+        return self.start_event.dsl_sloc
 
     def set_done(self, line_no):
         self.state = self.STATE_DONE
