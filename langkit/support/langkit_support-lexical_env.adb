@@ -241,8 +241,9 @@ package body Langkit_Support.Lexical_Env is
          Result.Rebindings (J) := L.Rebindings (J);
          Inc_Ref (Result.Rebindings (J));
       end loop;
+
       for J in 1 .. R.Size loop
-         Result.Rebindings (J + L.Size + 1) := R.Rebindings (J);
+         Result.Rebindings (J + L.Size) := R.Rebindings (J);
          Inc_Ref (Result.Rebindings (J));
       end loop;
 
