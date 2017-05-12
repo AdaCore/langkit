@@ -147,18 +147,21 @@ class ScopeState(object):
         self.scope = scope
         """
         :type: langkit.gdb.debug_info.Scope
+
         The scope of interest.
         """
 
         self.bindings = []
         """
         :type: list[Binding]
+
         Bindings that are live in this state.
         """
 
         self.expressions = OrderedDict()
         """
         :type: dict[str, ExpressionEvaluation]
+
         Expressions that are currently being evaluated or that are evaluated in
         this state, indexed by unique ids.
         """
