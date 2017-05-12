@@ -31,7 +31,8 @@ class State(object):
         self.scopes = []
         """
         :type: list[ScopeState]
-        The list of scope state to describe the current execution state. The
+
+        The stack of scope states describing the current execution state. The
         first item is the scope for the property itself. The following items
         are the nested scopes currently activated. The last item is the most
         nested scope.
