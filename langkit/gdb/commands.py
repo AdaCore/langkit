@@ -1,12 +1,15 @@
 from __future__ import absolute_import, division, print_function
 
 from collections import namedtuple
+from functools import partial
 import itertools
+from StringIO import StringIO
 
 import gdb
 
 from langkit.gdb.debug_info import DSLLocation, ExprDone, ExprStart, Scope
 from langkit.gdb.utils import expr_repr, name_repr, prop_repr
+from langkit.utils import no_colors
 
 
 class BaseCommand(gdb.Command):
@@ -71,23 +74,32 @@ class StatePrinter(object):
 
         self.with_ellipsis = True
         self.with_locs = False
+        self.sio = StringIO()
 
-    def run(self):
+    def _render(self):
+        """
+        Internal render method for the state printer.
+        """
+
+        # We rebind print to print to our StringIO instance for the scope of
+        # this method.
+        prn = partial(print, file=self.sio)
+
         if self.state is None:
-            print('Selected frame is not in a property.')
+            prn('Selected frame is not in a property.')
             return
 
-        print('Running {}'.format(prop_repr(self.state.property)))
-        print('from {}'.format(self.state.property.dsl_sloc))
+        prn('Running {}'.format(prop_repr(self.state.property)))
+        prn('from {}'.format(self.state.property.dsl_sloc))
 
         for scope_state in self.state.scopes:
             is_first = [True]
 
-            def print_info(*args, **kwargs):
+            def print_info(strn):
                 if is_first[0]:
-                    print('')
+                    prn('')
                     is_first[0] = False
-                print(*args, **kwargs)
+                prn(strn)
 
             for b in scope_state.bindings:
                 print_info('{}{} = {}'.format(
@@ -121,6 +133,23 @@ class StatePrinter(object):
                 ))
                 if last_started.dsl_sloc:
                     print_info('from {}'.format(last_started.dsl_sloc))
+
+    def run(self):
+        """
+        Output the state to stdout.
+        """
+        self._render()
+        print(self.sio.getvalue())
+
+    def render(self):
+        """
+        Return the state as a string.
+
+        :rtype: str
+        """
+        with no_colors():
+            self._render()
+        return self.sio.getvalue()
 
     def loc_image(self, var_name):
         """
