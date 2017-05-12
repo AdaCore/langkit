@@ -6,6 +6,7 @@ find in the standard library.
 
 from __future__ import absolute_import, division, print_function
 
+from contextlib import contextmanager
 from copy import copy
 import inspect
 from itertools import takewhile
@@ -100,6 +101,8 @@ class Colors(object):
     WARNING = YELLOW
     FAIL = RED
 
+    _enabled = True
+
     @classmethod
     def disable_colors(cls):
         """
@@ -119,6 +122,16 @@ if not gdb and (not sys.stdout.isatty() or not sys.stderr.isatty()):
     Colors.disable_colors()
 
 
+@contextmanager
+def no_colors():
+    """
+    Context manager to disable colors for a given scope.
+    """
+    old_val, Colors._enabled = Colors._enabled, False
+    yield
+    Colors._enabled = old_val
+
+
 def col(msg, color):
     """
     Utility function that return a string colored with the proper escape
@@ -129,7 +142,10 @@ def col(msg, color):
         one in the Colors class.
     :rtype: str
     """
-    return "{0}{1}{2}".format(color, msg, Colors.ENDC)
+    if Colors._enabled:
+        return "{0}{1}{2}".format(color, msg, Colors.ENDC)
+    else:
+        return msg
 
 
 def printcol(msg, color):
