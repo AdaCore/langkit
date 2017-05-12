@@ -2892,7 +2892,7 @@ package body ${ada_lib_name}.Analysis is
    function Children_Env
      (Node : access ${root_node_value_type}'Class;
       E_Info : Entity_Info := No_Entity_Info) return Lexical_Env
-   is (Node.Self_Env);
+   is (Rebind_Env (Node.Self_Env, E_Info));
 
    --------------
    -- Node_Env --
@@ -2901,7 +2901,7 @@ package body ${ada_lib_name}.Analysis is
    function Node_Env
      (Node : access ${root_node_value_type};
       E_Info : Entity_Info := No_Entity_Info) return AST_Envs.Lexical_Env
-   is (Node.Self_Env);
+   is (Rebind_Env (Node.Self_Env, E_Info));
 
    ## Generate the bodies of the root grammar class properties
    % for prop in T.root_node.get_properties(include_inherited=False):
