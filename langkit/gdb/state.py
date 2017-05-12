@@ -159,7 +159,7 @@ class ScopeState(object):
         """
         :type: dict[str, ExpressionEvaluation]
         Expressions that are currently being evaluated or that are evaluated in
-        this state.
+        this state, indexed by unique ids.
         """
 
 
