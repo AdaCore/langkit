@@ -707,6 +707,36 @@ package body Langkit_Support.Lexical_Env is
          Simple_Env_Getter (To_Rebind), Simple_Env_Getter (Rebind_To));
    end Rebind_Env;
 
+   ----------------
+   -- Rebind_Env --
+   ----------------
+
+   function Rebind_Env
+     (Base_Env            : Lexical_Env;
+      E_Info              : Entity_Info) return Lexical_Env
+   is
+   begin
+      --  If no info was passed, just return the original base env.
+      if E_Info = No_Entity_Info then
+         return Base_Env;
+      end if;
+
+      return N : constant Lexical_Env :=
+        new Lexical_Env_Type'
+          (Parent                     => No_Env_Getter,
+           Node                       => No_Element,
+           Referenced_Envs            => <>,
+           Transitive_Referenced_Envs => <>,
+           Env                        => null,
+           Default_MD                 => Empty_Metadata,
+           Rebindings                 =>
+             Combine (Base_Env.Rebindings, E_Info.Rebindings),
+           Ref_Count                  => 1)
+      do
+         Transitive_Reference (N, Base_Env);
+      end return;
+   end Rebind_Env;
+
    -------------
    -- Destroy --
    -------------
