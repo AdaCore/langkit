@@ -166,6 +166,30 @@ class ScopeState(object):
         this state, indexed by unique ids.
         """
 
+    def sorted_expressions(self):
+        """
+        Return a tuple, whose first element is the list of already evaluated
+        expressions in this scope, sorted by line, and second element is the
+        currently evaluating expression.
+
+        :rtype: (list[ExpressionEvaluation], ExpressionEvaluation)
+        """
+
+        done_exprs = []
+        last_started = None
+        for e in self.expressions.values():
+            if e.is_started:
+                last_started = e
+            elif e.is_done:
+                done_exprs.append(e)
+
+        # Sort expressions whose evaluation is completed by "done location"
+        # so that users see them in the order they saw evaluation
+        # happening.
+        done_exprs.sort(key=lambda e: e.done_at_line)
+
+        return done_exprs, last_started
+
 
 class Binding(object):
     """

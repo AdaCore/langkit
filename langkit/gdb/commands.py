@@ -108,18 +108,8 @@ class StatePrinter(object):
                     self.value_image(b.gen_name)
                 ))
 
-            done_exprs = []
-            last_started = None
-            for e in scope_state.expressions.values():
-                if e.is_started:
-                    last_started = e
-                elif e.is_done:
-                    done_exprs.append(e)
+            done_exprs, last_started = scope_state.sorted_expressions()
 
-            # Sort expressions whose evaluation is completed by "done location"
-            # so that users see them in the order they saw evaluation
-            # happening.
-            done_exprs.sort(key=lambda e: e.done_at_line)
             for e in done_exprs:
                 print_info('{}{} -> {}'.format(
                     expr_repr(e),
