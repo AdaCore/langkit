@@ -169,8 +169,8 @@ class ScopeState(object):
     def sorted_expressions(self):
         """
         Return a tuple, whose first element is the list of already evaluated
-        expressions in this scope, sorted by line, and second element is the
-        currently evaluating expression.
+        expressions in this scope, sorted by line of done, and second element
+        is the currently evaluating expression.
 
         :rtype: (list[ExpressionEvaluation], ExpressionEvaluation)
         """
