@@ -304,12 +304,23 @@ class NextCommand(BaseCommand):
 
             new_state = self.context.decode_state()
             if new_state:
+                _, new_current_expr = new_state.lookup_current_expr()
                 new_expr = new_state.lookup_expr(current_expr.expr_id)
+            else:
+                new_current_expr = None
+
+            # If we just finished the evaluation of an expression, display its
+            # value.
             if new_expr and new_expr.is_done:
                 print('{} evaluated to {}'.format(
                     expr_repr(new_expr),
                     new_expr.read(new_state.frame)
                 ))
+
+            # Display the expression of most interest, if any
+            if new_current_expr:
+                print('')
+                print('Now evaluating {}'.format(expr_repr(new_current_expr)))
 
 
 class OutCommand(BaseCommand):
