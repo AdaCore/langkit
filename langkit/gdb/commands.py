@@ -282,9 +282,7 @@ class NextCommand(BaseCommand):
                 # reach it.
                 gdb.execute('until {}'.format(root_expr.line_no))
             else:
-                print('Cannot resume execution: {} is about to return'.format(
-                    prop_repr(state.property)
-                ))
+                gdb.execute('finish')
 
         else:
             # Depending on the control flow behavior of the currently running
