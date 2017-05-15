@@ -41,12 +41,14 @@ class State(object):
         self.started_expressions = []
         """
         :type: list[ExpressionEvaluation]
+
         Stack of expressions that are being evaluated.
         """
 
         self.line_no = line_no
         """
         :type: int
+
         The line number in the generated source code where execution was when
         this state was decoded.
         """
