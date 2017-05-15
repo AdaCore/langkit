@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function
 
 import gdb
 
-from langkit.gdb import commands, printers
+from langkit.gdb import commands, functions, printers
 from langkit.gdb.context import Context
 
 
@@ -63,6 +63,8 @@ def setup(lib_name, astnode_names, prefix):
         commands.OutCommand,
     ]:
         cmd_cls(context)
+
+    functions.Match(context)
 
 
 def handle_new_objfile(objfile, lib_name):
