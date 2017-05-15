@@ -716,7 +716,8 @@ package body Langkit_Support.Lexical_Env is
       E_Info              : Entity_Info) return Lexical_Env
    is
    begin
-      --  If no info was passed, just return the original base env.
+      --  If no info was passed, just return the original base env
+
       if E_Info = No_Entity_Info then
          return Base_Env;
       end if;
