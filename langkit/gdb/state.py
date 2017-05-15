@@ -287,6 +287,18 @@ class ExpressionEvaluation(object):
         self.sub_exprs.append(expr)
         expr.parent_expr = self
 
+    def read(self, frame):
+        """
+        Read the value of this expression in the given GDB frame.
+
+        This is valid iff this expression is done.
+
+        :type frame: gdb.Frame
+        :rtype: gdb.Value
+        """
+        assert self.is_done
+        return frame.read_var(self.result_var.lower())
+
     def __repr__(self):
         return '<ExpressionEvaluation {}, {}>'.format(self.expr_id,
                                                       self.dsl_sloc)

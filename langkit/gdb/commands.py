@@ -362,10 +362,8 @@ sub-expression.
             return error('the expression is not evaluated yet')
 
         print('')
-        print('{} evaluated to: {}'.format(
-            expr_repr(current_expr),
-            frame.read_var(new_expr.result_var.lower())
-        ))
+        print('{} evaluated to: {}'.format(expr_repr(current_expr),
+                                           new_expr.read(new_state.frame)))
         if new_current_expr:
             print('')
             print('Now evaluating {}'.format(expr_repr(new_current_expr)))
