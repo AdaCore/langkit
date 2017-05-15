@@ -264,6 +264,7 @@ class NextCommand(BaseCommand):
         state = self.context.decode_state()
         if not state:
             print('Selected frame is not in a property.')
+            return
 
         scope_state, current_expr = state.lookup_current_expr()
 
