@@ -303,6 +303,15 @@ class NextCommand(BaseCommand):
             BreakpointGroup(self.context, next_slocs_candidates)
             gdb.execute('continue')
 
+            new_state = self.context.decode_state()
+            if new_state:
+                new_expr = new_state.lookup_expr(current_expr.expr_id)
+            if new_expr and new_expr.is_done:
+                print('{} evaluated to {}'.format(
+                    expr_repr(new_expr),
+                    new_expr.read(new_state.frame)
+                ))
+
 
 class OutCommand(BaseCommand):
     """Continue execution until the end of the evaluation of the current

@@ -92,6 +92,19 @@ class State(object):
                     return scope_state, e
         return (None, None)
 
+    def lookup_expr(self, expr_id):
+        """
+        Look for an expression evaluation matching the given ID.
+
+        :type expr_id: str
+        :rtype: None|ExpressionEvaluation
+        """
+        for scope in self.scopes:
+            try:
+                return scope.expressions[expr_id]
+            except KeyError:
+                pass
+
     @classmethod
     def decode(cls, context, frame):
         """
