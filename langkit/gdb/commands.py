@@ -7,6 +7,7 @@ from StringIO import StringIO
 
 import gdb
 
+from langkit.gdb.breakpoints import BreakpointGroup
 from langkit.gdb.debug_info import DSLLocation, ExprDone, ExprStart, Scope
 from langkit.gdb.utils import expr_repr, name_repr, prop_repr
 from langkit.utils import no_colors
@@ -299,9 +300,8 @@ class NextCommand(BaseCommand):
             for subexpr in current_expr.start_event.sub_expr_start:
                 next_slocs_candidates.append(subexpr.line_no)
 
-            # TODO: create one breakpoint per next sloc candidate and continue
-            # execution until we reach one.
-            print(next_slocs_candidates)
+            BreakpointGroup(self.context, next_slocs_candidates)
+            gdb.execute('continue')
 
 
 class OutCommand(BaseCommand):
