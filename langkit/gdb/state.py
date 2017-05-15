@@ -21,7 +21,14 @@ class State(object):
     Holder for the execution state of a property.
     """
 
-    def __init__(self, line_no, prop):
+    def __init__(self, frame, line_no, prop):
+        self.frame = frame
+        """
+        :type: gdb.Frame
+
+        The GDB frame from which this state was decoded.
+        """
+
         self.property = prop
         """
         :type: langkit.gdb.debug_info.Property
@@ -104,7 +111,7 @@ class State(object):
             return None
 
         # Create the result, add the property root scope
-        result = cls(line_no, prop)
+        result = cls(frame, line_no, prop)
         root_scope_state = ScopeState(result, None, prop)
         result.scopes.append(root_scope_state)
 
