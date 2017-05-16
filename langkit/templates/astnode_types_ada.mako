@@ -595,10 +595,7 @@
          begin
             for N of Ref_Env_Nodes.Items loop
                if N /= null then
-                  if N.Unit /= Self.Unit
-                     or else Self.Self_Env.Node = null
-                     or else Self.Self_Env.Node.Unit /= N.Unit
-                  then
+                  if N.Unit /= Self.Unit then
                      raise Property_Error with
                         "attempt to add a referenced environment to a foreign"
                         & " unit";
