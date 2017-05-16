@@ -277,8 +277,15 @@ class NextCommand(BaseCommand):
                 lambda e: isinstance(e, ExprStart),
                 state.property_scope.scope.iter_events()
             )
-            root_expr = next(iter(events))
-            if state.line_no < root_expr.line_no:
+            try:
+                root_expr = next(iter(events))
+            except StopIteration:
+                # This function has no computing expression: just finish it.
+                # For instance, this happens when properties return a constant
+                # boolean.
+                root_expr = None
+
+            if root_expr and state.line_no < root_expr.line_no:
                 # The first expression is ahead: resume execution until we
                 # reach it.
                 gdb.execute('until {}'.format(root_expr.line_no))
