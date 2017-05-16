@@ -221,7 +221,7 @@ package body ${ada_lib_name}.Analysis is
    ------------
 
    function Create
-     (Charset : String := ${string_repr(ctx.default_charset)}
+     (Charset : String := Default_Charset
       % if ctx.default_unit_provider:
          ; Unit_Provider : Unit_Provider_Access_Cst := null
       % endif

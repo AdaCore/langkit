@@ -92,6 +92,8 @@ package ${ada_lib_name}.Analysis is
 
    No_Token : constant Token_Type;
 
+   Default_Charset : constant String := ${string_repr(ctx.default_charset)};
+
    --------------------
    -- Unit providers --
    --------------------
@@ -137,7 +139,7 @@ package ${ada_lib_name}.Analysis is
    ---------------------------------
 
    function Create
-     (Charset : String := ${string_repr(ctx.default_charset)}
+     (Charset : String := Default_Charset
       % if ctx.default_unit_provider:
          ; Unit_Provider : Unit_Provider_Access_Cst := null
       % endif
