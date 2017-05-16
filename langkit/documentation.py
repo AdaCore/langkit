@@ -148,12 +148,8 @@ base_langkit_docs = {
         Charset will be used as a default charset to decode input sources in
         analysis units. Please see GNATCOLL.Iconv for a couple of supported
         charsets. Be careful: passing an unsupported charset here is not
-        guaranteed to raise an error here.
-
-        % if lang != 'ada':
-            If no charset is provided, take ${ctx.default_charset} as the
-            default.
-        % endif
+        guaranteed to raise an error here.  If no charset is provided, take
+        ${ctx.default_charset} as the default.
 
         ${TODO} Passing an unsupported charset here is not guaranteed to raise
         an error right here, but this would be really helpful for users.

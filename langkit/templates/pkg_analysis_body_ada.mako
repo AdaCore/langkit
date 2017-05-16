@@ -233,14 +233,16 @@ package body ${ada_lib_name}.Analysis is
             then ${ctx.default_unit_provider.fqn}
             else Unit_Provider);
       % endif
-      Symbols : constant Symbol_Table := Create;
-      Ret : Analysis_Context;
+      Actual_Charset : constant String :=
+        (if Charset = "" then Default_Charset else Charset);
+      Symbols        : constant Symbol_Table := Create;
+      Ret            : Analysis_Context;
    begin
       Ret := new Analysis_Context_Type'
         (Ref_Count  => 1,
          Units_Map  => <>,
          Symbols    => Symbols,
-         Charset    => To_Unbounded_String (Charset),
+         Charset    => To_Unbounded_String (Actual_Charset),
          Root_Scope => AST_Envs.Create
                          (Parent        => AST_Envs.No_Env_Getter,
                           Node          => null,
