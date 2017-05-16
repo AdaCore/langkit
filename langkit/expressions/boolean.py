@@ -346,7 +346,8 @@ class If(AbstractExpression):
         if else_then.type != rtype:
             else_then = Cast.Expr(else_then, rtype)
 
-        return If.Expr(construct(self.cond, BoolType), then, else_then, rtype)
+        return If.Expr(construct(self.cond, BoolType), then, else_then, rtype,
+                       abstract_expr=self)
 
     def __repr__(self):
         return '<If>'
