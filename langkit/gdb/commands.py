@@ -173,6 +173,11 @@ class BreakCommand(BaseCommand):
 
     * A DSL source location; for instance, in spec.py, line 128::
           break spec.py:128
+
+In both cases, one can pass an expression to make the breakpoint conditional.
+For instance::
+
+    break MyNode.p_property if $match("<Node XXX>", self)
 """
 
     def __init__(self, context):
@@ -180,12 +185,37 @@ class BreakCommand(BaseCommand):
                                            gdb.COMMAND_BREAKPOINTS)
 
     def invoke(self, arg, from_tty):
-        spec = arg.strip()
+        argv = arg.strip().split(None, 2)
 
-        if ':' in spec:
-            self.break_on_dsl_sloc(spec)
+        spec = None
+        cond = None
+
+        if len(argv) == 0:
+            print('Breakpoint specification missing')
+            return
+
+        elif len(argv) == 1:
+            spec,  = argv
+
+        elif len(argv) == 3:
+            spec, if_kwd, cond = argv
+            if if_kwd != 'if':
+                print('Invalid arguments (second arg should be "if")')
+                return
+
         else:
-            self.break_on_property(spec)
+            print('Invalid number of arguments')
+            return
+
+        bp = (self.break_on_dsl_sloc(spec)
+              if ':' in spec else
+              self.break_on_property(spec))
+        if cond:
+            try:
+                bp.condition = cond
+            except gdb.error as exc:
+                print(exc)
+                return
 
     def break_on_property(self, qualname):
         """
@@ -211,7 +241,7 @@ class BreakCommand(BaseCommand):
 
         # Break on the first line of the property's first inner scope so that
         # we skip the prologue (all variable declarations).
-        gdb.Breakpoint('{}:{}'.format(
+        return gdb.Breakpoint('{}:{}'.format(
             self.context.debug_info.filename,
             scopes[0].line_range.first_line
         ))
@@ -246,8 +276,9 @@ class BreakCommand(BaseCommand):
                 print('  In {}, {}'.format(m.prop.name, m.dsl_sloc))
         else:
             m, = matches
-            gdb.Breakpoint('{}:{}'.format(self.context.debug_info.filename,
-                                          m.line_no))
+            return gdb.Breakpoint('{}:{}'.format(
+                self.context.debug_info.filename, m.line_no
+            ))
 
 
 class NextCommand(BaseCommand):
