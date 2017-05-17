@@ -118,9 +118,12 @@ class ASTNodePrinter(BasePrinter):
 
     @classmethod
     def matches(cls, value, context):
-        return (value.type.code == gdb.TYPE_CODE_PTR
-                and value.type.target().code == gdb.TYPE_CODE_STRUCT
-                and (value.type.target().name
+        t = value.type
+        while t.code == gdb.TYPE_CODE_TYPEDEF:
+            t = t.target()
+        return (t.code == gdb.TYPE_CODE_PTR
+                and t.target().code == gdb.TYPE_CODE_STRUCT
+                and (t.target().name
                      in context.astnode_struct_names))
 
     @property
