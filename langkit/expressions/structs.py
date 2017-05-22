@@ -98,9 +98,9 @@ class Cast(AbstractExpression):
             )
         )
 
-        check_source_language(expr.type != self.dest_type, (
-            'Casting to the same type'
-        ), severity=Severity.warning)
+        check_source_language(expr.type != self.dest_type,
+                              'Casting to the same type',
+                              severity=Severity.warning)
 
         return Cast.Expr(expr, self.dest_type, do_raise=self.do_raise,
                          abstract_expr=self)
