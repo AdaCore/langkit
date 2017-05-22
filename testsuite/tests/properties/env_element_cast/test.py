@@ -41,6 +41,10 @@ class Literal(FooNode):
 
     c = Property(Self.b.el, public=True)
 
+    d = Property(Self.a.cast(BarNode),
+                 type=BarNode.entity(),
+                 public=True)
+
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
