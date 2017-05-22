@@ -89,20 +89,25 @@ class Cast(AbstractExpression):
 
         :rtype: Cast.Expr
         """
-        expr = construct(
-            self.expr,
-            lambda t: self.dest_type.matches(t) or t.matches(self.dest_type),
-            'Cannot cast {{expr_type}} to {}: only (up/down)casting is '
-            'allowed'.format(
-                self.dest_type.name().camel
-            )
+        expr = construct(self.expr)
+        t = expr.type
+
+        dest_type = (self.dest_type.entity()
+                     if t.is_entity_type and not self.dest_type.is_entity_type
+                     else self.dest_type)
+
+        check_source_language(
+            dest_type.matches(t) or t.matches(dest_type),
+            'Cannot cast {} to {}: only (up/down)casting is '
+            'allowed'.format(t.name().camel,
+                             dest_type.name().camel)
         )
 
-        check_source_language(expr.type != self.dest_type,
+        check_source_language(expr.type != dest_type,
                               'Casting to the same type',
                               severity=Severity.warning)
 
-        return Cast.Expr(expr, self.dest_type, do_raise=self.do_raise,
+        return Cast.Expr(expr, dest_type, do_raise=self.do_raise,
                          abstract_expr=self)
 
     def __repr__(self):
