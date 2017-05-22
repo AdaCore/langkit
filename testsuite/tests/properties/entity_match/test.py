@@ -42,6 +42,14 @@ class Literal(FooNode):
         public=True
     )
 
+    c = Property(
+        Self.a.match(
+            lambda b=BarNode: b.get_num,
+            lambda c=FooNode: c.get_num,
+        ),
+        public=True
+    )
+
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
