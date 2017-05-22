@@ -870,12 +870,7 @@ class Match(AbstractExpression):
         for i, (typ, _, _) in enumerate(self.matchers, 1):
             t_name = 'default one' if typ is None else typ.name().camel
 
-            if is_entity and typ:
-                check_source_language(
-                    typ.is_entity_type,
-                    "Match expression on an entity, should match entity "
-                    "types"
-                )
+            if typ and typ.is_entity_type:
                 typ = typ.el_type
 
             check_source_language(not type_set.include(typ or input_type),
@@ -909,6 +904,7 @@ class Match(AbstractExpression):
         # for proper ref-counting.
         matched_expr = SavedExpr('Match_Prefix', construct(self.matched_expr))
         matched_var = matched_expr.result_var.ref_expr
+        is_entity = matched_expr.type.is_entity_type
 
         check_source_language(issubclass(matched_expr.type, ASTNode)
                               or matched_expr.type.is_entity_type,
@@ -921,6 +917,11 @@ class Match(AbstractExpression):
 
         # * all matchers must target allowed types, i.e. input type subclasses;
         for typ, var, expr in self.matchers:
+            if is_entity and typ and not typ.is_entity_type:
+                typ = typ.entity()
+                var._type = typ
+                var.local_var.type = typ
+
             if typ is not None:
                 check_source_language(
                     typ.matches(matched_expr.type),
