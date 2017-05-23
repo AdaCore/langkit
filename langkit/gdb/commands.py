@@ -20,10 +20,11 @@ class BaseCommand(gdb.Command):
 
     def __init__(self, context, basename, command_class,
                  completer_class=gdb.COMPLETE_NONE):
-        super(BaseCommand, self).__init__(
-            '{}{}'.format(context.prefix, basename),
-            command_class, completer_class
-        )
+        kwargs = {'name': '{}{}'.format(context.prefix, basename),
+                  'command_class': command_class}
+        if completer_class is not None:
+            kwargs['completer_class'] = completer_class
+        super(BaseCommand, self).__init__(**kwargs)
         self.context = context
 
 
