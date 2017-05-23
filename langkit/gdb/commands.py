@@ -183,7 +183,19 @@ For instance::
 
     def __init__(self, context):
         super(BreakCommand, self).__init__(context, 'break',
-                                           gdb.COMMAND_BREAKPOINTS)
+                                           gdb.COMMAND_BREAKPOINTS, None)
+
+    def complete(self, text, word):
+        """
+        Try to complete `word`.
+
+        Assuming `word` is the start of a property qualified name, return all
+        possible completions. This is case insensitive, for user convenience.
+        """
+        prefix = word.lower()
+        result = [prop.name for prop in self.context.debug_info.properties
+                  if prop.name.lower().startswith(prefix)]
+        return result
 
     def invoke(self, arg, from_tty):
         argv = arg.strip().split(None, 2)
