@@ -224,9 +224,6 @@ For instance::
         `qualname`. Display a message for the user if that is not possible.
         """
         lower_prop = qualname.lower()
-        if not lower_prop:
-            print('Missing breakpoint specification')
-            return
 
         for prop in self.context.debug_info.properties:
             if prop.name.lower() == lower_prop:
