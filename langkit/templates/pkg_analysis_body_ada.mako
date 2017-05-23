@@ -2441,22 +2441,30 @@ package body ${ada_lib_name}.Analysis is
       ---------------------
 
       procedure Dump_Referenced
-        (Name : String; Refs : AST_Envs.Referenced_Envs_Vectors.Vector) is
+        (Name : String; Refs : AST_Envs.Referenced_Envs_Vectors.Vector)
+      is
+         Is_First : Boolean := True;
       begin
-         if Refs.Length > 0 then
-            Put_Line ("    " & Name & ":");
-            for R of Refs loop
-               Put ("      ");
-               Put (Short_Image (R.From_Node) & ": ");
+         for R of Refs loop
+            declare
+               Env : constant Lexical_Env := R.Resolver.all
+                 ((R.From_Node, No_Entity_Info));
+            begin
+               if Env /= Empty_Env then
+                  if Is_First then
+                     Put_Line ("    " & Name & ":");
+                     Is_First := False;
+                  end if;
+                  Put ("      ");
+                  Put (Short_Image (R.From_Node) & ": ");
 
-               Dump_One_Lexical_Env
-                 (Self           => R.Resolver.all
-                                      ((R.From_Node, No_Entity_Info)),
-                  Dump_Addresses => Dump_Addresses,
-                  Dump_Content   => False);
-               New_Line;
-            end loop;
-         end if;
+                  Dump_One_Lexical_Env (Self           => Env,
+                                        Dump_Addresses => Dump_Addresses,
+                                        Dump_Content   => False);
+                  New_Line;
+               end if;
+            end;
+         end loop;
       end Dump_Referenced;
 
       ---------------------------
