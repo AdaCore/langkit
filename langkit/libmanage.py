@@ -327,7 +327,7 @@ class ManageScript(object):
         )
         subparser.add_argument(
             '--check-only', help="Only check the input for errors, don't"
-            "generate the code",
+            " generate the code",
             action='store_true'
         )
         subparser.add_argument(
