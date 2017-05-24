@@ -297,7 +297,7 @@ def check_source_language(predicate, message, severity=Severity.error,
             Diagnostics.has_pending_error = True
 
 
-def warn_if(predicate, message, warning_name="", enabled=False):
+def warn_if(predicate, message, warning_name=""):
     """
     Helper around check_source_language, to raise warnings.
 
@@ -307,12 +307,10 @@ def warn_if(predicate, message, warning_name="", enabled=False):
     :param str warning_name: The name of the warning, so that the user can
         activate or deactivate this warning. If empty, the warning is always
         enabled, and cannot be disabled.
-    :param bool enabled: Whether the warning is enabled or not by default.
     """
     from langkit.compile_context import get_context
 
-    if (enabled or warning_name == ""
-            or warning_name in get_context().enabled_warnings):
+    if warning_name == "" or warning_name in get_context().enabled_warnings:
         check_source_language(not predicate, message,
                               severity=Severity.warning)
 
