@@ -16,7 +16,7 @@ import sys
 from langkit.compile_context import Verbosity
 from langkit.diagnostics import (
     Context, Diagnostics, DiagnosticError, DiagnosticStyle, Location,
-    check_source_language, extract_library_location
+    WarningSet, check_source_language, extract_library_location
 )
 from langkit.utils import Colors, col, printcol
 
@@ -97,6 +97,16 @@ class Coverage(object):
             directory=self.dirs.build_dir('coverage'),
             ignore_errors=True
         )
+
+
+class EnableWarningAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string):
+        namespace.enabled_warnings.enable(values)
+
+
+class DisableWarningAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string):
+        namespace.enabled_warnings.disable(values)
 
 
 def get_cpu_count():
@@ -326,9 +336,17 @@ class ManageScript(object):
             action='store_true'
         )
         subparser.add_argument(
-            '--enable-warning', '-w', dest="enabled_warnings",
-            action='append', default=[],
-            help='Enable a warning by name'
+            '--enable-warning', '-W', dest="enabled_warnings",
+            default=WarningSet(),
+            action=EnableWarningAction,
+            choices=[w.name for w in WarningSet.available_warnings],
+            help='Enable a warning'
+        )
+        subparser.add_argument(
+            '--disable-warning', '-w',
+            action=DisableWarningAction,
+            choices=[w.name for w in WarningSet.available_warnings],
+            help='Disable a warning'
         )
 
     def add_build_args(self, subparser):
@@ -583,7 +601,7 @@ class ManageScript(object):
                           annotate_fields_types=args.annotate_fields_types,
                           generate_lexer=not args.no_compile_quex,
                           check_only=args.check_only,
-                          enabled_warnings=args.enabled_warnings,
+                          warnings=args.enabled_warnings,
                           no_property_checks=args.no_property_checks)
 
         if args.check_only:

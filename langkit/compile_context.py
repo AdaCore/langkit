@@ -30,7 +30,7 @@ from mako.lookup import TemplateLookup
 from langkit import caching, names, template_utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
-from langkit.diagnostics import Severity, check_source_language
+from langkit.diagnostics import Severity, WarningSet, check_source_language
 import langkit.documentation
 from langkit.expressions import PropertyDef
 from langkit.passes import (
@@ -824,7 +824,7 @@ class CompileCtx(object):
     def emit(self, file_root='.', generate_lexer=True, main_source_dirs=set(),
              main_programs=set(), annotate_fields_types=False,
              check_only=False, no_property_checks=False,
-             enabled_warnings=[]):
+             warnings=None):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -856,7 +856,7 @@ class CompileCtx(object):
             the generated code for properties. Namely, this disables null
             checks on field access.
 
-        :param [str] enabled_warnings: A list of enabled warnings.
+        :param WarningSet warnings: Set of enabled warnings.
         """
         dir_path = path.join(
             path.dirname(path.realpath(__file__)), "templates"
@@ -868,7 +868,7 @@ class CompileCtx(object):
         )
 
         self.no_property_checks = no_property_checks
-        self.enabled_warnings = enabled_warnings
+        self.warnings = warnings or WarningSet()
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.

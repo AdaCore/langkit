@@ -386,22 +386,19 @@ class WarningSet(object):
             raise ValueError('Invalid warning: {}'.format(name))
 
 
-def warn_if(predicate, message, warning_name=""):
+def warn_if(predicate, message, warning):
     """
     Helper around check_source_language, to raise warnings.
 
     :param bool predicate: The predicate to check.
     :param str message: The base message to display if predicate happens to
         be false.
-    :param str warning_name: The name of the warning, so that the user can
-        activate or deactivate this warning. If empty, the warning is always
-        enabled, and cannot be disabled.
+    :param WarningDescriptor warning: The descriptor corresponding to this
+        warning. Depending on whether this warning is enabled in the current
+        context, the warning diagnostic will be emitted or not.
     """
-    from langkit.compile_context import get_context
-
-    if warning_name == "" or warning_name in get_context().enabled_warnings:
-        check_source_language(not predicate, message,
-                              severity=Severity.warning)
+    check_source_language(not warning.enabled or not predicate, message,
+                          severity=Severity.warning)
 
 
 def check_multiple(predicates_and_messages, severity=Severity.error):
