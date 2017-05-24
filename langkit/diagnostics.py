@@ -297,6 +297,95 @@ def check_source_language(predicate, message, severity=Severity.error,
             Diagnostics.has_pending_error = True
 
 
+class WarningDescriptor(object):
+    """
+    Embed information about a class of warnings.
+
+    Instances are to be passed as the `warning` argument in `warn_if`.
+    """
+
+    def __init__(self, name, enabled_by_default, description):
+        self.name = name
+        self.description = description
+        self.enabled_by_default = enabled_by_default
+
+    @property
+    def enabled(self):
+        """
+        Return whether this warning is enabled in the current context.
+
+        :rtype: bool
+        """
+        from langkit.compile_context import get_context
+        return self in get_context().warnings
+
+    def __repr__(self):
+        return '<WarningDescriptor {}>'.format(self.name)
+
+
+class WarningSet(object):
+    """
+    Set of enabled warnings.
+    """
+
+    prop_only_entities_warning = WarningDescriptor(
+        'prop-only-entities', False,
+        'Warn about properties that return AST nodes.'
+    )
+    unused_bindings_warning = WarningDescriptor(
+        'unused-bindings', True,
+        'Warn about bindings (in properties) that are unused, or the ones used'
+        ' while they are declared as unused.'
+    )
+    available_warnings = [prop_only_entities_warning, unused_bindings_warning]
+
+    def __init__(self):
+        self.enabled_warnings = {w for w in self.available_warnings
+                                 if w.enabled_by_default}
+
+    def enable(self, warning):
+        """
+        :type warning: WarningDescriptor|str
+        """
+        if isinstance(warning, str):
+            warning = self.lookup(warning)
+        self.enabled_warnings.add(warning)
+
+    def disable(self, warning):
+        """
+        :type warning: WarningDescriptor|str
+        """
+        if isinstance(warning, str):
+            warning = self.lookup(warning)
+        try:
+            self.enabled_warnings.remove(warning)
+        except KeyError:
+            pass
+
+    def __contains__(self, warning):
+        """
+        Return whether `warning` is enabled:
+
+        :type: WarningDescriptor
+        :rtype: bool
+        """
+        return warning in self.enabled_warnings
+
+    def lookup(self, name):
+        """
+        Look for the WarningDescriptor whose name is `name`. Raise a ValueError
+        if none matches.
+
+        :type name: str
+        :rtype warning: WarningDescriptor
+        """
+        for w in self.available_warnings:
+            if w.name == name:
+                return w
+        else:
+            raise ValueError('Invalid warning: {}'.format(name))
+
+
 def warn_if(predicate, message, warning_name=""):
     """
     Helper around check_source_language, to raise warnings.
