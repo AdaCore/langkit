@@ -336,6 +336,10 @@ class ManageScript(object):
             action='store_true'
         )
         subparser.add_argument(
+            '--list-warnings', action='store_true',
+            help='Display the list of available warnings',
+        )
+        subparser.add_argument(
             '--enable-warning', '-W', dest="enabled_warnings",
             default=WarningSet(),
             action=EnableWarningAction,
@@ -504,6 +508,10 @@ class ManageScript(object):
             cov.start()
         else:
             cov = None
+
+        if getattr(parsed_args, 'list_warnings', False):
+            WarningSet.print_list()
+            return
 
         # noinspection PyBroadException
         try:

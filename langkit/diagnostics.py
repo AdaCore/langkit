@@ -2,8 +2,10 @@ from __future__ import absolute_import, division, print_function
 
 import enum
 import os.path
+import sys
 import traceback
 
+import langkit.documentation
 from langkit.utils import Colors, assert_type, col
 
 
@@ -384,6 +386,29 @@ class WarningSet(object):
                 return w
         else:
             raise ValueError('Invalid warning: {}'.format(name))
+
+    @classmethod
+    def print_list(cls, out=sys.stdout, width=None):
+        """
+        Display the list of available warnings in `f`.
+
+        :param file out: File in which the list is displayed.
+        :param None|int width: Width of the message. If None, use
+            os.environ['COLUMNS'].
+        """
+        if width is None:
+            try:
+                width = int(os.environ['COLUMNS'])
+            except (KeyError, ValueError):
+                width = 80
+        print('List of available warnings:', file=out)
+        for w in cls.available_warnings:
+            print('', file=out)
+            print('* {}:'.format(w.name), file=out)
+            if w.enabled_by_default:
+                print('  [enabled by default]', file=out)
+            print(langkit.documentation.format_text(w.description, 2, width),
+                  file=out)
 
 
 def warn_if(predicate, message, warning):
