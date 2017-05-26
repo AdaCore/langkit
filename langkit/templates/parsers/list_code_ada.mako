@@ -10,10 +10,7 @@
     ${parser.pos_var} := No_Token_Index;
 % endif
 
-<%
-   list_type = parser.get_type()
-   el_type   = list_type.element_type().name()
-%>
+<% list_type = parser.get_type() %>
 
 ${parser.res_var} := ${list_type.name()}_Alloc.Alloc (Parser.Mem_Pool);
 
