@@ -49,7 +49,6 @@ package body ${ada_lib_name}.Analysis.Parsers is
       % endfor
    end record;
 
-
    % for parser in ctx.generated_parsers:
    ${parser.spec}
    % endfor
