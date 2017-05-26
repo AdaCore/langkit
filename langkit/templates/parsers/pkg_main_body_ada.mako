@@ -42,7 +42,18 @@ package body ${ada_lib_name}.Analysis.Parsers is
    pragma Warnings (On, "is not referenced");
    pragma Warnings (On, "possible aliasing problem for type");
 
+   type Free_Parse_List_Record;
+   type Free_Parse_List is access all Free_Parse_List_Record;
+   --  Cache of temporary lists of AST nodes used in List parsers
+
+   type Free_Parse_List_Record is record
+      Nodes : ${ctx.root_grammar_class.array_type().pkg_vector()}.Vector;
+      Next  : Free_Parse_List;
+   end record;
+
    type Parser_Private_Part_Type is record
+      Parse_Lists : Free_Parse_List;
+
       % for parser in sorted(ctx.fns):
       <% ret_type = parser.get_type().storage_type_name() %>
       ${parser.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
@@ -226,7 +237,20 @@ package body ${ada_lib_name}.Analysis.Parsers is
    procedure Destroy (Parser : in out Parser_Type) is
       procedure Free is new Ada.Unchecked_Deallocation
         (Parser_Private_Part_Type, Parser_Private_Part);
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Free_Parse_List_Record, Free_Parse_List);
+
+      Cur : Free_Parse_List renames Parser.Private_Part.Parse_Lists;
    begin
+      while Cur /= null loop
+         declare
+            Next : constant Free_Parse_List := Cur.Next;
+         begin
+            Cur.Nodes.Destroy;
+            Free (Cur);
+            Cur := Next;
+         end;
+      end loop;
       Free (Parser.Private_Part);
    end Destroy;
 
