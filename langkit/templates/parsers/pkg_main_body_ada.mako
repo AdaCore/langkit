@@ -72,6 +72,16 @@ package body ${ada_lib_name}.Analysis.Parsers is
    --  the parsing failed (Parser.Current_Pos = No_Token_Index), append
    --  corresponding diagnostics to Parser.Diagnostics, do nothing instead.
 
+   function Get_Parse_List (Parser : Parser_Type) return Free_Parse_List;
+   --  Get a free parse list, or allocate one if there is no free parse list in
+   --  Parser. When done with the result, the caller must invoke
+   --  Release_Parse_List.
+
+   procedure Release_Parse_List
+     (Parser : Parser_Type; List : in out Free_Parse_List);
+   --  Release a parse list, putting it in Parsers' free list. Set List to
+   --  null.
+
    ----------------------
    -- Create_From_File --
    ----------------------
@@ -262,5 +272,38 @@ package body ${ada_lib_name}.Analysis.Parsers is
    begin
       Parser.Private_Part := new Parser_Private_Part_Type'(others => <>);
    end Initialize;
+
+   --------------------
+   -- Get_Parse_List --
+   --------------------
+
+   function Get_Parse_List (Parser : Parser_Type) return Free_Parse_List is
+      Lists  : Free_Parse_List renames Parser.Private_Part.Parse_Lists;
+      Result : Free_Parse_List;
+   begin
+      if Lists = null then
+         Result := new Free_Parse_List_Record;
+
+      else
+         Result := Lists;
+         Lists := Lists.Next;
+      end if;
+
+      return Result;
+   end Get_Parse_List;
+
+   ------------------------
+   -- Release_Parse_List --
+   ------------------------
+
+   procedure Release_Parse_List
+     (Parser : Parser_Type; List : in out Free_Parse_List)
+   is
+      Lists  : Free_Parse_List renames Parser.Private_Part.Parse_Lists;
+   begin
+      List.Next := Lists;
+      Lists := List;
+      List := null;
+   end Release_Parse_List;
 
 end ${ada_lib_name}.Analysis.Parsers;
