@@ -10,8 +10,15 @@ function ${parser.gen_fn_name} (Parser : in out Parser_Type;
                                 return ${ret_type}
 is
    % for name, typ in var_context:
-      ${name} : ${typ.storage_type_name()}
-         ${":= " + typ.storage_nullexpr() if typ.storage_nullexpr() else ""};
+      ${name} :
+         % if isinstance(typ, basestring):
+            ${typ};
+         % else:
+            ${typ.storage_type_name()}
+            % if typ.storage_nullexpr():
+               := ${typ.storage_nullexpr()};
+            % endif
+         % endif
    % endfor
 
    % if parser.is_left_recursive():
