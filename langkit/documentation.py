@@ -705,27 +705,32 @@ def _render(ctx, entity, **kwargs):
     return text
 
 
-def get_available_width(indent_level):
+def get_available_width(indent_level, width=None):
     """
     Return the number of available columns on source code lines.
 
-    :param indent_level: Identation level of the source code lines.
+    :param int indent_level: Identation level of the source code lines.
+    :param int|None width: Total available width on source code lines. By
+        default, use 79.
     """
-    return 79 - indent_level
+    if width is None:
+        width = 79
+    return width - indent_level
 
 
 text_wrapper = textwrap.TextWrapper(drop_whitespace=True)
 
 
-def format_text(text, column):
+def format_text(text, column, width=None):
     """
     Format some text as mere indented text.
 
     :param str text: Text to format.
     :param int column: Indentation level for the result.
+    :param int|None width: See get_available_width.
     :rtype: str
     """
-    text_wrapper.available_width = get_available_width(column)
+    text_wrapper.available_width = get_available_width(column, width)
     lines = []
     for i, paragraph in enumerate(split_paragraphs(text)):
         if i > 0:
