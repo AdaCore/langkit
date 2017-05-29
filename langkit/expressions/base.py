@@ -263,7 +263,12 @@ class Frozable(object):
         """
         def wrapper(self, *args, **kwargs):
             if self.__dict__.get('_frozen', False):
-                raise Exception("Illegal field access")
+                func_name = func.__name__
+                if func_name == '__getattr__':
+                    error_msg = 'Illegal field access: {}'.format(*args)
+                else:
+                    error_msg = ' Illegal method call: {}'.format(func_name)
+                raise Exception(error_msg)
             return func(self, *args, **kwargs)
         return wrapper
 
