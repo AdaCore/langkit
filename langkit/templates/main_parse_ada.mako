@@ -172,7 +172,7 @@ procedure Parse is
          end loop;
       end if;
 
-      if (not Silent) and then Root (Unit) /= null then
+      if (not Silent) and then AST /= null then
          if Do_Print_Trivia then
             PP_Trivia (Unit);
          else
