@@ -2428,9 +2428,11 @@ class PropertyDef(AbstractNodeData):
 
         # Add the implicit lexical env. parameter if required
         if self.has_implicit_env:
+            from langkit.expressions.envs import Env
             self._add_argument(PropertyDef.env_arg_name,
                                LexicalEnvType,
-                               False)
+                               False,
+                               Env)
 
         # If this property has been explicitly marked as using entity info,
         # then set the relevant internal data.
