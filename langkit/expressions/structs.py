@@ -598,7 +598,7 @@ class FieldAccess(AbstractExpression):
         check_source_language(
             not to_get.is_property or
             not to_get.has_implicit_env or
-            Env.has_ambient_env,
+            Env.is_bound,
             'This property has no implicit environment parameter whereas {}'
             ' expects one: please use the eval_in_env construct to bind an'
             ' environment first.'.format(to_get.qualname)

@@ -32,26 +32,20 @@ class EnvVariable(AbstractVariable):
         self._is_bound = False
 
     @property
-    def has_ambient_env(self):
-        """
-        Return whether ambient environment value is available.
-
-        If there is one, this is either the implicit environment argument for
-        the current property, or the currently bound environment (using
-        eval_in_env).
-
-        :rtype: bool
-        """
-        return PropertyDef.get().has_implicit_env or self.is_bound
-
-    @property
     def is_bound(self):
         """
-        Return whether Env is bound, i.e. if it can be used in the current
-        context.
+        Return whether Env is bound.
+
+        This returns true iff at least one of the following conditions is True:
+
+          * the current property accepts this implicit argument;
+          * it is currently bound, though the .eval_in_env construct.
 
         :rtype: bool
         """
+        for arg in PropertyDef.get().arguments:
+            if arg.var is self:
+                return True
         return self._is_bound
 
     @contextmanager
@@ -88,7 +82,7 @@ class EnvVariable(AbstractVariable):
 
     def construct(self):
         check_source_language(
-            self.has_ambient_env,
+            self.is_bound,
             'This property has no implicit environment parameter: please use'
             ' the eval_in_env construct to bind an environment first.'
         )
