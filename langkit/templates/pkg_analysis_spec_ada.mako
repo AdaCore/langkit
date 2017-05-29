@@ -1255,6 +1255,9 @@ private
    ${array_types.private_decl(T.root_node.entity().array_type())}
    ${array_types.private_decl(root_node_array)}
 
+   package ${T.root_node.array_type().pkg_vector()} is
+      new Langkit_Support.Vectors (${T.root_node.name()});
+
    function Pre_Env_Actions
      (Self                  : access ${root_node_value_type};
       Current_Env, Root_Env : AST_Envs.Lexical_Env;

@@ -57,7 +57,9 @@
 
    <% elt_type = cls.element_type().name() %>
 
-   package ${cls.pkg_vector()} is new Langkit_Support.Vectors (${elt_type});
+   % if cls.element_type() != ctx.root_grammar_class:
+      package ${cls.pkg_vector()} is new Langkit_Support.Vectors (${elt_type});
+   % endif
 
    ---------
    -- Get --
