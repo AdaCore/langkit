@@ -1,6 +1,5 @@
-with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
-with System; use System;
+with System;        use System;
 with System.Memory; use System.Memory;
 
 package body Langkit_Support.Bump_Ptr is
@@ -197,6 +196,22 @@ package body Langkit_Support.Bump_Ptr is
       end Alloc;
 
    end Tagged_Alloc;
+
+   package body Array_Alloc is
+
+      function Alloc
+        (Pool : Bump_Ptr_Pool; Length : Natural) return Element_Array_Access
+      is
+         Stride : constant Storage_Offset :=
+            Align (Element_T'Max_Size_In_Storage_Elements, Pointer_Size);
+         Size   : constant Storage_Offset := Stride * Storage_Offset (Length);
+      begin
+         return (if Length = 0
+                 then Empty_Array_Access
+                 else To_Pointer (Allocate (Pool, Size)));
+      end Alloc;
+
+   end Array_Alloc;
 
    ---------------------------
    -- Allocate_From_Subpool --

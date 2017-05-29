@@ -1,5 +1,7 @@
+with Ada.Unchecked_Conversion;
+
 with System;
-with System.Storage_Elements; use System.Storage_Elements;
+with System.Storage_Elements;       use System.Storage_Elements;
 with System.Storage_Pools.Subpools; use System.Storage_Pools.Subpools;
 
 with Langkit_Support.Vectors;
@@ -79,6 +81,44 @@ package Langkit_Support.Bump_Ptr is
    --  BEWARE: This function will only work with *constrained* simple tagged
    --  types. It has not been tested with controlled objects, arrays, or
    --  discriminated types.
+
+   generic
+      type Element_T is private;
+      type Index_Type is (<>);
+   package Array_Alloc is
+
+      type Element_Array is array (Index_Type) of Element_T;
+      --  This package handles unsized array types to avoid having to deal with
+      --  fat pointers.
+
+      type Element_Array_Access is access all Element_Array;
+
+      Empty_Array_Access : constant Element_Array_Access;
+      --  Access to an empty array. As accessing its elements is forbidden, but
+      --  dereferencing it to take an empty slice is allowed, it is designed to
+      --  point to a non-null junk address.
+
+      function Alloc
+        (Pool : Bump_Ptr_Pool; Length : Natural) return Element_Array_Access
+         with Inline;
+      --  If Length is zero, return Empty_Array_Access. Otherwise, allocate an
+      --  array that is large enough to contain Length elements and return
+      --  an access to it.
+
+   private
+
+      function To_Pointer is new Ada.Unchecked_Conversion
+        (System.Address, Element_Array_Access);
+
+      Empty_Array_Access : constant Element_Array_Access := To_Pointer
+        (System.Null_Address + 1);
+
+   end Array_Alloc;
+   --  This generic allocation package can be used to allocate an array of
+   --  Element_T objects.
+   --
+   --  BEWARE: This function will only work with *constrained* basic types or
+   --  simple scalar types (no tagged, controlled, etc).
 
    -------------------------------------------------------
    -- Ada 2012 Pool with subpools safe & slow mechanism --
