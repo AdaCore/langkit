@@ -1189,7 +1189,7 @@ class Defer(Parser):
         return self.name == rule_name
 
     def __repr__(self):
-        return "Defer({0})".format(self.name)
+        return "{0}".format(self.name)
 
     def __init__(self, rule_name, parser_fn):
         """
