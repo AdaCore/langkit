@@ -301,6 +301,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
    is
       Lists  : Free_Parse_List renames Parser.Private_Part.Parse_Lists;
    begin
+      List.Nodes.Clear;
       List.Next := Lists;
       Lists := List;
       List := null;

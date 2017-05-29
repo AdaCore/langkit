@@ -949,6 +949,7 @@ class List(Parser):
 
     def create_vars_before(self):
         self.cpos = VarDef("lst_cpos", Token)
+        self.tmplist = VarDef('tmp_list', 'Free_Parse_List')
         return self.cpos
 
     def create_vars_after(self, start_pos):
