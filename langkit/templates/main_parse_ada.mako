@@ -31,16 +31,17 @@ procedure Parse is
    package String_Vectors is new Ada.Containers.Vectors
      (Natural, Unbounded_String);
 
-   Config     : Command_Line_Configuration;
-   Silent     : aliased Boolean;
+   Config      : Command_Line_Configuration;
+   Silent      : aliased Boolean;
    Measure_Time, Do_Print_Trivia : aliased Boolean;
-   Rule_Name  : aliased GNAT.Strings.String_Access :=
+   Rule_Name   : aliased GNAT.Strings.String_Access :=
       new String'("${ctx.main_rule_name}");
-   Charset    : aliased GNAT.Strings.String_Access :=
+   Charset     : aliased GNAT.Strings.String_Access :=
       new String'("iso-8859-1");
-   File_Name  : aliased GNAT.Strings.String_Access;
-   File_List  : aliased GNAT.Strings.String_Access;
-   Print_Envs : aliased Boolean;
+   File_Name   : aliased GNAT.Strings.String_Access;
+   File_List   : aliased GNAT.Strings.String_Access;
+   Print_Envs  : aliased Boolean;
+   Count_Nodes : aliased Boolean;
 
    Input_Str : Unbounded_String;
    Lookups   : String_Vectors.Vector;
@@ -189,6 +190,31 @@ procedure Parse is
          Dump_Lexical_Env (Unit);
       end if;
 
+      if Count_Nodes then
+         declare
+            Count : Natural := 0;
+
+            function Visit
+              (Node : access ${root_node_value_type}'Class) return Visit_Status
+            is
+            begin
+               if Node /= null then
+                  Count := Count + 1;
+               end if;
+               return Into;
+            end Visit;
+
+         begin
+            if AST /= null then
+               AST.Traverse (Visit'Access);
+            end if;
+            if not Silent then
+               Put_Line
+                 ("The tree contains" & Natural'Image (Count) & " nodes.");
+            end if;
+         end;
+      end if;
+
       if Measure_Time then
          Put_Line
            ("Time elapsed: " & Duration'Image (Time_After - Time_Before));
@@ -205,6 +231,10 @@ begin
    Define_Switch
      (Config, Silent'Access, "-s", "--silent",
       Help   => "Do not print the representation of the resulting tree");
+   Define_Switch
+     (Config, Count_Nodes'Access, "-C", "--count",
+      Help   => "Count the number of nodes in the resulting tree. This is"
+                & " handy to measure the performance of tree traversal.");
    Define_Switch
      (Config, Print_Envs'Access, "-E", "--print-envs",
       Help   => "Print lexical environments computed");
