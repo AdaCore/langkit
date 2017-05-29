@@ -18,7 +18,7 @@ from langkit.diagnostics import (
     Context, Diagnostics, DiagnosticError, DiagnosticStyle, Location,
     WarningSet, check_source_language, extract_library_location
 )
-from langkit.utils import Colors, col, printcol
+from langkit.utils import Colors, col, printcol, Log
 
 
 class Directories(object):
@@ -187,6 +187,10 @@ class ManageScript(object):
             '--full-error-traces', '-E', action='store_true', default=False,
             help='Always show full error traces, whatever the verbosity level'
                  ' (default: disabled)'
+        )
+        args_parser.add_argument(
+            '--trace', '-t', action='append', default=[],
+            help="Activate given debug trace"
         )
 
         # Don't enable this by default so that errors will not make automated
@@ -455,6 +459,10 @@ class ManageScript(object):
 
     def run(self, argv=None):
         parsed_args = self.args_parser.parse_args(argv)
+
+        for trace in parsed_args.trace:
+            print("Trace {} is activated".format(trace))
+            Log.enable(trace)
 
         Diagnostics.set_style(parsed_args.diagnostic_style)
 
