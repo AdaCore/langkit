@@ -22,6 +22,7 @@ not defined in the example, but relied on explicitly.
 
 from __future__ import absolute_import, division, print_function
 
+from collections import defaultdict
 from contextlib import contextmanager
 import difflib
 from funcy import keep
@@ -37,8 +38,9 @@ from langkit.diagnostics import (
 )
 from langkit.lexer import WithSymbol
 from langkit.template_utils import TemplateEnvironment
-from langkit.utils import (assert_type, common_ancestor, copy_with,
-                           type_check_instance)
+from langkit.utils import (
+    assert_type, common_ancestor, copy_with, type_check_instance, Log
+)
 
 
 def var_context():
@@ -1385,3 +1387,99 @@ class Enum(Parser):
 
 
 _ = Discard
+
+# This part of the file contains experiments toward automatic generation of
+# pretty printers for langkit grammars.
+
+
+class NodeToParsersPass():
+    """
+    This pass computes the correspondence between node-types and parsers. The
+    end goal is to have one and only one non-ambiguous rule to pretty-print an
+    AST type.
+    """
+
+    def __init__(self):
+        self.nodes_to_rules = defaultdict(list)
+
+    def log_node_to_rules(self, ctx):
+        """
+        Log the results of the compute pass.
+        """
+        for k, v in self.nodes_to_rules.items():
+            if len(v) > 1:
+                if not pp_struct_eq(v):
+                    Log.log("pp_eq", "for node {} is false".format(k))
+                    with Log.nest():
+                        for val in v:
+                            Log.log("pp_eq", val)
+                    Log.log("pp_eq")
+
+    def compute(self, parser):
+        """
+        This is a grammar-rules pass implementation, whose goal is to map each
+        node type to one specific parser.
+        """
+
+        if isinstance(parser, Transform):
+            self.nodes_to_rules[parser.get_type()].append(parser)
+        elif isinstance(parser, List):
+            self.nodes_to_rules[parser.get_type()].append(parser)
+
+        for c in parser.children():
+            self.compute(c)
+
+
+@Log.recursive
+@Log.log_return
+def structural_pp_equality(parser, other_parser):
+    """
+    Determine if two parsers are structurally equal, with regards to pretty
+    printing.
+
+    :type parser: Parser
+    :type other_parser: Parser
+    """
+    Log.log("pp_eq", "first is ", parser)
+    Log.log("pp_eq", "second is ", other_parser)
+
+    if isinstance(parser, Null) or isinstance(other_parser, Null):
+        return parser.get_type() == other_parser.get_type()
+
+    if type(parser) != type(other_parser):
+        return (parser and other_parser
+                and parser.get_type().matches(ASTNode)
+                and parser.get_type() == other_parser.get_type())
+
+    if isinstance(parser, Row):
+        return all(
+            structural_pp_equality(c1, c2)
+            for c1, c2 in zip(parser.children(), other_parser.children())
+        )
+    elif isinstance(parser, Tok):
+        return parser.val == other_parser.val
+    elif isinstance(parser, Transform):
+        return structural_pp_equality(parser.parser, other_parser.parser)
+    elif isinstance(parser, List):
+        return (
+            structural_pp_equality(parser.sep, other_parser.sep)
+            and structural_pp_equality(parser.parser, other_parser.parser)
+        )
+    else:
+        return True
+
+
+def pp_struct_eq(parsers):
+    """
+    Determine if N parsers are structurally equal, with regards to pretty
+    printing.
+
+    :param list[Parser] parsers: The list of parsers to test.
+    """
+    Log.log("pp_eq", parsers)
+    results = [
+        structural_pp_equality(parsers[i], parsers[i + 1])
+        for i, _ in enumerate(parsers[:-1])
+    ]
+    Log.log("pp_eq", results)
+    return all(results)
