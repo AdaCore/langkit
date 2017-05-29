@@ -31,6 +31,20 @@ class EnvVariable(AbstractVariable):
         )
         self._is_bound = False
 
+    def is_accepted_in(self, prop):
+        """
+        Return whether `self` is accepted as an implicit argument in the given
+        property.
+
+        :param PropertyDef prop: Property to test.
+        :rtype: bool
+        """
+        for arg in prop.arguments:
+            if arg.var is self:
+                return True
+        else:
+            return False
+
     @property
     def is_bound(self):
         """
@@ -39,14 +53,11 @@ class EnvVariable(AbstractVariable):
         This returns true iff at least one of the following conditions is True:
 
           * the current property accepts this implicit argument;
-          * it is currently bound, though the .eval_in_env construct.
+          * it is currently bound, through the .eval_in_env construct.
 
         :rtype: bool
         """
-        for arg in PropertyDef.get().arguments:
-            if arg.var is self:
-                return True
-        return self._is_bound
+        return self.is_accepted_in(PropertyDef.get()) or self._is_bound
 
     @contextmanager
     def bind(self):
@@ -71,7 +82,7 @@ class EnvVariable(AbstractVariable):
 
         :type prop: PropertyDef
         """
-        if prop.has_implicit_env:
+        if self.is_accepted_in(prop):
             with self.bind_name(self.default_name):
                 yield
         else:
