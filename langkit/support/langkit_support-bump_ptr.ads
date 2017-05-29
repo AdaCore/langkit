@@ -48,6 +48,7 @@ package Langkit_Support.Bump_Ptr is
 
    procedure Free (Pool : in out Bump_Ptr_Pool);
    --  Free all memory allocated by this pool.
+   --
    --  BEWARE: This will make dangling pointers of every pointers allocated via
    --  this pool.
 
@@ -55,27 +56,27 @@ package Langkit_Support.Bump_Ptr is
       type Element_T is private;
       type Element_Access is access all Element_T;
    package Alloc is
-      function Alloc
-        (Pool : Bump_Ptr_Pool) return Element_Access
-        with Inline;
+      function Alloc (Pool : Bump_Ptr_Pool) return Element_Access
+         with Inline;
    end Alloc;
    --  This generic allocation package can be used to allocate an object of
    --  type Element_T.
-   --  BEWARE: This procedure will only work with *constrained* basic types
-   --  or simple scalar types (no tagged/controlled/etc). If you need an all
+   --
+   --  BEWARE: This function will only work with *constrained* basic types or
+   --  simple scalar types (no tagged, controlled, etc). If you need an all
    --  around allocation mechanism for bump pointer pools, use the subpools
    --  mechanism!
 
    generic
       type Element_T is tagged private;
    package Tagged_Alloc is
-      function Alloc
-        (Pool : Bump_Ptr_Pool) return access Element_T
-        with Inline;
+      function Alloc (Pool : Bump_Ptr_Pool) return access Element_T
+         with Inline;
    end Tagged_Alloc;
-   --  This generic allocation package can be used to allocate an object
-   --  of tagged type Element_T.
-   --  BEWARE: This procedure will only work with *constrained* simple tagged
+   --  This generic allocation package can be used to allocate an object of
+   --  tagged type Element_T.
+   --
+   --  BEWARE: This function will only work with *constrained* simple tagged
    --  types. It has not been tested with controlled objects, arrays, or
    --  discriminated types.
 

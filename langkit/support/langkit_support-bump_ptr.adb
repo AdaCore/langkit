@@ -113,13 +113,11 @@ package body Langkit_Support.Bump_Ptr is
 
    package body Alloc is
 
-      function To_Pointer is
-        new Ada.Unchecked_Conversion (System.Address, Element_Access);
+      function To_Pointer is new Ada.Unchecked_Conversion
+        (System.Address, Element_Access);
 
-      function Alloc
-        (Pool : Bump_Ptr_Pool) return Element_Access is
+      function Alloc (Pool : Bump_Ptr_Pool) return Element_Access is
       begin
-
          --  This function just queries the proper size of the Element_T type,
          --  and converts the return value to the proper access type.
 
@@ -128,6 +126,7 @@ package body Langkit_Support.Bump_Ptr is
               (Pool,
                Align (Element_T'Max_Size_In_Storage_Elements, Pointer_Size)));
       end Alloc;
+
    end Alloc;
 
    type Address_Access is access all System.Address;
@@ -143,14 +142,12 @@ package body Langkit_Support.Bump_Ptr is
       T : aliased Element_T;
 
       package Gen_Alloc is new
-        Langkit_Support.Bump_Ptr.Alloc (Element_T, Element_Access);
+         Langkit_Support.Bump_Ptr.Alloc (Element_T, Element_Access);
 
       function Dirty_Conv is new
-        Ada.Unchecked_Conversion (Element_Access, Address_Access);
+         Ada.Unchecked_Conversion (Element_Access, Address_Access);
 
-      function Alloc
-        (Pool : Bump_Ptr_Pool) return access Element_T
-      is
+      function Alloc (Pool : Bump_Ptr_Pool) return access Element_T is
          --  This bit of code is actually quite funny. It is born out of the
          --  conflation of several unfortunate design choices in Ada:
 
@@ -198,6 +195,7 @@ package body Langkit_Support.Bump_Ptr is
          Tag_To.all := Tag_From.all;
          return Ret;
       end Alloc;
+
    end Tagged_Alloc;
 
    ---------------------------
