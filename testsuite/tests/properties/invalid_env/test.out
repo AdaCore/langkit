@@ -1,13 +1,13 @@
-== <get(<Env>, <FieldAccess .tok>)> ==
-File "test.py", line 34, in ExampleNode.prop
-    Error: This property has no implicit environment parameter: please use the eval_in_env construct to bind an environment first.
+== <get(<DynamicVariable current_env>, <FieldAccess .tok>)> ==
+File "test.py", line 33, in ExampleNode.prop
+    Error: current_env is not bound in this context: please use the .eval_in_env construct to bind it first.
 
 == <FieldAccess .implicit_prop> ==
-File "test.py", line 34, in ExampleNode.prop
-  line 48, in FieldAccess expression
+File "test.py", line 33, in ExampleNode.prop
+  line 51, in FieldAccess expression
     Error: This property has no implicit environment parameter whereas ExampleNode.p_implicit_prop expects one: please use the eval_in_env construct to bind an environment first.
 
-== <eval_in_env(<FieldAccess .node_env>, <get(<Env>, <FieldAccess .tok>)>)> ==
+== <eval_in_env(<FieldAccess .node_env>, <get(<DynamicVariable current_env>, <FieldAccess .tok>)>)> ==
 Code generation was successful
 
 == <eval_in_env(<FieldAccess .node_env>, <FieldAccess .implicit_prop>)> ==

@@ -17,23 +17,27 @@ from langkit.expressions.base import (
 from langkit.expressions.utils import array_aggr, assign_var
 
 
-class EnvVariable(AbstractVariable):
+class DynamicVariable(AbstractVariable):
     """
-    Singleton abstract variable for the implicit environment parameter.
+    Reference to a dynamic property variable.
     """
 
-    default_name = names.Name("Current_Env")
+    def __init__(self, name, type):
+        """
+        Create a dynamic variable.
 
-    def __init__(self):
-        super(EnvVariable, self).__init__(
-            self.default_name,
-            type=LexicalEnvType
-        )
+        These are implemented as optional arguments in properties.
+
+        :param str name: Lower-case name for this variable.
+        :param CompiledType type: Variable type.
+        """
+        self.argument_name = names.Name.from_lower(name)
+        super(DynamicVariable, self).__init__(self.argument_name, type)
         self._is_bound = False
 
     def is_accepted_in(self, prop):
         """
-        Return whether `self` is accepted as an implicit argument in the given
+        Return whether `self` is accepted as an optional argument in the given
         property.
 
         :param PropertyDef prop: Property to test.
@@ -48,7 +52,7 @@ class EnvVariable(AbstractVariable):
     @property
     def is_bound(self):
         """
-        Return whether Env is bound.
+        Return whether this dynamic variable is bound.
 
         This returns true iff at least one of the following conditions is True:
 
@@ -62,10 +66,10 @@ class EnvVariable(AbstractVariable):
     @contextmanager
     def bind(self):
         """
-        Tag Env as being bound.
+        Tag this dynamic variable as being bound.
 
-        This is used during the "construct" pass to check that all uses of Env
-        are made in a context where it is legal.
+        This is used during the "construct" pass to check that all uses are
+        made in a context where it is legal.
         """
         saved_is_bound = self._is_bound
         self._is_bound = True
@@ -75,15 +79,16 @@ class EnvVariable(AbstractVariable):
     @contextmanager
     def bind_default(self, prop):
         """
-        Context manager to setup the default Env binding for "prop".
+        Context manager to setup the default binding for this dynamic variable
+        in "prop".
 
-        This means: no binding if this property has no implicit env argument,
-        and the default one if it has one.
+        This means: no binding if this property does not accept `self` as an
+        implicit argument, and the default one if it does.
 
         :type prop: PropertyDef
         """
         if self.is_accepted_in(prop):
-            with self.bind_name(self.default_name):
+            with self.bind_name(self.argument_name):
                 yield
         else:
             saved_is_bound = self._is_bound
@@ -94,13 +99,15 @@ class EnvVariable(AbstractVariable):
     def construct(self):
         check_source_language(
             self.is_bound,
-            'This property has no implicit environment parameter: please use'
-            ' the eval_in_env construct to bind an environment first.'
+            '{} is not bound in this context: please use the .eval_in_env'
+            ' construct to bind it first.'.format(
+                self.argument_name.lower
+            )
         )
-        return super(EnvVariable, self).construct()
+        return super(DynamicVariable, self).construct()
 
     def __repr__(self):
-        return '<Env>'
+        return '<DynamicVariable {}>'.format(self.argument_name.lower)
 
 
 @auto_attr_custom("get")
@@ -412,6 +419,6 @@ def as_entity(self, node):
     return ret
 
 
-Env = EnvVariable()
+Env = DynamicVariable('Current_Env', LexicalEnvType)
 EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
                             type=LexicalEnvType)
