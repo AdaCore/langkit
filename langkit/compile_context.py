@@ -974,7 +974,9 @@ class CompileCtx(object):
 
         assert self.grammar, "Set grammar before compiling"
 
-        from langkit.parsers import Parser
+        from langkit.parsers import Parser, NodeToParsersPass
+
+        node_to_parsers = NodeToParsersPass()
 
         pass_manager = PassManager()
         pass_manager.add(
@@ -1017,6 +1019,11 @@ class CompileCtx(object):
             errors_checkpoint_pass,
 
             StopPipeline('check only', disabled=not check_only),
+
+            GrammarRulePass('Compute nodes parsers correspondence',
+                            node_to_parsers.compute),
+            GlobalPass('Log node parsers correspondence ',
+                       node_to_parsers.log_node_to_rules),
 
             MajorStepPass('Prepare code emission'),
 
