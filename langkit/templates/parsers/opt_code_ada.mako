@@ -25,6 +25,9 @@ if ${parser.parser.pos_var} = No_Token_Index then
         ${parser.parser.res_var} :=
           (${parser_type.storage_type_name()}_Alloc.Alloc (Parser.Mem_Pool));
         ${parser.parser.res_var}.Unit := Parser.Unit;
+        ${parser.parser.res_var}.Count := 0;
+        ${parser.parser.res_var}.Nodes :=
+           Alloc_AST_List_Array.Alloc (Parser.Mem_Pool, 0);
         ${parser.parser.res_var}.Token_Start_Index := ${parser.start_pos} - 1;
         ${parser.parser.res_var}.Token_End_Index := No_Token_Index;
     % elif parser_type:

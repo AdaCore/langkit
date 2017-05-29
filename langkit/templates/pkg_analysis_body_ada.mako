@@ -2999,11 +2999,11 @@ package body ${ada_lib_name}.Analysis is
       Result : Unbounded_String;
    begin
       Append (Result, '[');
-      for El of Node.Vec loop
+      for Child of Node.Nodes (1 .. Node.Count) loop
          if Length (Result) > 0 then
             Append (Result, ", ");
          end if;
-         Append (Result, El.Image);
+         Append (Result, Child.Image);
       end loop;
 
       Append (Result, ']');
@@ -3018,7 +3018,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : access ${generic_list_value_type}) return Natural
    is
    begin
-      return Node_Bump_Ptr_Vectors.Length (Node.Vec);
+      return Node.Count;
    end Child_Count;
 
    ---------------
@@ -3031,12 +3031,11 @@ package body ${ada_lib_name}.Analysis is
       Index_In_Bounds : out Boolean;
       Result          : out ${root_node_type_name}) is
    begin
-      if Index > Node_Bump_Ptr_Vectors.Last_Index (Node.Vec) then
+      if Index > Node.Count then
          Index_In_Bounds := False;
       else
          Index_In_Bounds := True;
-         Result := ${root_node_type_name}
-           (Node_Bump_Ptr_Vectors.Get_At_Index (Node.Vec, Index));
+         Result := Node.Nodes (Index);
       end if;
    end Get_Child;
 
@@ -3053,13 +3052,13 @@ package body ${ada_lib_name}.Analysis is
       Put
         (Prefix & Class_Wide_Node.Kind_Name
          & "[" & Image (Node.Sloc_Range) & "]");
-      if Node_Bump_Ptr_Vectors.Length (Node.Vec) = 0 then
+      if Node.Count = 0 then
          Put_Line (": <empty list>");
          return;
       end if;
 
       New_Line;
-      for Child of Node.Vec loop
+      for Child of Node.Nodes (1 .. Node.Count) loop
          if Child /= null then
             Child.Print (Prefix & "|  ");
          end if;

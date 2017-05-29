@@ -29,11 +29,12 @@ begin
 
       ${map.expr.render_pre()}
       % if map.concat:
+         <% expr = map.expr.render_expr() %>
          for Item_To_Append of
             % if map.expr.type.is_list_type:
-               ${map.expr.render_expr()}.Vec
+               ${expr}.Nodes (1 .. ${expr}.Count)
             % else:
-               ${map.expr.render_expr()}.Items
+               ${expr}.Items
             % endif
          loop
             % if map.type.element_type().is_refcounted():
@@ -60,11 +61,12 @@ begin
       % endif
 
       ## First, build a vector for all the resulting elements
+      <% coll_expr = map.collection.render_expr() %>
       for ${iteration_var} of
          % if map.collection.type.is_list_type:
-            ${map.collection.render_expr()}.Vec
+            ${coll_expr}.nodes (1 .. ${coll_expr}.Count)
          % else:
-            ${map.collection.render_expr()}.Items
+            ${coll_expr}.Items
          % endif
       loop
          ${scopes.start_scope(map.iter_scope)}

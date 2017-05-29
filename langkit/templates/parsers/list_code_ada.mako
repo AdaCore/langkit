@@ -42,24 +42,27 @@ loop
 
 end loop;
 
-## Create the result of this parser: an AST list node
+## Create the result of this parser: an AST list node, and copy the elements
+## from our temporray parse list to the result.
 ${parser.res_var} := ${list_type.name()}_Alloc.Alloc (Parser.Mem_Pool);
 ${parser.res_var}.Unit := Parser.Unit;
+${parser.res_var}.Count := ${parser.tmplist}.Nodes.Length;
 
-if ${parser.tmplist}.Nodes.Length > 0 then
-   ## Copy the elements from our temporray parse list to the result
-   declare
-      use Node_Bump_Ptr_Vectors;
-      In_Vec  : ${T.root_node.array_type().pkg_vector()}.Vector renames
-         ${parser.tmplist}.Nodes;
-      Out_Vec : Vector renames ${parser.res_var}.Vec;
-   begin
-      Out_Vec := Node_Bump_Ptr_Vectors.Create (Parser.Mem_Pool);
-      for I in In_Vec.First_Index .. In_Vec.Last_Index loop
-         Append (Out_Vec, In_Vec.Get (I));
-      end loop;
-   end;
+declare
+   Vec : ${T.root_node.array_type().pkg_vector()}.Vector renames
+      ${parser.tmplist}.Nodes;
+   Arr : Alloc_AST_List_Array.Element_Array_Access renames
+      ${parser.res_var}.Nodes;
+begin
+   Arr := Alloc_AST_List_Array.Alloc (Parser.Mem_Pool, Vec.Length);
+   for I in Vec.First_Index .. Vec.Last_Index loop
+      Arr (I) := Vec.Get (I);
+   end loop;
+end;
 
+## Depending on whether we have an empty list, initialize token start/end
+## information.
+if ${parser.res_var}.Count > 0 then
    ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
    ${parser.res_var}.Token_End_Index :=
      (if ${parser.cpos} = ${parser.start_pos}

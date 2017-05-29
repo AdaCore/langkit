@@ -20,11 +20,12 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
       ${quantifier.index_var.name} := 0;
    % endif
 
+   <% coll_expr = quantifier.collection.render_expr() %>
    for ${iteration_var} of
       % if quantifier.collection.type.is_list_type:
-         ${quantifier.collection.render_expr()}.Vec
+         ${coll_expr}.Nodes (1 .. ${coll_expr}.Count)
       % else:
-         ${quantifier.collection.render_expr()}.Items
+         ${coll_expr}.Items
       % endif
    loop
       ${scopes.start_scope(quantifier.iter_scope)}

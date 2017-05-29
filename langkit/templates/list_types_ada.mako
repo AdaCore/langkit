@@ -120,11 +120,10 @@
         (L : ${type_name}; Index : Integer)
          return ${element_type.name()}
       is
-        (${element_type.name()}
-           (Node_Bump_Ptr_Vectors.Get_At_Index (L.Vec, Index + 1)));
-      --  L.Vec is 1-based but Index is 0-based
+        (${element_type.name()} (L.Nodes (Index + 1)));
+      --  L.Nodes is 1-based but Index is 0-based
 
-      function Length (Node : ${type_name}) return Natural is (Node.Length);
+      function Length (Node : ${type_name}) return Natural is (Node.Count);
       --  Wrapper around the Length primitive to get the compiler happy for the
       --  the package instantiation below.
 

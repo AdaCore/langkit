@@ -1436,13 +1436,16 @@ private
    % endif
    % endfor
 
-   package Node_Bump_Ptr_Vectors is new Langkit_Support.Bump_Ptr.Vectors
-     (Element_Type => ${root_node_type_name});
+   package Alloc_AST_List_Array is new Langkit_Support.Bump_Ptr.Array_Alloc
+     (Element_T  => ${root_node_type_name},
+      Index_Type => Positive);
+   use type Alloc_AST_List_Array.Element_Array_Access;
 
    type ${generic_list_value_type} is
       abstract new ${root_node_value_type}
    with record
-      Vec : Node_Bump_Ptr_Vectors.Vector;
+      Count : Natural;
+      Nodes : Alloc_AST_List_Array.Element_Array_Access;
    end record;
 
    overriding procedure Destroy_Node
