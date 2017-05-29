@@ -806,18 +806,26 @@ class Argument(object):
     Holder for properties arguments.
     """
 
-    def __init__(self, name, type, is_explicit=True):
+    def __init__(self, name, type, is_explicit=True, abstract_var=None):
+        """
+        :param names.Name name: Argument name.
+        :param CompiledType type: Argument type.
+        :param bool is_explicit: Whether the argument is explicit. Note that
+            only properties can accept implicit arguments.
+        :param AbstractVariable|None abstract_var: For properties only. If
+            provided, use it as the abstract variable to reference this
+            argument. If not provided, an AbstractVariable instance is
+            automatically created.
+        """
         from langkit.expressions.base import AbstractVariable
-        self.var = AbstractVariable(name, type, source_name=name)
+        self.name = name
+        self.var = (abstract_var
+                    or AbstractVariable(name, type, source_name=name))
         self.is_explicit = is_explicit
 
     @property
     def type(self):
         return self.var.type
-
-    @property
-    def name(self):
-        return self.var._name
 
 
 class AbstractNodeData(object):

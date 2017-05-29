@@ -2141,16 +2141,14 @@ class PropertyDef(AbstractNodeData):
 
         return resolve_type(self.constructed_expr.type)
 
-    def _add_argument(self, name, type, is_explicit=True):
+    def _add_argument(self, name, type, is_explicit=True, abstract_var=None):
         """
         Helper to add an argument to this property.
 
-        This basically just fills the .arguments list.
-
-        :param str names.Name: Name for this argument.
-        :param CompiledType type: Type argument. Type for this argument.
+        This basically just fills the .arguments list. See Argument's
+        constructor for parameters documentation.
         """
-        self.arguments.append(Argument(name, type, is_explicit))
+        self.arguments.append(Argument(name, type, is_explicit, abstract_var))
 
     @property
     @memoized
