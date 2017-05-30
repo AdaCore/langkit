@@ -1396,18 +1396,6 @@ class AbstractVariable(AbstractExpression):
         scope.add(self.local_var)
         self._name = self.local_var.name
 
-    @contextmanager
-    def bind_name(self, name):
-        """
-        Bind the name of this var.
-
-        :param name: The new name.
-        """
-        _old_name = self._name
-        self._name = name
-        yield
-        self._name = _old_name
-
     def construct(self):
         key = (self._name, self._type)
         try:
@@ -1432,6 +1420,114 @@ class AbstractVariable(AbstractExpression):
         return "<Var {}>".format(self.source_name.lower
                                  if self.source_name else
                                  self._name.camel_with_underscores)
+
+
+class DynamicVariable(AbstractVariable):
+    """
+    Reference to a dynamic property variable.
+    """
+
+    def __init__(self, name, type):
+        """
+        Create a dynamic variable.
+
+        These are implemented as optional arguments in properties.
+
+        :param str name: Lower-case name for this variable.
+        :param CompiledType type: Variable type.
+        """
+        self.argument_name = names.Name.from_lower(name)
+        super(DynamicVariable, self).__init__(self.argument_name, type)
+        self._is_bound = False
+
+    @contextmanager
+    def bind_name(self, name):
+        """
+        Bind the name of this var.
+
+        :param name: The new name.
+        """
+        _old_name = self._name
+        self._name = name
+        yield
+        self._name = _old_name
+
+    def is_accepted_in(self, prop):
+        """
+        Return whether `self` is accepted as an optional argument in the given
+        property.
+
+        :param PropertyDef|None prop: Property to test. If None, this returns
+            False.
+        :rtype: bool
+        """
+        if prop is None:
+            return False
+        for arg in prop.arguments:
+            if arg.var is self:
+                return True
+        else:
+            return False
+
+    @property
+    def is_bound(self):
+        """
+        Return whether this dynamic variable is bound.
+
+        This returns true iff at least one of the following conditions is True:
+
+          * the current property accepts this implicit argument;
+          * it is currently bound, through the .eval_in_env construct.
+
+        :rtype: bool
+        """
+        return self.is_accepted_in(PropertyDef.get()) or self._is_bound
+
+    @contextmanager
+    def bind(self):
+        """
+        Tag this dynamic variable as being bound.
+
+        This is used during the "construct" pass to check that all uses are
+        made in a context where it is legal.
+        """
+        saved_is_bound = self._is_bound
+        self._is_bound = True
+        yield
+        self._is_bound = saved_is_bound
+
+    @contextmanager
+    def bind_default(self, prop):
+        """
+        Context manager to setup the default binding for this dynamic variable
+        in "prop".
+
+        This means: no binding if this property does not accept `self` as an
+        implicit argument, and the default one if it does.
+
+        :type prop: PropertyDef
+        """
+        if self.is_accepted_in(prop):
+            with self.bind_name(self.argument_name):
+                yield
+        else:
+            saved_is_bound = self._is_bound
+            self._is_bound = False
+            yield
+            self._is_bound = saved_is_bound
+
+    def construct(self):
+        check_source_language(
+            self.is_bound,
+            '{} is not bound in this context: please use the .eval_in_env'
+            ' construct to bind it first.'.format(
+                self.argument_name.lower
+            )
+        )
+        return super(DynamicVariable, self).construct()
+
+    def __repr__(self):
+        return '<DynamicVariable {}>'.format(self.argument_name.lower)
 
 
 class SelfVariable(AbstractVariable):
