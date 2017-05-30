@@ -1408,19 +1408,6 @@ class AbstractVariable(AbstractExpression):
         yield
         self._name = _old_name
 
-    @contextmanager
-    def bind_type(self, type):
-        """
-        Bind the type of this var.
-
-        :param langkit.compiled_types.CompiledType type: Type parameter. The
-            type of this placeholder.
-        """
-        _old_type = self._type
-        self._type = type
-        yield
-        self._type = _old_type
-
     def construct(self):
         key = (self._name, self._type)
         try:
@@ -1447,7 +1434,30 @@ class AbstractVariable(AbstractExpression):
                                  self._name.camel_with_underscores)
 
 
-Self = AbstractVariable(names.Name("Self"))
+class SelfVariable(AbstractVariable):
+
+    _singleton = None
+
+    def __init__(self):
+        assert SelfVariable._singleton is None
+        SelfVariable._singleton = self
+        super(SelfVariable, self).__init__(names.Name('Self'))
+
+    @contextmanager
+    def bind_type(self, type):
+        """
+        Bind the type of this variable.
+
+        :param langkit.compiled_types.CompiledType type: Type parameter. The
+            type of this placeholder.
+        """
+        _old_type = self._type
+        self._type = type
+        yield
+        self._type = _old_type
+
+
+Self = SelfVariable()
 
 
 @attr_expr("symbol")
