@@ -827,6 +827,10 @@ class Argument(object):
     def type(self):
         return self.var.type
 
+    def __repr__(self):
+        return '<Argument {} : {}>'.format(self.name.lower,
+                                           self.type.name().camel)
+
 
 class AbstractNodeData(object):
     """
