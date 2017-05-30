@@ -463,7 +463,8 @@ class FieldAccess(AbstractExpression):
                 # If the property has an implicit env argument, then pass it
                 # along.
                 if self.node_data.has_implicit_env:
-                    args.append((PropertyDef.env_arg_name, str(Env._name)))
+                    args.append((PropertyDef.env_arg_name,
+                                 self.implicit_env.render_expr()))
 
                 # If the called property uses environments, it will need and
                 # env rebindings parameter.

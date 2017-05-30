@@ -190,14 +190,11 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
 
 class EnvBindExpr(ComputingExpr):
 
-    def __init__(self, env_expr, to_eval_expr, abstract_expr=None):
-        self.to_eval_expr = to_eval_expr
+    def __init__(self, env_expr, env_var, to_eval_expr, abstract_expr=None):
         self.env_expr = env_expr
+        self.env_var = env_var
+        self.to_eval_expr = to_eval_expr
         self.static_type = self.to_eval_expr.type
-
-        # Declare a variable that will hold the value of the bound environment
-        self.env_var = PropertyDef.get().vars.create('New_Bound_Env',
-                                                     LexicalEnvType)
 
         super(EnvBindExpr, self).__init__('Env_Bind_Result',
                                           abstract_expr=abstract_expr)
@@ -214,14 +211,12 @@ class EnvBindExpr(ComputingExpr):
             assign_var(self.env_var.ref_expr, self.env_expr.render_expr()),
         ]
 
-        # Then we can compute the nested expression with the bound
-        # environment.
-        with Env.bind_name(self.env_var.name):
-            result.extend([
-                self.to_eval_expr.render_pre(),
-                assign_var(self.result_var.ref_expr,
-                           self.to_eval_expr.render_expr())
-            ])
+        # Then we can compute the nested expression with the bound environment
+        result.extend([
+            self.to_eval_expr.render_pre(),
+            assign_var(self.result_var.ref_expr,
+                       self.to_eval_expr.render_expr())
+        ])
 
         return '\n'.join(result)
 
@@ -245,8 +240,10 @@ def eval_in_env(self, env_expr, to_eval_expr):
     :param AbstractExpression to_eval_expr: The expression to eval.
     """
     env_resolved_expr = construct(env_expr, LexicalEnvType)
-    with Env.bind():
-        return EnvBindExpr(env_resolved_expr, construct(to_eval_expr),
+    env_var = PropertyDef.get().vars.create('New_Bound_Env',
+                                            LexicalEnvType)
+    with Env.bind(), Env.bind_name(env_var.name):
+        return EnvBindExpr(env_resolved_expr, env_var, construct(to_eval_expr),
                            abstract_expr=self)
 
 
