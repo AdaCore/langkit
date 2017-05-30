@@ -2447,6 +2447,11 @@ class PropertyDef(AbstractNodeData):
         if self.uses_entity_info:
             self.set_uses_entity_info()
 
+        # At this point, we assume the list of argument has reached its final
+        # state.
+        assert self.is_private or not any(arg.is_artificial
+                                          for arg in self.arguments)
+
     @memoized
     def _set_uses_entity_info(self):
         """
