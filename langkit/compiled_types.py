@@ -806,12 +806,12 @@ class Argument(object):
     Holder for properties arguments.
     """
 
-    def __init__(self, name, type, is_explicit=True, abstract_var=None):
+    def __init__(self, name, type, is_optional=False, abstract_var=None):
         """
         :param names.Name name: Argument name.
         :param CompiledType type: Argument type.
-        :param bool is_explicit: Whether the argument is explicit. Note that
-            only properties can accept implicit arguments.
+        :param bool is_optional: Whether the argument is optional. Note that
+            only properties can accept optional arguments.
         :param AbstractVariable|None abstract_var: For properties only. If
             provided, use it as the abstract variable to reference this
             argument. If not provided, an AbstractVariable instance is
@@ -821,7 +821,7 @@ class Argument(object):
         self.name = name
         self.var = (abstract_var
                     or AbstractVariable(name, type, source_name=name))
-        self.is_explicit = is_explicit
+        self.is_optional = is_optional
 
     @property
     def type(self):

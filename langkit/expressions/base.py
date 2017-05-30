@@ -2146,14 +2146,14 @@ class PropertyDef(AbstractNodeData):
 
         return resolve_type(self.constructed_expr.type)
 
-    def _add_argument(self, name, type, is_explicit=True, abstract_var=None):
+    def _add_argument(self, name, type, is_optional=False, abstract_var=None):
         """
         Helper to add an argument to this property.
 
         This basically just fills the .arguments list. See Argument's
         constructor for parameters documentation.
         """
-        self.arguments.append(Argument(name, type, is_explicit, abstract_var))
+        self.arguments.append(Argument(name, type, is_optional, abstract_var))
 
     @property
     @memoized
@@ -2436,7 +2436,7 @@ class PropertyDef(AbstractNodeData):
             from langkit.expressions.envs import Env
             self._add_argument(PropertyDef.env_arg_name,
                                LexicalEnvType,
-                               False,
+                               True,
                                Env)
 
         # If this property has been explicitly marked as using entity info,
@@ -2451,7 +2451,7 @@ class PropertyDef(AbstractNodeData):
         only once on each property.
         """
         # Add the entity info argument
-        self._add_argument(PropertyDef.entity_info_name, T.entity_info, False)
+        self._add_argument(PropertyDef.entity_info_name, T.entity_info, True)
         self.entity_info_arg = self.arguments[-1]
         self.uses_entity_info = True
 
@@ -2592,13 +2592,14 @@ class PropertyDef(AbstractNodeData):
 
     @property
     def exposed_implicit_arguments(self):
-        _, impl = funcy.split_by(lambda a: a.is_explicit, self.arguments)
+        _, impl = funcy.split_by(lambda a: not a.is_optional, self.arguments)
         return [a for a in impl if a.type._exposed]
 
     @property
     def explicit_arguments(self):
-        expl, impl = funcy.split_by(lambda a: a.is_explicit, self.arguments)
-        assert all(not a.is_explicit for a in impl), (
+        expl, impl = funcy.split_by(lambda a: not a.is_optional,
+                                    self.arguments)
+        assert all(a.is_optional for a in impl), (
             "All explicit arguments must come before implicit ones"
         )
         return expl
