@@ -82,6 +82,10 @@ class RefEnvs(object):
             not self.resolver.natural_arguments,
             'Referenced environment resolver must take no argument'
         )
+        check_source_language(
+            not self.resolver.has_implicit_env,
+            'Referenced environment resolver must not accept an implicit env'
+        )
 
 
 def add_to_env(mappings, dest_env=None, metadata=None, is_post=False,

@@ -36,7 +36,7 @@ class Name(FooNode):
     def ambiant_entity():
         return Env.get(Self.sym).at(0)
 
-    @langkit_property(has_implicit_env=True)
+    @langkit_property()
     def designated_env():
         return Self.unit.root.node_env.get(Self.sym).at(0).children_env
 
