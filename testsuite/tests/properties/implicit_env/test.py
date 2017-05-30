@@ -7,7 +7,7 @@ from langkit.compiled_types import (
     ASTNode, BoolType, root_grammar_class
 )
 from langkit.diagnostics import Diagnostics
-from langkit.expressions import AbstractProperty, Literal, Property
+from langkit.expressions import AbstractProperty, Literal, Property, Self
 from langkit.parsers import Grammar, Row
 
 from utils import emit_and_print_errors
@@ -36,8 +36,9 @@ def run(abstract_has_implicit_env, concrete_has_implicit_env):
 
     class AbstractNode(RootNode):
         prop = AbstractProperty(BoolType,
-                                has_implicit_env=abstract_has_implicit_env,
-                                public=True)
+                                has_implicit_env=abstract_has_implicit_env)
+
+        use_prop = Property(Self.node_env.eval_in_env(Self.prop), public=True)
 
     class ConcreteNode(AbstractNode):
         prop = Property(Literal(True),

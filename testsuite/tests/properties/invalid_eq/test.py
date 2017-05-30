@@ -27,7 +27,8 @@ def run(name, lhs, rhs):
         pass
 
     class Example(FooNode):
-        prop = Property(lhs.equals(rhs), has_implicit_env=True, public=True)
+        prop = Property(lhs.equals(rhs), has_implicit_env=True)
+        use_prop = Property(Self.node_env.eval_in_env(Self.prop), public=True)
 
     class Lit(FooNode):
         pass

@@ -2428,6 +2428,11 @@ class PropertyDef(AbstractNodeData):
 
         # Add the implicit lexical env. parameter if required
         if self.has_implicit_env:
+            check_source_language(
+                self.is_private,
+                'A public property cannot take an implicit env argument'
+            )
+
             from langkit.expressions.envs import Env
             self._add_argument(PropertyDef.env_arg_name,
                                LexicalEnvType,
