@@ -32,7 +32,7 @@ is
      (${property.self_arg_name});
    ${gdb_helper('bind', 'self', 'Self')}
 
-   % for arg in property.explicit_arguments:
+   % for arg in property.mandatory_arguments:
    ${gdb_helper('bind', arg.name.lower, arg.name.camel_with_underscores)}
    % endfor
 

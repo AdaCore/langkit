@@ -20,7 +20,7 @@
 
             explicit_args = [
                 unwrap_arg(arg.type, arg.name.lower)
-                for arg in field.explicit_arguments
+                for arg in field.mandatory_arguments
             ]
             implicit_args = [
                 # If we must use implicit args, unwrap them from the "kwargs"
@@ -34,7 +34,7 @@
                  ) if with_implicit_args else unwrap_arg(
                     arg.type, arg.type.py_nullexpr()
                 )
-                for arg in field.exposed_implicit_arguments
+                for arg in field.exposed_optional_arguments
             ]
             eval_args = ([c_result_constructor, c_accessor]
                          + explicit_args + implicit_args)
@@ -67,13 +67,13 @@
 
     % for field in cls.fields_with_accessors():
     <% arg_list = ['self'] + [a.name.lower
-                              for a in field.explicit_arguments] %>
-    % if not field.explicit_arguments:
+                              for a in field.mandatory_arguments] %>
+    % if not field.mandatory_arguments:
     @property
     % endif
     def ${field.name.lower}(${', '.join(arg_list)}):
         ${py_doc(field, 8)}
-        % if field.exposed_implicit_arguments:
+        % if field.exposed_optional_arguments:
         return self._${field.name.lower}(${', '.join(arg_list[1:])})
         % else:
         ${accessor_body(field, False)}
@@ -83,9 +83,9 @@
     ## Then, for properties with implicit arguments, emit private methods
 
     % for field in cls.fields_with_accessors():
-        % if field.exposed_implicit_arguments:
+        % if field.exposed_optional_arguments:
     <% arg_list = ['self'] + [a.name.lower
-                              for a in field.explicit_arguments] %>
+                              for a in field.mandatory_arguments] %>
     def _${field.name.lower}(${', '.join(arg_list)}, **kwargs):
         ${accessor_body(field, True)}
         % endif

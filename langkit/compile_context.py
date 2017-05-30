@@ -1536,6 +1536,6 @@ class CompileCtx(object):
             expose(f.type, f,
                    'return type' if f.is_property else 'type',
                    [f.qualname])
-            for arg in f.explicit_arguments:
+            for arg in f.natural_arguments:
                 expose(arg.type, f, '"{}" argument'.format(arg.name),
                        [f.qualname])

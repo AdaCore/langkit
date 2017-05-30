@@ -79,7 +79,7 @@ class RefEnvs(object):
             )
         )
         check_source_language(
-            not self.resolver.explicit_arguments,
+            not self.resolver.natural_arguments,
             'Referenced environment resolver must take no argument'
         )
 
@@ -319,7 +319,7 @@ class EnvSpec(object):
             explicit argument.
         :rtype: str
         """
-        assert not p.explicit_arguments
+        assert not p.natural_arguments
 
         with PropertyDef.bind_none(), \
                 Self.bind_type(self.ast_node), \

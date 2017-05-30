@@ -40,16 +40,16 @@
 
    ${accessor_profile(field)}
    is
-      % if field.exposed_implicit_arguments:
+      % if field.exposed_optional_arguments:
          pragma Unreferenced
            (${', '.join(arg.name.camel_with_underscores
-                        for arg in field.exposed_implicit_arguments)});
+                        for arg in field.exposed_optional_arguments)});
       % endif
 
       Unwrapped_Node : constant ${root_node_type_name} := Unwrap (Node);
       ## For each input argument, convert the C-level value into an Ada-level
       ## one.
-      % for arg in field.explicit_arguments:
+      % for arg in field.mandatory_arguments:
          <%
             arg_ref = arg.name
 
@@ -83,7 +83,7 @@
    begin
       Clear_Last_Exception;
 
-      % for arg in field.explicit_arguments:
+      % for arg in field.mandatory_arguments:
          % if is_token_type(arg.type):
             if Unwrap (${arg_ref}).Unit /= Unwrapped_Node.Unit then
                raise Constraint_Error with
@@ -102,7 +102,7 @@
                field_access = 'Typed_Node.{}'.format(field.name)
 
                actuals = ', '.join('{0.name} => Unwrapped_{0.name}'.format(a)
-                                   for a in field.explicit_arguments)
+                                   for a in field.mandatory_arguments)
                field_access = '{}{}'.format(
                    field_access,
                    ' ({})'.format(actuals)

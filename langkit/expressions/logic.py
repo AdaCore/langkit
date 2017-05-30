@@ -148,7 +148,7 @@ class Bind(AbstractExpression):
         # dependent).
 
         if self.eq_prop:
-            args = self.eq_prop.explicit_arguments
+            args = self.eq_prop.natural_arguments
             check_multiple([
                 (self.eq_prop.type == BoolType,
                  "Equality property must return boolean"),
@@ -373,7 +373,7 @@ class Predicate(AbstractExpression):
         exprs = [construct(e) for e in self.exprs]
 
         prop_types = [self.pred_property.struct] + [
-            a.type for a in self.pred_property.explicit_arguments
+            a.type for a in self.pred_property.natural_arguments
         ]
 
         # Separate logic variable expressions from extra argument expressions

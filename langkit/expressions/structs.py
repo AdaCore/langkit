@@ -450,7 +450,7 @@ class FieldAccess(AbstractExpression):
                 args = [
                     (formal.name, actual.render_expr())
                     for actual, formal in zip(
-                        self.arguments, self.node_data.explicit_arguments
+                        self.arguments, self.node_data.natural_arguments
                     )
                 ]
 
@@ -607,11 +607,11 @@ class FieldAccess(AbstractExpression):
         # Check that this property actually accepts these arguments and that
         # they are correctly typed.
         check_source_language(
-            len(self.arguments) == len(to_get.explicit_arguments),
+            len(self.arguments) == len(to_get.natural_arguments),
             'Invalid number of arguments in the call to {}:'
             ' {} expected but got {}'.format(
                 to_get.qualname,
-                len(to_get.explicit_arguments),
+                len(to_get.natural_arguments),
                 len(self.arguments),
             )
         )
@@ -623,7 +623,7 @@ class FieldAccess(AbstractExpression):
                     formal.name, i, to_get.qualname,
                 ) + ' expected {expected} but got {expr_type}'
             ) for i, (actual, formal) in enumerate(
-                zip(self.arguments, to_get.explicit_arguments), 1
+                zip(self.arguments, to_get.natural_arguments), 1
             )
         ]
 

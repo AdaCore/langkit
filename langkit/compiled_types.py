@@ -1061,20 +1061,37 @@ class AbstractNodeData(object):
         return self.struct.name() + self.name
 
     @property
-    def exposed_implicit_arguments(self):
+    def exposed_optional_arguments(self):
         """
-        Return the subset of "self.arguments" that are implicit arguments for
+        Return the subset of "self.arguments" that are optional arguments for
         which the type is exposed in public APIs.
+
+        This property makes sense in a code generation context.
 
         :rtype: list[Argument]
         """
         return []
 
     @property
-    def explicit_arguments(self):
+    def mandatory_arguments(self):
         """
-        Return the subset of "self.arguments" that are explicit arguments, that
-        is to say the subset that users actually handle in expressions.
+        Return the subset of "self.arguments" that are mandatory arguments,
+        i.e. excluding optional arguments.
+
+        This property makes sense in a code generation context.
+
+        :rtype: list[Argument]
+        """
+        return self.arguments
+
+    @property
+    def natural_arguments(self):
+        """
+        Return the subset of "self.arguments" that are non-artificial
+        arguments, that is to say the subset that users actually handle in
+        expressions.
+
+        This property makes sense in user-facing layers.
 
         :rtype: list[Argument]
         """
@@ -1083,11 +1100,11 @@ class AbstractNodeData(object):
     @property
     def exposed_arguments(self):
         """
-        Shortcut for explicit_arguments + exposed_implicit_arguments.
+        Shortcut for mandatory_arguments + exposed_optional_arguments.
 
         :rtype: list[Argument]
         """
-        return self.explicit_arguments + self.exposed_implicit_arguments
+        return self.mandatory_arguments + self.exposed_optional_arguments
 
     @classmethod
     def filter_fields(cls, mapping):

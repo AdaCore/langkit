@@ -2367,8 +2367,8 @@ class PropertyDef(AbstractNodeData):
                     # propagate it.
                     self.expected_type = self.base_property.expected_type
 
-            args = self.explicit_arguments
-            base_args = self.base_property.explicit_arguments
+            args = self.natural_arguments
+            base_args = self.base_property.natural_arguments
             check_source_language(
                 len(args) == len(base_args),
                 "Derived and base properties don't have the same number"
@@ -2406,8 +2406,8 @@ class PropertyDef(AbstractNodeData):
                 ' arguments'
             )
             check_source_language(
-                not self.explicit_arguments,
-                'A memoized property is not allowed to take explicit arguments'
+                not self.arguments,
+                'A memoized property is not allowed to take arguments'
             )
 
         if self.external:
@@ -2446,11 +2446,6 @@ class PropertyDef(AbstractNodeData):
         # then set the relevant internal data.
         if self.uses_entity_info:
             self.set_uses_entity_info()
-
-        # At this point, we assume the list of argument has reached its final
-        # state.
-        assert self.is_private or not any(arg.is_artificial
-                                          for arg in self.arguments)
 
     @memoized
     def _set_uses_entity_info(self):
@@ -2600,18 +2595,27 @@ class PropertyDef(AbstractNodeData):
         return self._doc
 
     @property
-    def exposed_implicit_arguments(self):
-        _, impl = funcy.split_by(lambda a: not a.is_optional, self.arguments)
-        return [a for a in impl if a.type._exposed]
+    def exposed_optional_arguments(self):
+        _, opt = funcy.split_by(lambda a: not a.is_optional, self.arguments)
+        return [a for a in opt if a.type._exposed]
 
     @property
-    def explicit_arguments(self):
-        expl, impl = funcy.split_by(lambda a: not a.is_optional,
-                                    self.arguments)
-        assert all(a.is_optional for a in impl), (
-            "All explicit arguments must come before implicit ones"
+    def mandatory_arguments(self):
+        mand, opt = funcy.split_by(lambda a: not a.is_optional,
+                                   self.arguments)
+        assert all(a.is_optional for a in opt), (
+            'All optional arguments must come before implicit ones'
         )
-        return expl
+        return mand
+
+    @property
+    def natural_arguments(self):
+        non_art, art = funcy.split_by(lambda a: not a.is_artificial,
+                                      self.arguments)
+        assert all(a.is_artificial for a in art), (
+            'All artificial arguments must come after all the other ones'
+        )
+        return non_art
 
     @memoized
     def do_generate_logic_predicate(self, *partial_args_types):
@@ -2652,8 +2656,8 @@ class PropertyDef(AbstractNodeData):
         :param [CompiledType] partial_args_types: The type of partially applied
             arguments passed to the logic predicate.
         """
-        exp_args = self.explicit_arguments[:len(self.explicit_arguments)
-                                           - len(partial_args_types)]
+        exp_args = self.mandatory_arguments[:len(self.mandatory_arguments)
+                                            - len(partial_args_types)]
 
         ret = [self.struct] + [a.type for a in exp_args]
         return ret
@@ -2692,7 +2696,7 @@ class PropertyDef(AbstractNodeData):
             arg: False
             for arg in (self.constructed_expr.bindings
                         + [construct(arg.var)
-                           for arg in self.explicit_arguments])
+                           for arg in self.natural_arguments])
         }
 
         def mark_vars(expr):
