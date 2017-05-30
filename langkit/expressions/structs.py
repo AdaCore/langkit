@@ -378,6 +378,12 @@ class FieldAccess(AbstractExpression):
             self.arguments = arguments
             self.implicit_deref = implicit_deref
 
+            if (
+                isinstance(self.node_data, PropertyDef)
+                and self.node_data.has_implicit_env
+            ):
+                self.implicit_env = construct(Env)
+
             # Create a variable for all field accesses in properties. This is
             # needed because the property will return an owning reference, so
             # we need it to be attached to the scope. In other cases, this can
