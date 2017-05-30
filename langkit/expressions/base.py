@@ -2447,6 +2447,18 @@ class PropertyDef(AbstractNodeData):
         if self.uses_entity_info:
             self.set_uses_entity_info()
 
+        # At this point, we assume the list of argument has reached its final
+        # state.
+
+        if self.base_property:
+            args = len(self.arguments)
+            base_args = len(self.base_property.arguments)
+            assert args == base_args, (
+                '{} has {} arguments, whereas its base property {} has {}'
+                ' ones'.format(self.qualname, args,
+                               self.base_property.qualname, base_args)
+            )
+
     @memoized
     def _set_uses_entity_info(self):
         """
