@@ -40,9 +40,12 @@ class DynamicVariable(AbstractVariable):
         Return whether `self` is accepted as an optional argument in the given
         property.
 
-        :param PropertyDef prop: Property to test.
+        :param PropertyDef|None prop: Property to test. If None, this returns
+            False.
         :rtype: bool
         """
+        if prop is None:
+            return False
         for arg in prop.arguments:
             if arg.var is self:
                 return True
