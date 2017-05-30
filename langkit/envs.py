@@ -240,7 +240,7 @@ class EnvSpec(object):
                 expr, AbstractNodeData.PREFIX_INTERNAL,
                 name=names.Name('_{}_{}'.format(name,
                                                 next(self.PROPERTY_COUNT))),
-                public=False, type=type, has_implicit_env=True
+                public=False, type=type
             )
             result.append(p)
             return p
