@@ -806,12 +806,17 @@ class Argument(object):
     Holder for properties arguments.
     """
 
-    def __init__(self, name, type, is_optional=False, abstract_var=None):
+    def __init__(self, name, type, is_optional=False, is_artificial=False,
+                 abstract_var=None):
         """
         :param names.Name name: Argument name.
         :param CompiledType type: Argument type.
         :param bool is_optional: Whether the argument is optional. Note that
-            only properties can accept optional arguments.
+            only properties can accept optional arguments, and such arguments
+            must be artificial.
+        :param bool is_artificial: Whether the argument was automatically
+            created by Langkit, i.e. the language specification did not mention
+            it.
         :param AbstractVariable|None abstract_var: For properties only. If
             provided, use it as the abstract variable to reference this
             argument. If not provided, an AbstractVariable instance is
@@ -822,6 +827,8 @@ class Argument(object):
         self.var = (abstract_var
                     or AbstractVariable(name, type, source_name=name))
         self.is_optional = is_optional
+        self.is_artificial = is_artificial
+        assert not is_optional or is_artificial
 
     @property
     def type(self):

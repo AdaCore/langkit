@@ -2146,14 +2146,16 @@ class PropertyDef(AbstractNodeData):
 
         return resolve_type(self.constructed_expr.type)
 
-    def _add_argument(self, name, type, is_optional=False, abstract_var=None):
+    def _add_argument(self, name, type, is_optional=False, is_artificial=False,
+                      abstract_var=None):
         """
         Helper to add an argument to this property.
 
         This basically just fills the .arguments list. See Argument's
         constructor for parameters documentation.
         """
-        self.arguments.append(Argument(name, type, is_optional, abstract_var))
+        self.arguments.append(Argument(name, type, is_optional, is_artificial,
+                                       abstract_var))
 
     @property
     @memoized
@@ -2436,8 +2438,9 @@ class PropertyDef(AbstractNodeData):
             from langkit.expressions.envs import Env
             self._add_argument(PropertyDef.env_arg_name,
                                LexicalEnvType,
-                               True,
-                               Env)
+                               is_optional=True,
+                               is_artificial=True,
+                               abstract_var=Env)
 
         # If this property has been explicitly marked as using entity info,
         # then set the relevant internal data.
@@ -2451,7 +2454,8 @@ class PropertyDef(AbstractNodeData):
         only once on each property.
         """
         # Add the entity info argument
-        self._add_argument(PropertyDef.entity_info_name, T.entity_info, True)
+        self._add_argument(PropertyDef.entity_info_name, T.entity_info,
+                           is_optional=True, is_artificial=True)
         self.entity_info_arg = self.arguments[-1]
         self.uses_entity_info = True
 
