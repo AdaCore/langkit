@@ -2438,7 +2438,7 @@ class PropertyDef(AbstractNodeData):
             from langkit.expressions.envs import Env
             self._add_argument(PropertyDef.env_arg_name,
                                LexicalEnvType,
-                               is_optional=True,
+                               is_optional=False,
                                is_artificial=True,
                                abstract_var=Env)
 
