@@ -36,17 +36,6 @@ is
    ${gdb_helper('bind', arg.name.lower, arg.name.camel_with_underscores)}
    % endfor
 
-   % if property.has_implicit_env:
-      ## Properties are evaluated in the context of a lexical environment. If
-      ## none was passed to the property, we assume that the users want to
-      ## evaluate it in the context of the scope of the node.
-      Current_Env : AST_Envs.Lexical_Env :=
-        (if ${property.env_arg_name} /= Empty_Env
-         then ${property.env_arg_name}
-         else Node.Self_Env);
-   % endif
-   pragma Warnings (On, "is not referenced");
-
    Property_Result : ${property.type.name()} := ${property.type.nullexpr()};
 
    ## For each scope, there is one of the following subprograms that finalizes

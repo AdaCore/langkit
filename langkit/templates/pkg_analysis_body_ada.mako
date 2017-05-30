@@ -938,9 +938,9 @@ package body ${ada_lib_name}.Analysis is
    ---------------------
 
    function Pre_Env_Actions
-     (Self                  : access ${root_node_value_type};
-      Current_Env, Root_Env : AST_Envs.Lexical_Env;
-      Add_To_Env_Only       : Boolean := False) return AST_Envs.Lexical_Env
+     (Self                : access ${root_node_value_type};
+      Bound_Env, Root_Env : AST_Envs.Lexical_Env;
+      Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env
    is (null);
 
    ---------------------
@@ -2289,18 +2289,18 @@ package body ${ada_lib_name}.Analysis is
    is
 
       procedure Populate_Internal
-        (Node        : access ${root_node_value_type}'Class;
-         Current_Env : Lexical_Env);
+        (Node      : access ${root_node_value_type}'Class;
+         Bound_Env : Lexical_Env);
 
       -----------------------
       -- Populate_Internal --
       -----------------------
 
       procedure Populate_Internal
-        (Node        : access ${root_node_value_type}'Class;
-         Current_Env : Lexical_Env)
+        (Node      : access ${root_node_value_type}'Class;
+         Bound_Env : Lexical_Env)
       is
-         Initial_Env : Lexical_Env := Current_Env;
+         Initial_Env : Lexical_Env := Bound_Env;
       begin
          if Node = null then
             return;
@@ -2308,9 +2308,9 @@ package body ${ada_lib_name}.Analysis is
 
          --  By default (i.e. unless env actions add a new env),
          --  the environment we store in Node is the current one.
-         Node.Self_Env := Current_Env;
+         Node.Self_Env := Bound_Env;
 
-         Initial_Env := Node.Pre_Env_Actions (Current_Env, Root_Env);
+         Initial_Env := Node.Pre_Env_Actions (Bound_Env, Root_Env);
 
          --  Call recursively on children
          for C of ${root_node_array.api_name()}'(Children (Node))

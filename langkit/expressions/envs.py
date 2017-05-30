@@ -196,7 +196,7 @@ class EnvBindExpr(ComputingExpr):
         self.static_type = self.to_eval_expr.type
 
         # Declare a variable that will hold the value of the bound environment
-        self.env_var = PropertyDef.get().vars.create('Bound_Env',
+        self.env_var = PropertyDef.get().vars.create('New_Bound_Env',
                                                      LexicalEnvType)
 
         super(EnvBindExpr, self).__init__('Env_Bind_Result',
@@ -422,6 +422,6 @@ def as_entity(self, node):
     return ret
 
 
-Env = DynamicVariable('Current_Env', LexicalEnvType)
+Env = DynamicVariable(PropertyDef.env_arg_name.lower, LexicalEnvType)
 EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
                             type=LexicalEnvType)

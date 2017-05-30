@@ -1844,7 +1844,7 @@ class PropertyDef(AbstractNodeData):
 
     # Reserved names for arguments in generated subprograms
     self_arg_name = names.Name('Node')
-    env_arg_name = names.Name('Lex_Env')
+    env_arg_name = names.Name('Bound_Env')
     env_rebinding_name = names.Name('Envs_Rebindings')
     entity_info_name = names.Name('E_Info')
 

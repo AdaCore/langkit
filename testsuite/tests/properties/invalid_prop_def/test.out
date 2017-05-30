@@ -15,7 +15,7 @@ File "test.py", line 60, in BarNode.propyprop
 
 == Incorrect property definition 4 ==
 File "test.py", line 65, in BarNode.propyprop
-    Error: Cannot define reserved arguments (node, lex_env)
+    Error: Cannot define reserved arguments (node, bound_env)
 
 == Incorrect property definition 5 ==
 File "test.py", line 70, in BarNode.propyprop

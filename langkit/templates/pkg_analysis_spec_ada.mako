@@ -1259,9 +1259,9 @@ private
       new Langkit_Support.Vectors (${T.root_node.name()});
 
    function Pre_Env_Actions
-     (Self                  : access ${root_node_value_type};
-      Current_Env, Root_Env : AST_Envs.Lexical_Env;
-      Add_To_Env_Only       : Boolean := False) return AST_Envs.Lexical_Env;
+     (Self                : access ${root_node_value_type};
+      Bound_Env, Root_Env : AST_Envs.Lexical_Env;
+      Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env;
    --  Internal procedure that will execute all necessary lexical env actions
    --  for Node. This is meant to be called by Populate_Lexical_Env, and not by
    --  the user.
@@ -1269,8 +1269,8 @@ private
    --  Post_Env_Actions.
 
    procedure Post_Env_Actions
-     (Self        : access ${root_node_value_type};
-      Current_Env, Root_Env : AST_Envs.Lexical_Env) is null;
+     (Self                : access ${root_node_value_type};
+      Bound_Env, Root_Env : AST_Envs.Lexical_Env) is null;
    --  Internal procedure that will execute all post add to env actions for
    --  Node. This is meant to be called by Populate_Lexical_Env.
 

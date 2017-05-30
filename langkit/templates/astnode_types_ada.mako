@@ -231,15 +231,15 @@
    % if not cls.is_env_spec_inherited:
 
       overriding function Pre_Env_Actions
-        (Self                  : access ${type_name};
-         Current_Env, Root_Env : AST_Envs.Lexical_Env;
-         Add_To_Env_Only       : Boolean := False)
+        (Self                : access ${type_name};
+         Bound_Env, Root_Env : AST_Envs.Lexical_Env;
+         Add_To_Env_Only     : Boolean := False)
          return AST_Envs.Lexical_Env;
 
    % if cls.env_spec.has_post_actions:
       overriding procedure Post_Env_Actions
-        (Self                  : access ${type_name};
-         Current_Env, Root_Env : AST_Envs.Lexical_Env);
+        (Self                : access ${type_name};
+         Bound_Env, Root_Env : AST_Envs.Lexical_Env);
    % endif
 
    % if cls.env_spec._add_env:
@@ -627,12 +627,12 @@
       ## Define this constant so that the expressions below, which are expanded
       ## into property calls, can reference it as the currently bound
       ## environment.
-      Current_Env : constant Lexical_Env :=
+      Bound_Env : constant Lexical_Env :=
         (if State.Node.Parent /= null
          then State.Node.Parent.Self_Env
          else State.Node.Self_Env);
 
-      Initial_Env : Lexical_Env := Current_Env;
+      Initial_Env : Lexical_Env := Bound_Env;
    begin
       % if cls.env_spec.env_hook_enabled:
          ${ctx.env_hook_subprogram.fqn}
@@ -650,13 +650,13 @@
    ---------------------
 
    overriding function Pre_Env_Actions
-     (Self                  : access ${type_name};
-      Current_Env, Root_Env : AST_Envs.Lexical_Env;
-      Add_To_Env_Only       : Boolean := False) return AST_Envs.Lexical_Env
+     (Self                : access ${type_name};
+      Bound_Env, Root_Env : AST_Envs.Lexical_Env;
+      Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env
    is
       use AST_Envs;
 
-      Initial_Env : Lexical_Env := Current_Env;
+      Initial_Env : Lexical_Env := Bound_Env;
       G_State     : Env_Getter_State_T :=
         (Node => ${root_node_type_name} (Self));
 
@@ -669,7 +669,7 @@
       % if cls.base().env_spec and cls.env_spec.call_parents:
          Initial_Env := Pre_Env_Actions
            (${cls.base().value_type_name()} (Self.all)'Access,
-            Current_Env, Root_Env, Add_To_Env_Only);
+            Bound_Env, Root_Env, Add_To_Env_Only);
       % endif
 
       ## initial_env
@@ -741,16 +741,16 @@
    ----------------------
 
    overriding procedure Post_Env_Actions
-     (Self                  : access ${type_name};
-      Current_Env, Root_Env : AST_Envs.Lexical_Env)
+     (Self                : access ${type_name};
+      Bound_Env, Root_Env : AST_Envs.Lexical_Env)
    is
       use AST_Envs;
-      Initial_Env : Lexical_Env := Current_Env;
+      Initial_Env : Lexical_Env := Bound_Env;
    begin
       % if cls.base().env_spec and cls.env_spec.call_parents:
          Post_Env_Actions
            (${cls.base().value_type_name()} (Self.all)'Access,
-            Current_Env, Root_Env);
+            Bound_Env, Root_Env);
       % endif
 
       #############################
