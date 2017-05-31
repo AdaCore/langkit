@@ -9,7 +9,7 @@ library project ${lib_name} is
    type Build_Mode_Type is ("dev", "prod");
    Build_Mode : Build_Mode_Type := external ("BUILD_MODE", "dev");
 
-   type Library_Kind_Type is ("static", "relocatable");
+   type Library_Kind_Type is ("static", "relocatable", "static-pic");
    Library_Kind_Param : Library_Kind_Type :=
      external ("LIBRARY_TYPE", "relocatable");
 
