@@ -6,10 +6,11 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 
-from langkit.compiled_types import ASTNode, Field, T, root_grammar_class
+from langkit.compiled_types import (ASTNode, Field, LexicalEnvType, T,
+                                    root_grammar_class)
 from langkit.diagnostics import Diagnostics
 from langkit.envs import EnvSpec, add_to_env
-from langkit.expressions import Env, New, Self, langkit_property
+from langkit.expressions import DynamicVariable, New, Self, langkit_property
 from langkit.parsers import Grammar, List, Tok
 
 from lexer_example import Token
@@ -17,6 +18,7 @@ from utils import build_and_run
 
 
 Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
+Env = DynamicVariable('env', LexicalEnvType)
 
 
 @root_grammar_class()
@@ -45,9 +47,8 @@ class Ref(FooNode):
 
     @langkit_property(public=True)
     def resolve():
-        return Self.parent.parent.node_env.eval_in_env(
-            Env.get(Self.name.symbol).at(0)
-        )
+        return Env.bind(Self.parent.parent.node_env,
+                        Env.get(Self.name.symbol).at(0))
 
 
 foo_grammar = Grammar('main_rule')
