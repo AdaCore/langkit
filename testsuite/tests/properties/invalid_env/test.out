@@ -5,7 +5,7 @@ File "test.py", line 33, in ExampleNode.prop
 == <FieldAccess .implicit_prop> ==
 File "test.py", line 33, in ExampleNode.prop
   line 51, in FieldAccess expression
-    Error: This property has no implicit environment parameter whereas ExampleNode.p_implicit_prop expects one: please use the eval_in_env construct to bind an environment first.
+    Error: bound_env is not bound in this context: please use the .eval_in_env construct to bind it first.
 
 == <eval_in_env(<FieldAccess .node_env>, <get(<DynamicVariable bound_env>, <FieldAccess .tok>)>)> ==
 Code generation was successful
