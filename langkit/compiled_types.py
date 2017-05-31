@@ -1590,13 +1590,6 @@ class StructMetaclass(CompiledTypeMetaclass):
                         'Properties are not yet supported on plain structs'
                     )
 
-        # Consider that AST nodes with type annotations for all their fields
-        # are type resolved: they don't need to be referenced by the grammar.
-        cls.is_type_resolved = (is_astnode and
-                                all(f._type is not None
-                                    for f in cls._fields.values()
-                                    if isinstance(f, Field)))
-
         return cls
 
     @classmethod
@@ -2492,6 +2485,13 @@ class ASTNode(Struct):
         """
         Emit a non-fatal error if this ASTNode subclass is not type resolved.
         """
+        # Consider that AST nodes with type annotations for all their fields
+        # are type resolved: they don't need to be referenced by the grammar.
+        cls.is_type_resolved = (
+            cls.is_type_resolved
+            or all(f._type is not None for f in cls.get_parse_fields())
+        )
+
         check_source_language(
             cls.is_type_resolved,
             'Unresolved ASTNode subclass. Use it in the grammar or provide a'
