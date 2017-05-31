@@ -141,6 +141,10 @@ class Bind(AbstractExpression):
                      T.root_node.name().camel
                 )),
 
+                (not self.conv_prop.dynamic_vars,
+                 'Property passed to bind must have no dynamically bound'
+                 ' variable'),
+
                 (not self.conv_prop.has_implicit_env,
                  'Bind property must not have an implicit env'),
             ])
@@ -164,6 +168,9 @@ class Bind(AbstractExpression):
                  'Equality property: expected 1 argument, got {}'.format(
                      len(args)
                 )),
+
+                (not self.eq_prop.dynamic_vars,
+                 'Equality property must have no dynamically bound variable'),
 
                 (not self.eq_prop.has_implicit_env,
                  'Equality property must not have an implicit env'),
