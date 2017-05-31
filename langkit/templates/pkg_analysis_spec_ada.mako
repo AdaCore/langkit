@@ -771,17 +771,17 @@ package ${ada_lib_name}.Analysis is
    --  Debug helper: return a short representation of the string, containing
    --  just the kind name and the sloc.
 
-   procedure Print (Node   : access ${root_node_value_type};
-                    Prefix : String := "") is abstract;
-   --  Debug helper: print to standard output Node and all its children. Prefix
-   --  is prepended to each output line.
+   procedure Print (Node        : access ${root_node_value_type};
+                    Line_Prefix : String := "") is abstract;
+   --  Debug helper: print to standard output Node and all its children.
+   --  Line_Prefix is prepended to each output line.
 
    procedure PP_Trivia
-     (Node  : access ${root_node_value_type}'Class;
-      Prefix : String := "");
+     (Node        : access ${root_node_value_type}'Class;
+      Line_Prefix : String := "");
    --  Debug helper: print to standard output Node and all its children along
-   --  with the trivia associated to them. Prefix is prepended to each output
-   --  line.
+   --  with the trivia associated to them. Line_Prefix is prepended to each
+   --  output line.
 
 
    procedure Dump_Lexical_Env
@@ -914,7 +914,7 @@ package ${ada_lib_name}.Analysis is
       Result          : out ${root_node_type_name});
 
    overriding procedure Print
-     (Node : access ${generic_list_value_type}; Prefix : String := "");
+     (Node : access ${generic_list_value_type}; Line_Prefix : String := "");
 
    overriding function Is_Empty_List
      (Node : access ${generic_list_value_type}) return Boolean;

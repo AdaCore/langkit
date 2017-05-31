@@ -2263,12 +2263,12 @@ package body ${ada_lib_name}.Analysis is
    ---------------
 
    procedure PP_Trivia
-     (Node   : access ${root_node_value_type}'Class;
-      Prefix : String := "")
+     (Node        : access ${root_node_value_type}'Class;
+      Line_Prefix : String := "")
    is
-      Children_Prefix : constant String := Prefix & "|  ";
+      Children_Prefix : constant String := Line_Prefix & "|  ";
    begin
-      Put_Line (Prefix & Kind_Name (Node));
+      Put_Line (Line_Prefix & Kind_Name (Node));
       for C of Children_With_Trivia (Node) loop
          case C.Kind is
             when Trivia =>
@@ -3044,13 +3044,13 @@ package body ${ada_lib_name}.Analysis is
    -----------
 
    overriding procedure Print
-     (Node : access ${generic_list_value_type}; Prefix : String := "")
+     (Node : access ${generic_list_value_type}; Line_Prefix : String := "")
    is
       Class_Wide_Node : constant ${root_node_type_name} :=
          ${root_node_type_name} (Node);
    begin
       Put
-        (Prefix & Class_Wide_Node.Kind_Name
+        (Line_Prefix & Class_Wide_Node.Kind_Name
          & "[" & Image (Node.Sloc_Range) & "]");
       if Node.Count = 0 then
          Put_Line (": <empty list>");
@@ -3060,7 +3060,7 @@ package body ${ada_lib_name}.Analysis is
       New_Line;
       for Child of Node.Nodes (1 .. Node.Count) loop
          if Child /= null then
-            Child.Print (Prefix & "|  ");
+            Child.Print (Line_Prefix & "|  ");
          end if;
       end loop;
    end Print;

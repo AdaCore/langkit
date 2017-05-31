@@ -131,8 +131,8 @@
             Result          : out ${root_node_type_name});
 
          overriding procedure Print
-           (Node   : access ${type_name};
-            Prefix : String := "");
+           (Node        : access ${type_name};
+            Line_Prefix : String := "");
 
       % endif
    % endif
@@ -438,15 +438,15 @@
       -----------
 
       overriding procedure Print
-        (Node   : access ${type_name};
-         Prefix : String := "")
+        (Node        : access ${type_name};
+         Line_Prefix : String := "")
       is
          Class_Wide_Node : constant ${cls.name()} := ${cls.name()} (Node);
-         Attr_Prefix     : constant String := Prefix & "|";
-         Children_Prefix : constant String := Prefix & "|  ";
+         Attr_Prefix     : constant String := Line_Prefix & "|";
+         Children_Prefix : constant String := Line_Prefix & "|  ";
       begin
          Put_Line
-           (Prefix & Class_Wide_Node.Kind_Name
+           (Line_Prefix & Class_Wide_Node.Kind_Name
             & "[" & Image (Node.Sloc_Range) & "]");
 
          % for i, field in enumerate(repr_fields):
