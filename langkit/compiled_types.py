@@ -1941,8 +1941,8 @@ class Struct(CompiledType):
         # TODO: instead of expecting types to be subtypes, we might want to
         # perform type unification (take the nearest common ancestor for all
         # field types). But then again, maybe not, it might be too confusing.
-        if cls.is_type_resolved:
-            for field, f_type in zip(fields, types):
+        for field, f_type in zip(fields, types):
+            if field.type:
                 check_source_language(
                     issubclass(f_type, field.type),
                     "Field {} already had type {}, got {}".format(
