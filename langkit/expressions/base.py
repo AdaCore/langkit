@@ -1513,6 +1513,71 @@ class DynamicVariable(AbstractVariable):
         return '<DynamicVariable {}>'.format(self.argument_name.lower)
 
 
+class DynamicVariableBindExpr(ComputingExpr):
+
+    def __init__(self, dynvar, value_var, value, to_eval_expr,
+                 abstract_expr=None):
+        self.dynvar = dynvar
+        self.value_var = value_var
+        self.value = value
+        self.to_eval_expr = to_eval_expr
+        self.static_type = self.to_eval_expr.type
+
+        super(DynamicVariableBindExpr, self).__init__(
+            'Dyn_Var_Bind_Result',
+            abstract_expr=abstract_expr
+        )
+
+    def _render_pre(self):
+        return '\n'.join([
+            # First, compute the value to bind
+            self.value.render_pre(),
+            assign_var(self.value_var.ref_expr, self.value.render_expr()),
+
+            # Then we can compute the nested expression with the bound variable
+            self.to_eval_expr.render_pre(),
+            assign_var(self.result_var.ref_expr,
+                       self.to_eval_expr.render_expr())
+        ])
+
+    @property
+    def subexprs(self):
+        return {'var': self.dynvar,
+                'value': self.value,
+                'expr': self.to_eval_expr}
+
+    def __repr__(self):
+        return '<DynamicVariableBindExpr>'
+
+
+@auto_attr
+def bind(self, dynvar, value, to_eval_expr):
+    """
+    Expression that will bind the result of `value` to the `dynvar`
+    DynamicVariable in order to evaluate the `to_eval_expr` expression.
+
+    :param DynamicVariable dynvar: Dynamic variable to bind.
+    :param AbstractExpression value: Value to bind.
+    :param AbstractExpression to_eval_expr: Expression to evaluate with the
+        binding.
+    :rtype: ResolvedExpression
+    """
+    check_source_language(
+        isinstance(dynvar, DynamicVariable),
+        '.bind must be called on dynamic variables only'
+        ' (here, got: {})'.format(dynvar)
+    )
+    resolved_value = construct(value, dynvar.type)
+    value_var = PropertyDef.get().vars.create(
+        'Bound_{}'.format(dynvar.argument_name.camel_with_underscores),
+        dynvar.type
+    )
+    with dynvar._bind(value_var.name):
+        return DynamicVariableBindExpr(dynvar, value_var, resolved_value,
+                                       construct(to_eval_expr),
+                                       abstract_expr=self)
+
+
 class SelfVariable(AbstractVariable):
 
     _singleton = None
