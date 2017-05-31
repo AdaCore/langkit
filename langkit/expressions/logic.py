@@ -381,6 +381,9 @@ class Predicate(AbstractExpression):
                  T.root_node.name().camel
             )),
 
+            (not self.pred_property.dynamic_vars,
+             'Predicate property must have no dynamically bound variables'),
+
             (not self.pred_property.has_implicit_env,
              'Predicate property must not have an implicit env'),
         ])
