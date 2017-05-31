@@ -146,7 +146,7 @@ def reset_langkit():
     StructMetaclass.struct_types = []
     StructMetaclass.env_metadata = None
     StructMetaclass.entity_info = None
-    Self.__dict__['_frozen'] = False
+    Self.unfreeze()
 
     T._type_dict = {}
 
