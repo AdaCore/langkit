@@ -9,11 +9,11 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractVariable, AbstractExpression, BasicExpr, CallExpr, ComputingExpr,
-    DynamicVariable, FieldAccessExpr, GetSymbol, LiteralExpr, NullExpr,
-    PropertyDef, Self, auto_attr, auto_attr_custom, construct
+    AbstractVariable, AbstractExpression, BasicExpr, CallExpr, FieldAccessExpr,
+    GetSymbol, LiteralExpr, NullExpr, PropertyDef, Self, auto_attr,
+    auto_attr_custom, construct
 )
-from langkit.expressions.utils import array_aggr, assign_var
+from langkit.expressions.utils import array_aggr
 
 
 @auto_attr_custom("get")
@@ -89,65 +89,6 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
         T.root_node.entity().array_type().add_to_context()
         return make_expr("Create ({})".format(array_expr),
                          T.root_node.entity().array_type())
-
-
-class EnvBindExpr(ComputingExpr):
-
-    def __init__(self, env_expr, env_var, to_eval_expr, abstract_expr=None):
-        self.env_expr = env_expr
-        self.env_var = env_var
-        self.to_eval_expr = to_eval_expr
-        self.static_type = self.to_eval_expr.type
-
-        super(EnvBindExpr, self).__init__('Env_Bind_Result',
-                                          abstract_expr=abstract_expr)
-
-    def _render_pre(self):
-        # First, compute the environment to bind using the current one and
-        # store it in the "New_Env" local variable.
-        #
-        # We need to keep the environment live during the bind operation.
-        # That is why we store this environment in a temporary so that it
-        # is automatically deallocated when leaving the scope.
-        result = [
-            self.env_expr.render_pre(),
-            assign_var(self.env_var.ref_expr, self.env_expr.render_expr()),
-        ]
-
-        # Then we can compute the nested expression with the bound environment
-        result.extend([
-            self.to_eval_expr.render_pre(),
-            assign_var(self.result_var.ref_expr,
-                       self.to_eval_expr.render_expr())
-        ])
-
-        return '\n'.join(result)
-
-    @property
-    def subexprs(self):
-        return {'env': self.env_expr, 'expr': self.to_eval_expr}
-
-    def __repr__(self):
-        return '<EnvBind.Expr>'
-
-
-@auto_attr
-def eval_in_env(self, env_expr, to_eval_expr):
-    """
-    Expression that will evaluate a subexpression in the context of a
-    particular lexical environment. Not meant to be used directly, but instead
-    via the eval_in_env shortcut.
-
-    :param AbstractExpression env_expr: An expression that will return a
-        lexical environment in which we will eval to_eval_expr.
-    :param AbstractExpression to_eval_expr: The expression to eval.
-    """
-    env_resolved_expr = construct(env_expr, LexicalEnvType)
-    env_var = PropertyDef.get().vars.create('New_Bound_Env',
-                                            LexicalEnvType)
-    with Env._bind(env_var.name):
-        return EnvBindExpr(env_resolved_expr, env_var, construct(to_eval_expr),
-                           abstract_expr=self)
 
 
 @auto_attr
@@ -322,6 +263,5 @@ def as_entity(self, node):
     return ret
 
 
-Env = DynamicVariable(PropertyDef.env_arg_name.lower, LexicalEnvType)
 EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
                             type=LexicalEnvType)

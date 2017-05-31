@@ -11,9 +11,9 @@ import funcy
 
 from langkit import names
 from langkit.compiled_types import (
-    AbstractNodeData, Argument, ASTNode, BoolType, CompiledType,
-    LexicalEnvType, LongType, NoCompiledType, Symbol, T, Token, gdb_bind_var,
-    gdb_helper, get_context, render as ct_render, resolve_type
+    AbstractNodeData, Argument, ASTNode, BoolType, CompiledType, LongType,
+    NoCompiledType, Symbol, T, Token, gdb_bind_var, gdb_helper, get_context,
+    render as ct_render, resolve_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, WarningSet, check_multiple,
@@ -2008,9 +2008,9 @@ class PropertyDef(AbstractNodeData):
 
     def __init__(self, expr, prefix, name=None, doc=None, public=None,
                  abstract=False, type=None, abstract_runtime_check=False,
-                 dynamic_vars=None, has_implicit_env=None, memoized=False,
-                 external=False, uses_entity_info=None,
-                 force_dispatching=False, warn_on_unused=True):
+                 dynamic_vars=None, memoized=False, external=False,
+                 uses_entity_info=None, force_dispatching=False,
+                 warn_on_unused=True):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -2061,12 +2061,6 @@ class PropertyDef(AbstractNodeData):
             to override. Just like `public`, it must always be consistent with
             base classes.
 
-        :param bool|None has_implicit_env: Whether this property is passed an
-            implicit "current environment" parameter.  If None, inherit from
-            the overriden property, or False in there is no property to
-            override. Just like `public`, it must always be consistent with
-            base classes.
-
         :param bool memoized: Whether this property must be memoized. Disabled
             by default.
 
@@ -2115,7 +2109,6 @@ class PropertyDef(AbstractNodeData):
         self.abstract = abstract
         self.abstract_runtime_check = abstract_runtime_check
         self._dynamic_vars = dynamic_vars
-        self._has_implicit_env = has_implicit_env
 
         self.overriding_properties = set()
         """
@@ -2231,7 +2224,6 @@ class PropertyDef(AbstractNodeData):
             abstract=self.abstract,
             type=self.expected_type,
             dynamic_vars=self._dynamic_vars,
-            has_implicit_env=self._has_implicit_env,
             external=self.external,
         )
         new.vars = copy(self.vars)
@@ -2358,16 +2350,6 @@ class PropertyDef(AbstractNodeData):
         """
         assert self._dynamic_vars is not None
         return self._dynamic_vars
-
-    @property
-    def has_implicit_env(self):
-        """
-        Return whether this property is passed an implicit environment param.
-
-        :rtype: bool
-        """
-        assert self._has_implicit_env is not None
-        return self._has_implicit_env
 
     def prepare_abstract_expression(self, context):
         """
@@ -2521,21 +2503,6 @@ class PropertyDef(AbstractNodeData):
                 )
             self._dynamic_vars = base_dynvars
 
-            # Likewise for accepting an implicit environment parameter
-            if self._has_implicit_env is None:
-                self._has_implicit_env = self.base_property._has_implicit_env
-            else:
-                check_source_language(
-                    self._has_implicit_env
-                    == self.base_property.has_implicit_env,
-                    '{} has {} implicit environment parameter, so should have'
-                    ' {}'.format(
-                        self.base_property.qualname,
-                        'an' if self.base_property._has_implicit_env else 'no',
-                        self.qualname,
-                    )
-                )
-
             # We then want to check the consistency of type annotations if they
             # exist.
             if self.base_property.expected_type:
@@ -2578,13 +2545,11 @@ class PropertyDef(AbstractNodeData):
                 )
 
         else:
-            # By default, properties are private, they have no dynamically
-            # bound variable and they don't accept an implicit environment
-            # parameter.
+            # By default, properties are private and they have no dynamically
+            # bound variable.
             self._is_public = bool(self._is_public)
             if self._dynamic_vars is None:
                 self._dynamic_vars = []
-            self._has_implicit_env = bool(self._has_implicit_env)
 
         if self.memoized:
             check_source_language(
@@ -2595,11 +2560,6 @@ class PropertyDef(AbstractNodeData):
             check_source_language(
                 not self._dynamic_vars,
                 'A memoized property cannot have dynamically bound variables'
-            )
-            check_source_language(
-                not self.has_implicit_env,
-                'A memoized property is not allowed to take an implicit env'
-                ' arguments'
             )
             check_source_language(
                 not self.arguments,
@@ -2632,20 +2592,6 @@ class PropertyDef(AbstractNodeData):
         for dynvar in self._dynamic_vars:
             self._add_argument(dynvar.argument_name, dynvar.type,
                                is_artificial=True, abstract_var=dynvar)
-
-        # Add the implicit lexical env. parameter if required
-        if self.has_implicit_env:
-            check_source_language(
-                self.is_private,
-                'A public property cannot take an implicit env argument'
-            )
-
-            from langkit.expressions.envs import Env
-            self._add_argument(PropertyDef.env_arg_name,
-                               LexicalEnvType,
-                               is_optional=False,
-                               is_artificial=True,
-                               abstract_var=Env)
 
         # If this property has been explicitly marked as using entity info,
         # then set the relevant internal data.
@@ -2718,8 +2664,6 @@ class PropertyDef(AbstractNodeData):
 
         :type context: langkit.compile_context.CompileCtx
         """
-        from langkit.expressions.envs import Env
-
         # If expr has already been constructed, return
         if self.constructed_expr:
             return
@@ -2751,9 +2695,9 @@ class PropertyDef(AbstractNodeData):
                 )
             ) if self.base_property else None
 
-            # Reset the Env binding so that this construction does not use a
-            # caller's binding.
-            with Env.bind_default(self), nested(*[
+            # Reset bindings for dynamically bound variables so that this
+            # construction does not use a caller's binding.
+            with nested(*[
                 dynvar.bind_default(self) for dynvar in self.dynamic_vars
             ]):
                 self.in_type = True
@@ -2989,7 +2933,7 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 
 # noinspection PyPep8Naming
 def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
-             has_implicit_env=None, memoized=False):
+             memoized=False):
     """
     Public constructor for concrete properties. You can declare your properties
     on your AST node subclasses directly, like this::
@@ -3008,7 +2952,7 @@ def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
     """
     return PropertyDef(expr, AbstractNodeData.PREFIX_PROPERTY, doc=doc,
                        public=public, type=type, dynamic_vars=dynamic_vars,
-                       has_implicit_env=has_implicit_env, memoized=memoized)
+                       memoized=memoized)
 
 
 class AbstractKind(Enum):
@@ -3018,9 +2962,8 @@ class AbstractKind(Enum):
 
 
 def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
-                     dynamic_vars=None, has_implicit_env=None, memoized=False,
-                     external=False, uses_entity_info=None,
-                     warn_on_unused=True):
+                     dynamic_vars=None, memoized=False, external=False,
+                     uses_entity_info=None, warn_on_unused=True):
     """
     Decorator to create properties from real Python methods. See Property for
     more details.
@@ -3039,7 +2982,6 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
                               AbstractKind.abstract_runtime_check],
             abstract_runtime_check=kind == AbstractKind.abstract_runtime_check,
             dynamic_vars=dynamic_vars,
-            has_implicit_env=has_implicit_env,
             memoized=memoized,
             external=external,
             uses_entity_info=uses_entity_info,

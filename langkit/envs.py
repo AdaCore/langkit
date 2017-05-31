@@ -6,9 +6,7 @@ from itertools import count
 from langkit import names
 from langkit.compiled_types import AbstractNodeData, LexicalEnvType, T
 from langkit.diagnostics import check_source_language
-from langkit.expressions import (
-    Env, FieldAccess, PropertyDef, Self, construct
-)
+from langkit.expressions import FieldAccess, PropertyDef, Self, construct
 
 
 AddToEnv = namedtuple("AddToEnv", ["mappings", "dest_env", "metadata",
@@ -86,10 +84,6 @@ class RefEnvs(object):
             not self.resolver.dynamic_vars,
             'Referenced environment resolver must have no dynamically bound'
             ' variable'
-        )
-        check_source_language(
-            not self.resolver.has_implicit_env,
-            'Referenced environment resolver must not accept an implicit env'
         )
 
 
@@ -235,12 +229,6 @@ class EnvSpec(object):
             if expr is None:
                 return None
 
-            # Set has_implicit_env for these internal properties so that they
-            # can use a default environment that the context gives. This
-            # default will be the Self_Env of the parent node, which is always
-            # the same, regardless of being run in the populate lexical env
-            # pass or later on. See Initial_Env_Getter_Fn functions for the
-            # code that fetches this default environment.
             p = PropertyDef(
                 expr, AbstractNodeData.PREFIX_INTERNAL,
                 name=names.Name('_{}_{}'.format(name,
@@ -318,11 +306,6 @@ class EnvSpec(object):
                         'Entity resolver properties must have no dynamically'
                         ' bound variable'
                     )
-                    check_source_language(
-                        not resolver.has_implicit_env,
-                        'Entity resolver properties must not use implicit'
-                        ' environments'
-                    )
 
     def _render_field_access(self, p):
         """
@@ -336,8 +319,7 @@ class EnvSpec(object):
         assert not p.natural_arguments
 
         with PropertyDef.bind_none(), \
-                Self.bind_type(self.ast_node), \
-                Env._bind(Env.argument_name):
+                Self.bind_type(self.ast_node):
             return FieldAccess.Expr(construct(Self), p, []).render_expr()
 
     @property

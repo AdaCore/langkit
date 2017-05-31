@@ -14,7 +14,6 @@ from langkit.expressions import (
     attr_expr, construct, render
 )
 from langkit.expressions.boolean import Eq, If, Not
-from langkit.expressions.envs import Env
 from langkit.expressions.utils import assign_var
 from langkit.utils import TypeSet, memoized
 
@@ -381,8 +380,6 @@ class FieldAccess(AbstractExpression):
             if isinstance(self.node_data, PropertyDef):
                 self.dynamic_vars = [construct(dynvar)
                                      for dynvar in self.node_data.dynamic_vars]
-                if self.node_data.has_implicit_env:
-                    self.implicit_env = construct(Env)
 
             # Create a variable for all field accesses in properties. This is
             # needed because the property will return an owning reference, so
@@ -466,12 +463,6 @@ class FieldAccess(AbstractExpression):
                                           self.dynamic_vars):
                     args.append((formal.argument_name,
                                  actual.render_expr()))
-
-                # If the property has an implicit env argument, then pass it
-                # along.
-                if self.node_data.has_implicit_env:
-                    args.append((PropertyDef.env_arg_name,
-                                 self.implicit_env.render_expr()))
 
                 # If the called property uses environments, it will need and
                 # env rebindings parameter.

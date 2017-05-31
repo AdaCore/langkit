@@ -144,9 +144,6 @@ class Bind(AbstractExpression):
                 (not self.conv_prop.dynamic_vars,
                  'Property passed to bind must have no dynamically bound'
                  ' variable'),
-
-                (not self.conv_prop.has_implicit_env,
-                 'Bind property must not have an implicit env'),
             ])
 
         # Those checks are run in construct, because we need the eq_prop to be
@@ -171,9 +168,6 @@ class Bind(AbstractExpression):
 
                 (not self.eq_prop.dynamic_vars,
                  'Equality property must have no dynamically bound variable'),
-
-                (not self.eq_prop.has_implicit_env,
-                 'Equality property must not have an implicit env'),
             ])
 
             other_type = args[0].type
@@ -383,9 +377,6 @@ class Predicate(AbstractExpression):
 
             (not self.pred_property.dynamic_vars,
              'Predicate property must have no dynamically bound variables'),
-
-            (not self.pred_property.has_implicit_env,
-             'Predicate property must not have an implicit env'),
         ])
 
         exprs = [construct(e) for e in self.exprs]
