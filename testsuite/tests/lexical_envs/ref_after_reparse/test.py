@@ -7,10 +7,11 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 
-from langkit.compiled_types import ASTNode, Field, T, root_grammar_class
+from langkit.compiled_types import (ASTNode, LexicalEnvType, Field, T,
+                                    root_grammar_class)
 from langkit.diagnostics import Diagnostics
 from langkit.envs import EnvSpec, RefEnvs, add_to_env
-from langkit.expressions import Env, New, Self, langkit_property
+from langkit.expressions import DynamicVariable, New, Self, langkit_property
 from langkit.parsers import Grammar, List, Row, Tok
 
 from lexer_example import Token
@@ -18,6 +19,7 @@ from utils import build_and_run
 
 
 Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
+Env = DynamicVariable('env', LexicalEnvType)
 
 
 @root_grammar_class()
@@ -32,7 +34,7 @@ class Name(FooNode):
     def sym():
         return Self.tok.symbol
 
-    @langkit_property(has_implicit_env=True)
+    @langkit_property(dynamic_vars=[Env])
     def ambiant_entity():
         return Env.get(Self.sym).at(0)
 
@@ -42,7 +44,7 @@ class Name(FooNode):
 
     @langkit_property(public=True)
     def entity():
-        return Self.node_env.eval_in_env(Self.ambiant_entity)
+        return Env.bind(Self.node_env, Self.ambiant_entity)
 
 
 class Block(FooNode):
