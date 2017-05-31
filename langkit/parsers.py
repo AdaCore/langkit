@@ -1440,8 +1440,8 @@ def structural_pp_equality(parser, other_parser):
     :type parser: Parser
     :type other_parser: Parser
     """
-    Log.log("pp_eq", "first is ", parser)
-    Log.log("pp_eq", "second is ", other_parser)
+    Log.log("pp_eq_impl", "first is ", parser)
+    Log.log("pp_eq_impl", "second is ", other_parser)
 
     if isinstance(parser, Null) or isinstance(other_parser, Null):
         return parser.get_type() == other_parser.get_type()
@@ -1476,10 +1476,10 @@ def pp_struct_eq(parsers):
 
     :param list[Parser] parsers: The list of parsers to test.
     """
-    Log.log("pp_eq", parsers)
+    Log.log("pp_eq_impl", parsers)
     results = [
         structural_pp_equality(parsers[i], parsers[i + 1])
         for i, _ in enumerate(parsers[:-1])
     ]
-    Log.log("pp_eq", results)
+    Log.log("pp_eq_impl", results)
     return all(results)
