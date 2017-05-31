@@ -378,11 +378,11 @@ class FieldAccess(AbstractExpression):
             self.arguments = arguments
             self.implicit_deref = implicit_deref
 
-            if (
-                isinstance(self.node_data, PropertyDef)
-                and self.node_data.has_implicit_env
-            ):
-                self.implicit_env = construct(Env)
+            if isinstance(self.node_data, PropertyDef):
+                self.dynamic_vars = [construct(dynvar)
+                                     for dynvar in self.node_data.dynamic_vars]
+                if self.node_data.has_implicit_env:
+                    self.implicit_env = construct(Env)
 
             # Create a variable for all field accesses in properties. This is
             # needed because the property will return an owning reference, so
@@ -459,6 +459,13 @@ class FieldAccess(AbstractExpression):
                         self.arguments, self.node_data.natural_arguments
                     )
                 ]
+
+                # If the property has dynamically bound variables, then pass
+                # them along.
+                for formal, actual in zip(self.node_data.dynamic_vars,
+                                          self.dynamic_vars):
+                    args.append((formal.argument_name,
+                                 actual.render_expr()))
 
                 # If the property has an implicit env argument, then pass it
                 # along.

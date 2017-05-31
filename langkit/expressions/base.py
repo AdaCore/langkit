@@ -2582,8 +2582,8 @@ class PropertyDef(AbstractNodeData):
             'A public property cannot have dynamically bound variables'
         )
         for dynvar in self._dynamic_vars:
-            self._add_argument(dynvar.name, dynvar.type, is_artificial=True,
-                               abstract_var=dynvar)
+            self._add_argument(dynvar.argument_name, dynvar.type,
+                               is_artificial=True, abstract_var=dynvar)
 
         # Add the implicit lexical env. parameter if required
         if self.has_implicit_env:
