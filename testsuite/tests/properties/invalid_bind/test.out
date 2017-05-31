@@ -6,7 +6,7 @@ File "test.py", line 33, in BarNode.main_prop
 == Incorrect bind eq_prop 2 ==
 File "test.py", line 33, in BarNode.main_prop
   line 35, in Bind expression
-    Error: Expected 1 argument for eq_prop, got 0
+    Error: Equality property: expected 1 argument, got 0
 
 == Incorrect bind eq_prop 3 ==
 File "test.py", line 33, in BarNode.main_prop

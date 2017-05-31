@@ -132,15 +132,17 @@ class Bind(AbstractExpression):
         if self.conv_prop:
             check_multiple([
                 (self.conv_prop.type.matches(T.root_node.entity()),
-                 "The property passed to bind must return a subtype "
-                 "of {}".format(T.root_node.entity().name().camel)),
+                 'Bind property must return a subtype of {}'.format(
+                     T.root_node.entity().name().camel
+                )),
 
                 (self.conv_prop.struct.matches(T.root_node),
-                 "The property passed to bind must belong to a subtype "
-                 "of {}".format(T.root_node.name().camel)),
+                 'Bind property must belong to a subtype of {}'.format(
+                     T.root_node.name().camel
+                )),
 
                 (not self.conv_prop.has_implicit_env,
-                 "Property passed to bind must not have an implicit env"),
+                 'Bind property must not have an implicit env'),
             ])
 
         # Those checks are run in construct, because we need the eq_prop to be
@@ -151,18 +153,20 @@ class Bind(AbstractExpression):
             args = self.eq_prop.natural_arguments
             check_multiple([
                 (self.eq_prop.type == BoolType,
-                 "Equality property must return boolean"),
+                 'Equality property must return boolean'),
 
                 (self.eq_prop.struct.matches(T.root_node),
-                 "The equality property passed to bind must belong to a "
-                 "subtype of {}".format(T.root_node.name().camel)),
+                 'Equality property must belong to a subtype of {}'.format(
+                     T.root_node.name().camel
+                )),
 
                 (len(args) == 1,
-                 "Expected 1 argument for eq_prop, got {}".format(len(args))),
+                 'Equality property: expected 1 argument, got {}'.format(
+                     len(args)
+                )),
 
                 (not self.eq_prop.has_implicit_env,
-                 "Equality property passed to bind must not have an implicit"
-                 " env"),
+                 'Equality property must not have an implicit env'),
             ])
 
             other_type = args[0].type
@@ -356,18 +360,22 @@ class Predicate(AbstractExpression):
     def construct(self):
         check_multiple([
             (isinstance(self.pred_property, PropertyDef),
-             "Needs a property reference, got {}".format(self.pred_property)),
+             'Predicates requires a property reference, got {} instead'.format(
+                 self.pred_property
+            )),
 
             (self.pred_property.type.matches(BoolType),
-             "The property passed to predicate must return a boolean, "
-             "got {}".format(self.pred_property.type.name().camel)),
+             'Predicate property must return a boolean, got {}'.format(
+                 self.pred_property.type.name().camel
+            )),
 
             (self.pred_property.struct.matches(T.root_node),
-             "The property passed to predicate must belong to a subtype "
-             "of {}".format(T.root_node.name().camel)),
+             'Predicate property must belong to a subtype of {}'.format(
+                 T.root_node.name().camel
+            )),
 
             (not self.pred_property.has_implicit_env,
-             "The property passed to predicate must not have an implicit env")
+             'Predicate property must not have an implicit env'),
         ])
 
         exprs = [construct(e) for e in self.exprs]
