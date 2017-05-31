@@ -83,6 +83,11 @@ class RefEnvs(object):
             'Referenced environment resolver must take no argument'
         )
         check_source_language(
+            not self.resolver.dynamic_vars,
+            'Referenced environment resolver must have no dynamically bound'
+            ' variable'
+        )
+        check_source_language(
             not self.resolver.has_implicit_env,
             'Referenced environment resolver must not accept an implicit env'
         )
@@ -307,6 +312,11 @@ class EnvSpec(object):
                         resolver.type.matches(T.entity),
                         'Entity resolver properties must return entities'
                         ' (got {})'.format(resolver.type.name().camel)
+                    )
+                    check_source_language(
+                        not resolver.dynamic_vars,
+                        'Entity resolver properties must have no dynamically'
+                        ' bound variable'
                     )
                     check_source_language(
                         not resolver.has_implicit_env,
