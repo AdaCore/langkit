@@ -1,0 +1,16 @@
+== <get(<DynamicVariable env>, <FieldAccess .tok>)> ==
+File "test.py", line 35, in ExampleNode.prop
+    Error: env is not bound in this context: please use the .eval_in_env construct to bind it first.
+
+== <FieldAccess .implicit_prop> ==
+File "test.py", line 35, in ExampleNode.prop
+  line 54, in FieldAccess expression
+    Error: env is not bound in this context: please use the .eval_in_env construct to bind it first.
+
+== <bind(<DynamicVariable env>, <FieldAccess .node_env>, <get(<DynamicVariable env>, <FieldAccess .tok>)>)> ==
+Code generation was successful
+
+== <bind(<DynamicVariable env>, <FieldAccess .node_env>, <FieldAccess .implicit_prop>)> ==
+Code generation was successful
+
+Done
