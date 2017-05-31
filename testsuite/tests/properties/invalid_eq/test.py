@@ -1,13 +1,17 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.compiled_types import ASTNode, T, root_grammar_class
+from langkit.compiled_types import (ASTNode, LexicalEnvType, T,
+                                    root_grammar_class)
 from langkit.diagnostics import Diagnostics
-from langkit.expressions import Env, Literal, No, Property, Self
+from langkit.expressions import DynamicVariable, Literal, No, Property, Self
 from langkit.parsers import Grammar, Tok
 
 from lexer_example import Token
 from os import path
 from utils import emit_and_print_errors
+
+
+Env = DynamicVariable('env', LexicalEnvType)
 
 
 def run(name, lhs, rhs):
@@ -27,8 +31,8 @@ def run(name, lhs, rhs):
         pass
 
     class Example(FooNode):
-        prop = Property(lhs.equals(rhs), has_implicit_env=True)
-        use_prop = Property(Self.node_env.eval_in_env(Self.prop), public=True)
+        prop = Property(lhs.equals(rhs), dynamic_vars=[Env])
+        use_prop = Property(Env.bind(Self.node_env, Self.prop), public=True)
 
     class Lit(FooNode):
         pass
@@ -41,6 +45,7 @@ def run(name, lhs, rhs):
         return foo_grammar
 
     emit_and_print_errors(lang_def)
+    Env.unfreeze()
     print('')
 
 
