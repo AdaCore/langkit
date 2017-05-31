@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from contextlib import contextmanager
+from contextlib import contextmanager, nested
 from copy import copy
 from functools import partial
 import inspect
@@ -2753,7 +2753,9 @@ class PropertyDef(AbstractNodeData):
 
             # Reset the Env binding so that this construction does not use a
             # caller's binding.
-            with Env.bind_default(self):
+            with Env.bind_default(self), nested(*[
+                dynvar.bind_default(self) for dynvar in self.dynamic_vars
+            ]):
                 self.in_type = True
                 try:
                     self.constructed_expr = construct(self.expr,
