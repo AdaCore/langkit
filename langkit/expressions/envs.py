@@ -145,7 +145,7 @@ def eval_in_env(self, env_expr, to_eval_expr):
     env_resolved_expr = construct(env_expr, LexicalEnvType)
     env_var = PropertyDef.get().vars.create('New_Bound_Env',
                                             LexicalEnvType)
-    with Env.bind(), Env.bind_name(env_var.name):
+    with Env._bind(env_var.name):
         return EnvBindExpr(env_resolved_expr, env_var, construct(to_eval_expr),
                            abstract_expr=self)
 

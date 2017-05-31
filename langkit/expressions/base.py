@@ -1356,7 +1356,8 @@ class AbstractVariable(AbstractExpression):
         """
         super(AbstractVariable, self).__init__()
 
-        if name.lower == '_':
+        # Kludge: in DynamicVariable and only there, name can be None
+        if name is not None and name.lower == '_':
             i = next(self.unused_count)
             name = names.Name('Unused_{}'.format(i))
 
@@ -1437,20 +1438,7 @@ class DynamicVariable(AbstractVariable):
         :param CompiledType type: Variable type.
         """
         self.argument_name = names.Name.from_lower(name)
-        super(DynamicVariable, self).__init__(self.argument_name, type)
-        self._is_bound = False
-
-    @contextmanager
-    def bind_name(self, name):
-        """
-        Bind the name of this var.
-
-        :param name: The new name.
-        """
-        _old_name = self._name
-        self._name = name
-        yield
-        self._name = _old_name
+        super(DynamicVariable, self).__init__(None, type)
 
     def is_accepted_in(self, prop):
         """
@@ -1469,6 +1457,33 @@ class DynamicVariable(AbstractVariable):
         else:
             return False
 
+    @contextmanager
+    def _bind(self, name):
+        """
+        Bind this variable to the given name.
+
+        :param names.Name name: The new name.
+        """
+        saved = self._name
+        self._name = name
+        yield
+        self._name = saved
+
+    @contextmanager
+    def bind_default(self, prop):
+        """
+        Context manager to setup the default binding for this dynamic variable
+        in `prop`.
+
+        This means: no binding if this property does not accept `self` as an
+        implicit argument, and the default one if it does.
+
+        :type prop: PropertyDef
+        """
+        with self._bind(self.argument_name
+                        if self.is_accepted_in(prop) else None):
+            yield
+
     @property
     def is_bound(self):
         """
@@ -1481,40 +1496,8 @@ class DynamicVariable(AbstractVariable):
 
         :rtype: bool
         """
-        return self.is_accepted_in(PropertyDef.get()) or self._is_bound
-
-    @contextmanager
-    def bind(self):
-        """
-        Tag this dynamic variable as being bound.
-
-        This is used during the "construct" pass to check that all uses are
-        made in a context where it is legal.
-        """
-        saved_is_bound = self._is_bound
-        self._is_bound = True
-        yield
-        self._is_bound = saved_is_bound
-
-    @contextmanager
-    def bind_default(self, prop):
-        """
-        Context manager to setup the default binding for this dynamic variable
-        in "prop".
-
-        This means: no binding if this property does not accept `self` as an
-        implicit argument, and the default one if it does.
-
-        :type prop: PropertyDef
-        """
-        if self.is_accepted_in(prop):
-            with self.bind_name(self.argument_name):
-                yield
-        else:
-            saved_is_bound = self._is_bound
-            self._is_bound = False
-            yield
-            self._is_bound = saved_is_bound
+        return (self.is_accepted_in(PropertyDef.get())
+                or self._name is not None)
 
     def construct(self):
         check_source_language(

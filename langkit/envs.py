@@ -337,7 +337,7 @@ class EnvSpec(object):
 
         with PropertyDef.bind_none(), \
                 Self.bind_type(self.ast_node), \
-                Env.bind_name(Env.argument_name):
+                Env._bind(Env.argument_name):
             return FieldAccess.Expr(construct(Self), p, []).render_expr()
 
     @property
