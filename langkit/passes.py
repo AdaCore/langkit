@@ -106,6 +106,21 @@ class GlobalPass(AbstractPass):
         self.pass_fn(context)
 
 
+class EmbedIpythonPass(AbstractPass):
+    """
+    Small utility pass that allows to embed an IPython interpreter at a given
+    point in the pipeline. This can be useful to inspect the state of
+    compilation and data structures for example.
+    """
+
+    def __init__(self):
+        super(EmbedIpythonPass, self).__init__("Embed IPython")
+
+    def run(self, context):
+        from IPython import embed
+        embed(header="Langkit debug prompt")
+
+
 class GrammarRulePass(AbstractPass):
     """
     Concrete pass to run on each grammar rule.
