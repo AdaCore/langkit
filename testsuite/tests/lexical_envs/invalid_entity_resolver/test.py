@@ -6,14 +6,19 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 
-from langkit.compiled_types import ASTNode, Field, T, root_grammar_class
+from langkit.compiled_types import (ASTNode, LexicalEnvType, Field, T,
+                                    root_grammar_class)
 from langkit.diagnostics import Diagnostics
 from langkit.envs import EnvSpec, add_to_env
-from langkit.expressions import New, Property, Self, langkit_property
+from langkit.expressions import (DynamicVariable, New, Property, Self,
+                                 langkit_property)
 from langkit.parsers import Grammar, List, Tok
 
 from lexer_example import Token
 from utils import emit_and_print_errors
+
+
+Env = DynamicVariable('env', LexicalEnvType)
 
 
 def run(name, prop):
@@ -63,6 +68,6 @@ def run(name, prop):
     emit_and_print_errors(lang_def)
 
 run('Bad return type', Property(Self.node_env.get('foo')))
-run('Has implicit env', Property(Self.node_env.get('foo').at(0),
-                                 has_implicit_env=True))
+run('Has dynamic variable', Property(Self.node_env.get('foo').at(0),
+                                     dynamic_vars=[Env]))
 print('Done')
