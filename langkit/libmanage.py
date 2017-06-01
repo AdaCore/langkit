@@ -18,7 +18,7 @@ from langkit.diagnostics import (
     Context, Diagnostics, DiagnosticError, DiagnosticStyle, Location,
     WarningSet, check_source_language, extract_library_location
 )
-from langkit.utils import Colors, col, printcol, Log
+from langkit.utils import Colors, Log, col, printcol
 
 
 class Directories(object):

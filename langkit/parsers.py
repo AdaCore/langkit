@@ -38,9 +38,8 @@ from langkit.diagnostics import (
 )
 from langkit.lexer import WithSymbol
 from langkit.template_utils import TemplateEnvironment
-from langkit.utils import (
-    assert_type, common_ancestor, copy_with, type_check_instance, Log
-)
+from langkit.utils import (Log, assert_type, common_ancestor, copy_with,
+                           type_check_instance)
 
 
 def var_context():
@@ -1389,7 +1388,7 @@ class Enum(Parser):
 _ = Discard
 
 # This part of the file contains experiments toward automatic generation of
-# pretty printers for langkit grammars.
+# pretty printers for Langkit grammars.
 
 
 class NodeToParsersPass():
