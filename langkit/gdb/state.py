@@ -11,9 +11,19 @@ def analysis_line_no(context, frame):
     :type frame: gdb.Frame
     :rtype: int|None
     """
-    current_file = frame.function().symtab.fullname()
-    return (frame.find_sal().line
-            if current_file == context.debug_info.filename else None)
+    current_func = frame.function()
+    if current_func is None:
+        return None
+
+    current_symtab = current_func.symtab
+    if current_symtab is None:
+        return None
+
+    current_file = current_symtab.fullname()
+    if current_file != context.debug_info.filename:
+        return None
+
+    return frame.find_sal().line
 
 
 class State(object):
