@@ -1398,17 +1398,18 @@ class AbstractVariable(AbstractExpression):
         self._name = self.local_var.name
 
     def construct(self):
-        key = (self._name, self._type)
+        typ = self.type
+        key = (self._name, typ)
         try:
             expr = self.construct_cache[key]
         except KeyError:
-            expr = VariableExpr(self._type, self._name, self)
+            expr = VariableExpr(typ, self._name, self)
             self.construct_cache[key] = expr
         return expr
 
     @property
     def type(self):
-        return self._type
+        return resolve_type(self._type)
 
     def set_type(self, type):
         assert self._type is None, ("You cannot change the type of a "
