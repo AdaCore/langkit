@@ -34,7 +34,7 @@ from langkit.compile_context import get_context
 from langkit.compiled_types import ASTNode, BoolType, CompiledType, Token
 from langkit.diagnostics import (
     Context, Location, check_source_language, extract_library_location,
-    Severity
+    Severity, WarningSet, warn_if
 )
 from langkit.lexer import WithSymbol
 from langkit.template_utils import TemplateEnvironment
@@ -1409,6 +1409,14 @@ class NodeToParsersPass():
         for k, v in self.nodes_to_rules.items():
             if len(v) > 1:
                 if not pp_struct_eq(v):
+                    warn_if(
+                        True,
+                        "Node {} is parsed in different incompatible "
+                        "ways. This will prevent the generation of an "
+                        "automatic pretty printer.\nFor more information, "
+                        "enable the pp_eq trace".format(k.name()),
+                        WarningSet.pp_bad_grammar
+                    )
                     Log.log("pp_eq", "for node {} is false".format(k))
                     with Log.nest():
                         for val in v:

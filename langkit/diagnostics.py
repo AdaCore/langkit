@@ -339,7 +339,14 @@ class WarningSet(object):
         'Warn about bindings (in properties) that are unused, or the ones used'
         ' while they are declared as unused.'
     )
-    available_warnings = [prop_only_entities_warning, unused_bindings_warning]
+    pp_bad_grammar = WarningDescriptor(
+        'pp-bad-grammar', False,
+        'Warn if the grammar is not amenable to the automatic generation of a '
+        'pretty-printer'
+    )
+    available_warnings = [
+        prop_only_entities_warning, unused_bindings_warning, pp_bad_grammar
+    ]
 
     def __init__(self):
         self.enabled_warnings = {w for w in self.available_warnings
