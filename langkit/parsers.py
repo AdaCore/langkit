@@ -1401,6 +1401,8 @@ class NodeToParsersPass():
 
     def __init__(self):
         self.nodes_to_rules = defaultdict(list)
+        self.can_create_pp = True
+        self.nodes_to_canonical_rule = {}
 
     def check_nodes_to_rules(self, ctx):
         """
@@ -1421,6 +1423,23 @@ class NodeToParsersPass():
                         for val in v:
                             Log.log("pp_eq", val)
                     Log.log("pp_eq")
+                    self.can_create_pp = False
+
+                self.nodes_to_canonical_rule[k] = find_canonical_parser(v)
+            else:
+                self.nodes_to_canonical_rule[k] = v[0]
+
+            Log.log("pp_canonical", k.name(), self.nodes_to_canonical_rule[k])
+
+        from langkit.compiled_types import StructMetaclass
+
+        for node_type in StructMetaclass.astnode_types:
+            WarningSet.pp_bad_grammar.warn_if(
+                node_type not in self.nodes_to_canonical_rule.keys()
+                and not node_type.abstract
+                and not node_type.synthetic,
+                "Missing parser for node {}".format(node_type.name())
+            )
 
     def compute(self, parser):
         """
