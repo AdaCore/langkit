@@ -108,6 +108,8 @@ class Bind(AbstractExpression):
                 return
             if isinstance(prop, FieldAccess):
                 prop = prop.resolve_field()
+            elif isinstance(prop, T.Defer):
+                prop = prop.get()
 
             check_source_language(
                 isinstance(prop, PropertyDef),
