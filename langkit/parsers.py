@@ -1437,7 +1437,7 @@ class NodeToParsersPass():
             self.compute(c)
 
 
-def creates_node(p):
+def creates_node(p, follow_refs=True):
     """
     Predicate that is true on parsers that create a node directly, or are just
     a reference to one or several parsers that creates nodes, without
@@ -1449,12 +1449,17 @@ def creates_node(p):
         Row(a, b, c)           # <- False
         Pick(";", "lol", c)    # <- False
     """
-    if isinstance(p, Or):
+    if isinstance(p, Or) and follow_refs:
         return all(creates_node(c) for c in p.children())
 
+    if isinstance(p, Defer) and follow_refs:
+        return p.get_type().matches(ASTNode)
+
     return (
-        isinstance(p, Transform) or isinstance(p, List)
-        or (isinstance(p, Defer) and p.get_type().matches(ASTNode))
+        isinstance(p, Transform)
+        or isinstance(p, List)
+        or (isinstance(p, Opt)
+            and p._booleanize and p._booleanize[0].matches(ASTNode))
     )
 
 
