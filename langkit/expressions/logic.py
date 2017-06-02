@@ -225,12 +225,11 @@ class Bind(AbstractExpression):
                 expr.create_result_var('Ent')
 
             check_source_language(
-
                 expr.type == LogicVarType
                 or expr.type.matches(T.root_node.entity()),
 
-                "Operands to a logic bind operator should be either "
-                "a logic variable or an entity, got {}".format(expr.type)
+                'Operands to a logic bind operator should be either'
+                ' a logic variable or an entity, got {}'.format(expr.type)
             )
 
             if (
