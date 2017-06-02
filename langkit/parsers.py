@@ -1098,7 +1098,7 @@ class Extract(Parser):
         return self.parser.error_repr
 
     def __repr__(self):
-        return "{0} >> {1}".format(self.parser, self.index)
+        return "Extract({0}, {1})".format(self.parser, self.index)
 
     def __init__(self, parser, index):
         """
