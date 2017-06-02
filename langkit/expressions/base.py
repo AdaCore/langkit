@@ -3010,6 +3010,49 @@ class Literal(AbstractExpression):
         return '<Literal {}>'.format(self.literal)
 
 
+def aggregate_expr(type, assocs):
+    """
+    Create a LiteralExpr instance for an Ada aggregate.
+
+    :param None|str|CompiledType type: Type of the aggregate.
+
+        If None, generate a mere Ada aggregate. For instance: `(A, B, C)`.
+
+        If it's a string, use it as a type name to generate a qualified
+        expression. For instance, with `type='Foo'`: `Foo'(A, B, C)`.
+
+        Otherwise, use the given CompileType to generate a qualified
+        expression, unless it's NoCompiledType.
+
+        Unless a true CompiledType subclass is provided, the result will get
+        the NoCompiledType type annotation.
+
+    :param list[(str|names.Name, ResolvedExpression)] assocs: List of
+        associations for the aggregate.
+
+    :rtype: LiteralExpr
+    """
+    if type is None or type is NoCompiledType:
+        meta_template = '({operands})'
+        type_name = None
+        type = NoCompiledType
+    elif isinstance(type, str):
+        meta_template = "{type}'({operands})"
+        type_name = type
+        type = NoCompiledType
+    else:
+        assert issubclass(type, NoCompiledType)
+        meta_template = "{type}'({operands})"
+        type_name = type.name().camel
+
+    template = meta_template.format(
+        type=type_name,
+        operands=(', '.join('{} => {{}}'.format(n) for n, _ in assocs)
+                  or 'null record')
+    )
+    return LiteralExpr(template, type, [e for _, e in assocs])
+
+
 class BasicExpr(ComputingExpr):
     """
     A basic resolved expression template, that automatically handles:
