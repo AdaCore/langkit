@@ -152,9 +152,9 @@
 
    type ${type_name} is record
       % for i, arg_type in enumerate(args_types):
-      Field_${i} : ${arg_type.name()};
+         Field_${i} : ${arg_type.name()};
       % endfor
-      Dbg_Img    : String_Access := null;
+      Dbg_Img : String_Access := null;
    end record;
 
    ------------

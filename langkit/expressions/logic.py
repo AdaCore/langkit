@@ -397,9 +397,6 @@ class Predicate(AbstractExpression):
              'Predicate property must belong to a subtype of {}'.format(
                  T.root_node.name().camel
             )),
-
-            (not self.pred_property.dynamic_vars,
-             'Predicate property must have no dynamically bound variables'),
         ])
 
         exprs = [construct(e) for e in self.exprs]
@@ -440,6 +437,11 @@ class Predicate(AbstractExpression):
                         i, expr.type.name().camel, arg_type.name().camel
                     )
                 )
+
+        # Append dynamic variables to embed their values in the closure
+        closure_exprs.extend(
+            construct(dynvar) for dynvar in self.pred_property.dynamic_vars
+        )
 
         pred_id = self.pred_property.do_generate_logic_predicate(*[
             e.type for e in closure_exprs
