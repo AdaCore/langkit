@@ -1023,7 +1023,7 @@ class CompileCtx(object):
             GrammarRulePass('Compute nodes parsers correspondence',
                             node_to_parsers.compute),
             GlobalPass('Log node parsers correspondence ',
-                       node_to_parsers.log_node_to_rules),
+                       node_to_parsers.check_nodes_to_rules),
 
             MajorStepPass('Prepare code emission'),
 

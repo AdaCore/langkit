@@ -1402,7 +1402,7 @@ class NodeToParsersPass():
     def __init__(self):
         self.nodes_to_rules = defaultdict(list)
 
-    def log_node_to_rules(self, ctx):
+    def check_nodes_to_rules(self, ctx):
         """
         Log the results of the compute pass.
         """
