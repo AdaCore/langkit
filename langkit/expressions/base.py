@@ -2931,7 +2931,7 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 
 # noinspection PyPep8Naming
 def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
-             memoized=False):
+             memoized=False, warn_on_unused=True):
     """
     Public constructor for concrete properties. You can declare your properties
     on your AST node subclasses directly, like this::
@@ -2950,7 +2950,7 @@ def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
     """
     return PropertyDef(expr, AbstractNodeData.PREFIX_PROPERTY, doc=doc,
                        public=public, type=type, dynamic_vars=dynamic_vars,
-                       memoized=memoized)
+                       memoized=memoized, warn_on_unused=warn_on_unused)
 
 
 class AbstractKind(Enum):
