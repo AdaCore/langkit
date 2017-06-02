@@ -38,8 +38,9 @@ from langkit.diagnostics import (
 )
 from langkit.lexer import WithSymbol
 from langkit.template_utils import TemplateEnvironment
-from langkit.utils import (Log, assert_type, common_ancestor, copy_with,
-                           type_check_instance)
+from langkit.utils import (
+    assert_type, common_ancestor, copy_with, type_check_instance, Log, is_same
+)
 
 
 def var_context():
@@ -1429,9 +1430,30 @@ class NodeToParsersPass():
             self.compute(c)
 
 
+def creates_node(p):
+    """
+    Predicate that is true on parsers that create a node directly, or are just
+    a reference to one or several parsers that creates nodes, without
+    additional parsing involved.
+
+    For example::
+        Node(..)               # <- True
+        Or(a, b, c)            # <- True if a b & c creates_node
+        Row(a, b, c)           # <- False
+        Pick(";", "lol", c)    # <- False
+    """
+    if isinstance(p, Or):
+        return all(creates_node(c) for c in p.children())
+
+    return (
+        isinstance(p, Transform) or isinstance(p, List)
+        or (isinstance(p, Defer) and p.get_type().matches(ASTNode))
+    )
+
+
 @Log.recursive
 @Log.log_return('pp_eq_impl')
-def structural_pp_equality(parser, other_parser):
+def structural_pp_equality(parsers, toplevel=True):
     """
     Determine if two parsers are structurally equal, with regards to pretty
     printing.
@@ -1439,33 +1461,68 @@ def structural_pp_equality(parser, other_parser):
     :type parser: Parser
     :type other_parser: Parser
     """
-    Log.log("pp_eq_impl", "first is ", parser)
-    Log.log("pp_eq_impl", "second is ", other_parser)
 
-    if isinstance(parser, Null) or isinstance(other_parser, Null):
-        return parser.get_type() == other_parser.get_type()
+    Log.log("pp_eq_impl", "parsers: ".format(parsers))
 
-    if type(parser) != type(other_parser):
-        return (parser and other_parser
-                and parser.get_type().matches(ASTNode)
-                and parser.get_type() == other_parser.get_type())
-
-    if isinstance(parser, Row):
-        return all(
-            structural_pp_equality(c1, c2)
-            for c1, c2 in zip(parser.children(), other_parser.children())
-        )
-    elif isinstance(parser, Tok):
-        return parser.val == other_parser.val
-    elif isinstance(parser, Transform):
-        return structural_pp_equality(parser.parser, other_parser.parser)
-    elif isinstance(parser, List):
-        return (
-            structural_pp_equality(parser.sep, other_parser.sep)
-            and structural_pp_equality(parser.parser, other_parser.parser)
-        )
-    else:
+    # If there is only one parser, the result is obviously True
+    if len(parsers) == 1:
         return True
+
+    parsers_types = set(type(p) for p in parsers)
+
+    # First, if there are Null parsers in the lot, we can safely ignore them,
+    # and run the algorithm on the remaining parsers.
+    if Null in parsers_types:
+        if is_same(p.get_type() for p in parsers):
+            return structural_pp_equality(
+                [p for p in parsers if not isinstance(p, Null)]
+            )
+
+    # All parsers are of the same kind. Let's see if they're structurally
+    # equivalent.
+    if len(parsers_types) == 1:
+        # We pick the type out of the set
+        typ = parsers_types.pop()
+
+        # For those parser kinds, we want to check if their children are the
+        # same.
+        if typ in (Row, Transform, List, Opt):
+            children_lists = [p.children() for p in parsers]
+            return is_same(len(c) for c in children_lists) and all(
+                structural_pp_equality(c, False)
+                for c in zip(*children_lists)
+            )
+        # For tok, we want to check that the parsed token is the same
+        elif typ == Tok:
+            return is_same(p.val for p in parsers)
+        # For extract, structural equality involves comparing indices too
+        elif typ == Extract:
+            return structural_pp_equality(
+                [p.parser for p in parsers]
+            ) and is_same(p.index for p in parsers)
+        # Defer and Or will be handled by the same logic we use when the kind
+        # of parser is not unique.
+        elif typ in (Defer, Or):
+            pass
+        else:
+            raise Exception("Parser type not handled")
+
+    # If we fall down here, either:
+    # 1. There are more than one parser kind.
+    # 2. The kind is one of those not handled by the block of code above (Or
+    #    and Defer).
+
+    # We will use a specific logic for sub-parsers (toplevel=False): If they
+    # all create nodes directly, without adding additional parser logic, then
+    # their uniqueness is already checked because we call
+    # structural_pp_equality on all of those.
+    if not toplevel:
+        resolved_parsers = [
+            p.parser if isinstance(p, Defer) else p for p in parsers
+        ]
+        return all(creates_node(p) for p in resolved_parsers)
+
+    return False
 
 
 def pp_struct_eq(parsers):
@@ -1476,9 +1533,5 @@ def pp_struct_eq(parsers):
     :param list[Parser] parsers: The list of parsers to test.
     """
     Log.log("pp_eq_impl", parsers)
-    results = [
-        structural_pp_equality(parsers[i], parsers[i + 1])
-        for i, _ in enumerate(parsers[:-1])
-    ]
-    Log.log("pp_eq_impl", results)
-    return all(results)
+
+    return structural_pp_equality(parsers)
