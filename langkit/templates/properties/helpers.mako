@@ -202,6 +202,8 @@
             'Self.Field_{}'.format(i)
             for i, _ in enumerate(args_types)
          ]
+         if prop.uses_entity_info:
+            args.append('Node_0.Info')
          args_fmt = '({})'.format(', '.join(args)) if args else ''
       %>
       return ${prop.name} ${args_fmt};
