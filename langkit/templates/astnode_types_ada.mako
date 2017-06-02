@@ -45,19 +45,16 @@
    % endfor
    % endfor
 
-   ## Generate logic converters
-   % for el in set(p for (p, _) in ctx.logic_binders if p):
-   ${prop_helpers.generate_logic_converter(el)}
-   % endfor
-
-   ## Generate logic equal function wrappers
-   % for el in set(p for (_, p) in ctx.logic_binders if p):
-   ${prop_helpers.generate_logic_equal(el)}
-   % endfor
-
-   ## Generate logic binders
+   ## Generate logic converters, equality predicates, and binders
    % for conv_prop, eq_prop in ctx.logic_binders:
-   ${prop_helpers.generate_logic_binder(conv_prop, eq_prop)}
+      % if conv_prop:
+         ${prop_helpers.generate_logic_converter(conv_prop)}
+      % endif
+      % if eq_prop:
+         ${prop_helpers.generate_logic_equal(eq_prop)}
+      % endif
+
+      ${prop_helpers.generate_logic_binder(conv_prop, eq_prop)}
    % endfor
 </%def>
 
