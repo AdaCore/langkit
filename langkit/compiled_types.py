@@ -120,6 +120,8 @@ def make_renderer(base_renderer=None):
         'is_equation_type':       type_check(EquationType),
         'is_env_rebindings_type': type_check(EnvRebindingsType),
         'is_struct_type':         type_check(Struct),
+        'no_builtins':
+            lambda ts: filter(lambda t: not t.is_builtin(), ts),
         'LexicalEnvType':         LexicalEnvType,
         'EnvRebindingsType':      EnvRebindingsType,
         'PropertyDef':            PropertyDef,

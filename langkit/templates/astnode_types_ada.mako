@@ -36,14 +36,11 @@
    ## Generate logic/predicate binders for the properties which require it.
    ## Note that we need to generate them before the properties bodies, because
    ## they'll be used in the bodies.
-   ##
-   ## TODO: Filtering logic duplicated with pkg_analysis_body.mako. See if we
-   ## can share in helpers.
 
-   % for cls in filter(lambda t: not t.is_builtin(), ctx.astnode_types):
-   % for prop in cls.get_properties(include_inherited=False):
-   ${prop_helpers.generate_logic_predicates(prop)}
-   % endfor
+   % for cls in no_builtins(ctx.astnode_types):
+      % for prop in cls.get_properties(include_inherited=False):
+         ${prop_helpers.generate_logic_predicates(prop)}
+      % endfor
    % endfor
 
    ## Generate logic converters, equality predicates, and binders

@@ -6,10 +6,7 @@
 <%namespace name="list_types"    file="list_types_ada.mako" />
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 
-<%
-   root_node_array = T.root_node.array_type()
-   no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts)
-%>
+<% root_node_array = T.root_node.array_type() %>
 
 with Ada.Containers;                  use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
