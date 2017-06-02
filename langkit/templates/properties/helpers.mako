@@ -50,10 +50,14 @@
    <%
       struct = eq_prop.struct.name()
       struct_entity = eq_prop.struct.entity().name()
+      type_name = 'Equals_Data_{}'.format(eq_prop.uid)
    %>
 
+   type ${type_name} is null record;
+   No_${type_name} : constant ${type_name} := (null record);
+
    function Eq_${eq_prop.uid}
-     (Data : Equals_Data_Default; L, R : ${T.entity.name()}) return Boolean is
+     (Data : ${type_name}; L, R : ${T.entity.name()}) return Boolean is
      pragma Unreferenced (Data);
    begin
       --  If any node pointer is null, then use that for equality
@@ -88,6 +92,7 @@
    eprop_uid = eq_prop.uid if eq_prop else "Default"
    package_name = "Bind_{}_{}".format(cprop_uid, eprop_uid)
    converter_type_name = "Logic_Converter_{}".format(cprop_uid)
+   equals_type_name = 'Equals_Data_{}'.format(eprop_uid)
    %>
    ## This package contains the necessary Adalog instantiations, so that we can
    ## create an equation that will bind two logic variables A and B so that::
@@ -97,8 +102,8 @@
    package ${package_name} is new Eq_Node.Raw_Custom_Bind
      (Converter      => ${converter_type_name},
       No_Data        => No_${converter_type_name},
-      Equals_Data    => Equals_Data_Default,
-      No_Equals_Data => No_Equals_Data_Default,
+      Equals_Data    => ${equals_type_name},
+      No_Equals_Data => No_${equals_type_name},
       Convert        => Convert,
       Equals         => Eq_${eprop_uid});
 </%def>
