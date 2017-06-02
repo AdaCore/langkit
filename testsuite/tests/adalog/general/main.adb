@@ -29,7 +29,7 @@ procedure Main is
 
    R3 : Relation :=
      (Member (X, (1, 2, 3, 4, 5, 6))
-      and Bind.Create (X, Y, D)
+      and Bind.Create (X, Y, D, Support.No_Data)
       and Pred_Int.Create (X, Is_Even'Unrestricted_Access)
       and Member (Y, (12, 18)));
 

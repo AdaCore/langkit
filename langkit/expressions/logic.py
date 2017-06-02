@@ -54,10 +54,16 @@ class Bind(AbstractExpression):
             self.rhs = rhs
             self.pred_func = pred_func
 
+            constructor_args = [
+                lhs, rhs, pred_func,
+                'No_Equals_Data_{}'.format(eq_prop.uid
+                                           if eq_prop else 'Default')
+            ]
+
             super(Bind.Expr, self).__init__(
                 'Bind_Result',
                 'Bind_{}_{}.Create'.format(cprop_uid, eprop_uid),
-                EquationType, [lhs, rhs, pred_func],
+                EquationType, constructor_args,
                 abstract_expr=abstract_expr
             )
 

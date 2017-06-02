@@ -36,7 +36,7 @@ procedure Main is
              Equals (X, 4),
              Equals (X, 5),
              Equals (X, 6))),
-         Bind.Create (X, Y, D),
+         Bind.Create (X, Y, D, D),
          Pred_Int.Create (X, Is_Even'Unrestricted_Access),
          Member (Y, (12, 18))));
 

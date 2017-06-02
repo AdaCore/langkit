@@ -74,24 +74,28 @@ package Langkit_Support.Adalog.Eq_Same is
          L_Dec_Ref => Dec_Ref,
          R_Dec_Ref => Dec_Ref);
 
-      function Create (L, R : Refs.Raw_Logic_Var.Var; Data : Converter)
-        return Relation
+      function Create
+        (L, R    : Refs.Raw_Logic_Var.Var;
+         Data    : Converter;
+         Eq_Data : Equals_Data) return Relation
       is
-        (Relation (Impl.Equals (L, R, Data, Data)));
+        (Relation (Impl.Equals (L, R, Data, Data, Eq_Data)));
 
       function Create
-        (L    : Refs.Raw_Logic_Var.Var;
-         R    : LR_Type;
-         Data : Converter) return Relation
+        (L       : Refs.Raw_Logic_Var.Var;
+         R       : LR_Type;
+         Data    : Converter;
+         Eq_Data : Equals_Data) return Relation
       is
-        (Relation (Impl.Equals (L, R, Data)));
+        (Relation (Impl.Equals (L, R, Data, Eq_Data)));
 
       function Create
-        (L    : LR_Type;
-         R    : Refs.Raw_Logic_Var.Var;
-         Data : Converter) return Relation
+        (L       : LR_Type;
+         R       : Refs.Raw_Logic_Var.Var;
+         Data    : Converter;
+         Eq_Data : Equals_Data) return Relation
       is
-        (Relation (Impl.Equals (L, R, Data)));
+        (Relation (Impl.Equals (L, R, Data, Eq_Data)));
 
    end Raw_Custom_Bind;
 

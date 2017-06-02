@@ -17,5 +17,5 @@ package Support is
       Equals      => Eq);
 
    function Square (X, Y : Eq_Int.Refs.Raw_Var) return Relation
-   is (Bind.Create (X, Y, No_Data));
+   is (Bind.Create (X, Y, No_Data, No_Data));
 end Support;
