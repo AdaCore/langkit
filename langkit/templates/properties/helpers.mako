@@ -47,7 +47,10 @@
 </%def>
 
 <%def name="logic_equal(eq_prop)">
-   <% struct = eq_prop.struct.name() %>
+   <%
+      struct = eq_prop.struct.name()
+      struct_entity = eq_prop.struct.entity().name()
+   %>
 
    function Eq_${eq_prop.uid} (L, R : ${T.entity.name()}) return Boolean is
    begin
@@ -61,10 +64,14 @@
          and then R.El.all in ${struct}_Type'Class
       then
          --  Then call the equality property on it
-         return ${eq_prop.name}
-          (${struct} (L.El),
-           (El => ${struct} (R.El), Info => R.Info),
-           ${eq_prop.entity_info_name} => L.Info);
+         declare
+            R_Entity : constant ${struct_entity} := (${struct} (R.El), R.Info);
+         begin
+            return ${eq_prop.name}
+             (${eq_prop.self_arg_name}             => ${struct} (L.El),
+              ${eq_prop.natural_arguments[0].name} => R_Entity,
+              ${eq_prop.entity_info_name}          => L.Info);
+          end;
       end if;
 
       --  Else raise an error
