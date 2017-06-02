@@ -39,20 +39,20 @@
 
    % for cls in no_builtins(ctx.astnode_types):
       % for prop in cls.get_properties(include_inherited=False):
-         ${prop_helpers.generate_logic_predicates(prop)}
+         ${prop_helpers.logic_predicates(prop)}
       % endfor
    % endfor
 
    ## Generate logic converters, equality predicates, and binders
    % for conv_prop, eq_prop in ctx.logic_binders:
       % if conv_prop:
-         ${prop_helpers.generate_logic_converter(conv_prop)}
+         ${prop_helpers.logic_converter(conv_prop)}
       % endif
       % if eq_prop:
-         ${prop_helpers.generate_logic_equal(eq_prop)}
+         ${prop_helpers.logic_equal(eq_prop)}
       % endif
 
-      ${prop_helpers.generate_logic_binder(conv_prop, eq_prop)}
+      ${prop_helpers.logic_binder(conv_prop, eq_prop)}
    % endfor
 </%def>
 

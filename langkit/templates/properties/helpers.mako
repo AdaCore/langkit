@@ -13,7 +13,7 @@
   )
 </%def>
 
-<%def name="generate_logic_converter(conv_prop)">
+<%def name="logic_converter(conv_prop)">
    <%
    type_name = "Logic_Converter_{}".format(conv_prop.uid)
    root_class = T.root_node.name()
@@ -46,7 +46,7 @@
    end Convert;
 </%def>
 
-<%def name="generate_logic_equal(eq_prop)">
+<%def name="logic_equal(eq_prop)">
    <% struct = eq_prop.struct.name() %>
 
    function Eq_${eq_prop.uid} (L, R : ${T.entity.name()}) return Boolean is
@@ -73,7 +73,7 @@
 
 </%def>
 
-<%def name="generate_logic_binder(conv_prop, eq_prop)">
+<%def name="logic_binder(conv_prop, eq_prop)">
    <%
    cprop_uid = conv_prop.uid if conv_prop else "Default"
    eprop_uid = eq_prop.uid if eq_prop else "Default"
@@ -92,7 +92,7 @@
       Equals    => Eq_${eprop_uid});
 </%def>
 
-<%def name="generate_logic_predicates(prop)">
+<%def name="logic_predicates(prop)">
    % for (args_types, pred_id) in prop.logic_predicates:
 
    <%
