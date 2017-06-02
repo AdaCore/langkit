@@ -621,6 +621,22 @@ class FieldAccess(AbstractExpression):
             )
         ]
 
+        # Even though it is redundant with DynamicVariable.construct, check
+        # that the callee's dynamic variables are bound here so we can emit a
+        # helpful error message if that's not the case.
+        if isinstance(self.to_get, PropertyDef):
+            unbound_dynvars = [
+                dynvar for dynvar in self.to_get.dynamic_vars
+                if not dynvar.is_bound
+            ]
+            check_source_language(
+                not unbound_dynvars,
+                'For call to {}, some dynamic variables need to be bound:'
+                ' {}'.format(self.to_get.qualname,
+                             ', '.join(dynvar.argument_name.lower
+                                       for dynvar in unbound_dynvars))
+            )
+
         ret = FieldAccess.Expr(
             self.receiver_expr, to_get, arg_exprs, self.is_deref,
             abstract_expr=self
