@@ -23,13 +23,19 @@ generic
    No_L_Data : Left_C_Data;
    No_R_Data : Right_C_Data;
 
+   type Equals_Data is private;
+   No_Equals_Data : Equals_Data;
+
    with function Convert
      (C_Data : Right_C_Data; From : R_Type) return L_Type is <>;
    with function Convert
      (C_Data : Left_C_Data; From : L_Type) return R_Type is <>;
 
-   with function Equals (L, R : L_Type) return Boolean is <>;
-   with function Equals (L, R : R_Type) return Boolean is <>;
+   with function Equals (Data : Equals_Data; L, R : L_Type) return Boolean
+   is <>;
+
+   with function Equals (Data : Equals_Data; L, R : R_Type) return Boolean
+   is <>;
 
    with package Left_Var is new Logic_Var
      (Element_Type => L_Type, others => <>);
@@ -50,21 +56,27 @@ package Langkit_Support.Adalog.Unify is
 
    package Simple_Unify is new Adalog.Unify_LR
      (L_Type, R_Type, Left_C_Data, Right_C_Data,
-      Convert, Convert, Left_Var, Right_Var, Equals,
+      Convert, Convert,
+      Equals_Data, Equals,
+      Left_Var, Right_Var,
       L_Dec_Ref, R_Dec_Ref);
    use Simple_Unify;
 
    package Unify_Left is new Unify_One_Side
-     (L_Type, R_Type, Equals, Right_C_Data,
-      Convert, Left_Var, Right_Var.Element_Image, Left_Var.Element_Image,
+     (L_Type, R_Type,
+      Right_C_Data, Convert,
+      Equals_Data, Equals,
+      Left_Var, Right_Var.Element_Image, Left_Var.Element_Image,
       Invert_Equals => False,
       R_Inc_Ref     => R_Inc_Ref,
       L_Dec_Ref     => L_Dec_Ref,
       R_Dec_Ref     => R_Dec_Ref);
 
    package Unify_Right is new Unify_One_Side
-     (R_Type, L_Type, Equals, Left_C_Data,
-      Convert, Right_Var, Left_Var.Element_Image, Right_Var.Element_Image,
+     (R_Type, L_Type,
+      Left_C_Data, Convert,
+      Equals_Data, Equals,
+      Right_Var, Left_Var.Element_Image, Right_Var.Element_Image,
       Invert_Equals => True,
       R_Inc_Ref     => L_Inc_Ref,
       L_Dec_Ref     => R_Dec_Ref,
@@ -75,28 +87,35 @@ package Langkit_Support.Adalog.Unify is
    ------------------
 
    function Equals
-     (L      : Left_Var.Var; R : Right_Var.Var;
-      L_Data : Left_C_Data := No_L_Data;
-      R_Data : Right_C_Data := No_R_Data)
+     (L       : Left_Var.Var; R : Right_Var.Var;
+      L_Data  : Left_C_Data := No_L_Data;
+      R_Data  : Right_C_Data := No_R_Data;
+      Eq_Data : Equals_Data := No_Equals_Data)
       return access Base_Relation'Class
    is
      (new Unify_LR_Rel.Rel'
-        (Rel    => Create (L, R, No_L_Data, No_R_Data),
+        (Rel    => Create (L, R, No_L_Data, No_R_Data, Eq_Data),
          others => <>))
    with Inline;
 
    function Equals
-     (L : Left_Var.Var; R : R_Type; R_Data : Right_C_Data := No_R_Data)
+     (L       : Left_Var.Var;
+      R       : R_Type;
+      R_Data  : Right_C_Data := No_R_Data;
+      Eq_Data : Equals_Data := No_Equals_Data)
       return access Base_Relation'Class
    is
-     (Unify_Left.Create (L, R, R_Data))
+     (Unify_Left.Create (L, R, R_Data, Eq_Data))
    with Inline;
 
    function Equals
-     (L : L_Type; R : Right_Var.Var; L_Data : Left_C_Data := No_L_Data)
+     (L       : L_Type;
+      R       : Right_Var.Var;
+      L_Data  : Left_C_Data := No_L_Data;
+      Eq_Data : Equals_Data := No_Equals_Data)
       return access Base_Relation'Class
    is
-     (Unify_Right.Create (R, L, L_Data))
+     (Unify_Right.Create (R, L, L_Data, Eq_Data))
    with Inline;
 
    ------------

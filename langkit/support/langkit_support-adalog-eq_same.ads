@@ -29,11 +29,16 @@ package Langkit_Support.Adalog.Eq_Same is
      (C_Data : Dummy_Convert_Data; From : LR_Type) return LR_Type
       with Inline;
 
-   function Equals (L, R : LR_Type) return Boolean is (L = R);
+   type Dummy_Equals_Data is null record;
+   No_Equals_Data : constant Dummy_Equals_Data := (null record);
+
+   function Equals (Data : Dummy_Equals_Data; L, R : LR_Type) return Boolean
+   is (L = R);
 
    package Raw_Impl is new Unify
      (LR_Type, LR_Type,
       Dummy_Convert_Data, Dummy_Convert_Data, No_Data, No_Data,
+      Dummy_Equals_Data, No_Equals_Data,
       Left_Var  => Refs.Raw_Logic_Var,
       Right_Var => Refs.Raw_Logic_Var,
       L_Inc_Ref => Inc_Ref,
@@ -50,13 +55,18 @@ package Langkit_Support.Adalog.Eq_Same is
       type Converter is private;
       No_Data : Converter;
 
+      type Equals_Data is private;
+      No_Equals_Data : Equals_Data;
+
       with function Convert (Data : Converter; From : LR_Type) return LR_Type;
-      with function Equals (L, R : LR_Type) return Boolean is <>;
+      with function Equals
+        (Eq_Data : Equals_Data; L, R : LR_Type) return Boolean is <>;
    package Raw_Custom_Bind is
 
       package Impl is new Unify
         (LR_Type, LR_Type,
          Converter, Converter, No_Data, No_Data,
+         Equals_Data, No_Equals_Data,
          Convert, Convert, Equals, Equals,
          Refs.Raw_Logic_Var, Refs.Raw_Logic_Var,
          L_Inc_Ref => Inc_Ref,

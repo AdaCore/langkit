@@ -14,10 +14,6 @@
 <%def name="logic_helpers()">
 
    pragma Warnings (Off, "referenced");
-   function Eq_Default (L, R : ${T.entity.name()}) return Boolean is
-     (Is_Equivalent (L, R))
-      with Inline;
-
    type Logic_Converter_Default is null record;
    No_Logic_Converter_Default : constant Logic_Converter_Default :=
      (null record);
@@ -31,6 +27,14 @@
       Inc_Ref (From);
       return From;
    end Convert;
+
+   type Equals_Data_Default is null record;
+   No_Equals_Data_Default : constant Equals_Data_Default := (null record);
+
+   function Eq_Default
+     (Data : Equals_Data_Default; L, R : ${T.entity.name()}) return Boolean
+   is (Is_Equivalent (L, R))
+      with Inline;
    pragma Warnings (On, "referenced");
 
    ## Generate logic/predicate binders for the properties which require it.

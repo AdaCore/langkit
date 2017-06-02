@@ -8,9 +8,10 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    use Var;
 
    function Create
-     (Left   : Var.Var;
-      Right  : R_Type;
-      R_Data : R_Convert_Data) return Unify_Rec;
+     (Left    : Var.Var;
+      Right   : R_Type;
+      R_Data  : R_Convert_Data;
+      Eq_Data : Equals_Data) return Unify_Rec;
    --  Helper for the public Create function
 
    -----------
@@ -33,9 +34,9 @@ package body Langkit_Support.Adalog.Unify_One_Side is
                Trace (L_Image (L_Val));
 
                if Invert_Equals then
-                  C := Equals (R_Val, L_Val);
+                  C := Equals (Self.Eq_Data, R_Val, L_Val);
                else
-                  C := Equals (L_Val, R_Val);
+                  C := Equals (Self.Eq_Data, L_Val, R_Val);
                end if;
                Trace ("Returning " & C'Image);
                L_Dec_Ref (R_Val);
@@ -157,25 +158,29 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    ------------
 
    function Create
-     (Left : Var.Var; Right : R_Type; R_Data : R_Convert_Data) return Unify_Rec
-   is
+     (Left    : Var.Var;
+      Right   : R_Type;
+      R_Data  : R_Convert_Data;
+      Eq_Data : Equals_Data) return Unify_Rec is
    begin
       R_Inc_Ref (Right);
       return (Left    => Left,
               Right   => Right,
               Changed => False,
-              R_Data  => R_Data);
+              R_Data  => R_Data,
+              Eq_Data => Eq_Data);
    end Create;
 
    function Create
-     (Left   : Var.Var;
-      Right  : R_Type;
-      R_Data : R_Convert_Data) return Relation
-   is
+     (Left    : Var.Var;
+      Right   : R_Type;
+      R_Data  : R_Convert_Data;
+      Eq_Data : Equals_Data) return Relation is
    begin
       --  Don't inc-ref Right here as the call to Create below will do it for
       --  us.
-      return new Unify'(Rel => Create (Left, Right, R_Data), others => <>);
+      return new Unify'(Rel => Create (Left, Right, R_Data, Eq_Data),
+                        others => <>);
    end Create;
 
    ------------

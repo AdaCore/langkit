@@ -23,7 +23,7 @@ package body Langkit_Support.Adalog.Unify_LR is
 
          --  Both values are defined, return true if they are equal
          if Is_Defined (Self.Right) then
-            B := Equals (LC, R);
+            B := Equals (Self.Eq_Data, LC, R);
             L_Dec_Ref (L);
             R_Dec_Ref (R);
             R_Dec_Ref (LC);

@@ -15,8 +15,6 @@ generic
    type L_Type is private;
    type R_Type is private;
 
-   with function Equals (L, R : L_Type) return Boolean is <>;
-
    type R_Convert_Data is private;
    --  Private type containing data associated to the Conversion function. Not
    --  necessary but useful if your conversion function has state.
@@ -24,6 +22,13 @@ generic
    with function Convert
      (C_Data : R_Convert_Data; From : R_Type) return L_Type is <>;
    --  Conversion function, to get an L_Type from an R_Type
+
+   type Equals_Data is private;
+   --  Private type containing data associated to the Equals function. Not
+   --  necessary, but useful if your equality function has state.
+
+   with function Equals (Data : Equals_Data; L, R : L_Type) return Boolean
+   is <>;
 
    with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
    --  Logic variable formal package
@@ -55,7 +60,10 @@ package Langkit_Support.Adalog.Unify_One_Side is
 
    type Unify is new Base_Relation with private;
    function Create
-     (Left : Var.Var; Right : R_Type; R_Data : R_Convert_Data) return Relation;
+     (Left    : Var.Var;
+      Right   : R_Type;
+      R_Data  : R_Convert_Data;
+      Eq_Data : Equals_Data) return Relation;
 
    ------------
    -- Member --
@@ -91,6 +99,7 @@ private
       Right   : R_Type;
       Changed : Boolean := False;
       R_Data  : R_Convert_Data;
+      Eq_Data : Equals_Data;
    end record;
 
    function Apply (Self : in out Unify_Rec) return Boolean;
