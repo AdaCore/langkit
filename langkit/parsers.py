@@ -1428,9 +1428,11 @@ class NodeToParsersPass():
         node type to one specific parser.
         """
 
-        if isinstance(parser, Transform):
-            self.nodes_to_rules[parser.get_type()].append(parser)
-        elif isinstance(parser, List):
+        if creates_node(parser, follow_refs=False):
+            if isinstance(parser, Opt):
+                for alt in parser.get_type()._alternatives:
+                    self.nodes_to_rules[alt].append(parser)
+
             self.nodes_to_rules[parser.get_type()].append(parser)
 
         for c in parser.children():
