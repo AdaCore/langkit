@@ -82,6 +82,14 @@ def copy_with(obj, **kwargs):
     return c
 
 
+def is_same(coll):
+    """
+    Helper function, returns True if every element in collection hashes to
+    the same value.
+    """
+    return len(set(coll)) == 1
+
+
 class Colors(object):
     """
     Utility escape sequences to color output in terminal.
