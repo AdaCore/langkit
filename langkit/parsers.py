@@ -1406,7 +1406,9 @@ class NodeToParsersPass():
 
     def check_nodes_to_rules(self, ctx):
         """
-        Log the results of the compute pass.
+        Check the results of the compute pass, to see if every node type only
+        has one non ambiguous way of being pretty printed, and assign a
+        canonical representation to every node type.
         """
         for k, v in self.nodes_to_rules.items():
             if len(v) > 1:
