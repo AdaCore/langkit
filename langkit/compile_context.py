@@ -530,11 +530,11 @@ class CompileCtx(object):
         self.logic_binders = set()
         """
         Set of tuple of properties for which we want to generate logic binders.
-        For the moment, there is just one property that handles the conversion
-        in the bind, but ultimately there will also be a property to check for
-        equality.
+        For each binder, there are potentially two properties: the conversion
+        property and the equality property. See langkit.expressions.logic.Bind
+        for more information.
 
-        :type: set[(PropertyDef, )]
+        :type: set[(PropertyDef|None, PropertyDef|None)]
         """
 
         self.env_hook_subprogram = env_hook_subprogram
