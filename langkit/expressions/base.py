@@ -1493,7 +1493,7 @@ class DynamicVariable(AbstractVariable):
         This returns true iff at least one of the following conditions is True:
 
           * the current property accepts this implicit argument;
-          * it is currently bound, through the .eval_in_env construct.
+          * it is currently bound, through the DynamicVariable.bind construct.
 
         :rtype: bool
         """
@@ -1503,8 +1503,8 @@ class DynamicVariable(AbstractVariable):
     def construct(self):
         check_source_language(
             self.is_bound,
-            '{} is not bound in this context: please use the .eval_in_env'
-            ' construct to bind it first.'.format(
+            '{} is not bound in this context: please use the .bind construct'
+            ' to bind it first.'.format(
                 self.argument_name.lower
             )
         )
