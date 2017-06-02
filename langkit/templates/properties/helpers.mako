@@ -47,12 +47,7 @@
    entity = T.entity.name()
    %>
 
-   ## We generate a custom type which is a functor in the C++ term, eg just a
-   ## function with state. The state it needs to keep is the lexical env at the
-   ## site where the logic binder is generated.
-   type ${type_name} is null record;
-
-   No_${type_name} : constant ${type_name} := (null record);
+   ${dynamic_vars_holder_decl(type_name, conv_prop.dynamic_vars)}
 
    function Convert (Self : ${type_name}; From : ${entity}) return ${entity}
       with Inline;
@@ -62,13 +57,19 @@
    -------------
 
    function Convert (Self : ${type_name}; From : ${entity}) return ${entity} is
-      pragma Unreferenced (Self);
+      % if not conv_prop.dynamic_vars:
+         pragma Unreferenced (Self);
+      % endif
       Ret : ${conv_prop.type.name()};
    begin
       ## Here, we just forward the return value from conv_prop to our caller,
       ## so there is nothing to do regarding ref-counting.
       Ret := ${conv_prop.name}
-        (${conv_prop.struct.name()} (From.El), From.Info);
+        (${conv_prop.self_arg_name}    => ${conv_prop.struct.name()} (From.El),
+         % for dynvar in conv_prop.dynamic_vars:
+            ${dynvar.argument_name}    => Self.${dynvar.argument_name},
+         % endfor
+         ${conv_prop.entity_info_name} => From.Info);
       return (El => ${root_class} (Ret.El), Info => Ret.Info);
    end Convert;
 </%def>

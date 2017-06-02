@@ -170,10 +170,6 @@ class Bind(AbstractExpression):
                  'Bind property must belong to a subtype of {}'.format(
                      T.root_node.name().camel
                 )),
-
-                (not self.conv_prop.dynamic_vars,
-                 'Property passed to bind must have no dynamically bound'
-                 ' variable'),
             ])
 
         # Those checks are run in construct, because we need the eq_prop to be
@@ -210,11 +206,12 @@ class Bind(AbstractExpression):
         cprop_uid = (self.conv_prop.uid if self.conv_prop else "Default")
         eprop_uid = (self.eq_prop.uid if self.eq_prop else "Default")
 
-        pred_func = untyped_literal_expr(
-            "Logic_Converter_{}'(null record)".format(cprop_uid)
-            if self.conv_prop
-            else "No_Logic_Converter_Default"
-        )
+        if self.conv_prop:
+            pred_func = Bind.Expr.dynamic_vars_to_holder(
+                self.conv_prop, 'Logic_Converter_{}'.format(cprop_uid)
+            )
+        else:
+            pred_func = untyped_literal_expr('No_Logic_Converter_Default')
 
         def construct_operand(op):
             from langkit.expressions import Cast, make_as_entity
