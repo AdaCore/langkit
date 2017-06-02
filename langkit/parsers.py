@@ -1453,7 +1453,7 @@ def creates_node(p):
 
 @Log.recursive
 @Log.log_return('pp_eq_impl')
-def structural_pp_equality(parsers, toplevel=True):
+def pp_struct_eq(parsers, toplevel=True):
     """
     Determine if two parsers are structurally equal, with regards to pretty
     printing.
@@ -1474,7 +1474,7 @@ def structural_pp_equality(parsers, toplevel=True):
     # and run the algorithm on the remaining parsers.
     if Null in parsers_types:
         if is_same(p.get_type() for p in parsers):
-            return structural_pp_equality(
+            return pp_struct_eq(
                 [p for p in parsers if not isinstance(p, Null)]
             )
 
@@ -1489,7 +1489,7 @@ def structural_pp_equality(parsers, toplevel=True):
         if typ in (Row, Transform, List, Opt):
             children_lists = [p.children() for p in parsers]
             return is_same(len(c) for c in children_lists) and all(
-                structural_pp_equality(c, False)
+                pp_struct_eq(c, False)
                 for c in zip(*children_lists)
             )
         # For tok, we want to check that the parsed token is the same
@@ -1497,7 +1497,7 @@ def structural_pp_equality(parsers, toplevel=True):
             return is_same(p.val for p in parsers)
         # For extract, structural equality involves comparing indices too
         elif typ == Extract:
-            return structural_pp_equality(
+            return pp_struct_eq(
                 [p.parser for p in parsers]
             ) and is_same(p.index for p in parsers)
         # Defer and Or will be handled by the same logic we use when the kind
@@ -1515,7 +1515,7 @@ def structural_pp_equality(parsers, toplevel=True):
     # We will use a specific logic for sub-parsers (toplevel=False): If they
     # all create nodes directly, without adding additional parser logic, then
     # their uniqueness is already checked because we call
-    # structural_pp_equality on all of those.
+    # pp_struct_eq on all of those.
     if not toplevel:
         resolved_parsers = [
             p.parser if isinstance(p, Defer) else p for p in parsers
@@ -1523,15 +1523,3 @@ def structural_pp_equality(parsers, toplevel=True):
         return all(creates_node(p) for p in resolved_parsers)
 
     return False
-
-
-def pp_struct_eq(parsers):
-    """
-    Determine if N parsers are structurally equal, with regards to pretty
-    printing.
-
-    :param list[Parser] parsers: The list of parsers to test.
-    """
-    Log.log("pp_eq_impl", parsers)
-
-    return structural_pp_equality(parsers)
