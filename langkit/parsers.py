@@ -25,7 +25,7 @@ from __future__ import absolute_import, division, print_function
 from collections import defaultdict
 from contextlib import contextmanager
 import difflib
-from funcy import keep
+from funcy import keep, split
 import inspect
 
 from langkit import compiled_types, names
@@ -1537,3 +1537,23 @@ def pp_struct_eq(parsers, toplevel=True):
         return all(creates_node(p) for p in resolved_parsers)
 
     return False
+
+
+def find_canonical_parser(parsers):
+    """
+    From a list of parsers corresponding to the same node type, return the one
+    that will be used to emit the pretty-printer, which is considered the
+    canonical one for pretty-printing.
+
+    :rtype: Parser
+    """
+    def has_null(parser):
+        """
+        Return true if parser contains a null parser somewhere.
+        """
+        return isinstance(parser, Null) or any(
+            has_null(c) for c in parser.children()
+        )
+
+    nulls, no_nulls = split(has_null, parsers)
+    return no_nulls[0] if no_nulls else nulls[0]
