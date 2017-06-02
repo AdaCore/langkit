@@ -1,16 +1,16 @@
 == Incorrect bind eq_prop 1 ==
-File "test.py", line 33, in BarNode.main_prop
-  line 35, in Bind expression
+File "test.py", line 32, in BarNode.main_prop
+  line 32, in Bind expression
     Error: Equality property must return boolean
 
 == Incorrect bind eq_prop 2 ==
-File "test.py", line 33, in BarNode.main_prop
-  line 35, in Bind expression
+File "test.py", line 32, in BarNode.main_prop
+  line 32, in Bind expression
     Error: Equality property: expected 1 argument, got 0
 
 == Incorrect bind eq_prop 3 ==
-File "test.py", line 33, in BarNode.main_prop
-  line 35, in Bind expression
+File "test.py", line 32, in BarNode.main_prop
+  line 32, in Bind expression
     Error: First arg of equality property should be an entity type
 
 == Correct bind eq_prop ==
