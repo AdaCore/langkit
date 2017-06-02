@@ -1430,7 +1430,7 @@ class NodeToParsersPass():
 
 
 @Log.recursive
-@Log.log_return
+@Log.log_return('pp_eq_impl')
 def structural_pp_equality(parser, other_parser):
     """
     Determine if two parsers are structurally equal, with regards to pretty

@@ -455,15 +455,17 @@ class Log():
     nesting_level = 0
 
     @staticmethod
-    def log_return(fn):
+    def log_return(trace):
         """
         Decorates a function, so that its return value is logged.
         """
-        def internal(*args, **kwargs):
-            ret = fn(*args, **kwargs)
-            Log.log("{} returned {}".format(fn.__name__, ret))
-            return ret
-        return internal
+        def decorator(fn):
+            def internal(*args, **kwargs):
+                ret = fn(*args, **kwargs)
+                Log.log(trace, "{} returned {}".format(fn.__name__, ret))
+                return ret
+            return internal
+        return decorator
 
     @staticmethod
     def log(trace, *args, **kwargs):
