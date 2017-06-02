@@ -1697,6 +1697,17 @@ def abstract(cls):
     return cls
 
 
+def synthetic(cls):
+    """
+    Decorator to tag an ASTNode subclass as synthetic.
+
+    :param type cls: Type parameter. The ASTNode subclass to decorate.
+    """
+    assert issubclass(cls, ASTNode)
+    cls.synthetic = True
+    return cls
+
+
 def root_grammar_class(generic_list_type=None):
     """
     Return a decorator to tag an ASTNode subclass as the root grammar node.
@@ -2263,6 +2274,7 @@ class ASTNode(Struct):
 
     is_ptr = True
     abstract = False
+    synthetic = False
     is_bool_node = False
     is_enum_node = False
     is_generic_list_type = False
