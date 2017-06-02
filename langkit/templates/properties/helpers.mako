@@ -53,12 +53,31 @@
       type_name = 'Equals_Data_{}'.format(eq_prop.uid)
    %>
 
-   type ${type_name} is null record;
-   No_${type_name} : constant ${type_name} := (null record);
+   type ${type_name} is
+   % if eq_prop.dynamic_vars:
+      record
+         % for dynvar in eq_prop.dynamic_vars:
+            ${dynvar.argument_name} : ${dynvar.type};
+         % endfor
+      end record;
+   % else:
+      null record;
+   % endif
+
+   No_${type_name} : constant ${type_name} := (
+      % if eq_prop.dynamic_vars:
+         ${', '.join(dynvar.type.nullexpr()
+                     for dynvar in eq_prop.dynamic_vars)}
+      % else:
+         null record
+      % endif
+   );
 
    function Eq_${eq_prop.uid}
      (Data : ${type_name}; L, R : ${T.entity.name()}) return Boolean is
-     pragma Unreferenced (Data);
+     % if not eq_prop.dynamic_vars:
+        pragma Unreferenced (Data);
+     % endif
    begin
       --  If any node pointer is null, then use that for equality
       if L.El = null or else R.El = null then
@@ -76,6 +95,9 @@
             return ${eq_prop.name}
              (${eq_prop.self_arg_name}             => ${struct} (L.El),
               ${eq_prop.natural_arguments[0].name} => R_Entity,
+              % for dynvar in eq_prop.dynamic_vars:
+                 ${dynvar.argument_name} => Data.${dynvar.argument_name},
+              % endfor
               ${eq_prop.entity_info_name}          => L.Info);
           end;
       end if;

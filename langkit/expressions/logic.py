@@ -8,7 +8,7 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, LiteralExpr, PropertyDef,
-    construct, auto_attr, render
+    aggregate_expr, auto_attr, construct, render
 )
 
 
@@ -54,17 +54,39 @@ class Bind(AbstractExpression):
             self.rhs = rhs
             self.pred_func = pred_func
 
-            constructor_args = [
-                lhs, rhs, pred_func,
-                'No_Equals_Data_{}'.format(eq_prop.uid
-                                           if eq_prop else 'Default')
-            ]
+            constructor_args = [lhs, rhs, pred_func]
+
+            if eq_prop:
+                constructor_args.append(self.dynamic_vars_to_holder(
+                    eq_prop,
+                    'Equals_Data_{}'.format(eq_prop.uid)
+                ))
+            else:
+                constructor_args.append('No_Equals_Data_Default')
 
             super(Bind.Expr, self).__init__(
                 'Bind_Result',
                 'Bind_{}_{}.Create'.format(cprop_uid, eprop_uid),
                 EquationType, constructor_args,
                 abstract_expr=abstract_expr
+            )
+
+        @staticmethod
+        def dynamic_vars_to_holder(prop, type_name):
+            """
+            Create an aggregate expression to hold the dynamic variables to
+            pass to `prop`. This is a helper to generate state for
+            conversion/equality properties.
+
+            :param PropertyDef prop: Property to pass the dynamic variables to.
+            :param str type_name: Type name for the aggregate to create.
+
+            :rtype: LiteralExpr
+            """
+            return aggregate_expr(
+                type_name,
+                [(dynvar.argument_name, construct(dynvar))
+                 for dynvar in prop.dynamic_vars]
             )
 
         @property
@@ -173,9 +195,6 @@ class Bind(AbstractExpression):
                  'Equality property: expected 1 argument, got {}'.format(
                      len(args)
                 )),
-
-                (not self.eq_prop.dynamic_vars,
-                 'Equality property must have no dynamically bound variable'),
             ])
 
             other_type = args[0].type
