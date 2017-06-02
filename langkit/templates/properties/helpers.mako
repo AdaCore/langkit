@@ -13,6 +13,33 @@
   )
 </%def>
 
+<%def name="dynamic_vars_holder_decl(type_name, dynvars)">
+   type ${type_name} is
+   % if dynvars:
+      record
+         % for dynvar in dynvars:
+            ${dynvar.argument_name} : ${dynvar.type.name()};
+         % endfor
+      end record;
+   % else:
+      null record;
+   % endif
+
+   No_${type_name} : constant ${type_name} := (
+      % if dynvars:
+         <%
+            items = [
+               '{} => {}'.format(dynvar.argument_name, dynvar.type.nullexpr())
+               for dynvar in dynvars
+            ]
+         %>
+         ${', '.join(items)}
+      % else:
+         null record
+      % endif
+   );
+</%def>
+
 <%def name="logic_converter(conv_prop)">
    <%
    type_name = "Logic_Converter_{}".format(conv_prop.uid)
@@ -53,25 +80,7 @@
       type_name = 'Equals_Data_{}'.format(eq_prop.uid)
    %>
 
-   type ${type_name} is
-   % if eq_prop.dynamic_vars:
-      record
-         % for dynvar in eq_prop.dynamic_vars:
-            ${dynvar.argument_name} : ${dynvar.type};
-         % endfor
-      end record;
-   % else:
-      null record;
-   % endif
-
-   No_${type_name} : constant ${type_name} := (
-      % if eq_prop.dynamic_vars:
-         ${', '.join(dynvar.type.nullexpr()
-                     for dynvar in eq_prop.dynamic_vars)}
-      % else:
-         null record
-      % endif
-   );
+   ${dynamic_vars_holder_decl(type_name, eq_prop.dynamic_vars)}
 
    function Eq_${eq_prop.uid}
      (Data : ${type_name}; L, R : ${T.entity.name()}) return Boolean is
