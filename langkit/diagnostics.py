@@ -301,9 +301,8 @@ def check_source_language(predicate, message, severity=Severity.error,
 
 class WarningDescriptor(object):
     """
-    Embed information about a class of warnings.
-
-    Instances are to be passed as the `warning` argument in `warn_if`.
+    Embed information about a class of warnings. Allows to log warning messages
+    via the `warn_if` method.
     """
 
     def __init__(self, name, enabled_by_default, description):
@@ -323,6 +322,18 @@ class WarningDescriptor(object):
 
     def __repr__(self):
         return '<WarningDescriptor {}>'.format(self.name)
+
+    def warn_if(self, predicate, message):
+        """
+        Helper around check_source_language, to raise warnings, depending on
+        whether self is enabled or not in the current context.
+
+        :param bool predicate: The predicate to check.
+        :param str message: The base message to display if predicate happens to
+            be false.
+        """
+        check_source_language(not self.enabled or not predicate, message,
+                              severity=Severity.warning)
 
 
 class WarningSet(object):
@@ -416,21 +427,6 @@ class WarningSet(object):
                 print('  [enabled by default]', file=out)
             print(langkit.documentation.format_text(w.description, 2, width),
                   file=out)
-
-
-def warn_if(predicate, message, warning):
-    """
-    Helper around check_source_language, to raise warnings.
-
-    :param bool predicate: The predicate to check.
-    :param str message: The base message to display if predicate happens to
-        be false.
-    :param WarningDescriptor warning: The descriptor corresponding to this
-        warning. Depending on whether this warning is enabled in the current
-        context, the warning diagnostic will be emitted or not.
-    """
-    check_source_language(not warning.enabled or not predicate, message,
-                          severity=Severity.warning)
 
 
 def check_multiple(predicates_and_messages, severity=Severity.error):

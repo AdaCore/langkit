@@ -17,7 +17,7 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, WarningSet, check_multiple,
-    check_source_language, check_type, extract_library_location, warn_if
+    check_source_language, check_type, extract_library_location
 )
 from langkit.expressions.utils import assign_var
 from langkit.utils import TypeSet, assert_type, dispatch_on_type, memoized
@@ -2733,10 +2733,9 @@ class PropertyDef(AbstractNodeData):
             )
 
     def check_return_types(self, context):
-        warn_if(
+        WarningSet.prop_only_entities_warning.warn_if(
             self.type.matches(T.root_node),
             '{} returns a node type'.format(self.qualname),
-            WarningSet.prop_only_entities_warning
         )
 
     def render_property(self, context):
@@ -2890,17 +2889,15 @@ class PropertyDef(AbstractNodeData):
                 for var in vars
             )
 
-        warn_if(
+        WarningSet.unused_bindings_warning.warn_if(
             unused_vars,
             'The following bindings are not used: {}'.format(
                 format_list(unused_vars)),
-            WarningSet.unused_bindings_warning
         )
-        warn_if(
+        WarningSet.unused_bindings_warning.warn_if(
             wrongly_used_vars,
             'The following bindings are used even though they are supposed to'
             ' be ignored: {}'.format(format_list(wrongly_used_vars)),
-            WarningSet.unused_bindings_warning
         )
 
 
