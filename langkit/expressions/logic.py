@@ -7,8 +7,8 @@ from langkit.compiled_types import (
 
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
-    AbstractExpression, CallExpr, ComputingExpr, LiteralExpr, PropertyDef,
-    aggregate_expr, auto_attr, construct, render
+    AbstractExpression, CallExpr, ComputingExpr, DynamicVariable, LiteralExpr,
+    PropertyDef, aggregate_expr, auto_attr, construct, render
 )
 
 
@@ -171,6 +171,10 @@ class Bind(AbstractExpression):
                      T.root_node.name().camel
                 )),
             ])
+
+            DynamicVariable.check_call_bindings(
+                self.conv_prop, "In Bind's conv_prop {prop}"
+            )
 
         # Those checks are run in construct, because we need the eq_prop to be
         # prepared already, which is not certain in do_prepare (order
