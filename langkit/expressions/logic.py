@@ -446,6 +446,10 @@ class Predicate(AbstractExpression):
                     )
                 )
 
+        DynamicVariable.check_call_bindings(
+            self.pred_property, 'In predicate property {prop}'
+        )
+
         # Append dynamic variables to embed their values in the closure
         closure_exprs.extend(
             construct(dynvar) for dynvar in self.pred_property.dynamic_vars
