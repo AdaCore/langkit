@@ -1465,10 +1465,14 @@ class DynamicVariable(AbstractVariable):
 
         :param names.Name name: The new name.
         """
+        p = PropertyDef.get()
         saved = self._name
+
         self._name = name
+        p.dynvar_binding_stack.append(self)
         yield
         self._name = saved
+        assert p.dynvar_binding_stack.pop() is self
 
     @contextmanager
     def bind_default(self, prop):
@@ -2153,6 +2157,15 @@ class PropertyDef(AbstractNodeData):
         self._requires_untyped_wrapper = False
         self.force_dispatching = force_dispatching
         self.warn_on_unused = warn_on_unused
+
+        self.dynvar_binding_stack = []
+        """
+        Stack of dynamic variable bindings. This is used to determine the set
+        of dynamic variables to reset when recursing on the construction of
+        properties.
+
+        :type: list[DynamicVariable]
+        """
 
     def property_set(self):
         """
