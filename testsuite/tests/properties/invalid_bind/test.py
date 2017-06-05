@@ -13,20 +13,22 @@ from utils import emit_and_print_errors
 
 
 env = DynamicVariable('env', LexicalEnvType)
+dyn_node = DynamicVariable('dyn_node', T.BazNode)
 
 
-def run(name, prop_expr):
+def run(name, eq_prop):
     """
     Emit and print the errors we get for the below grammar with "expr" as
     a property in BarNode.
     """
 
     Diagnostics.set_lang_source_dir(path.abspath(__file__))
-    env.unfreeze()
+    for dynvar in [env, dyn_node]:
+        dynvar.unfreeze()
 
     print('== {} =='.format(name))
 
-    prop = eval(prop_expr)
+    eq_prop = eval(eq_prop)
 
     @root_grammar_class()
     class FooNode(ASTNode):
@@ -36,7 +38,7 @@ def run(name, prop_expr):
     class BarNode(FooNode):
         main_prop = Property(
             env.bind(Self.node_env,
-                     Bind(Self.type_var, Self.ref_var, eq_prop=prop))
+                     Bind(Self.type_var, Self.ref_var, eq_prop=eq_prop))
         )
 
         @langkit_property(public=True)
@@ -52,6 +54,10 @@ def run(name, prop_expr):
         @langkit_property(warn_on_unused=False)
         def prop3(_=T.BarNode):
             return True
+
+        @langkit_property(warn_on_unused=False, dynamic_vars=[dyn_node])
+        def prop4(other=T.BazNode.entity()):
+            return other.el == dyn_node
 
         @langkit_property(warn_on_unused=False)
         def propA(other=T.BazNode.entity()):
@@ -78,6 +84,7 @@ def run(name, prop_expr):
 run('Incorrect bind eq_prop 1', 'T.BazNode.fields.prop')
 run('Incorrect bind eq_prop 2', 'T.BazNode.fields.prop2')
 run('Incorrect bind eq_prop 3', 'T.BazNode.fields.prop3')
+run('Incorrect bind eq_prop 4', 'T.BazNode.fields.prop4')
 run('Correct bind eq_prop A', 'T.BazNode.fields.propA')
 run('Correct bind eq_prop B', 'T.BazNode.fields.propB')
 print('Done')
