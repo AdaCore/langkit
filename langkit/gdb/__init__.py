@@ -51,7 +51,7 @@ def setup(lib_name, astnode_names, prefix):
         gdb_printers.append(printer)
 
     for objfile in gdb.objfiles():
-        handle_new_objfile(objfile, lib_name)
+        handle_new_objfile(objfile, lib_name, reparse_debug_info=False)
     gdb.events.new_objfile.connect(
         lambda event: handle_new_objfile(event.new_objfile, lib_name)
     )
@@ -67,7 +67,7 @@ def setup(lib_name, astnode_names, prefix):
     functions.Match(context)
 
 
-def handle_new_objfile(objfile, lib_name):
+def handle_new_objfile(objfile, lib_name, reparse_debug_info=True):
     # Registers our printers only for the objfile that contains the generated
     # library.
     version_symbol = gdb.lookup_global_symbol('{}__version'.format(lib_name))
@@ -75,3 +75,6 @@ def handle_new_objfile(objfile, lib_name):
         return
 
     objfile.pretty_printers.append(gdb_printers)
+
+    if reparse_debug_info:
+        global_context.reparse_debug_info()

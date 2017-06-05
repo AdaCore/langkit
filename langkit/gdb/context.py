@@ -27,7 +27,7 @@ class Context(object):
 
         self.astnode_struct_names = self._astnode_struct_names()
 
-        self.debug_info = DebugInfo.parse(self)
+        self.reparse_debug_info()
 
     def _astnode_struct_names(self):
         """
@@ -63,3 +63,9 @@ class Context(object):
         :rtype: str
         """
         return '{}__analysis__'.format(self.lib_name)
+
+    def reparse_debug_info(self):
+        """
+        Reload debug information from the analysis source file.
+        """
+        self.debug_info = DebugInfo.parse(self)
