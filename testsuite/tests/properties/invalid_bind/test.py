@@ -12,7 +12,7 @@ from os import path
 from utils import emit_and_print_errors
 
 
-Env = DynamicVariable('env', LexicalEnvType)
+env = DynamicVariable('env', LexicalEnvType)
 
 
 def run(name, prop_expr):
@@ -22,6 +22,7 @@ def run(name, prop_expr):
     """
 
     Diagnostics.set_lang_source_dir(path.abspath(__file__))
+    env.unfreeze()
 
     print('== {} =='.format(name))
 
@@ -33,7 +34,10 @@ def run(name, prop_expr):
         type_var = UserField(LogicVarType, public=False)
 
     class BarNode(FooNode):
-        main_prop = Property(Bind(Self.type_var, Self.ref_var, eq_prop=prop))
+        main_prop = Property(
+            env.bind(Self.node_env,
+                     Bind(Self.type_var, Self.ref_var, eq_prop=prop))
+        )
 
         @langkit_property(public=True)
         def wrapper():
@@ -50,12 +54,12 @@ def run(name, prop_expr):
             return True
 
         @langkit_property(warn_on_unused=False)
-        def prop4(other=T.BazNode.entity()):
+        def propA(other=T.BazNode.entity()):
             return Self.as_entity == other
 
-        @langkit_property(warn_on_unused=False, dynamic_vars=[Env])
-        def prop5(other=T.BazNode.entity()):
-            return other.node_env == Env
+        @langkit_property(warn_on_unused=False, dynamic_vars=[env])
+        def propB(other=T.BazNode.entity()):
+            return other.node_env == env
 
     def lang_def():
         foo_grammar = Grammar('main_rule')
@@ -74,6 +78,6 @@ def run(name, prop_expr):
 run('Incorrect bind eq_prop 1', 'T.BazNode.fields.prop')
 run('Incorrect bind eq_prop 2', 'T.BazNode.fields.prop2')
 run('Incorrect bind eq_prop 3', 'T.BazNode.fields.prop3')
-run('Correct bind eq_prop 4', 'T.BazNode.fields.prop4')
-run('Correct bind eq_prop 5', 'T.BazNode.fields.prop5')
+run('Correct bind eq_prop A', 'T.BazNode.fields.propA')
+run('Correct bind eq_prop B', 'T.BazNode.fields.propB')
 print('Done')

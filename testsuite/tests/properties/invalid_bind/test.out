@@ -1,24 +1,22 @@
 == Incorrect bind eq_prop 1 ==
-File "test.py", line 36, in BarNode.main_prop
-  line 36, in Bind expression
+File "test.py", line 39, in BarNode.main_prop
+  line 39, in Bind expression
     Error: Equality property must return boolean
 
 == Incorrect bind eq_prop 2 ==
-File "test.py", line 36, in BarNode.main_prop
-  line 36, in Bind expression
+File "test.py", line 39, in BarNode.main_prop
+  line 39, in Bind expression
     Error: Equality property: expected 1 argument, got 0
 
 == Incorrect bind eq_prop 3 ==
-File "test.py", line 36, in BarNode.main_prop
-  line 36, in Bind expression
+File "test.py", line 39, in BarNode.main_prop
+  line 39, in Bind expression
     Error: First arg of equality property should be an entity type
 
-== Correct bind eq_prop 4 ==
+== Correct bind eq_prop A ==
 Code generation was successful
 
-== Correct bind eq_prop 5 ==
-File "test.py", line 36, in BarNode.main_prop
-  line 36, in Bind expression
-    Error: env is not bound in this context: please use the .bind construct to bind it first.
+== Correct bind eq_prop B ==
+Code generation was successful
 
 Done
