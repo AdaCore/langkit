@@ -9,7 +9,7 @@ from langkit.compiled_types import (
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
-    ComputingExpr, Let, NullCheckExpr, NullExpr, PropertyDef,
+    ComputingExpr, DynamicVariable, Let, NullCheckExpr, NullExpr, PropertyDef,
     ResolvedExpression, SavedExpr, SequenceExpr, UnreachableExpr, attr_call,
     attr_expr, construct, render
 )
@@ -625,17 +625,8 @@ class FieldAccess(AbstractExpression):
         # that the callee's dynamic variables are bound here so we can emit a
         # helpful error message if that's not the case.
         if isinstance(self.to_get, PropertyDef):
-            unbound_dynvars = [
-                dynvar for dynvar in self.to_get.dynamic_vars
-                if not dynvar.is_bound
-            ]
-            check_source_language(
-                not unbound_dynvars,
-                'For call to {}, some dynamic variables need to be bound:'
-                ' {}'.format(self.to_get.qualname,
-                             ', '.join(dynvar.argument_name.lower
-                                       for dynvar in unbound_dynvars))
-            )
+            DynamicVariable.check_call_bindings(self.to_get,
+                                                'In call to {prop}')
 
         ret = FieldAccess.Expr(
             self.receiver_expr, to_get, arg_exprs, self.is_deref,

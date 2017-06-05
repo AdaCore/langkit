@@ -1517,6 +1517,33 @@ class DynamicVariable(AbstractVariable):
     def __repr__(self):
         return '<DynamicVariable {}>'.format(self.argument_name.lower)
 
+    @staticmethod
+    def check_call_bindings(prop, context_msg):
+        """
+        Emit an error diagnostic of there is at least one dynamic variable in
+        `prop` that is not currently bound. `context_msg` is used to format the
+        error message.
+
+        :param PropertyDef prop: Property "to call".
+        :param str context_msg: String to describe how this property is used.
+            This helps formatting the error message. It is formatted with
+            "prop", being the name of the property. For instance:
+
+                "In call to {prop}".
+        """
+        unbound_dynvars = [
+            dynvar for dynvar in prop.dynamic_vars
+            if not dynvar.is_bound
+        ]
+        check_source_language(
+            not unbound_dynvars,
+            '{}, some dynamic variables need to be bound: {}'.format(
+                context_msg.format(prop=prop.qualname),
+                ', '.join(dynvar.argument_name.lower
+                          for dynvar in unbound_dynvars)
+            )
+        )
+
 
 class DynamicVariableBindExpr(ComputingExpr):
 
