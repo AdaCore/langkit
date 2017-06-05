@@ -203,6 +203,10 @@ class Bind(AbstractExpression):
                 "Self and first argument should be of the same type"
             )
 
+            DynamicVariable.check_call_bindings(
+                self.eq_prop, "In Bind's eq_prop {prop}"
+            )
+
         cprop_uid = (self.conv_prop.uid if self.conv_prop else "Default")
         eprop_uid = (self.eq_prop.uid if self.eq_prop else "Default")
 
