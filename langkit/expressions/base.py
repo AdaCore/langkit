@@ -2700,7 +2700,18 @@ class PropertyDef(AbstractNodeData):
                 self.expected_type = self.base_property.type
             return
 
-        with self.bind(), Self.bind_type(self.struct):
+        previous_property = PropertyDef.get()
+        context_managers = [self.bind(), Self.bind_type(self.struct)]
+
+        # Reset bindings for dynamically bound variables so that this
+        # construction does not use a caller's binding. Also provide default
+        # bindings for self's dynamically bound variables.
+        to_reset = ([] if previous_property is None else
+                    previous_property.dynvar_binding_stack)
+        context_managers.extend(dynvar.bind_default(self)
+                                for dynvar in to_reset + self.dynamic_vars)
+
+        with nested(*context_managers):
             message = (
                 'expected type {{expected}}, got'
                 ' {{expr_type}} instead (expected type comes from'
@@ -2709,18 +2720,13 @@ class PropertyDef(AbstractNodeData):
                 )
             ) if self.base_property else None
 
-            # Reset bindings for dynamically bound variables so that this
-            # construction does not use a caller's binding.
-            with nested(*[
-                dynvar.bind_default(self) for dynvar in self.dynamic_vars
-            ]):
-                self.in_type = True
-                try:
-                    self.constructed_expr = construct(self.expr,
-                                                      self.expected_type,
-                                                      message)
-                finally:
-                    self.in_type = False
+            self.in_type = True
+            try:
+                self.constructed_expr = construct(self.expr,
+                                                  self.expected_type,
+                                                  message)
+            finally:
+                self.in_type = False
 
         # Make sure that all the created local variables are associated to a
         # scope.
