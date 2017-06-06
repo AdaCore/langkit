@@ -114,6 +114,13 @@ class TokenAction(Action):
         self.start_ignore_layout = start_ignore_layout
         self.end_ignore_layout = end_ignore_layout
 
+        self.matcher = None
+        """
+        If this action is associated to a Literal matcher, this will be set to
+        it.
+        :type: Matcher|None
+        """
+
     @property
     def value(self):
         return self._index
@@ -427,6 +434,8 @@ class Lexer(object):
                 # itself, so that we can find tokens via their literal
                 # representation.
                 self.literals_map[m.to_match] = a
+
+                a.matcher = m
 
     def emit(self):
         """
