@@ -1409,7 +1409,7 @@ class NodeToParsersPass():
     def __init__(self):
         self.nodes_to_rules = defaultdict(list)
         self.can_create_pp = True
-        self.nodes_to_canonical_rule = {}
+        self.canonical_rules = {}
 
     def check_nodes_to_rules(self, ctx):
         """
@@ -1434,23 +1434,21 @@ class NodeToParsersPass():
                     Log.log("pp_eq")
                     self.can_create_pp = False
 
-                self.nodes_to_canonical_rule[node] = (
-                    find_canonical_parser(parsers)
-                )
+                self.canonical_rules[node] = find_canonical_parser(parsers)
             else:
-                self.nodes_to_canonical_rule[node] = parsers[0]
+                self.canonical_rules[node] = parsers[0]
 
             Log.log("pp_canonical", node.name(),
-                    self.nodes_to_canonical_rule[node])
+                    self.canonical_rules[node])
 
             # Set the canonical parser on this ASTNode type
-            node.parser = self.nodes_to_canonical_rule[node]
+            node.parser = self.canonical_rules[node]
 
         from langkit.compiled_types import StructMetaclass
 
         for node_type in StructMetaclass.astnode_types:
             WarningSet.pp_bad_grammar.warn_if(
-                node_type not in self.nodes_to_canonical_rule.keys()
+                node_type not in self.canonical_rules.keys()
                 and not node_type.abstract
                 and not node_type.synthetic,
                 "Missing parser for node {}".format(node_type.name())
