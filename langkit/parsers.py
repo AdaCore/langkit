@@ -640,14 +640,14 @@ class Tok(Parser):
         """
         Parser.__init__(self)
 
-        self.val = val
+        self._val = val
         ":type: TokenAction|str"
 
         self.match_text = match_text
         ":type: str"
 
         check_source_language(
-            not self.match_text or isinstance(self.val, WithSymbol),
+            not self.match_text or isinstance(self._val, WithSymbol),
             "Tok matcher has match text, but val is not a WithSymbol instance,"
             " got {} instead".format(val)
         )
@@ -660,11 +660,19 @@ class Tok(Parser):
     def create_vars_after(self, start_pos):
         self.init_vars()
 
+    @property
+    def val(self):
+        """
+        Return the token action associated with this Tok parser.
+
+        :rtype: TokenAction
+        """
+        return (get_context().lexer.get_token(self._val)
+                if isinstance(self._val, basestring)
+                else self._val)
+
     def generate_code(self):
-        token = (get_context().lexer.get_token(self.val)
-                 if isinstance(self.val, basestring)
-                 else self.val)
-        return self.render('tok_code_ada', token_kind=token.ada_name)
+        return self.render('tok_code_ada', token_kind=self.val.ada_name)
 
     @property
     def matches_symbol(self):
