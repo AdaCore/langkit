@@ -42,6 +42,7 @@ procedure Parse is
    File_List   : aliased GNAT.Strings.String_Access;
    Print_Envs  : aliased Boolean;
    Count_Nodes : aliased Boolean;
+   Pretty_Print : aliased Boolean;
 
    Input_Str : Unbounded_String;
    Lookups   : String_Vectors.Vector;
@@ -215,6 +216,10 @@ procedure Parse is
          end;
       end if;
 
+      if Pretty_Print then
+         Put_Line (AST.PP);
+      end if;
+
       if Measure_Time then
          Put_Line
            ("Time elapsed: " & Duration'Image (Time_After - Time_Before));
@@ -257,6 +262,9 @@ begin
      (Config, File_List'Access, "-F:", "--file-list:",
       Help   => ("Parse files listed in the provided filename with the regular"
                  & " analysis circuitry (useful for timing measurements)"));
+   Define_Switch
+     (Config, Pretty_Print'Access, "-P", "--pp",
+      Help   => "Pretty print the code with the built in pretty printer");
    begin
       Getopt (Config);
    exception
