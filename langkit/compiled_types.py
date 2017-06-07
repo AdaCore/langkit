@@ -1281,7 +1281,6 @@ class FieldsDictProxy(DictProxy):
 # StructMetaclass will see these None values.
 Struct = None
 ASTNode = None
-_ = Struct, ASTNode  # Workaround PyCharm useless warnings
 
 
 class StructMetaclass(CompiledTypeMetaclass):
