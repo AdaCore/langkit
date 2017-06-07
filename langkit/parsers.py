@@ -1411,7 +1411,6 @@ class NodeToParsersPass():
 
     def __init__(self):
         self.nodes_to_rules = defaultdict(list)
-        self.can_create_pp = True
         self.canonical_rules = {}
 
     def check_nodes_to_rules(self, ctx):
@@ -1456,7 +1455,8 @@ class NodeToParsersPass():
                         for val in parsers:
                             Log.log("pp_eq", val)
                     Log.log("pp_eq")
-                    self.can_create_pp = False
+                    ctx.generate_pp = False
+                    return
 
                 self.canonical_rules[node] = find_canonical_parser(parsers)
             else:
