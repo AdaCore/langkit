@@ -41,7 +41,7 @@ class PythonAPISettings(AbstractAPISettings):
         # TODO: handle all types
         assert (not inc_ref
                 or not type.is_refcounted()
-                or issubclass(type, (ct.ArrayType, ct.Struct,
+                or issubclass(type, (ct.ArrayType, ct.StructType,
                                      ct.LexicalEnvType,
                                      ct.EnvRebindingsType,
                                      ct.EquationType))), (
@@ -68,7 +68,7 @@ class PythonAPISettings(AbstractAPISettings):
                 type.api_name().camel,
                 inc_ref
             )),
-            (ct.Struct, lambda _: '{}._wrap({{}}, inc_ref={})'.format(
+            (ct.StructType, lambda _: '{}._wrap({{}}, inc_ref={})'.format(
                 type.name().camel,
                 inc_ref
             )),
@@ -110,7 +110,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ArrayType, lambda cls: '{}._unwrap({{}})'.format(
                 cls.api_name().camel
             )),
-            (ct.Struct, lambda _: '{}._unwrap({{}})'.format(
+            (ct.StructType, lambda _: '{}._unwrap({{}})'.format(
                 type.name().camel
             )),
             (ct.Symbol, lambda _: '_text._unwrap({})'),
@@ -155,5 +155,5 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.EnumType, lambda _: ctype_type('c_uint')),
             (ct.ArrayType, lambda cls:
                 '{}._c_type'.format(cls.api_name().camel)),
-            (ct.Struct, lambda _: '{}._c_type'.format(type.name().camel)),
+            (ct.StructType, lambda _: '{}._c_type'.format(type.name().camel)),
         ])
