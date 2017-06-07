@@ -1410,28 +1410,31 @@ class NodeToParsersPass():
         has one non ambiguous way of being pretty printed, and assign a
         canonical representation to every node type.
         """
-        for k, v in self.nodes_to_rules.items():
-            if len(v) > 1:
-                if not pp_struct_eq(v):
+        for node, parsers in self.nodes_to_rules.items():
+            if len(parsers) > 1:
+                if not pp_struct_eq(parsers):
                     WarningSet.pp_bad_grammar.warn_if(
                         True,
                         "Node {} is parsed in different incompatible "
                         "ways. This will prevent the generation of an "
                         "automatic pretty printer.\nFor more information, "
-                        "enable the pp_eq trace".format(k.name()),
+                        "enable the pp_eq trace".format(node.name()),
                     )
-                    Log.log("pp_eq", "for node {} is false".format(k))
+                    Log.log("pp_eq", "for node {} is false".format(node))
                     with Log.nest():
-                        for val in v:
+                        for val in parsers:
                             Log.log("pp_eq", val)
                     Log.log("pp_eq")
                     self.can_create_pp = False
 
-                self.nodes_to_canonical_rule[k] = find_canonical_parser(v)
+                self.nodes_to_canonical_rule[node] = (
+                    find_canonical_parser(parsers)
+                )
             else:
-                self.nodes_to_canonical_rule[k] = v[0]
+                self.nodes_to_canonical_rule[node] = parsers[0]
 
-            Log.log("pp_canonical", k.name(), self.nodes_to_canonical_rule[k])
+            Log.log("pp_canonical", node.name(),
+                    self.nodes_to_canonical_rule[node])
 
         from langkit.compiled_types import StructMetaclass
 
