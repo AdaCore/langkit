@@ -257,15 +257,15 @@ class CompiledType(object):
     * convert_to_storage_expr.
     """
 
+    is_ast_node = False
+    """
+    Whether this type represents an AST node type.
+    """
+
     is_list_type = False
     """
     Whether this type represents an instantiation of ASTList (i.e. a list of
     AST nodes).
-    """
-
-    is_ast_node = False
-    """
-    Whether this type represents an AST node type.
     """
 
     is_entity_type = False
