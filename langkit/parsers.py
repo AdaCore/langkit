@@ -1421,6 +1421,8 @@ class NodeToParsersPass():
         """
         from langkit.compiled_types import StructMetaclass
 
+        # Check if every non-abstract non-synthetic node has a corresponding
+        # parser.
         for node_type in StructMetaclass.astnode_types:
             with node_type.diagnostic_context():
                 WarningSet.unused_node_type.warn_if(
@@ -1437,10 +1439,13 @@ class NodeToParsersPass():
                     "synthetic".format(node_type.name())
                 )
 
+        # Exit early if no pretty-printer generation has been asked
         if not ctx.generate_pp:
             return
 
         for node, parsers in self.nodes_to_rules.items():
+            # If the node has more than one parser, check if those are
+            # structurally equivalent.
             if len(parsers) > 1:
                 if not pp_struct_eq(parsers):
                     WarningSet.pp_bad_grammar.warn_if(
@@ -1450,11 +1455,6 @@ class NodeToParsersPass():
                         "automatic pretty printer.\nFor more information, "
                         "enable the pp_eq trace".format(node.name()),
                     )
-                    Log.log("pp_eq", "for node {} is false".format(node))
-                    with Log.nest():
-                        for val in parsers:
-                            Log.log("pp_eq", val)
-                    Log.log("pp_eq")
                     ctx.generate_pp = False
                     return
 
@@ -1462,8 +1462,7 @@ class NodeToParsersPass():
             else:
                 self.canonical_rules[node] = parsers[0]
 
-            Log.log("pp_canonical", node.name(),
-                    self.canonical_rules[node])
+            Log.log("pp_canonical", node.name(), self.canonical_rules[node])
 
             # Set the canonical parser on this ASTNodeType type
             node.parser = self.canonical_rules[node]
