@@ -396,21 +396,22 @@ class CompileCtx(object):
 
         self.astnode_types = []
         """
-        List for all ASTnode subclasses (ASTNode excluded), sorted so that A
-        is before B when A is a parent class for B. This sorting is important
+        List for all ASTnode subclasses (ASTNodeType excluded), sorted so that
+        A is before B when A is a parent class for B. This sorting is important
         to output declarations in dependency order.
+
         This is computed right after field types inference.
 
-        :type: list[langkit.compiled_types.ASTNode]
+        :type: list[langkit.compiled_types.ASTNodeType]
         """
 
         self.node_kind_constants = {}
         """
-        Mapping: ASTNode concrete (i.e. non abstract) subclass -> int,
+        Mapping: ASTNodeType concrete (i.e. non abstract) subclass -> int,
         associating specific constants to be used reliably in bindings.  This
         mapping is built at the beginning of code emission.
 
-        :type: dict[langkit.compiled_types.ASTNode, int]
+        :type: dict[langkit.compiled_types.ASTNodeType, int]
         """
 
         self._struct_types = []
@@ -422,10 +423,10 @@ class CompileCtx(object):
 
         self.root_grammar_class = None
         """
-        The ASTNode subclass that is the root class for every node used in
+        The ASTNodeType subclass that is the root class for every node used in
         the grammar.
 
-        :type: langkit.compiled_types.ASTNode
+        :type: langkit.compiled_types.ASTNodeType
         """
 
         self.generic_list_type = None
@@ -433,7 +434,7 @@ class CompileCtx(object):
         The root gammar class subclass that is the base class for all
         automatically generated root list types.
 
-        :type: langkit.compiled_types.ASTNode
+        :type: langkit.compiled_types.ASTNodeType
         """
 
         self.env_metadata = None
@@ -446,10 +447,10 @@ class CompileCtx(object):
 
         self.list_types = set()
         """
-        Set of all ASTNode subclasses (ASTNode included) for which we
+        Set of all ASTNodeType subclasses (ASTNodeType included) for which we
         generate a corresponding list type.
 
-        :type: set[langkit.compiled_types.ASTNode]
+        :type: set[langkit.compiled_types.ASTNodeType]
         """
 
         self.array_types = set()
@@ -607,11 +608,10 @@ class CompileCtx(object):
 
         :rtype: list[str]
         """
-        from langkit.compiled_types import ASTNode
         return sorted(
             name
             for name, parser in self.grammar.rules.items()
-            if issubclass(parser.get_type(), ASTNode)
+            if parser.get_type().is_ast_node
         )
 
     def compute_types(self):
@@ -620,7 +620,7 @@ class CompileCtx(object):
         available for code generation.
         """
 
-        # Get the list of ASTNode types from the StructType metaclass
+        # Get the list of ASTNodeType types from the StructType metaclass
         from langkit.compiled_types import LexicalEnvType, StructMetaclass
         entity = StructMetaclass.root_grammar_class.entity()
 
@@ -846,7 +846,7 @@ class CompileCtx(object):
 
         :param bool annotate_fields_types: Whether to try and annotate the
             type of fields in the grammar. If this is True, this will
-            actually modify the file in which ASTNode subclasses are
+            actually modify the file in which ASTNodeType subclasses are
             defined, and annotate empty field definitions.
 
         :param bool check_only: If true, only perform validity checks: stop
@@ -1042,7 +1042,7 @@ class CompileCtx(object):
             GlobalPass('annotate fields types',
                        CompileCtx.annotate_fields_types,
                        disabled=not annotate_fields_types),
-            GlobalPass('compute ASTNode kind constants',
+            GlobalPass('compute AST node kind constants',
                        CompileCtx.compute_node_kind_constants),
 
             # Now that all StructType subclasses referenced by the grammar have
@@ -1469,7 +1469,7 @@ class CompileCtx(object):
 
     def compute_node_kind_constants(self):
         """
-        Compute kind constants for all ASTNode concrete subclasses.
+        Compute kind constants for all concrete AST nodes.
         """
         for i, astnode in enumerate(
             (astnode
@@ -1483,8 +1483,8 @@ class CompileCtx(object):
 
     def add_structs_to_context(self):
         """
-        Make sure all StructType subclasses (including ASTNode ones) are added
-        to the context.
+        Make sure all StructType subclasses (including ASTNodeType ones) are
+        added to the context.
         """
         for t in self.struct_types + self.astnode_types:
             t.add_to_context()
