@@ -824,7 +824,7 @@ class CompileCtx(object):
     def emit(self, file_root='.', generate_lexer=True, main_source_dirs=set(),
              main_programs=set(), annotate_fields_types=False,
              check_only=False, no_property_checks=False,
-             warnings=None):
+             warnings=None, generate_pp=False):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -857,6 +857,9 @@ class CompileCtx(object):
             checks on field access.
 
         :param WarningSet warnings: Set of enabled warnings.
+
+        :param bool generate_pp: Whether to generate a pretty printer for the
+            given grammar.
         """
         dir_path = path.join(
             path.dirname(path.realpath(__file__)), "templates"
@@ -869,6 +872,7 @@ class CompileCtx(object):
 
         self.no_property_checks = no_property_checks
         self.warnings = warnings or WarningSet()
+        self.generate_pp = generate_pp
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.

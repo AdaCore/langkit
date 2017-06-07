@@ -151,11 +151,14 @@ class ManageScript(object):
         self.subparsers = subparsers = args_parser.add_subparsers()
 
         args_parser.add_argument(
+            '--pp', action='store_true', default=False,
+            help="Whether to automatically generate a pretty-printer along "
+            "with the parser for the grammar"
+        )
+        args_parser.add_argument(
             '--build-dir', default='build',
-            help=(
-                'Directory to use for generated source code and binaries. By'
-                ' default, use "build" in the current directory.'
-            )
+            help='Directory to use for generated source code and binaries. By'
+                 ' default, use "build" in the current directory.'
         )
         args_parser.add_argument(
             '--enable-static', action='store_true',
@@ -618,7 +621,8 @@ class ManageScript(object):
                           generate_lexer=not args.no_compile_quex,
                           check_only=args.check_only,
                           warnings=args.enabled_warnings,
-                          no_property_checks=args.no_property_checks)
+                          no_property_checks=args.no_property_checks,
+                          generate_pp=args.pp)
 
         if args.check_only:
             return
