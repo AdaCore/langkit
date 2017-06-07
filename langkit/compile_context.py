@@ -931,6 +931,9 @@ class CompileCtx(object):
         self.warnings = warnings or WarningSet()
         self.generate_pp = generate_pp
 
+        if self.generate_pp:
+            self.warnings.enable(self.warnings.pp_bad_grammar)
+
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
         if self.extensions_dir:
