@@ -1438,6 +1438,9 @@ class NodeToParsersPass():
                     "synthetic".format(node_type.name())
                 )
 
+        if not ctx.generate_pp:
+            return
+
         for node, parsers in self.nodes_to_rules.items():
             if len(parsers) > 1:
                 if not pp_struct_eq(parsers):
