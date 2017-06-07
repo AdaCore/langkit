@@ -14,10 +14,8 @@ from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
 )
 from langkit.template_utils import common_renderer
-from langkit.utils import (
-    DictProxy, assert_type, common_ancestor, issubtype, memoized,
-    not_implemented_error, type_check
-)
+from langkit.utils import (DictProxy, common_ancestor, issubtype, memoized,
+                           not_implemented_error, type_check)
 
 
 def get_context():
@@ -478,8 +476,8 @@ class CompiledType(object):
         :rtype: CompiledType
         """
 
-        # ASTNode subclasses (and thus entities) always can be unified: just
-        # take the most recent common ancestor.
+        # ASTNodeType subclasses (and thus entities) always can be unified:
+        # just take the most recent common ancestor.
         if cls.is_entity_type and other.is_entity_type:
             return common_ancestor(cls.el_type, other.el_type).entity()
         elif cls.is_ast_node and other.is_ast_node:
@@ -632,7 +630,7 @@ class LogicVarType(BasicType):
     which variables of the type can be mutated after creation.
 
     TODO: For the moment a logic variable is necessarily a holder around an
-    ASTNode. At some point we might want to make it generic, like list and
+    ASTNodeType. At some point we might want to make it generic, like list and
     array types.
     """
     _name = "Logic_Var"
@@ -945,7 +943,7 @@ class AbstractNodeData(object):
         assert self._name and self.struct
         if not self.struct.is_ast_node:
             return False
-        parent_cls = assert_type(self.struct, ASTNode).base()
+        parent_cls = self.struct.base()
         properties_to_override = [p._name
                                   for p in parent_cls.get_properties()]
         return (isinstance(self, PropertyDef) and
@@ -1208,7 +1206,7 @@ class AbstractField(AbstractNodeData):
 class Field(AbstractField):
     """
     Fields that are meant to store parsing results. Can be used only on
-    subclasses of ASTNode.
+    subclasses of ASTNodeType.
     """
     concrete = True
 
@@ -1291,10 +1289,10 @@ class StructMetaclass(CompiledTypeMetaclass):
 
     astnode_types = []
     """
-    List of ASTNode types. This list is updated every time a new astnode type
-    is created.
+    List of ASTNodeType types. This list is updated every time a new astnode
+    type is created.
 
-    :type: list[ASTNode]
+    :type: list[ASTNodeType]
     """
 
     struct_types = []
@@ -1306,11 +1304,11 @@ class StructMetaclass(CompiledTypeMetaclass):
 
     root_grammar_class = None
     """
-    The class used as a root for the whole ASTNode hierarchy for the
-    currently compiled grammar. Every ASTNode must derive directly or
+    The class used as a root for the whole ASTNodeType hierarchy for the
+    currently compiled grammar. Every AST node must derive directly or
     indirectly from that class.
 
-    :type: ASTNode
+    :type: ASTNodeType
     """
 
     env_metadata = None
@@ -1336,7 +1334,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         is_struct = False
 
         # The following are also mutually exclusive but they can be all False
-        is_base = False  # Base StructType/ASTNode?
+        is_base = False  # Base StructType/ASTNodeType?
         is_root_grammar_class = False  # Root grammar class?
 
         location = extract_library_location()
@@ -1360,26 +1358,26 @@ class StructMetaclass(CompiledTypeMetaclass):
         # * Every type deriving from StructType must derive from StructType
         #   itself (no further subclassing).
         #
-        # * Every type deriving from ASTNode must derive from a single user
-        #   defined subclass of ASTNode: the root grammar class.
+        # * Every type deriving from ASTNodeType must derive from a single user
+        #   defined subclass of ASTNodeType: the root grammar class.
         #
-        # Of course this does not apply to StructType and ASTNode themselves,
-        # which are created before all other classes. The root grammar class
-        # also requires special handling.
-        base_classes = [StructType, ASTNode]
+        # Of course this does not apply to StructType and ASTNodeType
+        # themselves, which are created before all other classes. The root
+        # grammar class also requires special handling.
+        base_classes = [StructType, ASTNodeType]
         with diag_ctx:
             if not all(base_classes):
                 is_base = True
                 is_struct = StructType is None
-                is_astnode = not is_struct and ASTNode is None
+                is_astnode = not is_struct and ASTNodeType is None
 
             elif base.is_ast_node:
                 is_astnode = True
                 # If we have no root grammar class yet and reach this point,
-                # the type necessarily derives from ASTNode. It's the root
+                # the type necessarily derives from ASTNodeType. It's the root
                 # grammar class.
                 if mcs.root_grammar_class is None:
-                    assert base is ASTNode
+                    assert base is ASTNodeType
                     is_root_grammar_class = True
                     dct['abstract'] = True
 
@@ -1428,7 +1426,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         dct['location'] = location
 
         # List types are resolved by construction: we create list types to
-        # contain specific ASTNode subclasses. All other types are not
+        # contain specific ASTNodeType subclasses. All other types are not
         # resolved, only the grammar will resolve them.
         dct['is_type_resolved'] = (
             is_astnode and
@@ -1437,7 +1435,7 @@ class StructMetaclass(CompiledTypeMetaclass):
              dct.get('is_generic_list_type', False))
         )
 
-        # By default, ASTNode subtypes aren't abstract. The "abstract"
+        # By default, ASTNodeType subtypes aren't abstract. The "abstract"
         # decorator may change this attribute later.
         dct.setdefault('abstract', False)
 
@@ -1515,7 +1513,7 @@ class StructMetaclass(CompiledTypeMetaclass):
                             )
                         )
 
-        # Associate each field and property to this ASTNode subclass, and
+        # Associate each field and property to this ASTNodeType subclass, and
         # assign them their name. Likewise for the environment specification.
         for f_n, f_v in fields.items():
             f_v.struct = cls
@@ -1659,7 +1657,7 @@ def root_grammar_class(generic_list_type=None):
     """
 
     def decorator(cls):
-        assert cls.base() == ASTNode
+        assert cls.base() == ASTNodeType
         assert StructMetaclass.root_grammar_class == cls, (
             "You can have only one descendent of ASTNode, and it must be the "
             "root grammar class"
@@ -1758,8 +1756,7 @@ class TypeDeclaration(object):
     def __init__(self, type, public_part, private_part):
         """
 
-        :param type(ASTNode) type: The type that this TypeDeclaration holds
-            onto.
+        :param ASTNodeType type: The type that this TypeDeclaration holds onto.
         :param str public_part: The generated code for the public part of
             the type declaration.
         :param private_part: The generated code for the private part of the
@@ -1803,7 +1800,7 @@ class StructType(CompiledType):
 
     _fields = OrderedDict()
     """
-    The fields for this ASTNode, instantiated by the metaclass
+    The fields for this StructType, instantiated by the metaclass
     :type: dict[str, Field]
     """
 
@@ -1836,8 +1833,8 @@ class StructType(CompiledType):
 
     is_ada_record = True
 
-    # ASTNode subclasses are exposed by default, and a compile pass will tag
-    # all StructType subclasses that are exposed through the public API.
+    # ASTNodeType subclasses are exposed by default, and a compile pass will
+    # tag all StructType subclasses that are exposed through the public API.
     _exposed = False
 
     @classmethod
@@ -1931,10 +1928,10 @@ class StructType(CompiledType):
     @classmethod
     def get_inheritance_chain(cls):
         """
-        Return a list for all classes from ASTNode to `cls` in the inheritance
-        chain.
+        Return a list for all classes from ASTNodeType to `cls` in the
+        inheritance chain.
 
-        :rtype: list[ASTNode]
+        :rtype: list[ASTNodeType]
         """
         return reversed([base_class for base_class in cls.mro()
                          if getattr(base_class, 'is_ast_node', False)])
@@ -2112,7 +2109,7 @@ class StructType(CompiledType):
             "Trying to generate code for a type before typing is complete"
         )
 
-        if cls not in get_context().types and cls != ASTNode:
+        if cls not in get_context().types and cls != ASTNodeType:
             base_class = cls.__bases__[0]
             if base_class.is_ast_node:
                 base_class.add_to_context()
@@ -2170,7 +2167,7 @@ class StructType(CompiledType):
     def doc(cls):
         # Yield documentation only for user types: types defined in Langkit
         # have documentation that targets Langkit users.
-        return cls.__doc__ if cls != ASTNode else None
+        return cls.__doc__ if cls != ASTNodeType else None
 
     @classmethod
     def c_type(cls, c_api_settings):
@@ -2229,7 +2226,7 @@ class ASTNodeType(StructType):
 
     parser = None
     """
-    Canonical parser for this ASTNode. Determined during the NodesToParsers
+    Canonical parser for this ASTNodeType. Determined during the NodesToParsers
     pass.
 
     :type: Parser
@@ -2239,19 +2236,19 @@ class ASTNodeType(StructType):
     """
     Root grammar class subclass. It is abstract, generated automatically when
     the root grammar class is known. All root list types subclass it.
-    :type: ASTNode
+    :type: ASTNodeType
     """
 
     has_abstract_list = False
     """
-    Whether the automatically generated list type for this ASTNode (the "root
-    list type") is abstract.
+    Whether the automatically generated list type for this ASTNodeType (the
+    "root list type") is abstract.
     """
 
     subclasses = []
     """
     List of subclasses. Overriden in the root grammar class and its children.
-    :type: list[ASTNode]
+    :type: list[ASTNodeType]
     """
 
     _exposed = True
@@ -2276,12 +2273,12 @@ class ASTNodeType(StructType):
     @classmethod
     def base(cls):
         """
-        Helper to return the base class of this ASTNode subclass.
-        :rtype: ASTNode
+        Helper to return the base class of this ASTNodeType subclass.
+        :rtype: ASTNodeType
         """
-        assert cls != ASTNode, (
-            "Base is not meant to be called on ASTNode itself, only on"
-            " subclasses of it"
+        assert cls != ASTNodeType, (
+            'Base is not meant to be called on ASTNodeType itself, only on'
+            ' subclasses of it'
         )
         return cls.__base__
 
@@ -2292,7 +2289,7 @@ class ASTNodeType(StructType):
         Return the list of all (direct or indirect) subclasses for cls that are
         not abstract, sorted by hierarchical name.
 
-        :rtype: list[ASTNode]
+        :rtype: list[ASTNodeType]
         """
         sorted_direct_subclasses = sorted(
             cls.subclasses, key=lambda subcls: subcls.hierarchical_name()
@@ -2362,7 +2359,7 @@ class ASTNodeType(StructType):
     @memoized
     def list_type(cls):
         """
-        Return an ASTNode subclass that represent a list of "cls".
+        Return an ASTNodeType subclass that represent a list of "cls".
 
         :rtype: CompiledType
         """
@@ -2448,7 +2445,8 @@ class ASTNodeType(StructType):
     @classmethod
     def check_resolved(cls):
         """
-        Emit a non-fatal error if this ASTNode subclass is not type resolved.
+        Emit a non-fatal error if this ASTNodeType subclass is not type
+        resolved.
         """
         # Consider that AST nodes with type annotations for all their fields
         # are type resolved: they don't need to be referenced by the grammar.
@@ -2889,7 +2887,7 @@ class TypeRepo(object):
     def root_node(self):
         """
         Shortcut to get the root AST node.
-        :rtype: ASTNode
+        :rtype: ASTNodeType
         """
         return StructMetaclass.root_grammar_class
 
