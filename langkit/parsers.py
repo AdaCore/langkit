@@ -31,7 +31,7 @@ import inspect
 from langkit import compiled_types, names
 from langkit.common import gen_name
 from langkit.compile_context import get_context
-from langkit.compiled_types import ASTNode, BoolType, CompiledType, Token
+from langkit.compiled_types import ASTNodeType, BoolType, CompiledType, Token
 from langkit.diagnostics import (
     Context, Location, check_source_language, extract_library_location,
     Severity, WarningSet
@@ -510,7 +510,7 @@ class Parser(object):
 
     def compute_fields_types(self):
         """
-        Infer ASTNode's fields from this parsers tree.
+        Infer ASTNodeType's fields from this parsers tree.
 
         This method recurses over child parsers.  Parser subclasses must
         override this method if they contribute to fields typing.
@@ -910,8 +910,8 @@ class List(Parser):
         By default, this parser will not match empty sequences but it will if
         `empty_valid` is True.
 
-        :param ASTNode list_cls: Type parameter. If provided, it must be a
-            ASTNode.list_type() subclass to be used for the result of this
+        :param ASTNodeType list_cls: Type parameter. If provided, it must be a
+            ASTNodeType.list_type() subclass to be used for the result of this
             parser.
 
         :param types.Token|string sep: Parser or string corresponding to the
@@ -1066,7 +1066,7 @@ class Opt(Parser):
         if dest is None:
             base, alt_true, alt_false = (BoolType, BoolType, BoolType)
         else:
-            base = assert_type(dest, ASTNode)
+            base = assert_type(dest, ASTNodeType)
             assert base.is_bool_node
             alt_true, alt_false = base._alternatives
 
@@ -1258,7 +1258,7 @@ class Transform(Parser):
         nodes whose type is `typ`.
         """
         Parser.__init__(self)
-        assert isinstance(typ, ASTNode) or typ.is_ast_node
+        assert isinstance(typ, ASTNodeType) or typ.is_ast_node
 
         self.parser = parser
         self.typ = typ
@@ -1351,7 +1351,7 @@ class Null(Parser):
 
     def generate_code(self):
         typ = self.get_type()
-        if isinstance(typ, ASTNode):
+        if typ.is_ast_node:
             self.get_type().add_to_context()
         return self.render('null_code_ada')
 
@@ -1451,7 +1451,7 @@ class NodeToParsersPass():
             Log.log("pp_canonical", node.name(),
                     self.canonical_rules[node])
 
-            # Set the canonical parser on this ASTNode type
+            # Set the canonical parser on this ASTNodeType type
             node.parser = self.canonical_rules[node]
 
         from langkit.compiled_types import StructMetaclass
@@ -1505,7 +1505,7 @@ def creates_node(p, follow_refs=True):
         return all(creates_node(c) for c in p.children())
 
     if isinstance(p, Defer) and follow_refs:
-        return p.get_type().matches(ASTNode)
+        return p.get_type().matches(ASTNodeType)
 
     if isinstance(p, Opt) and follow_refs and creates_node(p.parser):
         return True
@@ -1514,7 +1514,7 @@ def creates_node(p, follow_refs=True):
         isinstance(p, Transform)
         or isinstance(p, List)
         or isinstance(p, Opt) and (
-            p._booleanize and p._booleanize[0].matches(ASTNode)
+            p._booleanize and p._booleanize[0].matches(ASTNodeType)
         )
     )
 
