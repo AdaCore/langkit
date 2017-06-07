@@ -2779,7 +2779,7 @@ class PropertyDef(AbstractNodeData):
             )
 
     def check_return_types(self, context):
-        WarningSet.prop_only_entities_warning.warn_if(
+        WarningSet.prop_only_entities.warn_if(
             self.type.matches(T.root_node),
             '{} returns a node type'.format(self.qualname),
         )
@@ -2935,12 +2935,12 @@ class PropertyDef(AbstractNodeData):
                 for var in vars
             )
 
-        WarningSet.unused_bindings_warning.warn_if(
+        WarningSet.unused_bindings.warn_if(
             unused_vars,
             'The following bindings are not used: {}'.format(
                 format_list(unused_vars)),
         )
-        WarningSet.unused_bindings_warning.warn_if(
+        WarningSet.unused_bindings.warn_if(
             wrongly_used_vars,
             'The following bindings are used even though they are supposed to'
             ' be ignored: {}'.format(format_list(wrongly_used_vars)),

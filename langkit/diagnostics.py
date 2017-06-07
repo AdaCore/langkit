@@ -341,11 +341,11 @@ class WarningSet(object):
     Set of enabled warnings.
     """
 
-    prop_only_entities_warning = WarningDescriptor(
+    prop_only_entities = WarningDescriptor(
         'prop-only-entities', False,
         'Warn about properties that return AST nodes.'
     )
-    unused_bindings_warning = WarningDescriptor(
+    unused_bindings = WarningDescriptor(
         'unused-bindings', True,
         'Warn about bindings (in properties) that are unused, or the ones used'
         ' while they are declared as unused.'
@@ -356,7 +356,7 @@ class WarningSet(object):
         'pretty-printer'
     )
     available_warnings = [
-        prop_only_entities_warning, unused_bindings_warning, pp_bad_grammar
+        prop_only_entities, unused_bindings, pp_bad_grammar
     ]
 
     def __init__(self):
