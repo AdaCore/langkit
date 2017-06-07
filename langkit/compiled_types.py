@@ -1852,7 +1852,7 @@ class TypeDeclaration(object):
         )
 
 
-class Struct(CompiledType):
+class StructType(CompiledType):
     """
     Base class for all user struct-like composite types, such as POD structs
     and AST nodes.
@@ -2266,7 +2266,7 @@ class Struct(CompiledType):
         ))
 
 
-class ASTNode(Struct):
+class ASTNode(StructType):
     """
     Base class for all user AST nodes.
 
@@ -3059,3 +3059,7 @@ T = TypeRepo()
 Default type repository instance, to be used to refer to a type before its
 declaration
 """
+
+
+# Aliases for the user DSL
+Struct = StructType
