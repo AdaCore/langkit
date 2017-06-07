@@ -1468,15 +1468,23 @@ class NodeToParsersPass():
         node type to one specific parser.
         """
 
-        if creates_node(parser, follow_refs=False):
-            if isinstance(parser, Opt):
-                for alt in parser.get_type()._alternatives:
-                    self.nodes_to_rules[alt].append(parser)
+        def compute_internal(parser):
+            if creates_node(parser, follow_refs=False):
+                if isinstance(parser, Opt) and parser._booleanize:
+                    for alt in parser.get_type()._alternatives:
+                        self.nodes_to_rules[alt].append(parser)
 
-            self.nodes_to_rules[parser.get_type()].append(parser)
+                self.nodes_to_rules[parser.get_type()].append(parser)
 
-        for c in parser.children():
-            self.compute(c)
+            for c in parser.children():
+                compute_internal(c)
+
+        WarningSet.pp_bad_grammar.warn_if(
+            not creates_node(parser),
+            "'{}' toplevel rule loses information. Prevents "
+            "generation of the pretty-printer".format(parser.name)
+        )
+        compute_internal(parser)
 
 
 def creates_node(p, follow_refs=True):
