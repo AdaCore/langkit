@@ -2360,9 +2360,8 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: PropertyDef|None
         """
-        if issubclass(self.struct, ASTNode):
-            struct = assert_type(self.struct, ASTNode)
-            return struct.base().get_abstract_fields_dict(
+        if self.struct.is_ast_node:
+            return self.struct.base().get_abstract_fields_dict(
                 field_class=PropertyDef
             ).get(self._name.lower, None)
         else:

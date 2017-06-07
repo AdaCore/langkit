@@ -38,7 +38,7 @@ def unit(self, node):
 
     # Make sure that in the end, the prefix is an AST node
     check_source_language(
-        issubclass(node_expr.type, T.root_node),
+        node_expr.type.is_ast_node,
         'The "unit" field is available only for AST nodes; instead we have'
         ' here a {}'.format(node_expr.type.name().lower)
     )
