@@ -417,7 +417,7 @@ class CompileCtx(object):
         """
         List of all plain struct types.
 
-        :type: list[langkit.compiled_types.Struct]
+        :type: list[langkit.compiled_types.StructType]
         """
 
         self.root_grammar_class = None
@@ -438,10 +438,10 @@ class CompileCtx(object):
 
         self.env_metadata = None
         """
-        The Struct subclass that will be used as the lexical environment
+        The StructType subclass that will be used as the lexical environment
         metadata type.
 
-        :type: langkit.compiled_types.Struct
+        :type: langkit.compiled_types.StructType
         """
 
         self.list_types = set()
@@ -512,10 +512,10 @@ class CompileCtx(object):
 
         self.env_metadata = None
         """
-        Struct subclass used to annotate environment elements. Initialized
+        StructType subclass used to annotate environment elements. Initialized
         during the typing pass.
 
-        :type: langkit.compiled_types.Struct
+        :type: langkit.compiled_types.StructType
         """
 
         self.template_lookup_extra_dirs = template_lookup_extra_dirs or []
@@ -620,7 +620,7 @@ class CompileCtx(object):
         available for code generation.
         """
 
-        # Get the list of ASTNode types from the Struct metaclass
+        # Get the list of ASTNode types from the StructType metaclass
         from langkit.compiled_types import LexicalEnvType, StructMetaclass
         entity = StructMetaclass.root_grammar_class.entity()
 
@@ -934,7 +934,7 @@ class CompileCtx(object):
 
     @property
     def struct_types(self):
-        # Here we're skipping Struct because it's not a real type in
+        # Here we're skipping StructType because it's not a real type in
         # generated code. We're also putting env_metadata and entity in
         # the beginning and in the right dependency order (the metadata type
         # before the entity type).
@@ -1045,7 +1045,7 @@ class CompileCtx(object):
             GlobalPass('compute ASTNode kind constants',
                        CompileCtx.compute_node_kind_constants),
 
-            # Now that all Struct subclasses referenced by the grammar have
+            # Now that all StructType subclasses referenced by the grammar have
             # been typed, iterate over all declared subclasses to register the
             # ones that are unreachable from the grammar.  TODO: this kludge
             # will eventually disappear as part of OC22-016.
@@ -1483,8 +1483,8 @@ class CompileCtx(object):
 
     def add_structs_to_context(self):
         """
-        Make sure all Struct subclasses (including ASTNode ones) are added to
-        the context.
+        Make sure all StructType subclasses (including ASTNode ones) are added
+        to the context.
         """
         for t in self.struct_types + self.astnode_types:
             t.add_to_context()
@@ -1495,7 +1495,7 @@ class CompileCtx(object):
         This also emits non-blocking errors for all types that are exposed in
         the public API whereas they should not.
         """
-        from langkit.compiled_types import ArrayType, Struct, StructMetaclass
+        from langkit.compiled_types import ArrayType, StructMetaclass
 
         # All code must ignore _exposed attributes when the following is true
         if self.library_fields_all_public:
@@ -1508,7 +1508,7 @@ class CompileCtx(object):
             if t._exposed:
                 return
 
-            if issubclass(t, Struct) and not t.is_ast_node:
+            if t.is_struct_type and not t.is_ast_node:
                 for f in t.get_abstract_fields(include_inherited=False):
                     expose(f.type, f, 'type', traceback + [f.qualname])
 
