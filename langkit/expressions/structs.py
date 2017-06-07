@@ -3,9 +3,8 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import (
-    ASTNode, BoolType, BuiltinField, Field, Struct, UserField, resolve_type, T
-)
+from langkit.compiled_types import (ASTNode, BoolType, BuiltinField, Field,
+                                    UserField, resolve_type, T)
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
@@ -161,12 +160,12 @@ class IsNull(AbstractExpression):
 
 class New(AbstractExpression):
     """
-    Abstract expression to create Struct or ASTNode values.
+    Abstract expression to create StructType or ASTNode values.
     """
 
     class StructExpr(ComputingExpr):
         """
-        Resolved expression to create Struct values.
+        Resolved expression to create StructType values.
         """
 
         def __init__(self, struct_type, assocs, result_var_name=None,
@@ -249,9 +248,9 @@ class New(AbstractExpression):
 
     def __init__(self, struct_type, **field_values):
         """
-        :param langkit.compiled_types.Struct struct_type: Struct subclass (but
-            not an ASTNode subclass) for the struct type this expression must
-            create.
+        :param langkit.compiled_types.StructType struct_type: StructType
+            subclass (but not an ASTNode subclass) for the struct type this
+            expression must create.
         :param dict[str, AbstractExpression] fields: Values to assign to the
             fields for the created struct value.
         """
@@ -262,11 +261,12 @@ class New(AbstractExpression):
     def do_prepare(self):
         self.struct_type = resolve_type(self.struct_type)
 
-        check_source_language(issubclass(self.struct_type, Struct), (
+        check_source_language(
+            self.struct_type.is_struct_type,
             "Invalid type, expected struct type, got {}".format(
                 self.struct_type.name().camel
             )
-        ))
+        )
 
     def construct(self):
         """
@@ -489,8 +489,9 @@ class FieldAccess(AbstractExpression):
 
             else:
                 # If we reach this point, we know that we are accessing a
-                # Struct field: make sure we return the public API type, which
-                # may be different from the type thas is stored in the Struct.
+                # struct field: make sure we return the public API type,
+                # which may be different from the type thas is stored in the
+                # struct.
                 ret = self.node_data.type.extract_from_storage_expr(
                     prefix, '{}.{}'.format(prefix, self.node_data.name)
                 )
@@ -556,7 +557,7 @@ class FieldAccess(AbstractExpression):
         pfx_type = self.receiver_expr.type
 
         check_source_language(
-            issubclass(pfx_type, Struct),
+            pfx_type.is_struct_type,
             '{} values have no field (accessed field was {})'.format(
                 pfx_type.name().camel,
                 self.field

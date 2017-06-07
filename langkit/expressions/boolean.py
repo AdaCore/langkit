@@ -3,8 +3,8 @@ import inspect
 
 from langkit import names
 from langkit.compiled_types import (
-    ASTNode, BoolType, EquationType, LexicalEnvType, LongType, Struct, Symbol,
-    T
+    ASTNode, BoolType, EquationType, LexicalEnvType, LongType, StructType,
+    Symbol, T
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.analysis_units import AnalysisUnitType
@@ -473,9 +473,9 @@ class Then(AbstractExpression):
     def construct(self):
         # Accept as a prefix:
         # * any pointer, since it can be checked against "null";
-        # * any Struct, since structs are nullable.
+        # * any StructType, since structs are nullable.
         expr = construct(self.expr,
-                         lambda cls: cls.is_ptr or issubclass(cls, Struct))
+                         lambda cls: cls.is_ptr or cls.is_struct_type)
         self.var_expr.set_type(expr.type)
 
         # Create a then-expr specific scope to restrict the span of the "then"
@@ -491,12 +491,13 @@ class Then(AbstractExpression):
         if self.default_val is None:
             if then_expr.type.matches(BoolType):
                 default_expr = construct(False)
-            elif issubclass(then_expr.type, Struct):
+            elif then_expr.type.is_struct_type:
                 default_expr = construct(No(
                     # Because we're doing issubclass instead of isinstance,
-                    # PyCharm do not understand that then_exp.type is a Struct,
-                    # so the following is necessary not to have warnings.
-                    assert_type(then_expr.type, Struct)
+                    # PyCharm do not understand that then_exp.type is a
+                    # StructType, so the following is necessary not to have
+                    # warnings.
+                    assert_type(then_expr.type, StructType)
                 ))
             elif then_expr.type.matches(LexicalEnvType):
                 default_expr = construct(EmptyEnv)
