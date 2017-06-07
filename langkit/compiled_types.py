@@ -483,7 +483,7 @@ class CompiledType(object):
         # take the most recent common ancestor.
         if cls.is_entity_type and other.is_entity_type:
             return common_ancestor(cls.el_type, other.el_type).entity()
-        elif issubclass(cls, ASTNode) and issubclass(other, ASTNode):
+        elif cls.is_ast_node and other.is_ast_node:
             return common_ancestor(cls, other)
 
         # Otherwise, we require a strict subtyping relation
@@ -511,7 +511,7 @@ class CompiledType(object):
         if cls.is_entity_type and formal.is_entity_type:
             return cls.el_type.matches(formal.el_type)
 
-        if issubclass(formal, ASTNode):
+        if formal.is_ast_node:
             return issubclass(cls, formal)
         else:
             return cls == formal
@@ -944,7 +944,7 @@ class AbstractNodeData(object):
         from langkit.expressions import PropertyDef
 
         assert self._name and self.struct
-        if not issubclass(self.struct, ASTNode):
+        if not self.struct.is_ast_node:
             return False
         parent_cls = assert_type(self.struct, ASTNode).base()
         properties_to_override = [p._name
@@ -1422,7 +1422,7 @@ class StructMetaclass(CompiledTypeMetaclass):
                 is_struct = Struct is None
                 is_astnode = not is_struct and ASTNode is None
 
-            elif issubclass(base, ASTNode):
+            elif base.is_ast_node:
                 is_astnode = True
                 # If we have no root grammar class yet and reach this point,
                 # the type necessarily derives from ASTNode. It's the root
@@ -1697,7 +1697,7 @@ def abstract(cls):
 
     :param type cls: Type parameter. The ASTNode subclass to decorate.
     """
-    assert issubclass(cls, ASTNode)
+    assert cls.is_ast_node
     cls.abstract = True
     return cls
 
@@ -1708,7 +1708,7 @@ def synthetic(cls):
 
     :param type cls: Type parameter. The ASTNode subclass to decorate.
     """
-    assert issubclass(cls, ASTNode)
+    assert cls.is_ast_node
     cls.synthetic = True
     return cls
 
@@ -1783,11 +1783,11 @@ def env_metadata(cls):
     cls.__name__ = b'Metadata'  # Every metadata class should be named metadata
     cls.is_env_metadata = True
 
-    assert issubclass(cls, Struct), (
+    assert cls.is_struct_type, (
         "The type chosen to be environment metadata must be a struct type"
     )
 
-    assert not issubclass(cls, ASTNode), (
+    assert not cls.is_ast_node, (
         "The type chosen to be environment metadata must not be an ASTNode "
         "type"
     )
@@ -2000,7 +2000,7 @@ class Struct(CompiledType):
         :rtype: list[ASTNode]
         """
         return reversed([base_class for base_class in cls.mro()
-                         if issubclass(base_class, ASTNode)])
+                         if getattr(base_class, 'is_ast_node', False)])
 
     @classmethod
     def get_properties(cls, predicate=None, include_inherited=True):
@@ -2177,7 +2177,7 @@ class Struct(CompiledType):
 
         if cls not in get_context().types and cls != ASTNode:
             base_class = cls.__bases__[0]
-            if issubclass(base_class, ASTNode):
+            if base_class.is_ast_node:
                 base_class.add_to_context()
 
             get_context().types.add(cls)
