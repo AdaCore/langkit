@@ -528,7 +528,7 @@ class Parser(object):
 
         check_source_language(
             self.get_type() is not None
-            and issubclass(self.get_type(), ASTNode),
+            and self.get_type().is_ast_node,
             'Grammar rules must yield an AST node'
         )
 
@@ -744,7 +744,7 @@ class Or(Parser):
             #    return type is the common ancestor for all of these.
             #  - otherwise, make sure that all alternatives return exactly the
             #    same type.
-            if all(issubclass(t, ASTNode) for t in types):
+            if all(t.is_ast_node for t in types):
                 res = common_ancestor(*types)
             else:
                 typs = list(types)
@@ -949,7 +949,7 @@ class List(Parser):
             else:
                 item_type = self.parser.get_type()
                 check_source_language(
-                    issubclass(item_type, ASTNode),
+                    item_type.is_ast_node,
                     'List parsers only accept subparsers that yield AST nodes'
                     ' ({} provided here)'.format(item_type.name().camel)
                 )
@@ -1258,7 +1258,7 @@ class Transform(Parser):
         nodes whose type is `typ`.
         """
         Parser.__init__(self)
-        assert isinstance(typ, ASTNode) or issubclass(typ, ASTNode)
+        assert isinstance(typ, ASTNode) or typ.is_ast_node
 
         self.parser = parser
         self.typ = typ
