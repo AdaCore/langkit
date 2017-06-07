@@ -2,27 +2,27 @@
 Code generation was successful
 
 == Incorrect property definition 1 ==
-File "test.py", line 50, in BarNode.propyprop
+File "test.py", line 29, in BarNode.prop
     Error: Invalid abstract expression: ['Lol this is obviously wrong']
 
 == Incorrect property definition 2 ==
-File "test.py", line 55, in BarNode.propyprop
+File "test.py", line 29, in BarNode.prop
     Error: Invalid function signature: no *args nor **kwargs allowed
 
 == Incorrect property definition 3 ==
-File "test.py", line 60, in BarNode.propyprop
+File "test.py", line 29, in BarNode.prop
     Error: All parameters must have an associated type as a default value
 
 == Incorrect property definition 4 ==
-File "test.py", line 65, in BarNode.propyprop
+File "test.py", line 29, in BarNode.prop
     Error: Cannot define reserved arguments (node, bound_env)
 
 == Incorrect property definition 5 ==
-File "test.py", line 70, in BarNode.propyprop
+File "test.py", line 29, in BarNode.prop
     Error: Type provided is neither a CompiledType, neither a defered type reference: ['Obviously wrong']
 
 == Incorrect property definition 6 ==
-File "test.py", line 75, in BarNode.propyprop
-    Error: Type provided is neither a CompiledType, neither a defered type reference: <class 'langkit.compiled_types.NodeMacro'>
+File "test.py", line 29, in BarNode.prop
+    Error: Type provided is neither a CompiledType, neither a defered type reference: <class 'langkit.diagnostics.Diagnostics'>
 
 Done

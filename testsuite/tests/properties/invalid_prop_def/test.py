@@ -1,8 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.compiled_types import (
-    ASTNode, root_grammar_class, NodeMacro, LongType
-)
+from langkit.compiled_types import ASTNode, root_grammar_class, LongType
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import Property
 from langkit.parsers import Grammar, Row
@@ -11,14 +9,10 @@ from os import path
 from utils import emit_and_print_errors
 
 
-def run(name, *args):
+def run(name, prop_lambda):
     """
-    Emit and print the errors we get for the below grammar with *args as
-    a list of NodeMacro classes to use on BarNode.
-
-    This will not only check the consistency of Property diagnostics, but also
-    that the SLOCs generated for NodeMacros are good, ie. they will reference
-    the original definition site.
+    Emit and print the errors we get for the below grammar with `prop_lambda`
+    as the `expr` argument for a Property.
     """
 
     global FooNode
@@ -32,7 +26,7 @@ def run(name, *args):
         pass
 
     class BarNode(FooNode):
-        _macros = args
+        prop = Property(prop_lambda, warn_on_unused=False)
 
     def lang_def():
         foo_grammar = Grammar('main_rule')
@@ -43,36 +37,13 @@ def run(name, *args):
     print('')
 
 
-run("Correct code")
-
-
-class Macro1(NodeMacro):
-    propyprop = Property(["Lol this is obviously wrong"])
-run("Incorrect property definition 1", Macro1)
-
-
-class Macro2(NodeMacro):
-    propyprop = Property(lambda x, *y, **z: "pouet")
-run("Incorrect property definition 2", Macro2)
-
-
-class Macro3(NodeMacro):
-    propyprop = Property(lambda x, y=LongType: x)
-run("Incorrect property definition 3", Macro3)
-
-
-class Macro4(NodeMacro):
-    propyprop = Property(lambda Node=LongType, Lex_Env=LongType: Node)
-run("Incorrect property definition 4", Macro4)
-
-
-class Macro5(NodeMacro):
-    propyprop = Property(lambda a=["Obviously wrong"]: a)
-run("Incorrect property definition 5", Macro5)
-
-
-class Macro6(NodeMacro):
-    propyprop = Property(lambda a=NodeMacro: a)
-run("Incorrect property definition 6", Macro6)
+run("Correct code", lambda: True)
+run("Incorrect property definition 1", ["Lol this is obviously wrong"])
+run("Incorrect property definition 2", lambda x, *y, **z: "pouet")
+run("Incorrect property definition 3", lambda x, y=LongType: x)
+run("Incorrect property definition 4",
+    lambda Node=LongType, Lex_Env=LongType: Node)
+run("Incorrect property definition 5", lambda a=["Obviously wrong"]: a)
+run("Incorrect property definition 6", lambda a=Diagnostics: a)
 
 print('Done')

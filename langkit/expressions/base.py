@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
 from contextlib import contextmanager, nested
-from copy import copy
 from functools import partial
 import inspect
 from itertools import count
@@ -2248,34 +2247,6 @@ class PropertyDef(AbstractNodeData):
         """
         return str(self._index)
 
-    def __copy__(self):
-        """
-        When copying properties, we want to make sure they don't share local
-        variables, so we implement a custom copier that duplicates the
-        LocalVars instance.
-
-        :rtype: Property
-        """
-        new = PropertyDef(
-            expr=self.expr,
-            prefix=self.prefix,
-            name=self._name,
-            doc=self._doc,
-            public=self._is_public,
-            abstract=self.abstract,
-            type=self.expected_type,
-            dynamic_vars=self._dynamic_vars,
-            external=self.external,
-        )
-        new.vars = copy(self.vars)
-
-        # Copy is used in the context of macros. In macros, we want to copy
-        # the original Property's source location for error diagnostics,
-        # rather than use the copied stack trace that will reference the new
-        # class.
-        new.location = self.location
-        return new
-
     @classmethod
     def get(cls):
         """
@@ -3510,17 +3481,6 @@ class LocalVars(object):
 
     def render(self):
         return "\n".join(lv.render() for lv in self.local_vars.values())
-
-    def __copy__(self):
-        """
-        When copying local variables, we want to make sure they don't share
-        the underlying dictionnary, so we copy it.
-
-        :rtype: LocalVars
-        """
-        new = LocalVars()
-        new.local_vars = copy(self.local_vars)
-        return new
 
 
 class CallExpr(BasicExpr):

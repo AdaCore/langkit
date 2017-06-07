@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
 from collections import OrderedDict
-from copy import copy
 import difflib
 from itertools import count
 import pipes
@@ -1259,54 +1258,6 @@ class BuiltinField(UserField):
         self.should_emit = False
 
 
-class NodeMacro(object):
-    """
-    This class is used to extend Struct subclasses in a programmatic way.
-    You can put fields and attributes on a NodeMacro subclass that you would
-    put on a Struct subclass, and then extend any Struct subclass by adding
-    the NodeMacro subclass in the list of _macros of the Struct. For example::
-
-        class Foo(NodeMacro):
-            a = Field(..)
-            b = Property(Self.c)
-
-        class Bar(RootASTNode):
-            _macros = [Foo]
-            c = Field(..)
-
-        class Baz(RootASTNode):
-            _macros = [Foo]
-            c = Property(..)
-
-    What is highlighted by this example is that type checking is done after
-    macro expansion, and since langkit has type inference, macros are
-    polymorphic. Here Bar.c and Baz.c can have different types, and their b
-    property will also have a different type.
-    """
-
-    @classmethod
-    def _get_field_copies(cls):
-        """
-        Return a list of copies for all AbstractNodeData class attributes.
-
-        :rtype: list[(str, AbstractNodeData)]
-        """
-        return [
-            (f_n, copy(f_v))
-            for f_n, f_v in AbstractNodeData.filter_fields(cls.__dict__)
-        ]
-
-
-def create_macro(attrib_dict):
-    """
-    Helper to create macro types from a dict of attributes.
-
-    :param dict attrib_dict: The attributes to put on the macro class.
-    :rtype: NodeMacro
-    """
-    return type(b'macro', (NodeMacro, ), attrib_dict)
-
-
 class FieldsDictProxy(DictProxy):
     """
     Specialization of DictProxy for the fields of structures, to raise
@@ -1459,22 +1410,8 @@ class StructMetaclass(CompiledTypeMetaclass):
         for f_n, _ in dct_fields:
             dct.pop(f_n, None)
 
-        # Get the list of macro classes, and compute the ordered dicts of
-        # fields for each of them.
-        macro_classes = dct.get("_macros", [])
-        macro_fields = [m._get_field_copies() for m in macro_classes]
-
         env_spec = dct.get('env_spec', None)
         if is_astnode:
-            # Compute lexical environment specification. Since it can be
-            # specified in macros, we want to make sure that there's only one.
-            for klass in macro_classes:
-                es = klass.__dict__.get('env_spec', None)
-                assert not (es and env_spec), (
-                    "Too many lexical environments specifications defined for "
-                    "node {}".format(name)
-                )
-                env_spec = env_spec or es
             dct['is_env_spec_inherited'] = env_spec is None
             dct['env_spec'] = env_spec
         else:
@@ -1526,12 +1463,12 @@ class StructMetaclass(CompiledTypeMetaclass):
         # This builds a list of fields in a specific order:
         #
         # * fields are first ordered by origin: builtins, then fields from
-        #   "dct" and then fields from macro classes in macro order.
+        #   "dct".
         #
         # * then, they are ordered by field number (see AbstractnodeData).
         fields = mcs.merge_fields(
-            ([mcs.builtin_properties()] if is_root_grammar_class else []) +
-            [dct_fields] + macro_fields
+            ([mcs.builtin_properties()] if is_root_grammar_class else [])
+            + [dct_fields]
         )
 
         # "fields" contains all the non-internal fields for this class: check
