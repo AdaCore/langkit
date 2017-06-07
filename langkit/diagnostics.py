@@ -355,8 +355,13 @@ class WarningSet(object):
         'Warn if the grammar is not amenable to the automatic generation of a '
         'pretty-printer'
     )
+    unused_node_type = WarningDescriptor(
+        'unused-node-type', True,
+        'Warn if a node type is not used in the grammar, and is not marked as '
+        'abstract nor synthetic'
+    )
     available_warnings = [
-        prop_only_entities, unused_bindings, pp_bad_grammar
+        prop_only_entities, unused_bindings, pp_bad_grammar, unused_node_type
     ]
 
     def __init__(self):

@@ -1450,11 +1450,12 @@ class NodeToParsersPass():
         from langkit.compiled_types import StructMetaclass
 
         for node_type in StructMetaclass.astnode_types:
-            WarningSet.pp_bad_grammar.warn_if(
+            WarningSet.unused_node_type.warn_if(
                 node_type not in self.canonical_rules.keys()
                 and not node_type.abstract
                 and not node_type.synthetic,
-                "Missing parser for node {}".format(node_type.name())
+                "Node {} has no parser, and is marked neither abstract nor "
+                "synthetic".format(node_type.name())
             )
 
     def compute(self, parser):
