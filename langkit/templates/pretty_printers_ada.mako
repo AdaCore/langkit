@@ -1,3 +1,5 @@
+## vim: filetype=makoada
+
 <%def name="emit_toplevel_row(parser, node_type)">
    <%
    fields = list(reversed(node_type.get_parse_fields()))
