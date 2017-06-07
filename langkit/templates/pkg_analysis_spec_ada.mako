@@ -374,7 +374,7 @@ package ${ada_lib_name}.Analysis is
    ${array_types.public_incomplete_decl(LexicalEnvType.array_type())}
    ${array_types.public_decl(LexicalEnvType.array_type())}
 
-   ## See ASTNode.entity
+   ## See ASTNodeType.entity
    ${array_types.public_incomplete_decl(T.root_node.entity().array_type())}
    ${array_types.public_decl(T.root_node.entity().array_type())}
 

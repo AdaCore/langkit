@@ -1068,7 +1068,7 @@ class ${root_astnode_name}(object):
     @classmethod
     def _wrap(cls, c_value):
         """
-        Internal helper to wrap a low-level ASTnode value into an instance of
+        Internal helper to wrap a low-level ASTNode value into an instance of
         the the appropriate high-level ASTNode subclass.
         """
         if not c_value:
