@@ -149,7 +149,7 @@ class GrammarRulePass(AbstractPass):
 
 class ASTNodePass(AbstractPass):
     """
-    Concrete pass to run on each ASTNode subclass.
+    Concrete pass to run on each ASTNodeType subclass.
     """
 
     def __init__(self, name, pass_fn, disabled=False, auto_context=True):
@@ -157,10 +157,10 @@ class ASTNodePass(AbstractPass):
         :param str name: See AbstractPass.
 
         :param pass_fn: Function to be run when executing the pass. Called once
-            per ASTNode subclass. This function must take the context and the
-            ASTnode subclass.
+            per ASTNodeType subclass. This function must take the context and
+            the ASTnodeType subclass.
         :type (langkit.compile_context.CompileCtx,
-               langkit.compile_context.ASTNode) -> None
+               langkit.compile_context.ASTNodeType) -> None
 
         :param bool disabled: See AbstractPass.
 

@@ -81,7 +81,7 @@ def print_struct(context, file, struct):
         if struct.abstract:
             descr.append('<span class="kw">abstract</span>')
         descr.append('<span class="kw">root</span>'
-                     if base == compiled_types.ASTNode else
+                     if struct == context.root_grammar_class else
                      astnode_ref(base))
     else:
         kind = 'struct'

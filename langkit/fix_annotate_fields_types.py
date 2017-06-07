@@ -32,7 +32,7 @@ class FixAnnotateFieldsTypes(fixer_base.BaseFix):
         """
         Create a map from AST node subclasses names to types.
 
-        :rtype: dict[str, ASTNode]
+        :rtype: dict[str, ASTNodeType]
         """
         nodes = {}
         for astnode_type in StructMetaclass.astnode_types:
@@ -48,7 +48,7 @@ class FixAnnotateFieldsTypes(fixer_base.BaseFix):
 
         ast_node_name = klass.children[1].value
         ast_node = self.astnodes()[ast_node_name]
-        ":type: langkit.compiled_types.ASTNode"
+        ":type: langkit.compiled_types.ASTNodeType"
 
         field_name = node.parent.children[0].value
         field = ast_node.get_abstract_fields_dict()[field_name]

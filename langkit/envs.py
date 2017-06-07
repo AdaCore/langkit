@@ -160,9 +160,9 @@ class EnvSpec(object):
 
         self.ast_node = None
         """
-        ASTNode subclass associated to this environment specification.
-        Initialized when creating ASTNode subclasses.
-        :type: langkit.compiled_types.ASTNode
+        ASTNodeType subclass associated to this environment specification.
+        Initialized when creating ASTNodeType subclasses.
+        :type: langkit.compiled_types.ASTNodeType
         """
 
         self._add_env = add_env
