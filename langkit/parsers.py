@@ -1505,11 +1505,15 @@ def creates_node(p, follow_refs=True):
     if isinstance(p, Defer) and follow_refs:
         return p.get_type().matches(ASTNode)
 
+    if isinstance(p, Opt) and follow_refs and creates_node(p.parser):
+        return True
+
     return (
         isinstance(p, Transform)
         or isinstance(p, List)
-        or (isinstance(p, Opt)
-            and p._booleanize and p._booleanize[0].matches(ASTNode))
+        or isinstance(p, Opt) and (
+            p._booleanize and p._booleanize[0].matches(ASTNode)
+        )
     )
 
 
