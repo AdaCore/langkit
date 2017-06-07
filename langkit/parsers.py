@@ -121,10 +121,17 @@ class GeneratedParser(object):
 
 def render(*args, **kwargs):
     return compiled_types.make_renderer().update({
-        'is_tok':   type_check_instance(Tok),
-        'is_row':   type_check_instance(Row),
-        'is_class': inspect.isclass,
-        'ctx':      get_context()
+        'is_tok':       type_check_instance(Tok),
+        'is_row':       type_check_instance(Row),
+        'is_defer':     type_check_instance(Defer),
+        'is_transform': type_check_instance(Transform),
+        'is_list':      type_check_instance(List),
+        'is_opt':       type_check_instance(Opt),
+        'is_null':      type_check_instance(Null),
+        'is_extract':   type_check_instance(Extract),
+        'is_class':     inspect.isclass,
+        'ctx':          get_context(),
+        'creates_node': creates_node,
     }).render(*args, **kwargs)
 
 
