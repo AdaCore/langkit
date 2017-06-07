@@ -10,11 +10,11 @@
       else:
          results.append((subp, fields.pop()))
    %>
-   --  In emit toplevel row
-   --  ${parser}
-   --  ${node_type}
-   --  ${results}
-   % for (subp, field) in  results:
+   --  In emit toplevel row::
+   --     ${parser}
+   --     ${node_type}
+   --     ${results}
+   % for (subp, field) in results:
       % if field:
       ${emit_parser_pp_code(subp, ast_el="Node.{}".format(field.name))}
       % else:
@@ -116,8 +116,8 @@
 
 
 <%def name="pretty_printer(node_type)">
-   --  In pretty_printer
-   --  ${node_type}
+   --  In pretty_printer::
+   --     ${node_type}
 % if node_type.parser:
    declare
       Buffer : Unbounded_String;
