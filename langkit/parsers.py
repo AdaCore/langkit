@@ -1420,6 +1420,18 @@ class NodeToParsersPass():
         has one non ambiguous way of being pretty printed, and assign a
         canonical representation to every node type.
         """
+        from langkit.compiled_types import StructMetaclass
+
+        for node_type in StructMetaclass.astnode_types:
+            with node_type.diagnostic_context():
+                WarningSet.unused_node_type.warn_if(
+                    node_type not in self.nodes_to_rules.keys()
+                    and not node_type.abstract
+                    and not node_type.synthetic,
+                    "{} has no parser, and is marked neither abstract nor "
+                    "synthetic".format(node_type.name())
+                )
+
         for node, parsers in self.nodes_to_rules.items():
             if len(parsers) > 1:
                 if not pp_struct_eq(parsers):
@@ -1446,17 +1458,6 @@ class NodeToParsersPass():
 
             # Set the canonical parser on this ASTNodeType type
             node.parser = self.canonical_rules[node]
-
-        from langkit.compiled_types import StructMetaclass
-
-        for node_type in StructMetaclass.astnode_types:
-            WarningSet.unused_node_type.warn_if(
-                node_type not in self.canonical_rules.keys()
-                and not node_type.abstract
-                and not node_type.synthetic,
-                "Node {} has no parser, and is marked neither abstract nor "
-                "synthetic".format(node_type.name())
-            )
 
     def compute(self, parser):
         """
