@@ -109,7 +109,7 @@ def make_renderer(base_renderer=None):
         'is_bool':                type_check(BoolType),
         'is_analysis_unit':       type_check(AnalysisUnitType),
         'is_analysis_kind':       type_check(AnalysisUnitKind),
-        'is_struct':              type_check(Struct),
+        'is_struct':              type_check(StructType),
         'is_sloc_range':          type_check(SourceLocationRangeType),
         'is_token_type':          type_check(Token),
         'is_symbol_type':         type_check(Symbol),
@@ -118,7 +118,7 @@ def make_renderer(base_renderer=None):
         'is_logic_var_type':      type_check(LogicVarType),
         'is_equation_type':       type_check(EquationType),
         'is_env_rebindings_type': type_check(EnvRebindingsType),
-        'is_struct_type':         type_check(Struct),
+        'is_struct_type':         type_check(StructType),
         'no_builtins':
             lambda ts: filter(lambda t: not t.is_builtin(), ts),
         'LexicalEnvType':         LexicalEnvType,
@@ -247,7 +247,7 @@ class CompiledType(object):
 
     has_special_storage = False
     """
-    Whether this type uses a special type for storage in Structs and AST nodes.
+    Whether this type uses a special type for storage in structs and AST nodes.
     If this is true, the following class methods may be overriden:
 
     * storage_type_name;
@@ -258,7 +258,7 @@ class CompiledType(object):
 
     is_struct_type = False
     """
-    Whether this type is a subclass of Struct.
+    Whether this type is a subclass of StructType.
     """
 
     is_ast_node = False
@@ -376,7 +376,7 @@ class CompiledType(object):
     def storage_type_name(cls):
         """
         Return the name of the type that is used to store instances of this
-        type in Structs and ASTNodes. See documentation for
+        type in structs and ASTNodes. See documentation for
         has_special_storage.
 
         :rtype: str
@@ -437,7 +437,7 @@ class CompiledType(object):
     @classmethod
     def storage_nullexpr(cls):
         """
-        Return the nullexpr that is used for fields of this type in Structs and
+        Return the nullexpr that is used for fields of this type in structs and
         ASTNodes. See documentation for has_special_storage.
 
         :rtype: str
@@ -883,7 +883,7 @@ class AbstractNodeData(object):
         """
         :param names.Name|None name: Name for this field. Most of the time,
             this is initially unknown at field creation, so it is filled only
-            at Struct creation time.
+            at struct creation time.
 
         :param bool|None public: Whether this AbstractNodeData instance is
             supposed to be public or not.
@@ -906,9 +906,9 @@ class AbstractNodeData(object):
 
         self.struct = None
         """
-        Struct subclass that declared this field. Initialized when creating
-        Struct subclasses.
-        :type: Struct
+        StructType subclass that declared this field. Initialized when creating
+        StructType subclasses.
+        :type: StructType
         """
 
         self.arguments = []
@@ -1279,7 +1279,7 @@ class FieldsDictProxy(DictProxy):
 
 # These will be replaced by true class definitions. Before this happens,
 # StructMetaclass will see these None values.
-Struct = None
+StructType = None
 ASTNode = None
 
 
@@ -1301,7 +1301,7 @@ class StructMetaclass(CompiledTypeMetaclass):
     """
     List of all plain struct types.
 
-    :type: list[Struct]
+    :type: list[StructType]
     """
 
     root_grammar_class = None
@@ -1318,14 +1318,15 @@ class StructMetaclass(CompiledTypeMetaclass):
     The class designing the type used as metadata for the lexical environments
     values. Must be a pure struct type.
 
-    :type: Struct
+    :type: StructType
     """
 
     entity_info = None
     """
-    Struct subclass to contain all entity information, except the node itself.
+    StructType subclass to contain all entity information, except the node
+    itself.
 
-    :type: Struct
+    :type: StructType
     """
 
     def __new__(mcs, name, bases, dct):
@@ -1335,7 +1336,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         is_struct = False
 
         # The following are also mutually exclusive but they can be all False
-        is_base = False  # Base Struct/ASTNode?
+        is_base = False  # Base StructType/ASTNode?
         is_root_grammar_class = False  # Root grammar class?
 
         location = extract_library_location()
@@ -1356,20 +1357,20 @@ class StructMetaclass(CompiledTypeMetaclass):
 
         # We want to check various inheritance facts:
         #
-        # * Every type deriving from Struct must derive from Struct itself (no
-        #   further subclassing).
+        # * Every type deriving from StructType must derive from StructType
+        #   itself (no further subclassing).
         #
         # * Every type deriving from ASTNode must derive from a single user
         #   defined subclass of ASTNode: the root grammar class.
         #
-        # Of course this does not apply to Struct and ASTNode themselves, which
-        # are created before all other classes. The root grammar class also
-        # requires special handling.
-        base_classes = [Struct, ASTNode]
+        # Of course this does not apply to StructType and ASTNode themselves,
+        # which are created before all other classes. The root grammar class
+        # also requires special handling.
+        base_classes = [StructType, ASTNode]
         with diag_ctx:
             if not all(base_classes):
                 is_base = True
-                is_struct = Struct is None
+                is_struct = StructType is None
                 is_astnode = not is_struct and ASTNode is None
 
             elif base.is_ast_node:
@@ -1395,7 +1396,7 @@ class StructMetaclass(CompiledTypeMetaclass):
             else:
                 is_struct = True
                 check_source_language(
-                    base is Struct,
+                    base is StructType,
                     'All Struct subclasses must directly derive from Struct'
                     ' itself'
                 )
@@ -1793,8 +1794,8 @@ class StructType(CompiledType):
     Base class for all user struct-like composite types, such as POD structs
     and AST nodes.
 
-    User subclasses deriving from Struct will define by-value POD types that
-    cannot be subclassed themselves.
+    User subclasses deriving from StructType will define by-value POD types
+    that cannot be subclassed themselves.
     """
 
     env_spec = None
@@ -1836,7 +1837,7 @@ class StructType(CompiledType):
     is_ada_record = True
 
     # ASTNode subclasses are exposed by default, and a compile pass will tag
-    # all Struct subclasses that are exposed through the public API.
+    # all StructType subclasses that are exposed through the public API.
     _exposed = False
 
     @classmethod
@@ -1847,7 +1848,7 @@ class StructType(CompiledType):
     @classmethod
     def is_builtin(cls):
         """
-        Some Structs are considered "built-in", which means that either no
+        Some structs are considered "built-in", which means that either no
         code needs to be emitted for them, either special code will be
         emitted on a special path, and we can omit them from regular code
         generation.
@@ -2095,7 +2096,7 @@ class StructType(CompiledType):
     @classmethod
     def is_typed(cls):
         """
-        Helper to determine whether the Struct is typed or not, eg. whether
+        Helper to determine whether the StructType is typed or not, eg. whether
         every field has a definite type.
 
         :rtype: bool
@@ -2406,7 +2407,7 @@ class ASTNode(StructType):
         # not play well with class method when we want the memoization to be
         # common to the whole class hierarchy.
         if not StructMetaclass.entity_info:
-            StructMetaclass.entity_info = type(b'EntityInfo', (Struct, ), {
+            StructMetaclass.entity_info = type(b'EntityInfo', (StructType, ), {
                 'MD': BuiltinField(
                     T.env_md, doc='The metadata associated to the AST node'
                 ),
@@ -2426,7 +2427,7 @@ class ASTNode(StructType):
 
         entity_klass = type(
             b'Entity{}'.format(cls.name().camel if cls != T.root_node else ''),
-            (Struct, ), {
+            (StructType, ), {
                 'el': BuiltinField(cls, doc='The stored AST node'),
                 'info': BuiltinField(cls.entity_info(),
                                      access_needs_incref=True,
@@ -2837,7 +2838,7 @@ class TypeRepo(object):
 
         def entity(self):
             """
-            Proxy to the Struct.entity classmethod.
+            Proxy to the StructType.entity classmethod.
 
             :rtype: CompiledType
             """
@@ -2846,7 +2847,7 @@ class TypeRepo(object):
         @property
         def fields(self):
             """
-            Proxy to return the fields of a Struct.
+            Proxy to return the fields of a StructType.
 
             :rtype: DictProxy
             """
@@ -2896,10 +2897,10 @@ class TypeRepo(object):
     def env_md(self):
         """
         Shortcut to get the lexical environment metadata type.
-        :rtype: Struct
+        :rtype: StructType
         """
         if not StructMetaclass.env_metadata:
-            class Metadata(Struct):
+            class Metadata(StructType):
                 pass
             StructMetaclass.env_metadata = Metadata
 
@@ -2909,7 +2910,7 @@ class TypeRepo(object):
     def entity_info(self):
         """
         Shortcut to get the entity information type.
-        :rtype: Struct
+        :rtype: StructType
         """
         return StructMetaclass.root_grammar_class.entity_info()
 
@@ -2965,7 +2966,7 @@ class TypeRepo(object):
         """
         assert T.root_node
 
-        class EnvAssoc(Struct):
+        class EnvAssoc(StructType):
             key = UserField(type=Symbol)
             val = UserField(type=T.root_node)
 
