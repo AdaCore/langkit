@@ -2281,8 +2281,15 @@ class ASTNode(Struct):
     is_list_type = False
     is_root_list_type = False
     is_ada_record = False
-
     is_ast_node = True
+
+    parser = None
+    """
+    Canonical parser for this ASTNode. Determined during the NodesToParsers
+    pass.
+
+    :type: Parser
+    """
 
     generic_list_type = None
     """

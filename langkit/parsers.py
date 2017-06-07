@@ -1436,6 +1436,9 @@ class NodeToParsersPass():
             Log.log("pp_canonical", node.name(),
                     self.nodes_to_canonical_rule[node])
 
+            # Set the canonical parser on this ASTNode type
+            node.parser = self.nodes_to_canonical_rule[node]
+
         from langkit.compiled_types import StructMetaclass
 
         for node_type in StructMetaclass.astnode_types:
