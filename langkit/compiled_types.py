@@ -257,6 +257,11 @@ class CompiledType(object):
     * convert_to_storage_expr.
     """
 
+    is_struct_type = False
+    """
+    Whether this type is a subclass of Struct.
+    """
+
     is_ast_node = False
     """
     Whether this type represents an AST node type.
@@ -1868,6 +1873,8 @@ class Struct(CompiledType):
     __metaclass__ = StructMetaclass
     is_ptr = False
     null_allowed = True
+
+    is_struct_type = True
 
     is_env_metadata = False
     """
