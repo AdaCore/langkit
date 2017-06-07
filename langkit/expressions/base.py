@@ -10,7 +10,7 @@ import funcy
 
 from langkit import names
 from langkit.compiled_types import (
-    AbstractNodeData, Argument, ASTNode, BoolType, CompiledType, LongType,
+    AbstractNodeData, Argument, ASTNodeType, BoolType, CompiledType, LongType,
     NoCompiledType, Symbol, T, Token, gdb_bind_var, gdb_helper, get_context,
     render as ct_render, resolve_type
 )
@@ -162,9 +162,10 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
                 expected_type = assert_type(expected_type_or_pred,
                                             CompiledType)
 
-                if expected_type == ASTNode:
-                    # ASTNode does not exist in the generated code: we use it
-                    # as a shortcut for the actual root grammar class instead.
+                if expected_type == ASTNodeType:
+                    # ASTNodeType does not exist in the generated code: we use
+                    # it as a shortcut for the actual root grammar class
+                    # instead.
                     expected_type = T.root_node
 
                 check_source_language(ret.type.matches(expected_type), (
@@ -174,7 +175,7 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
 
                 # If the type matches expectation but is incompatible in the
                 # generated code, generate a conversion. This is needed for the
-                # various ASTNode subclasses.
+                # various ASTNodeType subclasses.
                 if downcast and expected_type != ret.type:
                     from langkit.expressions import Cast
                     return Cast.Expr(ret, expected_type)
@@ -2450,7 +2451,8 @@ class PropertyDef(AbstractNodeData):
             Recursive helper. Checks wether klass and its subclasses override
             self.
 
-            :param langkit.compiled_types.ASTNode klass: The class to check.
+            :param langkit.compiled_types.ASTNodeType klass: The class to
+                check.
             """
             for subclass in klass.subclasses:
                 for prop in subclass.get_properties(include_inherited=False):
@@ -2459,7 +2461,7 @@ class PropertyDef(AbstractNodeData):
                 check_overriding_props(subclass)
 
         if self.abstract and not self.abstract_runtime_check:
-            check_overriding_props(assert_type(self.struct, ASTNode))
+            check_overriding_props(assert_type(self.struct, ASTNodeType))
 
             unmatched_types = sorted(type_set.unmatched_types(self.struct),
                                      key=lambda cls: cls.hierarchical_name())

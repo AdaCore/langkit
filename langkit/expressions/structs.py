@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import (ASTNode, BoolType, BuiltinField, Field,
+from langkit.compiled_types import (ASTNodeType, BoolType, BuiltinField, Field,
                                     UserField, resolve_type, T)
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions import (
@@ -21,8 +21,7 @@ from langkit.utils import TypeSet, memoized
 @attr_call("cast_or_raise", do_raise=True)
 class Cast(AbstractExpression):
     """
-    Expression that is the result of casting an ASTNode subclass value
-    to another subclass.
+    Expression that is the result of downcasting an AST node value.
     """
 
     class Expr(ComputingExpr):
@@ -32,7 +31,7 @@ class Cast(AbstractExpression):
                      abstract_expr=None):
             """
             :type expr: ResolvedExpression
-            :type dest_type: ASTNode
+            :type dest_type: ASTNodeType
             :type do_raise: bool
 
             :param AbstractExpression|None abstract_expr: See
@@ -62,7 +61,7 @@ class Cast(AbstractExpression):
         """
         :param AbstractExpression expr: Expression on which the cast is
             performed.
-        :param ASTNode dest_type: ASTNode subclass to use for the cast.
+        :param ASTNodeType dest_type: AST node type to use for the cast.
         :param bool do_raise: Whether the exception should raise an
             exception or return null when the cast is invalid.
         """
@@ -75,7 +74,7 @@ class Cast(AbstractExpression):
         self.dest_type = resolve_type(self.dest_type)
 
         check_source_language(
-            self.dest_type.matches(ASTNode)
+            self.dest_type.matches(ASTNodeType)
             or self.dest_type.matches(T.root_node.entity()),
             "One can only cast to an ASTNode subtype or to an entity"
         )
@@ -249,8 +248,8 @@ class New(AbstractExpression):
     def __init__(self, struct_type, **field_values):
         """
         :param langkit.compiled_types.StructType struct_type: StructType
-            subclass (but not an ASTNode subclass) for the struct type this
-            expression must create.
+            subclass (but not an AST node) for the struct type this expression
+            must create.
         :param dict[str, AbstractExpression] fields: Values to assign to the
             fields for the created struct value.
         """
@@ -272,7 +271,7 @@ class New(AbstractExpression):
         """
         :rtype: StructExpr
         """
-        if issubclass(self.struct_type, ASTNode):
+        if self.struct_type.is_ast_node:
             check_source_language(
                 not self.struct_type.is_list_type,
                 'List node synthetization is not supported for now'
@@ -668,7 +667,8 @@ class IsA(AbstractExpression):
             """
             :param ResolvedExpr expr: Expression on which the test is
                 performed.
-            :param [ASTNode] astnodes: ASTNode subclasses to use for the test.
+            :param [ASTNodeType] astnodes: ASTNodeType subclasses to use for
+                the test.
             :param AbstractExpression|None abstract_expr: See
                 ResolvedExpression's constructor.
             """
@@ -725,7 +725,7 @@ class IsA(AbstractExpression):
         astnodes = [resolve_type(a) for a in self.astnodes]
         for a in astnodes:
             check_source_language(
-                issubclass(a, ASTNode) or a.is_entity_type,
+                a.is_ast_node or a.is_entity_type,
                 "Expected ASTNode subclass or entity, got {}".format(a)
             )
             check_source_language(a.matches(expr.type), (
@@ -859,7 +859,7 @@ class Match(AbstractExpression):
         matchers cover all cases. check_source_language will raise an error if
         it's not the case. Also emit warnings for unreachable matchers.
 
-        :param ASTNode input_type: Type parameter.
+        :param ASTNodeType input_type: Type parameter.
         :rtype: None
         """
 
@@ -908,7 +908,7 @@ class Match(AbstractExpression):
         matched_var = matched_expr.result_var.ref_expr
         is_entity = matched_expr.type.is_entity_type
 
-        check_source_language(issubclass(matched_expr.type, ASTNode)
+        check_source_language(matched_expr.type.is_ast_node
                               or matched_expr.type.is_entity_type,
                               'Match expressions can only work on AST nodes '
                               'or entities')
@@ -970,8 +970,8 @@ class Match(AbstractExpression):
             guard = Not.make_expr(Eq.make_expr(casted, NullExpr(casted.type)))
             if expr.type != rtype:
                 # We already checked that type matches, so only way this is
-                # true is if expr.type is an ASTNode type derived from
-                # rtype. In that case, we need an explicity upcast.
+                # true is if expr.type is an AST node type derived from rtype.
+                # In that case, we need an explicity upcast.
                 expr = Cast.Expr(expr, rtype)
 
             expr_with_scope = BindingScope(

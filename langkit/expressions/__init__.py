@@ -3,10 +3,10 @@ This represents the core of the expressions parts of the DSL, that will be used
 notably to define properties on AST nodes.
 
 - Users create trees of AbstractExpression subclasses instances, and wrap them
-  in Property instances in ASTNode subclasses.
+  in Property instances in ASTNodeType subclasses.
 - Code generation (Property.render) is done in two steps. First,
   AbstractExpression.construct returns ResolvedExpression trees which are bound
-  to specific ASTNode and Field classes.
+  to specific ASTNodeType and Field classes.
 - Finally, those ResolvedExpression trees are then used to generate concrete
   code for properties in the generated library.
 """

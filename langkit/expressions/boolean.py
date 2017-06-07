@@ -3,8 +3,7 @@ import inspect
 
 from langkit import names
 from langkit.compiled_types import (
-    ASTNode, BoolType, EquationType, LexicalEnvType, LongType, StructType,
-    Symbol, T
+    BoolType, EquationType, LexicalEnvType, LongType, StructType, Symbol, T
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.analysis_units import AnalysisUnitType
@@ -170,16 +169,16 @@ class Eq(AbstractExpression):
         # Don't use CompiledType.matches since in the generated code, we need
         # both operands to be *exactly* the same types, so handle specifically
         # each case.
-        if issubclass(lhs.type, ASTNode):
-            check_type_compatibility(issubclass(rhs.type, ASTNode))
+        if lhs.type.is_ast_node:
+            check_type_compatibility(rhs.type.is_ast_node)
 
             # Handle checks between two subclasses without explicit casts. In
             # order to help users to detect dubious checks, forbid operands
             # that can never be equal because they have no subclass in common.
             if issubclass(lhs.type, rhs.type):
-                lhs = Cast.Expr(lhs, assert_type(rhs.type, ASTNode))
+                lhs = Cast.Expr(lhs, rhs.type)
             elif issubclass(rhs.type, lhs.type):
-                rhs = Cast.Expr(rhs, assert_type(lhs.type, ASTNode))
+                rhs = Cast.Expr(rhs, lhs.type)
             else:
                 check_never_equal(False)
 
