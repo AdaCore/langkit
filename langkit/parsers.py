@@ -616,7 +616,9 @@ class Tok(Parser):
 
     @property
     def error_repr(self):
-        return '{}'.format(self.val)
+        return '{}'.format(
+            self.val.matcher.to_match if self.val.matcher else self.val
+        )
 
     def __repr__(self):
         return "Tok({0})".format(repr(self.val))
