@@ -2,6 +2,7 @@
 
 <%namespace name="exts" file="extensions.mako" />
 <%namespace name="prop_helpers" file="properties/helpers.mako" />
+<%namespace name="pretty_printers" file="pretty_printers_ada.mako" />
 
 <%def name="public_incomplete_decl(cls)">
 
@@ -109,6 +110,11 @@
       new ${cls.base().value_type_name()} with private;
 
    % if not cls.abstract:
+
+      % if ctx.generate_pp:
+      overriding function PP
+        (Node : access ${type_name}) return String;
+      % endif
 
       overriding function Kind
         (Node : access ${type_name}) return ${root_node_kind_name};
@@ -318,6 +324,14 @@
    %>
 
    % if not cls.abstract:
+
+      % if ctx.generate_pp:
+      overriding function PP (Node : access ${type_name}) return String
+      is
+      begin
+         ${pretty_printers.pretty_printer(cls)}
+      end PP;
+      % endif
 
       ----------
       -- Kind --

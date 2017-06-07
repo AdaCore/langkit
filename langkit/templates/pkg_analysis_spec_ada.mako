@@ -1,10 +1,12 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"   file="array_types_ada.mako" />
-<%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="enum_types"    file="enum_types_ada.mako" />
-<%namespace name="list_types"    file="list_types_ada.mako" />
-<%namespace name="struct_types"  file="struct_types_ada.mako" />
+<%namespace name="array_types"     file="array_types_ada.mako" />
+<%namespace name="astnode_types"   file="astnode_types_ada.mako" />
+<%namespace name="enum_types"      file="enum_types_ada.mako" />
+<%namespace name="list_types"      file="list_types_ada.mako" />
+<%namespace name="struct_types"    file="struct_types_ada.mako" />
+<%namespace name="pretty_printers" file="pretty_printers_ada.mako" />
+
 <%
    root_node_array = T.root_node.array_type()
    no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts)
@@ -411,6 +413,15 @@ package ${ada_lib_name}.Analysis is
                .. ${subclasses[-1].ada_kind_name()};
       % endif
    % endfor
+
+   % if ctx.generate_pp:
+   function PP
+     (Node : access ${root_node_value_type}) return String is abstract;
+   % else:
+   function PP
+     (Node : access ${root_node_value_type}) return String
+   is ("Pretty printer not generated");
+   % endif
 
    function Kind (Node : access ${root_node_value_type})
                   return ${root_node_kind_name} is abstract;
