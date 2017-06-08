@@ -1521,11 +1521,6 @@ class StructMetaclass(CompiledTypeMetaclass):
                         'Properties are not yet supported on plain structs'
                     )
 
-        # If this Struct should be the env metadata, register it as such
-        if dct.get('_is_env_metadata', False):
-            assert mcs.env_metadata is None
-            mcs.env_metadata = cls
-
         return cls
 
     @classmethod

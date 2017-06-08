@@ -626,17 +626,27 @@ class CompileCtx(object):
 
         # Get the list of Struct subclasses from the corresponding metaclass
         # and create the corresponding StructType subclasses.
+        user_env_md = None
         for st in _StructMetaclass.struct_types:
-            struct_type = type(st.__name__, (StructType, ), dict(st.__dict__))
+            struct_type = type(st.__name__, (StructType, ),
+                               {'_fields': st._fields})
             st._type = struct_type
             struct_type.dsl_decl = st
 
+            # If the language spec. tagged an env metadata struct, register it
+            # as such.
+            if st._is_env_metadata:
+                assert user_env_md is None
+                user_env_md = struct_type
+
         # If the language spec provided no env metadata struct, create a
         # default one.
-        if _StructMetaclass.env_metadata is None:
+        if user_env_md is None:
             class Metadata(StructType):
                 _fields = []
-                _is_env_metadata = True
+            StructMetaclass.env_metadata = Metadata
+        else:
+            StructMetaclass.env_metadata = user_env_md
         self.check_env_metadata(StructMetaclass.env_metadata)
 
         _StructMetaclass.reset()
