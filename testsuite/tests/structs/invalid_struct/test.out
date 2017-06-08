@@ -1,4 +1,4 @@
 File "test.py", line 23, in StructB
-    Error: All Struct subclasses must directly derive from Struct itself
+    Error: Struct subclasses must derive from Struct only
 
 Done

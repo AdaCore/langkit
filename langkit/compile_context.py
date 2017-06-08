@@ -620,9 +620,27 @@ class CompileCtx(object):
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
+        from langkit.compiled_types import (LexicalEnvType, StructMetaclass,
+                                            StructType)
+        from langkit.dsl import _StructMetaclass
+
+        # Get the list of Struct subclasses from the corresponding metaclass
+        # and create the corresponding StructType subclasses.
+        for st in _StructMetaclass.struct_types:
+            struct_type = type(st.__name__, (StructType, ), dict(st.__dict__))
+            st._struct_type = struct_type
+            struct_type.dsl_decl = st
+
+        # If the language spec provided no env metadata struct, create a
+        # default one.
+        if _StructMetaclass.env_metadata is None:
+            class Metadata(StructType):
+                _fields = []
+                _is_env_metadata = True
+
+        _StructMetaclass.reset()
 
         # Get the list of ASTNodeType types from the StructType metaclass
-        from langkit.compiled_types import LexicalEnvType, StructMetaclass
         entity = StructMetaclass.root_grammar_class.entity()
 
         self.astnode_types = list(StructMetaclass.astnode_types)

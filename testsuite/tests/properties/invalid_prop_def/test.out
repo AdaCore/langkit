@@ -19,10 +19,10 @@ File "test.py", line 29, in BarNode.prop
 
 == Incorrect property definition 5 ==
 File "test.py", line 29, in BarNode.prop
-    Error: Type provided is neither a CompiledType, neither a defered type reference: ['Obviously wrong']
+    Error: Invalid type reference: ['Obviously wrong']
 
 == Incorrect property definition 6 ==
 File "test.py", line 29, in BarNode.prop
-    Error: Type provided is neither a CompiledType, neither a defered type reference: <class 'langkit.diagnostics.Diagnostics'>
+    Error: Invalid type reference: <class 'langkit.diagnostics.Diagnostics'>
 
 Done

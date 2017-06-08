@@ -1413,7 +1413,8 @@ class StructMetaclass(CompiledTypeMetaclass):
 
         # Get the fields this class defines. Remove them as class members: we
         # want them to be stored in their own dict (see "cls.fields" below).
-        dct_fields = AbstractNodeData.filter_fields(dct)
+        dct_fields = (dct['_fields'] if is_struct and not is_base else
+                      AbstractNodeData.filter_fields(dct))
         for f_n, _ in dct_fields:
             dct.pop(f_n, None)
 
@@ -1519,6 +1520,10 @@ class StructMetaclass(CompiledTypeMetaclass):
                         not f_v.is_property,
                         'Properties are not yet supported on plain structs'
                     )
+
+        # If this Struct should be the env metadata, make it happen
+        if dct.get('_is_env_metadata', False):
+            cls = _env_metadata(cls)
 
         return cls
 
@@ -1677,28 +1682,12 @@ def root_grammar_class(generic_list_type=None):
     return decorator
 
 
-def env_metadata(cls):
+def _env_metadata(cls):
     """
-    Decorator to tag a Struct subclass as the type used for lexical
-    environments metadata.
+    Decorator to tag a StructType subclass as the type used for lexical
+    environments metadata. See langkit.dsl.env_metadata for more information.
 
-    The assumption that is done for the moment is that the struct subclass
-    given as argument must only have boolean fields. In the context of
-    libadalang, the idea is that env metadata is to be used to express things
-    such as "is this element accessed through an implicit dereference?" or
-    "does this element correspond to an Ada 2005 dot notation call".
-
-    This allows metadata to be combinable, that is you must be able to take two
-    metadata objects and combine them. Obvious for booleans, not so much
-    generally.
-
-    The fact that metadata is combinable allows us, for example, to take an
-    env containing subpprograms accessed via dot notation, and annotate the
-    whole env with the property "implicit dereference", if the receiver is
-    an access. Env elements containing a subprogram will thus have both
-    properties set.
-
-    :param Struct cls: Type parameter. The Struct subclass to decorate.
+    :param StructType cls: Type parameter. The Struct subclass to decorate.
     """
 
     StructMetaclass.env_metadata = cls
@@ -1781,6 +1770,14 @@ class StructType(CompiledType):
 
     User subclasses deriving from StructType will define by-value POD types
     that cannot be subclassed themselves.
+    """
+
+    dsl_decl = None
+    """
+    Struct subclass coming from the language specification DSL, from which this
+    StructType was created. None if this is a synthetic struct type.
+
+    :type: langkit.dsl.Struct|None
     """
 
     env_spec = None
@@ -2405,16 +2402,18 @@ class ASTNodeType(StructType):
         # common to the whole class hierarchy.
         if not StructMetaclass.entity_info:
             StructMetaclass.entity_info = type(b'EntityInfo', (StructType, ), {
-                'MD': BuiltinField(
-                    # Use a deferred type so that the language spec. can
-                    # reference entity types even before it declared the
-                    # metadata class.
-                    T.defer_env_md,
-                    doc='The metadata associated to the AST node'
-                ),
-                'rebindings': BuiltinField(EnvRebindingsType,
-                                           access_needs_incref=True,
-                                           doc=""),
+                '_fields': [
+                    ('MD', BuiltinField(
+                        # Use a deferred type so that the language spec. can
+                        # reference entity types even before it declared the
+                        # metadata class.
+                        T.defer_env_md,
+                        doc='The metadata associated to the AST node'
+                    )),
+                    ('rebindings', BuiltinField(EnvRebindingsType,
+                                                access_needs_incref=True,
+                                                doc=""))
+                ],
             })
         return StructMetaclass.entity_info
 
@@ -2429,12 +2428,15 @@ class ASTNodeType(StructType):
         entity_klass = type(
             b'Entity{}'.format(cls.name().camel if cls != T.root_node else ''),
             (StructType, ), {
-                'el': BuiltinField(cls, doc='The stored AST node'),
-                'info': BuiltinField(cls.entity_info(),
-                                     access_needs_incref=True,
-                                     doc='Entity info for this node'),
                 'is_entity_type': True,
-                'el_type': cls
+                'el_type': cls,
+
+                '_fields': [
+                    ('el', BuiltinField(cls, doc='The stored AST node')),
+                    ('info', BuiltinField(cls.entity_info(),
+                                          access_needs_incref=True,
+                                          doc='Entity info for this node')),
+                ]
             }
         )
 
@@ -2906,11 +2908,7 @@ class TypeRepo(object):
         Shortcut to get the lexical environment metadata type.
         :rtype: StructType
         """
-        if not StructMetaclass.env_metadata:
-            class Metadata(StructType):
-                pass
-            StructMetaclass.env_metadata = Metadata
-
+        assert StructMetaclass.env_metadata is not None
         return StructMetaclass.env_metadata
 
     @property
@@ -2978,28 +2976,39 @@ class TypeRepo(object):
         assert T.root_node
 
         class EnvAssoc(StructType):
-            key = UserField(type=Symbol)
-            val = UserField(type=T.root_node)
+            _fields = [
+                ('key', UserField(type=Symbol)),
+                ('val', UserField(type=T.root_node)),
+            ]
 
         return EnvAssoc
 
 
-def resolve_type(type_or_defer):
+def resolve_type(typeref):
     """
-    Given an object that can be either a TypeRepo.Defer instance or a
-    CompiledType, returns a CompiledType.
+    Resolve a type reference to the actual CompiledType subclass.
 
-    :param CompiledType|TypeRepo.Defer type_or_defer: the type to resolve.
+    :param typeref: Type reference to resolve. It can be either:
+        * None: it is directly returned;
+        * a CompiledType subclass: it is directly returned;
+        * a TypeRepo.Defer instance: it is deferred;
+        * a Struct subclass: the corresponding StructType subclass is
+          retrieved.
+
     :rtype: CompiledType
     """
-    if type_or_defer and not issubtype(type_or_defer, CompiledType):
-        check_source_language(
-            isinstance(type_or_defer, TypeRepo.Defer),
-            "Type provided is neither a CompiledType, "
-            "neither a defered type reference: {}".format(type_or_defer)
-        )
-        return type_or_defer.get()
-    return type_or_defer
+    if typeref is None or issubtype(typeref, CompiledType):
+        return typeref
+
+    elif isinstance(typeref, TypeRepo.Defer):
+        return typeref.get()
+
+    elif issubtype(typeref, Struct):
+        return typeref._struct_type
+
+    else:
+        check_source_language(False,
+                              'Invalid type reference: {}'.format(typeref))
 
 
 T = TypeRepo()
@@ -3010,5 +3019,9 @@ declaration
 
 
 # Aliases for the user DSL
-Struct = StructType
+import langkit.dsl
+
+Struct = langkit.dsl.Struct
 ASTNode = ASTNodeType
+
+env_metadata = langkit.dsl.env_metadata

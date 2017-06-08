@@ -8,6 +8,7 @@ import sys
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import CompiledTypeMetaclass, StructMetaclass
 from langkit.diagnostics import DiagnosticError
+from langkit.dsl import _StructMetaclass
 from langkit.expressions import Self
 from langkit.libmanage import ManageScript
 from langkit.utils import reset_memoized
@@ -147,5 +148,7 @@ def reset_langkit():
 
     CompiledTypeMetaclass.types = []
     CompiledTypeMetaclass.type_dict = {}
+
+    _StructMetaclass.reset()
 
     reset_memoized()
