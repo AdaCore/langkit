@@ -996,6 +996,9 @@ class CompileCtx(object):
             # This cannot be done before as the "compute fields type" pass will
             # create AST list types.
             GlobalPass('compute types', CompileCtx.compute_types),
+            ASTNodePass('check homonym AST node fields',
+                        lambda _, astnode: astnode.check_homonym_fields(),
+                        auto_context=False),
 
             errors_checkpoint_pass,
 

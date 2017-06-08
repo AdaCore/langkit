@@ -1498,21 +1498,6 @@ class StructMetaclass(CompiledTypeMetaclass):
             for p in env_spec.create_properties():
                 fields[p._name.lower] = p
 
-        # Make sure the homonym fields/properties are overriding ones
-        if is_astnode:
-            inherited_fields = base.get_abstract_fields_dict()
-            for f_n, f_v in fields.items():
-                with field_ctx(f_n):
-                    homonym_fld = inherited_fields.get(f_n)
-                    if homonym_fld:
-                        check_source_language(
-                            f_v.is_property and homonym_fld.is_property,
-                            '"{}" must be renamed as it conflicts with'
-                            ' {}'.format(
-                                f_n, homonym_fld.qualname
-                            )
-                        )
-
         # Associate each field and property to this ASTNodeType subclass, and
         # assign them their name. Likewise for the environment specification.
         for f_n, f_v in fields.items():
@@ -2472,6 +2457,25 @@ class ASTNodeType(StructType):
             'Unresolved ASTNode subclass. Use it in the grammar or provide a'
             ' type annotation for all its fields'
         )
+
+    @classmethod
+    def check_homonym_fields(cls):
+        """
+        Emit non-fatal errors if some fields in this subclass have conflicting
+        homonym fields in a superclass.
+        """
+        inherited_fields = cls.base().get_abstract_fields_dict()
+        for f_n, f_v in cls._fields.items():
+            with f_v.diagnostic_context():
+                homonym_fld = inherited_fields.get(f_n)
+                if homonym_fld:
+                    check_source_language(
+                        f_v.is_property and homonym_fld.is_property,
+                        '"{}" must be renamed as it conflicts with'
+                        ' {}'.format(
+                            f_n, homonym_fld.qualname
+                        )
+                    )
 
     @classmethod
     def py_nullexpr(cls):
