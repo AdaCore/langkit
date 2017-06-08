@@ -180,6 +180,39 @@ class ASTNodePass(AbstractPass):
                 self.pass_fn(context, astnode)
 
 
+class EnvSpecPass(AbstractPass):
+    """
+    Concrete pass to run on each EnvSpec instance.
+    """
+
+    def __init__(self, name, pass_fn, disabled=False):
+        """
+        :param str name: See AbstractPass.
+
+        :param pass_fn: Function to be run when executing the pass. Called once
+            per EnvSpec instance. This function must take the EnvSpec instance
+            itself and the context.
+        :type (langkit.envs.EnvSpec,
+               langkit.compile_context.CompileCtx) -> None
+
+        :param bool disabled: See AbstractPass.
+        """
+        super(EnvSpecPass, self).__init__(name, disabled)
+        self.pass_fn = pass_fn
+
+    def run(self, context):
+        for astnode in context.astnode_types:
+            env_spec = astnode.env_spec
+            if env_spec is None:
+                continue
+            assert env_spec.ast_node is not None
+
+            # Process EnvSpec instance only once, for the top-most subclass
+            # that has it.
+            if env_spec.ast_node is astnode:
+                self.pass_fn(env_spec, context)
+
+
 class PropertyPass(AbstractPass):
     """
     Concrete pass to run on each PropertyDef instance.
