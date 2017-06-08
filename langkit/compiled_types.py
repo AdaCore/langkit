@@ -2575,6 +2575,25 @@ class ArrayType(CompiledType):
         return capi.get_name(cls.api_name() + names.Name('Dec_Ref'))
 
 
+EnumType = None
+
+
+class EnumMetaclass(CompiledTypeMetaclass):
+
+    enum_types = set()
+    """
+    Set of all EnumType subclasses.
+
+    :type: set[langkit.compiled_types.CompiledType]
+    """
+
+    def __new__(mcs, name, bases, dct):
+        cls = CompiledTypeMetaclass.__new__(mcs, name, bases, dct)
+        if EnumType is not None:
+            mcs.enum_types.add(cls)
+        return cls
+
+
 class EnumType(CompiledType):
     """
     Base class for compiled types that hold a single value in a set of possible
@@ -2587,6 +2606,8 @@ class EnumType(CompiledType):
     Instances represent either the enum type itself in the generated code or a
     particular enum value.
     """
+
+    __metaclass__ = EnumMetaclass
 
     is_ptr = False
 
