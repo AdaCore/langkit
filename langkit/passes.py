@@ -4,6 +4,7 @@ Helpers to manage compilation passes.
 
 from __future__ import absolute_import, division, print_function
 
+from langkit.compiled_types import StructMetaclass
 from langkit.diagnostics import errors_checkpoint
 from langkit.utils import Colors, printcol
 
@@ -185,7 +186,7 @@ class EnvSpecPass(AbstractPass):
     Concrete pass to run on each EnvSpec instance.
     """
 
-    def __init__(self, name, pass_fn, disabled=False):
+    def __init__(self, name, pass_fn, disabled=False, iter_metaclass=False):
         """
         :param str name: See AbstractPass.
 
@@ -196,12 +197,20 @@ class EnvSpecPass(AbstractPass):
                langkit.compile_context.CompileCtx) -> None
 
         :param bool disabled: See AbstractPass.
+
+        :param bool iter_metaclass: If True, iterate on the AST nodes in
+            StructMetaclass.astnode_types. Otherwise, iterate on the context's
+            list of AST node types.
         """
         super(EnvSpecPass, self).__init__(name, disabled)
         self.pass_fn = pass_fn
+        self.iter_metaclass = iter_metaclass
 
     def run(self, context):
-        for astnode in context.astnode_types:
+        astnode_types = (StructMetaclass.astnode_types
+                         if self.iter_metaclass else
+                         context.astnode_types)
+        for astnode in astnode_types:
             env_spec = astnode.env_spec
             if env_spec is None:
                 continue
