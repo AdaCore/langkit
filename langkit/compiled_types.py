@@ -2966,7 +2966,7 @@ def resolve_type(typeref):
         return typeref.get()
 
     elif issubtype(typeref, Struct):
-        return typeref._struct_type
+        return typeref._type
 
     else:
         check_source_language(False,

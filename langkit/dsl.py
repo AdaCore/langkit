@@ -97,7 +97,7 @@ class Struct(object):
         ctx_message = 'in {}'.format(cls._name.camel)
         return Context(ctx_message, cls._location)
 
-    _struct_type = None
+    _type = None
     """
     Link to the StructType subclass corresponding to this Struct subclass. This
     is of course initialized only when we create the said StructType subclass.

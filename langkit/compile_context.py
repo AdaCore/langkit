@@ -628,7 +628,7 @@ class CompileCtx(object):
         # and create the corresponding StructType subclasses.
         for st in _StructMetaclass.struct_types:
             struct_type = type(st.__name__, (StructType, ), dict(st.__dict__))
-            st._struct_type = struct_type
+            st._type = struct_type
             struct_type.dsl_decl = st
 
         # If the language spec provided no env metadata struct, create a
