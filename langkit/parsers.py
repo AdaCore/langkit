@@ -975,7 +975,6 @@ class List(Parser):
         self.init_vars()
 
     def generate_code(self):
-        self.get_type().add_to_context()
         return self.render('list_code_ada')
 
 
@@ -1307,8 +1306,6 @@ class Transform(Parser):
         self.init_vars(self.parser.pos_var)
 
     def generate_code(self):
-
-        self.typ.add_to_context()
         return self.render(
             'transform_code_ada',
             args=(keep(self.parser.subresults)
@@ -1350,9 +1347,6 @@ class Null(Parser):
         self.init_vars(start_pos)
 
     def generate_code(self):
-        typ = self.get_type()
-        if typ.is_ast_node:
-            self.get_type().add_to_context()
         return self.render('null_code_ada')
 
     def get_type(self):
@@ -1399,7 +1393,6 @@ class Enum(Parser):
         return type(self.enum_type_inst)
 
     def generate_code(self):
-        self.enum_type_inst.add_to_context()
         return self.render('enum_code_ada')
 
 

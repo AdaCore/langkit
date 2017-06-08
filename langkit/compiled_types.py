@@ -346,20 +346,6 @@ class CompiledType(object):
         return False
 
     @classmethod
-    def add_to_context(cls):
-        """
-        If needed, put bits into the global context to implement this compiled
-        type.
-
-        Note that once this method got called on some "cls", further calls on
-        the same class must do nothing. Thus it is safe to call this method
-        multiple times for the same type.
-
-        Must be overriden in subclasses if needed.
-        """
-        pass
-
-    @classmethod
     def element_type(cls):
         """
         CompiledType subclass for the type of elements contained in this list
@@ -532,11 +518,17 @@ class CompiledType(object):
         :rtype: ArrayType
         """
         element_type = cls
-        return type(
+        cls = type(
             b'{}ArrayType'.format(element_type.name().camel), (ArrayType, ), {
                 'element_type': classmethod(lambda cls: element_type),
             }
         )
+        ctx = get_context(True)
+        if ctx:
+            ctx.array_types.add(cls)
+        else:
+            StructMetaclass.pending_array_types.append(cls)
+        return cls
 
 
 class NoCompiledType(CompiledType):
@@ -1311,6 +1303,21 @@ class StructMetaclass(CompiledTypeMetaclass):
     :type: list[StructType]
     """
 
+    pending_list_types = []
+    """
+    Set of ASTNodeType subclasses for list types that are created while there
+    is no context.
+
+    :type: list[ASTNodeType]
+    """
+
+    pending_array_types = []
+    """
+    Set of ArrayType subclasses that are created while there is no context.
+
+    :type: list[langkit.compiled_types.ArrayType]
+    """
+
     root_grammar_class = None
     """
     The class used as a root for the whole ASTNodeType hierarchy for the
@@ -2057,24 +2064,6 @@ class StructType(CompiledType):
         )
 
     @classmethod
-    def add_to_context(cls):
-
-        assert cls.is_typed, (
-            "Trying to generate code for a type before typing is complete"
-        )
-
-        if cls not in get_context().types and cls != ASTNodeType:
-            base_class = cls.__bases__[0]
-            if base_class.is_ast_node:
-                base_class.add_to_context()
-
-            get_context().types.add(cls)
-
-            for f in cls.get_fields(include_inherited=False):
-                if f.type:
-                    f.type.add_to_context()
-
-    @classmethod
     def _user_name(cls):
         """
         Turn the name of the "cls" class into a Name instance.
@@ -2319,25 +2308,15 @@ class ASTNodeType(StructType):
         """
         element_type = cls
 
-        def add_to_context(cls):
-            if cls in get_context().types:
-                return
-            get_context().types.add(cls)
-            get_context().list_types.add(cls.element_type())
-
-            # Make sure the type this list contains is already declared
-            cls.element_type().add_to_context()
-
         def name(cls):
             return (cls.element_type().name() + names.Name('List')
                     if cls.is_root_list_type else
                     cls._user_name())
 
-        return type(
+        cls = type(
             b'{}List'.format(element_type.name().camel),
             (StructMetaclass.root_grammar_class.generic_list_type, ), {
                 'name': classmethod(name),
-                'add_to_context': classmethod(add_to_context),
 
                 'abstract': element_type.has_abstract_list,
                 'is_generic_list_type': False,
@@ -2347,6 +2326,14 @@ class ASTNodeType(StructType):
                 'element_type': classmethod(lambda cls: element_type),
             }
         )
+
+        ctx = get_context(True)
+        if ctx:
+            ctx.list_types.add(element_type)
+        else:
+            StructMetaclass.pending_list_types.append(cls)
+
+        return cls
 
     @classmethod
     def entity_info(cls):
@@ -2485,16 +2472,6 @@ class ArrayType(CompiledType):
     @classmethod
     def nullexpr(cls):
         return null_constant()
-
-    @classmethod
-    def add_to_context(cls):
-        if cls in get_context().types:
-            return
-        get_context().types.add(cls)
-        get_context().array_types.add(cls)
-
-        # Make sure the type this list contains is already declared
-        cls.element_type().add_to_context()
 
     @classmethod
     def is_collection(cls):
@@ -2646,12 +2623,6 @@ class EnumType(CompiledType):
     @classmethod
     def name(cls):
         return names.Name.from_camel('{}Type'.format(cls.__name__))
-
-    @classmethod
-    def add_to_context(cls):
-        if cls not in get_context().types:
-            get_context().types.add(cls)
-            get_context().enum_types.add(cls)
 
     @classmethod
     def nullexpr(cls):

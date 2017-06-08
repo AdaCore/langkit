@@ -86,7 +86,6 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
         return make_expr("Get ({}, 0)".format(array_expr),
                          T.root_node.entity())
     else:
-        T.root_node.entity().array_type().add_to_context()
         return make_expr("Create ({})".format(array_expr),
                          T.root_node.entity().array_type())
 

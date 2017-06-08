@@ -383,18 +383,9 @@ class CompileCtx(object):
         :type: set[parsers.Parser]
         """
 
-        self.types = set()
-        """
-        Set of CompiledType subclasses: all such subclasses must register
-        themselves here when their add_to_context method is invoked. This
-        field too is used to avoid multiple generation issues.
-
-        :type: set[langkit.compiled_types.CompiledType]
-        """
-
         self.enum_types = set()
         """
-        Set of EnumType subclasses, registered by EnumType.add_to_context.
+        Set of all EnumType subclasses.
 
         :type: set[langkit.compiled_types.CompiledType]
         """
@@ -624,8 +615,9 @@ class CompileCtx(object):
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import (LexicalEnvType, StructMetaclass,
-                                            StructType)
+        from langkit.compiled_types import (
+            EnumMetaclass, LexicalEnvType, StructMetaclass, StructType
+        )
         from langkit.dsl import _StructMetaclass
 
         # Get the list of Struct subclasses from the corresponding metaclass
@@ -659,6 +651,10 @@ class CompileCtx(object):
         entity = StructMetaclass.root_grammar_class.entity()
 
         self.astnode_types = list(StructMetaclass.astnode_types)
+        self.list_types.update(t.element_type
+                               for t in StructMetaclass.pending_list_types)
+        self.array_types.update(StructMetaclass.pending_array_types)
+        self.enum_types = set(EnumMetaclass.enum_types)
 
         self.root_grammar_class = StructMetaclass.root_grammar_class
         self.generic_list_type = self.root_grammar_class.generic_list_type
@@ -1113,13 +1109,6 @@ class CompileCtx(object):
                        disabled=not annotate_fields_types),
             GlobalPass('compute AST node kind constants',
                        CompileCtx.compute_node_kind_constants),
-
-            # Now that all StructType subclasses referenced by the grammar have
-            # been typed, iterate over all declared subclasses to register the
-            # ones that are unreachable from the grammar.  TODO: this kludge
-            # will eventually disappear as part of OC22-016.
-            GlobalPass('add structs to context',
-                       CompileCtx.add_structs_to_context),
             errors_checkpoint_pass,
         )
 
@@ -1549,14 +1538,6 @@ class CompileCtx(object):
             start=1
         ):
             self.node_kind_constants[astnode] = i
-
-    def add_structs_to_context(self):
-        """
-        Make sure all StructType subclasses (including ASTNodeType ones) are
-        added to the context.
-        """
-        for t in self.struct_types + self.astnode_types:
-            t.add_to_context()
 
     def expose_public_api_types(self, astnode):
         """

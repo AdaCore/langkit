@@ -95,10 +95,6 @@ def expand_abstract_fn(fn):
             'parameter {} (got {})'.format(kw, default)
         )
 
-        # Make sure this type is known to the context, for code generation
-        # purposes.
-        default.add_to_context()
-
         fn_arguments.append(Argument(names.Name.from_lower(kw), default))
 
     # Now that we have placeholder for all arguments, we can expand the lambda
@@ -1987,7 +1983,6 @@ class EmptyArray(AbstractExpression):
 
     def do_prepare(self):
         self.array_type = resolve_type(self.element_type).array_type()
-        self.array_type.add_to_context()
 
     @staticmethod
     def construct_static(array_type, abstract_expr=None):

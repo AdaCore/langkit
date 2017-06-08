@@ -237,7 +237,6 @@ class Map(CollectionExpression):
                             if self.concat else
                             self.expr.type)
             self.static_type = element_type.array_type()
-            self.static_type.add_to_context()
 
             with iter_scope.parent.use():
                 super(Map.Expr, self).__init__('Map_Result',
@@ -563,8 +562,6 @@ class CollectionSingleton(AbstractExpression):
             :type expr: ResolvedExpression
             """
             self.expr = expr
-
-            self.expr.type.array_type().add_to_context()
             self.static_type = self.expr.type.array_type()
 
             super(CollectionSingleton.Expr, self).__init__(
