@@ -217,14 +217,13 @@ class EnvSpec(object):
         self.call_parents = call_parents
         "Whether to call parents env specs or not"
 
-    def create_properties(self):
+    def create_properties(self, context):
         """
         Turn the various abstract expression attributes for this env spec into
-        internal properties.
+        internal properties and add them to `astnode`.
 
-        :rtype: list[PropertyDef]
+        :param langkit.compile_context.CompileCtx context: Current context.
         """
-        result = []
 
         def create_internal_property(name, expr, type):
             if expr is None:
@@ -237,7 +236,7 @@ class EnvSpec(object):
                 public=False, type=type
             )
             p.location = getattr(expr, 'location') or self.location
-            result.append(p)
+            self.ast_node.add_field(p)
             return p
 
         self.initial_env = create_internal_property(
@@ -265,8 +264,6 @@ class EnvSpec(object):
         self.env_hook_arg = create_internal_property(
             'Env_Hook_Arg', self._unresolved_env_hook_arg, T.root_node
         )
-
-        return result
 
     def check_properties(self, context):
         """

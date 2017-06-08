@@ -990,6 +990,9 @@ class CompileCtx(object):
                        self.grammar.check_main_rule),
             GlobalPass('warn on unreferenced parsing rules',
                        self.grammar.warn_unreferenced_parsing_rules),
+            EnvSpecPass('create internal properties for env specs',
+                        EnvSpec.create_properties,
+                        iter_metaclass=True),
             GrammarRulePass('compute fields types',
                             lambda p: p.compute_fields_types()),
 

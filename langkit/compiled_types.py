@@ -1492,12 +1492,6 @@ class StructMetaclass(CompiledTypeMetaclass):
 
             cls.is_root_list_type = False
 
-        # Env specs may need to create properties: add these as fields for this
-        # node.
-        if env_spec:
-            for p in env_spec.create_properties():
-                fields[p._name.lower] = p
-
         # Associate each field and property to this ASTNodeType subclass, and
         # assign them their name. Likewise for the environment specification.
         for f_n, f_v in fields.items():
