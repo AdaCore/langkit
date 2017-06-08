@@ -5,7 +5,7 @@ from itertools import count
 
 from langkit import names
 from langkit.compiled_types import AbstractNodeData, LexicalEnvType, T
-from langkit.diagnostics import check_source_language
+from langkit.diagnostics import check_source_language, extract_library_location
 from langkit.expressions import FieldAccess, PropertyDef, Self, construct
 
 
@@ -157,6 +157,7 @@ class EnvSpec(object):
             node. This expression will be evaluated and passed to the
             environment hook.
         """
+        self.location = extract_library_location()
 
         self.ast_node = None
         """
@@ -235,6 +236,7 @@ class EnvSpec(object):
                                                 next(self.PROPERTY_COUNT))),
                 public=False, type=type
             )
+            p.location = getattr(expr, 'location') or self.location
             result.append(p)
             return p
 
