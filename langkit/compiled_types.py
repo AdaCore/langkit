@@ -18,7 +18,7 @@ from langkit.utils import (DictProxy, common_ancestor, issubtype, memoized,
                            not_implemented_error, type_check)
 
 
-def get_context():
+def get_context(*args, **kwargs):
     """
     Return the current compilation context, see
     langkit.compile_context.get_context.
@@ -29,7 +29,7 @@ def get_context():
     :rtype: CompileCtx
     """
     from langkit.compile_context import get_context
-    return get_context()
+    return get_context(*args, **kwargs)
 
 
 class GeneratedFunction(object):
