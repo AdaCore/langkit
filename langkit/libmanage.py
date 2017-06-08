@@ -12,6 +12,7 @@ import pipes
 import shutil
 import subprocess
 import sys
+import traceback
 
 from langkit.compile_context import Verbosity
 from langkit.diagnostics import (
@@ -491,7 +492,6 @@ class ManageScript(object):
                 ultratb = None  # To keep PyCharm happy...
 
                 def excepthook(type, value, tb):
-                    import traceback
                     traceback.print_exception(type, value, tb)
                     pdb.post_mortem(tb)
                 sys.excepthook = excepthook
@@ -511,7 +511,6 @@ class ManageScript(object):
             try:
                 cov = Coverage(self.dirs)
             except Exception as exc:
-                import traceback
                 print('Coverage not available:', file=sys.stderr)
                 traceback.print_exc(exc)
                 sys.exit(1)
@@ -527,15 +526,18 @@ class ManageScript(object):
         # noinspection PyBroadException
         try:
             parsed_args.func(parsed_args)
+
         except DiagnosticError:
             if parsed_args.debug:
                 raise
+            if parsed_args.verbosity.debug or parsed_args.full_error_traces:
+                traceback.print_exc()
             print(col('Errors, exiting', Colors.FAIL), file=sys.stderr)
             sys.exit(1)
+
         except Exception as e:
             if parsed_args.debug:
                 raise
-            import traceback
             ex_type, ex, tb = sys.exc_info()
 
             # If we have a syntax error, we know for sure the last stack frame
@@ -555,6 +557,7 @@ class ManageScript(object):
 
             print(col('Internal error! Exiting', Colors.FAIL), file=sys.stderr)
             sys.exit(1)
+
         finally:
             if parsed_args.profile:
                 pr.disable()
