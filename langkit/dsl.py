@@ -8,6 +8,49 @@ import langkit.names as names
 from langkit.utils import issubtype
 
 
+class BaseStruct(object):
+    """
+    Base class for Struct and ASTNode.
+    """
+
+    @classmethod
+    def _diagnostic_context(cls):
+        ctx_message = 'in {}'.format(cls._name.camel)
+        return Context(ctx_message, cls._location)
+
+    _type = None
+    """
+    Link to the StructType/ASTNodeType subclass corresponding to this subclass.
+    This is of course initialized only when we create the said
+    StructType/ASTNodeType subclass.
+
+    :type: langkit.compiled_types.CompiledType
+    """
+
+    _name = None
+    """
+    Name for this type.
+    :type: names.Name
+    """
+
+    _location = None
+    """
+    Location in the language spec. for the declaration of this type, or None if
+    it is created by Langkit.
+
+    :type: langkit.diagnostics.Location|None
+    """
+
+    _fields = None
+    """
+    List of fields for this type. For Struct subclasses, this is actually a
+    list of AbstractField. For ASTNode subclasses, this excludes inherited
+    fields.
+
+    :type: list[langkit.compiled_types.AbstractNodeData]
+    """
+
+
 class _StructMetaclass(type):
     """
     Internal metaclass for struct types, used to collect all Struct subclasses
@@ -35,7 +78,7 @@ class _StructMetaclass(type):
         cls.env_metadata = None
 
     def __new__(mcs, name, bases, dct):
-        is_base = bases == (object, )
+        is_base = bases == (BaseStruct, )
 
         if not is_base:
             mcs.process_subclass(name, bases, dct)
@@ -82,7 +125,7 @@ class _StructMetaclass(type):
         dct['_fields'] = fields
 
 
-class Struct(object):
+class Struct(BaseStruct):
     """
     Base class for all POD struct types.
 
@@ -92,45 +135,12 @@ class Struct(object):
 
     __metaclass__ = _StructMetaclass
 
-    @classmethod
-    def _diagnostic_context(cls):
-        ctx_message = 'in {}'.format(cls._name.camel)
-        return Context(ctx_message, cls._location)
-
-    _type = None
-    """
-    Link to the StructType subclass corresponding to this Struct subclass. This
-    is of course initialized only when we create the said StructType subclass.
-
-    :type: langkit.compiled_types.StructType
-    """
-
-    _name = None
-    """
-    Name for this struct type
-    :type: names.Name
-    """
-
-    _location = None
-    """
-    Location in the language spec. for the declaration of this struct type, or
-    None if it is created by Langkit.
-
-    :type: langkit.diagnostics.Location|None
-    """
-
     _is_env_metadata = False
     """
     Whether this struct type is tagged to be used as metadata in lexical
     environments.
 
     :type: bool
-    """
-
-    _fields = None
-    """
-    List of fields for this struct type.
-    :type: list[langkit.compiled_types.AbstractField]
     """
 
 
