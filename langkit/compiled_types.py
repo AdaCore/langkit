@@ -201,6 +201,14 @@ class CompiledTypeMetaclass(type):
     :type: [CompiledType]
     """
 
+    type_dict = {}
+    """
+    Mapping: type name -> CompiledType subclass. Used in TypeRepo for type
+    lookup by name.
+
+    :rtype: dict[str, CompiledType]
+    """
+
     def __new__(mcs, name, bases, dct):
         cls = type.__new__(mcs, name, bases, dct)
 
@@ -208,6 +216,7 @@ class CompiledTypeMetaclass(type):
         dct.setdefault("_internal", False)
         if not dct["_internal"]:
             mcs.types.append(cls)
+            mcs.type_dict[cls.__name__] = cls
 
         if 'location' not in dct:
             dct["location"] = extract_library_location()
@@ -2798,21 +2807,6 @@ class TypeRepo(object):
     Only Struct and AST node types are reachable through the type repository.
     """
 
-    def __init__(self):
-        self._type_dict = {}
-
-    def type_dict(self):
-        """
-        Returns a dictionnary of names to types.
-
-        :rtype: dict[str, CompiledType]
-        """
-        if not self._type_dict:
-            self._type_dict = {t.__name__: t
-                               for t in CompiledTypeMetaclass.types}
-
-        return self._type_dict
-
     class Defer(object):
         """
         Internal class representing a not-yet resolved type.
@@ -2881,7 +2875,8 @@ class TypeRepo(object):
         :param str type_name: The name of the rule.
         """
         def resolve():
-            type_dict = self.type_dict()
+            type_dict = CompiledTypeMetaclass.type_dict
+
             try:
                 return type_dict[type_name]
             except KeyError:

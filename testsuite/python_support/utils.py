@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 from langkit.compile_context import CompileCtx
-from langkit.compiled_types import StructMetaclass, T
+from langkit.compiled_types import CompiledTypeMetaclass, StructMetaclass
 from langkit.diagnostics import DiagnosticError
 from langkit.expressions import Self
 from langkit.libmanage import ManageScript
@@ -145,6 +145,7 @@ def reset_langkit():
     StructMetaclass.entity_info = None
     Self.unfreeze()
 
-    T._type_dict = {}
+    CompiledTypeMetaclass.types = []
+    CompiledTypeMetaclass.type_dict = {}
 
     reset_memoized()
