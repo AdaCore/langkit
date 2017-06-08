@@ -2915,6 +2915,10 @@ class TypeRepo(object):
         return StructMetaclass.env_metadata
 
     @property
+    def defer_env_md(self):
+        return self.Defer(lambda: self.env_md)
+
+    @property
     def entity_info(self):
         """
         Shortcut to get the entity information type.
