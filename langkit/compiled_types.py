@@ -1926,6 +1926,18 @@ class StructType(CompiledType):
                     field.type = inferred_type
 
     @classmethod
+    def add_field(cls, field):
+        """
+        Append a field to this Struct/AST node. This is not valid if a field
+        lookup has already been done on this Struct/AST node.
+
+        :param AbstractNodeData field: Field to append.
+        """
+        assert not cls._abstract_fields_dict_cache
+        cls._fields[field._name.lower] = field
+        field.struct = cls
+
+    @classmethod
     def get_inheritance_chain(cls):
         """
         Return a list for all classes from ASTNodeType to `cls` in the
@@ -2069,7 +2081,7 @@ class StructType(CompiledType):
 
         # No cached result, we have to compute it
         if field_class == AbstractNodeData:
-            # If we don't filter by class (i.e.  if we want the most general
+            # If we don't filter by class (i.e. if we want the most general
             # class field: AbstractNodeData), do the base class recursion.
             if include_inherited and cls.is_ast_node:
                 result = OrderedDict()
