@@ -992,7 +992,11 @@ class CompileCtx(object):
                        self.grammar.warn_unreferenced_parsing_rules),
             GrammarRulePass('compute fields types',
                             lambda p: p.compute_fields_types()),
+
+            # This cannot be done before as the "compute fields type" pass will
+            # create AST list types.
             GlobalPass('compute types', CompileCtx.compute_types),
+
             errors_checkpoint_pass,
 
             MajorStepPass('Compiling properties'),
