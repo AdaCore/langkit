@@ -248,7 +248,7 @@ class EnvSpec(object):
                 create_internal_property('Env_Mappings', exprs.mappings, None),
                 create_internal_property('Env_Dest', exprs.dest_env,
                                          LexicalEnvType),
-                create_internal_property('MD', exprs.metadata, T.env_md),
+                create_internal_property('MD', exprs.metadata, T.defer_env_md),
                 exprs.is_post,
                 resolver=exprs.resolver,
             ) for exprs in self._unresolved_envs_expressions

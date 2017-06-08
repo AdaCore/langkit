@@ -2397,7 +2397,11 @@ class ASTNodeType(StructType):
         if not StructMetaclass.entity_info:
             StructMetaclass.entity_info = type(b'EntityInfo', (StructType, ), {
                 'MD': BuiltinField(
-                    T.env_md, doc='The metadata associated to the AST node'
+                    # Use a deferred type so that the language spec. can
+                    # reference entity types even before it declared the
+                    # metadata class.
+                    T.defer_env_md,
+                    doc='The metadata associated to the AST node'
                 ),
                 'rebindings': BuiltinField(EnvRebindingsType,
                                            access_needs_incref=True,
