@@ -40,20 +40,24 @@ from langkit.passes import (
 )
 from langkit.utils import Colors, printcol
 
+
 compile_ctx = None
 
 
-def get_context():
+def get_context(or_none=False):
     """
     Returns the current compilation context. Meant to be used by the rest of
     LangKit, in any code that has been called as part of the CompileCtx.emit
     primitive.
 
+    :param bool or_none: If True, return None when there is no context.
+        Otherwise, raise an assertion error when there is no context.
+
     :rtype: CompileCtx
     """
-    assert compile_ctx is not None, (
-        "Get context has been called in a state in which the compile context"
-        " is not set"
+    assert or_none or compile_ctx is not None, (
+        'Get context has been called in a state in which the compile context'
+        ' is not set'
     )
     return compile_ctx
 
