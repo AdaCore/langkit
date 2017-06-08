@@ -32,10 +32,11 @@ from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.diagnostics import Severity, WarningSet, check_source_language
 import langkit.documentation
+from langkit.envs import EnvSpec
 from langkit.expressions import PropertyDef
 from langkit.passes import (
-    ASTNodePass, GlobalPass, GrammarRulePass, MajorStepPass, PassManager,
-    PropertyPass, StopPipeline, errors_checkpoint_pass
+    ASTNodePass, EnvSpecPass, GlobalPass, GrammarRulePass, MajorStepPass,
+    PassManager, PropertyPass, StopPipeline, errors_checkpoint_pass
 )
 from langkit.utils import Colors, printcol
 
@@ -1009,10 +1010,8 @@ class CompileCtx(object):
                          PropertyDef.check_return_types),
             GlobalPass('Compute uses envs attribute',
                        CompileCtx.compute_uses_entity_info_attr),
-            ASTNodePass('check env spec properties',
-                        lambda context, astnode:
-                            astnode.env_spec
-                            and astnode.env_spec.check_properties()),
+            EnvSpecPass('check env spec properties',
+                        EnvSpec.check_properties),
             ASTNodePass('check resolved ASTnode subclasses',
                         lambda _, astnode: astnode.check_resolved()),
             GlobalPass('warn on unused private properties',
