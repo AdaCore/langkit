@@ -1521,9 +1521,10 @@ class StructMetaclass(CompiledTypeMetaclass):
                         'Properties are not yet supported on plain structs'
                     )
 
-        # If this Struct should be the env metadata, make it happen
+        # If this Struct should be the env metadata, register it as such
         if dct.get('_is_env_metadata', False):
-            cls = _env_metadata(cls)
+            assert mcs.env_metadata is None
+            mcs.env_metadata = cls
 
         return cls
 
@@ -1682,40 +1683,6 @@ def root_grammar_class(generic_list_type=None):
     return decorator
 
 
-def _env_metadata(cls):
-    """
-    Decorator to tag a StructType subclass as the type used for lexical
-    environments metadata. See langkit.dsl.env_metadata for more information.
-
-    :param StructType cls: Type parameter. The Struct subclass to decorate.
-    """
-
-    StructMetaclass.env_metadata = cls
-
-    cls.__name__ = b'Metadata'  # Every metadata class should be named metadata
-    cls.is_env_metadata = True
-
-    assert cls.is_struct_type, (
-        "The type chosen to be environment metadata must be a struct type"
-    )
-
-    assert not cls.is_ast_node, (
-        "The type chosen to be environment metadata must not be an ASTNode "
-        "type"
-    )
-    for field in cls.get_fields():
-        assert isinstance(field, UserField), (
-            "Fields of the Struct type chosen to be environment metadata "
-            "must be instances of UserField."
-        )
-        assert field.type == BoolType, (
-            "Fields of the Struct type chosen to be environment metadata "
-            "must have type boolean"
-        )
-
-    return cls
-
-
 def has_abstract_list(cls):
     """
     Decorator to make the automatically generated list type for "cls" (the
@@ -1794,11 +1761,6 @@ class StructType(CompiledType):
     null_allowed = True
 
     is_struct_type = True
-
-    is_env_metadata = False
-    """
-    Whether this struct designates the env metadata struct.
-    """
 
     _cached_user_name = None
     """

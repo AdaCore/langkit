@@ -637,6 +637,7 @@ class CompileCtx(object):
             class Metadata(StructType):
                 _fields = []
                 _is_env_metadata = True
+        self.check_env_metadata(StructMetaclass.env_metadata)
 
         _StructMetaclass.reset()
 
@@ -676,6 +677,33 @@ class CompileCtx(object):
                         'Cannot invoke the environment hook if'
                         ' CompileContext.bind_env_hook has not been called'
                     )
+
+    def check_env_metadata(self, cls):
+        """
+        Perform legality checks on `cls`, the env metadata struct.
+
+        :param StructType cls: Environment metadata struct type.
+        """
+        from langkit.compiled_types import BoolType, UserField, resolve_type
+
+        with cls.diagnostic_context():
+            check_source_language(
+                cls.__name__ == 'Metadata',
+                'The environment metadata struct type must be called'
+                ' "Metadata" (here: {})'.format(cls.__name__)
+            )
+
+        for field in cls.get_fields():
+            with field.diagnostic_context():
+                check_source_language(
+                    isinstance(field, UserField),
+                    'Fields of the Struct type chosen to be environment'
+                    ' metadata must be instances of UserField.'
+                )
+                check_source_language(
+                    resolve_type(field.type).matches(BoolType),
+                    'Environment metadata fields must all be booleans'
+                )
 
     def all_properties(self, *args, **kwargs):
         """

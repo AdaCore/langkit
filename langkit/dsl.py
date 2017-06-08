@@ -5,6 +5,7 @@ from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
 )
 import langkit.names as names
+from langkit.utils import issubtype
 
 
 class _StructMetaclass(type):
@@ -156,7 +157,14 @@ def env_metadata(cls):
 
     :param Struct cls: Type parameter. The Struct subclass to decorate.
     """
-    assert issubclass(cls, Struct)
+    location = extract_library_location()
+    with Context('In call to env_metadata', location):
+        check_source_language(
+            issubtype(cls, Struct),
+            'env_metadata must be applied to a Struct subclass'
+            ' (here: {})'.format(cls)
+        )
+
     with cls._diagnostic_context():
         check_source_language(
             _StructMetaclass.env_metadata is None,
