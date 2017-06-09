@@ -1261,7 +1261,6 @@ class Transform(Parser):
 
         self.parser = parser
         self.typ = typ
-        self._is_ptr = typ.is_ptr
 
     def children(self):
         return [self.parser]
