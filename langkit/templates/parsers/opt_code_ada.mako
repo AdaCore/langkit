@@ -7,7 +7,9 @@ ${parser.parser.generate_code()}
 <%
 parser_type = parser.parser.get_type()
 if parser._booleanize:
-   base, alt_true, alt_false = parser._booleanize
+   base = parser._booleanize
+   if not is_bool(base):
+      alt_true, alt_false = base._alternatives
 %>
 
 if ${parser.parser.pos_var} = No_Token_Index then

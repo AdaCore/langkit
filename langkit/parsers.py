@@ -39,7 +39,8 @@ from langkit.diagnostics import (
 from langkit.lexer import WithSymbol
 from langkit.template_utils import TemplateEnvironment
 from langkit.utils import (
-    assert_type, common_ancestor, copy_with, type_check_instance, Log, is_same
+    Log, assert_type, common_ancestor, copy_with, is_same, issubtype,
+    type_check_instance
 )
 
 
@@ -1005,16 +1006,13 @@ class Opt(Parser):
 
         self._booleanize = None
         """
-        Three-tuple of types, used to determine how the result will be
-        booleanized:
+        If it is BoolType, then the result is booleanized into a regular
+        boolean.
 
-        * If the first type is an abstract node class, and the two others are
-          derived classes with no fields, then the second will be generated for
-          the True node, and the third for the False node.
+        If it is an EnumNode subclass with qualifier set to True, then the
+        result is booleanized into the corresponding two alternatives.
 
-        * If the first type is BoolType, then the result is booleanized into a
-          regular boolean.
-        :type: (CompiledType, CompiledType, CompiledType)
+        :type: BoolType|langkit.compiled_types.TypeRepo.EnumNode|None
         """
 
         self._is_error = False
@@ -1022,7 +1020,7 @@ class Opt(Parser):
         self.parser = Pick(parser, *parsers) if parsers else resolve(parser)
 
     def discard(self):
-        return (not self._booleanize) and self.parser.discard()
+        return self._booleanize is None and self.parser.discard()
 
     def error(self):
         """
@@ -1063,22 +1061,18 @@ class Opt(Parser):
         :rtype: Opt
         """
         if dest is None:
-            base, alt_true, alt_false = (BoolType, BoolType, BoolType)
+            booleanize = BoolType
         else:
-            base = assert_type(dest, ASTNodeType)
-            assert base.is_bool_node
-            alt_true, alt_false = base._alternatives
+            booleanize = assert_type(dest, ASTNodeType)
+            assert booleanize.is_bool_node
 
-        new = copy_with(self, _booleanize=(base, alt_true, alt_false))
-        return new
+        return copy_with(self, _booleanize=booleanize)
 
     def children(self):
         return [self.parser]
 
     def get_type(self):
-        return (
-            self._booleanize[0] if self._booleanize else self.parser.get_type()
-        )
+        return self._booleanize or self.parser.get_type()
 
     def create_vars_after(self, start_pos):
         self.init_vars(
@@ -1515,9 +1509,7 @@ def creates_node(p, follow_refs=True):
     return (
         isinstance(p, Transform)
         or isinstance(p, List)
-        or isinstance(p, Opt) and (
-            p._booleanize and p._booleanize[0].matches(ASTNodeType)
-        )
+        or (isinstance(p, Opt) and issubtype(p._booleanize, ASTNodeType))
     )
 
 
