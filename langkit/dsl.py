@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.compiled_types import AbstractField
+from langkit.compiled_types import AbstractField, T
 from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
 )
@@ -49,6 +49,13 @@ class BaseStruct(object):
 
     :type: list[langkit.compiled_types.AbstractNodeData]
     """
+
+    @classmethod
+    def array_type(cls):
+        """
+        Return the array type whose element type is `cls`.
+        """
+        return T.Defer(lambda: cls._type.array_type())
 
 
 def check_decorator_use(decorator, expected_cls, cls):
