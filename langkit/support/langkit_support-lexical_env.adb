@@ -466,11 +466,11 @@ package body Langkit_Support.Lexical_Env is
 
       use Referenced_Envs_Arrays;
 
-      function Recurse (Self : Lexical_Env) return Entity_Array is
-        (Get (Self, Key, From, Recursive => False,
+      function Recurse (Env : Lexical_Env) return Entity_Array is
+        (Get (Env, Key, From,
+              Recursive  => True,
               Rebindings => Current_Rebindings));
-      --  Recursively call Get with the same arguments except Self (set to the
-      --  Self we have here) and Recursive (set to False).
+      --  Recursively call Get with the same arguments, but with a new env
 
       function Get_Refd_Elements
         (Self : Referenced_Env) return Entity_Array;
@@ -511,7 +511,10 @@ package body Langkit_Support.Lexical_Env is
             --  case of error.
 
             declare
-               Result : constant Entity_Array := Recurse (Env);
+               Result : constant Entity_Array :=
+                 Get (Env, Key, From,
+                      Recursive  => False,
+                      Rebindings => Current_Rebindings);
             begin
                Dec_Ref (Env);
                return Result;
