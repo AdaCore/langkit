@@ -801,7 +801,7 @@
               (Node : access ${type_name}'Class)
                return Boolean
             is (Node.${field.name}.all
-                in ${field.type.alt_present.value_type_name()}'Class);
+                in ${field.type.alternatives[0].type.value_type_name()}'Class);
 
          % elif field.type.is_enum_node:
             function ${field.name}

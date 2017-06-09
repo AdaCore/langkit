@@ -617,6 +617,16 @@ class CompileCtx(object):
             if parser.get_type().is_ast_node
         )
 
+    def create_enum_node_classes(self):
+        """
+        Expand all EnumNode subclasses into ASTNodeType subclasses.
+        """
+        from langkit.dsl import _EnumNodeMetaclass
+        from langkit.compiled_types import create_enum_node_classes
+        for enum_type in _EnumNodeMetaclass.enum_types:
+            create_enum_node_classes(enum_type)
+        _EnumNodeMetaclass.reset()
+
     def compute_types(self):
         """
         Compute various information related to compiled types, that needs to be
@@ -1059,6 +1069,8 @@ class CompileCtx(object):
             EnvSpecPass('create internal properties for env specs',
                         EnvSpec.create_properties,
                         iter_metaclass=True),
+            GlobalPass('create enum node classes',
+                       CompileCtx.create_enum_node_classes),
             GrammarRulePass('compute fields types',
                             lambda p: p.compute_fields_types()),
 

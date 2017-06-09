@@ -17,8 +17,8 @@ if ${parser.parser.pos_var} = No_Token_Index then
       % if is_bool(base):
          ${parser.res_var} := False;
       % else:
-         ${parser.res_var} := ${base.name()}
-           (${alt_false.name()}_Alloc.Alloc (Parser.Mem_Pool));
+         ${parser.res_var} := ${base._type.name()}
+           (${alt_false.type.name()}_Alloc.Alloc (Parser.Mem_Pool));
          ${parser.res_var}.Unit := Parser.Unit;
          ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
          ${parser.res_var}.Token_End_Index := No_Token_Index;
@@ -53,8 +53,9 @@ else
    % if is_bool(base):
       ${parser.res_var} := True;
    % else:
-      ${parser.res_var} := ${base.name()}
-        (${alt_true.name()}_Alloc.Alloc (Parser.Mem_Pool));
+
+      ${parser.res_var} := ${base._type.name()}
+        (${alt_true.type.name()}_Alloc.Alloc (Parser.Mem_Pool));
       ${parser.res_var}.Unit := Parser.Unit;
       ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
       ${parser.res_var}.Token_End_Index := No_Token_Index;

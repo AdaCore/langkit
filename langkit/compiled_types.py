@@ -5,8 +5,6 @@ import difflib
 from itertools import count
 import pipes
 
-from funcy import compact
-
 from langkit import names
 from langkit.c_api import CAPIType
 from langkit.common import get_type, null_constant, is_keyword
@@ -2677,69 +2675,57 @@ class EnumType(CompiledType):
         ]
 
 
-class EnumNodeMetaclass(type):
+def create_enum_node_classes(cls):
+    """
+    Create the ASTNodeType subclasses to implement a EnumNode.
 
-    def __new__(mcs, name, bases, dct):
-        # HACK: We provide the EnumNode mechanism via type derivation,
-        # but the base EnumNode doesn't correspond to anything except a
-        # placeholder type, so we'll ignore it.
-        if name == "__EnumNodeInternal":
-            return type.__new__(mcs, name, bases, dct)
+    :param langkit.dsl.EnumNode cls: EnumNode subclass that describes this
+        type.
+    """
+    from langkit.expressions import Property, AbstractProperty
 
-        qualifier = dct.pop("qualifier", False)
+    is_bool_node = bool(cls._qualifier)
 
-        # If the class has True for the qualifier, then auto generate
-        # alternatives and node classes. Else, take them from the
-        # 'alternatives' field.
-        alternatives = (
-            ["present", "absent"] if qualifier else dct.pop('alternatives')
-        )
+    base_enum_dct = {
+        'alternatives': cls._alternatives,
+        'is_enum_node': True,
+        'is_bool_node': is_bool_node,
+    }
+    if is_bool_node:
+        prop = AbstractProperty(type=BoolType, public=True)
+        prop.location = cls._location
+        base_enum_dct['as_bool'] = prop
 
-        from langkit.expressions import Property, AbstractProperty
+    # Add other supplied fields to the base class dict
+    base_enum_dct.update(dict(cls._fields))
 
-        base_enum_dct = compact({
-            "as_bool":
-                AbstractProperty(type=BoolType, public=True)
-                if qualifier else None,
-            "is_bool_node": bool(qualifier),
-            "is_enum_node": True,
-        })
+    # Generate the abstract base node type
+    base_enum_node = abstract(type(cls._name.camel, (T.root_node, ),
+                                   base_enum_dct))
+    base_enum_node.is_type_resolved = True
+    base_enum_node._alternatives = []
+    cls._type = base_enum_node
 
-        # Add other supplied fields to the base class dict
-        base_enum_dct.update(dct)
+    for alt in cls._alternatives:
+        alt_name = cls._name + alt.name
 
-        # Generate the abstract base node type
-        basename = names.Name.from_camel(name)
-        base_enum_node = abstract(type(name, (T.root_node, ), base_enum_dct))
-        base_enum_node.is_type_resolved = True
-        base_enum_node._alternatives = []
+        # Generate the derived class corresponding to this alternative
+        dct = {}
+        if is_bool_node:
+            prop = Property(alt.name.lower == 'present')
+            prop.location = cls._location
+            dct['as_bool'] = prop
 
-        for alt in alternatives:
-            alt_name = basename + names.Name.from_lower(alt)
-            attr_name = (names.Name("alt") +
-                         names.Name.from_lower(alt)).lower
+        alt_type = type(alt_name.camel, (base_enum_node, ), dct)
+        alt._type = alt_type
 
-            # Generate the derived class corresponding to this
-            # alternative.
-            alt_type = type(
-                alt_name.camel, (base_enum_node, ),
-                compact({
-                    "as_bool": Property(alt == "present")
-                    if qualifier else None
-                })
-            )
+        # We don't force type resolution for those types since they have no
+        # fields. TODO: Generalize this to all types without fields.
+        alt_type.is_type_resolved = True
 
-            # We don't force type resolution for those types since they
-            # have no fields. TODO: Generalize this to all types
-            # without fields.
-            alt_type.is_type_resolved = True
-
-            # Make the alternative derived class accessible from the
-            # root node for the enum.
-            setattr(base_enum_node, attr_name, alt_type)
-            base_enum_node._alternatives.append(alt_type)
-
-        return base_enum_node
+        # Make the alternative derived class accessible from the root node for
+        # the enum.
+        base_enum_node._alternatives.append(alt_type)
 
 
 class TypeRepo(object):
@@ -2880,40 +2866,12 @@ class TypeRepo(object):
         """
         return self.root_node.entity()
 
-    # noinspection PyPep8Naming
     @property
-    @memoized
     def EnumNode(self):
-        """
-        Using this base class, users can create a hierarchy of nodes
-        deriving from the root node that are similar to an enum type. By
-        declaring an EnumNode derived type in the following way::
-
-            class Foo(T.EnumNode):
-                alternatives = ['bar', 'baz']
-
-        The user will get:
-
-        * An abstract node type the base type, deriving from T.root_node,
-          denoted by Foo.
-        * A concrete but empty node type for every alternative
-          of the enum type, that can be denoted by Foo.alt_{alt_name}.
-
-        Instead of providing explicit alternatives, the user can just
-        define the EnumNode as a qualifier node::
-
-            class Foo(T.EnumNode):
-                qualifier = True
-
-        In which case, alternatives will automatically be "present" and
-        "absent", and an as_bool method will be automatically generated.
-        """
-        assert T.root_node
-
-        class __EnumNodeInternal():
-            __metaclass__ = EnumNodeMetaclass
-
-        return __EnumNodeInternal
+        # TODO: update all uses in testsuites and Libadalang to use the global
+        # one.
+        from langkit.dsl import EnumNode
+        return EnumNode
 
     @property
     @memoized
@@ -2942,7 +2900,9 @@ def resolve_type(typeref):
         * a CompiledType subclass: it is directly returned;
         * a TypeRepo.Defer instance: it is deferred;
         * a DSLType subclass: the corresponding CompiledType subclass is
-          retrieved.
+          retrieved;
+        * an EnumNode.Alternative instance: the type corresponding to this
+          alternative is retrieved.
 
     :rtype: CompiledType
     """
@@ -2954,6 +2914,9 @@ def resolve_type(typeref):
 
     elif issubtype(typeref, langkit.dsl.DSLType):
         return typeref._type
+
+    elif isinstance(typeref, langkit.dsl.EnumNode.Alternative):
+        return typeref.type
 
     else:
         check_source_language(False,
@@ -2974,3 +2937,5 @@ Struct = langkit.dsl.Struct
 ASTNode = ASTNodeType
 
 env_metadata = langkit.dsl.env_metadata
+
+EnumNode = langkit.dsl.EnumNode

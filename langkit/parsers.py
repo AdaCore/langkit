@@ -1055,17 +1055,18 @@ class Opt(Parser):
 
             Opt("overriding").as_bool()
 
-        :param CompiledType|None dest: If not None, then it is expected that
-            this is an EnumType with qualifier = True. In this cases, the
-            result will be booleanized.
+        :param langkit.dsl.EnumNode|None dest: If not None, then it is expected
+            that this is an EnumNode subclass with qualifier set to True. In
+            this cases, the result will be booleanized using this enum type.
 
         :rtype: Opt
         """
+        from langkit.dsl import EnumNode
+
         if dest is None:
             booleanize = BoolType
         else:
-            booleanize = assert_type(dest, ASTNodeType)
-            assert booleanize.is_bool_node
+            booleanize = assert_type(dest, EnumNode)
 
         return copy_with(self, _booleanize=booleanize)
 
@@ -1078,7 +1079,8 @@ class Opt(Parser):
         elif self._booleanize is BoolType:
             return self._booleanize
         else:
-            return resolve_type(self._booleanize)
+            assert self._booleanize._type
+            return resolve_type(self._booleanize._type)
 
     def create_vars_after(self, start_pos):
         self.init_vars(
@@ -1510,6 +1512,8 @@ def creates_node(p, follow_refs=True):
         Row(a, b, c)           # <- False
         Pick(";", "lol", c)    # <- False
     """
+    from langkit.dsl import EnumNode
+
     if isinstance(p, Or) and follow_refs:
         return all(creates_node(c) for c in p.children())
 
@@ -1522,7 +1526,7 @@ def creates_node(p, follow_refs=True):
     return (
         isinstance(p, Transform)
         or isinstance(p, List)
-        or (isinstance(p, Opt) and issubtype(p._booleanize, ASTNodeType))
+        or (isinstance(p, Opt) and issubtype(p._booleanize, EnumNode))
     )
 
 
