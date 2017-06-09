@@ -2520,7 +2520,9 @@ package body ${ada_lib_name}.Analysis is
       Dump_Trans_Referenced
         ("Transitive referenced", Self.Transitive_Referenced_Envs);
 
-      if Self.Env.Is_Empty then
+      if Self.Env = null then
+         Put_Line ("    <null>");
+      elsif Self.Env.Is_Empty then
          Put_Line ("    <empty>");
       else
          for El in To_Sorted_Env (Self.Env.all).Iterate loop
