@@ -82,6 +82,17 @@ def check_decorator_use(decorator, expected_cls, cls):
         )
 
 
+def filter_out_special_fields(dct):
+    """
+    Helper for metaclasses. Return dct without the special fields (__foo__).
+
+    :param dict[str, T] dct: Class attributes dictionnary.
+    :rtype: dict[str, T]
+    """
+    return {k: v for k, v in dct.items()
+            if not k.startswith('__') or not k.endswith('__')}
+
+
 class _StructMetaclass(type):
     """
     Internal metaclass for struct types, used to collect all Struct subclasses
@@ -134,9 +145,7 @@ class _StructMetaclass(type):
         # Make sure all fields are AbstractField instances; assign them
         # their name.
         fields = []
-        for f_n, f_v in dct.items():
-            if f_n.startswith('__') and f_n.endswith('__'):
-                continue
+        for f_n, f_v in filter_out_special_fields(dct).items():
             fields.append((f_n, f_v))
             with Context('in {}.{}'.format(name, f_n), location):
                 check_source_language(
