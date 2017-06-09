@@ -2834,6 +2834,10 @@ class TypeRepo(object):
         return StructMetaclass.root_grammar_class
 
     @property
+    def defer_root_node(self):
+        return self.Defer(lambda: self.root_node)
+
+    @property
     def env_md(self):
         """
         Shortcut to get the lexical environment metadata type.
