@@ -39,6 +39,8 @@ class PassManager(object):
 
         for p in self.passes:
             if p.disabled:
+                if context.verbosity.debug:
+                    printcol('Skipping pass: {}'.format(p.name), Colors.YELLOW)
                 continue
             if isinstance(p, StopPipeline):
                 if context.verbosity.info:
@@ -46,6 +48,9 @@ class PassManager(object):
                              Colors.OKBLUE)
                 return
             else:
+                if (not isinstance(p, MajorStepPass)
+                        and context.verbosity.debug):
+                    printcol('Running pass: {}'.format(p.name), Colors.YELLOW)
                 p.run(context)
 
 
