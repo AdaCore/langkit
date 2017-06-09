@@ -1072,7 +1072,12 @@ class Opt(Parser):
         return [self.parser]
 
     def get_type(self):
-        return self._booleanize or self.parser.get_type()
+        if self._booleanize is None:
+            return self.parser.get_type()
+        elif self._booleanize is BoolType:
+            return self._booleanize
+        else:
+            return resolve_type(self._booleanize)
 
     def create_vars_after(self, start_pos):
         self.init_vars(
