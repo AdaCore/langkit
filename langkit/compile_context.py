@@ -561,6 +561,13 @@ class CompileCtx(object):
         """
 
     @property
+    def sorted_logic_binders(self):
+        return sorted(self.logic_binders, key=lambda x: (
+            x[0].name.camel if x[0] else ""
+            + x[1].name.camel if x[1] else ""
+        ))
+
+    @property
     def main_rule_name(self):
         """
         Shortcut for "self.grammar.main_rule_name".

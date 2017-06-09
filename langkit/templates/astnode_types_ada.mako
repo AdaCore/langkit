@@ -49,7 +49,7 @@
    % endfor
 
    ## Generate logic converters, equality predicates, and binders
-   % for conv_prop, eq_prop in ctx.logic_binders:
+   % for conv_prop, eq_prop in ctx.sorted_logic_binders:
       % if conv_prop:
          ${prop_helpers.logic_converter(conv_prop)}
       % endif
