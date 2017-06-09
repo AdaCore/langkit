@@ -8,10 +8,17 @@ import langkit.names as names
 from langkit.utils import issubtype
 
 
-class BaseStruct(object):
+class DSLType(object):
     """
-    Base class for Struct and ASTNode.
+    Base class for the representation of types in the DSL.
     """
+
+    @classmethod
+    def array_type(cls):
+        """
+        Return the array type whose element type is `cls`.
+        """
+        return T.Defer(lambda: cls._type.array_type())
 
     @classmethod
     def _diagnostic_context(cls):
@@ -41,6 +48,12 @@ class BaseStruct(object):
     :type: langkit.diagnostics.Location|None
     """
 
+
+class BaseStruct(DSLType):
+    """
+    Base class for Struct and ASTNode.
+    """
+
     _fields = None
     """
     List of fields for this type. For Struct subclasses, this is actually a
@@ -49,13 +62,6 @@ class BaseStruct(object):
 
     :type: list[langkit.compiled_types.AbstractNodeData]
     """
-
-    @classmethod
-    def array_type(cls):
-        """
-        Return the array type whose element type is `cls`.
-        """
-        return T.Defer(lambda: cls._type.array_type())
 
 
 def check_decorator_use(decorator, expected_cls, cls):

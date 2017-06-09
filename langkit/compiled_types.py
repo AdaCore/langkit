@@ -2941,7 +2941,7 @@ def resolve_type(typeref):
         * None: it is directly returned;
         * a CompiledType subclass: it is directly returned;
         * a TypeRepo.Defer instance: it is deferred;
-        * a Struct subclass: the corresponding StructType subclass is
+        * a DSLType subclass: the corresponding CompiledType subclass is
           retrieved.
 
     :rtype: CompiledType
@@ -2952,7 +2952,7 @@ def resolve_type(typeref):
     elif isinstance(typeref, TypeRepo.Defer):
         return typeref.get()
 
-    elif issubtype(typeref, Struct):
+    elif issubtype(typeref, langkit.dsl.DSLType):
         return typeref._type
 
     else:
