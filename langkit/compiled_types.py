@@ -2719,10 +2719,6 @@ def create_enum_node_classes(cls):
         alt_type = type(alt_name.camel, (base_enum_node, ), dct)
         alt._type = alt_type
 
-        # We don't force type resolution for those types since they have no
-        # fields. TODO: Generalize this to all types without fields.
-        alt_type.is_type_resolved = True
-
         # Make the alternative derived class accessible from the root node for
         # the enum.
         base_enum_node._alternatives.append(alt_type)
