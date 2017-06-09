@@ -328,8 +328,8 @@ class EnumNode(DSLType):
 
     _alternatives = None
     """
-    List of (name, ASTNodeType reference) association for each enum value.
-    :type: list[(names.Name, TypeRepo.Defer)]
+    List of alternatives: one for each enum value.
+    :type: list[EnumNode.Alternative]
     """
 
     _qualifier = None
