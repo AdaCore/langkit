@@ -195,7 +195,7 @@ package Langkit_Support.Lexical_Env is
    -----------------------------
 
    type Lexical_Env_Resolver is access
-      function (Ref : Entity) return Lexical_Env;
+     function (Ref : Entity) return Lexical_Env;
    --  Callback type for the lazy referenced env resolution mechanism
 
    type Referenced_Env is record
@@ -217,7 +217,7 @@ package Langkit_Support.Lexical_Env is
    ----------------------------------------
 
    type Entity_Resolver is access
-      function (Ref : Entity) return Entity;
+     function (Ref : Entity) return Entity;
    --  Callback type for the lazy entity resolution mechanism. Such functions
    --  must take a "reference" entity (e.g. a name) and return the referenced
    --  entity.
@@ -230,7 +230,7 @@ package Langkit_Support.Lexical_Env is
       --  return. Otherwise, it is the argument to pass to Resolver in order to
       --  get the result.
 
-      MD : Element_Metadata;
+      MD      : Element_Metadata;
       --  Metadata associated to Element
 
       Resolver : Entity_Resolver;
