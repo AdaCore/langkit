@@ -1257,7 +1257,7 @@ class Transform(Parser):
         nodes whose type is `typ`.
         """
         Parser.__init__(self)
-        assert isinstance(typ, ASTNodeType) or typ.is_ast_node
+        assert typ.is_ast_node
 
         self.parser = parser
         self.typ = typ
