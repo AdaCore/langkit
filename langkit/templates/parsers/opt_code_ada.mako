@@ -48,7 +48,7 @@ if ${parser.parser.pos_var} = No_Token_Index then
 
 % if parser._booleanize:
 else
-   % if is_bool (base):
+   % if is_bool(base):
       ${parser.res_var} := True;
    % else:
       ${parser.res_var} := ${base.name()}
