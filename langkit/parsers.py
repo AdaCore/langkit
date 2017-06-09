@@ -31,7 +31,8 @@ import inspect
 from langkit import compiled_types, names
 from langkit.common import gen_name
 from langkit.compile_context import get_context
-from langkit.compiled_types import ASTNodeType, BoolType, CompiledType, Token
+from langkit.compiled_types import (ASTNodeType, BoolType, CompiledType, Token,
+                                    T, resolve_type)
 from langkit.diagnostics import (
     Context, Location, check_source_language, extract_library_location,
     Severity, WarningSet
@@ -1248,7 +1249,12 @@ class Transform(Parser):
         return self.parser._is_left_recursive(rule_name)
 
     def __repr__(self):
-        return "{0} ^ {1}".format(self.parser, self.typ.name().camel)
+        return "{0} ^ {1}".format(
+            self.parser,
+            '<Defer>'
+            if isinstance(self.typ, T.Defer) else
+            self.typ.name().camel
+        )
 
     def __init__(self, parser, typ):
         """
@@ -1256,7 +1262,7 @@ class Transform(Parser):
         nodes whose type is `typ`.
         """
         Parser.__init__(self)
-        assert typ.is_ast_node
+        assert isinstance(typ, T.Defer) or typ.is_ast_node
 
         self.parser = parser
         self.typ = typ
@@ -1265,7 +1271,7 @@ class Transform(Parser):
         return [self.parser]
 
     def get_type(self):
-        return self.typ
+        return resolve_type(self.typ)
 
     def compute_fields_types(self):
         # Gather field types that come from all child parsers
