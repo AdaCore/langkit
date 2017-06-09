@@ -51,6 +51,24 @@ class BaseStruct(object):
     """
 
 
+def check_decorator_use(decorator, expected_cls, cls):
+    """
+    Helper for class decorators below. Raise a diagnostic error if `cls`,
+    which is the input parameter of `decorator`, is not a subclass of
+    `expected_cls`.
+    """
+    location = extract_library_location()
+    with Context('In call to the {} decorator'.format(decorator.__name__),
+                 location):
+        check_source_language(
+            issubtype(cls, expected_cls),
+            'The {} decorator must be called on a {} subclass'
+            ' (here, got: {})'.format(decorator.__name__,
+                                      expected_cls.__name__,
+                                      cls)
+        )
+
+
 class _StructMetaclass(type):
     """
     Internal metaclass for struct types, used to collect all Struct subclasses
@@ -167,13 +185,7 @@ def env_metadata(cls):
 
     :param Struct cls: Type parameter. The Struct subclass to decorate.
     """
-    location = extract_library_location()
-    with Context('In call to env_metadata', location):
-        check_source_language(
-            issubtype(cls, Struct),
-            'env_metadata must be applied to a Struct subclass'
-            ' (here: {})'.format(cls)
-        )
+    check_decorator_use(env_metadata, Struct, cls)
 
     with cls._diagnostic_context():
         check_source_language(
