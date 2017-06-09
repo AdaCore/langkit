@@ -1290,18 +1290,20 @@ class Transform(Parser):
             " some are None: {}".format(self.typ, fields_types)
         )
 
+        typ = self.get_type()
+
         # Check that the number of values produced by self and the number of
         # fields in the destination node are the same.
         nb_transform_values = len(fields_types)
-        nb_fields = len(self.typ.get_parse_fields())
+        nb_fields = len(typ.get_parse_fields())
         check_source_language(
             nb_transform_values == nb_fields,
             'Transform parser generates {} values, but {} has {} fields'
-            .format(nb_transform_values, self.typ.name().camel, nb_fields)
+            .format(nb_transform_values, typ.name().camel, nb_fields)
         )
 
         # Propagate types from self to destination node's fields
-        self.typ.set_types(fields_types)
+        typ.set_types(fields_types)
 
         # Handle sub-parsers
         Parser.compute_fields_types(self)
