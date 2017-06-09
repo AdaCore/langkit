@@ -6,7 +6,9 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 
-from langkit.compiled_types import ASTNode, Field, root_grammar_class
+from langkit.compiled_types import (
+    ASTNode, Field, root_grammar_class, abstract
+)
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import AbstractProperty, Property, Self
 from langkit.parsers import Grammar, Row, Tok
@@ -23,6 +25,7 @@ class FooNode(ASTNode):
     get_num = Property(1)
 
 
+@abstract
 class BarNode(FooNode):
     get_num = Property(2)
 

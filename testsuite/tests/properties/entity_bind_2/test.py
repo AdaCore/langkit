@@ -9,7 +9,7 @@ import os.path
 
 from langkit.compiled_types import (
     ASTNode, Field, root_grammar_class, LongType, UserField, LogicVarType,
-    BoolType, T
+    BoolType, T, abstract
 )
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import (
@@ -29,6 +29,7 @@ class FooNode(ASTNode):
     prop = AbstractProperty(runtime_check=True, type=LongType, public=True)
 
 
+@abstract
 class BarNode(FooNode):
     pass
 

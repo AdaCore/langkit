@@ -4,7 +4,7 @@ import itertools
 import os.path
 
 from langkit.compiled_types import (ASTNode, LexicalEnvType, BoolType,
-                                    root_grammar_class)
+                                    root_grammar_class, abstract)
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import (AbstractProperty, DynamicVariable, Literal,
                                  Property, Self)
@@ -40,6 +40,7 @@ def run(abstract_dyn_vars, concrete_dyn_vars):
     class RootNode(ASTNode):
         pass
 
+    @abstract
     class AbstractNode(RootNode):
         prop = AbstractProperty(BoolType, dynamic_vars=abstract_dyn_vars)
 

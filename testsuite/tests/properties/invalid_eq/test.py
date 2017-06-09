@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.compiled_types import (ASTNode, LexicalEnvType, T,
-                                    root_grammar_class)
+                                    root_grammar_class, abstract)
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import DynamicVariable, Literal, No, Property, Self
 from langkit.parsers import Grammar, Tok
@@ -34,6 +34,7 @@ def run(name, lhs, rhs):
         prop = Property(lhs.equals(rhs), dynamic_vars=[Env])
         use_prop = Property(Env.bind(Self.node_env, Self.prop), public=True)
 
+    @abstract
     class Lit(FooNode):
         pass
 

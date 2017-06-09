@@ -7,7 +7,8 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.compiled_types import (
-    ASTNode, Field, root_grammar_class, LongType, UserField, LogicVarType
+    ASTNode, Field, root_grammar_class, LongType, UserField, LogicVarType,
+    abstract
 )
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import AbstractProperty, Let, Property, Self, Bind
@@ -25,6 +26,7 @@ class FooNode(ASTNode):
     prop = AbstractProperty(runtime_check=True, type=LongType, public=True)
 
 
+@abstract
 class BarNode(FooNode):
     pass
 

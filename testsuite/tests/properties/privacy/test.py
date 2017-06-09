@@ -4,7 +4,7 @@ import itertools
 import os.path
 
 from langkit.compiled_types import (
-    ASTNode, BoolType, root_grammar_class
+    ASTNode, BoolType, root_grammar_class, abstract
 )
 from langkit.diagnostics import Diagnostics
 from langkit.expressions import AbstractProperty, Literal, Property, Self
@@ -34,6 +34,7 @@ def run(abstract_public, concrete_public):
     class RootNode(ASTNode):
         pass
 
+    @abstract
     class AbstractNode(RootNode):
         prop = AbstractProperty(BoolType, public=abstract_public)
 
