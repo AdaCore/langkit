@@ -31,8 +31,8 @@ import inspect
 from langkit import compiled_types, names
 from langkit.common import gen_name
 from langkit.compile_context import get_context
-from langkit.compiled_types import (ASTNodeType, BoolType, CompiledType, Token,
-                                    T, resolve_type)
+from langkit.compiled_types import (ASTNodeType, BoolType, Token, T,
+                                    resolve_type)
 from langkit.diagnostics import (
     Context, Location, check_source_language, extract_library_location,
     Severity, WarningSet
@@ -1334,13 +1334,7 @@ class Null(Parser):
         the same type as the other parser.
         """
         Parser.__init__(self)
-        if isinstance(result_type, (CompiledType, Parser)):
-            self.typ = result_type
-        elif issubclass(result_type, CompiledType):
-            self.typ = result_type
-        else:
-            raise TypeError(
-                'Invalid result type for Null parser: {}'.format(result_type))
+        self.typ = result_type
 
     def children(self):
         return []
@@ -1358,11 +1352,9 @@ class Null(Parser):
         return self.render('null_code_ada')
 
     def get_type(self):
-        return (
-            self.typ.get_type()
-            if isinstance(self.typ, Parser) else
-            self.typ
-        )
+        return (self.typ.get_type()
+                if isinstance(self.typ, Parser) else
+                resolve_type(self.typ))
 
 
 class Enum(Parser):
