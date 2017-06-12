@@ -13,17 +13,18 @@ from utils import emit_and_print_errors, reset_langkit
 Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
-@root_grammar_class()
-class FooNode(ASTNode):
-    pass
+def create_nodes():
+    global FooNode, ListNode, Num
 
+    @root_grammar_class()
+    class FooNode(ASTNode):
+        pass
 
-class ListNode(FooNode):
-    items = Field()
+    class ListNode(FooNode):
+        items = Field()
 
-
-class Num(FooNode):
-    field = Field()
+    class Num(FooNode):
+        field = Field()
 
 
 def lang_def():
@@ -43,7 +44,10 @@ def lang_def_2():
     return foo_grammar
 
 
+create_nodes()
 emit_and_print_errors(lang_def)
+
 reset_langkit()
+create_nodes()
 emit_and_print_errors(lang_def_2)
 print('Done')
