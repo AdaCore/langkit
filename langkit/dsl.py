@@ -1,7 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.compiled_types import (AbstractField, AbstractNodeData, UserField,
-                                    T, create_astnode_class)
+from langkit.compiled_types import (
+    _EnumType, AbstractField, AbstractNodeData, UserField, T,
+    create_astnode_class, create_enum_type
+)
 from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
 )
@@ -749,3 +751,83 @@ class EnumNode(DSLType):
         else:
             # Otherwise, we want to parse the sub-parsers as a row + transform
             return Row(*args) ^ typeref
+
+
+class _EnumMetaclass(type):
+
+    enum_types = set()
+    """
+    Set of all EnumType subclasses.
+
+    :type: set[langkit.compiled_types.CompiledType]
+    """
+
+    _base_cls = None
+
+    def __new__(mcs, name, bases, dct):
+        dct['_name'] = names.Name.from_camel(name)
+        dct['_location'] = extract_library_location()
+
+        cls = type.__new__(mcs, name, bases, dct)
+
+        # If this is an EnumType subclass, register it and create the
+        # corresponding CompiledType subclass.
+        if mcs._base_cls:
+            mcs.enum_types.add(cls)
+            cls._type = create_enum_type(cls)
+
+        else:
+            mcs._base_cls = cls
+
+        return cls
+
+
+class EnumType(DSLType):
+    """
+    Base class for compiled types that hold a single value in a set of possible
+    ones.
+
+    Subclasses must override the `alternatives` member to hold a list of
+    distinct strings that represent the set of possibilities.  They represent
+    the compiled type.
+
+    Instances represent a particular enum value.
+    """
+
+    __metaclass__ = _EnumMetaclass
+
+    alternatives = []
+    """
+    The list of alternatives for this EnumType subclass.
+
+    :type: list[str]
+    """
+
+    suffix = ''
+    """
+    Suffix to use for the alternatives when they are invalid identifiers in
+    some target language.
+
+    :type: str
+    """
+
+    def __init__(self, alt):
+        """
+        Create a value that represent one of the enum alternatives.
+
+        :param str alt: The alternative to use for this instance.
+        """
+        super(EnumType, self).__init__()
+        assert alt in self.alternatives
+        self.alt = alt
+
+    @property
+    def _enum_value(self):
+        """
+        Return the _EnumType.Alternative instance corresponding to this
+        instance.
+
+        :rtype: _EnumType.Alternative
+        """
+        assert self._type
+        return _EnumType.Alternative(self._type, self.alt)

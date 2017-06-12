@@ -99,7 +99,7 @@ def make_renderer(base_renderer=None):
         base_renderer = common_renderer
 
     template_args = {
-        'is_enum':                type_check(EnumType),
+        'is_enum':                type_check(_EnumType),
         'is_logic_var':           type_check(LogicVarType),
         'is_long':                type_check(LongType),
         'is_bool':                type_check(BoolType),
@@ -2503,39 +2503,11 @@ class ArrayType(CompiledType):
         return capi.get_name(cls.api_name() + names.Name('Dec_Ref'))
 
 
-EnumType = None
-
-
-class EnumMetaclass(CompiledTypeMetaclass):
-
-    enum_types = set()
-    """
-    Set of all EnumType subclasses.
-
-    :type: set[langkit.compiled_types.CompiledType]
-    """
-
-    def __new__(mcs, name, bases, dct):
-        cls = CompiledTypeMetaclass.__new__(mcs, name, bases, dct)
-        if EnumType is not None:
-            mcs.enum_types.add(cls)
-        return cls
-
-
-class EnumType(CompiledType):
+class _EnumType(CompiledType):
     """
     Base class for compiled types that hold a single value in a set of possible
     ones.
-
-    Subclasses must override the `alternatives` member to hold a list of
-    distinct strings that represent the set of possibilities.  They represent
-    the compiled type.
-
-    Instances represent either the enum type itself in the generated code or a
-    particular enum value.
     """
-
-    __metaclass__ = EnumMetaclass
 
     is_ptr = False
 
@@ -2550,17 +2522,23 @@ class EnumType(CompiledType):
     # some target language.
     suffix = ''
 
-    # noinspection PyMissingConstructor
-    def __init__(self, alt):
+    class Alternative(object):
         """
-        Create a value that represent one of the enum alternatives.
+        Specific enum value.
+        """
 
-        :param str alt: The alternative to use for this instance.
-        """
-        # CompiledType are not usually supposed to be instantiated.  EnumType
-        # is an exception to this rule, so do not call CompiledType.__init__.
-        assert alt in self.alternatives
-        self.alt = alt
+        def __init__(self, enum_type, alt):
+            self.enum_type = enum_type
+            self.alt = alt
+            assert alt in self.enum_type.alternatives
+
+        @property
+        def enumerator(self):
+            """
+            Return `get_enumerator` for this alternative.
+            :rtype: names.Name
+            """
+            return self.enum_type.get_enumerator(self.alt)
 
     @classmethod
     def base_name(cls):
@@ -2581,7 +2559,7 @@ class EnumType(CompiledType):
 
     @classmethod
     def doc(cls):
-        return cls.__doc__
+        return cls._doc
 
     @classmethod
     def c_type(cls, c_api_settings):
@@ -2601,14 +2579,6 @@ class EnumType(CompiledType):
         return (result + names.Name.from_lower(cls.suffix)
                 if is_keyword(result) else result)
 
-    @property
-    def enumerator(self):
-        """
-        Return `get_enumerator` for this alternative.
-        :rtype: names.Name
-        """
-        return self.get_enumerator(self.alt)
-
     @classmethod
     def alternatives_for(cls, language_settings):
         """
@@ -2626,6 +2596,19 @@ class EnumType(CompiledType):
             )
             for alt in cls.alternatives
         ]
+
+
+def create_enum_type(cls):
+    """
+    Create an _EnumType subclass for this EnumType subclass.
+
+    :param langkit.dsl.EnumType cls: Subclass to translate.
+    :rtype: _EnumType
+    """
+    dct = {'_doc': cls._doc,
+           'alternatives': cls.alternatives,
+           'suffix': cls.suffix}
+    return type(cls.__name__, (_EnumType, ), dct)
 
 
 def create_enum_node_classes(cls):
@@ -2904,3 +2887,5 @@ synthetic = langkit.dsl.synthetic
 has_abstract_list = langkit.dsl.has_abstract_list
 
 EnumNode = langkit.dsl.EnumNode
+
+EnumType = langkit.dsl.EnumType

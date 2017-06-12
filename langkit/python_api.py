@@ -60,7 +60,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.Symbol, lambda _: '{}._wrap()'),
             (ct.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (ct.LongType, lambda _: '{{}}{}'.format(value_suffix)),
-            (ct.EnumType, lambda _: '{}_to_str[{{}}{}]'.format(
+            (ct._EnumType, lambda _: '{}_to_str[{{}}{}]'.format(
                 type.c_type(self.c_api_settings).name,
                 value_suffix,
             )),
@@ -103,10 +103,11 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (ct.BoolType, lambda _: 'bool({})'),
             (ct.LongType, lambda _: 'int({})'),
-            (ct.EnumType, lambda _: '_unwrap_enum({{}}, str_to_{}, {})'.format(
-                type.c_type(self.c_api_settings).name,
-                type.name().camel
-            )),
+            (ct._EnumType, lambda _:
+                '_unwrap_enum({{}}, str_to_{}, {})'.format(
+                    type.c_type(self.c_api_settings).name,
+                    type.name().camel
+                )),
             (ct.ArrayType, lambda cls: '{}._unwrap({{}})'.format(
                 cls.api_name().camel
             )),
@@ -152,7 +153,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.ASTNodeType, lambda _: '{}._c_type'.format(
                 self.context.root_grammar_class.name().camel
             )),
-            (ct.EnumType, lambda _: ctype_type('c_uint')),
+            (ct._EnumType, lambda _: ctype_type('c_uint')),
             (ct.ArrayType, lambda cls:
                 '{}._c_type'.format(cls.api_name().camel)),
             (ct.StructType, lambda _: '{}._c_type'.format(type.name().camel)),

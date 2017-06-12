@@ -1383,7 +1383,7 @@ class Enum(Parser):
         self.parser = resolve(parser) if parser else None
         ":type: Parser|Row"
 
-        self.enum_type_inst = enum_type_inst
+        self.enum_type_inst = enum_type_inst._enum_value
 
     def create_vars_after(self, start_pos):
         self.init_vars(
@@ -1394,7 +1394,7 @@ class Enum(Parser):
         return keep([self.parser])
 
     def get_type(self):
-        return type(self.enum_type_inst)
+        return self.enum_type_inst.enum_type
 
     def generate_code(self):
         return self.render('enum_code_ada')

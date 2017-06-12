@@ -631,9 +631,10 @@ class CompileCtx(object):
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import (EnumMetaclass, LexicalEnvType,
+        from langkit.compiled_types import (LexicalEnvType,
                                             StructMetaclass, StructType)
-        from langkit.dsl import _ASTNodeMetaclass, _StructMetaclass
+        from langkit.dsl import (_ASTNodeMetaclass, _EnumMetaclass,
+                                 _StructMetaclass)
 
         # Get the list of Struct subclasses from the corresponding metaclass
         # and create the corresponding StructType subclasses.
@@ -672,7 +673,7 @@ class CompileCtx(object):
         self.list_types.update(t.element_type
                                for t in StructMetaclass.pending_list_types)
         self.array_types.update(StructMetaclass.pending_array_types)
-        self.enum_types = set(EnumMetaclass.enum_types)
+        self.enum_types = {et._type for et in _EnumMetaclass.enum_types}
 
         self.generic_list_type = self.root_grammar_class.generic_list_type
         self.env_metadata = StructMetaclass.env_metadata
