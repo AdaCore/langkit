@@ -1510,6 +1510,27 @@ class StructMetaclass(CompiledTypeMetaclass):
         cls._fields = fields
         cls.fields = FieldsDictProxy(fields, cls)
 
+        # If this is the root grammar type, create the generic list type name
+        if is_root_grammar_class:
+            generic_list_type_name = dct.pop('_generic_list_type',
+                                             cls.__name__ + 'BaseList')
+
+            @classmethod
+            def element_type(cls):
+                # The generic list type is not a real list type: only its
+                # subclasses will have a specific element type.
+                raise not_implemented_error(cls, cls.element_type)
+
+            cls.generic_list_type = abstract(type(
+                generic_list_type_name,
+                (cls, ),
+                {
+                    'nullexpr': classmethod(lambda cls: null_constant()),
+                    'is_generic_list_type': True,
+                    'element_type': element_type,
+                }
+            ))
+
         return cls
 
     @classmethod
@@ -1626,45 +1647,16 @@ def synthetic(cls):
     return cls
 
 
-def root_grammar_class(generic_list_type=None):
+def root_grammar_class(cls):
     """
-    Return a decorator to tag an ASTNode subclass as the root grammar node.
-
-    :param None|str generic_list_type: If provided, must be a camel case name
-        to use for the name of the generic list type.
+    Decorator to tag an ASTNode subclass as the root grammar node.
     """
-
-    def decorator(cls):
-        assert cls.base() == ASTNodeType
-        assert StructMetaclass.root_grammar_class == cls, (
-            "You can have only one descendent of ASTNode, and it must be the "
-            "root grammar class"
-        )
-
-        # Create the subclass for generic list type
-
-        @classmethod
-        def element_type(cls):
-            # The generic list type is not a real list type: only its
-            # subclasses will have a specific element type.
-            raise not_implemented_error(cls, cls.element_type)
-
-        generic_list_type_name = (generic_list_type
-                                  if generic_list_type else
-                                  cls.__name__ + b'BaseList')
-
-        cls.generic_list_type = abstract(type(
-            generic_list_type_name,
-            (cls, ),
-            {
-                'nullexpr': classmethod(lambda cls: null_constant()),
-                'is_generic_list_type': True,
-                'element_type': element_type,
-            }
-        ))
-        return cls
-
-    return decorator
+    assert cls.base() == ASTNodeType
+    assert StructMetaclass.root_grammar_class == cls, (
+        "You can have only one descendent of ASTNode, and it must be the "
+        "root grammar class"
+    )
+    return cls
 
 
 def has_abstract_list(cls):

@@ -19,7 +19,7 @@ def run(name, abstract_prop, prop=None):
 
     print('== {} =='.format(name))
 
-    @root_grammar_class()
+    @root_grammar_class
     class FooNode(ASTNode):
         pass
 

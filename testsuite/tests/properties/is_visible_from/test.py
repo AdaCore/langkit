@@ -22,7 +22,7 @@ from utils import build_and_run
 Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
-@root_grammar_class()
+@root_grammar_class
 class FooNode(ASTNode):
     @langkit_property(public=True)
     def is_visible_from(env1=LexicalEnvType, env2=LexicalEnvType):

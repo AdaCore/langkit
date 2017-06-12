@@ -21,7 +21,7 @@ def run(name, prop_lambda):
 
     print('== {} =='.format(name))
 
-    @root_grammar_class()
+    @root_grammar_class
     class FooNode(ASTNode):
         pass
 

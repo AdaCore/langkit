@@ -14,7 +14,7 @@ Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 def make_lang_def(lit):
     def lang_def():
-        @root_grammar_class()
+        @root_grammar_class
         class FooNode(ASTNode):
             b = Property(lit, public=True)
 

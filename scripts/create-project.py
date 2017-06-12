@@ -83,7 +83,7 @@ from langkit.parsers import Grammar, Row
 
 
 @abstract
-@root_grammar_class()
+@root_grammar_class
 class {lang_name}Node(ASTNode):
     """
     Root node class for {lang_name} AST nodes.

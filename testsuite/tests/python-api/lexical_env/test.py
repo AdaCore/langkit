@@ -26,7 +26,7 @@ class Metadata(Struct):
     pass
 
 
-@root_grammar_class()
+@root_grammar_class
 class FooNode(ASTNode):
     @langkit_property(public=True, return_type=LexicalEnvType)
     def env_id(env=LexicalEnvType):

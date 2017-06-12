@@ -30,7 +30,7 @@ def run_test(title, run_main):
     print('-' * len(title))
     sys.stdout.flush()
 
-    @root_grammar_class()
+    @root_grammar_class
     class FooNode(ASTNode):
         var_field = UserField(type=LogicVarType, public=True)
 

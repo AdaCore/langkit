@@ -22,7 +22,7 @@ def run(name, expr_fn):
     print('== {} =='.format(name))
 
     @abstract
-    @root_grammar_class()
+    @root_grammar_class
     class FooNode(ASTNode):
         pass
 

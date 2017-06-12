@@ -25,7 +25,7 @@ def run(name, match_expr):
     print('== {} =='.format(name))
 
     @abstract
-    @root_grammar_class()
+    @root_grammar_class
     class FooNode(ASTNode):
         prop = Property(Literal(0), public=True)
 

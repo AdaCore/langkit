@@ -19,7 +19,7 @@ def run(name, prop):
     Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
     print('== {} =='.format(name))
 
-    @root_grammar_class()
+    @root_grammar_class
     class FooNode(ASTNode):
         pass
 
