@@ -1425,15 +1425,9 @@ class StructMetaclass(CompiledTypeMetaclass):
             dct.pop(f_n, None)
 
         env_spec = dct.get('env_spec', None)
-        if is_astnode:
-            dct['is_env_spec_inherited'] = env_spec is None
-            dct['env_spec'] = env_spec
-        else:
-            with diag_ctx:
-                check_source_language(
-                    env_spec is None,
-                    'Structs cannot define lexical environment specifications'
-                )
+        assert env_spec is None or is_astnode
+        dct['is_env_spec_inherited'] = env_spec is None
+        dct['env_spec'] = env_spec
 
         dct['should_emit_array_type'] = (
             dct.get('should_emit_array_type', True) and
