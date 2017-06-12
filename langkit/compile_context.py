@@ -673,7 +673,6 @@ class CompileCtx(object):
         self.array_types.update(StructMetaclass.pending_array_types)
         self.enum_types = set(EnumMetaclass.enum_types)
 
-        self.root_grammar_class = StructMetaclass.root_grammar_class
         self.generic_list_type = self.root_grammar_class.generic_list_type
         self.env_metadata = StructMetaclass.env_metadata
 
@@ -1055,9 +1054,12 @@ class CompileCtx(object):
 
         assert self.grammar, "Set grammar before compiling"
 
+        from langkit.compiled_types import StructMetaclass
         from langkit.parsers import Parser, NodeToParsersPass
 
         node_to_parsers = NodeToParsersPass()
+
+        self.root_grammar_class = StructMetaclass.root_grammar_class
 
         pass_manager = PassManager()
         pass_manager.add(
