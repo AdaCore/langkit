@@ -1512,8 +1512,10 @@ class StructMetaclass(CompiledTypeMetaclass):
 
         # If this is the root grammar type, create the generic list type name
         if is_root_grammar_class:
-            generic_list_type_name = dct.pop('_generic_list_type',
-                                             cls.__name__ + 'BaseList')
+            generic_list_type_name = (
+                dct.pop('_generic_list_type', None)
+                or cls.__name__ + 'BaseList'
+            )
 
             @classmethod
             def element_type(cls):
