@@ -57,11 +57,11 @@ class BaseStruct(DSLType):
 
     _fields = None
     """
-    List of fields for this type. For Struct subclasses, this is actually a
-    list of AbstractField. For ASTNode subclasses, this excludes inherited
-    fields.
+    List of couples: (field name, field) for this type. For Struct subclasses,
+    this is actually a list of AbstractField. For ASTNode subclasses, this
+    excludes inherited fields.
 
-    :type: list[langkit.compiled_types.AbstractNodeData]
+    :type: list[(str, langkit.compiled_types.AbstractNodeData)]
     """
 
 
