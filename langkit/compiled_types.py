@@ -2880,12 +2880,10 @@ class TypeRepo(object):
         EnvAssoc type, used to add associations of key and value to the lexical
         environments, via the add_to_env primitive.
         """
-        assert T.root_node
-
         class EnvAssoc(StructType):
             _fields = [
                 ('key', UserField(type=Symbol)),
-                ('val', UserField(type=T.root_node)),
+                ('val', UserField(type=self.defer_root_node)),
             ]
 
         return EnvAssoc
