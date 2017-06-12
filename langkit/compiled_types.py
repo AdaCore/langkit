@@ -1468,12 +1468,9 @@ class StructMetaclass(CompiledTypeMetaclass):
             else:
                 mcs.astnode_types.append(cls)
 
-        # This builds a list of fields in a specific order:
-        #
-        # * fields are first ordered by origin: builtins, then fields from
-        #   "dct".
-        #
-        # * then, they are ordered by field number (see AbstractnodeData).
+        # This builds a list of fields in a specific order: first builtin
+        # fields, then fields from `dct`, sorted by field number (see
+        # AbstractNodeData).
         fields = mcs.merge_fields(
             ([mcs.builtin_properties()] if is_root_grammar_class else [])
             + [dct_fields]
