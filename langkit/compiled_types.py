@@ -2067,7 +2067,8 @@ class StructType(CompiledType):
         """Return a name that will be used when serializing this AST node."""
         # This name is used by pretty printers-like code: we need the
         # "original" node name here, not keyword-escaped ones.
-        return getattr(cls, "_repr_name", cls.__name__)
+        result = getattr(cls, "_repr_name") or cls.__name__
+        return result
 
     @classmethod
     def nullexpr(cls):
