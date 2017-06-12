@@ -2370,7 +2370,7 @@ class ASTNodeType(StructType):
         """
 
         entity_klass = type(
-            b'Entity{}'.format(cls.name().camel if cls != T.root_node else ''),
+            b'Entity{}'.format('' if cls.is_root_node else cls.name().camel),
             (StructType, ), {
                 'is_entity_type': True,
                 'el_type': cls,
@@ -2384,7 +2384,7 @@ class ASTNodeType(StructType):
             }
         )
 
-        if cls == T.root_node:
+        if cls.is_root_node:
             # LexicalEnv.get, which is bound in the AST.C generate package,
             # returns arrays of root node entities, so the corresponding
             # array type must be declared manually there.
