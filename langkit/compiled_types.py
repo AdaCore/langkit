@@ -1519,14 +1519,6 @@ class StructMetaclass(CompiledTypeMetaclass):
         cls._fields = fields
         cls.fields = FieldsDictProxy(fields, cls)
 
-        for f_n, f_v in fields.iteritems():
-            with field_ctx(f_n):
-                if is_struct:
-                    check_source_language(
-                        not f_v.is_property,
-                        'Properties are not yet supported on plain structs'
-                    )
-
         return cls
 
     @classmethod
