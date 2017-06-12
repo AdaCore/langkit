@@ -1404,6 +1404,7 @@ class StructMetaclass(CompiledTypeMetaclass):
                         ' which will be the root class of your grammar'
                         ' indirectly from the root grammar class'
                     )
+                dct['is_root_node'] = is_root_grammar_class
 
             else:
                 is_struct = True
@@ -2157,6 +2158,7 @@ class ASTNodeType(StructType):
     is_ptr = True
     abstract = False
     synthetic = False
+    is_root_node = False
     is_bool_node = False
     is_enum_node = False
     is_generic_list_type = False
