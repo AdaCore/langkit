@@ -1393,7 +1393,6 @@ class StructMetaclass(CompiledTypeMetaclass):
                 if mcs.root_grammar_class is None:
                     assert base is ASTNodeType
                     is_root_grammar_class = True
-                    dct['abstract'] = True
 
                 else:
                     # Check that it does indeed derives from the root grammar
@@ -1404,6 +1403,7 @@ class StructMetaclass(CompiledTypeMetaclass):
                         ' which will be the root class of your grammar'
                         ' indirectly from the root grammar class'
                     )
+
                 dct['is_root_node'] = is_root_grammar_class
 
             else:
@@ -1419,12 +1419,9 @@ class StructMetaclass(CompiledTypeMetaclass):
 
         # Get the fields this class defines. Remove them as class members: we
         # want them to be stored in their own dict (see "cls.fields" below).
-        dct_fields = (dct['_fields'] if is_struct and not is_base else
-                      AbstractNodeData.filter_fields(dct))
-        for f_n, _ in dct_fields:
-            dct.pop(f_n, None)
+        dct_fields = [] if is_base else dct['_fields']
 
-        env_spec = dct.get('env_spec', None)
+        env_spec = dct.get('_env_spec', None)
         assert env_spec is None or is_astnode
         dct['is_env_spec_inherited'] = env_spec is None
         dct['env_spec'] = env_spec
@@ -1446,8 +1443,13 @@ class StructMetaclass(CompiledTypeMetaclass):
         )
 
         # By default, ASTNodeType subtypes aren't abstract. The "abstract"
-        # decorator may change this attribute later.
-        dct.setdefault('abstract', False)
+        # decorator may change this attribute later. Likewise for synthetic
+        # nodes and nodes whose root list type is abstract.
+        dct['abstract'] = (
+            is_root_grammar_class or dct.get('_is_abstract', False)
+        )
+        dct['synthetic'] = dct.get('_is_synthetic', False)
+        dct['has_abstract_list'] = dct.get('_has_abstract_list', False)
 
         # This metaclass will register subclasses automatically
         dct['subclasses'] = []
@@ -1476,29 +1478,6 @@ class StructMetaclass(CompiledTypeMetaclass):
             + [dct_fields]
         )
 
-        # "fields" contains all the non-internal fields for this class: check
-        # that they use allowed names.
-        for f_n, f_v in fields.iteritems():
-            with field_ctx(f_n):
-                check_source_language(
-                    not f_n.startswith('_'),
-                    'Underscore-prefixed field names are not allowed'
-                )
-
-        if is_astnode and base.is_list_type:
-            # AST list types are not allowed to have syntax fields
-            syntax_fields = {f_n: f_v
-                             for f_n, f_v in fields.items()
-                             if not f_v.is_property}
-            with diag_ctx:
-                check_source_language(
-                    not syntax_fields,
-                    'ASTNode list types are not allowed to have fields'
-                    ' (here: {})'.format(', '.join(syntax_fields))
-                )
-
-            cls.is_root_list_type = False
-
         # Associate each field and property to this ASTNodeType subclass, and
         # assign them their name. Likewise for the environment specification.
         for f_n, f_v in fields.items():
@@ -1523,15 +1502,17 @@ class StructMetaclass(CompiledTypeMetaclass):
                 # subclasses will have a specific element type.
                 raise not_implemented_error(cls, cls.element_type)
 
-            cls.generic_list_type = abstract(type(
+            cls.generic_list_type = type(
                 generic_list_type_name,
                 (cls, ),
                 {
                     'nullexpr': classmethod(lambda cls: null_constant()),
                     'is_generic_list_type': True,
                     'element_type': element_type,
+                    '_fields': [],
+                    '_is_abstract': True,
                 }
-            ))
+            )
 
         return cls
 
@@ -1625,51 +1606,6 @@ class StructMetaclass(CompiledTypeMetaclass):
              for group in fields_groups],
             []
         ))
-
-
-def abstract(cls):
-    """
-    Decorator to tag an ASTNode subclass as abstract.
-
-    :param type cls: Type parameter. The ASTNode subclass to decorate.
-    """
-    assert cls.is_ast_node
-    cls.abstract = True
-    return cls
-
-
-def synthetic(cls):
-    """
-    Decorator to tag an ASTNode subclass as synthetic.
-
-    :param type cls: Type parameter. The ASTNode subclass to decorate.
-    """
-    assert cls.is_ast_node
-    cls.synthetic = True
-    return cls
-
-
-def root_grammar_class(cls):
-    """
-    Decorator to tag an ASTNode subclass as the root grammar node.
-    """
-    assert cls.base() == ASTNodeType
-    assert StructMetaclass.root_grammar_class == cls, (
-        "You can have only one descendent of ASTNode, and it must be the "
-        "root grammar class"
-    )
-    return cls
-
-
-def has_abstract_list(cls):
-    """
-    Decorator to make the automatically generated list type for "cls" (the
-    "root list type") abstract.
-
-    :param ASTNode cls: Type parameter. The AST node type to decorate.
-    """
-    cls.has_abstract_list = True
-    return cls
 
 
 class TypeDeclaration(object):
@@ -2296,12 +2232,13 @@ class ASTNodeType(StructType):
             (StructMetaclass.root_grammar_class.generic_list_type, ), {
                 'name': classmethod(name),
 
-                'abstract': element_type.has_abstract_list,
+                '_is_abstract': element_type.has_abstract_list,
                 'is_generic_list_type': False,
                 'is_list_type': True,
                 'is_root_list_type': True,
                 'is_collection': classmethod(lambda cls: True),
                 'element_type': classmethod(lambda cls: element_type),
+                '_fields': [],
             }
         )
 
@@ -2417,6 +2354,43 @@ class ASTNodeType(StructType):
 # dependency between the @abstract decorator and the ASTNodeType class, which
 # is caused by the assert statement that is inside the decorator.
 ASTNodeType.abstract = True
+
+
+def create_astnode_class(cls):
+    """
+    Create an ASTNodeType subclass for this ASTNode subclass.
+
+    :param langkit.dsl.ASTNode cls: Subclass to translate.
+    :rtype: ASTNodeType
+    """
+    from langkit.dsl import _ASTNodeList, _ASTNodeMetaclass
+
+    if cls._base is _ASTNodeList:
+        # This is supposed to be a root list type, use the
+        # ASTNodeType.list_type class method to create it.
+        element_type = cls._element_type._type
+        assert element_type
+        astnode_type = element_type.list_type()
+
+    else:
+        # This is a regular AST node: go through the regular subclassing
+        # machinery.
+        is_root = cls is _ASTNodeMetaclass.root_type
+
+        # Create the ASTNodeType subclass itself
+        base_cls = ASTNodeType if is_root else cls._base._type
+
+        # TODO: make explicit the list of fields that are forwarded to compiled
+        # type class constructor.
+        dct = {k: v for k, v in cls.__dict__.items()
+               if ((not k.startswith('__') or not k.endswith('__'))
+                   and not isinstance(v, AbstractNodeData))}
+
+        dct['is_root_list_type'] = False
+        astnode_type = type(cls.__name__, (base_cls, ), dct)
+
+    astnode_type.dsl_decl = cls
+    return astnode_type
 
 
 class ArrayType(CompiledType):
@@ -2666,35 +2640,42 @@ def create_enum_node_classes(cls):
 
     is_bool_node = bool(cls._qualifier)
 
+    fields = list(cls._fields)
     base_enum_dct = {
         'alternatives': cls._alternatives,
         'is_enum_node': True,
         'is_bool_node': is_bool_node,
+        'is_type_resolved': True,
+
+        '_fields': fields,
+        '_is_abstract': True,
+
+        # List of `base_enum_node` subclass we create here, one for each
+        # alternative.
+        '_alternatives': [],
     }
     if is_bool_node:
         prop = AbstractProperty(type=BoolType, public=True)
         prop.location = cls._location
-        base_enum_dct['as_bool'] = prop
+        fields.append(('as_bool', prop))
 
     # Add other supplied fields to the base class dict
     base_enum_dct.update(dict(cls._fields))
 
     # Generate the abstract base node type
-    base_enum_node = abstract(type(cls._name.camel, (T.root_node, ),
-                                   base_enum_dct))
-    base_enum_node.is_type_resolved = True
-    base_enum_node._alternatives = []
+    base_enum_node = type(cls._name.camel, (T.root_node, ), base_enum_dct)
     cls._type = base_enum_node
 
     for alt in cls._alternatives:
         alt_name = cls._name + alt.name
 
         # Generate the derived class corresponding to this alternative
-        dct = {}
+        fields = []
+        dct = {'_fields': fields}
         if is_bool_node:
             prop = Property(alt.name.lower == 'present')
             prop.location = cls._location
-            dct['as_bool'] = prop
+            fields.append(('as_bool', prop))
 
         alt_type = type(alt_name.camel, (base_enum_node, ), dct)
         alt._type = alt_type
@@ -2914,8 +2895,12 @@ declaration
 import langkit.dsl
 
 Struct = langkit.dsl.Struct
-ASTNode = ASTNodeType
-
 env_metadata = langkit.dsl.env_metadata
+
+ASTNode = langkit.dsl.ASTNode
+root_grammar_class = langkit.dsl.root_grammar_class
+abstract = langkit.dsl.abstract
+synthetic = langkit.dsl.synthetic
+has_abstract_list = langkit.dsl.has_abstract_list
 
 EnumNode = langkit.dsl.EnumNode

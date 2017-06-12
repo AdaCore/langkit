@@ -53,8 +53,7 @@ def run(abstract_public, concrete_public):
         return foo_grammar
 
     if emit_and_print_errors(lang_def):
-        for fld in (AbstractNode._fields['prop'],
-                    ConcreteNode._fields['prop']):
+        for fld in (AbstractNode.prop, ConcreteNode.prop):
             print('  {}: {}'.format(fld.qualname, fmt_privacy[fld.is_public]))
     print('')
 

@@ -1,12 +1,13 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.compiled_types import AbstractField, UserField, T
+from langkit.compiled_types import (AbstractField, AbstractNodeData, UserField,
+                                    T, create_astnode_class)
 from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
 )
 from langkit.expressions import PropertyDef
 import langkit.names as names
-from langkit.utils import issubtype
+from langkit.utils import DictProxy, issubtype
 
 
 class DSLType(object):
@@ -217,6 +218,332 @@ def env_metadata(cls):
         )
     _StructMetaclass.env_metadata = cls
     cls._is_env_metadata = True
+    return cls
+
+
+class FieldsDictProxy(DictProxy):
+    """
+    Specialization of DictProxy for the fields of structures, to raise
+    user-friendly diagnostic in case of unknown field.
+    """
+
+    def __init__(self, dct, struct):
+        super(FieldsDictProxy, self).__init__(dct)
+        self.struct = struct
+
+    def __getattr__(self, attr):
+        check_source_language(
+            attr in self.dct,
+            '{} has no {} field/property'.format(self.struct._name.camel,
+                                                 attr)
+        )
+        return self.dct[attr]
+
+
+class _ASTNodeMetaclass(type):
+    """
+    Internal metaclass for AST node types, used to collect all ASTNode
+    subclasses that language specifications declare.
+    """
+
+    astnode_types = []
+    """
+    List of all ASTNode subclasses, excluding ASTNode itself.
+
+    :type: list[ASTNode]
+    """
+
+    root_type = None
+    """
+    The direct ASTNode subclass that is used as a root for the whole AST node
+    hierarchy.
+
+    :type: ASTNode
+    """
+
+    root_grammar_class_called = False
+
+    @classmethod
+    def reset(cls):
+        cls.astnode_types = []
+        cls.root_type = None
+        cls.root_grammar_class_called = False
+
+    def __new__(mcs, name, bases, dct):
+        is_base = ((len(bases) == 1 and bases[0] in (object, BaseStruct))
+                   or dct.pop('_ASTNodeList__is_astnode_list_cls', False))
+        is_root = not is_base and mcs.root_type is None
+
+        if not is_base:
+            mcs.process_subclass(name, bases, dct, is_root)
+
+        cls = type.__new__(mcs, name, bases, dct)
+
+        if is_root:
+            mcs.root_type = cls
+
+        if not is_base:
+            mcs.astnode_types.append(cls)
+
+            # TODO: remove this proxy, make the language spec reference the
+            # fields directly as class attributes.
+            cls.fields = FieldsDictProxy(dict(cls._fields), cls)
+            cls._type = create_astnode_class(cls)
+
+        return cls
+
+    @classmethod
+    def process_subclass(mcs, name, bases, dct, is_root):
+        from langkit.envs import EnvSpec
+
+        location = extract_library_location()
+        base = bases[0]
+        is_list_type = issubclass(base, _ASTNodeList)
+        is_root_list_type = base is _ASTNodeList
+
+        node_ctx = Context('in {}'.format(name), location)
+
+        def field_ctx(field_name):
+            return Context('in {}.{}'.format(name, field_name), location)
+
+        with node_ctx:
+            check_source_language(len(bases) == 1,
+                                  'ASTNode subclasses must have exactly one'
+                                  ' base class')
+            if mcs.root_type is not None:
+                check_source_language(
+                    base is not ASTNode,
+                    'Only one class can derive from ASTNode (previous was:'
+                    ' {})'.format(mcs.root_type.__name__)
+                )
+
+            env_spec = dct.pop('env_spec', None)
+            check_source_language(
+                env_spec is None or isinstance(env_spec, EnvSpec),
+                'Invalid environment specification: {}'.format(env_spec)
+            )
+
+            repr_name = dct.pop('_repr_name', None)
+            check_source_language(
+                repr_name is None or isinstance(repr_name, str),
+                'If provided, _repr_name must be a string (here: {})'.format(
+                    repr_name
+                )
+            )
+
+            generic_list_type_name = dct.pop('_generic_list_type', None)
+            if generic_list_type_name is not None:
+                check_source_language(
+                    is_root,
+                    'Only the root AST node can hold the name of the generic'
+                    ' list type'
+                )
+                check_source_language(
+                    is_root,
+                    'Name of the generic list type must be a string, but got'
+                    ' {}'.format(repr(generic_list_type_name))
+                )
+
+        # If this is a list type, determine the corresponding element type
+        if is_root_list_type:
+            element_type = dct.pop('_element_type')
+        elif is_list_type:
+            element_type = base._element_type
+        else:
+            element_type = None
+
+        # Make sure all fields are AbstractNodeData instances; assign them
+        # their name.
+        fields = []
+        for f_n, f_v in dct.items():
+            if f_n.startswith('__') and f_n.endswith('__'):
+                continue
+            fields.append((f_n, f_v))
+            with field_ctx(f_n):
+                check_source_language(
+                    isinstance(f_v, AbstractNodeData),
+                    'Field {} is a {}, but only instances of AbstractNodeData'
+                    ' subclasses are allowed in ASTNode subclasses'.format(
+                        f_n, type(f_v)
+                    )
+                )
+                check_source_language(
+                    not f_n.startswith('_'),
+                    'Underscore-prefixed field names are not allowed'
+                )
+                f_v.name = names.Name.from_lower(f_n)
+
+        # AST list types are not allowed to have syntax fields
+        if is_list_type:
+            syntax_fields = [f_n for f_n, f_v in fields
+                             if not f_v.is_property]
+            with node_ctx:
+                check_source_language(
+                    not syntax_fields,
+                    'ASTNode list types are not allowed to have fields'
+                    ' (here: {})'.format(', '.join(sorted(syntax_fields)))
+                )
+
+        dct['_name'] = names.Name.from_camel(name)
+        dct['_location'] = location
+        dct['_fields'] = fields
+        dct['_repr_name'] = repr_name
+        dct['_base'] = base
+        dct['_env_spec'] = env_spec
+
+        # Make sure subclasses don't inherit the "list_type" cache from their
+        # base classes.
+        dct['_list_type'] = None
+
+        dct['_generic_list_type'] = generic_list_type_name
+
+        dct['_element_type'] = element_type
+
+
+class ASTNode(BaseStruct):
+    """
+    Base class for all AST node types.
+
+    Exactly one class must derive from ASTNode directly, then all other
+    subclasses must derive from this first subclass.
+    """
+
+    __metaclass__ = _ASTNodeMetaclass
+
+    _repr_name = None
+    """
+    Camel-case name to use to represent this node.
+    :type: str|None
+    """
+
+    _base = None
+    """
+    Base class from which this AST node type derives, or None for the root
+    type.
+
+    :type: ASTNode|None
+    """
+
+    _env_spec = None
+    """
+    EnvSpec instance associated to this subclass, if any.
+    :type: langkit.envs.EnvSpec|None
+    """
+
+    _has_abstract_list = None
+    """
+    Whether the list type corresponding to this AST node must be abstract.
+    :type: bool
+    """
+
+    _generic_list_type = None
+    """
+    User-specific name for the generic list type, in any.
+    :type: str|None
+    """
+
+    _list_type = None
+    """
+    Cache for the `list_type` method.
+    :type: _ASTNodeList
+    """
+
+    @classmethod
+    def list_type(cls):
+        """
+        Return an ASTNode subclass that represents a list of "cls".
+
+        :rtype: _ASTNodeList
+        """
+        with cls._diagnostic_context():
+            check_source_language(
+                cls is not ASTNode,
+                'Lists of base ASTNode are not allowed'
+            )
+        if cls._list_type is None:
+            cls._list_type = type((cls._name + names.Name('List')).camel,
+                                  (_ASTNodeList, ),
+                                  {'_element_type': cls})
+        return cls._list_type
+
+    @classmethod
+    def entity(cls):
+        return T.Defer(lambda: cls._type.entity())
+
+    def __new__(cls, *args):
+        """
+        This constructor can be used in the grammar to create a parser for this
+        AST node.
+        """
+        from langkit.parsers import Row
+
+        def get():
+            assert cls._type
+            return cls._type
+        return Row(*args) ^ T.Defer(get)
+
+
+class _ASTNodeList(ASTNode):
+    """
+    Internal base class for all AST node list types. Use ASTNode.list_type to
+    build such classes.
+    """
+    __is_astnode_list_cls = True
+
+    _element_type = None
+    """
+    ASTNode subclass that contains.
+    :type: ASTNode
+    """
+
+
+def root_grammar_class(cls):
+    """
+    Decorator to tag an ASTNode subclass as the root grammar node.
+    """
+    check_decorator_use(root_grammar_class, ASTNode, cls)
+
+    with cls._diagnostic_context():
+        check_source_language(
+            not _ASTNodeMetaclass.root_grammar_class_called,
+            'The "root_grammar_class" decorator cannot be used more than once'
+        )
+        _ASTNodeMetaclass.root_grammar_class_called = True
+
+    return cls
+
+
+def abstract(cls):
+    """
+    Decorator to tag an ASTNode subclass as abstract.
+
+    :param ASTNode cls: Type parameter. The ASTNode subclass to decorate.
+    """
+    check_decorator_use(abstract, ASTNode, cls)
+    cls._type.abstract = True
+    return cls
+
+
+def synthetic(cls):
+    """
+    Decorator to tag an ASTNode subclass as synthetic.
+
+    :param ASTNode cls: Type parameter. The ASTNode subclass to decorate.
+    """
+    check_decorator_use(synthetic, ASTNode, cls)
+    cls._type.synthetic = True
+    return cls
+
+
+def has_abstract_list(cls):
+    """
+    Decorator to make the automatically generated list type for "cls" (the
+    "root list type") abstract.
+
+    :param ASTNode cls: Type parameter. The AST node type to decorate.
+    """
+    check_decorator_use(has_abstract_list, ASTNode, cls)
+    cls._type.has_abstract_list = True
     return cls
 
 

@@ -8,7 +8,7 @@ import sys
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import CompiledTypeMetaclass, StructMetaclass
 from langkit.diagnostics import DiagnosticError
-from langkit.dsl import _StructMetaclass
+from langkit.dsl import _StructMetaclass, _ASTNodeMetaclass, _EnumNodeMetaclass
 from langkit.expressions import Self
 from langkit.libmanage import ManageScript
 from langkit.utils import reset_memoized
@@ -150,5 +150,7 @@ def reset_langkit():
     CompiledTypeMetaclass.type_dict = {}
 
     _StructMetaclass.reset()
+    _ASTNodeMetaclass.reset()
+    _EnumNodeMetaclass.reset()
 
     reset_memoized()

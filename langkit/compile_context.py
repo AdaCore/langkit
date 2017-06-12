@@ -625,17 +625,15 @@ class CompileCtx(object):
         from langkit.compiled_types import create_enum_node_classes
         for enum_type in _EnumNodeMetaclass.enum_types:
             create_enum_node_classes(enum_type)
-        _EnumNodeMetaclass.reset()
 
     def compute_types(self):
         """
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import (
-            EnumMetaclass, LexicalEnvType, StructMetaclass, StructType
-        )
-        from langkit.dsl import _StructMetaclass
+        from langkit.compiled_types import (EnumMetaclass, LexicalEnvType,
+                                            StructMetaclass, StructType)
+        from langkit.dsl import _ASTNodeMetaclass, _StructMetaclass
 
         # Get the list of Struct subclasses from the corresponding metaclass
         # and create the corresponding StructType subclasses.
@@ -662,7 +660,10 @@ class CompileCtx(object):
             StructMetaclass.env_metadata = user_env_md
         self.check_env_metadata(StructMetaclass.env_metadata)
 
-        _StructMetaclass.reset()
+        check_source_language(
+            _ASTNodeMetaclass.root_grammar_class_called,
+            'The "root_grammar_class" decorator must be used'
+        )
 
         # Get the list of ASTNodeType types from the StructType metaclass
         entity = StructMetaclass.root_grammar_class.entity()

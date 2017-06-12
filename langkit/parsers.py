@@ -1263,8 +1263,12 @@ class Transform(Parser):
         Create a Transform parser wrapping `parser` and that instantiates AST
         nodes whose type is `typ`.
         """
+        from langkit.dsl import ASTNode
+
         Parser.__init__(self)
-        assert isinstance(typ, T.Defer) or typ.is_ast_node
+        assert (issubtype(typ, ASTNode)
+                or isinstance(typ, T.Defer)
+                or typ.is_ast_node)
 
         self.parser = parser
         self.typ = typ

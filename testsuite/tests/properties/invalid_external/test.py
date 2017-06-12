@@ -28,7 +28,8 @@ def run(name, abstract_prop, prop=None):
         p = abstract_prop()
 
     class Example(AbstractExample):
-        p = prop() if prop else None
+        if prop:
+            p = prop()
 
     def lang_def():
         foo_grammar = Grammar('main_rule')

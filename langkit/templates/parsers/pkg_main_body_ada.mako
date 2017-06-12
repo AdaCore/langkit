@@ -35,6 +35,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
       use ${cls.name()}_Memos;
 
       % if not cls.abstract:
+         --  ${cls} - ${cls.abstract}
          package ${cls.name()}_Alloc is
             new Tagged_Alloc (${cls.value_type_name()});
       % endif
