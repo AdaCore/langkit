@@ -941,7 +941,7 @@ class List(Parser):
     def get_type(self):
         with self.diagnostic_context():
             if self.list_cls:
-                ret = self.list_cls
+                ret = resolve_type(self.list_cls)
                 check_source_language(
                     ret.is_list_type,
                     'Invalid list type for List parser: {}. '
