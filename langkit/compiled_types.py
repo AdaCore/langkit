@@ -1816,7 +1816,7 @@ class StructType(CompiledType):
                 check_source_language(
                     issubclass(f_type, field.type),
                     "Field {} already had type {}, got {}".format(
-                        field.name, field.type.name(), f_type.name()
+                        field.qualname, field.type.name(), f_type.name()
                     )
                 )
 
