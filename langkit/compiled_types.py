@@ -1431,6 +1431,7 @@ class StructMetaclass(CompiledTypeMetaclass):
             not is_root_grammar_class
         )
         dct['location'] = location
+        dct['_doc'] = dct.get('_doc')
 
         # List types are resolved by construction: we create list types to
         # contain specific ASTNodeType subclasses. All other types are not
@@ -2021,9 +2022,7 @@ class StructType(CompiledType):
 
     @classmethod
     def doc(cls):
-        # Yield documentation only for user types: types defined in Langkit
-        # have documentation that targets Langkit users.
-        return cls.__doc__ if cls != ASTNodeType else None
+        return cls._doc
 
     @classmethod
     def c_type(cls, c_api_settings):

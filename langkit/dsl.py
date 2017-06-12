@@ -50,6 +50,13 @@ class DSLType(object):
     :type: langkit.diagnostics.Location|None
     """
 
+    _doc = None
+    """
+    Docstring associated to this type.
+
+    :type: str|None
+    """
+
 
 class BaseStruct(DSLType):
     """
@@ -164,6 +171,7 @@ class _StructMetaclass(type):
 
         dct['_name'] = names.Name.from_camel(name)
         dct['_location'] = location
+        dct['_doc'] = dct.get('__doc__')
         dct['_fields'] = fields
 
 
@@ -386,6 +394,7 @@ class _ASTNodeMetaclass(type):
 
         dct['_name'] = names.Name.from_camel(name)
         dct['_location'] = location
+        dct['_doc'] = dct.get('__doc__')
         dct['_fields'] = fields
         dct['_repr_name'] = repr_name
         dct['_base'] = base
