@@ -2873,6 +2873,7 @@ def resolve_type(typeref):
         return typeref.get()
 
     elif issubtype(typeref, langkit.dsl.DSLType):
+        assert typeref._type
         return typeref._type
 
     elif isinstance(typeref, langkit.dsl.EnumNode.Alternative):
