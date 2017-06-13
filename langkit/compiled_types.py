@@ -12,7 +12,7 @@ from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
 )
 from langkit.template_utils import common_renderer
-from langkit.utils import (DictProxy, common_ancestor, issubtype, memoized,
+from langkit.utils import (common_ancestor, issubtype, memoized,
                            not_implemented_error, type_check)
 
 
@@ -1255,25 +1255,6 @@ class BuiltinField(UserField):
         self.should_emit = False
 
 
-class FieldsDictProxy(DictProxy):
-    """
-    Specialization of DictProxy for the fields of structures, to raise
-    user-friendly diagnostic in case of unknown field.
-    """
-
-    def __init__(self, dct, struct):
-        super(FieldsDictProxy, self).__init__(dct)
-        self.struct = struct
-
-    def __getattr__(self, attr):
-        check_source_language(
-            attr in self.dct,
-            '{} has no {} field/property'.format(self.struct.name().camel,
-                                                 attr)
-        )
-        return self.dct[attr]
-
-
 # These will be replaced by true class definitions. Before this happens,
 # StructMetaclass will see these None values.
 StructType = None
@@ -1488,7 +1469,6 @@ class StructMetaclass(CompiledTypeMetaclass):
             env_spec.ast_node = cls
 
         cls._fields = fields
-        cls.fields = FieldsDictProxy(fields, cls)
 
         # If this is the root grammar type, create the generic list type name
         if is_root_grammar_class:

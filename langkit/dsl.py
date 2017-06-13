@@ -9,7 +9,7 @@ from langkit.diagnostics import (
 )
 from langkit.expressions import PropertyDef
 import langkit.names as names
-from langkit.utils import DictProxy, issubtype
+from langkit.utils import issubtype
 
 
 # CompiledType subclasses aliases from compiled_types
@@ -238,25 +238,6 @@ def env_metadata(cls):
     return cls
 
 
-class FieldsDictProxy(DictProxy):
-    """
-    Specialization of DictProxy for the fields of structures, to raise
-    user-friendly diagnostic in case of unknown field.
-    """
-
-    def __init__(self, dct, struct):
-        super(FieldsDictProxy, self).__init__(dct)
-        self.struct = struct
-
-    def __getattr__(self, attr):
-        check_source_language(
-            attr in self.dct,
-            '{} has no {} field/property'.format(self.struct._name.camel,
-                                                 attr)
-        )
-        return self.dct[attr]
-
-
 class _ASTNodeMetaclass(type):
     """
     Internal metaclass for AST node types, used to collect all ASTNode
@@ -305,10 +286,6 @@ class _ASTNodeMetaclass(type):
 
         if not is_base:
             mcs.astnode_types.append(cls)
-
-            # TODO: remove this proxy, make the language spec reference the
-            # fields directly as class attributes.
-            cls.fields = FieldsDictProxy(dict(cls._fields), cls)
             cls._type = create_astnode_class(cls)
 
         return cls
