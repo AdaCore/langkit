@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, T, root_grammar_class
+from langkit.dsl import ASTNode, EnumNode, Field, T, root_grammar_class
 from langkit.parsers import Grammar, List, Or, Tok
 
 from lexer_example import Token
@@ -22,7 +22,7 @@ class FooNode(ASTNode):
     pass
 
 
-class Enum(T.EnumNode):
+class Enum(EnumNode):
     alternatives = ['null', 'example', 'default']
 
 

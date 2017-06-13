@@ -2769,13 +2769,6 @@ class TypeRepo(object):
         return self.root_node.entity()
 
     @property
-    def EnumNode(self):
-        # TODO: update all uses in testsuites and Libadalang to use the global
-        # one.
-        from langkit.dsl import EnumNode
-        return EnumNode
-
-    @property
     @memoized
     def env_assoc(self):
         """
