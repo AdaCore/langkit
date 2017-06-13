@@ -10,12 +10,8 @@ File "test.py", line 62, in Metadata
 File "test.py", line 44, in BadName
     Error: The environment metadata struct type must be called "Metadata" (here: BadName)
 
-== bad_field ==
-File "test.py", line 75, in Metadata.fld
-    Error: Fields of the Struct type chosen to be environment metadata must be instances of UserField.
-
 == bad_type ==
-File "test.py", line 81, in Metadata.fld
+File "test.py", line 75, in Metadata.fld
     Error: Environment metadata fields must all be booleans
 
 Done

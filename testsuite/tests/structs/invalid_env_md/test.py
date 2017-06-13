@@ -7,8 +7,8 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import DiagnosticError, Diagnostics
-from langkit.dsl import (ASTNode, BoolType, Field, Struct, T, UserField,
-                         env_metadata, root_grammar_class)
+from langkit.dsl import (ASTNode, Struct, T, UserField, env_metadata,
+                         root_grammar_class)
 from langkit.parsers import Grammar, Tok
 
 from lexer_example import Token
@@ -69,12 +69,6 @@ def bad_name():
         pass
 
 
-def bad_field():
-    @env_metadata
-    class Metadata(Struct):
-        fld = Field(type=BoolType)
-
-
 def bad_type():
     @env_metadata
     class Metadata(Struct):
@@ -84,6 +78,5 @@ def bad_type():
 run(not_a_struct)
 run(two_md)
 run(bad_name)
-run(bad_field)
 run(bad_type)
 print('Done')

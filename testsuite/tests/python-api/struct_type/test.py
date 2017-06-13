@@ -8,7 +8,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import (ASTNode, BoolType, Field, Struct, T,
-                         Token as TokenType, root_grammar_class)
+                         Token as TokenType, UserField, root_grammar_class)
 from langkit.expressions import langkit_property
 from langkit.parsers import Grammar, Tok
 
@@ -25,8 +25,8 @@ class FooNode(ASTNode):
 
 
 class Thing(Struct):
-    node = Field(type=T.Example)
-    comes_from_source = Field(type=BoolType)
+    node = UserField(type=T.Example)
+    comes_from_source = UserField(type=BoolType)
 
 
 class Example(FooNode):

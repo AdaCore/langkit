@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.compiled_types import (
-    _EnumType, AbstractField, AbstractNodeData, Field as _Field,
+    _EnumType, AbstractNodeData, Field as _Field,
     UserField as _UserField, T, create_astnode_class, create_enum_type
 )
 from langkit.diagnostics import (
@@ -77,8 +77,8 @@ class BaseStruct(DSLType):
     _fields = None
     """
     List of couples: (field name, field) for this type. For Struct subclasses,
-    this is actually a list of AbstractField. For ASTNode subclasses, this
-    excludes inherited fields.
+    this is actually a list of UserField. For ASTNode subclasses, this excludes
+    inherited fields.
 
     :type: list[(str, langkit.compiled_types.AbstractNodeData)]
     """
@@ -162,17 +162,15 @@ class _StructMetaclass(type):
                 'Struct subclasses must derive from Struct only',
             )
 
-        # Make sure all fields are AbstractField instances; assign them
-        # their name.
+        # Make sure all fields are UserField instances; assign them their name
         fields = []
         for f_n, f_v in filter_out_special_fields(dct).items():
             fields.append((f_n, f_v))
             with Context('in {}.{}'.format(name, f_n), location):
                 check_source_language(
-                    isinstance(f_v, AbstractField),
-                    'Field {} is a {}, but only Field/UserField instances'
-                    ' are allowed in Struct subclasses'.format(f_n,
-                                                               type(f_v))
+                    isinstance(f_v, _UserField),
+                    'Field {} is a {}, but only UserField instances are'
+                    ' allowed in Struct subclasses'.format(f_n, type(f_v))
                 )
                 check_source_language(
                     not f_n.startswith('_'),

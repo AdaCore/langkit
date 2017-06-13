@@ -7,7 +7,8 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, Struct, T, root_grammar_class
+from langkit.dsl import (ASTNode, Field, Struct, T, UserField,
+                         root_grammar_class)
 from langkit.expressions import New, Property, Self
 from langkit.parsers import Grammar, List, Tok
 
@@ -24,8 +25,8 @@ class FooNode(ASTNode):
 
 
 class Names(Struct):
-    label = Field(type=T.Name)
-    name_list = Field(type=T.Name.array_type())
+    label = UserField(type=T.Name)
+    name_list = UserField(type=T.Name.array_type())
 
 
 class ListDecl(FooNode):
