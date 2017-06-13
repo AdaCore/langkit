@@ -2850,17 +2850,19 @@ def resolve_type(typeref):
 
     :rtype: CompiledType
     """
+    from langkit.dsl import DSLType, EnumNode
+
     if typeref is None or issubtype(typeref, CompiledType):
         return typeref
 
     elif isinstance(typeref, TypeRepo.Defer):
         return typeref.get()
 
-    elif issubtype(typeref, langkit.dsl.DSLType):
+    elif issubtype(typeref, DSLType):
         assert typeref._type
         return typeref._type
 
-    elif isinstance(typeref, langkit.dsl.EnumNode.Alternative):
+    elif isinstance(typeref, EnumNode.Alternative):
         return typeref.type
 
     else:
@@ -2873,20 +2875,3 @@ T = TypeRepo()
 Default type repository instance, to be used to refer to a type before its
 declaration
 """
-
-
-# Aliases for the user DSL
-import langkit.dsl
-
-Struct = langkit.dsl.Struct
-env_metadata = langkit.dsl.env_metadata
-
-ASTNode = langkit.dsl.ASTNode
-root_grammar_class = langkit.dsl.root_grammar_class
-abstract = langkit.dsl.abstract
-synthetic = langkit.dsl.synthetic
-has_abstract_list = langkit.dsl.has_abstract_list
-
-EnumNode = langkit.dsl.EnumNode
-
-EnumType = langkit.dsl.EnumType
