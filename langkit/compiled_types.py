@@ -1428,6 +1428,14 @@ class StructMetaclass(CompiledTypeMetaclass):
         # This metaclass will register subclasses automatically
         dct['subclasses'] = []
 
+        if dct.get('is_generic_list_type', False):
+            @classmethod
+            def element_type(cls):
+                # The generic list type is not a real list type: only its
+                # subclasses will have a specific element type.
+                raise not_implemented_error(cls, cls.element_type)
+            dct['element_type'] = element_type
+
         cls = CompiledTypeMetaclass.__new__(mcs, name, bases, dct)
 
         # Now we have a class object, register it wherever it needs to be
@@ -1464,27 +1472,14 @@ class StructMetaclass(CompiledTypeMetaclass):
 
         # If this is the root grammar type, create the generic list type name
         if is_root_grammar_class:
-            generic_list_type_name = (
+            generic_list_type_name = names.Name.from_camel(
                 dct.pop('_generic_list_type', None)
                 or cls.__name__ + 'BaseList'
             )
 
-            @classmethod
-            def element_type(cls):
-                # The generic list type is not a real list type: only its
-                # subclasses will have a specific element type.
-                raise not_implemented_error(cls, cls.element_type)
-
-            cls.generic_list_type = type(
-                generic_list_type_name,
-                (cls, ),
-                {
-                    'nullexpr': classmethod(lambda cls: null_constant()),
-                    'is_generic_list_type': True,
-                    'element_type': element_type,
-                    '_fields': [],
-                    '_is_abstract': True,
-                }
+            cls.generic_list_type = create_astnode(
+                name=generic_list_type_name, location=None, doc=None, base=cls,
+                fields=[], is_generic_list_type=True
             )
 
         return cls
