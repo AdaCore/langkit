@@ -2203,9 +2203,9 @@ class ASTNodeType(StructType):
         # not play well with class method when we want the memoization to be
         # common to the whole class hierarchy.
         if not StructMetaclass.entity_info:
-            StructMetaclass.entity_info = type(b'EntityInfo', (StructType, ), {
-                '_name': names.Name('Entity_Info'),
-                '_fields': [
+            StructMetaclass.entity_info = create_struct(
+                names.Name('Entity_Info'), None, None,
+                [
                     ('MD', BuiltinField(
                         # Use a deferred type so that the language spec. can
                         # reference entity types even before it declared the
@@ -2217,7 +2217,7 @@ class ASTNodeType(StructType):
                                                 access_needs_incref=True,
                                                 doc=""))
                 ],
-            })
+            )
         return StructMetaclass.entity_info
 
     @classmethod
@@ -2232,29 +2232,22 @@ class ASTNodeType(StructType):
         if not cls.is_root_node:
             name += cls.name()
 
-        entity_klass = type(
-            name.camel,
-            (StructType, ), {
-                'is_entity_type': True,
-                'el_type': cls,
-
-                '_name': name,
-                '_fields': [
-                    ('el', BuiltinField(cls, doc='The stored AST node')),
-                    ('info', BuiltinField(cls.entity_info(),
-                                          access_needs_incref=True,
-                                          doc='Entity info for this node')),
-                ]
-            }
+        entity_cls = create_struct(
+            name, None, None,
+            [('el', BuiltinField(cls, doc='The stored AST node')),
+             ('info', BuiltinField(cls.entity_info(), access_needs_incref=True,
+                                   doc='Entity info for this node'))],
         )
+        entity_cls.is_entity_type = True
+        entity_cls.el_type = cls
 
         if cls.is_root_node:
             # LexicalEnv.get, which is bound in the AST.C generate package,
             # returns arrays of root node entities, so the corresponding
             # array type must be declared manually there.
-            entity_klass.should_emit_array_type = False
+            entity_cls.should_emit_array_type = False
 
-        return entity_klass
+        return entity_cls
 
     @classmethod
     def check_resolved(cls):
@@ -2789,14 +2782,11 @@ class TypeRepo(object):
         EnvAssoc type, used to add associations of key and value to the lexical
         environments, via the add_to_env primitive.
         """
-        class EnvAssoc(StructType):
-            _name = names.Name('Env_Assoc')
-            _fields = [
-                ('key', UserField(type=Symbol)),
-                ('val', UserField(type=self.defer_root_node)),
-            ]
-
-        return EnvAssoc
+        return create_struct(
+            names.Name('Env_Assoc'), None, None,
+            [('key', UserField(type=Symbol)),
+             ('val', UserField(type=self.defer_root_node))]
+        )
 
 
 def resolve_type(typeref):

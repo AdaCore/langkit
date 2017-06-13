@@ -631,8 +631,8 @@ class CompileCtx(object):
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import (LexicalEnvType,
-                                            StructMetaclass, StructType)
+        from langkit.compiled_types import (LexicalEnvType, StructMetaclass,
+                                            create_struct)
         from langkit.dsl import (_ASTNodeMetaclass, _EnumMetaclass,
                                  _StructMetaclass)
 
@@ -647,9 +647,9 @@ class CompileCtx(object):
         # If the language spec provided no env metadata struct, create a
         # default one.
         if user_env_md is None:
-            class Metadata(StructType):
-                _fields = []
-            StructMetaclass.env_metadata = Metadata
+            StructMetaclass.env_metadata = create_struct(
+                names.Name('Metadata'), None, None, []
+            )
         else:
             StructMetaclass.env_metadata = user_env_md
         self.check_env_metadata(StructMetaclass.env_metadata)
