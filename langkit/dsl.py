@@ -12,6 +12,15 @@ import langkit.names as names
 from langkit.utils import DictProxy, issubtype
 
 
+# CompiledType subclasses aliases from compiled_types
+from langkit.compiled_types import (
+    AnalysisUnitType, BoolType, EquationType, EnvRebindingsType,
+    LexicalEnvType, LogicVarType, LongType, Symbol, Token
+)
+_ = (AnalysisUnitType, BoolType, EquationType, EnvRebindingsType,
+     LexicalEnvType, LogicVarType, LongType, Symbol, Token)
+
+
 class DSLType(object):
     """
     Base class for the representation of types in the DSL.
