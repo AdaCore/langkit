@@ -1436,6 +1436,10 @@ class StructMetaclass(CompiledTypeMetaclass):
                 raise not_implemented_error(cls, cls.element_type)
             dct['element_type'] = element_type
 
+        elif dct.get('is_root_list_type', False):
+            dct['is_collection'] = classmethod(lambda cls: True)
+            dct['element_type'] = classmethod(lambda cls: cls._element_type)
+
         cls = CompiledTypeMetaclass.__new__(mcs, name, bases, dct)
 
         # Now we have a class object, register it wherever it needs to be
@@ -2186,31 +2190,16 @@ class ASTNodeType(StructType):
 
         :rtype: CompiledType
         """
-        element_type = cls
-
-        def name(cls):
-            return (cls.element_type().name() + names.Name('List')
-                    if cls.is_root_list_type else
-                    cls._user_name())
-
-        cls = type(
-            b'{}List'.format(element_type.name().camel),
-            (StructMetaclass.root_grammar_class.generic_list_type, ), {
-                'name': classmethod(name),
-
-                '_is_abstract': element_type.has_abstract_list,
-                'is_generic_list_type': False,
-                'is_list_type': True,
-                'is_root_list_type': True,
-                'is_collection': classmethod(lambda cls: True),
-                'element_type': classmethod(lambda cls: element_type),
-                '_fields': [],
-            }
+        cls = create_astnode(
+            name=cls.name() + names.Name('List'),
+            location=None, doc=None,
+            base=StructMetaclass.root_grammar_class.generic_list_type,
+            fields=[], element_type=cls
         )
 
         ctx = get_context(True)
         if ctx:
-            ctx.list_types.add(element_type)
+            ctx.list_types.add(cls._element_type)
         else:
             StructMetaclass.pending_list_types.append(cls)
 
