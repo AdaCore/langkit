@@ -1,3 +1,4 @@
+with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Langkit_Support.Array_Utils;
 
 package body Langkit_Support.Lexical_Env is
@@ -926,5 +927,36 @@ package body Langkit_Support.Lexical_Env is
    begin
       return Internal_Decorate (Elts);
    end Decorate;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Self : Env_Rebindings) return Text_Type is
+
+      function Image (Self : Lexical_Env) return Text_Type is
+        (if Self.Ref_Count /= No_Refcount
+         then "<synthetic>" else Element_Image (Self.Node));
+
+      function Image (Self : Env_Rebinding) return Text_Type is
+        ("(" & Image (Get_Env (Self.Old_Env))
+         & " -> " & Image (Get_Env (Self.New_Env)) & ")");
+
+   begin
+      if Self = null then
+         return "<null>";
+      end if;
+      declare
+         Buffer : Unbounded_Wide_Wide_String;
+      begin
+         Append (Buffer, "[");
+         for E of Self.Rebindings loop
+            Append (Buffer, Image (E));
+            Append (Buffer, ", ");
+         end loop;
+         Append (Buffer, "]");
+         return To_Wide_Wide_String (Buffer);
+      end;
+   end Image;
 
 end Langkit_Support.Lexical_Env;

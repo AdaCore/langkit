@@ -4,6 +4,7 @@ with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Vectors;
+with Langkit_Support.Text;    use Langkit_Support.Text;
 
 --  This package implements a scoped lexical environment data structure that
 --  will then be used in AST nodes. Particularities:
@@ -41,6 +42,8 @@ generic
    --  For dynamic env getters, the function pointer is allowed to have a state
    --  that carries needed data. This is preferred to a tagged type because the
    --  state has a fixed size here.
+
+   with function Element_Image (El : Element_T) return Text_Type;
 package Langkit_Support.Lexical_Env is
 
    ----------------------
@@ -372,6 +375,8 @@ package Langkit_Support.Lexical_Env is
        E_Info          : Entity_Info) return Lexical_Env;
    --  Returns a new env based on Base_Env, where To_Rebind is rebound to
    --  Rebind_To.
+
+   function Image (Self : Env_Rebindings) return Text_Type;
 
    procedure Destroy (Self : in out Lexical_Env);
    --  Deallocate the resources allocated to the Self lexical environment. Must

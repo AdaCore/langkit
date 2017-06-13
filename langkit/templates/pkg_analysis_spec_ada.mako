@@ -86,6 +86,12 @@ package ${ada_lib_name}.Analysis is
    function Is_Null
      (Node : access ${root_node_value_type}'Class) return Boolean;
 
+   function Short_Image
+     (Node : access ${root_node_value_type})
+      return Text_Type;
+   --  Return a short representation of the node, containing just the kind
+   --  name and the sloc.
+
    Property_Error : exception;
    ${ada_doc('langkit.property_error', 3)}
 
@@ -345,13 +351,17 @@ package ${ada_lib_name}.Analysis is
       Node : ${root_node_type_name};
    end record;
 
+   function El_Image (Node : ${root_node_type_name}) return Text_Type
+   is (Short_Image (Node));
+
    package AST_Envs is new Langkit_Support.Lexical_Env
      (Element_T        => ${root_node_type_name},
       Element_Metadata => ${T.env_md.name()},
       No_Element       => null,
       Empty_Metadata   => No_Metadata,
       Combine          => Combine,
-      Getter_State_T   => Env_Getter_State_T);
+      Getter_State_T   => Env_Getter_State_T,
+      Element_Image    => El_Image);
 
    --  The following subtypes are introduced to ease code generation, so we
    --  don't have to deal with the AST_Envs suffix.
@@ -441,6 +451,7 @@ package ${ada_lib_name}.Analysis is
    function Get_Unit
      (Node : access ${root_node_value_type}'Class)
       return Analysis_Unit;
+
    ${ada_doc('langkit.node_unit', 3)}
 
    -------------------------------
@@ -775,12 +786,6 @@ package ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}) return String is abstract;
    --  Debug helper: return a textual representation of this node and all its
    --  children.
-
-   function Short_Image
-     (Node : access ${root_node_value_type})
-      return Text_Type;
-   --  Debug helper: return a short representation of the string, containing
-   --  just the kind name and the sloc.
 
    procedure Print (Node        : access ${root_node_value_type};
                     Line_Prefix : String := "") is abstract;
