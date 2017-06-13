@@ -83,6 +83,55 @@ class BaseStruct(DSLType):
     :type: list[(str, langkit.compiled_types.AbstractNodeData)]
     """
 
+    @classmethod
+    def collect_fields(cls, owning_type, location, dct, field_cls):
+        """
+        Metaclass helper. Excluding __special__ entries, make sure all entries
+        in `dct` are instances of `field_cls` and return them as an annotated
+        list: (name, field).
+
+        This ensure that all fields are associated to a legal name, and records
+        this name in the field instances.
+
+        :param str owning_type: Name of the type for the type that will own the
+            fields.  Used for diagnostic message formatting purposes.
+        :param langkit.diagnostic.Location: Location for the declaration of the
+            owning type.
+        :param dict[str, T] dct: Input class dictionnary.
+        :param AbstractNodeData|list(AbstractNodeData) field_cls:
+            AbstractNodeData subclass, or list of subclasses.
+        :rtype: list[(str, AbstractNodeData)]
+        """
+        result = []
+        for f_n, f_v in dct.items():
+            # Ignore __special__ fields
+            if f_n.startswith('__') and f_n.endswith('__'):
+                continue
+
+            with Context('in {}.{}'.format(owning_type, f_n), location):
+                expected_types = (field_cls
+                                  if isinstance(field_cls, tuple) else
+                                  (field_cls, ))
+                check_source_language(
+                    isinstance(f_v, field_cls),
+                    'Field {f_name} is a {f_type}, but only instances of'
+                    ' {exp_type} subclasses are allowed in {metatype}'
+                    ' subclasses'.format(
+                        f_name=f_n, f_type=type(f_v),
+                        exp_type='/'.join(t.__name__ for t in expected_types),
+                        metatype=cls.__name__,
+                    )
+                )
+                check_source_language(
+                    not f_n.startswith('_'),
+                    'Underscore-prefixed field names are not allowed'
+                )
+
+            f_v.name = names.Name.from_lower(f_n)
+            result.append((f_n, f_v))
+
+        return result
+
 
 def _check_decorator_use(decorator, expected_cls, cls):
     """
@@ -100,17 +149,6 @@ def _check_decorator_use(decorator, expected_cls, cls):
                                       expected_cls.__name__,
                                       cls)
         )
-
-
-def filter_out_special_fields(dct):
-    """
-    Helper for metaclasses. Return dct without the special fields (__foo__).
-
-    :param dict[str, T] dct: Class attributes dictionnary.
-    :rtype: dict[str, T]
-    """
-    return {k: v for k, v in dct.items()
-            if not k.startswith('__') or not k.endswith('__')}
 
 
 class _StructMetaclass(type):
@@ -162,21 +200,7 @@ class _StructMetaclass(type):
                 'Struct subclasses must derive from Struct only',
             )
 
-        # Make sure all fields are UserField instances; assign them their name
-        fields = []
-        for f_n, f_v in filter_out_special_fields(dct).items():
-            fields.append((f_n, f_v))
-            with Context('in {}.{}'.format(name, f_n), location):
-                check_source_language(
-                    isinstance(f_v, _UserField),
-                    'Field {} is a {}, but only UserField instances are'
-                    ' allowed in Struct subclasses'.format(f_n, type(f_v))
-                )
-                check_source_language(
-                    not f_n.startswith('_'),
-                    'Underscore-prefixed field names are not allowed'
-                )
-                f_v.name = names.Name.from_lower(f_n)
+        fields = Struct.collect_fields(name, location, dct, _UserField)
 
         dct['_name'] = names.Name.from_camel(name)
         dct['_location'] = location
@@ -301,9 +325,6 @@ class _ASTNodeMetaclass(type):
 
         node_ctx = Context('in {}'.format(name), location)
 
-        def field_ctx(field_name):
-            return Context('in {}.{}'.format(name, field_name), location)
-
         with node_ctx:
             check_source_language(len(bases) == 1,
                                   'ASTNode subclasses must have exactly one'
@@ -350,26 +371,7 @@ class _ASTNodeMetaclass(type):
         else:
             element_type = None
 
-        # Make sure all fields are AbstractNodeData instances; assign them
-        # their name.
-        fields = []
-        for f_n, f_v in dct.items():
-            if f_n.startswith('__') and f_n.endswith('__'):
-                continue
-            fields.append((f_n, f_v))
-            with field_ctx(f_n):
-                check_source_language(
-                    isinstance(f_v, AbstractNodeData),
-                    'Field {} is a {}, but only instances of AbstractNodeData'
-                    ' subclasses are allowed in ASTNode subclasses'.format(
-                        f_n, type(f_v)
-                    )
-                )
-                check_source_language(
-                    not f_n.startswith('_'),
-                    'Underscore-prefixed field names are not allowed'
-                )
-                f_v.name = names.Name.from_lower(f_n)
+        fields = ASTNode.collect_fields(name, location, dct, AbstractNodeData)
 
         # AST list types are not allowed to have syntax fields
         if is_list_type:
@@ -583,25 +585,10 @@ class _EnumNodeMetaclass(type):
                 )
 
         doc = dct.get('__doc__')
-
         alts = [EnumNode.Alternative(names.Name.from_lower(alt))
                 for alt in alternatives]
-
-        fields = []
-        for f_n, f_v in filter_out_special_fields(dct).items():
-            fields.append((f_n, f_v))
-            with Context('in {}.{}'.format(name, f_n), location):
-                check_source_language(
-                    isinstance(f_v, (_UserField, PropertyDef)),
-                    'Field {} is a {}, but only UserField/Property instances'
-                    ' are allowed in EnumNode subclasses'.format(f_n,
-                                                                 type(f_v))
-                )
-                check_source_language(
-                    not f_n.startswith('_'),
-                    'Underscore-prefixed field names are not allowed'
-                )
-                f_v.name = names.Name.from_lower(f_n)
+        fields = EnumNode.collect_fields(name, location, dct,
+                                         (_UserField, PropertyDef))
 
         dct = {
             '_name': names.Name.from_camel(name),
