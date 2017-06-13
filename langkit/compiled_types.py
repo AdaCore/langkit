@@ -1485,18 +1485,6 @@ class StructMetaclass(CompiledTypeMetaclass):
 
         cls._fields = fields
 
-        # If this is the root grammar type, create the generic list type name
-        if is_root_grammar_class:
-            generic_list_type_name = names.Name.from_camel(
-                dct.pop('_generic_list_type', None)
-                or cls.__name__ + 'BaseList'
-            )
-
-            cls.generic_list_type = create_astnode(
-                name=generic_list_type_name, location=None, doc=None, base=cls,
-                fields=[], is_generic_list_type=True
-            )
-
         return cls
 
     @classmethod
@@ -2395,7 +2383,21 @@ def create_astnode(name, location, doc, base, fields, repr_name=None,
         '_is_synthetic': is_synthetic,
         '_has_abstract_list': has_abstract_list,
     }
-    return type(name.camel, (ASTNodeType, ) if base is None else (base, ), dct)
+    cls = type(name.camel, (ASTNodeType, ) if base is None else (base, ), dct)
+
+    # If this is the root grammar type, create the generic list type name
+    if base is None:
+        generic_list_type_name = names.Name.from_camel(
+            dct.pop('_generic_list_type', None)
+            or cls.__name__ + 'BaseList'
+        )
+
+        cls.generic_list_type = create_astnode(
+            name=generic_list_type_name, location=None, doc=None, base=cls,
+            fields=[], is_generic_list_type=True
+        )
+
+    return cls
 
 
 class ArrayType(CompiledType):
