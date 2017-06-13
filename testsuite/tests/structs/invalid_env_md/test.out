@@ -7,7 +7,7 @@ File "test.py", line 62, in Metadata
     Error: Only one Struct subclass can be the env metadata
 
 == bad_name ==
-File "test.py", line 44, in BadName
+File "test.py", line 68, in BadName
     Error: The environment metadata struct type must be called "Metadata" (here: BadName)
 
 == bad_type ==
