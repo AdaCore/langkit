@@ -2285,39 +2285,6 @@ class ASTNodeType(StructType):
 ASTNodeType.abstract = True
 
 
-def create_astnode_class(cls):
-    """
-    Create an ASTNodeType subclass for this ASTNode subclass.
-
-    :param langkit.dsl.ASTNode cls: Subclass to translate.
-    :rtype: ASTNodeType
-    """
-    from langkit.dsl import _ASTNodeList, _ASTNodeMetaclass
-
-    if cls._base is _ASTNodeList:
-        # This is supposed to be a root list type, use the
-        # ASTNodeType.list_type class method to create it.
-        element_type = cls._element_type._type
-        assert element_type
-        astnode_type = element_type.list_type()
-
-    else:
-        # This is a regular AST node: go through the regular subclassing
-        # machinery.
-        is_root = cls is _ASTNodeMetaclass.root_type
-
-        # Create the ASTNodeType subclass itself
-        astnode_type = create_astnode(
-            cls._name, cls._location, cls._doc,
-            base=None if is_root else cls._base._type,
-            fields=cls._fields,
-            env_spec=cls._env_spec
-        )
-
-    astnode_type.dsl_decl = cls
-    return astnode_type
-
-
 def create_astnode(name, location, doc, base, fields, repr_name=None,
                    env_spec=None, element_type=None,
                    is_generic_list_type=False, is_abstract=False,

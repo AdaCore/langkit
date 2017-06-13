@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.compiled_types import (
     _EnumType, AbstractNodeData, Field as _Field,
-    UserField as _UserField, T, create_astnode_class, create_enum_type
+    UserField as _UserField, T, create_astnode, create_enum_type
 )
 from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
@@ -320,7 +320,26 @@ class _ASTNodeMetaclass(type):
 
         if not is_base:
             mcs.astnode_types.append(cls)
-            cls._type = create_astnode_class(cls)
+
+            # Create the corresponding ASTNodeType subclass
+            if cls._base is _ASTNodeList:
+                # Only root list types are supposed to directly subclass
+                # _ASTNodeList.
+                element_type = cls._element_type._type
+                assert element_type
+                astnode_type = element_type.list_type()
+
+            else:
+                # Create the ASTNodeType subclass itself
+                astnode_type = create_astnode(
+                    cls._name, cls._location, cls._doc,
+                    base=None if is_root else cls._base._type,
+                    fields=cls._fields,
+                    env_spec=cls._env_spec
+                )
+
+            astnode_type.dsl_decl = cls
+            cls._type = astnode_type
 
         return cls
 
