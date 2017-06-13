@@ -712,7 +712,7 @@ class CompileCtx(object):
 
         :param StructType cls: Environment metadata struct type.
         """
-        from langkit.compiled_types import BoolType, UserField, resolve_type
+        from langkit.compiled_types import BoolType, resolve_type
 
         with cls.diagnostic_context():
             check_source_language(
@@ -723,11 +723,6 @@ class CompileCtx(object):
 
         for field in cls.get_fields():
             with field.diagnostic_context():
-                check_source_language(
-                    isinstance(field, UserField),
-                    'Fields of the Struct type chosen to be environment'
-                    ' metadata must be instances of UserField.'
-                )
                 check_source_language(
                     resolve_type(field.type).matches(BoolType),
                     'Environment metadata fields must all be booleans'
