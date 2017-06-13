@@ -343,6 +343,7 @@ class _ASTNodeMetaclass(type):
                     fields=cls._fields,
                     repr_name=cls._repr_name,
                     env_spec=cls._env_spec,
+                    generic_list_type_name=cls._generic_list_type_name,
                 )
 
             astnode_type.dsl_decl = cls
@@ -430,7 +431,7 @@ class _ASTNodeMetaclass(type):
         # base classes.
         dct['_list_type'] = None
 
-        dct['_generic_list_type'] = generic_list_type_name
+        dct['_generic_list_type_name'] = generic_list_type_name
 
         dct['_element_type'] = element_type
 
@@ -471,7 +472,7 @@ class ASTNode(BaseStruct):
     :type: bool
     """
 
-    _generic_list_type = None
+    _generic_list_type_name = None
     """
     User-specific name for the generic list type, in any.
     :type: str|None

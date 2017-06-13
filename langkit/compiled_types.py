@@ -2287,8 +2287,9 @@ ASTNodeType.abstract = True
 
 def create_astnode(name, location, doc, base, fields, repr_name=None,
                    env_spec=None, element_type=None,
-                   is_generic_list_type=False, is_abstract=False,
-                   is_synthetic=False, has_abstract_list=False):
+                   generic_list_type_name=None, is_generic_list_type=False,
+                   is_abstract=False, is_synthetic=False,
+                   has_abstract_list=False):
     """
     Create an ASTNode subclass.
 
@@ -2307,8 +2308,11 @@ def create_astnode(name, location, doc, base, fields, repr_name=None,
     :param ASTNodeType|None element_type: For root list types, this must be the
         ASTNodeType subclass that this list contains. Must be left to None in
         all other cases.
-    :param bool is_generic_type: Whether this subclass will materialize the
-        generic list type.
+    :param str|None generic_list_type_name: For the root node, if not None,
+        overrides the name of the generic list type. Must be None for all other
+        nodes.
+    :param bool is_generic_list_type: Whether this subclass will materialize
+        the generic list type.
     :param bool is_abstract: Whether this node is abstract. Note that this can
         be changed later. This is forced to True for the generic list type and
         for root list types whose element type has the `has_abstract_list`
@@ -2320,6 +2324,7 @@ def create_astnode(name, location, doc, base, fields, repr_name=None,
         type is actually created.
     :rtype: ASTNodeType
     """
+    is_root = base is None
     is_root_list = base is not None and base.is_generic_list_type
     is_list = base is not None and (is_root_list or base.is_list_type)
 
@@ -2334,6 +2339,8 @@ def create_astnode(name, location, doc, base, fields, repr_name=None,
         assert element_type is None
         if is_list:
             element_type = base._element_type
+
+    assert generic_list_type_name is None or is_root
 
     dct = {
         '_name': name,
@@ -2355,8 +2362,7 @@ def create_astnode(name, location, doc, base, fields, repr_name=None,
     # If this is the root grammar type, create the generic list type name
     if base is None:
         generic_list_type_name = names.Name.from_camel(
-            dct.pop('_generic_list_type', None)
-            or cls.__name__ + 'BaseList'
+            generic_list_type_name or cls.__name__ + 'BaseList'
         )
 
         cls.generic_list_type = create_astnode(
