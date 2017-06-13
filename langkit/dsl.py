@@ -140,6 +140,9 @@ class BaseStruct(DSLType):
             f_v.name = names.Name.from_lower(f_n)
             result.append((f_n, f_v))
 
+        # Sort fields by creation time order so that users get fields in the
+        # same order as it was declared in the DSL.
+        result.sort(key=lambda (_, f): f._index)
         return result
 
 

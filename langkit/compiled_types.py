@@ -1469,11 +1469,10 @@ class StructMetaclass(CompiledTypeMetaclass):
                 mcs.astnode_types.append(cls)
 
         # This builds a list of fields in a specific order: first builtin
-        # fields, then fields from `dct`, sorted by field number (see
-        # AbstractNodeData).
-        fields = mcs.merge_fields(
-            ([mcs.builtin_properties()] if is_root_grammar_class else [])
-            + [dct_fields]
+        # fields, then subclass-specific fields.
+        fields = OrderedDict(
+            (mcs.builtin_properties() if is_root_grammar_class else [])
+            + dct_fields
         )
 
         # Associate each field and property to this ASTNodeType subclass, and
@@ -1574,22 +1573,6 @@ class StructMetaclass(CompiledTypeMetaclass):
                 doc="Return the node's next sibling, if there is one"
             )),
         ]
-
-    @staticmethod
-    def merge_fields(fields_groups):
-        """
-        Merge groups of AbstractNodeData instances into an OrderedDict.
-
-        The resulting OrderedDict preserves the input order.
-
-        :type fields_groups: list[list[(str, AbstractNodeData)]]
-        :rtype: dict[str, AbstractNodeData]
-        """
-        return OrderedDict(sum(
-            [sorted(group, key=lambda (_, f): f._index)
-             for group in fields_groups],
-            []
-        ))
 
 
 class TypeDeclaration(object):
