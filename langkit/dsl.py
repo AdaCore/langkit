@@ -561,7 +561,7 @@ class _EnumNodeMetaclass(type):
 
     def __new__(mcs, name, bases, dct):
         # Don't do anything for EnumNode itself: it's just a placeholder
-        if bases == (DSLType, ):
+        if bases == (BaseStruct, ):
             return type.__new__(mcs, name, bases, dct)
 
         location = extract_library_location()
@@ -607,9 +607,9 @@ class _EnumNodeMetaclass(type):
             '_name': names.Name.from_camel(name),
             '_location': location,
             '_doc': doc,
+            '_fields': fields,
             '_alternatives': alts,
             '_qualifier': qualifier,
-            '_fields': fields,
         }
 
         # Make Alternative instances available as EnumNode class attributes for
@@ -627,7 +627,7 @@ class _EnumNodeMetaclass(type):
         return cls
 
 
-class EnumNode(DSLType):
+class EnumNode(BaseStruct):
     """
     Using this base class, users can create a hierarchy of nodes deriving from
     the root node that are similar to an enum type. By declaring an EnumNode
@@ -667,12 +667,6 @@ class EnumNode(DSLType):
     "absent".
 
     :type: bool
-    """
-
-    _fields = None
-    """
-    List of fields for this type.
-    :type: list[langkit.compiled_types.AbstractNodeData]
     """
 
     class Alternative(object):
