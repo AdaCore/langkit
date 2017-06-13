@@ -1332,7 +1332,7 @@ class StructMetaclass(CompiledTypeMetaclass):
         is_base = False  # Base StructType/ASTNodeType?
         is_root_grammar_class = False  # Root grammar class?
 
-        location = dct.get('_location', extract_library_location())
+        location = dct.get('_location')
         diag_ctx = Context('in {}'.format(name), location)
 
         def field_ctx(field_name):
