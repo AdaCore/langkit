@@ -2349,19 +2349,82 @@ def create_astnode_class(cls):
         is_root = cls is _ASTNodeMetaclass.root_type
 
         # Create the ASTNodeType subclass itself
-        base_cls = ASTNodeType if is_root else cls._base._type
-
-        # TODO: make explicit the list of fields that are forwarded to compiled
-        # type class constructor.
-        dct = {k: v for k, v in cls.__dict__.items()
-               if ((not k.startswith('__') or not k.endswith('__'))
-                   and not isinstance(v, AbstractNodeData))}
-
-        dct['is_root_list_type'] = False
-        astnode_type = type(cls.__name__, (base_cls, ), dct)
+        astnode_type = create_astnode(
+            cls._name, cls._location, cls._doc,
+            base=None if is_root else cls._base._type,
+            fields=cls._fields,
+            env_spec=cls._env_spec
+        )
 
     astnode_type.dsl_decl = cls
     return astnode_type
+
+
+def create_astnode(name, location, doc, base, fields, repr_name=None,
+                   env_spec=None, element_type=None,
+                   is_generic_list_type=False, is_abstract=False,
+                   is_synthetic=False, has_abstract_list=False):
+    """
+    Create an ASTNode subclass.
+
+    :param names.Name name: Name for this node.
+    :param langkit.diagnostics.Location|None location: Location for the
+        declaration of this node, if any.
+    :param str|None doc: User documentation for this node.
+    :param ASTNodeType|None base: ASTNodeType subclass corresponding to the
+        base class for this node. None when creating the root node.
+    :param list[(str, AbstractNodeData)] fields: List of (name, field) for this
+        node's fields. Inherited fields must not appear in this list.
+    :param str|None repr_name: Camel-case name to use to represent this node in
+        textual dumps.
+    :param langkit.envs.EnvSpec|None env_spec: Environment specification for
+        this node, if any.
+    :param ASTNodeType|None element_type: For root list types, this must be the
+        ASTNodeType subclass that this list contains. Must be left to None in
+        all other cases.
+    :param bool is_generic_type: Whether this subclass will materialize the
+        generic list type.
+    :param bool is_abstract: Whether this node is abstract. Note that this can
+        be changed later. This is forced to True for the generic list type and
+        for root list types whose element type has the `has_abstract_list`
+        attribute set to True.
+    :param bool is_synthetic: Whether this node is synthetic. Note that this
+        can be changed later.
+    :param bool has_abstract_list: Whether the root list type for this node
+        must be abstract. Node that this can be changed later, until the list
+        type is actually created.
+    :rtype: ASTNodeType
+    """
+    is_root_list = base is not None and base.is_generic_list_type
+    is_list = base is not None and (is_root_list or base.is_list_type)
+
+    if is_root_list:
+        assert issubtype(element_type, ASTNodeType)
+
+        # TODO: at this point, we need to make sure thas
+        # element_type.has_abstract_list in the future.
+        is_abstract = is_abstract or element_type.has_abstract_list
+
+    else:
+        assert element_type is None
+        if is_list:
+            element_type = base._element_type
+
+    dct = {
+        '_location': location,
+        '_doc': doc,
+        '_fields': fields,
+        '_repr_name': repr_name,
+        '_env_spec': env_spec,
+        'is_generic_list_type': is_generic_list_type,
+        'is_root_list_type': is_root_list,
+        'is_list_type': is_list,
+        '_element_type': element_type,
+        '_is_abstract': is_abstract or is_generic_list_type,
+        '_is_synthetic': is_synthetic,
+        '_has_abstract_list': has_abstract_list,
+    }
+    return type(name.camel, (ASTNodeType, ) if base is None else (base, ), dct)
 
 
 class ArrayType(CompiledType):
