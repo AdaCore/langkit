@@ -2642,30 +2642,22 @@ def create_enum_node_classes(cls):
     is_bool_node = bool(cls._qualifier)
 
     fields = list(cls._fields)
-    base_enum_dct = {
-        'alternatives': cls._alternatives,
-        'is_enum_node': True,
-        'is_bool_node': is_bool_node,
-        'is_type_resolved': True,
-
-        '_doc': cls._doc,
-        '_fields': fields,
-        '_is_abstract': True,
-
-        # List of `base_enum_node` subclass we create here, one for each
-        # alternative.
-        '_alternatives': [],
-    }
     if is_bool_node:
         prop = AbstractProperty(type=BoolType, public=True)
         prop.location = cls._location
         fields.append(('as_bool', prop))
 
-    # Add other supplied fields to the base class dict
-    base_enum_dct.update(dict(cls._fields))
-
     # Generate the abstract base node type
-    base_enum_node = type(cls._name.camel, (T.root_node, ), base_enum_dct)
+    base_enum_node = create_astnode(
+        name=cls._name, location=cls._location, doc=cls._doc, base=T.root_node,
+        fields=fields,
+        is_abstract=True
+    )
+    base_enum_node.alternatives = cls._alternatives
+    base_enum_node.is_enum_node = True
+    base_enum_node.is_bool_node = is_bool_node
+    base_enum_node.is_type_resolved = True
+    base_enum_node._alternatives = []
     cls._type = base_enum_node
 
     for alt in cls._alternatives:
@@ -2673,13 +2665,16 @@ def create_enum_node_classes(cls):
 
         # Generate the derived class corresponding to this alternative
         fields = []
-        dct = {'_fields': fields}
         if is_bool_node:
             prop = Property(alt.name.lower == 'present')
             prop.location = cls._location
             fields.append(('as_bool', prop))
 
-        alt_type = type(alt_name.camel, (base_enum_node, ), dct)
+        alt_type = create_astnode(
+            name=alt_name, location=None, doc=None,
+            base=base_enum_node,
+            fields=fields
+        )
         alt._type = alt_type
 
         # Make the alternative derived class accessible from the root node for
