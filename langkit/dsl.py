@@ -341,7 +341,8 @@ class _ASTNodeMetaclass(type):
                     cls._name, cls._location, cls._doc,
                     base=None if is_root else cls._base._type,
                     fields=cls._fields,
-                    env_spec=cls._env_spec
+                    repr_name=cls._repr_name,
+                    env_spec=cls._env_spec,
                 )
 
             astnode_type.dsl_decl = cls
