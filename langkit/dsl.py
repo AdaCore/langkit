@@ -84,7 +84,7 @@ class BaseStruct(DSLType):
     """
 
 
-def check_decorator_use(decorator, expected_cls, cls):
+def _check_decorator_use(decorator, expected_cls, cls):
     """
     Helper for class decorators below. Raise a diagnostic error if `cls`,
     which is the input parameter of `decorator`, is not a subclass of
@@ -226,7 +226,7 @@ def env_metadata(cls):
 
     :param Struct cls: Type parameter. The Struct subclass to decorate.
     """
-    check_decorator_use(env_metadata, Struct, cls)
+    _check_decorator_use(env_metadata, Struct, cls)
 
     with cls._diagnostic_context():
         check_source_language(
@@ -500,7 +500,7 @@ def root_grammar_class(cls):
     """
     Decorator to tag an ASTNode subclass as the root grammar node.
     """
-    check_decorator_use(root_grammar_class, ASTNode, cls)
+    _check_decorator_use(root_grammar_class, ASTNode, cls)
 
     with cls._diagnostic_context():
         check_source_language(
@@ -518,7 +518,7 @@ def abstract(cls):
 
     :param ASTNode cls: Type parameter. The ASTNode subclass to decorate.
     """
-    check_decorator_use(abstract, ASTNode, cls)
+    _check_decorator_use(abstract, ASTNode, cls)
     cls._type.abstract = True
     return cls
 
@@ -529,7 +529,7 @@ def synthetic(cls):
 
     :param ASTNode cls: Type parameter. The ASTNode subclass to decorate.
     """
-    check_decorator_use(synthetic, ASTNode, cls)
+    _check_decorator_use(synthetic, ASTNode, cls)
     cls._type.synthetic = True
     return cls
 
@@ -541,7 +541,7 @@ def has_abstract_list(cls):
 
     :param ASTNode cls: Type parameter. The AST node type to decorate.
     """
-    check_decorator_use(has_abstract_list, ASTNode, cls)
+    _check_decorator_use(has_abstract_list, ASTNode, cls)
     cls._type.has_abstract_list = True
     return cls
 
