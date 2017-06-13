@@ -1345,7 +1345,6 @@ class StructMetaclass(CompiledTypeMetaclass):
 
         # No matter what, reset all caches so that subclass don't "magically"
         # inherit their parent's.
-        dct['_cached_user_name'] = None
         dct['_abstract_fields_dict_cache'] = {}
 
         # We want to check various inheritance facts:
@@ -1389,6 +1388,19 @@ class StructMetaclass(CompiledTypeMetaclass):
         # This is a formal explanation for the top comments:
         assert sum(1 for b in [is_astnode, is_struct] if b) == 1
         assert sum(1 for b in [is_base, is_root_grammar_class] if b) <= 1
+
+        # Compute the user name for this subclass. Only base classes are
+        # allowed to not to have an input user name: for them, create one
+        # anyway as Struct code assumes it exists (for diagnostics for
+        # instance). TODO: this exception should go away with the transition to
+        # instance-based compiled types.
+        cls_name = dct.get('_name')
+        if cls_name and is_keyword(cls_name):
+            cls_name = cls_name + names.Name('Node')
+        elif not cls_name:
+            assert is_base
+            cls_name = names.Name.from_camel(name)
+        dct['_name'] = cls_name
 
         # Get the fields this class defines. Remove them as class members: we
         # want them to be stored in their own dict (see "cls.fields" below).
@@ -1648,10 +1660,10 @@ class StructType(CompiledType):
 
     is_struct_type = True
 
-    _cached_user_name = None
+    _name = None
     """
-    Cache for the _user_name method.
-    :type: None|names.Name
+    Name for this type.
+    :type: names.Name
     """
 
     _abstract_fields_dict_cache = {}
@@ -1948,27 +1960,12 @@ class StructType(CompiledType):
         )
 
     @classmethod
-    def _user_name(cls):
-        """
-        Turn the name of the "cls" class into a Name instance.
-
-        The result is intended to be used for code generation.
-
-        :rtype: names.Name
-        """
-        if not cls._cached_user_name:
-            name = names.Name.from_camel(cls.__name__)
-            cls._cached_user_name = (name + names.Name('Node')
-                                     if is_keyword(name) else name)
-        return cls._cached_user_name
-
-    @classmethod
     def name(cls):
         """
         Return the name that will be used in code generation for this AST node
         type.
         """
-        return cls._user_name()
+        return cls._name
 
     @classmethod
     def repr_name(cls):
@@ -2216,6 +2213,7 @@ class ASTNodeType(StructType):
         # common to the whole class hierarchy.
         if not StructMetaclass.entity_info:
             StructMetaclass.entity_info = type(b'EntityInfo', (StructType, ), {
+                '_name': names.Name('Entity_Info'),
                 '_fields': [
                     ('MD', BuiltinField(
                         # Use a deferred type so that the language spec. can
@@ -2239,12 +2237,17 @@ class ASTNodeType(StructType):
         information.
         """
 
+        name = names.Name('Entity')
+        if not cls.is_root_node:
+            name += cls.name()
+
         entity_klass = type(
-            b'Entity{}'.format('' if cls.is_root_node else cls.name().camel),
+            name.camel,
             (StructType, ), {
                 'is_entity_type': True,
                 'el_type': cls,
 
+                '_name': name,
                 '_fields': [
                     ('el', BuiltinField(cls, doc='The stored AST node')),
                     ('info', BuiltinField(cls.entity_info(),
@@ -2395,6 +2398,7 @@ def create_astnode(name, location, doc, base, fields, repr_name=None,
             element_type = base._element_type
 
     dct = {
+        '_name': name,
         '_location': location,
         '_doc': doc,
         '_fields': fields,
@@ -2814,6 +2818,7 @@ class TypeRepo(object):
         environments, via the add_to_env primitive.
         """
         class EnvAssoc(StructType):
+            _name = names.Name('Env_Assoc')
             _fields = [
                 ('key', UserField(type=Symbol)),
                 ('val', UserField(type=self.defer_root_node)),

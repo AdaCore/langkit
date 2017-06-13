@@ -641,7 +641,8 @@ class CompileCtx(object):
         user_env_md = None
         for st in _StructMetaclass.struct_types:
             struct_type = type(st.__name__, (StructType, ),
-                               {'_fields': st._fields})
+                               {'_name': names.Name.from_camel(st.__name__),
+                                '_fields': st._fields})
             st._type = struct_type
             struct_type.dsl_decl = st
 
