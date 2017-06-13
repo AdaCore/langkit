@@ -80,10 +80,10 @@ def run(name, eq_prop):
     print('')
 
 
-run('Incorrect bind eq_prop 1', 'T.BazNode.fields.prop')
-run('Incorrect bind eq_prop 2', 'T.BazNode.fields.prop2')
-run('Incorrect bind eq_prop 3', 'T.BazNode.fields.prop3')
-run('Incorrect bind eq_prop 4', 'T.BazNode.fields.prop4')
-run('Correct bind eq_prop A', 'T.BazNode.fields.propA')
-run('Correct bind eq_prop B', 'T.BazNode.fields.propB')
+run('Incorrect bind eq_prop 1', 'T.BazNode.prop')
+run('Incorrect bind eq_prop 2', 'T.BazNode.prop2')
+run('Incorrect bind eq_prop 3', 'T.BazNode.prop3')
+run('Incorrect bind eq_prop 4', 'T.BazNode.prop4')
+run('Correct bind eq_prop A', 'T.BazNode.propA')
+run('Correct bind eq_prop B', 'T.BazNode.propB')
 print('Done')

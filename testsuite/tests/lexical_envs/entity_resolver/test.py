@@ -47,7 +47,7 @@ class Ref(FooNode):
 
     env_spec = EnvSpec(add_to_env=add_to_env(
         New(T.env_assoc, key=Self.name.symbol, val=Self),
-        resolver=FooNode.fields.resolve_ref
+        resolver=FooNode.resolve_ref
     ))
 
     @langkit_property(public=True)

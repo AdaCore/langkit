@@ -69,7 +69,7 @@ class Decl(FooNode):
 class Using(FooNode):
     name = Field()
     env_spec = EnvSpec(
-        ref_envs=[RefEnvs(Name.fields.designated_env,
+        ref_envs=[RefEnvs(Name.designated_env,
                           Self.name.cast(FooNode).to_array)]
     )
 
