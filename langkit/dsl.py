@@ -38,6 +38,16 @@ class DSLType(object):
         ctx_message = 'in {}'.format(cls._name.camel)
         return Context(ctx_message, cls._location)
 
+    @staticmethod
+    def _import_base_type_info(name, location, dct):
+        """
+        Metaclass helper.  Register in `dct` the name, location and doc
+        information for the class to be built.
+        """
+        dct['_name'] = names.Name.from_camel(name)
+        dct['_location'] = location
+        dct['_doc'] = dct.get('__doc__')
+
     _type = None
     """
     Link to the StructType/ASTNodeType subclass corresponding to this subclass.
@@ -201,10 +211,7 @@ class _StructMetaclass(type):
             )
 
         fields = Struct.collect_fields(name, location, dct, _UserField)
-
-        dct['_name'] = names.Name.from_camel(name)
-        dct['_location'] = location
-        dct['_doc'] = dct.get('__doc__')
+        DSLType._import_base_type_info(name, location, dct)
         dct['_fields'] = fields
 
 
@@ -384,9 +391,7 @@ class _ASTNodeMetaclass(type):
                     ' (here: {})'.format(', '.join(sorted(syntax_fields)))
                 )
 
-        dct['_name'] = names.Name.from_camel(name)
-        dct['_location'] = location
-        dct['_doc'] = dct.get('__doc__')
+        DSLType._import_base_type_info(name, location, dct)
         dct['_fields'] = fields
         dct['_repr_name'] = repr_name
         dct['_base'] = base
@@ -584,20 +589,15 @@ class _EnumNodeMetaclass(type):
                     'The "alternatives" field must contain a list of strings'
                 )
 
-        doc = dct.get('__doc__')
         alts = [EnumNode.Alternative(names.Name.from_lower(alt))
                 for alt in alternatives]
         fields = EnumNode.collect_fields(name, location, dct,
                                          (_UserField, PropertyDef))
 
-        dct = {
-            '_name': names.Name.from_camel(name),
-            '_location': location,
-            '_doc': doc,
-            '_fields': fields,
-            '_alternatives': alts,
-            '_qualifier': qualifier,
-        }
+        DSLType._import_base_type_info(name, location, dct)
+        dct['_fields'] = fields
+        dct['_alternatives'] = alts
+        dct['_qualifier'] = qualifier
 
         # Make Alternative instances available as EnumNode class attributes for
         # a convenient way to create parsers for them.
@@ -737,8 +737,7 @@ class _EnumMetaclass(type):
     _base_cls = None
 
     def __new__(mcs, name, bases, dct):
-        dct['_name'] = names.Name.from_camel(name)
-        dct['_location'] = extract_library_location()
+        DSLType._import_base_type_info(name, extract_library_location(), dct)
 
         cls = type.__new__(mcs, name, bases, dct)
 
