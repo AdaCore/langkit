@@ -2629,6 +2629,7 @@ def create_enum_node_classes(cls):
         'is_bool_node': is_bool_node,
         'is_type_resolved': True,
 
+        '_doc': cls._doc,
         '_fields': fields,
         '_is_abstract': True,
 

@@ -603,6 +603,8 @@ class _EnumNodeMetaclass(type):
                     'The "alternatives" field must contain a list of strings'
                 )
 
+        doc = dct.get('__doc__')
+
         alts = [EnumNode.Alternative(names.Name.from_lower(alt))
                 for alt in alternatives]
 
@@ -625,6 +627,7 @@ class _EnumNodeMetaclass(type):
         dct = {
             '_name': names.Name.from_camel(name),
             '_location': location,
+            '_doc': doc,
             '_alternatives': alts,
             '_qualifier': qualifier,
             '_fields': fields,
