@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.compiled_types import (
-    _EnumType, AbstractField, AbstractNodeData, UserField, T,
-    create_astnode_class, create_enum_type
+    _EnumType, AbstractField, AbstractNodeData, Field as _Field,
+    UserField as _UserField, T, create_astnode_class, create_enum_type
 )
 from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
@@ -611,7 +611,7 @@ class _EnumNodeMetaclass(type):
             fields.append((f_n, f_v))
             with Context('in {}.{}'.format(name, f_n), location):
                 check_source_language(
-                    isinstance(f_v, (UserField, PropertyDef)),
+                    isinstance(f_v, (_UserField, PropertyDef)),
                     'Field {} is a {}, but only UserField/Property instances'
                     ' are allowed in EnumNode subclasses'.format(f_n,
                                                                  type(f_v))
@@ -840,3 +840,38 @@ class EnumType(DSLType):
         """
         assert self._type
         return _EnumType.Alternative(self._type, self.alt)
+
+
+def Field(repr=True, doc=None, type=None):
+    """
+    Create a field that is meant to store parsing results. Only AST nodes can
+    hold such fields.
+
+    :param bool repr: Whether the field will be displayed when pretty-printing
+        the embedding AST node.
+
+    :param str|None doc: User documentation for this field.
+
+    :param DSLType|CompiledType|None type: DSLType or CompiledType subclass for
+        values this field holds. If left to None, the type will be inferred
+        from the grammar.
+    """
+    return _Field(repr, doc, type)
+
+
+def UserField(type, repr=False, doc=None, public=True):
+    """
+    Create a field that is not meant to store parsing results. Both AST nodes
+    and Struct can hold such types.
+
+    :param DSLType|CompiledType type: DSLType or CompiledType subclass for
+        values this field holds.
+
+    :param bool repr: Whether the field will be displayed when pretty-printing
+        the embedding AST node.
+
+    :param str|None doc: User documentation for this field.
+
+    :param bool is_public: Whether this field is public in the generated APIs.
+    """
+    return _UserField(type, repr, doc, public)
