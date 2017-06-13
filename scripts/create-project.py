@@ -78,7 +78,7 @@ class Token(LexerToken):
 
 
 PARSER_TEMPLATE = '''\
-from langkit.compiled_types import ASTNode, abstract, root_grammar_class
+from langkit.dsl import ASTNode, abstract, root_grammar_class
 from langkit.parsers import Grammar, Row
 
 
