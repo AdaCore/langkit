@@ -2703,47 +2703,20 @@ class TypeRepo(object):
             """
             return self.getter()
 
-        def array_type(self):
-            """
-            Proxy to the CompiledType.array_type classmethod.
-
-            :rtype: ArrayType
-            """
-            return TypeRepo.Defer(lambda: self.get().array_type())
-
-        def list_type(self):
-            """
-            Proxy to the CompiledType.list_type classmethod.
-
-            :rtype: CompiledType
-            """
-            return TypeRepo.Defer(lambda: self.get().list_type())
-
-        def entity(self):
-            """
-            Proxy to the StructType.entity classmethod.
-
-            :rtype: CompiledType
-            """
-            return TypeRepo.Defer(lambda: self.get().entity())
-
-        @property
-        def fields(self):
-            """
-            Proxy to return the fields of a StructType.
-
-            :rtype: DictProxy
-            """
-            return TypeRepo.DeferWithAttributes(lambda: self.get().fields)
-
-    # TODO: merge this inside Defer (not sure it's a good design choice at the
-    # moment).
-    class DeferWithAttributes(Defer):
-        """
-        Like Defer, but also support random attribute access.
-        """
         def __getattr__(self, name):
-            return TypeRepo.Defer(lambda: getattr(self.get(), name))
+            def get():
+                prefix = self.get()
+                if (
+                    name in ('array_type', 'list_type', 'entity')
+                    or not issubtype(prefix, StructType)
+                ):
+                    return getattr(prefix, name)
+                else:
+                    return prefix._fields[name]
+            return TypeRepo.Defer(get)
+
+        def __call__(self, *args, **kwargs):
+            return TypeRepo.Defer(lambda: self.get()(*args, **kwargs))
 
     def __getattr__(self, type_name):
         """
