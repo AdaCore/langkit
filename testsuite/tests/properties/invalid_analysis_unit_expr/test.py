@@ -7,8 +7,8 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 
-from langkit.compiled_types import ASTNode, root_grammar_class
 from langkit.diagnostics import Diagnostics
+from langkit.dsl import ASTNode, root_grammar_class
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, Row
 

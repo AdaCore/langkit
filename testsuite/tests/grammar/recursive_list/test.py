@@ -1,8 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.compiled_types import (
-    ASTNode, Field, root_grammar_class
-)
+from langkit.dsl import ASTNode, Field, root_grammar_class
 from langkit.envs import EnvSpec
 from langkit.expressions import Self
 from langkit.parsers import Grammar, List, Row, Tok

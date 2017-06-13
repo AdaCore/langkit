@@ -7,9 +7,8 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 
-from langkit.compiled_types import (ASTNode, LexicalEnvType, Field, T,
-                                    root_grammar_class)
 from langkit.diagnostics import Diagnostics
+from langkit.dsl import ASTNode, Field, LexicalEnvType, T, root_grammar_class
 from langkit.envs import EnvSpec, RefEnvs, add_to_env
 from langkit.expressions import DynamicVariable, New, Self, langkit_property
 from langkit.parsers import Grammar, List, Row, Tok

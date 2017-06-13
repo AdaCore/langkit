@@ -1,10 +1,10 @@
 Emit with expected errors
 -------------------------
-File "test.py", line 35, in FooNode.eq_field
+File "test.py", line 33, in FooNode.eq_field
     Error: type is LogicEquation, which is forbidden in public API
-File "test.py", line 38, in FooNode.eq
+File "test.py", line 36, in FooNode.eq
     Error: return type is LogicEquation, which is forbidden in public API
-File "test.py", line 38, in FooNode.eq
+File "test.py", line 36, in FooNode.eq
     Error: "Eq" argument is LogicEquation, which is forbidden in public API
 Build and run:
 --------------

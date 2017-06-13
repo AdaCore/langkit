@@ -2,8 +2,8 @@ from __future__ import absolute_import, division, print_function
 
 from os import path
 
-from langkit.compiled_types import ASTNode, root_grammar_class
 from langkit.diagnostics import DiagnosticError, Diagnostics
+from langkit.dsl import ASTNode, root_grammar_class
 from langkit.expressions import Property, No
 
 

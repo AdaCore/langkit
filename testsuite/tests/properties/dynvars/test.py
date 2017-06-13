@@ -3,9 +3,9 @@ from __future__ import absolute_import, division, print_function
 import itertools
 import os.path
 
-from langkit.compiled_types import (ASTNode, LexicalEnvType, BoolType,
-                                    root_grammar_class, abstract)
 from langkit.diagnostics import Diagnostics
+from langkit.dsl import (ASTNode, LexicalEnvType, BoolType, abstract,
+                         root_grammar_class)
 from langkit.expressions import (AbstractProperty, DynamicVariable, Literal,
                                  Property, Self)
 from langkit.parsers import Grammar, Row

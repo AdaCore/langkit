@@ -1,6 +1,6 @@
-File "test.py", line 30, in FooNode.as_expr
+File "test.py", line 29, in FooNode.as_expr
     Warning: This private property is unused
-File "test.py", line 42, in Expression.result
+File "test.py", line 41, in Expression.result
     Warning: This private abstraction is unused
 Code generation was successful
 Done

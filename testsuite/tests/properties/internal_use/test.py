@@ -2,10 +2,9 @@ from __future__ import absolute_import, division, print_function
 
 from os import path
 
-from langkit.compiled_types import (
-    ASTNode, Field, Struct, abstract, env_metadata, root_grammar_class
-)
 from langkit.diagnostics import Diagnostics
+from langkit.dsl import (ASTNode, Field, Struct, abstract, env_metadata,
+                         root_grammar_class)
 from langkit.envs import EnvSpec, add_to_env
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, List, Opt, Row, Tok

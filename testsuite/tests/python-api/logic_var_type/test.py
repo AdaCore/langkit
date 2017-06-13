@@ -7,11 +7,9 @@ from __future__ import absolute_import, division, print_function
 import os.path
 import sys
 
-from langkit.compiled_types import (
-    ASTNode, Field, LogicVarType, Token as TokenType, UserField,
-    root_grammar_class
-)
 from langkit.diagnostics import Diagnostics
+from langkit.dsl import (ASTNode, Field, LogicVarType, Token as TokenType,
+                         UserField, root_grammar_class)
 from langkit.expressions import langkit_property
 from langkit.parsers import Grammar, Tok
 

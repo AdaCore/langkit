@@ -10,10 +10,9 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 
-from langkit.compiled_types import (
-    ASTNode, EnvRebindingsType, Field, Token as TokenType, root_grammar_class
-)
 from langkit.diagnostics import Diagnostics
+from langkit.dsl import (ASTNode, EnvRebindingsType, Field, Token as TokenType,
+                         root_grammar_class)
 from langkit.expressions import langkit_property
 from langkit.parsers import Grammar, Tok
 

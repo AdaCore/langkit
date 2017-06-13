@@ -6,10 +6,8 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 
-from langkit.compiled_types import (
-    ASTNode, Field, Token, root_grammar_class, synthetic
-)
 from langkit.diagnostics import Diagnostics
+from langkit.dsl import ASTNode, Field, Token, root_grammar_class, synthetic
 from langkit.expressions import New, Property, Self
 from langkit.parsers import Grammar, List, Row, Tok
 

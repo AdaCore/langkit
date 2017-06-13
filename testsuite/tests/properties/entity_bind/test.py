@@ -6,11 +6,9 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 
-from langkit.compiled_types import (
-    ASTNode, Field, root_grammar_class, LongType, UserField, LogicVarType,
-    abstract
-)
 from langkit.diagnostics import Diagnostics
+from langkit.dsl import (ASTNode, Field, LogicVarType, LongType, UserField,
+                         abstract, root_grammar_class)
 from langkit.expressions import AbstractProperty, Let, Property, Self, Bind
 from langkit.parsers import Grammar, Row, Tok
 

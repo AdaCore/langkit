@@ -1,9 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.compiled_types import (
-    ASTNode, LexicalEnvType, root_grammar_class, LogicVarType, UserField, T
-)
 from langkit.diagnostics import Diagnostics
+from langkit.dsl import (ASTNode, LexicalEnvType, LogicVarType, T, UserField,
+                         root_grammar_class)
 from langkit.expressions import (Bind, DynamicVariable, Property, Self, Var,
                                  langkit_property, ignore)
 from langkit.parsers import Grammar, Row, Or

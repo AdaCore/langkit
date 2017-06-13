@@ -6,11 +6,9 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 
-from langkit.compiled_types import (
-    ASTNode, BoolType, Field, Struct, T, UserField, env_metadata,
-    root_grammar_class
-)
 from langkit.diagnostics import DiagnosticError, Diagnostics
+from langkit.dsl import (ASTNode, BoolType, Field, Struct, T, UserField,
+                         env_metadata, root_grammar_class)
 from langkit.parsers import Grammar, Tok
 
 from lexer_example import Token

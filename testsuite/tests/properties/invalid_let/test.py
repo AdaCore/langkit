@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.compiled_types import (
-    ASTNode, root_grammar_class
-)
 from langkit.diagnostics import Diagnostics
+from langkit.dsl import ASTNode, root_grammar_class
 from langkit.expressions import Literal, Property, Let
 from langkit.parsers import Grammar, Row
 

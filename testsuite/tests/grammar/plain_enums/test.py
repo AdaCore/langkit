@@ -6,10 +6,8 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 
-from langkit.compiled_types import (
-    ASTNode, BoolType, EnumType, Field, root_grammar_class
-)
 from langkit.diagnostics import Diagnostics
+from langkit.dsl import ASTNode, BoolType, Field, EnumType, root_grammar_class
 from langkit.parsers import Enum, Grammar, List, Opt, Or, Tok
 
 from lexer_example import Token

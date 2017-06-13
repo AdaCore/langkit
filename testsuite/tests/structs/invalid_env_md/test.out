@@ -1,21 +1,21 @@
 == not_a_struct ==
-File "test.py", line 52, In call to the env_metadata decorator
+File "test.py", line 50, In call to the env_metadata decorator
     Error: The env_metadata decorator must be called on a Struct subclass (here, got: <class '__main__.Metadata'>)
 
 == two_md ==
-File "test.py", line 64, in Metadata
+File "test.py", line 62, in Metadata
     Error: Only one Struct subclass can be the env metadata
 
 == bad_name ==
-File "test.py", line 46, in BadName
+File "test.py", line 44, in BadName
     Error: The environment metadata struct type must be called "Metadata" (here: BadName)
 
 == bad_field ==
-File "test.py", line 77, in Metadata.fld
+File "test.py", line 75, in Metadata.fld
     Error: Fields of the Struct type chosen to be environment metadata must be instances of UserField.
 
 == bad_type ==
-File "test.py", line 83, in Metadata.fld
+File "test.py", line 81, in Metadata.fld
     Error: Environment metadata fields must all be booleans
 
 Done
