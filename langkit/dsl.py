@@ -287,8 +287,12 @@ class _ASTNodeMetaclass(type):
         cls.root_grammar_class_called = False
 
     def __new__(mcs, name, bases, dct):
+        # Does this subclass come from this module? If so, it's not to be
+        # considered as a DSLType per se.
         is_base = ((len(bases) == 1 and bases[0] in (object, BaseStruct))
                    or dct.pop('_ASTNodeList__is_astnode_list_cls', False))
+
+        # Is this the root AST node type?
         is_root = not is_base and mcs.root_type is None
 
         if not is_base:
