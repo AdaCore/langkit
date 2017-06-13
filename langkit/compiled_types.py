@@ -1994,6 +1994,26 @@ class StructType(CompiledType):
         ))
 
 
+def create_struct(name, location, doc, fields):
+    """
+    Create a StructType subclass.
+
+    :param names.Name name: Name for this struct.
+    :param langkit.diagnostics.Location|None location: Location for the
+        declaration of this struct, if any.
+    :param str|None doc: User documentation for this type.
+    :param list[(str, AbstractNodeData)] fields: List of (name, field) for this
+        struct's fields. Inheritted fields must not appear in this list.
+    """
+    dct = {
+        '_name': name,
+        '_location': location,
+        '_doc': doc,
+        '_fields': fields,
+    }
+    return type(name.camel, (StructType, ), dct)
+
+
 class ASTNodeType(StructType):
     """
     Base class for all user AST nodes.

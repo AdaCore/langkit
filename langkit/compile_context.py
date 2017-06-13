@@ -636,21 +636,13 @@ class CompileCtx(object):
         from langkit.dsl import (_ASTNodeMetaclass, _EnumMetaclass,
                                  _StructMetaclass)
 
-        # Get the list of Struct subclasses from the corresponding metaclass
-        # and create the corresponding StructType subclasses.
+        # Make sure the language spec tagged at most one metadata struct.
+        # Register it, if there is one.
         user_env_md = None
         for st in _StructMetaclass.struct_types:
-            struct_type = type(st.__name__, (StructType, ),
-                               {'_name': names.Name.from_camel(st.__name__),
-                                '_fields': st._fields})
-            st._type = struct_type
-            struct_type.dsl_decl = st
-
-            # If the language spec. tagged an env metadata struct, register it
-            # as such.
             if st._is_env_metadata:
                 assert user_env_md is None
-                user_env_md = struct_type
+                user_env_md = st._type
 
         # If the language spec provided no env metadata struct, create a
         # default one.

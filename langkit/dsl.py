@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.compiled_types import (
     _EnumType, AbstractNodeData, Field as _Field,
-    UserField as _UserField, T, create_astnode, create_enum_type
+    UserField as _UserField, T, create_astnode, create_enum_type, create_struct
 )
 from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
@@ -200,6 +200,12 @@ class _StructMetaclass(type):
 
         if not is_base:
             mcs.struct_types.append(cls)
+
+            # Create the corresponding StructType subclass
+            struct_type = create_struct(cls._name, cls._location, cls._doc,
+                                        cls._fields)
+            struct_type.dsl_decl = cls
+            cls._type = struct_type
 
         return cls
 
