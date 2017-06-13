@@ -1378,22 +1378,14 @@ class StructMetaclass(CompiledTypeMetaclass):
                 else:
                     # Check that it does indeed derives from the root grammar
                     # class.
-                    check_source_language(
-                        issubclass(base, mcs.root_grammar_class),
-                        'You can have only one class deriving from ASTNode,'
-                        ' which will be the root class of your grammar'
-                        ' indirectly from the root grammar class'
-                    )
+                    assert issubclass(base, mcs.root_grammar_class)
 
                 dct['is_root_node'] = is_root_grammar_class
 
             else:
+                assert base is StructType
                 is_struct = True
-                check_source_language(
-                    base is StructType,
-                    'All Struct subclasses must directly derive from Struct'
-                    ' itself'
-                )
+
         # This is a formal explanation for the top comments:
         assert sum(1 for b in [is_astnode, is_struct] if b) == 1
         assert sum(1 for b in [is_base, is_root_grammar_class] if b) <= 1
