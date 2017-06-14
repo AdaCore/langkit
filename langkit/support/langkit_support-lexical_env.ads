@@ -3,8 +3,8 @@ with Ada.Containers.Hashed_Maps;
 with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
-with Langkit_Support.Vectors;
 with Langkit_Support.Text;    use Langkit_Support.Text;
+with Langkit_Support.Vectors;
 
 --  This package implements a scoped lexical environment data structure that
 --  will then be used in AST nodes. Particularities:
