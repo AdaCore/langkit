@@ -38,7 +38,7 @@ from langkit.passes import (
     ASTNodePass, EnvSpecPass, GlobalPass, GrammarRulePass, MajorStepPass,
     PassManager, PropertyPass, StopPipeline, errors_checkpoint_pass
 )
-from langkit.utils import Colors, printcol
+from langkit.utils import Colors, printcol, topological_sort
 
 
 compile_ctx = None
@@ -994,35 +994,33 @@ class CompileCtx(object):
 
     @property
     def struct_types(self):
-        # Here we're skipping StructType because it's not a real type in
-        # generated code. We're also putting env_metadata and entity in
-        # the beginning and in the right dependency order (the metadata type
-        # before the entity type).
-        #
-        # TODO: Using a dependency order topological sort wouldn't hurt at
-        # some point.
+        from langkit.compiled_types import (
+            StructMetaclass, StructType, ASTNodeType
+        )
 
-        from langkit.compiled_types import StructMetaclass, T
-
-        if self._struct_types:
-            # TODO: A better solution at some point would be having a
-            # "freezable list" for struct_types (and every list of types for
-            # that matter) and raising an error if some code tries to add to it
-            # after the freeze point.
-            assert (
-                len(self._struct_types) == len(StructMetaclass.struct_types)
-            ), (
-                "CompileCtx.struct_types called too early: more struct types "
-                "were added"
+        def dependencies(struct_type):
+            """
+            Compute the set of dependencies for struct_type, namely the set of
+            struct types that are used by its fields.
+            """
+            return set(
+                f.type for f in struct_type._fields.values()
+                if issubclass(f.type, StructType)
+                and not issubclass(f.type, ASTNodeType)
             )
 
+        if self._struct_types:
+            assert (
+                len(self._struct_types) == len(StructMetaclass.struct_types)
+            ), ("CompileCtx.struct_types called too early: more struct types "
+                "were added")
+
         else:
-            builtin_types = [T.env_md, T.entity_info, T.entity]
-            struct_types = [
-                t for t in StructMetaclass.struct_types
-                if t not in [T.env_md, T.entity, T.entity_info]
-            ]
-            self._struct_types = builtin_types + struct_types
+            self._struct_types = list(topological_sort(
+                (t, dependencies(t)) for t in sorted(
+                    StructMetaclass.struct_types, key=lambda t: t.name
+                )
+            ))
 
         return self._struct_types
 
