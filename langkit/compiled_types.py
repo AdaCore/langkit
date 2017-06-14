@@ -1322,81 +1322,6 @@ class StructMetaclass(CompiledTypeMetaclass):
     :type: StructType
     """
 
-    @classmethod
-    def builtin_properties(mcs):
-        """
-        Return properties available for all AST nodes.
-
-        Note that mcs.root_grammar_class must be defined first.
-
-        :rtype: list[(str, AbstractNodeData)]
-        """
-        from langkit.expressions import PropertyDef
-
-        assert mcs.root_grammar_class
-        # Note that we must not provide implementation for them here (no
-        # expression) since the implementation comes from the hard-coded root
-        # AST node type definition.
-        return [
-            # The following fields return LexicalEnvType values, which are
-            # ref-counted. However these specific envs are owned by the
-            # analysis unit, so they are not ref-counted.
-
-            ("node_env", PropertyDef(
-                expr=None, prefix=None, type=LexicalEnvType,
-                public=False, external=True, uses_entity_info=True,
-                force_dispatching=True, warn_on_unused=False,
-                doc='For nodes that introduce a new environment, return the'
-                    ' parent lexical environment. Return the "inherited"'
-                    ' environment otherwise.'
-            )),
-            ("children_env", PropertyDef(
-                expr=None, prefix=None, type=LexicalEnvType,
-                public=False, external=True, uses_entity_info=True,
-                warn_on_unused=False,
-                doc='For nodes that introduce a new environment, return it.'
-                    ' Return the "inherited" environment otherwise.'
-            )),
-
-            ("parent", BuiltinField(
-                type=mcs.root_grammar_class,
-                doc="Return the lexical parent for this node. Return null for"
-                    " the root AST node or for AST nodes for which no one has"
-                    " a reference to the parent."
-            )),
-
-            # The following builtin fields are implemented as a property, so
-            # there is no need for an additional inc-ref.
-            ("parents", BuiltinField(
-                type=mcs.root_grammar_class.array_type(),
-                doc="Return an array that contains the lexical parents (this"
-                    " node included). Nearer parents are first in the list."
-            )),
-            ("children", BuiltinField(
-                type=mcs.root_grammar_class.array_type(),
-                doc="Return an array that contains the direct lexical "
-                    "children "
-            )),
-            ("token_start", PropertyDef(
-                expr=None, prefix=None, type=Token,
-                public=True, external=True, uses_entity_info=False,
-                doc="Return the first token used to parse this node."
-            )),
-            ("token_end", PropertyDef(
-                expr=None, prefix=None, type=Token,
-                public=True, external=True, uses_entity_info=False,
-                doc="Return the last token used to parse this node."
-            )),
-            ("previous_sibling", BuiltinField(
-                type=mcs.root_grammar_class,
-                doc="Return the node's previous sibling, if there is one"
-            )),
-            ("next_sibling", BuiltinField(
-                type=mcs.root_grammar_class,
-                doc="Return the node's next sibling, if there is one"
-            )),
-        ]
-
 
 class TypeDeclaration(object):
     """Simple holder for generated type declarations."""
@@ -2145,6 +2070,83 @@ class ASTNodeType(StructType):
     def py_nullexpr(cls):
         return 'None'
 
+    @classmethod
+    def builtin_properties(cls):
+        """
+        Return properties available for all AST nodes.
+
+        Note that StructMetaclass.root_grammar_class must be defined first.
+
+        :rtype: list[(str, AbstractNodeData)]
+        """
+        from langkit.expressions import PropertyDef
+
+        root_type = StructMetaclass.root_grammar_class
+        assert root_type
+
+        # Note that we must not provide implementation for them here (no
+        # expression) since the implementation comes from the hard-coded root
+        # AST node type definition.
+        return [
+            # The following fields return LexicalEnvType values, which are
+            # ref-counted. However these specific envs are owned by the
+            # analysis unit, so they are not ref-counted.
+
+            ('node_env', PropertyDef(
+                expr=None, prefix=None, type=LexicalEnvType,
+                public=False, external=True, uses_entity_info=True,
+                force_dispatching=True, warn_on_unused=False,
+                doc='For nodes that introduce a new environment, return the'
+                    ' parent lexical environment. Return the "inherited"'
+                    ' environment otherwise.'
+            )),
+            ('children_env', PropertyDef(
+                expr=None, prefix=None, type=LexicalEnvType,
+                public=False, external=True, uses_entity_info=True,
+                warn_on_unused=False,
+                doc='For nodes that introduce a new environment, return it.'
+                    ' Return the "inherited" environment otherwise.'
+            )),
+
+            ('parent', BuiltinField(
+                type=root_type,
+                doc='Return the lexical parent for this node. Return null for'
+                    ' the root AST node or for AST nodes for which no one has'
+                    ' a reference to the parent.'
+            )),
+
+            # The following builtin fields are implemented as a property, so
+            # there is no need for an additional inc-ref.
+            ('parents', BuiltinField(
+                type=root_type.array_type(),
+                doc='Return an array that contains the lexical parents (this'
+                    ' node included). Nearer parents are first in the list.'
+            )),
+            ('children', BuiltinField(
+                type=root_type.array_type(),
+                doc='Return an array that contains the direct lexical'
+                    ' children.'
+            )),
+            ('token_start', PropertyDef(
+                expr=None, prefix=None, type=Token,
+                public=True, external=True, uses_entity_info=False,
+                doc='Return the first token used to parse this node.'
+            )),
+            ('token_end', PropertyDef(
+                expr=None, prefix=None, type=Token,
+                public=True, external=True, uses_entity_info=False,
+                doc='Return the last token used to parse this node.'
+            )),
+            ('previous_sibling', BuiltinField(
+                type=root_type,
+                doc="Return the node's previous sibling, if there is one."
+            )),
+            ('next_sibling', BuiltinField(
+                type=root_type,
+                doc="Return the node's next sibling, if there is one."
+            )),
+        ]
+
 
 # We tag the ASTNodeType class as abstract here, because of the circular
 # dependency between the @abstract decorator and the ASTNodeType class, which
@@ -2219,7 +2221,7 @@ def create_astnode(name, location, doc, base, fields, repr_name=None,
 
     # Now we have an official root node type, we can create its builtin fields
     if is_root:
-        fields = StructMetaclass.builtin_properties() + fields
+        fields = ASTNodeType.builtin_properties() + fields
     init_base_struct_fields(cls, fields)
 
     cls.is_root_node = is_root
