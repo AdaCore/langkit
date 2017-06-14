@@ -1667,18 +1667,6 @@ class StructType(CompiledType):
         return result
 
     @classmethod
-    def is_typed(cls):
-        """
-        Helper to determine whether the StructType is typed or not, eg. whether
-        every field has a definite type.
-
-        :rtype: bool
-        """
-        return all(
-            f.type for f in cls.get_fields(include_inherited=False)
-        )
-
-    @classmethod
     def name(cls):
         """
         Return the name that will be used in code generation for this AST node
