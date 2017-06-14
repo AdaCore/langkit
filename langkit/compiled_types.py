@@ -1333,10 +1333,6 @@ class StructMetaclass(CompiledTypeMetaclass):
         is_root_grammar_class = False  # Root grammar class?
 
         location = dct.get('_location')
-        diag_ctx = Context('in {}'.format(name), location)
-
-        def field_ctx(field_name):
-            return Context('in {}.{}'.format(name, field_name), location)
 
         assert len(bases) == 1, (
             "Multiple inheritance for AST nodes is not supported"
@@ -1359,31 +1355,30 @@ class StructMetaclass(CompiledTypeMetaclass):
         # themselves, which are created before all other classes. The root
         # grammar class also requires special handling.
         base_classes = [StructType, ASTNodeType]
-        with diag_ctx:
-            if not all(base_classes):
-                is_base = True
-                is_struct = StructType is None
-                is_astnode = not is_struct and ASTNodeType is None
+        if not all(base_classes):
+            is_base = True
+            is_struct = StructType is None
+            is_astnode = not is_struct and ASTNodeType is None
 
-            elif base.is_ast_node:
-                is_astnode = True
-                # If we have no root grammar class yet and reach this point,
-                # the type necessarily derives from ASTNodeType. It's the root
-                # grammar class.
-                if mcs.root_grammar_class is None:
-                    assert base is ASTNodeType
-                    is_root_grammar_class = True
-
-                else:
-                    # Check that it does indeed derives from the root grammar
-                    # class.
-                    assert issubclass(base, mcs.root_grammar_class)
-
-                dct['is_root_node'] = is_root_grammar_class
+        elif base.is_ast_node:
+            is_astnode = True
+            # If we have no root grammar class yet and reach this point,
+            # the type necessarily derives from ASTNodeType. It's the root
+            # grammar class.
+            if mcs.root_grammar_class is None:
+                assert base is ASTNodeType
+                is_root_grammar_class = True
 
             else:
-                assert base is StructType
-                is_struct = True
+                # Check that it does indeed derives from the root grammar
+                # class.
+                assert issubclass(base, mcs.root_grammar_class)
+
+            dct['is_root_node'] = is_root_grammar_class
+
+        else:
+            assert base is StructType
+            is_struct = True
 
         # This is a formal explanation for the top comments:
         assert sum(1 for b in [is_astnode, is_struct] if b) == 1
