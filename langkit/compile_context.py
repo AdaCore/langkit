@@ -633,8 +633,7 @@ class CompileCtx(object):
         """
         from langkit.compiled_types import (LexicalEnvType, StructMetaclass,
                                             create_struct)
-        from langkit.dsl import (_ASTNodeMetaclass, _EnumMetaclass,
-                                 _StructMetaclass)
+        from langkit.dsl import _EnumMetaclass, _StructMetaclass
 
         # Make sure the language spec tagged at most one metadata struct.
         # Register it, if there is one.
@@ -653,11 +652,6 @@ class CompileCtx(object):
         else:
             StructMetaclass.env_metadata = user_env_md
         self.check_env_metadata(StructMetaclass.env_metadata)
-
-        check_source_language(
-            _ASTNodeMetaclass.root_grammar_class_called,
-            'The "root_grammar_class" decorator must be used'
-        )
 
         # Get the list of ASTNodeType types from the StructType metaclass
         entity = StructMetaclass.root_grammar_class.entity()

@@ -299,13 +299,10 @@ class _ASTNodeMetaclass(type):
     :type: ASTNode
     """
 
-    root_grammar_class_called = False
-
     @classmethod
     def reset(cls):
         cls.astnode_types = []
         cls.root_type = None
-        cls.root_grammar_class_called = False
 
     def __new__(mcs, name, bases, dct):
         # Does this subclass come from this module? If so, it's not to be
@@ -531,22 +528,6 @@ class _ASTNodeList(ASTNode):
     ASTNode subclass that contains.
     :type: ASTNode
     """
-
-
-def root_grammar_class(cls):
-    """
-    Decorator to tag an ASTNode subclass as the root grammar node.
-    """
-    _check_decorator_use(root_grammar_class, ASTNode, cls)
-
-    with cls._diagnostic_context():
-        check_source_language(
-            not _ASTNodeMetaclass.root_grammar_class_called,
-            'The "root_grammar_class" decorator cannot be used more than once'
-        )
-        _ASTNodeMetaclass.root_grammar_class_called = True
-
-    return cls
 
 
 def abstract(cls):

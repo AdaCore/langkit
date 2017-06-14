@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, root_grammar_class
+from langkit.dsl import ASTNode
 from langkit.expressions import Property
 from langkit.parsers import Grammar, Row
 
@@ -14,7 +14,6 @@ Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 def make_lang_def(lit):
     def lang_def():
-        @root_grammar_class
         class FooNode(ASTNode):
             b = Property(lit, public=True)
 

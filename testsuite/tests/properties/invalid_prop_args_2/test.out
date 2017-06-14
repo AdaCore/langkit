@@ -1,4 +1,4 @@
-File "test.py", line 29, in BarNode.base_prop
+File "test.py", line 28, in BarNode.base_prop
     Error: Argument #1 doesn't have the same type as in base property. Base has SymbolType, derived has Integer
 
 Done

@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import (ASTNode, Field, LexicalEnvType, Struct, T, abstract,
-                         env_metadata, root_grammar_class)
+                         env_metadata)
 from langkit.envs import EnvSpec, add_to_env
 from langkit.expressions import Self, New, langkit_property
 from langkit.parsers import Grammar, List, Opt, Row, Tok
@@ -24,7 +24,6 @@ class Metadata(Struct):
     pass
 
 
-@root_grammar_class
 class FooNode(ASTNode):
     @langkit_property(public=True, return_type=LexicalEnvType)
     def env_id(env=LexicalEnvType):

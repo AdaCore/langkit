@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, abstract, root_grammar_class
+from langkit.dsl import ASTNode, Field, abstract
 from langkit.parsers import Grammar, Row
 
 from os import path
@@ -13,7 +13,6 @@ Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 def lang_def():
     @abstract
-    @root_grammar_class
     class FooNode(ASTNode):
         pass
 

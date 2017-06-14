@@ -2,27 +2,27 @@
 Code generation was successful
 
 == Incorrect property definition 1 ==
-File "test.py", line 29, in BarNode.prop
+File "test.py", line 28, in BarNode.prop
     Error: Invalid abstract expression: ['Lol this is obviously wrong']
 
 == Incorrect property definition 2 ==
-File "test.py", line 29, in BarNode.prop
+File "test.py", line 28, in BarNode.prop
     Error: Invalid function signature: no *args nor **kwargs allowed
 
 == Incorrect property definition 3 ==
-File "test.py", line 29, in BarNode.prop
+File "test.py", line 28, in BarNode.prop
     Error: All parameters must have an associated type as a default value
 
 == Incorrect property definition 4 ==
-File "test.py", line 29, in BarNode.prop
+File "test.py", line 28, in BarNode.prop
     Error: Cannot define reserved arguments (node, bound_env)
 
 == Incorrect property definition 5 ==
-File "test.py", line 29, in BarNode.prop
+File "test.py", line 28, in BarNode.prop
     Error: Invalid type reference: ['Obviously wrong']
 
 == Incorrect property definition 6 ==
-File "test.py", line 29, in BarNode.prop
+File "test.py", line 28, in BarNode.prop
     Error: Invalid type reference: <class 'langkit.diagnostics.Diagnostics'>
 
 Done

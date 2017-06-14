@@ -1,8 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import (ASTNode, LexicalEnvType, LogicVarType, T, UserField,
-                         root_grammar_class)
+from langkit.dsl import ASTNode, LexicalEnvType, LogicVarType, T, UserField
 from langkit.expressions import (Bind, DynamicVariable, Property, Self, Var,
                                  langkit_property, ignore)
 from langkit.parsers import Grammar, Row, Or
@@ -29,7 +28,6 @@ def run(name, eq_prop):
 
     eq_prop = eval(eq_prop)
 
-    @root_grammar_class
     class FooNode(ASTNode):
         ref_var = UserField(LogicVarType, public=False)
         type_var = UserField(LogicVarType, public=False)

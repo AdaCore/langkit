@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, root_grammar_class
+from langkit.dsl import ASTNode, Field
 from langkit.envs import EnvSpec
 from langkit.expressions import Self
 from langkit.parsers import Grammar, List, Row, Tok
@@ -10,7 +10,6 @@ from utils import emit_and_print_errors
 
 
 def lang_def():
-    @root_grammar_class
     class FooNode(ASTNode):
         pass
 

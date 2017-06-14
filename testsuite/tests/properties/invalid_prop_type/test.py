@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, root_grammar_class
+from langkit.dsl import ASTNode, Field
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, Row
 
@@ -12,7 +12,6 @@ from utils import emit_and_print_errors
 Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 
-@root_grammar_class
 class FooNode(ASTNode):
     pass
 

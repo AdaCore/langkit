@@ -1,7 +1,7 @@
 == Bad return type ==
-File "test.py", line 46, in Ref._env_mappings_1
+File "test.py", line 45, in Ref._env_mappings_1
     Error: Entity resolver properties must return entities (got EntityArrayAccess)
 == Has dynamic variable ==
-File "test.py", line 46, in Ref._env_mappings_3
+File "test.py", line 45, in Ref._env_mappings_3
     Error: Entity resolver properties must have no dynamically bound variable
 Done

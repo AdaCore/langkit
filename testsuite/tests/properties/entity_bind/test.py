@@ -8,7 +8,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import (ASTNode, Field, LogicVarType, LongType, UserField,
-                         abstract, root_grammar_class)
+                         abstract)
 from langkit.expressions import AbstractProperty, Let, Property, Self, Bind
 from langkit.parsers import Grammar, Row, Tok
 
@@ -19,7 +19,6 @@ from utils import build_and_run
 Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
-@root_grammar_class
 class FooNode(ASTNode):
     prop = AbstractProperty(runtime_check=True, type=LongType, public=True)
 

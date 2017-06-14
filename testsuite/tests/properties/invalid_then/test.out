@@ -1,13 +1,13 @@
 == No argument ==
-File "test.py", line 30, in Example.prop
+File "test.py", line 29, in Example.prop
     Error: Invalid lambda for Then expression: exactly one parameter is required, without a default value
 
 == Two arguments ==
-File "test.py", line 30, in Example.prop
+File "test.py", line 29, in Example.prop
     Error: Invalid lambda for Then expression: exactly one parameter is required, without a default value
 
 == Default value ==
-File "test.py", line 30, in Example.prop
+File "test.py", line 29, in Example.prop
     Error: Invalid lambda for Then expression: exactly one parameter is required, without a default value
 
 Done

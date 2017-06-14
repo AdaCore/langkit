@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, LexicalEnvType, root_grammar_class
+from langkit.dsl import ASTNode, Field, LexicalEnvType
 from langkit.expressions import DynamicVariable, Property, Self
 from langkit.parsers import Grammar, Row, Tok
 
@@ -22,7 +22,6 @@ def run(expr):
 
     print('== {} =='.format(expr))
 
-    @root_grammar_class
     class FooNode(ASTNode):
         pass
 

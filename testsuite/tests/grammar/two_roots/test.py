@@ -3,12 +3,11 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import DiagnosticError, Diagnostics
-from langkit.dsl import ASTNode, root_grammar_class
+from langkit.dsl import ASTNode
 
 Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
-@root_grammar_class
 class FooNode(ASTNode):
     pass
 

@@ -1,5 +1,5 @@
 == Invalid field ==
-File "test.py", line 27, in Example.result
+File "test.py", line 26, in Example.result
     Error: AnalysisUnit values have no field (accessed field was foobar)
 
 Done

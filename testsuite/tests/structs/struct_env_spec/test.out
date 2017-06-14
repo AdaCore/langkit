@@ -1,4 +1,4 @@
-File "test.py", line 19, in StructA.env_spec
+File "test.py", line 18, in StructA.env_spec
     Error: Field env_spec is a <class 'langkit.envs.EnvSpec'>, but only instances of UserField subclasses are allowed in Struct subclasses
 
 Done

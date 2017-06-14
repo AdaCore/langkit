@@ -1,4 +1,4 @@
-File "test.py", line 29, in BarNode.base_prop
+File "test.py", line 28, in BarNode.base_prop
     Error: Derived and base properties don't have the same number of arguments, base has 1, derived has 0
 
 Done

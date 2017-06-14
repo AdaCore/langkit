@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, Token as TokenType, root_grammar_class
+from langkit.dsl import ASTNode, Field, Token as TokenType
 from langkit.parsers import Grammar, List, Or, Pick, Tok
 
 from lexer_example import Token
@@ -13,7 +13,6 @@ from utils import build_and_run
 Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
-@root_grammar_class
 class FooNode(ASTNode):
     pass
 

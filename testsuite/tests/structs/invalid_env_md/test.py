@@ -7,8 +7,7 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import DiagnosticError, Diagnostics
-from langkit.dsl import (ASTNode, Struct, T, UserField, env_metadata,
-                         root_grammar_class)
+from langkit.dsl import ASTNode, Struct, T, UserField, env_metadata
 from langkit.parsers import Grammar, Tok
 
 from lexer_example import Token
@@ -24,7 +23,6 @@ def run(md_constructor):
     print('== {} =='.format(md_constructor.__name__))
     Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
-    @root_grammar_class
     class FooNode(ASTNode):
         pass
 

@@ -1,4 +1,4 @@
-File "test.py", line 22, in StructB
+File "test.py", line 20, in StructB
     Error: Struct subclasses must derive from Struct only
 
 Done

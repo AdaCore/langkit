@@ -4,8 +4,7 @@ import itertools
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import (ASTNode, LexicalEnvType, BoolType, abstract,
-                         root_grammar_class)
+from langkit.dsl import ASTNode, LexicalEnvType, BoolType, abstract
 from langkit.expressions import (AbstractProperty, DynamicVariable, Literal,
                                  Property, Self)
 from langkit.parsers import Grammar, Row
@@ -36,7 +35,6 @@ def run(abstract_dyn_vars, concrete_dyn_vars):
     ))
     Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
-    @root_grammar_class
     class RootNode(ASTNode):
         pass
 

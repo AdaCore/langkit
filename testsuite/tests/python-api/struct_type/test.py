@@ -8,7 +8,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import (ASTNode, BoolType, Field, Struct, T,
-                         Token as TokenType, UserField, root_grammar_class)
+                         Token as TokenType, UserField)
 from langkit.expressions import langkit_property
 from langkit.parsers import Grammar, Tok
 
@@ -19,7 +19,6 @@ from utils import build_and_run
 Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
-@root_grammar_class
 class FooNode(ASTNode):
     pass
 

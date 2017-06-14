@@ -1,8 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import (ASTNode, LongType, Struct, UserField,
-                         root_grammar_class)
+from langkit.dsl import ASTNode, LongType, Struct, UserField
 from langkit.expressions import Property, New, Literal, No
 from langkit.parsers import Grammar, Row
 
@@ -26,7 +25,6 @@ def run(name, expr):
         a = UserField(type=LongType)
         b = UserField(type=LongType)
 
-    @root_grammar_class
     class FooNode(ASTNode):
         pass
 

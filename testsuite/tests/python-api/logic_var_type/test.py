@@ -9,7 +9,7 @@ import sys
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import (ASTNode, Field, LogicVarType, Token as TokenType,
-                         UserField, root_grammar_class)
+                         UserField)
 from langkit.expressions import langkit_property
 from langkit.parsers import Grammar, Tok
 
@@ -28,7 +28,6 @@ def run_test(title, run_main):
     print('-' * len(title))
     sys.stdout.flush()
 
-    @root_grammar_class
     class FooNode(ASTNode):
         var_field = UserField(type=LogicVarType, public=True)
 
