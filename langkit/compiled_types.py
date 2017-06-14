@@ -1332,16 +1332,10 @@ class StructMetaclass(CompiledTypeMetaclass):
         is_base = False  # Base StructType/ASTNodeType?
         is_root_grammar_class = False  # Root grammar class?
 
-        location = dct.get('_location')
-
         assert len(bases) == 1, (
             "Multiple inheritance for AST nodes is not supported"
         )
         base, = bases
-
-        # No matter what, reset all caches so that subclass don't "magically"
-        # inherit their parent's.
-        dct['_abstract_fields_dict_cache'] = {}
 
         # We want to check various inheritance facts:
         #
@@ -1384,19 +1378,6 @@ class StructMetaclass(CompiledTypeMetaclass):
         assert sum(1 for b in [is_astnode, is_struct] if b) == 1
         assert sum(1 for b in [is_base, is_root_grammar_class] if b) <= 1
 
-        # Compute the user name for this subclass. Only base classes are
-        # allowed to not to have an input user name: for them, create one
-        # anyway as Struct code assumes it exists (for diagnostics for
-        # instance). TODO: this exception should go away with the transition to
-        # instance-based compiled types.
-        cls_name = dct.get('_name')
-        if cls_name and is_keyword(cls_name):
-            cls_name = cls_name + names.Name('Node')
-        elif not cls_name:
-            assert is_base
-            cls_name = names.Name.from_camel(name)
-        dct['_name'] = cls_name
-
         # Get the fields this class defines. Remove them as class members: we
         # want them to be stored in their own dict (see "cls.fields" below).
         dct_fields = [] if is_base else dct['_fields']
@@ -1410,8 +1391,6 @@ class StructMetaclass(CompiledTypeMetaclass):
             dct.get('should_emit_array_type', True) and
             not is_root_grammar_class
         )
-        dct['location'] = location
-        dct['_doc'] = dct.get('_doc')
 
         # List types are resolved by construction: we create list types to
         # contain specific ASTNodeType subclasses. All other types are not
@@ -1992,6 +1971,21 @@ class StructType(CompiledType):
         ))
 
 
+def init_base_struct(cls, name, location, doc, fields):
+    """
+    Common initialization code for create_struct and create_astnode.
+    """
+    # Compute the user name for this subclass
+    cls._name = (name + names.Name('Node')) if is_keyword(name) else name
+    cls.location = location
+    cls._doc = doc
+    del fields  # TODO: move fields initialization code here
+
+    # No matter what, reset all caches so that subclass don't "magically"
+    # inherit their parent's.
+    cls._abstract_fields_dict_cache = {}
+
+
 def create_struct(name, location, doc, fields):
     """
     Create a StructType subclass.
@@ -2009,7 +2003,9 @@ def create_struct(name, location, doc, fields):
         '_doc': doc,
         '_fields': fields,
     }
-    return type(name.camel, (StructType, ), dct)
+    cls = type(name.camel, (StructType, ), dct)
+    init_base_struct(cls, name, location, doc, fields)
+    return cls
 
 
 class ASTNodeType(StructType):
@@ -2356,6 +2352,7 @@ def create_astnode(name, location, doc, base, fields, repr_name=None,
         '_has_abstract_list': has_abstract_list,
     }
     cls = type(name.camel, (ASTNodeType, ) if base is None else (base, ), dct)
+    init_base_struct(cls, name, location, doc, fields)
 
     # If this is the root grammar type, create the generic list type name
     if base is None:
