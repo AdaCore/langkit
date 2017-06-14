@@ -1378,10 +1378,6 @@ class StructMetaclass(CompiledTypeMetaclass):
         assert sum(1 for b in [is_astnode, is_struct] if b) == 1
         assert sum(1 for b in [is_base, is_root_grammar_class] if b) <= 1
 
-        # Get the fields this class defines. Remove them as class members: we
-        # want them to be stored in their own dict (see "cls.fields" below).
-        dct_fields = [] if is_base else dct['_fields']
-
         env_spec = dct.get('_env_spec', None)
         assert env_spec is None or is_astnode
         dct['is_env_spec_inherited'] = env_spec is None
@@ -1442,23 +1438,8 @@ class StructMetaclass(CompiledTypeMetaclass):
             else:
                 mcs.astnode_types.append(cls)
 
-        # This builds a list of fields in a specific order: first builtin
-        # fields, then subclass-specific fields.
-        fields = OrderedDict(
-            (mcs.builtin_properties() if is_root_grammar_class else [])
-            + dct_fields
-        )
-
-        # Associate each field and property to this ASTNodeType subclass, and
-        # assign them their name. Likewise for the environment specification.
-        for f_n, f_v in fields.items():
-            f_v.struct = cls
-            f_v.name = names.Name.from_lower(f_n)
         if env_spec:
             env_spec.ast_node = cls
-
-        cls._fields = fields
-
         return cls
 
     @classmethod
@@ -1979,7 +1960,12 @@ def init_base_struct(cls, name, location, doc, fields):
     cls._name = (name + names.Name('Node')) if is_keyword(name) else name
     cls.location = location
     cls._doc = doc
-    del fields  # TODO: move fields initialization code here
+
+    # Associate each field and property to this subclass and assign them names
+    for f_n, f_v in fields:
+        f_v.name = names.Name.from_lower(f_n)
+        f_v.struct = cls
+    cls._fields = OrderedDict(fields)
 
     # No matter what, reset all caches so that subclass don't "magically"
     # inherit their parent's.
@@ -2352,6 +2338,9 @@ def create_astnode(name, location, doc, base, fields, repr_name=None,
         '_has_abstract_list': has_abstract_list,
     }
     cls = type(name.camel, (ASTNodeType, ) if base is None else (base, ), dct)
+
+    if is_root:
+        fields = StructMetaclass.builtin_properties() + fields
     init_base_struct(cls, name, location, doc, fields)
 
     # If this is the root grammar type, create the generic list type name
