@@ -173,9 +173,9 @@ class Eq(AbstractExpression):
             # Handle checks between two subclasses without explicit casts. In
             # order to help users to detect dubious checks, forbid operands
             # that can never be equal because they have no subclass in common.
-            if issubclass(lhs.type, rhs.type):
+            if lhs.type.matches(rhs.type):
                 lhs = Cast.Expr(lhs, rhs.type)
-            elif issubclass(rhs.type, lhs.type):
+            elif rhs.type.matches(lhs.type):
                 rhs = Cast.Expr(rhs, lhs.type)
             else:
                 check_never_equal(False)
@@ -185,8 +185,8 @@ class Eq(AbstractExpression):
         elif lhs.type.is_entity_type:
             check_type_compatibility(rhs.type.is_entity_type)
             check_never_equal(
-                issubclass(lhs.type.el_type, rhs.type.el_type)
-                or issubclass(rhs.type.el_type, lhs.type.el_type)
+                lhs.type.el_type.matches(rhs.type.el_type)
+                or rhs.type.el_type.matches(lhs.type.el_type)
             )
             return self.make_expr_for_entities(lhs, rhs, self)
 

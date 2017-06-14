@@ -836,7 +836,7 @@ class Match(AbstractExpression):
                 match_type = resolve_type(argspec.defaults[0])
 
                 check_source_language(
-                    issubclass(match_type, T.root_node)
+                    match_type.is_ast_node
                     or match_type.is_entity_type,
                     'Invalid matching type: {}'.format(
                         match_type.name().camel

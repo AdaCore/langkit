@@ -1772,7 +1772,7 @@ class ASTNodeType(BaseStructType):
         for field, f_type in zip(fields, types):
             if field.type:
                 check_source_language(
-                    issubclass(f_type, field.type),
+                    f_type.matches(field.type),
                     "Field {} already had type {}, got {}".format(
                         field.qualname, field.type.name(), f_type.name()
                     )
@@ -1814,11 +1814,11 @@ class ASTNodeType(BaseStructType):
 
         :rtype: list[ASTNodeType]
         """
-        return reversed([
-            base_class for base_class in cls.mro()
-            if (issubtype(base_class, ASTNodeType)
-                and base_class is not ASTNodeType)
-        ])
+        result = []
+        while cls is not ASTNodeType:
+            result.append(cls)
+            cls = cls.base()
+        return reversed(result)
 
     @classmethod
     def base(cls):
@@ -2205,7 +2205,7 @@ def create_astnode(name, location, doc, base, fields, repr_name=None,
     is_list = base is not None and (is_root_list or base.is_list_type)
 
     if is_root_list:
-        assert issubtype(element_type, ASTNodeType)
+        assert element_type.is_ast_node
 
         # TODO: at this point, we need to make sure thas
         # element_type.has_abstract_list in the future.

@@ -996,20 +996,15 @@ class CompileCtx(object):
 
     @property
     def struct_types(self):
-        from langkit.compiled_types import (
-            CompiledTypeMetaclass, StructType, ASTNodeType
-        )
+        from langkit.compiled_types import CompiledTypeMetaclass
 
         def dependencies(struct_type):
             """
             Compute the set of dependencies for struct_type, namely the set of
             struct types that are used by its fields.
             """
-            return set(
-                f.type for f in struct_type._fields.values()
-                if issubclass(f.type, StructType)
-                and not issubclass(f.type, ASTNodeType)
-            )
+            return set(f.type for f in struct_type._fields.values()
+                       if f.type.is_struct_type)
 
         struct_types = CompiledTypeMetaclass.struct_types
 
