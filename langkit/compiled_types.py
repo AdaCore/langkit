@@ -1368,8 +1368,6 @@ class StructMetaclass(CompiledTypeMetaclass):
                 # class.
                 assert issubclass(base, mcs.root_grammar_class)
 
-            dct['is_root_node'] = is_root_grammar_class
-
         else:
             assert base is StructType
             is_struct = True
@@ -1378,68 +1376,13 @@ class StructMetaclass(CompiledTypeMetaclass):
         assert sum(1 for b in [is_astnode, is_struct] if b) == 1
         assert sum(1 for b in [is_base, is_root_grammar_class] if b) <= 1
 
-        env_spec = dct.get('_env_spec', None)
-        assert env_spec is None or is_astnode
-        dct['is_env_spec_inherited'] = env_spec is None
-        dct['env_spec'] = env_spec
-
-        dct['should_emit_array_type'] = (
-            dct.get('should_emit_array_type', True) and
-            not is_root_grammar_class
-        )
-
-        # List types are resolved by construction: we create list types to
-        # contain specific ASTNodeType subclasses. All other types are not
-        # resolved, only the grammar will resolve them.
-        dct['is_type_resolved'] = (
-            is_astnode and
-            (base.is_list_type or
-             dct.get('is_list_type', False) or
-             dct.get('is_generic_list_type', False))
-        )
-
-        # By default, ASTNodeType subtypes aren't abstract. The "abstract"
-        # decorator may change this attribute later. Likewise for synthetic
-        # nodes and nodes whose root list type is abstract.
-        dct['abstract'] = (
-            is_root_grammar_class or dct.get('_is_abstract', False)
-        )
-        dct['synthetic'] = dct.get('_is_synthetic', False)
-        dct['has_abstract_list'] = dct.get('_has_abstract_list', False)
-
-        # This metaclass will register subclasses automatically
-        dct['subclasses'] = []
-
-        if dct.get('is_generic_list_type', False):
-            @classmethod
-            def element_type(cls):
-                # The generic list type is not a real list type: only its
-                # subclasses will have a specific element type.
-                raise not_implemented_error(cls, cls.element_type)
-            dct['element_type'] = element_type
-
-        elif dct.get('is_root_list_type', False):
-            dct['is_collection'] = classmethod(lambda cls: True)
-            dct['element_type'] = classmethod(lambda cls: cls._element_type)
-
         cls = CompiledTypeMetaclass.__new__(mcs, name, bases, dct)
 
         # Now we have a class object, register it wherever it needs to be
         # registered.
-        if is_root_grammar_class:
-            mcs.root_grammar_class = cls
+        if not is_base and is_struct:
+            mcs.struct_types.append(cls)
 
-        elif is_astnode:
-            base.subclasses.append(cls)
-
-        if not is_base:
-            if is_struct:
-                mcs.struct_types.append(cls)
-            else:
-                mcs.astnode_types.append(cls)
-
-        if env_spec:
-            env_spec.ast_node = cls
         return cls
 
     @classmethod
@@ -1952,7 +1895,7 @@ class StructType(CompiledType):
         ))
 
 
-def init_base_struct(cls, name, location, doc, fields):
+def init_base_struct(cls, name, location, doc):
     """
     Common initialization code for create_struct and create_astnode.
     """
@@ -1961,15 +1904,21 @@ def init_base_struct(cls, name, location, doc, fields):
     cls.location = location
     cls._doc = doc
 
+    # No matter what, reset all caches so that subclass don't "magically"
+    # inherit their parent's.
+    cls._abstract_fields_dict_cache = {}
+
+
+def init_base_struct_fields(cls, fields):
+    """
+    Common initialization code for fields in create_struct and create_astnode.
+    """
+
     # Associate each field and property to this subclass and assign them names
     for f_n, f_v in fields:
         f_v.name = names.Name.from_lower(f_n)
         f_v.struct = cls
     cls._fields = OrderedDict(fields)
-
-    # No matter what, reset all caches so that subclass don't "magically"
-    # inherit their parent's.
-    cls._abstract_fields_dict_cache = {}
 
 
 def create_struct(name, location, doc, fields):
@@ -1990,7 +1939,8 @@ def create_struct(name, location, doc, fields):
         '_fields': fields,
     }
     cls = type(name.camel, (StructType, ), dct)
-    init_base_struct(cls, name, location, doc, fields)
+    init_base_struct(cls, name, location, doc)
+    init_base_struct_fields(cls, fields)
     return cls
 
 
@@ -2322,26 +2272,62 @@ def create_astnode(name, location, doc, base, fields, repr_name=None,
 
     assert generic_list_type_name is None or is_root
 
-    dct = {
-        '_name': name,
-        '_location': location,
-        '_doc': doc,
-        '_fields': fields,
-        '_repr_name': repr_name,
-        '_env_spec': env_spec,
-        'is_generic_list_type': is_generic_list_type,
-        'is_root_list_type': is_root_list,
-        'is_list_type': is_list,
-        '_element_type': element_type,
-        '_is_abstract': is_abstract or is_generic_list_type,
-        '_is_synthetic': is_synthetic,
-        '_has_abstract_list': has_abstract_list,
-    }
-    cls = type(name.camel, (ASTNodeType, ) if base is None else (base, ), dct)
+    cls = type(name.camel, (ASTNodeType, ) if base is None else (base, ), {})
+    init_base_struct(cls, name, location, doc)
 
+    # Register this new subclass where appropriate in StructMetaclass
+    if is_root:
+        StructMetaclass.root_grammar_class = cls
+    StructMetaclass.astnode_types.append(cls)
+
+    # Now we have an official root node type, we can create its builtin fields
     if is_root:
         fields = StructMetaclass.builtin_properties() + fields
-    init_base_struct(cls, name, location, doc, fields)
+    init_base_struct_fields(cls, fields)
+
+    cls.is_root_node = is_root
+    cls.is_generic_list_type = is_generic_list_type
+    cls.is_root_list_type = is_root_list
+    cls.is_list_type = is_list
+    cls.should_emit_array_type = not is_root
+
+    cls._repr_name = repr_name
+
+    if env_spec:
+        env_spec.ast_node = cls
+    cls.is_env_spec_inherited = env_spec is None
+    cls.env_spec = env_spec
+
+    # List types are resolved by construction: we create list types to contain
+    # specific ASTNodeType subclasses. All other types are not resolved, only
+    # the grammar will resolve them.
+    cls.is_type_resolved = is_list
+
+    # By default, ASTNodeType subtypes aren't abstract. The "abstract"
+    # decorator may change this attribute later. Likewise for synthetic nodes
+    # and nodes whose root list type is abstract.
+    cls.abstract = is_abstract or is_root or is_generic_list_type
+    cls.synthetic = is_synthetic
+    cls.has_abstract_list = has_abstract_list
+
+    # Prepare the list of subclasses for this node type and, if applicable,
+    # register it as a subclass of its base.
+    cls.subclasses = []
+    if not is_root:
+        base.subclasses.append(cls)
+
+    if is_generic_list_type:
+        @classmethod
+        def element_type(cls):
+            # The generic list type is not a real list type: only its
+            # subclasses will have a specific element type.
+            raise not_implemented_error(cls, cls.element_type)
+        cls.element_type = element_type
+
+    elif is_root_list:
+        cls._element_type = element_type
+        cls.is_collection = classmethod(lambda cls: True)
+        cls.element_type = classmethod(lambda cls: cls._element_type)
 
     # If this is the root grammar type, create the generic list type name
     if base is None:
