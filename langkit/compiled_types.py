@@ -1751,13 +1751,16 @@ class StructType(CompiledType):
     @classmethod
     def get_inheritance_chain(cls):
         """
-        Return a list for all classes from ASTNodeType to `cls` in the
-        inheritance chain.
+        Return a list for all classes from ASTNodeType (excluded) to `cls`
+        (included) in the inheritance chain. Root-most classes come first.
 
         :rtype: list[ASTNodeType]
         """
-        return reversed([base_class for base_class in cls.mro()
-                         if getattr(base_class, 'is_ast_node', False)])
+        return reversed([
+            base_class for base_class in cls.mro()
+            if (issubtype(base_class, ASTNodeType)
+                and base_class is not ASTNodeType)
+        ])
 
     @classmethod
     def get_properties(cls, predicate=None, include_inherited=True):
