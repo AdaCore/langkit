@@ -1309,12 +1309,6 @@ class BuiltinField(UserField):
         self.should_emit = False
 
 
-# These will be replaced by true class definitions. Before this happens,
-# StructMetaclass will see these None values.
-StructType = None
-ASTNodeType = None
-
-
 class TypeDeclaration(object):
     """Simple holder for generated type declarations."""
 
