@@ -1322,69 +1322,6 @@ class StructMetaclass(CompiledTypeMetaclass):
     :type: StructType
     """
 
-    def __new__(mcs, name, bases, dct):
-        # The two following booleans are mutually exclusive and at least one
-        # will be True.
-        is_astnode = False
-        is_struct = False
-
-        # The following are also mutually exclusive but they can be all False
-        is_base = False  # Base StructType/ASTNodeType?
-        is_root_grammar_class = False  # Root grammar class?
-
-        assert len(bases) == 1, (
-            "Multiple inheritance for AST nodes is not supported"
-        )
-        base, = bases
-
-        # We want to check various inheritance facts:
-        #
-        # * Every type deriving from StructType must derive from StructType
-        #   itself (no further subclassing).
-        #
-        # * Every type deriving from ASTNodeType must derive from a single user
-        #   defined subclass of ASTNodeType: the root grammar class.
-        #
-        # Of course this does not apply to StructType and ASTNodeType
-        # themselves, which are created before all other classes. The root
-        # grammar class also requires special handling.
-        base_classes = [StructType, ASTNodeType]
-        if not all(base_classes):
-            is_base = True
-            is_struct = StructType is None
-            is_astnode = not is_struct and ASTNodeType is None
-
-        elif base.is_ast_node:
-            is_astnode = True
-            # If we have no root grammar class yet and reach this point,
-            # the type necessarily derives from ASTNodeType. It's the root
-            # grammar class.
-            if mcs.root_grammar_class is None:
-                assert base is ASTNodeType
-                is_root_grammar_class = True
-
-            else:
-                # Check that it does indeed derives from the root grammar
-                # class.
-                assert issubclass(base, mcs.root_grammar_class)
-
-        else:
-            assert base is StructType
-            is_struct = True
-
-        # This is a formal explanation for the top comments:
-        assert sum(1 for b in [is_astnode, is_struct] if b) == 1
-        assert sum(1 for b in [is_base, is_root_grammar_class] if b) <= 1
-
-        cls = CompiledTypeMetaclass.__new__(mcs, name, bases, dct)
-
-        # Now we have a class object, register it wherever it needs to be
-        # registered.
-        if not is_base and is_struct:
-            mcs.struct_types.append(cls)
-
-        return cls
-
     @classmethod
     def builtin_properties(mcs):
         """
@@ -1523,7 +1460,6 @@ class StructType(CompiledType):
     :type: dict[str, Field]
     """
 
-    __metaclass__ = StructMetaclass
     is_ptr = False
     null_allowed = True
 
@@ -1941,6 +1877,7 @@ def create_struct(name, location, doc, fields):
     cls = type(name.camel, (StructType, ), dct)
     init_base_struct(cls, name, location, doc)
     init_base_struct_fields(cls, fields)
+    StructMetaclass.struct_types.append(cls)
     return cls
 
 
