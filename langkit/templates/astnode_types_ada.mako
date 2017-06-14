@@ -592,9 +592,10 @@
                     (${root_node_type_name} (B.F_Val));
                end if;
             end if;
-         
+
          % if is_array_type(exprs.mappings.type):
          end loop;
+         Dec_Ref (Env);
          Dec_Ref (Mappings);
          % endif
       end;
