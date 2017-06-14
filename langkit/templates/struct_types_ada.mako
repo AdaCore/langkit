@@ -55,10 +55,6 @@
 
    <% fields = cls.get_fields(include_inherited=False) %>
 
-   % for prop in cls.get_properties(include_inherited=False):
-   ${prop.prop_def}
-   % endfor
-
    % if cls.is_refcounted():
 
       -------------
