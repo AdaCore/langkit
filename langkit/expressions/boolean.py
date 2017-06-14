@@ -2,9 +2,8 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import (
-    BoolType, EquationType, LexicalEnvType, LongType, StructType, Symbol, T
-)
+from langkit.compiled_types import (BoolType, EquationType, LexicalEnvType,
+                                    LongType, Symbol, T)
 from langkit.diagnostics import check_source_language
 from langkit.expressions.analysis_units import AnalysisUnitType
 from langkit.expressions.base import (
@@ -13,7 +12,6 @@ from langkit.expressions.base import (
     construct, render
 )
 from langkit.expressions.envs import EmptyEnv
-from langkit.utils import assert_type
 
 
 @attr_call('and_then', 'and')
@@ -490,14 +488,8 @@ class Then(AbstractExpression):
         if self.default_val is None:
             if then_expr.type.matches(BoolType):
                 default_expr = construct(False)
-            elif then_expr.type.is_struct_type:
-                default_expr = construct(No(
-                    # Because we're doing issubclass instead of isinstance,
-                    # PyCharm do not understand that then_exp.type is a
-                    # StructType, so the following is necessary not to have
-                    # warnings.
-                    assert_type(then_expr.type, StructType)
-                ))
+            elif then_expr.type.is_base_struct_type:
+                default_expr = construct(No(then_expr.type))
             elif then_expr.type.matches(LexicalEnvType):
                 default_expr = construct(EmptyEnv)
             elif then_expr.type.matches(Symbol):
@@ -511,9 +503,9 @@ class Then(AbstractExpression):
 
                 check_source_language(
                     False,
-                    "Then expression should have a default value provided, "
-                    "in cases where the provided function's return type is "
-                    "not Bool, here {}".format(then_expr.type.name().camel)
+                    "Then expression should have a default value provided,"
+                    " in cases where the provided function's return type is"
+                    " not Bool, here {}".format(then_expr.type.name().camel)
                 )
         else:
             default_expr = construct(self.default_val, then_expr.type)

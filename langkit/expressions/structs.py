@@ -159,7 +159,7 @@ class IsNull(AbstractExpression):
 
 class New(AbstractExpression):
     """
-    Abstract expression to create StructType or ASTNode values.
+    Abstract expression to create StructType or ASTNodeType values.
     """
 
     class StructExpr(ComputingExpr):
@@ -247,9 +247,9 @@ class New(AbstractExpression):
 
     def __init__(self, struct_type, **field_values):
         """
-        :param langkit.compiled_types.StructType struct_type: StructType
-            subclass (but not an AST node) for the struct type this expression
-            must create.
+        :param langkit.compiled_types.BaseStructType struct_type:
+            BaseStructType subclass for the struct type this expression must
+            create.
         :param dict[str, AbstractExpression] fields: Values to assign to the
             fields for the created struct value.
         """
@@ -261,8 +261,8 @@ class New(AbstractExpression):
         self.struct_type = resolve_type(self.struct_type)
 
         check_source_language(
-            self.struct_type.is_struct_type,
-            "Invalid type, expected struct type, got {}".format(
+            self.struct_type.is_base_struct_type,
+            "Invalid type, expected struct type or AST node, got {}".format(
                 self.struct_type.name().camel
             )
         )
@@ -556,7 +556,7 @@ class FieldAccess(AbstractExpression):
         pfx_type = self.receiver_expr.type
 
         check_source_language(
-            pfx_type.is_struct_type,
+            pfx_type.is_base_struct_type,
             '{} values have no field (accessed field was {})'.format(
                 pfx_type.name().camel,
                 self.field

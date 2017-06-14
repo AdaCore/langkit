@@ -315,6 +315,11 @@ class CompiledType(object):
     * convert_to_storage_expr.
     """
 
+    is_base_struct_type = False
+    """
+    Whether this type is a subclass of BaseStructType.
+    """
+
     is_struct_type = False
     """
     Whether this type is a subclass of StructType.
@@ -1345,14 +1350,13 @@ class TypeDeclaration(object):
         )
 
 
-class StructType(CompiledType):
+class BaseStructType(CompiledType):
     """
-    Base class for all user struct-like composite types, such as POD structs
-    and AST nodes.
+    Base class to share common behavior between StructType and ASTNodeType.
+    """
 
-    User subclasses deriving from StructType will define by-value POD types
-    that cannot be subclassed themselves.
-    """
+    _internal = True
+    is_base_struct_type = True
 
     dsl_decl = None
     """
@@ -1362,24 +1366,16 @@ class StructType(CompiledType):
     :type: langkit.dsl.Struct|None
     """
 
-    env_spec = None
-    ":type: langkit.compiled_types.EnvSpec"
+    _name = None
+    """
+    Name for this type.
+    :type: names.Name
+    """
 
     _fields = OrderedDict()
     """
     The fields for this StructType, instantiated by the metaclass
     :type: dict[str, Field]
-    """
-
-    is_ptr = False
-    null_allowed = True
-
-    is_struct_type = True
-
-    _name = None
-    """
-    Name for this type.
-    :type: names.Name
     """
 
     _abstract_fields_dict_cache = {}
@@ -1392,99 +1388,29 @@ class StructType(CompiledType):
     :type: dict[(bool, AbstractNodeData), dict[str, AbstractField]]
     """
 
-    is_ada_record = True
+    @classmethod
+    def name(cls):
+        """
+        Return the name that will be used in code generation for this
+        struct/AST node type.
 
-    # ASTNodeType subclasses are exposed by default, and a compile pass will
-    # tag all StructType subclasses that are exposed through the public API.
-    _exposed = False
+        :rtype: names.Name
+        """
+        return cls._name
 
     @classmethod
-    @memoized
-    def is_refcounted(cls):
-        return any(f.type.is_refcounted() for f in cls._fields.values())
+    def doc(cls):
+        return cls._doc
 
     @classmethod
-    def is_builtin(cls):
-        """
-        Some structs are considered "built-in", which means that either no
-        code needs to be emitted for them, either special code will be
-        emitted on a special path, and we can omit them from regular code
-        generation.
-
-        :rtype: bool
-        """
-        return cls in (
-            # The root grammar class and the generic list types are emitted
-            # separately from the others.
-            CompiledTypeMetaclass.root_grammar_class,
-            CompiledTypeMetaclass.root_grammar_class.generic_list_type,
-
-            # The env metadata struct is emitted separately from the others
-            T.env_md,
-
-            # Entitiy info and the root node's entity type is not emitted per
-            # se, because it is a generic instantiation from
-            # Langkit_Support.Lexical_Env.
-            CompiledTypeMetaclass.root_grammar_class.entity_info(),
-            CompiledTypeMetaclass.root_grammar_class.entity(),
-        )
+    def c_type(cls, c_api_settings):
+        return CAPIType(c_api_settings, cls.name())
 
     @classmethod
-    def set_types(cls, types):
-        """
-        Associate `types` (a list of CompiledType) to fields in `cls` . It is
-        valid to perform this association multiple times as long as types are
-        consistent.
-
-        :type types: list[CompiledType]
-        """
-        fields = cls.get_parse_fields()
-
-        check_source_language(
-            len(fields) == len(types), "{} has {} fields ({} types given). You"
-            " probably have inconsistent grammar rules and type "
-            "declarations".format(cls.name().camel, len(fields), len(types))
-        )
-
-        # TODO: instead of expecting types to be subtypes, we might want to
-        # perform type unification (take the nearest common ancestor for all
-        # field types). But then again, maybe not, it might be too confusing.
-        for field, f_type in zip(fields, types):
-            if field.type:
-                check_source_language(
-                    issubclass(f_type, field.type),
-                    "Field {} already had type {}, got {}".format(
-                        field.qualname, field.type.name(), f_type.name()
-                    )
-                )
-
-        # Only assign types if cls was not yet typed. In the case where it
-        # was already typed, we checked above that the new types were
-        # consistent with the already present ones.
-        if not cls.is_type_resolved:
-            cls.is_type_resolved = True
-
-            for inferred_type, field in zip(types, fields):
-
-                # At this stage, if the field has a type, it means that the
-                # user assigned it one originally. In this case we will use the
-                # inferred type for checking only (raising an assertion if it
-                # does not correspond).
-                if field.type:
-                    with field.diagnostic_context():
-                        check_source_language(
-                            # Using matches here allows the user to annotate a
-                            # field with a more general type than the one
-                            # inferred.
-                            inferred_type.matches(field.type),
-                            'Expected type {} but type inferenced yielded type'
-                            ' {}'.format(
-                                field.type.name().camel,
-                                inferred_type.name().camel
-                            )
-                        )
-                else:
-                    field.type = inferred_type
+    def py_nullexpr(cls):
+        return '{}({})'.format(cls.name().camel, ', '.join(
+            f.type.py_nullexpr() for f in cls.get_fields()
+        ))
 
     @classmethod
     def add_field(cls, field):
@@ -1497,70 +1423,6 @@ class StructType(CompiledType):
         assert not cls._abstract_fields_dict_cache
         cls._fields[field._name.lower] = field
         field.struct = cls
-
-    @classmethod
-    def get_inheritance_chain(cls):
-        """
-        Return a list for all classes from ASTNodeType (excluded) to `cls`
-        (included) in the inheritance chain. Root-most classes come first.
-
-        :rtype: list[ASTNodeType]
-        """
-        return reversed([
-            base_class for base_class in cls.mro()
-            if (issubtype(base_class, ASTNodeType)
-                and base_class is not ASTNodeType)
-        ])
-
-    @classmethod
-    def get_properties(cls, predicate=None, include_inherited=True):
-        """
-        Return the list of all the fields `cls` has.
-
-        :param predicate: Predicate to filter fields if needed.
-        :type predicate: None|(Field) -> bool
-
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
-
-        :rtype: list[langkit.expressions.base.PropertyDef]
-        """
-        return cls.get_abstract_fields(
-            lambda f: f.is_property and (predicate is None or predicate(f)),
-            include_inherited
-        )
-
-    @classmethod
-    def get_memoized_properties(cls, include_inherited=False):
-        """
-        Return the list of all memoized properties `cls` has.
-
-        :param bool include_inherited: If true, include inheritted properties
-            in the returned list. Return only properties that were part of the
-            declaration of this node otherwise.
-
-        :rtype: list[langkit.expressions.base.PropertyDef]
-        """
-        return cls.get_properties(lambda p: p.memoized, include_inherited)
-
-    @classmethod
-    def get_parse_fields(cls, predicate=None, include_inherited=True):
-        """
-        Return the list of all the parse fields `cls` has, including its
-        parents'.
-
-        :param predicate: Predicate to filter fields if needed.
-        :type predicate: None|(Field) -> bool
-
-        :param bool include_inherited: If true, include inheritted fields in
-            the returned list. Return only fields that were part of the
-            declaration of this node otherwise.
-
-        :rtype: list[Field]
-        """
-        return cls.get_abstract_fields(predicate, include_inherited,
-                                       field_class=Field)
 
     @classmethod
     def get_user_fields(cls, predicate=None, include_inherited=True):
@@ -1666,42 +1528,56 @@ class StructType(CompiledType):
         cls._abstract_fields_dict_cache[key] = result
         return result
 
-    @classmethod
-    def name(cls):
-        """
-        Return the name that will be used in code generation for this AST node
-        type.
-        """
-        return cls._name
+
+class StructType(BaseStructType):
+    """
+    Base class for all structs (POD composite types).
+
+    All subclasses must derive StructType directly: further subclassing is
+    forbiden.
+    """
+
+    is_ptr = False
+    null_allowed = True
+    is_struct_type = True
+    is_ada_record = True
+
+    # A compile pass will tag all StructType subclasses that are exposed
+    # through the public API.
+    _exposed = False
 
     @classmethod
-    def repr_name(cls):
-        """Return a name that will be used when serializing this AST node."""
-        # This name is used by pretty printers-like code: we need the
-        # "original" node name here, not keyword-escaped ones.
-        result = getattr(cls, '_repr_name') or cls.__name__
-        return result
+    @memoized
+    def is_refcounted(cls):
+        return any(f.type.is_refcounted() for f in cls._fields.values())
+
+    @classmethod
+    def is_builtin(cls):
+        """
+        Some structs are considered "built-in", which means that either no code
+        needs to be emitted for them, either special code will be emitted on a
+        special path, and we can omit them from regular code generation.
+
+        :rtype: bool
+        """
+        return cls in (
+            # The env metadata struct is emitted separately from the others
+            T.env_md,
+
+            # Entitiy info and the root node's entity type is not emitted per
+            # se, because it is a generic instantiation from
+            # Langkit_Support.Lexical_Env.
+            CompiledTypeMetaclass.root_grammar_class.entity_info(),
+            CompiledTypeMetaclass.root_grammar_class.entity(),
+        )
 
     @classmethod
     def nullexpr(cls):
         """
-        Return a value that can be considered as "null" for this AST node type.
-        It indicates the absence of AST node.
-
+        Return a value that can be considered as "null" for this struct type.
         :rtype: str
         """
-        if cls.is_ptr:
-            return null_constant()
-        else:
-            return (names.Name('No') + cls.name()).camel_with_underscores
-
-    @classmethod
-    def doc(cls):
-        return cls._doc
-
-    @classmethod
-    def c_type(cls, c_api_settings):
-        return CAPIType(c_api_settings, cls.name())
+        return (names.Name('No') + cls.name()).camel_with_underscores
 
     @classmethod
     def c_inc_ref(cls, capi):
@@ -1722,12 +1598,6 @@ class StructType(CompiledType):
         :rtype: str
         """
         return capi.get_name(cls.name() + names.Name('Dec_Ref'))
-
-    @classmethod
-    def py_nullexpr(cls):
-        return '{}({})'.format(cls.name().camel, ', '.join(
-            f.type.py_nullexpr() for f in cls.get_fields()
-        ))
 
 
 def init_base_struct(cls, name, location, doc):
@@ -1780,7 +1650,7 @@ def create_struct(name, location, doc, fields):
     return cls
 
 
-class ASTNodeType(StructType):
+class ASTNodeType(BaseStructType):
     """
     Base class for all user AST nodes.
 
@@ -1794,6 +1664,7 @@ class ASTNodeType(StructType):
     """
 
     is_ptr = True
+    null_allowed = True
     abstract = False
     synthetic = False
     is_root_node = False
@@ -1812,6 +1683,9 @@ class ASTNodeType(StructType):
 
     :type: Parser
     """
+
+    env_spec = None
+    ":type: langkit.compiled_types.EnvSpec"
 
     generic_list_type = None
     """
@@ -1835,8 +1709,116 @@ class ASTNodeType(StructType):
     _exposed = True
 
     @classmethod
+    def repr_name(cls):
+        """
+        Return a name that will be used when serializing this AST node.
+        :rtype: str
+        """
+        # This name is used by pretty printers-like code: we need the
+        # "original" node name here, not keyword-escaped ones.
+        result = getattr(cls, '_repr_name') or cls.__name__
+        return result
+
+    @classmethod
+    def nullexpr(cls):
+        """
+        Return a value that can be considered as "null" for this AST node type.
+        It indicates the absence of AST node.
+
+        :rtype: str
+        """
+        return null_constant()
+
+    @classmethod
     def is_refcounted(cls):
         return False
+
+    @classmethod
+    def is_builtin(cls):
+        """
+        Some AST nodes are considered "built-in", which means that either no
+        code needs to be emitted for them, either special code will be emitted
+        on a special path, and we can omit them from regular code generation.
+
+        :rtype: bool
+        """
+        return cls in (
+            # The root grammar class and the generic list types are emitted
+            # separately from the others.
+            CompiledTypeMetaclass.root_grammar_class,
+            CompiledTypeMetaclass.root_grammar_class.generic_list_type,
+        )
+
+    @classmethod
+    def set_types(cls, types):
+        """
+        Associate `types` (a list of CompiledType) to fields in `cls` . It is
+        valid to perform this association multiple times as long as types are
+        consistent.
+
+        :type types: list[CompiledType]
+        """
+        fields = cls.get_parse_fields()
+
+        check_source_language(
+            len(fields) == len(types), "{} has {} fields ({} types given). You"
+            " probably have inconsistent grammar rules and type "
+            "declarations".format(cls.name().camel, len(fields), len(types))
+        )
+
+        # TODO: instead of expecting types to be subtypes, we might want to
+        # perform type unification (take the nearest common ancestor for all
+        # field types). But then again, maybe not, it might be too confusing.
+        for field, f_type in zip(fields, types):
+            if field.type:
+                check_source_language(
+                    issubclass(f_type, field.type),
+                    "Field {} already had type {}, got {}".format(
+                        field.qualname, field.type.name(), f_type.name()
+                    )
+                )
+
+        # Only assign types if cls was not yet typed. In the case where it
+        # was already typed, we checked above that the new types were
+        # consistent with the already present ones.
+        if not cls.is_type_resolved:
+            cls.is_type_resolved = True
+
+            for inferred_type, field in zip(types, fields):
+
+                # At this stage, if the field has a type, it means that the
+                # user assigned it one originally. In this case we will use the
+                # inferred type for checking only (raising an assertion if it
+                # does not correspond).
+                if field.type:
+                    with field.diagnostic_context():
+                        check_source_language(
+                            # Using matches here allows the user to annotate a
+                            # field with a more general type than the one
+                            # inferred.
+                            inferred_type.matches(field.type),
+                            'Expected type {} but type inferenced yielded type'
+                            ' {}'.format(
+                                field.type.name().camel,
+                                inferred_type.name().camel
+                            )
+                        )
+                else:
+                    field.type = inferred_type
+
+    @classmethod
+    def get_inheritance_chain(cls):
+        """
+        Return a list for all classes from ASTNodeType (excluded) to `cls`
+        (included) in the inheritance chain. Root-most classes come first.
+
+        :rtype: list[ASTNodeType]
+        """
+        return reversed([
+            base_class for base_class in cls.mro()
+            if (issubtype(base_class, ASTNodeType)
+                and base_class is not ASTNodeType)
+        ])
 
     @classmethod
     def base(cls):
@@ -1867,6 +1849,56 @@ class ASTNodeType(StructType):
              for subcls in sorted_direct_subclasses),
             []
         )
+
+    @classmethod
+    def get_parse_fields(cls, predicate=None, include_inherited=True):
+        """
+        Return the list of all the parse fields `cls` has, including its
+        parents'.
+
+        :param predicate: Predicate to filter fields if needed.
+        :type predicate: None|(Field) -> bool
+
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :rtype: list[Field]
+        """
+        return cls.get_abstract_fields(predicate, include_inherited,
+                                       field_class=Field)
+
+    @classmethod
+    def get_properties(cls, predicate=None, include_inherited=True):
+        """
+        Return the list of all the fields `cls` has.
+
+        :param predicate: Predicate to filter fields if needed.
+        :type predicate: None|(Field) -> bool
+
+        :param bool include_inherited: If true, include inheritted fields in
+            the returned list. Return only fields that were part of the
+            declaration of this node otherwise.
+
+        :rtype: list[langkit.expressions.base.PropertyDef]
+        """
+        return cls.get_abstract_fields(
+            lambda f: f.is_property and (predicate is None or predicate(f)),
+            include_inherited
+        )
+
+    @classmethod
+    def get_memoized_properties(cls, include_inherited=False):
+        """
+        Return the list of all memoized properties `cls` has.
+
+        :param bool include_inherited: If true, include inheritted properties
+            in the returned list. Return only properties that were part of the
+            declaration of this node otherwise.
+
+        :rtype: list[langkit.expressions.base.PropertyDef]
+        """
+        return cls.get_properties(lambda p: p.memoized, include_inherited)
 
     @classmethod
     def fields_with_accessors(cls):
@@ -2568,7 +2600,7 @@ class TypeRepo(object):
                 prefix = self.get()
                 if (
                     name in ('array_type', 'list_type', 'entity')
-                    or not issubtype(prefix, StructType)
+                    or not issubtype(prefix, BaseStructType)
                 ):
                     return getattr(prefix, name)
                 else:
