@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 from langkit.compile_context import CompileCtx
-from langkit.compiled_types import CompiledTypeMetaclass, StructMetaclass
+from langkit.compiled_types import CompiledTypeMetaclass
 from langkit.diagnostics import DiagnosticError
 from langkit.dsl import _StructMetaclass, _ASTNodeMetaclass, _EnumNodeMetaclass
 from langkit.expressions import Self
@@ -139,11 +139,11 @@ def reset_langkit():
     TODO: this is a hack to workaround another hack. At some point in the
     future, we should get rid of this global state in Langkit.
     """
-    StructMetaclass.root_grammar_class = None
-    StructMetaclass.astnode_types = []
-    StructMetaclass.struct_types = []
-    StructMetaclass.env_metadata = None
-    StructMetaclass.entity_info = None
+    CompiledTypeMetaclass.root_grammar_class = None
+    CompiledTypeMetaclass.astnode_types = []
+    CompiledTypeMetaclass.struct_types = []
+    CompiledTypeMetaclass.env_metadata = None
+    CompiledTypeMetaclass.entity_info = None
     Self.unfreeze()
 
     CompiledTypeMetaclass.types = []

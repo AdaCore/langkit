@@ -5,7 +5,7 @@ from lib2to3.fixer_util import Call, KeywordArg, Name, Attr
 from lib2to3.pygram import python_symbols as syms
 from lib2to3.pytree import Node
 
-from langkit.compiled_types import StructMetaclass
+from langkit.compiled_types import CompiledTypeMetaclass
 from langkit.utils import memoized
 
 
@@ -35,7 +35,7 @@ class FixAnnotateFieldsTypes(fixer_base.BaseFix):
         :rtype: dict[str, ASTNodeType]
         """
         nodes = {}
-        for astnode_type in StructMetaclass.astnode_types:
+        for astnode_type in CompiledTypeMetaclass.astnode_types:
             nodes[astnode_type.__name__] = astnode_type
 
         return nodes

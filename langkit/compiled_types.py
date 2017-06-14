@@ -207,6 +207,60 @@ class CompiledTypeMetaclass(type):
     :rtype: dict[str, CompiledType]
     """
 
+    astnode_types = []
+    """
+    List of ASTNodeType subclasses. This list is updated every time a new
+    subclass is created.
+
+    :type: list[ASTNodeType]
+    """
+
+    struct_types = []
+    """
+    List of all StructType subclasses.
+
+    :type: list[StructType]
+    """
+
+    pending_list_types = []
+    """
+    Set of ASTNodeType subclasses for list types that are created while there
+    is no context.
+
+    :type: list[ASTNodeType]
+    """
+
+    pending_array_types = []
+    """
+    Set of ArrayType subclasses that are created while there is no context.
+
+    :type: list[langkit.compiled_types.ArrayType]
+    """
+
+    root_grammar_class = None
+    """
+    The ASTNodeType subclass used as a root type. Every other ASTNodeType
+    subclass must derive directly or indirectly from that class.
+
+    :type: ASTNodeType
+    """
+
+    env_metadata = None
+    """
+    The StrucType subclass used as metadata for the lexical environments
+    values.
+
+    :type: StructType
+    """
+
+    entity_info = None
+    """
+    The StructType subclass to contain all entity information, except the node
+    itself.
+
+    :type: StructType
+    """
+
     def __new__(mcs, name, bases, dct):
         cls = type.__new__(mcs, name, bases, dct)
 
@@ -525,7 +579,7 @@ class CompiledType(object):
         if ctx:
             ctx.array_types.add(cls)
         else:
-            StructMetaclass.pending_array_types.append(cls)
+            CompiledTypeMetaclass.pending_array_types.append(cls)
         return cls
 
 
@@ -1261,68 +1315,6 @@ StructType = None
 ASTNodeType = None
 
 
-class StructMetaclass(CompiledTypeMetaclass):
-    """
-    Internal metaclass for AST nodes, used to ease fields handling during code
-    generation.
-    """
-
-    astnode_types = []
-    """
-    List of ASTNodeType types. This list is updated every time a new astnode
-    type is created.
-
-    :type: list[ASTNodeType]
-    """
-
-    struct_types = []
-    """
-    List of all plain struct types.
-
-    :type: list[StructType]
-    """
-
-    pending_list_types = []
-    """
-    Set of ASTNodeType subclasses for list types that are created while there
-    is no context.
-
-    :type: list[ASTNodeType]
-    """
-
-    pending_array_types = []
-    """
-    Set of ArrayType subclasses that are created while there is no context.
-
-    :type: list[langkit.compiled_types.ArrayType]
-    """
-
-    root_grammar_class = None
-    """
-    The class used as a root for the whole ASTNodeType hierarchy for the
-    currently compiled grammar. Every AST node must derive directly or
-    indirectly from that class.
-
-    :type: ASTNodeType
-    """
-
-    env_metadata = None
-    """
-    The class designing the type used as metadata for the lexical environments
-    values. Must be a pure struct type.
-
-    :type: StructType
-    """
-
-    entity_info = None
-    """
-    StructType subclass to contain all entity information, except the node
-    itself.
-
-    :type: StructType
-    """
-
-
 class TypeDeclaration(object):
     """Simple holder for generated type declarations."""
 
@@ -1430,8 +1422,8 @@ class StructType(CompiledType):
         return cls in (
             # The root grammar class and the generic list types are emitted
             # separately from the others.
-            StructMetaclass.root_grammar_class,
-            StructMetaclass.root_grammar_class.generic_list_type,
+            CompiledTypeMetaclass.root_grammar_class,
+            CompiledTypeMetaclass.root_grammar_class.generic_list_type,
 
             # The env metadata struct is emitted separately from the others
             T.env_md,
@@ -1439,8 +1431,8 @@ class StructType(CompiledType):
             # Entitiy info and the root node's entity type is not emitted per
             # se, because it is a generic instantiation from
             # Langkit_Support.Lexical_Env.
-            StructMetaclass.root_grammar_class.entity_info(),
-            StructMetaclass.root_grammar_class.entity(),
+            CompiledTypeMetaclass.root_grammar_class.entity_info(),
+            CompiledTypeMetaclass.root_grammar_class.entity(),
         )
 
     @classmethod
@@ -1802,7 +1794,7 @@ def create_struct(name, location, doc, fields):
     cls = type(name.camel, (StructType, ), dct)
     init_base_struct(cls, name, location, doc)
     init_base_struct_fields(cls, fields)
-    StructMetaclass.struct_types.append(cls)
+    CompiledTypeMetaclass.struct_types.append(cls)
     return cls
 
 
@@ -1960,7 +1952,7 @@ class ASTNodeType(StructType):
         cls = create_astnode(
             name=cls.name() + names.Name('List'),
             location=None, doc=None,
-            base=StructMetaclass.root_grammar_class.generic_list_type,
+            base=CompiledTypeMetaclass.root_grammar_class.generic_list_type,
             fields=[], element_type=cls
         )
 
@@ -1968,7 +1960,7 @@ class ASTNodeType(StructType):
         if ctx:
             ctx.list_types.add(cls._element_type)
         else:
-            StructMetaclass.pending_list_types.append(cls)
+            CompiledTypeMetaclass.pending_list_types.append(cls)
 
         return cls
 
@@ -1981,8 +1973,8 @@ class ASTNodeType(StructType):
         # This is manual memoization. It is necessary because memoization does
         # not play well with class method when we want the memoization to be
         # common to the whole class hierarchy.
-        if not StructMetaclass.entity_info:
-            StructMetaclass.entity_info = create_struct(
+        if not CompiledTypeMetaclass.entity_info:
+            CompiledTypeMetaclass.entity_info = create_struct(
                 names.Name('Entity_Info'), None, None,
                 [
                     ('MD', BuiltinField(
@@ -1997,7 +1989,7 @@ class ASTNodeType(StructType):
                                                 doc=""))
                 ],
             )
-        return StructMetaclass.entity_info
+        return CompiledTypeMetaclass.entity_info
 
     @classmethod
     @memoized
@@ -2075,13 +2067,14 @@ class ASTNodeType(StructType):
         """
         Return properties available for all AST nodes.
 
-        Note that StructMetaclass.root_grammar_class must be defined first.
+        Note that CompiledTypeMetaclass.root_grammar_class must be defined
+        first.
 
         :rtype: list[(str, AbstractNodeData)]
         """
         from langkit.expressions import PropertyDef
 
-        root_type = StructMetaclass.root_grammar_class
+        root_type = CompiledTypeMetaclass.root_grammar_class
         assert root_type
 
         # Note that we must not provide implementation for them here (no
@@ -2214,10 +2207,10 @@ def create_astnode(name, location, doc, base, fields, repr_name=None,
     cls = type(name.camel, (ASTNodeType, ) if base is None else (base, ), {})
     init_base_struct(cls, name, location, doc)
 
-    # Register this new subclass where appropriate in StructMetaclass
+    # Register this new subclass where appropriate in CompiledTypeMetaclass
     if is_root:
-        StructMetaclass.root_grammar_class = cls
-    StructMetaclass.astnode_types.append(cls)
+        CompiledTypeMetaclass.root_grammar_class = cls
+    CompiledTypeMetaclass.astnode_types.append(cls)
 
     # Now we have an official root node type, we can create its builtin fields
     if is_root:
@@ -2647,8 +2640,8 @@ class TypeRepo(object):
         Shortcut to get the lexical environment metadata type.
         :rtype: StructType
         """
-        assert StructMetaclass.env_metadata is not None
-        return StructMetaclass.env_metadata
+        assert CompiledTypeMetaclass.env_metadata is not None
+        return CompiledTypeMetaclass.env_metadata
 
     @property
     def defer_env_md(self):
@@ -2660,7 +2653,7 @@ class TypeRepo(object):
         Shortcut to get the entity information type.
         :rtype: StructType
         """
-        return StructMetaclass.root_grammar_class.entity_info()
+        return CompiledTypeMetaclass.root_grammar_class.entity_info()
 
     @property
     def entity(self):

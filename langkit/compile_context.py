@@ -631,8 +631,9 @@ class CompileCtx(object):
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import (LexicalEnvType, StructMetaclass,
-                                            create_struct)
+        from langkit.compiled_types import (
+            LexicalEnvType, CompiledTypeMetaclass, create_struct
+        )
         from langkit.dsl import _EnumMetaclass, _StructMetaclass
 
         # Make sure the language spec tagged at most one metadata struct.
@@ -646,24 +647,25 @@ class CompileCtx(object):
         # If the language spec provided no env metadata struct, create a
         # default one.
         if user_env_md is None:
-            StructMetaclass.env_metadata = create_struct(
+            CompiledTypeMetaclass.env_metadata = create_struct(
                 names.Name('Metadata'), None, None, []
             )
         else:
-            StructMetaclass.env_metadata = user_env_md
-        self.check_env_metadata(StructMetaclass.env_metadata)
+            CompiledTypeMetaclass.env_metadata = user_env_md
+        self.check_env_metadata(CompiledTypeMetaclass.env_metadata)
 
         # Get the list of ASTNodeType types from the StructType metaclass
-        entity = StructMetaclass.root_grammar_class.entity()
+        entity = CompiledTypeMetaclass.root_grammar_class.entity()
 
-        self.astnode_types = list(StructMetaclass.astnode_types)
-        self.list_types.update(t.element_type
-                               for t in StructMetaclass.pending_list_types)
-        self.array_types.update(StructMetaclass.pending_array_types)
+        self.astnode_types = list(CompiledTypeMetaclass.astnode_types)
+        self.list_types.update(
+            t.element_type for t in CompiledTypeMetaclass.pending_list_types
+        )
+        self.array_types.update(CompiledTypeMetaclass.pending_array_types)
         self.enum_types = {et._type for et in _EnumMetaclass.enum_types}
 
         self.generic_list_type = self.root_grammar_class.generic_list_type
-        self.env_metadata = StructMetaclass.env_metadata
+        self.env_metadata = CompiledTypeMetaclass.env_metadata
 
         # The Group lexical environment operation takes an array of lexical
         # envs, so we always need to generate the corresponding array type.
@@ -995,7 +997,7 @@ class CompileCtx(object):
     @property
     def struct_types(self):
         from langkit.compiled_types import (
-            StructMetaclass, StructType, ASTNodeType
+            CompiledTypeMetaclass, StructType, ASTNodeType
         )
 
         def dependencies(struct_type):
@@ -1009,17 +1011,18 @@ class CompileCtx(object):
                 and not issubclass(f.type, ASTNodeType)
             )
 
+        struct_types = CompiledTypeMetaclass.struct_types
+
         if self._struct_types:
             assert (
-                len(self._struct_types) == len(StructMetaclass.struct_types)
-            ), ("CompileCtx.struct_types called too early: more struct types "
-                "were added")
+                len(self._struct_types) == len(struct_types)
+            ), ('CompileCtx.struct_types called too early: more struct types'
+                ' were added')
 
         else:
             self._struct_types = list(topological_sort(
-                (t, dependencies(t)) for t in sorted(
-                    StructMetaclass.struct_types, key=lambda t: t.name
-                )
+                (t, dependencies(t))
+                for t in sorted(struct_types, key=lambda t: t.name)
             ))
 
         return self._struct_types
@@ -1036,12 +1039,12 @@ class CompileCtx(object):
 
         assert self.grammar, "Set grammar before compiling"
 
-        from langkit.compiled_types import StructMetaclass
+        from langkit.compiled_types import CompiledTypeMetaclass
         from langkit.parsers import Parser, NodeToParsersPass
 
         node_to_parsers = NodeToParsersPass()
 
-        self.root_grammar_class = StructMetaclass.root_grammar_class
+        self.root_grammar_class = CompiledTypeMetaclass.root_grammar_class
 
         pass_manager = PassManager()
         pass_manager.add(
@@ -1551,7 +1554,7 @@ class CompileCtx(object):
         This also emits non-blocking errors for all types that are exposed in
         the public API whereas they should not.
         """
-        from langkit.compiled_types import ArrayType, StructMetaclass
+        from langkit.compiled_types import ArrayType, CompiledTypeMetaclass
 
         # All code must ignore _exposed attributes when the following is true
         if self.library_fields_all_public:
@@ -1594,7 +1597,7 @@ class CompileCtx(object):
             t._exposed = True
 
         # Expose builtin types that we want in the public APIs
-        expose(StructMetaclass.entity_info, None, None, [])
+        expose(CompiledTypeMetaclass.entity_info, None, None, [])
 
         for f in astnode.get_abstract_fields(
             predicate=lambda f: f.is_public,

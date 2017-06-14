@@ -1423,11 +1423,11 @@ class NodeToParsersPass():
         has one non ambiguous way of being pretty printed, and assign a
         canonical representation to every node type.
         """
-        from langkit.compiled_types import StructMetaclass
+        from langkit.compiled_types import CompiledTypeMetaclass
 
         # Check if every non-abstract non-synthetic node has a corresponding
         # parser.
-        for node_type in StructMetaclass.astnode_types:
+        for node_type in CompiledTypeMetaclass.astnode_types:
             with node_type.diagnostic_context():
                 WarningSet.unused_node_type.warn_if(
                     node_type not in self.nodes_to_rules.keys()

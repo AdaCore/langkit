@@ -4,7 +4,7 @@ Helpers to manage compilation passes.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.compiled_types import StructMetaclass
+from langkit.compiled_types import CompiledTypeMetaclass
 from langkit.diagnostics import errors_checkpoint
 from langkit.utils import Colors, printcol
 
@@ -204,15 +204,15 @@ class EnvSpecPass(AbstractPass):
         :param bool disabled: See AbstractPass.
 
         :param bool iter_metaclass: If True, iterate on the AST nodes in
-            StructMetaclass.astnode_types. Otherwise, iterate on the context's
-            list of AST node types.
+            CompiledTypeMetaclass.astnode_types. Otherwise, iterate on the
+            context's list of AST node types.
         """
         super(EnvSpecPass, self).__init__(name, disabled)
         self.pass_fn = pass_fn
         self.iter_metaclass = iter_metaclass
 
     def run(self, context):
-        astnode_types = (StructMetaclass.astnode_types
+        astnode_types = (CompiledTypeMetaclass.astnode_types
                          if self.iter_metaclass else
                          context.astnode_types)
         for astnode in astnode_types:
