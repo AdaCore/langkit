@@ -3153,7 +3153,7 @@ class No(AbstractExpression):
         self.expr_type = resolve_type(self.expr_type)
         check_source_language(
             self.expr_type.null_allowed,
-            "Invalid type for Null expression: {}".format(
+            "Invalid type for No expression: {}".format(
                 self.expr_type.name().camel
             )
         )

@@ -3,6 +3,6 @@ Code generation was successful
 
 == Incorrect No usage ==
 File "test.py", line 28, in BarNode.prop
-    Error: Invalid type for Null expression: Integer
+    Error: Invalid type for No expression: Integer
 
 Done
