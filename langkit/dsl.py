@@ -12,15 +12,6 @@ import langkit.names as names
 from langkit.utils import issubtype
 
 
-# CompiledType subclasses aliases from compiled_types
-from langkit.compiled_types import (
-    AnalysisUnitType, BoolType, EquationType, EnvRebindingsType,
-    LexicalEnvType, LogicVarType, LongType, Symbol, Token
-)
-_ = (AnalysisUnitType, BoolType, EquationType, EnvRebindingsType,
-     LexicalEnvType, LogicVarType, LongType, Symbol, Token)
-
-
 class DSLType(object):
     """
     Base class for the representation of types in the DSL.
@@ -848,3 +839,80 @@ def UserField(type, repr=False, doc=None, public=True):
     :param bool is_public: Whether this field is public in the generated APIs.
     """
     return _UserField(type, repr, doc, public)
+
+
+class _BuiltinType(DSLType):
+    """
+    Base class for all built-in compiled types.
+    """
+    import langkit.compiled_types as _ct
+
+
+class AnalysisUnitType(_BuiltinType):
+    """
+    Type for analysis unit values.
+    """
+    _type = _BuiltinType._ct.AnalysisUnitType
+
+
+class BoolType(_BuiltinType):
+    """
+    Type for boolean values.
+    """
+    _type = _BuiltinType._ct.BoolType
+
+
+class EquationType(_BuiltinType):
+    """
+    An EquationType instance is an equation where logic variables (of type
+    LogicVarType) are involved in logical expressions.
+
+    An equation can be solved, and the variables instances will then be bound
+    to specific values.
+
+    Equations instance will typically be produced by expressions involving
+    logic variables.
+    """
+    _type = _BuiltinType._ct.EquationType
+
+
+class EnvRebindingsType(_BuiltinType):
+    """
+    Type for environment rebinding values.
+    """
+    _type = _BuiltinType._ct.EnvRebindingsType
+
+
+class LexicalEnvType(_BuiltinType):
+    """
+    Type for lexical environments.
+    """
+    _type = _BuiltinType._ct.LexicalEnvType
+
+
+class LogicVarType(_BuiltinType):
+    """
+    Type for logic variables, to be used in equations (see EquationType).
+    """
+    _type = _BuiltinType._ct.LogicVarType
+
+
+class LongType(_BuiltinType):
+    """
+    Simple integer type.
+    """
+    _type = _BuiltinType._ct.LongType
+
+
+class Symbol(_BuiltinType):
+    """
+    Type for symbol values (canonicalized names).
+    """
+    _type = _BuiltinType._ct.Symbol
+
+
+class Token(_BuiltinType):
+    """
+    Type for token values, as found in an analysis unit's token data handler.
+    """
+    _type = _BuiltinType._ct.Token
