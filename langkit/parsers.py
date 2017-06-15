@@ -139,13 +139,11 @@ def render(*args, **kwargs):
 
 def resolve(parser):
     """
-    :type parser: Parser|types.Token|ParserContainer
+    :type parser: Parser|ParserContainer
     :rtype: Parser
     """
     if isinstance(parser, Parser):
         return parser
-    elif isinstance(parser, Token):
-        return Tok(parser)
     elif isinstance(parser, basestring):
         return Tok(parser)
     else:
