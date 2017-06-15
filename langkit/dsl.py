@@ -848,6 +848,13 @@ class _BuiltinType(DSLType):
     import langkit.compiled_types as _ct
 
 
+class AnalysisUnitKind(_BuiltinType):
+    """
+    Type for the analysis unit kind enumeration.
+    """
+    _type = _BuiltinType._ct.AnalysisUnitKind
+
+
 class AnalysisUnitType(_BuiltinType):
     """
     Type for analysis unit values.
