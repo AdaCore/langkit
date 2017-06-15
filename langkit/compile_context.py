@@ -704,10 +704,11 @@ class CompileCtx(object):
         from langkit.compiled_types import BoolType, resolve_type
 
         with cls.diagnostic_context():
+            name = cls.name().camel
             check_source_language(
-                cls.__name__ == 'Metadata',
+                name == 'Metadata',
                 'The environment metadata struct type must be called'
-                ' "Metadata" (here: {})'.format(cls.__name__)
+                ' "Metadata" (here: {})'.format(name)
             )
 
         for field in cls.get_fields():
