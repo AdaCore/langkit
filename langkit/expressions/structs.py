@@ -74,8 +74,7 @@ class Cast(AbstractExpression):
         self.dest_type = resolve_type(self.dest_type)
 
         check_source_language(
-            self.dest_type.matches(ASTNodeType)
-            or self.dest_type.matches(T.root_node.entity()),
+            self.dest_type.is_ast_node or self.dest_type.is_entity_type,
             "One can only cast to an ASTNode subtype or to an entity"
         )
 
