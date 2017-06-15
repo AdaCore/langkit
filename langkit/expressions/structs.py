@@ -588,7 +588,7 @@ class FieldAccess(AbstractExpression):
         # If still not found, we have a problem
         check_source_language(
             to_get is not None, "Type {} has no '{}' field or property".format(
-                self.receiver_expr.type.__name__, self.field
+                self.receiver_expr.type.name().camel, self.field
             )
         )
 
