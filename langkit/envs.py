@@ -4,7 +4,7 @@ from collections import namedtuple
 from itertools import count
 
 from langkit import names
-from langkit.compiled_types import AbstractNodeData, LexicalEnvType, T
+from langkit.compiled_types import AbstractNodeData, T, lexical_env_type
 from langkit.diagnostics import check_source_language, extract_library_location
 from langkit.expressions import FieldAccess, PropertyDef, Self, construct
 
@@ -70,7 +70,7 @@ class RefEnvs(object):
         self.resolver.require_untyped_wrapper()
 
         check_source_language(
-            self.resolver.type.matches(LexicalEnvType),
+            self.resolver.type.matches(lexical_env_type),
             'Referenced environment resolver must return a lexical'
             ' environment (not {})'.format(
                 self.resolver.type.name().camel
@@ -240,14 +240,14 @@ class EnvSpec(object):
             return p
 
         self.initial_env = create_internal_property(
-            'Initial_Env', self._unresolved_initial_env, LexicalEnvType
+            'Initial_Env', self._unresolved_initial_env, lexical_env_type
         )
 
         self.envs_expressions = [
             add_to_env(
                 create_internal_property('Env_Mappings', exprs.mappings, None),
                 create_internal_property('Env_Dest', exprs.dest_env,
-                                         LexicalEnvType),
+                                         lexical_env_type),
                 create_internal_property('MD', exprs.metadata, T.defer_env_md),
                 exprs.is_post,
                 resolver=exprs.resolver,

@@ -3,10 +3,8 @@ from __future__ import absolute_import, division, print_function
 from functools import partial
 
 from langkit import names
-from langkit.compiled_types import (
-    BoolType, EnvRebindingsType, LexicalEnvType, NoCompiledType, Symbol, T,
-    Token
-)
+from langkit.compiled_types import (T, bool_type, lexical_env_type,
+                                    no_compiled_type, symbol_type, token_type)
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, BasicExpr, CallExpr,
@@ -50,16 +48,16 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
         )
 
     sym_expr = construct(symbol_expr)
-    if sym_expr.type == Token:
+    if sym_expr.type == token_type:
         sym_expr = GetSymbol.construct_static(sym_expr)
     check_source_language(
-        sym_expr.type == Symbol,
+        sym_expr.type == symbol_type,
         "Wrong type for symbol expr: {}".format(sym_expr.type)
     )
 
-    args = [('Self', construct(env_expr, LexicalEnvType)),
+    args = [('Self', construct(env_expr, lexical_env_type)),
             ('Key', sym_expr),
-            ('Recursive', construct(recursive, BoolType))]
+            ('Recursive', construct(recursive, bool_type))]
 
     # Pass the From parameter if the user wants sequential semantics
     if sequential:
@@ -92,8 +90,8 @@ def env_orphan(self, env_expr):
     :param AbstractExpression env_expr: Expression that will return a
         lexical environment.
     """
-    return CallExpr('Orphan_Env', 'AST_Envs.Orphan', LexicalEnvType,
-                    [construct(env_expr, LexicalEnvType)],
+    return CallExpr('Orphan_Env', 'AST_Envs.Orphan', lexical_env_type,
+                    [construct(env_expr, lexical_env_type)],
                     abstract_expr=self)
 
 
@@ -108,10 +106,10 @@ class EnvGroup(AbstractExpression):
         self.env_exprs = list(env_exprs)
 
     def construct(self):
-        env_exprs = [construct(e, LexicalEnvType) for e in self.env_exprs]
+        env_exprs = [construct(e, lexical_env_type) for e in self.env_exprs]
         array_arg = LiteralExpr(array_aggr(['{}' for _ in env_exprs]),
-                                NoCompiledType, env_exprs)
-        return CallExpr('Group_Env', 'Group', LexicalEnvType,
+                                no_compiled_type, env_exprs)
+        return CallExpr('Group_Env', 'Group', lexical_env_type,
                         [array_arg],
                         abstract_expr=self)
 
@@ -130,8 +128,8 @@ def env_group(self, env_array_expr):
         an array of lexical environments. If this array is empty, the empty
         environment is returned.
     """
-    return CallExpr('Group_Env', 'Group', LexicalEnvType,
-                    [construct(env_array_expr, LexicalEnvType.array_type())],
+    return CallExpr('Group_Env', 'Group', lexical_env_type,
+                    [construct(env_array_expr, lexical_env_type.array_type())],
                     abstract_expr=self)
 
 
@@ -146,9 +144,9 @@ def is_visible_from(self, referenced_env, base_env):
     :param AbstractExpression referenced_env: The environment referenced
         from base_env, for which we want to check visibility.
     """
-    return CallExpr('Is_Visible', 'Is_Visible_From', BoolType,
-                    [construct(referenced_env, LexicalEnvType),
-                     construct(base_env, LexicalEnvType)],
+    return CallExpr('Is_Visible', 'Is_Visible_From', bool_type,
+                    [construct(referenced_env, lexical_env_type),
+                     construct(base_env, lexical_env_type)],
                     abstract_expr=self)
 
 
@@ -160,7 +158,7 @@ def env_node(self, env):
     :param AbstractExpression env: The source environment.
     """
     return BasicExpr('Env_Node', '{}.Node', T.root_node,
-                     [construct(env, LexicalEnvType)],
+                     [construct(env, lexical_env_type)],
                      abstract_expr=self)
 
 
@@ -171,16 +169,16 @@ def env_parent(self, env):
 
     :param AbstractExpression env: The source environment.
     """
-    parent_env_getter = LiteralExpr(NoCompiledType, '{}.Parent',
-                                    [construct(env, LexicalEnvType)])
+    parent_env_getter = LiteralExpr(lexical_env_type, '{}.Parent',
+                                    [construct(env, lexical_env_type)])
     return CallExpr(
-        'Parent', 'AST_Envs.Get_Env', T.LexicalEnvType, [parent_env_getter],
+        'Parent', 'AST_Envs.Get_Env', T.lexical_env_type, [parent_env_getter],
         abstract_expr=self,
     )
 
 
 def make_combine(self, l_rebindings, r_rebindings):
-    return CallExpr('Combined', 'AST_Envs.Combine', EnvRebindingsType,
+    return CallExpr('Combined', 'AST_Envs.Combine', lexical_env_type,
                     [l_rebindings, r_rebindings],
                     abstract_expr=self)
 
@@ -191,8 +189,8 @@ def combine(self, l_rebindings, r_rebindings):
     Combine the two env rebindings given as arguments.
     """
     return make_combine(self,
-                        construct(l_rebindings, EnvRebindingsType),
-                        construct(r_rebindings, EnvRebindingsType))
+                        construct(l_rebindings, lexical_env_type),
+                        construct(r_rebindings, lexical_env_type))
 
 
 @auto_attr
@@ -201,10 +199,10 @@ def rebind_env(self, env, to_rebind, rebind_to):
     Returns a new environment based on `env` where `to_rebind` is rebound to
     `rebind_to`.
     """
-    return CallExpr('Rebound_Env', 'Rebind_Env', LexicalEnvType,
-                    [construct(env, LexicalEnvType),
-                     construct(to_rebind, LexicalEnvType),
-                     construct(rebind_to, LexicalEnvType)],
+    return CallExpr('Rebound_Env', 'Rebind_Env', lexical_env_type,
+                    [construct(env, lexical_env_type),
+                     construct(to_rebind, lexical_env_type),
+                     construct(rebind_to, lexical_env_type)],
                     abstract_expr=self)
 
 
@@ -257,4 +255,4 @@ def as_entity(self, node):
 
 
 EmptyEnv = AbstractVariable(names.Name("AST_Envs.Empty_Env"),
-                            type=LexicalEnvType)
+                            type=lexical_env_type)

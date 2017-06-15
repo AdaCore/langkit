@@ -31,18 +31,16 @@ import inspect
 from langkit import compiled_types, names
 from langkit.common import gen_name
 from langkit.compile_context import get_context
-from langkit.compiled_types import (ASTNodeType, BoolType, Token, T,
-                                    resolve_type)
+from langkit.compiled_types import (ASTNodeType, T, bool_type, resolve_type,
+                                    token_type)
 from langkit.diagnostics import (
     Context, Location, check_source_language, extract_library_location,
     Severity, WarningSet
 )
 from langkit.lexer import WithSymbol
 from langkit.template_utils import TemplateEnvironment
-from langkit.utils import (
-    Log, assert_type, common_ancestor, copy_with, is_same, issubtype,
-    type_check_instance
-)
+from langkit.utils import (Log, assert_type, copy_with, is_same, issubtype,
+                           type_check_instance)
 
 
 def var_context():
@@ -379,7 +377,7 @@ class Parser(object):
 
     def init_vars(self, pos_var=None, res_var=None):
         self.pos_var = (pos_var or VarDef(
-            "{}_pos".format(self.__class__.__name__.lower()), Token
+            "{}_pos".format(self.__class__.__name__.lower()), token_type
         ))
 
         self.res_var = (res_var or VarDef(
@@ -538,7 +536,7 @@ class Parser(object):
         context.fns.add(self)
 
         with add_var_context() as var_context:
-            pos_var = VarDef("pos", Token, create=False)
+            pos_var = VarDef("pos", token_type, create=False)
             self.traverse_create_vars(pos_var)
             t_env = TemplateEnvironment(
                 parser=self,
@@ -556,9 +554,11 @@ class Parser(object):
     def get_type(self):
         """
         Return a descriptor for the type this parser returns in the generated
-        code.  It can be either the Token class or a CompiledType subtype.
+        code.
 
         Subclasses must override this method.
+
+        :rtype: CompiledType
         """
         raise NotImplementedError()
 
@@ -657,7 +657,7 @@ class Tok(Parser):
         self.keep = keep
 
     def get_type(self):
-        return Token
+        return token_type
 
     def create_vars_after(self, start_pos):
         self.init_vars()
@@ -745,7 +745,7 @@ class Or(Parser):
             #  - otherwise, make sure that all alternatives return exactly the
             #    same type.
             if all(t.is_ast_node for t in types):
-                res = common_ancestor(*types)
+                res = ASTNodeType.common_ancestor(*types)
             else:
                 typs = list(types)
                 ref_type = typs[0]
@@ -910,8 +910,8 @@ class List(Parser):
         By default, this parser will not match empty sequences but it will if
         `empty_valid` is True.
 
-        :param ASTNodeType list_cls: Type parameter. If provided, it must be a
-            ASTNodeType.list_type() subclass to be used for the result of this
+        :param ASTNodeType list_cls: If provided, it must be a
+            ASTNodeType.list_type() subtype to be used for the result of this
             parser.
 
         :param types.Token|string sep: Parser or string corresponding to the
@@ -967,7 +967,7 @@ class List(Parser):
             )
 
     def create_vars_before(self):
-        self.cpos = VarDef("lst_cpos", Token)
+        self.cpos = VarDef("lst_cpos", token_type)
         self.tmplist = VarDef('tmp_list', 'Free_Parse_List')
         return self.cpos
 
@@ -1005,13 +1005,13 @@ class Opt(Parser):
 
         self._booleanize = None
         """
-        If it is BoolType, then the result is booleanized into a regular
+        If it is bool_type, then the result is booleanized into a regular
         boolean.
 
         If it is an EnumNode subclass with qualifier set to True, then the
         result is booleanized into the corresponding two alternatives.
 
-        :type: BoolType|langkit.compiled_types.TypeRepo.EnumNode|None
+        :type: CompiledType|None
         """
 
         self._is_error = False
@@ -1062,7 +1062,7 @@ class Opt(Parser):
         from langkit.dsl import EnumNode
 
         if dest is None:
-            booleanize = BoolType
+            booleanize = bool_type
         else:
             booleanize = assert_type(dest, EnumNode)
 
@@ -1074,7 +1074,7 @@ class Opt(Parser):
     def get_type(self):
         if self._booleanize is None:
             return self.parser.get_type()
-        elif self._booleanize is BoolType:
+        elif self._booleanize is bool_type:
             return self._booleanize
         else:
             assert self._booleanize._type
@@ -1331,7 +1331,7 @@ class Null(Parser):
     def __init__(self, result_type):
         """
         Create a new Null parser.  `result_type` is either a CompiledType
-        subclass that defines what nullexpr this parser returns, either a
+        instance that defines what nullexpr this parser returns, either a
         Parser subclass' instance.  In the latter case, this parser will return
         the same type as the other parser.
         """
@@ -1512,7 +1512,7 @@ def creates_node(p, follow_refs=True):
         return all(creates_node(c) for c in p.children())
 
     if isinstance(p, Defer) and follow_refs:
-        return p.get_type().matches(ASTNodeType)
+        return p.get_type().is_ast_node
 
     if isinstance(p, Opt) and follow_refs and creates_node(p.parser):
         return True

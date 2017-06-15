@@ -3,8 +3,8 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import (ASTNodeType, BoolType, BuiltinField, Field,
-                                    UserField, resolve_type, T)
+from langkit.compiled_types import (BuiltinField, Field, UserField, bool_type,
+                                    resolve_type)
 from langkit.diagnostics import Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
@@ -140,7 +140,7 @@ class IsNull(AbstractExpression):
             'Is_Null',
             '{} = null'.format('{}.El'
                                if cexpr.type.is_entity_type else '{}'),
-            BoolType, [cexpr]
+            bool_type, [cexpr]
         )
 
     def construct(self):
@@ -659,7 +659,7 @@ class IsA(AbstractExpression):
     """
 
     class Expr(ComputingExpr):
-        static_type = BoolType
+        static_type = bool_type
         pretty_class_name = 'IsA'
 
         def __init__(self, expr, astnodes, abstract_expr=None):
@@ -858,7 +858,7 @@ class Match(AbstractExpression):
         matchers cover all cases. check_source_language will raise an error if
         it's not the case. Also emit warnings for unreachable matchers.
 
-        :param ASTNodeType input_type: Type parameter.
+        :param ASTNodeType input_type: Type to check.
         :rtype: None
         """
 
@@ -953,8 +953,8 @@ class Match(AbstractExpression):
         for _, expr, _ in constructed_matchers:
             rtype = expr.type.unify(
                 rtype,
-                'Mismatching types in Match expression: got {cls} but expected'
-                ' {other} or sub/supertype'
+                'Mismatching types in Match expression: got {self} but'
+                ' expected {other} or sub/supertype'
             )
 
         # This is the expression execution will reach if we have a bug in our

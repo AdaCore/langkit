@@ -6,7 +6,8 @@ from itertools import count
 import types
 
 from langkit import names
-from langkit.compiled_types import BoolType, LongType, ArrayType, get_context
+from langkit.compiled_types import (ArrayType, get_context, bool_type,
+                                    long_type)
 from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
@@ -84,7 +85,7 @@ class CollectionExpression(AbstractExpression):
         )
         if self.requires_index:
             self.index_var = AbstractVariable(
-                names.Name('I'), type=LongType, create_local=True,
+                names.Name('I'), type=long_type, create_local=True,
                 source_name=names.Name.from_lower(argspec.args[1])
             )
             expr = self.expr_fn(self.index_var, self.element_var)
@@ -341,10 +342,10 @@ class Map(CollectionExpression):
         )
 
         with iter_scope.use():
-            filter_expr = (construct(self.filter_expr, BoolType)
+            filter_expr = (construct(self.filter_expr, bool_type)
                            if self.filter_expr else None)
 
-            take_while_expr = (construct(self.take_while_expr, BoolType)
+            take_while_expr = (construct(self.take_while_expr, bool_type)
                                if self.take_while_expr else None)
 
         return Map.Expr(list_element_var, element_var, index_var,
@@ -392,7 +393,7 @@ class Quantifier(CollectionExpression):
     """
 
     class Expr(ComputingExpr):
-        static_type = BoolType
+        static_type = bool_type
         pretty_class_name = 'Quantifier'
 
         def __init__(self, kind, collection, expr, list_element_var,
@@ -437,7 +438,7 @@ class Quantifier(CollectionExpression):
             self.element_var = element_var
             self.index_var = index_var
             self.iter_scope = iter_scope
-            self.static_type = BoolType
+            self.static_type = bool_type
 
             with iter_scope.parent.use():
                 super(Quantifier.Expr, self).__init__(
@@ -495,7 +496,7 @@ class Quantifier(CollectionExpression):
          iter_scope) = self.construct_common()
 
         check_source_language(
-            expr.type.matches(BoolType),
+            expr.type.matches(bool_type),
             "Wrong type for expression in quantifier: expected bool, "
             "got {}".format(expr.type.name().camel)
         )
@@ -524,7 +525,7 @@ def collection_get(self, coll_expr, index_expr, or_null=True):
     """
     # index_expr yields a 0-based index and all the Get primitives expect
     # 0-based indexes, so there is no need to fiddle indexes here.
-    index_expr = construct(index_expr, LongType)
+    index_expr = construct(index_expr, long_type)
 
     coll_expr = construct(coll_expr, lambda t: t.is_collection())
     or_null = construct(or_null)
@@ -541,7 +542,7 @@ def length(self, coll_expr):
     :param AbstractExpression coll_expr: The expression representing the
         collection to get from.
     """
-    return CallExpr('Len', 'Length', LongType,
+    return CallExpr('Len', 'Length', long_type,
                     [construct(coll_expr, lambda t: t.is_collection())],
                     abstract_expr=self)
 

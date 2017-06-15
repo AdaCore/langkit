@@ -27,8 +27,7 @@ class AbstractAPISettings(object):
         objects in Python.
 
         :param str value: The value to wrap.
-        :param langkit.compiled_types.CompiledType type: Type parameter. The
-            type for "value".
+        :param langkit.compiled_types.CompiledType type: The type for "value".
         :rtype: str
         """
         raise NotImplementedError()

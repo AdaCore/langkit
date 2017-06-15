@@ -1,10 +1,8 @@
 from __future__ import absolute_import, division, print_function
 import funcy
 
-from langkit.compiled_types import (
-    BoolType, EquationType, LogicVarType, NoCompiledType, T
-)
-
+from langkit.compiled_types import (T, bool_type, equation_type,
+                                    logic_var_type, no_compiled_type)
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable, LiteralExpr,
@@ -28,7 +26,7 @@ def untyped_literal_expr(expr_str, operands=[]):
         expression.
     :rtype: LiteralExpr
     """
-    return LiteralExpr(expr_str, NoCompiledType, operands)
+    return LiteralExpr(expr_str, no_compiled_type, operands)
 
 
 class Bind(AbstractExpression):
@@ -67,7 +65,7 @@ class Bind(AbstractExpression):
             super(Bind.Expr, self).__init__(
                 'Bind_Result',
                 'Bind_{}_{}.Create'.format(cprop_uid, eprop_uid),
-                EquationType, constructor_args,
+                equation_type, constructor_args,
                 abstract_expr=abstract_expr
             )
 
@@ -183,7 +181,7 @@ class Bind(AbstractExpression):
         if self.eq_prop:
             args = self.eq_prop.natural_arguments
             check_multiple([
-                (self.eq_prop.type == BoolType,
+                (self.eq_prop.type == bool_type,
                  'Equality property must return boolean'),
 
                 (self.eq_prop.struct.matches(T.root_node),
@@ -230,7 +228,7 @@ class Bind(AbstractExpression):
                 expr.create_result_var('Ent')
 
             check_source_language(
-                expr.type == LogicVarType
+                expr.type == logic_var_type
                 or expr.type.matches(T.root_node.entity()),
 
                 'Operands to a logic bind operator should be either'
@@ -256,7 +254,7 @@ class Bind(AbstractExpression):
 
 
 class DomainExpr(ComputingExpr):
-    static_type = EquationType
+    static_type = equation_type
 
     def __init__(self, domain, logic_var_expr, abstract_expr=None):
         self.domain = domain
@@ -282,7 +280,7 @@ def domain(self, logic_var_expr, domain):
     Define the domain of a logical variable. Several important properties about
     this expression:
 
-    This is the entry point into the logic DSL. A variable of LogicVarType
+    This is the entry point into the logic DSL. A logic_var_type variable
     *must* have a domain defined in the context of an equation. If it doesn't,
     its solution set is empty, and thus the only possible value for it is
     undefined.
@@ -324,7 +322,7 @@ def domain(self, logic_var_expr, domain):
     return DomainExpr(
         construct(domain, lambda d: d.is_collection(), "Type given "
                   "to LogicVar must be collection type, got {expr_type}"),
-        construct(logic_var_expr, LogicVarType),
+        construct(logic_var_expr, logic_var_type),
         abstract_expr=self,
     )
 
@@ -363,7 +361,7 @@ class Predicate(AbstractExpression):
 
             super(Predicate.Expr, self).__init__(
                 'Pred', '{}_Pred.Create'.format(pred_id),
-                EquationType, logic_var_exprs,
+                equation_type, logic_var_exprs,
                 abstract_expr=abstract_expr
             )
 
@@ -396,7 +394,7 @@ class Predicate(AbstractExpression):
                  self.pred_property
             )),
 
-            (self.pred_property.type.matches(BoolType),
+            (self.pred_property.type.matches(bool_type),
              'Predicate property must return a boolean, got {}'.format(
                  self.pred_property.type.name().camel
             )),
@@ -415,7 +413,7 @@ class Predicate(AbstractExpression):
 
         # Separate logic variable expressions from extra argument expressions
         logic_var_exprs, closure_exprs = funcy.split_by(
-            lambda e: e.type == LogicVarType, exprs
+            lambda e: e.type == logic_var_type, exprs
         )
 
         check_source_language(
@@ -424,13 +422,13 @@ class Predicate(AbstractExpression):
         )
 
         check_source_language(
-            all(e.type != LogicVarType for e in closure_exprs), "Logic "
+            all(e.type != logic_var_type for e in closure_exprs), "Logic "
             "variable expressions should be grouped at the beginning, and "
             "should not appear after non logic variable expressions"
         )
 
         for i, (expr, arg_type) in enumerate(zip(exprs, prop_types)):
-            if expr.type == LogicVarType:
+            if expr.type == logic_var_type:
                 check_source_language(
                     arg_type.matches(T.root_node), "Argument #{} of predicate "
                     "is a logic variable, the corresponding property formal "
@@ -491,7 +489,7 @@ def get_value(self, logic_var):
     """
     return CallExpr(
         'Eq_Solution', 'Eq_Node.Refs.Get_Value', T.root_node.entity(),
-        [construct(logic_var, LogicVarType)],
+        [construct(logic_var, logic_var_type)],
         abstract_expr=self,
     )
 
@@ -499,10 +497,9 @@ def get_value(self, logic_var):
 @auto_attr
 def solve(self, equation):
     """
-    Expression that will call solve on an instance of EquationType,
-    and return whether any solution was found or not. The solutions are not
-    returned, instead, logic variables are bound to their values in the
-    current solution.
+    Expression that will call solve on an instance of equation_type, and return
+    whether any solution was found or not. The solutions are not returned,
+    instead, logic variables are bound to their values in the current solution.
 
     TODO: For the moment, since properties returning equations will
     reconstruct them everytime, there is no way to get the second solution
@@ -511,8 +508,8 @@ def solve(self, equation):
 
     :param AbstractExpression equation: The equation to solve.
     """
-    return CallExpr('Solve_Success', 'Solve', BoolType,
-                    [construct(equation, EquationType)],
+    return CallExpr('Solve_Success', 'Solve', bool_type,
+                    [construct(equation, equation_type)],
                     abstract_expr=self)
 
 
@@ -543,11 +540,11 @@ class LogicBooleanOp(AbstractExpression):
         # access to record: unwrap it.
         relation_array = untyped_literal_expr(
             'Relation_Array ({}.Items)',
-            [construct(self.equation_array, EquationType.array_type())]
+            [construct(self.equation_array, equation_type.array_type())]
         )
 
         return CallExpr('Logic_Boolean_Op', 'Logic_{}'.format(self.kind_name),
-                        EquationType, [relation_array],
+                        equation_type, [relation_array],
                         abstract_expr=self)
 
     def __repr__(self):
@@ -585,7 +582,7 @@ class LogicTrue(AbstractExpression):
         super(LogicTrue, self).__init__()
 
     def construct(self):
-        return CallExpr('Logic_True', 'True_Rel', EquationType, [])
+        return CallExpr('Logic_True', 'True_Rel', equation_type, [])
 
     def __repr__(self):
         return '<LogicTrue>'
@@ -600,7 +597,7 @@ class LogicFalse(AbstractExpression):
         super(LogicFalse, self).__init__()
 
     def construct(self):
-        return CallExpr('Logic_False', 'False_Rel', EquationType, [])
+        return CallExpr('Logic_False', 'False_Rel', equation_type, [])
 
     def __repr__(self):
         return '<LogicFalse>'

@@ -10,9 +10,9 @@ import funcy
 
 from langkit import names
 from langkit.compiled_types import (
-    AbstractNodeData, Argument, ASTNodeType, BoolType, CompiledType, LongType,
-    NoCompiledType, Symbol, T, Token, gdb_bind_var, gdb_helper, get_context,
-    render as ct_render, resolve_type
+    AbstractNodeData, Argument, ASTNodeType, CompiledType, T, bool_type,
+    gdb_bind_var, gdb_helper, get_context, long_type, no_compiled_type,
+    render as ct_render, resolve_type, symbol_type, token_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, WarningSet, check_multiple,
@@ -90,9 +90,9 @@ def expand_abstract_fn(fn):
             )
         )
         check_source_language(
-            issubclass(default, CompiledType),
-            'A valid langkit CompiledType is required for '
-            'parameter {} (got {})'.format(kw, default)
+            isinstance(default, CompiledType),
+            'A valid Langkit DSLType subclass is required for parameter {}'
+            ' (got {})'.format(kw, default)
         )
 
         fn_arguments.append(Argument(names.Name.from_lower(kw), default))
@@ -152,17 +152,10 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
         ret.location = expr.location
 
         if expected_type_or_pred:
-            if isinstance(expected_type_or_pred, type):
+            if isinstance(expected_type_or_pred, CompiledType):
+                expected_type = expected_type_or_pred
                 if not custom_msg:
                     custom_msg = "Expected type {expected}, got {expr_type}"
-                expected_type = assert_type(expected_type_or_pred,
-                                            CompiledType)
-
-                if expected_type == ASTNodeType:
-                    # ASTNodeType does not exist in the generated code: we use
-                    # it as a shortcut for the actual root grammar class
-                    # instead.
-                    expected_type = T.root_node
 
                 check_source_language(ret.type.matches(expected_type), (
                     custom_msg.format(expected=expected_type.name().camel,
@@ -171,7 +164,7 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
 
                 # If the type matches expectation but is incompatible in the
                 # generated code, generate a conversion. This is needed for the
-                # various ASTNodeType subclasses.
+                # various ASTNodeType instances.
                 if downcast and expected_type != ret.type:
                     from langkit.expressions import Cast
                     return Cast.Expr(ret, expected_type)
@@ -814,7 +807,7 @@ class ResolvedExpression(object):
         self._render_pre_called = not isinstance(self, VariableExpr)
 
         assert (self.skippable_refcount
-                or self.type is NoCompiledType
+                or self.type is no_compiled_type
                 or not self.type.is_refcounted()
                 or self._result_var), (
             'ResolvedExpression instances that return ref-counted values must'
@@ -1010,8 +1003,7 @@ class ResolvedExpression(object):
             result.extend('|  {}'.format(line) for line in subdump)
             result.append(')')
 
-        elif (issubclass(type(json_like), type)
-                and issubclass(json_like, CompiledType)):
+        elif isinstance(json_like, CompiledType):
             return cls._ir_dump(json_like.name())
 
         elif isinstance(json_like, names.Name):
@@ -1027,7 +1019,7 @@ class ResolvedExpression(object):
         """
         A JSON-like datastructure to describe this expression.
 
-        Leaves of this datastructure are: strings, CompiledType subclasses,
+        Leaves of this datastructure are: strings, CompiledType instances,
         AbtsractNodeData instances and ResolvedExpression instances (for
         operands). This is used both for expression tree traversal and for IR
         dump.
@@ -1160,8 +1152,8 @@ class UnreachableExpr(ResolvedExpression):
 
     def __init__(self, expr_type):
         """
-        :param CompiledType expr_type: Type parameter. Type that a usual
-            expression would return in this case.
+        :param CompiledType expr_type: Type that a usual expression would
+            return in this case.
         """
         self.static_type = expr_type
         super(UnreachableExpr, self).__init__(skippable_refcount=True)
@@ -1651,12 +1643,12 @@ class GetSymbol(AbstractExpression):
 
         :rtype: CallExpr
         """
-        token = construct(self.token_expr, Token)
+        token = construct(self.token_expr, token_type)
         return self.construct_static(token, abstract_expr=self)
 
     @staticmethod
     def construct_static(token_expr, abstract_expr=None):
-        return CallExpr('Sym', 'Get_Symbol', Symbol, [token_expr],
+        return CallExpr('Sym', 'Get_Symbol', symbol_type, [token_expr],
                         abstract_expr=abstract_expr)
 
     def __repr__(self):
@@ -1671,7 +1663,7 @@ class SymbolLiteral(AbstractExpression):
     class Expr(ComputingExpr):
 
         def __init__(self, name, abstract_expr=None):
-            self.static_type = Symbol
+            self.static_type = symbol_type
             self.name = name
             get_context().add_symbol_literal(self.name)
 
@@ -2042,7 +2034,7 @@ class PropertyDef(AbstractNodeData):
         :param expr: The expression for the property. It can be either:
             * An expression.
             * A function that takes one or more arguments with default values
-              which are CompiledType subclasses. This is the way one can write
+              which are CompiledType instances. This is the way one can write
               properties that take parameters.
         :type expr:
             None
@@ -2327,7 +2319,7 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: PropertyDef|None
         """
-        if self.struct.is_ast_node:
+        if self.struct.is_ast_node and self.struct.base():
             return self.struct.base().get_abstract_fields_dict(
                 field_class=PropertyDef
             ).get(self._name.lower, None)
@@ -2441,15 +2433,15 @@ class PropertyDef(AbstractNodeData):
         """
         type_set = TypeSet()
 
-        def check_overriding_props(klass):
+        def check_overriding_props(node):
             """
             Recursive helper. Checks wether klass and its subclasses override
             self.
 
-            :param langkit.compiled_types.ASTNodeType klass: The class to
+            :param langkit.compiled_types.ASTNodeType node: The AST node to
                 check.
             """
-            for subclass in klass.subclasses:
+            for subclass in node.subclasses:
                 for prop in subclass.get_properties(include_inherited=False):
                     if prop._name == self._name:
                         type_set.include(subclass)
@@ -3014,8 +3006,8 @@ class Literal(AbstractExpression):
         # WARNING: Since bools are ints in Python, bool needs to be before int
         # in the following table.
         lit_str, rtype = dispatch_on_type(type(self.literal), [
-            (bool, lambda _: (str(self.literal), BoolType)),
-            (int, lambda _:  (str(self.literal), LongType)),
+            (bool, lambda _: (str(self.literal), bool_type)),
+            (int, lambda _:  (str(self.literal), long_type)),
         ], exception=DiagnosticError('Invalid abstract expression type: {}'))
         return LiteralExpr(lit_str, rtype)
 
@@ -3035,26 +3027,26 @@ def aggregate_expr(type, assocs):
         expression. For instance, with `type='Foo'`: `Foo'(A, B, C)`.
 
         Otherwise, use the given CompileType to generate a qualified
-        expression, unless it's NoCompiledType.
+        expression, unless it's no_compiled_type.
 
-        Unless a true CompiledType subclass is provided, the result will get
-        the NoCompiledType type annotation.
+        Unless a true CompiledType instance is provided, the result will get
+        the no_compiled_type type annotation.
 
     :param list[(str|names.Name, ResolvedExpression)] assocs: List of
         associations for the aggregate.
 
     :rtype: LiteralExpr
     """
-    if type is None or type is NoCompiledType:
+    if type is None or type is no_compiled_type:
         meta_template = '({operands})'
         type_name = None
-        type = NoCompiledType
+        type = no_compiled_type
     elif isinstance(type, str):
         meta_template = "{type}'({operands})"
         type_name = type
-        type = NoCompiledType
+        type = no_compiled_type
     else:
-        assert issubclass(type, NoCompiledType)
+        assert issubclass(type, no_compiled_type)
         meta_template = "{type}'({operands})"
         type_name = type.name().camel
 
@@ -3143,8 +3135,8 @@ class No(AbstractExpression):
 
     def __init__(self, expr_type):
         """
-        :param CompiledType expr_type: Type parameter. Type for the value this
-            expression creates.
+        :param CompiledType expr_type: Type for the value this expression
+            creates.
         """
         super(No, self).__init__()
         self.expr_type = expr_type
@@ -3224,7 +3216,7 @@ class TokenTextEq(BasicExpr):
         """
         super(TokenTextEq, self).__init__(
             'Is_Equal', "Text_Type'(Text ({})) = Text_Type'(Text ({}))",
-            BoolType, [left, right],
+            bool_type, [left, right],
             abstract_expr=abstract_expr
         )
 
@@ -3238,7 +3230,8 @@ def text_equals(self, left, right):
         whose text will be used for the test.
     :param AbstractExpression right: Likewise.
     """
-    return TokenTextEq(construct(left, Token), construct(right, Token),
+    return TokenTextEq(construct(left, token_type),
+                       construct(right, token_type),
                        abstract_expr=self)
 
 
@@ -3373,8 +3366,8 @@ class LocalVars(object):
             :param LocalVars vars: The LocalVars instance to which this
                 local variable is bound.
             :param langkit.names.Name name: The name of this local variable.
-            :param langkit.compiled_types.CompiledType type: Type parameter.
-                The type of this local variable.
+            :param langkit.compiled_types.CompiledType type: The type of this
+                local variable.
             """
             self.vars = vars
             self.name = name
@@ -3418,7 +3411,7 @@ class LocalVars(object):
 
             from langkit.compiled_types import LocalVars
             vars = LocalVars()
-            var = vars.create('Index', langkit.compiled_types.LongType)
+            var = vars.create('Index', langkit.compiled_types.long_type)
 
         The names are *always* unique, so you can pass several time the same
         string as a name, and create will handle creating a name that is unique
@@ -3428,8 +3421,8 @@ class LocalVars(object):
         scope.
 
         :param str|names.Name name: The name of the variable.
-        :param langkit.compiled_types.CompiledType type: Type parameter. The
-            type of the local variable.
+        :param langkit.compiled_types.CompiledType type: The type of the local
+            variable.
         :rtype: LocalVars.LocalVar
         """
         result = self.create_scopeless(name, type)
@@ -3442,8 +3435,8 @@ class LocalVars(object):
         The scope will have to be initialized later.
 
         :param str|names.Name name: The name of the variable.
-        :param langkit.compiled_types.CompiledType type: Type parameter. The
-            type of the local variable.
+        :param langkit.compiled_types.CompiledType type: The type of the local
+            variable.
         :rtype: LocalVars.LocalVar
         """
         name = names.Name.get(name)
@@ -3611,11 +3604,11 @@ class Arithmetic(AbstractExpression):
         l = construct(self.l)
         r = construct(self.r)
 
-        if l.type == Symbol and r.type == Symbol:
+        if l.type == symbol_type and r.type == symbol_type:
             assert self.op == '&'
             return BasicExpr(
                 'Sym_Concat',
-                'Find (Self.Unit.TDH.Symbols, ({}.all & {}.all))', Symbol,
+                'Find (Self.Unit.TDH.Symbols, ({}.all & {}.all))', symbol_type,
                 [l, r]
             )
 
@@ -3626,12 +3619,11 @@ class Arithmetic(AbstractExpression):
         )
 
         check_source_language(
-            l.type in (Symbol, LongType), "Invalid type for {}: {}".format(
-                self.op, l.type.name().camel
-            )
+            l.type in (symbol_type, long_type),
+            "Invalid type for {}: {}".format(self.op, l.type.name().camel)
         )
 
-        return BasicExpr('Arith_Result', '({} %s {})' % self.op, LongType,
+        return BasicExpr('Arith_Result', '({} %s {})' % self.op, long_type,
                          [l, r],
                          abstract_expr=self)
 

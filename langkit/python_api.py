@@ -28,8 +28,8 @@ class PythonAPISettings(AbstractAPISettings):
         value.
 
         :param str value: Expression yielding a low-level value.
-        :param ct.CompiledType type: Type parameter. Type corresponding to
-            the "value" expression.
+        :param ct.CompiledType type: Type corresponding to the "value"
+            expression.
         :param bool from_field_access: True if "value" is a record field
             access (False by default). This is a special case because of the
             way ctypes works.
@@ -41,25 +41,24 @@ class PythonAPISettings(AbstractAPISettings):
         # TODO: handle all types
         assert (not inc_ref
                 or not type.is_refcounted()
-                or issubclass(type, (ct.ArrayType, ct.StructType,
-                                     ct.LexicalEnvType,
-                                     ct.EnvRebindingsType,
-                                     ct.EquationType))), (
+                or type in (ct.lexical_env_type, ct.env_rebindings_type,
+                            ct.equation_type)
+                or isinstance(type, (ct.ArrayType, ct.StructType))), (
             'Incrementing ref-count of {} in the Python API is not handled'
             ' yet'.format(type.name())
         )
 
         value_suffix = '' if from_field_access else '.value'
         return dispatch_on_type(type, [
-            (ct.AnalysisUnitType, lambda _: 'AnalysisUnit._wrap({})'),
-            (ct.AnalysisUnitKind, lambda _: '_unit_kind_to_str[{}]'),
+            (ct.analysis_unit_type, lambda _: 'AnalysisUnit._wrap({})'),
+            (ct.analysis_unit_kind, lambda _: '_unit_kind_to_str[{}]'),
             (ct.ASTNodeType, lambda _: '{}._wrap({{}})'.format(
                 self.context.root_grammar_class.name().camel
             )),
-            (ct.Token, lambda _: '{}'),
-            (ct.Symbol, lambda _: '{}._wrap()'),
-            (ct.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
-            (ct.LongType, lambda _: '{{}}{}'.format(value_suffix)),
+            (ct.token_type, lambda _: '{}'),
+            (ct.symbol_type, lambda _: '{}._wrap()'),
+            (ct.bool_type, lambda _: 'bool({{}}{})'.format(value_suffix)),
+            (ct.long_type, lambda _: '{{}}{}'.format(value_suffix)),
             (ct._EnumType, lambda _: '{}_to_str[{{}}{}]'.format(
                 type.c_type(self.c_api_settings).name,
                 value_suffix,
@@ -72,16 +71,16 @@ class PythonAPISettings(AbstractAPISettings):
                 type.name().camel,
                 inc_ref
             )),
-            (ct.LexicalEnvType, lambda _:
+            (ct.lexical_env_type, lambda _:
                 'LexicalEnv._wrap({{}}, inc_ref={})'.format(inc_ref)),
-            (ct.LogicVarType, lambda _: 'LogicVar._wrap({})'),
-            (ct.EquationType, lambda _:
+            (ct.logic_var_type, lambda _: 'LogicVar._wrap({})'),
+            (ct.equation_type, lambda _:
                 'Equation._wrap({{}}, inc_ref={})'.format(inc_ref)),
-            (ct.EnvRebindingsType, lambda _:
+            (ct.env_rebindings_type, lambda _:
                 'EnvRebindings._wrap({{}}, inc_ref={})'.format(inc_ref)),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
-            '(wrapping): {}'.format(type)
+            ' (wrapping): {}'.format(type)
         )).format(value)
 
     def unwrap_value(self, value, type):
@@ -91,18 +90,18 @@ class PythonAPISettings(AbstractAPISettings):
         value.
 
         :param str value: Expression yielding a high-level value.
-        :param ct.CompiledType type: Type parameter. Type corresponding to the
-            "value" expression.
+        :param ct.CompiledType type: Type corresponding to the "value"
+            expression.
         :rtype: str
         """
         return dispatch_on_type(type, [
-            (ct.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({})'),
-            (ct.AnalysisUnitKind, lambda _: '_unwrap_unit_kind({})'),
+            (ct.analysis_unit_type, lambda _: 'AnalysisUnit._unwrap({})'),
+            (ct.analysis_unit_kind, lambda _: '_unwrap_unit_kind({})'),
             (ct.ASTNodeType, lambda _: '{}._unwrap({{}})'.format(
                 self.context.root_grammar_class.name().camel
             )),
-            (ct.BoolType, lambda _: 'bool({})'),
-            (ct.LongType, lambda _: 'int({})'),
+            (ct.bool_type, lambda _: 'bool({})'),
+            (ct.long_type, lambda _: 'int({})'),
             (ct._EnumType, lambda _:
                 '_unwrap_enum({{}}, str_to_{}, {})'.format(
                     type.c_type(self.c_api_settings).name,
@@ -114,14 +113,14 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.StructType, lambda _: '{}._unwrap({{}})'.format(
                 type.name().camel
             )),
-            (ct.Symbol, lambda _: '_text._unwrap({})'),
-            (ct.LexicalEnvType, lambda _: 'LexicalEnv._unwrap({})'),
-            (ct.LogicVarType, lambda _: 'LogicVar._unwrap({})'),
-            (ct.EquationType, lambda _: 'Equation._unwrap({})'),
-            (ct.EnvRebindingsType, lambda _: 'EnvRebindings._unwrap({})'),
+            (ct.symbol_type, lambda _: '_text._unwrap({})'),
+            (ct.lexical_env_type, lambda _: 'LexicalEnv._unwrap({})'),
+            (ct.logic_var_type, lambda _: 'LogicVar._unwrap({})'),
+            (ct.equation_type, lambda _: 'Equation._unwrap({})'),
+            (ct.env_rebindings_type, lambda _: 'EnvRebindings._unwrap({})'),
         ], exception=TypeError(
-            'Unhandled field type in the python binding '
-            '(unwrapping): {}'.format(type)
+            'Unhandled field type in the python binding'
+            ' (unwrapping): {}'.format(type)
         )).format(value)
 
     def type_internal_name(self, type):
@@ -129,8 +128,8 @@ class PythonAPISettings(AbstractAPISettings):
         Python specific helper, to get the internal name of a type that is
         wrapped.
 
-        :param CompiledType type: Type parameter. The type for which we want to
-            get the internal name.
+        :param CompiledType type: The type for which we want to get the
+            internal name.
         :rtype: str
         """
         def ctype_type(name):
@@ -140,16 +139,16 @@ class PythonAPISettings(AbstractAPISettings):
             return "_{}".format(name)
 
         return dispatch_on_type(type, [
-            (ct.BoolType, lambda _: ctype_type('c_uint8')),
-            (ct.LongType, lambda _: ctype_type('c_long')),
-            (ct.LexicalEnvType, lambda _: 'LexicalEnv._c_type'),
-            (ct.LogicVarType, lambda _: 'LogicVar._c_type'),
-            (ct.EquationType, lambda _: 'Equation._c_type'),
-            (ct.EnvRebindingsType, lambda _: 'EnvRebindings._c_type'),
-            (ct.Token, lambda _: 'Token'),
-            (ct.Symbol, lambda _: wrapped_type('text')),
-            (ct.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),
-            (ct.AnalysisUnitKind, lambda _: ctype_type('c_uint')),
+            (ct.bool_type, lambda _: ctype_type('c_uint8')),
+            (ct.long_type, lambda _: ctype_type('c_long')),
+            (ct.lexical_env_type, lambda _: 'LexicalEnv._c_type'),
+            (ct.logic_var_type, lambda _: 'LogicVar._c_type'),
+            (ct.equation_type, lambda _: 'Equation._c_type'),
+            (ct.env_rebindings_type, lambda _: 'EnvRebindings._c_type'),
+            (ct.token_type, lambda _: 'Token'),
+            (ct.symbol_type, lambda _: wrapped_type('text')),
+            (ct.analysis_unit_type, lambda _: 'AnalysisUnit._c_type'),
+            (ct.analysis_unit_kind, lambda _: ctype_type('c_uint')),
             (ct.ASTNodeType, lambda _: '{}._c_type'.format(
                 self.context.root_grammar_class.name().camel
             )),

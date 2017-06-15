@@ -2,10 +2,11 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import (BoolType, EquationType, LexicalEnvType,
-                                    LongType, Symbol, T)
+from langkit.compiled_types import (
+    T, analysis_unit_type, bool_type, equation_type, lexical_env_type,
+    long_type, symbol_type
+)
 from langkit.diagnostics import check_source_language
-from langkit.expressions.analysis_units import AnalysisUnitType
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
     ComputingExpr, LiteralExpr, No, NullExpr, PropertyDef, attr_call,
@@ -44,7 +45,7 @@ class BinaryBooleanOperator(AbstractExpression):
         :rtype: IfExpr
         """
         def construct_op(op):
-            return construct(op, lambda t: t in (BoolType, EquationType),
+            return construct(op, lambda t: t in (bool_type, equation_type),
                              "Operands of binary logic operator must be of "
                              "boolean or equation type, got {expr_type}")
 
@@ -55,22 +56,22 @@ class BinaryBooleanOperator(AbstractExpression):
             "operator should have the same type"
         )
 
-        if lhs.type is BoolType:
+        if lhs.type is bool_type:
             # Boolean case
             if self.kind == self.AND:
                 then = rhs
-                else_then = LiteralExpr('False', BoolType)
+                else_then = LiteralExpr('False', bool_type)
             else:
-                then = LiteralExpr('True', BoolType)
+                then = LiteralExpr('True', bool_type)
                 else_then = rhs
-            return If.Expr(lhs, then, else_then, BoolType)
+            return If.Expr(lhs, then, else_then, bool_type)
 
         else:
             # Equation case
             kind_name = self.kind.capitalize()
             return CallExpr(
                 '{}_Pred'.format(kind_name), 'Logic_{}'.format(kind_name),
-                EquationType, [lhs, rhs],
+                equation_type, [lhs, rhs],
                 abstract_expr=self
             )
 
@@ -114,7 +115,7 @@ class Eq(AbstractExpression):
     def make_expr(cls, lhs, rhs, abstract_expr=None):
         return (cls.make_expr_for_entities(lhs, rhs, abstract_expr)
                 if lhs.type.is_entity_type else
-                BasicExpr('Is_Equal', '{} = {}', BoolType, [lhs, rhs],
+                BasicExpr('Is_Equal', '{} = {}', bool_type, [lhs, rhs],
                           abstract_expr=abstract_expr))
 
     @staticmethod
@@ -125,7 +126,7 @@ class Eq(AbstractExpression):
             lhs = Cast.Expr(lhs, T.entity)
         if rhs.type != T.entity:
             rhs = Cast.Expr(rhs, T.entity)
-        return CallExpr('Is_Equiv', 'Is_Equivalent', BoolType,
+        return CallExpr('Is_Equiv', 'Is_Equivalent', bool_type,
                         [lhs, rhs],
                         abstract_expr=abstract_expr)
 
@@ -229,7 +230,7 @@ class OrderingTest(AbstractExpression):
             )
 
             super(OrderingTest.Expr, self).__init__(
-                'Comp_Result', template, BoolType, [lhs, rhs],
+                'Comp_Result', template, bool_type, [lhs, rhs],
                 abstract_expr=abstract_expr
             )
 
@@ -258,7 +259,7 @@ class OrderingTest(AbstractExpression):
         :rtype: OrderingTest.Expr
         """
         return OrderingTest.Expr(self.operator, *[
-            construct(e, LongType,
+            construct(e, long_type,
                       "Comparisons only work on scalars, not {expr_type}")
             for e in (self.lhs, self.rhs)
         ])
@@ -283,8 +284,8 @@ class If(AbstractExpression):
                 this part is returned.
             :param ResolvedExpression else_then: If "cond" is evaluated to
                 false, this part is returned.
-            :param langkit.compiled_types.CompiledType rtype: Type parameter.
-                The type that is returned by then and else_then.
+            :param langkit.compiled_types.CompiledType rtype: The type that is
+                returned by then and else_then.
             :param AbstractExpression|None abstract_expr: See
                 ResolvedExpression's constructor.
             """
@@ -333,7 +334,7 @@ class If(AbstractExpression):
         else_then = construct(self.else_then)
         rtype = then.type.unify(
             else_then.type,
-            'Mismatching types in If expression: {cls} and {other}'
+            'Mismatching types in If expression: {self} and {other}'
         )
 
         # If then/else_then have actually subtypes of the unified result type,
@@ -343,7 +344,7 @@ class If(AbstractExpression):
         if else_then.type != rtype:
             else_then = Cast.Expr(else_then, rtype)
 
-        return If.Expr(construct(self.cond, BoolType), then, else_then, rtype,
+        return If.Expr(construct(self.cond, bool_type), then, else_then, rtype,
                        abstract_expr=self)
 
     def __repr__(self):
@@ -363,12 +364,12 @@ class Not(AbstractExpression):
         self.expr = expr
 
     def construct(self):
-        return Not.make_expr(construct(self.expr, BoolType),
+        return Not.make_expr(construct(self.expr, bool_type),
                              abstract_expr=self)
 
     @staticmethod
     def make_expr(expr, abstract_expr=None):
-        return BasicExpr('Not_Val', 'not ({})', BoolType, [expr],
+        return BasicExpr('Not_Val', 'not ({})', bool_type, [expr],
                          abstract_expr=abstract_expr)
 
     def __repr__(self):
@@ -486,16 +487,16 @@ class Then(AbstractExpression):
         # Affect default value to the fallback expression. For the moment,
         # only booleans and structs are handled.
         if self.default_val is None:
-            if then_expr.type.matches(BoolType):
+            if then_expr.type.matches(bool_type):
                 default_expr = construct(False)
             elif then_expr.type.is_base_struct_type:
                 default_expr = construct(No(then_expr.type))
-            elif then_expr.type.matches(LexicalEnvType):
+            elif then_expr.type.matches(lexical_env_type):
                 default_expr = construct(EmptyEnv)
-            elif then_expr.type.matches(Symbol):
-                default_expr = NullExpr(Symbol)
-            elif then_expr.type.matches(AnalysisUnitType):
-                default_expr = construct(No(AnalysisUnitType))
+            elif then_expr.type.matches(symbol_type):
+                default_expr = NullExpr(symbol_type)
+            elif then_expr.type.matches(analysis_unit_type):
+                default_expr = construct(No(analysis_unit_type))
             else:
                 # The following is not actually used but PyCharm's typer
                 # requires it.

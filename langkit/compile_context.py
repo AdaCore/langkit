@@ -385,16 +385,16 @@ class CompileCtx(object):
 
         self.enum_types = set()
         """
-        Set of all EnumType subclasses.
+        Set of all _EnumType instances.
 
-        :type: set[langkit.compiled_types.CompiledType]
+        :type: set[langkit.compiled_types._EnumType]
         """
 
         self.astnode_types = []
         """
-        List for all ASTnode subclasses (ASTNodeType excluded), sorted so that
-        A is before B when A is a parent class for B. This sorting is important
-        to output declarations in dependency order.
+        List for all ASTnodeType instances, sorted so that A is before B when A
+        is a parent class for B. This sorting is important to output
+        declarations in dependency order.
 
         This is computed right after field types inference.
 
@@ -403,7 +403,7 @@ class CompileCtx(object):
 
         self.node_kind_constants = {}
         """
-        Mapping: ASTNodeType concrete (i.e. non abstract) subclass -> int,
+        Mapping: ASTNodeType concrete (i.e. non abstract) instance -> int,
         associating specific constants to be used reliably in bindings.  This
         mapping is built at the beginning of code emission.
 
@@ -419,7 +419,7 @@ class CompileCtx(object):
 
         self.root_grammar_class = None
         """
-        The ASTNodeType subclass that is the root class for every node used in
+        The ASTNodeType instance that is the root class for every node used in
         the grammar.
 
         :type: langkit.compiled_types.ASTNodeType
@@ -435,7 +435,7 @@ class CompileCtx(object):
 
         self.env_metadata = None
         """
-        The StructType subclass that will be used as the lexical environment
+        The StructType instance that will be used as the lexical environment
         metadata type.
 
         :type: langkit.compiled_types.StructType
@@ -443,17 +443,17 @@ class CompileCtx(object):
 
         self.list_types = set()
         """
-        Set of all ASTNodeType subclasses (ASTNodeType included) for which we
-        generate a corresponding list type.
+        Set of all ASTNodeType instances for which we generate a corresponding
+        list type.
 
         :type: set[langkit.compiled_types.ASTNodeType]
         """
 
         self.array_types = set()
         """
-        Set of all ArrayType subclasses.
+        Set of all ArrayType instances.
 
-        For each ArrayType subclass T, code emission for type definition will
+        For each ArrayType instance T, code emission for type definition will
         automatically happen in the AST.Types packages unless
         T.element_type().should_emit_array_type is False. In this case, type
         definition should be hard-wired in the AST package.
@@ -509,7 +509,7 @@ class CompileCtx(object):
 
         self.env_metadata = None
         """
-        StructType subclass used to annotate environment elements. Initialized
+        StructType instance used to annotate environment elements. Initialized
         during the typing pass.
 
         :type: langkit.compiled_types.StructType
@@ -584,7 +584,7 @@ class CompileCtx(object):
         order for declarations.
 
         :param set[langkit.compiled_types.CompiledType] type_set: Set of
-            CompiledType subclasses to sort.
+            CompiledType instances to sort.
         :rtype: list[langkit.compiled_types.CompiledType]
         """
         return sorted(type_set, key=lambda cls: cls.name())
@@ -619,21 +619,20 @@ class CompileCtx(object):
 
     def create_enum_node_classes(self):
         """
-        Expand all EnumNode subclasses into ASTNodeType subclasses.
+        Expand all EnumNode subclasses into ASTNodeType instances.
         """
         from langkit.dsl import _EnumNodeMetaclass
-        from langkit.compiled_types import create_enum_node_classes
+        from langkit.compiled_types import create_enum_node_types
         for enum_type in _EnumNodeMetaclass.enum_types:
-            create_enum_node_classes(enum_type)
+            create_enum_node_types(enum_type)
 
     def compute_types(self):
         """
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import (
-            LexicalEnvType, CompiledTypeMetaclass, create_struct
-        )
+        from langkit.compiled_types import (CompiledTypeMetaclass, StructType,
+                                            lexical_env_type)
         from langkit.dsl import _EnumMetaclass, _StructMetaclass
 
         # Make sure the language spec tagged at most one metadata struct.
@@ -647,14 +646,14 @@ class CompileCtx(object):
         # If the language spec provided no env metadata struct, create a
         # default one.
         if user_env_md is None:
-            CompiledTypeMetaclass.env_metadata = create_struct(
+            CompiledTypeMetaclass.env_metadata = StructType(
                 names.Name('Metadata'), None, None, []
             )
         else:
             CompiledTypeMetaclass.env_metadata = user_env_md
         self.check_env_metadata(CompiledTypeMetaclass.env_metadata)
 
-        # Get the list of ASTNodeType types from the StructType metaclass
+        # Get the list of ASTNodeType instances from CompiledTypeMetaclass
         entity = CompiledTypeMetaclass.root_grammar_class.entity()
 
         self.astnode_types = list(CompiledTypeMetaclass.astnode_types)
@@ -669,7 +668,7 @@ class CompileCtx(object):
 
         # The Group lexical environment operation takes an array of lexical
         # envs, so we always need to generate the corresponding array type.
-        self.array_types.add(LexicalEnvType.array_type())
+        self.array_types.add(lexical_env_type.array_type())
 
         # Likewise for the entity array type: LexicalEnv.get returns it.
         self.array_types.add(entity.array_type())
@@ -701,7 +700,7 @@ class CompileCtx(object):
 
         :param StructType cls: Environment metadata struct type.
         """
-        from langkit.compiled_types import BoolType, resolve_type
+        from langkit.compiled_types import bool_type, resolve_type
 
         with cls.diagnostic_context():
             name = cls.name().camel
@@ -714,7 +713,7 @@ class CompileCtx(object):
         for field in cls.get_fields():
             with field.diagnostic_context():
                 check_source_language(
-                    resolve_type(field.type).matches(BoolType),
+                    resolve_type(field.type).matches(bool_type),
                     'Environment metadata fields must all be booleans'
                 )
 
@@ -906,7 +905,7 @@ class CompileCtx(object):
 
         :param bool annotate_fields_types: Whether to try and annotate the
             type of fields in the grammar. If this is True, this will
-            actually modify the file in which ASTNodeType subclasses are
+            actually modify the file in which ASTNodeType instances are
             defined, and annotate empty field definitions.
 
         :param bool check_only: If true, only perform validity checks: stop
@@ -1567,7 +1566,7 @@ class CompileCtx(object):
                 for f in t.get_abstract_fields(include_inherited=False):
                     expose(f.type, f, 'type', traceback + [f.qualname])
 
-            elif issubclass(t, ArrayType):
+            elif isinstance(t, ArrayType):
                 expose(t.element_type(), for_field, 'element type',
                        traceback + ['array of {}'.format(t.name().camel)])
 

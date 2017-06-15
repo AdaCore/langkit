@@ -451,7 +451,7 @@ def check_type(obj, typ, message=None):
     Like utils.assert_type, but produces a client error instead.
 
     :param Any obj: The object to check.
-    :param T typ: Type parameter. The expected type of obj.
+    :param T typ: The expected type of obj.
     :param str|None message: The base message to display if type check fails.
 
     :rtype: T
