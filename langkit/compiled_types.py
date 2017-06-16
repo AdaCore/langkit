@@ -272,8 +272,7 @@ class CompiledType(object):
     """
 
     def __init__(self, name, location=None, doc=None, is_ptr=True,
-                 has_special_storage=False, is_base_struct_type=False,
-                 is_struct_type=False, is_ast_node=False, is_list_type=False,
+                 has_special_storage=False, is_list_type=False,
                  is_entity_type=False, should_emit_array_type=True,
                  exposed=True, c_type_name=None, external=False,
                  null_allowed=False, is_ada_record=False, is_refcounted=False,
@@ -299,15 +298,6 @@ class CompiledType(object):
               * storage_nullexpr;
               * extract_from_storage_expr;
               * convert_to_storage_expr.
-
-        :param bool is_base_struct_type: Whether this type is an instance of
-            BaseStructType.
-
-        :param bool is_struct_type: Whether this type is an instance of
-            StructType.
-
-        :param bool is_ast_node: Whether this type is an instance of
-            ASTNodeType.
 
         :param bool is_list_type: Whether this type is an AST node that is a
             list of AST nodes.
@@ -362,9 +352,6 @@ class CompiledType(object):
         self._doc = doc
         self.is_ptr = is_ptr
         self.has_special_storage = has_special_storage
-        self.is_base_struct_type = is_base_struct_type
-        self.is_struct_type = is_struct_type
-        self.is_ast_node = is_ast_node
         self.is_list_type = is_list_type
         self.is_entity_type = is_entity_type
         self.should_emit_array_type = should_emit_array_type
@@ -577,6 +564,18 @@ class CompiledType(object):
         """
         return ArrayType(name=self.name() + names.Name('Array_Type'),
                          element_type=self)
+
+    @property
+    def is_base_struct_type(self):
+        return isinstance(self, BaseStructType)
+
+    @property
+    def is_struct_type(self):
+        return isinstance(self, StructType)
+
+    @property
+    def is_ast_node(self):
+        return isinstance(self, ASTNodeType)
 
 
 class NoCompiledType(CompiledType):
@@ -1271,7 +1270,6 @@ class BaseStructType(CompiledType):
 
         super(BaseStructType, self).__init__(
             name, location, doc,
-            is_base_struct_type=True,
             type_repo_name=type_repo_name,
             **kwargs
         )
@@ -1432,7 +1430,6 @@ class StructType(BaseStructType):
             name, location, doc,
             is_ptr=False,
             null_allowed=True,
-            is_struct_type=True,
             is_ada_record=True,
 
             # A compile pass will tag all StructType subclasses that are
@@ -1572,10 +1569,8 @@ class ASTNodeType(BaseStructType):
         super(ASTNodeType, self).__init__(
             name, location, doc,
             is_ptr=True, null_allowed=True, is_ada_record=False,
-            is_ast_node=True, is_list_type=is_list,
-            should_emit_array_type=not is_root, exposed=True,
-            is_refcounted=False,
-            py_nullexpr='None',
+            is_list_type=is_list, should_emit_array_type=not is_root,
+            exposed=True, is_refcounted=False, py_nullexpr='None',
         )
         self._base = base
 
