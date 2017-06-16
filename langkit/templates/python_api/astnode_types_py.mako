@@ -29,10 +29,10 @@
                     arg.type,
                     'kwargs.get({}, {})'.format(
                         repr(arg.name.lower),
-                        arg.type.py_nullexpr()
+                        arg.type.py_nullexpr
                     )
                  ) if with_implicit_args else unwrap_arg(
-                    arg.type, arg.type.py_nullexpr()
+                    arg.type, arg.type.py_nullexpr
                 )
                 for arg in field.exposed_optional_arguments
             ]

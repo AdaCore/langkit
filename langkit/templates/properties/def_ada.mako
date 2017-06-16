@@ -36,7 +36,7 @@ is
    ${gdb_helper('bind', arg.name.lower, arg.name.camel_with_underscores)}
    % endfor
 
-   Property_Result : ${property.type.name} := ${property.type.nullexpr()};
+   Property_Result : ${property.type.name} := ${property.type.nullexpr};
 
    ## For each scope, there is one of the following subprograms that finalizes
    ## all the ref-counted local variables it contains, excluding variables from

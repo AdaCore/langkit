@@ -7,7 +7,7 @@
    % for arg in property.arguments:
       ; ${arg.name} : ${arg.type.name}
       % if arg.is_optional:
-         := ${arg.type.nullexpr()}
+         := ${arg.type.nullexpr}
       % endif
    % endfor
   )
@@ -29,7 +29,7 @@
       % if dynvars:
          <%
             items = [
-               '{} => {}'.format(dynvar.argument_name, dynvar.type.nullexpr())
+               '{} => {}'.format(dynvar.argument_name, dynvar.type.nullexpr)
                for dynvar in dynvars
             ]
          %>

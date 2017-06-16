@@ -38,7 +38,7 @@ ${expr.expr.render_pre()}
       % if expr.do_raise:
          raise Property_Error with "invalid object cast";
       % else:
-         ${expr.result_var.name} := ${expr.static_type.nullexpr()};
+         ${expr.result_var.name} := ${expr.static_type.nullexpr};
       % endif
    end if;
 % endif

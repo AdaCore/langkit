@@ -2832,7 +2832,7 @@ package body ${ada_lib_name}.Analysis is
       % if not T.env_md.get_fields():
       pragma Unreferenced (L, R);
       % endif
-      Ret : ${T.env_md.name} := ${T.env_md.nullexpr()};
+      Ret : ${T.env_md.name} := ${T.env_md.nullexpr};
    begin
       % for field in T.env_md.get_fields():
          Ret.${field.name} := L.${field.name} or R.${field.name};

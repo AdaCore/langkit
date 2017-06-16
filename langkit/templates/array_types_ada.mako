@@ -90,7 +90,7 @@
          % endif
          return Result;
       elsif Or_Null then
-         return ${cls.element_type.nullexpr()};
+         return ${cls.element_type.nullexpr};
       else
          raise Property_Error with "out-of-bounds array access";
       end if;

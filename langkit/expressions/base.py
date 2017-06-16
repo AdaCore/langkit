@@ -3120,7 +3120,7 @@ class NullExpr(BasicExpr):
 
     def __init__(self, type, abstract_expr=None):
         super(NullExpr, self).__init__(
-            'Null_Value', type.nullexpr(), type, [],
+            'Null_Value', type.nullexpr, type, [],
 
             # Ref-counting is correct, but not needed for null values, so avoid
             # generating it to reduce code bloat.

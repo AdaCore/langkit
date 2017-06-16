@@ -475,6 +475,7 @@ class CompiledType(object):
         """
         return base_expr
 
+    @property
     def nullexpr(self):
         """
         Return a string to be used in code generation for "null" expressions.
@@ -488,6 +489,7 @@ class CompiledType(object):
         else:
             return self._nullexpr
 
+    @property
     def py_nullexpr(self):
         """
         Return a string to be used in Python code gen for "null" expressions.
@@ -510,7 +512,7 @@ class CompiledType(object):
 
         :rtype: str
         """
-        return self.nullexpr()
+        return self.nullexpr
 
     def c_type(self, c_api_settings):
         """
@@ -1319,9 +1321,10 @@ class BaseStructType(CompiledType):
             f_v.struct = self
         self._fields = OrderedDict(fields)
 
+    @property
     def py_nullexpr(self):
         return '{}({})'.format(self.name.camel, ', '.join(
-            f.type.py_nullexpr() for f in self.get_fields()
+            f.type.py_nullexpr for f in self.get_fields()
         ))
 
     def add_field(self, field):

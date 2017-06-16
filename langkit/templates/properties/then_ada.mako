@@ -11,7 +11,7 @@ cond_expr = then.var_expr.render_expr()
 cond_type = then.var_expr.type
 %>
 
-if ${cond_expr} /= ${cond_type.nullexpr()} then
+if ${cond_expr} /= ${cond_type.nullexpr} then
    ${then.then_expr.render_pre()}
    ${then.result_var.name} := ${then.then_expr.render_expr()};
 else

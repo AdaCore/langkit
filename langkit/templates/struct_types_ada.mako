@@ -22,7 +22,7 @@
       % if fields or extensions:
          % for f in fields:
             ${f.name} : aliased ${f.type.storage_type_name}
-               := ${f.type.nullexpr()};
+               := ${f.type.nullexpr};
              ${ada_doc(f, 6)}
             ${extensions}
          % endfor
@@ -31,7 +31,7 @@
       % endif
    end record
      with Convention => C;
-   ${cls.nullexpr()} : constant ${cls.name} :=
+   ${cls.nullexpr} : constant ${cls.name} :=
    % if fields or extensions:
    (others => <>);
    % else:
