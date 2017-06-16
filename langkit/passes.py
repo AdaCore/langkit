@@ -149,7 +149,7 @@ class GrammarRulePass(AbstractPass):
 
     def run(self, context):
         for name, rule in context.grammar.rules.items():
-            with rule.diagnostic_context():
+            with rule.diagnostic_context:
                 self.pass_fn(rule)
 
 
@@ -180,7 +180,7 @@ class ASTNodePass(AbstractPass):
     def run(self, context):
         for astnode in context.astnode_types:
             if self.auto_context:
-                with astnode.diagnostic_context():
+                with astnode.diagnostic_context:
                     self.pass_fn(context, astnode)
             else:
                 self.pass_fn(context, astnode)
@@ -250,7 +250,7 @@ class PropertyPass(AbstractPass):
     def run(self, context):
         for astnode in context.astnode_types:
             for prop in astnode.get_properties(include_inherited=False):
-                with prop.diagnostic_context():
+                with prop.diagnostic_context:
                     self.pass_fn(prop, context)
 
 

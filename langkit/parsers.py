@@ -282,7 +282,7 @@ class Grammar(object):
                 return
             referenced_rules.add(rule_name)
             rule_parser = self.get_rule(rule_name)
-            with rule_parser.diagnostic_context():
+            with rule_parser.diagnostic_context:
                 visit_parser(rule_parser)
 
         # The following will fill "referenced_rules" thanks to recursion
@@ -452,6 +452,7 @@ class Parser(object):
         for c in self.children():
             c.set_location(self.location)
 
+    @property
     def diagnostic_context(self):
         """
         Helper that will return a diagnostic context manager with parameters
@@ -937,7 +938,7 @@ class List(Parser):
         return keep([self.parser, self.sep])
 
     def get_type(self):
-        with self.diagnostic_context():
+        with self.diagnostic_context:
             if self.list_cls:
                 ret = resolve_type(self.list_cls)
                 check_source_language(
@@ -959,7 +960,7 @@ class List(Parser):
         Parser.compute_fields_types(self)
 
         typ = self.get_type()
-        with self.diagnostic_context():
+        with self.diagnostic_context:
             check_source_language(
                 not typ.abstract,
                 'Please provide a concrete ASTnode subclass as list_cls'
@@ -1426,7 +1427,7 @@ class NodeToParsersPass():
         # Check if every non-abstract non-synthetic node has a corresponding
         # parser.
         for node_type in CompiledTypeMetaclass.astnode_types:
-            with node_type.diagnostic_context():
+            with node_type.diagnostic_context:
                 WarningSet.unused_node_type.warn_if(
                     node_type not in self.nodes_to_rules.keys()
                     and not node_type.abstract

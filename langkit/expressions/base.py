@@ -146,7 +146,7 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
     """
 
     expr = unsugar(expr)
-    with expr.diagnostic_context():
+    with expr.diagnostic_context:
 
         ret = expr.construct()
         ret.location = expr.location
@@ -275,6 +275,7 @@ class AbstractExpression(Frozable):
 
     attrs_dict = {}
 
+    @property
     def diagnostic_context(self):
         ctx_message = 'in {} expression'.format(self.__class__.__name__)
         return Context(ctx_message, self.location, "abstract_expr")
@@ -2295,7 +2296,7 @@ class PropertyDef(AbstractNodeData):
 
         # If the expr has not yet been constructed, try to construct it
         if not self.constructed_expr:
-            with self.diagnostic_context():
+            with self.diagnostic_context:
                 self.construct_and_type_expression(get_context())
 
         return resolve_type(self.constructed_expr.type)

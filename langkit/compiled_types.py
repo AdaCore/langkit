@@ -385,6 +385,7 @@ class CompiledType(object):
     def __repr__(self):
         return '<CompiledType {}>'.format(self.name.camel)
 
+    @property
     def diagnostic_context(self):
         ctx_message = 'in {}'.format(self.name.camel)
         return Context(ctx_message, self.location)
@@ -921,6 +922,7 @@ class AbstractNodeData(object):
         return (isinstance(self, PropertyDef) and
                 self._name in properties_to_override)
 
+    @property
     def diagnostic_context(self):
         ctx_message = 'in {}.{}'.format(self.struct.name.camel,
                                         self._name.lower)
@@ -973,7 +975,7 @@ class AbstractNodeData(object):
 
         :rtype: CAPIType
         """
-        with self.diagnostic_context():
+        with self.diagnostic_context:
             return self.type.c_type(capi)
 
     @property
@@ -1748,7 +1750,7 @@ class ASTNodeType(BaseStructType):
                 # inferred type for checking only (raising an assertion if it
                 # does not correspond).
                 if field.type:
-                    with field.diagnostic_context():
+                    with field.diagnostic_context:
                         check_source_language(
                             # Using matches here allows the user to annotate a
                             # field with a more general type than the one
@@ -2016,7 +2018,7 @@ class ASTNodeType(BaseStructType):
         inherited_fields = (self.base().get_abstract_fields_dict()
                             if self.base() else {})
         for f_n, f_v in self._fields.items():
-            with f_v.diagnostic_context():
+            with f_v.diagnostic_context:
                 homonym_fld = inherited_fields.get(f_n)
                 if homonym_fld:
                     check_source_language(

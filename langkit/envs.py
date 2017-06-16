@@ -280,7 +280,7 @@ class EnvSpec(object):
             ref_envs.check_resolver()
 
         for bindings_prop, _, _, _, resolver in self.envs_expressions:
-            with bindings_prop.diagnostic_context():
+            with bindings_prop.diagnostic_context:
                 check_source_language(
                     bindings_prop.type.matches(T.env_assoc) or
                     bindings_prop.type.matches(T.env_assoc.array_type()),

@@ -687,7 +687,7 @@ class CompileCtx(object):
         # it.
         if self.env_hook_subprogram is None:
             for t in self.astnode_types:
-                with t.diagnostic_context():
+                with t.diagnostic_context:
                     check_source_language(
                         t.env_spec is None or not t.env_spec.env_hook_enabled,
                         'Cannot invoke the environment hook if'
@@ -702,7 +702,7 @@ class CompileCtx(object):
         """
         from langkit.compiled_types import bool_type, resolve_type
 
-        with cls.diagnostic_context():
+        with cls.diagnostic_context:
             name = cls.name.camel
             check_source_language(
                 name == 'Metadata',
@@ -711,7 +711,7 @@ class CompileCtx(object):
             )
 
         for field in cls.get_fields():
-            with field.diagnostic_context():
+            with field.diagnostic_context:
                 check_source_language(
                     resolve_type(field.type).matches(bool_type),
                     'Environment metadata fields must all be booleans'
@@ -864,7 +864,7 @@ class CompileCtx(object):
         def warn(unused_set, message):
             sorted_set = sorted((p.qualname, p) for p in unused_set)
             for _, p in sorted_set:
-                with p.diagnostic_context():
+                with p.diagnostic_context:
                     check_source_language(False, message,
                                           severity=Severity.warning)
 
@@ -1574,7 +1574,7 @@ class CompileCtx(object):
                 # Only struct and array types have their "_exposed" attribute
                 # inferred. We consider all other ones to have a static value,
                 # so complain if we reach a type that must not be exposed.
-                with for_field.diagnostic_context():
+                with for_field.diagnostic_context:
                     text_tb = (
                         ' (from: {})'.format(
                             ' -> '.join(traceback[:-1])
