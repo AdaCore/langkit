@@ -847,6 +847,7 @@ class _BuiltinType(DSLType):
     Base class for all built-in compiled types.
     """
     import langkit.compiled_types as _ct
+    _ = _ct
 
 
 class AnalysisUnitKind(_BuiltinType):
