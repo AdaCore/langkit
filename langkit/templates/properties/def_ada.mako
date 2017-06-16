@@ -129,7 +129,7 @@ ${gdb_helper('end', property.qualname)}
 % if not property.overriding and is_array_type(property.type):
    function ${property.name}
      ${helpers.argument_list(property, False)}
-     return ${property.type.api_name()}
+     return ${property.type.api_name}
    is
       Raw    : ${property.type.name} := ${property.name}
         (
@@ -138,7 +138,7 @@ ${gdb_helper('end', property.qualname)}
                , ${arg.name}
            % endfor
         );
-      Result : constant ${property.type.api_name()} := Raw.Items;
+      Result : constant ${property.type.api_name} := Raw.Items;
    begin
       ## Just deallocate the array so that the ownership for each item is
       ## merely transfered to the caller.

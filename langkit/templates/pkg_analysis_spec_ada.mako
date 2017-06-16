@@ -485,7 +485,7 @@ package ${ada_lib_name}.Analysis is
 
    function Children
      (Node : access ${root_node_value_type}'Class)
-     return ${root_node_array.api_name()};
+     return ${root_node_array.api_name};
    --  Return an array containing all the children of Node.
    --  This is an alternative to the Child/Child_Count pair, useful if you want
    --  the convenience of Ada arrays, and you don't care about the small
@@ -1222,7 +1222,7 @@ private
 
    function Group is new AST_Envs.Group
      (Index_Type        => Positive,
-      Lexical_Env_Array => ${LexicalEnvType.array_type().api_name()});
+      Lexical_Env_Array => ${LexicalEnvType.array_type().api_name});
 
    function Group
      (Envs : ${LexicalEnvType.array_type().name})
@@ -1271,7 +1271,7 @@ private
    ${array_types.private_decl(T.root_node.entity().array_type())}
    ${array_types.private_decl(root_node_array)}
 
-   package ${T.root_node.array_type().pkg_vector()} is
+   package ${T.root_node.array_type().pkg_vector} is
       new Langkit_Support.Vectors (${T.root_node.name});
 
    function Pre_Env_Actions

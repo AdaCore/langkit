@@ -1,19 +1,19 @@
 ## vim: filetype=makoada
 
 <%def name="public_incomplete_decl(cls)">
-   type ${cls.pointed()};
-   type ${cls.name} is access all ${cls.pointed()};
+   type ${cls.pointed};
+   type ${cls.name} is access all ${cls.pointed};
 </%def>
 
 <%def name="public_decl(cls)">
 
    <% elt_type = cls.element_type().name %>
 
-   type ${cls.api_name()}
+   type ${cls.api_name}
      is array (Positive range <>) of ${cls.element_type().name};
-   type ${cls.pointed()} (N : Natural) is record
+   type ${cls.pointed} (N : Natural) is record
       Ref_Count : Positive;
-      Items     : ${cls.api_name()} (1 .. N);
+      Items     : ${cls.api_name} (1 .. N);
    end record;
 
    ## If we are on the entity type, we need a conversion function
@@ -50,7 +50,7 @@
 
 <%def name="private_decl(cls)">
   procedure Free is new Ada.Unchecked_Deallocation
-    (${cls.pointed()}, ${cls.name});
+    (${cls.pointed}, ${cls.name});
 </%def>
 
 <%def name="body(cls)">
@@ -58,7 +58,7 @@
    <% elt_type = cls.element_type().name %>
 
    % if cls.element_type() != ctx.root_grammar_class:
-      package ${cls.pkg_vector()} is new Langkit_Support.Vectors (${elt_type});
+      package ${cls.pkg_vector} is new Langkit_Support.Vectors (${elt_type});
    % endif
 
    ---------
@@ -101,7 +101,7 @@
    ------------
 
    function Concat (L, R : ${cls.name}) return ${cls.name} is
-      use ${cls.pkg_vector()};
+      use ${cls.pkg_vector};
       Ret : ${cls.name} := Create (Length (L) + Length (R));
    begin
       Ret.Items := (L.Items & R.Items);
@@ -153,12 +153,12 @@
    ------------
 
    function Create (Items_Count : Natural) return ${cls.name} is
-     (new ${cls.pointed()}'(N => Items_Count, Ref_Count => 1, Items => <>));
+     (new ${cls.pointed}'(N => Items_Count, Ref_Count => 1, Items => <>));
 
    % if cls.element_type() == T.root_node.entity():
    function Create (Items : AST_Envs.Entity_Array) return ${cls.name}
-   is (new ${cls.pointed()}'(N         => Items'Length,
-                             Items     => ${cls.api_name()} (Items),
-                             Ref_Count => 1));
+   is (new ${cls.pointed}'(N         => Items'Length,
+                           Items     => ${cls.api_name} (Items),
+                           Ref_Count => 1));
    % endif
 </%def>

@@ -49,7 +49,7 @@ ${parser.res_var}.Unit := Parser.Unit;
 ${parser.res_var}.Count := ${parser.tmplist}.Nodes.Length;
 
 declare
-   Vec : ${T.root_node.array_type().pkg_vector()}.Vector renames
+   Vec : ${T.root_node.array_type().pkg_vector}.Vector renames
       ${parser.tmplist}.Nodes;
    Arr : Alloc_AST_List_Array.Element_Array_Access renames
       ${parser.res_var}.Nodes;

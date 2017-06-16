@@ -106,8 +106,8 @@ package body ${ada_lib_name}.Analysis is
    package ${root_node_type_name}_Arrays
    is new Langkit_Support.Array_Utils
      (${root_node_type_name},
-      ${root_node_array.pkg_vector()}.Index_Type,
-      ${root_node_array.pkg_vector()}.Elements_Array);
+      ${root_node_array.pkg_vector}.Index_Type,
+      ${root_node_array.pkg_vector}.Elements_Array);
 
    ##  Make logic operations on nodes accessible
    use Eq_Node, Eq_Node.Raw_Impl;
@@ -1757,13 +1757,13 @@ package body ${ada_lib_name}.Analysis is
 
    function Children
      (Node : access ${root_node_value_type}'Class)
-     return ${root_node_array.api_name()}
+     return ${root_node_array.api_name}
    is
       First : constant Integer
         := ${root_node_array.index_type()}'First;
       Last  : constant Integer := First + Child_Count (Node) - 1;
    begin
-      return A : ${root_node_array.api_name()} (First .. Last)
+      return A : ${root_node_array.api_name} (First .. Last)
       do
          for I in First .. Last loop
             A (I) := Child (Node, I);
@@ -1775,7 +1775,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_array.name}
    is
-      C : ${root_node_array.api_name()} := Children (Node);
+      C : ${root_node_array.api_name} := Children (Node);
    begin
       return Ret : ${root_node_array.name} := Create (C'Length) do
          Ret.Items := C;
@@ -2223,11 +2223,11 @@ package body ${ada_lib_name}.Analysis is
 
       First_Child : constant ${root_node_array.index_type()} :=
          ${root_node_array.index_type()}'First;
-      N_Children  : constant ${root_node_array.api_name()}
-        := ${root_node_array.api_name()}
+      N_Children  : constant ${root_node_array.api_name}
+        := ${root_node_array.api_name}
              (${root_node_type_name}_Arrays.Filter
-              (${root_node_array.pkg_vector()}.Elements_Array
-                (${root_node_array.api_name()}'(Children (Node))),
+              (${root_node_array.pkg_vector}.Elements_Array
+                (${root_node_array.api_name}'(Children (Node))),
                Filter_Children'Access));
    begin
       if N_Children'Length > 0
@@ -2310,7 +2310,7 @@ package body ${ada_lib_name}.Analysis is
          Initial_Env := Node.Pre_Env_Actions (Bound_Env, Root_Env);
 
          --  Call recursively on children
-         for C of ${root_node_array.api_name()}'(Children (Node))
+         for C of ${root_node_array.api_name}'(Children (Node))
          loop
             Populate_Internal (C, Node.Self_Env);
          end loop;
@@ -2587,7 +2587,7 @@ package body ${ada_lib_name}.Analysis is
             end if;
          end if;
 
-         for Child of ${root_node_array.api_name()}'(Children (Current)) loop
+         for Child of ${root_node_array.api_name}'(Children (Current)) loop
             Internal (Child);
          end loop;
       end Internal;
@@ -2923,7 +2923,7 @@ package body ${ada_lib_name}.Analysis is
            new String'(Image (Node.Short_Image) & ".${f.name}");
       % endfor
       Assign_Names_To_Logic_Vars_Impl (Node);
-      for Child of ${root_node_array.api_name()}'(Children (Node)) loop
+      for Child of ${root_node_array.api_name}'(Children (Node)) loop
          if Child /= null then
             Assign_Names_To_Logic_Vars (Child);
          end if;

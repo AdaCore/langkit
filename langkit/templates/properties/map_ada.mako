@@ -12,7 +12,7 @@
    array_var = map.result_var.name
 
    vec_var = map.result_var.name + Name('Vec')
-   vec_pkg = map.type.pkg_vector()
+   vec_pkg = map.type.pkg_vector
 %>
 
 ${map.collection.render_pre()}

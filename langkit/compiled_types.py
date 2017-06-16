@@ -2137,12 +2137,14 @@ class ArrayType(CompiledType):
     def name(self):
         return self.element_type().name + names.Name('Array_Access')
 
+    @property
     def api_name(self):
         """
         Name of the type for general values in our bindings.
         """
         return self.element_type().name + names.Name('Array')
 
+    @property
     def pointed(self):
         """
         Name of the type for values that are pointed to by general values.
@@ -2151,6 +2153,7 @@ class ArrayType(CompiledType):
         """
         return self.element_type().name + names.Name('Array_Record')
 
+    @property
     def pkg_vector(self):
         """
         Name of the Langkit_Support.Vectors package instantiation corresponding
@@ -2161,7 +2164,7 @@ class ArrayType(CompiledType):
         return self.element_type().name + names.Name('Vectors')
 
     def c_type(self, c_api_settings):
-        return CAPIType(c_api_settings, self.api_name())
+        return CAPIType(c_api_settings, self.api_name)
 
     def is_collection(self):
         return True
@@ -2181,7 +2184,7 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return names.Name(self.pkg_vector().camel_with_underscores + '.Vector')
+        return names.Name(self.pkg_vector.camel_with_underscores + '.Vector')
 
     def array(self):
         """
@@ -2189,7 +2192,7 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return self.api_name()
+        return self.api_name
 
     def c_inc_ref(self, capi):
         """
@@ -2198,7 +2201,7 @@ class ArrayType(CompiledType):
         :param langkit.c_api.CAPISettings capi: Settings for the C API.
         :rtype: str
         """
-        return capi.get_name(self.api_name() + names.Name('Inc_Ref'))
+        return capi.get_name(self.api_name + names.Name('Inc_Ref'))
 
     def c_dec_ref(self, capi):
         """
@@ -2207,7 +2210,7 @@ class ArrayType(CompiledType):
         :param langkit.c_api.CAPISettings capi: Settings for the C API.
         :rtype: str
         """
-        return capi.get_name(self.api_name() + names.Name('Dec_Ref'))
+        return capi.get_name(self.api_name + names.Name('Dec_Ref'))
 
 
 class _EnumType(CompiledType):

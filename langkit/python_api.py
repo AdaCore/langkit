@@ -64,7 +64,7 @@ class PythonAPISettings(AbstractAPISettings):
                 value_suffix,
             )),
             (ct.ArrayType, lambda cls: '{}({{}}, inc_ref={})'.format(
-                type.api_name().camel,
+                type.api_name.camel,
                 inc_ref
             )),
             (ct.StructType, lambda _: '{}._wrap({{}}, inc_ref={})'.format(
@@ -108,7 +108,7 @@ class PythonAPISettings(AbstractAPISettings):
                     type.name.camel
                 )),
             (ct.ArrayType, lambda cls: '{}._unwrap({{}})'.format(
-                cls.api_name().camel
+                cls.api_name.camel
             )),
             (ct.StructType, lambda _: '{}._unwrap({{}})'.format(
                 type.name.camel
@@ -154,6 +154,6 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (ct._EnumType, lambda _: ctype_type('c_uint')),
             (ct.ArrayType, lambda cls:
-                '{}._c_type'.format(cls.api_name().camel)),
+                '{}._c_type'.format(cls.api_name.camel)),
             (ct.StructType, lambda _: '{}._c_type'.format(type.name.camel)),
         ])

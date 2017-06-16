@@ -47,7 +47,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
    --  Cache of temporary lists of AST nodes used in List parsers
 
    type Free_Parse_List_Record is record
-      Nodes : ${ctx.root_grammar_class.array_type().pkg_vector()}.Vector;
+      Nodes : ${ctx.root_grammar_class.array_type().pkg_vector}.Vector;
       Next  : Free_Parse_List;
    end record;
 
