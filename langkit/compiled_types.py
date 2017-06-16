@@ -276,7 +276,8 @@ class CompiledType(object):
                  is_entity_type=False, should_emit_array_type=True,
                  exposed=True, c_type_name=None, external=False,
                  null_allowed=False, is_ada_record=False, is_refcounted=False,
-                 nullexpr=None, py_nullexpr=None, type_repo_name=None):
+                 nullexpr=None, py_nullexpr=None, element_type=None,
+                 type_repo_name=None):
         """
         :param names.Name|str name: Type name. If a string, it must be
             camel-case.
@@ -341,6 +342,9 @@ class CompiledType(object):
         :param str|None py_nullexpr: Null expression to use in Python for this
             type. See the "py_nullexpr" method.
 
+        :param CompiledType|None element_type: If this is a collection type,
+            must be the corresponding element type. Must be None otherwise.
+
         :param str|None type_repo_name: Name to use for registration in
             TypeRepo. The camel-case of "name" is used if left to None.
     """
@@ -363,6 +367,7 @@ class CompiledType(object):
         self._is_refcounted = is_refcounted
         self._nullexpr = nullexpr
         self._py_nullexpr = py_nullexpr
+        self._element_type = element_type
 
         type_repo_name = type_repo_name or name.camel
         CompiledTypeMetaclass.types.append(self)
@@ -393,7 +398,22 @@ class CompiledType(object):
         return self._doc
 
     def is_collection(self):
-        return False
+        """
+        Return whether this is a collection type.
+
+        :rtype: bool
+        """
+        return self._element_type is not None
+
+    def element_type(self):
+        """
+        Assuming this is a collection type (array or list), return the
+        corresponding element type.
+
+        :rtype: CompiledType
+        """
+        assert self._element_type
+        return self._element_type
 
     def is_refcounted(self):
         """
@@ -411,18 +431,6 @@ class CompiledType(object):
         :rtype: bool
         """
         return self._is_refcounted
-
-    def element_type(self):
-        """
-        Assuming `self` is a collection type (array or list), return the
-        CompiledType instance for the type of elements contained in it.  Must
-        be overriden in relevant subclasses.
-
-        :rtype: CompiledType
-        """
-        raise NotImplementedError(
-            'element_type used on a non collection type: {}'.format(self)
-        )
 
     def storage_type_name(self):
         """
@@ -1571,6 +1579,7 @@ class ASTNodeType(BaseStructType):
             is_ptr=True, null_allowed=True, is_ada_record=False,
             is_list_type=is_list, should_emit_array_type=not is_root,
             exposed=True, is_refcounted=False, py_nullexpr='None',
+            element_type=element_type
         )
         self._base = base
 
@@ -1631,9 +1640,6 @@ class ASTNodeType(BaseStructType):
 
         if not is_root:
             base.subclasses.append(self)
-
-        self._element_type = element_type if is_list else None
-        self._is_collection = is_list
 
         # If this is the root grammar type, create the generic list type name
         self.generic_list_type = None
@@ -1699,13 +1705,6 @@ class ASTNodeType(BaseStructType):
             CompiledTypeMetaclass.root_grammar_class,
             CompiledTypeMetaclass.root_grammar_class.generic_list_type,
         )
-
-    def is_collection(self):
-        return self._is_collection
-
-    def element_type(self):
-        assert self._element_type
-        return self._element_type
 
     def set_types(self, types):
         """
@@ -2121,8 +2120,8 @@ class ArrayType(CompiledType):
         # only the ones that are exposed through the public API.
         super(ArrayType, self).__init__(name=name, is_ptr=True, exposed=False,
                                         is_refcounted=True,
-                                        nullexpr=null_constant())
-        self._element_type = element_type
+                                        nullexpr=null_constant(),
+                                        element_type=element_type)
 
         # Register this type where it needs to be registered
         ctx = get_context(True)
@@ -2132,13 +2131,13 @@ class ArrayType(CompiledType):
             CompiledTypeMetaclass.pending_array_types.append(self)
 
     def name(self):
-        return self._element_type.name() + names.Name('Array_Access')
+        return self.element_type().name() + names.Name('Array_Access')
 
     def api_name(self):
         """
         Name of the type for general values in our bindings.
         """
-        return self._element_type.name() + names.Name('Array')
+        return self.element_type().name() + names.Name('Array')
 
     def pointed(self):
         """
@@ -2146,7 +2145,7 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return self._element_type.name() + names.Name('Array_Record')
+        return self.element_type().name() + names.Name('Array_Record')
 
     def pkg_vector(self):
         """
@@ -2155,10 +2154,7 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return self._element_type.name() + names.Name('Vectors')
-
-    def element_type(self):
-        return self._element_type
+        return self.element_type().name() + names.Name('Vectors')
 
     def c_type(self, c_api_settings):
         return CAPIType(c_api_settings, self.api_name())
@@ -2172,7 +2168,7 @@ class ArrayType(CompiledType):
 
         :rtype: str
         """
-        pkg_vector_name = self._element_type.name() + names.Name('Vectors')
+        pkg_vector_name = self.element_type().name() + names.Name('Vectors')
         return '{}.Index_Type'.format(pkg_vector_name.camel_with_underscores)
 
     def vector(self):
