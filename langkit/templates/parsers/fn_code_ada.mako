@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
 <%
-ret_type = parser.get_type().storage_type_name()
+ret_type = parser.get_type().storage_type_name
 memo = "Parser.Private_Part.{}_Memo".format(parser.gen_fn_name)
 %>
 
@@ -14,16 +14,16 @@ is
          % if isinstance(typ, basestring):
             ${typ};
          % else:
-            ${typ.storage_type_name()}
-            % if typ.storage_nullexpr():
-               := ${typ.storage_nullexpr()};
+            ${typ.storage_type_name}
+            % if typ.storage_nullexpr:
+               := ${typ.storage_nullexpr};
             % endif
          % endif
    % endfor
 
    % if parser.is_left_recursive():
       Mem_Pos : Token_Index := Pos;
-      Mem_Res : ${ret_type} := ${parser.get_type().storage_nullexpr()};
+      Mem_Res : ${ret_type} := ${parser.get_type().storage_nullexpr};
    % endif
 
    M : ${ret_type}_Memos.Memo_Entry :=

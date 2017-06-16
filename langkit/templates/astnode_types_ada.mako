@@ -173,8 +173,8 @@
    %>
    % if fields or ext or memoized_properties:
        % for f in fields:
-            ${f.name} : aliased ${f.type.storage_type_name()}
-               := ${f.type.storage_nullexpr()};
+            ${f.name} : aliased ${f.type.storage_type_name}
+               := ${f.type.storage_nullexpr};
             ${ada_doc(f, 12)}
        % endfor
        ${exts.include_extension(ext)}

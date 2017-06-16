@@ -438,6 +438,7 @@ class CompiledType(object):
         """
         return self._is_refcounted
 
+    @property
     def storage_type_name(self):
         """
         Return the name of the type that is used to store instances of this
@@ -501,6 +502,7 @@ class CompiledType(object):
         else:
             return self._py_nullexpr
 
+    @property
     def storage_nullexpr(self):
         """
         Return the nullexpr that is used for fields of this type in structs and
@@ -655,11 +657,13 @@ class LogicVarType(CompiledType):
             c_type_name='logic_var_type',
         )
 
-    def storage_nullexpr(self):
-        return 'Null_Var_Record'
-
+    @property
     def storage_type_name(self):
         return names.Name('Logic_Var_Record')
+
+    @property
+    def storage_nullexpr(self):
+        return 'Null_Var_Record'
 
     def extract_from_storage_expr(self, node_expr, base_expr):
         del node_expr
@@ -757,9 +761,11 @@ class TokenType(CompiledType):
             type_repo_name='Token'
         )
 
+    @property
     def storage_type_name(self):
         return 'Token_Index'
 
+    @property
     def storage_nullexpr(self):
         return 'No_Token_Index'
 

@@ -55,7 +55,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
       Parse_Lists : Free_Parse_List;
 
       % for parser in sorted(ctx.fns):
-      <% ret_type = parser.get_type().storage_type_name() %>
+      <% ret_type = parser.get_type().storage_type_name %>
       ${parser.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
       % endfor
    end record;

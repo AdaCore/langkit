@@ -25,7 +25,7 @@ if ${parser.parser.pos_var} = No_Token_Index then
       % endif
     % elif parser_type and parser_type.is_list_type:
         ${parser.parser.res_var} :=
-          (${parser_type.storage_type_name()}_Alloc.Alloc (Parser.Mem_Pool));
+          (${parser_type.storage_type_name}_Alloc.Alloc (Parser.Mem_Pool));
         ${parser.parser.res_var}.Unit := Parser.Unit;
         ${parser.parser.res_var}.Count := 0;
         ${parser.parser.res_var}.Nodes :=
@@ -34,7 +34,7 @@ if ${parser.parser.pos_var} = No_Token_Index then
         ${parser.parser.res_var}.Token_End_Index := No_Token_Index;
     % elif parser_type:
         ${parser.parser.res_var} :=
-           ${parser_type.storage_nullexpr()};
+           ${parser_type.storage_nullexpr};
     % endif
 
     % if parser._is_error:

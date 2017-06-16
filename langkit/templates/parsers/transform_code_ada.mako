@@ -28,7 +28,7 @@ if ${parser.pos_var} /= No_Token_Index then
       ## Set children fields into the created node
       ${parser.res_var}.${field.name} :=
          % if field.type.is_ast_node:
-            ${field.type.storage_type_name()} (${arg});
+            ${field.type.storage_type_name} (${arg});
          % else:
             ${arg};
          % endif
