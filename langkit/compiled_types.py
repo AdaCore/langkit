@@ -1453,6 +1453,7 @@ class StructType(BaseStructType):
             name, location, doc,
             is_ptr=False,
             null_allowed=True,
+            nullexpr=(names.Name('No') + name).camel_with_underscores,
             is_ada_record=True,
 
             # A compile pass will tag all StructType subclasses that are
@@ -1486,13 +1487,6 @@ class StructType(BaseStructType):
             CompiledTypeMetaclass.root_grammar_class.entity_info(),
             CompiledTypeMetaclass.root_grammar_class.entity(),
         )
-
-    def nullexpr(self):
-        """
-        Return a value that can be considered as "null" for this struct type.
-        :rtype: str
-        """
-        return (names.Name('No') + self.name).camel_with_underscores
 
     def c_inc_ref(self, capi):
         """
@@ -1594,8 +1588,8 @@ class ASTNodeType(BaseStructType):
             name, location, doc,
             is_ptr=True, null_allowed=True, is_ada_record=False,
             is_list_type=is_list, should_emit_array_type=not is_root,
-            exposed=True, is_refcounted=False, py_nullexpr='None',
-            element_type=element_type
+            exposed=True, is_refcounted=False, nullexpr=null_constant(),
+            py_nullexpr='None', element_type=element_type
         )
         self._base = base
 
@@ -1697,15 +1691,6 @@ class ASTNodeType(BaseStructType):
         # "original" node name here, not keyword-escaped ones.
         result = self._repr_name or self.name.camel
         return result
-
-    def nullexpr(self):
-        """
-        Return a value that can be considered as "null" for this AST node type.
-        It indicates the absence of AST node.
-
-        :rtype: str
-        """
-        return null_constant()
 
     def is_builtin(self):
         """
@@ -2248,7 +2233,7 @@ class _EnumType(CompiledType):
         """
         super(_EnumType, self).__init__(
             name, location, doc,
-            is_ptr=False
+            is_ptr=False, nullexpr='Uninitialized'
         )
         self.alternatives = alternatives
         self.suffix = suffix
@@ -2282,9 +2267,6 @@ class _EnumType(CompiledType):
     @property
     def name(self):
         return self._name + names.Name('Type')
-
-    def nullexpr(self):
-        return 'Uninitialized'
 
     def c_type(self, c_api_settings):
         return CAPIType(c_api_settings, self.base_name())
