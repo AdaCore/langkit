@@ -1189,7 +1189,7 @@ class UserField(AbstractField):
     """
 
     def __init__(self, type, repr=False, doc=None, public=True,
-                 access_needs_incref=False):
+                 access_needs_incref=True):
         """
         See inherited doc. In this version we just ensure that a type is
         passed because it is mandatory for data fields. We also set repr to
@@ -2076,12 +2076,14 @@ class ASTNodeType(BaseStructType):
             ('parents', BuiltinField(
                 type=root_type.array_type(),
                 doc='Return an array that contains the lexical parents (this'
-                    ' node included). Nearer parents are first in the list.'
+                    ' node included). Nearer parents are first in the list.',
+                access_needs_incref=False,
             )),
             ('children', BuiltinField(
                 type=root_type.array_type(),
                 doc='Return an array that contains the direct lexical'
-                    ' children.'
+                    ' children.',
+                access_needs_incref=False,
             )),
             ('token_start', PropertyDef(
                 expr=None, prefix=None, type=token_type,
