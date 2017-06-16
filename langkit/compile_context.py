@@ -455,7 +455,7 @@ class CompileCtx(object):
 
         For each ArrayType instance T, code emission for type definition will
         automatically happen in the AST.Types packages unless
-        T.element_type().should_emit_array_type is False. In this case, type
+        T.element_type.should_emit_array_type is False. In this case, type
         definition should be hard-wired in the AST package.
 
         :type: set[langkit.compiled_types.ArrayType]
@@ -1567,7 +1567,7 @@ class CompileCtx(object):
                     expose(f.type, f, 'type', traceback + [f.qualname])
 
             elif isinstance(t, ArrayType):
-                expose(t.element_type(), for_field, 'element type',
+                expose(t.element_type, for_field, 'element type',
                        traceback + ['array of {}'.format(t.name.camel)])
 
             else:

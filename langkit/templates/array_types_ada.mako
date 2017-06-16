@@ -7,10 +7,10 @@
 
 <%def name="public_decl(cls)">
 
-   <% elt_type = cls.element_type().name %>
+   <% elt_type = cls.element_type.name %>
 
    type ${cls.api_name}
-     is array (Positive range <>) of ${cls.element_type().name};
+     is array (Positive range <>) of ${cls.element_type.name};
    type ${cls.pointed} (N : Natural) is record
       Ref_Count : Positive;
       Items     : ${cls.api_name} (1 .. N);
@@ -20,7 +20,7 @@
    ## to be able to get element arrays starting from 0 and convert them into
    ## arrays starting from 1. We need it to convert from entity arrays,
    ## to our array record type.
-   % if cls.element_type() == T.root_node.entity():
+   % if cls.element_type == T.root_node.entity():
    function Create (Items : AST_Envs.Entity_Array) return ${cls.name};
    % endif
 
@@ -55,9 +55,9 @@
 
 <%def name="body(cls)">
 
-   <% elt_type = cls.element_type().name %>
+   <% elt_type = cls.element_type.name %>
 
-   % if cls.element_type() != ctx.root_grammar_class:
+   % if cls.element_type != ctx.root_grammar_class:
       package ${cls.pkg_vector} is new Langkit_Support.Vectors (${elt_type});
    % endif
 
@@ -85,12 +85,12 @@
       Result : ${elt_type};
    begin
       if Relative_Get (T, Index, Result) then
-         % if cls.element_type().is_refcounted():
+         % if cls.element_type.is_refcounted():
             Inc_Ref (Result);
          % endif
          return Result;
       elsif Or_Null then
-         return ${cls.element_type().nullexpr()};
+         return ${cls.element_type.nullexpr()};
       else
          raise Property_Error with "out-of-bounds array access";
       end if;
@@ -134,7 +134,7 @@
       end if;
 
       if T.Ref_Count = 1 then
-         % if cls.element_type().is_refcounted():
+         % if cls.element_type.is_refcounted():
             ## When we destroy the array, owned values will have one less
             ## owner, so decrement their reference count.
             for Item of T.Items loop
@@ -155,7 +155,7 @@
    function Create (Items_Count : Natural) return ${cls.name} is
      (new ${cls.pointed}'(N => Items_Count, Ref_Count => 1, Items => <>));
 
-   % if cls.element_type() == T.root_node.entity():
+   % if cls.element_type == T.root_node.entity():
    function Create (Items : AST_Envs.Entity_Array) return ${cls.name}
    is (new ${cls.pointed}'(N         => Items'Length,
                            Items     => ${cls.api_name} (Items),

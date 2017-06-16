@@ -57,13 +57,13 @@ class _BaseArray(object):
 
 <%
    type_name = cls.api_name.camel
-   element_type = cls.element_type()
+   element_type = cls.element_type
    c_element_type = pyapi.type_internal_name(element_type)
 %>
 
 class ${type_name}(_BaseArray):
     """
-    Wrapper class for arrays of ${cls.element_type().name}.
+    Wrapper class for arrays of ${cls.element_type.name}.
 
     This class is not meant to be directly instantiated: it is only used to
     expose values that various methods return.

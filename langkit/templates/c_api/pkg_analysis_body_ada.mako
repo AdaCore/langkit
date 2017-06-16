@@ -1376,7 +1376,7 @@ package body ${ada_lib_name}.Analysis.C is
    % endfor
 
    % for array_type in ctx.sorted_types(ctx.array_types):
-      % if array_type.element_type().should_emit_array_type:
+      % if array_type.element_type.should_emit_array_type:
          ${array_types.body(array_type)}
       % endif
    % endfor

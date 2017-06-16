@@ -116,10 +116,10 @@ class CollectionExpression(AbstractExpression):
                  langkit.expressions.base.LocalVars.Scope)
         """
         collection_expr = construct(
-            self.collection, lambda t: t.is_collection(),
+            self.collection, lambda t: t.is_collection,
             'Map cannot iterate on {expr_type}, which is not a collection'
         )
-        self.element_var.set_type(collection_expr.type.element_type())
+        self.element_var.set_type(collection_expr.type.element_type)
 
         current_scope = PropertyDef.get_scope()
 
@@ -234,7 +234,7 @@ class Map(CollectionExpression):
             self.concat = concat
             self.iter_scope = iter_scope
 
-            element_type = (self.expr.type.element_type()
+            element_type = (self.expr.type.element_type
                             if self.concat else
                             self.expr.type)
             self.static_type = element_type.array_type()
@@ -336,7 +336,7 @@ class Map(CollectionExpression):
          iter_scope) = self.construct_common()
 
         check_source_language(
-            not self.concat or expr.type.is_collection(),
+            not self.concat or expr.type.is_collection,
             'Cannot mapcat with expressions returning {} values (collections'
             ' expected instead)'.format(expr.type.name)
         )
@@ -527,9 +527,9 @@ def collection_get(self, coll_expr, index_expr, or_null=True):
     # 0-based indexes, so there is no need to fiddle indexes here.
     index_expr = construct(index_expr, long_type)
 
-    coll_expr = construct(coll_expr, lambda t: t.is_collection())
+    coll_expr = construct(coll_expr, lambda t: t.is_collection)
     or_null = construct(or_null)
-    return CallExpr('Get_Result', 'Get', coll_expr.type.element_type(),
+    return CallExpr('Get_Result', 'Get', coll_expr.type.element_type,
                     [coll_expr, index_expr, or_null],
                     abstract_expr=self)
 
@@ -543,7 +543,7 @@ def length(self, coll_expr):
         collection to get from.
     """
     return CallExpr('Len', 'Length', long_type,
-                    [construct(coll_expr, lambda t: t.is_collection())],
+                    [construct(coll_expr, lambda t: t.is_collection)],
                     abstract_expr=self)
 
 
@@ -641,8 +641,8 @@ class Concat(AbstractExpression):
         check_multiple([
             (array_1.type == array_2.type,
              "Got different array element types in concat: {} and {}".format(
-                 array_1.type.element_type().name,
-                 array_2.type.element_type().name
+                 array_1.type.element_type.name,
+                 array_2.type.element_type.name
              )),
         ])
 

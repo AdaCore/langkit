@@ -400,6 +400,7 @@ class CompiledType(object):
         """
         return self._doc
 
+    @property
     def is_collection(self):
         """
         Return whether this is a collection type.
@@ -408,6 +409,7 @@ class CompiledType(object):
         """
         return self._element_type is not None
 
+    @property
     def element_type(self):
         """
         Assuming this is a collection type (array or list), return the
@@ -2140,14 +2142,14 @@ class ArrayType(CompiledType):
 
     @property
     def name(self):
-        return self.element_type().name + names.Name('Array_Access')
+        return self.element_type.name + names.Name('Array_Access')
 
     @property
     def api_name(self):
         """
         Name of the type for general values in our bindings.
         """
-        return self.element_type().name + names.Name('Array')
+        return self.element_type.name + names.Name('Array')
 
     @property
     def pointed(self):
@@ -2156,7 +2158,7 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return self.element_type().name + names.Name('Array_Record')
+        return self.element_type.name + names.Name('Array_Record')
 
     @property
     def pkg_vector(self):
@@ -2166,7 +2168,7 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return self.element_type().name + names.Name('Vectors')
+        return self.element_type.name + names.Name('Vectors')
 
     def c_type(self, c_api_settings):
         return CAPIType(c_api_settings, self.api_name)
@@ -2180,7 +2182,7 @@ class ArrayType(CompiledType):
 
         :rtype: str
         """
-        pkg_vector_name = self.element_type().name + names.Name('Vectors')
+        pkg_vector_name = self.element_type.name + names.Name('Vectors')
         return '{}.Index_Type'.format(pkg_vector_name.camel_with_underscores)
 
     def vector(self):

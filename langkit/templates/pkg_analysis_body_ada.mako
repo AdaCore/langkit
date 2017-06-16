@@ -3107,7 +3107,7 @@ package body ${ada_lib_name}.Analysis is
    % endfor
 
    % for array_type in ctx.sorted_types(ctx.array_types):
-   % if array_type.element_type().should_emit_array_type:
+   % if array_type.element_type.should_emit_array_type:
    ${array_types.body(array_type)}
    % endif
    % endfor
@@ -3122,7 +3122,7 @@ package body ${ada_lib_name}.Analysis is
 
    % for astnode in ctx.astnode_types:
       % if astnode.is_root_list_type:
-         ${list_types.body(astnode.element_type())}
+         ${list_types.body(astnode.element_type)}
       % elif astnode.is_list_type:
          ${astnode_types.body(astnode)}
       % endif

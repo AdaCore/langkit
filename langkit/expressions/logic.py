@@ -320,7 +320,7 @@ def domain(self, logic_var_expr, domain):
         itself.
     """
     return DomainExpr(
-        construct(domain, lambda d: d.is_collection(), "Type given "
+        construct(domain, lambda d: d.is_collection, "Type given "
                   "to LogicVar must be collection type, got {expr_type}"),
         construct(logic_var_expr, logic_var_type),
         abstract_expr=self,

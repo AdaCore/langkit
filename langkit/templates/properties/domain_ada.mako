@@ -9,7 +9,7 @@ declare
 begin
    for J in 0 .. Length (Dom) - 1 loop
       A (J + 1) := (
-         % if expr.domain.static_type.element_type().is_entity_type:
+         % if expr.domain.static_type.element_type.is_entity_type:
             Get (Dom, J)
          % else:
             (El => Get (Dom, J), others => <>)

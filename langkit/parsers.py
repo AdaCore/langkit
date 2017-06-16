@@ -1436,7 +1436,7 @@ class NodeToParsersPass():
                     # because the user has no way to mark them as abstract.
                     and not (
                         node_type.is_list_type
-                        and node_type.element_type().list_type() == node_type
+                        and node_type.element_type.list_type() == node_type
                     ),
                     "{} has no parser, and is marked neither abstract nor "
                     "synthetic".format(node_type.name)

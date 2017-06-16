@@ -59,7 +59,7 @@ class FixAnnotateFieldsTypes(fixer_base.BaseFix):
         type_expr = build_attr("T", field_type_name)
         if field.type.is_list_type:
             type_expr = Call(build_attr(
-                build_attr("T", field.type.element_type().__name__),
+                build_attr("T", field.type.element_type.__name__),
                 "list_type"
             ))
 

@@ -845,7 +845,7 @@ package ${ada_lib_name}.Analysis is
 
    % for astnode in ctx.astnode_types:
       % if astnode.is_root_list_type:
-         ${list_types.public_incomplete_decl(astnode.element_type())}
+         ${list_types.public_incomplete_decl(astnode.element_type)}
       % elif astnode.is_list_type:
          ${astnode_types.public_incomplete_decl(astnode)}
       % endif
@@ -893,7 +893,7 @@ package ${ada_lib_name}.Analysis is
    -------------------------------------------
 
    % for array_type in ctx.sorted_types(ctx.array_types):
-   % if array_type.element_type().should_emit_array_type:
+   % if array_type.element_type.should_emit_array_type:
    ${array_types.public_incomplete_decl(array_type)}
    % endif
    % endfor
@@ -954,7 +954,7 @@ package ${ada_lib_name}.Analysis is
    --  have here pure Ada arrays instead.
 
    % for array_type in ctx.sorted_types(ctx.array_types):
-   % if array_type.element_type().should_emit_array_type:
+   % if array_type.element_type.should_emit_array_type:
    ${array_types.public_decl(array_type)}
    % endif
    % endfor
@@ -973,7 +973,7 @@ package ${ada_lib_name}.Analysis is
 
    % for astnode in ctx.astnode_types:
       % if astnode.is_root_list_type:
-         ${list_types.public_decl(astnode.element_type())}
+         ${list_types.public_decl(astnode.element_type)}
       % elif astnode.is_list_type:
          ${astnode_types.public_decl(astnode)}
       % endif
@@ -1447,7 +1447,7 @@ private
    --  generation.
 
    % for array_type in ctx.sorted_types(ctx.array_types):
-   % if array_type.element_type().should_emit_array_type:
+   % if array_type.element_type.should_emit_array_type:
    ${array_types.private_decl(array_type)}
    % endif
    % endfor
@@ -1475,7 +1475,7 @@ private
 
    % for astnode in ctx.astnode_types:
       % if astnode.is_root_list_type:
-         ${list_types.private_decl(astnode.element_type())}
+         ${list_types.private_decl(astnode.element_type)}
       % elif astnode.is_list_type:
          ${astnode_types.private_decl(astnode)}
       % endif
