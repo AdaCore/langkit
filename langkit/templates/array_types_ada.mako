@@ -85,7 +85,7 @@
       Result : ${elt_type};
    begin
       if Relative_Get (T, Index, Result) then
-         % if cls.element_type.is_refcounted():
+         % if cls.element_type.is_refcounted:
             Inc_Ref (Result);
          % endif
          return Result;
@@ -134,7 +134,7 @@
       end if;
 
       if T.Ref_Count = 1 then
-         % if cls.element_type.is_refcounted():
+         % if cls.element_type.is_refcounted:
             ## When we destroy the array, owned values will have one less
             ## owner, so decrement their reference count.
             for Item of T.Items loop

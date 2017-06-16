@@ -56,7 +56,7 @@ is
          begin
             ## Finalize the local variable for this scope
             % for var in scope.variables:
-               % if var.type.is_refcounted():
+               % if var.type.is_refcounted:
                   Dec_Ref (${var.name});
                % endif
             % endfor
@@ -74,7 +74,7 @@ begin
                Result : constant ${property.type.name} :=
                   Self.${property.memoization_value_field_name};
             begin
-               % if property.type.is_refcounted():
+               % if property.type.is_refcounted:
                   Inc_Ref (Result);
                % endif
                return Result;
@@ -88,14 +88,14 @@ begin
    ${property.constructed_expr.render_pre()}
 
    Property_Result := ${property.constructed_expr.render_expr()};
-   % if property.type.is_refcounted():
+   % if property.type.is_refcounted:
       Inc_Ref (Property_Result);
    % endif
    ${scopes.finalize_scope(property.vars.root_scope)}
 
    % if property.memoized:
       Self.${property.memoization_state_field_name} := Computed;
-      % if property.type.is_refcounted():
+      % if property.type.is_refcounted:
          Inc_Ref (Property_Result);
          Set_Filled_Caches (Self.Unit);
       % endif

@@ -420,6 +420,7 @@ class CompiledType(object):
         assert self._element_type
         return self._element_type
 
+    @property
     def is_refcounted(self):
         """
         Return whether this type matters for the ref-counting mechanism.
@@ -1109,7 +1110,7 @@ class AbstractNodeData(object):
 
         :rtype: bool
         """
-        return self.type.is_refcounted() and self._access_needs_incref
+        return self.type.is_refcounted and self._access_needs_incref
 
 
 class AbstractField(AbstractNodeData):
@@ -1457,8 +1458,9 @@ class StructType(BaseStructType):
         self._init_fields(fields)
         CompiledTypeMetaclass.struct_types.append(self)
 
+    @property
     def is_refcounted(self):
-        return any(f.type.is_refcounted() for f in self._fields.values())
+        return any(f.type.is_refcounted for f in self._fields.values())
 
     def is_builtin(self):
         """

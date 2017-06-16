@@ -809,7 +809,7 @@ class ResolvedExpression(object):
 
         assert (self.skippable_refcount
                 or self.type is no_compiled_type
-                or not self.type.is_refcounted()
+                or not self.type.is_refcounted
                 or self._result_var), (
             'ResolvedExpression instances that return ref-counted values must'
             ' store their result in a local variable (this {} does'
@@ -3293,7 +3293,7 @@ class LocalVars(object):
             :rtype: bool
             """
             for var in self.variables:
-                if var.type.is_refcounted():
+                if var.type.is_refcounted:
                     return True
 
             return include_children and any(s.has_refcounted_vars(True)

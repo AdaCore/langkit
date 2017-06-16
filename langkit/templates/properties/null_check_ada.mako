@@ -27,7 +27,7 @@ ${operand.render_pre()}
 ## The laws of ref-counting tell us to create an ownership share for our
 ## result. If we are storing our result into a result variable, we need to
 ## inc-ref.
-% if expr.type.is_refcounted() and expr.result_var:
+% if expr.type.is_refcounted and expr.result_var:
    ${expr.result_var.name} := ${operand.render_expr()};
    Inc_Ref (${expr.result_var.name});
 % endif

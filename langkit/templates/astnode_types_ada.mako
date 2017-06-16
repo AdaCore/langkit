@@ -489,7 +489,7 @@
          is
          begin
             % for p in memoized_properties:
-               % if p.type.is_refcounted():
+               % if p.type.is_refcounted:
                   if Node.${p.memoization_state_field_name} = Computed then
                      Dec_Ref (Node.${p.memoization_value_field_name});
                   end if;

@@ -12,7 +12,7 @@ def inc_ref(var):
     :type var: langkit.expressions.VariableExpr
     :rtype: str
     """
-    return 'Inc_Ref ({});'.format(var.name) if var.type.is_refcounted() else ''
+    return 'Inc_Ref ({});'.format(var.name) if var.type.is_refcounted else ''
 
 
 def assign_var(var, expr, requires_incref=True):

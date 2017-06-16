@@ -40,7 +40,7 @@ class PythonAPISettings(AbstractAPISettings):
 
         # TODO: handle all types
         assert (not inc_ref
-                or not type.is_refcounted()
+                or not type.is_refcounted
                 or type in (ct.lexical_env_type, ct.env_rebindings_type,
                             ct.equation_type)
                 or isinstance(type, (ct.ArrayType, ct.StructType))), (

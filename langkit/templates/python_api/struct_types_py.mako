@@ -162,7 +162,7 @@ class ${type_name}(${', '.join(base_classes)}):
         )
         return result
 
-    % if cls.is_refcounted():
+    % if cls.is_refcounted:
     _c_ptr_type = ctypes.POINTER(_c_type)
     _inc_ref = staticmethod(_import_func('${cls.c_inc_ref(capi)}',
                             [_c_ptr_type], None))

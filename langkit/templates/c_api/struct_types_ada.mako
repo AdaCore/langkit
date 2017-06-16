@@ -14,7 +14,7 @@
 subtype ${c_type_name} is ${ada_type_name};
 type ${c_type_name}_Ptr is access ${ada_type_name};
 
-% if cls.is_refcounted():
+% if cls.is_refcounted:
 procedure ${inc_ref} (R : ${c_type_name}_Ptr)
    with Export        => True,
         Convention    => C,
@@ -36,7 +36,7 @@ procedure ${dec_ref} (R : ${c_type_name}_Ptr)
    dec_ref = cls.c_dec_ref(capi)
 %>
 
-% if cls.is_refcounted():
+% if cls.is_refcounted:
 procedure ${inc_ref} (R : ${c_type_name}_Ptr) is
 begin
    Clear_Last_Exception;

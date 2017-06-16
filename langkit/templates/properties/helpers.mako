@@ -169,7 +169,7 @@
    ) return ${type_name} is
    begin
       % for i, arg_type in enumerate(args_types):
-         % if arg_type.is_refcounted():
+         % if arg_type.is_refcounted:
             Inc_Ref (Field_${i});
          % endif
       % endfor
@@ -224,7 +224,7 @@
       procedure Free is new Ada.Unchecked_Deallocation (String, String_Access);
    begin
       % for i, arg_type in enumerate(args_types):
-         % if arg_type.is_refcounted():
+         % if arg_type.is_refcounted:
             Dec_Ref (Self.Field_${i});
          % endif
       % endfor
@@ -242,7 +242,7 @@
 </%def>
 
 <%def name="inc_ref(var)">
-   % if var.type.is_refcounted():
+   % if var.type.is_refcounted:
       Inc_Ref (${var.name});
    % endif
 </%def>

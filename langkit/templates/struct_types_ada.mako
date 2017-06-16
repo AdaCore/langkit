@@ -38,7 +38,7 @@
    (null record);
    % endif
 
-   % if cls.is_refcounted():
+   % if cls.is_refcounted:
       procedure Inc_Ref (R : ${cls.name});
       procedure Dec_Ref (R : in out ${cls.name});
    % endif
@@ -55,7 +55,7 @@
 
    <% fields = cls.get_fields(include_inherited=False) %>
 
-   % if cls.is_refcounted():
+   % if cls.is_refcounted:
 
       -------------
       -- Inc_Ref --
@@ -64,7 +64,7 @@
       procedure Inc_Ref (R : ${cls.name}) is
       begin
          % for f in fields:
-            % if f.type.is_refcounted():
+            % if f.type.is_refcounted:
                Inc_Ref (R.${f.name});
             % endif
          % endfor
@@ -77,7 +77,7 @@
       procedure Dec_Ref (R : in out ${cls.name}) is
       begin
          % for f in fields:
-            % if f.type.is_refcounted():
+            % if f.type.is_refcounted:
                Dec_Ref (R.${f.name});
             % endif
          % endfor

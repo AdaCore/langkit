@@ -201,7 +201,7 @@ class New(AbstractExpression):
                 # Only then, create ownership shares for the returned record
                 + ['Inc_Ref ({});'.format(expr.render_expr())
                    for _, expr in fields
-                   if expr.type.is_refcounted()]
+                   if expr.type.is_refcounted]
             )
 
         def _render_pre(self):
@@ -506,7 +506,7 @@ class FieldAccess(AbstractExpression):
                 # for other cases.
                 result.append('{} := {};'.format(self.result_var.name,
                                                  self.field_access_expr))
-                if (self.type.is_refcounted() and
+                if (self.type.is_refcounted and
                         self.node_data.access_needs_incref):
                     result.append('Inc_Ref ({});'.format(self.result_var.name))
 

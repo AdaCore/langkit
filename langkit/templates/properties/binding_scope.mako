@@ -10,7 +10,7 @@ ${scopes.start_scope(expr.scope)}
 
 ${expr.expr.render_pre()}
 ${expr.result_var.name} := ${expr.expr.render_expr()};
-% if expr.type.is_refcounted():
+% if expr.type.is_refcounted:
    Inc_Ref (${expr.result_var.name});
 % endif
 
