@@ -24,18 +24,18 @@ package body ${ada_lib_name}.Analysis.Parsers is
    pragma Warnings (Off, "is not referenced");
    pragma Warnings (Off, "possible aliasing problem for type");
    % for enum_type in ctx.enum_types:
-      package ${enum_type.name()}_Memos is new Langkit_Support.Packrat
-        (${enum_type.name()}, Token_Index);
-      use ${enum_type.name()}_Memos;
+      package ${enum_type.name}_Memos is new Langkit_Support.Packrat
+        (${enum_type.name}, Token_Index);
+      use ${enum_type.name}_Memos;
    % endfor
 
    % for cls in ctx.astnode_types:
-      package ${cls.name()}_Memos is new Langkit_Support.Packrat
-        (${cls.name()}, Token_Index);
-      use ${cls.name()}_Memos;
+      package ${cls.name}_Memos is new Langkit_Support.Packrat
+        (${cls.name}, Token_Index);
+      use ${cls.name}_Memos;
 
       % if not cls.abstract:
-         package ${cls.name()}_Alloc is
+         package ${cls.name}_Alloc is
             new Tagged_Alloc (${cls.value_type_name()});
       % endif
    % endfor

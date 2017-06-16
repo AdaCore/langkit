@@ -7,8 +7,8 @@ ${parser.parser.generate_code()}
 if ${parser.pos_var} /= No_Token_Index then
 
    ## Create the transform wrapper node
-   ${parser.res_var} := ${parser.get_type().name()}
-     (${parser.get_type().name()}_Alloc.Alloc (Parser.Mem_Pool));
+   ${parser.res_var} := ${parser.get_type().name}
+     (${parser.get_type().name}_Alloc.Alloc (Parser.Mem_Pool));
 
    ## Compute and set the sloc range for this AST node. Reminders:
    ##   * start_pos the name for the position of the lexer before this parser

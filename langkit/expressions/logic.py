@@ -161,12 +161,12 @@ class Bind(AbstractExpression):
             check_multiple([
                 (self.conv_prop.type.matches(T.root_node.entity()),
                  'Bind property must return a subtype of {}'.format(
-                     T.root_node.entity().name().camel
+                     T.root_node.entity().name.camel
                 )),
 
                 (self.conv_prop.struct.matches(T.root_node),
                  'Bind property must belong to a subtype of {}'.format(
-                     T.root_node.name().camel
+                     T.root_node.name.camel
                 )),
             ])
 
@@ -186,7 +186,7 @@ class Bind(AbstractExpression):
 
                 (self.eq_prop.struct.matches(T.root_node),
                  'Equality property must belong to a subtype of {}'.format(
-                     T.root_node.name().camel
+                     T.root_node.name.camel
                 )),
 
                 (len(args) == 1,
@@ -396,12 +396,12 @@ class Predicate(AbstractExpression):
 
             (self.pred_property.type.matches(bool_type),
              'Predicate property must return a boolean, got {}'.format(
-                 self.pred_property.type.name().camel
+                 self.pred_property.type.name.camel
             )),
 
             (self.pred_property.struct.matches(T.root_node),
              'Predicate property must belong to a subtype of {}'.format(
-                 T.root_node.name().camel
+                 T.root_node.name.camel
             )),
         ])
 
@@ -433,14 +433,14 @@ class Predicate(AbstractExpression):
                     arg_type.matches(T.root_node), "Argument #{} of predicate "
                     "is a logic variable, the corresponding property formal "
                     "has type {}, but should be a descendent of {}".format(
-                        i, arg_type.name().camel, T.root_node.name().camel
+                        i, arg_type.name.camel, T.root_node.name.camel
                     )
                 )
             else:
                 check_source_language(
                     expr.type.matches(arg_type), "Argument #{} of predicate "
                     "has type {}, should be {}".format(
-                        i, expr.type.name().camel, arg_type.name().camel
+                        i, expr.type.name.camel, arg_type.name.camel
                     )
                 )
 
@@ -460,7 +460,7 @@ class Predicate(AbstractExpression):
         # Append the debug image for the predicate
         closure_exprs.append(untyped_literal_expr('"{}.{}"'.format(
             self.pred_property.name.camel_with_underscores,
-            self.pred_property.struct.name().camel_with_underscores
+            self.pred_property.struct.name.camel_with_underscores
         )))
 
         logic_var_exprs.append(

@@ -587,7 +587,7 @@ class CompileCtx(object):
             CompiledType instances to sort.
         :rtype: list[langkit.compiled_types.CompiledType]
         """
-        return sorted(type_set, key=lambda cls: cls.name())
+        return sorted(type_set, key=lambda cls: cls.name)
 
     def do_generate_logic_binder(self, convert_property=None,
                                  eq_property=None):
@@ -703,7 +703,7 @@ class CompileCtx(object):
         from langkit.compiled_types import bool_type, resolve_type
 
         with cls.diagnostic_context():
-            name = cls.name().camel
+            name = cls.name.camel
             check_source_language(
                 name == 'Metadata',
                 'The environment metadata struct type must be called'
@@ -1258,7 +1258,7 @@ class CompileCtx(object):
                 'gdb_py',
                 langkit_path=os.path.dirname(os.path.dirname(__file__)),
                 lib_name=lib_name,
-                astnode_names=[node.name().camel_with_underscores
+                astnode_names=[node.name.camel_with_underscores
                                for node in self.astnode_types],
                 prefix=(self.short_name.lower
                         if self.short_name else lib_name),
@@ -1568,7 +1568,7 @@ class CompileCtx(object):
 
             elif isinstance(t, ArrayType):
                 expose(t.element_type(), for_field, 'element type',
-                       traceback + ['array of {}'.format(t.name().camel)])
+                       traceback + ['array of {}'.format(t.name.camel)])
 
             else:
                 # Only struct and array types have their "_exposed" attribute
@@ -1583,7 +1583,7 @@ class CompileCtx(object):
                     check_source_language(
                         t._exposed,
                         "{} is {}, which is forbidden in public API{}".format(
-                            type_use, t.name().camel, text_tb
+                            type_use, t.name.camel, text_tb
                         ),
                         severity=Severity.non_blocking_error
                     )

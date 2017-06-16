@@ -4,7 +4,7 @@
 
 <%def name="public_incomplete_decl(cls)">
 
-   type ${cls.name()};
+   type ${cls.name};
    ${ada_doc(cls, 3)}
 
 </%def>
@@ -13,11 +13,11 @@
 
    <%
       fields = cls.get_fields(include_inherited=False)
-      ext = ctx.ext("nodes", cls.name(), "components")
+      ext = ctx.ext("nodes", cls.name, "components")
       extensions = exts.include_extension(ext)
    %>
 
-   type ${cls.name()} is record
+   type ${cls.name} is record
 
       % if fields or extensions:
          % for f in fields:
@@ -31,7 +31,7 @@
       % endif
    end record
      with Convention => C;
-   ${cls.nullexpr()} : constant ${cls.name()} :=
+   ${cls.nullexpr()} : constant ${cls.name} :=
    % if fields or extensions:
    (others => <>);
    % else:
@@ -39,14 +39,14 @@
    % endif
 
    % if cls.is_refcounted():
-      procedure Inc_Ref (R : ${cls.name()});
-      procedure Dec_Ref (R : in out ${cls.name()});
+      procedure Inc_Ref (R : ${cls.name});
+      procedure Dec_Ref (R : in out ${cls.name});
    % endif
 
    % if cls.is_entity_type:
       function Create
-         (El : ${cls.el_type.name()}; Info : Entity_Info)
-          return ${cls.name()};
+         (El : ${cls.el_type.name}; Info : Entity_Info)
+          return ${cls.name};
    % endif
 </%def>
 
@@ -61,7 +61,7 @@
       -- Inc_Ref --
       -------------
 
-      procedure Inc_Ref (R : ${cls.name()}) is
+      procedure Inc_Ref (R : ${cls.name}) is
       begin
          % for f in fields:
             % if f.type.is_refcounted():
@@ -74,7 +74,7 @@
       -- Dec_Ref --
       -------------
 
-      procedure Dec_Ref (R : in out ${cls.name()}) is
+      procedure Dec_Ref (R : in out ${cls.name}) is
       begin
          % for f in fields:
             % if f.type.is_refcounted():
@@ -92,8 +92,8 @@
       ------------
 
       function Create
-         (El : ${cls.el_type.name()}; Info : Entity_Info)
-          return ${cls.name()} is
+         (El : ${cls.el_type.name}; Info : Entity_Info)
+          return ${cls.name} is
        begin
          Inc_Ref (Info.Rebindings);
          return (El => El, Info => Info);

@@ -90,7 +90,7 @@ def print_struct(context, file, struct):
         '<span class="kw">{kind}</span>'
         ' <span class="def">{name}</span>'
         '{descr}</dt>'.format(
-            name=struct.name().camel,
+            name=struct.name.camel,
             kind=kind,
             descr=' : {}'.format(' '.join(descr)) if descr else ''
         ),
@@ -136,12 +136,12 @@ def print_field(context, file, struct, field):
         ' <span class="def" id="{node}-{field}">{field}</span>'
         ' : {type}{inherit_note}</dt>'.format(
             prefixes=' '.join(prefixes),
-            node=struct.name().camel,
+            node=struct.name.camel,
             field=field.name.lower,
             type=(
                 astnode_ref(field.type)
                 if field.type in context.astnode_types else
-                field.type.name().camel
+                field.type.name.camel
             ),
             inherit_note=inherit_note
         ),
@@ -156,13 +156,13 @@ def print_field(context, file, struct, field):
 
 def astnode_ref(node):
     return '<a href="#{name}" class="ref-link">{name}</a>'.format(
-        name=node.name().camel
+        name=node.name.camel
     )
 
 
 def field_ref(field):
     return '<a href="#{node}-{field}" class="ref-link">{node}</a>'.format(
-        node=field.struct.name().camel,
+        node=field.struct.name.camel,
         field=field.name.lower
     )
 
@@ -269,7 +269,7 @@ def write_astdoc(context, file):
         print('<h2>Enumeration types</h2>', file=file)
 
         for enum_type in context.enum_types:
-            print('enum {}:'.format(enum_type.name().camel), file=file)
+            print('enum {}:'.format(enum_type.name.camel), file=file)
             doc = enum_type.doc()
             if doc:
                 print(documentation.format_text(doc, 4), file=file)

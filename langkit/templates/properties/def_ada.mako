@@ -10,10 +10,10 @@
 
 ${"overriding" if property.overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
-   return ${property.type.name()}
+   return ${property.type.name}
 is (raise Property_Error
     with "Property ${property.name} not implemented on type "
-    & Kind_Name (${Self.type.name()} (${property.self_arg_name})));
+    & Kind_Name (${Self.type.name} (${property.self_arg_name})));
 
 % elif not property.abstract and not property.external:
 ${gdb_helper('property-start',
@@ -22,13 +22,13 @@ ${gdb_helper('property-start',
 pragma Warnings (Off, "is not referenced");
 ${"overriding" if property.overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
-   return ${property.type.name()}
+   return ${property.type.name}
 is
    use type AST_Envs.Lexical_Env;
 
    ## We declare a variable Self, that has the named class wide access type
    ## that we can use to dispatch on other properties and all.
-   Self : ${Self.type.name()} := ${Self.type.name()}
+   Self : ${Self.type.name} := ${Self.type.name}
      (${property.self_arg_name});
    ${gdb_helper('bind', 'self', 'Self')}
 
@@ -36,7 +36,7 @@ is
    ${gdb_helper('bind', arg.name.lower, arg.name.camel_with_underscores)}
    % endfor
 
-   Property_Result : ${property.type.name()} := ${property.type.nullexpr()};
+   Property_Result : ${property.type.name} := ${property.type.nullexpr()};
 
    ## For each scope, there is one of the following subprograms that finalizes
    ## all the ref-counted local variables it contains, excluding variables from
@@ -71,7 +71,7 @@ begin
             null;
          when Computed =>
             declare
-               Result : constant ${property.type.name()} :=
+               Result : constant ${property.type.name} :=
                   Self.${property.memoization_value_field_name};
             begin
                % if property.type.is_refcounted():
@@ -131,7 +131,7 @@ ${gdb_helper('end', property.qualname)}
      ${helpers.argument_list(property, False)}
      return ${property.type.api_name()}
    is
-      Raw    : ${property.type.name()} := ${property.name}
+      Raw    : ${property.type.name} := ${property.name}
         (
            ${property.self_arg_name}
            % for arg in property.arguments:

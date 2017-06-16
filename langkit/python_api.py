@@ -45,7 +45,7 @@ class PythonAPISettings(AbstractAPISettings):
                             ct.equation_type)
                 or isinstance(type, (ct.ArrayType, ct.StructType))), (
             'Incrementing ref-count of {} in the Python API is not handled'
-            ' yet'.format(type.name())
+            ' yet'.format(type.name)
         )
 
         value_suffix = '' if from_field_access else '.value'
@@ -53,7 +53,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.analysis_unit_type, lambda _: 'AnalysisUnit._wrap({})'),
             (ct.analysis_unit_kind, lambda _: '_unit_kind_to_str[{}]'),
             (ct.ASTNodeType, lambda _: '{}._wrap({{}})'.format(
-                self.context.root_grammar_class.name().camel
+                self.context.root_grammar_class.name.camel
             )),
             (ct.token_type, lambda _: '{}'),
             (ct.symbol_type, lambda _: '{}._wrap()'),
@@ -68,7 +68,7 @@ class PythonAPISettings(AbstractAPISettings):
                 inc_ref
             )),
             (ct.StructType, lambda _: '{}._wrap({{}}, inc_ref={})'.format(
-                type.name().camel,
+                type.name.camel,
                 inc_ref
             )),
             (ct.lexical_env_type, lambda _:
@@ -98,20 +98,20 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.analysis_unit_type, lambda _: 'AnalysisUnit._unwrap({})'),
             (ct.analysis_unit_kind, lambda _: '_unwrap_unit_kind({})'),
             (ct.ASTNodeType, lambda _: '{}._unwrap({{}})'.format(
-                self.context.root_grammar_class.name().camel
+                self.context.root_grammar_class.name.camel
             )),
             (ct.bool_type, lambda _: 'bool({})'),
             (ct.long_type, lambda _: 'int({})'),
             (ct._EnumType, lambda _:
                 '_unwrap_enum({{}}, str_to_{}, {})'.format(
                     type.c_type(self.c_api_settings).name,
-                    type.name().camel
+                    type.name.camel
                 )),
             (ct.ArrayType, lambda cls: '{}._unwrap({{}})'.format(
                 cls.api_name().camel
             )),
             (ct.StructType, lambda _: '{}._unwrap({{}})'.format(
-                type.name().camel
+                type.name.camel
             )),
             (ct.symbol_type, lambda _: '_text._unwrap({})'),
             (ct.lexical_env_type, lambda _: 'LexicalEnv._unwrap({})'),
@@ -150,10 +150,10 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.analysis_unit_type, lambda _: 'AnalysisUnit._c_type'),
             (ct.analysis_unit_kind, lambda _: ctype_type('c_uint')),
             (ct.ASTNodeType, lambda _: '{}._c_type'.format(
-                self.context.root_grammar_class.name().camel
+                self.context.root_grammar_class.name.camel
             )),
             (ct._EnumType, lambda _: ctype_type('c_uint')),
             (ct.ArrayType, lambda cls:
                 '{}._c_type'.format(cls.api_name().camel)),
-            (ct.StructType, lambda _: '{}._c_type'.format(type.name().camel)),
+            (ct.StructType, lambda _: '{}._c_type'.format(type.name.camel)),
         ])

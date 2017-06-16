@@ -27,7 +27,7 @@ loop
 
    ## Append the parsed result to the list
    ${parser.tmplist}.Nodes.Append
-     (${ctx.root_grammar_class.name()} (${parser.parser.res_var}));
+     (${ctx.root_grammar_class.name} (${parser.parser.res_var}));
 
    ## Parse the separator, if there is one. The separator is always discarded.
    % if parser.sep:
@@ -44,7 +44,7 @@ end loop;
 
 ## Create the result of this parser: an AST list node, and copy the elements
 ## from our temporary parse list to the result.
-${parser.res_var} := ${list_type.name()}_Alloc.Alloc (Parser.Mem_Pool);
+${parser.res_var} := ${list_type.name}_Alloc.Alloc (Parser.Mem_Pool);
 ${parser.res_var}.Unit := Parser.Unit;
 ${parser.res_var}.Count := ${parser.tmplist}.Nodes.Length;
 

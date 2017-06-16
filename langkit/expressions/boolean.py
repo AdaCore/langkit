@@ -153,7 +153,7 @@ class Eq(AbstractExpression):
             check_source_language(
                 is_valid,
                 'Incompatible types for equality: {} and {}'.format(
-                    lhs.type.name().camel, rhs.type.name().camel
+                    lhs.type.name.camel, rhs.type.name.camel
                 )
             )
 
@@ -161,7 +161,7 @@ class Eq(AbstractExpression):
             check_source_language(
                 can_be_equal,
                 '{} and {} values are never equal'.format(
-                    lhs.type.name().camel, rhs.type.name().camel
+                    lhs.type.name.camel, rhs.type.name.camel
                 )
             )
 
@@ -506,7 +506,7 @@ class Then(AbstractExpression):
                     False,
                     "Then expression should have a default value provided,"
                     " in cases where the provided function's return type is"
-                    " not Bool, here {}".format(then_expr.type.name().camel)
+                    " not Bool, here {}".format(then_expr.type.name.camel)
                 )
         else:
             default_expr = construct(self.default_val, then_expr.type)

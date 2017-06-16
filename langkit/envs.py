@@ -73,7 +73,7 @@ class RefEnvs(object):
             self.resolver.type.matches(lexical_env_type),
             'Referenced environment resolver must return a lexical'
             ' environment (not {})'.format(
-                self.resolver.type.name().camel
+                self.resolver.type.name.camel
             )
         )
         check_source_language(
@@ -287,7 +287,7 @@ class EnvSpec(object):
                     'The bindings expression in environment specification '
                     ' must be either an env_assoc or an array of env_assocs: '
                     'got {} instead'.format(
-                        bindings_prop.type.name().camel
+                        bindings_prop.type.name.camel
                     )
                 )
                 if resolver:
@@ -298,7 +298,7 @@ class EnvSpec(object):
                     check_source_language(
                         resolver.type.matches(T.entity),
                         'Entity resolver properties must return entities'
-                        ' (got {})'.format(resolver.type.name().camel)
+                        ' (got {})'.format(resolver.type.name.camel)
                     )
                     check_source_language(
                         not resolver.dynamic_vars,

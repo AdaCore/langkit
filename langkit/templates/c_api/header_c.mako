@@ -32,12 +32,12 @@ typedef enum {
 % for astnode in ctx.astnode_types:
     % if astnode.abstract:
 
-        /* ${astnode.name()} (abstract)  */
+        /* ${astnode.name} (abstract)  */
         ${c_doc(astnode, 8)}
     % else:
 
         ${c_doc(astnode, 8)}
-        ${capi.get_name(astnode.name())}
+        ${capi.get_name(astnode.name)}
           = ${ctx.node_kind_constants[astnode]},
     % endif
 % endfor

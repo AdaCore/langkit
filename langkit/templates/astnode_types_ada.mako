@@ -7,7 +7,7 @@
 <%def name="public_incomplete_decl(cls)">
 
    type ${cls.value_type_name()};
-   type ${cls.name()} is access all ${cls.value_type_name()}'Class;
+   type ${cls.name} is access all ${cls.value_type_name()}'Class;
    ${ada_doc(cls, 3)}
 
 </%def>
@@ -21,7 +21,7 @@
 
    function Convert
      (Self : Logic_Converter_Default;
-      From : ${T.entity.name()}) return ${T.entity.name()}
+      From : ${T.entity.name}) return ${T.entity.name}
    is
       pragma Unreferenced (Self);
    begin
@@ -33,7 +33,7 @@
    No_Equals_Data_Default : constant Equals_Data_Default := (null record);
 
    function Eq_Default
-     (Data : Equals_Data_Default; L, R : ${T.entity.name()}) return Boolean
+     (Data : Equals_Data_Default; L, R : ${T.entity.name}) return Boolean
    is (Is_Equivalent (L, R))
       with Inline;
    pragma Warnings (On, "referenced");
@@ -66,7 +66,7 @@
    <% type_name = field.struct.value_type_name() %>
 
    function ${field.name}
-     (Node : access ${type_name}) return ${field.type.name()};
+     (Node : access ${type_name}) return ${field.type.name};
    ${ada_doc(field, 6)}
 
    ## If this field return an enum node, generate a shortcut to get the
@@ -92,8 +92,8 @@
 
    <%
       type_name = cls.value_type_name()
-      base_name = cls.base().name()
-      ext = ctx.ext("nodes", cls.name(), "public_decls")
+      base_name = cls.base().name
+      ext = ctx.ext("nodes", cls.name, "public_decls")
       memoized_properties = cls.get_memoized_properties(include_inherited=True)
 
       logic_vars = cls.get_fields(
@@ -103,7 +103,7 @@
    %>
 
    --
-   --  ${cls.name()}
+   --  ${cls.name}
    --
 
    type ${type_name} is ${"abstract" if cls.abstract else "" }
@@ -168,7 +168,7 @@
    <%
       fields = cls.get_fields(include_inherited=False,
                               predicate=lambda f: f.should_emit)
-      ext = ctx.ext("nodes", cls.name(), "components")
+      ext = ctx.ext("nodes", cls.name, "components")
       memoized_properties = cls.get_memoized_properties()
    %>
    % if fields or ext or memoized_properties:
@@ -188,7 +188,7 @@
       ${p.memoization_state_field_name} : Memoization_State := Not_Computed;
    % endfor
    % for p in memoized_properties:
-      ${p.memoization_value_field_name} : ${p.type.name()};
+      ${p.memoization_value_field_name} : ${p.type.name};
    % endfor
 </%def>
 
@@ -196,7 +196,7 @@
 
    <%
       type_name = cls.value_type_name()
-      base_name = cls.base().name()
+      base_name = cls.base().name
       memoized_properties = cls.get_memoized_properties(include_inherited=True)
    %>
 
@@ -274,7 +274,7 @@
 
    % if props:
       --
-      --  Private and non-dispatching primitives for ${cls.name()}
+      --  Private and non-dispatching primitives for ${cls.name}
       --
 
       % for prop in props:
@@ -284,7 +284,7 @@
 
    % if untyped_wrappers:
       --
-      --  Untyped wrappers for ${cls.name()}
+      --  Untyped wrappers for ${cls.name}
       --
 
       % for prop in untyped_wrappers:
@@ -298,7 +298,7 @@
 <%def name="body(cls)">
 
    --
-   --  Primitives for ${cls.name()}
+   --  Primitives for ${cls.name}
    --
 
    <%
@@ -313,7 +313,7 @@
 
    type_name = cls.value_type_name()
 
-   ext = ctx.ext("nodes", cls.name(), "bodies")
+   ext = ctx.ext("nodes", cls.name, "bodies")
 
    memoized_properties = cls.get_memoized_properties(include_inherited=True)
 
@@ -368,7 +368,7 @@
       overriding function Image
         (Node : access ${type_name}) return String
       is
-         Class_Wide_Node : constant ${cls.name()} := ${cls.name()} (Node);
+         Class_Wide_Node : constant ${cls.name} := ${cls.name} (Node);
          Result          : Unbounded_String;
       begin
          Append (Result, Class_Wide_Node.Kind_Name);
@@ -454,7 +454,7 @@
         (Node        : access ${type_name};
          Line_Prefix : String := "")
       is
-         Class_Wide_Node : constant ${cls.name()} := ${cls.name()} (Node);
+         Class_Wide_Node : constant ${cls.name} := ${cls.name} (Node);
          Attr_Prefix     : constant String := Line_Prefix & "|";
          Children_Prefix : constant String := Line_Prefix & "|  ";
       begin
@@ -557,7 +557,7 @@
            ${call_prop(exprs.dest_env) if exprs.dest_env else "Initial_Env"};
 
          ${"Mappings" if is_array_type(exprs.mappings.type) else "B"} :
-           ${exprs.mappings.type.name()} := ${call_prop(exprs.mappings)};
+           ${exprs.mappings.type.name} := ${call_prop(exprs.mappings)};
       begin
          % if is_array_type(exprs.mappings.type):
          for B of Mappings.Items loop
@@ -604,7 +604,7 @@
    <%def name="emit_ref_envs(ref_envs_list)">
       % for ref_envs in ref_envs_list:
          declare
-            Ref_Env_Nodes : ${ref_envs.nodes_property.type.name()} :=
+            Ref_Env_Nodes : ${ref_envs.nodes_property.type.name} :=
                ${call_prop(ref_envs.nodes_property)};
          begin
             for N of Ref_Env_Nodes.Items loop
@@ -624,7 +624,7 @@
    </%def>
 
    <%
-   env_getter = "{}_Initial_Env_Getter_Fn".format(cls.name())
+   env_getter = "{}_Initial_Env_Getter_Fn".format(cls.name)
    has_dyn_env = cls.env_spec.initial_env or cls.env_spec.env_hook_enabled
    %>
 
@@ -636,7 +636,7 @@
    function ${env_getter}
      (State : Env_Getter_State_T) return AST_Envs.Lexical_Env
    is
-      Self        : ${cls.name()} := ${cls.name()} (State.Node);
+      Self        : ${cls.name} := ${cls.name} (State.Node);
 
       ## Define this constant so that the expressions below, which are expanded
       ## into property calls, can reference it as the currently bound
@@ -787,7 +787,7 @@
 
    % for field in cls.get_fields(include_inherited=False):
       function ${field.name}
-        (Node : access ${type_name}) return ${field.type.name()}
+        (Node : access ${type_name}) return ${field.type.name}
       is
       begin
          return ${field.type.extract_from_storage_expr(

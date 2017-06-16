@@ -3,7 +3,7 @@
 <%def name="decl(cls)">
 
 <%
-   ada_type_name = cls.name().camel_with_underscores
+   ada_type_name = cls.name.camel_with_underscores
    c_type_name = cls.c_type(capi).name
    inc_ref = cls.c_inc_ref(capi)
    dec_ref = cls.c_dec_ref(capi)
@@ -30,7 +30,7 @@ procedure ${dec_ref} (R : ${c_type_name}_Ptr)
 <%def name="body(cls)">
 
 <%
-   ada_type_name = cls.name().camel_with_underscores
+   ada_type_name = cls.name.camel_with_underscores
    c_type_name = cls.c_type(capi).name
    inc_ref = cls.c_inc_ref(capi)
    dec_ref = cls.c_dec_ref(capi)

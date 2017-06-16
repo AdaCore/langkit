@@ -5,7 +5,7 @@
    access ${Self.type.value_type_name()}${"" if dispatching else "'Class"}
 
    % for arg in property.arguments:
-      ; ${arg.name} : ${arg.type.name()}
+      ; ${arg.name} : ${arg.type.name}
       % if arg.is_optional:
          := ${arg.type.nullexpr()}
       % endif
@@ -18,7 +18,7 @@
    % if dynvars:
       record
          % for dynvar in dynvars:
-            ${dynvar.argument_name} : ${dynvar.type.name()};
+            ${dynvar.argument_name} : ${dynvar.type.name};
          % endfor
       end record;
    % else:
@@ -43,8 +43,8 @@
 <%def name="logic_converter(conv_prop)">
    <%
    type_name = "Logic_Converter_{}".format(conv_prop.uid)
-   root_class = T.root_node.name()
-   entity = T.entity.name()
+   root_class = T.root_node.name
+   entity = T.entity.name
    %>
 
    ${dynamic_vars_holder_decl(type_name, conv_prop.dynamic_vars)}
@@ -60,12 +60,12 @@
       % if not conv_prop.dynamic_vars:
          pragma Unreferenced (Self);
       % endif
-      Ret : ${conv_prop.type.name()};
+      Ret : ${conv_prop.type.name};
    begin
       ## Here, we just forward the return value from conv_prop to our caller,
       ## so there is nothing to do regarding ref-counting.
       Ret := ${conv_prop.name}
-        (${conv_prop.self_arg_name}    => ${conv_prop.struct.name()} (From.El),
+        (${conv_prop.self_arg_name}    => ${conv_prop.struct.name} (From.El),
          % for dynvar in conv_prop.dynamic_vars:
             ${dynvar.argument_name}    => Self.${dynvar.argument_name},
          % endfor
@@ -76,15 +76,15 @@
 
 <%def name="logic_equal(eq_prop)">
    <%
-      struct = eq_prop.struct.name()
-      struct_entity = eq_prop.struct.entity().name()
+      struct = eq_prop.struct.name
+      struct_entity = eq_prop.struct.entity().name
       type_name = 'Equals_Data_{}'.format(eq_prop.uid)
    %>
 
    ${dynamic_vars_holder_decl(type_name, eq_prop.dynamic_vars)}
 
    function Eq_${eq_prop.uid}
-     (Data : ${type_name}; L, R : ${T.entity.name()}) return Boolean is
+     (Data : ${type_name}; L, R : ${T.entity.name}) return Boolean is
      % if not eq_prop.dynamic_vars:
         pragma Unreferenced (Data);
      % endif
@@ -146,13 +146,13 @@
    <%
       type_name = "{}_Predicate_Caller".format(pred_id)
       package_name = "{}_Pred".format(pred_id)
-      root_class = T.root_node.name()
+      root_class = T.root_node.name
       formal_node_types = prop.get_concrete_node_types(args_types)
    %>
 
    type ${type_name} is record
       % for i, arg_type in enumerate(args_types):
-         Field_${i} : ${arg_type.name()};
+         Field_${i} : ${arg_type.name};
       % endfor
       Dbg_Img : String_Access := null;
    end record;
@@ -163,7 +163,7 @@
 
    function Create (
       % for i, arg_type in enumerate(args_types):
-         Field_${i} : ${arg_type.name()};
+         Field_${i} : ${arg_type.name};
       % endfor
       Dbg_Img : String_Access := null
    ) return ${type_name} is
@@ -188,7 +188,7 @@
    function Call
      (Self       : ${type_name}
      % for i in range(len(formal_node_types)):
-     ; Node_${i} : ${T.entity.name()}
+     ; Node_${i} : ${T.entity.name}
      % endfor
      ) return Boolean
    is
@@ -196,7 +196,7 @@
    begin
       <%
          args = [
-            '{} (Node_{}.El)'.format(formal_type.name(), i)
+            '{} (Node_{}.El)'.format(formal_type.name, i)
             for i, formal_type in enumerate(formal_node_types)
          ] + [
             'Self.Field_{}'.format(i)
@@ -232,7 +232,7 @@
    end Free;
 
    package ${package_name} is new Predicate_${len(formal_node_types)}
-     (El_Type        => ${T.entity.name()},
+     (El_Type        => ${T.entity.name},
       Var            => Eq_Node.Refs.Raw_Logic_Var,
       Predicate_Type => ${type_name},
       Free           => Free,

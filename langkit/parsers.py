@@ -753,7 +753,7 @@ class Or(Parser):
                 check_source_language(
                     all(t == ref_type for t in typs),
                     'Alternatives yield incompatible types: {}'.format(
-                        ', '.join(sorted(t.name().camel for t in typs))
+                        ', '.join(sorted(t.name.camel for t in typs))
                     )
                 )
                 res = ref_type
@@ -943,7 +943,7 @@ class List(Parser):
                 check_source_language(
                     ret.is_list_type,
                     'Invalid list type for List parser: {}. '
-                    'Not a list type'.format(ret.name().camel)
+                    'Not a list type'.format(ret.name.camel)
                 )
                 return ret
             else:
@@ -951,7 +951,7 @@ class List(Parser):
                 check_source_language(
                     item_type.is_ast_node,
                     'List parsers only accept subparsers that yield AST nodes'
-                    ' ({} provided here)'.format(item_type.name().camel)
+                    ' ({} provided here)'.format(item_type.name.camel)
                 )
                 return item_type.list_type()
 
@@ -963,7 +963,7 @@ class List(Parser):
             check_source_language(
                 not typ.abstract,
                 'Please provide a concrete ASTnode subclass as list_cls'
-                ' ({} is abstract)'.format(typ.name().camel)
+                ' ({} is abstract)'.format(typ.name.camel)
             )
 
     def create_vars_before(self):
@@ -1253,7 +1253,7 @@ class Transform(Parser):
             self.parser,
             '<Defer>'
             if isinstance(self.typ, T.Defer) else
-            self.typ.name().camel
+            self.typ.name.camel
         )
 
     def __init__(self, parser, typ):
@@ -1303,7 +1303,7 @@ class Transform(Parser):
         check_source_language(
             nb_transform_values == nb_fields,
             'Transform parser generates {} values, but {} has {} fields'
-            .format(nb_transform_values, typ.name().camel, nb_fields)
+            .format(nb_transform_values, typ.name.camel, nb_fields)
         )
 
         # Propagate types from self to destination node's fields
@@ -1438,7 +1438,7 @@ class NodeToParsersPass():
                         and node_type.element_type().list_type() == node_type
                     ),
                     "{} has no parser, and is marked neither abstract nor "
-                    "synthetic".format(node_type.name())
+                    "synthetic".format(node_type.name)
                 )
 
         # Exit early if no pretty-printer generation has been asked
@@ -1455,7 +1455,7 @@ class NodeToParsersPass():
                         "Node {} is parsed in different incompatible "
                         "ways. This will prevent the generation of an "
                         "automatic pretty printer.\nFor more information, "
-                        "enable the pp_eq trace".format(node.name()),
+                        "enable the pp_eq trace".format(node.name),
                     )
                     ctx.generate_pp = False
                     return
@@ -1464,7 +1464,7 @@ class NodeToParsersPass():
             else:
                 self.canonical_rules[node] = parsers[0]
 
-            Log.log("pp_canonical", node.name(), self.canonical_rules[node])
+            Log.log("pp_canonical", node.name, self.canonical_rules[node])
 
             # Set the canonical parser on this ASTNodeType type
             node.parser = self.canonical_rules[node]

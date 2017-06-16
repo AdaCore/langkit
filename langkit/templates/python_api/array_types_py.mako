@@ -63,7 +63,7 @@ class _BaseArray(object):
 
 class ${type_name}(_BaseArray):
     """
-    Wrapper class for arrays of ${cls.element_type().name()}.
+    Wrapper class for arrays of ${cls.element_type().name}.
 
     This class is not meant to be directly instantiated: it is only used to
     expose values that various methods return.

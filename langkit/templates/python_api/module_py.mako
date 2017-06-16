@@ -19,7 +19,7 @@ from __future__ import (absolute_import, division, print_function,
 
 
 <%
-    root_astnode_name = T.root_node.name().camel
+    root_astnode_name = T.root_node.name.camel
     c_node = '{}._c_type'.format(root_astnode_name)
     c_node_enum = '{}._c_enum_type'.format(root_astnode_name)
 %>
@@ -1515,7 +1515,7 @@ def _unwrap_str(c_char_p_value):
 _kind_to_astnode_cls = {
     % for subclass in ctx.astnode_types:
         % if not subclass.abstract:
-    ${ctx.node_kind_constants[subclass]}: ${subclass.name()},
+    ${ctx.node_kind_constants[subclass]}: ${subclass.name},
         % endif
     % endfor
 }

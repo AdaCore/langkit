@@ -56,7 +56,7 @@
             if arg.type.is_ada_record:
                arg_ref = '{}.all'.format(arg_ref)
          %>
-         Unwrapped_${arg.name} : constant ${arg.type.name()} :=
+         Unwrapped_${arg.name} : constant ${arg.type.name} :=
             % if is_enum(arg.type):
                ${field.type} (${arg_ref})
             % elif is_bool(arg.type):
@@ -68,7 +68,7 @@
             % elif is_analysis_kind(arg.type):
                Unit_Kind'Val (${arg_ref})
             % elif arg.type.is_ast_node:
-               ${arg.type.name()} (Unwrap (${arg_ref}))
+               ${arg.type.name} (Unwrap (${arg_ref}))
             % elif is_token_type(arg.type):
                Token (Node, Token_Index ({arg_ref}.Index))
             % elif is_symbol_type(arg.type):
@@ -95,8 +95,8 @@
 
       if Unwrapped_Node.all in ${struct.value_type_name()}'Class then
          declare
-            Typed_Node : constant ${struct.name()} :=
-               ${struct.name()} (Unwrapped_Node);
+            Typed_Node : constant ${struct.name} :=
+               ${struct.name} (Unwrapped_Node);
          begin
              <%
                field_access = 'Typed_Node.{}'.format(field.name)
@@ -116,7 +116,7 @@
              Value_P.all :=
                 % if is_enum(field.type):
                     ${field.type.c_type(capi).name}
-                      (${field.type.name()}'Pos (${field_access}))
+                      (${field.type.name}'Pos (${field_access}))
                 % elif is_bool(field.type):
                     ${bool_type} (Boolean'Pos (${field_access}))
                 % elif is_long(field.type):

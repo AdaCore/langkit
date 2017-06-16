@@ -44,7 +44,7 @@ begin
          end loop;
       % else:
          declare
-            Item_To_Append : constant ${map.type.element_type().name()} :=
+            Item_To_Append : constant ${map.type.element_type().name} :=
                ${map.expr.render_expr()};
          begin
             % if map.type.element_type().is_refcounted():
@@ -83,7 +83,7 @@ begin
 
          % if list_element_var:
             ${element_var} :=
-               ${map.element_var.type.name()} (${list_element_var});
+               ${map.element_var.type.name} (${list_element_var});
          % endif
 
          % if map.filter:

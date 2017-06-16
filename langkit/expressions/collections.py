@@ -338,7 +338,7 @@ class Map(CollectionExpression):
         check_source_language(
             not self.concat or expr.type.is_collection(),
             'Cannot mapcat with expressions returning {} values (collections'
-            ' expected instead)'.format(expr.type.name())
+            ' expected instead)'.format(expr.type.name)
         )
 
         with iter_scope.use():
@@ -379,7 +379,7 @@ def as_array(self, list_expr):
     check_source_language(
         result.collection.type.is_list_type,
         '.as_array input must be an AST list (here: {})'.format(
-            result.collection.type.name().camel
+            result.collection.type.name.camel
         )
     )
     return result
@@ -498,7 +498,7 @@ class Quantifier(CollectionExpression):
         check_source_language(
             expr.type.matches(bool_type),
             "Wrong type for expression in quantifier: expected bool, "
-            "got {}".format(expr.type.name().camel)
+            "got {}".format(expr.type.name.camel)
         )
 
         return Quantifier.Expr(self.kind, collection_expr, expr,
@@ -641,8 +641,8 @@ class Concat(AbstractExpression):
         check_multiple([
             (array_1.type == array_2.type,
              "Got different array element types in concat: {} and {}".format(
-                 array_1.type.element_type().name(),
-                 array_2.type.element_type().name()
+                 array_1.type.element_type().name,
+                 array_2.type.element_type().name
              )),
         ])
 

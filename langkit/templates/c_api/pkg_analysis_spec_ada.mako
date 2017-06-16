@@ -461,7 +461,7 @@ package ${ada_lib_name}.Analysis.C is
 
    function ${capi.get_name('lexical_env_get')}
      (Env : ${lexical_env_type}; Name : ${text_type})
-      return ${(T.root_node.entity().array_type().name())}
+      return ${(T.root_node.entity().array_type().name)}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('lexical_env_get')}";

@@ -1773,11 +1773,11 @@ package body ${ada_lib_name}.Analysis is
 
    function Children
      (Node : access ${root_node_value_type}'Class)
-     return ${root_node_array.name()}
+     return ${root_node_array.name}
    is
       C : ${root_node_array.api_name()} := Children (Node);
    begin
-      return Ret : ${root_node_array.name()} := Create (C'Length) do
+      return Ret : ${root_node_array.name} := Create (C'Length) do
          Ret.Items := C;
       end return;
    end Children;
@@ -2635,7 +2635,7 @@ package body ${ada_lib_name}.Analysis is
    function Parents
      (Node         : access ${root_node_value_type}'Class;
       Include_Self : Boolean := True)
-      return ${root_node_array.name()}
+      return ${root_node_array.name}
    is
       Count : Natural := 0;
       Start : ${root_node_type_name} :=
@@ -2648,7 +2648,7 @@ package body ${ada_lib_name}.Analysis is
       end loop;
 
       declare
-         Result : constant ${root_node_array.name()} := Create (Count);
+         Result : constant ${root_node_array.name} := Create (Count);
       begin
          Cur := Start;
          for I in Result.Items'Range loop
@@ -2827,12 +2827,12 @@ package body ${ada_lib_name}.Analysis is
    -------------
 
    function Combine
-     (L, R : ${T.env_md.name()}) return ${T.env_md.name()}
+     (L, R : ${T.env_md.name}) return ${T.env_md.name}
    is
       % if not T.env_md.get_fields():
       pragma Unreferenced (L, R);
       % endif
-      Ret : ${T.env_md.name()} := ${T.env_md.nullexpr()};
+      Ret : ${T.env_md.name} := ${T.env_md.nullexpr()};
    begin
       % for field in T.env_md.get_fields():
          Ret.${field.name} := L.${field.name} or R.${field.name};
@@ -2877,8 +2877,8 @@ package body ${ada_lib_name}.Analysis is
    -----------
 
    function Group
-     (Envs : ${LexicalEnvType.array_type().name()})
-      return ${LexicalEnvType.name()}
+     (Envs : ${LexicalEnvType.array_type().name})
+      return ${LexicalEnvType.name}
    is (Group (Envs.Items));
 
    % for astnode in ctx.astnode_types:
@@ -2934,7 +2934,7 @@ package body ${ada_lib_name}.Analysis is
    -- El_Image --
    --------------
 
-   function El_Image (N : ${T.entity.name()}) return String is
+   function El_Image (N : ${T.entity.name}) return String is
    begin
       if N.El /= null then
          declare

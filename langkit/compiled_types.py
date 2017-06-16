@@ -129,7 +129,7 @@ def make_renderer(base_renderer=None):
         capi = ctx.c_api_settings
 
         # Name of the root AST node access type
-        type_name = ctx.root_grammar_class.name()
+        type_name = ctx.root_grammar_class.name
 
         # Name of the root AST node record type
         value_type = type_name + names.Name("Type")
@@ -138,8 +138,8 @@ def make_renderer(base_renderer=None):
         kind_name = type_name + names.Name("Kind_Type")
 
         # Likewise, for the generic list type
-        glist_type_name = ctx.generic_list_type.name()
-        glist_value_type = ctx.generic_list_type.name() + names.Name("Type")
+        glist_type_name = ctx.generic_list_type.name
+        glist_value_type = ctx.generic_list_type.name + names.Name("Type")
 
         template_args.update({
             'root_node_type_name':   type_name,
@@ -373,6 +373,7 @@ class CompiledType(object):
         CompiledTypeMetaclass.types.append(self)
         CompiledTypeMetaclass.type_dict[type_repo_name] = self
 
+    @property
     def name(self):
         """
         Name of the type for general values in the Ada generated code.
@@ -382,10 +383,10 @@ class CompiledType(object):
         return self._name
 
     def __repr__(self):
-        return '<CompiledType {}>'.format(self.name().camel)
+        return '<CompiledType {}>'.format(self.name.camel)
 
     def diagnostic_context(self):
-        ctx_message = 'in {}'.format(self.name().camel)
+        ctx_message = 'in {}'.format(self.name.camel)
         return Context(ctx_message, self.location)
 
     def doc(self):
@@ -440,7 +441,7 @@ class CompiledType(object):
 
         :rtype: str
         """
-        return self.name()
+        return self.name
 
     def extract_from_storage_expr(self, node_expr, base_expr):
         """
@@ -510,7 +511,7 @@ class CompiledType(object):
 
         :param CAPISettings c_api_settings: The settings for the C API.
         """
-        return CAPIType(c_api_settings, self.c_type_name or self.name(),
+        return CAPIType(c_api_settings, self.c_type_name or self.name,
                         external=self.external)
 
     def unify(self, other, error_msg=None):
@@ -537,7 +538,7 @@ class CompiledType(object):
         check_source_language(
             self.matches(other),
             (error_msg or 'Mismatching types: {self} and {other}').format(
-                self=self.name().camel, other=other.name().camel
+                self=self.name.camel, other=other.name.camel
             )
         )
         return self
@@ -570,7 +571,7 @@ class CompiledType(object):
 
         :rtype: ArrayType
         """
-        return ArrayType(name=self.name() + names.Name('Array_Type'),
+        return ArrayType(name=self.name + names.Name('Array_Type'),
                          element_type=self)
 
     @property
@@ -696,7 +697,7 @@ class EnvRebindingsType(CompiledType):
         :param langkit.c_api.CAPISettings capi: Settings for the C API.
         :rtype: str
         """
-        return capi.get_name(self.name() + names.Name('Inc_Ref'))
+        return capi.get_name(self.name + names.Name('Inc_Ref'))
 
     def c_dec_ref(self, capi):
         """
@@ -705,7 +706,7 @@ class EnvRebindingsType(CompiledType):
         :param langkit.c_api.CAPISettings capi: Settings for the C API.
         :rtype: str
         """
-        return capi.get_name(self.name() + names.Name('Dec_Ref'))
+        return capi.get_name(self.name + names.Name('Dec_Ref'))
 
 env_rebindings_type = EnvRebindingsType()
 
@@ -810,7 +811,7 @@ class Argument(object):
 
     def __repr__(self):
         return '<Argument {} : {}>'.format(self.name.lower,
-                                           self.type.name().camel)
+                                           self.type.name.camel)
 
 
 class AbstractNodeData(object):
@@ -921,7 +922,7 @@ class AbstractNodeData(object):
                 self._name in properties_to_override)
 
     def diagnostic_context(self):
-        ctx_message = 'in {}.{}'.format(self.struct.name().camel,
+        ctx_message = 'in {}.{}'.format(self.struct.name.camel,
                                         self._name.lower)
         return Context(ctx_message, self.location)
 
@@ -1001,7 +1002,7 @@ class AbstractNodeData(object):
         :rtype: str
         """
         return '{}.{}'.format(
-            self.struct.name().camel if self.struct else '<unresolved>',
+            self.struct.name.camel if self.struct else '<unresolved>',
             self.name.lower if self._name else '<unresolved>'
         )
 
@@ -1033,7 +1034,7 @@ class AbstractNodeData(object):
         :rtype: names.Name
         """
         assert self.struct
-        return self.struct.name() + self.name
+        return self.struct.name + self.name
 
     @property
     def exposed_optional_arguments(self):
@@ -1305,7 +1306,7 @@ class BaseStructType(CompiledType):
         self._fields = OrderedDict(fields)
 
     def py_nullexpr(self):
-        return '{}({})'.format(self.name().camel, ', '.join(
+        return '{}({})'.format(self.name.camel, ', '.join(
             f.type.py_nullexpr() for f in self.get_fields()
         ))
 
@@ -1476,7 +1477,7 @@ class StructType(BaseStructType):
         Return a value that can be considered as "null" for this struct type.
         :rtype: str
         """
-        return (names.Name('No') + self.name()).camel_with_underscores
+        return (names.Name('No') + self.name).camel_with_underscores
 
     def c_inc_ref(self, capi):
         """
@@ -1485,7 +1486,7 @@ class StructType(BaseStructType):
         :param langkit.c_api.CAPISettings capi: Settings for the C API.
         :rtype: str
         """
-        return capi.get_name(self.name() + names.Name('Inc_Ref'))
+        return capi.get_name(self.name + names.Name('Inc_Ref'))
 
     def c_dec_ref(self, capi):
         """
@@ -1494,7 +1495,7 @@ class StructType(BaseStructType):
         :param langkit.c_api.CAPISettings capi: Settings for the C API.
         :rtype: str
         """
-        return capi.get_name(self.name() + names.Name('Dec_Ref'))
+        return capi.get_name(self.name + names.Name('Dec_Ref'))
 
 
 class ASTNodeType(BaseStructType):
@@ -1653,7 +1654,7 @@ class ASTNodeType(BaseStructType):
             generic_list_type_name = (
                 names.Name.from_camel(generic_list_type_name)
                 if generic_list_type_name else
-                (self.name() + names.Name('Base_List'))
+                (self.name + names.Name('Base_List'))
             )
 
             self.generic_list_type = ASTNodeType(
@@ -1679,7 +1680,7 @@ class ASTNodeType(BaseStructType):
         """
         # This name is used by pretty printers-like code: we need the
         # "original" node name here, not keyword-escaped ones.
-        result = self._repr_name or self.name().camel
+        result = self._repr_name or self.name.camel
         return result
 
     def nullexpr(self):
@@ -1719,7 +1720,7 @@ class ASTNodeType(BaseStructType):
         check_source_language(
             len(fields) == len(types), "{} has {} fields ({} types given). You"
             " probably have inconsistent grammar rules and type "
-            "declarations".format(self.name().camel, len(fields), len(types))
+            "declarations".format(self.name.camel, len(fields), len(types))
         )
 
         # TODO: instead of expecting types to be subtypes, we might want to
@@ -1730,7 +1731,7 @@ class ASTNodeType(BaseStructType):
                 check_source_language(
                     f_type.matches(field.type),
                     "Field {} already had type {}, got {}".format(
-                        field.qualname, field.type.name(), f_type.name()
+                        field.qualname, field.type.name, f_type.name
                     )
                 )
 
@@ -1755,8 +1756,8 @@ class ASTNodeType(BaseStructType):
                             inferred_type.matches(field.type),
                             'Expected type {} but type inferenced yielded type'
                             ' {}'.format(
-                                field.type.name().camel,
-                                inferred_type.name().camel
+                                field.type.name.camel,
+                                inferred_type.name.camel
                             )
                         )
                 else:
@@ -1889,7 +1890,7 @@ class ASTNodeType(BaseStructType):
 
         :rtype: str
         """
-        return '.'.join(node.name().base_name
+        return '.'.join(node.name.base_name
                         for node in self.get_inheritance_chain())
 
     def ada_kind_name(self):
@@ -1897,7 +1898,7 @@ class ASTNodeType(BaseStructType):
         Return the name of the Ada enumerator to represent this kind of node.
         :rtype: str
         """
-        return (get_context().lang_name + self.name()).camel_with_underscores
+        return (get_context().lang_name + self.name).camel_with_underscores
 
     def value_type_name(self):
         """
@@ -1907,7 +1908,7 @@ class ASTNodeType(BaseStructType):
 
         :rtype: str
         """
-        return (self.name() + names.Name('Type')).camel_with_underscores
+        return (self.name + names.Name('Type')).camel_with_underscores
 
     # We want structural equality on lists whose elements have the same types.
     # Memoization is one way to make sure that, for each CompiledType instance
@@ -1920,7 +1921,7 @@ class ASTNodeType(BaseStructType):
         :rtype: CompiledType
         """
         result = ASTNodeType(
-            name=self.name() + names.Name('List'),
+            name=self.name + names.Name('List'),
             location=None, doc=None,
             base=CompiledTypeMetaclass.root_grammar_class.generic_list_type,
             fields=[], element_type=self
@@ -1969,7 +1970,7 @@ class ASTNodeType(BaseStructType):
 
         name = names.Name('Entity')
         if not self.is_root_node:
-            name += self.name()
+            name += self.name
 
         result = StructType(
             name, None, None,
@@ -2132,14 +2133,15 @@ class ArrayType(CompiledType):
         else:
             CompiledTypeMetaclass.pending_array_types.append(self)
 
+    @property
     def name(self):
-        return self.element_type().name() + names.Name('Array_Access')
+        return self.element_type().name + names.Name('Array_Access')
 
     def api_name(self):
         """
         Name of the type for general values in our bindings.
         """
-        return self.element_type().name() + names.Name('Array')
+        return self.element_type().name + names.Name('Array')
 
     def pointed(self):
         """
@@ -2147,7 +2149,7 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return self.element_type().name() + names.Name('Array_Record')
+        return self.element_type().name + names.Name('Array_Record')
 
     def pkg_vector(self):
         """
@@ -2156,7 +2158,7 @@ class ArrayType(CompiledType):
 
         :rtype: names.Name
         """
-        return self.element_type().name() + names.Name('Vectors')
+        return self.element_type().name + names.Name('Vectors')
 
     def c_type(self, c_api_settings):
         return CAPIType(c_api_settings, self.api_name())
@@ -2170,7 +2172,7 @@ class ArrayType(CompiledType):
 
         :rtype: str
         """
-        pkg_vector_name = self.element_type().name() + names.Name('Vectors')
+        pkg_vector_name = self.element_type().name + names.Name('Vectors')
         return '{}.Index_Type'.format(pkg_vector_name.camel_with_underscores)
 
     def vector(self):
@@ -2259,6 +2261,7 @@ class _EnumType(CompiledType):
         """
         return self._name
 
+    @property
     def name(self):
         return self._name + names.Name('Type')
 

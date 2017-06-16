@@ -78,7 +78,7 @@ class _BaseEntity(_BaseStruct):
 <%def name="decl(cls)">
 
 <%
-   type_name = cls.name().camel
+   type_name = cls.name.camel
    base_classes = ['_BaseEntity'
                    if cls.is_entity_type else
                    '_BaseStruct']

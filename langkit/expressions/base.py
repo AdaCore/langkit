@@ -158,8 +158,8 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
                     custom_msg = "Expected type {expected}, got {expr_type}"
 
                 check_source_language(ret.type.matches(expected_type), (
-                    custom_msg.format(expected=expected_type.name().camel,
-                                      expr_type=ret.type.name().camel)
+                    custom_msg.format(expected=expected_type.name.camel,
+                                      expr_type=ret.type.name.camel)
                 ))
 
                 # If the type matches expectation but is incompatible in the
@@ -176,7 +176,7 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
                     "predicate of type (ResolvedExpression) -> bool"
                 )
                 check_source_language(expected_type_or_pred(ret.type), (
-                    custom_msg.format(expr_type=ret.type.name().camel)
+                    custom_msg.format(expr_type=ret.type.name.camel)
                 ))
 
         return ret
@@ -1004,7 +1004,7 @@ class ResolvedExpression(object):
             result.append(')')
 
         elif isinstance(json_like, CompiledType):
-            return cls._ir_dump(json_like.name())
+            return cls._ir_dump(json_like.name)
 
         elif isinstance(json_like, names.Name):
             result.append(json_like.camel_with_underscores)
@@ -1164,7 +1164,7 @@ class UnreachableExpr(ResolvedExpression):
 
     def __repr__(self):
         return '<UnreachableExpr (for {} expr)>'.format(
-            self.type.name().camel
+            self.type.name.camel
         )
 
 
@@ -1206,7 +1206,7 @@ class LiteralExpr(ResolvedExpression):
     def __repr__(self):
         return '<LiteralExpr {} ({})>'.format(
             self.template,
-            self.static_type.name().camel if self.static_type else '<no type>'
+            self.static_type.name.camel if self.static_type else '<no type>'
         )
 
 
@@ -1987,7 +1987,7 @@ class EmptyArray(AbstractExpression):
 
     def __repr__(self):
         return '<EmptyArray of {}>'.format(
-            resolve_type(self.element_type).name().camel
+            resolve_type(self.element_type).name.camel
         )
 
 
@@ -2457,7 +2457,7 @@ class PropertyDef(AbstractNodeData):
                 not unmatched_types,
                 "Abstract property {} is not overriden in all subclasses. "
                 "Missing overriding properties on classes: {}".format(
-                    self.name.lower, ", ".join([t.name().camel for t in
+                    self.name.lower, ", ".join([t.name.camel for t in
                                                 unmatched_types])
                 ),
                 severity=Severity.non_blocking_error
@@ -2513,9 +2513,9 @@ class PropertyDef(AbstractNodeData):
                         '{} returns {} whereas it overrides {}, which returns'
                         ' {}. The former should match the latter.'.format(
                             self.qualname,
-                            self.expected_type.name().camel,
+                            self.expected_type.name.camel,
                             self.base_property.qualname,
-                            self.base_property.type.name().camel
+                            self.base_property.type.name.camel
                         )
                     )
                 else:
@@ -2539,8 +2539,8 @@ class PropertyDef(AbstractNodeData):
                     "Argument #{} doesn't have the same type as in base "
                     "property. Base has {}, derived has {}".format(
                         i + 1,
-                        arg.var.type.name().camel,
-                        base_arg.var.type.name().camel
+                        arg.var.type.name.camel,
+                        base_arg.var.type.name.camel
                     )
                 )
 
@@ -2702,7 +2702,7 @@ class PropertyDef(AbstractNodeData):
                 'expected type {{expected}}, got'
                 ' {{expr_type}} instead (expected type comes from'
                 ' overridden base property in {base_prop})'.format(
-                    base_prop=self.base_property.struct.name().camel
+                    base_prop=self.base_property.struct.name.camel
                 )
             ) if self.base_property else None
 
@@ -2731,9 +2731,9 @@ class PropertyDef(AbstractNodeData):
                 self.type.matches(self.base_property.type),
                 "{} returns {} whereas it overrides {}, which returns {}."
                 " The former should match the latter.".format(
-                    self.qualname, self.type.name().camel,
+                    self.qualname, self.type.name.camel,
                     self.base_property.qualname,
-                    self.base_property.type.name().camel
+                    self.base_property.type.name.camel
                 )
             )
 
@@ -2805,7 +2805,7 @@ class PropertyDef(AbstractNodeData):
 
         # This id will uniquely identify both the generic package and the
         # closure data structure.
-        pred_id = "{}_{}_{}".format(self.struct.name(), self.name, pred_num)
+        pred_id = "{}_{}_{}".format(self.struct.name, self.name, pred_num)
 
         # We can use a list because the method is memoized, eg. this won't
         # be executed twice for the same partial_args_types tuple.
@@ -3048,7 +3048,7 @@ def aggregate_expr(type, assocs):
     else:
         assert issubclass(type, no_compiled_type)
         meta_template = "{type}'({operands})"
-        type_name = type.name().camel
+        type_name = type.name.camel
 
     template = meta_template.format(
         type=type_name,
@@ -3146,7 +3146,7 @@ class No(AbstractExpression):
         check_source_language(
             self.expr_type.null_allowed,
             "Invalid type for No expression: {}".format(
-                self.expr_type.name().camel
+                self.expr_type.name.camel
             )
         )
 
@@ -3160,7 +3160,7 @@ class No(AbstractExpression):
 
     def __repr__(self):
         expr_type = resolve_type(self.expr_type)
-        return '<No {}>'.format(expr_type.name().camel)
+        return '<No {}>'.format(expr_type.name.camel)
 
 
 class FieldAccessExpr(BasicExpr):
@@ -3200,7 +3200,7 @@ class FieldAccessExpr(BasicExpr):
 
     def __repr__(self):
         return '<FieldAccessExpr {} ({})>'.format(self.field_name,
-                                                  self.type.name().camel)
+                                                  self.type.name.camel)
 
 
 class TokenTextEq(BasicExpr):
@@ -3386,7 +3386,7 @@ class LocalVars(object):
             assert self.type, "Local var must have type before it is rendered"
             return "{} : {};".format(
                 self.name.camel_with_underscores,
-                self.type.name().camel_with_underscores
+                self.type.name.camel_with_underscores
             )
 
         @property
@@ -3402,7 +3402,7 @@ class LocalVars(object):
         def __repr__(self):
             return '<LocalVar {} : {}>'.format(
                 self.name.camel_with_underscores,
-                self.type.name().camel if self.type else '<none>'
+                self.type.name.camel if self.type else '<none>'
             )
 
     def create(self, name, type):
@@ -3614,13 +3614,13 @@ class Arithmetic(AbstractExpression):
 
         check_source_language(
             l.type == r.type, "Incompatible types for {}: {} and {}".format(
-                self.op, l.type.name().camel, r.type.name().camel
+                self.op, l.type.name.camel, r.type.name.camel
             )
         )
 
         check_source_language(
             l.type in (symbol_type, long_type),
-            "Invalid type for {}: {}".format(self.op, l.type.name().camel)
+            "Invalid type for {}: {}".format(self.op, l.type.name.camel)
         )
 
         return BasicExpr('Arith_Result', '({} %s {})' % self.op, long_type,

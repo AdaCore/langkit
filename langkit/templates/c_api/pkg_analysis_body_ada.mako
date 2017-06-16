@@ -545,7 +545,7 @@ package body ${ada_lib_name}.Analysis.C is
    Node_Kind_Names : constant array (${root_node_kind_name}) of Text_Access :=
      (${', '.join('{} => new Text_Type\'(To_Text ("{}"))'.format(
                       cls.ada_kind_name(),
-                      cls.name().camel
+                      cls.name.camel
                   )
                   for cls in ctx.astnode_types
                   if not cls.abstract)});
@@ -1237,7 +1237,7 @@ package body ${ada_lib_name}.Analysis.C is
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};
       Name : ${text_type})
-      return ${T.root_node.entity().array_type().name()} is
+      return ${T.root_node.entity().array_type().name} is
    begin
       Clear_Last_Exception;
 

@@ -8,10 +8,10 @@ ast_node = expr.static_type.el_type if is_entity else expr.static_type
 <%def name="generate_cast(operand_expr)">
    % if is_entity:
       ${expr.result_var.name} := Create
-        (El   => ${ast_node.name()} (${operand_expr}.El),
+        (El   => ${ast_node.name} (${operand_expr}.El),
          Info => ${operand_expr}.Info);
    % else:
-      ${expr.result_var.name} := ${ast_node.name()} (${operand_expr});
+      ${expr.result_var.name} := ${ast_node.name} (${operand_expr});
    % endif
 </%def>
 

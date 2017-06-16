@@ -40,7 +40,7 @@ def unit(self, node):
     check_source_language(
         node_expr.type.is_ast_node,
         'The "unit" field is available only for AST nodes; instead we have'
-        ' here a {}'.format(node_expr.type.name().lower)
+        ' here a {}'.format(node_expr.type.name.lower)
     )
 
     # From the point of view of properties, analysis units are not ref-counted,

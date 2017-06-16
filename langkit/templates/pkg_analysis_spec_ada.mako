@@ -337,7 +337,7 @@ package ${ada_lib_name}.Analysis is
    ${struct_types.public_decl(T.env_md)}
 
    function Combine
-     (L, R : ${T.env_md.name()}) return ${T.env_md.name()};
+     (L, R : ${T.env_md.name}) return ${T.env_md.name};
    --  The combine function on environments metadata does a boolean Or on every
    --  boolean component of the env metadata.
 
@@ -356,7 +356,7 @@ package ${ada_lib_name}.Analysis is
 
    package AST_Envs is new Langkit_Support.Lexical_Env
      (Element_T        => ${root_node_type_name},
-      Element_Metadata => ${T.env_md.name()},
+      Element_Metadata => ${T.env_md.name},
       No_Element       => null,
       Empty_Metadata   => No_Metadata,
       Combine          => Combine,
@@ -494,7 +494,7 @@ package ${ada_lib_name}.Analysis is
    function Parents
      (Node         : access ${root_node_value_type}'Class;
       Include_Self : Boolean := True)
-      return ${root_node_array.name()};
+      return ${root_node_array.name};
    --  Return the list of parents for this node. This node included in the list
    --  iff Include_Self.
 
@@ -855,10 +855,10 @@ package ${ada_lib_name}.Analysis is
    -- Adalog instantiations --
    ---------------------------
 
-   function El_Image (N : ${T.entity.name()}) return String;
+   function El_Image (N : ${T.entity.name}) return String;
 
    package Eq_Node is new Langkit_Support.Adalog.Eq_Same
-     (LR_Type       => ${T.entity.name()},
+     (LR_Type       => ${T.entity.name},
       Element_Image => El_Image,
       Inc_Ref       => AST_Envs.Inc_Ref,
       Dec_Ref       => AST_Envs.Dec_Ref);
@@ -1158,7 +1158,7 @@ private
 
    function Children
      (Node : access ${root_node_value_type}'Class)
-     return ${root_node_array.name()};
+     return ${root_node_array.name};
    --  Return an array containing all the children of Node.
    --  This is an alternative to the Child/Child_Count pair, useful if you want
    --  the convenience of ada arrays, and you don't care about the small
@@ -1225,8 +1225,8 @@ private
       Lexical_Env_Array => ${LexicalEnvType.array_type().api_name()});
 
    function Group
-     (Envs : ${LexicalEnvType.array_type().name()})
-      return ${LexicalEnvType.name()};
+     (Envs : ${LexicalEnvType.array_type().name})
+      return ${LexicalEnvType.name};
    --  Convenience wrapper for uniform types handling in code generation
 
    -------------------------------
@@ -1272,7 +1272,7 @@ private
    ${array_types.private_decl(root_node_array)}
 
    package ${T.root_node.array_type().pkg_vector()} is
-      new Langkit_Support.Vectors (${T.root_node.name()});
+      new Langkit_Support.Vectors (${T.root_node.name});
 
    function Pre_Env_Actions
      (Self                : access ${root_node_value_type};
