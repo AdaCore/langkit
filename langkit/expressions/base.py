@@ -2760,6 +2760,7 @@ class PropertyDef(AbstractNodeData):
                     'properties/untyped_wrapper_decl_ada'
                 ) if self.requires_untyped_wrapper else ''
 
+    @property
     def doc(self):
         return self._doc
 

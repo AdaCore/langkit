@@ -55,7 +55,7 @@ def trim_docstring_lines(docstring):
 
 
 def format_doc(entity):
-    doc = entity.doc()
+    doc = entity.doc
     if doc:
         doc = trim_docstring_lines(doc)
         ret = '<div class="doc">{}</div>'.format(
@@ -270,7 +270,7 @@ def write_astdoc(context, file):
 
         for enum_type in context.enum_types:
             print('enum {}:'.format(enum_type.name.camel), file=file)
-            doc = enum_type.doc()
+            doc = enum_type.doc
             if doc:
                 print(documentation.format_text(doc, 4), file=file)
             print('    {}'.format(' '.join(enum_type.alternatives)),

@@ -390,6 +390,7 @@ class CompiledType(object):
         ctx_message = 'in {}'.format(self.name.camel)
         return Context(ctx_message, self.location)
 
+    @property
     def doc(self):
         """
         Return the user documentation for this type, or None if there is no
@@ -1019,6 +1020,7 @@ class AbstractNodeData(object):
         assert isinstance(name, names.Name)
         self._name = name
 
+    @property
     def doc(self):
         """
         Documentation for the abstract node field.
@@ -1173,6 +1175,7 @@ class AbstractField(AbstractNodeData):
     def __repr__(self):
         return '<ASTNode {} Field({})>'.format(self._index, self.qualname)
 
+    @property
     def doc(self):
         return self._doc
 

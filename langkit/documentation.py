@@ -701,7 +701,7 @@ def _render(ctx, entity, **kwargs):
         kwargs['TODO'] = todo_markers[lang]
         text = ctx.documentations[entity].render(**kwargs)
     else:
-        text = entity.doc()
+        text = entity.doc
     return text
 
 
