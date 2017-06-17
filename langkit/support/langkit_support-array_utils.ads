@@ -107,9 +107,9 @@ package Langkit_Support.Array_Utils is
       type Out_Type is private;
       type Out_Array_Type is array (Index_Type range <>) of Out_Type;
    function Map
-     (In_Array : Array_Type;
-      Transform : access function
-        (In_Element : Element_Type) return Out_Type) return Out_Array_Type;
+     (In_Array  : Array_Type;
+      Transform : access function (El : Element_Type) return Out_Type)
+     return Out_Array_Type;
    --  Applies Transform on every element of In_Array, returning an array from
    --  all the transformed elements.
    --  This version takes an access Transform parameter, and is meant for the
@@ -126,9 +126,9 @@ package Langkit_Support.Array_Utils is
    --  values.
 
    function Id_Map
-     (In_Array : Array_Type;
-      Transform : access function
-        (In_Element : Element_Type) return Element_Type) return Array_Type;
+     (In_Array  : Array_Type;
+      Transform : access function (El : Element_Type) return Element_Type)
+     return Array_Type;
    --  Applies Transform on every element of In_Array, returning an array from
    --  all the transformed elements.
    --  This version takes an access Transform parameter, and is meant for the
@@ -148,8 +148,8 @@ package Langkit_Support.Array_Utils is
 
    function Filter
      (In_Array : Array_Type;
-      Pred     : access function
-        (E : Element_Type) return Boolean) return Array_Type;
+      Pred     : access function (E : Element_Type) return Boolean)
+     return Array_Type;
    --  Returns a new array that contains every element in In_Array for which
    --  Predicate returns true.
    --  This version takes an access Predicate parameter.
@@ -201,7 +201,7 @@ package Langkit_Support.Array_Utils is
       with function Predicate (In_Element : Element_Type) return Boolean;
    function Find_Gen
      (In_Array : Array_Type;
-      Rev : Boolean := False) return Option_Type;
+      Rev      : Boolean := False) return Option_Type;
    --  Return the first element in In_Array for which Predicate returns True.
    --  If Rev is True, the search will be done from the end of the array
    --  to the start.
@@ -209,10 +209,9 @@ package Langkit_Support.Array_Utils is
    --  an option type for the element.
 
    function Find
-     (In_Array : Array_Type;
-      Predicate :
-      access function (El : Element_Type) return Boolean;
-      Rev : Boolean := False) return Option_Type;
+     (In_Array  : Array_Type;
+      Predicate : access function (El : Element_Type) return Boolean;
+      Rev       : Boolean := False) return Option_Type;
    --  Return the first element in In_Array for which Predicate returns True.
    --  If Rev is True, the search will be done from the end of the array
    --  to the start.
@@ -220,11 +219,10 @@ package Langkit_Support.Array_Utils is
    --  returns an option type for the element.
 
    function Find
-     (In_Array : Array_Type;
-      Predicate :
-      access function (El : Element_Type) return Boolean;
-      Rev : Boolean := False;
-      Ret : out Element_Type) return Boolean;
+     (In_Array  : Array_Type;
+      Predicate : access function (El : Element_Type) return Boolean;
+      Rev       : Boolean := False;
+      Ret       : out Element_Type) return Boolean;
    --  Return the first element in In_Array for which Predicate returns True.
    --  If Rev is True, the search will be done from the end of the array
    --  to the start.
@@ -234,9 +232,9 @@ package Langkit_Support.Array_Utils is
    generic
       with function Predicate (In_Element : Element_Type) return Boolean;
    function Find_Gen_Or
-     (In_Array : Array_Type;
+     (In_Array         : Array_Type;
       Val_If_Not_Found : Element_Type;
-      Rev : Boolean := False) return Element_Type;
+      Rev              : Boolean := False) return Element_Type;
    --  Return the first element in In_Array for which Predicate returns True.
    --  If Rev is True, the search will be done from the end of the array
    --  to the start.
@@ -244,11 +242,10 @@ package Langkit_Support.Array_Utils is
    --  returns Val_If_Not_Found if no element is found.
 
    function Find
-     (In_Array : Array_Type;
-      Predicate :
-      access function (El : Element_Type) return Boolean;
+     (In_Array         : Array_Type;
+      Predicate        : access function (El : Element_Type) return Boolean;
       Val_If_Not_Found : Element_Type;
-      Rev : Boolean := False) return Element_Type;
+      Rev              : Boolean := False) return Element_Type;
    --  Return the first element in In_Array for which Predicate returns True.
    --  If Rev is True, the search will be done from the end of the array
    --  to the start.
@@ -261,12 +258,11 @@ package Langkit_Support.Array_Utils is
 
    generic
       type F_Type is private;
-      type Fun_Ret_Array_Type is array (Index_Type range <>) of F_Type;
+      type Fn_Ret_Array_Type is array (Index_Type range <>) of F_Type;
    function Flat_Map
-     (In_Array : Array_Type;
-      Transform : access function
-        (In_Element : Element_Type) return Fun_Ret_Array_Type)
-      return Fun_Ret_Array_Type;
+     (In_Array  : Array_Type;
+      Transform : access function (El : Element_Type) return Fn_Ret_Array_Type)
+     return Fn_Ret_Array_Type;
    --  Given a transform function, that from an element of the array, returns a
    --  new array, this function applies the transform function to every element
    --  in the array, and returns the concatenation of every resulting array.
@@ -275,10 +271,9 @@ package Langkit_Support.Array_Utils is
    --  function.
 
    function Id_Flat_Map
-     (In_Array : Array_Type;
-      Transform : access function
-        (In_Element : Element_Type) return Array_Type)
-      return Array_Type;
+     (In_Array  : Array_Type;
+      Transform : access function (El : Element_Type) return Array_Type)
+     return Array_Type;
    --  Given a transform function, that from an element of the array, returns a
    --  new array, this function applies the transform function to every element
    --  in the array, and returns the concatenation of every resulting array.

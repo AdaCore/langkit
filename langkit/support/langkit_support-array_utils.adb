@@ -27,8 +27,7 @@ package body Langkit_Support.Array_Utils is
    -- Map_Gen --
    -------------
 
-   function Map_Gen (In_Array : Array_Type) return Out_Array_Type
-   is
+   function Map_Gen (In_Array : Array_Type) return Out_Array_Type is
    begin
       return Ret_Array : Out_Array_Type (In_Array'Range) do
          for J in In_Array'Range loop
@@ -42,9 +41,9 @@ package body Langkit_Support.Array_Utils is
    ---------
 
    function Map
-     (In_Array : Array_Type;
-      Transform : access function
-        (In_Element : Element_Type) return Out_Type) return Out_Array_Type
+     (In_Array  : Array_Type;
+      Transform : access function (El : Element_Type) return Out_Type)
+     return Out_Array_Type
    is
       function Map_Gen_Internal
       is new Map_Gen (Out_Type, Out_Array_Type, Transform.all);
@@ -58,8 +57,8 @@ package body Langkit_Support.Array_Utils is
 
    function Filter
      (In_Array : Array_Type;
-      Pred : access function
-        (E : Element_Type) return Boolean) return Array_Type
+      Pred     : access function (E : Element_Type) return Boolean)
+     return Array_Type
    is
       function Filter_Internal is new Filter_Gen (Pred.all);
    begin
@@ -235,8 +234,7 @@ package body Langkit_Support.Array_Utils is
 
    function Id_Flat_Map
      (In_Array : Array_Type;
-      Transform : access function
-        (In_Element : Element_Type) return Array_Type)
+      Transform : access function (El : Element_Type) return Array_Type)
       return Array_Type
    is
       function Id_Flat_Map_Internal is new Id_Flat_Map_Gen (Transform.all);
@@ -265,13 +263,12 @@ package body Langkit_Support.Array_Utils is
    --------------
 
    function Flat_Map
-     (In_Array : Array_Type;
-      Transform : access function
-        (In_Element : Element_Type) return Fun_Ret_Array_Type)
-      return Fun_Ret_Array_Type
+     (In_Array  : Array_Type;
+      Transform : access function (El : Element_Type) return Fn_Ret_Array_Type)
+      return Fn_Ret_Array_Type
    is
       function Flat_Map_Internal
-      is new Flat_Map_Gen (F_Type, Fun_Ret_Array_Type, Transform.all);
+      is new Flat_Map_Gen (F_Type, Fn_Ret_Array_Type, Transform.all);
    begin
       return Flat_Map_Internal (In_Array);
    end Flat_Map;
@@ -293,9 +290,9 @@ package body Langkit_Support.Array_Utils is
    ------------
 
    function Id_Map
-     (In_Array : Array_Type;
-      Transform : access function
-        (In_Element : Element_Type) return Element_Type) return Array_Type
+     (In_Array  : Array_Type;
+      Transform : access function (El : Element_Type) return Element_Type)
+     return Array_Type
    is
       function Id_Map_Internal is new Id_Map_Gen (Transform.all);
    begin
@@ -304,19 +301,20 @@ package body Langkit_Support.Array_Utils is
 
    generic
       with function Predicate (In_Element : Element_Type) return Boolean;
-   function Find_Internal (In_Array : Array_Type;
-                           Rev : Boolean := False;
-                           Ret : out Element_Type) return Boolean;
+   function Find_Internal
+     (In_Array : Array_Type;
+      Rev      : Boolean := False;
+      Ret      : out Element_Type) return Boolean;
 
    ----------
    -- Find --
    ----------
 
-   function Find (In_Array : Array_Type;
-                  Predicate :
-                  access function (El : Element_Type) return Boolean;
-                  Rev : Boolean := False;
-                  Ret : out Element_Type) return Boolean
+   function Find
+     (In_Array : Array_Type;
+      Predicate : access function (El : Element_Type) return Boolean;
+      Rev       : Boolean := False;
+      Ret       : out Element_Type) return Boolean
    is
       function F is new Find_Internal (Predicate.all);
    begin
@@ -327,9 +325,10 @@ package body Langkit_Support.Array_Utils is
    -- Find_Internal --
    -------------------
 
-   function Find_Internal (In_Array : Array_Type;
-                           Rev : Boolean := False;
-                           Ret : out Element_Type) return Boolean
+   function Find_Internal
+     (In_Array : Array_Type;
+      Rev      : Boolean := False;
+      Ret      : out Element_Type) return Boolean
    is
    begin
       if Rev then
@@ -363,8 +362,9 @@ package body Langkit_Support.Array_Utils is
    -- Find_Gen --
    --------------
 
-   function Find_Gen (In_Array : Array_Type;
-                      Rev : Boolean := False) return Option_Type
+   function Find_Gen
+     (In_Array : Array_Type;
+      Rev      : Boolean := False) return Option_Type
    is
       function F is new Find_Internal (Predicate);
       El : Element_Type;
@@ -381,10 +381,9 @@ package body Langkit_Support.Array_Utils is
    ----------
 
    function Find
-     (In_Array : Array_Type;
-      Predicate :
-      access function (El : Element_Type) return Boolean;
-      Rev : Boolean := False) return Option_Type
+     (In_Array  : Array_Type;
+      Predicate : access function (El : Element_Type) return Boolean;
+      Rev       : Boolean := False) return Option_Type
    is
       function F is new Find_Internal (Predicate.all);
       El : Element_Type;
@@ -400,9 +399,10 @@ package body Langkit_Support.Array_Utils is
    -- Find_Gen_Or --
    -----------------
 
-   function Find_Gen_Or (In_Array : Array_Type;
-                         Val_If_Not_Found : Element_Type;
-                         Rev : Boolean := False) return Element_Type
+   function Find_Gen_Or
+     (In_Array         : Array_Type;
+      Val_If_Not_Found : Element_Type;
+      Rev              : Boolean := False) return Element_Type
    is
       function F is new Find_Internal (Predicate);
       El : Element_Type;
@@ -419,11 +419,10 @@ package body Langkit_Support.Array_Utils is
    ----------
 
    function Find
-     (In_Array : Array_Type;
-      Predicate :
-      access function (El : Element_Type) return Boolean;
+     (In_Array         : Array_Type;
+      Predicate        : access function (El : Element_Type) return Boolean;
       Val_If_Not_Found : Element_Type;
-      Rev : Boolean := False) return Element_Type
+      Rev              : Boolean := False) return Element_Type
    is
       function F is new Find_Internal (Predicate.all);
       El : Element_Type;
