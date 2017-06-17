@@ -15,17 +15,17 @@ package body Langkit_Support.Lexical_Env is
    package Internal_Map_Element_Arrays is new Langkit_Support.Array_Utils
      (Internal_Map_Element, Positive, Internal_Map_Element_Array);
 
-   function Pop_Rebinding
+   function Extract_Rebinding
      (Rebindings        : in out Env_Rebindings;
       Rebound_Env       : Lexical_Env) return Lexical_Env;
-   --  Look for a pair in Rebindings whose Old_Env field is "Old_Env".
+   --  Look for a pair in Rebindings whose Old_Env field is "Rebound_Env".
    --
-   --  If there is one, return its New_Env field in "New_Env", and put the
-   --  remaining set of rebindings in rebindings. Otherwise, forward "Old_Env"
-   --  to "New_Env".
+   --  If there is one, return the env it is associated to, and put the
+   --  remaining set of rebindings in rebindings. Otherwise, return
+   --  "Rebound_Env".
    --
-   --  In all cases, "Popped_Rebindings" contains upon return a new ownership
-   --  share.
+   --  If Rebindings is bound to a new set of rebindings upon return, the
+   --  ownership share of the old rebinding set will have been forfeited.
 
    procedure Transitive_Reference
      (Self            : Lexical_Env;
@@ -578,7 +578,7 @@ package body Langkit_Support.Lexical_Env is
       --  we'll get it here. We'll also shed it from the set of current
       --  rebindings.
 
-      Own_Lookup_Env := Pop_Rebinding (Current_Rebindings, Self);
+      Own_Lookup_Env := Extract_Rebinding (Current_Rebindings, Self);
 
       declare
          use type Entity_Array;
@@ -814,11 +814,11 @@ package body Langkit_Support.Lexical_Env is
       Self := null;
    end Dec_Ref;
 
-   -------------------
-   -- Pop_Rebinding --
-   -------------------
+   -----------------------
+   -- Extract_Rebinding --
+   -----------------------
 
-   function Pop_Rebinding
+   function Extract_Rebinding
      (Rebindings        : in out Env_Rebindings;
       Rebound_Env       : Lexical_Env) return Lexical_Env
    is
@@ -864,7 +864,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       return Return_Env;
-   end Pop_Rebinding;
+   end Extract_Rebinding;
 
    --------------
    -- Decorate --
