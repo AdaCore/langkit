@@ -410,8 +410,8 @@ private
    end record;
 
    type Env_Rebindings_Type (Size : Natural) is record
-      Ref_Count  : Natural := 1;
-      Rebindings : Env_Rebindings_Array (1 .. Size);
+      Ref_Count : Natural := 1;
+      Bindings  : Env_Rebindings_Array (1 .. Size);
    end record;
 
    No_Env_Getter    : constant Env_Getter := (False, False, null);

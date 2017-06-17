@@ -154,7 +154,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       for I in 1 .. L.Size loop
-         if not Is_Equivalent (L.Rebindings (I), R.Rebindings (I)) then
+         if not Is_Equivalent (L.Bindings (I), R.Bindings (I)) then
             return False;
          end if;
       end loop;
@@ -175,7 +175,7 @@ package body Langkit_Support.Lexical_Env is
       declare
          Result : constant Env_Rebindings := new Env_Rebindings_Type'
            (Size       => Bindings'Length,
-            Rebindings => Bindings,
+            Bindings => Bindings,
             Ref_Count  => 1);
       begin
          for R of Bindings loop
@@ -207,7 +207,7 @@ package body Langkit_Support.Lexical_Env is
       if Self /= null then
          Self.Ref_Count := Self.Ref_Count - 1;
          if Self.Ref_Count = 0 then
-            for R of Self.Rebindings loop
+            for R of Self.Bindings loop
                Dec_Ref (R);
             end loop;
             Unchecked_Free (Self);
@@ -236,13 +236,13 @@ package body Langkit_Support.Lexical_Env is
       Result.Ref_Count := 1;
 
       for J in 1 .. L.Size loop
-         Result.Rebindings (J) := L.Rebindings (J);
-         Inc_Ref (Result.Rebindings (J));
+         Result.Bindings (J) := L.Bindings (J);
+         Inc_Ref (Result.Bindings (J));
       end loop;
 
       for J in 1 .. R.Size loop
-         Result.Rebindings (J + L.Size) := R.Rebindings (J);
-         Inc_Ref (Result.Rebindings (J));
+         Result.Bindings (J + L.Size) := R.Bindings (J);
+         Inc_Ref (Result.Bindings (J));
       end loop;
 
       return Result;
@@ -263,7 +263,7 @@ package body Langkit_Support.Lexical_Env is
       else
          return Create
            (if Self /= null
-            then Self.Rebindings & Binding
+            then Self.Bindings & Binding
             else (1 => Binding));
       end if;
    end Append;
@@ -833,7 +833,7 @@ package body Langkit_Support.Lexical_Env is
 
          for J in reverse 1 .. Rebindings.Size loop
             declare
-               R         : Env_Rebinding renames Rebindings.Rebindings (J);
+               R         : Env_Rebinding renames Rebindings.Bindings (J);
                R_Old_Env : Lexical_Env renames Get_Env (R.Old_Env);
             begin
                if Rebound_Env = R_Old_Env then
@@ -856,8 +856,8 @@ package body Langkit_Support.Lexical_Env is
             --  Create the new rebindings set
 
             Rebindings := Create
-              (Rebindings.Rebindings (1 .. Popped_Index - 1)
-               & Rebindings.Rebindings (Popped_Index + 1 .. Rebindings.Size));
+              (Rebindings.Bindings (1 .. Popped_Index - 1)
+               & Rebindings.Bindings (Popped_Index + 1 .. Rebindings.Size));
          end if;
 
          Dec_Ref (Old_Rebindings);
@@ -915,8 +915,7 @@ package body Langkit_Support.Lexical_Env is
          then "<synthetic>" else Element_Image (Self.Node));
 
       function Image (Self : Env_Rebinding) return Text_Type is
-        ("(" & Image (Get_Env (Self.Old_Env))
-         & " -> " & Image (Get_Env (Self.New_Env)) & ")");
+        (Image (Get_Env (Self.New_Env)));
 
    begin
       if Self = null then
@@ -926,7 +925,7 @@ package body Langkit_Support.Lexical_Env is
          Buffer : Unbounded_Wide_Wide_String;
       begin
          Append (Buffer, "[");
-         for E of Self.Rebindings loop
+         for E of Self.Bindings loop
             Append (Buffer, Image (E));
             Append (Buffer, ", ");
          end loop;
