@@ -175,7 +175,7 @@ package body Langkit_Support.Lexical_Env is
       declare
          Result : constant Env_Rebindings := new Env_Rebindings_Type'
            (Size       => Bindings'Length,
-            Bindings => Bindings,
+            Bindings   => Bindings,
             Ref_Count  => 1);
       begin
          for R of Bindings loop
