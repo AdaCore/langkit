@@ -229,9 +229,10 @@ class EnvGetterPrinter(BasePrinter):
             )
         )
 
-    def to_string(self):
+    @property
+    def env(self):
         if self.value['dynamic']:
-            return '<EnvGetter dynamic>'
+            return None
         else:
             # With GNAT encodings, GDB exposes the variant part as a field that
             # is an union. Sometimes it's half-decoded...
@@ -240,7 +241,11 @@ class EnvGetterPrinter(BasePrinter):
                 variant = union['O']
             except gdb.error:
                 variant = self.value['S']
-            return str(variant['env'])
+            return variant['env']
+
+    def to_string(self):
+        env = self.env
+        return str(env) if env else '<EnvGetter dynamic>'
 
 
 class ReferencedEnvPrinter(BasePrinter):
