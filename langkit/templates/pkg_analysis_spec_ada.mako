@@ -351,7 +351,11 @@ package ${ada_lib_name}.Analysis is
       Node : ${root_node_type_name};
    end record;
 
-   function El_Image (Node : ${root_node_type_name}) return Text_Type;
+   function Node_File_And_Sloc_Image
+     (Node : ${root_node_type_name}) return Text_Type;
+   --  Return a "sourcefile:lineno:columnno" corresponding to the starting sloc
+   --  of Node. Used to create a human-readable representation for env.
+   --  rebindings.
 
    package AST_Envs is new Langkit_Support.Lexical_Env
      (Element_T        => ${root_node_type_name},
@@ -360,7 +364,7 @@ package ${ada_lib_name}.Analysis is
       Empty_Metadata   => No_Metadata,
       Combine          => Combine,
       Getter_State_T   => Env_Getter_State_T,
-      Element_Image    => El_Image);
+      Element_Image    => Node_File_And_Sloc_Image);
 
    --  The following subtypes are introduced to ease code generation, so we
    --  don't have to deal with the AST_Envs suffix.
