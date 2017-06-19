@@ -142,10 +142,7 @@ class ASTNodePrinter(BasePrinter):
     def unit(self):
         return AnalysisUnit(tagged_field(self.value, 'unit'))
 
-    def to_string(self):
-        if not self.value:
-            return 'null'
-
+    def sloc(self, with_end=True):
         filename = self.unit.filename
         if filename:
             filename = os.path.basename(filename)
@@ -153,12 +150,18 @@ class ASTNodePrinter(BasePrinter):
         tdh = TDH(tagged_field(self.value, 'unit')['tdh'])
         start = int(tagged_field(self.value, 'token_start_index'))
         end = int(tagged_field(self.value, 'token_end_index'))
-        return '<{} {}{}-{}>'.format(
-            self.kind,
+        return '{}{}{}'.format(
             '{}:'.format(filename) if filename else '',
+
             tdh.token(start).sloc_range.start,
-            tdh.token(end).sloc_range.end if end else None
+
+            ':{}'.format(tdh.token(end).sloc_range.end)
+            if with_end and end else ''
         )
+
+    def to_string(self):
+        return ('<{} {}>'.format(self.kind, self.sloc())
+                if self.value else 'null')
 
 
 class LexicalEnvPrinter(BasePrinter):
