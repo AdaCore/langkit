@@ -461,8 +461,8 @@ class FieldAccess(AbstractExpression):
                     args.append((formal.argument_name,
                                  actual.render_expr()))
 
-                # If the called property uses environments, it will need and
-                # env rebindings parameter.
+                # If the called property uses entity information, pass it
+                # along.
                 if self.node_data.uses_entity_info and self.entity_info_expr:
                     args.append((str(PropertyDef.entity_info_name),
                                  self.entity_info_expr))
