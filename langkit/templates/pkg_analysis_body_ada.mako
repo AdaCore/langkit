@@ -2323,6 +2323,16 @@ package body ${ada_lib_name}.Analysis is
       Populate_Internal (Node, Env);
    end Populate_Lexical_Env;
 
+   ---------------
+   -- El_Image  --
+   ---------------
+
+   function El_Image (Node : ${root_node_type_name}) return Text_Type
+   is ("`"
+       & To_Text (To_String (Node.Unit.File_Name))
+       & " " & To_Text (Image (Sloc_Range (Node)))
+       & "`");
+
    -----------------
    -- Short_Image --
    -----------------

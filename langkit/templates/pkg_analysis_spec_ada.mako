@@ -351,8 +351,7 @@ package ${ada_lib_name}.Analysis is
       Node : ${root_node_type_name};
    end record;
 
-   function El_Image (Node : ${root_node_type_name}) return Text_Type
-   is (Short_Image (Node));
+   function El_Image (Node : ${root_node_type_name}) return Text_Type;
 
    package AST_Envs is new Langkit_Support.Lexical_Env
      (Element_T        => ${root_node_type_name},
