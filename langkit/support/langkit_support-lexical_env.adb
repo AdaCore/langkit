@@ -925,9 +925,11 @@ package body Langkit_Support.Lexical_Env is
          Buffer : Unbounded_Wide_Wide_String;
       begin
          Append (Buffer, "[");
-         for E of Self.Bindings loop
-            Append (Buffer, Image (E));
-            Append (Buffer, ", ");
+         for I in 1 .. Self.Size loop
+            if I > 1 then
+               Append (Buffer, ", ");
+            end if;
+            Append (Buffer, Image (Self.Bindings (I)));
          end loop;
          Append (Buffer, "]");
          return To_Wide_Wide_String (Buffer);
