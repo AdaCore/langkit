@@ -313,8 +313,33 @@ class EntityPrinter(BasePrinter):
         return self.value['el']
 
     def to_string(self):
-        return ('<Entity for {}>'.format(self.node)
-                if self.node else 'null')
+        if not self.node:
+            return 'null'
+
+        node = ASTNodePrinter(self.node, self.context)
+
+        rebindings = self.value['info']['rebindings']
+        if not rebindings:
+            rebindings_image = ''
+
+        else:
+            def rebinding_img(value):
+                new_env = EnvGetterPrinter(value['new_env'],
+                                           self.context).env
+
+                return ASTNodePrinter(new_env['node'], self.context).sloc(
+                    with_end=False
+                ) if new_env and new_env['node'] else '<synthetic>'
+
+            size = int(rebindings['size'])
+            array = rebindings['bindings'].address.cast(
+                rebindings['bindings'].type.target().array(1, size).pointer()
+            ).dereference()
+            rebindings_image = ' [{}]'.format(', '.join(
+                rebinding_img(array[i]) for i in range(1, size + 1)
+            ))
+
+        return '<| {} {}{} |>'.format(node.kind, node.sloc(), rebindings_image)
 
 
 class ArrayPrettyPrinter(BasePrinter):
