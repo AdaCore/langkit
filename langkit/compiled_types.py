@@ -306,11 +306,11 @@ class CompiledType(object):
         :param bool is_entity_type: Whether this type represents an entity
             type.
 
-        :param bool should_emit_array_type: Whether the array type for this
-            compiled type is to be automatically generated in the AST.Types
-            generated package. If not, hard-wired code in the AST package
-            should emit do it. See CompileContext.array_types for more
-            information.
+        :param bool should_emit_array_type: Whether declarations for this
+            compiled typed's array type are generated along with all regular
+            array types. It must be False for several special types (for
+            instance, the root AST node), for which the array type declarations
+            are hard-wired in the $.Analysis package.
 
         :param bool exposed: Whether the type should be exposed to the C and
             Python APIs. Note that all types are exposed anyway when the
