@@ -2329,10 +2329,8 @@ package body ${ada_lib_name}.Analysis is
 
    function Node_File_And_Sloc_Image
      (Node : ${root_node_type_name}) return Text_Type
-   is ("`"
-       & To_Text (To_String (Node.Unit.File_Name))
-       & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node))))
-       & "`");
+   is (To_Text (To_String (Node.Unit.File_Name))
+       & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node)))));
 
    -----------------
    -- Short_Image --
