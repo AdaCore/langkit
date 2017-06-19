@@ -858,11 +858,11 @@ package ${ada_lib_name}.Analysis is
    -- Adalog instantiations --
    ---------------------------
 
-   function El_Image (N : ${T.entity.name}) return String;
+   function Image (N : ${T.entity.name}) return String;
 
    package Eq_Node is new Langkit_Support.Adalog.Eq_Same
      (LR_Type       => ${T.entity.name},
-      Element_Image => El_Image,
+      Element_Image => Image,
       Inc_Ref       => AST_Envs.Inc_Ref,
       Dec_Ref       => AST_Envs.Dec_Ref);
    subtype Logic_Var is Eq_Node.Refs.Raw_Var;

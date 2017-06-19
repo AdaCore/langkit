@@ -2941,11 +2941,11 @@ package body ${ada_lib_name}.Analysis is
       end loop;
    end Assign_Names_To_Logic_Vars;
 
-   --------------
-   -- El_Image --
-   --------------
+   -----------
+   -- Image --
+   -----------
 
-   function El_Image (N : ${T.entity.name}) return String is
+   function Image (N : ${T.entity.name}) return String is
    begin
       if N.El /= null then
          declare
@@ -2961,7 +2961,7 @@ package body ${ada_lib_name}.Analysis is
       else
          return "None";
       end if;
-   end El_Image;
+   end Image;
 
    ---------------
    -- Can_Reach --
