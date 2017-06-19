@@ -2330,7 +2330,7 @@ package body ${ada_lib_name}.Analysis is
    function El_Image (Node : ${root_node_type_name}) return Text_Type
    is ("`"
        & To_Text (To_String (Node.Unit.File_Name))
-       & " " & To_Text (Image (Sloc_Range (Node)))
+       & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node))))
        & "`");
 
    -----------------
