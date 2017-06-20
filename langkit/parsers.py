@@ -361,7 +361,7 @@ class Parser(object):
         variable for either pos_var or res_var, this callback is the way to do
         it.
         """
-        pass
+        pass  # no-code-coverage
 
     def create_vars_before(self):
         """
@@ -372,7 +372,7 @@ class Parser(object):
 
         :rtype: None|VarDef
         """
-        pass
+        pass  # no-code-coverage
 
     def init_vars(self, pos_var=None, res_var=None):
         self.pos_var = (pos_var or VarDef(
