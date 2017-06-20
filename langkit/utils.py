@@ -115,14 +115,9 @@ class Colors(object):
     @classmethod
     def disable_colors(cls):
         """
-        Reset color codes to empty strings.
+        Disable the use of colors in col/printcol.
         """
-        for name in dir(cls):
-            value = getattr(cls, name)
-            if (all(c.isalpha() for c in name) and
-                    name.upper() == name and
-                    isinstance(value, basestring)):
-                setattr(cls, name, '')
+        cls._enabled = False
 
 
 # Keep colors when we are running under GDB. Otherwise, disable colors as soon
