@@ -38,7 +38,6 @@ from langkit.diagnostics import (
     Severity, WarningSet
 )
 from langkit.lexer import WithSymbol
-from langkit.template_utils import TemplateEnvironment
 from langkit.utils import (Log, assert_type, copy_with, is_same, issubtype,
                            type_check_instance)
 
@@ -539,12 +538,9 @@ class Parser(object):
         with add_var_context() as var_context:
             pos_var = VarDef("pos", token_type, create=False)
             self.traverse_create_vars(pos_var)
-            t_env = TemplateEnvironment(
-                parser=self,
-                code=self.generate_code(),
-                var_context=var_context
-
-            )
+            t_env = {'parser': self,
+                     'code': self.generate_code(),
+                     'var_context': var_context}
 
             context.generated_parsers.append(GeneratedParser(
                 self.gen_fn_name,

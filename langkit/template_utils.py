@@ -9,23 +9,10 @@ from langkit.common import string_repr, get_type, null_constant
 from langkit.diagnostics import DiagnosticError
 
 
-class TemplateEnvironment(dict):
-    """
-    Environment that gathers names for template processing.
-    Names are associated to values with the attribute syntax.
-    """
-
-    def __setattr__(self, name, value):
-        self[name] = value
-
-    def __getattr__(self, name):
-        return self[name]
-
-
 class Renderer(object):
 
     def __init__(self, template_env=None, **kwargs):
-        self.env = TemplateEnvironment(template_env or {})
+        self.env = dict(template_env or {})
         self.env.update(kwargs)
 
     def update(self, env):
@@ -35,10 +22,9 @@ class Renderer(object):
         return Renderer(self.env, **kwargs)
 
     def render(self, template_name, env=None, **kwargs):
-        env = env or {}
-        return self.update(
-            TemplateEnvironment(
-                env.items() + kwargs.items()))._render(template_name)
+        env = dict(env or {})
+        env.update(kwargs)
+        return self.update(env)._render(template_name)
 
     def _render(self, template_name):
         try:
