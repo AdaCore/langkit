@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import re
 
 from langkit import names
+from langkit.diagnostics import check_source_language
 from langkit.language_api import AbstractAPISettings
 
 
@@ -72,8 +73,10 @@ class CAPISettings(AbstractAPISettings):
         choose it).
         """
         lib_name = self.context.lib_name.lower
-        if not self.LIB_NAME_RE.match(lib_name):
-            raise ValueError('Invalid library name: {}'.format(lib_name))
+        check_source_language(
+            self.LIB_NAME_RE.match(lib_name),
+            'Invalid library name: {}'.format(lib_name)
+        )
         return lib_name
 
     #
