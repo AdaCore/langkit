@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit import common, names
+from langkit import common
 from langkit.language_api import AbstractAPISettings
 
 
@@ -22,8 +22,6 @@ class AdaAPISettings(AbstractAPISettings):
 
     @classmethod
     def escape(cls, name, suffix):
-        if isinstance(suffix, basestring):
-            suffix = names.Name.from_lower(suffix)
         return (name + suffix
                 if name.base_name.lower() in cls.KEYWORDS else
                 name)
