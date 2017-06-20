@@ -61,45 +61,6 @@ class Directories(object):
         return path.join(self.root_langkit_source_dir, *args)
 
 
-class Coverage(object):
-    """
-    Guard object used to compute code coverage (optionally).
-    """
-
-    def __init__(self, dirs):
-        self.dirs = dirs
-
-        import coverage
-        self.cov = coverage.coverage(
-            branch=True,
-            source=[
-                self.dirs.langkit_source_dir(),
-                self.dirs.lang_source_dir(),
-            ],
-            omit=[
-                self.dirs.langkit_source_dir('libmanage.py'),
-                self.dirs.lang_source_dir('manage.py'),
-                self.dirs.lang_source_dir('env.py'),
-            ],
-        )
-
-        self.cov.exclude('def __repr__')
-        self.cov.exclude('raise NotImplementedError()')
-        self.cov.exclude('assert False')
-
-    def start(self):
-        self.cov.start()
-
-    def stop(self):
-        self.cov.stop()
-
-    def generate_report(self):
-        self.cov.html_report(
-            directory=self.dirs.build_dir('coverage'),
-            ignore_errors=True
-        )
-
-
 class EnableWarningAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string):
         namespace.enabled_warnings.enable(values)
@@ -295,8 +256,7 @@ class ManageScript(object):
         )
 
         # The create_context method will create the context and set it here
-        # only right before executing commands so that coverage computation
-        # will apply to create_context.
+        # only right before executing commands.
         self.context = None
 
         # This will be set in the run method, when we have parsed arguments
@@ -310,10 +270,6 @@ class ManageScript(object):
 
         :type subparser: argparse.ArgumentParser
         """
-        subparser.add_argument(
-            '--coverage', '-C', action='store_true',
-            help='Compute code coverage for the code generator'
-        )
         subparser.add_argument(
             '--pretty-print', '-p', action='store_true',
             help='Pretty-print generated source code'
@@ -506,19 +462,6 @@ class ManageScript(object):
         if install_dir:
             self.dirs.set_install_dir(install_dir)
 
-        # Compute code coverage in the code generator if asked to
-        if parsed_args.func == self.do_generate and parsed_args.coverage:
-            try:
-                cov = Coverage(self.dirs)
-            except Exception as exc:
-                print('Coverage not available:', file=sys.stderr)
-                traceback.print_exc(exc)
-                sys.exit(1)
-
-            cov.start()
-        else:
-            cov = None
-
         if getattr(parsed_args, 'list_warnings', False):
             WarningSet.print_list()
             return
@@ -563,10 +506,6 @@ class ManageScript(object):
                 pr.disable()
                 ps = pstats.Stats(pr)
                 ps.dump_stats('langkit.prof')
-
-        if cov is not None:
-            cov.stop()
-            cov.generate_report()
 
     def set_context(self, parsed_args):
         self.context = self.create_context(parsed_args)
