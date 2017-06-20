@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit import compiled_types, documentation, expressions
+from langkit import compiled_types, expressions
 from langkit.diagnostics import check_source_language, Severity
 from langkit.utils import dispatch_on_type
 
@@ -146,6 +146,20 @@ def print_field(context, file, struct, field):
     print('</div>', file=file)
 
 
+def print_enum(context, file, enum_type):
+    print(
+        '<dt id="{name}">'
+        '<span class="kw">enum</span>'
+        ' <span class="def">{name}</span>'
+        '</dt>'.format(name=enum_type.name.camel),
+        file=file
+    )
+    print('<dd>{}<dl>'.format(format_doc(enum_type)), file=file)
+    for alt in enum_type.alternatives:
+        print('<dt class="def">{}</dt>'.format(alt), file=file)
+    print('</dl></dd>', file=file)
+
+
 def astnode_ref(node):
     return '<a href="#{name}" class="ref-link">{name}</a>'.format(
         name=node.name.camel
@@ -260,14 +274,10 @@ def write_astdoc(context, file):
     if context.enum_types:
         print('<h2>Enumeration types</h2>', file=file)
 
+        print('<dl>', file=file)
         for enum_type in context.enum_types:
-            print('enum {}:'.format(enum_type.name.camel), file=file)
-            doc = enum_type.doc
-            if doc:
-                print(documentation.format_text(doc, 4), file=file)
-            print('    {}'.format(' '.join(enum_type.alternatives)),
-                  file=file)
-            print('', file=file)
+            print_enum(context, file, enum_type)
+        print('</dl>', file=file)
 
     print('<h2>Structure types</h2>', file=file)
 
