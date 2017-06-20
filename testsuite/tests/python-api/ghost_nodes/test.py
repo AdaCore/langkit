@@ -25,9 +25,14 @@ class Enum(EnumNode):
     alternatives = ['null', 'example', 'default']
 
 
+class PlusQualifier(EnumNode):
+    qualifier = True
+
+
 class Param(FooNode):
     name = Field(type=T.Name)
     mode = Field(type=T.Enum)
+    has_plus = Field(type=T.PlusQualifier)
 
 
 class Name (FooNode):
@@ -36,13 +41,16 @@ class Name (FooNode):
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
-    main_rule=List(Param(foo_grammar.name, foo_grammar.mode)),
+    main_rule=List(Param(foo_grammar.name,
+                         foo_grammar.mode,
+                         foo_grammar.plus)),
     name=Name(Tok(Token.Identifier, keep=True)),
     mode=Or(
         Enum.alt_null('null'),
         Enum.alt_example('example'),
         Enum.alt_default(),
     ),
+    plus=PlusQualifier('+'),
 )
 build_and_run(foo_grammar, 'main.py')
 print('Done')

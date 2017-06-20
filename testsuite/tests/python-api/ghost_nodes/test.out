@@ -1,14 +1,18 @@
 Regular node: <Param 1:1-1:2>
 Regular node: <Name 1:1-1:2>
 Ghost node: <EnumDefault 2:1-2:1>
+Ghost node: <PlusQualifierAbsent 2:1-2:1>
 Regular node: <Param 2:1-2:7>
 Regular node: <Name 2:1-2:2>
 Regular node: <EnumNull 2:3-2:7>
+Ghost node: <PlusQualifierAbsent 3:1-3:1>
 Regular node: <Param 3:1-3:2>
 Regular node: <Name 3:1-3:2>
 Ghost node: <EnumDefault 4:1-4:1>
+Ghost node: <PlusQualifierAbsent 4:1-4:1>
 Regular node: <Param 4:1-4:7>
 Regular node: <Name 4:1-4:2>
 Regular node: <EnumNull 4:3-4:7>
+Ghost node: <PlusQualifierAbsent 4:8-4:8>
 Done.
 Done
