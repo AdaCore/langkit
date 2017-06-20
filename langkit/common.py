@@ -73,9 +73,7 @@ def string_repr(string):
     :param str string: The string to represent.
     :return: A string literal representation of string.
     """
-    if isinstance(string, unicode):
-        string = string.encode('ascii')
-    return '"{0}"'.format(repr(string)[1:-1].replace('"', r'""'))
+    return '"{0}"'.format(repr(string)[1:-1].replace('"', '""'))
 
 
 def null_constant():
@@ -119,21 +117,6 @@ def gen_name(var_name):
 
     var_id = next(__next_ids[var_name.lower])
     return var_name + names.Name(str(var_id))
-
-
-def gen_names(*var_names):
-    """
-    Utility function around gen_name, meant to be used with unpacking. Will
-    generate a list of names given the list of base names `var_names`. Used
-    like::
-
-        name_a, name_b = gen_names("a", "b")
-
-    :param list[str] var_names: The list of base names.
-    :rtype: list[str]
-    """
-    for var_name in var_names:
-        yield gen_name(var_name)
 
 
 basic_types = {
