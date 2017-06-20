@@ -19,37 +19,6 @@ except ImportError:
     gdb = None
 
 
-class StructEq(object):
-    """
-    Mixin for structural equality.
-    """
-    def __eq__(self, other):
-        if type(other) is type(self):
-            if hasattr(self, "_eq_keys"):
-                eq_keys = self._eq_keys
-            elif hasattr(self, "_excl_eq_keys"):
-                eq_keys = set(self.__dict__.keys()) ^ set(self._excl_eq_keys)
-            else:
-                return self.__dict__ == other.__dict__
-
-            return all(v == other.__dict__[k] for k, v in self.__dict__
-                       if k in eq_keys)
-
-        return False
-
-
-def unescape(char):
-    """
-    Unescape char if it is escaped.
-
-    :param str char: An eventually escaped character.
-    :rtype: str
-    """
-    if char[0] == "\\":
-        return char[1:]
-    return char
-
-
 def copy_with(obj, **kwargs):
     """
     Copy an object, and add every key value association passed in kwargs to it.
@@ -193,36 +162,12 @@ def memoized(func):
             result = result
         return result
 
-    wrapper.reset_cache = lambda: cache.clear()
-
     return wrapper
 
 
 def reset_memoized():
-    if getattr(memoized, "caches", None):
-        for cache in memoized.caches:
-            cache.clear()
-
-
-def type_check_exact(klass):
-    """
-    Return a predicate that will return true if its parameter is exactly egal
-    to `klass`.
-
-    :param type klass: Class to check against.
-    :rtype: (T) -> bool
-    """
-    return lambda t: t and t == klass
-
-
-def type_check(klass):
-    """
-    Return a predicate that will return true if its parameter is a subclass
-    of `klass`.
-    :param type klass: Class to check against.
-    :rtype: (T) -> bool
-    """
-    return lambda t: t and issubclass(t, klass)
+    for cache in getattr(memoized, "caches", []):
+        cache.clear()
 
 
 def type_check_instance(klass):
@@ -393,19 +338,7 @@ def issubtype(type, parent_type):
     return inspect.isclass(type) and issubclass(type, parent_type)
 
 
-class DictProxy(object):
-    """
-    Util class to be able to access dict keys via the attribute notation in
-    Python. Used in the property DSL.
-    """
-    def __init__(self, dct):
-        self.dct = dct
-
-    def __getattr__(self, attr):
-        return self.dct[attr]
-
-
-def not_implemented_error(self_or_cls, method):
+def not_implemented_error(self_or_cls, method):  # no-code-coverage
     """
     Return a NotImplementedError instance to explain that `self or_cls` must
     override method `method`.
