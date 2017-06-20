@@ -70,7 +70,7 @@ class Action(object):
           function has been called.
         :rtype: str
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
 
 class TokenAction(Action):
