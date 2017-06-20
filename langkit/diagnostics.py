@@ -85,9 +85,6 @@ class Location(object):
     def __repr__(self):
         return "<Location {} {}>".format(self.file, self.line)
 
-    def __str__(self):
-        return 'File "{}", line {}'.format(self.file, self.line)
-
 
 def extract_library_location(stack=None):
     """
