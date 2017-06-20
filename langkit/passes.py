@@ -49,7 +49,7 @@ class PassManager(object):
                 return
             else:
                 if (not isinstance(p, MajorStepPass)
-                        and context.verbosity.debug):
+                        and context.verbosity.debug):  # no-code-coverage
                     printcol('Running pass: {}'.format(p.name), Colors.YELLOW)
                 p.run(context)
 
@@ -112,7 +112,7 @@ class GlobalPass(AbstractPass):
         self.pass_fn(context)
 
 
-class EmbedIpythonPass(AbstractPass):
+class EmbedIpythonPass(AbstractPass):  # no-code-coverage
     """
     Small utility pass that allows to embed an IPython interpreter at a given
     point in the pipeline. This can be useful to inspect the state of
@@ -219,12 +219,7 @@ class EnvSpecPass(AbstractPass):
             env_spec = astnode.env_spec
             if env_spec is None:
                 continue
-            assert env_spec.ast_node is not None
-
-            # Process EnvSpec instance only once, for the top-most subclass
-            # that has it.
-            if env_spec.ast_node is astnode:
-                self.pass_fn(env_spec, context)
+            self.pass_fn(env_spec, context)
 
 
 class PropertyPass(AbstractPass):
