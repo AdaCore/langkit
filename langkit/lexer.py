@@ -468,14 +468,12 @@ class Lexer(object):
                 literal, self.tokens.__name__
             )
         )
-        if literal in self.literals_map:
-            return self.literals_map[literal]
-        else:
-            check_source_language(
-                False,
-                "{} token literal is not part of the valid tokens for "
-                "this grammar".format(literal)
-            )
+        check_source_language(
+            literal in self.literals_map,
+            '{} token literal is not part of the valid tokens for this'
+            ' this grammar'.format(literal)
+        )
+        return self.literals_map[literal]
 
     @property
     def sorted_tokens(self):
