@@ -496,19 +496,20 @@ class FieldAccess(AbstractExpression):
             return ret
 
         def _render_pre(self):
+            # As long as this method is called, this should not be a simple
+            # field access and thus we should have a result variable.
+            assert not self.simple_field_access and self.result_var
+
             sub_exprs = [self.receiver_expr] + self.arguments
             result = [e.render_pre() for e in sub_exprs]
 
-            if self.result_var:
-                # If we return to a result var, we need to make sure we create
-                # a new ownership share for the result of the field access.
-                # Property calls already do that, but we must inc-ref ourselves
-                # for other cases.
-                result.append('{} := {};'.format(self.result_var.name,
-                                                 self.field_access_expr))
-                if (self.type.is_refcounted and
-                        self.node_data.access_needs_incref):
-                    result.append('Inc_Ref ({});'.format(self.result_var.name))
+            # We need to make sure we create a new ownership share for the
+            # result of the field access.  Property calls already do that, but
+            # we must inc-ref ourselves for other cases.
+            result.append('{} := {};'.format(self.result_var.name,
+                                             self.field_access_expr))
+            if self.type.is_refcounted and self.node_data.access_needs_incref:
+                result.append('Inc_Ref ({});'.format(self.result_var.name))
 
             return '\n'.join(result)
 
