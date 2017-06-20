@@ -30,24 +30,6 @@ def get_context(*args, **kwargs):
     return get_context(*args, **kwargs)
 
 
-class GeneratedFunction(object):
-    """
-    Simple holder for functions' declaration/implementation generated code.
-    """
-    def __init__(self, name, declaration=None, implementation=None):
-        self.name = name
-        self.declaration = declaration
-        self.implementation = implementation
-
-
-class AbstractFieldAccessor(GeneratedFunction):
-    """Generated function that expose field read access."""
-    def __init__(self, name, field, c_declaration, **kwargs):
-        super(AbstractFieldAccessor, self).__init__(name, **kwargs)
-        self.field = field
-        self.c_declaration = c_declaration
-
-
 def c_node_type(capi):
     return CAPIType(capi, 'base_node')
 
@@ -924,9 +906,7 @@ class AbstractNodeData(object):
         """
         from langkit.expressions import PropertyDef
 
-        assert self._name and self.struct
-        if not self.struct.is_ast_node:
-            return False
+        assert self._name and self.struct and self.struct.is_ast_node
         parent_cls = self.struct.base()
         properties_to_override = ([p._name
                                    for p in parent_cls.get_properties()]
@@ -1097,18 +1077,6 @@ class AbstractNodeData(object):
         """
         return self.mandatory_arguments + self.exposed_optional_arguments
 
-    @classmethod
-    def filter_fields(cls, mapping):
-        """
-        Return a list of tuples (name, value) for all fields in mapping.
-
-        :type mapping: dict[str, AbstractNodeData]
-        :rtype: list[(str, AbstractNodeData)]
-        """
-        return [(f_n, f_v)
-                for f_n, f_v in mapping.items()
-                if isinstance(f_v, cls)]
-
     @property
     def access_needs_incref(self):
         """
@@ -1145,8 +1113,7 @@ class AbstractField(AbstractNodeData):
         :param bool access_needs_incref: See AbstractNodeData's constructor.
         """
 
-        if not self.concrete:
-            raise NotImplementedError()
+        assert self.concrete, 'AbstractField itself cannot be instantiated'
 
         super(AbstractField, self).__init__(
             public=True, access_needs_incref=access_needs_incref
@@ -1242,42 +1209,6 @@ class BuiltinField(UserField):
     def __init__(self, *args, **kwargs):
         super(BuiltinField, self).__init__(*args, **kwargs)
         self.should_emit = False
-
-
-class TypeDeclaration(object):
-    """Simple holder for generated type declarations."""
-
-    def __init__(self, type, public_part, private_part):
-        """
-
-        :param ASTNodeType type: The type that this TypeDeclaration holds onto.
-        :param str public_part: The generated code for the public part of
-            the type declaration.
-        :param private_part: The generated code for the private part of the
-            type declaration.
-        """
-        self.type = type
-        self.public_part = public_part
-        self.private_part = private_part
-
-    @staticmethod
-    def render(template_name, t_env, type, **kwargs):
-        """
-        Helper to create a TypeDeclaration out of the instantiations of a
-        single template.
-
-        :param str template_name: The name of the template.
-        :param TemplateEnvironment|None t_env: The environment to use for
-            rendering.
-        :param CompiledType type: The type to render.
-        :param dict kwargs: Additional arguments to pass to the mako render
-            function.
-        """
-        return TypeDeclaration(
-            type,
-            render(template_name, t_env, private_part=False, **kwargs),
-            render(template_name, t_env, private_part=True, **kwargs)
-        )
 
 
 class BaseStructType(CompiledType):
@@ -2168,9 +2099,6 @@ class ArrayType(CompiledType):
 
     def c_type(self, c_api_settings):
         return CAPIType(c_api_settings, self.api_name)
-
-    def is_collection(self):
-        return True
 
     def index_type(self):
         """
