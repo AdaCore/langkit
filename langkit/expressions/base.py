@@ -2675,7 +2675,7 @@ class PropertyDef(AbstractNodeData):
             'specify its return type explicitly.'.format(self.qualname)
         )
 
-        # If we don't have an expression, this have to be an abstract/external
+        # If we don't have an expression, this has to be an abstract/external
         # property. In this case, try to get the type from the base property.
         if self.expr is None:
             assert self.abstract or self.external
