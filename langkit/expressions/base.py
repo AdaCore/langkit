@@ -3554,39 +3554,6 @@ class NullCheckExpr(ResolvedExpression):
         return '<NullCheckExpr>'
 
 
-def is_simple_expr(expr):
-    """
-    Helper method to check that the expression is a simple expression,
-    that can be evaluated outside of a property context.
-
-    :param AbstractExpression expr: The expression to check.
-    :rtype: bool
-    """
-    from langkit.expressions.structs import FieldAccess
-
-    # Only accept FieldAccess. If the designated field is actually a property,
-    # only allow argument-less ones.
-    return expr is Self or (
-        isinstance(expr, FieldAccess)
-        and expr.receiver is Self and not expr.arguments
-    )
-
-
-def check_simple_expr(expr):
-    """
-    Helper method to check that the expression is a simple expression,
-    that can be evaluated outside of a property context, and to raise an
-    AssertionError otherwise.
-
-    :param AbstractExpression expr: The expression to check.
-    """
-    assert is_simple_expr(expr), (
-        "Only simple expressions consisting of a reference to"
-        " Self, or a Field/Property access on Self, are allowed in"
-        " the expressions in a lexical environment specification"
-    )
-
-
 class Arithmetic(AbstractExpression):
     """
     Arithmetic abstract expression. Used for emission of simple operator
