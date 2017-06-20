@@ -36,16 +36,12 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
     :param bool recursive: Whether lookup must be performed recursively on
         parent environments.
     """
+    check_source_language(
+        isinstance(symbol_expr, (AbstractExpression, basestring)),
+        'Invalid key argument for Env.get: {}'.format(repr(symbol_expr))
+    )
 
-    current_prop = PropertyDef.get()
-    if current_prop:
-        current_prop.set_uses_entity_info()
-
-    if not isinstance(symbol_expr, (AbstractExpression, basestring)):
-        check_source_language(
-            False,
-            'Invalid key argument for Env.get: {}'.format(repr(symbol_expr))
-        )
+    PropertyDef.get().set_uses_entity_info()
 
     sym_expr = construct(symbol_expr)
     if sym_expr.type == token_type:
