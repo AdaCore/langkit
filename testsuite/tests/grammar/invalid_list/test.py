@@ -17,7 +17,7 @@ def create_nodes():
     global FooNode, ListNode, Num
 
     class FooNode(ASTNode):
-        pass
+        _generic_list_type = 'FooList'
 
     class ListNode(FooNode):
         items = Field()
