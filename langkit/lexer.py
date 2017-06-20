@@ -45,11 +45,11 @@ class Pattern(Matcher):
 
     def max_match_length(self):
         for c in self.pattern:
-            if re.escape(c) != c and c not in ('.', '\''):
-                raise ValueError(
-                    'Cannot compute the maximum number of characters this'
-                    ' pattern will accept: {}'.format(repr(self.pattern))
-                )
+            check_source_language(
+                re.escape(c) == c or c in ('.', '\''),
+                'Cannot compute the maximum number of characters this pattern'
+                ' will accept: {}'.format(repr(self.pattern))
+            )
         return len(self.pattern)
 
     def render(self):
