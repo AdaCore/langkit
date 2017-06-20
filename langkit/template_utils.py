@@ -18,9 +18,6 @@ class Renderer(object):
     def update(self, env):
         return Renderer(self.env, **env)
 
-    def extend(self, **kwargs):
-        return Renderer(self.env, **kwargs)
-
     def render(self, template_name, env=None, **kwargs):
         env = dict(env or {})
         env.update(kwargs)
@@ -29,11 +26,11 @@ class Renderer(object):
     def _render(self, template_name):
         try:
             return mako_template(template_name).render(**self.env)
-        except DiagnosticError:
+        except DiagnosticError:  # no-code-coverage
             # In the case of DiagnosticErrors, we don't want to show the
             # traceback.
             raise
-        except Exception:
+        except Exception:  # no-code-coverage
             sys.stderr.write('Mako exception:\n{}\n'.format(
                 mako.exceptions.text_error_template().render())
             )
