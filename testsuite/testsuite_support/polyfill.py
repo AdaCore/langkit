@@ -311,6 +311,7 @@ class BaseTestsuite(object):
         if self.args.temp_dir:
             self.args.disable_cleanup = True
 
+        # Create the directory to hold temporaries
         if self.args.temp_dir:
             self.working_dir = os.path.abspath(self.args.temp_dir)
             if not os.path.exists(self.working_dir):
@@ -319,9 +320,16 @@ class BaseTestsuite(object):
             self.working_dir = tempfile.mkdtemp(prefix='polyfill-')
         self.global_env['working_dir'] = self.working_dir
 
+        # Create the directory to hold the testsuite report
+        output_dir = os.path.abspath('out')
+        self.global_env['output_dir'] = output_dir
+        if os.path.exists(output_dir):
+            shutil.rmtree(output_dir)
+        os.mkdir(output_dir)
+
         self.global_env['options'] = self.args
         self.report_writer = ReportWriter(
-            self.working_dir, self.colors, self.args.show_error_output,
+            output_dir, self.colors, self.args.show_error_output,
             self.args.pretty_out
         )
 
