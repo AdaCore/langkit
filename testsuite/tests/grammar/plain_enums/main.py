@@ -7,6 +7,6 @@ import libfoolang
 
 
 ctx = libfoolang.AnalysisContext()
-u = ctx.get_from_buffer('foo.txt', 'example+ null')
+u = ctx.get_from_buffer('foo.txt', 'example example+ null example')
 u.root.dump()
 print('main.py: Done.')

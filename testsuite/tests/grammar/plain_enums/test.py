@@ -21,12 +21,23 @@ class FooNode(ASTNode):
     pass
 
 
-class MyEnum(EnumType):
+class MyEnum1(EnumType):
+    alternatives = ['e_example', 'e_null']
+
+
+class MyEnum2(EnumType):
+    """
+    Documented enum.
+
+    This enumeration type is documented, and thus tests documentation
+    generation for it.
+    """
     alternatives = ['e_example', 'e_null']
 
 
 class EnumNode(FooNode):
-    my_enum = Field(type=MyEnum)
+    enum_1 = Field(type=MyEnum1)
+    enum_2 = Field(type=MyEnum2)
     has_plus = Field(type=BoolType)
 
 
@@ -37,8 +48,9 @@ class Nodes(FooNode):
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=Nodes(List(EnumNode(
-        Or(Enum(Tok(Token.Example), MyEnum('e_example')),
-           Enum(Tok(Token.Null), MyEnum('e_null'))),
+        Or(Enum(Tok(Token.Example), MyEnum1('e_example')),
+           Enum(Tok(Token.Null), MyEnum1('e_null'))),
+        Enum(Tok(Token.Example), MyEnum2('e_example')),
         Opt('+').as_bool()
     ))),
 )
