@@ -37,19 +37,10 @@ class PythonDriver(BaseDriver):
             # Consider all Langkit Python source files, except modules which
             # are currently not tested at all.
             source = os.path.join(self.langkit_root_dir, 'langkit')
-            omit = [
-                os.path.join('langkit', 'fix_annotate_fields_types.py'),
-                os.path.join('langkit', 'gdb', '*'),
-                os.path.join('langkit', 'setup.py'),
-                os.path.join('langkit', 'stylechecks', '*'),
-            ]
-
             argv = [
-                'coverage', 'run', '--branch', '--source={}'.format(source),
-                '--omit={}'.format(','.join(
-                    os.path.join(self.langkit_root_dir, pattern)
-                    for pattern in omit
-                ))
+                'coverage', 'run', '--source={}'.format(source),
+                '--rcfile={}'.format(os.path.join(self.testsuite_dir,
+                                                  'coverage.ini'))
             ]
             derived_env['COVERAGE_FILE'] = os.path.join(
                 self.global_env['coverage_dir'],

@@ -102,13 +102,17 @@ class Testsuite(BaseTestsuite):
             # report.
             cov_files = glob.glob(os.path.join(self.coverage_dir,
                                                '*.coverage'))
+            rcfile = os.path.join(self.root_dir, 'coverage.ini')
 
             for argv in (
-                ['coverage', 'combine'] + cov_files,
-                ['coverage', 'report'],
-                ['coverage', 'html', '-d.', '--title=Langkit coverage report'],
+                ['combine'] + cov_files,
+                ['report'],
+                ['html', '-d.', '--title=Langkit coverage report'],
             ):
-                subprocess.check_call(argv, cwd=self.coverage_dir)
+                if argv[0] != 'combine':
+                    argv.append('--rcfile=' + rcfile)
+                subprocess.check_call(['coverage'] + argv,
+                                      cwd=self.coverage_dir)
 
             html_index = os.path.join(self.coverage_dir, 'index.html')
             assert os.path.exists(html_index)
