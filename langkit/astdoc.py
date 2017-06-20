@@ -6,7 +6,7 @@ from langkit.utils import dispatch_on_type
 
 try:
     from docutils.core import publish_parts
-except ImportError:
+except ImportError:  # no-code-coverage
     check_source_language(
         False,
         "Missing docutils to properly render sphinx doc. Install the "
@@ -17,14 +17,6 @@ except ImportError:
     # Provide a stub implementation for publish_parts
     def publish_parts(x, *args, **kwargs):
         return {'html_body': x}
-
-
-def escape(text):
-    for char, entity in (
-        ('<', '&lt;'), ('>', '&gt;'), ('&', '&amp;')
-    ):
-        text = text.replace(char, entity)
-    return text
 
 
 def trim_docstring_lines(docstring):
@@ -277,13 +269,12 @@ def write_astdoc(context, file):
                   file=file)
             print('', file=file)
 
-    if context.struct_types:
-        print('<h2>Structure types</h2>', file=file)
+    print('<h2>Structure types</h2>', file=file)
 
-        print('<dl>', file=file)
-        for struct_type in context.struct_types:
-            print_struct(context, file, struct_type)
-        print('</dl>', file=file)
+    print('<dl>', file=file)
+    for struct_type in context.struct_types:
+        print_struct(context, file, struct_type)
+    print('</dl>', file=file)
 
     print('<h2>AST node types</h2>', file=file)
 
