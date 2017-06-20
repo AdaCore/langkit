@@ -31,7 +31,34 @@ class PythonDriver(BaseDriver):
         derived_env = dict(os.environ)
         derived_env[b'PYTHON_INTERPRETER'] = self.python_interpreter
 
-        self.run_and_check([sys.executable, 'test.py'], derived_env)
+        # If code coverage is requested, run the test script under the
+        # "coverage" program.
+        if self.global_env['options'].coverage:
+            # Consider all Langkit Python source files, except modules which
+            # are currently not tested at all.
+            source = os.path.join(self.langkit_root_dir, 'langkit')
+            omit = [
+                os.path.join('langkit', 'fix_annotate_fields_types.py'),
+                os.path.join('langkit', 'gdb', '*'),
+                os.path.join('langkit', 'setup.py'),
+                os.path.join('langkit', 'stylechecks', '*'),
+            ]
+
+            argv = [
+                'coverage', 'run', '--branch', '--source={}'.format(source),
+                '--omit={}'.format(','.join(
+                    os.path.join(self.langkit_root_dir, pattern)
+                    for pattern in omit
+                ))
+            ]
+            derived_env['COVERAGE_FILE'] = os.path.join(
+                self.global_env['coverage_dir'],
+                self.test_env['test_name'] + '.coverage'
+            )
+        else:
+            argv = [sys.executable]
+
+        self.run_and_check(argv + ['test.py'], derived_env)
 
     @property
     def support_dir(self):

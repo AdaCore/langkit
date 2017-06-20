@@ -1,6 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
+import glob
 import os
+import subprocess
 
 # pyflakes off
 with_gnatpython = False
@@ -36,6 +38,11 @@ class Testsuite(BaseTestsuite):
             '--with-python', default=None,
             help='If provided, use as the Python interpreter in testcases.')
 
+        self.main.add_option(
+            '--coverage', '-C', action='store_true',
+            help='Enable computation of code coverage for Langkit'
+        )
+
         #
         # Convenience options for developpers
         #
@@ -53,7 +60,24 @@ class Testsuite(BaseTestsuite):
             help='Rewrite test baselines according to current output.'
         )
 
+    @property
+    def coverage_enabled(self):
+        return self.global_env['options'].coverage
+
+    @property
+    def coverage_dir(self):
+        return os.path.join(self.global_env['output_dir'], 'coverage')
+
     def tear_up(self):
+        super(Testsuite, self).tear_up()
+
+        if self.coverage_enabled:
+            # Create a directory that we'll use to:
+            #
+            #   1) collect coverage data for each testcase;
+            #   2) generate the HTML report.
+            os.mkdir(self.coverage_dir)
+            self.global_env['coverage_dir'] = self.coverage_dir
 
         def report(p, pname):
             if p.status != 0:
@@ -70,3 +94,25 @@ class Testsuite(BaseTestsuite):
                      os.path.join(self.root_dir, '..', 'langkit', 'support',
                                   'langkit_support.gpr')], output=PIPE)
             report(p, "Langkit support")
+
+    def tear_down(self):
+        if self.coverage_enabled:
+            # Consolidate coverage data for each testcase and generate both a
+            # sumary textual report on the standard output and a detailed HTML
+            # report.
+            cov_files = glob.glob(os.path.join(self.coverage_dir,
+                                               '*.coverage'))
+
+            for argv in (
+                ['coverage', 'combine'] + cov_files,
+                ['coverage', 'report'],
+                ['coverage', 'html', '-d.', '--title=Langkit coverage report'],
+            ):
+                subprocess.check_call(argv, cwd=self.coverage_dir)
+
+            html_index = os.path.join(self.coverage_dir, 'index.html')
+            assert os.path.exists(html_index)
+            print('Detailed HTML coverage report available at:'
+                  ' {}'.format(html_index))
+
+        super(Testsuite, self).tear_down()
