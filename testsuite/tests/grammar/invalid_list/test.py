@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field
+from langkit.dsl import ASTNode, Field, Annotations
 from langkit.parsers import Grammar, Row, List, Tok
 
 from lexer_example import Token
@@ -17,7 +17,7 @@ def create_nodes():
     global FooNode, ListNode, Num
 
     class FooNode(ASTNode):
-        _generic_list_type = 'FooList'
+        annotations = Annotations(generic_list_type='FooList')
 
     class ListNode(FooNode):
         items = Field()

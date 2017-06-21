@@ -272,6 +272,38 @@ def env_metadata(cls):
     return cls
 
 
+class Annotations(object):
+    def __init__(self, repr_name=None, generic_list_type=None):
+        """
+        Constructor for a node's annotations.
+
+        :param str|None repr_name: The name to be used in repr for this node
+            type.
+
+        :param str|None generic_list_type: The name of the generic list type.
+        """
+        self.repr_name = repr_name
+        self.generic_list_type = generic_list_type
+
+    def process_annotations(self, is_root):
+        check_source_language(
+            self.repr_name is None or isinstance(self.repr_name, str),
+            'If provided, _repr_name must be a string (here: {})'.format(
+                self.repr_name
+            )
+        )
+
+        if self.generic_list_type is not None:
+            check_source_language(
+                is_root, 'Only the root AST node can hold the name of the'
+                ' generic list type'
+            )
+            check_source_language(
+                is_root, 'Name of the generic list type must be a string, but'
+                ' got {}'.format(repr(self.generic_list_type))
+            )
+
+
 class _ASTNodeMetaclass(type):
     """
     Internal metaclass for AST node types, used to collect all ASTNode
@@ -331,9 +363,9 @@ class _ASTNodeMetaclass(type):
                     cls._name, cls._location, cls._doc,
                     base=None if is_root else cls._base._type,
                     fields=cls._fields,
-                    repr_name=cls._repr_name,
+                    repr_name=cls._annotations.repr_name,
                     env_spec=cls._env_spec,
-                    generic_list_type_name=cls._generic_list_type_name,
+                    generic_list_type_name=cls._annotations.generic_list_type,
                 )
 
             astnode_type.dsl_decl = cls
@@ -369,26 +401,8 @@ class _ASTNodeMetaclass(type):
                 'Invalid environment specification: {}'.format(env_spec)
             )
 
-            repr_name = dct.pop('_repr_name', None)
-            check_source_language(
-                repr_name is None or isinstance(repr_name, str),
-                'If provided, _repr_name must be a string (here: {})'.format(
-                    repr_name
-                )
-            )
-
-            generic_list_type_name = dct.pop('_generic_list_type', None)
-            if generic_list_type_name is not None:
-                check_source_language(
-                    is_root,
-                    'Only the root AST node can hold the name of the generic'
-                    ' list type'
-                )
-                check_source_language(
-                    is_root,
-                    'Name of the generic list type must be a string, but got'
-                    ' {}'.format(repr(generic_list_type_name))
-                )
+            annotations = dct.pop('annotations', None) or Annotations()
+            annotations.process_annotations(is_root)
 
         # If this is a list type, determine the corresponding element type
         if is_root_list_type:
@@ -413,17 +427,14 @@ class _ASTNodeMetaclass(type):
 
         DSLType._import_base_type_info(name, location, dct)
         dct['_fields'] = fields
-        dct['_repr_name'] = repr_name
         dct['_base'] = base
         dct['_env_spec'] = env_spec
 
         # Make sure subclasses don't inherit the "list_type" cache from their
         # base classes.
         dct['_list_type'] = None
-
-        dct['_generic_list_type_name'] = generic_list_type_name
-
         dct['_element_type'] = element_type
+        dct['_annotations'] = annotations
 
 
 class ASTNode(BaseStruct):
