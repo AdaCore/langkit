@@ -1220,7 +1220,7 @@ class BaseStructType(CompiledType):
         """
         See CompiledType.__init__ for a description of arguments.
         """
-        repr_name = type_repo_name = name.camel
+        type_repo_name = name.camel
         if is_keyword(name):
             name = name + names.Name('Node')
 
@@ -1236,8 +1236,6 @@ class BaseStructType(CompiledType):
 
         :type: dict[(bool, AbstractNodeData), dict[str, AbstractField]]
         """
-
-        self._repr_name = repr_name
 
     def _init_fields(self, fields):
         """
@@ -1446,8 +1444,8 @@ class ASTNodeType(BaseStructType):
     Type for an AST node.
     """
 
-    def __init__(self, name, location, doc, base, fields, repr_name=None,
-                 env_spec=None, element_type=None, generic_list_type_name=None,
+    def __init__(self, name, location, doc, base, fields,
+                 env_spec=None, element_type=None, annotations=None,
                  is_generic_list_type=False, is_abstract=False,
                  is_synthetic=False, has_abstract_list=False,
                  is_enum_node=False, is_bool_node=False):
@@ -1465,19 +1463,12 @@ class ASTNodeType(BaseStructType):
         :param list[(str, AbstractNodeData)] fields: List of (name, field) for
             this node's fields. Inherited fields must not appear in this list.
 
-        :param str|None repr_name: Camel-case name to use to represent this
-            node in textual dumps.
-
         :param langkit.envs.EnvSpec|None env_spec: Environment specification
             for this node, if any.
 
         :param ASTNodeType|None element_type: For root list types, this must be
             the ASTNodeType subclass that this list contains. Must be left to
             None in all other cases.
-
-        :param str|None generic_list_type_name: For the root node, if not None,
-            overrides the name of the generic list type. Must be None for all
-            other nodes.
 
         :param bool is_generic_list_type: Whether this subclass will
             materialize the generic list type.
@@ -1516,8 +1507,6 @@ class ASTNodeType(BaseStructType):
             if is_list:
                 element_type = base._element_type
 
-        assert generic_list_type_name is None or is_root
-
         super(ASTNodeType, self).__init__(
             name, location, doc,
             is_ptr=True, null_allowed=True, is_ada_record=False,
@@ -1542,7 +1531,8 @@ class ASTNodeType(BaseStructType):
         self.is_generic_list_type = is_generic_list_type
         self.is_root_list_type = is_root_list
 
-        self._repr_name = repr_name or self._repr_name
+        from langkit.dsl import Annotations
+        self.annotations = annotations or Annotations()
 
         if env_spec:
             env_spec.ast_node = self
@@ -1595,8 +1585,8 @@ class ASTNodeType(BaseStructType):
 
         if base is None:
             generic_list_type_name = (
-                names.Name.from_camel(generic_list_type_name)
-                if generic_list_type_name else
+                names.Name.from_camel(annotations.generic_list_type)
+                if annotations.generic_list_type else
                 (self.name + names.Name('Base_List'))
             )
 
@@ -1623,7 +1613,7 @@ class ASTNodeType(BaseStructType):
         """
         # This name is used by pretty printers-like code: we need the
         # "original" node name here, not keyword-escaped ones.
-        result = self._repr_name or self.name.camel
+        result = self.annotations.repr_name or self.name.camel
         return result
 
     def is_builtin(self):
