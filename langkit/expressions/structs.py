@@ -357,6 +357,8 @@ class FieldAccess(AbstractExpression):
 
             :param bool implicit_deref: Whether the receiver is an entity,
                 and we want to access a field or property of the stored node.
+                In the case of an entity prefix for an AST node field, return
+                an entity with the same entity info.
 
             :param AbstractExpression|None abstract_expr: See
                 ResolvedExpression's constructor.
@@ -367,6 +369,7 @@ class FieldAccess(AbstractExpression):
             # step.
             p = PropertyDef.get()
             self.simple_field_access = not p
+            assert not self.simple_field_access or not implicit_deref
 
             if not self.simple_field_access:
                 self.receiver_expr = NullCheckExpr(receiver_expr,
@@ -375,13 +378,22 @@ class FieldAccess(AbstractExpression):
                 self.receiver_expr = receiver_expr
 
             self.node_data = node_data
-            self.static_type = self.node_data.type
             self.arguments = arguments
             self.implicit_deref = implicit_deref
 
             if isinstance(self.node_data, PropertyDef):
                 self.dynamic_vars = [construct(dynvar)
                                      for dynvar in self.node_data.dynamic_vars]
+
+            self.wrap_result_in_entity = (
+                self.implicit_deref
+                and isinstance(self.node_data, Field)
+                and self.node_data.type.is_ast_node
+            )
+
+            self.static_type = self.node_data.type
+            if self.wrap_result_in_entity:
+                self.static_type = self.static_type.entity()
 
             # Create a variable for all field accesses in properties. This is
             # needed because the property will return an owning reference, so
@@ -496,6 +508,11 @@ class FieldAccess(AbstractExpression):
                 # struct.
                 ret = self.node_data.type.extract_from_storage_expr(
                     prefix, '{}.{}'.format(prefix, self.node_data.name)
+                )
+
+            if self.wrap_result_in_entity:
+                ret = 'Create (El => {}, Info => {})'.format(
+                    ret, self.entity_info_expr
                 )
 
             return ret
