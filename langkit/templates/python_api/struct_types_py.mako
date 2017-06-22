@@ -63,8 +63,7 @@ class _BaseEntity(_BaseStruct):
             return getattr(node, name)
 
         def bound_method(*args, **kwargs):
-            kwargs[${repr(PropertyDef.env_rebinding_name.lower)}] = \
-                self.rebindings
+            kwargs[${repr(PropertyDef.entity_info_name.lower)}] = self.info
             return unbound_private_method(node, *args, **kwargs)
 
         # If the public method is actually a property, the caller will not
