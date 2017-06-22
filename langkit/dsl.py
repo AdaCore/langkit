@@ -127,6 +127,10 @@ class BaseStruct(DSLType):
                     not f_n.startswith('_'),
                     'Underscore-prefixed field names are not allowed'
                 )
+                check_source_language(
+                    f_n.lower() == f_n,
+                    'Field names must be lower-case'
+                )
 
             f_v.name = names.Name.from_lower(f_n)
             result.append((f_n, f_v))
