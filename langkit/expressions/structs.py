@@ -288,11 +288,16 @@ class New(AbstractExpression):
             )))
 
         # Create a dict of field names to fields in the struct type
+
+        def is_required(f):
+            return (self.struct_type.is_struct_type
+                    if isinstance(f, BuiltinField) else
+                    isinstance(f, (Field, UserField)))
+
         required_fields = {
             f._name.lower: f
             for f in self.struct_type.get_abstract_fields()
-            if isinstance(f, (Field, UserField))
-            and not isinstance(f, BuiltinField)
+            if is_required(f)
         }
 
         error_if_not_empty(
