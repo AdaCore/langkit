@@ -117,7 +117,7 @@ class CollectionExpression(AbstractExpression):
         """
         collection_expr = construct(
             self.collection, lambda t: t.is_collection,
-            'Map cannot iterate on {expr_type}, which is not a collection'
+            'Cannot iterate on {expr_type}, which is not a collection'
         )
         self.element_var.set_type(collection_expr.type.element_type)
 
