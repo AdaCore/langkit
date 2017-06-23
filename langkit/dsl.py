@@ -272,6 +272,21 @@ def env_metadata(cls):
     return cls
 
 
+def inherited_annotation(fn):
+    """
+    Decorate a method on Annotations, so that if the returned value is None, it
+    will query it on the base node's annotation.
+    """
+    def internal(self, *args, **kwargs):
+        val = fn(self, *args, **kwargs)
+        if val is not None:
+            return val
+        else:
+            return internal(self.get_parent_annotations(), *args, **kwargs)
+
+    return property(internal)
+
+
 class Annotations(object):
     def __init__(self, repr_name=None, generic_list_type=None):
         """
