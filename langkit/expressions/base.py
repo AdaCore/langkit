@@ -19,7 +19,9 @@ from langkit.diagnostics import (
     check_source_language, check_type, extract_library_location
 )
 from langkit.expressions.utils import assign_var
-from langkit.utils import TypeSet, assert_type, dispatch_on_type, memoized
+from langkit.utils import (
+    TypeSet, assert_type, dispatch_on_type, memoized, inherited_property
+)
 
 
 def unsugar(expr, ignore_errors=False):
@@ -1996,6 +1998,9 @@ def render(*args, **kwargs):
     return ct_render(*args, property=PropertyDef.get(), Self=Self, **kwargs)
 
 
+inherited_information = inherited_property(lambda s: s.base_property)
+
+
 class PropertyDef(AbstractNodeData):
     """
     This is the underlying class that is used to represent properties in the
@@ -2175,7 +2180,7 @@ class PropertyDef(AbstractNodeData):
         self._requires_untyped_wrapper = False
         self.force_dispatching = force_dispatching
         self.warn_on_unused = warn_on_unused
-        self.ignore_warn_on_node = ignore_warn_on_node
+        self._ignore_warn_on_node = ignore_warn_on_node
 
         self.dynvar_binding_stack = []
         """
@@ -2185,6 +2190,10 @@ class PropertyDef(AbstractNodeData):
 
         :type: list[DynamicVariable]
         """
+
+    @inherited_information
+    def ignore_warn_on_node(self):
+        return self._ignore_warn_on_node
 
     def property_set(self):
         """
