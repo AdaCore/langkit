@@ -1229,6 +1229,36 @@ class LiteralExpr(ResolvedExpression):
         )
 
 
+class UncheckedCastExpr(ResolvedExpression):
+    """
+    Resolved expression for unchecked casts.
+
+    These casts will not raise a Property_Error if they fail. We must use them
+    in code generation only when we know they cannot fail.
+    """
+
+    def __init__(self, expr, dest_type):
+        self.expr = expr
+        self.dest_type = dest_type
+        self.static_type = dest_type
+        super(UncheckedCastExpr, self).__init__()
+
+    def _render_pre(self):
+        return self.expr.render_pre()
+
+    def _render_expr(self):
+        return '{} ({})'.format(self.dest_type.name, self.expr.render_expr())
+
+    @property
+    def subexprs(self):
+        return {'0-type': self.dest_type, '1-expr': self.expr}
+
+    def __repr__(self):
+        return '<UncheckedCastExpr {}>'.format(
+            self.dest_type.name.camel_with_underscores
+        )
+
+
 class ComputingExpr(ResolvedExpression):
     """
     Base class for resolved expressions that do computations.
