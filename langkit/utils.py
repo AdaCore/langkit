@@ -459,7 +459,7 @@ class classproperty(property):
         return classmethod(self.fget).__get__(None, owner)()
 
 
-def inherited_property(parent_getter):
+def inherited_property(parent_getter, default_val=False):
     """
     Decorate a method, from an object with a parent, so that if the returned
     value is None, it will query it on the parent.
@@ -470,7 +470,9 @@ def inherited_property(parent_getter):
             if val is not None:
                 return val
             else:
-                return internal(parent_getter(self), *args, **kwargs)
+                parent = parent_getter(self)
+                return (internal(parent, *args, **kwargs)
+                        if parent else default_val)
 
         return property(internal)
 
