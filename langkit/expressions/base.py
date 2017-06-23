@@ -2739,10 +2739,11 @@ class PropertyDef(AbstractNodeData):
             )
 
     def check_return_types(self, context):
-        WarningSet.prop_only_entities.warn_if(
-            self.type.matches(T.root_node),
-            '{} returns a node type'.format(self.qualname),
-        )
+        if self.struct.annotations.warn_on_node:
+            WarningSet.prop_only_entities.warn_if(
+                self.type.matches(T.root_node),
+                '{} returns a node type'.format(self.qualname),
+            )
 
     def render_property(self, context):
         """

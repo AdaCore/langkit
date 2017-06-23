@@ -339,7 +339,7 @@ class WarningSet(object):
     """
 
     prop_only_entities = WarningDescriptor(
-        'prop-only-entities', False,
+        'prop-only-entities', True,
         'Warn about properties that return AST nodes.'
     )
     unused_bindings = WarningDescriptor(

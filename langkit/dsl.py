@@ -288,7 +288,8 @@ def inherited_annotation(fn):
 
 
 class Annotations(object):
-    def __init__(self, repr_name=None, generic_list_type=None):
+    def __init__(self, repr_name=None, generic_list_type=None,
+                 warn_on_node=None):
         """
         Constructor for a node's annotations.
 
@@ -299,6 +300,11 @@ class Annotations(object):
         """
         self.repr_name = repr_name
         self.generic_list_type = generic_list_type
+        self._warn_on_node = warn_on_node
+
+    @inherited_annotation
+    def warn_on_node(self):
+        return self._warn_on_node
 
     def process_annotations(self, node, is_root):
         self.node = node
@@ -318,6 +324,9 @@ class Annotations(object):
                 is_root, 'Name of the generic list type must be a string, but'
                 ' got {}'.format(repr(self.generic_list_type))
             )
+
+        if is_root and self._warn_on_node is None:
+            self._warn_on_node = False
 
     def get_parent_annotations(self):
         """
