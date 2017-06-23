@@ -57,11 +57,11 @@ def run(name, eq_prop):
             return other.el == dyn_node
 
         @langkit_property(warn_on_unused=False)
-        def propA(other=T.BazNode.entity()):
+        def prop_a(other=T.BazNode.entity()):
             return Self.as_entity == other
 
         @langkit_property(warn_on_unused=False, dynamic_vars=[env])
-        def propB(other=T.BazNode.entity()):
+        def prop_b(other=T.BazNode.entity()):
             return other.node_env == env
 
     def lang_def():
@@ -82,6 +82,6 @@ run('Incorrect bind eq_prop 1', 'T.BazNode.prop')
 run('Incorrect bind eq_prop 2', 'T.BazNode.prop2')
 run('Incorrect bind eq_prop 3', 'T.BazNode.prop3')
 run('Incorrect bind eq_prop 4', 'T.BazNode.prop4')
-run('Correct bind eq_prop A', 'T.BazNode.propA')
-run('Correct bind eq_prop B', 'T.BazNode.propB')
+run('Correct bind eq_prop A', 'T.BazNode.prop_a')
+run('Correct bind eq_prop B', 'T.BazNode.prop_b')
 print('Done')
