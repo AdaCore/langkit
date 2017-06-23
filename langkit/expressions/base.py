@@ -2030,7 +2030,7 @@ class PropertyDef(AbstractNodeData):
                  abstract=False, type=None, abstract_runtime_check=False,
                  dynamic_vars=None, memoized=False, external=False,
                  uses_entity_info=None, force_dispatching=False,
-                 warn_on_unused=True):
+                 warn_on_unused=True, ignore_warn_on_node=False):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -2099,6 +2099,9 @@ class PropertyDef(AbstractNodeData):
 
         :param bool warn_on_unused: Wether to warn on unused or not. Defaults
             to True.
+
+        :param bool ignore_warn_on_node: Wether to ignore warn_on_node warnings
+            for this property. Defaults to False.
         """
 
         super(PropertyDef, self).__init__(name=name, public=public)
@@ -2172,6 +2175,7 @@ class PropertyDef(AbstractNodeData):
         self._requires_untyped_wrapper = False
         self.force_dispatching = force_dispatching
         self.warn_on_unused = warn_on_unused
+        self.ignore_warn_on_node = ignore_warn_on_node
 
         self.dynvar_binding_stack = []
         """
@@ -2939,7 +2943,7 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 
 # noinspection PyPep8Naming
 def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
-             memoized=False, warn_on_unused=True):
+             memoized=False, warn_on_unused=True, ignore_warn_on_node=False):
     """
     Public constructor for concrete properties. You can declare your properties
     on your AST node subclasses directly, like this::
@@ -2958,7 +2962,8 @@ def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
     """
     return PropertyDef(expr, AbstractNodeData.PREFIX_PROPERTY, doc=doc,
                        public=public, type=type, dynamic_vars=dynamic_vars,
-                       memoized=memoized, warn_on_unused=warn_on_unused)
+                       memoized=memoized, warn_on_unused=warn_on_unused,
+                       ignore_warn_on_node=ignore_warn_on_node)
 
 
 class AbstractKind(Enum):
@@ -2969,7 +2974,8 @@ class AbstractKind(Enum):
 
 def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
                      dynamic_vars=None, memoized=False, external=False,
-                     uses_entity_info=None, warn_on_unused=True):
+                     uses_entity_info=None, warn_on_unused=True,
+                     ignore_warn_on_node=False):
     """
     Decorator to create properties from real Python methods. See Property for
     more details.
@@ -2992,6 +2998,7 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
             external=external,
             uses_entity_info=uses_entity_info,
             warn_on_unused=warn_on_unused,
+            ignore_warn_on_node=ignore_warn_on_node
         )
     return decorator
 
