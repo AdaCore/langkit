@@ -1423,15 +1423,12 @@ class AbstractVariable(AbstractExpression):
             i = next(self.unused_count)
             name = names.Name('Unused_{}'.format(i))
 
-        self.local_var = None
-        if create_local:
-            self.local_var = PropertyDef.get().vars.create_scopeless(name,
-                                                                     type)
-            self._name = self.local_var.name
-        else:
-            self._name = name
-
         self._type = type
+        self.local_var = None
+        self._name = name
+        if create_local:
+            self.create_local_variable()
+
         self.source_name = source_name
 
         self.construct_cache = {}
@@ -1446,21 +1443,32 @@ class AbstractVariable(AbstractExpression):
         Whether this variable was explicitely ignored
         """
 
-    def add_to_scope(self, scope):
+    def create_local_variable(self, scope=None):
         """
-        Add this already existing variable to "scope".
+        Create a local variable to correspond to this variable reference.
+        Update its name, if needed. This must not be called if a local variable
+        was already created for `self`.
 
-        This is allowed iff this variable is not registered as a local variable
-        yet and it must already be typed.
+        :param LocalVars.Scope|None scope: If left to None, the variable is
+            created scope-less. Otherwise, it is added to `scope`.
         """
         assert self.local_var is None
-        assert self._type is not None
-        self.local_var = PropertyDef.get().vars.create_scopeless(
-            self._name,
-            self._type
-        )
-        scope.add(self.local_var)
+
+        self.local_var = PropertyDef.get().vars.create_scopeless(self._name,
+                                                                 self._type)
         self._name = self.local_var.name
+        if scope:
+            scope.add(self.local_var)
+
+    def add_to_scope(self, scope):
+        """
+        Add this already existing variable to `scope`.
+
+        This is allowed iff this variable is not registered as a local variable
+        yet. `type` must be None iff this variable is already typed.
+        """
+        self.create_local_variable()
+        scope.add(self.local_var)
 
     def construct(self):
         typ = self.type
@@ -1477,8 +1485,7 @@ class AbstractVariable(AbstractExpression):
         return resolve_type(self._type)
 
     def set_type(self, type):
-        assert self._type is None, ("You cannot change the type of a "
-                                    "variable that already has one")
+        assert self._type is None, 'Variable type cannot be set twice'
         self._type = type
         if self.local_var:
             self.local_var.type = type
