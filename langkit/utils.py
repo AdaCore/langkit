@@ -444,3 +444,16 @@ def topological_sort(items):
                 remaining_items.append((item, dependencies))
         assert(emitted)
         items = remaining_items
+
+
+class classproperty(property):
+    """
+    Decorator to have a class property, equivalent to::
+
+        @classmethod
+        @property
+
+    If the above was valid.
+    """
+    def __get__(self, cls, owner):
+        return classmethod(self.fget).__get__(None, owner)()
