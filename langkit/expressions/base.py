@@ -2743,7 +2743,8 @@ class PropertyDef(AbstractNodeData):
             )
 
     def check_return_types(self, context):
-        if self.struct.annotations.warn_on_node:
+        if (self.struct.annotations.warn_on_node
+                and not self.ignore_warn_on_node):
             WarningSet.prop_only_entities.warn_if(
                 self.type.matches(T.root_node),
                 '{} returns a node type'.format(self.qualname),
