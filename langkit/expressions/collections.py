@@ -85,7 +85,7 @@ class CollectionExpression(AbstractExpression):
         )
         if self.requires_index:
             self.index_var = AbstractVariable(
-                names.Name('I'), type=long_type, create_local=True,
+                names.Name('I'), type=long_type,
                 source_name=names.Name.from_lower(argspec.args[1])
             )
             expr = self.expr_fn(self.index_var, self.element_var)
@@ -115,13 +115,22 @@ class CollectionExpression(AbstractExpression):
                  ResolvedExpression,
                  langkit.expressions.base.LocalVars.Scope)
         """
+        current_scope = PropertyDef.get_scope()
+
+        # First, build the collection expression. From the result, we can
+        # deduce the type of the element variable.
         collection_expr = construct(
             self.collection, lambda t: t.is_collection,
             'Cannot iterate on {expr_type}, which is not a collection'
         )
         self.element_var.set_type(collection_expr.type.element_type)
 
-        current_scope = PropertyDef.get_scope()
+        # Then we can build the inner expression
+        with current_scope.new_child() as inner_scope:
+            inner_expr = construct(self.expr)
+
+        if self.index_var:
+            self.index_var.add_to_scope(inner_scope)
 
         # If we are iterating over an AST list, then we get root grammar typed
         # values. We need to convert them to the more specific type to get the
@@ -136,18 +145,14 @@ class CollectionExpression(AbstractExpression):
             )
             self.element_var.add_to_scope(current_scope)
 
-        with current_scope.new_child() as iter_scope:
-            if self.index_var:
-                PropertyDef.get_scope().add(self.index_var.local_var)
-
-            return (collection_expr,
-                    construct(self.expr),
-                    (construct(self.list_element_var)
-                     if self.list_element_var else
-                     None),
-                    construct(self.element_var),
-                    construct(self.index_var) if self.index_var else None,
-                    iter_scope)
+        return (collection_expr,
+                inner_expr,
+                (construct(self.list_element_var)
+                 if self.list_element_var else
+                 None),
+                construct(self.element_var),
+                construct(self.index_var) if self.index_var else None,
+                inner_scope)
 
 
 @attr_expr("contains")
