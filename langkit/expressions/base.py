@@ -1441,7 +1441,10 @@ class AbstractVariable(AbstractExpression):
         Cache used to memoize the "construct" method.
         """
 
-        self.ignored = source_name == names.Name.from_lower('_')
+        self._ignored = False
+        """
+        Whether this variable was explicitely ignored
+        """
 
     def add_to_scope(self, scope):
         """
@@ -1479,6 +1482,13 @@ class AbstractVariable(AbstractExpression):
         self._type = type
         if self.local_var:
             self.local_var.type = type
+
+    @property
+    def ignored(self):
+        return self._ignored or self.source_name == names.Name.from_lower('_')
+
+    def tag_ignored(self):
+        self._ignored = True
 
     def __repr__(self):
         return "<Var {}>".format(self.source_name.lower
@@ -3698,4 +3708,4 @@ def ignore(*vars):
     :type vars: list[AbstractVariable]
     """
     for var in vars:
-        var.ignored = True
+        var.tag_ignored()
