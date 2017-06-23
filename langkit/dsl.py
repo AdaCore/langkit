@@ -300,7 +300,8 @@ class Annotations(object):
         self.repr_name = repr_name
         self.generic_list_type = generic_list_type
 
-    def process_annotations(self, is_root):
+    def process_annotations(self, node, is_root):
+        self.node = node
         check_source_language(
             self.repr_name is None or isinstance(self.repr_name, str),
             'If provided, _repr_name must be a string (here: {})'.format(
@@ -424,8 +425,7 @@ class _ASTNodeMetaclass(type):
                 'Invalid environment specification: {}'.format(env_spec)
             )
 
-            annotations = dct.pop('annotations', None) or Annotations()
-            annotations.process_annotations(is_root)
+            annotations = dct.pop('annotations', None)
 
         # If this is a list type, determine the corresponding element type
         if is_root_list_type:

@@ -1532,7 +1532,9 @@ class ASTNodeType(BaseStructType):
         self.is_root_list_type = is_root_list
 
         from langkit.dsl import Annotations
-        self.annotations = annotations or Annotations()
+        annotations = annotations or Annotations()
+        self.annotations = annotations
+        self.annotations.process_annotations(self, is_root)
 
         if env_spec:
             env_spec.ast_node = self
