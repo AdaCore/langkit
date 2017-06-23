@@ -303,6 +303,15 @@ class Annotations(object):
                 ' got {}'.format(repr(self.generic_list_type))
             )
 
+    def get_parent_annotations(self):
+        """
+        Get annotations for the base node.
+
+        :rtype: Annotations
+        """
+        bn = self.node.base()
+        return bn.annotations if bn else None
+
 
 class _ASTNodeMetaclass(type):
     """
