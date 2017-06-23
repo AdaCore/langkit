@@ -2035,7 +2035,7 @@ class PropertyDef(AbstractNodeData):
                  abstract=False, type=None, abstract_runtime_check=False,
                  dynamic_vars=None, memoized=False, external=False,
                  uses_entity_info=None, force_dispatching=False,
-                 warn_on_unused=True, ignore_warn_on_node=False):
+                 warn_on_unused=True, ignore_warn_on_node=None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -2105,8 +2105,8 @@ class PropertyDef(AbstractNodeData):
         :param bool warn_on_unused: Wether to warn on unused or not. Defaults
             to True.
 
-        :param bool ignore_warn_on_node: Wether to ignore warn_on_node warnings
-            for this property. Defaults to False.
+        :param bool|None ignore_warn_on_node: Wether to ignore warn_on_node
+            warnings for this property. Defaults to None, which means inherit.
         """
 
         super(PropertyDef, self).__init__(name=name, public=public)
@@ -2953,7 +2953,7 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 
 # noinspection PyPep8Naming
 def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
-             memoized=False, warn_on_unused=True, ignore_warn_on_node=False):
+             memoized=False, warn_on_unused=True, ignore_warn_on_node=None):
     """
     Public constructor for concrete properties. You can declare your properties
     on your AST node subclasses directly, like this::
@@ -2985,7 +2985,7 @@ class AbstractKind(Enum):
 def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
                      dynamic_vars=None, memoized=False, external=False,
                      uses_entity_info=None, warn_on_unused=True,
-                     ignore_warn_on_node=False):
+                     ignore_warn_on_node=None):
     """
     Decorator to create properties from real Python methods. See Property for
     more details.
