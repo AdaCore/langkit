@@ -20,7 +20,7 @@ from langkit.diagnostics import (
 )
 from langkit.expressions.utils import assign_var
 from langkit.utils import (
-    TypeSet, assert_type, dispatch_on_type, memoized, inherited_property
+    TypeSet, assert_type, dispatch_on_type, inherited_property, memoized
 )
 
 

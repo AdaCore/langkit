@@ -9,7 +9,7 @@ from langkit.diagnostics import (
 )
 from langkit.expressions import PropertyDef
 import langkit.names as names
-from langkit.utils import issubtype, inherited_property, classproperty
+from langkit.utils import classproperty, inherited_property, issubtype
 
 
 class DSLType(object):
