@@ -72,10 +72,10 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
 
     if resolve_unique:
         return make_expr("Get ({}, 0)".format(array_expr),
-                         T.root_node.entity())
+                         T.root_node.entity)
     else:
         return make_expr("Create ({})".format(array_expr),
-                         T.root_node.entity().array_type())
+                         T.root_node.entity.array_type())
 
 
 @auto_attr
@@ -217,9 +217,9 @@ def make_as_entity(node_expr, abstract_expr=None):
 
     return If.Expr(
         IsNull.construct_static(node_expr),
-        NullExpr(node_expr.type.entity()),
+        NullExpr(node_expr.type.entity),
         New.StructExpr(
-            node_expr.type.entity(), {
+            node_expr.type.entity, {
                 names.Name('El'): node_var,
                 names.Name('Info'): construct(
                     PropertyDef.get().entity_info_arg.var
@@ -228,7 +228,7 @@ def make_as_entity(node_expr, abstract_expr=None):
             result_var_name=names.Name.from_lower("as_entity"),
             abstract_expr=abstract_expr,
         ),
-        node_expr.type.entity(),
+        node_expr.type.entity,
         abstract_expr=abstract_expr
     )
 

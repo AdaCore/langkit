@@ -9,7 +9,7 @@ from langkit.diagnostics import (
 )
 from langkit.expressions import PropertyDef
 import langkit.names as names
-from langkit.utils import issubtype, inherited_property
+from langkit.utils import issubtype, inherited_property, classproperty
 
 
 class DSLType(object):
@@ -511,9 +511,9 @@ class ASTNode(BaseStruct):
                                   {'_element_type': cls})
         return cls._list_type
 
-    @classmethod
+    @classproperty
     def entity(cls):
-        return T.Defer(lambda: cls._type.entity())
+        return T.Defer(lambda: cls._type.entity)
 
     def __new__(cls, *args):
         """

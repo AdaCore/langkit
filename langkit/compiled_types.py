@@ -521,7 +521,7 @@ class CompiledType(object):
         # just take the most recent common ancestor.
         if self.is_entity_type and other.is_entity_type:
             return ASTNodeType.common_ancestor(self.el_type,
-                                               other.el_type).entity()
+                                               other.el_type).entity
         elif self.is_ast_node and other.is_ast_node:
             return ASTNodeType.common_ancestor(self, other)
 
@@ -1417,7 +1417,7 @@ class StructType(BaseStructType):
             # se, because it is a generic instantiation from
             # Langkit_Support.Lexical_Env.
             CompiledTypeMetaclass.root_grammar_class.entity_info(),
-            CompiledTypeMetaclass.root_grammar_class.entity(),
+            CompiledTypeMetaclass.root_grammar_class.entity,
         )
 
     def c_inc_ref(self, capi):
@@ -1887,6 +1887,7 @@ class ASTNodeType(BaseStructType):
             )
         return CompiledTypeMetaclass.entity_info
 
+    @property
     @memoized
     def entity(self):
         """
@@ -2390,7 +2391,7 @@ class TypeRepo(object):
         This property returns the root type used to describe an AST node with
         semantic information attached.
         """
-        return self.root_node.entity()
+        return self.root_node.entity
 
     @property
     @memoized

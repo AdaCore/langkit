@@ -88,7 +88,7 @@ class Cast(AbstractExpression):
         expr = construct(self.expr)
         t = expr.type
 
-        dest_type = (self.dest_type.entity()
+        dest_type = (self.dest_type.entity
                      if t.is_entity_type and not self.dest_type.is_entity_type
                      else self.dest_type)
 
@@ -393,7 +393,7 @@ class FieldAccess(AbstractExpression):
 
             self.static_type = self.node_data.type
             if self.wrap_result_in_entity:
-                self.static_type = self.static_type.entity()
+                self.static_type = self.static_type.entity
 
             # Create a variable for all field accesses in properties. This is
             # needed because the property will return an owning reference, so
@@ -941,7 +941,7 @@ class Match(AbstractExpression):
         # * all matchers must target allowed types, i.e. input type subclasses;
         for typ, var, expr in self.matchers:
             if is_entity and typ and not typ.is_entity_type:
-                typ = typ.entity()
+                typ = typ.entity
                 var._type = typ
                 var.local_var.type = typ
 

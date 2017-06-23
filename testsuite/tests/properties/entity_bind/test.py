@@ -31,7 +31,7 @@ class BarNode(FooNode):
 class Literal(FooNode):
     tok = Field()
 
-    a = AbstractProperty(runtime_check=True, type=FooNode.entity())
+    a = AbstractProperty(runtime_check=True, type=FooNode.entity)
     var = UserField(LogicVarType, public=False)
 
     b = Property(Bind(Self.var, Self.a))

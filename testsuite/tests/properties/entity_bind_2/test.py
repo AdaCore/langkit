@@ -34,11 +34,11 @@ class BarNode(FooNode):
 class Literal(FooNode):
     tok = Field()
 
-    a = AbstractProperty(runtime_check=True, type=FooNode.entity())
+    a = AbstractProperty(runtime_check=True, type=FooNode.entity)
     var = UserField(LogicVarType, public=False)
 
     @langkit_property(return_type=BoolType)
-    def is_eq(other=T.Literal.entity()):
+    def is_eq(other=T.Literal.entity):
         return (Self.as_entity == other)
 
     b = Property(Bind(Self.var, Self.a, eq_prop=Self.is_eq))

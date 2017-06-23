@@ -32,17 +32,17 @@ class Literal(FooNode):
     tok = Field()
 
     a = AbstractProperty(
-        runtime_check=True, type=FooNode.entity()
+        runtime_check=True, type=FooNode.entity
     )
 
     b = Property(
-        Self.a.cast(BarNode.entity())
+        Self.a.cast(BarNode.entity)
     )
 
     c = Property(Self.b.el, public=True)
 
     d = Property(Self.a.cast(BarNode),
-                 type=BarNode.entity(),
+                 type=BarNode.entity,
                  public=True)
 
 

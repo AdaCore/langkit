@@ -654,7 +654,7 @@ class CompileCtx(object):
         self.check_env_metadata(CompiledTypeMetaclass.env_metadata)
 
         # Get the list of ASTNodeType instances from CompiledTypeMetaclass
-        entity = CompiledTypeMetaclass.root_grammar_class.entity()
+        entity = CompiledTypeMetaclass.root_grammar_class.entity
 
         self.astnode_types = list(CompiledTypeMetaclass.astnode_types)
         self.list_types.update(

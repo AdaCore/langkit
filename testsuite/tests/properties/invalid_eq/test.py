@@ -61,7 +61,7 @@ def example_expr():
 
 
 def example_entity():
-    return Env.get('foo').at(0).cast(T.Example.entity())
+    return Env.get('foo').at(0).cast(T.Example.entity)
 
 
 def lit_expr():
@@ -69,7 +69,7 @@ def lit_expr():
 
 
 def lit_entity():
-    return Env.get('foo').at(0).cast(T.Lit.entity())
+    return Env.get('foo').at(0).cast(T.Lit.entity)
 
 
 def foo_expr():

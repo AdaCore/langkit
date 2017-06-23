@@ -28,10 +28,10 @@ class FooNode(ASTNode):
 class Literal(FooNode):
     tok = Field()
 
-    a = AbstractProperty(runtime_check=True, type=FooNode.entity())
+    a = AbstractProperty(runtime_check=True, type=FooNode.entity)
     var = UserField(LogicVarType, public=False)
 
-    @langkit_property(return_type=T.Literal.entity())
+    @langkit_property(return_type=T.Literal.entity)
     def node():
         return Self.as_entity
 

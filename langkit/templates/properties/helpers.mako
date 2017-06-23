@@ -77,7 +77,7 @@
 <%def name="logic_equal(eq_prop)">
    <%
       struct = eq_prop.struct.name
-      struct_entity = eq_prop.struct.entity().name
+      struct_entity = eq_prop.struct.entity.name
       type_name = 'Equals_Data_{}'.format(eq_prop.uid)
    %>
 

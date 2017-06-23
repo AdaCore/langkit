@@ -159,9 +159,9 @@ class Bind(AbstractExpression):
         # computed before this pass.
         if self.conv_prop:
             check_multiple([
-                (self.conv_prop.type.matches(T.root_node.entity()),
+                (self.conv_prop.type.matches(T.root_node.entity),
                  'Bind property must return a subtype of {}'.format(
-                     T.root_node.entity().name.camel
+                     T.root_node.entity.name.camel
                 )),
 
                 (self.conv_prop.struct.matches(T.root_node),
@@ -229,17 +229,17 @@ class Bind(AbstractExpression):
 
             check_source_language(
                 expr.type == logic_var_type
-                or expr.type.matches(T.root_node.entity()),
+                or expr.type.matches(T.root_node.entity),
 
                 'Operands to a logic bind operator should be either'
                 ' a logic variable or an entity, got {}'.format(expr.type)
             )
 
             if (
-                expr.type.matches(T.root_node.entity())
-                and expr.type is not T.root_node.entity()
+                expr.type.matches(T.root_node.entity)
+                and expr.type is not T.root_node.entity
             ):
-                expr = Cast.Expr(expr, T.root_node.entity())
+                expr = Cast.Expr(expr, T.root_node.entity)
 
             return expr
 
@@ -488,7 +488,7 @@ def get_value(self, logic_var):
         extract the value.
     """
     return CallExpr(
-        'Eq_Solution', 'Eq_Node.Refs.Get_Value', T.root_node.entity(),
+        'Eq_Solution', 'Eq_Node.Refs.Get_Value', T.root_node.entity,
         [construct(logic_var, logic_var_type)],
         abstract_expr=self,
     )
