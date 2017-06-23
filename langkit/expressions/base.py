@@ -1333,6 +1333,61 @@ class SequenceExpr(ResolvedExpression):
     def __repr__(self):
         return '<SequenceExpr>'
 
+    class _ForwardExpr(ResolvedExpression):
+        def __init__(self, dest_var, expr):
+            self.dest_var = dest_var
+            self.expr = expr
+            self.static_type = dest_var.type
+            super(SequenceExpr._ForwardExpr, self).__init__()
+
+        def _render_pre(self):
+            result = [self.expr.render_pre()]
+
+            # If the destination variable comes from the sources, emit debug
+            # info for it: the end of our inner expression is its definition
+            # point.
+            if (
+                self.dest_var.abstract_var
+                and self.dest_var.abstract_var.source_name
+            ):
+                result.append(gdb_helper(
+                    'bind',
+                    self.dest_var.abstract_var.source_name.lower,
+                    self.dest_var.name.camel_with_underscores
+                ))
+
+            result.append(assign_var(self.dest_var, self.expr.render_expr()))
+            return '\n'.join(result)
+
+        def _render_expr(self):
+            return self.dest_var.render_expr()
+
+        @property
+        def subexprs(self):
+            return {'0-var': self.dest_var, '1-expr': self.expr}
+
+        def __repr__(self):
+            return '<ForwardExpr {}>'.format(self.dest_var)
+
+    @classmethod
+    def make_forward(cls, dest_var, pre_expr, post_expr, abstract_expr=None):
+        """
+        Create a sequence expression that:
+
+          * evaluates `pre_expr`;
+          * forward its value to `dest_var`;
+          * evaluates `post_expr` and return its value.
+
+        :param VariableExpr dest_var: Variable to forward `pre_expr` to.
+        :param ResolvedExpression pre_expr: First expression to evaluate.
+        :param ResolvedExpression post_expr: Second expression to evaluate.
+        :rtype: SequenceExpr
+        """
+        assert pre_expr.type.matches(dest_var.type)
+
+        return cls(cls._ForwardExpr(dest_var, pre_expr), post_expr,
+                   abstract_expr=abstract_expr)
+
 
 class AbstractVariable(AbstractExpression):
     """
