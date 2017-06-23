@@ -479,12 +479,6 @@ class ASTNode(BaseStruct):
 
     __metaclass__ = _ASTNodeMetaclass
 
-    _repr_name = None
-    """
-    Camel-case name to use to represent this node.
-    :type: str|None
-    """
-
     _base = None
     """
     Base class from which this AST node type derives, or None for the root
@@ -503,12 +497,6 @@ class ASTNode(BaseStruct):
     """
     Whether the list type corresponding to this AST node must be abstract.
     :type: bool
-    """
-
-    _generic_list_type_name = None
-    """
-    User-specific name for the generic list type, in any.
-    :type: str|None
     """
 
     _list_type = None
