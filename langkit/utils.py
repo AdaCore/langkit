@@ -457,3 +457,21 @@ class classproperty(property):
     """
     def __get__(self, cls, owner):
         return classmethod(self.fget).__get__(None, owner)()
+
+
+def inherited_property(parent_getter):
+    """
+    Decorate a method, from an object with a parent, so that if the returned
+    value is None, it will query it on the parent.
+    """
+    def impl(fn):
+        def internal(self, *args, **kwargs):
+            val = fn(self, *args, **kwargs)
+            if val is not None:
+                return val
+            else:
+                return internal(parent_getter(self), *args, **kwargs)
+
+        return property(internal)
+
+    return impl

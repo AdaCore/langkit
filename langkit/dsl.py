@@ -9,7 +9,7 @@ from langkit.diagnostics import (
 )
 from langkit.expressions import PropertyDef
 import langkit.names as names
-from langkit.utils import issubtype
+from langkit.utils import issubtype, inherited_property
 
 
 class DSLType(object):
@@ -272,19 +272,7 @@ def env_metadata(cls):
     return cls
 
 
-def inherited_annotation(fn):
-    """
-    Decorate a method on Annotations, so that if the returned value is None, it
-    will query it on the base node's annotation.
-    """
-    def internal(self, *args, **kwargs):
-        val = fn(self, *args, **kwargs)
-        if val is not None:
-            return val
-        else:
-            return internal(self.get_parent_annotations(), *args, **kwargs)
-
-    return property(internal)
+inherited_annotation = inherited_property(lambda s: s.get_parent_annotations())
 
 
 class Annotations(object):
