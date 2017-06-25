@@ -1191,11 +1191,11 @@ package body ${ada_lib_name}.Analysis.C is
                     Trivia => Token_Index (Token.Trivia_Index)));
    end Unwrap;
 
-   ${array_types.body(T.root_node.array_type())}
+   ${array_types.body(T.root_node.array)}
 
-   ${array_types.body(LexicalEnvType.array_type())}
+   ${array_types.body(LexicalEnvType.array)}
 
-   ${array_types.body(T.root_node.entity.array_type())}
+   ${array_types.body(T.root_node.entity.array)}
 
    function ${capi.get_name('lexical_env_empty')} return ${lexical_env_type} is
    begin
@@ -1237,7 +1237,7 @@ package body ${ada_lib_name}.Analysis.C is
    function ${capi.get_name('lexical_env_get')}
      (Env  : ${lexical_env_type};
       Name : ${text_type})
-      return ${T.root_node.entity.array_type().name} is
+      return ${T.root_node.entity.array.name} is
    begin
       Clear_Last_Exception;
 

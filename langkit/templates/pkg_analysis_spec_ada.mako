@@ -8,7 +8,7 @@
 <%namespace name="pretty_printers" file="pretty_printers_ada.mako" />
 
 <%
-   root_node_array = T.root_node.array_type()
+   root_node_array = T.root_node.array
    no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts)
    library_private_field = lambda f: not library_public_field(f)
 %>
@@ -384,12 +384,12 @@ package ${ada_lib_name}.Analysis is
 
    ## Declare arrays of lexical environments here because we need them for the
    ## Group operation below.
-   ${array_types.public_incomplete_decl(LexicalEnvType.array_type())}
-   ${array_types.public_decl(LexicalEnvType.array_type())}
+   ${array_types.public_incomplete_decl(LexicalEnvType.array)}
+   ${array_types.public_decl(LexicalEnvType.array)}
 
    ## See ASTNodeType.entity
-   ${array_types.public_incomplete_decl(T.root_node.entity.array_type())}
-   ${array_types.public_decl(T.root_node.entity.array_type())}
+   ${array_types.public_incomplete_decl(T.root_node.entity.array)}
+   ${array_types.public_decl(T.root_node.entity.array)}
 
    ## Declare arrays of root nodes here since some primitives rely on it and
    ## since the declarations require AST_Envs.
@@ -1225,10 +1225,10 @@ private
 
    function Group is new AST_Envs.Group
      (Index_Type        => Positive,
-      Lexical_Env_Array => ${LexicalEnvType.array_type().api_name});
+      Lexical_Env_Array => ${LexicalEnvType.array.api_name});
 
    function Group
-     (Envs : ${LexicalEnvType.array_type().name})
+     (Envs : ${LexicalEnvType.array.name})
       return ${LexicalEnvType.name};
    --  Convenience wrapper for uniform types handling in code generation
 
@@ -1270,11 +1270,11 @@ private
    procedure Free_Extensions (Node : access ${root_node_value_type}'Class);
    --  Implementation helper to free the extensions associatde to Node
 
-   ${array_types.private_decl(LexicalEnvType.array_type())}
-   ${array_types.private_decl(T.root_node.entity.array_type())}
+   ${array_types.private_decl(LexicalEnvType.array)}
+   ${array_types.private_decl(T.root_node.entity.array)}
    ${array_types.private_decl(root_node_array)}
 
-   package ${T.root_node.array_type().pkg_vector} is
+   package ${T.root_node.array.pkg_vector} is
       new Langkit_Support.Vectors (${T.root_node.name});
 
    function Pre_Env_Actions

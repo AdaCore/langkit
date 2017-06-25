@@ -63,7 +63,7 @@ class ExampleList(FooNode):
                 lambda _: False,
             )
         ),
-        type=BoolType.array_type(),
+        type=BoolType.array,
         public=True
     )
 

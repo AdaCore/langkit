@@ -24,7 +24,7 @@ class FooNode(ASTNode):
 
 class Names(Struct):
     label = UserField(type=T.Name)
-    name_list = UserField(type=T.Name.array_type())
+    name_list = UserField(type=T.Name.array)
 
 
 class ListDecl(FooNode):

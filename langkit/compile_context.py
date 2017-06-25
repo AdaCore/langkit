@@ -668,10 +668,10 @@ class CompileCtx(object):
 
         # The Group lexical environment operation takes an array of lexical
         # envs, so we always need to generate the corresponding array type.
-        self.array_types.add(lexical_env_type.array_type())
+        self.array_types.add(lexical_env_type.array)
 
         # Likewise for the entity array type: LexicalEnv.get returns it.
-        self.array_types.add(entity.array_type())
+        self.array_types.add(entity.array)
 
         # Sort them in dependency order as required but also then in
         # alphabetical order so that generated declarations are kept in a

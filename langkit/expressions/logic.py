@@ -540,7 +540,7 @@ class LogicBooleanOp(AbstractExpression):
         # access to record: unwrap it.
         relation_array = untyped_literal_expr(
             'Relation_Array ({}.Items)',
-            [construct(self.equation_array, equation_type.array_type())]
+            [construct(self.equation_array, equation_type.array)]
         )
 
         return CallExpr('Logic_Boolean_Op', 'Logic_{}'.format(self.kind_name),

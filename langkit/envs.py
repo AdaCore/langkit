@@ -58,7 +58,7 @@ class RefEnvs(object):
         referenced lexical envs.
         """
         self.nodes_property = create_internal_property(
-            'Ref_Env_Nodes', self.nodes_expr, T.root_node.array_type()
+            'Ref_Env_Nodes', self.nodes_expr, T.root_node.array
         )
 
     def check_resolver(self):
@@ -94,7 +94,7 @@ def add_to_env(mappings, dest_env=None, metadata=None, is_post=False,
 
     :param AbstractExpression mappings: One or several mappings of key to value
         to add to the environment. Must be either of type T.env_assoc, or
-        T.env_assoc.array_type().
+        T.env_assoc.array.
 
     :param AbstractExpression dest_env: The destination environment in which to
         add the elements.
@@ -283,7 +283,7 @@ class EnvSpec(object):
             with bindings_prop.diagnostic_context:
                 check_source_language(
                     bindings_prop.type.matches(T.env_assoc) or
-                    bindings_prop.type.matches(T.env_assoc.array_type()),
+                    bindings_prop.type.matches(T.env_assoc.array),
                     'The bindings expression in environment specification '
                     ' must be either an env_assoc or an array of env_assocs: '
                     'got {} instead'.format(

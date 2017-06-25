@@ -2095,7 +2095,7 @@ class EmptyArray(AbstractExpression):
         self.array_type = None
 
     def do_prepare(self):
-        self.array_type = resolve_type(self.element_type).array_type()
+        self.array_type = resolve_type(self.element_type).array
 
     @staticmethod
     def construct_static(array_type, abstract_expr=None):

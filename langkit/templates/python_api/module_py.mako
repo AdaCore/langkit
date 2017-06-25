@@ -455,7 +455,7 @@ class LexicalEnv(object):
         result = _lexical_env_get(self._c_value,
                                   ctypes.byref(_text._unwrap(name)))
         return ${pyapi.wrap_value('result',
-                                  T.root_node.entity.array_type())}
+                                  T.root_node.entity.array)}
 
     def __del__(self):
         self._dec_ref(self._c_value)
@@ -1424,7 +1424,7 @@ _lexical_env_node = _import_func(
 _lexical_env_get = _import_func(
     '${capi.get_name("lexical_env_get")}',
     [LexicalEnv._c_type, ctypes.POINTER(_text)],
-    ${pyapi.type_internal_name(T.root_node.entity.array_type())}
+    ${pyapi.type_internal_name(T.root_node.entity.array)}
 )
 % endif
 

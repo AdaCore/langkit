@@ -17,12 +17,12 @@ class DSLType(object):
     Base class for the representation of types in the DSL.
     """
 
-    @classmethod
-    def array_type(cls):
+    @classproperty
+    def array(cls):
         """
         Return the array type whose element type is `cls`.
         """
-        return T.Defer(lambda: cls._type.array_type())
+        return T.Defer(lambda: cls._type.array)
 
     @classmethod
     def _diagnostic_context(cls):

@@ -21,7 +21,7 @@ Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 class FooNode(ASTNode):
 
     @langkit_property(public=True)
-    def count(seq=T.Example.array_type()):
+    def count(seq=T.Example.array):
         return seq.length
 
 

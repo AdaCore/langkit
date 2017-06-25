@@ -6,7 +6,7 @@
 <%namespace name="list_types"    file="list_types_ada.mako" />
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 
-<% root_node_array = T.root_node.array_type() %>
+<% root_node_array = T.root_node.array %>
 
 with Ada.Containers;                  use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
@@ -1182,8 +1182,8 @@ package body ${ada_lib_name}.Analysis is
       Unit.Has_Filled_Caches := False;
    end Reset_Property_Caches;
 
-   ${array_types.body(LexicalEnvType.array_type())}
-   ${array_types.body(T.root_node.entity.array_type())}
+   ${array_types.body(LexicalEnvType.array)}
+   ${array_types.body(T.root_node.entity.array)}
 
    function Child_Number
      (Node : access ${root_node_value_type}'Class)
@@ -2886,7 +2886,7 @@ package body ${ada_lib_name}.Analysis is
    -----------
 
    function Group
-     (Envs : ${LexicalEnvType.array_type().name})
+     (Envs : ${LexicalEnvType.array.name})
       return ${LexicalEnvType.name}
    is (Group (Envs.Items));
 

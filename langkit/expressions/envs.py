@@ -75,7 +75,7 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
                          T.root_node.entity)
     else:
         return make_expr("Create ({})".format(array_expr),
-                         T.root_node.entity.array_type())
+                         T.root_node.entity.array)
 
 
 @auto_attr
@@ -125,7 +125,7 @@ def env_group(self, env_array_expr):
         environment is returned.
     """
     return CallExpr('Group_Env', 'Group', lexical_env_type,
-                    [construct(env_array_expr, lexical_env_type.array_type())],
+                    [construct(env_array_expr, lexical_env_type.array)],
                     abstract_expr=self)
 
 

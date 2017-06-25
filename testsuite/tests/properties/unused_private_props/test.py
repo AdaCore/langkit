@@ -40,7 +40,7 @@ class Expression(FooNode):
 
     # This property is private, but is called from "referenced_units", so
     # "names" and all its overriding properties are used.
-    names = AbstractProperty(type=T.Name.array_type())
+    names = AbstractProperty(type=T.Name.array)
 
     referenced_units = Property(Self.names.map(lambda n: n.designated_unit),
                                 public=True)

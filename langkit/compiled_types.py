@@ -555,8 +555,9 @@ class CompiledType(object):
             return self is formal
 
     # Memoize so that we have only one array type for each element type
+    @property
     @memoized
-    def array_type(self):
+    def array(self):
         """
         Create an array type whose element type is `self`.
 
@@ -2002,13 +2003,13 @@ class ASTNodeType(BaseStructType):
             # The following builtin fields are implemented as a property, so
             # there is no need for an additional inc-ref.
             ('parents', BuiltinField(
-                type=root_type.array_type(),
+                type=root_type.array,
                 doc='Return an array that contains the lexical parents (this'
                     ' node included). Nearer parents are first in the list.',
                 access_needs_incref=False,
             )),
             ('children', BuiltinField(
-                type=root_type.array_type(),
+                type=root_type.array,
                 doc='Return an array that contains the direct lexical'
                     ' children.',
                 access_needs_incref=False,
@@ -2315,7 +2316,7 @@ class TypeRepo(object):
             def get():
                 prefix = self.get()
                 if (
-                    name in ('array_type', 'list_type', 'entity')
+                    name in ('array', 'list_type', 'entity')
                     or not isinstance(prefix, BaseStructType)
                 ):
                     return getattr(prefix, name)
