@@ -30,7 +30,7 @@ class Name(FooNode):
     tok = Field()
 
 
-class Scope(Name.list_type()):
+class Scope(Name.list):
     pass
 
 

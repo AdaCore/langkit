@@ -29,7 +29,7 @@ class Names(Struct):
 
 class ListDecl(FooNode):
     label = Field(type=T.Name)
-    name_list = Field(type=T.Name.list_type())
+    name_list = Field(type=T.Name.list)
 
     to_struct = Property(
         New(Names,

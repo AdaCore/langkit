@@ -11,7 +11,7 @@
    <%
       elt_type = element_type.name
 
-      list_type = element_type.list_type()
+      list_type = element_type.list
       value_type = list_type.value_type_name()
       type_name = list_type.name
    %>
@@ -27,7 +27,7 @@
    <%
       elt_type = element_type.name
 
-      list_type = element_type.list_type()
+      list_type = element_type.list
       value_type = list_type.value_type_name()
       type_name = list_type.name
    %>
@@ -57,7 +57,7 @@
    <%
       elt_type = element_type.name
 
-      list_type = element_type.list_type()
+      list_type = element_type.list
       value_type = list_type.value_type_name()
       type_name = list_type.name
    %>
@@ -82,7 +82,7 @@
 
    <%
       elt_type = element_type.name
-      list_type = element_type.list_type()
+      list_type = element_type.list
       value_type = list_type.value_type_name()
       type_name = list_type.name
    %>

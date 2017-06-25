@@ -1839,9 +1839,10 @@ class ASTNodeType(BaseStructType):
 
     # We want structural equality on lists whose elements have the same types.
     # Memoization is one way to make sure that, for each CompiledType instance
-    # X: X.list_type() is X.list_type().
+    # X: X.list is X.list.
+    @property
     @memoized
-    def list_type(self):
+    def list(self):
         """
         Return an ASTNodeType subclass that represent a list of `self`.
 
@@ -2316,7 +2317,7 @@ class TypeRepo(object):
             def get():
                 prefix = self.get()
                 if (
-                    name in ('array', 'list_type', 'entity')
+                    name in ('array', 'list', 'entity')
                     or not isinstance(prefix, BaseStructType)
                 ):
                     return getattr(prefix, name)

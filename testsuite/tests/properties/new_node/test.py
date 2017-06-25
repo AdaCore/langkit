@@ -29,7 +29,7 @@ class Literal(FooNode):
 @synthetic
 class SynthNode(FooNode):
     name = Field(type=Token)
-    items = Field(type=Literal.list_type())
+    items = Field(type=Literal.list)
 
 
 class LiteralSequence(FooNode):

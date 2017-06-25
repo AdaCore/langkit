@@ -25,7 +25,7 @@ class FooNode(ASTNode):
         return seq.length
 
 
-class Sequence(FooNode.list_type()):
+class Sequence(FooNode.list):
     all_items = Property(Self.map(lambda i: i), public=True)
     example_items = Property(Self.filtermap(
         lambda i: i.cast_or_raise(T.Example),

@@ -378,7 +378,7 @@ class _ASTNodeMetaclass(type):
                 # _ASTNodeList.
                 element_type = cls._element_type._type
                 assert element_type
-                astnode_type = element_type.list_type()
+                astnode_type = element_type.list
 
             else:
                 astnode_type = ASTNodeType(
@@ -493,8 +493,8 @@ class ASTNode(BaseStruct):
     :type: _ASTNodeList
     """
 
-    @classmethod
-    def list_type(cls):
+    @classproperty
+    def list(cls):
         """
         Return an ASTNode subclass that represents a list of "cls".
 

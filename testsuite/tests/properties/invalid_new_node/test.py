@@ -30,7 +30,7 @@ def run(name, prop_fn, prop_memoized):
     class EmptyNode(FooNode):
         pass
 
-    class LiteralList(Literal.list_type()):
+    class LiteralList(Literal.list):
         prop = Property(prop_fn(), memoized=prop_memoized)
 
     def lang_def():

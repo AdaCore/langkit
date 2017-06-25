@@ -17,7 +17,7 @@ class FooNode(ASTNode):
     pass
 
 
-class Sequence(FooNode.list_type()):
+class Sequence(FooNode.list):
     pass
 
 

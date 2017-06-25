@@ -17,7 +17,7 @@ class Element(ASTNode):
     pass
 
 
-class Sequence(Element.list_type()):
+class Sequence(Element.list):
     pass
 
 

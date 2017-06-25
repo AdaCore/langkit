@@ -42,7 +42,7 @@ class EnumNode(FooNode):
 
 
 class Nodes(FooNode):
-    nodes = Field(type=EnumNode.list_type())
+    nodes = Field(type=EnumNode.list)
 
 
 foo_grammar = Grammar('main_rule')

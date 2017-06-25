@@ -34,7 +34,7 @@ class Name(FooNode):
                                                  val=Self)))
 
 
-class Scope(Name.list_type()):
+class Scope(Name.list):
     env_spec = EnvSpec(add_env=True)
 
 

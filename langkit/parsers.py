@@ -908,7 +908,7 @@ class List(Parser):
         `empty_valid` is True.
 
         :param ASTNodeType list_cls: If provided, it must be a
-            ASTNodeType.list_type() subtype to be used for the result of this
+            ASTNodeType.list subtype to be used for the result of this
             parser.
 
         :param types.Token|string sep: Parser or string corresponding to the
@@ -950,7 +950,7 @@ class List(Parser):
                     'List parsers only accept subparsers that yield AST nodes'
                     ' ({} provided here)'.format(item_type.name.camel)
                 )
-                return item_type.list_type()
+                return item_type.list
 
     def compute_fields_types(self):
         Parser.compute_fields_types(self)
@@ -1432,7 +1432,7 @@ class NodeToParsersPass():
                     # because the user has no way to mark them as abstract.
                     and not (
                         node_type.is_list_type
-                        and node_type.element_type.list_type() == node_type
+                        and node_type.element_type.list == node_type
                     ),
                     "{} has no parser, and is marked neither abstract nor "
                     "synthetic".format(node_type.name)
