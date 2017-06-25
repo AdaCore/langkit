@@ -28,7 +28,8 @@ class RefEnvs(object):
         Property_Error.
 
         :param PropertyDef|None resolver: Property that takes no argument
-            (explicit or implicit) and that returns a lexical environment.
+            (explicit or implicit) appart from Self, and that returns a lexical
+            environment.
 
         :param AbstractExpression|None nodes_expr: Abstract expression that
             returns an array of AST nodes. Each node will be given to the above
