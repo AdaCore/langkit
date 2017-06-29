@@ -15,6 +15,12 @@ class EnvAction(object):
         """
         raise NotImplementedError()
 
+    def create_internal_properties(self, create_property):
+        """
+        Create properties needed for the emission of this env action.
+        """
+        raise NotImplementedError()
+
 
 class AddToEnv(EnvAction):
     def __init__(self, mappings, dest_env, metadata, is_post, resolver):
@@ -92,12 +98,12 @@ class RefEnvs(EnvAction):
         resolver. It is None before the property is built.
         """
 
-    def create_nodes_property(self, create_internal_property):
+    def create_internal_properties(self, create_property):
         """
         Create the property that returns the list of nodes to resolve into
         referenced lexical envs.
         """
-        self.nodes_property = create_internal_property(
+        self.nodes_property = create_property(
             'Ref_Env_Nodes', self.nodes_expr, T.root_node.array
         )
 
@@ -310,9 +316,9 @@ class EnvSpec(object):
         self.has_post_actions = any([e.is_post for e in self.envs_expressions])
 
         for ref_envs in self.ref_envs:
-            ref_envs.create_nodes_property(create_internal_property)
+            ref_envs.create_internal_properties(create_internal_property)
         for ref_envs in self.post_ref_envs:
-            ref_envs.create_nodes_property(create_internal_property)
+            ref_envs.create_internal_properties(create_internal_property)
 
         self.env_hook_arg = create_internal_property(
             'Env_Hook_Arg', self._unresolved_env_hook_arg, T.root_node
