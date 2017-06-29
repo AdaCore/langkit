@@ -1,6 +1,5 @@
 from __future__ import absolute_import, division, print_function
 
-from collections import namedtuple
 from itertools import count
 
 from langkit import names
@@ -9,11 +8,20 @@ from langkit.diagnostics import check_source_language, extract_library_location
 from langkit.expressions import FieldAccess, PropertyDef, Self, construct
 
 
-AddToEnv = namedtuple("AddToEnv", ["mappings", "dest_env", "metadata",
-                                   "is_post", "resolver"])
+class EnvAction(object):
+    pass
 
 
-class RefEnvs(object):
+class AddToEnv(EnvAction):
+    def __init__(self, mappings, dest_env, metadata, is_post, resolver):
+        self.mappings = mappings
+        self.dest_env = dest_env
+        self.metadata = metadata
+        self.is_post = is_post
+        self.resolver = resolver
+
+
+class RefEnvs(EnvAction):
     """
     Couple of a property and an expression to evaluate referenced envs.
     """
@@ -293,29 +301,29 @@ class EnvSpec(object):
         for ref_envs in self.post_ref_envs:
             ref_envs.check_resolver()
 
-        for bindings_prop, _, _, _, resolver in self.envs_expressions:
-            with bindings_prop.diagnostic_context:
+        for env_expr in self.envs_expressions:
+            with env_expr.mappings.diagnostic_context:
                 check_source_language(
-                    bindings_prop.type.matches(T.env_assoc) or
-                    bindings_prop.type.matches(T.env_assoc.array),
+                    env_expr.mappings.type.matches(T.env_assoc) or
+                    env_expr.mappings.type.matches(T.env_assoc.array),
                     'The bindings expression in environment specification '
                     ' must be either an env_assoc or an array of env_assocs: '
                     'got {} instead'.format(
-                        bindings_prop.type.name.camel
+                        env_expr.mappings.type.name.camel
                     )
                 )
-                if resolver:
+                if env_expr.resolver:
                     # Ask for the creation of untyped wrappers for all
                     # properties used as entity resolvers.
-                    resolver.require_untyped_wrapper()
+                    env_expr.resolver.require_untyped_wrapper()
 
                     check_source_language(
-                        resolver.type.matches(T.entity),
+                        env_expr.resolver.type.matches(T.entity),
                         'Entity resolver properties must return entities'
-                        ' (got {})'.format(resolver.type.name.camel)
+                        ' (got {})'.format(env_expr.resolver.type.name.camel)
                     )
                     check_source_language(
-                        not resolver.dynamic_vars,
+                        not env_expr.resolver.dynamic_vars,
                         'Entity resolver properties must have no dynamically'
                         ' bound variable'
                     )
