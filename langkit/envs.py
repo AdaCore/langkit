@@ -35,11 +35,11 @@ class RefEnvs(EnvAction):
         environments that do not respect these rules will trigger a
         Property_Error.
 
-        :param PropertyDef|None resolver: Property that takes no argument
+        :param PropertyDef resolver: Property that takes no argument
             (explicit or implicit) appart from Self, and that returns a lexical
             environment.
 
-        :param AbstractExpression|None nodes_expr: Abstract expression that
+        :param AbstractExpression nodes_expr: Abstract expression that
             returns an array of AST nodes. Each node will be given to the above
             resolver in order to get corresponding referenced lexical envs.
             In this array, null nodes are allowed: they are simply discarded.
