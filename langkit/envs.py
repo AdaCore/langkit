@@ -9,7 +9,11 @@ from langkit.expressions import FieldAccess, PropertyDef, Self, construct
 
 
 class EnvAction(object):
-    pass
+    def check(self):
+        """
+        Check that the env action is legal.
+        """
+        raise NotImplementedError()
 
 
 class AddToEnv(EnvAction):
@@ -19,6 +23,33 @@ class AddToEnv(EnvAction):
         self.metadata = metadata
         self.is_post = is_post
         self.resolver = resolver
+
+    def check(self):
+        with self.mappings.diagnostic_context:
+            check_source_language(
+                self.mappings.type.matches(T.env_assoc) or
+                self.mappings.type.matches(T.env_assoc.array),
+                'The bindings expression in environment specification '
+                ' must be either an env_assoc or an array of env_assocs: '
+                'got {} instead'.format(
+                    self.mappings.type.name.camel
+                )
+            )
+            if self.resolver:
+                # Ask for the creation of untyped wrappers for all
+                # properties used as entity resolvers.
+                self.resolver.require_untyped_wrapper()
+
+                check_source_language(
+                    self.resolver.type.matches(T.entity),
+                    'Entity resolver properties must return entities'
+                    ' (got {})'.format(self.resolver.type.name.camel)
+                )
+                check_source_language(
+                    not self.resolver.dynamic_vars,
+                    'Entity resolver properties must have no dynamically'
+                    ' bound variable'
+                )
 
 
 class RefEnvs(EnvAction):
@@ -70,7 +101,7 @@ class RefEnvs(EnvAction):
             'Ref_Env_Nodes', self.nodes_expr, T.root_node.array
         )
 
-    def check_resolver(self):
+    def check(self):
         """
         Check that the resolver property is conforming.
         """
@@ -296,37 +327,9 @@ class EnvSpec(object):
 
         :param langkit.compile_context.CompileCtx context: Current context.
         """
-        for ref_envs in self.ref_envs:
-            ref_envs.check_resolver()
-        for ref_envs in self.post_ref_envs:
-            ref_envs.check_resolver()
-
-        for env_expr in self.envs_expressions:
-            with env_expr.mappings.diagnostic_context:
-                check_source_language(
-                    env_expr.mappings.type.matches(T.env_assoc) or
-                    env_expr.mappings.type.matches(T.env_assoc.array),
-                    'The bindings expression in environment specification '
-                    ' must be either an env_assoc or an array of env_assocs: '
-                    'got {} instead'.format(
-                        env_expr.mappings.type.name.camel
-                    )
-                )
-                if env_expr.resolver:
-                    # Ask for the creation of untyped wrappers for all
-                    # properties used as entity resolvers.
-                    env_expr.resolver.require_untyped_wrapper()
-
-                    check_source_language(
-                        env_expr.resolver.type.matches(T.entity),
-                        'Entity resolver properties must return entities'
-                        ' (got {})'.format(env_expr.resolver.type.name.camel)
-                    )
-                    check_source_language(
-                        not env_expr.resolver.dynamic_vars,
-                        'Entity resolver properties must have no dynamically'
-                        ' bound variable'
-                    )
+        for action in (self.ref_envs + self.post_ref_envs
+                       + self.envs_expressions):
+            action.check()
 
     def _render_field_access(self, p):
         """
