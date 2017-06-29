@@ -156,8 +156,8 @@ class EnvSpec(object):
             This will register referenced environments to this node' "self"
             environment.
 
-        :param RefEnvs|list[RefEnvs] ref_envs: Like ref_envs, but evaluated
-            after after the children have been processed.
+        :param RefEnvs|list[RefEnvs] post_ref_envs: Like ref_envs, but
+            evaluated after after the children have been processed.
 
         :param AbstractExpression initial_env: If supplied, this env will be
             used as the lexical environment to execute the rest of the actions.
