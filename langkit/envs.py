@@ -88,6 +88,19 @@ class RefEnvs(object):
         )
 
 
+def reference(nodes, through):
+    """
+    Reference a group of lexical environments, that will be lazily yielded by
+    calling the `through` property on the array of nodes `nodes`.
+
+    :param AbstractExpression nodes: An expression that yields a list of nodes.
+    :param PropertyDef through: A property reference.
+
+    :rtype: RefEnvs
+    """
+    return RefEnvs(through, nodes)
+
+
 def add_to_env(mappings, dest_env=None, metadata=None, is_post=False,
                resolver=None):
     """
