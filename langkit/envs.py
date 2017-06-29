@@ -315,9 +315,7 @@ class EnvSpec(object):
 
         self.has_post_actions = any([e.is_post for e in self.envs_expressions])
 
-        for ref_envs in self.ref_envs:
-            ref_envs.create_internal_properties(create_internal_property)
-        for ref_envs in self.post_ref_envs:
+        for ref_envs in self.ref_envs + self.post_ref_envs:
             ref_envs.create_internal_properties(create_internal_property)
 
         self.env_hook_arg = create_internal_property(
