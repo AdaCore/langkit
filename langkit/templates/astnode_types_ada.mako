@@ -550,16 +550,19 @@
       ## If we have an _add_to_env specification, we generate code to
       ## add elements to the lexical environment.
 
-      <% md = call_prop(exprs.metadata) if exprs.metadata else "No_Metadata" %>
+      <% md = (call_prop(exprs.metadata_prop)
+               if exprs.metadata else "No_Metadata") %>
 
       declare
          Env : Lexical_Env :=
-           ${call_prop(exprs.dest_env) if exprs.dest_env else "Initial_Env"};
+           ${call_prop(exprs.dest_env_prop) \
+             if exprs.dest_env_prop else "Initial_Env"};
 
-         ${"Mappings" if is_array_type(exprs.mappings.type) else "B"} :
-           ${exprs.mappings.type.name} := ${call_prop(exprs.mappings)};
+         ${"Mappings" if is_array_type(exprs.mappings_prop.type) else "B"} :
+           ${exprs.mappings_prop.type.name}
+             := ${call_prop(exprs.mappings_prop)};
       begin
-         % if is_array_type(exprs.mappings.type):
+         % if is_array_type(exprs.mappings_prop.type):
          for B of Mappings.Items loop
          % endif
             ## Add the element to the environment
@@ -593,7 +596,7 @@
                end if;
             end if;
 
-         % if is_array_type(exprs.mappings.type):
+         % if is_array_type(exprs.mappings_prop.type):
          end loop;
          Dec_Ref (Env);
          Dec_Ref (Mappings);

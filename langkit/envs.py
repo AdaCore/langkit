@@ -31,14 +31,14 @@ class AddToEnv(EnvAction):
         self.resolver = resolver
 
     def check(self):
-        with self.mappings.diagnostic_context:
+        with self.mappings_prop.diagnostic_context:
             check_source_language(
-                self.mappings.type.matches(T.env_assoc) or
-                self.mappings.type.matches(T.env_assoc.array),
+                self.mappings_prop.type.matches(T.env_assoc) or
+                self.mappings_prop.type.matches(T.env_assoc.array),
                 'The bindings expression in environment specification '
                 ' must be either an env_assoc or an array of env_assocs: '
                 'got {} instead'.format(
-                    self.mappings.type.name.camel
+                    self.mappings_prop.type.name.camel
                 )
             )
             if self.resolver:
@@ -56,6 +56,17 @@ class AddToEnv(EnvAction):
                     'Entity resolver properties must have no dynamically'
                     ' bound variable'
                 )
+
+    def create_internal_properties(self, create_property):
+        self.mappings_prop = create_property(
+            'Env_Mappings', self.mappings, None
+        )
+        self.dest_env_prop = create_property(
+            'Env_Dest', self.dest_env, lexical_env_type
+        )
+        self.metadata_prop = create_property(
+            'MD', self.metadata, T.defer_env_md
+        )
 
 
 class RefEnvs(EnvAction):
@@ -235,9 +246,6 @@ class EnvSpec(object):
         self._unresolved_initial_env = initial_env
         ":type: AbstractExpression"
 
-        self._unresolved_envs_expressions = []
-        ":type: list[AddToEnv]"
-
         self.envs_expressions = []
         ":type: list[AddToEnv]"
 
@@ -249,7 +257,7 @@ class EnvSpec(object):
                 " or list of AddToEnv"
             )
 
-            self._unresolved_envs_expressions = (
+            self.envs_expressions = (
                 [add_to_env] if isinstance(add_to_env, AddToEnv)
                 else add_to_env
             )
@@ -302,21 +310,11 @@ class EnvSpec(object):
             'Initial_Env', self._unresolved_initial_env, lexical_env_type
         )
 
-        self.envs_expressions = [
-            add_to_env(
-                create_internal_property('Env_Mappings', exprs.mappings, None),
-                create_internal_property('Env_Dest', exprs.dest_env,
-                                         lexical_env_type),
-                create_internal_property('MD', exprs.metadata, T.defer_env_md),
-                exprs.is_post,
-                resolver=exprs.resolver,
-            ) for exprs in self._unresolved_envs_expressions
-        ]
-
         self.has_post_actions = any([e.is_post for e in self.envs_expressions])
 
-        for ref_envs in self.ref_envs + self.post_ref_envs:
-            ref_envs.create_internal_properties(create_internal_property)
+        for action in (self.ref_envs + self.post_ref_envs
+                       + self.envs_expressions):
+            action.create_internal_properties(create_internal_property)
 
         self.env_hook_arg = create_internal_property(
             'Env_Hook_Arg', self._unresolved_env_hook_arg, T.root_node
