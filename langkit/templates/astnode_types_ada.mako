@@ -241,7 +241,7 @@
          Add_To_Env_Only     : Boolean := False)
          return AST_Envs.Lexical_Env;
 
-   % if cls.env_spec.has_post_actions:
+   % if cls.env_spec.post_actions:
       overriding procedure Post_Env_Actions
         (Self                : access ${type_name};
          Bound_Env, Root_Env : AST_Envs.Lexical_Env);
@@ -753,7 +753,7 @@
 
    ## Emit Post_Env_Actions only if needed
 
-   % if cls.env_spec.has_post_actions:
+   % if cls.env_spec.post_actions:
    ----------------------
    -- Post_Env_Actions --
    ----------------------

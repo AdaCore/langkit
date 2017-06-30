@@ -260,8 +260,7 @@ class EnvSpec(object):
         self._unresolved_initial_env = initial_env
         ":type: AbstractExpression"
 
-        self.envs_expressions = []
-        ":type: list[AddToEnv]"
+        add_to_envs = []
 
         if add_to_env:
             check_source_language(
@@ -271,24 +270,26 @@ class EnvSpec(object):
                 " or list of AddToEnv"
             )
 
-            self.envs_expressions = (
+            add_to_envs = (
                 [add_to_env] if isinstance(add_to_env, AddToEnv)
                 else add_to_env
             )
 
-        self.ref_envs = ([ref_envs]
-                         if isinstance(ref_envs, RefEnvs) else ref_envs)
-        self.post_ref_envs = ([post_ref_envs]
-                              if isinstance(post_ref_envs, RefEnvs)
-                              else post_ref_envs)
-
         self.pre_actions = [
-            a for a in self.envs_expressions if not a.is_post
-        ] + ([AddEnv()] if add_env else []) + self.ref_envs
+            a for a in add_to_envs if not a.is_post
+        ] + ([AddEnv()] if add_env else []) + (
+            [ref_envs] if isinstance(ref_envs, RefEnvs) else ref_envs
+        )
 
         self.post_actions = [
-            a for a in self.envs_expressions if a.is_post
-        ] + self.post_ref_envs
+            a for a in add_to_envs if a.is_post
+        ] + (
+            [post_ref_envs]
+            if isinstance(post_ref_envs, RefEnvs)
+            else post_ref_envs
+        )
+
+        self.actions = self.pre_actions + self.post_actions
 
         self._unresolved_env_hook_arg = env_hook_arg
         ":type: AbstractExpression"
@@ -300,8 +301,6 @@ class EnvSpec(object):
 
         self.env_hook_arg = None
         ":type: PropertyDef"
-
-        self.has_post_actions = False
 
         self.call_parents = call_parents
         "Whether to call parents env specs or not"
@@ -332,10 +331,7 @@ class EnvSpec(object):
             'Initial_Env', self._unresolved_initial_env, lexical_env_type
         )
 
-        self.has_post_actions = any([e.is_post for e in self.envs_expressions])
-
-        for action in (self.ref_envs + self.post_ref_envs
-                       + self.envs_expressions):
+        for action in self.actions:
             action.create_internal_properties(create_internal_property)
 
         self.env_hook_arg = create_internal_property(
@@ -351,8 +347,7 @@ class EnvSpec(object):
 
         :param langkit.compile_context.CompileCtx context: Current context.
         """
-        for action in (self.ref_envs + self.post_ref_envs
-                       + self.envs_expressions):
+        for action in self.actions:
             action.check()
 
     def _render_field_access(self, p):

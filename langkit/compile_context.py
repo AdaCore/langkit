@@ -823,13 +823,9 @@ class CompileCtx(object):
             # reachable.
             for astnode in self.astnode_types:
                 if astnode.env_spec:
-                    for exprs in astnode.env_spec.envs_expressions:
-                        if exprs.resolver:
-                            queue.add(exprs.resolver)
                     queue.update(
-                        ref_envs.resolver
-                        for ref_envs in (astnode.env_spec.ref_envs
-                                         + astnode.env_spec.post_ref_envs)
+                        action.resolver for action in astnode.env_spec.actions
+                        if action.resolver
                     )
 
             while queue:
