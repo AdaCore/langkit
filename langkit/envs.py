@@ -13,13 +13,13 @@ class EnvAction(object):
         """
         Check that the env action is legal.
         """
-        raise NotImplementedError()
+        pass
 
     def create_internal_properties(self, create_property):
         """
         Create properties needed for the emission of this env action.
         """
-        raise NotImplementedError()
+        pass
 
 
 class AddEnv(EnvAction):
