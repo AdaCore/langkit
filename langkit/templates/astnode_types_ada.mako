@@ -604,40 +604,35 @@
       end;
    </%def>
 
-   <%def name="emit_ref_envs(ref_envs_list)">
-      % for ref_envs in ref_envs_list:
-         declare
-            Ref_Env_Nodes : ${ref_envs.nodes_property.type.name} :=
-               ${call_prop(ref_envs.nodes_property)};
-         begin
-            for N of Ref_Env_Nodes.Items loop
-               if N /= null then
-                  if N.Unit /= Self.Unit then
-                     raise Property_Error with
-                        "attempt to add a referenced environment to a foreign"
-                        & " unit";
-                  end if;
-                  Reference (Self.Self_Env, N,
-                             ${ref_envs.resolver.name}'Access);
+   <%def name="emit_ref_env(ref_env)">
+      declare
+         Ref_Env_Nodes : ${ref_env.nodes_property.type.name} :=
+            ${call_prop(ref_env.nodes_property)};
+      begin
+         for N of Ref_Env_Nodes.Items loop
+            if N /= null then
+               if N.Unit /= Self.Unit then
+                  raise Property_Error with
+                     "attempt to add a referenced environment to a foreign"
+                     & " unit";
                end if;
-            end loop;
-            Dec_Ref (Ref_Env_Nodes);
-         end;
-      % endfor
+               Reference (Self.Self_Env, N,
+                          ${ref_env.resolver.name}'Access);
+            end if;
+         end loop;
+         Dec_Ref (Ref_Env_Nodes);
+      end;
    </%def>
 
    <%def name="emit_add_env(add_env)">
-      --  Return early if we only want to run add_to_env actions
       if Add_To_Env_Only then
          return Initial_Env;
       end if;
 
-      ## add_env
-
       % if cls.env_spec._add_env:
          G := Simple_Env_Getter (Initial_Env);
          % if has_dyn_env:
-         if Initial_Env not in Root_Env | Empty_Env 
+         if Initial_Env not in Root_Env | Empty_Env
             and then Initial_Env.Node.Unit /= Self.Unit
          then
             G := Dyn_Env_Getter (${env_getter}'Access, G_State);
@@ -651,6 +646,18 @@
 
          Register_Destroyable (Self.Unit, Self.Self_Env);
       % endif
+   </%def>
+
+   <%def name="emit_env_action(env_action)">
+
+   ## This function is an explicit dispatch table on action's class, calling
+   ## the proper emit function for a given action. It is quite ugly but is
+   ## still the best way I found that did not imply making a lot of round trips
+   ## between Mako and regular python.
+
+   ${{"AddEnv":   emit_add_env,
+      "AddToEnv": emit_add_to_env,
+      "RefEnvs":  emit_ref_env}[env_action.__class__.__name__](env_action)}
    </%def>
 
    <%
@@ -722,19 +729,9 @@
          Initial_Env := ${env_getter} (G_State);
       % endif
 
-      ## add_to_env
-
-      % for exprs in cls.env_spec.envs_expressions:
-      % if not exprs.is_post:
-      ${emit_add_to_env(exprs)}
-      % endif
+      % for action in cls.env_spec.pre_actions:
+      ${emit_env_action (action)}
       % endfor
-
-      ${emit_add_env(None)}
-
-      ## ref_envs
-
-      ${emit_ref_envs(cls.env_spec.ref_envs)}
 
       return Initial_Env;
    end Pre_Env_Actions;
@@ -778,13 +775,9 @@
       ## Post add_to_env actions ##
       #############################
 
-      % for exprs in cls.env_spec.envs_expressions:
-      % if exprs.is_post:
-      ${emit_add_to_env(exprs)}
-      % endif
+      % for action in cls.env_spec.post_actions:
+      ${emit_env_action (action)}
       % endfor
-
-      ${emit_ref_envs(cls.env_spec.post_ref_envs)}
    end Post_Env_Actions;
    % endif
 
