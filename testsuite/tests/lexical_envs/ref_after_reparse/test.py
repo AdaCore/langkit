@@ -52,8 +52,8 @@ class Block(FooNode):
     refs = Field()
 
     env_spec = EnvSpec([
-        add_env(),
-        add_to_env(New(T.env_assoc, key=Self.name.sym, val=Self))
+        add_to_env(New(T.env_assoc, key=Self.name.sym, val=Self)),
+        add_env()
     ])
 
 
