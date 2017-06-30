@@ -272,6 +272,14 @@ class EnvSpec(object):
                               if isinstance(post_ref_envs, RefEnvs)
                               else post_ref_envs)
 
+        self.pre_actions = [
+            a for a in self.envs_expressions if not a.is_post
+        ] + ([AddEnv()] if add_env else []) + self.ref_envs
+
+        self.post_actions = [
+            a for a in self.envs_expressions if a.is_post
+        ] + self.post_ref_envs
+
         self._unresolved_env_hook_arg = env_hook_arg
         ":type: AbstractExpression"
 
