@@ -22,6 +22,10 @@ class EnvAction(object):
         raise NotImplementedError()
 
 
+class AddEnv(EnvAction):
+    pass
+
+
 class AddToEnv(EnvAction):
     def __init__(self, mappings, dest_env, metadata, is_post, resolver):
         self.mappings = mappings
