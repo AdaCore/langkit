@@ -9,6 +9,16 @@ from langkit.expressions import FieldAccess, PropertyDef, Self, construct
 
 
 class EnvAction(object):
+
+    resolver = None
+    """
+    Some env actions use resolvers, that are property that will yield a lexical
+    environment from a Node. To facilitate accessing it in general, we'll set a
+    class attribute to None on the base class.
+
+    :type: PropertyDef
+    """
+
     def check(self):
         """
         Check that the env action is legal.
