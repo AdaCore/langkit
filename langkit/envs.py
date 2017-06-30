@@ -7,6 +7,25 @@ from langkit.compiled_types import AbstractNodeData, T, lexical_env_type
 from langkit.diagnostics import check_source_language, extract_library_location
 from langkit.expressions import FieldAccess, PropertyDef, Self, construct
 
+"""
+This module contains the public API and the implementation for lexical
+environments specifications.
+
+At a high level, the user adds environment specifications to node types the
+following way::
+
+
+class MyNode(RootNode):
+    ...
+
+    env_spec = EnvSpec([
+        list_of_actions
+    ], other_options)
+
+
+Read the documentation below for more details.
+"""
+
 
 class EnvAction(object):
 
