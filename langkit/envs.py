@@ -27,6 +27,55 @@ Read the documentation below for more details.
 """
 
 
+# Public API for env actions
+
+def add_env():
+    """
+    Add an environment linked to the current node. This env action must be
+    called as a pre action. The only actions that can precede this one in pre
+    actions are add_to_env actions with the current env as a destination.
+
+    :rtype: EnvAction
+    """
+    return AddEnv()
+
+
+def reference(nodes, through):
+    """
+    Reference a group of lexical environments, that will be lazily yielded by
+    calling the `through` property on the array of nodes `nodes`.
+
+    :param AbstractExpression nodes: An expression that yields a list of nodes.
+    :param PropertyDef through: A property reference.
+
+    :rtype: RefEnvs
+    """
+    return RefEnvs(through, nodes)
+
+
+def add_to_env(mappings, dest_env=None, metadata=None, is_post=False,
+               resolver=None):
+    """
+    Specify elements to add to the lexical environment.
+
+    :param AbstractExpression mappings: One or several mappings of key to value
+        to add to the environment. Must be either of type T.env_assoc, or
+        T.env_assoc.array.
+
+    :param AbstractExpression dest_env: The destination environment in which to
+        add the elements.
+    :param AbstractExpression metadata: Optional expression for metadata.
+    :param bool is_post: Whether to execute the add_to_env action after
+        children have been treated.
+    :param PropertyDef|None resolver: Optional property that returns an AST
+        node. If provided, the lexical environment lookup that will try to
+        return the given mappings will first run this property on all nodes and
+        return its result instead.
+    :return:
+    """
+    return AddToEnv(mappings, dest_env, metadata, is_post, resolver)
+
+
 class EnvAction(object):
 
     resolver = None
@@ -175,46 +224,6 @@ class RefEnvs(EnvAction):
             'Referenced environment resolver must have no dynamically bound'
             ' variable'
         )
-
-
-def add_env():
-    return AddEnv()
-
-
-def reference(nodes, through):
-    """
-    Reference a group of lexical environments, that will be lazily yielded by
-    calling the `through` property on the array of nodes `nodes`.
-
-    :param AbstractExpression nodes: An expression that yields a list of nodes.
-    :param PropertyDef through: A property reference.
-
-    :rtype: RefEnvs
-    """
-    return RefEnvs(through, nodes)
-
-
-def add_to_env(mappings, dest_env=None, metadata=None, is_post=False,
-               resolver=None):
-    """
-    Specify elements to add to the lexical environment.
-
-    :param AbstractExpression mappings: One or several mappings of key to value
-        to add to the environment. Must be either of type T.env_assoc, or
-        T.env_assoc.array.
-
-    :param AbstractExpression dest_env: The destination environment in which to
-        add the elements.
-    :param AbstractExpression metadata: Optional expression for metadata.
-    :param bool is_post: Whether to execute the add_to_env action after
-        children have been treated.
-    :param PropertyDef|None resolver: Optional property that returns an AST
-        node. If provided, the lexical environment lookup that will try to
-        return the given mappings will first run this property on all nodes and
-        return its result instead.
-    :return:
-    """
-    return AddToEnv(mappings, dest_env, metadata, is_post, resolver)
 
 
 class EnvSpec(object):
