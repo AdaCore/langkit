@@ -4,7 +4,9 @@ from itertools import count
 
 from langkit import names
 from langkit.compiled_types import AbstractNodeData, T, lexical_env_type
-from langkit.diagnostics import check_source_language, extract_library_location
+from langkit.diagnostics import (
+    check_source_language, extract_library_location, Context
+)
 from langkit.expressions import FieldAccess, PropertyDef, Self, construct
 
 """
@@ -153,6 +155,15 @@ class EnvSpec(object):
         "Whether to call parents env specs or not"
 
         self.adds_env = any(isinstance(a, AddEnv) for a in self.pre_actions)
+
+    @property
+    def diagnostic_context(self):
+        """
+        Diagnostic context for env specs.
+        """
+
+        ctx_message = 'in env spec'
+        return Context(ctx_message, self.location)
 
     def create_internal_property(self, name, expr, type):
         """
