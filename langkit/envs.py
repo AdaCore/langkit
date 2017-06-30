@@ -76,156 +76,6 @@ def add_to_env(mappings, dest_env=None, metadata=None, is_post=False,
     return AddToEnv(mappings, dest_env, metadata, is_post, resolver)
 
 
-class EnvAction(object):
-
-    resolver = None
-    """
-    Some env actions use resolvers, that are property that will yield a lexical
-    environment from a Node. To facilitate accessing it in general, we'll set a
-    class attribute to None on the base class.
-
-    :type: PropertyDef
-    """
-
-    def check(self):
-        """
-        Check that the env action is legal.
-        """
-        pass
-
-    def create_internal_properties(self, create_property):
-        """
-        Create properties needed for the emission of this env action.
-        """
-        pass
-
-
-class AddEnv(EnvAction):
-    pass
-
-
-class AddToEnv(EnvAction):
-    def __init__(self, mappings, dest_env, metadata, is_post, resolver):
-        self.mappings = mappings
-        self.dest_env = dest_env
-        self.metadata = metadata
-        self.is_post = is_post
-        self.resolver = resolver
-
-    def check(self):
-        with self.mappings_prop.diagnostic_context:
-            check_source_language(
-                self.mappings_prop.type.matches(T.env_assoc) or
-                self.mappings_prop.type.matches(T.env_assoc.array),
-                'The bindings expression in environment specification '
-                ' must be either an env_assoc or an array of env_assocs: '
-                'got {} instead'.format(
-                    self.mappings_prop.type.name.camel
-                )
-            )
-            if self.resolver:
-                # Ask for the creation of untyped wrappers for all
-                # properties used as entity resolvers.
-                self.resolver.require_untyped_wrapper()
-
-                check_source_language(
-                    self.resolver.type.matches(T.entity),
-                    'Entity resolver properties must return entities'
-                    ' (got {})'.format(self.resolver.type.name.camel)
-                )
-                check_source_language(
-                    not self.resolver.dynamic_vars,
-                    'Entity resolver properties must have no dynamically'
-                    ' bound variable'
-                )
-
-    def create_internal_properties(self, create_property):
-        self.mappings_prop = create_property(
-            'Env_Mappings', self.mappings, None
-        )
-        self.dest_env_prop = create_property(
-            'Env_Dest', self.dest_env, lexical_env_type
-        )
-        self.metadata_prop = create_property(
-            'MD', self.metadata, T.defer_env_md
-        )
-
-
-class RefEnvs(EnvAction):
-    """
-    Couple of a property and an expression to evaluate referenced envs.
-    """
-
-    def __init__(self, resolver, nodes_expr):
-        """
-        All nodes that nodes_expr yields must belong to the same analysis unit
-        as the AST node that triggers this RefEnvs. Besides, the lexical
-        environment to which these referenced environments are added must also
-        belong to the same analysis unit. Attempts to add referenced
-        environments that do not respect these rules will trigger a
-        Property_Error.
-
-        :param PropertyDef resolver: Property that takes no argument
-            (explicit or implicit) appart from Self, and that returns a lexical
-            environment.
-
-        :param AbstractExpression nodes_expr: Abstract expression that
-            returns an array of AST nodes. Each node will be given to the above
-            resolver in order to get corresponding referenced lexical envs.
-            In this array, null nodes are allowed: they are simply discarded.
-        """
-        assert resolver
-        assert nodes_expr
-
-        self.resolver = resolver
-        ":type: PropertyDef"
-
-        self.nodes_expr = nodes_expr
-        ":type: AbstractExpression"
-
-        self.nodes_property = None
-        """
-        :type: PropertyDef
-
-        This holds the property that returns a list of nodes to pass to the
-        resolver. It is None before the property is built.
-        """
-
-    def create_internal_properties(self, create_property):
-        """
-        Create the property that returns the list of nodes to resolve into
-        referenced lexical envs.
-        """
-        self.nodes_property = create_property(
-            'Ref_Env_Nodes', self.nodes_expr, T.root_node.array
-        )
-
-    def check(self):
-        """
-        Check that the resolver property is conforming.
-        """
-        if isinstance(self.resolver, T.Defer):
-            self.resolver = self.resolver.get()
-        self.resolver.require_untyped_wrapper()
-
-        check_source_language(
-            self.resolver.type.matches(lexical_env_type),
-            'Referenced environment resolver must return a lexical'
-            ' environment (not {})'.format(
-                self.resolver.type.name.camel
-            )
-        )
-        check_source_language(
-            not self.resolver.natural_arguments,
-            'Referenced environment resolver must take no argument'
-        )
-        check_source_language(
-            not self.resolver.dynamic_vars,
-            'Referenced environment resolver must have no dynamically bound'
-            ' variable'
-        )
-
-
 class EnvSpec(object):
     """
     Class defining a lexical environment specification for an ASTNode subclass.
@@ -394,3 +244,153 @@ class EnvSpec(object):
         :rtype: str
         """
         return self._render_field_access(self.env_hook_arg)
+
+
+class EnvAction(object):
+
+    resolver = None
+    """
+    Some env actions use resolvers, that are property that will yield a lexical
+    environment from a Node. To facilitate accessing it in general, we'll set a
+    class attribute to None on the base class.
+
+    :type: PropertyDef
+    """
+
+    def check(self):
+        """
+        Check that the env action is legal.
+        """
+        pass
+
+    def create_internal_properties(self, create_property):
+        """
+        Create properties needed for the emission of this env action.
+        """
+        pass
+
+
+class AddEnv(EnvAction):
+    pass
+
+
+class AddToEnv(EnvAction):
+    def __init__(self, mappings, dest_env, metadata, is_post, resolver):
+        self.mappings = mappings
+        self.dest_env = dest_env
+        self.metadata = metadata
+        self.is_post = is_post
+        self.resolver = resolver
+
+    def check(self):
+        with self.mappings_prop.diagnostic_context:
+            check_source_language(
+                self.mappings_prop.type.matches(T.env_assoc) or
+                self.mappings_prop.type.matches(T.env_assoc.array),
+                'The bindings expression in environment specification '
+                ' must be either an env_assoc or an array of env_assocs: '
+                'got {} instead'.format(
+                    self.mappings_prop.type.name.camel
+                )
+            )
+            if self.resolver:
+                # Ask for the creation of untyped wrappers for all
+                # properties used as entity resolvers.
+                self.resolver.require_untyped_wrapper()
+
+                check_source_language(
+                    self.resolver.type.matches(T.entity),
+                    'Entity resolver properties must return entities'
+                    ' (got {})'.format(self.resolver.type.name.camel)
+                )
+                check_source_language(
+                    not self.resolver.dynamic_vars,
+                    'Entity resolver properties must have no dynamically'
+                    ' bound variable'
+                )
+
+    def create_internal_properties(self, create_property):
+        self.mappings_prop = create_property(
+            'Env_Mappings', self.mappings, None
+        )
+        self.dest_env_prop = create_property(
+            'Env_Dest', self.dest_env, lexical_env_type
+        )
+        self.metadata_prop = create_property(
+            'MD', self.metadata, T.defer_env_md
+        )
+
+
+class RefEnvs(EnvAction):
+    """
+    Couple of a property and an expression to evaluate referenced envs.
+    """
+
+    def __init__(self, resolver, nodes_expr):
+        """
+        All nodes that nodes_expr yields must belong to the same analysis unit
+        as the AST node that triggers this RefEnvs. Besides, the lexical
+        environment to which these referenced environments are added must also
+        belong to the same analysis unit. Attempts to add referenced
+        environments that do not respect these rules will trigger a
+        Property_Error.
+
+        :param PropertyDef resolver: Property that takes no argument
+            (explicit or implicit) appart from Self, and that returns a lexical
+            environment.
+
+        :param AbstractExpression nodes_expr: Abstract expression that
+            returns an array of AST nodes. Each node will be given to the above
+            resolver in order to get corresponding referenced lexical envs.
+            In this array, null nodes are allowed: they are simply discarded.
+        """
+        assert resolver
+        assert nodes_expr
+
+        self.resolver = resolver
+        ":type: PropertyDef"
+
+        self.nodes_expr = nodes_expr
+        ":type: AbstractExpression"
+
+        self.nodes_property = None
+        """
+        :type: PropertyDef
+
+        This holds the property that returns a list of nodes to pass to the
+        resolver. It is None before the property is built.
+        """
+
+    def create_internal_properties(self, create_property):
+        """
+        Create the property that returns the list of nodes to resolve into
+        referenced lexical envs.
+        """
+        self.nodes_property = create_property(
+            'Ref_Env_Nodes', self.nodes_expr, T.root_node.array
+        )
+
+    def check(self):
+        """
+        Check that the resolver property is conforming.
+        """
+        if isinstance(self.resolver, T.Defer):
+            self.resolver = self.resolver.get()
+        self.resolver.require_untyped_wrapper()
+
+        check_source_language(
+            self.resolver.type.matches(lexical_env_type),
+            'Referenced environment resolver must return a lexical'
+            ' environment (not {})'.format(
+                self.resolver.type.name.camel
+            )
+        )
+        check_source_language(
+            not self.resolver.natural_arguments,
+            'Referenced environment resolver must take no argument'
+        )
+        check_source_language(
+            not self.resolver.dynamic_vars,
+            'Referenced environment resolver must have no dynamically bound'
+            ' variable'
+        )
