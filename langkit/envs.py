@@ -158,6 +158,10 @@ class RefEnvs(EnvAction):
         )
 
 
+def add_env():
+    return AddEnv()
+
+
 def reference(nodes, through):
     """
     Reference a group of lexical environments, that will be lazily yielded by
@@ -202,10 +206,8 @@ class EnvSpec(object):
     PROPERTY_COUNT = count(0)
 
     def __init__(self,
-                 add_env=False,
-                 add_to_env=None,
-                 ref_envs=[],
-                 post_ref_envs=[],
+                 pre_actions=[],
+                 post_actions=[],
                  initial_env=None,
                  env_hook_arg=None,
                  call_parents=True):
@@ -250,9 +252,6 @@ class EnvSpec(object):
         :type: langkit.compiled_types.ASTNodeType
         """
 
-        self._add_env = add_env
-        ":type: bool"
-
         # The following attributes (unresolved_*) contain abstract expressions
         # used to describe various environment behaviors. They all have
         # corresponding attributes that embed them as properties: see below.
@@ -260,35 +259,8 @@ class EnvSpec(object):
         self._unresolved_initial_env = initial_env
         ":type: AbstractExpression"
 
-        add_to_envs = []
-
-        if add_to_env:
-            check_source_language(
-                isinstance(add_to_env, AddToEnv)
-                or isinstance(add_to_env, list),
-                "Wrong parameter for add_to_env: Expected AddToEnv named-tuple"
-                " or list of AddToEnv"
-            )
-
-            add_to_envs = (
-                [add_to_env] if isinstance(add_to_env, AddToEnv)
-                else add_to_env
-            )
-
-        self.pre_actions = [
-            a for a in add_to_envs if not a.is_post
-        ] + ([AddEnv()] if add_env else []) + (
-            [ref_envs] if isinstance(ref_envs, RefEnvs) else ref_envs
-        )
-
-        self.post_actions = [
-            a for a in add_to_envs if a.is_post
-        ] + (
-            [post_ref_envs]
-            if isinstance(post_ref_envs, RefEnvs)
-            else post_ref_envs
-        )
-
+        self.pre_actions = list(pre_actions)
+        self.post_actions = list(post_actions)
         self.actions = self.pre_actions + self.post_actions
 
         self._unresolved_env_hook_arg = env_hook_arg
@@ -304,6 +276,8 @@ class EnvSpec(object):
 
         self.call_parents = call_parents
         "Whether to call parents env specs or not"
+
+        self.adds_env = any(isinstance(a, AddEnv) for a in self.pre_actions)
 
     def create_properties(self, context):
         """

@@ -4,7 +4,7 @@ from os import path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, Struct, abstract, env_metadata
-from langkit.envs import EnvSpec, add_to_env
+from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, List, Opt, Row, Tok
 
@@ -34,10 +34,10 @@ class Def(Stmt):
     body = Field()
 
     name = Property(Self.id)
-    env_spec = EnvSpec(
-        add_env=True,
-        add_to_env=add_to_env(Self.id.symbol, Self)
-    )
+    env_spec = EnvSpec([
+        add_to_env(Self.id.symbol, Self),
+        add_env()
+    ])
 
     faulty_prop = Property(Self._env_mappings_0)
 
@@ -45,7 +45,7 @@ class Def(Stmt):
 class Block(Stmt):
     items = Field()
 
-    env_spec = EnvSpec(add_env=True)
+    env_spec = EnvSpec([add_env()])
 
 
 def lang_def():

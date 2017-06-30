@@ -247,7 +247,7 @@
          Bound_Env, Root_Env : AST_Envs.Lexical_Env);
    % endif
 
-   % if cls.env_spec._add_env:
+   % if cls.env_spec.adds_env:
       overriding function Node_Env
         (Node : access ${type_name};
          E_Info : Entity_Info := No_Entity_Info) return AST_Envs.Lexical_Env;
@@ -629,7 +629,7 @@
          return Initial_Env;
       end if;
 
-      % if cls.env_spec._add_env:
+      % if cls.env_spec.adds_env:
          G := Simple_Env_Getter (Initial_Env);
          % if has_dyn_env:
          if Initial_Env not in Root_Env | Empty_Env
@@ -711,7 +711,7 @@
       G_State     : Env_Getter_State_T :=
         (Node => ${root_node_type_name} (Self));
 
-      % if cls.env_spec._add_env:
+      % if cls.env_spec.adds_env:
       G           : Env_Getter;
       % endif
    begin
@@ -739,7 +739,7 @@
    ## If the node class adds an env, then the environement in which node is is
    ## the parent env.
 
-   % if cls.env_spec._add_env:
+   % if cls.env_spec.adds_env:
 
    --------------
    -- Node_Env --

@@ -8,7 +8,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, LexicalEnvType, T
-from langkit.envs import EnvSpec, add_to_env
+from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import (DynamicVariable, New, Property, Self,
                                  langkit_property)
 from langkit.parsers import Grammar, List, Tok
@@ -31,20 +31,20 @@ def run(name, prop):
         name = Field()
         refs = Field()
 
-        env_spec = EnvSpec(
-            add_env=True,
-            add_to_env=add_to_env(
+        env_spec = EnvSpec([
+            add_to_env(
                 New(T.env_assoc, key=Self.name.symbol, val=Self)
-            )
-        )
+            ),
+            add_env()
+        ])
 
     class Ref(FooNode):
         name = Field()
 
-        env_spec = EnvSpec(add_to_env=add_to_env(
+        env_spec = EnvSpec([add_to_env(
             New(T.env_assoc, key=Self.name.symbol, val=Self),
             resolver=FooNode.resolve_ref
-        ))
+        )])
 
         @langkit_property(public=True)
         def resolve():

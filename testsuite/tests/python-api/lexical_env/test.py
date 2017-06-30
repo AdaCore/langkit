@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import (ASTNode, Field, LexicalEnvType, Struct, T, abstract,
                          env_metadata)
-from langkit.envs import EnvSpec, add_to_env
+from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import Self, New, langkit_property
 from langkit.parsers import Grammar, List, Opt, Row, Tok
 
@@ -39,16 +39,16 @@ class Def(Stmt):
     id = Field()
     body = Field()
 
-    env_spec = EnvSpec(
-        add_env=True,
-        add_to_env=add_to_env(New(T.env_assoc, key=Self.id.symbol, val=Self))
-    )
+    env_spec = EnvSpec([
+        add_to_env(New(T.env_assoc, key=Self.id.symbol, val=Self)),
+        add_env()
+    ])
 
 
 class Block(Stmt):
     items = Field()
 
-    env_spec = EnvSpec(add_env=True)
+    env_spec = EnvSpec([add_env()])
 
 
 foo_grammar = Grammar('stmts_rule')

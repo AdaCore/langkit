@@ -9,7 +9,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, LexicalEnvType, T
-from langkit.envs import EnvSpec, RefEnvs, add_to_env
+from langkit.envs import EnvSpec, reference, add_to_env, add_env
 from langkit.expressions import DynamicVariable, New, Self, langkit_property
 from langkit.parsers import Grammar, List, Row, Tok
 
@@ -51,26 +51,26 @@ class Block(FooNode):
     usings = Field()
     refs = Field()
 
-    env_spec = EnvSpec(
-        add_env=True,
-        add_to_env=add_to_env(New(T.env_assoc, key=Self.name.sym, val=Self))
-    )
+    env_spec = EnvSpec([
+        add_env(),
+        add_to_env(New(T.env_assoc, key=Self.name.sym, val=Self))
+    ])
 
 
 class Decl(FooNode):
     name = Field()
 
-    env_spec = EnvSpec(
-        add_to_env=add_to_env(New(T.env_assoc, key=Self.name.sym, val=Self))
-    )
+    env_spec = EnvSpec([
+        add_to_env(New(T.env_assoc, key=Self.name.sym, val=Self))
+    ])
 
 
 class Using(FooNode):
     name = Field()
-    env_spec = EnvSpec(
-        ref_envs=[RefEnvs(Name.designated_env,
-                          Self.name.cast(FooNode).to_array)]
-    )
+    env_spec = EnvSpec([
+        reference(Self.name.cast(FooNode).to_array,
+                  through=Name.designated_env)
+    ])
 
 
 class Ref(FooNode):

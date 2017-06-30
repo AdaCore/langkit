@@ -9,7 +9,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, LexicalEnvType, T
-from langkit.envs import EnvSpec, add_to_env
+from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import New, Self, langkit_property
 from langkit.parsers import Grammar, List, Tok
 
@@ -29,13 +29,14 @@ class FooNode(ASTNode):
 class Name(FooNode):
     tok = Field()
 
-    env_spec = EnvSpec(add_to_env=add_to_env(New(T.env_assoc,
-                                                 key=Self.tok.symbol,
-                                                 val=Self)))
+    env_spec = EnvSpec([
+        add_to_env(New(T.env_assoc, key=Self.tok.symbol, val=Self)),
+        add_env()
+    ])
 
 
 class Scope(Name.list):
-    env_spec = EnvSpec(add_env=True)
+    env_spec = EnvSpec([add_env()])
 
 
 foo_grammar = Grammar('main_rule')
