@@ -154,6 +154,23 @@ class EnvSpec(object):
 
         self.adds_env = any(isinstance(a, AddEnv) for a in self.pre_actions)
 
+    def create_internal_property(self, name, expr, type):
+        """
+        Create an internal property for this env spec.
+        """
+        if expr is None:
+            return None
+
+        p = PropertyDef(
+            expr, AbstractNodeData.PREFIX_INTERNAL,
+            name=names.Name('_{}_{}'.format(name,
+                                            next(self.PROPERTY_COUNT))),
+            public=False, type=type, ignore_warn_on_node=True
+        )
+        p.location = getattr(expr, 'location') or self.location
+        self.ast_node.add_field(p)
+        return p
+
     def create_properties(self, context):
         """
         Turn the various abstract expression attributes for this env spec into
@@ -162,28 +179,14 @@ class EnvSpec(object):
         :param langkit.compile_context.CompileCtx context: Current context.
         """
 
-        def create_internal_property(name, expr, type):
-            if expr is None:
-                return None
-
-            p = PropertyDef(
-                expr, AbstractNodeData.PREFIX_INTERNAL,
-                name=names.Name('_{}_{}'.format(name,
-                                                next(self.PROPERTY_COUNT))),
-                public=False, type=type, ignore_warn_on_node=True
-            )
-            p.location = getattr(expr, 'location') or self.location
-            self.ast_node.add_field(p)
-            return p
-
-        self.initial_env = create_internal_property(
+        self.initial_env = self.create_internal_property(
             'Initial_Env', self._unresolved_initial_env, lexical_env_type
         )
 
         for action in self.actions:
-            action.create_internal_properties(create_internal_property)
+            action.create_internal_properties(self)
 
-        self.env_hook_arg = create_internal_property(
+        self.env_hook_arg = self.create_internal_property(
             'Env_Hook_Arg', self._unresolved_env_hook_arg, T.root_node
         )
 
@@ -260,7 +263,7 @@ class EnvAction(object):
         """
         pass
 
-    def create_internal_properties(self, create_property):
+    def create_internal_properties(self, env_spec):
         """
         Create properties needed for the emission of this env action.
         """
@@ -305,14 +308,14 @@ class AddToEnv(EnvAction):
                     ' bound variable'
                 )
 
-    def create_internal_properties(self, create_property):
-        self.mappings_prop = create_property(
+    def create_internal_properties(self, env_spec):
+        self.mappings_prop = env_spec.create_internal_property(
             'Env_Mappings', self.mappings, None
         )
-        self.dest_env_prop = create_property(
+        self.dest_env_prop = env_spec.create_internal_property(
             'Env_Dest', self.dest_env, lexical_env_type
         )
-        self.metadata_prop = create_property(
+        self.metadata_prop = env_spec.create_internal_property(
             'MD', self.metadata, T.defer_env_md
         )
 
@@ -357,12 +360,12 @@ class RefEnvs(EnvAction):
         resolver. It is None before the property is built.
         """
 
-    def create_internal_properties(self, create_property):
+    def create_internal_properties(self, env_spec):
         """
         Create the property that returns the list of nodes to resolve into
         referenced lexical envs.
         """
-        self.nodes_property = create_property(
+        self.nodes_property = env_spec.create_internal_property(
             'Ref_Env_Nodes', self.nodes_expr, T.root_node.array
         )
 
