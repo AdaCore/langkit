@@ -626,6 +626,33 @@
       % endfor
    </%def>
 
+   <%def name="emit_add_env(add_env)">
+      --  Return early if we only want to run add_to_env actions
+      if Add_To_Env_Only then
+         return Initial_Env;
+      end if;
+
+      ## add_env
+
+      % if cls.env_spec._add_env:
+         G := Simple_Env_Getter (Initial_Env);
+         % if has_dyn_env:
+         if Initial_Env not in Root_Env | Empty_Env 
+            and then Initial_Env.Node.Unit /= Self.Unit
+         then
+            G := Dyn_Env_Getter (${env_getter}'Access, G_State);
+         end if;
+         % endif
+
+         Self.Self_Env := AST_Envs.Create
+           (Parent        => G,
+            Node          => Self,
+            Is_Refcounted => False);
+
+         Register_Destroyable (Self.Unit, Self.Self_Env);
+      % endif
+   </%def>
+
    <%
    env_getter = "{}_Initial_Env_Getter_Fn".format(cls.name)
    has_dyn_env = cls.env_spec.initial_env or cls.env_spec.env_hook_enabled
@@ -703,30 +730,7 @@
       % endif
       % endfor
 
-      --  Return early if we only want to run add_to_env actions
-      if Add_To_Env_Only then
-         return Initial_Env;
-      end if;
-
-      ## add_env
-
-      % if cls.env_spec._add_env:
-         G := Simple_Env_Getter (Initial_Env);
-         % if has_dyn_env:
-         if Initial_Env not in Root_Env | Empty_Env 
-            and then Initial_Env.Node.Unit /= Self.Unit
-         then
-            G := Dyn_Env_Getter (${env_getter}'Access, G_State);
-         end if;
-         % endif
-
-         Self.Self_Env := AST_Envs.Create
-           (Parent        => G,
-            Node          => Self,
-            Is_Refcounted => False);
-
-         Register_Destroyable (Self.Unit, Self.Self_Env);
-      % endif
+      ${emit_add_env(None)}
 
       ## ref_envs
 
