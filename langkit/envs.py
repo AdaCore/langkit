@@ -90,24 +90,12 @@ class EnvSpec(object):
                  env_hook_arg=None,
                  call_parents=True):
         """
+        :param list[EnvAction] pre_actions: A list of environment actions to
+            execute.
 
-        :param bool add_env: Wether to add a new scoped lexical environment.
-            The new environment will be linked to the corresponding AST node
-            and will have the AST node's lexical environment as a parent.
-
-        :param add_to_env: Eiter an AddToEnv named tuple, or a list of them.
-            Used to add elements to the lexical environment. See add_to_env's
-            doc for more details.
-        :type add_to_env: AddToEnv|[AddToEnv]
-
-        :param RefEnvs|list[RefEnvs] ref_envs: If this env spec introduces
-            referenced environments, this must be a RefEnvs instance (or a list
-            of them) to describe how to compute the environments to reference.
-            This will register referenced environments to this node' "self"
-            environment.
-
-        :param RefEnvs|list[RefEnvs] post_ref_envs: Like ref_envs, but
-            evaluated after after the children have been processed.
+        :param list[EnvAction] post_actions: A list of environment actions to
+            execute after the env spec for the node's children has been
+            executed.
 
         :param AbstractExpression initial_env: If supplied, this env will be
             used as the lexical environment to execute the rest of the actions.
