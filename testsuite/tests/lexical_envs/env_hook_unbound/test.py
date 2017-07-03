@@ -19,7 +19,7 @@ class FooNode(ASTNode):
 
 
 class BarNode(FooNode):
-    env_spec = EnvSpec([call_env_hook(Self)])
+    env_spec = EnvSpec(call_env_hook(Self))
 
 
 def lang_def():

@@ -29,14 +29,14 @@ class FooNode(ASTNode):
 class Name(FooNode):
     tok = Field()
 
-    env_spec = EnvSpec([
+    env_spec = EnvSpec(
         add_to_env(New(T.env_assoc, key=Self.tok.symbol, val=Self)),
         add_env()
-    ])
+    )
 
 
 class Scope(Name.list):
-    env_spec = EnvSpec([add_env()])
+    env_spec = EnvSpec(add_env())
 
 
 foo_grammar = Grammar('main_rule')

@@ -127,6 +127,8 @@ class EnvSpec(object):
         :type: langkit.compiled_types.ASTNodeType
         """
 
+        actions = list(actions)
+
         self.env_hook = None
         if isinstance(actions and actions[0], CallEnvHook):
             self.env_hook = actions.pop(0)

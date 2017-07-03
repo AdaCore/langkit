@@ -51,26 +51,26 @@ class Block(FooNode):
     usings = Field()
     refs = Field()
 
-    env_spec = EnvSpec([
+    env_spec = EnvSpec(
         add_to_env(New(T.env_assoc, key=Self.name.sym, val=Self)),
         add_env()
-    ])
+    )
 
 
 class Decl(FooNode):
     name = Field()
 
-    env_spec = EnvSpec([
+    env_spec = EnvSpec(
         add_to_env(New(T.env_assoc, key=Self.name.sym, val=Self))
-    ])
+    )
 
 
 class Using(FooNode):
     name = Field()
-    env_spec = EnvSpec([
+    env_spec = EnvSpec(
         reference(Self.name.cast(FooNode).to_array,
                   through=Name.designated_env)
-    ])
+    )
 
 
 class Ref(FooNode):

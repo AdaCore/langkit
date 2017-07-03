@@ -33,21 +33,21 @@ class Decl(FooNode):
     name = Field()
     refs = Field()
 
-    env_spec = EnvSpec([
+    env_spec = EnvSpec(
         add_to_env(
             New(T.env_assoc, key=Self.name.symbol, val=Self)
         ),
         add_env()
-    ])
+    )
 
 
 class Ref(FooNode):
     name = Field()
 
-    env_spec = EnvSpec([add_to_env(
+    env_spec = EnvSpec(add_to_env(
         New(T.env_assoc, key=Self.name.symbol, val=Self),
         resolver=FooNode.resolve_ref
-    )])
+    ))
 
     @langkit_property(public=True)
     def resolve():

@@ -19,9 +19,9 @@ class FooNode(ASTNode):
 
 
 class Example(FooNode):
-    env_spec = EnvSpec([
+    env_spec = EnvSpec(
         set_initial_env(Self.parent.parent.children_env)
-    ])
+    )
 
 
 foo_grammar = Grammar('main_rule')

@@ -39,16 +39,16 @@ class Def(Stmt):
     id = Field()
     body = Field()
 
-    env_spec = EnvSpec([
+    env_spec = EnvSpec(
         add_to_env(New(T.env_assoc, key=Self.id.symbol, val=Self)),
         add_env()
-    ])
+    )
 
 
 class Block(Stmt):
     items = Field()
 
-    env_spec = EnvSpec([add_env()])
+    env_spec = EnvSpec(add_env())
 
 
 foo_grammar = Grammar('stmts_rule')

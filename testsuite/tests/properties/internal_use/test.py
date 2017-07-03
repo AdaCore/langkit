@@ -34,10 +34,10 @@ class Def(Stmt):
     body = Field()
 
     name = Property(Self.id)
-    env_spec = EnvSpec([
+    env_spec = EnvSpec(
         add_to_env(Self.id.symbol, Self),
         add_env()
-    ])
+    )
 
     faulty_prop = Property(Self._env_mappings_0)
 
@@ -45,7 +45,7 @@ class Def(Stmt):
 class Block(Stmt):
     items = Field()
 
-    env_spec = EnvSpec([add_env()])
+    env_spec = EnvSpec(add_env())
 
 
 def lang_def():
