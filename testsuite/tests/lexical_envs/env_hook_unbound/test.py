@@ -4,7 +4,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode
-from langkit.envs import EnvSpec
+from langkit.envs import EnvSpec, call_env_hook
 from langkit.expressions import Self
 from langkit.parsers import Grammar, Row
 
@@ -19,7 +19,7 @@ class FooNode(ASTNode):
 
 
 class BarNode(FooNode):
-    env_spec = EnvSpec(env_hook_arg=Self)
+    env_spec = EnvSpec([call_env_hook(Self)])
 
 
 def lang_def():

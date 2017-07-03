@@ -87,6 +87,10 @@ def set_initial_env(env_expr):
     return SetInitialEnv(env_expr)
 
 
+def call_env_hook(env_expr):
+    return CallEnvHook(env_expr)
+
+
 class EnvSpec(object):
     """
     Class defining a lexical environment specification for an ASTNode subclass.
@@ -94,7 +98,7 @@ class EnvSpec(object):
 
     PROPERTY_COUNT = count(0)
 
-    def __init__(self, actions=[], env_hook_arg=None):
+    def __init__(self, actions=[]):
         """
         :param list[EnvAction] pre_actions: A list of environment actions to
             execute.
@@ -124,9 +128,10 @@ class EnvSpec(object):
         :type: langkit.compiled_types.ASTNodeType
         """
 
-        # The following attributes (unresolved_*) contain abstract expressions
-        # used to describe various environment behaviors. They all have
-        # corresponding attributes that embed them as properties: see below.
+        self.env_hook = None
+        if isinstance(actions and actions[0], CallEnvHook):
+            self.env_hook = actions.pop(0)
+            ":type: SetInitialEnv"
 
         self.initial_env = None
         if isinstance(actions and actions[0], SetInitialEnv):
@@ -143,9 +148,6 @@ class EnvSpec(object):
         self.pre_actions = pre
         self.post_actions = post
         self.actions = self.pre_actions + self.post_actions
-
-        self._unresolved_env_hook_arg = env_hook_arg
-        ":type: AbstractExpression"
 
         # These are the property attributes
 
@@ -200,8 +202,10 @@ class EnvSpec(object):
         for action in self.actions:
             action.create_internal_properties(self)
 
-        self.env_hook_arg = self.create_internal_property(
-            'Env_Hook_Arg', self._unresolved_env_hook_arg, T.root_node
+        self.env_hook_arg_prop = self.create_internal_property(
+            'Env_Hook_Arg',
+            self.env_hook and self.env_hook.env_expr,
+            T.root_node
         )
 
     def check_spec(self, context):
@@ -263,7 +267,7 @@ class EnvSpec(object):
 
         :rtype: bool
         """
-        return bool(self.env_hook_arg)
+        return bool(self.env_hook_arg_prop)
 
     @property
     def env_hook_arg_expr(self):
@@ -274,7 +278,7 @@ class EnvSpec(object):
 
         :rtype: str
         """
-        return self._render_field_access(self.env_hook_arg)
+        return self._render_field_access(self.env_hook_arg_prop)
 
 
 class EnvAction(object):
@@ -433,6 +437,27 @@ class HandleChildren(EnvAction):
     pass
 
 
-class SetInitialEnv(EnvAction):
+class ExprHolderAction(EnvAction):
     def __init__(self, env_expr):
         self.env_expr = env_expr
+
+
+class SetInitialEnv(ExprHolderAction):
+
+    def check(self):
+        # Check is not normally called on this, so if it is called it means
+        # that a SetInitialEnv instance has found its way into a regular action
+        # list.
+        check_source_language(
+            "set_initial_env can only be preceded by call_env_hook"
+        )
+
+
+class CallEnvHook(ExprHolderAction):
+    def check(self):
+        # Check is not normally called on this, so if it is called it means
+        # that a CallEnvHook instance has found its way into a regular action
+        # list.
+        check_source_language(
+            "set_initial_env must be first in the action list"
+        )
