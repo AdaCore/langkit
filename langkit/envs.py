@@ -113,7 +113,7 @@ class EnvSpec(object):
 
     PROPERTY_COUNT = count(0)
 
-    def __init__(self, actions=[]):
+    def __init__(self, *actions):
         """
         :param list[EnvAction] actions: A list of environment actions to
             execute.
