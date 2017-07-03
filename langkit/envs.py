@@ -100,24 +100,8 @@ class EnvSpec(object):
 
     def __init__(self, actions=[]):
         """
-        :param list[EnvAction] pre_actions: A list of environment actions to
+        :param list[EnvAction] actions: A list of environment actions to
             execute.
-
-        :param list[EnvAction] post_actions: A list of environment actions to
-            execute after the env spec for the node's children has been
-            executed.
-
-        :param AbstractExpression initial_env: If supplied, this env will be
-            used as the lexical environment to execute the rest of the actions.
-            For example, if you pass an initial_env, and add_env, then an env
-            will be added to the env passed as initial_env, and the node
-            concerned by this env specification will have initial_env as a
-            parent indirectly.
-
-        :param AbstractExpression env_hook_arg: Does nothing if left to None.
-            If supplied, it must be an abstract expression that resolves to a
-            node. This expression will be evaluated and passed to the
-            environment hook.
         """
         self.location = extract_library_location()
 
