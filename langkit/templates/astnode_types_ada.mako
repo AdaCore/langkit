@@ -715,14 +715,6 @@
       G           : Env_Getter;
       % endif
    begin
-      ## Super call
-
-      % if cls.base().env_spec and cls.env_spec.call_parents:
-         Initial_Env := Pre_Env_Actions
-           (${cls.base().value_type_name()} (Self.all)'Access,
-            Bound_Env, Root_Env, Add_To_Env_Only);
-      % endif
-
       ## initial_env
 
       % if has_dyn_env:
@@ -765,12 +757,6 @@
       use AST_Envs;
       Initial_Env : Lexical_Env := Bound_Env;
    begin
-      % if cls.base().env_spec and cls.env_spec.call_parents:
-         Post_Env_Actions
-           (${cls.base().value_type_name()} (Self.all)'Access,
-            Bound_Env, Root_Env);
-      % endif
-
       #############################
       ## Post add_to_env actions ##
       #############################

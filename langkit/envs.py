@@ -93,8 +93,7 @@ class EnvSpec(object):
     def __init__(self,
                  actions=[],
                  initial_env=None,
-                 env_hook_arg=None,
-                 call_parents=True):
+                 env_hook_arg=None):
         """
         :param list[EnvAction] pre_actions: A list of environment actions to
             execute.
@@ -152,9 +151,6 @@ class EnvSpec(object):
 
         self.env_hook_arg = None
         ":type: PropertyDef"
-
-        self.call_parents = call_parents
-        "Whether to call parents env specs or not"
 
         self.adds_env = any(isinstance(a, AddEnv) for a in self.pre_actions)
 
