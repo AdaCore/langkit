@@ -4,7 +4,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode
-from langkit.envs import EnvSpec
+from langkit.envs import EnvSpec, set_initial_env
 from langkit.expressions import Self
 from langkit.parsers import Grammar, Row
 
@@ -19,7 +19,9 @@ class FooNode(ASTNode):
 
 
 class Example(FooNode):
-    env_spec = EnvSpec(initial_env=Self.parent.parent.children_env)
+    env_spec = EnvSpec([
+        set_initial_env(Self.parent.parent.children_env)
+    ])
 
 
 foo_grammar = Grammar('main_rule')

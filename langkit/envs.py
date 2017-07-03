@@ -83,6 +83,10 @@ def handle_children():
     return HandleChildren()
 
 
+def set_initial_env(env_expr):
+    return SetInitialEnv(env_expr)
+
+
 class EnvSpec(object):
     """
     Class defining a lexical environment specification for an ASTNode subclass.
@@ -90,10 +94,7 @@ class EnvSpec(object):
 
     PROPERTY_COUNT = count(0)
 
-    def __init__(self,
-                 actions=[],
-                 initial_env=None,
-                 env_hook_arg=None):
+    def __init__(self, actions=[], env_hook_arg=None):
         """
         :param list[EnvAction] pre_actions: A list of environment actions to
             execute.
@@ -127,8 +128,10 @@ class EnvSpec(object):
         # used to describe various environment behaviors. They all have
         # corresponding attributes that embed them as properties: see below.
 
-        self._unresolved_initial_env = initial_env
-        ":type: AbstractExpression"
+        self.initial_env = None
+        if isinstance(actions and actions[0], SetInitialEnv):
+            self.initial_env = actions.pop(0)
+            ":type: SetInitialEnv"
 
         pre, post = split_by(
             lambda a: not isinstance(a, HandleChildren), actions
@@ -146,7 +149,7 @@ class EnvSpec(object):
 
         # These are the property attributes
 
-        self.initial_env = None
+        self.initial_env_prop = None
         ":type: PropertyDef"
 
         self.env_hook_arg = None
@@ -188,8 +191,10 @@ class EnvSpec(object):
         :param langkit.compile_context.CompileCtx context: Current context.
         """
 
-        self.initial_env = self.create_internal_property(
-            'Initial_Env', self._unresolved_initial_env, lexical_env_type
+        self.initial_env_prop = self.create_internal_property(
+            'Initial_Env',
+            self.initial_env and self.initial_env.env_expr,
+            lexical_env_type
         )
 
         for action in self.actions:
@@ -249,7 +254,7 @@ class EnvSpec(object):
         The initial environment expression.
         :rtype: str
         """
-        return self._render_field_access(self.initial_env)
+        return self._render_field_access(self.initial_env_prop)
 
     @property
     def env_hook_enabled(self):
@@ -426,3 +431,8 @@ class HandleChildren(EnvAction):
     Stub class to delimit pre and post env actions.
     """
     pass
+
+
+class SetInitialEnv(EnvAction):
+    def __init__(self, env_expr):
+        self.env_expr = env_expr
