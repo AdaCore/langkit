@@ -76,6 +76,13 @@ def add_to_env(mappings, dest_env=None, metadata=None, resolver=None):
     return AddToEnv(mappings, dest_env, metadata, resolver)
 
 
+def handle_children():
+    """
+    Handle the node's children lexical environments.
+    """
+    return HandleChildren()
+
+
 class EnvSpec(object):
     """
     Class defining a lexical environment specification for an ASTNode subclass.
@@ -84,8 +91,7 @@ class EnvSpec(object):
     PROPERTY_COUNT = count(0)
 
     def __init__(self,
-                 pre_actions=[],
-                 post_actions=[],
+                 actions=[],
                  initial_env=None,
                  env_hook_arg=None,
                  call_parents=True):
@@ -125,8 +131,15 @@ class EnvSpec(object):
         self._unresolved_initial_env = initial_env
         ":type: AbstractExpression"
 
-        self.pre_actions = list(pre_actions)
-        self.post_actions = list(post_actions)
+        pre, post = split_by(
+            lambda a: not isinstance(a, HandleChildren), actions
+        )
+
+        # Get rid of the HandleChildren delimiter action
+        post = post and post[1:]
+
+        self.pre_actions = pre
+        self.post_actions = post
         self.actions = self.pre_actions + self.post_actions
 
         self._unresolved_env_hook_arg = env_hook_arg
@@ -410,3 +423,10 @@ class RefEnvs(EnvAction):
             'Referenced environment resolver must have no dynamically bound'
             ' variable'
         )
+
+
+class HandleChildren(EnvAction):
+    """
+    Stub class to delimit pre and post env actions.
+    """
+    pass
