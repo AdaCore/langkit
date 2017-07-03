@@ -79,15 +79,30 @@ def add_to_env(mappings, dest_env=None, metadata=None, resolver=None):
 def handle_children():
     """
     Handle the node's children lexical environments.
+
+    :rtype: HandleChildren
     """
     return HandleChildren()
 
 
 def set_initial_env(env_expr):
+    """
+    Action that sets the initial env in which the rest of the environment
+    actions are evaluated. This action must be first or second in the list of
+    action, can only be preceded by call_env_hook.
+
+    :rtype: SetInitialEnv
+    """
     return SetInitialEnv(env_expr)
 
 
 def call_env_hook(env_expr):
+    """
+    Call the env-hook, that is an externally defined procedure, with env_expr
+    as argument.
+
+    :rtype: CallEnvHook
+    """
     return CallEnvHook(env_expr)
 
 
