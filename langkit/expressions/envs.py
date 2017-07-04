@@ -202,14 +202,19 @@ def rebind_env(self, env, to_rebind, rebind_to):
                     abstract_expr=self)
 
 
-def make_as_entity(node_expr, abstract_expr=None):
+def make_as_entity(node_expr, entity_info=None, abstract_expr=None):
     """
     Helper for as_entity. Takes a resolved expression instead of an abstract
     one.
     """
     from langkit.expressions import If, IsNull, New
-    p = PropertyDef.get()
-    p.set_uses_entity_info()
+
+    # If we use the ambient entity info, make the current property an entity
+    # one.
+    if entity_info is None:
+        p = PropertyDef.get()
+        p.set_uses_entity_info()
+        entity_info = construct(p.entity_info_arg.var)
 
     # Create a variable to hold the input node so we can reference it
     # multiple times in the sub-expression.
@@ -219,13 +224,9 @@ def make_as_entity(node_expr, abstract_expr=None):
         IsNull.construct_static(node_expr),
         NullExpr(node_expr.type.entity),
         New.StructExpr(
-            node_expr.type.entity, {
-                names.Name('El'): node_var,
-                names.Name('Info'): construct(
-                    PropertyDef.get().entity_info_arg.var
-                )
-            },
-            result_var_name=names.Name.from_lower("as_entity"),
+            node_expr.type.entity, {names.Name('El'): node_var,
+                                    names.Name('Info'): entity_info},
+            result_var_name=names.Name.from_lower('as_entity'),
             abstract_expr=abstract_expr,
         ),
         node_expr.type.entity,
