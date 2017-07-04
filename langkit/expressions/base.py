@@ -1086,17 +1086,26 @@ class ResolvedExpression(object):
     def destructure_entity(self):
         """
         Must be called only on expressions that evaluate to entities.  Return
-        expressions to access separately 1) the node and 2) the entity info for
-        an entity.
+        3 expressions:
 
-        :rtype: (ResolvedExpression, ResolvedExpression).
+          1. A SavedExpr wrapper for self, so its result can be used multiple
+             times.
+          2. An expression that evaluates the entity node.
+          3. An expression that evaluates the entity info.
+
+        The SavedExpr (1) must be evaluated before any of (2) and (3) are
+        evaluated themselves.
+
+        :rtype: (ResolvedExpression, ResolvedExpression, ResolvedExpression).
         """
         from langkit.expressions.structs import FieldAccess
         assert self.type.is_entity_type
         fields = self.type.get_abstract_fields_dict()
+        saved = SavedExpr('Saved', self)
         return (
-            FieldAccess.Expr(self, fields['el'], []),
-            FieldAccess.Expr(self, fields['info'], []),
+            saved,
+            FieldAccess.Expr(saved.result_var_expr, fields['el'], []),
+            FieldAccess.Expr(saved.result_var_expr, fields['info'], []),
         )
 
 
