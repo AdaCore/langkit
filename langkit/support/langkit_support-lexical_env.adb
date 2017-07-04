@@ -6,9 +6,6 @@ package body Langkit_Support.Lexical_Env is
    package Entity_Arrays is new Langkit_Support.Array_Utils
      (Entity, Positive, Entity_Array);
 
-   package Lexical_Env_Arrays is new Langkit_Support.Array_Utils
-     (Lexical_Env, Positive, Lexical_Env_Vectors.Elements_Array);
-
    package Referenced_Envs_Arrays is new Langkit_Support.Array_Utils
      (Referenced_Env, Positive, Referenced_Envs_Vectors.Elements_Array);
 
@@ -357,7 +354,6 @@ package body Langkit_Support.Lexical_Env is
         (Parent                     => Parent,
          Node                       => Node,
          Referenced_Envs            => <>,
-         Transitive_Referenced_Envs => <>,
          Env                        => new Internal_Envs.Map,
          Default_MD                 => Default_MD,
          Rebindings                 => null,
@@ -423,7 +419,11 @@ package body Langkit_Support.Lexical_Env is
       Resolver        : Lexical_Env_Resolver) is
    begin
       Referenced_Envs_Vectors.Append
-        (Self.Referenced_Envs, Referenced_Env'(Referenced_From, Resolver));
+        (Self.Referenced_Envs,
+         Referenced_Env'(Is_Dynamic    => True,
+                         Is_Transitive => False,
+                         From_Node     => Referenced_From,
+                         Resolver      => Resolver));
    end Reference;
 
    --------------------------
@@ -434,7 +434,10 @@ package body Langkit_Support.Lexical_Env is
      (Self            : Lexical_Env;
       To_Reference    : Lexical_Env) is
    begin
-      Self.Transitive_Referenced_Envs.Append (To_Reference);
+      Self.Referenced_Envs.Append
+        (Referenced_Env'(Is_Dynamic    => False,
+                         Is_Transitive => True,
+                         Env           => To_Reference));
       Inc_Ref (To_Reference);
    end Transitive_Reference;
 
@@ -457,12 +460,6 @@ package body Langkit_Support.Lexical_Env is
 
       use Referenced_Envs_Arrays;
 
-      function Recurse (Env : Lexical_Env) return Entity_Array is
-        (Get (Env, Key, From,
-              Recursive  => True,
-              Rebindings => Current_Rebindings));
-      --  Recursively call Get with the same arguments, but with a new env
-
       function Get_Refd_Elements
         (Self : Referenced_Env) return Entity_Array;
       --  If we can determine that From can reach Self.From_Node, return the
@@ -482,19 +479,16 @@ package body Langkit_Support.Lexical_Env is
       function Get_Refd_Elements
         (Self : Referenced_Env) return Entity_Array
       is
-         Ent : constant Entity := (Self.From_Node, No_Entity_Info);
          Env : Lexical_Env;
       begin
-
-         --  If the client passed an origin from the request, see if the
-         --  environment is reachable.
-
-         if From /= No_Element and then not Can_Reach (Self.From_Node, From)
+         if Self.Is_Dynamic
+           and then From /= No_Element
+           and then not Can_Reach (Self.From_Node, From)
          then
             return Entity_Arrays.Empty_Array;
          end if;
 
-         Env := Self.Resolver.all (Ent);
+         Env := Get_Refd_Env (Self);
 
          begin
             --  Make sure that whether Recurse suceeds or raises an exception,
@@ -504,16 +498,20 @@ package body Langkit_Support.Lexical_Env is
             declare
                Result : constant Entity_Array :=
                  Get (Env, Key, From,
-                      Recursive  => False,
+                      Recursive  => Self.Is_Transitive,
                       Rebindings => Current_Rebindings);
             begin
-               Dec_Ref (Env);
+               if Self.Is_Dynamic then
+                  Dec_Ref (Env);
+               end if;
                return Result;
             end;
 
          exception
             when others =>
-               Dec_Ref (Env);
+               if Self.Is_Dynamic then
+                  Dec_Ref (Env);
+               end if;
                raise;
          end;
       end Get_Refd_Elements;
@@ -545,11 +543,6 @@ package body Langkit_Support.Lexical_Env is
 
             else Entity_Arrays.Empty_Array);
       end Get_Own_Elements;
-
-      function Get_Concat is new Lexical_Env_Arrays.Flat_Map_Gen
-        (Entity, Entity_Array, Recurse);
-      --  Return the concatenation of Recurse for all lexical envs in the input
-      --  array.
 
       function Get_Refd_Elements is new Referenced_Envs_Arrays.Flat_Map_Gen
         (Entity, Entity_Array, Get_Refd_Elements);
@@ -587,17 +580,13 @@ package body Langkit_Support.Lexical_Env is
               (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
             else Entity_Arrays.Empty_Array);
 
-         Trans_Refd_Elts : constant Entity_Array :=
-            Get_Concat
-              (Lexical_Env_Vectors.To_Array (Self.Transitive_Referenced_Envs));
-
          Parent_Elts : constant Entity_Array :=
            (if Recursive
             then Get (Parent_Env, Key, Rebindings => Current_Rebindings)
             else Entity_Arrays.Empty_Array);
 
          Ret : Entity_Array :=
-            Own_Elts & Refd_Elts & Trans_Refd_Elts & Parent_Elts;
+            Own_Elts & Refd_Elts & Parent_Elts;
 
          Last_That_Can_Reach : Integer := Ret'Last;
       begin
@@ -628,7 +617,6 @@ package body Langkit_Support.Lexical_Env is
         (Parent                     => No_Env_Getter,
          Node                       => Self.Node,
          Referenced_Envs            => Self.Referenced_Envs.Copy,
-         Transitive_Referenced_Envs => Self.Transitive_Referenced_Envs.Copy,
          Env                        => Self.Env,
          Default_MD                 => Self.Default_MD,
          Rebindings                 => Self.Rebindings,
@@ -654,7 +642,6 @@ package body Langkit_Support.Lexical_Env is
            (Parent                     => No_Env_Getter,
             Node                       => No_Element,
             Referenced_Envs            => <>,
-            Transitive_Referenced_Envs => <>,
             Env                        => null,
             Default_MD                 => Empty_Metadata,
             Rebindings                 => null,
@@ -684,7 +671,6 @@ package body Langkit_Support.Lexical_Env is
           (Parent                     => No_Env_Getter,
            Node                       => No_Element,
            Referenced_Envs            => <>,
-           Transitive_Referenced_Envs => <>,
            Env                        => null,
            Default_MD                 => Empty_Metadata,
            Rebindings                 => Rebindings,
@@ -729,7 +715,6 @@ package body Langkit_Support.Lexical_Env is
           (Parent                     => No_Env_Getter,
            Node                       => No_Element,
            Referenced_Envs            => <>,
-           Transitive_Referenced_Envs => <>,
            Env                        => null,
            Default_MD                 => Empty_Metadata,
            Rebindings                 =>
@@ -760,16 +745,12 @@ package body Langkit_Support.Lexical_Env is
          Destroy (Self.Env);
       end if;
 
-      --  (Transitive) referenced envs, on the other hand, are always owned by
-      --  Self.
-
-      Referenced_Envs_Vectors.Destroy (Self.Referenced_Envs);
-
-      for Ref_Env of Self.Transitive_Referenced_Envs loop
-         Refd_Env := Ref_Env;
+      for Ref_Env of Self.Referenced_Envs loop
+         Refd_Env := (if not Ref_Env.Is_Dynamic then Ref_Env.Env else null);
          Dec_Ref (Refd_Env);
       end loop;
-      Lexical_Env_Vectors.Destroy (Self.Transitive_Referenced_Envs);
+
+      Referenced_Envs_Vectors.Destroy (Self.Referenced_Envs);
 
       Dec_Ref (Self.Rebindings);
 
@@ -928,5 +909,20 @@ package body Langkit_Support.Lexical_Env is
          return To_Wide_Wide_String (Buffer);
       end;
    end Image;
+
+   -------------
+   -- Get_Env --
+   -------------
+
+   function Get_Refd_Env (Self : Referenced_Env) return Lexical_Env is
+   begin
+      case Self.Is_Dynamic is
+         when True =>
+            return Self.Resolver.all
+              (Entity'(Self.From_Node, No_Entity_Info));
+         when False =>
+            return Self.Env;
+      end case;
+   end Get_Refd_Env;
 
 end Langkit_Support.Lexical_Env;

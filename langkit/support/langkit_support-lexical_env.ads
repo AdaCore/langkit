@@ -201,15 +201,24 @@ package Langkit_Support.Lexical_Env is
      function (Ref : Entity) return Lexical_Env;
    --  Callback type for the lazy referenced env resolution mechanism
 
-   type Referenced_Env is record
-      From_Node : Element_T;
-      --  The node from which the environment has been referenced
+   type Referenced_Env (Is_Dynamic : Boolean := False) is record
+      Is_Transitive : Boolean := False;
 
-      Resolver  : Lexical_Env_Resolver;
-      --  A function that takes From_Node and resolves to the environment that
-      --  is referenced.
+      case Is_Dynamic is
+         when True =>
+            From_Node : Element_T;
+            --  The node from which the environment has been referenced
+
+            Resolver  : Lexical_Env_Resolver;
+            --  A function that takes From_Node and resolves to the environment
+            --  that is referenced.
+         when False =>
+            Env       : Lexical_Env;
+      end case;
    end record;
    --  Represents a referenced env
+
+   function Get_Refd_Env (Self : Referenced_Env) return Lexical_Env;
 
    package Referenced_Envs_Vectors is new Langkit_Support.Vectors
      (Referenced_Env);
@@ -271,13 +280,6 @@ package Langkit_Support.Lexical_Env is
 
       Referenced_Envs : Referenced_Envs_Vectors.Vector;
       --  A list of environments referenced by this environment
-
-      Transitive_Referenced_Envs : Lexical_Env_Vectors.Vector;
-      --  A list of environments referenced by this environment. Unlike
-      --  Referenced_Envs, Transitive_Referenced_Envs are *always* explored
-      --  when calling Get, whether the "Recursive" parameter is True or not.
-      --  They're used to create new environments that are the concatenation
-      --  of other environments.
 
       Env : Internal_Map := null;
       --  Map containing mappings from symbols to elements for this env
@@ -428,7 +430,6 @@ private
      (Parent                     => No_Env_Getter,
       Node                       => No_Element,
       Referenced_Envs            => <>,
-      Transitive_Referenced_Envs => <>,
       Env                        => Empty_Env_Map'Access,
       Default_MD                 => Empty_Metadata,
       Rebindings                 => null,

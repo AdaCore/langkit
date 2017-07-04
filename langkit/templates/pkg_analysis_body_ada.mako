@@ -2452,8 +2452,7 @@ package body ${ada_lib_name}.Analysis is
       begin
          for R of Refs loop
             declare
-               Env : constant Lexical_Env := R.Resolver.all
-                 ((R.From_Node, No_Entity_Info));
+               Env : constant Lexical_Env := Get_Refd_Env (R);
             begin
                if Env /= Empty_Env then
                   if Is_First then
@@ -2471,26 +2470,6 @@ package body ${ada_lib_name}.Analysis is
             end;
          end loop;
       end Dump_Referenced;
-
-      ---------------------------
-      -- Dump_Trans_Referenced --
-      ---------------------------
-
-      procedure Dump_Trans_Referenced
-        (Name : String; Refs : AST_Envs.Lexical_Env_Vectors.Vector) is
-      begin
-         if Refs.Length > 0 then
-            Put_Line ("    " & Name & ":");
-            for R of Refs loop
-               Put ("      ");
-               Dump_One_Lexical_Env
-                 (Self           => R,
-                  Dump_Addresses => Dump_Addresses,
-                  Dump_Content   => False);
-               New_Line;
-            end loop;
-         end if;
-      end Dump_Trans_Referenced;
 
    begin
       if Env_Id'Length /= 0 then
@@ -2525,8 +2504,6 @@ package body ${ada_lib_name}.Analysis is
       Put_Line (":");
 
       Dump_Referenced ("Referenced", Self.Referenced_Envs);
-      Dump_Trans_Referenced
-        ("Transitive referenced", Self.Transitive_Referenced_Envs);
 
       if Self.Env = null then
          Put_Line ("    <null>");
