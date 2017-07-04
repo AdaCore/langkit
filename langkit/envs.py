@@ -56,6 +56,12 @@ def reference(nodes, through):
     return RefEnvs(through, nodes)
 
 
+def strong_reference(env_expr):
+    """
+    """
+    return StrongRef(env_expr)
+
+
 def add_to_env(mappings, dest_env=None, metadata=None, resolver=None):
     """
     Specify elements to add to the lexical environment.
@@ -461,4 +467,16 @@ class CallEnvHook(ExprHolderAction):
         # list.
         check_source_language(
             "set_initial_env must be first in the action list"
+        )
+
+
+class StrongRef(ExprHolderAction):
+
+    def create_internal_properties(self, env_spec):
+        """
+        Create the property that returns the list of nodes to resolve into
+        referenced lexical envs.
+        """
+        self.env_property = env_spec.create_internal_property(
+            'Strong_Ref_Env', self.env_expr, T.LexicalEnv
         )

@@ -27,13 +27,6 @@ package body Langkit_Support.Lexical_Env is
    --  If Rebindings is bound to a new set of rebindings upon return, the
    --  ownership share of the old rebinding set will have been forfeited.
 
-   procedure Transitive_Reference
-     (Self            : Lexical_Env;
-      To_Reference    : Lexical_Env)
-      with Pre => Self.Ref_Count /= No_Refcount;
-   --  Reference the env To_Reference from Self, making its content accessible
-   --  from Self. This is available only for ref-counted lexical environments.
-
    function Decorate
      (Elts       : Internal_Map_Element_Array;
       MD         : Element_Metadata;

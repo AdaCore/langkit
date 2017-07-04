@@ -648,6 +648,15 @@
       % endif
    </%def>
 
+   <%def name="emit_strong_ref(strong_ref)">
+      declare
+         Refd_Env : ${strong_ref.env_property.type.name} :=
+            ${call_prop(strong_ref.env_property)};
+      begin
+         Transitive_Reference (Self.Self_Env, Refd_Env);
+      end;
+   </%def>
+
    <%def name="emit_env_action(env_action)">
 
    ## This function is an explicit dispatch table on action's class, calling
@@ -655,9 +664,10 @@
    ## still the best way I found that did not imply making a lot of round trips
    ## between Mako and regular python.
 
-   ${{"AddEnv":   emit_add_env,
-      "AddToEnv": emit_add_to_env,
-      "RefEnvs":  emit_ref_env}[env_action.__class__.__name__](env_action)}
+   ${{"AddEnv":     emit_add_env,
+      "AddToEnv":   emit_add_to_env,
+      "RefEnvs":    emit_ref_env,
+      "StrongRef":  emit_strong_ref}[env_action.__class__.__name__](env_action)}
    </%def>
 
    <%

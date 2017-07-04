@@ -336,6 +336,12 @@ package Langkit_Support.Lexical_Env is
    --  True. Practically this means that the origin point of the request needs
    --  to be *after* Referenced_From in the file.
 
+   procedure Transitive_Reference
+     (Self            : Lexical_Env;
+      To_Reference    : Lexical_Env);
+   --  Reference the env To_Reference from Self, making its content accessible
+   --  from Self. This is available only for ref-counted lexical environments.
+
    function Get
      (Self       : Lexical_Env;
       Key        : Symbol_Type;
