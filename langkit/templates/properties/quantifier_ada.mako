@@ -26,7 +26,7 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
       % endif
    loop
       ## Initialize all element variables
-      % for elt_var, init_expr in quantifier.element_vars:
+      % for elt_var, init_expr in reversed(quantifier.element_vars):
          % if init_expr:
             ${init_expr.render_pre()}
             ${assign_var(elt_var, init_expr.render_expr())}

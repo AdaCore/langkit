@@ -68,7 +68,7 @@ begin
       loop
 
          ## Initialize all element variables
-         % for elt_var, init_expr in map.element_vars:
+         % for elt_var, init_expr in reversed(map.element_vars):
             % if init_expr:
                ${init_expr.render_pre()}
                ${assign_var(elt_var, init_expr.render_expr())}
