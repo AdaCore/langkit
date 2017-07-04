@@ -1093,7 +1093,7 @@ class ResolvedExpression(object):
         """
         from langkit.expressions.structs import FieldAccess
         assert self.type.is_entity_type
-        fields = self.get_abstract_fields_dict()
+        fields = self.type.get_abstract_fields_dict()
         return (
             FieldAccess.Expr(self, fields['el'], []),
             FieldAccess.Expr(self, fields['info'], []),
