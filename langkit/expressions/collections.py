@@ -408,9 +408,6 @@ class Quantifier(CollectionExpression):
                 check that all items in "collection" fullfill "expr" while
                 'any' will check that at least one of them does.
 
-            :param ResolvedExpression expr: Expression to evaluate for each
-                item in "collection".
-
             :param ResolvedExpression collection: Collection on which this map
                 operation works.
 
