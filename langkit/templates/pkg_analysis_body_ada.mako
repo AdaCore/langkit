@@ -2310,8 +2310,7 @@ package body ${ada_lib_name}.Analysis is
          Initial_Env := Node.Pre_Env_Actions (Bound_Env, Root_Env);
 
          --  Call recursively on children
-         for C of ${root_node_array.api_name}'(Children (Node))
-         loop
+         for C of ${root_node_array.api_name}'(Children (Node)) loop
             Populate_Internal (C, Node.Self_Env);
          end loop;
 
