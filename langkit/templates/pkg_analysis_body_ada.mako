@@ -2297,7 +2297,7 @@ package body ${ada_lib_name}.Analysis is
         (Node      : access ${root_node_value_type}'Class;
          Bound_Env : Lexical_Env)
       is
-         Initial_Env : Lexical_Env := Bound_Env;
+         Initial_Env : Lexical_Env;
       begin
          if Node = null then
             return;
