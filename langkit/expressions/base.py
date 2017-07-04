@@ -2113,7 +2113,8 @@ class EmptyArray(AbstractExpression):
 
 
 def render(*args, **kwargs):
-    return ct_render(*args, property=PropertyDef.get(), Self=Self, **kwargs)
+    return ct_render(*args, property=PropertyDef.get(), Self=Self,
+                     assign_var=assign_var, **kwargs)
 
 
 inherited_information = inherited_property(lambda s: s.base_property)
