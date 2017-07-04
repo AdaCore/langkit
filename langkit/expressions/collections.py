@@ -37,6 +37,70 @@ class CollectionExpression(AbstractExpression):
 
     _counter = count()
 
+    class ConstructCommonResult(object):
+        """
+        Holder for the result of the "construct_common" method.
+        """
+
+        def __init__(self, collection_expr, element_vars, index_var,
+                     inner_expr, inner_scope):
+            self.collection_expr = collection_expr
+            """
+            Resolved expression corresponding to the collection on which the
+            iteration is done.
+
+            :type: ResolvedExpression
+            """
+
+            self.element_vars = element_vars
+            """
+            List of "element" iteration variables, and their initialization
+            expression, if any.
+
+            we need a list of "element" iteration variables for code generation
+            purposes. For instance, assuming we iterate on an entity that is an
+            AST list, we need 3 variables::
+
+              * one that contains the node whose type is the root one (AST
+                lists contain only root nodes in the generated code);
+
+              * one that contains the node that is casted to the proper type;
+
+              * one that wraps this casted node as an entity.
+
+            The first variable is the one used to expand iteration expressions
+            (see the "user_element_var" property.  This is the one that must
+            have a source name. The other ones are mere code generation
+            temporaries.
+
+            The last variable is the one that is used as the actual iteration
+            variable in the generated code. This is the only one that will not
+            require explicit initialization.
+
+            :type: list[(ResolvedExpression, ResolvedExpression|None)]
+            """
+
+            self.index_var = index_var
+            """
+            The index variable as a resolved expression, if required.
+
+            :type: ResolvedExpression|None
+            """
+
+            self.inner_expr = inner_expr
+            """
+            Resolved expression to be evaluated for each collection item.
+
+            :type: ResolvedExpression
+            """
+
+            self.inner_scope = inner_scope
+            """
+            Local variable scope for the body of the iteration.
+
+            :type: langkit.expressions.base.LocalVars.Scope
+            """
+
     def __init__(self, collection, expr):
         """
         :param AbstractExpression collection: Collection on which this map
@@ -94,41 +158,10 @@ class CollectionExpression(AbstractExpression):
 
     def construct_common(self):
         """
-        Construct the expressions commonly needed by collection expression
-        subclasses, and return them as a tuple constituted of:
+        Construct and return the expressions commonly needed by collection
+        expression subclasses.
 
-        1. The resolved collection expression.
-        2. The list of "element" iteration variables, and their initialization
-           expression (if any).
-        3. The index variable as a resolved expression.
-        4. The resolved expression function passed to CollectionExpression's
-           constructor.
-        5. The inner scope for the iteration.
-
-        About point 2: we need a list of "element" iteration variables for code
-        generation purposes. For instance, assuming we iterate on an entity
-        that is an AST list, we need 3 variables::
-
-          * one that contains the node whose type is the root one (AST lists
-            contain only root nodes in the generated code);
-
-          * one that contains the node that is casted to the proper type;
-
-          * one that wraps this casted node as an entity.
-
-        The first variable is the one used to expand iteration expressions (see
-        the "user_element_var" property.  This is the one that must have a
-        source name. The other ones are mere code generation temporaries.
-
-        The last variable is the one that is used as the actual iteration
-        variable in the generated code. This is the only one that will not
-        require explicit initialization.
-
-        :rtype: (ResolvedExpression,
-                 list[(ResolvedExpression, ResolvedExpression|None)],
-                 ResolvedExpression,
-                 ResolvedExpression,
-                 langkit.expressions.base.LocalVars.Scope)
+        :rtype: CollectionExpression.ConstructCommonResult
         """
         current_scope = PropertyDef.get_scope()
 
@@ -174,12 +207,14 @@ class CollectionExpression(AbstractExpression):
 
         elt_var_inits.append(None)
 
-        return (collection_expr,
-                [(construct(elt_var), init)
-                 for elt_var, init in zip(elt_vars, elt_var_inits)],
-                construct(self.index_var) if self.index_var else None,
-                inner_expr,
-                inner_scope)
+        return self.ConstructCommonResult(
+            collection_expr,
+            [(construct(elt_var), init)
+             for elt_var, init in zip(elt_vars, elt_var_inits)],
+            construct(self.index_var) if self.index_var else None,
+            inner_expr,
+            inner_scope
+        )
 
 
 @attr_expr("contains")
@@ -206,17 +241,13 @@ class Contains(CollectionExpression):
 
         :rtype: QuantifierExpr
         """
-        (collection,
-         elt_vars,
-         index_var,
-         predicate,
-         iter_scope) = self.construct_common()
-        assert index_var is None
+        r = self.construct_common()
+        assert r.index_var is None
 
         # "collection" contains "item" if at least one element in
         # "collection" is equal to "item".
-        return Quantifier.Expr(Quantifier.ANY, collection, predicate, elt_vars,
-                               index_var, iter_scope)
+        return Quantifier.Expr(Quantifier.ANY, r.collection_expr, r.inner_expr,
+                               r.element_vars, r.index_var, r.inner_scope)
 
     def __repr__(self):
         return '<Contains>'
@@ -363,28 +394,24 @@ class Map(CollectionExpression):
 
         :rtype: MapExpr
         """
-        (collection_expr,
-         element_vars,
-         index_var,
-         expr,
-         iter_scope) = self.construct_common()
+        r = self.construct_common()
 
         check_source_language(
-            not self.concat or expr.type.is_collection,
+            not self.concat or r.inner_expr.type.is_collection,
             'Cannot mapcat with expressions returning {} values (collections'
-            ' expected instead)'.format(expr.type.name)
+            ' expected instead)'.format(r.inner_expr.type.name)
         )
 
-        with iter_scope.use():
+        with r.inner_scope.use():
             filter_expr = (construct(self.filter_expr, bool_type)
                            if self.filter_expr else None)
 
             take_while_expr = (construct(self.take_while_expr, bool_type)
                                if self.take_while_expr else None)
 
-        return Map.Expr(element_vars, index_var, collection_expr, expr,
-                        iter_scope, filter_expr, self.concat, take_while_expr,
-                        abstract_expr=self)
+        return Map.Expr(r.element_vars, r.index_var, r.collection_expr,
+                        r.inner_expr, r.inner_scope, filter_expr, self.concat,
+                        take_while_expr, abstract_expr=self)
 
     def __repr__(self):
         name = None
@@ -518,20 +545,16 @@ class Quantifier(CollectionExpression):
 
         :rtype: QuantifierExpr
         """
-        (collection_expr,
-         element_vars,
-         index_var,
-         expr,
-         iter_scope) = self.construct_common()
+        r = self.construct_common()
 
         check_source_language(
-            expr.type.matches(bool_type),
+            r.inner_expr.type.matches(bool_type),
             "Wrong type for expression in quantifier: expected bool, "
-            "got {}".format(expr.type.name.camel)
+            "got {}".format(r.inner_expr.type.name.camel)
         )
 
-        return Quantifier.Expr(self.kind, collection_expr, expr, element_vars,
-                               index_var, iter_scope)
+        return Quantifier.Expr(self.kind, r.collection_expr, r.inner_expr,
+                               r.element_vars, r.index_var, r.inner_scope)
 
     def __repr__(self):
         return '<{}Quantifier>'.format(self.kind.capitalize())
