@@ -618,7 +618,7 @@ class Tok(Parser):
         )
 
     def __repr__(self):
-        return "Tok({0})".format(repr(self.val))
+        return "Tok({0})".format(repr(self._val))
 
     def discard(self):
         return not self.keep
