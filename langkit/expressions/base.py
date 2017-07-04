@@ -1304,7 +1304,23 @@ class SavedExpr(ResolvedExpression):
 
     @property
     def result_var(self):
+        """
+        Return the LocalVar instance corresponding to the result of this
+        expression.
+
+        :rtype: LocalVars.LocalVar
+        """
         return self.exposed_result_var
+
+    @property
+    def result_var_expr(self):
+        """
+        Return a reference to the variable that contains the result of this
+        expression.
+
+        :rtype: VariableExpr
+        """
+        return self.result_var.ref_expr
 
     def _render_pre(self):
         result = [self.expr.render_pre()]
