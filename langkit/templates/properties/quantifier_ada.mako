@@ -3,11 +3,8 @@
 <%namespace name="scopes" file="scopes_ada.mako" />
 
 <%
-   list_element_var = (quantifier.list_element_var.name
-                       if quantifier.list_element_var else
-                       None)
-   element_var = quantifier.element_var.name
-   iteration_var = list_element_var or element_var
+   codegen_element_var = quantifier.element_vars[-1][0].name
+   user_element_var = quantifier.element_vars[0][0]
    result_var = quantifier.result_var.name
 %>
 
@@ -21,18 +18,35 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
    % endif
 
    <% coll_expr = quantifier.collection.render_expr() %>
-   for ${iteration_var} of
+   for ${codegen_element_var} of
       % if quantifier.collection.type.is_list_type:
          ${coll_expr}.Nodes (1 .. ${coll_expr}.Count)
       % else:
          ${coll_expr}.Items
       % endif
    loop
+      ## Initialize all element variables
+      % for elt_var, init_expr in quantifier.element_vars:
+         % if init_expr:
+            ${init_expr.render_pre()}
+            ${assign_var(elt_var, init_expr.render_expr())}
+         % endif
+      % endfor
+
       ${scopes.start_scope(quantifier.iter_scope)}
-      % if list_element_var:
-         ${element_var} :=
-            ${quantifier.element_var.type.name} (${list_element_var});
+
+      ## Bind user iteration variables
+      % if user_element_var.source_name:
+         ${gdb_helper('bind',
+                      user_element_var.source_name.lower,
+                      user_element_var.name.camel_with_underscores)}
       % endif
+      % if quantifier.index_var:
+         ${gdb_helper('bind',
+                      quantifier.index_var.source_name.lower,
+                      quantifier.index_var.name.camel_with_underscores)}
+      % endif
+
       ${quantifier.expr.render_pre()}
 
       ## Depending on the kind of the quantifier, we want to abort as soon as

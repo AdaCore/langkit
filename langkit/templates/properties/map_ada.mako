@@ -3,11 +3,8 @@
 <%namespace name="scopes" file="scopes_ada.mako" />
 
 <%
-   list_element_var = (map.list_element_var.name
-                       if map.list_element_var else
-                       None)
-   element_var = map.element_var.name
-   iteration_var = list_element_var or element_var
+   codegen_element_var = map.element_vars[-1][0].name
+   user_element_var = map.element_vars[0][0]
 
    array_var = map.result_var.name
 
@@ -62,18 +59,29 @@ begin
 
       ## First, build a vector for all the resulting elements
       <% coll_expr = map.collection.render_expr() %>
-      for ${iteration_var} of
+      for ${codegen_element_var} of
          % if map.collection.type.is_list_type:
             ${coll_expr}.nodes (1 .. ${coll_expr}.Count)
          % else:
             ${coll_expr}.Items
          % endif
       loop
+
+         ## Initialize all element variables
+         % for elt_var, init_expr in map.element_vars:
+            % if init_expr:
+               ${init_expr.render_pre()}
+               ${assign_var(elt_var, init_expr.render_expr())}
+            % endif
+         % endfor
+
          ${scopes.start_scope(map.iter_scope)}
-         % if map.element_var:
+
+         ## Bind user iteration variables
+         % if user_element_var.source_name:
             ${gdb_helper('bind',
-                         map.element_var.source_name.lower,
-                         iteration_var.camel_with_underscores)}
+                         user_element_var.source_name.lower,
+                         user_element_var.name.camel_with_underscores)}
          % endif
          % if map.index_var:
             ${gdb_helper('bind',
@@ -81,11 +89,7 @@ begin
                          map.index_var.name.camel_with_underscores)}
          % endif
 
-         % if list_element_var:
-            ${element_var} :=
-               ${map.element_var.type.name} (${list_element_var});
-         % endif
-
+         ## Emit the user body for the loop
          % if map.filter:
             ${map.filter.render_pre()}
             if ${map.filter.render_expr()} then
