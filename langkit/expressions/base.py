@@ -1047,7 +1047,7 @@ class ResolvedExpression(object):
         def explore(values):
             if values is None:
                 return []
-            elif isinstance(values, list):
+            elif isinstance(values, (list, tuple)):
                 return funcy.mapcat(explore, values)
             elif isinstance(values, dict):
                 return funcy.mapcat(explore, values.values())
