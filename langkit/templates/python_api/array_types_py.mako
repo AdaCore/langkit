@@ -38,7 +38,7 @@ class _BaseArray(object):
         elif not (0 <= key < self._length):
             raise IndexError()
 
-        return self._unwrap_item(self._items[key])
+        return self._wrap_item(self._items[key])
 
     @classmethod
     def _unwrap(cls, value):
@@ -70,7 +70,7 @@ class ${type_name}(_BaseArray):
     """
 
     @staticmethod
-    def _unwrap_item(item):
+    def _wrap_item(item):
         return ${pyapi.wrap_value('item', element_type, inc_ref=True)}
 
     _c_element_type = ${c_element_type}
