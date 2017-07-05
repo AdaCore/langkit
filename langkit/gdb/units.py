@@ -1,12 +1,12 @@
 from __future__ import absolute_import, division, print_function
 
 try:
-    from gnatdbg.strings import UnboundedStringPrinter
+    from gnatdbg.strings import UnboundedString
 except ImportError:
     fetch_unbounded_string = None
 else:
     fetch_unbounded_string = (
-        lambda value: UnboundedStringPrinter(value).get_string_value()
+        lambda value: UnboundedString(value).get_string()
     )
 
 
@@ -20,5 +20,5 @@ class AnalysisUnit(object):
 
     @property
     def filename(self):
-        return (eval(fetch_unbounded_string(self.value['file_name']))
+        return (fetch_unbounded_string(self.value['file_name'])
                 if fetch_unbounded_string else None)
