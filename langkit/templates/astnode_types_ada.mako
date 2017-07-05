@@ -616,8 +616,10 @@
                      "attempt to add a referenced environment to a foreign"
                      & " unit";
                end if;
-               Reference (Self.Self_Env, N,
-                          ${ref_env.resolver.name}'Access);
+               Reference
+                 (Self.Self_Env, N,
+                  ${ref_env.resolver.name}'Access,
+                  Transitive => ${"True" if ref_env.transitive else "False"});
             end if;
          end loop;
          Dec_Ref (Ref_Env_Nodes);
@@ -666,8 +668,7 @@
 
    ${{"AddEnv":     emit_add_env,
       "AddToEnv":   emit_add_to_env,
-      "RefEnvs":    emit_ref_env,
-      "StrongRef":  emit_strong_ref}[env_action.__class__.__name__](env_action)}
+      "RefEnvs":    emit_ref_env}[env_action.__class__.__name__](env_action)}
    </%def>
 
    <%

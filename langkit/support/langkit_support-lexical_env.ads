@@ -331,18 +331,18 @@ package Langkit_Support.Lexical_Env is
    procedure Reference
      (Self            : Lexical_Env;
       Referenced_From : Element_T;
-      Resolver        : Lexical_Env_Resolver);
+      Resolver        : Lexical_Env_Resolver;
+      Transitive      : Boolean := False);
    --  Reference the env To_Reference from Self, making its content accessible
    --  from self. For requests with an origin point (From parameter), the
    --  content will only be visible if Can_Reach (Referenced_From, From) is
    --  True. Practically this means that the origin point of the request needs
    --  to be *after* Referenced_From in the file.
 
-   procedure Transitive_Reference
-     (Self            : Lexical_Env;
-      To_Reference    : Lexical_Env);
-   --  Reference the env To_Reference from Self, making its content accessible
-   --  from Self. This is available only for ref-counted lexical environments.
+   procedure Reference
+     (Self         : Lexical_Env;
+      To_Reference : Lexical_Env;
+      Transitive   : Boolean := False);
 
    function Get
      (Self       : Lexical_Env;

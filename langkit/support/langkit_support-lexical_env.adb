@@ -416,30 +416,35 @@ package body Langkit_Support.Lexical_Env is
    procedure Reference
      (Self            : Lexical_Env;
       Referenced_From : Element_T;
-      Resolver        : Lexical_Env_Resolver) is
+      Resolver        : Lexical_Env_Resolver;
+      Transitive      : Boolean := False)
+   is
    begin
       Referenced_Envs_Vectors.Append
         (Self.Referenced_Envs,
          Referenced_Env'(Is_Dynamic    => True,
-                         Is_Transitive => False,
+                         Is_Transitive => Transitive,
                          From_Node     => Referenced_From,
                          Resolver      => Resolver));
    end Reference;
 
-   --------------------------
-   -- Transitive_Reference --
-   --------------------------
+   ---------------
+   -- Reference --
+   ---------------
 
-   procedure Transitive_Reference
-     (Self            : Lexical_Env;
-      To_Reference    : Lexical_Env) is
+   procedure Reference
+     (Self         : Lexical_Env;
+      To_Reference : Lexical_Env;
+      Transitive   : Boolean := False)
+   is
    begin
-      Self.Referenced_Envs.Append
-        (Referenced_Env'(Is_Dynamic    => False,
-                         Is_Transitive => True,
+      Referenced_Envs_Vectors.Append
+        (Self.Referenced_Envs,
+         Referenced_Env'(Is_Dynamic    => False,
+                         Is_Transitive => Transitive,
                          Env           => To_Reference));
       Inc_Ref (To_Reference);
-   end Transitive_Reference;
+   end Reference;
 
    ---------
    -- Get --
@@ -481,6 +486,10 @@ package body Langkit_Support.Lexical_Env is
       is
          Env : Lexical_Env;
       begin
+         if not Recursive and then not Self.Is_Transitive then
+            return Entity_Arrays.Empty_Array;
+         end if;
+
          if Self.Is_Dynamic
            and then From /= No_Element
            and then not Can_Reach (Self.From_Node, From)
@@ -498,7 +507,7 @@ package body Langkit_Support.Lexical_Env is
             declare
                Result : constant Entity_Array :=
                  Get (Env, Key, From,
-                      Recursive  => Self.Is_Transitive,
+                      Recursive  => Recursive and Self.Is_Transitive,
                       Rebindings => Current_Rebindings);
             begin
                if Self.Is_Dynamic then
@@ -575,10 +584,8 @@ package body Langkit_Support.Lexical_Env is
             Get_Own_Elements (Own_Lookup_Env, Current_Rebindings);
 
          Refd_Elts  : constant Entity_Array :=
-           (if Recursive
-            then Get_Refd_Elements
-              (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs))
-            else Entity_Arrays.Empty_Array);
+           Get_Refd_Elements
+             (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs));
 
          Parent_Elts : constant Entity_Array :=
            (if Recursive
@@ -647,7 +654,7 @@ package body Langkit_Support.Lexical_Env is
             Rebindings                 => null,
             Ref_Count                  => 1);
          for Env of Envs loop
-            Transitive_Reference (N, Env);
+            Reference (N, Env, Transitive => True);
          end loop;
          return N;
       end case;
@@ -676,7 +683,7 @@ package body Langkit_Support.Lexical_Env is
            Rebindings                 => Rebindings,
            Ref_Count                  => 1);
    begin
-      Transitive_Reference (N, Base_Env);
+      Reference (N, Base_Env, Transitive => True);
       return N;
    end Rebind_Env;
 
@@ -721,7 +728,7 @@ package body Langkit_Support.Lexical_Env is
              Combine (Base_Env.Rebindings, E_Info.Rebindings),
            Ref_Count                  => 1)
       do
-         Transitive_Reference (N, Base_Env);
+         Reference (N, Base_Env, Transitive => True);
       end return;
    end Rebind_Env;
 

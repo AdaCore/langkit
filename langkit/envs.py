@@ -43,7 +43,7 @@ def add_env():
     return AddEnv()
 
 
-def reference(nodes, through):
+def reference(nodes, through, transitive=False):
     """
     Reference a group of lexical environments, that will be lazily yielded by
     calling the `through` property on the array of nodes `nodes`.
@@ -53,13 +53,7 @@ def reference(nodes, through):
 
     :rtype: RefEnvs
     """
-    return RefEnvs(through, nodes)
-
-
-def strong_reference(env_expr):
-    """
-    """
-    return StrongRef(env_expr)
+    return RefEnvs(through, nodes, transitive)
 
 
 def add_to_env(mappings, dest_env=None, metadata=None, resolver=None):
@@ -367,7 +361,7 @@ class RefEnvs(EnvAction):
     Couple of a property and an expression to evaluate referenced envs.
     """
 
-    def __init__(self, resolver, nodes_expr):
+    def __init__(self, resolver, nodes_expr, transitive=False):
         """
         All nodes that nodes_expr yields must belong to the same analysis unit
         as the AST node that triggers this RefEnvs. Besides, the lexical
@@ -401,6 +395,8 @@ class RefEnvs(EnvAction):
         This holds the property that returns a list of nodes to pass to the
         resolver. It is None before the property is built.
         """
+
+        self.transitive = transitive
 
     def create_internal_properties(self, env_spec):
         """
@@ -467,16 +463,4 @@ class CallEnvHook(ExprHolderAction):
         # list.
         check_source_language(
             "set_initial_env must be first in the action list"
-        )
-
-
-class StrongRef(ExprHolderAction):
-
-    def create_internal_properties(self, env_spec):
-        """
-        Create the property that returns the list of nodes to resolve into
-        referenced lexical envs.
-        """
-        self.env_property = env_spec.create_internal_property(
-            'Strong_Ref_Env', self.env_expr, T.LexicalEnv
         )
