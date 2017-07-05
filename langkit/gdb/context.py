@@ -26,6 +26,7 @@ class Context(object):
         self.prefix = prefix
 
         self.astnode_struct_names = self._astnode_struct_names()
+        self.entity_struct_names = self._entity_struct_names()
 
         self.reparse_debug_info()
 
@@ -39,6 +40,18 @@ class Context(object):
                 Name.from_camel_with_underscores(name)
             for name in self.astnode_names
         }
+
+    def _entity_struct_names(self):
+        """
+        Turn the set of AST node names into a set of encoded type names for the
+        corresponding entity records.
+        """
+        return {
+            '{}__analysis__entity_{}'.format(
+                self.lib_name,
+                Name.from_camel_with_underscores(name).lower
+            ) for name in self.astnode_names
+        } | {'{}__analysis__ast_envs__entity'.format(self.lib_name)}
 
     def decode_state(self, frame=None):
         """

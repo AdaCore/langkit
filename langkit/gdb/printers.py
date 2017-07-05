@@ -298,15 +298,8 @@ class EntityPrinter(BasePrinter):
 
     @classmethod
     def matches(cls, value, context):
-        return (
-            value.type.code == gdb.TYPE_CODE_STRUCT
-            and (
-                value.type.name
-                == '{}__analysis__ast_envs__entity'.format(
-                    context.lib_name
-                )
-            )
-        )
+        return (value.type.code == gdb.TYPE_CODE_STRUCT
+                and value.type.name in context.entity_struct_names)
 
     @property
     def node(self):
