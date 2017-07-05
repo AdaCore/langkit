@@ -38,7 +38,12 @@ class _BaseArray(object):
         elif not (0 <= key < self._length):
             raise IndexError()
 
-        return self._wrap_item(self._items[key])
+        # In ctypes, accessing an array element does not copy it, which means
+        # the the array must live at least as long as the accessed element. We
+        # cannot guarantee that, so we must copy the element so that it is
+        # independent of the array it comes from.
+        item = self._c_element_type.from_buffer_copy(self._items[key])
+        return self._wrap_item(item)
 
     @classmethod
     def _unwrap(cls, value):
