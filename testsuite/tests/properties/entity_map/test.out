@@ -1,0 +1,14 @@
+main.py: Running...
+a:
+  Ref(c) -> +Decl(c)
+    +Ref(a)
+b:
+  Ref(a) -> Decl(a)
+    Ref(c)
+  Ref(c) -> +Decl(c)
+    +Ref(a)
++c:
+  Ref(a) -> Decl(a)
+    Ref(c)
+main.py: Done.
+Done
