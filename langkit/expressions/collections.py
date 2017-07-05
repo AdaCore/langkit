@@ -13,9 +13,10 @@ from langkit.diagnostics import (
 )
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, CallExpr, ComputingExpr, PropertyDef,
-    UncheckedCastExpr, attr_expr, attr_call, auto_attr_custom, auto_attr,
-    construct, render, unsugar
+    SequenceExpr, UncheckedCastExpr, attr_expr, attr_call, auto_attr_custom,
+    auto_attr, construct, render, unsugar
 )
+from langkit.expressions.envs import make_as_entity
 
 
 def collection_expr_identity(x):
@@ -167,24 +168,48 @@ class CollectionExpression(AbstractExpression):
 
         # First, build the collection expression. From the result, we can
         # deduce the type of the element variable.
-        collection_expr = construct(
-            self.collection, lambda t: t.is_collection,
-            'Cannot iterate on {expr_type}, which is not a collection'
+        collection_expr = construct(self.collection)
+        with_entities = collection_expr.type.is_entity_type
+        if with_entities:
+            saved_entity_coll_expr, collection_expr, entity_info = (
+                collection_expr.destructure_entity()
+            )
+            collection_expr = SequenceExpr(saved_entity_coll_expr,
+                                           collection_expr)
+
+        check_source_language(
+            collection_expr.type.is_collection,
+            'Cannot iterate on {}, which is not a collection'.format(
+                collection_expr.type.name.camel
+            )
         )
 
-        self.element_var.set_type(collection_expr.type.element_type)
+        elt_type = collection_expr.type.element_type
+        if with_entities:
+            elt_type = elt_type.entity
+        self.element_var.set_type(elt_type)
 
         # List of "element" iteration variables
-        elt_vars = [self.element_var]
+        elt_vars = [construct(self.element_var)]
 
         # List of initializing expressions for them
         elt_var_inits = []
+
+        if with_entities:
+            entity_var = elt_vars[-1]
+            node_var = AbstractVariable(
+                names.Name('Bare') + self.element_var._name,
+                type=elt_type.el_type
+            )
+            elt_var_inits.append(make_as_entity(construct(node_var),
+                                                entity_info=entity_info))
+            elt_vars.append(construct(node_var))
 
         # If we are iterating over an AST list, then we get root grammar typed
         # values. We need to convert them to the more specific type to get the
         # rest of the expression machinery work.
         if collection_expr.type.is_list_type:
-            typed_elt_var = self.element_var
+            typed_elt_var = elt_vars[-1]
             untyped_elt_var = AbstractVariable(
                 names.Name('Untyped') + self.element_var._name,
                 type=get_context().root_grammar_class
@@ -193,14 +218,16 @@ class CollectionExpression(AbstractExpression):
             # variable and push the new last variable.
             elt_var_inits.append(UncheckedCastExpr(construct(untyped_elt_var),
                                                    typed_elt_var.type))
-            elt_vars.append(untyped_elt_var)
+            elt_vars.append(construct(untyped_elt_var))
 
         # Only then we can build the inner expression
         with current_scope.new_child() as inner_scope:
             inner_expr = construct(self.expr)
 
+        if with_entities:
+            entity_var.abstract_var.create_local_variable(inner_scope)
         if collection_expr.type.is_list_type:
-            typed_elt_var.create_local_variable(inner_scope)
+            typed_elt_var.abstract_var.create_local_variable(inner_scope)
 
         if self.index_var:
             self.index_var.add_to_scope(inner_scope)
@@ -209,8 +236,7 @@ class CollectionExpression(AbstractExpression):
 
         return self.ConstructCommonResult(
             collection_expr,
-            [(construct(elt_var), init)
-             for elt_var, init in zip(elt_vars, elt_var_inits)],
+            zip(elt_vars, elt_var_inits),
             construct(self.index_var) if self.index_var else None,
             inner_expr,
             inner_scope
