@@ -25,7 +25,7 @@ begin
       % endif
 
       ${map.expr.render_pre()}
-      % if map.concat:
+      % if map.do_concat:
          <% expr = map.expr.render_expr() %>
          for Item_To_Append of
             % if map.expr.type.is_list_type:

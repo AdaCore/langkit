@@ -282,7 +282,7 @@ class Contains(CollectionExpression):
 @attr_call('filter', collection_expr_identity)
 @attr_call('filtermap')
 @attr_call('map', filter_expr=collection_expr_none)
-@attr_call('mapcat', filter_expr=collection_expr_none, concat=True)
+@attr_call('mapcat', filter_expr=collection_expr_none, do_concat=True)
 @attr_call('take_while', collection_expr_identity, collection_expr_none, False)
 class Map(CollectionExpression):
     """
@@ -297,7 +297,7 @@ class Map(CollectionExpression):
         pretty_class_name = 'Map'
 
         def __init__(self, element_vars, index_var, collection, expr,
-                     iter_scope, filter=None, concat=False, take_while=None,
+                     iter_scope, filter=None, do_concat=False, take_while=None,
                      abstract_expr=None):
             """
             :type element_vars: list[(ResolvedExpression,
@@ -307,7 +307,7 @@ class Map(CollectionExpression):
             :type expr: ResolvedExpression
             :type iter_scope: langkit.expressions.base.LocalVars.Scope
             :type filter: ResolvedExpression
-            :type concat: bool
+            :type do_concat: bool
             :type take_while: ResolvedExpression
             :type abstract_expr: AbstractExpression|None
             """
@@ -317,11 +317,11 @@ class Map(CollectionExpression):
             self.collection = collection
             self.expr = expr
             self.filter = filter
-            self.concat = concat
+            self.do_concat = do_concat
             self.iter_scope = iter_scope
 
             element_type = (self.expr.type.element_type
-                            if self.concat else
+                            if self.do_concat else
                             self.expr.type)
             self.static_type = element_type.array
 
@@ -360,7 +360,7 @@ class Map(CollectionExpression):
             )
 
     def __init__(self, collection, expr, filter_expr=collection_expr_none,
-                 concat=False, take_while_pred=collection_expr_none):
+                 do_concat=False, take_while_pred=collection_expr_none):
         """
         See CollectionExpression for the other parameters.
 
@@ -369,7 +369,7 @@ class Map(CollectionExpression):
             to include or exclude an item from the collection.
         :type filter_expr: None|(AbstractExpression) -> AbstractExpression
 
-        :param bool concat: If true, "expr" must return arrays, and this
+        :param bool do_concat: If true, "expr" must return arrays, and this
             expression returns the concatenation of all the arrays "expr"
             returns.
 
@@ -383,7 +383,7 @@ class Map(CollectionExpression):
         self.filter_fn = filter_expr
 
         self.take_while_pred = take_while_pred
-        self.concat = concat
+        self.do_concat = do_concat
         self.filter_expr = None
         self.take_while_expr = None
 
@@ -423,7 +423,7 @@ class Map(CollectionExpression):
         r = self.construct_common()
 
         check_source_language(
-            not self.concat or r.inner_expr.type.is_collection,
+            not self.do_concat or r.inner_expr.type.is_collection,
             'Cannot mapcat with expressions returning {} values (collections'
             ' expected instead)'.format(r.inner_expr.type.name)
         )
@@ -436,8 +436,8 @@ class Map(CollectionExpression):
                                if self.take_while_expr else None)
 
         return Map.Expr(r.element_vars, r.index_var, r.collection_expr,
-                        r.inner_expr, r.inner_scope, filter_expr, self.concat,
-                        take_while_expr, abstract_expr=self)
+                        r.inner_expr, r.inner_scope, filter_expr,
+                        self.do_concat, take_while_expr, abstract_expr=self)
 
     def __repr__(self):
         name = None
@@ -446,7 +446,7 @@ class Map(CollectionExpression):
                     if self.filter_fn == collection_expr_none else
                     'Filter')
         if not name:
-            name = 'MapCat' if self.concat else 'Map'
+            name = 'MapCat' if self.do_concat else 'Map'
         return '<{}>'.format(name)
 
 
