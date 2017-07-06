@@ -65,8 +65,8 @@ package body Langkit_Support.Adalog.Unify_LR is
          --  defer.
 
          raise Early_Binding_Error
-           with "Variable " & Image (Self.Right) & " and " & Image (Self.Left)
-           & " are not defined yet.";
+           with ("Variables " & Image (Self.Right) & " and "
+                 & Image (Self.Left) & " are not defined yet");
       end if;
 
       --  Right is defined, left is not, give left the value of right and
