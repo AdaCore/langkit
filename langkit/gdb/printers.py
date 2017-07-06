@@ -155,7 +155,7 @@ class ASTNodePrinter(BasePrinter):
 
             tdh.token(start).sloc_range.start,
 
-            ':{}'.format(tdh.token(end).sloc_range.end)
+            '-{}'.format(tdh.token(end).sloc_range.end)
             if with_end and end else ''
         )
 
