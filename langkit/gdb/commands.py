@@ -282,8 +282,19 @@ For instance::
             print('No match for {}'.format(dsl_sloc))
         elif len(matches) > 1:
             print('Multiple matches for {}:'.format(dsl_sloc))
-            for m in matches:
-                print('  In {}, {}'.format(m.prop.name, m.dsl_sloc))
+
+            def idx_fmt(i):
+                return '[{}] '.format(i)
+
+            idx_width = len(idx_fmt(len(matches)))
+            for i, m in enumerate(matches, 1):
+                print('{}In {}, {}'.format(
+                    idx_fmt(i).rjust(idx_width),
+                    m.prop.name, m.dsl_sloc
+                ))
+                print('{}at {}:{}'.format(' ' * idx_width,
+                                          self.context.debug_info.filename,
+                                          m.line_no))
         else:
             m, = matches
             return gdb.Breakpoint('{}:{}'.format(
