@@ -4,6 +4,7 @@ from collections import namedtuple
 from functools import partial
 import itertools
 from StringIO import StringIO
+import sys
 
 import gdb
 
@@ -11,6 +12,14 @@ from langkit.gdb.breakpoints import BreakpointGroup
 from langkit.gdb.debug_info import DSLLocation, ExprDone, ExprStart, Scope
 from langkit.gdb.utils import expr_repr, name_repr, prop_repr
 from langkit.utils import no_colors
+
+
+def get_input(prompt):
+    """
+    Wrapper around raw_input/input depending on the Python version.
+    """
+    input_fn = input if sys.version_info.major > 2 else raw_input
+    return input_fn(prompt)
 
 
 class BaseCommand(gdb.Command):
@@ -280,7 +289,11 @@ For instance::
 
         if not matches:
             print('No match for {}'.format(dsl_sloc))
-        elif len(matches) > 1:
+
+        elif len(matches) == 1:
+            m,  = matches
+
+        else:
             print('Multiple matches for {}:'.format(dsl_sloc))
 
             def idx_fmt(i):
@@ -295,11 +308,34 @@ For instance::
                 print('{}at {}:{}'.format(' ' * idx_width,
                                           self.context.debug_info.filename,
                                           m.line_no))
-        else:
-            m, = matches
-            return gdb.Breakpoint('{}:{}'.format(
-                self.context.debug_info.filename, m.line_no
-            ))
+
+            print('Please chose one of the above locations [default=1]:')
+            try:
+                choice = get_input('> ')
+            except EOFError:
+                print('Aborting: no breakpoint created')
+                return
+
+            if not choice:
+                choice = 1
+            else:
+                try:
+                    choice = int(choice)
+                except ValueError:
+                    print('Invalid index choice: {}'.format(choice))
+                    return
+
+                if choice < 1 or choice > len(matches):
+                    print('Choice must be in range {}-{}'.format(
+                        1, len(matches)
+                    ))
+                    return
+
+            m = matches[choice]
+
+        return gdb.Breakpoint('{}:{}'.format(
+            self.context.debug_info.filename, m.line_no
+        ))
 
 
 class NextCommand(BaseCommand):
