@@ -289,6 +289,7 @@ For instance::
 
         if not matches:
             print('No match for {}'.format(dsl_sloc))
+            return
 
         elif len(matches) == 1:
             m,  = matches
