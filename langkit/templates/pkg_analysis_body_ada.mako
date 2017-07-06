@@ -679,24 +679,14 @@ package body ${ada_lib_name}.Analysis is
    -------------
 
    procedure Destroy (Context : in out Analysis_Context) is
-      Std_Unit : Analysis_Unit := Get_From_File (Context, "standard.ads");
-
       procedure Free is new Ada.Unchecked_Deallocation
         (Analysis_Context_Private_Part_Type, Analysis_Context_Private_Part);
    begin
-
-      --  TODO: This is a hack to make sure that we don't deallocate standard
-      --  too early, because every unit is going to depend on it. Waiting for
-      --  proper handling of lazy links in referenced envs.
-      Inc_Ref (Std_Unit);
-
       for Unit of Context.Units_Map loop
          Unit.Context := null;
          Dec_Ref (Unit);
       end loop;
       AST_Envs.Destroy (Context.Root_Scope);
-
-      Dec_Ref (Std_Unit);
 
       Destroy (Context.Symbols);
 
