@@ -560,7 +560,7 @@ package body Langkit_Support.Lexical_Env is
       function Can_Reach_F (El : Entity) return Boolean is
         (Can_Reach (El.El, From));
 
-      Own_Lookup_Env    : Lexical_Env;
+      Own_Lookup_Env : Lexical_Env;
 
    begin
       if Self = null then
