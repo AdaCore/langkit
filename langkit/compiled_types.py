@@ -2321,8 +2321,19 @@ class TypeRepo(object):
                     or not isinstance(prefix, BaseStructType)
                 ):
                     return getattr(prefix, name)
-                else:
+
+                try:
                     return prefix._fields[name]
+                except KeyError:
+                    check_source_language(
+                        False,
+                        '{prefix} has no {attr} attribute'.format(
+                            prefix=(prefix.name.camel
+                                    if isinstance(prefix, CompiledType) else
+                                    prefix),
+                            attr=repr(name)
+                        )
+                    )
             return TypeRepo.Defer(get)
 
         def __call__(self, *args, **kwargs):
