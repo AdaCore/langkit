@@ -62,6 +62,12 @@ package body ${ada_lib_name}.Analysis is
 
    ${array_types.body(root_node_array)}
 
+   % for array_type in ctx.sorted_types(ctx.array_types):
+   % if array_type.element_type.should_emit_array_type:
+   ${array_types.body(array_type)}
+   % endif
+   % endfor
+
    procedure Destroy (Self : in out Lex_Env_Data_Type);
    --  Destroy data associated to lexical environments
 
@@ -3079,12 +3085,6 @@ package body ${ada_lib_name}.Analysis is
 
    % for struct_type in no_builtins(ctx.struct_types):
    ${struct_types.body(struct_type)}
-   % endfor
-
-   % for array_type in ctx.sorted_types(ctx.array_types):
-   % if array_type.element_type.should_emit_array_type:
-   ${array_types.body(array_type)}
-   % endif
    % endfor
 
    ${astnode_types.logic_helpers()}
