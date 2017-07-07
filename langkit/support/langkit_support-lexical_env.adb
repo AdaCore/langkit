@@ -1,4 +1,5 @@
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
+
 with Langkit_Support.Array_Utils;
 
 package body Langkit_Support.Lexical_Env is
