@@ -1175,12 +1175,6 @@ package body ${ada_lib_name}.Analysis is
    ${array_types.body(LexicalEnvType.array)}
    ${array_types.body(T.root_node.entity.array)}
 
-   function Child_Index
-     (Node : access ${root_node_value_type}'Class)
-      return Positive
-      with Pre => Node.Parent /= null;
-   --  Return the 1-based index for Node in its parents' children
-
    function Lookup_Internal
      (Node : ${root_node_type_name};
       Sloc : Source_Location;
@@ -2748,15 +2742,20 @@ package body ${ada_lib_name}.Analysis is
 
    function Child_Index
      (Node : access ${root_node_value_type}'Class)
-      return Positive
+      return Natural
    is
       N : ${root_node_type_name} := null;
    begin
+      if Node.Parent = null then
+         raise Property_Error with
+            "Trying to get the child index of a root node";
+      end if;
+
       for I in Node.Parent.First_Child_Index .. Node.Parent.Last_Child_Index
       loop
          N := Child (Node.Parent, I);
          if N = Node then
-            return I;
+            return I - 1;
          end if;
       end loop;
 
@@ -2773,7 +2772,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_type_name}
    is
-      N : constant Positive := Child_Index (Node);
+      N : constant Positive := Child_Index (Node) + 1;
    begin
       return (if N = 1
               then null
@@ -2788,9 +2787,10 @@ package body ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_type_name}
    is
+      N : constant Positive := Child_Index (Node) + 1;
    begin
       --  If Node is the last sibling, then Child will return null
-      return Node.Parent.Child (Child_Index (Node) + 1);
+      return Node.Parent.Child (N + 1);
    end Next_Sibling;
 
    ## Env metadata's body

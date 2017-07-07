@@ -642,6 +642,11 @@ package ${ada_lib_name}.Analysis is
       N : ${root_node_type_name})
       return Boolean;
 
+   function Child_Index
+     (Node : access ${root_node_value_type}'Class)
+      return Natural;
+   --  Return the 0-based index for Node in its parent's children
+
    function Previous_Sibling
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_type_name};

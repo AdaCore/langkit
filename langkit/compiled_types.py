@@ -2025,6 +2025,11 @@ class ASTNodeType(BaseStructType):
                 public=True, external=True, uses_entity_info=False,
                 doc='Return the last token used to parse this node.'
             )),
+            ('child_index', BuiltinField(
+                type=long_type,
+                doc="Return the 0-based index for Node in its parent's"
+                    " children."
+            )),
             ('previous_sibling', BuiltinField(
                 type=root_type,
                 doc="Return the node's previous sibling, if there is one."
