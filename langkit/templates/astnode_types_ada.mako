@@ -726,8 +726,6 @@
       G           : Env_Getter;
       % endif
    begin
-      ## initial_env
-
       % if has_dyn_env:
          Initial_Env := ${env_getter} (G_State);
       % endif
@@ -768,10 +766,6 @@
       use AST_Envs;
       Initial_Env : Lexical_Env := Bound_Env;
    begin
-      #############################
-      ## Post add_to_env actions ##
-      #############################
-
       % for action in cls.env_spec.post_actions:
       ${emit_env_action (action)}
       % endfor
