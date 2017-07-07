@@ -1175,7 +1175,7 @@ package body ${ada_lib_name}.Analysis is
    ${array_types.body(LexicalEnvType.array)}
    ${array_types.body(T.root_node.entity.array)}
 
-   function Child_Number
+   function Child_Index
      (Node : access ${root_node_value_type}'Class)
       return Positive
       with Pre => Node.Parent /= null;
@@ -2742,11 +2742,11 @@ package body ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class) return Boolean
    is (Node = null);
 
-   ------------------
-   -- Child_Number --
-   ------------------
+   -----------------
+   -- Child_Index --
+   -----------------
 
-   function Child_Number
+   function Child_Index
      (Node : access ${root_node_value_type}'Class)
       return Positive
    is
@@ -2763,7 +2763,7 @@ package body ${ada_lib_name}.Analysis is
       --  If we reach this point, then Node isn't a Child of Node.Parent. This
       --  is not supposed to happen.
       raise Program_Error;
-   end Child_Number;
+   end Child_Index;
 
    ----------------------
    -- Previous_Sibling --
@@ -2773,7 +2773,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_type_name}
    is
-      N : constant Positive := Child_Number (Node);
+      N : constant Positive := Child_Index (Node);
    begin
       return (if N = 1
               then null
@@ -2790,7 +2790,7 @@ package body ${ada_lib_name}.Analysis is
    is
    begin
       --  If Node is the last sibling, then Child will return null
-      return Node.Parent.Child (Child_Number (Node) + 1);
+      return Node.Parent.Child (Child_Index (Node) + 1);
    end Next_Sibling;
 
    ## Env metadata's body
