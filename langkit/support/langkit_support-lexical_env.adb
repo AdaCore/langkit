@@ -671,10 +671,12 @@ package body Langkit_Support.Lexical_Env is
      (Base_Env             : Lexical_Env;
       To_Rebind, Rebind_To : Env_Getter) return Lexical_Env
    is
-      Base_Rebindings : constant Env_Rebindings := Base_Env.Rebindings;
-      Rebinding       : constant Env_Rebinding := (To_Rebind, Rebind_To);
+      --  The rebindings we create for the new env is a singleton with only the
+      --  pair that the user wants to add. Any rebinding that the original env
+      --  already has will be concatenated during env lookup.
+
       Rebindings      : constant Env_Rebindings :=
-         Append (Base_Rebindings, Rebinding);
+        Create ((1 => (To_Rebind, Rebind_To)));
 
       N : constant Lexical_Env :=
         new Lexical_Env_Type'
