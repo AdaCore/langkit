@@ -441,9 +441,11 @@ package body Langkit_Support.Lexical_Env is
    begin
       Referenced_Envs_Vectors.Append
         (Self.Referenced_Envs,
-         Referenced_Env'(Is_Dynamic    => False,
-                         Is_Transitive => Transitive,
-                         Env           => To_Reference));
+         Referenced_Env'
+           (Is_Dynamic    => False,
+            Is_Transitive => Transitive,
+            Is_Refcounted => To_Reference.Ref_Count /= No_Refcount,
+            Env           => To_Reference));
       Inc_Ref (To_Reference);
    end Reference;
 
@@ -754,8 +756,10 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       for Ref_Env of Self.Referenced_Envs loop
-         Refd_Env := (if not Ref_Env.Is_Dynamic then Ref_Env.Env else null);
-         Dec_Ref (Refd_Env);
+         if not Ref_Env.Is_Dynamic and then Ref_Env.Is_Refcounted then
+            Refd_Env := Ref_Env.Env;
+            Dec_Ref (Refd_Env);
+         end if;
       end loop;
 
       Referenced_Envs_Vectors.Destroy (Self.Referenced_Envs);

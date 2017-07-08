@@ -212,8 +212,15 @@ package Langkit_Support.Lexical_Env is
             Resolver  : Lexical_Env_Resolver;
             --  A function that takes From_Node and resolves to the environment
             --  that is referenced.
+
          when False =>
-            Env       : Lexical_Env;
+            Is_Refcounted : Boolean;
+            --  Whether Env is ref-counted. When it's not, we can avoid calling
+            --  Dec_Ref at destruction time. This is useful because at analysis
+            --  unit destruction time, this may be a dangling access to an
+            --  environment from another unit.
+
+            Env           : Lexical_Env;
       end case;
    end record;
    --  Represents a referenced env
