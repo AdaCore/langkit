@@ -263,6 +263,12 @@ def as_entity(self, node):
     p = PropertyDef.get()
     check_source_language(p, "as_entity has to be used in a property")
 
+    check_source_language(
+        p._uses_entity_info is not False,
+        'This property has been explicitely tagged as not using entity info,'
+        ' so .as_entity is invalid here'
+    )
+
     # We want to keep original type of node, so no downcast
     node_expr = construct(node, T.root_node, downcast=False)
 

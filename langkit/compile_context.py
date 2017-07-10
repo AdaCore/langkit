@@ -783,15 +783,20 @@ class CompileCtx(object):
                 p.set_uses_entity_info()
 
             for bw_link in backwards.get(prop, set()):
-                if not bw_link.uses_entity_info:
+                if not bw_link._uses_entity_info:
                     propagate(bw_link)
 
         # Propagate computed attribute
         for prop in self.all_properties(
-            lambda p: not p.base_property and p.uses_entity_info,
+            lambda p: not p.base_property and p._uses_entity_info,
             include_inherited=False
         ):
             propagate(prop)
+
+        # Clearly tag all properties that don't use entity info
+        for prop in self.all_properties():
+            if prop._uses_entity_info is None:
+                prop._uses_entity_info = False
 
     def warn_unused_private_properties(self):
         """

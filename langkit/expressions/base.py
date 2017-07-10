@@ -2318,10 +2318,10 @@ class PropertyDef(AbstractNodeData):
             self._uses_entity_info = uses_entity_info
         else:
             check_source_language(
-                uses_entity_info is None,
-                "Cannot specify uses_entity_info for internal properties"
+                uses_entity_info in (None, False),
+                "Cannot specify uses_entity_info=True for internal properties"
             )
-            self._uses_entity_info = False
+            self._uses_entity_info = uses_entity_info
 
         self.entity_info_arg = None
         self._requires_untyped_wrapper = False
@@ -2737,7 +2737,7 @@ class PropertyDef(AbstractNodeData):
 
         # If this property has been explicitly marked as using entity info,
         # then set the relevant internal data.
-        if self.uses_entity_info:
+        if self._uses_entity_info:
             self.set_uses_entity_info()
 
         # At this point, we assume the list of argument has reached its final
