@@ -318,6 +318,8 @@ class AddToEnv(EnvAction):
         self.resolver = resolver
 
     def check(self):
+        if isinstance(self.resolver, T.Defer):
+            self.resolver = self.resolver.get()
         with self.mappings_prop.diagnostic_context:
             check_source_language(
                 self.mappings_prop.type.matches(T.env_assoc) or
