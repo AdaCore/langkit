@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, T, abstract
+from langkit.dsl import ASTNode, BoolType, T, abstract
 from langkit.expressions import ExternalProperty, Property, Self
 from langkit.parsers import Grammar, Row
 
@@ -11,8 +11,9 @@ from utils import emit_and_print_errors
 
 def run(name, abstract_prop, prop=None):
     """
-    Emit and print the errors we get for the below grammar with "expr" as
-    a property in BarNode.
+    Emit and print the errors we get for the below grammar with `abstract_prop`
+    as a property in AbstractExample and `prop` (if provided) as a property in
+    Example.
     """
 
     Diagnostics.set_lang_source_dir(path.abspath(__file__))
@@ -40,14 +41,15 @@ def run(name, abstract_prop, prop=None):
     print('')
 
 
-run("Missing type",
+run('Missing type',
     lambda: ExternalProperty(uses_entity_info=False))
 
-run("Invalid abstract",
+run('Invalid abstract',
     lambda: ExternalProperty(abstract=True, type=T.FooNode,
                              uses_entity_info=False),
     lambda: Property(Self))
 
-run("Invalid memoized",
-    lambda: ExternalProperty(memoized=True, uses_entity_info=False))
+run('Invalid memoized',
+    lambda: ExternalProperty(memoized=True, type=BoolType,
+                             uses_entity_info=False))
 print('Done')
