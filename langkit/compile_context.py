@@ -786,6 +786,10 @@ class CompileCtx(object):
                     ),
                     p.location
                 ):
+                    check_source_language(
+                        p._uses_entity_info is not False,
+                        'Cannot use entity info, as explicitely forbiden'
+                    )
                     p.set_uses_entity_info()
 
         all_props = list(self.all_properties(include_inherited=False))
