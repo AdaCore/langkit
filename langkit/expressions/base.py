@@ -2712,21 +2712,6 @@ class PropertyDef(AbstractNodeData):
             if self._dynamic_vars is None:
                 self._dynamic_vars = []
 
-        if self.memoized:
-            check_source_language(
-                not self.abstract,
-                'A memoized property cannot be abstract: memoization is not an'
-                ' inheritted behavior'
-            )
-            check_source_language(
-                not self._dynamic_vars,
-                'A memoized property cannot have dynamically bound variables'
-            )
-            check_source_language(
-                not self.arguments,
-                'A memoized property is not allowed to take arguments'
-            )
-
         if self.external:
             check_source_language(
                 self.expr is None,
@@ -2735,10 +2720,6 @@ class PropertyDef(AbstractNodeData):
             check_source_language(
                 not self.abstract,
                 'An external property cannot be abstract'
-            )
-            check_source_language(
-                not self.memoized,
-                'An external property cannot be memoized'
             )
 
         # See abstract_runtime_check documentation in __init__
@@ -2905,6 +2886,26 @@ class PropertyDef(AbstractNodeData):
                 self.type.matches(T.root_node),
                 '{} returns a node type'.format(self.qualname),
             )
+
+    def check_memoized(self, context):
+        """
+        Check that various invariants for memoized properties are respected.
+        """
+        if not self.memoized:
+            return
+
+        for invariant_p, msg in [
+            (not self.abstract,
+             'A memoized property cannot be abstract: memoization is not an'
+             ' inheritted behavior'),
+            (not self._dynamic_vars,
+             'A memoized property cannot have dynamically bound variables'),
+            (not self.external,
+             'An external property cannot be memoized'),
+            (not self.arguments,
+             'A memoized property is not allowed to take arguments'),
+        ]:
+            check_source_language(invariant_p, msg)
 
     def render_property(self, context):
         """

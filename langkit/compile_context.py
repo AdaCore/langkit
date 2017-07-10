@@ -1076,6 +1076,8 @@ class CompileCtx(object):
                          PropertyDef.check_return_types),
             GlobalPass('compute uses entity info attribute',
                        CompileCtx.compute_uses_entity_info_attr),
+            PropertyPass('check memoized properties',
+                         PropertyDef.check_memoized),
             EnvSpecPass('check env specs',
                         EnvSpec.check_spec),
             ASTNodePass('check resolved ASTnode subclasses',
