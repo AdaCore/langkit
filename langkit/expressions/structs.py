@@ -433,14 +433,18 @@ class FieldAccess(AbstractExpression):
 
             :rtype: str|None
             """
-            if self.node_data.optional_entity_info and not self.implicit_deref:
-                return None
-
             # If the property that this field accesses requires entity info,
-            # then the prefix is supposed to be an entity, hence the assertion
-            # below. See CompileCtx.compute_uses_entity_info_attr for how we
-            # check this invariant.
-            assert self.implicit_deref
+            # then the prefix is supposed to be an entity. There are only two
+            # exceptions to this: either the entity info is actually optional,
+            # either we are out of any property. In these cases, leave the
+            # default entity info.
+            #
+            # See CompileCtx.compute_uses_entity_info_attr for how we check
+            # that the assertion always holds.
+            if not self.implicit_deref:
+                assert (self.node_data.optional_entity_info
+                        or PropertyDef.get() is None)
+                return None
 
             # When it is required, entity info comes from the entity, if we're
             # calling the property on an entity.
