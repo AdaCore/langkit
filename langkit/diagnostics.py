@@ -82,6 +82,16 @@ class Location(object):
         self.line = line
         self.text = text
 
+    @property
+    def as_tuple(self):
+        return (self.file, self.line)
+
+    def __eq__(self, other):
+        return self.as_tuple == other.as_tuple
+
+    def __lt__(self, other):
+        return self.as_tuple < other.as_tuple
+
     def __repr__(self):
         return "<Location {} {}>".format(self.file, self.line)
 
