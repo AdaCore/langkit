@@ -2331,7 +2331,7 @@ class TypeRepo(object):
             def get():
                 prefix = self.get()
                 if (
-                    name in ('array', 'list', 'entity')
+                    name in ('array', 'list', 'entity', 'new')
                     or not isinstance(prefix, BaseStructType)
                 ):
                     return getattr(prefix, name)
