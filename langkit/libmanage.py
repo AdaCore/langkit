@@ -534,9 +534,11 @@ class ManageScript(object):
             """
             Helper function to pretty-print files from a GPR project.
             """
+            self.check_call(args, 'Show pp path', ['which', 'gnatpp'])
+            self.check_call(args, 'Show pp version', ['gnatpp', '--version'])
             self.check_call(args, 'Pretty-printing', [
                 'gnatpp', '-P{}'.format(project_file), '-rnb',
-                '--insert-blank-lines',
+                '--insert-blank-lines', '-v',
             ] + self.gpr_scenario_vars(args, 'prod', 'relocatable')
               + glob.glob(glob_pattern)
             )
@@ -891,7 +893,7 @@ class ManageScript(object):
         """
         Log and run a command with a derived environment.
 
-        If the command exists with an error status code, exit ourselves with a
+        If the command exits with an error status code, exit ourselves with a
         status code and a proper error message.
 
         :param argparse.Namespace args: The arguments parsed from the command
