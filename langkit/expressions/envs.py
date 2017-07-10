@@ -9,9 +9,9 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractVariable, AbstractExpression, BasicExpr, CallExpr,
-    GetSymbol, LiteralExpr, NullExpr, PropertyDef, Self, auto_attr,
-    auto_attr_custom, construct
+    AbstractExpression, AbstractVariable, BasicExpr, CallExpr, GetSymbol,
+    LiteralExpr, NullExpr, PropertyDef, Self, auto_attr, auto_attr_custom,
+    construct
 )
 from langkit.expressions.utils import array_aggr
 
@@ -267,6 +267,18 @@ def as_entity(self, node):
     node_expr = construct(node, T.root_node, downcast=False)
 
     ret = make_as_entity(node_expr, abstract_expr=self)
+    ret.create_result_var('Ent')
+    return ret
+
+
+@auto_attr
+def as_bare_entity(self, node):
+    """
+    Construct an entity from node, with default entity info.
+    """
+    node_expr = construct(node, T.root_node, downcast=False)
+    ret = make_as_entity(node_expr, entity_info=NullExpr(T.entity_info),
+                         abstract_expr=self)
     ret.create_result_var('Ent')
     return ret
 
