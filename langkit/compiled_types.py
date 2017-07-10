@@ -578,6 +578,15 @@ class CompiledType(object):
     def is_ast_node(self):
         return isinstance(self, ASTNodeType)
 
+    def new(self, *args, **kwargs):
+        """
+        Shortcut to the New expression, allowing type.new(..) syntax.
+
+        :rtype: AbstractExpression
+        """
+        from langkit.expressions.structs import New
+        return New(self, *args, **kwargs)
+
 
 class NoCompiledType(CompiledType):
     """
