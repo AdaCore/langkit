@@ -3,8 +3,10 @@ from __future__ import absolute_import, division, print_function
 from functools import partial
 
 from langkit import names
-from langkit.compiled_types import (T, bool_type, lexical_env_type,
-                                    no_compiled_type, symbol_type, token_type)
+from langkit.compiled_types import (
+    T, bool_type, lexical_env_type, env_rebindings_type, no_compiled_type,
+    symbol_type, token_type
+)
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, AbstractExpression, BasicExpr, CallExpr,
@@ -187,6 +189,26 @@ def combine(self, l_rebindings, r_rebindings):
     return make_combine(self,
                         construct(l_rebindings, lexical_env_type),
                         construct(r_rebindings, lexical_env_type))
+
+
+def make_append_rebinding(self, rebindings, to_rebind, rebind_to):
+    return CallExpr('Rebinding', 'AST_Envs.Append_Rebinding',
+                    env_rebindings_type,
+                    [rebindings, to_rebind, rebind_to],
+                    abstract_expr=self)
+
+
+@auto_attr
+def append_rebinding(self, rebindings, to_rebind, rebind_to):
+    """
+    Functionally append a rebinding of to_rebind -> rebind_to to rebindings.
+    """
+    return make_append_rebinding(
+        self,
+        construct(rebindings, env_rebindings_type),
+        construct(to_rebind, lexical_env_type),
+        construct(rebind_to, lexical_env_type)
+    )
 
 
 @auto_attr
