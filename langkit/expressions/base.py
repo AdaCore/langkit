@@ -2672,6 +2672,9 @@ class PropertyDef(AbstractNodeData):
                 )
             self._dynamic_vars = base_dynvars
 
+            if self._uses_entity_info is None:
+                self._uses_entity_info = self.base_property._uses_entity_info
+
             # We then want to check the consistency of type annotations if they
             # exist.
             if self.base_property.expected_type:
