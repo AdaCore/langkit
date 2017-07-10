@@ -905,6 +905,7 @@ class AbstractNodeData(object):
         """
 
         self._uses_entity_info = False
+        self.optional_entity_info = False
         self._access_needs_incref = access_needs_incref
 
     @property
@@ -1998,17 +1999,18 @@ class ASTNodeType(BaseStructType):
             # analysis unit, so they are not ref-counted.
 
             ('node_env', PropertyDef(
-                expr=None, prefix=None, type=lexical_env_type,
-                public=False, external=True, uses_entity_info=True,
-                force_dispatching=True, warn_on_unused=False,
+                expr=None, prefix=None, type=lexical_env_type, public=False,
+                external=True, uses_entity_info=True,
+                optional_entity_info=True, force_dispatching=True,
+                warn_on_unused=False,
                 doc='For nodes that introduce a new environment, return the'
                     ' parent lexical environment. Return the "inherited"'
                     ' environment otherwise.'
             )),
             ('children_env', PropertyDef(
-                expr=None, prefix=None, type=lexical_env_type,
-                public=False, external=True, uses_entity_info=True,
-                warn_on_unused=False,
+                expr=None, prefix=None, type=lexical_env_type, public=False,
+                external=True, uses_entity_info=True,
+                optional_entity_info=True, warn_on_unused=False,
                 doc='For nodes that introduce a new environment, return it.'
                     ' Return the "inherited" environment otherwise.'
             )),

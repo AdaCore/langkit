@@ -2181,8 +2181,9 @@ class PropertyDef(AbstractNodeData):
     def __init__(self, expr, prefix, name=None, doc=None, public=None,
                  abstract=False, type=None, abstract_runtime_check=False,
                  dynamic_vars=None, memoized=False, external=False,
-                 uses_entity_info=None, force_dispatching=False,
-                 warn_on_unused=True, ignore_warn_on_node=None):
+                 uses_entity_info=None, optional_entity_info=False,
+                 force_dispatching=False, warn_on_unused=True,
+                 ignore_warn_on_node=None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -2245,6 +2246,12 @@ class PropertyDef(AbstractNodeData):
         :param bool uses_entity_info: Whether this property uses lexical
             environments at all or not. If it does, then it will have an extra
             parameter for env rebindings.
+
+        :param bool optional_entity_info: If `uses_entity_info` is True,
+            whether the entity info is optional. This allows properties to be
+            called on 1) bare AST nodes, in which case the default entity info
+            is passed, and 2) on entities, in which case the entity info from
+            the prefix is passed.
 
         :param bool force_dispatching: Force making this property a dispatching
             one. Useful for externally defined properties.
@@ -2322,6 +2329,7 @@ class PropertyDef(AbstractNodeData):
                 "Cannot specify uses_entity_info=True for internal properties"
             )
             self._uses_entity_info = uses_entity_info
+        self.optional_entity_info = optional_entity_info
 
         self.entity_info_arg = None
         self._requires_untyped_wrapper = False

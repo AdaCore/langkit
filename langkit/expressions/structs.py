@@ -433,6 +433,9 @@ class FieldAccess(AbstractExpression):
 
             :rtype: str|None
             """
+            if self.node_data.optional_entity_info and not self.implicit_deref:
+                return None
+
             # If the property that this field accesses requires entity info,
             # then the prefix is supposed to be an entity, hence the assertion
             # below. See CompileCtx.compute_uses_entity_info_attr for how we
@@ -477,8 +480,10 @@ class FieldAccess(AbstractExpression):
                 # If the called property uses entity information, pass it
                 # along.
                 if self.node_data.uses_entity_info:
-                    args.append((str(PropertyDef.entity_info_name),
-                                 self.entity_info_expr))
+                    einfo_expr = self.entity_info_expr
+                    if einfo_expr:
+                        args.append((str(PropertyDef.entity_info_name),
+                                     einfo_expr))
 
                 # Private non-dispatching properties are declared in
                 # $.Analysis' body, so they are not genuine Ada primitives, so

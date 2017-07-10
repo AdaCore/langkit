@@ -808,6 +808,7 @@ class CompileCtx(object):
                 with nested(*context_mgrs):
                     check_source_language(
                         not expr.node_data.uses_entity_info
+                        or expr.node_data.optional_entity_info
                         or expr.implicit_deref,
                         'Call to {} must be done on an entity'.format(
                             expr.node_data.qualname
