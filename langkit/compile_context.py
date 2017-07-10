@@ -30,7 +30,8 @@ from mako.lookup import TemplateLookup
 from langkit import caching, names, template_utils
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
-from langkit.diagnostics import Severity, WarningSet, check_source_language
+from langkit.diagnostics import (Context, Severity, WarningSet,
+                                 check_source_language)
 import langkit.documentation
 from langkit.envs import EnvSpec
 from langkit.expressions import PropertyDef
@@ -772,31 +773,48 @@ class CompileCtx(object):
         property.  This will determine whether it is necessary to pass along
         entity information or not.
         """
+        from langkit.expressions import FieldAccess
 
-        _, backwards = self.properties_callgraphs()
-
-        def propagate(prop):
-            """
-            Propagate the `uses_entity_info` attribute to callers.
-            """
+        # Propagate the `uses_entity_info` attribute to all
+        # overriding/overriden properties around `prop`.
+        for prop in self.all_properties(lambda p: p._uses_entity_info,
+                                        include_inherited=False):
             for p in prop.property_set():
-                p.set_uses_entity_info()
+                with Context(
+                    'By inheritance from {} to {}'.format(
+                        prop.qualname, p.struct.name.camel
+                    ),
+                    p.location
+                ):
+                    p.set_uses_entity_info()
 
-            for bw_link in backwards.get(prop, set()):
-                if not bw_link._uses_entity_info:
-                    propagate(bw_link)
-
-        # Propagate computed attribute
-        for prop in self.all_properties(
-            lambda p: not p.base_property and p._uses_entity_info,
-            include_inherited=False
-        ):
-            propagate(prop)
+        all_props = list(self.all_properties(include_inherited=False))
 
         # Clearly tag all properties that don't use entity info
-        for prop in self.all_properties():
+        for prop in all_props:
             if prop._uses_entity_info is None:
                 prop._uses_entity_info = False
+
+        # Now that we determined entity info usage for all properties, make
+        # sure that calls to properties that require entity info are made on
+        # entities.
+
+        def process_expr(expr):
+            if isinstance(expr, FieldAccess.Expr):
+                check_source_language(
+                    not expr.node_data.uses_entity_info or expr.implicit_deref,
+                    'Call to {} must be done on an entity'.format(
+                        expr.node_data.qualname
+                    )
+                )
+
+            for subexpr in expr.flat_subexprs():
+                process_expr(subexpr)
+
+        for prop in all_props:
+            with prop.diagnostic_context:
+                if prop.constructed_expr:
+                    process_expr(prop.constructed_expr)
 
     def warn_unused_private_properties(self):
         """

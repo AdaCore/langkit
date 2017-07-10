@@ -433,19 +433,15 @@ class FieldAccess(AbstractExpression):
 
             :rtype: str|None
             """
+            # If the property that this field accesses requires entity info,
+            # then the prefix is supposed to be an entity, hence the assertion
+            # below. See CompileCtx.compute_uses_entity_info_attr for how we
+            # check this invariant.
+            assert self.implicit_deref
 
-            # Entity info can come from one of two sources:
-            if self.implicit_deref:
-                # From the entity, if we're calling the property on an entity
-                return '{}.Info'.format(self.prefix)
-            elif PropertyDef.get() and PropertyDef.get().uses_entity_info:
-                # From the property context, if we are in a property that
-                # uses_entity_info and calling the property on an AST node.
-                return str(PropertyDef.entity_info_name)
-            else:
-                # Just use the default (empty) entity info if we have none of
-                # the above.
-                return None
+            # When it is required, entity info comes from the entity, if we're
+            # calling the property on an entity.
+            return '{}.Info'.format(self.prefix)
 
         @property
         def field_access_expr(self):
@@ -458,7 +454,7 @@ class FieldAccess(AbstractExpression):
             prefix = self.prefix
 
             if self.implicit_deref:
-                prefix = "{}.El".format(prefix)
+                prefix = '{}.El'.format(prefix)
 
             # If we're calling a property, then pass the arguments
             if isinstance(self.node_data, PropertyDef):
@@ -480,7 +476,7 @@ class FieldAccess(AbstractExpression):
 
                 # If the called property uses entity information, pass it
                 # along.
-                if self.node_data.uses_entity_info and self.entity_info_expr:
+                if self.node_data.uses_entity_info:
                     args.append((str(PropertyDef.entity_info_name),
                                  self.entity_info_expr))
 
@@ -496,7 +492,7 @@ class FieldAccess(AbstractExpression):
                     args.insert(0, ('Node', prefix))
 
                 if args:
-                    ret += " ({})".format(', '.join(
+                    ret += ' ({})'.format(', '.join(
                         '{} => {}'.format(name, value)
                         for name, value in args
                     ))
