@@ -14,7 +14,7 @@ from __future__ import absolute_import, division, print_function
 
 import ast
 from collections import defaultdict
-from contextlib import contextmanager
+from contextlib import contextmanager, nested
 from distutils.spawn import find_executable
 from glob import glob
 import inspect
@@ -801,12 +801,18 @@ class CompileCtx(object):
 
         def process_expr(expr):
             if isinstance(expr, FieldAccess.Expr):
-                check_source_language(
-                    not expr.node_data.uses_entity_info or expr.implicit_deref,
-                    'Call to {} must be done on an entity'.format(
-                        expr.node_data.qualname
+                context_mgrs = []
+                if expr.abstract_expr:
+                    context_mgrs.append(expr.abstract_expr.diagnostic_context)
+
+                with nested(*context_mgrs):
+                    check_source_language(
+                        not expr.node_data.uses_entity_info
+                        or expr.implicit_deref,
+                        'Call to {} must be done on an entity'.format(
+                            expr.node_data.qualname
+                        )
                     )
-                )
 
             for subexpr in expr.flat_subexprs():
                 process_expr(subexpr)
