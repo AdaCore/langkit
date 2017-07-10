@@ -37,6 +37,7 @@ def unsugar(expr, ignore_errors=False):
 
     :rtype: AbstractExpression
     """
+    from langkit.compiled_types import TypeRepo
     if expr is None:
         return None
 
@@ -45,6 +46,8 @@ def unsugar(expr, ignore_errors=False):
         expr = Literal(expr)
     elif isinstance(expr, basestring):
         expr = SymbolLiteral(expr)
+    elif isinstance(expr, TypeRepo.Defer):
+        expr = expr.get()
 
     check_source_language(
         ignore_errors or isinstance(expr, AbstractExpression),
