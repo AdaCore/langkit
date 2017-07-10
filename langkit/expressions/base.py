@@ -2738,7 +2738,7 @@ class PropertyDef(AbstractNodeData):
         # If this property has been explicitly marked as using entity info,
         # then set the relevant internal data.
         if self._uses_entity_info:
-            self.set_uses_entity_info()
+            self._set_uses_entity_info()
 
         # At this point, we assume the list of argument has reached its final
         # state.
@@ -2769,9 +2769,8 @@ class PropertyDef(AbstractNodeData):
         Set this property as using environments, which will trigger the
         addition of the env rebinding implicit parameter.
         """
-
-        for prop in self.property_set():
-            prop._set_uses_entity_info()
+        if not self._uses_entity_info:
+            self._set_uses_entity_info()
 
     def require_untyped_wrapper(self):
         """
