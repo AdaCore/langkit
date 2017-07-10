@@ -686,25 +686,33 @@ package body Langkit_Support.Lexical_Env is
      (Base_Env             : Lexical_Env;
       To_Rebind, Rebind_To : Env_Getter) return Lexical_Env
    is
-      --  The rebindings we create for the new env is a singleton with only the
-      --  pair that the user wants to add. Any rebinding that the original env
-      --  already has will be concatenated during env lookup.
-
-      Rebindings      : constant Env_Rebindings :=
-        Create ((1 => (To_Rebind, Rebind_To)));
-
-      N : constant Lexical_Env :=
-        new Lexical_Env_Type'
-          (Parent                     => No_Env_Getter,
-           Node                       => No_Element,
-           Referenced_Envs            => <>,
-           Env                        => null,
-           Default_MD                 => Empty_Metadata,
-           Rebindings                 => Rebindings,
-           Ref_Count                  => 1);
    begin
-      Reference (N, Base_Env, Transitive => True);
-      return N;
+      if Get_Env (To_Rebind).Ref_Count /= No_Refcount then
+         raise Constraint_Error
+           with "Can only rebind a non synthetic environment";
+      end if;
+
+      declare
+         --  The rebindings we create for the new env is a singleton with
+         --  only the pair that the user wants to add. Any rebinding that the
+         --  original env already has will be concatenated during env lookup.
+
+         Rebindings      : constant Env_Rebindings :=
+           Create ((1 => (To_Rebind, Rebind_To)));
+
+         N : constant Lexical_Env :=
+           new Lexical_Env_Type'
+             (Parent                     => No_Env_Getter,
+              Node                       => No_Element,
+              Referenced_Envs            => <>,
+              Env                        => null,
+              Default_MD                 => Empty_Metadata,
+              Rebindings                 => Rebindings,
+              Ref_Count                  => 1);
+      begin
+         Reference (N, Base_Env, Transitive => True);
+         return N;
+      end;
    end Rebind_Env;
 
    ----------------
