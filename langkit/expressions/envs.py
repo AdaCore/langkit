@@ -43,8 +43,6 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
         'Invalid key argument for Env.get: {}'.format(repr(symbol_expr))
     )
 
-    PropertyDef.get().set_uses_entity_info()
-
     sym_expr = construct(symbol_expr)
     if sym_expr.type == token_type:
         sym_expr = GetSymbol.construct_static(sym_expr)
