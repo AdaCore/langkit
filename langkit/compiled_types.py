@@ -904,7 +904,7 @@ class AbstractNodeData(object):
         :type: None|names.Name
         """
 
-        self.uses_entity_info = False
+        self._uses_entity_info = False
         self._access_needs_incref = access_needs_incref
 
     @property
@@ -923,6 +923,16 @@ class AbstractNodeData(object):
                                   if parent_cls else [])
         return (isinstance(self, PropertyDef) and
                 self._name in properties_to_override)
+
+    @property
+    def uses_entity_info(self):
+        """
+        Return whether evaluating this field requires entity info.
+
+        :rtype: bool
+        """
+        assert self._uses_entity_info is not None
+        return self._uses_entity_info
 
     @property
     def diagnostic_context(self):

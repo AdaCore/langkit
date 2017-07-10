@@ -2315,13 +2315,13 @@ class PropertyDef(AbstractNodeData):
                 uses_entity_info is not None,
                 "Need to specify uses_entity_info for external properties"
             )
-            self.uses_entity_info = uses_entity_info
+            self._uses_entity_info = uses_entity_info
         else:
             check_source_language(
                 uses_entity_info is None,
                 "Cannot specify uses_entity_info for internal properties"
             )
-            self.uses_entity_info = False
+            self._uses_entity_info = False
 
         self.entity_info_arg = None
         self._requires_untyped_wrapper = False
@@ -2762,7 +2762,7 @@ class PropertyDef(AbstractNodeData):
         self._add_argument(PropertyDef.entity_info_name, T.entity_info,
                            is_optional=True, is_artificial=True)
         self.entity_info_arg = self.arguments[-1]
-        self.uses_entity_info = True
+        self._uses_entity_info = True
 
     def set_uses_entity_info(self):
         """
