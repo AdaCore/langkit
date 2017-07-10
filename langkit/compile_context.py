@@ -1070,11 +1070,11 @@ class CompileCtx(object):
                          PropertyDef.compute_property_attributes),
             PropertyPass('construct and type expressions',
                          PropertyDef.construct_and_type_expression),
-            PropertyPass('check_overriding_types',
+            PropertyPass('check overriding types',
                          PropertyDef.check_overriding_types),
-            PropertyPass('check_properties_return_types',
+            PropertyPass('check properties return types',
                          PropertyDef.check_return_types),
-            GlobalPass('Compute uses envs attribute',
+            GlobalPass('compute uses entity info attribute',
                        CompileCtx.compute_uses_entity_info_attr),
             EnvSpecPass('check env specs',
                         EnvSpec.check_spec),
@@ -1089,9 +1089,9 @@ class CompileCtx(object):
 
             StopPipeline('check only', disabled=not check_only),
 
-            GrammarRulePass('Compute nodes parsers correspondence',
+            GrammarRulePass('compute nodes parsers correspondence',
                             node_to_parsers.compute),
-            GlobalPass('Log node parsers correspondence ',
+            GlobalPass('log node parsers correspondence ',
                        node_to_parsers.check_nodes_to_rules),
 
             MajorStepPass('Prepare code emission'),
