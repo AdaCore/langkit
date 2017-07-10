@@ -139,6 +139,11 @@ package Langkit_Support.Lexical_Env is
    function Append
      (Self : Env_Rebindings; Binding : Env_Rebinding) return Env_Rebindings;
 
+   function Append_Rebinding
+     (Self      : Env_Rebindings;
+      To_Rebind : Lexical_Env;
+      Rebind_To : Lexical_Env) return Env_Rebindings;
+
    --------------
    -- Entities --
    --------------
