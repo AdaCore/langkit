@@ -2871,7 +2871,7 @@ package body ${ada_lib_name}.Analysis is
    ------------------
 
    function Children_Env
-     (Node : access ${root_node_value_type}'Class;
+     (Node   : access ${root_node_value_type}'Class;
       E_Info : Entity_Info := No_Entity_Info) return Lexical_Env
    is (Rebind_Env (Node.Self_Env, E_Info));
 
@@ -2880,7 +2880,7 @@ package body ${ada_lib_name}.Analysis is
    --------------
 
    function Node_Env
-     (Node : access ${root_node_value_type};
+     (Node   : access ${root_node_value_type};
       E_Info : Entity_Info := No_Entity_Info) return AST_Envs.Lexical_Env
    is (Rebind_Env (Node.Self_Env, E_Info));
 
