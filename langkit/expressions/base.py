@@ -2359,6 +2359,20 @@ class PropertyDef(AbstractNodeData):
     def ignore_warn_on_node(self):
         return self._ignore_warn_on_node
 
+    @property
+    @memoized
+    def all_overriding_properties(self):
+        """
+        Return self's overriding properties and all their own overriding ones,
+        recursively.
+
+        :rtype: list[PropertyDef]
+        """
+        def helper(prop, except_self=False):
+            return sum((helper(p) for p in prop.overriding_properties),
+                       [] if except_self else [prop])
+        return helper(self, except_self=True)
+
     def property_set(self):
         """
         Return all properties associated with this property in terms of
@@ -2366,15 +2380,9 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: list[PropertyDef]
         """
-        def internal(prop):
-            ret = [prop]
-            for p in prop.overriding_properties:
-                ret.extend(internal(p))
-            return ret
-
         return (
             self.base_property.property_set()
-            if self.base_property else internal(self)
+            if self.base_property else [self] + self.all_overriding_properties
         )
 
     @property
