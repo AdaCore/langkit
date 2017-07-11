@@ -730,30 +730,51 @@ class CompileCtx(object):
             for prop in astnode.get_properties(*args, **kwargs):
                 yield prop
 
-    def properties_callgraphs(self):
+    def properties_callgraphs(
+        self, forwards_converter=lambda expr, to_prop: to_prop,
+        backwards_converter=lambda expr, from_prop: from_prop,
+    ):
         """
-        Return forwards and backwards callgraphs for all properties.
+        Compute forwards and backwards properties callgraphs.
 
-        This takes care of overriding properties. In other words, if C calls A
-        and B overrides A, then we consider that C calls both A and B. Note
-        that this considers references to properties in logic expressions as
-        calls.
+        The forwards callgraph is a mapping::
 
-        :rtype: (dict[PropertyDef, set[PropertyDef]],
-                 dict[PropertyDef, set[PropertyDef]])
+           Caller property -> set of called properties
+
+        While the backwards one is::
+
+           Called property -> set of caller properties
+
+        This takes care of overriding properties: if C calls A and B overrides
+        A, then we consider that C calls both A and B. Note that this considers
+        references to properties in logic expressions as calls.
+
+        :param forwards_converter: Function to customize what the forwards call
+            graph contains. It is its result that is added to the returned set.
+            The given resolved expression, which comes from the caller property
+            is the expression that references the given called property.
+        :type forwards_converter: (ResolvedExpression, PropertyDef) -> T
+
+        :param backwards_converter: Likewise for the backwards callgraph.
+            The given resolved expression, which comes from the given caller
+            property is the expression that references the called property.
+        :type forwards_converter: (ResolvedExpression, PropertyDef) -> T
+
+        :return: A tuple for 1) the forwards callgraph 2) the backwards one.
+        :rtype: (dict[PropertyDef, set[T]], dict[PropertyDef, set[T]])
         """
-        def add_forward(from_prop, to_prop):
+        def add_forward(from_prop, to_prop, expr):
             backwards.setdefault(to_prop, set())
-            forwards[from_prop].add(to_prop)
-            backwards[to_prop].add(from_prop)
+            forwards[from_prop].add(forwards_converter(expr, to_prop))
+            backwards[to_prop].add(backwards_converter(expr, from_prop))
             for over_prop in to_prop.overriding_properties:
-                add_forward(from_prop, over_prop)
+                add_forward(from_prop, over_prop, expr)
 
         def traverse_expr(expr):
             for ref_prop in expr.flat_subexprs(
                 lambda e: isinstance(e, PropertyDef)
             ):
-                add_forward(prop, ref_prop)
+                add_forward(prop, ref_prop, expr)
             for subexpr in expr.flat_subexprs():
                 traverse_expr(subexpr)
 
