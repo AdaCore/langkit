@@ -767,7 +767,7 @@ class CompileCtx(object):
             backwards.setdefault(to_prop, set())
             forwards[from_prop].add(forwards_converter(expr, to_prop))
             backwards[to_prop].add(backwards_converter(expr, from_prop))
-            for over_prop in to_prop.overriding_properties:
+            for over_prop in to_prop.all_overriding_properties:
                 add_forward(from_prop, over_prop, expr)
 
         def traverse_expr(expr):
