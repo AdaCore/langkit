@@ -95,6 +95,9 @@
          (El : ${cls.el_type.name}; Info : Entity_Info)
           return ${cls.name} is
        begin
+         if El = null then
+            return ${cls.nullexpr};
+         end if;
          Inc_Ref (Info.Rebindings);
          return (El => El, Info => Info);
        end Create;
