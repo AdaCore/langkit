@@ -16,13 +16,16 @@ class DSLType(object):
     """
     Base class for the representation of types in the DSL.
     """
+
+    @classmethod
     def new(cls, *args, **kwargs):
         """
         Shortcut to the New expression, allowing type.new(..) syntax.
 
         :rtype: AbstractExpression
         """
-        return T.Defer(lambda: cls._type.new(*args, **kwargs))
+        from langkit.expressions.structs import New
+        return New(cls, *args, **kwargs)
 
     @classproperty
     def array(cls):
