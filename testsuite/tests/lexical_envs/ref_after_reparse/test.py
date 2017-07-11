@@ -78,7 +78,7 @@ class Ref(FooNode):
 
     @langkit_property(public=True)
     def entity():
-        return Self.name.entity
+        return Self.as_entity.name.entity
 
 
 foo_grammar = Grammar('main_rule')
