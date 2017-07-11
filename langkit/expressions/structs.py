@@ -768,7 +768,13 @@ class IsA(AbstractExpression):
         :rtype: IsAExpr
         """
         expr = construct(self.expr)
-        astnodes = [resolve_type(a) for a in self.astnodes]
+        as_entity = expr.type.is_entity_type
+
+        def resolve(astnode):
+            t = resolve_type(astnode)
+            return t.entity if as_entity and t.is_ast_node else t
+        astnodes = [resolve(a) for a in self.astnodes]
+
         for a in astnodes:
             check_source_language(
                 a.is_ast_node or a.is_entity_type,
