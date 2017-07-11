@@ -1543,7 +1543,7 @@ class AbstractVariable(AbstractExpression):
         try:
             expr = self.construct_cache[key]
         except KeyError:
-            expr = VariableExpr(typ, self._name, self)
+            expr = VariableExpr(typ, self._name, abstract_var=self)
             self.construct_cache[key] = expr
         return expr
 
