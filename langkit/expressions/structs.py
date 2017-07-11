@@ -371,15 +371,13 @@ class FieldAccess(AbstractExpression):
             self.simple_field_access = not p
             assert not self.simple_field_access or not implicit_deref
 
-            if not self.simple_field_access:
-                self.receiver_expr = NullCheckExpr(receiver_expr,
-                                                   implicit_deref)
-            else:
-                self.receiver_expr = receiver_expr
-
+            self.original_receiver_expr = receiver_expr
+            self.receiver_expr = (receiver_expr
+                                  if self.simple_field_access else
+                                  NullCheckExpr(receiver_expr, implicit_deref))
+            self.implicit_deref = implicit_deref
             self.node_data = node_data
             self.arguments = arguments
-            self.implicit_deref = implicit_deref
 
             if isinstance(self.node_data, PropertyDef):
                 self.dynamic_vars = [construct(dynvar)
@@ -402,6 +400,20 @@ class FieldAccess(AbstractExpression):
             return "<FieldAccessExpr {} {} {}>".format(
                 self.receiver_expr, self.node_data, self.type
             )
+
+        def wrap_prefix_in_entity(self):
+            """
+            Mutate this expression so that it wraps the prefix into an entity.
+            """
+            from langkit.expressions.envs import make_as_entity
+
+            assert not self.implicit_deref
+            assert not self.simple_field_access
+            # The current receiver expression already contains a null check, so
+            # we don't have to go through the full complexity of .as_entity.
+            self.receiver_expr = make_as_entity(self.receiver_expr,
+                                                null_check=False)
+            self.implicit_deref = True
 
         @property
         def wrap_result_in_entity(self):
