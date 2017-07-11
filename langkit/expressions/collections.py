@@ -604,11 +604,30 @@ def collection_get(self, coll_expr, index_expr, or_null=True):
     # 0-based indexes, so there is no need to fiddle indexes here.
     index_expr = construct(index_expr, long_type)
 
-    coll_expr = construct(coll_expr, lambda t: t.is_collection)
+    coll_expr = construct(coll_expr)
+    as_entity = coll_expr.type.is_entity_type
+    if as_entity:
+        saved_coll_expr, coll_expr, entity_info = (
+            coll_expr.destructure_entity()
+        )
+
+    check_source_language(
+        coll_expr.type.is_collection,
+        '.at prefix must be a collection: got {} instead'.format(
+            coll_expr.type.name.camel
+        )
+    )
+
     or_null = construct(or_null)
-    return CallExpr('Get_Result', 'Get', coll_expr.type.element_type,
-                    [coll_expr, index_expr, or_null],
-                    abstract_expr=self)
+    result = CallExpr('Get_Result', 'Get', coll_expr.type.element_type,
+                      [coll_expr, index_expr, or_null])
+
+    if as_entity:
+        result = SequenceExpr(saved_coll_expr,
+                              make_as_entity(result, entity_info))
+
+    result.abstract_expr = self
+    return result
 
 
 @auto_attr
