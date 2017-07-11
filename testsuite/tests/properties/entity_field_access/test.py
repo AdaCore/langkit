@@ -30,7 +30,7 @@ class FooNode(ASTNode):
     @langkit_property(public=True)
     def test_main():
         return (
-            Self.cast(T.Couple)
+            Self.as_entity.cast(T.Couple)
 
             # This will return an entity with is_first=True
             .first_entity
