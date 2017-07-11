@@ -222,12 +222,21 @@ def rebind_env(self, env, to_rebind, rebind_to):
                     abstract_expr=self)
 
 
-def make_as_entity(node_expr, entity_info=None, abstract_expr=None):
+def make_as_entity(node_expr, entity_info=None, null_check=True,
+                   abstract_expr=None):
     """
     Helper for as_entity. Takes a resolved expression instead of an abstract
     one.
+
+    :param ResolvedExpression node_expr: The AST node expression to wrap as an
+        entity.
+    :param ResolvedExpression|None entity_info: Expression to use as the entity
+        information. If provided, its type must be T.entity_info. Otherwise,
+        the ambient entity info is used.
     """
     from langkit.expressions import If, IsNull, New
+
+    entity_type = node_expr.type.entity
 
     # If we use the ambient entity info, make the current property an entity
     # one.
@@ -236,22 +245,28 @@ def make_as_entity(node_expr, entity_info=None, abstract_expr=None):
         p.set_uses_entity_info()
         entity_info = construct(p.entity_info_arg.var)
 
-    # Create a variable to hold the input node so we can reference it
-    # multiple times in the sub-expression.
-    node_var = node_expr.create_result_var('Node_For_Entity')
+    # Expression tree sharing is forbidden, so if we need to reference the
+    # result of the input node expression multiple times, create a variable to
+    # hold the input node.
+    node_ref = (node_expr.create_result_var('Node_For_Entity')
+                if null_check else node_expr)
 
-    return If.Expr(
-        IsNull.construct_static(node_expr),
-        NullExpr(node_expr.type.entity),
-        New.StructExpr(
-            node_expr.type.entity, {names.Name('El'): node_var,
-                                    names.Name('Info'): entity_info},
-            result_var_name=names.Name.from_lower('as_entity'),
-            abstract_expr=abstract_expr,
-        ),
-        node_expr.type.entity,
-        abstract_expr=abstract_expr
+    entity_expr = New.StructExpr(
+        entity_type, {names.Name('El'): node_ref,
+                      names.Name('Info'): entity_info},
+        result_var_name=names.Name.from_lower('as_entity'),
     )
+
+    result = If.Expr(
+        IsNull.construct_static(node_expr),
+        NullExpr(entity_type),
+        entity_expr,
+        entity_type,
+        abstract_expr=abstract_expr
+    ) if null_check else entity_expr
+
+    result.abstract_expr = abstract_expr
+    return result
 
 
 @auto_attr
