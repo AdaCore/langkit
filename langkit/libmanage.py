@@ -534,13 +534,22 @@ class ManageScript(object):
             """
             Helper function to pretty-print files from a GPR project.
             """
-            self.check_call(args, 'Show pp path', ['which', 'gnatpp'])
-            self.check_call(args, 'Show pp version', ['gnatpp', '--version'])
-            self.check_call(args, 'Pretty-printing', [
+            if self.verbosity.debug:
+                self.check_call(args, 'Show pp path', ['which', 'gnatpp'])
+                self.check_call(args, 'Show pp version',
+                                ['gnatpp', '--version'])
+
+            argv = [
                 'gnatpp', '-P{}'.format(project_file), '-rnb',
-                '--insert-blank-lines', '-v',
-            ] + self.gpr_scenario_vars(args, 'prod', 'relocatable')
-              + glob.glob(glob_pattern)
+                '--insert-blank-lines',
+            ]
+            if self.verbosity.debug:
+                argv.append('-v')
+
+            self.check_call(
+                args, 'Pretty-printing',
+                argv + self.gpr_scenario_vars(args, 'prod', 'relocatable')
+                + glob.glob(glob_pattern)
             )
 
         self.log_info(
