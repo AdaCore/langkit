@@ -5,7 +5,7 @@ import inspect
 from langkit import names
 from langkit.compiled_types import (BuiltinField, Field, UserField, bool_type,
                                     resolve_type)
-from langkit.diagnostics import Severity, check_source_language
+from langkit.diagnostics import Context, Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
     ComputingExpr, DynamicVariable, Let, NullCheckExpr, NullExpr, PropertyDef,
@@ -588,6 +588,11 @@ class FieldAccess(AbstractExpression):
         self.field = field
         self.arguments = arguments
         self.is_deref = False
+
+    @property
+    def diagnostic_context(self):
+        return Context('in access to .{}'.format(self.field), self.location,
+                       'abstract_expr')
 
     def resolve_field(self):
         """

@@ -1,5 +1,5 @@
 File "test.py", line 25, in BarNode.prop_2
-  line 25, in FieldAccess expression
+  line 25, in access to .prop_1
   line 21, in BarCode.prop_1
     Error: Recursion loop in type inference for property BarCode.p_prop_1. Try to specify its return type explicitly.
 

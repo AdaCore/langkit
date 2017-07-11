@@ -1,4 +1,4 @@
 File "test.py", line 42, in Def.faulty_prop
-  line 42, in FieldAccess expression
+  line 42, in access to ._env_mappings_0
     Error: Def.internal_env_mappings_0 is for internal use only
 Done
