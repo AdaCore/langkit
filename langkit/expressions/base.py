@@ -1173,6 +1173,15 @@ class VariableExpr(ResolvedExpression):
             self.name.lower,
             ' ({})'.format(src_name.lower) if src_name else '')
 
+    @property
+    def is_self(self):
+        """
+        Return whether this correspond to the Self singleton.
+
+        :rtype: bool
+        """
+        return self.abstract_var and self.abstract_var is Self
+
 
 class UnreachableExpr(ResolvedExpression):
     """
@@ -2780,6 +2789,10 @@ class PropertyDef(AbstractNodeData):
         Set this property as using environments, which will trigger the
         addition of the env rebinding implicit parameter.
         """
+        check_source_language(
+            self._uses_entity_info is not False,
+            'Cannot use entity info, as explicitely forbiden'
+        )
         if not self._uses_entity_info:
             self._set_uses_entity_info()
 
