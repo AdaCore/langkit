@@ -385,12 +385,6 @@ class FieldAccess(AbstractExpression):
                 self.dynamic_vars = [construct(dynvar)
                                      for dynvar in self.node_data.dynamic_vars]
 
-            self.wrap_result_in_entity = (
-                self.implicit_deref
-                and isinstance(self.node_data, Field)
-                and self.node_data.type.is_ast_node
-            )
-
             self.static_type = self.node_data.type
             if self.wrap_result_in_entity:
                 self.static_type = self.static_type.entity
@@ -407,6 +401,20 @@ class FieldAccess(AbstractExpression):
         def __repr__(self):
             return "<FieldAccessExpr {} {} {}>".format(
                 self.receiver_expr, self.node_data, self.type
+            )
+
+        @property
+        def wrap_result_in_entity(self):
+            """
+            Whether the result is an AST node that must be wrapped as an
+            entity.
+
+            :rtype: bool
+            """
+            return (
+                self.implicit_deref
+                and isinstance(self.node_data, Field)
+                and self.node_data.type.is_ast_node
             )
 
         @property
