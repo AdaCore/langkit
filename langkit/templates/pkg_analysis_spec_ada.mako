@@ -347,10 +347,6 @@ package ${ada_lib_name}.Analysis is
    --  eg. this does not handle general visibility issues, just sequentiality of
    --  declarations.
 
-   type Env_Getter_State_T is record
-      Node : ${root_node_type_name};
-   end record;
-
    function Node_File_And_Sloc_Image
      (Node : ${root_node_type_name}) return Text_Type;
    --  Return a "sourcefile:lineno:columnno" corresponding to the starting sloc
@@ -363,7 +359,6 @@ package ${ada_lib_name}.Analysis is
       No_Element       => null,
       Empty_Metadata   => No_Metadata,
       Combine          => Combine,
-      Getter_State_T   => Env_Getter_State_T,
       Element_Image    => Node_File_And_Sloc_Image);
 
    --  The following subtypes are introduced to ease code generation, so we

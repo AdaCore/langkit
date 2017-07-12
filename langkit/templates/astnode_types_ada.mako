@@ -637,7 +637,7 @@
          if Initial_Env not in Root_Env | Empty_Env
             and then Initial_Env.Node.Unit /= Self.Unit
          then
-            G := Dyn_Env_Getter (${env_getter}'Access, G_State);
+            G := Dyn_Env_Getter (${env_getter}'Access, Self);
          end if;
          % endif
 
@@ -682,17 +682,17 @@
    ---------------------------
 
    function ${env_getter}
-     (State : Env_Getter_State_T) return AST_Envs.Lexical_Env
+     (Node : ${root_node_type_name}) return AST_Envs.Lexical_Env
    is
-      Self : ${cls.name} := ${cls.name} (State.Node);
+      Self : constant ${cls.name} := ${cls.name} (Node);
 
       ## Define this constant so that the expressions below, which are expanded
       ## into property calls, can reference it as the currently bound
       ## environment.
       Bound_Env : constant Lexical_Env :=
-        (if State.Node.Parent /= null
-         then State.Node.Parent.Self_Env
-         else State.Node.Self_Env);
+        (if Self.Parent /= null
+         then Self.Parent.Self_Env
+         else Self.Self_Env);
 
       Initial_Env : Lexical_Env := Bound_Env;
    begin
@@ -719,15 +719,13 @@
       use AST_Envs;
 
       Initial_Env : Lexical_Env := Bound_Env;
-      G_State     : Env_Getter_State_T :=
-        (Node => ${root_node_type_name} (Self));
 
       % if cls.env_spec.adds_env:
       G : Env_Getter;
       % endif
    begin
       % if has_dyn_env:
-         Initial_Env := ${env_getter} (G_State);
+         Initial_Env := ${env_getter} (${root_node_type_name} (Self));
       % endif
 
       % for action in cls.env_spec.pre_actions:

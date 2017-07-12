@@ -38,11 +38,6 @@ generic
    --  for lexical envs, as-in, an element declared after another is not yet
    --  visible.
 
-   type Getter_State_T is private;
-   --  For dynamic env getters, the function pointer is allowed to have a state
-   --  that carries needed data. This is preferred to a tagged type because the
-   --  state has a fixed size here.
-
    with function Element_Image (El : Element_T) return Text_Type;
 package Langkit_Support.Lexical_Env is
 
@@ -61,8 +56,7 @@ package Langkit_Support.Lexical_Env is
    -- Env_Getter --
    ----------------
 
-   type Getter_Fn_T is access
-     function (Self : Getter_State_T) return Lexical_Env;
+   type Getter_Fn_T is access function (Elt : Element_T) return Lexical_Env;
 
    type Env_Getter is private;
    --  Link to an environment. It can be either a simple link (just a pointer)
@@ -75,7 +69,7 @@ package Langkit_Support.Lexical_Env is
    --  Create a static Env_Getter (i.e. pointer to environment)
 
    function Dyn_Env_Getter
-     (Fn : Getter_Fn_T; State : Getter_State_T) return Env_Getter;
+     (Fn : Getter_Fn_T; Elt : Element_T) return Env_Getter;
    --  Create a dynamic Env_Getter (i.e. function and closure to compute an
    --  environment).
 
@@ -416,8 +410,8 @@ private
    type Env_Getter (Dynamic : Boolean := False) is record
       case Dynamic is
          when True =>
-            Getter_State : Getter_State_T;
-            Getter_Fn    : Getter_Fn_T;
+            Elt       : Element_T;
+            Getter_Fn : Getter_Fn_T;
          when False =>
             Is_Refcounted : Boolean;
             --  Whether Env is ref-counted. When it's not, we can avoid calling
