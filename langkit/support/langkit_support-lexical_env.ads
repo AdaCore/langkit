@@ -58,7 +58,21 @@ package Langkit_Support.Lexical_Env is
 
    type Getter_Fn_T is access function (Elt : Element_T) return Lexical_Env;
 
-   type Env_Getter is private;
+   type Env_Getter (Dynamic : Boolean := False) is record
+      case Dynamic is
+         when True =>
+            Elt       : Element_T;
+            Getter_Fn : Getter_Fn_T;
+         when False =>
+            Is_Refcounted : Boolean;
+            --  Whether Env is ref-counted. When it's not, we can avoid calling
+            --  Dec_Ref at destruction time: This is useful because at analysis
+            --  unit destruction time, this may be a dangling access to an
+            --  environment from another unit.
+
+            Env           : Lexical_Env;
+      end case;
+   end record;
    --  Link to an environment. It can be either a simple link (just a pointer)
    --  or a dynamic link (a function that recomputes the link when needed). See
    --  tho two constructors below.
@@ -406,22 +420,6 @@ package Langkit_Support.Lexical_Env is
    --  otherwise.
 
 private
-
-   type Env_Getter (Dynamic : Boolean := False) is record
-      case Dynamic is
-         when True =>
-            Elt       : Element_T;
-            Getter_Fn : Getter_Fn_T;
-         when False =>
-            Is_Refcounted : Boolean;
-            --  Whether Env is ref-counted. When it's not, we can avoid calling
-            --  Dec_Ref at destruction time: This is useful because at analysis
-            --  unit destruction time, this may be a dangling access to an
-            --  environment from another unit.
-
-            Env           : Lexical_Env;
-      end case;
-   end record;
 
    type Env_Rebindings_Type (Size : Natural) is record
       Ref_Count : Natural := 1;
