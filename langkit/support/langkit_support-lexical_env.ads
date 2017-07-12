@@ -41,6 +41,52 @@ generic
    with function Element_Image (El : Element_T) return Text_Type;
 package Langkit_Support.Lexical_Env is
 
+   type Env_Rebindings_Type (<>) is private;
+   type Env_Rebindings is access all Env_Rebindings_Type;
+   --  Set of mappings from one lexical environment to another. This is used to
+   --  temporarily substitute lexical environment during symbol lookup.
+
+   --------------
+   -- Entities --
+   --------------
+
+   type Entity_Info is record
+      MD         : Element_Metadata;
+      Rebindings : Env_Rebindings := null;
+   end record
+      with Convention => C;
+
+   No_Entity_Info : constant Entity_Info := (Empty_Metadata, null);
+
+   function Combine (L, R : Entity_Info) return Entity_Info;
+   --  Return a new Entity_Info that combines info from both L and R
+
+   procedure Inc_Ref (Self : Entity_Info);
+   --  Increment the reference count of items in Self
+
+   procedure Dec_Ref (Self : in out Entity_Info);
+   --  Decrement the reference count of items in Self
+
+   type Entity is record
+      El      : Element_T;
+      Info    : Entity_Info;
+   end record;
+   --  Wrapper structure to contain both the 'real' env element that the user
+   --  wanted to store, and its associated metadata.
+
+   function Create (El : Element_T; MD : Element_Metadata) return Entity;
+   --  Constructor that returns an Entity from an Element_T and an
+   --  Element_Metadata instances.
+
+   function Is_Equivalent (L, R : Entity) return Boolean;
+   --  Return whether we can consider that L and R are equivalent entities
+
+   procedure Inc_Ref (Self : Entity);
+   --  Increment the reference count of items in Self
+
+   procedure Dec_Ref (Self : in out Entity);
+   --  Decrement the reference count of items in Self
+
    ----------------------
    -- Lexical_Env Type --
    ----------------------
@@ -121,11 +167,6 @@ package Langkit_Support.Lexical_Env is
 
    type Env_Rebindings_Array is array (Positive range <>) of Env_Rebinding;
 
-   type Env_Rebindings_Type (<>) is private;
-   type Env_Rebindings is access all Env_Rebindings_Type;
-   --  Set of mappings from one lexical environment to another. This is used to
-   --  temporarily substitute lexical environment during symbol lookup.
-
    function Is_Equivalent (L, R : Env_Rebindings) return Boolean;
    --  Return whether we can consider L and R as being the same set of env
    --  rebindings. Raise a Constraint_Error if this involves comparing
@@ -151,47 +192,6 @@ package Langkit_Support.Lexical_Env is
      (Self      : Env_Rebindings;
       To_Rebind : Lexical_Env;
       Rebind_To : Lexical_Env) return Env_Rebindings;
-
-   --------------
-   -- Entities --
-   --------------
-
-   type Entity_Info is record
-      MD         : Element_Metadata;
-      Rebindings : Env_Rebindings := null;
-   end record
-      with Convention => C;
-
-   No_Entity_Info : constant Entity_Info := (Empty_Metadata, null);
-
-   function Combine (L, R : Entity_Info) return Entity_Info;
-   --  Return a new Entity_Info that combines info from both L and R
-
-   procedure Inc_Ref (Self : Entity_Info);
-   --  Increment the reference count of items in Self
-
-   procedure Dec_Ref (Self : in out Entity_Info);
-   --  Decrement the reference count of items in Self
-
-   type Entity is record
-      El      : Element_T;
-      Info    : Entity_Info;
-   end record;
-   --  Wrapper structure to contain both the 'real' env element that the user
-   --  wanted to store, and its associated metadata.
-
-   function Create (El : Element_T; MD : Element_Metadata) return Entity;
-   --  Constructor that returns an Entity from an Element_T and an
-   --  Element_Metadata instances.
-
-   function Is_Equivalent (L, R : Entity) return Boolean;
-   --  Return whether we can consider that L and R are equivalent entities
-
-   procedure Inc_Ref (Self : Entity);
-   --  Increment the reference count of items in Self
-
-   procedure Dec_Ref (Self : in out Entity);
-   --  Decrement the reference count of items in Self
 
    -------------------------------------
    -- Arrays of elements and entities --
