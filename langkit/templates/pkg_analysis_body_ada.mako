@@ -2442,7 +2442,7 @@ package body ${ada_lib_name}.Analysis is
       begin
          for R of Refs loop
             declare
-               Env : constant Lexical_Env := Get_Refd_Env (R);
+               Env : Lexical_Env := Get_Env (R.Getter);
             begin
                if Env /= Empty_Env then
                   if Is_First then
@@ -2450,12 +2450,13 @@ package body ${ada_lib_name}.Analysis is
                      Is_First := False;
                   end if;
                   Put ("      ");
-                  Put (Short_Image (R.From_Node) & ": ");
+                  Put (Short_Image (R.Getter.Node) & ": ");
 
                   Dump_One_Lexical_Env (Self           => Env,
                                         Dump_Addresses => Dump_Addresses,
                                         Dump_Content   => False);
                   New_Line;
+                  Dec_Ref (Env);
                end if;
             end;
          end loop;

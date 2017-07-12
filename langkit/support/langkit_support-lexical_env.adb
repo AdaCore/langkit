@@ -440,13 +440,12 @@ package body Langkit_Support.Lexical_Env is
       Resolver        : Lexical_Env_Resolver;
       Transitive      : Boolean := False)
    is
+      Getter : constant Env_Getter :=
+         Dyn_Env_Getter (Resolver, Referenced_From);
    begin
       Referenced_Envs_Vectors.Append
         (Self.Referenced_Envs,
-         Referenced_Env'(Is_Dynamic    => True,
-                         Is_Transitive => Transitive,
-                         From_Node     => Referenced_From,
-                         Resolver      => Resolver));
+         Referenced_Env'(Transitive, Getter));
    end Reference;
 
    ---------------
@@ -461,12 +460,7 @@ package body Langkit_Support.Lexical_Env is
    begin
       Referenced_Envs_Vectors.Append
         (Self.Referenced_Envs,
-         Referenced_Env'
-           (Is_Dynamic    => False,
-            Is_Transitive => Transitive,
-            Is_Refcounted => To_Reference.Ref_Count /= No_Refcount,
-            Env           => To_Reference));
-      Inc_Ref (To_Reference);
+         Referenced_Env'(Transitive, Simple_Env_Getter (To_Reference)));
    end Reference;
 
    ---------
@@ -513,14 +507,14 @@ package body Langkit_Support.Lexical_Env is
             return Entity_Arrays.Empty_Array;
          end if;
 
-         if Self.Is_Dynamic
+         if Self.Getter.Dynamic
            and then From /= No_Element
-           and then not Can_Reach (Self.From_Node, From)
+           and then not Can_Reach (Self.Getter.Node, From)
          then
             return Entity_Arrays.Empty_Array;
          end if;
 
-         Env := Get_Refd_Env (Self);
+         Env := Get_Env (Self.Getter);
 
          begin
             --  Make sure that whether Recurse suceeds or raises an exception,
@@ -533,17 +527,13 @@ package body Langkit_Support.Lexical_Env is
                       Recursive  => Recursive and Self.Is_Transitive,
                       Rebindings => Current_Rebindings);
             begin
-               if Self.Is_Dynamic then
-                  Dec_Ref (Env);
-               end if;
+               Dec_Ref (Env);
                return Result;
             end;
 
          exception
             when others =>
-               if Self.Is_Dynamic then
-                  Dec_Ref (Env);
-               end if;
+               Dec_Ref (Env);
                raise;
          end;
       end Get_Refd_Elements;
@@ -772,7 +762,6 @@ package body Langkit_Support.Lexical_Env is
    procedure Destroy (Self : in out Lexical_Env) is
       procedure Free is
         new Ada.Unchecked_Deallocation (Lexical_Env_Type, Lexical_Env);
-      Refd_Env : Lexical_Env;
    begin
 
       --  Do not free the internal map for ref-counted allocated environments
@@ -786,16 +775,15 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       for Ref_Env of Self.Referenced_Envs loop
-         if not Ref_Env.Is_Dynamic and then Ref_Env.Is_Refcounted then
-            Refd_Env := Ref_Env.Env;
-            Dec_Ref (Refd_Env);
-         end if;
+         declare
+            Getter : Env_Getter := Ref_Env.Getter;
+         begin
+            Dec_Ref (Getter);
+         end;
       end loop;
 
       Referenced_Envs_Vectors.Destroy (Self.Referenced_Envs);
-
       Dec_Ref (Self.Rebindings);
-
       Free (Self);
    end Destroy;
 
@@ -951,20 +939,5 @@ package body Langkit_Support.Lexical_Env is
          return To_Wide_Wide_String (Buffer);
       end;
    end Image;
-
-   -------------
-   -- Get_Env --
-   -------------
-
-   function Get_Refd_Env (Self : Referenced_Env) return Lexical_Env is
-   begin
-      case Self.Is_Dynamic is
-         when True =>
-            return Self.Resolver.all
-              (Entity'(Self.From_Node, No_Entity_Info));
-         when False =>
-            return Self.Env;
-      end case;
-   end Get_Refd_Env;
 
 end Langkit_Support.Lexical_Env;

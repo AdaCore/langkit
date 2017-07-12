@@ -212,31 +212,11 @@ package Langkit_Support.Lexical_Env is
    -- Referenced environments --
    -----------------------------
 
-   type Referenced_Env (Is_Dynamic : Boolean := False) is record
+   type Referenced_Env is record
       Is_Transitive : Boolean := False;
-
-      case Is_Dynamic is
-         when True =>
-            From_Node : Element_T;
-            --  The node from which the environment has been referenced
-
-            Resolver  : Lexical_Env_Resolver;
-            --  A function that takes From_Node and resolves to the environment
-            --  that is referenced.
-
-         when False =>
-            Is_Refcounted : Boolean;
-            --  Whether Env is ref-counted. When it's not, we can avoid calling
-            --  Dec_Ref at destruction time. This is useful because at analysis
-            --  unit destruction time, this may be a dangling access to an
-            --  environment from another unit.
-
-            Env           : Lexical_Env;
-      end case;
+      Getter        : Env_Getter;
    end record;
    --  Represents a referenced env
-
-   function Get_Refd_Env (Self : Referenced_Env) return Lexical_Env;
 
    package Referenced_Envs_Vectors is new Langkit_Support.Vectors
      (Referenced_Env);
