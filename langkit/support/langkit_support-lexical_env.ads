@@ -98,17 +98,19 @@ package Langkit_Support.Lexical_Env is
    --  Pointer type for lexical environments. This is the type that shall be
    --  used.
 
+   type Lexical_Env_Resolver is access
+     function (Ref : Entity) return Lexical_Env;
+   --  Callback type for the lazy referenced env resolution mechanism
+
    ----------------
    -- Env_Getter --
    ----------------
 
-   type Getter_Fn_T is access function (Elt : Element_T) return Lexical_Env;
-
    type Env_Getter (Dynamic : Boolean := False) is record
       case Dynamic is
          when True =>
-            Elt       : Element_T;
-            Getter_Fn : Getter_Fn_T;
+            Elt      : Element_T;
+            Resolver : Lexical_Env_Resolver;
          when False =>
             Is_Refcounted : Boolean;
             --  Whether Env is ref-counted. When it's not, we can avoid calling
@@ -129,7 +131,7 @@ package Langkit_Support.Lexical_Env is
    --  Create a static Env_Getter (i.e. pointer to environment)
 
    function Dyn_Env_Getter
-     (Fn : Getter_Fn_T; Elt : Element_T) return Env_Getter;
+     (Resolver : Lexical_Env_Resolver; Elt : Element_T) return Env_Getter;
    --  Create a dynamic Env_Getter (i.e. function and closure to compute an
    --  environment).
 
@@ -209,10 +211,6 @@ package Langkit_Support.Lexical_Env is
    -----------------------------
    -- Referenced environments --
    -----------------------------
-
-   type Lexical_Env_Resolver is access
-     function (Ref : Entity) return Lexical_Env;
-   --  Callback type for the lazy referenced env resolution mechanism
 
    type Referenced_Env (Is_Dynamic : Boolean := False) is record
       Is_Transitive : Boolean := False;

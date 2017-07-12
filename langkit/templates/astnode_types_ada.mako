@@ -681,10 +681,9 @@
    -- Initial_Env_Getter_Fn --
    ---------------------------
 
-   function ${env_getter}
-     (Node : ${root_node_type_name}) return AST_Envs.Lexical_Env
+   function ${env_getter} (E : Entity) return AST_Envs.Lexical_Env
    is
-      Self : constant ${cls.name} := ${cls.name} (Node);
+      Self : constant ${cls.name} := ${cls.name} (E.El);
 
       ## Define this constant so that the expressions below, which are expanded
       ## into property calls, can reference it as the currently bound
@@ -725,7 +724,8 @@
       % endif
    begin
       % if has_dyn_env:
-         Initial_Env := ${env_getter} (${root_node_type_name} (Self));
+         Initial_Env := ${env_getter}
+           ((El => ${root_node_type_name} (Self), Info => No_Entity_Info));
       % endif
 
       % for action in cls.env_spec.pre_actions:
