@@ -684,7 +684,7 @@
    function ${env_getter}
      (State : Env_Getter_State_T) return AST_Envs.Lexical_Env
    is
-      Self        : ${cls.name} := ${cls.name} (State.Node);
+      Self : ${cls.name} := ${cls.name} (State.Node);
 
       ## Define this constant so that the expressions below, which are expanded
       ## into property calls, can reference it as the currently bound
@@ -723,7 +723,7 @@
         (Node => ${root_node_type_name} (Self));
 
       % if cls.env_spec.adds_env:
-      G           : Env_Getter;
+      G : Env_Getter;
       % endif
    begin
       % if has_dyn_env:
@@ -747,7 +747,7 @@
    --------------
 
    overriding function Node_Env
-     (Node : access ${type_name};
+     (Node   : access ${type_name};
       E_Info : Entity_Info := No_Entity_Info) return AST_Envs.Lexical_Env
    is (AST_Envs.Get_Env (Node.Self_Env.Parent));
    % endif
