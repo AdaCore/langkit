@@ -109,7 +109,7 @@ package Langkit_Support.Lexical_Env is
    type Env_Getter (Dynamic : Boolean := False) is record
       case Dynamic is
          when True =>
-            Elt      : Element_T;
+            Node     : Element_T;
             Resolver : Lexical_Env_Resolver;
          when False =>
             Is_Refcounted : Boolean;
@@ -131,7 +131,7 @@ package Langkit_Support.Lexical_Env is
    --  Create a static Env_Getter (i.e. pointer to environment)
 
    function Dyn_Env_Getter
-     (Resolver : Lexical_Env_Resolver; Elt : Element_T) return Env_Getter;
+     (Resolver : Lexical_Env_Resolver; Node : Element_T) return Env_Getter;
    --  Create a dynamic Env_Getter (i.e. function and closure to compute an
    --  environment).
 

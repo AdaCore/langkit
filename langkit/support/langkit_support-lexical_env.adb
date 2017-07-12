@@ -50,10 +50,10 @@ package body Langkit_Support.Lexical_Env is
    --------------------
 
    function Dyn_Env_Getter
-     (Resolver : Lexical_Env_Resolver; Elt : Element_T) return Env_Getter
+     (Resolver : Lexical_Env_Resolver; Node : Element_T) return Env_Getter
    is
    begin
-      return Env_Getter'(True, Elt, Resolver);
+      return Env_Getter'(True, Node, Resolver);
    end Dyn_Env_Getter;
 
    -------------
@@ -65,7 +65,7 @@ package body Langkit_Support.Lexical_Env is
       if Self.Dynamic then
          declare
             R : constant Lexical_Env_Resolver := Self.Resolver;
-            E : constant Entity := (El => Self.Elt, Info => No_Entity_Info);
+            E : constant Entity := (El => Self.Node, Info => No_Entity_Info);
          begin
             return R.all (E);
          end;
