@@ -68,8 +68,8 @@ package Langkit_Support.Lexical_Env is
    --  Decrement the reference count of items in Self
 
    type Entity is record
-      El      : Element_T;
-      Info    : Entity_Info;
+      El   : Element_T;
+      Info : Entity_Info;
    end record;
    --  Wrapper structure to contain both the 'real' env element that the user
    --  wanted to store, and its associated metadata.
