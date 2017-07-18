@@ -61,14 +61,14 @@ And then open the following file in your favorite browser:
 Bootstrapping a new language engine
 -----------------------------------
 
-Nothing is more simple than getting an initial project skeleton to work on a new
-language engine. Imagine you want to create an engine for the Foo language, run
-from the top-level directory:
+Nothing is more simple than getting an initial project skeleton to work on a
+new language engine. Imagine you want to create an engine for the Foo language,
+run from the top-level directory:
 
     $ python langkit/create-project.py Foo
 
-And then have a look at the created `foo` directory: you have minimal lexers and
-parsers and a `manage.py` script you can use to build this new engine:
+And then have a look at the created `foo` directory: you have minimal lexers
+and parsers and a `manage.py` script you can use to build this new engine:
 
     $ python foo/manage.py make
 
