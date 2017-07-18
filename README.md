@@ -23,6 +23,9 @@ To use Langkit:
 - The mako template system for Python (see `REQUIREMENTS.dev`)
 - Clang-format
 
+Note that for now, Langkit requires at least a Python 2.7 interpreter. That
+being said, Python3 support is planned and we should not be very far from it.
+
 Install
 -------
 
