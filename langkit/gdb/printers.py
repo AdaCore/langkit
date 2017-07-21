@@ -310,27 +310,56 @@ class EntityPrinter(BasePrinter):
             return 'null'
 
         node = ASTNodePrinter(self.node, self.context)
+        rebindings = RebindingsPrinter(
+            self.value['info']['rebindings'], self.context
+        )
+        return '<| {} {} {} |>'.format(node.kind, node.sloc(),
+                                       rebindings.inner)
 
-        rebindings = self.value['info']['rebindings']
+
+class RebindingsPrinter(BasePrinter):
+    """
+    Pretty-printer for lexical environments rebindings.
+    """
+
+    name = 'Rebindings'
+
+    @classmethod
+    def matches(cls, value, context):
+        return (
+            value.type.code == gdb.TYPE_CODE_PTR
+            and value.type.target().code == gdb.TYPE_CODE_STRUCT
+            and (
+                value.type.target().name
+                == '{}__analysis__ast_envs__env_rebindings_type'.format(
+                    context.lib_name
+                )
+            )
+        )
+
+    @property
+    def inner(self):
+        rebindings = self.value
+
         if not rebindings:
-            rebindings_image = ''
+            return 'null'
 
-        else:
-            def rebinding_img(value):
-                new_env = EnvGetterPrinter(value['new_env'], self.context).env
-                return ASTNodePrinter(new_env['node'], self.context).sloc(
-                    with_end=False
-                ) if new_env and new_env['node'] else '<synthetic>'
+        def rebinding_img(value):
+            new_env = EnvGetterPrinter(value['new_env'], self.context).env
+            return ASTNodePrinter(new_env['node'], self.context).sloc(
+                with_end=False
+            ) if new_env and new_env['node'] else '<synthetic>'
 
-            size = int(rebindings['size'])
-            array = rebindings['bindings'].address.cast(
-                rebindings['bindings'].type.target().array(1, size).pointer()
-            ).dereference()
-            rebindings_image = ' [{}]'.format(', '.join(
-                rebinding_img(array[i]) for i in range(1, size + 1)
-            ))
+        size = int(rebindings['size'])
+        array = rebindings['bindings'].address.cast(
+            rebindings['bindings'].type.target().array(1, size).pointer()
+        ).dereference()
+        return '[{}]'.format(', '.join(
+            rebinding_img(array[i]) for i in range(1, size + 1)
+        ))
 
-        return '<| {} {}{} |>'.format(node.kind, node.sloc(), rebindings_image)
+    def to_string(self):
+        return "<Rebindings {}>".format(self.inner)
 
 
 class ArrayPrettyPrinter(BasePrinter):
