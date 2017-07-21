@@ -317,9 +317,7 @@ class EntityPrinter(BasePrinter):
 
         else:
             def rebinding_img(value):
-                new_env = EnvGetterPrinter(value['new_env'],
-                                           self.context).env
-
+                new_env = EnvGetterPrinter(value['new_env'], self.context).env
                 return ASTNodePrinter(new_env['node'], self.context).sloc(
                     with_end=False
                 ) if new_env and new_env['node'] else '<synthetic>'
