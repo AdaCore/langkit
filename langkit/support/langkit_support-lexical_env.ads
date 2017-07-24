@@ -379,6 +379,9 @@ package Langkit_Support.Lexical_Env is
    function Rebind_Env
       (Base_Env        : Lexical_Env;
        E_Info          : Entity_Info) return Lexical_Env;
+   function Rebind_Env
+      (Base_Env        : Lexical_Env;
+       Rebindings      : Env_Rebindings) return Lexical_Env;
    --  Returns a new env based on Base_Env, where To_Rebind is rebound to
    --  Rebind_To.
 
