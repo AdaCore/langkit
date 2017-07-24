@@ -210,15 +210,14 @@ def append_rebinding(self, rebindings, to_rebind, rebind_to):
 
 
 @auto_attr
-def rebind_env(self, env, to_rebind, rebind_to):
+def rebind_env(self, env, rebindings):
     """
     Returns a new environment based on `env` where `to_rebind` is rebound to
     `rebind_to`.
     """
     return CallExpr('Rebound_Env', 'Rebind_Env', lexical_env_type,
                     [construct(env, lexical_env_type),
-                     construct(to_rebind, lexical_env_type),
-                     construct(rebind_to, lexical_env_type)],
+                     construct(rebindings, env_rebindings_type)],
                     abstract_expr=self)
 
 
