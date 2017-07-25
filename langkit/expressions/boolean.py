@@ -498,10 +498,6 @@ class Then(AbstractExpression):
             elif then_expr.type.matches(analysis_unit_type):
                 default_expr = construct(No(analysis_unit_type))
             else:
-                # The following is not actually used but PyCharm's typer
-                # requires it.
-                default_expr = None
-
                 check_source_language(
                     False,
                     "Then expression should have a default value provided,"
