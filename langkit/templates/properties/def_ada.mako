@@ -32,6 +32,11 @@ is
      (${property.self_arg_name});
    ${gdb_helper('bind', 'self', 'Self')}
 
+   % if property._has_self_entity:
+   Ent : ${Self.type.entity.name} :=
+     ${Self.type.entity.name}'(Info => E_Info, El => Self);
+   % endif
+
    % for arg in property.mandatory_arguments:
    ${gdb_helper('bind', arg.name.lower, arg.name.camel_with_underscores)}
    % endfor

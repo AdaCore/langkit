@@ -905,6 +905,7 @@ class AbstractNodeData(object):
         """
 
         self._uses_entity_info = False
+        self._has_self_entity = False
         self.optional_entity_info = False
         self._access_needs_incref = access_needs_incref
 

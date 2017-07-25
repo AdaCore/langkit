@@ -1774,12 +1774,31 @@ class SelfVariable(AbstractVariable):
             type of this placeholder.
         """
         _old_type = self._type
+        _old_entity_type = Entity._type
         self._type = type
+        Entity._type = self._type.entity
         yield
         self._type = _old_type
+        Entity._type = _old_entity_type
 
 
 Self = SelfVariable()
+
+
+class EntityVariable(AbstractVariable):
+    _singleton = None
+
+    def __init__(self):
+        assert EntityVariable._singleton is None
+        EntityVariable._singleton = self
+        super(EntityVariable, self).__init__(names.Name('Ent'))
+
+    def construct(self):
+        PropertyDef.get().set_uses_entity_info()
+        PropertyDef.get()._has_self_entity = True
+        return super(EntityVariable, self).construct()
+
+Entity = EntityVariable()
 
 
 @attr_expr("symbol")
