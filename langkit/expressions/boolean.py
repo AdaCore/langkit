@@ -2,17 +2,13 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import (
-    T, analysis_unit_type, bool_type, equation_type, lexical_env_type,
-    long_type, symbol_type
-)
+from langkit.compiled_types import T, bool_type, equation_type, long_type
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
-    ComputingExpr, LiteralExpr, No, NullExpr, PropertyDef, attr_call,
+    ComputingExpr, LiteralExpr, No, PropertyDef, attr_call,
     construct, render
 )
-from langkit.expressions.envs import EmptyEnv
 
 
 @attr_call('and_then', 'and')
@@ -484,31 +480,17 @@ class Then(AbstractExpression):
             var_expr = construct(self.var_expr)
         then_expr = BindingScope(then_expr, [var_expr], scope=then_scope)
 
-        # Affect default value to the fallback expression. For the moment,
-        # we white-list types that have a default null expr. TODO: This should
-        # be handled in the type, rather than as a dispatch table here.
+        # Affect default value to the fallback expression
         if self.default_val is None:
-            if then_expr.type.matches(bool_type):
-                default_expr = construct(False)
-            elif then_expr.type.is_base_struct_type:
-                default_expr = construct(No(then_expr.type))
-            elif then_expr.type.matches(lexical_env_type):
-                default_expr = construct(EmptyEnv)
-            elif then_expr.type.matches(symbol_type):
-                default_expr = NullExpr(symbol_type)
-            elif then_expr.type.matches(analysis_unit_type):
-                default_expr = construct(No(analysis_unit_type))
-            elif then_expr.type.is_array:
-                default_expr = NullExpr(then_expr.type)
-            else:
-                check_source_language(
-                    False,
-                    "Then expression should have a default value provided,"
-                    " in cases where the provided function's return type (here"
-                    " {}) does not have a default null value".format(
-                        then_expr.type.name.camel
-                    )
+            check_source_language(
+                then_expr.type.null_allowed or then_expr.type is bool_type,
+                "Then expression should have a default value provided,"
+                " in cases where the provided function's return type (here"
+                " {}) does not have a default null value".format(
+                    then_expr.type.name.camel
                 )
+            )
+            default_expr = construct(No(then_expr.type))
         else:
             default_expr = construct(self.default_val, then_expr.type)
 
