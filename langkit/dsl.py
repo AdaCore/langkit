@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import langkit.compiled_types as _internal_types
 from langkit.compiled_types import (
     _EnumType, ASTNodeType, AbstractNodeData, Field as _Field, StructType,
     UserField as _UserField, T
@@ -879,29 +880,28 @@ class _BuiltinType(DSLType):
     """
     Base class for all built-in compiled types.
     """
-    import langkit.compiled_types as _ct
-    _ = _ct
+    pass
 
 
 class AnalysisUnitKind(_BuiltinType):
     """
     Type for the analysis unit kind enumeration.
     """
-    _type = _BuiltinType._ct.analysis_unit_kind
+    _type = _internal_types.analysis_unit_kind
 
 
 class AnalysisUnitType(_BuiltinType):
     """
     Type for analysis unit values.
     """
-    _type = _BuiltinType._ct.analysis_unit_type
+    _type = _internal_types.analysis_unit_type
 
 
 class BoolType(_BuiltinType):
     """
     Type for boolean values.
     """
-    _type = _BuiltinType._ct.bool_type
+    _type = _internal_types.bool_type
 
 
 class EquationType(_BuiltinType):
@@ -915,46 +915,46 @@ class EquationType(_BuiltinType):
     Equations instance will typically be produced by expressions involving
     logic variables.
     """
-    _type = _BuiltinType._ct.equation_type
+    _type = _internal_types.equation_type
 
 
 class EnvRebindingsType(_BuiltinType):
     """
     Type for environment rebinding values.
     """
-    _type = _BuiltinType._ct.env_rebindings_type
+    _type = _internal_types.env_rebindings_type
 
 
 class LexicalEnvType(_BuiltinType):
     """
     Type for lexical environments.
     """
-    _type = _BuiltinType._ct.lexical_env_type
+    _type = _internal_types.lexical_env_type
 
 
 class LogicVarType(_BuiltinType):
     """
     Type for logic variables, to be used in equations (see EquationType).
     """
-    _type = _BuiltinType._ct.logic_var_type
+    _type = _internal_types.logic_var_type
 
 
 class LongType(_BuiltinType):
     """
     Simple integer type.
     """
-    _type = _BuiltinType._ct.long_type
+    _type = _internal_types.long_type
 
 
 class Symbol(_BuiltinType):
     """
     Type for symbol values (canonicalized names).
     """
-    _type = _BuiltinType._ct.symbol_type
+    _type = _internal_types.symbol_type
 
 
 class Token(_BuiltinType):
     """
     Type for token values, as found in an analysis unit's token data handler.
     """
-    _type = _BuiltinType._ct.token_type
+    _type = _internal_types.token_type
