@@ -498,6 +498,8 @@ class Then(AbstractExpression):
                 default_expr = NullExpr(symbol_type)
             elif then_expr.type.matches(analysis_unit_type):
                 default_expr = construct(No(analysis_unit_type))
+            elif then_expr.type.is_array:
+                default_expr = NullExpr(then_expr.type)
             else:
                 check_source_language(
                     False,
