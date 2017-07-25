@@ -2084,7 +2084,8 @@ class ArrayType(CompiledType):
         super(ArrayType, self).__init__(name=name, is_ptr=True, exposed=False,
                                         is_refcounted=True,
                                         nullexpr=null_constant(),
-                                        element_type=element_type)
+                                        element_type=element_type,
+                                        null_allowed=True)
 
         # Register this type where it needs to be registered
         ctx = get_context(True)
