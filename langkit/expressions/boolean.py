@@ -501,8 +501,10 @@ class Then(AbstractExpression):
                 check_source_language(
                     False,
                     "Then expression should have a default value provided,"
-                    " in cases where the provided function's return type is"
-                    " not Bool, here {}".format(then_expr.type.name.camel)
+                    " in cases where the provided function's return type (here"
+                    " {}) does not have a default null value".format(
+                        then_expr.type.name.camel
+                    )
                 )
         else:
             default_expr = construct(self.default_val, then_expr.type)
