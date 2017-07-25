@@ -485,7 +485,8 @@ class Then(AbstractExpression):
         then_expr = BindingScope(then_expr, [var_expr], scope=then_scope)
 
         # Affect default value to the fallback expression. For the moment,
-        # only booleans and structs are handled.
+        # we white-list types that have a default null expr. TODO: This should
+        # be handled in the type, rather than as a dispatch table here.
         if self.default_val is None:
             if then_expr.type.matches(bool_type):
                 default_expr = construct(False)
