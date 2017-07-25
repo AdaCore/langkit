@@ -578,6 +578,10 @@ class CompiledType(object):
     def is_ast_node(self):
         return isinstance(self, ASTNodeType)
 
+    @property
+    def is_array(self):
+        return isinstance(self, ArrayType)
+
     def new(self, *args, **kwargs):
         """
         Shortcut to the New expression, allowing type.new(..) syntax.
