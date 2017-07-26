@@ -50,23 +50,18 @@ This command may be followed by a "/X" flag, where X is one or several of:
         super(StateCommand, self).__init__(context, 'state', gdb.COMMAND_DATA)
 
     def invoke(self, arg, from_tty):
-        printer = StatePrinter(self.context)
+        if arg and arg[0] != '/':
+            print('Invalid argument')
+            return
 
-        if arg:
-            if not arg.startswith('/'):
-                print('Invalid argument')
-                return
+        arg = set(arg[1:]) if arg else set()
 
-            for c in arg[1:]:
-                if c == 'f':
-                    printer.with_ellipsis = False
-                elif c == 's':
-                    printer.with_locs = True
-                else:
-                    print('Invalid flag: {}'.format(repr(c)))
-                    return
+        invalid_args = arg.difference('sf')
+        if invalid_args:
+            print('Invalid flags: {}'.format(repr(", ".join(invalid_args))))
+            return
 
-        printer.run()
+        StatePrinter(self.context, 'f' in arg, 's' in arg).run()
 
 
 class StatePrinter(object):
@@ -77,14 +72,14 @@ class StatePrinter(object):
 
     ellipsis_limit = 50
 
-    def __init__(self, context):
+    def __init__(self, context, with_ellipsis=True, with_locs=False):
         self.context = context
 
         self.frame = gdb.selected_frame()
         self.state = self.context.decode_state(self.frame)
 
-        self.with_ellipsis = True
-        self.with_locs = False
+        self.with_ellipsis = with_ellipsis
+        self.with_locs = with_locs
         self.sio = StringIO()
 
     def _render(self):
