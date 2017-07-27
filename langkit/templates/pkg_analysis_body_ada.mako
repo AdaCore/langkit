@@ -260,7 +260,9 @@ package body ${ada_lib_name}.Analysis is
          % endif
 
          Private_Part =>
-         new Analysis_Context_Private_Part_Type'(others => <>)
+            new Analysis_Context_Private_Part_Type'(others => <>),
+
+         Discard_Errors_In_Populate_Lexical_Env => <>
         );
 
       Initialize (Ret.Private_Part.Parser);
@@ -327,6 +329,16 @@ package body ${ada_lib_name}.Analysis is
          Destroy (Context);
       end if;
    end Dec_Ref;
+
+   --------------------------------------------
+   -- Discard_Errors_In_Populate_Lexical_Env --
+   --------------------------------------------
+
+   procedure Discard_Errors_In_Populate_Lexical_Env
+     (Context : Analysis_Context; Discard : Boolean) is
+   begin
+      Context.Discard_Errors_In_Populate_Lexical_Env := Discard;
+   end Discard_Errors_In_Populate_Lexical_Env;
 
    -----------------
    -- Create_Unit --
@@ -923,7 +935,14 @@ package body ${ada_lib_name}.Analysis is
       end if;
       Unit.Is_Env_Populated := True;
 
-      Populate_Lexical_Env (Unit.AST_Root, Unit.Context.Root_Scope);
+      begin
+         Populate_Lexical_Env (Unit.AST_Root, Unit.Context.Root_Scope);
+      exception
+         when Property_Error =>
+            if not Unit.Context.Discard_Errors_In_Populate_Lexical_Env then
+               raise;
+            end if;
+      end;
    end Populate_Lexical_Env;
 
    ---------------------

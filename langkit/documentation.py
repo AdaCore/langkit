@@ -171,6 +171,10 @@ base_langkit_docs = {
         Decrease the reference count to an analysis context. Destruction
         happens when the ref-count reaches 0.
     """,
+    'langkit.context_discard_errors_in_populate_lexical_env': """
+        Debug helper. Set whether Property_Error exceptions raised in
+        Populate_Lexical_Env should be discarded. They are by default.
+    """,
     'langkit.destroy_context': """
         Invoke Remove on all the units Context contains and free Context. Thus,
         any analysis unit it contains may survive if there are still references

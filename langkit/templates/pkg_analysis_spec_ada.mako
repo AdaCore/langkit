@@ -160,6 +160,10 @@ package ${ada_lib_name}.Analysis is
    procedure Dec_Ref (Context : in out Analysis_Context);
    ${ada_doc('langkit.context_decref', 3)}
 
+   procedure Discard_Errors_In_Populate_Lexical_Env
+     (Context : Analysis_Context; Discard : Boolean);
+   ${ada_doc('langkit.context_discard_errors_in_populate_lexical_env', 3)}
+
    function Get_From_File
      (Context     : Analysis_Context;
       Filename    : String;
@@ -1044,6 +1048,9 @@ private
       % endif
 
       Private_Part : Analysis_Context_Private_Part;
+
+      Discard_Errors_In_Populate_Lexical_Env : Boolean := True;
+      --  See the eponym procedure
    end record;
 
    procedure Reset_Property_Caches (Context : Analysis_Context);
