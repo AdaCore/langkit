@@ -843,8 +843,12 @@ class CompileCtx(object):
                         if do_propagate:
                             propagate(from_prop)
 
-        for prop in self.all_properties(lambda p: p._uses_entity_info,
-                                        include_inherited=False):
+        props_using_einfo = sorted(
+            self.all_properties(lambda p: p._uses_entity_info,
+                                include_inherited=False),
+            key=lambda p: p.qualname
+        )
+        for prop in props_using_einfo:
             propagate(prop)
 
         all_props = list(self.all_properties(include_inherited=False))
