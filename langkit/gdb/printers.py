@@ -318,26 +318,8 @@ class ReferencedEnvPrinter(BasePrinter):
             )
         )
 
-    @property
-    def resolver_name(self):
-        """
-        If we can determine the name of the property for this resolver, return
-        it. Return None otherwise.
-        """
-        resolver = self.value['resolver']
-        m = re.match(r'0x[a-f0-9]+ <.*\.([a-z_]+)>', str(resolver))
-        if m:
-            return m.group(1)
-
     def to_string(self):
-        from_node = self.value['from_node']
-        resolver = self.value['resolver']
-
-        resolver_name = self.resolver_name
-        if resolver_name:
-            return '{}.{}'.format(from_node, resolver_name)
-        else:
-            return '{} ({})'.format(resolver, from_node)
+        return EnvGetterPrinter(self.value['getter'], self.context).image
 
 
 class EntityPrinter(BasePrinter):
