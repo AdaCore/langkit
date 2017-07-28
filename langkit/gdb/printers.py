@@ -230,18 +230,29 @@ class EnvGetterPrinter(BasePrinter):
         )
 
     @property
+    def is_dynamic(self):
+        return self.value['dynamic']
+
+    @property
+    def _variant(self):
+        """
+        Return the record variant that applies to this env getter.
+        """
+        # With GNAT encodings, GDB exposes the variant part as a field that is
+        # an union. Sometimes it's half-decoded...
+        try:
+            union = self.value['dynamic___XVN']
+            return union['S1'] if self.is_dynamic else union['O']
+        except gdb.error:
+            return self.value['S']
+
+    @property
     def env(self):
-        if self.value['dynamic']:
-            return None
-        else:
-            # With GNAT encodings, GDB exposes the variant part as a field that
-            # is an union. Sometimes it's half-decoded...
-            try:
-                union = self.value['dynamic___XVN']
-                variant = union['O']
-            except gdb.error:
-                variant = self.value['S']
-            return variant['env']
+        """
+        If this env getter is static, return the env it references. Otherwise,
+        return None.
+        """
+        return self.variant['env'] if not self.is_dynamic else None
 
     def to_string(self):
         env = self.env
