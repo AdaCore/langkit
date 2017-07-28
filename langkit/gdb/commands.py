@@ -61,7 +61,7 @@ This command may be followed by a "/X" flag, where X is one or several of:
             print('Invalid flags: {}'.format(repr(", ".join(invalid_args))))
             return
 
-        StatePrinter(self.context, 'f' in arg, 's' in arg).run()
+        StatePrinter(self.context, 'f' not in arg, 's' in arg).run()
 
 
 class StatePrinter(object):
