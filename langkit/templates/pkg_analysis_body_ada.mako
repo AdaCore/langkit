@@ -2957,14 +2957,13 @@ package body ${ada_lib_name}.Analysis is
    -- Can_Reach --
    ---------------
 
-   function Can_Reach (El, From : ${root_node_type_name}) return Boolean
-   is
+   function Can_Reach (El, From : ${root_node_type_name}) return Boolean is
    begin
       --  Since this function is only used to implement sequential semantics in
       --  envs, we consider that elements coming from different units are
       --  always visible for each other, and let the user implement language
       --  specific visibility rules in the DSL.
-      if El.Unit /= From.Unit then
+      if El = null or else El.Unit /= From.Unit then
          return True;
       end if;
 
