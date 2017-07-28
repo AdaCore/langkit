@@ -191,6 +191,15 @@ package ${ada_lib_name}.Analysis.C is
            External_name => "${capi.get_name('context_decref')}";
    ${ada_c_doc('langkit.context_decref', 3)}
 
+   procedure ${capi.get_name("context_discard_errors_in_populate_lexical_env")}
+     (Context : ${analysis_context_type};
+      Discard : int)
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name(
+              'context_discard_errors_in_populate_lexical_env')}";
+   ${ada_c_doc('langkit.context_discard_errors_in_populate_lexical_env', 3)}
+
    procedure ${capi.get_name('destroy_analysis_context')}
      (Context : ${analysis_context_type})
       with Export        => True,

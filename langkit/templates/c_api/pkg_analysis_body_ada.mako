@@ -141,6 +141,15 @@ package body ${ada_lib_name}.Analysis.C is
       Dec_Ref (C);
    end;
 
+   procedure ${capi.get_name("context_discard_errors_in_populate_lexical_env")}
+     (Context : ${analysis_context_type};
+      Discard : int)
+   is
+      C : Analysis_Context := Unwrap (Context);
+   begin
+      Discard_Errors_In_Populate_Lexical_Env (C, Discard /= 0);
+   end;
+
    procedure ${capi.get_name("destroy_analysis_context")}
      (Context : ${analysis_context_type})
    is

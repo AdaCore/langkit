@@ -213,6 +213,12 @@ ${c_doc('langkit.context_decref')}
 extern void
 ${capi.get_name("context_decref")}(${analysis_context_type} context);
 
+${c_doc('langkit.context_discard_errors_in_populate_lexical_env')}
+extern void
+${capi.get_name("context_discard_errors_in_populate_lexical_env")}(
+        ${analysis_context_type} context,
+        int discard);
+
 ${c_doc('langkit.destroy_context')}
 extern void
 ${capi.get_name("destroy_analysis_context")}(
