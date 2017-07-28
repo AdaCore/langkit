@@ -208,6 +208,7 @@ package body Langkit_Support.Lexical_Env is
             end loop;
             Unchecked_Free (Self);
          end if;
+         Self := null;
       end if;
    end Dec_Ref;
 
