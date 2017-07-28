@@ -156,7 +156,7 @@ base_langkit_docs = {
 
         % if ctx.default_unit_provider:
             If provided, Unit_Provider will be used to query the file name that
-            corresponds to an unit reference during semantic analysis. If it is
+            corresponds to a unit reference during semantic analysis. If it is
             ${null}, the default one is used instead. It is up to the caller to
             free resources allocated to it when done with the analysis context.
         % endif
@@ -326,7 +326,7 @@ base_langkit_docs = {
         were parsed with trivia analysis disabled.
     """,
     'langkit.unit_filename': """
-        Return the filename an unit is associated to.
+        Return the filename a unit is associated to.
 
         % if lang == 'c':
             The returned string is dynamically allocated and the caller must
@@ -525,8 +525,8 @@ base_langkit_docs = {
     """,
 
     'langkit.create_unit_provider': """
-        Create an unit provider. When done with it, the result must be passed
-        to ${capi.get_name('destroy_unit_provider')}.
+        Create a unit provider. When done with it, the result must be passed to
+        ${capi.get_name('destroy_unit_provider')}.
 
         Pass as "data" a pointer to hold your private data: it will be passed
         to all callbacks below.
@@ -543,21 +543,21 @@ base_langkit_docs = {
         except it takes an analysis unit reference represented as a string.
     """,
     'langkit.destroy_unit_provider': """
-        Destroy an unit provider. This calls the "destroy" callback: see
+        Destroy a unit provider. This calls the "destroy" callback: see
         ${capi.get_name('create_unit_provider')} for more information.
     """,
 
     'langkit.unit_provider_destroy_type': """
-        Callback type for functions that are called when destroying an unit
-        file provider type.
+        Callback type for functions that are called when destroying a unit file
+        provider type.
     """,
     'langkit.unit_provider_get_unit_from_node_type': """
-        Callback type for functions that are called to turn an unit reference
+        Callback type for functions that are called to turn a unit reference
         encoded as an AST node into an analysis unit.
     """,
     'langkit.unit_provider_get_unit_from_name_type': """
-        Callback type for functions that are called to turn an unit reference
-        encoded as an unit name into an analysis unit.
+        Callback type for functions that are called to turn a unit reference
+        encoded as a unit name into an analysis unit.
     """,
 
     #

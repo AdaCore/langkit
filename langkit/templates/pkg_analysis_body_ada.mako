@@ -493,9 +493,9 @@ package body ${ada_lib_name}.Analysis is
       Unit.Has_Filled_Caches := False;
       Unit.Diagnostics.Clear;
 
-      --  As (re-)loading an unit can change how any AST node property in the
-      --  whole analysis context behaves, we have to invalidate caches. This
-      --  is likely overkill, but kill all caches here as it's easy to do.
+      --  As (re-)loading a unit can change how any AST node property in the
+      --  whole analysis context behaves, we have to invalidate caches. This is
+      --  likely overkill, but kill all caches here as it's easy to do.
       Reset_Property_Caches (Unit.Context);
 
       --  Now create the parser. This is where lexing occurs, so this is where
@@ -510,7 +510,7 @@ package body ${ada_lib_name}.Analysis is
       exception
          when Exc : Name_Error =>
             --  This happens when we cannot open the source file for lexing:
-            --  return an unit anyway with diagnostics indicating what happens.
+            --  return a unit anyway with diagnostics indicating what happens.
 
             Add_Diagnostic
               (Exception_Message (Exc));
@@ -928,7 +928,7 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Populate_Lexical_Env (Unit : Analysis_Unit) is
    begin
-      --  TODO??? Handle env invalidation when reparsing an unit and when a
+      --  TODO??? Handle env invalidation when reparsing a unit and when a
       --  previous call raised a Property_Error.
       if Unit.Is_Env_Populated then
          return;

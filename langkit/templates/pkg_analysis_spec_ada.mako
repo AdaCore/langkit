@@ -44,7 +44,7 @@ use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 --  This package provides types and primitives to analyze source files as
 --  analysis units.
 --
---  This is the entry point to parse and process an unit: first create an
+--  This is the entry point to parse and process a unit: first create an
 --  analysis context with Create, then get analysis units out of it using
 --  Get_From_File and/or Get_From_Buffer.
 
@@ -189,7 +189,7 @@ package ${ada_lib_name}.Analysis is
    function Has_Unit
      (Context       : Analysis_Context;
       Unit_Filename : String) return Boolean;
-   --  Returns whether Context contains an unit correponding to Unit_Filename
+   --  Returns whether Context contains a unit correponding to Unit_Filename
 
    % if ctx.default_unit_provider:
 
@@ -212,7 +212,7 @@ package ${ada_lib_name}.Analysis is
       Rule        : Grammar_Rule :=
          ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit;
-   --  If an Unit for Filename already exists, return it unchanged. Otherwise,
+   --  If a Unit for Filename already exists, return it unchanged. Otherwise,
    --  create an empty analysis unit for Filename with a diagnostic that
    --  contains the Error message.
 
