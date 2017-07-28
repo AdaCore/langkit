@@ -602,7 +602,7 @@ package body Langkit_Support.Lexical_Env is
 
          Parent_Elts : constant Entity_Array :=
            (if Recursive
-            then Get (Parent_Env, Key, Rebindings => Current_Rebindings)
+            then Get (Parent_Env, Key, From, Rebindings => Current_Rebindings)
             else Entity_Arrays.Empty_Array);
 
          Ret : Entity_Array :=
