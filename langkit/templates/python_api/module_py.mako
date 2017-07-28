@@ -273,6 +273,10 @@ class AnalysisContext(object):
         if not _remove_analysis_unit(self._c_value, filename):
             raise KeyError('No such unit: {}'.format(filename))
 
+    def discard_errors_in_populate_lexical_env(self, discard):
+        ${py_doc('langkit.context_discard_errors_in_populate_lexical_env', 8)}
+        _discard_errors_in_populate_lexical_env(self._c_value, bool(discard))
+
     class _c_type(ctypes.c_void_p):
         pass
 
@@ -1272,6 +1276,10 @@ _context_incref = _import_func(
 _context_decref = _import_func(
     '${capi.get_name("context_decref")}',
     [AnalysisContext._c_type], None
+)
+_discard_errors_in_populate_lexical_env = _import_func(
+   '${capi.get_name("context_discard_errors_in_populate_lexical_env")}',
+   [AnalysisContext._c_type, ctypes.c_int], None
 )
 _destroy_analysis_context = _import_func(
     '${capi.get_name("destroy_analysis_context")}',
