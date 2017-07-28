@@ -12,11 +12,23 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-print('Calling AnalysisUnit.populate_lexical_env()...')
-try:
-    u.populate_lexical_env()
-except libfoolang.PropertyError:
-    print('Got a PropertyError as expected!')
-else:
-    print('Got no PropertyError, which is unexpected!')
+
+def test():
+    print('   Calling AnalysisUnit.populate_lexical_env()...')
+    try:
+        u.populate_lexical_env()
+    except libfoolang.PropertyError:
+        print('   Got a PropertyError')
+    else:
+        print('   Got no PropertyError')
+
+
+print('Not discarding errors...')
+ctx.discard_errors_in_populate_lexical_env(False)
+test()
+
+print('Discarding errors...')
+ctx.discard_errors_in_populate_lexical_env(True)
+test()
+
 print('Done.')
