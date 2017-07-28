@@ -346,8 +346,10 @@ class EntityPrinter(BasePrinter):
         rebindings = RebindingsPrinter(
             self.value['info']['rebindings'], self.context
         )
-        return '<| {} {} {} |>'.format(node.kind, node.sloc(),
-                                       rebindings.inner)
+        return '<| {} {}{} |>'.format(
+            node.kind, node.sloc(),
+            '' if rebindings.is_null else ' {}'.format(rebindings.inner)
+        )
 
 
 class RebindingsPrinter(BasePrinter):
