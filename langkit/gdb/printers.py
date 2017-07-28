@@ -252,11 +252,51 @@ class EnvGetterPrinter(BasePrinter):
         If this env getter is static, return the env it references. Otherwise,
         return None.
         """
-        return self.variant['env'] if not self.is_dynamic else None
+        return self._variant['env'] if not self.is_dynamic else None
+
+    @property
+    def node(self):
+        """
+        If this env getter is dynamic, return the node use to resolve the
+        reference. Otherwise, return None.
+        """
+        return self._variant['node'] if self.is_dynamic else None
+
+    @property
+    def resolver(self):
+        """
+        If this env getter is dynamic, return the corresponding resolver.
+        Otherwise, return None.
+        """
+        return self._variant['resolver'] if self.is_dynamic else None
+
+    @property
+    def resolver_name(self):
+        """
+        If we can determine the name of the property for this resolver, return
+        it. Return None otherwise.
+        """
+        m = re.match(r'0x[a-f0-9]+ <.*\.([a-z_]+)>', str(self.resolver))
+        if m:
+            return m.group(1)
+
+    @property
+    def image(self):
+        """
+        Return a description of the env getter as a string.
+        """
+        if self.is_dynamic:
+            node = self.node
+            resolver = self.resolver
+            resolver_name = self.resolver_name
+            return ('{}.{}'.format(node, resolver_name)
+                    if resolver_name else
+                    '{} ({})'.format(resolver, node))
+        else:
+            return str(self.env)
 
     def to_string(self):
-        env = self.env
-        return str(env) if env else '<EnvGetter dynamic>'
+        return 'EnvGetter ({})'.format(self.image)
 
 
 class ReferencedEnvPrinter(BasePrinter):
