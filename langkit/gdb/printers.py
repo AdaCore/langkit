@@ -371,10 +371,18 @@ class RebindingsPrinter(BasePrinter):
         )
 
     @property
-    def inner(self):
-        rebindings = self.value
+    def is_null(self):
+        """
+        Return whether this contains no rebinding.
+        """
+        return not self.value
 
-        if not rebindings:
+    @property
+    def inner(self):
+        """
+        Return the description of the rebindings list as a string.
+        """
+        if self.is_null:
             return 'null'
 
         def rebinding_img(value):
@@ -382,6 +390,8 @@ class RebindingsPrinter(BasePrinter):
             return ASTNodePrinter(new_env['node'], self.context).sloc(
                 with_end=False
             ) if new_env and new_env['node'] else '<synthetic>'
+
+        rebindings = self.value
 
         size = int(rebindings['size'])
         array = rebindings['bindings'].address.cast(
