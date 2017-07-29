@@ -455,8 +455,9 @@ package ${ada_lib_name}.Analysis is
    -- Tree traversal operations --
    -------------------------------
 
-   function Child_Count (Node : access ${root_node_value_type})
-                         return Natural is abstract;
+   function Child_Count
+     (Node : access ${root_node_value_type}'Class) return Natural
+   with Inline;
    --  Return the number of children Node has
 
    function First_Child_Index
@@ -913,9 +914,6 @@ package ${ada_lib_name}.Analysis is
       abstract new ${root_node_value_type}
       with private;
    --  Base type for all lists of AST node subclasses
-
-   overriding function Child_Count
-     (Node : access ${generic_list_value_type}) return Natural;
 
    overriding procedure Get_Child
      (Node            : access ${generic_list_value_type};

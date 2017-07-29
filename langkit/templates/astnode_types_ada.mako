@@ -122,8 +122,6 @@
       ## No need to regenerate these primitives for list types as the
       ## inheritted one already fit.
       % if not cls.is_list_type:
-         overriding function Child_Count
-           (Node : access ${type_name}) return Natural;
          overriding procedure Get_Child
            (Node            : access ${type_name};
             Index           : Positive;
@@ -343,18 +341,6 @@
       ## No need to regenerate these primitives for list types as the
       ## inheritted one already fit.
       % if not cls.is_list_type:
-
-      -----------------
-      -- Child_Count --
-      -----------------
-
-      overriding function Child_Count
-        (Node : access ${type_name}) return Natural
-      is
-         pragma Unreferenced (Node);
-      begin
-         return ${len(astnode_fields)};
-      end Child_Count;
 
       ---------------
       -- Get_Child --

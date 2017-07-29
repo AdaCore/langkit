@@ -2995,17 +2995,6 @@ package body ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class) return Lex_Env_Data
    is (${ada_lib_name}.Analysis.Get_Lex_Env_Data (Node.Unit));
 
-   -----------------
-   -- Child_Count --
-   -----------------
-
-   overriding function Child_Count
-     (Node : access ${generic_list_value_type}) return Natural
-   is
-   begin
-      return Node.Count;
-   end Child_Count;
-
    ---------------
    -- Get_Child --
    ---------------
@@ -3130,5 +3119,30 @@ package body ${ada_lib_name}.Analysis is
    begin
       return To_String (Kind_Names (Node.Kind));
    end Kind_Name;
+
+   Kind_To_Counts : array (${root_node_kind_name}) of Integer :=
+     (${", \n".join(cls.ada_kind_name()
+                    + " => {}".format(
+                        len(cls.get_parse_fields(lambda f: f.type.is_ast_node))
+                        if not cls.is_list_type
+                        else -1
+                    )
+                    for cls in ctx.astnode_types if not cls.abstract)});
+
+   -----------------
+   -- Child_Count --
+   -----------------
+
+   function Child_Count
+     (Node : access ${root_node_value_type}'Class) return Natural
+   is
+      C : Integer := Kind_To_Counts (Node.Kind);
+   begin
+      if C = -1 then
+         return ${generic_list_type_name} (Node).Count;
+      else
+         return C;
+      end if;
+   end Child_Count;
 
 end ${ada_lib_name}.Analysis;
