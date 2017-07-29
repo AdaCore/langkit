@@ -441,11 +441,6 @@ package ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class) return String;
    --  Return the concrete kind for Node
 
-   function Is_Empty_List
-     (Node : access ${root_node_value_type}) return Boolean;
-   --  Return whether Node is an empty list (so this is wrong for all nodes
-   --  that are not lists).
-
    function Is_Ghost
      (Node : access ${root_node_value_type}'Class) return Boolean;
    ${ada_doc('langkit.node_is_ghost', 3)}
@@ -930,9 +925,6 @@ package ${ada_lib_name}.Analysis is
 
    overriding procedure Print
      (Node : access ${generic_list_value_type}; Line_Prefix : String := "");
-
-   overriding function Is_Empty_List
-     (Node : access ${generic_list_value_type}) return Boolean;
 
    -----------------------------------------
    -- Structure types (full declarations) --

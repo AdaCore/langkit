@@ -1108,14 +1108,6 @@ package body ${ada_lib_name}.Analysis is
       return Node.Unit;
    end Get_Unit;
 
-   -------------------
-   -- Is_Empty_List --
-   -------------------
-
-   function Is_Empty_List
-     (Node : access ${root_node_value_type}) return Boolean
-   is (False);
-
    --------------------
    -- Reference_Unit --
    --------------------
@@ -3057,16 +3049,6 @@ package body ${ada_lib_name}.Analysis is
          end if;
       end loop;
    end Print;
-
-   -------------------
-   -- Is_Empty_List --
-   -------------------
-
-   overriding function Is_Empty_List
-     (Node : access ${generic_list_value_type})
-      return Boolean
-   is
-     (Child_Count (${root_node_type_name} (Node)) = 0);
 
    ------------------
    -- Destroy_Node --
