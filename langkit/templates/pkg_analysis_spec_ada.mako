@@ -438,7 +438,7 @@ package ${ada_lib_name}.Analysis is
    function Kind (Node : access ${root_node_value_type})
                   return ${root_node_kind_name} is abstract;
    function Kind_Name
-     (Node : access ${root_node_value_type}) return String is abstract;
+     (Node : access ${root_node_value_type}'Class) return String;
    --  Return the concrete kind for Node
 
    function Is_Empty_List

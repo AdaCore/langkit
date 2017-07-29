@@ -3135,4 +3135,18 @@ package body ${ada_lib_name}.Analysis is
    function Image (Value : Boolean) return String
    is (if Value then "True" else "False");
 
+
+   Kind_Names : array (${root_node_kind_name}) of Unbounded_String :=
+     (${", \n".join(cls.ada_kind_name()
+                    + " => To_Unbounded_String (\""
+                    + cls.ada_kind_name() + "\")"
+                    for cls in ctx.astnode_types if not cls.abstract)});
+
+   function Kind_Name
+     (Node : access ${root_node_value_type}'Class) return String
+   is
+   begin
+      return To_String (Kind_Names (Node.Kind));
+   end Kind_Name;
+
 end ${ada_lib_name}.Analysis;

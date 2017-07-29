@@ -43,8 +43,6 @@
       % endif
       overriding function Kind
         (Node : access ${value_type}) return ${root_node_kind_name};
-      overriding function Kind_Name
-        (Node : access ${value_type}) return String;
    % endif
 
    function Item
@@ -108,17 +106,6 @@
       begin
          return ${list_type.ada_kind_name()};
       end Kind;
-
-      ---------------
-      -- Kind_Name --
-      ---------------
-
-      overriding function Kind_Name
-        (Node : access ${value_type}) return String
-      is
-      begin
-         return "${list_type.repr_name()}";
-      end Kind_Name;
 
    % endif
 

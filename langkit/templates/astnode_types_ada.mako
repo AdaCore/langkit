@@ -118,8 +118,6 @@
 
       overriding function Kind
         (Node : access ${type_name}) return ${root_node_kind_name};
-      overriding function Kind_Name
-        (Node : access ${type_name}) return String;
 
       ## No need to regenerate these primitives for list types as the
       ## inheritted one already fit.
@@ -341,18 +339,6 @@
       begin
          return ${cls.ada_kind_name()};
       end Kind;
-
-      ---------------
-      -- Kind_Name --
-      ---------------
-
-      overriding function Kind_Name
-        (Node : access ${type_name}) return String
-      is
-         pragma Unreferenced (Node);
-      begin
-         return "${cls.repr_name()}";
-      end Kind_Name;
 
       ## No need to regenerate these primitives for list types as the
       ## inheritted one already fit.
