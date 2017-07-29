@@ -3003,27 +3003,6 @@ package body ${ada_lib_name}.Analysis is
      (Node : access ${root_node_value_type}'Class) return Lex_Env_Data
    is (${ada_lib_name}.Analysis.Get_Lex_Env_Data (Node.Unit));
 
-   -----------
-   -- Image --
-   -----------
-
-   overriding function Image
-     (Node : access ${generic_list_value_type}) return String
-   is
-      Result : Unbounded_String;
-   begin
-      Append (Result, '[');
-      for Child of Node.Nodes (1 .. Node.Count) loop
-         if Length (Result) > 0 then
-            Append (Result, ", ");
-         end if;
-         Append (Result, Child.Image);
-      end loop;
-
-      Append (Result, ']');
-      return To_String (Result);
-   end Image;
-
    -----------------
    -- Child_Count --
    -----------------

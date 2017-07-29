@@ -124,9 +124,6 @@
       ## No need to regenerate these primitives for list types as the
       ## inheritted one already fit.
       % if not cls.is_list_type:
-         overriding function Image
-           (Node : access ${type_name}) return String;
-
          overriding function Child_Count
            (Node : access ${type_name}) return Natural;
          overriding procedure Get_Child
@@ -360,50 +357,6 @@
       ## No need to regenerate these primitives for list types as the
       ## inheritted one already fit.
       % if not cls.is_list_type:
-
-      -----------
-      -- Image --
-      -----------
-
-      overriding function Image
-        (Node : access ${type_name}) return String
-      is
-         Class_Wide_Node : constant ${cls.name} := ${cls.name} (Node);
-         Result          : Unbounded_String;
-      begin
-         Append (Result, Class_Wide_Node.Kind_Name);
-         Append (Result, '[');
-         Append (Result, Image (Node.Sloc_Range));
-         Append (Result, "](");
-
-         % for i, field in enumerate(repr_fields):
-             % if i > 0:
-                 Append (Result, ", ");
-             % endif
-
-             % if field.type.is_ptr:
-                 if Node.${field.name} /= null then
-             % endif
-
-             % if field.type.is_ast_node:
-                Append (Result,
-                        Image (${root_node_type_name} (Node.${field.name})));
-             % elif is_token_type(field.type):
-                Append (Result, Image (Token (Node, Node.${field.name})));
-             % else:
-                Append (Result, Image (Node.${field.name}));
-             % endif
-
-             % if field.type.is_ptr:
-                 else
-                    Append (Result, "None");
-                 end if;
-             % endif
-         % endfor
-
-         Append (Result, ')');
-         return To_String (Result);
-      end Image;
 
       -----------------
       -- Child_Count --

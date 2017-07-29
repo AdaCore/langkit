@@ -789,11 +789,6 @@ package ${ada_lib_name}.Analysis is
    -- Debug helpers --
    -------------------
 
-   function Image
-     (Node : access ${root_node_value_type}) return String is abstract;
-   --  Debug helper: return a textual representation of this node and all its
-   --  children.
-
    procedure Print (Node        : access ${root_node_value_type};
                     Line_Prefix : String := "") is abstract;
    --  Debug helper: print to standard output Node and all its children.
@@ -923,9 +918,6 @@ package ${ada_lib_name}.Analysis is
       abstract new ${root_node_value_type}
       with private;
    --  Base type for all lists of AST node subclasses
-
-   overriding function Image
-     (Node : access ${generic_list_value_type}) return String;
 
    overriding function Child_Count
      (Node : access ${generic_list_value_type}) return Natural;
