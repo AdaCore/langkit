@@ -3110,7 +3110,7 @@ package body ${ada_lib_name}.Analysis is
    Kind_Names : array (${root_node_kind_name}) of Unbounded_String :=
      (${", \n".join(cls.ada_kind_name()
                     + " => To_Unbounded_String (\""
-                    + cls.ada_kind_name() + "\")"
+                    + cls.repr_name() + "\")"
                     for cls in ctx.astnode_types if not cls.abstract)});
 
    function Kind_Name
@@ -3144,5 +3144,39 @@ package body ${ada_lib_name}.Analysis is
          return C;
       end if;
    end Child_Count;
+
+   ---------------------------
+   -- Reset_Property_Caches --
+   ---------------------------
+
+   procedure Reset_Property_Caches
+     (Node : access ${root_node_value_type}'Class)
+   is
+      K : ${root_node_kind_name} := Node.Kind;
+   begin
+   case K is
+   % for cls in ctx.astnode_types:
+   % if not cls.abstract:
+   <% memo_props = cls.get_memoized_properties(include_inherited=True) %>
+   % if memo_props:
+      when ${cls.ada_kind_name()} =>
+         declare
+            N : ${cls.name} := ${cls.name} (Node);
+         begin
+            % for p in memo_props:
+               % if p.type.is_refcounted:
+                  if N.${p.memoization_state_field_name} = Computed then
+                     Dec_Ref (N.${p.memoization_value_field_name});
+                  end if;
+               % endif
+               N.${p.memoization_state_field_name} := Not_Computed;
+            % endfor
+         end;
+   % endif
+   % endif
+   % endfor
+   when others => null;
+   end case;
+   end Reset_Property_Caches;
 
 end ${ada_lib_name}.Analysis;

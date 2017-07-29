@@ -1156,8 +1156,9 @@ private
    --  the convenience of ada arrays, and you don't care about the small
    --  performance hit of creating an array.
 
-   procedure Reset_Property_Caches (Node : access ${root_node_value_type})
-      is null;
+   procedure Reset_Property_Caches
+     (Node : access ${root_node_value_type}'Class)
+   with Inline;
    --  Reset the properties memoization caches attached to this node
 
    procedure Set_Parents (Node, Parent : access ${root_node_value_type}'Class);

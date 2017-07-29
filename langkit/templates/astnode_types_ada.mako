@@ -200,11 +200,6 @@
 
    % if not cls.abstract and not cls.is_list_type:
 
-      % if memoized_properties:
-         overriding procedure Reset_Property_Caches
-           (Node : access ${type_name});
-      % endif
-
       overriding procedure Destroy_Node
         (Node : access ${cls.value_type_name()});
 
@@ -407,22 +402,6 @@
          % endfor
 
       end Print;
-
-      % if memoized_properties:
-         overriding procedure Reset_Property_Caches
-           (Node : access ${cls.value_type_name()})
-         is
-         begin
-            % for p in memoized_properties:
-               % if p.type.is_refcounted:
-                  if Node.${p.memoization_state_field_name} = Computed then
-                     Dec_Ref (Node.${p.memoization_value_field_name});
-                  end if;
-               % endif
-               Node.${p.memoization_state_field_name} := Not_Computed;
-            % endfor
-         end Reset_Property_Caches;
-      % endif
 
       ------------------
       -- Destroy_Node --
