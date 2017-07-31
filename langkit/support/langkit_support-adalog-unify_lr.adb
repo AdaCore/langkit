@@ -83,7 +83,7 @@ package body Langkit_Support.Adalog.Unify_LR is
       end;
 
       case Result is
-         when Try_Again =>
+         when Progress | No_Progress =>
             raise Program_Error with "not implemented yet";
 
          when Satisfied =>

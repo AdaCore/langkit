@@ -155,7 +155,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
          Trace ("The relation solving resulted in " & Ret'Image);
          Current_Solving_Relation := null;
          case Ret is
-            when Try_Again =>
+            when Progress | No_Progress =>
                raise Early_Binding_Error;
 
             when Satisfied =>

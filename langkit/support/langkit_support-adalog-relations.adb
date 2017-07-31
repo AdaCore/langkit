@@ -60,8 +60,8 @@ package body Langkit_Support.Adalog.Relations is
          case Self.State is
             when Start =>
                case Apply (Self.Rel) is
-                  when Try_Again =>
-                     return Try_Again;
+                  when Progress | No_Progress =>
+                     raise Program_Error with "not implemented yet";
 
                   when Satisfied =>
                      Self.State := Success;

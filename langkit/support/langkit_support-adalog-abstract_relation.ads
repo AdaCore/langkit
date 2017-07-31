@@ -7,7 +7,7 @@ package Langkit_Support.Adalog.Abstract_Relation is
    -- Base_Relation --
    -------------------
 
-   type Solving_State is (Try_Again, Satisfied, Unsatisfied);
+   type Solving_State is (Progress, No_Progress, Satisfied, Unsatisfied);
 
    function "+" (B : Boolean) return Solving_State is
      (if B then Satisfied else Unsatisfied);
