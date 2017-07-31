@@ -45,10 +45,10 @@ package body Langkit_Support.Adalog.Unify_One_Side is
 
       else
          declare
-            R_Val : L_Type := Convert (Self.R_Data, Self.Right);
+            L_Val : L_Type := Convert (Self.R_Data, Self.Right);
          begin
-            Result := +Set_Value (Self.Left, R_Val);
-            L_Dec_Ref (R_Val);
+            Result := +Set_Value (Self.Left, L_Val);
+            L_Dec_Ref (L_Val);
             case Result is
                when Try_Again =>
                   raise Program_Error with "not implemented yet";
