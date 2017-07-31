@@ -50,44 +50,57 @@ package body Langkit_Support.Adalog.Operations is
    -- Solve_Impl --
    ----------------
 
-   overriding function Solve_Impl (Self : in out Any_Rel) return Boolean is
+   overriding function Solve_Impl (Self : in out Any_Rel) return Solving_State
+   is
    begin
       while Self.State <= Self.Count loop
-         if Self.Sub_Rels (Self.State).Solve then
-            return True;
-         end if;
-         Self.State := Self.State + 1;
+         case Self.Sub_Rels (Self.State).Solve is
+            when Try_Again =>
+               raise Program_Error with "not implemented yet";
+
+            when Satisfied =>
+               return Satisfied;
+
+            when Unsatisfied =>
+               Self.State := Self.State + 1;
+         end case;
       end loop;
-      return False;
+      return Unsatisfied;
    end Solve_Impl;
 
    ----------------
    -- Solve_Impl --
    ----------------
 
-   overriding function Solve_Impl (Self : in out All_Rel) return Boolean is
+   overriding function Solve_Impl (Self : in out All_Rel) return Solving_State
+   is
    begin
       if Self.State = Self.Count + 1 then
          Self.State := Self.Count;
       end if;
 
       while Self.State <= Self.Count loop
-         if Self.Sub_Rels (Self.State).Solve then
-            Trace ("Solving rel " & Self.State'Image
-                   & " succeeded, moving on to next rel");
-            Self.State := Self.State + 1;
-         else
-            if Self.State = 1 then
-               return False;
-            else
+         case Self.Sub_Rels (Self.State).Solve is
+            when Try_Again =>
+               raise Program_Error with "not implemented yet";
+
+            when Satisfied =>
                Trace ("Solving rel " & Self.State'Image
-                      & " failed, let's reset and try previous rel again");
-               Self.Sub_Rels (Self.State).Reset;
-               Self.State := Self.State - 1;
-            end if;
-         end if;
+                      & " succeeded, moving on to next rel");
+               Self.State := Self.State + 1;
+
+            when Unsatisfied =>
+               if Self.State = 1 then
+                  return Unsatisfied;
+               else
+                  Trace ("Solving rel " & Self.State'Image
+                         & " failed, let's reset and try previous rel again");
+                  Self.Sub_Rels (Self.State).Reset;
+                  Self.State := Self.State - 1;
+               end if;
+         end case;
       end loop;
-      return True;
+      return Satisfied;
    end Solve_Impl;
 
    --------------

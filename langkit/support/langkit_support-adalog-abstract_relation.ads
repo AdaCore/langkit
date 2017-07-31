@@ -7,6 +7,11 @@ package Langkit_Support.Adalog.Abstract_Relation is
    -- Base_Relation --
    -------------------
 
+   type Solving_State is (Try_Again, Satisfied, Unsatisfied);
+
+   function "+" (B : Boolean) return Solving_State is
+     (if B then Satisfied else Unsatisfied);
+
    type Base_Relation is abstract tagged record
       Ref_Count : Natural := 1;
    end record;
@@ -37,13 +42,15 @@ package Langkit_Support.Adalog.Abstract_Relation is
    --    relation systems possibly have multiple solutions. This state can
    --    be reset via the Reset primitive.
 
-   function Solve (Self : in out Base_Relation'Class) return Boolean;
-   --  Solve the relation system. Iff the solve process did issue a correct
-   --  solution, this will return True, and all logic variables bound by the
-   --  relation will have a value.
+   function Solve (Self : in out Base_Relation'Class) return Solving_State;
+   --  Solve the relation system. If the resolution process could not solve the
+   --  equation because some input data is missing, return Try_Again. If it
+   --  could determine that the equation has no correct solution, return
+   --  Unsatisfied.  Otherwise, initialize all logic variables with solution
+   --  values and return Satisfied.
 
    function Solve_Impl
-     (Self : in out Base_Relation) return Boolean is abstract;
+     (Self : in out Base_Relation) return Solving_State is abstract;
    --  Solve function that must be implemented by relations
 
    procedure Reset (Self : in out Base_Relation) is abstract;

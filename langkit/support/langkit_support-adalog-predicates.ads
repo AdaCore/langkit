@@ -56,8 +56,8 @@ package Langkit_Support.Adalog.Predicates is
       --  return the same result (provided the provided predicate satisfies
       --  this invariant).
 
-      function Apply
-        (Self : in out Predicate_Logic) return Boolean;
+      overriding function Apply
+        (Self : in out Predicate_Logic) return Solving_State;
 
       procedure Revert (Self : in out Predicate_Logic);
       procedure Free (Self : in out Predicate_Logic);
@@ -166,8 +166,8 @@ package Langkit_Support.Adalog.Predicates is
       --  return the same result (provided the provided predicate satisfies
       --  this invariant).
 
-      function Apply
-        (Self : in out Predicate_Logic) return Boolean;
+      overriding function Apply
+        (Self : in out Predicate_Logic) return Solving_State;
 
       procedure Revert (Self : in out Predicate_Logic);
       procedure Free (Self : in out Predicate_Logic);

@@ -10,10 +10,10 @@ package body Langkit_Support.Adalog.Relations is
       -- Solve_Impl --
       ----------------
 
-      function Solve_Impl (Self : in out Rel) return Boolean is
+      function Solve_Impl (Self : in out Rel) return Solving_State is
       begin
          if Self.Done then
-            return False;
+            return Unsatisfied;
          end if;
          Self.Done := True;
          return Apply (Self.Rel);
@@ -55,23 +55,30 @@ package body Langkit_Support.Adalog.Relations is
       -- Solve_Impl --
       ----------------
 
-      function Solve_Impl (Self : in out Rel) return Boolean is
+      function Solve_Impl (Self : in out Rel) return Solving_State is
       begin
          case Self.State is
             when Start =>
-               if Apply (Self.Rel) then
-                  Self.State := Success;
-                  return True;
-               else
-                  Self.State := Finish;
-                  return False;
-               end if;
+               case Apply (Self.Rel) is
+                  when Try_Again =>
+                     return Try_Again;
+
+                  when Satisfied =>
+                     Self.State := Success;
+                     return Satisfied;
+
+                  when Unsatisfied =>
+                     Self.State := Finish;
+                     return Unsatisfied;
+               end case;
+
             when Success =>
                Revert (Self.Rel);
                Self.State := Finish;
-               return False;
+               return Unsatisfied;
+
             when Finish =>
-               return False;
+               return Unsatisfied;
          end case;
       end Solve_Impl;
 

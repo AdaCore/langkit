@@ -18,47 +18,52 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    -- Apply --
    -----------
 
-   function Apply (Self : in out Unify_Rec) return Boolean is
+   function Apply (Self : in out Unify_Rec) return Solving_State is
+      Result : Solving_State;
    begin
       Trace ("In Unify_One_Side");
+
       if Is_Defined (Self.Left) then
-
          Trace ("Left defined");
-
-         return C : Boolean do
-            declare
-               R_Val : L_Type := Convert (Self.R_Data, Self.Right);
-               L_Val : L_Type := Get_Value (Self.Left);
-            begin
-               Trace (L_Image (R_Val));
-               Trace (L_Image (L_Val));
-
-               if Invert_Equals then
-                  C := Equals (Self.Eq_Data, R_Val, L_Val);
-               else
-                  C := Equals (Self.Eq_Data, L_Val, R_Val);
-               end if;
-               Trace ("Returning " & C'Image);
-               L_Dec_Ref (R_Val);
-               L_Dec_Ref (L_Val);
-            end;
-         end return;
-      else
 
          declare
             R_Val : L_Type := Convert (Self.R_Data, Self.Right);
-            B     : constant Boolean := Set_Value (Self.Left, R_Val);
+            L_Val : L_Type := Get_Value (Self.Left);
          begin
-            L_Dec_Ref (R_Val);
-            if B then
-               Trace ("Setting left worked !");
-               Self.Changed := True;
+            Trace (L_Image (R_Val));
+            Trace (L_Image (L_Val));
+
+            if Invert_Equals then
+               Result := +Equals (Self.Eq_Data, R_Val, L_Val);
             else
-               Trace ("Setting left failed !");
+               Result := +Equals (Self.Eq_Data, L_Val, R_Val);
             end if;
-            return B;
+            Trace ("Returning " & Result'Image);
+            L_Dec_Ref (R_Val);
+            L_Dec_Ref (L_Val);
+         end;
+
+      else
+         declare
+            R_Val : L_Type := Convert (Self.R_Data, Self.Right);
+         begin
+            Result := +Set_Value (Self.Left, R_Val);
+            L_Dec_Ref (R_Val);
+            case Result is
+               when Try_Again =>
+                  raise Program_Error with "not implemented yet";
+
+               when Satisfied =>
+                  Trace ("Setting left worked !");
+                  Self.Changed := True;
+
+               when Unsatisfied =>
+                  Trace ("Setting left failed !");
+            end case;
          end;
       end if;
+
+      return Result;
    end Apply;
 
    ------------
@@ -86,13 +91,13 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    -- Solve_Impl --
    ----------------
 
-   function Solve_Impl (Self : in out Member_T) return Boolean is
+   function Solve_Impl (Self : in out Member_T) return Solving_State is
    begin
       if Self.Current_Index in Self.Values.all'Range then
          if Is_Defined (Self.Left) and then not Self.Changed then
 
             if Self.Domain_Checked then
-               return False;
+               return Unsatisfied;
             end if;
 
             Self.Domain_Checked := True;
@@ -105,11 +110,12 @@ package body Langkit_Support.Adalog.Unify_One_Side is
                   L_Dec_Ref (L);
                   L_Dec_Ref (R_Val);
                   if B then
-                     return True;
+                     return Satisfied;
                   end if;
                end;
             end loop;
-            return False;
+            return Unsatisfied;
+
          else
             loop
                Self.Current_Index := Self.Current_Index + 1;
@@ -122,20 +128,21 @@ package body Langkit_Support.Adalog.Unify_One_Side is
                   L_Dec_Ref (R_Val);
                   if B then
                      Self.Changed := True;
-                     return True;
+                     return Satisfied;
                   end if;
                end;
 
                exit when Self.Current_Index not in Self.Values.all'Range;
             end loop;
 
-            return False;
+            return Unsatisfied;
          end if;
+
       else
          if Self.Changed then
             Reset (Self.Left);
          end if;
-         return False;
+         return Unsatisfied;
       end if;
    end Solve_Impl;
 

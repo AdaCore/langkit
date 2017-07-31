@@ -1,5 +1,7 @@
 with Ada.Unchecked_Deallocation;
 
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
 package body Langkit_Support.Adalog.Logic_Ref is
@@ -53,7 +55,7 @@ package body Langkit_Support.Adalog.Logic_Ref is
             Trace ("Applying predicate on " & Image (Self));
          end if;
 
-         if not El.Apply then
+         if El.Apply = Unsatisfied then
             Trace ("Applying predicate failed");
 
             Dec_Ref (Self.Value);

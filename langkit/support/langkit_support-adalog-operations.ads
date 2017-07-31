@@ -24,7 +24,7 @@ package Langkit_Support.Adalog.Operations is
 
    type Any_Rel is new Base_Aggregate_Rel with null record;
 
-   overriding function Solve_Impl (Self : in out Any_Rel) return Boolean;
+   overriding function Solve_Impl (Self : in out Any_Rel) return Solving_State;
    overriding function Custom_Image (Self : Any_Rel) return String;
 
    ---------
@@ -33,7 +33,7 @@ package Langkit_Support.Adalog.Operations is
 
    type All_Rel is new Base_Aggregate_Rel with null record;
 
-   overriding function Solve_Impl (Self : in out All_Rel) return Boolean;
+   overriding function Solve_Impl (Self : in out All_Rel) return Solving_State;
    overriding function Custom_Image (Self : All_Rel) return String;
 
    ------------------

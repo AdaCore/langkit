@@ -19,7 +19,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
    -- Solve --
    -----------
 
-   function Solve (Self : in out Base_Relation'Class) return Boolean is
+   function Solve (Self : in out Base_Relation'Class) return Solving_State is
 
       procedure Wait;
       --  Wait for user input
@@ -45,7 +45,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
          Wait;
       end if;
 
-      return Res : constant Boolean := Self.Solve_Impl do
+      return Res : constant Solving_State := Self.Solve_Impl do
          Trace (Res'Image);
          Wait;
       end return;
@@ -156,11 +156,20 @@ package body Langkit_Support.Adalog.Abstract_Relation is
    begin
       Current_Solving_Relation := Self;
       declare
-         Ret : constant Boolean := Self.all.Solve;
+         Ret : constant Solving_State := Self.all.Solve;
       begin
          Trace ("The relation solving resulted in " & Ret'Image);
          Current_Solving_Relation := null;
-         return Ret;
+         case Ret is
+            when Try_Again =>
+               raise Early_Binding_Error;
+
+            when Satisfied =>
+               return True;
+
+            when Unsatisfied =>
+               return False;
+         end case;
       end;
    end Solve;
 

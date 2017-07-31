@@ -83,7 +83,8 @@ package Langkit_Support.Adalog.Unify_One_Side is
       Vals   : R_Type_Array;
       R_Data : R_Convert_Data) return Relation;
 
-   overriding function Solve_Impl (Self : in out Member_T) return Boolean;
+   overriding function Solve_Impl
+     (Self : in out Member_T) return Solving_State;
    overriding procedure Reset (Self : in out Member_T);
    overriding procedure Cleanup (Self : in out Member_T);
    overriding function Custom_Image (Self : Member_T) return String;
@@ -102,7 +103,7 @@ private
       Eq_Data : Equals_Data;
    end record;
 
-   function Apply (Self : in out Unify_Rec) return Boolean;
+   function Apply (Self : in out Unify_Rec) return Solving_State;
    procedure Revert (Self : in out Unify_Rec);
    procedure Free (Self : in out Unify_Rec);
 

@@ -12,7 +12,7 @@ package Langkit_Support.Adalog.Relations is
 
    generic
       type Ty is private;
-      with function Apply (Self : in out Ty) return Boolean is <>;
+      with function Apply (Self : in out Ty) return Solving_State is <>;
       with procedure Free (Self : in out Ty) is <>;
       with function Custom_Image (Self : Ty) return String is <>;
    package Pure_Relation is
@@ -24,7 +24,7 @@ package Langkit_Support.Adalog.Relations is
          Rel  : Ty;
       end record;
 
-      overriding function Solve_Impl (Self : in out Rel) return Boolean;
+      overriding function Solve_Impl (Self : in out Rel) return Solving_State;
       overriding procedure Reset (Self : in out Rel);
       overriding procedure Cleanup (Self : in out Rel);
       overriding function Custom_Image (Self : Rel) return String;
@@ -36,7 +36,7 @@ package Langkit_Support.Adalog.Relations is
 
    generic
       type Ty is private;
-      with function Apply (Self : in out Ty) return Boolean is <>;
+      with function Apply (Self : in out Ty) return Solving_State is <>;
       with procedure Revert (Self : in out Ty) is <>;
       with procedure Free (Self : in out Ty) is <>;
       with function Custom_Image (Self : Ty) return String is <>;
@@ -52,7 +52,7 @@ package Langkit_Support.Adalog.Relations is
          Rel   : Ty;
       end record;
 
-      overriding function Solve_Impl (Self : in out Rel) return Boolean;
+      overriding function Solve_Impl (Self : in out Rel) return Solving_State;
       overriding procedure Reset (Self : in out Rel);
       overriding procedure Cleanup (Self : in out Rel);
 

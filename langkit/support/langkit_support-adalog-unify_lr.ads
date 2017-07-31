@@ -47,7 +47,7 @@ package Langkit_Support.Adalog.Unify_LR is
       State   : LR_State := No_Change;
    end record;
 
-   function Apply (Self : in out Unify_LR) return Boolean;
+   function Apply (Self : in out Unify_LR) return Solving_State;
    procedure Revert (Self : in out Unify_LR);
    procedure Free (Self : in out Unify_LR) is null;
 

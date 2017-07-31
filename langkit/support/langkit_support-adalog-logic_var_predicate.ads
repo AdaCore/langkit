@@ -1,3 +1,5 @@
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Cheap_Sets;
 
 --  This package defines a support interface for logic variables. Logic
@@ -15,10 +17,11 @@ with Langkit_Support.Cheap_Sets;
 --  predicates do not take a logic var formal.
 
 package Langkit_Support.Adalog.Logic_Var_Predicate is
+
    type Var_Predicate_Type is abstract tagged null record;
 
    function Apply
-     (Self : in out Var_Predicate_Type) return Boolean is abstract;
+     (Self : in out Var_Predicate_Type) return Solving_State is abstract;
    --  Apply the predicate, and return whether it succeeded or not
 
    type Var_Predicate is access all Var_Predicate_Type'Class;

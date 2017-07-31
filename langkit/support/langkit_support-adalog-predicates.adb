@@ -23,15 +23,18 @@ package body Langkit_Support.Adalog.Predicates is
       -----------
 
       overriding function Apply
-        (Self : in out Predicate_Logic) return Boolean
+        (Self : in out Predicate_Logic) return Solving_State
       is
       begin
          if Is_Defined (Self.Ref) then
             Trace ("In predicate apply, calling predicate");
-            return A : Boolean do
-               A := Call (Self.Pred, Get_Value (Self.Ref));
-               Trace (A'Img);
-            end return;
+            declare
+               R : constant Boolean := Call (Self.Pred, Get_Value (Self.Ref));
+            begin
+               Trace (R'Img);
+               return +R;
+            end;
+
          else
             Trace ("In predicate apply, var " & Image (Self.Ref)
                    & " not defined, deferring application");
@@ -40,7 +43,7 @@ package body Langkit_Support.Adalog.Predicates is
             --  the time, and we register the predicate to be called at a later
             --  time.
             Add_Predicate (Self.Ref, Self'Unchecked_Access);
-            return True;
+            return Satisfied;
          end if;
       end Apply;
 
@@ -78,7 +81,7 @@ package body Langkit_Support.Adalog.Predicates is
       -----------
 
       overriding function Apply
-        (Self : in out Predicate_Logic) return Boolean
+        (Self : in out Predicate_Logic) return Solving_State
       is
       begin
          if (for all Ref of Self.Refs => Is_Defined (Ref)) then
@@ -89,14 +92,14 @@ package body Langkit_Support.Adalog.Predicates is
                   Vals (I) := Get_Value (Self.Refs (I));
                end loop;
 
-               return Call (Self.Pred, Vals);
+               return +Call (Self.Pred, Vals);
             end;
          else
             for Ref of Self.Refs loop
                Add_Predicate (Ref, Self'Unchecked_Access);
             end loop;
 
-            return True;
+            return Satisfied;
          end if;
       end Apply;
 
