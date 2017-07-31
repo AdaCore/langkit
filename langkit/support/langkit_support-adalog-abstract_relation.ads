@@ -64,9 +64,8 @@ package Langkit_Support.Adalog.Abstract_Relation is
    function Children (Self : Base_Relation) return Relation_Array
    is (Empty_Array);
 
-   function Custom_Image (Self : Base_Relation) return String is ("");
-   --  Implementers of relations can overload this function if they want the
-   --  default image provided by the Print_Relation function to be overloaded.
+   function Custom_Image (Self : Base_Relation) return String is abstract;
+   --  Text to use in Print_Relation to represent this relation
 
    function Solve (Self : Relation) return Boolean;
    --  Function to solve the toplevel relation, used by Langkit
