@@ -1,0 +1,6 @@
+<All>:
+| | <Any>:
+| | | | Member X { 1,  2,  3,  4,  5,  6}
+| | | | Member Y { 10,  11}
+| | | | <True>
+| | Bind X <=> Y
