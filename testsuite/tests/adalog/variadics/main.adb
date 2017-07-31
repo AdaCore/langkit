@@ -45,7 +45,7 @@ procedure Main is
    use Eq_Int.Refs;
 
 begin
-   while R3.Solve loop
+   while Solve (R3) loop
       Put_Line ("X =" & Get_Value (X)'Img & ", Y =" & Get_Value (Y)'Img);
    end loop;
 end Main;

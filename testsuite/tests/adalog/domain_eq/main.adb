@@ -17,7 +17,7 @@ begin
       R : Relation :=
         Member (X, (1, 2, 3, 4, 5, 6)) or Equals (X, 7) or Equals (X, 8);
    begin
-      while R.Solve loop
+      while Solve (R) loop
          Put_Line ("X =" & Get_Value (X)'Img);
       end loop;
    end;
@@ -37,7 +37,7 @@ begin
               Equals (Y, 2) or
               Equals (Y, 1));
    begin
-      while R.Solve loop
+      while Solve (R) loop
          Put_Line ("X =" & Get_Value (X)'Img & ", Y =" & Get_Value (Y)'Img);
       end loop;
    end;

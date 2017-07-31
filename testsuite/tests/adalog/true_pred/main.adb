@@ -19,7 +19,7 @@ procedure Main is
    X : constant Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
    R : Relation := Member (X, (1, 2, 3, 4, 5, 6)) and True_Rel;
 begin
-   while R.Solve loop
+   while Solve (R) loop
       Put_Line ("X =" & Get_Value (X)'Img);
    end loop;
 end Main;
