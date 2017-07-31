@@ -19,7 +19,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
    -- Solve --
    -----------
 
-   function Solve (Self : in out Base_Relation) return Boolean is
+   function Solve (Self : in out Base_Relation'Class) return Boolean is
 
       procedure Wait;
       --  Wait for user input
@@ -45,7 +45,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
          Wait;
       end if;
 
-      return Res : constant Boolean := Base_Relation'Class (Self).Solve_Impl do
+      return Res : constant Boolean := Self.Solve_Impl do
          Trace (Res'Image);
          Wait;
       end return;

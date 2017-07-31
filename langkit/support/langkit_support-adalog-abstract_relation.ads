@@ -37,7 +37,7 @@ package Langkit_Support.Adalog.Abstract_Relation is
    --    relation systems possibly have multiple solutions. This state can
    --    be reset via the Reset primitive.
 
-   function Solve (Self : in out Base_Relation) return Boolean;
+   function Solve (Self : in out Base_Relation'Class) return Boolean;
    --  Solve the relation system. Iff the solve process did issue a correct
    --  solution, this will return True, and all logic variables bound by the
    --  relation will have a value.
