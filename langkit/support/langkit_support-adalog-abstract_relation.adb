@@ -1,9 +1,5 @@
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Tags;
-with Ada.Text_IO;           use Ada.Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
-
-with GNATCOLL.Utils; use GNATCOLL.Utils;
 
 with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
@@ -40,7 +36,8 @@ package body Langkit_Support.Adalog.Abstract_Relation is
       if Current_Solving_Relation /= null then
          if Debug.Debug then
             Print_Relation (Current_Solving_Relation,
-                            Self'Unrestricted_Access);
+                            Self'Unrestricted_Access,
+                            With_Colors => True);
          end if;
          Wait;
       end if;
@@ -87,25 +84,33 @@ package body Langkit_Support.Adalog.Abstract_Relation is
    --------------------
 
    procedure Print_Relation
-     (Self : Relation; Current_Relation : Relation := null)
+     (Self             : Relation;
+      Current_Relation : Relation := null;
+      With_Colors      : Boolean := False)
    is
+      procedure Start_Line (Level : Integer);
       procedure Internal (R : Relation; Level : Integer);
 
-      procedure Internal (R : Relation; Level : Integer) is
+      ----------------
+      -- Start_Line --
+      ----------------
 
-         procedure Start_Line;
-         procedure Start_Line is
-         begin
-            for Dummy in 1 .. (Level * 2) loop
-               Put ("| ");
-            end loop;
-         end Start_Line;
-
-         Is_Current : constant Boolean :=
-           Current_Relation /= null
-           and then Current_Relation = R;
+      procedure Start_Line (Level : Integer) is
       begin
-         if Is_Current then
+         for Dummy in 1 .. (Level * 2) loop
+            Put ("| ");
+         end loop;
+      end Start_Line;
+
+      --------------
+      -- Internal --
+      --------------
+
+      procedure Internal (R : Relation; Level : Integer) is
+         Is_Current : constant Boolean :=
+            Current_Relation /= null and then Current_Relation = R;
+      begin
+         if With_Colors and then Is_Current then
             Put (ASCII.ESC & "[92m");
          end if;
 
@@ -113,19 +118,8 @@ package body Langkit_Support.Adalog.Abstract_Relation is
             return;
          end if;
 
-         declare
-            Names : constant Unbounded_String_Array
-              := Split (Ada.Tags.Expanded_Name (R.all'Tag), On => '.');
-            Name  : constant String :=
-              (if Names (Names'Last) = "REL"
-               then To_String (Names (Names'Last - 1))
-               else To_String (Names (Names'Last)));
-
-            Custom_Image : constant String := R.Custom_Image;
-         begin
-            Start_Line;
-            Put (if Custom_Image /= "" then Custom_Image else Name);
-         end;
+         Start_Line (Level);
+         Put (R.Custom_Image);
 
          declare
             Children : constant Relation_Array := R.Children;
@@ -140,7 +134,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
             end if;
          end;
 
-         if Is_Current then
+         if With_Colors and then Is_Current then
             Put (ASCII.ESC & "[0m");
          end if;
       end Internal;

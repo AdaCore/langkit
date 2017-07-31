@@ -72,7 +72,14 @@ package Langkit_Support.Adalog.Abstract_Relation is
    --  Function to solve the toplevel relation, used by Langkit
 
    procedure Print_Relation
-     (Self : Relation; Current_Relation : Relation := null);
+     (Self             : Relation;
+      Current_Relation : Relation := null;
+      With_Colors      : Boolean := False);
+   --  Debug helper: display a relation tree as human readable text on the
+   --  standard output.
+   --
+   --  If With_Colors is true, output ANSII escape sequences to highlight the
+   --  the given current relation in the tree.
 
    procedure Inc_Ref (Self : Relation);
    procedure Dec_Ref (Self : in out Relation);
