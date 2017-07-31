@@ -55,7 +55,7 @@ package body Langkit_Support.Adalog.Operations is
    begin
       while Self.State <= Self.Count loop
          case Self.Sub_Rels (Self.State).Solve is
-            when Try_Again =>
+            when Progress .. No_Progress =>
                raise Program_Error with "not implemented yet";
 
             when Satisfied =>
