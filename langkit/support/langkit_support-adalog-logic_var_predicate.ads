@@ -25,8 +25,7 @@ package Langkit_Support.Adalog.Logic_Var_Predicate is
    --  Access type that is meant to be used by clients. Predicates are meant to
    --  be manipulated through accesses.
 
-   package Pred_Sets
-   is new Langkit_Support.Cheap_Sets (Var_Predicate, null);
+   package Pred_Sets is new Langkit_Support.Cheap_Sets (Var_Predicate, null);
    --  Logic variables will want to manipulate sets of predicates associated to
    --  them.
 

@@ -79,7 +79,7 @@ package Langkit_Support.Adalog.Unify_LR is
       Eq_Data : Equals_Data) return Relation
    is
      (new Unify_LR_Rel.Rel'
-        (Rel => Create (Left, Right, L_Data, R_Data, Eq_Data),
+        (Rel    => Create (Left, Right, L_Data, R_Data, Eq_Data),
          others => <>));
 
 end Langkit_Support.Adalog.Unify_LR;
