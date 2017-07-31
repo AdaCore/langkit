@@ -51,9 +51,9 @@ class Testsuite(BaseTestsuite):
 
         self.main.add_option(
             '--disable-tear-up-builds', '-B', action='store_true',
-            help='Disable the automatic build of Langkit_Support and Adalog'
-                 ' during the testsuite tear_up step. This is used to speed up'
-                 ' successive testsuite runs during development.'
+            help='Disable the automatic build of Langkit_Support during the'
+                 ' testsuite tear_up step. This is used to speed up successive'
+                 ' testsuite runs during development.'
         )
 
         # Tests update
@@ -99,8 +99,8 @@ class Testsuite(BaseTestsuite):
                     )
                 )
 
-        # Build Langkit_Support and Adalog so that each testcase does not try
-        # to build it in parallel.
+        # Build Langkit_Support so that each testcase does not try to build it
+        # in parallel.
         if not self.global_env['options'].disable_tear_up_builds:
             gargs = ['-p', '-f', '-P', self.langkit_support_project_file]
             cargs = ['-cargs', '-O0', '-g']
