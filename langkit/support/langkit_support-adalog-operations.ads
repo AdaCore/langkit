@@ -45,18 +45,13 @@ package Langkit_Support.Adalog.Operations is
    --  for both L and R. As for all constructors, the created object has only
    --  one ownership share which is given to the caller.
 
-   function Logic_Or (L, R : Relation) return access Base_Relation'Class;
-   function Logic_And (L, R : Relation) return access Base_Relation'Class;
+   function Logic_Or (L, R : Relation) return Relation;
+   function Logic_And (L, R : Relation) return Relation;
 
-   function "or" (L, R : Relation) return access Base_Relation'Class
-      renames Logic_Or;
+   function "or" (L, R : Relation) return Relation renames Logic_Or;
+   function "and" (L, R : Relation) return Relation renames Logic_And;
 
-   function "and" (L, R : Relation) return access Base_Relation'Class
-                   renames Logic_And;
-
-   function Logic_Any
-     (Rels : Relation_Array) return access Base_Relation'Class;
-   function Logic_All
-     (Rels : Relation_Array) return access Base_Relation'Class;
+   function Logic_Any (Rels : Relation_Array) return Relation;
+   function Logic_All (Rels : Relation_Array) return Relation;
 
 end Langkit_Support.Adalog.Operations;

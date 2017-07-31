@@ -107,9 +107,7 @@ package body Langkit_Support.Adalog.Operations is
    -- Logic_Or --
    --------------
 
-   function Logic_Or
-     (L, R : Relation) return access Base_Relation'Class
-   is
+   function Logic_Or (L, R : Relation) return Relation is
    begin
       return Logic_Any ((L, R));
    end Logic_Or;
@@ -118,9 +116,7 @@ package body Langkit_Support.Adalog.Operations is
    -- Logic_And --
    ---------------
 
-   function Logic_And
-     (L, R : Relation) return access Base_Relation'Class
-   is
+   function Logic_And (L, R : Relation) return Relation is
    begin
       return Logic_All ((L, R));
    end Logic_And;
@@ -129,8 +125,7 @@ package body Langkit_Support.Adalog.Operations is
    -- Logic_Any --
    ---------------
 
-   function Logic_Any (Rels : Relation_Array) return access Base_Relation'Class
-   is
+   function Logic_Any (Rels : Relation_Array) return Relation is
       function Process (Rel : Relation) return Relation_Array
       is
         (if Rel.all in False_Relation.Rel'Class then Empty_Array
@@ -164,8 +159,7 @@ package body Langkit_Support.Adalog.Operations is
    -- Logic_All --
    ---------------
 
-   function Logic_All
-     (Rels : Relation_Array) return access Base_Relation'Class is
+   function Logic_All (Rels : Relation_Array) return Relation is
 
       function Process (Rel : Relation) return Relation_Array
       is
