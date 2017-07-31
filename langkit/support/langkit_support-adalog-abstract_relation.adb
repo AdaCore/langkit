@@ -20,9 +20,10 @@ package body Langkit_Support.Adalog.Abstract_Relation is
    -----------
 
    function Solve (Self : in out Base_Relation) return Boolean is
-      procedure Wait;
 
+      procedure Wait;
       --  Wait for user input
+
       procedure Wait is
       begin
          pragma Warnings (Off, "always");
@@ -34,6 +35,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
             begin null; end;
          end if;
       end Wait;
+
    begin
       if Current_Solving_Relation /= null then
          if Debug.Debug then
