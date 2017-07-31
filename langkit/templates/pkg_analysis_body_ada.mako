@@ -3113,6 +3113,10 @@ package body ${ada_lib_name}.Analysis is
                     + cls.repr_name() + "\")"
                     for cls in ctx.astnode_types if not cls.abstract)});
 
+   ---------------
+   -- Kind_Name --
+   ---------------
+
    function Kind_Name
      (Node : access ${root_node_value_type}'Class) return String
    is
