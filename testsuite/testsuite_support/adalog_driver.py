@@ -21,6 +21,8 @@ class AdalogDriver(BaseDriver):
 
     @catch_test_errors
     def run(self):
+        coverage = self.global_env['options'].coverage
+
         source = self.test_env.get('main_source', 'main.adb')
         with open(self.working_dir('p.gpr'), 'w') as f:
             f.write("""
@@ -40,6 +42,18 @@ class AdalogDriver(BaseDriver):
                 )
             ))
 
-        self.run_and_check(['gprbuild', '-p', '-P', 'p.gpr', '-cargs', '-O0',
-                            '-g'])
-        self.run_and_check(['./{}'.format(source[:-4])])
+        gargs = ['-p', '-Pp.gpr']
+        cargs = ['-cargs', '-O0', '-g']
+        if coverage:
+            gargs.append('--subdirs=gnatcov')
+            cargs.extend(['-fdump-scos', '-fpreserve-control-flow'])
+        self.run_and_check(['gprbuild'] + gargs + cargs)
+
+        program_name = source[:-4]
+        if coverage:
+            trace_file = self.coverage_file('trace')
+            argv = ['gnatcov', 'run', '-o', trace_file,
+                    self.working_dir('gnatcov', program_name)]
+        else:
+            argv = ['./{}'.format(program_name)]
+        self.run_and_check(argv)

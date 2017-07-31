@@ -42,10 +42,7 @@ class PythonDriver(BaseDriver):
                 '--rcfile={}'.format(os.path.join(self.testsuite_dir,
                                                   'coverage.ini'))
             ]
-            derived_env['COVERAGE_FILE'] = os.path.join(
-                self.global_env['coverage_dir'],
-                self.test_env['test_name'] + '.coverage'
-            )
+            derived_env['COVERAGE_FILE'] = self.coverage_file('coverage')
         else:
             argv = [sys.executable]
 

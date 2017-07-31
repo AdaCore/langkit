@@ -158,6 +158,19 @@ class BaseDriver(TestDriver):
     def original_expected_file(self):
         return os.path.join(self.test_dir, 'test.out')
 
+    def coverage_file(self, ext):
+        """
+        Return the name of a coverage data file (or trace file) for the current
+        test.
+
+        :param str ext: File extension for this file.
+        :rtype: str
+        """
+        return os.path.join(
+            self.global_env['coverage_dir'],
+            self.test_env['test_name'] + '.' + ext
+        )
+
     #
     # Tear up helpers
     #

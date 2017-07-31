@@ -40,7 +40,9 @@ class Testsuite(BaseTestsuite):
 
         self.main.add_option(
             '--coverage', '-C', action='store_true',
-            help='Enable computation of code coverage for Langkit'
+            help='Enable computation of code coverage for Langkit and'
+                 ' Langkit_Support. This requires coverage.py and'
+                 ' GNATcoverage.'
         )
 
         #
@@ -68,6 +70,15 @@ class Testsuite(BaseTestsuite):
     def coverage_dir(self):
         return os.path.join(self.global_env['output_dir'], 'coverage')
 
+    @property
+    def langkit_support_coverage_dir(self):
+        return os.path.join(self.coverage_dir, 'langkit_support')
+
+    @property
+    def langkit_support_project_file(self):
+        return os.path.join(self.root_dir, '..', 'langkit', 'support',
+                            'langkit_support.gpr')
+
     def tear_up(self):
         super(Testsuite, self).tear_up()
 
@@ -77,6 +88,7 @@ class Testsuite(BaseTestsuite):
             #   1) collect coverage data for each testcase;
             #   2) generate the HTML report.
             os.mkdir(self.coverage_dir)
+            os.mkdir(self.langkit_support_coverage_dir)
             self.global_env['coverage_dir'] = self.coverage_dir
 
         def report(p, pname):
@@ -90,9 +102,13 @@ class Testsuite(BaseTestsuite):
         # Build Langkit_Support and Adalog so that each testcase does not try
         # to build it in parallel.
         if not self.global_env['options'].disable_tear_up_builds:
-            p = Run(['gprbuild', '-p', '-f', '-P',
-                     os.path.join(self.root_dir, '..', 'langkit', 'support',
-                                  'langkit_support.gpr')], output=PIPE)
+            gargs = ['-p', '-f', '-P', self.langkit_support_project_file]
+            cargs = ['-cargs', '-O0', '-g']
+            if self.coverage_enabled:
+                gargs.append('--subdirs=gnatcov')
+                cargs.extend(['-fdump-scos', '-fpreserve-control-flow'])
+
+            p = Run(['gprbuild'] + gargs + cargs, output=PIPE)
             report(p, "Langkit support")
 
     def tear_down(self):
@@ -100,23 +116,47 @@ class Testsuite(BaseTestsuite):
             # Consolidate coverage data for each testcase and generate both a
             # sumary textual report on the standard output and a detailed HTML
             # report.
-            cov_files = glob.glob(os.path.join(self.coverage_dir,
-                                               '*.coverage'))
-            rcfile = os.path.join(self.root_dir, 'coverage.ini')
+            langkit_cov_files = glob.glob(os.path.join(self.coverage_dir,
+                                                       '*.coverage'))
 
-            for argv in (
-                ['combine'] + cov_files,
-                ['report'],
-                ['html', '-d.', '--title=Langkit coverage report'],
-            ):
-                if argv[0] != 'combine':
-                    argv.append('--rcfile=' + rcfile)
-                subprocess.check_call(['coverage'] + argv,
-                                      cwd=self.coverage_dir)
+            lksp_cov_files = glob.glob(os.path.join(self.coverage_dir,
+                                                    '*.trace'))
 
-            html_index = os.path.join(self.coverage_dir, 'index.html')
-            assert os.path.exists(html_index)
-            print('Detailed HTML coverage report available at:'
-                  ' {}'.format(html_index))
+            if langkit_cov_files:
+                rcfile = os.path.join(self.root_dir, 'coverage.ini')
+                for argv in (
+                    ['combine'] + langkit_cov_files,
+                    ['report'],
+                    ['html', '-d.', '--title=Langkit coverage report'],
+                ):
+                    if argv[0] != 'combine':
+                        argv.append('--rcfile=' + rcfile)
+                    subprocess.check_call(['coverage'] + argv,
+                                          cwd=self.coverage_dir)
+
+                html_index = os.path.join(self.coverage_dir, 'index.html')
+                assert os.path.exists(html_index)
+                print('Detailed HTML coverage report for Langkit available at:'
+                      ' {}'.format(html_index))
+            else:
+                print('No test exercised Langkit: no coverage report to'
+                      ' produce')
+
+            if lksp_cov_files:
+                subprocess.check_call([
+                    'gnatcov', 'coverage',
+                    '-P', self.langkit_support_project_file,
+                    '--level=stmt+decision',
+                    '--annotate=dhtml',
+                    '--output-dir', self.langkit_support_coverage_dir,
+                    '--subdirs=gnatcov',
+                ] + lksp_cov_files)
+                print('HTML coverage report for Langkit_Support: {}'.format(
+                    os.path.join(self.langkit_support_coverage_dir,
+                                 'index.html')
+                ))
+            else:
+                print('No test exercised Langkit_Support: no coverage report'
+                      ' to produce')
 
         super(Testsuite, self).tear_down()
