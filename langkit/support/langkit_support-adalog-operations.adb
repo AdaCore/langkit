@@ -52,7 +52,7 @@ package body Langkit_Support.Adalog.Operations is
 
    overriding function Solve_Impl (Self : in out Any_Rel) return Boolean is
    begin
-      while Self.State <= Self.N loop
+      while Self.State <= Self.Count loop
          if Self.Sub_Rels (Self.State).Solve then
             return True;
          end if;
@@ -67,11 +67,11 @@ package body Langkit_Support.Adalog.Operations is
 
    overriding function Solve_Impl (Self : in out All_Rel) return Boolean is
    begin
-      if Self.State = Self.N + 1 then
-         Self.State := Self.N;
+      if Self.State = Self.Count + 1 then
+         Self.State := Self.Count;
       end if;
 
-      while Self.State <= Self.N loop
+      while Self.State <= Self.Count loop
          if Self.Sub_Rels (Self.State).Solve then
             Trace ("Solving rel " & Self.State'Image
                    & " succeeded, moving on to next rel");
@@ -142,7 +142,7 @@ package body Langkit_Support.Adalog.Operations is
       end if;
 
       return new Any_Rel'(Ref_Count => 1,
-                          N         => Keep_Rels'Length,
+                          Count     => Keep_Rels'Length,
                           Sub_Rels  => Keep_Rels,
                           State     => <>);
    end Logic_Any;
@@ -178,7 +178,7 @@ package body Langkit_Support.Adalog.Operations is
       end if;
 
       return new All_Rel'(Ref_Count => 1,
-                          N         => Keep_Rels'Length,
+                          Count     => Keep_Rels'Length,
                           Sub_Rels  => Keep_Rels,
                           State     => <>);
    end Logic_All;

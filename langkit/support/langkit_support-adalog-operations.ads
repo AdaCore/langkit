@@ -6,9 +6,9 @@ use Langkit_Support.Adalog.Abstract_Relation;
 
 package Langkit_Support.Adalog.Operations is
 
-   type Base_Aggregate_Rel (N : Positive) is abstract new Base_Relation
+   type Base_Aggregate_Rel (Count : Positive) is abstract new Base_Relation
      with record
-      Sub_Rels    : Relation_Array (1 .. N);
+      Sub_Rels    : Relation_Array (1 .. Count);
       State       : Positive := 1;
    end record;
 
