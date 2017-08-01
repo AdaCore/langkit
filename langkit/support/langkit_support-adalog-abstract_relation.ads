@@ -28,17 +28,17 @@ package Langkit_Support.Adalog.Abstract_Relation is
    --  Base type for a type implementing the relation interface. A relation has
    --  the following properties:
    --
-   --  - It keeps references to zero or more sub-relations, relations that
+   --  * It keeps references to zero or more sub-relations, relations that
    --    it will expand. For example, an AND relation will have two (or more)
    --    sub-relations.
    --
-   --  - It keeps reference to zero or more logical variables, that it will
-   --    bound when solved.
+   --  * It keeps references to zero or more logical variables, that it will
+   --    bind when solved.
    --
-   --  - It can be solved, and that implies eventually solving sub relations,
+   --  * It can be solved, and that implies eventually solving sub relations,
    --    and eventually binding logic variables.
    --
-   --  - It keeps the current state of solving, which is necessary since
+   --  * It keeps the current state of solving, which is necessary since
    --    relation systems possibly have multiple solutions. This state can
    --    be reset via the Reset primitive.
 
