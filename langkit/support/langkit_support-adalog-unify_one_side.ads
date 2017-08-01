@@ -30,6 +30,9 @@ generic
    with function Equals (Data : Equals_Data; L, R : L_Type) return Boolean
    is <>;
 
+   Convert_Image : String := "";
+   Equals_Image  : String := "";
+
    with package Var is new Logic_Var (Element_Type => L_Type, others => <>);
    --  Logic variable formal package
 
@@ -107,8 +110,7 @@ private
    procedure Revert (Self : in out Unify_Rec);
    procedure Free (Self : in out Unify_Rec);
 
-   function Custom_Image (Self : Unify_Rec) return String
-   is ("Unify " & Var.Image (Self.Left) & " {" & R_Image (Self.Right) & "}");
+   function Custom_Image (Self : Unify_Rec) return String;
 
    package Rel is new Relations.Stateful_Relation (Unify_Rec);
    type Unify is new Rel.Rel with null record;

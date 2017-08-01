@@ -104,4 +104,22 @@ package body Langkit_Support.Adalog.Unify_LR is
       end case;
       Self.State := No_Change;
    end Revert;
+
+   ------------------
+   -- Custom_Image --
+   ------------------
+
+   function Custom_Image (Self : Unify_LR) return String is
+      C : constant String :=
+        (if Convert_Image = "" then ""
+         else " (convert: " & Convert_Image & ")");
+      E : constant String :=
+        (if Equals_Image = "" then ""
+         else " (equals: " & Equals_Image & ")");
+   begin
+      return ("Bind " & Left_Var.Image (Self.Left)
+              & " <=> " & Right_Var.Image (Self.Right)
+              & C & E);
+   end Custom_Image;
+
 end Langkit_Support.Adalog.Unify_LR;

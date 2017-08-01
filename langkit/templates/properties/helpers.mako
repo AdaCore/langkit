@@ -137,7 +137,9 @@
       Equals_Data    => ${equals_type_name},
       No_Equals_Data => No_${equals_type_name},
       Convert        => Convert,
-      Equals         => Eq_${eprop_uid});
+      Equals         => Eq_${eprop_uid},
+      Convert_Image  => ${string_repr(conv_prop.qualname if conv_prop else '')},
+      Equals_Image   => ${string_repr(eq_prop.qualname if eq_prop else '')});
 </%def>
 
 <%def name="logic_predicates(prop)">

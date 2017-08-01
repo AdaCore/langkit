@@ -88,6 +88,22 @@ package body Langkit_Support.Adalog.Unify_One_Side is
       R_Dec_Ref (Self.Right);
    end Free;
 
+   ------------------
+   -- Custom_Image --
+   ------------------
+
+   function Custom_Image (Self : Unify_Rec) return String is
+      C : constant String :=
+        (if Convert_Image = "" then ""
+         else " (convert: " & Convert_Image & ")");
+      E : constant String :=
+        (if Equals_Image = "" then ""
+         else " (equals: " & Equals_Image & ")");
+   begin
+      return ("Unify " & Var.Image (Self.Left) & " <= " & R_Image (Self.Right)
+              & C & E);
+   end Custom_Image;
+
    ----------------
    -- Solve_Impl --
    ----------------

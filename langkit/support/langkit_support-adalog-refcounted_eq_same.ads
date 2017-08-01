@@ -39,14 +39,20 @@ package Langkit_Support.Adalog.Refcounted_Eq_Same is
    subtype Refcounted_Member_Array is Refcounted_Impl.Unify_Left.R_Type_Array;
 
    generic
+
       type Converter is private;
       with function Convert (Data : Converter; From : LR_Type) return LR_Type;
+
+      Convert_Image : String := "";
+      Equals_Image  : String := "";
+
    package Refcounted_Custom_Bind is
       package Impl is new Unify_LR
         (LR_Type, LR_Type,
          Converter, Converter,
          Convert, Convert,
          Dummy_Equals_Data, Equals,
+         Convert_Image, Equals_Image,
          Refs.Refcounted_Logic_Var, Refs.Refcounted_Logic_Var,
          L_Dec_Ref => Dec_Ref,
          R_Dec_Ref => Dec_Ref);

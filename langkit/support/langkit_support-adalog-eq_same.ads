@@ -61,6 +61,10 @@ package Langkit_Support.Adalog.Eq_Same is
       with function Convert (Data : Converter; From : LR_Type) return LR_Type;
       with function Equals
         (Eq_Data : Equals_Data; L, R : LR_Type) return Boolean is <>;
+
+      Convert_Image : String := "";
+      Equals_Image  : String := "";
+
    package Raw_Custom_Bind is
 
       package Impl is new Unify
@@ -68,6 +72,7 @@ package Langkit_Support.Adalog.Eq_Same is
          Converter, Converter, No_Data, No_Data,
          Equals_Data, No_Equals_Data,
          Convert, Convert, Equals, Equals,
+         Convert_Image, Equals_Image,
          Refs.Raw_Logic_Var, Refs.Raw_Logic_Var,
          L_Inc_Ref => Inc_Ref,
          R_Inc_Ref => Inc_Ref,

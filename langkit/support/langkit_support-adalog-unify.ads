@@ -37,6 +37,9 @@ generic
    with function Equals (Data : Equals_Data; L, R : R_Type) return Boolean
    is <>;
 
+   Convert_Image : String := "";
+   Equals_Image  : String := "";
+
    with package Left_Var is new Logic_Var
      (Element_Type => L_Type, others => <>);
 
@@ -58,6 +61,7 @@ package Langkit_Support.Adalog.Unify is
      (L_Type, R_Type, Left_C_Data, Right_C_Data,
       Convert, Convert,
       Equals_Data, Equals,
+      Convert_Image, Equals_Image,
       Left_Var, Right_Var,
       L_Dec_Ref, R_Dec_Ref);
    use Simple_Unify;
@@ -66,6 +70,7 @@ package Langkit_Support.Adalog.Unify is
      (L_Type, R_Type,
       Right_C_Data, Convert,
       Equals_Data, Equals,
+      Convert_Image, Equals_Image,
       Left_Var, Right_Var.Element_Image, Left_Var.Element_Image,
       Invert_Equals => False,
       R_Inc_Ref     => R_Inc_Ref,
@@ -76,6 +81,7 @@ package Langkit_Support.Adalog.Unify is
      (R_Type, L_Type,
       Left_C_Data, Convert,
       Equals_Data, Equals,
+      Convert_Image, Equals_Image,
       Right_Var, Left_Var.Element_Image, Right_Var.Element_Image,
       Invert_Equals => True,
       R_Inc_Ref     => L_Inc_Ref,

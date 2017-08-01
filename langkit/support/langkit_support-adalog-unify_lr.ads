@@ -22,6 +22,9 @@ generic
    with function Equals (Eq_Data : Equals_Data; L, R : R_Type) return Boolean
    is <>;
 
+   Convert_Image : String := "";
+   Equals_Image  : String := "";
+
    with package Left_Var is new Adalog.Logic_Var
      (Element_Type => L_Type, others => <>);
 
@@ -64,10 +67,7 @@ package Langkit_Support.Adalog.Unify_LR is
         Eq_Data => Eq_Data,
         State   => No_Change));
 
-   function Custom_Image (Self : Unify_LR) return String
-   is
-     ("Bind " & Left_Var.Image (Self.Left)
-      & " <=> " & Right_Var.Image (Self.Right));
+   function Custom_Image (Self : Unify_LR) return String;
 
    package Unify_LR_Rel is new Relations.Stateful_Relation (Unify_LR);
 
