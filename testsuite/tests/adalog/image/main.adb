@@ -22,6 +22,7 @@ procedure Main is
       or Logic_Any (Empty_Array)
       or Logic_All (Empty_Array))
      and Equals (X, Y)
+     and Logic_Any ((1 => True_Rel))
      and Logic_All ((1 => True_Rel));
 begin
    X.Dbg_Name := new String'("X");
