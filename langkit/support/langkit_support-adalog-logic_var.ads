@@ -2,8 +2,6 @@ pragma Warnings (Off);
 
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
-with Langkit_Support.Adalog.Logic_Var_Predicate;
-use Langkit_Support.Adalog.Logic_Var_Predicate;
 
 --  This package is meant to be used as a generic formal package, representing
 --  the interface to a logic variable. It is used so that the interface and the
@@ -45,19 +43,6 @@ generic
 
    with function Create return Logic_Var_Type is <>;
    --  Return a new logic variable
-
-   with function Get_Pending_Predicates
-     (Self : Logic_Var_Type) return Pred_Sets.Set is <>;
-   --  Get the predicates associated to this logic variables
-
-   with procedure Add_Predicate (Self : Logic_Var_Type; Pred : Var_Predicate)
-     is <>;
-   --  Add a new predicate to the predicates associated to this logic variable
-
-   with procedure Remove_Predicate
-     (Self : Logic_Var_Type; Pred : Var_Predicate) is <>;
-   --  Remove the predicate Pred from the set of predicates associated to the
-   --  logic variable.
 
    with function Image (Self : Logic_Var_Type) return String is <>;
    --  Return a string image of Self

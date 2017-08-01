@@ -54,23 +54,4 @@ package body Langkit_Support.Adalog.Refcounted_Logic_Ref is
    function Is_Defined (Self : Ref) return Boolean is
      (LRef.Is_Defined (Self.Unchecked_Get.Content));
 
-   ----------------------
-   -- Remove_Predicate --
-   ----------------------
-
-   procedure Remove_Predicate (Self : Ref; Pred : Var_Predicate)
-   is
-   begin
-      LRef.Remove_Predicate (Self.Unchecked_Get.Content, Pred);
-   end Remove_Predicate;
-
-   -------------------
-   -- Add_Predicate --
-   -------------------
-
-   procedure Add_Predicate (Self : Ref; Pred : Var_Predicate) is
-   begin
-      LRef.Add_Predicate (Self.Unchecked_Get.Content, Pred);
-   end Add_Predicate;
-
 end Langkit_Support.Adalog.Refcounted_Logic_Ref;

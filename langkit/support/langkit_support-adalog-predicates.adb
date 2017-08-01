@@ -14,7 +14,6 @@ package body Langkit_Support.Adalog.Predicates is
 
       procedure Free (Self : in out Predicate_Logic) is
       begin
-         Remove_Predicate (Self.Ref, Self'Unrestricted_Access);
          Free (Self.Pred);
       end Free;
 
@@ -47,7 +46,7 @@ package body Langkit_Support.Adalog.Predicates is
 
       procedure Revert (Self : in out Predicate_Logic) is
       begin
-         Remove_Predicate (Self.Ref, Self'Unchecked_Access);
+         null;
       end Revert;
 
    end Predicate;
@@ -64,9 +63,6 @@ package body Langkit_Support.Adalog.Predicates is
 
       procedure Free (Self : in out Predicate_Logic) is
       begin
-         for Ref of Self.Refs loop
-            Remove_Predicate (Ref, Self'Unrestricted_Access);
-         end loop;
          Free (Self.Pred);
       end Free;
 
@@ -104,9 +100,7 @@ package body Langkit_Support.Adalog.Predicates is
 
       procedure Revert (Self : in out Predicate_Logic) is
       begin
-         for Ref of Self.Refs loop
-            Remove_Predicate (Ref, Self'Unchecked_Access);
-         end loop;
+         null;
       end Revert;
 
    end N_Predicate;

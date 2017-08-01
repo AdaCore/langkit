@@ -1,8 +1,6 @@
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 
 with Langkit_Support.Adalog.Logic_Var;
-with Langkit_Support.Adalog.Logic_Var_Predicate;
-use Langkit_Support.Adalog.Logic_Var_Predicate;
 
 --  This package contains the implementation of logic variables. This is done
 --  by implementing base simple types, and instantiating the Adalog.Logic_Var
@@ -43,11 +41,6 @@ package Langkit_Support.Adalog.Logic_Ref is
       Value             : Element_Type;
       --  The value of this logic variable, when it is set
 
-      Pending_Relations : Pred_Sets.Set;
-      --  List of relations which applications are pending on this variable
-      --  being defined. When the variable will be set, relations will be
-      --  evaluated.
-
       Dbg_Name          : String_Access;
       --  Access to a string representing the name of this variable. Using
       --  this, you can name your variable with human readable names, and
@@ -67,15 +60,6 @@ package Langkit_Support.Adalog.Logic_Ref is
    function Image (Self : Var) return String is
      (if Self.Dbg_Name /= null then Self.Dbg_Name.all else "None");
 
-   ------------------------------
-   -- Var predicates functions --
-   ------------------------------
-
-   procedure Add_Predicate (Self : in out Var; Pred : Var_Predicate);
-   function Get_Pending_Predicates (Self : Var) return Pred_Sets.Set
-   is (Self.Pending_Relations);
-   procedure Remove_Predicate (Self : in out Var; Pred : Var_Predicate);
-
    -----------------------
    -- Raw variable type --
    -----------------------
@@ -91,12 +75,6 @@ package Langkit_Support.Adalog.Logic_Ref is
      (Self : in out Raw_Var; Data : Element_Type) return Boolean;
    function Get_Value (Self : Raw_Var) return Element_Type;
    function Create return Raw_Var;
-
-   function Get_Pending_Predicates (Self : Raw_Var) return Pred_Sets.Set
-   is (Get_Pending_Predicates (Self.all));
-
-   procedure Remove_Predicate (Self : Raw_Var; Pred : Var_Predicate);
-   procedure Add_Predicate (Self : Raw_Var; Pred : Var_Predicate);
 
    function Image (Self : Raw_Var) return String is
      (Image (Self.all));

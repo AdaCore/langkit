@@ -1,7 +1,5 @@
 with Ada.Unchecked_Deallocation;
 
-with Langkit_Support.Adalog.Abstract_Relation;
-use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
 package body Langkit_Support.Adalog.Logic_Ref is
@@ -42,35 +40,10 @@ package body Langkit_Support.Adalog.Logic_Ref is
          Trace ("Old value is " & Element_Image (Old.Value));
       end if;
 
-      --  First set the value
       Dec_Ref (Self.Value);
       Self.Value := Data;
       Inc_Ref (Self.Value);
       Self.Reset := False;
-
-      --  Then check if we have pending relations, and if they evaluate to
-      --  True.
-      for El of Pred_Sets.Elements (Self.Pending_Relations) loop
-         if Debug.Debug then
-            Trace ("Applying predicate on " & Image (Self));
-         end if;
-
-         if El.Apply = Unsatisfied then
-            Trace ("Applying predicate failed");
-
-            Dec_Ref (Self.Value);
-            Self := Old;
-            Inc_Ref (Self.Value);
-
-            if Debug.Debug then
-               Trace ("Self element value is now "
-                      & Element_Image (Self.Value));
-            end if;
-
-            Dec_Ref (Old.Value);
-            return False;
-         end if;
-      end loop;
 
       Dec_Ref (Old.Value);
       return True;
@@ -141,47 +114,6 @@ package body Langkit_Support.Adalog.Logic_Ref is
       return new Var'(Reset => True, others => <>);
    end Create;
 
-   -------------------
-   -- Add_Predicate --
-   -------------------
-
-   procedure Add_Predicate (Self : in out Var; Pred : Var_Predicate) is
-      use Pred_Sets;
-      Dummy : Boolean := Add (Self.Pending_Relations, Pred);
-   begin
-      null;
-   end Add_Predicate;
-
-   ----------------------
-   -- Remove_Predicate --
-   ----------------------
-
-   procedure Remove_Predicate (Self : in out Var; Pred : Var_Predicate) is
-      use Pred_Sets;
-      Dummy : Boolean := Remove (Self.Pending_Relations, Pred);
-   begin
-      Trace ("In remove predicate");
-      null;
-   end Remove_Predicate;
-
-   ----------------------
-   -- Remove_Predicate --
-   ----------------------
-
-   procedure Remove_Predicate (Self : Raw_Var; Pred : Var_Predicate) is
-   begin
-      Remove_Predicate (Self.all, Pred);
-   end Remove_Predicate;
-
-   -------------------
-   -- Add_Predicate --
-   -------------------
-
-   procedure Add_Predicate (Self : Raw_Var; Pred : Var_Predicate) is
-   begin
-      Add_Predicate (Self.all, Pred);
-   end Add_Predicate;
-
    -------------
    -- Destroy --
    -------------
@@ -191,7 +123,6 @@ package body Langkit_Support.Adalog.Logic_Ref is
         (String, String_Access);
    begin
       Dec_Ref (Self.Value);
-      Pred_Sets.Destroy (Self.Pending_Relations);
       Destroy (Self.Dbg_Name);
    end Destroy;
 

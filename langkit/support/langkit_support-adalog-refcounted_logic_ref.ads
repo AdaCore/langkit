@@ -2,8 +2,6 @@ with GNATCOLL.Refcount;
 
 with Langkit_Support.Adalog.Logic_Ref;
 with Langkit_Support.Adalog.Logic_Var;
-with Langkit_Support.Adalog.Logic_Var_Predicate;
-use Langkit_Support.Adalog.Logic_Var_Predicate;
 
 --  This package contains one implementation of logic variables. This is done
 --  by implementing base simple types, and instantiating the Adalog.Logic_Var
@@ -41,12 +39,6 @@ package Langkit_Support.Adalog.Refcounted_Logic_Ref is
    function Is_Defined (Self : Ref) return Boolean;
    function Set_Value (Self : in out Ref; Data : Element_Type) return Boolean;
    function Get_Value (Self : Ref) return Element_Type;
-
-   function Get_Pending_Predicates (Self : Ref) return Pred_Sets.Set
-   is (LRef.Get_Pending_Predicates (Self.Unchecked_Get.Content));
-
-   procedure Remove_Predicate (Self : Ref; Pred : Var_Predicate);
-   procedure Add_Predicate (Self : Ref; Pred : Var_Predicate);
 
    function Image (Self : Ref) return String is
      (LRef.Image (Self.Unchecked_Get.Content));
