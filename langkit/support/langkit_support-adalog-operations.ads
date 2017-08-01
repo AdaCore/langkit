@@ -6,10 +6,31 @@ use Langkit_Support.Adalog.Abstract_Relation;
 
 package Langkit_Support.Adalog.Operations is
 
+   type Working_Queue_Type is array (Positive range <>) of Positive;
+
    type Base_Aggregate_Rel (Count : Positive) is abstract new Base_Relation
      with record
+      Next : Natural := 1;
+      --  Index in Working_Queue of the next sub-relation to evaluate
+
       Sub_Rels : Relation_Array (1 .. Count);
-      Next     : Positive := 1;
+      --  List of sub-relations that make up this ALL/ANY operation
+
+      Working_Queue : Working_Queue_Type (1 .. Count);
+      --  Queue of indexes for sub-relations to evaluate.
+      --
+      --  This queue of indexes is maintained so that at any time, the index of
+      --  Satisfied/Unsatisfied relations come first while the index of
+      --  Progress/No_Progress ones come last.
+      --
+      --  When a sub-relation evaluates to Satisfied/Unsatisfied, its index is
+      --  swapped with the index of the first sub-relation that is still to be
+      --  (re)evaluated and Next is bumped.
+      --
+      --  If, at the end of an evaluation iteration, all sub-relation returned
+      --  No_Progress, it means that this aggregate relation is not standalone:
+      --  the parent must continue evaluating other relations before attempting
+      --  to re-evaluate it.
    end record;
 
    overriding procedure Reset (Self : in out Base_Aggregate_Rel);

@@ -49,9 +49,10 @@ package body Langkit_Support.Adalog.Unify_One_Side is
          begin
             Result := +Set_Value (Self.Left, L_Val);
             L_Dec_Ref (L_Val);
+
             case Result is
                when Progress | No_Progress =>
-                  raise Program_Error with "not implemented yet";
+                  raise Program_Error with "should not happen";
 
                when Satisfied =>
                   Trace ("Setting left worked !");

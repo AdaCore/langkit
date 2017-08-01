@@ -26,25 +26,19 @@ package body Langkit_Support.Adalog.Predicates is
         (Self : in out Predicate_Logic) return Solving_State
       is
       begin
-         if Is_Defined (Self.Ref) then
-            Trace ("In predicate apply, calling predicate");
-            declare
-               R : constant Boolean := Call (Self.Pred, Get_Value (Self.Ref));
-            begin
-               Trace (R'Img);
-               return +R;
-            end;
-
-         else
-            Trace ("In predicate apply, var " & Image (Self.Ref)
-                   & " not defined, deferring application");
-
-            --  If the variable is not set, then predicate will return True all
-            --  the time, and we register the predicate to be called at a later
-            --  time.
-            Add_Predicate (Self.Ref, Self'Unchecked_Access);
-            return Satisfied;
+         if not Is_Defined (Self.Ref) then
+            Trace ("In Predicate apply, var " & Image (Self.Ref)
+                   & " not defined, no progress");
+            return No_Progress;
          end if;
+
+         Trace ("In Predicate apply, calling predicate");
+         declare
+            R : constant Boolean := Call (Self.Pred, Get_Value (Self.Ref));
+         begin
+            Trace (R'Img);
+            return +R;
+         end;
       end Apply;
 
       ------------
@@ -84,23 +78,24 @@ package body Langkit_Support.Adalog.Predicates is
         (Self : in out Predicate_Logic) return Solving_State
       is
       begin
-         if (for all Ref of Self.Refs => Is_Defined (Ref)) then
-            declare
-               Vals : Val_Array (1 .. Arity);
-            begin
-               for I in Self.Refs'Range loop
-                  Vals (I) := Get_Value (Self.Refs (I));
-               end loop;
+         for Ref of Self.Refs loop
+            if not Is_Defined (Ref) then
+               Trace ("In N_Predicate apply, var " & Image (Ref)
+                      & " not defined, deferring application");
+               return No_Progress;
+            end if;
+         end loop;
 
-               return +Call (Self.Pred, Vals);
-            end;
-         else
-            for Ref of Self.Refs loop
-               Add_Predicate (Ref, Self'Unchecked_Access);
+         Trace ("In N_Predicate apply, calling predicate");
+         declare
+            Vals : Val_Array (1 .. Arity);
+         begin
+            for I in Self.Refs'Range loop
+               Vals (I) := Get_Value (Self.Refs (I));
             end loop;
 
-            return Satisfied;
-         end if;
+            return +Call (Self.Pred, Vals);
+         end;
       end Apply;
 
       ------------

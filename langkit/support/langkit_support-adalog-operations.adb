@@ -9,6 +9,19 @@ package body Langkit_Support.Adalog.Operations is
    package Rel_Arrays_Utils is new Langkit_Support.Array_Utils
      (Relation, Positive, Relation_Array);
 
+   procedure Initialize_Working_Queue (Self : in out Base_Aggregate_Rel'Class);
+   --  Initialize Self's working queue with starting indexes
+
+   function Get_From_Queue
+     (Self : Base_Aggregate_Rel'Class; Index : Positive) return Relation
+   is (Self.Sub_Rels (Self.Working_Queue (Index)));
+   --  Return the relation corresponding to Index in the working queue
+
+   procedure Set_Completed
+     (Self : in out Base_Aggregate_Rel'Class; Index : Positive);
+   --  Tag the Index'th element in the working queue as completed: it will not
+   --  be evaluated anymore.
+
    -----------
    -- Reset --
    -----------
@@ -52,20 +65,54 @@ package body Langkit_Support.Adalog.Operations is
 
    overriding function Solve_Impl (Self : in out Any_Rel) return Solving_State
    is
+      Has_Progressed : Boolean := False;
+      --  Whether there was progress at all during this call
+
+      Stalled : Boolean := False;
+      --  We want to stop trying to evaluate sub-expressions if there was no
+      --  progress made during one whole iteration. This boolean is clear iff
+      --  whether the current iteration (FOR loop below) made progress.
    begin
-      while Self.Next <= Self.Count loop
-         case Self.Sub_Rels (Self.Next).Solve is
-            when Progress | No_Progress =>
-               raise Program_Error with "not implemented yet";
+      Trace ("In Any_Rel:");
 
-            when Satisfied =>
-               return Satisfied;
+      while not Stalled loop
+         Stalled := True;
+         for I in Self.Next .. Self.Count loop
+            case Get_From_Queue (Self, I).Solve is
+               when No_Progress =>
+                  null;
 
-            when Unsatisfied =>
-               Self.Next := Self.Next + 1;
-         end case;
+               when Progress =>
+                  Stalled := False;
+                  Has_Progressed := True;
+
+               when Satisfied =>
+                  return Satisfied;
+
+               when Unsatisfied =>
+                  Stalled := False;
+                  Has_Progressed := True;
+                  Set_Completed (Self, I);
+                  Trace ("In Any_Rel: relation unsatisfied, get the next one");
+            end case;
+         end loop;
       end loop;
-      return Unsatisfied;
+
+      --  If we completed the evaluation of all sub-relations without finding
+      --  one Satisfied, then we know this aggregate relation is Unsatisfied.
+
+      if Self.Next > Self.Count then
+         Trace ("In Any_Rel: no relation satisfied");
+         return Unsatisfied;
+
+      elsif Has_Progressed then
+         Trace ("In Any_Rel: some progress made, now returning");
+         return Progress;
+
+      else
+         Trace ("In Any_Rel: no progress made, now returning");
+         return No_Progress;
+      end if;
    end Solve_Impl;
 
    ----------------
@@ -74,33 +121,91 @@ package body Langkit_Support.Adalog.Operations is
 
    overriding function Solve_Impl (Self : in out All_Rel) return Solving_State
    is
+      Has_Progressed : Boolean := False;
+      --  Whether there was progress at all during this call
+
+      Stalled : Boolean := False;
+      --  We want to stop trying to evaluate sub-expressions if there was no
+      --  progress made during one whole iteration. This boolean is clear iff
+      --  whether the current iteration (FOR loop below) made progress.
+
+      procedure Tag_Progress;
+      --  Update the below flags to indicate progress has been made
+
+      ------------------
+      -- Tag_Progress --
+      ------------------
+
+      procedure Tag_Progress is
+      begin
+         Has_Progressed := True;
+         Stalled := False;
+      end Tag_Progress;
+
+      I : Positive;
    begin
-      if Self.Next = Self.Count + 1 then
+      Trace ("In All_Rel:");
+
+      if Self.Next > Self.Count then
+         Trace ("In All_Rel: last relation was evaluated: getting back to it");
          Self.Next := Self.Count;
       end if;
 
-      while Self.Next <= Self.Count loop
-         case Self.Sub_Rels (Self.Next).Solve is
-            when Progress | No_Progress =>
-               raise Program_Error with "not implemented yet";
+      while not Stalled loop
+         Stalled := True;
+         I := Self.Next;
+         Inner_Loop : while I <= Self.Count loop
+            case Get_From_Queue (Self, I).Solve is
+               when No_Progress =>
+                  I := I + 1;
 
-            when Satisfied =>
-               Trace ("Solving rel " & Self.Next'Image
-                      & " succeeded, moving on to next rel");
-               Self.Next := Self.Next + 1;
+               when Progress =>
+                  Tag_Progress;
+                  I := I + 1;
 
-            when Unsatisfied =>
-               if Self.Next = 1 then
-                  return Unsatisfied;
-               else
-                  Trace ("Solving rel " & Self.Next'Image
-                         & " failed, let's reset and try previous rel again");
-                  Self.Sub_Rels (Self.Next).Reset;
-                  Self.Next := Self.Next - 1;
-               end if;
-         end case;
+               when Satisfied =>
+                  Tag_Progress;
+                  Trace ("In All_Rel: relation satisfied");
+                  Set_Completed (Self, I);
+                  I := I + 1;
+
+               when Unsatisfied =>
+                  if I = 1 then
+                     Trace ("In All_Rel: first relation unsatisfied");
+                     return Unsatisfied;
+                  end if;
+
+                  Tag_Progress;
+                  Trace ("In All_Rel: relation unsatisfied, resetting it and"
+                         & " getting back to the previous one");
+                  Get_From_Queue (Self, I).Reset;
+
+                  --  We managed to evaluate this sub-relation, so we must move
+                  --  it to the list of completed sub-relations. This
+                  --  increments Self.Next, and we must get back to the
+                  --  previous sub-relation, hence the -2.
+                  Set_Completed (Self, I);
+                  Self.Next := Self.Next - 2;
+                  exit Inner_Loop;
+            end case;
+         end loop Inner_Loop;
       end loop;
-      return Satisfied;
+
+      --  If we completed the evaluation of all sub-relations without finding
+      --  one Unsatisfied, then we know this aggregate relation is Satisfied.
+
+      if Self.Next > Self.Count then
+         Trace ("In All_Rel: all relations satisfied");
+         return Satisfied;
+
+      elsif Has_Progressed then
+         Trace ("In All_Rel: some progress made, now returning");
+         return Progress;
+
+      else
+         Trace ("In All_Rel: no progress made, now returning");
+         return No_Progress;
+      end if;
    end Solve_Impl;
 
    --------------
@@ -149,10 +254,17 @@ package body Langkit_Support.Adalog.Operations is
          return Keep_Rels (1);
       end if;
 
-      return new Any_Rel'(Ref_Count => 1,
-                          Count     => Keep_Rels'Length,
-                          Sub_Rels  => Keep_Rels,
-                          Next      => <>);
+      declare
+         Result : constant access Any_Rel := new Any_Rel'
+           (Ref_Count     => 1,
+            Count         => Keep_Rels'Length,
+            Next          => <>,
+            Sub_Rels      => Keep_Rels,
+            Working_Queue => <>);
+      begin
+         Initialize_Working_Queue (Result.all);
+         return Relation (Result);
+      end;
    end Logic_Any;
 
    ---------------
@@ -184,10 +296,43 @@ package body Langkit_Support.Adalog.Operations is
          return Keep_Rels (1);
       end if;
 
-      return new All_Rel'(Ref_Count => 1,
-                          Count     => Keep_Rels'Length,
-                          Sub_Rels  => Keep_Rels,
-                          Next      => <>);
+      declare
+         Result : constant access All_Rel := new All_Rel'
+           (Ref_Count     => 1,
+            Count         => Keep_Rels'Length,
+            Next          => <>,
+            Sub_Rels      => Keep_Rels,
+            Working_Queue => <>);
+      begin
+         Initialize_Working_Queue (Result.all);
+         return Relation (Result);
+      end;
    end Logic_All;
+
+   ------------------------------
+   -- Initialize_Working_Queue --
+   ------------------------------
+
+   procedure Initialize_Working_Queue (Self : in out Base_Aggregate_Rel'Class)
+   is
+   begin
+      for I in Self.Working_Queue'Range loop
+         Self.Working_Queue (I) := I;
+      end loop;
+   end Initialize_Working_Queue;
+
+   -------------------
+   -- Set_Completed --
+   -------------------
+
+   procedure Set_Completed
+     (Self : in out Base_Aggregate_Rel'Class; Index : Positive)
+   is
+      Saved : constant Positive := Self.Working_Queue (Self.Next);
+   begin
+      Self.Working_Queue (Self.Next) := Self.Working_Queue (Index);
+      Self.Working_Queue (Index) := Saved;
+      Self.Next := Self.Next + 1;
+   end Set_Completed;
 
 end Langkit_Support.Adalog.Operations;

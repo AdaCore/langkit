@@ -9,6 +9,9 @@ package Langkit_Support.Adalog.Abstract_Relation is
 
    type Solving_State is (Progress, No_Progress, Satisfied, Unsatisfied);
 
+   subtype Finished_Solving_State is
+      Solving_State range Satisfied ..  Unsatisfied;
+
    function "+" (B : Boolean) return Solving_State is
      (if B then Satisfied else Unsatisfied);
 
@@ -43,11 +46,14 @@ package Langkit_Support.Adalog.Abstract_Relation is
    --    be reset via the Reset primitive.
 
    function Solve (Self : in out Base_Relation'Class) return Solving_State;
-   --  Solve the relation system. If the resolution process could not solve the
-   --  equation because some input data is missing, return Try_Again. If it
-   --  could determine that the equation has no correct solution, return
-   --  Unsatisfied.  Otherwise, initialize all logic variables with solution
-   --  values and return Satisfied.
+   --  Try to solve the relation subtree::
+   --
+   --    * If some logic variables are cannot be bound whereas they are
+   --      required to make progress, return Progress or No_Progress, depending
+   --      on whether some progress could be made at all towards resolution.
+   --
+   --    * If resolution completes, return Satisfied when there exists a
+   --      solution or Unsatisfied otherwise.
 
    function Solve_Impl
      (Self : in out Base_Relation) return Solving_State is abstract;
