@@ -93,13 +93,17 @@ package body Langkit_Support.Adalog.Unify_One_Side is
 
    function Solve_Impl (Self : in out Member_T) return Solving_State is
    begin
+      Trace ("In Member");
       if Self.Current_Index in Self.Values.all'Range then
          if Is_Defined (Self.Left) and then not Self.Changed then
 
             if Self.Domain_Checked then
+               Trace ("In Member: left already defined, domain is checked,"
+                      & " returning Unsatisfied");
                return Unsatisfied;
             end if;
 
+            Trace ("In Member: left already defined, checking domain");
             Self.Domain_Checked := True;
             for V of Self.Values.all loop
                declare
@@ -110,10 +114,13 @@ package body Langkit_Support.Adalog.Unify_One_Side is
                   L_Dec_Ref (L);
                   L_Dec_Ref (R_Val);
                   if B then
+                     Trace ("In Member: left already defined, satisfied");
                      return Satisfied;
                   end if;
                end;
             end loop;
+
+            Trace ("In Member: left already defined, unsatisfied");
             return Unsatisfied;
 
          else
@@ -127,6 +134,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
                begin
                   L_Dec_Ref (R_Val);
                   if B then
+                     Trace ("In Member: just defined left, satisfied");
                      Self.Changed := True;
                      return Satisfied;
                   end if;
@@ -135,12 +143,16 @@ package body Langkit_Support.Adalog.Unify_One_Side is
                exit when Self.Current_Index not in Self.Values.all'Range;
             end loop;
 
+            Trace ("In Member: just defined left, unsatisfied");
             return Unsatisfied;
          end if;
 
       else
          if Self.Changed then
+            Trace ("In Member: changed, resetting left");
             Reset (Self.Left);
+         else
+            Trace ("In Member: not changed, unsatisfied");
          end if;
          return Unsatisfied;
       end if;
