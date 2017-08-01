@@ -30,22 +30,17 @@ package body Langkit_Support.Adalog.Logic_Ref is
 
    function Set_Value (Self : in out Var; Data : Element_Type) return Boolean
    is
-      Old : Var := Self;
    begin
-      Inc_Ref (Old.Value);
-
       if Debug.Debug then
          Trace ("Setting the value of " & Image (Self) & " to "
                 & Element_Image (Data));
-         Trace ("Old value is " & Element_Image (Old.Value));
+         Trace ("Old value is " & Element_Image (Self.Value));
       end if;
 
       Dec_Ref (Self.Value);
       Self.Value := Data;
       Inc_Ref (Self.Value);
       Self.Reset := False;
-
-      Dec_Ref (Old.Value);
       return True;
    end Set_Value;
 
