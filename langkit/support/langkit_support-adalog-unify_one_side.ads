@@ -115,11 +115,24 @@ private
 
    type Member_T is new Base_Relation with record
       Left           : Var.Var;
+      --  Logic variable that must be one of the given values
+
       Values         : R_Type_Array_Access;
+      --  Possible set of values for the logic variable
+
       Current_Index  : Positive := 1;
+      --  Index in Values of the next value to try to assign to Left
+
       Changed        : Boolean := False;
+      --  Whether we assigned a value to Left last time Solve was called
+
       Domain_Checked : Boolean := False;
+      --  Whether the last time Solve was called, we checked the value of Left
+      --  without assigning it ourselves.
+
       R_Data         : R_Convert_Data;
+      --  Data to convert a value from Values into a value that can be assigned
+      --  to Left.
    end record;
 
 end Langkit_Support.Adalog.Unify_One_Side;
