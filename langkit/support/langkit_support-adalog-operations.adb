@@ -18,7 +18,7 @@ package body Langkit_Support.Adalog.Operations is
       for R of Self.Sub_Rels loop
          R.Reset;
       end loop;
-      Self.State := 1;
+      Self.Next := 1;
    end Reset;
 
    -------------
@@ -53,16 +53,16 @@ package body Langkit_Support.Adalog.Operations is
    overriding function Solve_Impl (Self : in out Any_Rel) return Solving_State
    is
    begin
-      while Self.State <= Self.Count loop
-         case Self.Sub_Rels (Self.State).Solve is
-            when Progress .. No_Progress =>
+      while Self.Next <= Self.Count loop
+         case Self.Sub_Rels (Self.Next).Solve is
+            when Progress | No_Progress =>
                raise Program_Error with "not implemented yet";
 
             when Satisfied =>
                return Satisfied;
 
             when Unsatisfied =>
-               Self.State := Self.State + 1;
+               Self.Next := Self.Next + 1;
          end case;
       end loop;
       return Unsatisfied;
@@ -75,28 +75,28 @@ package body Langkit_Support.Adalog.Operations is
    overriding function Solve_Impl (Self : in out All_Rel) return Solving_State
    is
    begin
-      if Self.State = Self.Count + 1 then
-         Self.State := Self.Count;
+      if Self.Next = Self.Count + 1 then
+         Self.Next := Self.Count;
       end if;
 
-      while Self.State <= Self.Count loop
-         case Self.Sub_Rels (Self.State).Solve is
+      while Self.Next <= Self.Count loop
+         case Self.Sub_Rels (Self.Next).Solve is
             when Progress | No_Progress =>
                raise Program_Error with "not implemented yet";
 
             when Satisfied =>
-               Trace ("Solving rel " & Self.State'Image
+               Trace ("Solving rel " & Self.Next'Image
                       & " succeeded, moving on to next rel");
-               Self.State := Self.State + 1;
+               Self.Next := Self.Next + 1;
 
             when Unsatisfied =>
-               if Self.State = 1 then
+               if Self.Next = 1 then
                   return Unsatisfied;
                else
-                  Trace ("Solving rel " & Self.State'Image
+                  Trace ("Solving rel " & Self.Next'Image
                          & " failed, let's reset and try previous rel again");
-                  Self.Sub_Rels (Self.State).Reset;
-                  Self.State := Self.State - 1;
+                  Self.Sub_Rels (Self.Next).Reset;
+                  Self.Next := Self.Next - 1;
                end if;
          end case;
       end loop;
@@ -152,7 +152,7 @@ package body Langkit_Support.Adalog.Operations is
       return new Any_Rel'(Ref_Count => 1,
                           Count     => Keep_Rels'Length,
                           Sub_Rels  => Keep_Rels,
-                          State     => <>);
+                          Next      => <>);
    end Logic_Any;
 
    ---------------
@@ -187,7 +187,7 @@ package body Langkit_Support.Adalog.Operations is
       return new All_Rel'(Ref_Count => 1,
                           Count     => Keep_Rels'Length,
                           Sub_Rels  => Keep_Rels,
-                          State     => <>);
+                          Next      => <>);
    end Logic_All;
 
 end Langkit_Support.Adalog.Operations;

@@ -9,7 +9,7 @@ package Langkit_Support.Adalog.Operations is
    type Base_Aggregate_Rel (Count : Positive) is abstract new Base_Relation
      with record
       Sub_Rels : Relation_Array (1 .. Count);
-      State    : Positive := 1;
+      Next     : Positive := 1;
    end record;
 
    overriding procedure Reset (Self : in out Base_Aggregate_Rel);
