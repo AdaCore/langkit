@@ -42,7 +42,7 @@ begin
             Put_Line ("No solution found");
          end if;
       end;
-      Dec_Ref (R);
+      Free_Relation_Tree (R);
    end loop;
 
    Destroy (X.all);

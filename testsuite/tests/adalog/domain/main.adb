@@ -18,4 +18,5 @@ begin
    while Solve (R) loop
       Put_Line ("X =" & Get_Value (X)'Img);
    end loop;
+   Free_Relation_Tree (R);
 end Main;

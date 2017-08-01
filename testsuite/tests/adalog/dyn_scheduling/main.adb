@@ -75,7 +75,7 @@ begin
          when Langkit_Support.Adalog.Early_Binding_Error =>
             Put_Line ("Got an Early_Binding_Error exception");
       end;
-      Dec_Ref (R);
+      Free_Relation_Tree (R);
    end loop;
 
    Destroy (X.all);

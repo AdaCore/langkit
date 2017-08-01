@@ -36,4 +36,5 @@ begin
       Put_Line ("X =" & Get_Value (X)'Img);
       Put_Line ("Y =" & Get_Value (Y)'Img);
    end loop;
+   Free_Relation_Tree (R3);
 end Main;

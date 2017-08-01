@@ -24,6 +24,7 @@ begin
       while Solve (R) loop
          Put_Line ("X =" & Get_Value (X)'Img & ", Y =" & Get_Value (Y)'Img);
       end loop;
+      Free_Relation_Tree (R);
    end;
 
    declare
@@ -36,6 +37,7 @@ begin
       while Solve (R) loop
          Put_Line ("X =" & Get_Value (X)'Img & ", Y =" & Get_Value (Y)'Img);
       end loop;
+      Free_Relation_Tree (R);
    end;
 
 end Main;

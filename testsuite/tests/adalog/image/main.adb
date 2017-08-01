@@ -30,7 +30,7 @@ begin
 
    Print_Relation (R);
 
-   Dec_Ref (R);
+   Free_Relation_Tree (R);
    Destroy (X.all);
    Destroy (Y.all);
 end Main;
