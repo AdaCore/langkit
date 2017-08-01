@@ -28,8 +28,7 @@ package body Langkit_Support.Adalog.Logic_Ref is
    -- Set_Value --
    ---------------
 
-   function Set_Value (Self : in out Var; Data : Element_Type) return Boolean
-   is
+   procedure Set_Value (Self : in out Var; Data : Element_Type) is
    begin
       if Debug.Debug then
          Trace ("Setting the value of " & Image (Self) & " to "
@@ -41,7 +40,6 @@ package body Langkit_Support.Adalog.Logic_Ref is
       Self.Value := Data;
       Inc_Ref (Self.Value);
       Self.Reset := False;
-      return True;
    end Set_Value;
 
    ---------------
@@ -83,13 +81,11 @@ package body Langkit_Support.Adalog.Logic_Ref is
    ---------------
 
    pragma Warnings (Off);
-   function Set_Value
-     (Self : in out Raw_Var; Data : Element_Type) return Boolean
-   is
-   begin
-      return Set_Value (Self.all, Data);
-   end Set_Value;
+   procedure Set_Value (Self : in out Raw_Var; Data : Element_Type) is
    pragma Warnings (On);
+   begin
+      Set_Value (Self.all, Data);
+   end Set_Value;
 
    ---------------
    -- Get_Value --

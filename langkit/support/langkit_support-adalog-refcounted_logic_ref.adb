@@ -8,11 +8,9 @@ package body Langkit_Support.Adalog.Refcounted_Logic_Ref is
    -- Set_Value --
    ---------------
 
-   function Set_Value
-     (Self : in out Ref; Data : Element_Type) return Boolean
-   is
+   procedure Set_Value (Self : in out Ref; Data : Element_Type) is
    begin
-      return LRef.Set_Value (Self.Unchecked_Get.Content, Data);
+      LRef.Set_Value (Self.Unchecked_Get.Content, Data);
    end Set_Value;
 
    ---------------

@@ -19,7 +19,6 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    -----------
 
    function Apply (Self : in out Unify_Rec) return Solving_State is
-      Result : Solving_State;
    begin
       Trace ("In Unify_One_Side");
 
@@ -27,6 +26,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
          Trace ("Left defined");
 
          declare
+            Result : Solving_State;
             R_Val : L_Type := Convert (Self.R_Data, Self.Right);
             L_Val : L_Type := Get_Value (Self.Left);
          begin
@@ -41,30 +41,20 @@ package body Langkit_Support.Adalog.Unify_One_Side is
             Trace ("Returning " & Result'Image);
             L_Dec_Ref (R_Val);
             L_Dec_Ref (L_Val);
+            return Result;
          end;
 
       else
          declare
             L_Val : L_Type := Convert (Self.R_Data, Self.Right);
          begin
-            Result := +Set_Value (Self.Left, L_Val);
+            Set_Value (Self.Left, L_Val);
             L_Dec_Ref (L_Val);
-
-            case Result is
-               when Progress | No_Progress =>
-                  raise Program_Error with "should not happen";
-
-               when Satisfied =>
-                  Trace ("Setting left worked !");
-                  Self.Changed := True;
-
-               when Unsatisfied =>
-                  Trace ("Setting left failed !");
-            end case;
+            Self.Changed := True;
+            return Satisfied;
          end;
       end if;
 
-      return Result;
    end Apply;
 
    ------------
@@ -141,27 +131,19 @@ package body Langkit_Support.Adalog.Unify_One_Side is
             return Unsatisfied;
 
          else
-            loop
-               Self.Current_Index := Self.Current_Index + 1;
+            Self.Current_Index := Self.Current_Index + 1;
 
-               declare
-                  R_Val : L_Type := Convert
-                    (Self.R_Data, Self.Values (Self.Current_Index - 1));
-                  B     : constant Boolean := Set_Value (Self.Left, R_Val);
-               begin
-                  L_Dec_Ref (R_Val);
-                  if B then
-                     Trace ("In Member: just defined left, satisfied");
-                     Self.Changed := True;
-                     return Satisfied;
-                  end if;
-               end;
+            declare
+               R_Val : L_Type := Convert
+                 (Self.R_Data, Self.Values (Self.Current_Index - 1));
+            begin
+               Set_Value (Self.Left, R_Val);
+               L_Dec_Ref (R_Val);
+            end;
 
-               exit when Self.Current_Index not in Self.Values.all'Range;
-            end loop;
-
-            Trace ("In Member: just defined left, unsatisfied");
-            return Unsatisfied;
+            Trace ("In Member: just defined left, satisfied");
+            Self.Changed := True;
+            return Satisfied;
          end if;
 
       else

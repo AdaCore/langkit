@@ -30,11 +30,11 @@ package body Langkit_Support.Adalog.Unify_LR is
             Trace ("In Unify_LR, Right value is : " & Element_Image (R));
             Trace ("In Unify_LR, both defined, returning " & Result'Image);
 
-         elsif Set_Value (Self.Right, LC) then
-
+         else
             --  Left is defined, right is not, give right the value of left and
             --  return true.
 
+            Set_Value (Self.Right, LC);
             Result := Satisfied;
             Self.State := Right_Changed;
             Trace ("In Unify_LR, propagating right, from "
@@ -43,11 +43,6 @@ package body Langkit_Support.Adalog.Unify_LR is
             Trace ("In Unify_LR, From value is : " & Element_Image (L));
             Trace ("In Unify_LR, Old to value is : " & Element_Image (R));
             Trace ("In Unify_LR, New to value is : " & Element_Image (LC));
-
-         else
-
-            Result := Unsatisfied;
-            Trace ("In Unify_LR, propagating right failed! ");
          end if;
 
          L_Dec_Ref (L);
@@ -67,28 +62,15 @@ package body Langkit_Support.Adalog.Unify_LR is
       declare
          RC : L_Type := Convert (Self.R_Data, R);
       begin
-         Result := +Set_Value (Self.Left, RC);
-         pragma Assert (Result in Finished_Solving_State);
-
+         Set_Value (Self.Left, RC);
          R_Dec_Ref (R);
          L_Dec_Ref (RC);
       end;
 
-      case Result is
-         when Progress | No_Progress =>
-            raise Program_Error with "should not happen";
-
-         when Satisfied =>
-            Self.State := Left_Changed;
-            Trace ("In Unify_LR, propagating left, from "
-                      & Image (Self.Right) & " to "
-                      & Image (Self.Left));
-
-         when Unsatisfied =>
-            Trace ("In Unify_LR, propagating left failed ! ");
-      end case;
-
-      return Result;
+      Self.State := Left_Changed;
+      Trace ("In Unify_LR, propagating left,"
+             & " from " & Image (Self.Right) & " to " & Image (Self.Left));
+      return Satisfied;
    end Apply;
 
    ------------

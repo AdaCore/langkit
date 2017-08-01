@@ -37,7 +37,7 @@ package Langkit_Support.Adalog.Refcounted_Logic_Ref is
 
    procedure Reset (Self : in out Ref);
    function Is_Defined (Self : Ref) return Boolean;
-   function Set_Value (Self : in out Ref; Data : Element_Type) return Boolean;
+   procedure Set_Value (Self : in out Ref; Data : Element_Type);
    function Get_Value (Self : Ref) return Element_Type;
 
    function Image (Self : Ref) return String is

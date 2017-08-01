@@ -54,7 +54,7 @@ package Langkit_Support.Adalog.Logic_Ref is
 
    procedure Reset (Self : in out Var);
    function Is_Defined (Self : Var) return Boolean;
-   function Set_Value (Self : in out Var; Data : Element_Type) return Boolean;
+   procedure Set_Value (Self : in out Var; Data : Element_Type);
    function Get_Value (Self : Var) return Element_Type;
    procedure Destroy (Self : in out Var);
    function Image (Self : Var) return String is
@@ -71,8 +71,7 @@ package Langkit_Support.Adalog.Logic_Ref is
    type Raw_Var is access all Var;
    procedure Reset (Self : in out Raw_Var);
    function Is_Defined (Self : Raw_Var) return Boolean;
-   function Set_Value
-     (Self : in out Raw_Var; Data : Element_Type) return Boolean;
+   procedure Set_Value (Self : in out Raw_Var; Data : Element_Type);
    function Get_Value (Self : Raw_Var) return Element_Type;
    function Create return Raw_Var;
 
