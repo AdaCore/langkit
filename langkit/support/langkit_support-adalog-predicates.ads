@@ -1,8 +1,6 @@
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Logic_Var;
-with Langkit_Support.Adalog.Logic_Var_Predicate;
-use Langkit_Support.Adalog.Logic_Var_Predicate;
 with Langkit_Support.Adalog.Relations;
 use Langkit_Support.Adalog.Relations;
 
@@ -47,7 +45,7 @@ package Langkit_Support.Adalog.Predicates is
 
       use Var;
 
-      type Predicate_Logic is new Var_Predicate_Type with record
+      type Predicate_Logic is record
          Ref  : Var.Var;
          Pred : Predicate_Type;
       end record;
@@ -56,8 +54,7 @@ package Langkit_Support.Adalog.Predicates is
       --  return the same result (provided the provided predicate satisfies
       --  this invariant).
 
-      overriding function Apply
-        (Self : in out Predicate_Logic) return Solving_State;
+      function Apply (Self : in out Predicate_Logic) return Solving_State;
 
       procedure Revert (Self : in out Predicate_Logic);
       procedure Free (Self : in out Predicate_Logic);
@@ -157,7 +154,7 @@ package Langkit_Support.Adalog.Predicates is
 
       use Var;
 
-      type Predicate_Logic is new Var_Predicate_Type with record
+      type Predicate_Logic is record
          Refs  : Var_Array (1 .. Arity);
          Pred  : Predicate_Type;
       end record;
@@ -166,8 +163,7 @@ package Langkit_Support.Adalog.Predicates is
       --  return the same result (provided the provided predicate satisfies
       --  this invariant).
 
-      overriding function Apply
-        (Self : in out Predicate_Logic) return Solving_State;
+      function Apply (Self : in out Predicate_Logic) return Solving_State;
 
       procedure Revert (Self : in out Predicate_Logic);
       procedure Free (Self : in out Predicate_Logic);

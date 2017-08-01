@@ -22,7 +22,6 @@ library project Langkit_Support is
       "Langkit_Support.Adalog.Eq_Same",
       "Langkit_Support.Adalog.Logic_Ref",
       "Langkit_Support.Adalog.Logic_Var",
-      "Langkit_Support.Adalog.Logic_Var_Predicate",
       "Langkit_Support.Adalog.Main_Support",
       "Langkit_Support.Adalog.Operations",
       "Langkit_Support.Adalog.Predicates",

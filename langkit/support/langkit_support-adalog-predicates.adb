@@ -21,9 +21,11 @@ package body Langkit_Support.Adalog.Predicates is
       -- Apply --
       -----------
 
-      overriding function Apply
-        (Self : in out Predicate_Logic) return Solving_State
-      is
+      pragma Warnings (Off);
+      --  Hide complains that Self could be IN, as we are forced to make it IN
+      --  OUT for generic instantiation.
+      function Apply (Self : in out Predicate_Logic) return Solving_State is
+      pragma Warnings (On);
       begin
          if not Is_Defined (Self.Ref) then
             Trace ("In Predicate apply, var " & Image (Self.Ref)
@@ -70,9 +72,11 @@ package body Langkit_Support.Adalog.Predicates is
       -- Apply --
       -----------
 
-      overriding function Apply
-        (Self : in out Predicate_Logic) return Solving_State
-      is
+      pragma Warnings (Off);
+      --  Hide complains that Self could be IN, as we are forced to make it IN
+      --  OUT for generic instantiation.
+      function Apply (Self : in out Predicate_Logic) return Solving_State is
+      pragma Warnings (On);
       begin
          for Ref of Self.Refs loop
             if not Is_Defined (Ref) then
