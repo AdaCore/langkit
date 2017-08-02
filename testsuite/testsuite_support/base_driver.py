@@ -158,6 +158,10 @@ class BaseDriver(TestDriver):
     def original_expected_file(self):
         return os.path.join(self.test_dir, 'test.out')
 
+    @property
+    def coverage_enabled(self):
+        return self.global_env['options'].coverage
+
     def coverage_file(self, ext):
         """
         Return the name of a coverage data file (or trace file) for the current

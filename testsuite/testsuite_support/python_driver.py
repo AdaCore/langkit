@@ -33,7 +33,7 @@ class PythonDriver(BaseDriver):
 
         # If code coverage is requested, run the test script under the
         # "coverage" program.
-        if self.global_env['options'].coverage:
+        if self.coverage_enabled:
             # Consider all Langkit Python source files, except modules which
             # are currently not tested at all.
             source = os.path.join(self.langkit_root_dir, 'langkit')
