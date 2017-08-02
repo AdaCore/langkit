@@ -3,9 +3,7 @@ from __future__ import absolute_import, division, print_function
 import os
 import os.path
 
-from testsuite_support.base_driver import (
-    BaseDriver, catch_test_errors,
-)
+from testsuite_support.base_driver import BaseDriver, catch_test_errors
 
 
 class AdalogDriver(BaseDriver):
