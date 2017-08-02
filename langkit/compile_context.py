@@ -794,20 +794,18 @@ class CompileCtx(object):
         property.  This will determine whether it is necessary to pass along
         entity information or not.
         """
-        from langkit.expressions import FieldAccess, VariableExpr
+        from langkit.expressions import FieldAccess
 
         _, backwards = self.properties_callgraphs(
             backwards_converter=lambda expr, from_prop: (expr, from_prop)
         )
 
-        def propagate(prop):
-            """
-            Propagate the `uses_entity_info` attribute:
-              * in the property set of `prop` (overriding/overriden
-                properties);
-              * to callers of `prop` when the call is made on Self.
-            """
-
+        props_using_einfo = sorted(
+            self.all_properties(lambda p: p._uses_entity_info,
+                                include_inherited=False),
+            key=lambda p: p.qualname
+        )
+        for prop in props_using_einfo:
             # Propagate in the property set
             for p in prop.property_set():
                 with Context(
@@ -816,40 +814,6 @@ class CompileCtx(object):
                     p.location
                 ):
                     p.set_uses_entity_info()
-
-                # For each Self.<p>, wrap Self as an entity and make the
-                # embedding property itself use entity information.
-                for expr, from_prop in backwards.get(p, []):
-                    if (
-                        isinstance(expr, FieldAccess.Expr)
-                        and not expr.implicit_deref
-                        and isinstance(expr.original_receiver_expr,
-                                       VariableExpr)
-                        and expr.original_receiver_expr.is_self
-                    ):
-                        context_mgrs = [from_prop.bind()]
-                        if expr.abstract_expr:
-                            context_mgrs.append(
-                                expr.abstract_expr.diagnostic_context
-                            )
-
-                        # The wrapping below will automatically tag `from_prop`
-                        # as using entity information, so we must decide
-                        # whether to recurse *before*.
-                        do_propagate = not from_prop._uses_entity_info
-                        with nested(*context_mgrs):
-                            expr.wrap_prefix_in_entity()
-
-                        if do_propagate:
-                            propagate(from_prop)
-
-        props_using_einfo = sorted(
-            self.all_properties(lambda p: p._uses_entity_info,
-                                include_inherited=False),
-            key=lambda p: p.qualname
-        )
-        for prop in props_using_einfo:
-            propagate(prop)
 
         all_props = list(self.all_properties(include_inherited=False))
 
