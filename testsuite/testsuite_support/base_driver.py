@@ -261,6 +261,32 @@ class BaseDriver(TestDriver):
             raise TestError(
                 '{} returned status code {}'.format(program, p.status))
 
+    def create_project_file(self, project_file, mains):
+        """
+        Create a project file for the given main source files.
+
+        The project file is created in the working directory. It gathers the
+        Ada source files in the working directory.
+
+        :param str project_file: Project file name to create.
+        :param list[str] mains: List of main source files.
+        """
+        with open(self.working_dir(project_file), 'w') as f:
+            f.write("""
+            with "{lk_support}";
+
+            project P is
+                for Languages use ("Ada");
+                for Source_Dirs use (".");
+                for Object_Dir use ".";
+                for Main use ({mains});
+            end P;
+            """.format(
+                mains=', '.join('"{}"'.format(m) for m in mains),
+                lk_support=os.path.join(self.testsuite_dir, '..', 'langkit',
+                                        'support', 'langkit_support.gpr')
+            ))
+
     def gprbuild(self, project_file):
         """
         Run GPRbuild on the given project file.
