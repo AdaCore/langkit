@@ -243,14 +243,24 @@ class BaseDriver(TestDriver):
     # Run helpers
     #
 
-    def run_and_check(self, argv, env=None):
+    def run_and_check(self, argv, env=None, for_coverage=False):
         """
         Run a subprocess with `argv` and check it completes with status code 0.
 
         In case of failure, the test output is appended to the actual output
         and a TestError is raised.
+
+        :param list[str] argv: List of arguments to pass to the subprocess.
+        :param None|dict[str, str] env: If provided, environment variables to
+            pass to the subprocess.
+        :param bool for_coverage: If true and if coverage is enabled, produce a
+            trace file.
         """
         program = argv[0]
+
+        if for_coverage and self.coverage_enabled:
+            trace_file = self.coverage_file('trace')
+            argv = ['gnatcov', 'run', '-o', trace_file] + argv
 
         p = Run(argv, cwd=self.working_dir(),
                 timeout=self.TIMEOUT,
@@ -298,8 +308,25 @@ class BaseDriver(TestDriver):
         :param str project_file: Project file name.
         """
         argv = ['gprbuild', '-P', project_file, '-p']
-        argv.extend(['-cargs', '-O0', '-g', '-gnata'])
-        self.run_and_check(argv)
+        cargs = ['-O0', '-g', '-gnata']
+        if self.coverage_enabled:
+            argv.append('--subdirs=gnatcov')
+            cargs += ['-fdump-scos', '-fpreserve-control-flow']
+        self.run_and_check(argv + ['-cargs'] + cargs)
+
+    def program_path(self, main_source_file):
+        """
+        Return the path to the program corresponding to the given main file.
+
+        :param str main_source_file: File name for the main source file from
+            which the program has been built.
+        :rtype: str
+        """
+        assert main_source_file.endswith('.adb')
+        program_name = main_source_file[:-4]
+        return (self.working_dir('gnatcov', program_name)
+                if self.coverage_enabled else
+                self.working_dir(program_name))
 
     #
     # Analysis helpers

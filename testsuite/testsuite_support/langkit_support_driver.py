@@ -15,4 +15,4 @@ class LangkitSupportDriver(BaseDriver):
         source = self.test_env.get('main_source', 'main.adb')
         self.create_project_file('p.gpr', [source])
         self.gprbuild('p.gpr')
-        self.run_and_check(['./{}'.format(source[:-4])])
+        self.run_and_check([self.program_path(source)], for_coverage=True)
