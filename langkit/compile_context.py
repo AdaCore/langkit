@@ -875,7 +875,8 @@ class CompileCtx(object):
                         or expr.implicit_deref,
                         'Call to {} must be done on an entity'.format(
                             expr.node_data.qualname
-                        )
+                        ),
+                        severity=Severity.non_blocking_error
                     )
 
             for subexpr in expr.flat_subexprs():
