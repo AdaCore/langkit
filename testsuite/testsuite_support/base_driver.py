@@ -261,6 +261,16 @@ class BaseDriver(TestDriver):
             raise TestError(
                 '{} returned status code {}'.format(program, p.status))
 
+    def gprbuild(self, project_file):
+        """
+        Run GPRbuild on the given project file.
+
+        :param str project_file: Project file name.
+        """
+        argv = ['gprbuild', '-P', project_file, '-p']
+        argv.extend(['-cargs', '-O0', '-g', '-gnata'])
+        self.run_and_check(argv)
+
     #
     # Analysis helpers
     #

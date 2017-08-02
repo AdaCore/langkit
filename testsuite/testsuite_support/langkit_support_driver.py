@@ -32,6 +32,5 @@ class LangkitSupportDriver(BaseDriver):
                                         "support", "langkit_support.gpr")
             ))
 
-        self.run_and_check(['gprbuild', '-p', '-P', 'p.gpr', '-gnata',
-                            '-cargs', '-O0', '-g'])
+        self.gprbuild('p.gpr')
         self.run_and_check(['./{}'.format(source[:-4])])
