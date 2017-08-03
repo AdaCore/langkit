@@ -142,7 +142,23 @@ class ASTNodePrinter(BasePrinter):
     def unit(self):
         return AnalysisUnit(tagged_field(self.value, 'unit'))
 
+    @property
+    def synthetic(self):
+        """
+        Return whether this node is synthetic.
+
+        :rtype: bool
+        """
+        return int(tagged_field(self.value, 'token_start_index')) == 0
+
     def sloc(self, with_end=True):
+        """
+        Return the source location for this node as a string.
+
+        This must not be called if the node is synthetic.
+
+        :rtype: str
+        """
         filename = self.unit.filename
         if filename:
             filename = os.path.basename(filename)
@@ -159,8 +175,19 @@ class ASTNodePrinter(BasePrinter):
             if with_end and end else ''
         )
 
+    @property
+    def parent(self):
+        """
+        Return the parent node, or None if it's the root one.
+
+        :rtype: gdb.Value
+        """
+        return tagged_field(self.value, 'parent')
+
     def to_string(self):
-        return ('<{} {}>'.format(self.kind, self.sloc())
+        loc = ('synthetic from {}'.format(self.parent)
+               if self.synthetic else self.sloc())
+        return ('<{} {}>'.format(self.kind, loc)
                 if self.value else 'null')
 
 
