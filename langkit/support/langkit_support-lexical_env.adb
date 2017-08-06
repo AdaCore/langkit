@@ -168,6 +168,12 @@ package body Langkit_Support.Lexical_Env is
          return null;
       end if;
 
+      --  Check unicity of rebindings
+      pragma Assert
+        (for all I in Bindings'Range =>
+           (for all J in Bindings'Range =>
+              J = I or else Bindings (I) /= Bindings (J)));
+
       declare
          Result : constant Env_Rebindings := new Env_Rebindings_Type'
            (Size       => Bindings'Length,
