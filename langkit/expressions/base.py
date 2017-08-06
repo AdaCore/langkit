@@ -414,11 +414,12 @@ class AbstractExpression(Frozable):
         them in attrs or it would cause infinite recursion.
         """
         from langkit.expressions.structs import IsNull
-        from langkit.expressions.boolean import Not
+        from langkit.expressions.boolean import Not, Or
         from langkit.expressions.logic import All, Any
 
         return {
             '_or': lambda alt: self.then(lambda e: e, default_val=alt),
+            'any_of': lambda *els: Or(*[self == el for el in els]),
             'empty': self.length.equals(0),
             'find': lambda filter_expr:
                 self.filter(filter_expr).at(0),
