@@ -173,22 +173,6 @@ def env_parent(self, env):
     )
 
 
-def make_combine(self, l_rebindings, r_rebindings):
-    return CallExpr('Combined', 'AST_Envs.Combine', lexical_env_type,
-                    [l_rebindings, r_rebindings],
-                    abstract_expr=self)
-
-
-@auto_attr
-def combine(self, l_rebindings, r_rebindings):
-    """
-    Combine the two env rebindings given as arguments.
-    """
-    return make_combine(self,
-                        construct(l_rebindings, lexical_env_type),
-                        construct(r_rebindings, lexical_env_type))
-
-
 def make_append_rebinding(self, rebindings, to_rebind, rebind_to):
     return CallExpr('Rebinding', 'AST_Envs.Append_Rebinding',
                     env_rebindings_type,
