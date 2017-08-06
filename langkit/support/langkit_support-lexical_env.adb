@@ -748,10 +748,10 @@ package body Langkit_Support.Lexical_Env is
            Referenced_Envs            => <>,
            Env                        => null,
            Default_MD                 => Empty_Metadata,
-           Rebindings                 =>
-             Combine (Base_Env.Rebindings, Rebindings),
+           Rebindings                 => Rebindings,
            Ref_Count                  => 1)
       do
+         Inc_Ref (Rebindings);
          Reference (N, Base_Env, Transitive => True);
       end return;
    end Rebind_Env;
