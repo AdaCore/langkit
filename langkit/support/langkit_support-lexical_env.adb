@@ -581,7 +581,7 @@ package body Langkit_Support.Lexical_Env is
          return Entity_Arrays.Empty_Array;
       end if;
 
-      Current_Rebindings := Combine (Rebindings, Self.Rebindings);
+      Current_Rebindings := Combine (Self.Rebindings, Rebindings);
 
       --  If there is an environment corresponding to Self in env rebindings,
       --  we'll get it here. We'll also shed it from the set of current
