@@ -116,7 +116,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
                declare
                   L     : L_Type := Get_Value (Self.Left);
                   R_Val : L_Type := Convert (Self.R_Data, V);
-                  B     : constant Boolean := L = R_Val;
+                  B     : constant Boolean := Equals (Self.Eq_Data, L, R_Val);
                begin
                   L_Dec_Ref (L);
                   L_Dec_Ref (R_Val);
@@ -206,9 +206,10 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    ------------
 
    function Member
-     (R      : Var.Var;
-      Vals   : R_Type_Array;
-      R_Data : R_Convert_Data) return Relation
+     (R       : Var.Var;
+      Vals    : R_Type_Array;
+      R_Data  : R_Convert_Data;
+      Eq_Data : Equals_Data) return Relation
    is
    begin
       for V of Vals loop
@@ -221,6 +222,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
          Changed        => False,
          Domain_Checked => False,
          R_Data         => R_Data,
+         Eq_Data        => Eq_Data,
          others         => <>);
    end Member;
 

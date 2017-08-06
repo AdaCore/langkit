@@ -129,10 +129,11 @@ package Langkit_Support.Adalog.Unify is
    ------------
 
    function Member
-     (R      : Left_Var.Var;
-      Vals   : Unify_Left.R_Type_Array;
-      R_Data : Right_C_Data := No_R_Data) return Relation
+     (R       : Left_Var.Var;
+      Vals    : Unify_Left.R_Type_Array;
+      R_Data  : Right_C_Data := No_R_Data;
+      Eq_Data : Equals_Data := No_Equals_Data) return Relation
    is
-      (Unify_Left.Member (R, Vals, R_Data));
+      (Unify_Left.Member (R, Vals, R_Data, Eq_Data));
 
 end Langkit_Support.Adalog.Unify;

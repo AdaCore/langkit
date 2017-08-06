@@ -84,7 +84,8 @@ package Langkit_Support.Adalog.Unify_One_Side is
    function Member
      (R      : Var.Var;
       Vals   : R_Type_Array;
-      R_Data : R_Convert_Data) return Relation;
+      R_Data : R_Convert_Data;
+      Eq_Data : Equals_Data) return Relation;
 
    overriding function Solve_Impl
      (Self : in out Member_T) return Solving_State;
@@ -135,6 +136,9 @@ private
       R_Data         : R_Convert_Data;
       --  Data to convert a value from Values into a value that can be assigned
       --  to Left.
+
+      Eq_Data        : Equals_Data;
+      --  Data to check values equality.
    end record;
 
 end Langkit_Support.Adalog.Unify_One_Side;
