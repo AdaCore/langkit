@@ -248,6 +248,12 @@ package body Langkit_Support.Lexical_Env is
          Inc_Ref (Result.Bindings (J));
       end loop;
 
+      --  Check unicity of rebindings
+      pragma Assert
+        (for all I in Result.Bindings'Range =>
+           (for all J in Result.Bindings'Range =>
+              J = I or else Result.Bindings (I) /= Result.Bindings (J)));
+
       return Result;
    end Combine;
 
