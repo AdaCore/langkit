@@ -845,8 +845,15 @@ package body Langkit_Support.Lexical_Env is
    begin
       if Rebindings /= null then
 
-         --  Look in reverse order as if there is a rebinding that we match, we
-         --  want to get the last one only.
+         --  Look in reverse order: The correct behavior is to extract the
+         --  *last* rebinding, because due to the stacked nature of rebindings,
+         --  the user is never supposed to extract a rebinding other than the
+         --  last one that was added.
+         --
+         --  TODO: We're still doing a full for-loop to check if this invariant
+         --  is consistently respected. This means that the case where the env
+         --  is not found is linear, which is probably the most common case.
+         --  Ideally we would have the loop only in debug builds.
 
          for J in reverse 1 .. Rebindings.Size loop
             declare
@@ -856,6 +863,9 @@ package body Langkit_Support.Lexical_Env is
                if Rebound_Env = R_Old_Env then
                   Popped_Index := J;
                   Return_Env := Get_Env (R.New_Env);
+
+                  --  Extracted rebinding *must* be the last one.
+                  pragma Assert (J = Rebindings.Size);
                   exit;
                end if;
             end;
