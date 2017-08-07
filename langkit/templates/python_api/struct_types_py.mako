@@ -77,13 +77,17 @@ class _BaseEntity(_BaseStruct):
 <%def name="decl(cls)">
 
 <%
-   type_name = cls.name.camel
-   base_classes = ['_BaseEntity'
-                   if cls.is_entity_type else
-                   '_BaseStruct']
+    type_name = cls.name.camel
+
+    if cls == T.entity:
+        base_cls = '_BaseEntity'
+    elif cls.is_entity_type:
+        base_cls = cls.el_type.base().entity.name.camel
+    else:
+        base_cls = '_BaseStruct'
 %>
 
-class ${type_name}(${', '.join(base_classes)}):
+class ${type_name}(${base_cls}):
     ${py_doc(cls, 4)}
 
     <% field_names = [f.name.lower for f in cls.get_fields()] %>
