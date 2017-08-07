@@ -672,13 +672,13 @@ package body Langkit_Support.Lexical_Env is
          return N;
       when others =>
          N := new Lexical_Env_Type'
-           (Parent                     => No_Env_Getter,
-            Node                       => No_Element,
-            Referenced_Envs            => <>,
-            Env                        => null,
-            Default_MD                 => Empty_Metadata,
-            Rebindings                 => null,
-            Ref_Count                  => 1);
+           (Parent          => No_Env_Getter,
+            Node            => No_Element,
+            Referenced_Envs => <>,
+            Env             => null,
+            Default_MD      => Empty_Metadata,
+            Rebindings      => null,
+            Ref_Count       => 1);
          for Env of Envs loop
             Reference (N, Env, Transitive => True);
          end loop;
@@ -710,13 +710,13 @@ package body Langkit_Support.Lexical_Env is
 
          N : constant Lexical_Env :=
            new Lexical_Env_Type'
-             (Parent                     => No_Env_Getter,
-              Node                       => No_Element,
-              Referenced_Envs            => <>,
-              Env                        => null,
-              Default_MD                 => Empty_Metadata,
-              Rebindings                 => Rebindings,
-              Ref_Count                  => 1);
+             (Parent          => No_Env_Getter,
+              Node            => No_Element,
+              Referenced_Envs => <>,
+              Env             => null,
+              Default_MD      => Empty_Metadata,
+              Rebindings      => Rebindings,
+              Ref_Count       => 1);
       begin
          Reference (N, Base_Env, Transitive => True);
          return N;
@@ -755,13 +755,13 @@ package body Langkit_Support.Lexical_Env is
 
       return N : constant Lexical_Env :=
         new Lexical_Env_Type'
-          (Parent                     => No_Env_Getter,
-           Node                       => No_Element,
-           Referenced_Envs            => <>,
-           Env                        => null,
-           Default_MD                 => Empty_Metadata,
-           Rebindings                 => Rebindings,
-           Ref_Count                  => 1)
+          (Parent          => No_Env_Getter,
+           Node            => No_Element,
+           Referenced_Envs => <>,
+           Env             => null,
+           Default_MD      => Empty_Metadata,
+           Rebindings      => Rebindings,
+           Ref_Count       => 1)
       do
          Inc_Ref (Rebindings);
          Reference (N, Base_Env, Transitive => True);
@@ -876,7 +876,7 @@ package body Langkit_Support.Lexical_Env is
                   Popped_Index := J;
                   Return_Env := Get_Env (R.New_Env);
 
-                  --  Extracted rebinding *must* be the last one.
+                  --  Extracted rebinding *must* be the last one
                   pragma Assert (J = Rebindings.Size);
                   exit;
                end if;
