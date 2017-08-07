@@ -288,7 +288,7 @@ inherited_annotation = inherited_property(lambda s: s.get_parent_annotations())
 
 class Annotations(object):
     def __init__(self, repr_name=None, generic_list_type=None,
-                 warn_on_node=None):
+                 warn_on_node=None, rebindable=False):
         """
         Constructor for a node's annotations.
 
@@ -297,14 +297,21 @@ class Annotations(object):
         :param str|None generic_list_type: The name of the generic list type.
         :param bool|None warn_on_node: Inherited attribute (False by default).
             Per-node switch to disable some warnings.
+        :param bool rebindable: Whether lexical environments that belong to
+            this kind of node can be rebound.
         """
         self.repr_name = repr_name
         self.generic_list_type = generic_list_type
         self._warn_on_node = warn_on_node
+        self._rebindable = rebindable
 
     @inherited_annotation
     def warn_on_node(self):
         return self._warn_on_node
+
+    @inherited_annotation
+    def rebindable(self):
+        return self._rebindable
 
     def process_annotations(self, node, is_root):
         self.node = node
