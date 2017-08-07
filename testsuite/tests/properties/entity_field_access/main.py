@@ -17,6 +17,7 @@ if u.diagnostics:
 
 u.populate_lexical_env()
 
-print('.test_main:', u.root.p_test_main)
-print('.property_on_entity:', u.root.p_property_on_entity)
+struct_repr = libfoolang._BaseStruct.__repr__
+print('.test_main:', struct_repr(u.root.p_test_main))
+print('.property_on_entity:', struct_repr(u.root.p_property_on_entity))
 print('main.py: Done.')

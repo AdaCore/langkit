@@ -1504,6 +1504,12 @@ _token_range_text = _import_func(
     [ctypes.POINTER(Token), ctypes.POINTER(Token), ctypes.POINTER(_text)],
     ctypes.c_int
 )
+% if T.entity._exposed or ctx.library_fields_all_public:
+_entity_image = _import_func(
+    "${capi.get_name('entity_image')}",
+    [ctypes.POINTER(Entity._c_type)], _text
+)
+% endif
 
 
 #

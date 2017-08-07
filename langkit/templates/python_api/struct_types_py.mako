@@ -72,6 +72,10 @@ class _BaseEntity(_BaseStruct):
                 if isinstance(unbound_public_method, property) else
                 bound_method)
 
+    def __repr__(self):
+        c_value = Entity._unwrap(self)
+        return _entity_image(ctypes.byref(c_value))._wrap()
+
 </%def>
 
 <%def name="decl(cls)">
