@@ -371,19 +371,12 @@ package Langkit_Support.Lexical_Env is
    --  is greater than 1, the result is dynamically allocated.
 
    function Rebind_Env
-     (Base_Env             : Lexical_Env;
-      To_Rebind, Rebind_To : Env_Getter) return Lexical_Env;
-   function Rebind_Env
-     (Base_Env             : Lexical_Env;
-      To_Rebind, Rebind_To : Lexical_Env) return Lexical_Env;
-   function Rebind_Env
       (Base_Env        : Lexical_Env;
        E_Info          : Entity_Info) return Lexical_Env;
    function Rebind_Env
       (Base_Env        : Lexical_Env;
        Rebindings      : Env_Rebindings) return Lexical_Env;
-   --  Returns a new env based on Base_Env, where To_Rebind is rebound to
-   --  Rebind_To.
+   --  Returns a new env based on Base_Env to include the given Rebindings
 
    function Image (Self : Env_Rebindings) return Text_Type;
 
