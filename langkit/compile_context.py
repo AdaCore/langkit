@@ -1620,7 +1620,7 @@ class CompileCtx(object):
             if t._exposed:
                 return
 
-            if t.is_struct_type and not t.is_ast_node:
+            if t.is_struct_type:
 
                 if t.is_entity_type and not t.el_type.is_root_node:
                     expose(t.el_type.base().entity, for_field, 'parent type',
