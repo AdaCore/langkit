@@ -2927,22 +2927,32 @@ package body ${ada_lib_name}.Analysis is
    -- Image --
    -----------
 
-   function Image (N : ${T.entity.name}) return String is
+   function Image (Ent : ${T.entity.name}) return Text_Type is
    begin
-      if N.El /= null then
+      if Ent.El /= null then
          declare
-            Node_Image : String := Image (N.El.Short_Image);
+            Node_Image : constant Text_Type := Ent.El.Short_Image;
          begin
             return
-            (if N.Info.Rebindings /= null
+            (if Ent.Info.Rebindings /= null
              then "<| "
              & Node_Image (Node_Image'First + 1 .. Node_Image'Last -1) & " "
-             & Image (AST_Envs.Image (N.Info.Rebindings)) & " |>"
+             & AST_Envs.Image (Ent.Info.Rebindings) & " |>"
              else Node_Image);
          end;
       else
          return "None";
       end if;
+   end Image;
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Ent : ${T.entity.name}) return String is
+      Result : constant Text_Type := Image (Ent);
+   begin
+      return Image (Result);
    end Image;
 
    ---------------

@@ -853,7 +853,8 @@ package ${ada_lib_name}.Analysis is
    -- Adalog instantiations --
    ---------------------------
 
-   function Image (N : ${T.entity.name}) return String;
+   function Image (Ent : ${T.entity.name}) return Text_Type;
+   function Image (Ent : ${T.entity.name}) return String;
    ${ada_doc('langkit.entity_image', 3)}
 
    package Eq_Node is new Langkit_Support.Adalog.Eq_Same
