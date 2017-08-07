@@ -196,8 +196,7 @@ def append_rebinding(self, rebindings, to_rebind, rebind_to):
 @auto_attr
 def rebind_env(self, env, rebindings):
     """
-    Returns a new environment based on `env` where `to_rebind` is rebound to
-    `rebind_to`.
+    Return a new environment based on `env` to include the given `rebindings`.
     """
     return CallExpr('Rebound_Env', 'Rebind_Env', lexical_env_type,
                     [construct(env, lexical_env_type),
