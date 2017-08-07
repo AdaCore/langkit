@@ -294,8 +294,9 @@ class Annotations(object):
 
         :param str|None repr_name: The name to be used in repr for this node
             type.
-
         :param str|None generic_list_type: The name of the generic list type.
+        :param bool|None warn_on_node: Inherited attribute (False by default).
+            Per-node switch to disable some warnings.
         """
         self.repr_name = repr_name
         self.generic_list_type = generic_list_type
