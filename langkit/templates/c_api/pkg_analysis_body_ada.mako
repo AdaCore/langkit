@@ -961,6 +961,21 @@ package body ${ada_lib_name}.Analysis.C is
          return 0;
    end;
 
+   function ${capi.get_name('entity_image')}
+     (Ent : ${entity_type}_Ptr) return ${text_type} is
+   begin
+      Clear_Last_Exception;
+      declare
+         Img : constant Text_Type := Image (Ent.all);
+      begin
+         return Wrap_Alloc (Img);
+      end;
+   exception
+      when Exc : others =>
+         Set_Last_Exception (Exc);
+         return (System.Null_Address, 0, 0);
+   end;
+
    ------------
    -- Unwrap --
    ------------

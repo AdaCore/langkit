@@ -139,6 +139,7 @@ def make_renderer(base_renderer=None):
             'analysis_unit_type':    analysis_unit_type.c_type(capi).name,
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             c_node_type(capi).name,
+            'entity_type':           T.entity.c_type(capi).name,
             'lexical_env_type':      lexical_env_type.c_type(capi).name,
             'logic_var_type':        logic_var_type.c_type(capi).name,
             'equation_type':         equation_type.c_type(capi).name,

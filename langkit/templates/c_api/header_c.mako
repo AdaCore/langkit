@@ -508,6 +508,10 @@ extern void
 ${capi.get_name('token_is_equivalent')}(${token_type} *left,
                                         ${token_type} *right);
 
+${c_doc('langkit.entity_image')}
+extern ${text_type}
+${capi.get_name("entity_image")}(${entity_type} ent);
+
 #ifdef __cplusplus
 }
 #endif
