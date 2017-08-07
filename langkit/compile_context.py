@@ -632,8 +632,9 @@ class CompileCtx(object):
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import (CompiledTypeMetaclass, StructType,
-                                            lexical_env_type)
+        from langkit.compiled_types import (
+            ASTNodeType, CompiledTypeMetaclass, StructType, lexical_env_type
+        )
         from langkit.dsl import _EnumMetaclass, _StructMetaclass
 
         # Make sure the language spec tagged at most one metadata struct.
@@ -678,11 +679,7 @@ class CompileCtx(object):
         # alphabetical order so that generated declarations are kept in a
         # relatively stable order. This is really useful for debugging
         # purposes.
-        keys = {
-            cls: cls.hierarchical_name()
-            for cls in self.astnode_types
-        }
-        self.astnode_types.sort(key=lambda cls: keys[cls])
+        self.astnode_types.sort(key=ASTNodeType.hierarchical_name)
 
         # Check that the environment hook is bound if the language spec uses
         # it.

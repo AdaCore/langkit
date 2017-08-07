@@ -1834,6 +1834,7 @@ class ASTNodeType(BaseStructType):
     def c_type(self, c_api_settings):
         return c_node_type(c_api_settings)
 
+    @memoized
     def hierarchical_name(self):
         """
         Return a name that contains all the base classes for this node type.
