@@ -138,7 +138,7 @@ private
       --  to Left.
 
       Eq_Data        : Equals_Data;
-      --  Data to check values equality.
+      --  Data to check values equality
    end record;
 
 end Langkit_Support.Adalog.Unify_One_Side;
