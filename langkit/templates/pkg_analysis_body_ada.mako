@@ -2332,6 +2332,36 @@ package body ${ada_lib_name}.Analysis is
    is (To_Text (To_String (Node.Unit.File_Name))
        & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node)))));
 
+   --------------------------
+   -- Raise_Property_Error --
+   --------------------------
+
+   procedure Raise_Property_Error (Message : String := "") is
+   begin
+      if Message'Length = 0 then
+         raise Property_Error;
+      else
+         raise Property_Error with Message;
+      end if;
+   end Raise_Property_Error;
+
+   -------------------
+   -- Is_Rebindable --
+   -------------------
+
+   function Is_Rebindable (Node : ${root_node_type_name}) return Boolean is
+   begin
+      <% rebindable_nodes = [n for n in ctx.astnode_types
+                             if n.annotations.rebindable] %>
+      % if not rebindable_nodes:
+         return True;
+      % else:
+         <% type_sum = ' | '.join("{}_Type'Class".format(n.name)
+                                  for n in rebindable_nodes) %>
+         return Node.all in ${type_sum};
+      % endif
+   end Is_Rebindable;
+
    -----------------
    -- Short_Image --
    -----------------

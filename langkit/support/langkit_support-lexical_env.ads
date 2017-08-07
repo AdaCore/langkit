@@ -30,6 +30,8 @@ generic
    No_Element     : Element_T;
    Empty_Metadata : Element_Metadata;
 
+   with procedure Raise_Property_Error (Message : String := "");
+
    with function Combine (L, R : Element_Metadata) return Element_Metadata;
 
    with function Can_Reach (El, From : Element_T) return Boolean is <>;
@@ -38,7 +40,12 @@ generic
    --  for lexical envs, as-in, an element declared after another is not yet
    --  visible.
 
+   with function Is_Rebindable (Element : Element_T) return Boolean is <>;
+   --  Return whether a lexical environment whose node is Element can be
+   --  rebound.
+
    with function Element_Image (El : Element_T) return Text_Type;
+
 package Langkit_Support.Lexical_Env is
 
    type Env_Rebindings_Type (<>) is private;

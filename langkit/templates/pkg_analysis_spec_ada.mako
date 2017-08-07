@@ -357,13 +357,18 @@ package ${ada_lib_name}.Analysis is
    --  of Node. Used to create a human-readable representation for env.
    --  rebindings.
 
+   procedure Raise_Property_Error (Message : String := "");
+
+   function Is_Rebindable (Node : ${root_node_type_name}) return Boolean;
+
    package AST_Envs is new Langkit_Support.Lexical_Env
-     (Element_T        => ${root_node_type_name},
-      Element_Metadata => ${T.env_md.name},
-      No_Element       => null,
-      Empty_Metadata   => No_Metadata,
-      Combine          => Combine,
-      Element_Image    => Node_File_And_Sloc_Image);
+     (Element_T            => ${root_node_type_name},
+      Element_Metadata     => ${T.env_md.name},
+      No_Element           => null,
+      Empty_Metadata       => No_Metadata,
+      Raise_Property_Error => Raise_Property_Error,
+      Combine              => Combine,
+      Element_Image        => Node_File_And_Sloc_Image);
 
    --  The following subtypes are introduced to ease code generation, so we
    --  don't have to deal with the AST_Envs suffix.

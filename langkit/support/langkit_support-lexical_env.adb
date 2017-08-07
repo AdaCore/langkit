@@ -287,6 +287,12 @@ package body Langkit_Support.Lexical_Env is
       Rebind_To            : Lexical_Env) return Env_Rebindings
    is
    begin
+      if To_Rebind.Node /= No_Element
+         and then not Is_Rebindable (To_Rebind.Node)
+      then
+         Raise_Property_Error ("Illegal lexical environment rebinding");
+      end if;
+
       return Append
         (Self, Env_Rebinding'(Simple_Env_Getter (To_Rebind),
                               Simple_Env_Getter (Rebind_To)));
