@@ -854,6 +854,7 @@ package ${ada_lib_name}.Analysis is
    ---------------------------
 
    function Image (N : ${T.entity.name}) return String;
+   ${ada_doc('langkit.entity_image', 3)}
 
    package Eq_Node is new Langkit_Support.Adalog.Eq_Same
      (LR_Type       => ${T.entity.name},

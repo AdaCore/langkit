@@ -403,6 +403,9 @@ base_langkit_docs = {
     'langkit.node_short_image': """
         Return a representation of NODE as a string.
     """,
+    'langkit.entity_image': """
+        Return a representation of E as a string.
+    """,
 
     'langkit.token_text': """
         Get the text of the given token.
