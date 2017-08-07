@@ -2101,7 +2101,15 @@ class Var(AbstractVariable):
 
     def __init__(self, expr):
         super(Var, self).__init__(names.Name("Block_Var"), create_local=True)
-        Block.get().add_var(self, expr)
+
+        # For debug purposes, preserve a link to the block that contains this
+        # variable. We can't store the block itself as an attribute or we'll
+        # get an infinite recursion in AbstractExpression.explore because of
+        # the reference loop between this variable and the block.
+        block = Block.get()
+        self.get_block = lambda: block
+
+        block.add_var(self, expr)
 
         # TODO: the following is a hack, that will likely only disappear when
         # we'll move the DSL from Python to a true DSL.
