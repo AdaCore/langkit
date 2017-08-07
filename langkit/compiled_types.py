@@ -1927,6 +1927,9 @@ class ASTNodeType(BaseStructType):
         if not self.is_root_node:
             name += self.name
 
+            # Make sure entity types for parent nodes are also created
+            self.base().entity
+
         result = StructType(
             name, None, None,
             [('el', BuiltinField(self, doc='The stored AST node')),

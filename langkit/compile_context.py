@@ -1055,10 +1055,15 @@ class CompileCtx(object):
         def dependencies(struct_type):
             """
             Compute the set of dependencies for struct_type, namely the set of
-            struct types that are used by its fields.
+            struct types that are used by its fields. For entities, this also
+            includes the entity type of the parent node.
             """
-            return set(f.type for f in struct_type._fields.values()
-                       if f.type.is_struct_type)
+            result = set(f.type for f in struct_type._fields.values()
+                         if f.type.is_struct_type)
+            if (struct_type.is_entity_type and not
+                    struct_type.el_type.is_root_node):
+                result.add(struct_type.el_type.base().entity)
+            return result
 
         struct_types = CompiledTypeMetaclass.struct_types
 
@@ -1619,6 +1624,11 @@ class CompileCtx(object):
                 return
 
             if t.is_struct_type and not t.is_ast_node:
+
+                if t.is_entity_type and not t.el_type.is_root_node:
+                    expose(t.el_type.base().entity, for_field, 'parent type',
+                           traceback + ['parent entity type'])
+
                 for f in t.get_abstract_fields(include_inherited=False):
                     expose(f.type, f, 'type', traceback + [f.qualname])
 
