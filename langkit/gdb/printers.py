@@ -185,10 +185,12 @@ class ASTNodePrinter(BasePrinter):
         return tagged_field(self.value, 'parent')
 
     def to_string(self):
+        if not self.value:
+            return 'null'
+
         loc = ('synthetic from {}'.format(self.parent)
                if self.synthetic else self.sloc())
-        return ('<{} {}>'.format(self.kind, loc)
-                if self.value else 'null')
+        return '<{} {}>'.format(self.kind, loc)
 
 
 class LexicalEnvPrinter(BasePrinter):
