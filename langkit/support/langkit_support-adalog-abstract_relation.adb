@@ -28,7 +28,9 @@ package body Langkit_Support.Adalog.Abstract_Relation is
             Put_Line ("Press enter to continue ..");
             declare
                Dummy : String := Ada.Text_IO.Get_Line;
-            begin null; end;
+            begin
+               null;
+            end;
          end if;
       end Wait;
 
