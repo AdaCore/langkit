@@ -400,6 +400,9 @@ package Langkit_Support.Lexical_Env is
    --  set it to null. Also destroy it if the count drops to 0. Do nothing
    --  otherwise.
 
+   function Shed_Bindings
+     (E : Entity_Info; Env : Lexical_Env) return Entity_Info;
+
 private
 
    type Env_Rebindings_Type (Size : Natural) is record
