@@ -14,8 +14,8 @@ package body Langkit_Support.Lexical_Env is
      (Internal_Map_Element, Positive, Internal_Map_Element_Array);
 
    function Extract_Rebinding
-     (Rebindings        : in out Env_Rebindings;
-      Rebound_Env       : Lexical_Env) return Lexical_Env;
+     (Rebindings  : in out Env_Rebindings;
+      Rebound_Env : Lexical_Env) return Lexical_Env;
    --  Look for a pair in Rebindings whose Old_Env field is "Rebound_Env".
    --
    --  If there is one, return the env it is associated to, and put the
@@ -612,10 +612,10 @@ package body Langkit_Support.Lexical_Env is
 
          Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
 
-         Own_Elts   : constant Entity_Array :=
+         Own_Elts : constant Entity_Array :=
             Get_Own_Elements (Own_Lookup_Env, Current_Rebindings);
 
-         Refd_Elts  : constant Entity_Array :=
+         Refd_Elts : constant Entity_Array :=
            Get_Refd_Elements
              (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs));
 
@@ -653,13 +653,13 @@ package body Langkit_Support.Lexical_Env is
    begin
       Inc_Ref (Self.Rebindings);
       return new Lexical_Env_Type'
-        (Parent                     => No_Env_Getter,
-         Node                       => Self.Node,
-         Referenced_Envs            => Self.Referenced_Envs.Copy,
-         Env                        => Self.Env,
-         Default_MD                 => Self.Default_MD,
-         Rebindings                 => Self.Rebindings,
-         Ref_Count                  => 1);
+        (Parent          => No_Env_Getter,
+         Node            => Self.Node,
+         Referenced_Envs => Self.Referenced_Envs.Copy,
+         Env             => Self.Env,
+         Default_MD      => Self.Default_MD,
+         Rebindings      => Self.Rebindings,
+         Ref_Count       => 1);
    end Orphan;
 
    -----------
@@ -803,8 +803,8 @@ package body Langkit_Support.Lexical_Env is
    -----------------------
 
    function Extract_Rebinding
-     (Rebindings        : in out Env_Rebindings;
-      Rebound_Env       : Lexical_Env) return Lexical_Env
+     (Rebindings  : in out Env_Rebindings;
+      Rebound_Env : Lexical_Env) return Lexical_Env
    is
       Popped_Index   : Natural        := 0;
       Return_Env     : Lexical_Env    := Rebound_Env;
