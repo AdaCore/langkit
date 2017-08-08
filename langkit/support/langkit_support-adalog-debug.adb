@@ -21,7 +21,8 @@ package body Langkit_Support.Adalog.Debug is
 
    function Debug return Boolean is
    begin
-      return Debug_Enabled and then Runtime_Debug_State in Trace | Step;
+      return Debug_Enabled
+        and then Runtime_Debug_State in Trace | Step | Step_At_First_Unsat;
    end Debug;
 
    ---------------------

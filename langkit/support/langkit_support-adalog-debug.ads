@@ -8,7 +8,7 @@
 --    a debug mode at runtime via Set_Debug_State.
 
 package Langkit_Support.Adalog.Debug is
-   type Debug_State_Type is (None, Trace, Step);
+   type Debug_State_Type is (None, Trace, Step, Step_At_First_Unsat);
    --  If Trace, will trace the execution. If step, will trace and stop at
    --  every step of the solve so that you can trace the solve operation
    --  step-by-step.

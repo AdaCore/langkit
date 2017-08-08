@@ -45,6 +45,10 @@ package body Langkit_Support.Adalog.Abstract_Relation is
       end if;
 
       return Res : constant Solving_State := Self.Solve_Impl do
+         if Debug_State = Step_At_First_Unsat and then Res = Unsatisfied then
+            Set_Debug_State (Step);
+         end if;
+
          Trace (Res'Image);
          Wait;
       end return;
