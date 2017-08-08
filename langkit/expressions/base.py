@@ -2956,7 +2956,7 @@ class PropertyDef(AbstractNodeData):
         for invariant_p, msg in [
             (not self.abstract,
              'A memoized property cannot be abstract: memoization is not an'
-             ' inheritted behavior'),
+             ' inherited behavior'),
             (not self._dynamic_vars,
              'A memoized property cannot have dynamically bound variables'),
             (not self.uses_entity_info,
