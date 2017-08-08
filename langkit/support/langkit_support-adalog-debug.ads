@@ -17,8 +17,8 @@ package Langkit_Support.Adalog.Debug is
    --  - If Step_At_First_Unsat, will trace the execution, and set the mode to
    --    Step as soon as *any* relation solving returns Unsatisfied.
    --
-   --  WARNING: Trace and step mode are not thread safe. It would not make
-   --  any sense to try to use them with solving happning in several threads at
+   --  WARNING: Trace and step mode are not thread safe. It would not make any
+   --  sense to try to use them with solving happening in several threads at
    --  the same time.
 
    Debug_Enabled : constant Boolean := True;
