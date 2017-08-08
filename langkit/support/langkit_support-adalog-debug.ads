@@ -9,9 +9,14 @@
 
 package Langkit_Support.Adalog.Debug is
    type Debug_State_Type is (None, Trace, Step, Step_At_First_Unsat);
-   --  If Trace, will trace the execution. If step, will trace and stop at
-   --  every step of the solve so that you can trace the solve operation
-   --  step-by-step.
+   --  Set the debug state for Adalog:
+   --
+   --  - If Trace, will trace the execution.
+   --  - If Step, will trace and stop at every step of the solve so that you
+   --    can trace the solve operation step-by-step.
+   --  - If Step_At_First_Unsat, will trace the execution, and set the mode to
+   --    Step as soon as *any* relation solving returns Unsatisfied.
+   --
    --  WARNING: Trace and step mode are not thread safe. It would not make
    --  any sense to try to use them with solving happning in several threads at
    --  the same time.
