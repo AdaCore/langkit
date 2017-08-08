@@ -106,6 +106,15 @@ def call_env_hook(env_expr):
     return CallEnvHook(env_expr)
 
 
+def do(expr):
+    """
+    Evaluate given expression for its side effects, discarding its result.
+
+    :rtype: CallEnvHook
+    """
+    return Do(expr)
+
+
 class EnvSpec(object):
     """
     Class defining a lexical environment specification for an ASTNode subclass.
@@ -465,4 +474,11 @@ class CallEnvHook(ExprHolderAction):
         # list.
         check_source_language(
             "set_initial_env must be first in the action list"
+        )
+
+
+class Do(ExprHolderAction):
+    def create_internal_properties(self, env_spec):
+        self.do_property = env_spec.create_internal_property(
+            'Env_Do', self.env_expr, None
         )

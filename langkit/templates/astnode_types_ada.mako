@@ -563,6 +563,18 @@
       end;
    </%def>
 
+   <%def name="emit_do(do_action)">
+      declare
+         Dummy : ${do_action.do_property.type.name};
+      begin
+         Dummy := ${call_prop(do_action.do_property)};
+         % if do_action.do_property.type.is_refcounted:
+         Dec_Ref (Dummy);
+         % endif
+      end;
+   </%def>
+
+
    <%def name="emit_env_action(env_action)">
 
    ## This function is an explicit dispatch table on action's class, calling
@@ -572,7 +584,8 @@
 
    ${{"AddEnv":     emit_add_env,
       "AddToEnv":   emit_add_to_env,
-      "RefEnvs":    emit_ref_env}[env_action.__class__.__name__](env_action)}
+      "RefEnvs":    emit_ref_env,
+      "Do":         emit_do}[env_action.__class__.__name__](env_action)}
    </%def>
 
    <%
