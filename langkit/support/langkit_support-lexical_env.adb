@@ -25,6 +25,13 @@ package body Langkit_Support.Lexical_Env is
    --  If Rebindings is bound to a new set of rebindings upon return, the
    --  ownership share of the old rebinding set will have been forfeited.
 
+   function Shed_Bindings
+     (From_Env   : Lexical_Env;
+      Rebindings : Env_Rebindings) return Env_Rebindings
+     with Inline;
+   --  Shed env rebindings that are not in the parent chain for the env
+   --  From_Env. Returns a new rebindings with a new ownership share.
+
    function Decorate
      (Elts       : Internal_Map_Element_Array;
       MD         : Element_Metadata;
@@ -592,12 +599,15 @@ package body Langkit_Support.Lexical_Env is
       function Can_Reach_F (El : Entity) return Boolean is
         (Can_Reach (El.El, From));
 
-      Own_Lookup_Env : Lexical_Env;
-
+      Own_Lookup_Env    : Lexical_Env;
+      Parent_Env        :  Lexical_Env;
+      Parent_Rebindings : Env_Rebindings;
    begin
       if Self = null then
          return Entity_Arrays.Empty_Array;
       end if;
+
+      Parent_Env := Get_Env (Self.Parent);
 
       Current_Rebindings := Combine (Self.Rebindings, Rebindings);
 
@@ -607,10 +617,14 @@ package body Langkit_Support.Lexical_Env is
 
       Own_Lookup_Env := Extract_Rebinding (Current_Rebindings, Self);
 
+      if Own_Lookup_Env /= Self then
+         Parent_Rebindings := Shed_Bindings (Parent_Env, Current_Rebindings);
+      else
+         Parent_Rebindings := Current_Rebindings;
+      end if;
+
       declare
          use type Entity_Array;
-
-         Parent_Env : constant Lexical_Env := Get_Env (Self.Parent);
 
          Own_Elts : constant Entity_Array :=
             Get_Own_Elements (Own_Lookup_Env, Current_Rebindings);
@@ -621,7 +635,7 @@ package body Langkit_Support.Lexical_Env is
 
          Parent_Elts : constant Entity_Array :=
            (if Recursive
-            then Get (Parent_Env, Key, From, Rebindings => Current_Rebindings)
+            then Get (Parent_Env, Key, From, Rebindings => Parent_Rebindings)
             else Entity_Arrays.Empty_Array);
 
          Ret : Entity_Array :=
@@ -636,6 +650,10 @@ package body Langkit_Support.Lexical_Env is
             for I in Last_That_Can_Reach + 1 .. Ret'Last loop
                Dec_Ref (Ret (I));
             end loop;
+         end if;
+
+         if Parent_Rebindings /= Current_Rebindings then
+            Dec_Ref (Parent_Rebindings);
          end if;
 
          Dec_Ref (Own_Lookup_Env);
@@ -857,6 +875,59 @@ package body Langkit_Support.Lexical_Env is
 
       return Return_Env;
    end Extract_Rebinding;
+
+   -------------------
+   -- Shed_Bindings --
+   -------------------
+
+   function Shed_Bindings
+     (From_Env   : Lexical_Env;
+      Rebindings : Env_Rebindings) return Env_Rebindings
+   is
+      function Get_First_Rebindable_Env (L : Lexical_Env) return Lexical_Env
+      is
+        (if L = null
+         or else (L.Node /= No_Element and then Is_Rebindable (L.Node))
+         then L
+         else Get_First_Rebindable_Env (Get_Env (L.Parent)));
+
+      First_Rebindable_Parent : Lexical_Env;
+      Current_Last_Binding : Natural;
+   begin
+      --  If there is no bindings, nothing to do here
+      if Rebindings = null then
+         return null;
+      end if;
+
+      Current_Last_Binding := Rebindings.Size;
+
+      --  Try to find a rebindable node in the parent chain
+      First_Rebindable_Parent := Get_First_Rebindable_Env (From_Env);
+
+      --  If there is no rebindable parent anywhere, it means we cannot have
+      --  rebindings. In that case, shed them all, eg. return null rebindings.
+      if First_Rebindable_Parent = null then
+         return null;
+      else
+         --  If we find a rebindable parent, then we will shed every rebindings
+         --  between the top of the rebinding stack, and the corresponding
+         --  rebinding.
+         while
+           Current_Last_Binding >= 1
+           and then
+           Get_Env (Rebindings.Bindings (Current_Last_Binding).Old_Env)
+             /= First_Rebindable_Parent
+         loop
+            Current_Last_Binding := Current_Last_Binding - 1;
+         end loop;
+
+         if Current_Last_Binding /= 0 then
+            return Create (Rebindings.Bindings (1 .. Current_Last_Binding));
+         else
+            return null;
+         end if;
+      end if;
+   end Shed_Bindings;
 
    --------------
    -- Decorate --
