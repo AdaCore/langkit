@@ -551,7 +551,10 @@ package body Langkit_Support.Lexical_Env is
                Result : constant Entity_Array :=
                  Get (Env, Key, From,
                       Recursive  => Recursive and Self.Is_Transitive,
-                      Rebindings => Current_Rebindings);
+                      Rebindings =>
+                        (if Self.Is_Transitive
+                         then Current_Rebindings
+                         else Shed_Bindings (Env, Current_Rebindings)));
             begin
                Dec_Ref (Env);
                return Result;
