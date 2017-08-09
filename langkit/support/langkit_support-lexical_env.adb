@@ -527,7 +527,8 @@ package body Langkit_Support.Lexical_Env is
       function Get_Refd_Elements
         (Self : Referenced_Env) return Entity_Array
       is
-         Env : Lexical_Env;
+         Env        : Lexical_Env;
+         Rebindings : Env_Rebindings;
       begin
          if not Recursive and then not Self.Is_Transitive then
             return Entity_Arrays.Empty_Array;
@@ -547,15 +548,20 @@ package body Langkit_Support.Lexical_Env is
             --  we always Dec_Ref the returned environment so we don't leak in
             --  case of error.
 
+            if Self.Is_Transitive then
+               Rebindings := Current_Rebindings;
+               Inc_Ref (Rebindings);
+            else
+               Rebindings := Shed_Bindings (Env, Current_Rebindings);
+            end if;
+
             declare
                Result : constant Entity_Array :=
                  Get (Env, Key, From,
                       Recursive  => Recursive and Self.Is_Transitive,
-                      Rebindings =>
-                        (if Self.Is_Transitive
-                         then Current_Rebindings
-                         else Shed_Bindings (Env, Current_Rebindings)));
+                      Rebindings => Rebindings);
             begin
+               Dec_Ref (Rebindings);
                Dec_Ref (Env);
                return Result;
             end;
