@@ -82,7 +82,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
          Self.Cleanup;
          Unchecked_Free (Self);
       end if;
-
+      Self := null;
    end Dec_Ref;
 
    --------------------
