@@ -890,12 +890,12 @@ package body Langkit_Support.Lexical_Env is
       function Get_First_Rebindable_Env (L : Lexical_Env) return Lexical_Env
       is
         (if L = null
-         or else (L.Node /= No_Element and then Is_Rebindable (L.Node))
+            or else (L.Node /= No_Element and then Is_Rebindable (L.Node))
          then L
          else Get_First_Rebindable_Env (Get_Env (L.Parent)));
 
       First_Rebindable_Parent : Lexical_Env;
-      Current_Last_Binding : Natural;
+      Current_Last_Binding    : Natural;
    begin
       --  If there is no bindings, nothing to do here
       if Rebindings = null then
