@@ -2980,9 +2980,15 @@ class PropertyDef(AbstractNodeData):
                 self.prop_decl = render('properties/decl_ada')
                 self.prop_def = render('properties/def_ada')
 
-                self.untyped_wrapper_decl = render(
-                    'properties/untyped_wrapper_decl_ada'
-                ) if self.requires_untyped_wrapper else ''
+                if self.requires_untyped_wrapper:
+                    self.untyped_wrapper_decl = render(
+                        'properties/untyped_wrapper_decl_ada'
+                    )
+                    self.untyped_wrapper_def = render(
+                        'properties/untyped_wrapper_def_ada'
+                    )
+                else:
+                    self.untyped_wrapper_decl = self.untyped_wrapper_def = ''
 
     @property
     def doc(self):

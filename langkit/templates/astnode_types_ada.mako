@@ -725,5 +725,12 @@
    ${prop.prop_def}
    % endfor
 
+   ## Generate bodies of untyped wrappers
+   % for prop in cls.get_properties(include_inherited=False, \
+                                    predicate=lambda f: \
+                                              f.requires_untyped_wrapper):
+   ${prop.untyped_wrapper_def}
+   % endfor
+
    ${exts.include_extension(ext)}
 </%def>

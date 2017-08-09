@@ -2931,6 +2931,14 @@ package body ${ada_lib_name}.Analysis is
    ${prop.prop_def}
    % endfor
 
+   ## Generate bodies of untyped wrappers
+   % for prop in T.root_node.get_properties( \
+      include_inherited=False, \
+      predicate=lambda f: f.requires_untyped_wrapper \
+   ):
+   ${prop.untyped_wrapper_def}
+   % endfor
+
    --------------------------------
    -- Assign_Names_To_Logic_Vars --
    --------------------------------
