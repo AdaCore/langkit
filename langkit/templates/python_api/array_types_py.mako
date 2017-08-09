@@ -80,7 +80,8 @@ class ${type_name}(_BaseArray):
 
     @staticmethod
     def _wrap_item(item):
-        return ${pyapi.wrap_value('item', element_type, inc_ref=True)}
+        return ${(pyapi.wrap_value('item', element_type, from_field_access=True,
+                                   inc_ref=True))}
 
     _c_element_type = ${c_element_type}
 

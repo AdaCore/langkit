@@ -30,9 +30,9 @@ class PythonAPISettings(AbstractAPISettings):
         :param str value: Expression yielding a low-level value.
         :param ct.CompiledType type: Type corresponding to the "value"
             expression.
-        :param bool from_field_access: True if "value" is a record field
-            access (False by default). This is a special case because of the
-            way ctypes works.
+        :param bool from_field_access: True if "value" is a record field or
+            array item access (False by default). This is a special case
+            because of the way ctypes works.
         :param bool inc_ref: If True, this conversion also creates a new
             ownership share for "value".
         :rtype: str
