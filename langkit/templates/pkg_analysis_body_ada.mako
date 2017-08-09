@@ -1788,7 +1788,7 @@ package body ${ada_lib_name}.Analysis is
    -----------------
 
    function First_Token (TDH : Token_Data_Handler_Access) return Token_Type is
-      use Token_Vectors, Trivia_Vectors, Integer_Vectors;
+      use Token_Vectors, Trivia_Vectors, Token_Data_Handlers.Integer_Vectors;
    begin
       if Length (TDH.Tokens_To_Trivias) = 0
          or else (First_Element (TDH.Tokens_To_Trivias)
@@ -1812,7 +1812,7 @@ package body ${ada_lib_name}.Analysis is
    ----------------
 
    function Last_Token (TDH : Token_Data_Handler_Access) return Token_Type is
-      use Token_Vectors, Trivia_Vectors, Integer_Vectors;
+      use Token_Vectors, Trivia_Vectors, Token_Data_Handlers.Integer_Vectors;
    begin
       if Length (TDH.Tokens_To_Trivias) = 0
            or else
@@ -1860,7 +1860,8 @@ package body ${ada_lib_name}.Analysis is
       end if;
 
       declare
-         use Token_Vectors, Trivia_Vectors, Integer_Vectors;
+         use Token_Vectors, Trivia_Vectors,
+             Token_Data_Handlers.Integer_Vectors;
          TDH : Token_Data_Handler renames Token.TDH.all;
 
          function Next_Token return Token_Type is
@@ -1923,7 +1924,8 @@ package body ${ada_lib_name}.Analysis is
       end if;
 
       declare
-         use Token_Vectors, Trivia_Vectors, Integer_Vectors;
+         use Token_Vectors, Trivia_Vectors,
+             Token_Data_Handlers.Integer_Vectors;
          TDH : Token_Data_Handler renames Token.TDH.all;
       begin
          if Token.Trivia = No_Token_Index then
