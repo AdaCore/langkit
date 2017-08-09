@@ -932,6 +932,17 @@ package body Langkit_Support.Lexical_Env is
       end if;
    end Shed_Bindings;
 
+   -------------------
+   -- Shed_Bindings --
+   -------------------
+
+   function Shed_Bindings
+     (E : Entity_Info; Env : Lexical_Env) return Entity_Info is
+   begin
+      return (MD         => E.MD,
+              Rebindings => Shed_Bindings (Env, E.Rebindings));
+   end Shed_Bindings;
+
    --------------
    -- Decorate --
    --------------
@@ -1001,12 +1012,5 @@ package body Langkit_Support.Lexical_Env is
          return To_Wide_Wide_String (Buffer);
       end;
    end Image;
-
-   function Shed_Bindings
-     (E : Entity_Info; Env : Lexical_Env) return Entity_Info is
-   begin
-      return (MD => E.MD,
-              Rebindings => Shed_Bindings (Env, E.Rebindings));
-   end Shed_Bindings;
 
 end Langkit_Support.Lexical_Env;
