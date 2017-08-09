@@ -42,7 +42,11 @@ class _BaseArray(object):
         # the the array must live at least as long as the accessed element. We
         # cannot guarantee that, so we must copy the element so that it is
         # independent of the array it comes from.
-        item = self._c_element_type.from_buffer_copy(self._items[key])
+        item = self._items[key]
+        try:
+            item = self._c_element_type.from_buffer_copy(item)
+        except TypeError:
+            pass
         return self._wrap_item(item)
 
     @classmethod
