@@ -1,0 +1,25 @@
+main.py: Running...
+== cond0 ==
+  .cond0(()) = 1
+== cond1 ==
+  .cond1((True,)) = 1
+  .cond1((False,)) = 2
+== cond2 ==
+  .cond2((True, True)) = 1
+  .cond2((True, False)) = 1
+  .cond2((False, True)) = 2
+  .cond2((False, False)) = 3
+== cond3 ==
+  .cond3((True, True, True)) = 1
+  .cond3((True, True, False)) = 1
+  .cond3((True, False, True)) = 1
+  .cond3((True, False, False)) = 1
+  .cond3((False, True, True)) = 2
+  .cond3((False, True, False)) = 2
+  .cond3((False, False, True)) = 3
+  .cond3((False, False, False)) = 3
+== cond_node ==
+.cond_node(False) = None
+.cond_node(True) = <Example 1:1-1:8>
+main.py: Done.
+Done
