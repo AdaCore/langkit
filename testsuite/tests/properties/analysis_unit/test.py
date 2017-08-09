@@ -11,7 +11,7 @@ from langkit.dsl import AnalysisUnitType, ASTNode, Field, LongType, T, abstract
 from langkit.expressions import (
     AbstractProperty, ExternalProperty, Property, Self, langkit_property
 )
-from langkit.parsers import Grammar, Or, Row, Tok
+from langkit.parsers import Grammar, Or, Tok
 
 from lexer_example import Token
 from utils import build_and_run
@@ -56,12 +56,12 @@ class Plus(Expression):
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=Or(
-        Row(foo_grammar.atom, '+', foo_grammar.main_rule) ^ Plus,
+        Plus(foo_grammar.atom, '+', foo_grammar.main_rule),
         foo_grammar.atom
     ),
     atom=Or(
-        Row(Tok(Token.Number, keep=True)) ^ Literal,
-        Row(Tok(Token.Identifier, keep=True)) ^ Name,
+        Literal(Tok(Token.Number, keep=True)),
+        Name(Tok(Token.Identifier, keep=True)),
     ),
 )
 build_and_run(foo_grammar, 'main.py')
