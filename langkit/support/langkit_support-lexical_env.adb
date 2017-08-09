@@ -908,7 +908,7 @@ package body Langkit_Support.Lexical_Env is
       First_Rebindable_Parent := Get_First_Rebindable_Env (From_Env);
 
       --  If there is no rebindable parent anywhere, it means we cannot have
-      --  rebindings. In that case, shed them all, eg. return null rebindings.
+      --  rebindings. In that case, shed them all, e.g. return null rebindings.
       if First_Rebindable_Parent = null then
          return null;
       else
