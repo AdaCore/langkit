@@ -500,3 +500,68 @@ class Then(AbstractExpression):
     def __repr__(self):
         return "<Then {}: {} {}>".format(self.expr, self.var_expr,
                                          self.then_expr)
+
+
+class Cond(AbstractExpression):
+    """
+    Abstract expression for chains of conditions.
+    """
+
+    def __init__(self, *args):
+        """
+        :param list[AbstractExpression] args: List of operands. They must have
+            the following organization::
+
+                arg 1   (boolean): arg 2 (T)
+                arg 3   (boolean): arg 4 (T)
+                ...
+                arg N-1 (boolean): arg N (T)
+                -                  arg N+1 (T)
+
+            This has the same semantics as::
+
+                if arg 1      then arg 2
+                elsif arg 3   then arg 4
+                ...
+                elsif arg N-1 then arg N
+                else               arg N+1
+        """
+        super(Cond, self).__init__()
+        self.args = args
+
+    def construct(self):
+        from langkit.expressions import Cast
+
+        check_source_language(len(self.args) > 0, 'Missing Cond arguments')
+        check_source_language(len(self.args) % 2 == 1,
+                              'Missing last Cond argument')
+
+        # Lower each pair of condition/expression in resolved expression
+        pairs = []
+        for i in range(len(self.args) // 2):
+            cond = construct(self.args[2 * i], bool_type)
+            expr = construct(self.args[2 * i + 1])
+            pairs.append((cond, expr))
+        else_expr = construct(self.args[-1])
+
+        # Unify types for all return expression
+        rtype = else_expr.type
+        for _, expr in pairs:
+            rtype = rtype.unify(
+                expr.type,
+                'Mismatching types in Cond expression'
+            )
+
+        # Since we have subtypes in the DSL but incompatible types in Ada (for
+        # instance for AST nodes, or entities), we sometimes need to convert
+        # sub-expressions to the returned type.
+        def cast_if_needed(expr):
+            return expr if expr.type == rtype else Cast.Expr(expr, rtype)
+
+        # Build this Cond as a big resolved expression
+        result = cast_if_needed(else_expr)
+        for cond, expr in reversed(pairs):
+            result = If.Expr(cond, cast_if_needed(expr), result, rtype)
+        result.abstract_expr = self
+
+        return result
