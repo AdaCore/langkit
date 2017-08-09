@@ -401,7 +401,9 @@ package Langkit_Support.Lexical_Env is
    --  otherwise.
 
    function Shed_Bindings
-     (E : Entity_Info; Env : Lexical_Env) return Entity_Info;
+     (E_Info : Entity_Info; Env : Lexical_Env) return Entity_Info;
+   --  Return a new entity from E_Info, shedding env rebindings that are not in
+   --  the parent chain for the env From_Env. Return a new ownership share.
 
 private
 

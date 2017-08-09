@@ -937,10 +937,10 @@ package body Langkit_Support.Lexical_Env is
    -------------------
 
    function Shed_Bindings
-     (E : Entity_Info; Env : Lexical_Env) return Entity_Info is
+     (E_Info : Entity_Info; Env : Lexical_Env) return Entity_Info is
    begin
-      return (MD         => E.MD,
-              Rebindings => Shed_Bindings (Env, E.Rebindings));
+      return (MD         => E_Info.MD,
+              Rebindings => Shed_Bindings (Env, E_Info.Rebindings));
    end Shed_Bindings;
 
    --------------
