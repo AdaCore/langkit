@@ -624,6 +624,7 @@ package body Langkit_Support.Lexical_Env is
          Parent_Rebindings := Shed_Bindings (Parent_Env, Current_Rebindings);
       else
          Parent_Rebindings := Current_Rebindings;
+         Inc_Ref (Parent_Rebindings);
       end if;
 
       declare
@@ -655,10 +656,7 @@ package body Langkit_Support.Lexical_Env is
             end loop;
          end if;
 
-         if Parent_Rebindings /= Current_Rebindings then
-            Dec_Ref (Parent_Rebindings);
-         end if;
-
+         Dec_Ref (Parent_Rebindings);
          Dec_Ref (Own_Lookup_Env);
          Dec_Ref (Current_Rebindings);
 
