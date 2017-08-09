@@ -140,7 +140,7 @@ class PythonAPISettings(AbstractAPISettings):
 
         return dispatch_on_type(type, [
             (ct.bool_type, lambda _: ctype_type('c_uint8')),
-            (ct.long_type, lambda _: ctype_type('c_long')),
+            (ct.long_type, lambda _: ctype_type('c_int')),
             (ct.lexical_env_type, lambda _: 'LexicalEnv._c_type'),
             (ct.logic_var_type, lambda _: 'LogicVar._c_type'),
             (ct.equation_type, lambda _: 'Equation._c_type'),
