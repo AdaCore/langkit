@@ -1183,6 +1183,13 @@ class VariableExpr(ResolvedExpression):
         """
         return self.abstract_var and self.abstract_var is Self
 
+    @property
+    def subexprs(self):
+        result = {'name': self.name.lower}
+        if self.source_name:
+            result['source-name'] = self.source_name.lower
+        return result
+
 
 class UnreachableExpr(ResolvedExpression):
     """
