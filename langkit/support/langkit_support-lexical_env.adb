@@ -30,7 +30,7 @@ package body Langkit_Support.Lexical_Env is
       Rebindings : Env_Rebindings) return Env_Rebindings
      with Inline;
    --  Shed env rebindings that are not in the parent chain for the env
-   --  From_Env. Returns a new rebindings with a new ownership share.
+   --  From_Env. Return a new rebindings with a new ownership share.
 
    function Decorate
      (Elts       : Internal_Map_Element_Array;
