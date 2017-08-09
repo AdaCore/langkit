@@ -135,14 +135,22 @@ class CollectionExpression(AbstractExpression):
              'for arguments')
         ])
 
+        if len(argspec.args) == 2:
+            self.requires_index = True
+            index_var_pos = 0
+            item_var_pos = 1
+        else:
+            self.requires_index = False
+            index_var_pos = None
+            item_var_pos = 0
+
         # Get the name of the loop variable from the DSL. But don't when we
         # have a "default" one, such as for using the ".filter" combinator. In
         # this case, it's up to ".filter"'s special implementation to get the
         # name from the filter function.
         source_name = (None if self.expr_fn == collection_expr_identity else
-                       names.Name.from_lower(argspec.args[0]))
+                       names.Name.from_lower(argspec.args[item_var_pos]))
 
-        self.requires_index = len(argspec.args) == 2
         self.element_var = AbstractVariable(
             names.Name("Item_{}".format(next(CollectionExpression._counter))),
             source_name=source_name
@@ -150,7 +158,7 @@ class CollectionExpression(AbstractExpression):
         if self.requires_index:
             self.index_var = AbstractVariable(
                 names.Name('I'), type=long_type,
-                source_name=names.Name.from_lower(argspec.args[1])
+                source_name=names.Name.from_lower(argspec.args[index_var_pos])
             )
             expr = self.expr_fn(self.index_var, self.element_var)
         else:
