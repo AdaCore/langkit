@@ -105,6 +105,11 @@
       Ret : ${cls.name} := Create (Length (L) + Length (R));
    begin
       Ret.Items := (L.Items & R.Items);
+      % if cls.element_type.is_refcounted:
+         for Item of Ret.Items loop
+            Inc_Ref (Item);
+         end loop;
+      % endif
       return Ret;
    end Concat;
 
