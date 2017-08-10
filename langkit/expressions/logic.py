@@ -6,7 +6,7 @@ from langkit.compiled_types import (T, bool_type, equation_type,
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable, LiteralExpr,
-    PropertyDef, aggregate_expr, auto_attr, construct, render
+    NullExpr, PropertyDef, aggregate_expr, auto_attr, construct, render
 )
 
 
@@ -481,15 +481,28 @@ class Predicate(AbstractExpression):
 def get_value(self, logic_var):
     """
     Expression that'll extract the value out of a logic variable. The type is
-    always the root entity type.
+    always the root entity type. If the variable is not defined, return a null
+    entity.
 
     :param AbstractExpression logic_var: The logic var from which we want to
         extract the value.
     """
-    return CallExpr(
-        'Eq_Solution', 'Eq_Node.Refs.Get_Value', T.root_node.entity,
-        [construct(logic_var, logic_var_type)],
-        abstract_expr=self,
+    from langkit.expressions import If
+
+    rtype = T.root_node.entity
+
+    logic_var_expr = construct(logic_var, logic_var_type)
+    logic_var_ref = logic_var_expr.create_result_var('Logic_Var_Value')
+
+    return If.Expr(
+        cond=CallExpr('Is_Logic_Var_Defined', 'Eq_Node.Refs.Is_Defined',
+                      bool_type, [logic_var_expr]),
+        then=CallExpr('Eq_Solution', 'Eq_Node.Refs.Get_Value', rtype,
+                      [logic_var_ref]),
+        else_then=NullExpr(T.root_node.entity),
+
+        rtype=rtype,
+        abstract_expr=self
     )
 
 
