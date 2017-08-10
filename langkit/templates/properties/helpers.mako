@@ -197,9 +197,10 @@
       pragma Unreferenced (Self);
    begin
       <%
-         args = [
-            '{} (Node_{}.El)'.format(formal_type.name, i)
-            for i, formal_type in enumerate(formal_node_types)
+         args = ['{} (Node_0.El)'.format(formal_node_types[0].name)] + [
+            '(El => {} (Node_{}.El), Info => Node_{}.Info)'.format(
+                formal_type.el_type.name, i, i
+            ) for i, formal_type in enumerate(formal_node_types[1:], 1)
          ] + [
             'Self.Field_{}'.format(i)
             for i, _ in enumerate(args_types)

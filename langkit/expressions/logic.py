@@ -407,9 +407,7 @@ class Predicate(AbstractExpression):
 
         exprs = [construct(e) for e in self.exprs]
 
-        prop_types = [self.pred_property.struct] + [
-            a.type for a in self.pred_property.natural_arguments
-        ]
+        prop_types = [a.type for a in self.pred_property.natural_arguments]
 
         # Separate logic variable expressions from extra argument expressions
         logic_var_exprs, closure_exprs = funcy.split_by(
@@ -430,7 +428,8 @@ class Predicate(AbstractExpression):
         for i, (expr, arg_type) in enumerate(zip(exprs, prop_types)):
             if expr.type == logic_var_type:
                 check_source_language(
-                    arg_type.matches(T.root_node), "Argument #{} of predicate "
+                    arg_type.matches(T.root_node.entity),
+                    "Argument #{} of predicate "
                     "is a logic variable, the corresponding property formal "
                     "has type {}, but should be a descendent of {}".format(
                         i, arg_type.name.camel, T.root_node.name.camel
