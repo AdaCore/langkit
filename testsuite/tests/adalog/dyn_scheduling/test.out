@@ -34,8 +34,8 @@ Got an Early_Binding_Error exception
 | | Predicate is-even? on Y
 | | Member X { 1,  2}
 
-Solution: { X = 1; Y = 10 }
-Solution: { X = 2; Y = 10 }
+Solution: { X = 1; Y =<undefined> }
+Solution: { X = 2; Y =<undefined> }
 Got an Early_Binding_Error exception
 ========================================================================
 <Any>:

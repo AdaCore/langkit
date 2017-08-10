@@ -15,6 +15,11 @@ procedure Main is
    X : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
    Y : Eq_Int.Refs.Raw_Var := Eq_Int.Refs.Create;
 
+   function Safe_Get_Value (V : Eq_Int.Refs.Raw_Var) return String is
+     ((if Is_Defined (V)
+       then Integer'Image (Get_Value (V))
+       else "<undefined>"));
+
    Relations : array (Positive range <>) of Relation :=
      (Equals (X, Y) and Member (X, (1, 2, 3)),
       --  Simple dynamic scheduling: the second relation must be evaluated
@@ -64,8 +69,8 @@ begin
          Reset (X);
          Reset (Y);
          while Solve (R) loop
-            Put_Line ("Solution: { X =" & Get_Value (X)'Img
-                      & "; Y =" & Get_Value (Y)'Img & " }");
+            Put_Line ("Solution: { X =" & Safe_Get_Value (X)
+                      & "; Y =" & Safe_Get_Value (Y) & " }");
             N := N + 1;
          end loop;
          if N = 0 then
