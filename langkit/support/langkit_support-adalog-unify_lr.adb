@@ -18,13 +18,13 @@ package body Langkit_Support.Adalog.Unify_LR is
       if Is_Defined (Self.Left) then
 
          L := Get_Value (Self.Left);
-         R := Get_Value (Self.Right);
          LC := Convert (Self.L_Data, L);
 
          if Is_Defined (Self.Right) then
 
             --  Both values are defined, return true if they are equal
 
+            R := Get_Value (Self.Right);
             Result := +Equals (Self.Eq_Data, LC, R);
             Trace ("In Unify_LR, Left value is : " & Element_Image (L));
             Trace ("In Unify_LR, Right value is : " & Element_Image (R));
@@ -41,7 +41,6 @@ package body Langkit_Support.Adalog.Unify_LR is
                    & Image (Self.Left) & " to "
                    & Image (Self.Right));
             Trace ("In Unify_LR, From value is : " & Element_Image (L));
-            Trace ("In Unify_LR, Old to value is : " & Element_Image (R));
             Trace ("In Unify_LR, New to value is : " & Element_Image (LC));
          end if;
 
