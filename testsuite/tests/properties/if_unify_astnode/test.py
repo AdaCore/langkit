@@ -35,14 +35,12 @@ class Literal(FooNode):
     pass
 
 
-def lang_def():
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=Or(
-            BarNode(Tok(Token.Example)),
-            Literal(Tok(Token.Number)),
-        )
+grammar = Grammar('main_rule')
+grammar.add_rules(
+    main_rule=Or(
+        BarNode(Tok(Token.Example)),
+        Literal(Tok(Token.Number)),
     )
-    return foo_grammar
-emit_and_print_errors(lang_def)
+)
+emit_and_print_errors(grammar)
 print('Done')

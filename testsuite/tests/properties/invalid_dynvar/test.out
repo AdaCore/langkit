@@ -4,7 +4,7 @@ File "test.py", line 33, in ExampleNode.prop
 
 == <FieldAccess .implicit_prop> ==
 File "test.py", line 33, in ExampleNode.prop
-  line 52, in access to .implicit_prop
+  line 49, in access to .implicit_prop
     Error: In call to ExampleNode.p_implicit_prop, some dynamic variables need to be bound: env
 
 == <bind(<DynamicVariable env>, <FieldAccess .node_env>, <get(<DynamicVariable env>, <FieldAccess .tok>)>)> ==

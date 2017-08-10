@@ -22,13 +22,9 @@ class BarNode(FooNode):
     env_spec = EnvSpec(call_env_hook(Self))
 
 
-def lang_def():
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=Row('example') ^ BarNode,
-    )
-    return foo_grammar
-
-
-emit_and_print_errors(lang_def)
+grammar = Grammar('main_rule')
+grammar.add_rules(
+    main_rule=Row('example') ^ BarNode,
+)
+emit_and_print_errors(grammar)
 print('Done')

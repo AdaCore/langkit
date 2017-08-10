@@ -68,17 +68,13 @@ class ExampleList(FooNode):
     )
 
 
-def lang_def():
-    foo_grammar = Grammar('item')
-    foo_grammar.add_rules(
-        item=Or(foo_grammar.example, foo_grammar.example_list),
-        example=Row('example') ^ Example,
-        example_list=ExampleList(
-            '(', List(foo_grammar.item), ')'
-        )
+grammar = Grammar('item')
+grammar.add_rules(
+    item=Or(grammar.example, grammar.example_list),
+    example=Row('example') ^ Example,
+    example_list=ExampleList(
+        '(', List(grammar.item), ')'
     )
-    return foo_grammar
-
-
-emit_and_print_errors(lang_def)
+)
+emit_and_print_errors(grammar)
 print('Done')

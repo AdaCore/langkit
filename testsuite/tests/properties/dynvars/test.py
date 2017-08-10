@@ -47,14 +47,12 @@ def run(abstract_dyn_vars, concrete_dyn_vars):
     class ConcreteNode(AbstractNode):
         prop = Property(Literal(True), dynamic_vars=concrete_dyn_vars)
 
-    def lang_def():
-        foo_grammar = Grammar('main_rule')
-        foo_grammar.add_rules(
-            main_rule=Row('example') ^ ConcreteNode,
-        )
-        return foo_grammar
+    grammar = Grammar('main_rule')
+    grammar.add_rules(
+        main_rule=Row('example') ^ ConcreteNode,
+    )
 
-    if emit_and_print_errors(lang_def):
+    if emit_and_print_errors(grammar):
         for fld in (AbstractNode.prop, ConcreteNode.prop):
             print('  {}: {}'.format(fld.qualname,
                                     fmt_value(fld.dynamic_vars)))

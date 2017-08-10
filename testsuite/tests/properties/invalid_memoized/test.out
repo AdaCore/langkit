@@ -1,5 +1,5 @@
 == Invalid uses entity info ==
-File "test.py", line 40, in Example.p
+File "test.py", line 38, in Example.p
     Error: A memoized property cannot use entity info
 
 Done

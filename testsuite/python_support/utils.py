@@ -49,14 +49,13 @@ def prepare_context(grammar,
     return ctx
 
 
-def emit_and_print_errors(grammar_fn,
+def emit_and_print_errors(grammar,
                           lexer=None,
                           library_fields_all_public=False):
     """
     Compile and emit code for CTX. Return whether this was successful.
 
-    :param () -> langkit.parsers.Grammar grammar_fn: A function returning the
-        grammar to be used.
+    :param langkit.parsers.Grammar grammar_fn: The language grammar to use.
 
     :param langkit.lexer.Lexer lexer: The lexer to use along with the grammar.
 
@@ -70,7 +69,7 @@ def emit_and_print_errors(grammar_fn,
         lexer = foo_lexer
 
     try:
-        ctx = prepare_context(grammar_fn(), lexer, library_fields_all_public)
+        ctx = prepare_context(grammar, lexer, library_fields_all_public)
         ctx.emit('build', generate_lexer=False)
         # ... and tell about how it went
     except DiagnosticError:

@@ -21,11 +21,9 @@ class Example(FooNode):
     tok = Field(type=T.FooNode.does_not_exist)
 
 
-def get_fg():
-    fg = Grammar('main_rule')
-    fg.add_rules(
-        main_rule=Example(Tok(Token.Example, keep=True)),
-    )
-    return fg
-emit_and_print_errors(get_fg)
+fg = Grammar('main_rule')
+fg.add_rules(
+    main_rule=Example(Tok(Token.Example, keep=True)),
+)
+emit_and_print_errors(fg)
 print('Done')

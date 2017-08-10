@@ -1,16 +1,16 @@
 == Missing NullNode ==
 File "test.py", line 50, in ExampleNode.prop
-  line 78, in Match expression
+  line 75, in Match expression
     Error: The following AST nodes have no handler: NullNode (all BodyNode subclasses require one)
 
 == Missing Expression ==
 File "test.py", line 50, in ExampleNode.prop
-  line 81, in Match expression
+  line 78, in Match expression
     Error: The following AST nodes have no handler: Expression (all BodyNode subclasses require one)
 
 == Missing Compound ==
 File "test.py", line 50, in ExampleNode.prop
-  line 85, in Match expression
+  line 82, in Match expression
     Error: The following AST nodes have no handler: Compound (all BodyNode subclasses require one)
 
 == Invalid type ==
@@ -19,36 +19,36 @@ File "test.py", line 50, in ExampleNode.prop
 
 == Irrelevant AST node ==
 File "test.py", line 50, in ExampleNode.prop
-  line 97, in Match expression
+  line 94, in Match expression
     Error: Cannot match FooNode (input type is BodyNode)
 
 == Default case after full coverage ==
 File "test.py", line 50, in ExampleNode.prop
-  line 103, in Match expression
+  line 100, in Match expression
     Warning: The #2 matcher (default one) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after default case (1) ==
 File "test.py", line 50, in ExampleNode.prop
-  line 108, in Match expression
+  line 105, in Match expression
     Warning: The #2 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after default case (2) ==
 File "test.py", line 50, in ExampleNode.prop
-  line 112, in Match expression
+  line 109, in Match expression
     Warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after full coverage (1) ==
 File "test.py", line 50, in ExampleNode.prop
-  line 117, in Match expression
+  line 114, in Match expression
     Warning: The #2 matcher (Number) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 
 == Node after full coverage (2) ==
 File "test.py", line 50, in ExampleNode.prop
-  line 123, in Match expression
+  line 120, in Match expression
     Warning: The #4 matcher (BodyNode) is unreachable as all previous matchers cover all the nodes it can match
 Code generation was successful
 

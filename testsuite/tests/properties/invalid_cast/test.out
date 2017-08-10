@@ -7,7 +7,7 @@ File "test.py", line 34, in ListNode.prop
 
 == Invalid cast 2 ==
 File "test.py", line 34, in ListNode.prop
-  line 55, in Cast expression
+  line 52, in Cast expression
     Error: Cannot cast BarNode to ListNode: only (up/down)casting is allowed
 
 Done

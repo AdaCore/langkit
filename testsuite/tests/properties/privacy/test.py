@@ -42,14 +42,12 @@ def run(abstract_public, concrete_public):
 
         public_prop = Property(Self.prop, public=True)
 
-    def lang_def():
-        foo_grammar = Grammar('main_rule')
-        foo_grammar.add_rules(
-            main_rule=Row('example') ^ ConcreteNode,
-        )
-        return foo_grammar
+    grammar = Grammar('main_rule')
+    grammar.add_rules(
+        main_rule=Row('example') ^ ConcreteNode,
+    )
 
-    if emit_and_print_errors(lang_def):
+    if emit_and_print_errors(grammar):
         for fld in (AbstractNode.prop, ConcreteNode.prop):
             print('  {}: {}'.format(fld.qualname, fmt_privacy[fld.is_public]))
     print('')

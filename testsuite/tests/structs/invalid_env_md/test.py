@@ -29,17 +29,15 @@ def run(md_constructor):
     class Example(FooNode):
         pass
 
-    def lang_def():
-        foo_grammar = Grammar('main_rule')
-        foo_grammar.add_rules(main_rule=Example(Tok(Token.Example)))
-        return foo_grammar
+    grammar = Grammar('main_rule')
+    grammar.add_rules(main_rule=Example(Tok(Token.Example)))
 
     try:
         md_constructor()
     except DiagnosticError:
         reset_langkit()
     else:
-        emit_and_print_errors(lang_def)
+        emit_and_print_errors(grammar)
     print('')
 
 

@@ -81,16 +81,16 @@ class Plus(Expression):
     names = Property(Self.left.names.concat(Self.right.names))
 
 
-foo_grammar = Grammar('main_rule')
-foo_grammar.add_rules(
+grammar = Grammar('main_rule')
+grammar.add_rules(
     main_rule=Or(
-        Plus(foo_grammar.atom, '+', foo_grammar.main_rule),
-        foo_grammar.atom
+        Plus(grammar.atom, '+', grammar.main_rule),
+        grammar.atom
     ),
     atom=Or(
         Literal(Tok(Token.Number, keep=True)),
         Name(Tok(Token.Identifier, keep=True)),
     ),
 )
-emit_and_print_errors(lambda: foo_grammar)
+emit_and_print_errors(grammar)
 print('Done')

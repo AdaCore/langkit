@@ -11,21 +11,18 @@ from utils import emit_and_print_errors
 Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 
-def lang_def():
-    @abstract
-    class FooNode(ASTNode):
-        pass
-
-    class ExampleNode(FooNode):
-        pass
-
-    foo_grammar = Grammar('main_rulezz')
-    foo_grammar.add_rules(
-        main_rule=Row('example') ^ ExampleNode
-    )
-
-    return foo_grammar
+@abstract
+class FooNode(ASTNode):
+    pass
 
 
-emit_and_print_errors(lang_def)
+class ExampleNode(FooNode):
+    pass
+
+
+grammar = Grammar('main_rulezz')
+grammar.add_rules(
+    main_rule=Row('example') ^ ExampleNode
+)
+emit_and_print_errors(grammar)
 print('Done')

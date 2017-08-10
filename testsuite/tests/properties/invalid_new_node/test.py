@@ -33,18 +33,15 @@ def run(name, prop_fn, prop_memoized):
     class LiteralList(Literal.list):
         prop = Property(prop_fn(), memoized=prop_memoized)
 
-    def lang_def():
-        foo_grammar = Grammar('main_rule')
-        foo_grammar.add_rules(
-            main_rule=foo_grammar.list_rule,
-            list_rule=Row(
-                '(', List(foo_grammar.list_item, sep=',', cls=LiteralList), ')'
-            )[0],
-            list_item=Row(Tok(Token.Number, keep=True)) ^ Literal,
-        )
-        return foo_grammar
-
-    emit_and_print_errors(lang_def)
+    grammar = Grammar('main_rule')
+    grammar.add_rules(
+        main_rule=grammar.list_rule,
+        list_rule=Row(
+            '(', List(grammar.list_item, sep=',', cls=LiteralList), ')'
+        )[0],
+        list_item=Row(Tok(Token.Number, keep=True)) ^ Literal,
+    )
+    emit_and_print_errors(grammar)
     print('')
 
 

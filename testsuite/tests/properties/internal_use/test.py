@@ -48,24 +48,21 @@ class Block(Stmt):
     env_spec = EnvSpec(add_env())
 
 
-def lang_def():
-    foo_grammar = Grammar('stmts_rule')
-    foo_grammar.add_rules(
-        def_rule=Row(
-            Tok(Token.Identifier, keep=True),
-            Opt(Row('(', foo_grammar.stmts_rule, ')')[1])
-        ) ^ Def,
+grammar = Grammar('stmts_rule')
+grammar.add_rules(
+    def_rule=Row(
+        Tok(Token.Identifier, keep=True),
+        Opt(Row('(', grammar.stmts_rule, ')')[1])
+    ) ^ Def,
 
-        stmt_rule=(
-            foo_grammar.def_rule
-            | Row('{',
-                  List(foo_grammar.stmt_rule, empty_valid=True),
-                  '}') ^ Block
-        ),
+    stmt_rule=(
+        grammar.def_rule
+        | Row('{',
+              List(grammar.stmt_rule, empty_valid=True),
+              '}') ^ Block
+    ),
 
-        stmts_rule=List(foo_grammar.stmt_rule)
-    )
-    return foo_grammar
-
-emit_and_print_errors(lang_def)
+    stmts_rule=List(grammar.stmt_rule)
+)
+emit_and_print_errors(grammar)
 print('Done')

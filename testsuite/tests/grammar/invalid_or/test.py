@@ -25,20 +25,17 @@ class Atom(Element):
     tok = Field(type=TokenType)
 
 
-def grammar():
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=foo_grammar.element,
-        element=Or(foo_grammar.atom,
-                   foo_grammar.sequence),
-        sequence=List('(', foo_grammar.element, ')',
-                      sep=',',
-                      list_cls=Sequence,
-                      empty_valid=True),
-        atom=Tok(Token.Identifier, keep=True),
-    )
-    return foo_grammar
-
+grammar = Grammar('main_rule')
+grammar.add_rules(
+    main_rule=grammar.element,
+    element=Or(grammar.atom,
+               grammar.sequence),
+    sequence=List('(', grammar.element, ')',
+                  sep=',',
+                  list_cls=Sequence,
+                  empty_valid=True),
+    atom=Tok(Token.Identifier, keep=True),
+)
 emit_and_print_errors(grammar)
 
 print('Done')

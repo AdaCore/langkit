@@ -9,29 +9,28 @@ from lexer_example import Token
 from utils import emit_and_print_errors
 
 
-def lang_def():
-    class FooNode(ASTNode):
-        pass
+class FooNode(ASTNode):
+    pass
 
-    class Def(FooNode):
-        name = Field()
-        body = Field()
-        env_spec = EnvSpec(add_env=True, add_to_env=(Self.name, Self))
 
-    foo_grammar = Grammar('stmt_rule')
-    foo_grammar.add_rules(
-        def_rule=Row(
-            Tok(Token.Identifier, keep=True),
-            '(', foo_grammar.stmt_rule, ')'
-        ) ^ Def,
-        stmt_rule=List(
-            foo_grammar.def_rule
-            | Row('{', List(foo_grammar.stmt_rule, empty_valid=True), '}')[1],
-            empty_valid=True
-        )
+class Def(FooNode):
+    name = Field()
+    body = Field()
+    env_spec = EnvSpec(add_env=True, add_to_env=(Self.name, Self))
+
+
+grammar = Grammar('stmt_rule')
+grammar.add_rules(
+    def_rule=Row(
+        Tok(Token.Identifier, keep=True),
+        '(', grammar.stmt_rule, ')'
+    ) ^ Def,
+    stmt_rule=List(
+        grammar.def_rule
+        | Row('{', List(grammar.stmt_rule, empty_valid=True), '}')[1],
+        empty_valid=True
     )
-    return foo_grammar
-
-emit_and_print_errors(lang_def)
+)
+emit_and_print_errors(grammar)
 
 print('Done')

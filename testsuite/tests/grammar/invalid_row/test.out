@@ -1,3 +1,3 @@
-File "test.py", line 31, In definition of grammar rule main_rule
+File "test.py", line 30, In definition of grammar rule main_rule
     Error: Grammar rules must yield an AST node
 Done

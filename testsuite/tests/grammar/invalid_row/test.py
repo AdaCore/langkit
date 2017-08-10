@@ -25,13 +25,9 @@ class Literal(FooNode):
     tok = Field()
 
 
-def lang_def():
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=Row(List(Tok(Token.Number, keep=True) ^ Literal)),
-    )
-    return foo_grammar
-
-
-emit_and_print_errors(lang_def)
+grammar = Grammar('main_rule')
+grammar.add_rules(
+    main_rule=Row(List(Tok(Token.Number, keep=True) ^ Literal)),
+)
+emit_and_print_errors(grammar)
 print('Done')

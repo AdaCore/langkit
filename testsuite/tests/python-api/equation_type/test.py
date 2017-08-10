@@ -38,15 +38,15 @@ def run_test(title, run_main):
     class Example(FooNode):
         tok = Field(type=TokenType)
 
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
+    grammar = Grammar('main_rule')
+    grammar.add_rules(
         main_rule=Example(Tok(Token.Example, keep=True)),
     )
 
     if run_main:
-        build_and_run(foo_grammar, 'main.py', library_fields_all_public=True)
+        build_and_run(grammar, 'main.py', library_fields_all_public=True)
     else:
-        emit_and_print_errors(lambda: foo_grammar)
+        emit_and_print_errors(grammar)
     sys.stdout.flush()
 
 

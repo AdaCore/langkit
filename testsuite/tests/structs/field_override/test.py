@@ -38,13 +38,10 @@ class Name(RootNode):
     tok = Field()
 
 
-def lang_def():
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=Expr(Name(Tok(Token.Identifier, keep=True)))
-    )
-    return foo_grammar
+grammar = Grammar('main_rule')
+grammar.add_rules(
+    main_rule=Expr(Name(Tok(Token.Identifier, keep=True)))
+)
 
-
-emit_and_print_errors(lang_def)
+emit_and_print_errors(grammar)
 print('Done')

@@ -49,27 +49,24 @@ def run(name, match_expr):
 
         prop = Property(match_expr)
 
-    def lang_def():
-        foo_grammar = Grammar('main_rule')
-        foo_grammar.add_rules(
-            main_rule=Row(
-                'example',
-                Or(foo_grammar.expression,
-                   Row('null') ^ NullNode)
-            ) ^ ExampleNode,
+    grammar = Grammar('main_rule')
+    grammar.add_rules(
+        main_rule=Row(
+            'example',
+            Or(grammar.expression,
+               Row('null') ^ NullNode)
+        ) ^ ExampleNode,
 
-            number=Tok(Token.Number, keep=True) ^ Number,
+        number=Tok(Token.Number, keep=True) ^ Number,
 
-            expression=Or(
-                Row(foo_grammar.number,
-                    ',',
-                    foo_grammar.expression) ^ Compound,
-                foo_grammar.number
-            ),
-        )
-        return foo_grammar
-
-    emit_and_print_errors(lang_def)
+        expression=Or(
+            Row(grammar.number,
+                ',',
+                grammar.expression) ^ Compound,
+            grammar.number
+        ),
+    )
+    emit_and_print_errors(grammar)
     print('')
 
 

@@ -50,20 +50,18 @@ def run(name, prop):
         def resolve():
             return Self.node_env.get(Self.name.symbol).at(0)
 
-    def lang_def():
-        foo_grammar = Grammar('main_rule')
-        foo_grammar.add_rules(
-            main_rule=List(foo_grammar.decl),
-            decl=Decl(
-                Tok(Token.Identifier, keep=True),
-                Tok(Token.LPar),
-                List(foo_grammar.ref, empty_valid=True),
-                Tok(Token.RPar)
-            ),
-            ref=Ref(Tok(Token.Identifier, keep=True)),
-        )
-        return foo_grammar
-    emit_and_print_errors(lang_def)
+    grammar = Grammar('main_rule')
+    grammar.add_rules(
+        main_rule=List(grammar.decl),
+        decl=Decl(
+            Tok(Token.Identifier, keep=True),
+            Tok(Token.LPar),
+            List(grammar.ref, empty_valid=True),
+            Tok(Token.RPar)
+        ),
+        ref=Ref(Tok(Token.Identifier, keep=True)),
+    )
+    emit_and_print_errors(grammar)
 
 run('Bad return type', Property(Self.node_env.get('foo')))
 run('Has dynamic variable', Property(Self.node_env.get('foo').at(0),

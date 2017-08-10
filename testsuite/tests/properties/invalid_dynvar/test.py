@@ -36,14 +36,11 @@ def run(expr):
             public=True
         )
 
-    def lang_def():
-        foo_grammar = Grammar('main_rule')
-        foo_grammar.add_rules(
-            main_rule=Row(Tok('example', keep=True)) ^ ExampleNode,
-        )
-        return foo_grammar
-
-    emit_and_print_errors(lang_def)
+    grammar = Grammar('main_rule')
+    grammar.add_rules(
+        main_rule=Row(Tok('example', keep=True)) ^ ExampleNode,
+    )
+    emit_and_print_errors(grammar)
     Env.unfreeze()
     print('')
 

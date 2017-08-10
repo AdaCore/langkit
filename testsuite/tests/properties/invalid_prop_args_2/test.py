@@ -28,14 +28,11 @@ class BarNode(BarCode):
     base_prop = Property(lambda x=Symbol: 12)
 
 
-def lang_def():
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=Row('example', foo_grammar.rule_2) ^ BarCode,
-        rule_2=Row('example', foo_grammar.rule_2) ^ BarNode,
-    )
-    return foo_grammar
-
-emit_and_print_errors(lang_def)
+grammar = Grammar('main_rule')
+grammar.add_rules(
+    main_rule=Row('example', grammar.rule_2) ^ BarCode,
+    rule_2=Row('example', grammar.rule_2) ^ BarNode,
+)
+emit_and_print_errors(grammar)
 print('')
 print('Done')

@@ -31,15 +31,12 @@ def run(name, expr_fn):
     class Name(FooNode):
         tok = Field()
 
-    def lang_def():
-        foo_grammar = Grammar('main_rule')
-        foo_grammar.add_rules(
-            main_rule=Example('example', Opt(foo_grammar.name)),
-            name=Name(Tok(Token.Identifier, keep=True)),
-        )
-        return foo_grammar
-
-    emit_and_print_errors(lang_def)
+    grammar = Grammar('main_rule')
+    grammar.add_rules(
+        main_rule=Example('example', Opt(grammar.name)),
+        name=Name(Tok(Token.Identifier, keep=True)),
+    )
+    emit_and_print_errors(grammar)
     print('')
 
 

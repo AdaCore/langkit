@@ -1,13 +1,13 @@
 == Missing type ==
-File "test.py", line 45, in AbstractExample.p
+File "test.py", line 43, in AbstractExample.p
     Error: This property requires an explicit return type
 
 == Invalid abstract ==
-File "test.py", line 49, in AbstractExample.p
+File "test.py", line 47, in AbstractExample.p
     Error: An external property cannot be abstract
 
 == Invalid memoized ==
-File "test.py", line 54, in AbstractExample.p
+File "test.py", line 52, in AbstractExample.p
     Error: An external property cannot be memoized
 
 Done

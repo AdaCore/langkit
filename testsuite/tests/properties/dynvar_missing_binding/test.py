@@ -29,12 +29,9 @@ class Example(FooNode):
     p2 = Property(dynvar)
 
 
-def grammar_fn():
-    foo_grammar = Grammar('main_rule')
-    foo_grammar.add_rules(
-        main_rule=Example(Tok(Token.Example, keep=True)),
-    )
-    return foo_grammar
-
-emit_and_print_errors(grammar_fn)
+grammar = Grammar('main_rule')
+grammar.add_rules(
+    main_rule=Example(Tok(Token.Example, keep=True)),
+)
+emit_and_print_errors(grammar)
 print('Done')
