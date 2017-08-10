@@ -481,7 +481,7 @@ class Predicate(AbstractExpression):
 def get_value(self, logic_var):
     """
     Expression that'll extract the value out of a logic variable. The type is
-    always the root grammar class.
+    always the root entity type.
 
     :param AbstractExpression logic_var: The logic var from which we want to
         extract the value.
