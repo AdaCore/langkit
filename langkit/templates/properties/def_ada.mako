@@ -104,7 +104,18 @@ begin
       Set_Filled_Caches (Self.Unit);
 
       % if property.type.is_refcounted:
-         Inc_Ref (Property_Result);
+         ## As they can be deallocated before the memoization caches are reset,
+         ## not-refcounted lexical environment must be tagged in a special way
+         ## to avoid invalid memory read later.
+         % if is_lexical_env(property.type):
+            if Property_Result.Ref_Count = No_Refcount then
+               Self.${property.memoization_state_field_name} :=
+                  Computed_No_Refcount;
+            end if;
+         % else:
+            Inc_Ref (Property_Result);
+         % endif
+
       % endif
    % endif
 
