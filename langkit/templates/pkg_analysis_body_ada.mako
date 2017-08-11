@@ -685,6 +685,13 @@ package body ${ada_lib_name}.Analysis is
       declare
          Unit : constant Analysis_Unit := Element (Cur);
       begin
+         --  whole analysis context behaves, we have to invalidate caches. This
+         --  is likely overkill, but kill all caches here as it's easy to do.
+         Analysis.Reset_Property_Caches (Unit.Context);
+
+         --  Remove all lexical environment artifacts from this analysis unit
+         Remove_Exiled_Entries (Unit.Lex_Env_Data_Acc);
+
          Unit.Context := null;
          Dec_Ref (Unit);
       end;
@@ -700,6 +707,10 @@ package body ${ada_lib_name}.Analysis is
       procedure Free is new Ada.Unchecked_Deallocation
         (Analysis_Context_Private_Part_Type, Analysis_Context_Private_Part);
    begin
+      --  Reset property caches upfront as we can't do that when destroying
+      --  units one after the other.
+      Reset_Property_Caches (Context);
+
       for Unit of Context.Units_Map loop
          Unit.Context := null;
          Dec_Ref (Unit);
@@ -863,16 +874,6 @@ package body ${ada_lib_name}.Analysis is
    procedure Destroy (Unit : Analysis_Unit) is
       Unit_Var : Analysis_Unit := Unit;
    begin
-      if Unit.Context /= null then
-         --  As unloading a unit can change how any AST node property in the
-         --  whole analysis context behaves, we have to invalidate caches. This
-         --  is likely overkill, but kill all caches here as it's easy to do.
-         Reset_Property_Caches (Unit.Context);
-
-         --  Remove all lexical environment artifacts from this analysis unit
-         Remove_Exiled_Entries (Unit.Lex_Env_Data_Acc);
-      end if;
-
       Destroy (Unit.Lex_Env_Data_Acc);
       Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
 
