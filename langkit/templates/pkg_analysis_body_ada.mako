@@ -863,6 +863,16 @@ package body ${ada_lib_name}.Analysis is
    procedure Destroy (Unit : Analysis_Unit) is
       Unit_Var : Analysis_Unit := Unit;
    begin
+      if Unit.Context /= null then
+         --  As unloading a unit can change how any AST node property in the
+         --  whole analysis context behaves, we have to invalidate caches. This
+         --  is likely overkill, but kill all caches here as it's easy to do.
+         Reset_Property_Caches (Unit.Context);
+
+         --  Remove all lexical environment artifacts from this analysis unit
+         Remove_Exiled_Entries (Unit.Lex_Env_Data_Acc);
+      end if;
+
       Destroy (Unit.Lex_Env_Data_Acc);
       Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
 
@@ -877,7 +887,6 @@ package body ${ada_lib_name}.Analysis is
       end loop;
       Destroyable_Vectors.Destroy (Unit.Destroyables);
       Free (Unit_Var);
-
    end Destroy;
 
    -----------
