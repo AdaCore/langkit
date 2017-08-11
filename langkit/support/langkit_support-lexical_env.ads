@@ -400,7 +400,7 @@ package Langkit_Support.Lexical_Env is
    --  set it to null. Also destroy it if the count drops to 0. Do nothing
    --  otherwise.
 
-   function Shed_Bindings
+   function Shed_Rebindings
      (E_Info : Entity_Info; Env : Lexical_Env) return Entity_Info;
    --  Return a new entity from E_Info, shedding env rebindings that are not in
    --  the parent chain for the env From_Env. Return a new ownership share.

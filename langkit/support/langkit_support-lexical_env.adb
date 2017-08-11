@@ -25,7 +25,7 @@ package body Langkit_Support.Lexical_Env is
    --  If Rebindings is bound to a new set of rebindings upon return, the
    --  ownership share of the old rebinding set will have been forfeited.
 
-   function Shed_Bindings
+   function Shed_Rebindings
      (From_Env   : Lexical_Env;
       Rebindings : Env_Rebindings) return Env_Rebindings
      with Inline;
@@ -552,7 +552,7 @@ package body Langkit_Support.Lexical_Env is
                Rebindings := Current_Rebindings;
                Inc_Ref (Rebindings);
             else
-               Rebindings := Shed_Bindings (Env, Current_Rebindings);
+               Rebindings := Shed_Rebindings (Env, Current_Rebindings);
             end if;
 
             declare
@@ -627,7 +627,7 @@ package body Langkit_Support.Lexical_Env is
       Own_Lookup_Env := Extract_Rebinding (Current_Rebindings, Self);
 
       if Own_Lookup_Env /= Self then
-         Parent_Rebindings := Shed_Bindings (Parent_Env, Current_Rebindings);
+         Parent_Rebindings := Shed_Rebindings (Parent_Env, Current_Rebindings);
       else
          Parent_Rebindings := Current_Rebindings;
          Inc_Ref (Parent_Rebindings);
@@ -883,11 +883,11 @@ package body Langkit_Support.Lexical_Env is
       return Return_Env;
    end Extract_Rebinding;
 
-   -------------------
-   -- Shed_Bindings --
-   -------------------
+   ---------------------
+   -- Shed_Rebindings --
+   ---------------------
 
-   function Shed_Bindings
+   function Shed_Rebindings
      (From_Env   : Lexical_Env;
       Rebindings : Env_Rebindings) return Env_Rebindings
    is
@@ -934,18 +934,18 @@ package body Langkit_Support.Lexical_Env is
             return null;
          end if;
       end if;
-   end Shed_Bindings;
+   end Shed_Rebindings;
 
-   -------------------
-   -- Shed_Bindings --
-   -------------------
+   ---------------------
+   -- Shed_Rebindings --
+   ---------------------
 
-   function Shed_Bindings
+   function Shed_Rebindings
      (E_Info : Entity_Info; Env : Lexical_Env) return Entity_Info is
    begin
       return (MD         => E_Info.MD,
-              Rebindings => Shed_Bindings (Env, E_Info.Rebindings));
-   end Shed_Bindings;
+              Rebindings => Shed_Rebindings (Env, E_Info.Rebindings));
+   end Shed_Rebindings;
 
    --------------
    -- Decorate --

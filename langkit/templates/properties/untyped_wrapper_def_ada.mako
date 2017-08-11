@@ -6,7 +6,7 @@ is
    <% uses_einfo = property.uses_entity_info %>
 
    % if uses_einfo:
-      E_Info : Entity_Info := Shed_Bindings (E.Info, E.El.Node_Env);
+      E_Info : Entity_Info := Shed_Rebindings (E.Info, E.El.Node_Env);
    % endif
 
    Result : constant ${property.untyped_wrapper_rtype.name} :=
