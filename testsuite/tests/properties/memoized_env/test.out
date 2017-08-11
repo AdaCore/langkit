@@ -1,0 +1,6 @@
+main.py: Running...
+unit_a references: [<Block 1:1-1:6>]
+Deallocate unit_b
+Deallocate unit_a
+main.py: Done.
+Done
