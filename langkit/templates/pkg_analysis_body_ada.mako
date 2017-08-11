@@ -3228,7 +3228,8 @@ package body ${ada_lib_name}.Analysis is
          begin
             % for p in memo_props:
                % if p.type.is_refcounted:
-                  if N.${p.memoization_state_field_name} = Computed then
+                  if N.${p.memoization_state_field_name} = Computed_Refcount
+                  then
                      Dec_Ref (N.${p.memoization_value_field_name});
                   end if;
                % endif

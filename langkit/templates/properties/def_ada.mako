@@ -74,7 +74,7 @@ begin
       case Self.${property.memoization_state_field_name} is
          when Not_Computed =>
             null;
-         when Computed =>
+         when Computed_Refcount | Computed_No_Refcount =>
             declare
                Result : constant ${property.type.name} :=
                   Self.${property.memoization_value_field_name};
@@ -99,7 +99,7 @@ begin
    ${scopes.finalize_scope(property.vars.root_scope)}
 
    % if property.memoized:
-      Self.${property.memoization_state_field_name} := Computed;
+      Self.${property.memoization_state_field_name} := Computed_Refcount;
       Self.${property.memoization_value_field_name} := Property_Result;
       Set_Filled_Caches (Self.Unit);
 
