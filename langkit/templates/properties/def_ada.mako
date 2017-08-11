@@ -74,7 +74,7 @@ begin
       case Self.${property.memoization_state_field_name} is
          when Not_Computed =>
             null;
-         when Computed_Refcount | Computed_No_Refcount =>
+         when Computed =>
             declare
                Result : constant ${property.type.name} :=
                   Self.${property.memoization_value_field_name};
@@ -99,23 +99,12 @@ begin
    ${scopes.finalize_scope(property.vars.root_scope)}
 
    % if property.memoized:
-      Self.${property.memoization_state_field_name} := Computed_Refcount;
+      Self.${property.memoization_state_field_name} := Computed;
       Self.${property.memoization_value_field_name} := Property_Result;
       Set_Filled_Caches (Self.Unit);
 
       % if property.type.is_refcounted:
-         ## As they can be deallocated before the memoization caches are reset,
-         ## not-refcounted lexical environment must be tagged in a special way
-         ## to avoid invalid memory read later.
-         % if is_lexical_env(property.type):
-            if Property_Result.Ref_Count = No_Refcount then
-               Self.${property.memoization_state_field_name} :=
-                  Computed_No_Refcount;
-            end if;
-         % else:
-            Inc_Ref (Property_Result);
-         % endif
-
+         Inc_Ref (Property_Result);
       % endif
    % endif
 

@@ -1233,17 +1233,11 @@ private
    -- Root AST node (internals) --
    -------------------------------
 
-   type Memoization_State is
-     (Not_Computed,
-      Computed_Refcount,
-      Computed_No_Refcount,
-      Raise_Property_Error);
+   type Memoization_State is (Not_Computed, Computed, Raise_Property_Error);
    --  Implementation detail for properties memoization. Values describe if::
    --
    --    * the property is still to be evaluated (Not_Computed);
-   --    * if its result value is already available and should be dec-ref'd
-   --      when the memoization slot is reset (Comptuted_Refcount) or should
-   --      not be dec-ref'd (Computed_No_Refcount);
+   --    * if its result value is already available (Computed);
    --    * if it is known to raise a Property_Error (Raise_Property_Error).
 
    type ${root_node_value_type} is abstract tagged record
