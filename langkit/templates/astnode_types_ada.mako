@@ -554,15 +554,6 @@
       % endif
    </%def>
 
-   <%def name="emit_strong_ref(strong_ref)">
-      declare
-         Refd_Env : ${strong_ref.env_property.type.name} :=
-            ${call_prop(strong_ref.env_property)};
-      begin
-         Transitive_Reference (Self.Self_Env, Refd_Env);
-      end;
-   </%def>
-
    <%def name="emit_do(do_action)">
       declare
          Dummy : ${do_action.do_property.type.name};
