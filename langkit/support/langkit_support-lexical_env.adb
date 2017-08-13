@@ -636,7 +636,7 @@ package body Langkit_Support.Lexical_Env is
         (Can_Reach (El.El, From));
 
       Own_Lookup_Env    : Lexical_Env;
-      Parent_Env        :  Lexical_Env;
+      Parent_Env        : Lexical_Env;
       Parent_Rebindings : Env_Rebindings;
    begin
       if Self = null then
