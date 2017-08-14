@@ -501,7 +501,9 @@ package body Langkit_Support.Lexical_Env is
       Key        : Symbol_Type;
       From       : Element_T := No_Element;
       Recursive  : Boolean := True;
-      Rebindings : Env_Rebindings := null)
+      Rebindings : Env_Rebindings := null;
+      Filter     : access function (Ent : Entity; Env : Lexical_Env)
+                                    return Boolean := null)
       return Entity_Array
    is
       Current_Rebindings : Env_Rebindings;
@@ -522,6 +524,10 @@ package body Langkit_Support.Lexical_Env is
       --  Return the elements for Key contained by the internal map contained
       --  in the Self environment. Decorate each element with its own metadata
       --  and with the given Rebindings.
+
+      function Is_Filtered_Out return Boolean;
+      --  Return whether, according to Filter, Self should be discarded during
+      --  the lexical env lookup.
 
       -----------------------
       -- Get_Refd_Elements --
@@ -562,7 +568,8 @@ package body Langkit_Support.Lexical_Env is
                Result : constant Entity_Array :=
                  Get (Env, Key, From,
                       Recursive  => Recursive and Self.Is_Transitive,
-                      Rebindings => Rebindings);
+                      Rebindings => Rebindings,
+                      Filter     => Filter);
             begin
                Dec_Ref (Rebindings);
                Dec_Ref (Env);
@@ -604,6 +611,23 @@ package body Langkit_Support.Lexical_Env is
             else Entity_Arrays.Empty_Array);
       end Get_Own_Elements;
 
+      ---------------------
+      -- Is_Filtered_Out --
+      ---------------------
+
+      function Is_Filtered_Out return Boolean is
+         E : constant Entity := (El => From, Info => No_Entity_Info);
+      begin
+         --  If we are not provided a node and a property to call, just
+         --  consider all environments.
+
+         if From = No_Element or else Filter = null then
+            return False;
+         end if;
+
+         return not Filter (E, Self);
+      end Is_Filtered_Out;
+
       function Get_Refd_Elements is new Referenced_Envs_Arrays.Flat_Map_Gen
         (Entity, Entity_Array, Get_Refd_Elements);
       --  Likewise, but calling Get_Refd_Elements instead of Recurse
@@ -639,20 +663,29 @@ package body Langkit_Support.Lexical_Env is
       declare
          use type Entity_Array;
 
+         Empty : Entity_Array renames Entity_Arrays.Empty_Array;
+
+         Filtered_Out : constant Boolean := Is_Filtered_Out;
+
          Own_Elts : constant Entity_Array :=
-            Get_Own_Elements (Own_Lookup_Env, Current_Rebindings);
+           (if Filtered_Out
+            then Empty
+            else Get_Own_Elements (Own_Lookup_Env, Current_Rebindings));
 
          Refd_Elts : constant Entity_Array :=
-           Get_Refd_Elements
-             (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs));
+           (if Filtered_Out
+            then Empty
+            else Get_Refd_Elements
+               (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs)));
 
          Parent_Elts : constant Entity_Array :=
            (if Recursive
-            then Get (Parent_Env, Key, From, Rebindings => Parent_Rebindings)
-            else Entity_Arrays.Empty_Array);
+            then Get (Parent_Env, Key, From,
+                      Rebindings => Parent_Rebindings,
+                      Filter     => Filter)
+            else Empty);
 
-         Ret : Entity_Array :=
-            Own_Elts & Refd_Elts & Parent_Elts;
+         Ret : Entity_Array := Own_Elts & Refd_Elts & Parent_Elts;
 
          Last_That_Can_Reach : Integer := Ret'Last;
       begin

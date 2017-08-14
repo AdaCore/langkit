@@ -364,7 +364,9 @@ package Langkit_Support.Lexical_Env is
       Key        : Symbol_Type;
       From       : Element_T := No_Element;
       Recursive  : Boolean := True;
-      Rebindings : Env_Rebindings := null)
+      Rebindings : Env_Rebindings := null;
+      Filter     : access function (Ent : Entity; Env : Lexical_Env)
+                                    return Boolean := null)
       return Entity_Array;
    --  Get the array of entities for this Key. If From is given, then
    --  elements will be filtered according to the Can_Reach primitive given
@@ -372,6 +374,9 @@ package Langkit_Support.Lexical_Env is
    --
    --  If Recursive, look for Key in all Self's parents as well, and in
    --  referenced envs. Otherwise, limit the search to Self.
+   --
+   --  If Filter is not null, use it as a filter to disable lookup on envs for
+   --  which Filter.all (From, Env) returns False.
 
    function Orphan (Self : Lexical_Env) return Lexical_Env;
    --  Return a dynamically allocated copy of Self that has no parent
