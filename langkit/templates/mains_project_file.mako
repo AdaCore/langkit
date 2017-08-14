@@ -34,4 +34,9 @@ project Mains is
       end case;
    end Compiler;
 
+
+   package Binder is
+      for Switches ("ada") use ("-E");
+   end Binder;
+
 end Mains;
