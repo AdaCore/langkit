@@ -160,11 +160,22 @@ package Langkit_Support.Lexical_Env is
    -- Env_Rebindings --
    --------------------
 
-   type Env_Rebinding is private;
+   type Env_Rebinding is private
+      with Type_Invariant =>
+         (Old_Env (Env_Rebinding) = null
+          or else Is_Primary (Old_Env (Env_Rebinding)))
+         and then (New_Env (Env_Rebinding) = null
+                   or else Is_Primary (New_Env (Env_Rebinding)));
    --  Mapping from one lexical environment (the old one) to another (the new
    --  one).
 
    No_Env_Rebinding : constant Env_Rebinding;
+
+   function Old_Env (Self : Env_Rebinding) return Lexical_Env;
+   --  Return the environment Self rebinds
+
+   function New_Env (Self : Env_Rebinding) return Lexical_Env;
+   --  Retrun the environment that Self rebinds to
 
    procedure Inc_Ref (Self : Env_Rebinding);
    --  Shortcut to run Inc_Ref on both embedded Env_Getter values
@@ -198,7 +209,8 @@ package Langkit_Support.Lexical_Env is
    function Append_Rebinding
      (Self      : Env_Rebindings;
       To_Rebind : Lexical_Env;
-      Rebind_To : Lexical_Env) return Env_Rebindings;
+      Rebind_To : Lexical_Env) return Env_Rebindings
+      with Pre => Is_Primary (To_Rebind) and then Is_Primary (Rebind_To);
 
    -------------------------------------
    -- Arrays of elements and entities --
@@ -403,11 +415,22 @@ package Langkit_Support.Lexical_Env is
    --  Return a new entity from E_Info, shedding env rebindings that are not in
    --  the parent chain for the env From_Env. Return a new ownership share.
 
+   function Is_Primary (Self : Lexical_Env) return Boolean is
+     (Self.Ref_Count = No_Refcount and then Self.Node /= No_Element);
+   --  Return whether Self is a lexical environment that was created in an
+   --  environment specification.
+
 private
 
    type Env_Rebinding is record
       Old_Env, New_Env : Env_Getter;
+      --  Both must be static env getters
    end record;
+
+   function Old_Env (Self : Env_Rebinding) return Lexical_Env is
+     (Self.Old_Env.Env);
+   function New_Env (Self : Env_Rebinding) return Lexical_Env is
+     (Self.New_Env.Env);
 
    type Env_Rebindings_Type (Size : Natural) is record
       Ref_Count : Natural := 1;

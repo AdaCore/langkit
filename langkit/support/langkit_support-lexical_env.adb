@@ -134,9 +134,12 @@ package body Langkit_Support.Lexical_Env is
    -------------
 
    procedure Dec_Ref (Self : in out Env_Rebinding) is
+      Old_Env : Env_Getter := Self.Old_Env;
+      New_Env : Env_Getter := Self.New_Env;
    begin
-      Dec_Ref (Self.Old_Env);
-      Dec_Ref (Self.New_Env);
+      Dec_Ref (Old_Env);
+      Dec_Ref (New_Env);
+      Self := No_Env_Rebinding;
    end Dec_Ref;
 
    -------------------
