@@ -277,8 +277,8 @@ package body ${ada_lib_name}.Analysis is
 
       Symbol_Literals_Text : array (Symbol_Literal_Type) of Text_Cst_Access :=
       (
-         ${', '.join("Text_{}'Access".format(name) for sym, name in \
-                     ctx.sorted_symbol_literals)}
+         ${(', '.join("{name} => Text_{name}'Access".format(name=name)
+                      for sym, name in ctx.sorted_symbol_literals))}
       );
 
       ----------------------------
