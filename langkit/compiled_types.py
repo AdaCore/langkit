@@ -779,6 +779,7 @@ token_type = TokenType()
 symbol_type = CompiledType(
     'SymbolType',
     nullexpr='null',
+    null_allowed=True,
 
     # See below: symbols are represented in the C API as text records
     is_ada_record=True,
