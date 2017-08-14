@@ -160,9 +160,7 @@ package Langkit_Support.Lexical_Env is
    -- Env_Rebindings --
    --------------------
 
-   type Env_Rebinding is record
-      Old_Env, New_Env : Env_Getter;
-   end record;
+   type Env_Rebinding is private;
    --  Mapping from one lexical environment (the old one) to another (the new
    --  one).
 
@@ -406,6 +404,10 @@ package Langkit_Support.Lexical_Env is
    --  the parent chain for the env From_Env. Return a new ownership share.
 
 private
+
+   type Env_Rebinding is record
+      Old_Env, New_Env : Env_Getter;
+   end record;
 
    type Env_Rebindings_Type (Size : Natural) is record
       Ref_Count : Natural := 1;
