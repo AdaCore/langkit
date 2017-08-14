@@ -20,7 +20,8 @@ from langkit.expressions.utils import array_aggr
 @auto_attr_custom("get_sequential", sequential=True)
 @auto_attr_custom("resolve_unique", resolve_unique=True)
 def env_get(self, env_expr, symbol_expr, resolve_unique=False,
-            sequential=False, sequential_from=Self, recursive=True):
+            sequential=False, sequential_from=Self, recursive=True,
+            filter_prop=None):
     """
     Expression for lexical environment get operation.
 
@@ -37,6 +38,16 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
         sequential, must be an expression to use as the reference node.
     :param bool recursive: Whether lookup must be performed recursively on
         parent environments.
+    :param PropertyDef|None filter_prop: If provided, must be a reference to a
+        root node property that::
+
+          * takes a lexical environment;
+          * returns a boolean;
+          * has no dynamic variable;
+          * does not use entity information.
+
+        Lexical environments for which this property returns False will be
+        disregarded from the symbol lookup.
     """
     check_source_language(
         isinstance(symbol_expr, (AbstractExpression, basestring)),
@@ -58,6 +69,32 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
     # Pass the From parameter if the user wants sequential semantics
     if sequential:
         args.append(('From', construct(sequential_from, T.root_node)))
+
+    if filter_prop:
+        check_source_language(
+            sequential,
+            'a sequential lookup is required to use a filter property'
+        )
+        check_source_language(
+            isinstance(filter_prop, PropertyDef),
+            'filter_prop must be a PropertyDef instance (got'
+            ' {})'.format(filter_prop)
+        )
+        check_source_language(
+            len(filter_prop.arguments) == 1
+            and filter_prop.arguments[0].type == lexical_env_type,
+            'filter_prop must take exactly one argument: a lexical environment'
+        )
+        check_source_language(
+            filter_prop.type == bool_type,
+            'filter_prop must return a boolean (got'
+            ' {})'.format(filter_prop.type.name.camel)
+        )
+        check_source_language(not filter_prop.dynamic_vars,
+                              'filter_prop cannot have dynamic variables')
+
+        filter_prop.require_untyped_wrapper()
+        args.append(('Filter', "{}'Access".format(filter_prop.name)))
 
     array_expr = 'AST_Envs.Get ({})'.format(', '.join('{} => {{}}'.format(n)
                                                       for n, _ in args))
