@@ -284,9 +284,9 @@ package body Langkit_Support.Lexical_Env is
       end if;
    end Append;
 
-   ------------
-   -- Append --
-   ------------
+   ----------------------
+   -- Append_Rebinding --
+   ----------------------
 
    function Append_Rebinding
      (Self                 : Env_Rebindings;
