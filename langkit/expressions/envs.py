@@ -1,7 +1,5 @@
 from __future__ import absolute_import, division, print_function
 
-from functools import partial
-
 from langkit import names
 from langkit.compiled_types import (
     T, bool_type, lexical_env_type, env_rebindings_type, no_compiled_type,
@@ -9,11 +7,11 @@ from langkit.compiled_types import (
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, BasicExpr, CallExpr, GetSymbol,
-    LiteralExpr, NullExpr, PropertyDef, Self, auto_attr, auto_attr_custom,
-    construct
+    AbstractExpression, AbstractVariable, BasicExpr, CallExpr, ComputingExpr,
+    GetSymbol, LiteralExpr, NullExpr, PropertyDef, Self, auto_attr,
+    auto_attr_custom, construct
 )
-from langkit.expressions.utils import array_aggr
+from langkit.expressions.utils import array_aggr, assign_var
 
 
 @auto_attr_custom("get")
@@ -55,21 +53,19 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
         'Invalid key argument for Env.get: {}'.format(repr(symbol_expr))
     )
 
+    env_constr_expr = construct(env_expr, lexical_env_type)
+
     sym_expr = construct(symbol_expr)
     if sym_expr.type == token_type:
         sym_expr = GetSymbol.construct_static(sym_expr)
     check_source_language(
         sym_expr.type == symbol_type,
-        "Wrong type for symbol expr: {}".format(sym_expr.type)
+        'Wrong type for symbol expr: {}'.format(sym_expr.type.name.camel)
     )
 
-    args = [('Self', construct(env_expr, lexical_env_type)),
-            ('Key', sym_expr),
-            ('Recursive', construct(recursive, bool_type))]
+    from_expr = construct(sequential_from, T.root_node) if sequential else None
 
-    # Pass the From parameter if the user wants sequential semantics
-    if sequential:
-        args.append(('From', construct(sequential_from, T.root_node)))
+    recursive_expr = construct(recursive, bool_type)
 
     if filter_prop:
         check_source_language(
@@ -95,25 +91,71 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
                               'filter_prop cannot have dynamic variables')
 
         filter_prop.require_untyped_wrapper()
-        args.append(('Filter', "{}'Access".format(filter_prop.name)))
 
-    array_expr = 'AST_Envs.Get ({})'.format(', '.join('{} => {{}}'.format(n)
-                                                      for n, _ in args))
+    return EnvGet(env_constr_expr, sym_expr, resolve_unique, recursive_expr,
+                  from_expr, filter_prop, self)
 
-    # In both cases below, the BasicExpr template is going to be a function
-    # call that returns a new ownership share, so there is no need for an
-    # inc-ref for the storage in the result variable.
-    make_expr = partial(BasicExpr, 'Env_Get_Result',
-                        operands=[e for _, e in args],
-                        requires_incref=False,
-                        abstract_expr=self)
 
-    if resolve_unique:
-        return make_expr("Get ({}, 0)".format(array_expr),
-                         T.root_node.entity)
-    else:
-        return make_expr("Create ({})".format(array_expr),
-                         T.root_node.entity.array)
+class EnvGet(ComputingExpr):
+    def __init__(self, env_expr, key_expr, resolve_unique, recursive_expr,
+                 sequential_from=None, filter_prop=None, abstract_expr=None):
+        self.env_expr = env_expr
+        self.key_expr = key_expr
+        self.resolve_unique = resolve_unique
+        self.recursive_expr = recursive_expr
+        self.sequential_from = sequential_from
+        self.filter_prop = filter_prop
+        super(EnvGet, self).__init__('Env_Get_Result',
+                                     abstract_expr=abstract_expr)
+
+    @property
+    def type(self):
+        t = T.root_node.entity
+        return t if self.resolve_unique else t.array
+
+    def _render_pre(self):
+        result = [
+            self.env_expr.render_pre(),
+            self.key_expr.render_pre(),
+            self.recursive_expr.render_pre(),
+        ]
+        args = [('Self', self.env_expr.render_expr()),
+                ('Key', self.key_expr.render_expr()),
+                ('Recursive', self.recursive_expr.render_expr())]
+
+        # Pass the From parameter if the user wants sequential semantics
+        if self.sequential_from:
+            result.append(self.sequential_from.render_pre())
+            args.append(('From', self.sequential_from.render_expr()))
+
+        # Pass the filter property if asked to
+        if self.filter_prop:
+            args.append(('Filter', "{}'Access".format(self.filter_prop.name)))
+
+        array_expr = 'AST_Envs.Get ({})'.format(
+            ', '.join('{} => {}'.format(n, v) for n, v in args)
+        )
+        result_expr = 'Get ({}, 0)' if self.resolve_unique else 'Create ({})'
+
+        # In both cases above, the expression is going to be a function call
+        # that returns a new ownership share, so there is no need for an
+        # inc-ref for the storage in the result variable.
+        result.append(assign_var(self.result_var.ref_expr,
+                                 result_expr.format(array_expr),
+                                 requires_incref=False))
+
+        return '\n'.join(result)
+
+    @property
+    def subexprs(self):
+        return {
+            'env': self.env_expr,
+            'key': self.key_expr,
+            'resolve_unique': self.resolve_unique,
+            'recursive': self.recursive_expr,
+            'sequential_from': self.sequential_from,
+            'filter_prop': self.filter_prop
+        }
 
 
 @auto_attr
