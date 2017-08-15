@@ -1,0 +1,4 @@
+main.py: Running...
+<Ref 6:9-6:10> resolves to <EntityArray [<Decl 1:1-1:4>]>
+main.py: Done.
+Done
