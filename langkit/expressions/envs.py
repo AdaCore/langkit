@@ -36,8 +36,9 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
     :param bool sequential: Whether resolution needs to be sequential or not.
     :param AbstractExpression sequential_from: If resolution needs to be
         sequential, must be an expression to use as the reference node.
-    :param bool recursive: Whether lookup must be performed recursively on
-        parent environments.
+    :param AbstractExpression recursive: Expression that must return a boolean,
+        which controls whether lookup must be performed recursively on parent
+        environments.
     :param PropertyDef|None filter_prop: If provided, must be a reference to a
         root node property that::
 
