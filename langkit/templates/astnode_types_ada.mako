@@ -48,12 +48,15 @@
       % endfor
    % endfor
 
+   <% emitted_eq_props = set() %>
    ## Generate logic converters, equality predicates, and binders
    % for conv_prop, eq_prop in ctx.sorted_logic_binders:
+
       % if conv_prop:
          ${prop_helpers.logic_converter(conv_prop)}
       % endif
-      % if eq_prop:
+      % if eq_prop and eq_prop.uid not in emitted_eq_props:
+         <% emitted_eq_props.add(eq_prop.uid) %>
          ${prop_helpers.logic_equal(eq_prop)}
       % endif
 
