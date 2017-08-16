@@ -1575,7 +1575,7 @@ package body ${ada_lib_name}.Analysis is
 
    begin
       if Node.Is_Synthetic then
-         return No_Source_Location_Range;
+         return Sloc_Range (Node.Parent);
       end if;
 
       --  Snapping: We'll go one token before the start token, and one token
