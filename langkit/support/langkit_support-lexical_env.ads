@@ -132,7 +132,7 @@ package Langkit_Support.Lexical_Env is
    --  or a dynamic link (a function that recomputes the link when needed). See
    --  tho two constructors below.
 
-   No_Env_Getter : constant Env_Getter;
+   No_Env_Getter : constant Env_Getter := (False, False, null);
 
    function Simple_Env_Getter (E : Lexical_Env) return Env_Getter;
    --  Create a static Env_Getter (i.e. pointer to environment)
@@ -442,7 +442,6 @@ private
       Bindings  : Env_Rebindings_Array (1 .. Size);
    end record;
 
-   No_Env_Getter    : constant Env_Getter := (False, False, null);
    No_Env_Rebinding : constant Env_Rebinding := (No_Env_Getter, No_Env_Getter);
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
