@@ -549,7 +549,8 @@ class Cond(AbstractExpression):
         for _, expr in pairs:
             rtype = rtype.unify(
                 expr.type,
-                'Mismatching types in Cond expression'
+                'Mismatching types in Cond expression: {self} expected but got'
+                ' {other} instead'
             )
 
         # Since we have subtypes in the DSL but incompatible types in Ada (for
