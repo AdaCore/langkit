@@ -1,0 +1,20 @@
+== Missing args ==
+File "test.py", line 27, in Example.p
+    Error: Missing Cond arguments
+
+== Missing last ==
+File "test.py", line 27, in Example.p
+  line 38, in Cond expression
+    Error: Missing last Cond argument
+
+== Bad condition type ==
+File "test.py", line 27, in Example.p
+  line 39, in Cond expression
+    Error: Bad condition type in Cond expression: Boolean expected but got Example instead
+
+== Bad return type ==
+File "test.py", line 27, in Example.p
+  line 40, in Cond expression
+    Error: Mismatching types in Cond expression: Boolean expected but got Example instead
+
+Done
