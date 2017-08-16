@@ -539,7 +539,11 @@ class Cond(AbstractExpression):
         # Lower each pair of condition/expression in resolved expression
         pairs = []
         for i in range(len(self.args) // 2):
-            cond = construct(self.args[2 * i], bool_type)
+            cond = construct(
+                self.args[2 * i], bool_type,
+                custom_msg='Bad condition type in Cond expression: {expected}'
+                           ' expected but got {expr_type} instead'
+            )
             expr = construct(self.args[2 * i + 1])
             pairs.append((cond, expr))
         else_expr = construct(self.args[-1])
