@@ -7,7 +7,7 @@ from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
     ComputingExpr, LiteralExpr, No, PropertyDef, attr_call,
-    construct, render
+    construct, render, unsugar
 )
 
 
@@ -462,7 +462,7 @@ class Then(AbstractExpression):
         self.var_expr = AbstractVariable(
             names.Name("Var_Expr"), create_local=True,
             source_name=names.Name(argspec.args[0]))
-        self.then_expr = self.then_fn(self.var_expr)
+        self.then_expr = unsugar(self.then_fn(self.var_expr))
 
     def construct(self):
         # Accept as a prefix:
