@@ -245,10 +245,13 @@ def env_parent(self, env):
 
     :param AbstractExpression env: The source environment.
     """
-    parent_env_getter = LiteralExpr(lexical_env_type, '{}.Parent',
-                                    [construct(env, lexical_env_type)])
+    parent_env_getter = LiteralExpr(
+        '{}.Parent',
+        lexical_env_type,
+        [construct(env, lexical_env_type)]
+    )
     return CallExpr(
-        'Parent', 'AST_Envs.Get_Env', T.lexical_env_type, [parent_env_getter],
+        'Parent', 'AST_Envs.Get_Env', lexical_env_type, [parent_env_getter],
         abstract_expr=self,
     )
 
