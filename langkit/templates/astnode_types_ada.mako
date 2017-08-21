@@ -507,9 +507,10 @@
 
          % if is_array_type(exprs.mappings_prop.type):
          end loop;
-         Dec_Ref (Env);
          Dec_Ref (Mappings);
          % endif
+
+         Dec_Ref (Env);
       end;
    </%def>
 
