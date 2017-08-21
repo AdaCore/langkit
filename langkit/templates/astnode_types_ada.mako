@@ -472,34 +472,36 @@
          % if is_array_type(exprs.mappings_prop.type):
          for B of Mappings.Items loop
          % endif
-            ## Add the element to the environment
-            Add (Self  => Env,
-                 Key   => B.F_Key,
-                 Value => ${root_node_type_name} (B.F_Val),
-                 MD    => ${md}
+            if B /= No_Env_Assoc then
+               ## Add the element to the environment
+               Add (Self  => Env,
+                    Key   => B.F_Key,
+                    Value => ${root_node_type_name} (B.F_Val),
+                    MD    => ${md}
 
-                 % if exprs.resolver:
-                 , Resolver => ${exprs.resolver.name}'Access
-                 % endif
-            );
+                    % if exprs.resolver:
+                    , Resolver => ${exprs.resolver.name}'Access
+                    % endif
+               );
 
-            ## If we're adding the element to an env that belongs to a different
-            ## unit, then:
-            if Env /= Empty_Env
-               and then (Env = Root_Env or else Env.Node.Unit /= Self.Unit)
-            then
-               ## Add the env, the key, and the value to the list of entries
-               ## contained in other units, so we can remove them when reparsing
-               ## val's unit.
-               Get_Lex_Env_Data (B.F_Val).Is_Contained_By.Append
-                 ((Env, B.F_Key, ${root_node_type_name} (B.F_Val)));
+               ## If we're adding the element to an env that belongs to a
+               ## different unit, then:
+               if Env /= Empty_Env
+                  and then (Env = Root_Env or else Env.Node.Unit /= Self.Unit)
+               then
+                  ## Add the env, the key, and the value to the list of entries
+                  ## contained in other units, so we can remove them when
+                  ## reparsing val's unit.
+                  Get_Lex_Env_Data (B.F_Val).Is_Contained_By.Append
+                    ((Env, B.F_Key, ${root_node_type_name} (B.F_Val)));
 
-               if Env /= Root_Env then
-                  ## Add Val to the list of entries that env's unit contains, so
-                  ## that when the unit is reparsed, we can call add_to_env
-                  ## again on those nodes.
-                  Get_Lex_Env_Data (Env.Node).Contains.Append
-                    (${root_node_type_name} (B.F_Val));
+                  if Env /= Root_Env then
+                     ## Add Val to the list of entries that env's unit
+                     ## contains, so that when the unit is reparsed, we can
+                     ## call add_to_env again on those nodes.
+                     Get_Lex_Env_Data (Env.Node).Contains.Append
+                       (${root_node_type_name} (B.F_Val));
+                  end if;
                end if;
             end if;
 
