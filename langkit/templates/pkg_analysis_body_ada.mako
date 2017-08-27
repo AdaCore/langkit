@@ -1275,9 +1275,7 @@ package body ${ada_lib_name}.Analysis is
       -----------
 
       function Visit
-        (Node : access ${root_node_value_type}'Class)
-         return Visit_Status
-      is
+        (Node : access ${root_node_value_type}'Class) return Visit_Status is
       begin
          Node.Reset_Caches;
          return Into;
