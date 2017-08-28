@@ -82,9 +82,9 @@ package body ${ada_lib_name}.Analysis.Parsers is
    --  Release a parse list, putting it in Parsers' free list. Set List to
    --  null.
 
-   ----------------------
-   -- Create_From_File --
-   ----------------------
+   ---------------------------
+   -- Init_Parser_From_File --
+   ---------------------------
 
    procedure Init_Parser_From_File
      (Filename, Charset : String;
@@ -105,9 +105,9 @@ package body ${ada_lib_name}.Analysis.Parsers is
       % endif
    end Init_Parser_From_File;
 
-   ------------------------
-   -- Create_From_Buffer --
-   ------------------------
+   -----------------------------
+   -- Init_Parser_From_Buffer --
+   -----------------------------
 
    procedure Init_Parser_From_Buffer
      (Buffer, Charset : String;
