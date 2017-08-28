@@ -602,27 +602,18 @@ class ManageScript(object):
 
         :param bool is_library: If true, build both relocatable and static
             libraries (depending on modes enabled in "args"). Otherwise, use
-            static if available or relocatable mode otherwise.
+            relocatable if available or static mode otherwise.
 
         :return: Whether to build in shared mode and whether to build static
             mode. Only one is True when is_library is False.
         :rtype: (bool, bool)
         """
-        import platform
-        osname = platform.system()
-
         # The basic principle is: build shared unless disabled and build static
         # unless disabled. But for programs, we can build only one mode: in
-        # this case, static has priority over shared.
-
-        # HACK: For the moment static builds are not working under windows, so
-        # we short circuit them.
-        if 'Windows' in osname or 'CYGWIN' in osname and not is_library:
-            return (True, False)
-
-        build_static = args.enable_static
-        build_shared = (args.enable_shared
-                        and (not build_static or is_library))
+        # this case, shared has priority over static.
+        build_shared = args.enable_shared
+        build_static = (args.enable_static and
+                        (is_library or not build_shared))
         return (build_shared, build_static)
 
     def gpr_scenario_vars(self, args, build_mode=None,
