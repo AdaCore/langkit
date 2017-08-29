@@ -273,7 +273,7 @@ class AttributeExpression(object):
     DSL.
     """
 
-    def __init__(self, constructor, args, kwargs, parameterless):
+    def __init__(self, constructor, args, kwargs, parameterless, doc=None):
         """
         :param constructor: Callable that builds the expression.
         :param args: Partial list of positional arguments to pass to
@@ -281,11 +281,14 @@ class AttributeExpression(object):
         :param kwargs: Partial keyword arguments to pass to `constructor`.
         :param bool parameterless: False if this ".attribute" requires
             arguments, true otherwise.
+        :param str|None doc: If provided, must be a string to use as the
+            documentation for this attribute expression.
         """
         self.constructor = constructor
         self.args = args
         self.kwargs = kwargs
         self.parameterless = parameterless
+        self.doc = doc or constructor.__doc__
 
     def build(self, prefix):
         return (self.constructor(prefix, *self.args, **self.kwargs)
@@ -608,6 +611,8 @@ def attr_call(name, *args, **kwargs):
     attr_expr_impl for more details.
 
     :param name: The name of the attribute.
+    :param str|None doc: If provided, must be a string to use as the
+        documentation for this attribute expression.
     :param args: additional arguments to pass to the class.
     :param kwargs: additional arguments to pass to the class.
     """
@@ -621,6 +626,8 @@ def attr_expr(name, *args, **kwargs):
     class. See attr_expr_impl for more details.
 
     :param name: The name of the attribute.
+    :param str|None doc: If provided, must be a string to use as the
+        documentation for this attribute expression.
     :param args: additional arguments to pass to the class.
     :param kwargs: additional arguments to pass to the class.
     """
@@ -632,15 +639,18 @@ def attr_expr_impl(name, args, kwargs, parameterless=False):
     Implementation for attr_expr and attr_call.
 
     :param name: The name of the attribute.
-    :param bool parameterless: Whether the attribute should take parameters
-        or not.
     :param args: additional arguments to pass to the class.
     :param kwargs: additional arguments to pass to the class.
+    :param bool parameterless: Whether the attribute should take parameters
+        or not.
+    :param str|None doc: If provided, must be a string to use as the
+        documentation for this attribute expression.
     """
 
     def internal(decorated_class):
         AbstractExpression.attrs_dict[name] = AttributeExpression(
-            decorated_class, args, kwargs, parameterless
+            decorated_class, args, kwargs, parameterless,
+            kwargs.pop('doc', None)
         )
         return decorated_class
 
@@ -655,10 +665,13 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
 
     :param str|None name: The name of the attribute. If None, the name of the
         function will be taken.
+    :param str|None doc: If provided, must be a string to use as the
+        documentation for this attribute expression.
     :param [object] partial_args: Arguments to partially apply to the function.
     :param [object] partial_kwargs: Keyword arguments to partially apply to the
         function.
     """
+    doc = partial_kwargs.pop('doc', None)
 
     def internal(fn):
         attr_name = name or fn.__name__
@@ -693,7 +706,7 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
 
         decorator = (attr_expr if nb_args == 2 else attr_call)
 
-        decorator(attr_name)(type(
+        decorator(attr_name, doc)(type(
             b'{}'.format(attr_name),
             (AbstractExpression, ), {
                 'construct': construct,
