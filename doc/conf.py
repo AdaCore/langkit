@@ -12,6 +12,8 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from __future__ import (absolute_import, division, print_function)
+
 import sys
 import os
 
@@ -345,3 +347,10 @@ todo_include_todos = True
 
 # Generate documentation for __init__ methods
 autoclass_content = 'both'
+
+
+def setup(app):
+    from langkit.auto_properties_dsl import (AutoPropertiesDSL,
+                                             properties_dsl_ref)
+    app.add_directive('auto-properties-dsl', AutoPropertiesDSL)
+    app.add_role('dsl', properties_dsl_ref)

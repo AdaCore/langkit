@@ -15,6 +15,7 @@ Contents:
    tutorial
    extension_points
    api_documentation
+   properties_dsl
    internals
 
 
