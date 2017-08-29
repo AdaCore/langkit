@@ -267,6 +267,37 @@ class Frozable(object):
         return wrapper
 
 
+class AttributeExpression(object):
+    """
+    Holder for information related to a ".attribute" construct in the property
+    DSL.
+    """
+
+    def __init__(self, constructor, args, kwargs, parameterless):
+        """
+        :param constructor: Callable that builds the expression.
+        :param args: Partial list of positional arguments to pass to
+            `constructor`.
+        :param kwargs: Partial keyword arguments to pass to `constructor`.
+        :param bool parameterless: False if this ".attribute" requires
+            arguments, true otherwise.
+        """
+        self.constructor = constructor
+        self.args = args
+        self.kwargs = kwargs
+        self.parameterless = parameterless
+
+    def build(self, prefix):
+        return (self.constructor(prefix, *self.args, **self.kwargs)
+                if self.parameterless else
+                partial(self.constructor, prefix, *self.args, **self.kwargs))
+
+    def __repr__(self):
+        return '<AttributeExpression for {}, args={}, kwargs={}>'.format(
+            self.constructor, self.args, self.kwargs
+        )
+
+
 class AbstractExpression(Frozable):
     """
     An abstract expression is an expression that is not yet resolved (think:
@@ -446,16 +477,7 @@ class AbstractExpression(Frozable):
         from langkit.expressions.structs import FieldAccess
 
         try:
-            klass, args, kwargs, paramless = (
-                AbstractExpression.attrs_dict[attr]
-            )
-            if paramless:
-                # Automatically instantiate paramless attributes
-                return klass(self, *args, **kwargs)
-            else:
-                # For attributes with parameters, return a partial
-                # instantiation.
-                return partial(klass, self, *args, **kwargs)
+            return AbstractExpression.attrs_dict[attr].build(self)
         except KeyError:
             return self.composed_attrs().get(attr, FieldAccess(self, attr))
 
@@ -617,8 +639,9 @@ def attr_expr_impl(name, args, kwargs, parameterless=False):
     """
 
     def internal(decorated_class):
-        AbstractExpression.attrs_dict[name] = (decorated_class, args, kwargs,
-                                               parameterless)
+        AbstractExpression.attrs_dict[name] = AttributeExpression(
+            decorated_class, args, kwargs, parameterless
+        )
         return decorated_class
 
     return internal
