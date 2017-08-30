@@ -729,9 +729,7 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
                          for i in range(self.nb_exprs))
 
         def construct(self):
-            kwargs = dict(partial_kwargs)
-            kwargs.update(self.kwargs)
-            return fn(self, *(self.sub_expressions + partial_args), **kwargs)
+            return fn(self, *self.sub_expressions, **self.kwargs)
 
         def __repr__(self):
             return "<{}{}>".format(
@@ -746,7 +744,7 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
 
         decorator = (attr_expr if nb_args == 2 else attr_call)
 
-        decorator(attr_name, doc=doc)(type(
+        decorator(attr_name, *partial_args, doc=doc, **partial_kwargs)(type(
             b'{}'.format(attr_name),
             (AbstractExpression, ), {
                 'construct': construct,
