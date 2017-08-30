@@ -38,7 +38,15 @@ class AutoPropertiesDSL(docutils.parsers.rst.Directive):
             document.note_explicit_target(target_node)
 
             term = nodes.term()
-            self._parse(['expr.\ **{}**'.format(name)], term)
+            term_label = r'expr.\ **{}**'.format(name)
+            argspec = attr_expr.argspec
+            if argspec is None:
+                pass
+            elif len(argspec) == 0:
+                term_label += r'\ ()'
+            else:
+                term_label += r'\ (\ *{}*\ )'.format(', '.join(argspec))
+            self._parse([term_label], term)
 
             definition = nodes.definition()
             doc = attr_expr.doc or '*Not yet documented*'

@@ -290,6 +290,46 @@ class AttributeExpression(object):
         self.parameterless = parameterless
         self.doc = doc or constructor.__doc__
 
+    @property
+    def argspec(self):
+        """
+        Return a user-level argument specification for this construct.
+
+        This returns None for parameter-less attributes and a list of strings
+        for the others.
+
+        :rtype: None|list[str]
+        """
+        func = self.constructor
+
+        if self.parameterless:
+            return None
+        elif inspect.isclass(func):
+            func = getattr(func, '_wrapped_function', func.__init__)
+        elif not inspect.isfunction(func):
+            return ['???']
+
+        args, varargs, keywords, defaults = inspect.getargspec(func)
+        result = []
+
+        # Discard "self", which is irrelevant for documentation purposes, plus
+        # the next argument which is the prefix for the attribute expression.
+        result = args[2:]
+
+        # Remove positional arguments which are already provided by partial
+        # evaluation.
+        result = result[len(self.args):]
+
+        # Likewise for keyword arguments
+        for kw in self.kwargs:
+            result.remove(kw)
+
+        # Describe variadic constructors as such
+        if varargs:
+            result.append('\*' + varargs)
+
+        return result
+
     def build(self, prefix):
         return (self.constructor(prefix, *self.args, **self.kwargs)
                 if self.parameterless else
@@ -714,6 +754,7 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
                 '__repr__': __repr__,
                 'sub_expressions': sub_expressions,
                 '__doc__': fn.__doc__,
+                '_wrapped_function': fn,
             }
         ))
 
