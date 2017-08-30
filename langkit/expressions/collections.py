@@ -481,10 +481,17 @@ def as_array(self, list_expr):
 
 
 @attr_call('all', kind='all')
-@attr_call('any', kind='any')
+@attr_call('any', kind='any',
+           doc='Like :dsl:`all`, but return true as soon as the predicate'
+               ' returns true for one collection item.')
 class Quantifier(CollectionExpression):
     """
-    Expression that tests a predicate over the items of a collection.
+    Must be applied on a collection. This returns whether `predicate` returns
+    true for all the items in a collection.
+
+    For instance, this computes whether all integers in an array are positive:
+    .. code:: python
+        int_array.all(lambda i: i > 0)
     """
 
     class Expr(ComputingExpr):
