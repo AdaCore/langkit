@@ -242,7 +242,9 @@ def check_text(report, filename, lang, first_line, text, is_comment):
                 continue
             s.is_prompt = False
 
-        if line.startswith(b':type') or line.startswith(b':rtype:'):
+        if (line.startswith(b':type')
+                or line.startswith(b':rtype:')
+                or line.startswith(b'.. code')):
             s.end_block(False)
             s.is_sphinx = True
         elif line.startswith(b':param'):
