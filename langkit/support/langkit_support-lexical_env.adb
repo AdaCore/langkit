@@ -39,6 +39,9 @@ package body Langkit_Support.Lexical_Env is
    --  From an array of entities, decorate every element with additional
    --  Metadata stored in MD.
 
+   procedure Check_Rebindings_Unicity (Self : Env_Rebindings);
+   --  Assert that all rebindings are unique in Self
+
    -----------------------
    -- Simple_Env_Getter --
    -----------------------
@@ -178,18 +181,13 @@ package body Langkit_Support.Lexical_Env is
          return null;
       end if;
 
-      --  Check unicity of rebindings
-      pragma Assert
-        (for all I in Bindings'Range =>
-           (for all J in Bindings'Range =>
-              J = I or else Bindings (I) /= Bindings (J)));
-
       declare
          Result : constant Env_Rebindings := new Env_Rebindings_Type'
            (Size       => Bindings'Length,
             Bindings   => Bindings,
             Ref_Count  => 1);
       begin
+         Check_Rebindings_Unicity (Result);
          for R of Bindings loop
             Inc_Ref (R);
          end loop;
@@ -258,12 +256,7 @@ package body Langkit_Support.Lexical_Env is
          Inc_Ref (Result.Bindings (J));
       end loop;
 
-      --  Check unicity of rebindings
-      pragma Assert
-        (for all I in Result.Bindings'Range =>
-           (for all J in Result.Bindings'Range =>
-              J = I or else Result.Bindings (I) /= Result.Bindings (J)));
-
+      Check_Rebindings_Unicity (Result);
       return Result;
    end Combine;
 
@@ -1016,6 +1009,19 @@ package body Langkit_Support.Lexical_Env is
    begin
       return Internal_Decorate (Elts);
    end Decorate;
+
+   ------------------------------
+   -- Check_Rebindings_Unicity --
+   ------------------------------
+
+   procedure Check_Rebindings_Unicity (Self : Env_Rebindings) is
+      Bindings : Env_Rebindings_Array renames Self.Bindings;
+   begin
+      pragma Assert
+        (for all I in Bindings'Range =>
+           (for all J in Bindings'Range =>
+              J = I or else Bindings (I) /= Bindings (J)));
+   end Check_Rebindings_Unicity;
 
    -----------
    -- Image --
