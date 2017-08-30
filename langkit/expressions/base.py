@@ -706,7 +706,7 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
 
         decorator = (attr_expr if nb_args == 2 else attr_call)
 
-        decorator(attr_name, doc)(type(
+        decorator(attr_name, doc=doc)(type(
             b'{}'.format(attr_name),
             (AbstractExpression, ), {
                 'construct': construct,
