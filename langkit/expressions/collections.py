@@ -601,11 +601,17 @@ class Quantifier(CollectionExpression):
         return '<{}Quantifier>'.format(self.kind.capitalize())
 
 
-@auto_attr_custom("at")
-@auto_attr_custom("at_or_raise", or_null=False)
-def collection_get(self, coll_expr, index_expr, or_null=True):
+@auto_attr_custom('at', or_null=True)
+@auto_attr_custom('at_or_raise', or_null=False,
+                  doc='Like :dsl:`at`, but raise a property error when the'
+                      ' index is out of bounds.')
+def collection_get(self, coll_expr, index, or_null):
     """
-    Expression that will get an element from a collection.
+    Get an element from a collection. Must be applied on a collection.
+
+    Indexes are 0-based. As in Python, `index` can be negative, to retrieve
+    elements in reverse order. For instance, ``expr.at(-1)`` will return the
+    last element.
 
     :param AbstractExpression coll_expr: The expression representing the
         collection to get from.
@@ -615,9 +621,9 @@ def collection_get(self, coll_expr, index_expr, or_null=True):
         index is not valid for the collection. If False, it will raise an
         exception.
     """
-    # index_expr yields a 0-based index and all the Get primitives expect
-    # 0-based indexes, so there is no need to fiddle indexes here.
-    index_expr = construct(index_expr, long_type)
+    # index yields a 0-based index and all the Get primitives expect 0-based
+    # indexes, so there is no need to fiddle indexes here.
+    index_expr = construct(index, long_type)
 
     coll_expr = construct(coll_expr)
     as_entity = coll_expr.type.is_entity_type
