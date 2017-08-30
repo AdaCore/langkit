@@ -251,7 +251,7 @@ class CollectionExpression(AbstractExpression):
         )
 
 
-@attr_expr("contains")
+@attr_call("contains")
 class Contains(CollectionExpression):
     """
     Abstract expression for a membership test expression.
