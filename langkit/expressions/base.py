@@ -713,6 +713,7 @@ def auto_attr_custom(name, *partial_args, **partial_kwargs):
                 '__init__': __init__,
                 '__repr__': __repr__,
                 'sub_expressions': sub_expressions,
+                '__doc__': fn.__doc__,
             }
         ))
 
