@@ -1019,8 +1019,8 @@ package body Langkit_Support.Lexical_Env is
    begin
       pragma Assert
         (for all I in Bindings'Range =>
-           (for all J in Bindings'Range =>
-              J = I or else Bindings (I) /= Bindings (J)));
+           (for all J in I + 1 .. Bindings'Last =>
+              Bindings (I) /= Bindings (J)));
    end Check_Rebindings_Unicity;
 
    -----------
