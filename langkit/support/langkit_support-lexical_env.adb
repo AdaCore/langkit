@@ -875,13 +875,6 @@ package body Langkit_Support.Lexical_Env is
      (From_Env   : Lexical_Env;
       Rebindings : Env_Rebindings) return Env_Rebindings
    is
-      function Get_First_Rebindable_Env (L : Lexical_Env) return Lexical_Env
-      is
-        (if L = null
-            or else (L.Node /= No_Element and then Is_Rebindable (L.Node))
-         then L
-         else Get_First_Rebindable_Env (Get_Env (L.Parent)));
-
       First_Rebindable_Parent : Lexical_Env;
       Current_Last_Binding    : Natural;
    begin
@@ -892,32 +885,39 @@ package body Langkit_Support.Lexical_Env is
 
       Current_Last_Binding := Rebindings.Size;
 
-      --  Try to find a rebindable node in the parent chain
-      First_Rebindable_Parent := Get_First_Rebindable_Env (From_Env);
+      --  Look for the first environment in From_Env's parent chain whose Node
+      --  is rebindable. Use null if there is no such env.
+      First_Rebindable_Parent := From_Env;
+      while
+         First_Rebindable_Parent /= null
+         and then (First_Rebindable_Parent.Node = No_Element
+                   or else not Is_Rebindable (First_Rebindable_Parent.Node))
+      loop
+         First_Rebindable_Parent := Get_Env (First_Rebindable_Parent.Parent);
+      end loop;
 
       --  If there is no rebindable parent anywhere, it means we cannot have
-      --  rebindings. In that case, shed them all, e.g. return null rebindings.
+      --  rebindings. In that case, shed them all, i.e. return null rebindings.
       if First_Rebindable_Parent = null then
          return null;
-      else
-         --  If we find a rebindable parent, then we will shed every rebindings
-         --  between the top of the rebinding stack, and the corresponding
-         --  rebinding.
-         while
-           Current_Last_Binding >= 1
-           and then
-           Get_Env (Rebindings.Bindings (Current_Last_Binding).Old_Env)
-             /= First_Rebindable_Parent
-         loop
-            Current_Last_Binding := Current_Last_Binding - 1;
-         end loop;
-
-         if Current_Last_Binding /= 0 then
-            return Create (Rebindings.Bindings (1 .. Current_Last_Binding));
-         else
-            return null;
-         end if;
       end if;
+
+      --  If we fond a rebindable parent, then we will shed all rebindings
+      --  between the top of the rebinding stack and the corresponding
+      --  rebinding.
+      while
+        Current_Last_Binding >= 1
+        and then
+        Get_Env (Rebindings.Bindings (Current_Last_Binding).Old_Env)
+          /= First_Rebindable_Parent
+      loop
+         Current_Last_Binding := Current_Last_Binding - 1;
+      end loop;
+
+      return
+        (if Current_Last_Binding /= 0
+         then Create (Rebindings.Bindings (1 .. Current_Last_Binding))
+         else null);
    end Shed_Rebindings;
 
    ---------------------
