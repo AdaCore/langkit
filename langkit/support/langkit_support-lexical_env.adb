@@ -511,8 +511,6 @@ package body Langkit_Support.Lexical_Env is
       use Internal_Envs;
       use Entity_Arrays;
 
-      use Referenced_Envs_Arrays;
-
       function Get_Refd_Elements
         (Self : Referenced_Env) return Entity_Array;
       --  If we can determine that From can reach Self.From_Node, return the

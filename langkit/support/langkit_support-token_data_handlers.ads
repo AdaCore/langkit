@@ -26,7 +26,7 @@ package Langkit_Support.Token_Data_Handlers is
    package Integer_Vectors is new Langkit_Support.Vectors
      (Element_Type => Integer);
 
-   use Token_Vectors, Text_Vectors, Trivia_Vectors, Integer_Vectors;
+   use Token_Vectors, Trivia_Vectors, Integer_Vectors;
 
    type Token_Index is new Integer range
       Token_Vectors.Index_Type'First - 1
