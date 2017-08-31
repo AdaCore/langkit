@@ -812,8 +812,10 @@ package body Langkit_Support.Lexical_Env is
       Self := null;
    end Dec_Ref;
 
-   function Pop (Rebindings : Env_Rebindings) return Env_Rebindings
-   is (Create (Rebindings.Bindings (1 .. Rebindings.Size - 1)));
+   function Pop (Rebindings : Env_Rebindings) return Env_Rebindings is
+     (if Rebindings = null
+      then null
+      else Create (Rebindings.Bindings (1 .. Rebindings.Size - 1)));
 
    -----------------------
    -- Extract_Rebinding --
@@ -857,15 +859,8 @@ package body Langkit_Support.Lexical_Env is
       Inc_Ref (Return_Env);
 
       if Return_Env /= Rebound_Env then
-         if Rebindings.Size = 1 then
-            --  We are going to remove the only rebinding Rebindings had, so we
-            --  return the "null" value for rebindings.
-            Rebindings := null;
-         else
-            --  Create the new rebindings set
-            Rebindings := Pop (Rebindings);
-         end if;
-
+         --  Create the new rebindings set
+         Rebindings := Pop (Rebindings);
          Dec_Ref (Old_Rebindings);
       end if;
 
