@@ -53,7 +53,8 @@ package ${ada_lib_name}.Analysis is
    type Analysis_Context is private;
    ${ada_doc('langkit.analysis_context_type', 3)}
 
-   type Analysis_Unit is private;
+   type Analysis_Unit_Type is private;
+   type Analysis_Unit is access all Analysis_Unit_Type;
    ${ada_doc('langkit.analysis_unit_type', 3)}
 
    No_Analysis_Unit : constant Analysis_Unit;
@@ -980,10 +981,8 @@ private
    use AST_Envs;
 
    type Analysis_Context_Type;
-   type Analysis_Unit_Type;
 
    type Analysis_Context is access all Analysis_Context_Type;
-   type Analysis_Unit is access all Analysis_Unit_Type;
 
    No_Analysis_Unit    : constant Analysis_Unit := null;
    No_Analysis_Context : constant Analysis_Context := null;
