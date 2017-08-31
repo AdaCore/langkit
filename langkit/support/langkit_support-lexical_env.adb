@@ -40,7 +40,9 @@ package body Langkit_Support.Lexical_Env is
    --  Metadata stored in MD.
 
    procedure Check_Rebindings_Unicity (Self : Env_Rebindings);
-   --  Assert that all rebindings are unique in Self
+   --  Perform a unicity check on the various rebindings in Self. In
+   --  particular, check that there are no two identical Old_Env and no two
+   --  identical New_Env in the set of rebindings.
 
    -----------------------
    -- Simple_Env_Getter --
@@ -1017,10 +1019,13 @@ package body Langkit_Support.Lexical_Env is
    procedure Check_Rebindings_Unicity (Self : Env_Rebindings) is
       Bindings : Env_Rebindings_Array renames Self.Bindings;
    begin
-      pragma Assert
-        (for all I in Bindings'Range =>
-           (for all J in I + 1 .. Bindings'Last =>
-              Bindings (I) /= Bindings (J)));
+      for I in Bindings'Range loop
+         for J in I + 1 .. Bindings'Last loop
+            pragma Assert
+              (Old_Env (Bindings (I)) /= Old_Env (Bindings (J))
+               and then New_Env (Bindings (I)) /= New_Env (Bindings (J)));
+         end loop;
+      end loop;
    end Check_Rebindings_Unicity;
 
    -----------
