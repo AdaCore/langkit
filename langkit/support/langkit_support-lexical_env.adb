@@ -946,18 +946,16 @@ package body Langkit_Support.Lexical_Env is
 
       function Create_Entity (Elt : Internal_Map_Element) return Entity
       is
-         Resolved : Entity;
-         Result   : constant Entity :=
-           (El      => Elt.Element,
-            Info    => (MD         => Combine (Elt.MD, MD),
-                        Rebindings => Rebindings));
+         Result : constant Entity :=
+           (El   => Elt.Element,
+            Info => (MD         => Combine (Elt.MD, MD),
+                     Rebindings => Rebindings));
       begin
          if Elt.Resolver = null then
             Inc_Ref (Result.Info.Rebindings);
             return Result;
          else
-            Resolved := Elt.Resolver.all (Result);
-            return Resolved;
+            return Elt.Resolver.all (Result);
          end if;
       end Create_Entity;
 
