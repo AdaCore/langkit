@@ -412,8 +412,9 @@ package Langkit_Support.Lexical_Env is
 
    function Shed_Rebindings
      (E_Info : Entity_Info; Env : Lexical_Env) return Entity_Info;
-   --  Return a new entity from E_Info, shedding env rebindings that are not in
-   --  the parent chain for the env From_Env. Return a new ownership share.
+   --  Return a new entity info from E_Info, shedding env rebindings that are
+   --  not in the parent chain for the env From_Env. Return a new ownership
+   --  share.
 
    function Is_Primary (Self : Lexical_Env) return Boolean is
      (Self.Ref_Count = No_Refcount and then Self.Node /= No_Element);
