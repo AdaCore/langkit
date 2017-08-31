@@ -167,7 +167,8 @@ package Langkit_Support.Lexical_Env is
          and then (New_Env (Env_Rebinding) = null
                    or else Is_Primary (New_Env (Env_Rebinding)));
    --  Mapping from one lexical environment (the old one) to another (the new
-   --  one).
+   --  one). Note that as both referenced environments are primary, this data
+   --  type does not need ref-counting primitives.
 
    No_Env_Rebinding : constant Env_Rebinding;
 
@@ -176,12 +177,6 @@ package Langkit_Support.Lexical_Env is
 
    function New_Env (Self : Env_Rebinding) return Lexical_Env;
    --  Retrun the environment that Self rebinds to
-
-   procedure Inc_Ref (Self : Env_Rebinding);
-   --  Shortcut to run Inc_Ref on both embedded Env_Getter values
-
-   procedure Dec_Ref (Self : in out Env_Rebinding);
-   --  Shortcut to run Dec_Ref on both embedded Env_Getter values
 
    type Env_Rebindings_Array is array (Positive range <>) of Env_Rebinding;
 

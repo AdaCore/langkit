@@ -124,29 +124,6 @@ package body Langkit_Support.Lexical_Env is
       end if;
    end Dec_Ref;
 
-   -------------
-   -- Inc_Ref --
-   -------------
-
-   procedure Inc_Ref (Self : Env_Rebinding) is
-   begin
-      Inc_Ref (Self.Old_Env);
-      Inc_Ref (Self.New_Env);
-   end Inc_Ref;
-
-   -------------
-   -- Dec_Ref --
-   -------------
-
-   procedure Dec_Ref (Self : in out Env_Rebinding) is
-      Old_Env : Env_Getter := Self.Old_Env;
-      New_Env : Env_Getter := Self.New_Env;
-   begin
-      Dec_Ref (Old_Env);
-      Dec_Ref (New_Env);
-      Self := No_Env_Rebinding;
-   end Dec_Ref;
-
    -------------------
    -- Is_Equivalent --
    -------------------
@@ -190,9 +167,6 @@ package body Langkit_Support.Lexical_Env is
             Ref_Count  => 1);
       begin
          Check_Rebindings_Unicity (Result);
-         for R of Bindings loop
-            Inc_Ref (R);
-         end loop;
          return Result;
       end;
    end Create;
@@ -219,9 +193,6 @@ package body Langkit_Support.Lexical_Env is
       if Self /= null then
          Self.Ref_Count := Self.Ref_Count - 1;
          if Self.Ref_Count = 0 then
-            for R of Self.Bindings loop
-               Dec_Ref (R);
-            end loop;
             Unchecked_Free (Self);
          end if;
          Self := null;
@@ -245,19 +216,10 @@ package body Langkit_Support.Lexical_Env is
          return L;
       end if;
 
-      Result := new Env_Rebindings_Type (L.Size + R.Size);
-      Result.Ref_Count := 1;
-
-      for J in 1 .. L.Size loop
-         Result.Bindings (J) := L.Bindings (J);
-         Inc_Ref (Result.Bindings (J));
-      end loop;
-
-      for J in 1 .. R.Size loop
-         Result.Bindings (J + L.Size) := R.Bindings (J);
-         Inc_Ref (Result.Bindings (J));
-      end loop;
-
+      Result := new Env_Rebindings_Type'
+        (Size      => L.Size + R.Size,
+         Ref_Count => 1,
+         Bindings  => L.Bindings & R.Bindings);
       Check_Rebindings_Unicity (Result);
       return Result;
    end Combine;
