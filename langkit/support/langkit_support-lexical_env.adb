@@ -711,8 +711,7 @@ package body Langkit_Support.Lexical_Env is
    ----------------
 
    function Rebind_Env
-     (Base_Env        : Lexical_Env;
-      Rebindings      : Env_Rebindings) return Lexical_Env
+     (Base_Env : Lexical_Env; Rebindings : Env_Rebindings) return Lexical_Env
    is
    begin
       --  If no rebindings were passed, just return the original base env
@@ -742,8 +741,7 @@ package body Langkit_Support.Lexical_Env is
    ----------------
 
    function Rebind_Env
-     (Base_Env            : Lexical_Env;
-      E_Info              : Entity_Info) return Lexical_Env
+     (Base_Env : Lexical_Env; E_Info : Entity_Info) return Lexical_Env
    is
    begin
       return Rebind_Env (Base_Env, E_Info.Rebindings);
