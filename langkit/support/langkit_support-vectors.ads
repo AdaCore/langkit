@@ -102,6 +102,14 @@ package Langkit_Support.Vectors is
      with Pre => Length (Self) > 0;
    --  Pop the last element from vector
 
+   function Pop (Self : in out Vector; N : Index_Type) return Element_Type
+      with Pre => N <= Self.Last_Index;
+   procedure Pop (Self : in out Vector; N : Index_Type)
+      with Pre => N <= Self.Last_Index;
+   --  Move the last element in Self at index N and then remove the last
+   --  element. This makes it possible to remove an item from the vector while
+   --  iterating on it.
+
    function Has_Element (Self : Vector; N : Index_Type) return Boolean
      with Inline;
    --  Given a vector and an index, return True if the index is in the vector

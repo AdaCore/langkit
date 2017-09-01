@@ -168,6 +168,28 @@ package body Langkit_Support.Vectors is
       null;
    end Pop;
 
+   ---------
+   -- Pop --
+   ---------
+
+   function Pop (Self : in out Vector; N : Index_Type) return Element_Type is
+      Result : constant Element_Type := Self.Get (N);
+   begin
+      Self.Set (N, Self.Last_Element);
+      Self.Size := Self.Size - 1;
+      return Result;
+   end Pop;
+
+   ---------
+   -- Pop --
+   ---------
+
+   procedure Pop (Self : in out Vector; N : Index_Type) is
+      Discard : constant Element_Type := Self.Pop (N);
+   begin
+      null;
+   end Pop;
+
    -------------------
    -- First_Element --
    -------------------
