@@ -773,8 +773,8 @@ package body Langkit_Support.Lexical_Env is
             Dec_Ref (Getter);
          end;
       end loop;
+      Self.Referenced_Envs.Destroy;
 
-      Referenced_Envs_Vectors.Destroy (Self.Referenced_Envs);
       Dec_Ref (Self.Rebindings);
       Free (Self);
    end Destroy;
