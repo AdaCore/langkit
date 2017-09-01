@@ -1059,8 +1059,8 @@ private
    package Destroyable_Vectors is new Langkit_Support.Vectors
      (Destroyable_Type);
 
-   package Analysis_Unit_Sets
-   is new Langkit_Support.Cheap_Sets (Analysis_Unit, null);
+   package Analysis_Unit_Sets is new Langkit_Support.Cheap_Sets
+     (Analysis_Unit, null);
 
    type Lex_Env_Data_Type;
    type Lex_Env_Data is access all Lex_Env_Data_Type;
