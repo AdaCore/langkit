@@ -2,6 +2,8 @@ with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Unchecked_Deallocation;
 
+with System.Storage_Elements; use System.Storage_Elements;
+
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Vectors;
@@ -46,9 +48,13 @@ generic
 
    with function Element_Image (El : Element_T) return Text_Type;
 
+   with procedure Register_Rebinding
+     (Element : Element_T; Rebinding : System.Address);
+   --  Register a rebinding to be destroyed when Element is destroyed
+
 package Langkit_Support.Lexical_Env is
 
-   type Env_Rebindings_Type (<>) is private;
+   type Env_Rebindings_Type;
    type Env_Rebindings is access all Env_Rebindings_Type;
    --  Set of mappings from one lexical environment to another. This is used to
    --  temporarily substitute lexical environment during symbol lookup.
@@ -68,12 +74,6 @@ package Langkit_Support.Lexical_Env is
    function Combine (L, R : Entity_Info) return Entity_Info;
    --  Return a new Entity_Info that combines info from both L and R
 
-   procedure Inc_Ref (Self : Entity_Info);
-   --  Increment the reference count of items in Self
-
-   procedure Dec_Ref (Self : in out Entity_Info);
-   --  Decrement the reference count of items in Self
-
    type Entity is record
       El   : Element_T;
       Info : Entity_Info;
@@ -87,12 +87,6 @@ package Langkit_Support.Lexical_Env is
 
    function Is_Equivalent (L, R : Entity) return Boolean;
    --  Return whether we can consider that L and R are equivalent entities
-
-   procedure Inc_Ref (Self : Entity);
-   --  Increment the reference count of items in Self
-
-   procedure Dec_Ref (Self : in out Entity);
-   --  Decrement the reference count of items in Self
 
    ----------------------
    -- Lexical_Env Type --
@@ -178,28 +172,22 @@ package Langkit_Support.Lexical_Env is
    function New_Env (Self : Env_Rebinding) return Lexical_Env;
    --  Retrun the environment that Self rebinds to
 
-   type Env_Rebindings_Array is array (Positive range <>) of Env_Rebinding;
+   package Env_Rebindings_Vectors is new Langkit_Support.Vectors
+     (Env_Rebindings);
 
-   function Is_Equivalent (L, R : Env_Rebindings) return Boolean;
-   --  Return whether we can consider L and R as being the same set of env
-   --  rebindings. Raise a Constraint_Error if this involves comparing
-   --  synthetic environment or dynamic env getters.
-
-   function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings;
-   --  Create a new Env_Rebindings from an array of binding pairs
-
-   procedure Inc_Ref (Self : Env_Rebindings);
-   --  Increment Self's reference count. Do nothing if Self is null.
-
-   procedure Dec_Ref (Self : in out Env_Rebindings);
-   --  Decrement Self's reference count. Also destroy it if the count drops to
-   --  0. Do nothing in Self is null.
+   type Env_Rebindings_Type is record
+      Parent    : Env_Rebindings;
+      Rebinding : Env_Rebinding;
+      Children  : Env_Rebindings_Vectors.Vector;
+   end record;
 
    function Combine (L, R : Env_Rebindings) return Env_Rebindings;
    --  Return a new Env_Rebindings that combines rebindings from both L and R
 
    function Append
      (Self : Env_Rebindings; Binding : Env_Rebinding) return Env_Rebindings;
+   --  Create a new rebindings and register it to Self and to
+   --  Old_Env/New_Env's analysis units.
 
    function Append_Rebinding
      (Self      : Env_Rebindings;
@@ -277,6 +265,21 @@ package Langkit_Support.Lexical_Env is
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Internal_Envs.Map, Internal_Map);
 
+   function Hash (Env : Lexical_Env) return Hash_Type;
+
+   package Env_Rebindings_Pools is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Lexical_Env,
+      Element_Type    => Env_Rebindings,
+      Hash            => Hash,
+      Equivalent_Keys => "=",
+      "="             => "=");
+
+   type Env_Rebindings_Pool is access all Env_Rebindings_Pools.Map;
+   --  Pool of env rebindings to be stored in a Lexical_Env
+
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (Env_Rebindings_Pools.Map, Env_Rebindings_Pool);
+
    No_Refcount : constant Integer := -1;
    --  Special constant for the Ref_Count field below that means: this lexical
    --  environment is not ref-counted.
@@ -300,6 +303,11 @@ package Langkit_Support.Lexical_Env is
       --  Default metadata for this env instance
 
       Rebindings : Env_Rebindings := null;
+
+      Rebindings_Pool : Env_Rebindings_Pool := null;
+      --  Cache for all parent-less env rebindings whose Old_Env is the lexical
+      --  environment that owns this pool. As a consequence, this is allocated
+      --  only for primary lexical environments that are rebindable.
 
       Ref_Count : Integer;
       --  For ref-counted lexical environments, this contains the number of
@@ -413,8 +421,7 @@ package Langkit_Support.Lexical_Env is
    function Shed_Rebindings
      (E_Info : Entity_Info; Env : Lexical_Env) return Entity_Info;
    --  Return a new entity info from E_Info, shedding env rebindings that are
-   --  not in the parent chain for the env From_Env. Return a new ownership
-   --  share.
+   --  not in the parent chain for the env From_Env.
 
    function Is_Primary (Self : Lexical_Env) return Boolean is
      (Self.Ref_Count = No_Refcount and then Self.Node /= No_Element);
@@ -433,11 +440,6 @@ private
    function New_Env (Self : Env_Rebinding) return Lexical_Env is
      (Self.New_Env.Env);
 
-   type Env_Rebindings_Type (Size : Natural) is record
-      Ref_Count : Natural := 1;
-      Bindings  : Env_Rebindings_Array (1 .. Size);
-   end record;
-
    No_Env_Rebinding : constant Env_Rebinding := (No_Env_Getter, No_Env_Getter);
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
@@ -448,7 +450,11 @@ private
       Env                        => Empty_Env_Map'Access,
       Default_MD                 => Empty_Metadata,
       Rebindings                 => null,
+      Rebindings_Pool            => null,
       Ref_Count                  => No_Refcount);
    Empty_Env : constant Lexical_Env := Empty_Env_Record'Access;
+
+   function Hash (Env : Lexical_Env) return Hash_Type is
+     (Hash_Type'Mod (To_Integer (Env.all'Address)));
 
 end Langkit_Support.Lexical_Env;

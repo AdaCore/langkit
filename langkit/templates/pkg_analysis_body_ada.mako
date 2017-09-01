@@ -366,7 +366,8 @@ package body ${ada_lib_name}.Analysis is
          AST_Mem_Pool      => No_Pool,
          Destroyables      => Destroyable_Vectors.Empty_Vector,
          Referenced_Units  => <>,
-         Lex_Env_Data_Acc  => new Lex_Env_Data_Type);
+         Lex_Env_Data_Acc  => new Lex_Env_Data_Type,
+         Rebindings        => Env_Rebindings_Vectors.Empty_Vector);
    begin
       Initialize (Unit.TDH, Context.Symbols);
       Context.Units_Map.Insert (Fname, Unit);
@@ -497,6 +498,10 @@ package body ${ada_lib_name}.Analysis is
       --  whole analysis context behaves, we have to invalidate caches. This is
       --  likely overkill, but kill all caches here as it's easy to do.
       Reset_Property_Caches (Unit.Context);
+
+      --  Reparsing will invalidate all lexical environments related to this
+      --  unit, so destroy all related rebindings as well.
+      Destroy_Rebindings (Unit.Rebindings'Access);
 
       --  Now create the parser. This is where lexing occurs, so this is where
       --  we get most "setup" issues: missing input file, bad charset, etc.
@@ -737,6 +742,79 @@ package body ${ada_lib_name}.Analysis is
       end loop;
    end Reset_Property_Caches;
 
+   ------------------------
+   -- Destroy_Rebindings --
+   ------------------------
+
+   procedure Destroy_Rebindings
+     (Rebindings : access Env_Rebindings_Vectors.Vector)
+   is
+      procedure Destroy is new Ada.Unchecked_Deallocation
+        (Env_Rebindings_Type, Env_Rebindings);
+
+      procedure Recurse (R : Env_Rebindings);
+      --  Destroy R's children and then destroy R. It is up to the caller to
+      --  remove R from its parent's Children vector.
+
+      procedure Unregister
+        (R          : Env_Rebindings;
+         Rebindings : in out Env_Rebindings_Vectors.Vector);
+      --  Remove R from Rebindings
+
+      -------------
+      -- Recurse --
+      -------------
+
+      procedure Recurse (R : Env_Rebindings) is
+      begin
+         for C of R.Children loop
+            Recurse (C);
+         end loop;
+         R.Children.Destroy;
+
+         Unregister (R, Old_Env (R.Rebinding).Node.Unit.Rebindings);
+         Unregister (R, New_Env (R.Rebinding).Node.Unit.Rebindings);
+
+         declare
+            Var_R : Env_Rebindings := R;
+         begin
+            Destroy (Var_R);
+         end;
+      end Recurse;
+
+      ----------------
+      -- Unregister --
+      ----------------
+
+      procedure Unregister
+        (R          : Env_Rebindings;
+         Rebindings : in out Env_Rebindings_Vectors.Vector) is
+      begin
+         for I in 1 .. Rebindings.Length loop
+            if Rebindings.Get (I) = R then
+               Rebindings.Pop (I);
+               return;
+            end if;
+         end loop;
+
+         --  We are always supposed to find R in Rebindings, so this should be
+         --  unreachable.
+         raise Program_Error;
+      end Unregister;
+
+   begin
+      while Rebindings.Length > 0 loop
+         declare
+            R : constant Env_Rebindings := Rebindings.Get (1);
+         begin
+            if R.Parent /= null then
+               Unregister (R, R.Parent.Children);
+            end if;
+            Recurse (R);
+         end;
+      end loop;
+   end Destroy_Rebindings;
+
    -------------
    -- Inc_Ref --
    -------------
@@ -876,6 +954,9 @@ package body ${ada_lib_name}.Analysis is
    begin
       Destroy (Unit.Lex_Env_Data_Acc);
       Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
+
+      Destroy_Rebindings (Unit.Rebindings'Access);
+      Unit.Rebindings.Destroy;
 
       if Unit.AST_Root /= null then
          Destroy (Unit.AST_Root);
@@ -2374,6 +2455,19 @@ package body ${ada_lib_name}.Analysis is
       % endif
    end Is_Rebindable;
 
+   ------------------------
+   -- Register_Rebinding --
+   ------------------------
+
+   procedure Register_Rebinding
+     (Node : ${root_node_type_name}; Rebinding : System.Address)
+   is
+      function Convert is new Ada.Unchecked_Conversion
+        (System.Address, Env_Rebindings);
+   begin
+      Node.Unit.Rebindings.Append (Convert (Rebinding));
+   end Register_Rebinding;
+
    -----------------
    -- Short_Image --
    -----------------
@@ -3032,7 +3126,6 @@ package body ${ada_lib_name}.Analysis is
       (El : ${root_node_type_name}; Info : Entity_Info)
        return Entity is
     begin
-      Inc_Ref (Info.Rebindings);
       return (El => El, Info => Info);
     end Create;
 

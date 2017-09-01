@@ -41,8 +41,7 @@ class PythonAPISettings(AbstractAPISettings):
         # TODO: handle all types
         assert (not inc_ref
                 or not type.is_refcounted
-                or type in (ct.lexical_env_type, ct.env_rebindings_type,
-                            ct.equation_type)
+                or type in (ct.lexical_env_type, ct.equation_type)
                 or isinstance(type, (ct.ArrayType, ct.StructType))), (
             'Incrementing ref-count of {} in the Python API is not handled'
             ' yet'.format(type.name)
@@ -76,8 +75,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.logic_var_type, lambda _: 'LogicVar._wrap({})'),
             (ct.equation_type, lambda _:
                 'Equation._wrap({{}}, inc_ref={})'.format(inc_ref)),
-            (ct.env_rebindings_type, lambda _:
-                'EnvRebindings._wrap({{}}, inc_ref={})'.format(inc_ref)),
+            (ct.env_rebindings_type, lambda _: 'EnvRebindings._wrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             ' (wrapping): {}'.format(type)

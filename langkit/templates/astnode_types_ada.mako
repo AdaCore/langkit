@@ -25,7 +25,6 @@
    is
       pragma Unreferenced (Self);
    begin
-      Inc_Ref (From);
       return From;
    end Convert;
 

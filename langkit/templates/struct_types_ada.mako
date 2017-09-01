@@ -98,7 +98,6 @@
          if El = null then
             return ${cls.nullexpr};
          end if;
-         Inc_Ref (Info.Rebindings);
          return (El => El, Info => Info);
        end Create;
 

@@ -487,18 +487,6 @@ package ${ada_lib_name}.Analysis.C is
            Convention    => C,
            External_name => "${capi.get_name('lexical_env_dec_ref')}";
 
-   procedure ${capi.get_name('env_rebindings_inc_ref')}
-     (Self : ${env_rebindings_type})
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('env_rebindings_inc_ref')}";
-
-   procedure ${capi.get_name('env_rebindings_dec_ref')}
-     (Self : ${env_rebindings_type})
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('env_rebindings_dec_ref')}";
-
    -------------------------
    -- Equation primitives --
    -------------------------

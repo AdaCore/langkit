@@ -694,27 +694,9 @@ class EnvRebindingsType(CompiledType):
             null_allowed=True,
             nullexpr='null',
             c_type_name='env_rebindings_type',
-            is_refcounted=True,
+            is_refcounted=False,
             py_nullexpr='None'
         )
-
-    def c_inc_ref(self, capi):
-        """
-        Name of the C API function to inc-ref an env rebindings value.
-
-        :param langkit.c_api.CAPISettings capi: Settings for the C API.
-        :rtype: str
-        """
-        return capi.get_name(self.name + names.Name('Inc_Ref'))
-
-    def c_dec_ref(self, capi):
-        """
-        Name of the C API function to dec-ref an env rebindings value.
-
-        :param langkit.c_api.CAPISettings capi: Settings for the C API.
-        :rtype: str
-        """
-        return capi.get_name(self.name + names.Name('Dec_Ref'))
 
 env_rebindings_type = EnvRebindingsType()
 

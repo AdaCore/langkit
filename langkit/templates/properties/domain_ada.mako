@@ -19,15 +19,4 @@ begin
 
    ${expr.result_var.name} :=
      Bind_Default_Default.Impl.Member (${expr.logic_var_expr.render_expr()}, A);
-
-   ## Below, the call to Dec_Ref is here because:
-   ##
-   ## 1. Dom has an ownership share for each of its elements.
-   ## 2. The call to member is borrowing this ownership share only for the time
-   ##    of the call.
-   ## 3. Calls to Get create ownership shares.
-
-   for J in 1 .. Length (Dom) loop
-      Dec_Ref (A (J));
-   end loop;
 end;

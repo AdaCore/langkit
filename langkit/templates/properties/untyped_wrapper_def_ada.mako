@@ -21,8 +21,5 @@ is
       ${Self.type.name} (E.El).${property.name}
          ${'({})'.format(', '.join(args)) if args else ''};
 begin
-   % if uses_einfo:
-      Dec_Ref (E_Info);
-   % endif
    return Result;
 end;

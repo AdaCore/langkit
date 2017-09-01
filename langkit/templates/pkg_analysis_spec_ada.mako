@@ -362,6 +362,16 @@ package ${ada_lib_name}.Analysis is
 
    function Is_Rebindable (Node : ${root_node_type_name}) return Boolean;
 
+   procedure Register_Rebinding
+     (Node : ${root_node_type_name}; Rebinding : System.Address);
+   --  Register a rebinding to be destroyed when Node's analysis unit is
+   --  destroyed or reparsed.
+   --
+   --  TODO??? For now the rebinding must be represented as an untyped pointer
+   --  because we probably need some big refactoring to provide to
+   --  Langkit_Support.Lexical_Env a procedure that has visibility on both
+   --  Env_Rebindings and on the analysis unit record.
+
    package AST_Envs is new Langkit_Support.Lexical_Env
      (Element_T            => ${root_node_type_name},
       Element_Metadata     => ${T.env_md.name},
@@ -369,7 +379,8 @@ package ${ada_lib_name}.Analysis is
       Empty_Metadata       => No_Metadata,
       Raise_Property_Error => Raise_Property_Error,
       Combine              => Combine,
-      Element_Image        => Node_File_And_Sloc_Image);
+      Element_Image        => Node_File_And_Sloc_Image,
+      Register_Rebinding   => Register_Rebinding);
 
    --  The following subtypes are introduced to ease code generation, so we
    --  don't have to deal with the AST_Envs suffix.
@@ -381,8 +392,6 @@ package ${ada_lib_name}.Analysis is
    Empty_Env : Lexical_Env renames AST_Envs.Empty_Env;
    No_Entity_Info : Entity_Info renames AST_Envs.No_Entity_Info;
 
-   procedure Inc_Ref (E : Entity) renames AST_Envs.Inc_Ref;
-   procedure Dec_Ref (E : in out Entity) renames AST_Envs.Dec_Ref;
    function Create
      (El : ${root_node_type_name}; Info : Entity_Info)
       return Entity;
@@ -865,9 +874,7 @@ package ${ada_lib_name}.Analysis is
 
    package Eq_Node is new Langkit_Support.Adalog.Eq_Same
      (LR_Type       => ${T.entity.name},
-      Element_Image => Image,
-      Inc_Ref       => AST_Envs.Inc_Ref,
-      Dec_Ref       => AST_Envs.Dec_Ref);
+      Element_Image => Image);
    subtype Logic_Var is Eq_Node.Refs.Raw_Var;
    subtype Logic_Var_Record is Eq_Node.Refs.Var;
    Null_Var : constant Logic_Var := null;
@@ -1124,6 +1131,11 @@ private
       Lex_Env_Data_Acc  : Lex_Env_Data;
       --  Lexical environment metadata for elements in this units' environments
       --  that belong to other units.
+
+      Rebindings        : aliased Env_Rebindings_Vectors.Vector;
+      --  List of rebindings for which Old_Env and/or New_Env belong to this
+      --  unit. When this unit gets destroyed or reparsed, these rebindings
+      --  need to be destroyed too (see Destroy_Rebindings).
    end record;
 
    function Token_Data
@@ -1140,6 +1152,16 @@ private
    procedure Reset_Property_Caches (Unit : Analysis_Unit);
    --  If AST_Node is not null, invoke Reset_Property_Caches primitives on all
    --  the nodes it contains.
+
+   procedure Destroy_Rebindings
+     (Rebindings : access Env_Rebindings_Vectors.Vector);
+   --  Destroy all rebindings in Rebindings, plus their child rebindings. Note
+   --  that children can belong to various analysis units, so this takes care
+   --  of removing the destroyed rebindings from each concerned analysis unit's
+   --  Rebindings vector.
+   --
+   --  This require an access parameter in order to avoid aliasing issues in
+   --  the body.
 
    function Is_Referenced_From
      (Referenced, Unit : Analysis_Unit) return Boolean;

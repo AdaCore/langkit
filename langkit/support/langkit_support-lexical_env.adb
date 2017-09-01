@@ -29,8 +29,7 @@ package body Langkit_Support.Lexical_Env is
      (From_Env   : Lexical_Env;
       Rebindings : Env_Rebindings) return Env_Rebindings
      with Inline;
-   --  Shed env rebindings that are not in the parent chain for the env
-   --  From_Env. Return a new rebindings with a new ownership share.
+   --  Shed env rebindings that are not in the parent chain for From_Env
 
    function Decorate
      (Elts       : Internal_Map_Element_Array;
@@ -124,102 +123,26 @@ package body Langkit_Support.Lexical_Env is
       end if;
    end Dec_Ref;
 
-   -------------------
-   -- Is_Equivalent --
-   -------------------
-
-   function Is_Equivalent (L, R : Env_Rebindings) return Boolean is
-      function Is_Equivalent (L, R : Env_Rebinding) return Boolean is
-        (Is_Equivalent (L.Old_Env, R.Old_Env)
-         and then Is_Equivalent (L.New_Env, R.New_Env));
-   begin
-      if L = null or else R = null then
-         return L = R;
-      end if;
-
-      if L.Size /= R.Size then
-         return False;
-      end if;
-
-      for I in 1 .. L.Size loop
-         if not Is_Equivalent (L.Bindings (I), R.Bindings (I)) then
-            return False;
-         end if;
-      end loop;
-
-      return True;
-   end Is_Equivalent;
-
-   ------------
-   -- Create --
-   ------------
-
-   function Create (Bindings : Env_Rebindings_Array) return Env_Rebindings is
-   begin
-      if Bindings'Length = 0 then
-         return null;
-      end if;
-
-      declare
-         Result : constant Env_Rebindings := new Env_Rebindings_Type'
-           (Size       => Bindings'Length,
-            Bindings   => Bindings,
-            Ref_Count  => 1);
-      begin
-         Check_Rebindings_Unicity (Result);
-         return Result;
-      end;
-   end Create;
-
-   -------------
-   -- Inc_Ref --
-   -------------
-
-   procedure Inc_Ref (Self : Env_Rebindings) is
-   begin
-      if Self /= null then
-         Self.Ref_Count := Self.Ref_Count + 1;
-      end if;
-   end Inc_Ref;
-
-   -------------
-   -- Dec_Ref --
-   -------------
-
-   procedure Dec_Ref (Self : in out Env_Rebindings) is
-      procedure Unchecked_Free
-      is new Ada.Unchecked_Deallocation (Env_Rebindings_Type, Env_Rebindings);
-   begin
-      if Self /= null then
-         Self.Ref_Count := Self.Ref_Count - 1;
-         if Self.Ref_Count = 0 then
-            Unchecked_Free (Self);
-         end if;
-         Self := null;
-      end if;
-   end Dec_Ref;
-
    -------------
    -- Combine --
    -------------
 
    function Combine (L, R : Env_Rebindings) return Env_Rebindings is
-      Result : Env_Rebindings;
+      Result, Cur : Env_Rebindings;
    begin
-      if L = null and then R = null then
-         return null;
-      elsif L = null or else L.Size = 0 then
-         Inc_Ref (R);
+      if L = null then
          return R;
-      elsif R = null or else R.Size = 0 then
-         Inc_Ref (L);
+      elsif R = null then
          return L;
       end if;
 
-      Result := new Env_Rebindings_Type'
-        (Size      => L.Size + R.Size,
-         Ref_Count => 1,
-         Bindings  => L.Bindings & R.Bindings);
+      Result := L;
+      Cur := R;
+      while Cur /= null loop
+         Result := Append (Result, Cur.Rebinding);
+         Cur := Cur.Parent;
+      end loop;
+
       Check_Rebindings_Unicity (Result);
       return Result;
    end Combine;
@@ -231,17 +154,53 @@ package body Langkit_Support.Lexical_Env is
    function Append
      (Self : Env_Rebindings; Binding : Env_Rebinding) return Env_Rebindings
    is
+      Old_Env : constant Lexical_Env := Get_Env (Binding.Old_Env);
+      New_Env : constant Lexical_Env := Get_Env (Binding.New_Env);
    begin
-      if Binding = No_Env_Rebinding then
-         Inc_Ref (Self);
-         return Self;
+      --  Look for an existing rebinding for the result: in the Old_Env's pool
+      --  if there is no parent, otherwise in the parent's children.
+      if Self = null then
+         if Old_Env.Rebindings_Pool /= null then
+            declare
+               use Env_Rebindings_Pools;
+               Cur : constant Cursor := Old_Env.Rebindings_Pool.Find
+                 (New_Env);
+            begin
+               if Cur /= Env_Rebindings_Pools.No_Element then
+                  return Element (Cur);
+               end if;
+            end;
+         end if;
 
       else
-         return Create
-           (if Self /= null
-            then Self.Bindings & Binding
-            else (1 => Binding));
+         for C of Self.Children loop
+            if C.Rebinding = Binding then
+               return C;
+            end if;
+         end loop;
       end if;
+
+      --  No luck? then create a new rebinding and register it where required
+      declare
+         Result : constant Env_Rebindings := new Env_Rebindings_Type'
+           (Parent    => Self,
+            Rebinding => Binding,
+            Children  => Env_Rebindings_Vectors.Empty_Vector);
+      begin
+         if Self /= null then
+            Self.Children.Append (Result);
+         else
+            if Old_Env.Rebindings_Pool = null then
+               Old_Env.Rebindings_Pool := new Env_Rebindings_Pools.Map;
+            end if;
+            Old_Env.Rebindings_Pool.Insert (New_Env, Result);
+         end if;
+
+         Register_Rebinding (Old_Env.Node, Result.all'Address);
+         Register_Rebinding (New_Env.Node, Result.all'Address);
+         Check_Rebindings_Unicity (Result);
+         return Result;
+      end;
    end Append;
 
    ----------------------
@@ -273,24 +232,6 @@ package body Langkit_Support.Lexical_Env is
               Rebindings => Combine (L.Rebindings, R.Rebindings));
    end Combine;
 
-   -------------
-   -- Inc_Ref --
-   -------------
-
-   procedure Inc_Ref (Self : Entity_Info) is
-   begin
-      Inc_Ref (Self.Rebindings);
-   end Inc_Ref;
-
-   -------------
-   -- Dec_Ref --
-   -------------
-
-   procedure Dec_Ref (Self : in out Entity_Info) is
-   begin
-      Dec_Ref (Self.Rebindings);
-   end Dec_Ref;
-
    ------------
    -- Create --
    ------------
@@ -319,27 +260,8 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       --  For all other cases, make sure the entity info is equivalent
-      return L.Info.MD = R.Info.MD and then Is_Equivalent (L.Info.Rebindings,
-                                                            R.Info.Rebindings);
+      return L.Info = R.Info;
    end Is_Equivalent;
-
-   -------------
-   -- Inc_Ref --
-   -------------
-
-   procedure Inc_Ref (Self : Entity) is
-   begin
-      Inc_Ref (Self.Info.Rebindings);
-   end Inc_Ref;
-
-   -------------
-   -- Dec_Ref --
-   -------------
-
-   procedure Dec_Ref (Self : in out Entity) is
-   begin
-      Dec_Ref (Self.Info.Rebindings);
-   end Dec_Ref;
 
    ------------
    -- Create --
@@ -362,6 +284,7 @@ package body Langkit_Support.Lexical_Env is
          Env                        => new Internal_Envs.Map,
          Default_MD                 => Default_MD,
          Rebindings                 => null,
+         Rebindings_Pool            => null,
          Ref_Count                  => (if Is_Refcounted then 1
                                         else No_Refcount));
    end Create;
@@ -466,8 +389,7 @@ package body Langkit_Support.Lexical_Env is
       use Internal_Envs;
       use Entity_Arrays;
 
-      function Get_Refd_Elements
-        (Self : Referenced_Env) return Entity_Array;
+      function Get_Refd_Elements (Self : Referenced_Env) return Entity_Array;
       --  If we can determine that From can reach Self.From_Node, return the
       --  recursive lookup of Key in Self. Otherwise, return an empty array.
 
@@ -486,11 +408,8 @@ package body Langkit_Support.Lexical_Env is
       -- Get_Refd_Elements --
       -----------------------
 
-      function Get_Refd_Elements
-        (Self : Referenced_Env) return Entity_Array
-      is
-         Env        : Lexical_Env;
-         Rebindings : Env_Rebindings;
+      function Get_Refd_Elements (Self : Referenced_Env) return Entity_Array is
+         Env : Lexical_Env;
       begin
          if not Recursive and then not Self.Is_Transitive then
             return Entity_Arrays.Empty_Array;
@@ -505,26 +424,22 @@ package body Langkit_Support.Lexical_Env is
 
          Env := Get_Env (Self.Getter);
 
+         --  Make sure that whether the call to Get below suceeds or raises an
+         --  exception, we always Dec_Ref the returned environment so we don't
+         --  leak in case of error.
          begin
-            --  Make sure that whether Recurse suceeds or raises an exception,
-            --  we always Dec_Ref the returned environment so we don't leak in
-            --  case of error.
-
-            if Self.Is_Transitive then
-               Rebindings := Current_Rebindings;
-               Inc_Ref (Rebindings);
-            else
-               Rebindings := Shed_Rebindings (Env, Current_Rebindings);
-            end if;
-
             declare
+               Rebindings : constant Env_Rebindings :=
+                 (if Self.Is_Transitive
+                  then Current_Rebindings
+                  else Shed_Rebindings (Env, Current_Rebindings));
+
                Result : constant Entity_Array :=
                  Get (Env, Key, From,
                       Recursive  => Recursive and Self.Is_Transitive,
                       Rebindings => Rebindings,
                       Filter     => Filter);
             begin
-               Dec_Ref (Rebindings);
                Dec_Ref (Env);
                return Result;
             end;
@@ -606,12 +521,10 @@ package body Langkit_Support.Lexical_Env is
 
       Own_Lookup_Env := Extract_Rebinding (Current_Rebindings, Self);
 
-      if Own_Lookup_Env /= Self then
-         Parent_Rebindings := Shed_Rebindings (Parent_Env, Current_Rebindings);
-      else
-         Parent_Rebindings := Current_Rebindings;
-         Inc_Ref (Parent_Rebindings);
-      end if;
+      Parent_Rebindings :=
+        (if Own_Lookup_Env /= Self
+         then Shed_Rebindings (Parent_Env, Current_Rebindings)
+         else Current_Rebindings);
 
       declare
          use type Entity_Array;
@@ -646,14 +559,9 @@ package body Langkit_Support.Lexical_Env is
 
          if From /= No_Element then
             Partition (Ret, Can_Reach_F'Access, Last_That_Can_Reach);
-            for I in Last_That_Can_Reach + 1 .. Ret'Last loop
-               Dec_Ref (Ret (I));
-            end loop;
          end if;
 
-         Dec_Ref (Parent_Rebindings);
          Dec_Ref (Own_Lookup_Env);
-         Dec_Ref (Current_Rebindings);
 
          return Ret (Ret'First .. Last_That_Can_Reach);
       end;
@@ -665,7 +573,6 @@ package body Langkit_Support.Lexical_Env is
 
    function Orphan (Self : Lexical_Env) return Lexical_Env is
    begin
-      Inc_Ref (Self.Rebindings);
       return new Lexical_Env_Type'
         (Parent          => No_Env_Getter,
          Node            => Self.Node,
@@ -673,6 +580,7 @@ package body Langkit_Support.Lexical_Env is
          Env             => Self.Env,
          Default_MD      => Self.Default_MD,
          Rebindings      => Self.Rebindings,
+         Rebindings_Pool => null,
          Ref_Count       => 1);
    end Orphan;
 
@@ -698,6 +606,7 @@ package body Langkit_Support.Lexical_Env is
             Env             => null,
             Default_MD      => Empty_Metadata,
             Rebindings      => null,
+            Rebindings_Pool => null,
             Ref_Count       => 1);
          for Env of Envs loop
             Reference (N, Env, Transitive => True);
@@ -729,9 +638,13 @@ package body Langkit_Support.Lexical_Env is
            Env             => null,
            Default_MD      => Empty_Metadata,
            Rebindings      => Rebindings,
+
+           --  This pool is only used on primary lexical environments, so there
+           --  is no need to convey it to synthetic lexical envs.
+           Rebindings_Pool => null,
+
            Ref_Count       => 1)
       do
-         Inc_Ref (Rebindings);
          Reference (N, Base_Env, Transitive => True);
       end return;
    end Rebind_Env;
@@ -754,6 +667,7 @@ package body Langkit_Support.Lexical_Env is
    procedure Destroy (Self : in out Lexical_Env) is
       procedure Free is
         new Ada.Unchecked_Deallocation (Lexical_Env_Type, Lexical_Env);
+      Primary : constant Boolean := Is_Primary (Self);
    begin
 
       --  Do not free the internal map for ref-counted allocated environments
@@ -775,7 +689,10 @@ package body Langkit_Support.Lexical_Env is
       end loop;
       Self.Referenced_Envs.Destroy;
 
-      Dec_Ref (Self.Rebindings);
+      if Primary and then Self.Rebindings_Pool /= null then
+         Destroy (Self.Rebindings_Pool);
+      end if;
+
       Free (Self);
    end Destroy;
 
@@ -811,9 +728,7 @@ package body Langkit_Support.Lexical_Env is
    end Dec_Ref;
 
    function Pop (Rebindings : Env_Rebindings) return Env_Rebindings is
-     (if Rebindings = null
-      then null
-      else Create (Rebindings.Bindings (1 .. Rebindings.Size - 1)));
+     (if Rebindings = null then null else Rebindings.Parent);
 
    -----------------------
    -- Extract_Rebinding --
@@ -823,43 +738,46 @@ package body Langkit_Support.Lexical_Env is
      (Rebindings  : in out Env_Rebindings;
       Rebound_Env : Lexical_Env) return Lexical_Env
    is
-      Return_Env     : Lexical_Env    := Rebound_Env;
-      Old_Rebindings : Env_Rebindings := Rebindings;
+      Return_Env : Lexical_Env := Rebound_Env;
    begin
       if Rebindings /= null then
-
-         --  Look in reverse order: The correct behavior is to extract the
-         --  *last* rebinding, because due to the stacked nature of rebindings,
-         --  the user is never supposed to extract a rebinding other than the
-         --  last one that was added.
+         --  Look for a rebinding in the chain whose Old_Env is Rebound_Env.
+         --  The correct behavior is to extract the *last* rebinding, because
+         --  due to the stacked nature of rebindings, the user is never
+         --  supposed to extract a rebinding other than the last one that was
+         --  added.
          --
          --  TODO: We're still doing a full for-loop to check if this invariant
          --  is consistently respected. This means that the case where the env
          --  is not found is linear, which is probably the most common case.
          --  Ideally we would have the loop only in debug builds.
 
-         for J in reverse 1 .. Rebindings.Size loop
-            declare
-               R         : Env_Rebinding renames Rebindings.Bindings (J);
-               R_Old_Env : Lexical_Env renames Get_Env (R.Old_Env);
-            begin
-               if Rebound_Env = R_Old_Env then
-                  Return_Env := Get_Env (R.New_Env);
+         declare
+            R : Env_Rebindings := Rebindings;
+         begin
+            while R /= null loop
+               declare
+                  R_Old_Env : Lexical_Env renames
+                     Get_Env (R.Rebinding.Old_Env);
+               begin
+                  if Rebound_Env = R_Old_Env then
+                     Return_Env := Get_Env (R.Rebinding.New_Env);
 
-                  --  Extracted rebinding *must* be the last one
-                  pragma Assert (J = Rebindings.Size);
-                  exit;
-               end if;
-            end;
-         end loop;
+                     --  Extracted rebinding *must* be the last one
+                     pragma Assert (R = Rebindings);
+                     exit;
+                  end if;
+               end;
+               R := R.Parent;
+            end loop;
+         end;
       end if;
 
       Inc_Ref (Return_Env);
 
+      --  If we found the rebinding to extract, create the new rebindings set
       if Return_Env /= Rebound_Env then
-         --  Create the new rebindings set
          Rebindings := Pop (Rebindings);
-         Dec_Ref (Old_Rebindings);
       end if;
 
       return Return_Env;
@@ -874,14 +792,12 @@ package body Langkit_Support.Lexical_Env is
       Rebindings : Env_Rebindings) return Env_Rebindings
    is
       First_Rebindable_Parent : Lexical_Env;
-      Current_Last_Binding    : Natural;
+      Result                  : Env_Rebindings := Rebindings;
    begin
       --  If there is no bindings, nothing to do here
       if Rebindings = null then
          return null;
       end if;
-
-      Current_Last_Binding := Rebindings.Size;
 
       --  Look for the first environment in From_Env's parent chain whose Node
       --  is rebindable. Use null if there is no such env.
@@ -904,18 +820,13 @@ package body Langkit_Support.Lexical_Env is
       --  between the top of the rebinding stack and the corresponding
       --  rebinding.
       while
-        Current_Last_Binding >= 1
-        and then
-        Get_Env (Rebindings.Bindings (Current_Last_Binding).Old_Env)
-          /= First_Rebindable_Parent
+         Result /= null
+         and then Get_Env (Result.Rebinding.Old_Env) /= First_Rebindable_Parent
       loop
-         Current_Last_Binding := Current_Last_Binding - 1;
+         Result := Result.Parent;
       end loop;
 
-      return
-        (if Current_Last_Binding /= 0
-         then Create (Rebindings.Bindings (1 .. Current_Last_Binding))
-         else null);
+      return Result;
    end Shed_Rebindings;
 
    ---------------------
@@ -949,12 +860,10 @@ package body Langkit_Support.Lexical_Env is
             Info => (MD         => Combine (Elt.MD, MD),
                      Rebindings => Rebindings));
       begin
-         if Elt.Resolver = null then
-            Inc_Ref (Result.Info.Rebindings);
-            return Result;
-         else
-            return Elt.Resolver.all (Result);
-         end if;
+         return
+           (if Elt.Resolver = null
+            then Result
+            else Elt.Resolver.all (Result));
       end Create_Entity;
 
       function Internal_Decorate is new Internal_Map_Element_Arrays.Map_Gen
@@ -970,14 +879,16 @@ package body Langkit_Support.Lexical_Env is
    ------------------------------
 
    procedure Check_Rebindings_Unicity (Self : Env_Rebindings) is
-      Bindings : Env_Rebindings_Array renames Self.Bindings;
+      L, R : Env_Rebindings := Self;
    begin
-      for I in Bindings'Range loop
-         for J in I + 1 .. Bindings'Last loop
-            pragma Assert
-              (Old_Env (Bindings (I)) /= Old_Env (Bindings (J))
-               and then New_Env (Bindings (I)) /= New_Env (Bindings (J)));
+      while L /= null loop
+         R := L.Parent;
+         while R /= null loop
+            pragma Assert (L.Rebinding.Old_Env /= R.Rebinding.Old_Env);
+            pragma Assert (L.Rebinding.New_Env /= R.Rebinding.New_Env);
+            R := R.Parent;
          end loop;
+         L := L.Parent;
       end loop;
    end Check_Rebindings_Unicity;
 
@@ -999,16 +910,27 @@ package body Langkit_Support.Lexical_Env is
          return "<null>";
       end if;
       declare
-         Buffer : Unbounded_Wide_Wide_String;
+         use Env_Rebindings_Vectors;
+         Rebindings_Vector : Vector := Empty_Vector;
+         Cur               : Env_Rebindings := Self;
+         Buffer            : Unbounded_Wide_Wide_String;
       begin
+         --  Get rebindings in reverse order: older first, most recent last
+         while Cur /= null loop
+            Rebindings_Vector.Append (Cur);
+            Cur := Cur.Parent;
+         end loop;
+
          Append (Buffer, "[");
-         for I in 1 .. Self.Size loop
-            if I > 1 then
+         for I in reverse 1 .. Rebindings_Vector.Last_Index loop
+            if I < Rebindings_Vector.Last_Index then
                Append (Buffer, ", ");
             end if;
-            Append (Buffer, Image (Self.Bindings (I)));
+            Append (Buffer, Image (Rebindings_Vector.Get (I).Rebinding));
          end loop;
          Append (Buffer, "]");
+
+         Rebindings_Vector.Destroy;
          return To_Wide_Wide_String (Buffer);
       end;
    end Image;
