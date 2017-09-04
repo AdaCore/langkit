@@ -266,6 +266,8 @@ def check_text(report, filename, lang, first_line, text, is_comment):
             s.quote_indent = indent_level(line) + 1
         elif line.endswith(b'...'):
             s.last_end = b'...'
+        elif line.startswith(b'.. '):
+            s.quote_indent = indent_level(line) + 1
         elif not empty_line:
             s.last_end = line[-1:]
         s.last_line = line

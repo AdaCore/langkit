@@ -461,6 +461,18 @@ testcases = (
                 supposed to be a string
             """
     ''', [(7, 0, 'Docstring sentences must end with periods')]),
+    Testcase('docstring_multi_15.py', '''
+        from __future__ import absolute_import, division, print_function
+
+        def foo():
+            """
+            Documenting some function.
+
+            .. code:: python
+
+                foo + bar(True)
+            """
+    ''', []),
 
     #
     # "from __future__ testing
