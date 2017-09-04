@@ -71,9 +71,6 @@ package Langkit_Support.Lexical_Env is
 
    No_Entity_Info : constant Entity_Info := (Empty_Metadata, null);
 
-   function Combine (L, R : Entity_Info) return Entity_Info;
-   --  Return a new Entity_Info that combines info from both L and R
-
    type Entity is record
       El   : Element_T;
       Info : Entity_Info;
