@@ -38,7 +38,7 @@ class AutoPropertiesDSL(docutils.parsers.rst.Directive):
             document.note_explicit_target(target_node)
 
             term = nodes.term()
-            term_label = r'expr.\ **{}**'.format(name)
+            term_label = r'{}.\ **{}**'.format(attr_expr.prefix_name, name)
             argspec = attr_expr.argspec
             if argspec is None:
                 pass

@@ -288,7 +288,19 @@ class AttributeExpression(object):
         self.args = args
         self.kwargs = kwargs
         self.parameterless = parameterless
+
         self.doc = doc or constructor.__doc__
+        self._prefix_name, self._argspec = self._build_argspec()
+
+    @property
+    def prefix_name(self):
+        """
+        Name of the prefix for this attribute expression. This is used to
+        generate documentation.
+
+        :rtype: str
+        """
+        return self._prefix_name
 
     @property
     def argspec(self):
@@ -300,35 +312,41 @@ class AttributeExpression(object):
 
         :rtype: None|list[str]
         """
-        func = self.constructor
+        return self._argspec
 
-        if self.parameterless:
-            return None
-        elif inspect.isclass(func):
+    def _build_argspec(self):
+        func = self.constructor
+        first_arg_is_self = False
+
+        if inspect.isclass(func):
             func = getattr(func, '_wrapped_function', func.__init__)
+            first_arg_is_self = True
         elif not inspect.isfunction(func):
-            return ['???']
+            return 'expr', ['???']
 
         args, varargs, keywords, defaults = inspect.getargspec(func)
-        result = []
 
-        # Discard "self", which is irrelevant for documentation purposes, plus
-        # the next argument which is the prefix for the attribute expression.
-        result = args[2:]
+        # If present, discard the first argument (self), which is irrelevant
+        # for documentation purposes. The second argument is the prefix for the
+        # attribute expression.
+        argspec = list(args)
+        if first_arg_is_self:
+            argspec.pop(0)
+        prefix_name = argspec.pop(0)
 
-        # Remove positional arguments which are already provided by partial
-        # evaluation.
-        result = result[len(self.args):]
-
-        # Likewise for keyword arguments
+        # Remove positional and keyword arguments which are already provided by
+        # partial evaluation.
+        argspec = argspec[len(self.args):]
         for kw in self.kwargs:
-            result.remove(kw)
+            argspec.remove(kw)
 
         # Describe variadic constructors as such
         if varargs:
-            result.append('\*' + varargs)
+            argspec.append('\*' + varargs)
 
-        return result
+        if self.parameterless:
+            argspec = None
+        return prefix_name, argspec
 
     def build(self, prefix):
         return (self.constructor(prefix, *self.args, **self.kwargs)
