@@ -701,6 +701,8 @@ class CollectionSingleton(AbstractExpression):
         """
         :param AbstractExpression expr: The expression representing the
             single element to create the collection from.
+        :param bool coerce_null: If False, always return a 1-sized array.
+            Otherwise, return an empty array when `expr` is null.
         """
         super(CollectionSingleton, self).__init__()
         self.expr = expr
