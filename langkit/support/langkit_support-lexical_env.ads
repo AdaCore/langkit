@@ -176,10 +176,10 @@ package Langkit_Support.Lexical_Env is
    --  Old_Env/New_Env's analysis units.
 
    function Append_Rebinding
-     (Self      : Env_Rebindings;
-      To_Rebind : Lexical_Env;
-      Rebind_To : Lexical_Env) return Env_Rebindings
-      with Pre => Is_Primary (To_Rebind) and then Is_Primary (Rebind_To);
+     (Self    : Env_Rebindings;
+      Old_Env : Lexical_Env;
+      New_Env : Lexical_Env) return Env_Rebindings
+      with Pre => Is_Primary (Old_Env) and then Is_Primary (New_Env);
 
    -------------------------------------
    -- Arrays of elements and entities --

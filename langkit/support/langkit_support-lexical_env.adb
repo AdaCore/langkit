@@ -205,15 +205,15 @@ package body Langkit_Support.Lexical_Env is
    ----------------------
 
    function Append_Rebinding
-     (Self      : Env_Rebindings;
-      To_Rebind : Lexical_Env;
-      Rebind_To : Lexical_Env) return Env_Rebindings is
+     (Self    : Env_Rebindings;
+      Old_Env : Lexical_Env;
+      New_Env : Lexical_Env) return Env_Rebindings is
    begin
-      if not Is_Rebindable (To_Rebind.Node) then
+      if not Is_Rebindable (Old_Env.Node) then
          Raise_Property_Error ("Illegal lexical environment rebinding");
       end if;
 
-      return Append (Self, To_Rebind, Rebind_To);
+      return Append (Self, Old_Env, New_Env);
    end Append_Rebinding;
 
    ------------

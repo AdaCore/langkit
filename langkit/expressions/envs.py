@@ -256,23 +256,24 @@ def env_parent(self, env):
     )
 
 
-def make_append_rebinding(self, rebindings, to_rebind, rebind_to):
+def make_append_rebinding(self, rebindings, old_env, new_env):
     return CallExpr('Rebinding', 'AST_Envs.Append_Rebinding',
                     env_rebindings_type,
-                    [rebindings, to_rebind, rebind_to],
+                    [rebindings, old_env, new_env],
                     abstract_expr=self)
 
 
 @auto_attr
-def append_rebinding(self, rebindings, to_rebind, rebind_to):
+def append_rebinding(self, rebindings, old_env, new_env):
     """
-    Functionally append a rebinding of to_rebind -> rebind_to to rebindings.
+    Functionally append a rebinding from `old_env` to `new_env` (two lexical
+    environments) on top of `rebindings` (a chain of rebindings).
     """
     return make_append_rebinding(
         self,
         construct(rebindings, env_rebindings_type),
-        construct(to_rebind, lexical_env_type),
-        construct(rebind_to, lexical_env_type)
+        construct(old_env, lexical_env_type),
+        construct(new_env, lexical_env_type)
     )
 
 
