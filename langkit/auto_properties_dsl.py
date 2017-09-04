@@ -17,6 +17,18 @@ class AutoPropertiesDSL(docutils.parsers.rst.Directive):
     Directive to generate a definition list for all DSL constructors.
     """
 
+    def _prepare_docstring(self, docstring):
+        """
+        Remove anything that appears after a line that starts with ":". This
+        makes it possible to remove directives like ":param XXX:" which are
+        intended for Langkit developpers, not for users.
+        """
+        result = prepare_docstring(docstring)
+        for i, line in enumerate(result):
+            if line.startswith(':'):
+                return '\n'.join(result[:i]).rstrip().split('\n')
+        return result
+
     def _parse(self, strlist, dest_block):
         self.state.nested_parse(StringList(strlist), 0, dest_block)
 
@@ -50,7 +62,7 @@ class AutoPropertiesDSL(docutils.parsers.rst.Directive):
 
             definition = nodes.definition()
             doc = attr_expr.doc or '*Not yet documented*'
-            self._parse(prepare_docstring(doc), definition)
+            self._parse(self._prepare_docstring(doc), definition)
 
             def_list_item.append(target_node)
             def_list_item.append(term)
