@@ -184,10 +184,9 @@ def check_text(report, filename, lang, first_line, text, is_comment):
 
         def end_block(self, is_last):
             """To be called at the end of each hunk of text."""
-
             if (not self.last_line or
-                    not self.last_line.strip()
-                    or self.quote_indent is not None):
+                    not self.last_line.strip() or
+                    self.quote_indent is not None):
                 return
 
             if self.may_be_header:
