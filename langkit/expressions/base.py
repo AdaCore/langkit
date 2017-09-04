@@ -516,8 +516,8 @@ class AbstractExpression(Frozable):
             'find': lambda filter_expr:
                 self.filter(filter_expr).at(0),
             'keep': lambda klass:
-                self.filtermap(filter_expr=lambda e: e.is_a(klass),
-                               expr=lambda e: e.cast(klass)),
+                self.filtermap(lambda e: e.cast(klass),
+                               lambda e: e.is_a(klass)),
             'logic_all': lambda e: All(self.map(e)),
             'logic_any': lambda e: Any(self.map(e)),
             'exists': lambda filter_expr:
@@ -1831,15 +1831,13 @@ class DynamicVariableBindExpr(ComputingExpr):
 
 
 @auto_attr
-def bind(self, dynvar, value, to_eval_expr):
+def bind(self, dynvar, value, expr):
     """
-    Expression that will bind the result of `value` to the `dynvar`
-    DynamicVariable in order to evaluate the `to_eval_expr` expression.
+    Bind `value` to the `dynvar` dynamic variable in order to evaluate `expr`.
 
     :param DynamicVariable dynvar: Dynamic variable to bind.
     :param AbstractExpression value: Value to bind.
-    :param AbstractExpression to_eval_expr: Expression to evaluate with the
-        binding.
+    :param AbstractExpression expr: Expression to evaluate with the binding.
     :rtype: ResolvedExpression
     """
     check_source_language(
@@ -1854,7 +1852,7 @@ def bind(self, dynvar, value, to_eval_expr):
     )
     with dynvar._bind(value_var.name):
         return DynamicVariableBindExpr(dynvar, value_var, resolved_value,
-                                       construct(to_eval_expr),
+                                       construct(expr),
                                        abstract_expr=self)
 
 

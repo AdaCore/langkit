@@ -18,10 +18,15 @@ from langkit.utils import TypeSet, memoized
 
 
 @attr_call("cast", do_raise=False)
-@attr_call("cast_or_raise", do_raise=True)
+@attr_call("cast_or_raise", do_raise=True,
+           doc='Like :dsl:`cast`, but raise a property error in case of'
+               ' mismatch.')
 class Cast(AbstractExpression):
     """
-    Expression that is the result of downcasting an AST node value.
+    Downcast the AST `node` to the more specific `dest_type` AST node type.
+
+    This returns a null node if the actual type of `node` is not a subtype of
+    `dest_type`.
     """
 
     class Expr(ComputingExpr):
@@ -57,16 +62,16 @@ class Cast(AbstractExpression):
         def is_downcast(self):
             return self.expr.type.matches(self.static_type)
 
-    def __init__(self, expr, dest_type, do_raise=False):
+    def __init__(self, node, dest_type, do_raise=False):
         """
-        :param AbstractExpression expr: Expression on which the cast is
+        :param AbstractExpression node: Expression on which the cast is
             performed.
         :param ASTNodeType dest_type: AST node type to use for the cast.
         :param bool do_raise: Whether the exception should raise an
             exception or return null when the cast is invalid.
         """
         super(Cast, self).__init__()
-        self.expr = expr
+        self.expr = node
         self.dest_type = dest_type
         self.do_raise = do_raise
 

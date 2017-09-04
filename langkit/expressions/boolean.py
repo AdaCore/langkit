@@ -12,10 +12,14 @@ from langkit.expressions.base import (
 
 
 @attr_call('and_then', 'and')
-@attr_call('or_else', 'or')
+@attr_call('or_else', 'or',
+           doc='Like :dsl:`and_then`, but for the OR boolean operator or the'
+               ' logical disjunction.')
 class BinaryBooleanOperator(AbstractExpression):
     """
-    Abstract expression for binary boolean expressions.
+    If `lhs` and `rhs` are booleans, this evaluates them in a short-circuit AND
+    boolean operator fashion. Otherwise, both must be equations, and this
+    returns a new equation that describes the logical conjunction.
     """
 
     AND = 'and'
@@ -104,7 +108,7 @@ def Or(*args):
 @attr_call("equals")
 class Eq(AbstractExpression):
     """
-    Expression for equality test expression.
+    Return whether `lhs` equals `rhs`.
     """
 
     @classmethod

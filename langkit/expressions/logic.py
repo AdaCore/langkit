@@ -280,7 +280,7 @@ def domain(self, logic_var_expr, domain):
     Define the domain of a logical variable. Several important properties about
     this expression:
 
-    This is the entry point into the logic DSL. A logic_var_type variable
+    This is the entry point into the logic DSL. A ``logic_var_type`` variable
     *must* have a domain defined in the context of an equation. If it doesn't,
     its solution set is empty, and thus the only possible value for it is
     undefined.
@@ -291,26 +291,27 @@ def domain(self, logic_var_expr, domain):
     set of every domains.
 
     So for example, in the equation::
+
         Domain(A, [1, 2]) and Domain(B, [1, 2])
 
     The set of solutions is::
+
         [(1, 1), (1, 2), (2, 1), (2, 2)]
 
-    The 'or' operator acts like concatenation on domains of logic variable, so
-    for example::
+    The ``or`` operator acts like concatenation on domains of logic variable,
+    so for example::
 
         Domain(A, [1, 2]) or Domain(A, [3, 4])
 
-    is equivalent to (but slower than) Domain(A, [1, 2, 3, 4]).
+    is equivalent to (but slower than) ``Domain(A, [1, 2, 3, 4])``.
 
     You can define an equation that is invalid, in that not every equation has
-    a domain, and, due to runtime dispatch , we cannot statically predict if
-    that's gonna happen. Thus, trying to solve such an equation will result in
-    an error.
+    a domain, and, due to runtime dispatch, we cannot statically predict if
+    that's going to happen. Thus, trying to solve such an equation will result
+    in an error.
 
-    Please note that for the moment equations can exist only on AST nodes,
-    so the above examples are invalid, and just meant to illustrate the
-    semantics.
+    Please note that for the moment equations can exist only on AST nodes, so
+    the above examples are invalid, and just meant to illustrate the semantics.
 
     :param AbstractExpression logic_var_expr: An expression
         that must resolve to an instance of a logic variable.

@@ -254,7 +254,7 @@ class CollectionExpression(AbstractExpression):
 @attr_call("contains")
 class Contains(CollectionExpression):
     """
-    Abstract expression for a membership test expression.
+    Return whether `item` is an existing element in `collection`.
     """
 
     def __init__(self, collection, item):
@@ -287,11 +287,73 @@ class Contains(CollectionExpression):
         return '<Contains>'
 
 
-@attr_call('filter', collection_expr_identity)
+@attr_call('filter')
+def _filter(collection, filter):
+    """
+    Filter elements in `collection`.
+
+    This return an array that only contains items from `collection` for which
+    the `filter` predicate returned true. For instance, to filter all null AST
+    nodes in an array:
+
+    .. code:: python
+
+        node_array.filter(lambda n: Not(n.is_null))
+    """
+    return Map(collection, collection_expr_identity, filter)
+
+
 @attr_call('filtermap')
-@attr_call('map', filter_expr=collection_expr_none)
-@attr_call('mapcat', filter_expr=collection_expr_none, do_concat=True)
-@attr_call('take_while', collection_expr_identity, collection_expr_none, False)
+def filtermap(collection, expr, filter):
+    """
+    Shortcut to perform :dsl:`filter` and :dsl:`map` in a single shot.
+    """
+    return Map(collection, expr, filter)
+
+
+@attr_call('map')
+def map(collection, expr):
+    """
+    Return an array of the results of evaluating `expr` to the items of
+    `collection`.
+
+    For instance, to return an array that contains all parents of an array of
+    AST nodes:
+
+    .. code:: python
+
+        node_array.map(lambda n: n.parent)
+    """
+    return Map(collection, expr)
+
+
+@attr_call('mapcat')
+def mapcat(collection, expr):
+    """
+    Like :dsl:`map`, except that `expr` is expected to return arrays:
+    this returns an array that is the concatenation of all the returned
+    arrays.
+    """
+    return Map(collection, expr, do_concat=True)
+
+
+@attr_call('take_while')
+def take_while(collection, take_while_pred):
+    """
+    Return an array that contains all items in `collection` until the first one
+    for which the `take_while_pred` predicate returns false.
+
+    For instance, this return an array that contains the first parents of
+    `node` whose type is a subtype of some `Scope` AST node type:
+
+    .. code:: python
+
+        node.parents.take_while(lambda n: n.is_a(Scope))
+    """
+    return Map(collection, collection_expr_identity,
+               take_while_pred=take_while_pred)
+
+
 class Map(CollectionExpression):
     """
     Abstract expression that is the result of a map expression evaluation.
@@ -367,15 +429,15 @@ class Map(CollectionExpression):
                 [v for v, _ in self.element_vars] + [self.index_var]
             )
 
-    def __init__(self, collection, expr, filter_expr=collection_expr_none,
+    def __init__(self, collection, expr, filter=collection_expr_none,
                  do_concat=False, take_while_pred=collection_expr_none):
         """
         See CollectionExpression for the other parameters.
 
-        :param filter_expr: If provided, a function that takes an induction
-            variable and that returns a boolean expression which says whether
-            to include or exclude an item from the collection.
-        :type filter_expr: None|(AbstractExpression) -> AbstractExpression
+        :param filter: If provided, a function that takes an induction variable
+            and that returns a boolean expression which says whether to include
+            or exclude an item from the collection.
+        :type filter: None|(AbstractExpression) -> AbstractExpression
 
         :param bool do_concat: If true, "expr" must return arrays, and this
             expression returns the concatenation of all the arrays "expr"
@@ -388,7 +450,7 @@ class Map(CollectionExpression):
         """
         super(Map, self).__init__(collection, expr)
 
-        self.filter_fn = filter_expr
+        self.filter_fn = filter
 
         self.take_while_pred = take_while_pred
         self.do_concat = do_concat
@@ -459,16 +521,13 @@ class Map(CollectionExpression):
 
 
 @auto_attr
-def as_array(self, list_expr):
+def as_array(self, ast_list):
     """
     Turn an AST list node into an array for the same elements.
 
     This is basically a shortcut to a map operation with the identity function.
-
-    :param AbstractExpression list_expr: The AST list to convert.
-    :rtype: ResolvedExpression
     """
-    abstract_result = Map(list_expr, expr=collection_expr_identity)
+    abstract_result = Map(ast_list, expr=collection_expr_identity)
     abstract_result.prepare()
     result = construct(abstract_result)
     check_source_language(
@@ -486,11 +545,13 @@ def as_array(self, list_expr):
                ' returns true for one collection item.')
 class Quantifier(CollectionExpression):
     """
-    Must be applied on a collection. This returns whether `predicate` returns
-    true for all the items in a collection.
+    Return whether `predicate` returns true for all the items in the input
+    `collection`.
 
     For instance, this computes whether all integers in an array are positive:
+
     .. code:: python
+
         int_array.all(lambda i: i > 0)
     """
 
@@ -605,18 +666,14 @@ class Quantifier(CollectionExpression):
 @auto_attr_custom('at_or_raise', or_null=False,
                   doc='Like :dsl:`at`, but raise a property error when the'
                       ' index is out of bounds.')
-def collection_get(self, coll_expr, index, or_null):
+def collection_get(self, collection, index, or_null):
     """
-    Get an element from a collection. Must be applied on a collection.
+    Get the `index`\ -th element from `collection`.
 
     Indexes are 0-based. As in Python, `index` can be negative, to retrieve
     elements in reverse order. For instance, ``expr.at(-1)`` will return the
     last element.
 
-    :param AbstractExpression coll_expr: The expression representing the
-        collection to get from.
-    :param AbstractExpression index_expr: The expression representing the
-        index of the element to get.
     :param bool or_null: If true, the expression will return null if the
         index is not valid for the collection. If False, it will raise an
         exception.
@@ -625,7 +682,7 @@ def collection_get(self, coll_expr, index, or_null):
     # indexes, so there is no need to fiddle indexes here.
     index_expr = construct(index, long_type)
 
-    coll_expr = construct(coll_expr)
+    coll_expr = construct(collection)
     as_entity = coll_expr.type.is_entity_type
     if as_entity:
         saved_coll_expr, coll_expr, entity_info = (
@@ -652,24 +709,22 @@ def collection_get(self, coll_expr, index, or_null):
 
 
 @auto_attr
-def length(self, coll_expr):
+def length(self, collection):
     """
-    Expression that will return the length of a collection.
-
-    :param AbstractExpression coll_expr: The expression representing the
-        collection to get from.
+    Compute the length of `collection`.
     """
     return CallExpr('Len', 'Length', long_type,
-                    [construct(coll_expr, lambda t: t.is_collection)],
+                    [construct(collection, lambda t: t.is_collection)],
                     abstract_expr=self)
 
 
 @attr_expr('singleton')
-@attr_expr('to_array', coerce_null=True)
+@attr_expr('to_array', coerce_null=True,
+           doc='Like :dsl:`singleton`, but return an empty array if `expr` is'
+               ' null.')
 class CollectionSingleton(AbstractExpression):
     """
-    Expression that will return a collection of a single element, given the
-    single element.
+    Return a 1-sized array whose only item is `expr`.
     """
 
     class Expr(ComputingExpr):
@@ -735,7 +790,8 @@ class CollectionSingleton(AbstractExpression):
 @attr_call('concat')
 class Concat(AbstractExpression):
     """
-    Expression that will concatenate two arrays.
+    Return the concatenation of `array_1` and `array_2`. Both must be arrays of
+    the same type.
     """
 
     def __init__(self, array_1, array_2):

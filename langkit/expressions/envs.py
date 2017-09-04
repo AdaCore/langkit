@@ -21,7 +21,7 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
             sequential=False, sequential_from=Self, recursive=True,
             filter_prop=None):
     """
-    Expression for lexical environment get operation.
+    Perform a lexical environment lookup.
 
     :param AbstractExpression env_expr: Expression that will yield the env
         to get the element from.
@@ -159,15 +159,15 @@ class EnvGet(ComputingExpr):
 
 
 @auto_attr
-def env_orphan(self, env_expr):
+def env_orphan(self, env):
     """
-    Expression that will create a lexical environment copy with no parent.
+    Return a copy of the `env` lexical environment which has no parent.
 
-    :param AbstractExpression env_expr: Expression that will return a
+    :param AbstractExpression env: Expression that will return a
         lexical environment.
     """
     return CallExpr('Orphan_Env', 'AST_Envs.Orphan', lexical_env_type,
-                    [construct(env_expr, lexical_env_type)],
+                    [construct(env, lexical_env_type)],
                     abstract_expr=self)
 
 
@@ -194,18 +194,18 @@ class EnvGroup(AbstractExpression):
 
 
 @auto_attr
-def env_group(self, env_array_expr):
+def env_group(self, env_array):
     """
-    Expression that will return a lexical environment that logically groups
-    together multiple lexical environments from an array of lexical
-    environments.
+    Return a new lexical environment that logically groups together multiple
+    environments. `env_array` must be an array that contains the environments
+    to be grouped.
 
-    :param AbstractExpression env_array_expr: Expression that will return
+    :param AbstractExpression env_array: Expression that will return
         an array of lexical environments. If this array is empty, the empty
         environment is returned.
     """
     return CallExpr('Group_Env', 'Group', lexical_env_type,
-                    [construct(env_array_expr, lexical_env_type.array)],
+                    [construct(env_array, lexical_env_type.array)],
                     abstract_expr=self)
 
 
@@ -229,7 +229,7 @@ def is_visible_from(self, referenced_env, base_env):
 @auto_attr
 def env_node(self, env):
     """
-    Return the node associated to this environment.
+    Return the node associated to the `env` environment.
 
     :param AbstractExpression env: The source environment.
     """
@@ -241,7 +241,7 @@ def env_node(self, env):
 @auto_attr
 def env_parent(self, env):
     """
-    Return this env's parent env.
+    Return the parent of the `env` lexical environment.
 
     :param AbstractExpression env: The source environment.
     """
@@ -338,7 +338,8 @@ def make_as_entity(node_expr, entity_info=None, null_check=True,
 @auto_attr
 def as_entity(self, node):
     """
-    Construct an entity from node, including context (env rebindings).
+    Wrap `node` into an entity. This uses environment rebindings from the
+    context.
     """
 
     p = PropertyDef.get()
@@ -361,7 +362,8 @@ def as_entity(self, node):
 @auto_attr
 def as_bare_entity(self, node):
     """
-    Construct an entity from node, with default entity info.
+    Wrap `node` into an entity, using default entity information (in
+    particular, no rebindings).
     """
     node_expr = construct(node, T.root_node, downcast=False)
     ret = make_as_entity(node_expr, entity_info=NullExpr(T.entity_info),
