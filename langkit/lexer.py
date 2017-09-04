@@ -37,7 +37,7 @@ class Pattern(Matcher):
     Matcher. This will match a regular expression like pattern. Since the
     lexer DSL uses Quex underneath, you can find more documentation about
     the recognized regular expression language here: `Quex pattern language
-     <http://quex.sourceforge.net/doc/html/usage/patterns/context-free.html>`_.
+    <http://quex.sourceforge.net/doc/html/usage/patterns/context-free.html>`_.
     """
 
     def __init__(self, pattern):
@@ -398,10 +398,11 @@ class Lexer(object):
         """
         Add the list of rules to the lexer's internal list of rules. A rule is
         either:
-          - A tuple of a Matcher and an Action to execute on this matcher. This
-            is the common case;
-          - An instance of a class derived from `RuleAssoc`. This is used to
-            implement custom matching behaviour, such as in the case of `Case`.
+
+        * A tuple of a Matcher and an Action to execute on this matcher. This
+          is the common case;
+        * An instance of a class derived from `RuleAssoc`. This is used to
+          implement custom matching behaviour, such as in the case of `Case`.
 
         Please note that the order of addition matters. It will determine which
         rules are tried first by the lexer, so you could in effect make some

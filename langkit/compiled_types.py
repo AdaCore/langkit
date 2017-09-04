@@ -2445,6 +2445,7 @@ def resolve_type(typeref):
     Resolve a type reference to the actual CompiledType subclass.
 
     :param typeref: Type reference to resolve. It can be either:
+
         * None: it is directly returned;
         * a CompiledType subclass: it is directly returned;
         * a TypeRepo.Defer instance: it is deferred;
