@@ -506,11 +506,17 @@ class PythonLang(LanguageChecker):
                 report.set_context(filename, 1)
                 if not future_seen:
                     report.add('Missing __future__ imports')
-                elif future_seen != self.future_expected:
-                    report.add('Missing __future__ imports: {}'.format(
-                        ', '.join(sorted(name for name in
-                                         self.future_expected - future_seen))
-                    ))
+                else:
+                    missing = self.future_expected - future_seen
+                    extraneous = future_seen - self.future_expected
+                    if missing:
+                        report.add('Missing __future__ imports: {}'.format(
+                            ', '.join(sorted(missing))
+                        ))
+                    if extraneous:
+                        report.add('Extraneous __future__ imports: {}'.format(
+                            ', '.join(sorted(extraneous))
+                        ))
 
 
 class MakoLang(LanguageChecker):
