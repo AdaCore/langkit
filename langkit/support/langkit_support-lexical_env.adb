@@ -47,8 +47,7 @@ package body Langkit_Support.Lexical_Env is
    -- Simple_Env_Getter --
    -----------------------
 
-   function Simple_Env_Getter (E : Lexical_Env) return Env_Getter
-   is
+   function Simple_Env_Getter (E : Lexical_Env) return Env_Getter is
    begin
       Inc_Ref (E);
       return Env_Getter'(Dynamic       => False,
@@ -61,8 +60,7 @@ package body Langkit_Support.Lexical_Env is
    --------------------
 
    function Dyn_Env_Getter
-     (Resolver : Lexical_Env_Resolver; Node : Element_T) return Env_Getter
-   is
+     (Resolver : Lexical_Env_Resolver; Node : Element_T) return Env_Getter is
    begin
       return Env_Getter'(True, Node, Resolver);
    end Dyn_Env_Getter;
@@ -207,10 +205,9 @@ package body Langkit_Support.Lexical_Env is
    ----------------------
 
    function Append_Rebinding
-     (Self                 : Env_Rebindings;
-      To_Rebind            : Lexical_Env;
-      Rebind_To            : Lexical_Env) return Env_Rebindings
-   is
+     (Self      : Env_Rebindings;
+      To_Rebind : Lexical_Env;
+      Rebind_To : Lexical_Env) return Env_Rebindings is
    begin
       if not Is_Rebindable (To_Rebind.Node) then
          Raise_Property_Error ("Illegal lexical environment rebinding");
@@ -223,8 +220,7 @@ package body Langkit_Support.Lexical_Env is
    -- Create --
    ------------
 
-   function Create (El : Element_T; MD : Element_Metadata) return Entity
-   is
+   function Create (El : Element_T; MD : Element_Metadata) return Entity is
    begin
       return Entity'
         (El      => El,
@@ -258,8 +254,7 @@ package body Langkit_Support.Lexical_Env is
      (Parent        : Env_Getter;
       Node          : Element_T;
       Is_Refcounted : Boolean;
-      Default_MD    : Element_Metadata := Empty_Metadata) return Lexical_Env
-   is
+      Default_MD    : Element_Metadata := Empty_Metadata) return Lexical_Env is
    begin
       if Parent /= No_Env_Getter then
          Inc_Ref (Parent);
@@ -641,8 +636,7 @@ package body Langkit_Support.Lexical_Env is
    ----------------
 
    function Rebind_Env
-     (Base_Env : Lexical_Env; E_Info : Entity_Info) return Lexical_Env
-   is
+     (Base_Env : Lexical_Env; E_Info : Entity_Info) return Lexical_Env is
    begin
       return Rebind_Env (Base_Env, E_Info.Rebindings);
    end Rebind_Env;
@@ -652,11 +646,10 @@ package body Langkit_Support.Lexical_Env is
    -------------
 
    procedure Destroy (Self : in out Lexical_Env) is
-      procedure Free is
-        new Ada.Unchecked_Deallocation (Lexical_Env_Type, Lexical_Env);
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Lexical_Env_Type, Lexical_Env);
       Primary : constant Boolean := Is_Primary (Self);
    begin
-
       --  Do not free the internal map for ref-counted allocated environments
       --  as all maps are owned by analysis unit owned environments.
 
@@ -833,12 +826,10 @@ package body Langkit_Support.Lexical_Env is
       MD         : Element_Metadata;
       Rebindings : Env_Rebindings) return Entity_Array
    is
-      function Create_Entity (Elt : Internal_Map_Element)
-         return Entity;
+      function Create_Entity (Elt : Internal_Map_Element) return Entity;
       --  Transform an element from the environment into an entity
 
-      function Create_Entity (Elt : Internal_Map_Element) return Entity
-      is
+      function Create_Entity (Elt : Internal_Map_Element) return Entity is
          Result : constant Entity :=
            (El   => Elt.Element,
             Info => (MD         => Combine (Elt.MD, MD),
