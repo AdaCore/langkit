@@ -772,8 +772,8 @@ package body ${ada_lib_name}.Analysis is
          end loop;
          R.Children.Destroy;
 
-         Unregister (R, Old_Env (R.Rebinding).Node.Unit.Rebindings);
-         Unregister (R, New_Env (R.Rebinding).Node.Unit.Rebindings);
+         Unregister (R, R.Old_Env.Node.Unit.Rebindings);
+         Unregister (R, R.New_Env.Node.Unit.Rebindings);
 
          declare
             Var_R : Env_Rebindings := R;

@@ -151,38 +151,27 @@ package Langkit_Support.Lexical_Env is
    -- Env_Rebindings --
    --------------------
 
-   type Env_Rebinding is private
-      with Type_Invariant =>
-         (Old_Env (Env_Rebinding) = null
-          or else Is_Primary (Old_Env (Env_Rebinding)))
-         and then (New_Env (Env_Rebinding) = null
-                   or else Is_Primary (New_Env (Env_Rebinding)));
-   --  Mapping from one lexical environment (the old one) to another (the new
-   --  one). Note that as both referenced environments are primary, this data
-   --  type does not need ref-counting primitives.
-
-   No_Env_Rebinding : constant Env_Rebinding;
-
-   function Old_Env (Self : Env_Rebinding) return Lexical_Env;
-   --  Return the environment Self rebinds
-
-   function New_Env (Self : Env_Rebinding) return Lexical_Env;
-   --  Retrun the environment that Self rebinds to
-
    package Env_Rebindings_Vectors is new Langkit_Support.Vectors
      (Env_Rebindings);
 
    type Env_Rebindings_Type is record
-      Parent    : Env_Rebindings;
-      Rebinding : Env_Rebinding;
-      Children  : Env_Rebindings_Vectors.Vector;
+      Parent           : Env_Rebindings;
+      Old_Env, New_Env : Lexical_Env;
+      Children         : Env_Rebindings_Vectors.Vector;
    end record;
+   --  Tree of remappings from one lexical environment (Old_Env) to another
+   --  (New_Env). Note that both referenced environments must be primary and
+   --  env rebindings are supposed to be destroyed when one of their
+   --  dependencies (Parent, Old_Env or New_Env) is destroyed, so there is no
+   --  need for ref-counting primitives.
 
    function Combine (L, R : Env_Rebindings) return Env_Rebindings;
    --  Return a new Env_Rebindings that combines rebindings from both L and R
 
    function Append
-     (Self : Env_Rebindings; Binding : Env_Rebinding) return Env_Rebindings;
+     (Self             : Env_Rebindings;
+      Old_Env, New_Env : Lexical_Env) return Env_Rebindings
+      with Pre => Is_Primary (Old_Env) and then Is_Primary (New_Env);
    --  Create a new rebindings and register it to Self and to
    --  Old_Env/New_Env's analysis units.
 
@@ -426,18 +415,6 @@ package Langkit_Support.Lexical_Env is
    --  environment specification.
 
 private
-
-   type Env_Rebinding is record
-      Old_Env, New_Env : Env_Getter;
-      --  Both must be static env getters
-   end record;
-
-   function Old_Env (Self : Env_Rebinding) return Lexical_Env is
-     (Self.Old_Env.Env);
-   function New_Env (Self : Env_Rebinding) return Lexical_Env is
-     (Self.New_Env.Env);
-
-   No_Env_Rebinding : constant Env_Rebinding := (No_Env_Getter, No_Env_Getter);
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Type :=

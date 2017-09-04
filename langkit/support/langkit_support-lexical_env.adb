@@ -139,7 +139,7 @@ package body Langkit_Support.Lexical_Env is
       Result := L;
       Cur := R;
       while Cur /= null loop
-         Result := Append (Result, Cur.Rebinding);
+         Result := Append (Result, Cur.Old_Env, Cur.New_Env);
          Cur := Cur.Parent;
       end loop;
 
@@ -152,10 +152,8 @@ package body Langkit_Support.Lexical_Env is
    ------------
 
    function Append
-     (Self : Env_Rebindings; Binding : Env_Rebinding) return Env_Rebindings
-   is
-      Old_Env : constant Lexical_Env := Get_Env (Binding.Old_Env);
-      New_Env : constant Lexical_Env := Get_Env (Binding.New_Env);
+     (Self             : Env_Rebindings;
+      Old_Env, New_Env : Lexical_Env) return Env_Rebindings is
    begin
       --  Look for an existing rebinding for the result: in the Old_Env's pool
       --  if there is no parent, otherwise in the parent's children.
@@ -174,7 +172,7 @@ package body Langkit_Support.Lexical_Env is
 
       else
          for C of Self.Children loop
-            if C.Rebinding = Binding then
+            if C.Old_Env = Old_Env and then C.New_Env = New_Env then
                return C;
             end if;
          end loop;
@@ -183,9 +181,10 @@ package body Langkit_Support.Lexical_Env is
       --  No luck? then create a new rebinding and register it where required
       declare
          Result : constant Env_Rebindings := new Env_Rebindings_Type'
-           (Parent    => Self,
-            Rebinding => Binding,
-            Children  => Env_Rebindings_Vectors.Empty_Vector);
+           (Parent   => Self,
+            Old_Env  => Old_Env,
+            New_Env  => New_Env,
+            Children => Env_Rebindings_Vectors.Empty_Vector);
       begin
          if Self /= null then
             Self.Children.Append (Result);
@@ -217,9 +216,7 @@ package body Langkit_Support.Lexical_Env is
          Raise_Property_Error ("Illegal lexical environment rebinding");
       end if;
 
-      return Append
-        (Self, Env_Rebinding'(Simple_Env_Getter (To_Rebind),
-                              Simple_Env_Getter (Rebind_To)));
+      return Append (Self, To_Rebind, Rebind_To);
    end Append_Rebinding;
 
    ------------
@@ -747,11 +744,10 @@ package body Langkit_Support.Lexical_Env is
          begin
             while R /= null loop
                declare
-                  R_Old_Env : Lexical_Env renames
-                     Get_Env (R.Rebinding.Old_Env);
+                  R_Old_Env : constant Lexical_Env := R.Old_Env;
                begin
                   if Rebound_Env = R_Old_Env then
-                     Return_Env := Get_Env (R.Rebinding.New_Env);
+                     Return_Env := R.New_Env;
 
                      --  Extracted rebinding *must* be the last one
                      pragma Assert (R = Rebindings);
@@ -809,9 +805,7 @@ package body Langkit_Support.Lexical_Env is
       --  If we fond a rebindable parent, then we will shed all rebindings
       --  between the top of the rebinding stack and the corresponding
       --  rebinding.
-      while
-         Result /= null
-         and then Get_Env (Result.Rebinding.Old_Env) /= First_Rebindable_Parent
+      while Result /= null and then Result.Old_Env /= First_Rebindable_Parent
       loop
          Result := Result.Parent;
       end loop;
@@ -874,8 +868,8 @@ package body Langkit_Support.Lexical_Env is
       while L /= null loop
          R := L.Parent;
          while R /= null loop
-            pragma Assert (L.Rebinding.Old_Env /= R.Rebinding.Old_Env);
-            pragma Assert (L.Rebinding.New_Env /= R.Rebinding.New_Env);
+            pragma Assert
+              (L.Old_Env /= R.Old_Env and then L.New_Env /= R.New_Env);
             R := R.Parent;
          end loop;
          L := L.Parent;
@@ -892,8 +886,8 @@ package body Langkit_Support.Lexical_Env is
         (if Self.Ref_Count /= No_Refcount
          then "<synthetic>" else Element_Image (Self.Node));
 
-      function Image (Self : Env_Rebinding) return Text_Type is
-        (Image (Get_Env (Self.New_Env)));
+      function Rebinding_Image (Self : Env_Rebindings) return Text_Type is
+        (Image (Self.New_Env));
 
    begin
       if Self = null then
@@ -916,7 +910,7 @@ package body Langkit_Support.Lexical_Env is
             if I < Rebindings_Vector.Last_Index then
                Append (Buffer, ", ");
             end if;
-            Append (Buffer, Image (Rebindings_Vector.Get (I).Rebinding));
+            Append (Buffer, Rebinding_Image (Rebindings_Vector.Get (I)));
          end loop;
          Append (Buffer, "]");
 
