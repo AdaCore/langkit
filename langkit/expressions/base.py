@@ -1901,18 +1901,18 @@ class EntityVariable(AbstractVariable):
 Entity = EntityVariable()
 
 
-@attr_expr("symbol")
+@attr_expr('symbol')
 class GetSymbol(AbstractExpression):
     """
-    Abstract expression that gets a symbol out of a token.
+    Return the symbol associated to `token`.
     """
 
-    def __init__(self, token_expr):
+    def __init__(self, token):
         """
-        :param AbstractExpression token_expr: Expression returning a token.
+        :param AbstractExpression token: Expression returning a token.
         """
         super(GetSymbol, self).__init__()
-        self.token_expr = token_expr
+        self.token_expr = token
 
     def construct(self):
         """
@@ -3563,7 +3563,7 @@ class TokenTextEq(BasicExpr):
 @auto_attr
 def text_equals(self, left, right):
     """
-    Expression to test equality of the text of two tokens.
+    Return whether the two `left` and `right` tokens have the same text.
 
     :param AbstractExpression left: Expression that must resolve to a token,
         whose text will be used for the test.

@@ -23,7 +23,7 @@ UnitBody = AbstractVariable(
 @auto_attr
 def unit(self, node):
     """
-    Expression that gets the analysis unit that "node_expr" belongs to.
+    Return the analysis unit that owns `node`.
 
     :param AbstractExpression node: Node for which we want the embedding
         analysis unit.
@@ -53,8 +53,8 @@ def unit(self, node):
 @auto_attr
 def is_referenced_from(self, referenced_unit, base_unit):
     """
-    Expression to compute whether an analysis unit is referenced from another
-    unit.
+    Return whether the `referenced_unit` analysis unit is referenced from
+    `base_unit`.
 
     :param AbstractExpression referenced_unit: The unit that may be referenced
         from base_unit.
@@ -72,14 +72,10 @@ def is_referenced_from(self, referenced_unit, base_unit):
 @auto_attr_custom("root")
 def analysis_unit_root(self, unit):
     """
-    Construct a resolved expression for the evaluation of a property on an
-    analysis unit.
+    Return `unit`'s root AST node.
 
-    :param ResolvedExpression unit_expr: Expression that yields the analysis
-        unit for which we evaluate a property.
-    :param str field_name: Name of the property to evaluate.
-    :param list[AbstractExpression] arguments: List of arguments associated to
-        this property evaluation.
+    :param ResolvedExpression unit: Expression that yields the analysis
+        unit for which we want to extract the root AST node.
     """
     unit_expr = construct(unit, analysis_unit_type)
     return CallExpr('Unit_Root', 'Root', T.root_node,

@@ -117,7 +117,9 @@ class Cast(AbstractExpression):
 @attr_expr("is_null")
 class IsNull(AbstractExpression):
     """
-    Abstract expression to test the passed expression is null.
+    If `expr` is an entity, return whether the corresponding AST node is null
+    (even if the entity info is non null). For all other types, return whether
+    it is the null value.
     """
 
     def __init__(self, expr):
@@ -709,10 +711,12 @@ class FieldAccess(AbstractExpression):
                                             '(...)' if self.arguments else '')
 
 
-@attr_call("is_a")
+@attr_call('is_a')
 class IsA(AbstractExpression):
     """
-    Expression that is the result of testing the kind of a node.
+    Return whether the kind of `node_or_entity` is one of `astnodes` (a list of
+    ``ASTNode`` subclasses). Note that if `node_or_entity` is an entity, entity
+    types are accepted in `astnodes`.
     """
 
     class Expr(ComputingExpr):
@@ -760,14 +764,14 @@ class IsA(AbstractExpression):
                 astnode.name.camel for astnode in self.astnodes
             ))
 
-    def __init__(self, expr, *astnodes):
+    def __init__(self, node_or_entity, *astnodes):
         """
-        :param AbstractExpression astnode: Expression on which the test is
-            performed.
+        :param AbstractExpression node_or_entity: Expression on which the test
+            is performed.
         :param ASTNode astnode: ASTNode subclass to use for the test.
         """
         super(IsA, self).__init__()
-        self.expr = expr
+        self.expr = node_or_entity
         self.astnodes = astnodes
 
     def construct(self):
@@ -806,73 +810,64 @@ class IsA(AbstractExpression):
 @attr_call('match')
 class Match(AbstractExpression):
     """
-    Expression that performs computations that depend on a AST node type match.
+    Evaluate various expressions depending on `node_or_entity`'s kind.
 
-    For instance::
+    `matchers` must be a sequence of functions that return the expressions to
+    evaluate depending on the kind. There are two cases.
 
-        expression.match(
-            lambda n=SomeNodeType: n.foo,
-            lambda n=SomeOtherType: n.bar,
-        )
+    1.  Either they all must accept one optional argument whose default values
+        are the types to match. In this case, the set of types to match must
+        cover all possible kinds. For instance, given the following type tree::
 
-    Will return n.foo for a node "n" that is a SomeNodeType.
+            Statement
+            Expr:
+                BinaryOp:
+                    PlusOp
+                    MinusOp
+                Call
+
+        Then given an ``expr`` parameter that yields an ``Expr`` value, the
+        following matchers are valid::
+
+            Match(expr,
+                  lambda e=PlusOp: X,
+                  lambda e=MinusOp: Y,
+                  lambda e=Call: Z)
+            Match(expr,
+                  lambda e=BinaryOp: X,
+                  lambda e=Call: Y)
+
+        But the following are not::
+
+            # MinusOp not handled:
+            Match(expr,
+                  lambda e=PlusOp: X,
+                  lambda e=Call: Z)
+
+            # Expr nodes can never be Statement
+            Match(expr,
+                  lambda e=BinaryOp: X,
+                  lambda e=Call: Y,
+                  lambda e=Statement: Z)
+
+    2.  Otherwise, all but one must accept such an optional argument.  The only
+        other one must accept a mandatory argument and will match the remaining
+        cases. For instance::
+
+            Match(expr,
+                  lambda e=BinaryOp: X,
+                  lambda e: Y)
     """
 
-    def __init__(self, expr, *matchers):
+    def __init__(self, node_or_entity, *matchers):
         """
-        :param AbstractExpression expr: The expression to match.
+        :param AbstractExpression node_or_entity: The expression to match.
 
-        :param matchers: Sequence of functions that return the expressions to
-            evaluate depending on the match. There are two cases.
-
-            1.  Either they all must accept one optional argument whose default
-                values are the types to match. In this case, the set of types
-                to match must cover all possible values. For instance, given
-                the following type tree::
-
-                    Statement
-                    Expr:
-                        BinaryOp:
-                            PlusOp
-                            MinusOp
-                        Call
-
-                Then given an "expr" parameter that yields an Expr value, the
-                follwing matchers are valid::
-
-                    Match(expr,
-                          lambda e=PlusOp: X,
-                          lambda e=MinusOp: Y,
-                          lambda e=Call: Z)
-                    Match(expr,
-                          lambda e=BinaryOp: X,
-                          lambda e=Call: Y)
-
-                But the following are not::
-
-                    # MinusOp not handled:
-                    Match(expr,
-                          lambda e=PlusOp: X,
-                          lambda e=Call: Z)
-
-                    # Expr nodes can never be Statement
-                    Match(expr,
-                          lambda e=BinaryOp: X,
-                          lambda e=Call: Y,
-                          lambda e=Statement: Z)
-
-            2.  Otherwise, all but one must accept such an optional argument.
-                The only other one must accept a mandatory argument and will
-                match the remaining cases. For
-                instance::
-
-                    Match(expr,
-                          lambda e=BinaryOp: X,
-                          lambda e: Y)
+        :param matchers: See the class docstring.
         :type matchers: list[() -> AbstractExpression]
         """
         super(Match, self).__init__()
-        self.matched_expr = expr
+        self.matched_expr = node_or_entity
         self.matchers_functions = matchers
 
         self.matchers = None

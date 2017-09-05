@@ -379,15 +379,14 @@ class Not(AbstractExpression):
 @attr_call('then')
 class Then(AbstractExpression):
     """
-    Expression for the then boolean combinator that works as follows::
+    Evaluate and return the result of `then_fn` if `expr` is not null.
+    Otherwise, evaluate and return the result of `default_val`.
 
-        expression.then(
-            lambda expr_result: arbitrary_expression, default_expression
-        )
+    For instance, to evaluate the property of a node or return false when this
+    node is null::
 
-    This property code will evaluate the arbitrary expression if expression
-    evaluates to a not null result, and will evaluate the default_expression
-    otherwise.
+        node.then(lambda n: n.my_property,
+                  False)
     """
 
     class Expr(ComputingExpr):

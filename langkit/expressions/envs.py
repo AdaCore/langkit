@@ -257,8 +257,8 @@ def env_group(self, env_array):
 @auto_attr
 def is_visible_from(self, referenced_env, base_env):
     """
-    Expression that will return whether an env's associated compilation unit is
-    visible from another env's compilation unit.
+    Return whether the analysis unit associated to the `referenced_env` lexical
+    environment is visible from `base_env`'s.
 
     :param AbstractExpression base_env: The environment from which we want
         to check visibility.

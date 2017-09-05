@@ -481,9 +481,8 @@ class Predicate(AbstractExpression):
 @auto_attr
 def get_value(self, logic_var):
     """
-    Expression that'll extract the value out of a logic variable. The type is
-    always the root entity type. If the variable is not defined, return a null
-    entity.
+    Extract the value out of a logic variable. The returned type is always the
+    root entity type. If the variable is not defined, return a null entity.
 
     :param AbstractExpression logic_var: The logic var from which we want to
         extract the value.
@@ -510,14 +509,16 @@ def get_value(self, logic_var):
 @auto_attr
 def solve(self, equation):
     """
-    Expression that will call solve on an instance of equation_type, and return
-    whether any solution was found or not. The solutions are not returned,
-    instead, logic variables are bound to their values in the current solution.
+    Call ``solve`` on the given `equation` and return whether any solution was
+    found or not. The solutions are not returned, instead, logic variables are
+    bound to their values in the current solution.
 
-    TODO: For the moment, since properties returning equations will
-    reconstruct them everytime, there is no way to get the second solution
-    if there is one. Also you cannot do that manually either since a
-    property exposing equations cannot be public at the moment.
+    .. todo::
+
+        For the moment, since properties returning equations will reconstruct
+        them everytime, there is no way to get the second solution if there is
+        one. Also you cannot do that manually either since a property exposing
+        equations cannot be public at the moment.
 
     :param AbstractExpression equation: The equation to solve.
     """
