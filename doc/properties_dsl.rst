@@ -19,4 +19,9 @@ Declaring properties
 Attribute expressions reference
 ===============================
 
-.. auto-properties-dsl::
+.. auto-properties-dsl:: attr
+
+Expression constructors reference
+=================================
+
+.. auto-properties-dsl:: cls

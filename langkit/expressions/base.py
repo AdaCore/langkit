@@ -380,6 +380,7 @@ class AbstractExpression(Frozable):
     """
 
     attrs_dict = {}
+    constructors = []
 
     @property
     def diagnostic_context(self):
@@ -669,6 +670,17 @@ class AbstractExpression(Frozable):
         """
         from langkit.expressions.boolean import Eq
         return Eq(self, other)
+
+
+def dsl_document(cls):
+    """
+    Decorator for AbstractExpression subclasses to be described in the Langkit
+    user documentation.
+    """
+    AbstractExpression.constructors.append(DocumentedExpression(
+        False, cls.__name__, cls, (), {}, False
+    ))
+    return cls
 
 
 def attr_call(name, *args, **kwargs):
