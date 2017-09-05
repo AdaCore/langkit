@@ -3542,38 +3542,6 @@ class FieldAccessExpr(BasicExpr):
                                                   self.type.name.camel)
 
 
-class TokenTextEq(BasicExpr):
-    """
-    Resolved expression to test equality of the text of two tokens.
-    """
-    def __init__(self, left, right, abstract_expr=None):
-        """
-        :type left: ResolvedExpression
-        :type right: ResolvedExpression
-        :param AbstractExpression|None abstract_expr: See ResolvedExpression's
-            constructor.
-        """
-        super(TokenTextEq, self).__init__(
-            'Is_Equal', "Text_Type'(Text ({})) = Text_Type'(Text ({}))",
-            bool_type, [left, right],
-            abstract_expr=abstract_expr
-        )
-
-
-@auto_attr
-def text_equals(self, left, right):
-    """
-    Return whether the two `left` and `right` tokens have the same text.
-
-    :param AbstractExpression left: Expression that must resolve to a token,
-        whose text will be used for the test.
-    :param AbstractExpression right: Likewise.
-    """
-    return TokenTextEq(construct(left, token_type),
-                       construct(right, token_type),
-                       abstract_expr=self)
-
-
 class LocalVars(object):
     """
     Represents the state of local variables in a property definition.
