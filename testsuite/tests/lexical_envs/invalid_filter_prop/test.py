@@ -16,8 +16,7 @@ from utils import emit_and_print_errors
 Env = DynamicVariable('env', LexicalEnvType)
 
 
-def run(name, prop, sequential=True, filter_prop=lambda foo_node:
-        foo_node.filter_prop):
+def run(name, prop, filter_prop=lambda foo_node: foo_node.filter_prop):
     Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
     print('== {} =='.format(name))
 
@@ -38,9 +37,11 @@ def run(name, prop, sequential=True, filter_prop=lambda foo_node:
 
         @langkit_property(public=True)
         def resolve():
-            return Self.node_env.get(Self.name.symbol,
-                                     sequential=sequential,
-                                     filter_prop=filter_prop(FooNode)).at(0)
+            return Self.node_env.get_sequential(
+                symbol=Self.name.symbol,
+                sequential_from=Self,
+                filter_prop=filter_prop(FooNode)
+            ).at(0)
 
     grammar = Grammar('main_rule')
     grammar.add_rules(
@@ -55,7 +56,6 @@ def run(name, prop, sequential=True, filter_prop=lambda foo_node:
     )
     emit_and_print_errors(grammar)
 
-run('Not sequential', Property(Self), sequential=False)
 run('Bad property reference', Property(Self), filter_prop=lambda _: 1)
 run('Bad return type', Property(lambda env=LexicalEnvType: env))
 run('Bad argument count', Property(lambda _=LexicalEnvType, b=BoolType: b))

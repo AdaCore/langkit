@@ -1,25 +1,20 @@
-== Not sequential ==
-File "test.py", line 39, in Ref.resolve
-  line 43, in get expression
-    Error: a sequential lookup is required to use a filter property
 == Bad property reference ==
-File "test.py", line 39, in Ref.resolve
-  line 43, in get expression
+File "test.py", line 38, in Ref.resolve
     Error: filter_prop must be a PropertyDef instance (got 1)
 == Bad return type ==
-File "test.py", line 39, in Ref.resolve
-  line 43, in get expression
+File "test.py", line 38, in Ref.resolve
+  line 43, in EnvGet expression
     Error: filter_prop must return a boolean (got LexicalEnv)
 == Bad argument count ==
-File "test.py", line 39, in Ref.resolve
-  line 43, in get expression
+File "test.py", line 38, in Ref.resolve
+  line 43, in EnvGet expression
     Error: filter_prop must take exactly one argument: a lexical environment
 == Bad argument type ==
-File "test.py", line 39, in Ref.resolve
-  line 43, in get expression
+File "test.py", line 38, in Ref.resolve
+  line 43, in EnvGet expression
     Error: filter_prop must take exactly one argument: a lexical environment
 == Has dynamic variable ==
-File "test.py", line 39, in Ref.resolve
-  line 43, in get expression
+File "test.py", line 38, in Ref.resolve
+  line 43, in EnvGet expression
     Error: filter_prop must take exactly one argument: a lexical environment
 Done

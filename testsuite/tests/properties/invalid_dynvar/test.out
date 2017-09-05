@@ -1,4 +1,4 @@
-== <get(<DynamicVariable env>, <FieldAccess .tok>)> ==
+== <EnvGet(<DynamicVariable env>, <FieldAccess .tok>)> ==
 File "test.py", line 33, in ExampleNode.prop
     Error: env is not bound in this context: please use the .bind construct to bind it first.
 
@@ -7,7 +7,7 @@ File "test.py", line 33, in ExampleNode.prop
   line 49, in access to .implicit_prop
     Error: In call to ExampleNode.p_implicit_prop, some dynamic variables need to be bound: env
 
-== <bind(<DynamicVariable env>, <FieldAccess .node_env>, <get(<DynamicVariable env>, <FieldAccess .tok>)>)> ==
+== <bind(<DynamicVariable env>, <FieldAccess .node_env>, <EnvGet(<DynamicVariable env>, <FieldAccess .tok>)>)> ==
 Code generation was successful
 
 == <bind(<DynamicVariable env>, <FieldAccess .node_env>, <FieldAccess .implicit_prop>)> ==

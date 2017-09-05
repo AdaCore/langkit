@@ -39,9 +39,9 @@ class Ref(FooNode):
 
     @langkit_property(public=True)
     def resolve():
-        return Self.node_env.get(Self.name.symbol,
-                                 sequential=True,
-                                 filter_prop=FooNode.filter_prop)
+        return Self.node_env.get_sequential(Self.name.symbol,
+                                            Self,
+                                            filter_prop=FooNode.filter_prop)
 
 grammar = Grammar('main_rule')
 grammar.add_rules(

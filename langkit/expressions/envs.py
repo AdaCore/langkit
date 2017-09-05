@@ -8,142 +8,199 @@ from langkit.compiled_types import (
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, CallExpr, ComputingExpr,
-    GetSymbol, LiteralExpr, NullExpr, PropertyDef, Self, auto_attr,
-    auto_attr_custom, construct
+    GetSymbol, LiteralExpr, NullExpr, PropertyDef, Self, attr_call, auto_attr,
+    construct
 )
 from langkit.expressions.utils import array_aggr, assign_var
 
 
-@auto_attr_custom("get")
-@auto_attr_custom("get_sequential", sequential=True)
-def env_get(self, env_expr, symbol_expr, sequential=False,
-            sequential_from=Self, recursive=True, filter_prop=None):
+@attr_call('get')
+def get(env, symbol, recursive=True):
     """
-    Perform a lexical environment lookup.
+    Perform a lexical environment lookup. Look for nodes that are associated to
+    the given `symbol` in the `env` lexical environment.
 
-    :param AbstractExpression env_expr: Expression that will yield the env
-        to get the element from.
-    :param AbstractExpression|str symbol_expr: Expression that will yield the
-        symbol to use as a key on the env, or a string to turn into a symbol.
-    :param bool sequential: Whether resolution needs to be sequential or not.
-    :param AbstractExpression sequential_from: If resolution needs to be
-        sequential, must be an expression to use as the reference node.
-    :param AbstractExpression recursive: Expression that must return a boolean,
-        which controls whether lookup must be performed recursively on parent
-        environments.
-    :param PropertyDef|None filter_prop: If provided, must be a reference to a
-        root node property that::
-
-          * takes a lexical environment;
-          * returns a boolean;
-          * has no dynamic variable;
-          * does not use entity information.
-
-        Lexical environments for which this property returns False will be
-        disregarded from the symbol lookup.
+    If `recursive` is true (the default), do a recursive lookup in parent
+    environments and referenced ones. Otherwise, only look into `env`.
     """
-    check_source_language(
-        isinstance(symbol_expr, (AbstractExpression, basestring)),
-        'Invalid key argument for Env.get: {}'.format(repr(symbol_expr))
-    )
+    return EnvGet(env, symbol, recursive=recursive)
 
-    env_constr_expr = construct(env_expr, lexical_env_type)
 
-    sym_expr = construct(symbol_expr)
-    if sym_expr.type == token_type:
-        sym_expr = GetSymbol.construct_static(sym_expr)
-    check_source_language(
-        sym_expr.type == symbol_type,
-        'Wrong type for symbol expr: {}'.format(sym_expr.type.name.camel)
-    )
+@attr_call('get_sequential')
+def get_sequential(env, symbol, sequential_from, recursive=True,
+                   filter_prop=None):
+    """
+    Like :dsl:`get`, but do a sequential lookup: discard AST nodes that belong
+    to the same unit as the `sequential_from` node and that appear before it.
 
-    from_expr = construct(sequential_from, T.root_node) if sequential else None
+    If `filter_prop` is provided, it must be a reference to a root node
+    property that:
 
-    recursive_expr = construct(recursive, bool_type)
+    * takes a lexical environment;
+    * returns a boolean;
+    * has no dynamic variable;
+    * does not use entity information.
 
-    if filter_prop:
+    Lexical environments for which this property returns false will be
+    disregarded from the symbol lookup.
+    """
+    return EnvGet(env, symbol, sequential=True,
+                  sequential_from=sequential_from, recursive=recursive,
+                  filter_prop=filter_prop)
+
+
+class EnvGet(AbstractExpression):
+    """
+    Expression to perform a lexical environment lookup.
+    """
+
+    class Expr(ComputingExpr):
+        def __init__(self, env_expr, key_expr, recursive_expr,
+                     sequential=False, sequential_from=None, filter_prop=None,
+                     abstract_expr=None):
+            self.env_expr = env_expr
+            self.key_expr = key_expr
+            self.recursive_expr = recursive_expr
+            self.sequential = sequential
+            self.sequential_from = sequential_from
+            self.filter_prop = filter_prop
+            self.static_type = T.root_node.entity.array
+            super(EnvGet.Expr, self).__init__('Env_Get_Result',
+                                              abstract_expr=abstract_expr)
+
+        def _render_pre(self):
+            result = [
+                self.env_expr.render_pre(),
+                self.key_expr.render_pre(),
+                self.recursive_expr.render_pre(),
+            ]
+            args = [('Self', self.env_expr.render_expr()),
+                    ('Key', self.key_expr.render_expr()),
+                    ('Recursive', self.recursive_expr.render_expr())]
+
+            # Pass the From parameter if the user wants sequential semantics
+            if self.sequential_from:
+                result.append(self.sequential_from.render_pre())
+                args.append(('From', self.sequential_from.render_expr()))
+
+            # Pass the filter property if asked to
+            if self.filter_prop:
+                args.append(('Filter',
+                             "{}'Access".format(self.filter_prop.name)))
+
+            array_expr = 'AST_Envs.Get ({})'.format(
+                ', '.join('{} => {}'.format(n, v) for n, v in args)
+            )
+            result_expr = 'Create ({})'
+
+            # In both cases above, the expression is going to be a function
+            # call that returns a new ownership share, so there is no need for
+            # an inc-ref for the storage in the result variable.
+            result.append(assign_var(self.result_var.ref_expr,
+                                     result_expr.format(array_expr),
+                                     requires_incref=False))
+
+            return '\n'.join(result)
+
+        @property
+        def subexprs(self):
+            return {
+                'env': self.env_expr,
+                'key': self.key_expr,
+                'recursive': self.recursive_expr,
+                'sequential_from': self.sequential_from,
+                'filter_prop': self.filter_prop
+            }
+
+    def __init__(self, env, symbol, sequential=False, sequential_from=Self,
+                 recursive=True, filter_prop=None):
+        """
+        :param AbstractExpression env: Expression that will yield the env to
+            get the element from.
+        :param AbstractExpression|str symbol: Expression that will yield the
+            symbol to use as a key on the env, or a string to turn into a
+            symbol.
+        :param bool sequential: Whether resolution needs to be sequential or
+            not.
+        :param AbstractExpression sequential_from: If resolution needs to be
+            sequential, must be an expression to use as the reference node.
+        :param AbstractExpression recursive: Expression that must return a
+            boolean, which controls whether lookup must be performed
+            recursively on parent environments.
+        :param PropertyDef|None filter_prop: If provided, must be a reference
+            to a root node property that::
+
+              * takes a lexical environment;
+              * returns a boolean;
+              * has no dynamic variable;
+              * does not use entity information.
+
+            Lexical environments for which this property returns False will be
+            disregarded from the symbol lookup.
+        """
+        super(EnvGet, self).__init__()
+
         check_source_language(
-            sequential,
-            'a sequential lookup is required to use a filter property'
+            isinstance(symbol, (AbstractExpression, basestring)),
+            'Invalid key argument for Env.get: {}'.format(repr(symbol))
         )
+
         check_source_language(
-            isinstance(filter_prop, PropertyDef),
-            'filter_prop must be a PropertyDef instance (got'
-            ' {})'.format(filter_prop)
+            filter_prop is None or isinstance(filter_prop, PropertyDef),
+            'filter_prop must be a PropertyDef instance (got {})'.format(
+                filter_prop
+            )
         )
-        check_source_language(
-            len(filter_prop.arguments) == 1
-            and filter_prop.arguments[0].type == lexical_env_type,
-            'filter_prop must take exactly one argument: a lexical environment'
-        )
-        check_source_language(
-            filter_prop.type == bool_type,
-            'filter_prop must return a boolean (got'
-            ' {})'.format(filter_prop.type.name.camel)
-        )
-        check_source_language(not filter_prop.dynamic_vars,
-                              'filter_prop cannot have dynamic variables')
 
-        filter_prop.require_untyped_wrapper()
-
-    return EnvGet(env_constr_expr, sym_expr, recursive_expr, from_expr,
-                  filter_prop, self)
-
-
-class EnvGet(ComputingExpr):
-    def __init__(self, env_expr, key_expr, recursive_expr,
-                 sequential_from=None, filter_prop=None, abstract_expr=None):
-        self.env_expr = env_expr
-        self.key_expr = key_expr
-        self.recursive_expr = recursive_expr
+        self.env = env
+        self.symbol = symbol
+        self.sequential = sequential
         self.sequential_from = sequential_from
+        self.recursive = recursive
         self.filter_prop = filter_prop
-        self.static_type = T.root_node.entity.array
-        super(EnvGet, self).__init__('Env_Get_Result',
-                                     abstract_expr=abstract_expr)
 
-    def _render_pre(self):
-        result = [
-            self.env_expr.render_pre(),
-            self.key_expr.render_pre(),
-            self.recursive_expr.render_pre(),
-        ]
-        args = [('Self', self.env_expr.render_expr()),
-                ('Key', self.key_expr.render_expr()),
-                ('Recursive', self.recursive_expr.render_expr())]
+    def construct(self):
+        env_expr = construct(self.env, lexical_env_type)
 
-        # Pass the From parameter if the user wants sequential semantics
-        if self.sequential_from:
-            result.append(self.sequential_from.render_pre())
-            args.append(('From', self.sequential_from.render_expr()))
-
-        # Pass the filter property if asked to
-        if self.filter_prop:
-            args.append(('Filter', "{}'Access".format(self.filter_prop.name)))
-
-        array_expr = 'AST_Envs.Get ({})'.format(
-            ', '.join('{} => {}'.format(n, v) for n, v in args)
+        sym_expr = construct(self.symbol)
+        if sym_expr.type == token_type:
+            sym_expr = GetSymbol.construct_static(sym_expr)
+        check_source_language(
+            sym_expr.type == symbol_type,
+            'Wrong type for symbol expr: {}'.format(sym_expr.type.name.camel)
         )
-        result_expr = 'Create ({})'
 
-        # In both cases above, the expression is going to be a function call
-        # that returns a new ownership share, so there is no need for an
-        # inc-ref for the storage in the result variable.
-        result.append(assign_var(self.result_var.ref_expr,
-                                 result_expr.format(array_expr),
-                                 requires_incref=False))
+        from_expr = (construct(self.sequential_from, T.root_node)
+                     if self.sequential else None)
 
-        return '\n'.join(result)
+        recursive_expr = construct(self.recursive, bool_type)
 
-    @property
-    def subexprs(self):
-        return {
-            'env': self.env_expr,
-            'key': self.key_expr,
-            'recursive': self.recursive_expr,
-            'sequential_from': self.sequential_from,
-            'filter_prop': self.filter_prop
-        }
+        if self.filter_prop:
+            check_source_language(
+                self.sequential,
+                'a sequential lookup is required to use a filter property'
+            )
+            check_source_language(
+                len(self.filter_prop.arguments) == 1
+                and self.filter_prop.arguments[0].type == lexical_env_type,
+                'filter_prop must take exactly one argument: a lexical'
+                ' environment'
+            )
+            check_source_language(
+                self.filter_prop.type == bool_type,
+                'filter_prop must return a boolean (got'
+                ' {})'.format(self.filter_prop.type.name.camel)
+            )
+            check_source_language(not self.filter_prop.dynamic_vars,
+                                  'filter_prop cannot have dynamic variables')
+
+            self.filter_prop.require_untyped_wrapper()
+
+        return EnvGet.Expr(env_expr, sym_expr, recursive_expr, self.sequential,
+                           from_expr, self.filter_prop, abstract_expr=self)
+
+    def __repr__(self):
+        return '<EnvGet({}, {})>'.format(self.env, self.symbol)
 
 
 @auto_attr
