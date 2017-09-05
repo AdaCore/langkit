@@ -345,13 +345,13 @@ def domain(self, logic_var_expr, domain):
 @dsl_document
 class Predicate(AbstractExpression):
     """
-    Return an equation that ensures that a certain property is maintained on
-    one or several logical variables in all possible solutions, so that the
+    Return an equation that ensures that the `predicate` property is maintained
+    on one or several logical variables in all possible solutions, so that the
     only solutions in the equations are the equations where the property is
-    True.
+    true.
 
-    Expressions that are passed that are not logical variables will be passed
-    as extra arguments to the property, so their types need to match::
+    Expressions that are passed as `exprs` that are not logical variables will
+    be passed as extra arguments to `predicate`, so their types need to match::
 
         class BaseNode(ASTNode):
             a = UserField(LogicVarType)
@@ -390,9 +390,9 @@ class Predicate(AbstractExpression):
         def __repr__(self):
             return '<Predicate.Expr {}>'.format(self.pred_id)
 
-    def __init__(self, pred_property, *exprs):
+    def __init__(self, predicate, *exprs):
         """
-        :param PropertyDef pred_property: The property to use as a predicate.
+        :param PropertyDef predicate: The property to use as a predicate.
             For convenience, it can be a property of any subtype of the root
             AST node, but it needs to return a boolean.
 
@@ -400,7 +400,7 @@ class Predicate(AbstractExpression):
             predicate, logical variables first, and extra arguments last.
         """
         super(Predicate, self).__init__()
-        self.pred_property = pred_property
+        self.pred_property = predicate
         self.exprs = exprs
 
     def construct(self):
