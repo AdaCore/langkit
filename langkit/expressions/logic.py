@@ -6,7 +6,8 @@ from langkit.compiled_types import (T, bool_type, equation_type,
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable, LiteralExpr,
-    NullExpr, PropertyDef, aggregate_expr, auto_attr, construct, render
+    NullExpr, PropertyDef, aggregate_expr, auto_attr, construct, dsl_document,
+    render
 )
 
 
@@ -29,16 +30,29 @@ def untyped_literal_expr(expr_str, operands=[]):
     return LiteralExpr(expr_str, no_compiled_type, operands)
 
 
+@dsl_document
 class Bind(AbstractExpression):
     """
-    This expression binds two logic variables A and B, through a property call,
-    so that, in logical terms::
+    Bind the two logic variables `from_expr` and `to_expr`, through a property
+    call.
 
-        B = A.property_call()
+    If provided, `conv_prop` must be a property that takes no argument and that
+    return any ``ASTNode`` subclass. It is used to convert `from_expr` into a
+    value to which `to_expr` is compared.
 
-    Which is expressed in the DSL as::
+    If provided, `eq_prop` must be a property that takes one ``ASTNode``
+    subclass argument and that compares it to ``Self``. In this case, the
+    argument must be of the same type that the node that owns the property. It
+    is used to compare the two logic variables (after `conv_prop` call, if
+    applicable).
 
-        Bind(A, B, property)
+    For instance, in order to express the following logical equation::
+
+        B = A.some_property()
+
+    Write in the DSL::
+
+        Bind(A, B, conv_prop=T.TypeOfA.some_property)
     """
 
     class Expr(CallExpr):
@@ -328,10 +342,11 @@ def domain(self, logic_var_expr, domain):
     )
 
 
+@dsl_document
 class Predicate(AbstractExpression):
     """
-    The predicate expression will ensure that a certain property is maintained
-    on one or several logical variables in all possible solutions, so that the
+    Return an equation that ensures that a certain property is maintained on
+    one or several logical variables in all possible solutions, so that the
     only solutions in the equations are the equations where the property is
     True.
 
@@ -565,31 +580,32 @@ class LogicBooleanOp(AbstractExpression):
         return '<Logic{}>'.format(self.kind_name)
 
 
+@dsl_document
 class Any(LogicBooleanOp):
     """
-    Expression that will combine sub logic expressions via an Or logic
-    operator. Use this when you have an unbounded number of sub-equations to
-    bind. The parameter is an array of equations.
+    Combine all equations in the `equations` array vie an OR logic operation.
+    Use this when you have an unbounded number of sub-equations to bind.
     """
 
-    def __init__(self, equation_array):
-        super(Any, self).__init__(equation_array, LogicBooleanOp.KIND_OR)
+    def __init__(self, equations):
+        super(Any, self).__init__(equations, LogicBooleanOp.KIND_OR)
 
 
+@dsl_document
 class All(LogicBooleanOp):
     """
-    Expression that will combine sub logic expressions via an And logic
-    operator. Use this when you have an unbounded number of sub-equations to
-    bind. The parameter is an array of equations.
+    Combine all equations in the `equations` array vie an AND logic operation.
+    Use this when you have an unbounded number of sub-equations to bind.
     """
 
-    def __init__(self, equation_array):
-        super(All, self).__init__(equation_array, LogicBooleanOp.KIND_AND)
+    def __init__(self, equations):
+        super(All, self).__init__(equations, LogicBooleanOp.KIND_AND)
 
 
+@dsl_document
 class LogicTrue(AbstractExpression):
     """
-    An equation that always return True.
+    Return an equation that always return True.
     """
 
     def __init__(self):
@@ -602,9 +618,10 @@ class LogicTrue(AbstractExpression):
         return '<LogicTrue>'
 
 
+@dsl_document
 class LogicFalse(AbstractExpression):
     """
-    An equation that always return False.
+    Return an equation that always return False.
     """
 
     def __init__(self):

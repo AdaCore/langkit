@@ -2041,11 +2041,18 @@ class BindingScope(ComputingExpr):
             repr(self.expr))
 
 
+@dsl_document
 class Let(AbstractExpression):
     """
-    Abstract expressions that associates names to values from other abstract
-    expressions and that evaluates yet another abstract expressions with these
-    names available.
+    Define bindings in order to evaluate an expression.
+
+    This is similar to the ``let ... in ...`` constructs in traditional
+    functional languages. For instance::
+
+        Let(lambda collection=node.some_property:
+            If(collection.length > 0,
+               collection.at(0),
+               node))
     """
 
     class Expr(ComputingExpr):
@@ -2266,9 +2273,10 @@ class Var(AbstractVariable):
             self._creator_stack_frame = None
 
 
+@dsl_document
 class EmptyArray(AbstractExpression):
     """
-    Expression that returns an empty array.
+    Return an empty array of `element_type`.
     """
 
     def __init__(self, element_type):
@@ -3350,9 +3358,15 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
     return decorator
 
 
+@dsl_document
 class Literal(AbstractExpression):
     """
-    Expression for literals of any type.
+    Turn the Python `literal` into the corresponding DSL literal. This is
+    sometimes necessary to disambiguate the DSL.
+
+    For instance::
+
+        Literal(0)
     """
 
     def __init__(self, literal):
@@ -3485,9 +3499,10 @@ class NullExpr(BasicExpr):
         )
 
 
+@dsl_document
 class No(AbstractExpression):
     """
-    Expression that returns a null value for the given type.
+    Return a null value of type `expr_type`.
     """
 
     def __init__(self, expr_type):

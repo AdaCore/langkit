@@ -10,7 +10,7 @@ from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
     ComputingExpr, DynamicVariable, Let, NullCheckExpr, NullExpr, PropertyDef,
     ResolvedExpression, SavedExpr, SequenceExpr, UnreachableExpr, attr_call,
-    attr_expr, construct, render
+    attr_expr, construct, dsl_document, render
 )
 from langkit.expressions.boolean import Eq, If, Not
 from langkit.expressions.utils import assign_var
@@ -162,9 +162,23 @@ class IsNull(AbstractExpression):
         return '<IsNull>'
 
 
+@dsl_document
 class New(AbstractExpression):
     """
-    Abstract expression to create StructType or ASTNodeType values.
+    Create a structure value or a new AST node.
+
+    `struct_type` must be the type of the value to create and `field_values`
+    must contain key/value associations for all fields this structure or AST
+    node contains. Note that creating AST nodes requires the embedding property
+    to be memoized.
+
+    For instance, assuming the following ``Struct`` subclass::
+
+        class MyStruct(Struct):
+            a = UserField(BoolType)
+            b = UserField(SomeNode)
+
+        New(MyStruct, a=True, b=No(SomeNode))
     """
 
     class StructExpr(ComputingExpr):

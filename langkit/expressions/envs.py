@@ -9,7 +9,7 @@ from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, CallExpr, ComputingExpr,
     GetSymbol, LiteralExpr, NullExpr, PropertyDef, Self, attr_call, auto_attr,
-    construct
+    construct, dsl_document
 )
 from langkit.expressions.utils import array_aggr, assign_var
 
@@ -216,10 +216,10 @@ def env_orphan(self, env):
                     abstract_expr=self)
 
 
+@dsl_document
 class EnvGroup(AbstractExpression):
     """
-    Expression that will return a lexical environment that logically groups
-    together multiple lexical environments.
+    Like :dsl:`env_group`, but take a fixed list of input lexical environments.
     """
 
     def __init__(self, *env_exprs):

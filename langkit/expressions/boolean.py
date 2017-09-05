@@ -6,8 +6,8 @@ from langkit.compiled_types import T, bool_type, equation_type, long_type
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
-    ComputingExpr, LiteralExpr, No, PropertyDef, attr_call,
-    construct, render, unsugar
+    ComputingExpr, LiteralExpr, No, PropertyDef, attr_call, construct,
+    dsl_document, render, unsugar
 )
 
 
@@ -265,9 +265,10 @@ class OrderingTest(AbstractExpression):
         ])
 
 
+@dsl_document
 class If(AbstractExpression):
     """
-    Abstract expression for a conditional expression.
+    Return `then` if `cond` is true, return `else_then` otherwise.
     """
 
     class Expr(ComputingExpr):
@@ -351,9 +352,10 @@ class If(AbstractExpression):
         return '<If>'
 
 
+@dsl_document
 class Not(AbstractExpression):
     """
-    Expression for "not" boolean expressions.
+    Return true if `expr` is false and conversely.
     """
 
     def __init__(self, expr):
@@ -505,9 +507,28 @@ class Then(AbstractExpression):
                                          self.then_expr)
 
 
+@dsl_document
 class Cond(AbstractExpression):
     """
-    Abstract expression for chains of conditions.
+    Evaluate a specific expression depending on a chain of expressions in an
+    IF/ELSE IF/.../ELSE fashion.
+
+    For instance, the following::
+
+        Cond(cond1, expr1,
+             cond2, expr2,
+             cond3, expr3,
+             expr4)
+
+    Is equivalent to::
+
+        If(cond1, expr1,
+           If(cond2, expr2,
+              If(cond3, expr3,
+                 expr4)))
+
+    Since there is always one condition per expression except for the last
+    expression, `args` must contain an odd number of expressions.
     """
 
     def __init__(self, *args):
