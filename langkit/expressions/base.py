@@ -267,14 +267,19 @@ class Frozable(object):
         return wrapper
 
 
-class AttributeExpression(object):
+class DocumentedExpression(object):
     """
-    Holder for information related to a ".attribute" construct in the property
-    DSL.
+    Holder for documentation data associated to a property DSL constructor
+    (attribute or class constructor).
     """
 
-    def __init__(self, constructor, args, kwargs, parameterless, doc=None):
+    def __init__(self, is_attribute, name, constructor, args, kwargs,
+                 parameterless, doc=None):
         """
+        :param bool is_attribute: Whether this constructor is a mere class
+            constructor or an attribute constructor.
+        :param str name: Unique string to use as the name for this in generated
+            documentation. This is the attribute name or the class name.
         :param constructor: Callable that builds the expression.
         :param args: Partial list of positional arguments to pass to
             `constructor`.
@@ -284,6 +289,8 @@ class AttributeExpression(object):
         :param str|None doc: If provided, must be a string to use as the
             documentation for this attribute expression.
         """
+        self.is_attribute = is_attribute
+        self.name = name
         self.constructor = constructor
         self.args = args
         self.kwargs = kwargs
@@ -295,11 +302,12 @@ class AttributeExpression(object):
     @property
     def prefix_name(self):
         """
-        Name of the prefix for this attribute expression. This is used to
-        generate documentation.
+        Only valid for attribute constructors.  Name of the prefix for this
+        attribute expression. This is used to generate documentation.
 
         :rtype: str
         """
+        assert self.is_attribute
         return self._prefix_name
 
     @property
@@ -332,7 +340,7 @@ class AttributeExpression(object):
         argspec = list(args)
         if first_arg_is_self:
             argspec.pop(0)
-        prefix_name = argspec.pop(0)
+        prefix_name = argspec.pop(0) if self.is_attribute else None
 
         # Remove positional and keyword arguments which are already provided by
         # partial evaluation.
@@ -349,12 +357,13 @@ class AttributeExpression(object):
         return prefix_name, argspec
 
     def build(self, prefix):
+        assert self.is_attribute
         return (self.constructor(prefix, *self.args, **self.kwargs)
                 if self.parameterless else
                 partial(self.constructor, prefix, *self.args, **self.kwargs))
 
     def __repr__(self):
-        return '<AttributeExpression for {}, args={}, kwargs={}>'.format(
+        return '<DocumentedExpression for {}, args={}, kwargs={}>'.format(
             self.constructor, self.args, self.kwargs
         )
 
@@ -706,8 +715,8 @@ def attr_expr_impl(name, args, kwargs, parameterless=False):
     """
 
     def internal(decorated_class):
-        AbstractExpression.attrs_dict[name] = AttributeExpression(
-            decorated_class, args, kwargs, parameterless,
+        AbstractExpression.attrs_dict[name] = DocumentedExpression(
+            True, name, decorated_class, args, kwargs, parameterless,
             kwargs.pop('doc', None)
         )
         return decorated_class

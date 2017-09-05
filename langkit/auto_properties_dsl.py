@@ -37,21 +37,22 @@ class AutoPropertiesDSL(docutils.parsers.rst.Directive):
         def_list = nodes.definition_list()
         result = [def_list]
 
-        for name, attr_expr in sorted(AbstractExpression.attrs_dict.items()):
+        for _, doc_expr in sorted(AbstractExpression.attrs_dict.items()):
             def_list_item = nodes.definition_list_item()
 
             # Create a target for this documentation entry so that the rest of
             # the documentation can reference it (see `properties_dsl_ref`
             # below`).
-            target_id = 'properties-dsl-{}'.format(name)
+            target_id = 'properties-dsl-{}'.format(doc_expr.name)
             target_node = nodes.target('', '',
                                        ids=[target_id],
                                        names=[target_id])
             document.note_explicit_target(target_node)
 
             term = nodes.term()
-            term_label = r'{}.\ **{}**'.format(attr_expr.prefix_name, name)
-            argspec = attr_expr.argspec
+            term_label = r'{}.\ **{}**'.format(doc_expr.prefix_name,
+                                               doc_expr.name)
+            argspec = doc_expr.argspec
             if argspec is None:
                 pass
             elif len(argspec) == 0:
@@ -61,7 +62,7 @@ class AutoPropertiesDSL(docutils.parsers.rst.Directive):
             self._parse([term_label], term)
 
             definition = nodes.definition()
-            doc = attr_expr.doc or '*Not yet documented*'
+            doc = doc_expr.doc or '*Not yet documented*'
             self._parse(self._prepare_docstring(doc), definition)
 
             def_list_item.append(target_node)
