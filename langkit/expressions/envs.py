@@ -16,10 +16,8 @@ from langkit.expressions.utils import array_aggr, assign_var
 
 @auto_attr_custom("get")
 @auto_attr_custom("get_sequential", sequential=True)
-@auto_attr_custom("resolve_unique", resolve_unique=True)
-def env_get(self, env_expr, symbol_expr, resolve_unique=False,
-            sequential=False, sequential_from=Self, recursive=True,
-            filter_prop=None):
+def env_get(self, env_expr, symbol_expr, sequential=False,
+            sequential_from=Self, recursive=True, filter_prop=None):
     """
     Perform a lexical environment lookup.
 
@@ -27,10 +25,6 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
         to get the element from.
     :param AbstractExpression|str symbol_expr: Expression that will yield the
         symbol to use as a key on the env, or a string to turn into a symbol.
-    :param bool resolve_unique: Wether we want an unique result or not.
-        NOTE: For the moment, nothing will be done to ensure that only one
-        result is available. The implementation will just take the first
-        result.
     :param bool sequential: Whether resolution needs to be sequential or not.
     :param AbstractExpression sequential_from: If resolution needs to be
         sequential, must be an expression to use as the reference node.
@@ -92,26 +86,21 @@ def env_get(self, env_expr, symbol_expr, resolve_unique=False,
 
         filter_prop.require_untyped_wrapper()
 
-    return EnvGet(env_constr_expr, sym_expr, resolve_unique, recursive_expr,
-                  from_expr, filter_prop, self)
+    return EnvGet(env_constr_expr, sym_expr, recursive_expr, from_expr,
+                  filter_prop, self)
 
 
 class EnvGet(ComputingExpr):
-    def __init__(self, env_expr, key_expr, resolve_unique, recursive_expr,
+    def __init__(self, env_expr, key_expr, recursive_expr,
                  sequential_from=None, filter_prop=None, abstract_expr=None):
         self.env_expr = env_expr
         self.key_expr = key_expr
-        self.resolve_unique = resolve_unique
         self.recursive_expr = recursive_expr
         self.sequential_from = sequential_from
         self.filter_prop = filter_prop
+        self.static_type = T.root_node.entity.array
         super(EnvGet, self).__init__('Env_Get_Result',
                                      abstract_expr=abstract_expr)
-
-    @property
-    def type(self):
-        t = T.root_node.entity
-        return t if self.resolve_unique else t.array
 
     def _render_pre(self):
         result = [
@@ -135,7 +124,7 @@ class EnvGet(ComputingExpr):
         array_expr = 'AST_Envs.Get ({})'.format(
             ', '.join('{} => {}'.format(n, v) for n, v in args)
         )
-        result_expr = 'Get ({}, 0)' if self.resolve_unique else 'Create ({})'
+        result_expr = 'Create ({})'
 
         # In both cases above, the expression is going to be a function call
         # that returns a new ownership share, so there is no need for an
@@ -151,7 +140,6 @@ class EnvGet(ComputingExpr):
         return {
             'env': self.env_expr,
             'key': self.key_expr,
-            'resolve_unique': self.resolve_unique,
             'recursive': self.recursive_expr,
             'sequential_from': self.sequential_from,
             'filter_prop': self.filter_prop
