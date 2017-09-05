@@ -351,6 +351,8 @@ class DocumentedExpression(object):
         # Describe variadic constructors as such
         if varargs:
             argspec.append('\*' + varargs)
+        if keywords:
+            argspec.append('\*\*' + keywords)
 
         if self.parameterless:
             argspec = None
