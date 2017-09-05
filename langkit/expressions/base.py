@@ -2048,6 +2048,12 @@ class Let(AbstractExpression):
     """
     Define bindings in order to evaluate an expression.
 
+    `lambda_fn` is a lambda function that takes one argument per binding. Each
+    argument must have a default value that is the expression to compute the
+    value associated to the binding. The body for this lambda function is the
+    expression to evaluate with the bindings and computes the result of this
+    Let expression.
+
     This is similar to the ``let ... in ...`` constructs in traditional
     functional languages. For instance::
 
