@@ -473,6 +473,20 @@ testcases = (
                 foo + bar(True)
             """
     ''', []),
+    Testcase('docstring_multi_16.py', '''
+        from __future__ import absolute_import, division, print_function
+
+        def foo():
+            """
+            Documenting some :ref:`function <foo>`.
+
+            And now some :ref:`code <foo>` :
+
+            .. code:: python
+
+                foo + bar(True)
+            """
+    ''', [(6, 0, 'Extra space before double punctuation')]),
 
     #
     # "from __future__ testing

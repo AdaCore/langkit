@@ -25,6 +25,7 @@ GREEN = '\x1b[32m'
 YELLOW = '\x1b[33m'
 
 punctuation_re = re.compile(' [!?:;]')
+sphinx_role_re = re.compile(':[a-z-]+:`')
 
 
 def colored(msg, color):
@@ -258,8 +259,12 @@ def check_text(report, filename, lang, first_line, text, is_comment):
 
         report.set_context(filename, first_line + i - 1)
 
-        if punctuation_re.search(line):
-            report.add('Extra space before double punctuation')
+        # Report extra space before double punctuation. The below regexp will
+        # also match Sphinx role markup (:foo:`bar`), which we must not report.
+        for subs in punctuation_re.finditer(line):
+            match = line[subs.start(0):].strip()
+            if not sphinx_role_re.match(match):
+                report.add('Extra space before double punctuation')
 
         if line.endswith(b'::'):
             s.last_end = b'::'
