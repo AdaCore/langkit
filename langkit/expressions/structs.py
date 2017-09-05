@@ -796,7 +796,10 @@ class IsA(AbstractExpression):
             )
             check_source_language(a.matches(expr.type), (
                 'When testing the dynamic subtype of an AST node, the type to'
-                ' check must be a subclass of the value static type.'
+                ' check must be a subclass of the value static type. Here, {}'
+                ' is not a subclass of {}.'.format(
+                    a.name.camel, expr.type.name.camel
+                )
             ))
         return IsA.Expr(expr, astnodes, abstract_expr=self)
 
