@@ -3,6 +3,8 @@
 --  This package defines subprograms whose only purpose it to be used from a
 --  debugger. This is supposed to make developpers' life easier.
 
+with Langkit_Support.Symbols; use Langkit_Support.Symbols;
+
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
@@ -26,5 +28,9 @@ package ${ada_lib_name}.Debug is
    procedure PEnv (Env : Lexical_Env);
    --  "Print lexical Environment". Print the content of Env and all its parent
    --  chain.
+
+   function Sym_Matches (S : Symbol_Type; Text : String) return Boolean;
+   --  Return whether the text associated to S matches Text. There is a bug in
+   --  GDB that makes comparison with "=" always return false.
 
 end ${ada_lib_name}.Debug;

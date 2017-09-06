@@ -58,4 +58,13 @@ package body ${ada_lib_name}.Debug is
       Dump_Lexical_Env_Parent_Chain (Env);
    end PEnv;
 
+   -----------------
+   -- Sym_Matches --
+   -----------------
+
+   function Sym_Matches (S : Symbol_Type; Text : String) return Boolean is
+   begin
+      return Image (S.all) = Text;
+   end Sym_Matches;
+
 end ${ada_lib_name}.Debug;
