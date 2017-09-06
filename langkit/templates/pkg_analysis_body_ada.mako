@@ -482,6 +482,11 @@ package body ${ada_lib_name}.Analysis is
       end Add_Diagnostic;
 
    begin
+      --  Reparsing will invalidate all lexical environments related to this
+      --  unit, so destroy all related rebindings as well. This browses AST
+      --  nodes, so we have to do this before destroying the AST nodes pool.
+      Destroy_Rebindings (Unit.Rebindings'Access);
+
       --  If we have an AST_Mem_Pool already, we are reparsing. We want to
       --  destroy it to free all the allocated memory.
       if Unit.AST_Root /= null then
@@ -498,10 +503,6 @@ package body ${ada_lib_name}.Analysis is
       --  whole analysis context behaves, we have to invalidate caches. This is
       --  likely overkill, but kill all caches here as it's easy to do.
       Reset_Property_Caches (Unit.Context);
-
-      --  Reparsing will invalidate all lexical environments related to this
-      --  unit, so destroy all related rebindings as well.
-      Destroy_Rebindings (Unit.Rebindings'Access);
 
       --  Now create the parser. This is where lexing occurs, so this is where
       --  we get most "setup" issues: missing input file, bad charset, etc.
