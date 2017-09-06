@@ -502,6 +502,7 @@ package body ${ada_lib_name}.Analysis is
       --  As (re-)loading a unit can change how any AST node property in the
       --  whole analysis context behaves, we have to invalidate caches. This is
       --  likely overkill, but kill all caches here as it's easy to do.
+      --  Likewise for values in logic variables.
       Reset_Caches (Unit.Context);
 
       --  Now create the parser. This is where lexing occurs, so this is where
@@ -3321,21 +3322,37 @@ package body ${ada_lib_name}.Analysis is
    case K is
    % for cls in ctx.astnode_types:
       % if not cls.abstract:
-         <% memo_props = cls.get_memoized_properties(include_inherited=True) %>
-         % if memo_props:
+         <%
+            memo_props = cls.get_memoized_properties(include_inherited=True)
+            logic_vars = [fld for fld in cls.get_user_fields()
+                          if is_logic_var(fld.type)]
+         %>
+         % if memo_props or logic_vars:
             when ${cls.ada_kind_name()} =>
                declare
                   N : ${cls.name} := ${cls.name} (Node);
                begin
-                  % for p in memo_props:
-                     % if p.type.is_refcounted:
-                        if N.${p.memoization_state_field_name} = Computed
-                        then
-                           Dec_Ref (N.${p.memoization_value_field_name});
-                        end if;
-                     % endif
-                     N.${p.memoization_state_field_name} := Not_Computed;
-                  % endfor
+                  % if memo_props:
+                     % for p in memo_props:
+                        % if p.type.is_refcounted:
+                           if N.${p.memoization_state_field_name} = Computed
+                           then
+                              Dec_Ref (N.${p.memoization_value_field_name});
+                           end if;
+                        % endif
+                        N.${p.memoization_state_field_name} := Not_Computed;
+                     % endfor
+                  % endif
+
+                  % if logic_vars:
+                     % for field in logic_vars:
+                        --  TODO??? Fix Adalog so that Destroy resets the
+                        --  value it stores.
+                        N.${field.name}.Value := No_Entity;
+                        Eq_Node.Refs.Reset (N.${field.name});
+                        Eq_Node.Refs.Destroy (N.${field.name});
+                     % endfor
+                  % endif
                end;
          % endif
       % endif

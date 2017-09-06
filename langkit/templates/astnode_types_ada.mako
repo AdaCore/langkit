@@ -418,14 +418,7 @@
          if Langkit_Support.Extensions.Has_Extensions then
             Node.Free_Extensions;
          end if;
-         % if memoized_properties:
-            Node.Reset_Caches;
-         % endif
-         % for field in user_fields:
-            % if is_logic_var(field.type):
-               Eq_Node.Refs.Destroy (Node.${field.name});
-            % endif
-         % endfor
+         Node.Reset_Caches;
       end Destroy_Node;
 
       % endif
