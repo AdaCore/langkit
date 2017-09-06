@@ -502,7 +502,7 @@ package body ${ada_lib_name}.Analysis is
       --  As (re-)loading a unit can change how any AST node property in the
       --  whole analysis context behaves, we have to invalidate caches. This is
       --  likely overkill, but kill all caches here as it's easy to do.
-      Reset_Property_Caches (Unit.Context);
+      Reset_Caches (Unit.Context);
 
       --  Now create the parser. This is where lexing occurs, so this is where
       --  we get most "setup" issues: missing input file, bad charset, etc.
@@ -693,7 +693,7 @@ package body ${ada_lib_name}.Analysis is
       begin
          --  whole analysis context behaves, we have to invalidate caches. This
          --  is likely overkill, but kill all caches here as it's easy to do.
-         Analysis.Reset_Property_Caches (Unit.Context);
+         Analysis.Reset_Caches (Unit.Context);
 
          --  Remove all lexical environment artifacts from this analysis unit
          Remove_Exiled_Entries (Unit.Lex_Env_Data_Acc);
@@ -713,9 +713,9 @@ package body ${ada_lib_name}.Analysis is
       procedure Free is new Ada.Unchecked_Deallocation
         (Analysis_Context_Private_Part_Type, Analysis_Context_Private_Part);
    begin
-      --  Reset property caches upfront as we can't do that when destroying
-      --  units one after the other.
-      Reset_Property_Caches (Context);
+      --  Reset caches upfront as we can't do that when destroying units one
+      --  after the other.
+      Reset_Caches (Context);
 
       for Unit of Context.Units_Map loop
          Unit.Context := null;
@@ -732,16 +732,16 @@ package body ${ada_lib_name}.Analysis is
       Free (Context);
    end Destroy;
 
-   ---------------------------
-   -- Reset_Property_Caches --
-   ---------------------------
+   ------------------
+   -- Reset_Caches --
+   ------------------
 
-   procedure Reset_Property_Caches (Context : Analysis_Context) is
+   procedure Reset_Caches (Context : Analysis_Context) is
    begin
       for Unit of Context.Units_Map loop
-         Reset_Property_Caches (Unit);
+         Reset_Caches (Unit);
       end loop;
-   end Reset_Property_Caches;
+   end Reset_Caches;
 
    ------------------------
    -- Destroy_Rebindings --
@@ -1263,11 +1263,11 @@ package body ${ada_lib_name}.Analysis is
          Convert (Destroy_Procedure'Address));
    end Register_Destroyable_Gen;
 
-   ---------------------------
-   -- Reset_Property_Caches --
-   ---------------------------
+   ------------------
+   -- Reset_Caches --
+   ------------------
 
-   procedure Reset_Property_Caches (Unit : Analysis_Unit) is
+   procedure Reset_Caches (Unit : Analysis_Unit) is
 
       -----------
       -- Visit --
@@ -1278,7 +1278,7 @@ package body ${ada_lib_name}.Analysis is
          return Visit_Status
       is
       begin
-         Node.Reset_Property_Caches;
+         Node.Reset_Caches;
          return Into;
       end Visit;
 
@@ -1287,7 +1287,7 @@ package body ${ada_lib_name}.Analysis is
          Unit.AST_Root.Traverse (Visit'Access);
       end if;
       Unit.Has_Filled_Caches := False;
-   end Reset_Property_Caches;
+   end Reset_Caches;
 
    ${array_types.body(LexicalEnvType.array)}
    ${array_types.body(T.root_node.entity.array)}
@@ -3311,13 +3311,11 @@ package body ${ada_lib_name}.Analysis is
       end if;
    end Child_Count;
 
-   ---------------------------
-   -- Reset_Property_Caches --
-   ---------------------------
+   ------------------
+   -- Reset_Caches --
+   ------------------
 
-   procedure Reset_Property_Caches
-     (Node : access ${root_node_value_type}'Class)
-   is
+   procedure Reset_Caches (Node : access ${root_node_value_type}'Class) is
       K : ${root_node_kind_name} := Node.Kind;
    begin
    case K is
@@ -3344,6 +3342,6 @@ package body ${ada_lib_name}.Analysis is
    % endfor
    when others => null;
    end case;
-   end Reset_Property_Caches;
+   end Reset_Caches;
 
 end ${ada_lib_name}.Analysis;

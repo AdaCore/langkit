@@ -1048,8 +1048,8 @@ private
       --  See the eponym procedure
    end record;
 
-   procedure Reset_Property_Caches (Context : Analysis_Context);
-   --  Call Reset_Property_Caches on all units Context contains
+   procedure Reset_Caches (Context : Analysis_Context);
+   --  Call Reset_Caches on all units Context contains
 
    type Destroy_Procedure is access procedure (Object : System.Address);
 
@@ -1149,9 +1149,9 @@ private
    procedure Set_Filled_Caches (Unit : Analysis_Unit);
    --  Tag Unit as having filled caches for properties memoization
 
-   procedure Reset_Property_Caches (Unit : Analysis_Unit);
-   --  If AST_Node is not null, invoke Reset_Property_Caches primitives on all
-   --  the nodes it contains.
+   procedure Reset_Caches (Unit : Analysis_Unit);
+   --  If AST_Node is not null, invoke Reset_Caches primitives on all the nodes
+   --  it contains.
 
    procedure Destroy_Rebindings
      (Rebindings : access Env_Rebindings_Vectors.Vector);
@@ -1184,7 +1184,7 @@ private
    --  the convenience of ada arrays, and you don't care about the small
    --  performance hit of creating an array.
 
-   procedure Reset_Property_Caches
+   procedure Reset_Caches
      (Node : access ${root_node_value_type}'Class)
    with Inline;
    --  Reset the properties memoization caches attached to this node

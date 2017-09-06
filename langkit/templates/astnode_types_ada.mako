@@ -419,7 +419,7 @@
             Node.Free_Extensions;
          end if;
          % if memoized_properties:
-            Node.Reset_Property_Caches;
+            Node.Reset_Caches;
          % endif
          % for field in user_fields:
             % if is_logic_var(field.type):
