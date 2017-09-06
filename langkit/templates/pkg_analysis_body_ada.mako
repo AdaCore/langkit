@@ -808,9 +808,18 @@ package body ${ada_lib_name}.Analysis is
          declare
             R : constant Env_Rebindings := Rebindings.Get (1);
          begin
-            if R.Parent /= null then
+            --  Here, we basically undo what has been done in AST_Envs.Append
+
+            --  If this rebinding has no parent, then during its creation we
+            --  registered it in its Old_Env. Otherwise, it is registered
+            --  in its Parent's Children list.
+            if R.Parent = null then
+               R.Old_Env.Rebindings_Pool.Delete (R.New_Env);
+            else
                Unregister (R, R.Parent.Children);
             end if;
+
+            --  In all cases it's registered in Old_Env's and New_Env's units
             Recurse (R);
          end;
       end loop;
