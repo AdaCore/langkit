@@ -860,7 +860,6 @@ package body ${ada_lib_name}.Analysis is
          Self.Contains.To_Array;
       Env : Lexical_Env;
    begin
-      Self.Is_Contained_By.Clear;
       for El of Els loop
          Env := El.Pre_Env_Actions (El.Self_Env, Root_Scope, True);
          El.Post_Env_Actions (Env, Root_Scope);
