@@ -3320,25 +3320,25 @@ package body ${ada_lib_name}.Analysis is
    begin
    case K is
    % for cls in ctx.astnode_types:
-   % if not cls.abstract:
-   <% memo_props = cls.get_memoized_properties(include_inherited=True) %>
-   % if memo_props:
-      when ${cls.ada_kind_name()} =>
-         declare
-            N : ${cls.name} := ${cls.name} (Node);
-         begin
-            % for p in memo_props:
-               % if p.type.is_refcounted:
-                  if N.${p.memoization_state_field_name} = Computed
-                  then
-                     Dec_Ref (N.${p.memoization_value_field_name});
-                  end if;
-               % endif
-               N.${p.memoization_state_field_name} := Not_Computed;
-            % endfor
-         end;
-   % endif
-   % endif
+      % if not cls.abstract:
+         <% memo_props = cls.get_memoized_properties(include_inherited=True) %>
+         % if memo_props:
+            when ${cls.ada_kind_name()} =>
+               declare
+                  N : ${cls.name} := ${cls.name} (Node);
+               begin
+                  % for p in memo_props:
+                     % if p.type.is_refcounted:
+                        if N.${p.memoization_state_field_name} = Computed
+                        then
+                           Dec_Ref (N.${p.memoization_value_field_name});
+                        end if;
+                     % endif
+                     N.${p.memoization_state_field_name} := Not_Computed;
+                  % endfor
+               end;
+         % endif
+      % endif
    % endfor
    when others => null;
    end case;
