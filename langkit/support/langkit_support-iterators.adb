@@ -10,7 +10,7 @@ package body Langkit_Support.Iterators is
      (I    : in out Iterator'Class;
       Proc : access procedure (Element : Element_Type))
    is
-      Element  : Element_Type;
+      Element : Element_Type;
    begin
       while I.Next (Element) loop
          Proc (Element);
@@ -22,11 +22,10 @@ package body Langkit_Support.Iterators is
    -------------
 
    function Consume (I : Iterator'Class) return Elements_Array is
-      package Element_Vectors
-      is new Langkit_Support.Vectors (Element_Type);
+      package Element_Vectors is new Langkit_Support.Vectors (Element_Type);
 
-      Element  : Element_Type;
-      V        : Element_Vectors.Vector;
+      Element : Element_Type;
+      V       : Element_Vectors.Vector;
    begin
       --  Note: This is bad design in Ada: We're hiding mutation of the
       --  Iterator object, because if we make it mutable, then you can no
