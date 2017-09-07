@@ -5,16 +5,16 @@ package body Langkit_Support.Tree_Traversal_Iterator is
    ----------
 
    function Next (It      : in out Traverse_Iterator;
-                  Element : out Element_Type) return Boolean
+                  Element : out Node_Type) return Boolean
    is
       use Natural_Vectors;
 
-      Child  : Element_Type;
+      Child : Node_Type;
    begin
 
       --  We don't have anything to return
 
-      if It.Node = Null_Value then
+      if It.Node = No_Node then
          return False;
       end if;
 
@@ -28,7 +28,7 @@ package body Langkit_Support.Tree_Traversal_Iterator is
       loop
          Child := Get_Child (It.Node, I);
 
-         if Child /= Null_Value then
+         if Child /= No_Node then
             Append (It.Stack, I + 1);
             It.Node := Child;
             return True;
@@ -44,7 +44,7 @@ package body Langkit_Support.Tree_Traversal_Iterator is
          for J in Pop (It.Stack) .. Last_Child_Index (It.Node) loop
             Child := Get_Child (It.Node, J);
 
-            if Child /= Null_Value then
+            if Child /= No_Node then
                --  We found a sibling! Remember to look for the next one
                --  when we get back to the parent and proceed.
 
@@ -59,7 +59,7 @@ package body Langkit_Support.Tree_Traversal_Iterator is
       --  node, so put It.Node to null so that Next returns False on the next
       --  run.
 
-      It.Node := Null_Value;
+      It.Node := No_Node;
       return True;
    end Next;
 
@@ -76,11 +76,10 @@ package body Langkit_Support.Tree_Traversal_Iterator is
    -- Create --
    ------------
 
-   function Create (Root : Element_Type) return Traverse_Iterator is
+   function Create (Root : Node_Type) return Traverse_Iterator is
    begin
       return Traverse_Iterator'
-        (Ada.Finalization.Limited_Controlled with
-         Root, Null_Value, others => <>);
+        (Ada.Finalization.Limited_Controlled with Root, others => <>);
    end Create;
 
 end Langkit_Support.Tree_Traversal_Iterator;
