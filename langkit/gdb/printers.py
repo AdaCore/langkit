@@ -417,20 +417,18 @@ class RebindingsPrinter(BasePrinter):
             return 'null'
 
         def rebinding_img(value):
-            new_env = EnvGetterPrinter(value['new_env'], self.context).env
-            return ASTNodePrinter(new_env['node'], self.context).sloc(
-                with_end=False
-            ) if new_env and new_env['node'] else '<synthetic>'
+            return ASTNodePrinter(value['new_env']['node'],
+                                  self.context).sloc(with_end=False)
 
-        rebindings = self.value
+        # Gather all Env_Rebindings_Type records, parents last
+        rebindings = []
+        r = self.value
+        while r:
+            rebindings.append(r)
+            r = r['parent']
 
-        size = int(rebindings['size'])
-        array = rebindings['bindings'].address.cast(
-            rebindings['bindings'].type.target().array(1, size).pointer()
-        ).dereference()
-        return '[{}]'.format(', '.join(
-            rebinding_img(array[i]) for i in range(1, size + 1)
-        ))
+        return '[{}]'.format(', '.join(rebinding_img(r)
+                                       for r in reversed(rebindings)))
 
     def to_string(self):
         return "<Rebindings {}>".format(self.inner)
