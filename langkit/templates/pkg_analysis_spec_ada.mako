@@ -1338,7 +1338,7 @@ private
      (N : ${root_node_type_name}; I : Natural) return ${root_node_type_name};
 
    package Traversal_Iterators is new Langkit_Support.Tree_Traversal_Iterator
-     (Element_type      => ${root_node_type_name},
+     (Element_Type      => ${root_node_type_name},
       Null_Value        => null,
       First_Child_Index => First_Child_Index_For_Traverse,
       Last_Child_Index  => Last_Child_Index_For_Traverse,
