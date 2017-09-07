@@ -200,13 +200,6 @@
       ${node_fields(cls)}
    end record;
 
-   % if not cls.abstract and not cls.is_list_type:
-
-      overriding procedure Destroy_Node
-        (Node : access ${cls.value_type_name()});
-
-   % endif
-
    ## Private field getters
 
    <% library_private_field = lambda f: not library_public_field(f) %>
@@ -404,22 +397,6 @@
          % endfor
 
       end Print;
-
-      ------------------
-      -- Destroy_Node --
-      ------------------
-
-      overriding procedure Destroy_Node
-        (Node : access ${cls.value_type_name()})
-      is
-      begin
-         ## When no extension is registered, we don't need to recurse on the
-         ## tree at all.
-         if Langkit_Support.Extensions.Has_Extensions then
-            Node.Free_Extensions;
-         end if;
-         Node.Reset_Caches;
-      end Destroy_Node;
 
       % endif
 

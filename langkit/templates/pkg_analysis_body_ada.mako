@@ -1334,7 +1334,8 @@ package body ${ada_lib_name}.Analysis is
          return;
       end if;
 
-      Node.Destroy_Node;
+      Node.Free_Extensions;
+      Node.Reset_Caches;
       for I in 1 .. Node.Child_Count loop
          Destroy (Node.Child (I));
       end loop;
@@ -3202,19 +3203,6 @@ package body ${ada_lib_name}.Analysis is
       end loop;
    end Print;
 
-   ------------------
-   -- Destroy_Node --
-   ------------------
-
-   overriding procedure Destroy_Node
-     (Node : access ${generic_list_value_type})
-   is
-   begin
-      if Langkit_Support.Extensions.Has_Extensions then
-         Node.Free_Extensions;
-      end if;
-   end Destroy_Node;
-
    % for struct_type in no_builtins(ctx.struct_types):
    ${struct_types.body(struct_type)}
    % endfor
@@ -3258,7 +3246,12 @@ package body ${ada_lib_name}.Analysis is
       procedure Free is new Ada.Unchecked_Deallocation
         (${root_node_value_type}'Class, ${root_node_type_name});
    begin
-      Node.Destroy_Node;
+      --  Don't call Node.Destroy, as Node's children may be gone already: they
+      --  have their own destructor and there is no specified order for the
+      --  call of these destructors.
+      Node.Free_Extensions;
+      Node.Reset_Caches;
+
       Free (Node);
    end Destroy_Synthetic_Node;
 

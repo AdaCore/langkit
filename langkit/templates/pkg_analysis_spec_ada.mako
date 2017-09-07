@@ -1193,10 +1193,6 @@ private
    --  Set Node.Parent to Parent, and initialize recursively the parent of all
    --  child nodes.
 
-   procedure Destroy_Node (Node : access ${root_node_value_type}) is null;
-   --  Free the resources allocated to this node. This is conceptually abstract
-   --  but we can't have private abstract primitives in Ada.
-
    procedure Destroy (Node : access ${root_node_value_type}'Class);
    --  Free the resources allocated to this node and all its children
 
@@ -1482,9 +1478,6 @@ private
       Count : Natural;
       Nodes : Alloc_AST_List_Array.Element_Array_Access;
    end record;
-
-   overriding procedure Destroy_Node
-     (Node : access ${generic_list_value_type});
 
    % for astnode in no_builtins(ctx.astnode_types):
      % if not astnode.is_list_type:
