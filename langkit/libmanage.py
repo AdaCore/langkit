@@ -187,8 +187,9 @@ class ManageScript(object):
             :rtype: argparse.ArgumentParser
             """
             p = subparsers.add_parser(
-                # Take the name of the function without the do_ prefix
-                fn.__name__.replace('do_', ''),
+                # Take the name of the function without the do_ prefix and with
+                # dashes instead of underscores.
+                fn.__name__.replace('do_', '').replace('_', '-'),
 
                 # Take the first paragraph of the function's documentation as
                 # help.
