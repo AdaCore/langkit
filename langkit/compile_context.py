@@ -971,7 +971,8 @@ class CompileCtx(object):
         :param bool generate_pp: Whether to generate a pretty printer for the
             given grammar.
         """
-        add_template_dir(self.extensions_dir)
+        if self.extensions_dir:
+            add_template_dir(self.extensions_dir)
         for dirpath in keep(self.template_lookup_extra_dirs):
             add_template_dir(dirpath)
 
