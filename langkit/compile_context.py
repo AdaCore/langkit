@@ -25,9 +25,8 @@ import subprocess
 import sys
 
 from funcy import keep
-from mako.lookup import TemplateLookup
 
-from langkit import caching, names, template_utils
+from langkit import caching, names
 from langkit.ada_api import AdaAPISettings
 from langkit.c_api import CAPISettings
 from langkit.diagnostics import (Context, Severity, WarningSet,
@@ -39,6 +38,7 @@ from langkit.passes import (
     ASTNodePass, EnvSpecPass, GlobalPass, GrammarRulePass, MajorStepPass,
     PassManager, PropertyPass, StopPipeline, errors_checkpoint_pass
 )
+from langkit.template_utils import add_template_dir
 from langkit.utils import Colors, printcol, topological_sort
 
 
@@ -971,14 +971,9 @@ class CompileCtx(object):
         :param bool generate_pp: Whether to generate a pretty printer for the
             given grammar.
         """
-        dir_path = path.join(
-            path.dirname(path.realpath(__file__)), "templates"
-        )
-        template_utils.template_lookup = TemplateLookup(
-            directories=keep([dir_path, self.extensions_dir]
-                             + self.template_lookup_extra_dirs),
-            strict_undefined=True
-        )
+        add_template_dir(self.extensions_dir)
+        for dirpath in keep(self.template_lookup_extra_dirs):
+            add_template_dir(dirpath)
 
         self.no_property_checks = no_property_checks
         self.warnings = warnings or WarningSet()

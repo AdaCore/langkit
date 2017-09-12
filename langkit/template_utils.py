@@ -1,8 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
+import os.path
 import sys
 
 import mako.exceptions
+from mako.lookup import TemplateLookup
 
 from langkit import documentation, names
 from langkit.common import string_repr, get_type, null_constant
@@ -37,12 +39,24 @@ class Renderer(object):
             raise
 
 
-template_lookup = None
+_template_dirs = []
+_template_lookup = None
 ":type: mako.utils.TemplateLookup"
 
 
+def add_template_dir(path):
+    global _template_lookup
+    _template_dirs.append(path)
+    _template_lookup = TemplateLookup(directories=_template_dirs,
+                                      strict_undefined=True)
+
+
+add_template_dir(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                              'templates'))
+
+
 def mako_template(file_name):
-    return template_lookup.get_template("{}.mako".format(file_name))
+    return _template_lookup.get_template("{}.mako".format(file_name))
 
 
 common_renderer = Renderer({
