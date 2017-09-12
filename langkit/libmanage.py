@@ -19,6 +19,7 @@ from langkit.diagnostics import (
     Context, Diagnostics, DiagnosticError, DiagnosticStyle, Location,
     WarningSet, check_source_language, extract_library_location
 )
+from langkit.langkit_support import LangkitSupport
 from langkit.utils import Colors, Log, col, printcol
 
 
@@ -255,6 +256,27 @@ class ManageScript(object):
             '--json', '-J', action='store_true',
             help='Output necessary env keys to json'
         )
+
+        ###############################################
+        # Generate, Build and Install Langkit_Support #
+        ###############################################
+
+        self.generate_lksp_parser = create_parser(
+            self.do_generate_langkit_support
+        )
+        self.build_lksp_parser = create_parser(
+            self.do_build_langkit_support
+        )
+        self.install_lksp_parser = create_parser(
+            self.do_install_langkit_support
+        )
+        self.install_lksp_parser.add_argument(
+            'install-dir',
+            help='Installation directory.'
+        )
+
+        self.add_build_args(self.build_lksp_parser)
+        self.add_build_args(self.install_lksp_parser)
 
         # The create_context method will create the context and set it here
         # only right before executing commands.
@@ -592,6 +614,8 @@ class ManageScript(object):
             gnatpp(self.dirs.build_dir('src', 'mains.gpr'),
                    self.dirs.build_dir('src', '*.ad*'))
 
+        self.do_generate_langkit_support(args)
+
         self.log_info("Generation complete!", Colors.OKGREEN)
 
     def what_to_build(self, args, is_library):
@@ -836,6 +860,27 @@ class ManageScript(object):
             print(json.dumps(result))
         else:
             self.write_setenv()
+
+    def lksp(self, args):
+        return LangkitSupport(args.build_dir)
+
+    def do_generate_langkit_support(self, args):
+        """
+        Generate the build tree and project file for Langkit_Support.
+        """
+        self.lksp(args).generate()
+
+    def do_build_langkit_support(self, args):
+        """
+        Build Langkit_Support.
+        """
+        self.gprbuild(args, self.lksp(args).lksp_project_file, True)
+
+    def do_install_langkit_support(self, args):
+        """
+        Install Langkit_Support.
+        """
+        self.gprinstall(args, self.lksp(args).lksp_project_file, True)
 
     def do_help(self, args):
         """

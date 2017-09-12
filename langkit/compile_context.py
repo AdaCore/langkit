@@ -1220,19 +1220,10 @@ class CompileCtx(object):
                 quex_path=os.environ['QUEX_PATH'],
             ))
 
-        # Create the project file we will use to build Langkit_support
-        from os.path import dirname, abspath, join
-        lngk_support_dir = join(dirname(abspath(__file__)), "support")
-        with open(join(lib_path, 'gnat', 'langkit_support.gpr'), 'w') as f:
-            f.write(self.render_template(
-                'langkit_support_gpr',
-                source_dir=lngk_support_dir
-            ))
-
         # Copy additional source files from the language specification
         for filepath in self.additional_source_files:
             filename = os.path.basename(filepath)
-            shutil.copy(filepath, join(src_path, filename))
+            shutil.copy(filepath, path.join(src_path, filename))
 
         with open(os.path.join(share_path, 'ast-types.html'), 'w') as f:
             from langkit import astdoc
@@ -1322,7 +1313,7 @@ class CompileCtx(object):
 
         # Add any sources in $lang_path/extensions/support if it exists
         if self.ext('support'):
-            for f in glob(join(self.ext('support'), "*.ad*")):
+            for f in glob(path.join(self.ext('support'), "*.ad*")):
                 shutil.copy(f, src_path)
 
         if self.verbosity.info:
