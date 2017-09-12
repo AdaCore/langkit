@@ -851,7 +851,10 @@ class ManageScript(object):
         add_path('PATH', self.dirs.build_dir('bin'))
         add_path('C_INCLUDE_PATH', self.dirs.build_dir('include'))
 
-        for lib in ['langkit_support', self.lib_name.lower()]:
+        libs = ['langkit_support']
+        if self.context:
+            libs.append(self.lib_name.lower())
+        for lib in libs:
             add_path('LIBRARY_PATH',
                      self.dirs.build_dir('lib', lib + '.static'))
             add_path('LD_LIBRARY_PATH',
