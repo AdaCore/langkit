@@ -158,6 +158,12 @@ class ManageScript(object):
             '--trace', '-t', action='append', default=[],
             help="Activate given debug trace"
         )
+        args_parser.add_argument(
+            '--no-langkit-support', action='store_true',
+            help='Assuming that Langkit_Support is already built and'
+                 ' installed. This is useful to package the generated library'
+                 ' only.'
+        )
 
         # Don't enable this by default so that errors will not make automated
         # tasks hang.
@@ -603,6 +609,9 @@ class ManageScript(object):
         if args.check_only:
             return
 
+        if not args.no_langkit_support:
+            self.do_generate_langkit_support(args)
+
         if getattr(args, 'pretty_print', False):
             self.log_info("Pretty-printing sources for Libadalang...",
                           Colors.HEADER)
@@ -613,8 +622,6 @@ class ManageScript(object):
             )
             gnatpp(self.dirs.build_dir('src', 'mains.gpr'),
                    self.dirs.build_dir('src', '*.ad*'))
-
-        self.do_generate_langkit_support(args)
 
         self.log_info("Generation complete!", Colors.OKGREEN)
 
@@ -813,7 +820,9 @@ class ManageScript(object):
         lib_name = self.lib_name.lower()
 
         # Install libraries
-        for prj in ['langkit_support.gpr', lib_name + '.gpr']:
+        projects = ([] if args.no_langkit_support else
+                    ['langkit_support.gpr']) + [lib_name + '.gpr']
+        for prj in projects:
             self.gprinstall(args, self.dirs.build_dir('lib', 'gnat', prj),
                             True)
 
