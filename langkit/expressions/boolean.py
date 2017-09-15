@@ -11,17 +11,26 @@ from langkit.expressions.base import (
 )
 
 
-@attr_call('and_then', 'and')
-@attr_call('or_else', 'or',
-           doc='Like :dsl:`and_then`, but for the OR boolean operator or the'
-               ' logical disjunction.')
-class BinaryBooleanOperator(AbstractExpression):
+@attr_call('and_then')
+def and_then(lhs, rhs):
     """
     If `lhs` and `rhs` are booleans, this evaluates them in a short-circuit AND
     boolean operator fashion. Otherwise, both must be equations, and this
     returns a new equation that describes the logical conjunction.
     """
+    return BinaryBooleanOperator('and', lhs, rhs)
 
+
+@attr_call('or_else')
+def or_else(lhs, rhs):
+    """
+    Like :dsl:`and_then`, but for the OR boolean operator or the logical
+    disjunction.
+    """
+    return BinaryBooleanOperator('or', lhs, rhs)
+
+
+class BinaryBooleanOperator(AbstractExpression):
     AND = 'and'
     OR = 'or'
 
