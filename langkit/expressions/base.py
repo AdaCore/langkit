@@ -1888,6 +1888,7 @@ class SelfVariable(AbstractVariable):
     def __init__(self):
         assert SelfVariable._singleton is None
         SelfVariable._singleton = self
+        self._type = None
         super(SelfVariable, self).__init__(names.Name('Self'))
 
     @contextmanager
@@ -1905,6 +1906,11 @@ class SelfVariable(AbstractVariable):
         yield
         self._type = _old_type
         Entity._type = _old_entity_type
+
+    def construct(self):
+        check_source_language(self._type is not None,
+                              'Self is not bound in this context')
+        return super(SelfVariable, self).construct()
 
 
 Self = SelfVariable()
