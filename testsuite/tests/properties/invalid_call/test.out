@@ -9,11 +9,11 @@ File "test.py", line 29, in BarNode.prop
 == Incorrect call code 2 ==
 File "test.py", line 29, in BarNode.prop
   line 41, in access to .prop_2
-    Error: Invalid number of arguments in the call to BarNode.p_prop_2: 1 expected but got 2
+    Error: The last argument is unexpected
 
 == Incorrect call code 3 ==
 File "test.py", line 29, in BarNode.prop
   line 42, in No expression
-    Error: Invalid X actual (#1) for BarNode.p_prop_2: expected Integer but got FooNode
+    Error: Invalid "x" actual (#1) for BarNode.p_prop_2: expected Integer but got FooNode
 
 Done

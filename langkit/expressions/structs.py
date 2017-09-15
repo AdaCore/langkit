@@ -355,6 +355,68 @@ class FieldAccess(AbstractExpression):
     evaluation.
     """
 
+    class Arguments(object):
+        """
+        Holder for arguments to pass to a property.
+
+        `args` is a list/tuple of AbstractExpression while `kwargs` is a
+        mapping of argument names (str) to AbstractExpression.
+        """
+
+        def __init__(self, args, kwargs):
+            self.args = args
+            self.kwargs = kwargs
+
+        def prepare(self):
+            return (self.args, self.kwargs)
+
+        def associate(self, prop):
+            """
+            Try to associate passed arguments with each natural argument in the
+            `prop` property. If invalid count or invalid argument names are
+            detected, raise the appropriate user diagnostic. On success, return
+            a list with all actuals and arg keyword/position to pass in the
+            same order as natural arguments in the spec.
+
+            :rtype: list[(T, AbstractExpression)]
+            """
+            args = list(enumerate(self.args, 1))
+            kwargs = dict(self.kwargs)
+            result = []
+            for arg_spec in prop.natural_arguments:
+                # Look for a keyword argument corresponding to `arg_spec`
+                arg_name = arg_spec.name.lower
+                key = arg_spec.name.lower
+                try:
+                    actual = kwargs.pop(arg_name)
+                except KeyError:
+                    # There is no keyword argument passed for this argument, so
+                    # pick the first remaining one from positional arguments.
+                    check_source_language(
+                        args,
+                        'Missing actual for argument {}'.format(arg_name)
+                    )
+                    key, actual = args.pop(0)
+
+                result.append((key, actual))
+
+            # At this point, we managed to find an actual for all arguments, so
+            # all remaining passed arguments are unexpected.
+            check_source_language(
+                not args,
+                'The last {} unexpected'.format(
+                    '{} arguments are'.format(len(args))
+                    if len(args) > 1 else 'argument is'
+                )
+            )
+            check_source_language(
+                not kwargs,
+                'Invalid keyword arguments: {}'.format(', '.join(
+                    sorted(kwargs)
+                ))
+            )
+            return result
+
     class Expr(ResolvedExpression):
         """
         Resolved expression that represents a field access in generated code.
@@ -593,16 +655,15 @@ class FieldAccess(AbstractExpression):
                 result['2-args'] = self.arguments
             return result
 
-    def __init__(self, receiver, field, arguments=()):
+    def __init__(self, receiver, field, arguments=None):
         """
         :param AbstractExpression receiver: Expression on which the field
             access was done.
 
         :param str field: The name of the field that is accessed.
 
-        :param arguments: Assuming field is a property that takes arguments,
-            these are passed to it.
-        :type arguments: list[AbstractExpression]
+        :param FieldAccess.Arguments arguments: Assuming field is a property
+            that takes arguments, these are passed to it.
         """
         super(FieldAccess, self).__init__()
         self.receiver = receiver
@@ -672,25 +733,22 @@ class FieldAccess(AbstractExpression):
 
         # Check that this property actually accepts these arguments and that
         # they are correctly typed.
-        check_source_language(
-            len(self.arguments) == len(to_get.natural_arguments),
-            'Invalid number of arguments in the call to {}:'
-            ' {} expected but got {}'.format(
-                to_get.qualname,
-                len(to_get.natural_arguments),
-                len(self.arguments),
-            )
-        )
+        if self.arguments:
+            args = self.arguments.associate(to_get)
+        else:
+            args = []
+        assert len(args) == len(to_get.natural_arguments)
 
         arg_exprs = [
             construct(
                 actual, formal.type,
-                custom_msg='Invalid {} actual (#{}) for {}:'.format(
-                    formal.name, i, to_get.qualname,
+                custom_msg='Invalid "{}" actual{} for {}:'.format(
+                    formal.name.lower,
+                    ' (#{})'.format(key) if isinstance(key, int) else '',
+                    to_get.qualname,
                 ) + ' expected {expected} but got {expr_type}'
-            ) for i, (actual, formal) in enumerate(
-                zip(self.arguments, to_get.natural_arguments), 1
-            )
+            ) for (key, actual), formal in zip(args,
+                                               to_get.natural_arguments)
         ]
 
         # Even though it is redundant with DynamicVariable.construct, check
@@ -706,19 +764,19 @@ class FieldAccess(AbstractExpression):
         )
         return ret
 
-    def __call__(self, *args):
+    def __call__(self, *args, **kwargs):
         """
-        Build a new FieldAccess instance with "args" as arguments.
+        Build a new FieldAccess instance passing the given arguments.
 
         :param args: List of arguments for the call.
         :type args: list[AbstractExpression]
+        :param kwargs: Mapping of arguments for the call.
+        :type kwargs: dict[str, AbstractExpression]
         :rtype: FieldAccess
         """
-        # TODO: at some point, it could be useful to allow passing arguments by
-        # keywords.
-
         assert not self.arguments, 'Cannot call the result of a property'
-        return FieldAccess(self.receiver, self.field, args)
+        return FieldAccess(self.receiver, self.field,
+                           self.Arguments(args, kwargs))
 
     def __repr__(self):
         return "<FieldAccess .{}{}>".format(self.field,
