@@ -1721,13 +1721,8 @@ class DynamicVariable(AbstractVariable):
             False.
         :rtype: bool
         """
-        if prop is None:
-            return False
-        for arg in prop.arguments:
-            if arg.var is self:
-                return True
-        else:
-            return False
+        return prop is not None and any(self is dyn_var
+                                        for dyn_var in prop.dynamic_vars)
 
     @contextmanager
     def _bind(self, name):
@@ -1776,6 +1771,10 @@ class DynamicVariable(AbstractVariable):
                 or self._name is not None)
 
     def construct(self):
+        check_source_language(
+            PropertyDef.get()._dynamic_vars is not None,
+            'Dynamic variables cannot be bound in this context'
+        )
         check_source_language(
             self.is_bound,
             '{} is not bound in this context: please use the .bind construct'
