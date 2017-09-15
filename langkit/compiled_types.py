@@ -775,7 +775,7 @@ class Argument(object):
     """
 
     def __init__(self, name, type, is_optional=False, is_artificial=False,
-                 abstract_var=None):
+                 default_value=None, abstract_var=None):
         """
         :param names.Name name: Argument name.
         :param CompiledType type: Argument type.
@@ -785,6 +785,14 @@ class Argument(object):
         :param bool is_artificial: Whether the argument was automatically
             created by Langkit, i.e. the language specification did not mention
             it.
+        :param ResolvedExpression|None default_value: If None, there is no
+            default value associated to this argument. Otherwise, it must be a
+            resolved expression that can be evaluated at all call sites for the
+            corresponding property; callers that don't provide a value for this
+            argument will actually use this default value. While, from a
+            language design point of view, this makes this argument an
+            "optional" one, this is irrelated to the `is_optional` argument
+            above, which is a code generation detail.
         :param AbstractVariable|None abstract_var: For properties only. If
             provided, use it as the abstract variable to reference this
             argument. If not provided, an AbstractVariable instance is
@@ -797,6 +805,7 @@ class Argument(object):
         self.is_optional = is_optional
         self.is_artificial = is_artificial
         assert not is_optional or is_artificial
+        self.default_value = default_value
 
     @property
     def type(self):

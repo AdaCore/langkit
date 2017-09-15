@@ -84,23 +84,35 @@ def expand_abstract_fn(fn):
 
     # Check that all parameters have declared types in default arguments
     for kw, default in zip(argspec.args, defaults):
-        # The type could be an early reference to a not yet declared type,
-        # resolve it.
-        default = resolve_type(default)
-
         check_source_language(
             kw.lower() not in PropertyDef.reserved_arg_lower_names,
             'Cannot define reserved arguments ({})'.format(
                 ', '.join(PropertyDef.reserved_arg_lower_names)
             )
         )
+
+        # Expect either a single value (the argument type) or a couple (the
+        # argument type and an expression for the default value).
+        if isinstance(default, tuple) and len(default) == 2:
+            type_ref, default_value = default
+        else:
+            type_ref = default
+            default_value = None
+
+        # The type could be an early reference to a not yet declared type,
+        # resolve it.
+        type_ref = resolve_type(type_ref)
         check_source_language(
-            isinstance(default, CompiledType),
+            isinstance(type_ref, CompiledType),
             'A valid Langkit DSLType subclass is required for parameter {}'
-            ' (got {})'.format(kw, default)
+            ' (got {})'.format(kw, type_ref)
         )
 
-        fn_arguments.append(Argument(names.Name.from_lower(kw), default))
+        if default_value:
+            default_value = construct(default_value, type_ref)
+
+        fn_arguments.append(Argument(names.Name.from_lower(kw), type_ref,
+                                     default_value=default_value))
 
     # Now that we have placeholder for all arguments, we can expand the lambda
     # into a real AbstractExpression.
