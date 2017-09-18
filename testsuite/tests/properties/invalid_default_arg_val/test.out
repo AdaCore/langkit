@@ -1,0 +1,57 @@
+== Bad tuple ==
+File "test.py", line 29, in Example.p
+    Error: Invalid type reference: (<class 'langkit.dsl.BoolType'>,)
+
+== Bad expr ==
+File "test.py", line 29, in Example.p
+    Error: Invalid abstract expression: <class 'langkit.dsl.BoolType'>
+
+== Bad type ==
+File "test.py", line 29, in Example.p
+  line 36, in Literal expression
+    Error: Expected type Boolean, got Integer
+
+== Bad Self use ==
+File "test.py", line 29, in Example.p
+    Error: Self is not bound in this context
+
+== Bad dynamic variable use ==
+File "test.py", line 29, in Example.p
+    Error: Dynamic variables cannot be bound in this context
+
+== Missing argument (1) ==
+File "test.py", line 30, in Example.calling
+  line 50, in access to .p
+    Error: Missing actual for argument a
+
+== Missing argument (2) ==
+File "test.py", line 30, in Example.calling
+  line 53, in access to .p
+    Error: Missing actual for argument a
+
+== Bad keyword argument ==
+File "test.py", line 30, in Example.calling
+  line 36, in Literal expression
+    Error: Invalid "a" actual for Example.p_p: expected Boolean but got Integer
+
+== Too many arguments (1) ==
+File "test.py", line 30, in Example.calling
+  line 61, in access to .p
+    Error: The last argument is unexpected
+
+== Too many arguments (2) ==
+File "test.py", line 30, in Example.calling
+  line 64, in access to .p
+    Error: The last argument is unexpected
+
+== Too many arguments (3) ==
+File "test.py", line 30, in Example.calling
+  line 67, in access to .p
+    Error: Invalid keyword arguments: c
+
+== Too many arguments (4) ==
+File "test.py", line 30, in Example.calling
+  line 70, in access to .p
+    Error: The last 2 arguments are unexpected
+
+Done
