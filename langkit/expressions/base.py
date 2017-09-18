@@ -496,6 +496,9 @@ class AbstractExpression(Frozable):
             elif isinstance(obj, (dict)):
                 for v in obj.items():
                     explore(v, fn)
+            elif (not isinstance(obj, (PropertyDef, TypeRepo.Defer)) and
+                    hasattr(obj, 'prepare')):
+                explore(obj.prepare(), fn)
 
         ret = self
         for p, order in passes:
