@@ -10,9 +10,10 @@ import funcy
 
 from langkit import names
 from langkit.compiled_types import (
-    AbstractNodeData, Argument, ASTNodeType, CompiledType, T, bool_type,
-    gdb_bind_var, gdb_helper, get_context, long_type, no_compiled_type,
-    render as ct_render, resolve_type, symbol_type, token_type
+    AbstractNodeData, Argument, ASTNodeType, CompiledType, T, TypeRepo,
+    bool_type, gdb_bind_var, gdb_helper, get_context, long_type,
+    no_compiled_type, render as ct_render, resolve_type, symbol_type,
+    token_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, WarningSet, check_multiple,
@@ -37,7 +38,6 @@ def unsugar(expr, ignore_errors=False):
 
     :rtype: AbstractExpression
     """
-    from langkit.compiled_types import TypeRepo
     if expr is None:
         return None
 
