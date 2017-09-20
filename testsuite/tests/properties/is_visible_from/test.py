@@ -1,5 +1,5 @@
 """
-Test that the "is_visible_from" operation properly raise a PropertyError for
+Test that the "is_visible_from" operation properly raises a PropertyError for
 invalid input.
 """
 
