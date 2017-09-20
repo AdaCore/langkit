@@ -257,7 +257,7 @@ class CompiledType(object):
     def __init__(self, name, location=None, doc=None, is_ptr=True,
                  has_special_storage=False, is_list_type=False,
                  is_entity_type=False, should_emit_array_type=True,
-                 exposed=True, c_type_name=None, external=False,
+                 exposed=False, c_type_name=None, external=False,
                  null_allowed=False, is_ada_record=False, is_refcounted=False,
                  nullexpr=None, py_nullexpr=None, element_type=None,
                  type_repo_name=None):
@@ -607,6 +607,7 @@ no_compiled_type = NoCompiledType('NoCompiledType')
 
 analysis_unit_type = CompiledType(
     'AnalysisUnit',
+    exposed=True,
     nullexpr='null',
     should_emit_array_type=True,
     null_allowed=True,
@@ -614,6 +615,7 @@ analysis_unit_type = CompiledType(
 
 analysis_unit_kind = CompiledType(
     'UnitKind',
+    exposed=True,
     is_ptr=False,
 )
 
@@ -622,7 +624,6 @@ lexical_env_type = CompiledType(
     nullexpr='Empty_Env',
     should_emit_array_type=False,
     null_allowed=True,
-    exposed=False,
     is_refcounted=True,
     py_nullexpr='LexicalEnv.Empty',
 )
@@ -652,7 +653,6 @@ class LogicVarType(CompiledType):
             nullexpr='null',
             is_ptr=False,
             has_special_storage=True,
-            exposed=False,
             c_type_name='logic_var_type',
         )
 
@@ -676,7 +676,6 @@ logic_var_type = LogicVarType()
 equation_type = CompiledType(
     'LogicEquation',
     nullexpr='Null_Logic_Equation',
-    exposed=False,
     null_allowed=True,
     c_type_name='equation_type',
     is_refcounted=True,
@@ -691,6 +690,7 @@ class EnvRebindingsType(CompiledType):
     def __init__(self):
         super(EnvRebindingsType, self).__init__(
             name='EnvRebindings',
+            exposed=True,
             null_allowed=True,
             nullexpr='null',
             c_type_name='env_rebindings_type',
@@ -702,6 +702,7 @@ env_rebindings_type = EnvRebindingsType()
 
 bool_type = CompiledType(
     name=get_type(bool),
+    exposed=True,
     is_ptr=False,
     nullexpr='false',
     py_nullexpr='False',
@@ -713,6 +714,7 @@ bool_type = CompiledType(
 
 long_type = CompiledType(
     name=get_type(long),
+    exposed=True,
     is_ptr=False,
     nullexpr='0',
     external=True,
@@ -721,6 +723,7 @@ long_type = CompiledType(
 
 source_location_range_type = CompiledType(
     'SourceLocationRange',
+    exposed=True,
     is_ptr=False,
     nullexpr='SourceLocationRange()',
 )
@@ -734,6 +737,7 @@ class TokenType(CompiledType):
     def __init__(self):
         super(TokenType, self).__init__(
             name='TokenType',
+            exposed=True,
             is_ptr=False,
             nullexpr='No_Token',
             is_ada_record=True,
@@ -760,6 +764,7 @@ token_type = TokenType()
 
 symbol_type = CompiledType(
     'SymbolType',
+    exposed=True,
     nullexpr='null',
     null_allowed=True,
 
@@ -2078,7 +2083,7 @@ class ArrayType(CompiledType):
     def __init__(self, name, element_type):
         # By default, array types are not exposed. A compilation pass will tag
         # only the ones that are exposed through the public API.
-        super(ArrayType, self).__init__(name=name, is_ptr=True, exposed=False,
+        super(ArrayType, self).__init__(name=name, is_ptr=True,
                                         is_refcounted=True,
                                         nullexpr=null_constant(),
                                         element_type=element_type,
@@ -2188,7 +2193,7 @@ class _EnumType(CompiledType):
         """
         super(_EnumType, self).__init__(
             name, location, doc,
-            is_ptr=False, nullexpr='Uninitialized'
+            exposed=True, is_ptr=False, nullexpr='Uninitialized'
         )
         self.alternatives = alternatives
         self.suffix = suffix
