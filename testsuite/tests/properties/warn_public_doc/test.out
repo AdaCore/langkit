@@ -1,0 +1,8 @@
+File "test.py", line 26, in FooNode.undoc_prop
+    Warning: This property is public but it lacks documentation
+File "test.py", line 31, in FooNode.will_doc_prop
+    Warning: This property is public but it lacks documentation
+File "test.py", line 45, in Example.undoc_prop
+    Warning: This property is public but it lacks documentation
+Code generation was successful
+Done
