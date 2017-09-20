@@ -3307,7 +3307,7 @@ class PropertyDef(AbstractNodeData):
         del context
         WarningSet.undocumented_public_properties.warn_if(
             self.is_public and not any(p.doc for p in self.base_properties),
-            'This property is public but it lacks documenation'
+            'This property is public but it lacks documentation'
         )
 
 
