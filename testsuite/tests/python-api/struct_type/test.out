@@ -1,5 +1,0 @@
-main.py: Running...
-u.root.p_entity(None) = <TypeError: Thing instance expected, got <type 'NoneType'> instead>
-u.root.p_entity(entity) = <Thing f_node=<Example 1:1-1:9> f_comes_from_source=True>
-main.py: Done.
-Done

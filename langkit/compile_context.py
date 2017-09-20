@@ -1595,7 +1595,7 @@ class CompileCtx(object):
         This also emits non-blocking errors for all types that are exposed in
         the public API whereas they should not.
         """
-        from langkit.compiled_types import ArrayType, CompiledTypeMetaclass
+        from langkit.compiled_types import ArrayType, T
 
         def expose(t, for_field, type_use, traceback):
             """
@@ -1619,16 +1619,7 @@ class CompileCtx(object):
             if t._exposed:
                 return
 
-            if t.is_struct_type:
-
-                if t.is_entity_type and not t.el_type.is_root_node:
-                    expose(t.el_type.base().entity, for_field, 'parent type',
-                           traceback + ['parent entity type'])
-
-                for f in t.get_abstract_fields(include_inherited=False):
-                    expose(f.type, f, 'type', traceback + [f.qualname])
-
-            elif isinstance(t, ArrayType):
+            if isinstance(t, ArrayType):
                 # Don't allow public arrays of arrays
                 check(
                     not isinstance(t.element_type, ArrayType),
@@ -1639,16 +1630,21 @@ class CompileCtx(object):
                        traceback + ['array of {}'.format(t.name.camel)])
 
             else:
-                # Only struct and array types have their "_exposed" attribute
-                # inferred. We consider all other ones to have a static value,
-                # so complain if we reach a type that must not be exposed.
+                # Only array types have their "_exposed" attribute inferred. We
+                # consider all other ones to have a static value, so complain
+                # if we reach a type that must not be exposed.
                 check(t._exposed, t.name.camel)
                 return
 
             t._exposed = True
 
-        # Expose builtin types that we want in the public APIs
-        expose(CompiledTypeMetaclass.entity_info, None, None, [])
+        # As struct exceptions, manually expose structs required to expose
+        # entities.
+        #
+        # TODO: this must go away once we manage to make entity types opaque in
+        # the public API.
+        T.env_md._exposed = True
+        T.entity_info._exposed = True
 
         for f in astnode.get_abstract_fields(
             predicate=lambda f: f.is_public,
