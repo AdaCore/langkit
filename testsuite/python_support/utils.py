@@ -14,9 +14,7 @@ from langkit.libmanage import ManageScript
 from langkit.utils import reset_memoized
 
 
-def prepare_context(grammar,
-                    lexer=None,
-                    library_fields_all_public=False):
+def prepare_context(grammar, lexer=None):
     """
     Create a compile context and prepare the build directory for code
     generation.
@@ -26,9 +24,6 @@ def prepare_context(grammar,
 
     :param langkit.lexer.Lexer lexer: The language lexer to use for this
         context.
-
-    :param bool library_fields_all_public: Whether private fields should be
-        exported in code generation (they are not by default).
     """
 
     if lexer is None:
@@ -44,14 +39,11 @@ def prepare_context(grammar,
     ctx = CompileCtx(lang_name='Foo',
                      lexer=lexer,
                      grammar=grammar)
-    ctx.library_fields_all_public = library_fields_all_public
 
     return ctx
 
 
-def emit_and_print_errors(grammar,
-                          lexer=None,
-                          library_fields_all_public=False):
+def emit_and_print_errors(grammar, lexer=None):
     """
     Compile and emit code for CTX. Return whether this was successful.
 
@@ -59,8 +51,6 @@ def emit_and_print_errors(grammar,
 
     :param langkit.lexer.Lexer lexer: The lexer to use along with the grammar.
 
-    :param bool library_fields_all_public: Whether private fields should be
-        exported in code generation (they are not by default).
     :rtype: bool
     """
 
@@ -69,7 +59,7 @@ def emit_and_print_errors(grammar,
         lexer = foo_lexer
 
     try:
-        ctx = prepare_context(grammar, lexer, library_fields_all_public)
+        ctx = prepare_context(grammar, lexer)
         ctx.emit('build', generate_lexer=False)
         # ... and tell about how it went
     except DiagnosticError:
@@ -83,9 +73,7 @@ def emit_and_print_errors(grammar,
         reset_langkit()
 
 
-def build_and_run(grammar, py_script,
-                  lexer=None,
-                  library_fields_all_public=False):
+def build_and_run(grammar, py_script, lexer=None):
     """
     Compile and emit code for CTX and build the generated library. Then run
     PY_SCRIPT with this library available.
@@ -97,7 +85,7 @@ def build_and_run(grammar, py_script,
         from lexer_example import foo_lexer
         lexer = foo_lexer
 
-    ctx = prepare_context(grammar, lexer, library_fields_all_public)
+    ctx = prepare_context(grammar, lexer)
 
     class Manage(ManageScript):
         def create_context(self, args):
@@ -112,8 +100,6 @@ def build_and_run(grammar, py_script,
     # First build the library. Forward all test.py's arguments to the libmanage
     # call so that manual testcase runs can pass "-g", for instance.
     argv = sys.argv[1:] + ['--full-error-traces', '-vnone', 'make']
-    if ctx.library_fields_all_public:
-        argv.append('--library-fields-all-public')
     m.run(argv)
 
     # Write a "setenv" script to make developper investigation convenient
