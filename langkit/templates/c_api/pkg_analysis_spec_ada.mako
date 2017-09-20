@@ -40,18 +40,6 @@ package ${ada_lib_name}.Analysis.C is
    type ${node_kind_type} is new int;
    ${ada_c_doc('langkit.node_kind_type', 3)}
 
-   type ${lexical_env_type} is new System.Address;
-   ${ada_c_doc('langkit.lexical_env_type', 3)}
-
-   type ${logic_var_type} is new System.Address;
-   ${ada_c_doc('langkit.logic_var_type', 3)}
-
-   type ${equation_type} is new System.Address;
-   ${ada_c_doc('langkit.equation_type', 3)}
-
-   type ${env_rebindings_type} is new System.Address;
-   ${ada_c_doc('langkit.env_rebindings_type', 3)}
-
    --  Helper data structures for source location handling
 
    type ${sloc_type} is record
@@ -441,67 +429,7 @@ package ${ada_lib_name}.Analysis.C is
    ${ada_c_doc('langkit.text_to_locale_string', 3)}
 
    ${array_types.decl(T.root_node.array)}
-
-   ------------------------------------
-   -- Lexical environment primitives --
-   ------------------------------------
-
-   ${array_types.decl(LexicalEnvType.array)}
    ${array_types.decl(T.root_node.entity.array)}
-
-   function ${capi.get_name('lexical_env_empty')} return ${lexical_env_type}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('lexical_env_empty')}";
-
-   function ${capi.get_name('lexical_env_parent')}
-     (Env : ${lexical_env_type})
-      return ${lexical_env_type}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('lexical_env_parent')}";
-
-   function ${capi.get_name('lexical_env_node')}
-     (Env : ${lexical_env_type})
-      return ${node_type}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('lexical_env_node')}";
-
-   function ${capi.get_name('lexical_env_get')}
-     (Env : ${lexical_env_type}; Name : ${text_type})
-      return ${(T.root_node.entity.array.name)}
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('lexical_env_get')}";
-
-   procedure ${capi.get_name('lexical_env_inc_ref')}
-     (Env : ${lexical_env_type})
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('lexical_env_inc_ref')}";
-
-   procedure ${capi.get_name('lexical_env_dec_ref')}
-     (Env : ${lexical_env_type})
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('lexical_env_dec_ref')}";
-
-   -------------------------
-   -- Equation primitives --
-   -------------------------
-
-   procedure ${capi.get_name('equation_inc_ref')}
-     (Self : ${equation_type})
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('equation_inc_ref')}";
-
-   procedure ${capi.get_name('equation_dec_ref')}
-     (Self : ${equation_type})
-      with Export        => True,
-           Convention    => C,
-           External_name => "${capi.get_name('equation_dec_ref')}";
 
    -------------------------
    -- Extensions handling --
@@ -716,26 +644,6 @@ package ${ada_lib_name}.Analysis.C is
    --       Optimization-and-Strict-Aliasing.html>.
 
    pragma Warnings (Off, "possible aliasing problem for type");
-
-   function Wrap is new Ada.Unchecked_Conversion
-     (AST_Envs.Lexical_Env, ${lexical_env_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${lexical_env_type}, AST_Envs.Lexical_Env);
-
-   function Wrap is new Ada.Unchecked_Conversion
-     (Logic_Var, ${logic_var_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${logic_var_type}, Logic_Var);
-
-   function Wrap is new Ada.Unchecked_Conversion
-     (Env_Rebindings, ${env_rebindings_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${env_rebindings_type}, Env_Rebindings);
-
-   function Wrap is new Ada.Unchecked_Conversion
-     (Logic_Equation, ${equation_type});
-   function Unwrap is new Ada.Unchecked_Conversion
-     (${equation_type}, Logic_Equation);
 
    function Wrap is new Ada.Unchecked_Conversion
      (Analysis_Context, ${analysis_context_type});
