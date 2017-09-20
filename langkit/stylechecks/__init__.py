@@ -324,7 +324,9 @@ def check_generic(report, filename, content, lang):
     for i, line in iter_lines(content):
         report.set_context(filename, i)
 
-        if len(line) > 80 and b'http://' not in line:
+        if (len(line) > 80 and
+                b'http://' not in line and
+                b'https://' not in line):
             report.add('Too long line')
         comment_start = line.find(lang.comment_start)
 
