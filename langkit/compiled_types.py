@@ -2270,7 +2270,13 @@ def create_enum_node_types(cls):
 
     fields = list(cls._fields)
     if is_bool_node:
-        prop = AbstractProperty(type=bool_type, public=True)
+        present_alt = cls._alternatives[0]
+        prop = AbstractProperty(
+            type=bool_type, public=True,
+            doc='Return whether this is an instance of {}'.format(
+                (cls._name + present_alt.name).camel
+            )
+        )
         prop.location = cls._location
         fields.append(('as_bool', prop))
 
