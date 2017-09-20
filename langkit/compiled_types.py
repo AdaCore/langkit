@@ -1632,6 +1632,10 @@ class ASTNodeType(BaseStructType):
         self.is_enum_node = is_enum_node
         self.is_bool_node = is_bool_node
 
+        # Make sure we have one entity type for each AST node type
+        entity_type = self.entity
+        del entity_type
+
     def repr_name(self):
         """
         Return a name that will be used when serializing this AST node.
@@ -1937,6 +1941,7 @@ class ASTNodeType(BaseStructType):
         )
         result.is_entity_type = True
         result.el_type = self
+        result._exposed = True
 
         if self.is_root_node:
             # LexicalEnv.get, which is bound in the AST.C generate package,
