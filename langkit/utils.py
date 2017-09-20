@@ -442,7 +442,7 @@ def topological_sort(items):
                 emitted = True
             else:
                 remaining_items.append((item, dependencies))
-        assert(emitted)
+        assert emitted
         items = remaining_items
 
 
