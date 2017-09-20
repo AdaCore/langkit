@@ -2146,14 +2146,6 @@ class ArrayType(CompiledType):
         """
         return names.Name(self.pkg_vector.camel_with_underscores + '.Vector')
 
-    def array(self):
-        """
-        Name of the type for array values.
-
-        :rtype: names.Name
-        """
-        return self.api_name
-
     def c_inc_ref(self, capi):
         """
         Name of the C API function to inc-ref an array value.

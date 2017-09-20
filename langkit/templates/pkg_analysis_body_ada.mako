@@ -1735,7 +1735,7 @@ package body ${ada_lib_name}.Analysis is
       --  assume that all lookups fall into this node's sloc range.
       pragma Assert (Compare (Sloc_Range (Node, Snap), Sloc) = Inside);
 
-      Children : constant ${root_node_array.array()} := Node.Children;
+      Children : constant ${root_node_array.api_name} := Node.Children;
       Pos      : Relative_Position;
       Result   : ${root_node_type_name};
    begin
