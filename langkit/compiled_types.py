@@ -1463,6 +1463,36 @@ class StructType(BaseStructType):
         return capi.get_name(self.name + names.Name('Dec_Ref'))
 
 
+class EntityType(StructType):
+    """
+    Subclass of StructType dedicated to entity types.
+    """
+
+    def __init__(self, astnode):
+        self.astnode = astnode
+
+        name = names.Name('Entity')
+        if not self.astnode.is_root_node:
+            name += self.astnode.name
+
+        super(EntityType, self).__init__(
+            name, None, None,
+            [('el', BuiltinField(self.astnode, doc='The stored AST node')),
+             ('info', BuiltinField(self.astnode.entity_info(),
+                                   access_needs_incref=True,
+                                   doc='Entity info for this node'))],
+        )
+        self.is_entity_type = True
+        self.el_type = astnode
+        self._exposed = True
+
+        if self.astnode.is_root_node:
+            # LexicalEnv.get, which is bound in the AST.C generate package,
+            # returns arrays of root node entities, so the corresponding
+            # array type must be declared manually there.
+            self.should_emit_array_type = False
+
+
 class ASTNodeType(BaseStructType):
     """
     Type for an AST node.
@@ -1924,32 +1954,7 @@ class ASTNodeType(BaseStructType):
         Return the entity type, which is a node type with assorted semantic
         information.
         """
-
-        name = names.Name('Entity')
-        if not self.is_root_node:
-            name += self.name
-
-            # Make sure entity types for parent nodes are also created
-            self.base().entity
-
-        result = StructType(
-            name, None, None,
-            [('el', BuiltinField(self, doc='The stored AST node')),
-             ('info', BuiltinField(self.entity_info(),
-                                   access_needs_incref=True,
-                                   doc='Entity info for this node'))],
-        )
-        result.is_entity_type = True
-        result.el_type = self
-        result._exposed = True
-
-        if self.is_root_node:
-            # LexicalEnv.get, which is bound in the AST.C generate package,
-            # returns arrays of root node entities, so the corresponding
-            # array type must be declared manually there.
-            result.should_emit_array_type = False
-
-        return result
+        return EntityType(self)
 
     def check_resolved(self):
         """
