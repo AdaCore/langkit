@@ -7,14 +7,17 @@ import sys
 
 from langkit.compile_context import CompileCtx
 from langkit.compiled_types import CompiledTypeMetaclass
-from langkit.diagnostics import DiagnosticError
+from langkit.diagnostics import DiagnosticError, WarningSet
 from langkit.dsl import _StructMetaclass, _ASTNodeMetaclass, _EnumNodeMetaclass
 from langkit.expressions import Self
 from langkit.libmanage import ManageScript
 from langkit.utils import reset_memoized
 
 
-def prepare_context(grammar, lexer=None):
+default_warning_set = WarningSet()
+
+
+def prepare_context(grammar, lexer=None, warning_set=default_warning_set):
     """
     Create a compile context and prepare the build directory for code
     generation.
@@ -24,6 +27,8 @@ def prepare_context(grammar, lexer=None):
 
     :param langkit.lexer.Lexer lexer: The language lexer to use for this
         context.
+
+    :param WarningSet warning_set: Set of warnings to emit.
     """
 
     if lexer is None:
@@ -39,17 +44,21 @@ def prepare_context(grammar, lexer=None):
     ctx = CompileCtx(lang_name='Foo',
                      lexer=lexer,
                      grammar=grammar)
+    ctx.warnings = warning_set
 
     return ctx
 
 
-def emit_and_print_errors(grammar, lexer=None):
+def emit_and_print_errors(grammar, lexer=None,
+                          warning_set=default_warning_set):
     """
     Compile and emit code for CTX. Return whether this was successful.
 
     :param langkit.parsers.Grammar grammar_fn: The language grammar to use.
 
     :param langkit.lexer.Lexer lexer: The lexer to use along with the grammar.
+
+    :param WarningSet warning_set: Set of warnings to emit.
 
     :rtype: bool
     """
@@ -59,7 +68,7 @@ def emit_and_print_errors(grammar, lexer=None):
         lexer = foo_lexer
 
     try:
-        ctx = prepare_context(grammar, lexer)
+        ctx = prepare_context(grammar, lexer, warning_set)
         ctx.emit('build', generate_lexer=False)
         # ... and tell about how it went
     except DiagnosticError:
@@ -73,19 +82,22 @@ def emit_and_print_errors(grammar, lexer=None):
         reset_langkit()
 
 
-def build_and_run(grammar, py_script, lexer=None):
+def build_and_run(grammar, py_script, lexer=None,
+                  warning_set=default_warning_set):
     """
     Compile and emit code for CTX and build the generated library. Then run
     PY_SCRIPT with this library available.
 
     An exception is raised if any step fails (the script must return code 0).
+
+    :param WarningSet warning_set: Set of warnings to emit.
     """
 
     if lexer is None:
         from lexer_example import foo_lexer
         lexer = foo_lexer
 
-    ctx = prepare_context(grammar, lexer)
+    ctx = prepare_context(grammar, lexer, warning_set)
 
     class Manage(ManageScript):
         def create_context(self, args):
@@ -100,6 +112,8 @@ def build_and_run(grammar, py_script, lexer=None):
     # First build the library. Forward all test.py's arguments to the libmanage
     # call so that manual testcase runs can pass "-g", for instance.
     argv = sys.argv[1:] + ['--full-error-traces', '-vnone', 'make']
+    for w in WarningSet.available_warnings:
+        argv.append('-{}{}'.format('W' if w in warning_set else 'w', w.name))
     m.run(argv)
 
     # Write a "setenv" script to make developper investigation convenient

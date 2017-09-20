@@ -375,6 +375,11 @@ class WarningSet(object):
         self.enabled_warnings = {w for w in self.available_warnings
                                  if w.enabled_by_default}
 
+    def __repr__(self):
+        return '<WarningSet [{}]>'.format(', '.join(
+            w.name for w in self.enabled_warnings
+        ))
+
     def enable(self, warning):
         """
         :type warning: WarningDescriptor|str

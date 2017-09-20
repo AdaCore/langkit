@@ -554,6 +554,11 @@ class CompileCtx(object):
         emission.
         """
 
+        self.warnings = WarningSet()
+        """
+        Set of warnings to emit.
+        """
+
     @property
     def sorted_logic_binders(self):
         return sorted(self.logic_binders, key=lambda x: (
@@ -970,8 +975,9 @@ class CompileCtx(object):
             add_template_dir(dirpath)
 
         self.no_property_checks = no_property_checks
-        self.warnings = warnings or WarningSet()
         self.generate_pp = generate_pp
+        if warnings:
+            self.warnings = warnings
 
         if self.generate_pp:
             self.warnings.enable(self.warnings.pp_bad_grammar)

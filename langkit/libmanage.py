@@ -328,7 +328,7 @@ class ManageScript(object):
             help='Display the list of available warnings',
         )
         subparser.add_argument(
-            '--enable-warning', '-W', dest="enabled_warnings",
+            '--enable-warning', '-W', dest='enabled_warnings',
             default=WarningSet(),
             action=EnableWarningAction,
             choices=[w.name for w in WarningSet.available_warnings],
