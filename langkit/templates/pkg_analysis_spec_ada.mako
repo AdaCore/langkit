@@ -103,6 +103,18 @@ package ${ada_lib_name}.Analysis is
 
    Default_Charset : constant String := ${string_repr(ctx.default_charset)};
 
+   ------------------
+   -- Entity types --
+   ------------------
+
+   % for e in ctx.entity_types:
+      % if e.is_root_type:
+         type ${e.api_name} is tagged private;
+      % else:
+         type ${e.api_name} is new ${e.base.api_name} with private;
+      % endif
+   % endfor
+
    --------------------
    -- Unit providers --
    --------------------
@@ -988,6 +1000,21 @@ package ${ada_lib_name}.Analysis is
    % endfor
 
 private
+
+   -----------------------------
+   -- Entity types (internal) --
+   -----------------------------
+
+   % for e in ctx.entity_types:
+      % if e.is_root_type:
+         type ${e.api_name} is tagged record
+            Node   : ${root_node_type_name};
+            E_Info : Entity_Info;
+         end record;
+      % else:
+         type ${e.api_name} is new ${e.base.api_name} with null record;
+      % endif
+   % endfor
 
    use AST_Envs;
 

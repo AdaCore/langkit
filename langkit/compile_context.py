@@ -411,6 +411,13 @@ class CompileCtx(object):
         :type: list[langkit.compiled_types.StructType]
         """
 
+        self._entity_types = []
+        """
+        List of all entity types.
+
+        :type: list[langkit.compiled_types.EntityType]
+        """
+
         self.root_grammar_class = None
         """
         The ASTNodeType instance that is the root class for every node used in
@@ -1075,6 +1082,16 @@ class CompileCtx(object):
             ))
 
         return self._struct_types
+
+    @property
+    def entity_types(self):
+        if not self._entity_types:
+            from langkit.compiled_types import EntityType
+
+            self._entity_types = [s for s in self.struct_types
+                                  if isinstance(s, EntityType)]
+
+        return self._entity_types
 
     def _compile(self, check_only=False, annotate_fields_types=False):
         """

@@ -1571,6 +1571,33 @@ class EntityType(StructType):
         # compatible, so this reduces the amount of types emitted.
         return CAPIType(capi, 'base_entity')
 
+    @property
+    def is_root_type(self):
+        """
+        Return whether this entity type correspond to the AST node root type.
+
+        :rtype: bool
+        """
+        return self.astnode.is_root_node
+
+    @property
+    def base(self):
+        """
+        Return the entity type that `self` overrides, or None for the root.
+
+        :rtype: EntityType
+        """
+        return None if self.is_root_type else self.astnode.base().entity
+
+    @property
+    def api_name(self):
+        """
+        Type name to use in the public API.
+
+        :rtype: names.Name
+        """
+        return names.Name('Public') + self.astnode.name
+
 
 class ASTNodeType(BaseStructType):
     """
