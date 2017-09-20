@@ -17,29 +17,16 @@ if u.diagnostics:
 
 u.populate_lexical_env()
 
-empty = ('LexicalEnv.empty', libfoolang.LexicalEnv.Empty)
-non_empty = ('u.root.children_env', u.root.children_env)
-
-for (arg1_str, arg1), (arg2_str, arg2) in [
-    (empty, empty),
-    (empty, non_empty),
-    (non_empty, empty),
-    (non_empty, non_empty),
+for arg1, arg2 in [
+    (True, True),
+    (True, False),
+    (False, True),
+    (False, False)
 ]:
     try:
-        result = u.root.p_is_visible_from(arg1, arg2)
+        result = u.root.p_prop(arg1, arg2)
     except libfoolang.PropertyError as exc:
         result = '<PropertyError: {}>'.format(exc)
-    print('u.root.p_is_visible_from({}, {}) = {}'.format(
-        arg1_str, arg2_str, result
-    ))
-
-# Make sure lexical environments are collected before the context/units so we
-# don't have use-after-free patterns for the former. This is acceptable as
-# lexical environments are internal.
-del empty, non_empty
-del arg1, arg2, result
-import gc
-gc.collect()
+    print('u.root.p_test({}, {}) = {}'.format(arg1, arg2, result))
 
 print('main.py: Done.')

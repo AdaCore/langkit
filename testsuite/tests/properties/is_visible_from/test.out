@@ -1,10 +1,10 @@
 main.py: Running...
-u.root.p_is_visible_from(LexicalEnv.empty, LexicalEnv.empty) = <PropertyError: raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : referenced environment does not belong to any analysis unit
+u.root.p_test(True, True) = <PropertyError: raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : referenced environment does not belong to any analysis unit
 >
-u.root.p_is_visible_from(LexicalEnv.empty, u.root.children_env) = <PropertyError: raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : referenced environment does not belong to any analysis unit
+u.root.p_test(True, False) = <PropertyError: raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : referenced environment does not belong to any analysis unit
 >
-u.root.p_is_visible_from(u.root.children_env, LexicalEnv.empty) = <PropertyError: raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : base environment does not belong to any analysis unit
+u.root.p_test(False, True) = <PropertyError: raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : base environment does not belong to any analysis unit
 >
-u.root.p_is_visible_from(u.root.children_env, u.root.children_env) = True
+u.root.p_test(False, False) = True
 main.py: Done.
 Done

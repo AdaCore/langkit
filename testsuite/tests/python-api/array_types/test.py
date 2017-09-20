@@ -49,5 +49,5 @@ foo_grammar.add_rules(
     null=Null(Tok(Token.Null)),
 )
 
-build_and_run(foo_grammar, 'main.py', library_fields_all_public=True)
+build_and_run(foo_grammar, 'main.py')
 print('Done')

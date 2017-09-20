@@ -41,5 +41,5 @@ foo_grammar.add_rules(
     main_rule=Example(Tok(Token.Identifier, keep=True)),
 )
 
-build_and_run(foo_grammar, 'main.py', library_fields_all_public=True)
+build_and_run(foo_grammar, 'main.py')
 print('Done')

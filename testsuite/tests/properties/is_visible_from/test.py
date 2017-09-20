@@ -8,9 +8,9 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, LexicalEnvType, T
+from langkit.dsl import ASTNode, BoolType, Field, T
 from langkit.envs import EnvSpec, add_to_env, add_env
-from langkit.expressions import New, Self, langkit_property
+from langkit.expressions import EmptyEnv, If, New, Self, Var, langkit_property
 from langkit.parsers import Grammar, List, Tok
 
 from lexer_example import Token
@@ -21,9 +21,12 @@ Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
 class FooNode(ASTNode):
+
     @langkit_property(public=True)
-    def is_visible_from(env1=LexicalEnvType, env2=LexicalEnvType):
-        return env1.is_visible_from(env2)
+    def prop(empty1=BoolType, empty2=BoolType):
+        arg1 = Var(If(empty1, EmptyEnv, Self.children_env))
+        arg2 = Var(If(empty2, EmptyEnv, Self.children_env))
+        return arg1.is_visible_from(arg2)
 
 
 class Name(FooNode):
@@ -44,5 +47,5 @@ foo_grammar.add_rules(
     main_rule=List(foo_grammar.name, list_cls=Scope),
     name=Name(Tok(Token.Identifier, keep=True)),
 )
-build_and_run(foo_grammar, 'main.py', library_fields_all_public=True)
+build_and_run(foo_grammar, 'main.py')
 print('Done')
