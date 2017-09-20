@@ -1601,6 +1601,21 @@ class CompileCtx(object):
             """
             Recursively tag "t" and all the types it references as exposed.
             """
+            def check(predicate, descr):
+                with for_field.diagnostic_context:
+                    text_tb = (
+                        ' (from: {})'.format(
+                            ' -> '.join(traceback[:-1])
+                        ) if len(traceback) > 1 else ''
+                    )
+                    check_source_language(
+                        predicate,
+                        '{} is {}, which is forbidden in public API{}'.format(
+                            type_use, descr, text_tb
+                        ),
+                        severity=Severity.non_blocking_error
+                    )
+
             if t._exposed:
                 return
 
@@ -1614,6 +1629,12 @@ class CompileCtx(object):
                     expose(f.type, f, 'type', traceback + [f.qualname])
 
             elif isinstance(t, ArrayType):
+                # Don't allow public arrays of arrays
+                check(
+                    not isinstance(t.element_type, ArrayType),
+                    '{}, an array of arrays'.format(t.name.camel)
+                )
+
                 expose(t.element_type, for_field, 'element type',
                        traceback + ['array of {}'.format(t.name.camel)])
 
@@ -1621,19 +1642,7 @@ class CompileCtx(object):
                 # Only struct and array types have their "_exposed" attribute
                 # inferred. We consider all other ones to have a static value,
                 # so complain if we reach a type that must not be exposed.
-                with for_field.diagnostic_context:
-                    text_tb = (
-                        ' (from: {})'.format(
-                            ' -> '.join(traceback[:-1])
-                        ) if len(traceback) > 1 else ''
-                    )
-                    check_source_language(
-                        t._exposed,
-                        "{} is {}, which is forbidden in public API{}".format(
-                            type_use, t.name.camel, text_tb
-                        ),
-                        severity=Severity.non_blocking_error
-                    )
+                check(t._exposed, t.name.camel)
                 return
 
             t._exposed = True

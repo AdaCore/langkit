@@ -1,0 +1,4 @@
+File "test.py", line 21, in Example.array_of_array
+    Error: return type is ExampleArrayAccessArrayAccess, an array of arrays, which is forbidden in public API
+
+Done
