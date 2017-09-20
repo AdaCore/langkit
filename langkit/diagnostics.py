@@ -367,8 +367,13 @@ class WarningSet(object):
         'Warn if a node type is not used in the grammar, and is not marked as '
         'abstract nor synthetic'
     )
+    undocumented_public_properties = WarningDescriptor(
+        'undocumented-public-properties', True,
+        'Warn if a public property is left undocumented'
+    )
     available_warnings = [
-        prop_only_entities, unused_bindings, pp_bad_grammar, unused_node_type
+        prop_only_entities, unused_bindings, pp_bad_grammar, unused_node_type,
+        undocumented_public_properties
     ]
 
     def __init__(self):

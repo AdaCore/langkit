@@ -2570,6 +2570,16 @@ class PropertyDef(AbstractNodeData):
         )
 
     @property
+    @memoized
+    def base_properties(self):
+        """
+        Return the list of all properties that `self` overrides (`self`
+        included), newest first.
+        """
+        base = self.base_property
+        return [self] + (base.base_properties if base else [])
+
+    @property
     def overriding(self):
         """
         Whether this property is overriding or not.
@@ -3291,6 +3301,13 @@ class PropertyDef(AbstractNodeData):
             wrongly_used_vars,
             'The following bindings are used even though they are supposed to'
             ' be ignored: {}'.format(format_list(wrongly_used_vars)),
+        )
+
+    def warn_on_undocumented_public_property(self, context):
+        del context
+        WarningSet.undocumented_public_properties.warn_if(
+            self.is_public and not any(p.doc for p in self.base_properties),
+            'This property is public but it lacks documenation'
         )
 
 

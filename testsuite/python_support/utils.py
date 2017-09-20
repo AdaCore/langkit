@@ -16,6 +16,10 @@ from langkit.utils import reset_memoized
 
 default_warning_set = WarningSet()
 
+# We don't want to be forced to provide dummy docs for public properties in
+# testcases.
+default_warning_set.disable(WarningSet.undocumented_public_properties)
+
 
 def prepare_context(grammar, lexer=None, warning_set=default_warning_set):
     """

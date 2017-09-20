@@ -1139,6 +1139,8 @@ class CompileCtx(object):
                         lambda _, astnode: astnode.check_resolved()),
             GlobalPass('warn on unused private properties',
                        CompileCtx.warn_unused_private_properties),
+            PropertyPass('warn on undocumented public properties',
+                         PropertyDef.warn_on_undocumented_public_property),
             ASTNodePass('expose public structs and arrays types in APIs',
                         CompileCtx.expose_public_api_types,
                         auto_context=False),
