@@ -435,127 +435,6 @@ class AnalysisUnit(object):
             return value._c_value
 
 
-% if ctx.library_fields_all_public:
-class LexicalEnv(object):
-    ${py_doc('langkit.lexical_env_type', 4)}
-
-    _exposed = False
-
-    def __init__(self, c_value, inc_ref=False):
-        self._c_value = c_value
-        if inc_ref:
-            self._inc_ref(self._c_value)
-
-    @property
-    def parent(self):
-        return LexicalEnv._wrap(_lexical_env_parent(self._c_value))
-
-    @property
-    def node(self):
-        return ${root_astnode_name}._wrap(_lexical_env_node(self._c_value))
-
-    def get(self, name):
-        ${py_doc('langkit.lexical_env_get', 8)}
-        result = _lexical_env_get(self._c_value,
-                                  ctypes.byref(_text._unwrap(name)))
-        return ${pyapi.wrap_value('result',
-                                  T.root_node.entity.array)}
-
-    def __del__(self):
-        self._dec_ref(self._c_value)
-        self._c_value = None
-
-    class _c_type(ctypes.c_void_p):
-        pass
-
-    _inc_ref = staticmethod(_import_func(
-        '${capi.get_name("lexical_env_inc_ref")}',
-        [_c_type], None
-    ))
-    _dec_ref = staticmethod(_import_func(
-        '${capi.get_name("lexical_env_dec_ref")}',
-        [_c_type], None
-    ))
-
-    @classmethod
-    def _unwrap(cls, value):
-        if value is None:
-            raise TypeError('None is not an allowed LexicalEnv value')
-        elif not isinstance(value, cls):
-            _raise_type_error('LexicalEnv', value)
-        return value._c_value
-
-    @classmethod
-    def _wrap(cls, c_value, inc_ref=False):
-        return cls(c_value, inc_ref) if c_value else None
-
-    Empty = None
-    ${py_doc('langkit.lexical_env_empty', 4)}
-
-_lexical_env_empty = _import_func(
-    '${capi.get_name("lexical_env_empty")}',
-    [], LexicalEnv._c_type
-)
-LexicalEnv.Empty = LexicalEnv._wrap(_lexical_env_empty())
-
-
-class BasePointerBinding(object):
-    """
-    Base class for dummy type bindings around mere pointers.
-    """
-
-    def __init__(self, c_value, inc_ref=False):
-        self._c_value = c_value
-        if inc_ref and self._inc_ref:
-            self._inc_ref(c_value)
-
-    def __del__(self):
-        if self._dec_ref:
-            self._dec_ref(self._c_value)
-        self._c_value = None
-
-    class _c_type(ctypes.c_void_p):
-        pass
-
-    @classmethod
-    def _unwrap(cls, value):
-        if value is None:
-            return 0
-        elif not isinstance(value, cls):
-            _raise_type_error(cls.__name__, value)
-        else:
-            return value._c_value
-
-    @classmethod
-    def _wrap(cls, c_value, inc_ref=False):
-        return cls(c_value, inc_ref) if c_value else None
-
-    _inc_ref = None
-    _dec_ref = None
-
-
-class LogicVar(BasePointerBinding):
-    ${py_doc('langkit.logic_var_type', 4)}
-
-    _exposed = False
-
-
-class Equation(BasePointerBinding):
-    ${py_doc('langkit.equation_type', 4)}
-
-    _exposed = False
-
-    _inc_ref = staticmethod(_import_func(
-        '${capi.get_name("equation_inc_ref")}',
-        [BasePointerBinding._c_type], None
-    ))
-    _dec_ref = staticmethod(_import_func(
-        '${capi.get_name("equation_dec_ref")}',
-        [BasePointerBinding._c_type], None
-    ))
-% endif
-
-
 class Sloc(object):
     ${py_doc('langkit.sloc_type', 4)}
 
@@ -1212,7 +1091,7 @@ def _unwrap_enum(py_value, type_name, translator):
 ${struct_types.base_decls()}
 
 % for struct_type in ctx.struct_types:
-    % if struct_type._exposed or ctx.library_fields_all_public:
+    % if struct_type._exposed:
 ${struct_types.decl(struct_type)}
     % endif
 % endfor
@@ -1223,7 +1102,7 @@ ${struct_types.decl(struct_type)}
 
 ${array_types.base_decl()}
 % for array_type in ctx.sorted_types(ctx.array_types):
-    % if array_type._exposed or ctx.library_fields_all_public:
+    % if array_type._exposed:
 ${array_types.decl(array_type)}
     % endif
 % endfor
@@ -1404,23 +1283,6 @@ _node_child = _import_func(
     [${c_node}, ctypes.c_uint, ctypes.POINTER(${c_node})], ctypes.c_int
 )
 
-% if ctx.library_fields_all_public:
-# Lexical environment primitives
-_lexical_env_parent = _import_func(
-    '${capi.get_name("lexical_env_parent")}',
-    [LexicalEnv._c_type], LexicalEnv._c_type
-)
-_lexical_env_node = _import_func(
-    '${capi.get_name("lexical_env_node")}',
-    [LexicalEnv._c_type], ${c_node}
-)
-_lexical_env_get = _import_func(
-    '${capi.get_name("lexical_env_get")}',
-    [LexicalEnv._c_type, ctypes.POINTER(_text)],
-    ${pyapi.type_internal_name(T.root_node.entity.array)}
-)
-% endif
-
 % for astnode in ctx.astnode_types:
     % for field in astnode.fields_with_accessors():
 _${field.accessor_basename.lower} = _import_func(
@@ -1489,7 +1351,7 @@ _token_range_text = _import_func(
     [ctypes.POINTER(Token), ctypes.POINTER(Token), ctypes.POINTER(_text)],
     ctypes.c_int
 )
-% if T.entity._exposed or ctx.library_fields_all_public:
+% if T.entity._exposed:
 _entity_image = _import_func(
     "${capi.get_name('entity_image')}",
     [ctypes.POINTER(Entity._c_type)], _text

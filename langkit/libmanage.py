@@ -304,11 +304,6 @@ class ManageScript(object):
             help='Pretty-print generated source code'
         )
         subparser.add_argument(
-            '--library-fields-all-public', action='store_true',
-            help='Make all fields and properties public in the generated'
-                 ' library'
-        )
-        subparser.add_argument(
             '--annotate-fields-types', action='store_true',
             help='Experimental feature. Modify the Python files where the '
                  'node types are defined, to annotate empty Field() '
@@ -538,9 +533,6 @@ class ManageScript(object):
 
     def set_context(self, parsed_args):
         self.context = self.create_context(parsed_args)
-        self.context.library_fields_all_public = getattr(
-            parsed_args, 'library_fields_all_public', False
-        )
 
         # Set the extensions dir on the compile context
         self.context.extensions_dir = self.dirs.lang_source_dir(

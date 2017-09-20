@@ -224,7 +224,6 @@ class CompileCtx(object):
 
     def __init__(self, lang_name, lexer, grammar,
                  lib_name=None, short_name=None,
-                 library_fields_all_public=False,
                  c_symbol_prefix=None,
                  enable_python_api=True,
                  default_charset='utf-8',
@@ -255,10 +254,6 @@ class CompileCtx(object):
             and underscore: see langkit.names.Name). It will be used where
             a short name for the library is requested, for instance for the
             shortcut module name in the generated playground script.
-
-        :param bool library_fields_all_public: Whether private fields are
-            exposed anyway in the various generated APIs. Doing so is useful
-            for debugging.
 
         :param c_symbol_prefix: Valid C identifier used as a prefix for all
             top-level declarations in the generated C API.  If not provided,
@@ -347,8 +342,6 @@ class CompileCtx(object):
             (self.lang_name.lower
              if c_symbol_prefix is None else c_symbol_prefix)
         )
-
-        self.library_fields_all_public = library_fields_all_public
 
         self.default_charset = default_charset
 
@@ -1595,10 +1588,6 @@ class CompileCtx(object):
         the public API whereas they should not.
         """
         from langkit.compiled_types import ArrayType, CompiledTypeMetaclass
-
-        # All code must ignore _exposed attributes when the following is true
-        if self.library_fields_all_public:
-            return
 
         def expose(t, for_field, type_use, traceback):
             """

@@ -1,5 +1,0 @@
-main.py: Running...
-u.root.p_er(None) = None
-u.root.p_er(42) = <TypeError: EnvRebindings instance expected, got <type 'int'> instead>
-main.py: Done.
-Done

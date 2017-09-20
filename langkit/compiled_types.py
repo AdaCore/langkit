@@ -41,7 +41,7 @@ def library_public_field(field):
     :param AbstractNodeData field: Field to test.
     :rtype: bool
     """
-    return field.is_public or get_context().library_fields_all_public
+    return field.is_public
 
 
 def gdb_helper(*args):

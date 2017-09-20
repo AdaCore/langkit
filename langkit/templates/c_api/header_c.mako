@@ -43,17 +43,6 @@ typedef enum {
 % endfor
 } ${node_kind_type};
 
-% if ctx.library_fields_all_public:
-${c_doc('langkit.lexical_env_type')}
-typedef void *${lexical_env_type};
-
-${c_doc('langkit.logic_var_type')}
-typedef void *${logic_var_type};
-
-${c_doc('langkit.equation_type')}
-typedef void *${equation_type};
-% endif
-
 ${c_doc('langkit.env_rebindings_type')}
 typedef void *${env_rebindings_type};
 
@@ -125,7 +114,7 @@ typedef struct {
 } ${exception_type};
 
 % for struct_type in ctx.struct_types:
-    % if struct_type._exposed or ctx.library_fields_all_public:
+    % if struct_type._exposed:
         ${struct_types.decl(struct_type)}
     % endif
 % endfor
@@ -186,7 +175,7 @@ typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
 % endfor
 
 % for array_type in ctx.sorted_types(ctx.array_types):
-    % if array_type._exposed or ctx.library_fields_all_public:
+    % if array_type._exposed:
         ${array_types.decl(array_type)}
     % endif
 % endfor
@@ -379,42 +368,6 @@ ${capi.get_name("free")}(void *address);
 ${c_doc('langkit.destroy_text')}
 extern void
 ${capi.get_name("destroy_text")}(${text_type} *text);
-
-% if ctx.library_fields_all_public:
-/* Lexical environment primitives */
-
-${c_doc('langkit.lexical_env_empty')}
-extern ${lexical_env_type}
-${capi.get_name('lexical_env_empty')}(void);
-
-${c_doc('langkit.lexical_env_parent')}
-extern ${lexical_env_type}
-${capi.get_name('lexical_env_parent')}(${lexical_env_type} env);
-
-${c_doc('langkit.lexical_env_node')}
-extern ${node_type}
-${capi.get_name('lexical_env_node')}(${lexical_env_type} env);
-
-${c_doc('langkit.lexical_env_get')}
-extern ${T.root_node.entity.array.c_type(capi).name}
-${capi.get_name('lexical_env_get')}(${lexical_env_type} env,
-                                    ${text_type} *name);
-
-extern void
-${capi.get_name('lexical_env_inc_ref')}(${lexical_env_type} env);
-
-/* Decrement the ref-count for "env". This deallocates it if the ref-count
-   drops to 0.  */
-extern void
-${capi.get_name('lexical_env_dec_ref')}(${lexical_env_type} env);
-
-/* Equation primitives */
-extern void
-${capi.get_name('equation_inc_ref')}(${equation_type} self);
-
-extern void
-${capi.get_name('equation_dec_ref')}(${equation_type} self);
-% endif
 
 /*
  * Kind-specific AST node primitives

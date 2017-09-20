@@ -61,11 +61,9 @@ def format_doc(entity):
 def print_struct(context, file, struct):
     is_astnode = struct.is_ast_node
     base = struct.base() if is_astnode else None
-    fields = list(struct.get_abstract_fields())
 
-    # Do not document internal fields unless everything is public
-    if not context.library_fields_all_public:
-        fields = [f for f in fields if not f.is_internal]
+    # Do not document internal fields
+    fields = [f for f in struct.get_abstract_fields() if not f.is_internal]
 
     descr = []
     if is_astnode:
