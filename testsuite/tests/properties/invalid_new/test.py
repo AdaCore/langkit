@@ -2,7 +2,8 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, LongType, Struct, UserField
-from langkit.expressions import Property, New, Literal, No
+from langkit.expressions import (Literal, New, No, Property, Self, Var,
+                                 langkit_property)
 from langkit.parsers import Grammar, Row
 
 from os import path
@@ -29,7 +30,12 @@ def run(name, expr):
         pass
 
     class BarNode(FooNode):
-        prop = Property(expr, public=True)
+        @langkit_property(public=True)
+        def public_prop():
+            struct = Var(Self.prop)
+            return struct.a + struct.b
+
+        prop = Property(expr)
 
     grammar = Grammar('main_rule')
     grammar.add_rules(
