@@ -591,6 +591,7 @@ def excludes_match(path, excludes):
     :type excludes: list[str]
     :rtype: bool
     """
+    path = os.path.sep + path
     return any(path.endswith(os.path.sep + e)
                for e in excludes)
 
