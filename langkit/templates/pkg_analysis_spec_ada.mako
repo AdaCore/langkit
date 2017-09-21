@@ -113,6 +113,7 @@ package ${ada_lib_name}.Analysis is
       % else:
          type ${e.api_name} is new ${e.base.api_name} with private;
       % endif
+      No_${e.api_name} : constant ${e.api_name};
    % endfor
 
    --------------------
@@ -1014,6 +1015,7 @@ private
       % else:
          type ${e.api_name} is new ${e.base.api_name} with null record;
       % endif
+      No_${e.api_name} : constant ${e.api_name} := (null, No_Entity_Info);
    % endfor
 
    use AST_Envs;
