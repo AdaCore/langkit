@@ -1009,6 +1009,22 @@ package ${ada_lib_name}.Analysis is
         (Node : ${root_entity.api_name}'Class) return ${e.api_name};
    % endfor
 
+   -----------------------
+   -- Entity primitives --
+   -----------------------
+
+   function Kind
+     (Node : ${root_entity.api_name}'Class) return ${root_node_kind_name};
+   function Kind_Name (Node : ${root_entity.api_name}'Class) return String;
+   --  Return the concrete kind for Node
+
+   function Is_Ghost (Node : ${root_entity.api_name}'Class) return Boolean;
+   ${ada_doc('langkit.node_is_ghost', 3)}
+
+   function Get_Unit
+     (Node : ${root_entity.api_name}'Class) return Analysis_Unit;
+   ${ada_doc('langkit.node_unit', 3)}
+
 private
 
    -----------------------------

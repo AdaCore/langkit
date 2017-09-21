@@ -3462,4 +3462,46 @@ package body ${ada_lib_name}.Analysis is
       end;
    % endfor
 
+   -----------------------
+   -- Entity primitives --
+   -----------------------
+
+   ----------
+   -- Kind --
+   ----------
+
+   function Kind
+     (Node : ${root_entity.api_name}'Class) return ${root_node_kind_name} is
+   begin
+      return Node.Node.Kind;
+   end Kind;
+
+   ---------------
+   -- Kind_Name --
+   ---------------
+
+   function Kind_Name (Node : ${root_entity.api_name}'Class) return String is
+   begin
+      return Node.Node.Kind_Name;
+   end Kind_Name;
+
+   --------------
+   -- Is_Ghost --
+   --------------
+
+   function Is_Ghost (Node : ${root_entity.api_name}'Class) return Boolean is
+   begin
+      return Node.Node.Is_Ghost;
+   end Is_Ghost;
+
+   --------------
+   -- Get_Unit --
+   --------------
+
+   function Get_Unit
+     (Node : ${root_entity.api_name}'Class) return Analysis_Unit is
+   begin
+      return Node.Node.Get_Unit;
+   end Get_Unit;
+
 end ${ada_lib_name}.Analysis;
