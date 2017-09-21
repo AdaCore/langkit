@@ -3610,4 +3610,39 @@ package body ${ada_lib_name}.Analysis is
       return (Node.Node.Parent, Node.E_Info);
    end Parent;
 
+   ----------------
+   -- Sloc_Range --
+   ----------------
+
+   function Sloc_Range
+     (Node : ${root_entity.api_name}'Class;
+      Snap : Boolean := False) return Source_Location_Range is
+   begin
+      return Node.Node.Sloc_Range;
+   end Sloc_Range;
+
+   -------------
+   -- Compare --
+   -------------
+
+   function Compare
+     (Node : ${root_entity.api_name}'Class;
+      Sloc : Source_Location;
+      Snap : Boolean := False) return Relative_Position is
+   begin
+      return Node.Node.Compare (Sloc, Snap);
+   end Compare;
+
+   ------------
+   -- Lookup --
+   ------------
+
+   function Lookup
+     (Node : ${root_entity.api_name}'Class;
+      Sloc : Source_Location;
+      Snap : Boolean := False) return ${root_entity.api_name} is
+   begin
+      return (Node.Node.Lookup (Sloc, Snap), No_Entity_Info)
+   end Lookup;
+
 end ${ada_lib_name}.Analysis;

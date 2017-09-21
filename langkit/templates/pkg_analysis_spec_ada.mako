@@ -1080,6 +1080,35 @@ package ${ada_lib_name}.Analysis is
 
    --  TODO??? Port Traverse and Iterators code
 
+   ----------------------------------------
+   -- Source location-related operations --
+   ----------------------------------------
+
+   function Sloc_Range
+     (Node : ${root_entity.api_name}'Class;
+      Snap : Boolean := False) return Source_Location_Range;
+   --  Return the source location range corresponding to the set of tokens from
+   --  which Node was parsed.
+   --
+   --  TODO??? Document the Snap formal.
+
+   function Compare
+     (Node : ${root_entity.api_name}'Class;
+      Sloc : Source_Location;
+      Snap : Boolean := False) return Relative_Position;
+   --  Compare Sloc to the sloc range of Node.
+   --
+   --  TODO??? Document the Snap formal.
+
+   function Lookup
+     (Node : ${root_entity.api_name}'Class;
+      Sloc : Source_Location;
+      Snap : Boolean := False) return ${root_node_type_name};
+   --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
+   --  it, or null if no such node was found.
+   --
+   --  TODO??? Document the Snap formal.
+
 private
 
    -----------------------------
