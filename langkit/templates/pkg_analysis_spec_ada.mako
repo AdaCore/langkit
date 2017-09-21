@@ -815,7 +815,6 @@ package ${ada_lib_name}.Analysis is
    --  with the trivia associated to them. Line_Prefix is prepended to each
    --  output line.
 
-
    procedure Dump_Lexical_Env
      (Node     : access ${root_node_value_type}'Class;
       Root_Env : AST_Envs.Lexical_Env);
