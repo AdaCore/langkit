@@ -349,7 +349,7 @@ package ${ada_lib_name}.Analysis is
    function Can_Reach (El, From : ${root_node_type_name}) return Boolean;
    --  Return whether El can reach From, from a sequential viewpoint. If
    --  elements are declared in different units, it will always return True,
-   --  eg. this does not handle general visibility issues, just sequentiality of
+   --  eg this does not handle general visibility issues, just sequentiality of
    --  declarations.
 
    function Node_File_And_Sloc_Image

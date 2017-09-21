@@ -1893,6 +1893,20 @@ def bind(self, dynvar, value, expr):
                                        abstract_expr=self)
 
 
+@auto_attr
+def can_reach(self, node, from_node):
+    """
+    Return whether `node` can reach `from_node` (two AST nodes), from a
+    sequential viewpoint.  If elements are declared in different units, it will
+    always return True, eg this does not handle general visibility issues, just
+    sequentiality of declarations.
+    """
+    node_expr = construct(node, T.root_node)
+    from_node_expr = construct(from_node, T.root_node)
+    return CallExpr('Node_Can_Reach', 'Can_Reach', bool_type,
+                    [node_expr, from_node_expr], abstract_expr=self)
+
+
 class SelfVariable(AbstractVariable):
 
     _singleton = None
