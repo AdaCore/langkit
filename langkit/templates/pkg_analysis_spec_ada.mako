@@ -467,7 +467,6 @@ package ${ada_lib_name}.Analysis is
    function Get_Unit
      (Node : access ${root_node_value_type}'Class)
       return Analysis_Unit;
-
    ${ada_doc('langkit.node_unit', 3)}
 
    -------------------------------
