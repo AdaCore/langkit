@@ -498,6 +498,7 @@
                Reference
                  (Self.Self_Env, N,
                   ${ref_env.resolver.name}'Access,
+                  Self,
                   Transitive => ${"True" if ref_env.transitive else "False"});
             end if;
          end loop;

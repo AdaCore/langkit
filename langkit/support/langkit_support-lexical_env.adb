@@ -327,6 +327,7 @@ package body Langkit_Support.Lexical_Env is
      (Self            : Lexical_Env;
       Referenced_From : Element_T;
       Resolver        : Lexical_Env_Resolver;
+      Creator         : Element_T;
       Transitive      : Boolean := False)
    is
       Getter : constant Env_Getter :=
@@ -334,7 +335,7 @@ package body Langkit_Support.Lexical_Env is
    begin
       Referenced_Envs_Vectors.Append
         (Self.Referenced_Envs,
-         Referenced_Env'(Transitive, Getter));
+         Referenced_Env'(Transitive, Getter, Creator));
    end Reference;
 
    ---------------
@@ -344,12 +345,15 @@ package body Langkit_Support.Lexical_Env is
    procedure Reference
      (Self         : Lexical_Env;
       To_Reference : Lexical_Env;
+      Creator      : Element_T;
       Transitive   : Boolean := False)
    is
    begin
       Referenced_Envs_Vectors.Append
         (Self.Referenced_Envs,
-         Referenced_Env'(Transitive, Simple_Env_Getter (To_Reference)));
+         Referenced_Env'(Transitive,
+                         Simple_Env_Getter (To_Reference),
+                         Creator));
    end Reference;
 
    ---------
@@ -591,7 +595,7 @@ package body Langkit_Support.Lexical_Env is
             Rebindings_Pool => null,
             Ref_Count       => 1);
          for Env of Envs loop
-            Reference (N, Env, Transitive => True);
+            Reference (N, Env, No_Element, Transitive => True);
          end loop;
          return N;
       end case;
@@ -627,7 +631,7 @@ package body Langkit_Support.Lexical_Env is
 
            Ref_Count       => 1)
       do
-         Reference (N, Base_Env, Transitive => True);
+         Reference (N, Base_Env, No_Element, Transitive => True);
       end return;
    end Rebind_Env;
 

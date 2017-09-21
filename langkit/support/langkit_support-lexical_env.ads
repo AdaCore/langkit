@@ -200,7 +200,15 @@ package Langkit_Support.Lexical_Env is
 
    type Referenced_Env is record
       Is_Transitive : Boolean := False;
-      Getter        : Env_Getter;
+      --  Whether this reference is transitive. This changes the behavior of
+      --  the Get lookup operation.
+
+      Getter : Env_Getter;
+      --  Closure to fetch the environment that is referenced
+
+      Creator : Element_T;
+      --  Node that triggered the creation of this environment reference
+      --  (optional, can be null).
    end record;
    --  Represents a referenced env
 
@@ -335,17 +343,30 @@ package Langkit_Support.Lexical_Env is
      (Self            : Lexical_Env;
       Referenced_From : Element_T;
       Resolver        : Lexical_Env_Resolver;
+      Creator         : Element_T;
       Transitive      : Boolean := False);
-   --  Reference the env To_Reference from Self, making its content accessible
-   --  from self. For requests with an origin point (From parameter), the
-   --  content will only be visible if Can_Reach (Referenced_From, From) is
-   --  True. Practically this means that the origin point of the request needs
-   --  to be *after* Referenced_From in the file.
+   --  Add a dynamic reference from Self to the lexical environment computed
+   --  calling Resolver on Referenced_From. This makes the content of this
+   --  dynamic environment accessible when performing lookups on Self (see the
+   --  Get function).
+   --
+   --  Unless the reference is transitive, requests with an origin point (From
+   --  parameter), the content will only be visible if:
+   --
+   --    * Can_Reach (Referenced_From, From) is True. Practically this means
+   --      that the origin point of the request needs to be *after*
+   --      Referenced_From in the file.
+   --    * Creator is null or is not a parent of From.
+   --
+   --  If Transitive, Creator must be No_Element.
 
    procedure Reference
      (Self         : Lexical_Env;
       To_Reference : Lexical_Env;
+      Creator      : Element_T;
       Transitive   : Boolean := False);
+   --  Add a static reference from Self to To_Reference. See above for the
+   --  meaning of arguments.
 
    function Get
      (Self       : Lexical_Env;
