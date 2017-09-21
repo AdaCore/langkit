@@ -246,10 +246,6 @@ class EnvSpec(object):
 
             if post_addenv:
                 check_source_language(
-                    all(isinstance(a, AddToEnv) for a in pre_addenv),
-                    "All actions preceding add_env must be add_to_envs"
-                )
-                check_source_language(
                     all(a.dest_env for a in post_addenv
                         if isinstance(a, AddToEnv)),
                     "add_to_env actions happening after add_env must have an"
