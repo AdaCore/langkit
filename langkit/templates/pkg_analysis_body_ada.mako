@@ -3444,4 +3444,22 @@ package body ${ada_lib_name}.Analysis is
    end case;
    end Reset_Caches;
 
+   -----------------------
+   -- Entity converters --
+   -----------------------
+
+   % for e in ctx.entity_types:
+      function As_${e.el_type.name}
+        (Node : ${root_entity.api_name}'Class) return ${e.api_name} is
+      begin
+         if Node.Node = null then
+            return No_${e.api_name};
+         elsif Node.Node.all in ${e.el_type.value_type_name()}'Class then
+            return (Node => Node.Node, E_Info => Node.E_Info);
+         else
+            raise Constraint_Error with "Invalid type conversion";
+         end if;
+      end;
+   % endfor
+
 end ${ada_lib_name}.Analysis;

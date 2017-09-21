@@ -1000,6 +1000,15 @@ package ${ada_lib_name}.Analysis is
       % endif
    % endfor
 
+   -----------------------
+   -- Entity converters --
+   -----------------------
+
+   % for e in ctx.entity_types:
+      function As_${e.el_type.name}
+        (Node : ${root_entity.api_name}'Class) return ${e.api_name};
+   % endfor
+
 private
 
    -----------------------------
