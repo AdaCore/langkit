@@ -1060,26 +1060,6 @@ package ${ada_lib_name}.Analysis is
       return ${root_entity.api_name};
    --  Return the Index'th child of Node, or null if Node has no such child
 
-   function Children
-     (Node : ${root_entity.api_name}'Class)
-     return ${entity_array};
-   --  Return an array containing all the children of Node.
-   --  This is an alternative to the Child/Child_Count pair, useful if you want
-   --  the convenience of Ada arrays, and you don't care about the small
-   --  performance hit of creating an array.
-
-   function Parents
-     (Node         : ${root_entity.api_name}'Class;
-      Include_Self : Boolean := True)
-      return ${entity_array};
-   --  Return the list of parents for this node. This node included in the list
-   --  iff Include_Self.
-
-   function Parent
-     (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name};
-
-   --  TODO??? Port Traverse and Iterators code
-
    ----------------------------------------
    -- Source location-related operations --
    ----------------------------------------
@@ -1103,11 +1083,27 @@ package ${ada_lib_name}.Analysis is
    function Lookup
      (Node : ${root_entity.api_name}'Class;
       Sloc : Source_Location;
-      Snap : Boolean := False) return ${root_node_type_name};
+      Snap : Boolean := False) return ${root_entity.api_name};
    --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
    --  it, or null if no such node was found.
    --
    --  TODO??? Document the Snap formal.
+
+   -----------------------
+   -- Lexical utilities --
+   -----------------------
+
+   function Text (Node : ${root_entity.api_name}'Class) return Text_Type;
+   --  Shortcut to get the source buffer slice corresponding to the text that
+   --  spans between the first and last tokens of an AST node.
+
+   --  TODO??? Bind Children_With_Trivia (changing the Node type in
+   --  Child_Record).
+
+   function Token_Range
+     (Node : ${root_entity.api_name}'Class)
+      return Token_Iterator;
+   --  Return an iterator on the range of tokens encompassed by Node
 
 private
 

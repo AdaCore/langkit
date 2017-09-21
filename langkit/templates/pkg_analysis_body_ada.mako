@@ -3561,55 +3561,6 @@ package body ${ada_lib_name}.Analysis is
       return (Node.Node.Child (Index), Node.E_Info);
    end Child;
 
-   --------------
-   -- Children --
-   --------------
-
-   function Children
-     (Node : ${root_entity.api_name}'Class)
-     return ${entity_array}
-   is
-      Bare_Children : ${root_node_array.name} := Node.Node.Children;
-      Result        : ${entity_array} (1 .. Bare_Children.N);
-   begin
-      for I in Result'Range loop
-         Result (I) := (Bare_Children.Items (I), Node.E_Info);
-      end loop;
-      Dec_Ref (Bare_Children);
-      return Result;
-   end Children;
-
-   -------------
-   -- Parents --
-   -------------
-
-   function Parents
-     (Node         : ${root_entity.api_name}'Class;
-      Include_Self : Boolean := True)
-      return ${entity_array}
-   is
-      Bare_Parents : ${root_node_array.name} := Node.Node.Parents;
-      Result       : ${entity_array} (1 .. Bare_Parents.N);
-   begin
-      --  TODO: shed entity information as appropriate
-      for I in Result'Range loop
-         Result (I) := (Bare_Parents.Items (I), Node.E_Info);
-      end loop;
-      Dec_Ref (Bare_Parents);
-      return Result;
-   end Parents;
-
-   ------------
-   -- Parent --
-   ------------
-
-   function Parent
-     (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name} is
-   begin
-      --  TODO: shed entity information as appropriate
-      return (Node.Node.Parent, Node.E_Info);
-   end Parent;
-
    ----------------
    -- Sloc_Range --
    ----------------
@@ -3642,7 +3593,30 @@ package body ${ada_lib_name}.Analysis is
       Sloc : Source_Location;
       Snap : Boolean := False) return ${root_entity.api_name} is
    begin
-      return (Node.Node.Lookup (Sloc, Snap), No_Entity_Info)
+      return (Node.Node.Lookup (Sloc, Snap), No_Entity_Info);
    end Lookup;
+
+   ----------
+   -- Text --
+   ----------
+
+   function Text (Node : ${root_entity.api_name}'Class) return Text_Type is
+   begin
+      return Node.Node.Text;
+   end Text;
+
+   --  TODO??? Bind Children_With_Trivia (changing the Node type in
+   --  Child_Record).
+
+   -----------------
+   -- Token_Range --
+   -----------------
+
+   function Token_Range
+     (Node : ${root_entity.api_name}'Class)
+      return Token_Iterator is
+   begin
+      return Node.Node.Token_Range;
+   end Token_Range;
 
 end ${ada_lib_name}.Analysis;
