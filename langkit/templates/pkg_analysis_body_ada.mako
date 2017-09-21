@@ -3504,4 +3504,110 @@ package body ${ada_lib_name}.Analysis is
       return Node.Node.Get_Unit;
    end Get_Unit;
 
+   -----------------
+   -- Child_Count --
+   -----------------
+
+   function Child_Count
+     (Node : ${root_entity.api_name}'Class) return Natural is begin
+      return Node.Node.Child_Count;
+   end Child_Count;
+
+   -----------------------
+   -- First_Child_Index --
+   -----------------------
+
+   function First_Child_Index
+     (Node : ${root_entity.api_name}'Class) return Natural is
+   begin
+      return Node.Node.First_Child_Index;
+   end First_Child_Index;
+
+   ----------------------
+   -- Last_Child_Index --
+   ----------------------
+
+   function Last_Child_Index
+     (Node : ${root_entity.api_name}'Class) return Natural is
+   begin
+      return Node.Node.Last_Child_Index;
+   end Last_Child_Index;
+
+   ---------------
+   -- Get_Child --
+   ---------------
+
+   procedure Get_Child
+     (Node            : ${root_entity.api_name};
+      Index           : Positive;
+      Index_In_Bounds : out Boolean;
+      Result          : out ${root_entity.api_name})
+   is
+      N : ${root_node_type_name};
+   begin
+      Node.Node.Get_Child (Index, Index_In_Bounds, N);
+      Result := (N, Node.E_Info);
+   end Get_Child;
+
+   -----------
+   -- Child --
+   -----------
+
+   function Child
+     (Node  : ${root_entity.api_name}'Class;
+      Index : Positive) return ${root_entity.api_name}
+   is
+   begin
+      return (Node.Node.Child (Index), Node.E_Info);
+   end Child;
+
+   --------------
+   -- Children --
+   --------------
+
+   function Children
+     (Node : ${root_entity.api_name}'Class)
+     return ${entity_array}
+   is
+      Bare_Children : ${root_node_array.name} := Node.Node.Children;
+      Result        : ${entity_array} (1 .. Bare_Children.N);
+   begin
+      for I in Result'Range loop
+         Result (I) := (Bare_Children.Items (I), Node.E_Info);
+      end loop;
+      Dec_Ref (Bare_Children);
+      return Result;
+   end Children;
+
+   -------------
+   -- Parents --
+   -------------
+
+   function Parents
+     (Node         : ${root_entity.api_name}'Class;
+      Include_Self : Boolean := True)
+      return ${entity_array}
+   is
+      Bare_Parents : ${root_node_array.name} := Node.Node.Parents;
+      Result       : ${entity_array} (1 .. Bare_Parents.N);
+   begin
+      --  TODO: shed entity information as appropriate
+      for I in Result'Range loop
+         Result (I) := (Bare_Parents.Items (I), Node.E_Info);
+      end loop;
+      Dec_Ref (Bare_Parents);
+      return Result;
+   end Parents;
+
+   ------------
+   -- Parent --
+   ------------
+
+   function Parent
+     (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name} is
+   begin
+      --  TODO: shed entity information as appropriate
+      return (Node.Node.Parent, Node.E_Info);
+   end Parent;
+
 end ${ada_lib_name}.Analysis;

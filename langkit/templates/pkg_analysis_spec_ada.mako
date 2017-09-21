@@ -116,6 +116,9 @@ package ${ada_lib_name}.Analysis is
       No_${e.api_name} : constant ${e.api_name};
    % endfor
 
+   type ${entity_array} is
+      array (Positive range <>) of ${root_entity.api_name};
+
    --------------------
    -- Unit providers --
    --------------------
@@ -1024,6 +1027,58 @@ package ${ada_lib_name}.Analysis is
    function Get_Unit
      (Node : ${root_entity.api_name}'Class) return Analysis_Unit;
    ${ada_doc('langkit.node_unit', 3)}
+
+   -------------------------------
+   -- Tree traversal operations --
+   -------------------------------
+
+   function Child_Count
+     (Node : ${root_entity.api_name}'Class) return Natural
+   with Inline;
+   --  Return the number of children Node has
+
+   function First_Child_Index
+     (Node : ${root_entity.api_name}'Class) return Natural;
+   --  Return the index of the first child Node has
+
+   function Last_Child_Index
+     (Node : ${root_entity.api_name}'Class) return Natural;
+   --  Return the index of the last child Node has, or 0 if there is no child
+
+   procedure Get_Child
+     (Node            : ${root_entity.api_name};
+      Index           : Positive;
+      Index_In_Bounds : out Boolean;
+      Result          : out ${root_entity.api_name});
+   --  Get the Index'th child of Node, storing it into Result. Child indexing
+   --  is 1-based. Store in Index_In_Bounds whether Node had such a child; if
+   --  not, the content of Result is undefined.
+
+   function Child
+     (Node  : ${root_entity.api_name}'Class;
+      Index : Positive)
+      return ${root_entity.api_name};
+   --  Return the Index'th child of Node, or null if Node has no such child
+
+   function Children
+     (Node : ${root_entity.api_name}'Class)
+     return ${entity_array};
+   --  Return an array containing all the children of Node.
+   --  This is an alternative to the Child/Child_Count pair, useful if you want
+   --  the convenience of Ada arrays, and you don't care about the small
+   --  performance hit of creating an array.
+
+   function Parents
+     (Node         : ${root_entity.api_name}'Class;
+      Include_Self : Boolean := True)
+      return ${entity_array};
+   --  Return the list of parents for this node. This node included in the list
+   --  iff Include_Self.
+
+   function Parent
+     (Node : ${root_entity.api_name}'Class) return ${root_entity.api_name};
+
+   --  TODO??? Port Traverse and Iterators code
 
 private
 
