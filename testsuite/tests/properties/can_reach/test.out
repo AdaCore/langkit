@@ -1,0 +1,11 @@
+main.py: Running...
+can_reach(<Example src1.txt:1>, <Example src1.txt:1>) = False
+can_reach(<Example src1.txt:1>, <Example src1.txt:2>) = True
+can_reach(<Example src1.txt:2>, <Example src1.txt:1>) = False
+can_reach(None, <Example src1.txt:1>) = True
+can_reach(<Example src1.txt:1>, None) = True
+can_reach(None, None) = True
+can_reach(<Example src1.txt:1>, <ExampleList src2.txt:1>) = True
+can_reach(<ExampleList src2.txt:1>, <Example src1.txt:1>) = True
+main.py: Done.
+Done
