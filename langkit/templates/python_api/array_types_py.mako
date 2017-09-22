@@ -65,7 +65,7 @@ class _BaseArray(object):
 <%def name="decl(cls)">
 
 <%
-   type_name = cls.api_name.camel
+   type_name = cls.array_type_name.camel
    element_type = cls.element_type
    c_element_type = pyapi.type_internal_name(element_type)
 %>

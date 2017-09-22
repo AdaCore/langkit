@@ -9,11 +9,11 @@
 
    <% elt_type = cls.element_type.name %>
 
-   type ${cls.api_name}
-     is array (Positive range <>) of ${cls.element_type.name};
+   type ${cls.array_type_name} is
+      array (Positive range <>) of ${cls.element_type.name};
    type ${cls.pointed} (N : Natural) is record
       Ref_Count : Positive;
-      Items     : ${cls.api_name} (1 .. N);
+      Items     : ${cls.array_type_name} (1 .. N);
    end record;
 
    ## If we are on the entity type, we need a conversion function
@@ -163,7 +163,7 @@
    % if cls.element_type == T.root_node.entity:
    function Create (Items : AST_Envs.Entity_Array) return ${cls.name}
    is (new ${cls.pointed}'(N         => Items'Length,
-                           Items     => ${cls.api_name} (Items),
+                           Items     => ${cls.array_type_name} (Items),
                            Ref_Count => 1));
    % endif
 </%def>

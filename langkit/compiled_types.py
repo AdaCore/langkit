@@ -109,6 +109,7 @@ def make_renderer(base_renderer=None):
     if get_context():
         ctx = get_context()
         capi = ctx.c_api_settings
+        root_entity = ctx.root_grammar_class.entity
 
         # Name of the root AST node access type
         type_name = ctx.root_grammar_class.name
@@ -129,6 +130,8 @@ def make_renderer(base_renderer=None):
             'root_node_kind_name':   kind_name,
             'generic_list_type_name': glist_type_name,
             'generic_list_value_type': glist_value_type,
+            'root_entity':           root_entity,
+            'entity_array':          root_entity.array.api_name,
             'ctx':                   get_context(),
             'ada_lib_name':          get_context().ada_api_settings.lib_name,
             'T':                     T,
@@ -2079,7 +2082,16 @@ class ArrayType(CompiledType):
     @property
     def api_name(self):
         """
-        Name of the type for general values in our bindings.
+        Name of the public array type. This is the same as `array_type_name`
+        for public types (such as booleans, integers, analysis units, etc.) but
+        we have a different one for "wrapped" types, such as entities.
+        """
+        return self.array_type_name
+
+    @property
+    def array_type_name(self):
+        """
+        Name of the Ada array type.
         """
         return self.element_type.name + names.Name('Array')
 
@@ -2103,7 +2115,7 @@ class ArrayType(CompiledType):
         return self.element_type.name + names.Name('Vectors')
 
     def c_type(self, c_api_settings):
-        return CAPIType(c_api_settings, self.api_name)
+        return CAPIType(c_api_settings, self.array_type_name)
 
     def index_type(self):
         """
@@ -2129,7 +2141,7 @@ class ArrayType(CompiledType):
         :param langkit.c_api.CAPISettings capi: Settings for the C API.
         :rtype: str
         """
-        return capi.get_name(self.api_name + names.Name('Inc_Ref'))
+        return capi.get_name(self.array_type_name + names.Name('Inc_Ref'))
 
     def c_dec_ref(self, capi):
         """
@@ -2138,7 +2150,7 @@ class ArrayType(CompiledType):
         :param langkit.c_api.CAPISettings capi: Settings for the C API.
         :rtype: str
         """
-        return capi.get_name(self.api_name + names.Name('Dec_Ref'))
+        return capi.get_name(self.array_type_name + names.Name('Dec_Ref'))
 
 
 class _EnumType(CompiledType):

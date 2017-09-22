@@ -20,7 +20,7 @@ ${ada_doc(property, 0)}
       and is_array_type(property.type):
    function ${property.name}
      ${helpers.argument_list(property, False)}
-     return ${property.type.api_name};
+     return ${property.type.array_type_name};
    % if property.type.is_refcounted:
       --  Helper to return a basic Ada array. The array items are still
       --  ref-counted: the caller must dec-ref them when done with them.
