@@ -113,13 +113,16 @@ package ${ada_lib_name}.Analysis is
       % else:
          type ${e.api_name} is new ${e.base.api_name} with private;
       % endif
-      No_${e.api_name} : constant ${e.api_name};
    % endfor
 
    % for array_type in ctx.sorted_types(ctx.array_types):
       % if array_type.element_type.is_entity_type:
          ${array_types.public_api_decl(array_type)}
       % endif
+   % endfor
+
+   % for e in ctx.entity_types:
+      No_${e.api_name} : constant ${e.api_name};
    % endfor
 
    --------------------
