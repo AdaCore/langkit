@@ -2584,16 +2584,6 @@ class PropertyDef(AbstractNodeData):
         )
 
     @property
-    @memoized
-    def base_properties(self):
-        """
-        Return the list of all properties that `self` overrides (`self`
-        included), newest first.
-        """
-        base = self.base_property
-        return [self] + (base.base_properties if base else [])
-
-    @property
     def overriding(self):
         """
         Whether this property is overriding or not.
@@ -3319,8 +3309,10 @@ class PropertyDef(AbstractNodeData):
 
     def warn_on_undocumented_public_property(self, context):
         del context
+        # For public properties only, warn undocumented ones. Only warn for
+        # base properties: no need to repeat for the other ones.
         WarningSet.undocumented_public_properties.warn_if(
-            self.is_public and not any(p.doc for p in self.base_properties),
+            self.is_public and not self.overriding and not self.doc,
             'This property is public but it lacks documentation'
         )
 
