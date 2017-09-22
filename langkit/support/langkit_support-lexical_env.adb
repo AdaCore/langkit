@@ -43,6 +43,9 @@ package body Langkit_Support.Lexical_Env is
    --  particular, check that there are no two identical Old_Env and no two
    --  identical New_Env in the set of rebindings.
 
+   function Is_Parent (Candidate_Parent, Node : Element_T) return Boolean;
+   --  Return whether Candidate_Parent is a parent of Node
+
    -----------------------
    -- Simple_Env_Getter --
    -----------------------
@@ -401,9 +404,15 @@ package body Langkit_Support.Lexical_Env is
             return Entity_Arrays.Empty_Array;
          end if;
 
+         --  Don't follow the reference environment if either:
+         --   * the node from which this reference starts cannot reach From;
+         --   * the node that created this environment reference is a parent of
+         --     From.
+
          if Self.Getter.Dynamic
            and then From /= No_Element
-           and then not Can_Reach (Self.Getter.Node, From)
+           and then (not Can_Reach (Self.Getter.Node, From)
+                     or else Is_Parent (Self.Creator, From))
          then
             return Entity_Arrays.Empty_Array;
          end if;
@@ -870,6 +879,27 @@ package body Langkit_Support.Lexical_Env is
          L := L.Parent;
       end loop;
    end Check_Rebindings_Unicity;
+
+   ---------------
+   -- Is_Parent --
+   ---------------
+
+   function Is_Parent (Candidate_Parent, Node : Element_T) return Boolean is
+      N : Element_T;
+   begin
+      if Candidate_Parent = No_Element then
+         return False;
+      end if;
+
+      N := Parent (Node);
+      while N /= No_Element loop
+         if N = Candidate_Parent then
+            return True;
+         end if;
+         N := Parent (N);
+      end loop;
+      return False;
+   end Is_Parent;
 
    -----------
    -- Image --

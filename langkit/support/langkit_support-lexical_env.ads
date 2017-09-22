@@ -36,6 +36,8 @@ generic
 
    with function Combine (L, R : Element_Metadata) return Element_Metadata;
 
+   with function Parent (El : Element_T) return Element_T is <>;
+
    with function Can_Reach (El, From : Element_T) return Boolean is <>;
    --  Function that will allow filtering nodes depending on the origin node of
    --  the request. In practice, this is used to implement sequential semantics

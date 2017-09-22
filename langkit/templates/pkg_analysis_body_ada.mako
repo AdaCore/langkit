@@ -2477,6 +2477,14 @@ package body ${ada_lib_name}.Analysis is
       Node.Unit.Rebindings.Append (Convert (Rebinding));
    end Register_Rebinding;
 
+   --------------------
+   -- Element_Parent --
+   --------------------
+
+   function Element_Parent
+     (Node : ${root_node_type_name}) return ${root_node_type_name}
+   is (Node.Parent);
+
    -----------------
    -- Short_Image --
    -----------------

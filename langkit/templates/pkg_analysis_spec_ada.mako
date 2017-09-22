@@ -372,6 +372,9 @@ package ${ada_lib_name}.Analysis is
    --  Langkit_Support.Lexical_Env a procedure that has visibility on both
    --  Env_Rebindings and on the analysis unit record.
 
+   function Element_Parent
+     (Node : ${root_node_type_name}) return ${root_node_type_name};
+
    package AST_Envs is new Langkit_Support.Lexical_Env
      (Element_T            => ${root_node_type_name},
       Element_Metadata     => ${T.env_md.name},
@@ -379,6 +382,7 @@ package ${ada_lib_name}.Analysis is
       Empty_Metadata       => No_Metadata,
       Raise_Property_Error => Raise_Property_Error,
       Combine              => Combine,
+      Parent               => Element_Parent,
       Element_Image        => Node_File_And_Sloc_Image,
       Register_Rebinding   => Register_Rebinding);
 
