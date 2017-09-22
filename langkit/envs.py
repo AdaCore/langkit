@@ -43,17 +43,21 @@ def add_env():
     return AddEnv()
 
 
-def reference(nodes, through, transitive=False):
+def reference(nodes, through, transitive=False, register_creator=True):
     """
     Reference a group of lexical environments, that will be lazily yielded by
     calling the `through` property on the array of nodes `nodes`.
 
     :param AbstractExpression nodes: An expression that yields a list of nodes.
     :param PropertyDef through: A property reference.
+    :param bool register_creator: Register the node whose environment spec
+        creates this reference. This will prevent infinite recursion in
+        environment lookups when the reference resolution involves another
+        lookup in a child environment.
 
     :rtype: RefEnvs
     """
-    return RefEnvs(through, nodes, transitive)
+    return RefEnvs(through, nodes, transitive, register_creator)
 
 
 def add_to_env(mappings, dest_env=None, metadata=None, resolver=None):
@@ -372,7 +376,8 @@ class RefEnvs(EnvAction):
     Couple of a property and an expression to evaluate referenced envs.
     """
 
-    def __init__(self, resolver, nodes_expr, transitive=False):
+    def __init__(self, resolver, nodes_expr, transitive=False,
+                 register_creator=True):
         """
         All nodes that nodes_expr yields must belong to the same analysis unit
         as the AST node that triggers this RefEnvs. Besides, the lexical
@@ -389,6 +394,11 @@ class RefEnvs(EnvAction):
             returns an array of AST nodes. Each node will be given to the above
             resolver in order to get corresponding referenced lexical envs.
             In this array, null nodes are allowed: they are simply discarded.
+
+        :param bool register_creator: Register the node whose environment spec
+            creates this reference. This will prevent infinite recursion in
+            environment lookups when the reference resolution involves another
+            lookup in a child environment.
         """
         assert resolver
         assert nodes_expr
@@ -408,6 +418,8 @@ class RefEnvs(EnvAction):
         """
 
         self.transitive = transitive
+
+        self.register_creator = register_creator
 
     def create_internal_properties(self, env_spec):
         """
