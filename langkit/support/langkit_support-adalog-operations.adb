@@ -170,8 +170,9 @@ package body Langkit_Support.Adalog.Operations is
                   I := I + 1;
 
                when Unsatisfied =>
-                  if I = 1 then
-                     Trace ("In All_Rel: first relation unsatisfied");
+                  if Self.Next = 1 then
+                     Trace ("In All_Rel: first evaluated relation"
+                            & " unsatisfied");
                      return Unsatisfied;
                   end if;
 
