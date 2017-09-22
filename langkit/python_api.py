@@ -68,7 +68,7 @@ class PythonAPISettings(AbstractAPISettings):
                 inc_ref
             )),
             (ct.StructType, lambda _: '{}._wrap({{}}, inc_ref={})'.format(
-                self.struct_wrapper(type),
+                type.name.camel,
                 inc_ref
             )),
             (ct.lexical_env_type, lambda _:
@@ -111,7 +111,7 @@ class PythonAPISettings(AbstractAPISettings):
                 self.array_wrapper(cls)
             )),
             (ct.StructType, lambda _: '{}._unwrap({{}})'.format(
-                self.struct_wrapper(type)
+                type.name.camel
             )),
             (ct.symbol_type, lambda _: '_text._unwrap({})'),
             (ct.lexical_env_type, lambda _: 'LexicalEnv._unwrap({})'),
@@ -157,15 +157,10 @@ class PythonAPISettings(AbstractAPISettings):
                 ct.T.entity.name.camel
             )),
             (ct.StructType, lambda _:
-                '{}._c_type'.format(self.struct_wrapper(type))),
+                '{}._c_type'.format(type.name.camel)),
         ])
 
     def array_wrapper(self, array_type):
         return (ct.T.entity.array
                 if array_type.element_type.is_entity_type else
                 array_type).array_type_name.camel
-
-    def struct_wrapper(self, struct_type):
-        return (ct.T.entity
-                if struct_type.is_entity_type else
-                struct_type).name.camel
