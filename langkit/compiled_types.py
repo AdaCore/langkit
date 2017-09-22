@@ -2226,7 +2226,9 @@ class ArrayType(CompiledType):
         for public types (such as booleans, integers, analysis units, etc.) but
         we have a different one for "wrapped" types, such as entities.
         """
-        return self.array_type_name
+        return (names.Name('Public') + self.array_type_name
+                if self.element_type.is_entity_type else
+                self.array_type_name)
 
     @property
     def dsl_name(self):

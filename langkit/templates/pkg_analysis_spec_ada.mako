@@ -116,8 +116,11 @@ package ${ada_lib_name}.Analysis is
       No_${e.api_name} : constant ${e.api_name};
    % endfor
 
-   type ${entity_array} is
-      array (Positive range <>) of ${root_entity.api_name};
+   % for array_type in ctx.sorted_types(ctx.array_types):
+      % if array_type.element_type.is_entity_type:
+         ${array_types.public_api_decl(array_type)}
+      % endif
+   % endfor
 
    --------------------
    -- Unit providers --

@@ -1,5 +1,10 @@
 ## vim: filetype=makoada
 
+<%def name="public_api_decl(cls)">
+   type ${cls.api_name} is
+      array (Positive range <>) of ${cls.element_type.api_name};
+</%def>
+
 <%def name="public_incomplete_decl(cls)">
    type ${cls.pointed};
    type ${cls.name} is access all ${cls.pointed};
