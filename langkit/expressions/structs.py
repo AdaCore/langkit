@@ -738,10 +738,8 @@ class FieldAccess(AbstractExpression):
 
         # Check that this property actually accepts these arguments and that
         # they are correctly typed.
-        if self.arguments:
-            args = self.arguments.associate(to_get)
-        else:
-            args = []
+        input_args = self.arguments or FieldAccess.Arguments([], {})
+        args = input_args.associate(to_get)
         assert len(args) == len(to_get.natural_arguments)
 
         arg_exprs = [
