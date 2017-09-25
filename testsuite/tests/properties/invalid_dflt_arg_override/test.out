@@ -8,7 +8,7 @@ File "test.py", line 30, in Example.prop
 
 == Wrong value ==
 File "test.py", line 30, in Example.prop
-    Error: Argument "A" does not have the same default value (<LiteralExpr False (Boolean)>) as in base property (<LiteralExpr True (Boolean)>)
+    Error: Argument "A" does not have the same default value (False) as in base property (True)
 
 == Correct ==
 Code generation was successful

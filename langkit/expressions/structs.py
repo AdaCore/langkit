@@ -750,8 +750,7 @@ class FieldAccess(AbstractExpression):
                     ' (#{})'.format(key) if isinstance(key, int) else '',
                     to_get.qualname,
                 ) + ' expected {expected} but got {expr_type}'
-            ) for (key, actual), formal in zip(args,
-                                               to_get.natural_arguments)
+            ) for (key, actual), formal in zip(args, to_get.natural_arguments)
         ]
 
         # Even though it is redundant with DynamicVariable.construct, check
