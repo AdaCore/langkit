@@ -3638,4 +3638,47 @@ package body ${ada_lib_name}.Analysis is
       return Node.Node.PP;
    end PP;
 
+   -----------
+   -- Print --
+   -----------
+
+   procedure Print
+     (Node        : ${root_entity.api_name}'Class;
+      Line_Prefix : String := "") is
+   begin
+      Node.Node.Print (Line_Prefix);
+   end Print;
+
+   ---------------
+   -- PP_Trivia --
+   ---------------
+
+   procedure PP_Trivia
+     (Node        : ${root_entity.api_name}'Class;
+      Line_Prefix : String := "") is
+   begin
+      Node.Node.PP_Trivia (Line_Prefix);
+   end PP_Trivia;
+
+   ----------------------
+   -- Dump_Lexical_Env --
+   ----------------------
+
+   procedure Dump_Lexical_Env
+     (Node     : ${root_entity.api_name}'Class;
+      Root_Env : AST_Envs.Lexical_Env) is
+   begin
+      Node.Node.Dump_Lexical_Env (Root_Env);
+   end Dump_Lexical_Env;
+
+   --------------------------------
+   -- Assign_Names_To_Logic_Vars --
+   --------------------------------
+
+   procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class)
+   is
+   begin
+      Node.Node.Assign_Names_To_Logic_Vars;
+   end Assign_Names_To_Logic_Vars;
+
 end ${ada_lib_name}.Analysis;

@@ -1127,6 +1127,34 @@ package ${ada_lib_name}.Analysis is
 
    function PP (Node : ${root_entity.api_name}'Class) return String;
 
+   -------------------
+   -- Debug helpers --
+   -------------------
+
+   procedure Print
+     (Node        : ${root_entity.api_name}'Class;
+      Line_Prefix : String := "");
+   --  Debug helper: print to standard output Node and all its children.
+   --  Line_Prefix is prepended to each output line.
+
+   procedure PP_Trivia
+     (Node        : ${root_entity.api_name}'Class;
+      Line_Prefix : String := "");
+   --  Debug helper: print to standard output Node and all its children along
+   --  with the trivia associated to them. Line_Prefix is prepended to each
+   --  output line.
+
+   procedure Dump_Lexical_Env
+     (Node     : ${root_entity.api_name}'Class;
+      Root_Env : AST_Envs.Lexical_Env);
+   --  Debug helper: dump the lexical environment of Node, and consequently any
+   --  nested lexical environment. Used for debugging/testing purpose. Pass the
+   --  root env explicitly so that we can tag it properly in the output.
+
+   procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class);
+   --  Debug helper: Assign names to every logical variable in the root node,
+   --  so that we can trace logical variables.
+
 private
 
    -----------------------------
