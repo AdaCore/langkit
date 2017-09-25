@@ -1,11 +1,12 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"     file="array_types_ada.mako" />
-<%namespace name="astnode_types"   file="astnode_types_ada.mako" />
-<%namespace name="enum_types"      file="enum_types_ada.mako" />
-<%namespace name="list_types"      file="list_types_ada.mako" />
-<%namespace name="struct_types"    file="struct_types_ada.mako" />
-<%namespace name="pretty_printers" file="pretty_printers_ada.mako" />
+<%namespace name="array_types"       file="array_types_ada.mako" />
+<%namespace name="astnode_types"     file="astnode_types_ada.mako" />
+<%namespace name="enum_types"        file="enum_types_ada.mako" />
+<%namespace name="list_types"        file="list_types_ada.mako" />
+<%namespace name="struct_types"      file="struct_types_ada.mako" />
+<%namespace name="pretty_printers"   file="pretty_printers_ada.mako" />
+<%namespace name="public_properties" file="public_properties_ada.mako" />
 
 <%
    root_node_array = T.root_node.array
@@ -1033,6 +1034,15 @@ package ${ada_lib_name}.Analysis is
    function Get_Unit
      (Node : ${root_entity.api_name}'Class) return Analysis_Unit;
    ${ada_doc('langkit.node_unit', 3)}
+
+   % for e in ctx.entity_types:
+      % for p in e.el_type.get_properties( \
+         include_inherited=False, \
+         predicate=lambda p: p.is_public and not p.overriding \
+      ):
+         ${public_properties.decl(p)}
+      % endfor
+   % endfor
 
    -------------------------------
    -- Tree traversal operations --
