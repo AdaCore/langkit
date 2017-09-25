@@ -2921,13 +2921,20 @@ class PropertyDef(AbstractNodeData):
             )
 
             for i, (arg, base_arg) in enumerate(zip(args, base_args)):
-                # Check that argument types are consistent with the base
-                # property.
+                # Check that argument names and types are consistent with the
+                # base property.
+                check_source_language(
+                    arg.name == base_arg.name,
+                    'Argument #{} does not have the same name here ({}) as in'
+                    ' base property ({})'.format(
+                        i + 1, arg.name.lower, base_arg.name.lower
+                    )
+                )
                 check_source_language(
                     arg.var.type == base_arg.var.type,
-                    "Argument #{} doesn't have the same type as in base "
-                    "property. Base has {}, derived has {}".format(
-                        i + 1,
+                    'Argument "{}" does not have the same type as in base'
+                    ' property. Base has {}, derived has {}'.format(
+                        arg.name,
                         arg.var.type.name.camel,
                         base_arg.var.type.name.camel
                     )
