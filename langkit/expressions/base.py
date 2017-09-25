@@ -108,7 +108,7 @@ def expand_abstract_fn(fn):
             ' (got {})'.format(kw, type_ref)
         )
 
-        if default_value:
+        if default_value is not None:
             default_value = construct(default_value, type_ref)
 
         fn_arguments.append(Argument(names.Name.from_lower(kw), type_ref,
