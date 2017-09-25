@@ -391,12 +391,17 @@ class FieldAccess(AbstractExpression):
                     actual = kwargs.pop(arg_name)
                 except KeyError:
                     # There is no keyword argument passed for this argument, so
-                    # pick the first remaining one from positional arguments.
-                    check_source_language(
-                        args,
-                        'Missing actual for argument {}'.format(arg_name)
-                    )
-                    key, actual = args.pop(0)
+                    # pick the first remaining one from positional arguments
+                    # or, if there is no positional argument left, fallback to
+                    # the default argument.
+                    if args:
+                        key, actual = args.pop(0)
+                    else:
+                        check_source_language(
+                            arg_spec.default_value is not None,
+                            'Missing actual for argument {}'.format(arg_name)
+                        )
+                        actual = arg_spec.default_value
 
                 result.append((key, actual))
 
