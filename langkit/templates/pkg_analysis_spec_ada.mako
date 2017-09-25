@@ -1121,6 +1121,12 @@ package ${ada_lib_name}.Analysis is
       return Token_Iterator;
    --  Return an iterator on the range of tokens encompassed by Node
 
+   --------------------
+   -- Pretty-printer --
+   --------------------
+
+   function PP (Node : ${root_entity.api_name}'Class) return String;
+
 private
 
    -----------------------------

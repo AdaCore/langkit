@@ -3629,4 +3629,13 @@ package body ${ada_lib_name}.Analysis is
       return Node.Node.Token_Range;
    end Token_Range;
 
+   --------
+   -- PP --
+   --------
+
+   function PP (Node : ${root_entity.api_name}'Class) return String is
+   begin
+      return Node.Node.PP;
+   end PP;
+
 end ${ada_lib_name}.Analysis;
