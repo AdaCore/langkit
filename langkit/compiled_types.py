@@ -344,6 +344,15 @@ class CompiledType(object):
         """
         return self._name
 
+    @property
+    def api_name(self):
+        """
+        Name of public type. By default, it is the same as `name`.
+
+        :rtype: names.Name
+        """
+        return self.name
+
     def __repr__(self):
         return '<CompiledType {}>'.format(self.name.camel)
 
