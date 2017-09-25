@@ -803,8 +803,9 @@ package ${ada_lib_name}.Analysis is
    -- Debug helpers --
    -------------------
 
-   procedure Print (Node        : access ${root_node_value_type};
-                    Line_Prefix : String := "") is abstract;
+   procedure Print
+     (Node        : access ${root_node_value_type};
+      Line_Prefix : String := "") is abstract;
    --  Debug helper: print to standard output Node and all its children.
    --  Line_Prefix is prepended to each output line.
 

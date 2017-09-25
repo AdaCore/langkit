@@ -3074,7 +3074,7 @@ package body ${ada_lib_name}.Analysis is
            predicate=lambda f: f.type.is_logic_var_type \
       ):
          Node.${f.name}.Dbg_Name :=
-           new String'(Image (Node.Short_Image) & ".${f.name}");
+            new String'(Image (Node.Short_Image) & ".${f.name}");
       % endfor
       Assign_Names_To_Logic_Vars_Impl (Node);
       for Child of ${root_node_array.api_name}'(Children (Node)) loop
