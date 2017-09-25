@@ -2921,6 +2921,8 @@ class PropertyDef(AbstractNodeData):
             )
 
             for i, (arg, base_arg) in enumerate(zip(args, base_args)):
+                # Check that argument types are consistent with the base
+                # property.
                 check_source_language(
                     arg.var.type == base_arg.var.type,
                     "Argument #{} doesn't have the same type as in base "
@@ -2930,6 +2932,36 @@ class PropertyDef(AbstractNodeData):
                         base_arg.var.type.name.camel
                     )
                 )
+
+                # First check that the presence of a default argument value is
+                # consistent with the base property.
+                if arg.default_value is None:
+                    check_source_language(
+                        base_arg.default_value is None,
+                        'Argument "{}" must have the same default value as in'
+                        ' base property ({})'.format(
+                            arg.name, self.base_property.qualname
+                        )
+                    )
+                else:
+                    check_source_language(
+                        base_arg.default_value is not None,
+                        'Argument "{}" cannot have a default value, to be'
+                        ' consistent with its base property ({})'.format(
+                            arg.name, self.base_property.qualname
+                        )
+                    )
+
+                # Then check that if there is a default value, it is the same
+                if arg.default_value is not None:
+                    check_source_language(
+                        arg.default_value.ir_dump
+                        == base_arg.default_value.ir_dump,
+                        'Argument "{}" does not have the same default value'
+                        ' ({}) as in base property ({})'.format(
+                            arg.name, arg.default_value, base_arg.default_value
+                        )
+                    )
 
         else:
             # By default, properties are private and they have no dynamically
