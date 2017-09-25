@@ -1,0 +1,16 @@
+== Missing default value ==
+File "test.py", line 30, in Example.prop
+    Error: Argument "A" must have the same default value as in base property (FooNode.p_prop)
+
+== Extra default value ==
+File "test.py", line 30, in Example.prop
+    Error: Argument "A" cannot have a default value, to be consistent with its base property (FooNode.p_prop)
+
+== Wrong value ==
+File "test.py", line 30, in Example.prop
+    Error: Argument "A" does not have the same default value (<LiteralExpr False (Boolean)>) as in base property (<LiteralExpr True (Boolean)>)
+
+== Correct ==
+Code generation was successful
+
+Done
