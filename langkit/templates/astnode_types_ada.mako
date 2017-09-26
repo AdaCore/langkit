@@ -168,10 +168,10 @@
    % endif
 
    % if logic_vars:
-   procedure Assign_Names_To_Logic_Vars_Impl
-     (Node : access ${type_name});
-   --  Debug helper: Assign names to every logical variable in the root node,
-   --  so that we can trace logical variables.
+      procedure Assign_Names_To_Logic_Vars_Impl
+        (Node : access ${type_name});
+      --  Debug helper: Assign names to every logical variable in the root
+      --  node, so that we can trace logical variables.
    % endif
 
    ## Public field getters
@@ -254,17 +254,18 @@
          Add_To_Env_Only     : Boolean := False)
          return AST_Envs.Lexical_Env;
 
-   % if cls.env_spec.post_actions:
-      overriding procedure Post_Env_Actions
-        (Self                : access ${type_name};
-         Bound_Env, Root_Env : AST_Envs.Lexical_Env);
-   % endif
+      % if cls.env_spec.post_actions:
+         overriding procedure Post_Env_Actions
+           (Self                : access ${type_name};
+            Bound_Env, Root_Env : AST_Envs.Lexical_Env);
+      % endif
 
-   % if cls.env_spec.adds_env:
-      overriding function Node_Env
-        (Node : access ${type_name};
-         E_Info : Entity_Info := No_Entity_Info) return AST_Envs.Lexical_Env;
-   % endif
+      % if cls.env_spec.adds_env:
+         overriding function Node_Env
+           (Node   : access ${type_name};
+            E_Info : Entity_Info := No_Entity_Info)
+            return AST_Envs.Lexical_Env;
+      % endif
 
    % endif
 
@@ -433,9 +434,7 @@
    % endif
 
    % if logic_vars:
-   procedure Assign_Names_To_Logic_Vars_Impl
-     (Node : access ${type_name})
-   is
+   procedure Assign_Names_To_Logic_Vars_Impl (Node : access ${type_name}) is
    begin
       % for f in logic_vars:
       Node.${f.name}.Dbg_Name :=
@@ -595,8 +594,7 @@
    -- Initial_Env_Getter_Fn --
    ---------------------------
 
-   function ${env_getter} (E : Entity) return AST_Envs.Lexical_Env
-   is
+   function ${env_getter} (E : Entity) return AST_Envs.Lexical_Env is
       Self : constant ${cls.name} := ${cls.name} (E.El);
 
       ## Define this constant so that the expressions below, which are expanded
