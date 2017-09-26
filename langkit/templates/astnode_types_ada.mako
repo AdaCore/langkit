@@ -90,6 +90,36 @@
 </%def>
 
 
+<%def name="field_body(field)">
+   <% type_name = field.struct.value_type_name() %>
+
+   function ${field.name}
+     (Node : access ${type_name}) return ${field.type.name}
+   is
+   begin
+      return ${field.type.extract_from_storage_expr(
+                   node_expr='Node',
+                   base_expr='Node.{}'.format(field.name)
+               )};
+   end ${field.name};
+
+   % if field.type.is_ast_node:
+      % if field.type.is_bool_node:
+         function ${field.name}
+           (Node : access ${type_name}'Class) return Boolean
+         is (Node.${field.name}.all
+             in ${field.type.alternatives[0].type.value_type_name()}'Class);
+
+      % elif field.type.is_enum_node:
+         function ${field.name}
+           (Node : access ${type_name}'Class)
+            return ${field.type.ada_kind_name()}
+         is (Node.${field.name}.Kind);
+      % endif
+   % endif
+</%def>
+
+
 <%def name="public_decl(cls)">
 
    <%
@@ -659,31 +689,7 @@
    ## Body of attribute getters
 
    % for field in cls.get_fields(include_inherited=False):
-      function ${field.name}
-        (Node : access ${type_name}) return ${field.type.name}
-      is
-      begin
-         return ${field.type.extract_from_storage_expr(
-                      node_expr='Node',
-                      base_expr='Node.{}'.format(field.name)
-                  )};
-      end ${field.name};
-
-      % if field.type.is_ast_node:
-         % if field.type.is_bool_node:
-            function ${field.name}
-              (Node : access ${type_name}'Class)
-               return Boolean
-            is (Node.${field.name}.all
-                in ${field.type.alternatives[0].type.value_type_name()}'Class);
-
-         % elif field.type.is_enum_node:
-            function ${field.name}
-              (Node : access ${type_name}'Class)
-               return ${field.type.ada_kind_name()}
-            is (Node.${field.name}.Kind);
-         % endif
-      % endif
+      ${field_body(field)}
    % endfor
 
    ## Generate the bodies of properties
