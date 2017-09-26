@@ -126,6 +126,17 @@ package ${ada_lib_name}.Analysis is
       No_${e.api_name} : constant ${e.api_name};
    % endfor
 
+   function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean;
+   --  Return whether Node references to AST node
+
+   function Short_Image (Node : ${root_entity.api_name}) return Text_Type;
+   --  Return a short string describing Node, or "None" if Node.Is_Null is
+   --  true.
+
+   function Image (Node : ${root_entity.api_name}) return Text_Type;
+   function Image (Node : ${root_entity.api_name}) return String;
+   --  Like Short_Image, also including its rebinding metadata
+
    --------------------
    -- Unit providers --
    --------------------

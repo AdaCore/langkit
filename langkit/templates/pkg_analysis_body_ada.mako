@@ -3445,6 +3445,34 @@ package body ${ada_lib_name}.Analysis is
    end case;
    end Reset_Caches;
 
+   -------------
+   -- Is_Null --
+   -------------
+
+   function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean is
+     (Node.Node = null);
+
+   -----------------
+   -- Short_Image --
+   -----------------
+
+   function Short_Image (Node : ${root_entity.api_name}) return Text_Type is
+     (if Node.Is_Null then "None" else Node.Node.Short_Image);
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Node : ${root_entity.api_name}) return Text_Type is
+     (Image (${T.entity.name}'(Node.Node, Node.E_Info)));
+
+   -----------
+   -- Image --
+   -----------
+
+   function Image (Node : ${root_entity.api_name}) return String is
+     (Image (Image (Node)));
+
    -----------------------
    -- Entity converters --
    -----------------------
