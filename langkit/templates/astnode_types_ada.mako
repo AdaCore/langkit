@@ -64,26 +64,45 @@
 </%def>
 
 
-<%def name="field_decl(field)">
+<%def name="bare_field_decl(field)">
    <% type_name = field.struct.value_type_name() %>
 
    function ${field.name}
-     (Node : access ${type_name}) return ${field.type.name};
+     (Node : access ${type_name}'Class) return ${field.type.name};
+</%def>
+
+
+<%def name="bare_field_body(field)">
+   <% type_name = field.struct.value_type_name() %>
+
+   function ${field.name}
+     (Node : access ${type_name}'Class) return ${field.type.name}
+   is (${field.type.extract_from_storage_expr(
+             node_expr='Node',
+             base_expr='Node.{}'.format(field.name))});
+</%def>
+
+
+<%def name="field_decl(field)">
+   <%
+      type_name = field.struct.entity.api_name
+      ret_type = field.type.entity if field.type.is_ast_node else field.type
+   %>
+
+   function ${field.name}
+     (Node : ${type_name}'Class) return ${ret_type.api_name};
    ${ada_doc(field, 6)}
 
    ## If this field return an enum node, generate a shortcut to get the
    ## symbolic value.
    % if field.type.is_ast_node:
       % if field.type.is_bool_node:
-         function ${field.name}
-           (Node : access ${type_name}'Class)
-            return Boolean
+         function ${field.name} (Node : ${type_name}'Class) return Boolean
             with Inline => True;
 
       % elif field.type.is_enum_node:
          function ${field.name}
-           (Node : access ${type_name}'Class)
-            return ${field.type.ada_kind_name()}
+           (Node : ${type_name}'Class) return ${field.type.ada_kind_name()}
             with Inline => True;
       % endif
    % endif
@@ -91,30 +110,42 @@
 
 
 <%def name="field_body(field)">
-   <% type_name = field.struct.value_type_name() %>
+   <%
+      type_name = field.struct.entity.api_name
+      ret_type = field.type.entity if field.type.is_ast_node else field.type
+      bare_type = field.struct.name
+   %>
 
    function ${field.name}
-     (Node : access ${type_name}) return ${field.type.name}
+     (Node : ${type_name}'Class) return ${ret_type.api_name}
    is
+      Self   : constant ${bare_type} := ${bare_type} (Node.Node);
+      Result : constant ${field.type.name} := ${(
+          field.type.extract_from_storage_expr(
+              node_expr='Self',
+              base_expr='Self.{}'.format(field.name)
+          )
+      )};
    begin
-      return ${field.type.extract_from_storage_expr(
-                   node_expr='Node',
-                   base_expr='Node.{}'.format(field.name)
-               )};
+      % if field.type.is_ast_node:
+         return (${root_node_type_name} (Result), Node.E_Info);
+      % else:
+         return Result;
+      % endif
    end ${field.name};
 
    % if field.type.is_ast_node:
+      <% field_expr = '{} (Node.Node).{}'.format(bare_type, field.name) %>
+
       % if field.type.is_bool_node:
-         function ${field.name}
-           (Node : access ${type_name}'Class) return Boolean
-         is (Node.${field.name}.all
-             in ${field.type.alternatives[0].type.value_type_name()}'Class);
+         function ${field.name} (Node : ${type_name}'Class) return Boolean
+         is (${field_expr}.all in
+                ${field.type.alternatives[0].type.name}_Type'Class);
 
       % elif field.type.is_enum_node:
          function ${field.name}
-           (Node : access ${type_name}'Class)
-            return ${field.type.ada_kind_name()}
-         is (Node.${field.name}.Kind);
+           (Node : ${type_name}'Class) return ${field.type.ada_kind_name()}
+         is (${field_expr}.Kind);
       % endif
    % endif
 </%def>
@@ -174,13 +205,12 @@
       --  node, so that we can trace logical variables.
    % endif
 
-   ## Public field getters
-
-   % for field in cls.get_fields(include_inherited=False, \
-                                 predicate=library_public_field):
-      ${field_decl(field)}
+   ## Field getters
+   % for field in cls.get_parse_fields(include_inherited=False):
+      ${bare_field_decl(field)}
    % endfor
 
+   ## Properties
    % for prop in cls.get_properties(include_inherited=False, \
                                     predicate=library_public_field):
       ${prop.prop_decl}
@@ -223,6 +253,7 @@
       type_name = cls.value_type_name()
       base_name = cls.base().name
       memoized_properties = cls.get_memoized_properties(include_inherited=True)
+      library_private_field = lambda f: not library_public_field(f)
    %>
 
    type ${type_name} is ${"abstract" if cls.abstract else ""}
@@ -230,15 +261,7 @@
       ${node_fields(cls)}
    end record;
 
-   ## Private field getters
-
-   <% library_private_field = lambda f: not library_public_field(f) %>
-
-   % for field in cls.get_fields(include_inherited=False, \
-                                 predicate=library_private_field):
-      ${field_decl(field)}
-   % endfor
-
+   ## Private dispatching properties
    % for prop in cls.get_properties(include_inherited=False, \
                                     predicate=library_private_field):
       % if prop.dispatching:
@@ -682,10 +705,9 @@
 
    % endif
 
-   ## Body of attribute getters
-
-   % for field in cls.get_fields(include_inherited=False):
-      ${field_body(field)}
+   ## Field getters
+   % for field in cls.get_parse_fields(include_inherited=False):
+      ${bare_field_body(field)}
    % endfor
 
    ## Generate the bodies of properties

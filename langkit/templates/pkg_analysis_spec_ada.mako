@@ -1036,12 +1036,21 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.node_unit', 3)}
 
    % for e in ctx.entity_types:
+
+      % for f in e.el_type.get_parse_fields( \
+         include_inherited=False, \
+         predicate=lambda f: f.is_public, \
+      ):
+         ${astnode_types.field_decl(f)}
+      % endfor
+
       % for p in e.el_type.get_properties( \
          include_inherited=False, \
          predicate=lambda p: p.is_public and not p.overriding \
       ):
          ${public_properties.decl(p)}
       % endfor
+
    % endfor
 
    -------------------------------
