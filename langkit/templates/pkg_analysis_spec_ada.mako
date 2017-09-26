@@ -1076,6 +1076,53 @@ package ${ada_lib_name}.Analysis is
       return ${root_entity.api_name};
    --  Return the Index'th child of Node, or null if Node has no such child
 
+   function Traverse
+     (Node  : ${root_entity.api_name}'Class;
+      Visit : access function (Node : ${root_entity.api_name}'Class)
+                               return Visit_Status)
+     return Visit_Status;
+   --  Given the parent node for a subtree, traverse all syntactic nodes of
+   --  this tree, calling the given function on each node in pre order (ie.
+   --  top-down). The order of traversing subtrees follows the order of
+   --  declaration of the corresponding attributes in the grammar. The
+   --  traversal is controlled as follows by the result returned by Visit:
+   --
+   --     Into   The traversal continues normally with the syntactic
+   --            children of the node just processed.
+   --
+   --     Over   The children of the node just processed are skipped and
+   --            excluded from the traversal, but otherwise processing
+   --            continues elsewhere in the tree.
+   --
+   --     Stop   The entire traversal is immediately abandoned, and the
+   --            original call to Traverse returns Stop.
+
+   procedure Traverse
+     (Node  : ${root_entity.api_name}'Class;
+      Visit : access function (Node : ${root_entity.api_name}'Class)
+                               return Visit_Status);
+   --  This is the same as Traverse function except that no result is returned
+   --  i.e. the Traverse function is called and the result is simply discarded.
+
+   generic
+      type Data_Type is private;
+      Reset_After_Traversal : Boolean := False;
+   function Public_Traverse_With_Data
+     (Node  : ${root_entity.api_name}'Class;
+      Visit : access function (Node : ${root_entity.api_name}'Class;
+                               Data : in out Data_type)
+                               return Visit_Status;
+      Data  : in out Data_Type)
+      return Visit_Status;
+   --  This is the same as the first Traverse function except it accepts an
+   --  argument that is passed to all Visit calls.
+   --
+   --  If Reset_After_Traversal is True, the Data formal is left unchanged when
+   --  Traverse_With_Data returns no matter what Visit does. Visit can change
+   --  it otherwise.
+
+   --  TODO??? Port Iterators code
+
    ----------------------------------------
    -- Source location-related operations --
    ----------------------------------------

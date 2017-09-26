@@ -3681,4 +3681,89 @@ package body ${ada_lib_name}.Analysis is
       Node.Node.Assign_Names_To_Logic_Vars;
    end Assign_Names_To_Logic_Vars;
 
+   --------------
+   -- Traverse --
+   --------------
+
+   function Traverse
+     (Node  : ${root_entity.api_name}'Class;
+      Visit : access function (Node : ${root_entity.api_name}'Class)
+              return Visit_Status)
+     return Visit_Status
+   is
+      E_Info : constant Entity_Info := Node.E_Info;
+
+      -------------
+      -- Wrapper --
+      -------------
+
+      function Wrapper
+        (Node : access ${root_node_value_type}'Class) return Visit_Status
+      is
+         Public_Node : constant ${root_entity.api_name} :=
+           (${root_node_type_name} (Node), E_Info);
+      begin
+         return Visit (Public_Node);
+      end Wrapper;
+
+   begin
+      return Node.Node.Traverse (Wrapper'Access);
+   end Traverse;
+
+   --------------
+   -- Traverse --
+   --------------
+
+   procedure Traverse
+     (Node  : ${root_entity.api_name}'Class;
+      Visit : access function (Node : ${root_entity.api_name}'Class)
+                               return Visit_Status)
+   is
+      Result_Status : Visit_Status;
+      pragma Unreferenced (Result_Status);
+   begin
+      Result_Status := Traverse (Node, Visit);
+   end Traverse;
+
+   -------------------------------
+   -- Public_Traverse_With_Data --
+   -------------------------------
+
+   function Public_Traverse_With_Data
+     (Node  : ${root_entity.api_name}'Class;
+      Visit : access function (Node : ${root_entity.api_name}'Class;
+                               Data : in out Data_type)
+                               return Visit_Status;
+      Data  : in out Data_Type)
+      return Visit_Status
+   is
+      E_Info : constant Entity_Info := Node.E_Info;
+
+      ------------
+      -- Helper --
+      ------------
+
+      function Helper
+        (Node : access ${root_node_value_type}'Class) return Visit_Status
+      is
+         Public_Node : constant ${root_entity.api_name} :=
+           (${root_node_type_name} (Node), E_Info);
+      begin
+         return Visit (Public_Node, Data);
+      end Helper;
+
+      Saved_Data : Data_Type;
+      Result     : Visit_Status;
+
+   begin
+      if Reset_After_Traversal then
+         Saved_Data := Data;
+      end if;
+      Result := Node.Node.Traverse (Helper'Access);
+      if Reset_After_Traversal then
+         Data := Saved_Data;
+      end if;
+      return Result;
+   end Public_Traverse_With_Data;
+
 end ${ada_lib_name}.Analysis;
