@@ -1261,6 +1261,8 @@ class CompileCtx(object):
             ("pkg_init",         ["init"], True),
             # Unit for analysis primitives
             ("pkg_analysis",     ["analysis"], True),
+            # Unit for AST node iteration primitives
+            ("pkg_iterators",    ["iterators"], True),
             # Unit for all parsers
             ("parsers/pkg_main", ["analysis", "parsers"], True),
             # Unit for the lexer

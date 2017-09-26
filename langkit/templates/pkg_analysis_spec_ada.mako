@@ -1121,8 +1121,6 @@ package ${ada_lib_name}.Analysis is
    --  Traverse_With_Data returns no matter what Visit does. Visit can change
    --  it otherwise.
 
-   --  TODO??? Port Iterators code
-
    function Child_Index (Node : ${root_entity.api_name}'Class) return Natural;
    --  Return the 0-based index for Node in its parent's children
 
