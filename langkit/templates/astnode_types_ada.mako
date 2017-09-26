@@ -498,7 +498,7 @@
                Reference
                  (Self.Self_Env, N,
                   ${ref_env.resolver.name}'Access,
-                  ${'Self' if ref_env.register_creator else 'null'},
+                  ${'Self' if not ref_env.visible_to_children else 'null'},
                   Transitive => ${"True" if ref_env.transitive else "False"});
             end if;
          end loop;

@@ -43,21 +43,26 @@ def add_env():
     return AddEnv()
 
 
-def reference(nodes, through, transitive=False, register_creator=True):
+def reference(nodes, through, transitive=False, visible_to_children=False):
     """
     Reference a group of lexical environments, that will be lazily yielded by
     calling the `through` property on the array of nodes `nodes`.
 
     :param AbstractExpression nodes: An expression that yields a list of nodes.
     :param PropertyDef through: A property reference.
-    :param bool register_creator: Register the node whose environment spec
-        creates this reference. This will prevent infinite recursion in
-        environment lookups when the reference resolution involves another
-        lookup in a child environment.
+    :param bool visible_to_children: If true, then the referenced
+            environment will be visible to the node, and the children of the
+            node on which reference acts.
+
+            By default this is false, to prevent infinite recursions that can
+            happen if any children of node does an env-lookup as part of its
+            env spec. Use this flag if you need this reference to be visible to
+            children of node, and are sure that it can cause no infinite
+            recursion.
 
     :rtype: RefEnvs
     """
-    return RefEnvs(through, nodes, transitive, register_creator)
+    return RefEnvs(through, nodes, transitive, visible_to_children)
 
 
 def add_to_env(mappings, dest_env=None, metadata=None, resolver=None):
@@ -377,7 +382,7 @@ class RefEnvs(EnvAction):
     """
 
     def __init__(self, resolver, nodes_expr, transitive=False,
-                 register_creator=True):
+                 visible_to_children=False):
         """
         All nodes that nodes_expr yields must belong to the same analysis unit
         as the AST node that triggers this RefEnvs. Besides, the lexical
@@ -395,10 +400,15 @@ class RefEnvs(EnvAction):
             resolver in order to get corresponding referenced lexical envs.
             In this array, null nodes are allowed: they are simply discarded.
 
-        :param bool register_creator: Register the node whose environment spec
-            creates this reference. This will prevent infinite recursion in
-            environment lookups when the reference resolution involves another
-            lookup in a child environment.
+        :param bool visible_to_children: If true, then the referenced
+            environment will be visible to the node, and the children of the
+            node on which reference acts.
+
+            By default this is false, to prevent infinite recursions that can
+            happen if any children of node does an env-lookup as part of its
+            env spec. Use this flag if you need this reference to be visible to
+            children of node, and are sure that it can cause no infinite
+            recursion.
         """
         assert resolver
         assert nodes_expr
@@ -419,7 +429,7 @@ class RefEnvs(EnvAction):
 
         self.transitive = transitive
 
-        self.register_creator = register_creator
+        self.visible_to_children = visible_to_children
 
     def create_internal_properties(self, env_spec):
         """
