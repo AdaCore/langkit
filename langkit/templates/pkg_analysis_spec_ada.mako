@@ -295,6 +295,7 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.unit_diagnostics', 3)}
 
    function Root (Unit : Analysis_Unit) return ${root_node_type_name};
+   function Root (Unit : Analysis_Unit) return ${root_entity.api_name};
    ${ada_doc('langkit.unit_root', 3)}
 
    function First_Token (Unit : Analysis_Unit) return Token_Type;

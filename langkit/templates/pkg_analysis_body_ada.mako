@@ -1143,6 +1143,9 @@ package body ${ada_lib_name}.Analysis is
    function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
      (Unit.AST_Root);
 
+   function Root (Unit : Analysis_Unit) return ${root_entity.api_name} is
+     ((Unit.AST_Root, No_Entity_Info));
+
    -----------------
    -- First_Token --
    -----------------
