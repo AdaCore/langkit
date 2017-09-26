@@ -1304,15 +1304,11 @@ class BaseStructType(CompiledType):
         """
         See CompiledType.__init__ for a description of arguments.
         """
-        type_repo_name = name.camel
+        kwargs.setdefault('type_repo_name', name.camel)
         if is_keyword(name):
             name = name + names.Name('Node')
 
-        super(BaseStructType, self).__init__(
-            name, location, doc,
-            type_repo_name=type_repo_name,
-            **kwargs
-        )
+        super(BaseStructType, self).__init__(name, location, doc, **kwargs)
 
         self._abstract_fields_dict_cache = {}
         """
