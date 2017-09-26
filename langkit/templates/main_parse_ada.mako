@@ -67,7 +67,7 @@ procedure Parse is
    -- Process_Lookups --
    ---------------------
 
-   procedure Process_Lookups (Node : ${root_node_type_name}) is
+   procedure Process_Lookups (Node : ${root_entity.api_name}'Class) is
    begin
       for Lookup_Str of Lookups loop
          New_Line;
@@ -81,8 +81,8 @@ procedure Parse is
               (Slice (Lookup_Str, Sep + 1, Length (Lookup_Str)));
 
             Sloc : constant Source_Location := (Line, Column);
-            Lookup_Node : ${root_node_type_name} :=
-               Lookup (${root_node_type_name} (Node), (Line, Column));
+            Lookup_Node : ${root_entity.api_name} :=
+               Node.Lookup ((Line, Column));
          begin
             Put_Line ("Lookup " & Image (Sloc) & ":");
             Lookup_Node.Print;
@@ -94,9 +94,9 @@ procedure Parse is
    -- Process_Node --
    ------------------
 
-   procedure Process_Node (Res : ${root_node_type_name}) is
+   procedure Process_Node (Res : ${root_entity.api_name}'Class) is
    begin
-      if Res = null then
+      if Res.Is_Null then
          Put_Line ("<null node>");
          return;
       end if;
@@ -160,7 +160,7 @@ procedure Parse is
       Unit         : Analysis_Unit;
       Time_Before  : constant Time := Clock;
       Time_After   : Time;
-      AST          : ${root_node_type_name};
+      AST          : ${root_entity.api_name};
    begin
       Unit := Get_From_File (Ctx, File_Name, "", True,
                              With_Trivia => Do_Print_Trivia);
@@ -174,7 +174,7 @@ procedure Parse is
          end loop;
       end if;
 
-      if (not Silent) and then AST /= null then
+      if (not Silent) and then not AST.Is_Null then
          if Do_Print_Trivia then
             PP_Trivia (Unit);
          else
@@ -196,17 +196,16 @@ procedure Parse is
             Count : Natural := 0;
 
             function Visit
-              (Node : access ${root_node_value_type}'Class) return Visit_Status
-            is
+              (Node : ${root_entity.api_name}'Class) return Visit_Status is
             begin
-               if Node /= null then
+               if Node.Is_Null then
                   Count := Count + 1;
                end if;
                return Into;
             end Visit;
 
          begin
-            if AST /= null then
+            if AST.Is_Null then
                AST.Traverse (Visit'Access);
             end if;
             if not Silent then

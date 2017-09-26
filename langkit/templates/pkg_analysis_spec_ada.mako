@@ -9,7 +9,6 @@
 <%namespace name="public_properties" file="public_properties_ada.mako" />
 
 <%
-   root_node_array = T.root_node.array
    no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts)
    library_private_field = lambda f: not library_public_field(f)
 %>
@@ -39,6 +38,8 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 with Langkit_Support.Tree_Traversal_Iterator;
 with Langkit_Support.Vectors;
 
+limited private with ${ada_lib_name}.Analysis.Implementation;
+
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
@@ -54,8 +55,7 @@ package ${ada_lib_name}.Analysis is
    type Analysis_Context is private;
    ${ada_doc('langkit.analysis_context_type', 3)}
 
-   type Analysis_Unit_Type is private;
-   type Analysis_Unit is access all Analysis_Unit_Type;
+   type Analysis_Unit is private;
    ${ada_doc('langkit.analysis_unit_type', 3)}
 
    No_Analysis_Unit : constant Analysis_Unit;
@@ -76,24 +76,6 @@ package ${ada_lib_name}.Analysis is
    );
    ${ada_doc('langkit.grammar_rule_type', 3)}
 
-   type ${root_node_value_type} is abstract tagged private;
-   --  This "by-value" type is public to expose the fact that the various
-   --  AST nodes are a hierarchy of tagged types, but it is not intended to be
-   --  used directly, hence the "_Type" suffix. Please use instead the
-   --  class-wide types such at the one below.
-
-   type ${root_node_type_name} is access all ${root_node_value_type}'Class;
-   --  Most generic AST node type
-
-   function Is_Null
-     (Node : access ${root_node_value_type}'Class) return Boolean;
-
-   function Short_Image
-     (Node : access ${root_node_value_type})
-      return Text_Type;
-   --  Return a short representation of the node, containing just the kind
-   --  name and the sloc.
-
    Property_Error : exception;
    ${ada_doc('langkit.property_error', 3)}
 
@@ -104,21 +86,15 @@ package ${ada_lib_name}.Analysis is
 
    Default_Charset : constant String := ${string_repr(ctx.default_charset)};
 
-   ------------------
-   -- Entity types --
-   ------------------
+   ---------------
+   -- AST nodes --
+   ---------------
 
    % for e in ctx.entity_types:
       % if e.is_root_type:
          type ${e.api_name} is tagged private;
       % else:
          type ${e.api_name} is new ${e.base.api_name} with private;
-      % endif
-   % endfor
-
-   % for array_type in ctx.sorted_types(ctx.array_types):
-      % if array_type.element_type.is_entity_type:
-         ${array_types.public_api_decl(array_type)}
       % endif
    % endfor
 
@@ -129,13 +105,19 @@ package ${ada_lib_name}.Analysis is
    function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean;
    --  Return whether Node references to AST node
 
-   function Short_Image (Node : ${root_entity.api_name}) return Text_Type;
+   function Short_Image
+     (Node : ${root_entity.api_name}'Class) return Text_Type;
    --  Return a short string describing Node, or "None" if Node.Is_Null is
    --  true.
 
-   function Image (Node : ${root_entity.api_name}) return Text_Type;
-   function Image (Node : ${root_entity.api_name}) return String;
+   function Image (Node : ${root_entity.api_name}'Class) return Text_Type;
+   function Image (Node : ${root_entity.api_name}'Class) return String;
    --  Like Short_Image, also including its rebinding metadata
+
+   % for e in ctx.entity_types:
+      function As_${e.el_type.kwless_raw_name}
+        (Node : ${root_entity.api_name}'Class) return ${e.api_name};
+   % endfor
 
    --------------------
    -- Unit providers --
@@ -157,7 +139,7 @@ package ${ada_lib_name}.Analysis is
    function Get_Unit
      (Provider    : Unit_Provider_Interface;
       Context     : Analysis_Context;
-      Node        : ${root_node_type_name};
+      Node        : ${root_entity.api_name}'Class;
       Kind        : Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False;
@@ -252,13 +234,12 @@ package ${ada_lib_name}.Analysis is
    --  contains the Error message.
 
    function Unit_Provider
-     (Context : Analysis_Context)
-      return Unit_Provider_Access_Cst;
+     (Context : Analysis_Context) return Unit_Provider_Access_Cst;
    --  Object to translate unit names to file names
    % endif
 
-   procedure Remove (Context   : Analysis_Context;
-                     File_Name : String);
+   procedure Remove
+     (Context : Analysis_Context; File_Name : String);
    ${ada_doc('langkit.remove_unit', 3)}
 
    procedure Destroy (Context : in out Analysis_Context);
@@ -294,7 +275,6 @@ package ${ada_lib_name}.Analysis is
    function Diagnostics (Unit : Analysis_Unit) return Diagnostics_Array;
    ${ada_doc('langkit.unit_diagnostics', 3)}
 
-   function Root (Unit : Analysis_Unit) return ${root_node_type_name};
    function Root (Unit : Analysis_Unit) return ${root_entity.api_name};
    ${ada_doc('langkit.unit_root', 3)}
 
@@ -325,129 +305,8 @@ package ${ada_lib_name}.Analysis is
    --  useful for visibility purposes, and is mainly meant to be used in the
    --  env hooks.
 
-   ----------------
-   -- Extensions --
-   ----------------
-
-   --  Extensions are a way to associate arbitrary data (Extension_Type, i.e.
-   --  pointers) to AST nodes.
-   --
-   --  In order to associate an extension to an AST node, one has first to
-   --  register itself in Langkit_Support.Extensions to get an Extension_ID.
-   --  Then, this ID must be passed to Get_Extension, which will create a slot
-   --  to store this extension (or return an already existing one for the same
-   --  ID). It is this slot that can be used to store arbitrary data.
-   --
-   --  As AST nodes can be deallocated later on, this abritrary data sometimes
-   --  needs to be deallocated as well. The destructor mechanism was designed
-   --  for this: when the AST node is about to be deallocated, the destructor
-   --  callback is invoked so that one has a chance to release allocated
-   --  resources.
-
-   type Extension_Type is new System.Address;
-   --  Data type storing arbitrary values in AST nodes
-
-   type Extension_Access is access all Extension_Type;
-   --  Access to the arbitrary values stored in AST nodes
-
-   type Extension_Destructor is
-     access procedure (Node      : access ${root_node_value_type}'Class;
-                       Extension : Extension_Type)
-     with Convention => C;
-   --  Type for extension destructors. The parameter are the "Node" the
-   --  extension was attached to and the "Extension" itself.
-
-   function Get_Extension
-     (Node : access ${root_node_value_type}'Class;
-      ID   : Extension_ID;
-      Dtor : Extension_Destructor) return Extension_Access;
-   --  Get (and create if needed) the extension corresponding to ID for Node.
-   --  If the extension is created, the Dtor destructor is associated to it.
-   --  Note that the returned access is not guaranteed to stay valid after
-   --  subsequent calls to Get_Extension.
-
-   ---------------------------
-   -- Environments handling --
-   ---------------------------
-
-   --  The following types and operations are implementation details we did not
-   --  manage yet to put in a private part. Please don't use them.
-
-   ${struct_types.public_incomplete_decl(T.env_md)}
-   ${struct_types.public_decl(T.env_md)}
-
-   function Combine
-     (L, R : ${T.env_md.name}) return ${T.env_md.name};
-   --  The combine function on environments metadata does a boolean Or on every
-   --  boolean component of the env metadata.
-
-   function Can_Reach (El, From : ${root_node_type_name}) return Boolean;
-   --  Return whether El can reach From, from a sequential viewpoint. If
-   --  elements are declared in different units, it will always return True,
-   --  eg this does not handle general visibility issues, just sequentiality of
-   --  declarations.
-
-   function Node_File_And_Sloc_Image
-     (Node : ${root_node_type_name}) return Text_Type;
-   --  Return a "sourcefile:lineno:columnno" corresponding to the starting sloc
-   --  of Node. Used to create a human-readable representation for env.
-   --  rebindings.
-
-   procedure Raise_Property_Error (Message : String := "");
-
-   function Is_Rebindable (Node : ${root_node_type_name}) return Boolean;
-
-   procedure Register_Rebinding
-     (Node : ${root_node_type_name}; Rebinding : System.Address);
-   --  Register a rebinding to be destroyed when Node's analysis unit is
-   --  destroyed or reparsed.
-   --
-   --  TODO??? For now the rebinding must be represented as an untyped pointer
-   --  because we probably need some big refactoring to provide to
-   --  Langkit_Support.Lexical_Env a procedure that has visibility on both
-   --  Env_Rebindings and on the analysis unit record.
-
-   function Element_Parent
-     (Node : ${root_node_type_name}) return ${root_node_type_name};
-
-   package AST_Envs is new Langkit_Support.Lexical_Env
-     (Element_T            => ${root_node_type_name},
-      Element_Metadata     => ${T.env_md.name},
-      No_Element           => null,
-      Empty_Metadata       => No_Metadata,
-      Raise_Property_Error => Raise_Property_Error,
-      Combine              => Combine,
-      Parent               => Element_Parent,
-      Element_Image        => Node_File_And_Sloc_Image,
-      Register_Rebinding   => Register_Rebinding);
-
-   --  The following subtypes are introduced to ease code generation, so we
-   --  don't have to deal with the AST_Envs suffix.
-
-   subtype Lexical_Env is AST_Envs.Lexical_Env;
-   subtype Entity_Info is AST_Envs.Entity_Info;
-   subtype Entity is AST_Envs.Entity;
-   subtype Env_Rebindings is AST_Envs.Env_Rebindings;
-   Empty_Env : Lexical_Env renames AST_Envs.Empty_Env;
-   No_Entity_Info : Entity_Info renames AST_Envs.No_Entity_Info;
-
-   function Create
-     (El : ${root_node_type_name}; Info : Entity_Info)
-      return Entity;
-
-   ## Declare arrays of lexical environments here because we need them for the
-   ## Group operation below.
-   ${array_types.public_incomplete_decl(T.LexicalEnv.array)}
-   ${array_types.public_decl(T.LexicalEnv.array)}
-
-   ## See ASTNodeType.entity
-   ${array_types.public_incomplete_decl(T.root_node.entity.array)}
-   ${array_types.public_decl(T.root_node.entity.array)}
-
-   ## Declare arrays of root nodes here since some primitives rely on it and
-   ## since the declarations require AST_Envs.
-   ${array_types.public_incomplete_decl(root_node_array)}
-   ${array_types.public_decl(root_node_array)}
+   function Is_Referenced_From
+     (Referenced, Unit : Analysis_Unit) return Boolean;
 
    -----------------------------
    -- Miscellanous operations --
@@ -479,258 +338,6 @@ package ${ada_lib_name}.Analysis is
                .. ${subclasses[-1].ada_kind_name()};
       % endif
    % endfor
-
-   % if ctx.generate_pp:
-   function PP
-     (Node : access ${root_node_value_type}) return String is abstract;
-   % else:
-   function PP
-     (Node : access ${root_node_value_type}) return String
-   is ("Pretty printer not generated");
-   % endif
-
-   function Kind (Node : access ${root_node_value_type})
-                  return ${root_node_kind_name} is abstract;
-   function Kind_Name
-     (Node : access ${root_node_value_type}'Class) return String;
-   --  Return the concrete kind for Node
-
-   function Is_Ghost
-     (Node : access ${root_node_value_type}'Class) return Boolean;
-   ${ada_doc('langkit.node_is_ghost', 3)}
-
-   function Get_Unit
-     (Node : access ${root_node_value_type}'Class)
-      return Analysis_Unit;
-   ${ada_doc('langkit.node_unit', 3)}
-
-   -------------------------------
-   -- Tree traversal operations --
-   -------------------------------
-
-   function Child_Count
-     (Node : access ${root_node_value_type}'Class) return Natural
-   with Inline;
-   --  Return the number of children Node has
-
-   function First_Child_Index
-     (Node : access ${root_node_value_type}'Class) return Natural;
-   --  Return the index of the first child Node has
-
-   function Last_Child_Index
-     (Node : access ${root_node_value_type}'Class) return Natural;
-   --  Return the index of the last child Node has, or 0 if there is no child
-
-   procedure Get_Child
-     (Node            : access ${root_node_value_type};
-      Index           : Positive;
-      Index_In_Bounds : out Boolean;
-      Result          : out ${root_node_type_name}) is abstract;
-   --  Get the Index'th child of Node, storing it into Result. Child indexing
-   --  is 1-based. Store in Index_In_Bounds whether Node had such a child; if
-   --  not, the content of Result is undefined.
-
-   function Child (Node  : access ${root_node_value_type}'Class;
-                   Index : Positive) return ${root_node_type_name};
-   --  Return the Index'th child of Node, or null if Node has no such child
-
-   function Children
-     (Node : access ${root_node_value_type}'Class)
-     return ${root_node_array.api_name};
-   --  Return an array containing all the children of Node.
-   --  This is an alternative to the Child/Child_Count pair, useful if you want
-   --  the convenience of Ada arrays, and you don't care about the small
-   --  performance hit of creating an array.
-
-   function Parents
-     (Node         : access ${root_node_value_type}'Class;
-      Include_Self : Boolean := True)
-      return ${root_node_array.name};
-   --  Return the list of parents for this node. This node included in the list
-   --  iff Include_Self.
-
-   function Parent
-     (Node : access ${root_node_value_type}'Class)
-     return ${root_node_type_name};
-
-   type Visit_Status is (Into, Over, Stop);
-   --  Helper type to control the AST node traversal process. See Traverse.
-
-   function Traverse
-     (Node  : access ${root_node_value_type}'Class;
-      Visit : access function (Node : access ${root_node_value_type}'Class)
-                               return Visit_Status)
-     return Visit_Status;
-   --  Given the parent node for a subtree, traverse all syntactic nodes of
-   --  this tree, calling the given function on each node in pre order (ie.
-   --  top-down). The order of traversing subtrees follows the order of
-   --  declaration of the corresponding attributes in the grammar. The
-   --  traversal is controlled as follows by the result returned by Visit:
-   --
-   --     Into   The traversal continues normally with the syntactic
-   --            children of the node just processed.
-   --
-   --     Over   The children of the node just processed are skipped and
-   --            excluded from the traversal, but otherwise processing
-   --            continues elsewhere in the tree.
-   --
-   --     Stop   The entire traversal is immediately abandoned, and the
-   --            original call to Traverse returns Stop.
-
-   procedure Traverse
-     (Node  : access ${root_node_value_type}'Class;
-      Visit : access function (Node : access ${root_node_value_type}'Class)
-                               return Visit_Status);
-   --  This is the same as Traverse function except that no result is returned
-   --  i.e. the Traverse function is called and the result is simply discarded.
-
-   generic
-      type Data_Type is private;
-      Reset_After_Traversal : Boolean := False;
-   function Traverse_With_Data
-     (Node  : access ${root_node_value_type}'Class;
-      Visit : access function (Node : access ${root_node_value_type}'Class;
-                               Data : in out Data_type)
-                               return Visit_Status;
-      Data  : in out Data_Type)
-      return Visit_Status;
-   --  This is the same as the first Traverse function except it accepts an
-   --  argument that is passed to all Visit calls.
-   --
-   --  If Reset_After_Traversal is True, the Data formal is left unchanged when
-   --  Traverse_With_Data returns no matter what Visit does. Visit can change
-   --  it otherwise.
-
-   package ${root_node_type_name}_Iterators is new Langkit_Support.Iterators
-     (Element_Type  => ${root_node_type_name},
-      Element_Array => ${T.root_node.array.array_type_name});
-
-   type Traverse_Iterator is
-     limited new ${root_node_type_name}_Iterators.Iterator
-     with private;
-
-   function Traverse
-     (Root : access ${root_node_value_type}'Class)
-      return Traverse_Iterator;
-   --  Return an iterator that yields all AST nodes under Root (included) in a
-   --  prefix DFS (depth first search) fasion.
-
-   type ${root_node_type_name}_Predicate_Type is interface;
-   type ${root_node_type_name}_Predicate is
-      access all ${root_node_type_name}_Predicate_Type'Class;
-   --  Predicate on AST nodes.
-   --
-   --  Useful predicates often rely on values from some context, so predicates
-   --  that are mere accesses to a function are not powerful enough. Having a
-   --  full interface for this makes it possible to package both the predicate
-   --  code and some data it needs.
-
-   function Evaluate
-     (P : access ${root_node_type_name}_Predicate_Type;
-      N : ${root_node_type_name})
-      return Boolean is abstract;
-   --  Return the value of the predicate for the N node
-
-   procedure Destroy is new Ada.Unchecked_Deallocation
-     (${root_node_type_name}_Predicate_Type'Class,
-      ${root_node_type_name}_Predicate);
-
-   type Find_Iterator is limited
-     new ${root_node_type_name}_Iterators.Iterator
-     with private;
-   --  Iterator type for Find (see below)
-
-   overriding function Next
-     (It       : in out Find_Iterator;
-      Element  : out ${root_node_type_name}) return Boolean;
-
-   type Local_Find_Iterator is limited
-      new ${root_node_type_name}_Iterators.Iterator
-   with private;
-   --  Iterator type for the Find function that takes an access to function. It
-   --  is called Local_Find_Iterator because if you use a locally declared
-   --  function, the iterator itself will only be valid in the scope of the
-   --  function.
-
-   overriding function Next
-     (It      : in out Local_Find_Iterator;
-      Element : out ${root_node_type_name})
-      return Boolean;
-
-   function Find
-     (Root      : access ${root_node_value_type}'Class;
-      Predicate : access function (N : ${root_node_type_name}) return Boolean)
-      return Local_Find_Iterator;
-   --  Return an iterator that yields all AST nodes under Root (included) that
-   --  satisfy the Predicate predicate.
-
-   function Find
-     (Root      : access ${root_node_value_type}'Class;
-      Predicate : ${root_node_type_name}_Predicate)
-      return Find_Iterator;
-   --  Return an iterator that yields all AST nodes under Root (included) that
-   --  satisfy the Predicate predicate. Predicate will be destroyed when
-   --  Find_Iterator is exhausted.
-
-   function Find_First
-     (Root      : access ${root_node_value_type}'Class;
-      Predicate : ${root_node_type_name}_Predicate)
-      return ${root_node_type_name};
-   --  Return the first found AST node under Root (included) that satisfies the
-   --  Pred, or return null if there is no such node.
-
-   type ${root_node_type_name}_Kind_Filter is
-      new ${root_node_type_name}_Predicate_Type with
-   record
-      Kind : ${root_node_kind_name};
-   end record;
-   --  Predicate that returns true for all AST nodes of some kind
-
-   function Evaluate
-     (P : access ${root_node_type_name}_Kind_Filter;
-      N : ${root_node_type_name})
-      return Boolean;
-
-   function Child_Index
-     (Node : access ${root_node_value_type}'Class)
-      return Natural;
-   --  Return the 0-based index for Node in its parent's children
-
-   function Previous_Sibling
-     (Node : access ${root_node_value_type}'Class)
-     return ${root_node_type_name};
-   --  Return the Node's previous sibling in the tree, if there is such a node
-
-   function Next_Sibling
-     (Node : access ${root_node_value_type}'Class)
-     return ${root_node_type_name};
-   --  Return the Node's next sibling in the tree, if there is such a node
-
-   ----------------------------------------
-   -- Source location-related operations --
-   ----------------------------------------
-
-   function Sloc_Range (Node : access ${root_node_value_type}'Class;
-                        Snap : Boolean := False) return Source_Location_Range;
-   --  Return the source location range corresponding to the set of tokens from
-   --  which Node was parsed.
-   --
-   --  TODO??? Document the Snap formal.
-
-   function Compare (Node : access ${root_node_value_type}'Class;
-                     Sloc : Source_Location;
-                     Snap : Boolean := False) return Relative_Position;
-   --  Compare Sloc to the sloc range of Node.
-   --
-   --  TODO??? Document the Snap formal.
-
-   function Lookup (Node : access ${root_node_value_type}'Class;
-                    Sloc : Source_Location;
-                    Snap : Boolean := False) return ${root_node_type_name};
-   --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
-   --  it, or null if no such node was found.
-   --
-   --  TODO??? Document the Snap formal.
 
    -----------------------
    -- Lexical utilities --
@@ -784,18 +391,13 @@ package ${ada_lib_name}.Analysis is
    --  Source location range for this token. Note that the end bound is
    --  exclusive.
 
-   function Text
-     (Node : access ${root_node_value_type}'Class) return Text_Type;
-   --  Shortcut to get the source buffer slice corresponding to the text that
-   --  spans between the first and last tokens of an AST node.
-
    type Child_Or_Trivia is (Child, Trivia);
    --  Discriminator for the Child_Record type
 
    type Child_Record (Kind : Child_Or_Trivia := Child) is record
       case Kind is
          when Child =>
-            Node : ${root_node_type_name};
+            Node : ${root_entity.api_name};
          when Trivia =>
             Trivia : Token_Type;
       end case;
@@ -805,7 +407,7 @@ package ${ada_lib_name}.Analysis is
    type Children_Array is array (Positive range <>) of Child_Record;
 
    function Children_With_Trivia
-     (Node : access ${root_node_value_type}'Class) return Children_Array;
+     (Node : ${root_entity.api_name}'Class) return Children_Array;
    --  Return the children of this node interleaved with Trivia token nodes, so
    --  that:
    --  - Every trivia contained between Node.Start_Token and Node.End_Token - 1
@@ -830,98 +432,6 @@ package ${ada_lib_name}.Analysis is
      (Self : Token_Iterator; Tok : Token_Type) return Boolean;
    function Element (Self : Token_Iterator; Tok : Token_Type) return Token_Type;
 
-   function Token_Range
-     (Node : access ${root_node_value_type}'Class)
-      return Token_Iterator;
-   --  Return an iterator on the range of tokens encompassed by Node
-
-   -------------------
-   -- Debug helpers --
-   -------------------
-
-   procedure Print
-     (Node        : access ${root_node_value_type};
-      Line_Prefix : String := "") is abstract;
-   --  Debug helper: print to standard output Node and all its children.
-   --  Line_Prefix is prepended to each output line.
-
-   procedure PP_Trivia
-     (Node        : access ${root_node_value_type}'Class;
-      Line_Prefix : String := "");
-   --  Debug helper: print to standard output Node and all its children along
-   --  with the trivia associated to them. Line_Prefix is prepended to each
-   --  output line.
-
-   procedure Dump_Lexical_Env
-     (Node     : access ${root_node_value_type}'Class;
-      Root_Env : AST_Envs.Lexical_Env);
-   --  Debug helper: dump the lexical environment of Node, and consequently any
-   --  nested lexical environment. Used for debugging/testing purpose. Pass the
-   --  root env explicitly so that we can tag it properly in the output.
-
-   procedure Dump_One_Lexical_Env
-     (Self           : AST_Envs.Lexical_Env;
-      Env_Id         : String := "";
-      Parent_Env_Id  : String := "";
-      Dump_Addresses : Boolean := False;
-      Dump_Content   : Boolean := True);
-   --  Debug helper: Dumps one lexical env. You can supply ids for env and its
-   --  parent, so that they will be identified in the output.
-
-   procedure Dump_Lexical_Env_Parent_Chain (Env : AST_Envs.Lexical_Env);
-   --  Debug helper: dump a lexical env as all its parents
-
-   procedure Assign_Names_To_Logic_Vars
-     (Node : access ${root_node_value_type}'Class);
-   --  Debug helper: Assign names to every logical variable in the root node,
-   --  so that we can trace logical variables.
-
-   procedure Assign_Names_To_Logic_Vars_Impl
-     (Node : access ${root_node_value_type}) is null;
-
-   ------------------------------------------------------
-   -- AST node derived types (incomplete declarations) --
-   ------------------------------------------------------
-
-   type ${generic_list_value_type};
-   --  Base type for all lists of AST node subclasses
-
-   type ${generic_list_type_name} is
-      access all ${generic_list_value_type}'Class;
-
-   % for astnode in no_builtins(ctx.astnode_types):
-     % if not astnode.is_list_type:
-       ${astnode_types.public_incomplete_decl(astnode)}
-     % endif
-   % endfor
-
-   % for astnode in ctx.astnode_types:
-      % if astnode.is_root_list_type:
-         ${list_types.public_incomplete_decl(astnode.element_type)}
-      % elif astnode.is_list_type:
-         ${astnode_types.public_incomplete_decl(astnode)}
-      % endif
-   % endfor
-
-   ---------------------------
-   -- Adalog instantiations --
-   ---------------------------
-
-   function Image (Ent : ${T.entity.name}) return Text_Type;
-   function Image (Ent : ${T.entity.name}) return String;
-   ${ada_doc('langkit.entity_image', 3)}
-
-   package Eq_Node is new Langkit_Support.Adalog.Eq_Same
-     (LR_Type       => ${T.entity.name},
-      Element_Image => Image);
-   subtype Logic_Var is Eq_Node.Refs.Raw_Var;
-   subtype Logic_Var_Record is Eq_Node.Refs.Var;
-   Null_Var : constant Logic_Var := null;
-   Null_Var_Record : constant Logic_Var_Record := (Reset => True, others => <>);
-
-   subtype Logic_Equation is Relation;
-   Null_Logic_Equation : constant Logic_Equation := null;
-
    -----------------------
    -- Enumeration types --
    -----------------------
@@ -932,108 +442,19 @@ package ${ada_lib_name}.Analysis is
    ${enum_types.public_decl(cls)}
    % endfor
 
-   -----------------------------------------------
-   -- Structure types (incomplete declarations) --
-   -----------------------------------------------
-
-   % for struct_type in no_builtins(ctx.struct_types):
-   ${struct_types.public_incomplete_decl(struct_type)}
-   % endfor
-
-   -------------------------------------------
-   -- Array types (incomplete declarations) --
-   -------------------------------------------
-
-   % for array_type in ctx.sorted_types(ctx.array_types):
-   % if array_type.element_type.should_emit_array_type:
-   ${array_types.public_incomplete_decl(array_type)}
-   % endif
-   % endfor
-
-   ------------------------------
-   -- Root AST node properties --
-   ------------------------------
-
-   % for prop in T.root_node.get_properties( \
-         include_inherited=False, \
-         predicate=library_public_field):
-      ${prop.prop_decl}
-   % endfor
-
-   -----------------------
-   -- Generic list type --
-   -----------------------
-
-   type ${generic_list_value_type} is
-      abstract new ${root_node_value_type}
-      with private;
-   --  Base type for all lists of AST node subclasses
-
-   overriding procedure Get_Child
-     (Node            : access ${generic_list_value_type};
-      Index           : Positive;
-      Index_In_Bounds : out Boolean;
-      Result          : out ${root_node_type_name});
-
-   overriding procedure Print
-     (Node : access ${generic_list_value_type}; Line_Prefix : String := "");
-
-   -----------------------------------------
-   -- Structure types (full declarations) --
-   -----------------------------------------
-
-   % for struct_type in no_builtins(ctx.struct_types):
-   ${struct_types.public_decl(struct_type)}
-   % endfor
-
    -----------------
    -- Array types --
    -----------------
 
-   --  We implement array types as discriminated records so that binding to C
-   --  can be done without copy.
-
-   --  TODO??? This is likely to change in the near future: we would like to
-   --  have here pure Ada arrays instead.
-
    % for array_type in ctx.sorted_types(ctx.array_types):
-   % if array_type.element_type.should_emit_array_type:
-   ${array_types.public_decl(array_type)}
-   % endif
-   % endfor
-
-   ------------------------------------------------
-   -- AST node derived types (full declarations) --
-   ------------------------------------------------
-
-   --  See above for overriden primitive operations documentations
-
-   % for astnode in no_builtins(ctx.astnode_types):
-     % if not astnode.is_list_type:
-       ${astnode_types.public_decl(astnode)}
-     % endif
-   % endfor
-
-   % for astnode in ctx.astnode_types:
-      % if astnode.is_root_list_type:
-         ${list_types.public_decl(astnode.element_type)}
-      % elif astnode.is_list_type:
-         ${astnode_types.public_decl(astnode)}
+      % if array_type._exposed:
+         ${array_types.public_api_decl(array_type)}
       % endif
    % endfor
 
-   -----------------------
-   -- Entity converters --
-   -----------------------
-
-   % for e in ctx.entity_types:
-      function As_${e.el_type.name}
-        (Node : ${root_entity.api_name}'Class) return ${e.api_name};
-   % endfor
-
-   -----------------------
-   -- Entity primitives --
-   -----------------------
+   -------------------------
+   -- AST Node primitives --
+   -------------------------
 
    function Kind
      (Node : ${root_entity.api_name}'Class) return ${root_node_kind_name};
@@ -1083,7 +504,7 @@ package ${ada_lib_name}.Analysis is
    --  Return the index of the last child Node has, or 0 if there is no child
 
    procedure Get_Child
-     (Node            : ${root_entity.api_name};
+     (Node            : ${root_entity.api_name}'Class;
       Index           : Positive;
       Index_In_Bounds : out Boolean;
       Result          : out ${root_entity.api_name});
@@ -1096,6 +517,9 @@ package ${ada_lib_name}.Analysis is
       Index : Positive)
       return ${root_entity.api_name};
    --  Return the Index'th child of Node, or null if Node has no such child
+
+   type Visit_Status is (Into, Over, Stop);
+   --  Helper type to control the AST node traversal process. See Traverse.
 
    function Traverse
      (Node  : ${root_entity.api_name}'Class;
@@ -1186,8 +610,7 @@ package ${ada_lib_name}.Analysis is
    --  Child_Record).
 
    function Token_Range
-     (Node : ${root_entity.api_name}'Class)
-      return Token_Iterator;
+     (Node : ${root_entity.api_name}'Class) return Token_Iterator;
    --  Return an iterator on the range of tokens encompassed by Node
 
    --------------------
@@ -1213,12 +636,8 @@ package ${ada_lib_name}.Analysis is
    --  with the trivia associated to them. Line_Prefix is prepended to each
    --  output line.
 
-   procedure Dump_Lexical_Env
-     (Node     : ${root_entity.api_name}'Class;
-      Root_Env : AST_Envs.Lexical_Env);
-   --  Debug helper: dump the lexical environment of Node, and consequently any
-   --  nested lexical environment. Used for debugging/testing purpose. Pass the
-   --  root env explicitly so that we can tag it properly in the output.
+   procedure Dump_Lexical_Env_Tree (Unit : Analysis_Unit);
+   --  TODO???
 
    procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class);
    --  Debug helper: Assign names to every logical variable in the root node,
@@ -1226,406 +645,64 @@ package ${ada_lib_name}.Analysis is
 
 private
 
-   -----------------------------
-   -- Entity types (internal) --
-   -----------------------------
-
-   % for e in ctx.entity_types:
-      % if e.is_root_type:
-         type ${e.api_name} is tagged record
-            Node   : ${root_node_type_name};
-            E_Info : Entity_Info;
-         end record;
-      % else:
-         type ${e.api_name} is new ${e.base.api_name} with null record;
-      % endif
-      No_${e.api_name} : constant ${e.api_name} := (null, No_Entity_Info);
-   % endfor
-
-   use AST_Envs;
-
-   type Analysis_Context_Type;
-
-   type Analysis_Context is access all Analysis_Context_Type;
+   type Analysis_Context is access all Implementation.Analysis_Context_Type;
+   type Analysis_Unit is access all Implementation.Analysis_Unit_Type;
 
    No_Analysis_Unit    : constant Analysis_Unit := null;
    No_Analysis_Context : constant Analysis_Context := null;
 
-   package Units_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Unbounded_String,
-      Element_Type    => Analysis_Unit,
-      Hash            => Ada.Strings.Unbounded.Hash,
-      Equivalent_Keys => "=");
+   --------------------------
+   -- AST nodes (internal) --
+   --------------------------
 
-   % if ctx.symbol_literals:
-      type Symbol_Literal_Type is (
-         <%
-            sym_items = ctx.sorted_symbol_literals
-            last_i = len(sym_items) - 1
-         %>
-         % for i, (sym, name) in enumerate(sym_items):
-            ${name}${',' if i < last_i else ''}
-            -- ${sym}
-         % endfor
-      );
+   <% md_fields = T.env_md.get_fields() %>
 
-      type Symbol_Literal_Array is array (Symbol_Literal_Type) of Symbol_Type;
-      type Symbol_Literal_Array_Access is access all Symbol_Literal_Array;
-   % endif
+   type Public_Metadata is
+      % if md_fields:
+         record
+            % for f in md_fields:
+               % if f.type.is_bool_type:
+                  ${f.name} : Boolean := False;
+               % elif f.type.is_ast_node:
+                  ${f.name} : System.Address := System.Null_Address;
+               % else:
+                  <% assert False %>
+               % endif
+            % endfor
+         end record
+            with Convention => C;
+      % else:
+         null record
+            with Convention => C;
+      % endif;
 
-   type Analysis_Context_Private_Part_Type;
-   type Analysis_Context_Private_Part
-   is access all Analysis_Context_Private_Part_Type;
-
-   type Analysis_Context_Type is record
-      Ref_Count  : Natural;
-      Units_Map  : Units_Maps.Map;
-      Symbols    : Symbol_Table;
-
-      Charset    : Unbounded_String;
-      --  Default charset to use in analysis units
-
-      Root_Scope : AST_Envs.Lexical_Env;
-      --  The lexical scope that is shared amongst every compilation unit. Used
-      --  to resolve cross file references.
-
-      % if ctx.default_unit_provider:
-      Unit_Provider : Unit_Provider_Access_Cst;
-      --  Object to translate unit names to file names
+   No_Public_Metadata : constant Public_Metadata :=
+      % if md_fields:
+         (others => <>);
+      % else:
+         (null record);
       % endif
 
-      % if ctx.symbol_literals:
-      Symbol_Literals : Symbol_Literal_Array;
-      --  List of pre-computed symbols in the Symbols table
+   type Public_Entity_Info is record
+      MD         : Public_Metadata;
+      Rebindings : System.Address;
+   end record;
+
+   No_Public_Entity_Info : constant Public_Entity_Info :=
+     (No_Public_Metadata, System.Null_Address);
+
+   % for e in ctx.entity_types:
+      % if e.is_root_type:
+         type ${e.api_name} is tagged record
+            Node   : access Implementation.${root_node_value_type}'Class;
+            E_Info : Public_Entity_Info;
+         end record;
+      % else:
+         type ${e.api_name} is new ${e.base.api_name} with null record;
       % endif
-
-      Private_Part : Analysis_Context_Private_Part;
-
-      Discard_Errors_In_Populate_Lexical_Env : Boolean := True;
-      --  See the eponym procedure
-   end record;
-
-   procedure Reset_Caches (Context : Analysis_Context);
-   --  Call Reset_Caches on all units Context contains
-
-   type Destroy_Procedure is access procedure (Object : System.Address);
-
-   type Destroyable_Type is record
-      Object  : System.Address;
-      --  Object to destroy
-
-      Destroy : Destroy_Procedure;
-      --  Procedure to destroy Object
-   end record;
-   --  Simple holder to associate an object to destroy and the procedure to
-   --  perform the destruction.
-
-   package Destroyable_Vectors is new Langkit_Support.Vectors
-     (Destroyable_Type);
-
-   package Analysis_Unit_Sets is new Langkit_Support.Cheap_Sets
-     (Analysis_Unit, null);
-
-   type Lex_Env_Data_Type;
-   type Lex_Env_Data is access all Lex_Env_Data_Type;
-
-   procedure Destroy (Self : in out Lex_Env_Data);
-   --  Likewise, but also free the memory allocated to Self
-
-   type Analysis_Unit_Type is record
-      Context           : Analysis_Context;
-      --  The owning context for this analysis unit
-
-      Ref_Count         : Natural;
-      --  Ref count for the analysis unit. Note that in the Ada API you'll
-      --  still have to call Inc_Ref/Dec_Ref manually.
-
-      AST_Root          : ${root_node_type_name};
-
-      File_Name         : Unbounded_String;
-      --  The originating name for this analysis unit. This should be set even
-      --  if the analysis unit was parsed from a buffer.
-
-      Charset           : Unbounded_String;
-      --  The parsing charset for this analysis unit, as a string. If the
-      --  charset used actually came from a byte order mark, this is
-      --  nevertheless set to the one the user requested.
-
-      TDH               : aliased Token_Data_Handler;
-      --  The token data handler that handles all token data during parsing and
-      --  owns it afterwards.
-
-      Diagnostics       : Diagnostics_Vectors.Vector;
-      --  The list of diagnostics produced for this analysis unit
-
-      With_Trivia       : Boolean;
-      --  Whether Trivia nodes were parsed and included in this analysis unit
-
-      Is_Env_Populated  : Boolean;
-      --  Whether Populate_Lexical_Env was called on this unit. Used not to
-      --  populate multiple times the same unit and hence avoid infinite
-      --  populate recursions for circular dependencies.
-
-      Has_Filled_Caches : Boolean;
-      --  Set iff at least one memoized property has been evaluated
-      --  successfully in one of the nodes, i.e. whether we need to invalidate
-      --  the cache on the AST_Root tree.
-
-      Rule              : Grammar_Rule;
-      --  The grammar rule used to parse this unit
-
-      AST_Mem_Pool      : Bump_Ptr_Pool;
-      --  This memory pool shall only be used for AST parsing. Stored here
-      --  because it is more convenient, but one shall not allocate from it.
-
-      Destroyables      : Destroyable_Vectors.Vector;
-      --  Collection of objects to destroy when destroying the analysis unit
-
-      Referenced_Units  : Analysis_Unit_Sets.Set;
-      --  Units that are referenced from this one. Useful for
-      --  visibility/computation of the reference graph.
-
-      Lex_Env_Data_Acc  : Lex_Env_Data;
-      --  Lexical environment metadata for elements in this units' environments
-      --  that belong to other units.
-
-      Rebindings        : aliased Env_Rebindings_Vectors.Vector;
-      --  List of rebindings for which Old_Env and/or New_Env belong to this
-      --  unit. When this unit gets destroyed or reparsed, these rebindings
-      --  need to be destroyed too (see Destroy_Rebindings).
-   end record;
-
-   function Token_Data
-     (Unit : Analysis_Unit) return Token_Data_Handler_Access;
-
-   procedure Register_Destroyable_Helper
-     (Unit    : Analysis_Unit;
-      Object  : System.Address;
-      Destroy : Destroy_Procedure);
-
-   procedure Set_Filled_Caches (Unit : Analysis_Unit);
-   --  Tag Unit as having filled caches for properties memoization
-
-   procedure Reset_Caches (Unit : Analysis_Unit);
-   --  If AST_Node is not null, invoke Reset_Caches primitives on all the nodes
-   --  it contains.
-
-   procedure Destroy_Rebindings
-     (Rebindings : access Env_Rebindings_Vectors.Vector);
-   --  Destroy all rebindings in Rebindings, plus their child rebindings. Note
-   --  that children can belong to various analysis units, so this takes care
-   --  of removing the destroyed rebindings from each concerned analysis unit's
-   --  Rebindings vector.
-   --
-   --  This require an access parameter in order to avoid aliasing issues in
-   --  the body.
-
-   function Is_Referenced_From
-     (Referenced, Unit : Analysis_Unit) return Boolean;
-   --  Check whether the Referenced unit is referenced from Unit
-
-   generic
-      type T (<>) is limited private;
-      type T_Access is access all T;
-      with procedure Destroy (Object : in out T_Access);
-   procedure Register_Destroyable_Gen
-     (Unit : Analysis_Unit; Object : T_Access);
-   --  Generic procedure to register an object so that it is automatically
-   --  destroyed when Unit is destroyed.
-
-   function Children
-     (Node : access ${root_node_value_type}'Class)
-     return ${root_node_array.name};
-   --  Return an array containing all the children of Node.
-   --  This is an alternative to the Child/Child_Count pair, useful if you want
-   --  the convenience of ada arrays, and you don't care about the small
-   --  performance hit of creating an array.
-
-   procedure Reset_Caches
-     (Node : access ${root_node_value_type}'Class)
-   with Inline;
-   --  Reset the properties memoization caches attached to this node
-
-   procedure Set_Parents (Node, Parent : access ${root_node_value_type}'Class);
-   --  Set Node.Parent to Parent, and initialize recursively the parent of all
-   --  child nodes.
-
-   procedure Destroy (Node : access ${root_node_value_type}'Class);
-   --  Free the resources allocated to this node and all its children
-
-   ------------------------------
-   -- Root AST node properties --
-   ------------------------------
-
-   % for prop in T.root_node.get_properties( \
-         include_inherited=False, \
-         predicate=library_private_field):
-      % if prop.dispatching:
-         ${prop.prop_decl}
-      % endif
+      No_${e.api_name} : constant ${e.api_name} :=
+        (null, No_Public_Entity_Info);
    % endfor
-
-   --------------------------
-   -- Extensions internals --
-   --------------------------
-
-   type Extension_Slot is record
-      ID        : Extension_ID;
-      Extension : Extension_Access;
-      Dtor      : Extension_Destructor;
-   end record;
-
-   package Extension_Vectors is new Langkit_Support.Vectors
-     (Element_Type => Extension_Slot);
-
-   --------------------------------------
-   -- Environments handling (internal) --
-   --------------------------------------
-
-   No_Entity : constant Entity := (null, No_Entity_Info);
-
-   procedure Inc_Ref (Self : Lexical_Env) renames AST_Envs.Inc_Ref;
-   procedure Dec_Ref (Self : in out Lexical_Env) renames AST_Envs.Dec_Ref;
-
-   function Get
-     (A     : AST_Envs.Entity_Array;
-      Index : Integer)
-      return Entity;
-   --  Simple getter that raises Property_Error on out-of-bound accesses.
-   --  Useful for code generation.
-
-   function Group is new AST_Envs.Group
-     (Index_Type        => Positive,
-      Lexical_Env_Array => ${T.LexicalEnv.array.api_name});
-
-   function Group
-     (Envs : ${T.LexicalEnv.array.name})
-      return ${T.LexicalEnv.name};
-   --  Convenience wrapper for uniform types handling in code generation
-
-   -------------------------------
-   -- Root AST node (internals) --
-   -------------------------------
-
-   type Memoization_State is (Not_Computed, Computed, Raise_Property_Error);
-   --  Implementation detail for properties memoization. Values describe if::
-   --
-   --    * the property is still to be evaluated (Not_Computed);
-   --    * if its result value is already available (Computed);
-   --    * if it is known to raise a Property_Error (Raise_Property_Error).
-
-   type ${root_node_value_type} is abstract tagged record
-      Parent                 : ${root_node_type_name} := null;
-
-      Unit                   : Analysis_Unit := null;
-      --  Reference to the analysis unit that owns this node
-
-      Token_Start_Index      : Token_Index  := No_Token_Index;
-      Token_End_Index        : Token_Index  := No_Token_Index;
-      --  Reference to the start and end token that constitutes this node. If
-      --  this node is a ghost, Token_Start_Index is the token that this AST
-      --  node relates to and Token_End_Index is No_Token_Index. Otherwise,
-      --  both tokens are inclusive, i.e. they both belong to this node.
-
-      Extensions             : Extension_Vectors.Vector;
-
-      Self_Env               : AST_Envs.Lexical_Env;
-      --  Hold the environment this node defines, or the parent environment
-      --  otherwise.
-
-      ${astnode_types.node_fields(T.root_node, emit_null=False)}
-   end record;
-
-   procedure Free_Extensions (Node : access ${root_node_value_type}'Class);
-   --  Implementation helper to free the extensions associatde to Node
-
-   ${array_types.private_decl(T.LexicalEnv.array)}
-   ${array_types.private_decl(T.root_node.entity.array)}
-   ${array_types.private_decl(root_node_array)}
-
-   package ${T.root_node.array.pkg_vector} is
-      new Langkit_Support.Vectors (${T.root_node.name});
-
-   function Pre_Env_Actions
-     (Self                : access ${root_node_value_type};
-      Bound_Env, Root_Env : AST_Envs.Lexical_Env;
-      Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env;
-   --  Internal procedure that will execute all necessary lexical env actions
-   --  for Node. This is meant to be called by Populate_Lexical_Env, and not by
-   --  the user.
-   --  The return value is the initial environment to be passed to
-   --  Post_Env_Actions.
-
-   procedure Post_Env_Actions
-     (Self                : access ${root_node_value_type};
-      Bound_Env, Root_Env : AST_Envs.Lexical_Env) is null;
-   --  Internal procedure that will execute all post add to env actions for
-   --  Node. This is meant to be called by Populate_Lexical_Env.
-
-   function Is_Visible_From
-     (Referenced_Env, Base_Env : AST_Envs.Lexical_Env) return Boolean;
-   --  Return whether the unit that Referenced_Env belongs to is visible from
-   --  the unit that Base_Env belongs to. If at least one of these two lexical
-   --  environments does not belong to a particular analysis unit, this raises
-   --  a Property_Error.
-
-   procedure Populate_Lexical_Env
-     (Node     : access ${root_node_value_type}'Class;
-      Root_Env : AST_Envs.Lexical_Env);
-   --  Populate the lexical environment for node and all its children
-
-   --------------------------------
-   -- Tree traversal (internals) --
-   --------------------------------
-
-   function Get_Parent
-     (N : ${root_node_type_name}) return ${root_node_type_name};
-
-   function First_Child_Index_For_Traverse
-     (N : ${root_node_type_name}) return Natural;
-
-   function Last_Child_Index_For_Traverse
-     (N : ${root_node_type_name}) return Natural;
-
-   function Get_Child
-     (N : ${root_node_type_name}; I : Natural) return ${root_node_type_name};
-
-   package Traversal_Iterators is new Langkit_Support.Tree_Traversal_Iterator
-     (Node_Type         => ${root_node_type_name},
-      No_Node           => null,
-      Node_Array        => ${T.root_node.array.array_type_name},
-      First_Child_Index => First_Child_Index_For_Traverse,
-      Last_Child_Index  => Last_Child_Index_For_Traverse,
-      Iterators         => ${root_node_type_name}_Iterators);
-
-   type Traverse_Iterator is
-      limited new Traversal_Iterators.Traverse_Iterator with null record;
-
-   type Find_Iterator is limited
-      new Ada.Finalization.Limited_Controlled
-      and ${root_node_type_name}_Iterators.Iterator with
-   record
-      Traverse_It : Traverse_Iterator;
-      --  Traverse iterator to fetch all nodes
-
-      Predicate   : ${root_node_type_name}_Predicate;
-      --  Predicate used to filter the nodes Traverse_It yields
-   end record;
-
-   overriding procedure Finalize (It : in out Find_Iterator);
-
-   type Local_Find_Iterator is limited
-      new Ada.Finalization.Limited_Controlled
-      and ${root_node_type_name}_Iterators.Iterator with
-   record
-      Traverse_It : Traverse_Iterator;
-      --  Traverse iterator to fetch all nodes
-
-      Predicate   : access function (N : ${root_node_type_name})
-                                     return Boolean;
-      --  Predicate used to filter the nodes Traverse_It yields
-   end record;
-   --  Iterator type for Find (see below)
 
    -----------------------------------
    -- Lexical utilities (internals) --
@@ -1682,32 +759,12 @@ private
    function Last_Token (TDH : Token_Data_Handler_Access) return Token_Type;
    --  Internal helper. Return a reference to the last token in TDH.
 
-   function Token
-     (Node  : access ${root_node_value_type}'Class;
-      Index : Token_Index) return Token_Type;
-   --  Helper for properties. This is used to turn token indexes as stored in
-   --  AST nodes into Token_Type values.
-
-   function Stored_Token
-     (Node  : access ${root_node_value_type}'Class;
-      Token : Token_Type)
-      return Token_Index;
-   --  Helper for properties. This is used to turn a Token_Type value into a
-   --  Token_Index value that can be stored as a field in Node. This raises a
-   --  Property_Error if Node and Token don't belong to the same analysis unit
-   --  or if Token is actually a Trivia.
-
-   function Is_Synthetic
-     (Node : access ${root_node_value_type}'Class) return Boolean;
-   --  Returns whether the node is a synthetic node, i.e. whether it was
-   --  generated for semantic analysis instead of parsing.
-
    --------------------------------
    -- Token Iterator (internals) --
    --------------------------------
 
    type Token_Iterator is record
-      Node : ${root_node_type_name};
+      Node : ${root_entity.api_name};
       Last : Token_Index;
    end record;
 
@@ -1719,36 +776,19 @@ private
    --  corresponding symbol. This is an internal helper for properties code
    --  generation.
 
-   % for array_type in ctx.sorted_types(ctx.array_types):
-   % if array_type.element_type.should_emit_array_type:
-   ${array_types.private_decl(array_type)}
-   % endif
-   % endfor
+   generic
+      type T (<>) is limited private;
+      type T_Access is access all T;
+      with procedure Destroy (Object : in out T_Access);
+   procedure Register_Destroyable_Gen
+     (Unit : Analysis_Unit; Object : T_Access);
+   --  Generic procedure to register an object so that it is automatically
+   --  destroyed when Unit is destroyed.
 
-   package Alloc_AST_List_Array is new Langkit_Support.Bump_Ptr.Array_Alloc
-     (Element_T  => ${root_node_type_name},
-      Index_Type => Positive);
-   use type Alloc_AST_List_Array.Element_Array_Access;
+   procedure Set_Filled_Caches (Unit : Analysis_Unit);
+   --  Tag Unit as having filled ccaches for properties memoization
 
-   type ${generic_list_value_type} is
-      abstract new ${root_node_value_type}
-   with record
-      Count : Natural;
-      Nodes : Alloc_AST_List_Array.Element_Array_Access;
-   end record;
-
-   % for astnode in no_builtins(ctx.astnode_types):
-     % if not astnode.is_list_type:
-       ${astnode_types.private_decl(astnode)}
-     % endif
-   % endfor
-
-   % for astnode in ctx.astnode_types:
-      % if astnode.is_root_list_type:
-         ${list_types.private_decl(astnode.element_type)}
-      % elif astnode.is_list_type:
-         ${astnode_types.private_decl(astnode)}
-      % endif
-   % endfor
+   function Get_Lex_Env_Data
+     (Unit : Analysis_Unit) return access Implementation.Lex_Env_Data_Type;
 
 end ${ada_lib_name}.Analysis;

@@ -1256,19 +1256,21 @@ class CompileCtx(object):
 
         ada_modules = [
             # Top (pure) package
-            ("pkg_main",         [], False),
+            ("pkg_main",            [], False),
             # Unit for initialization primitives
-            ("pkg_init",         ["init"], True),
-            # Unit for analysis primitives
-            ("pkg_analysis",     ["analysis"], True),
+            ("pkg_init",            ["init"], True),
+            # Unit for public analysis primitives
+            ("pkg_analysis",        ["analysis"], True),
+            # Unit for implementation of analysis primitives
+            ("pkg_implementation",  ["analysis", "implementation"], True),
             # Unit for AST node iteration primitives
-            ("pkg_iterators",    ["iterators"], True),
+            ("pkg_iterators",       ["iterators"], True),
             # Unit for all parsers
-            ("parsers/pkg_main", ["analysis", "parsers"], True),
+            ("parsers/pkg_main",    ["analysis", "parsers"], True),
             # Unit for the lexer
-            ("lexer/pkg_lexer",  ["lexer"], True),
+            ("lexer/pkg_lexer",     ["lexer"], True),
             # Unit for debug helpers
-            ("pkg_debug",        ["debug"], True),
+            ("pkg_debug",           ["debug"], True),
         ]
 
         for template_base_name, qual_name, has_body in ada_modules:
@@ -1387,7 +1389,7 @@ class CompileCtx(object):
             )
 
         self.write_ada_module(src_path, "c_api/pkg_analysis",
-                              ["Analysis", "C"])
+                              ["Analysis", "Implementation", "C"])
 
     def emit_python_api(self, python_path):
         """

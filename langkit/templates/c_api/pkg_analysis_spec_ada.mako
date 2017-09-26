@@ -28,7 +28,7 @@ with Langkit_Support.Text;  use Langkit_Support.Text;
 --  use this package. Please refer to the C header if you want to use the C
 --  API.
 
-package ${ada_lib_name}.Analysis.C is
+package ${ada_lib_name}.Analysis.Implementation.C is
 
    type ${analysis_context_type} is new System.Address;
    ${ada_c_doc('langkit.analysis_context_type', 3)}
@@ -704,4 +704,4 @@ package ${ada_lib_name}.Analysis.C is
 
    pragma Warnings (Off, "possible aliasing problem for type");
 
-end ${ada_lib_name}.Analysis.C;
+end ${ada_lib_name}.Analysis.Implementation.C;

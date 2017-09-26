@@ -22,34 +22,6 @@
 
 </%def>
 
-<%def name="public_decl(element_type)">
-
-   <%
-      elt_type = element_type.name
-
-      list_type = element_type.list
-      value_type = list_type.value_type_name()
-      type_name = list_type.name
-   %>
-
-   type ${value_type} is
-      ${'abstract' if element_type.has_abstract_list else ''}
-      new ${generic_list_value_type} with private;
-
-   % if not element_type.has_abstract_list:
-      % if ctx.generate_pp:
-      overriding function PP
-        (Node : access ${value_type}) return String;
-      % endif
-      overriding function Kind
-        (Node : access ${value_type}) return ${root_node_kind_name};
-   % endif
-
-   function Item
-     (Node  : access ${value_type}; Index : Positive) return ${elt_type};
-
-</%def>
-
 <%def name="private_decl(element_type)">
 
    <%
@@ -63,6 +35,18 @@
    type ${value_type} is
       ${'abstract' if element_type.has_abstract_list else ''}
       new ${generic_list_value_type} with null record;
+
+   % if not element_type.has_abstract_list:
+      % if ctx.generate_pp:
+      overriding function PP
+        (Node : access ${value_type}) return String;
+      % endif
+      overriding function Kind
+        (Node : access ${value_type}) return ${root_node_kind_name};
+   % endif
+
+   function Item
+     (Node  : access ${value_type}; Index : Positive) return ${elt_type};
 
    ## Helper generated for properties code. Used in CollectionGet's code
    function Get

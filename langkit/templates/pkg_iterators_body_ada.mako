@@ -9,7 +9,7 @@ package body ${ada_lib_name}.Iterators is
    function Traverse
      (Root : ${root_entity.api_name}'Class) return Traverse_Iterator is
    begin
-      return Create (Root.As_${root_entity.el_type.name});
+      return Create (Root.As_${root_entity.el_type.kwless_raw_name});
    end Traverse;
 
    ----------

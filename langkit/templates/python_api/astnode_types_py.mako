@@ -36,9 +36,10 @@
 
         # Python expression that yield a tuple that contains the names for all
         # fields that "cls" inherits.
-        parent_fields = ('{}._field_names'.format(parent_cls.name.camel)
-                         if parent_cls else
-                         '()')
+        parent_fields = (
+            '{}._field_names'.format(parent_cls.kwless_raw_name.camel)
+            if parent_cls else '()'
+        )
     %>
 
     % for field in cls.fields_with_accessors():
@@ -58,7 +59,7 @@
     )
 
     % if not cls.abstract:
-    _kind_name = ${repr(cls.name.camel)}
+    _kind_name = ${repr(cls.kwless_raw_name.camel)}
     % endif
 
     % if cls.is_list_type:
@@ -68,7 +69,7 @@
 
 <%def name="decl(cls)">
 
-class ${cls.name.camel}(${cls.base().name.camel}):
+class ${cls.kwless_raw_name.camel}(${cls.base().kwless_raw_name.camel}):
     ${py_doc(cls, 4)}
 ${subclass_decls(cls)}
 

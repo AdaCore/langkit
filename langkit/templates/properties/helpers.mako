@@ -195,8 +195,6 @@
      % endfor
      ) return Boolean
    is
-      pragma Unreferenced (Self);
-
       Node : constant ${formal_node_types[0].name} :=
          ${formal_node_types[0].name} (Node_0.El);
    begin

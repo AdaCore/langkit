@@ -86,14 +86,14 @@ def make_renderer(base_renderer=None):
         type_name = ctx.root_grammar_class.name
 
         # Name of the root AST node record type
-        value_type = type_name + names.Name("Type")
+        value_type = type_name + names.Name('Type')
 
         # Name of the root AST node kind type
-        kind_name = type_name + names.Name("Kind_Type")
+        kind_name = root_entity.api_name + names.Name('Kind_Type')
 
         # Likewise, for the generic list type
         glist_type_name = ctx.generic_list_type.name
-        glist_value_type = ctx.generic_list_type.name + names.Name("Type")
+        glist_value_type = ctx.generic_list_type.name + names.Name('Type')
 
         template_args.update({
             'no_builtins': lambda ts: filter(lambda t: not t.is_builtin(), ts),
@@ -1146,7 +1146,7 @@ class AbstractNodeData(object):
         :rtype: names.Name
         """
         assert self.struct
-        return self.struct.name + self.name
+        return self.struct.kwless_raw_name + self.name
 
     @property
     def natural_arguments(self):
@@ -1539,7 +1539,7 @@ class EntityType(StructType):
 
         name = names.Name('Entity')
         if not self.astnode.is_root_node:
-            name += self.astnode.name
+            name += self.astnode.raw_name
 
         super(EntityType, self).__init__(
             name, None, None,
@@ -1592,7 +1592,7 @@ class EntityType(StructType):
 
         :rtype: names.Name
         """
-        return names.Name('Public') + self.astnode.name
+        return self.astnode.kwless_raw_name
 
 
 class ASTNodeType(BaseStructType):
@@ -1647,6 +1647,13 @@ class ASTNodeType(BaseStructType):
         :param bool is_bool_node: Whether this not is a qualifier coming from
             the expansion of langkit.dsl.EnumNode.
         """
+        self.raw_name = name
+        self.kwless_raw_name = (self.raw_name + names.Name('Node')
+                                if is_keyword(self.raw_name) else
+                                self.raw_name)
+
+        name = names.Name('Bare') + name
+
         is_root = base is None
         is_root_list = base is not None and base.is_generic_list_type
         is_list = base is not None and (is_root_list or base.is_list_type)
@@ -1668,7 +1675,8 @@ class ASTNodeType(BaseStructType):
             is_ptr=True, null_allowed=True, is_ada_record=False,
             is_list_type=is_list, should_emit_array_type=not is_root,
             is_refcounted=False, nullexpr=null_constant(),
-            element_type=element_type
+            element_type=element_type,
+            type_repo_name=self.raw_name.camel
         )
         self._base = base
         self.is_root_node = is_root
@@ -1744,7 +1752,7 @@ class ASTNodeType(BaseStructType):
             generic_list_type_name = (
                 names.Name.from_camel(annotations.generic_list_type)
                 if annotations.generic_list_type else
-                (self.name + names.Name('Base_List'))
+                (self.kwless_raw_name + names.Name('Base_List'))
             )
 
             self.generic_list_type = ASTNodeType(
@@ -1768,6 +1776,10 @@ class ASTNodeType(BaseStructType):
         del entity_type
 
     @property
+    def dsl_name(self):
+        return self.raw_name.camel
+
+    @property
     def py_nullexpr(self):
         return "None"
 
@@ -1778,7 +1790,7 @@ class ASTNodeType(BaseStructType):
         """
         # This name is used by pretty printers-like code: we need the
         # "original" node name here, not keyword-escaped ones.
-        result = self.annotations.repr_name or self.name.camel
+        result = self.annotations.repr_name or self.kwless_raw_name.camel
         return result
 
     def is_builtin(self):
@@ -1988,7 +2000,8 @@ class ASTNodeType(BaseStructType):
         Return the name of the Ada enumerator to represent this kind of node.
         :rtype: str
         """
-        return (get_context().lang_name + self.name).camel_with_underscores
+        return (get_context().lang_name +
+                self.kwless_raw_name).camel_with_underscores
 
     def value_type_name(self):
         """
@@ -2012,7 +2025,7 @@ class ASTNodeType(BaseStructType):
         :rtype: CompiledType
         """
         result = ASTNodeType(
-            name=self.name + names.Name('List'),
+            name=self.kwless_raw_name + names.Name('List'),
             location=None, doc=None,
             base=CompiledTypeMetaclass.root_grammar_class.generic_list_type,
             fields=[], element_type=self
@@ -2222,9 +2235,7 @@ class ArrayType(CompiledType):
         for public types (such as booleans, integers, analysis units, etc.) but
         we have a different one for "wrapped" types, such as entities.
         """
-        return (names.Name('Public') + self.array_type_name
-                if self.element_type.is_entity_type else
-                self.array_type_name)
+        return self.element_type.api_name + names.Name('Array')
 
     @property
     def dsl_name(self):

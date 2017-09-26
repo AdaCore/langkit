@@ -150,27 +150,52 @@
    % endif
 </%def>
 
+<%def name="node_fields(cls, emit_null=True)">
+   <%
+      fields = cls.get_fields(include_inherited=False,
+                              predicate=lambda f: f.should_emit)
+      ext = ctx.ext('nodes', cls.raw_name, 'components')
+      memoized_properties = cls.get_memoized_properties()
+   %>
+   % if fields or ext or memoized_properties:
+       % for f in fields:
+            ${f.name} : aliased ${f.type.storage_type_name}
+               := ${f.type.storage_nullexpr};
+            ${ada_doc(f, 12)}
+       % endfor
+       ${exts.include_extension(ext)}
+   % elif emit_null:
+      null;
+   % endif
 
-<%def name="public_decl(cls)">
+   ## Put all state flags first, and only then cached values not to wast too
+   ## much space with alignment. TODO: put all the flags in a packed array.
+   % for p in memoized_properties:
+      ${p.memoization_state_field_name} : Memoization_State := Not_Computed;
+   % endfor
+   % for p in memoized_properties:
+      ${p.memoization_value_field_name} : ${p.type.name};
+   % endfor
+</%def>
+
+<%def name="private_decl(cls)">
 
    <%
       type_name = cls.value_type_name()
       base_name = cls.base().name
-      ext = ctx.ext("nodes", cls.name, "public_decls")
       memoized_properties = cls.get_memoized_properties(include_inherited=True)
-
+      library_private_field = lambda f: not library_public_field(f)
       logic_vars = cls.get_fields(
          include_inherited=True,
          predicate=lambda f: f.type.is_logic_var_type
       )
+      ext = ctx.ext('nodes', cls.raw_name, 'public_decls')
    %>
 
-   --
-   --  ${cls.name}
-   --
-
-   type ${type_name} is ${"abstract" if cls.abstract else "" }
-      new ${cls.base().value_type_name()} with private;
+   type ${type_name} is ${"abstract" if cls.abstract else ""}
+      new ${cls.base().value_type_name()} with record
+      ${node_fields(cls)}
+   end record;
 
    % if not cls.abstract:
 
@@ -217,49 +242,6 @@
    % endfor
 
    ${exts.include_extension(ext)}
-</%def>
-
-<%def name="node_fields(cls, emit_null=True)">
-   <%
-      fields = cls.get_fields(include_inherited=False,
-                              predicate=lambda f: f.should_emit)
-      ext = ctx.ext("nodes", cls.name, "components")
-      memoized_properties = cls.get_memoized_properties()
-   %>
-   % if fields or ext or memoized_properties:
-       % for f in fields:
-            ${f.name} : aliased ${f.type.storage_type_name}
-               := ${f.type.storage_nullexpr};
-            ${ada_doc(f, 12)}
-       % endfor
-       ${exts.include_extension(ext)}
-   % elif emit_null:
-      null;
-   % endif
-
-   ## Put all state flags first, and only then cached values not to wast too
-   ## much space with alignment. TODO: put all the flags in a packed array.
-   % for p in memoized_properties:
-      ${p.memoization_state_field_name} : Memoization_State := Not_Computed;
-   % endfor
-   % for p in memoized_properties:
-      ${p.memoization_value_field_name} : ${p.type.name};
-   % endfor
-</%def>
-
-<%def name="private_decl(cls)">
-
-   <%
-      type_name = cls.value_type_name()
-      base_name = cls.base().name
-      memoized_properties = cls.get_memoized_properties(include_inherited=True)
-      library_private_field = lambda f: not library_public_field(f)
-   %>
-
-   type ${type_name} is ${"abstract" if cls.abstract else ""}
-      new ${cls.base().value_type_name()} with record
-      ${node_fields(cls)}
-   end record;
 
    ## Private dispatching properties
    % for prop in cls.get_properties(include_inherited=False, \
@@ -350,7 +332,7 @@
 
    type_name = cls.value_type_name()
 
-   ext = ctx.ext("nodes", cls.name, "bodies")
+   ext = ctx.ext('nodes', cls.raw_name, 'bodies')
 
    memoized_properties = cls.get_memoized_properties(include_inherited=True)
 

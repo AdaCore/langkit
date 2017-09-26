@@ -12,6 +12,7 @@
 with Ada.Containers;                  use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Ordered_Maps;
+with Ada.Containers.Vectors;
 with Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
@@ -40,6 +41,8 @@ with Langkit_Support.Adalog.Pure_Relations;
 use Langkit_Support.Adalog.Pure_Relations;
 pragma Warnings (On, "referenced");
 
+with ${ada_lib_name}.Analysis.Implementation;
+use ${ada_lib_name}.Analysis.Implementation;
 with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;
 with ${ada_lib_name}.Lexer;
 
@@ -55,47 +58,17 @@ with ${ctx.symbol_canonicalizer.unit_fqn};
 
 package body ${ada_lib_name}.Analysis is
 
-   type Analysis_Context_Private_Part_Type is record
-      Parser : Parser_Type;
-      --  Main parser type. TODO: If we want to parse in several tasks, we'll
-      --  replace that by an array of parsers.
-   end record;
+   use AST_Envs;
 
-   ${array_types.body(root_node_array)}
+   function Convert is new Ada.Unchecked_Conversion
+     (Public_Entity_Info, Entity_Info);
+   function Convert is new Ada.Unchecked_Conversion
+     (Entity_Info, Public_Entity_Info);
 
-   % for array_type in ctx.sorted_types(ctx.array_types):
-   % if array_type.element_type.should_emit_array_type:
-   ${array_types.body(array_type)}
-   % endif
-   % endfor
-
-   procedure Destroy (Self : in out Lex_Env_Data_Type);
-   --  Destroy data associated to lexical environments
-
-   type Containing_Env_Element is record
-      Env  : Lexical_Env;
-      Key  : Symbol_Type;
-      Node : ${root_node_type_name};
-   end record;
-   --  Tuple of values passed to Lexical_Env.Add. Used in the lexical
-   --  environment rerooting machinery: see Lex_Env_Data_Type.
-
-   package Containing_Envs is new Langkit_Support.Vectors
-     (Containing_Env_Element);
-
-   type Lex_Env_Data_Type is record
-      Is_Contained_By : Containing_Envs.Vector;
-      --  Lexical env population for the unit that owns this Lex_Env_Data may
-      --  have added AST nodes it owns to the lexical environments that belong
-      --  to other units. For each of these AST nodes, this vector contains an
-      --  entry that records the target environment, the AST node and the
-      --  corresponding symbol.
-
-      Contains : ${root_node_type_name}_Vectors.Vector;
-      --  The unit that owns this Lex_Env_Data owns a set of lexical
-      --  environments. This vector contains the list of AST nodes that were
-      --  added to these environments and that come from other units.
-   end record;
+   package Node_Arrays is new Langkit_Support.Array_Utils
+     (${root_entity.api_name},
+      Positive,
+      ${root_entity.array.api_name});
 
    procedure Remove_Exiled_Entries (Self : Lex_Env_Data);
    --  Remove lex env entries that references some of the unit's nodes, in
@@ -108,13 +81,6 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Update_After_Reparse (Unit : Analysis_Unit);
    --  Update stale lexical environment data after the reparsing of Unit
-
-   ## Utility package
-   package ${root_node_type_name}_Arrays
-   is new Langkit_Support.Array_Utils
-     (${root_node_type_name},
-      ${root_node_array.pkg_vector}.Index_Type,
-      ${root_node_array.pkg_vector}.Elements_Array);
 
    ##  Make logic operations on nodes accessible
    use Eq_Node, Eq_Node.Raw_Impl;
@@ -170,40 +136,28 @@ package body ${ada_lib_name}.Analysis is
       --  Create pre-computed symbol literals in Symbols and return them
    % endif
 
-   function Convert
-     (TDH      : Token_Data_Handler;
-      Token    : Token_Type;
-      Raw_Data : Lexer.Token_Data_Type) return Token_Data_Type;
-   --  Turn data from TDH and Raw_Data into a user-ready token data record
+   procedure Reset_Caches (Context : Analysis_Context);
+   --  Call Reset_Caches on all units Context contains
 
-   ------------------------
-   -- Address_To_Id_Maps --
-   ------------------------
+   procedure Reset_Caches (Unit : Analysis_Unit);
+   --  If AST_Node is not null, invoke Reset_Caches primitives on all the nodes
+   --  it contains.
 
-   --  Those maps are used to give unique ids to lexical envs while pretty
-   --  printing them.
+   procedure Register_Destroyable_Helper
+     (Unit    : Analysis_Unit;
+      Object  : System.Address;
+      Destroy : Destroy_Procedure);
+   --  Common underlying implementation for Register_Destroyable_Gen
 
-   package Address_To_Id_Maps is new Ada.Containers.Hashed_Maps
-     (Lexical_Env, Integer, Hash, "=");
-
-   type Dump_Lexical_Env_State is record
-      Env_Ids : Address_to_Id_Maps.Map;
-      --  Mapping: Lexical_Env -> Integer, used to remember which unique Ids we
-      --  assigned to the lexical environments we found.
-
-      Next_Id : Positive := 1;
-      --  Id to assign to the next unknown lexical environment
-
-      Root_Env : Lexical_Env;
-      --  Lexical environment we consider a root (this is the Root_Scope from
-      --  the current analysis context), or null if unknown.
-   end record;
-   --  Holder for the state of lexical environment dumpers
-
-   function Get_Env_Id
-     (E : Lexical_Env; State : in out Dump_Lexical_Env_State) return String;
-   --  If E is known, return its unique Id from State. Otherwise, assign it a
-   --  new unique Id and return it.
+   procedure Destroy_Rebindings
+     (Rebindings : access Env_Rebindings_Vectors.Vector);
+   --  Destroy all rebindings in Rebindings, plus their child rebindings. Note
+   --  that children can belong to various analysis units, so this takes care
+   --  of removing the destroyed rebindings from each concerned analysis unit's
+   --  Rebindings vector.
+   --
+   --  This require an access parameter in order to avoid aliasing issues in
+   --  the body.
 
    --------------------
    -- Update_Charset --
@@ -541,8 +495,8 @@ package body ${ada_lib_name}.Analysis is
       Unit.AST_Mem_Pool := Create;
       Unit.Context.Private_Part.Parser.Mem_Pool := Unit.AST_Mem_Pool;
 
-      Unit.AST_Root :=
-        Parse (Unit.Context.Private_Part.Parser, Rule => Unit.Rule);
+      Unit.AST_Root := ${root_node_type_name}
+        (Parse (Unit.Context.Private_Part.Parser, Rule => Unit.Rule));
       Unit.Diagnostics := Unit.Context.Private_Part.Parser.Diagnostics;
    end Do_Parsing;
 
@@ -692,7 +646,7 @@ package body ${ada_lib_name}.Analysis is
       begin
          --  whole analysis context behaves, we have to invalidate caches. This
          --  is likely overkill, but kill all caches here as it's easy to do.
-         Analysis.Reset_Caches (Unit.Context);
+         Reset_Caches (Unit.Context);
 
          --  Remove all lexical environment artifacts from this analysis unit
          Remove_Exiled_Entries (Unit.Lex_Env_Data_Acc);
@@ -1045,16 +999,6 @@ package body ${ada_lib_name}.Analysis is
    end Populate_Lexical_Env;
 
    ---------------------
-   -- Pre_Env_Actions --
-   ---------------------
-
-   function Pre_Env_Actions
-     (Self                : access ${root_node_value_type};
-      Bound_Env, Root_Env : AST_Envs.Lexical_Env;
-      Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env
-   is (null);
-
-   ---------------------
    -- Is_Visible_From --
    ---------------------
 
@@ -1106,19 +1050,6 @@ package body ${ada_lib_name}.Analysis is
       Dump_Lexical_Env (Unit.AST_Root, Unit.Context.Root_Scope);
    end Dump_Lexical_Env;
 
-   --------------------------
-   -- Register_Destroyable --
-   --------------------------
-
-   procedure Register_Destroyable_Helper
-     (Unit    : Analysis_Unit;
-      Object  : System.Address;
-      Destroy : Destroy_Procedure)
-   is
-   begin
-      Destroyable_Vectors.Append (Unit.Destroyables, (Object, Destroy));
-   end Register_Destroyable_Helper;
-
    % if ctx.default_unit_provider:
    -------------------
    -- Unit_Provider --
@@ -1129,22 +1060,12 @@ package body ${ada_lib_name}.Analysis is
       return Unit_Provider_Access_Cst is (Context.Unit_Provider);
    % endif
 
-   ----------------
-   -- Token_Data --
-   ----------------
-
-   function Token_Data (Unit : Analysis_Unit) return Token_Data_Handler_Access
-   is (Unit.TDH'Access);
-
    ----------
    -- Root --
    ----------
 
-   function Root (Unit : Analysis_Unit) return ${root_node_type_name} is
-     (Unit.AST_Root);
-
    function Root (Unit : Analysis_Unit) return ${root_entity.api_name} is
-     ((Unit.AST_Root, No_Entity_Info));
+     ((Unit.AST_Root, No_Public_Entity_Info));
 
    -----------------
    -- First_Token --
@@ -1198,18 +1119,6 @@ package body ${ada_lib_name}.Analysis is
       Unit.Has_Filled_Caches := True;
    end Set_Filled_Caches;
 
-   --------------
-   -- Get_Unit --
-   --------------
-
-   function Get_Unit
-     (Node : access ${root_node_value_type}'Class)
-      return Analysis_Unit
-   is
-   begin
-      return Node.Unit;
-   end Get_Unit;
-
    --------------------
    -- Reference_Unit --
    --------------------
@@ -1225,8 +1134,7 @@ package body ${ada_lib_name}.Analysis is
    ------------------------
 
    function Is_Referenced_From
-     (Referenced, Unit : Analysis_Unit) return Boolean
-   is
+     (Referenced, Unit : Analysis_Unit) return Boolean is
    begin
       if Unit = null or else Referenced = null then
          return False;
@@ -1242,28 +1150,10 @@ package body ${ada_lib_name}.Analysis is
    ----------------------
 
    function Get_Lex_Env_Data
-     (Unit : Analysis_Unit) return Lex_Env_Data
-   is
+     (Unit : Analysis_Unit) return access Implementation.Lex_Env_Data_Type is
    begin
       return Unit.Lex_Env_Data_Acc;
    end Get_Lex_Env_Data;
-
-   ------------------------------
-   -- Register_Destroyable_Gen --
-   ------------------------------
-
-   procedure Register_Destroyable_Gen
-     (Unit : Analysis_Unit; Object : T_Access)
-   is
-      function Convert is new Ada.Unchecked_Conversion
-        (System.Address, Destroy_Procedure);
-      procedure Destroy_Procedure (Object : in out T_Access) renames Destroy;
-   begin
-      Register_Destroyable_Helper
-        (Unit,
-         Object.all'Address,
-         Convert (Destroy_Procedure'Address));
-   end Register_Destroyable_Gen;
 
    ------------------
    -- Reset_Caches --
@@ -1288,6 +1178,36 @@ package body ${ada_lib_name}.Analysis is
       end if;
       Unit.Has_Filled_Caches := False;
    end Reset_Caches;
+
+   --------------------------
+   -- Register_Destroyable --
+   --------------------------
+
+   procedure Register_Destroyable_Helper
+     (Unit    : Analysis_Unit;
+      Object  : System.Address;
+      Destroy : Destroy_Procedure)
+   is
+   begin
+      Destroyable_Vectors.Append (Unit.Destroyables, (Object, Destroy));
+   end Register_Destroyable_Helper;
+
+   ------------------------------
+   -- Register_Destroyable_Gen --
+   ------------------------------
+
+   procedure Register_Destroyable_Gen
+     (Unit : Analysis_Unit; Object : T_Access)
+   is
+      function Convert is new Ada.Unchecked_Conversion
+        (System.Address, Destroy_Procedure);
+      procedure Destroy_Procedure (Object : in out T_Access) renames Destroy;
+   begin
+      Register_Destroyable_Helper
+        (Unit,
+         Object.all'Address,
+         Convert (Destroy_Procedure'Address));
+   end Register_Destroyable_Gen;
 
    ${array_types.body(T.LexicalEnv.array)}
    ${array_types.body(T.root_node.entity.array)}
@@ -1327,254 +1247,6 @@ package body ${ada_lib_name}.Analysis is
    -- Destroy --
    -------------
 
-   procedure Destroy (Node : access ${root_node_value_type}'Class) is
-   begin
-      if Node = null then
-         return;
-      end if;
-
-      Node.Free_Extensions;
-      Node.Reset_Caches;
-      for I in 1 .. Node.Child_Count loop
-         Destroy (Node.Child (I));
-      end loop;
-   end Destroy;
-
-   -----------
-   -- Child --
-   -----------
-
-   function Child (Node  : access ${root_node_value_type}'Class;
-                   Index : Positive) return ${root_node_type_name}
-   is
-      Result          : ${root_node_type_name};
-      Index_In_Bounds : Boolean;
-   begin
-      Get_Child (Node, Index, Index_In_Bounds, Result);
-      return (if Index_In_Bounds then Result else null);
-   end Child;
-
-   --------------
-   -- Traverse --
-   --------------
-
-   function Traverse
-     (Node  : access ${root_node_value_type}'Class;
-      Visit : access function (Node : access ${root_node_value_type}'Class)
-              return Visit_Status)
-     return Visit_Status
-   is
-      Status : Visit_Status := Into;
-
-   begin
-      if Node /= null then
-         Status := Visit (Node);
-
-         --  Skip processing the child nodes if the returned status is Over
-         --  or Stop. In the former case the previous call to Visit has taken
-         --  care of processing the needed childs, and in the latter case we
-         --  must immediately stop processing the tree.
-
-         if Status = Into then
-            for I in 1 .. Child_Count (Node) loop
-               declare
-                  Cur_Child : constant ${root_node_type_name} :=
-                     Child (Node, I);
-
-               begin
-                  if Cur_Child /= null then
-                     Status := Traverse (Cur_Child, Visit);
-                     exit when Status /= Into;
-                  end if;
-               end;
-            end loop;
-         end if;
-      end if;
-
-      if Status = Stop then
-         return Stop;
-
-      --  At this stage the Over status has no sense and we just continue
-      --  processing the tree.
-
-      else
-         return Into;
-      end if;
-   end Traverse;
-
-   --------------
-   -- Traverse --
-   --------------
-
-   procedure Traverse
-     (Node  : access ${root_node_value_type}'Class;
-      Visit : access function (Node : access ${root_node_value_type}'Class)
-                               return Visit_Status)
-   is
-      Result_Status : Visit_Status;
-      pragma Unreferenced (Result_Status);
-   begin
-      Result_Status := Traverse (Node, Visit);
-   end Traverse;
-
-   ------------------------
-   -- Traverse_With_Data --
-   ------------------------
-
-   function Traverse_With_Data
-     (Node  : access ${root_node_value_type}'Class;
-      Visit : access function (Node : access ${root_node_value_type}'Class;
-                               Data : in out Data_type)
-                               return Visit_Status;
-      Data  : in out Data_Type)
-      return Visit_Status
-   is
-      function Helper (Node : access ${root_node_value_type}'Class)
-                       return Visit_Status;
-
-      ------------
-      -- Helper --
-      ------------
-
-      function Helper (Node : access ${root_node_value_type}'Class)
-                       return Visit_Status
-      is
-      begin
-         return Visit (Node, Data);
-      end Helper;
-
-      Saved_Data : Data_Type;
-      Result     : Visit_Status;
-
-   begin
-      if Reset_After_Traversal then
-         Saved_Data := Data;
-      end if;
-      Result := Traverse (Node, Helper'Access);
-      if Reset_After_Traversal then
-         Data := Saved_Data;
-      end if;
-      return Result;
-   end Traverse_With_Data;
-
-   --------------
-   -- Traverse --
-   --------------
-
-   function Traverse
-     (Root : access ${root_node_value_type}'Class)
-      return Traverse_Iterator
-   is
-   begin
-      return Create (Root);
-   end Traverse;
-
-   ----------------
-   -- Get_Parent --
-   ----------------
-
-   function Get_Parent
-     (N : ${root_node_type_name}) return ${root_node_type_name}
-   is (N.Parent);
-
-   ------------------------------------
-   -- First_Child_Index_For_Traverse --
-   ------------------------------------
-
-   function First_Child_Index_For_Traverse
-     (N : ${root_node_type_name}) return Natural
-   is (N.First_Child_Index);
-
-   -----------------------------------
-   -- Last_Child_Index_For_Traverse --
-   -----------------------------------
-
-   function Last_Child_Index_For_Traverse
-     (N : ${root_node_type_name}) return Natural
-   is (N.Last_Child_Index);
-
-   ---------------
-   -- Get_Child --
-   ---------------
-
-   function Get_Child
-     (N : ${root_node_type_name}; I : Natural) return ${root_node_type_name}
-   is (N.Child (I));
-
-   ----------
-   -- Next --
-   ----------
-
-   function Next (It       : in out Find_Iterator;
-                  Element  : out ${root_node_type_name}) return Boolean
-   is
-   begin
-      while Next (It.Traverse_It, Element) loop
-         if It.Predicate.Evaluate (Element) then
-            return True;
-         end if;
-      end loop;
-      return False;
-   end Next;
-
-   --------------
-   -- Finalize --
-   --------------
-
-   overriding procedure Finalize (It : in out Find_Iterator) is
-   begin
-      Destroy (It.Predicate);
-   end Finalize;
-
-   ----------
-   -- Next --
-   ----------
-
-   overriding function Next
-     (It      : in out Local_Find_Iterator;
-      Element : out ${root_node_type_name})
-      return Boolean
-   is
-   begin
-      while Next (It.Traverse_It, Element) loop
-         if It.Predicate (Element) then
-            return True;
-         end if;
-      end loop;
-      return False;
-   end Next;
-
-   ----------
-   -- Find --
-   ----------
-
-   function Find
-     (Root      : access ${root_node_value_type}'Class;
-      Predicate : access function (N : ${root_node_type_name}) return Boolean)
-     return Local_Find_Iterator
-   is
-      Dummy  : ${root_node_type_name};
-      Ignore : Boolean;
-   begin
-      return Ret : Local_Find_Iterator
-        := Local_Find_Iterator'
-          (Ada.Finalization.Limited_Controlled with
-           Traverse_It => Traverse (Root),
-
-           --  We still want to provide this functionality, even though it is
-           --  unsafe. TODO: We might be able to make a safe version of this
-           --  using generics. Still would be more verbose though.
-           Predicate   => Predicate'Unrestricted_Access.all)
-      do
-         Ignore := Next (Ret.Traverse_It, Dummy);
-
-      end return;
-   end Find;
-
-   -------------
-   -- Destroy --
-   -------------
-
    procedure Destroy (Self : in out Lex_Env_Data_Type) is
    begin
       Self.Is_Contained_By.Destroy;
@@ -1592,62 +1264,6 @@ package body ${ada_lib_name}.Analysis is
       Destroy (Self.all);
       Free (Self);
    end Destroy;
-
-   ----------
-   -- Find --
-   ----------
-
-   function Find
-     (Root      : access ${root_node_value_type}'Class;
-      Predicate : ${root_node_type_name}_Predicate)
-      return Find_Iterator
-   is
-      Dummy  : ${root_node_type_name};
-      Ignore : Boolean;
-   begin
-      return Ret : Find_Iterator :=
-        (Ada.Finalization.Limited_Controlled with
-         Traverse_It => Traverse (Root),
-         Predicate   => Predicate)
-      do
-         Ignore := Next (Ret.Traverse_It, Dummy);
-      end return;
-   end Find;
-
-   ----------------
-   -- Find_First --
-   ----------------
-
-   function Find_First
-     (Root      : access ${root_node_value_type}'Class;
-      Predicate : ${root_node_type_name}_Predicate)
-      return ${root_node_type_name}
-   is
-      I      : Find_Iterator := Find (Root, Predicate);
-      Result : ${root_node_type_name};
-      Dummy  : ${root_node_type_name};
-      Ignore : Boolean;
-   begin
-      Ignore := Next (I.Traverse_It, Dummy);
-      --  Ignore first result
-      if not I.Next (Result) then
-         Result := null;
-      end if;
-      return Result;
-   end Find_First;
-
-   --------------
-   -- Evaluate --
-   --------------
-
-   function Evaluate
-     (P : access ${root_node_type_name}_Kind_Filter;
-      N : ${root_node_type_name})
-      return Boolean
-   is
-   begin
-      return N.Kind = P.Kind;
-   end Evaluate;
 
    ----------------
    -- Sloc_Range --
@@ -2139,16 +1755,6 @@ package body ${ada_lib_name}.Analysis is
    function Element (Self : Token_Iterator; Tok : Token_Type) return Token_Type
    is (Tok);
 
-   -----------------
-   -- Token_Range --
-   -----------------
-
-   function Token_Range
-     (Node : access ${root_node_value_type}'Class)
-      return Token_Iterator
-   is
-     (Token_Iterator'(${root_node_type_name} (Node), Node.Token_End_Index));
-
    --------------
    -- Raw_Data --
    --------------
@@ -2157,26 +1763,6 @@ package body ${ada_lib_name}.Analysis is
      (if T.Trivia = No_Token_Index
       then Token_Vectors.Get (T.TDH.Tokens, Natural (T.Token))
       else Trivia_Vectors.Get (T.TDH.Trivias, Natural (T.Trivia)).T);
-
-   -------------
-   -- Convert --
-   -------------
-
-   function Convert
-     (TDH      : Token_Data_Handler;
-      Token    : Token_Type;
-      Raw_Data : Lexer.Token_Data_Type) return Token_Data_Type is
-   begin
-      return (Kind          => Raw_Data.Kind,
-              Is_Trivia     => Token.Trivia /= No_Token_Index,
-              Index         => (if Token.Trivia = No_Token_Index
-                                then Token.Token
-                                else Token.Trivia),
-              Source_Buffer => Text_Cst_Access (TDH.Source_Buffer),
-              Source_First  => Raw_Data.Source_First,
-              Source_Last   => Raw_Data.Source_Last,
-              Sloc_Range    => Raw_Data.Sloc_Range);
-   end Convert;
 
    ----------
    -- Data --
@@ -2295,13 +1881,14 @@ package body ${ada_lib_name}.Analysis is
    --------------------------
 
    function Children_With_Trivia
-     (Node : access ${root_node_value_type}'Class) return Children_Array
+     (Node : ${root_entity.api_name}'Class) return Children_Array
    is
-      package Children_Vectors is new Langkit_Support.Vectors (Child_Record);
+      package Children_Vectors is new Ada.Containers.Vectors
+        (Positive, Child_Record);
       use Children_Vectors;
 
-      Ret_Vec : Children_Vectors.Vector;
-      TDH     : Token_Data_Handler renames Node.Unit.TDH;
+      Ret_Vec : Vector;
+      TDH     : Token_Data_Handler renames Node.Node.Unit.TDH;
 
       procedure Append_Trivias (First, Last : Token_Index);
       --  Append all the trivias of tokens between indices First and Last to
@@ -2311,120 +1898,52 @@ package body ${ada_lib_name}.Analysis is
       begin
          for I in First .. Last loop
             for D of Get_Trivias (TDH, I) loop
-               Append (Ret_Vec, (Kind   => Trivia,
-                                 Trivia => (TDH    => Node.Unit.TDH'Access,
-                                            Token  => I,
-                                            Trivia => D)));
+               Ret_Vec.Append ((Kind   => Trivia,
+                                Trivia => (TDH    => TDH'Access,
+                                           Token  => I,
+                                           Trivia => D)));
             end loop;
          end loop;
       end Append_Trivias;
 
-      function Filter_Children (N : ${root_node_type_name}) return Boolean is
+      function Filter_Children
+        (N : ${root_entity.api_name}) return Boolean
+      is
          --  Get rid of null nodes
-        (N /= null
+        (not N.Is_Null
          --  Get rid of nodes with no real existence in the source code
          and then not N.Is_Ghost);
 
-      First_Child : constant ${root_node_array.index_type()} :=
-         ${root_node_array.index_type()}'First;
-      N_Children  : constant ${root_node_array.api_name}
-        := ${root_node_array.api_name}
-             (${root_node_type_name}_Arrays.Filter
-              (${root_node_array.pkg_vector}.Elements_Array
-                (${root_node_array.api_name}'(Children (Node))),
-               Filter_Children'Access));
+      First_Child : constant Positive := 1;
+      N_Children  : constant ${root_entity.array.api_name} :=
+         Node_Arrays.Filter
+           (Node.Children, Filter_Children'Access);
    begin
       if N_Children'Length > 0
-        and then (Node.Token_Start_Index
-                    /= N_Children (First_Child).Token_Start_Index)
+        and then (Node.Node.Token_Start_Index
+                    /= N_Children (First_Child).Node.Token_Start_Index)
       then
-         Append_Trivias (Node.Token_Start_Index,
-                         N_Children (First_Child).Token_Start_Index - 1);
+         Append_Trivias (Node.Node.Token_Start_Index,
+                         N_Children (First_Child).Node.Token_Start_Index - 1);
       end if;
 
       for I in N_Children'Range loop
-         Append (Ret_Vec, Child_Record'(Child, N_Children (I)));
-         Append_Trivias (N_Children (I).Token_End_Index,
+         Ret_Vec.Append (Child_Record'(Child, N_Children (I)));
+         Append_Trivias (N_Children (I).Node.Token_End_Index,
                          (if I = N_Children'Last
-                          then Node.Token_End_Index - 1
-                          else N_Children (I + 1).Token_Start_Index - 1));
+                          then Node.Node.Token_End_Index - 1
+                          else N_Children (I + 1).Node.Token_Start_Index - 1));
       end loop;
 
-      return A : constant Children_Array :=
-         Children_Array (To_Array (Ret_Vec))
-      do
-         --  Don't forget to free Ret_Vec, since its memory is not
-         --  automatically managed.
-         Destroy (Ret_Vec);
-      end return;
-   end Children_With_Trivia;
-
-   ---------------
-   -- PP_Trivia --
-   ---------------
-
-   procedure PP_Trivia
-     (Node        : access ${root_node_value_type}'Class;
-      Line_Prefix : String := "")
-   is
-      Children_Prefix : constant String := Line_Prefix & "|  ";
-   begin
-      Put_Line (Line_Prefix & Kind_Name (Node));
-      for C of Children_With_Trivia (Node) loop
-         case C.Kind is
-            when Trivia =>
-               Put_Line (Children_Prefix & Text (C.Trivia));
-            when Child =>
-               C.Node.PP_Trivia (Children_Prefix);
-         end case;
-      end loop;
-   end PP_Trivia;
-
-   --------------------------
-   -- Populate_Lexical_Env --
-   --------------------------
-
-   procedure Populate_Lexical_Env
-     (Node     : access ${root_node_value_type}'Class;
-      Root_Env : AST_Envs.Lexical_Env)
-   is
-
-      procedure Populate_Internal
-        (Node      : access ${root_node_value_type}'Class;
-         Bound_Env : Lexical_Env);
-
-      -----------------------
-      -- Populate_Internal --
-      -----------------------
-
-      procedure Populate_Internal
-        (Node      : access ${root_node_value_type}'Class;
-         Bound_Env : Lexical_Env)
-      is
-         Initial_Env : Lexical_Env;
+      declare
+         A : Children_Array (1 .. Natural (Ret_Vec.Length));
       begin
-         if Node = null then
-            return;
-         end if;
-
-         --  By default (i.e. unless env actions add a new env),
-         --  the environment we store in Node is the current one.
-         Node.Self_Env := Bound_Env;
-
-         Initial_Env := Node.Pre_Env_Actions (Bound_Env, Root_Env);
-
-         --  Call recursively on children
-         for C of ${root_node_array.api_name}'(Children (Node)) loop
-            Populate_Internal (C, Node.Self_Env);
+         for I in A'Range loop
+            A (I) := Ret_Vec.Element (I);
          end loop;
-
-         Node.Post_Env_Actions (Initial_Env, Root_Env);
-      end Populate_Internal;
-
-      Env : AST_Envs.Lexical_Env := Root_Env;
-   begin
-      Populate_Internal (Node, Env);
-   end Populate_Lexical_Env;
+         return A;
+      end;
+   end Children_With_Trivia;
 
    -------------------------------
    -- Node_File_And_Sloc_Image  --
@@ -2434,36 +1953,6 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_node_type_name}) return Text_Type
    is (To_Text (To_String (Node.Unit.File_Name))
        & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node)))));
-
-   --------------------------
-   -- Raise_Property_Error --
-   --------------------------
-
-   procedure Raise_Property_Error (Message : String := "") is
-   begin
-      if Message'Length = 0 then
-         raise Property_Error;
-      else
-         raise Property_Error with Message;
-      end if;
-   end Raise_Property_Error;
-
-   -------------------
-   -- Is_Rebindable --
-   -------------------
-
-   function Is_Rebindable (Node : ${root_node_type_name}) return Boolean is
-   begin
-      <% rebindable_nodes = [n for n in ctx.astnode_types
-                             if n.annotations.rebindable] %>
-      % if not rebindable_nodes:
-         return True;
-      % else:
-         <% type_sum = ' | '.join("{}_Type'Class".format(n.name)
-                                  for n in rebindable_nodes) %>
-         return Node.all in ${type_sum};
-      % endif
-   end Is_Rebindable;
 
    ------------------------
    -- Register_Rebinding --
@@ -2532,33 +2021,6 @@ package body ${ada_lib_name}.Analysis is
       end loop;
       return Ret_Env;
    end To_Sorted_Env;
-
-   ----------------
-   -- Get_Env_Id --
-   ----------------
-
-   function Get_Env_Id
-     (E : Lexical_Env; State : in out Dump_Lexical_Env_State) return String
-   is
-      C        : Address_To_Id_Maps.Cursor;
-      Inserted : Boolean;
-   begin
-      if E = null then
-         return "$null";
-
-      elsif E = State.Root_Env then
-         --  Insert root env with a special Id so that we only print it once
-         State.Env_Ids.Insert (E, -1, C, Inserted);
-         return "$root";
-      end if;
-
-      State.Env_Ids.Insert (E, State.Next_Id, C, Inserted);
-      if Inserted then
-         State.Next_Id := State.Next_Id + 1;
-      end if;
-
-      return '@' & Stripped_Image (Address_To_Id_Maps.Element (C));
-   end Get_Env_Id;
 
    ----------
    -- Dump --
@@ -2683,11 +2145,10 @@ package body ${ada_lib_name}.Analysis is
    -- Dump_Lexical_Env --
    ----------------------
 
-   procedure Dump_Lexical_Env
-     (Node     : access ${root_node_value_type}'Class;
-      Root_Env : AST_Envs.Lexical_Env)
-   is
-      State : Dump_Lexical_Env_State := (Root_Env => Root_Env, others => <>);
+   procedure Dump_Lexical_Env_Tree (Unit : Analysis_Unit) is
+      Node     : constant ${root_node_type_name} := Unit.AST_Root;
+      Root_Env : constant Lexical_Env := Unit.Context.Root_Scope;
+      State    : Dump_Lexical_Env_State := (Root_Env => Root_Env, others => <>);
 
       --------------------------
       -- Explore_Parent_Chain --
@@ -2740,7 +2201,7 @@ package body ${ada_lib_name}.Analysis is
       --  environments.
    begin
       Internal (${root_node_type_name} (Node));
-   end Dump_Lexical_Env;
+   end Dump_Lexical_Env_Tree;
 
    -----------------------------------
    -- Dump_Lexical_Env_Parent_Chain --
@@ -2773,37 +2234,6 @@ package body ${ada_lib_name}.Analysis is
       end loop;
    end Dump_Lexical_Env_Parent_Chain;
 
-   -------------
-   -- Parents --
-   -------------
-
-   function Parents
-     (Node         : access ${root_node_value_type}'Class;
-      Include_Self : Boolean := True)
-      return ${root_node_array.name}
-   is
-      Count : Natural := 0;
-      Start : ${root_node_type_name} :=
-        ${root_node_type_name} (if Include_Self then Node else Node.Parent);
-      Cur   : ${root_node_type_name} := Start;
-   begin
-      while Cur /= null loop
-         Count := Count + 1;
-         Cur := Cur.Parent;
-      end loop;
-
-      declare
-         Result : constant ${root_node_array.name} := Create (Count);
-      begin
-         Cur := Start;
-         for I in Result.Items'Range loop
-            Result.Items (I) := Cur;
-            Cur := Cur.Parent;
-         end loop;
-         return Result;
-      end;
-   end Parents;
-
    -----------------------
    -- First_Child_Index --
    -----------------------
@@ -2819,17 +2249,6 @@ package body ${ada_lib_name}.Analysis is
    function Last_Child_Index
      (Node : access ${root_node_value_type}'Class) return Natural
    is (Node.Child_Count);
-
-   ------------
-   -- Parent --
-   ------------
-
-   function Parent
-     (Node : access ${root_node_value_type}'Class) return ${root_node_type_name}
-   is
-   begin
-      return Node.Parent;
-   end Parent;
 
    ------------------
    -- Stored_Token --
@@ -3043,294 +2462,36 @@ package body ${ada_lib_name}.Analysis is
       return ${T.LexicalEnv.name}
    is (Group (Envs.Items));
 
-   % for astnode in ctx.astnode_types:
-       ${astnode_types.body_decl(astnode)}
-   % endfor
-
-   ------------------
-   -- Children_Env --
-   ------------------
-
-   function Children_Env
-     (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Lexical_Env
-   is (Rebind_Env (Node.Self_Env, E_Info));
-
-   --------------
-   -- Node_Env --
-   --------------
-
-   function Node_Env
-     (Node   : access ${root_node_value_type};
-      E_Info : Entity_Info := No_Entity_Info) return AST_Envs.Lexical_Env
-   is (Rebind_Env (Node.Self_Env, E_Info));
-
-   ------------
-   -- Parent --
-   ------------
-
-   function Parent
-     (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity is
-   begin
-      --  TODO: shed entity information as appropriate
-      return (Node.Parent, E_Info);
-   end Parent;
-
-   -------------
-   -- Parents --
-   -------------
-
-   function Parents
-     (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity_Array_Access
-   is
-      Bare_Parents : ${root_node_array.name} := Node.Parents;
-      Result       : Entity_Array_Access := Create (Bare_Parents.N);
-   begin
-      --  TODO: shed entity information as appropriate
-      for I in Bare_Parents.Items'Range loop
-         Result.Items (I) := (Bare_Parents.Items (I), E_Info);
-      end loop;
-      Dec_Ref (Bare_Parents);
-      return Result;
-   end Parents;
-
-   --------------
-   -- Children --
-   --------------
-
-   function Children
-     (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity_Array_Access
-   is
-      Bare_Children : ${root_node_array.name} := Node.Children;
-      Result        : Entity_Array_Access := Create (Bare_Children.N);
-   begin
-      --  TODO: shed entity information as appropriate
-      for I in Bare_Children.Items'Range loop
-         Result.Items (I) := (Bare_Children.Items (I), E_Info);
-      end loop;
-      Dec_Ref (Bare_Children);
-      return Result;
-   end Children;
-
-   ----------------------
-   -- Previous_Sibling --
-   ----------------------
-
-   function Previous_Sibling
-     (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity is
-   begin
-      return (Node.Previous_Sibling, E_Info);
-   end Previous_Sibling;
-
-   ------------------
-   -- Next_Sibling --
-   ------------------
-
-   function Next_Sibling
-     (Node   : access ${root_node_value_type}'Class;
-      E_Info : Entity_Info := No_Entity_Info) return Entity is
-   begin
-      return (Node.Next_Sibling, E_Info);
-   end Next_Sibling;
-
-   ## Generate the bodies of the root grammar class properties
-   % for prop in T.root_node.get_properties(include_inherited=False):
-   ${prop.prop_def}
-   % endfor
-
-   ## Generate bodies of untyped wrappers
-   % for prop in T.root_node.get_properties( \
-      include_inherited=False, \
-      predicate=lambda f: f.requires_untyped_wrapper \
-   ):
-   ${prop.untyped_wrapper_def}
-   % endfor
-
    --------------------------------
    -- Assign_Names_To_Logic_Vars --
    --------------------------------
 
-   procedure Assign_Names_To_Logic_Vars
-    (Node : access ${root_node_value_type}'Class) is
+   procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class)
+   is
    begin
       % for f in T.root_node.get_fields( \
            include_inherited=False, \
            predicate=lambda f: f.type.is_logic_var_type \
       ):
-         Node.${f.name}.Dbg_Name :=
+         Node.Node.${f.name}.Dbg_Name :=
             new String'(Image (Node.Short_Image) & ".${f.name}");
       % endfor
-      Assign_Names_To_Logic_Vars_Impl (Node);
-      for Child of ${root_node_array.api_name}'(Children (Node)) loop
-         if Child /= null then
-            Assign_Names_To_Logic_Vars (Child);
-         end if;
-      end loop;
+
+      Assign_Names_To_Logic_Vars_Impl (Node.Node);
+
+      declare
+         Children : ${root_entity.array.api_name} := Node.Children;
+      begin
+         for Child of Children loop
+            if not Child.Is_Null then
+               Assign_Names_To_Logic_Vars (Child);
+            end if;
+         end loop;
+      end;
    end Assign_Names_To_Logic_Vars;
-
-   -----------
-   -- Image --
-   -----------
-
-   function Image (Ent : ${T.entity.name}) return Text_Type is
-   begin
-      if Ent.El /= null then
-         declare
-            Node_Image : constant Text_Type := Ent.El.Short_Image;
-         begin
-            return
-            (if Ent.Info.Rebindings /= null
-             then "<| "
-             & Node_Image (Node_Image'First + 1 .. Node_Image'Last -1) & " "
-             & AST_Envs.Image (Ent.Info.Rebindings) & " |>"
-             else Node_Image);
-         end;
-      else
-         return "None";
-      end if;
-   end Image;
-
-   -----------
-   -- Image --
-   -----------
-
-   function Image (Ent : ${T.entity.name}) return String is
-      Result : constant Text_Type := Image (Ent);
-   begin
-      return Image (Result);
-   end Image;
-
-   ---------------
-   -- Can_Reach --
-   ---------------
-
-   function Can_Reach (El, From : ${root_node_type_name}) return Boolean is
-   begin
-      --  Since this function is only used to implement sequential semantics in
-      --  envs, we consider that elements coming from different units are
-      --  always visible for each other, and let the user implement language
-      --  specific visibility rules in the DSL.
-      if El = null or else From = null or else El.Unit /= From.Unit then
-         return True;
-      end if;
-
-       return Compare
-         (Start_Sloc (Sloc_Range (El)),
-          Start_Sloc (Sloc_Range (From))) = After;
-   end Can_Reach;
-
-   ------------
-   -- Create --
-   ------------
-
-   function Create
-      (El : ${root_node_type_name}; Info : Entity_Info)
-       return Entity is
-    begin
-      return (El => El, Info => Info);
-    end Create;
-
-   procedure Register_Destroyable is new Register_Destroyable_Gen
-     (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env, AST_Envs.Destroy);
-
-   pragma Warnings (Off, "referenced");
-   procedure Register_Destroyable
-     (Unit : Analysis_Unit; Node : ${root_node_type_name});
-   --  Helper for synthetized nodes. We cannot used the generic
-   --  Register_Destroyable because the root AST node is an abstract types, so
-   --  this is implemented using the untyped (using System.Address)
-   --  implementation helper.
-   pragma Warnings (Off, "referenced");
 
    procedure Destroy_Synthetic_Node (Node : in out ${root_node_type_name});
    --  Helper for the Register_Destroyable above
-
-   function Get_Lex_Env_Data
-     (Node : access ${root_node_value_type}'Class) return Lex_Env_Data
-   is (${ada_lib_name}.Analysis.Get_Lex_Env_Data (Node.Unit));
-
-   ---------------
-   -- Get_Child --
-   ---------------
-
-   overriding procedure Get_Child
-     (Node            : access ${generic_list_value_type};
-      Index           : Positive;
-      Index_In_Bounds : out Boolean;
-      Result          : out ${root_node_type_name}) is
-   begin
-      if Index > Node.Count then
-         Index_In_Bounds := False;
-      else
-         Index_In_Bounds := True;
-         Result := Node.Nodes (Index);
-      end if;
-   end Get_Child;
-
-   -----------
-   -- Print --
-   -----------
-
-   overriding procedure Print
-     (Node : access ${generic_list_value_type}; Line_Prefix : String := "")
-   is
-      Class_Wide_Node : constant ${root_node_type_name} :=
-         ${root_node_type_name} (Node);
-   begin
-      Put
-        (Line_Prefix & Class_Wide_Node.Kind_Name
-         & "[" & Image (Node.Sloc_Range) & "]");
-      if Node.Count = 0 then
-         Put_Line (": <empty list>");
-         return;
-      end if;
-
-      New_Line;
-      for Child of Node.Nodes (1 .. Node.Count) loop
-         if Child /= null then
-            Child.Print (Line_Prefix & "|  ");
-         end if;
-      end loop;
-   end Print;
-
-   % for struct_type in no_builtins(ctx.struct_types):
-   ${struct_types.body(struct_type)}
-   % endfor
-
-   ${astnode_types.logic_helpers()}
-
-   % for astnode in no_builtins(ctx.astnode_types):
-     % if not astnode.is_list_type:
-       ${astnode_types.body(astnode)}
-     % endif
-   % endfor
-
-   % for astnode in ctx.astnode_types:
-      % if astnode.is_root_list_type:
-         ${list_types.body(astnode.element_type)}
-      % elif astnode.is_list_type:
-         ${astnode_types.body(astnode)}
-      % endif
-   % endfor
-
-   --------------------------
-   -- Register_Destroyable --
-   --------------------------
-
-   procedure Register_Destroyable
-     (Unit : Analysis_Unit; Node : ${root_node_type_name})
-   is
-      procedure Helper is new Register_Destroyable_Gen
-        (${root_node_value_type}'Class,
-         ${root_node_type_name},
-         Destroy_Synthetic_Node);
-   begin
-      Helper (Unit, Node);
-   end Register_Destroyable;
 
    ----------------------------
    -- Destroy_Synthetic_Node --
@@ -3356,98 +2517,6 @@ package body ${ada_lib_name}.Analysis is
    function Image (Value : Boolean) return String
    is (if Value then "True" else "False");
 
-
-   Kind_Names : array (${root_node_kind_name}) of Unbounded_String :=
-     (${", \n".join(cls.ada_kind_name()
-                    + " => To_Unbounded_String (\""
-                    + cls.repr_name() + "\")"
-                    for cls in ctx.astnode_types if not cls.abstract)});
-
-   ---------------
-   -- Kind_Name --
-   ---------------
-
-   function Kind_Name
-     (Node : access ${root_node_value_type}'Class) return String
-   is
-   begin
-      return To_String (Kind_Names (Node.Kind));
-   end Kind_Name;
-
-   Kind_To_Counts : array (${root_node_kind_name}) of Integer :=
-     (${", \n".join(cls.ada_kind_name()
-                    + " => {}".format(
-                        len(cls.get_parse_fields(lambda f: f.type.is_ast_node))
-                        if not cls.is_list_type
-                        else -1
-                    )
-                    for cls in ctx.astnode_types if not cls.abstract)});
-
-   -----------------
-   -- Child_Count --
-   -----------------
-
-   function Child_Count
-     (Node : access ${root_node_value_type}'Class) return Natural
-   is
-      C : Integer := Kind_To_Counts (Node.Kind);
-   begin
-      if C = -1 then
-         return ${generic_list_type_name} (Node).Count;
-      else
-         return C;
-      end if;
-   end Child_Count;
-
-   ------------------
-   -- Reset_Caches --
-   ------------------
-
-   procedure Reset_Caches (Node : access ${root_node_value_type}'Class) is
-      K : ${root_node_kind_name} := Node.Kind;
-   begin
-   case K is
-   % for cls in ctx.astnode_types:
-      % if not cls.abstract:
-         <%
-            memo_props = cls.get_memoized_properties(include_inherited=True)
-            logic_vars = [fld for fld in cls.get_user_fields()
-                          if fld.type.is_logic_var_type]
-         %>
-         % if memo_props or logic_vars:
-            when ${cls.ada_kind_name()} =>
-               declare
-                  N : ${cls.name} := ${cls.name} (Node);
-               begin
-                  % if memo_props:
-                     % for p in memo_props:
-                        % if p.type.is_refcounted:
-                           if N.${p.memoization_state_field_name} = Computed
-                           then
-                              Dec_Ref (N.${p.memoization_value_field_name});
-                           end if;
-                        % endif
-                        N.${p.memoization_state_field_name} := Not_Computed;
-                     % endfor
-                  % endif
-
-                  % if logic_vars:
-                     % for field in logic_vars:
-                        --  TODO??? Fix Adalog so that Destroy resets the
-                        --  value it stores.
-                        N.${field.name}.Value := No_Entity;
-                        Eq_Node.Refs.Reset (N.${field.name});
-                        Eq_Node.Refs.Destroy (N.${field.name});
-                     % endfor
-                  % endif
-               end;
-         % endif
-      % endif
-   % endfor
-   when others => null;
-   end case;
-   end Reset_Caches;
-
    -------------
    -- Is_Null --
    -------------
@@ -3459,21 +2528,22 @@ package body ${ada_lib_name}.Analysis is
    -- Short_Image --
    -----------------
 
-   function Short_Image (Node : ${root_entity.api_name}) return Text_Type is
-     (if Node.Is_Null then "None" else Node.Node.Short_Image);
+   function Short_Image
+     (Node : ${root_entity.api_name}'Class) return Text_Type
+   is (if Node.Is_Null then "None" else Node.Node.Short_Image);
 
    -----------
    -- Image --
    -----------
 
-   function Image (Node : ${root_entity.api_name}) return Text_Type is
-     (Image (${T.entity.name}'(Node.Node, Node.E_Info)));
+   function Image (Node : ${root_entity.api_name}'Class) return Text_Type is
+     (Image (${T.entity.name}'(Node.Node, Convert (Node.E_Info))));
 
    -----------
    -- Image --
    -----------
 
-   function Image (Node : ${root_entity.api_name}) return String is
+   function Image (Node : ${root_entity.api_name}'Class) return String is
      (Image (Image (Node)));
 
    -----------------------
@@ -3481,7 +2551,7 @@ package body ${ada_lib_name}.Analysis is
    -----------------------
 
    % for e in ctx.entity_types:
-      function As_${e.el_type.name}
+      function As_${e.el_type.kwless_raw_name}
         (Node : ${root_entity.api_name}'Class) return ${e.api_name} is
       begin
          if Node.Node = null then
@@ -3588,7 +2658,7 @@ package body ${ada_lib_name}.Analysis is
    ---------------
 
    procedure Get_Child
-     (Node            : ${root_entity.api_name};
+     (Node            : ${root_entity.api_name}'Class;
       Index           : Positive;
       Index_In_Bounds : out Boolean;
       Result          : out ${root_entity.api_name})
@@ -3643,7 +2713,7 @@ package body ${ada_lib_name}.Analysis is
       Sloc : Source_Location;
       Snap : Boolean := False) return ${root_entity.api_name} is
    begin
-      return (Node.Node.Lookup (Sloc, Snap), No_Entity_Info);
+      return (Node.Node.Lookup (Sloc, Snap), No_Public_Entity_Info);
    end Lookup;
 
    ----------
@@ -3652,7 +2722,7 @@ package body ${ada_lib_name}.Analysis is
 
    function Text (Node : ${root_entity.api_name}'Class) return Text_Type is
    begin
-      return Node.Node.Text;
+      return Text (Node.Token_Start, Node.Token_End);
    end Text;
 
    --  TODO??? Bind Children_With_Trivia (changing the Node type in
@@ -3666,7 +2736,8 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class)
       return Token_Iterator is
    begin
-      return Node.Node.Token_Range;
+      return Token_Iterator'(Node.As_${T.root_node.kwless_raw_name},
+                             Node.Node.Token_End_Index);
    end Token_Range;
 
    --------
@@ -3711,16 +2782,6 @@ package body ${ada_lib_name}.Analysis is
       Node.Node.Dump_Lexical_Env (Root_Env);
    end Dump_Lexical_Env;
 
-   --------------------------------
-   -- Assign_Names_To_Logic_Vars --
-   --------------------------------
-
-   procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class)
-   is
-   begin
-      Node.Node.Assign_Names_To_Logic_Vars;
-   end Assign_Names_To_Logic_Vars;
-
    --------------
    -- Traverse --
    --------------
@@ -3731,7 +2792,7 @@ package body ${ada_lib_name}.Analysis is
               return Visit_Status)
      return Visit_Status
    is
-      E_Info : constant Entity_Info := Node.E_Info;
+      E_Info : constant Public_Entity_Info := Node.E_Info;
 
       -------------
       -- Wrapper --
@@ -3777,7 +2838,7 @@ package body ${ada_lib_name}.Analysis is
       Data  : in out Data_Type)
       return Visit_Status
    is
-      E_Info : constant Entity_Info := Node.E_Info;
+      E_Info : constant Public_Entity_Info := Node.E_Info;
 
       ------------
       -- Helper --

@@ -77,6 +77,6 @@ def analysis_unit_root(self, unit):
     :param ResolvedExpression unit: Expression that yields the analysis
         unit for which we want to extract the root AST node.
     """
-    unit_expr = construct(unit, analysis_unit_type)
-    return CallExpr('Unit_Root', 'Root', T.root_node,
-                    [NullCheckExpr(unit_expr)], abstract_expr=self)
+    unit_expr = NullCheckExpr(construct(unit, analysis_unit_type))
+    return FieldAccessExpr(unit_expr, 'AST_Root', T.root_node,
+                           do_explicit_incref=False, abstract_expr=self)

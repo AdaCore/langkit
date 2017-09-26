@@ -30,10 +30,11 @@
 
          for arg in property.natural_arguments:
             if arg.type.is_entity_type:
-               actual = '({type} ({name}.Node), {name}.E_Info)'.format(
-                  type=arg.type.el_type.name,
-                  name=arg.name
-               )
+               actual = (
+                  '({type} ({name}.Node), Convert ({name}.E_Info))'.format(
+                     type=arg.type.el_type.name,
+                     name=arg.name
+               ))
 
             elif arg.type.is_array_type:
                 # We need to allocate our special record type to pass it to the
@@ -47,9 +48,10 @@
 
                 if arg.type.element_type.is_entity_type:
                     unwrap_code.extend([
-                        "for I in Result'Range loop",
-                        "   {actual}.Items (I) := ({typ} ({arg} (I).Node),"
-                        "                          {arg} (I).E_Info);".format(
+                        "for I in {arg}'Range loop"
+                        "   {actual}.Items (I) :="
+                        "      ({typ} ({arg} (I).Node),"
+                        "       Convert ({arg} (I).E_Info));".format(
                             actual=actual,
                             arg=arg.name,
                             typ=arg.type.element_type.el_type.name,
@@ -66,13 +68,14 @@
             actuals.append(actual)
 
          if property.uses_entity_info:
-             actuals.append('E_Info => {}.E_Info'.format(self_arg))
+             actuals.append('E_Info => Convert ({}.E_Info)'.format(self_arg))
 
          ## Wrap the result, if needed
 
          if property.type.is_entity_type:
              wrapped_result = (
-                 '({} (Property_Result.El), Property_Result.Info)'.format(
+                 '({} (Property_Result.El),'
+                 ' Convert (Property_Result.Info))'.format(
                      root_node_type_name
                  )
              )
@@ -89,7 +92,7 @@
                      "         Property_Result.Items (I);",
                      "   begin",
                      "      Result (I) :=",
-                     "         ({} (Item.El), Item.Info);".format(
+                     "         ({} (Item.El), Convert (Item.Info));".format(
                          root_node_type_name
                      ),
                      "   end;",

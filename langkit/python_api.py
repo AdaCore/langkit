@@ -53,7 +53,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.analysis_unit_kind, lambda _: '_unit_kind_to_str[{}]'),
             (ct.ASTNodeType, lambda _: '{}'),
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
-                ct.T.root_node.name.camel
+                ct.T.root_node.kwless_raw_name.camel
             )),
             (ct.token_type, lambda _: '{}'),
             (ct.symbol_type, lambda _: '{}._wrap()'),
@@ -98,7 +98,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.analysis_unit_kind, lambda _: '_unwrap_unit_kind({})'),
             (ct.ASTNodeType, lambda _: '{}'),
             (ct.EntityType, lambda _: '{}._unwrap({{}})'.format(
-                ct.T.root_node.name.camel
+                ct.T.root_node.kwless_raw_name.camel
             )),
             (ct.bool_type, lambda _: 'bool({})'),
             (ct.long_type, lambda _: 'int({})'),

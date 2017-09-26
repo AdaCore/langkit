@@ -1,10 +1,14 @@
 ## vim: filetype=makoada
 
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Packrat;
 with Langkit_Support.Text;    use Langkit_Support.Text;
+
+with ${ada_lib_name}.Analysis.Implementation;
+use ${ada_lib_name}.Analysis.Implementation;
 
 package body ${ada_lib_name}.Analysis.Parsers is
 
@@ -197,8 +201,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
    function Parse
      (Parser         : in out Parser_Type;
       Check_Complete : Boolean := True;
-      Rule           : Grammar_Rule)
-      return ${root_node_type_name}
+      Rule           : Grammar_Rule) return Parsed_Node
    is
       Result : ${root_node_type_name};
    begin
@@ -212,7 +215,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
       end case;
       Process_Parsing_Error (Parser, Check_Complete);
       Set_Parents (Result, null);
-      return Result;
+      return Parsed_Node (Result);
    end Parse;
 
    % for parser in ctx.generated_parsers:

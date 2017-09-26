@@ -3,13 +3,15 @@
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 
-with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
+limited with ${ada_lib_name}.Analysis.Implementation;
+with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 --  This package provides types and primitives to parse buffers and files and
 --  get AST out of them.
 
-private package ${ada_lib_name}.Analysis.Parsers is
+package ${ada_lib_name}.Analysis.Parsers is
 
    type Cst_String is access constant String;
 
@@ -25,6 +27,12 @@ private package ${ada_lib_name}.Analysis.Parsers is
          Custom_Message    : Cst_String;
       end case;
    end record;
+
+   type Parsed_Node is access all Implementation.${root_node_value_type}'Class;
+   % if ctx.symbol_literals:
+      type Symbol_Literal_Array_Access is
+         access all Implementation.Symbol_Literal_Array;
+   % endif
 
    type Parser_Private_Part is private;
 
@@ -72,7 +80,7 @@ private package ${ada_lib_name}.Analysis.Parsers is
      (Parser         : in out Parser_Type;
       Check_Complete : Boolean := True;
       Rule           : Grammar_Rule)
-      return ${root_node_type_name};
+      return Parsed_Node;
    --  Do the actual parsing using the Rule parsing rule.  If Check_Complete,
    --  consider the case when the parser could not consume all the input tokens
    --  as an error.

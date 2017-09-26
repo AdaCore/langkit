@@ -31,7 +31,7 @@ ${exts.include_extension(
    ctx.ext('analysis', 'c_api', 'body_deps')
 )}
 
-package body ${ada_lib_name}.Analysis.C is
+package body ${ada_lib_name}.Analysis.Implementation.C is
 
 % if ctx.default_unit_provider:
    type C_Unit_Provider_Type is
@@ -49,7 +49,7 @@ package body ${ada_lib_name}.Analysis.C is
    overriding function Get_Unit
      (Provider    : C_Unit_Provider_Type;
       Context     : Analysis_Context;
-      Node        : ${root_node_type_name};
+      Node        : ${root_entity.api_name}'Class;
       Kind        : Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False;
@@ -555,7 +555,7 @@ package body ${ada_lib_name}.Analysis.C is
    Node_Kind_Names : constant array (${root_node_kind_name}) of Text_Access :=
      (${', '.join('{} => new Text_Type\'(To_Text ("{}"))'.format(
                       cls.ada_kind_name(),
-                      cls.name.camel
+                      cls.kwless_raw_name.camel
                   )
                   for cls in ctx.astnode_types
                   if not cls.abstract)});
@@ -1083,7 +1083,7 @@ package body ${ada_lib_name}.Analysis.C is
    overriding function Get_Unit
      (Provider    : C_Unit_Provider_Type;
       Context     : Analysis_Context;
-      Node        : ${root_node_type_name};
+      Node        : ${root_entity.api_name}'Class;
       Kind        : Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False;
@@ -1093,7 +1093,7 @@ package body ${ada_lib_name}.Analysis.C is
                                   then Null_Ptr
                                   else New_String (Charset));
 
-      Ent      : ${root_entity.name} := (Node, No_Entity_Info);
+      Ent      : ${root_entity.name} := (Node.Node, No_Entity_Info);
       C_Result : ${analysis_unit_type} := Provider.Get_Unit_From_Node_Func
         (Provider.Data, Wrap (Context), Ent'Unrestricted_Access, Wrap (Kind),
          C_Charset, Boolean'Pos (Reparse), Boolean'Pos (With_Trivia));
@@ -1227,4 +1227,4 @@ package body ${ada_lib_name}.Analysis.C is
       % endif
    % endfor
 
-end ${ada_lib_name}.Analysis.C;
+end ${ada_lib_name}.Analysis.Implementation.C;

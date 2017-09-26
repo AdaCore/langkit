@@ -32,15 +32,15 @@ typedef void* ${node_type};
 ${c_doc('langkit.node_kind_type')}
 typedef enum {
 % for astnode in ctx.astnode_types:
+    <% name = astnode.kwless_raw_name %>
     % if astnode.abstract:
 
-        /* ${astnode.name} (abstract)  */
+        /* ${name} (abstract)  */
         ${c_doc(astnode, 8)}
     % else:
 
         ${c_doc(astnode, 8)}
-        ${capi.get_name(astnode.name)}
-          = ${ctx.node_kind_constants[astnode]},
+        ${capi.get_name(name)} = ${ctx.node_kind_constants[astnode]},
     % endif
 % endfor
 } ${node_kind_type};

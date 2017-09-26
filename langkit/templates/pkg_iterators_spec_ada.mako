@@ -14,7 +14,8 @@ with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 package ${ada_lib_name}.Iterators is
 
    package ${root_entity.api_name}_Iterators is new Langkit_Support.Iterators
-     (Element_Type => ${root_entity.api_name});
+     (Element_Type  => ${root_entity.api_name},
+      Element_Array => ${root_entity.array.api_name});
 
    type Traverse_Iterator is
       limited new ${root_entity.api_name}_Iterators.Iterator
@@ -114,6 +115,7 @@ private
    package Traversal_Iterators is new Langkit_Support.Tree_Traversal_Iterator
      (Node_Type         => ${root_entity.api_name},
       No_Node           => No_${root_entity.api_name},
+      Node_Array        => ${root_entity.array.api_name},
       First_Child_Index => First_Child_Index_For_Traverse,
       Last_Child_Index  => Last_Child_Index_For_Traverse,
       Iterators         => ${root_entity.api_name}_Iterators);

@@ -14,8 +14,10 @@
 
    <% elt_type = cls.element_type.name %>
 
-   type ${cls.array_type_name} is
-      array (Positive range <>) of ${cls.element_type.name};
+   % if not cls._exposed or cls.array_type_name != cls.api_name:
+      type ${cls.array_type_name} is
+         array (Positive range <>) of ${cls.element_type.name};
+   % endif
    type ${cls.pointed} (N : Natural) is record
       Ref_Count : Positive;
       Items     : ${cls.array_type_name} (1 .. N);
@@ -167,8 +169,9 @@
 
    % if cls.element_type == T.root_node.entity:
    function Create (Items : AST_Envs.Entity_Array) return ${cls.name}
-   is (new ${cls.pointed}'(N         => Items'Length,
-                           Items     => ${cls.array_type_name} (Items),
-                           Ref_Count => 1));
+   is (new ${cls.pointed}'
+         (N         => Items'Length,
+          Items     => Implementation.${cls.array_type_name} (Items),
+          Ref_Count => 1));
    % endif
 </%def>
