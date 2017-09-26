@@ -1123,6 +1123,9 @@ package ${ada_lib_name}.Analysis is
 
    --  TODO??? Port Iterators code
 
+   function Child_Index (Node : ${root_entity.api_name}'Class) return Natural;
+   --  Return the 0-based index for Node in its parent's children
+
    ----------------------------------------
    -- Source location-related operations --
    ----------------------------------------

@@ -3766,4 +3766,14 @@ package body ${ada_lib_name}.Analysis is
       return Result;
    end Public_Traverse_With_Data;
 
+   -----------------
+   -- Child_Index --
+   -----------------
+
+   function Child_Index (Node : ${root_entity.api_name}'Class) return Natural
+   is
+   begin
+      return Node.Node.Child_Index;
+   end Child_Index;
+
 end ${ada_lib_name}.Analysis;
