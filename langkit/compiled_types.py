@@ -1531,8 +1531,8 @@ class ASTNodeType(BaseStructType):
             name, location, doc,
             is_ptr=True, null_allowed=True, is_ada_record=False,
             is_list_type=is_list, should_emit_array_type=not is_root,
-            exposed=True, is_refcounted=False, nullexpr=null_constant(),
-            py_nullexpr='None', element_type=element_type
+            is_refcounted=False, nullexpr=null_constant(), py_nullexpr='None',
+            element_type=element_type
         )
         self._base = base
 
