@@ -1595,7 +1595,7 @@ class CompileCtx(object):
         This also emits non-blocking errors for all types that are exposed in
         the public API whereas they should not.
         """
-        from langkit.compiled_types import ArrayType, BuiltinField, T
+        from langkit.compiled_types import ArrayType, BuiltinField, Field, T
 
         def expose(t, for_field, type_use, traceback, no_check):
             """
@@ -1659,6 +1659,12 @@ class CompileCtx(object):
             predicate=lambda f: f.is_public,
             include_inherited=False
         ):
+            # Parse fields that are bare AST nodes are manually wrapped to
+            # return entities in the public API. Bare AST nodes themselves
+            # belong to the private API, so avoid exposing them.
+            if isinstance(f, Field) and f.type.is_ast_node:
+                continue
+
             # Ignore builtin fields, as when they involve a private type, they
             # actually expose a wrapper that wraps/unwraps it into a public
             # type.
