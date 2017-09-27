@@ -9,7 +9,7 @@ from langkit.compile_context import CompileCtx
 from langkit.compiled_types import CompiledTypeMetaclass
 from langkit.diagnostics import DiagnosticError, WarningSet
 from langkit.dsl import _StructMetaclass, _ASTNodeMetaclass, _EnumNodeMetaclass
-from langkit.expressions import Self
+from langkit.expressions import Entity, Self
 from langkit.libmanage import ManageScript
 from langkit.utils import reset_memoized
 
@@ -148,6 +148,7 @@ def reset_langkit():
     CompiledTypeMetaclass.env_metadata = None
     CompiledTypeMetaclass.entity_info = None
     Self.unfreeze()
+    Entity.unfreeze()
 
     CompiledTypeMetaclass.types = []
     CompiledTypeMetaclass.type_dict = {}
