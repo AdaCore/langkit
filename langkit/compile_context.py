@@ -1597,11 +1597,13 @@ class CompileCtx(object):
         """
         from langkit.compiled_types import ArrayType, BuiltinField, T
 
-        def expose(t, for_field, type_use, traceback):
+        def expose(t, for_field, type_use, traceback, no_check):
             """
             Recursively tag "t" and all the types it references as exposed.
             """
             def check(predicate, descr):
+                if no_check:
+                    return
                 with for_field.diagnostic_context:
                     text_tb = (
                         ' (from: {})'.format(
@@ -1633,7 +1635,8 @@ class CompileCtx(object):
                 )
 
                 expose(t.element_type, for_field, 'element type',
-                       traceback + ['array of {}'.format(t.name.camel)])
+                       traceback + ['array of {}'.format(t.name.camel)],
+                       no_check)
 
             else:
                 # Only array types have their "_exposed" attribute inferred. We
@@ -1656,9 +1659,16 @@ class CompileCtx(object):
             predicate=lambda f: f.is_public,
             include_inherited=False
         ):
+            # Ignore builtin fields, as when they involve a private type, they
+            # actually expose a wrapper that wraps/unwraps it into a public
+            # type.
+            no_check = isinstance(f, BuiltinField)
+
             expose(f.type, f,
                    'return type' if f.is_property else 'type',
-                   [f.qualname])
+                   [f.qualname],
+                   no_check)
             for arg in f.natural_arguments:
                 expose(arg.type, f, '"{}" argument'.format(arg.name),
-                       [f.qualname])
+                       [f.qualname],
+                       no_check)
