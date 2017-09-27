@@ -742,11 +742,17 @@ class CollectionSingleton(AbstractExpression):
             )
 
         def _render_pre(self):
+            result_var = self.result_var.name
             return self.expr.render_pre() + """
-            {result_var} := Create (Items_Count => 1);
-            {result_var}.Items (1) := {item};
-            """.format(result_var=self.result_var.name,
-                       item=self.expr.render_expr())
+                {result_var} := Create (Items_Count => 1);
+                {result_var}.Items (1) := {item};
+                {inc_ref}
+            """.format(
+                result_var=result_var,
+                item=self.expr.render_expr(),
+                inc_ref=('Inc_Ref ({}.Items (1));'.format(result_var)
+                         if self.expr.type.is_refcounted else '')
+            )
 
         @property
         def subexprs(self):
