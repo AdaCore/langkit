@@ -1595,7 +1595,7 @@ class CompileCtx(object):
         This also emits non-blocking errors for all types that are exposed in
         the public API whereas they should not.
         """
-        from langkit.compiled_types import ArrayType, T
+        from langkit.compiled_types import ArrayType, BuiltinField, T
 
         def expose(t, for_field, type_use, traceback):
             """
@@ -1624,6 +1624,12 @@ class CompileCtx(object):
                 check(
                     not isinstance(t.element_type, ArrayType),
                     '{}, an array of arrays'.format(t.name.camel)
+                )
+
+                # Reject public arrays of bare AST nodes
+                check(
+                    not t.element_type.is_ast_node,
+                    '{}, an array of bare AST nodes'.format(t.name.camel)
                 )
 
                 expose(t.element_type, for_field, 'element type',
