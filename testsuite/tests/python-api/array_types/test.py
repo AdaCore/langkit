@@ -8,7 +8,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, T
-from langkit.expressions import Property, Self, langkit_property
+from langkit.expressions import Entity, Property, langkit_property
 from langkit.parsers import Grammar, List, Or, Tok
 
 from lexer_example import Token
@@ -21,13 +21,13 @@ Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 class FooNode(ASTNode):
 
     @langkit_property(public=True)
-    def count(seq=T.Example.array):
+    def count(seq=T.Example.entity.array):
         return seq.length
 
 
 class Sequence(FooNode.list):
-    all_items = Property(Self.map(lambda i: i), public=True)
-    example_items = Property(Self.filtermap(
+    all_items = Property(Entity.map(lambda i: i), public=True)
+    example_items = Property(Entity.filtermap(
         lambda i: i.cast_or_raise(T.Example),
         lambda i: i.is_a(T.Example)
     ), public=True)

@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field
-from langkit.expressions import Property, Self
+from langkit.expressions import Entity, Property
 from langkit.parsers import Grammar, Row, List, Tok
 
 from lexer_example import Token
@@ -46,8 +46,8 @@ def run(name, expr):
     print('')
 
 
-run("Correct code", lambda: Self.nb_list.map(lambda x: x))
-run("Incorrect map code 1", lambda: Self.nb_list.map(lambda x, y, z: x))
-run("Incorrect map code 2", lambda: Self.nb_list.map(lambda x=12: x))
-run("Incorrect map code 3", lambda: Self.nb_list.map(lambda x, *y: x))
+run("Correct code", lambda: Entity.nb_list.map(lambda x: x))
+run("Incorrect map code 1", lambda: Entity.nb_list.map(lambda x, y, z: x))
+run("Incorrect map code 2", lambda: Entity.nb_list.map(lambda x=12: x))
+run("Incorrect map code 3", lambda: Entity.nb_list.map(lambda x, *y: x))
 print('Done')
