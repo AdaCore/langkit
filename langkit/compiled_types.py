@@ -2529,7 +2529,7 @@ class TypeRepo(object):
         Shortcut to get the root AST node.
         :rtype: ASTNodeType
         """
-        result = get_context().root_grammar_class
+        result = CompiledTypeMetaclass.root_grammar_class
         assert result
         return result
 
