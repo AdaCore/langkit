@@ -42,7 +42,7 @@ def run(name, eq_prop):
         def wrapper():
             _ = Var(Self.main_prop)
             ignore(_)
-            return Self
+            return Self.as_bare_entity
 
     class BazNode(FooNode):
         prop = Property(12, warn_on_unused=False)

@@ -35,6 +35,6 @@ def run(name, expr):
     print('')
 
 
-run("Correct code", lambda: No(FooNode))
+run("Correct code", lambda: No(FooNode.entity))
 run("Incorrect No usage", lambda: No(LongType))
 print('Done')

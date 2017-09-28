@@ -17,7 +17,7 @@ class FooNode(ASTNode):
 
 
 class BarNode(FooNode):
-    prop = Property(Let(lambda _=Self.parent: No(FooNode)), public=True)
+    prop = Property(Let(lambda _=Self.parent: No(FooNode.entity)), public=True)
 
 
 foo_grammar = Grammar('main_rule')

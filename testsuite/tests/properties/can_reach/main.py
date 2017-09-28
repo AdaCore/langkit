@@ -30,7 +30,7 @@ u2_ex = u2.root
 
 
 def fmt_node(n):
-    return ('None' if n is None else
+    return ('None' if n.el is None else
             '<{} {}:{}>'.format(n.kind_name, n.unit.filename,
                                 n.sloc_range.start.line))
 
@@ -47,6 +47,8 @@ for node, from_node in [
     (u1_ex1, u2_ex),
     (u2_ex, u1_ex1),
 ]:
+    node = libfoolang.FooNode.bare_entity(node)
+    from_node = libfoolang.FooNode.bare_entity(from_node)
     print('can_reach({}, {}) = {}'.format(fmt_node(node), fmt_node(from_node),
                                           root.p_can_reach(node, from_node)))
 

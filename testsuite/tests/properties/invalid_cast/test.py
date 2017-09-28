@@ -30,8 +30,12 @@ def run(name, expr):
 
     class ListNode(FooNode):
         nb_list = Field()
-        bar_node_parent = Property(Self.parent.cast(BarNode), public=True)
-        prop = Property(expr, public=True)
+        bar_node_parent = Property(Self.parent.cast(BarNode))
+        prop = Property(expr)
+
+        public_bar_node_parent = Property(Self.bar_node_parent.as_bare_entity,
+                                          public=True)
+        public_prop = Property(Self.prop.as_bare_entity, public=True)
 
     class NumberNode(FooNode):
         tok = Field()

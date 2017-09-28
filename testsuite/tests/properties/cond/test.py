@@ -53,7 +53,7 @@ class Example(FooNode):
     @langkit_property(public=True)
     def cond_node(b=BoolType):
         return Cond(Self.identity(b), Self,
-                    No(FooNode))
+                    No(FooNode)).as_bare_entity
 
 
 foo_grammar = Grammar('main_rule')

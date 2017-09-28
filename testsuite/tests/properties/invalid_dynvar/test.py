@@ -28,7 +28,7 @@ def run(expr):
     class ExampleNode(FooNode):
         tok = Field()
 
-        implicit_prop = Property(Self, dynamic_vars=[Env])
+        implicit_prop = Property(Self.as_bare_entity, dynamic_vars=[Env])
 
         prop = Property(expr, public=True)
         use_implicit_prop = Property(

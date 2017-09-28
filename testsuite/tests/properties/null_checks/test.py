@@ -22,20 +22,21 @@ Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 class FooNode(ASTNode):
     null_unit = Property(No(AnalysisUnitType), public=True)
-    null_node = Property(No(T.Expression), public=True)
+    null_node = Property(No(T.Expression.entity), public=True)
 
-    deref_null_unit = Property(Self.null_unit.root, public=True)
-    deref_null_node = Property(Self.null_node.null_node, public=True)
+    deref_null_unit = Property(Self.null_unit.root.as_bare_entity, public=True)
+    deref_null_node = Property(Self.null_node.null_node,
+                               public=True)
     null_node_unit = Property(Self.null_node.unit, public=True)
 
     cast_null_node = Property(Self.null_node.cast(T.Name), public=True)
 
     match_null_node = Property(
-        Self.null_node.match(
+        Self.null_node.el.match(
             lambda l=T.Literal: l,
             lambda n=T.Name: n,
             lambda others: others
-        ),
+        ).as_bare_entity,
         public=True
     )
 
@@ -56,9 +57,9 @@ class Name(Expression):
     deref_env_element = Property(Self.env_element.null_node, public=True)
     match_env_element = Property(
         Self.env_element.match(
-            lambda l=T.Literal.entity: l.el,
-            lambda n=T.Name.entity: n.el,
-            lambda others: others.el
+            lambda l=T.Literal.entity: l,
+            lambda n=T.Name.entity: n,
+            lambda others: others,
         ),
         public=True
     )

@@ -21,7 +21,7 @@ Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
 class FooNode(ASTNode):
-    root_node = Property(Self.unit.root, public=True)
+    root_node = Property(Self.unit.root.as_bare_entity, public=True)
 
 
 @abstract

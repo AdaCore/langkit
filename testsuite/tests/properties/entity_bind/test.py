@@ -36,7 +36,8 @@ class Literal(FooNode):
 
     b = Property(Bind(Self.var, Self.a))
 
-    public_prop = Property(Let(lambda _=Self.b: Self), public=True)
+    public_prop = Property(Let(lambda _=Self.b: Self.as_bare_entity),
+                           public=True)
 
 
 foo_grammar = Grammar('main_rule')

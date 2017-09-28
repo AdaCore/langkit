@@ -39,7 +39,7 @@ class Literal(FooNode):
         Self.a.cast(BarNode.entity)
     )
 
-    c = Property(Self.b.el, public=True)
+    c = Property(Self.b, public=True)
 
     d = Property(Self.a.cast(BarNode),
                  type=BarNode.entity,

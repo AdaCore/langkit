@@ -9,7 +9,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, T, abstract
-from langkit.expressions import AbstractProperty, No, Property
+from langkit.expressions import AbstractProperty, No, Property, Self
 from langkit.parsers import Grammar, Or, Row
 
 from utils import emit_and_print_errors
@@ -33,7 +33,9 @@ def run(name, astnode_fn):
 
     @abstract
     class MiddleNode(FooNode):
-        get_random_node = AbstractProperty(type=T.MiddleNode, public=True)
+        get_random_node = AbstractProperty(type=T.MiddleNode)
+        public_prop = Property(Self.get_random_node.as_bare_entity,
+                               public=True)
 
     class ExampleNode(MiddleNode):
         get_random_node = Property(No(astnode))

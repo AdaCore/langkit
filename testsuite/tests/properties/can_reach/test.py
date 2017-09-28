@@ -21,8 +21,8 @@ Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 class FooNode(ASTNode):
 
     @langkit_property(public=True)
-    def can_reach(n=T.FooNode, from_node=T.FooNode):
-        return n.can_reach(from_node)
+    def can_reach(n=T.FooNode.entity, from_node=T.FooNode.entity):
+        return n.el.can_reach(from_node.el)
 
 
 class Example(FooNode):

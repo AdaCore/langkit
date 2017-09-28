@@ -17,7 +17,7 @@ class FooNode(ASTNode):
 
 
 class ExampleNode(FooNode):
-    prop = Property(Self.cast(T.ExampleNode), public=True)
+    prop = Property(Self.cast(T.ExampleNode).as_bare_entity, public=True)
 
 
 grammar = Grammar('main_rule')

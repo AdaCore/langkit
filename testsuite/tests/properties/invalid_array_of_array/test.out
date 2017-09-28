@@ -1,5 +1,7 @@
 File "test.py", line 20, in Example.array_of_nodes
     Error: return type is ExampleArrayAccess, an array of bare AST nodes, which is forbidden in public API
+File "test.py", line 20, in Example.array_of_nodes
+    Error: element type is Example, which is forbidden in public API (from: Example.p_array_of_nodes)
 File "test.py", line 21, in Example.array_of_array
     Error: return type is ExampleArrayAccessArrayAccess, an array of arrays, which is forbidden in public API
 

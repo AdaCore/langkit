@@ -22,7 +22,7 @@ class FooNode(ASTNode):
     pred = Property(True)
 
     foo_1 = Property(
-        If(Self.pred, No(T.BarNode), No(T.Literal)),
+        If(Self.pred, No(T.BarNode), No(T.Literal)).as_bare_entity,
         public=True
     )
 

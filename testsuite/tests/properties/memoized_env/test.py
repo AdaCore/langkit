@@ -24,7 +24,7 @@ class Ref(FooNode):
 
     @langkit_property(public=True)
     def referenced():
-        return Self.referenced_env.env_node
+        return Self.referenced_env.env_node.as_bare_entity
 
     @langkit_property(memoized=True)
     def referenced_env():

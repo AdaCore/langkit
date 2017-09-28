@@ -8,7 +8,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, Token, synthetic
-from langkit.expressions import New, Property, Self
+from langkit.expressions import New, Self, langkit_property
 from langkit.parsers import Grammar, List, Row, Tok
 
 from lexer_example import Token as LexToken
@@ -36,11 +36,13 @@ class LiteralSequence(FooNode):
     name = Field()
     items = Field()
 
-    prop = Property(
-        New(SynthNode, name=Self.name, items=Self.items),
-        public=True,
-        memoized=True
-    )
+    @langkit_property(memoized=True)
+    def new_node():
+        return New(SynthNode, name=Self.name, items=Self.items)
+
+    @langkit_property(public=True)
+    def prop():
+        return Self.new_node.as_bare_entity
 
 
 foo_grammar = Grammar('main_rule')
