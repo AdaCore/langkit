@@ -1025,6 +1025,15 @@ class ${root_astnode_name}(object):
                              e_info)
         )
 
+    @classmethod
+    def bare_entity(self, node):
+        md = Metadata(${', '.join(['False'] * len(T.env_md.get_fields()))})
+        return Entity(node, EntityInfo(md, None))
+
+    @property
+    def as_bare_entity(self):
+        return self.bare_entity(self)
+
 
 class EnvRebindings(object):
     ${py_doc('langkit.env_rebindings_type', 4)}
