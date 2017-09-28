@@ -57,7 +57,7 @@
     def ${field.name.lower}(${', '.join(arg_list)}):
         ${py_doc(field, 8)}
         <% args = arg_list[1:] + [T.entity_info.py_nullexpr] %>
-        return self._${field.name.lower}(${', '.join(args)})
+        return self._ENT_${field.name.lower}(${', '.join(args)})
     % endfor
 
     ## Then, emit private methods that accept an entity information argument
@@ -66,7 +66,7 @@
     <% arg_list = (['self'] +
                    [a.name.lower for a in field.arguments] +
                    [field.entity_info_name.lower]) %>
-    def _${field.name.lower}(${', '.join(arg_list)}):
+    def _ENT_${field.name.lower}(${', '.join(arg_list)}):
         ${accessor_body(field)}
     % endfor
 

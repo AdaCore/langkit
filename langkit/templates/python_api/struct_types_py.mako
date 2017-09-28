@@ -56,7 +56,7 @@ class _BaseEntity(_BaseStruct):
         # its private implementation method. If there is none, it means we have
         # a regular attribute access for the AST node.
         try:
-            unbound_method = getattr(type(self.el), '_' + name)
+            unbound_method = getattr(type(self.el), '_ENT_' + name)
         except AttributeError:
             return getattr(self.el, name)
 
