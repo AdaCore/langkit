@@ -94,7 +94,7 @@ class ${type_name}(${base_cls}):
 
     <% field_names = [f.name.lower for f in cls.get_fields()] %>
 
-    __slots__ = (${', '.join(map(repr, field_names))})
+    __slots__ = (${', '.join([repr('_' + f) for f in field_names])})
 
     def __init__(self, ${', '.join(field_names)}):
         % for f in field_names:
