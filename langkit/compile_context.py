@@ -708,9 +708,12 @@ class CompileCtx(object):
 
         for field in cls.get_fields():
             with field.diagnostic_context:
+                typ = resolve_type(field.type)
                 check_source_language(
-                    resolve_type(field.type).matches(bool_type),
-                    'Environment metadata fields must all be booleans'
+                    typ.matches(bool_type)
+                    or (typ.null_allowed and not typ.is_refcounted),
+                    'Environment metadata fields must all be of nullable non-'
+                    'refcounted types, or booleans'
                 )
 
     def all_properties(self, *args, **kwargs):

@@ -2981,7 +2981,18 @@ package body ${ada_lib_name}.Analysis is
       Ret : ${T.env_md.name} := ${T.env_md.nullexpr};
    begin
       % for field in T.env_md.get_fields():
+         % if field.type.is_bool_type:
          Ret.${field.name} := L.${field.name} or R.${field.name};
+         % else:
+         if L.${field.name} = ${field.type.nullexpr} then
+            Ret.${field.name} := R.${field.name};
+         elsif R.${field.name} = ${field.type.nullexpr} then
+            Ret.${field.name} := L.${field.name};
+         else
+            raise Property_Error with "Wrong combine for metadata field";
+         end if;
+         % endif
+
       % endfor
       return Ret;
    end Combine;
