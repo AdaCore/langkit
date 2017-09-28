@@ -37,7 +37,7 @@ is
      ${Self.type.entity.name}'(Info => E_Info, El => Self);
    % endif
 
-   % for arg in property.mandatory_arguments:
+   % for arg in property.arguments:
    ${gdb_helper('bind', arg.name.lower, arg.name.camel_with_underscores)}
    % endfor
 

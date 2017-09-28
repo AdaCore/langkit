@@ -779,14 +779,11 @@ class Argument(object):
     Holder for properties arguments.
     """
 
-    def __init__(self, name, type, is_optional=False, is_artificial=False,
-                 default_value=None, abstract_var=None):
+    def __init__(self, name, type, is_artificial=False, default_value=None,
+                 abstract_var=None):
         """
         :param names.Name name: Argument name.
         :param CompiledType type: Argument type.
-        :param bool is_optional: Whether the argument is optional. Note that
-            only properties can accept optional arguments, and such arguments
-            must be artificial.
         :param bool is_artificial: Whether the argument was automatically
             created by Langkit, i.e. the language specification did not mention
             it.
@@ -807,9 +804,7 @@ class Argument(object):
         self.name = name
         self.var = (abstract_var
                     or AbstractVariable(name, type, source_name=name))
-        self.is_optional = is_optional
         self.is_artificial = is_artificial
-        assert not is_optional or is_artificial
         self.default_value = default_value
 
     @property
@@ -846,6 +841,10 @@ class AbstractNodeData(object):
     PREFIX_FIELD = names.Name('F')
     PREFIX_PROPERTY = names.Name('P')
     PREFIX_INTERNAL = names.Name('Internal')
+
+    # Name to use for the implicit entity information argument in field
+    # accessors.
+    entity_info_name = names.Name('E_Info')
 
     prefix = None
     """
@@ -1056,30 +1055,6 @@ class AbstractNodeData(object):
         return self.struct.name + self.name
 
     @property
-    def exposed_optional_arguments(self):
-        """
-        Return the subset of "self.arguments" that are optional arguments for
-        which the type is exposed in public APIs.
-
-        This property makes sense in a code generation context.
-
-        :rtype: list[Argument]
-        """
-        return []
-
-    @property
-    def mandatory_arguments(self):
-        """
-        Return the subset of "self.arguments" that are mandatory arguments,
-        i.e. excluding optional arguments.
-
-        This property makes sense in a code generation context.
-
-        :rtype: list[Argument]
-        """
-        return self.arguments
-
-    @property
     def natural_arguments(self):
         """
         Return the subset of "self.arguments" that are non-artificial
@@ -1091,15 +1066,6 @@ class AbstractNodeData(object):
         :rtype: list[Argument]
         """
         return self.arguments
-
-    @property
-    def exposed_arguments(self):
-        """
-        Shortcut for mandatory_arguments + exposed_optional_arguments.
-
-        :rtype: list[Argument]
-        """
-        return self.mandatory_arguments + self.exposed_optional_arguments
 
     @property
     def access_needs_incref(self):

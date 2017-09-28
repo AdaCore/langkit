@@ -354,7 +354,7 @@ def make_as_entity(node_expr, entity_info=None, null_check=True,
     if entity_info is None:
         p = PropertyDef.get()
         p.set_uses_entity_info()
-        entity_info = construct(p.entity_info_arg.var)
+        entity_info = construct(p.entity_info_arg)
 
     # Expression tree sharing is forbidden, so if we need to reference the
     # result of the input node expression multiple times, create a variable to

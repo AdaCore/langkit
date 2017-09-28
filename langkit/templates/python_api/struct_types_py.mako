@@ -52,25 +52,23 @@ class _BaseEntity(_BaseStruct):
         Evaluate the "name" attribute on the wrapped AST node. This
         automatically passes parents environment rebindings.
         """
-        node = self.el
-        unbound_public_method = getattr(type(node), name)
-
-        # If there is no private method for this accessor, it means there are
-        # no implicit arguments to pass, so just return it.
+        # Assuming "name" designates a property or a field accessor, try to get
+        # its private implementation method. If there is none, it means we have
+        # a regular attribute access for the AST node.
         try:
-            unbound_private_method = getattr(type(node), '_' + name)
+            unbound_method = getattr(type(self.el), '_' + name)
         except AttributeError:
-            return getattr(node, name)
+            return getattr(self.el, name)
 
-        def bound_method(*args, **kwargs):
-            kwargs[${repr(PropertyDef.entity_info_name.lower)}] = self.info
-            return unbound_private_method(node, *args, **kwargs)
+        bound_method = getattr(type(self.el), name)
 
-        # If the public method is actually a property, the caller will not
-        # expect a callable to be returned: in this case, call it right now.
-        return (bound_method()
-                if isinstance(unbound_public_method, property) else
-                bound_method)
+        def wrapper(*args, **kwargs):
+            args = [self.el] + list(args) + [self.info]
+            return unbound_method(*args, **kwargs)
+
+        # If the target method is a property, we must evaluate it right away.
+        # Otherwise, return a callable.
+        return wrapper() if isinstance(bound_method, property) else wrapper
 
     def __repr__(self):
         c_value = Entity._unwrap(self)

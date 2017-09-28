@@ -995,7 +995,7 @@ class ${root_astnode_name}(object):
         else:
             return py_value._c_value
 
-    def _eval_field(self, c_result, c_accessor, *c_args):
+    def _eval_field(self, c_result, c_accessor, e_info, *c_args):
         """
         Internal helper to evaluate low-level field accessors/properties.
 
@@ -1003,7 +1003,8 @@ class ${root_astnode_name}(object):
         the result in "c_result". This raises a PropertyError if the evaluation
         failed. Return "c_result" for convenience.
         """
-        args = (self._c_value, ) + c_args + (ctypes.byref(c_result), )
+        e_info = ${pyapi.unwrap_value('e_info', T.entity_info)}
+        args = (self._c_value, ) + c_args + (e_info, ctypes.byref(c_result))
         if not c_accessor(*args):
             exc = _get_last_exception()
             if exc:
@@ -1012,7 +1013,7 @@ class ${root_astnode_name}(object):
                 raise PropertyError()
         return c_result
 
-    def _eval_astnode_field(self, c_accessor):
+    def _eval_astnode_field(self, c_accessor, e_info):
         """
         Internal helper. Wrapper around _eval_field for fields that return an
         AST node and that accept no explicit argument. This is useful as it's
@@ -1020,7 +1021,8 @@ class ${root_astnode_name}(object):
         code length.
         """
         return ${root_astnode_name}._wrap(
-            self._eval_field(${root_astnode_name}._c_type(), c_accessor)
+            self._eval_field(${root_astnode_name}._c_type(), c_accessor,
+                             e_info)
         )
 
 
@@ -1288,7 +1290,7 @@ _node_child = _import_func(
 _${field.accessor_basename.lower} = _import_func(
     '${capi.get_name(field.accessor_basename)}',
     [${c_node},
-     % for arg in field.exposed_arguments:
+     % for arg in field.arguments:
         <%
             type_expr = pyapi.type_internal_name(arg.type)
             if arg.type.is_ada_record:
@@ -1296,6 +1298,7 @@ _${field.accessor_basename.lower} = _import_func(
         %>
         ${type_expr},
      % endfor
+     ctypes.POINTER(${pyapi.type_internal_name(T.entity_info)}),
      ctypes.POINTER(${pyapi.type_internal_name(field.type)})],
     ctypes.c_int
 )

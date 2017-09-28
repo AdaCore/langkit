@@ -6,11 +6,13 @@
    function ${accessor_name}
      (Node    : ${node_type};
 
-      % for arg in field.exposed_arguments:
+      % for arg in field.arguments:
          ${arg.name} : ${'access constant ' if arg.type.is_ada_record else ''}
                        ${arg.type.c_type(capi).name};
       % endfor
 
+      ${field.entity_info_name} : access constant
+         ${T.entity_info.c_type(capi).name};
       Value_P : access ${field.type.c_type(capi).name}) return int
 </%def>
 
@@ -40,10 +42,14 @@
 
    ${accessor_profile(field)}
    is
+      % if not field.is_property or not field.uses_entity_info:
+         pragma Unreferenced (${field.entity_info_name});
+      % endif
+
       Unwrapped_Node : constant ${root_node_type_name} := Unwrap (Node);
       ## For each input argument, convert the C-level value into an Ada-level
       ## one.
-      % for arg in field.exposed_arguments:
+      % for arg in field.arguments:
          <%
             arg_ref = arg.name
 
@@ -77,7 +83,7 @@
    begin
       Clear_Last_Exception;
 
-      % for arg in field.exposed_arguments:
+      % for arg in field.arguments:
          % if is_token_type(arg.type):
             if Unwrap (${arg_ref}).Unit /= Unwrapped_Node.Unit then
                raise Constraint_Error with
@@ -95,11 +101,15 @@
              <%
                field_access = 'Typed_Node.{}'.format(field.name)
 
-               actuals = ', '.join('{0.name} => Unwrapped_{0.name}'.format(a)
-                                   for a in field.exposed_arguments)
+               actuals = ['{0.name} => Unwrapped_{0.name}'.format(a)
+                          for a in field.arguments]
+               if field.is_property and field.uses_entity_info:
+                   actuals.append('{arg} => {arg}.all'.format(
+                       arg=field.entity_info_name
+                   ))
                field_access = '{}{}'.format(
                    field_access,
-                   ' ({})'.format(actuals)
+                   ' ({})'.format(', '.join(actuals))
                    if actuals else ''
                )
                if not field.is_property:

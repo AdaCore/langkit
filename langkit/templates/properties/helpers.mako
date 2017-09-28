@@ -2,14 +2,15 @@
 
 <%def name="argument_list(property, dispatching)">
   (${property.self_arg_name} :
-   access ${Self.type.value_type_name()}${"" if dispatching else "'Class"}
+      access ${Self.type.value_type_name()}${"" if dispatching else "'Class"}
 
    % for arg in property.arguments:
       ; ${arg.name} : ${arg.type.name}
-      % if arg.is_optional:
-         := ${arg.type.nullexpr}
-      % endif
    % endfor
+   % if property.uses_entity_info:
+   ; ${property.entity_info_name} : ${T.entity_info.name} :=
+      ${T.entity_info.nullexpr}
+   % endif
   )
 </%def>
 

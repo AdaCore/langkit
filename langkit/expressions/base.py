@@ -2381,7 +2381,6 @@ class PropertyDef(AbstractNodeData):
     self_arg_name = names.Name('Node')
     env_arg_name = names.Name('Bound_Env')
     env_rebinding_name = names.Name('Envs_Rebindings')
-    entity_info_name = names.Name('E_Info')
 
     # Collections for these
     reserved_arg_names = (self_arg_name, env_arg_name)
@@ -2540,7 +2539,6 @@ class PropertyDef(AbstractNodeData):
             self._uses_entity_info = uses_entity_info
         self.optional_entity_info = optional_entity_info
 
-        self.entity_info_arg = None
         self._requires_untyped_wrapper = False
         self.force_dispatching = force_dispatching
         self.warn_on_unused = warn_on_unused
@@ -2686,7 +2684,7 @@ class PropertyDef(AbstractNodeData):
 
         return resolve_type(self.constructed_expr.type)
 
-    def _add_argument(self, name, type, is_optional=False, is_artificial=False,
+    def _add_argument(self, name, type, is_artificial=False,
                       abstract_var=None):
         """
         Helper to add an argument to this property.
@@ -2694,7 +2692,7 @@ class PropertyDef(AbstractNodeData):
         This basically just fills the .arguments list. See Argument's
         constructor for parameters documentation.
         """
-        self.arguments.append(Argument(name, type, is_optional, is_artificial,
+        self.arguments.append(Argument(name, type, is_artificial,
                                        abstract_var))
 
     @property
@@ -3006,7 +3004,7 @@ class PropertyDef(AbstractNodeData):
         # If this property has been explicitly marked as using entity info,
         # then set the relevant internal data.
         if self._uses_entity_info:
-            self._set_uses_entity_info()
+            self._uses_entity_info = True
 
         # At this point, we assume the list of argument has reached its final
         # state.
@@ -3020,17 +3018,18 @@ class PropertyDef(AbstractNodeData):
                                self.base_property.qualname, base_args)
             )
 
+    @property
     @memoized
-    def _set_uses_entity_info(self):
+    def entity_info_arg(self):
         """
-        Internal helper for set_uses_entity_info. Uses memoized so it is called
-        only once on each property.
+        Return an abstract expression to yield the entity information passed as
+        argument.
+
+        :rtype: AbstractExpression
         """
-        # Add the entity info argument
-        self._add_argument(PropertyDef.entity_info_name, T.entity_info,
-                           is_optional=True, is_artificial=True)
-        self.entity_info_arg = self.arguments[-1]
-        self._uses_entity_info = True
+        assert self._uses_entity_info
+        return AbstractVariable(self.entity_info_name, T.entity_info,
+                                source_name=self.entity_info_name)
 
     def set_uses_entity_info(self):
         """
@@ -3041,8 +3040,7 @@ class PropertyDef(AbstractNodeData):
             self._uses_entity_info is not False,
             'Cannot use entity info, as explicitely forbiden'
         )
-        if not self._uses_entity_info:
-            self._set_uses_entity_info()
+        self._uses_entity_info = True
 
     def require_untyped_wrapper(self):
         """
@@ -3207,20 +3205,6 @@ class PropertyDef(AbstractNodeData):
         return self._doc
 
     @property
-    def exposed_optional_arguments(self):
-        _, opt = funcy.split_by(lambda a: not a.is_optional, self.arguments)
-        return [a for a in opt if a.type._exposed]
-
-    @property
-    def mandatory_arguments(self):
-        mand, opt = funcy.split_by(lambda a: not a.is_optional,
-                                   self.arguments)
-        assert all(a.is_optional for a in opt), (
-            'All optional arguments must come before implicit ones'
-        )
-        return mand
-
-    @property
     def natural_arguments(self):
         non_art, art = funcy.split_by(lambda a: not a.is_artificial,
                                       self.arguments)
@@ -3268,8 +3252,9 @@ class PropertyDef(AbstractNodeData):
         :param [CompiledType] partial_args_types: The type of partially applied
             arguments passed to the logic predicate.
         """
-        exp_args = self.mandatory_arguments[:len(self.mandatory_arguments)
-                                            - len(partial_args_types)]
+        exp_args = self.arguments[
+            :len(self.arguments) - len(partial_args_types)
+        ]
 
         ret = [self.struct] + [a.type for a in exp_args]
         return ret
