@@ -8,7 +8,7 @@ import gdb.printing
 
 from langkit.gdb.tdh import TDH
 from langkit.gdb.units import AnalysisUnit
-from langkit.gdb.utils import adaify_name, tagged_field
+from langkit.gdb.utils import adaify_name, tagged_field, ptr_to_int
 from langkit.utils import memoized
 
 
@@ -236,7 +236,7 @@ class LexicalEnvPrinter(BasePrinter):
         elif self.ref_count == -1:
             return '<LexicalEnv root>'.format(self.node)
         else:
-            return '<LexicalEnv synthetic>'
+            return '<LexicalEnv synthetic 0x{}>'.format(ptr_to_int(self.value))
 
 
 class EnvGetterPrinter(BasePrinter):
