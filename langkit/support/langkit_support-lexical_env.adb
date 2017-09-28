@@ -576,7 +576,7 @@ package body Langkit_Support.Lexical_Env is
          Default_MD      => Self.Default_MD,
          Rebindings      => Self.Rebindings,
          Rebindings_Pool => null,
-         Ref_Count       => 1);
+         Ref_Count       => <>);
    end Orphan;
 
    -----------
@@ -602,7 +602,7 @@ package body Langkit_Support.Lexical_Env is
             Default_MD      => Empty_Metadata,
             Rebindings      => null,
             Rebindings_Pool => null,
-            Ref_Count       => 1);
+            Ref_Count       => <>);
          for Env of Envs loop
             Reference (N, Env, No_Element, Transitive => True);
          end loop;
@@ -638,7 +638,7 @@ package body Langkit_Support.Lexical_Env is
            --  is no need to convey it to synthetic lexical envs.
            Rebindings_Pool => null,
 
-           Ref_Count       => 1)
+           Ref_Count       => <>)
       do
          Reference (N, Base_Env, No_Element, Transitive => True);
       end return;

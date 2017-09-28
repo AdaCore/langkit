@@ -304,7 +304,7 @@ package Langkit_Support.Lexical_Env is
       --  environment that owns this pool. As a consequence, this is allocated
       --  only for primary lexical environments that are rebindable.
 
-      Ref_Count : Integer;
+      Ref_Count : Integer := 1;
       --  For ref-counted lexical environments, this contains the number of
       --  owners. It is initially set to 1. When it drops to 0, the env can be
       --  destroyed.
