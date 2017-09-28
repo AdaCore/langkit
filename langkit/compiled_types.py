@@ -1632,7 +1632,7 @@ class ASTNodeType(BaseStructType):
             name, location, doc,
             is_ptr=True, null_allowed=True, is_ada_record=False,
             is_list_type=is_list, should_emit_array_type=not is_root,
-            is_refcounted=False, nullexpr=null_constant(), py_nullexpr='None',
+            is_refcounted=False, nullexpr=null_constant(),
             element_type=element_type
         )
         self._base = base
@@ -1732,6 +1732,10 @@ class ASTNodeType(BaseStructType):
         # Make sure we have one entity type for each AST node type
         entity_type = self.entity
         del entity_type
+
+    @property
+    def py_nullexpr(self):
+        return "None"
 
     def repr_name(self):
         """
