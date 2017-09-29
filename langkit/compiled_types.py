@@ -1458,9 +1458,6 @@ class StructType(BaseStructType):
             null_allowed=True,
             nullexpr=(names.Name('No') + name).camel_with_underscores,
             is_ada_record=True,
-
-            # A compile pass will tag all StructType subclasses that are
-            # exposed through the public API.
             exposed=False,
 
             **kwargs
