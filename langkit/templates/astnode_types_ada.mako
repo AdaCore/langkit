@@ -100,7 +100,7 @@
 
       logic_vars = cls.get_fields(
          include_inherited=True,
-         predicate=lambda f: is_logic_var(f.type)
+         predicate=lambda f: f.type.is_logic_var_type
       )
    %>
 
@@ -302,7 +302,7 @@
 
    logic_vars = cls.get_fields(
       include_inherited=True,
-      predicate=lambda f: is_logic_var(f.type)
+      predicate=lambda f: f.type.is_logic_var_type
    )
    %>
 

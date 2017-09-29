@@ -3071,7 +3071,7 @@ package body ${ada_lib_name}.Analysis is
    begin
       % for f in T.root_node.get_fields( \
            include_inherited=False, \
-           predicate=lambda f: is_logic_var(f.type) \
+           predicate=lambda f: f.type.is_logic_var_type \
       ):
          Node.${f.name}.Dbg_Name :=
            new String'(Image (Node.Short_Image) & ".${f.name}");
@@ -3324,7 +3324,7 @@ package body ${ada_lib_name}.Analysis is
          <%
             memo_props = cls.get_memoized_properties(include_inherited=True)
             logic_vars = [fld for fld in cls.get_user_fields()
-                          if is_logic_var(fld.type)]
+                          if fld.type.is_logic_var_type]
          %>
          % if memo_props or logic_vars:
             when ${cls.ada_kind_name()} =>

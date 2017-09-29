@@ -84,8 +84,6 @@ def make_renderer(base_renderer=None):
         return lambda t: t is compiled_type
 
     template_args = {
-        'is_logic_var':           type_is(logic_var_type),
-        'is_logic_var_type':      type_is(logic_var_type),
         'is_long':                type_is(long_type),
         'is_bool':                type_is(bool_type),
         'is_analysis_unit':       type_is(analysis_unit_type),
@@ -402,6 +400,15 @@ class CompiledType(object):
         :rtype: bool
         """
         return isinstance(self, EnumType)
+
+    @property
+    def is_logic_var_type(self):
+        """
+        Return whether this is an instance of LogicVarType.
+
+        :rtype: bool
+        """
+        return isinstance(self, LogicVarType)
 
     @property
     def element_type(self):

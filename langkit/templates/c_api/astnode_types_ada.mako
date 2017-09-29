@@ -36,7 +36,7 @@
       def simple_wrapping(t):
          return (is_lexical_env(t)
                  or is_equation_type(t)
-                 or is_logic_var_type(t)
+                 or t.is_logic_var_type
                  or is_env_rebindings_type(t))
    %>
 
