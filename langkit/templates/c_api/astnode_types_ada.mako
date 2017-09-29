@@ -71,7 +71,7 @@
                ${arg.type.name} (Unwrap (${arg_ref}))
             % elif arg.type.is_token_type:
                Token (Node, Token_Index ({arg_ref}.Index))
-            % elif is_symbol_type(arg.type):
+            % elif arg.type.is_symbol_type:
                Unwrap (Unwrapped_Node.Unit, ${arg_ref})
             % elif simple_wrapping(arg.type):
                Unwrap (${arg_ref})
@@ -133,7 +133,7 @@
                     Wrap (${root_node_type_name} (${field_access}))
                 % elif field.type.is_token_type:
                     Wrap (${field_access})
-                % elif is_symbol_type(field.type):
+                % elif field.type.is_symbol_type:
                     Wrap (${field_access})
                 % elif simple_wrapping(field.type):
                     Wrap (${field_access})
