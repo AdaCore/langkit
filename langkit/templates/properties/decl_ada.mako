@@ -17,7 +17,7 @@ ${ada_doc(property, 0)}
 
 % if property.is_public \
       and not property.overriding \
-      and is_array_type(property.type):
+      and property.type.is_array_type:
    function ${property.name}
      ${helpers.argument_list(property, False)}
      return ${property.type.array_type_name};

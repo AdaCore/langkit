@@ -12,8 +12,7 @@ from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
 )
 from langkit.template_utils import common_renderer
-from langkit.utils import (issubtype, memoized, not_implemented_error,
-                           type_check_instance)
+from langkit.utils import issubtype, memoized, not_implemented_error
 
 
 def get_context(*args, **kwargs):
@@ -84,7 +83,6 @@ def make_renderer(base_renderer=None):
         return lambda t: t is compiled_type
 
     template_args = {
-        'is_array_type':          type_check_instance(ArrayType),
         'is_lexical_env':         type_is(lexical_env_type),
         'is_equation_type':       type_is(equation_type),
         'is_env_rebindings_type': type_is(env_rebindings_type),
@@ -387,6 +385,13 @@ class CompiledType(object):
         Return whether this is the analysis unit kind type.
         """
         return self == analysis_unit_kind
+
+    @property
+    def is_array_type(self):
+        """
+        Return whether this is an instance of ArrayType.
+        """
+        return isinstance(self, ArrayType)
 
     @property
     def is_bool_type(self):

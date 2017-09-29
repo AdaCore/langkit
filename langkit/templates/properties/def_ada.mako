@@ -132,7 +132,7 @@ ${gdb_helper('end', property.qualname)}
 
 ## Wrapper to return convenient Ada arrays
 
-% if not property.overriding and is_array_type(property.type):
+% if not property.overriding and property.type.is_array_type:
    function ${property.name}
      ${helpers.argument_list(property, False)}
      return ${property.type.array_type_name}

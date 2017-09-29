@@ -434,11 +434,11 @@
            ${call_prop(exprs.dest_env_prop) \
              if exprs.dest_env_prop else "Initial_Env"};
 
-         ${"Mappings" if is_array_type(exprs.mappings_prop.type) else "B"} :
+         ${"Mappings" if exprs.mappings_prop.type.is_array_type else "B"} :
            ${exprs.mappings_prop.type.name}
              := ${call_prop(exprs.mappings_prop)};
       begin
-         % if is_array_type(exprs.mappings_prop.type):
+         % if exprs.mappings_prop.type.is_array_type:
          for B of Mappings.Items loop
          % endif
             if B /= No_Env_Assoc then
@@ -474,7 +474,7 @@
                end if;
             end if;
 
-         % if is_array_type(exprs.mappings_prop.type):
+         % if exprs.mappings_prop.type.is_array_type:
          end loop;
          Dec_Ref (Mappings);
          % endif

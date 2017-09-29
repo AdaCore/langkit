@@ -119,7 +119,7 @@ class ${type_name}(${base_cls}):
              ## At this point in the binding, no array type has been emitted
              ## yet, so use a generic pointer: we will do the conversion later
              ## for users.
-             % if is_array_type(field.type):
+             % if field.type.is_array_type:
                  ctypes.c_void_p
              % else:
                 ${pyapi.type_internal_name(field.type)}
@@ -134,7 +134,7 @@ class ${type_name}(${base_cls}):
             % for field in cls.get_fields():
             <%
                 fld = 'c_value.{}'.format(field.name.lower)
-                if is_array_type(field.type):
+                if field.type.is_array_type:
                     fld = 'ctypes.cast({}, {})'.format(
                         fld,
                         pyapi.type_internal_name(field.type)
@@ -161,7 +161,7 @@ class ${type_name}(${base_cls}):
             %>
             ${f.name.lower}=${(
                 'ctypes.cast({}, ctypes.c_void_p)'.format(unwrapped)
-                if is_array_type(f.type) else unwrapped
+                if f.type.is_array_type else unwrapped
             )},
             % endfor
         )
