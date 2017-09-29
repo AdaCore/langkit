@@ -1008,7 +1008,7 @@ class Opt(Parser):
         If it is an EnumNode subclass with qualifier set to True, then the
         result is booleanized into the corresponding two alternatives.
 
-        :type: CompiledType|None
+        :type: DSLType|CompiledType|None
         """
 
         self._is_error = False
@@ -1064,6 +1064,17 @@ class Opt(Parser):
             booleanize = assert_type(dest, EnumNode)
 
         return copy_with(self, _booleanize=booleanize)
+
+    @property
+    def booleanized_type(self):
+        """
+        For parsers that return a boolean, return the actual result type to use
+        in code generation.
+
+        :rtype: CompiledType
+        """
+        assert self._booleanize
+        return resolve_type(self._booleanize)
 
     def children(self):
         return [self.parser]
