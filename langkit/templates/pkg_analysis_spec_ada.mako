@@ -402,8 +402,8 @@ package ${ada_lib_name}.Analysis is
 
    ## Declare arrays of lexical environments here because we need them for the
    ## Group operation below.
-   ${array_types.public_incomplete_decl(LexicalEnvType.array)}
-   ${array_types.public_decl(LexicalEnvType.array)}
+   ${array_types.public_incomplete_decl(T.LexicalEnv.array)}
+   ${array_types.public_decl(T.LexicalEnv.array)}
 
    ## See ASTNodeType.entity
    ${array_types.public_incomplete_decl(T.root_node.entity.array)}
@@ -1241,11 +1241,11 @@ private
 
    function Group is new AST_Envs.Group
      (Index_Type        => Positive,
-      Lexical_Env_Array => ${LexicalEnvType.array.api_name});
+      Lexical_Env_Array => ${T.LexicalEnv.array.api_name});
 
    function Group
-     (Envs : ${LexicalEnvType.array.name})
-      return ${LexicalEnvType.name};
+     (Envs : ${T.LexicalEnv.array.name})
+      return ${T.LexicalEnv.name};
    --  Convenience wrapper for uniform types handling in code generation
 
    -------------------------------
@@ -1284,7 +1284,7 @@ private
    procedure Free_Extensions (Node : access ${root_node_value_type}'Class);
    --  Implementation helper to free the extensions associatde to Node
 
-   ${array_types.private_decl(LexicalEnvType.array)}
+   ${array_types.private_decl(T.LexicalEnv.array)}
    ${array_types.private_decl(T.root_node.entity.array)}
    ${array_types.private_decl(root_node_array)}
 

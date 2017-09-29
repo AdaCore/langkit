@@ -83,9 +83,7 @@ def make_renderer(base_renderer=None):
         return lambda t: t is compiled_type
 
     template_args = {
-        'no_builtins':
-            lambda ts: filter(lambda t: not t.is_builtin(), ts),
-        'LexicalEnvType':         lexical_env_type,
+        'no_builtins': lambda ts: filter(lambda t: not t.is_builtin(), ts),
         'EnvRebindingsType':      env_rebindings_type,
         'PropertyDef':            PropertyDef,
     }

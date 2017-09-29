@@ -1288,7 +1288,7 @@ package body ${ada_lib_name}.Analysis is
       Unit.Has_Filled_Caches := False;
    end Reset_Caches;
 
-   ${array_types.body(LexicalEnvType.array)}
+   ${array_types.body(T.LexicalEnv.array)}
    ${array_types.body(T.root_node.entity.array)}
 
    function Lookup_Internal
@@ -3023,8 +3023,8 @@ package body ${ada_lib_name}.Analysis is
    -----------
 
    function Group
-     (Envs : ${LexicalEnvType.array.name})
-      return ${LexicalEnvType.name}
+     (Envs : ${T.LexicalEnv.array.name})
+      return ${T.LexicalEnv.name}
    is (Group (Envs.Items));
 
    % for astnode in ctx.astnode_types:
