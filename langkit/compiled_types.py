@@ -2450,9 +2450,9 @@ class TypeRepo(object):
 
         :param str type_name: The name of the rule.
         """
-        def resolve():
-            type_dict = CompiledTypeMetaclass.type_dict
+        type_dict = CompiledTypeMetaclass.type_dict
 
+        def resolve():
             try:
                 return type_dict[type_name]
             except KeyError:
@@ -2466,7 +2466,14 @@ class TypeRepo(object):
                         ) if close_matches else ''
                     )
                 )
-        return TypeRepo.Defer(resolve)
+
+        # Resolve immediately the type reference if possible, except for AST
+        # nodes: use a Defer object anyway so that we can support properties
+        # reference on top of it.
+        result = type_dict.get(type_name)
+        return (TypeRepo.Defer(resolve)
+                if result is None or isinstance(result, ASTNodeType) else
+                result)
 
     @property
     def root_node(self):

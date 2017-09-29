@@ -150,8 +150,8 @@ def reset_langkit():
     Self.unfreeze()
     Entity.unfreeze()
 
-    CompiledTypeMetaclass.types = []
-    CompiledTypeMetaclass.type_dict = {}
+    CompiledTypeMetaclass.types[:] = []
+    CompiledTypeMetaclass.type_dict.clear()
 
     _StructMetaclass.reset()
     _ASTNodeMetaclass.reset()
