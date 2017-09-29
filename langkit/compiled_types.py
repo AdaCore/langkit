@@ -84,7 +84,6 @@ def make_renderer(base_renderer=None):
         return lambda t: t is compiled_type
 
     template_args = {
-        'is_token_type':          type_is(token_type),
         'is_symbol_type':         type_is(symbol_type),
         'is_array_type':          type_check_instance(ArrayType),
         'is_lexical_env':         type_is(lexical_env_type),
@@ -434,6 +433,15 @@ class CompiledType(object):
         :rtype: bool
         """
         return self == long_type
+
+    @property
+    def is_token_type(self):
+        """
+        Return whether this is a token type.
+
+        :rtype: bool
+        """
+        return self == token_type
 
     @property
     def element_type(self):

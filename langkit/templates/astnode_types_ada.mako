@@ -386,7 +386,7 @@
                else
                   Put_Line (" <null>");
                end if;
-            % elif is_token_type(field.type):
+            % elif field.type.is_token_type:
                Put_Line
                  (Attr_Prefix & "${field._name.lower}: "
                   & Text (${field.name} (Node)));

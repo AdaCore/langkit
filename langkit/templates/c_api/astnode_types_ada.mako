@@ -69,7 +69,7 @@
                Unit_Kind'Val (${arg_ref})
             % elif arg.type.is_ast_node:
                ${arg.type.name} (Unwrap (${arg_ref}))
-            % elif is_token_type(arg.type):
+            % elif arg.type.is_token_type:
                Token (Node, Token_Index ({arg_ref}.Index))
             % elif is_symbol_type(arg.type):
                Unwrap (Unwrapped_Node.Unit, ${arg_ref})
@@ -84,7 +84,7 @@
       Clear_Last_Exception;
 
       % for arg in field.arguments:
-         % if is_token_type(arg.type):
+         % if arg.type.is_token_type:
             if Unwrap (${arg_ref}).Unit /= Unwrapped_Node.Unit then
                raise Constraint_Error with
                  ("The input token does not belong to the same unit as"
@@ -131,7 +131,7 @@
                     Unit_Kind'Pos (${field_access})
                 % elif field.type.is_ast_node:
                     Wrap (${root_node_type_name} (${field_access}))
-                % elif is_token_type(field.type):
+                % elif field.type.is_token_type:
                     Wrap (${field_access})
                 % elif is_symbol_type(field.type):
                     Wrap (${field_access})
