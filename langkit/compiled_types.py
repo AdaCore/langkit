@@ -84,7 +84,6 @@ def make_renderer(base_renderer=None):
         return lambda t: t is compiled_type
 
     template_args = {
-        'is_enum':                type_check_instance(EnumType),
         'is_logic_var':           type_is(logic_var_type),
         'is_logic_var_type':      type_is(logic_var_type),
         'is_long':                type_is(long_type),
@@ -394,6 +393,15 @@ class CompiledType(object):
         :rtype: bool
         """
         return self._element_type is not None
+
+    @property
+    def is_enum_type(self):
+        """
+        Return whether this is an instance of EnumType.
+
+        :rtype: bool
+        """
+        return isinstance(self, EnumType)
 
     @property
     def element_type(self):
