@@ -502,7 +502,9 @@ package ${ada_lib_name}.Analysis.C is
    ------------------
 
    % for struct_type in ctx.sorted_types(ctx.struct_types):
-      ${struct_types.decl(struct_type)}
+      % if struct_type._exposed and struct_type.emit_c_type:
+         ${struct_types.decl(struct_type)}
+      % endif
    % endfor
 
    -----------------
@@ -510,8 +512,18 @@ package ${ada_lib_name}.Analysis.C is
    -----------------
 
    % for array_type in ctx.sorted_types(ctx.array_types):
-      % if array_type.element_type.should_emit_array_type:
+      % if array_type.element_type.should_emit_array_type and \
+            array_type._exposed and \
+            array_type.emit_c_type:
          ${array_types.decl(array_type)}
+      % endif
+
+      % if array_type.element_type.is_entity_type and \
+            array_type.element_type != T.entity:
+         function Convert is new Ada.Unchecked_Conversion
+           (${array_type.name}, ${T.entity.array.name});
+         function Convert is new Ada.Unchecked_Conversion
+           (${T.entity.array.name}, ${array_type.name});
       % endif
    % endfor
 

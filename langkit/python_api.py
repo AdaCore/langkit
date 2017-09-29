@@ -63,11 +63,11 @@ class PythonAPISettings(AbstractAPISettings):
                 value_suffix,
             )),
             (ct.ArrayType, lambda cls: '{}({{}}, inc_ref={})'.format(
-                type.array_type_name.camel,
+                self.array_wrapper(type),
                 inc_ref
             )),
             (ct.StructType, lambda _: '{}._wrap({{}}, inc_ref={})'.format(
-                type.name.camel,
+                self.struct_wrapper(type),
                 inc_ref
             )),
             (ct.lexical_env_type, lambda _:
@@ -106,10 +106,10 @@ class PythonAPISettings(AbstractAPISettings):
                     type.name.camel
                 )),
             (ct.ArrayType, lambda cls: '{}._unwrap({{}})'.format(
-                cls.array_type_name.camel
+                self.array_wrapper(cls)
             )),
             (ct.StructType, lambda _: '{}._unwrap({{}})'.format(
-                type.name.camel
+                self.struct_wrapper(type)
             )),
             (ct.symbol_type, lambda _: '_text._unwrap({})'),
             (ct.lexical_env_type, lambda _: 'LexicalEnv._unwrap({})'),
@@ -152,6 +152,20 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (ct.EnumType, lambda _: ctype_type('c_uint')),
             (ct.ArrayType, lambda cls:
-                '{}._c_type'.format(cls.array_type_name.camel)),
-            (ct.StructType, lambda _: '{}._c_type'.format(type.name.camel)),
+                '{}._c_type'.format(self.array_wrapper(cls))),
+            (ct.EntityType, lambda _: '{}._c_type'.format(
+                ct.T.entity.name.camel
+            )),
+            (ct.StructType, lambda _:
+                '{}._c_type'.format(self.struct_wrapper(type))),
         ])
+
+    def array_wrapper(self, array_type):
+        return (ct.T.entity.array
+                if array_type.element_type.is_entity_type else
+                array_type).array_type_name.camel
+
+    def struct_wrapper(self, struct_type):
+        return (ct.T.entity
+                if struct_type.is_entity_type else
+                struct_type).name.camel

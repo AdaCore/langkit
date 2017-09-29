@@ -1506,6 +1506,19 @@ class StructType(BaseStructType):
         """
         return capi.get_name(self.name + names.Name('Dec_Ref'))
 
+    @property
+    def emit_c_type(self):
+        """
+        Return whether to emit a C type for this type.
+
+        This is used to filter out all entity types except the root one. All
+        entity types are compatible from an ABI point of view, so this reduces
+        the amount of code emitted for them.
+
+        :rtype: bool
+        """
+        return not self.is_entity_type or self == T.entity
+
 
 class EntityType(StructType):
     """
@@ -1535,6 +1548,11 @@ class EntityType(StructType):
             # returns arrays of root node entities, so the corresponding
             # array type must be declared manually there.
             self.should_emit_array_type = False
+
+    def c_type(self, capi):
+        # Emit only one C binding type for entities. They are all ABI
+        # compatible, so this reduces the amount of types emitted.
+        return CAPIType(capi, 'base_entity')
 
 
 class ASTNodeType(BaseStructType):
@@ -2190,7 +2208,11 @@ class ArrayType(CompiledType):
         return self.element_type.name + names.Name('Vectors')
 
     def c_type(self, c_api_settings):
-        return CAPIType(c_api_settings, self.array_type_name)
+        if (self.element_type.is_entity_type and
+                not self.element_type.emit_c_type):
+            return T.entity.array.c_type(c_api_settings)
+        else:
+            return CAPIType(c_api_settings, self.array_type_name)
 
     def index_type(self):
         """
@@ -2226,6 +2248,18 @@ class ArrayType(CompiledType):
         :rtype: str
         """
         return capi.get_name(self.array_type_name + names.Name('Dec_Ref'))
+
+    @property
+    def emit_c_type(self):
+        """
+        Return whether to emit a C type for this type.
+
+        See StructType.emit_c_type.
+
+        :rtype: bool
+        """
+        return (not self.element_type.is_struct_type or
+                self.element_type.emit_c_type)
 
 
 class EnumType(CompiledType):

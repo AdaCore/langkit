@@ -114,7 +114,7 @@ typedef struct {
 } ${exception_type};
 
 % for struct_type in ctx.struct_types:
-    % if struct_type._exposed:
+    % if struct_type._exposed and struct_type.emit_c_type:
         ${struct_types.decl(struct_type)}
     % endif
 % endfor
@@ -174,8 +174,13 @@ typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
     ${enum_types.decl(enum_type)}
 % endfor
 
+${array_types.decl(T.root_node.array)}
+${array_types.decl(T.entity.array)}
+
 % for array_type in ctx.sorted_types(ctx.array_types):
-    % if array_type._exposed:
+    % if array_type.element_type.should_emit_array_type and \
+            array_type._exposed and \
+            array_type.emit_c_type:
         ${array_types.decl(array_type)}
     % endif
 % endfor

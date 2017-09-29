@@ -1102,7 +1102,7 @@ def _unwrap_enum(py_value, type_name, translator):
 ${struct_types.base_decls()}
 
 % for struct_type in ctx.struct_types:
-    % if struct_type._exposed:
+    % if struct_type._exposed and struct_type.emit_c_type:
 ${struct_types.decl(struct_type)}
     % endif
 % endfor
@@ -1112,8 +1112,10 @@ ${struct_types.decl(struct_type)}
 #
 
 ${array_types.base_decl()}
+${array_types.decl(T.root_node.array)}
+${array_types.decl(T.entity.array)}
 % for array_type in ctx.sorted_types(ctx.array_types):
-    % if array_type._exposed:
+    % if array_type._exposed and array_type.emit_c_type:
 ${array_types.decl(array_type)}
     % endif
 % endfor

@@ -1,5 +1,5 @@
 main.py: Running...
 .test_main: <Entity el=<Couple 1:2-1:8> info=<EntityInfo md=<Metadata f_is_first=True f_is_second=False> rebindings=None>>
-.property_on_entity: <EntityCouple el=<Couple 1:1-1:12> info=<EntityInfo md=<Metadata f_is_first=False f_is_second=False> rebindings=None>>
+.property_on_entity: <Entity el=<Couple 1:1-1:12> info=<EntityInfo md=<Metadata f_is_first=False f_is_second=False> rebindings=None>>
 main.py: Done.
 Done

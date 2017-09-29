@@ -1,7 +1,7 @@
 main.py: Running...
-u.root.p_count(None) = <TypeError: EntityExampleArray instance expected, got <type 'NoneType'> instead>
-u.root.p_count(42) = <TypeError: EntityExampleArray instance expected, got <type 'int'> instead>
-u.root.p_count(u.root.p_all_items) = <TypeError: EntityExampleArray instance expected, got <class 'libfoolang.EntityArray'> instead>
+u.root.p_count(None) = <TypeError: EntityArray instance expected, got <type 'NoneType'> instead>
+u.root.p_count(42) = <TypeError: EntityArray instance expected, got <type 'int'> instead>
+u.root.p_count(u.root.p_all_items) = 3
 u.root.p_count(u.root.p_example_items) = 2
 main.py: Done.
 Done

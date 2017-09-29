@@ -69,6 +69,10 @@
                Unit_Kind'Val (${arg_ref})
             % elif arg.type.is_ast_node:
                ${arg.type.name} (Unwrap (${arg_ref}))
+            % elif arg.type.is_entity_type:
+               (${arg.type.el_type.name} (${arg_ref}.El), ${arg_ref}.Info)
+            % elif arg.type.is_array and not arg.type.emit_c_type:
+               Convert (${arg_ref})
             % elif arg.type.is_token_type:
                Token (Node, Token_Index ({arg_ref}.Index))
             % elif arg.type.is_symbol_type:
@@ -95,53 +99,63 @@
 
       if Unwrapped_Node.all in ${struct.value_type_name()}'Class then
          declare
+            <%
+              field_access = 'Typed_Node.{}'.format(field.name)
+
+              actuals = ['{0.name} => Unwrapped_{0.name}'.format(a)
+                         for a in field.arguments]
+              if field.is_property and field.uses_entity_info:
+                  actuals.append('{arg} => {arg}.all'.format(
+                      arg=field.entity_info_name
+                  ))
+              field_access = '{}{}'.format(
+                  field_access,
+                  ' ({})'.format(', '.join(actuals))
+                  if actuals else ''
+              )
+              if not field.is_property:
+                 field_access = field.type.extract_from_storage_expr(
+                    'Unwrapped_Node', field_access
+                 )
+            %>
+
             Typed_Node : constant ${struct.name} :=
                ${struct.name} (Unwrapped_Node);
+            Result     : ${field.type.name};
          begin
-             <%
-               field_access = 'Typed_Node.{}'.format(field.name)
+            --  Keep this assignment after the BEGIN keyword above so that the
+            --  exception handler covers it.
+            Result := ${field_access};
 
-               actuals = ['{0.name} => Unwrapped_{0.name}'.format(a)
-                          for a in field.arguments]
-               if field.is_property and field.uses_entity_info:
-                   actuals.append('{arg} => {arg}.all'.format(
-                       arg=field.entity_info_name
-                   ))
-               field_access = '{}{}'.format(
-                   field_access,
-                   ' ({})'.format(', '.join(actuals))
-                   if actuals else ''
-               )
-               if not field.is_property:
-                  field_access = field.type.extract_from_storage_expr(
-                     'Unwrapped_Node', field_access
-                  )
-             %>
-             Value_P.all :=
-                % if field.type.is_enum_type:
-                    ${field.type.c_type(capi).name}
-                      (${field.type.name}'Pos (${field_access}))
-                % elif field.type.is_bool_type:
-                    ${bool_type} (Boolean'Pos (${field_access}))
-                % elif field.type.is_long_type:
-                    int (${field_access})
-                % elif field.type.is_analysis_unit_type:
-                    Wrap (${field_access})
-                % elif field.type.is_analysis_unit_kind:
-                    Unit_Kind'Pos (${field_access})
-                % elif field.type.is_ast_node:
-                    Wrap (${root_node_type_name} (${field_access}))
-                % elif field.type.is_token_type:
-                    Wrap (${field_access})
-                % elif field.type.is_symbol_type:
-                    Wrap (${field_access})
-                % elif simple_wrapping(field.type):
-                    Wrap (${field_access})
-                % else:
-                    ${field_access}
-                % endif
-             ;
-             return 1;
+            Value_P.all :=
+               % if field.type.is_enum_type:
+                   ${field.type.c_type(capi).name}
+                     (${field.type.name}'Pos (Result))
+               % elif field.type.is_bool_type:
+                   ${bool_type} (Boolean'Pos (Result))
+               % elif field.type.is_long_type:
+                   int (Result)
+               % elif field.type.is_analysis_unit_type:
+                   Wrap (Result)
+               % elif field.type.is_analysis_unit_kind:
+                   Unit_Kind'Pos (Result)
+               % elif field.type.is_ast_node:
+                   Wrap (${root_node_type_name} (Result))
+               % elif field.type.is_entity_type:
+                  (${root_node_type_name} (Result.El), Result.Info)
+               % elif field.type.is_array and not field.type.emit_c_type:
+                  Convert (Result)
+               % elif field.type.is_token_type:
+                   Wrap (Result)
+               % elif field.type.is_symbol_type:
+                   Wrap (Result)
+               % elif simple_wrapping(field.type):
+                   Wrap (Result)
+               % else:
+                   Result
+               % endif
+            ;
+            return 1;
          exception
             when Exc : Property_Error =>
                ## If we reach this handler, it means the expression failed at
