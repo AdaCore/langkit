@@ -84,7 +84,6 @@ def make_renderer(base_renderer=None):
         return lambda t: t is compiled_type
 
     template_args = {
-        'is_analysis_unit':       type_is(analysis_unit_type),
         'is_analysis_kind':       type_is(analysis_unit_kind),
         'is_struct':              type_check_instance(StructType),
         'is_struct_type':         type_check_instance(StructType),
@@ -380,6 +379,13 @@ class CompiledType(object):
         :rtype: None|str
         """
         return self._doc
+
+    @property
+    def is_analysis_unit_type(self):
+        """
+        Return whether this is the analysis unit type.
+        """
+        return self == analysis_unit_type
 
     @property
     def is_bool_type(self):
