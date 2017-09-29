@@ -87,7 +87,7 @@ If everything went fine, you should be able to run the ``parse`` test binary:
 
     $ build/bin/parse
     Parsing failed:
-    Line 1, column 1: Expected "Example", got "Termination"
+    Line 1, column 1: Expected "example", got "Termination"
     <null node>
 
 Great! This binary just tries to parse its command-line argument and displays
@@ -99,7 +99,7 @@ allows exactly one "example" keyword:
     $ build/bin/parse example
     ExampleNode[1:1-1:8]
 
-Here, we have an ExampleNode which spans from line 1, column 1 to line 1,
+Here, we have an ``ExampleNode`` which spans from line 1, column 1 to line 1,
 column 8.  This language is pretty useless but now we checked that the setup
 was working, let's implement Kaleidoscope!
 
@@ -144,48 +144,41 @@ class.
 .. code-block:: python
 
     class Token(LexerToken):
-        Example    = NoText()
+        Example    = WithText()
 
         # Keywords
-        Def        = NoText()
-        Extern     = NoText()
+        Def        = WithText()
+        Extern     = WithText()
 
         # Other alphanumeric tokens
         Identifier = WithSymbol()
         Number     = WithText()
 
         # Punctuation
-        LPar       = NoText()
-        RPar       = NoText()
-        Comma      = NoText()
-        Colon      = NoText()
+        LPar       = WithText()
+        RPar       = WithText()
+        Comma      = WithText()
+        Colon      = WithText()
 
         # Operators
-        Plus       = NoText()
-        Minus      = NoText()
-        Mult       = NoText()
-        Div        = NoText()
+        Plus       = WithText()
+        Minus      = WithText()
+        Mult       = WithText()
+        Div        = WithText()
 
 Ok, so here we have four kind of tokens:
-
-* The ``def`` and ``extern`` keywords, for which keeping the text is useless:
-  there is only one possible ``def`` keyword (same for ``external``) so copying
-  the text for it gives no useful information. We use ``NoText`` instances to
-  achieve this.
 
 * Identifiers, which we'll use for function names and variable names so we want
   to put the corresponding text in a symbol table. We use ``WithSymbol``
   instances to achieve this.
 
-* Decimal literals (``Number``), for which we will keep the associated text so
-  we can later extract the corresponding value later. We use ``WithText``
-  instances to achieve this.
+* All other tokens (keywords such as ``def`` or ``extern``, decimal literals
+  ``Number``, etc.) for which we will just keep the associated text, we use
+  ``WithText`` instances. This will allow us later able to extract the
+  corresponding integer value for decimal literals for instance.
 
-* Punctuation and operators, for which keeping the text is useless, just like
-  for keywords.
-
-Do not forget to add ``WithText`` and ``WithSymbol`` to the import statement so
-that you can use them in your lexer specification.
+Do not forget to add ``WithSymbol`` to the import statement so that you can use
+them in your lexer specification.
 
 Good, so now let's create the lexer itself.  The first thing to do is to
 instantiate the ``Lexer`` class and provide it the set of available tokens:
@@ -292,8 +285,8 @@ Tree), which is a representation of the source code making analysis easier. Our
 next task will be to actually define how our AST will look like so that the
 parser will know what to create.
 
-Take your code editor, open ``language/parser.py`` and replace the ``Example``
-class definition with the following ones:
+Take your code editor, open ``language/parser.py`` and replace the
+``ExampleNode`` class definition with the following ones:
 
 .. code-block:: python
 
@@ -331,8 +324,7 @@ class definition with the following ones:
         args = Field()
 
 As usual, new code comes with its new dependencies: also complete the
-``langkit.compiled_types`` import statement with ``abstract``, ``EnumType`` and
-``Field``.
+``langkit.dsl`` import statement with ``abstract``, ``EnumType`` and ``Field``.
 
 Each class definition is a way to declare how a particular AST node will look.
 Think of it as a kind of structure: here the ``Function`` AST node has two
@@ -384,23 +376,29 @@ examples:
   one (no more, no less).
 
 The basic idea is that you use the callables Langkit provides (``Row``, ``Or``,
-etc.) in order to compose in a quite natural way what rules can match. Let's
-move forward with a real world example: Kaleidoscope! Each chunk of code below
-appears as a keyword argument of the ``add_rules`` method invocation (you can
-remove the previous ``main_rule`` one).
+etc. from the ``langkit.parsers`` module) in order to compose in a quite
+natural way what rules can match. Let's move forward with a real world example:
+Kaleidoscope! Each chunk of code below appears as a keyword argument of the
+``add_rules`` method invocation (you can remove the previous ``main_rule``
+one). But first, let's add a shortcut for our grammar instance:
 
 .. code-block:: python
 
-    main_rule=List(Or(G.extern_decl, G.function, G.expr)),
+    G = kaleidoscope_grammar
 
-Remember that ``G`` is another name for ``kaleidoscope_grammar``, so that it's
-shorter to write/read here.  ``G.external_decl`` references the parsing rule
-called ``external_decl``.  It does not exist yet, but Langkit allows such
-forward references anyway so that rules can reference themselves in a recursive
-fashion.
+Now, redefine the ``main_rule`` parsing rule:
+
+.. code-block:: python
+
+    main_rule=List(Row(Or(G.extern_decl, G.function, G.expr), ';')[0]),
+
+``G.external_decl`` references the parsing rule called ``external_decl``.  It
+does not exist yet, but Langkit allows such forward references anyway so that
+rules can reference themselves in a recursive fashion.
 
 So what this rule matches is a list in which elements can be either external
-declarations, function definitions or expressions.
+declarations, function definitions or expressions, each one followed by a
+colon.
 
 .. code-block:: python
 
@@ -557,47 +555,52 @@ to launch another build and then run ``parse`` on some code:
     $ ./manage.py make
     [... snipped...]
 
-    $ build/bin/parse 'extern foo(a); def bar(a, b) a * foo(a + 1)'
-    ExternDecl[1:1-1:15]
-    | proto:
-    | | Prototype[1:8-1:14]
-    | | | name:
-    | | | | Identifier[1:8-1:11]
-    | | | | | name: foo
-    | | | args:
-    | | | | Identifier[1:12-1:13]
-    | | | | | name: a
-    Function[1:16-1:44]
-    | proto:
-    | | Prototype[1:20-1:29]
-    | | | name:
-    | | | | Identifier[1:20-1:23]
-    | | | | | name: bar
-    | | | args:
-    | | | | Identifier[1:24-1:25]
-    | | | | | name: a
-    | | | | Identifier[1:27-1:28]
-    | | | | | name: b
-    | body:
-    | | BinaryExpr[1:30-1:44]
-    | | | lhs:
-    | | | | Identifier[1:30-1:31]
-    | | | | | name: a
-    | | | op: mult
-    | | | rhs:
-    | | | | CallExpr[1:34-1:44]
-    | | | | | callee:
-    | | | | | | Identifier[1:34-1:37]
-    | | | | | | | name: foo
-    | | | | | args:
-    | | | | | | BinaryExpr[1:38-1:43]
-    | | | | | | | lhs:
-    | | | | | | | | Identifier[1:38-1:39]
-    | | | | | | | | | name: a
-    | | | | | | | op: plus
-    | | | | | | | rhs:
-    | | | | | | | | Number[1:42-1:43]
-    | | | | | | | | | value: 1
+    $ build/bin/parse 'extern foo(a); def bar(a, b) a * foo(a + 1);'
+    KaleidoscopeNodeList[1:1-1:45]
+    |  ExternDecl[1:1-1:14]
+    |  |proto:
+    |  |  Prototype[1:8-1:14]
+    |  |  |name:
+    |  |  |  Identifier[1:8-1:11]
+    |  |  |  |name: foo
+    |  |  |args:
+    |  |  |  IdentifierList[1:12-1:13]
+    |  |  |  |  Identifier[1:12-1:13]
+    |  |  |  |  |name: a
+    |  FunctionNode[1:16-1:44]
+    |  |proto:
+    |  |  Prototype[1:20-1:29]
+    |  |  |name:
+    |  |  |  Identifier[1:20-1:23]
+    |  |  |  |name: bar
+    |  |  |args:
+    |  |  |  IdentifierList[1:24-1:28]
+    |  |  |  |  Identifier[1:24-1:25]
+    |  |  |  |  |name: a
+    |  |  |  |  Identifier[1:27-1:28]
+    |  |  |  |  |name: b
+    |  |body:
+    |  |  BinaryExpr[1:30-1:44]
+    |  |  |lhs:
+    |  |  |  Identifier[1:30-1:31]
+    |  |  |  |name: a
+    |  |  |op: mult
+    |  |  |rhs:
+    |  |  |  CallExpr[1:34-1:44]
+    |  |  |  |callee:
+    |  |  |  |  Identifier[1:34-1:37]
+    |  |  |  |  |name: foo
+    |  |  |  |args:
+    |  |  |  |  ExprList[1:38-1:43]
+    |  |  |  |  |  BinaryExpr[1:38-1:43]
+    |  |  |  |  |  |lhs:
+    |  |  |  |  |  |  Identifier[1:38-1:39]
+    |  |  |  |  |  |  |name: a
+    |  |  |  |  |  |op: plus
+    |  |  |  |  |  |rhs:
+    |  |  |  |  |  |  Number[1:42-1:43]
+    |  |  |  |  |  |  |value: 1
+
 
 Yay! What a pretty AST! Here's also a very useful tip for grammar development:
 it's possible to run ``parse`` on rules that are not the main ones. For
@@ -639,9 +642,12 @@ top of it. Let's use the Python API for now as it's more concise, handier and
 likely more stable. Besides, using the Python API makes it really easy to
 experiment since you have an interactive interpreter. So, considering you
 successfully built the library with the Kaleidoscope parser and lexer, make
-sure the ``build/lib`` directory is in your ``LD_LIBRARY_PATH`` (on Unix, adapt
-for Windows) and that the ``build/python/libkaleidoscopelang.py`` is reachable
-from Python (check ``PYTHONPATH``).
+sure the ``build/lib/langkit_support.relocatable`` and the
+``build/lib/libkaleidoscopelang.relocatable`` directories is in your
+``LD_LIBRARY_PATH`` (on most Unix, ``DYLD_FALLBACK_LIBRARY_PATH`` on Darwin,
+adapt for Windows) and that the ``build/python/libkaleidoscopelang.py`` is
+reachable from Python (add ``build/python`` in your ``PYTHONPATH`` environment
+variable).
 
 Alright, so the first thing to do with the Python API is to import the
 ``libkaleidoscopelang`` module and instantiate an analysis context from it:
@@ -661,7 +667,7 @@ from a buffer (i.e. a string value):
     unit_1 = ctx.get_from_file('foo.kal')
 
     # Parse code from a buffer as if it came from the 'foo.kal' file.
-    unit_2 = ctx.get_from_buffer('foo.kal', 'def foo(a, b) a + b')
+    unit_2 = ctx.get_from_buffer('foo.kal', 'def foo(a, b) a + b;')
 
 .. todo::
 
@@ -675,24 +681,24 @@ can then browse the AST nodes programmatically:
 
     # Get the root AST node.
     print unit_2.root
-    # <libkaleidoscopelang.ASTList object at 0x7f09dc905bd0>
+    # <KaleidoscopeNodeList 1:1-1:21>
 
-    unit_2.dump()
-    # <list>
+    unit_2.root.dump()
+    # <KaleidoscopeNodeList>
     # |item 0:
     # |  <FunctionNode>
     # |  |proto:
     # ...
 
     print unit_2.root[0]
-    # <libkaleidoscopelang.FunctionNode object at 0x7f09dc905c90>
+    # <FunctionNode 1:1-1:20>
 
     print list(unit_2.root[0].iter_fields())
-    # [('proto', <libkaleidoscopelang.Prototype object at 0x7f09dc905e10>),
-    #  ('body', <libkaleidoscopelang.BinaryExpr object at 0x7f09dc905c50>)]
+    # [(u'proto', <Prototype 1:5-1:14>),
+    #  (u'body', <BinaryExpr 1:15-1:20>)]
 
-    print list(unit_2.root[0].f_body
-    # <libkaleidoscopelang.BinaryExpr object at 0x7f09dc905c50>
+    print list(unit_2.root[0].f_body)
+    # <BinaryExpr 1:15-1:20>
 
 Note how names for AST node fields got a ``f_`` prefix: this is used to
 distinguish AST node fields from generic AST node attributes and methods, such
@@ -753,7 +759,7 @@ Our top-level code looks like this:
         unit = ctx.get_from_file(filename)
         if unit.diagnostics:
             for diag in unit.diagnostics:
-                print_error(filename, diag.sloc_range, diag.messegae)
+                print_error(filename, diag.sloc_range, diag.message)
             sys.exit(1)
         try:
             Interpreter().execute(unit.root)
@@ -775,7 +781,7 @@ important bits in ``Interpreter``:
 
     # Method for the Interpreter class
     def execute(self, ast):
-        assert isinstance(ast, lkl.ASTList)
+        assert isinstance(ast, lkl.KaleidoscopeNodeList)
         for node in ast:
             if isinstance(node, lkl.FunctionNode):
                 self.functions[node.f_proto.f_name.f_name.text] = node
