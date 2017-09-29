@@ -2396,12 +2396,15 @@ class TypeRepo(object):
         """
         Internal class representing a not-yet resolved type.
         """
-        def __init__(self, getter):
+        def __init__(self, getter, label):
             """
             :param () -> CompiledType getter: A function that will return
                 the resolved type when called.
+            :param str label: Short description of what this Defer object
+                resolves to, for debugging purposes.
             """
             self.getter = getter
+            self.label = label
 
         def get(self):
             """
@@ -2432,10 +2435,22 @@ class TypeRepo(object):
                             attr=repr(name)
                         )
                     )
-            return TypeRepo.Defer(get)
+            return TypeRepo.Defer(get, '{}.{}'.format(self.label, name))
 
         def __call__(self, *args, **kwargs):
-            return TypeRepo.Defer(lambda: self.get()(*args, **kwargs))
+            label_args = []
+            for arg in args:
+                label_args.append(str(arg))
+            for kw, arg in kwargs.items():
+                label_args.append('{}={}'.format(kw, arg))
+
+            return TypeRepo.Defer(
+                lambda: self.get()(*args, **kwargs),
+                '{}({})'.format(self.label, ', '.join(label_args))
+            )
+
+        def __repr__(self):
+            return '<Defer {}>'.format(self.label)
 
     def __getattr__(self, type_name):
         """
@@ -2464,7 +2479,7 @@ class TypeRepo(object):
         # nodes: use a Defer object anyway so that we can support properties
         # reference on top of it.
         result = type_dict.get(type_name)
-        return (TypeRepo.Defer(resolve)
+        return (TypeRepo.Defer(resolve, type_name)
                 if result is None or isinstance(result, ASTNodeType) else
                 result)
 
@@ -2480,7 +2495,7 @@ class TypeRepo(object):
 
     @property
     def defer_root_node(self):
-        return self.Defer(lambda: self.root_node)
+        return self.Defer(lambda: self.root_node, 'root_node')
 
     @property
     def env_md(self):
@@ -2493,7 +2508,7 @@ class TypeRepo(object):
 
     @property
     def defer_env_md(self):
-        return self.Defer(lambda: self.env_md)
+        return self.Defer(lambda: self.env_md, '.env_md')
 
     @property
     def entity_info(self):

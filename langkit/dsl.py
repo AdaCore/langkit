@@ -33,7 +33,8 @@ class DSLType(object):
         """
         Return the array type whose element type is `cls`.
         """
-        return T.Defer(lambda: cls._type.array)
+        return T.Defer(lambda: cls._type.array,
+                       '{}.array'.format(cls._name.camel))
 
     @classmethod
     def _diagnostic_context(cls):
@@ -532,7 +533,8 @@ class ASTNode(BaseStruct):
 
     @classproperty
     def entity(cls):
-        return T.Defer(lambda: cls._type.entity)
+        return T.Defer(lambda: cls._type.entity,
+                       '{}.entity'.format(cls._name.camel))
 
     def __new__(cls, *args):
         """
@@ -544,7 +546,7 @@ class ASTNode(BaseStruct):
         def get():
             assert cls._type
             return cls._type
-        return Row(*args) ^ T.Defer(get)
+        return Row(*args) ^ T.Defer(get, cls._name.camel)
 
 
 class _ASTNodeList(ASTNode):
@@ -733,7 +735,7 @@ class EnumNode(BaseStruct):
             def get():
                 assert self._type
                 return self._type
-            return T.Defer(get)
+            return T.Defer(get, 'Alternative({})'.format(self.name.camel))
 
         def __call__(self, *args):
             """
