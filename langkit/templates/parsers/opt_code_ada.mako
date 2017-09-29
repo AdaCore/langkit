@@ -8,13 +8,13 @@ ${parser.parser.generate_code()}
 parser_type = parser.parser.get_type()
 if parser._booleanize:
    base = parser.booleanized_type
-   if not is_bool(base):
+   if not base.is_bool_type:
       alt_true, alt_false = base._alternatives
 %>
 
 if ${parser.parser.pos_var} = No_Token_Index then
     % if parser._booleanize:
-      % if is_bool(base):
+      % if base.is_bool_type:
          ${parser.res_var} := False;
       % else:
          ${parser.res_var} := ${base.name}
@@ -50,7 +50,7 @@ if ${parser.parser.pos_var} = No_Token_Index then
 
 % if parser._booleanize:
 else
-   % if is_bool(base):
+   % if base.is_bool_type:
       ${parser.res_var} := True;
    % else:
       ${parser.res_var} := ${base.name}

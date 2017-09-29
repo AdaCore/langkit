@@ -59,7 +59,7 @@
          Unwrapped_${arg.name} : constant ${arg.type.name} :=
             % if arg.type.is_enum_type:
                ${field.type} (${arg_ref})
-            % elif is_bool(arg.type):
+            % elif arg.type.is_bool_type:
                ${arg_ref} /= 0
             % elif arg.type.is_long_type:
                Integer (${arg_ref})
@@ -121,7 +121,7 @@
                 % if field.type.is_enum_type:
                     ${field.type.c_type(capi).name}
                       (${field.type.name}'Pos (${field_access}))
-                % elif is_bool(field.type):
+                % elif field.type.is_bool_type:
                     ${bool_type} (Boolean'Pos (${field_access}))
                 % elif field.type.is_long_type:
                     int (${field_access})
