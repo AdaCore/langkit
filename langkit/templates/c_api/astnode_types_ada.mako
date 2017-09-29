@@ -65,7 +65,7 @@
                Integer (${arg_ref})
             % elif arg.type.is_analysis_unit_type:
                Unwrap (${arg_ref})
-            % elif is_analysis_kind(arg.type):
+            % elif arg.type.is_analysis_unit_kind:
                Unit_Kind'Val (${arg_ref})
             % elif arg.type.is_ast_node:
                ${arg.type.name} (Unwrap (${arg_ref}))
@@ -127,7 +127,7 @@
                     int (${field_access})
                 % elif field.type.is_analysis_unit_type:
                     Wrap (${field_access})
-                % elif is_analysis_kind(field.type):
+                % elif field.type.is_analysis_unit_kind:
                     Unit_Kind'Pos (${field_access})
                 % elif field.type.is_ast_node:
                     Wrap (${root_node_type_name} (${field_access}))

@@ -84,7 +84,6 @@ def make_renderer(base_renderer=None):
         return lambda t: t is compiled_type
 
     template_args = {
-        'is_analysis_kind':       type_is(analysis_unit_kind),
         'is_struct':              type_check_instance(StructType),
         'is_struct_type':         type_check_instance(StructType),
         'is_sloc_range':          type_is(source_location_range_type),
@@ -386,6 +385,13 @@ class CompiledType(object):
         Return whether this is the analysis unit type.
         """
         return self == analysis_unit_type
+
+    @property
+    def is_analysis_unit_kind(self):
+        """
+        Return whether this is the analysis unit kind type.
+        """
+        return self == analysis_unit_kind
 
     @property
     def is_bool_type(self):
