@@ -61,7 +61,7 @@
                ${field.type} (${arg_ref})
             % elif is_bool(arg.type):
                ${arg_ref} /= 0
-            % elif is_long(arg.type):
+            % elif arg.type.is_long_type:
                Integer (${arg_ref})
             % elif is_analysis_unit(arg.type):
                Unwrap (${arg_ref})
@@ -123,7 +123,7 @@
                       (${field.type.name}'Pos (${field_access}))
                 % elif is_bool(field.type):
                     ${bool_type} (Boolean'Pos (${field_access}))
-                % elif is_long(field.type):
+                % elif field.type.is_long_type:
                     int (${field_access})
                 % elif is_analysis_unit(field.type):
                     Wrap (${field_access})

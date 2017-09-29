@@ -84,7 +84,6 @@ def make_renderer(base_renderer=None):
         return lambda t: t is compiled_type
 
     template_args = {
-        'is_long':                type_is(long_type),
         'is_bool':                type_is(bool_type),
         'is_analysis_unit':       type_is(analysis_unit_type),
         'is_analysis_kind':       type_is(analysis_unit_kind),
@@ -409,6 +408,15 @@ class CompiledType(object):
         :rtype: bool
         """
         return isinstance(self, LogicVarType)
+
+    @property
+    def is_long_type(self):
+        """
+        Return whether this is a integer type.
+
+        :rtype: bool
+        """
+        return self == long_type
 
     @property
     def element_type(self):
