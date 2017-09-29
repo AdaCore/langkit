@@ -74,19 +74,13 @@ def make_renderer(base_renderer=None):
     :param Renderer base_renderer: The renderer to base the resulting
         renderer on.
     """
-    from langkit.expressions import PropertyDef
-
     if base_renderer is None:
         base_renderer = common_renderer
 
     def type_is(compiled_type):
         return lambda t: t is compiled_type
 
-    template_args = {
-        'no_builtins': lambda ts: filter(lambda t: not t.is_builtin(), ts),
-        'EnvRebindingsType':      env_rebindings_type,
-        'PropertyDef':            PropertyDef,
-    }
+    template_args = {}
     if get_context():
         ctx = get_context()
         capi = ctx.c_api_settings
@@ -106,6 +100,7 @@ def make_renderer(base_renderer=None):
         glist_value_type = ctx.generic_list_type.name + names.Name("Type")
 
         template_args.update({
+            'no_builtins': lambda ts: filter(lambda t: not t.is_builtin(), ts),
             'root_node_type_name':   type_name,
             'root_node_value_type':  value_type,
             'root_node_kind_name':   kind_name,
