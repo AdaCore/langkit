@@ -83,7 +83,6 @@ def make_renderer(base_renderer=None):
         return lambda t: t is compiled_type
 
     template_args = {
-        'is_env_rebindings_type': type_is(env_rebindings_type),
         'no_builtins':
             lambda ts: filter(lambda t: not t.is_builtin(), ts),
         'LexicalEnvType':         lexical_env_type,
@@ -417,6 +416,15 @@ class CompiledType(object):
         :rtype: bool
         """
         return isinstance(self, EnumType)
+
+    @property
+    def is_env_rebindings_type(self):
+        """
+        Return whether this is the env rebindings type.
+
+        :rtype: bool
+        """
+        return self == env_rebindings_type
 
     @property
     def is_equation_type(self):
