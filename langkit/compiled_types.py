@@ -84,9 +84,6 @@ def make_renderer(base_renderer=None):
         return lambda t: t is compiled_type
 
     template_args = {
-        'is_struct':              type_check_instance(StructType),
-        'is_struct_type':         type_check_instance(StructType),
-        'is_sloc_range':          type_is(source_location_range_type),
         'is_token_type':          type_is(token_type),
         'is_symbol_type':         type_is(symbol_type),
         'is_array_type':          type_check_instance(ArrayType),
