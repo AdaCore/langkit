@@ -895,6 +895,7 @@ class AnalysisUnitKind(_BuiltinType):
     """
     Type for the analysis unit kind enumeration.
     """
+    _name = names.Name('Analysis_Unit_Kind')
     _type = _internal_types.analysis_unit_kind
 
 
@@ -902,6 +903,7 @@ class AnalysisUnitType(_BuiltinType):
     """
     Type for analysis unit values.
     """
+    _name = names.Name('Analysis_Unit_Type')
     _type = _internal_types.analysis_unit_type
 
 
@@ -909,6 +911,7 @@ class BoolType(_BuiltinType):
     """
     Type for boolean values.
     """
+    _name = names.Name('Bool_Type')
     _type = _internal_types.bool_type
 
 
@@ -923,6 +926,7 @@ class EquationType(_BuiltinType):
     Equations instance will typically be produced by expressions involving
     logic variables.
     """
+    _name = names.Name('Equation_Type')
     _type = _internal_types.equation_type
 
 
@@ -930,6 +934,7 @@ class EnvRebindingsType(_BuiltinType):
     """
     Type for environment rebinding values.
     """
+    _name = names.Name('Env_Rebindings_Type')
     _type = _internal_types.env_rebindings_type
 
 
@@ -937,6 +942,7 @@ class LexicalEnvType(_BuiltinType):
     """
     Type for lexical environments.
     """
+    _name = names.Name('Lexical_Env_Type')
     _type = _internal_types.lexical_env_type
 
 
@@ -944,6 +950,7 @@ class LogicVarType(_BuiltinType):
     """
     Type for logic variables, to be used in equations (see EquationType).
     """
+    _name = names.Name('Logic_Var_Type')
     _type = _internal_types.logic_var_type
 
 
@@ -951,6 +958,7 @@ class LongType(_BuiltinType):
     """
     Simple integer type.
     """
+    _name = names.Name('Long_Type')
     _type = _internal_types.long_type
 
 
@@ -958,6 +966,7 @@ class Symbol(_BuiltinType):
     """
     Type for symbol values (canonicalized names).
     """
+    _name = names.Name('Symbol')
     _type = _internal_types.symbol_type
 
 
@@ -965,4 +974,5 @@ class Token(_BuiltinType):
     """
     Type for token values, as found in an analysis unit's token data handler.
     """
+    _name = names.Name('Token')
     _type = _internal_types.token_type
