@@ -2,8 +2,8 @@ from __future__ import absolute_import, division, print_function
 
 import langkit.compiled_types as _internal_types
 from langkit.compiled_types import (
-    _EnumType, ASTNodeType, AbstractNodeData, Field as _Field, StructType,
-    UserField as _UserField, T
+    EnumType as _EnumType, ASTNodeType, AbstractNodeData, Field as _Field,
+    StructType, UserField as _UserField, T
 )
 from langkit.diagnostics import (
     Context, check_source_language, extract_library_location

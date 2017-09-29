@@ -84,7 +84,7 @@ def make_renderer(base_renderer=None):
         return lambda t: t is compiled_type
 
     template_args = {
-        'is_enum':                type_check_instance(_EnumType),
+        'is_enum':                type_check_instance(EnumType),
         'is_logic_var':           type_is(logic_var_type),
         'is_logic_var_type':      type_is(logic_var_type),
         'is_long':                type_is(long_type),
@@ -2153,7 +2153,7 @@ class ArrayType(CompiledType):
         return capi.get_name(self.array_type_name + names.Name('Dec_Ref'))
 
 
-class _EnumType(CompiledType):
+class EnumType(CompiledType):
     """
     Enumeration type. This is a compiled type that hold a single value in a set
     of possible ones.
@@ -2171,7 +2171,7 @@ class _EnumType(CompiledType):
         :param str suffix: Suffix to use for the alternatives when they are
             invalid identifiers in some target language.
         """
-        super(_EnumType, self).__init__(
+        super(EnumType, self).__init__(
             name, location, doc,
             exposed=True, is_ptr=False, nullexpr='Uninitialized'
         )
