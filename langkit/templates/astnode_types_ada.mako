@@ -540,23 +540,21 @@
          return Initial_Env;
       end if;
 
-      % if cls.env_spec.adds_env:
-         G := Simple_Env_Getter (Initial_Env);
-         % if has_dyn_env:
-         if Initial_Env not in Root_Env | Empty_Env
-            and then Initial_Env.Node.Unit /= Self.Unit
-         then
-            G := Dyn_Env_Getter (${env_getter}'Access, Self);
-         end if;
-         % endif
-
-         Self.Self_Env := AST_Envs.Create
-           (Parent        => G,
-            Node          => Self,
-            Is_Refcounted => False);
-
-         Register_Destroyable (Self.Unit, Self.Self_Env);
+      G := Simple_Env_Getter (Initial_Env);
+      % if has_dyn_env:
+      if Initial_Env not in Root_Env | Empty_Env
+         and then Initial_Env.Node.Unit /= Self.Unit
+      then
+         G := Dyn_Env_Getter (${env_getter}'Access, Self);
+      end if;
       % endif
+
+      Self.Self_Env := AST_Envs.Create
+        (Parent        => ${"No_Env_Getter" if add_env.no_parent else "G"},
+         Node          => Self,
+         Is_Refcounted => False);
+
+      Register_Destroyable (Self.Unit, Self.Self_Env);
    </%def>
 
    <%def name="emit_do(do_action)">

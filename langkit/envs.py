@@ -32,15 +32,17 @@ Read the documentation below for more details.
 
 # Public API for env actions
 
-def add_env():
+def add_env(no_parent=False):
     """
     Add an environment linked to the current node. This env action must be
     called as a pre action. The only actions that can precede this one in pre
     actions are add_to_env actions with the current env as a destination.
 
+    :param bool no_parent: If passed, the new env will be created with no
+        parent env.
     :rtype: EnvAction
     """
-    return AddEnv()
+    return AddEnv(no_parent)
 
 
 def reference(nodes, through, transitive=False, visible_to_children=False):
@@ -321,7 +323,8 @@ class EnvAction(object):
 
 
 class AddEnv(EnvAction):
-    pass
+    def __init__(self, no_parent=False):
+        self.no_parent = no_parent
 
 
 class AddToEnv(EnvAction):
