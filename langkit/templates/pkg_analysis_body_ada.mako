@@ -182,9 +182,6 @@ package body ${ada_lib_name}.Analysis is
    --  Those maps are used to give unique ids to lexical envs while pretty
    --  printing them.
 
-   function Hash (S : Lexical_Env) return Hash_Type is
-     (Hash_Type (To_Integer (S.all'Address)));
-
    package Address_To_Id_Maps is new Ada.Containers.Hashed_Maps
      (Lexical_Env, Integer, Hash, "=");
 

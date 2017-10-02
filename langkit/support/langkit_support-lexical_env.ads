@@ -436,6 +436,9 @@ package Langkit_Support.Lexical_Env is
    --  Return whether Self is a lexical environment that was created in an
    --  environment specification.
 
+   function Hash (Env : Lexical_Env) return Hash_Type is
+     (Hash_Type'Mod (To_Integer (Env.all'Address)));
+
 private
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
@@ -449,8 +452,5 @@ private
       Rebindings_Pool            => null,
       Ref_Count                  => No_Refcount);
    Empty_Env : constant Lexical_Env := Empty_Env_Record'Access;
-
-   function Hash (Env : Lexical_Env) return Hash_Type is
-     (Hash_Type'Mod (To_Integer (Env.all'Address)));
 
 end Langkit_Support.Lexical_Env;
