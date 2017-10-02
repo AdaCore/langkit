@@ -1110,9 +1110,10 @@ package body ${ada_lib_name}.Analysis.C is
                                   then Null_Ptr
                                   else New_String (Charset));
 
+      Ent      : ${root_entity.name} := (Node, No_Entity_Info);
       C_Result : ${analysis_unit_type} := Provider.Get_Unit_From_Node_Func
-        (Provider.Data, Wrap (Context), Wrap (Node), Wrap (Kind), C_Charset,
-         Boolean'Pos (Reparse), Boolean'Pos (With_Trivia));
+        (Provider.Data, Wrap (Context), Ent'Unrestricted_Access, Wrap (Kind),
+         C_Charset, Boolean'Pos (Reparse), Boolean'Pos (With_Trivia));
    begin
       Free (C_Charset);
       if C_Result = ${analysis_unit_type} (System.Null_Address) then

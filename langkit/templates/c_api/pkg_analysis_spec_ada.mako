@@ -40,6 +40,8 @@ package ${ada_lib_name}.Analysis.C is
    type ${node_kind_type} is new int;
    ${ada_c_doc('langkit.node_kind_type', 3)}
 
+   ${struct_types.decl(root_entity)}
+
    --  Helper data structures for source location handling
 
    type ${sloc_type} is record
@@ -128,7 +130,7 @@ package ${ada_lib_name}.Analysis.C is
    type ${unit_provider_get_unit_from_node_type} is access function
      (Data        : System.Address;
       Context     : ${analysis_context_type};
-      Node        : ${node_type};
+      Node        : ${root_entity.c_type(capi).name}_Ptr;
       Kind        : ${unit_kind_type};
       Charset     : chars_ptr;
       Reparse     : int;
@@ -502,7 +504,9 @@ package ${ada_lib_name}.Analysis.C is
    ------------------
 
    % for struct_type in ctx.sorted_types(ctx.struct_types):
-      % if struct_type._exposed and struct_type.emit_c_type:
+      % if struct_type._exposed and \
+            struct_type.emit_c_type and \
+            struct_type != root_entity:
          ${struct_types.decl(struct_type)}
       % endif
    % endfor

@@ -140,7 +140,7 @@ ${c_doc('langkit.unit_provider_get_unit_from_node_type')}
 typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_node_type})(
    void *data,
    ${analysis_context_type} context,
-   ${node_type} node,
+   ${root_entity.c_type(capi).name} *node,
    ${unit_kind_type} kind,
    const char *charset,
    int reparse,
