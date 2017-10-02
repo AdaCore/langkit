@@ -29,10 +29,6 @@ def get_context(*args, **kwargs):
     return get_context(*args, **kwargs)
 
 
-def c_node_type(capi):
-    return CAPIType(capi, 'base_node')
-
-
 def library_public_field(field):
     """
     Return whether we must generate accessors in APIs for this field.
@@ -117,7 +113,7 @@ def make_renderer(base_renderer=None):
             'analysis_context_type': CAPIType(capi, 'analysis_context').name,
             'analysis_unit_type':    analysis_unit_type.c_type(capi).name,
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
-            'node_type':             c_node_type(capi).name,
+            'node_type':             ctx.root_grammar_class.c_type(capi).name,
             'entity_type':           T.entity.c_type(capi).name,
             'lexical_env_type':      lexical_env_type.c_type(capi).name,
             'logic_var_type':        logic_var_type.c_type(capi).name,
@@ -1934,7 +1930,7 @@ class ASTNodeType(BaseStructType):
                 if not f.is_overriding]
 
     def c_type(self, c_api_settings):
-        return c_node_type(c_api_settings)
+        return CAPIType(c_api_settings, 'base_node')
 
     @memoized
     def hierarchical_name(self):
