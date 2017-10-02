@@ -6,6 +6,8 @@
 <%namespace name="enum_types"    file="enum_types_ada.mako" />
 <%namespace name="exts"          file="../extensions.mako" />
 
+<% entity_type = root_entity.c_type(capi).name %>
+
 with Ada.Exceptions;                  use Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Unchecked_Conversion;
@@ -246,8 +248,9 @@ package ${ada_lib_name}.Analysis.C is
            External_name => "${capi.get_name('remove_analysis_unit')}";
    ${ada_c_doc('langkit.remove_unit', 3)}
 
-   function ${capi.get_name('unit_root')} (Unit : ${analysis_unit_type})
-                                           return ${node_type}
+   procedure ${capi.get_name('unit_root')}
+     (Unit     : ${analysis_unit_type};
+      Result_P : ${entity_type}_Ptr)
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('unit_root')}";
@@ -308,8 +311,7 @@ package ${ada_lib_name}.Analysis.C is
    ${ada_c_doc('langkit.unit_diagnostic', 3)}
 
    function ${capi.get_name('node_unit')}
-     (Node : ${node_type})
-      return ${analysis_unit_type}
+     (Node : ${entity_type}_Ptr) return ${analysis_unit_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('node_unit')}";
@@ -365,8 +367,8 @@ package ${ada_lib_name}.Analysis.C is
    -- General AST node primitives --
    ---------------------------------
 
-   function ${capi.get_name('node_kind')} (Node : ${node_type})
-      return ${node_kind_type}
+   function ${capi.get_name('node_kind')}
+     (Node : ${entity_type}_Ptr) return ${node_kind_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('node_kind')}";
@@ -379,45 +381,47 @@ package ${ada_lib_name}.Analysis.C is
            External_name => "${capi.get_name('kind_name')}";
    ${ada_c_doc('langkit.kind_name', 3)}
 
-   function ${capi.get_name('node_is_ghost')} (Node : ${node_type}) return int
+   function ${capi.get_name('node_is_ghost')}
+     (Node : ${entity_type}_Ptr) return int
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('node_is_ghost')}";
 
-   function ${capi.get_name('node_short_image')} (Node : ${node_type})
-                                                  return ${text_type}
+   function ${capi.get_name('node_short_image')}
+     (Node : ${entity_type}_Ptr) return ${text_type}
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('node_short_image')}";
    ${ada_c_doc('langkit.node_short_image', 3)}
 
    procedure ${capi.get_name('node_sloc_range')}
-     (Node         : ${node_type};
+     (Node         : ${entity_type}_Ptr;
       Sloc_Range_P : access ${sloc_range_type})
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('node_sloc_range')}";
    ${ada_c_doc('langkit.node_sloc_range', 3)}
 
-   function ${capi.get_name('lookup_in_node')}
-     (Node : ${node_type};
-      Sloc : ${sloc_type}) return ${node_type}
+   procedure ${capi.get_name('lookup_in_node')}
+     (Node   : ${entity_type}_Ptr;
+      Sloc   : ${sloc_type};
+      Result : ${entity_type}_Ptr)
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('lookup_in_node')}";
    ${ada_c_doc('langkit.lookup_in_node', 3)}
 
-   function ${capi.get_name('node_child_count')} (Node : ${node_type})
-                                                  return unsigned
+   function ${capi.get_name('node_child_count')}
+     (Node : ${entity_type}_Ptr) return unsigned
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('node_child_count')}";
    ${ada_c_doc('langkit.node_child_count', 3)}
 
    function ${capi.get_name('node_child')}
-     (Node    : ${node_type};
+     (Node    : ${entity_type}_Ptr;
       N       : unsigned;
-      Child_P : access ${node_type}) return int
+      Child_P : ${entity_type}_Ptr) return int
       with Export        => True,
            Convention    => C,
            External_name => "${capi.get_name('node_child')}";

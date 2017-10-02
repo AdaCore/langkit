@@ -6,6 +6,8 @@
 <%namespace name="enum_types"    file="enum_types_c.mako" />
 <%namespace name="exts" file="../extensions.mako" />
 
+<% entity_type = root_entity.c_type(capi).name %>
+
 #ifndef ${capi.header_guard_id}
 #define ${capi.header_guard_id}
 
@@ -140,7 +142,7 @@ ${c_doc('langkit.unit_provider_get_unit_from_node_type')}
 typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_node_type})(
    void *data,
    ${analysis_context_type} context,
-   ${root_entity.c_type(capi).name} *node,
+   ${entity_type} *node,
    ${unit_kind_type} kind,
    const char *charset,
    int reparse,
@@ -255,8 +257,9 @@ ${capi.get_name("remove_analysis_unit")}(${analysis_context_type} context,
                                          const char *filename);
 
 ${c_doc('langkit.unit_root')}
-extern ${node_type}
-${capi.get_name("unit_root")}(${analysis_unit_type} unit);
+extern void
+${capi.get_name("unit_root")}(${analysis_unit_type} unit,
+                              ${entity_type} *result_p);
 
 ${c_doc('langkit.unit_first_token')}
 extern void
@@ -292,7 +295,7 @@ ${capi.get_name("unit_diagnostic")}(${analysis_unit_type} unit,
 
 ${c_doc('langkit.node_unit')}
 extern ${analysis_unit_type}
-${capi.get_name("node_unit")}(${node_type} node);
+${capi.get_name("node_unit")}(${entity_type} *node);
 
 ${c_doc('langkit.unit_incref')}
 extern ${analysis_unit_type}
@@ -326,9 +329,14 @@ ${capi.get_name("unit_populate_lexical_env")}(${analysis_unit_type} unit);
  * General AST node primitives
  */
 
+static inline int
+${capi.get_name("node_is_null")}(${entity_type} *node) {
+    return node->el == NULL;
+}
+
 ${c_doc('langkit.node_kind')}
 extern ${node_kind_type}
-${capi.get_name("node_kind")}(${node_type} node);
+${capi.get_name("node_kind")}(${entity_type} *node);
 
 ${c_doc('langkit.kind_name')}
 extern ${text_type}
@@ -336,31 +344,32 @@ ${capi.get_name("kind_name")}(${node_kind_type} kind);
 
 ${c_doc('langkit.node_is_ghost')}
 extern int
-${capi.get_name("node_is_ghost")}(${node_type} node);
+${capi.get_name("node_is_ghost")}(${entity_type} *node);
 
 ${c_doc('langkit.node_short_image')}
 extern ${text_type}
-${capi.get_name("node_short_image")}(${node_type} node);
+${capi.get_name("node_short_image")}(${entity_type} *node);
 
 ${c_doc('langkit.node_sloc_range')}
 extern void
-${capi.get_name("node_sloc_range")}(${node_type} node,
+${capi.get_name("node_sloc_range")}(${entity_type} *node,
                                     ${sloc_range_type} *sloc_range);
 
 ${c_doc('langkit.lookup_in_node')}
-extern ${node_type}
-${capi.get_name("lookup_in_node")}(${node_type} node,
-                                   const ${sloc_type} *sloc);
+extern void
+${capi.get_name("lookup_in_node")}(${entity_type} *node,
+                                   const ${sloc_type} *sloc,
+                                   ${entity_type} *result_p);
 
 ${c_doc('langkit.node_child_count')}
 extern unsigned
-${capi.get_name("node_child_count")}(${node_type} node);
+${capi.get_name("node_child_count")}(${entity_type} *node);
 
 ${c_doc('langkit.node_child')}
 extern int
-${capi.get_name("node_child")}(${node_type} node,
+${capi.get_name("node_child")}(${entity_type} *node,
                                unsigned n,
-                               ${node_type}* child_p);
+                               ${entity_type}* child_p);
 
 ${c_doc('langkit.text_to_locale_string')}
 extern char *
@@ -468,7 +477,7 @@ ${capi.get_name('token_is_equivalent')}(${token_type} *left,
 
 ${c_doc('langkit.entity_image')}
 extern ${text_type}
-${capi.get_name("entity_image")}(${entity_type} ent);
+${capi.get_name('entity_image')}(${entity_type} ent);
 
 #ifdef __cplusplus
 }

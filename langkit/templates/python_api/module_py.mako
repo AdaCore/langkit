@@ -22,6 +22,7 @@ from __future__ import (absolute_import, division, print_function,
     root_astnode_name = T.root_node.name.camel
     c_node = '{}._c_type'.format(root_astnode_name)
     c_node_enum = '{}._c_enum_type'.format(root_astnode_name)
+    c_entity = '{}._c_type'.format(root_entity.name.camel)
 %>
 
 
@@ -372,7 +373,9 @@ class AnalysisUnit(object):
     @property
     def root(self):
         ${py_doc('langkit.unit_root', 8)}
-        return ${root_astnode_name}._wrap(_unit_root(self._c_value))
+        result = ${c_entity}()
+        _unit_root(self._c_value, ctypes.byref(result))
+        return ${root_astnode_name}._wrap(result.el)
 
     @property
     def first_token(self):
@@ -729,7 +732,8 @@ class ${root_astnode_name}(object):
     @property
     def unit(self):
         ${py_doc('langkit.node_unit', 8)}
-        return AnalysisUnit(_node_unit(self._c_value))
+        node = self._unwrap_bare_entity
+        return AnalysisUnit(_node_unit(ctypes.byref(node)))
 
     @property
     def kind_name(self):
@@ -739,13 +743,15 @@ class ${root_astnode_name}(object):
     @property
     def is_ghost(self):
         ${py_doc('langkit.node_is_ghost', 8)}
-        return bool(_node_is_ghost(self._c_value))
+        node = self._unwrap_bare_entity
+        return bool(_node_is_ghost(ctypes.byref(node)))
 
     @property
     def sloc_range(self):
         ${py_doc('langkit.node_sloc_range', 8)}
+        node = self._unwrap_bare_entity
         result = SlocRange._c_type()
-        _node_sloc_range(self._c_value, ctypes.byref(result))
+        _node_sloc_range(ctypes.byref(node), ctypes.byref(result))
         return result._wrap()
 
     @property
@@ -760,19 +766,23 @@ class ${root_astnode_name}(object):
     @property
     def short_image(self):
         ${py_doc('langkit.node_short_image', 8)}
-        text = _node_short_image(self._c_value)
+        node = self._unwrap_bare_entity
+        text = _node_short_image(ctypes.byref(node))
         return text._wrap()
 
     def lookup(self, sloc):
         ${py_doc('langkit.lookup_in_node', 8)}
+        node = self._unwrap_bare_entity
         c_sloc = Sloc._c_type._unwrap(sloc)
-        c_node =_lookup_in_node(self._c_value,
-                                ctypes.byref(c_sloc))
-        return ${root_astnode_name}._wrap(c_node)
+        result = ${c_entity}()
+        _lookup_in_node(ctypes.byref(node), ctypes.byref(c_sloc),
+                        ctypes.byref(result))
+        return ${root_astnode_name}._wrap(result.el)
 
     def __len__(self):
         """Return the number of ${root_astnode_name} children this node has."""
-        return _node_child_count(self._c_value)
+        node = self._unwrap_bare_entity
+        return _node_child_count(ctypes.byref(node))
 
     def __getitem__(self, key):
         """
@@ -789,12 +799,13 @@ class ${root_astnode_name}(object):
         if key < 0:
             key += len(self)
 
-        result = self._c_type()
-        success = _node_child(self._c_value, key, ctypes.byref(result))
+        node = self._unwrap_bare_entity
+        result = ${c_entity}()
+        success = _node_child(ctypes.byref(node), key, ctypes.byref(result))
         if not success:
             raise IndexError('child index out of range')
         else:
-            return ${root_astnode_name}._wrap(result)
+            return ${root_astnode_name}._wrap(result.el)
 
     def iter_fields(self, with_fields=True, with_properties=True):
         """Iterate through all the fields this node contains
@@ -969,7 +980,9 @@ class ${root_astnode_name}(object):
             return c_pyobj_p.contents.value
         else:
             # Create a new wrapper for this node...
-            kind = _node_kind(c_value)
+            c_entity = ${c_entity}()
+            c_entity.el = c_value
+            kind = _node_kind(ctypes.byref(c_entity))
             py_obj = _kind_to_astnode_cls[kind](c_value)
 
             # .. and store it in our extension.
@@ -1033,6 +1046,16 @@ class ${root_astnode_name}(object):
     @property
     def as_bare_entity(self):
         return self.bare_entity(self)
+
+    @property
+    def _unwrap_bare_entity(self):
+        result = ${c_entity}()
+        result.el = self._c_value
+        % for fld in T.env_md.get_fields():
+        result.el.${fld.name.lower} = False
+        % endfor
+        result.info.rebindings = None
+        return result
 
 
 class EnvRebindings(object):
@@ -1196,7 +1219,7 @@ _remove_analysis_unit = _import_func(
 )
 _unit_root = _import_func(
     '${capi.get_name("unit_root")}',
-    [AnalysisUnit._c_type], ${c_node}
+    [AnalysisUnit._c_type, ctypes.POINTER(${c_entity})], None
 )
 _unit_first_token = _import_func(
     "${capi.get_name('unit_first_token')}",
@@ -1229,7 +1252,7 @@ _unit_diagnostic = _import_func(
 )
 _node_unit = _import_func(
     '${capi.get_name("node_unit")}',
-    [${c_node}], AnalysisUnit._c_type
+    [ctypes.POINTER(${c_entity})], AnalysisUnit._c_type
 )
 _unit_incref = _import_func(
     '${capi.get_name("unit_incref")}',
@@ -1265,7 +1288,7 @@ _unit_populate_lexical_env = _import_func(
 # General AST node primitives
 _node_kind = _import_func(
     '${capi.get_name("node_kind")}',
-    [${c_node}], ${c_node_enum}
+    [ctypes.POINTER(${c_entity})], ${c_node_enum}
 )
 _kind_name = _import_func(
     '${capi.get_name("kind_name")}',
@@ -1273,27 +1296,30 @@ _kind_name = _import_func(
 )
 _node_is_ghost = _import_func(
     '${capi.get_name("node_is_ghost")}',
-    [${c_node}], ctypes.c_int
+    [ctypes.POINTER(${c_entity})], ctypes.c_int
 )
 _node_short_image = _import_func(
     '${capi.get_name("node_short_image")}',
-    [${c_node}], _text
+    [ctypes.POINTER(${c_entity})], _text
 )
 _node_sloc_range = _import_func(
     '${capi.get_name("node_sloc_range")}',
-    [${c_node}, ctypes.POINTER(SlocRange._c_type)], None
+    [ctypes.POINTER(${c_entity}), ctypes.POINTER(SlocRange._c_type)], None
 )
 _lookup_in_node = _import_func(
     '${capi.get_name("lookup_in_node")}',
-    [${c_node}, ctypes.POINTER(Sloc._c_type)], ${c_node}
+    [ctypes.POINTER(${c_entity}),
+     ctypes.POINTER(Sloc._c_type),
+     ctypes.POINTER(${c_entity})], None
 )
 _node_child_count = _import_func(
     '${capi.get_name("node_child_count")}',
-    [${c_node}], ctypes.c_uint
+    [ctypes.POINTER(${c_entity})], ctypes.c_uint
 )
 _node_child = _import_func(
     '${capi.get_name("node_child")}',
-    [${c_node}, ctypes.c_uint, ctypes.POINTER(${c_node})], ctypes.c_int
+    [ctypes.POINTER(${c_entity}), ctypes.c_uint, ctypes.POINTER(${c_entity})],
+    ctypes.c_int
 )
 
 % for astnode in ctx.astnode_types:

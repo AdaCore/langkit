@@ -6,6 +6,8 @@
 <%namespace name="enum_types"    file="enum_types_ada.mako" />
 <%namespace name="exts"          file="../extensions.mako" />
 
+<% entity_type = root_entity.c_type(capi).name %>
+
 with Ada.Finalization;
 
 pragma Warnings (Off, "is an internal GNAT unit");
@@ -280,20 +282,20 @@ package body ${ada_lib_name}.Analysis.C is
          return 0;
    end;
 
-   function ${capi.get_name("unit_root")}
-     (Unit : ${analysis_unit_type}) return ${node_type} is
+   procedure ${capi.get_name('unit_root')}
+     (Unit     : ${analysis_unit_type};
+      Result_P : ${entity_type}_Ptr) is
    begin
       Clear_Last_Exception;
 
       declare
          U : constant Analysis_Unit := Unwrap (Unit);
       begin
-         return Wrap (U.AST_Root);
+         Result_P.all := (U.AST_Root, No_Entity_Info);
       end;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return ${node_type} (System.Null_Address);
    end;
 
    procedure ${capi.get_name('unit_first_token')}
@@ -425,13 +427,12 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name('node_unit')}
-     (Node : ${node_type}) return ${analysis_unit_type} is
+     (Node : ${entity_type}_Ptr) return ${analysis_unit_type} is
    begin
       Clear_Last_Exception;
 
       declare
-         N : constant ${root_node_type_name} := Unwrap (Node);
-         U : constant Analysis_Unit := Get_Unit (N);
+         U : constant Analysis_Unit := Get_Unit (Node.El);
       begin
          return Wrap (U);
       end;
@@ -559,14 +560,13 @@ package body ${ada_lib_name}.Analysis.C is
                   for cls in ctx.astnode_types
                   if not cls.abstract)});
 
-   function ${capi.get_name("node_kind")}
-     (Node : ${node_type}) return ${node_kind_type} is
+   function ${capi.get_name('node_kind')}
+     (Node : ${entity_type}_Ptr) return ${node_kind_type} is
    begin
       Clear_Last_Exception;
 
       declare
-         N : constant ${root_node_type_name} := Unwrap (Node);
-         K : ${root_node_kind_name} := Kind (N);
+         K : ${root_node_kind_name} := Kind (Node.El);
       begin
          return ${node_kind_type} (K'Enum_Rep);
       end;
@@ -595,16 +595,11 @@ package body ${ada_lib_name}.Analysis.C is
          return (System.Null_Address, 0, Is_Allocated => 0);
    end;
 
-   function ${capi.get_name('node_is_ghost')} (Node : ${node_type}) return int
-   is
+   function ${capi.get_name('node_is_ghost')}
+     (Node : ${entity_type}_Ptr) return int is
    begin
       Clear_Last_Exception;
-
-      declare
-         N : constant ${root_node_type_name} := Unwrap (Node);
-      begin
-         return Boolean'Pos (N.Is_Ghost);
-      end;
+      return Boolean'Pos (Node.El.Is_Ghost);
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
@@ -612,12 +607,11 @@ package body ${ada_lib_name}.Analysis.C is
    end;
 
    function ${capi.get_name('node_short_image')}
-     (Node : ${node_type}) return ${text_type} is
+     (Node : ${entity_type}_Ptr) return ${text_type} is
    begin
       Clear_Last_Exception;
       declare
-         N   : constant ${root_node_type_name} := Unwrap (Node);
-         Img : constant Text_Type := N.Short_Image;
+         Img : constant Text_Type := Node.El.Short_Image;
       begin
          return Wrap_Alloc (Img);
       end;
@@ -627,74 +621,63 @@ package body ${ada_lib_name}.Analysis.C is
          return (System.Null_Address, 0, 0);
    end;
 
-   procedure ${capi.get_name("node_sloc_range")}
-     (Node         : ${node_type};
+   procedure ${capi.get_name('node_sloc_range')}
+     (Node         : ${entity_type}_Ptr;
       Sloc_Range_P : access ${sloc_range_type}) is
    begin
       Clear_Last_Exception;
 
-      declare
-         N : constant ${root_node_type_name} := Unwrap (Node);
-      begin
-         Sloc_Range_P.all := Wrap (Sloc_Range (N));
-      end;
+      Sloc_Range_P.all := Wrap (Sloc_Range (Node.El));
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
    end;
 
-   function ${capi.get_name("lookup_in_node")}
-     (Node : ${node_type};
-      Sloc : ${sloc_type}) return ${node_type} is
+   procedure ${capi.get_name('lookup_in_node')}
+     (Node   : ${entity_type}_Ptr;
+      Sloc   : ${sloc_type};
+      Result : ${entity_type}_Ptr) is
    begin
       Clear_Last_Exception;
 
       declare
-         N : constant ${root_node_type_name} := Unwrap (Node);
          S : constant Source_Location := Unwrap (Sloc);
       begin
-         return Wrap (Lookup (N, S));
+         Result.all := (Lookup (Node.El, S), Node.Info);
       end;
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
-         return ${node_type} (System.Null_Address);
    end;
 
    function ${capi.get_name("node_child_count")}
-     (Node : ${node_type}) return unsigned is
+     (Node : ${entity_type}_Ptr) return unsigned is
    begin
       Clear_Last_Exception;
-
-      declare
-         N : constant ${root_node_type_name} := Unwrap (Node);
-      begin
-         return unsigned (Child_Count (N));
-      end;
+      return unsigned (Child_Count (Node.El));
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);
          return 0;
    end;
 
-   function ${capi.get_name("node_child")}
-     (Node    : ${node_type};
+   function ${capi.get_name('node_child')}
+     (Node    : ${entity_type}_Ptr;
       N       : unsigned;
-      Child_P : access ${node_type}) return int is
+      Child_P : ${entity_type}_Ptr) return int is
    begin
       Clear_Last_Exception;
 
       declare
-         Nod    : constant ${root_node_type_name} := Unwrap (Node);
          Result : ${root_node_type_name};
          Exists : Boolean;
       begin
          if N > unsigned (Natural'Last) then
             return 0;
          end if;
-         Get_Child (Nod, Natural (N) + 1, Exists, Result);
+         Get_Child (Node.El, Natural (N) + 1, Exists, Result);
          if Exists then
-            Child_P.all := Wrap (Result);
+            Child_P.all := (Result, Node.Info);
             return 1;
          else
             return 0;
