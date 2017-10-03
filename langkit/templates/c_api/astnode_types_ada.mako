@@ -14,7 +14,11 @@
                        ${arg.type.c_type(capi).name};
       % endfor
 
-      Value_P : access ${field.type.c_type(capi).name}) return int
+      Value_P : access ${(
+         entity_type
+         if field.type.is_ast_node else
+         field.type.c_type(capi).name
+      )}) return int
 </%def>
 
 <%def name="accessor_decl(field)">
@@ -137,7 +141,7 @@
                % elif field.type.is_analysis_unit_kind:
                    Unit_Kind'Pos (Result)
                % elif field.type.is_ast_node:
-                   Wrap (${root_node_type_name} (Result))
+                   (${root_node_type_name} (Result), Node.Info)
                % elif field.type.is_entity_type:
                   (${root_node_type_name} (Result.El), Result.Info)
                % elif field.type.is_array and not field.type.emit_c_type:

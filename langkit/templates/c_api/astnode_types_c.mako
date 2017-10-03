@@ -19,7 +19,9 @@ extern int ${accessor_name}(
         ${arg.name},
     % endfor
 
-    ${field.c_type_or_error(capi).name} *value_p
+    ${(entity_type
+       if field.type.is_ast_node else
+       field.c_type_or_error(capi).name)} *value_p
 );
 
 </%def>

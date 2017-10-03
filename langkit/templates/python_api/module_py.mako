@@ -1036,8 +1036,7 @@ class ${root_astnode_name}(object):
         code length.
         """
         return ${root_astnode_name}._wrap(
-            self._eval_field(${root_astnode_name}._c_type(), c_accessor,
-                             e_info)
+            self._eval_field(${c_entity}(), c_accessor, e_info).el
         )
 
     @classmethod
@@ -1337,7 +1336,9 @@ _${field.accessor_basename.lower} = _import_func(
         %>
         ${type_expr},
      % endfor
-     ctypes.POINTER(${pyapi.type_internal_name(field.type)})],
+     ctypes.POINTER(${(c_entity
+                       if field.type.is_ast_node else
+                       pyapi.type_internal_name(field.type))})],
     ctypes.c_int
 )
     % endfor
