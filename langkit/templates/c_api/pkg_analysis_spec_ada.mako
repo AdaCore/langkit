@@ -525,14 +525,6 @@ package ${ada_lib_name}.Analysis.C is
             array_type.emit_c_type:
          ${array_types.decl(array_type)}
       % endif
-
-      % if array_type.element_type.is_entity_type and \
-            array_type.element_type != T.entity:
-         function Convert is new Ada.Unchecked_Conversion
-           (${array_type.name}, ${T.entity.array.name});
-         function Convert is new Ada.Unchecked_Conversion
-           (${T.entity.array.name}, ${array_type.name});
-      % endif
    % endfor
 
    ----------
@@ -699,6 +691,16 @@ package ${ada_lib_name}.Analysis.C is
       Extension_Destructor);
    function Convert is new Ada.Unchecked_Conversion
      (chars_ptr, System.Address);
+
+   % for array_type in ctx.sorted_types(ctx.array_types):
+      % if array_type.element_type.is_entity_type and \
+            array_type.element_type != T.entity:
+         function Convert is new Ada.Unchecked_Conversion
+           (${array_type.name}, ${T.entity.array.name});
+         function Convert is new Ada.Unchecked_Conversion
+           (${T.entity.array.name}, ${array_type.name});
+      % endif
+   % endfor
 
    pragma Warnings (Off, "possible aliasing problem for type");
 
