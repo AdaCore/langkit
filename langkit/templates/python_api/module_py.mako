@@ -718,13 +718,13 @@ class ${root_astnode_name}(object):
 
     ${astnode_types.subclass_decls(T.root_node)}
 
-    def __init__(self, c_value):
+    def __init__(self, ext):
         """
         This constructor is an implementation detail, and is not meant to be
         used directly. For now, the creation of AST nodes can happen only as
         part of the parsing of an analysis unit.
         """
-        self._c_value = c_value
+        self._ext = ext
 
     def __del__(self):
         super(${root_astnode_name}, self).__init__()
@@ -965,34 +965,15 @@ class ${root_astnode_name}(object):
         Internal helper to wrap a low-level ASTNode value into an instance of
         the the appropriate high-level ASTNode subclass.
         """
-        if not c_value:
+        ext = _ASTNodeExtension.get_or_create(c_value)
+        if ext is None:
             return None
 
-        # First, look if we already built a wrapper for this node so that we
-        # only have one wrapper per node.
-        c_pyobj_p = _node_extension(c_value, _node_extension_id,
-                                    _node_ext_dtor_c)
-        c_pyobj_p = ctypes.cast(
-            c_pyobj_p,
-            ctypes.POINTER(ctypes.py_object)
-        )
-        if c_pyobj_p.contents:
-            return c_pyobj_p.contents.value
-        else:
-            # Create a new wrapper for this node...
-            c_entity = ${c_entity}()
-            c_entity.el = c_value
-            kind = _node_kind(ctypes.byref(c_entity))
-            py_obj = _kind_to_astnode_cls[kind](c_value)
-
-            # .. and store it in our extension.
-            c_pyobj_p[0] = ctypes.py_object(py_obj)
-
-            # We want to increment its ref count so that the wrapper will be
-            # alive as long as the extension references it.
-            ctypes.pythonapi.Py_IncRef(ctypes.py_object(py_obj))
-
-            return py_obj
+        # Pick the right subclass to materialize this node in Python
+        c_entity = ${c_entity}()
+        c_entity.el = c_value
+        kind = _node_kind(ctypes.byref(c_entity))
+        return _kind_to_astnode_cls[kind](ext)
 
     @classmethod
     def _unwrap(cls, py_value):
@@ -1006,7 +987,7 @@ class ${root_astnode_name}(object):
         elif not isinstance(py_value, ${root_astnode_name}):
             _raise_type_error(${repr(root_astnode_name)}, py_value)
         else:
-            return py_value._c_value
+            return py_value._ext.c_handle
 
     def _eval_field(self, c_result, c_accessor, e_info, *c_args):
         """
@@ -1017,7 +998,7 @@ class ${root_astnode_name}(object):
         failed. Return "c_result" for convenience.
         """
         entity = ${c_entity}()
-        entity.el = self._c_value
+        entity.el = self._unwrap(self)
         entity.info = ${pyapi.unwrap_value('e_info', T.entity_info)}
         args = (entity, ) + c_args + (ctypes.byref(c_result), )
         if not c_accessor(*args):
@@ -1051,7 +1032,7 @@ class ${root_astnode_name}(object):
     @property
     def _unwrap_bare_entity(self):
         result = ${c_entity}()
-        result.el = self._c_value
+        result.el = self._unwrap(self)
         % for fld in T.env_md.get_fields():
         result.el.${fld.name.lower} = False
         % endfor
@@ -1423,27 +1404,69 @@ _kind_to_astnode_cls = {
     % endfor
 }
 
-# We use the extension mechanism to keep a single wrapper ${root_astnode_name}
-# instance per underlying AST node. This way, users can store attributes in
-# wrappers and expect to find these attributes back when getting the same node
-# later.
 
-# TODO: this mechanism currently introduces reference loops between the
-# ${root_astnode_name} and its wrapper. When a Python wraper is created for
-# some ${root_astnode_name}, both will never be deallocated (i.e. we have
-# memory leaks).  This absolutely needs to be fixed for real world use but in
-# the meantime, let's keep this implementation for prototyping.
+class _Extension(object):
+    """
+    Internal holder for a handle to a C API resource.
 
-_node_extension_id = _register_extension("python_api_astnode_wrapper")
+    We use the extension mechanism to keep a single _Extension instance per
+    underlying C API resource.
+    """
+
+    __slots__ = ('_c_handle', )
+
+    @classmethod
+    def lookup(cls, c_handle):
+        raise NotImplementedError()
+
+    @classmethod
+    def get_or_create(cls, c_handle):
+        if not c_handle:
+            return None
+
+        # If there is already an _Extension instance for the `c_handle`
+        # resource, return it.
+        c_pyobj_p = ctypes.cast(cls.lookup(c_handle),
+                                ctypes.POINTER(ctypes.py_object))
+        if c_pyobj_p.contents:
+            return c_pyobj_p.contents.value
+
+        # Otherwise, create a dedicated one...
+        ext = cls(c_handle)
+
+        # .. and store it in our extension.
+        c_pyobj_p[0] = ctypes.py_object(ext)
+
+        # We want to increment its ref count so that the wrapper will be
+        # alive as long as the extension references it.
+        ctypes.pythonapi.Py_IncRef(ctypes.py_object(ext))
+        return ext
+
+    def __init__(self, c_handle):
+        self._c_handle = c_handle
+
+    @property
+    def c_handle(self):
+        return self._c_handle
+
+
+class _ASTNodeExtension(_Extension):
+    @classmethod
+    def lookup(cls, c_handle):
+        return _node_extension(c_handle, _node_extension_id, _node_ext_dtor_c)
+
+
 def _node_ext_dtor_py(c_node, c_pyobj):
     """
     Callback for extension upon ${root_astnode_name} destruction: free the
     reference for the Python wrapper.
     """
-    # At this point, c_pyobj is a System.Address in Ada that have been decoded
+    # At this point, c_pyobj is a System.Address in Ada that has been decoded
     # by ctypes.c_void_p as a "long" Python object. We used to try to convert
-    # it into a ctypes.py_object with:
+    # it into a ctypes.py_object with::
+    #
     #   ctypes.py_object(c_pyobj)
+    #
     # but this was wrong: the result was a reference to the long object itself,
     # not to the object whose address was stored in the long. And this led to
     # random memory issues with the call to Py_DecRef... Actual casting is the
@@ -1453,6 +1476,7 @@ def _node_ext_dtor_py(c_node, c_pyobj):
 
 
 _node_ext_dtor_c = _node_extension_destructor(_node_ext_dtor_py)
+_node_extension_id = _register_extension('python_api_astnode_wrapper')
 
 
 def _field_address(struct, field_name):
