@@ -1,18 +1,19 @@
 ## vim: filetype=makoada
 
 <%def name="accessor_profile(field)">
-   <% accessor_name = capi.get_name(field.accessor_basename) %>
+   <%
+      accessor_name = capi.get_name(field.accessor_basename)
+      entity_type = root_entity.c_type(capi).name
+   %>
 
    function ${accessor_name}
-     (Node    : ${node_type};
+     (Node : ${entity_type}_Ptr;
 
       % for arg in field.arguments:
          ${arg.name} : ${'access constant ' if arg.type.is_ada_record else ''}
                        ${arg.type.c_type(capi).name};
       % endfor
 
-      ${field.entity_info_name} : access constant
-         ${T.entity_info.c_type(capi).name};
       Value_P : access ${field.type.c_type(capi).name}) return int
 </%def>
 
@@ -42,11 +43,7 @@
 
    ${accessor_profile(field)}
    is
-      % if not field.is_property or not field.uses_entity_info:
-         pragma Unreferenced (${field.entity_info_name});
-      % endif
-
-      Unwrapped_Node : constant ${root_node_type_name} := Unwrap (Node);
+      Unwrapped_Node : constant ${root_node_type_name} := Node.El;
       ## For each input argument, convert the C-level value into an Ada-level
       ## one.
       % for arg in field.arguments:
@@ -105,8 +102,8 @@
               actuals = ['{0.name} => Unwrapped_{0.name}'.format(a)
                          for a in field.arguments]
               if field.is_property and field.uses_entity_info:
-                  actuals.append('{arg} => {arg}.all'.format(
-                      arg=field.entity_info_name
+                  actuals.append('{} => Node.Info'.format(
+                      field.entity_info_name
                   ))
               field_access = '{}{}'.format(
                   field_access,

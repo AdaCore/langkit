@@ -3,11 +3,14 @@
 
 <%def name="accessor_decl(field)">
 
-<% accessor_name = capi.get_name(field.accessor_basename) %>
+<%
+   accessor_name = capi.get_name(field.accessor_basename)
+   entity_type = root_entity.c_type(capi).name
+%>
 
 ${c_doc(field)}
 extern int ${accessor_name}(
-    ${node_type} node,
+    ${entity_type} *node,
 
     % for arg in field.arguments:
         <% type_name = arg.type.c_type(capi).name %>
@@ -16,7 +19,6 @@ extern int ${accessor_name}(
         ${arg.name},
     % endfor
 
-    const ${T.entity_info.c_type(capi).name}* ${field.entity_info_name},
     ${field.c_type_or_error(capi).name} *value_p
 );
 

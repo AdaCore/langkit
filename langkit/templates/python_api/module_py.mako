@@ -1016,8 +1016,10 @@ class ${root_astnode_name}(object):
         the result in "c_result". This raises a PropertyError if the evaluation
         failed. Return "c_result" for convenience.
         """
-        e_info = ${pyapi.unwrap_value('e_info', T.entity_info)}
-        args = (self._c_value, ) + c_args + (e_info, ctypes.byref(c_result))
+        entity = ${c_entity}()
+        entity.el = self._c_value
+        entity.info = ${pyapi.unwrap_value('e_info', T.entity_info)}
+        args = (entity, ) + c_args + (ctypes.byref(c_result), )
         if not c_accessor(*args):
             exc = _get_last_exception()
             if exc:
@@ -1326,7 +1328,7 @@ _node_child = _import_func(
     % for field in astnode.fields_with_accessors():
 _${field.accessor_basename.lower} = _import_func(
     '${capi.get_name(field.accessor_basename)}',
-    [${c_node},
+    [ctypes.POINTER(${c_entity}),
      % for arg in field.arguments:
         <%
             type_expr = pyapi.type_internal_name(arg.type)
@@ -1335,7 +1337,6 @@ _${field.accessor_basename.lower} = _import_func(
         %>
         ${type_expr},
      % endfor
-     ctypes.POINTER(${pyapi.type_internal_name(T.entity_info)}),
      ctypes.POINTER(${pyapi.type_internal_name(field.type)})],
     ctypes.c_int
 )
