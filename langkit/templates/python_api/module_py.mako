@@ -21,7 +21,6 @@ from __future__ import (absolute_import, division, print_function,
 <%
     root_astnode_name = T.root_node.name.camel
     c_node = '{}._c_type'.format(root_astnode_name)
-    c_node_enum = '{}._c_enum_type'.format(root_astnode_name)
     c_entity = '{}._c_type'.format(root_entity.name.camel)
 %>
 
@@ -958,7 +957,6 @@ class ${root_astnode_name}(object):
 
     class _c_type(ctypes.c_void_p):
         pass
-    _c_enum_type = ctypes.c_uint
 
     @classmethod
     def _wrap(cls, c_value):
@@ -1271,11 +1269,11 @@ _unit_populate_lexical_env = _import_func(
 # General AST node primitives
 _node_kind = _import_func(
     '${capi.get_name("node_kind")}',
-    [ctypes.POINTER(${c_entity})], ${c_node_enum}
+    [ctypes.POINTER(${c_entity})], ctypes.c_int
 )
 _kind_name = _import_func(
     '${capi.get_name("kind_name")}',
-    [${c_node_enum}], _text
+    [ctypes.c_int], _text
 )
 _node_is_ghost = _import_func(
     '${capi.get_name("node_is_ghost")}',
