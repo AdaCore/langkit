@@ -715,6 +715,7 @@ class ${root_astnode_name}(object):
     ${py_doc(T.root_node, 4)}
 
     is_list_type = False
+    __slots__ = ('_ext', )
 
     ${astnode_types.subclass_decls(T.root_node)}
 
