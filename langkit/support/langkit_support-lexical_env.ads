@@ -437,7 +437,9 @@ package Langkit_Support.Lexical_Env is
    --  environment specification.
 
    function Hash (Env : Lexical_Env) return Hash_Type is
-     (Hash_Type'Mod (To_Integer (Env.all'Address)));
+     (if Env /= null
+      then Hash_Type'Mod (To_Integer (Env.all'Address))
+      else 0);
 
 private
 
