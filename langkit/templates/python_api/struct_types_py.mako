@@ -144,6 +144,10 @@ class ${type_name}(${base_cls}):
             %>${copy},
             % endfor
         )
+        % if cls.is_entity_type:
+        if result.el is None:
+            return None
+        % endif
         if cls._inc_ref and inc_ref:
             cls._inc_ref(ctypes.byref(c_value))
         return result
