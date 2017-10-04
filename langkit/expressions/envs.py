@@ -296,7 +296,8 @@ def env_parent(self, env):
         [construct(env, lexical_env_type)]
     )
     return CallExpr(
-        'Parent', 'AST_Envs.Get_Env', lexical_env_type, [parent_env_getter],
+        'Env_Parent', 'AST_Envs.Get_Env', lexical_env_type,
+        [parent_env_getter],
         abstract_expr=self,
     )
 
