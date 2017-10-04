@@ -151,7 +151,23 @@ def reset_langkit():
     Entity.unfreeze()
 
     CompiledTypeMetaclass.types[:] = []
-    CompiledTypeMetaclass.type_dict.clear()
+
+    def to_remove(t):
+        if t.is_base_struct_type:
+            return True
+        elif t.is_enum_type:
+            return True
+        elif t.is_array_type:
+            return to_remove(t.element_type)
+        else:
+            return False
+
+    remove_set = set()
+    for name, typ in CompiledTypeMetaclass.type_dict.items():
+        if to_remove(typ):
+            remove_set.add(name)
+    for n in remove_set:
+        CompiledTypeMetaclass.type_dict.pop(n)
 
     _StructMetaclass.reset()
     _ASTNodeMetaclass.reset()
