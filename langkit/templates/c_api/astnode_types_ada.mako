@@ -101,10 +101,16 @@
       if Unwrapped_Node.all in ${struct.value_type_name()}'Class then
          declare
             <%
-              field_access = 'Typed_Node.{}'.format(field.name)
+              # For properties, don't use the dot notation as it could conflict
+              # with homonym fields.
+              field_access = (str(field.name)
+                              if field.is_property else
+                              'Typed_Node.{}'.format(field.name))
 
               actuals = ['{0.name} => Unwrapped_{0.name}'.format(a)
                          for a in field.arguments]
+              if field.is_property:
+                  actuals.insert(0, 'Typed_Node')
               if field.is_property and field.uses_entity_info:
                   actuals.append('{} => Node.Info'.format(
                       field.entity_info_name

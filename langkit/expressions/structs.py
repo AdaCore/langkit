@@ -597,16 +597,8 @@ class FieldAccess(AbstractExpression):
                         args.append((str(PropertyDef.entity_info_name),
                                      einfo_expr))
 
-                # Private non-dispatching properties are declared in
-                # $.Analysis' body, so they are not genuine Ada primitives, so
-                # dot notation is not available for them.
-                dot_notation = (self.node_data.is_public
-                                or self.node_data.dispatching)
-                if dot_notation:
-                    ret = '{}.{}'.format(prefix, self.node_data.name)
-                else:
-                    ret = str(self.node_data.name)
-                    args.insert(0, ('Node', prefix))
+                ret = str(self.node_data.name)
+                args.insert(0, ('Node', prefix))
 
                 if args:
                     ret += ' ({})'.format(', '.join(
