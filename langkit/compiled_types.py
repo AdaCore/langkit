@@ -2074,9 +2074,6 @@ class ASTNodeType(BaseStructType):
         """
         from langkit.expressions import PropertyDef
 
-        root_type = CompiledTypeMetaclass.root_grammar_class
-        assert root_type
-
         # Note that we must not provide implementation for them here (no
         # expression) since the implementation comes from the hard-coded root
         # AST node type definition.
@@ -2102,8 +2099,9 @@ class ASTNodeType(BaseStructType):
                     ' Return the "inherited" environment otherwise.'
             )),
 
-            ('parent', BuiltinField(
-                type=root_type,
+            ('parent', PropertyDef(
+                expr=None, prefix=None, type=T.entity, public=True,
+                external=True, uses_entity_info=True, warn_on_unused=False,
                 doc='Return the lexical parent for this node. Return null for'
                     ' the root AST node or for AST nodes for which no one has'
                     ' a reference to the parent.'
@@ -2111,17 +2109,17 @@ class ASTNodeType(BaseStructType):
 
             # The following builtin fields are implemented as a property, so
             # there is no need for an additional inc-ref.
-            ('parents', BuiltinField(
-                type=root_type.array,
+            ('parents', PropertyDef(
+                expr=None, prefix=None, type=T.entity.array, public=True,
+                external=True, uses_entity_info=True, warn_on_unused=False,
                 doc='Return an array that contains the lexical parents (this'
-                    ' node included). Nearer parents are first in the list.',
-                access_needs_incref=False,
+                    ' node included). Nearer parents are first in the list.'
             )),
-            ('children', BuiltinField(
-                type=root_type.array,
+            ('children', PropertyDef(
+                expr=None, prefix=None, type=T.entity.array, public=True,
+                external=True, uses_entity_info=True, warn_on_unused=False,
                 doc='Return an array that contains the direct lexical'
-                    ' children.',
-                access_needs_incref=False,
+                    ' children.'
             )),
             ('token_start', PropertyDef(
                 expr=None, prefix=None, type=token_type,
@@ -2138,12 +2136,14 @@ class ASTNodeType(BaseStructType):
                 doc="Return the 0-based index for Node in its parent's"
                     " children."
             )),
-            ('previous_sibling', BuiltinField(
-                type=root_type,
+            ('previous_sibling', PropertyDef(
+                expr=None, prefix=None, type=T.entity, public=True,
+                external=True, uses_entity_info=True, warn_on_unused=False,
                 doc="Return the node's previous sibling, if there is one."
             )),
-            ('next_sibling', BuiltinField(
-                type=root_type,
+            ('next_sibling', PropertyDef(
+                expr=None, prefix=None, type=T.entity, public=True,
+                external=True, uses_entity_info=True, warn_on_unused=False,
                 doc="Return the node's next sibling, if there is one."
             )),
         ]

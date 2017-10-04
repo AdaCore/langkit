@@ -21,7 +21,7 @@ Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 class FooNode(ASTNode):
     @langkit_property(memoized=True, public=True)
     def foo():
-        return Self.to_array
+        return Self.as_bare_entity.to_array
 
 
 class Example(FooNode):

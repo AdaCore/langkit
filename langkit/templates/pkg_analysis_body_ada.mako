@@ -3059,6 +3059,78 @@ package body ${ada_lib_name}.Analysis is
       E_Info : Entity_Info := No_Entity_Info) return AST_Envs.Lexical_Env
    is (Rebind_Env (Node.Self_Env, E_Info));
 
+   ------------
+   -- Parent --
+   ------------
+
+   function Parent
+     (Node   : access ${root_node_value_type}'Class;
+      E_Info : Entity_Info := No_Entity_Info) return Entity is
+   begin
+      --  TODO: shed entity information as appropriate
+      return (Node.Parent, E_Info);
+   end Parent;
+
+   -------------
+   -- Parents --
+   -------------
+
+   function Parents
+     (Node   : access ${root_node_value_type}'Class;
+      E_Info : Entity_Info := No_Entity_Info) return Entity_Array_Access
+   is
+      Bare_Parents : ${root_node_array.name} := Node.Parents;
+      Result       : Entity_Array_Access := Create (Bare_Parents.N);
+   begin
+      --  TODO: shed entity information as appropriate
+      for I in Bare_Parents.Items'Range loop
+         Result.Items (I) := (Bare_Parents.Items (I), E_Info);
+      end loop;
+      Dec_Ref (Bare_Parents);
+      return Result;
+   end Parents;
+
+   --------------
+   -- Children --
+   --------------
+
+   function Children
+     (Node   : access ${root_node_value_type}'Class;
+      E_Info : Entity_Info := No_Entity_Info) return Entity_Array_Access
+   is
+      Bare_Children : ${root_node_array.name} := Node.Children;
+      Result        : Entity_Array_Access := Create (Bare_Children.N);
+   begin
+      --  TODO: shed entity information as appropriate
+      for I in Bare_Children.Items'Range loop
+         Result.Items (I) := (Bare_Children.Items (I), E_Info);
+      end loop;
+      Dec_Ref (Bare_Children);
+      return Result;
+   end Children;
+
+   ----------------------
+   -- Previous_Sibling --
+   ----------------------
+
+   function Previous_Sibling
+     (Node   : access ${root_node_value_type}'Class;
+      E_Info : Entity_Info := No_Entity_Info) return Entity is
+   begin
+      return (Node.Previous_Sibling, E_Info);
+   end Previous_Sibling;
+
+   ------------------
+   -- Next_Sibling --
+   ------------------
+
+   function Next_Sibling
+     (Node   : access ${root_node_value_type}'Class;
+      E_Info : Entity_Info := No_Entity_Info) return Entity is
+   begin
+      return (Node.Next_Sibling, E_Info);
+   end Next_Sibling;
+
    ## Generate the bodies of the root grammar class properties
    % for prop in T.root_node.get_properties(include_inherited=False):
    ${prop.prop_def}

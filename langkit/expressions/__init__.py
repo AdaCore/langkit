@@ -17,6 +17,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.expressions.base import *
 
 from langkit.expressions.analysis_units import *
+from langkit.expressions.astnodes import *
 from langkit.expressions.boolean import *
 from langkit.expressions.collections import *
 from langkit.expressions.envs import *
