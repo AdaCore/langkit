@@ -489,20 +489,6 @@ class FieldAccess(AbstractExpression):
                 self.receiver_expr, self.node_data, self.type
             )
 
-        def wrap_prefix_in_entity(self):
-            """
-            Mutate this expression so that it wraps the prefix into an entity.
-            """
-            from langkit.expressions.envs import make_as_entity
-
-            assert not self.implicit_deref
-            assert not self.simple_field_access
-            # The current receiver expression already contains a null check, so
-            # we don't have to go through the full complexity of .as_entity.
-            self.receiver_expr = make_as_entity(self.receiver_expr,
-                                                null_check=False)
-            self.implicit_deref = True
-
         @property
         def wrap_result_in_entity(self):
             """
