@@ -1598,15 +1598,13 @@ class CompileCtx(object):
         This also emits non-blocking errors for all types that are exposed in
         the public API whereas they should not.
         """
-        from langkit.compiled_types import ArrayType, BuiltinField, Field, T
+        from langkit.compiled_types import ArrayType, Field, T
 
-        def expose(t, for_field, type_use, traceback, no_check):
+        def expose(t, for_field, type_use, traceback):
             """
             Recursively tag "t" and all the types it references as exposed.
             """
             def check(predicate, descr):
-                if no_check:
-                    return
                 with for_field.diagnostic_context:
                     text_tb = (
                         ' (from: {})'.format(
@@ -1638,8 +1636,7 @@ class CompileCtx(object):
                 )
 
                 expose(t.element_type, for_field, 'element type',
-                       traceback + ['array of {}'.format(t.name.camel)],
-                       no_check)
+                       traceback + ['array of {}'.format(t.name.camel)])
 
             else:
                 # Only array types have their "_exposed" attribute inferred. We
@@ -1668,16 +1665,9 @@ class CompileCtx(object):
             if isinstance(f, Field) and f.type.is_ast_node:
                 continue
 
-            # Ignore builtin fields, as when they involve a private type, they
-            # actually expose a wrapper that wraps/unwraps it into a public
-            # type.
-            no_check = isinstance(f, BuiltinField)
-
             expose(f.type, f,
                    'return type' if f.is_property else 'type',
-                   [f.qualname],
-                   no_check)
+                   [f.qualname])
             for arg in f.natural_arguments:
                 expose(arg.type, f, '"{}" argument'.format(arg.name),
-                       [f.qualname],
-                       no_check)
+                       [f.qualname])
