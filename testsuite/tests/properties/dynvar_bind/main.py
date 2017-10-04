@@ -19,6 +19,6 @@ u.populate_lexical_env()
 foo = u.root[0]
 
 for ref in foo.f_refs:
-    print('{} resolves to {}'.format(ref, ref.p_resolve.el))
+    print('{} resolves to {}'.format(ref, ref.p_resolve))
 
 print('main.py: Done.')

@@ -71,7 +71,10 @@
             % elif arg.type.is_ast_node:
                ${arg.type.name} (Unwrap (${arg_ref}))
             % elif arg.type.is_entity_type:
-               (${arg.type.el_type.name} (${arg_ref}.El), ${arg_ref}.Info)
+               (if ${arg_ref}.El = null
+                then ${arg.type.nullexpr}
+                else (${arg.type.el_type.name} (${arg_ref}.El),
+                      ${arg_ref}.Info))
             % elif arg.type.is_array and not arg.type.emit_c_type:
                Convert (${arg_ref})
             % elif arg.type.is_token_type:

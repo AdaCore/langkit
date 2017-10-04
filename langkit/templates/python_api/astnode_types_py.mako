@@ -2,13 +2,10 @@
 
 <%def name="accessor_body(field)">
 
-        <%
-            c_accessor = '_{}'.format(field.accessor_basename.lower)
-            e_info = field.entity_info_name.lower
-        %>
+        <% c_accessor = '_{}'.format(field.accessor_basename.lower) %>
 
         % if field.type.is_ast_node and not field.arguments:
-        return self._eval_astnode_field(${c_accessor}, ${e_info})
+        return self._eval_astnode_field(${c_accessor})
 
         % else:
         <%
@@ -20,8 +17,7 @@
             # Expression for the C value for field evaluation
             explicit_args = [pyapi.unwrap_value(arg.name.lower, arg.type)
                              for arg in field.arguments]
-            eval_args = ([c_result_constructor, c_accessor, e_info]
-                         + explicit_args)
+            eval_args = [c_result_constructor, c_accessor] + explicit_args
             c_result = 'self._eval_field({})'.format(', '.join(eval_args))
 
             # What comes next is the unwrapping of this C result for the
@@ -45,10 +41,6 @@
                          '()')
     %>
 
-    ## First, emit public properties/methods for field accessors. They are
-    ## basically wrappers that call the private method that accepts an entity
-    ## information argument.
-
     % for field in cls.fields_with_accessors():
     <% arg_list = ['self'] + [a.name.lower for a in field.arguments] %>
     % if not field.arguments:
@@ -56,17 +48,6 @@
     % endif
     def ${field.name.lower}(${', '.join(arg_list)}):
         ${py_doc(field, 8)}
-        <% args = arg_list[1:] + [T.entity_info.py_nullexpr] %>
-        return self._ENT_${field.name.lower}(${', '.join(args)})
-    % endfor
-
-    ## Then, emit private methods that accept an entity information argument
-
-    % for field in cls.fields_with_accessors():
-    <% arg_list = (['self'] +
-                   [a.name.lower for a in field.arguments] +
-                   [field.entity_info_name.lower]) %>
-    def _ENT_${field.name.lower}(${', '.join(arg_list)}):
         ${accessor_body(field)}
     % endfor
 

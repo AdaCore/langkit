@@ -23,7 +23,7 @@ def nimage(node):
 
 
 def eimage(entity):
-    return '{}{}'.format('+' if entity.info.md.f_b else '', nimage(entity.el))
+    return '{}{}'.format('+' if entity.metadata.f_b else '', nimage(entity))
 
 
 libfoolang._trace = True

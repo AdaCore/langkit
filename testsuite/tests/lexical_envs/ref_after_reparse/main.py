@@ -40,7 +40,7 @@ def dump_xref(unit):
     for block in unit.root:
         print('In {}:'.format(name_img(block)))
         for ref in block.f_refs:
-            print('   {} resolves to {}'.format(ref, ref.p_entity.el))
+            print('   {} resolves to {}'.format(ref, ref.p_entity))
 
 
 print('After first parsing:')
