@@ -1636,6 +1636,9 @@ class ASTNodeType(BaseStructType):
             element_type=element_type
         )
         self._base = base
+        self.is_root_node = is_root
+        self.is_generic_list_type = is_generic_list_type
+        self.is_root_list_type = is_root_list
 
         # Register this new subclass where appropriate in CompiledTypeMetaclass
         if is_root:
@@ -1647,10 +1650,6 @@ class ASTNodeType(BaseStructType):
         if is_root:
             fields = self.builtin_properties() + fields
         self._init_fields(fields)
-
-        self.is_root_node = is_root
-        self.is_generic_list_type = is_generic_list_type
-        self.is_root_list_type = is_root_list
 
         from langkit.dsl import Annotations
         annotations = annotations or Annotations()
