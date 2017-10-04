@@ -604,3 +604,6 @@ class Cond(AbstractExpression):
         result.abstract_expr = self
 
         return result
+
+    def __repr__(self):
+        return '<Cond>'
