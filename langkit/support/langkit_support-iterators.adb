@@ -1,4 +1,4 @@
-with Langkit_Support.Vectors;
+with Ada.Containers.Vectors;
 
 package body Langkit_Support.Iterators is
 
@@ -22,7 +22,8 @@ package body Langkit_Support.Iterators is
    -------------
 
    function Consume (I : Iterator'Class) return Element_Array is
-      package Element_Vectors is new Langkit_Support.Vectors (Element_Type);
+      package Element_Vectors is new Ada.Containers.Vectors
+        (Positive, Element_Type);
 
       Element : Element_Type;
       V       : Element_Vectors.Vector;
@@ -40,15 +41,17 @@ package body Langkit_Support.Iterators is
       --  You have to declare the iterator explicitly.
 
       while I'Unrestricted_Access.Next (Element) loop
-         Element_Vectors.Append (V, Element);
+         V.Append (Element);
       end loop;
 
-      return
-         Result : constant Element_Array :=
-            Element_Array (Element_Vectors.To_Array (V))
-      do
-         Element_Vectors.Destroy (V);
-      end return;
+      declare
+         Result : Element_Array (1 .. Natural (V.Length));
+      begin
+         for I in Result'Range loop
+            Result (I) := V.Element (I);
+         end loop;
+         return Result;
+      end;
    end Consume;
 
 end Langkit_Support.Iterators;
