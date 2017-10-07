@@ -2613,7 +2613,9 @@ package body ${ada_lib_name}.Analysis is
                      Is_First := False;
                   end if;
                   Put ("      ");
-                  Put (Short_Image (R.Getter.Node) & ": ");
+                  if R.Getter.Dynamic then
+                     Put (Short_Image (R.Getter.Node) & ": ");
+                  end if;
 
                   Dump_One_Lexical_Env (Self           => Env,
                                         Dump_Addresses => Dump_Addresses,
