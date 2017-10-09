@@ -27,7 +27,7 @@ def unit(self, node):
 
     :param AbstractExpression node: Node for which we want the embedding
         analysis unit.
-    :rtype: AbstractExpression
+    :rtype: ResolvedExpression
     """
     node_expr = construct(node)
 
