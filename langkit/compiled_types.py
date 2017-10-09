@@ -2198,6 +2198,10 @@ class ArrayType(CompiledType):
         return self.array_type_name
 
     @property
+    def dsl_name(self):
+        return '{}.array'.format(self.element_type.dsl_name)
+
+    @property
     def array_type_name(self):
         """
         Name of the Ada array type.
