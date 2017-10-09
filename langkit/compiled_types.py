@@ -1562,6 +1562,10 @@ class EntityType(StructType):
             # array type must be declared manually there.
             self.should_emit_array_type = False
 
+    @property
+    def dsl_name(self):
+        return '{}.entity'.format(self.el_type.dsl_name)
+
     def c_type(self, capi):
         # Emit only one C binding type for entities. They are all ABI
         # compatible, so this reduces the amount of types emitted.

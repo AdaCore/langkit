@@ -26,12 +26,12 @@ File "test.py", line 32, in Example.prop
 == ASTNode <-> Entity ==
 File "test.py", line 32, in Example.prop
   line 32, in Eq expression
-    Error: Incompatible types for equality: FooNode and Entity
+    Error: Incompatible types for equality: FooNode and FooNode.entity
 
 == Boolean <-> Entity ==
 File "test.py", line 32, in Example.prop
   line 32, in Eq expression
-    Error: Incompatible types for equality: Boolean and Entity
+    Error: Incompatible types for equality: Boolean and FooNode.entity
 
 == ASTNode <-> Boolean ==
 File "test.py", line 32, in Example.prop
@@ -51,6 +51,6 @@ File "test.py", line 32, in Example.prop
 == Entity <-> Entity (never equal) ==
 File "test.py", line 32, in Example.prop
   line 32, in Eq expression
-    Error: EntityExample and EntityLit values are never equal
+    Error: Example.entity and Lit.entity values are never equal
 
 Done
