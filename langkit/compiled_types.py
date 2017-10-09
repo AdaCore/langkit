@@ -349,12 +349,21 @@ class CompiledType(object):
         """
         return self.name
 
+    @property
+    def dsl_name(self):
+        """
+        Type name as it appears in the DSL. To be used in diagnostics.
+
+        :rtype: str
+        """
+        return self.name.camel
+
     def __repr__(self):
         return '<CompiledType {}>'.format(self.name.camel)
 
     @property
     def diagnostic_context(self):
-        ctx_message = 'in {}'.format(self.name.camel)
+        ctx_message = 'in {}'.format(self.dsl_name)
         return Context(ctx_message, self.location)
 
     @property
@@ -616,7 +625,7 @@ class CompiledType(object):
         check_source_language(
             self.matches(other),
             (error_msg or 'Mismatching types: {self} and {other}').format(
-                self=self.name.camel, other=other.name.camel
+                self=self.dsl_name, other=other.dsl_name
             )
         )
         return self
@@ -1025,8 +1034,7 @@ class AbstractNodeData(object):
 
     @property
     def diagnostic_context(self):
-        ctx_message = 'in {}.{}'.format(self.struct.name.camel,
-                                        self._name.lower)
+        ctx_message = 'in {}.{}'.format(self.struct.dsl_name, self._name.lower)
         return Context(ctx_message, self.location)
 
     @property
@@ -1105,7 +1113,7 @@ class AbstractNodeData(object):
         :rtype: str
         """
         return '{}.{}'.format(
-            self.struct.name.camel if self.struct else '<unresolved>',
+            self.struct.dsl_name if self.struct else '<unresolved>',
             self.name.lower if self._name else '<unresolved>'
         )
 
@@ -1772,9 +1780,9 @@ class ASTNodeType(BaseStructType):
         fields = self.get_parse_fields()
 
         check_source_language(
-            len(fields) == len(types), "{} has {} fields ({} types given). You"
-            " probably have inconsistent grammar rules and type "
-            "declarations".format(self.name.camel, len(fields), len(types))
+            len(fields) == len(types), '{} has {} fields ({} types given). You'
+            ' probably have inconsistent grammar rules and type'
+            ' declarations'.format(self.dsl_name, len(fields), len(types))
         )
 
         # TODO: instead of expecting types to be subtypes, we might want to
@@ -1810,8 +1818,8 @@ class ASTNodeType(BaseStructType):
                             inferred_type.matches(field.type),
                             'Expected type {} but type inferenced yielded type'
                             ' {}'.format(
-                                field.type.name.camel,
-                                inferred_type.name.camel
+                                field.type.dsl_name,
+                                inferred_type.dsl_name
                             )
                         )
                 else:
@@ -2468,7 +2476,7 @@ class TypeRepo(object):
                     check_source_language(
                         False,
                         '{prefix} has no {attr} attribute'.format(
-                            prefix=(prefix.name.camel
+                            prefix=(prefix.dsl_name
                                     if isinstance(prefix, CompiledType) else
                                     prefix),
                             attr=repr(name)

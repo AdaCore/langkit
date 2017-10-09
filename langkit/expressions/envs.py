@@ -167,7 +167,7 @@ class EnvGet(AbstractExpression):
             sym_expr = GetSymbol.construct_static(sym_expr)
         check_source_language(
             sym_expr.type == symbol_type,
-            'Wrong type for symbol expr: {}'.format(sym_expr.type.name.camel)
+            'Wrong type for symbol expr: {}'.format(sym_expr.type.dsl_name)
         )
 
         from_expr = (construct(self.sequential_from, T.root_node)
@@ -189,7 +189,7 @@ class EnvGet(AbstractExpression):
             check_source_language(
                 self.filter_prop.type == bool_type,
                 'filter_prop must return a boolean (got'
-                ' {})'.format(self.filter_prop.type.name.camel)
+                ' {})'.format(self.filter_prop.type.dsl_name)
             )
             check_source_language(not self.filter_prop.dynamic_vars,
                                   'filter_prop cannot have dynamic variables')

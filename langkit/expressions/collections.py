@@ -188,7 +188,7 @@ class CollectionExpression(AbstractExpression):
         check_source_language(
             collection_expr.type.is_collection,
             'Cannot iterate on {}, which is not a collection'.format(
-                collection_expr.type.name.camel
+                collection_expr.type.dsl_name
             )
         )
 
@@ -533,7 +533,7 @@ def as_array(self, ast_list):
     check_source_language(
         result.collection.type.is_list_type,
         '.as_array input must be an AST list (here: {})'.format(
-            result.collection.type.name.camel
+            result.collection.type.dsl_name
         )
     )
     return result
@@ -651,8 +651,8 @@ class Quantifier(CollectionExpression):
 
         check_source_language(
             r.inner_expr.type.matches(bool_type),
-            "Wrong type for expression in quantifier: expected bool, "
-            "got {}".format(r.inner_expr.type.name.camel)
+            'Wrong type for expression in quantifier: expected bool,'
+            ' got {}'.format(r.inner_expr.type.dsl_name)
         )
 
         return Quantifier.Expr(self.kind, r.collection_expr, r.inner_expr,
@@ -692,7 +692,7 @@ def collection_get(self, collection, index, or_null):
     check_source_language(
         coll_expr.type.is_collection,
         '.at prefix must be a collection: got {} instead'.format(
-            coll_expr.type.name.camel
+            coll_expr.type.dsl_name
         )
     )
 

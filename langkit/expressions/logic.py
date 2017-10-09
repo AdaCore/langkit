@@ -175,12 +175,12 @@ class Bind(AbstractExpression):
             check_multiple([
                 (self.conv_prop.type.matches(T.root_node.entity),
                  'Bind property must return a subtype of {}'.format(
-                     T.root_node.entity.name.camel
+                     T.root_node.entity.dsl_name
                 )),
 
                 (self.conv_prop.struct.matches(T.root_node),
                  'Bind property must belong to a subtype of {}'.format(
-                     T.root_node.name.camel
+                     T.root_node.dsl_name
                 )),
             ])
 
@@ -200,7 +200,7 @@ class Bind(AbstractExpression):
 
                 (self.eq_prop.struct.matches(T.root_node),
                  'Equality property must belong to a subtype of {}'.format(
-                     T.root_node.name.camel
+                     T.root_node.dsl_name
                 )),
 
                 (len(args) == 1,
@@ -412,12 +412,12 @@ class Predicate(AbstractExpression):
 
             (self.pred_property.type.matches(bool_type),
              'Predicate property must return a boolean, got {}'.format(
-                 self.pred_property.type.name.camel
+                 self.pred_property.type.dsl_name
             )),
 
             (self.pred_property.struct.matches(T.root_node),
              'Predicate property must belong to a subtype of {}'.format(
-                 T.root_node.name.camel
+                 T.root_node.dsl_name
             )),
         ])
 
@@ -448,14 +448,14 @@ class Predicate(AbstractExpression):
                     "Argument #{} of predicate "
                     "is a logic variable, the corresponding property formal "
                     "has type {}, but should be a descendent of {}".format(
-                        i, arg_type.name.camel, T.root_node.name.camel
+                        i, arg_type.dsl_name, T.root_node.dsl_name
                     )
                 )
             else:
                 check_source_language(
                     expr.type.matches(arg_type), "Argument #{} of predicate "
                     "has type {}, should be {}".format(
-                        i, expr.type.name.camel, arg_type.name.camel
+                        i, expr.type.dsl_name, arg_type.dsl_name
                     )
                 )
 

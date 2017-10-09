@@ -750,7 +750,7 @@ class Or(Parser):
                 check_source_language(
                     all(t == ref_type for t in typs),
                     'Alternatives yield incompatible types: {}'.format(
-                        ', '.join(sorted(t.name.camel for t in typs))
+                        ', '.join(sorted(t.dsl_name for t in typs))
                     )
                 )
                 res = ref_type
@@ -940,7 +940,7 @@ class List(Parser):
                 check_source_language(
                     ret.is_list_type,
                     'Invalid list type for List parser: {}. '
-                    'Not a list type'.format(ret.name.camel)
+                    'Not a list type'.format(ret.dsl_name)
                 )
                 return ret
             else:
@@ -948,7 +948,7 @@ class List(Parser):
                 check_source_language(
                     item_type.is_ast_node,
                     'List parsers only accept subparsers that yield AST nodes'
-                    ' ({} provided here)'.format(item_type.name.camel)
+                    ' ({} provided here)'.format(item_type.dsl_name)
                 )
                 return item_type.list
 
@@ -960,7 +960,7 @@ class List(Parser):
             check_source_language(
                 not typ.abstract,
                 'Please provide a concrete ASTnode subclass as list_cls'
-                ' ({} is abstract)'.format(typ.name.camel)
+                ' ({} is abstract)'.format(typ.dsl_name)
             )
 
     def create_vars_before(self):
@@ -1261,7 +1261,7 @@ class Transform(Parser):
             self.parser,
             '<Defer>'
             if isinstance(self.typ, T.Defer) else
-            self.typ.name.camel
+            self.typ.dsl_name
         )
 
     def __init__(self, parser, typ):
@@ -1311,7 +1311,7 @@ class Transform(Parser):
         check_source_language(
             nb_transform_values == nb_fields,
             'Transform parser generates {} values, but {} has {} fields'
-            .format(nb_transform_values, typ.name.camel, nb_fields)
+            .format(nb_transform_values, typ.dsl_name, nb_fields)
         )
 
         # Propagate types from self to destination node's fields

@@ -32,7 +32,7 @@ def parent(self, node):
     check_source_language(
         node_expr.type.is_ast_node or node_expr.type.is_entity_type,
         'Invalid prefix for "parent": got {} but AST node or entity'
-        ' expected'.format(node_expr.type.name.camel)
+        ' expected'.format(node_expr.type.dsl_name)
     )
 
     if node_expr.type.is_entity_type:
@@ -59,7 +59,7 @@ def parents(self, node):
     check_source_language(
         node_expr.type.is_ast_node or node_expr.type.is_entity_type,
         'Invalid prefix for "parents": got {} but AST node or entity'
-        ' expected'.format(node_expr.type.name.camel)
+        ' expected'.format(node_expr.type.dsl_name)
     )
 
     if node_expr.type.is_entity_type:
@@ -81,7 +81,7 @@ def children(self, node):
     check_source_language(
         node_expr.type.is_ast_node or node_expr.type.is_entity_type,
         'Invalid prefix for "children": got {} but AST node or entity'
-        ' expected'.format(node_expr.type.name.camel)
+        ' expected'.format(node_expr.type.dsl_name)
     )
 
     if node_expr.type.is_entity_type:

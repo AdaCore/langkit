@@ -177,8 +177,8 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
                     custom_msg = "Expected type {expected}, got {expr_type}"
 
                 check_source_language(ret.type.matches(expected_type), (
-                    custom_msg.format(expected=expected_type.name.camel,
-                                      expr_type=ret.type.name.camel)
+                    custom_msg.format(expected=expected_type.dsl_name,
+                                      expr_type=ret.type.dsl_name)
                 ))
 
                 # If the type matches expectation but is incompatible in the
@@ -195,7 +195,7 @@ def construct(expr, expected_type_or_pred=None, custom_msg=None,
                     "predicate of type (ResolvedExpression) -> bool"
                 )
                 check_source_language(expected_type_or_pred(ret.type), (
-                    custom_msg.format(expr_type=ret.type.name.camel)
+                    custom_msg.format(expr_type=ret.type.dsl_name)
                 ))
 
         return ret
@@ -2841,7 +2841,7 @@ class PropertyDef(AbstractNodeData):
                 not unmatched_types,
                 "Abstract property {} is not overriden in all subclasses. "
                 "Missing overriding properties on classes: {}".format(
-                    self.name.lower, ", ".join([t.name.camel for t in
+                    self.name.lower, ", ".join([t.dsl_name for t in
                                                 unmatched_types])
                 ),
                 severity=Severity.non_blocking_error
@@ -2900,9 +2900,9 @@ class PropertyDef(AbstractNodeData):
                         '{} returns {} whereas it overrides {}, which returns'
                         ' {}. The former should match the latter.'.format(
                             self.qualname,
-                            self.expected_type.name.camel,
+                            self.expected_type.dsl_name,
                             self.base_property.qualname,
-                            self.base_property.type.name.camel
+                            self.base_property.type.dsl_name
                         )
                     )
                 else:
@@ -2935,8 +2935,8 @@ class PropertyDef(AbstractNodeData):
                     'Argument "{}" does not have the same type as in base'
                     ' property. Base has {}, derived has {}'.format(
                         arg.name,
-                        arg.var.type.name.camel,
-                        base_arg.var.type.name.camel
+                        arg.var.type.dsl_name,
+                        base_arg.var.type.dsl_name
                     )
                 )
 
@@ -3113,7 +3113,7 @@ class PropertyDef(AbstractNodeData):
                 'expected type {{expected}}, got'
                 ' {{expr_type}} instead (expected type comes from'
                 ' overridden base property in {base_prop})'.format(
-                    base_prop=self.base_property.struct.name.camel
+                    base_prop=self.base_property.struct.dsl_name
                 )
             ) if self.base_property else None
 
@@ -3142,9 +3142,9 @@ class PropertyDef(AbstractNodeData):
                 self.type.matches(self.base_property.type),
                 "{} returns {} whereas it overrides {}, which returns {}."
                 " The former should match the latter.".format(
-                    self.qualname, self.type.name.camel,
+                    self.qualname, self.type.dsl_name,
                     self.base_property.qualname,
-                    self.base_property.type.name.camel
+                    self.base_property.type.dsl_name
                 )
             )
 
@@ -3596,7 +3596,7 @@ class No(AbstractExpression):
         check_source_language(
             self.expr_type.null_allowed,
             "Invalid type for No expression: {}".format(
-                self.expr_type.name.camel
+                self.expr_type.dsl_name
             )
         )
 
@@ -4002,13 +4002,13 @@ class Arithmetic(AbstractExpression):
 
         check_source_language(
             l.type == r.type, "Incompatible types for {}: {} and {}".format(
-                self.op, l.type.name.camel, r.type.name.camel
+                self.op, l.type.dsl_name, r.type.dsl_name
             )
         )
 
         check_source_language(
             l.type in (symbol_type, long_type),
-            "Invalid type for {}: {}".format(self.op, l.type.name.camel)
+            "Invalid type for {}: {}".format(self.op, l.type.dsl_name)
         )
 
         return BasicExpr('Arith_Result', '({} %s {})' % self.op, long_type,

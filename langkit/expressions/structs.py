@@ -100,7 +100,7 @@ class Cast(AbstractExpression):
         check_source_language(
             dest_type.matches(t) or t.matches(dest_type),
             'Cannot cast {} to {}: only (up/down)casting is '
-            'allowed'.format(t.name.camel, dest_type.name.camel)
+            'allowed'.format(t.dsl_name, dest_type.dsl_name)
         )
 
         check_source_language(expr.type != dest_type,
@@ -282,7 +282,7 @@ class New(AbstractExpression):
         check_source_language(
             self.struct_type.is_base_struct_type,
             "Invalid type, expected struct type or AST node, got {}".format(
-                self.struct_type.name.camel
+                self.struct_type.dsl_name
             )
         )
 
@@ -324,12 +324,12 @@ class New(AbstractExpression):
         error_if_not_empty(
             set(required_fields) - set(self.field_values.keys()),
             'Values are missing for {} fields'.format(
-                self.struct_type.name.camel
+                self.struct_type.dsl_name
             )
         )
         error_if_not_empty(
             set(self.field_values.keys()) - set(required_fields),
-            'Extraneous fields for {}'.format(self.struct_type.name.camel)
+            'Extraneous fields for {}'.format(self.struct_type.dsl_name)
         )
 
         # At this stage, we know that the user has only provided fields that
@@ -674,7 +674,7 @@ class FieldAccess(AbstractExpression):
         check_source_language(
             pfx_type.is_base_struct_type,
             '{} values have no field (accessed field was {})'.format(
-                pfx_type.name.camel,
+                pfx_type.dsl_name,
                 self.field
             )
         )
@@ -705,7 +705,7 @@ class FieldAccess(AbstractExpression):
         # If still not found, we have a problem
         check_source_language(
             to_get is not None, "Type {} has no '{}' field or property".format(
-                self.receiver_expr.type.name.camel, self.field
+                self.receiver_expr.type.dsl_name, self.field
             )
         )
 
@@ -850,7 +850,7 @@ class IsA(AbstractExpression):
                 'When testing the dynamic subtype of an AST node, the type to'
                 ' check must be a subclass of the value static type. Here, {}'
                 ' is not a subclass of {}.'.format(
-                    a.name.camel, expr.type.name.camel
+                    a.dsl_name, expr.type.dsl_name
                 )
             ))
         return IsA.Expr(expr, astnodes, abstract_expr=self)
@@ -951,7 +951,7 @@ class Match(AbstractExpression):
                     match_type.is_ast_node
                     or match_type.is_entity_type,
                     'Invalid matching type: {}'.format(
-                        match_type.name.camel
+                        match_type.dsl_name
                     )
                 )
             else:
@@ -982,7 +982,7 @@ class Match(AbstractExpression):
             input_type = input_type.el_type
 
         for i, (typ, _, _) in enumerate(self.matchers, 1):
-            t_name = 'default one' if typ is None else typ.name.camel
+            t_name = 'default one' if typ is None else typ.dsl_name
 
             if typ and typ.is_entity_type:
                 typ = typ.el_type
@@ -1000,8 +1000,8 @@ class Match(AbstractExpression):
             not mm,
             'The following AST nodes have no handler: {} (all {} subclasses'
             ' require one)'.format(
-                ', '.join(typ.name.camel for typ in mm),
-                input_type.name.camel
+                ', '.join(typ.dsl_name for typ in mm),
+                input_type.dsl_name
             )
         )
 
@@ -1040,8 +1040,8 @@ class Match(AbstractExpression):
                 check_source_language(
                     typ.matches(matched_expr.type),
                     'Cannot match {} (input type is {})'.format(
-                        typ.name.camel,
-                        matched_expr.type.name.camel
+                        typ.dsl_name,
+                        matched_expr.type.dsl_name
                     )
                 )
             else:

@@ -699,7 +699,7 @@ class CompileCtx(object):
         from langkit.compiled_types import bool_type, resolve_type
 
         with cls.diagnostic_context:
-            name = cls.name.camel
+            name = cls.dsl_name
             check_source_language(
                 name == 'Metadata',
                 'The environment metadata struct type must be called'
@@ -808,7 +808,7 @@ class CompileCtx(object):
             for p in prop.property_set():
                 with Context(
                     'By inheritance from {} to {}'.format(prop.qualname,
-                                                          p.struct.name.camel),
+                                                          p.struct.dsl_name),
                     p.location
                 ):
                     p.set_uses_entity_info()
@@ -1626,23 +1626,23 @@ class CompileCtx(object):
                 # Don't allow public arrays of arrays
                 check(
                     not isinstance(t.element_type, ArrayType),
-                    '{}, an array of arrays'.format(t.name.camel)
+                    '{}, an array of arrays'.format(t.dsl_name)
                 )
 
                 # Reject public arrays of bare AST nodes
                 check(
                     not t.element_type.is_ast_node,
-                    '{}, an array of bare AST nodes'.format(t.name.camel)
+                    '{}, an array of bare AST nodes'.format(t.dsl_name)
                 )
 
                 expose(t.element_type, for_field, 'element type',
-                       traceback + ['array of {}'.format(t.name.camel)])
+                       traceback + ['array of {}'.format(t.dsl_name)])
 
             else:
                 # Only array types have their "_exposed" attribute inferred. We
                 # consider all other ones to have a static value, so complain
                 # if we reach a type that must not be exposed.
-                check(t._exposed, t.name.camel)
+                check(t._exposed, t.dsl_name)
                 return
 
             t._exposed = True

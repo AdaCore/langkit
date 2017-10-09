@@ -344,7 +344,7 @@ class AddToEnv(EnvAction):
                 'The bindings expression in environment specification '
                 ' must be either an env_assoc or an array of env_assocs: '
                 'got {} instead'.format(
-                    self.mappings_prop.type.name.camel
+                    self.mappings_prop.type.dsl_name
                 )
             )
             if self.resolver:
@@ -355,7 +355,7 @@ class AddToEnv(EnvAction):
                 check_source_language(
                     self.resolver.type.matches(T.entity),
                     'Entity resolver properties must return entities'
-                    ' (got {})'.format(self.resolver.type.name.camel)
+                    ' (got {})'.format(self.resolver.type.dsl_name)
                 )
                 check_source_language(
                     not self.resolver.dynamic_vars,
@@ -451,7 +451,7 @@ class RefEnvs(EnvAction):
             self.resolver.type.matches(lexical_env_type),
             'Referenced environment resolver must return a lexical'
             ' environment (not {})'.format(
-                self.resolver.type.name.camel
+                self.resolver.type.dsl_name
             )
         )
         check_source_language(

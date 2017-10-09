@@ -80,7 +80,7 @@ def print_struct(context, file, struct):
         '<span class="kw">{kind}</span>'
         ' <span class="def">{name}</span>'
         '{descr}</dt>'.format(
-            name=struct.name.camel,
+            name=struct.dsl_name,
             kind=kind,
             descr=' : {}'.format(' '.join(descr)) if descr else ''
         ),
@@ -126,12 +126,12 @@ def print_field(context, file, struct, field):
         ' <span class="def" id="{node}-{field}">{field}</span>'
         ' : {type}{inherit_note}</dt>'.format(
             prefixes=' '.join(prefixes),
-            node=struct.name.camel,
+            node=struct.dsl_name,
             field=field.name.lower,
             type=(
                 astnode_ref(field.type)
                 if field.type in context.astnode_types else
-                field.type.name.camel
+                field.type.dsl_name
             ),
             inherit_note=inherit_note
         ),
@@ -149,7 +149,7 @@ def print_enum(context, file, enum_type):
         '<dt id="{name}">'
         '<span class="kw">enum</span>'
         ' <span class="def">{name}</span>'
-        '</dt>'.format(name=enum_type.name.camel),
+        '</dt>'.format(name=enum_type.dsl_name),
         file=file
     )
     print('<dd>{}<dl>'.format(format_doc(enum_type)), file=file)
@@ -160,13 +160,13 @@ def print_enum(context, file, enum_type):
 
 def astnode_ref(node):
     return '<a href="#{name}" class="ref-link">{name}</a>'.format(
-        name=node.name.camel
+        name=node.dsl_name
     )
 
 
 def field_ref(field):
     return '<a href="#{node}-{field}" class="ref-link">{node}</a>'.format(
-        node=field.struct.name.camel,
+        node=field.struct.dsl_name,
         field=field.name.lower
     )
 

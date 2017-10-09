@@ -162,7 +162,7 @@ class Eq(AbstractExpression):
             check_source_language(
                 is_valid,
                 'Incompatible types for equality: {} and {}'.format(
-                    lhs.type.name.camel, rhs.type.name.camel
+                    lhs.type.dsl_name, rhs.type.dsl_name
                 )
             )
 
@@ -170,7 +170,7 @@ class Eq(AbstractExpression):
             check_source_language(
                 can_be_equal,
                 '{} and {} values are never equal'.format(
-                    lhs.type.name.camel, rhs.type.name.camel
+                    lhs.type.dsl_name, rhs.type.dsl_name
                 )
             )
 
@@ -502,7 +502,7 @@ class Then(AbstractExpression):
                 "Then expression should have a default value provided,"
                 " in cases where the provided function's return type (here"
                 " {}) does not have a default null value".format(
-                    then_expr.type.name.camel
+                    then_expr.type.dsl_name
                 )
             )
             default_expr = construct(No(then_expr.type))
