@@ -1408,6 +1408,62 @@ class Enum(Parser):
 
 _ = Discard
 
+
+class Predicate(Parser):
+    """
+    This composite parser takes as parameters a sub parser and a property
+    reference that will be used as predicate, and will test the predicate on
+    the node resulting of parsing. If true, it will return the node, else, it
+    will error.
+    """
+
+    def __init__(self, parser, property_ref):
+        """
+        Create a wrapper parser around `parser` that returns `enum_type_inst`
+        (an EnumType subclass instance) when matching.
+        """
+        Parser.__init__(self)
+        self.parser = resolve(parser) if parser else None
+        ":type: Parser|Row"
+
+        self.property_ref = property_ref
+
+    def _is_left_recursive(self, rule_name):
+        if self.parser:
+            return self.parser._is_left_recursive(rule_name)
+        return False
+
+    def __repr__(self):
+        return "Predicate({0}, {1})".format(self.parser, self.property_ref)
+
+    def create_vars_after(self, start_pos):
+        self.init_vars()
+
+    def children(self):
+        return [self.parser]
+
+    def get_type(self):
+        return self.parser.get_type()
+
+    def generate_code(self):
+        if isinstance(self.property_ref, T.Defer):
+            self.property_ref = self.property_ref.get()
+
+        check_source_language(
+            self.property_ref.type.matches(bool_type),
+            "Property passed as predicate to Predicate parser must return "
+            "a boolean"
+        )
+
+        check_source_language(
+            self.property_ref.struct.matches(self.parser.get_type()),
+            "Property passed as predicate to Predicate parser must take a node"
+            " with the type of the sub-parser"
+        )
+
+        return self.render('predicate_code_ada')
+
+
 # This part of the file contains experiments toward automatic generation of
 # pretty printers for Langkit grammars.
 
