@@ -2234,6 +2234,8 @@ class ArrayType(CompiledType):
     def array_type_name(self):
         """
         Name of the Ada array type.
+
+        :rtype: names.Name
         """
         return self.element_type.name + names.Name('Array')
 
