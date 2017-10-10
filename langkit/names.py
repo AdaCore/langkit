@@ -35,6 +35,9 @@ class Name(object):
     def __eq__(self, other):
         return isinstance(other, Name) and self.base_name == other.base_name
 
+    def __ne__(self, other):
+        return not (self == other)
+
     def __lt__(self, other):
         return self.base_name < other.base_name
 
