@@ -567,7 +567,8 @@ package ${ada_lib_name}.Analysis is
    --  it otherwise.
 
    package ${root_node_type_name}_Iterators is new Langkit_Support.Iterators
-     (Element_Type => ${root_node_type_name});
+     (Element_Type  => ${root_node_type_name},
+      Element_Array => ${T.root_node.array.array_type_name});
 
    type Traverse_Iterator is
      limited new ${root_node_type_name}_Iterators.Iterator
@@ -1339,6 +1340,7 @@ private
    package Traversal_Iterators is new Langkit_Support.Tree_Traversal_Iterator
      (Node_Type         => ${root_node_type_name},
       No_Node           => null,
+      Node_Array        => ${T.root_node.array.array_type_name},
       First_Child_Index => First_Child_Index_For_Traverse,
       Last_Child_Index  => Last_Child_Index_For_Traverse,
       Iterators         => ${root_node_type_name}_Iterators);

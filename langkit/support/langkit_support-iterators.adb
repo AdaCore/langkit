@@ -21,7 +21,7 @@ package body Langkit_Support.Iterators is
    -- Consume --
    -------------
 
-   function Consume (I : Iterator'Class) return Elements_Array is
+   function Consume (I : Iterator'Class) return Element_Array is
       package Element_Vectors is new Langkit_Support.Vectors (Element_Type);
 
       Element : Element_Type;
@@ -44,8 +44,8 @@ package body Langkit_Support.Iterators is
       end loop;
 
       return
-         Result : constant Elements_Array :=
-            Elements_Array (Element_Vectors.To_Array (V))
+         Result : constant Element_Array :=
+            Element_Array (Element_Vectors.To_Array (V))
       do
          Element_Vectors.Destroy (V);
       end return;

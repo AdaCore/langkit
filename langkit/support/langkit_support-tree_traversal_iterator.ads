@@ -13,6 +13,9 @@ generic
    No_Node : Node_Type;
    --  Special value to represent the absence of a node
 
+   type Node_Array is array (Positive range <>) of Node_Type;
+   --  Type to use for array of nodes
+
    with function First_Child_Index (N : Node_Type) return Natural is <>;
    --  Return the index of the first child in N
 
@@ -28,7 +31,8 @@ generic
    --  Return the parent node for N. Returning No_Node means that N is the root
    --  node.
 
-   with package Iterators is new Langkit_Support.Iterators (Node_Type);
+   with package Iterators is new Langkit_Support.Iterators
+     (Node_Type, Node_Array);
 
 package Langkit_Support.Tree_Traversal_Iterator is
 
