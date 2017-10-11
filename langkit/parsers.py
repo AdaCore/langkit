@@ -1419,22 +1419,19 @@ class Predicate(Parser):
 
     def __init__(self, parser, property_ref):
         """
-        Create a wrapper parser around `parser` that returns `enum_type_inst`
-        (an EnumType subclass instance) when matching.
+        :param Parser parser: Sub-parser whose result is the predicate input.
+        :param PropertyDef property_ref: Property to use as the predicate.
         """
         Parser.__init__(self)
-        self.parser = resolve(parser) if parser else None
-        ":type: Parser|Row"
 
+        self.parser = resolve(parser)
         self.property_ref = property_ref
 
     def _is_left_recursive(self, rule_name):
-        if self.parser:
-            return self.parser._is_left_recursive(rule_name)
-        return False
+        return self.parser._is_left_recursive(rule_name)
 
     def __repr__(self):
-        return "Predicate({0}, {1})".format(self.parser, self.property_ref)
+        return 'Predicate({0}, {1})'.format(self.parser, self.property_ref)
 
     def create_vars_after(self, start_pos):
         self.init_vars()
@@ -1451,8 +1448,8 @@ class Predicate(Parser):
 
         check_source_language(
             self.property_ref.type.matches(bool_type),
-            "Property passed as predicate to Predicate parser must return "
-            "a boolean"
+            "Property passed as predicate to Predicate parser must return"
+            " a boolean"
         )
 
         check_source_language(
