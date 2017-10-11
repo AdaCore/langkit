@@ -703,7 +703,7 @@ class CompileCtx(object):
 
         :param StructType cls: Environment metadata struct type.
         """
-        from langkit.compiled_types import bool_type, resolve_type
+        from langkit.compiled_types import resolve_type
 
         with cls.diagnostic_context:
             name = cls.dsl_name
@@ -717,10 +717,9 @@ class CompileCtx(object):
             with field.diagnostic_context:
                 typ = resolve_type(field.type)
                 check_source_language(
-                    typ.matches(bool_type)
-                    or (typ.null_allowed and not typ.is_refcounted),
-                    'Environment metadata fields must all be of nullable non-'
-                    'refcounted types, or booleans'
+                    typ.is_bool_type or typ.is_ast_node,
+                    'Environment metadata fields can be only booleans or AST'
+                    ' nodes'
                 )
 
     def all_properties(self, *args, **kwargs):
