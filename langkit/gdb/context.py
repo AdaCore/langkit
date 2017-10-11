@@ -36,8 +36,9 @@ class Context(object):
         record names, as GDB will see them, to user-friendly ASTNode names.
         """
         return {
-            '{}__analysis__{}_type'.format(self.lib_name, name.lower()):
-                Name.from_camel_with_underscores(name)
+            '{}__analysis__implementation__bare_{}_type'.format(
+                self.lib_name, name.lower()
+            ): Name.from_camel_with_underscores(name)
             for name in self.astnode_names
         }
 
@@ -47,11 +48,12 @@ class Context(object):
         corresponding entity records.
         """
         return {
-            '{}__analysis__entity_{}'.format(
+            '{}__analysis__implementation__entity_{}'.format(
                 self.lib_name,
                 Name.from_camel_with_underscores(name).lower
             ) for name in self.astnode_names
-        } | {'{}__analysis__ast_envs__entity'.format(self.lib_name)}
+        } | {'{}__analysis__implementation__ast_envs__entity'
+             .format(self.lib_name)}
 
     def decode_state(self, frame=None):
         """
@@ -75,7 +77,7 @@ class Context(object):
 
         :rtype: str
         """
-        return '{}__analysis__'.format(self.lib_name)
+        return '{}__analysis__implementation__'.format(self.lib_name)
 
     def reparse_debug_info(self):
         """

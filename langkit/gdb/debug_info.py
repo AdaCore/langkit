@@ -56,7 +56,7 @@ class DebugInfo(object):
         # Look for the "$-analysis.adb" file using some symbol that is supposed
         # to be defined there.
         has_unit_sym = gdb.lookup_global_symbol(
-            '{}__analysis__has_unit'.format(context.lib_name)
+            '{}__analysis__implementation__is_null'.format(context.lib_name)
         )
         if not has_unit_sym:
             return result

@@ -1327,8 +1327,6 @@ class CompileCtx(object):
                 'gdb_py',
                 langkit_path=os.path.dirname(os.path.dirname(__file__)),
                 lib_name=lib_name,
-                astnode_names=[node.name.camel_with_underscores
-                               for node in self.astnode_types],
                 prefix=(self.short_name.lower
                         if self.short_name else lib_name),
             ))
