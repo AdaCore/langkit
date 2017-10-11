@@ -1332,7 +1332,7 @@ class BaseStructType(CompiledType):
 
     @property
     def py_nullexpr(self):
-        return '{}({})'.format(self.name.camel, ', '.join(
+        return self._py_nullexpr or '{}({})'.format(self.name.camel, ', '.join(
             f.type.py_nullexpr for f in self.get_fields()
         ))
 
@@ -1674,7 +1674,7 @@ class ASTNodeType(BaseStructType):
             name, location, doc,
             is_ptr=True, null_allowed=True, is_ada_record=False,
             is_list_type=is_list, should_emit_array_type=not is_root,
-            is_refcounted=False, nullexpr=null_constant(),
+            is_refcounted=False, nullexpr=null_constant(), py_nullexpr='None',
             element_type=element_type,
             type_repo_name=self.raw_name.camel
         )
@@ -1778,10 +1778,6 @@ class ASTNodeType(BaseStructType):
     @property
     def dsl_name(self):
         return self.raw_name.camel
-
-    @property
-    def py_nullexpr(self):
-        return "None"
 
     def repr_name(self):
         """
