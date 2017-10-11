@@ -1,6 +1,6 @@
 ## vim: filetype=makoada
 
---  Start enum_code
+--  Start predicate_code
 
 ${parser.parser.generate_code()}
 
@@ -12,4 +12,4 @@ else
     ${parser.res_var} := null;
 end if;
 
---  End enum_code
+--  End predicate_code
