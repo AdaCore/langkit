@@ -460,13 +460,13 @@
       ## If we have an _add_to_env specification, we generate code to
       ## add elements to the lexical environment.
 
-      <% md = (call_prop(exprs.metadata_prop)
-               if exprs.metadata else "No_Metadata") %>
-
       declare
          Env : Lexical_Env :=
            ${call_prop(exprs.dest_env_prop) \
              if exprs.dest_env_prop else "Initial_Env"};
+         MD  : constant ${T.env_md.name} :=
+            ${(call_prop(exprs.metadata_prop)
+               if exprs.metadata else 'No_Metadata')};
 
          ${"Mappings" if exprs.mappings_prop.type.is_array_type else "B"} :
            ${exprs.mappings_prop.type.name}
@@ -476,11 +476,28 @@
          for B of Mappings.Items loop
          % endif
             if B /= No_Env_Assoc then
+               ## Make sure metadata does not contain any foreign node
+               <% astnode_fields = [f for f in T.env_md.get_fields()
+                                    if f.type.is_ast_node] %>
+               % if astnode_fields:
+                  if ${(
+                     ' or else '.join(
+                         ['({n} /= null and then {n}.Unit /= Self.Unit)'.format(
+                             n='MD.{}'.format(f.name)
+                         ) for f in astnode_fields]
+                     )
+                  )}
+                  then
+                     raise Property_Error
+                        with "Cannot add metadata that contains foreign nodes";
+                  end if;
+               % endif
+
                ## Add the element to the environment
                Add (Self  => Env,
                     Key   => B.F_Key,
                     Value => ${root_node_type_name} (B.F_Val),
-                    MD    => ${md}
+                    MD    => MD
 
                     % if exprs.resolver:
                     , Resolver => ${exprs.resolver.name}'Access
