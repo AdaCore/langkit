@@ -94,7 +94,7 @@ class AnalysisUnitPrinter(BasePrinter):
             value.type.code == gdb.TYPE_CODE_PTR
             and value.type.target().code == gdb.TYPE_CODE_STRUCT
             and (value.type.target().name ==
-                 '{}__analysis__analysis_unit_type'.format(context.lib_name))
+                 context.implname('analysis_unit_type'))
         )
 
     def to_string(self):
@@ -207,9 +207,7 @@ class LexicalEnvPrinter(BasePrinter):
             and value.type.target().code == gdb.TYPE_CODE_STRUCT
             and (
                 value.type.target().name
-                == '{}__analysis__ast_envs__lexical_env_type'.format(
-                    context.lib_name
-                )
+                == context.implname('ast_envs__lexical_env_type')
             )
         )
 
@@ -226,7 +224,7 @@ class LexicalEnvPrinter(BasePrinter):
             return 'null'
 
         empty_env = gdb.lookup_global_symbol(
-            '{}__analysis__ast_envs__empty_env'.format(self.context.lib_name)
+            self.context.implname('ast_envs__empty_env')
         )
 
         if self.value == empty_env.value():

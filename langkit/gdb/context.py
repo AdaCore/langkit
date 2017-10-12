@@ -84,3 +84,13 @@ class Context(object):
         Reload debug information from the analysis source file.
         """
         self.debug_info = DebugInfo.parse(self)
+
+    def implname(self, suffix):
+        """
+        Return the C-style symbol name to use for an Ada entity in the
+        $.Analysis.Implementation package.
+
+        :param str suffix: Name suffix. For instance: "my_type_name".
+        :rtype: str
+        """
+        return '{}__analysis__implementation__{}'.format(self.lib_name, suffix)
