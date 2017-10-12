@@ -1,5 +1,5 @@
 """
-Test the handling of analysis units in the properties DSL.
+Test that invalid environment metadata structs are properly rejected.
 """
 
 from __future__ import absolute_import, division, print_function
