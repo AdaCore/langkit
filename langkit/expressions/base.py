@@ -97,6 +97,7 @@ def expand_abstract_fn(fn):
         if isinstance(default, tuple) and len(default) == 2:
             type_ref, default_value = default
             default_value = unsugar(default_value)
+            default_value.prepare()
         else:
             type_ref = default
             default_value = None
