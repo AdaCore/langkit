@@ -2712,8 +2712,8 @@ class PropertyDef(AbstractNodeData):
         This basically just fills the .arguments list. See Argument's
         constructor for parameters documentation.
         """
-        self.arguments.append(Argument(name, type, is_artificial,
-                                       abstract_var))
+        self.arguments.append(Argument(name, type, is_artificial=is_artificial,
+                                       abstract_var=abstract_var))
 
     @property
     @memoized
