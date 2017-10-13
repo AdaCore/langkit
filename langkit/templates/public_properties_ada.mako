@@ -6,6 +6,11 @@
   (${property.self_arg_name} : ${property.struct.entity.api_name}'Class
    % for arg in property.natural_arguments:
       ; ${arg.name} : ${arg.type.api_name}
+
+      ## Make entity arguments class-wide so that 1) these property wrappers
+      ## are not primitives and 2) we can give them default values.
+      ${"'Class" if arg.type.is_entity_type else ''}
+
       % if arg.default_value is not None:
          := ${arg.default_value.construct().render_public_ada_constant()}
       % endif
