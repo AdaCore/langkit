@@ -3459,7 +3459,7 @@ class Literal(AbstractExpression):
             (bool, lambda _: (str(self.literal), bool_type)),
             (int, lambda _:  (str(self.literal), long_type)),
         ], exception=DiagnosticError('Invalid abstract expression type: {}'))
-        return LiteralExpr(lit_str, rtype)
+        return LiteralExpr(lit_str, rtype, abstract_expr=self)
 
     def __repr__(self):
         return '<Literal {}>'.format(self.literal)
