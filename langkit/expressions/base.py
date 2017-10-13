@@ -1433,6 +1433,15 @@ class BindableLiteralExpr(LiteralExpr):
         """
         raise not_implemented_error(self, self.render_public_ada_constant)
 
+    def render_python_constant(self):
+        """
+        Assuming this expression is a valid constant, return Python code to
+        materialize it in the generated binding.
+
+        :rtype: str
+        """
+        raise not_implemented_error(self, self.rendrer_python_constant)
+
 
 class BooleanLiteralExpr(BindableLiteralExpr):
 
@@ -1446,6 +1455,9 @@ class BooleanLiteralExpr(BindableLiteralExpr):
         return str(self.value)
 
     def render_public_ada_constant(self):
+        return str(self.value)
+
+    def render_python_constant(self):
         return str(self.value)
 
 
@@ -1462,6 +1474,9 @@ class IntegerLiteralExpr(BindableLiteralExpr):
 
     def render_public_ada_constant(self):
         return str(self.literal)
+
+    def render_python_constant(self):
+        return str(self.value)
 
 
 class NullExpr(BindableLiteralExpr):
@@ -1489,6 +1504,9 @@ class NullExpr(BindableLiteralExpr):
             )
         )
         return self._render_expr()
+
+    def render_python_constant(self):
+        return 'None' if self.type.is_entity_type else self.type.py_nullexpr
 
 
 class UncheckedCastExpr(ResolvedExpression):

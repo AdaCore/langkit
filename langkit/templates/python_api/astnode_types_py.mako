@@ -43,7 +43,16 @@
     %>
 
     % for field in cls.fields_with_accessors():
-    <% arg_list = ['self'] + [a.name.lower for a in field.arguments] %>
+    <%
+        arg_list = ['self'] + [
+            (a.name.lower
+             if a.default_value is None else
+             '{}={}'.format(a.name.lower,
+                            a.default_value.construct()
+                            .render_python_constant()))
+            for a in field.arguments
+        ]
+    %>
     % if not field.arguments:
     @property
     % endif
