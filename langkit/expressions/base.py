@@ -116,7 +116,7 @@ def expand_abstract_fn(fn):
         if default_value is not None:
             defval_expr = construct(default_value, type_ref)
             check_source_language(
-                isinstance(defval_expr, LiteralExpr),
+                isinstance(defval_expr, BindableLiteralExpr),
                 'Default value must be a compile-time known constant'
                 ' (got {})'.format(default_value)
             )
@@ -1039,24 +1039,6 @@ class ResolvedExpression(object):
         """
         return "{}\n{}".format(self.render_pre(), self.render_expr())
 
-    def render_private_ada_constant(self):
-        """
-        Assuming this expression is a valid constant, return Ada code to
-        materialize it in the private API ($.Analysis.Implementation).
-
-        :rtype: str
-        """
-        raise not_implemented_error(self, self.render_private_ada_constant)
-
-    def render_public_ada_constant(self):
-        """
-        Assuming this expression is a valid constant, return Ada code to
-        materialize it in the public API ($.Analysis).
-
-        :rtype: str
-        """
-        raise not_implemented_error(self, self.render_public_ada_constant)
-
     @property
     def type(self):
         """
@@ -1406,18 +1388,14 @@ class LiteralExpr(ResolvedExpression):
     def _render_expr(self):
         return self.template.format(*[o.render_expr() for o in self.operands])
 
-    def render_private_ada_constant(self):
-        assert not self.operands
-        return self._render_expr()
+    def render_python_constant(self):
+        """
+        Assuming this expression is a valid constant, return Python code to
+        materialize it in the generated binding.
 
-    def render_public_ada_constant(self):
-        assert not self.operands
-        assert self.type.api_name == self.type.name, (
-            'Cannot generate a public Ada constant for type {}'.format(
-                self.type.dsl_name
-            )
-        )
-        return self._render_expr()
+        :rtype: str
+        """
+        raise not_implemented_error(self, self.rendrer_python_constant)
 
     @property
     def subexprs(self):
@@ -1432,7 +1410,61 @@ class LiteralExpr(ResolvedExpression):
         )
 
 
-class NullExpr(LiteralExpr):
+class BindableLiteralExpr(LiteralExpr):
+    """
+    Resolved expression for literals that can be expressed in all bindings.
+    """
+
+    def render_private_ada_constant(self):
+        """
+        Assuming this expression is a valid constant, return Ada code to
+        materialize it in the private API ($.Analysis.Implementation).
+
+        :rtype: str
+        """
+        raise not_implemented_error(self, self.render_private_ada_constant)
+
+    def render_public_ada_constant(self):
+        """
+        Assuming this expression is a valid constant, return Ada code to
+        materialize it in the public API ($.Analysis).
+
+        :rtype: str
+        """
+        raise not_implemented_error(self, self.render_public_ada_constant)
+
+
+class BooleanLiteralExpr(BindableLiteralExpr):
+
+    def __init__(self, value, abstract_expr=None):
+        self.value = value
+        super(BooleanLiteralExpr, self).__init__(
+            str(value), bool_type, abstract_expr=abstract_expr
+        )
+
+    def render_private_ada_constant(self):
+        return str(self.value)
+
+    def render_public_ada_constant(self):
+        return str(self.value)
+
+
+class IntegerLiteralExpr(BindableLiteralExpr):
+
+    def __init__(self, value, abstract_expr=None):
+        self.value = value
+        super(IntegerLiteralExpr, self).__init__(
+            str(value), long_type, abstract_expr=abstract_expr
+        )
+
+    def render_private_ada_constant(self):
+        return str(self.literal)
+
+    def render_public_ada_constant(self):
+        return str(self.literal)
+
+
+class NullExpr(BindableLiteralExpr):
     """
     Resolved expression for the null expression corresponding to some type.
     """
@@ -1444,11 +1476,19 @@ class NullExpr(LiteralExpr):
                                     expr)
         super(NullExpr, self).__init__(expr, type, abstract_expr=abstract_expr)
 
+    def render_private_ada_constant(self):
+        return self._render_expr()
+
     def render_public_ada_constant(self):
-        assert not self.operands
-        return ('No_{}'.format(self.type.api_name.camel_with_underscores)
-                if self.type.is_entity_type else
-                super(NullExpr, self).__init__())
+        if self.type.is_entity_type:
+            return 'No_{}'.format(self.type.api_name.camel_with_underscores)
+
+        assert self.type.api_name == self.type.name, (
+            'Cannot generate a public Ada constant for type {}'.format(
+                self.type.dsl_name
+            )
+        )
+        return self._render_expr()
 
 
 class UncheckedCastExpr(ResolvedExpression):
@@ -3513,11 +3553,11 @@ class Literal(AbstractExpression):
     def construct(self):
         # WARNING: Since bools are ints in Python, bool needs to be before int
         # in the following table.
-        lit_str, rtype = dispatch_on_type(type(self.literal), [
-            (bool, lambda _: (str(self.literal), bool_type)),
-            (int, lambda _:  (str(self.literal), long_type)),
+        cls = dispatch_on_type(type(self.literal), [
+            (bool, lambda _: BooleanLiteralExpr),
+            (int, lambda _:  IntegerLiteralExpr),
         ], exception=DiagnosticError('Invalid abstract expression type: {}'))
-        return LiteralExpr(lit_str, rtype, abstract_expr=self)
+        return cls(self.literal, abstract_expr=self)
 
     def __repr__(self):
         return '<Literal {}>'.format(self.literal)
