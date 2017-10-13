@@ -374,11 +374,13 @@ class FieldAccess(AbstractExpression):
             """
             Try to associate passed arguments with each natural argument in the
             `prop` property. If invalid count or invalid argument names are
-            detected, raise the appropriate user diagnostic. On success, return
-            a list with all actuals and arg keyword/position to pass in the
-            same order as natural arguments in the spec.
+            detected, raise the appropriate user diagnostic.
 
-            :rtype: list[(T, AbstractExpression)]
+            On success, return a list with all actuals and arg keyword/position
+            to pass in the same order as natural arguments in the spec. None
+            values are left for arguments that must be passed default values.
+
+            :rtype: list[(T, AbstractExpression|None)]
             """
             args = list(enumerate(self.args, 1))
             kwargs = dict(self.kwargs)
@@ -401,7 +403,9 @@ class FieldAccess(AbstractExpression):
                             arg_spec.default_value is not None,
                             'Missing actual for argument {}'.format(arg_name)
                         )
-                        actual = arg_spec.default_value
+                        # Don't pass the argument explicitely: let Ada pass the
+                        # default one instead.
+                        actual = None
 
                 result.append((key, actual))
 
@@ -440,8 +444,11 @@ class FieldAccess(AbstractExpression):
             :param langkit.compiled_types.AbstracNodeData node_data: The
                 accessed property or field.
 
-            :param list[ResolvedExpression] arguments: If non-empty, this field
-                access will actually be a primitive call.
+            :param list[ResolvedExpression|None] arguments: If non-empty, this
+                field access will actually be a primitive call. Each item is a
+                ResolvedExpression for an actual to pass, or None for arguments
+                to let them have their default value. List list must have the
+                same size as `node_data.natural_arguments`.
 
             :param bool implicit_deref: Whether the receiver is an entity,
                 and we want to access a field or property of the stored node.
@@ -465,7 +472,11 @@ class FieldAccess(AbstractExpression):
                                   NullCheckExpr(receiver_expr, implicit_deref))
             self.implicit_deref = implicit_deref
             self.node_data = node_data
+
             self.arguments = arguments
+            if self.arguments is not None:
+                assert (len(self.arguments) ==
+                        len(self.node_data.natural_arguments))
 
             if isinstance(self.node_data, PropertyDef):
                 self.dynamic_vars = [construct(dynvar)
@@ -565,7 +576,7 @@ class FieldAccess(AbstractExpression):
                     (formal.name, actual.render_expr())
                     for actual, formal in zip(
                         self.arguments, self.node_data.natural_arguments
-                    )
+                    ) if actual is not None
                 ]
 
                 # If the property has dynamically bound variables, then pass
@@ -613,7 +624,8 @@ class FieldAccess(AbstractExpression):
             # field access and thus we should have a result variable.
             assert not self.simple_field_access and self.result_var
 
-            sub_exprs = [self.receiver_expr] + self.arguments
+            sub_exprs = [self.receiver_expr] + filter(lambda e: e is not None,
+                                                      self.arguments)
             result = [e.render_pre() for e in sub_exprs]
 
             # We need to make sure we create a new ownership share for the
@@ -721,14 +733,15 @@ class FieldAccess(AbstractExpression):
         assert len(args) == len(to_get.natural_arguments)
 
         arg_exprs = [
-            construct(
+            None if actual is None else construct(
                 actual, formal.type,
                 custom_msg='Invalid "{}" actual{} for {}:'.format(
                     formal.name.lower,
                     ' (#{})'.format(key) if isinstance(key, int) else '',
                     to_get.qualname,
                 ) + ' expected {expected} but got {expr_type}'
-            ) for (key, actual), formal in zip(args, to_get.natural_arguments)
+            )
+            for (key, actual), formal in zip(args, to_get.natural_arguments)
         ]
 
         # Even though it is redundant with DynamicVariable.construct, check
