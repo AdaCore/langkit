@@ -111,7 +111,12 @@ def expand_abstract_fn(fn):
         # Only check that the expression is valid: we'll re-generate one tree
         # of resolved expression per call site.
         if default_value is not None:
-            construct(default_value, type_ref)
+            defval_expr = construct(default_value, type_ref)
+            check_source_language(
+                isinstance(defval_expr, LiteralExpr),
+                'Default value must be a compile-time known constant'
+                ' (got {})'.format(default_value)
+            )
 
         fn_arguments.append(Argument(names.Name.from_lower(kw), type_ref,
                                      default_value=default_value))

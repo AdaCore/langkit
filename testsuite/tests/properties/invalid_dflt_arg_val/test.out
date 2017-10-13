@@ -54,4 +54,8 @@ File "test.py", line 30, in Example.calling
   line 70, in access to .p
     Error: The last 2 arguments are unexpected
 
+== Non-literal argument ==
+File "test.py", line 29, in Example.p
+    Error: Default value must be a compile-time known constant (got <Eq>)
+
 Done

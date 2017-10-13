@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType, T
-from langkit.expressions import DynamicVariable, Property, Self
+from langkit.expressions import DynamicVariable, Literal, Property, Self
 from langkit.parsers import Grammar
 
 from os import path
@@ -68,5 +68,9 @@ run('Too many arguments (3)',
 run('Too many arguments (4)',
     lambda a=BoolType, b=(BoolType, True): a.and_then(b),
     Self.p(True, False, 1, a=False))
+
+run('Non-literal argument',
+    lambda a=(BoolType, Literal(True).equals(False)): a,
+    Self.p)
 
 print('Done')
