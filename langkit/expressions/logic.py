@@ -1,7 +1,11 @@
 from __future__ import absolute_import, division, print_function
+
+from itertools import izip_longest
+
 import funcy
 
-from langkit.compiled_types import (T, bool_type, equation_type,
+from langkit import names
+from langkit.compiled_types import (Argument, T, bool_type, equation_type,
                                     logic_var_type, no_compiled_type)
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
@@ -419,41 +423,62 @@ class Predicate(AbstractExpression):
             )),
         ])
 
-        exprs = [construct(e) for e in self.exprs]
-
-        prop_types = [a.type for a in self.pred_property.natural_arguments]
-
         # Separate logic variable expressions from extra argument expressions
+        exprs = [construct(e) for e in self.exprs]
         logic_var_exprs, closure_exprs = funcy.split_by(
             lambda e: e.type == logic_var_type, exprs
         )
-
         check_source_language(
             len(logic_var_exprs) > 0, "Predicate instantiation should have at "
             "least one logic variable expression"
         )
-
         check_source_language(
-            all(e.type != logic_var_type for e in closure_exprs), "Logic "
-            "variable expressions should be grouped at the beginning, and "
-            "should not appear after non logic variable expressions"
+            all(e.type != logic_var_type for e in closure_exprs),
+            'Logic variable expressions should be grouped at the beginning,'
+            ' and should not appear after non logic variable expressions'
         )
 
-        for i, (expr, arg_type) in enumerate(zip(exprs, prop_types)):
+        # Compute the list of arguments to pass to the property (Self
+        # included).
+        args = ([Argument(names.Name('Self'),
+                 self.pred_property.struct.entity)] +
+                self.pred_property.natural_arguments)
+
+        # Then check that 1) all extra passed actuals match what the property
+        # arguments expect and that 2) arguments left without an actual have a
+        # default value.
+        for i, (expr, arg) in enumerate(izip_longest(exprs, args)):
+
+            if expr is None:
+                check_source_language(
+                    False,
+                    'Missing an actual for argument #{} ({})'.format(
+                        i, arg.name.lower
+                    )
+                )
+                continue
+
+            check_source_language(
+                arg is not None,
+                'Too many actuals: at most {} expected, got {}'.format(
+                    len(args), len(exprs)
+                )
+            )
+
             if expr.type == logic_var_type:
                 check_source_language(
-                    arg_type.matches(T.root_node.entity),
+                    arg.type.matches(T.root_node.entity),
                     "Argument #{} of predicate "
                     "is a logic variable, the corresponding property formal "
                     "has type {}, but should be a descendent of {}".format(
-                        i, arg_type.dsl_name, T.root_node.entity.dsl_name
+                        i, arg.type.dsl_name, T.root_node.entity.dsl_name
                     )
                 )
             else:
                 check_source_language(
-                    expr.type.matches(arg_type), "Argument #{} of predicate "
+                    expr.type.matches(arg.type), "Argument #{} of predicate "
                     "has type {}, should be {}".format(
-                        i, expr.type.dsl_name, arg_type.dsl_name
+                        i, expr.type.dsl_name, arg.type.dsl_name
                     )
                 )
 
