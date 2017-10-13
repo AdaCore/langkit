@@ -2631,14 +2631,14 @@ class TypeRepo(object):
 
 def resolve_type(typeref):
     """
-    Resolve a type reference to the actual CompiledType subclass.
+    Resolve a type reference to the actual CompiledType instance.
 
     :param typeref: Type reference to resolve. It can be either:
 
         * None: it is directly returned;
-        * a CompiledType subclass: it is directly returned;
+        * a CompiledType instance: it is directly returned;
         * a TypeRepo.Defer instance: it is deferred;
-        * a DSLType subclass: the corresponding CompiledType subclass is
+        * a DSLType subclass: the corresponding CompiledType instance is
           retrieved;
         * an EnumNode.Alternative instance: the type corresponding to this
           alternative is retrieved.
@@ -2648,21 +2648,24 @@ def resolve_type(typeref):
     from langkit.dsl import DSLType, EnumNode
 
     if typeref is None or isinstance(typeref, CompiledType):
-        return typeref
+        result = typeref
 
     elif isinstance(typeref, TypeRepo.Defer):
-        return typeref.get()
+        result = typeref.get()
 
     elif issubtype(typeref, DSLType):
         assert typeref._type
-        return typeref._type
+        result = typeref._type
 
     elif isinstance(typeref, EnumNode.Alternative):
-        return typeref.type
+        result = typeref.type
 
     else:
         check_source_language(False,
                               'Invalid type reference: {}'.format(typeref))
+
+    assert result is None or isinstance(result, CompiledType)
+    return result
 
 
 T = TypeRepo()
