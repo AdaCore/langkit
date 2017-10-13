@@ -5,7 +5,6 @@
 <%namespace name="enum_types"        file="enum_types_ada.mako" />
 <%namespace name="list_types"        file="list_types_ada.mako" />
 <%namespace name="struct_types"      file="struct_types_ada.mako" />
-<%namespace name="public_properties" file="public_properties_ada.mako" />
 
 <% root_node_array = T.root_node.array %>
 
@@ -1611,24 +1610,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
    begin
       return Node.Node.Get_Unit;
    end Get_Unit;
-
-   % for e in ctx.entity_types:
-
-      % for f in e.el_type.get_parse_fields( \
-         include_inherited=False, \
-         predicate=lambda f: f.is_public \
-      ):
-         ${astnode_types.field_body(f)}
-      % endfor
-
-      % for p in e.el_type.get_properties( \
-         include_inherited=False, \
-         predicate=lambda p: p.is_public and not p.overriding \
-      ):
-         ${public_properties.body(p)}
-      % endfor
-
-   % endfor
 
    -------------
    -- Destroy --
