@@ -491,9 +491,9 @@ class Predicate(AbstractExpression):
             construct(dynvar) for dynvar in self.pred_property.dynamic_vars
         )
 
-        pred_id = self.pred_property.do_generate_logic_predicate(*[
-            e.type for e in closure_exprs
-        ])
+        pred_id = self.pred_property.do_generate_logic_predicate(
+            tuple(e.type for e in closure_exprs)
+        )
 
         # Append the debug image for the predicate
         closure_exprs.append(untyped_literal_expr('"{}.{}"'.format(

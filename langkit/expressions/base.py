@@ -3331,7 +3331,7 @@ class PropertyDef(AbstractNodeData):
         return non_art
 
     @memoized
-    def do_generate_logic_predicate(self, *partial_args_types):
+    def do_generate_logic_predicate(self, partial_args_types):
         """
         Helper method, will trigger the emission of a logic predicate object
         for the property for the given partial argument types.
