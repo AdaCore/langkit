@@ -31,6 +31,10 @@ def run(name, *pred_args):
         def pred1(n=T.FooNode.entity):
             return n.is_null
 
+        @langkit_property(warn_on_unused=False)
+        def pred2(n=T.FooNode.entity, b=(BoolType, False)):
+            return n.is_null & b
+
         @langkit_property(public=True)
         def prop():
             ignore(Var(Predicate(*pred_args)))
@@ -48,6 +52,9 @@ run('No logic var', T.Example.pred1)
 run('One missing logic var', T.Example.pred1, Self.var1)
 run('Bad argument type', T.Example.pred1, Self.var1, True)
 run('Too many arguments', T.Example.pred1, Self.var1, Self.var2, True)
-run('Ok', T.Example.pred1, Self.var1, Self.var2)
+run('Ok (no default var)', T.Example.pred1, Self.var1, Self.var2)
+
+run('Ok (one unpassed default var)', T.Example.pred2, Self.var1, Self.var2)
+run('Ok (one passed default var)', T.Example.pred2, Self.var1, Self.var2, True)
 
 print('Done')
