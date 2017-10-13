@@ -8,7 +8,7 @@ File "test.py", line 30, in Example.prop
 
 == Wrong value ==
 File "test.py", line 30, in Example.prop
-    Error: Argument "A" does not have the same default value (False) as in base property (True)
+    Error: Argument "A" does not have the same default value (<Literal False>) as in base property (<Literal True>)
 
 == Correct ==
 Code generation was successful

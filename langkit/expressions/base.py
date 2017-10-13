@@ -95,6 +95,7 @@ def expand_abstract_fn(fn):
         # argument type and an expression for the default value).
         if isinstance(default, tuple) and len(default) == 2:
             type_ref, default_value = default
+            default_value = unsugar(default_value)
         else:
             type_ref = default
             default_value = None
