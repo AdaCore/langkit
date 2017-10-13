@@ -6,6 +6,9 @@
   (${property.self_arg_name} : ${property.struct.entity.api_name}'Class
    % for arg in property.natural_arguments:
       ; ${arg.name} : ${arg.type.api_name}
+      % if arg.default_value is not None:
+         := ${arg.default_value.construct().render_public_ada_constant()}
+      % endif
    % endfor
   ) return ${(property.type.api_name)}
 </%def>

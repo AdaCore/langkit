@@ -21,7 +21,8 @@ from langkit.diagnostics import (
 )
 from langkit.expressions.utils import assign_var
 from langkit.utils import (
-    TypeSet, assert_type, dispatch_on_type, inherited_property, memoized
+    TypeSet, assert_type, dispatch_on_type, inherited_property,
+    not_implemented_error, memoized
 )
 
 
@@ -1037,6 +1038,24 @@ class ResolvedExpression(object):
         """
         return "{}\n{}".format(self.render_pre(), self.render_expr())
 
+    def render_private_ada_constant(self):
+        """
+        Assuming this expression is a valid constant, return Ada code to
+        materialize it in the private API ($.Analysis.Implementation).
+
+        :rtype: str
+        """
+        raise not_implemented_error(self, self.render_private_ada_constant)
+
+    def render_public_ada_constant(self):
+        """
+        Assuming this expression is a valid constant, return Ada code to
+        materialize it in the public API ($.Analysis).
+
+        :rtype: str
+        """
+        raise not_implemented_error(self, self.render_public_ada_constant)
+
     @property
     def type(self):
         """
@@ -1386,6 +1405,19 @@ class LiteralExpr(ResolvedExpression):
     def _render_expr(self):
         return self.template.format(*[o.render_expr() for o in self.operands])
 
+    def render_private_ada_constant(self):
+        assert not self.operands
+        return self._render_expr()
+
+    def render_public_ada_constant(self):
+        assert not self.operands
+        assert self.type.api_name == self.type.name, (
+            'Cannot generate a public Ada constant for type {}'.format(
+                self.type.dsl_name
+            )
+        )
+        return self._render_expr()
+
     @property
     def subexprs(self):
         return {'0-type': self.static_type,
@@ -1410,6 +1442,12 @@ class NullExpr(LiteralExpr):
             expr = "{}'({})".format(type.name.camel_with_underscores,
                                     expr)
         super(NullExpr, self).__init__(expr, type, abstract_expr=abstract_expr)
+
+    def render_public_ada_constant(self):
+        assert not self.operands
+        return ('No_{}'.format(self.type.api_name.camel_with_underscores)
+                if self.type.is_entity_type else
+                super(NullExpr, self).__init__())
 
 
 class UncheckedCastExpr(ResolvedExpression):

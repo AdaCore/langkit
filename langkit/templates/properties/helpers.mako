@@ -6,6 +6,9 @@
 
    % for arg in property.arguments:
       ; ${arg.name} : ${arg.type.name}
+      % if arg.default_value is not None:
+         := ${arg.default_value.construct().render_private_ada_constant()}
+      % endif
    % endfor
    % if property.uses_entity_info:
    ; ${property.entity_info_name} : ${T.entity_info.name} :=
