@@ -8,7 +8,8 @@ from langkit.compiled_types import AbstractNodeData, T, lexical_env_type
 from langkit.diagnostics import (
     check_source_language, extract_library_location, Context
 )
-from langkit.expressions import FieldAccess, PropertyDef, Self, construct
+from langkit.expressions import (FieldAccess, PropertyDef, Self, construct,
+                                 resolve_property)
 
 """
 This module contains the public API and the implementation for lexical
@@ -335,8 +336,7 @@ class AddToEnv(EnvAction):
         self.resolver = resolver
 
     def check(self):
-        if isinstance(self.resolver, T.Defer):
-            self.resolver = self.resolver.get()
+        self.resolver = resolve_property(self.resolver)
         with self.mappings_prop.diagnostic_context:
             check_source_language(
                 self.mappings_prop.type.matches(T.env_assoc) or
@@ -443,8 +443,7 @@ class RefEnvs(EnvAction):
         """
         Check that the resolver property is conforming.
         """
-        if isinstance(self.resolver, T.Defer):
-            self.resolver = self.resolver.get()
+        self.resolver = resolve_property(self.resolver)
         self.resolver.require_untyped_wrapper()
 
         check_source_language(

@@ -37,6 +37,7 @@ from langkit.diagnostics import (
     Context, Location, check_source_language, extract_library_location,
     Severity, WarningSet
 )
+from langkit.expressions import resolve_property
 from langkit.lexer import WithSymbol
 from langkit.utils import (Log, assert_type, copy_with, is_same, issubtype,
                            type_check_instance)
@@ -1443,8 +1444,7 @@ class Predicate(Parser):
         return self.parser.get_type()
 
     def generate_code(self):
-        if isinstance(self.property_ref, T.Defer):
-            self.property_ref = self.property_ref.get()
+        self.property_ref = resolve_property(self.property_ref)
 
         check_source_language(
             self.property_ref.type.matches(bool_type),

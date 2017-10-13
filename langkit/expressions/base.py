@@ -4125,3 +4125,30 @@ def ignore(*vars):
     """
     for var in vars:
         var.tag_ignored()
+
+
+def resolve_property(propref):
+    """
+    Resolve a property reference to the actual PropertyDef instance.
+
+    :param propref: Property reference to resolve. It can be either:
+
+        * None: it is directly returned;
+        * a PropertyDef instance: it is directly returned;
+        * a TypeRepo.Defer instance: it is deferred.
+
+    :rtype: PropertyDef
+    """
+    if propref is None or isinstance(propref, PropertyDef):
+        result = propref
+
+    elif isinstance(propref, TypeRepo.Defer):
+        result = propref.get()
+
+    else:
+        check_source_language(False, 'Invalid property reference: {}'.format(
+            propref
+        ))
+
+    assert result is None or isinstance(result, PropertyDef)
+    return result

@@ -7,7 +7,7 @@ from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable, LiteralExpr,
     NullExpr, PropertyDef, aggregate_expr, auto_attr, construct, dsl_document,
-    render
+    render, resolve_property
 )
 
 
@@ -403,13 +403,11 @@ class Predicate(AbstractExpression):
         self.pred_property = predicate
         self.exprs = exprs
 
+    def do_prepare(self):
+        self.pred_property = resolve_property(self.pred_property)
+
     def construct(self):
         check_multiple([
-            (isinstance(self.pred_property, PropertyDef),
-             'Predicates requires a property reference, got {} instead'.format(
-                 self.pred_property
-            )),
-
             (self.pred_property.type.matches(bool_type),
              'Predicate property must return a boolean, got {}'.format(
                  self.pred_property.type.dsl_name
