@@ -3608,9 +3608,10 @@ class No(AbstractExpression):
         :rtype: LiteralExpr
         """
         if self.expr_type.is_array:
-            return EmptyArray.construct_static(self.expr_type)
+            return EmptyArray.construct_static(self.expr_type,
+                                               abstract_expr=self)
         else:
-            return NullExpr(self.expr_type, self)
+            return NullExpr(self.expr_type, abstract_expr=self)
 
     def __repr__(self):
         expr_type = resolve_type(self.expr_type)
