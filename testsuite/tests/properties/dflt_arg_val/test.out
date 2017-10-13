@@ -1,0 +1,10 @@
+main.py: Running...
+n.p_prop1() = True
+n.p_prop1(True) = True
+n.p_prop1(False) = False
+n.p_prop2() = None
+n.p_prop2(None) = None
+n.p_prop2(<Example 1:1-1:8>) = <Example 1:1-1:8>
+main.py: Done.
+
+Done
