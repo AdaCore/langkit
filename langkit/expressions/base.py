@@ -1360,7 +1360,7 @@ class LiteralExpr(ResolvedExpression):
     value or an Ada aggregate.
     """
 
-    def __init__(self, template, expr_type, operands=[]):
+    def __init__(self, template, expr_type, operands=[], abstract_expr=None):
         """
         :param str template: String template for the expression. Rendering will
             interpolate it with the operands' render_expr methods evaluation.
@@ -1371,7 +1371,8 @@ class LiteralExpr(ResolvedExpression):
         self.template = template
         self.operands = operands
 
-        super(LiteralExpr, self).__init__(skippable_refcount=True)
+        super(LiteralExpr, self).__init__(skippable_refcount=True,
+                                          abstract_expr=abstract_expr)
 
     def _render_pre(self):
         return '\n'.join(o.render_pre() for o in self.operands)
