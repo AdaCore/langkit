@@ -446,7 +446,7 @@ class Predicate(AbstractExpression):
                     "Argument #{} of predicate "
                     "is a logic variable, the corresponding property formal "
                     "has type {}, but should be a descendent of {}".format(
-                        i, arg_type.dsl_name, T.root_node.dsl_name
+                        i, arg_type.dsl_name, T.root_node.entity.dsl_name
                     )
                 )
             else:
