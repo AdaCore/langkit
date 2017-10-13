@@ -86,11 +86,19 @@ def emit_and_print_errors(grammar, lexer=None,
         reset_langkit()
 
 
+def build(grammar, lexer=None, warning_set=default_warning_set):
+    """
+    Shortcut for `build_and_run` to only build.
+    """
+    build_and_run(grammar, py_script=None, lexer=lexer,
+                  warning_set=warning_set)
+
+
 def build_and_run(grammar, py_script, lexer=None,
                   warning_set=default_warning_set):
     """
-    Compile and emit code for CTX and build the generated library. Then run
-    PY_SCRIPT with this library available.
+    Compile and emit code for `ctx` and build the generated library. Then, if
+    `py_script` is not None, run it with this library available.
 
     An exception is raised if any step fails (the script must return code 0).
 
@@ -119,6 +127,10 @@ def build_and_run(grammar, py_script, lexer=None,
     for w in WarningSet.available_warnings:
         argv.append('-{}{}'.format('W' if w in warning_set else 'w', w.name))
     m.run(argv)
+
+    # No script is provided? Then we have nothing left to do
+    if py_script is None:
+        return
 
     # Write a "setenv" script to make developper investigation convenient
     with open('setenv.sh', 'w') as f:
