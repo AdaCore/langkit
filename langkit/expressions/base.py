@@ -3331,13 +3331,16 @@ class PropertyDef(AbstractNodeData):
         return non_art
 
     @memoized
-    def do_generate_logic_predicate(self, partial_args_types):
+    def do_generate_logic_predicate(self, partial_args_types,
+                                    default_passed_args):
         """
         Helper method, will trigger the emission of a logic predicate object
         for the property for the given partial argument types.
 
         :param [CompiledType] partial_args_types: The type of partially applied
             arguments passed to the logic predicate.
+        :param int default_passed_args: Number of arguments passed by default
+            value.
 
         :return: The identifier for the logic predicate, to be used as a prefix
             in code generation for every entity related to it.
@@ -3354,11 +3357,13 @@ class PropertyDef(AbstractNodeData):
 
         # We can use a list because the method is memoized, eg. this won't
         # be executed twice for the same partial_args_types tuple.
-        self.logic_predicates.append((partial_args_types, pred_id))
+        self.logic_predicates.append((partial_args_types,
+                                      default_passed_args,
+                                      pred_id))
 
         return pred_id
 
-    def get_concrete_node_types(self, partial_args_types):
+    def get_concrete_node_types(self, partial_args_types, default_passed_args):
         """
         Helper for emission of logic predicate wrappers. Given partial
         argument types for trailing arguments that do not correspond to logic
@@ -3368,13 +3373,13 @@ class PropertyDef(AbstractNodeData):
 
         :param [CompiledType] partial_args_types: The type of partially applied
             arguments passed to the logic predicate.
+        :param int default_passed_args: Number of arguments passed by default
+            value.
         """
-        exp_args = self.arguments[
-            :len(self.arguments) - len(partial_args_types)
-        ]
-
-        ret = [self.struct] + [a.type for a in exp_args]
-        return ret
+        logic_vars = (len(self.arguments) -
+                      len(partial_args_types) -
+                      default_passed_args)
+        return [self.struct] + [a.type for a in self.arguments[:logic_vars]]
 
     @property
     def memoization_state_field_name(self):

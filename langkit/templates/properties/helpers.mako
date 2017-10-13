@@ -147,13 +147,14 @@
 </%def>
 
 <%def name="logic_predicates(prop)">
-   % for (args_types, pred_id) in prop.logic_predicates:
+   % for (args_types, default_passed_args, pred_id) in prop.logic_predicates:
 
    <%
       type_name = "{}_Predicate_Caller".format(pred_id)
       package_name = "{}_Pred".format(pred_id)
       root_class = T.root_node.name
-      formal_node_types = prop.get_concrete_node_types(args_types)
+      formal_node_types = prop.get_concrete_node_types(args_types,
+                                                       default_passed_args)
    %>
 
    type ${type_name} is record
@@ -220,7 +221,7 @@
             for i, _ in enumerate(args_types)
          ]
          if prop.uses_entity_info:
-            args.append('Node_0.Info')
+            args.append('{} => Node_0.Info'.format(prop.entity_info_name))
          args_fmt = '({})'.format(', '.join(args)) if args else ''
       %>
       return ${prop.name} ${args_fmt};

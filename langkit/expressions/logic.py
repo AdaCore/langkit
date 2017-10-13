@@ -447,15 +447,17 @@ class Predicate(AbstractExpression):
         # Then check that 1) all extra passed actuals match what the property
         # arguments expect and that 2) arguments left without an actual have a
         # default value.
+        default_passed_args = 0
         for i, (expr, arg) in enumerate(izip_longest(exprs, args)):
 
             if expr is None:
                 check_source_language(
-                    False,
+                    arg.default_value is not None,
                     'Missing an actual for argument #{} ({})'.format(
                         i, arg.name.lower
                     )
                 )
+                default_passed_args += 1
                 continue
 
             check_source_language(
@@ -492,7 +494,8 @@ class Predicate(AbstractExpression):
         )
 
         pred_id = self.pred_property.do_generate_logic_predicate(
-            tuple(e.type for e in closure_exprs)
+            tuple(e.type for e in closure_exprs),
+            default_passed_args
         )
 
         # Append the debug image for the predicate
