@@ -115,7 +115,7 @@ def make_renderer(base_renderer=None):
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             ctx.root_grammar_class.c_type(capi).name,
             'entity_type':           T.entity.c_type(capi).name,
-            'env_rebindings_type':   env_rebindings_type.c_type(capi).name,
+            'env_rebindings_type':   T.EnvRebindingsType.c_type(capi).name,
             'unit_kind_type':        T.AnalysisUnitKind.c_type(capi).name,
             'unit_provider_type':    CAPIType(capi, 'unit_provider').name,
             'unit_provider_destroy_type':
@@ -428,7 +428,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == env_rebindings_type
+        return self == T.EnvRebindingsType
 
     @property
     def is_equation_type(self):
@@ -2060,7 +2060,7 @@ class ASTNodeType(BaseStructType):
                         T.defer_env_md,
                         doc='The metadata associated to the AST node'
                     )),
-                    ('rebindings', BuiltinField(env_rebindings_type,
+                    ('rebindings', BuiltinField(T.EnvRebindingsType,
                                                 access_needs_incref=True,
                                                 doc=""))
                 ],

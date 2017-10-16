@@ -71,7 +71,7 @@ class PythonAPISettings(AbstractAPISettings):
                 type.name.camel,
                 inc_ref
             )),
-            (ct.env_rebindings_type, lambda _: 'EnvRebindings._wrap({})'),
+            (T.EnvRebindingsType, lambda _: 'EnvRebindings._wrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             ' (wrapping): {}'.format(type)
@@ -109,7 +109,7 @@ class PythonAPISettings(AbstractAPISettings):
                 type.name.camel
             )),
             (ct.symbol_type, lambda _: '_text._unwrap({})'),
-            (ct.env_rebindings_type, lambda _: 'EnvRebindings._unwrap({})'),
+            (T.EnvRebindingsType, lambda _: 'EnvRebindings._unwrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
             ' (unwrapping): {}'.format(type)
@@ -133,7 +133,7 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (T.BoolType, lambda _: ctype_type('c_uint8')),
             (ct.long_type, lambda _: ctype_type('c_int')),
-            (ct.env_rebindings_type, lambda _: 'EnvRebindings._c_type'),
+            (T.EnvRebindingsType, lambda _: 'EnvRebindings._c_type'),
             (ct.token_type, lambda _: 'Token'),
             (ct.symbol_type, lambda _: wrapped_type('text')),
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),

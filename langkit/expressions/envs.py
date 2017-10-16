@@ -1,8 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit import names
-from langkit.compiled_types import (T, env_rebindings_type, no_compiled_type,
-                                    symbol_type, token_type)
+from langkit.compiled_types import T, no_compiled_type, symbol_type, token_type
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, CallExpr, ComputingExpr,
@@ -302,7 +301,7 @@ def env_parent(self, env):
 
 def make_append_rebinding(self, rebindings, old_env, new_env):
     return CallExpr('Rebinding', 'AST_Envs.Append_Rebinding',
-                    env_rebindings_type,
+                    T.EnvRebindingsType,
                     [rebindings, old_env, new_env],
                     abstract_expr=self)
 
@@ -315,7 +314,7 @@ def append_rebinding(self, rebindings, old_env, new_env):
     """
     return make_append_rebinding(
         self,
-        construct(rebindings, env_rebindings_type),
+        construct(rebindings, T.EnvRebindingsType),
         construct(old_env, T.LexicalEnvType),
         construct(new_env, T.LexicalEnvType)
     )
@@ -328,7 +327,7 @@ def rebind_env(self, env, rebindings):
     """
     return CallExpr('Rebound_Env', 'Rebind_Env', T.LexicalEnvType,
                     [construct(env, T.LexicalEnvType),
-                     construct(rebindings, env_rebindings_type)],
+                     construct(rebindings, T.EnvRebindingsType)],
                     abstract_expr=self)
 
 
