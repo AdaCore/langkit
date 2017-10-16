@@ -697,33 +697,6 @@ class NoCompiledType(CompiledType):
 no_compiled_type = NoCompiledType('NoCompiledType')
 
 
-analysis_unit_type = CompiledType(
-    'AnalysisUnit',
-    type_repo_name='AnalysisUnitType',
-    exposed=True,
-    nullexpr='null',
-    should_emit_array_type=True,
-    null_allowed=True,
-)
-
-analysis_unit_kind = CompiledType(
-    'UnitKind',
-    type_repo_name='AnalysisUnitKind',
-    exposed=True,
-    is_ptr=False,
-)
-
-lexical_env_type = CompiledType(
-    'LexicalEnv',
-    type_repo_name='LexicalEnvType',
-    nullexpr='Empty_Env',
-    should_emit_array_type=False,
-    null_allowed=True,
-    is_refcounted=True,
-    py_nullexpr='LexicalEnv.Empty',
-)
-
-
 class LogicVarType(CompiledType):
     """
     Singleton for the logic variable type.
@@ -767,17 +740,6 @@ class LogicVarType(CompiledType):
     def convert_to_storage_expr(self, node_expr, base_expr):
         raise not_implemented_error(self, self.convert_to_storage_expr)
 
-logic_var_type = LogicVarType()
-
-equation_type = CompiledType(
-    'LogicEquation',
-    type_repo_name='EquationType',
-    nullexpr='Null_Logic_Equation',
-    null_allowed=True,
-    c_type_name='equation_type',
-    is_refcounted=True,
-)
-
 
 class EnvRebindingsType(CompiledType):
     """
@@ -795,38 +757,6 @@ class EnvRebindingsType(CompiledType):
             is_refcounted=False,
             py_nullexpr='None'
         )
-
-env_rebindings_type = EnvRebindingsType()
-
-bool_type = CompiledType(
-    name=get_type(bool),
-    type_repo_name='BoolType',
-    exposed=True,
-    is_ptr=False,
-    nullexpr='false',
-    py_nullexpr='False',
-
-    # "bool" is not a built-in type in C: we define our own type based on
-    # uint8_t.
-    c_type_name='bool'
-)
-
-long_type = CompiledType(
-    name=get_type(long),
-    type_repo_name='LongType',
-    exposed=True,
-    is_ptr=False,
-    nullexpr='0',
-    external=True,
-    c_type_name='int'
-)
-
-source_location_range_type = CompiledType(
-    'SourceLocationRange',
-    exposed=True,
-    is_ptr=False,
-    nullexpr='SourceLocationRange()',
-)
 
 
 class TokenType(CompiledType):
@@ -859,20 +789,6 @@ class TokenType(CompiledType):
 
     def convert_to_storage_expr(self, node_expr, base_expr):
         return 'Stored_Token ({}, {})'.format(node_expr, base_expr)
-
-token_type = TokenType()
-
-symbol_type = CompiledType(
-    'SymbolType',
-    type_repo_name='SymbolType',
-    exposed=True,
-    nullexpr='null',
-    null_allowed=True,
-
-    # See below: symbols are represented in the C API as text records
-    is_ada_record=True,
-    c_type_name='text',
-)
 
 
 class Argument(object):
@@ -2471,6 +2387,94 @@ def create_enum_node_types(cls):
         base_enum_node._alternatives.append(alt_type)
 
 
+def create_builtin_types():
+    """
+    Create CompiledType instances for all buil-tin types. This will
+    automatically register them in the current CompiledTypeMetaclass.
+    """
+    CompiledType(
+        'AnalysisUnit',
+        type_repo_name='AnalysisUnitType',
+        exposed=True,
+        nullexpr='null',
+        should_emit_array_type=True,
+        null_allowed=True,
+    )
+
+    CompiledType(
+        'UnitKind',
+        type_repo_name='AnalysisUnitKind',
+        exposed=True,
+        is_ptr=False,
+    )
+
+    CompiledType(
+        'LexicalEnv',
+        type_repo_name='LexicalEnvType',
+        nullexpr='Empty_Env',
+        should_emit_array_type=False,
+        null_allowed=True,
+        is_refcounted=True,
+        py_nullexpr='LexicalEnv.Empty',
+    )
+
+    LogicVarType()
+
+    CompiledType(
+        'LogicEquation',
+        type_repo_name='EquationType',
+        nullexpr='Null_Logic_Equation',
+        null_allowed=True,
+        c_type_name='equation_type',
+        is_refcounted=True,
+    )
+    EnvRebindingsType()
+
+    CompiledType(
+        name=get_type(bool),
+        type_repo_name='BoolType',
+        exposed=True,
+        is_ptr=False,
+        nullexpr='false',
+        py_nullexpr='False',
+
+        # "bool" is not a built-in type in C: we define our own type based on
+        # uint8_t.
+        c_type_name='bool'
+    )
+
+    CompiledType(
+        name=get_type(long),
+        type_repo_name='LongType',
+        exposed=True,
+        is_ptr=False,
+        nullexpr='0',
+        external=True,
+        c_type_name='int'
+    )
+
+    CompiledType(
+        'SourceLocationRange',
+        exposed=True,
+        is_ptr=False,
+        nullexpr='SourceLocationRange()',
+    )
+
+    TokenType()
+
+    CompiledType(
+        'SymbolType',
+        type_repo_name='SymbolType',
+        exposed=True,
+        nullexpr='null',
+        null_allowed=True,
+
+        # See below: symbols are represented in the C API as text records
+        is_ada_record=True,
+        c_type_name='text',
+    )
+
+
 class TypeRepo(object):
     """
     Repository of types. Used to be able to do early references to not yet
@@ -2678,3 +2682,5 @@ T = TypeRepo()
 Default type repository instance, to be used to refer to a type before its
 declaration
 """
+
+create_builtin_types()
