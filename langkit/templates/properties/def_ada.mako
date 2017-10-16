@@ -24,8 +24,6 @@ ${"overriding" if property.overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
    return ${property.type.name}
 is
-   use type AST_Envs.Lexical_Env;
-
    ## We declare a variable Self, that has the named class wide access type
    ## that we can use to dispatch on other properties and all.
    Self : ${Self.type.name} := ${Self.type.name}
