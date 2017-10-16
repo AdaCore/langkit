@@ -50,7 +50,7 @@ class PythonAPISettings(AbstractAPISettings):
 
         value_suffix = '' if from_field_access else '.value'
         return dispatch_on_type(type, [
-            (ct.analysis_unit_type, lambda _: 'AnalysisUnit._wrap({})'),
+            (T.AnalysisUnitType, lambda _: 'AnalysisUnit._wrap({})'),
             (ct.analysis_unit_kind, lambda _: '_unit_kind_to_str[{}]'),
             (ct.ASTNodeType, lambda _: '_ASTNodeExtension.get_or_create({})'),
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
@@ -95,7 +95,7 @@ class PythonAPISettings(AbstractAPISettings):
         :rtype: str
         """
         return dispatch_on_type(type, [
-            (ct.analysis_unit_type, lambda _: 'AnalysisUnit._unwrap({})'),
+            (T.AnalysisUnitType, lambda _: 'AnalysisUnit._unwrap({})'),
             (ct.analysis_unit_kind, lambda _: '_unwrap_unit_kind({})'),
             (ct.ASTNodeType, lambda _: '_ASTNodeExtension.unwrap({})'),
             (ct.EntityType, lambda _: '{}._unwrap({{}})'.format(
@@ -148,7 +148,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.env_rebindings_type, lambda _: 'EnvRebindings._c_type'),
             (ct.token_type, lambda _: 'Token'),
             (ct.symbol_type, lambda _: wrapped_type('text')),
-            (ct.analysis_unit_type, lambda _: 'AnalysisUnit._c_type'),
+            (T.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),
             (ct.analysis_unit_kind, lambda _: ctype_type('c_uint')),
             (ct.ASTNodeType, lambda _: '_ASTNodeExtension.c_type'),
             (ct.EnumType, lambda _: ctype_type('c_uint')),

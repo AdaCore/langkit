@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit import names
-from langkit.compiled_types import T, analysis_unit_kind, analysis_unit_type
+from langkit.compiled_types import T, analysis_unit_kind
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, CallExpr, FieldAccessExpr, NullCheckExpr, auto_attr,
@@ -44,7 +44,7 @@ def unit(self, node):
 
     # From the point of view of properties, analysis units are not ref-counted,
     # so we must not inc-ref here.
-    return FieldAccessExpr(node_expr, 'Unit', analysis_unit_type,
+    return FieldAccessExpr(node_expr, 'Unit', T.AnalysisUnitType,
                            do_explicit_incref=False,
                            abstract_expr=self)
 
@@ -63,8 +63,8 @@ def is_referenced_from(self, referenced_unit, base_unit):
     :rtype: ResolvedExpression
     """
     return CallExpr('Is_Referenced', 'Is_Referenced_From', T.BoolType,
-                    [construct(referenced_unit, analysis_unit_type),
-                     construct(base_unit, analysis_unit_type)],
+                    [construct(referenced_unit, T.AnalysisUnitType),
+                     construct(base_unit, T.AnalysisUnitType)],
                     abstract_expr=self)
 
 
@@ -76,6 +76,6 @@ def analysis_unit_root(self, unit):
     :param ResolvedExpression unit: Expression that yields the analysis
         unit for which we want to extract the root AST node.
     """
-    unit_expr = NullCheckExpr(construct(unit, analysis_unit_type))
+    unit_expr = NullCheckExpr(construct(unit, T.AnalysisUnitType))
     return FieldAccessExpr(unit_expr, 'AST_Root', T.root_node,
                            do_explicit_incref=False, abstract_expr=self)

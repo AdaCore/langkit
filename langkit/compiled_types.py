@@ -111,7 +111,7 @@ def make_renderer(base_renderer=None):
             'capi':                  capi,
             'bool_type':             T.BoolType.c_type(capi).name,
             'analysis_context_type': CAPIType(capi, 'analysis_context').name,
-            'analysis_unit_type':    analysis_unit_type.c_type(capi).name,
+            'analysis_unit_type':    T.AnalysisUnitType.c_type(capi).name,
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             ctx.root_grammar_class.c_type(capi).name,
             'entity_type':           T.entity.c_type(capi).name,
@@ -381,7 +381,7 @@ class CompiledType(object):
         """
         Return whether this is the analysis unit type.
         """
-        return self == analysis_unit_type
+        return self == T.AnalysisUnitType
 
     @property
     def is_analysis_unit_kind(self):
