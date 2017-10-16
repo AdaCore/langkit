@@ -11,16 +11,13 @@
 with Ada.Containers;                  use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Ordered_Maps;
-with Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
 with System.Address_Image;
-with System.Storage_Elements;    use System.Storage_Elements;
 
-with Langkit_Support.Array_Utils;
 with Langkit_Support.Images;  use Langkit_Support.Images;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
@@ -44,17 +41,9 @@ with ${ada_lib_name}.Lexer;
 %if ctx.env_hook_subprogram:
 with ${ctx.env_hook_subprogram.unit_fqn};
 %endif
-%if ctx.default_unit_provider:
-with ${ctx.default_unit_provider.unit_fqn};
-%endif
-%if ctx.symbol_canonicalizer:
-with ${ctx.symbol_canonicalizer.unit_fqn};
-%endif
 
 package body ${ada_lib_name}.Analysis.Implementation is
 
-   function Convert is new Ada.Unchecked_Conversion
-     (Public_Entity_Info, Entity_Info);
    function Convert is new Ada.Unchecked_Conversion
      (Entity_Info, Public_Entity_Info);
 
@@ -76,9 +65,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ${array_types.body(array_type)}
    % endif
    % endfor
-
-   ##  Make logic operations on nodes accessible
-   use Eq_Node, Eq_Node.Raw_Impl;
 
    ---------------------
    -- Pre_Env_Actions --

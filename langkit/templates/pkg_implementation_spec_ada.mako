@@ -15,7 +15,6 @@
 %>
 
 with Ada.Containers.Hashed_Maps;
-with Ada.Finalization;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
 with Ada.Unchecked_Deallocation;
@@ -27,16 +26,13 @@ use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Eq_Same;
 
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
-with Langkit_Support.Bump_Ptr.Vectors;
 with Langkit_Support.Cheap_Sets;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Extensions;  use Langkit_Support.Extensions;
-with Langkit_Support.Iterators;
 with Langkit_Support.Lexical_Env;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
-with Langkit_Support.Tree_Traversal_Iterator;
 with Langkit_Support.Vectors;
 
 with ${ada_lib_name}.Analysis.Parsers;  use ${ada_lib_name}.Analysis.Parsers;
