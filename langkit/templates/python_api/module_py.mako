@@ -737,6 +737,17 @@ class ${root_astnode_name}(object):
         super(${root_astnode_name}, self).__init__()
 
     @property
+    def _id_tuple(self):
+        return (self._node_ext, self._metadata, self._rebindings)
+
+    def __eq__(self, other):
+        return (isinstance(other, ${root_astnode_name}) and
+                self._id_tuple == other._id_tuple)
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    @property
     def unit(self):
         ${py_doc('langkit.node_unit', 8)}
         node = self._unwrap(self)
