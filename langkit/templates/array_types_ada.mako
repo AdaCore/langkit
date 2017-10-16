@@ -108,7 +108,6 @@
    ------------
 
    function Concat (L, R : ${cls.name}) return ${cls.name} is
-      use ${cls.pkg_vector};
       Ret : ${cls.name} := Create (Length (L) + Length (R));
    begin
       Ret.Items := (L.Items & R.Items);
