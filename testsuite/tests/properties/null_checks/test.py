@@ -8,8 +8,8 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import (AnalysisUnitType, ASTNode, Field, T,
-                         Token as TokenType, abstract)
+from langkit.dsl import (AnalysisUnitType, ASTNode, Field, T, TokenType,
+                         abstract)
 from langkit.expressions import No, Property, Self
 from langkit.parsers import Grammar, Or, Row, Tok
 

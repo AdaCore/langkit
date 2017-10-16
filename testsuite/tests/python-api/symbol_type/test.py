@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, Symbol, Token as TokenType
+from langkit.dsl import ASTNode, Field, SymbolType, TokenType
 from langkit.expressions import langkit_property
 from langkit.parsers import Grammar, Tok
 
@@ -25,8 +25,8 @@ class FooNode(ASTNode):
 class Example(FooNode):
     tok = Field(type=TokenType)
 
-    @langkit_property(public=True, return_type=Symbol)
-    def sym(sym=Symbol):
+    @langkit_property(public=True, return_type=SymbolType)
+    def sym(sym=SymbolType):
         return sym
 
 

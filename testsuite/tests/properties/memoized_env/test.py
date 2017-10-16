@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, T, Token as TokenType
+from langkit.dsl import ASTNode, Field, T, TokenType
 from langkit.envs import EnvSpec, add_env, add_to_env
 from langkit.expressions import Self, langkit_property
 from langkit.parsers import Grammar, List, Row, Tok

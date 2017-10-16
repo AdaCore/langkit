@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, Token as TokenType
+from langkit.dsl import ASTNode, Field, TokenType
 from langkit.parsers import Grammar, Tok
 
 from lexer_example import Token

@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, LongType, Symbol
+from langkit.dsl import ASTNode, Field, LongType, SymbolType
 from langkit.expressions import Property, langkit_property, AbstractKind
 from langkit.parsers import Grammar, Row
 
@@ -25,7 +25,7 @@ class BarCode(FooNode):
 
 
 class BarNode(BarCode):
-    base_prop = Property(lambda x=Symbol: 12)
+    base_prop = Property(lambda x=SymbolType: 12)
 
 
 grammar = Grammar('main_rule')

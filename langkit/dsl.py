@@ -969,14 +969,14 @@ class LongType(_BuiltinType):
     _name = names.Name('Long_Type')
 
 
-class Symbol(_BuiltinType):
+class SymbolType(_BuiltinType):
     """
     Type for symbol values (canonicalized names).
     """
     _name = names.Name('Symbol_Type')
 
 
-class Token(_BuiltinType):
+class TokenType(_BuiltinType):
     """
     Type for token values, as found in an analysis unit's token data handler.
     """

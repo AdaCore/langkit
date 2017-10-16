@@ -7,11 +7,11 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, Token, synthetic
+from langkit.dsl import ASTNode, Field, TokenType, synthetic
 from langkit.expressions import New, Self, langkit_property
 from langkit.parsers import Grammar, List, Row, Tok
 
-from lexer_example import Token as LexToken
+from lexer_example import Token
 from utils import build_and_run
 
 
@@ -28,7 +28,7 @@ class Literal(FooNode):
 
 @synthetic
 class SynthNode(FooNode):
-    name = Field(type=Token)
+    name = Field(type=TokenType)
     items = Field(type=Literal.list)
 
 
@@ -49,10 +49,10 @@ foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=foo_grammar.list_rule,
     list_rule=Row('(',
-                  Tok(LexToken.Identifier, keep=True),
+                  Tok(Token.Identifier, keep=True),
                   List(foo_grammar.list_item, sep=','),
                   ')') ^ LiteralSequence,
-    list_item=Row(Tok(LexToken.Number, keep=True)) ^ Literal,
+    list_item=Row(Tok(Token.Number, keep=True)) ^ Literal,
 )
 build_and_run(foo_grammar, 'main.py')
 print('Done')
