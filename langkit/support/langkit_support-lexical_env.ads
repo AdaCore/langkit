@@ -440,6 +440,15 @@ package Langkit_Support.Lexical_Env is
    function Hash (Env : Lexical_Env) return Hash_Type is
      (Hash_Type'Mod (To_Integer (Env.all'Address)));
 
+   function Lexical_Env_Image
+     (Self           : Lexical_Env;
+      Env_Id         : String := "";
+      Parent_Env_Id  : String := "";
+      Dump_Addresses : Boolean := False;
+      Dump_Content   : Boolean := True) return String;
+
+   function Lexical_Env_Parent_Chain (Env : Lexical_Env) return String;
+
    procedure Dump_One_Lexical_Env
      (Self           : Lexical_Env;
       Env_Id         : String := "";

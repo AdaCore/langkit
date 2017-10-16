@@ -1,10 +1,12 @@
 with Ada.Containers.Ordered_Maps;
+with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
 
+with System.Address_Image;
+
 with Langkit_Support.Array_Utils;
 with Langkit_Support.Images; use Langkit_Support.Images;
-with System.Address_Image;
 
 package body Langkit_Support.Lexical_Env is
 
@@ -985,13 +987,16 @@ package body Langkit_Support.Lexical_Env is
    -- Dump --
    ----------
 
-   procedure Dump_One_Lexical_Env
+   function Lexical_Env_Image
      (Self           : Lexical_Env;
       Env_Id         : String := "";
       Parent_Env_Id  : String := "";
       Dump_Addresses : Boolean := False;
-      Dump_Content   : Boolean := True)
+      Dump_Content   : Boolean := True) return String
    is
+
+      Result : Unbounded_String;
+
       use Sorted_Envs;
 
       function Short_Image
@@ -1020,7 +1025,7 @@ package body Langkit_Support.Lexical_Env is
          if First_Arg then
             First_Arg := False;
          else
-            Put (", ");
+            Append (Result, ", ");
          end if;
       end New_Arg;
 
@@ -1039,18 +1044,20 @@ package body Langkit_Support.Lexical_Env is
             begin
                if Env /= Empty_Env then
                   if Is_First then
-                     Put_Line ("    " & Name & ":");
+                     Append (Result, "    " & Name & ":" & ASCII.LF);
                      Is_First := False;
                   end if;
-                  Put ("      ");
+                  Append (Result, "      ");
                   if R.Getter.Dynamic then
-                     Put (Short_Image (R.Getter.Node) & ": ");
+                     Append (Result, Short_Image (R.Getter.Node) & ": ");
                   end if;
 
-                  Dump_One_Lexical_Env (Self           => Env,
+                  Append
+                    (Result,
+                     Lexical_Env_Image (Self           => Env,
                                         Dump_Addresses => Dump_Addresses,
-                                        Dump_Content   => False);
-                  New_Line;
+                                        Dump_Content   => False));
+                  Append (Result, ASCII.LF);
                   Dec_Ref (Env);
                end if;
             end;
@@ -1059,50 +1066,108 @@ package body Langkit_Support.Lexical_Env is
 
    begin
       if Env_Id'Length /= 0 then
-         Put (Env_Id & " = ");
+         Append (Result, Env_Id & " = ");
       end if;
-      Put ("LexEnv(");
+      Append (Result, "LexEnv(");
       if Self = Empty_Env then
          New_Arg;
-         Put ("Empty");
+         Append (Result, "Empty");
       end if;
       if Self.Ref_Count /= No_Refcount then
          New_Arg;
-         Put ("Synthetic");
+         Append (Result, "Synthetic");
       end if;
       if Parent_Env_Id'Length > 0 then
          New_Arg;
-         Put ("Parent=" & (if Self.Parent /= No_Env_Getter
-              then Parent_Env_Id else "null"));
+         Append (Result,
+                 "Parent="
+                 & (if Self.Parent /= No_Env_Getter
+                    then Parent_Env_Id else "null"));
       end if;
       if Self.Node /= No_Element then
          New_Arg;
-         Put ("Node=" & Image (Element_Image (Self.Node, False)));
+         Append (Result, "Node=" & Image (Element_Image (Self.Node, False)));
       end if;
       if Dump_Addresses then
          New_Arg;
-         Put ("0x" & System.Address_Image (Self.all'Address));
+         Append (Result, "0x" & System.Address_Image (Self.all'Address));
       end if;
-      Put (")");
+      Append (Result, ")");
+
       if not Dump_Content then
-         return;
+         return To_String (Result);
       end if;
-      Put_Line (":");
+      Append (Result, ":" & ASCII.LF);
 
       Dump_Referenced ("Referenced", Self.Referenced_Envs);
 
       if Self.Env = null then
-         Put_Line ("    <null>");
+         Append (Result, "    <null>" & ASCII.LF);
       elsif Self.Env.Is_Empty then
-         Put_Line ("    <empty>");
+         Append (Result, "    <empty>" & ASCII.LF);
       else
          for El in To_Sorted_Env (Self.Env.all).Iterate loop
-            Put ("    ");
-            Put_Line (Langkit_Support.Text.Image (Key (El).all) & ": "
-                      & Image (Element (El)));
+            Append (Result, "    ");
+            Append
+              (Result,
+               Langkit_Support.Text.Image (Key (El).all) & ": "
+               & Image (Element (El))
+               & ASCII.LF);
          end loop;
       end if;
-      New_Line;
+
+      return To_String (Result);
+   end Lexical_Env_Image;
+
+   -----------------------------------
+   -- Dump_Lexical_Env_Parent_Chain --
+   -----------------------------------
+
+   function Lexical_Env_Parent_Chain
+     (Env : Lexical_Env) return String
+   is
+      Id     : Positive := 1;
+      E      : Lexical_Env := Env;
+      Result : Unbounded_String;
+   begin
+
+      if E = null then
+         Append (Result, "<null>" & ASCII.LF);
+      end if;
+
+      while E /= null loop
+         declare
+            Id_Str : constant String := '@' & Stripped_Image (Id);
+         begin
+            Append
+              (Result,
+               Lexical_Env_Image
+                 (Self           => E,
+                  Env_Id         => Id_Str,
+                  Parent_Env_Id  => '@' & Stripped_Image (Id + 1),
+                  Dump_Addresses => True));
+         end;
+         Id := Id + 1;
+         E := Get_Env (E.Parent);
+      end loop;
+      return To_String (Result);
+   end Lexical_Env_Parent_Chain;
+
+   --------------------------
+   -- Dump_One_Lexical_Env --
+   --------------------------
+
+   procedure Dump_One_Lexical_Env
+     (Self           : Lexical_Env;
+      Env_Id         : String := "";
+      Parent_Env_Id  : String := "";
+      Dump_Addresses : Boolean := False;
+      Dump_Content   : Boolean := True)
+   is
+   begin
+      Put_Line
+        (Lexical_Env_Image
+           (Self, Env_Id, Parent_Env_Id, Dump_Addresses, Dump_Content));
    end Dump_One_Lexical_Env;
 
    -----------------------------------
@@ -1110,25 +1175,8 @@ package body Langkit_Support.Lexical_Env is
    -----------------------------------
 
    procedure Dump_Lexical_Env_Parent_Chain (Env : Lexical_Env) is
-      Id : Positive := 1;
-      E  : Lexical_Env := Env;
    begin
-      if E = null then
-         Put_Line ("<null>");
-      end if;
-
-      while E /= null loop
-         declare
-            Id_Str : constant String := '@' & Stripped_Image (Id);
-         begin
-            Dump_One_Lexical_Env
-              (Self           => E,
-               Env_Id         => Id_Str,
-               Parent_Env_Id  => '@' & Stripped_Image (Id + 1),
-               Dump_Addresses => True);
-         end;
-         Id := Id + 1;
-         E := Get_Env (E.Parent);
-      end loop;
+      Put_Line (Lexical_Env_Parent_Chain (Env));
    end Dump_Lexical_Env_Parent_Chain;
+
 end Langkit_Support.Lexical_Env;
