@@ -5,8 +5,8 @@ from itertools import izip_longest
 import funcy
 
 from langkit import names
-from langkit.compiled_types import (Argument, T, bool_type, equation_type,
-                                    logic_var_type, no_compiled_type)
+from langkit.compiled_types import (Argument, T, equation_type, logic_var_type,
+                                    no_compiled_type)
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable, LiteralExpr,
@@ -199,7 +199,7 @@ class Bind(AbstractExpression):
         if self.eq_prop:
             args = self.eq_prop.natural_arguments
             check_multiple([
-                (self.eq_prop.type == bool_type,
+                (self.eq_prop.type == T.BoolType,
                  'Equality property must return boolean'),
 
                 (self.eq_prop.struct.matches(T.root_node),
@@ -412,7 +412,7 @@ class Predicate(AbstractExpression):
 
     def construct(self):
         check_multiple([
-            (self.pred_property.type.matches(bool_type),
+            (self.pred_property.type.matches(T.BoolType),
              'Predicate property must return a boolean, got {}'.format(
                  self.pred_property.type.dsl_name
             )),
@@ -537,7 +537,7 @@ def get_value(self, logic_var):
 
     return If.Expr(
         cond=CallExpr('Is_Logic_Var_Defined', 'Eq_Node.Refs.Is_Defined',
-                      bool_type, [logic_var_expr]),
+                      T.BoolType, [logic_var_expr]),
         then=CallExpr('Eq_Solution', 'Eq_Node.Refs.Get_Value', rtype,
                       [logic_var_ref]),
         else_then=NullExpr(T.root_node.entity),
@@ -563,7 +563,7 @@ def solve(self, equation):
 
     :param AbstractExpression equation: The equation to solve.
     """
-    return CallExpr('Solve_Success', 'Solve', bool_type,
+    return CallExpr('Solve_Success', 'Solve', T.BoolType,
                     [construct(equation, equation_type)],
                     abstract_expr=self)
 

@@ -3,13 +3,12 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import (BuiltinField, Field, UserField, bool_type,
-                                    resolve_type)
+from langkit.compiled_types import BuiltinField, Field, UserField, resolve_type
 from langkit.diagnostics import Context, Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
     ComputingExpr, DynamicVariable, Let, NullCheckExpr, NullExpr, PropertyDef,
-    ResolvedExpression, SavedExpr, SequenceExpr, UnreachableExpr, attr_call,
+    ResolvedExpression, SavedExpr, SequenceExpr, T, UnreachableExpr, attr_call,
     attr_expr, construct, dsl_document, render
 )
 from langkit.expressions.boolean import Eq, If, Not
@@ -146,7 +145,7 @@ class IsNull(AbstractExpression):
             'Is_Null',
             '{} = null'.format('{}.El'
                                if cexpr.type.is_entity_type else '{}'),
-            bool_type, [cexpr]
+            T.BoolType, [cexpr]
         )
 
     def construct(self):
@@ -785,7 +784,7 @@ class IsA(AbstractExpression):
     """
 
     class Expr(ComputingExpr):
-        static_type = bool_type
+        static_type = T.BoolType
         pretty_class_name = 'IsA'
 
         def __init__(self, expr, astnodes, abstract_expr=None):

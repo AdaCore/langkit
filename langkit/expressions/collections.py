@@ -6,14 +6,13 @@ from itertools import count
 import types
 
 from langkit import names
-from langkit.compiled_types import (ArrayType, get_context, bool_type,
-                                    long_type)
+from langkit.compiled_types import ArrayType, get_context, long_type
 from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, CallExpr, ComputingExpr, PropertyDef,
-    SequenceExpr, UncheckedCastExpr, attr_expr, attr_call, auto_attr_custom,
+    SequenceExpr, T, UncheckedCastExpr, attr_expr, attr_call, auto_attr_custom,
     auto_attr, construct, render, unsugar
 )
 from langkit.expressions.envs import make_as_entity
@@ -499,10 +498,10 @@ class Map(CollectionExpression):
         )
 
         with r.inner_scope.use():
-            filter_expr = (construct(self.filter_expr, bool_type)
+            filter_expr = (construct(self.filter_expr, T.BoolType)
                            if self.filter_expr else None)
 
-            take_while_expr = (construct(self.take_while_expr, bool_type)
+            take_while_expr = (construct(self.take_while_expr, T.BoolType)
                                if self.take_while_expr else None)
 
         return Map.Expr(r.element_vars, r.index_var, r.collection_expr,
@@ -556,7 +555,7 @@ class Quantifier(CollectionExpression):
     """
 
     class Expr(ComputingExpr):
-        static_type = bool_type
+        static_type = T.BoolType
         pretty_class_name = 'Quantifier'
 
         def __init__(self, kind, collection, expr, element_vars, index_var,
@@ -592,7 +591,7 @@ class Quantifier(CollectionExpression):
             self.element_vars = element_vars
             self.index_var = index_var
             self.iter_scope = iter_scope
-            self.static_type = bool_type
+            self.static_type = T.BoolType
 
             with iter_scope.parent.use():
                 super(Quantifier.Expr, self).__init__(
@@ -650,7 +649,7 @@ class Quantifier(CollectionExpression):
         r = self.construct_common()
 
         check_source_language(
-            r.inner_expr.type.matches(bool_type),
+            r.inner_expr.type.matches(T.BoolType),
             'Wrong type for expression in quantifier: expected bool,'
             ' got {}'.format(r.inner_expr.type.dsl_name)
         )

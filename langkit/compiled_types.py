@@ -109,7 +109,7 @@ def make_renderer(base_renderer=None):
             'T':                     T,
             'ada_api':               get_context().ada_api_settings,
             'capi':                  capi,
-            'bool_type':             bool_type.c_type(capi).name,
+            'bool_type':             T.BoolType.c_type(capi).name,
             'analysis_context_type': CAPIType(capi, 'analysis_context').name,
             'analysis_unit_type':    analysis_unit_type.c_type(capi).name,
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
@@ -404,7 +404,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == bool_type
+        return self == T.BoolType
 
     @property
     def is_collection(self):
@@ -2433,7 +2433,7 @@ def create_enum_node_types(cls):
     if is_bool_node:
         present_alt = cls._alternatives[0]
         prop = AbstractProperty(
-            type=bool_type, public=True,
+            type=T.BoolType, public=True,
             doc='Return whether this is an instance of {}'.format(
                 (cls._name + present_alt.name).camel
             )

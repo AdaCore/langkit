@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import langkit.compiled_types as ct
+from langkit.compiled_types import T
 from langkit.language_api import AbstractAPISettings
 from langkit.utils import dispatch_on_type
 
@@ -57,7 +58,7 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (ct.token_type, lambda _: '{}'),
             (ct.symbol_type, lambda _: '{}._wrap()'),
-            (ct.bool_type, lambda _: 'bool({{}}{})'.format(value_suffix)),
+            (T.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (ct.long_type, lambda _: '{{}}{}'.format(value_suffix)),
             (ct.EnumType, lambda _: '{}_to_str[{{}}{}]'.format(
                 type.c_type(self.c_api_settings).name,
@@ -100,7 +101,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda _: '{}._unwrap({{}})'.format(
                 ct.T.root_node.kwless_raw_name.camel
             )),
-            (ct.bool_type, lambda _: 'bool({})'),
+            (T.BoolType, lambda _: 'bool({})'),
             (ct.long_type, lambda _: 'int({})'),
             (ct.EnumType, lambda _:
                 '_unwrap_enum({{}}, str_to_{}, {})'.format(
@@ -139,7 +140,7 @@ class PythonAPISettings(AbstractAPISettings):
             return "_{}".format(name)
 
         return dispatch_on_type(type, [
-            (ct.bool_type, lambda _: ctype_type('c_uint8')),
+            (T.BoolType, lambda _: ctype_type('c_uint8')),
             (ct.long_type, lambda _: ctype_type('c_int')),
             (ct.lexical_env_type, lambda _: 'LexicalEnv._c_type'),
             (ct.logic_var_type, lambda _: 'LogicVar._c_type'),

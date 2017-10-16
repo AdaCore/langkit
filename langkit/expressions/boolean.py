@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import T, bool_type, equation_type, long_type
+from langkit.compiled_types import T, equation_type, long_type
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
@@ -54,7 +54,7 @@ class BinaryBooleanOperator(AbstractExpression):
         :rtype: IfExpr
         """
         def construct_op(op):
-            return construct(op, lambda t: t in (bool_type, equation_type),
+            return construct(op, lambda t: t in (T.BoolType, equation_type),
                              "Operands of binary logic operator must be of "
                              "boolean or equation type, got {expr_type}")
 
@@ -65,15 +65,15 @@ class BinaryBooleanOperator(AbstractExpression):
             "operator should have the same type"
         )
 
-        if lhs.type is bool_type:
+        if lhs.type is T.BoolType:
             # Boolean case
             if self.kind == self.AND:
                 then = rhs
-                else_then = LiteralExpr('False', bool_type)
+                else_then = LiteralExpr('False', T.BoolType)
             else:
-                then = LiteralExpr('True', bool_type)
+                then = LiteralExpr('True', T.BoolType)
                 else_then = rhs
-            return If.Expr(lhs, then, else_then, bool_type)
+            return If.Expr(lhs, then, else_then, T.BoolType)
 
         else:
             # Equation case
@@ -124,7 +124,7 @@ class Eq(AbstractExpression):
     def make_expr(cls, lhs, rhs, abstract_expr=None):
         return (cls.make_expr_for_entities(lhs, rhs, abstract_expr)
                 if lhs.type.is_entity_type else
-                BasicExpr('Is_Equal', '{} = {}', bool_type, [lhs, rhs],
+                BasicExpr('Is_Equal', '{} = {}', T.BoolType, [lhs, rhs],
                           abstract_expr=abstract_expr))
 
     @staticmethod
@@ -135,7 +135,7 @@ class Eq(AbstractExpression):
             lhs = Cast.Expr(lhs, T.entity)
         if rhs.type != T.entity:
             rhs = Cast.Expr(rhs, T.entity)
-        return CallExpr('Is_Equiv', 'Is_Equivalent', bool_type,
+        return CallExpr('Is_Equiv', 'Is_Equivalent', T.BoolType,
                         [lhs, rhs],
                         abstract_expr=abstract_expr)
 
@@ -239,7 +239,7 @@ class OrderingTest(AbstractExpression):
             )
 
             super(OrderingTest.Expr, self).__init__(
-                'Comp_Result', template, bool_type, [lhs, rhs],
+                'Comp_Result', template, T.BoolType, [lhs, rhs],
                 abstract_expr=abstract_expr
             )
 
@@ -354,8 +354,8 @@ class If(AbstractExpression):
         if else_then.type != rtype:
             else_then = Cast.Expr(else_then, rtype)
 
-        return If.Expr(construct(self.cond, bool_type), then, else_then, rtype,
-                       abstract_expr=self)
+        return If.Expr(construct(self.cond, T.BoolType), then, else_then,
+                       rtype, abstract_expr=self)
 
     def __repr__(self):
         return '<If>'
@@ -375,12 +375,12 @@ class Not(AbstractExpression):
         self.expr = expr
 
     def construct(self):
-        return Not.make_expr(construct(self.expr, bool_type),
+        return Not.make_expr(construct(self.expr, T.BoolType),
                              abstract_expr=self)
 
     @staticmethod
     def make_expr(expr, abstract_expr=None):
-        return BasicExpr('Not_Val', 'not ({})', bool_type, [expr],
+        return BasicExpr('Not_Val', 'not ({})', T.BoolType, [expr],
                          abstract_expr=abstract_expr)
 
     def __repr__(self):
@@ -498,7 +498,7 @@ class Then(AbstractExpression):
         # Affect default value to the fallback expression
         if self.default_val is None:
             check_source_language(
-                then_expr.type.null_allowed or then_expr.type is bool_type,
+                then_expr.type.null_allowed or then_expr.type is T.BoolType,
                 "Then expression should have a default value provided,"
                 " in cases where the provided function's return type (here"
                 " {}) does not have a default null value".format(
@@ -574,7 +574,7 @@ class Cond(AbstractExpression):
         pairs = []
         for i in range(len(self.args) // 2):
             cond = construct(
-                self.args[2 * i], bool_type,
+                self.args[2 * i], T.BoolType,
                 custom_msg='Bad condition type in Cond expression: {expected}'
                            ' expected but got {expr_type} instead'
             )

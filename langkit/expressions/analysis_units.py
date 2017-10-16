@@ -1,8 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit import names
-from langkit.compiled_types import (T, analysis_unit_kind, analysis_unit_type,
-                                    bool_type)
+from langkit.compiled_types import T, analysis_unit_kind, analysis_unit_type
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, CallExpr, FieldAccessExpr, NullCheckExpr, auto_attr,
@@ -63,7 +62,7 @@ def is_referenced_from(self, referenced_unit, base_unit):
 
     :rtype: ResolvedExpression
     """
-    return CallExpr('Is_Referenced', 'Is_Referenced_From', bool_type,
+    return CallExpr('Is_Referenced', 'Is_Referenced_From', T.BoolType,
                     [construct(referenced_unit, analysis_unit_type),
                      construct(base_unit, analysis_unit_type)],
                     abstract_expr=self)

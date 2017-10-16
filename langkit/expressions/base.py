@@ -11,9 +11,8 @@ import funcy
 from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNodeType, CompiledType, T, TypeRepo,
-    bool_type, gdb_bind_var, gdb_helper, get_context, long_type,
-    no_compiled_type, render as ct_render, resolve_type, symbol_type,
-    token_type
+    gdb_bind_var, gdb_helper, get_context, long_type, no_compiled_type,
+    render as ct_render, resolve_type, symbol_type, token_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, WarningSet, check_multiple,
@@ -1448,7 +1447,7 @@ class BooleanLiteralExpr(BindableLiteralExpr):
     def __init__(self, value, abstract_expr=None):
         self.value = value
         super(BooleanLiteralExpr, self).__init__(
-            str(value), bool_type, abstract_expr=abstract_expr
+            str(value), T.BoolType, abstract_expr=abstract_expr
         )
 
     def render_private_ada_constant(self):
@@ -2022,7 +2021,7 @@ def can_reach(self, node, from_node):
     """
     node_expr = construct(node, T.root_node)
     from_node_expr = construct(from_node, T.root_node)
-    return CallExpr('Node_Can_Reach', 'Can_Reach', bool_type,
+    return CallExpr('Node_Can_Reach', 'Can_Reach', T.BoolType,
                     [node_expr, from_node_expr], abstract_expr=self)
 
 

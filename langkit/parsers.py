@@ -31,8 +31,7 @@ import inspect
 from langkit import compiled_types, names
 from langkit.common import gen_name
 from langkit.compile_context import get_context
-from langkit.compiled_types import (ASTNodeType, T, bool_type, resolve_type,
-                                    token_type)
+from langkit.compiled_types import ASTNodeType, T, resolve_type, token_type
 from langkit.diagnostics import (
     Context, Location, check_source_language, extract_library_location,
     Severity, WarningSet
@@ -1060,7 +1059,7 @@ class Opt(Parser):
         from langkit.dsl import EnumNode
 
         if dest is None:
-            booleanize = bool_type
+            booleanize = T.BoolType
         else:
             booleanize = assert_type(dest, EnumNode)
 
@@ -1083,7 +1082,7 @@ class Opt(Parser):
     def get_type(self):
         if self._booleanize is None:
             return self.parser.get_type()
-        elif self._booleanize is bool_type:
+        elif self._booleanize is T.BoolType:
             return self._booleanize
         else:
             assert self._booleanize._type
@@ -1447,7 +1446,7 @@ class Predicate(Parser):
         self.property_ref = resolve_property(self.property_ref)
 
         check_source_language(
-            self.property_ref.type.matches(bool_type),
+            self.property_ref.type.matches(T.BoolType),
             "Property passed as predicate to Predicate parser must return"
             " a boolean"
         )

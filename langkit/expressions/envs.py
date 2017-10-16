@@ -2,8 +2,8 @@ from __future__ import absolute_import, division, print_function
 
 from langkit import names
 from langkit.compiled_types import (
-    T, bool_type, lexical_env_type, env_rebindings_type, no_compiled_type,
-    symbol_type, token_type
+    T, lexical_env_type, env_rebindings_type, no_compiled_type, symbol_type,
+    token_type
 )
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
@@ -173,7 +173,7 @@ class EnvGet(AbstractExpression):
         from_expr = (construct(self.sequential_from, T.root_node)
                      if self.sequential else None)
 
-        recursive_expr = construct(self.recursive, bool_type)
+        recursive_expr = construct(self.recursive, T.BoolType)
 
         if self.filter_prop:
             check_source_language(
@@ -187,7 +187,7 @@ class EnvGet(AbstractExpression):
                 ' environment'
             )
             check_source_language(
-                self.filter_prop.type == bool_type,
+                self.filter_prop.type == T.BoolType,
                 'filter_prop must return a boolean (got'
                 ' {})'.format(self.filter_prop.type.dsl_name)
             )
@@ -265,7 +265,7 @@ def is_visible_from(self, referenced_env, base_env):
     :param AbstractExpression referenced_env: The environment referenced
         from base_env, for which we want to check visibility.
     """
-    return CallExpr('Is_Visible', 'Is_Visible_From', bool_type,
+    return CallExpr('Is_Visible', 'Is_Visible_From', T.BoolType,
                     [construct(referenced_env, lexical_env_type),
                      construct(base_env, lexical_env_type)],
                     abstract_expr=self)
