@@ -31,7 +31,7 @@ import inspect
 from langkit import compiled_types, names
 from langkit.common import gen_name
 from langkit.compile_context import get_context
-from langkit.compiled_types import ASTNodeType, T, resolve_type, token_type
+from langkit.compiled_types import ASTNodeType, T, resolve_type
 from langkit.diagnostics import (
     Context, Location, check_source_language, extract_library_location,
     Severity, WarningSet
@@ -376,7 +376,7 @@ class Parser(object):
 
     def init_vars(self, pos_var=None, res_var=None):
         self.pos_var = (pos_var or VarDef(
-            "{}_pos".format(self.__class__.__name__.lower()), token_type
+            "{}_pos".format(self.__class__.__name__.lower()), T.TokenType
         ))
 
         self.res_var = (res_var or VarDef(
@@ -536,7 +536,7 @@ class Parser(object):
         context.fns.add(self)
 
         with add_var_context() as var_context:
-            pos_var = VarDef("pos", token_type, create=False)
+            pos_var = VarDef("pos", T.TokenType, create=False)
             self.traverse_create_vars(pos_var)
             t_env = {'parser': self,
                      'code': self.generate_code(),
@@ -654,7 +654,7 @@ class Tok(Parser):
         self.keep = keep
 
     def get_type(self):
-        return token_type
+        return T.TokenType
 
     def create_vars_after(self, start_pos):
         self.init_vars()
@@ -964,7 +964,7 @@ class List(Parser):
             )
 
     def create_vars_before(self):
-        self.cpos = VarDef("lst_cpos", token_type)
+        self.cpos = VarDef("lst_cpos", T.TokenType)
         self.tmplist = VarDef('tmp_list', 'Free_Parse_List')
         return self.cpos
 

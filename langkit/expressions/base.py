@@ -12,7 +12,7 @@ from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNodeType, CompiledType, T, TypeRepo,
     gdb_bind_var, gdb_helper, get_context, no_compiled_type,
-    render as ct_render, resolve_type, symbol_type, token_type
+    render as ct_render, resolve_type, symbol_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, WarningSet, check_multiple,
@@ -2095,7 +2095,7 @@ class GetSymbol(AbstractExpression):
 
         :rtype: CallExpr
         """
-        token = construct(self.token_expr, token_type)
+        token = construct(self.token_expr, T.TokenType)
         return self.construct_static(token, abstract_expr=self)
 
     @staticmethod

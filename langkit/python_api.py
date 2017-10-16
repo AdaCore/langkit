@@ -55,7 +55,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.EntityType, lambda _: '{}._wrap({{}})'.format(
                 ct.T.root_node.kwless_raw_name.camel
             )),
-            (ct.token_type, lambda _: '{}'),
+            (T.TokenType, lambda _: '{}'),
             (ct.symbol_type, lambda _: '{}._wrap()'),
             (T.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (T.LongType, lambda _: '{{}}{}'.format(value_suffix)),
@@ -134,7 +134,7 @@ class PythonAPISettings(AbstractAPISettings):
             (T.BoolType, lambda _: ctype_type('c_uint8')),
             (T.LongType, lambda _: ctype_type('c_int')),
             (T.EnvRebindingsType, lambda _: 'EnvRebindings._c_type'),
-            (ct.token_type, lambda _: 'Token'),
+            (T.TokenType, lambda _: 'Token'),
             (ct.symbol_type, lambda _: wrapped_type('text')),
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),
             (T.AnalysisUnitKind, lambda _: ctype_type('c_uint')),

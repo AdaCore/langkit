@@ -482,7 +482,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == token_type
+        return self == T.TokenType
 
     @property
     def element_type(self):
@@ -2172,12 +2172,12 @@ class ASTNodeType(BaseStructType):
                     ' children.'
             )),
             ('token_start', PropertyDef(
-                expr=None, prefix=None, type=token_type,
+                expr=None, prefix=None, type=T.TokenType,
                 public=True, external=True, uses_entity_info=False,
                 doc='Return the first token used to parse this node.'
             )),
             ('token_end', PropertyDef(
-                expr=None, prefix=None, type=token_type,
+                expr=None, prefix=None, type=T.TokenType,
                 public=True, external=True, uses_entity_info=False,
                 doc='Return the last token used to parse this node.'
             )),
