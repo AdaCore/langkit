@@ -130,7 +130,7 @@ def make_renderer(base_renderer=None):
             'token_type':            CAPIType(capi, 'token').name,
             'sloc_type':             CAPIType(capi, 'source_location').name,
             'sloc_range_type':
-                source_location_range_type.c_type(capi).name,
+                T.SourceLocationRange.c_type(capi).name,
             'text_type':             CAPIType(capi, 'text').name,
             'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
             'exception_type':        CAPIType(capi, 'exception').name,
