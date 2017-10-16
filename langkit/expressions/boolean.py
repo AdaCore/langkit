@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import T, equation_type, long_type
+from langkit.compiled_types import T, long_type
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
@@ -54,7 +54,7 @@ class BinaryBooleanOperator(AbstractExpression):
         :rtype: IfExpr
         """
         def construct_op(op):
-            return construct(op, lambda t: t in (T.BoolType, equation_type),
+            return construct(op, lambda t: t in (T.BoolType, T.EquationType),
                              "Operands of binary logic operator must be of "
                              "boolean or equation type, got {expr_type}")
 
@@ -80,7 +80,7 @@ class BinaryBooleanOperator(AbstractExpression):
             kind_name = self.kind.capitalize()
             return CallExpr(
                 '{}_Pred'.format(kind_name), 'Logic_{}'.format(kind_name),
-                equation_type, [lhs, rhs],
+                T.EquationType, [lhs, rhs],
                 abstract_expr=self
             )
 

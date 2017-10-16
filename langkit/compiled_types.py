@@ -437,7 +437,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == equation_type
+        return self == T.EquationType
 
     @property
     def is_lexical_env_type(self):

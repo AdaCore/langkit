@@ -5,7 +5,7 @@ from itertools import izip_longest
 import funcy
 
 from langkit import names
-from langkit.compiled_types import Argument, T, equation_type, no_compiled_type
+from langkit.compiled_types import Argument, T, no_compiled_type
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable, LiteralExpr,
@@ -82,7 +82,7 @@ class Bind(AbstractExpression):
             super(Bind.Expr, self).__init__(
                 'Bind_Result',
                 'Bind_{}_{}.Create'.format(cprop_uid, eprop_uid),
-                equation_type, constructor_args,
+                T.EquationType, constructor_args,
                 abstract_expr=abstract_expr
             )
 
@@ -271,7 +271,7 @@ class Bind(AbstractExpression):
 
 
 class DomainExpr(ComputingExpr):
-    static_type = equation_type
+    static_type = T.EquationType
 
     def __init__(self, domain, logic_var_expr, abstract_expr=None):
         self.domain = domain
@@ -380,7 +380,7 @@ class Predicate(AbstractExpression):
 
             super(Predicate.Expr, self).__init__(
                 'Pred', '{}_Pred.Create'.format(pred_id),
-                equation_type, logic_var_exprs,
+                T.EquationType, logic_var_exprs,
                 abstract_expr=abstract_expr
             )
 
@@ -563,7 +563,7 @@ def solve(self, equation):
     :param AbstractExpression equation: The equation to solve.
     """
     return CallExpr('Solve_Success', 'Solve', T.BoolType,
-                    [construct(equation, equation_type)],
+                    [construct(equation, T.EquationType)],
                     abstract_expr=self)
 
 
@@ -594,11 +594,11 @@ class LogicBooleanOp(AbstractExpression):
         # access to record: unwrap it.
         relation_array = untyped_literal_expr(
             'Relation_Array ({}.Items)',
-            [construct(self.equation_array, equation_type.array)]
+            [construct(self.equation_array, T.EquationType.array)]
         )
 
         return CallExpr('Logic_Boolean_Op', 'Logic_{}'.format(self.kind_name),
-                        equation_type, [relation_array],
+                        T.EquationType, [relation_array],
                         abstract_expr=self)
 
     def __repr__(self):
@@ -637,7 +637,7 @@ class LogicTrue(AbstractExpression):
         super(LogicTrue, self).__init__()
 
     def construct(self):
-        return CallExpr('Logic_True', 'True_Rel', equation_type, [])
+        return CallExpr('Logic_True', 'True_Rel', T.EquationType, [])
 
     def __repr__(self):
         return '<LogicTrue>'
@@ -653,7 +653,7 @@ class LogicFalse(AbstractExpression):
         super(LogicFalse, self).__init__()
 
     def construct(self):
-        return CallExpr('Logic_False', 'False_Rel', equation_type, [])
+        return CallExpr('Logic_False', 'False_Rel', T.EquationType, [])
 
     def __repr__(self):
         return '<LogicFalse>'
