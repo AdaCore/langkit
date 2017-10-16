@@ -6,7 +6,7 @@ from itertools import count
 import types
 
 from langkit import names
-from langkit.compiled_types import ArrayType, get_context, long_type
+from langkit.compiled_types import ArrayType, get_context
 from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
@@ -156,7 +156,7 @@ class CollectionExpression(AbstractExpression):
         )
         if self.requires_index:
             self.index_var = AbstractVariable(
-                names.Name('I'), type=long_type,
+                names.Name('I'), type=T.LongType,
                 source_name=names.Name.from_lower(argspec.args[index_var_pos])
             )
             expr = self.expr_fn(self.index_var, self.element_var)
@@ -679,7 +679,7 @@ def collection_get(self, collection, index, or_null):
     """
     # index yields a 0-based index and all the Get primitives expect 0-based
     # indexes, so there is no need to fiddle indexes here.
-    index_expr = construct(index, long_type)
+    index_expr = construct(index, T.LongType)
 
     coll_expr = construct(collection)
     as_entity = coll_expr.type.is_entity_type
@@ -712,7 +712,7 @@ def length(self, collection):
     """
     Compute the length of `collection`.
     """
-    return CallExpr('Len', 'Length', long_type,
+    return CallExpr('Len', 'Length', T.LongType,
                     [construct(collection, lambda t: t.is_collection)],
                     abstract_expr=self)
 

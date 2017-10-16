@@ -58,7 +58,7 @@ class PythonAPISettings(AbstractAPISettings):
             (ct.token_type, lambda _: '{}'),
             (ct.symbol_type, lambda _: '{}._wrap()'),
             (T.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
-            (ct.long_type, lambda _: '{{}}{}'.format(value_suffix)),
+            (T.LongType, lambda _: '{{}}{}'.format(value_suffix)),
             (ct.EnumType, lambda _: '{}_to_str[{{}}{}]'.format(
                 type.c_type(self.c_api_settings).name,
                 value_suffix,
@@ -96,7 +96,7 @@ class PythonAPISettings(AbstractAPISettings):
                 ct.T.root_node.kwless_raw_name.camel
             )),
             (T.BoolType, lambda _: 'bool({})'),
-            (ct.long_type, lambda _: 'int({})'),
+            (T.LongType, lambda _: 'int({})'),
             (ct.EnumType, lambda _:
                 '_unwrap_enum({{}}, str_to_{}, {})'.format(
                     type.c_type(self.c_api_settings).name,
@@ -132,7 +132,7 @@ class PythonAPISettings(AbstractAPISettings):
 
         return dispatch_on_type(type, [
             (T.BoolType, lambda _: ctype_type('c_uint8')),
-            (ct.long_type, lambda _: ctype_type('c_int')),
+            (T.LongType, lambda _: ctype_type('c_int')),
             (T.EnvRebindingsType, lambda _: 'EnvRebindings._c_type'),
             (ct.token_type, lambda _: 'Token'),
             (ct.symbol_type, lambda _: wrapped_type('text')),

@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import T, long_type
+from langkit.compiled_types import T
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope, CallExpr,
@@ -268,7 +268,7 @@ class OrderingTest(AbstractExpression):
         :rtype: OrderingTest.Expr
         """
         return OrderingTest.Expr(self.operator, *[
-            construct(e, long_type,
+            construct(e, T.LongType,
                       "Comparisons only work on scalars, not {expr_type}")
             for e in (self.lhs, self.rhs)
         ])

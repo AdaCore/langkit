@@ -11,7 +11,7 @@ import funcy
 from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNodeType, CompiledType, T, TypeRepo,
-    gdb_bind_var, gdb_helper, get_context, long_type, no_compiled_type,
+    gdb_bind_var, gdb_helper, get_context, no_compiled_type,
     render as ct_render, resolve_type, symbol_type, token_type
 )
 from langkit.diagnostics import (
@@ -1465,7 +1465,7 @@ class IntegerLiteralExpr(BindableLiteralExpr):
     def __init__(self, value, abstract_expr=None):
         self.value = value
         super(IntegerLiteralExpr, self).__init__(
-            str(value), long_type, abstract_expr=abstract_expr
+            str(value), T.LongType, abstract_expr=abstract_expr
         )
 
     def render_private_ada_constant(self):
@@ -3930,9 +3930,9 @@ class LocalVars(object):
         """
         Create a local variables in templates::
 
-            from langkit.compiled_types import LocalVars
+            from langkit.compiled_types import LocalVars, T
             vars = LocalVars()
-            var = vars.create('Index', langkit.compiled_types.long_type)
+            var = vars.create('Index', T.LongType)
 
         The names are *always* unique, so you can pass several time the same
         string as a name, and create will handle creating a name that is unique
@@ -4107,11 +4107,11 @@ class Arithmetic(AbstractExpression):
         )
 
         check_source_language(
-            l.type in (symbol_type, long_type),
+            l.type in (symbol_type, T.LongType),
             "Invalid type for {}: {}".format(self.op, l.type.dsl_name)
         )
 
-        return BasicExpr('Arith_Result', '({} %s {})' % self.op, long_type,
+        return BasicExpr('Arith_Result', '({} %s {})' % self.op, T.LongType,
                          [l, r],
                          abstract_expr=self)
 

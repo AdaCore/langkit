@@ -464,7 +464,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == long_type
+        return self == T.LongType
 
     @property
     def is_symbol_type(self):
@@ -2182,7 +2182,7 @@ class ASTNodeType(BaseStructType):
                 doc='Return the last token used to parse this node.'
             )),
             ('child_index', BuiltinField(
-                type=long_type,
+                type=T.LongType,
                 doc="Return the 0-based index for Node in its parent's"
                     " children."
             )),
