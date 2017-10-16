@@ -807,10 +807,6 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  replace that by an array of parsers.
    end record;
 
-   procedure Destroy (Self : in out Lex_Env_Data_Type);
-   procedure Destroy (Self : in out Lex_Env_Data);
-   --  Destroy data associated to lexical environments
-
    type Containing_Env_Element is record
       Env  : Lexical_Env;
       Key  : Symbol_Type;

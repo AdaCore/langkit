@@ -13,30 +13,15 @@
    library_private_field = lambda f: not library_public_field(f)
 %>
 
-with Ada.Containers.Hashed_Maps;
-with Ada.Finalization;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Strings.Unbounded.Hash;
 with Ada.Unchecked_Deallocation;
 
 with System;
 
-with Langkit_Support.Adalog.Abstract_Relation;
-use Langkit_Support.Adalog.Abstract_Relation;
-with Langkit_Support.Adalog.Eq_Same;
-
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
-with Langkit_Support.Bump_Ptr.Vectors;
-with Langkit_Support.Cheap_Sets;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
-with Langkit_Support.Extensions;  use Langkit_Support.Extensions;
-with Langkit_Support.Iterators;
-with Langkit_Support.Lexical_Env;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
 with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
 with Langkit_Support.Text;        use Langkit_Support.Text;
-with Langkit_Support.Tree_Traversal_Iterator;
-with Langkit_Support.Vectors;
 
 limited private with ${ada_lib_name}.Analysis.Implementation;
 
@@ -118,10 +103,12 @@ package ${ada_lib_name}.Analysis is
    function Image (Node : ${root_entity.api_name}'Class) return String;
    --  Like Short_Image, also including its rebinding metadata
 
+   pragma Warnings (Off, "defined after private extension");
    % for e in ctx.entity_types:
       function As_${e.el_type.kwless_raw_name}
         (Node : ${root_entity.api_name}'Class) return ${e.api_name};
    % endfor
+   pragma Warnings (On, "defined after private extension");
 
    --------------------
    -- Unit providers --
@@ -279,8 +266,10 @@ package ${ada_lib_name}.Analysis is
    function Diagnostics (Unit : Analysis_Unit) return Diagnostics_Array;
    ${ada_doc('langkit.unit_diagnostics', 3)}
 
+   pragma Warnings (Off, "defined after private extension");
    function Root (Unit : Analysis_Unit) return ${root_entity.api_name};
    ${ada_doc('langkit.unit_root', 3)}
+   pragma Warnings (On, "defined after private extension");
 
    function First_Token (Unit : Analysis_Unit) return Token_Type;
    ${ada_doc('langkit.unit_first_token', 3)}
@@ -472,6 +461,7 @@ package ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Analysis_Unit;
    ${ada_doc('langkit.node_unit', 3)}
 
+   pragma Warnings (Off, "defined after private extension");
    % for e in ctx.entity_types:
 
       % for f in e.el_type.get_parse_fields( \
@@ -489,6 +479,7 @@ package ${ada_lib_name}.Analysis is
       % endfor
 
    % endfor
+   pragma Warnings (On, "defined after private extension");
 
    -------------------------------
    -- Tree traversal operations --
@@ -507,6 +498,7 @@ package ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Natural;
    --  Return the index of the last child Node has, or 0 if there is no child
 
+   pragma Warnings (Off, "defined after private extension");
    procedure Get_Child
      (Node            : ${root_entity.api_name}'Class;
       Index           : Positive;
@@ -521,6 +513,7 @@ package ${ada_lib_name}.Analysis is
       Index : Positive)
       return ${root_entity.api_name};
    --  Return the Index'th child of Node, or null if Node has no such child
+   pragma Warnings (On, "defined after private extension");
 
    type Visit_Status is (Into, Over, Stop);
    --  Helper type to control the AST node traversal process. See Traverse.
@@ -593,6 +586,7 @@ package ${ada_lib_name}.Analysis is
    --
    --  TODO??? Document the Snap formal.
 
+   pragma Warnings (Off, "defined after private extension");
    function Lookup
      (Node : ${root_entity.api_name}'Class;
       Sloc : Source_Location;
@@ -601,6 +595,7 @@ package ${ada_lib_name}.Analysis is
    --  it, or null if no such node was found.
    --
    --  TODO??? Document the Snap formal.
+   pragma Warnings (On, "defined after private extension");
 
    -----------------------
    -- Lexical utilities --

@@ -11,22 +11,18 @@
 
 with Ada.Containers;                  use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
-with Ada.Containers.Ordered_Maps;
 with Ada.Containers.Vectors;
 with Ada.Exceptions;
+with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
-with System.Address_Image;
-with System.Storage_Elements;    use System.Storage_Elements;
-
 with Langkit_Support.Array_Utils;
-with Langkit_Support.Images;  use Langkit_Support.Images;
-with Langkit_Support.Relative_Get;
-with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
-with Langkit_Support.Text;    use Langkit_Support.Text;
+with Langkit_Support.Images; use Langkit_Support.Images;
+with Langkit_Support.Slocs;  use Langkit_Support.Slocs;
+with Langkit_Support.Text;   use Langkit_Support.Text;
 
 pragma Warnings (Off, "referenced");
 with Langkit_Support.Adalog.Abstract_Relation;
@@ -46,9 +42,6 @@ use ${ada_lib_name}.Analysis.Implementation;
 with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;
 with ${ada_lib_name}.Lexer;
 
-%if ctx.env_hook_subprogram:
-with ${ctx.env_hook_subprogram.unit_fqn};
-%endif
 %if ctx.default_unit_provider:
 with ${ctx.default_unit_provider.unit_fqn};
 %endif
@@ -82,8 +75,9 @@ package body ${ada_lib_name}.Analysis is
    procedure Update_After_Reparse (Unit : Analysis_Unit);
    --  Update stale lexical environment data after the reparsing of Unit
 
-   ##  Make logic operations on nodes accessible
-   use Eq_Node, Eq_Node.Raw_Impl;
+   procedure Destroy (Self : in out Lex_Env_Data_Type);
+   procedure Destroy (Self : in out Lex_Env_Data);
+   --  Destroy data associated to lexical environments
 
    procedure Destroy (Unit : Analysis_Unit);
 
@@ -308,7 +302,7 @@ package body ${ada_lib_name}.Analysis is
          Ref_Count         => 1,
          AST_Root          => null,
          File_Name         => Fname,
-         Charset           => <>,
+         Charset           => To_Unbounded_String (Charset),
          TDH               => <>,
          Diagnostics       => <>,
          With_Trivia       => With_Trivia,
@@ -999,25 +993,6 @@ package body ${ada_lib_name}.Analysis is
    end Populate_Lexical_Env;
 
    ---------------------
-   -- Is_Visible_From --
-   ---------------------
-
-   function Is_Visible_From
-     (Referenced_Env, Base_Env : AST_Envs.Lexical_Env) return Boolean is
-      Referenced_Node : constant ${root_node_type_name} := Referenced_Env.Node;
-      Base_Node       : constant ${root_node_type_name} := Base_Env.Node;
-   begin
-      if Referenced_Node = null then
-         raise Property_Error with
-            "referenced environment does not belong to any analysis unit";
-      elsif Base_Node = null then
-         raise Property_Error with
-            "base environment does not belong to any analysis unit";
-      end if;
-      return Is_Referenced_From (Referenced_Node.Unit, Base_Node.Unit);
-   end Is_Visible_From;
-
-   ---------------------
    -- Has_Diagnostics --
    ---------------------
 
@@ -1200,9 +1175,6 @@ package body ${ada_lib_name}.Analysis is
          Convert (Destroy_Procedure'Address));
    end Register_Destroyable_Gen;
 
-   ${array_types.body(T.LexicalEnvType.array)}
-   ${array_types.body(T.root_node.entity.array)}
-
    -------------
    -- Destroy --
    -------------
@@ -1366,8 +1338,7 @@ package body ${ada_lib_name}.Analysis is
       end if;
 
       declare
-         use Token_Vectors, Trivia_Vectors,
-             Token_Data_Handlers.Integer_Vectors;
+         use Trivia_Vectors, Token_Data_Handlers.Integer_Vectors;
          TDH : Token_Data_Handler renames Token.TDH.all;
       begin
          if Token.Trivia = No_Token_Index then
@@ -1660,25 +1631,6 @@ package body ${ada_lib_name}.Analysis is
       end;
    end Children_With_Trivia;
 
-   ------------------------
-   -- Register_Rebinding --
-   ------------------------
-
-   procedure Register_Rebinding
-     (Node : ${root_node_type_name}; Rebinding : System.Address)
-   is
-      pragma Warnings (Off, "possible aliasing problem for type");
-      function Convert is new Ada.Unchecked_Conversion
-        (System.Address, Env_Rebindings);
-      pragma Warnings (Off, "possible aliasing problem for type");
-   begin
-      Node.Unit.Rebindings.Append (Convert (Rebinding));
-   end Register_Rebinding;
-
-   ------------------------
-   -- Address_To_Id_Maps --
-   ------------------------
-
    --  Those maps are used to give unique ids to lexical envs while pretty
    --  printing them.
 
@@ -1797,78 +1749,6 @@ package body ${ada_lib_name}.Analysis is
 
    ${struct_types.body(T.env_md)}
 
-   -------------
-   -- Combine --
-   -------------
-
-   function Combine
-     (L, R : ${T.env_md.name}) return ${T.env_md.name}
-   is
-      % if not T.env_md.get_fields():
-      pragma Unreferenced (L, R);
-      % endif
-      Ret : ${T.env_md.name} := ${T.env_md.nullexpr};
-   begin
-      % for field in T.env_md.get_fields():
-         ## For boolean fields, consolidation is a mere OR operation. For AST
-         ## nodes, we expect at least one side to be null.
-         % if field.type.is_bool_type:
-            Ret.${field.name} := L.${field.name} or R.${field.name};
-         % else:
-            if L.${field.name} = ${field.type.nullexpr} then
-               Ret.${field.name} := R.${field.name};
-            elsif R.${field.name} = ${field.type.nullexpr} then
-               Ret.${field.name} := L.${field.name};
-            else
-               raise Property_Error
-                  with "Cannot combine two non-null metadata AST nodes";
-            end if;
-         % endif
-      % endfor
-      return Ret;
-   end Combine;
-
-   ---------
-   -- Get --
-   ---------
-
-   function Get
-     (A     : AST_Envs.Entity_Array;
-      Index : Integer)
-      return Entity
-   is
-      function Length (A : AST_Envs.Entity_Array) return Natural
-      is (A'Length);
-
-      function Get
-        (A     : AST_Envs.Entity_Array;
-         Index : Integer)
-         return Entity
-      is (A (Index + 1)); --  A is 1-based but Index is 0-based
-
-      function Relative_Get is new Langkit_Support.Relative_Get
-        (Item_Type     => Entity,
-         Sequence_Type => AST_Envs.Entity_Array,
-         Length        => Length,
-         Get           => Get);
-      Result : Entity;
-   begin
-      if Relative_Get (A, Index, Result) then
-         return Result;
-      else
-         raise Property_Error with "out-of-bounds array access";
-      end if;
-   end Get;
-
-   -----------
-   -- Group --
-   -----------
-
-   function Group
-     (Envs : ${T.LexicalEnvType.array.name})
-      return ${T.LexicalEnvType.name}
-   is (Group (Envs.Items));
-
    --------------------------------
    -- Assign_Names_To_Logic_Vars --
    --------------------------------
@@ -1896,26 +1776,6 @@ package body ${ada_lib_name}.Analysis is
          end loop;
       end;
    end Assign_Names_To_Logic_Vars;
-
-   procedure Destroy_Synthetic_Node (Node : in out ${root_node_type_name});
-   --  Helper for the Register_Destroyable above
-
-   ----------------------------
-   -- Destroy_Synthetic_Node --
-   ----------------------------
-
-   procedure Destroy_Synthetic_Node (Node : in out ${root_node_type_name}) is
-      procedure Free is new Ada.Unchecked_Deallocation
-        (${root_node_value_type}'Class, ${root_node_type_name});
-   begin
-      --  Don't call Node.Destroy, as Node's children may be gone already: they
-      --  have their own destructor and there is no specified order for the
-      --  call of these destructors.
-      Node.Free_Extensions;
-      Node.Reset_Caches;
-
-      Free (Node);
-   end Destroy_Synthetic_Node;
 
    -----------
    -- Image --
@@ -2108,7 +1968,7 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class;
       Snap : Boolean := False) return Source_Location_Range is
    begin
-      return Node.Node.Sloc_Range;
+      return Node.Node.Sloc_Range (Snap);
    end Sloc_Range;
 
    -------------

@@ -10,15 +10,11 @@
 
 with Ada.Containers;                  use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
-with Ada.Containers.Ordered_Maps;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
-with System.Address_Image;
-
-with Langkit_Support.Images;  use Langkit_Support.Images;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Text;    use Langkit_Support.Text;
@@ -1331,28 +1327,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
    begin
       return Node.Node.Get_Unit;
    end Get_Unit;
-
-   -------------
-   -- Destroy --
-   -------------
-
-   procedure Destroy (Self : in out Lex_Env_Data_Type) is
-   begin
-      Self.Is_Contained_By.Destroy;
-      Self.Contains.Destroy;
-   end Destroy;
-
-   -------------
-   -- Destroy --
-   -------------
-
-   procedure Destroy (Self : in out Lex_Env_Data) is
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Lex_Env_Data_Type, Lex_Env_Data);
-   begin
-      Destroy (Self.all);
-      Free (Self);
-   end Destroy;
 
    ----------------
    -- Token_Data --
