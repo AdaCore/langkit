@@ -23,7 +23,7 @@ class FooNode(ASTNode):
 
 
 class Name(FooNode):
-    tok = Field(type=T.Token)
+    tok = Field(type=T.TokenType)
 
 
 foo_grammar = Grammar('main_rule')

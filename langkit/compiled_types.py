@@ -702,6 +702,7 @@ no_compiled_type = NoCompiledType('NoCompiledType')
 
 analysis_unit_type = CompiledType(
     'AnalysisUnit',
+    type_repo_name='AnalysisUnitType',
     exposed=True,
     nullexpr='null',
     should_emit_array_type=True,
@@ -710,12 +711,14 @@ analysis_unit_type = CompiledType(
 
 analysis_unit_kind = CompiledType(
     'UnitKind',
+    type_repo_name='AnalysisUnitKind',
     exposed=True,
     is_ptr=False,
 )
 
 lexical_env_type = CompiledType(
     'LexicalEnv',
+    type_repo_name='LexicalEnvType',
     nullexpr='Empty_Env',
     should_emit_array_type=False,
     null_allowed=True,
@@ -745,6 +748,7 @@ class LogicVarType(CompiledType):
     def __init__(self):
         super(LogicVarType, self).__init__(
             name='LogicVar',
+            type_repo_name='LogicVarType',
             nullexpr='null',
             is_ptr=False,
             has_special_storage=True,
@@ -770,6 +774,7 @@ logic_var_type = LogicVarType()
 
 equation_type = CompiledType(
     'LogicEquation',
+    type_repo_name='EquationType',
     nullexpr='Null_Logic_Equation',
     null_allowed=True,
     c_type_name='equation_type',
@@ -785,6 +790,7 @@ class EnvRebindingsType(CompiledType):
     def __init__(self):
         super(EnvRebindingsType, self).__init__(
             name='EnvRebindings',
+            type_repo_name='EnvRebindingsType',
             exposed=True,
             null_allowed=True,
             nullexpr='null',
@@ -797,6 +803,7 @@ env_rebindings_type = EnvRebindingsType()
 
 bool_type = CompiledType(
     name=get_type(bool),
+    type_repo_name='BoolType',
     exposed=True,
     is_ptr=False,
     nullexpr='false',
@@ -809,6 +816,7 @@ bool_type = CompiledType(
 
 long_type = CompiledType(
     name=get_type(long),
+    type_repo_name='LongType',
     exposed=True,
     is_ptr=False,
     nullexpr='0',
@@ -832,13 +840,13 @@ class TokenType(CompiledType):
     def __init__(self):
         super(TokenType, self).__init__(
             name='TokenType',
+            type_repo_name='TokenType',
             exposed=True,
             is_ptr=False,
             nullexpr='No_Token',
             is_ada_record=True,
             has_special_storage=True,
-            c_type_name='token',
-            type_repo_name='Token'
+            c_type_name='token'
         )
 
     @property
@@ -859,6 +867,7 @@ token_type = TokenType()
 
 symbol_type = CompiledType(
     'SymbolType',
+    type_repo_name='SymbolType',
     exposed=True,
     nullexpr='null',
     null_allowed=True,

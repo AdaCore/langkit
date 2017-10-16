@@ -68,7 +68,7 @@ def bad_name():
 def bad_type():
     @env_metadata
     class Metadata(Struct):
-        fld = UserField(type=T.AnalysisUnit)
+        fld = UserField(type=T.AnalysisUnitType)
 
 
 run(not_a_struct)

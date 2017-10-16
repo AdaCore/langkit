@@ -990,7 +990,7 @@ class ${root_astnode_name}(object):
 
         metadata = ${pyapi.wrap_value('c_value.info.md', T.env_md)}
         rebindings = ${(pyapi.wrap_value('c_value.info.rebindings',
-                                         T.EnvRebindings))}
+                                         T.EnvRebindingsType))}
 
         # Pick the right subclass to materialize this node in Python
         c_entity = ${c_entity}()

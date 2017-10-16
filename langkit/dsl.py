@@ -968,7 +968,7 @@ class Symbol(_BuiltinType):
     """
     Type for symbol values (canonicalized names).
     """
-    _name = names.Name('Symbol')
+    _name = names.Name('Symbol_Type')
     _type = _internal_types.symbol_type
 
 
@@ -976,5 +976,5 @@ class Token(_BuiltinType):
     """
     Type for token values, as found in an analysis unit's token data handler.
     """
-    _name = names.Name('Token')
+    _name = names.Name('Token_Type')
     _type = _internal_types.token_type

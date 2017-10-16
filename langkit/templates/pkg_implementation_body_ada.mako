@@ -119,7 +119,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Node.Unit;
    end Get_Unit;
 
-   ${array_types.body(T.LexicalEnv.array)}
+   ${array_types.body(T.LexicalEnvType.array)}
    ${array_types.body(T.root_node.entity.array)}
 
    function Lookup_Internal
@@ -1223,8 +1223,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -----------
 
    function Group
-     (Envs : ${T.LexicalEnv.array.name})
-      return ${T.LexicalEnv.name}
+     (Envs : ${T.LexicalEnvType.array.name})
+      return ${T.LexicalEnvType.name}
    is (Group (Envs.Items));
 
    % for astnode in ctx.astnode_types:

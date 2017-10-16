@@ -29,7 +29,7 @@ class Metadata(Struct):
 
 
 class Name(FooNode):
-    tok = Field(type=T.Token)
+    tok = Field(type=T.TokenType)
 
     sym = Property(Self.tok.symbol, type=T.SymbolType)
     resolve = Property(Self.parent.node_env.get(Self.sym).at(0),
