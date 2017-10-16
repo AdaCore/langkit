@@ -110,6 +110,7 @@ package ${ada_lib_name}.Analysis is
 
    function Short_Image
      (Node : ${root_entity.api_name}'Class) return Text_Type;
+   function Short_Image (Node : ${root_entity.api_name}'Class) return String;
    --  Return a short string describing Node, or "None" if Node.Is_Null is
    --  true.
 

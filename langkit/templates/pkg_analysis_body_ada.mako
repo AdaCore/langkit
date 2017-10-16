@@ -2543,6 +2543,9 @@ package body ${ada_lib_name}.Analysis is
      (Node : ${root_entity.api_name}'Class) return Text_Type
    is (if Node.Is_Null then "None" else Node.Node.Short_Image);
 
+   function Short_Image (Node : ${root_entity.api_name}'Class) return String is
+     (Image (Node.Short_Image));
+
    -----------
    -- Image --
    -----------
