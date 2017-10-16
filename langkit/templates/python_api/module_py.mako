@@ -1086,6 +1086,13 @@ class _Extension(object):
     def c_handle(self):
         return self._c_handle
 
+    @classmethod
+    def unwrap(cls, value):
+        if value is None:
+            return None
+        assert isinstance(value, cls)
+        return value.c_handle
+
 
 class _ASTNodeExtension(_Extension):
 
