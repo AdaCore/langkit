@@ -104,6 +104,18 @@ class ${type_name}(${base_cls}):
         pass
         % endif
 
+    def __eq__(self, other):
+        if not isinstance(other, ${type_name}):
+            return False
+        % for f in field_names:
+        if self._${f} != other._${f}:
+            return False
+        % endfor
+        return True
+
+    def __ne__(self, other):
+        return not (self == other)
+
     % for field in cls.get_fields():
 
     @property
