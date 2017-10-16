@@ -2663,8 +2663,7 @@ def resolve_type(typeref):
         result = typeref.get()
 
     elif issubtype(typeref, DSLType):
-        assert typeref._type
-        result = typeref._type
+        result = typeref._resolve()
 
     elif isinstance(typeref, EnumNode.Alternative):
         result = typeref.type

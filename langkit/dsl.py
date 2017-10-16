@@ -1,9 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
-import langkit.compiled_types as _internal_types
 from langkit.compiled_types import (
-    EnumType as _EnumType, ASTNodeType, AbstractNodeData, Field as _Field,
-    StructType, UserField as _UserField, T
+    EnumType as _EnumType, ASTNodeType, AbstractNodeData,
+    CompiledTypeMetaclass, Field as _Field, StructType,
+    UserField as _UserField, T
 )
 from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
@@ -33,7 +33,7 @@ class DSLType(object):
         """
         Return the array type whose element type is `cls`.
         """
-        return T.Defer(lambda: cls._type.array,
+        return T.Defer(lambda: cls._resolve().array,
                        '{}.array'.format(cls._name.camel))
 
     @classmethod
@@ -50,6 +50,19 @@ class DSLType(object):
         dct['_name'] = names.Name.from_camel(name)
         dct['_location'] = location
         dct['_doc'] = dct.get('__doc__')
+
+    @classmethod
+    def _resolve(cls):
+        """
+        Resolve to the CompiledType instance corresponding to this DSL type
+        subclass.
+
+        :rtype: langkit.compiled_types.CompiledType
+        """
+        # Provide a sane default for classes that are created by users, but we
+        # will override this for builtin types.
+        assert cls._type
+        return cls._type
 
     _type = None
     """
@@ -396,14 +409,14 @@ class _ASTNodeMetaclass(type):
             if cls._base is _ASTNodeList:
                 # Only root list types are supposed to directly subclass
                 # _ASTNodeList.
-                element_type = cls._element_type._type
+                element_type = cls._element_type._resolve()
                 assert element_type
                 astnode_type = element_type.list
 
             else:
                 astnode_type = ASTNodeType(
                     cls._name, cls._location, cls._doc,
-                    base=None if is_root else cls._base._type,
+                    base=None if is_root else cls._base._resolve(),
                     fields=cls._fields,
                     env_spec=cls._env_spec,
                     annotations=cls._annotations,
@@ -533,7 +546,7 @@ class ASTNode(BaseStruct):
 
     @classproperty
     def entity(cls):
-        return T.Defer(lambda: cls._type.entity,
+        return T.Defer(lambda: cls._resolve().entity,
                        '{}.entity'.format(cls._name.camel))
 
     def __new__(cls, *args):
@@ -543,10 +556,7 @@ class ASTNode(BaseStruct):
         """
         from langkit.parsers import Row
 
-        def get():
-            assert cls._type
-            return cls._type
-        return Row(*args) ^ T.Defer(get, cls._name.camel)
+        return Row(*args) ^ T.Defer(cls._resolve, cls._name.camel)
 
 
 class _ASTNodeList(ASTNode):
@@ -890,7 +900,10 @@ class _BuiltinType(DSLType):
     """
     Base class for all built-in compiled types.
     """
-    pass
+
+    @classmethod
+    def _resolve(cls):
+        return CompiledTypeMetaclass.type_dict[cls._name.camel]
 
 
 class AnalysisUnitKind(_BuiltinType):
@@ -898,7 +911,6 @@ class AnalysisUnitKind(_BuiltinType):
     Type for the analysis unit kind enumeration.
     """
     _name = names.Name('Analysis_Unit_Kind')
-    _type = _internal_types.analysis_unit_kind
 
 
 class AnalysisUnitType(_BuiltinType):
@@ -906,7 +918,6 @@ class AnalysisUnitType(_BuiltinType):
     Type for analysis unit values.
     """
     _name = names.Name('Analysis_Unit_Type')
-    _type = _internal_types.analysis_unit_type
 
 
 class BoolType(_BuiltinType):
@@ -914,7 +925,6 @@ class BoolType(_BuiltinType):
     Type for boolean values.
     """
     _name = names.Name('Bool_Type')
-    _type = _internal_types.bool_type
 
 
 class EquationType(_BuiltinType):
@@ -929,7 +939,6 @@ class EquationType(_BuiltinType):
     logic variables.
     """
     _name = names.Name('Equation_Type')
-    _type = _internal_types.equation_type
 
 
 class EnvRebindingsType(_BuiltinType):
@@ -937,7 +946,6 @@ class EnvRebindingsType(_BuiltinType):
     Type for environment rebinding values.
     """
     _name = names.Name('Env_Rebindings_Type')
-    _type = _internal_types.env_rebindings_type
 
 
 class LexicalEnvType(_BuiltinType):
@@ -945,7 +953,6 @@ class LexicalEnvType(_BuiltinType):
     Type for lexical environments.
     """
     _name = names.Name('Lexical_Env_Type')
-    _type = _internal_types.lexical_env_type
 
 
 class LogicVarType(_BuiltinType):
@@ -953,7 +960,6 @@ class LogicVarType(_BuiltinType):
     Type for logic variables, to be used in equations (see EquationType).
     """
     _name = names.Name('Logic_Var_Type')
-    _type = _internal_types.logic_var_type
 
 
 class LongType(_BuiltinType):
@@ -961,7 +967,6 @@ class LongType(_BuiltinType):
     Simple integer type.
     """
     _name = names.Name('Long_Type')
-    _type = _internal_types.long_type
 
 
 class Symbol(_BuiltinType):
@@ -969,7 +974,6 @@ class Symbol(_BuiltinType):
     Type for symbol values (canonicalized names).
     """
     _name = names.Name('Symbol_Type')
-    _type = _internal_types.symbol_type
 
 
 class Token(_BuiltinType):
@@ -977,4 +981,3 @@ class Token(_BuiltinType):
     Type for token values, as found in an analysis unit's token data handler.
     """
     _name = names.Name('Token_Type')
-    _type = _internal_types.token_type
