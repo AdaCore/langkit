@@ -115,7 +115,7 @@ def make_renderer(base_renderer=None):
             'node_kind_type':        CAPIType(capi, 'node_kind_enum').name,
             'node_type':             ctx.root_grammar_class.c_type(capi).name,
             'entity_type':           T.entity.c_type(capi).name,
-            'lexical_env_type':      lexical_env_type.c_type(capi).name,
+            'lexical_env_type':      T.LexicalEnvType.c_type(capi).name,
             'logic_var_type':        logic_var_type.c_type(capi).name,
             'equation_type':         equation_type.c_type(capi).name,
             'env_rebindings_type':   env_rebindings_type.c_type(capi).name,
@@ -449,7 +449,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == lexical_env_type
+        return self == T.LexicalEnvType
 
     @property
     def is_logic_var_type(self):
@@ -2136,7 +2136,7 @@ class ASTNodeType(BaseStructType):
             # analysis unit, so they are not ref-counted.
 
             ('node_env', PropertyDef(
-                expr=None, prefix=None, type=lexical_env_type, public=False,
+                expr=None, prefix=None, type=T.LexicalEnvType, public=False,
                 external=True, uses_entity_info=True,
                 optional_entity_info=True, force_dispatching=True,
                 warn_on_unused=False,
@@ -2145,7 +2145,7 @@ class ASTNodeType(BaseStructType):
                     ' environment otherwise.'
             )),
             ('children_env', PropertyDef(
-                expr=None, prefix=None, type=lexical_env_type, public=False,
+                expr=None, prefix=None, type=T.LexicalEnvType, public=False,
                 external=True, uses_entity_info=True,
                 optional_entity_info=True, warn_on_unused=False,
                 doc='For nodes that introduce a new environment, return it.'

@@ -4,7 +4,7 @@ from funcy import split_by
 from itertools import count
 
 from langkit import names
-from langkit.compiled_types import AbstractNodeData, T, lexical_env_type
+from langkit.compiled_types import AbstractNodeData, T
 from langkit.diagnostics import (
     check_source_language, extract_library_location, Context
 )
@@ -218,7 +218,7 @@ class EnvSpec(object):
         self.initial_env_prop = self.create_internal_property(
             'Initial_Env',
             self.initial_env and self.initial_env.env_expr,
-            lexical_env_type
+            T.LexicalEnvType
         )
 
         for action in self.actions:
@@ -368,7 +368,7 @@ class AddToEnv(EnvAction):
             'Env_Mappings', self.mappings, None
         )
         self.dest_env_prop = env_spec.create_internal_property(
-            'Env_Dest', self.dest_env, lexical_env_type
+            'Env_Dest', self.dest_env, T.LexicalEnvType
         )
         self.metadata_prop = env_spec.create_internal_property(
             'MD', self.metadata, T.defer_env_md
@@ -447,7 +447,7 @@ class RefEnvs(EnvAction):
         self.resolver.require_untyped_wrapper()
 
         check_source_language(
-            self.resolver.type.matches(lexical_env_type),
+            self.resolver.type.matches(T.LexicalEnvType),
             'Referenced environment resolver must return a lexical'
             ' environment (not {})'.format(
                 self.resolver.type.dsl_name

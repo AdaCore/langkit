@@ -637,9 +637,8 @@ class CompileCtx(object):
         Compute various information related to compiled types, that needs to be
         available for code generation.
         """
-        from langkit.compiled_types import (
-            ASTNodeType, CompiledTypeMetaclass, StructType, lexical_env_type
-        )
+        from langkit.compiled_types import (ASTNodeType, CompiledTypeMetaclass,
+                                            StructType, T)
         from langkit.dsl import _EnumMetaclass, _StructMetaclass
 
         # Make sure the language spec tagged at most one metadata struct.
@@ -675,7 +674,7 @@ class CompileCtx(object):
 
         # The Group lexical environment operation takes an array of lexical
         # envs, so we always need to generate the corresponding array type.
-        self.array_types.add(lexical_env_type.array)
+        self.array_types.add(T.LexicalEnvType.array)
 
         # Likewise for the entity array type: LexicalEnv.get returns it.
         self.array_types.add(entity.array)
