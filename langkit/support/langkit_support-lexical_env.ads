@@ -48,7 +48,8 @@ generic
    --  Return whether a lexical environment whose node is Element can be
    --  rebound.
 
-   with function Element_Image (El : Element_T) return Text_Type;
+   with function Element_Image (El    : Element_T;
+                                Short : Boolean := True) return Text_Type;
 
    with procedure Register_Rebinding
      (Element : Element_T; Rebinding : System.Address);
@@ -438,6 +439,15 @@ package Langkit_Support.Lexical_Env is
 
    function Hash (Env : Lexical_Env) return Hash_Type is
      (Hash_Type'Mod (To_Integer (Env.all'Address)));
+
+   procedure Dump_One_Lexical_Env
+     (Self           : Lexical_Env;
+      Env_Id         : String := "";
+      Parent_Env_Id  : String := "";
+      Dump_Addresses : Boolean := False;
+      Dump_Content   : Boolean := True);
+
+   procedure Dump_Lexical_Env_Parent_Chain (Env : Lexical_Env);
 
 private
 

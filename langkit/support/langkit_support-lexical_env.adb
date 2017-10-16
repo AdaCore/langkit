@@ -1,6 +1,10 @@
+with Ada.Containers.Ordered_Maps;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Text_IO;                     use Ada.Text_IO;
 
 with Langkit_Support.Array_Utils;
+with Langkit_Support.Images; use Langkit_Support.Images;
+with System.Address_Image;
 
 package body Langkit_Support.Lexical_Env is
 
@@ -944,4 +948,187 @@ package body Langkit_Support.Lexical_Env is
       end;
    end Image;
 
+   -----------------
+   -- Sorted_Envs --
+   -----------------
+
+   --  Those ordered maps are used to have a stable representation of internal
+   --  lexical environments, which is not the case with hashed maps.
+
+   function "<" (L, R : Symbol_Type) return Boolean
+   is
+     (L.all < R.all);
+
+   package Sorted_Envs is new Ada.Containers.Ordered_Maps
+     (Symbol_Type,
+      Element_Type    => Internal_Map_Element_Vectors.Vector,
+      "<"             => "<",
+      "="             => Internal_Map_Element_Vectors."=");
+
+   function To_Sorted_Env (Env : Internal_Envs.Map) return Sorted_Envs.Map;
+
+   -------------------
+   -- To_Sorted_Env --
+   -------------------
+
+   function To_Sorted_Env (Env : Internal_Envs.Map) return Sorted_Envs.Map is
+      Ret_Env : Sorted_Envs.Map;
+      use Internal_Envs;
+   begin
+      for El in Env.Iterate loop
+         Ret_Env.Include (Key (El), Element (El));
+      end loop;
+      return Ret_Env;
+   end To_Sorted_Env;
+
+   ----------
+   -- Dump --
+   ----------
+
+   procedure Dump_One_Lexical_Env
+     (Self           : Lexical_Env;
+      Env_Id         : String := "";
+      Parent_Env_Id  : String := "";
+      Dump_Addresses : Boolean := False;
+      Dump_Content   : Boolean := True)
+   is
+      use Sorted_Envs;
+
+      function Short_Image
+        (N : Element_T) return String
+      is (if N = No_Element then "<null>"
+          else Image (Element_Image (N, False)));
+      --  TODO??? This is slightly hackish, because we're converting a wide
+      --  string back to string. But since we're using this solely for
+      --  test/debug purposes, it should not matter. Still, would be good to
+      --  have Text_Type everywhere at some point.
+
+      function Image (El : Internal_Map_Element) return String is
+        (Short_Image (El.Element));
+
+      function Image is new Internal_Map_Element_Vectors.Image
+        (Image);
+
+      procedure Dump_Referenced
+        (Name : String; Refs : Referenced_Envs_Vectors.Vector);
+
+      First_Arg : Boolean := True;
+
+      procedure New_Arg;
+      procedure New_Arg is
+      begin
+         if First_Arg then
+            First_Arg := False;
+         else
+            Put (", ");
+         end if;
+      end New_Arg;
+
+      ---------------------
+      -- Dump_Referenced --
+      ---------------------
+
+      procedure Dump_Referenced
+        (Name : String; Refs : Referenced_Envs_Vectors.Vector)
+      is
+         Is_First : Boolean := True;
+      begin
+         for R of Refs loop
+            declare
+               Env : Lexical_Env := Get_Env (R.Getter);
+            begin
+               if Env /= Empty_Env then
+                  if Is_First then
+                     Put_Line ("    " & Name & ":");
+                     Is_First := False;
+                  end if;
+                  Put ("      ");
+                  if R.Getter.Dynamic then
+                     Put (Short_Image (R.Getter.Node) & ": ");
+                  end if;
+
+                  Dump_One_Lexical_Env (Self           => Env,
+                                        Dump_Addresses => Dump_Addresses,
+                                        Dump_Content   => False);
+                  New_Line;
+                  Dec_Ref (Env);
+               end if;
+            end;
+         end loop;
+      end Dump_Referenced;
+
+   begin
+      if Env_Id'Length /= 0 then
+         Put (Env_Id & " = ");
+      end if;
+      Put ("LexEnv(");
+      if Self = Empty_Env then
+         New_Arg;
+         Put ("Empty");
+      end if;
+      if Self.Ref_Count /= No_Refcount then
+         New_Arg;
+         Put ("Synthetic");
+      end if;
+      if Parent_Env_Id'Length > 0 then
+         New_Arg;
+         Put ("Parent=" & (if Self.Parent /= No_Env_Getter
+              then Parent_Env_Id else "null"));
+      end if;
+      if Self.Node /= No_Element then
+         New_Arg;
+         Put ("Node=" & Image (Element_Image (Self.Node, False)));
+      end if;
+      if Dump_Addresses then
+         New_Arg;
+         Put ("0x" & System.Address_Image (Self.all'Address));
+      end if;
+      Put (")");
+      if not Dump_Content then
+         return;
+      end if;
+      Put_Line (":");
+
+      Dump_Referenced ("Referenced", Self.Referenced_Envs);
+
+      if Self.Env = null then
+         Put_Line ("    <null>");
+      elsif Self.Env.Is_Empty then
+         Put_Line ("    <empty>");
+      else
+         for El in To_Sorted_Env (Self.Env.all).Iterate loop
+            Put ("    ");
+            Put_Line (Langkit_Support.Text.Image (Key (El).all) & ": "
+                      & Image (Element (El)));
+         end loop;
+      end if;
+      New_Line;
+   end Dump_One_Lexical_Env;
+
+   -----------------------------------
+   -- Dump_Lexical_Env_Parent_Chain --
+   -----------------------------------
+
+   procedure Dump_Lexical_Env_Parent_Chain (Env : Lexical_Env) is
+      Id : Positive := 1;
+      E  : Lexical_Env := Env;
+   begin
+      if E = null then
+         Put_Line ("<null>");
+      end if;
+
+      while E /= null loop
+         declare
+            Id_Str : constant String := '@' & Stripped_Image (Id);
+         begin
+            Dump_One_Lexical_Env
+              (Self           => E,
+               Env_Id         => Id_Str,
+               Parent_Env_Id  => '@' & Stripped_Image (Id + 1),
+               Dump_Addresses => True);
+         end;
+         Id := Id + 1;
+         E := Get_Env (E.Parent);
+      end loop;
+   end Dump_Lexical_Env_Parent_Chain;
 end Langkit_Support.Lexical_Env;

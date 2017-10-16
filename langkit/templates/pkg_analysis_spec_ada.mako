@@ -640,9 +640,6 @@ package ${ada_lib_name}.Analysis is
    --  with the trivia associated to them. Line_Prefix is prepended to each
    --  output line.
 
-   procedure Dump_Lexical_Env_Tree (Unit : Analysis_Unit);
-   --  TODO???
-
    procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class);
    --  Debug helper: Assign names to every logical variable in the root node,
    --  so that we can trace logical variables.

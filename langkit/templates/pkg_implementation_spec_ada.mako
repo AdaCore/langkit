@@ -124,8 +124,9 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  eg this does not handle general visibility issues, just sequentiality of
    --  declarations.
 
-   function Node_File_And_Sloc_Image
-     (Node : ${root_node_type_name}) return Text_Type;
+   function AST_Envs_Element_Image
+     (Node  : ${root_node_type_name};
+      Short : Boolean := True) return Text_Type;
    --  Return a "sourcefile:lineno:columnno" corresponding to the starting sloc
    --  of Node. Used to create a human-readable representation for env.
    --  rebindings.
@@ -155,7 +156,7 @@ package ${ada_lib_name}.Analysis.Implementation is
       Raise_Property_Error => Raise_Property_Error,
       Combine              => Combine,
       Parent               => Element_Parent,
-      Element_Image        => Node_File_And_Sloc_Image,
+      Element_Image        => AST_Envs_Element_Image,
       Register_Rebinding   => Register_Rebinding);
 
    use AST_Envs;
@@ -496,25 +497,6 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  with the trivia associated to them. Line_Prefix is prepended to each
    --  output line.
 
-   procedure Dump_Lexical_Env
-     (Node     : access ${root_node_value_type}'Class;
-      Root_Env : Lexical_Env);
-   --  Debug helper: dump the lexical environment of Node, and consequently any
-   --  nested lexical environment. Used for debugging/testing purpose. Pass the
-   --  root env explicitly so that we can tag it properly in the output.
-
-   procedure Dump_One_Lexical_Env
-     (Self           : Lexical_Env;
-      Env_Id         : String := "";
-      Parent_Env_Id  : String := "";
-      Dump_Addresses : Boolean := False;
-      Dump_Content   : Boolean := True);
-   --  Debug helper: Dumps one lexical env. You can supply ids for env and its
-   --  parent, so that they will be identified in the output.
-
-   procedure Dump_Lexical_Env_Parent_Chain (Env : Lexical_Env);
-   --  Debug helper: dump a lexical env as all its parents
-
    procedure Assign_Names_To_Logic_Vars
      (Node : access ${root_node_value_type}'Class);
    --  Debug helper: Assign names to every logical variable in the root node,
@@ -522,35 +504,6 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    procedure Assign_Names_To_Logic_Vars_Impl
      (Node : access ${root_node_value_type}) is null;
-
-   ------------------------
-   -- Address_To_Id_Maps --
-   ------------------------
-
-   --  Those maps are used to give unique ids to lexical envs while pretty
-   --  printing them.
-
-   package Address_To_Id_Maps is new Ada.Containers.Hashed_Maps
-     (Lexical_Env, Integer, Hash, "=");
-
-   type Dump_Lexical_Env_State is record
-      Env_Ids : Address_to_Id_Maps.Map;
-      --  Mapping: Lexical_Env -> Integer, used to remember which unique Ids we
-      --  assigned to the lexical environments we found.
-
-      Next_Id : Positive := 1;
-      --  Id to assign to the next unknown lexical environment
-
-      Root_Env : Lexical_Env;
-      --  Lexical environment we consider a root (this is the Root_Scope from
-      --  the current analysis context), or null if unknown.
-   end record;
-   --  Holder for the state of lexical environment dumpers
-
-   function Get_Env_Id
-     (E : Lexical_Env; State : in out Dump_Lexical_Env_State) return String;
-   --  If E is known, return its unique Id from State. Otherwise, assign it a
-   --  new unique Id and return it.
 
    ------------------------------------------------------
    -- AST node derived types (incomplete declarations) --

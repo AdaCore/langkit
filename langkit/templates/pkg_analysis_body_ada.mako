@@ -1041,15 +1041,6 @@ package body ${ada_lib_name}.Analysis is
       return Result;
    end Diagnostics;
 
-   ----------------------
-   -- Dump_Lexical_Env --
-   ----------------------
-
-   procedure Dump_Lexical_Env (Unit : Analysis_Unit) is
-   begin
-      Dump_Lexical_Env (Unit.AST_Root, Unit.Context.Root_Scope);
-   end Dump_Lexical_Env;
-
    % if ctx.default_unit_provider:
    -------------------
    -- Unit_Provider --
@@ -1669,15 +1660,6 @@ package body ${ada_lib_name}.Analysis is
       end;
    end Children_With_Trivia;
 
-   -------------------------------
-   -- Node_File_And_Sloc_Image  --
-   -------------------------------
-
-   function Node_File_And_Sloc_Image
-     (Node : ${root_node_type_name}) return Text_Type
-   is (To_Text (To_String (Node.Unit.File_Name))
-       & ":" & To_Text (Image (Start_Sloc (Sloc_Range (Node)))));
-
    ------------------------
    -- Register_Rebinding --
    ------------------------
@@ -1693,161 +1675,67 @@ package body ${ada_lib_name}.Analysis is
       Node.Unit.Rebindings.Append (Convert (Rebinding));
    end Register_Rebinding;
 
-   -----------------
-   -- Sorted_Envs --
-   -----------------
+   ------------------------
+   -- Address_To_Id_Maps --
+   ------------------------
 
-   --  Those ordered maps are used to have a stable representation of internal
-   --  lexical environments, which is not the case with hashed maps.
+   --  Those maps are used to give unique ids to lexical envs while pretty
+   --  printing them.
 
-   function "<" (L, R : Symbol_Type) return Boolean
+   package Address_To_Id_Maps is new Ada.Containers.Hashed_Maps
+     (Lexical_Env, Integer, Hash, "=");
+
+   type Dump_Lexical_Env_State is record
+      Env_Ids : Address_to_Id_Maps.Map;
+      --  Mapping: Lexical_Env -> Integer, used to remember which unique Ids we
+      --  assigned to the lexical environments we found.
+
+      Next_Id : Positive := 1;
+      --  Id to assign to the next unknown lexical environment
+
+      Root_Env : Lexical_Env;
+      --  Lexical environment we consider a root (this is the Root_Scope from
+      --  the current analysis context), or null if unknown.
+   end record;
+   --  Holder for the state of lexical environment dumpers
+
+   function Get_Env_Id
+     (E : Lexical_Env; State : in out Dump_Lexical_Env_State) return String;
+   --  If E is known, return its unique Id from State. Otherwise, assign it a
+   --  new unique Id and return it.
+
+   ----------------
+   -- Get_Env_Id --
+   ----------------
+
+   function Get_Env_Id
+     (E : Lexical_Env; State : in out Dump_Lexical_Env_State) return String
    is
-     (L.all < R.all);
-
-   package Sorted_Envs is new Ada.Containers.Ordered_Maps
-     (Symbol_Type,
-      Element_Type    => AST_Envs.Internal_Map_Element_Vectors.Vector,
-      "<"             => "<",
-      "="             => AST_Envs.Internal_Map_Element_Vectors."=");
-
-   -------------------
-   -- To_Sorted_Env --
-   -------------------
-
-   function To_Sorted_Env (Env : Internal_Envs.Map) return Sorted_Envs.Map is
-      Ret_Env : Sorted_Envs.Map;
-      use Internal_Envs;
+      C        : Address_To_Id_Maps.Cursor;
+      Inserted : Boolean;
    begin
-      for El in Env.Iterate loop
-         Ret_Env.Include (Key (El), Element (El));
-      end loop;
-      return Ret_Env;
-   end To_Sorted_Env;
+      if E = null then
+         return "$null";
 
-   ----------
-   -- Dump --
-   ----------
-
-   procedure Dump_One_Lexical_Env
-     (Self           : AST_Envs.Lexical_Env;
-      Env_Id         : String := "";
-      Parent_Env_Id  : String := "";
-      Dump_Addresses : Boolean := False;
-      Dump_Content   : Boolean := True)
-   is
-      use Sorted_Envs;
-
-      function Short_Image
-        (N : access ${root_node_value_type}'Class) return String
-      is (if N = null then "<null>" else Image (N.Short_Image));
-      -- TODO??? This is slightly hackish, because we're converting a wide
-      -- string back to string. But since we're using this solely for
-      -- test/debug purposes, it should not matter. Still, would be good to
-      -- have Text_Type everywhere at some point.
-
-      function Image (El : Internal_Map_Element) return String is
-        (Short_Image (El.Element));
-
-      function Image is new AST_Envs.Internal_Map_Element_Vectors.Image
-        (Image);
-
-      First_Arg : Boolean := True;
-
-      procedure New_Arg is
-      begin
-         if First_Arg then
-            First_Arg := False;
-         else
-            Put (", ");
-         end if;
-      end New_Arg;
-
-      ---------------------
-      -- Dump_Referenced --
-      ---------------------
-
-      procedure Dump_Referenced
-        (Name : String; Refs : AST_Envs.Referenced_Envs_Vectors.Vector)
-      is
-         Is_First : Boolean := True;
-      begin
-         for R of Refs loop
-            declare
-               Env : Lexical_Env := Get_Env (R.Getter);
-            begin
-               if Env /= Empty_Env then
-                  if Is_First then
-                     Put_Line ("    " & Name & ":");
-                     Is_First := False;
-                  end if;
-                  Put ("      ");
-                  if R.Getter.Dynamic then
-                     Put (Short_Image (R.Getter.Node) & ": ");
-                  end if;
-
-                  Dump_One_Lexical_Env (Self           => Env,
-                                        Dump_Addresses => Dump_Addresses,
-                                        Dump_Content   => False);
-                  New_Line;
-                  Dec_Ref (Env);
-               end if;
-            end;
-         end loop;
-      end Dump_Referenced;
-
-   begin
-      if Env_Id'Length /= 0 then
-         Put (Env_Id & " = ");
+      elsif E = State.Root_Env then
+         --  Insert root env with a special Id so that we only print it once
+         State.Env_Ids.Insert (E, -1, C, Inserted);
+         return "$root";
       end if;
-      Put ("LexEnv(");
-      if Self = Empty_Env then
-         New_Arg;
-         Put ("Empty");
-      end if;
-      if Self.Ref_Count /= AST_Envs.No_Refcount then
-         New_Arg;
-         Put ("Synthetic");
-      end if;
-      if Parent_Env_Id'Length > 0 then
-         New_Arg;
-         Put ("Parent=" & (if Self.Parent /= AST_Envs.No_Env_Getter
-                           then Parent_Env_Id else "null"));
-      end if;
-      if Self.Node /= null then
-         New_Arg;
-         Put ("Node=" & Image (Self.Node.Short_Image));
-      end if;
-      if Dump_Addresses then
-         New_Arg;
-         Put ("0x" & System.Address_Image (Self.all'Address));
-      end if;
-      Put (")");
-      if not Dump_Content then
-         return;
-      end if;
-      Put_Line (":");
 
-      Dump_Referenced ("Referenced", Self.Referenced_Envs);
-
-      if Self.Env = null then
-         Put_Line ("    <null>");
-      elsif Self.Env.Is_Empty then
-         Put_Line ("    <empty>");
-      else
-         for El in To_Sorted_Env (Self.Env.all).Iterate loop
-            Put ("    ");
-            Put_Line (Langkit_Support.Text.Image (Key (El).all) & ": "
-                 & Image (Element (El)));
-         end loop;
+      State.Env_Ids.Insert (E, State.Next_Id, C, Inserted);
+      if Inserted then
+         State.Next_Id := State.Next_Id + 1;
       end if;
-      New_Line;
-   end Dump_One_Lexical_Env;
+
+      return '@' & Stripped_Image (Address_To_Id_Maps.Element (C));
+   end Get_Env_Id;
 
    ----------------------
    -- Dump_Lexical_Env --
    ----------------------
 
-   procedure Dump_Lexical_Env_Tree (Unit : Analysis_Unit) is
+   procedure Dump_Lexical_Env (Unit : Analysis_Unit) is
       Node     : constant ${root_node_type_name} := Unit.AST_Root;
       Root_Env : constant Lexical_Env := Unit.Context.Root_Scope;
       State    : Dump_Lexical_Env_State := (Root_Env => Root_Env, others => <>);
@@ -1903,38 +1791,7 @@ package body ${ada_lib_name}.Analysis is
       --  environments.
    begin
       Internal (${root_node_type_name} (Node));
-   end Dump_Lexical_Env_Tree;
-
-   -----------------------------------
-   -- Dump_Lexical_Env_Parent_Chain --
-   -----------------------------------
-
-   procedure Dump_Lexical_Env_Parent_Chain (Env : AST_Envs.Lexical_Env) is
-      Id : Positive := 1;
-      E  : Lexical_Env := Env;
-   begin
-      if E = null then
-         Put_Line ("<null>");
-      end if;
-
-      while E /= null loop
-         declare
-            Id_Str : constant String := '@' & Stripped_Image (Id);
-         begin
-            if E = null then
-               Put_Line (Id_Str & " = <null>");
-            else
-               Dump_One_Lexical_Env
-                 (Self           => E,
-                  Env_Id         => Id_Str,
-                  Parent_Env_Id  => '@' & Stripped_Image (Id + 1),
-                  Dump_Addresses => True);
-            end if;
-         end;
-         Id := Id + 1;
-         E := AST_Envs.Get_Env (E.Parent);
-      end loop;
-   end Dump_Lexical_Env_Parent_Chain;
+   end Dump_Lexical_Env;
 
    ## Env metadata's body
 
@@ -2332,17 +2189,6 @@ package body ${ada_lib_name}.Analysis is
    begin
       Node.Node.PP_Trivia (Line_Prefix);
    end PP_Trivia;
-
-   ----------------------
-   -- Dump_Lexical_Env --
-   ----------------------
-
-   procedure Dump_Lexical_Env
-     (Node     : ${root_entity.api_name}'Class;
-      Root_Env : AST_Envs.Lexical_Env) is
-   begin
-      Node.Node.Dump_Lexical_Env (Root_Env);
-   end Dump_Lexical_Env;
 
    --------------
    -- Traverse --
