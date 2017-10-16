@@ -129,26 +129,3 @@ begin
 end ${property.name};
 ${gdb_helper('end', property.qualname)}
 % endif
-
-## Wrapper to return convenient Ada arrays
-
-% if not property.overriding and property.type.is_array_type:
-   function ${property.name}
-     ${helpers.argument_list(property, False)}
-     return ${property.type.array_type_name}
-   is
-      Raw    : ${property.type.name} := ${property.name}
-        (
-           ${property.self_arg_name}
-           % for arg in property.arguments:
-               , ${arg.name}
-           % endfor
-        );
-      Result : constant ${property.type.array_type_name} := Raw.Items;
-   begin
-      ## Just deallocate the array so that the ownership for each item is
-      ## merely transfered to the caller.
-      Free (Raw);
-      return Result;
-   end ${property.name};
-% endif
