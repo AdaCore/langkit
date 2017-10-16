@@ -30,13 +30,11 @@ package body ${ada_lib_name}.Analysis.Parsers is
    % for enum_type in ctx.enum_types:
       package ${enum_type.name}_Memos is new Langkit_Support.Packrat
         (${enum_type.name}, Token_Index);
-      use ${enum_type.name}_Memos;
    % endfor
 
    % for cls in ctx.astnode_types:
       package ${cls.name}_Memos is new Langkit_Support.Packrat
         (${cls.name}, Token_Index);
-      use ${cls.name}_Memos;
 
       % if not cls.abstract:
          package ${cls.name}_Alloc is
@@ -239,7 +237,8 @@ package body ${ada_lib_name}.Analysis.Parsers is
 
       --  Reset the memo tables in the private part
       % for fn in sorted(ctx.fns):
-         Clear (Parser.Private_Part.${fn.gen_fn_name}_Memo);
+         ${fn.get_type().storage_type_name}_Memos.Clear
+           (Parser.Private_Part.${fn.gen_fn_name}_Memo);
       % endfor
    end Reset;
 

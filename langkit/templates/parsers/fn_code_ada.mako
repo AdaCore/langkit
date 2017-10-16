@@ -2,13 +2,15 @@
 
 <%
 ret_type = parser.get_type().storage_type_name
-memo = "Parser.Private_Part.{}_Memo".format(parser.gen_fn_name)
+memo = 'Parser.Private_Part.{}_Memo'.format(parser.gen_fn_name)
 %>
 
-function ${parser.gen_fn_name} (Parser : in out Parser_Type;
-                                Pos    : Token_Index)
-                                return ${ret_type}
+function ${parser.gen_fn_name}
+  (Parser : in out Parser_Type;
+   Pos    : Token_Index) return ${ret_type}
 is
+   use ${ret_type}_Memos;
+
    % for name, typ in var_context:
       ${name} :
          % if isinstance(typ, basestring):
@@ -26,8 +28,7 @@ is
       Mem_Res : ${ret_type} := ${parser.get_type().storage_nullexpr};
    % endif
 
-   M : ${ret_type}_Memos.Memo_Entry :=
-     Get (${memo}, Pos);
+   M : Memo_Entry := Get (${memo}, Pos);
 
 begin
 
@@ -41,11 +42,7 @@ begin
    end if;
 
    % if parser.is_left_recursive():
-       Set (${memo},
-            False,
-            ${parser.res_var},
-            Pos,
-            Mem_Pos);
+       Set (${memo}, False, ${parser.res_var}, Pos, Mem_Pos);
 
        <<Try_Again>>
    % endif
@@ -64,11 +61,12 @@ begin
       if ${parser.pos_var} > Mem_Pos then
          Mem_Pos := ${parser.pos_var};
          Mem_Res := ${parser.res_var};
-         Set (${memo},
-              ${parser.pos_var} /= No_Token_Index,
-              ${parser.res_var},
-              Pos,
-              ${parser.pos_var});
+         Set
+           (${memo},
+            ${parser.pos_var} /= No_Token_Index,
+            ${parser.res_var},
+            Pos,
+            ${parser.pos_var});
          goto Try_Again;
 
       elsif Mem_Pos > Pos then
@@ -78,11 +76,12 @@ begin
       end if;
    % endif
 
-   Set (${memo},
-        ${parser.pos_var} /= No_Token_Index,
-        ${parser.res_var},
-        Pos,
-        ${parser.pos_var});
+   Set
+     (${memo},
+      ${parser.pos_var} /= No_Token_Index,
+      ${parser.res_var},
+      Pos,
+      ${parser.pos_var});
 
    % if parser.is_left_recursive():
        <<No_Memo>>
