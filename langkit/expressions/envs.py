@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit import names
-from langkit.compiled_types import T, no_compiled_type, symbol_type
+from langkit.compiled_types import T, no_compiled_type
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, BasicExpr, CallExpr, ComputingExpr,
@@ -163,7 +163,7 @@ class EnvGet(AbstractExpression):
         if sym_expr.type == T.TokenType:
             sym_expr = GetSymbol.construct_static(sym_expr)
         check_source_language(
-            sym_expr.type == symbol_type,
+            sym_expr.type == T.SymbolType,
             'Wrong type for symbol expr: {}'.format(sym_expr.type.dsl_name)
         )
 

@@ -473,7 +473,7 @@ class CompiledType(object):
 
         :rtype: bool
         """
-        return self == symbol_type
+        return self == T.SymbolType
 
     @property
     def is_token_type(self):
@@ -2630,7 +2630,7 @@ class TypeRepo(object):
         """
         return StructType(
             names.Name('Env_Assoc'), None, None,
-            [('key', UserField(type=symbol_type)),
+            [('key', UserField(type=T.SymbolType)),
              ('val', UserField(type=self.defer_root_node))]
         )
 

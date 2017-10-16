@@ -12,7 +12,7 @@ from langkit import names
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNodeType, CompiledType, T, TypeRepo,
     gdb_bind_var, gdb_helper, get_context, no_compiled_type,
-    render as ct_render, resolve_type, symbol_type
+    render as ct_render, resolve_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, WarningSet, check_multiple,
@@ -2100,7 +2100,7 @@ class GetSymbol(AbstractExpression):
 
     @staticmethod
     def construct_static(token_expr, abstract_expr=None):
-        return CallExpr('Sym', 'Get_Symbol', symbol_type, [token_expr],
+        return CallExpr('Sym', 'Get_Symbol', T.SymbolType, [token_expr],
                         abstract_expr=abstract_expr)
 
     def __repr__(self):
@@ -2115,7 +2115,7 @@ class SymbolLiteral(AbstractExpression):
     class Expr(ComputingExpr):
 
         def __init__(self, name, abstract_expr=None):
-            self.static_type = symbol_type
+            self.static_type = T.SymbolType
             self.name = name
             get_context().add_symbol_literal(self.name)
 
@@ -4092,12 +4092,12 @@ class Arithmetic(AbstractExpression):
         l = construct(self.l)
         r = construct(self.r)
 
-        if l.type == symbol_type and r.type == symbol_type:
+        if l.type == T.SymbolType and r.type == T.SymbolType:
             assert self.op == '&'
             return BasicExpr(
                 'Sym_Concat',
-                'Find (Self.Unit.TDH.Symbols, ({}.all & {}.all))', symbol_type,
-                [l, r]
+                'Find (Self.Unit.TDH.Symbols, ({}.all & {}.all))',
+                T.SymbolType, [l, r]
             )
 
         check_source_language(
@@ -4107,7 +4107,7 @@ class Arithmetic(AbstractExpression):
         )
 
         check_source_language(
-            l.type in (symbol_type, T.LongType),
+            l.type in (T.SymbolType, T.LongType),
             "Invalid type for {}: {}".format(self.op, l.type.dsl_name)
         )
 
