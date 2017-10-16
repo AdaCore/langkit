@@ -1267,7 +1267,7 @@ class CompileCtx(object):
             # Unit for all parsers
             ("parsers/pkg_main",    ["analysis", "parsers"], True),
             # Unit for the lexer
-            ("lexer/pkg_lexer",     ["lexer"], True),
+            ("lexer/pkg_main",      ["lexer"], True),
             # Unit for debug helpers
             ("pkg_debug",           ["debug"], True),
         ]
@@ -1385,7 +1385,7 @@ class CompileCtx(object):
                 render("c_api/header_c")
             )
 
-        self.write_ada_module(src_path, "c_api/pkg_analysis",
+        self.write_ada_module(src_path, "c_api/pkg_main",
                               ["Analysis", "Implementation", "C"])
 
     def emit_python_api(self, python_path):
