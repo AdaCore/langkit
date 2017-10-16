@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit import names
-from langkit.compiled_types import T, analysis_unit_kind
+from langkit.compiled_types import T
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
     AbstractVariable, CallExpr, FieldAccessExpr, NullCheckExpr, auto_attr,
@@ -11,11 +11,11 @@ from langkit.expressions.base import (
 
 UnitSpecification = AbstractVariable(
     names.Name('Unit_Specification'),
-    type=analysis_unit_kind
+    type=T.AnalysisUnitKind
 )
 UnitBody = AbstractVariable(
     names.Name('Unit_Body'),
-    type=analysis_unit_kind
+    type=T.AnalysisUnitKind
 )
 
 

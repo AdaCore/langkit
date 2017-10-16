@@ -119,7 +119,7 @@ def make_renderer(base_renderer=None):
             'logic_var_type':        logic_var_type.c_type(capi).name,
             'equation_type':         equation_type.c_type(capi).name,
             'env_rebindings_type':   env_rebindings_type.c_type(capi).name,
-            'unit_kind_type':        analysis_unit_kind.c_type(capi).name,
+            'unit_kind_type':        T.AnalysisUnitKind.c_type(capi).name,
             'unit_provider_type':    CAPIType(capi, 'unit_provider').name,
             'unit_provider_destroy_type':
                 CAPIType(capi, 'unit_provider_destroy_callback').name,
@@ -388,7 +388,7 @@ class CompiledType(object):
         """
         Return whether this is the analysis unit kind type.
         """
-        return self == analysis_unit_kind
+        return self == T.AnalysisUnitKind
 
     @property
     def is_array_type(self):
