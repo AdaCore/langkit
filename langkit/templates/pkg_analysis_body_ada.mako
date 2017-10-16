@@ -2526,6 +2526,15 @@ package body ${ada_lib_name}.Analysis is
    function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean is
      (Node.Node = null);
 
+   ---------
+   -- "=" --
+   ---------
+
+   function "=" (L, R : ${root_entity.api_name}'Class) return Boolean is
+   begin
+      return L.Node = R.Node and then L.E_Info = R.E_Info;
+   end "=";
+
    -----------------
    -- Short_Image --
    -----------------

@@ -105,6 +105,9 @@ package ${ada_lib_name}.Analysis is
    function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean;
    --  Return whether Node references to AST node
 
+   function "=" (L, R : ${root_entity.api_name}'Class) return Boolean;
+   --  Return whether L and R designate the same entity
+
    function Short_Image
      (Node : ${root_entity.api_name}'Class) return Text_Type;
    --  Return a short string describing Node, or "None" if Node.Is_Null is
