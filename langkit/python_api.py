@@ -42,7 +42,6 @@ class PythonAPISettings(AbstractAPISettings):
         # TODO: handle all types
         assert (not inc_ref
                 or not type.is_refcounted
-                or type in (T.LexicalEnvType, ct.equation_type)
                 or isinstance(type, (ct.ArrayType, ct.StructType))), (
             'Incrementing ref-count of {} in the Python API is not handled'
             ' yet'.format(type.name)
@@ -72,11 +71,6 @@ class PythonAPISettings(AbstractAPISettings):
                 type.name.camel,
                 inc_ref
             )),
-            (T.LexicalEnvType, lambda _:
-                'LexicalEnv._wrap({{}}, inc_ref={})'.format(inc_ref)),
-            (ct.logic_var_type, lambda _: 'LogicVar._wrap({})'),
-            (ct.equation_type, lambda _:
-                'Equation._wrap({{}}, inc_ref={})'.format(inc_ref)),
             (ct.env_rebindings_type, lambda _: 'EnvRebindings._wrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
@@ -115,9 +109,6 @@ class PythonAPISettings(AbstractAPISettings):
                 type.name.camel
             )),
             (ct.symbol_type, lambda _: '_text._unwrap({})'),
-            (T.LexicalEnvType, lambda _: 'LexicalEnv._unwrap({})'),
-            (ct.logic_var_type, lambda _: 'LogicVar._unwrap({})'),
-            (ct.equation_type, lambda _: 'Equation._unwrap({})'),
             (ct.env_rebindings_type, lambda _: 'EnvRebindings._unwrap({})'),
         ], exception=TypeError(
             'Unhandled field type in the python binding'
@@ -142,9 +133,6 @@ class PythonAPISettings(AbstractAPISettings):
         return dispatch_on_type(type, [
             (T.BoolType, lambda _: ctype_type('c_uint8')),
             (ct.long_type, lambda _: ctype_type('c_int')),
-            (T.LexicalEnvType, lambda _: 'LexicalEnv._c_type'),
-            (ct.logic_var_type, lambda _: 'LogicVar._c_type'),
-            (ct.equation_type, lambda _: 'Equation._c_type'),
             (ct.env_rebindings_type, lambda _: 'EnvRebindings._c_type'),
             (ct.token_type, lambda _: 'Token'),
             (ct.symbol_type, lambda _: wrapped_type('text')),
