@@ -5,8 +5,7 @@ from itertools import izip_longest
 import funcy
 
 from langkit import names
-from langkit.compiled_types import (Argument, T, equation_type, logic_var_type,
-                                    no_compiled_type)
+from langkit.compiled_types import Argument, T, equation_type, no_compiled_type
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable, LiteralExpr,
@@ -246,7 +245,7 @@ class Bind(AbstractExpression):
                 expr.create_result_var('Ent')
 
             check_source_language(
-                expr.type == logic_var_type
+                expr.type == T.LogicVarType
                 or expr.type.matches(T.root_node.entity),
 
                 'Operands to a logic bind operator should be either'
@@ -298,7 +297,7 @@ def domain(self, logic_var_expr, domain):
     Define the domain of a logical variable. Several important properties about
     this expression:
 
-    This is the entry point into the logic DSL. A ``logic_var_type`` variable
+    This is the entry point into the logic DSL. A ``LogicVarType`` variable
     *must* have a domain defined in the context of an equation. If it doesn't,
     its solution set is empty, and thus the only possible value for it is
     undefined.
@@ -341,7 +340,7 @@ def domain(self, logic_var_expr, domain):
     return DomainExpr(
         construct(domain, lambda d: d.is_collection, "Type given "
                   "to LogicVar must be collection type, got {expr_type}"),
-        construct(logic_var_expr, logic_var_type),
+        construct(logic_var_expr, T.LogicVarType),
         abstract_expr=self,
     )
 
@@ -426,14 +425,14 @@ class Predicate(AbstractExpression):
         # Separate logic variable expressions from extra argument expressions
         exprs = [construct(e) for e in self.exprs]
         logic_var_exprs, closure_exprs = funcy.split_by(
-            lambda e: e.type == logic_var_type, exprs
+            lambda e: e.type == T.LogicVarType, exprs
         )
         check_source_language(
             len(logic_var_exprs) > 0, "Predicate instantiation should have at "
             "least one logic variable expression"
         )
         check_source_language(
-            all(e.type != logic_var_type for e in closure_exprs),
+            all(e.type != T.LogicVarType for e in closure_exprs),
             'Logic variable expressions should be grouped at the beginning,'
             ' and should not appear after non logic variable expressions'
         )
@@ -467,7 +466,7 @@ class Predicate(AbstractExpression):
                 )
             )
 
-            if expr.type == logic_var_type:
+            if expr.type == T.LogicVarType:
                 check_source_language(
                     arg.type.matches(T.root_node.entity),
                     "Argument #{} of predicate "
@@ -532,7 +531,7 @@ def get_value(self, logic_var):
 
     rtype = T.root_node.entity
 
-    logic_var_expr = construct(logic_var, logic_var_type)
+    logic_var_expr = construct(logic_var, T.LogicVarType)
     logic_var_ref = logic_var_expr.create_result_var('Logic_Var_Value')
 
     return If.Expr(
