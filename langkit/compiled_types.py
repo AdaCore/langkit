@@ -152,12 +152,6 @@ class CompiledTypeMetaclass(object):
     instance to refer to any compiled type.
     """
 
-    types = []
-    """
-    List of compiled types.
-    :type: [CompiledType]
-    """
-
     type_dict = {}
     """
     Mapping: type name -> CompiledType instance. Used in TypeRepo for type
@@ -325,7 +319,6 @@ class CompiledType(object):
         self._element_type = element_type
 
         type_repo_name = type_repo_name or name.camel
-        CompiledTypeMetaclass.types.append(self)
         CompiledTypeMetaclass.type_dict[type_repo_name] = self
 
     @property

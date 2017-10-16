@@ -162,7 +162,6 @@ def reset_langkit():
     Self.unfreeze()
     Entity.unfreeze()
 
-    CompiledTypeMetaclass.types[:] = []
     CompiledTypeMetaclass.type_dict.clear()
     create_builtin_types()
 
