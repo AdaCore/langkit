@@ -462,6 +462,31 @@ class CompileCtx(object):
         :type: set[langkit.compiled_types.ArrayType]
         """
 
+        self.memoized_properties = set()
+        """
+        Set of all PropertyDef instances that are memoized.
+
+        :type: set[langkit.expressions.base.PropertyDef]
+        """
+
+        self.memoization_keys = set()
+        """
+        Set of all CompiledType instances that are used as key in the hashed
+        maps used to implement properties memoization. All of them must be
+        hashable.
+
+        :type: set[langkit.compiled_types.CompiledType]
+        """
+
+        self.memoization_values = set()
+        """
+        Set of all CompiledType instances that are used as value in the hashed
+        maps used to implement properties memoization. Any type can fit, there
+        is no restriction.
+
+        :type: set[langkit.compiled_types.CompiledType]
+        """
+
         self.symbol_literals = {}
         """
         Container for all symbol literals to be used in code generation.
@@ -1688,3 +1713,18 @@ class CompileCtx(object):
             for arg in f.natural_arguments:
                 expose(arg.type, f, '"{}" argument'.format(arg.name),
                        [f.qualname])
+
+    @property
+    def has_memoization(self):
+        """
+        Return whether one property is memoized.
+
+        :rtype: bool
+        """
+        has_keys = bool(self.memoization_keys)
+        has_values = bool(self.memoization_values)
+        assert has_keys == has_values, (
+            'Either there is no memoized property, either we do, in which case'
+            ' there must be at least one key type and one key value'
+        )
+        return has_keys

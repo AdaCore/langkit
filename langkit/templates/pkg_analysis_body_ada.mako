@@ -313,7 +313,12 @@ package body ${ada_lib_name}.Analysis is
          Destroyables      => Destroyable_Vectors.Empty_Vector,
          Referenced_Units  => <>,
          Lex_Env_Data_Acc  => new Lex_Env_Data_Type,
-         Rebindings        => Env_Rebindings_Vectors.Empty_Vector);
+         Rebindings        => Env_Rebindings_Vectors.Empty_Vector
+
+         % if ctx.has_memoization:
+         , Memoization_Map   => <>
+         % endif
+      );
    begin
       Initialize (Unit.TDH, Context.Symbols);
       Context.Units_Map.Insert (Fname, Unit);
@@ -1143,6 +1148,9 @@ package body ${ada_lib_name}.Analysis is
          Unit.AST_Root.Traverse (Visit'Access);
       end if;
       Unit.Has_Filled_Caches := False;
+      % if ctx.has_memoization:
+         Destroy (Unit.Memoization_Map);
+      % endif
    end Reset_Caches;
 
    --------------------------

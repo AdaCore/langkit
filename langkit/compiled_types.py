@@ -226,7 +226,7 @@ class CompiledType(object):
                  exposed=False, c_type_name=None, external=False,
                  null_allowed=False, is_ada_record=False, is_refcounted=False,
                  nullexpr=None, py_nullexpr=None, element_type=None,
-                 type_repo_name=None):
+                 hashable=False, type_repo_name=None):
         """
         :param names.Name|str name: Type name. If a string, it must be
             camel-case.
@@ -294,6 +294,9 @@ class CompiledType(object):
         :param CompiledType|None element_type: If this is a collection type,
             must be the corresponding element type. Must be None otherwise.
 
+        :param bool hashable: Whether this type has a Hash primitive, so that
+            it can be used as a key in hashed maps/sets.
+
         :param str|None type_repo_name: Name to use for registration in
             TypeRepo. The camel-case of "name" is used if left to None.
     """
@@ -317,9 +320,35 @@ class CompiledType(object):
         self._nullexpr = nullexpr
         self._py_nullexpr = py_nullexpr
         self._element_type = element_type
+        self.hashable = hashable
 
         type_repo_name = type_repo_name or name.camel
         CompiledTypeMetaclass.type_dict[type_repo_name] = self
+
+    def add_as_memoization_key(self, context):
+        """
+        Add `self` to the set of types that are used as keys in the hashed maps
+        used to implement properties memoization. It has to be hashable.
+        """
+        assert self.hashable
+        context.memoization_keys.add(self)
+
+    def add_as_memoization_value(self, context):
+        """
+        Add `self` to the set of types that are used as values in the hashed
+        maps used to implement properties memoization.
+        """
+        context.memoization_values.add(self)
+
+    @property
+    def memoization_kind(self):
+        """
+        Return the enumerator name that correspond to this type for the
+        discriminated record to materialize memoization keys/values.
+
+        :rtype: str
+        """
+        return (names.Name('Mmz') + self.name).camel_with_underscores
 
     @property
     def name(self):

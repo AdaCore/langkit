@@ -5,16 +5,23 @@
 <%namespace name="enum_types"        file="enum_types_ada.mako" />
 <%namespace name="list_types"        file="list_types_ada.mako" />
 <%namespace name="struct_types"      file="struct_types_ada.mako" />
+<%namespace name="memoization"       file="memoization_ada.mako" />
 
 <% root_node_array = T.root_node.array %>
 
 with Ada.Containers;                  use Ada.Containers;
-with Ada.Containers.Hashed_Maps;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
+% if ctx.has_memoization:
+with System.Storage_Elements; use System.Storage_Elements;
+% endif
+
+% if ctx.has_memoization:
+with Langkit_Support.Hashes; use Langkit_Support.Hashes;
+% endif
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Text;    use Langkit_Support.Text;
@@ -61,6 +68,10 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ${array_types.body(array_type)}
    % endif
    % endfor
+
+   % if ctx.has_memoization:
+      ${memoization.body()}
+   % endif
 
    ---------------------
    -- Pre_Env_Actions --

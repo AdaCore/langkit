@@ -7,6 +7,7 @@
 <%namespace name="struct_types"      file="struct_types_ada.mako" />
 <%namespace name="pretty_printers"   file="pretty_printers_ada.mako" />
 <%namespace name="public_properties" file="public_properties_ada.mako" />
+<%namespace name="memoization"       file="memoization_ada.mako" />
 
 <%
    root_node_array = T.root_node.array
@@ -14,6 +15,7 @@
    library_private_field = lambda f: not library_public_field(f)
 %>
 
+with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
@@ -175,6 +177,38 @@ package ${ada_lib_name}.Analysis.Implementation is
    ${array_types.public_incomplete_decl(root_node_array)}
    ${array_types.public_decl(root_node_array)}
 
+   ------------------------------------------------------
+   -- AST node derived types (incomplete declarations) --
+   ------------------------------------------------------
+
+   type ${generic_list_value_type};
+   --  Base type for all lists of AST node subclasses
+
+   type ${generic_list_type_name} is
+      access all ${generic_list_value_type}'Class;
+
+   % for astnode in no_builtins(ctx.astnode_types):
+     % if not astnode.is_list_type:
+       ${astnode_types.public_incomplete_decl(astnode)}
+     % endif
+   % endfor
+
+   % for astnode in ctx.astnode_types:
+      % if astnode.is_root_list_type:
+         ${list_types.public_incomplete_decl(astnode.element_type)}
+      % elif astnode.is_list_type:
+         ${astnode_types.public_incomplete_decl(astnode)}
+      % endif
+   % endfor
+
+   % if ctx.has_memoization:
+   ------------------------
+   --  Memoization state --
+   ------------------------
+
+   ${memoization.decl()}
+   % endif
+
    -----------------------------
    -- Miscellanous operations --
    -----------------------------
@@ -314,6 +348,11 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  List of rebindings for which Old_Env and/or New_Env belong to this
       --  unit. When this unit gets destroyed or reparsed, these rebindings
       --  need to be destroyed too (see Destroy_Rebindings).
+
+      % if ctx.has_memoization:
+         Memoization_Map : Memoization_Maps.Map;
+         --  Mapping of arguments tuple to property result for memoization
+      % endif
    end record;
 
 
@@ -500,30 +539,6 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    procedure Assign_Names_To_Logic_Vars_Impl
      (Node : access ${root_node_value_type}) is null;
-
-   ------------------------------------------------------
-   -- AST node derived types (incomplete declarations) --
-   ------------------------------------------------------
-
-   type ${generic_list_value_type};
-   --  Base type for all lists of AST node subclasses
-
-   type ${generic_list_type_name} is
-      access all ${generic_list_value_type}'Class;
-
-   % for astnode in no_builtins(ctx.astnode_types):
-     % if not astnode.is_list_type:
-       ${astnode_types.public_incomplete_decl(astnode)}
-     % endif
-   % endfor
-
-   % for astnode in ctx.astnode_types:
-      % if astnode.is_root_list_type:
-         ${list_types.public_incomplete_decl(astnode.element_type)}
-      % elif astnode.is_list_type:
-         ${astnode_types.public_incomplete_decl(astnode)}
-      % endif
-   % endfor
 
    ---------------------------
    -- Adalog instantiations --
