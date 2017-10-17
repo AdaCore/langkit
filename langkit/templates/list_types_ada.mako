@@ -17,8 +17,7 @@
    %>
 
    type ${value_type};
-   type ${type_name} is
-      access all ${list_type.value_type_name()}'Class;
+   type ${type_name} is access all ${list_type.value_type_name()}'Class;
 
 </%def>
 
