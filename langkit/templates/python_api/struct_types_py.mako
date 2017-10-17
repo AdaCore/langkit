@@ -28,6 +28,17 @@ class _BaseStruct(object):
                       for name in field_names)
         )
 
+    @property
+    def as_tuple(self):
+        return tuple(getattr(self, f) for f, _ in self._c_type._fields_)
+
+    def __eq__(self, other):
+        return (isinstance(other, type(self)) and
+                self.as_tuple == other.as_tuple)
+
+    def __ne__(self, other):
+        return not (self == other)
+
     # There is no need here to override __del__ as all structure fields already
     # override their own __del__ operators, so structure fields will
     # automatically deallocate themselves when their own Python ref-count will
@@ -103,18 +114,6 @@ class ${type_name}(${base_cls}):
         % if not field_names:
         pass
         % endif
-
-    def __eq__(self, other):
-        if not isinstance(other, ${type_name}):
-            return False
-        % for f in field_names:
-        if self._${f} != other._${f}:
-            return False
-        % endfor
-        return True
-
-    def __ne__(self, other):
-        return not (self == other)
 
     % for field in cls.get_fields():
 
