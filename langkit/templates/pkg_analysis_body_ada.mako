@@ -307,7 +307,6 @@ package body ${ada_lib_name}.Analysis is
          Diagnostics       => <>,
          With_Trivia       => With_Trivia,
          Is_Env_Populated  => False,
-         Has_Filled_Caches => False,
          Rule              => Rule,
          AST_Mem_Pool      => No_Pool,
          Destroyables      => Destroyable_Vectors.Empty_Vector,
@@ -447,7 +446,6 @@ package body ${ada_lib_name}.Analysis is
          Free (Unit.AST_Mem_Pool);
       end if;
       Unit.AST_Root := null;
-      Unit.Has_Filled_Caches := False;
       Unit.Diagnostics.Clear;
 
       --  As (re-)loading a unit can change how any AST node property in the
@@ -1080,16 +1078,6 @@ package body ${ada_lib_name}.Analysis is
    function Get_Filename (Unit : Analysis_Unit) return String is
      (To_String (Unit.File_Name));
 
-   -----------------------
-   -- Set_Filled_Caches --
-   -----------------------
-
-   procedure Set_Filled_Caches (Unit : Analysis_Unit)
-   is
-   begin
-      Unit.Has_Filled_Caches := True;
-   end Set_Filled_Caches;
-
    --------------------
    -- Reference_Unit --
    --------------------
@@ -1144,10 +1132,9 @@ package body ${ada_lib_name}.Analysis is
       end Visit;
 
    begin
-      if Unit.Has_Filled_Caches and Unit.AST_Root /= null then
+      if Unit.AST_Root /= null then
          Unit.AST_Root.Traverse (Visit'Access);
       end if;
-      Unit.Has_Filled_Caches := False;
       % if ctx.has_memoization:
          Destroy (Unit.Memoization_Map);
       % endif

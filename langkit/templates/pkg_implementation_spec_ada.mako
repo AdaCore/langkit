@@ -321,11 +321,6 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  populate multiple times the same unit and hence avoid infinite
       --  populate recursions for circular dependencies.
 
-      Has_Filled_Caches : Boolean;
-      --  Set iff at least one memoized property has been evaluated
-      --  successfully in one of the nodes, i.e. whether we need to invalidate
-      --  the cache on the AST_Root tree.
-
       Rule              : Grammar_Rule;
       --  The grammar rule used to parse this unit
 

@@ -784,9 +784,6 @@ private
    --  Generic procedure to register an object so that it is automatically
    --  destroyed when Unit is destroyed.
 
-   procedure Set_Filled_Caches (Unit : Analysis_Unit);
-   --  Tag Unit as having filled ccaches for properties memoization
-
    function Get_Lex_Env_Data
      (Unit : Analysis_Unit) return access Implementation.Lex_Env_Data_Type;
 

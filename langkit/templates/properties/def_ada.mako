@@ -67,24 +67,69 @@ is
       % endif
    % endfor
 
+   % if property.memoized:
+         <%
+            key_length = 1 + len(property.arguments)
+            if property.uses_entity_info:
+               key_length += 1
+         %>
+         use Memoization_Maps;
+         Mmz_Map : Map renames Node.Unit.Memoization_Map;
+         Mmz_Cur : Cursor;
+         Mmz_K   : Mmz_Key :=
+           (Property => ${property.memoization_enum},
+            Items    => new Mmz_Key_Array (1 ..  ${key_length}));
+         Mmz_Val : Mmz_Value := (Kind => Mmz_Property_Error);
+   % endif
+
 begin
    % if property.memoized:
-      case Self.${property.memoization_state_field_name} is
-         when Not_Computed =>
-            null;
-         when Computed =>
-            declare
-               Result : constant ${property.type.name} :=
-                  Self.${property.memoization_value_field_name};
-            begin
+      ## If memoization is enabled for this property, look for an already
+      ## computed result for this property.
+
+      Mmz_K.Items (1) := (Kind => ${property.struct.memoization_kind},
+                          As_${property.struct.name} => Self);
+      % for i, arg in enumerate(property.arguments, 2):
+         Mmz_K.Items (${i}) := (Kind => ${arg.type.memoization_kind},
+                                As_${arg.type.name} => ${arg.name});
+         % if arg.type.is_refcounted:
+            Inc_Ref (Mmz_K.Items (${i}));
+         % endif
+      % endfor
+      % if property.uses_entity_info:
+         Mmz_K.Items (${key_length}) :=
+           (Kind => ${T.entity_info.memoization_kind},
+            As_${T.entity_info.name} => ${property.entity_info_name});
+      % endif
+
+      declare
+         use Memoization_Maps;
+         Inserted : Boolean;
+      begin
+         Mmz_Map.Insert (Mmz_K, Mmz_Val, Mmz_Cur, Inserted);
+
+         ## Once we got past the last statement:
+         ##
+         ## * Either the insertion succeeded, in which case the only ownership
+         ##   share for Mmz_K got transfered to Mmz_Map.
+         ##
+         ## * Either is failed, in which case Mmz_K is no longer useful: we
+         ##   must destroy it.
+
+         if not Inserted then
+            Destroy (Mmz_K.Items);
+            Mmz_Val := Memoization_Maps.Element (Mmz_Cur);
+            if Mmz_Val.Kind = Mmz_Property_Error then
+               raise Property_Error;
+            else
+               Property_Result := Mmz_Val.As_${property.type.name};
                % if property.type.is_refcounted:
-                  Inc_Ref (Result);
+                  Inc_Ref (Property_Result);
                % endif
-               return Result;
-            end;
-         when Raise_Property_Error =>
-            raise Property_Error;
-      end case;
+               return Property_Result;
+            end if;
+         end if;
+      end;
    % endif
 
    ${scopes.start_scope(property.vars.root_scope)}
@@ -97,10 +142,11 @@ begin
    ${scopes.finalize_scope(property.vars.root_scope)}
 
    % if property.memoized:
-      Self.${property.memoization_state_field_name} := Computed;
-      Self.${property.memoization_value_field_name} := Property_Result;
-      Set_Filled_Caches (Self.Unit);
-
+      ## If memoization is enabled for this property, save the result for later
+      ## re-use.
+      Mmz_Val := (Kind => ${property.type.memoization_kind},
+                    As_${property.type.name} => Property_Result);
+      Mmz_Map.Replace_Element (Mmz_Cur, Mmz_Val);
       % if property.type.is_refcounted:
          Inc_Ref (Property_Result);
       % endif
@@ -118,8 +164,7 @@ begin
          % endfor
 
          % if property.memoized:
-            Self.${property.memoization_state_field_name} :=
-               Raise_Property_Error;
+            Mmz_Map.Replace_Element (Mmz_Cur, Mmz_Val);
          % endif
 
          raise;

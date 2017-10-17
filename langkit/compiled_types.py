@@ -1619,7 +1619,7 @@ class ASTNodeType(BaseStructType):
             is_ptr=True, null_allowed=True, is_ada_record=False,
             is_list_type=is_list, should_emit_array_type=not is_root,
             is_refcounted=False, nullexpr=null_constant(), py_nullexpr='None',
-            element_type=element_type,
+            element_type=element_type, hashable=True,
             type_repo_name=self.raw_name.camel
         )
         self._base = base

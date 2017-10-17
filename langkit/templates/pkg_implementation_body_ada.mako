@@ -1291,27 +1291,14 @@ package body ${ada_lib_name}.Analysis.Implementation is
    % for cls in ctx.astnode_types:
       % if not cls.abstract:
          <%
-            memo_props = cls.get_memoized_properties(include_inherited=True)
             logic_vars = [fld for fld in cls.get_user_fields()
                           if fld.type.is_logic_var_type]
          %>
-         % if memo_props or logic_vars:
+         % if logic_vars:
             when ${cls.ada_kind_name()} =>
                declare
                   N : ${cls.name} := ${cls.name} (Node);
                begin
-                  % if memo_props:
-                     % for p in memo_props:
-                        % if p.type.is_refcounted:
-                           if N.${p.memoization_state_field_name} = Computed
-                           then
-                              Dec_Ref (N.${p.memoization_value_field_name});
-                           end if;
-                        % endif
-                        N.${p.memoization_state_field_name} := Not_Computed;
-                     % endfor
-                  % endif
-
                   % if logic_vars:
                      % for field in logic_vars:
                         --  TODO??? Fix Adalog so that Destroy resets the
