@@ -35,17 +35,17 @@ library project Langkit_Support is
       "Langkit_Support.Bump_Ptr.Vectors",
       "Langkit_Support.Cheap_Sets",
       "Langkit_Support.Diagnostics",
+      "Langkit_Support.Extensions",
       "Langkit_Support.Images",
       "Langkit_Support.Iterators",
-      "Langkit_Support.Extensions",
       "Langkit_Support.Lexical_Env",
       "Langkit_Support.Packrat",
       "Langkit_Support.Relative_Get",
       "Langkit_Support.Slocs",
       "Langkit_Support.Symbols",
+      "Langkit_Support.Text",
       "Langkit_Support.Token_Data_Handlers",
       "Langkit_Support.Tree_Traversal_Iterator",
-      "Langkit_Support.Text",
       "Langkit_Support.Vectors");
 
    for Source_Dirs use (${string_repr(source_dir)});
