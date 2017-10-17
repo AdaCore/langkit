@@ -39,6 +39,9 @@ class _BaseStruct(object):
     def __ne__(self, other):
         return not (self == other)
 
+    def __hash__(self):
+        return hash(self.as_tuple)
+
     # There is no need here to override __del__ as all structure fields already
     # override their own __del__ operators, so structure fields will
     # automatically deallocate themselves when their own Python ref-count will
