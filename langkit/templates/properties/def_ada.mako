@@ -93,7 +93,7 @@ begin
          Mmz_K.Items (${i}) := (Kind => ${arg.type.memoization_kind},
                                 As_${arg.type.name} => ${arg.name});
          % if arg.type.is_refcounted:
-            Inc_Ref (Mmz_K.Items (${i}));
+            Inc_Ref (Mmz_K.Items (${i}).As_${arg.type.name});
          % endif
       % endfor
       % if property.uses_entity_info:
