@@ -4,6 +4,8 @@ with Ada.Unchecked_Deallocation;
 
 with System.Storage_Elements; use System.Storage_Elements;
 
+with GNATCOLL.Traces;
+
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Vectors;
@@ -56,6 +58,14 @@ generic
    --  Register a rebinding to be destroyed when Element is destroyed
 
 package Langkit_Support.Lexical_Env is
+
+   use GNATCOLL;
+
+   Me : constant Traces.Trace_Handle :=
+     Traces.Create ("Lexical_Env", Traces.Off, Stream => "&2");
+   --  Trace to debug lexical envs. This trace is meant to be activated on
+   --  demand, when the client of lexical env wants more information about
+   --  this specific lookup.
 
    type Env_Rebindings_Type;
    type Env_Rebindings is access all Env_Rebindings_Type;
