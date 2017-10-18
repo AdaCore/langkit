@@ -76,6 +76,11 @@ procedure Destroy (Map : in out Memoization_Maps.Map);
      (Env_Rebindings_Type, Env_Rebindings);
 % endif
 
+% if T.entity_info in ctx.memoization_keys:
+   function Hash (Info : Entity_Info) return Hash_Type is
+     (Combine (Hash (Info.MD), Hash (Info.Rebindings)));
+% endif
+
 function Hash is new Langkit_Support.Hashes.Hash_Access
   (${root_node_value_type}'Class, ${root_node_type_name});
 

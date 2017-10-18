@@ -1425,11 +1425,17 @@ class StructType(BaseStructType):
             nullexpr=(names.Name('No') + name).camel_with_underscores,
             is_ada_record=True,
             exposed=False,
+            hashable=True,
 
             **kwargs
         )
         self._init_fields(fields)
         CompiledTypeMetaclass.struct_types.append(self)
+
+    def add_as_memoization_key(self, context):
+        super(StructType, self).add_as_memoization_key(context)
+        for f in self.get_fields():
+            f.type.add_as_memoization_key(context)
 
     @property
     def has_equivalent_function(self):
