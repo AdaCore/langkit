@@ -122,10 +122,14 @@ class Eq(AbstractExpression):
 
     @classmethod
     def make_expr(cls, lhs, rhs, abstract_expr=None):
-        return (cls.make_expr_for_entities(lhs, rhs, abstract_expr)
-                if lhs.type.is_entity_type else
-                BasicExpr('Is_Equal', '{} = {}', T.BoolType, [lhs, rhs],
-                          abstract_expr=abstract_expr))
+        if lhs.type.is_entity_type:
+            return cls.make_expr_for_entities(lhs, rhs, abstract_expr)
+        elif lhs.type.is_lexical_env_type:
+            return CallExpr('Is_Equal', 'Equivalent', T.BoolType, [lhs, rhs],
+                            abstract_expr=abstract_expr)
+        else:
+            return BasicExpr('Is_Equal', '{} = {}', T.BoolType, [lhs, rhs],
+                             abstract_expr=abstract_expr)
 
     @staticmethod
     def make_expr_for_entities(lhs, rhs, abstract_expr=None):
