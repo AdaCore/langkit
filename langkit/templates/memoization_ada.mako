@@ -67,10 +67,8 @@ procedure Destroy (Map : in out Memoization_Maps.Map);
    value_types = ctx.sorted_types(ctx.memoization_values)
 %>
 
-function Hash (Node : ${root_node_type_name}) return Hash_Type is
-  (if Node = null
-   then Initial_Hash
-   else Hash_Type'Mod (To_Integer (Node.all'Address)));
+function Hash is new Langkit_Support.Hashes.Hash_Access
+  (${root_node_value_type}'Class, ${root_node_type_name});
 
 function Hash (Key : Mmz_Key_Item) return Hash_Type;
 function Equivalent (L, R : Mmz_Key_Item) return Boolean;

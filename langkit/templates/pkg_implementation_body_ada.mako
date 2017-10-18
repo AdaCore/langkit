@@ -16,10 +16,6 @@ with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
 % if ctx.has_memoization:
-with System.Storage_Elements; use System.Storage_Elements;
-% endif
-
-% if ctx.has_memoization:
 with Langkit_Support.Hashes; use Langkit_Support.Hashes;
 % endif
 with Langkit_Support.Relative_Get;
