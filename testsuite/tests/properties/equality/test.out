@@ -1,0 +1,5 @@
+main.py: Running...
+<Decl 1:1-1:5> .test_env (<Decl 1:1-1:5>) = True
+<Decl 1:1-1:5> .test_env (<Decl 1:6-1:12>) = False
+main.py: Done.
+Done
