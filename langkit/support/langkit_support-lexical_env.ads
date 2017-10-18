@@ -309,7 +309,7 @@ package Langkit_Support.Lexical_Env is
       --  instance. In the generated library, Elements will be AST nodes. If
       --  the lexical env is refcounted, then it does not own this env.
 
-      Default_MD : Element_Metadata;
+      Default_MD : Element_Metadata := Empty_Metadata;
       --  Default metadata for this env instance
 
       Rebindings : Env_Rebindings := null;
