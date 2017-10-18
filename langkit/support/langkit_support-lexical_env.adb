@@ -508,6 +508,12 @@ package body Langkit_Support.Lexical_Env is
       Parent_Env        : Lexical_Env;
       Parent_Rebindings : Env_Rebindings;
    begin
+      if Traces.Active (Me) then
+         Traces.Trace
+           (Me, "In Env get "
+            & Lexical_Env_Image (Self, Dump_Content => False));
+      end if;
+
       if Self = null then
          return Entity_Arrays.Empty_Array;
       end if;
@@ -556,6 +562,19 @@ package body Langkit_Support.Lexical_Env is
 
          Last_That_Can_Reach : Integer := Ret'Last;
       begin
+         if Traces.Active (Me) and then Own_Elts'Length > 0 then
+            Traces.Trace
+              (Me,
+               "Found element in self env "
+               & Lexical_Env_Image (Self, Dump_Content => False));
+
+            Traces.Increase_Indent (Me);
+            for El of Own_Elts loop
+               Traces.Trace (Me, Image (Element_Image (El.El, False)));
+            end loop;
+
+            Traces.Decrease_Indent (Me);
+         end if;
          --  Only filter if a non null value was given for the From parameter
 
          if From /= No_Element then
