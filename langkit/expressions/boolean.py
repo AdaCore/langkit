@@ -139,7 +139,7 @@ class Eq(AbstractExpression):
             lhs = Cast.Expr(lhs, T.entity)
         if rhs.type != T.entity:
             rhs = Cast.Expr(rhs, T.entity)
-        return CallExpr('Is_Equiv', 'Is_Equivalent', T.BoolType,
+        return CallExpr('Is_Equiv', 'Equivalent', T.BoolType,
                         [lhs, rhs],
                         abstract_expr=abstract_expr)
 

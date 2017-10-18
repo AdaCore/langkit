@@ -95,18 +95,18 @@ package body Langkit_Support.Lexical_Env is
       end if;
    end Get_Env;
 
-   -------------------
-   -- Is_Equivalent --
-   -------------------
+   ----------------
+   -- Equivalent --
+   ----------------
 
-   function Is_Equivalent (L, R : Env_Getter) return Boolean is
+   function Equivalent (L, R : Env_Getter) return Boolean is
    begin
       if L.Dynamic or else R.Dynamic then
          raise Constraint_Error with "trying to compare dynamic env getters";
       else
          return L.Env = R.Env;
       end if;
-   end Is_Equivalent;
+   end Equivalent;
 
    -------------
    -- Inc_Ref --
@@ -236,11 +236,11 @@ package body Langkit_Support.Lexical_Env is
          Info    => (MD => MD, Rebindings => null));
    end Create;
 
-   -------------------
-   -- Is_Equivalent --
-   -------------------
+   ----------------
+   -- Equivalent --
+   ----------------
 
-   function Is_Equivalent (L, R : Entity) return Boolean is
+   function Equivalent (L, R : Entity) return Boolean is
    begin
       if L.El /= R.El then
          return False;
@@ -253,7 +253,7 @@ package body Langkit_Support.Lexical_Env is
 
       --  For all other cases, make sure the entity info is equivalent
       return L.Info = R.Info;
-   end Is_Equivalent;
+   end Equivalent;
 
    ------------
    -- Create --

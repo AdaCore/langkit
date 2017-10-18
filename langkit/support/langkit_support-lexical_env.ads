@@ -95,7 +95,7 @@ package Langkit_Support.Lexical_Env is
    --  Constructor that returns an Entity from an Element_T and an
    --  Element_Metadata instances.
 
-   function Is_Equivalent (L, R : Entity) return Boolean;
+   function Equivalent (L, R : Entity) return Boolean;
    --  Return whether we can consider that L and R are equivalent entities
 
    ----------------------
@@ -149,7 +149,7 @@ package Langkit_Support.Lexical_Env is
    function Get_Env (Self : Env_Getter) return Lexical_Env;
    --  Return the environment associated to the Self env getter
 
-   function Is_Equivalent (L, R : Env_Getter) return Boolean;
+   function Equivalent (L, R : Env_Getter) return Boolean;
    --  If at least one of L and R is a dynamic env getter, raise a
    --  Constraint_Error. Otherwise, return whether the pointed environments are
    --  equal.

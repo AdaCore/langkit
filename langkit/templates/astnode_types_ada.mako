@@ -33,7 +33,7 @@
 
    function Eq_Default
      (Data : Equals_Data_Default; L, R : ${T.entity.name}) return Boolean
-   is (Is_Equivalent (L, R))
+   is (Equivalent (L, R))
       with Inline;
    pragma Warnings (On, "referenced");
 
