@@ -641,6 +641,7 @@ package body ${ada_lib_name}.Analysis is
       declare
          Unit : constant Analysis_Unit := Element (Cur);
       begin
+         --  As unloading a unit can change how any AST node property in the
          --  whole analysis context behaves, we have to invalidate caches. This
          --  is likely overkill, but kill all caches here as it's easy to do.
          Reset_Caches (Unit.Context);
