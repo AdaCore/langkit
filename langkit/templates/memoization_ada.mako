@@ -71,6 +71,11 @@ procedure Destroy (Map : in out Memoization_Maps.Map);
    function Hash (B : Boolean) return Hash_Type is (Boolean'Pos (B));
 % endif
 
+% if T.EnvRebindingsType in ctx.memoization_keys:
+   function Hash is new Langkit_Support.Hashes.Hash_Access
+     (Env_Rebindings_Type, Env_Rebindings);
+% endif
+
 function Hash is new Langkit_Support.Hashes.Hash_Access
   (${root_node_value_type}'Class, ${root_node_type_name});
 

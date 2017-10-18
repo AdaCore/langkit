@@ -789,7 +789,8 @@ class EnvRebindingsType(CompiledType):
             nullexpr='null',
             c_type_name='env_rebindings_type',
             is_refcounted=False,
-            py_nullexpr='None'
+            py_nullexpr='None',
+            hashable=True,
         )
 
 
