@@ -124,7 +124,7 @@ class Eq(AbstractExpression):
     def make_expr(cls, lhs, rhs, abstract_expr=None):
         if lhs.type.is_entity_type:
             return cls.make_expr_for_entities(lhs, rhs, abstract_expr)
-        elif lhs.type.is_lexical_env_type:
+        elif lhs.type.has_equivalent_function:
             return CallExpr('Is_Equal', 'Equivalent', T.BoolType, [lhs, rhs],
                             abstract_expr=abstract_expr)
         else:

@@ -226,7 +226,8 @@ class CompiledType(object):
                  exposed=False, c_type_name=None, external=False,
                  null_allowed=False, is_ada_record=False, is_refcounted=False,
                  nullexpr=None, py_nullexpr=None, element_type=None,
-                 hashable=False, type_repo_name=None):
+                 hashable=False, has_equivalent_function=False,
+                 type_repo_name=None):
         """
         :param names.Name|str name: Type name. If a string, it must be
             camel-case.
@@ -297,6 +298,10 @@ class CompiledType(object):
         :param bool hashable: Whether this type has a Hash primitive, so that
             it can be used as a key in hashed maps/sets.
 
+        :param bool has_equivalent_function: Whether testing equivalence for
+            two values of this type must go through an Equivalent function. If
+            not, code generation will use its "=" operator.
+
         :param str|None type_repo_name: Name to use for registration in
             TypeRepo. The camel-case of "name" is used if left to None.
     """
@@ -321,9 +326,14 @@ class CompiledType(object):
         self._py_nullexpr = py_nullexpr
         self._element_type = element_type
         self.hashable = hashable
+        self._has_equivalent_function = has_equivalent_function
 
         type_repo_name = type_repo_name or name.camel
         CompiledTypeMetaclass.type_dict[type_repo_name] = self
+
+    @property
+    def has_equivalent_function(self):
+        return self._has_equivalent_function
 
     def add_as_memoization_key(self, context):
         """
@@ -2438,6 +2448,7 @@ def create_builtin_types():
         null_allowed=True,
         is_refcounted=True,
         py_nullexpr='LexicalEnv.Empty',
+        has_equivalent_function=True,
     )
 
     LogicVarType()
