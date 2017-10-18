@@ -67,23 +67,6 @@ procedure Destroy (Map : in out Memoization_Maps.Map);
    value_types = ctx.sorted_types(ctx.memoization_values)
 %>
 
-% if T.BoolType.requires_hash_function:
-   function Hash (B : Boolean) return Hash_Type is (Boolean'Pos (B));
-% endif
-
-% if T.EnvRebindingsType.requires_hash_function:
-   function Hash is new Langkit_Support.Hashes.Hash_Access
-     (Env_Rebindings_Type, Env_Rebindings);
-% endif
-
-% if T.entity_info.requires_hash_function:
-   function Hash (Info : Entity_Info) return Hash_Type is
-     (Combine (Hash (Info.MD), Hash (Info.Rebindings)));
-% endif
-
-function Hash is new Langkit_Support.Hashes.Hash_Access
-  (${root_node_value_type}'Class, ${root_node_type_name});
-
 function Hash (Key : Mmz_Key_Item) return Hash_Type;
 function Equivalent (L, R : Mmz_Key_Item) return Boolean;
 procedure Destroy (Key : in out Mmz_Key_Array_Access);

@@ -2485,6 +2485,7 @@ def create_builtin_types():
         null_allowed=True,
         is_refcounted=True,
         py_nullexpr='LexicalEnv.Empty',
+        hashable=True,
         has_equivalent_function=True,
     )
 

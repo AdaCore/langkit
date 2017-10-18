@@ -1,6 +1,7 @@
 --  Test that the Equivalence function for lexical envs works properly
 
-with Ada.Text_IO;              use Ada.Text_IO;
+with Ada.Containers; use Ada.Containers;
+with Ada.Text_IO;    use Ada.Text_IO;
 
 with System;
 
@@ -14,6 +15,9 @@ procedure Main is
    end record;
 
    Default_MD : constant Metadata := (I => 0);
+
+   function Element_Hash (C : Character) return Hash_Type is (0);
+   function Metadata_Hash (MD : Metadata) return Hash_Type is (0);
 
    procedure Raise_Property_Error (Message : String := "") is
    begin
@@ -37,6 +41,8 @@ procedure Main is
       Element_Metadata     => Metadata,
       No_Element           => ' ',
       Empty_Metadata       => Default_MD,
+      Element_Hash         => Element_Hash,
+      Metadata_hash        => Metadata_Hash,
       Raise_Property_Error => Raise_Property_Error,
       Combine              => Combine,
       Can_Reach            => Can_Reach,

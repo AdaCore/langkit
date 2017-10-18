@@ -15,9 +15,7 @@ with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
-% if ctx.has_memoization:
-with Langkit_Support.Hashes; use Langkit_Support.Hashes;
-% endif
+with Langkit_Support.Hashes;      use Langkit_Support.Hashes;
 with Langkit_Support.Relative_Get;
 with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
 with Langkit_Support.Text;    use Langkit_Support.Text;
@@ -646,6 +644,27 @@ package body ${ada_lib_name}.Analysis.Implementation is
    function Element_Parent
      (Node : ${root_node_type_name}) return ${root_node_type_name}
    is (Node.Parent);
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Node : access ${root_node_value_type}'Class) return Hash_Type
+   is
+      function H is new Hash_Access
+        (${root_node_value_type}'Class, ${root_node_type_name});
+   begin
+      return H (Node);
+   end Hash;
+
+   % if T.BoolType.requires_hash_function:
+      function Hash (B : Boolean) return Hash_Type is (Boolean'Pos (B));
+   % endif
+
+   % if T.entity_info.requires_hash_function:
+      function Hash (Info : Entity_Info) return Hash_Type is
+        (Combine (Hash (Info.MD), Hash (Info.Rebindings)));
+   % endif
 
    -----------------
    -- Short_Image --

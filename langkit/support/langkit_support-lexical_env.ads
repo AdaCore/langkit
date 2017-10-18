@@ -2,10 +2,11 @@ with Ada.Containers; use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Unchecked_Deallocation;
 
-with System.Storage_Elements; use System.Storage_Elements;
+with System;
 
 with GNATCOLL.Traces;
 
+with Langkit_Support.Hashes; use Langkit_Support.Hashes;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 with Langkit_Support.Text;    use Langkit_Support.Text;
 with Langkit_Support.Vectors;
@@ -33,6 +34,9 @@ generic
    type Element_Metadata is private;
    No_Element     : Element_T;
    Empty_Metadata : Element_Metadata;
+
+   with function Element_Hash (Element : Element_T) return Hash_Type;
+   with function Metadata_Hash (Metadata : Element_Metadata) return Hash_Type;
 
    with procedure Raise_Property_Error (Message : String := "");
 
@@ -193,6 +197,9 @@ package Langkit_Support.Lexical_Env is
       Old_Env : Lexical_Env;
       New_Env : Lexical_Env) return Env_Rebindings
       with Pre => Is_Primary (Old_Env) and then Is_Primary (New_Env);
+
+   function Hash is new Hashes.Hash_Access
+     (Env_Rebindings_Type, Env_Rebindings);
 
    -------------------------------------
    -- Arrays of elements and entities --
@@ -450,9 +457,6 @@ package Langkit_Support.Lexical_Env is
      (Self.Ref_Count = No_Refcount and then Self.Node /= No_Element);
    --  Return whether Self is a lexical environment that was created in an
    --  environment specification.
-
-   function Hash (Env : Lexical_Env) return Hash_Type is
-     (Hash_Type'Mod (To_Integer (Env.all'Address)));
 
    function Lexical_Env_Image
      (Self           : Lexical_Env;

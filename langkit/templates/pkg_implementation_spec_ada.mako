@@ -146,11 +146,18 @@ package ${ada_lib_name}.Analysis.Implementation is
    function Element_Parent
      (Node : ${root_node_type_name}) return ${root_node_type_name};
 
+   function Hash
+     (Node : access ${root_node_value_type}'Class) return Hash_Type;
+   function Named_Hash (Node : ${root_node_type_name}) return Hash_Type is
+     (Hash (Node));
+
    package AST_Envs is new Langkit_Support.Lexical_Env
      (Element_T            => ${root_node_type_name},
       Element_Metadata     => ${T.env_md.name},
       No_Element           => null,
       Empty_Metadata       => No_Metadata,
+      Element_Hash         => Named_Hash,
+      Metadata_Hash        => Hash,
       Raise_Property_Error => Raise_Property_Error,
       Combine              => Combine,
       Parent               => Element_Parent,
@@ -176,6 +183,15 @@ package ${ada_lib_name}.Analysis.Implementation is
    ## since the declarations require AST_Envs.
    ${array_types.public_incomplete_decl(root_node_array)}
    ${array_types.public_decl(root_node_array)}
+
+   ## Generate Hash functions for "built-in types" if need be
+   % if T.BoolType.requires_hash_function:
+      function Hash (B : Boolean) return Hash_Type;
+   % endif
+
+   % if T.entity_info.requires_hash_function:
+      function Hash (Info : Entity_Info) return Hash_Type;
+   % endif
 
    ------------------------------------------------------
    -- AST node derived types (incomplete declarations) --

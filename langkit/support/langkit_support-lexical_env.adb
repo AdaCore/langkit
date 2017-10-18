@@ -2,6 +2,7 @@ with Ada.Containers.Ordered_Maps;
 with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
+with Ada.Unchecked_Conversion;
 
 with System.Address_Image;
 
@@ -1038,6 +1039,76 @@ package body Langkit_Support.Lexical_Env is
 
       return True;
    end Equivalent;
+
+   ----------
+   -- Hash --
+   ----------
+
+   function Hash (Env : Lexical_Env) return Hash_Type is
+
+      function Convert is new Ada.Unchecked_Conversion
+        (Lexical_Env_Resolver, System.Address);
+      function Hash is new Hash_Address
+        (System.Word_Size / System.Storage_Unit);
+      function Hash is new Hash_Access (Internal_Envs.Map, Internal_Map);
+      function Hash (Getter : Env_Getter) return Hash_Type;
+      function Hash (Ref : Referenced_Env) return Hash_Type;
+      function Hash (Refs : Referenced_Envs_Vectors.Vector) return Hash_Type;
+
+      ----------
+      -- Hash --
+      ----------
+
+      function Hash (Getter : Env_Getter) return Hash_Type is
+      begin
+         case Getter.Dynamic is
+            when True =>
+               return Combine
+                 ((1,
+                   Element_Hash (Getter.Node),
+                   Hash (Convert (Getter.Resolver))));
+            when False =>
+               return Combine (0, Hash (Getter.Env));
+         end case;
+      end Hash;
+
+      ----------
+      -- Hash --
+      ----------
+
+      function Hash (Ref : Referenced_Env) return Hash_Type is
+      begin
+         return Combine ((Boolean'Pos (Ref.Is_Transitive),
+                          Hash (Ref.Getter),
+                          Element_Hash (Ref.Creator)));
+      end Hash;
+
+      ----------
+      -- Hash --
+      ----------
+
+      function Hash (Refs : Referenced_Envs_Vectors.Vector) return Hash_Type is
+         Hashes : Hash_Array (1 .. Refs.Length);
+      begin
+         for I in Hashes'Range loop
+            Hashes (I) := Hash (Refs.Get (I));
+         end loop;
+         return Combine (Hashes);
+      end Hash;
+
+   begin
+      if Env = null then
+         return Initial_Hash;
+      end if;
+
+      return Combine
+        ((Hash (Env.Parent),
+          Element_Hash (Env.Node),
+          Hash (Env.Referenced_Envs),
+          Hash (Env.Env),
+          Metadata_Hash (Env.Default_MD),
+          Hash (Env.Rebindings)));
+   end Hash;
 
    -----------------
    -- Sorted_Envs --

@@ -721,6 +721,10 @@ class CompileCtx(object):
                         ' CompileContext.bind_env_hook has not been called'
                     )
 
+        # We need a hash function for the metadata structure as the
+        # Langkit_Support.Lexical_Env generic package requires it.
+        T.env_md.require_hash_function()
+
     def check_env_metadata(self, cls):
         """
         Perform legality checks on `cls`, the env metadata struct.
