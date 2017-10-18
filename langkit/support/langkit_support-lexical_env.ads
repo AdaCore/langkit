@@ -271,6 +271,10 @@ package Langkit_Support.Lexical_Env is
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Internal_Envs.Map, Internal_Map);
 
+   function Equivalent (L, R : Lexical_Env) return Boolean;
+   --  Return whether L and R are equivalent lexical environments: same
+   --  envs topology, same internal map, etc.
+
    function Hash (Env : Lexical_Env) return Hash_Type;
 
    package Env_Rebindings_Pools is new Ada.Containers.Hashed_Maps

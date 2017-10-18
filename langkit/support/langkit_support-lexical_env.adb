@@ -969,6 +969,76 @@ package body Langkit_Support.Lexical_Env is
       end;
    end Image;
 
+   ----------------
+   -- Equivalent --
+   ----------------
+
+   function Equivalent (L, R : Lexical_Env) return Boolean is
+
+      function Equivalent (L, R : Env_Getter) return Boolean;
+      function Equivalent (L, R : Referenced_Env) return Boolean;
+
+      ----------------
+      -- Equivalent --
+      ----------------
+
+      function Equivalent (L, R : Env_Getter) return Boolean is
+      begin
+         if L.Dynamic then
+            return (R.Dynamic
+                    and then L.Node = R.Node
+                    and then L.Resolver = R.Resolver);
+         else
+            return L.Env = R.Env;
+         end if;
+      end Equivalent;
+
+      ----------------
+      -- Equivalent --
+      ----------------
+
+      function Equivalent (L, R : Referenced_Env) return Boolean is
+      begin
+         return (L.Is_Transitive = R.Is_Transitive
+                 and then Equivalent (L.Getter, R.Getter)
+                 and then L.Creator = R.Creator);
+      end Equivalent;
+
+   begin
+      --  Optimization: if we have two primary lexical environments, don't go
+      --  through structural comparison: we can use pointer equality.
+
+      if Is_Primary (L) and then Is_Primary (R) then
+         return L = R;
+      end if;
+
+      --  Compare all fields to see if they are equivalent. We can use strict
+      --  equality for nodes and rebindings because there is only one
+      --  value for each equivalence class.
+
+      if not Equivalent (L.Parent, R.Parent)
+         or else L.Node /= R.Node
+         or else L.Env /= R.Env
+         or else L.Default_MD /= R.Default_MD
+         or else L.Rebindings /= R.Rebindings
+      then
+         return False;
+      end if;
+
+      if L.Referenced_Envs.Length /= R.Referenced_Envs.Length then
+         return False;
+      end if;
+      for I in 1 .. L.Referenced_Envs.Last_Index loop
+         if not Equivalent (L.Referenced_Envs.Get (I),
+                            R.Referenced_Envs.Get (I))
+         then
+            return False;
+         end if;
+      end loop;
+
+      return True;
+   end Equivalent;
+
    -----------------
    -- Sorted_Envs --
    -----------------
