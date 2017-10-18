@@ -30,6 +30,10 @@ class FooNode(ASTNode):
     def env_struct():
         return New(EnvStruct, env=Self.children_env.env_orphan)
 
+    @langkit_property()
+    def env_array():
+        return Self.children_env.env_orphan.singleton
+
 
 class Decl(FooNode):
     has_plus = Field()
@@ -48,6 +52,10 @@ class Decl(FooNode):
     @langkit_property(public=True, return_type=T.BoolType)
     def test_struct(other=T.FooNode.entity):
         return Self.env_struct == other.env_struct
+
+    @langkit_property(public=True, return_type=T.BoolType)
+    def test_array(other=T.FooNode.entity):
+        return Self.env_array == other.env_array
 
 
 class Ref(FooNode):

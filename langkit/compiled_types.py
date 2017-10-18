@@ -2169,7 +2169,8 @@ class ArrayType(CompiledType):
                                         is_refcounted=True,
                                         nullexpr=null_constant(),
                                         element_type=element_type,
-                                        null_allowed=True)
+                                        null_allowed=True,
+                                        has_equivalent_function=True)
 
         # Register this type where it needs to be registered
         ctx = get_context(True)

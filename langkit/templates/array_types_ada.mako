@@ -53,6 +53,8 @@
    procedure Inc_Ref (T : ${cls.name});
    procedure Dec_Ref (T : in out ${cls.name});
 
+   function Equivalent (L, R : ${cls.name}) return Boolean;
+
 </%def>
 
 <%def name="private_decl(cls)">
@@ -173,4 +175,30 @@
           Items     => Implementation.${cls.array_type_name} (Items),
           Ref_Count => 1));
    % endif
+
+   ----------------
+   -- Equivalent --
+   ----------------
+
+   function Equivalent (L, R : ${cls.name}) return Boolean is
+   begin
+      if L.N /= R.N then
+         return False;
+      end if;
+
+      for I in L.Items'Range loop
+         if
+            % if cls.element_type.has_equivalent_function:
+               not Equivalent (L.Items (I), R.Items (I))
+            % else:
+               L.Items (I) /= R.Items (I)
+            % endif
+         then
+            return False;
+         end if;
+      end loop;
+
+      return True;
+   end Equivalent;
+
 </%def>
