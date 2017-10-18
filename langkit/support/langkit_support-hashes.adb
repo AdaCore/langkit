@@ -1,3 +1,7 @@
+with Ada.Unchecked_Conversion;
+
+with System.Storage_Elements;
+
 with Interfaces;
 
 package body Langkit_Support.Hashes is
@@ -39,5 +43,21 @@ package body Langkit_Support.Hashes is
       end loop;
       return Result;
    end Combine;
+
+   -----------------
+   -- Hash_Access --
+   -----------------
+
+   function Hash_Access (Acc : Object_Access) return Hash_Type is
+      use System, System.Storage_Elements;
+
+      function Convert is new Ada.Unchecked_Conversion
+        (Object_Access, Integer_Address);
+
+      Shift_Amount : constant := Word_Size / Storage_Unit;
+      Addr : constant Integer_Address := Convert (Acc) / (2 ** Shift_Amount);
+   begin
+      return Hash_Type'Mod (Addr);
+   end Hash_Access;
 
 end Langkit_Support.Hashes;

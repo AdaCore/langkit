@@ -14,6 +14,12 @@ package Langkit_Support.Hashes is
    function Combine (Hashes : Hash_Array) return Hash_Type;
    --  Combine several hashes into a single one. This is like hashing a tuple.
 
+   generic
+      type Object_Type (<>) is limited private;
+      type Object_Access is access Object_Type;
+   function Hash_Access (Acc : Object_Access) return Hash_Type;
+   --  Generic access hash function
+
 private
 
    Initial_Hash : constant Hash_Type := 0;
