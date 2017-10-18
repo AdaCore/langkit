@@ -1429,6 +1429,10 @@ class StructType(BaseStructType):
         CompiledTypeMetaclass.struct_types.append(self)
 
     @property
+    def has_equivalent_function(self):
+        return any(f.type.has_equivalent_function for f in self.get_fields())
+
+    @property
     def is_refcounted(self):
         return any(f.type.is_refcounted for f in self._fields.values())
 

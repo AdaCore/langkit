@@ -48,6 +48,10 @@
          (El : ${cls.el_type.name}; Info : Entity_Info)
           return ${cls.name};
    % endif
+
+   % if cls.has_equivalent_function:
+      function Equivalent (L, R : ${cls.name}) return Boolean;
+   % endif
 </%def>
 
 
@@ -103,4 +107,21 @@
 
    % endif
 
+   % if cls.has_equivalent_function:
+
+      ----------------
+      -- Equivalent --
+      ----------------
+
+      function Equivalent (L, R : ${cls.name}) return Boolean is
+      begin
+         return ${(' and then '.join(
+            ('Equivalent (L.{}, R.{})'
+             if f.type.has_equivalent_function else
+             'L.{} = R.{}').format(f.name, f.name)
+            for f in cls.get_fields()
+         ))};
+      end Equivalent;
+
+   % endif
 </%def>

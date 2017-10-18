@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, T
+from langkit.dsl import ASTNode, Field, Struct, UserField, T
 from langkit.envs import EnvSpec, add_env, add_to_env
 from langkit.expressions import New, Self, langkit_property
 from langkit.parsers import Grammar, List, Opt, Tok
@@ -20,8 +20,15 @@ from utils import build_and_run
 Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
+class EnvStruct(Struct):
+    env = UserField(type=T.LexicalEnvType)
+
+
 class FooNode(ASTNode):
-    pass
+
+    @langkit_property()
+    def env_struct():
+        return New(EnvStruct, env=Self.children_env.env_orphan)
 
 
 class Decl(FooNode):
@@ -37,6 +44,10 @@ class Decl(FooNode):
     @langkit_property(public=True, return_type=T.BoolType)
     def test_env(other=T.FooNode.entity):
         return Self.children_env.env_orphan == other.children_env.env_orphan
+
+    @langkit_property(public=True, return_type=T.BoolType)
+    def test_struct(other=T.FooNode.entity):
+        return Self.env_struct == other.env_struct
 
 
 class Ref(FooNode):
