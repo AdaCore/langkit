@@ -1,0 +1,106 @@
+--  Test that the Equivalence function for lexical envs works properly
+
+with Ada.Text_IO;              use Ada.Text_IO;
+
+with System;
+
+with Langkit_Support.Lexical_Env;
+with Langkit_Support.Text; use Langkit_Support.Text;
+
+procedure Main is
+
+   type Metadata is record
+      I : Integer;
+   end record;
+
+   Default_MD : constant Metadata := (I => 0);
+
+   procedure Raise_Property_Error (Message : String := "") is
+   begin
+      raise Program_Error;
+   end Raise_Property_Error;
+
+   function Combine (L, R : Metadata) return Metadata is ((I => L.I + R.I));
+   function Parent (Node : Character) return Character is (' ');
+   function Can_Reach (Node, From : Character) return Boolean is (True);
+   function Is_Rebindable (Node : Character) return Boolean is (True);
+
+   function Element_Image
+     (Node : Character; Short : Boolean := True) return Text_Type
+   is (To_Text ("'" & Node & "'"));
+
+   procedure Register_Rebinding (Node : Character; Rebinding : System.Address)
+   is null;
+
+   package Envs is new Langkit_Support.Lexical_Env
+     (Element_T            => Character,
+      Element_Metadata     => Metadata,
+      No_Element           => ' ',
+      Empty_Metadata       => Default_MD,
+      Raise_Property_Error => Raise_Property_Error,
+      Combine              => Combine,
+      Can_Reach            => Can_Reach,
+      Is_Rebindable        => Is_Rebindable,
+      Element_Image        => Element_Image,
+      Register_Rebinding   => Register_Rebinding);
+   use Envs;
+
+   Root_A1 : Lexical_Env := new Lexical_Env_Type'
+     (Node => 'A', Ref_Count => No_Refcount, others => <>);
+   Root_A2 : Lexical_Env := new Lexical_Env_Type'
+     (Root_A1.all'Update (Ref_Count => 1));
+   Root_A3 : Lexical_Env := new Lexical_Env_Type'(Root_A2.all);
+
+   Root_A2_Getter : constant Env_Getter := Simple_Env_Getter (Root_A2);
+
+   Root_B1 : Lexical_Env := new Lexical_Env_Type'
+     (Root_A2.all'Update (Node => 'B'));
+
+   Child : Lexical_Env := new Lexical_Env_Type'
+     (Root_A2.all'Update (Parent => Root_A2_Getter));
+
+   function To_Refs
+     (Ref : Referenced_Env) return Referenced_Envs_Vectors.Vector
+   is
+      V : Referenced_Envs_Vectors.Vector;
+   begin
+      V.Append (Ref);
+      return V;
+   end To_Refs;
+
+   Ref_1 : constant Referenced_Env :=
+     (Is_Transitive => False, Getter => Root_A2_Getter, Creator => ' ');
+   Ref_2 : constant Referenced_Env :=
+     (Is_Transitive => False, Getter => Root_A2_Getter, Creator => 'A');
+
+   Env_Ref_1 : Lexical_Env := new Lexical_Env_Type'
+     (Root_A2.all'Update (Referenced_Envs => To_Refs (Ref_1)));
+   Env_Ref_2 : Lexical_Env := new Lexical_Env_Type'
+     (Root_A2.all'Update (Referenced_Envs => To_Refs (Ref_2)));
+   Env_Ref_3 : Lexical_Env := new Lexical_Env_Type'
+     (Root_A2.all'Update (Referenced_Envs => To_Refs (Ref_1)));
+
+   MD : Lexical_Env := new Lexical_Env_Type'
+     (Root_A2.all'Update (Default_MD => (I => 1)));
+begin
+   --  Check for various combinations of equivalent environments with
+   --  enabled/disable ref-counting.
+   pragma Assert (Equivalent (Root_A1, Root_A1));
+   pragma Assert (Equivalent (Root_A2, Root_A2));
+   pragma Assert (Equivalent (Root_A1, Root_A2));
+   pragma Assert (Equivalent (Root_A2, Root_A3));
+
+   --  Check different Parent
+   pragma Assert (not Equivalent (Root_A2, Child));
+
+   --  Check different Node
+   pragma Assert (not Equivalent (Root_A3, Root_B1));
+
+   --  Check Referenced_Envs
+   pragma Assert (not Equivalent (Root_A2, Env_Ref_1));
+   pragma Assert (Equivalent (Env_Ref_1, Env_Ref_3));
+   pragma Assert (not Equivalent (Env_Ref_1, Env_Ref_2));
+
+   --  Check different Default_MD
+   pragma Assert (not Equivalent (Root_A2, MD));
+end Main;
