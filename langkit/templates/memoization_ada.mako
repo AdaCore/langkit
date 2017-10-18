@@ -71,8 +71,36 @@ function Hash (Node : ${root_node_type_name}) return Hash_Type is
   (if Node = null
    then Initial_Hash
    else Hash_Type'Mod (To_Integer (Node.all'Address)));
+
 function Hash (Key : Mmz_Key_Item) return Hash_Type;
+function Equivalent (L, R : Mmz_Key_Item) return Boolean;
 procedure Destroy (Key : in out Mmz_Key_Array_Access);
+
+----------------
+-- Equivalent --
+----------------
+
+function Equivalent (L, R : Mmz_Key_Item) return Boolean is
+begin
+   if L.Kind /= R.Kind then
+      return False;
+   end if;
+
+   case L.Kind is
+      % for t in key_types:
+         when ${t.memoization_kind} =>
+            <%
+               l = 'L.As_{}'.format(t.name)
+               r = 'R.As_{}'.format(t.name)
+            %>
+            % if t.has_equivalent_function:
+               return Equivalent (${l}, ${r});
+            % else:
+               return ${l} = ${r};
+            % endif
+      % endfor
+   end case;
+end Equivalent;
 
 ----------
 -- Hash --
@@ -118,7 +146,7 @@ begin
    end if;
 
    for I in L_Items'Range loop
-      if L_Items (I) /= R_Items (I) then
+      if not Equivalent (L_Items (I), R_Items (I)) then
          return False;
       end if;
    end loop;
