@@ -1065,6 +1065,10 @@ package body Langkit_Support.Lexical_Env is
       end Dump_Referenced;
 
    begin
+      if Self = null then
+         return "";
+      end if;
+
       if Env_Id'Length /= 0 then
          Append (Result, Env_Id & " = ");
       end if;
