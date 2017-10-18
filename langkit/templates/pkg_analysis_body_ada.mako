@@ -1683,6 +1683,15 @@ package body ${ada_lib_name}.Analysis is
       return '@' & Stripped_Image (Address_To_Id_Maps.Element (C));
    end Get_Env_Id;
 
+   ------------------------
+   -- Trigger_Envs_Debug --
+   ------------------------
+
+   procedure Trigger_Envs_Debug (Is_Active : Boolean) is
+   begin
+      AST_Envs.Me.Set_Active (Is_Active);
+   end Trigger_Envs_Debug;
+
    ----------------------
    -- Dump_Lexical_Env --
    ----------------------

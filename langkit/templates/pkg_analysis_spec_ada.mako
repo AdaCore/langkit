@@ -286,6 +286,9 @@ package ${ada_lib_name}.Analysis is
    procedure Dump_Lexical_Env (Unit : Analysis_Unit);
    --  Debug helper: output the lexical envs for given analysis unit
 
+   procedure Trigger_Envs_Debug (Is_Active : Boolean);
+   --  Activate debug traces for lexical envs lookups
+
    procedure Print (Unit : Analysis_Unit);
    --  Debug helper: output the AST and eventual diagnostic for this unit on
    --  standard output.
