@@ -2477,6 +2477,7 @@ def create_builtin_types():
         is_ptr=False,
         nullexpr='false',
         py_nullexpr='False',
+        hashable=True,
 
         # "bool" is not a built-in type in C: we define our own type based on
         # uint8_t.
