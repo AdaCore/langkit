@@ -340,7 +340,9 @@ class CompiledType(object):
         Add `self` to the set of types that are used as keys in the hashed maps
         used to implement properties memoization. It has to be hashable.
         """
-        assert self.hashable
+        assert self.hashable, 'Trying to use {} as hashable type'.format(
+            self.dsl_name
+        )
         context.memoization_keys.add(self)
 
     def add_as_memoization_value(self, context):
