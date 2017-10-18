@@ -4,7 +4,6 @@
 <%namespace name="astnode_types"     file="astnode_types_ada.mako" />
 <%namespace name="enum_types"        file="enum_types_ada.mako" />
 <%namespace name="list_types"        file="list_types_ada.mako" />
-<%namespace name="struct_types"      file="struct_types_ada.mako" />
 <%namespace name="public_properties" file="public_properties_ada.mako" />
 
 <% root_node_array = T.root_node.array %>
@@ -1751,10 +1750,6 @@ package body ${ada_lib_name}.Analysis is
    begin
       Internal (${root_node_type_name} (Node));
    end Dump_Lexical_Env;
-
-   ## Env metadata's body
-
-   ${struct_types.body(T.env_md)}
 
    --------------------------------
    -- Assign_Names_To_Logic_Vars --

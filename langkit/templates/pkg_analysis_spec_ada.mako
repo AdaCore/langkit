@@ -4,7 +4,6 @@
 <%namespace name="astnode_types"     file="astnode_types_ada.mako" />
 <%namespace name="enum_types"        file="enum_types_ada.mako" />
 <%namespace name="list_types"        file="list_types_ada.mako" />
-<%namespace name="struct_types"      file="struct_types_ada.mako" />
 <%namespace name="pretty_printers"   file="pretty_printers_ada.mako" />
 <%namespace name="public_properties" file="public_properties_ada.mako" />
 
