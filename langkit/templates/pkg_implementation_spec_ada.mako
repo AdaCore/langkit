@@ -217,161 +217,6 @@ package ${ada_lib_name}.Analysis.Implementation is
       % endif
    % endfor
 
-   % if ctx.has_memoization:
-   ------------------------
-   --  Memoization state --
-   ------------------------
-
-   ${memoization.decl()}
-   % endif
-
-   -----------------------------
-   -- Miscellanous operations --
-   -----------------------------
-
-   type Destroy_Procedure is access procedure (Object : System.Address);
-
-   type Destroyable_Type is record
-      Object  : System.Address;
-      --  Object to destroy
-
-      Destroy : Destroy_Procedure;
-      --  Procedure to destroy Object
-   end record;
-   --  Simple holder to associate an object to destroy and the procedure to
-   --  perform the destruction.
-
-   type Analysis_Context_Private_Part_Type;
-   type Analysis_Context_Private_Part is access all
-      Analysis_Context_Private_Part_Type;
-   type Lex_Env_Data_Type;
-   type Lex_Env_Data is access all Lex_Env_Data_Type;
-
-   package Destroyable_Vectors is new Langkit_Support.Vectors
-     (Destroyable_Type);
-
-   package Analysis_Unit_Sets is new Langkit_Support.Cheap_Sets
-     (Analysis_Unit, null);
-
-   package Units_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Unbounded_String,
-      Element_Type    => Analysis_Unit,
-      Hash            => Ada.Strings.Unbounded.Hash,
-      Equivalent_Keys => "=");
-
-   % if ctx.symbol_literals:
-      type Symbol_Literal_Type is (
-         <%
-            sym_items = ctx.sorted_symbol_literals
-            last_i = len(sym_items) - 1
-         %>
-         % for i, (sym, name) in enumerate(sym_items):
-            ${name}${',' if i < last_i else ''}
-            -- ${sym}
-         % endfor
-      );
-
-      type Symbol_Literal_Array is array (Symbol_Literal_Type) of Symbol_Type;
-      type Symbol_Literal_Array_Access is access all Symbol_Literal_Array;
-   % endif
-
-   type Analysis_Context_Type is record
-      Ref_Count  : Natural;
-      Units_Map  : Units_Maps.Map;
-      Symbols    : Symbol_Table;
-
-      Charset    : Unbounded_String;
-      --  Default charset to use in analysis units
-
-      Root_Scope : Lexical_Env;
-      --  The lexical scope that is shared amongst every compilation unit. Used
-      --  to resolve cross file references.
-
-      % if ctx.default_unit_provider:
-      Unit_Provider : Unit_Provider_Access_Cst;
-      --  Object to translate unit names to file names
-      % endif
-
-      % if ctx.symbol_literals:
-      Symbol_Literals : Symbol_Literal_Array;
-      --  List of pre-computed symbols in the Symbols table
-      % endif
-
-      Private_Part : Analysis_Context_Private_Part;
-
-      Discard_Errors_In_Populate_Lexical_Env : Boolean := True;
-      --  See the eponym procedure
-
-      In_Populate_Lexical_Env : Boolean := False;
-      --  Flag to tell whether we are running the Populate_Lexical_Env pass.
-      --  When it's on, we must not use the memoization map as the hash of
-      --  lexical environment changes when their content changes.
-   end record;
-
-   type Analysis_Unit_Type is record
-      Context           : Analysis_Context;
-      --  The owning context for this analysis unit
-
-      Ref_Count         : Natural;
-      --  Ref count for the analysis unit. Note that in the Ada API you'll
-      --  still have to call Inc_Ref/Dec_Ref manually.
-
-      AST_Root          : ${root_node_type_name};
-
-      File_Name         : Unbounded_String;
-      --  The originating name for this analysis unit. This should be set even
-      --  if the analysis unit was parsed from a buffer.
-
-      Charset           : Unbounded_String;
-      --  The parsing charset for this analysis unit, as a string. If the
-      --  charset used actually came from a byte order mark, this is
-      --  nevertheless set to the one the user requested.
-
-      TDH               : aliased Token_Data_Handler;
-      --  The token data handler that handles all token data during parsing and
-      --  owns it afterwards.
-
-      Diagnostics       : Diagnostics_Vectors.Vector;
-      --  The list of diagnostics produced for this analysis unit
-
-      With_Trivia       : Boolean;
-      --  Whether Trivia nodes were parsed and included in this analysis unit
-
-      Is_Env_Populated  : Boolean;
-      --  Whether Populate_Lexical_Env was called on this unit. Used not to
-      --  populate multiple times the same unit and hence avoid infinite
-      --  populate recursions for circular dependencies.
-
-      Rule              : Grammar_Rule;
-      --  The grammar rule used to parse this unit
-
-      AST_Mem_Pool      : Bump_Ptr_Pool;
-      --  This memory pool shall only be used for AST parsing. Stored here
-      --  because it is more convenient, but one shall not allocate from it.
-
-      Destroyables      : Destroyable_Vectors.Vector;
-      --  Collection of objects to destroy when destroying the analysis unit
-
-      Referenced_Units  : Analysis_Unit_Sets.Set;
-      --  Units that are referenced from this one. Useful for
-      --  visibility/computation of the reference graph.
-
-      Lex_Env_Data_Acc  : Lex_Env_Data;
-      --  Lexical environment metadata for elements in this units' environments
-      --  that belong to other units.
-
-      Rebindings        : aliased Env_Rebindings_Vectors.Vector;
-      --  List of rebindings for which Old_Env and/or New_Env belong to this
-      --  unit. When this unit gets destroyed or reparsed, these rebindings
-      --  need to be destroyed too (see Destroy_Rebindings).
-
-      % if ctx.has_memoization:
-         Memoization_Map : Memoization_Maps.Map;
-         --  Mapping of arguments tuple to property result for memoization
-      % endif
-   end record;
-
-
    % if ctx.generate_pp:
    function PP
      (Node : access ${root_node_value_type}) return String is abstract;
@@ -878,5 +723,157 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    function Bare_Node
      (Node : ${root_entity.api_name}'Class) return ${root_node_type_name};
+
+   % if ctx.has_memoization:
+   ------------------------
+   --  Memoization state --
+   ------------------------
+
+   ${memoization.decl()}
+   % endif
+
+   -----------------------------
+   -- Miscellanous operations --
+   -----------------------------
+
+   type Destroy_Procedure is access procedure (Object : System.Address);
+
+   type Destroyable_Type is record
+      Object  : System.Address;
+      --  Object to destroy
+
+      Destroy : Destroy_Procedure;
+      --  Procedure to destroy Object
+   end record;
+   --  Simple holder to associate an object to destroy and the procedure to
+   --  perform the destruction.
+
+   type Analysis_Context_Private_Part is access all
+      Analysis_Context_Private_Part_Type;
+   type Lex_Env_Data is access all Lex_Env_Data_Type;
+
+   package Destroyable_Vectors is new Langkit_Support.Vectors
+     (Destroyable_Type);
+
+   package Analysis_Unit_Sets is new Langkit_Support.Cheap_Sets
+     (Analysis_Unit, null);
+
+   package Units_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Unbounded_String,
+      Element_Type    => Analysis_Unit,
+      Hash            => Ada.Strings.Unbounded.Hash,
+      Equivalent_Keys => "=");
+
+   % if ctx.symbol_literals:
+      type Symbol_Literal_Type is (
+         <%
+            sym_items = ctx.sorted_symbol_literals
+            last_i = len(sym_items) - 1
+         %>
+         % for i, (sym, name) in enumerate(sym_items):
+            ${name}${',' if i < last_i else ''}
+            -- ${sym}
+         % endfor
+      );
+
+      type Symbol_Literal_Array is array (Symbol_Literal_Type) of Symbol_Type;
+      type Symbol_Literal_Array_Access is access all Symbol_Literal_Array;
+   % endif
+
+   type Analysis_Context_Type is record
+      Ref_Count  : Natural;
+      Units_Map  : Units_Maps.Map;
+      Symbols    : Symbol_Table;
+
+      Charset    : Unbounded_String;
+      --  Default charset to use in analysis units
+
+      Root_Scope : Lexical_Env;
+      --  The lexical scope that is shared amongst every compilation unit. Used
+      --  to resolve cross file references.
+
+      % if ctx.default_unit_provider:
+      Unit_Provider : Unit_Provider_Access_Cst;
+      --  Object to translate unit names to file names
+      % endif
+
+      % if ctx.symbol_literals:
+      Symbol_Literals : Symbol_Literal_Array;
+      --  List of pre-computed symbols in the Symbols table
+      % endif
+
+      Private_Part : Analysis_Context_Private_Part;
+
+      Discard_Errors_In_Populate_Lexical_Env : Boolean := True;
+      --  See the eponym procedure
+
+      In_Populate_Lexical_Env : Boolean := False;
+      --  Flag to tell whether we are running the Populate_Lexical_Env pass.
+      --  When it's on, we must not use the memoization map as the hash of
+      --  lexical environment changes when their content changes.
+   end record;
+
+   type Analysis_Unit_Type is record
+      Context           : Analysis_Context;
+      --  The owning context for this analysis unit
+
+      Ref_Count         : Natural;
+      --  Ref count for the analysis unit. Note that in the Ada API you'll
+      --  still have to call Inc_Ref/Dec_Ref manually.
+
+      AST_Root          : ${root_node_type_name};
+
+      File_Name         : Unbounded_String;
+      --  The originating name for this analysis unit. This should be set even
+      --  if the analysis unit was parsed from a buffer.
+
+      Charset           : Unbounded_String;
+      --  The parsing charset for this analysis unit, as a string. If the
+      --  charset used actually came from a byte order mark, this is
+      --  nevertheless set to the one the user requested.
+
+      TDH               : aliased Token_Data_Handler;
+      --  The token data handler that handles all token data during parsing and
+      --  owns it afterwards.
+
+      Diagnostics       : Diagnostics_Vectors.Vector;
+      --  The list of diagnostics produced for this analysis unit
+
+      With_Trivia       : Boolean;
+      --  Whether Trivia nodes were parsed and included in this analysis unit
+
+      Is_Env_Populated  : Boolean;
+      --  Whether Populate_Lexical_Env was called on this unit. Used not to
+      --  populate multiple times the same unit and hence avoid infinite
+      --  populate recursions for circular dependencies.
+
+      Rule              : Grammar_Rule;
+      --  The grammar rule used to parse this unit
+
+      AST_Mem_Pool      : Bump_Ptr_Pool;
+      --  This memory pool shall only be used for AST parsing. Stored here
+      --  because it is more convenient, but one shall not allocate from it.
+
+      Destroyables      : Destroyable_Vectors.Vector;
+      --  Collection of objects to destroy when destroying the analysis unit
+
+      Referenced_Units  : Analysis_Unit_Sets.Set;
+      --  Units that are referenced from this one. Useful for
+      --  visibility/computation of the reference graph.
+
+      Lex_Env_Data_Acc  : Lex_Env_Data;
+      --  Lexical environment metadata for elements in this units' environments
+      --  that belong to other units.
+
+      Rebindings        : aliased Env_Rebindings_Vectors.Vector;
+      --  List of rebindings for which Old_Env and/or New_Env belong to this
+      --  unit. When this unit gets destroyed or reparsed, these rebindings
+      --  need to be destroyed too (see Destroy_Rebindings).
+
+      % if ctx.has_memoization:
+         Memoization_Map : Memoization_Maps.Map;
+         --  Mapping of arguments tuple to property result for memoization
+      % endif
+   end record;
 
 end ${ada_lib_name}.Analysis.Implementation;
