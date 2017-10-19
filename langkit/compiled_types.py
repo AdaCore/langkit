@@ -1938,18 +1938,6 @@ class ASTNodeType(BaseStructType):
             include_inherited
         )
 
-    def get_memoized_properties(self, include_inherited=False):
-        """
-        Return the list of all memoized properties `self` has.
-
-        :param bool include_inherited: If true, include inheritted properties
-            in the returned list. Return only properties that were part of the
-            declaration of this node otherwise.
-
-        :rtype: list[langkit.expressions.base.PropertyDef]
-        """
-        return self.get_properties(lambda p: p.memoized, include_inherited)
-
     def fields_with_accessors(self):
         """
         Return a list of fields for which we must generate accessors in APIs.

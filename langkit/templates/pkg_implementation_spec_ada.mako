@@ -489,13 +489,6 @@ package ${ada_lib_name}.Analysis.Implementation is
    -- Root AST node (internals) --
    -------------------------------
 
-   type Memoization_State is (Not_Computed, Computed, Raise_Property_Error);
-   --  Implementation detail for properties memoization. Values describe if::
-   --
-   --    * the property is still to be evaluated (Not_Computed);
-   --    * if its result value is already available (Computed);
-   --    * if it is known to raise a Property_Error (Raise_Property_Error).
-
    type ${root_node_value_type} is abstract tagged record
       Parent                 : ${root_node_type_name} := null;
 
