@@ -23,6 +23,10 @@ with Ada.Unchecked_Deallocation;
 
 with System;
 
+% if ctx.properties_logging:
+   with GNATCOLL.Traces;
+% endif
+
 with Langkit_Support.Adalog.Abstract_Relation;
 use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Adalog.Eq_Same;
@@ -42,6 +46,12 @@ with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 package ${ada_lib_name}.Analysis.Implementation is
+
+   % if ctx.properties_logging:
+      Properties_Traces : constant GNATCOLL.Traces.Trace_Handle :=
+         GNATCOLL.Traces.Create
+           ("Properties", GNATCOLL.Traces.On, Stream => "&1");
+   % endif
 
    type ${root_node_value_type};
    --  This "by-value" type is public to expose the fact that the various

@@ -340,6 +340,11 @@ class ManageScript(object):
             choices=[w.name for w in WarningSet.available_warnings],
             help='Disable a warning'
         )
+        subparser.add_argument(
+            '--enable-properties-logging', dest='enabled_properties_logging',
+            action='store_true',
+            help='Instrument properties code to do logging'
+        )
 
     def add_build_args(self, subparser):
         """
@@ -596,7 +601,8 @@ class ManageScript(object):
                           check_only=args.check_only,
                           warnings=args.enabled_warnings,
                           no_property_checks=args.no_property_checks,
-                          generate_pp=args.pp)
+                          generate_pp=args.pp,
+                          properties_logging=args.enabled_properties_logging)
 
         if args.check_only:
             return

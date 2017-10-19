@@ -969,7 +969,7 @@ class CompileCtx(object):
     def emit(self, file_root='.', generate_lexer=True, main_source_dirs=set(),
              main_programs=set(), annotate_fields_types=False,
              check_only=False, no_property_checks=False,
-             warnings=None, generate_pp=False):
+             warnings=None, generate_pp=False, properties_logging=False):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -1005,6 +1005,9 @@ class CompileCtx(object):
 
         :param bool generate_pp: Whether to generate a pretty printer for the
             given grammar.
+
+        :param bool propeties_logging: Whether to instrument properties code to
+            do logging.
         """
         if self.extensions_dir:
             add_template_dir(self.extensions_dir)
@@ -1013,6 +1016,7 @@ class CompileCtx(object):
 
         self.no_property_checks = no_property_checks
         self.generate_pp = generate_pp
+        self.properties_logging = properties_logging
         if warnings:
             self.warnings = warnings
 

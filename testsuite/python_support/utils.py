@@ -95,7 +95,7 @@ def build(grammar, lexer=None, warning_set=default_warning_set):
 
 
 def build_and_run(grammar, py_script, lexer=None,
-                  warning_set=default_warning_set):
+                  warning_set=default_warning_set, properties_logging=False):
     """
     Compile and emit code for `ctx` and build the generated library. Then, if
     `py_script` is not None, run it with this library available.
@@ -126,6 +126,8 @@ def build_and_run(grammar, py_script, lexer=None,
     argv = sys.argv[1:] + ['--full-error-traces', '-vnone', 'make']
     for w in WarningSet.available_warnings:
         argv.append('-{}{}'.format('W' if w in warning_set else 'w', w.name))
+    if properties_logging:
+        argv.append('--enable-properties-logging')
     m.run(argv)
 
     # No script is provided? Then we have nothing left to do
