@@ -48,6 +48,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
          declare
             L_Val : L_Type := Convert (Self.R_Data, Self.Right);
          begin
+            Trace ("Set Left from converted Right value");
             Set_Value (Self.Left, L_Val);
             L_Dec_Ref (L_Val);
             Self.Changed := True;
