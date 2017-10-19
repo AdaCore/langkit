@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode
+from langkit.dsl import ASTNode, T
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, Row
 
@@ -35,6 +35,8 @@ def run(name, prop):
 
 
 run('Invalid uses entity info',
-    lambda: Property(Self.as_entity, memoized=True))
+    lambda: Property(lambda a=T.entity.array:
+                     a.any(lambda item: item == Self.as_entity),
+                     memoized=True))
 
 print('Done')

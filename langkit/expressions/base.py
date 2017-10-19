@@ -3284,14 +3284,8 @@ class PropertyDef(AbstractNodeData):
             (not self.abstract,
              'A memoized property cannot be abstract: memoization is not an'
              ' inherited behavior'),
-            (not self._dynamic_vars,
-             'A memoized property cannot have dynamically bound variables'),
-            (not self.uses_entity_info,
-             'A memoized property cannot use entity info'),
             (not self.external,
              'An external property cannot be memoized'),
-            (not self.arguments,
-             'A memoized property is not allowed to take arguments'),
         ]:
             check_source_language(invariant_p, msg)
 
