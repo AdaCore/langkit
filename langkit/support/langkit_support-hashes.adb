@@ -44,20 +44,32 @@ package body Langkit_Support.Hashes is
       return Result;
    end Combine;
 
+   ------------------
+   -- Hash_Address --
+   ------------------
+
+   function Hash_Address (Addr : System.Address) return Hash_Type is
+      use System, System.Storage_Elements;
+
+      Result : constant Integer_Address :=
+         To_Integer (Addr) / (2 ** Ignored_LSB);
+   begin
+      return Hash_Type'Mod (Result);
+   end Hash_Address;
+
    -----------------
    -- Hash_Access --
    -----------------
 
    function Hash_Access (Acc : Object_Access) return Hash_Type is
-      use System, System.Storage_Elements;
+      use System;
 
       function Convert is new Ada.Unchecked_Conversion
-        (Object_Access, Integer_Address);
+        (Object_Access, System.Address);
+      function Hash is new Hash_Address (Word_Size / Storage_Unit);
 
-      Shift_Amount : constant := Word_Size / Storage_Unit;
-      Addr : constant Integer_Address := Convert (Acc) / (2 ** Shift_Amount);
    begin
-      return Hash_Type'Mod (Addr);
+      return Hash (Convert (Acc));
    end Hash_Access;
 
 end Langkit_Support.Hashes;

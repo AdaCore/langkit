@@ -1,5 +1,7 @@
 with Ada.Containers; use Ada.Containers;
 
+with System;
+
 --  Various helpers to work with hashes for standard containers
 
 package Langkit_Support.Hashes is
@@ -13,6 +15,13 @@ package Langkit_Support.Hashes is
 
    function Combine (Hashes : Hash_Array) return Hash_Type;
    --  Combine several hashes into a single one. This is like hashing a tuple.
+
+   generic
+      Ignored_LSB : Natural;
+      --  Amount of least significant bits to ignore for hashing
+   function Hash_Address (Addr : System.Address) return Hash_Type;
+   --  Compute the hash of an address, ignoring the given amount of least
+   --  significant bits.
 
    generic
       type Object_Type (<>) is limited private;
