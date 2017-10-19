@@ -67,16 +67,16 @@ procedure Destroy (Map : in out Memoization_Maps.Map);
    value_types = ctx.sorted_types(ctx.memoization_values)
 %>
 
-% if T.BoolType in ctx.memoization_keys:
+% if T.BoolType.requires_hash_function:
    function Hash (B : Boolean) return Hash_Type is (Boolean'Pos (B));
 % endif
 
-% if T.EnvRebindingsType in ctx.memoization_keys:
+% if T.EnvRebindingsType.requires_hash_function:
    function Hash is new Langkit_Support.Hashes.Hash_Access
      (Env_Rebindings_Type, Env_Rebindings);
 % endif
 
-% if T.entity_info in ctx.memoization_keys:
+% if T.entity_info.requires_hash_function:
    function Hash (Info : Entity_Info) return Hash_Type is
      (Combine (Hash (Info.MD), Hash (Info.Rebindings)));
 % endif

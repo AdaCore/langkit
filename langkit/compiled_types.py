@@ -327,6 +327,7 @@ class CompiledType(object):
         self._element_type = element_type
         self.hashable = hashable
         self._has_equivalent_function = has_equivalent_function
+        self._requires_hash_function = False
 
         type_repo_name = type_repo_name or name.camel
         CompiledTypeMetaclass.type_dict[type_repo_name] = self
@@ -334,6 +335,22 @@ class CompiledType(object):
     @property
     def has_equivalent_function(self):
         return self._has_equivalent_function
+
+    @property
+    def requires_hash_function(self):
+        """
+        Return whether code generation must produce a Hash function for this
+        type.
+
+        :rtype: bool
+        """
+        return self._requires_hash_function
+
+    def require_hash_function(self):
+        """
+        Tag this type as requiring a hash function.
+        """
+        self._requires_hash_function = True
 
     def add_as_memoization_key(self, context):
         """
@@ -344,6 +361,7 @@ class CompiledType(object):
             self.dsl_name
         )
         context.memoization_keys.add(self)
+        self.require_hash_function()
 
     def add_as_memoization_value(self, context):
         """
@@ -1440,6 +1458,11 @@ class StructType(BaseStructType):
     @property
     def has_equivalent_function(self):
         return any(f.type.has_equivalent_function for f in self.get_fields())
+
+    def require_hash_function(self):
+        super(StructType, self).require_hash_function()
+        for f in self.get_fields():
+            f.type.require_hash_function()
 
     @property
     def is_refcounted(self):

@@ -53,7 +53,7 @@
       function Equivalent (L, R : ${cls.name}) return Boolean;
    % endif
 
-   % if cls in ctx.memoization_keys:
+   % if cls.requires_hash_function:
       function Hash (R : ${cls.name}) return Hash_Type;
    % endif
 
@@ -130,7 +130,7 @@
 
    % endif
 
-   % if cls in ctx.memoization_keys:
+   % if cls.requires_hash_function:
 
       ----------
       -- Hash --
