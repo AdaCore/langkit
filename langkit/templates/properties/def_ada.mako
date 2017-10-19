@@ -81,6 +81,17 @@ is
    % endif
 
 begin
+   % if ctx.properties_logging:
+      Properties_Traces.Trace
+        ("${property.qualname} ("
+         & Trace_Image (Self)
+         % for arg in property.arguments:
+            & ", " & Trace_Image (${arg.name})
+         % endfor
+         & "):");
+      Properties_Traces.Increase_Indent;
+   % endif
+
    % if property.memoized:
       ## If memoization is enabled for this property, look for an already
       ## computed result for this property. See the declaration of
@@ -123,12 +134,25 @@ begin
             if not Inserted then
                Destroy (Mmz_K.Items);
                Mmz_Val := Memoization_Maps.Element (Mmz_Cur);
+
                if Mmz_Val.Kind = Mmz_Property_Error then
+                  % if ctx.properties_logging:
+                     Properties_Traces.Trace
+                       ("Result: Property_Error");
+                     Properties_Traces.Decrease_Indent;
+                  % endif
                   raise Property_Error;
+
                else
                   Property_Result := Mmz_Val.As_${property.type.name};
                   % if property.type.is_refcounted:
                      Inc_Ref (Property_Result);
+                  % endif
+
+                  % if ctx.properties_logging:
+                     Properties_Traces.Trace
+                       ("Result: " & Trace_Image (Property_Result));
+                     Properties_Traces.Decrease_Indent;
                   % endif
                   return Property_Result;
                end if;
@@ -159,9 +183,15 @@ begin
       end if;
    % endif
 
+   % if ctx.properties_logging:
+      Properties_Traces.Trace ("Result: " & Trace_Image (Property_Result));
+      Properties_Traces.Decrease_Indent;
+   % endif
+
    return Property_Result;
 
-% if property.vars.root_scope.has_refcounted_vars(True):
+% if property.vars.root_scope.has_refcounted_vars(True) or \
+     ctx.properties_logging:
    exception
       when Property_Error =>
          % for scope in all_scopes:
@@ -174,6 +204,11 @@ begin
             if not Node.Unit.Context.In_Populate_Lexical_Env then
                Mmz_Map.Replace_Element (Mmz_Cur, Mmz_Val);
             end if;
+         % endif
+
+         % if ctx.properties_logging:
+            Properties_Traces.Trace ("Result: Properties_Error");
+            Properties_Traces.Decrease_Indent;
          % endif
 
          raise;
