@@ -76,60 +76,65 @@ is
          use Memoization_Maps;
          Mmz_Map : Map renames Node.Unit.Memoization_Map;
          Mmz_Cur : Cursor;
-         Mmz_K   : Mmz_Key :=
-           (Property => ${property.memoization_enum},
-            Items    => new Mmz_Key_Array (1 ..  ${key_length}));
+         Mmz_K   : Mmz_Key;
          Mmz_Val : Mmz_Value := (Kind => Mmz_Property_Error);
    % endif
 
 begin
    % if property.memoized:
       ## If memoization is enabled for this property, look for an already
-      ## computed result for this property.
+      ## computed result for this property. See the declaration of
+      ## Analysis_Context_Type.In_Populate_Lexical_Env for the rationale about
+      ## the test that follows.
 
-      Mmz_K.Items (1) := (Kind => ${property.struct.memoization_kind},
-                          As_${property.struct.name} => Self);
-      % for i, arg in enumerate(property.arguments, 2):
-         Mmz_K.Items (${i}) := (Kind => ${arg.type.memoization_kind},
-                                As_${arg.type.name} => ${arg.name});
-         % if arg.type.is_refcounted:
-            Inc_Ref (Mmz_K.Items (${i}).As_${arg.type.name});
+      if not Node.Unit.Context.In_Populate_Lexical_Env then
+         Mmz_K :=
+           (Property => ${property.memoization_enum},
+            Items    => new Mmz_Key_Array (1 ..  ${key_length}));
+         Mmz_K.Items (1) := (Kind => ${property.struct.memoization_kind},
+                             As_${property.struct.name} => Self);
+         % for i, arg in enumerate(property.arguments, 2):
+            Mmz_K.Items (${i}) := (Kind => ${arg.type.memoization_kind},
+                                   As_${arg.type.name} => ${arg.name});
+            % if arg.type.is_refcounted:
+               Inc_Ref (Mmz_K.Items (${i}).As_${arg.type.name});
+            % endif
+         % endfor
+         % if property.uses_entity_info:
+            Mmz_K.Items (${key_length}) :=
+              (Kind => ${T.entity_info.memoization_kind},
+               As_${T.entity_info.name} => ${property.entity_info_name});
          % endif
-      % endfor
-      % if property.uses_entity_info:
-         Mmz_K.Items (${key_length}) :=
-           (Kind => ${T.entity_info.memoization_kind},
-            As_${T.entity_info.name} => ${property.entity_info_name});
-      % endif
 
-      declare
-         use Memoization_Maps;
-         Inserted : Boolean;
-      begin
-         Mmz_Map.Insert (Mmz_K, Mmz_Val, Mmz_Cur, Inserted);
+         declare
+            use Memoization_Maps;
+            Inserted : Boolean;
+         begin
+            Mmz_Map.Insert (Mmz_K, Mmz_Val, Mmz_Cur, Inserted);
 
-         ## Once we got past the last statement:
-         ##
-         ## * Either the insertion succeeded, in which case the only ownership
-         ##   share for Mmz_K got transfered to Mmz_Map.
-         ##
-         ## * Either is failed, in which case Mmz_K is no longer useful: we
-         ##   must destroy it.
+            ## Once we got past the last statement:
+            ##
+            ## * Either the insertion succeeded, in which case the only
+            ##   ownership share for Mmz_K got transfered to Mmz_Map.
+            ##
+            ## * Either is failed, in which case Mmz_K is no longer useful: we
+            ##   must destroy it.
 
-         if not Inserted then
-            Destroy (Mmz_K.Items);
-            Mmz_Val := Memoization_Maps.Element (Mmz_Cur);
-            if Mmz_Val.Kind = Mmz_Property_Error then
-               raise Property_Error;
-            else
-               Property_Result := Mmz_Val.As_${property.type.name};
-               % if property.type.is_refcounted:
-                  Inc_Ref (Property_Result);
-               % endif
-               return Property_Result;
+            if not Inserted then
+               Destroy (Mmz_K.Items);
+               Mmz_Val := Memoization_Maps.Element (Mmz_Cur);
+               if Mmz_Val.Kind = Mmz_Property_Error then
+                  raise Property_Error;
+               else
+                  Property_Result := Mmz_Val.As_${property.type.name};
+                  % if property.type.is_refcounted:
+                     Inc_Ref (Property_Result);
+                  % endif
+                  return Property_Result;
+               end if;
             end if;
-         end if;
-      end;
+         end;
+      end if;
    % endif
 
    ${scopes.start_scope(property.vars.root_scope)}
@@ -144,12 +149,14 @@ begin
    % if property.memoized:
       ## If memoization is enabled for this property, save the result for later
       ## re-use.
-      Mmz_Val := (Kind => ${property.type.memoization_kind},
-                    As_${property.type.name} => Property_Result);
-      Mmz_Map.Replace_Element (Mmz_Cur, Mmz_Val);
-      % if property.type.is_refcounted:
-         Inc_Ref (Property_Result);
-      % endif
+      if not Node.Unit.Context.In_Populate_Lexical_Env then
+         Mmz_Val := (Kind => ${property.type.memoization_kind},
+                       As_${property.type.name} => Property_Result);
+         Mmz_Map.Replace_Element (Mmz_Cur, Mmz_Val);
+         % if property.type.is_refcounted:
+            Inc_Ref (Property_Result);
+         % endif
+      end if;
    % endif
 
    return Property_Result;
@@ -164,7 +171,9 @@ begin
          % endfor
 
          % if property.memoized:
-            Mmz_Map.Replace_Element (Mmz_Cur, Mmz_Val);
+            if not Node.Unit.Context.In_Populate_Lexical_Env then
+               Mmz_Map.Replace_Element (Mmz_Cur, Mmz_Val);
+            end if;
          % endif
 
          raise;

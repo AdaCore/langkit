@@ -576,6 +576,13 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
       Env : AST_Envs.Lexical_Env := Root_Env;
    begin
+
+      --  If we reach this point, one caller is supposed to have set the
+      --  following flag.
+      if not Node.Unit.Context.In_Populate_Lexical_Env then
+         raise Program_Error;
+      end if;
+
       Populate_Internal (Node, Env);
    end Populate_Lexical_Env;
 

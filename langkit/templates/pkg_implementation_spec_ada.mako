@@ -301,6 +301,11 @@ package ${ada_lib_name}.Analysis.Implementation is
 
       Discard_Errors_In_Populate_Lexical_Env : Boolean := True;
       --  See the eponym procedure
+
+      In_Populate_Lexical_Env : Boolean := False;
+      --  Flag to tell whether we are running the Populate_Lexical_Env pass.
+      --  When it's on, we must not use the memoization map as the hash of
+      --  lexical environment changes when their content changes.
    end record;
 
    type Analysis_Unit_Type is record

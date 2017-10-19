@@ -209,8 +209,8 @@ package body ${ada_lib_name}.Analysis is
          Private_Part =>
             new Analysis_Context_Private_Part_Type'(others => <>),
 
-         Discard_Errors_In_Populate_Lexical_Env => <>
-        );
+         Discard_Errors_In_Populate_Lexical_Env => <>,
+         In_Populate_Lexical_Env => False);
 
       Initialize (Ret.Private_Part.Parser);
       return Ret;
@@ -299,25 +299,25 @@ package body ${ada_lib_name}.Analysis is
    is
       Fname : constant Unbounded_String := To_Unbounded_String (Filename);
       Unit  : Analysis_Unit := new Analysis_Unit_Type'
-        (Context           => Context,
-         Ref_Count         => 1,
-         AST_Root          => null,
-         File_Name         => Fname,
-         Charset           => To_Unbounded_String (Charset),
-         TDH               => <>,
-         Diagnostics       => <>,
-         With_Trivia       => With_Trivia,
-         Is_Env_Populated  => False,
-         Rule              => Rule,
-         AST_Mem_Pool      => No_Pool,
-         Destroyables      => Destroyable_Vectors.Empty_Vector,
-         Referenced_Units  => <>,
-         Lex_Env_Data_Acc  => new Lex_Env_Data_Type,
-         Rebindings        => Env_Rebindings_Vectors.Empty_Vector
-
+        (Context                 => Context,
+         Ref_Count               => 1,
+         AST_Root                => null,
+         File_Name               => Fname,
+         Charset                 => To_Unbounded_String (Charset),
+         TDH                     => <>,
+         Diagnostics             => <>,
+         With_Trivia             => With_Trivia,
+         Is_Env_Populated        => False,
+         Rule                    => Rule,
+         AST_Mem_Pool            => No_Pool,
+         Destroyables            => Destroyable_Vectors.Empty_Vector,
+         Referenced_Units        => <>,
+         Lex_Env_Data_Acc        => new Lex_Env_Data_Type,
+         Rebindings              => Env_Rebindings_Vectors.Empty_Vector
          % if ctx.has_memoization:
          , Memoization_Map   => <>
          % endif
+
       );
    begin
       Initialize (Unit.TDH, Context.Symbols);
@@ -979,6 +979,8 @@ package body ${ada_lib_name}.Analysis is
    --------------------------
 
    procedure Populate_Lexical_Env (Unit : Analysis_Unit) is
+      Saved_In_Populate_Lexical_Env : constant Boolean :=
+         Unit.Context.In_Populate_Lexical_Env;
    begin
       --  TODO??? Handle env invalidation when reparsing a unit and when a
       --  previous call raised a Property_Error.
@@ -987,14 +989,18 @@ package body ${ada_lib_name}.Analysis is
       end if;
       Unit.Is_Env_Populated := True;
 
+      Unit.Context.In_Populate_Lexical_Env := True;
       begin
          Populate_Lexical_Env (Unit.AST_Root, Unit.Context.Root_Scope);
       exception
          when Property_Error =>
             if not Unit.Context.Discard_Errors_In_Populate_Lexical_Env then
+               Unit.Context.In_Populate_Lexical_Env :=
+                  Saved_In_Populate_Lexical_Env;
                raise;
             end if;
       end;
+      Unit.Context.In_Populate_Lexical_Env := Saved_In_Populate_Lexical_Env;
    end Populate_Lexical_Env;
 
    ---------------------
