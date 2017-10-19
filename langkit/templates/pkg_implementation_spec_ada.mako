@@ -236,6 +236,12 @@ package ${ada_lib_name}.Analysis.Implementation is
    is ("Pretty printer not generated");
    % endif
 
+   % if ctx.properties_logging:
+      function Trace_Image
+        (Node       : access ${root_node_value_type}'Class;
+         Decoration : Boolean := True) return String;
+   % endif
+
    function Kind (Node : access ${root_node_value_type})
                   return ${root_node_kind_name} is abstract;
    function Kind_Name
@@ -429,6 +435,19 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    subtype Logic_Equation is Relation;
    Null_Logic_Equation : constant Logic_Equation := null;
+
+   % if ctx.properties_logging:
+      function Trace_Image (B : Boolean) return String;
+      function Trace_Image (I : Integer) return String;
+      function Trace_Image (S : Symbol_Type) return String;
+      function Trace_Image (Env : Lexical_Env) return String;
+      function Trace_Image (E : Entity) return String;
+      function Trace_Image (Info : Entity_Info) return String;
+      function Trace_Image (R : Env_Rebindings) return String;
+      function Trace_Image (Unit : Analysis_Unit) return String;
+      function Trace_Image (Eq : Logic_Equation) return String;
+      function Trace_Image (Var : Logic_Var) return String;
+   % endif
 
    -----------------------------------------------
    -- Structure types (incomplete declarations) --

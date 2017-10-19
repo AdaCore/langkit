@@ -57,6 +57,10 @@
       function Hash (R : ${cls.name}) return Hash_Type;
    % endif
 
+   % if ctx.properties_logging:
+      function Trace_Image (R : ${cls.name}) return String;
+   % endif
+
 </%def>
 
 
@@ -155,6 +159,34 @@
             return Combine ((${', '.join(field_hash(f) for f in fields)}));
          % endif
       end Hash;
+   % endif
+
+   % if ctx.properties_logging:
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (R : ${cls.name}) return String is
+      begin
+         % if cls.is_entity_type:
+            return Trace_Image (Entity'(El   => ${root_node_type_name} (R.El),
+                                        Info => R.Info));
+         % else:
+            return
+              ("("
+               % if not cls.get_fields():
+                  & "null record"
+               % else:
+                  % for i, f in enumerate (cls.get_fields()):
+                     % if i > 0:
+                        & ", "
+                     % endif
+                     & "${f.name} => " & Trace_Image (R.${f.name})
+                  % endfor
+               % endif
+               & ")");
+         % endif
+      end Trace_Image;
    % endif
 
 </%def>

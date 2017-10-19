@@ -1215,6 +1215,112 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end loop;
    end Print;
 
+   % if ctx.properties_logging:
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (B : Boolean) return String is
+      begin
+         return (if B then "True" else "False");
+      end Trace_Image;
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (I : Integer) return String is
+      begin
+         return Integer'Image (I);
+      end Trace_Image;
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (S : Symbol_Type) return String is
+      begin
+         return (if S = null
+                 then "None"
+                 else Image (S.all, With_Quotes => True));
+      end Trace_Image;
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (Env : Lexical_Env) return String is
+      begin
+         if Env.Ref_Count = No_Refcount then
+            return "<LexicalEnv for " & Trace_Image (Env.Node) & ">";
+         else
+            return "<LexicalEnv synthetic>";
+         end if;
+      end Trace_Image;
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (E : Entity) return String is
+      begin
+         if E.El = null then
+            return "None";
+         else
+            return ("<|" & Trace_Image (E.El, Decoration => False)
+                    & " " & Trace_Image (E.Info) & "|>");
+         end if;
+      end Trace_Image;
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (Info : Entity_Info) return String is
+      begin
+         return ("(MD => " & Trace_Image (Info.MD)
+                 & ", Rebindings => " & Trace_Image (Info.Rebindings));
+      end Trace_Image;
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (R : Env_Rebindings) return String is
+      begin
+         return Image (Image (R));
+      end Trace_Image;
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (Unit : Analysis_Unit) return String is
+      begin
+         return "Analysis_Unit (""" & Get_Filename (Unit) & """)";
+      end Trace_Image;
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (Eq : Logic_Equation) return String is
+      begin
+         return "<LogicEquation>";
+      end Trace_Image;
+
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (Var : Logic_Var) return String is
+      begin
+         return "<LogicVariable>";
+      end Trace_Image;
+
+   % endif
+
    % for struct_type in no_builtins(ctx.struct_types):
    ${struct_types.body(struct_type)}
    % endfor
@@ -1259,6 +1365,29 @@ package body ${ada_lib_name}.Analysis.Implementation is
    function Image (Value : Boolean) return String
    is (if Value then "True" else "False");
 
+   % if ctx.properties_logging:
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image
+        (Node       : access ${root_node_value_type}'Class;
+         Decoration : Boolean := True) return String is
+      begin
+         if Node = null then
+            return "None";
+         else
+            declare
+               Result : constant String :=
+                 (Node.Kind_Name & " "
+                  & Get_Filename (Node.Unit) & ":"
+                  & Image (Node.Sloc_Range));
+            begin
+               return (if Decoration then "<" & Result & ">" else Result);
+            end;
+         end if;
+      end Trace_Image;
+   % endif
 
    Kind_Names : array (${root_node_kind_name}) of Unbounded_String :=
      (${", \n".join(cls.ada_kind_name()

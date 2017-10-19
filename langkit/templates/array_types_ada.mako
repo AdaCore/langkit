@@ -55,6 +55,10 @@
 
    function Equivalent (L, R : ${cls.name}) return Boolean;
 
+   % if ctx.properties_logging:
+      function Trace_Image (A : ${cls.name}) return String;
+   % endif
+
 </%def>
 
 <%def name="private_decl(cls)">
@@ -200,5 +204,25 @@
 
       return True;
    end Equivalent;
+
+   % if ctx.properties_logging:
+      -----------------
+      -- Trace_Image --
+      -----------------
+
+      function Trace_Image (A : ${cls.name}) return String is
+         Result : Unbounded_String;
+      begin
+         Append (Result, "[");
+         for I in A.Items'Range loop
+            if I > A.Items'First then
+               Append (Result, ", ");
+            end if;
+            Append (Result, Trace_Image (A.Items (I)));
+         end loop;
+         Append (Result, "]");
+         return To_String (Result);
+      end Trace_Image;
+   % endif
 
 </%def>
