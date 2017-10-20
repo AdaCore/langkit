@@ -815,6 +815,7 @@ class CompileCtx(object):
 
         for prop in self.all_properties(include_inherited=False):
             forwards.setdefault(prop, set())
+            backwards.setdefault(prop, set())
             if prop.constructed_expr:
                 traverse_expr(prop.constructed_expr)
 
