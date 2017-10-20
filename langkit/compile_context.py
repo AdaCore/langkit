@@ -1745,11 +1745,77 @@ class CompileCtx(object):
         """
         from langkit.compiled_types import T
 
-        fwd_graph, back_graph = self.properties_callgraphs()
+        class Annotation(object):
+            """
+            Analysis annotation for a property.
+            """
 
+            def __init__(self, reason=None, call_chain=[]):
+                """
+                :param str|None reason: None if this property can be memoized.
+                    Otherwise, error message to indicate why.
+                :param list[PropertyDef] call_chain: When this property cannot
+                    be memoized because of transitivity, chain of properties
+                    that led to this decision.
+                """
+                assert (reason is None) == (not call_chain)
+                self.reason = reason
+                self.call_chain = call_chain
+
+            @property
+            def memoizable(self):
+                """
+                Return whether the property this annotation relates to is
+                considered to be memoizable (for now).
+
+                :rtype: bool
+                """
+                return self.reason is None
+
+            def with_call(self, prop):
+                """
+                Return a copy of `self` with `prop` appened to its call chain.
+
+                :rtype: Annotation
+                """
+                if self.reason is None:
+                    return self
+                else:
+                    return Annotation(self.reason, self.call_chain + [prop])
+
+            def simpler_than(self, other):
+                """
+                Return whether `self` is at least as simple than `other`.
+
+                This assumes that both `self.memoizable` and `other.memoizable`
+                are false.  An annotation is consider simpler if its call chain
+                is not bigger.
+
+                :rtype: bool
+                """
+                assert not self.memoizable and not other.memoizable
+                return (other.reason is not None and
+                        len(self.call_chain) <= len(other.call_chain))
+
+            def __repr__(self):
+                return '<Annotation {} ({})>'.format(
+                    self.memoizable,
+                    ', '.join(p.qualname for p in self.call_chain)
+                )
+
+        _, back_graph = self.properties_callgraphs()
+        annotations = {prop: Annotation() for prop in back_graph}
+
+        # First check that properties can be memoized without considering
+        # callgraph-transitive evidence that they cannot (but collect all
+        # information).
         for astnode in self.astnode_types:
             for prop in astnode.get_properties(include_inherited=False):
                 with prop.diagnostic_context:
+
+                    tr_reason = prop.transitive_reason_for_no_memoization
+                    if tr_reason is not None:
+                        annotations[prop] = Annotation(tr_reason, [prop])
 
                     if not prop.memoized:
                         continue
@@ -1771,3 +1837,35 @@ class CompileCtx(object):
                         )
                         arg.type.add_as_memoization_key(self)
                     prop.type.add_as_memoization_value(self)
+
+        # Now do the propagation of callgraph-transitive evidence
+        queue = {p for p, a in annotations.items() if not a.memoizable}
+        while queue:
+            callee = queue.pop()
+            for caller in back_graph[callee]:
+                callee_annot = annotations[callee].with_call(caller)
+                caller_annot = annotations[caller]
+                if (not callee_annot.memoizable and
+                        (caller_annot.memoizable or
+                            callee_annot.simpler_than(caller_annot))):
+                    annotations[caller] = callee_annot
+                    queue.add(caller)
+
+        for prop, annot in sorted(annotations.items(),
+                                  key=lambda (p, _): p.qualname):
+            if not prop.memoized or annot.memoizable:
+                continue
+
+            message = 'Property cannot be memoized '
+            if annot.call_chain:
+                message += '(in {}: {}, call chain is: {})'.format(
+                    annot.call_chain[0].qualname,
+                    annot.reason,
+                    ' -> '.join(p.qualname for p in reversed(annot.call_chain))
+                )
+            else:
+                message += '({})'.format(annot.reason)
+
+            with prop.diagnostic_context:
+                check_source_language(False, message,
+                                      severity=Severity.non_blocking_error)

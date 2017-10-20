@@ -3429,6 +3429,29 @@ class PropertyDef(AbstractNodeData):
 
         return None
 
+    @property
+    def transitive_reason_for_no_memoization(self):
+        """
+        Determine if there is a reason that this property cannot be memoized.
+        If so, this reason is considered to be transitive and will propagate to
+        properties that all this one.
+
+        If there is no such reason (i.e. if this property can be memoized,
+        assuming that `self.reason_for_no_memoization` returns True), return
+        None. Otherwise, return the reason as a string.
+
+        As for `reason_for_no_memoization`, this does not do callgraph
+        propagation itself and relies on `CompileCtx.check_memoized` to do so.
+
+        :rtype: str|None
+        """
+        if self._solves_equation:
+            return 'Cannot memoize equation solving'
+        elif self._gets_logic_var_value:
+            return 'Cannot memoize extracting the value of a logic variable'
+        else:
+            return None
+
     def warn_on_unused_bindings(self):
         """
         Emit warnings for bindings such as variables or arguments, that are not
