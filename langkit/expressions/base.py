@@ -2669,6 +2669,17 @@ class PropertyDef(AbstractNodeData):
         :type: list[DynamicVariable]
         """
 
+        self._solves_equation = False
+        """
+        Whether this property uses the ".solve" operation on a logic equation.
+        """
+
+        self._gets_logic_var_value = False
+        """
+        Whether this property uses the ".get_value" operation on a logic
+        variable.
+        """
+
     @inherited_information
     def ignore_warn_on_node(self):
         return self._ignore_warn_on_node

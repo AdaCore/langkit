@@ -529,6 +529,8 @@ def get_value(self, logic_var):
     """
     from langkit.expressions import If
 
+    PropertyDef.get()._gets_logic_var_value = True
+
     rtype = T.root_node.entity
 
     logic_var_expr = construct(logic_var, T.LogicVarType)
@@ -562,6 +564,7 @@ def solve(self, equation):
 
     :param AbstractExpression equation: The equation to solve.
     """
+    PropertyDef.get()._solves_equation = True
     return CallExpr('Solve_Success', 'Solve', T.BoolType,
                     [construct(equation, T.EquationType)],
                     abstract_expr=self)
