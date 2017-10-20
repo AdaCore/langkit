@@ -3272,37 +3272,6 @@ class PropertyDef(AbstractNodeData):
                 '{} returns a node type'.format(self.qualname),
             )
 
-    def check_memoized(self, context):
-        """
-        Check that various invariants for memoized properties are respected.
-        Also register involved types in the memoization machinery.
-        """
-        if not self.memoized:
-            return
-
-        for invariant_p, msg in [
-            (not self.abstract,
-             'A memoized property cannot be abstract: memoization is not an'
-             ' inherited behavior'),
-            (not self.external,
-             'An external property cannot be memoized'),
-        ]:
-            check_source_language(invariant_p, msg)
-
-        context.memoized_properties.add(self)
-        self.struct.add_as_memoization_key(context)
-        if self.uses_entity_info:
-            T.entity_info.add_as_memoization_key(context)
-        for arg in self.arguments:
-            check_source_language(
-                arg.type.hashable,
-                'This property cannot be memoized because argument {} (of type'
-                ' {}) is not hashable'.format(arg.name.lower,
-                                              arg.type.dsl_name),
-            )
-            arg.type.add_as_memoization_key(context)
-        self.type.add_as_memoization_value(context)
-
     def render_property(self, context):
         """
         Render the given property to generated code.
@@ -3423,6 +3392,31 @@ class PropertyDef(AbstractNodeData):
         return (names.Name('Mmz') +
                 self.struct.name +
                 self.name).camel_with_underscores
+
+    @property
+    def reason_for_no_memoization(self):
+        """
+        Return whether this property is a valid candidate for memoization.
+
+        If it is memoizable, return None, otherwise return a message that
+        describes why it is not memoizable.
+
+        This predicate ignores callgraph considerations and focuses on
+        characteristics specific to `self`: whether it contains side-effects
+        (equation solving), whether it is external, or abstract. The
+        `CompileCtx.check_memoized` pass will take care of doing call-graph
+        analysis on top of this.
+
+        :rtype: None|str
+        """
+        if self.abstract:
+            return ('A memoized property cannot be abstract: memoization is'
+                    ' not an inherited behavior')
+
+        if self.external:
+            return 'An external property cannot be memoized'
+
+        return None
 
     def warn_on_unused_bindings(self):
         """

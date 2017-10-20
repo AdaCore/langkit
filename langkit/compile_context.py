@@ -1182,8 +1182,8 @@ class CompileCtx(object):
                          PropertyDef.check_return_types),
             GlobalPass('compute uses entity info attribute',
                        CompileCtx.compute_uses_entity_info_attr),
-            PropertyPass('check memoized properties',
-                         PropertyDef.check_memoized),
+            GlobalPass('check memoized properties',
+                       CompileCtx.check_memoized),
             EnvSpecPass('check env specs',
                         EnvSpec.check_spec),
             ASTNodePass('check resolved ASTnode subclasses',
@@ -1736,3 +1736,37 @@ class CompileCtx(object):
             ' there must be at least one key type and one key value'
         )
         return has_keys
+
+    def check_memoized(self):
+        """
+        Check that various invariants for memoized properties are respected.
+        Also register involved types in the memoization machinery.
+        """
+        from langkit.compiled_types import T
+
+        fwd_graph, back_graph = self.properties_callgraphs()
+
+        for astnode in self.astnode_types:
+            for prop in astnode.get_properties(include_inherited=False):
+                with prop.diagnostic_context:
+
+                    if not prop.memoized:
+                        continue
+
+                    reason = prop.reason_for_no_memoization
+                    check_source_language(reason is None, reason)
+
+                    self.memoized_properties.add(prop)
+                    prop.struct.add_as_memoization_key(self)
+                    if prop.uses_entity_info:
+                        T.entity_info.add_as_memoization_key(self)
+                    for arg in prop.arguments:
+                        check_source_language(
+                            arg.type.hashable,
+                            'This property cannot be memoized because argument'
+                            ' {} (of type {}) is not hashable'.format(
+                                arg.name.lower, arg.type.dsl_name
+                            ),
+                        )
+                        arg.type.add_as_memoization_key(self)
+                    prop.type.add_as_memoization_value(self)
