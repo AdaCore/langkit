@@ -1,0 +1,7 @@
+File "test.py", line 28, in Example.get_var
+    Error: Property cannot be memoized (in Example.p_get_var: Cannot memoize extracting the value of a logic variable, call chain is: Example.p_get_var)
+File "test.py", line 44, in Example.get_var2_public_wrapper
+    Error: Property cannot be memoized (in Example.p_get_var2: Cannot memoize extracting the value of a logic variable, call chain is: Example.p_get_var2_public_wrapper -> Example.p_get_var2)
+File "test.py", line 50, in Example.top_wrapper
+    Error: Property cannot be memoized (in Example.p_get_var2: Cannot memoize extracting the value of a logic variable, call chain is: Example.p_top_wrapper -> Example.p_get_var2)
+Done
