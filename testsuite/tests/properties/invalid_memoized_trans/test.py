@@ -51,6 +51,21 @@ class Example(FooNode):
     def top_wrapper():
         return Self.get_var_wrapper == Self.get_var2
 
+    #
+    # ... but using unsafe_memoization, all should be fine!
+    #
+
+    # First check that this attribute works on a property that cannot be
+    # memoized because it contains an "immediately" unsafe construct.
+    @langkit_property(public=True, memoized=True, unsafe_memoization=True)
+    def get_var3():
+        return Self.var.get_value
+
+    # Then, on one that cannot be memoized because of transitivity
+    @langkit_property(public=True, memoized=True, unsafe_memoization=True)
+    def get_var2_public_wrapper2():
+        return Self.get_var2
+
 
 grammar = Grammar('main_rule')
 grammar.add_rules(
