@@ -19,6 +19,8 @@ with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
+with GNATCOLL.Traces;
+
 with Langkit_Support.Array_Utils;
 with Langkit_Support.Images; use Langkit_Support.Images;
 with Langkit_Support.Slocs;  use Langkit_Support.Slocs;
@@ -1685,7 +1687,7 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Trigger_Envs_Debug (Is_Active : Boolean) is
    begin
-      AST_Envs.Me.Set_Active (Is_Active);
+      GNATCOLL.Traces.Set_Active (AST_Envs.Me, Is_Active);
    end Trigger_Envs_Debug;
 
    ----------------------
