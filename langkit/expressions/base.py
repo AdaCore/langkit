@@ -2504,10 +2504,10 @@ class PropertyDef(AbstractNodeData):
 
     def __init__(self, expr, prefix, name=None, doc=None, public=None,
                  abstract=False, type=None, abstract_runtime_check=False,
-                 dynamic_vars=None, memoized=False, external=False,
-                 uses_entity_info=None, optional_entity_info=False,
-                 force_dispatching=False, warn_on_unused=True,
-                 ignore_warn_on_node=None):
+                 dynamic_vars=None, memoized=False, unsafe_memoization=False,
+                 external=False, uses_entity_info=None,
+                 optional_entity_info=False, force_dispatching=False,
+                 warn_on_unused=True, ignore_warn_on_node=None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -2560,6 +2560,12 @@ class PropertyDef(AbstractNodeData):
 
         :param bool memoized: Whether this property must be memoized. Disabled
             by default.
+
+        :param bool unsafe_memoization: If true, allow memoization for this
+            property or its callers even when it is unsafe to do so, for
+            instance when using equation resolution constructs, which are
+            memoization-unfriendly as they use side-effects. This should be
+            used when the side is contained inside the call to this property.
 
         :param bool external: Whether this property's implementation is
             provided by the language specification. If true, `expr` must be
@@ -2640,6 +2646,8 @@ class PropertyDef(AbstractNodeData):
         ":type: str|None"
 
         self.memoized = memoized
+        self.unsafe_memoization = unsafe_memoization
+
         self.external = external
         if self.external:
             check_source_language(
@@ -3553,7 +3561,8 @@ class AbstractKind(Enum):
 
 
 def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
-                     dynamic_vars=None, memoized=False, external=False,
+                     dynamic_vars=None, memoized=False,
+                     unsafe_memoization=False, external=False,
                      uses_entity_info=None, warn_on_unused=True,
                      ignore_warn_on_node=None):
     """
@@ -3575,6 +3584,7 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
             abstract_runtime_check=kind == AbstractKind.abstract_runtime_check,
             dynamic_vars=dynamic_vars,
             memoized=memoized,
+            unsafe_memoization=unsafe_memoization,
             external=external,
             uses_entity_info=uses_entity_info,
             warn_on_unused=warn_on_unused,

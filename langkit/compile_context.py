@@ -1814,7 +1814,7 @@ class CompileCtx(object):
                 with prop.diagnostic_context:
 
                     tr_reason = prop.transitive_reason_for_no_memoization
-                    if tr_reason is not None:
+                    if tr_reason is not None and not prop.unsafe_memoization:
                         annotations[prop] = Annotation(tr_reason, [prop])
 
                     if not prop.memoized:
@@ -1845,6 +1845,12 @@ class CompileCtx(object):
             for caller in back_graph[callee]:
                 callee_annot = annotations[callee].with_call(caller)
                 caller_annot = annotations[caller]
+
+                # Stop propagation on properties that state that they can
+                # handle memoization safety.
+                if caller.unsafe_memoization:
+                    continue
+
                 if (not callee_annot.memoizable and
                         (caller_annot.memoizable or
                             callee_annot.simpler_than(caller_annot))):
