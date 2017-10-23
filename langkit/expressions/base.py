@@ -2505,9 +2505,10 @@ class PropertyDef(AbstractNodeData):
     def __init__(self, expr, prefix, name=None, doc=None, public=None,
                  abstract=False, type=None, abstract_runtime_check=False,
                  dynamic_vars=None, memoized=False, unsafe_memoization=False,
-                 external=False, uses_entity_info=None,
-                 optional_entity_info=False, force_dispatching=False,
-                 warn_on_unused=True, ignore_warn_on_node=None):
+                 memoize_in_populate=False, external=False,
+                 uses_entity_info=None, optional_entity_info=False,
+                 force_dispatching=False, warn_on_unused=True,
+                 ignore_warn_on_node=None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -2566,6 +2567,10 @@ class PropertyDef(AbstractNodeData):
             instance when using equation resolution constructs, which are
             memoization-unfriendly as they use side-effects. This should be
             used when the side is contained inside the call to this property.
+
+        :param bool memoize_in_populate: Whether to memoize the property during
+            the populate lexical environment pass. It is disabled by default as
+            the hash of lexical environments changes during this pass.
 
         :param bool external: Whether this property's implementation is
             provided by the language specification. If true, `expr` must be
@@ -2647,6 +2652,7 @@ class PropertyDef(AbstractNodeData):
 
         self.memoized = memoized
         self.unsafe_memoization = unsafe_memoization
+        self.memoize_in_populate = memoize_in_populate
 
         self.external = external
         if self.external:
@@ -3562,9 +3568,9 @@ class AbstractKind(Enum):
 
 def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
                      dynamic_vars=None, memoized=False,
-                     unsafe_memoization=False, external=False,
-                     uses_entity_info=None, warn_on_unused=True,
-                     ignore_warn_on_node=None):
+                     unsafe_memoization=False, memoize_in_populate=False,
+                     external=False, uses_entity_info=None,
+                     warn_on_unused=True, ignore_warn_on_node=None):
     """
     Decorator to create properties from real Python methods. See Property for
     more details.
@@ -3585,6 +3591,7 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
             dynamic_vars=dynamic_vars,
             memoized=memoized,
             unsafe_memoization=unsafe_memoization,
+            memoize_in_populate=memoize_in_populate,
             external=external,
             uses_entity_info=uses_entity_info,
             warn_on_unused=warn_on_unused,

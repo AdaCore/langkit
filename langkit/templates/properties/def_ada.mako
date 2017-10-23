@@ -98,7 +98,10 @@ begin
       ## Analysis_Context_Type.In_Populate_Lexical_Env for the rationale about
       ## the test that follows.
 
+      % if not property.memoize_in_populate:
       if not Node.Unit.Context.In_Populate_Lexical_Env then
+      % endif
+
          Mmz_K :=
            (Property => ${property.memoization_enum},
             Items    => new Mmz_Key_Array (1 ..  ${key_length}));
@@ -158,7 +161,10 @@ begin
                end if;
             end if;
          end;
+
+      % if not property.memoize_in_populate:
       end if;
+      % endif
    % endif
 
    ${scopes.start_scope(property.vars.root_scope)}
@@ -173,14 +179,19 @@ begin
    % if property.memoized:
       ## If memoization is enabled for this property, save the result for later
       ## re-use.
+      % if not property.memoize_in_populate:
       if not Node.Unit.Context.In_Populate_Lexical_Env then
+      % endif
+
          Mmz_Val := (Kind => ${property.type.memoization_kind},
                        As_${property.type.name} => Property_Result);
          Mmz_Map.Replace_Element (Mmz_Cur, Mmz_Val);
          % if property.type.is_refcounted:
             Inc_Ref (Property_Result);
          % endif
+      % if not property.memoize_in_populate:
       end if;
+      % endif
    % endif
 
    % if ctx.properties_logging:
@@ -201,9 +212,15 @@ begin
          % endfor
 
          % if property.memoized:
+            % if not property.memoize_in_populate:
             if not Node.Unit.Context.In_Populate_Lexical_Env then
+            % endif
+
                Mmz_Map.Replace_Element (Mmz_Cur, Mmz_Val);
+
+            % if not property.memoize_in_populate:
             end if;
+            % endif
          % endif
 
          % if ctx.properties_logging:
