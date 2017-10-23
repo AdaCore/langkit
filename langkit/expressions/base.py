@@ -3370,29 +3370,6 @@ class PropertyDef(AbstractNodeData):
         return [self.struct] + [a.type for a in self.arguments[:logic_vars]]
 
     @property
-    def memoization_state_field_name(self):
-        """
-        Assuming this property is memoized, return the name of the boolean
-        field that indicates whether there is already a value that has been
-        computed for this property.
-
-        :rtype: names.Name
-        """
-        assert self.memoized
-        return names.Name('In_Cache') + self.name
-
-    @property
-    def memoization_value_field_name(self):
-        """
-        Assuming this property is memoized, return the name of the field that
-        is used to store the cached value for this property.
-
-        :rtype: names.Name
-        """
-        assert self.memoized
-        return names.Name('Cached') + self.name
-
-    @property
     def memoization_enum(self):
         """
         Return the enumerator name to materialize references to this property
