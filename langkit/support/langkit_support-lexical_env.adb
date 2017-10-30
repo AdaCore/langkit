@@ -384,13 +384,6 @@ package body Langkit_Support.Lexical_Env is
    is
       procedure Get_Refd_Elements (Self : Referenced_Env);
 
-      procedure Get_Own_Elements
-        (Self       : Lexical_Env;
-         Rebindings : Env_Rebindings);
-      --  Return the elements for Key contained by the internal map contained
-      --  in the Self environment. Decorate each element with its own metadata
-      --  and with the given Rebindings.
-
       function Is_Filtered_Out return Boolean is
         (if From = No_Element or else Filter = null
          then False
@@ -471,34 +464,10 @@ package body Langkit_Support.Lexical_Env is
             raise;
       end Get_Refd_Elements;
 
-      ----------------------
-      -- Get_Own_Elements --
-      ----------------------
-
-      procedure Get_Own_Elements
-        (Self       : Lexical_Env;
-         Rebindings : Env_Rebindings)
-      is
-         C : Cursor := Internal_Envs.No_Element;
-      begin
-         if Self.Env /= null then
-            C := Self.Env.Find (Key);
-         end if;
-
-         if Has_Element (C) then
-            --  We iterate in reverse, so that last inserted
-            --  results are returned first.
-            for El of reverse Element (C) loop
-               Append_Result (Decorate (El, Self.Default_MD, Rebindings));
-               --  We iterate in reverse, so that last inserted results are
-               --  returned first.
-            end loop;
-         end if;
-      end Get_Own_Elements;
-
-      Own_Lookup_Env    : Lexical_Env;
+      Env               : Lexical_Env;
       Parent_Env        : Lexical_Env;
       Parent_Rebindings : Env_Rebindings;
+      C                 : Cursor := Internal_Envs.No_Element;
    begin
       if Self = null then
          return;
@@ -518,27 +487,47 @@ package body Langkit_Support.Lexical_Env is
       --  we'll get it here. We'll also shed it from the set of current
       --  rebindings.
 
-      Own_Lookup_Env := Extract_Rebinding (Current_Rebindings, Self);
+      Env := Extract_Rebinding (Current_Rebindings, Self);
 
       Parent_Rebindings :=
-        (if Own_Lookup_Env /= Self
+        (if Env /= Self
          then Shed_Rebindings (Parent_Env, Current_Rebindings)
          else Current_Rebindings);
 
       if not Is_Filtered_Out then
-         Get_Own_Elements (Own_Lookup_Env, Current_Rebindings);
+
+         --  Phase 1: Get elements in own env if there are any
+
+         if Env.Env /= null then
+            C := Env.Env.Find (Key);
+         end if;
+
+         if Has_Element (C) then
+            --  We iterate in reverse, so that last inserted
+            --  results are returned first.
+            for El of reverse Element (C) loop
+               Append_Result
+                 (Decorate (El, Env.Default_MD, Current_Rebindings));
+               --  We iterate in reverse, so that last inserted results are
+               --  returned first.
+            end loop;
+         end if;
+
+         --  Phase 2: Get elements in referenced envs
 
          for Refd_Env of Self.Referenced_Envs loop
             Get_Refd_Elements (Refd_Env);
          end loop;
       end if;
 
+      --  Phase 3: Get elements in parent envs
+
       if Recursive then
          Get_Internal
            (Parent_Env, Key, From, True, Parent_Rebindings, Filter, Results);
       end if;
 
-      Dec_Ref (Own_Lookup_Env);
+      Dec_Ref (Env);
    end Get_Internal;
 
    ---------
