@@ -44,15 +44,16 @@ package body Langkit_Support.Lexical_Env is
    --  Return whether Candidate_Parent is a parent of Node
 
    procedure Get_Internal
-     (Self       : Lexical_Env;
-      Key        : Symbol_Type;
-      From       : Element_T := No_Element;
-      Recursive  : Boolean := True;
-      Rebindings : Env_Rebindings := null;
-      Filter     :
-        access function (Ent : Entity; Env : Lexical_Env) return Boolean
+     (Self          : Lexical_Env;
+      Key           : Symbol_Type;
+      From          : Element_T := No_Element;
+      Recursive     : Boolean := True;
+      Rebindings    : Env_Rebindings := null;
+      Filter        :
+      access function (Ent : Entity; Env : Lexical_Env) return Boolean
       := null;
-      Results    : in out Entity_Vectors.Vector);
+      Stop_At_First : Boolean;
+      Results       : in out Entity_Vectors.Vector);
 
    -----------------------
    -- Simple_Env_Getter --
@@ -372,15 +373,16 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    procedure Get_Internal
-     (Self       : Lexical_Env;
-      Key        : Symbol_Type;
-      From       : Element_T := No_Element;
-      Recursive  : Boolean := True;
-      Rebindings : Env_Rebindings := null;
-      Filter     :
-        access function (Ent : Entity; Env : Lexical_Env) return Boolean
+     (Self          : Lexical_Env;
+      Key           : Symbol_Type;
+      From          : Element_T := No_Element;
+      Recursive     : Boolean := True;
+      Rebindings    : Env_Rebindings := null;
+      Filter        :
+      access function (Ent : Entity; Env : Lexical_Env) return Boolean
       := null;
-      Results    : in out Entity_Vectors.Vector)
+      Stop_At_First : Boolean;
+      Results       : in out Entity_Vectors.Vector)
    is
       procedure Get_Refd_Elements (Self : Referenced_Env);
 
@@ -453,6 +455,7 @@ package body Langkit_Support.Lexical_Env is
                then Current_Rebindings
                else Shed_Rebindings (Env, Current_Rebindings)),
             Filter     => Filter,
+            Stop_At_First => Stop_At_First,
             Results    => Results);
 
          Dec_Ref (Env);
@@ -508,8 +511,10 @@ package body Langkit_Support.Lexical_Env is
             for El of reverse Element (C) loop
                Append_Result
                  (Decorate (El, Env.Default_MD, Current_Rebindings));
-               --  We iterate in reverse, so that last inserted results are
-               --  returned first.
+               if Stop_At_First then
+                  goto Early_Exit;
+               end if;
+
             end loop;
          end if;
 
@@ -524,9 +529,11 @@ package body Langkit_Support.Lexical_Env is
 
       if Recursive then
          Get_Internal
-           (Parent_Env, Key, From, True, Parent_Rebindings, Filter, Results);
+           (Parent_Env, Key, From, True, Parent_Rebindings, Filter,
+            Stop_At_First, Results);
       end if;
 
+      <<Early_Exit>>
       Dec_Ref (Env);
    end Get_Internal;
 
@@ -541,17 +548,19 @@ package body Langkit_Support.Lexical_Env is
       Recursive  : Boolean := True;
       Rebindings : Env_Rebindings := null;
       Filter     : access function (Ent : Entity; Env : Lexical_Env)
-                                    return Boolean := null)
-      return Entity_Array
+                   return Boolean := null;
+      Stop_At_First  : Boolean := False) return Entity_Array
    is
       V : Entity_Vectors.Vector;
    begin
+
       if Has_Trace then
          Me.Trace ("===== In Env get, key=" & Image (Key.all) & " =====");
          Me.Increase_Indent;
       end if;
 
-      Get_Internal (Self, Key, From, Recursive, Rebindings, Filter, V);
+      Get_Internal (Self, Key, From, Recursive, Rebindings, Filter,
+                    Stop_At_First, V);
 
       if Has_Trace then
          Traces.Trace (Me, "Returning vector with length " & V.Length'Image);
