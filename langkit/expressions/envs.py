@@ -54,7 +54,7 @@ class EnvGet(AbstractExpression):
     class Expr(ComputingExpr):
         def __init__(self, env_expr, key_expr, recursive_expr,
                      sequential=False, sequential_from=None, filter_prop=None,
-                     abstract_expr=None):
+                     only_first=False, abstract_expr=None):
             self.env_expr = env_expr
             self.key_expr = key_expr
             self.recursive_expr = recursive_expr
@@ -62,6 +62,7 @@ class EnvGet(AbstractExpression):
             self.sequential_from = sequential_from
             self.filter_prop = filter_prop
             self.static_type = T.root_node.entity.array
+            self.only_first = only_first
             super(EnvGet.Expr, self).__init__('Env_Get_Result',
                                               abstract_expr=abstract_expr)
 
@@ -73,7 +74,8 @@ class EnvGet(AbstractExpression):
             ]
             args = [('Self', self.env_expr.render_expr()),
                     ('Key', self.key_expr.render_expr()),
-                    ('Recursive', self.recursive_expr.render_expr())]
+                    ('Recursive', self.recursive_expr.render_expr()),
+                    ('Stop_At_First', self.only_first.render_expr())]
 
             # Pass the From parameter if the user wants sequential semantics
             if self.sequential_from:
@@ -110,7 +112,7 @@ class EnvGet(AbstractExpression):
             }
 
     def __init__(self, env, symbol, sequential=False, sequential_from=Self,
-                 recursive=True, filter_prop=None):
+                 recursive=True, filter_prop=None, only_first=False):
         """
         :param AbstractExpression env: Expression that will yield the env to
             get the element from.
@@ -155,6 +157,7 @@ class EnvGet(AbstractExpression):
         self.sequential_from = sequential_from
         self.recursive = recursive
         self.filter_prop = filter_prop
+        self.only_first = only_first
 
     def construct(self):
         env_expr = construct(self.env, T.LexicalEnvType)
@@ -171,6 +174,7 @@ class EnvGet(AbstractExpression):
                      if self.sequential else None)
 
         recursive_expr = construct(self.recursive, T.BoolType)
+        only_first_expr = construct(self.only_first, T.BoolType)
 
         if self.filter_prop:
             check_source_language(
@@ -194,7 +198,8 @@ class EnvGet(AbstractExpression):
             self.filter_prop.require_untyped_wrapper()
 
         return EnvGet.Expr(env_expr, sym_expr, recursive_expr, self.sequential,
-                           from_expr, self.filter_prop, abstract_expr=self)
+                           from_expr, self.filter_prop, only_first_expr,
+                           abstract_expr=self)
 
     def __repr__(self):
         return '<EnvGet({}, {})>'.format(self.env, self.symbol)
