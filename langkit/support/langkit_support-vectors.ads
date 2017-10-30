@@ -22,12 +22,16 @@ package Langkit_Support.Vectors is
    type Elements_Array is array (Index_Type range <>) of Element_Type;
    Empty_Array : Elements_Array (1 .. 0) := (others => <>);
 
+   subtype Iteration_Index_Type is Integer;
+
    type Vector is tagged private
      with Iterable =>
        (First       => First_Index,
         Next        => Next,
         Has_Element => Has_Element,
-        Element     => Get);
+        Element     => Get,
+        Last        => Last_Index,
+        Previous    => Previous);
 
    Empty_Vector : constant Vector;
 
@@ -39,7 +43,8 @@ package Langkit_Support.Vectors is
 
    procedure Remove_At (Self : in out Vector; Index : Index_Type);
 
-   function Get (Self : Vector; Index : Index_Type) return Element_Type
+   function Get
+     (Self : Vector; Index : Iteration_Index_Type) return Element_Type
      with Inline;
    --  Get the element at Index
 
@@ -79,17 +84,27 @@ package Langkit_Support.Vectors is
      with Inline;
    --  Return the Length of the vector, ie. the number of elements it contains
 
-   function First_Index (Self : Vector) return Index_Type is (Index_Type'First)
+   function First_Index (Self : Vector) return Iteration_Index_Type
+   is (Index_Type'First)
      with Inline;
    --  Return the first index, only used for the Iterable aspect
 
-   function Last_Index (Self : Vector) return Integer
+   function Last_Index (Self : Vector) return Iteration_Index_Type
    is (First_Index (Self) + Length (Self) - 1)
      with Inline;
    --  Return the index of the last element in this vector or
    --  First_Index (Self) - 1 if this vector is empty.
 
-   function Next (Self : Vector; N : Index_Type) return Index_Type is (N + 1)
+   function Next
+     (Self : Vector; N : Iteration_Index_Type) return Iteration_Index_Type
+   is (N + 1)
+   with Inline;
+   --  Given a vector and an index, return the next index. Only used for the
+   --  iterable aspect.
+
+   function Previous
+     (Self : Vector; N : Iteration_Index_Type) return Iteration_Index_Type
+   is (N - 1)
      with Inline;
    --  Given a vector and an index, return the next index. Only used for the
    --  iterable aspect.
@@ -110,7 +125,8 @@ package Langkit_Support.Vectors is
    --  element. This makes it possible to remove an item from the vector while
    --  iterating on it.
 
-   function Has_Element (Self : Vector; N : Index_Type) return Boolean
+   function Has_Element
+     (Self : Vector; N : Iteration_Index_Type) return Boolean
      with Inline;
    --  Given a vector and an index, return True if the index is in the vector
    --  range. Only used for the iterable aspect.
@@ -159,7 +175,9 @@ private
 
    Empty_Vector : constant Vector := (E => null, Size => 0, others => <>);
 
-   function Has_Element (Self : Vector; N : Index_Type) return Boolean is
-     (N <= Last_Index (Self));
+   function Has_Element
+     (Self : Vector; N : Iteration_Index_Type) return Boolean
+   is
+     (N <= Last_Index (Self) and then N >= First_Index (Self));
 
 end Langkit_Support.Vectors;

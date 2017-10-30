@@ -79,7 +79,9 @@ package body Langkit_Support.Vectors is
    -- Get --
    ---------
 
-   function Get (Self : Vector; Index : Index_Type) return Element_Type is
+   function Get
+     (Self : Vector; Index : Iteration_Index_Type) return Element_Type
+   is
    begin
       if Small_Vector_Capacity = 0 then
          return Self.E (Index);
