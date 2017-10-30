@@ -65,11 +65,16 @@ package Langkit_Support.Lexical_Env is
 
    use GNATCOLL;
 
+   Debug_Mode : constant Boolean := False;
+
    Me : constant Traces.Trace_Handle :=
      Traces.Create ("Lexical_Env", Traces.Off, Stream => "&2");
    --  Trace to debug lexical envs. This trace is meant to be activated on
    --  demand, when the client of lexical env wants more information about
    --  this specific lookup.
+
+   function Has_Trace return Boolean
+   is (Debug_Mode and then Traces.Active (Me));
 
    type Env_Rebindings_Type;
    type Env_Rebindings is access all Env_Rebindings_Type;

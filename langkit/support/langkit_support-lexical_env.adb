@@ -6,19 +6,9 @@ with Ada.Unchecked_Conversion;
 
 with System.Address_Image;
 
-with Langkit_Support.Array_Utils;
 with Langkit_Support.Images; use Langkit_Support.Images;
 
 package body Langkit_Support.Lexical_Env is
-
-   package Entity_Arrays is new Langkit_Support.Array_Utils
-     (Entity, Positive, Entity_Array);
-
-   package Referenced_Envs_Arrays is new Langkit_Support.Array_Utils
-     (Referenced_Env, Positive, Referenced_Envs_Vectors.Elements_Array);
-
-   package Internal_Map_Element_Arrays is new Langkit_Support.Array_Utils
-     (Internal_Map_Element, Positive, Internal_Map_Element_Array);
 
    function Extract_Rebinding
      (Rebindings  : in out Env_Rebindings;
@@ -39,9 +29,9 @@ package body Langkit_Support.Lexical_Env is
    --  Shed env rebindings that are not in the parent chain for From_Env
 
    function Decorate
-     (Elts       : Internal_Map_Element_Array;
+     (El         : Internal_Map_Element;
       MD         : Element_Metadata;
-      Rebindings : Env_Rebindings) return Entity_Array;
+      Rebindings : Env_Rebindings) return Entity;
    --  From an array of entities, decorate every element with additional
    --  Metadata stored in MD.
 
@@ -52,6 +42,17 @@ package body Langkit_Support.Lexical_Env is
 
    function Is_Parent (Candidate_Parent, Node : Element_T) return Boolean;
    --  Return whether Candidate_Parent is a parent of Node
+
+   procedure Get_Internal
+     (Self       : Lexical_Env;
+      Key        : Symbol_Type;
+      From       : Element_T := No_Element;
+      Recursive  : Boolean := True;
+      Rebindings : Env_Rebindings := null;
+      Filter     :
+        access function (Ent : Entity; Env : Lexical_Env) return Boolean
+      := null;
+      Results    : in out Entity_Vectors.Vector);
 
    -----------------------
    -- Simple_Env_Getter --
@@ -370,96 +371,113 @@ package body Langkit_Support.Lexical_Env is
    -- Get --
    ---------
 
-   function Get
+   procedure Get_Internal
      (Self       : Lexical_Env;
       Key        : Symbol_Type;
       From       : Element_T := No_Element;
       Recursive  : Boolean := True;
       Rebindings : Env_Rebindings := null;
-      Filter     : access function (Ent : Entity; Env : Lexical_Env)
-                                    return Boolean := null)
-      return Entity_Array
+      Filter     :
+        access function (Ent : Entity; Env : Lexical_Env) return Boolean
+      := null;
+      Results    : in out Entity_Vectors.Vector)
    is
-      Current_Rebindings : Env_Rebindings;
+      procedure Get_Refd_Elements (Self : Referenced_Env);
 
-      use Internal_Envs;
-      use Entity_Arrays;
-
-      function Get_Refd_Elements (Self : Referenced_Env) return Entity_Array;
-      --  If we can determine that From can reach Self.From_Node, return the
-      --  recursive lookup of Key in Self. Otherwise, return an empty array.
-
-      function Get_Own_Elements
+      procedure Get_Own_Elements
         (Self       : Lexical_Env;
-         Rebindings : Env_Rebindings) return Entity_Array;
+         Rebindings : Env_Rebindings);
       --  Return the elements for Key contained by the internal map contained
       --  in the Self environment. Decorate each element with its own metadata
       --  and with the given Rebindings.
 
-      function Is_Filtered_Out return Boolean;
+      function Is_Filtered_Out return Boolean is
+        (if From = No_Element or else Filter = null
+         then False
+         else not
+           Filter (Entity'(El => From,
+                           Info => No_Entity_Info),
+                   Self));
       --  Return whether, according to Filter, Self should be discarded during
       --  the lexical env lookup.
+
+      procedure Append_Result (E : Entity);
+
+      use Internal_Envs;
+
+      Current_Rebindings : Env_Rebindings;
+
+      -----------------
+      -- Can_Reach_F --
+      -----------------
+
+      function Can_Reach_F (El : Entity) return Boolean is
+        (Can_Reach (El.El, From));
+
+      -------------------
+      -- Append_Result --
+      -------------------
+
+      procedure Append_Result (E : Entity) is
+      begin
+         if Has_Trace then
+            Traces.Trace (Me, "Found " & Image (Element_Image (E.El, False)));
+         end if;
+
+         if From = No_Element or else Can_Reach_F (E) then
+            Results.Append (E);
+         end if;
+      end Append_Result;
 
       -----------------------
       -- Get_Refd_Elements --
       -----------------------
 
-      function Get_Refd_Elements (Self : Referenced_Env) return Entity_Array is
-         Env : Lexical_Env;
+      procedure Get_Refd_Elements (Self : Referenced_Env) is
+         Env        : Lexical_Env;
       begin
-         if not Recursive and then not Self.Is_Transitive then
-            return Entity_Arrays.Empty_Array;
-         end if;
-
          --  Don't follow the reference environment if either:
          --   * the node from which this reference starts cannot reach From;
          --   * the node that created this environment reference is a parent of
          --     From.
 
-         if Self.Getter.Dynamic
-           and then From /= No_Element
-           and then (not Can_Reach (Self.Getter.Node, From)
-                     or else Is_Parent (Self.Creator, From))
+         if (not Recursive and then not Self.Is_Transitive)
+           or else (Self.Getter.Dynamic
+                    and then From /= No_Element
+                    and then (not Can_Reach (Self.Getter.Node, From)
+                              or else Is_Parent (Self.Creator, From)))
          then
-            return Entity_Arrays.Empty_Array;
+            return;
          end if;
 
          Env := Get_Env (Self.Getter);
 
-         --  Make sure that whether the call to Get below suceeds or raises an
-         --  exception, we always Dec_Ref the returned environment so we don't
-         --  leak in case of error.
-         begin
-            declare
-               Rebindings : constant Env_Rebindings :=
-                 (if Self.Is_Transitive
-                  then Current_Rebindings
-                  else Shed_Rebindings (Env, Current_Rebindings));
+         Get_Internal
+           (Env, Key, From,
+            Recursive  => Recursive and Self.Is_Transitive,
+            Rebindings =>
+              (if Self.Is_Transitive
+               then Current_Rebindings
+               else Shed_Rebindings (Env, Current_Rebindings)),
+            Filter     => Filter,
+            Results    => Results);
 
-               Result : constant Entity_Array :=
-                 Get (Env, Key, From,
-                      Recursive  => Recursive and Self.Is_Transitive,
-                      Rebindings => Rebindings,
-                      Filter     => Filter);
-            begin
-               Dec_Ref (Env);
-               return Result;
-            end;
-
-         exception
-            when others =>
-               Dec_Ref (Env);
-               raise;
-         end;
+         Dec_Ref (Env);
+      exception
+         when others =>
+            --  Make sure that we always Dec_Ref the returned environment so we
+            --  don't leak in case of error.
+            Dec_Ref (Env);
+            raise;
       end Get_Refd_Elements;
 
       ----------------------
       -- Get_Own_Elements --
       ----------------------
 
-      function Get_Own_Elements
+      procedure Get_Own_Elements
         (Self       : Lexical_Env;
-         Rebindings : Env_Rebindings) return Entity_Array
+         Rebindings : Env_Rebindings)
       is
          C : Cursor := Internal_Envs.No_Element;
       begin
@@ -467,56 +485,29 @@ package body Langkit_Support.Lexical_Env is
             C := Self.Env.Find (Key);
          end if;
 
-         return
-           (if Has_Element (C)
-
-            --  We want to reverse the returned array, so that last inserted
+         if Has_Element (C) then
+            --  We iterate in reverse, so that last inserted
             --  results are returned first.
-            then Decorate
-              (Internal_Map_Element_Arrays.Reverse_Array
-                 (Internal_Map_Element_Vectors.To_Array (Element (C))),
-               Self.Default_MD,
-               Rebindings)
-
-            else Entity_Arrays.Empty_Array);
-      end Get_Own_Elements;
-
-      ---------------------
-      -- Is_Filtered_Out --
-      ---------------------
-
-      function Is_Filtered_Out return Boolean is
-         E : constant Entity := (El => From, Info => No_Entity_Info);
-      begin
-         --  If we are not provided a node and a property to call, just
-         --  consider all environments.
-
-         if From = No_Element or else Filter = null then
-            return False;
+            for El of reverse Element (C) loop
+               Append_Result (Decorate (El, Self.Default_MD, Rebindings));
+               --  We iterate in reverse, so that last inserted results are
+               --  returned first.
+            end loop;
          end if;
-
-         return not Filter (E, Self);
-      end Is_Filtered_Out;
-
-      function Get_Refd_Elements is new Referenced_Envs_Arrays.Flat_Map_Gen
-        (Entity, Entity_Array, Get_Refd_Elements);
-      --  Likewise, but calling Get_Refd_Elements instead of Recurse
-
-      function Can_Reach_F (El : Entity) return Boolean is
-        (Can_Reach (El.El, From));
+      end Get_Own_Elements;
 
       Own_Lookup_Env    : Lexical_Env;
       Parent_Env        : Lexical_Env;
       Parent_Rebindings : Env_Rebindings;
    begin
-      if Traces.Active (Me) then
-         Traces.Trace
-           (Me, "In Env get "
-            & Lexical_Env_Image (Self, Dump_Content => False));
+      if Self = null then
+         return;
       end if;
 
-      if Self = null then
-         return Entity_Arrays.Empty_Array;
+      if Has_Trace then
+         Traces.Trace (Me,
+                       "Get_Internal env="
+                       & Lexical_Env_Image (Self, Dump_Content => False));
       end if;
 
       Parent_Env := Get_Env (Self.Parent);
@@ -534,58 +525,56 @@ package body Langkit_Support.Lexical_Env is
          then Shed_Rebindings (Parent_Env, Current_Rebindings)
          else Current_Rebindings);
 
-      declare
-         use type Entity_Array;
+      if not Is_Filtered_Out then
+         Get_Own_Elements (Own_Lookup_Env, Current_Rebindings);
 
-         Empty : Entity_Array renames Entity_Arrays.Empty_Array;
+         for Refd_Env of Self.Referenced_Envs loop
+            Get_Refd_Elements (Refd_Env);
+         end loop;
+      end if;
 
-         Filtered_Out : constant Boolean := Is_Filtered_Out;
+      if Recursive then
+         Get_Internal
+           (Parent_Env, Key, From, True, Parent_Rebindings, Filter, Results);
+      end if;
 
-         Own_Elts : constant Entity_Array :=
-           (if Filtered_Out
-            then Empty
-            else Get_Own_Elements (Own_Lookup_Env, Current_Rebindings));
+      Dec_Ref (Own_Lookup_Env);
+   end Get_Internal;
 
-         Refd_Elts : constant Entity_Array :=
-           (if Filtered_Out
-            then Empty
-            else Get_Refd_Elements
-               (Referenced_Envs_Vectors.To_Array (Self.Referenced_Envs)));
+   ---------
+   -- Get --
+   ---------
 
-         Parent_Elts : constant Entity_Array :=
-           (if Recursive
-            then Get (Parent_Env, Key, From,
-                      Rebindings => Parent_Rebindings,
-                      Filter     => Filter)
-            else Empty);
+   function Get
+     (Self       : Lexical_Env;
+      Key        : Symbol_Type;
+      From       : Element_T := No_Element;
+      Recursive  : Boolean := True;
+      Rebindings : Env_Rebindings := null;
+      Filter     : access function (Ent : Entity; Env : Lexical_Env)
+                                    return Boolean := null)
+      return Entity_Array
+   is
+      V : Entity_Vectors.Vector;
+   begin
+      if Has_Trace then
+         Me.Trace ("===== In Env get, key=" & Image (Key.all) & " =====");
+         Me.Increase_Indent;
+      end if;
 
-         Ret : Entity_Array := Own_Elts & Refd_Elts & Parent_Elts;
+      Get_Internal (Self, Key, From, Recursive, Rebindings, Filter, V);
 
-         Last_That_Can_Reach : Integer := Ret'Last;
-      begin
-         if Traces.Active (Me) and then Own_Elts'Length > 0 then
-            Traces.Trace
-              (Me,
-               "Found element in self env "
-               & Lexical_Env_Image (Self, Dump_Content => False));
+      if Has_Trace then
+         Traces.Trace (Me, "Returning vector with length " & V.Length'Image);
+      end if;
 
-            Traces.Increase_Indent (Me);
-            for El of Own_Elts loop
-               Traces.Trace (Me, Image (Element_Image (El.El, False)));
-            end loop;
-
-            Traces.Decrease_Indent (Me);
+      return Ret : constant Entity_Array := Entity_Vectors.To_Array (V) do
+         V.Destroy;
+         if Has_Trace then
+            Me.Decrease_Indent;
+            Me.Trace ("===== Out Env get =====");
          end if;
-         --  Only filter if a non null value was given for the From parameter
-
-         if From /= No_Element then
-            Partition (Ret, Can_Reach_F'Access, Last_That_Can_Reach);
-         end if;
-
-         Dec_Ref (Own_Lookup_Env);
-
-         return Ret (Ret'First .. Last_That_Can_Reach);
-      end;
+      end return;
    end Get;
 
    ------------
@@ -861,31 +850,19 @@ package body Langkit_Support.Lexical_Env is
    --------------
 
    function Decorate
-     (Elts       : Internal_Map_Element_Array;
+     (El         : Internal_Map_Element;
       MD         : Element_Metadata;
-      Rebindings : Env_Rebindings) return Entity_Array
+      Rebindings : Env_Rebindings) return Entity
    is
-      function Create_Entity (Elt : Internal_Map_Element) return Entity;
-      --  Transform an element from the environment into an entity
-
-      function Create_Entity (Elt : Internal_Map_Element) return Entity is
-         Result : constant Entity :=
-           (El   => Elt.Element,
-            Info => (MD         => Combine (Elt.MD, MD),
-                     Rebindings => Rebindings));
-      begin
-         return
-           (if Elt.Resolver = null
-            then Result
-            else Elt.Resolver.all (Result));
-      end Create_Entity;
-
-      function Internal_Decorate is new Internal_Map_Element_Arrays.Map_Gen
-        (Out_Type       => Entity,
-         Out_Array_Type => Entity_Array,
-         Transform      => Create_Entity) with Inline;
+      Result : constant Entity :=
+        (El   => El.Element,
+         Info => (MD         => Combine (El.MD, MD),
+                  Rebindings => Rebindings));
    begin
-      return Internal_Decorate (Elts);
+      return
+        (if El.Resolver = null
+         then Result
+         else El.Resolver.all (Result));
    end Decorate;
 
    ------------------------------
