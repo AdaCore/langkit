@@ -12,7 +12,8 @@ from langkit.expressions.utils import array_aggr, assign_var
 
 
 @attr_call('get')
-def get(env, symbol, recursive=True):
+@attr_call('get_first', only_first=True)
+def get(env, symbol, recursive=True, only_first=False):
     """
     Perform a lexical environment lookup. Look for nodes that are associated to
     the given `symbol` in the `env` lexical environment.
@@ -20,12 +21,13 @@ def get(env, symbol, recursive=True):
     If `recursive` is true (the default), do a recursive lookup in parent
     environments and referenced ones. Otherwise, only look into `env`.
     """
-    return EnvGet(env, symbol, recursive=recursive)
+    return EnvGet(env, symbol, recursive=recursive, only_first=only_first)
 
 
 @attr_call('get_sequential')
+@attr_call('get_first_sequential', only_first=True)
 def get_sequential(env, symbol, sequential_from, recursive=True,
-                   filter_prop=None):
+                   filter_prop=None, only_first=False):
     """
     Like :dsl:`get`, but do a sequential lookup: discard AST nodes that belong
     to the same unit as the `sequential_from` node and that appear before it.
@@ -43,7 +45,7 @@ def get_sequential(env, symbol, sequential_from, recursive=True,
     """
     return EnvGet(env, symbol, sequential=True,
                   sequential_from=sequential_from, recursive=recursive,
-                  filter_prop=filter_prop)
+                  filter_prop=filter_prop, only_first=only_first)
 
 
 class EnvGet(AbstractExpression):
