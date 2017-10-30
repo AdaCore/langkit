@@ -210,7 +210,8 @@ package Langkit_Support.Lexical_Env is
    -- Arrays of elements and entities --
    -------------------------------------
 
-   package Entity_Vectors is new Langkit_Support.Vectors (Entity);
+   package Entity_Vectors is new Langkit_Support.Vectors
+     (Entity, Small_Vector_Capacity => 2);
    --  Vectors used to store collections of environment elements, as values of
    --  a lexical environment map. We want to use vectors internally.
 
