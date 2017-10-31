@@ -548,8 +548,7 @@ package body Langkit_Support.Lexical_Env is
       Recursive  : Boolean := True;
       Rebindings : Env_Rebindings := null;
       Filter     : access function (Ent : Entity; Env : Lexical_Env)
-                   return Boolean := null;
-      Stop_At_First  : Boolean := False) return Entity_Array
+                   return Boolean := null) return Entity_Array
    is
       V : Entity_Vectors.Vector;
    begin
@@ -559,8 +558,7 @@ package body Langkit_Support.Lexical_Env is
          Me.Increase_Indent;
       end if;
 
-      Get_Internal (Self, Key, From, Recursive, Rebindings, Filter,
-                    Stop_At_First, V);
+      Get_Internal (Self, Key, From, Recursive, Rebindings, Filter, False, V);
 
       if Has_Trace then
          Traces.Trace (Me, "Returning vector with length " & V.Length'Image);
@@ -574,6 +572,47 @@ package body Langkit_Support.Lexical_Env is
          end if;
       end return;
    end Get;
+
+   ---------
+   -- Get --
+   ---------
+
+   function Get_First
+     (Self       : Lexical_Env;
+      Key        : Symbol_Type;
+      From       : Element_T := No_Element;
+      Recursive  : Boolean := True;
+      Rebindings : Env_Rebindings := null;
+      Filter     : access function (Ent : Entity; Env : Lexical_Env)
+                   return Boolean := null) return Entity
+   is
+      V : Entity_Vectors.Vector;
+   begin
+
+      if Has_Trace then
+         Me.Trace ("==== In Env Get_First, key=" & Image (Key.all) & " ====");
+         Me.Increase_Indent;
+      end if;
+
+      Get_Internal (Self, Key, From, Recursive, Rebindings, Filter,
+                    True, V);
+
+      if Has_Trace then
+         Traces.Trace (Me, "Returning vector with length " & V.Length'Image);
+      end if;
+
+      return Ret : constant Entity :=
+        (if V.Length > 0 then V.First_Element
+         else (No_Element, No_Entity_Info))
+      do
+         V.Destroy;
+         if Has_Trace then
+            Me.Decrease_Indent;
+            Me.Trace ("===== Out Env Get_First =====");
+         end if;
+      end return;
+
+   end Get_First;
 
    ------------
    -- Orphan --

@@ -63,7 +63,12 @@ class EnvGet(AbstractExpression):
             self.sequential = sequential
             self.sequential_from = sequential_from
             self.filter_prop = filter_prop
-            self.static_type = T.root_node.entity.array
+
+            self.static_type = (
+                T.root_node.entity if only_first
+                else T.root_node.entity.array
+            )
+
             self.only_first = only_first
             super(EnvGet.Expr, self).__init__('Env_Get_Result',
                                               abstract_expr=abstract_expr)
@@ -76,8 +81,7 @@ class EnvGet(AbstractExpression):
             ]
             args = [('Self', self.env_expr.render_expr()),
                     ('Key', self.key_expr.render_expr()),
-                    ('Recursive', self.recursive_expr.render_expr()),
-                    ('Stop_At_First', self.only_first.render_expr())]
+                    ('Recursive', self.recursive_expr.render_expr())]
 
             # Pass the From parameter if the user wants sequential semantics
             if self.sequential_from:
@@ -89,10 +93,14 @@ class EnvGet(AbstractExpression):
                 args.append(('Filter',
                              "{}'Access".format(self.filter_prop.name)))
 
-            array_expr = 'AST_Envs.Get ({})'.format(
-                ', '.join('{} => {}'.format(n, v) for n, v in args)
-            )
-            result_expr = 'Create ({})'.format(array_expr)
+            if self.only_first:
+                result_expr = 'AST_Envs.Get_First ({})'.format(
+                    ', '.join('{} => {}'.format(n, v) for n, v in args)
+                )
+            else:
+                result_expr = 'Create (AST_Envs.Get ({}))'.format(
+                    ', '.join('{} => {}'.format(n, v) for n, v in args)
+                )
 
             # In both cases above, the expression is going to be a function
             # call that returns a new ownership share, so there is no need for
@@ -176,7 +184,6 @@ class EnvGet(AbstractExpression):
                      if self.sequential else None)
 
         recursive_expr = construct(self.recursive, T.BoolType)
-        only_first_expr = construct(self.only_first, T.BoolType)
 
         if self.filter_prop:
             check_source_language(
@@ -200,7 +207,7 @@ class EnvGet(AbstractExpression):
             self.filter_prop.require_untyped_wrapper()
 
         return EnvGet.Expr(env_expr, sym_expr, recursive_expr, self.sequential,
-                           from_expr, self.filter_prop, only_first_expr,
+                           from_expr, self.filter_prop, self.only_first,
                            abstract_expr=self)
 
     def __repr__(self):
