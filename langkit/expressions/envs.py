@@ -92,13 +92,13 @@ class EnvGet(AbstractExpression):
             array_expr = 'AST_Envs.Get ({})'.format(
                 ', '.join('{} => {}'.format(n, v) for n, v in args)
             )
-            result_expr = 'Create ({})'
+            result_expr = 'Create ({})'.format(array_expr)
 
             # In both cases above, the expression is going to be a function
             # call that returns a new ownership share, so there is no need for
             # an inc-ref for the storage in the result variable.
             result.append(assign_var(self.result_var.ref_expr,
-                                     result_expr.format(array_expr),
+                                     result_expr,
                                      requires_incref=False))
 
             return '\n'.join(result)
