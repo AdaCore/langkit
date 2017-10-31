@@ -19,9 +19,7 @@ package body Langkit_Support.Vectors is
       if Small_Vector_Capacity > 0 then
          if Self.Capacity = Small_Vector_Capacity then
             Self.E := To_Pointer (Alloc (Siz));
-            for I in First_Index (Self)
-                     .. First_Index (Self) + Capacity - 1
-            loop
+            for I in Self.SV'Range loop
                Self.E.all (I) := Self.SV (I);
             end loop;
          else
