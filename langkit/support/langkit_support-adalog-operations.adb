@@ -80,7 +80,21 @@ package body Langkit_Support.Adalog.Operations is
          for I in Self.Next .. Self.Count loop
             case Get_From_Queue (Self, I).Solve is
                when No_Progress =>
-                  null;
+                  --  TODO: Previous implementation was wrong: it was just a
+                  --  null statement, so resolution would skip to the next one
+                  --  here, and if the next one was SAT then return SAT, but
+                  --  without setting the current relation to the next one, so
+                  --  when executing resolution again, the Any would return
+                  --  No_Progress again, rather than calling the previously SAT
+                  --  relation which would have been the proper behavior.
+                  --
+                  --  I didn't figure out how to do that, rather implementing
+                  --  another behavior: On no progress, we reset self and
+                  --  return no progress. This is correct but probably not the
+                  --  most efficient behavior.
+
+                  Self.Reset;
+                  return No_Progress;
 
                when Progress =>
                   Stalled := False;
