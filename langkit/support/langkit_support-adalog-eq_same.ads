@@ -65,6 +65,8 @@ package Langkit_Support.Adalog.Eq_Same is
       Convert_Image : String := "";
       Equals_Image  : String := "";
 
+      One_Side_Convert : Boolean := False;
+
    package Raw_Custom_Bind is
 
       package Impl is new Unify
@@ -77,7 +79,8 @@ package Langkit_Support.Adalog.Eq_Same is
          L_Inc_Ref => Inc_Ref,
          R_Inc_Ref => Inc_Ref,
          L_Dec_Ref => Dec_Ref,
-         R_Dec_Ref => Dec_Ref);
+         R_Dec_Ref => Dec_Ref,
+         One_Side_Convert => One_Side_Convert);
 
       function Create
         (L, R    : Refs.Raw_Logic_Var.Var;

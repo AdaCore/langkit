@@ -136,14 +136,21 @@
    ##
    ## Which is expressed as Bind (A, B, Property) in the DSL.
    package ${package_name} is new Eq_Node.Raw_Custom_Bind
-     (Converter      => ${converter_type_name},
-      No_Data        => No_${converter_type_name},
-      Equals_Data    => ${equals_type_name},
-      No_Equals_Data => No_${equals_type_name},
-      Convert        => Convert,
-      Equals         => Eq_${eprop_uid},
-      Convert_Image  => ${string_repr(conv_prop.qualname if conv_prop else '')},
-      Equals_Image   => ${string_repr(eq_prop.qualname if eq_prop else '')});
+     (Converter        => ${converter_type_name},
+      No_Data          => No_${converter_type_name},
+      Equals_Data      => ${equals_type_name},
+      No_Equals_Data   => No_${equals_type_name},
+      Convert          => Convert,
+      Equals           => Eq_${eprop_uid},
+      Convert_Image    =>
+        ${string_repr(conv_prop.qualname if conv_prop else '')},
+      Equals_Image     => ${string_repr(eq_prop.qualname if eq_prop else '')},
+
+      ## We don't support passing converters that works both ways (from left to
+      ## right and from right to left value) because it is confusing, so when a
+      ## converter is passed, we forbid two sided conversions.
+      One_Side_Convert => ${"True" if conv_prop else "False"}
+      );
 </%def>
 
 <%def name="logic_predicates(prop)">

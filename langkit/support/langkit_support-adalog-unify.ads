@@ -51,6 +51,8 @@ generic
    with procedure L_Dec_Ref (L : in out L_Type);
    with procedure R_Dec_Ref (R : in out R_Type);
 
+   One_Side_Convert : Boolean := False;
+
 package Langkit_Support.Adalog.Unify is
 
    --  TODO HACK FIXME??? P418-022 Removing the body for this package causes a
@@ -63,7 +65,8 @@ package Langkit_Support.Adalog.Unify is
       Equals_Data, Equals,
       Convert_Image, Equals_Image,
       Left_Var, Right_Var,
-      L_Dec_Ref, R_Dec_Ref);
+      L_Dec_Ref, R_Dec_Ref,
+      One_Side_Convert => One_Side_Convert);
    use Simple_Unify;
 
    package Unify_Left is new Unify_One_Side

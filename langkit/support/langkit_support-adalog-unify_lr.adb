@@ -50,7 +50,8 @@ package body Langkit_Support.Adalog.Unify_LR is
          return Result;
       end if;
 
-      if not Is_Defined (Self.Right) then
+      if not Is_Defined (Self.Right) or else One_Side_Convert then
+         Trace ("No progress, one side convert = " & One_Side_Convert'Image);
          return No_Progress;
       end if;
 

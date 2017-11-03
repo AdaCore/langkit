@@ -34,6 +34,8 @@ generic
    with procedure L_Dec_Ref (L : in out L_Type);
    with procedure R_Dec_Ref (R : in out R_Type);
 
+   One_Side_Convert : Boolean := False;
+
 package Langkit_Support.Adalog.Unify_LR is
 
    --------------
