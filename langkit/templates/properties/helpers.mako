@@ -209,12 +209,14 @@
       Node : constant ${formal_node_types[0].name} :=
          ${formal_node_types[0].name} (Node_0.El);
    begin
-      ## Check that Node is null first so we have a chance to raise a proper
-      ## Property_Error.
-      % if not ctx.no_property_checks:
+      ## Here, we'll raise a property error, but only for dispatching
+      ## properties. For non dispatching properties we'll allow the user to
+      ## handle null however he wants.
+      % if prop.dispatching and not ctx.no_property_checks:
          if Node = null then
-            raise Property_Error with "predicate call on a null node";
-         end if;
+            raise Property_Error
+              with "In predicate, calling dispatching property on a null node";
+        end if;
       % endif
 
       <%
