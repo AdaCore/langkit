@@ -22,7 +22,9 @@ package Langkit_Support.Vectors is
    type Elements_Array is array (Index_Type range <>) of Element_Type;
    Empty_Array : Elements_Array (1 .. 0) := (others => <>);
 
-   subtype Iteration_Index_Type is Integer;
+   subtype Iteration_Index_Type is Natural;
+   --  Like Index_Type, but also covers zero, which is used to represent a
+   --  dummy last index value for empty vectors.
 
    type Vector is tagged private
      with Iterable =>
