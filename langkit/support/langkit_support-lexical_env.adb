@@ -559,8 +559,9 @@ package body Langkit_Support.Lexical_Env is
    begin
 
       if Has_Trace then
-         Me.Trace ("===== In Env get, key=" & Image (Key.all) & " =====");
-         Me.Increase_Indent;
+         Traces.Trace
+           (Me, "===== In Env get, key=" & Image (Key.all) & " =====");
+         Traces.Increase_Indent (Me);
       end if;
 
       Get_Internal (Self, Key, From, Recursive, Rebindings, Filter, False, V);
@@ -572,8 +573,8 @@ package body Langkit_Support.Lexical_Env is
       return Ret : constant Entity_Array := Entity_Vectors.To_Array (V) do
          V.Destroy;
          if Has_Trace then
-            Me.Decrease_Indent;
-            Me.Trace ("===== Out Env get =====");
+            Traces.Decrease_Indent (Me);
+            Traces.Trace (Me, "===== Out Env get =====");
          end if;
       end return;
    end Get;
@@ -595,8 +596,9 @@ package body Langkit_Support.Lexical_Env is
    begin
 
       if Has_Trace then
-         Me.Trace ("==== In Env Get_First, key=" & Image (Key.all) & " ====");
-         Me.Increase_Indent;
+         Traces.Trace
+           (Me, "==== In Env Get_First, key=" & Image (Key.all) & " ====");
+         Traces.Increase_Indent (Me);
       end if;
 
       Get_Internal (Self, Key, From, Recursive, Rebindings, Filter,
@@ -612,8 +614,8 @@ package body Langkit_Support.Lexical_Env is
       do
          V.Destroy;
          if Has_Trace then
-            Me.Decrease_Indent;
-            Me.Trace ("===== Out Env Get_First =====");
+            Traces.Decrease_Indent (Me);
+            Traces.Trace (Me, "===== Out Env Get_First =====");
          end if;
       end return;
 

@@ -31,9 +31,13 @@ package Langkit_Support.Vectors is
        (First       => First_Index,
         Next        => Next,
         Has_Element => Has_Element,
-        Element     => Get,
-        Last        => Last_Index,
-        Previous    => Previous);
+        Element     => Get);
+
+   --  TODO??? When the next GNAT Community release (2018) comes, add the
+   --  following two aspects::
+   --
+   --      Last        => Last_Index,
+   --      Previous    => Previous,
 
    Empty_Vector : constant Vector;
 
