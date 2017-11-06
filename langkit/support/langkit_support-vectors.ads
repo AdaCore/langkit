@@ -177,7 +177,6 @@ private
 
    function Has_Element
      (Self : Vector; N : Iteration_Index_Type) return Boolean
-   is
-     (N <= Last_Index (Self) and then N >= First_Index (Self));
+   is (N in First_Index (Self) .. Last_Index (Self));
 
 end Langkit_Support.Vectors;
