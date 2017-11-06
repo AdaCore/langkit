@@ -404,16 +404,9 @@ package Langkit_Support.Lexical_Env is
       From       : Element_T := No_Element;
       Recursive  : Boolean := True;
       Rebindings : Env_Rebindings := null;
-      Filter     : access function (Ent : Entity; Env : Lexical_Env)
-                   return Boolean := null) return Entity_Array;
-   function Get_First
-     (Self       : Lexical_Env;
-      Key        : Symbol_Type;
-      From       : Element_T := No_Element;
-      Recursive  : Boolean := True;
-      Rebindings : Env_Rebindings := null;
-      Filter     : access function (Ent : Entity; Env : Lexical_Env)
-                   return Boolean := null) return Entity;
+      Filter     : access
+         function (Ent : Entity; Env : Lexical_Env) return Boolean := null)
+      return Entity_Array;
    --  Get the array of entities for this Key. If From is given, then
    --  elements will be filtered according to the Can_Reach primitive given
    --  as parameter for the generic package.
@@ -423,6 +416,18 @@ package Langkit_Support.Lexical_Env is
    --
    --  If Filter is not null, use it as a filter to disable lookup on envs for
    --  which Filter.all (From, Env) returns False.
+
+   function Get_First
+     (Self       : Lexical_Env;
+      Key        : Symbol_Type;
+      From       : Element_T := No_Element;
+      Recursive  : Boolean := True;
+      Rebindings : Env_Rebindings := null;
+      Filter     : access
+         function (Ent : Entity; Env : Lexical_Env) return Boolean := null)
+      return Entity;
+   --  Like Get, but return only the first matching entity. Return a null
+   --  entity if no entity is found.
 
    function Orphan (Self : Lexical_Env) return Lexical_Env;
    --  Return a dynamically allocated copy of Self that has no parent

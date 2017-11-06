@@ -49,9 +49,8 @@ package body Langkit_Support.Lexical_Env is
       From          : Element_T := No_Element;
       Recursive     : Boolean := True;
       Rebindings    : Env_Rebindings := null;
-      Filter        :
-      access function (Ent : Entity; Env : Lexical_Env) return Boolean
-      := null;
+      Filter        : access
+         function (Ent : Entity; Env : Lexical_Env) return Boolean := null;
       Stop_At_First : Boolean;
       Results       : in out Entity_Vectors.Vector);
 
@@ -378,9 +377,8 @@ package body Langkit_Support.Lexical_Env is
       From          : Element_T := No_Element;
       Recursive     : Boolean := True;
       Rebindings    : Env_Rebindings := null;
-      Filter        :
-      access function (Ent : Entity; Env : Lexical_Env) return Boolean
-      := null;
+      Filter        : access
+         function (Ent : Entity; Env : Lexical_Env) return Boolean := null;
       Stop_At_First : Boolean;
       Results       : in out Entity_Vectors.Vector)
    is
@@ -508,9 +506,11 @@ package body Langkit_Support.Lexical_Env is
 
          if Has_Element (C) then
             Elements := Element (C);
-            --  We iterate in reverse, so that last inserted
-            --  results are returned first. TODO ??? Use for .. of next GPL
-            --  release.
+
+            --  We iterate in reverse, so that last inserted results are
+            --  returned first.
+
+            --  TODO??? Use "for .. of next" GPL release
             for I in reverse Elements.First_Index .. Elements.Last_Index loop
                Append_Result
                  (Decorate (Elements.Get (I),
@@ -551,8 +551,9 @@ package body Langkit_Support.Lexical_Env is
       From       : Element_T := No_Element;
       Recursive  : Boolean := True;
       Rebindings : Env_Rebindings := null;
-      Filter     : access function (Ent : Entity; Env : Lexical_Env)
-                   return Boolean := null) return Entity_Array
+      Filter     : access
+         function (Ent : Entity; Env : Lexical_Env) return Boolean := null)
+      return Entity_Array
    is
       V : Entity_Vectors.Vector;
    begin
