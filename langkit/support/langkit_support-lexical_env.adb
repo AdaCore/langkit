@@ -471,6 +471,7 @@ package body Langkit_Support.Lexical_Env is
       Parent_Env        : Lexical_Env;
       Parent_Rebindings : Env_Rebindings;
       C                 : Cursor := Internal_Envs.No_Element;
+      Elements          : Internal_Map_Element_Vectors.Vector;
    begin
       if Self = null then
          return;
@@ -506,11 +507,14 @@ package body Langkit_Support.Lexical_Env is
          end if;
 
          if Has_Element (C) then
+            Elements := Element (C);
             --  We iterate in reverse, so that last inserted
-            --  results are returned first.
-            for El of reverse Element (C) loop
+            --  results are returned first. TODO ??? Use for .. of next GPL
+            --  release.
+            for I in reverse Elements.First_Index .. Elements.Last_Index loop
                Append_Result
-                 (Decorate (El, Env.Default_MD, Current_Rebindings));
+                 (Decorate (Elements.Get (I),
+                  Env.Default_MD, Current_Rebindings));
                if Stop_At_First then
                   goto Early_Exit;
                end if;
