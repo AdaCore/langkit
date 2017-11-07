@@ -1,3 +1,4 @@
+with Ada.Containers.Vectors;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
@@ -5,11 +6,18 @@ with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
 package body Langkit_Support.Adalog.Abstract_Relation is
 
-   Current_Solving_Relation : Relation := null;
-   --  NOTE??? We don't want to require a solving context or whatever for the
-   --  moment, so we have the Current_Solving_Relation as a global. This is
-   --  only used for tracing/debugging purposes, but should ultimately be
-   --  removed anyway.
+   package Relation_Vectors is new Ada.Containers.Vectors (Positive, Relation);
+
+   Current_Solving_Relation_Stack : Relation_Vectors.Vector;
+   --  NOTE??? We use a stack of relations for debugging/tracing. This should
+   --  be replaced by having a solving context, that could be useful for other
+   --  things as well.
+
+   function Get_Current_Solving_Relation return Relation
+   is
+     (if not Current_Solving_Relation_Stack.Is_Empty
+      then Current_Solving_Relation_Stack.Last_Element
+      else null);
 
    -----------
    -- Solve --
@@ -35,9 +43,9 @@ package body Langkit_Support.Adalog.Abstract_Relation is
       end Wait;
 
    begin
-      if Current_Solving_Relation /= null then
+      if Get_Current_Solving_Relation /= null then
          if Debug.Debug then
-            Print_Relation (Current_Solving_Relation,
+            Print_Relation (Get_Current_Solving_Relation,
                             Self'Unrestricted_Access,
                             With_Colors => True);
          end if;
@@ -154,12 +162,12 @@ package body Langkit_Support.Adalog.Abstract_Relation is
 
    function Solve (Self : Relation) return Boolean is
    begin
-      Current_Solving_Relation := Self;
+      Current_Solving_Relation_Stack.Append (Self);
       declare
          Ret : constant Solving_State := Self.all.Solve;
       begin
          Trace ("The relation solving resulted in " & Ret'Image);
-         Current_Solving_Relation := null;
+         Current_Solving_Relation_Stack.Delete_Last;
          case Ret is
             when Progress | No_Progress =>
                raise Early_Binding_Error;
