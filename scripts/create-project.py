@@ -79,7 +79,7 @@ class Token(LexerToken):
 
 PARSER_TEMPLATE = '''\
 from langkit.dsl import ASTNode, abstract
-from langkit.parsers import Grammar, Row
+from langkit.parsers import Grammar
 
 
 @abstract
@@ -94,7 +94,7 @@ class ExampleNode({lang_name}Node):
 
 {lang_name_slug}_grammar = Grammar('main_rule')
 {lang_name_slug}_grammar.add_rules(
-    main_rule=Row('example') ^ ExampleNode
+    main_rule=ExampleNode('example')
 )
 '''
 
