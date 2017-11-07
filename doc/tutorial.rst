@@ -370,12 +370,12 @@ Langkit generates recursive descent parsers using `parser combinators
 examples:
 
 * ``'def'`` matches exactly one ``def`` token;
-* ``Row('def', Tok(Token.Identifier))`` matches a ``def`` token followed by an
-  identifier token.
+* ``Def('def', Tok(Token.Identifier))`` matches a ``def`` token followed by an
+  identifier token, creating a ``Def`` node.
 * ``Or('def', 'extern')`` matches either a ``def`` keyword, either a ``extern``
   one (no more, no less).
 
-The basic idea is that you use the callables Langkit provides (``Row``, ``Or``,
+The basic idea is that you use the callables Langkit provides (``Tok``, ``Or``,
 etc. from the ``langkit.parsers`` module) in order to compose in a quite
 natural way what rules can match. Let's move forward with a real world example:
 Kaleidoscope! Each chunk of code below appears as a keyword argument of the
@@ -390,7 +390,7 @@ Now, redefine the ``main_rule`` parsing rule:
 
 .. code-block:: python
 
-    main_rule=List(Row(Or(G.extern_decl, G.function, G.expr), ';')[0]),
+    main_rule=List(Pick(Or(G.extern_decl, G.function, G.expr), ';')),
 
 ``G.external_decl`` references the parsing rule called ``external_decl``.  It
 does not exist yet, but Langkit allows such forward references anyway so that
@@ -402,38 +402,32 @@ colon.
 
 .. code-block:: python
 
-    extern_decl=Row('extern', G.prototype) ^ ExternDecl,
+    extern_decl=ExternDecl('extern', G.prototype),
 
-This one is interesting: the ``Row`` part matches the ``extern`` keyword
-followed by what the ``prototype`` rule matches. Then, what the ``^
-ExternDecl`` part does is to take what the ``Row`` part matched and create an
+This one is interesting: inside the parens, we matches the ``extern`` keyword
+followed by what the ``prototype`` rule matches. Then, thanks to the
+``ExternDecl`` call, we take the content we matched and create an
 ``ExternDecl`` AST node to hold the result.
 
 ... but how is that possible? We saw above that ``ExternDecl`` has only one
-field, whereas the ``Row`` part matched two items. The trick is that by
-default, mere tokens are discarded.  Once it's discarded, the only thing left
-is what ``prototype`` matched, and so there is exactly one result to put in
+field, whereas the call matched two items. The trick is that by default, mere
+tokens are discarded.  Once it's discarded, the only thing left is what
+``prototype`` matched, and so there is exactly one result to put in
 ``ExternDecl``.
 
-In Langkit, the human-friendly name for ``^`` is the *transform* operator.  On
-the left side it takes a sub-parser while on the right side it takes a concrete
-KaleidoscopeNode subclass that must have the same number of fields as the
-number of results the sub-parser yields (i.e. one for every sub-parser except
-``Row`` and the number of non-discarded items in ``Row`` sub-parsers).
-
 .. code-block:: python
 
-    function=Row('def', G.prototype, G.expr) ^ Function,
+    function=Function('def', G.prototype, G.expr),
 
 We have here a pattern that is very similar to ``extern_decl``, except that the
-``Row`` part has two non-discarded results: ``prototype`` and ``expr``.  This
-is fortunate, as the ``Function`` node requires two fields.
+AST node constructor has two non-discarded results: ``prototype`` and ``expr``.
+This is fortunate, as the ``Function`` node requires two fields.
 
 .. code-block:: python
 
-    prototype=Row(G.identifier, '(',
-                  List(G.identifier, sep=',', empty_valid=True),
-                  ')') ^ Prototype,
+    prototype=Prototype(G.identifier, '(',
+                        List(G.identifier, sep=',', empty_valid=True),
+                        ')'),
 
 The only new bit in this rule is how the ``List`` combinator is used: last
 time, it had only one parameter: a sub-parser to specify how to match
@@ -448,12 +442,12 @@ that take no argument.
 .. code-block:: python
 
     expr=Or(
-        Row('(', G.expr, ')')[1],
-        Row(G.expr,
+        Pick('(', G.expr, ')'),
+        BinaryExpr(G.expr,
             Or(Enum('+', Operator('plus')),
                Enum('-', Operator('minus'))),
             G.prod_expr
-        ) ^ BinaryExpr,
+        ),
         G.prod_expr,
     ),
 
@@ -461,9 +455,8 @@ Let's dive into the richest grammatical element of Kaleidoscope: expressions!
 An expression can be either:
 
 * A sub-expression nested in parenthesis, to give users more control over how
-  associativity works. Note that we used here the subscript operation to
-  extract the middle result (first one is at index 0, middle one is at index 1)
-  of the ``Row`` part.
+  associativity works. Note that we used here the ``Pick`` parser to parse
+  parens while only returning the AST node that ``G.expr`` yields.
 
 * Two sub-expressions with an operator in the middle, building a binary
   expression. This shows how we can turn tokens into enumerators:
@@ -480,11 +473,11 @@ An expression can be either:
 .. code-block:: python
 
     prod_expr=Or(
-        Row(G.prod_expr,
+        BinaryExpr(G.prod_expr,
             Or(Enum('*', Operator('mult')),
                Enum('/', Operator('div'))),
             G.call_or_single
-        ) ^ BinaryExpr,
+        ),
         G.call_or_single,
     ),
 
@@ -504,9 +497,9 @@ remember that: yes, Langkit handles left recursivity!).
 .. code-block:: python
 
     call_or_single=Or(
-        Row (G.identifier, '(',
-             List(G.expr, sep=',', empty_valid=True),
-             ')') ^ CallExpr,
+        CallExpr(G.identifier, '(',
+                 List(G.expr, sep=',', empty_valid=True),
+                 ')'),
         G.identifier,
         G.number,
     ),
