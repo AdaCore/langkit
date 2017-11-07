@@ -6,7 +6,7 @@ from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, Struct, abstract, env_metadata
 from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import Property, Self
-from langkit.parsers import Grammar, List, Opt, Row, Tok
+from langkit.parsers import Grammar, List, Opt, Tok
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -50,16 +50,16 @@ class Block(Stmt):
 
 grammar = Grammar('stmts_rule')
 grammar.add_rules(
-    def_rule=Row(
+    def_rule=Def(
         Tok(Token.Identifier, keep=True),
-        Opt(Row('(', grammar.stmts_rule, ')')[1])
-    ) ^ Def,
+        Opt('(', grammar.stmts_rule, ')')
+    ),
 
     stmt_rule=(
         grammar.def_rule
-        | Row('{',
-              List(grammar.stmt_rule, empty_valid=True),
-              '}') ^ Block
+        | Block('{',
+                List(grammar.stmt_rule, empty_valid=True),
+                '}')
     ),
 
     stmts_rule=List(grammar.stmt_rule)

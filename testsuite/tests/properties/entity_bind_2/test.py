@@ -13,7 +13,7 @@ from langkit.dsl import (ASTNode, BoolType, Field, LongType, LogicVarType, T,
 from langkit.expressions import (
     AbstractProperty, Let, Property, Self, Bind, langkit_property
 )
-from langkit.parsers import Grammar, Row, Tok
+from langkit.parsers import Grammar, Tok
 
 from lexer_example import Token
 from utils import build_and_run
@@ -50,7 +50,7 @@ class Literal(FooNode):
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
-    main_rule=Row(Tok(Token.Number, keep=True)) ^ Literal,
+    main_rule=Literal(Tok(Token.Number, keep=True)),
 )
 build_and_run(foo_grammar, 'main.py')
 print('Done')

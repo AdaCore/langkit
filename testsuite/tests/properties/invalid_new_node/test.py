@@ -5,7 +5,7 @@ import os.path
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, T
 from langkit.expressions import New, Property
-from langkit.parsers import Grammar, List, Row, Tok
+from langkit.parsers import Grammar, List, Pick, Tok
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -36,10 +36,10 @@ def run(name, prop_fn, prop_memoized):
     grammar = Grammar('main_rule')
     grammar.add_rules(
         main_rule=grammar.list_rule,
-        list_rule=Row(
+        list_rule=Pick(
             '(', List(grammar.list_item, sep=',', cls=LiteralList), ')'
-        )[0],
-        list_item=Row(Tok(Token.Number, keep=True)) ^ Literal,
+        ),
+        list_item=Literal(Tok(Token.Number, keep=True)),
     )
     emit_and_print_errors(grammar)
     print('')

@@ -6,7 +6,7 @@ from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode
 from langkit.envs import EnvSpec, call_env_hook
 from langkit.expressions import Self
-from langkit.parsers import Grammar, Row
+from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
 
@@ -24,7 +24,7 @@ class BarNode(FooNode):
 
 grammar = Grammar('main_rule')
 grammar.add_rules(
-    main_rule=Row('example') ^ BarNode,
+    main_rule=BarNode('example'),
 )
 emit_and_print_errors(grammar)
 print('Done')

@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType, Field, abstract
 from langkit.expressions import Literal, Property, Self
-from langkit.parsers import Grammar, Or, Row, Tok
+from langkit.parsers import Grammar, Or, Tok
 
 from lexer_example import Token
 from os import path
@@ -51,18 +51,18 @@ def run(name, match_expr):
 
     grammar = Grammar('main_rule')
     grammar.add_rules(
-        main_rule=Row(
+        main_rule=ExampleNode(
             'example',
-            Or(grammar.expression,
-               Row('null') ^ NullNode)
-        ) ^ ExampleNode,
+            Or(
+                grammar.expression,
+                NullNode('null')
+            )
+        ),
 
-        number=Tok(Token.Number, keep=True) ^ Number,
+        number=Number(Tok(Token.Number, keep=True)),
 
         expression=Or(
-            Row(grammar.number,
-                ',',
-                grammar.expression) ^ Compound,
+            Compound(grammar.number, ',', grammar.expression),
             grammar.number
         ),
     )

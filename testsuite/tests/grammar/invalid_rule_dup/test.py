@@ -4,7 +4,7 @@ from os import path
 
 from langkit.diagnostics import Diagnostics, DiagnosticError
 from langkit.dsl import ASTNode, abstract
-from langkit.parsers import Grammar, Row
+from langkit.parsers import Grammar
 
 
 Diagnostics.set_lang_source_dir(path.abspath(__file__))
@@ -21,13 +21,13 @@ class ExampleNode(FooNode):
 
 grammar = Grammar('main_rule')
 grammar.add_rules(
-    sec_rule=Row('example'),
+    sec_rule=ExampleNode('example'),
 )
 
 try:
     grammar.add_rules(
-        sec_rule=Row('example'),
-        main_rule=Row(grammar.sec_rule) ^ ExampleNode
+        sec_rule=ExampleNode('example'),
+        main_rule=ExampleNode(grammar.sec_rule)
     )
 except DiagnosticError:
     # Diagnostics are supposed to be printed on standard output, no need to do

@@ -5,7 +5,7 @@ from langkit.dsl import ASTNode, BoolType, Field, T
 from langkit.expressions import (
     Let, Property, Self, Var, langkit_property, ignore
 )
-from langkit.parsers import Grammar, List, Or, Row
+from langkit.parsers import Grammar, List, Or
 
 from os import path
 from utils import emit_and_print_errors
@@ -71,7 +71,7 @@ class ExampleList(FooNode):
 grammar = Grammar('item')
 grammar.add_rules(
     item=Or(grammar.example, grammar.example_list),
-    example=Row('example') ^ Example,
+    example=Example('example'),
     example_list=ExampleList(
         '(', List(grammar.item), ')'
     )

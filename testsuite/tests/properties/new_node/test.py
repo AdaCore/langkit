@@ -9,7 +9,7 @@ import os.path
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, TokenType, synthetic
 from langkit.expressions import New, Self, langkit_property
-from langkit.parsers import Grammar, List, Row, Tok
+from langkit.parsers import Grammar, List, Tok
 
 from lexer_example import Token
 from utils import build_and_run
@@ -48,11 +48,13 @@ class LiteralSequence(FooNode):
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=foo_grammar.list_rule,
-    list_rule=Row('(',
-                  Tok(Token.Identifier, keep=True),
-                  List(foo_grammar.list_item, sep=','),
-                  ')') ^ LiteralSequence,
-    list_item=Row(Tok(Token.Number, keep=True)) ^ Literal,
+    list_rule=LiteralSequence(
+        '(',
+        Tok(Token.Identifier, keep=True),
+        List(foo_grammar.list_item, sep=','),
+        ')'
+    ),
+    list_item=Literal(Tok(Token.Number, keep=True)),
 )
 build_and_run(foo_grammar, 'main.py')
 print('Done')

@@ -6,7 +6,7 @@ import os.path
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType, abstract
 from langkit.expressions import AbstractProperty, Literal, Property, Self
-from langkit.parsers import Grammar, Row
+from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
 
@@ -44,7 +44,7 @@ def run(abstract_public, concrete_public):
 
     grammar = Grammar('main_rule')
     grammar.add_rules(
-        main_rule=Row('example') ^ ConcreteNode,
+        main_rule=ConcreteNode('example'),
     )
 
     if emit_and_print_errors(grammar):

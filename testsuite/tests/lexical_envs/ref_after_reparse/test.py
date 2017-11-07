@@ -11,7 +11,7 @@ from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, LexicalEnvType, T
 from langkit.envs import EnvSpec, reference, add_to_env, add_env
 from langkit.expressions import DynamicVariable, New, Self, langkit_property
-from langkit.parsers import Grammar, List, Row, Tok
+from langkit.parsers import Grammar, List, Pick, Tok
 
 from lexer_example import Token
 from utils import build_and_run
@@ -94,13 +94,13 @@ foo_grammar.add_rules(
                 foo_grammar.ref_list,
                 Tok(Token.RBrace)),
 
-    decl_list=Row(Tok(Token.LPar),
-                  List(foo_grammar.decl, empty_valid=True),
-                  Tok(Token.RPar))[1],
+    decl_list=Pick(Tok(Token.LPar),
+                   List(foo_grammar.decl, empty_valid=True),
+                   Tok(Token.RPar)),
 
-    using_list=Row(Tok(Token.LPar),
-                   List(foo_grammar.using, empty_valid=True),
-                   Tok(Token.RPar))[1],
+    using_list=Pick(Tok(Token.LPar),
+                    List(foo_grammar.using, empty_valid=True),
+                    Tok(Token.RPar)),
 
     ref_list=List(foo_grammar.ref, empty_valid=True),
 

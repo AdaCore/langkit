@@ -11,7 +11,7 @@ from langkit.dsl import ASTNode, Field
 from langkit.lexer import (
     Eof, Ignore, Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText
 )
-from langkit.parsers import Grammar, Row, Tok, Or
+from langkit.parsers import Grammar, Tok, Or
 
 from utils import build_and_run
 
@@ -81,7 +81,7 @@ foo_grammar = Grammar('main_rule')
 A = foo_grammar
 
 foo_grammar.add_rules(
-    lit=Row(Tok(Token.Number, keep=True)) ^ Literal,
+    lit=Literal(Tok(Token.Number, keep=True)),
     nl=NewLineNode(A.lit, L.Newline(), A.lit),
     ind=IndentNode(A.lit, L.Newline(), L.Indent(), A.lit, L.Dedent()),
     comp=CompositeNode(

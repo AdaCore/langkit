@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, abstract
-from langkit.parsers import Grammar, Row
+from langkit.parsers import Grammar
 
 from os import path
 
@@ -22,8 +22,8 @@ class ExampleNode(FooNode):
 
 grammar = Grammar('main_rule')
 grammar.add_rules(
-    sec_rule=Row('example'),
-    main_rule=Row(grammar.sec_rules) ^ ExampleNode
+    sec_rule=ExampleNode('example'),
+    main_rule=ExampleNode(grammar.sec_rules),
 )
 emit_and_print_errors(grammar)
 print('Done')

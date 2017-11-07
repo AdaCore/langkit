@@ -11,7 +11,7 @@ from langkit.diagnostics import Diagnostics
 from langkit.dsl import (AnalysisUnitType, ASTNode, Field, T, TokenType,
                          abstract)
 from langkit.expressions import No, Property, Self
-from langkit.parsers import Grammar, Or, Row, Tok
+from langkit.parsers import Grammar, Or, Pick, Tok
 
 from lexer_example import Token
 from utils import build_and_run
@@ -74,13 +74,13 @@ foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=foo_grammar.expression,
     expression=Or(
-        Row('(', foo_grammar.expression, ')')[1],
+        Pick('(', foo_grammar.expression, ')'),
         Plus(foo_grammar.atom, '+', foo_grammar.main_rule),
         foo_grammar.atom,
     ),
     atom=Or(
-        Row(Tok(Token.Number, keep=True)) ^ Literal,
-        Row(Tok(Token.Identifier, keep=True)) ^ Name,
+        Literal(Tok(Token.Number, keep=True)),
+        Name(Tok(Token.Identifier, keep=True)),
     ),
 )
 build_and_run(foo_grammar, 'main.py')

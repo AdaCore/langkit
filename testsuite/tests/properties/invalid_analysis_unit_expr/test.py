@@ -10,7 +10,7 @@ import os.path
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode
 from langkit.expressions import Property, Self
-from langkit.parsers import Grammar, Row
+from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
 
@@ -26,7 +26,7 @@ def run(name, prop):
         result = Property(prop)
 
     grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=Row('example') ^ Example)
+    grammar.add_rules(main_rule=Example('example'))
     emit_and_print_errors(grammar)
     print('')
 

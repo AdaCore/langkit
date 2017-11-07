@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, LongType
 from langkit.expressions import Property, Self
-from langkit.parsers import Grammar, Row, List, Tok
+from langkit.parsers import Grammar, List, Tok
 
 from lexer_example import Token
 from os import path
@@ -42,10 +42,10 @@ def run(name, expr):
 
     grammar = Grammar('main_rule')
     grammar.add_rules(
-        main_rule=Row('example', grammar.list_rule) ^ BarNode,
-        list_rule=Row(
-            List(Tok(Token.Number, keep=True) ^ NumberNode)
-        ) ^ ListNode,
+        main_rule=BarNode('example', grammar.list_rule),
+        list_rule=ListNode(
+            List(NumberNode(Tok(Token.Number, keep=True)))
+        ),
     )
     emit_and_print_errors(grammar)
     print('')

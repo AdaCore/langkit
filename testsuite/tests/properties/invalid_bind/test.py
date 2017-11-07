@@ -4,7 +4,7 @@ from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, LexicalEnvType, LogicVarType, T, UserField
 from langkit.expressions import (Bind, DynamicVariable, Property, Self, Var,
                                  langkit_property, ignore)
-from langkit.parsers import Grammar, Row, Or
+from langkit.parsers import Grammar, Or
 
 from os import path
 from utils import emit_and_print_errors
@@ -67,8 +67,8 @@ def run(name, eq_prop):
     grammar = Grammar('main_rule')
     grammar.add_rules(
         main_rule=Or(
-            Row('example') ^ BarNode,
-            Row('example') ^ BazNode,
+            BarNode('example'),
+            BazNode('example'),
         )
     )
     emit_and_print_errors(grammar)

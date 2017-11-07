@@ -6,7 +6,7 @@ from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode
 from langkit.envs import EnvSpec, set_initial_env
 from langkit.expressions import Self
-from langkit.parsers import Grammar, Row
+from langkit.parsers import Grammar
 
 from utils import build_and_run
 
@@ -26,6 +26,6 @@ class Example(FooNode):
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
-    main_rule=Row('example') ^ Example,
+    main_rule=Example('example'),
 )
 build_and_run(foo_grammar, 'script.py')

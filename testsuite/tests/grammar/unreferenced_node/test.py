@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, abstract
-from langkit.parsers import Grammar, Row
+from langkit.parsers import Grammar
 
 from os import path
 
@@ -26,7 +26,7 @@ class UnreferencedNode(FooNode):
 
 grammar = Grammar('main_rule')
 grammar.add_rules(
-    main_rule=Row('example') ^ ExampleNode
+    main_rule=ExampleNode('example')
 )
 emit_and_print_errors(grammar)
 print('Done')

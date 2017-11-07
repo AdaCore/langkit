@@ -4,7 +4,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, Annotations
-from langkit.parsers import Grammar, Row, List, Tok
+from langkit.parsers import Grammar, List, Tok
 
 from lexer_example import Token
 from utils import emit_and_print_errors, reset_langkit
@@ -29,7 +29,7 @@ def create_nodes():
 create_nodes()
 grammar = Grammar('main_rule')
 grammar.add_rules(
-    main_rule=Row(List(Tok(Token.Number, keep=True))) ^ ListNode,
+    main_rule=ListNode(List(Tok(Token.Number, keep=True))),
 )
 emit_and_print_errors(grammar)
 

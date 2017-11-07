@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, LongType
 from langkit.expressions import Property, langkit_property, AbstractKind
-from langkit.parsers import Grammar, Row
+from langkit.parsers import Grammar
 
 from os import path
 from utils import emit_and_print_errors
@@ -30,8 +30,8 @@ class BarNode(BarCode):
 
 grammar = Grammar('main_rule')
 grammar.add_rules(
-    main_rule=Row('example', grammar.rule_2) ^ BarCode,
-    rule_2=Row('example', grammar.rule_2) ^ BarNode,
+    main_rule=BarCode('example', grammar.rule_2),
+    rule_2=BarNode('example', grammar.rule_2),
 )
 emit_and_print_errors(grammar)
 print('')

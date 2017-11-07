@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType, T, abstract
 from langkit.expressions import ExternalProperty, Property, Self
-from langkit.parsers import Grammar, Row
+from langkit.parsers import Grammar
 
 from os import path
 from utils import emit_and_print_errors
@@ -33,7 +33,7 @@ def run(name, abstract_prop, prop=None):
 
     grammar = Grammar('main_rule')
     grammar.add_rules(
-        main_rule=Row('example') ^ Example,
+        main_rule=Example('example'),
     )
     emit_and_print_errors(grammar)
     print('')
