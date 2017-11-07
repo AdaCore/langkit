@@ -127,7 +127,7 @@ def render(*args, **kwargs):
         'is_list':      type_check_instance(List),
         'is_opt':       type_check_instance(Opt),
         'is_null':      type_check_instance(Null),
-        'is_extract':   type_check_instance(Extract),
+        'is_extract':   type_check_instance(_Extract),
         'is_class':     inspect.isclass,
         'ctx':          get_context(),
         'creates_node': creates_node,
@@ -803,7 +803,7 @@ def Pick(*parsers):
     if pick_parser_idx == -1:
         return _Row(*parsers)
     else:
-        return _Row(*parsers)[pick_parser_idx]
+        return _Extract(_Row(*parsers), pick_parser_idx)
 
 
 class _Row(Parser):
@@ -867,13 +867,6 @@ class _Row(Parser):
 
     def generate_code(self):
         return self.render('row_code_ada', exit_label=gen_name("Exit_Row"))
-
-    def __getitem__(self, index):
-        """
-        Return a parser that matches `self` and that discards everything except
-        the `index`th field in the row.
-        """
-        return Extract(self, index)
 
 
 class List(Parser):
@@ -1096,19 +1089,8 @@ class Opt(Parser):
     def generate_code(self):
         return self.render('opt_code_ada')
 
-    def __getitem__(self, index):
-        """
-        Return a parser that matches `self` and that discards everything except
-        the `index`th field in the row.
 
-        Used as a shortcut, will only work if the Opt's sub-parser is a row.
-        """
-        m = self.parser
-        assert isinstance(m, _Row)
-        return Opt(Extract(m, index))
-
-
-class Extract(Parser):
+class _Extract(Parser):
     """
     Wrapper parser used to discard everything from a _Row parser except a
     single field in it.
@@ -1628,7 +1610,7 @@ def pp_struct_eq(parsers, toplevel=True):
         elif typ == Tok:
             return is_same(p.val for p in parsers)
         # For extract, structural equality involves comparing indices too
-        elif typ == Extract:
+        elif typ == _Extract:
             return pp_struct_eq(
                 [p.parser for p in parsers]
             ) and is_same(p.index for p in parsers)
