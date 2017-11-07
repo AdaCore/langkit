@@ -554,9 +554,9 @@ class ASTNode(BaseStruct):
         This constructor can be used in the grammar to create a parser for this
         AST node.
         """
-        from langkit.parsers import Row
+        from langkit.parsers import _Row, _Transform
 
-        return Row(*args) ^ T.Defer(cls._resolve, cls._name.camel)
+        return _Transform(_Row(*args), T.Defer(cls._resolve, cls._name.camel))
 
 
 class _ASTNodeList(ASTNode):
@@ -767,7 +767,7 @@ class EnumNode(BaseStruct):
         """
         Construct a parser for this EnumNode subclass.
         """
-        from langkit.parsers import Row, Opt
+        from langkit.parsers import _Row, _Transform, Opt
 
         if cls._qualifier:
             # If the node is a boolean node, then we want to parse the
@@ -776,7 +776,7 @@ class EnumNode(BaseStruct):
 
         else:
             # Otherwise, we want to parse the sub-parsers as a row + transform
-            return Row(*args) ^ typeref
+            return _Transform(_Row(*args), typeref)
 
 
 class _EnumMetaclass(type):

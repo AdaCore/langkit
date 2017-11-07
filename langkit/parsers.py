@@ -121,9 +121,9 @@ class GeneratedParser(object):
 def render(*args, **kwargs):
     return compiled_types.make_renderer().update({
         'is_tok':       type_check_instance(Tok),
-        'is_row':       type_check_instance(Row),
+        'is_row':       type_check_instance(_Row),
         'is_defer':     type_check_instance(Defer),
-        'is_transform': type_check_instance(Transform),
+        'is_transform': type_check_instance(_Transform),
         'is_list':      type_check_instance(List),
         'is_opt':       type_check_instance(Opt),
         'is_null':      type_check_instance(Null),
@@ -374,14 +374,22 @@ class Parser(object):
         """
         pass  # no-code-coverage
 
-    def init_vars(self, pos_var=None, res_var=None):
-        self.pos_var = (pos_var or VarDef(
-            "{}_pos".format(self.__class__.__name__.lower()), T.TokenType
-        ))
+    @classmethod
+    def parser_cls_name(cls):
+        """
+        Return a name for this parser class to be used for code generation.
 
-        self.res_var = (res_var or VarDef(
-            "{}_res".format(self.__class__.__name__.lower()), self.get_type()
-        ))
+        :rtype: str
+        """
+        return cls.__name__.strip('_')
+
+    def init_vars(self, pos_var=None, res_var=None):
+        base_name = self.parser_cls_name().lower()
+
+        self.pos_var = pos_var or VarDef('{}_pos'.format(base_name),
+                                         T.TokenType)
+        self.res_var = res_var or VarDef('{}_res'.format(base_name),
+                                         self.get_type())
 
     @property
     def error_repr(self):
@@ -398,7 +406,7 @@ class Parser(object):
 
         The result is used as a base name for the generated function name.
         """
-        return names.Name.from_camel(type(self).__name__ + "Parse")
+        return names.Name.from_camel(self.parser_cls_name() + 'Parse')
 
     @property
     def name(self):
@@ -432,13 +440,6 @@ class Parser(object):
             alternatives.append(other_parser)
 
         return Or(*alternatives)
-
-    def __xor__(self, transform_fn):
-        """
-        :type transform_fn: (T) => U
-        :rtype: Transform
-        """
-        return Transform(self, transform_fn)
 
     def set_location(self, location):
         """
@@ -780,8 +781,8 @@ def always_make_progress(parser):
 
 def Pick(*parsers):
     """
-    Utility around Row and Extract, that will automatically scan a Row, remove
-    tokens and ignored sub parses, and extract the only significant sub-result.
+    Parser that scans a sequence of sub-parsers, remove tokens and ignored sub
+    parsers, and extract the only significant sub-result.
 
     If there are several significant sub-results, raises an error.
     """
@@ -800,12 +801,12 @@ def Pick(*parsers):
         pick_parser_idx = i
 
     if pick_parser_idx == -1:
-        return Row(*parsers)
+        return _Row(*parsers)
     else:
-        return Row(*parsers)[pick_parser_idx]
+        return _Row(*parsers)[pick_parser_idx]
 
 
-class Row(Parser):
+class _Row(Parser):
     """
     Parser that matches a what sub-parsers match in sequence.
     """
@@ -852,11 +853,11 @@ class Row(Parser):
         return self.parsers
 
     def get_type(self):
-        # A Row parser never yields a concrete result itself
+        # A _Row parser never yields a concrete result itself
         return None
 
     def create_vars_before(self):
-        # We pass in a dummy object for res_var, because Rows have no result
+        # We pass in a dummy object for res_var, because _Rows have no result
         self.init_vars(res_var=object())
         return self.pos_var
 
@@ -991,12 +992,10 @@ class Opt(Parser):
     def __repr__(self):
         return "Opt({0})".format(self.parser)
 
-    def __init__(self, parser, *parsers):
+    def __init__(self, *parsers):
         """
-        Create a parser that matches `parser` and then `parsers` if possible or
-        matches an empty sequence otherwise.  The result is equivalent to::
-
-            Opt(Row(parser, *parsers)).
+        Create a parser that matches `parsers` if possible or matches an empty
+        sequence otherwise.
         """
         Parser.__init__(self)
 
@@ -1013,7 +1012,7 @@ class Opt(Parser):
 
         self._is_error = False
         self.contains_anonymous_row = bool(parsers)
-        self.parser = Pick(parser, *parsers) if parsers else resolve(parser)
+        self.parser = Pick(*parsers)
 
     def discard(self):
         return self._booleanize is None and self.parser.discard()
@@ -1098,21 +1097,21 @@ class Opt(Parser):
         return self.render('opt_code_ada')
 
     def __getitem__(self, index):
-        """Same as Row.__getitem__:
+        """
         Return a parser that matches `self` and that discards everything except
         the `index`th field in the row.
 
         Used as a shortcut, will only work if the Opt's sub-parser is a row.
         """
         m = self.parser
-        assert isinstance(m, Row)
+        assert isinstance(m, _Row)
         return Opt(Extract(m, index))
 
 
 class Extract(Parser):
     """
-    Wrapper parser used to discard everything from a Row parser except a single
-    field in it.
+    Wrapper parser used to discard everything from a _Row parser except a
+    single field in it.
     """
 
     def _is_left_recursive(self, rule_name):
@@ -1127,14 +1126,14 @@ class Extract(Parser):
 
     def __init__(self, parser, index):
         """
-        :param Row parser: The parser that will serve as target for
+        :param _Row parser: The parser that will serve as target for
             extract operation.
         :param int index: The index you want to extract from the row.
         """
         Parser.__init__(self)
         self.parser = parser
         self.index = index
-        assert isinstance(self.parser, Row)
+        assert isinstance(self.parser, _Row)
 
     def children(self):
         return [self.parser]
@@ -1248,16 +1247,16 @@ class Defer(Parser):
         return self.render('fn_call_ada')
 
 
-class Transform(Parser):
+class _Transform(Parser):
     """
-    Wrapper parser for a Row parser used to instantiate an AST node.
+    Wrapper parser for a _Row parser used to instantiate an AST node.
     """
 
     def _is_left_recursive(self, rule_name):
         return self.parser._is_left_recursive(rule_name)
 
     def __repr__(self):
-        return "{0} ^ {1}".format(
+        return "Transform({0}, {1})".format(
             self.parser,
             '<Defer>'
             if isinstance(self.typ, T.Defer) else
@@ -1266,7 +1265,7 @@ class Transform(Parser):
 
     def __init__(self, parser, typ):
         """
-        Create a Transform parser wrapping `parser` and that instantiates AST
+        Create a _Transform parser wrapping `parser` and that instantiates AST
         nodes whose type is `typ`.
         """
         from langkit.dsl import ASTNode
@@ -1287,8 +1286,8 @@ class Transform(Parser):
 
     def compute_fields_types(self):
         # Gather field types that come from all child parsers
-        if isinstance(self.parser, Row):
-            # There are multiple fields for Row parsers
+        if isinstance(self.parser, _Row):
+            # There are multiple fields for _Row parsers
             fields_types = [parser.get_type()
                             for parser in self.parser.parsers
                             if not parser.discard()]
@@ -1327,7 +1326,7 @@ class Transform(Parser):
         return self.render(
             'transform_code_ada',
             args=(keep(self.parser.subresults)
-                  if isinstance(self.parser, Row) else [self.parser.res_var]),
+                  if isinstance(self.parser, _Row) else [self.parser.res_var]),
         )
 
 
@@ -1387,7 +1386,7 @@ class Enum(Parser):
         """
         Parser.__init__(self)
         self.parser = resolve(parser) if parser else None
-        ":type: Parser|Row"
+        ":type: Parser|_Row"
 
         self.enum_type_inst = enum_type_inst._enum_value
 
@@ -1563,7 +1562,7 @@ def creates_node(p, follow_refs=True):
     For example::
         Node(..)               # <- True
         Or(a, b, c)            # <- True if a b & c creates_node
-        Row(a, b, c)           # <- False
+        _Row(a, b, c)          # <- False
         Pick(";", "lol", c)    # <- False
     """
     from langkit.dsl import EnumNode
@@ -1578,7 +1577,7 @@ def creates_node(p, follow_refs=True):
         return True
 
     return (
-        isinstance(p, Transform)
+        isinstance(p, _Transform)
         or isinstance(p, List)
         or (isinstance(p, Opt) and issubtype(p._booleanize, EnumNode))
     )
@@ -1619,7 +1618,7 @@ def pp_struct_eq(parsers, toplevel=True):
 
         # For those parser kinds, we want to check if their children are the
         # same.
-        if typ in (Row, Transform, List, Opt):
+        if typ in (_Row, _Transform, List, Opt):
             children_lists = [p.children() for p in parsers]
             return is_same(len(c) for c in children_lists) and all(
                 pp_struct_eq(c, False)
