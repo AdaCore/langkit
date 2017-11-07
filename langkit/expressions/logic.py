@@ -9,8 +9,8 @@ from langkit.compiled_types import Argument, T, no_compiled_type
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable, LiteralExpr,
-    NullExpr, PropertyDef, aggregate_expr, auto_attr, construct, dsl_document,
-    render, resolve_property
+    NullExpr, PropertyDef, Self, aggregate_expr, auto_attr, construct,
+    dsl_document, render, resolve_property
 )
 
 
@@ -565,8 +565,9 @@ def solve(self, equation):
     :param AbstractExpression equation: The equation to solve.
     """
     PropertyDef.get()._solves_equation = True
-    return CallExpr('Solve_Success', 'Solve', T.BoolType,
-                    [construct(equation, T.EquationType)],
+    return CallExpr('Solve_Success', 'Solve_Wrapper', T.BoolType,
+                    [construct(equation, T.EquationType),
+                     construct(Self, T.root_node)],
                     abstract_expr=self)
 
 

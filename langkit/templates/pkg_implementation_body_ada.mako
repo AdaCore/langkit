@@ -41,6 +41,12 @@ with ${ctx.env_hook_subprogram.unit_fqn};
 
 package body ${ada_lib_name}.Analysis.Implementation is
 
+   function Solve_Wrapper
+     (R            : Relation;
+      Context_Node : ${root_node_type_name}) return Boolean;
+   --  Wrapper for Langkit_Support.Adalog.Solve; will handle setting the debug
+   --  strings in the equation if in debug mode.
+
    function Convert is new Ada.Unchecked_Conversion
      (Entity_Info, Public_Entity_Info);
 
@@ -66,6 +72,23 @@ package body ${ada_lib_name}.Analysis.Implementation is
    % if ctx.has_memoization:
       ${memoization.body()}
    % endif
+
+   -------------------
+   -- Solve_Wrapper --
+   -------------------
+
+   function Solve_Wrapper
+     (R            : Relation;
+      Context_Node : ${root_node_type_name}) return Boolean is
+   begin
+      if Context_Node /= null 
+         and then Langkit_Support.Adalog.Debug.Debug
+      then
+         Context_Node.Assign_Names_To_Logic_Vars;
+      end if;
+
+      return Solve (R);
+   end Solve_Wrapper;
 
    ---------------------
    -- Pre_Env_Actions --
