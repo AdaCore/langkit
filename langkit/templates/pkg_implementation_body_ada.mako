@@ -1,11 +1,12 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"       file="array_types_ada.mako" />
-<%namespace name="astnode_types"     file="astnode_types_ada.mako" />
-<%namespace name="enum_types"        file="enum_types_ada.mako" />
-<%namespace name="list_types"        file="list_types_ada.mako" />
-<%namespace name="struct_types"      file="struct_types_ada.mako" />
-<%namespace name="memoization"       file="memoization_ada.mako" />
+<%namespace name="array_types"   file="array_types_ada.mako" />
+<%namespace name="astnode_types" file="astnode_types_ada.mako" />
+<%namespace name="enum_types"    file="enum_types_ada.mako" />
+<%namespace name="exts"          file="extensions.mako" />
+<%namespace name="list_types"    file="list_types_ada.mako" />
+<%namespace name="memoization"   file="memoization_ada.mako" />
+<%namespace name="struct_types"  file="struct_types_ada.mako" />
 
 <% root_node_array = T.root_node.array %>
 
@@ -1112,6 +1113,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
    % for prop in T.root_node.get_properties(include_inherited=False):
    ${prop.prop_def}
    % endfor
+
+   ## Generate the extensions for root node type
+
+   <% ext = ctx.ext('nodes', T.root_node.raw_name, 'bodies') %>
+   ${exts.include_extension(ext)}
 
    ## Generate bodies of untyped wrappers
    % for prop in T.root_node.get_properties( \
