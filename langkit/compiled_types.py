@@ -120,9 +120,6 @@ def make_renderer(base_renderer=None):
             'unit_provider_type':    CAPIType(capi, 'unit_provider').name,
             'unit_provider_destroy_type':
                 CAPIType(capi, 'unit_provider_destroy_callback').name,
-            'unit_provider_get_unit_from_node_type':
-                CAPIType(capi,
-                         'unit_provider_get_unit_from_node_callback').name,
             'unit_provider_get_unit_from_name_type':
                 CAPIType(capi,
                          'unit_provider_get_unit_from_name_callback').name,

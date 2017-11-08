@@ -138,17 +138,6 @@ typedef void *${unit_provider_type};
 ${c_doc('langkit.unit_provider_destroy_type')}
 typedef void (*${unit_provider_destroy_type})(void *data);
 
-${c_doc('langkit.unit_provider_get_unit_from_node_type')}
-typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_node_type})(
-   void *data,
-   ${analysis_context_type} context,
-   ${entity_type} *node,
-   ${unit_kind_type} kind,
-   const char *charset,
-   int reparse,
-   int with_trivia
-);
-
 ${c_doc('langkit.unit_provider_get_unit_from_name_type')}
 typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
    void *data,
@@ -430,7 +419,6 @@ extern ${unit_provider_type}
 ${capi.get_name('create_unit_provider')}(
    void *data,
    ${unit_provider_destroy_type} destroy_func,
-   ${unit_provider_get_unit_from_node_type} get_unit_from_node_func,
    ${unit_provider_get_unit_from_name_type} get_unit_from_name_func
 );
 

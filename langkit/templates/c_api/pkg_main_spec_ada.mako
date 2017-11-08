@@ -129,17 +129,6 @@ package ${ada_lib_name}.Analysis.Implementation.C is
       with Convention => C;
    ${ada_c_doc('langkit.unit_provider_destroy_type', 3)}
 
-   type ${unit_provider_get_unit_from_node_type} is access function
-     (Data        : System.Address;
-      Context     : ${analysis_context_type};
-      Node        : ${root_entity.c_type(capi).name}_Ptr;
-      Kind        : ${unit_kind_type};
-      Charset     : chars_ptr;
-      Reparse     : int;
-      With_Trivia : int) return ${analysis_unit_type}
-      with Convention => C;
-   ${ada_c_doc('langkit.unit_provider_get_unit_from_node_type', 3)}
-
    type ${unit_provider_get_unit_from_name_type} is access function
      (Data        : System.Address;
       Context     : ${analysis_context_type};
@@ -474,7 +463,6 @@ package ${ada_lib_name}.Analysis.Implementation.C is
    function ${capi.get_name('create_unit_provider')}
      (Data                    : System.Address;
       Destroy_Func            : ${unit_provider_destroy_type};
-      Get_Unit_From_Node_Func : ${unit_provider_get_unit_from_node_type};
       Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type})
       return ${unit_provider_type}
       with Export        => True,

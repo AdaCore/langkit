@@ -40,20 +40,10 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    with record
       Data                    : System.Address;
       Destroy_Func            : ${unit_provider_destroy_type};
-      Get_Unit_From_Node_Func : ${unit_provider_get_unit_from_node_type};
       Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type};
    end record;
 
    overriding procedure Finalize (Provider : in out C_Unit_Provider_Type);
-
-   overriding function Get_Unit
-     (Provider    : C_Unit_Provider_Type;
-      Context     : Analysis_Context;
-      Node        : ${root_entity.api_name}'Class;
-      Kind        : Unit_Kind;
-      Charset     : String := "";
-      Reparse     : Boolean := False;
-      With_Trivia : Boolean := False) return Analysis_Unit;
 
    overriding function Get_Unit
      (Provider    : C_Unit_Provider_Type;
@@ -1028,7 +1018,6 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    function ${capi.get_name('create_unit_provider')}
      (Data                    : System.Address;
       Destroy_Func            : ${unit_provider_destroy_type};
-      Get_Unit_From_Node_Func : ${unit_provider_get_unit_from_node_type};
       Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type})
       return ${unit_provider_type}
    is
@@ -1040,7 +1029,6 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
               (Ada.Finalization.Controlled with
                Data                    => Data,
                Destroy_Func            => Destroy_Func,
-               Get_Unit_From_Node_Func => Get_Unit_From_Node_Func,
                Get_Unit_From_Name_Func => Get_Unit_From_Name_Func);
       begin
          return Wrap (Result);
@@ -1075,35 +1063,6 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    begin
       Provider.Destroy_Func (Provider.Data);
    end Finalize;
-
-   --------------
-   -- Get_Unit --
-   --------------
-
-   overriding function Get_Unit
-     (Provider    : C_Unit_Provider_Type;
-      Context     : Analysis_Context;
-      Node        : ${root_entity.api_name}'Class;
-      Kind        : Unit_Kind;
-      Charset     : String := "";
-      Reparse     : Boolean := False;
-      With_Trivia : Boolean := False) return Analysis_Unit
-   is
-      C_Charset   : chars_ptr := (if Charset'Length = 0
-                                  then Null_Ptr
-                                  else New_String (Charset));
-
-      Ent      : ${root_entity.name} := (Node.Node, No_Entity_Info);
-      C_Result : ${analysis_unit_type} := Provider.Get_Unit_From_Node_Func
-        (Provider.Data, Wrap (Context), Ent'Unrestricted_Access, Wrap (Kind),
-         C_Charset, Boolean'Pos (Reparse), Boolean'Pos (With_Trivia));
-   begin
-      Free (C_Charset);
-      if C_Result = ${analysis_unit_type} (System.Null_Address) then
-         raise Property_Error with "invalid AST node for unit name";
-      end if;
-      return Unwrap (C_Result);
-   end Get_Unit;
 
    --------------
    -- Get_Unit --

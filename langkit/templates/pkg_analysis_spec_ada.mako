@@ -129,16 +129,6 @@ package ${ada_lib_name}.Analysis is
    function Get_Unit
      (Provider    : Unit_Provider_Interface;
       Context     : Analysis_Context;
-      Node        : ${root_entity.api_name}'Class;
-      Kind        : Unit_Kind;
-      Charset     : String := "";
-      Reparse     : Boolean := False;
-      With_Trivia : Boolean := False) return Analysis_Unit is abstract;
-   ${ada_doc('langkit.unit_provider_get_unit_from_node', 3)}
-
-   function Get_Unit
-     (Provider    : Unit_Provider_Interface;
-      Context     : Analysis_Context;
       Name        : Text_Type;
       Kind        : Unit_Kind;
       Charset     : String := "";

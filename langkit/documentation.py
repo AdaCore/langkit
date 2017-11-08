@@ -505,15 +505,6 @@ base_langkit_docs = {
         represented as an AST node into a file name. This is used get
         inter-unit analysis working.
     """,
-    'langkit.unit_provider_get_unit_from_node': """
-        Fetch and return the analysis unit referenced by the input AST node.
-        % if lang == 'ada':
-            Raise a Property_Error
-        % else:
-            Return ${null}
-        % endif
-        if Node is not a valid unit name representation.
-    """,
     'langkit.unit_provider_get_unit_from_name': """
         Fetch and return the analysis unit referenced by the input unit name.
         % if lang == 'ada':
@@ -553,10 +544,6 @@ base_langkit_docs = {
     'langkit.unit_provider_destroy_type': """
         Callback type for functions that are called when destroying a unit file
         provider type.
-    """,
-    'langkit.unit_provider_get_unit_from_node_type': """
-        Callback type for functions that are called to turn a unit reference
-        encoded as an AST node into an analysis unit.
     """,
     'langkit.unit_provider_get_unit_from_name_type': """
         Callback type for functions that are called to turn a unit reference
