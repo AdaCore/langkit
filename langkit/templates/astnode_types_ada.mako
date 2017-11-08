@@ -1,7 +1,7 @@
 ## vim: filetype=makoada
 
-<%namespace name="exts" file="extensions.mako" />
-<%namespace name="prop_helpers" file="properties/helpers.mako" />
+<%namespace name="exts"            file="extensions.mako" />
+<%namespace name="prop_helpers"    file="properties/helpers.mako" />
 <%namespace name="pretty_printers" file="pretty_printers_ada.mako" />
 
 <%def name="public_incomplete_decl(cls)">
