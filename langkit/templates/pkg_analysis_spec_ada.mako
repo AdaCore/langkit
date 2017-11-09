@@ -358,6 +358,10 @@ package ${ada_lib_name}.Analysis is
    function Text (First, Last : Token_Type) return Text_Type;
    ${ada_doc('langkit.token_range_text', 3)}
 
+   function Get_Symbol (Token : Token_Type) return Symbol_Type;
+   --  Assuming that Token refers to a token that contains a symbol, return the
+   --  corresponding symbol.
+
    function Kind (Token_Data : Token_Data_Type) return Token_Kind
       with Inline;
    ${ada_doc('langkit.token_kind', 3)}
@@ -758,11 +762,6 @@ private
 
    function Raw_Data (T : Token_Type) return Lexer.Token_Data_Type;
    --  Return the raw token data for T
-
-   function Get_Symbol (Token : Token_Type) return Symbol_Type;
-   --  Assuming that Token refers to a token that contains a symbol, return the
-   --  corresponding symbol. This is an internal helper for properties code
-   --  generation.
 
    generic
       type T (<>) is limited private;
