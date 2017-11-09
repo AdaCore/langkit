@@ -34,12 +34,11 @@ def run(name, prop_lambda):
 
 
 run("Correct code", lambda: True)
-run("Incorrect property definition 1", ["Lol this is obviously wrong"])
-run("Incorrect property definition 2", lambda x, *y, **z: "pouet")
-run("Incorrect property definition 3", lambda x, y=LongType: x)
-run("Incorrect property definition 4",
+run("Incorrect property definition 1", lambda x, *y, **z: "pouet")
+run("Incorrect property definition 2", lambda x, y=LongType: x)
+run("Incorrect property definition 3",
     lambda Node=LongType, Lex_Env=LongType: Node)
-run("Incorrect property definition 5", lambda a=["Obviously wrong"]: a)
-run("Incorrect property definition 6", lambda a=Diagnostics: a)
+run("Incorrect property definition 4", lambda a=["Obviously wrong"]: a)
+run("Incorrect property definition 5", lambda a=Diagnostics: a)
 
 print('Done')

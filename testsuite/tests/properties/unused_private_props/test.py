@@ -9,7 +9,7 @@ import os.path
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import AnalysisUnitType, ASTNode, Field, LongType, T, abstract
 from langkit.expressions import (
-    AbstractProperty, EmptyArray, ExternalProperty, Property, Self,
+    AbstractProperty, No, ExternalProperty, Property, Self,
     langkit_property
 )
 from langkit.parsers import Grammar, Or, Tok
@@ -53,7 +53,7 @@ class Literal(Expression):
     result = ExternalProperty(uses_entity_info=False)
 
     # See Expression.name
-    names = Property(EmptyArray(T.Name))
+    names = Property(No(T.Name.array))
 
     evaluate = Property(Self.result, public=True)
 

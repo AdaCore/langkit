@@ -769,7 +769,7 @@ class CollectionSingleton(AbstractExpression):
         self.coerce_null = coerce_null
 
     def construct(self):
-        from langkit.expressions import If, IsNull, EmptyArray
+        from langkit.expressions import If, IsNull, ArrayLiteral
 
         expr = construct(self.expr)
         expr_var = expr.create_result_var('To_Array_Prefix')
@@ -781,7 +781,7 @@ class CollectionSingleton(AbstractExpression):
         if self.coerce_null:
             return If.Expr(
                 IsNull.construct_static(expr),
-                EmptyArray.construct_static(expr.type.array),
+                ArrayLiteral.construct_static([], expr.type.array),
                 ret,
                 ret.type
             )

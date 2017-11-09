@@ -178,6 +178,11 @@
          (N         => Items'Length,
           Items     => Implementation.${cls.array_type_name} (Items),
           Ref_Count => 1));
+   % else:
+   pragma Warnings (Off, "referenced");
+   function Create (Items : ${cls.array_type_name}) return ${cls.name} is
+     (new ${cls.pointed}'(N => Items'Length, Ref_Count => 1, Items => Items));
+   pragma Warnings (On, "referenced");
    % endif
 
    ----------------

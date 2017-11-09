@@ -48,6 +48,8 @@ def unsugar(expr, ignore_errors=False):
         expr = SymbolLiteral(expr)
     elif isinstance(expr, TypeRepo.Defer):
         expr = expr.get()
+    elif isinstance(expr, (list, tuple)):
+        expr = ArrayLiteral(expr, None)
 
     check_source_language(
         ignore_errors or isinstance(expr, AbstractExpression),
@@ -2434,35 +2436,58 @@ class Var(AbstractVariable):
 
 
 @dsl_document
-class EmptyArray(AbstractExpression):
+class ArrayLiteral(AbstractExpression):
     """
     Return an empty array of `element_type`.
     """
 
-    def __init__(self, element_type):
+    def __init__(self, elements=[], element_type=None):
         """
         :param CompiledType element_type: Type for array items.
         """
-        super(EmptyArray, self).__init__()
+        super(ArrayLiteral, self).__init__()
         self.element_type = element_type
         self.array_type = None
-
-    def do_prepare(self):
-        self.array_type = resolve_type(self.element_type).array
+        self.elements = list(elements)
 
     @staticmethod
-    def construct_static(array_type, abstract_expr=None):
-        return CallExpr('Empty_Array', 'Create', array_type,
-                        ['Items_Count => 0'],
-                        abstract_expr=abstract_expr)
+    def construct_static(elements, array_type, abstract_expr=None):
+        if len(elements) == 0:
+            return CallExpr('Array_Lit', 'Create', array_type,
+                            ['Items_Count => 0'],
+                            abstract_expr=abstract_expr)
+        else:
+            return CallExpr(
+                'Array_Lit', 'Create', array_type,
+                [aggregate_expr(str(array_type.array_type_name), [
+                    (i, el) for i, el in enumerate(elements, 1)
+                ])],
+                abstract_expr=abstract_expr
+            )
 
     def construct(self):
-        return self.construct_static(self.array_type, abstract_expr=self)
+        resolved_elements = []
+        if self.elements:
+            resolved_elements = [construct(el) for el in self.elements]
+            for el in resolved_elements:
+                if self.element_type is None:
+                    self.element_type = el.static_type
+                else:
+                    check_source_language(
+                        self.element_type == el.static_type,
+                        "In Array literal, expected element of type {},"
+                        " got {}".format(self.element_type,
+                                         el.static_type)
+                    )
+
+        self.array_type = resolve_type(self.element_type).array
+
+        return self.construct_static(
+            resolved_elements, self.array_type, abstract_expr=self
+        )
 
     def __repr__(self):
-        return '<EmptyArray of {}>'.format(
-            resolve_type(self.element_type).name.camel
-        )
+        return '<ArrayLiteral>'
 
 
 def render(*args, **kwargs):
@@ -3749,8 +3774,8 @@ class No(AbstractExpression):
         :rtype: LiteralExpr
         """
         if self.expr_type.is_array:
-            return EmptyArray.construct_static(self.expr_type,
-                                               abstract_expr=self)
+            return ArrayLiteral.construct_static([], self.expr_type,
+                                                 abstract_expr=self)
         else:
             return NullExpr(self.expr_type, abstract_expr=self)
 
