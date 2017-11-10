@@ -1127,24 +1127,11 @@ package body ${ada_lib_name}.Analysis is
    ------------------
 
    procedure Reset_Caches (Unit : Analysis_Unit) is
-
-      -----------
-      -- Visit --
-      -----------
-
-      function Visit
-        (Node : access ${root_node_value_type}'Class) return Visit_Status is
-      begin
-         Node.Reset_Caches;
-         return Into;
-      end Visit;
-
    begin
-      if Unit.AST_Root /= null then
-         Unit.AST_Root.Traverse (Visit'Access);
-      end if;
       % if ctx.has_memoization:
          Destroy (Unit.Memoization_Map);
+      % else:
+         null;
       % endif
    end Reset_Caches;
 
