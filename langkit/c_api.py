@@ -26,10 +26,11 @@ class CAPIType(object):
         """
         self.c_api_settings = c_api_settings
         self.external = external
-        # Make private thefollowing in order to avoid accidental use of these
+
+        # Make private the following in order to avoid accidental use of these
         # instead of the properties.
         self._name = (name if isinstance(name, names.Name) else
-                      names.Name.from_lower(name))
+                      names.Name(name))
 
     @property
     def name(self):
