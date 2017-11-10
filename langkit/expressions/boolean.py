@@ -484,11 +484,17 @@ class Then(AbstractExpression):
 
     def construct(self):
         # Accept as a prefix:
-        # * any pointer, since it can be checked against "null";
-        # * any StructType, since structs are nullable.
-        expr = construct(self.expr,
-                         lambda cls: cls.is_ptr or cls.is_struct_type,
-                         'Invalid prefix type for .then: {expr_type}')
+        #
+        #   * any pointer, since it can be checked against "null";
+        #   * any StructType, since structs are nullable;
+        #   * any LexicalEnvType, which has EmptyEnv as a null value.
+        expr = construct(
+            self.expr,
+            lambda cls: (cls.is_ptr or
+                         cls.is_struct_type or
+                         cls.is_lexical_env_type),
+            'Invalid prefix type for .then: {expr_type}'
+        )
         self.var_expr.set_type(expr.type)
 
         # Create a then-expr specific scope to restrict the span of the "then"
