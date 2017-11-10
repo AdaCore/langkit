@@ -252,6 +252,8 @@ class Bind(AbstractExpression):
                 ' a logic variable or an entity, got {}'.format(expr.type)
             )
 
+            # Because of Ada OOP typing rules, for code generation to work
+            # properly, make sure the type of `expr` is the root node entity.
             if (
                 expr.type.matches(T.root_node.entity)
                 and expr.type is not T.root_node.entity
