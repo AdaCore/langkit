@@ -1296,14 +1296,19 @@ class BaseStructType(CompiledType):
         """
         Bind input fields to `self` and initialize their name.
 
-        :param list[(str, AbstractNodeData)] fields: List of (name, field) for
-            this struct's fields. Inheritted fields must not appear in this
-            list.
+        :param list[(str|names.Name, AbstractNodeData)] fields: List of (name,
+            field) for this struct's fields. Inheritted fields must not appear
+            in this list.
         """
+        self._fields = OrderedDict()
         for f_n, f_v in fields:
-            f_v.name = names.Name.from_lower(f_n)
+            f_v.name = (f_n if isinstance(f_n, names.Name) else
+                        names.Name.from_lower(f_n))
             f_v.struct = self
-        self._fields = OrderedDict(fields)
+
+            # Use the "hidden" name so that lookups work on undecorated field
+            # names.
+            self._fields[f_v._name.lower] = f_v
 
     @property
     def py_nullexpr(self):
@@ -1432,9 +1437,9 @@ class StructType(BaseStructType):
         """
         :param name: See CompiledType.__init__.
 
-        :param list[(str, AbstractNodeData)] fields: List of (name, field) for
-            this struct's fields. Inheritted fields must not appear in this
-            list.
+        :param list[(str|names.Name, AbstractNodeData)] fields: List of (name,
+            field) for this struct's fields. Inheritted fields must not appear
+            in this list.
         """
         super(StructType, self).__init__(
             name, location, doc,
@@ -1606,8 +1611,9 @@ class ASTNodeType(BaseStructType):
         :param ASTNodeType|None base: ASTNodeType subclass corresponding to the
             base class for this node. None when creating the root node.
 
-        :param list[(str, AbstractNodeData)] fields: List of (name, field) for
-            this node's fields. Inherited fields must not appear in this list.
+        :param list[(str|names.Name, AbstractNodeData)] fields: List of (name,
+            field) for this node's fields. Inherited fields must not appear in
+            this list.
 
         :param langkit.envs.EnvSpec|None env_spec: Environment specification
             for this node, if any.
