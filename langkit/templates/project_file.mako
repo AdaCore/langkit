@@ -69,10 +69,19 @@ library project ${lib_name} is
       --    * redundant constructs (R), as we do have redundant conversions for
       --      AST nodes (A'Class and B'Class are not compatible even though B
       --      derives from A).
+      --
+      --  As for style diagnostics:
+      --    * check the casing of attributes (a);
+      --    * check double spaces before comments (b);
+      --    * check the casing of keywords (k);
+      --    * check the casing of entities in Standard (n);
+      --    * check the casing of pragmas (p);
+      --    * check the casing of references is the same as the casing of the
+      --      corresponding defining identifiers (r).
 
       Common_Ada_Cargs := ();
       case Enable_Warnings is
-         when "true" => Common_Ada_Cargs := ("-gnatwaCKMR");
+         when "true" => Common_Ada_Cargs := ("-gnatwaCKMR", "-gnatyacknpr");
          when others => null;
       end case;
 
