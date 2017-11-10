@@ -3948,9 +3948,11 @@ class LocalVars(object):
 
         def render(self):
             assert self.type, "Local var must have type before it is rendered"
-            return "{} : {};".format(
+            return "{} : {}{};".format(
                 self.name.camel_with_underscores,
-                self.type.name.camel_with_underscores
+                self.type.name.camel_with_underscores,
+                (' := {}'.format(self.type.nullexpr)
+                 if self.type.is_refcounted and not self.type.is_ptr else '')
             )
 
         @property
