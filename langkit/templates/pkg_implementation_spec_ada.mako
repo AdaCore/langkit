@@ -794,7 +794,7 @@ package ${ada_lib_name}.Analysis.Implementation is
          %>
          % for i, (sym, name) in enumerate(sym_items):
             ${name}${',' if i < last_i else ''}
-            -- ${sym}
+            --  ${sym}
          % endfor
       );
 
