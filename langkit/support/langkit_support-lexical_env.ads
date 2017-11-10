@@ -145,20 +145,14 @@ package Langkit_Support.Lexical_Env is
             Node     : Element_T;
             Resolver : Lexical_Env_Resolver;
          when False =>
-            Is_Refcounted : Boolean;
-            --  Whether Env is ref-counted. When it's not, we can avoid calling
-            --  Dec_Ref at destruction time: This is useful because at analysis
-            --  unit destruction time, this may be a dangling access to an
-            --  environment from another unit.
-
-            Env           : Lexical_Env;
+            Env : Lexical_Env;
       end case;
    end record;
    --  Link to an environment. It can be either a simple link (just a pointer)
    --  or a dynamic link (a function that recomputes the link when needed). See
    --  tho two constructors below.
 
-   No_Env_Getter : constant Env_Getter := (False, False, Null_Lexical_Env);
+   No_Env_Getter : constant Env_Getter := (False, Null_Lexical_Env);
 
    function Simple_Env_Getter (E : Lexical_Env) return Env_Getter;
    --  Create a static Env_Getter (i.e. pointer to environment)

@@ -66,9 +66,8 @@ package body Langkit_Support.Lexical_Env is
    function Simple_Env_Getter (E : Lexical_Env) return Env_Getter is
    begin
       Inc_Ref (E);
-      return Env_Getter'(Dynamic       => False,
-                         Is_Refcounted => E.Is_Refcounted,
-                         Env           => E);
+      return Env_Getter'(Dynamic => False,
+                         Env     => E);
    end Simple_Env_Getter;
 
    --------------------
@@ -119,7 +118,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Inc_Ref (Self : Env_Getter) is
    begin
-      if not Self.Dynamic and then Self.Is_Refcounted then
+      if not Self.Dynamic then
          Inc_Ref (Self.Env);
       end if;
    end Inc_Ref;
@@ -130,7 +129,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Dec_Ref (Self : in out Env_Getter) is
    begin
-      if not Self.Dynamic and then Self.Is_Refcounted then
+      if not Self.Dynamic then
          Dec_Ref (Self.Env);
       end if;
    end Dec_Ref;
