@@ -1316,9 +1316,7 @@ package body Langkit_Support.Lexical_Env is
    -- Dump_Lexical_Env_Parent_Chain --
    -----------------------------------
 
-   function Lexical_Env_Parent_Chain
-     (Env : Lexical_Env) return String
-   is
+   function Lexical_Env_Parent_Chain (Env : Lexical_Env) return String is
       Id     : Positive := 1;
       E      : Lexical_Env := Env;
       Result : Unbounded_String;
