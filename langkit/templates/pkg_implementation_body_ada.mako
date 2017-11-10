@@ -58,8 +58,10 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}'Class) return Lex_Env_Data
    is (Lex_Env_Data (${ada_lib_name}.Analysis.Get_Lex_Env_Data (Node.Unit)));
 
+   procedure Destroy (Env : in out Lexical_Env_Access);
+
    procedure Register_Destroyable is new Register_Destroyable_Gen
-     (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env, AST_Envs.Destroy);
+     (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env_Access, Destroy);
 
    ${array_types.body(root_node_array)}
 
@@ -90,6 +92,17 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Solve (R);
    end Solve_Wrapper;
 
+   -------------
+   -- Destroy --
+   -------------
+
+   procedure Destroy (Env : in out Lexical_Env_Access) is
+      Mutable_Env : Lexical_Env := (Env, Env.Ref_Count /= No_Refcount);
+   begin
+      Destroy (Mutable_Env);
+      Env := null;
+   end Destroy;
+
    ---------------------
    -- Pre_Env_Actions --
    ---------------------
@@ -98,7 +111,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (Self                : access ${root_node_value_type};
       Bound_Env, Root_Env : AST_Envs.Lexical_Env;
       Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env
-   is (null);
+   is (Null_Lexical_Env);
 
    ---------------------
    -- Is_Visible_From --
@@ -106,8 +119,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    function Is_Visible_From
      (Referenced_Env, Base_Env : AST_Envs.Lexical_Env) return Boolean is
-      Referenced_Node : constant ${root_node_type_name} := Referenced_Env.Node;
-      Base_Node       : constant ${root_node_type_name} := Base_Env.Node;
+      Referenced_Node : constant ${root_node_type_name} :=
+         Referenced_Env.Env.Node;
+      Base_Node       : constant ${root_node_type_name} := Base_Env.Env.Node;
    begin
       if Referenced_Node = null then
          raise Property_Error with
@@ -1275,10 +1289,10 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
       function Trace_Image (Env : Lexical_Env) return String is
       begin
-         if Env.Ref_Count = No_Refcount then
-            return "<LexicalEnv for " & Trace_Image (Env.Node) & ">";
-         else
+         if Env.Is_Refcounted then
             return "<LexicalEnv synthetic>";
+         else
+            return "<LexicalEnv for " & Trace_Image (Env.Env.Node) & ">";
          end if;
       end Trace_Image;
 

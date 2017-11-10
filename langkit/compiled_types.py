@@ -2471,6 +2471,7 @@ def create_builtin_types():
         nullexpr='Empty_Env',
         should_emit_array_type=False,
         null_allowed=True,
+        is_ptr=False,
         is_refcounted=True,
         py_nullexpr='LexicalEnv.Empty',
         hashable=True,

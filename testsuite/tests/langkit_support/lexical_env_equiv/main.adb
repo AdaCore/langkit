@@ -51,19 +51,19 @@ procedure Main is
       Register_Rebinding   => Register_Rebinding);
    use Envs;
 
-   Root_A1 : Lexical_Env := new Lexical_Env_Type'
-     (Node => 'A', Ref_Count => No_Refcount, others => <>);
-   Root_A2 : Lexical_Env := new Lexical_Env_Type'
-     (Root_A1.all'Update (Ref_Count => 1));
-   Root_A3 : Lexical_Env := new Lexical_Env_Type'(Root_A2.all);
+   Root_A1 : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Node => 'A', Ref_Count => No_Refcount, others => <>));
+   Root_A2 : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Root_A1.Env.all'Update (Ref_Count => 1)));
+   Root_A3 : Lexical_Env := Wrap (new Lexical_Env_Type'(Root_A2.Env.all));
 
    Root_A2_Getter : constant Env_Getter := Simple_Env_Getter (Root_A2);
 
-   Root_B1 : Lexical_Env := new Lexical_Env_Type'
-     (Root_A2.all'Update (Node => 'B'));
+   Root_B1 : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Root_A2.Env.all'Update (Node => 'B')));
 
-   Child : Lexical_Env := new Lexical_Env_Type'
-     (Root_A2.all'Update (Parent => Root_A2_Getter));
+   Child : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Root_A2.Env.all'Update (Parent => Root_A2_Getter)));
 
    function To_Refs
      (Ref : Referenced_Env) return Referenced_Envs_Vectors.Vector
@@ -79,15 +79,15 @@ procedure Main is
    Ref_2 : constant Referenced_Env :=
      (Is_Transitive => False, Getter => Root_A2_Getter, Creator => 'A');
 
-   Env_Ref_1 : Lexical_Env := new Lexical_Env_Type'
-     (Root_A2.all'Update (Referenced_Envs => To_Refs (Ref_1)));
-   Env_Ref_2 : Lexical_Env := new Lexical_Env_Type'
-     (Root_A2.all'Update (Referenced_Envs => To_Refs (Ref_2)));
-   Env_Ref_3 : Lexical_Env := new Lexical_Env_Type'
-     (Root_A2.all'Update (Referenced_Envs => To_Refs (Ref_1)));
+   Env_Ref_1 : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Root_A2.Env.all'Update (Referenced_Envs => To_Refs (Ref_1))));
+   Env_Ref_2 : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Root_A2.Env.all'Update (Referenced_Envs => To_Refs (Ref_2))));
+   Env_Ref_3 : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Root_A2.Env.all'Update (Referenced_Envs => To_Refs (Ref_1))));
 
-   MD : Lexical_Env := new Lexical_Env_Type'
-     (Root_A2.all'Update (Default_MD => (I => 1)));
+   MD : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Root_A2.Env.all'Update (Default_MD => (I => 1))));
 begin
    --  Check for various combinations of equivalent environments with
    --  enabled/disable ref-counting.

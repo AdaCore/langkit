@@ -114,9 +114,22 @@ package Langkit_Support.Lexical_Env is
    type Lexical_Env_Type;
    --  Value type for lexical envs
 
-   type Lexical_Env is access all Lexical_Env_Type;
-   --  Pointer type for lexical environments. This is the type that shall be
+   type Lexical_Env_Access is access all Lexical_Env_Type;
+
+   type Lexical_Env is record
+      Env : Lexical_Env_Access;
+      --  Referenced lexical environment
+
+      Is_Refcounted : Boolean;
+      --  Whether Env is ref-counted. When it's not, we can avoid calling
+      --  Dec_Ref at destruction time: This is useful because at analysis unit
+      --  destruction time, this may be a dangling access to an environment
+      --  from another unit.
+   end record;
+   --  Reference to a lexical environments. This is the type that shall be
    --  used.
+
+   Null_Lexical_Env : constant Lexical_Env := (null, False);
 
    type Lexical_Env_Resolver is access
      function (Ref : Entity) return Lexical_Env;
@@ -145,7 +158,7 @@ package Langkit_Support.Lexical_Env is
    --  or a dynamic link (a function that recomputes the link when needed). See
    --  tho two constructors below.
 
-   No_Env_Getter : constant Env_Getter := (False, False, null);
+   No_Env_Getter : constant Env_Getter := (False, False, Null_Lexical_Env);
 
    function Simple_Env_Getter (E : Lexical_Env) return Env_Getter;
    --  Create a static Env_Getter (i.e. pointer to environment)
@@ -472,7 +485,7 @@ package Langkit_Support.Lexical_Env is
    --  not in the parent chain for the env From_Env.
 
    function Is_Primary (Self : Lexical_Env) return Boolean is
-     (Self.Ref_Count = No_Refcount and then Self.Node /= No_Element);
+     (not Self.Is_Refcounted and then Self.Env.Node /= No_Element);
    --  Return whether Self is a lexical environment that was created in an
    --  environment specification.
 
@@ -494,6 +507,8 @@ package Langkit_Support.Lexical_Env is
 
    procedure Dump_Lexical_Env_Parent_Chain (Env : Lexical_Env);
 
+   function Wrap (Env : Lexical_Env_Access) return Lexical_Env;
+
 private
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
@@ -506,6 +521,6 @@ private
       Rebindings                 => null,
       Rebindings_Pool            => null,
       Ref_Count                  => No_Refcount);
-   Empty_Env : constant Lexical_Env := Empty_Env_Record'Access;
+   Empty_Env : constant Lexical_Env := (Empty_Env_Record'Access, False);
 
 end Langkit_Support.Lexical_Env;

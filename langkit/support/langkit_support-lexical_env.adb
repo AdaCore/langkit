@@ -10,6 +10,11 @@ with Langkit_Support.Images; use Langkit_Support.Images;
 
 package body Langkit_Support.Lexical_Env is
 
+   function Wrap (Env : Lexical_Env_Access) return Lexical_Env is
+     (if Env /= null and then Env.Ref_Count /= No_Refcount
+      then (Env, True)
+      else (Env, False));
+
    function Extract_Rebinding
      (Rebindings  : in out Env_Rebindings;
       Rebound_Env : Lexical_Env) return Lexical_Env;
@@ -62,7 +67,7 @@ package body Langkit_Support.Lexical_Env is
    begin
       Inc_Ref (E);
       return Env_Getter'(Dynamic       => False,
-                         Is_Refcounted => E.Ref_Count /= No_Refcount,
+                         Is_Refcounted => E.Is_Refcounted,
                          Env           => E);
    end Simple_Env_Getter;
 
@@ -90,9 +95,7 @@ package body Langkit_Support.Lexical_Env is
             return R.all (E);
          end;
       else
-         if Self.Env /= null then
-            Inc_Ref (Self.Env);
-         end if;
+         Inc_Ref (Self.Env);
          return Self.Env;
       end if;
    end Get_Env;
@@ -167,10 +170,10 @@ package body Langkit_Support.Lexical_Env is
       --  Look for an existing rebinding for the result: in the Old_Env's pool
       --  if there is no parent, otherwise in the parent's children.
       if Self = null then
-         if Old_Env.Rebindings_Pool /= null then
+         if Old_Env.Env.Rebindings_Pool /= null then
             declare
                use Env_Rebindings_Pools;
-               Cur : constant Cursor := Old_Env.Rebindings_Pool.Find
+               Cur : constant Cursor := Old_Env.Env.Rebindings_Pool.Find
                  (New_Env);
             begin
                if Cur /= Env_Rebindings_Pools.No_Element then
@@ -198,14 +201,14 @@ package body Langkit_Support.Lexical_Env is
          if Self /= null then
             Self.Children.Append (Result);
          else
-            if Old_Env.Rebindings_Pool = null then
-               Old_Env.Rebindings_Pool := new Env_Rebindings_Pools.Map;
+            if Old_Env.Env.Rebindings_Pool = null then
+               Old_Env.Env.Rebindings_Pool := new Env_Rebindings_Pools.Map;
             end if;
-            Old_Env.Rebindings_Pool.Insert (New_Env, Result);
+            Old_Env.Env.Rebindings_Pool.Insert (New_Env, Result);
          end if;
 
-         Register_Rebinding (Old_Env.Node, Result.all'Address);
-         Register_Rebinding (New_Env.Node, Result.all'Address);
+         Register_Rebinding (Old_Env.Env.Node, Result.all'Address);
+         Register_Rebinding (New_Env.Env.Node, Result.all'Address);
          Check_Rebindings_Unicity (Result);
          return Result;
       end;
@@ -220,7 +223,7 @@ package body Langkit_Support.Lexical_Env is
       Old_Env : Lexical_Env;
       New_Env : Lexical_Env) return Env_Rebindings is
    begin
-      if not Is_Rebindable (Old_Env.Node) then
+      if not Is_Rebindable (Old_Env.Env.Node) then
          Raise_Property_Error ("Illegal lexical environment rebinding");
       end if;
 
@@ -265,12 +268,13 @@ package body Langkit_Support.Lexical_Env is
      (Parent        : Env_Getter;
       Node          : Element_T;
       Is_Refcounted : Boolean;
-      Default_MD    : Element_Metadata := Empty_Metadata) return Lexical_Env is
+      Default_MD    : Element_Metadata := Empty_Metadata) return Lexical_Env
+   is
    begin
       if Parent /= No_Env_Getter then
          Inc_Ref (Parent);
       end if;
-      return new Lexical_Env_Type'
+      return Wrap (new Lexical_Env_Type'
         (Parent                     => Parent,
          Node                       => Node,
          Referenced_Envs            => <>,
@@ -279,7 +283,7 @@ package body Langkit_Support.Lexical_Env is
          Rebindings                 => null,
          Rebindings_Pool            => null,
          Ref_Count                  => (if Is_Refcounted then 1
-                                        else No_Refcount));
+                                        else No_Refcount)));
    end Create;
 
    ---------
@@ -298,6 +302,7 @@ package body Langkit_Support.Lexical_Env is
       Element : constant Internal_Map_Element := (Value, MD, Resolver);
       C       : Cursor;
       Dummy   : Boolean;
+      Map     : Internal_Envs.Map renames Self.Env.Env.all;
    begin
       --  See Empty_Env's documentation
 
@@ -305,9 +310,8 @@ package body Langkit_Support.Lexical_Env is
          return;
       end if;
 
-      Self.Env.Insert
-        (Key, Internal_Map_Element_Vectors.Empty_Vector, C, Dummy);
-      Reference (Self.Env.all, C).Element.Append (Element);
+      Map.Insert (Key, Internal_Map_Element_Vectors.Empty_Vector, C, Dummy);
+      Reference (Map, C).Element.Append (Element);
    end Add;
 
    ------------
@@ -319,7 +323,8 @@ package body Langkit_Support.Lexical_Env is
       Key   : Symbol_Type;
       Value : Element_T)
    is
-      V : constant Internal_Envs.Reference_Type := Self.Env.Reference (Key);
+      V : constant Internal_Envs.Reference_Type :=
+         Self.Env.Env.Reference (Key);
    begin
       --  Get rid of element
       for I in 1 .. V.Length loop
@@ -345,7 +350,7 @@ package body Langkit_Support.Lexical_Env is
          Dyn_Env_Getter (Resolver, Referenced_From);
    begin
       Referenced_Envs_Vectors.Append
-        (Self.Referenced_Envs,
+        (Self.Env.Referenced_Envs,
          Referenced_Env'(Transitive, Getter, Creator));
    end Reference;
 
@@ -361,7 +366,7 @@ package body Langkit_Support.Lexical_Env is
    is
    begin
       Referenced_Envs_Vectors.Append
-        (Self.Referenced_Envs,
+        (Self.Env.Referenced_Envs,
          Referenced_Env'(Transitive,
                          Simple_Env_Getter (To_Reference),
                          Creator));
@@ -471,7 +476,7 @@ package body Langkit_Support.Lexical_Env is
       C                 : Cursor := Internal_Envs.No_Element;
       Elements          : Internal_Map_Element_Vectors.Vector;
    begin
-      if Self = null then
+      if Self = Null_Lexical_Env then
          return;
       end if;
 
@@ -481,9 +486,9 @@ package body Langkit_Support.Lexical_Env is
                        & Lexical_Env_Image (Self, Dump_Content => False));
       end if;
 
-      Parent_Env := Get_Env (Self.Parent);
+      Parent_Env := Get_Env (Self.Env.Parent);
 
-      Current_Rebindings := Combine (Self.Rebindings, Rebindings);
+      Current_Rebindings := Combine (Self.Env.Rebindings, Rebindings);
 
       --  If there is an environment corresponding to Self in env rebindings,
       --  we'll get it here. We'll also shed it from the set of current
@@ -500,8 +505,8 @@ package body Langkit_Support.Lexical_Env is
 
          --  Phase 1: Get elements in own env if there are any
 
-         if Env.Env /= null then
-            C := Env.Env.Find (Key);
+         if Env.Env.Env /= null then
+            C := Env.Env.Env.Find (Key);
          end if;
 
          if Has_Element (C) then
@@ -514,7 +519,7 @@ package body Langkit_Support.Lexical_Env is
             for I in reverse Elements.First_Index .. Elements.Last_Index loop
                Append_Result
                  (Decorate (Elements.Get (I),
-                  Env.Default_MD, Current_Rebindings));
+                  Env.Env.Default_MD, Current_Rebindings));
                if Stop_At_First then
                   goto Early_Exit;
                end if;
@@ -524,7 +529,7 @@ package body Langkit_Support.Lexical_Env is
 
          --  Phase 2: Get elements in referenced envs
 
-         for Refd_Env of Self.Referenced_Envs loop
+         for Refd_Env of Self.Env.Referenced_Envs loop
             Get_Refd_Elements (Refd_Env);
          end loop;
       end if;
@@ -626,16 +631,17 @@ package body Langkit_Support.Lexical_Env is
    ------------
 
    function Orphan (Self : Lexical_Env) return Lexical_Env is
+      Env : Lexical_Env_Type renames Self.Env.all;
    begin
-      return new Lexical_Env_Type'
+      return Wrap (new Lexical_Env_Type'
         (Parent          => No_Env_Getter,
-         Node            => Self.Node,
-         Referenced_Envs => Self.Referenced_Envs.Copy,
-         Env             => Self.Env,
-         Default_MD      => Self.Default_MD,
-         Rebindings      => Self.Rebindings,
+         Node            => Env.Node,
+         Referenced_Envs => Env.Referenced_Envs.Copy,
+         Env             => Env.Env,
+         Default_MD      => Env.Default_MD,
+         Rebindings      => Env.Rebindings,
          Rebindings_Pool => null,
-         Ref_Count       => <>);
+         Ref_Count       => <>));
    end Orphan;
 
    -----------
@@ -653,7 +659,7 @@ package body Langkit_Support.Lexical_Env is
          Inc_Ref (N);
          return N;
       when others =>
-         N := new Lexical_Env_Type'
+         N := Wrap (new Lexical_Env_Type'
            (Parent          => No_Env_Getter,
             Node            => No_Element,
             Referenced_Envs => <>,
@@ -661,7 +667,7 @@ package body Langkit_Support.Lexical_Env is
             Default_MD      => Empty_Metadata,
             Rebindings      => null,
             Rebindings_Pool => null,
-            Ref_Count       => <>);
+            Ref_Count       => <>));
          for Env of Envs loop
             Reference (N, Env, No_Element, Transitive => True);
          end loop;
@@ -685,7 +691,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       return N : constant Lexical_Env :=
-        new Lexical_Env_Type'
+        Wrap (new Lexical_Env_Type'
           (Parent          => No_Env_Getter,
            Node            => No_Element,
            Referenced_Envs => <>,
@@ -697,7 +703,7 @@ package body Langkit_Support.Lexical_Env is
            --  is no need to convey it to synthetic lexical envs.
            Rebindings_Pool => null,
 
-           Ref_Count       => <>)
+           Ref_Count       => <>))
       do
          Reference (N, Base_Env, No_Element, Transitive => True);
       end return;
@@ -719,33 +725,34 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Destroy (Self : in out Lexical_Env) is
       procedure Free is new Ada.Unchecked_Deallocation
-        (Lexical_Env_Type, Lexical_Env);
+        (Lexical_Env_Type, Lexical_Env_Access);
       Primary : constant Boolean := Is_Primary (Self);
    begin
       --  Do not free the internal map for ref-counted allocated environments
       --  as all maps are owned by analysis unit owned environments.
 
-      if Self.Ref_Count = No_Refcount then
-         for Elts of Self.Env.all loop
+      if not Self.Is_Refcounted then
+         for Elts of Self.Env.Env.all loop
             Internal_Map_Element_Vectors.Destroy (Elts);
          end loop;
-         Destroy (Self.Env);
+         Destroy (Self.Env.Env);
       end if;
 
-      for Ref_Env of Self.Referenced_Envs loop
+      for Ref_Env of Self.Env.Referenced_Envs loop
          declare
             Getter : Env_Getter := Ref_Env.Getter;
          begin
             Dec_Ref (Getter);
          end;
       end loop;
-      Self.Referenced_Envs.Destroy;
+      Self.Env.Referenced_Envs.Destroy;
 
-      if Primary and then Self.Rebindings_Pool /= null then
-         Destroy (Self.Rebindings_Pool);
+      if Primary and then Self.Env.Rebindings_Pool /= null then
+         Destroy (Self.Env.Rebindings_Pool);
       end if;
 
-      Free (Self);
+      Free (Self.Env);
+      Self := Null_Lexical_Env;
    end Destroy;
 
    -------------
@@ -754,11 +761,9 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Inc_Ref (Self : Lexical_Env) is
    begin
-      if Self.Ref_Count = No_Refcount then
-         return;
+      if Self.Is_Refcounted then
+         Self.Env.Ref_Count := Self.Env.Ref_Count + 1;
       end if;
-
-      Self.Ref_Count := Self.Ref_Count + 1;
    end Inc_Ref;
 
    -------------
@@ -767,16 +772,16 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Dec_Ref (Self : in out Lexical_Env) is
    begin
-      if Self = null or else Self.Ref_Count = No_Refcount then
+      if not Self.Is_Refcounted then
          return;
       end if;
 
-      Self.Ref_Count := Self.Ref_Count - 1;
-      if Self.Ref_Count = 0 then
-         Dec_Ref (Self.Parent);
+      Self.Env.Ref_Count := Self.Env.Ref_Count - 1;
+      if Self.Env.Ref_Count = 0 then
+         Dec_Ref (Self.Env.Parent);
          Destroy (Self);
       end if;
-      Self := null;
+      Self := Null_Lexical_Env;
    end Dec_Ref;
 
    function Pop (Rebindings : Env_Rebindings) return Env_Rebindings is
@@ -854,16 +859,18 @@ package body Langkit_Support.Lexical_Env is
       --  is rebindable. Use null if there is no such env.
       First_Rebindable_Parent := From_Env;
       while
-         First_Rebindable_Parent /= null
-         and then (First_Rebindable_Parent.Node = No_Element
-                   or else not Is_Rebindable (First_Rebindable_Parent.Node))
+         First_Rebindable_Parent /= Null_Lexical_Env
+         and then
+           (First_Rebindable_Parent.Env.Node = No_Element
+            or else not Is_Rebindable (First_Rebindable_Parent.Env.Node))
       loop
-         First_Rebindable_Parent := Get_Env (First_Rebindable_Parent.Parent);
+         First_Rebindable_Parent :=
+            Get_Env (First_Rebindable_Parent.Env.Parent);
       end loop;
 
       --  If there is no rebindable parent anywhere, it means we cannot have
       --  rebindings. In that case, shed them all, i.e. return null rebindings.
-      if First_Rebindable_Parent = null then
+      if First_Rebindable_Parent = Null_Lexical_Env then
          return null;
       end if;
 
@@ -955,8 +962,8 @@ package body Langkit_Support.Lexical_Env is
    function Image (Self : Env_Rebindings) return Text_Type is
 
       function Image (Self : Lexical_Env) return Text_Type is
-        (if Self.Ref_Count /= No_Refcount
-         then "<synthetic>" else Element_Image (Self.Node));
+        (if Self.Is_Refcounted
+         then "<synthetic>" else Element_Image (Self.Env.Node));
 
       function Rebinding_Image (Self : Env_Rebindings) return Text_Type is
         (Image (Self.New_Env));
@@ -1038,21 +1045,21 @@ package body Langkit_Support.Lexical_Env is
       --  equality for nodes and rebindings because there is only one
       --  value for each equivalence class.
 
-      if not Equivalent (L.Parent, R.Parent)
-         or else L.Node /= R.Node
-         or else L.Env /= R.Env
-         or else L.Default_MD /= R.Default_MD
-         or else L.Rebindings /= R.Rebindings
+      if not Equivalent (L.Env.Parent, R.Env.Parent)
+         or else L.Env.Node /= R.Env.Node
+         or else L.Env.Env /= R.Env.Env
+         or else L.Env.Default_MD /= R.Env.Default_MD
+         or else L.Env.Rebindings /= R.Env.Rebindings
       then
          return False;
       end if;
 
-      if L.Referenced_Envs.Length /= R.Referenced_Envs.Length then
+      if L.Env.Referenced_Envs.Length /= R.Env.Referenced_Envs.Length then
          return False;
       end if;
-      for I in 1 .. L.Referenced_Envs.Last_Index loop
-         if not Equivalent (L.Referenced_Envs.Get (I),
-                            R.Referenced_Envs.Get (I))
+      for I in 1 .. L.Env.Referenced_Envs.Last_Index loop
+         if not Equivalent (L.Env.Referenced_Envs.Get (I),
+                            R.Env.Referenced_Envs.Get (I))
          then
             return False;
          end if;
@@ -1118,17 +1125,17 @@ package body Langkit_Support.Lexical_Env is
       end Hash;
 
    begin
-      if Env = null then
+      if Env = Null_Lexical_Env then
          return Initial_Hash;
       end if;
 
       return Combine
-        ((Hash (Env.Parent),
-          Element_Hash (Env.Node),
-          Hash (Env.Referenced_Envs),
-          Hash (Env.Env),
-          Metadata_Hash (Env.Default_MD),
-          Hash (Env.Rebindings)));
+        ((Hash (Env.Env.Parent),
+          Element_Hash (Env.Env.Node),
+          Hash (Env.Env.Referenced_Envs),
+          Hash (Env.Env.Env),
+          Metadata_Hash (Env.Env.Default_MD),
+          Hash (Env.Env.Rebindings)));
    end Hash;
 
    -----------------
@@ -1246,7 +1253,7 @@ package body Langkit_Support.Lexical_Env is
       end Dump_Referenced;
 
    begin
-      if Self = null then
+      if Self = Null_Lexical_Env then
          return "";
       end if;
 
@@ -1258,7 +1265,7 @@ package body Langkit_Support.Lexical_Env is
          New_Arg;
          Append (Result, "Empty");
       end if;
-      if Self.Ref_Count /= No_Refcount then
+      if Self.Is_Refcounted then
          New_Arg;
          Append (Result, "Synthetic");
       end if;
@@ -1266,16 +1273,17 @@ package body Langkit_Support.Lexical_Env is
          New_Arg;
          Append (Result,
                  "Parent="
-                 & (if Self.Parent /= No_Env_Getter
+                 & (if Self.Env.Parent /= No_Env_Getter
                     then Parent_Env_Id else "null"));
       end if;
-      if Self.Node /= No_Element then
+      if Self.Env.Node /= No_Element then
          New_Arg;
-         Append (Result, "Node=" & Image (Element_Image (Self.Node, False)));
+         Append (Result, "Node="
+                 & Image (Element_Image (Self.Env.Node, False)));
       end if;
       if Dump_Addresses then
          New_Arg;
-         Append (Result, "0x" & System.Address_Image (Self.all'Address));
+         Append (Result, "0x" & System.Address_Image (Self.Env.all'Address));
       end if;
       Append (Result, ")");
 
@@ -1284,14 +1292,14 @@ package body Langkit_Support.Lexical_Env is
       end if;
       Append (Result, ":" & ASCII.LF);
 
-      Dump_Referenced ("Referenced", Self.Referenced_Envs);
+      Dump_Referenced ("Referenced", Self.Env.Referenced_Envs);
 
-      if Self.Env = null then
+      if Self.Env.Env = null then
          Append (Result, "    <null>" & ASCII.LF);
-      elsif Self.Env.Is_Empty then
+      elsif Self.Env.Env.Is_Empty then
          Append (Result, "    <empty>" & ASCII.LF);
       else
-         for El in To_Sorted_Env (Self.Env.all).Iterate loop
+         for El in To_Sorted_Env (Self.Env.Env.all).Iterate loop
             Append (Result, "    ");
             Append
               (Result,
@@ -1316,11 +1324,11 @@ package body Langkit_Support.Lexical_Env is
       Result : Unbounded_String;
    begin
 
-      if E = null then
+      if E = Null_Lexical_Env then
          Append (Result, "<null>" & ASCII.LF);
       end if;
 
-      while E /= null loop
+      while E /= Null_Lexical_Env loop
          declare
             Id_Str : constant String := '@' & Stripped_Image (Id);
          begin
@@ -1333,7 +1341,7 @@ package body Langkit_Support.Lexical_Env is
                   Dump_Addresses => True));
          end;
          Id := Id + 1;
-         E := Get_Env (E.Parent);
+         E := Get_Env (E.Env.Parent);
       end loop;
       return To_String (Result);
    end Lexical_Env_Parent_Chain;

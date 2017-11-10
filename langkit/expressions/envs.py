@@ -308,7 +308,7 @@ def env_node(self, env):
 
     :param AbstractExpression env: The source environment.
     """
-    return BasicExpr('Env_Node', '{}.Node', T.root_node,
+    return BasicExpr('Env_Node', '{}.Env.Node', T.root_node,
                      [construct(env, T.LexicalEnvType)],
                      abstract_expr=self)
 
@@ -321,7 +321,7 @@ def env_parent(self, env):
     :param AbstractExpression env: The source environment.
     """
     parent_env_getter = LiteralExpr(
-        '{}.Parent',
+        '{}.Env.Parent',
         T.LexicalEnvType,
         [construct(env, T.LexicalEnvType)]
     )

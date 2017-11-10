@@ -494,7 +494,8 @@
                ## If we're adding the element to an env that belongs to a
                ## different unit, then:
                if Env /= Empty_Env
-                  and then (Env = Root_Env or else Env.Node.Unit /= Self.Unit)
+                  and then (Env = Root_Env
+                            or else Env.Env.Node.Unit /= Self.Unit)
                then
                   ## Add the env, the key, and the value to the list of entries
                   ## contained in other units, so we can remove them when
@@ -506,7 +507,7 @@
                      ## Add Val to the list of entries that env's unit
                      ## contains, so that when the unit is reparsed, we can
                      ## call add_to_env again on those nodes.
-                     Get_Lex_Env_Data (Env.Node).Contains.Append
+                     Get_Lex_Env_Data (Env.Env.Node).Contains.Append
                        (${root_node_type_name} (B.F_Val));
                   end if;
                end if;
@@ -552,7 +553,7 @@
       G := Simple_Env_Getter (Initial_Env);
       % if has_dyn_env:
       if Initial_Env not in Root_Env | Empty_Env
-         and then Initial_Env.Node.Unit /= Self.Unit
+         and then Initial_Env.Env.Node.Unit /= Self.Unit
       then
          G := Dyn_Env_Getter (${env_getter}'Access, Self);
       end if;
@@ -563,7 +564,7 @@
          Node          => Self,
          Is_Refcounted => False);
 
-      Register_Destroyable (Self.Unit, Self.Self_Env);
+      Register_Destroyable (Self.Unit, Self.Self_Env.Env);
    </%def>
 
    <%def name="emit_do(do_action)">
@@ -666,7 +667,7 @@
    overriding function Node_Env
      (Node   : access ${type_name};
       E_Info : Entity_Info := No_Entity_Info) return AST_Envs.Lexical_Env
-   is (AST_Envs.Get_Env (Node.Self_Env.Parent));
+   is (AST_Envs.Get_Env (Node.Self_Env.Env.Parent));
    % endif
 
    ## Emit Post_Env_Actions only if needed

@@ -725,8 +725,8 @@ package body ${ada_lib_name}.Analysis is
          end loop;
          R.Children.Destroy;
 
-         Unregister (R, R.Old_Env.Node.Unit.Rebindings);
-         Unregister (R, R.New_Env.Node.Unit.Rebindings);
+         Unregister (R, R.Old_Env.Env.Node.Unit.Rebindings);
+         Unregister (R, R.New_Env.Env.Node.Unit.Rebindings);
 
          declare
             Var_R : Env_Rebindings := R;
@@ -766,7 +766,7 @@ package body ${ada_lib_name}.Analysis is
             --  registered it in its Old_Env. Otherwise, it is registered
             --  in its Parent's Children list.
             if R.Parent = null then
-               R.Old_Env.Rebindings_Pool.Delete (R.New_Env);
+               R.Old_Env.Env.Rebindings_Pool.Delete (R.New_Env);
             else
                Unregister (R, R.Parent.Children);
             end if;
@@ -1656,7 +1656,7 @@ package body ${ada_lib_name}.Analysis is
       C        : Address_To_Id_Maps.Cursor;
       Inserted : Boolean;
    begin
-      if E = null then
+      if E = Null_Lexical_Env then
          return "$null";
 
       elsif E = State.Root_Env then
@@ -1697,11 +1697,11 @@ package body ${ada_lib_name}.Analysis is
 
       procedure Explore_Parent_Chain (Env : Lexical_Env) is
       begin
-         if Env /= null then
+         if Env /= Null_Lexical_Env then
             Dump_One_Lexical_Env
               (Env, Get_Env_Id (Env, State),
-               Get_Env_Id (AST_Envs.Get_Env (Env.Parent), State));
-            Explore_Parent_Chain (AST_Envs.Get_Env (Env.Parent));
+               Get_Env_Id (AST_Envs.Get_Env (Env.Env.Parent), State));
+            Explore_Parent_Chain (AST_Envs.Get_Env (Env.Env.Parent));
          end if;
       end Explore_Parent_Chain;
 
@@ -1723,7 +1723,7 @@ package body ${ada_lib_name}.Analysis is
          --  envs we have already seen or not.
          if not State.Env_Ids.Contains (Current.Self_Env) then
             Env := Current.Self_Env;
-            Parent := Ast_Envs.Get_Env (Env.Parent);
+            Parent := Ast_Envs.Get_Env (Env.Env.Parent);
             Explore_Parent := not State.Env_Ids.Contains (Parent);
 
             Dump_One_Lexical_Env
