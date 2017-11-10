@@ -260,6 +260,10 @@ class Bind(AbstractExpression):
             ):
                 expr = Cast.Expr(expr, T.root_node.entity)
 
+            # Make sure this equation will work on a clean logic variable
+            if expr.type.matches(T.LogicVarType):
+                expr = ResetLogicVar(expr)
+
             return expr
 
         lhs = construct_operand(self.from_expr)
@@ -342,7 +346,7 @@ def domain(self, logic_var_expr, domain):
     return DomainExpr(
         construct(domain, lambda d: d.is_collection, "Type given "
                   "to LogicVar must be collection type, got {expr_type}"),
-        construct(logic_var_expr, T.LogicVarType),
+        ResetLogicVar(construct(logic_var_expr, T.LogicVarType)),
         abstract_expr=self,
     )
 
@@ -438,6 +442,9 @@ class Predicate(AbstractExpression):
             'Logic variable expressions should be grouped at the beginning,'
             ' and should not appear after non logic variable expressions'
         )
+
+        # Make sure this predicate will work on clean logic variables
+        logic_var_exprs = [ResetLogicVar(expr) for expr in logic_var_exprs]
 
         # Compute the list of arguments to pass to the property (Self
         # included).
