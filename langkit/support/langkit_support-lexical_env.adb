@@ -278,7 +278,7 @@ package body Langkit_Support.Lexical_Env is
         (Parent                     => Parent,
          Node                       => Node,
          Referenced_Envs            => <>,
-         Env                        => new Internal_Envs.Map,
+         Map                        => new Internal_Envs.Map,
          Default_MD                 => Default_MD,
          Rebindings                 => null,
          Rebindings_Pool            => null,
@@ -302,7 +302,7 @@ package body Langkit_Support.Lexical_Env is
       Element : constant Internal_Map_Element := (Value, MD, Resolver);
       C       : Cursor;
       Dummy   : Boolean;
-      Map     : Internal_Envs.Map renames Self.Env.Env.all;
+      Map     : Internal_Envs.Map renames Self.Env.Map.all;
    begin
       --  See Empty_Env's documentation
 
@@ -324,7 +324,7 @@ package body Langkit_Support.Lexical_Env is
       Value : Element_T)
    is
       V : constant Internal_Envs.Reference_Type :=
-         Self.Env.Env.Reference (Key);
+         Self.Env.Map.Reference (Key);
    begin
       --  Get rid of element
       for I in 1 .. V.Length loop
@@ -505,8 +505,8 @@ package body Langkit_Support.Lexical_Env is
 
          --  Phase 1: Get elements in own env if there are any
 
-         if Env.Env.Env /= null then
-            C := Env.Env.Env.Find (Key);
+         if Env.Env.Map /= null then
+            C := Env.Env.Map.Find (Key);
          end if;
 
          if Has_Element (C) then
@@ -637,7 +637,7 @@ package body Langkit_Support.Lexical_Env is
         (Parent          => No_Env_Getter,
          Node            => Env.Node,
          Referenced_Envs => Env.Referenced_Envs.Copy,
-         Env             => Env.Env,
+         Map             => Env.Map,
          Default_MD      => Env.Default_MD,
          Rebindings      => Env.Rebindings,
          Rebindings_Pool => null,
@@ -663,7 +663,7 @@ package body Langkit_Support.Lexical_Env is
            (Parent          => No_Env_Getter,
             Node            => No_Element,
             Referenced_Envs => <>,
-            Env             => null,
+            Map             => null,
             Default_MD      => Empty_Metadata,
             Rebindings      => null,
             Rebindings_Pool => null,
@@ -695,7 +695,7 @@ package body Langkit_Support.Lexical_Env is
           (Parent          => No_Env_Getter,
            Node            => No_Element,
            Referenced_Envs => <>,
-           Env             => null,
+           Map             => null,
            Default_MD      => Empty_Metadata,
            Rebindings      => Rebindings,
 
@@ -732,10 +732,10 @@ package body Langkit_Support.Lexical_Env is
       --  as all maps are owned by analysis unit owned environments.
 
       if not Self.Is_Refcounted then
-         for Elts of Self.Env.Env.all loop
+         for Elts of Self.Env.Map.all loop
             Internal_Map_Element_Vectors.Destroy (Elts);
          end loop;
-         Destroy (Self.Env.Env);
+         Destroy (Self.Env.Map);
       end if;
 
       for Ref_Env of Self.Env.Referenced_Envs loop
@@ -1047,7 +1047,7 @@ package body Langkit_Support.Lexical_Env is
 
       if not Equivalent (L.Env.Parent, R.Env.Parent)
          or else L.Env.Node /= R.Env.Node
-         or else L.Env.Env /= R.Env.Env
+         or else L.Env.Map /= R.Env.Map
          or else L.Env.Default_MD /= R.Env.Default_MD
          or else L.Env.Rebindings /= R.Env.Rebindings
       then
@@ -1133,7 +1133,7 @@ package body Langkit_Support.Lexical_Env is
         ((Hash (Env.Env.Parent),
           Element_Hash (Env.Env.Node),
           Hash (Env.Env.Referenced_Envs),
-          Hash (Env.Env.Env),
+          Hash (Env.Env.Map),
           Metadata_Hash (Env.Env.Default_MD),
           Hash (Env.Env.Rebindings)));
    end Hash;
@@ -1294,12 +1294,12 @@ package body Langkit_Support.Lexical_Env is
 
       Dump_Referenced ("Referenced", Self.Env.Referenced_Envs);
 
-      if Self.Env.Env = null then
+      if Self.Env.Map = null then
          Append (Result, "    <null>" & ASCII.LF);
-      elsif Self.Env.Env.Is_Empty then
+      elsif Self.Env.Map.Is_Empty then
          Append (Result, "    <empty>" & ASCII.LF);
       else
-         for El in To_Sorted_Env (Self.Env.Env.all).Iterate loop
+         for El in To_Sorted_Env (Self.Env.Map.all).Iterate loop
             Append (Result, "    ");
             Append
               (Result,

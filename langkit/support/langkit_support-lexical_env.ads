@@ -330,7 +330,7 @@ package Langkit_Support.Lexical_Env is
       Referenced_Envs : Referenced_Envs_Vectors.Vector;
       --  A list of environments referenced by this environment
 
-      Env : Internal_Map := null;
+      Map : Internal_Map := null;
       --  Map containing mappings from symbols to elements for this env
       --  instance. In the generated library, Elements will be AST nodes. If
       --  the lexical env is refcounted, then it does not own this env.
@@ -516,7 +516,7 @@ private
      (Parent                     => No_Env_Getter,
       Node                       => No_Element,
       Referenced_Envs            => <>,
-      Env                        => Empty_Env_Map'Access,
+      Map                        => Empty_Env_Map'Access,
       Default_MD                 => Empty_Metadata,
       Rebindings                 => null,
       Rebindings_Pool            => null,
