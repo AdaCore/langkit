@@ -602,10 +602,10 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  the convenience of ada arrays, and you don't care about the small
    --  performance hit of creating an array.
 
-   procedure Reset_Caches
+   procedure Reset_Logic_Vars
      (Node : access ${root_node_value_type}'Class)
    with Inline;
-   --  Reset the properties memoization caches attached to this node
+   --  Reset the logic variables attached to this node
 
    procedure Set_Parents (Node, Parent : access ${root_node_value_type}'Class);
    --  Set Node.Parent to Parent, and initialize recursively the parent of all

@@ -174,7 +174,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end if;
 
       Node.Free_Extensions;
-      Node.Reset_Caches;
+      Node.Reset_Logic_Vars;
       for I in 1 .. Node.Child_Count loop
          Destroy (Node.Child (I));
       end loop;
@@ -1376,7 +1376,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       --  have their own destructor and there is no specified order for the
       --  call of these destructors.
       Node.Free_Extensions;
-      Node.Reset_Caches;
+      Node.Reset_Logic_Vars;
 
       Free (Node);
    end Destroy_Synthetic_Node;
@@ -1454,11 +1454,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end if;
    end Child_Count;
 
-   ------------------
-   -- Reset_Caches --
-   ------------------
+   ----------------------
+   -- Reset_Logic_Vars --
+   ----------------------
 
-   procedure Reset_Caches (Node : access ${root_node_value_type}'Class) is
+   procedure Reset_Logic_Vars (Node : access ${root_node_value_type}'Class) is
       K : ${root_node_kind_name} := Node.Kind;
    begin
    case K is
@@ -1488,7 +1488,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    % endfor
    when others => null;
    end case;
-   end Reset_Caches;
+   end Reset_Logic_Vars;
 
    --------------
    -- Get_Unit --
