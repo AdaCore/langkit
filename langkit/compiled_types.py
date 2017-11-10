@@ -2031,7 +2031,7 @@ class ASTNodeType(BaseStructType):
             CompiledTypeMetaclass.entity_info = StructType(
                 names.Name('Entity_Info'), None, None,
                 [
-                    ('md', BuiltinField(
+                    (names.Name('MD'), BuiltinField(
                         # Use a deferred type so that the language spec. can
                         # reference entity types even before it declared the
                         # metadata class.
