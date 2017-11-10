@@ -61,7 +61,7 @@ begin
       <% coll_expr = map.collection.render_expr() %>
       for ${codegen_element_var} of
          % if map.collection.type.is_list_type:
-            ${coll_expr}.nodes (1 .. ${coll_expr}.Count)
+            ${coll_expr}.Nodes (1 .. ${coll_expr}.Count)
          % else:
             ${coll_expr}.Items
          % endif

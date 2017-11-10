@@ -2495,7 +2495,7 @@ def create_builtin_types():
         type_repo_name='BoolType',
         exposed=True,
         is_ptr=False,
-        nullexpr='false',
+        nullexpr='False',
         py_nullexpr='False',
         hashable=True,
 

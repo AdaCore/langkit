@@ -278,7 +278,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    function Traverse_With_Data
      (Node  : access ${root_node_value_type}'Class;
       Visit : access function (Node : access ${root_node_value_type}'Class;
-                               Data : in out Data_type)
+                               Data : in out Data_Type)
                                return Visit_Status;
       Data  : in out Data_Type)
       return Visit_Status

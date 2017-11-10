@@ -67,7 +67,7 @@ package body ${ada_lib_name}.Lexer is
    --  constants above.
 
    function Lexer_From_Buffer (Buffer  : System.Address;
-                               Length  : Size_T)
+                               Length  : size_t)
                                return Lexer_Type
       with Import        => True,
            Convention    => C,

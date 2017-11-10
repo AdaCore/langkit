@@ -782,7 +782,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
 
       declare
          N  : constant ${root_node_type_name} := Unwrap (Node);
-         ID : constant Extension_ID := Extension_Id (Ext_Id);
+         ID : constant Extension_ID := Extension_ID (Ext_Id);
          D  : constant Extension_Destructor := Convert (Dtor);
       begin
          return Get_Extension (N, ID, D).all'Address;

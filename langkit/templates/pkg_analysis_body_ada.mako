@@ -1628,7 +1628,7 @@ package body ${ada_lib_name}.Analysis is
      (Lexical_Env, Integer, Hash, "=");
 
    type Dump_Lexical_Env_State is record
-      Env_Ids : Address_to_Id_Maps.Map;
+      Env_Ids : Address_To_Id_Maps.Map;
       --  Mapping: Lexical_Env -> Integer, used to remember which unique Ids we
       --  assigned to the lexical environments we found.
 
@@ -1723,7 +1723,7 @@ package body ${ada_lib_name}.Analysis is
          --  envs we have already seen or not.
          if not State.Env_Ids.Contains (Current.Self_Env) then
             Env := Current.Self_Env;
-            Parent := Ast_Envs.Get_Env (Env.Env.Parent);
+            Parent := AST_Envs.Get_Env (Env.Env.Parent);
             Explore_Parent := not State.Env_Ids.Contains (Parent);
 
             Dump_One_Lexical_Env
@@ -2096,7 +2096,7 @@ package body ${ada_lib_name}.Analysis is
    function Public_Traverse_With_Data
      (Node  : ${root_entity.api_name}'Class;
       Visit : access function (Node : ${root_entity.api_name}'Class;
-                               Data : in out Data_type)
+                               Data : in out Data_Type)
                                return Visit_Status;
       Data  : in out Data_Type)
       return Visit_Status

@@ -554,7 +554,7 @@ package ${ada_lib_name}.Analysis is
    function Public_Traverse_With_Data
      (Node  : ${root_entity.api_name}'Class;
       Visit : access function (Node : ${root_entity.api_name}'Class;
-                               Data : in out Data_type)
+                               Data : in out Data_Type)
                                return Visit_Status;
       Data  : in out Data_Type)
       return Visit_Status;
