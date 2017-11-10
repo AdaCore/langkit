@@ -9,8 +9,8 @@ from langkit.compiled_types import Argument, T, no_compiled_type
 from langkit.diagnostics import check_multiple, check_source_language
 from langkit.expressions.base import (
     AbstractExpression, CallExpr, ComputingExpr, DynamicVariable, LiteralExpr,
-    NullExpr, PropertyDef, Self, aggregate_expr, auto_attr, construct,
-    dsl_document, render, resolve_property
+    NullExpr, PropertyDef, ResolvedExpression, Self, aggregate_expr, auto_attr,
+    construct, dsl_document, render, resolve_property
 )
 
 
@@ -663,3 +663,37 @@ class LogicFalse(AbstractExpression):
 
     def __repr__(self):
         return '<LogicFalse>'
+
+
+class ResetLogicVar(ResolvedExpression):
+    """
+    Resolved expression wrapper to reset a logic variable.
+
+    We use this wrapper during logic equation construction so that they can
+    work on logic variables that don't hold stale results.
+    """
+
+    def __init__(self, logic_var_expr):
+        assert logic_var_expr.type == T.LogicVarType
+        self.logic_var_expr = logic_var_expr
+        self.static_type = T.LogicVarType
+        super(ResetLogicVar, self).__init__()
+
+    def _render_pre(self):
+        return '\n'.join([
+            '{pre}',
+            '{var}.Value := No_Entity;',
+            'Eq_Node.Refs.Reset ({var}.all);',
+            'Eq_Node.Refs.Destroy ({var}.all);',
+        ]).format(pre=self.logic_var_expr.render_pre(),
+                  var=self.logic_var_expr.render_expr())
+
+    def _render_expr(self):
+        return self.logic_var_expr.render_expr()
+
+    @property
+    def subexprs(self):
+        return {'logic_var': self.logic_var_expr}
+
+    def __repr__(self):
+        return '<ResetLogicVar>'
