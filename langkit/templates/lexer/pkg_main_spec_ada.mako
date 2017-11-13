@@ -90,6 +90,18 @@ package ${ada_lib_name}.Lexer is
    --  Debug helper: return a human-readable representation of T, a token that
    --  belongs to TDH.
 
+   type Symbolization_Result (Success : Boolean; Size : Natural) is record
+      case Success is
+         when True  => Symbol : Text_Type (1 .. Size);
+         when False => Error_Message : Text_Type (1 .. Size);
+      end case;
+   end record;
+
+   function Create_Symbol (Name : Text_Type) return Symbolization_Result is
+     ((Success => True, Size => Name'Length, Symbol => Name));
+   function Create_Error (Message : Text_Type) return Symbolization_Result is
+     ((Success => False, Size => Message'Length, Error_Message => Message));
+
    function Force_Symbol
      (TDH : Token_Data_Handler;
       T   : in out Token_Data_Type) return Symbol_Type;

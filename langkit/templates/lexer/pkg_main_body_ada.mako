@@ -196,14 +196,19 @@ package body ${ada_lib_name}.Lexer is
                   Bounded_Text : Text_Type (1 .. Natural (Token.Text_Length))
                      with Address => Token.Text;
 
-                  Symbol_Text  : constant Text_Type :=
+                  Symbol_Res : constant Symbolization_Result :=
                      % if ctx.symbol_canonicalizer:
                         ${ctx.symbol_canonicalizer.fqn} (Bounded_Text);
                      % else:
-                        Bounded_Text;
+                        Create_Symbol (Bounded_Text);
                      % endif
                begin
-                  Symbol := Find (TDH.Symbols, Symbol_Text);
+                  if Symbol_Res.Success then
+                     Symbol := Find (TDH.Symbols, Symbol_Res.Symbol);
+                  else
+                     --  TODO??? Report the symbolization error
+                     raise Program_Error;
+                  end if;
                end;
          % endif
 
@@ -630,17 +635,22 @@ package body ${ada_lib_name}.Lexer is
    begin
       if T.Symbol = null then
          declare
-            Text : Text_Type renames
+            Text   : Text_Type renames
                TDH.Source_Buffer (T.Source_First ..  T.Source_Last);
-         begin
-            T.Symbol := Find
-              (TDH.Symbols,
+            Symbol : constant Symbolization_Result :=
                % if ctx.symbol_canonicalizer:
                   ${ctx.symbol_canonicalizer.fqn} (Text)
                % else:
-                  Text
+                  Create_Symbol (Text)
                % endif
-               );
+            ;
+         begin
+            --  This function is run as part of semantic analysis: there is
+            --  currently no way to report errors from here, so just discard
+            --  canonicalization issues here.
+            if Symbol.Success then
+               T.Symbol := Find (TDH.Symbols, Symbol.Symbol);
+            end if;
          end;
       end if;
       return T.Symbol;

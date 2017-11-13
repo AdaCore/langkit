@@ -235,15 +235,20 @@ package body ${ada_lib_name}.Analysis is
             declare
                Raw_Text : Text_Type renames
                   Symbol_Literals_Text (Literal).all;
-               Text     : constant Text_Type :=
+               Symbol   : constant Symbolization_Result :=
                   % if ctx.symbol_canonicalizer:
                      ${ctx.symbol_canonicalizer.fqn} (Raw_Text)
                   % else:
-                     Raw_Text
+                     Create_Symbol (Raw_Text)
                   % endif
                ;
             begin
-               Result (Literal) := Find (Symbols, Text);
+               if Symbol.Success then
+                  Result (Literal) := Find (Symbols, Symbol.Symbol);
+               else
+                  raise Program_Error with
+                    "Cannot canonicalize symbol literal: " & Image (Raw_Text);
+               end if;
             end;
          end loop;
          return Result;

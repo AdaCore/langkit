@@ -314,10 +314,12 @@ class CompileCtx(object):
             subprogram to call in order to canonicazie symbol identifiers. Such
             a suprogram must have the following signature::
 
-                function Canonicalize (Name : Text_Type) return Text_Type;
+                function Canonicalize
+                  (Name : Text_Type) return Symbolization_Result;
 
             It takes an identifier name and must return the canonical name for
-            it, so that all equivalent symbols have the same canonical name.
+            it (or an error), so that all equivalent symbols have the same
+            canonical name.
 
             This can be used, for instance, to implement case insensivity.
 
