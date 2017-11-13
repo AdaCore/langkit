@@ -1558,6 +1558,36 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Node.Node;
    end Bare_Node;
 
+   ------------------
+   -- Reset_Caches --
+   ------------------
+
+   procedure Reset_Caches (Context : Analysis_Context) is
+   begin
+      --  Increase Context's version number. If we are about to overflow, reset
+      --  all version numbers from analysis units.
+      if Context.Cache_Version = Natural'Last then
+         Context.Cache_Version := 1;
+         for Unit of Context.Units_Map loop
+            Unit.Cache_Version := 0;
+         end loop;
+      else
+         Context.Cache_Version := Context.Cache_Version + 1;
+      end if;
+   end Reset_Caches;
+
+   ------------------
+   -- Reset_Caches --
+   ------------------
+
+   procedure Reset_Caches (Unit : Analysis_Unit) is
+   begin
+      % if ctx.has_memoization:
+         Destroy (Unit.Memoization_Map);
+      % endif
+      Unit.Cache_Version := Unit.Context.Cache_Version;
+   end Reset_Caches;
+
    % if ctx.has_memoization:
 
       ----------------------------
@@ -1565,14 +1595,20 @@ package body ${ada_lib_name}.Analysis.Implementation is
       ----------------------------
 
       function Lookup_Memoization_Map
-        (Map    : in out Memoization_Maps.Map;
+        (Unit   : Analysis_Unit;
          Key    : in out Mmz_Key;
          Cursor : out Memoization_Maps.Cursor) return Boolean
       is
          Inserted : Boolean;
          Value    : constant Mmz_Value := (Kind => Mmz_Property_Error);
       begin
-         Map.Insert (Key, Value, Cursor, Inserted);
+
+         --  Make sure that we don't lookup stale caches
+         if Unit.Cache_Version < Unit.Context.Cache_Version then
+            Reset_Caches (Unit);
+         end if;
+
+         Unit.Memoization_Map.Insert (Key, Value, Cursor, Inserted);
 
          if not Inserted then
             Destroy (Key.Items);

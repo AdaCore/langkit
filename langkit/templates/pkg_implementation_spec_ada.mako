@@ -833,6 +833,11 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  Flag to tell whether we are running the Populate_Lexical_Env pass.
       --  When it's on, we must not use the memoization map as the hash of
       --  lexical environment changes when their content changes.
+
+      Cache_Version : Natural := 0;
+      --  Version number used to invalidate memoization caches in a lazy
+      --  fashion. If an analysis unit's version number is strictly inferior to
+      --  this, its memoization map should be cleared.
    end record;
 
    type Analysis_Unit_Type is record
@@ -896,11 +901,22 @@ package ${ada_lib_name}.Analysis.Implementation is
          Memoization_Map : Memoization_Maps.Map;
          --  Mapping of arguments tuple to property result for memoization
       % endif
+
+      Cache_Version : Natural := 0;
+      --  See the eponym field in Analysis_Context_Type
    end record;
+
+   procedure Reset_Caches (Context : Analysis_Context);
+   --  Call Reset_Caches on all the units that Context contains. Note: this is
+   --  is done lazily, just incrementing a version number.
+
+   procedure Reset_Caches (Unit : Analysis_Unit);
+   --  Destroy Unit's memoization cache. This resets Unit's version number to
+   --  Unit.Context.Cache_Version.
 
    % if ctx.has_memoization:
       function Lookup_Memoization_Map
-        (Map    : in out Memoization_Maps.Map;
+        (Unit   : Analysis_Unit;
          Key    : in out Mmz_Key;
          Cursor : out Memoization_Maps.Cursor) return Boolean;
       --  Look for a memoization entry in Unit.Memoization_Map that correspond

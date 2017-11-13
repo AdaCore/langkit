@@ -120,7 +120,7 @@ begin
                As_${T.entity_info.name} => ${property.entity_info_name});
          % endif
 
-         if not Lookup_Memoization_Map (Mmz_Map, Mmz_K, Mmz_Cur) then
+         if not Lookup_Memoization_Map (Node.Unit, Mmz_K, Mmz_Cur) then
             Mmz_Val := Memoization_Maps.Element (Mmz_Cur);
 
             if Mmz_Val.Kind = Mmz_Property_Error then

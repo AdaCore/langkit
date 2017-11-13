@@ -131,13 +131,6 @@ package body ${ada_lib_name}.Analysis is
       --  Create pre-computed symbol literals in Symbols and return them
    % endif
 
-   procedure Reset_Caches (Context : Analysis_Context);
-   --  Call Reset_Caches on all units Context contains
-
-   procedure Reset_Caches (Unit : Analysis_Unit);
-   --  If AST_Node is not null, invoke Reset_Caches primitives on all the nodes
-   --  it contains.
-
    procedure Register_Destroyable_Helper
      (Unit    : Analysis_Unit;
       Object  : System.Address;
@@ -210,7 +203,8 @@ package body ${ada_lib_name}.Analysis is
             new Analysis_Context_Private_Part_Type'(others => <>),
 
          Discard_Errors_In_Populate_Lexical_Env => <>,
-         In_Populate_Lexical_Env => False);
+         In_Populate_Lexical_Env => False,
+         Cache_Version => <>);
 
       Initialize (Ret.Private_Part.Parser);
       return Ret;
@@ -313,11 +307,11 @@ package body ${ada_lib_name}.Analysis is
          Destroyables            => Destroyable_Vectors.Empty_Vector,
          Referenced_Units        => <>,
          Lex_Env_Data_Acc        => new Lex_Env_Data_Type,
-         Rebindings              => Env_Rebindings_Vectors.Empty_Vector
+         Rebindings              => Env_Rebindings_Vectors.Empty_Vector,
+         Cache_Version           => <>
          % if ctx.has_memoization:
          , Memoization_Map   => <>
          % endif
-
       );
    begin
       Initialize (Unit.TDH, Context.Symbols);
@@ -678,17 +672,6 @@ package body ${ada_lib_name}.Analysis is
 
       Free (Context);
    end Destroy;
-
-   ------------------
-   -- Reset_Caches --
-   ------------------
-
-   procedure Reset_Caches (Context : Analysis_Context) is
-   begin
-      for Unit of Context.Units_Map loop
-         Reset_Caches (Unit);
-      end loop;
-   end Reset_Caches;
 
    ------------------------
    -- Destroy_Rebindings --
@@ -1118,19 +1101,6 @@ package body ${ada_lib_name}.Analysis is
    begin
       return Unit.Lex_Env_Data_Acc;
    end Get_Lex_Env_Data;
-
-   ------------------
-   -- Reset_Caches --
-   ------------------
-
-   procedure Reset_Caches (Unit : Analysis_Unit) is
-   begin
-      % if ctx.has_memoization:
-         Destroy (Unit.Memoization_Map);
-      % else:
-         null;
-      % endif
-   end Reset_Caches;
 
    --------------------------
    -- Register_Destroyable --
