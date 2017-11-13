@@ -2438,13 +2438,15 @@ class Var(AbstractVariable):
 @dsl_document
 class ArrayLiteral(AbstractExpression):
     """
-    Return an empty array of `element_type`.
+    Return an array literal that contains `elements`, a list of expressions for
+    array components.
+
+    If `element_type` is provided, the type of all components is checked
+    against it, otherwise it is inferred from sub-expressions. Because of this,
+    `element_type` is mandatory when `elements` is empty.
     """
 
     def __init__(self, elements=[], element_type=None):
-        """
-        :param CompiledType element_type: Type for array items.
-        """
         super(ArrayLiteral, self).__init__()
         self.element_type = element_type
         self.array_type = None
