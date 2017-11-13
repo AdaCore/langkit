@@ -1558,4 +1558,29 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Node.Node;
    end Bare_Node;
 
+   % if ctx.has_memoization:
+
+      ----------------------------
+      -- Lookup_Memoization_Map --
+      ----------------------------
+
+      function Lookup_Memoization_Map
+        (Map    : in out Memoization_Maps.Map;
+         Key    : in out Mmz_Key;
+         Cursor : out Memoization_Maps.Cursor) return Boolean
+      is
+         Inserted : Boolean;
+         Value    : constant Mmz_Value := (Kind => Mmz_Property_Error);
+      begin
+         Map.Insert (Key, Value, Cursor, Inserted);
+
+         if not Inserted then
+            Destroy (Key.Items);
+            Key := Memoization_Maps.Key (Cursor);
+         end if;
+
+         return Inserted;
+      end Lookup_Memoization_Map;
+   % endif
+
 end ${ada_lib_name}.Analysis.Implementation;

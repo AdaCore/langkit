@@ -120,46 +120,31 @@ begin
                As_${T.entity_info.name} => ${property.entity_info_name});
          % endif
 
-         declare
-            Inserted : Boolean;
-         begin
-            Mmz_Map.Insert (Mmz_K, Mmz_Val, Mmz_Cur, Inserted);
+         if not Lookup_Memoization_Map (Mmz_Map, Mmz_K, Mmz_Cur) then
+            Mmz_Val := Memoization_Maps.Element (Mmz_Cur);
 
-            ## Once we got past the last statement:
-            ##
-            ## * Either the insertion succeeded, in which case the only
-            ##   ownership share for Mmz_K got transfered to Mmz_Map.
-            ##
-            ## * Either is failed, in which case Mmz_K is no longer useful: we
-            ##   must destroy it.
+            if Mmz_Val.Kind = Mmz_Property_Error then
+               % if ctx.properties_logging:
+                  Properties_Traces.Trace
+                    ("Result: Property_Error");
+                  Properties_Traces.Decrease_Indent;
+               % endif
+               raise Property_Error;
 
-            if not Inserted then
-               Destroy (Mmz_K.Items);
-               Mmz_Val := Memoization_Maps.Element (Mmz_Cur);
+            else
+               Property_Result := Mmz_Val.As_${property.type.name};
+               % if property.type.is_refcounted:
+                  Inc_Ref (Property_Result);
+               % endif
 
-               if Mmz_Val.Kind = Mmz_Property_Error then
-                  % if ctx.properties_logging:
-                     Properties_Traces.Trace
-                       ("Result: Property_Error");
-                     Properties_Traces.Decrease_Indent;
-                  % endif
-                  raise Property_Error;
-
-               else
-                  Property_Result := Mmz_Val.As_${property.type.name};
-                  % if property.type.is_refcounted:
-                     Inc_Ref (Property_Result);
-                  % endif
-
-                  % if ctx.properties_logging:
-                     Properties_Traces.Trace
-                       ("Result: " & Trace_Image (Property_Result));
-                     Properties_Traces.Decrease_Indent;
-                  % endif
-                  return Property_Result;
-               end if;
+               % if ctx.properties_logging:
+                  Properties_Traces.Trace
+                    ("Result: " & Trace_Image (Property_Result));
+                  Properties_Traces.Decrease_Indent;
+               % endif
+               return Property_Result;
             end if;
-         end;
+         end if;
 
       % if not property.memoize_in_populate:
       end if;

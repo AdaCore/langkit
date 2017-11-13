@@ -898,4 +898,14 @@ package ${ada_lib_name}.Analysis.Implementation is
       % endif
    end record;
 
+   % if ctx.has_memoization:
+      function Lookup_Memoization_Map
+        (Map    : in out Memoization_Maps.Map;
+         Key    : in out Mmz_Key;
+         Cursor : out Memoization_Maps.Cursor) return Boolean;
+      --  Look for a memoization entry in Unit.Memoization_Map that correspond
+      --  to Key, creating one if none is found, and store it in Cursor. If one
+      --  was created, return True. Otherwise, destroy Key and return False.
+   % endif
+
 end ${ada_lib_name}.Analysis.Implementation;
