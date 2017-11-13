@@ -452,7 +452,6 @@ package body ${ada_lib_name}.Analysis is
       --  As (re-)loading a unit can change how any AST node property in the
       --  whole analysis context behaves, we have to invalidate caches. This is
       --  likely overkill, but kill all caches here as it's easy to do.
-      --  Likewise for values in logic variables.
       Reset_Caches (Unit.Context);
 
       --  Now create the parser. This is where lexing occurs, so this is where
