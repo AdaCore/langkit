@@ -845,9 +845,7 @@ package body ${ada_lib_name}.Analysis is
 
          --  Finally, any entry that was rooted in one of the unit's lex envs
          --  needs to be re-rooted.
-         Reroot_Foreign_Nodes
-           (Unit.Lex_Env_Data_Acc, Unit.Context.Root_Scope);
-
+         Reroot_Foreign_Nodes (Unit.Lex_Env_Data_Acc, Unit.Context.Root_Scope);
       end if;
    end Update_After_Reparse;
 
