@@ -492,14 +492,6 @@ package body ${ada_lib_name}.Lexer is
       Decoded_Buffer := Result;
       Source_First := Result'First + Quex_Leading_Characters;
 
-      --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
-      --  them here.
-
-      if Buffer'Length = 0 then
-         Source_Last := Source_First - 1;
-         return;
-      end if;
-
       --  If we have a byte order mark, it overrides the requested Charset
 
       Input_Index := Buffer'First;
@@ -510,6 +502,14 @@ package body ${ada_lib_name}.Lexer is
             GNAT.Byte_Order_Mark.Read_BOM (Buffer, Len, BOM);
             Input_Index := Input_Index + Len;
          end;
+      end if;
+
+      --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
+      --  them here.
+
+      if Input_Index > Buffer'Last then
+         Source_Last := Source_First - 1;
+         return;
       end if;
 
       --  Create the Iconv converter. We will notice unknown charsets here
