@@ -1369,4 +1369,16 @@ package body Langkit_Support.Lexical_Env is
       Put_Line (Lexical_Env_Parent_Chain (Env));
    end Dump_Lexical_Env_Parent_Chain;
 
+   --------------------
+   -- Get_Parent_Env --
+   --------------------
+
+   function Get_Parent_Env (Self : Lexical_Env) return Lexical_Env is
+      Ret : constant Lexical_Env := Get_Env (Self.Env.Parent);
+   begin
+      return (if Ret = Null_Lexical_Env
+              then Empty_Env
+              else Ret);
+   end Get_Parent_Env;
+
 end Langkit_Support.Lexical_Env;
