@@ -91,14 +91,18 @@ package body ${ada_lib_name}.Lexer is
    generic
       With_Trivia : Boolean;
    procedure Process_All_Tokens
-     (Lexer : Lexer_Type; TDH : in out Token_Data_Handler);
+     (Lexer       : Lexer_Type;
+      TDH         : in out Token_Data_Handler;
+      Diagnostics : in out Diagnostics_Vectors.Vector);
 
    ------------------------
    -- Process_All_Tokens --
    ------------------------
 
    procedure Process_All_Tokens
-     (Lexer : Lexer_Type; TDH : in out Token_Data_Handler)
+     (Lexer       : Lexer_Type;
+      TDH         : in out Token_Data_Handler;
+      Diagnostics : in out Diagnostics_Vectors.Vector)
    is
 
       Token                 : aliased Quex_Token_Type;
@@ -210,8 +214,8 @@ package body ${ada_lib_name}.Lexer is
                   if Symbol_Res.Success then
                      Symbol := Find (TDH.Symbols, Symbol_Res.Symbol);
                   else
-                     --  TODO??? Report the symbolization error
-                     raise Program_Error;
+                     Append (Diagnostics, Sloc_Range,
+                             Symbol_Res.Error_Message);
                   end if;
                end;
          % endif
@@ -387,6 +391,7 @@ package body ${ada_lib_name}.Lexer is
      (Filename, Charset : String;
       Read_BOM          : Boolean;
       TDH               : in out Token_Data_Handler;
+      Diagnostics       : in out Diagnostics_Vectors.Vector;
       With_Trivia       : Boolean)
    is
       --  The following call to Open_Read may fail with a Name_Error exception:
@@ -403,7 +408,8 @@ package body ${ada_lib_name}.Lexer is
 
    begin
       begin
-         Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH, With_Trivia);
+         Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH, Diagnostics,
+                          With_Trivia);
       exception
          when Unknown_Charset | Invalid_Input =>
             Free (Region);
@@ -422,6 +428,7 @@ package body ${ada_lib_name}.Lexer is
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
       TDH             : in out Token_Data_Handler;
+      Diagnostics     : in out Diagnostics_Vectors.Vector;
       With_Trivia     : Boolean)
    is
       Decoded_Buffer : Text_Access;
@@ -429,8 +436,8 @@ package body ${ada_lib_name}.Lexer is
       Source_Last    : Natural;
       Lexer          : Lexer_Type;
    begin
-      Decode_Buffer
-        (Buffer, Charset, Read_BOM, Decoded_Buffer, Source_First, Source_Last);
+      Decode_Buffer (Buffer, Charset, Read_BOM, Decoded_Buffer, Source_First,
+                     Source_Last);
       Lexer := Lexer_From_Buffer
         (Decoded_Buffer.all'Address,
          size_t (Source_Last - Source_First + 1));
@@ -441,9 +448,9 @@ package body ${ada_lib_name}.Lexer is
       Reset (TDH, Decoded_Buffer, Source_First, Source_Last);
 
       if With_Trivia then
-         Process_All_Tokens_With_Trivia (Lexer, TDH);
+         Process_All_Tokens_With_Trivia (Lexer, TDH, Diagnostics);
       else
-         Process_All_Tokens_No_Trivia (Lexer, TDH);
+         Process_All_Tokens_No_Trivia (Lexer, TDH, Diagnostics);
       end if;
       Free_Lexer (Lexer);
    end Lex_From_Buffer;

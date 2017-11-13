@@ -96,7 +96,8 @@ package body ${ada_lib_name}.Analysis.Parsers is
    is
       TDH : Token_Data_Handler_Access renames Token_Data (Unit);
    begin
-      Lex_From_Filename (Filename, Charset, Read_BOM, TDH.all, With_Trivia);
+      Lex_From_Filename (Filename, Charset, Read_BOM, TDH.all,
+                         Unit.Diagnostics, With_Trivia);
       Reset (Parser);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
@@ -119,7 +120,8 @@ package body ${ada_lib_name}.Analysis.Parsers is
    is
       TDH : Token_Data_Handler_Access renames Token_Data (Unit);
    begin
-      Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH.all, With_Trivia);
+      Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH.all,
+                       Unit.Diagnostics, With_Trivia);
       Reset (Parser);
       Parser.Unit := Unit;
       Parser.TDH := TDH;

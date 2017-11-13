@@ -1,8 +1,9 @@
 ## vim: filetype=makoada
 
-with Langkit_Support.Slocs;   use Langkit_Support.Slocs;
-with Langkit_Support.Symbols; use Langkit_Support.Symbols;
-with Langkit_Support.Text;    use Langkit_Support.Text;
+with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
+with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
+with Langkit_Support.Symbols;     use Langkit_Support.Symbols;
+with Langkit_Support.Text;        use Langkit_Support.Text;
 with Langkit_Support.Token_Data_Handlers;
 
 --  This package provides types and primitives to split text streams into lists
@@ -54,17 +55,21 @@ package ${ada_lib_name}.Lexer is
    --  Raised by Lex_From_* functions when the input contains an invalid byte
    --  sequence.
 
-   procedure Lex_From_Filename (Filename, Charset : String;
-                                Read_BOM          : Boolean;
-                                TDH               : in out Token_Data_Handler;
-                                With_Trivia       : Boolean);
+   procedure Lex_From_Filename
+     (Filename, Charset : String;
+      Read_BOM          : Boolean;
+      TDH               : in out Token_Data_Handler;
+      Diagnostics       : in out Diagnostics_Vectors.Vector;
+      With_Trivia       : Boolean);
    --  Extract tokens out of Filename and store them into TDH. Raise a
    --  Name_Error exception if the file could not be open.
 
-   procedure Lex_From_Buffer (Buffer, Charset : String;
-                              Read_BOM        : Boolean;
-                              TDH             : in out Token_Data_Handler;
-                              With_Trivia     : Boolean);
+   procedure Lex_From_Buffer
+     (Buffer, Charset : String;
+      Read_BOM        : Boolean;
+      TDH             : in out Token_Data_Handler;
+      Diagnostics     : in out Diagnostics_Vectors.Vector;
+      With_Trivia     : Boolean);
    --  Likewise, but extract tokens from an in-memory buffer. This never raises
    --  an exception.
 
