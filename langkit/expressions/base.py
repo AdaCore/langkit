@@ -2479,6 +2479,11 @@ class ArrayLiteral(AbstractExpression):
                         ' got {}'.format(self.element_type.dsl_name,
                                          el.static_type.dsl_name)
                     )
+        else:
+            check_source_language(
+                self.element_type is not None,
+                'Missing element type for empty array literal'
+            )
 
         self.array_type = resolve_type(self.element_type).array
 
