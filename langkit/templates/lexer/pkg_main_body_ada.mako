@@ -61,6 +61,10 @@ package body ${ada_lib_name}.Lexer is
    --  in Decoded_Buffer that hold the input source text. It is up to the
    --  caller to deallocate Decoded_Buffer when done with it.
    --
+   --  Raise an Unknown_Charset exception if Charset is... unknown. Raise
+   --  Invalid_Input if Buffer contains invalid byte sequences according to
+   --  Charset.
+   --
    --  Quex quirk: this actually allocates more than the actual buffer to keep
    --  Quex happy. The two first characters are set to null and there is an
    --  extra null character at the end of the buffer. See the Quex_*_Characters
