@@ -430,6 +430,8 @@ package body ${ada_lib_name}.Analysis is
       end Add_Diagnostic;
 
    begin
+      Unit.Diagnostics.Clear;
+
       --  Reparsing will invalidate all lexical environments related to this
       --  unit, so destroy all related rebindings as well. This browses AST
       --  nodes, so we have to do this before destroying the AST nodes pool.
@@ -491,7 +493,7 @@ package body ${ada_lib_name}.Analysis is
 
       Unit.AST_Root := ${root_node_type_name}
         (Parse (Unit.Context.Private_Part.Parser, Rule => Unit.Rule));
-      Unit.Diagnostics := Unit.Context.Private_Part.Parser.Diagnostics;
+      Unit.Diagnostics.Append (Unit.Context.Private_Part.Parser.Diagnostics);
    end Do_Parsing;
 
    -------------------
