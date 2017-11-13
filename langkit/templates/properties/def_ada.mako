@@ -121,7 +121,6 @@ begin
          % endif
 
          declare
-            use Memoization_Maps;
             Inserted : Boolean;
          begin
             Mmz_Map.Insert (Mmz_K, Mmz_Val, Mmz_Cur, Inserted);
