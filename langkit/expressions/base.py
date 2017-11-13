@@ -2475,9 +2475,9 @@ class ArrayLiteral(AbstractExpression):
                 else:
                     check_source_language(
                         self.element_type == el.static_type,
-                        "In Array literal, expected element of type {},"
-                        " got {}".format(self.element_type,
-                                         el.static_type)
+                        'In Array literal, expected element of type {},'
+                        ' got {}'.format(self.element_type.dsl_name,
+                                         el.static_type.dsl_name)
                     )
 
         self.array_type = resolve_type(self.element_type).array
