@@ -40,10 +40,9 @@ if ${parser.parser.pos_var} = No_Token_Index then
     % if parser._is_error:
         ## Emit a diagnostic informing the user that the sub parser has not
         ## succeeded.
-        Parser.Diagnostics.Append
-          ((Get_Token (Parser.TDH.all, ${parser.start_pos}).Sloc_Range,
-            To_Unbounded_Wide_Wide_String (To_Text
-            ("Missing '${parser.parser.error_repr}'"))));
+        Append (Parser.Diagnostics,
+                Get_Token (Parser.TDH.all, ${parser.start_pos}).Sloc_Range,
+                To_Text ("Missing '${parser.parser.error_repr}'"));
     % endif
 
     ${parser.parser.pos_var} := ${parser.start_pos};

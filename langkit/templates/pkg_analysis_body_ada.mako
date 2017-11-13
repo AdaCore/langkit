@@ -8,13 +8,12 @@
 
 <% root_node_array = T.root_node.array %>
 
-with Ada.Containers;                  use Ada.Containers;
+with Ada.Containers;             use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
 with Ada.Containers.Vectors;
 with Ada.Exceptions;
-with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
-with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
-with Ada.Text_IO;                     use Ada.Text_IO;
+with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
+with Ada.Text_IO;                use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
@@ -426,9 +425,8 @@ package body ${ada_lib_name}.Analysis is
 
       procedure Add_Diagnostic (Message : String) is
       begin
-         Unit.Diagnostics.Append
-           ((Sloc_Range => No_Source_Location_Range,
-             Message    => To_Unbounded_Wide_Wide_String (To_Text (Message))));
+         Append (Unit.Diagnostics, No_Source_Location_Range,
+                 To_Text (Message));
       end Add_Diagnostic;
 
    begin
@@ -608,9 +606,7 @@ package body ${ada_lib_name}.Analysis is
                Create_Unit (Context, Filename, Charset, With_Trivia, Rule);
             Msg  : constant Text_Type := To_Text (Error);
          begin
-            Unit.Diagnostics.Append
-              ((Sloc_Range => No_Source_Location_Range,
-                Message    => To_Unbounded_Wide_Wide_String (Msg)));
+            Append (Unit.Diagnostics, No_Source_Location_Range, Msg);
             return Unit;
          end;
       else

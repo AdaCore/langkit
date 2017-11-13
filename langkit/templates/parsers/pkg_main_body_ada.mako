@@ -1,6 +1,5 @@
 ## vim: filetype=makoada
 
-with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Unchecked_Deallocation;
 
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
@@ -144,16 +143,14 @@ package body ${ada_lib_name}.Analysis.Parsers is
             Get_Token (Parser.TDH.all, Parser.Last_Fail.Pos);
          D : constant Diagnostic :=
            (if Parser.Last_Fail.Kind = Token_Fail then
-             (Sloc_Range => Last_Token.Sloc_Range,
-              Message    => To_Unbounded_Wide_Wide_String (To_Text
-                ("Expected "
-                 & Token_Error_Image (Parser.Last_Fail.Expected_Token_Id)
-                 & ", got "
-                 & Token_Error_Image (Parser.Last_Fail.Found_Token_Id))))
+             Create (Last_Token.Sloc_Range, To_Text
+               ("Expected "
+                & Token_Error_Image (Parser.Last_Fail.Expected_Token_Id)
+                & ", got "
+                & Token_Error_Image (Parser.Last_Fail.Found_Token_Id)))
             else
-              (Sloc_Range => Last_Token.Sloc_Range,
-               Message => To_Unbounded_Wide_Wide_String
-                 (To_Text (Parser.Last_Fail.Custom_Message.all))));
+              Create (Last_Token.Sloc_Range,
+                      To_Text (Parser.Last_Fail.Custom_Message.all)));
       begin
          Parser.Diagnostics.Append (D);
       end Add_Last_Fail_Diagnostic;
@@ -173,14 +170,11 @@ package body ${ada_lib_name}.Analysis.Parsers is
             declare
                First_Garbage_Token : Lexer.Token_Data_Type renames
                   Get_Token (Parser.TDH.all, Parser.Current_Pos);
-               D                   : constant Diagnostic :=
-                 (Sloc_Range => First_Garbage_Token.Sloc_Range,
-                  Message    => To_Unbounded_Wide_Wide_String (To_Text
-                    ("End of input expected, got """
-                     & Token_Kind_Name (First_Garbage_Token.Kind)
-                     & """")));
             begin
-               Parser.Diagnostics.Append (D);
+               Append (Parser.Diagnostics, First_Garbage_Token.Sloc_Range,
+                       To_Text ("End of input expected, got """
+                                & Token_Kind_Name (First_Garbage_Token.Kind)
+                                & """"));
             end;
 
          --  Else, the last fail pos is further down the line, and we want to
