@@ -120,6 +120,11 @@ package Langkit_Support.Lexical_Env is
       Env : Lexical_Env_Access;
       --  Referenced lexical environment
 
+      Hash : Hash_Type;
+      --  Env's hash. We need to pre-compute it so that the value is available
+      --  even after Env is deallocated. This makes it possible to destroy a
+      --  hash table that contains references to deallocated environments.
+
       Is_Refcounted : Boolean;
       --  Whether Env is ref-counted. When it's not, we can avoid calling
       --  Dec_Ref at destruction time: This is useful because at analysis unit
@@ -129,7 +134,7 @@ package Langkit_Support.Lexical_Env is
    --  Reference to a lexical environments. This is the type that shall be
    --  used.
 
-   Null_Lexical_Env : constant Lexical_Env := (null, False);
+   Null_Lexical_Env : constant Lexical_Env := (null, 0, False);
 
    type Lexical_Env_Resolver is access
      function (Ref : Entity) return Lexical_Env;
@@ -295,7 +300,8 @@ package Langkit_Support.Lexical_Env is
    --  Return whether L and R are equivalent lexical environments: same
    --  envs topology, same internal map, etc.
 
-   function Hash (Env : Lexical_Env) return Hash_Type;
+   function Hash (Env : Lexical_Env_Access) return Hash_Type;
+   function Hash (Env : Lexical_Env) return Hash_Type is (Env.Hash);
 
    package Env_Rebindings_Pools is new Ada.Containers.Hashed_Maps
      (Key_Type        => Lexical_Env,
@@ -515,6 +521,11 @@ private
       Rebindings                 => null,
       Rebindings_Pool            => null,
       Ref_Count                  => No_Refcount);
-   Empty_Env : constant Lexical_Env := (Empty_Env_Record'Access, False);
+
+   --  Because of circular elaboration issues, we cannot call Hash here to
+   --  compute the real hash. Using a dummy precomputed one is probably enough.
+   Empty_Env : constant Lexical_Env := (Env  => Empty_Env_Record'Access,
+                                        Hash => 0,
+                                        Is_Refcounted => False);
 
 end Langkit_Support.Lexical_Env;

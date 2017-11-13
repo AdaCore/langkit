@@ -97,7 +97,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -------------
 
    procedure Destroy (Env : in out Lexical_Env_Access) is
-      Mutable_Env : Lexical_Env := (Env, Env.Ref_Count /= No_Refcount);
+      Mutable_Env : Lexical_Env := (Env, 0, Env.Ref_Count /= No_Refcount);
    begin
       Destroy (Mutable_Env);
       Env := null;

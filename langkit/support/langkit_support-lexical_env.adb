@@ -11,9 +11,9 @@ with Langkit_Support.Images; use Langkit_Support.Images;
 package body Langkit_Support.Lexical_Env is
 
    function Wrap (Env : Lexical_Env_Access) return Lexical_Env is
-     (if Env /= null and then Env.Ref_Count /= No_Refcount
-      then (Env, True)
-      else (Env, False));
+     ((Env           => Env,
+       Hash          => Hash (Env),
+       Is_Refcounted => Env /= null and then Env.Ref_Count /= No_Refcount));
 
    function Extract_Rebinding
      (Rebindings  : in out Env_Rebindings;
@@ -1071,7 +1071,7 @@ package body Langkit_Support.Lexical_Env is
    -- Hash --
    ----------
 
-   function Hash (Env : Lexical_Env) return Hash_Type is
+   function Hash (Env : Lexical_Env_Access) return Hash_Type is
 
       function Convert is new Ada.Unchecked_Conversion
         (Lexical_Env_Resolver, System.Address);
@@ -1124,17 +1124,17 @@ package body Langkit_Support.Lexical_Env is
       end Hash;
 
    begin
-      if Env = Null_Lexical_Env then
+      if Env = null then
          return Initial_Hash;
       end if;
 
       return Combine
-        ((Hash (Env.Env.Parent),
-          Element_Hash (Env.Env.Node),
-          Hash (Env.Env.Referenced_Envs),
-          Hash (Env.Env.Map),
-          Metadata_Hash (Env.Env.Default_MD),
-          Hash (Env.Env.Rebindings)));
+        ((Hash (Env.Parent),
+          Element_Hash (Env.Node),
+          Hash (Env.Referenced_Envs),
+          Hash (Env.Map),
+          Metadata_Hash (Env.Default_MD),
+          Hash (Env.Rebindings)));
    end Hash;
 
    -----------------
