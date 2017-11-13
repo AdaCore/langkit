@@ -665,10 +665,6 @@ package body ${ada_lib_name}.Analysis is
       procedure Free is new Ada.Unchecked_Deallocation
         (Analysis_Context_Private_Part_Type, Analysis_Context_Private_Part);
    begin
-      --  Reset caches upfront as we can't do that when destroying units one
-      --  after the other.
-      Reset_Caches (Context);
-
       for Unit of Context.Units_Map loop
          Unit.Context := null;
          Dec_Ref (Unit);
@@ -915,6 +911,10 @@ package body ${ada_lib_name}.Analysis is
    begin
       Destroy (Unit.Lex_Env_Data_Acc);
       Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
+
+      % if ctx.has_memoization:
+         Destroy (Unit.Memoization_Map);
+      % endif
 
       Destroy_Rebindings (Unit.Rebindings'Access);
       Unit.Rebindings.Destroy;
