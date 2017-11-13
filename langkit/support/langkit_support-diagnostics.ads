@@ -22,4 +22,15 @@ package Langkit_Support.Diagnostics is
 
    type Diagnostics_Array is array (Positive range <>) of Diagnostic;
 
+   function Create
+     (Sloc_Range : Source_Location_Range;
+      Message    : Wide_Wide_String) return Diagnostic;
+   --  Shortcut to create a diagnostic
+
+   procedure Append
+     (Diagnostics : in out Diagnostics_Vectors.Vector;
+      Sloc_Range  : Source_Location_Range;
+      Message     : Wide_Wide_String);
+   --  Shortcut to append a diagnostic to a vector
+
 end Langkit_Support.Diagnostics;

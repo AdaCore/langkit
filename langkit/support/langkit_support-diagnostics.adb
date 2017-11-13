@@ -20,4 +20,29 @@ package body Langkit_Support.Diagnostics is
       return Sloc_Prefix & Image (To_Wide_Wide_String (D.Message));
    end To_Pretty_String;
 
+   ------------
+   -- Create --
+   ------------
+
+   function Create
+     (Sloc_Range : Source_Location_Range;
+      Message    : Wide_Wide_String) return Diagnostic
+   is
+   begin
+      return (Sloc_Range, To_Unbounded_Wide_Wide_String (Message));
+   end Create;
+
+   ------------
+   -- Append --
+   ------------
+
+   procedure Append
+     (Diagnostics : in out Diagnostics_Vectors.Vector;
+      Sloc_Range  : Source_Location_Range;
+      Message     : Wide_Wide_String)
+   is
+   begin
+      Diagnostics.Append (Create (Sloc_Range, Message));
+   end Append;
+
 end Langkit_Support.Diagnostics;
