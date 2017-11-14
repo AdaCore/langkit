@@ -50,7 +50,7 @@ package Langkit_Support.Adalog.Abstract_Relation is
 
    function Solve
      (Self    : in out Base_Relation'Class;
-      Context : Solving_Context) return Solving_State;
+      Context : in out Solving_Context) return Solving_State;
    --  Try to solve the relation subtree::
    --
    --    * If some logic variables are cannot be bound whereas they are
@@ -62,7 +62,7 @@ package Langkit_Support.Adalog.Abstract_Relation is
 
    function Solve_Impl
      (Self    : in out Base_Relation;
-      Context : Solving_Context) return Solving_State is abstract;
+      Context : in out Solving_Context) return Solving_State is abstract;
    --  Solve function that must be implemented by relations
 
    procedure Reset (Self : in out Base_Relation) is abstract;
@@ -79,8 +79,11 @@ package Langkit_Support.Adalog.Abstract_Relation is
    function Custom_Image (Self : Base_Relation) return String is abstract;
    --  Text to use in Print_Relation to represent this relation
 
-   function Solve (Self : Relation) return Boolean;
-   --  Function to solve the toplevel relation, used by Langkit
+   function Solve (Self : Relation; Timeout : Natural := 0) return Boolean;
+   --  Function to solve the toplevel relation, used by Langkit.
+   --
+   --  Raise a Timeout_Error if the given Timeout is not respected (zero means:
+   --  no timeout).
 
    procedure Print_Relation
      (Self             : Relation;
@@ -98,11 +101,19 @@ package Langkit_Support.Adalog.Abstract_Relation is
    --  bringing the reference count to 0 will Destroy the referenced relation
    --  object and put the pointer to null, hence the in out mode.
 
+   procedure Tick (Context : in out Solving_Context);
+   --  If Contex.Timeout is zero, do nothing. Otherwise, decrement it, and
+   --  raise a Timeout_Error exception if it reaches zero.
+
 private
 
    type Solving_Context is record
       Root_Relation : Relation;
       --  Root node for the current tree of relation being solved
+
+      Timeout : Natural;
+      --  Remaining number of steps allowed for the current resolution. Zero
+      --  means: no timeout.
    end record;
 
 end Langkit_Support.Adalog.Abstract_Relation;

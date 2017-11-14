@@ -101,7 +101,7 @@ package body Langkit_Support.Adalog.Unify_One_Side is
 
    function Solve_Impl
      (Self    : in out Member_T;
-      Context : Solving_Context) return Solving_State
+      Context : in out Solving_Context) return Solving_State
    is
       pragma Unreferenced (Context);
    begin

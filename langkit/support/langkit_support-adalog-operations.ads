@@ -47,7 +47,7 @@ package Langkit_Support.Adalog.Operations is
 
    overriding function Solve_Impl
      (Self    : in out Any_Rel;
-      Context : Solving_Context) return Solving_State;
+      Context : in out Solving_Context) return Solving_State;
    overriding function Custom_Image (Self : Any_Rel) return String;
 
    ---------
@@ -58,7 +58,7 @@ package Langkit_Support.Adalog.Operations is
 
    overriding function Solve_Impl
      (Self    : in out All_Rel;
-      Context : Solving_Context) return Solving_State;
+      Context : in out Solving_Context) return Solving_State;
    overriding function Custom_Image (Self : All_Rel) return String;
 
    ------------------

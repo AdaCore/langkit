@@ -11,7 +11,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
 
    function Solve
      (Self    : in out Base_Relation'Class;
-      Context : Solving_Context) return Solving_State
+      Context : in out Solving_Context) return Solving_State
    is
 
       procedure Wait;
@@ -145,8 +145,10 @@ package body Langkit_Support.Adalog.Abstract_Relation is
    -- Solve --
    -----------
 
-   function Solve (Self : Relation) return Boolean is
-      Context : constant Solving_Context := (Root_Relation => Self);
+   function Solve (Self : Relation; Timeout : Natural := 0) return Boolean is
+      Context : Solving_Context :=
+        (Root_Relation => Self,
+         Timeout       => Timeout);
    begin
       declare
          Ret : constant Solving_State := Self.all.Solve (Context);
@@ -164,5 +166,21 @@ package body Langkit_Support.Adalog.Abstract_Relation is
          end case;
       end;
    end Solve;
+
+   ----------
+   -- Tick --
+   ----------
+
+   procedure Tick (Context : in out Solving_Context) is
+   begin
+      if Context.Timeout = 0 then
+         return;
+      end if;
+
+      Context.Timeout := Context.Timeout - 1;
+      if Context.Timeout = 0 then
+         raise Timeout_Error;
+      end if;
+   end Tick;
 
 end Langkit_Support.Adalog.Abstract_Relation;

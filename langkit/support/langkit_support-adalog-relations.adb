@@ -12,7 +12,7 @@ package body Langkit_Support.Adalog.Relations is
 
       function Solve_Impl
         (Self    : in out Rel;
-         Context : Solving_Context) return Solving_State
+         Context : in out Solving_Context) return Solving_State
       is
          pragma Unreferenced (Context);
       begin
@@ -65,7 +65,7 @@ package body Langkit_Support.Adalog.Relations is
 
       function Solve_Impl
         (Self    : in out Rel;
-         Context : Solving_Context) return Solving_State
+         Context : in out Solving_Context) return Solving_State
       is
          pragma Unreferenced (Context);
       begin
