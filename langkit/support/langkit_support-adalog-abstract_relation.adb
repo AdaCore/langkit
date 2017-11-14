@@ -19,9 +19,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
 
       procedure Wait is
       begin
-         pragma Warnings (Off, "always");
          if Debug_State = Step then
-            pragma Warnings (On, "always");
             Put_Line ("Press enter to continue ..");
             declare
                Dummy : String := Ada.Text_IO.Get_Line;
