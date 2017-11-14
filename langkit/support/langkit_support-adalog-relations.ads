@@ -24,7 +24,9 @@ package Langkit_Support.Adalog.Relations is
          Rel  : Ty;
       end record;
 
-      overriding function Solve_Impl (Self : in out Rel) return Solving_State;
+      overriding function Solve_Impl
+        (Self    : in out Rel;
+         Context : Solving_Context) return Solving_State;
       overriding procedure Reset (Self : in out Rel);
       overriding procedure Cleanup (Self : in out Rel);
       overriding function Custom_Image (Self : Rel) return String;
@@ -52,7 +54,9 @@ package Langkit_Support.Adalog.Relations is
          Rel   : Ty;
       end record;
 
-      overriding function Solve_Impl (Self : in out Rel) return Solving_State;
+      overriding function Solve_Impl
+        (Self    : in out Rel;
+         Context : Solving_Context) return Solving_State;
       overriding procedure Reset (Self : in out Rel);
       overriding procedure Cleanup (Self : in out Rel);
 

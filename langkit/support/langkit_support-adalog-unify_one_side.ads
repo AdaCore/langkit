@@ -88,7 +88,8 @@ package Langkit_Support.Adalog.Unify_One_Side is
       Eq_Data : Equals_Data) return Relation;
 
    overriding function Solve_Impl
-     (Self : in out Member_T) return Solving_State;
+     (Self    : in out Member_T;
+      Context : Solving_Context) return Solving_State;
    overriding procedure Reset (Self : in out Member_T);
    overriding procedure Cleanup (Self : in out Member_T);
    overriding function Custom_Image (Self : Member_T) return String;

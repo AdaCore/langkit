@@ -10,7 +10,11 @@ package body Langkit_Support.Adalog.Relations is
       -- Solve_Impl --
       ----------------
 
-      function Solve_Impl (Self : in out Rel) return Solving_State is
+      function Solve_Impl
+        (Self    : in out Rel;
+         Context : Solving_Context) return Solving_State
+      is
+         pragma Unreferenced (Context);
       begin
          if Self.Done then
             return Unsatisfied;
@@ -59,7 +63,11 @@ package body Langkit_Support.Adalog.Relations is
       -- Solve_Impl --
       ----------------
 
-      function Solve_Impl (Self : in out Rel) return Solving_State is
+      function Solve_Impl
+        (Self    : in out Rel;
+         Context : Solving_Context) return Solving_State
+      is
+         pragma Unreferenced (Context);
       begin
          case Self.State is
             when Start =>

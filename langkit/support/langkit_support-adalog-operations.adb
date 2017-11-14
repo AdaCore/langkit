@@ -63,7 +63,9 @@ package body Langkit_Support.Adalog.Operations is
    -- Solve_Impl --
    ----------------
 
-   overriding function Solve_Impl (Self : in out Any_Rel) return Solving_State
+   overriding function Solve_Impl
+     (Self    : in out Any_Rel;
+      Context : Solving_Context) return Solving_State
    is
       Has_Progressed : Boolean := False;
       --  Whether there was progress at all during this call
@@ -78,7 +80,7 @@ package body Langkit_Support.Adalog.Operations is
       while not Stalled loop
          Stalled := True;
          for I in Self.Next .. Self.Count loop
-            case Get_From_Queue (Self, I).Solve is
+            case Get_From_Queue (Self, I).Solve (Context) is
                when No_Progress =>
                   --  TODO: Previous implementation was wrong: it was just a
                   --  null statement, so resolution would skip to the next one
@@ -133,7 +135,9 @@ package body Langkit_Support.Adalog.Operations is
    -- Solve_Impl --
    ----------------
 
-   overriding function Solve_Impl (Self : in out All_Rel) return Solving_State
+   overriding function Solve_Impl
+     (Self    : in out All_Rel;
+      Context : Solving_Context) return Solving_State
    is
       Has_Progressed : Boolean := False;
       --  Whether there was progress at all during this call
@@ -169,7 +173,7 @@ package body Langkit_Support.Adalog.Operations is
          Stalled := True;
          I := Self.Next;
          Inner_Loop : while I <= Self.Count loop
-            case Get_From_Queue (Self, I).Solve is
+            case Get_From_Queue (Self, I).Solve (Context) is
                when No_Progress =>
                   I := I + 1;
 

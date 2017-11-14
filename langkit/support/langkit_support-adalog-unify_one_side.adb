@@ -99,7 +99,11 @@ package body Langkit_Support.Adalog.Unify_One_Side is
    -- Solve_Impl --
    ----------------
 
-   function Solve_Impl (Self : in out Member_T) return Solving_State is
+   function Solve_Impl
+     (Self    : in out Member_T;
+      Context : Solving_Context) return Solving_State
+   is
+      pragma Unreferenced (Context);
    begin
       Trace ("In Member");
       if Self.Current_Index in Self.Values.all'Range then

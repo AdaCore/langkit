@@ -1,4 +1,3 @@
-with Ada.Containers.Vectors;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Deallocation;
 
@@ -6,24 +5,14 @@ with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
 
 package body Langkit_Support.Adalog.Abstract_Relation is
 
-   package Relation_Vectors is new Ada.Containers.Vectors (Positive, Relation);
-
-   Current_Solving_Relation_Stack : Relation_Vectors.Vector;
-   --  NOTE??? We use a stack of relations for debugging/tracing. This should
-   --  be replaced by having a solving context, that could be useful for other
-   --  things as well.
-
-   function Get_Current_Solving_Relation return Relation
-   is
-     (if not Current_Solving_Relation_Stack.Is_Empty
-      then Current_Solving_Relation_Stack.Last_Element
-      else null);
-
    -----------
    -- Solve --
    -----------
 
-   function Solve (Self : in out Base_Relation'Class) return Solving_State is
+   function Solve
+     (Self    : in out Base_Relation'Class;
+      Context : Solving_Context) return Solving_State
+   is
 
       procedure Wait;
       --  Wait for user input
@@ -43,16 +32,14 @@ package body Langkit_Support.Adalog.Abstract_Relation is
       end Wait;
 
    begin
-      if Get_Current_Solving_Relation /= null then
-         if Debug.Debug then
-            Print_Relation (Get_Current_Solving_Relation,
-                            Self'Unrestricted_Access,
-                            With_Colors => True);
-         end if;
-         Wait;
+      if Debug.Debug then
+         Print_Relation (Context.Root_Relation,
+                         Self'Unrestricted_Access,
+                         With_Colors => True);
       end if;
+      Wait;
 
-      return Res : constant Solving_State := Self.Solve_Impl do
+      return Res : constant Solving_State := Self.Solve_Impl (Context) do
          if Debug_State = Step_At_First_Unsat and then Res = Unsatisfied then
             Set_Debug_State (Step);
          end if;
@@ -161,13 +148,12 @@ package body Langkit_Support.Adalog.Abstract_Relation is
    -----------
 
    function Solve (Self : Relation) return Boolean is
+      Context : constant Solving_Context := (Root_Relation => Self);
    begin
-      Current_Solving_Relation_Stack.Append (Self);
       declare
-         Ret : constant Solving_State := Self.all.Solve;
+         Ret : constant Solving_State := Self.all.Solve (Context);
       begin
          Trace ("The relation solving resulted in " & Ret'Image);
-         Current_Solving_Relation_Stack.Delete_Last;
          case Ret is
             when Progress | No_Progress =>
                raise Early_Binding_Error;

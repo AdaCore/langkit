@@ -3,6 +3,9 @@
 
 package Langkit_Support.Adalog.Abstract_Relation is
 
+   type Solving_Context is private;
+   --  Information about the current relation being solved
+
    -------------------
    -- Base_Relation --
    -------------------
@@ -45,7 +48,9 @@ package Langkit_Support.Adalog.Abstract_Relation is
    --    relation systems possibly have multiple solutions. This state can
    --    be reset via the Reset primitive.
 
-   function Solve (Self : in out Base_Relation'Class) return Solving_State;
+   function Solve
+     (Self    : in out Base_Relation'Class;
+      Context : Solving_Context) return Solving_State;
    --  Try to solve the relation subtree::
    --
    --    * If some logic variables are cannot be bound whereas they are
@@ -56,7 +61,8 @@ package Langkit_Support.Adalog.Abstract_Relation is
    --      solution or Unsatisfied otherwise.
 
    function Solve_Impl
-     (Self : in out Base_Relation) return Solving_State is abstract;
+     (Self    : in out Base_Relation;
+      Context : Solving_Context) return Solving_State is abstract;
    --  Solve function that must be implemented by relations
 
    procedure Reset (Self : in out Base_Relation) is abstract;
@@ -91,5 +97,12 @@ package Langkit_Support.Adalog.Abstract_Relation is
    --  Reference counting primitives to be used by Langkit. A Dec_Ref call
    --  bringing the reference count to 0 will Destroy the referenced relation
    --  object and put the pointer to null, hence the in out mode.
+
+private
+
+   type Solving_Context is record
+      Root_Relation : Relation;
+      --  Root node for the current tree of relation being solved
+   end record;
 
 end Langkit_Support.Adalog.Abstract_Relation;
