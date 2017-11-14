@@ -161,6 +161,10 @@ package ${ada_lib_name}.Analysis is
      (Context : Analysis_Context; Discard : Boolean);
    ${ada_doc('langkit.context_discard_errors_in_populate_lexical_env', 3)}
 
+   procedure Set_Logic_Resolution_Timeout
+     (Context : Analysis_Context; Timeout : Natural);
+   ${ada_doc('langkit.context_set_logic_resolution_timeout', 3)}
+
    function Get_From_File
      (Context     : Analysis_Context;
       Filename    : String;

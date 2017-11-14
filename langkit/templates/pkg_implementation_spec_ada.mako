@@ -834,6 +834,12 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  When it's on, we must not use the memoization map as the hash of
       --  lexical environment changes when their content changes.
 
+      Logic_Resolution_Timeout : Natural := 0;
+      --  If zero, inefficient. Otherwise, designates the maximal number of
+      --  steps allowed in the resolution of logic equations before
+      --  interrupting the resolution because of timeout. See the
+      --  Set_Logic_Resolution_Timeout procedure.
+
       Cache_Version : Natural := 0;
       --  Version number used to invalidate memoization caches in a lazy
       --  fashion. If an analysis unit's version number is strictly inferior to

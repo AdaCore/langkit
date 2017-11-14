@@ -90,7 +90,12 @@ package body ${ada_lib_name}.Analysis.Implementation is
          Context_Node.Assign_Names_To_Logic_Vars;
       end if;
 
-      return Solve (R);
+      begin
+         return Solve (R, Context_Node.Unit.Context.Logic_Resolution_Timeout);
+      exception
+         when Langkit_Support.Adalog.Timeout_Error =>
+            raise Property_Error with "logic resolution timed out";
+      end;
    end Solve_Wrapper;
 
    -------------

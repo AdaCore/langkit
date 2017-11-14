@@ -202,6 +202,7 @@ package body ${ada_lib_name}.Analysis is
             new Analysis_Context_Private_Part_Type'(others => <>),
 
          Discard_Errors_In_Populate_Lexical_Env => <>,
+         Logic_Resolution_Timeout => <>,
          In_Populate_Lexical_Env => False,
          Cache_Version => <>);
 
@@ -284,6 +285,12 @@ package body ${ada_lib_name}.Analysis is
    begin
       Context.Discard_Errors_In_Populate_Lexical_Env := Discard;
    end Discard_Errors_In_Populate_Lexical_Env;
+
+   procedure Set_Logic_Resolution_Timeout
+     (Context : Analysis_Context; Timeout : Natural) is
+   begin
+      Context.Logic_Resolution_Timeout := Timeout;
+   end Set_Logic_Resolution_Timeout;
 
    -----------------
    -- Create_Unit --
