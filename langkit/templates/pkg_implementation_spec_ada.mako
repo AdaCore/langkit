@@ -834,7 +834,7 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  When it's on, we must not use the memoization map as the hash of
       --  lexical environment changes when their content changes.
 
-      Logic_Resolution_Timeout : Natural := 0;
+      Logic_Resolution_Timeout : Natural := 100_000;
       --  If zero, inefficient. Otherwise, designates the maximal number of
       --  steps allowed in the resolution of logic equations before
       --  interrupting the resolution because of timeout. See the
