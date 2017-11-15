@@ -61,6 +61,7 @@ def emit_and_print_errors(grammar, lexer=None,
     :param langkit.parsers.Grammar grammar_fn: The language grammar to use.
 
     :param langkit.lexer.Lexer lexer: The lexer to use along with the grammar.
+        Use `lexer_example.foo_lexer` if left to None.
 
     :param WarningSet warning_set: Set of warnings to emit.
 
@@ -102,7 +103,11 @@ def build_and_run(grammar, py_script, lexer=None,
 
     An exception is raised if any step fails (the script must return code 0).
 
+    :param langkit.lexer.Lexer lexer: The lexer to use along with the grammar.
+        See emit_and_print_errors.
     :param WarningSet warning_set: Set of warnings to emit.
+    :param bool properties_logging: Whether to enable properties logging in
+        code generation.
     """
 
     if lexer is None:
