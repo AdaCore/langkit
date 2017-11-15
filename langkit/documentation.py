@@ -366,13 +366,19 @@ base_langkit_docs = {
     """,
 
     'langkit.unit_populate_lexical_env': """
-        Populate the lexical environments for this analysis unit, according to
-        the specifications given in the language spec.
+        Create lexical environments for this analysis unit, according to the
+        specifications given in the language spec.
 
+        If not done before, it will be automatically called during semantic
+        analysis. Calling it before enables one to control where the latency
+        occurs.
+
+        Depending on whether errors are discarded (see
+        Discard_Errors_In_Populate_Lexical_Env),
         % if lang == 'c':
-            Return 0 on failure and 1 on success.
+            return 0 on failure and 1 on success.
         % else:
-            Raise a Property_Error on failure.
+            raise a Property_Error on failure.
         % endif
     """,
 
