@@ -196,23 +196,14 @@ class ASTNodePrinter(BasePrinter):
         return '<{}>'.format(self.node_to_string())
 
 
-class LexicalEnvPrinter(BasePrinter):
+class LexicalEnv(object):
     """
-    Pretty-printer for lexical environments.
+    Wrapper for Lexical_Env_Access values.
     """
 
-    name = 'LexicalEnv'
-
-    @classmethod
-    def matches(cls, value, context):
-        return (
-            value.type.code == gdb.TYPE_CODE_PTR
-            and value.type.target().code == gdb.TYPE_CODE_STRUCT
-            and (
-                value.type.target().name
-                == context.implname('ast_envs__lexical_env_type')
-            )
-        )
+    def __init__(self, value, context):
+        self.value = value
+        self.context = context
 
     @property
     def node(self):
@@ -227,10 +218,10 @@ class LexicalEnvPrinter(BasePrinter):
             return 'null'
 
         empty_env = gdb.lookup_global_symbol(
-            self.context.implname('ast_envs__empty_env')
+            self.context.implname('ast_envs__empty_env_record')
         )
 
-        if self.value == empty_env.value():
+        if self.value == empty_env.value().address:
             return '<LexicalEnv empty>'
         elif self.node:
             return '<LexicalEnv for {}>'.format(self.node)
@@ -238,6 +229,22 @@ class LexicalEnvPrinter(BasePrinter):
             return '<LexicalEnv root>'.format(self.node)
         else:
             return '<LexicalEnv synthetic 0x{}>'.format(ptr_to_int(self.value))
+
+
+class LexicalEnvPrinter(BasePrinter):
+    """
+    Pretty-printer for lexical environments.
+    """
+
+    name = 'LexicalEnv'
+
+    @classmethod
+    def matches(cls, value, context):
+        return (value.type.code == gdb.TYPE_CODE_STRUCT and
+                value.type.name == context.implname('ast_envs__lexical_env'))
+
+    def to_string(self):
+        return LexicalEnv(self.value['env'], self.context).to_string()
 
 
 class EnvGetterPrinter(BasePrinter):
