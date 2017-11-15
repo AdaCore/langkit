@@ -1200,9 +1200,11 @@ class CompileCtx(object):
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.
+        self.extensions_src_dir = None
         if self.extensions_dir:
             src_dir = path.join(self.extensions_dir, 'src')
             if path.isdir(src_dir):
+                self.extensions_src_dir = src_dir
                 for filename in os.listdir(src_dir):
                     filepath = path.join(src_dir, filename)
                     if path.isfile(filepath) and not filename.startswith("."):
@@ -1460,11 +1462,6 @@ class CompileCtx(object):
                 quex_path=os.environ['QUEX_PATH'],
             )
         )
-
-        # Copy additional source files from the language specification
-        for filepath in self.additional_source_files:
-            filename = os.path.basename(filepath)
-            copy_file(filepath, path.join(src_path, filename))
 
         if self.generate_astdoc:
             from langkit import astdoc

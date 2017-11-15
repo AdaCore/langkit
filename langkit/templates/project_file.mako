@@ -52,7 +52,10 @@ library project ${lib_name} is
       "quex_lexer-token.h",
       "quex_lexer-token_ids.h");
 
-   for Source_Dirs use ("../../include/${lib_name.lower()}");
+   for Source_Dirs use 
+      ("../../include/${lib_name.lower()}",
+       "${ctx.extensions_src_dir}");
+
    for Library_Dir use "../${lib_name.lower()}." & Library_Kind_Param;
    for Object_Dir use "../../obj/${lib_name.lower()}." & Library_Kind_Param;
 
