@@ -8,20 +8,14 @@ pragma Warnings (Off, "internal");
 with Ada.Strings.Unbounded.Aux; use Ada.Strings.Unbounded.Aux;
 with Ada.Text_IO;               use Ada.Text_IO;
 
-with Interfaces; use Interfaces;
-
 with GNAT.Command_Line; use GNAT.Command_Line;
 with GNAT.Strings;
 
-with Langkit_Support.Bump_Ptr;           use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;              use Langkit_Support.Slocs;
-with Langkit_Support.Symbols;            use Langkit_Support.Symbols;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Init;     use ${ada_lib_name}.Init;
-with ${ada_lib_name}.Lexer;
-use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 procedure Parse is
 
@@ -47,6 +41,12 @@ procedure Parse is
    Input_Str : Unbounded_String;
    Lookups   : String_Vectors.Vector;
 
+   procedure Register_Lookups;
+   procedure Process_Lookups (Node : ${root_entity.api_name}'Class);
+   procedure Process_Node (Res : ${root_entity.api_name}'Class);
+   procedure Parse_Input;
+   procedure Process_File (File_Name : String; Ctx : in out Analysis_Context);
+
    ----------------------
    -- Register_Lookups --
    ----------------------
@@ -55,7 +55,7 @@ procedure Parse is
    begin
       loop
          declare
-            Arg : String := Get_Argument;
+            Arg : constant String := Get_Argument;
          begin
             exit when Arg'Length = 0;
             Lookups.Append (+Arg);
@@ -75,13 +75,13 @@ procedure Parse is
          declare
             Sep : constant Natural := Index (Lookup_Str, ":");
 
-            Line : Line_Number := Line_Number'Value
+            Line   : constant Line_Number := Line_Number'Value
               (Slice (Lookup_Str, 1, Sep - 1));
-            Column : Column_Number := Column_Number'Value
+            Column : constant Column_Number := Column_Number'Value
               (Slice (Lookup_Str, Sep + 1, Length (Lookup_Str)));
 
-            Sloc : constant Source_Location := (Line, Column);
-            Lookup_Node : ${root_entity.api_name} :=
+            Sloc        : constant Source_Location := (Line, Column);
+            Lookup_Node : constant ${root_entity.api_name} :=
                Node.Lookup ((Line, Column));
          begin
             Put_Line ("Lookup " & Image (Sloc) & ":");
@@ -196,6 +196,13 @@ procedure Parse is
             Count : Natural := 0;
 
             function Visit
+              (Node : ${root_entity.api_name}'Class) return Visit_Status;
+
+            -----------
+            -- Visit --
+            -----------
+
+            function Visit
               (Node : ${root_entity.api_name}'Class) return Visit_Status is
             begin
                if Node.Is_Null then
@@ -279,7 +286,7 @@ begin
          Open (F, In_File, File_List.all);
          while not End_Of_File (F) loop
             declare
-               Filename : String := Get_Line (F);
+               Filename : constant String := Get_Line (F);
             begin
                Process_File (Filename, Ctx);
                Remove (Ctx, Filename);
