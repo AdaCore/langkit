@@ -831,17 +831,15 @@ class CompileCtx(object):
         """
         from langkit.expressions import FieldAccess
 
-        _, backwards = self.properties_callgraphs(
-            backwards_converter=lambda expr, from_prop: (expr, from_prop)
-        )
-
+        # For each property that uses entity info, extend that attribute to the
+        # whole property set, as it changes the signature of the generated
+        # subprograms.
         props_using_einfo = sorted(
             self.all_properties(lambda p: p._uses_entity_info,
                                 include_inherited=False),
             key=lambda p: p.qualname
         )
         for prop in props_using_einfo:
-            # Propagate in the property set
             for p in prop.property_set():
                 with Context(
                     'By inheritance from {} to {}'.format(prop.qualname,
@@ -852,10 +850,9 @@ class CompileCtx(object):
 
         all_props = list(self.all_properties(include_inherited=False))
 
-        # Clearly tag all properties that don't use entity info
+        # Then, clearly tag all properties that don't use entity info
         for prop in all_props:
-            if prop._uses_entity_info is None:
-                prop._uses_entity_info = False
+            prop._uses_entity_info = bool(prop._uses_entity_info)
 
         # Now that we determined entity info usage for all properties, make
         # sure that calls to properties that require entity info are made on
