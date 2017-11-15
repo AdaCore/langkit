@@ -20,6 +20,26 @@ default_warning_set = WarningSet()
 # testcases.
 default_warning_set.disable(WarningSet.undocumented_public_properties)
 
+project_template = """
+with "libfoolang";
+
+project Gen is
+    for Languages use ("Ada");
+    for Source_Dirs use (".");
+    for Object_Dir use "obj";
+    for Main use ("{main_source}");
+
+    package Builder is
+        for Executable ("{main_source}") use "main";
+    end Builder;
+
+    package Compiler is
+        for Default_Switches ("Ada") use
+          ("-g", "-O0", "-gnata", "-gnatwae", "-gnatyg");
+    end Compiler;
+end Gen;
+"""
+
 
 def prepare_context(grammar, lexer=None, warning_set=default_warning_set):
     """
@@ -91,15 +111,15 @@ def build(grammar, lexer=None, warning_set=default_warning_set):
     """
     Shortcut for `build_and_run` to only build.
     """
-    build_and_run(grammar, py_script=None, lexer=lexer,
-                  warning_set=warning_set)
+    build_and_run(grammar, lexer=lexer, warning_set=warning_set)
 
 
-def build_and_run(grammar, py_script, lexer=None,
+def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
                   warning_set=default_warning_set, properties_logging=False):
     """
     Compile and emit code for `ctx` and build the generated library. Then, if
-    `py_script` is not None, run it with this library available.
+    `py_script` is not None, run it with this library available. If `ada_main`
+    is not None, build it and run it, too.
 
     An exception is raised if any step fails (the script must return code 0).
 
@@ -135,23 +155,31 @@ def build_and_run(grammar, py_script, lexer=None,
         argv.append('--enable-properties-logging')
     m.run(argv)
 
-    # No script is provided? Then we have nothing left to do
-    if py_script is None:
-        return
-
     # Write a "setenv" script to make developper investigation convenient
     with open('setenv.sh', 'w') as f:
         m.write_setenv(f)
 
-    # Then execute a script with it. Note that in order to use the generated
-    # library, we have to use the special Python interpreter the testsuite
-    # provides us. See the corresponding code in
-    # testuite_support/python_driver.py.
-    python_interpreter = os.environ['PYTHON_INTERPRETER']
-    subprocess.check_call(
-        [python_interpreter, py_script],
-        env=m.derived_env()
-    )
+    env = m.derived_env()
+
+    def run(*argv):
+        subprocess.check_call(argv, env=env)
+
+    if py_script is not None:
+        # Run the Python script. Note that in order to use the generated
+        # library, we have to use the special Python interpreter the testsuite
+        # provides us. See the corresponding code in
+        # testuite_support/python_driver.py.
+        python_interpreter = os.environ['PYTHON_INTERPRETER']
+        run(python_interpreter, py_script)
+
+    if ada_main is not None:
+        # Generate a project file to build the given Ada main and then run the
+        # program.
+        with open('gen.gpr', 'w') as f:
+            f.write(project_template.format(main_source=ada_main))
+        run('gprbuild', '-Pgen', '-q', '-p',
+            '-XLIBRARY_TYPE=relocatable', '-XXMLADA_BUILD=relocatable')
+        run(os.path.join('obj', 'main'))
 
 
 def reset_langkit():
