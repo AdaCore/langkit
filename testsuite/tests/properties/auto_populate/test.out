@@ -1,0 +1,5 @@
+main.py: Running...
+<Ref 1:8-1:9>.p_decl = <Decl 1:1-1:5>
+<Ref 1:8-1:9>.p_decl_wrapper = <Decl 1:1-1:5>
+main.py: Done.
+Done
