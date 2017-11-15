@@ -2610,9 +2610,11 @@ class PropertyDef(AbstractNodeData):
             extensions/nodes/{node_name}/bodies extension file. Note that the
             engines always generate the public declaration part.
 
-        :param bool uses_entity_info: Whether this property uses lexical
-            environments at all or not. If it does, then it will have an extra
-            parameter for env rebindings.
+        :param bool uses_entity_info: Whether this property requires entity
+            information to be passed for Self. If left to None, this will be
+            computed using the properties call graph. If false, uses of entity
+            info will be rejected. Note that this must be non-None for external
+            property, as they escape call graph analysis.
 
         :param bool optional_entity_info: If `uses_entity_info` is True,
             whether the entity info is optional. This allows properties to be
@@ -3206,8 +3208,9 @@ class PropertyDef(AbstractNodeData):
 
     def set_uses_entity_info(self):
         """
-        Set this property as using environments, which will trigger the
-        addition of the env rebinding implicit parameter.
+        Set this property as using entity information for Self.
+
+        This triggers the addition of an implicit parameter (Entity_Info).
         """
         check_source_language(
             self._uses_entity_info is not False,
