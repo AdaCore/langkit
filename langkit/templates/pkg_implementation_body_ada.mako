@@ -1611,7 +1611,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
          Cursor : out Memoization_Maps.Cursor) return Boolean
       is
          Inserted : Boolean;
-         Value    : constant Mmz_Value := (Kind => Mmz_Property_Error);
+         Value    : constant Mmz_Value := (Kind => Mmz_Evaluating);
       begin
 
          --  Make sure that we don't lookup stale caches

@@ -17,8 +17,8 @@ type Mmz_Property is
   (${', '.join(p.memoization_enum for p in memoized_props)});
 type Mmz_Key_Kind is (${', '.join(t.memoization_kind for t in key_types)});
 type Mmz_Value_Kind is
-  (Mmz_Property_Error${(''.join(', ' + t.memoization_kind
-                                for t in value_types))});
+  (Mmz_Evaluating, Mmz_Property_Error
+   ${(''.join(', ' + t.memoization_kind for t in value_types))});
 
 type Mmz_Key_Item (Kind : Mmz_Key_Kind := ${default_key}) is record
    case Kind is
@@ -36,9 +36,9 @@ type Mmz_Key is record
    Items    : Mmz_Key_Array_Access;
 end record;
 
-type Mmz_Value (Kind : Mmz_Value_Kind := Mmz_Property_Error) is record
+type Mmz_Value (Kind : Mmz_Value_Kind := Mmz_Evaluating) is record
    case Kind is
-      when Mmz_Property_Error =>
+      when Mmz_Evaluating | Mmz_Property_Error =>
          null;
 
       % for t in value_types:

@@ -77,7 +77,7 @@ is
          Mmz_Map : Map renames Node.Unit.Memoization_Map;
          Mmz_Cur : Cursor;
          Mmz_K   : Mmz_Key;
-         Mmz_Val : Mmz_Value := (Kind => Mmz_Property_Error);
+         Mmz_Val : Mmz_Value;
    % endif
 
 begin
@@ -123,7 +123,14 @@ begin
          if not Lookup_Memoization_Map (Node.Unit, Mmz_K, Mmz_Cur) then
             Mmz_Val := Memoization_Maps.Element (Mmz_Cur);
 
-            if Mmz_Val.Kind = Mmz_Property_Error then
+            if Mmz_Val.Kind = Mmz_Evaluating then
+               % if ctx.properties_logging:
+                  Properties_Traces.Trace
+                    ("Result: infinite recursion");
+               % endif
+               raise Property_Error with "Infinite recursion detected";
+
+            elsif Mmz_Val.Kind = Mmz_Property_Error then
                % if ctx.properties_logging:
                   Properties_Traces.Trace
                     ("Result: Property_Error");
