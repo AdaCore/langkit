@@ -45,6 +45,9 @@ package Langkit_Support.Slocs is
    --  Tell where Compared is with respect to Reference (before, inside = same
    --  sloc, after).
 
+   function "<" (L, R : Source_Location) return Boolean is
+     (Compare (L, R) = After);
+
    function Compare
      (Sloc_Range : Source_Location_Range;
       Sloc       : Source_Location) return Relative_Position
