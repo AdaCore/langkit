@@ -295,10 +295,17 @@ def is_visible_from(self, referenced_env, base_env):
     :param AbstractExpression referenced_env: The environment referenced
         from base_env, for which we want to check visibility.
     """
-    return CallExpr('Is_Visible', 'Is_Visible_From', T.BoolType,
-                    [construct(referenced_env, T.LexicalEnvType),
-                     construct(base_env, T.LexicalEnvType)],
-                    abstract_expr=self)
+    return IsVisibleFromExpr(referenced_env, base_env, abstract_expr=self)
+
+
+class IsVisibleFromExpr(CallExpr):
+    def __init__(self, referenced_env, base_env, abstract_expr=None):
+        super(IsVisibleFromExpr, self).__init__(
+            'Is_Visible', 'Is_Visible_From', T.BoolType,
+            [construct(referenced_env, T.LexicalEnvType),
+             construct(base_env, T.LexicalEnvType)],
+            abstract_expr=abstract_expr
+        )
 
 
 @auto_attr
