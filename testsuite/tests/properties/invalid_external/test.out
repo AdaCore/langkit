@@ -10,4 +10,12 @@ File "test.py", line 47, in AbstractExample.p
 File "test.py", line 52, in AbstractExample.p
     Error: An external property cannot be memoized
 
+== Missing uses_entity_info=... ==
+File "test.py", line 55, in AbstractExample.p
+    Error: uses_entity_info is required for external properties
+
+== Missing uses_envs=... ==
+File "test.py", line 58, in AbstractExample.p
+    Error: uses_envs is required for external properties
+
 Done

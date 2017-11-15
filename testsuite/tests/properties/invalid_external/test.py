@@ -50,4 +50,11 @@ run('Invalid abstract',
 run('Invalid memoized',
     lambda: ExternalProperty(memoized=True, type=BoolType,
                              uses_entity_info=False, uses_envs=False))
+
+run('Missing uses_entity_info=...',
+    lambda: ExternalProperty(memoized=True, type=BoolType, uses_envs=False))
+run('Missing uses_envs=...',
+    lambda: ExternalProperty(memoized=True, type=BoolType,
+                             uses_entity_info=False))
+
 print('Done')
