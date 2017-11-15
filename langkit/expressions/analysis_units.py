@@ -62,10 +62,17 @@ def is_referenced_from(self, referenced_unit, base_unit):
 
     :rtype: ResolvedExpression
     """
-    return CallExpr('Is_Referenced', 'Is_Referenced_From', T.BoolType,
-                    [construct(referenced_unit, T.AnalysisUnitType),
-                     construct(base_unit, T.AnalysisUnitType)],
-                    abstract_expr=self)
+    return IsReferencedFrom(referenced_unit, base_unit, abstract_expr=self)
+
+
+class IsReferencedFrom(CallExpr):
+    def __init__(self, referenced_unit, base_unit, abstract_expr=None):
+        super(IsReferencedFrom, self).__init__(
+            'Is_Referenced', 'Is_Referenced_From', T.BoolType,
+            [construct(referenced_unit, T.AnalysisUnitType),
+             construct(base_unit, T.AnalysisUnitType)],
+            abstract_expr=self
+        )
 
 
 @auto_attr_custom("root")
