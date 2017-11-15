@@ -3206,7 +3206,7 @@ class PropertyDef(AbstractNodeData):
         """
         check_source_language(
             self._uses_entity_info is not False,
-            'Cannot use entity info, as explicitely forbiden'
+            'Cannot use entity info, as explicitely forbidden'
         )
         self._uses_entity_info = True
 
