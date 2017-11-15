@@ -3062,9 +3062,6 @@ class PropertyDef(AbstractNodeData):
                 )
             self._dynamic_vars = base_dynvars
 
-            if self._uses_entity_info is None:
-                self._uses_entity_info = self.base_property._uses_entity_info
-
             # We then want to check the consistency of type annotations if they
             # exist.
             if self.base_property.expected_type:
@@ -3175,11 +3172,6 @@ class PropertyDef(AbstractNodeData):
         for dynvar in self._dynamic_vars:
             self._add_argument(dynvar.argument_name, dynvar.type,
                                is_artificial=True, abstract_var=dynvar)
-
-        # If this property has been explicitly marked as using entity info,
-        # then set the relevant internal data.
-        if self._uses_entity_info:
-            self._uses_entity_info = True
 
         # At this point, we assume the list of argument has reached its final
         # state.
