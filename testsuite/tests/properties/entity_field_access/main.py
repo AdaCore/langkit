@@ -15,8 +15,6 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
-
 
 def entity_repr(e):
     return '{} (metadata={})'.format(e, e.metadata)

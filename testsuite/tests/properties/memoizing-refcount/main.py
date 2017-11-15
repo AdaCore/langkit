@@ -17,8 +17,6 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
-
 
 def c_address(py_array):
     return ctypes.addressof(py_array._c_value.contents)

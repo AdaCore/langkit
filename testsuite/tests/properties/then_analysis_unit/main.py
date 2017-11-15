@@ -15,7 +15,6 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
 for node in [u.root, u.root[0]]:
     print('{}.unit = {}'.format(node, node.p_unit))
 

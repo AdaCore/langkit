@@ -15,8 +15,6 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
-
 for arg1, arg2 in [
     (True, True),
     (True, False),

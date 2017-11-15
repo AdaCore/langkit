@@ -18,7 +18,6 @@ begin
    end if;
 
    Discard_Errors_In_Populate_Lexical_Env (Ctx, False);
-   Populate_Lexical_Env (Unit);
 
    declare
       Dummy : Boolean;

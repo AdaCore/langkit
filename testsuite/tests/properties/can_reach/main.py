@@ -17,7 +17,6 @@ def parse_unit(filename, src_buffer):
         for d in u.diagnostics:
             print('{}: {}'.format(filename, d))
         sys.exit(1)
-    u.populate_lexical_env()
     return u
 
 

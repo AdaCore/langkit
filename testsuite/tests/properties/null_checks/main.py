@@ -15,7 +15,6 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
 expr = u.root
 iden = expr.f_left
 for node, prop in [

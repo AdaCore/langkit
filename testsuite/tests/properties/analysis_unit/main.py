@@ -15,7 +15,6 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
 print('result = {}'.format(u.root.p_result))
 
 try:

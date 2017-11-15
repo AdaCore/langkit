@@ -15,8 +15,6 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
-
 try:
     res_none = u.root.p_count(None)
 except TypeError as exc:

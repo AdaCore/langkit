@@ -15,7 +15,6 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
 foo = u.root[0]
 
 for ref in foo.f_refs:

@@ -17,7 +17,6 @@ def load_unit(name):
         for d in u.diagnostics:
             print(d)
         sys.exit(1)
-    u.populate_lexical_env()
     return u
 
 

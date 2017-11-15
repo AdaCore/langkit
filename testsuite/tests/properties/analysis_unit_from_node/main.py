@@ -15,7 +15,6 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
 for node in u.root.findall(lambda _: True):
     print('{}.root = {}'.format(node, node.p_root_node))
 

@@ -15,8 +15,6 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
-
 
 def nimage(node):
     return '{}({})'.format(type(node).__name__, node.f_name.text)

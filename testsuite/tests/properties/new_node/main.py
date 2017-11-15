@@ -15,6 +15,5 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
 u.root.p_prop.dump()
 print('main.py: Done.')

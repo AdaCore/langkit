@@ -15,7 +15,6 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
 for ref in u.root.findall(libfoolang.Ref):
     print('{} resolves to {}'.format(ref, ref.p_resolve))
 

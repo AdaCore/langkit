@@ -16,7 +16,6 @@ if u.diagnostics:
         print(d)
     sys.exit(1)
 
-u.populate_lexical_env()
 n = u.root
 
 for i in range(4):
