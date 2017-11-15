@@ -184,13 +184,16 @@ class ASTNodePrinter(BasePrinter):
         """
         return tagged_field(self.value, 'parent')
 
-    def to_string(self):
+    def node_to_string(self):
         if not self.value:
             return 'null'
 
         loc = ('synthetic from {}'.format(self.parent)
                if self.synthetic else self.sloc())
-        return '<{} {}>'.format(self.kind, loc)
+        return '{} {}'.format(self.kind, loc)
+
+    def to_string(self):
+        return '<{}>'.format(self.node_to_string())
 
 
 class LexicalEnvPrinter(BasePrinter):
@@ -373,8 +376,8 @@ class EntityPrinter(BasePrinter):
         rebindings = RebindingsPrinter(
             self.value['info']['rebindings'], self.context
         )
-        return '<| {} {}{} |>'.format(
-            node.kind, node.sloc(),
+        return '<| {}{} |>'.format(
+            node.node_to_string(),
             '' if rebindings.is_null else ' {}'.format(rebindings.inner)
         )
 
