@@ -4,8 +4,8 @@ from langkit import names
 from langkit.compiled_types import T
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractVariable, CallExpr, FieldAccessExpr, NullCheckExpr, auto_attr,
-    auto_attr_custom, construct
+    AbstractVariable, CallExpr, FieldAccessExpr, NullCheckExpr, PropertyDef,
+    auto_attr, auto_attr_custom, construct
 )
 
 
@@ -73,6 +73,8 @@ class IsReferencedFrom(CallExpr):
              construct(base_unit, T.AnalysisUnitType)],
             abstract_expr=self
         )
+
+        PropertyDef.get().set_uses_envs()
 
 
 @auto_attr_custom("root")

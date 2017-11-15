@@ -92,6 +92,10 @@ begin
       Properties_Traces.Increase_Indent;
    % endif
 
+   % if property.is_public and property.uses_envs:
+      Populate_Lexical_Env (Node.Unit);
+   % endif
+
    % if property.memoized:
       ## If memoization is enabled for this property, look for an already
       ## computed result for this property. See the declaration of

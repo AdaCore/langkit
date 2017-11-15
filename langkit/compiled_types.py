@@ -2109,7 +2109,7 @@ class ASTNodeType(BaseStructType):
 
             ('node_env', PropertyDef(
                 expr=None, prefix=None, type=T.LexicalEnvType, public=False,
-                external=True, uses_entity_info=True,
+                external=True, uses_entity_info=True, uses_envs=True,
                 optional_entity_info=True, force_dispatching=True,
                 warn_on_unused=False,
                 doc='For nodes that introduce a new environment, return the'
@@ -2118,7 +2118,7 @@ class ASTNodeType(BaseStructType):
             )),
             ('children_env', PropertyDef(
                 expr=None, prefix=None, type=T.LexicalEnvType, public=False,
-                external=True, uses_entity_info=True,
+                external=True, uses_entity_info=True, uses_envs=True,
                 optional_entity_info=True, warn_on_unused=False,
                 doc='For nodes that introduce a new environment, return it.'
                     ' Return the "inherited" environment otherwise.'
@@ -2126,7 +2126,8 @@ class ASTNodeType(BaseStructType):
 
             ('parent', PropertyDef(
                 expr=None, prefix=None, type=T.entity, public=True,
-                external=True, uses_entity_info=True, warn_on_unused=False,
+                external=True, uses_entity_info=True, uses_envs=False,
+                warn_on_unused=False,
                 doc='Return the lexical parent for this node. Return null for'
                     ' the root AST node or for AST nodes for which no one has'
                     ' a reference to the parent.'
@@ -2136,24 +2137,28 @@ class ASTNodeType(BaseStructType):
             # there is no need for an additional inc-ref.
             ('parents', PropertyDef(
                 expr=None, prefix=None, type=T.entity.array, public=True,
-                external=True, uses_entity_info=True, warn_on_unused=False,
+                external=True, uses_entity_info=True, uses_envs=False,
+                warn_on_unused=False,
                 doc='Return an array that contains the lexical parents (this'
                     ' node included). Nearer parents are first in the list.'
             )),
             ('children', PropertyDef(
                 expr=None, prefix=None, type=T.entity.array, public=True,
-                external=True, uses_entity_info=True, warn_on_unused=False,
+                external=True, uses_entity_info=True, uses_envs=False,
+                warn_on_unused=False,
                 doc='Return an array that contains the direct lexical'
                     ' children.'
             )),
             ('token_start', PropertyDef(
                 expr=None, prefix=None, type=T.TokenType,
                 public=True, external=True, uses_entity_info=False,
+                uses_envs=False,
                 doc='Return the first token used to parse this node.'
             )),
             ('token_end', PropertyDef(
                 expr=None, prefix=None, type=T.TokenType,
                 public=True, external=True, uses_entity_info=False,
+                uses_envs=False,
                 doc='Return the last token used to parse this node.'
             )),
             ('child_index', BuiltinField(
@@ -2163,12 +2168,14 @@ class ASTNodeType(BaseStructType):
             )),
             ('previous_sibling', PropertyDef(
                 expr=None, prefix=None, type=T.entity, public=True,
-                external=True, uses_entity_info=True, warn_on_unused=False,
+                external=True, uses_entity_info=True, uses_envs=False,
+                warn_on_unused=False,
                 doc="Return the node's previous sibling, if there is one."
             )),
             ('next_sibling', PropertyDef(
                 expr=None, prefix=None, type=T.entity, public=True,
-                external=True, uses_entity_info=True, warn_on_unused=False,
+                external=True, uses_entity_info=True, uses_envs=False,
+                warn_on_unused=False,
                 doc="Return the node's next sibling, if there is one."
             )),
         ]

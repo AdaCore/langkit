@@ -40,14 +40,14 @@ def run(name, abstract_prop, prop=None):
 
 
 run('Missing type',
-    lambda: ExternalProperty(uses_entity_info=False))
+    lambda: ExternalProperty(uses_entity_info=False, uses_envs=False))
 
 run('Invalid abstract',
     lambda: ExternalProperty(abstract=True, type=T.FooNode,
-                             uses_entity_info=False),
+                             uses_entity_info=False, uses_envs=False),
     lambda: Property(Self))
 
 run('Invalid memoized',
     lambda: ExternalProperty(memoized=True, type=BoolType,
-                             uses_entity_info=False))
+                             uses_entity_info=False, uses_envs=False))
 print('Done')

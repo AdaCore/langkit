@@ -2538,9 +2538,9 @@ class PropertyDef(AbstractNodeData):
                  abstract=False, type=None, abstract_runtime_check=False,
                  dynamic_vars=None, memoized=False, unsafe_memoization=False,
                  memoize_in_populate=False, external=False,
-                 uses_entity_info=None, optional_entity_info=False,
-                 force_dispatching=False, warn_on_unused=True,
-                 ignore_warn_on_node=None):
+                 uses_entity_info=None, uses_envs=None,
+                 optional_entity_info=False, force_dispatching=False,
+                 warn_on_unused=True, ignore_warn_on_node=None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -2615,6 +2615,13 @@ class PropertyDef(AbstractNodeData):
             computed using the properties call graph. If false, uses of entity
             info will be rejected. Note that this must be non-None for external
             property, as they escape call graph analysis.
+
+        :param bool|None uses_envs: Whether this property makes a lexical
+            environment lookup, or calls a property that does one
+            (transitively). If left to None, this will be computed using the
+            properties call graph. If false, lookups will be rejected. Note
+            that this must be non-None for external property, as they escape
+            call graph analysis.
 
         :param bool optional_entity_info: If `uses_entity_info` is True,
             whether the entity info is optional. This allows properties to be
@@ -2695,12 +2702,25 @@ class PropertyDef(AbstractNodeData):
                 'uses_entity_info is required for external properties'
             )
             self._uses_entity_info = uses_entity_info
+
+            check_source_language(
+                uses_envs is not None,
+                'uses_envs is required for external properties'
+            )
+            self._uses_envs = uses_envs
         else:
             check_source_language(
                 uses_entity_info in (None, False),
                 'Cannot specify uses_entity_info=True for internal properties'
             )
             self._uses_entity_info = uses_entity_info
+
+            check_source_language(
+                uses_envs is None,
+                'Cannot explicitely pass uses_envs for internal properties'
+            )
+            self._uses_envs = uses_envs
+
         self.optional_entity_info = optional_entity_info
 
         self._requires_untyped_wrapper = False
@@ -3210,6 +3230,30 @@ class PropertyDef(AbstractNodeData):
         )
         self._uses_entity_info = True
 
+    @property
+    def uses_envs(self):
+        """
+        Return whether the proper evaluation of this property requires
+        Populate_Lexical_Env to be called.
+
+        :rtype: bool
+        """
+        assert self._uses_envs is not None
+        return self._uses_envs
+
+    def set_uses_envs(self):
+        """
+        Set this property as using lexical environment lookups.
+
+        If this property is public, this will trigger an automatical call to
+        Populate_Lexical_Env.
+        """
+        check_source_language(
+            self._uses_envs is not False,
+            'Cannot use lexical environments, as explicitely forbidden'
+        )
+        self._uses_envs = True
+
     def require_untyped_wrapper(self):
         """
         Tag this property as requiring an untyped wrapper function. This
@@ -3596,7 +3640,7 @@ class AbstractKind(Enum):
 def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
                      dynamic_vars=None, memoized=False,
                      unsafe_memoization=False, memoize_in_populate=False,
-                     external=False, uses_entity_info=None,
+                     external=False, uses_entity_info=None, uses_envs=None,
                      warn_on_unused=True, ignore_warn_on_node=None):
     """
     Decorator to create properties from real Python methods. See Property for
@@ -3621,6 +3665,7 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
             memoize_in_populate=memoize_in_populate,
             external=external,
             uses_entity_info=uses_entity_info,
+            uses_envs=uses_envs,
             warn_on_unused=warn_on_unused,
             ignore_warn_on_node=ignore_warn_on_node
         )

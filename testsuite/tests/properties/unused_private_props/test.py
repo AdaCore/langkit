@@ -50,7 +50,7 @@ class Literal(Expression):
     tok = Field()
 
     # This one is private, but it is called by "evaluate" so it's not usused
-    result = ExternalProperty(uses_entity_info=False)
+    result = ExternalProperty(uses_entity_info=False, uses_envs=False)
 
     # See Expression.name
     names = Property(No(T.Name.array))
@@ -63,7 +63,7 @@ class Name(Expression):
 
     # This one is private and called transitively from a public property
     designated_unit = ExternalProperty(type=AnalysisUnitType,
-                                       uses_entity_info=False)
+                                       uses_entity_info=False, uses_envs=False)
 
     result = Property(Self.designated_unit.root.cast(Expression).result)
 

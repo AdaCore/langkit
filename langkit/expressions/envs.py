@@ -92,6 +92,8 @@ class EnvGet(AbstractExpression):
             super(EnvGet.Expr, self).__init__('Env_Get_Result',
                                               abstract_expr=abstract_expr)
 
+            PropertyDef.get().set_uses_envs()
+
         def _render_pre(self):
             result = [
                 self.env_expr.render_pre(),
@@ -306,6 +308,8 @@ class IsVisibleFromExpr(CallExpr):
              construct(base_env, T.LexicalEnvType)],
             abstract_expr=abstract_expr
         )
+
+        PropertyDef.get().set_uses_envs()
 
 
 @auto_attr

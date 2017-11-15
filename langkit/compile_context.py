@@ -886,6 +886,31 @@ class CompileCtx(object):
                 if prop.constructed_expr:
                     process_expr(prop.constructed_expr)
 
+    def compute_uses_envs_attr(self):
+        """
+        Pass to compute the `uses_envs` attribute for every property.
+
+        This will determine if public properties need to automatically call
+        Populate_Lexical_Env.
+        """
+        _, backwards = self.properties_callgraphs()
+
+        queue = sorted(self.all_properties(lambda p: p._uses_envs,
+                                           include_inherited=False),
+                       key=lambda p: p.qualname)
+
+        # Propagate the "uses envs" attribute in the backwards call graph
+        while queue:
+            prop = queue.pop(0)
+            for caller in backwards[prop]:
+                if not caller._uses_envs:
+                    caller.set_uses_envs()
+                    queue.append(caller)
+
+        # For all unreached nodes, tag them as not using envs
+        for prop in self.all_properties(include_inherited=False):
+            prop._uses_envs = bool(prop._uses_envs)
+
     def warn_unused_private_properties(self):
         """
         Check that all private properties are actually used: if one is not,
@@ -1185,6 +1210,8 @@ class CompileCtx(object):
                          PropertyDef.check_return_types),
             GlobalPass('compute uses entity info attribute',
                        CompileCtx.compute_uses_entity_info_attr),
+            GlobalPass('compute uses envs attribute',
+                       CompileCtx.compute_uses_envs_attr),
             GlobalPass('check memoized properties',
                        CompileCtx.check_memoized),
             EnvSpecPass('check env specs',
