@@ -2692,13 +2692,13 @@ class PropertyDef(AbstractNodeData):
         if self.external:
             check_source_language(
                 uses_entity_info is not None,
-                "Need to specify uses_entity_info for external properties"
+                'uses_entity_info is required for external properties'
             )
             self._uses_entity_info = uses_entity_info
         else:
             check_source_language(
                 uses_entity_info in (None, False),
-                "Cannot specify uses_entity_info=True for internal properties"
+                'Cannot specify uses_entity_info=True for internal properties'
             )
             self._uses_entity_info = uses_entity_info
         self.optional_entity_info = optional_entity_info
