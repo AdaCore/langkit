@@ -2696,30 +2696,9 @@ class PropertyDef(AbstractNodeData):
         self.memoize_in_populate = memoize_in_populate
 
         self.external = external
-        if self.external:
-            check_source_language(
-                uses_entity_info is not None,
-                'uses_entity_info is required for external properties'
-            )
-            self._uses_entity_info = uses_entity_info
 
-            check_source_language(
-                uses_envs is not None,
-                'uses_envs is required for external properties'
-            )
-            self._uses_envs = uses_envs
-        else:
-            check_source_language(
-                uses_entity_info in (None, False),
-                'Cannot specify uses_entity_info=True for internal properties'
-            )
-            self._uses_entity_info = uses_entity_info
-
-            check_source_language(
-                uses_envs is None,
-                'Cannot explicitely pass uses_envs for internal properties'
-            )
-            self._uses_envs = uses_envs
+        self._uses_entity_info = uses_entity_info
+        self._uses_envs = uses_envs
 
         self.optional_entity_info = optional_entity_info
 
@@ -3178,6 +3157,26 @@ class PropertyDef(AbstractNodeData):
             check_source_language(
                 not self.abstract,
                 'An external property cannot be abstract'
+            )
+
+            check_source_language(
+                self._uses_entity_info is not None,
+                'uses_entity_info is required for external properties'
+            )
+            check_source_language(
+                self._uses_envs is not None,
+                'uses_envs is required for external properties'
+            )
+        else:
+            check_source_language(
+                self._uses_entity_info in (None, False),
+                'Cannot specify uses_entity_info=True for internal'
+                ' properties'
+            )
+            check_source_language(
+                self._uses_envs is None,
+                'Cannot explicitely pass uses_envs for internal'
+                ' properties'
             )
 
         # See abstract_runtime_check documentation in __init__
