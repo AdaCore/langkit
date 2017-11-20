@@ -981,6 +981,10 @@ package body ${ada_lib_name}.Analysis is
       end if;
       Unit.Is_Env_Populated := True;
 
+      if Unit.AST_Root = null then
+         return;
+      end if;
+
       Unit.Context.In_Populate_Lexical_Env := True;
       begin
          Populate_Lexical_Env (Unit.AST_Root, Unit.Context.Root_Scope);
