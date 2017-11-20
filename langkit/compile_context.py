@@ -100,13 +100,13 @@ def write_ada_file(out_dir, source_kind, qual_name, content):
         write the file.
     :param str source_kind: One of the constants ADA_SPEC or ADA_BODY,
         determining whether the source is a spec or a body.
-    :param list[str] qual_name: The qualified name of the Ada spec/body,
-        as a list of string components.
+    :param list[names.Name] qual_name: The qualified name of the Ada spec/body,
+        as a list of Name components.
     :param str content: The source content to write to the file.
     """
     assert source_kind in (ADA_SPEC, ADA_BODY)
-    file_name = "{}.{}".format("-".join(qual_name).lower(),
-                               "ads" if source_kind == ADA_SPEC else "adb")
+    file_name = '{}.{}'.format('-'.join(n.lower for n in qual_name),
+                               'ads' if source_kind == ADA_SPEC else 'adb')
     file_path = os.path.join(out_dir, file_name)
 
     # TODO: no tool is able to pretty-print a single Ada source file
@@ -1082,10 +1082,10 @@ class CompileCtx(object):
             basically everything that comes before the _body_ada/_spec_ada
             component, including the directory.
 
-        :param list[str] qual_name: Qualified name for the Ada module,
-            as a list of strings. The base library name is automatically
-            prepended to that list, so every generated module will be a
-            child module of the base library module.
+        :param list[names.Name] qual_name: Qualified name for the Ada module,
+            as a list of "simple" package names. The base library name is
+            automatically prepended to that list, so every generated module
+            will be a child module of the base library module.
 
         :param bool has_body: If true, generate a body for this unit.
         """
@@ -1094,7 +1094,7 @@ class CompileCtx(object):
                 write_ada_file(
                     out_dir=out_dir,
                     source_kind=kind,
-                    qual_name=[self.ada_api_settings.lib_name] + qual_name,
+                    qual_name=[self.lib_name] + qual_name,
                     content=self.render_template(
                         "{}{}_ada".format(
                             template_base_name +
@@ -1314,30 +1314,32 @@ class CompileCtx(object):
 
         ada_modules = [
             # Top (pure) package
-            ("pkg_main",            [], False),
+            ('pkg_main',            '', False),
             # Unit for initialization primitives
-            ("pkg_init",            ["init"], True),
+            ('pkg_init',            'Init', True),
             # Unit for public analysis primitives
-            ("pkg_analysis",        ["analysis"], True),
+            ('pkg_analysis',        'Analysis', True),
             # Unit for implementation of analysis primitives
-            ("pkg_implementation",  ["analysis", "implementation"], True),
+            ('pkg_implementation',  'Analysis.Implementation', True),
             # Unit for AST node iteration primitives
-            ("pkg_iterators",       ["iterators"], True),
+            ('pkg_iterators',       'Iterators', True),
             # Unit for all parsers
-            ("parsers/pkg_main",    ["analysis", "parsers"], True),
+            ('parsers/pkg_main',    'Analysis.Parsers', True),
             # Unit for the lexer
-            ("lexer/pkg_main",      ["lexer"], True),
+            ('lexer/pkg_main',      'Lexer', True),
             # Unit for debug helpers
-            ("pkg_debug",           ["debug"], True),
+            ('pkg_debug',           'Debug', True),
         ]
 
         for template_base_name, qual_name, has_body in ada_modules:
+            qual_name = ([names.Name(n) for n in qual_name.split('.')]
+                         if qual_name else [])
             self.write_ada_module(src_path, template_base_name, qual_name,
                                   has_body)
 
         with names.camel_with_underscores:
             write_ada_file(
-                path.join(file_root, "src"), ADA_BODY, ["parse"],
+                path.join(file_root, "src"), ADA_BODY, [names.Name('Parse')],
                 self.render_template("main_parse_ada")
             )
 
@@ -1444,8 +1446,10 @@ class CompileCtx(object):
                 render("c_api/header_c")
             )
 
-        self.write_ada_module(src_path, "c_api/pkg_main",
-                              ["Analysis", "Implementation", "C"])
+        self.write_ada_module(
+            src_path, "c_api/pkg_main",
+            [names.Name(n) for n in 'Analysis.Implementation.C'.split('.')]
+        )
 
     def emit_python_api(self, python_path):
         """
