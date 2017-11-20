@@ -21,6 +21,8 @@ with Interfaces.C.Strings; use Interfaces.C.Strings;
 with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
 
+${exts.with_clauses(with_clauses)}
+
 --  This package defines data types and subprograms to provide the
 --  implementation of the exported C API for analysis primitives.
 --

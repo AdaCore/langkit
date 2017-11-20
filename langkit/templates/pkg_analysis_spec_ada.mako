@@ -3,6 +3,7 @@
 <%namespace name="array_types"       file="array_types_ada.mako" />
 <%namespace name="astnode_types"     file="astnode_types_ada.mako" />
 <%namespace name="enum_types"        file="enum_types_ada.mako" />
+<%namespace name="exts"              file="extensions.mako" />
 <%namespace name="list_types"        file="list_types_ada.mako" />
 <%namespace name="pretty_printers"   file="pretty_printers_ada.mako" />
 <%namespace name="public_properties" file="public_properties_ada.mako" />
@@ -26,6 +27,8 @@ limited private with ${ada_lib_name}.Analysis.Implementation;
 
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
+
+${exts.with_clauses(with_clauses)}
 
 --  This package provides types and primitives to analyze source files as
 --  analysis units.

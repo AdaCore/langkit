@@ -27,9 +27,7 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
 
-${exts.include_extension(
-   ctx.ext('analysis', 'c_api', 'body_deps')
-)}
+${exts.with_clauses(with_clauses)}
 
 package body ${ada_lib_name}.Analysis.Implementation.C is
 

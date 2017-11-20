@@ -3,6 +3,7 @@
 <%namespace name="array_types"       file="array_types_ada.mako" />
 <%namespace name="astnode_types"     file="astnode_types_ada.mako" />
 <%namespace name="enum_types"        file="enum_types_ada.mako" />
+<%namespace name="exts"              file="extensions.mako" />
 <%namespace name="list_types"        file="list_types_ada.mako" />
 <%namespace name="struct_types"      file="struct_types_ada.mako" />
 <%namespace name="pretty_printers"   file="pretty_printers_ada.mako" />
@@ -44,6 +45,8 @@ with Langkit_Support.Vectors;
 with ${ada_lib_name}.Analysis.Parsers;  use ${ada_lib_name}.Analysis.Parsers;
 with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
+
+${exts.with_clauses(with_clauses)}
 
 package ${ada_lib_name}.Analysis.Implementation is
 

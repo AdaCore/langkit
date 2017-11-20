@@ -593,6 +593,29 @@ class CompileCtx(object):
         Set of warnings to emit.
         """
 
+        self.with_clauses = defaultdict(list)
+        """
+        Mapping that binds a list of additional WITH/USE clauses to generate
+        for each source file in the generated library. Used to add WITH/USE
+        clauses required by extensions. See the `add_with_clause` method.
+
+        :type: dict[(str, str), list[(str, bool)]
+        """
+
+    def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False):
+        """
+        Add a WITH clause for `to_pkg` in the `source_kind` part of the
+        `from_pkg` generated package.
+
+        :param str from_pkg: Package to which the WITH clause must be added.
+        :param str source_kind: Kind of source file in which the WITH clause
+            must be added. Must be eiher ADA_SPEC or ADA_BODY.
+        :param str to_pkg: Name of the Ada package to WITH.
+        :param bool use_clause: Whethet to generate the corresponding USE
+            clause.
+        """
+        self.with_clauses[(from_pkg, source_kind)].append((to_pkg, use_clause))
+
     @property
     def sorted_logic_binders(self):
         return sorted(self.logic_binders, key=lambda x: (
@@ -1090,6 +1113,9 @@ class CompileCtx(object):
         :param bool has_body: If true, generate a body for this unit.
         """
         for kind in [ADA_SPEC] + ([ADA_BODY] if has_body else []):
+            qual_name_str = '.'.join(n.camel_with_underscores
+                                     for n in qual_name)
+            with_clauses = self.with_clauses[(qual_name_str, kind)]
             with names.camel_with_underscores:
                 write_ada_file(
                     out_dir=out_dir,
@@ -1103,6 +1129,7 @@ class CompileCtx(object):
                             ("" if template_base_name.endswith("/") else "_"),
                             kind
                         ),
+                        with_clauses=with_clauses,
                     )
                 )
 

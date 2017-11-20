@@ -43,7 +43,7 @@ use ${ada_lib_name}.Analysis.Implementation;
 with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;
 with ${ada_lib_name}.Lexer;
 
-${(exts.with_clauses([
+${(exts.with_clauses(with_clauses + [
    ((ctx.default_unit_provider.unit_fqn, False)
     if ctx.default_unit_provider else None),
    ((ctx.symbol_canonicalizer.unit_fqn, False)
