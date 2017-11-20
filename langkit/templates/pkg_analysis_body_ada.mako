@@ -3,6 +3,7 @@
 <%namespace name="array_types"       file="array_types_ada.mako" />
 <%namespace name="astnode_types"     file="astnode_types_ada.mako" />
 <%namespace name="enum_types"        file="enum_types_ada.mako" />
+<%namespace name="exts"              file="extensions.mako" />
 <%namespace name="list_types"        file="list_types_ada.mako" />
 <%namespace name="public_properties" file="public_properties_ada.mako" />
 
@@ -178,9 +179,9 @@ package body ${ada_lib_name}.Analysis is
       Actual_Charset : constant String :=
         (if Charset = "" then Default_Charset else Charset);
       Symbols        : constant Symbol_Table := Create;
-      Ret            : Analysis_Context;
+      Context        : Analysis_Context;
    begin
-      Ret := new Analysis_Context_Type'
+      Context := new Analysis_Context_Type'
         (Ref_Count  => 1,
          Units_Map  => <>,
          Symbols    => Symbols,
@@ -206,8 +207,9 @@ package body ${ada_lib_name}.Analysis is
          In_Populate_Lexical_Env => False,
          Cache_Version => <>);
 
-      Initialize (Ret.Private_Part.Parser);
-      return Ret;
+      Initialize (Context.Private_Part.Parser);
+      ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}
+      return Context;
    end Create;
 
    % if ctx.symbol_literals:
