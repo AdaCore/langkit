@@ -43,12 +43,12 @@ use ${ada_lib_name}.Analysis.Implementation;
 with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;
 with ${ada_lib_name}.Lexer;
 
-%if ctx.default_unit_provider:
-with ${ctx.default_unit_provider.unit_fqn};
-%endif
-%if ctx.symbol_canonicalizer:
-with ${ctx.symbol_canonicalizer.unit_fqn};
-%endif
+${(exts.with_clauses([
+   ((ctx.default_unit_provider.unit_fqn, False)
+    if ctx.default_unit_provider else None),
+   ((ctx.symbol_canonicalizer.unit_fqn, False)
+    if ctx.symbol_canonicalizer else None),
+]))}
 
 package body ${ada_lib_name}.Analysis is
 

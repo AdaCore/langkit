@@ -36,9 +36,10 @@ pragma Warnings (On, "referenced");
 
 with ${ada_lib_name}.Lexer;
 
-%if ctx.env_hook_subprogram:
-with ${ctx.env_hook_subprogram.unit_fqn};
-%endif
+${(exts.with_clauses([
+   ((ctx.env_hook_subprogram.unit_fqn, False)
+    if ctx.env_hook_subprogram else None)
+]))}
 
 package body ${ada_lib_name}.Analysis.Implementation is
 
