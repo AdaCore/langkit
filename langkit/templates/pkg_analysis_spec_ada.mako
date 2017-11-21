@@ -1,12 +1,12 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"       file="array_types_ada.mako" />
-<%namespace name="astnode_types"     file="astnode_types_ada.mako" />
-<%namespace name="enum_types"        file="enum_types_ada.mako" />
-<%namespace name="exts"              file="extensions.mako" />
-<%namespace name="list_types"        file="list_types_ada.mako" />
-<%namespace name="pretty_printers"   file="pretty_printers_ada.mako" />
-<%namespace name="public_properties" file="public_properties_ada.mako" />
+<%namespace name="array_types"     file="array_types_ada.mako" />
+<%namespace name="astnode_types"   file="astnode_types_ada.mako" />
+<%namespace name="entities"        file="entities_ada.mako" />
+<%namespace name="enum_types"      file="enum_types_ada.mako" />
+<%namespace name="exts"            file="extensions.mako" />
+<%namespace name="list_types"      file="list_types_ada.mako" />
+<%namespace name="pretty_printers" file="pretty_printers_ada.mako" />
 
 <%
    no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts)
@@ -89,28 +89,9 @@ package ${ada_lib_name}.Analysis is
       No_${e.api_name} : constant ${e.api_name};
    % endfor
 
-   function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean;
-   --  Return whether Node references to AST node
-
-   function "=" (L, R : ${root_entity.api_name}'Class) return Boolean;
-   --  Return whether L and R designate the same entity
-
-   function Short_Image
-     (Node : ${root_entity.api_name}'Class) return Text_Type;
-   function Short_Image (Node : ${root_entity.api_name}'Class) return String;
-   --  Return a short string describing Node, or "None" if Node.Is_Null is
-   --  true.
-
-   function Image (Node : ${root_entity.api_name}'Class) return Text_Type;
-   function Image (Node : ${root_entity.api_name}'Class) return String;
-   --  Like Short_Image, also including its rebinding metadata
-
-   pragma Warnings (Off, "defined after private extension");
-   % for e in ctx.entity_types:
-      function As_${e.el_type.kwless_raw_name}
-        (Node : ${root_entity.api_name}'Class) return ${e.api_name};
-   % endfor
-   pragma Warnings (On, "defined after private extension");
+   % if not ctx.separate_properties:
+      ${entities.decls1()}
+   % endif
 
    --------------------
    -- Unit providers --
@@ -387,28 +368,9 @@ package ${ada_lib_name}.Analysis is
    --  Source location range for this token. Note that the end bound is
    --  exclusive.
 
-   type Child_Or_Trivia is (Child, Trivia);
-   --  Discriminator for the Child_Record type
-
-   type Child_Record (Kind : Child_Or_Trivia := Child) is record
-      case Kind is
-         when Child =>
-            Node : ${root_entity.api_name};
-         when Trivia =>
-            Trivia : Token_Type;
-      end case;
-   end record;
-   --  Variant that holds either an AST node or a token
-
-   type Children_Array is array (Positive range <>) of Child_Record;
-
-   function Children_With_Trivia
-     (Node : ${root_entity.api_name}'Class) return Children_Array;
-   --  Return the children of this node interleaved with Trivia token nodes, so
-   --  that:
-   --  - Every trivia contained between Node.Start_Token and Node.End_Token - 1
-   --    will be part of the returned array;
-   --  - Nodes and trivias will be lexically ordered.
+   % if not ctx.separate_properties:
+      ${entities.decls2()}
+   % endif
 
    --------------------
    -- Token Iterator --
@@ -448,199 +410,9 @@ package ${ada_lib_name}.Analysis is
       % endif
    % endfor
 
-   -------------------------
-   -- AST Node primitives --
-   -------------------------
-
-   function Kind
-     (Node : ${root_entity.api_name}'Class) return ${root_node_kind_name};
-   function Kind_Name (Node : ${root_entity.api_name}'Class) return String;
-   --  Return the concrete kind for Node
-
-   function Is_Ghost (Node : ${root_entity.api_name}'Class) return Boolean;
-   ${ada_doc('langkit.node_is_ghost', 3)}
-
-   function Get_Unit
-     (Node : ${root_entity.api_name}'Class) return Analysis_Unit;
-   ${ada_doc('langkit.node_unit', 3)}
-
-   pragma Warnings (Off, "defined after private extension");
-   % for e in ctx.entity_types:
-
-      % for f in e.el_type.get_parse_fields( \
-         include_inherited=False, \
-         predicate=lambda f: f.is_public, \
-      ):
-         ${astnode_types.field_decl(f)}
-      % endfor
-
-      % for p in e.el_type.get_properties( \
-         include_inherited=False, \
-         predicate=lambda p: p.is_public and not p.overriding \
-      ):
-         ${public_properties.decl(p)}
-      % endfor
-
-   % endfor
-   pragma Warnings (On, "defined after private extension");
-
-   -------------------------------
-   -- Tree traversal operations --
-   -------------------------------
-
-   function Child_Count
-     (Node : ${root_entity.api_name}'Class) return Natural
-   with Inline;
-   --  Return the number of children Node has
-
-   function First_Child_Index
-     (Node : ${root_entity.api_name}'Class) return Natural;
-   --  Return the index of the first child Node has
-
-   function Last_Child_Index
-     (Node : ${root_entity.api_name}'Class) return Natural;
-   --  Return the index of the last child Node has, or 0 if there is no child
-
-   pragma Warnings (Off, "defined after private extension");
-   procedure Get_Child
-     (Node            : ${root_entity.api_name}'Class;
-      Index           : Positive;
-      Index_In_Bounds : out Boolean;
-      Result          : out ${root_entity.api_name});
-   --  Get the Index'th child of Node, storing it into Result. Child indexing
-   --  is 1-based. Store in Index_In_Bounds whether Node had such a child; if
-   --  not, the content of Result is undefined.
-
-   function Child
-     (Node  : ${root_entity.api_name}'Class;
-      Index : Positive)
-      return ${root_entity.api_name};
-   --  Return the Index'th child of Node, or null if Node has no such child
-   pragma Warnings (On, "defined after private extension");
-
-   type Visit_Status is (Into, Over, Stop);
-   --  Helper type to control the AST node traversal process. See Traverse.
-
-   function Traverse
-     (Node  : ${root_entity.api_name}'Class;
-      Visit : access function (Node : ${root_entity.api_name}'Class)
-                               return Visit_Status)
-     return Visit_Status;
-   --  Given the parent node for a subtree, traverse all syntactic nodes of
-   --  this tree, calling the given function on each node in pre order (ie.
-   --  top-down). The order of traversing subtrees follows the order of
-   --  declaration of the corresponding attributes in the grammar. The
-   --  traversal is controlled as follows by the result returned by Visit:
-   --
-   --     Into   The traversal continues normally with the syntactic
-   --            children of the node just processed.
-   --
-   --     Over   The children of the node just processed are skipped and
-   --            excluded from the traversal, but otherwise processing
-   --            continues elsewhere in the tree.
-   --
-   --     Stop   The entire traversal is immediately abandoned, and the
-   --            original call to Traverse returns Stop.
-
-   procedure Traverse
-     (Node  : ${root_entity.api_name}'Class;
-      Visit : access function (Node : ${root_entity.api_name}'Class)
-                               return Visit_Status);
-   --  This is the same as Traverse function except that no result is returned
-   --  i.e. the Traverse function is called and the result is simply discarded.
-
-   generic
-      type Data_Type is private;
-      Reset_After_Traversal : Boolean := False;
-   function Public_Traverse_With_Data
-     (Node  : ${root_entity.api_name}'Class;
-      Visit : access function (Node : ${root_entity.api_name}'Class;
-                               Data : in out Data_Type)
-                               return Visit_Status;
-      Data  : in out Data_Type)
-      return Visit_Status;
-   --  This is the same as the first Traverse function except it accepts an
-   --  argument that is passed to all Visit calls.
-   --
-   --  If Reset_After_Traversal is True, the Data formal is left unchanged when
-   --  Traverse_With_Data returns no matter what Visit does. Visit can change
-   --  it otherwise.
-
-   function Child_Index (Node : ${root_entity.api_name}'Class) return Natural;
-   --  Return the 0-based index for Node in its parent's children
-
-   ----------------------------------------
-   -- Source location-related operations --
-   ----------------------------------------
-
-   function Sloc_Range
-     (Node : ${root_entity.api_name}'Class;
-      Snap : Boolean := False) return Source_Location_Range;
-   --  Return the source location range corresponding to the set of tokens from
-   --  which Node was parsed.
-   --
-   --  TODO??? Document the Snap formal.
-
-   function Compare
-     (Node : ${root_entity.api_name}'Class;
-      Sloc : Source_Location;
-      Snap : Boolean := False) return Relative_Position;
-   --  Compare Sloc to the sloc range of Node.
-   --
-   --  TODO??? Document the Snap formal.
-
-   pragma Warnings (Off, "defined after private extension");
-   function Lookup
-     (Node : ${root_entity.api_name}'Class;
-      Sloc : Source_Location;
-      Snap : Boolean := False) return ${root_entity.api_name};
-   --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
-   --  it, or null if no such node was found.
-   --
-   --  TODO??? Document the Snap formal.
-   pragma Warnings (On, "defined after private extension");
-
-   -----------------------
-   -- Lexical utilities --
-   -----------------------
-
-   function Text (Node : ${root_entity.api_name}'Class) return Text_Type;
-   --  Shortcut to get the source buffer slice corresponding to the text that
-   --  spans between the first and last tokens of an AST node.
-
-   --  TODO??? Bind Children_With_Trivia (changing the Node type in
-   --  Child_Record).
-
-   function Token_Range
-     (Node : ${root_entity.api_name}'Class) return Token_Iterator;
-   --  Return an iterator on the range of tokens encompassed by Node
-
-   --------------------
-   -- Pretty-printer --
-   --------------------
-
-   function PP (Node : ${root_entity.api_name}'Class) return String;
-
-   -------------------
-   -- Debug helpers --
-   -------------------
-
-   procedure Print
-     (Node        : ${root_entity.api_name}'Class;
-      Line_Prefix : String := "");
-   --  Debug helper: print to standard output Node and all its children.
-   --  Line_Prefix is prepended to each output line.
-
-   procedure PP_Trivia
-     (Node        : ${root_entity.api_name}'Class;
-      Line_Prefix : String := "");
-   --  Debug helper: print to standard output Node and all its children along
-   --  with the trivia associated to them. Line_Prefix is prepended to each
-   --  output line.
-
-   procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class);
-   --  Debug helper: Assign names to every logical variable in the root node,
-   --  so that we can trace logical variables.
+   % if not ctx.separate_properties:
+      ${entities.decls3()}
+   % endif
 
 private
 

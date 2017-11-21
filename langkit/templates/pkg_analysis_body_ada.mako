@@ -1,17 +1,18 @@
 ## vim: filetype=makoada
 
-<%namespace name="array_types"       file="array_types_ada.mako" />
-<%namespace name="astnode_types"     file="astnode_types_ada.mako" />
-<%namespace name="enum_types"        file="enum_types_ada.mako" />
-<%namespace name="exts"              file="extensions.mako" />
-<%namespace name="list_types"        file="list_types_ada.mako" />
-<%namespace name="public_properties" file="public_properties_ada.mako" />
+<%namespace name="array_types" file="array_types_ada.mako" />
+<%namespace name="entities"    file="entities_ada.mako" />
+<%namespace name="enum_types"  file="enum_types_ada.mako" />
+<%namespace name="exts"        file="extensions.mako" />
+<%namespace name="list_types"  file="list_types_ada.mako" />
 
 <% root_node_array = T.root_node.array %>
 
 with Ada.Containers;             use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
+% if not ctx.separate_properties:
 with Ada.Containers.Vectors;
+% endif
 with Ada.Exceptions;
 with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
 with Ada.Text_IO;                use Ada.Text_IO;
@@ -20,7 +21,10 @@ with Ada.Unchecked_Deallocation;
 
 with GNATCOLL.Traces;
 
-with Langkit_Support.Array_Utils;
+% if not ctx.separate_properties:
+   with Langkit_Support.Array_Utils;
+% endif
+
 with Langkit_Support.Images; use Langkit_Support.Images;
 with Langkit_Support.Slocs;  use Langkit_Support.Slocs;
 with Langkit_Support.Text;   use Langkit_Support.Text;
@@ -43,6 +47,11 @@ use ${ada_lib_name}.Analysis.Implementation;
 with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;
 with ${ada_lib_name}.Lexer;
 
+% if ctx.separate_properties:
+   with ${ada_lib_name}.Analysis.Properties;
+   use ${ada_lib_name}.Analysis.Properties;
+% endif
+
 ${(exts.with_clauses(with_clauses + [
    ((ctx.default_unit_provider.unit_fqn, False)
     if ctx.default_unit_provider else None),
@@ -53,16 +62,6 @@ ${(exts.with_clauses(with_clauses + [
 package body ${ada_lib_name}.Analysis is
 
    use AST_Envs;
-
-   function Convert is new Ada.Unchecked_Conversion
-     (Public_Entity_Info, Entity_Info);
-   function Convert is new Ada.Unchecked_Conversion
-     (Entity_Info, Public_Entity_Info);
-
-   package Node_Arrays is new Langkit_Support.Array_Utils
-     (${root_entity.api_name},
-      Positive,
-      ${root_entity.array.api_name});
 
    procedure Remove_Exiled_Entries (Self : Lex_Env_Data);
    --  Remove lex env entries that references some of the unit's nodes, in
@@ -1399,7 +1398,7 @@ package body ${ada_lib_name}.Analysis is
    -----------------
 
    function First_Token (Self : Token_Iterator) return Token_Type
-   is (Self.Node.Token_Start);
+   is (Token_Start (Self.Node));
 
    ----------------
    -- Next_Token --
@@ -1535,75 +1534,6 @@ package body ${ada_lib_name}.Analysis is
               " Text=" & Image (Text (Token), With_Quotes => True) & ">");
    end Image;
 
-   --------------------------
-   -- Children_With_Trivia --
-   --------------------------
-
-   function Children_With_Trivia
-     (Node : ${root_entity.api_name}'Class) return Children_Array
-   is
-      package Children_Vectors is new Ada.Containers.Vectors
-        (Positive, Child_Record);
-      use Children_Vectors;
-
-      Ret_Vec : Vector;
-      TDH     : Token_Data_Handler renames Node.Node.Unit.TDH;
-
-      procedure Append_Trivias (First, Last : Token_Index);
-      --  Append all the trivias of tokens between indices First and Last to
-      --  the returned vector.
-
-      procedure Append_Trivias (First, Last : Token_Index) is
-      begin
-         for I in First .. Last loop
-            for D of Get_Trivias (TDH, I) loop
-               Ret_Vec.Append ((Kind   => Trivia,
-                                Trivia => (TDH    => TDH'Access,
-                                           Token  => I,
-                                           Trivia => D)));
-            end loop;
-         end loop;
-      end Append_Trivias;
-
-      function Filter_Children
-        (N : ${root_entity.api_name}) return Boolean
-      is
-         --  Get rid of null nodes
-        (not N.Is_Null
-         --  Get rid of nodes with no real existence in the source code
-         and then not N.Is_Ghost);
-
-      First_Child : constant Positive := 1;
-      N_Children  : constant ${root_entity.array.api_name} :=
-         Node_Arrays.Filter
-           (Node.Children, Filter_Children'Access);
-   begin
-      if N_Children'Length > 0
-        and then (Node.Node.Token_Start_Index
-                    /= N_Children (First_Child).Node.Token_Start_Index)
-      then
-         Append_Trivias (Node.Node.Token_Start_Index,
-                         N_Children (First_Child).Node.Token_Start_Index - 1);
-      end if;
-
-      for I in N_Children'Range loop
-         Ret_Vec.Append (Child_Record'(Child, N_Children (I)));
-         Append_Trivias (N_Children (I).Node.Token_End_Index,
-                         (if I = N_Children'Last
-                          then Node.Node.Token_End_Index - 1
-                          else N_Children (I + 1).Node.Token_Start_Index - 1));
-      end loop;
-
-      declare
-         A : Children_Array (1 .. Natural (Ret_Vec.Length));
-      begin
-         for I in A'Range loop
-            A (I) := Ret_Vec.Element (I);
-         end loop;
-         return A;
-      end;
-   end Children_With_Trivia;
-
    --  Those maps are used to give unique ids to lexical envs while pretty
    --  printing them.
 
@@ -1727,34 +1657,6 @@ package body ${ada_lib_name}.Analysis is
       Internal (${root_node_type_name} (Node));
    end Dump_Lexical_Env;
 
-   --------------------------------
-   -- Assign_Names_To_Logic_Vars --
-   --------------------------------
-
-   procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class)
-   is
-   begin
-      % for f in T.root_node.get_fields( \
-           include_inherited=False, \
-           predicate=lambda f: f.type.is_logic_var_type \
-      ):
-         Node.Node.${f.name}.Dbg_Name :=
-            new String'(Image (Node.Short_Image) & ".${f.name}");
-      % endfor
-
-      Assign_Names_To_Logic_Vars_Impl (Node.Node);
-
-      declare
-         Children : ${root_entity.array.api_name} := Node.Children;
-      begin
-         for Child of Children loop
-            if not Child.Is_Null then
-               Assign_Names_To_Logic_Vars (Child);
-            end if;
-         end loop;
-      end;
-   end Assign_Names_To_Logic_Vars;
-
    -----------
    -- Image --
    -----------
@@ -1762,365 +1664,8 @@ package body ${ada_lib_name}.Analysis is
    function Image (Value : Boolean) return String
    is (if Value then "True" else "False");
 
-   -------------
-   -- Is_Null --
-   -------------
-
-   function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean is
-     (Node.Node = null);
-
-   ---------
-   -- "=" --
-   ---------
-
-   function "=" (L, R : ${root_entity.api_name}'Class) return Boolean is
-   begin
-      return L.Node = R.Node and then L.E_Info = R.E_Info;
-   end "=";
-
-   -----------------
-   -- Short_Image --
-   -----------------
-
-   function Short_Image
-     (Node : ${root_entity.api_name}'Class) return Text_Type
-   is (if Node.Is_Null then "None" else Node.Node.Short_Image);
-
-   function Short_Image (Node : ${root_entity.api_name}'Class) return String is
-     (Image (Node.Short_Image));
-
-   -----------
-   -- Image --
-   -----------
-
-   function Image (Node : ${root_entity.api_name}'Class) return Text_Type is
-     (Image (${T.entity.name}'(Node.Node, Convert (Node.E_Info))));
-
-   -----------
-   -- Image --
-   -----------
-
-   function Image (Node : ${root_entity.api_name}'Class) return String is
-     (Image (Image (Node)));
-
-   -----------------------
-   -- Entity converters --
-   -----------------------
-
-   % for e in ctx.entity_types:
-      function As_${e.el_type.kwless_raw_name}
-        (Node : ${root_entity.api_name}'Class) return ${e.api_name} is
-      begin
-         if Node.Node = null then
-            return No_${e.api_name};
-         elsif Node.Node.all in ${e.el_type.value_type_name()}'Class then
-            return (Node => Node.Node, E_Info => Node.E_Info);
-         else
-            raise Constraint_Error with "Invalid type conversion";
-         end if;
-      end;
-   % endfor
-
-   -----------------------
-   -- Entity primitives --
-   -----------------------
-
-   ----------
-   -- Kind --
-   ----------
-
-   function Kind
-     (Node : ${root_entity.api_name}'Class) return ${root_node_kind_name} is
-   begin
-      return Node.Node.Kind;
-   end Kind;
-
-   ---------------
-   -- Kind_Name --
-   ---------------
-
-   function Kind_Name (Node : ${root_entity.api_name}'Class) return String is
-   begin
-      return Node.Node.Kind_Name;
-   end Kind_Name;
-
-   --------------
-   -- Is_Ghost --
-   --------------
-
-   function Is_Ghost (Node : ${root_entity.api_name}'Class) return Boolean is
-   begin
-      return Node.Node.Is_Ghost;
-   end Is_Ghost;
-
-   --------------
-   -- Get_Unit --
-   --------------
-
-   function Get_Unit
-     (Node : ${root_entity.api_name}'Class) return Analysis_Unit is
-   begin
-      return Node.Node.Get_Unit;
-   end Get_Unit;
-
-   % for e in ctx.entity_types:
-
-      % for f in e.el_type.get_parse_fields( \
-         include_inherited=False, \
-         predicate=lambda f: f.is_public \
-      ):
-         ${astnode_types.field_body(f)}
-      % endfor
-
-      % for p in e.el_type.get_properties( \
-         include_inherited=False, \
-         predicate=lambda p: p.is_public and not p.overriding \
-      ):
-         ${public_properties.body(p)}
-      % endfor
-
-   % endfor
-
-   -----------------
-   -- Child_Count --
-   -----------------
-
-   function Child_Count
-     (Node : ${root_entity.api_name}'Class) return Natural is begin
-      return Node.Node.Child_Count;
-   end Child_Count;
-
-   -----------------------
-   -- First_Child_Index --
-   -----------------------
-
-   function First_Child_Index
-     (Node : ${root_entity.api_name}'Class) return Natural is
-   begin
-      return Node.Node.First_Child_Index;
-   end First_Child_Index;
-
-   ----------------------
-   -- Last_Child_Index --
-   ----------------------
-
-   function Last_Child_Index
-     (Node : ${root_entity.api_name}'Class) return Natural is
-   begin
-      return Node.Node.Last_Child_Index;
-   end Last_Child_Index;
-
-   ---------------
-   -- Get_Child --
-   ---------------
-
-   procedure Get_Child
-     (Node            : ${root_entity.api_name}'Class;
-      Index           : Positive;
-      Index_In_Bounds : out Boolean;
-      Result          : out ${root_entity.api_name})
-   is
-      N : ${root_node_type_name};
-   begin
-      Node.Node.Get_Child (Index, Index_In_Bounds, N);
-      Result := (N, Node.E_Info);
-   end Get_Child;
-
-   -----------
-   -- Child --
-   -----------
-
-   function Child
-     (Node  : ${root_entity.api_name}'Class;
-      Index : Positive) return ${root_entity.api_name}
-   is
-   begin
-      return (Node.Node.Child (Index), Node.E_Info);
-   end Child;
-
-   ----------------
-   -- Sloc_Range --
-   ----------------
-
-   function Sloc_Range
-     (Node : ${root_entity.api_name}'Class;
-      Snap : Boolean := False) return Source_Location_Range is
-   begin
-      return Node.Node.Sloc_Range (Snap);
-   end Sloc_Range;
-
-   -------------
-   -- Compare --
-   -------------
-
-   function Compare
-     (Node : ${root_entity.api_name}'Class;
-      Sloc : Source_Location;
-      Snap : Boolean := False) return Relative_Position is
-   begin
-      return Node.Node.Compare (Sloc, Snap);
-   end Compare;
-
-   ------------
-   -- Lookup --
-   ------------
-
-   function Lookup
-     (Node : ${root_entity.api_name}'Class;
-      Sloc : Source_Location;
-      Snap : Boolean := False) return ${root_entity.api_name} is
-   begin
-      return (Node.Node.Lookup (Sloc, Snap), No_Public_Entity_Info);
-   end Lookup;
-
-   ----------
-   -- Text --
-   ----------
-
-   function Text (Node : ${root_entity.api_name}'Class) return Text_Type is
-   begin
-      return Text (Node.Token_Start, Node.Token_End);
-   end Text;
-
-   --  TODO??? Bind Children_With_Trivia (changing the Node type in
-   --  Child_Record).
-
-   -----------------
-   -- Token_Range --
-   -----------------
-
-   function Token_Range
-     (Node : ${root_entity.api_name}'Class)
-      return Token_Iterator is
-   begin
-      return Token_Iterator'(Node.As_${T.root_node.kwless_raw_name},
-                             Node.Node.Token_End_Index);
-   end Token_Range;
-
-   --------
-   -- PP --
-   --------
-
-   function PP (Node : ${root_entity.api_name}'Class) return String is
-   begin
-      return Node.Node.PP;
-   end PP;
-
-   -----------
-   -- Print --
-   -----------
-
-   procedure Print
-     (Node        : ${root_entity.api_name}'Class;
-      Line_Prefix : String := "") is
-   begin
-      Node.Node.Print (Line_Prefix);
-   end Print;
-
-   ---------------
-   -- PP_Trivia --
-   ---------------
-
-   procedure PP_Trivia
-     (Node        : ${root_entity.api_name}'Class;
-      Line_Prefix : String := "") is
-   begin
-      Node.Node.PP_Trivia (Line_Prefix);
-   end PP_Trivia;
-
-   --------------
-   -- Traverse --
-   --------------
-
-   function Traverse
-     (Node  : ${root_entity.api_name}'Class;
-      Visit : access function (Node : ${root_entity.api_name}'Class)
-              return Visit_Status)
-     return Visit_Status
-   is
-      E_Info : constant Public_Entity_Info := Node.E_Info;
-
-      -------------
-      -- Wrapper --
-      -------------
-
-      function Wrapper
-        (Node : access ${root_node_value_type}'Class) return Visit_Status
-      is
-         Public_Node : constant ${root_entity.api_name} :=
-           (${root_node_type_name} (Node), E_Info);
-      begin
-         return Visit (Public_Node);
-      end Wrapper;
-
-   begin
-      return Node.Node.Traverse (Wrapper'Access);
-   end Traverse;
-
-   --------------
-   -- Traverse --
-   --------------
-
-   procedure Traverse
-     (Node  : ${root_entity.api_name}'Class;
-      Visit : access function (Node : ${root_entity.api_name}'Class)
-                               return Visit_Status)
-   is
-      Result_Status : Visit_Status;
-      pragma Unreferenced (Result_Status);
-   begin
-      Result_Status := Traverse (Node, Visit);
-   end Traverse;
-
-   -------------------------------
-   -- Public_Traverse_With_Data --
-   -------------------------------
-
-   function Public_Traverse_With_Data
-     (Node  : ${root_entity.api_name}'Class;
-      Visit : access function (Node : ${root_entity.api_name}'Class;
-                               Data : in out Data_Type)
-                               return Visit_Status;
-      Data  : in out Data_Type)
-      return Visit_Status
-   is
-      E_Info : constant Public_Entity_Info := Node.E_Info;
-
-      ------------
-      -- Helper --
-      ------------
-
-      function Helper
-        (Node : access ${root_node_value_type}'Class) return Visit_Status
-      is
-         Public_Node : constant ${root_entity.api_name} :=
-           (${root_node_type_name} (Node), E_Info);
-      begin
-         return Visit (Public_Node, Data);
-      end Helper;
-
-      Saved_Data : Data_Type;
-      Result     : Visit_Status;
-
-   begin
-      if Reset_After_Traversal then
-         Saved_Data := Data;
-      end if;
-      Result := Node.Node.Traverse (Helper'Access);
-      if Reset_After_Traversal then
-         Data := Saved_Data;
-      end if;
-      return Result;
-   end Public_Traverse_With_Data;
-
-   -----------------
-   -- Child_Index --
-   -----------------
-
-   function Child_Index (Node : ${root_entity.api_name}'Class) return Natural
-   is
-   begin
-      return Node.Node.Child_Index;
-   end Child_Index;
+   % if not ctx.separate_properties:
+      ${entities.bodies()}
+   % endif
 
 end ${ada_lib_name}.Analysis;

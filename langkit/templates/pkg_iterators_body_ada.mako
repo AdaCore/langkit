@@ -1,5 +1,10 @@
 ## vim: filetype=makoada
 
+% if ctx.separate_properties:
+   with ${ada_lib_name}.Analysis.Properties;
+   use ${ada_lib_name}.Analysis.Properties;
+% endif
+
 package body ${ada_lib_name}.Iterators is
 
    --------------
@@ -9,7 +14,7 @@ package body ${ada_lib_name}.Iterators is
    function Traverse
      (Root : ${root_entity.api_name}'Class) return Traverse_Iterator is
    begin
-      return Create (Root.As_${root_entity.el_type.kwless_raw_name});
+      return Create (As_${root_entity.el_type.kwless_raw_name} (Root));
    end Traverse;
 
    ----------
@@ -119,7 +124,7 @@ package body ${ada_lib_name}.Iterators is
      (P : access ${root_entity.api_name}_Kind_Filter;
       N : ${root_entity.api_name}) return Boolean is
    begin
-      return N.Kind = P.Kind;
+      return Kind (N) = P.Kind;
    end Evaluate;
 
    ----------------
@@ -128,7 +133,7 @@ package body ${ada_lib_name}.Iterators is
 
    function Get_Parent
      (N : ${root_entity.api_name}) return ${root_entity.api_name}
-   is (N.Parent);
+   is (Parent (N));
 
    ------------------------------------
    -- First_Child_Index_For_Traverse --
@@ -136,7 +141,7 @@ package body ${ada_lib_name}.Iterators is
 
    function First_Child_Index_For_Traverse
      (N : ${root_entity.api_name}) return Natural
-   is (N.First_Child_Index);
+   is (First_Child_Index (N));
 
    -----------------------------------
    -- Last_Child_Index_For_Traverse --
@@ -144,7 +149,7 @@ package body ${ada_lib_name}.Iterators is
 
    function Last_Child_Index_For_Traverse
      (N : ${root_entity.api_name}) return Natural
-   is (N.Last_Child_Index);
+   is (Last_Child_Index (N));
 
    ---------------
    -- Get_Child --
@@ -152,7 +157,7 @@ package body ${ada_lib_name}.Iterators is
 
    function Get_Child
      (N : ${root_entity.api_name}; I : Natural) return ${root_entity.api_name}
-   is (N.Child (I));
+   is (Child (N, I));
 
    --------------
    -- Finalize --

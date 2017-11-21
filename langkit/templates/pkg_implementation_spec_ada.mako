@@ -46,6 +46,11 @@ with ${ada_lib_name}.Analysis.Parsers;  use ${ada_lib_name}.Analysis.Parsers;
 with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
+% if ctx.separate_properties:
+   with ${ada_lib_name}.Analysis.Properties;
+   use ${ada_lib_name}.Analysis.Properties;
+% endif
+
 ${exts.with_clauses(with_clauses)}
 
 package ${ada_lib_name}.Analysis.Implementation is
@@ -578,7 +583,6 @@ package ${ada_lib_name}.Analysis.Implementation is
    package Alloc_AST_List_Array is new Langkit_Support.Bump_Ptr.Array_Alloc
      (Element_T  => ${root_node_type_name},
       Index_Type => Positive);
-   use type Alloc_AST_List_Array.Element_Array_Access;
 
    type ${generic_list_value_type} is
       abstract new ${root_node_value_type}

@@ -567,12 +567,12 @@ package body ${ada_lib_name}.Analysis.Implementation is
         (Node, No_Public_Entity_Info);
    begin
       Put_Line (Line_Prefix & Kind_Name (Node));
-      for C of N.Children_With_Trivia loop
+      for C of Children_With_Trivia (N) loop
          case C.Kind is
             when Trivia =>
                Put_Line (Children_Prefix & Text (C.Trivia));
             when Child =>
-               C.Node.PP_Trivia (Children_Prefix);
+               PP_Trivia (C.Node, Children_Prefix);
          end case;
       end loop;
    end PP_Trivia;

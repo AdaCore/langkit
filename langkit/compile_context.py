@@ -1362,6 +1362,11 @@ class CompileCtx(object):
             ('lexer/pkg_main',      'Lexer', True),
             # Unit for debug helpers
             ('pkg_debug',           'Debug', True),
+
+            # Temporary unit for separate properties. Generate this package in
+            # all cases so that we don't have to do special cases in user
+            # sources that must work with both flavors of generated libraries.
+            ('pkg_properties', 'Analysis.Properties', True),
         ]
 
         for template_base_name, qual_name, has_body in ada_modules:
