@@ -88,12 +88,12 @@ package body Langkit_Support.Adalog.Operations is
                   --  null statement, so resolution would skip to the next one
                   --  here, and if the next one was SAT then return SAT, but
                   --  without setting the current relation to the next one, so
-                  --  when executing resolution again, the Any would return
+                  --  when executing resolution again, then Any would return
                   --  No_Progress again, rather than calling the previously SAT
                   --  relation which would have been the proper behavior.
                   --
                   --  I didn't figure out how to do that, rather implementing
-                  --  another behavior: On no progress, we reset self and
+                  --  another behavior: on no progress, we reset self and
                   --  return no progress. This is correct but probably not the
                   --  most efficient behavior.
 
