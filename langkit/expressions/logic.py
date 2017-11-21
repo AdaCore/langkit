@@ -36,8 +36,8 @@ def untyped_literal_expr(expr_str, operands=[]):
 @dsl_document
 class Bind(AbstractExpression):
     """
-    Bind the two logic variables `from_expr` and `to_expr`, through a property
-    call.
+    Bind the two logic variables `from_expr` and `to_expr`, or one logic
+    variable `from_expr` and an entity `to_expr`, through a property call.
 
     If provided, `conv_prop` must be a property that takes no argument and that
     return any ``ASTNode`` subclass. It is used to convert `from_expr` into a
@@ -236,38 +236,36 @@ class Bind(AbstractExpression):
         else:
             pred_func = untyped_literal_expr('No_Logic_Converter_Default')
 
-        def construct_operand(op):
-            from langkit.expressions import Cast, make_as_entity
-            expr = construct(op)
+        # Left operand must be a logic variable. Make sure the resulting
+        # equation will work on a clean logic variable.
+        lhs = ResetLogicVar(construct(self.from_expr, T.LogicVarType))
 
-            if expr.type.matches(T.root_node):
-                expr = make_as_entity(expr)
-                expr.create_result_var('Ent')
+        # Second one can be either a logic variable or an entity (or an AST
+        # node that is promoted to an entity).
+        rhs = construct(self.to_expr)
 
+        if rhs.type.matches(T.LogicVarType):
+            # For this operand too, make sure it will work on a clean logic
+            # variable.
+            rhs = ResetLogicVar(rhs)
+        elif rhs.type.matches(T.root_node):
+            from langkit.expressions import make_as_entity
+            rhs = make_as_entity(rhs)
+        else:
             check_source_language(
-                expr.type == T.LogicVarType
-                or expr.type.matches(T.root_node.entity),
-
-                'Operands to a logic bind operator should be either'
-                ' a logic variable or an entity, got {}'.format(expr.type)
+                rhs.type.matches(T.root_node.entity),
+                'Right operand must be either a logic variable or an entity,'
+                ' got {}'.format(rhs.type.dsl_name)
             )
 
-            # Because of Ada OOP typing rules, for code generation to work
-            # properly, make sure the type of `expr` is the root node entity.
-            if (
-                expr.type.matches(T.root_node.entity)
-                and expr.type is not T.root_node.entity
-            ):
-                expr = Cast.Expr(expr, T.root_node.entity)
-
-            # Make sure this equation will work on a clean logic variable
-            if expr.type.matches(T.LogicVarType):
-                expr = ResetLogicVar(expr)
-
-            return expr
-
-        lhs = construct_operand(self.from_expr)
-        rhs = construct_operand(self.to_expr)
+        # Because of Ada OOP typing rules, for code generation to work
+        # properly, make sure the type of `rhs` is the root node entity.
+        if (
+            rhs.type.matches(T.root_node.entity)
+            and rhs.type is not T.root_node.entity
+        ):
+            from langkit.expressions import Cast
+            rhs = Cast.Expr(rhs, T.root_node.entity)
 
         return Bind.Expr(self.conv_prop, self.eq_prop, cprop_uid, eprop_uid,
                          lhs, rhs, pred_func, abstract_expr=self)
