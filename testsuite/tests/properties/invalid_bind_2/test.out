@@ -1,0 +1,17 @@
+== Bind(logic_var, logic_var) ==
+Code generation was successful
+
+== Bind(logic_var, entity) ==
+Code generation was successful
+
+== Bind(entity, logic_var) ==
+File "test.py", line 27, in ExampleNode.resolve
+  line 42, in Bind expression
+    Error: Expected type LogicVar, got ExampleNode.entity
+
+== Bind(logic_var, bool) ==
+File "test.py", line 27, in ExampleNode.resolve
+  line 43, in Bind expression
+    Error: Right operand must be either a logic variable or an entity, got Boolean
+
+Done
