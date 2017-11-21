@@ -82,10 +82,10 @@ procedure Parse is
 
             Sloc        : constant Source_Location := (Line, Column);
             Lookup_Node : constant ${root_entity.api_name} :=
-               Node.Lookup ((Line, Column));
+               Lookup (Node, (Line, Column));
          begin
             Put_Line ("Lookup " & Image (Sloc) & ":");
-            Lookup_Node.Print;
+            Print (Lookup_Node);
          end;
       end loop;
    end Process_Lookups;
@@ -96,7 +96,7 @@ procedure Parse is
 
    procedure Process_Node (Res : ${root_entity.api_name}'Class) is
    begin
-      if Res.Is_Null then
+      if Is_Null (Res) then
          Put_Line ("<null node>");
          return;
       end if;
@@ -105,7 +105,7 @@ procedure Parse is
          if Do_Print_Trivia then
             PP_Trivia (Res);
          else
-            Res.Print;
+            Print (Res);
          end if;
       end if;
 
@@ -174,11 +174,11 @@ procedure Parse is
          end loop;
       end if;
 
-      if (not Silent) and then not AST.Is_Null then
+      if (not Silent) and then not Is_Null (AST) then
          if Do_Print_Trivia then
             PP_Trivia (Unit);
          else
-            AST.Print;
+            Print (AST);
          end if;
 
          Process_Lookups (AST);
@@ -205,15 +205,15 @@ procedure Parse is
             function Visit
               (Node : ${root_entity.api_name}'Class) return Visit_Status is
             begin
-               if Node.Is_Null then
+               if Is_Null (Node) then
                   Count := Count + 1;
                end if;
                return Into;
             end Visit;
 
          begin
-            if AST.Is_Null then
-               AST.Traverse (Visit'Access);
+            if Is_Null (AST) then
+               Traverse (AST, Visit'Access);
             end if;
             if not Silent then
                Put_Line
@@ -223,7 +223,7 @@ procedure Parse is
       end if;
 
       if Pretty_Print then
-         Put_Line (AST.PP);
+         Put_Line (PP (AST));
       end if;
 
       if Measure_Time then
