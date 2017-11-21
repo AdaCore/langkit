@@ -20,7 +20,7 @@ package body Langkit_Support.Adalog.Abstract_Relation is
       procedure Wait is
       begin
          if Debug_State = Step then
-            Put_Line ("Press enter to continue ..");
+            Put_Line ("Press enter to continue...");
             declare
                Dummy : String := Ada.Text_IO.Get_Line;
             begin
