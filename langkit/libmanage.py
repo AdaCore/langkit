@@ -9,6 +9,7 @@ import os
 from os import path
 import pdb
 import pipes
+import shlex
 import shutil
 import subprocess
 import sys
@@ -375,8 +376,8 @@ class ManageScript(object):
             help='Disable warnings to build the generated library'
         )
         subparser.add_argument(
-            '--cargs', nargs='*', default=[],
-            help='Options to pass as "-cargs" to GPRbuild'
+            '--gargs',
+            help='Options appened to GPRbuild invocations'
         )
         subparser.add_argument(
             '--disable-mains', type=self.parse_mains_list, default=[], nargs=1,
@@ -698,10 +699,11 @@ class ManageScript(object):
         elif args.verbosity == Verbosity('debug'):
             base_argv.append('-vl')
 
-        cargs = []
-        # Depending on where this is invoked, the "cargs" option may not be set
-        if hasattr(args, 'cargs'):
-            cargs.extend(args.cargs)
+        # Depending on where this is invoked, the "--gargs" option may not be
+        # set. Don't call shlex.split with an empty input, otherwise it will
+        # try to read something from stdin...
+        gargs = getattr(args, 'gargs', '')
+        gargs = shlex.split(gargs) if gargs else []
 
         def run(library_type):
             argv = list(base_argv)
@@ -711,8 +713,7 @@ class ManageScript(object):
                 argv.extend('{}.adb'.format(main) for main in mains)
             if Diagnostics.style == DiagnosticStyle.gnu_full:
                 argv.append('-gnatef')
-            argv.append('-cargs')
-            argv.extend(cargs)
+            argv.extend(gargs)
             self.check_call(args, 'Build', argv)
 
         build_shared, build_static = self.what_to_build(args, is_library)
