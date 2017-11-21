@@ -346,6 +346,12 @@ class ManageScript(object):
             action='store_true',
             help='Instrument properties code to do logging'
         )
+        subparser.add_argument(
+            '--separate-properties', dest='separate_properties',
+            action='store_true',
+            help='Generate public properties in a separate package. This is a'
+                 ' development helper only, to make builds faster with GNAT.'
+        )
 
     def add_build_args(self, subparser):
         """
@@ -603,7 +609,8 @@ class ManageScript(object):
                           warnings=args.enabled_warnings,
                           no_property_checks=args.no_property_checks,
                           generate_pp=args.pp,
-                          properties_logging=args.enabled_properties_logging)
+                          properties_logging=args.enabled_properties_logging,
+                          separate_properties=args.separate_properties)
 
         if args.check_only:
             return

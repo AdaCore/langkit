@@ -1017,7 +1017,8 @@ class CompileCtx(object):
     def emit(self, file_root='.', generate_lexer=True, main_source_dirs=set(),
              main_programs=set(), annotate_fields_types=False,
              check_only=False, no_property_checks=False,
-             warnings=None, generate_pp=False, properties_logging=False):
+             warnings=None, generate_pp=False, properties_logging=False,
+             separate_properties=False):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -1056,6 +1057,10 @@ class CompileCtx(object):
 
         :param bool propeties_logging: Whether to instrument properties code to
             do logging.
+
+        :param bool separate_properties: Whether to generate public properties
+            in a separate package. This is a development helper only, to make
+            builds faster with GNAT.
         """
         if self.extensions_dir:
             add_template_dir(self.extensions_dir)
@@ -1065,6 +1070,7 @@ class CompileCtx(object):
         self.no_property_checks = no_property_checks
         self.generate_pp = generate_pp
         self.properties_logging = properties_logging
+        self.separate_properties = separate_properties
         if warnings:
             self.warnings = warnings
 
