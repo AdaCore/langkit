@@ -74,6 +74,20 @@ package body Langkit_Support.Adalog.Operations is
       --  We want to stop trying to evaluate sub-expressions if there was no
       --  progress made during one whole iteration. This boolean is clear iff
       --  whether the current iteration (FOR loop below) made progress.
+
+      procedure Tag_Progress;
+      --  Update the above flags to indicate progress has been made
+
+      ------------------
+      -- Tag_Progress --
+      ------------------
+
+      procedure Tag_Progress is
+      begin
+         Has_Progressed := True;
+         Stalled := False;
+      end Tag_Progress;
+
    begin
       Trace ("In Any_Rel:");
 
@@ -101,15 +115,13 @@ package body Langkit_Support.Adalog.Operations is
                   return No_Progress;
 
                when Progress =>
-                  Stalled := False;
-                  Has_Progressed := True;
+                  Tag_Progress;
 
                when Satisfied =>
                   return Satisfied;
 
                when Unsatisfied =>
-                  Stalled := False;
-                  Has_Progressed := True;
+                  Tag_Progress;
                   Set_Completed (Self, I);
                   Trace ("In Any_Rel: relation unsatisfied, get the next one");
             end case;
@@ -150,7 +162,7 @@ package body Langkit_Support.Adalog.Operations is
       --  whether the current iteration (FOR loop below) made progress.
 
       procedure Tag_Progress;
-      --  Update the below flags to indicate progress has been made
+      --  Update the above flags to indicate progress has been made
 
       ------------------
       -- Tag_Progress --
