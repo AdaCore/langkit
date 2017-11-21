@@ -1,3 +1,5 @@
+with Langkit_Support.Adalog.Debug; use Langkit_Support.Adalog.Debug;
+
 package body Langkit_Support.Adalog.Relations is
 
    -------------------
@@ -17,9 +19,11 @@ package body Langkit_Support.Adalog.Relations is
          pragma Unreferenced (Context);
       begin
          if Self.Done then
+            Trace ("In Pure_Relation: already done, returning UNSATISFIED");
             return Unsatisfied;
          end if;
          Self.Done := True;
+         Trace ("In Pure_Relation: not done yet, evaluating...");
          return Apply (Self.Rel);
       end Solve_Impl;
 
@@ -71,25 +75,32 @@ package body Langkit_Support.Adalog.Relations is
       begin
          case Self.State is
             when Start =>
+               Trace ("In Stateful_Relation: Start state, evaluating...");
                case Apply (Self.Rel) is
                   when No_Progress => return No_Progress;
                   when Progress    => return Progress;
 
                   when Satisfied =>
+                     Trace ("In Stateful_Relation: moving to Success state");
                      Self.State := Success;
                      return Satisfied;
 
                   when Unsatisfied =>
+                     Trace ("In Stateful_Relation: moving to Finish state");
                      Self.State := Finish;
                      return Unsatisfied;
                end case;
 
             when Success =>
+               Trace ("In Stateful_Relation: Success state, reverting, moving"
+                      & " to Finish state and returning UNSATISFIED");
                Revert (Self.Rel);
                Self.State := Finish;
                return Unsatisfied;
 
             when Finish =>
+               Trace ("In Stateful_Relation: Finish state, returning"
+                      & " UNSATISFIED");
                return Unsatisfied;
          end case;
       end Solve_Impl;
