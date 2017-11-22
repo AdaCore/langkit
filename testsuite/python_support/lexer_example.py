@@ -8,6 +8,7 @@ from langkit.lexer import (
 class Token(LexerToken):
     Example = WithText()
     Null = WithText()
+    Def = WithText()
 
     Comma = WithText()
     LPar = WithText()
@@ -25,8 +26,9 @@ foo_lexer.add_rules(
     (Pattern(r'[ \n\r\t]+'), Ignore()),
     (Eof(),                  Token.Termination),
 
-    (Literal("example"),     Token.Example),
-    (Literal("null"),        Token.Null),
+    (Literal('example'),     Token.Example),
+    (Literal('null'),        Token.Null),
+    (Literal('def'),         Token.Def),
 
     (Literal(','),           Token.Comma),
     (Literal('('),           Token.LPar),
