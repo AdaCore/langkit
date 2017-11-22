@@ -2664,8 +2664,31 @@ class PropertyDef(AbstractNodeData):
         ":type: LocalVars"
 
         self.expected_type = type
+
         self.abstract = abstract
+        """
+        Whether this property is declared as abstract in the DSL.
+
+        Note that this being true does not imply that the function that
+        implements this property in the generated code is abstract: if
+        `abstract_runtime_check` is True, the function will be concrete (and
+        will just raise an exception).
+
+        :type: bool
+        """
+
         self.abstract_runtime_check = abstract_runtime_check
+        """
+        Assuming this property is abstract, whether AST node concrete subclass
+        are allowed not to override it. If true, this means that we will
+        generate a concrete function to implement this property, and this
+        function will just raise a runtime error when called.
+
+        :type: bool
+        """
+
+        assert not self.abstract_runtime_check or self.abstract
+
         self._dynamic_vars = dynamic_vars
 
         self.overriding_properties = set()
