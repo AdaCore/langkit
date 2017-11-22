@@ -155,6 +155,11 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         argv.append('--enable-properties-logging')
     m.run(argv)
 
+    # Flush stdout and stderr, so that diagnostics appear deterministically
+    # before the script/program output.
+    sys.stdout.flush()
+    sys.stderr.flush()
+
     # Write a "setenv" script to make developper investigation convenient
     with open('setenv.sh', 'w') as f:
         m.write_setenv(f)
