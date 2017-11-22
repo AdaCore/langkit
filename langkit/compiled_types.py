@@ -1981,6 +1981,24 @@ class ASTNodeType(BaseStructType):
         return (get_context().lang_name +
                 self.kwless_raw_name).camel_with_underscores
 
+    @property
+    def ada_kind_range_name(self):
+        """
+        Return the name of the Ada kind subtype to represent the set of node
+        kinds that include `self` and all its subclasses.
+
+        :rtype: str
+        """
+        if self.abstract:
+            return self.ada_kind_name
+        elif self.subclasses:
+            return self.ada_kind_name + '_Range'
+        else:
+            raise ValueError(
+                'Concrete AST nodes that do not have subclasses cannot have a'
+                ' dedicated subtype kind'
+            )
+
     def value_type_name(self):
         """
         Return the name of the Ada type for the record that implements this AST

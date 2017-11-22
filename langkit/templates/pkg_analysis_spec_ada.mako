@@ -304,8 +304,8 @@ package ${ada_lib_name}.Analysis is
    ## concrete subclasses.
    % for cls in ctx.astnode_types:
       <% subclasses = cls.concrete_subclasses() %>
-      % if cls.abstract and subclasses:
-         subtype ${cls.ada_kind_name} is
+      % if subclasses:
+         subtype ${cls.ada_kind_range_name} is
             ${root_node_kind_name} range
                ${subclasses[0].ada_kind_name}
                .. ${subclasses[-1].ada_kind_name};
