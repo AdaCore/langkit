@@ -1,0 +1,46 @@
+File "test.py", line 45, in FooNode.find_exprs
+  line 56, in Match expression
+    Warning: The #2 matcher (Atom) is unreachable as all previous matchers cover all the nodes it can match
+main.py: Running...
+Atoms:
+   <Lit 3:6-3:7>
+   <Lit 3:11-3:12>
+   <Ref 3:15-3:16>
+   <Lit 5:7-5:9>
+   <Lit 5:13-5:15>
+   <Ref 5:18-5:19>
+   <Lit 5:24-5:26>
+   <Lit 7:5-7:8>
+Atoms or exprs:
+   <Plus 3:6-3:17>
+   <Lit 3:6-3:7>
+   <Plus 3:11-3:16>
+   <Lit 3:11-3:12>
+   <Ref 3:15-3:16>
+   <Plus 5:6-5:26>
+   <Plus 5:7-5:20>
+   <Lit 5:7-5:9>
+   <Plus 5:13-5:19>
+   <Lit 5:13-5:15>
+   <Ref 5:18-5:19>
+   <Lit 5:24-5:26>
+   <Lit 7:5-7:8>
+Exprs:
+   <Plus 3:6-3:17>
+   <Lit 3:6-3:7>
+   <Plus 3:11-3:16>
+   <Lit 3:11-3:12>
+   <Ref 3:15-3:16>
+   <Plus 5:6-5:26>
+   <Plus 5:7-5:20>
+   <Lit 5:7-5:9>
+   <Plus 5:13-5:19>
+   <Lit 5:13-5:15>
+   <Ref 5:18-5:19>
+   <Lit 5:24-5:26>
+   <Lit 7:5-7:8>
+Refs:
+   <Ref 3:15-3:16>
+   <Ref 5:18-5:19>
+main.py: Done.
+Done
