@@ -1229,7 +1229,8 @@ class CompileCtx(object):
             ASTNodePass('check homonym AST node fields',
                         lambda _, astnode: astnode.check_homonym_fields(),
                         auto_context=False),
-
+            GlobalPass('compute AST node kind constants',
+                       CompileCtx.compute_node_kind_constants),
             errors_checkpoint_pass,
 
             MajorStepPass('Compiling properties'),
@@ -1284,8 +1285,6 @@ class CompileCtx(object):
             GlobalPass('annotate fields types',
                        CompileCtx.annotate_fields_types,
                        disabled=not annotate_fields_types),
-            GlobalPass('compute AST node kind constants',
-                       CompileCtx.compute_node_kind_constants),
             errors_checkpoint_pass,
         )
 
