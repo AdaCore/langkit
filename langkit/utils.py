@@ -271,13 +271,13 @@ class TypeSet(object):
         """
         Include a class and all of its subclasses.
 
-        If t is the last subclass for some base class, this adds the parent
+        If `t` is the last subclass for some base class, this adds the parent
         subclass. This makes sense as once all concrete subclasses of the
-        abstract A type are handled, it is true that A is handled.
+        abstract `A` type are handled, it is true that `A` is handled.
 
-        Return whether t was already present in self.
+        Return whether `t` was already present in `self`.
 
-        :param ASTNode|None t: Type parameter.
+        :param ASTNodeType|None t: AST node to include.
         :rtype: bool
         """
         if t in self.matched_types:
@@ -304,14 +304,14 @@ class TypeSet(object):
 
     def unmatched_types(self, t):
         """
-        Return the set of t subclasses that are not matched by any matcher.
+        Return the set of `t` subclasses that are not matched by any matcher.
 
         Omit subclasses when none of them are matched: only the parent is
         returned in this case, so that we don't flood users with whole
         hierarchies of classes.
 
-        :param ASTNode t: Type parameter.
-        :rtype: set[ASTNode]
+        :type t: ASTNodeType
+        :rtype: set[ASTNodeType]
         """
         if t in self.matched_types:
             return set()
