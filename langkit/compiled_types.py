@@ -1897,14 +1897,17 @@ class ASTNodeType(BaseStructType):
 
         :rtype: list[ASTNodeType]
         """
+        result = []
+
         sorted_direct_subclasses = sorted(
             self.subclasses, key=lambda subcls: subcls.hierarchical_name()
         )
-        return sum(
-            ((subcls.concrete_subclasses() if subcls.abstract else [subcls])
-             for subcls in sorted_direct_subclasses),
-            []
-        )
+        for subcls in sorted_direct_subclasses:
+            if not subcls.abstract:
+                result.append(subcls)
+            result.extend(subcls.concrete_subclasses())
+
+        return result
 
     def get_parse_fields(self, predicate=None, include_inherited=True):
         """
