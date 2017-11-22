@@ -2841,7 +2841,7 @@ class PropertyDef(AbstractNodeData):
     @contextmanager
     def bind(self):
         """
-        Bind the current property to "Self", so that it is accessible in the
+        Bind the current property to `self`, so that it is accessible in the
         expression templates.
         """
         self.__current_properties__.append(self)
@@ -2852,7 +2852,7 @@ class PropertyDef(AbstractNodeData):
     @contextmanager
     def bind_none(cls):
         """
-        Unbind "Self", so that compilation no longer see the current property.
+        Unbind `self`, so that compilation no longer see the current property.
 
         This is needed to compile Property-less expressions such as environment
         specifications.
