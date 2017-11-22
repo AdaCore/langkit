@@ -2878,9 +2878,20 @@ class PropertyDef(AbstractNodeData):
         :rtype: PropertyDef|None
         """
         if self.struct.is_ast_node and self.struct.base():
-            return self.struct.base().get_abstract_fields_dict(
+            result = self.struct.base().get_abstract_fields_dict(
                 field_class=PropertyDef
             ).get(self._name.lower, None)
+
+            if result:
+                check_source_language(
+                    not self.abstract or self.abstract_runtime_check,
+                    'Abstract properties with no runtime check cannot override'
+                    ' another property. Here, {} is abstract and overrides'
+                    ' {}.'.format(
+                        self.qualname, result.qualname
+                    )
+                )
+            return result
         else:
             return None
 
