@@ -1,0 +1,9 @@
+== Abstracts overrides without runtime check ==
+File "test.py", line 30, in Example.prop
+    Error: Abstract property p_prop is not overriden in all subclasses. Missing overriding properties on classes: Example
+File "test.py", line 30, in Example.prop
+    Error: Abstract properties with no runtime check cannot override another property. Here, Example.p_prop is abstract and overrides BaseNode.p_prop.
+
+== Abstracts overrides with runtime check ==
+
+Done
