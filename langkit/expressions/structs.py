@@ -3,15 +3,16 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import BuiltinField, Field, UserField, resolve_type
+from langkit.compiled_types import (BuiltinField, Field, UserField,
+                                    get_context, resolve_type)
 from langkit.diagnostics import Context, Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
     ComputingExpr, DynamicVariable, Let, NullCheckExpr, NullExpr, PropertyDef,
-    ResolvedExpression, SavedExpr, SequenceExpr, T, UnreachableExpr, attr_call,
-    attr_expr, construct, dsl_document, render
+    ResolvedExpression, SavedExpr, T, attr_call, attr_expr, construct,
+    dsl_document, render
 )
-from langkit.expressions.boolean import Eq, If, Not
+from langkit.expressions.boolean import Eq
 from langkit.expressions.utils import assign_var
 from langkit.utils import TypeSet, memoized
 
@@ -926,6 +927,185 @@ class Match(AbstractExpression):
                   lambda e: Y)
     """
 
+    class Matcher(object):
+        def __init__(self, match_var, match_expr, inner_scope):
+            """
+            :param VariableExpr match_var: Variable to hold the matched
+                node/entity.
+            :param ResolvedExpression match_expr: Expression to evaluate when
+                this matcher is active.
+            :param LocalVars.Scope inner_scope: Scope that will wrap
+                `match_expr` so that the definition of `match_var` is confined
+                to it.
+            """
+            self.match_var = match_var
+            self.match_expr = match_expr
+            self.inner_scope = inner_scope
+
+            self.matched_concrete_nodes = None
+            """
+            Set of all concrete AST nodes that this matcher can accept.
+            Computed in Match.Expr's constructor.
+
+            :type: set[ASTNodeType]
+            """
+
+        @property
+        def match_type(self):
+            """
+            Return the type that this matcher matches (AST node or entity).
+
+            :rtype: ASTNodeType|StructType
+            """
+            return self.match_var.type
+
+        @property
+        def match_astnode_type(self):
+            """
+            Return the AST node type that this matcher matches, or the
+            corresponding AST node if it matches an entity type.
+
+            :rtype: ASTNodeType
+            """
+            return (self.match_type.el_type
+                    if self.match_type.is_entity_type else
+                    self.match_type)
+
+        @property
+        def ada_kind_set(self):
+            """
+            Turn `matched_concrete_nodes` into an set of AST node kinds,
+            suitable to use in Ada's `X in Y | Z` construct.
+
+            :rtype: str
+            """
+            ctx = get_context()
+            kinds = sorted(ctx.node_kind_constants[astnode]
+                           for astnode in self.matched_concrete_nodes)
+
+            # Try to collapse sequences of contiguous kinds into ranges
+            first_kind = kinds.pop(0)
+            groups = [(first_kind, first_kind)]
+            for k in kinds:
+                first, last = groups[-1]
+                if k == last + 1:
+                    groups[-1] = (first, k)
+                else:
+                    groups.append((k, k))
+
+            # Turn numeric constants into enumeration names
+            groups = [
+                (ctx.kind_constant_to_node[f].ada_kind_name,
+                 ctx.kind_constant_to_node[l].ada_kind_name)
+                for f, l in groups
+            ]
+
+            return ' | '.join(
+                (f if f == l else '{} .. {}'.format(f, l))
+                for f, l in groups
+            )
+
+    class Expr(ComputingExpr):
+
+        def __init__(self, prefix_expr, matchers, abstract_expr=None):
+            """
+            :param ResolvedExpression prefix_expr: The expression on which the
+                dispatch occurs. It must be either an AST node or an entity.
+            :param list[Match.Matcher] matchers: List of matchers for this
+                node.
+            """
+            assert (prefix_expr.type.is_ast_node or
+                    prefix_expr.type.is_entity_type)
+            self.prefix_expr = NullCheckExpr(
+                prefix_expr,
+                implicit_deref=prefix_expr.type.is_entity_type
+            )
+
+            # Variable to hold the value of which we do dispatching
+            # (prefix_expr).
+            self.prefix_var = PropertyDef.get().vars.create(
+                'Match_Prefix', self.prefix_expr.type)
+
+            # Compute the return type as the unification of all branches
+            rtype = matchers[-1].match_expr.type
+            for m in matchers:
+                rtype = m.match_expr.type.unify(
+                    rtype,
+                    'Mismatching types in Match expression: got {self} but'
+                    ' expected {other} or sub/supertype'
+                )
+            self.static_type = rtype
+
+            # Wrap each matcher expression so that all capture variables are
+            # bound and initialized.
+            self.matchers = []
+            for m in matchers:
+                # Initialize match_var...
+                let_expr = Let.Expr(
+                    [m.match_var],
+                    [Cast.Expr(self.prefix_var.ref_expr, m.match_var.type)],
+
+                    # ... and cast this matcher's result to the Match result's
+                    # type, as required by OOP with access types in Ada.
+                    (m.match_expr
+                     if m.match_expr.type == rtype else
+                     Cast.Expr(m.match_expr, rtype))
+                )
+
+                # Now do the binding for static analysis and debugging
+                self.matchers.append(Match.Matcher(
+                    m.match_var,
+                    BindingScope(let_expr, [], scope=m.inner_scope),
+                    m.inner_scope
+                ))
+
+            # Determine for each matcher the set of concrete AST nodes it can
+            # actually match.
+            self._compute_matched_concrete_nodes()
+
+            super(Match.Expr, self).__init__('Match_Result',
+                                             abstract_expr=abstract_expr)
+
+        def _compute_matched_concrete_nodes(self):
+            """
+            Compute the Match.Matcher.matched_concrete_nodes fields in all
+            matchers for this expression.
+            """
+
+            def concrete_nodes(astnode):
+                """
+                Return the set of concrete nodes that can fit `astnode`.
+
+                :rtype: set[ASTNodeType]
+                """
+                result = set(astnode.concrete_subclasses())
+                if not astnode.abstract:
+                    result.add(astnode)
+                return result
+
+            prefix_type = self.prefix_expr.type
+            if prefix_type.is_entity_type:
+                prefix_type = prefix_type.el_type
+            remaining_nodes = concrete_nodes(prefix_type)
+
+            for m in self.matchers:
+                candidates = concrete_nodes(m.match_astnode_type)
+                m.matched_concrete_nodes = candidates & remaining_nodes
+                remaining_nodes -= m.matched_concrete_nodes
+
+            assert not remaining_nodes
+
+        def _render_pre(self):
+            return render('properties/match_ada', expr=self)
+
+        @property
+        def subexprs(self):
+            return {'prefix': self.prefix_expr,
+                    'matchers': [m.match_expr for m in self.matchers]}
+
+        def __repr__(self):
+            return '<Match.Expr>'
+
     def __init__(self, node_or_entity, *matchers):
         """
         :param AbstractExpression node_or_entity: The expression to match.
@@ -1025,19 +1205,14 @@ class Match(AbstractExpression):
         """
         outer_scope = PropertyDef.get_scope()
 
-        # Create a local variable so that in the generated code, we don't have
-        # to re-compute the prefix for each type check. This is also required
-        # for proper ref-counting.
-        matched_expr = SavedExpr('Match_Prefix', construct(self.matched_expr))
-        matched_var = matched_expr.result_var.ref_expr
+        matched_expr = construct(
+            self.matched_expr,
+            lambda t: t.is_ast_node or t.is_entity_type,
+            'Match expressions can only work on AST nodes or entities: got'
+            ' {expr_type} instead'
+        )
         is_entity = matched_expr.type.is_entity_type
-
-        check_source_language(matched_expr.type.is_ast_node
-                              or matched_expr.type.is_entity_type,
-                              'Match expressions can only work on AST nodes '
-                              'or entities')
-
-        constructed_matchers = []
+        matchers = []
 
         # Check (i.e. raise an error if no true) the set of matchers is valid:
 
@@ -1065,54 +1240,15 @@ class Match(AbstractExpression):
             # is not exposed outside in the debug info.
             with outer_scope.new_child() as inner_scope:
                 inner_scope.add(var.local_var)
-                constructed_matchers.append((construct(var), construct(expr),
-                                             inner_scope))
+                matchers.append(Match.Matcher(construct(var),
+                                construct(expr),
+                                inner_scope))
 
         # * all possible input types must have at least one matcher. Also warn
         #   if some matchers are unreachable.
         self._check_match_coverage(matched_expr.type)
 
-        # Compute the return type as the unification of all branches
-        _, expr, _ = constructed_matchers[-1]
-        rtype = expr.type
-        for _, expr, _ in constructed_matchers:
-            rtype = expr.type.unify(
-                rtype,
-                'Mismatching types in Match expression: got {self} but'
-                ' expected {other} or sub/supertype'
-            )
-
-        # This is the expression execution will reach if we have a bug in our
-        # code (i.e. if matchers did not cover all cases).
-        result = UnreachableExpr(rtype)
-
-        # Wrap this "failing" expression with all the cases to match in the
-        # appropriate order, so that in the end the first matchers are tested
-        # first.
-        for match_var, expr, inner_scope in reversed(constructed_matchers):
-            casted = SavedExpr('Match', Cast.Expr(matched_var, match_var.type))
-            guard = Not.make_expr(Eq.make_expr(casted, NullExpr(casted.type)))
-            if expr.type != rtype:
-                # We already checked that type matches, so only way this is
-                # true is if expr.type is an AST node type derived from rtype.
-                # In that case, we need an explicity upcast.
-                expr = Cast.Expr(expr, rtype)
-
-            expr_with_scope = BindingScope(
-                Let.Expr([match_var],
-                         [casted.result_var.ref_expr],
-                         expr),
-                [],
-                scope=inner_scope
-            )
-            result = If.Expr(guard, expr_with_scope, result, rtype)
-
-        return SequenceExpr(
-            NullCheckExpr(matched_expr,
-                          implicit_deref=matched_expr.type.is_entity_type),
-            result,
-            abstract_expr=self
-        )
+        return Match.Expr(matched_expr, matchers, abstract_expr=self)
 
     def __repr__(self):
         return '<Match>'
