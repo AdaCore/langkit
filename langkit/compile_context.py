@@ -406,6 +406,13 @@ class CompileCtx(object):
         :type: dict[langkit.compiled_types.ASTNodeType, int]
         """
 
+        self.kind_constant_to_node = {}
+        """
+        Reverse mapping for `node_kind_constants`.
+
+        :type: dict[int, langkit.compiled_types.ASTNodeType]
+        """
+
         self._struct_types = []
         """
         List of all plain struct types.
@@ -1710,6 +1717,7 @@ class CompileCtx(object):
             start=1
         ):
             self.node_kind_constants[astnode] = i
+            self.kind_constant_to_node[i] = astnode
 
     def expose_public_api_types(self, astnode):
         """
