@@ -542,7 +542,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
 
    Node_Kind_Names : constant array (${root_node_kind_name}) of Text_Access :=
      (${', '.join('{} => new Text_Type\'(To_Text ("{}"))'.format(
-                      cls.ada_kind_name(),
+                      cls.ada_kind_name,
                       cls.kwless_raw_name.camel
                   )
                   for cls in ctx.astnode_types

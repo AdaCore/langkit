@@ -1972,6 +1972,7 @@ class ASTNodeType(BaseStructType):
         return '.'.join(node.name.base_name
                         for node in self.get_inheritance_chain())
 
+    @property
     def ada_kind_name(self):
         """
         Return the name of the Ada enumerator to represent this kind of node.

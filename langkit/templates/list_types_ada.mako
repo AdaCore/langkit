@@ -87,7 +87,7 @@
         (Node : access ${value_type}) return ${root_node_kind_name}
       is
       begin
-         return ${list_type.ada_kind_name()};
+         return ${list_type.ada_kind_name};
       end Kind;
 
    % endif

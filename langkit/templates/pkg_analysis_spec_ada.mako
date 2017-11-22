@@ -289,13 +289,13 @@ package ${ada_lib_name}.Analysis is
    ## kind. Nothing can be an instance of an abstract subclass, so these do not
    ## need their own kind.
    type ${root_node_kind_name} is
-     (${', '.join(cls.ada_kind_name()
+     (${', '.join(cls.ada_kind_name
                   for cls in ctx.astnode_types
                   if not cls.abstract)});
    --  AST node concrete types
 
    for ${root_node_kind_name} use
-     (${', '.join('{} => {}'.format(cls.ada_kind_name(),
+     (${', '.join('{} => {}'.format(cls.ada_kind_name,
                                     ctx.node_kind_constants[cls])
                   for cls in ctx.astnode_types
                   if not cls.abstract)});
@@ -305,10 +305,10 @@ package ${ada_lib_name}.Analysis is
    % for cls in ctx.astnode_types:
       <% subclasses = cls.concrete_subclasses() %>
       % if cls.abstract and subclasses:
-         subtype ${cls.ada_kind_name()} is
+         subtype ${cls.ada_kind_name} is
             ${root_node_kind_name} range
-               ${subclasses[0].ada_kind_name()}
-               .. ${subclasses[-1].ada_kind_name()};
+               ${subclasses[0].ada_kind_name}
+               .. ${subclasses[-1].ada_kind_name};
       % endif
    % endfor
 

@@ -1439,7 +1439,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    % endif
 
    Kind_Names : array (${root_node_kind_name}) of Unbounded_String :=
-     (${", \n".join(cls.ada_kind_name()
+     (${", \n".join(cls.ada_kind_name
                     + " => To_Unbounded_String (\""
                     + cls.repr_name() + "\")"
                     for cls in ctx.astnode_types if not cls.abstract)});
@@ -1456,7 +1456,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    end Kind_Name;
 
    Kind_To_Counts : array (${root_node_kind_name}) of Integer :=
-     (${", \n".join(cls.ada_kind_name()
+     (${", \n".join(cls.ada_kind_name
                     + " => {}".format(
                         len(cls.get_parse_fields(lambda f: f.type.is_ast_node))
                         if not cls.is_list_type
@@ -1495,7 +1495,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
                           if fld.type.is_logic_var_type]
          %>
          % if logic_vars:
-            when ${cls.ada_kind_name()} =>
+            when ${cls.ada_kind_name} =>
                declare
                   N : ${cls.name} := ${cls.name} (Node);
                begin

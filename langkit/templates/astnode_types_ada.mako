@@ -102,7 +102,7 @@
 
       % elif field.type.is_enum_node:
          function ${field.name}
-           (Node : ${type_name}'Class) return ${field.type.ada_kind_name()}
+           (Node : ${type_name}'Class) return ${field.type.ada_kind_name}
             with Inline => True;
       % endif
    % endif
@@ -144,7 +144,7 @@
 
       % elif field.type.is_enum_node:
          function ${field.name}
-           (Node : ${type_name}'Class) return ${field.type.ada_kind_name()}
+           (Node : ${type_name}'Class) return ${field.type.ada_kind_name}
          is (${field_expr}.Kind);
       % endif
    % endif
@@ -348,7 +348,7 @@
       is
          pragma Unreferenced (Node);
       begin
-         return ${cls.ada_kind_name()};
+         return ${cls.ada_kind_name};
       end Kind;
 
       ## No need to regenerate these primitives for list types as the
