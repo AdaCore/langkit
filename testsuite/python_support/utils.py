@@ -20,6 +20,8 @@ default_warning_set = WarningSet()
 # testcases.
 default_warning_set.disable(WarningSet.undocumented_public_properties)
 
+pretty_print = bool(int(os.environ.get('LANGKIT_PRETTY_PRINT', '0')))
+
 project_template = """
 with "libfoolang";
 
@@ -69,6 +71,7 @@ def prepare_context(grammar, lexer=None, warning_set=default_warning_set):
                      lexer=lexer,
                      grammar=grammar)
     ctx.warnings = warning_set
+    ctx.pretty_print = pretty_print
 
     return ctx
 
@@ -153,6 +156,8 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         argv.append('-{}{}'.format('W' if w in warning_set else 'w', w.name))
     if properties_logging:
         argv.append('--enable-properties-logging')
+    if pretty_print:
+        argv.append('--pretty-print')
     m.run(argv)
 
     # Flush stdout and stderr, so that diagnostics appear deterministically

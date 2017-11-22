@@ -53,6 +53,10 @@ class Testsuite(BaseTestsuite):
                  ' testsuite tear_up step. This is used to speed up successive'
                  ' testsuite runs during development.'
         )
+        self.main.add_option(
+            '--pretty-print', action='store_true',
+            help='Pretty-print generated source code.'
+        )
 
         # Tests update
         self.main.add_option(
@@ -79,6 +83,9 @@ class Testsuite(BaseTestsuite):
 
     def tear_up(self):
         super(Testsuite, self).tear_up()
+
+        self.global_env['pretty_print'] = (
+            self.global_env['options'].pretty_print)
 
         if self.coverage_enabled:
             # Create a directory that we'll use to:
