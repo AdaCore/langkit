@@ -111,14 +111,14 @@ class ManageScript(object):
 
         self.args_parser = args_parser = argparse.ArgumentParser(
             description='General manager to handle actions relative to'
-                        ' building/testing libadalang'
+                        ' building/testing libadalang.'
         )
         self.subparsers = subparsers = args_parser.add_subparsers()
 
         args_parser.add_argument(
             '--pp', action='store_true', default=False,
-            help="Whether to automatically generate a pretty-printer along "
-            "with the parser for the grammar"
+            help='Whether to automatically generate a pretty-printer along'
+                 ' with the parser for the grammar.'
         )
         args_parser.add_argument(
             '--build-dir', default='build',
@@ -128,20 +128,20 @@ class ManageScript(object):
         args_parser.add_argument(
             '--enable-static', action='store_true',
             help='Enable the generation of static libraries (default:'
-                 ' disabled)'
+                 ' disabled).'
         )
         args_parser.add_argument(
             '--disable-static', action='store_false', dest='enable_static',
-            help='Disable the generation of static libraries'
+            help='Disable the generation of static libraries.'
         )
         args_parser.add_argument(
             '--enable-shared', action='store_true', default=True,
             help='Enable the generation (and testing) of shared libraries'
-                 ' (default: enabled)'
+                 ' (default: enabled).'
         )
         args_parser.add_argument(
             '--disable-shared', action='store_false', dest='enable_shared',
-            help='Disable the generation (and testing) of shared libraries'
+            help='Disable the generation (and testing) of shared libraries.'
         )
         args_parser.add_argument(
             '--verbosity', '-v', nargs='?',
@@ -154,11 +154,11 @@ class ManageScript(object):
         args_parser.add_argument(
             '--full-error-traces', '-E', action='store_true', default=False,
             help='Always show full error traces, whatever the verbosity level'
-                 ' (default: disabled)'
+                 ' (default: disabled).'
         )
         args_parser.add_argument(
             '--trace', '-t', action='append', default=[],
-            help="Activate given debug trace"
+            help='Activate given debug trace.'
         )
         args_parser.add_argument(
             '--no-langkit-support', action='store_true',
@@ -172,17 +172,17 @@ class ManageScript(object):
         args_parser.add_argument(
             '-g', '--debug', action='store_true',
             help='In case of internal error or diagnostic error, run a'
-                 ' post-mortem PDB session'
+                 ' post-mortem PDB session.'
         )
         args_parser.add_argument(
             '--profile', action='store_true',
-            help='Run cProfile and langkit, and generate a data file '
-            '"langkit.prof"'
+            help='Run cProfile and langkit, and generate a data file'
+                 ' "langkit.prof".'
         )
         args_parser.add_argument(
             '--diagnostic-style', '-D', type=DiagnosticStyle,
             default=DiagnosticStyle.default,
-            help='Style for error messages'
+            help='Style for error messages.'
         )
 
         def create_parser(fn, needs_context=False):
@@ -262,7 +262,7 @@ class ManageScript(object):
 
         self.setenv_parser.add_argument(
             '--json', '-J', action='store_true',
-            help='Output necessary env keys to json'
+            help='Output necessary env keys to JSON.'
         )
 
         ###############################################
@@ -303,49 +303,47 @@ class ManageScript(object):
         """
         subparser.add_argument(
             '--pretty-print', '-p', action='store_true',
-            help='Pretty-print generated source code'
+            help='Pretty-print generated source code.'
         )
         subparser.add_argument(
             '--annotate-fields-types', action='store_true',
-            help='Experimental feature. Modify the Python files where the '
-                 'node types are defined, to annotate empty Field() '
-                 'definitions.'
+            help='Experimental feature. Modify the Python files where the'
+                 ' node types are defined, to annotate empty Field() '
+                 ' definitions.'
         )
         subparser.add_argument(
-            '--no-compile-quex', help="Don't compile the quex lexer",
-            action='store_true',
+            '--no-compile-quex', action='store_true',
+            help="Don't compile the Quex lexer."
         )
         subparser.add_argument(
-            '--check-only', help="Only check the input for errors, don't"
-            " generate the code",
-            action='store_true'
+            '--check-only', action='store_true',
+            help="Only check the input for errors, don't generate the code."
         )
         subparser.add_argument(
-            '--no-property-checks',
-            help="Don't generate runtime checks for properties",
-            action='store_true'
+            '--no-property-checks', action='store_true',
+            help="Don't generate runtime checks for properties."
         )
         subparser.add_argument(
             '--list-warnings', action='store_true',
-            help='Display the list of available warnings',
+            help='Display the list of available warnings.'
         )
         subparser.add_argument(
             '--enable-warning', '-W', dest='enabled_warnings',
             default=WarningSet(),
             action=EnableWarningAction,
             choices=[w.name for w in WarningSet.available_warnings],
-            help='Enable a warning'
+            help='Enable a warning.'
         )
         subparser.add_argument(
             '--disable-warning', '-w',
             action=DisableWarningAction,
             choices=[w.name for w in WarningSet.available_warnings],
-            help='Disable a warning'
+            help='Disable a warning.'
         )
         subparser.add_argument(
             '--enable-properties-logging', dest='enabled_properties_logging',
             action='store_true',
-            help='Instrument properties code to do logging'
+            help='Instrument properties code to do logging.'
         )
         subparser.add_argument(
             '--separate-properties', dest='separate_properties',
@@ -362,29 +360,29 @@ class ManageScript(object):
         """
         subparser.add_argument(
             '--jobs', '-j', type=int, default=get_cpu_count(),
-            help='Number of parallel jobs to spawn in parallel '
-                 '(default: your number of cpu)'
+            help='Number of parallel jobs to spawn in parallel (default: your'
+                 ' number of cpu).'
         )
         subparser.add_argument(
             '--build-mode', '-b', choices=list(self.BUILD_MODES),
             default='dev',
-            help='Selects a preset for build options'
+            help='Selects a preset for build options.'
         )
         subparser.add_argument(
             '--enable-build-warnings',
             action='store_true', dest='enable_build_warnings',
             default=self.ENABLE_BUILD_WARNINGS_DEFAULT,
-            help='Enable warnings to build the generated library'
+            help='Enable warnings to build the generated library.'
         )
         subparser.add_argument(
             '--disable-build-warnings',
             action='store_false', dest='enable_build_warnings',
             default=self.ENABLE_BUILD_WARNINGS_DEFAULT,
-            help='Disable warnings to build the generated library'
+            help='Disable warnings to build the generated library.'
         )
         subparser.add_argument(
             '--gargs',
-            help='Options appened to GPRbuild invocations'
+            help='Options appened to GPRbuild invocations.'
         )
         subparser.add_argument(
             '--disable-mains', type=self.parse_mains_list, default=[], nargs=1,
@@ -395,7 +393,7 @@ class ManageScript(object):
         )
         subparser.add_argument(
             '--disable-all-mains', action='store_true',
-            help='Do not build any main program'
+            help='Do not build any main program.'
         )
 
     def create_context(self, args):
