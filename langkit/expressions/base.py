@@ -3292,9 +3292,7 @@ class PropertyDef(AbstractNodeData):
             self.is_private or not self._dynamic_vars,
             'A public property cannot have dynamically bound variables'
         )
-        for dynvar in self._dynamic_vars:
-            self._add_argument(dynvar.argument_name, dynvar.type,
-                               is_artificial=True, abstract_var=dynvar)
+        self.build_dynamic_var_arguments()
 
         # At this point, we assume the list of argument has reached its final
         # state.
@@ -3307,6 +3305,14 @@ class PropertyDef(AbstractNodeData):
                 ' ones'.format(self.qualname, args,
                                self.base_property.qualname, base_args)
             )
+
+    def build_dynamic_var_arguments(self):
+        """
+        Append arguments for each dynamic variable in this property.
+        """
+        for dynvar in self._dynamic_vars:
+            self._add_argument(dynvar.argument_name, dynvar.type,
+                               is_artificial=True, abstract_var=dynvar)
 
     @property
     @memoized
