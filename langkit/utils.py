@@ -159,7 +159,6 @@ def memoized(func):
         except KeyError:
             result = func(*args, **kwargs)
             cache[key] = result
-            result = result
         return result
 
     return wrapper
