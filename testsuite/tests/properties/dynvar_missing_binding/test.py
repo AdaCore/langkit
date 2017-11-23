@@ -25,7 +25,7 @@ class Example(FooNode):
     # The "construct" pass on p1 will require the type of p2 and thus trigger
     # the construction of p2. A bug used to propagate the binding of "dynvar"
     # from the construction of p1 to p2's.
-    p1 = Property(dynvar.bind(Self, Self.p2), public=True)
+    p1 = Property(dynvar.bind(Self, Self.p2).as_bare_entity, public=True)
     p2 = Property(dynvar)
 
 
