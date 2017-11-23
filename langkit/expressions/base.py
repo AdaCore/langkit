@@ -21,7 +21,7 @@ from langkit.diagnostics import (
 from langkit.expressions.utils import assign_var
 from langkit.utils import (
     TypeSet, assert_type, dispatch_on_type, inherited_property,
-    not_implemented_error, memoized
+    not_implemented_error, memoized, self_memoized
 )
 
 
@@ -2755,7 +2755,7 @@ class PropertyDef(AbstractNodeData):
         return self._ignore_warn_on_node
 
     @property
-    @memoized
+    @self_memoized
     def all_overriding_properties(self):
         """
         Return self's overriding properties and all their own overriding ones,
@@ -2893,7 +2893,7 @@ class PropertyDef(AbstractNodeData):
                                        abstract_var=abstract_var))
 
     @property
-    @memoized
+    @self_memoized
     def base_property(self):
         """
         Get the base property for this property, if it exists.
@@ -2908,18 +2908,18 @@ class PropertyDef(AbstractNodeData):
             if result:
                 check_source_language(
                     not self.abstract or self.abstract_runtime_check,
-                    'Abstract properties with no runtime check cannot override'
-                    ' another property. Here, {} is abstract and overrides'
-                    ' {}.'.format(
+                    'Abstract properties with no runtime check cannot'
+                    ' override another property. Here, {} is abstract and'
+                    ' overrides {}.'.format(
                         self.qualname, result.qualname
                     )
                 )
             return result
-        else:
-            return None
+
+        return None
 
     @property
-    @memoized
+    @self_memoized
     def root_property(self):
         """
         Return the ultimate base property for "self", or "self" is it has no
@@ -2931,6 +2931,17 @@ class PropertyDef(AbstractNodeData):
         while result.base_property:
             result = result.base_property
         return result
+
+    def reset_inheritance_info(self):
+        """
+        Reset memoization caches inheritance-related information.
+
+        Must be called when modifying a tree of inherited properties.
+        """
+        for prop in (PropertyDef.base_property, PropertyDef.root_property,
+                     PropertyDef.all_overriding_properties):
+            prop.fget.reset(self)
+        self.overriding_properties = []
 
     @property
     def dynamic_vars(self):
