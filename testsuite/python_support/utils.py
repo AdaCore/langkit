@@ -140,7 +140,7 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         def create_context(self, args):
             return ctx
 
-    m = Manage()
+    m = Manage(override_lang_source_dir=False)
 
     extensions_dir = os.path.abspath('extensions')
     if os.path.isdir(extensions_dir):
