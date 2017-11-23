@@ -1315,14 +1315,15 @@ class BaseStructType(CompiledType):
 
     def add_field(self, field):
         """
-        Append a field to this Struct/AST node. This is not valid if a field
-        lookup has already been done on this Struct/AST node.
+        Append a field to this Struct/AST node.
 
         :param AbstractNodeData field: Field to append.
         """
-        assert not self._abstract_fields_dict_cache
         self._fields[field._name.lower] = field
         field.struct = self
+
+        # Invalidate the field lookup cache
+        self._abstract_fields_dict_cache = {}
 
     def get_user_fields(self, predicate=None, include_inherited=True):
         """
