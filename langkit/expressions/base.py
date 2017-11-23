@@ -983,7 +983,10 @@ class ResolvedExpression(object):
         # If this resolved expression materialize the computation of an
         # abstract expression and its result is stored in a variable, make it
         # visible to the GDB helpers.
-        if self.abstract_expr and self.result_var:
+        if (PropertyDef.get() and
+                PropertyDef.get().has_debug_info and
+                self.abstract_expr and
+                self.result_var):
             unique_id = str(next(self.expr_count))
 
             loc = self.abstract_expr.location
@@ -1674,8 +1677,9 @@ class SequenceExpr(ResolvedExpression):
             # info for it: the end of our inner expression is its definition
             # point.
             if (
-                self.dest_var.abstract_var
-                and self.dest_var.abstract_var.source_name
+                PropertyDef.get().has_debug_info and
+                self.dest_var.abstract_var and
+                self.dest_var.abstract_var.source_name
             ):
                 result.append(gdb_helper(
                     'bind',
@@ -2238,19 +2242,28 @@ class Let(AbstractExpression):
                                            abstract_expr=abstract_expr)
 
         def _render_pre(self):
+            debug_info = PropertyDef.get().has_debug_info
+
             # Start and end a debug info scope around the whole expression so
             # that the bindings we create in this Let expression die when
             # leaving its evaluation in a debugger.
-            result = [gdb_helper('scope-start')]
+            result = []
+            if debug_info:
+                result.append(gdb_helper('scope-start'))
+
             for var, expr in zip(self.vars, self.var_exprs):
                 result.extend([expr.render_pre(),
-                               assign_var(var, expr.render_expr()),
-                               gdb_bind_var(var)])
+                               assign_var(var, expr.render_expr())])
+                if debug_info:
+                    result.append(gdb_bind_var(var))
+
             result.extend([
                 self.expr.render_pre(),
-                assign_var(self.result_var.ref_expr, self.expr.render_expr()),
-                gdb_helper('end')
+                assign_var(self.result_var.ref_expr, self.expr.render_expr())
             ])
+
+            if debug_info:
+                result.append(gdb_helper('end'))
             return '\n'.join(result)
 
         @property
@@ -2497,9 +2510,46 @@ class ArrayLiteral(AbstractExpression):
         return '<ArrayLiteral>'
 
 
+def gdb_helper_for_prop(func):
+    def wrapper(prop, *args, **kwargs):
+        return func(prop, *args, **kwargs) if prop.has_debug_info else ''
+    return wrapper
+
+
+@gdb_helper_for_prop
+def gdb_property_start(prop):
+    return gdb_helper('property-start',
+                      prop.qualname,
+                      '{}:{}'.format(prop.location.file, prop.location.line))
+
+
+@gdb_helper_for_prop
+def gdb_scope_start(prop):
+    return gdb_helper('scope-start')
+
+
+@gdb_helper_for_prop
+def gdb_end(prop):
+    return gdb_helper('end', prop.qualname)
+
+
+@gdb_helper_for_prop
+def gdb_bind(prop, dsl_name, var_name):
+    return gdb_helper('bind', dsl_name, var_name)
+
+
 def render(*args, **kwargs):
-    return ct_render(*args, property=PropertyDef.get(), Self=Self,
-                     assign_var=assign_var, **kwargs)
+    return ct_render(
+        *args,
+        property=PropertyDef.get(),
+        Self=Self,
+        assign_var=assign_var,
+        gdb_property_start=gdb_property_start,
+        gdb_scope_start=gdb_scope_start,
+        gdb_end=gdb_end,
+        gdb_bind=gdb_bind,
+        **kwargs
+    )
 
 
 inherited_information = inherited_property(lambda s: s.base_property)
@@ -2749,6 +2799,15 @@ class PropertyDef(AbstractNodeData):
         Whether this property uses the ".get_value" operation on a logic
         variable.
         """
+
+    @property
+    def has_debug_info(self):
+        """
+        Return whether we should emit debug information for this property.
+
+        :rtype: bool
+        """
+        return self.location is not None
 
     @inherited_information
     def ignore_warn_on_node(self):

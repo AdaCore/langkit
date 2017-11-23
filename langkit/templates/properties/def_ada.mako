@@ -16,9 +16,7 @@ is (raise Property_Error
     & Kind_Name (${Self.type.name} (${property.self_arg_name})));
 
 % elif not property.abstract and not property.external:
-${gdb_helper('property-start',
-             property.qualname,
-             '{}:{}'.format(property.location.file, property.location.line))}
+${gdb_property_start(property)}
 pragma Warnings (Off, "is not referenced");
 ${"overriding" if property.overriding else ""} function ${property.name}
   ${helpers.argument_list(property, property.dispatching)}
@@ -28,7 +26,7 @@ is
    ## that we can use to dispatch on other properties and all.
    Self : ${Self.type.name} := ${Self.type.name}
      (${property.self_arg_name});
-   ${gdb_helper('bind', 'self', 'Self')}
+   ${gdb_bind(property, 'self', 'Self')}
 
    % if property._has_self_entity:
    Ent : ${Self.type.entity.name} :=
@@ -36,7 +34,7 @@ is
    % endif
 
    % for arg in property.arguments:
-   ${gdb_helper('bind', arg.name.lower, arg.name.camel_with_underscores)}
+   ${gdb_bind(property, arg.name.lower, arg.name.camel_with_underscores)}
    % endfor
 
    Property_Result : ${property.type.name} := ${property.type.nullexpr};
@@ -226,5 +224,5 @@ begin
          raise;
 % endif
 end ${property.name};
-${gdb_helper('end', property.qualname)}
+${gdb_end(property)}
 % endif
