@@ -12,7 +12,8 @@ from langkit.diagnostics import (
     Context, check_source_language, extract_library_location
 )
 from langkit.template_utils import common_renderer
-from langkit.utils import issubtype, memoized, not_implemented_error
+from langkit.utils import (issubtype, memoized, not_implemented_error,
+                           self_memoized)
 
 
 def get_context(*args, **kwargs):
@@ -965,13 +966,6 @@ class AbstractNodeData(object):
         :type: list[Argument]
         """
 
-        self._cached_name = None
-        """
-        Cache for the name property.
-
-        :type: None|names.Name
-        """
-
         self._uses_entity_info = False
         self._has_self_entity = False
         self.optional_entity_info = False
@@ -1060,21 +1054,20 @@ class AbstractNodeData(object):
             return self.type.c_type(capi)
 
     @property
+    @self_memoized
     def name(self):
         """
         :rtype: names.Name
         """
-        if not self._cached_name:
-            assert self._name
+        assert self._name
 
-            # If this is an internal property, the name has an underscore
-            # prefix that we want to get rid of for code generation.
-            radix = (names.Name(self._name.base_name[1:])
-                     if self.is_internal else
-                     self._name)
+        # If this is an internal property, the name has an underscore
+        # prefix that we want to get rid of for code generation.
+        radix = (names.Name(self._name.base_name[1:])
+                 if self.is_internal else
+                 self._name)
 
-            self._cached_name = self.prefix + radix if self.prefix else radix
-        return self._cached_name
+        return self.prefix + radix if self.prefix else radix
 
     @property
     def qualname(self):
