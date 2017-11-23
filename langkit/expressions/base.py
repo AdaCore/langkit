@@ -2898,13 +2898,30 @@ class PropertyDef(AbstractNodeData):
         return cls.get().vars.current_scope
 
     @contextmanager
-    def bind(self):
+    def bind(self, bind_dynamic_vars=False):
         """
         Bind the current property to `self`, so that it is accessible in the
         expression templates.
+
+        :param bool bind_dynamic_vars: Whether to bind dynamic variables.
         """
+        previous_property = self.get()
         self.__current_properties__.append(self)
-        yield
+
+        context_managers = []
+
+        # Reset bindings for dynamically bound variables so that they don't
+        # leak through this property.  Also provide default bindings for self's
+        # dynamically bound variables.
+        if bind_dynamic_vars:
+            to_reset = ([] if previous_property is None else
+                        previous_property.dynvar_binding_stack)
+            context_managers.extend(dynvar.bind_default(self)
+                                    for dynvar in to_reset + self.dynamic_vars)
+
+        with nested(*context_managers):
+            yield
+
         self.__current_properties__.pop()
 
     @classmethod
@@ -3418,18 +3435,7 @@ class PropertyDef(AbstractNodeData):
                 self.expected_type = self.base_property.type
             return
 
-        previous_property = PropertyDef.get()
-        context_managers = [self.bind(), Self.bind_type(self.struct)]
-
-        # Reset bindings for dynamically bound variables so that this
-        # construction does not use a caller's binding. Also provide default
-        # bindings for self's dynamically bound variables.
-        to_reset = ([] if previous_property is None else
-                    previous_property.dynvar_binding_stack)
-        context_managers.extend(dynvar.bind_default(self)
-                                for dynvar in to_reset + self.dynamic_vars)
-
-        with nested(*context_managers):
+        with self.bind(bind_dynamic_vars=True), Self.bind_type(self.struct):
             message = (
                 'expected type {{expected}}, got'
                 ' {{expr_type}} instead (expected type comes from'
