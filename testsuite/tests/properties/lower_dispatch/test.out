@@ -1,0 +1,18 @@
+main.py: Running...
+a.p_evaluate_abstract = 3
+a.p_evaluate_rtcheck = raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : Property P_Evaluate_Rtcheck not implemented on type Ref
+a.p_evaluate_concrete = 3
+a.p_evaluate_entity = 3
+
+b.p_evaluate_abstract = 6
+b.p_evaluate_rtcheck = raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : Property P_Evaluate_Rtcheck not implemented on type Ref
+b.p_evaluate_concrete = 6
+b.p_evaluate_entity = 6
+
+c.p_evaluate_abstract = 1
+c.p_evaluate_rtcheck = 1
+c.p_evaluate_concrete = 1
+c.p_evaluate_entity = 1
+
+main.py: Done.
+Done
