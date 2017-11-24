@@ -3130,8 +3130,8 @@ class PropertyDef(AbstractNodeData):
 
             check_source_language(
                 not unmatched_types,
-                "Abstract property {} is not overriden in all subclasses. "
-                "Missing overriding properties on classes: {}".format(
+                'Abstract property {} is not overriden in all subclasses.'
+                ' Missing overriding properties on classes: {}'.format(
                     self.name.lower, ", ".join([t.dsl_name for t in
                                                 unmatched_types])
                 ),
