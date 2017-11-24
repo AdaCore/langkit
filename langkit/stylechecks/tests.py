@@ -45,6 +45,16 @@ testcases = (
     '''.format('a' * 81), []),
 
     #
+    # ASCII testing
+    #
+
+    Testcase('ascii_1.py', '''
+        from __future__ import absolute_import, division, print_function
+
+        # Comment with a special char: \xa0
+    ''', [(3, 0, 'Non-ASCII characters')]),
+
+    #
     # Comment box testing
     #
 

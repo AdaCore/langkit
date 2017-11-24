@@ -162,17 +162,16 @@ package body Langkit_Support.Bump_Ptr is
          --  logic in a generic. But this is impossible, because you cannot
          --  declare a representation clause on a type that is declared in
          --  the scope of a generic.
-         --   (╯°□°）╯︵ ┻━┻.
 
          --  3. Ok, so you cannot encapsulate in a generic. Let's do a memory
          --  pool manually, like we'd do in C/C++. Problem is, you don't call
          --  the new operator to instantiate tagged objects, so your tagged
-         --  objects are gonna have no tag! (ﾉಥ益ಥ）ﾉ﻿ ┻━┻.
+         --  objects are gonna have no tag!
 
          --  3. No problem, let's hack around it by creating a temp variable of
          --  the type, and assigning to the newly allocated instance, so that
          --  the tag is gonna be copied! Except assignment doesn't copy tags in
-         --  Ada ┻━┻ ︵ヽ(`Д´)ﾉ︵﻿ ┻━┻.
+         --  Ada.
 
          --  Hence we are reduced to this dirty hack, where we'll create a temp
          --  object, get the tag, and copy it manually in the newly created

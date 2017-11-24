@@ -27,6 +27,8 @@ YELLOW = '\x1b[33m'
 punctuation_re = re.compile(' [!?:;]')
 sphinx_role_re = re.compile(':[a-z-]+:`')
 
+accepted_chars = [chr(c) for c in range(0x20, 0x80)]
+
 
 def colored(msg, color):
     """Return a string that displays "msg" in "color" inside a terminal."""
@@ -323,6 +325,11 @@ def check_generic(report, filename, content, lang):
 
     for i, line in iter_lines(content):
         report.set_context(filename, i)
+
+        for c in line:
+            if c not in accepted_chars:
+                report.add('Non-ASCII characters')
+                break
 
         if (len(line) > 80 and
                 b'http://' not in line and
