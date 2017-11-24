@@ -1744,7 +1744,8 @@ class ASTNodeType(BaseStructType):
 
             self.generic_list_type = ASTNodeType(
                 name=generic_list_type_name, location=None, doc=None,
-                base=self, fields=[], is_generic_list_type=True
+                base=self, fields=[], is_generic_list_type=True,
+                is_abstract=True
             )
 
         self.parser = None
