@@ -84,7 +84,10 @@ class Testsuite(BaseTestsuite):
     def tear_up(self):
         super(Testsuite, self).tear_up()
 
-        self.global_env['pretty_print'] = (
+        # It seems that arguments parsing in GNATpython leaves None in
+        # store_true options when they are not passed. So here we need to
+        # coerce to bool.
+        self.global_env['pretty_print'] = bool(
             self.global_env['options'].pretty_print)
 
         if self.coverage_enabled:
