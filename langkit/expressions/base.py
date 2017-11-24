@@ -3013,7 +3013,7 @@ class PropertyDef(AbstractNodeData):
         for prop in (PropertyDef.base_property, PropertyDef.root_property,
                      PropertyDef.all_overriding_properties):
             prop.fget.reset(self)
-        self.overriding_properties = []
+        self.overriding_properties = set()
 
     @property
     def dynamic_vars(self):
