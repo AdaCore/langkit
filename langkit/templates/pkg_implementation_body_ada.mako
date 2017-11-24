@@ -1264,6 +1264,14 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end loop;
    end Print;
 
+   ------------
+   -- Length --
+   ------------
+
+   function Length
+     (Node : access ${generic_list_value_type}'Class) return Natural
+   is (Node.Child_Count);
+
    % if ctx.properties_logging:
 
       -----------------

@@ -52,9 +52,6 @@
       Or_Null : Boolean := False) return ${element_type.name};
    --  When Index is positive, return the Index'th element in T. Otherwise,
    --  return the element at index (Size - Index - 1). Index is zero-based.
-
-   ## Helper for properties code
-   function Length (Node : access ${value_type}'Class) return Natural;
 </%def>
 
 <%def name="body(element_type)">
@@ -134,11 +131,4 @@
      (Node  : access ${value_type}'Class; Index : Positive)
       return ${element_type.name}
    is (${element_type.name} (Node.Child (Index)));
-
-   ------------
-   -- Length --
-   ------------
-
-   function Length (Node : access ${value_type}'Class) return Natural
-   is (Node.Child_Count);
 </%def>

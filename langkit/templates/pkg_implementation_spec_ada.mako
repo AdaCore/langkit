@@ -601,6 +601,9 @@ package ${ada_lib_name}.Analysis.Implementation is
    overriding procedure Print
      (Node : access ${generic_list_value_type}; Line_Prefix : String := "");
 
+   function Length
+     (Node : access ${generic_list_value_type}'Class) return Natural;
+
    function Children
      (Node : access ${root_node_value_type}'Class)
      return ${root_node_array.name};
