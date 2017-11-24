@@ -639,8 +639,8 @@ package ${ada_lib_name}.Analysis.Implementation is
       Lexical_Env_Array => ${T.LexicalEnvType.array.api_name});
 
    function Group
-     (Envs : ${T.LexicalEnvType.array.name})
-      return ${T.LexicalEnvType.name};
+     (Envs : ${T.LexicalEnvType.array.name}; 
+      Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnvType.name};
    --  Convenience wrapper for uniform types handling in code generation
 
    procedure Free_Extensions (Node : access ${root_node_value_type}'Class);

@@ -271,7 +271,7 @@ class EnvGroup(AbstractExpression):
 
 
 @auto_attr
-def env_group(self, env_array):
+def env_group(self, env_array, with_md=None):
     """
     Return a new lexical environment that logically groups together multiple
     environments. `env_array` must be an array that contains the environments
@@ -281,8 +281,14 @@ def env_group(self, env_array):
         an array of lexical environments. If this array is empty, the empty
         environment is returned.
     """
+    from langkit.expressions import No
+
+    if not with_md:
+        with_md = No(T.env_md)
+
     return CallExpr('Group_Env', 'Group', T.LexicalEnvType,
-                    [construct(env_array, T.LexicalEnvType.array)],
+                    [construct(env_array, T.LexicalEnvType.array),
+                     construct(with_md, T.env_md)],
                     abstract_expr=self)
 
 

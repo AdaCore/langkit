@@ -451,7 +451,9 @@ package Langkit_Support.Lexical_Env is
    generic
       type Index_Type is range <>;
       type Lexical_Env_Array is array (Index_Type range <>) of Lexical_Env;
-   function Group (Envs : Lexical_Env_Array) return Lexical_Env;
+   function Group
+     (Envs    : Lexical_Env_Array;
+      With_Md : Element_Metadata := Empty_Metadata) return Lexical_Env;
    --  Return a lexical environment that logically groups together multiple
    --  lexical environments. Note that this does not modify the input
    --  environments, however it returns a new owning reference.

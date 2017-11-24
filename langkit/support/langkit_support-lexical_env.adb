@@ -398,7 +398,7 @@ package body Langkit_Support.Lexical_Env is
       --  Return whether, according to Filter, Self should be discarded during
       --  the lexical env lookup.
 
-      procedure Append_Result (E : Entity);
+      function Append_Result (E : Entity) return Boolean;
 
       use Internal_Envs;
 
@@ -415,7 +415,7 @@ package body Langkit_Support.Lexical_Env is
       -- Append_Result --
       -------------------
 
-      procedure Append_Result (E : Entity) is
+      function Append_Result (E : Entity) return Boolean is
       begin
          if Has_Trace then
             Traces.Trace (Me, "Found " & Image (Element_Image (E.El, False)));
@@ -423,7 +423,10 @@ package body Langkit_Support.Lexical_Env is
 
          if From = No_Element or else Can_Reach_F (E) then
             Results.Append (E);
+            return True;
          end if;
+
+         return False;
       end Append_Result;
 
       -----------------------
@@ -516,11 +519,13 @@ package body Langkit_Support.Lexical_Env is
 
             --  TODO??? Use "for .. of next" GPL release
             for I in reverse Elements.First_Index .. Elements.Last_Index loop
-               Append_Result
-                 (Decorate (Elements.Get (I),
-                  Env.Env.Default_MD, Current_Rebindings));
-               if Stop_At_First then
-                  goto Early_Exit;
+               if Append_Result
+                   (Decorate (Elements.Get (I),
+                    Env.Env.Default_MD, Current_Rebindings))
+               then
+                  if Stop_At_First then
+                     goto Early_Exit;
+                  end if;
                end if;
 
             end loop;
@@ -647,7 +652,10 @@ package body Langkit_Support.Lexical_Env is
    -- Group --
    -----------
 
-   function Group (Envs : Lexical_Env_Array) return Lexical_Env is
+   function Group
+     (Envs    : Lexical_Env_Array;
+      With_Md : Element_Metadata := Empty_Metadata) return Lexical_Env
+   is
       N : Lexical_Env;
    begin
       case Envs'Length is
@@ -663,7 +671,7 @@ package body Langkit_Support.Lexical_Env is
             Node            => No_Element,
             Referenced_Envs => <>,
             Map             => null,
-            Default_MD      => Empty_Metadata,
+            Default_MD      => With_Md,
             Rebindings      => null,
             Rebindings_Pool => null,
             Ref_Count       => <>));

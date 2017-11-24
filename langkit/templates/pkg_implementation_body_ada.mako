@@ -1017,8 +1017,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -----------
 
    function Group
-     (Envs : ${T.LexicalEnvType.array.name})
-      return ${T.LexicalEnvType.name}
+     (Envs : ${T.LexicalEnvType.array.name}; 
+      Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnvType.name}
    is (Group (Envs.Items));
 
    % for astnode in ctx.astnode_types:
