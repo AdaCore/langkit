@@ -1071,25 +1071,13 @@ class Match(AbstractExpression):
             Compute the Match.Matcher.matched_concrete_nodes fields in all
             matchers for this expression.
             """
-
-            def concrete_nodes(astnode):
-                """
-                Return the set of concrete nodes that can fit `astnode`.
-
-                :rtype: set[ASTNodeType]
-                """
-                result = set(astnode.concrete_subclasses())
-                if not astnode.abstract:
-                    result.add(astnode)
-                return result
-
             prefix_type = self.prefix_expr.type
             if prefix_type.is_entity_type:
                 prefix_type = prefix_type.el_type
-            remaining_nodes = concrete_nodes(prefix_type)
+            remaining_nodes = set(prefix_type.concrete_subclasses())
 
             for m in self.matchers:
-                candidates = concrete_nodes(m.match_astnode_type)
+                candidates = set(m.match_astnode_type.concrete_subclasses())
                 m.matched_concrete_nodes = candidates & remaining_nodes
                 remaining_nodes -= m.matched_concrete_nodes
 

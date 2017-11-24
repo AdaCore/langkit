@@ -1887,18 +1887,17 @@ class ASTNodeType(BaseStructType):
     def concrete_subclasses(self):
         """
         Return the list of all (direct or indirect) subclass types for `self`
-        that are not abstract, sorted by hierarchical name.
+        that are not abstract, sorted by hierarchical name. If `self` is not
+        abstract, it is included.
 
         :rtype: list[ASTNodeType]
         """
-        result = []
+        result = [] if self.abstract else [self]
 
         sorted_direct_subclasses = sorted(
             self.subclasses, key=lambda subcls: subcls.hierarchical_name()
         )
         for subcls in sorted_direct_subclasses:
-            if not subcls.abstract:
-                result.append(subcls)
             result.extend(subcls.concrete_subclasses())
 
         return result
