@@ -14,10 +14,13 @@ Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 def run(lit):
     class FooNode(ASTNode):
+        pass
+
+    class ExampleNode(FooNode):
         b = Property(lit, public=True)
 
     grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=FooNode('example'))
+    grammar.add_rules(main_rule=ExampleNode('example'))
     emit_and_print_errors(grammar)
 
 print('Valid case')

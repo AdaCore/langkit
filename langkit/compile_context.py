@@ -1012,6 +1012,48 @@ class CompileCtx(object):
         warn(unreachable_private, 'This private property is unused')
         warn(unused_abstractions, 'This private abstraction is unused')
 
+    def warn_unreachable_base_properties(self):
+        """
+        Emit a warning for properties that can never be executed because they
+        are defined on an abstract node and all concrete subclassed have it
+        overriden.
+        """
+        unreachable = []
+
+        for astnode in self.astnode_types:
+            for prop in astnode.get_properties(include_inherited=False):
+                # As we process whole properties set in one round, just focus
+                # on root properties. And of course only on dispatching
+                # properties.
+                if prop.base_property or not prop.dispatching:
+                    continue
+
+                # Also focus on properties for which we emit code (concrete
+                # ones and the ones with a runtime check).
+                props = [p for p in prop.property_set()
+                         if not p.abstract or p.abstract_runtime_check]
+
+                # Set of concrete nodes that can reach this property
+                nodes = set(astnode.concrete_subclasses())
+
+                # Process properties in reverse hierarchical order to process
+                # leaf properties before parent ones.
+                for p in reversed(props):
+                    reaching_p = set(p.struct.concrete_subclasses()) & nodes
+                    if not reaching_p:
+                        unreachable.append(p)
+                    nodes = nodes - reaching_p
+
+        unreachable.sort(key=lambda p: p.location)
+        for p in unreachable:
+            with p.diagnostic_context:
+                check_source_language(
+                    False,
+                    'Unreachable property: all concrete subclasses override'
+                    ' it',
+                    severity=Severity.warning
+                )
+
     def render_template(self, *args, **kwargs):
         # Kludge: to avoid circular dependency issues, do not import parsers
         # until needed.
@@ -1258,6 +1300,8 @@ class CompileCtx(object):
                         lambda _, astnode: astnode.check_resolved()),
             GlobalPass('warn on unused private properties',
                        CompileCtx.warn_unused_private_properties),
+            GlobalPass('warn on unreachable base properties',
+                       CompileCtx.warn_unreachable_base_properties),
             PropertyPass('warn on undocumented public properties',
                          PropertyDef.warn_on_undocumented_public_property),
             ASTNodePass('expose public structs and arrays types in APIs',

@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics, WarningSet
 from langkit.dsl import ASTNode
-from langkit.expressions import langkit_property
+from langkit.expressions import AbstractKind, T, langkit_property
 from langkit.parsers import Grammar
 
 from os import path
@@ -15,22 +15,25 @@ Diagnostics.set_lang_source_dir(path.abspath(__file__))
 class FooNode(ASTNode):
 
     # This property is documented, so it should not have a warning
-    @langkit_property(public=True)
+    @langkit_property(public=True, return_type=T.BoolType,
+                      kind=AbstractKind.abstract)
     def doc_prop():
         """
         This property is documented.
         """
-        return True
+        pass
 
     # This property is undocumented, so it should have a warning
-    @langkit_property(public=True)
+    @langkit_property(public=True, return_type=T.BoolType,
+                      kind=AbstractKind.abstract)
     def undoc_prop():
-        return True
+        pass
 
     # This property is undocumented, so it should have a warning
-    @langkit_property(public=True)
+    @langkit_property(public=True, return_type=T.BoolType,
+                      kind=AbstractKind.abstract)
     def will_doc_prop():
-        return True
+        pass
 
 
 class Example(FooNode):

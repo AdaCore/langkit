@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType
-from langkit.expressions import langkit_property
+from langkit.expressions import AbstractKind, langkit_property
 from langkit.parsers import Grammar
 
 from os import path
@@ -21,9 +21,10 @@ def run(name, arg_parent, arg_overriding):
     print('== {} =='.format(name))
 
     class FooNode(ASTNode):
-        @langkit_property(public=True)
+        @langkit_property(public=True, return_type=BoolType,
+                          kind=AbstractKind.abstract)
         def prop(a=arg_parent):
-            return a
+            pass
 
     class Example(FooNode):
         @langkit_property()
