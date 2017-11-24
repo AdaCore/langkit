@@ -54,6 +54,7 @@ package body Langkit_Support.Lexical_Env is
       From          : Element_T := No_Element;
       Recursive     : Boolean := True;
       Rebindings    : Env_Rebindings := null;
+      Metadata      : Element_Metadata := Empty_Metadata;
       Filter        : access
          function (Ent : Entity; Env : Lexical_Env) return Boolean := null;
       Stop_At_First : Boolean;
@@ -381,6 +382,7 @@ package body Langkit_Support.Lexical_Env is
       From          : Element_T := No_Element;
       Recursive     : Boolean := True;
       Rebindings    : Env_Rebindings := null;
+      Metadata      : Element_Metadata := Empty_Metadata;
       Filter        : access
          function (Ent : Entity; Env : Lexical_Env) return Boolean := null;
       Stop_At_First : Boolean;
@@ -403,6 +405,8 @@ package body Langkit_Support.Lexical_Env is
       use Internal_Envs;
 
       Current_Rebindings : Env_Rebindings;
+
+      Current_Metadata   : Element_Metadata;
 
       -----------------
       -- Can_Reach_F --
@@ -459,6 +463,7 @@ package body Langkit_Support.Lexical_Env is
               (if Self.Is_Transitive
                then Current_Rebindings
                else Shed_Rebindings (Env, Current_Rebindings)),
+            Metadata => Current_Metadata,
             Filter     => Filter,
             Stop_At_First => Stop_At_First,
             Results    => Results);
@@ -491,6 +496,7 @@ package body Langkit_Support.Lexical_Env is
       Parent_Env := Get_Env (Self.Env.Parent);
 
       Current_Rebindings := Combine (Self.Env.Rebindings, Rebindings);
+      Current_Metadata := Combine (Self.Env.Default_MD, Metadata);
 
       --  If there is an environment corresponding to Self in env rebindings,
       --  we'll get it here. We'll also shed it from the set of current
@@ -521,7 +527,7 @@ package body Langkit_Support.Lexical_Env is
             for I in reverse Elements.First_Index .. Elements.Last_Index loop
                if Append_Result
                    (Decorate (Elements.Get (I),
-                    Env.Env.Default_MD, Current_Rebindings))
+                    Current_Metadata, Current_Rebindings))
                then
                   if Stop_At_First then
                      goto Early_Exit;
@@ -542,7 +548,10 @@ package body Langkit_Support.Lexical_Env is
 
       if Recursive then
          Get_Internal
-           (Parent_Env, Key, From, True, Parent_Rebindings, Filter,
+           (Parent_Env, Key, From, True,
+            Parent_Rebindings,
+            Current_Metadata,
+            Filter,
             Stop_At_First, Results);
       end if;
 
@@ -573,7 +582,8 @@ package body Langkit_Support.Lexical_Env is
          Traces.Increase_Indent (Me);
       end if;
 
-      Get_Internal (Self, Key, From, Recursive, Rebindings, Filter, False, V);
+      Get_Internal (Self, Key, From, Recursive, Rebindings,
+                    Empty_Metadata, Filter, False, V);
 
       if Has_Trace then
          Traces.Trace (Me, "Returning vector with length " & V.Length'Image);
@@ -610,8 +620,8 @@ package body Langkit_Support.Lexical_Env is
          Traces.Increase_Indent (Me);
       end if;
 
-      Get_Internal (Self, Key, From, Recursive, Rebindings, Filter,
-                    True, V);
+      Get_Internal (Self, Key, From, Recursive, Rebindings, Empty_Metadata,
+                    Filter, True, V);
 
       if Has_Trace then
          Traces.Trace (Me, "Returning vector with length " & V.Length'Image);
@@ -659,26 +669,22 @@ package body Langkit_Support.Lexical_Env is
       N : Lexical_Env;
    begin
       case Envs'Length is
-      when 0 =>
-         return Empty_Env;
-      when 1 =>
-         N := Envs (Envs'First);
-         Inc_Ref (N);
-         return N;
-      when others =>
-         N := Wrap (new Lexical_Env_Type'
-           (Parent          => No_Env_Getter,
-            Node            => No_Element,
-            Referenced_Envs => <>,
-            Map             => null,
-            Default_MD      => With_Md,
-            Rebindings      => null,
-            Rebindings_Pool => null,
-            Ref_Count       => <>));
-         for Env of Envs loop
-            Reference (N, Env, No_Element, Transitive => True);
-         end loop;
-         return N;
+         when 0 =>
+            return Empty_Env;
+         when others =>
+            N := Wrap (new Lexical_Env_Type'
+              (Parent          => No_Env_Getter,
+               Node            => No_Element,
+               Referenced_Envs => <>,
+               Map             => null,
+               Default_MD      => With_Md,
+               Rebindings      => null,
+               Rebindings_Pool => null,
+               Ref_Count       => <>));
+            for Env of Envs loop
+               Reference (N, Env, No_Element, Transitive => True);
+            end loop;
+            return N;
       end case;
    end Group;
 
