@@ -2631,10 +2631,6 @@ class PropertyDef(AbstractNodeData):
             scheme with current langkit capabilities in which the parser
             generate the right types for the functionality you want.
 
-            Note that for abstract properties that are private, this is
-            automatically enabled, as abstract private primitives are not
-            allowed in Ada.
-
         :param None|list[DynamicVariable] dynamic_vars: List of dynamically
             bound variables for this property. If left to None, inherit from
             the overriden property, or the empty list if these is no property
@@ -3299,10 +3295,6 @@ class PropertyDef(AbstractNodeData):
                 'Cannot explicitely pass uses_envs for internal'
                 ' properties'
             )
-
-        # See abstract_runtime_check documentation in __init__
-        if self.is_private and self.abstract:
-            self.abstract_runtime_check = True
 
         # Add dynamically bound variables as arguments
         check_source_language(
