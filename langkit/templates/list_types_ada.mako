@@ -9,8 +9,6 @@
 <%def name="public_incomplete_decl(element_type)">
 
    <%
-      elt_type = element_type.name
-
       list_type = element_type.list
       value_type = list_type.value_type_name()
       type_name = list_type.name
@@ -24,8 +22,6 @@
 <%def name="private_decl(element_type)">
 
    <%
-      elt_type = element_type.name
-
       list_type = element_type.list
       value_type = list_type.value_type_name()
       type_name = list_type.name
@@ -44,10 +40,12 @@
         (Node : access ${value_type}) return ${root_node_kind_name};
    % endif
 
+   ## Helpers generated for properties code. Used in CollectionGet's and
+   ## Map/Quantifier's code.
    function Item
-     (Node  : access ${value_type}; Index : Positive) return ${elt_type};
+     (Node  : access ${value_type}'Class; Index : Positive)
+      return ${element_type.name};
 
-   ## Helper generated for properties code. Used in CollectionGet's code
    function Get
      (Node    : access ${value_type}'Class;
       Index   : Integer;
@@ -62,7 +60,6 @@
 <%def name="body(element_type)">
 
    <%
-      elt_type = element_type.name
       list_type = element_type.list
       value_type = list_type.value_type_name()
       type_name = list_type.name
@@ -134,8 +131,9 @@
    ----------
 
    function Item
-     (Node  : access ${value_type}; Index : Positive) return ${elt_type}
-   is (${elt_type} (Node.Child (Index)));
+     (Node  : access ${value_type}'Class; Index : Positive)
+      return ${element_type.name}
+   is (${element_type.name} (Node.Child (Index)));
 
    ------------
    -- Length --
