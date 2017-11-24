@@ -3125,8 +3125,13 @@ class PropertyDef(AbstractNodeData):
         if self.abstract and not self.abstract_runtime_check:
             check_overriding_props(assert_type(self.struct, ASTNodeType))
 
-            unmatched_types = sorted(type_set.unmatched_types(self.struct),
-                                     key=lambda cls: cls.hierarchical_name())
+            # Don't consider abstract types for unmatched types as it's safe to
+            # have a propert that is left abstract on an abstract AST node.
+            unmatched_types = sorted(
+                [t for t in type_set.unmatched_types(self.struct)
+                 if not t.abstract],
+                key=lambda cls: cls.hierarchical_name()
+            )
 
             check_source_language(
                 not unmatched_types,
