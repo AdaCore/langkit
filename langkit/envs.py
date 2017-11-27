@@ -53,15 +53,14 @@ def reference(nodes, through, transitive=False, visible_to_children=False):
 
     :param AbstractExpression nodes: An expression that yields a list of nodes.
     :param PropertyDef through: A property reference.
-    :param bool visible_to_children: If true, then the referenced
-            environment will be visible to the node, and the children of the
-            node on which reference acts.
+    :param bool visible_to_children: If true, then the referenced environment
+        will be visible to the node, and the children of the node on which
+        the reference acts.
 
-            By default this is false, to prevent infinite recursions that can
-            happen if any children of node does an env-lookup as part of its
-            env spec. Use this flag if you need this reference to be visible to
-            children of node, and are sure that it can cause no infinite
-            recursion.
+        By default this is false, to prevent infinite recursions that can
+        happen if any children of node does an env-lookup as part of its env
+        spec. Use this flag if you need this reference to be visible to
+        children of node, and are sure that it can cause no infinite recursion.
 
     :rtype: RefEnvs
     """
