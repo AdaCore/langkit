@@ -321,6 +321,16 @@ class EnvAction(object):
         """
         pass
 
+    def rewrite_property_refs(self, mapping):
+        """
+        Rewrite `PropertyDef` references according to `mapping`. See
+        CompileCtx.lower_properties_dispatching.
+
+        :param dict[PropertyDef, PropertyDef] mapping: PropertyDef reference
+            substitution mapping.
+        """
+        pass
+
 
 class AddEnv(EnvAction):
     def __init__(self, no_parent=False):
@@ -372,6 +382,9 @@ class AddToEnv(EnvAction):
         self.metadata_prop = env_spec.create_internal_property(
             'MD', self.metadata, T.defer_env_md
         )
+
+    def rewrite_property_refs(self, mapping):
+        self.resolver = mapping.get(self.resolver, self.resolver)
 
 
 class RefEnvs(EnvAction):
@@ -461,6 +474,9 @@ class RefEnvs(EnvAction):
             'Referenced environment resolver must have no dynamically bound'
             ' variable'
         )
+
+    def rewrite_property_refs(self, mapping):
+        self.resolver = mapping.get(self.resolver, self.resolver)
 
 
 class HandleChildren(EnvAction):

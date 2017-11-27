@@ -1292,8 +1292,6 @@ class CompileCtx(object):
                        CompileCtx.compute_uses_entity_info_attr),
             GlobalPass('compute uses envs attribute',
                        CompileCtx.compute_uses_envs_attr),
-            GlobalPass('check memoized properties',
-                       CompileCtx.check_memoized),
             EnvSpecPass('check env specs',
                         EnvSpec.check_spec),
             ASTNodePass('check resolved ASTnode subclasses',
@@ -1307,6 +1305,10 @@ class CompileCtx(object):
             ASTNodePass('expose public structs and arrays types in APIs',
                         CompileCtx.expose_public_api_types,
                         auto_context=False),
+            GlobalPass('lower properties dispatching',
+                       CompileCtx.lower_properties_dispatching),
+            GlobalPass('check memoized properties',
+                       CompileCtx.check_memoized),
             errors_checkpoint_pass,
 
             StopPipeline('check only', disabled=not check_only),
@@ -1841,6 +1843,178 @@ class CompileCtx(object):
             for arg in f.natural_arguments:
                 expose(arg.type, f, '"{}" argument'.format(arg.name),
                        [f.qualname])
+
+    def lower_properties_dispatching(self):
+        """
+        Lower all dispatching properties.
+
+        For each set of related dispatching properties, create a wrapper one
+        that does manual dispatching based on AST node kinds and make all the
+        other ones non-dispatching and private.
+        """
+        from langkit.compiled_types import Argument
+        from langkit.expressions import (Entity, FieldAccess, LocalVars, Match,
+                                         Self, construct)
+
+        ignored_props = set()
+        redirected_props = {}
+        wrapper_props = set()
+
+        # Iterate on AST nodes in hierarchical order, so that we meet root
+        # properties before the overriding ones. As processing root properties
+        # will remove the dispatching attribute of all overriding ones, we will
+        # not process the same property twice.
+        for astnode in self.astnode_types:
+            for prop in astnode.get_properties(
+                lambda p: p.dispatching,
+                include_inherited=False
+            ):
+                if prop in ignored_props:
+                    continue
+
+                # `prop` must the ultimate base property: see the above comment
+                prop_set = prop.property_set()
+                assert prop_set[0] == prop
+
+                # Because of the way they integrate in code generation,
+                # external properties need to use tag-based dispatching, so
+                # don't lower dispatching for any set of properties that
+                # contain an external one.
+                if any(p.external or p.force_dispatching for p in prop_set):
+                    ignored_props.update(prop_set)
+                    continue
+
+                def static_name(prop):
+                    return prop.struct.name + prop.name
+
+                static_props = list(prop_set)
+
+                # After the transformation, only the dispatching property will
+                # require an untyped wrapper, so just remember if we need at
+                # least one and make sure we generate at most one per property
+                # hierarchy.
+                requires_untyped_wrapper = any(p.requires_untyped_wrapper
+                                               for p in static_props)
+                for p in static_props:
+                    p._requires_untyped_wrapper = False
+                prop._requires_untyped_wrapper = requires_untyped_wrapper
+
+                # The root property will be re-purposed as dispatching
+                # function, so if it wasn't abstract, create a clone that the
+                # dispatcher will redirect to.
+                #
+                # Note that in this context, we consider abstract properties
+                # with a runtime check as concrete, as we do generate a body
+                # for them. Because of this, we can here create a concrete
+                # property that has an abstract runtime check.
+                root_static = None
+                prop.reset_inheritance_info()
+                if not prop.abstract or prop.abstract_runtime_check:
+                    root_static = PropertyDef(
+                        expr=None, prefix=None, name=prop.name,
+                        type=prop.type,
+                        doc=prop.doc,
+                        public=False,
+                        dynamic_vars=prop.dynamic_vars,
+                        uses_entity_info=prop.uses_entity_info,
+                        uses_envs=prop.uses_envs,
+                        optional_entity_info=prop.optional_entity_info,
+                    )
+                    static_props[0] = root_static
+
+                    # Transfer arguments from the dispatcher to the new static
+                    # property, then regenerate arguments in the dispatcher.
+                    root_static.arguments = prop.arguments
+                    prop.arguments = [
+                        Argument(arg.name, arg.type, arg.is_artificial,
+                                 arg.default_value)
+                        for arg in prop.natural_arguments
+                    ]
+                    prop.build_dynamic_var_arguments()
+
+                    root_static.constructed_expr = prop.constructed_expr
+                    prop.constructed_expr = None
+
+                    root_static.vars = prop.vars
+                    prop.vars = LocalVars()
+
+                    root_static.abstract_runtime_check = (
+                        prop.abstract_runtime_check)
+                    prop.abstract_runtime_check = False
+
+                    root_static._has_self_entity = prop._has_self_entity
+
+                    root_static.struct = prop.struct
+
+                else:
+                    # If there is no runtime check for abstract properties, the
+                    # set of concrete properties should cover the whole
+                    # hierarchy tree. Just remove the future dispatcher from
+                    # the list of statically dispatched properties.
+                    static_props.pop(0)
+
+                # Make sure all static properties are public, not dispatching
+                # anymore, and assign them another name so that they don't
+                # override each other in the generated code.
+                for p in static_props:
+                    p._is_public = False
+
+                    p.prefix = None
+                    p._name = static_name(p)
+                    PropertyDef.name.fget.reset(p)
+
+                    # Now that "root_static" is properly renamed, we can add it
+                    # to its owning ASTNodeType instance.
+                    if p == root_static:
+                        prop.struct.add_field(p)
+
+                    p.abstract = False
+                    p.reset_inheritance_info()
+
+                    redirected_props[p] = prop
+
+                # Now turn the root property into a dispatcher
+                wrapper_props.add(prop)
+                prop.abstract = False
+
+                with prop.bind(bind_dynamic_vars=True), \
+                        Self.bind_type(prop.struct):
+                    outer_scope = prop.get_scope()
+                    self_arg = construct(Entity
+                                         if prop.uses_entity_info else
+                                         Self)
+                    matchers = []
+                    for p in reversed(static_props):
+                        match_var = prop.vars.create_scopeless(
+                            'Match_Var',
+                            (p.struct.entity
+                             if prop.uses_entity_info
+                             else p.struct)
+                        )
+                        with outer_scope.new_child() as inner_scope:
+                            inner_scope.add(match_var)
+                            static_call = FieldAccess.Expr(
+                                receiver_expr=match_var.ref_expr,
+                                node_data=p,
+                                arguments=[construct(arg.var)
+                                           for arg in prop.natural_arguments],
+                                implicit_deref=p.uses_entity_info
+                            )
+                            matchers.append(Match.Matcher(
+                                match_var.ref_expr, static_call, inner_scope
+                            ))
+
+                    prop.constructed_expr = Match.Expr(self_arg, matchers)
+
+        # Now that all relevant properties have been transformed, update all
+        # references to them so that we always call the wrapper. Note that we
+        # don't have to do this for property expressions are we are supposed to
+        # have already directed to root properties at resolved expression
+        # construction time.
+        for astnode in self.astnode_types:
+            if astnode.env_spec:
+                for env_action in astnode.env_spec.actions:
+                    env_action.rewrite_property_refs(redirected_props)
 
     @property
     def has_memoization(self):
