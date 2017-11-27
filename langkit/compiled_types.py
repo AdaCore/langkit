@@ -947,6 +947,16 @@ class AbstractNodeData(object):
 
         self._name = name
 
+        self._original_name = None
+        """
+        Name for this property as specified in the DSL, if different from the
+        current name.
+
+        :type: names.Name
+        """
+        if name:
+            self._original_name = self.name
+
         self.struct = None
         """
         StructType subclass that declared this field. Initialized when creating
@@ -1030,7 +1040,7 @@ class AbstractNodeData(object):
         Whether this property is internal.
         :rtype: bool
         """
-        return self._name.base_name.startswith('_')
+        return self.prefix == AbstractNodeData.PREFIX_INTERNAL
 
     @property
     def type(self):
@@ -1053,21 +1063,44 @@ class AbstractNodeData(object):
         with self.diagnostic_context:
             return self.type.c_type(capi)
 
+    def _prefixed_name(self, name):
+        """
+        Decorate `name` with this AbstractNodeData's prefix.
+
+        :rtype: names.Name
+        """
+        assert name
+
+        # If this is an internal property, the name has an underscore
+        # prefix that we want to get rid of for code generation.
+        radix = (names.Name(name.base_name[1:])
+                 if self.is_internal else
+                 name)
+
+        return self.prefix + radix if self.prefix else radix
+
     @property
     @self_memoized
     def name(self):
         """
         :rtype: names.Name
         """
-        assert self._name
+        return self._prefixed_name(self._name)
 
-        # If this is an internal property, the name has an underscore
-        # prefix that we want to get rid of for code generation.
-        radix = (names.Name(self._name.base_name[1:])
-                 if self.is_internal else
-                 self._name)
+    @name.setter
+    def name(self, name):
+        assert isinstance(name, names.Name)
+        self._name = name
+        if self._original_name is None:
+            self._original_name = self.name
 
-        return self.prefix + radix if self.prefix else radix
+    @property
+    def original_name(self):
+        """
+        :rtype: names.Name
+        """
+        assert self._original_name
+        return self._original_name
 
     @property
     def qualname(self):
@@ -1075,11 +1108,16 @@ class AbstractNodeData(object):
         Return the qualified name for this field, i.e. the name of the owning
         type plus the name of the field itself. This is useful for diagnostic
         messages.
+
+        Note that if expansion renamed this property, this will return the
+        original (DSL-level) name.
+
         :rtype: str
         """
         return '{}.{}'.format(
             self.struct.dsl_name if self.struct else '<unresolved>',
-            self.name.lower if self._name else '<unresolved>'
+            (self.original_name.lower
+             if self._original_name else '<unresolved>')
         )
 
     def __repr__(self):
@@ -1087,11 +1125,6 @@ class AbstractNodeData(object):
             type(self).__name__,
             self.qualname
         )
-
-    @name.setter
-    def name(self, name):
-        assert isinstance(name, names.Name)
-        self._name = name
 
     @property
     def doc(self):

@@ -2728,6 +2728,8 @@ class PropertyDef(AbstractNodeData):
             warnings for this property. Defaults to None, which means inherit.
         """
 
+        self.prefix = prefix
+
         super(PropertyDef, self).__init__(name=name, public=public)
 
         self.in_type = False
@@ -2741,8 +2743,6 @@ class PropertyDef(AbstractNodeData):
 
         :type: [([CompiledType], str)]
         """
-
-        self.prefix = prefix
 
         self.expr = expr
         ":type: AbstractExpression"
