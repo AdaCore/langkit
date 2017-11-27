@@ -120,7 +120,6 @@ def make_renderer(base_renderer=None):
             'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
             'exception_type':        CAPIType(capi, 'exception').name,
             'library_public_field':  library_public_field,
-            'gdb_helper':            gdb_helper,
         })
     return base_renderer.update(template_args)
 
