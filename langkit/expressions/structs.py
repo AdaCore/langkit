@@ -471,7 +471,11 @@ class FieldAccess(AbstractExpression):
                                   if self.simple_field_access else
                                   NullCheckExpr(receiver_expr, implicit_deref))
             self.implicit_deref = implicit_deref
+
             self.node_data = node_data
+            self.original_node_data = node_data
+            if self.node_data.is_property:
+                self.node_data = self.node_data.root_property
 
             self.arguments = arguments
             if self.arguments is not None:
@@ -645,7 +649,7 @@ class FieldAccess(AbstractExpression):
         @property
         def subexprs(self):
             result = {'0-prefix': self.receiver_expr,
-                      '1-field': self.node_data}
+                      '1-field': self.original_node_data}
             if self.arguments:
                 result['2-args'] = self.arguments
             return result
