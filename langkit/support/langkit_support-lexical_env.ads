@@ -460,6 +460,10 @@ package Langkit_Support.Lexical_Env is
    --
    --  If this array is empty, Empty_Env is returned. Note that if Envs'Length
    --  is greater than 1, the result is dynamically allocated.
+   --
+   --  If With_Md is passed, the resulting env will have the passed metadata
+   --  instance as default metadata. As a result, any env element returned will
+   --  have its metadata combined with the default metadata.
 
    function Rebind_Env
       (Base_Env : Lexical_Env;

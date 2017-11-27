@@ -280,6 +280,9 @@ def env_group(self, env_array, with_md=None):
     :param AbstractExpression env_array: Expression that will return
         an array of lexical environments. If this array is empty, the empty
         environment is returned.
+
+    :param AbstractExpression with_md: Optional metadata struct. If passed,
+        then it will be made the default metadata for this lexical environment.
     """
     from langkit.expressions import No
 

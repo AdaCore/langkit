@@ -639,7 +639,7 @@ package ${ada_lib_name}.Analysis.Implementation is
       Lexical_Env_Array => ${T.LexicalEnvType.array.api_name});
 
    function Group
-     (Envs : ${T.LexicalEnvType.array.name}; 
+     (Envs : ${T.LexicalEnvType.array.name};
       Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnvType.name};
    --  Convenience wrapper for uniform types handling in code generation
 

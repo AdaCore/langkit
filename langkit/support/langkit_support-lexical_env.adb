@@ -401,6 +401,8 @@ package body Langkit_Support.Lexical_Env is
       --  the lexical env lookup.
 
       function Append_Result (E : Entity) return Boolean;
+      --  Add E to results, if it passes the Can_Reach filter. Return whether
+      --  result was appended or not.
 
       use Internal_Envs;
 
