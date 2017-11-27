@@ -23,8 +23,7 @@ def run(name, prop):
         pass
 
     class Example(FooNode):
-        if prop:
-            p = prop()
+        p = prop()
 
     grammar = Grammar('main_rule')
     grammar.add_rules(
@@ -37,6 +36,6 @@ def run(name, prop):
 run('Invalid uses entity info',
     lambda: Property(lambda a=T.entity.array:
                      a.any(lambda item: item == Self.as_entity),
-                     memoized=True))
+                     memoized=True, public=True))
 
 print('Done')
