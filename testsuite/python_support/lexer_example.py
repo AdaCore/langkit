@@ -15,6 +15,7 @@ class Token(LexerToken):
     RPar = WithText()
     LBrace = WithText()
     RBrace = WithText()
+    Equal = WithText()
     Plus = WithText()
 
     Number = WithText()
@@ -35,6 +36,7 @@ foo_lexer.add_rules(
     (Literal(')'),           Token.RPar),
     (Literal('{'),           Token.LBrace),
     (Literal('}'),           Token.RBrace),
+    (Literal('='),           Token.Equal),
     (Literal('+'),           Token.Plus),
 
     (Pattern('[0-9]+'),      Token.Number),
