@@ -163,7 +163,12 @@ class Bind(AbstractExpression):
             return prop
 
         self.eq_prop = resolve('eq_prop', self.eq_prop)
+        if self.eq_prop:
+            self.eq_prop.root_property
+
         self.conv_prop = resolve('conv_prop', self.conv_prop)
+        if self.conv_prop:
+            self.conv_prop = self.conv_prop.root_property
 
     def construct(self):
         from langkit.compile_context import get_context
@@ -411,7 +416,7 @@ class Predicate(AbstractExpression):
         self.exprs = exprs
 
     def do_prepare(self):
-        self.pred_property = resolve_property(self.pred_property)
+        self.pred_property = resolve_property(self.pred_property).root_property
 
     def construct(self):
         check_multiple([
