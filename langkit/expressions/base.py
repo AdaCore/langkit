@@ -12,8 +12,8 @@ from langkit import names
 from langkit.common import string_repr
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNodeType, CompiledType, T, TypeRepo,
-    gdb_bind_var, gdb_helper, get_context, no_compiled_type,
-    render as ct_render, resolve_type
+    gdb_helper, get_context, no_compiled_type, render as ct_render,
+    resolve_type
 )
 from langkit.diagnostics import (
     Context, DiagnosticError, Severity, WarningSet, check_multiple,
@@ -2285,7 +2285,8 @@ class Let(AbstractExpression):
                                            abstract_expr=abstract_expr)
 
         def _render_pre(self):
-            debug_info = PropertyDef.get().has_debug_info
+            prop = PropertyDef.get()
+            debug_info = prop.has_debug_info
 
             # Start and end a debug info scope around the whole expression so
             # that the bindings we create in this Let expression die when
@@ -2298,7 +2299,7 @@ class Let(AbstractExpression):
                 result.extend([expr.render_pre(),
                                assign_var(var, expr.render_expr())])
                 if debug_info:
-                    result.append(gdb_bind_var(var))
+                    result.append(gdb_bind_var(prop, var))
 
             result.extend([
                 self.expr.render_pre(),
@@ -2581,6 +2582,21 @@ def gdb_bind(prop, dsl_name, var_name):
     return gdb_helper('bind', dsl_name, var_name)
 
 
+@gdb_helper_for_prop
+def gdb_bind_var(prop, var):
+    """
+    Output a GDB helper directive to bind a variable. This does nothing if the
+    variable has no source name.
+
+    :param ResolvedExpression var: The variable to bind.
+    :rtype: str
+    """
+    return (gdb_bind(prop,
+                     var.abstract_var.source_name.lower,
+                     var.name.camel_with_underscores)
+            if var.abstract_var and var.abstract_var.source_name else '')
+
+
 def render(*args, **kwargs):
     return ct_render(
         *args,
@@ -2591,6 +2607,7 @@ def render(*args, **kwargs):
         gdb_scope_start=gdb_scope_start,
         gdb_end=gdb_end,
         gdb_bind=gdb_bind,
+        gdb_bind_var=gdb_bind_var,
         **kwargs
     )
 

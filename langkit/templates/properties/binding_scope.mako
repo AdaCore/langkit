@@ -5,7 +5,7 @@
 ${scopes.start_scope(expr.scope)}
 
 % for binding in expr.expr_bindings:
-   ${gdb_bind_var(binding)}
+   ${gdb_bind_var(property, binding)}
 % endfor
 
 ${expr.expr.render_pre()}

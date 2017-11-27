@@ -50,19 +50,6 @@ def gdb_helper(*args):
     return '--# {}'.format(' '.join(pipes.quote(a) for a in args))
 
 
-def gdb_bind_var(var):
-    """
-    Output a GDB helper directive to bind a variable. This does nothing if the
-    variable has no source name.
-
-    :param ResolvedExpression var: The variable to bind.
-    :rtype: str
-    """
-    return (gdb_helper('bind', var.abstract_var.source_name.lower,
-                       var.name.camel_with_underscores)
-            if var.abstract_var and var.abstract_var.source_name else '')
-
-
 @memoized
 def make_renderer(base_renderer=None):
     """
@@ -134,7 +121,6 @@ def make_renderer(base_renderer=None):
             'exception_type':        CAPIType(capi, 'exception').name,
             'library_public_field':  library_public_field,
             'gdb_helper':            gdb_helper,
-            'gdb_bind_var':          gdb_bind_var,
         })
     return base_renderer.update(template_args)
 
