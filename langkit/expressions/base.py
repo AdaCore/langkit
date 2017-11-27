@@ -2573,7 +2573,7 @@ def gdb_scope_start(prop):
 
 @gdb_helper_for_prop
 def gdb_end(prop):
-    return gdb_helper('end', prop.qualname)
+    return gdb_helper('end')
 
 
 @gdb_helper_for_prop
