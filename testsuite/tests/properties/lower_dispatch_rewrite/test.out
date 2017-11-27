@@ -1,0 +1,6 @@
+main.py: Running...
+<Ref x (from a)> -> <Var x (from a)>
+<DerivedRef a (from b)> -> <Def 2:1-5:14>
+<Ref x (from b)> -> <Var x (from a)>
+main.py: Done.
+Done
