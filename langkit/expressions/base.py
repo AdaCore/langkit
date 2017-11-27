@@ -2732,6 +2732,15 @@ class PropertyDef(AbstractNodeData):
 
         super(PropertyDef, self).__init__(name=name, public=public)
 
+        self._original_is_public = None
+        """
+        Original privacy for this property. Can be different from `is_public`
+        after properties expansion. Computed right after `is_public` itself in
+        the `prepare` pass.
+
+        :type: bool
+        """
+
         self.in_type = False
         "Recursion guard for the construct pass"
 
@@ -3314,6 +3323,8 @@ class PropertyDef(AbstractNodeData):
             if self._dynamic_vars is None:
                 self._dynamic_vars = []
 
+        self._original_is_public = self.is_public
+
         if self.external:
             check_source_language(
                 self.expr is None,
@@ -3362,6 +3373,10 @@ class PropertyDef(AbstractNodeData):
                 ' ones'.format(self.qualname, args,
                                self.base_property.qualname, base_args)
             )
+
+    @property
+    def original_is_public(self):
+        return self._original_is_public
 
     def build_dynamic_var_arguments(self):
         """

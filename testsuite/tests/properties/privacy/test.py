@@ -53,7 +53,8 @@ def run(abstract_public, concrete_public):
 
     if emit_and_print_errors(grammar):
         for fld in (AbstractNode.prop, ConcreteNode.prop):
-            print('  {}: {}'.format(fld.qualname, fmt_privacy[fld.is_public]))
+            print('  {}: {}'.format(fld.qualname,
+                                    fmt_privacy[fld.original_is_public]))
     print('')
 
 
