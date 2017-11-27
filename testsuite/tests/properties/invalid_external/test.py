@@ -26,6 +26,7 @@ def run(name, abstract_prop, prop=None):
     @abstract
     class AbstractExample(FooNode):
         p = abstract_prop()
+        public_p = Property(Self.p, public=True)
 
     class Example(AbstractExample):
         if prop:
