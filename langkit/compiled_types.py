@@ -1988,13 +1988,8 @@ class ASTNodeType(BaseStructType):
         """
         if self.abstract:
             return self.ada_kind_name
-        elif self.subclasses:
-            return self.ada_kind_name + '_Range'
         else:
-            raise ValueError(
-                'Concrete AST nodes that do not have subclasses cannot have a'
-                ' dedicated subtype kind'
-            )
+            return self.ada_kind_name + '_Range'
 
     def value_type_name(self):
         """
