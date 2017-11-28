@@ -26,7 +26,7 @@ is
    ## that we can use to dispatch on other properties and all.
    Self : ${Self.type.name} := ${Self.type.name}
      (${property.self_arg_name});
-   ${gdb_bind(property, 'self', 'Self')}
+   ${gdb_bind('self', 'Self')}
 
    % if property._has_self_entity:
    Ent : ${Self.type.entity.name} :=
@@ -34,7 +34,7 @@ is
    % endif
 
    % for arg in property.arguments:
-   ${gdb_bind(property, arg.name.lower, arg.name.camel_with_underscores)}
+   ${gdb_bind(arg.name.lower, arg.name.camel_with_underscores)}
    % endfor
 
    Property_Result : ${property.type.name} := ${property.type.nullexpr};
@@ -224,5 +224,5 @@ begin
          raise;
 % endif
 end ${property.name};
-${gdb_end(property)}
+${gdb_end()}
 % endif

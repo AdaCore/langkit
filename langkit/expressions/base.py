@@ -2299,7 +2299,7 @@ class Let(AbstractExpression):
                 result.extend([expr.render_pre(),
                                assign_var(var, expr.render_expr())])
                 if debug_info:
-                    result.append(gdb_bind_var(prop, var))
+                    result.append(gdb_bind_var(var))
 
             result.extend([
                 self.expr.render_pre(),
@@ -2554,36 +2554,25 @@ class ArrayLiteral(AbstractExpression):
         return '<ArrayLiteral>'
 
 
-def gdb_helper_for_prop(func):
-    def wrapper(prop, *args, **kwargs):
-        return func(prop, *args, **kwargs) if prop.has_debug_info else ''
-    return wrapper
-
-
-@gdb_helper_for_prop
 def gdb_property_start(prop):
     return gdb_helper('property-start',
                       prop.qualname,
                       '{}:{}'.format(prop.location.file, prop.location.line))
 
 
-@gdb_helper_for_prop
-def gdb_scope_start(prop):
+def gdb_scope_start():
     return gdb_helper('scope-start')
 
 
-@gdb_helper_for_prop
-def gdb_end(prop):
+def gdb_end():
     return gdb_helper('end')
 
 
-@gdb_helper_for_prop
-def gdb_bind(prop, dsl_name, var_name):
+def gdb_bind(dsl_name, var_name):
     return gdb_helper('bind', dsl_name, var_name)
 
 
-@gdb_helper_for_prop
-def gdb_bind_var(prop, var):
+def gdb_bind_var(var):
     """
     Output a GDB helper directive to bind a variable. This does nothing if the
     variable has no source name.
@@ -2591,8 +2580,7 @@ def gdb_bind_var(prop, var):
     :param ResolvedExpression var: The variable to bind.
     :rtype: str
     """
-    return (gdb_bind(prop,
-                     var.abstract_var.source_name.lower,
+    return (gdb_bind(var.abstract_var.source_name.lower,
                      var.name.camel_with_underscores)
             if var.abstract_var and var.abstract_var.source_name else '')
 

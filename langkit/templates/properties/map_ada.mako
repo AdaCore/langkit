@@ -79,13 +79,11 @@ begin
 
          ## Bind user iteration variables
          % if user_element_var.source_name:
-            ${gdb_bind(property,
-                       user_element_var.source_name.lower,
+            ${gdb_bind(user_element_var.source_name.lower,
                        user_element_var.name.camel_with_underscores)}
          % endif
          % if map.index_var:
-            ${gdb_bind(property,
-                       map.index_var.source_name.lower,
+            ${gdb_bind(map.index_var.source_name.lower,
                        map.index_var.name.camel_with_underscores)}
          % endif
 
