@@ -2140,8 +2140,7 @@ class ASTNodeType(BaseStructType):
             ('node_env', PropertyDef(
                 expr=None, prefix=None, type=T.LexicalEnvType, public=False,
                 external=True, uses_entity_info=True, uses_envs=True,
-                optional_entity_info=True, force_dispatching=True,
-                warn_on_unused=False,
+                optional_entity_info=True, warn_on_unused=False,
                 doc='For nodes that introduce a new environment, return the'
                     ' parent lexical environment. Return the "inherited"'
                     ' environment otherwise.'

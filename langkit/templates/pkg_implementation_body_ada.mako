@@ -1194,9 +1194,32 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------
 
    function Node_Env
-     (Node   : access ${root_node_value_type};
+     (Node   : access ${root_node_value_type}'Class;
       E_Info : Entity_Info := No_Entity_Info) return Lexical_Env
-   is (Rebind_Env (Node.Self_Env, E_Info));
+   is
+      <%
+         nodes_adding_env = [
+            n for n in ctx.astnode_types
+            if n.env_spec and
+               not n.is_env_spec_inherited and
+               n.env_spec.adds_env
+         ]
+      %>
+      Base_Env : Lexical_Env :=
+         % if nodes_adding_env:
+            (if Node.Kind in
+               ${' | '.join(n.ada_kind_range_name for n in nodes_adding_env)}
+             then AST_Envs.Get_Env (Node.Self_Env.Env.Parent)
+             else Node.Self_Env)
+         % else:
+            Node.Self_Env
+         % endif
+      ;
+      Result : constant Lexical_Env := Rebind_Env (Base_Env, E_Info);
+   begin
+      Dec_Ref (Base_Env);
+      return Result;
+   end Node_Env;
 
    ------------
    -- Parent --
