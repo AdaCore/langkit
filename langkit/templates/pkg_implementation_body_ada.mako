@@ -775,13 +775,29 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -----------------
 
    function Short_Image
-     (Node : access ${root_node_value_type})
-      return Text_Type
-   is
-      Self : access ${root_node_value_type}'Class := Node;
+     (Node : access ${root_node_value_type}'Class) return Text_Type is
    begin
-      return "<" & To_Text (Kind_Name (Self))
-             & " " & To_Text (Image (Sloc_Range (Node))) & ">";
+      <%
+         matchers = list(reversed([
+            n for n in ctx.astnode_types
+            if n.annotations.custom_short_image
+         ]))
+         matched_types, _ = ctx.collapse_concrete_nodes(
+            ctx.root_grammar_class, matchers
+         )
+      %>
+      case Node.Kind is
+         % for matcher, matched in zip(matchers, matched_types):
+            % if matched:
+               when ${ctx.astnode_kind_set(matched)} =>
+                  return ${matcher.name}_Short_Image
+                    (${matcher.name} (Node));
+            % endif
+         % endfor
+         when others =>
+            return "<" & To_Text (Node.Kind_Name)
+                   & " " & To_Text (Image (Node.Sloc_Range)) & ">";
+      end case;
    end Short_Image;
 
    -------------

@@ -302,7 +302,8 @@ inherited_annotation = inherited_property(lambda s: s.get_parent_annotations())
 
 class Annotations(object):
     def __init__(self, repr_name=None, generic_list_type=None,
-                 warn_on_node=None, rebindable=False):
+                 warn_on_node=None, rebindable=False,
+                 custom_short_image=False):
         """
         Constructor for a node's annotations.
 
@@ -313,11 +314,17 @@ class Annotations(object):
             Per-node switch to disable some warnings.
         :param bool rebindable: Whether lexical environments that belong to
             this kind of node can be rebound.
+        :param bool custom_short_image: Whether this AST node must use a
+            custom Short_Image implementation. If true, extensions must add the
+            declaration and the definition of a function called
+            `[NODE_NAME]_Short_Image` that takes the node in argument and that
+            returns a `Text_Type` value.
         """
         self.repr_name = repr_name
         self.generic_list_type = generic_list_type
         self._warn_on_node = warn_on_node
         self._rebindable = rebindable
+        self.custom_short_image = custom_short_image
 
     @inherited_annotation
     def warn_on_node(self):
