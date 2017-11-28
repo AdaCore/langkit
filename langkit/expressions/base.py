@@ -2577,12 +2577,20 @@ def gdb_bind_var(var):
     Output a GDB helper directive to bind a variable. This does nothing if the
     variable has no source name.
 
-    :param ResolvedExpression var: The variable to bind.
+    :param LocalVars.LocalVar|VariableExpr var: The variable to bind.
     :rtype: str
     """
-    return (gdb_bind(var.abstract_var.source_name.lower,
-                     var.name.camel_with_underscores)
-            if var.abstract_var and var.abstract_var.source_name else '')
+    gen_name = var.name
+    if isinstance(var, VariableExpr):
+        var = var.abstract_var
+    else:
+        assert isinstance(var, AbstractVariable)
+
+    if not (var and var.source_name):
+        return ''
+
+    return gdb_bind(var.source_name.lower,
+                    gen_name.camel_with_underscores)
 
 
 def render(*args, **kwargs):
