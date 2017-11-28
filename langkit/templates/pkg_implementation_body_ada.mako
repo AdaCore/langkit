@@ -1493,35 +1493,36 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ----------------------
 
    procedure Reset_Logic_Vars (Node : access ${root_node_value_type}'Class) is
-      K : ${root_node_kind_name} := Node.Kind;
+
+      procedure Reset (LV : in out Logic_Var_Record);
+      --  Reset the LV logic variable, clearing the value it stores
+
+      -----------
+      -- Reset --
+      -----------
+
+      procedure Reset (LV : in out Logic_Var_Record) is
+      begin
+         --  TODO??? Fix Adalog so that Destroy resets the
+         --  value it stores.
+         LV.Value := No_Entity;
+         Eq_Node.Refs.Reset (LV);
+         Eq_Node.Refs.Destroy (LV);
+      end Reset;
+
+      K : constant ${root_node_kind_name} := Node.Kind;
+
    begin
-   case K is
-   % for cls in ctx.astnode_types:
-      % if not cls.abstract:
-         <%
-            logic_vars = [fld for fld in cls.get_user_fields()
-                          if fld.type.is_logic_var_type]
-         %>
-         % if logic_vars:
-            when ${cls.ada_kind_name} =>
-               declare
-                  N : ${cls.name} := ${cls.name} (Node);
-               begin
-                  % if logic_vars:
-                     % for field in logic_vars:
-                        --  TODO??? Fix Adalog so that Destroy resets the
-                        --  value it stores.
-                        N.${field.name}.Value := No_Entity;
-                        Eq_Node.Refs.Reset (N.${field.name});
-                        Eq_Node.Refs.Destroy (N.${field.name});
-                     % endfor
-                  % endif
-               end;
-         % endif
-      % endif
-   % endfor
-   when others => null;
-   end case;
+      <%
+          def get_actions(astnode, node_expr):
+              return '\n'.join(
+                  'Reset ({}.{});'.format(node_expr, field.name)
+                  for field in astnode.get_user_fields(
+                      include_inherited=False)
+                  if field.type.is_logic_var_type
+              )
+      %>
+      ${ctx.generate_actions_for_hierarchy('Node', 'K', get_actions)}
    end Reset_Logic_Vars;
 
    --------------
