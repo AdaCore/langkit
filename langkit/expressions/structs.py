@@ -3,8 +3,7 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import (BuiltinField, Field, UserField,
-                                    get_context, resolve_type)
+from langkit.compiled_types import BuiltinField, Field, UserField, resolve_type
 from langkit.diagnostics import Context, Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
@@ -14,7 +13,7 @@ from langkit.expressions import (
 )
 from langkit.expressions.boolean import Eq
 from langkit.expressions.utils import assign_var
-from langkit.utils import TypeSet, memoized
+from langkit.utils import TypeSet, astnode_kind_set, memoized
 
 
 @attr_call("cast", do_raise=False)
@@ -975,40 +974,6 @@ class Match(AbstractExpression):
                     if self.match_type.is_entity_type else
                     self.match_type)
 
-        @property
-        def ada_kind_set(self):
-            """
-            Turn `matched_concrete_nodes` into an set of AST node kinds,
-            suitable to use in Ada's `X in Y | Z` construct.
-
-            :rtype: str
-            """
-            ctx = get_context()
-            kinds = sorted(ctx.node_kind_constants[astnode]
-                           for astnode in self.matched_concrete_nodes)
-
-            # Try to collapse sequences of contiguous kinds into ranges
-            first_kind = kinds.pop(0)
-            groups = [(first_kind, first_kind)]
-            for k in kinds:
-                first, last = groups[-1]
-                if k == last + 1:
-                    groups[-1] = (first, k)
-                else:
-                    groups.append((k, k))
-
-            # Turn numeric constants into enumeration names
-            groups = [
-                (ctx.kind_constant_to_node[f].ada_kind_name,
-                 ctx.kind_constant_to_node[l].ada_kind_name)
-                for f, l in groups
-            ]
-
-            return ' | '.join(
-                (f if f == l else '{} .. {}'.format(f, l))
-                for f, l in groups
-            )
-
     class Expr(ComputingExpr):
 
         def __init__(self, prefix_expr, matchers, abstract_expr=None):
@@ -1088,7 +1053,8 @@ class Match(AbstractExpression):
             assert not remaining_nodes
 
         def _render_pre(self):
-            return render('properties/match_ada', expr=self)
+            return render('properties/match_ada', expr=self,
+                          kind_set=astnode_kind_set)
 
         @property
         def subexprs(self):

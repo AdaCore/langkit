@@ -185,3 +185,51 @@ def not_implemented_error(self_or_cls, method):  # no-code-coverage
     return NotImplementedError('{} must override method {}'.format(
         cls.__name__, method.__name__
     ))
+
+
+def astnode_kind_set(nodes):
+    """
+    Turn a set of AST nodes into a the corresponding set of AST node kinds.
+
+    The result is suitable to use in Ada's `X in Y | Z` construct.
+
+    :param set[langkit.compiled_types.ASTNodeType] nodes: Set of AST
+        nodes to process. Abstract AST nodes are expanded into the set of
+        their concrete subclasses.
+    :rtype: str
+    """
+    from langkit.compiled_types import get_context
+
+    # Compute the set of concrete AST nodes that is covered by `nodes`
+    concrete_nodes = set()
+    for n in nodes:
+        if n.abstract:
+            concrete_nodes.update(n.concrete_subclasses())
+        else:
+            concrete_nodes.add(n)
+
+    ctx = get_context()
+    kinds = sorted(ctx.node_kind_constants[astnode]
+                   for astnode in concrete_nodes)
+
+    # Try to collapse sequences of contiguous kinds into ranges
+    first_kind = kinds.pop(0)
+    groups = [(first_kind, first_kind)]
+    for k in kinds:
+        first, last = groups[-1]
+        if k == last + 1:
+            groups[-1] = (first, k)
+        else:
+            groups.append((k, k))
+
+    # Turn numeric constants into enumeration names
+    groups = [
+        (ctx.kind_constant_to_node[f].ada_kind_name,
+         ctx.kind_constant_to_node[l].ada_kind_name)
+        for f, l in groups
+    ]
+
+    return ' | '.join(
+        (f if f == l else '{} .. {}'.format(f, l))
+        for f, l in groups
+    )
