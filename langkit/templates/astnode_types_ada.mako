@@ -191,15 +191,6 @@
 
       overriding function Kind
         (Node : access ${type_name}) return ${root_node_kind_name};
-
-      ## No need to regenerate these primitives for list types as the
-      ## inheritted one already fit.
-      % if not cls.is_list_type:
-         overriding procedure Print
-           (Node        : access ${type_name};
-            Line_Prefix : String := "");
-
-      % endif
    % endif
 
    ## Field getters
@@ -328,49 +319,6 @@
       begin
          return ${cls.ada_kind_name};
       end Kind;
-
-      ## No need to regenerate these primitives for list types as the
-      ## inheritted one already fit.
-      % if not cls.is_list_type:
-
-      -----------
-      -- Print --
-      -----------
-
-      overriding procedure Print
-        (Node        : access ${type_name};
-         Line_Prefix : String := "")
-      is
-         Class_Wide_Node : constant ${cls.name} := ${cls.name} (Node);
-         Attr_Prefix     : constant String := Line_Prefix & "|";
-         Children_Prefix : constant String := Line_Prefix & "|  ";
-      begin
-         Put_Line
-           (Line_Prefix & Class_Wide_Node.Kind_Name
-            & "[" & Image (Node.Sloc_Range) & "]");
-
-         % for i, field in enumerate(repr_fields):
-            % if field.type.is_ptr:
-               Put (Attr_Prefix & "${field._name.lower}:");
-               if Node.${field.name} /= null then
-                  New_Line;
-                  Node.${field.name}.Print (Children_Prefix);
-               else
-                  Put_Line (" <null>");
-               end if;
-            % elif field.type.is_token_type:
-               Put_Line
-                 (Attr_Prefix & "${field._name.lower}: "
-                  & Text (${field.name} (Node)));
-            % else:
-               Put_Line (Attr_Prefix & "${field._name.lower}: "
-                         & Image (Node.${field.name}));
-            % endif
-         % endfor
-
-      end Print;
-
-      % endif
 
    % endif
 

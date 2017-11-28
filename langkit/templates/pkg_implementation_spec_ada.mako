@@ -409,8 +409,8 @@ package ${ada_lib_name}.Analysis.Implementation is
    -------------------
 
    procedure Print
-     (Node        : access ${root_node_value_type};
-      Line_Prefix : String := "") is abstract;
+     (Node        : access ${root_node_value_type}'Class;
+      Line_Prefix : String := "");
    --  Debug helper: print to standard output Node and all its children.
    --  Line_Prefix is prepended to each output line.
 
@@ -592,9 +592,6 @@ package ${ada_lib_name}.Analysis.Implementation is
       Nodes : Alloc_AST_List_Array.Element_Array_Access;
    end record;
    --  Base type for all lists of AST node subclasses
-
-   overriding procedure Print
-     (Node : access ${generic_list_value_type}; Line_Prefix : String := "");
 
    function Length
      (Node : access ${generic_list_value_type}'Class) return Natural;

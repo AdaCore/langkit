@@ -849,6 +849,90 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Index_In_Bounds := False;
    end Get_Child;
 
+   -----------
+   -- Print --
+   -----------
+
+   procedure Print
+     (Node        : access ${root_node_value_type}'Class;
+      Line_Prefix : String := "")
+   is
+      K               : constant ${root_node_kind_name} := Node.Kind;
+      Attr_Prefix     : constant String := Line_Prefix & "|";
+      Children_Prefix : constant String := Line_Prefix & "|  ";
+
+   begin
+     Put (Line_Prefix & Node.Kind_Name & "[" & Image (Node.Sloc_Range) & "]");
+     if Node.all not in ${generic_list_value_type}'Class then
+        New_Line;
+     end if;
+
+      <%
+        root_type = ctx.root_grammar_class.name
+
+        def get_actions(astnode, node_expr):
+            repr_fields = astnode.get_parse_fields(
+                lambda f: f.repr,
+                include_inherited=False
+            )
+
+            result = []
+
+            # Emit only one processing code for all list types: no need to
+            # repeat it multiple times.
+            if astnode.is_generic_list_type:
+                result.append("""
+                    if {node}.Count = 0 then
+                       Put_Line (": <empty list>");
+                       return;
+                    end if;
+
+                    New_Line;
+                    for Child of {node}.Nodes (1 .. {node}.Count) loop
+                       if Child /= null then
+                          Child.Print (Line_Prefix & "|  ");
+                       end if;
+                    end loop;
+                """.format(node=node_expr))
+            elif astnode.is_list:
+                pass
+
+            elif repr_fields:
+                for i, field in enumerate(repr_fields):
+                    if field.type.is_ptr:
+                        handler = """
+                           Put (Attr_Prefix & "{print_name}:");
+                           if {node}.{field_name} /= null then
+                              New_Line;
+                              {node}.{field_name}.Print (Children_Prefix);
+                           else
+                              Put_Line (" <null>");
+                           end if;
+                        """
+
+                    elif field.type.is_token_type:
+                        handler = """
+                           Put_Line
+                             (Attr_Prefix & "{print_name}: "
+                              & Text ({field_name} ({node})));
+                        """
+
+                    else:
+                        handler = """
+                           Put_Line (Attr_Prefix & "{print_name}: "
+                                     & Image ({node}.{field_name}));
+                        """
+
+                    result.append(handler.format(
+                        node=node_expr,
+                        print_name=field._name.lower,
+                        field_name=field.name
+                    ))
+            return '\n'.join(result)
+      %>
+      ${ctx.generate_actions_for_hierarchy('Node', 'K', get_actions)}
+   end Print;
+
    ------------
    -- Parent --
    ------------
@@ -1319,32 +1403,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    procedure Destroy_Synthetic_Node (Node : in out ${root_node_type_name});
    --  Helper for the Register_Destroyable above
-
-   -----------
-   -- Print --
-   -----------
-
-   overriding procedure Print
-     (Node : access ${generic_list_value_type}; Line_Prefix : String := "")
-   is
-      Class_Wide_Node : constant ${root_node_type_name} :=
-         ${root_node_type_name} (Node);
-   begin
-      Put
-        (Line_Prefix & Class_Wide_Node.Kind_Name
-         & "[" & Image (Node.Sloc_Range) & "]");
-      if Node.Count = 0 then
-         Put_Line (": <empty list>");
-         return;
-      end if;
-
-      New_Line;
-      for Child of Node.Nodes (1 .. Node.Count) loop
-         if Child /= null then
-            Child.Print (Line_Prefix & "|  ");
-         end if;
-      end loop;
-   end Print;
 
    ------------
    -- Length --
