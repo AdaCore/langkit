@@ -142,6 +142,37 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end case;
    end Pre_Env_Actions;
 
+   ----------------------
+   -- Post_Env_Actions --
+   ----------------------
+
+   procedure Post_Env_Actions
+     (Self                : access ${root_node_value_type}'Class;
+      Bound_Env, Root_Env : AST_Envs.Lexical_Env) is
+   begin
+      <%
+         matchers = list(reversed([
+            n for n in ctx.astnode_types
+            if n.env_spec and
+               not n.is_env_spec_inherited
+               and n.env_spec.post_actions
+         ]))
+         matched_types, _ = ctx.collapse_concrete_nodes(
+            ctx.root_grammar_class, matchers
+         )
+      %>
+      case Self.Kind is
+         % for matcher, matched in zip(matchers, matched_types):
+            % if matched:
+               when ${ctx.astnode_kind_set(matched)} =>
+                  ${matcher.name}_Post_Env_Actions
+                    (${matcher.name} (Self), Bound_Env, Root_Env);
+            % endif
+         % endfor
+         when others => null;
+      end case;
+   end Post_Env_Actions;
+
    ---------------------
    -- Is_Visible_From --
    ---------------------

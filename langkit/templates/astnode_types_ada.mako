@@ -222,8 +222,8 @@
          Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env;
 
       % if cls.env_spec.post_actions:
-         overriding procedure Post_Env_Actions
-           (Self                : access ${type_name};
+         procedure ${cls.name}_Post_Env_Actions
+           (Self                : access ${type_name}'Class;
             Bound_Env, Root_Env : AST_Envs.Lexical_Env);
       % endif
 
@@ -537,21 +537,17 @@
    ## Emit Post_Env_Actions only if needed
 
    % if cls.env_spec.post_actions:
-   ----------------------
-   -- Post_Env_Actions --
-   ----------------------
-
-   overriding procedure Post_Env_Actions
-     (Self                : access ${type_name};
-      Bound_Env, Root_Env : AST_Envs.Lexical_Env)
-   is
-      use AST_Envs;
-      Initial_Env : Lexical_Env := Bound_Env;
-   begin
-      % for action in cls.env_spec.post_actions:
-      ${emit_env_action (action)}
-      % endfor
-   end Post_Env_Actions;
+      procedure ${cls.name}_Post_Env_Actions
+        (Self                : access ${type_name}'Class;
+         Bound_Env, Root_Env : AST_Envs.Lexical_Env)
+      is
+         use AST_Envs;
+         Initial_Env : Lexical_Env := Bound_Env;
+      begin
+         % for action in cls.env_spec.post_actions:
+         ${emit_env_action (action)}
+         % endfor
+      end;
    % endif
 
    % endif

@@ -561,8 +561,8 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Post_Env_Actions.
 
    procedure Post_Env_Actions
-     (Self                : access ${root_node_value_type};
-      Bound_Env, Root_Env : Lexical_Env) is null;
+     (Self                : access ${root_node_value_type}'Class;
+      Bound_Env, Root_Env : Lexical_Env);
    --  Internal procedure that will execute all post add to env actions for
    --  Node. This is meant to be called by Populate_Lexical_Env.
 
