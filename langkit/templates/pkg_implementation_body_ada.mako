@@ -1138,7 +1138,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------------------------
 
    procedure Assign_Names_To_Logic_Vars
-    (Node : access ${root_node_value_type}'Class) is
+     (Node : access ${root_node_value_type}'Class) is
    begin
       % for f in T.root_node.get_fields( \
            include_inherited=False, \
