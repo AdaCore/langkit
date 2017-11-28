@@ -291,13 +291,14 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  is 1-based. Store in Index_In_Bounds whether Node had such a child; if
    --  not, the content of Result is undefined.
 
-   function Child (Node  : access ${root_node_value_type}'Class;
-                   Index : Positive) return ${root_node_type_name};
+   function Child
+     (Node  : access ${root_node_value_type}'Class;
+      Index : Positive) return ${root_node_type_name};
    --  Return the Index'th child of Node, or null if Node has no such child
 
    function Children
      (Node : access ${root_node_value_type}'Class)
-     return ${root_node_array.api_name};
+      return ${root_node_array.api_name};
    --  Return an array containing all the children of Node.
    --  This is an alternative to the Child/Child_Count pair, useful if you want
    --  the convenience of Ada arrays, and you don't care about the small
@@ -312,13 +313,13 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    function Parent
      (Node : access ${root_node_value_type}'Class)
-     return ${root_node_type_name};
+      return ${root_node_type_name};
 
    function Traverse
      (Node  : access ${root_node_value_type}'Class;
       Visit : access function (Node : access ${root_node_value_type}'Class)
                                return Visit_Status)
-     return Visit_Status;
+      return Visit_Status;
    --  Given the parent node for a subtree, traverse all syntactic nodes of
    --  this tree, calling the given function on each node in pre order (ie.
    --  top-down). The order of traversing subtrees follows the order of
@@ -366,35 +367,38 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    function Previous_Sibling
      (Node : access ${root_node_value_type}'Class)
-     return ${root_node_type_name};
+      return ${root_node_type_name};
    --  Return the Node's previous sibling in the tree, if there is such a node
 
    function Next_Sibling
      (Node : access ${root_node_value_type}'Class)
-     return ${root_node_type_name};
+      return ${root_node_type_name};
    --  Return the Node's next sibling in the tree, if there is such a node
 
    ----------------------------------------
    -- Source location-related operations --
    ----------------------------------------
 
-   function Sloc_Range (Node : access ${root_node_value_type}'Class;
-                        Snap : Boolean := False) return Source_Location_Range;
+   function Sloc_Range
+     (Node : access ${root_node_value_type}'Class;
+      Snap : Boolean := False) return Source_Location_Range;
    --  Return the source location range corresponding to the set of tokens from
    --  which Node was parsed.
    --
    --  TODO??? Document the Snap formal.
 
-   function Compare (Node : access ${root_node_value_type}'Class;
-                     Sloc : Source_Location;
-                     Snap : Boolean := False) return Relative_Position;
+   function Compare
+     (Node : access ${root_node_value_type}'Class;
+      Sloc : Source_Location;
+      Snap : Boolean := False) return Relative_Position;
    --  Compare Sloc to the sloc range of Node.
    --
    --  TODO??? Document the Snap formal.
 
-   function Lookup (Node : access ${root_node_value_type}'Class;
-                    Sloc : Source_Location;
-                    Snap : Boolean := False) return ${root_node_type_name};
+   function Lookup
+     (Node : access ${root_node_value_type}'Class;
+      Sloc : Source_Location;
+      Snap : Boolean := False) return ${root_node_type_name};
    --  Look for the bottom-most AST node whose sloc range contains Sloc. Return
    --  it, or null if no such node was found.
    --
@@ -606,7 +610,7 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    function Children
      (Node : access ${root_node_value_type}'Class)
-     return ${root_node_array.name};
+      return ${root_node_array.name};
    --  Return an array containing all the children of Node.
    --  This is an alternative to the Child/Child_Count pair, useful if you want
    --  the convenience of ada arrays, and you don't care about the small
@@ -639,7 +643,7 @@ package ${ada_lib_name}.Analysis.Implementation is
       Lexical_Env_Array => ${T.LexicalEnvType.array.api_name});
 
    function Group
-     (Envs : ${T.LexicalEnvType.array.name};
+     (Envs   : ${T.LexicalEnvType.array.name};
       Env_Md : ${T.env_md.name} := No_Metadata) return ${T.LexicalEnvType.name};
    --  Convenience wrapper for uniform types handling in code generation
 
