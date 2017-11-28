@@ -37,12 +37,10 @@ ${result_var} := ${'False' if quantifier.kind == ANY else 'True'};
 
       ## Bind user iteration variables
       % if user_element_var.source_name:
-         ${gdb_bind(user_element_var.source_name.lower,
-                    user_element_var.name.camel_with_underscores)}
+         ${gdb_bind_var(user_element_var)}
       % endif
       % if quantifier.index_var:
-         ${gdb_bind(quantifier.index_var.source_name.lower,
-                    quantifier.index_var.name.camel_with_underscores)}
+         ${gdb_bind_var(quantifier.index_var)}
       % endif
 
       ${quantifier.expr.render_pre()}
