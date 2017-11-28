@@ -778,6 +778,77 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}'Class) return Natural
    is (Node.Child_Count);
 
+   ---------------
+   -- Get_Child --
+   ---------------
+
+   procedure Get_Child
+     (Node            : access ${root_node_value_type}'Class;
+      Index           : Positive;
+      Index_In_Bounds : out Boolean;
+      Result          : out ${root_node_type_name})
+   is
+      K : constant ${root_node_kind_name} := Node.Kind;
+
+   begin
+      <%
+        root_type = ctx.root_grammar_class.name
+
+        def get_actions(astnode, node_expr):
+            specific_fields = astnode.get_parse_fields(
+                lambda f: f.type.is_ast_node,
+                include_inherited=False
+            )
+
+            result = []
+
+            # Emit only one processing code for all list types: no need to
+            # repeat it multiple times.
+            if astnode.is_generic_list_type:
+                result.append("""
+                    if Index > {node}.Count then
+                        Index_In_Bounds := False;
+                    else
+                        Result := {node}.Nodes (Index);
+                    end if;
+                    return;
+                """.format(node=node_expr))
+            elif astnode.is_list:
+                pass
+
+            # Otherwise, emit code to handle regular fields, when there are
+            # some.
+            elif specific_fields:
+                # Compute the index of the first AST node field we handle here
+                all_fields = astnode.get_parse_fields(
+                    lambda f: f.type.is_ast_node,
+                    include_inherited=True
+                )
+                first_field_index = len(all_fields) - len(specific_fields) + 1
+
+                result.append('case Index is')
+                for i, f in enumerate(specific_fields, first_field_index):
+                    result.append("""
+                        when {} =>
+                            Result := {} ({}.{});
+                            return;
+                    """.format(i, root_type, node_expr, f.name))
+                result.append("""
+                        when others => null;
+                    end case;
+                """)
+            return '\n'.join(result)
+      %>
+
+      Index_In_Bounds := True;
+      Result := null;
+      ${ctx.generate_actions_for_hierarchy('Node', 'K', get_actions)}
+
+      --  Execution should reach this point iff nothing matched this index, so
+      --  we must be out of bounds.
+      Index_In_Bounds := False;
+   end Get_Child;
+
    ------------
    -- Parent --
    ------------
@@ -1248,24 +1319,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    procedure Destroy_Synthetic_Node (Node : in out ${root_node_type_name});
    --  Helper for the Register_Destroyable above
-
-   ---------------
-   -- Get_Child --
-   ---------------
-
-   overriding procedure Get_Child
-     (Node            : access ${generic_list_value_type};
-      Index           : Positive;
-      Index_In_Bounds : out Boolean;
-      Result          : out ${root_node_type_name}) is
-   begin
-      if Index > Node.Count then
-         Index_In_Bounds := False;
-      else
-         Index_In_Bounds := True;
-         Result := Node.Nodes (Index);
-      end if;
-   end Get_Child;
 
    -----------
    -- Print --

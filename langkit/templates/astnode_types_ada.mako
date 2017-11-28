@@ -195,12 +195,6 @@
       ## No need to regenerate these primitives for list types as the
       ## inheritted one already fit.
       % if not cls.is_list_type:
-         overriding procedure Get_Child
-           (Node            : access ${type_name};
-            Index           : Positive;
-            Index_In_Bounds : out Boolean;
-            Result          : out ${root_node_type_name});
-
          overriding procedure Print
            (Node        : access ${type_name};
             Line_Prefix : String := "");
@@ -338,35 +332,6 @@
       ## No need to regenerate these primitives for list types as the
       ## inheritted one already fit.
       % if not cls.is_list_type:
-
-      ---------------
-      -- Get_Child --
-      ---------------
-
-      overriding procedure Get_Child
-        (Node            : access ${type_name};
-         Index           : Positive;
-         Index_In_Bounds : out Boolean;
-         Result          : out ${root_node_type_name})
-      is
-         ## Some ASTnodes have no ASTNode child: avoid the "unused parameter"
-         ## compilation warning for them.
-         % if not astnode_fields:
-             pragma Unreferenced (Node);
-             pragma Unreferenced (Result);
-         % endif
-      begin
-         case Index is
-             % for i, field in enumerate(astnode_fields, 1):
-                 when ${i} =>
-                     Result := ${root_node_type_name} (Node.${field.name});
-                     Index_In_Bounds := True;
-             % endfor
-             when others =>
-                Index_In_Bounds := False;
-                Result := null;
-         end case;
-      end Get_Child;
 
       -----------
       -- Print --

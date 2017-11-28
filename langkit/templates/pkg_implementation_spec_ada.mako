@@ -283,10 +283,10 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Return the index of the last child Node has, or 0 if there is no child
 
    procedure Get_Child
-     (Node            : access ${root_node_value_type};
+     (Node            : access ${root_node_value_type}'Class;
       Index           : Positive;
       Index_In_Bounds : out Boolean;
-      Result          : out ${root_node_type_name}) is abstract;
+      Result          : out ${root_node_type_name});
    --  Get the Index'th child of Node, storing it into Result. Child indexing
    --  is 1-based. Store in Index_In_Bounds whether Node had such a child; if
    --  not, the content of Result is undefined.
@@ -592,12 +592,6 @@ package ${ada_lib_name}.Analysis.Implementation is
       Nodes : Alloc_AST_List_Array.Element_Array_Access;
    end record;
    --  Base type for all lists of AST node subclasses
-
-   overriding procedure Get_Child
-     (Node            : access ${generic_list_value_type};
-      Index           : Positive;
-      Index_In_Bounds : out Boolean;
-      Result          : out ${root_node_type_name});
 
    overriding procedure Print
      (Node : access ${generic_list_value_type}; Line_Prefix : String := "");
