@@ -233,3 +233,30 @@ def astnode_kind_set(nodes):
         (f if f == l else '{} .. {}'.format(f, l))
         for f, l in groups
     )
+
+
+def collapse_concrete_nodes(input_type, astnodes):
+    """
+    Compute the set of concrete subclasses for `input_types` that match each
+    AST node in `astnodes`. For each item in `astnodes`, we exclude the set of
+    subclasses already returned for the previous item.
+
+    This is useful to implement Match-like constructs: for each matcher, this
+    computes the set of concrete AST nodes that can be matched (hence the
+    exclusion).
+
+    This returns a tuple: first element is a list of the same size as
+    `astnodes` and contains the corresponding sets of concrete AST nodes. The
+    second element is the set of unmatched concrete AST nodes.
+
+    :rtype: (list[set[ASTNodeType]], set[ASTNodeType])
+    """
+    remaining_nodes = set(input_type.concrete_subclasses())
+    result = []
+
+    for node in astnodes:
+        candidates = set(node.concrete_subclasses())
+        result.append(candidates & remaining_nodes)
+        remaining_nodes -= result[-1]
+
+    return (result, remaining_nodes)

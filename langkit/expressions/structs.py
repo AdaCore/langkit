@@ -13,7 +13,8 @@ from langkit.expressions import (
 )
 from langkit.expressions.boolean import Eq
 from langkit.expressions.utils import assign_var
-from langkit.utils import TypeSet, astnode_kind_set, memoized
+from langkit.utils import (TypeSet, astnode_kind_set, collapse_concrete_nodes,
+                           memoized)
 
 
 @attr_call("cast", do_raise=False)
@@ -1030,27 +1031,20 @@ class Match(AbstractExpression):
 
             # Determine for each matcher the set of concrete AST nodes it can
             # actually match.
-            self._compute_matched_concrete_nodes()
-
-            super(Match.Expr, self).__init__('Match_Result',
-                                             abstract_expr=abstract_expr)
-
-        def _compute_matched_concrete_nodes(self):
-            """
-            Compute the Match.Matcher.matched_concrete_nodes fields in all
-            matchers for this expression.
-            """
             prefix_type = self.prefix_expr.type
             if prefix_type.is_entity_type:
                 prefix_type = prefix_type.el_type
-            remaining_nodes = set(prefix_type.concrete_subclasses())
+            matched_types, remainder = collapse_concrete_nodes(
+                (prefix_type.el_type
+                 if prefix_type.is_entity_type else prefix_type),
+                [m.match_astnode_type for m in self.matchers]
+            )
+            assert not remainder
+            for matcher, matched in zip(self.matchers, matched_types):
+                matcher.matched_concrete_nodes = matched
 
-            for m in self.matchers:
-                candidates = set(m.match_astnode_type.concrete_subclasses())
-                m.matched_concrete_nodes = candidates & remaining_nodes
-                remaining_nodes -= m.matched_concrete_nodes
-
-            assert not remaining_nodes
+            super(Match.Expr, self).__init__('Match_Result',
+                                             abstract_expr=abstract_expr)
 
         def _render_pre(self):
             return render('properties/match_ada', expr=self,
