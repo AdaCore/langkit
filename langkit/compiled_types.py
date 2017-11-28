@@ -1687,6 +1687,7 @@ class ASTNodeType(BaseStructType):
         self.is_root_node = is_root
         self.is_generic_list_type = is_generic_list_type
         self.is_root_list_type = is_root_list
+        self.is_list = is_list
 
         # Register this new subclass where appropriate in CompiledTypeMetaclass
         if is_root:
