@@ -174,10 +174,6 @@
       type_name = cls.value_type_name()
       base_name = cls.base().name
       library_private_field = lambda f: not library_public_field(f)
-      logic_vars = cls.get_fields(
-         include_inherited=True,
-         predicate=lambda f: f.type.is_logic_var_type
-      )
       ext = ctx.ext('nodes', cls.raw_name, 'public_decls')
    %>
 
@@ -210,13 +206,6 @@
             Line_Prefix : String := "");
 
       % endif
-   % endif
-
-   % if logic_vars:
-      procedure Assign_Names_To_Logic_Vars_Impl
-        (Node : access ${type_name});
-      --  Debug helper: Assign names to every logical variable in the root
-      --  node, so that we can trace logical variables.
    % endif
 
    ## Field getters
@@ -322,11 +311,6 @@
    type_name = cls.value_type_name()
 
    ext = ctx.ext('nodes', cls.raw_name, 'bodies')
-
-   logic_vars = cls.get_fields(
-      include_inherited=True,
-      predicate=lambda f: f.type.is_logic_var_type
-   )
    %>
 
    % if not cls.abstract:
@@ -423,16 +407,6 @@
 
       % endif
 
-   % endif
-
-   % if logic_vars:
-   procedure Assign_Names_To_Logic_Vars_Impl (Node : access ${type_name}) is
-   begin
-      % for f in logic_vars:
-      Node.${f.name}.Dbg_Name :=
-        new String'(Image (Node.Short_Image) & ".${f.name}");
-      % endfor
-   end Assign_Names_To_Logic_Vars_Impl;
    % endif
 
    ###################################

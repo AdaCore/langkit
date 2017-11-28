@@ -1138,16 +1138,45 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------------------------
 
    procedure Assign_Names_To_Logic_Vars
-     (Node : access ${root_node_value_type}'Class) is
+     (Node : access ${root_node_value_type}'Class)
+   is
+
+      procedure Assign
+        (Node  : access ${root_node_value_type}'Class;
+         LV    : in out Logic_Var_Record;
+         Field : String);
+      --  Assign a name to the LV logic variable. Node must be the node that
+      --  owns LV, and Field must be the name of the field in Node that holds
+      --  LV.
+
+      ------------
+      -- Assign --
+      ------------
+
+      procedure Assign
+        (Node  : access ${root_node_value_type}'Class;
+         LV    : in out Logic_Var_Record;
+         Field : String) is
+      begin
+         LV.Dbg_Name := new String'(Image (Node.Short_Image) & "." & Field);
+      end Assign;
+
+      K : constant ${root_node_kind_name} := Node.Kind;
+
    begin
-      % for f in T.root_node.get_fields( \
-           include_inherited=False, \
-           predicate=lambda f: f.type.is_logic_var_type \
-      ):
-         Node.${f.name}.Dbg_Name :=
-            new String'(Image (Node.Short_Image) & ".${f.name}");
-      % endfor
-      Assign_Names_To_Logic_Vars_Impl (Node);
+      <%
+          def get_actions(astnode, node_expr):
+              return '\n'.join(
+                  'Assign ({node}, {node}.{field}, "{field}");'.format(
+                     node=node_expr,
+                     field=field.name
+                  )
+                  for field in astnode.get_user_fields(
+                      include_inherited=False)
+                  if field.type.is_logic_var_type
+              )
+      %>
+      ${ctx.generate_actions_for_hierarchy('Node', 'K', get_actions)}
       for Child of ${root_node_array.api_name}'(Children (Node)) loop
          if Child /= null then
             Assign_Names_To_Logic_Vars (Child);

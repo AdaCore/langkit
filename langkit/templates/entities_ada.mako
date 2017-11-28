@@ -635,25 +635,7 @@
    procedure Assign_Names_To_Logic_Vars (Node : ${root_entity.api_name}'Class)
    is
    begin
-      % for f in T.root_node.get_fields( \
-           include_inherited=False, \
-           predicate=lambda f: f.type.is_logic_var_type \
-      ):
-         Node.Node.${f.name}.Dbg_Name :=
-            new String'(Image (Short_Image (Node)) & ".${f.name}");
-      % endfor
-
-      Assign_Names_To_Logic_Vars_Impl (Node.Node);
-
-      declare
-         Child_Nodes : ${root_entity.array.api_name} := Children (Node);
-      begin
-         for Child of Child_Nodes loop
-            if not Is_Null (Child) then
-               Assign_Names_To_Logic_Vars (Child);
-            end if;
-         end loop;
-      end;
+      Assign_Names_To_Logic_Vars (Node.Node);
    end Assign_Names_To_Logic_Vars;
 
    --------------------------
