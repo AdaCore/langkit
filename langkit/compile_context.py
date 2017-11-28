@@ -1945,6 +1945,7 @@ class CompileCtx(object):
                     root_static._has_self_entity = prop._has_self_entity
 
                     root_static.struct = prop.struct
+                    root_static.location = prop.location
 
                 else:
                     # If there is no runtime check for abstract properties, the
