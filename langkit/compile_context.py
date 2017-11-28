@@ -2019,6 +2019,180 @@ class CompileCtx(object):
                 for env_action in astnode.env_spec.actions:
                     env_action.rewrite_property_refs(redirected_props)
 
+    def generate_actions_for_hierarchy(self, node_var, kind_var,
+                                       actions_for_astnode):
+        """
+        Generate a sequence of Ada statements/nested CASE blocks to execute
+        some actions on an AST node depending on its kind.
+
+        This method is useful to avoid generating the same statements over and
+        over for multiple AST node kinds. For instance, given a root AST node
+        `A` a field `f` on `A`, and its derivations `B`, `C` and `D`, if one
+        wants to perform clean-up on some AST node fields, there is no need to
+        generate specific code for `B.f`, `C.f` and `D.f` when we could just
+        generate code for `A.f`.
+
+        :param str node_var: Name of the variable that holds the AST node to
+            process.
+        :param str kind_var: Name of the variable that holds the kind of the
+            AST node to process. Holding it in a variables is handy to avoid
+            computing it multiple times.
+        :param (ASTNodeType) -> str actions_for_astnode: Function that return
+            the actions (i.e. Ada statements as a single string) to perform for
+            the given AST node type. Note that these actions should be specific
+            to the AST node, i.e. they should not overlap with actions for any
+            parent AST node.
+        :type actions_for_astnode: (ASTNodeType) -> str
+        """
+
+        class Matcher(object):
+            """
+            Holder for "when ... =>" clauses in a CASE block.
+            """
+
+            def __init__(self, astnode, actions):
+                self.astnode = astnode
+                """
+                AST node that `self` matches.
+                :type: ASTNodeType
+                """
+
+                self.actions = actions
+                """
+                List of actions specific to this matched AST node.
+                :type: str
+                """
+
+                self.inner_case = Case(astnode)
+                """
+                Case instance for nodes that are more specific than `astnode`.
+                :type: Case
+                """
+
+            @staticmethod
+            def new_node_var(astnode):
+                """
+                Return the variable name that will hold the casted value for
+                the matched AST node.
+
+                :rtype: names.Name
+                """
+                return names.Name('N') + astnode.name
+
+        class Case(object):
+            """
+            Holder for a generated CASE blocks.
+            """
+
+            def __init__(self, astnode):
+                self.astnode = astnode
+                """
+                Most specific type for this CASE block's input expression.
+                :type: ASTNodeType
+                """
+
+                self.matchers = []
+                """
+                List of matchers for this CASE block.
+                :type: list[Matcher]
+                """
+
+        root_node = self.root_grammar_class
+
+        result = []
+        """
+        List of strings for the sequence of Ada statements to return.
+        :type: list[str]
+        """
+
+        case_stack = [Case(root_node)]
+        """
+        Stack of Case instances for the Case tree we are currently building.
+        First element is for the top-level CASE node while the last element is
+        for the currently inner-most CASE node.
+        :type: list[Case]
+        """
+
+        def build_cases(astnode):
+            """
+            Build the tree of CASE blocks for `astnode` and all its subclasses.
+            """
+            # Don't bother processing classes unless they actually have
+            # concrete subclasses, otherwise we would be producing dead code.
+            if not astnode.concrete_subclasses():
+                return
+
+            to_pop = False
+
+            if astnode == root_node:
+                # As a special case, emit actions for the root node outside of
+                # the top-level CASE block as we don't need to dispatch on
+                # anything for them: they always must be applied.
+                actions = actions_for_astnode(astnode, node_var)
+                if actions:
+                    result.append(actions)
+
+            else:
+                # If there are actions for this node, add a matcher for them
+                # and process the subclasses in a nested CASE block.
+                actions = actions_for_astnode(
+                    astnode, Matcher.new_node_var(astnode)
+                )
+                if actions:
+                    m = Matcher(astnode, actions)
+                    case_stack[-1].matchers.append(m)
+                    case_stack.append(m.inner_case)
+                    to_pop = True
+
+            for subcls in astnode.subclasses:
+                build_cases(subcls)
+
+            if to_pop:
+                case_stack.pop()
+
+        def print_case(case, node_var):
+            """
+            Render a tree of CASE blocks and append them to `result`.
+
+            :param Case case: CASE block to render.
+            :param str node_var: Name of the variable that holds the node on
+                which this CASE must dispatch.
+            """
+            if not case.matchers:
+                return
+
+            result.append('case {} ({}) is'.format(
+                case.astnode.ada_kind_range_name, kind_var
+            ))
+            for m in case.matchers:
+                new_node_type = m.astnode.name.camel_with_underscores
+                new_node_var = m.new_node_var(m.astnode)
+                result.append("""
+                    when {range} =>
+                       declare
+                          {new_node_var} : constant {new_node_type} :=
+                             {new_node_type} ({node_var});
+                       begin
+                """.format(
+                    range=m.astnode.ada_kind_range_name,
+                    node_var=node_var,
+                    new_node_type=new_node_type,
+                    new_node_var=new_node_var,
+                ))
+                result.append(m.actions)
+                print_case(m.inner_case, new_node_var)
+                result.append('end;')
+
+            result.append('when others => null;')
+            result.append('end case;')
+
+        with names.camel_with_underscores:
+            build_cases(root_node)
+            assert len(case_stack) == 1
+            print_case(case_stack[0], node_var)
+
+        return '\n'.join(result) or 'null;'
+
     @property
     def has_memoization(self):
         """
