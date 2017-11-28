@@ -232,6 +232,12 @@ For instance::
         prefix = word.lower()
         result = [prop.name for prop in self.context.debug_info.properties
                   if prop.name.lower().startswith(prefix)]
+
+        # If the users didn't ask for a special property, don't suggest special
+        # properties, as they are usually just noise for them.
+        if not prefix.startswith('['):
+            result = [n for n in result if not n.startswith('[')]
+
         return result
 
     def invoke(self, arg, from_tty):
