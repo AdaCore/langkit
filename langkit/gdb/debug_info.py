@@ -104,7 +104,8 @@ class DebugInfo(object):
                 if scope_stack:
                     raise ParseError(line_no, 'property-start directive not'
                                      ' allowed inside another property')
-                p = Property(LineRange(d.line_no, None), d.name, d.dsl_sloc)
+                p = Property(LineRange(d.line_no, None), d.name, d.dsl_sloc,
+                             d.is_dispatcher)
                 self.properties.append(p)
                 scope_stack.append(p)
 
@@ -292,10 +293,11 @@ class Scope(object):
 
 
 class Property(Scope):
-    def __init__(self, line_range, name, dsl_sloc):
+    def __init__(self, line_range, name, dsl_sloc, is_dispatcher):
         super(Property, self).__init__(line_range, name)
         self.name = name
         self.dsl_sloc = dsl_sloc
+        self.is_dispatcher = is_dispatcher
 
 
 class Event(object):
@@ -428,15 +430,22 @@ class Directive(object):
 
 
 class PropertyStart(Directive):
-    def __init__(self, name, dsl_sloc, line_no):
+    def __init__(self, name, dsl_sloc, is_dispatcher, line_no):
         super(PropertyStart, self).__init__(line_no)
         self.name = name
         self.dsl_sloc = dsl_sloc
+        self.is_dispatcher = is_dispatcher
 
     @classmethod
     def parse(cls, line_no, args):
-        name, dsl_sloc = args
-        return cls(name, DSLLocation.parse(dsl_sloc), line_no)
+        name, info = args
+        if info == 'dispatcher':
+            is_dispatcher = True
+            dsl_sloc = None
+        else:
+            is_dispatcher = False
+            dsl_sloc = DSLLocation.parse(info)
+        return cls(name, dsl_sloc, is_dispatcher, line_no)
 
 
 class ScopeStart(Directive):

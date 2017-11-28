@@ -1954,6 +1954,8 @@ class CompileCtx(object):
                     # the list of statically dispatched properties.
                     static_props.pop(0)
 
+                prop.is_dispatcher = True
+
                 # Make sure all static properties are public, not dispatching
                 # anymore, and assign them another name so that they don't
                 # override each other in the generated code.

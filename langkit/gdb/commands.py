@@ -132,7 +132,8 @@ class StatePrinter(object):
             return
 
         prn('Running {}'.format(prop_repr(self.state.property)))
-        prn('from {}'.format(self.state.property.dsl_sloc))
+        if self.state.property.dsl_sloc:
+            prn('from {}'.format(self.state.property.dsl_sloc))
 
         for scope_state in self.state.scopes:
             is_first = [True]

@@ -2555,9 +2555,14 @@ class ArrayLiteral(AbstractExpression):
 
 
 def gdb_property_start(prop):
-    return gdb_helper('property-start',
-                      prop.qualname,
-                      '{}:{}'.format(prop.location.file, prop.location.line))
+    if prop.is_dispatcher:
+        return gdb_helper('property-start',
+                          '[dispatcher]{}'.format(prop.qualname),
+                          'dispatcher')
+    else:
+        return gdb_helper('property-start', prop.qualname,
+                          '{}:{}'.format(prop.location.file,
+                                         prop.location.line))
 
 
 def gdb_scope_start():
@@ -2750,6 +2755,14 @@ class PropertyDef(AbstractNodeData):
         Original privacy for this property. Can be different from `is_public`
         after properties expansion. Computed right after `is_public` itself in
         the `prepare` pass.
+
+        :type: bool
+        """
+
+        self.is_dispatcher = False
+        """
+        Whether this property is just a wrapper that, based on the kind of
+        Self, dispatches to specific properties.
 
         :type: bool
         """

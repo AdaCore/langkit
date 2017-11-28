@@ -70,7 +70,13 @@ def prop_repr(prop):
     :type prop: langkit.gdb.debug_info.Property
     :rtype: str
     """
-    return col(col(prop.name, Colors.RED), Colors.BOLD)
+    prefix = '[dispatcher]'
+    if prop.name.startswith(prefix):
+        name = prop.name[len(prefix):]
+        label = 'dispatch property for {}'.format(name)
+    else:
+        label = prop.name
+    return col(col(label, Colors.RED), Colors.BOLD)
 
 
 def adaify_name(context, name):
