@@ -2345,3 +2345,7 @@ class CompileCtx(object):
             with prop.diagnostic_context:
                 check_source_language(False, message,
                                       severity=Severity.non_blocking_error)
+
+    astnode_kind_set = langkit.utils.astnode_kind_set
+    collapse_concrete_nodes = staticmethod(
+        langkit.utils.collapse_concrete_nodes)

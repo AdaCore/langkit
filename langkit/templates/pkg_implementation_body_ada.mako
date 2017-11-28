@@ -115,10 +115,32 @@ package body ${ada_lib_name}.Analysis.Implementation is
    ---------------------
 
    function Pre_Env_Actions
-     (Self                : access ${root_node_value_type};
+     (Self                : access ${root_node_value_type}'Class;
       Bound_Env, Root_Env : AST_Envs.Lexical_Env;
       Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env
-   is (Null_Lexical_Env);
+   is
+   begin
+      <%
+         matchers = list(reversed([
+            n for n in ctx.astnode_types
+            if n.env_spec and not n.is_env_spec_inherited
+         ]))
+         matched_types, _ = ctx.collapse_concrete_nodes(
+            ctx.root_grammar_class, matchers
+         )
+      %>
+      case Self.Kind is
+         % for matcher, matched in zip(matchers, matched_types):
+            % if matched:
+               when ${ctx.astnode_kind_set(matched)} =>
+                  return ${matcher.name}_Pre_Env_Actions
+                    (${matcher.name} (Self),
+                     Bound_Env, Root_Env, Add_To_Env_Only);
+            % endif
+         % endfor
+         when others => return Null_Lexical_Env;
+      end case;
+   end Pre_Env_Actions;
 
    ---------------------
    -- Is_Visible_From --

@@ -216,11 +216,10 @@
 
    % if not cls.is_env_spec_inherited:
 
-      overriding function Pre_Env_Actions
-        (Self                : access ${type_name};
+      function ${cls.name}_Pre_Env_Actions
+        (Self                : access ${type_name}'Class;
          Bound_Env, Root_Env : AST_Envs.Lexical_Env;
-         Add_To_Env_Only     : Boolean := False)
-         return AST_Envs.Lexical_Env;
+         Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env;
 
       % if cls.env_spec.post_actions:
          overriding procedure Post_Env_Actions
@@ -506,12 +505,9 @@
    end ${env_getter};
 
    % endif
-   ---------------------
-   -- Pre_Env_Actions --
-   ---------------------
 
-   overriding function Pre_Env_Actions
-     (Self                : access ${type_name};
+   function ${cls.name}_Pre_Env_Actions
+     (Self                : access ${type_name}'Class;
       Bound_Env, Root_Env : AST_Envs.Lexical_Env;
       Add_To_Env_Only     : Boolean := False) return AST_Envs.Lexical_Env
    is
@@ -533,7 +529,7 @@
       % endfor
 
       return Initial_Env;
-   end Pre_Env_Actions;
+   end;
 
    ## If the node class adds an env, then the environement in which node is is
    ## the parent env.

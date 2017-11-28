@@ -3,7 +3,8 @@ from __future__ import absolute_import, division, print_function
 import inspect
 
 from langkit import names
-from langkit.compiled_types import BuiltinField, Field, UserField, resolve_type
+from langkit.compiled_types import (BuiltinField, Field, UserField,
+                                    get_context, resolve_type)
 from langkit.diagnostics import Context, Severity, check_source_language
 from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
@@ -13,8 +14,7 @@ from langkit.expressions import (
 )
 from langkit.expressions.boolean import Eq
 from langkit.expressions.utils import assign_var
-from langkit.utils import (TypeSet, astnode_kind_set, collapse_concrete_nodes,
-                           memoized)
+from langkit.utils import TypeSet, collapse_concrete_nodes, memoized
 
 
 @attr_call("cast", do_raise=False)
@@ -1048,7 +1048,7 @@ class Match(AbstractExpression):
 
         def _render_pre(self):
             return render('properties/match_ada', expr=self,
-                          kind_set=astnode_kind_set)
+                          kind_set=get_context().astnode_kind_set)
 
         @property
         def subexprs(self):

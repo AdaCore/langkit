@@ -187,7 +187,7 @@ def not_implemented_error(self_or_cls, method):  # no-code-coverage
     ))
 
 
-def astnode_kind_set(nodes):
+def astnode_kind_set(context, nodes):
     """
     Turn a set of AST nodes into a the corresponding set of AST node kinds.
 
@@ -198,8 +198,6 @@ def astnode_kind_set(nodes):
         their concrete subclasses.
     :rtype: str
     """
-    from langkit.compiled_types import get_context
-
     # Compute the set of concrete AST nodes that is covered by `nodes`
     concrete_nodes = set()
     for n in nodes:
@@ -208,8 +206,7 @@ def astnode_kind_set(nodes):
         else:
             concrete_nodes.add(n)
 
-    ctx = get_context()
-    kinds = sorted(ctx.node_kind_constants[astnode]
+    kinds = sorted(context.node_kind_constants[astnode]
                    for astnode in concrete_nodes)
 
     # Try to collapse sequences of contiguous kinds into ranges
@@ -224,8 +221,8 @@ def astnode_kind_set(nodes):
 
     # Turn numeric constants into enumeration names
     groups = [
-        (ctx.kind_constant_to_node[f].ada_kind_name,
-         ctx.kind_constant_to_node[l].ada_kind_name)
+        (context.kind_constant_to_node[f].ada_kind_name,
+         context.kind_constant_to_node[l].ada_kind_name)
         for f, l in groups
     ]
 

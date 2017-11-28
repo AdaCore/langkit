@@ -550,12 +550,13 @@ package ${ada_lib_name}.Analysis.Implementation is
    end record;
 
    function Pre_Env_Actions
-     (Self                : access ${root_node_value_type};
+     (Self                : access ${root_node_value_type}'Class;
       Bound_Env, Root_Env : Lexical_Env;
       Add_To_Env_Only     : Boolean := False) return Lexical_Env;
    --  Internal procedure that will execute all necessary lexical env actions
    --  for Node. This is meant to be called by Populate_Lexical_Env, and not by
    --  the user.
+   --
    --  The return value is the initial environment to be passed to
    --  Post_Env_Actions.
 
