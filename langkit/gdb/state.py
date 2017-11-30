@@ -124,7 +124,7 @@ class State(object):
         :type frame: gdb.Frame
         :rtype: None|State
         """
-        from langkit.gdb.debug_info import Event, Scope
+        from langkit.gdb.debug_info import Event, PropertyCall, Scope
 
         line_no = analysis_line_no(context, frame)
 
@@ -155,6 +155,10 @@ class State(object):
                         result.scopes.append(sub_scope_state)
                         build_scope_state(sub_scope_state)
                         break
+
+                elif isinstance(event, PropertyCall):
+                    if line_no in event.line_range:
+                        scope_state.called_property = event.property(context)
 
         build_scope_state(root_scope_state)
         return result
@@ -196,6 +200,13 @@ class ScopeState(object):
 
         Expressions that are currently being evaluated or that are evaluated in
         this state, indexed by unique ids.
+        """
+
+        self.called_property = None
+        """
+        Property that is currently being called, if any.
+
+        :type: Property|None
         """
 
     def sorted_expressions(self):

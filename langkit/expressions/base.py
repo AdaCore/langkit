@@ -2574,6 +2574,10 @@ def gdb_scope_start():
     return gdb_helper('scope-start')
 
 
+def gdb_property_call_start(prop):
+    return gdb_helper('property-call-start', prop.debug_name)
+
+
 def gdb_end():
     return gdb_helper('end')
 

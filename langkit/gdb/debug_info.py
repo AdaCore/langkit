@@ -118,11 +118,18 @@ class DebugInfo(object):
                 self.properties_dict[p.name] = p
                 scope_stack.append(p)
 
-            elif d.is_a(ScopeStart):
-                if not scope_stack:
-                    raise ParseError(line_no, 'scope-start directive not'
-                                              ' allowed outside a property')
-                scope_stack.append(Scope(LineRange(d.line_no, None)))
+            elif d.is_a(ScopeStart, PropertyCallStart):
+                if not scope_stack or not isinstance(scope_stack[-1], Scope):
+                    raise ParseError(
+                        line_no,
+                        '{} directive must occur inside a property or a'
+                        ' property scope'.format(d.directive_name)
+                    )
+                if d.is_a(ScopeStart):
+                    scope_stack.append(Scope(LineRange(d.line_no, None)))
+                else:
+                    scope_stack.append(PropertyCall(LineRange(d.line_no, None),
+                                                    d.name))
 
             elif d.is_a(End):
                 if not scope_stack:
@@ -310,6 +317,20 @@ class Scope(object):
         )
 
 
+class PropertyCall(object):
+    def __init__(self, line_range, name):
+        self.line_range = line_range
+        self.name = name
+
+    def property(self, context):
+        """
+        Look for the property that this property call targets.
+
+        :rtype: Property
+        """
+        return context.debug_info.get_property_by_name(self.name)
+
+
 class Property(Scope):
     def __init__(self, line_range, name, dsl_sloc, is_dispatcher):
         super(Property, self).__init__(line_range, name)
@@ -425,8 +446,20 @@ class Directive(object):
     def __init__(self, line_no):
         self.line_no = line_no
 
-    def is_a(self, cls):
-        return isinstance(self, cls)
+    def is_a(self, *classes):
+        return isinstance(self, classes)
+
+    @property
+    def directive_name(self):
+        """
+        Return the name of this directive.
+
+        :rtype: str
+        """
+        for name, dir_type in self.name_to_cls.items():
+            if isinstance(self, dir_type):
+                return name
+        raise KeyError('Unknown directive: {}'.format(self))
 
     @classmethod
     def parse(cls, line_no, name, args):
@@ -464,6 +497,17 @@ class PropertyStart(Directive):
             is_dispatcher = False
             dsl_sloc = DSLLocation.parse(info)
         return cls(name, dsl_sloc, is_dispatcher, line_no)
+
+
+class PropertyCallStart(Directive):
+    def __init__(self, name, line_no):
+        super(PropertyCallStart, self).__init__(line_no)
+        self.name = name
+
+    @classmethod
+    def parse(cls, line_no, args):
+        name, = args
+        return cls(name, line_no)
 
 
 class ScopeStart(Directive):
@@ -518,6 +562,7 @@ class ExprDoneDirective(Directive):
 
 Directive.name_to_cls.update({
     'property-start': PropertyStart,
+    'property-call-start': PropertyCallStart,
     'scope-start': ScopeStart,
     'bind': BindDirective,
     'end': End,

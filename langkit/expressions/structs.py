@@ -10,7 +10,7 @@ from langkit.expressions import (
     AbstractExpression, AbstractVariable, BasicExpr, BindingScope,
     ComputingExpr, DynamicVariable, Let, NullCheckExpr, NullExpr, PropertyDef,
     ResolvedExpression, SavedExpr, T, attr_call, attr_expr, construct,
-    dsl_document, render
+    dsl_document, gdb_end, gdb_property_call_start, render
 )
 from langkit.expressions.boolean import Eq
 from langkit.expressions.utils import assign_var
@@ -642,15 +642,27 @@ class FieldAccess(AbstractExpression):
             # field access and thus we should have a result variable.
             assert not self.simple_field_access and self.result_var
 
+            # Emit debug helper directives to describe the call if the target
+            # is a property we generated code for.
+            call_debug_info = (self.node_data.is_property and
+                               not self.node_data.external)
+
             sub_exprs = [self.receiver_expr] + filter(lambda e: e is not None,
                                                       self.arguments)
             result = [e.render_pre() for e in sub_exprs]
 
+            if call_debug_info:
+                result.append(gdb_property_call_start(self.node_data))
+
+            result.append('{} := {};'.format(self.result_var.name,
+                                             self.field_access_expr))
+
+            if call_debug_info:
+                result.append(gdb_end())
+
             # We need to make sure we create a new ownership share for the
             # result of the field access.  Property calls already do that, but
             # we must inc-ref ourselves for other cases.
-            result.append('{} := {};'.format(self.result_var.name,
-                                             self.field_access_expr))
             if self.type.is_refcounted and self.node_data.access_needs_incref:
                 result.append('Inc_Ref ({});'.format(self.result_var.name))
 
