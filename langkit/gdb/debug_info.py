@@ -40,6 +40,13 @@ class DebugInfo(object):
         :type: list[Property]
         """
 
+        self.properties_dict = {}
+        """
+        Name-based lookup dictionnary for properties.
+
+        :type: dict[str, Property]
+        """
+
     @classmethod
     def parse(cls, context):
         """
@@ -83,6 +90,7 @@ class DebugInfo(object):
         :rtype: None
         """
         self.properties = []
+        self.properties_dict = {}
         scope_stack = []
         expr_stack = []
 
@@ -107,6 +115,7 @@ class DebugInfo(object):
                 p = Property(LineRange(d.line_no, None), d.name, d.dsl_sloc,
                              d.is_dispatcher)
                 self.properties.append(p)
+                self.properties_dict[p.name] = p
                 scope_stack.append(p)
 
             elif d.is_a(ScopeStart):
@@ -186,6 +195,15 @@ class DebugInfo(object):
                 break
             elif line_no in p.line_range:
                 return p
+
+    def get_property_by_name(self, name):
+        """
+        Fetch the property called `name`. Raise an error if not found.
+
+        :param str name: Name of the property to fetch.
+        :rtype: Property
+        """
+        return self.properties_dict[name]
 
 
 class DSLLocation(object):
