@@ -189,8 +189,6 @@
         (Node : access ${type_name}) return String;
       % endif
 
-      overriding function Kind
-        (Node : access ${type_name}) return ${root_node_kind_name};
    % endif
 
    ## Field getters
@@ -299,18 +297,6 @@
          ${pretty_printers.pretty_printer(cls)}
       end PP;
       % endif
-
-      ----------
-      -- Kind --
-      ----------
-
-      overriding function Kind
-        (Node : access ${type_name}) return ${root_node_kind_name}
-      is
-         pragma Unreferenced (Node);
-      begin
-         return ${cls.ada_kind_name};
-      end Kind;
 
    % endif
 

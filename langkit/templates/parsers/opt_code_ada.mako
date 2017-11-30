@@ -19,6 +19,7 @@ if ${parser.parser.pos_var} = No_Token_Index then
       % else:
          ${parser.res_var} := ${base.name}
            (${alt_false.name}_Alloc.Alloc (Parser.Mem_Pool));
+         ${parser.res_var}.Kind := ${alt_false.ada_kind_name};
          ${parser.res_var}.Unit := Parser.Unit;
          ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
          ${parser.res_var}.Token_End_Index := No_Token_Index;
@@ -26,6 +27,7 @@ if ${parser.parser.pos_var} = No_Token_Index then
     % elif parser_type and parser_type.is_list_type:
         ${parser.parser.res_var} :=
           (${parser_type.storage_type_name}_Alloc.Alloc (Parser.Mem_Pool));
+        ${parser.res_var}.Kind := ${parser_type.ada_kind_name};
         ${parser.parser.res_var}.Unit := Parser.Unit;
         ${parser.parser.res_var}.Count := 0;
         ${parser.parser.res_var}.Nodes :=
@@ -54,6 +56,7 @@ else
    % else:
       ${parser.res_var} := ${base.name}
         (${alt_true.name}_Alloc.Alloc (Parser.Mem_Pool));
+      ${parser.res_var}.Kind := ${alt_true.ada_kind_name};
       ${parser.res_var}.Unit := Parser.Unit;
       ${parser.res_var}.Token_Start_Index := ${parser.start_pos};
       ${parser.res_var}.Token_End_Index := No_Token_Index;

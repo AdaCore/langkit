@@ -36,8 +36,6 @@
       overriding function PP
         (Node : access ${value_type}) return String;
       % endif
-      overriding function Kind
-        (Node : access ${value_type}) return ${root_node_kind_name};
    % endif
 
    ## Helpers generated for properties code. Used in CollectionGet's and
@@ -72,17 +70,6 @@
          ${pretty_printers.pretty_printer(list_type)}
       end PP;
       % endif
-
-      ----------
-      -- Kind --
-      ----------
-
-      overriding function Kind
-        (Node : access ${value_type}) return ${root_node_kind_name}
-      is
-      begin
-         return ${list_type.ada_kind_name};
-      end Kind;
 
    % endif
 

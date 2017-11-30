@@ -3,6 +3,7 @@
 <% result = expr.result_var.name %>
 
 ${result} := new ${expr.static_type.value_type_name()};
+${result}.Kind := ${expr.static_type.ada_kind_name};
 Register_Destroyable (Self.Unit, ${root_node_type_name} (${result}));
 
 ## We consider the creator of a synthetized nodes as its parent even though

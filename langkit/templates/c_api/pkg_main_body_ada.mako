@@ -554,7 +554,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Clear_Last_Exception;
 
       declare
-         K : ${root_node_kind_name} := Kind (Node.El);
+         K : ${root_node_kind_name} := Node.El.Kind;
       begin
          return ${node_kind_type} (K'Enum_Rep);
       end;

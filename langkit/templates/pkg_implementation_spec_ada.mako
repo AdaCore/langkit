@@ -250,8 +250,6 @@ package ${ada_lib_name}.Analysis.Implementation is
          Decoration : Boolean := True) return String;
    % endif
 
-   function Kind (Node : access ${root_node_value_type})
-                  return ${root_node_kind_name} is abstract;
    function Kind_Name
      (Node : access ${root_node_value_type}'Class) return String;
    --  Return the concrete kind for Node
@@ -545,6 +543,9 @@ package ${ada_lib_name}.Analysis.Implementation is
       Self_Env               : Lexical_Env;
       --  Hold the environment this node defines, or the parent environment
       --  otherwise.
+
+      Kind : ${root_node_kind_name};
+      --  Kind for this node. This must reflect the object tag
 
       ${astnode_types.node_fields(T.root_node, emit_null=False)}
    end record;
