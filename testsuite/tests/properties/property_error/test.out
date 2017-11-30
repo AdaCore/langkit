@@ -3,7 +3,7 @@ Evaluating p_raise_msg...
   -> raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : Custom error message!
 
 Evaluating p_raise_no_msg...
-  -> raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : libfoolang-analysis-implementation.adb:1944
+  -> raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : libfoolang-analysis-implementation.adb:[line-number]
 
 main.py: Done.
 Done

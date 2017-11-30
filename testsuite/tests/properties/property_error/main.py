@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 print('main.py: Running...')
 
 
+import re
 import sys
 
 import libfoolang
@@ -22,7 +23,8 @@ for p in ('p_raise_msg', 'p_raise_no_msg'):
     try:
         _ = getattr(u.root, p)
     except libfoolang.PropertyError as exc:
-        print('  -> {}'.format(exc))
+        msg = re.sub('\d+', '[line-number]', str(exc))
+        print('  -> {}'.format(msg))
     else:
         print('No exception raised...')
 
