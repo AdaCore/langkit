@@ -1378,6 +1378,33 @@ class UnreachableExpr(ErrorExpr):
         )
 
 
+@dsl_document
+class PropertyError(AbstractExpression):
+    """
+    Expression to raise a Property_Error. `expr_type` is the type this
+    expression would have if it computed a value. `message` is an optional
+    error message (it can be left to None).
+    """
+
+    def __init__(self, expr_type, message=None):
+        self.expr_type = expr_type
+        self.message = message
+        super(PropertyError, self).__init__()
+
+    def construct(self):
+        check_source_language(
+            isinstance(self.expr_type, CompiledType),
+            'Invalid input type: {}'.format(repr(self.expr_type))
+        )
+        check_source_language(
+            self.message is None or isinstance(self.message, str),
+            'Invalid error message: {}'.format(repr(self.message))
+        )
+        return ErrorExpr(self.expr_type,
+                         names.Name('Property_Error'),
+                         self.message)
+
+
 class LiteralExpr(ResolvedExpression):
     """
     Resolved expression for literals of any type.
