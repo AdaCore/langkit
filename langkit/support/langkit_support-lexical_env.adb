@@ -1042,7 +1042,7 @@ package body Langkit_Support.Lexical_Env is
                     and then L.Node = R.Node
                     and then L.Resolver = R.Resolver);
          else
-            return L.Env = R.Env;
+            return not R.Dynamic and then L.Env = R.Env;
          end if;
       end Equivalent;
 
