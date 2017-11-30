@@ -2650,8 +2650,8 @@ class PropertyDef(AbstractNodeData):
                  dynamic_vars=None, memoized=False, unsafe_memoization=False,
                  memoize_in_populate=False, external=False,
                  uses_entity_info=None, uses_envs=None,
-                 optional_entity_info=False, force_dispatching=False,
-                 warn_on_unused=True, ignore_warn_on_node=None):
+                 optional_entity_info=False, warn_on_unused=True,
+                 ignore_warn_on_node=None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -2735,9 +2735,6 @@ class PropertyDef(AbstractNodeData):
             called on 1) bare AST nodes, in which case the default entity info
             is passed, and 2) on entities, in which case the entity info from
             the prefix is passed.
-
-        :param bool force_dispatching: Force making this property a dispatching
-            one. Useful for externally defined properties.
 
         :param bool warn_on_unused: Wether to warn on unused or not. Defaults
             to True.
@@ -2850,7 +2847,6 @@ class PropertyDef(AbstractNodeData):
         self.optional_entity_info = optional_entity_info
 
         self._requires_untyped_wrapper = False
-        self.force_dispatching = force_dispatching
         self.warn_on_unused = warn_on_unused
         self._ignore_warn_on_node = ignore_warn_on_node
 
@@ -2935,8 +2931,7 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: bool
         """
-        return (self.force_dispatching
-                or self.abstract
+        return (self.abstract
                 or self.base_property
                 or self.overriding_properties)
 

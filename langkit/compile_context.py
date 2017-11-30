@@ -1880,7 +1880,7 @@ class CompileCtx(object):
                 # external properties need to use tag-based dispatching, so
                 # don't lower dispatching for any set of properties that
                 # contain an external one.
-                if any(p.external or p.force_dispatching for p in prop_set):
+                if any(p.external for p in prop_set):
                     ignored_props.update(prop_set)
                     continue
 
