@@ -1267,22 +1267,29 @@ class VariableExpr(ResolvedExpression):
 
     pretty_class_name = 'Var'
 
-    def __init__(self, type, name, abstract_var=None):
+    def __init__(self, type, name, local_var=None, abstract_var=None):
         """
         Create a variable reference expression.
 
         :param langkit.compiled_types.CompiledType type: Type for the
             referenced variable.
         :param names.Name name: Name of the referenced variable.
+        :param LocalVars.LocalVar|None local_var: The corresponding local
+            variable, if there is one.
         :param AbstractVariable|None abstract_var: AbstractVariable that
             compiled to this resolved expression, if any.
         """
         self.static_type = assert_type(type, CompiledType)
         self.name = name
+        self.local_var = local_var
         self.abstract_var = abstract_var
         self._ignored = False
 
         super(VariableExpr, self).__init__(skippable_refcount=True)
+
+    @property
+    def result_var(self):
+        return self.local_var
 
     def _render_expr(self):
         return self.name.camel_with_underscores
@@ -4232,7 +4239,7 @@ class LocalVars(object):
             """
             assert self.type, ('Local variables must have a type before turned'
                                ' into a resolved expression.')
-            return VariableExpr(self.type, self.name)
+            return VariableExpr(self.type, self.name, local_var=self)
 
         def __repr__(self):
             return '<LocalVar {} : {}>'.format(
