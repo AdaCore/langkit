@@ -32,17 +32,22 @@ class Cast(AbstractExpression):
     class Expr(ComputingExpr):
         pretty_class_name = 'Cast'
 
-        def __init__(self, expr, dest_type, do_raise=False,
+        def __init__(self, expr, dest_type, do_raise=False, unsafe=False,
                      abstract_expr=None):
             """
             :type expr: ResolvedExpression
             :type dest_type: ASTNodeType
             :type do_raise: bool
 
+            :param bool unsafe: If true, elide the type check before doing the
+                caste. This is used to avoid noisy and useless type checks in
+                generated code: these checks would fail only because of a bug
+                in the code generator.
             :param AbstractExpression|None abstract_expr: See
                 ResolvedExpression's constructor.
             """
             self.do_raise = do_raise
+            self.unsafe = unsafe
             self.expr = SavedExpr('Cast_Expr', expr)
             self.static_type = dest_type
             super(Cast.Expr, self).__init__('Cast_Result',

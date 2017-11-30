@@ -22,9 +22,9 @@ ${expr.expr.render_pre()}
    node_expr = operand_expr + ('.El' if is_entity else '')
 %>
 
-% if expr.is_downcast:
-   ## If we know statically that this is a downcast, then no need to generate
-   ## checking code.
+% if expr.is_downcast or expr.unsafe:
+   ## If we know statically that this is a downcast, or if asked to do an
+   ## unsafe conversion, then no need to generate checking code.
    ${generate_cast(operand_expr)}
 
 % else:
