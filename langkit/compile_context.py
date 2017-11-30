@@ -1996,12 +1996,17 @@ class CompileCtx(object):
                         )
                         with outer_scope.new_child() as inner_scope:
                             inner_scope.add(match_var)
+                            # When this field access gets evaluated, we know
+                            # that the receiver is not null as we already tried
+                            # to get its kind, so we can perform an unsafe
+                            # field access on it.
                             static_call = FieldAccess.Expr(
                                 receiver_expr=match_var.ref_expr,
                                 node_data=p,
                                 arguments=[construct(arg.var)
                                            for arg in prop.natural_arguments],
-                                implicit_deref=p.uses_entity_info
+                                implicit_deref=p.uses_entity_info,
+                                unsafe=True
                             )
                             matchers.append(Match.Matcher(
                                 match_var.ref_expr, static_call, inner_scope
