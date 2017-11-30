@@ -44,26 +44,40 @@ This command may be followed by a "/X" flag, where X is one or several of:
 
     * f: display the full image of values (no ellipsis);
     * s: to print the name of the Ada variables that hold DSL values.
+
+There is one optional argument: a variable name. If specified, this command
+only displays information for this variable.
 """
 
     def __init__(self, context):
         super(StateCommand, self).__init__(context, 'state', gdb.COMMAND_DATA)
 
     def invoke(self, arg, from_tty):
-        if arg and arg[0] != '/':
-            print('Invalid argument')
-            return
+        args = arg.split()
+        flags = set()
+        var_name = None
 
-        arg = set(arg[1:]) if arg else set()
+        # Get flags, if any
+        if args and args[0].startswith('/'):
+            flags = set(args.pop(0)[1:])
+            invalid_flags = flags.difference('sf')
+            if invalid_flags:
+                print('Invalid flags: {}'.format(', '.join(
+                    invalid_flags
+                )))
+                return
 
-        invalid_args = arg.difference('sf')
-        if invalid_args:
-            print('Invalid flags: {}'.format(repr(", ".join(invalid_args))))
-            return
+        # Get the variable name, if any
+        if args:
+            var_name = args.pop(0)
+
+        if args:
+            print('Invalid extra arguments: {}'.format(' '.join(args)))
 
         StatePrinter(self.context,
-                     with_ellipsis='f' not in arg,
-                     with_locs='s' in arg).run()
+                     with_ellipsis='f' not in flags,
+                     with_locs='s' in flags,
+                     var_name=var_name).run()
 
 
 class StatePrinter(object):
@@ -74,7 +88,8 @@ class StatePrinter(object):
 
     ellipsis_limit = 50
 
-    def __init__(self, context, with_ellipsis=True, with_locs=False):
+    def __init__(self, context, with_ellipsis=True, with_locs=False,
+                 var_name=None):
         self.context = context
 
         self.frame = gdb.selected_frame()
@@ -82,6 +97,7 @@ class StatePrinter(object):
 
         self.with_ellipsis = with_ellipsis
         self.with_locs = with_locs
+        self.var_name = var_name
         self.sio = StringIO()
 
     def _render(self):
@@ -93,8 +109,26 @@ class StatePrinter(object):
         # this method.
         prn = partial(print, file=self.sio)
 
+        def print_binding(print_fn, b):
+            print_fn('{}{} = {}'.format(
+                name_repr(b),
+                self.loc_image(b.gen_name),
+                self.value_image(b.gen_name)
+            ))
+
         if self.state is None:
             prn('Selected frame is not in a property.')
+            return
+
+        # If we are asked to display only one variable, look for it, print it,
+        # and stop there.
+        if self.var_name:
+            for scope_state in self.state.scopes:
+                for b in scope_state.bindings:
+                    if b.dsl_name == self.var_name:
+                        print_binding(prn, b)
+                        return
+            prn('No binding called {}'.format(self.var_name))
             return
 
         prn('Running {}'.format(prop_repr(self.state.property)))
@@ -110,11 +144,7 @@ class StatePrinter(object):
                 prn(strn)
 
             for b in scope_state.bindings:
-                print_info('{}{} = {}'.format(
-                    name_repr(b),
-                    self.loc_image(b.gen_name),
-                    self.value_image(b.gen_name)
-                ))
+                print_binding(print_info, b)
 
             done_exprs, last_started = scope_state.sorted_expressions()
 
