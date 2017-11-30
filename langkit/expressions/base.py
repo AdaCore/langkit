@@ -9,6 +9,7 @@ from enum import Enum
 import funcy
 
 from langkit import names
+from langkit.common import string_repr
 from langkit.compiled_types import (
     AbstractNodeData, Argument, ASTNodeType, CompiledType, T, TypeRepo,
     gdb_bind_var, gdb_helper, get_context, no_compiled_type,
@@ -1337,28 +1338,43 @@ class VariableExpr(ResolvedExpression):
         return result
 
 
-class UnreachableExpr(ResolvedExpression):
+class ErrorExpr(ResolvedExpression):
     """
     Resolved expression that just raises an error.
+    """
 
-    This is useful to use as a placeholder for unreachable code.
+    def __init__(self, expr_type, exception_name, message=None):
+        """
+        :param CompiledType expr_type: Placeholder type for this expression, as
+            if this expression would return a value.
+        :param names.Name exception_name: Name of the Ada exception to raise.
+        :param str|None message: Optional error message.
+        """
+        self.static_type = expr_type
+        self.exception_name = exception_name
+        self.message = message
+        super(ErrorExpr, self).__init__(skippable_refcount=True)
+
+    def _render_expr(self):
+        result = 'raise {}'.format(self.exception_name)
+        if self.message:
+            result += ' with {}'.format(string_repr(self.message))
+        return result
+
+    def __repr__(self):
+        return '<ErrorExpr {} with {}>'.format(self.exception_name,
+                                               repr(self.message))
+
+
+class UnreachableExpr(ErrorExpr):
+    """
+    Placeholder resolved expression for unreachable code.
     """
 
     def __init__(self, expr_type):
-        """
-        :param CompiledType expr_type: Type that a usual expression would
-            return in this case.
-        """
-        self.static_type = expr_type
-        super(UnreachableExpr, self).__init__(skippable_refcount=True)
-
-    def _render_expr(self):
-        return ('raise Program_Error with'
-                ' "Executing supposedly unreachable code"')
-
-    def __repr__(self):
-        return '<UnreachableExpr (for {} expr)>'.format(
-            self.type.name.camel
+        super(UnreachableExpr, self).__init__(
+            expr_type, names.Name('Program_Error'),
+            'Executing supposedly unreachable code'
         )
 
 
