@@ -324,6 +324,9 @@ package Langkit_Support.Lexical_Env is
       Parent : Env_Getter := No_Env_Getter;
       --  Parent environment for this env. Null by default.
 
+      Transitive_Parent : Boolean := False;
+      --  Whether the parent link is transitive or not.
+
       Node : Element_T;
       --  Node for which this environment was created
 
@@ -360,10 +363,11 @@ package Langkit_Support.Lexical_Env is
    --  represent missing scopes from erroneous trees.
 
    function Create
-     (Parent        : Env_Getter;
-      Node          : Element_T;
-      Is_Refcounted : Boolean;
-      Default_MD    : Element_Metadata := Empty_Metadata) return Lexical_Env;
+     (Parent            : Env_Getter;
+      Node              : Element_T;
+      Is_Refcounted     : Boolean;
+      Default_MD        : Element_Metadata := Empty_Metadata;
+      Transitive_Parent : Boolean := False) return Lexical_Env;
    --  Constructor. Creates a new lexical env, given a parent, an internal data
    --  env, and a default metadata. If Is_Refcounted is true, the caller is the
    --  only owner of the result (ref-count is 1).
@@ -523,6 +527,7 @@ private
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Type :=
      (Parent                     => No_Env_Getter,
+      Transitive_Parent          => False,
       Node                       => No_Element,
       Referenced_Envs            => <>,
       Map                        => Empty_Env_Map'Access,

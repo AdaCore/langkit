@@ -359,9 +359,10 @@
       % endif
 
       Self.Self_Env := AST_Envs.Create
-        (Parent        => ${"No_Env_Getter" if add_env.no_parent else "G"},
-         Node          => Self,
-         Is_Refcounted => False);
+        (Parent            => ${"No_Env_Getter" if add_env.no_parent else "G"},
+         Node              => Self,
+         Is_Refcounted     => False,
+         Transitive_Parent => ${add_env.transitive_parent});
 
       Register_Destroyable (Self.Unit, Self.Self_Env.Env);
    </%def>

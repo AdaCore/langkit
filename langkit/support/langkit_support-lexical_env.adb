@@ -268,14 +268,15 @@ package body Langkit_Support.Lexical_Env is
      (Parent        : Env_Getter;
       Node          : Element_T;
       Is_Refcounted : Boolean;
-      Default_MD    : Element_Metadata := Empty_Metadata) return Lexical_Env
-   is
+      Default_MD    : Element_Metadata := Empty_Metadata;
+      Transitive_Parent : Boolean := False) return Lexical_Env is
    begin
       if Parent /= No_Env_Getter then
          Inc_Ref (Parent);
       end if;
       return Wrap (new Lexical_Env_Type'
         (Parent                     => Parent,
+         Transitive_Parent          => Transitive_Parent,
          Node                       => Node,
          Referenced_Envs            => <>,
          Map                        => new Internal_Envs.Map,
@@ -498,8 +499,6 @@ package body Langkit_Support.Lexical_Env is
                        & Lexical_Env_Image (Self, Dump_Content => False));
       end if;
 
-      Parent_Env := Get_Env (Self.Env.Parent);
-
       Current_Rebindings := Combine (Self.Env.Rebindings, Rebindings);
       Current_Metadata := Combine (Self.Env.Default_MD, Metadata);
 
@@ -508,11 +507,6 @@ package body Langkit_Support.Lexical_Env is
       --  rebindings.
 
       Env := Extract_Rebinding (Current_Rebindings, Self);
-
-      Parent_Rebindings :=
-        (if Env /= Self
-         then Shed_Rebindings (Parent_Env, Current_Rebindings)
-         else Current_Rebindings);
 
       if not Is_Filtered_Out then
 
@@ -551,7 +545,14 @@ package body Langkit_Support.Lexical_Env is
 
       --  Phase 3: Get elements in parent envs
 
-      if Recursive then
+      if Recursive or Self.Env.Transitive_Parent then
+         Parent_Env := Get_Env (Self.Env.Parent);
+
+         Parent_Rebindings :=
+           (if Env /= Self
+            then Shed_Rebindings (Parent_Env, Current_Rebindings)
+            else Current_Rebindings);
+
          Get_Internal
            (Parent_Env, Key, From, True,
             Parent_Rebindings,
@@ -652,15 +653,17 @@ package body Langkit_Support.Lexical_Env is
    function Orphan (Self : Lexical_Env) return Lexical_Env is
       Env : Lexical_Env_Type renames Self.Env.all;
    begin
-      return Wrap (new Lexical_Env_Type'
-        (Parent          => No_Env_Getter,
-         Node            => Env.Node,
-         Referenced_Envs => Env.Referenced_Envs.Copy,
-         Map             => Env.Map,
-         Default_MD      => Env.Default_MD,
-         Rebindings      => Env.Rebindings,
-         Rebindings_Pool => null,
-         Ref_Count       => <>));
+      return Wrap
+        (new Lexical_Env_Type'
+           (Parent            => No_Env_Getter,
+            Transitive_Parent => False,
+            Node              => Env.Node,
+            Referenced_Envs   => Env.Referenced_Envs.Copy,
+            Map               => Env.Map,
+            Default_MD        => Env.Default_MD,
+            Rebindings        => Env.Rebindings,
+            Rebindings_Pool   => null,
+            Ref_Count         => <>));
    end Orphan;
 
    -----------
@@ -678,14 +681,16 @@ package body Langkit_Support.Lexical_Env is
             return Empty_Env;
          when others =>
             N := Wrap (new Lexical_Env_Type'
-              (Parent          => No_Env_Getter,
-               Node            => No_Element,
-               Referenced_Envs => <>,
-               Map             => null,
-               Default_MD      => With_Md,
-               Rebindings      => null,
-               Rebindings_Pool => null,
-               Ref_Count       => <>));
+                         (Parent            => No_Env_Getter,
+                          Transitive_Parent => False,
+                          Node              => No_Element,
+                          Referenced_Envs   => <>,
+                          Map               => null,
+                          Default_MD        => With_Md,
+                          Rebindings        => null,
+                          Rebindings_Pool   => null,
+                          Ref_Count         => <>));
+
             for Env of Envs loop
                Reference (N, Env, No_Element, Transitive => True);
             end loop;
@@ -710,18 +715,19 @@ package body Langkit_Support.Lexical_Env is
 
       return N : constant Lexical_Env :=
         Wrap (new Lexical_Env_Type'
-          (Parent          => No_Env_Getter,
-           Node            => No_Element,
-           Referenced_Envs => <>,
-           Map             => null,
-           Default_MD      => Empty_Metadata,
-           Rebindings      => Rebindings,
+                (Parent            => No_Env_Getter,
+                 Transitive_Parent => False,
+                 Node              => No_Element,
+                 Referenced_Envs   => <>,
+                 Map               => null,
+                 Default_MD        => Empty_Metadata,
+                 Rebindings        => Rebindings,
 
-           --  This pool is only used on primary lexical environments, so there
-           --  is no need to convey it to synthetic lexical envs.
-           Rebindings_Pool => null,
+                 --  This pool is only used on primary lexical environments, so
+                 --  there is no need to convey it to synthetic lexical envs.
+                 Rebindings_Pool   => null,
 
-           Ref_Count       => <>))
+                 Ref_Count         => <>))
       do
          Reference (N, Base_Env, No_Element, Transitive => True);
       end return;
