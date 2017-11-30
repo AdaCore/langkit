@@ -441,7 +441,7 @@ class FieldAccess(AbstractExpression):
         pretty_class_name = 'FieldAccess'
 
         def __init__(self, receiver_expr, node_data, arguments,
-                     implicit_deref=False, abstract_expr=None):
+                     implicit_deref=False, unsafe=False, abstract_expr=None):
             """
             :param ResolvedExpression receiver_expr: The receiver of the field
                 access.
@@ -460,6 +460,11 @@ class FieldAccess(AbstractExpression):
                 In the case of an entity prefix for an AST node field, return
                 an entity with the same entity info.
 
+            :param bool unsafe: If true, don't generate the null crheck before
+                doing the field access. This is used to avoid noisy and useless
+                null checks in generated code: these checks would fail only
+                because of a bug in the code generator.
+
             :param AbstractExpression|None abstract_expr: See
                 ResolvedExpression's constructor.
             """
@@ -471,11 +476,15 @@ class FieldAccess(AbstractExpression):
             self.simple_field_access = not p
             assert not self.simple_field_access or not implicit_deref
 
-            self.original_receiver_expr = receiver_expr
-            self.receiver_expr = (receiver_expr
-                                  if self.simple_field_access else
-                                  NullCheckExpr(receiver_expr, implicit_deref))
             self.implicit_deref = implicit_deref
+            self.unsafe = unsafe
+
+            self.original_receiver_expr = receiver_expr
+            self.receiver_expr = (
+                receiver_expr
+                if self.simple_field_access or self.unsafe else
+                NullCheckExpr(receiver_expr, implicit_deref)
+            )
 
             self.node_data = node_data
             self.original_node_data = node_data
