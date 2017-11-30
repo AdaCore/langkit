@@ -2556,11 +2556,9 @@ class ArrayLiteral(AbstractExpression):
 
 def gdb_property_start(prop):
     if prop.is_dispatcher:
-        return gdb_helper('property-start',
-                          '[dispatcher]{}'.format(prop.qualname),
-                          'dispatcher')
+        return gdb_helper('property-start', prop.debug_name, 'dispatcher')
     else:
-        return gdb_helper('property-start', prop.qualname,
+        return gdb_helper('property-start', prop.debug_name,
                           '{}:{}'.format(prop.location.file,
                                          prop.location.line))
 
@@ -2878,6 +2876,14 @@ class PropertyDef(AbstractNodeData):
         :rtype: bool
         """
         return self.location is not None
+
+    @property
+    def debug_name(self):
+        """
+        Return the name for this property to use in debug info.
+        """
+        return ('[dispatcher]{}'.format(self.qualname)
+                if self.is_dispatcher else self.qualname)
 
     @inherited_information
     def ignore_warn_on_node(self):
