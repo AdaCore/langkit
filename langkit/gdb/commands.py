@@ -134,6 +134,9 @@ class StatePrinter(object):
         if self.state.property.dsl_sloc:
             prn('from {}'.format(self.state.property.dsl_sloc))
 
+        if self.state.in_memoization_lookup:
+            prn('About to return a memoized result...')
+
         for scope_state in self.state.scopes:
             is_first = [True]
 

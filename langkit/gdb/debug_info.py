@@ -119,18 +119,26 @@ class DebugInfo(object):
                 self.properties_dict[p.name] = p
                 scope_stack.append(p)
 
-            elif d.is_a(ScopeStart, PropertyCallStart):
+            elif d.is_a(ScopeStart, PropertyCallStart,
+                        MemoizationLookupDirective):
                 if not scope_stack or not isinstance(scope_stack[-1], Scope):
                     raise ParseError(
                         line_no,
                         '{} directive must occur inside a property or a'
                         ' property scope'.format(d.directive_name)
                     )
-                if d.is_a(ScopeStart):
-                    scope_stack.append(Scope(LineRange(d.line_no, None)))
+
+                line_range = LineRange(d.line_no, None)
+
+                if d.is_a(MemoizationLookupDirective):
+                    new_scope = MemoizationLookup(line_range)
+                elif d.is_a(PropertyCallStart):
+                    new_scope = PropertyCall(line_range, d.name)
                 else:
-                    scope_stack.append(PropertyCall(LineRange(d.line_no, None),
-                                                    d.name))
+                    assert d.is_a(ScopeStart)
+                    new_scope = Scope(line_range)
+
+                scope_stack.append(new_scope)
 
             elif d.is_a(End):
                 if not scope_stack:
@@ -142,9 +150,6 @@ class DebugInfo(object):
                 else:
                     assert isinstance(ended_scope, Property), (
                         'Top-level scopes must all be properties'
-                    )
-                    assert len(ended_scope.subscopes) == 1, (
-                        'Properties can have only one sub-scope'
                     )
                     assert not expr_stack, (
                         'Some expressions are not done when leaving property'
@@ -182,6 +187,16 @@ class DebugInfo(object):
                 )
                 start_event._done_event = done_event
                 scope_stack[-1].events.append(done_event)
+
+            elif d.is_a(MemoizationReturnDirective):
+                if (not scope_stack or
+                        not isinstance(scope_stack[-1], MemoizationLookup)):
+                    raise ParseError(
+                        line_no,
+                        'memoization-result directive must appear inside a'
+                        ' memoization-lookup scope'
+                    )
+                scope_stack[-1].events.append(d)
 
             else:
                 raise NotImplementedError('Unknown directive: {}'.format(d))
@@ -360,6 +375,21 @@ class Property(Scope):
         self.dsl_sloc = dsl_sloc
         self.is_dispatcher = is_dispatcher
 
+    @property
+    def memoization_lookup(self):
+        """
+        Return None if this property is not memoized. Otherwise, return the
+        special scope that covers code that is about to return based on a
+        memoization cached result. To be used when putting breakpoints at the
+        beginning of properties.
+
+        :rtype: MemoizationLookup|None
+        """
+        for e in self.events:
+            if isinstance(e, MemoizationLookup):
+                return e
+        return None
+
 
 class Event(BaseEvent):
     def __init__(self, line_no, entity=None):
@@ -468,6 +498,18 @@ class ExprDone(Event):
         return '<ExprDone {}, line {}>'.format(self.expr_id, self.line_no)
 
 
+class MemoizationLookup(Scope):
+    pass
+
+
+class MemoizationReturn(Event):
+    def apply_on_state(self, scope_state):
+        pass
+
+    def __repr__(self):
+        return '<MemoizationReturn, line {}>'.format(self.line_no)
+
+
 class Directive(object):
     """
     Holder for GDB helper directives as parsed from source files.
@@ -542,6 +584,20 @@ class PropertyCallStart(Directive):
         return cls(name, line_no)
 
 
+class MemoizationLookupDirective(Directive):
+    @classmethod
+    def parse(cls, line_no, args):
+        assert len(args) == 0
+        return cls(line_no)
+
+
+class MemoizationReturnDirective(Directive):
+    @classmethod
+    def parse(cls, line_no, args):
+        assert len(args) == 0
+        return cls(line_no)
+
+
 class ScopeStart(Directive):
     @classmethod
     def parse(cls, line_no, args):
@@ -595,6 +651,8 @@ class ExprDoneDirective(Directive):
 Directive.name_to_cls.update({
     'property-start': PropertyStart,
     'property-call-start': PropertyCallStart,
+    'memoization-lookup': MemoizationLookupDirective,
+    'memoization-return': MemoizationReturnDirective,
     'scope-start': ScopeStart,
     'bind': BindDirective,
     'end': End,

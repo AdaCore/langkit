@@ -2570,6 +2570,14 @@ def gdb_property_start(prop):
                                          prop.location.line))
 
 
+def gdb_memoization_lookup():
+    return gdb_helper('memoization-lookup')
+
+
+def gdb_memoization_return():
+    return gdb_helper('memoization-return')
+
+
 def gdb_scope_start():
     return gdb_helper('scope-start')
 
@@ -2614,6 +2622,8 @@ def render(*args, **kwargs):
         Self=Self,
         assign_var=assign_var,
         gdb_property_start=gdb_property_start,
+        gdb_memoization_lookup=gdb_memoization_lookup,
+        gdb_memoization_return=gdb_memoization_return,
         gdb_scope_start=gdb_scope_start,
         gdb_end=gdb_end,
         gdb_bind=gdb_bind,

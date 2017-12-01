@@ -123,6 +123,7 @@ begin
          % endif
 
          if not Lookup_Memoization_Map (Node.Unit, Mmz_K, Mmz_Cur) then
+            ${gdb_memoization_lookup()}
             Mmz_Val := Memoization_Maps.Element (Mmz_Cur);
 
             if Mmz_Val.Kind = Mmz_Evaluating then
@@ -130,6 +131,7 @@ begin
                   Properties_Traces.Trace
                     ("Result: infinite recursion");
                % endif
+               ${gdb_memoization_return()}
                raise Property_Error with "Infinite recursion detected";
 
             elsif Mmz_Val.Kind = Mmz_Property_Error then
@@ -138,6 +140,7 @@ begin
                     ("Result: Property_Error");
                   Properties_Traces.Decrease_Indent;
                % endif
+               ${gdb_memoization_return()}
                raise Property_Error;
 
             else
@@ -151,8 +154,10 @@ begin
                     ("Result: " & Trace_Image (Property_Result));
                   Properties_Traces.Decrease_Indent;
                % endif
+               ${gdb_memoization_return()}
                return Property_Result;
             end if;
+            ${gdb_end()}
          end if;
 
       % if not property.memoize_in_populate:

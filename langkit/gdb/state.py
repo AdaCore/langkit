@@ -71,6 +71,19 @@ class State(object):
         """
 
     @property
+    def in_memoization_lookup(self):
+        """
+        Return whether execution is inside a memoization handler, about to
+        return a cached result.
+
+        :rtype: bool
+        """
+        from langkit.gdb.debug_info import MemoizationLookup
+
+        innermost = self.innermost_scope
+        return innermost and isinstance(innermost.scope, MemoizationLookup)
+
+    @property
     def property_scope(self):
         """
         Return the ScopeState associated to the running property.
