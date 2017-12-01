@@ -62,6 +62,7 @@ def setup(lib_name, astnode_names, prefix):
         commands.BreakCommand,
         commands.NextCommand,
         commands.OutCommand,
+        commands.StepInsideCommand,
     ]:
         cmd_cls(context)
 

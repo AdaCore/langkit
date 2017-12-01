@@ -427,6 +427,16 @@ class ExprStart(Event):
         assert self._done_event
         return self._done_event
 
+    @property
+    def line_range(self):
+        """
+        Return the line range that spans from this ExprStart event to the
+        corresponding ExprDone one.
+
+        :rtype: LineRange
+        """
+        return LineRange(self.line_no, self.done_event.line_no)
+
     def apply_on_state(self, scope_state):
         assert self.expr_id not in scope_state.expressions
         expr = ExpressionEvaluation(self)

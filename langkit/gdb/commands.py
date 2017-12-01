@@ -7,7 +7,7 @@ import sys
 
 import gdb
 
-from langkit.gdb.control_flow import go_next, go_out
+from langkit.gdb.control_flow import go_next, go_out, go_step_inside
 from langkit.gdb.debug_info import DSLLocation, ExprStart, Scope
 from langkit.gdb.utils import expr_repr, name_repr, prop_repr
 from langkit.utils import no_colors
@@ -398,3 +398,19 @@ sub-expression.
             print('This command takes no argument')
         else:
             go_out(self.context)
+
+
+class StepInsideCommand(BaseCommand):
+    """If execution is about to call a property, step inside it. Traverse
+dispatch properties in order to land directly in the dispatched property.
+    """
+
+    def __init__(self, context):
+        super(StepInsideCommand, self).__init__(context, 'si',
+                                                gdb.COMMAND_RUNNING)
+
+    def invoke(self, arg, from_tty):
+        if arg:
+            print('This command takes no argument')
+        else:
+            go_step_inside(self.context)

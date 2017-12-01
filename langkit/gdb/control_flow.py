@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 import gdb
 
 from langkit.gdb.breakpoints import BreakpointGroup
-from langkit.gdb.debug_info import ExprDone, ExprStart
+from langkit.gdb.debug_info import ExprDone, ExprStart, PropertyCall, Scope
 from langkit.gdb.utils import expr_repr
 
 
@@ -157,3 +157,97 @@ def go_out(context):
     if new_current_expr:
         print('')
         print('Now evaluating {}'.format(expr_repr(new_current_expr)))
+
+
+def go_step_inside(context):
+    """
+    If execution is about to call a property, step inside it. Traverse
+    dispatch properties in order to land directly in the dispatched property.
+    """
+
+    def continue_until(line_no, hide_output):
+        dest_spec = '{}:{}'.format(context.debug_info.filename,
+                                   line_no)
+        gdb.Breakpoint(dest_spec, internal=True, temporary=True)
+        gdb.execute('continue', to_string=hide_output)
+
+    # First, look for a property call in the current execution state
+    state = context.decode_state()
+    if not state:
+        print('Selected frame is not in a property.')
+        return
+    scope_state, current_expr = state.lookup_current_expr()
+    target = scope_state.called_property if scope_state else None
+
+    # If we are not inside a  property call already, look for all property
+    # calls in the current expression.
+    if not target and scope_state:
+        # Look for property calls that fall under the following line range...
+        expr_range = current_expr.start_event.line_range
+
+        # ... and that *don't* fall under these (i.e. exclude calls for nested
+        # expressions).
+        filter_ranges = [expr.line_range
+                         for expr in current_expr.start_event.sub_expr_start]
+
+        def filter(e):
+            if not isinstance(e, PropertyCall):
+                return False
+            line_no = event.line_range.first_line
+            if line_no not in expr_range:
+                return False
+            for fr in filter_ranges:
+                if line_no in fr:
+                    return False
+            return True
+
+        targets = [event.property(context)
+                   for event in scope_state.scope.iter_events()
+                   if filter(event)]
+        if len(targets) == 1:
+            target = targets[0]
+
+    # Still no call target in sight? Just behave like the "next" commmand
+    if not target:
+        go_next(context)
+        return
+
+    # If the target is not a dispatcher, put a temporary breakpoint on the
+    # first line in its body and continue to reach it.
+    if not target.is_dispatcher:
+        line_no = scope_start_location(context, target)
+        if line_no:
+            continue_until(line_no, False)
+        else:
+            go_next(context)
+        return
+
+    # The target is a dispatcher. These have only one first-level scope, so:
+    # continue to its first-level scope.
+    outer_scopes = list(target.iter_events(recursive=False, filter=Scope))
+    if len(outer_scopes) != 1:
+        print('ERROR: dispatcher {} has none or multiple first-level'
+              ' scopes'.format(target))
+        return
+    outer_scope = outer_scopes[0]
+    continue_until(outer_scope.line_range.first_line, True)
+
+    # Step until we reach a nested scope, so that we let the dispatch occur
+    while True:
+        state = context.decode_state()
+        if not state or state.property != target:
+            print('ERROR: landed somewhere else that in {}'.format(target))
+            return
+        inner_scope = state.innermost_scope.scope
+
+        if inner_scope != outer_scope:
+            break
+        gdb.execute('next')
+
+    # We now reached the matcher that contains the call to the dispatched
+    # property: find it and follow the call.
+    targets = [call.property(context)
+               for call in inner_scope.iter_events(filter=PropertyCall)
+               if call.line_range.first_line in inner_scope.line_range]
+    target = targets[0] if len(targets) == 1 else None
+    continue_until(scope_start_location(context, target), False)
