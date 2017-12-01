@@ -1,12 +1,38 @@
 from __future__ import absolute_import, division, print_function
 
-import itertools
-
 import gdb
 
 from langkit.gdb.breakpoints import BreakpointGroup
 from langkit.gdb.debug_info import ExprDone, ExprStart
 from langkit.gdb.utils import expr_repr
+
+
+def scope_start_location(context, scope, allow_degraded_mode=True):
+    """
+    Return the line number in the generated source where to put a breakpoint
+    for the beginning of a scope.
+
+    :type context: langkit.gdb.context.Context
+    :type scope: Scope
+
+    :param bool allow_degraded_mode: By default, use the sloc of the root
+        expression. If there is not and this is true, fallback on the first
+        line of `scope`, otherwise return None.
+
+        This last case is degraded mode, as the first line of the root
+        expression takes us closer to the interesting bits in source code.
+
+    :rtype: int|None
+    """
+    # First look for the root expression in this scope
+    events = scope.iter_events(filter=ExprStart)
+    try:
+        return next(iter(events)).line_no
+    except StopIteration:
+        pass
+
+    # Otherwise just return the first line of this scope
+    return scope.line_range.first_line if allow_degraded_mode else None
 
 
 def go_next(context):
@@ -26,21 +52,13 @@ def go_next(context):
         # expressions: either the property just started (root expression
         # evaluation is ahead), either it is about to return (root expr.  eval.
         # is behind).
-        events = itertools.ifilter(
-            lambda e: isinstance(e, ExprStart),
-            state.property_scope.scope.iter_events()
-        )
-        try:
-            root_expr = next(iter(events))
-        except StopIteration:
-            # This function has no computing expression: just finish it.  For
-            # instance, this happens when properties return a constant boolean.
-            root_expr = None
+        line_no = scope_start_location(context, state.property_scope.scope,
+                                       allow_degraded_mode=False)
 
-        if root_expr and state.line_no < root_expr.line_no:
+        if line_no and state.line_no < line_no:
             # The first expression is ahead: resume execution until we reach
             # it.
-            gdb.execute('until {}'.format(root_expr.line_no))
+            gdb.execute('until {}'.format(line_no))
         else:
             gdb.execute('finish')
 
