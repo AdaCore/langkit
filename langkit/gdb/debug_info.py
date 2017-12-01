@@ -5,6 +5,7 @@ properties DSL level.
 
 from __future__ import absolute_import, division, print_function
 
+import inspect
 import shlex
 
 import gdb
@@ -284,7 +285,11 @@ class LineRange(object):
         return '{}-{}'.format(self.first_line, self.last_line)
 
 
-class Scope(object):
+class BaseEvent(object):
+    pass
+
+
+class Scope(BaseEvent):
     def __init__(self, line_range, label=None):
         self.line_range = line_range
         self.label = label
@@ -294,20 +299,37 @@ class Scope(object):
     def subscopes(self):
         return [e for e in self.events if isinstance(e, Scope)]
 
-    def iter_events(self, recursive=True):
+    def iter_events(self, recursive=True, filter=None):
         """
         Iterate through all events in this scope and, if `recursive`, all
         sub-scopes. Events are yielded in source order.
 
-        :rtype: iter[Event]
+        :param filter: If left to None, don't filter the results. If it's a
+            class, return only instances of this class. Otherwise, treat it as
+            a predicate function and return only items for which the predicate
+            returns true.
+
+        :rtype: iter[BaseEvent]
         """
+
+        def predicate(e):
+            if filter is None:
+                return True
+            elif inspect.isclass(filter):
+                return isinstance(e, filter)
+            else:
+                return filter(e)
+
         for e in self.events:
             if isinstance(e, Scope):
+                if predicate(e):
+                    yield e
                 if recursive:
-                    for sub_e in e.iter_events():
+                    for sub_e in e.iter_events(filter=filter):
                         yield sub_e
             else:
-                yield e
+                if predicate(e):
+                    yield e
 
     def __repr__(self):
         return '<{}{} {}>'.format(
@@ -339,7 +361,7 @@ class Property(Scope):
         self.is_dispatcher = is_dispatcher
 
 
-class Event(object):
+class Event(BaseEvent):
     def __init__(self, line_no, entity=None):
         self.line_no = line_no
         self.entity = entity
