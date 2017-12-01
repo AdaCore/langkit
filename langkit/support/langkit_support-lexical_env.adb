@@ -33,13 +33,6 @@ package body Langkit_Support.Lexical_Env is
      with Inline;
    --  Shed env rebindings that are not in the parent chain for From_Env
 
-   function Decorate
-     (El         : Internal_Map_Element;
-      MD         : Element_Metadata;
-      Rebindings : Env_Rebindings) return Entity;
-   --  From an array of entities, decorate every element with additional
-   --  Metadata stored in MD.
-
    procedure Check_Rebindings_Unicity (Self : Env_Rebindings);
    --  Perform a unicity check on the various rebindings in Self. In
    --  particular, check that there are no two identical Old_Env and no two
@@ -404,7 +397,10 @@ package body Langkit_Support.Lexical_Env is
       --  Return whether, according to Filter, Self should be discarded during
       --  the lexical env lookup.
 
-      function Append_Result (E : Entity) return Boolean;
+      function Append_Result
+        (El         : Internal_Map_Element;
+         MD         : Element_Metadata;
+         Rebindings : Env_Rebindings) return Boolean;
       --  Add E to results, if it passes the Can_Reach filter. Return whether
       --  result was appended or not.
 
@@ -425,15 +421,32 @@ package body Langkit_Support.Lexical_Env is
       -- Append_Result --
       -------------------
 
-      function Append_Result (E : Entity) return Boolean is
+      function Append_Result
+        (El         : Internal_Map_Element;
+         MD         : Element_Metadata;
+         Rebindings : Env_Rebindings) return Boolean
+      is
+         E : constant Entity :=
+           (El   => El.Element,
+            Info => (MD         => Combine (El.MD, MD),
+                     Rebindings => Rebindings));
       begin
+
          if Has_Trace then
-            Traces.Trace (Me, "Found " & Image (Element_Image (E.El, False)));
+            Traces.Trace
+              (Me, "Found " & Image (Element_Image (E.El, False)));
          end if;
 
          if From = No_Element or else Can_Reach_F (E) then
-            Results.Append (E);
-            return True;
+            declare
+               Resolved_Entity : constant Entity :=
+                 (if El.Resolver = null
+                  then E
+                  else El.Resolver.all (E));
+            begin
+               Results.Append (Resolved_Entity);
+               return True;
+            end;
          end if;
 
          return False;
@@ -525,8 +538,9 @@ package body Langkit_Support.Lexical_Env is
             --  TODO??? Use "for .. of next" GPL release
             for I in reverse Elements.First_Index .. Elements.Last_Index loop
                if Append_Result
-                   (Decorate (Elements.Get (I),
-                    Current_Metadata, Current_Rebindings))
+                   (Elements.Get (I),
+                    Current_Metadata,
+                    Current_Rebindings)
                then
                   if Stop_At_First then
                      goto Early_Exit;
@@ -919,26 +933,6 @@ package body Langkit_Support.Lexical_Env is
       return (MD         => E_Info.MD,
               Rebindings => Shed_Rebindings (Env, E_Info.Rebindings));
    end Shed_Rebindings;
-
-   --------------
-   -- Decorate --
-   --------------
-
-   function Decorate
-     (El         : Internal_Map_Element;
-      MD         : Element_Metadata;
-      Rebindings : Env_Rebindings) return Entity
-   is
-      Result : constant Entity :=
-        (El   => El.Element,
-         Info => (MD         => Combine (El.MD, MD),
-                  Rebindings => Rebindings));
-   begin
-      return
-        (if El.Resolver = null
-         then Result
-         else El.Resolver.all (Result));
-   end Decorate;
 
    ------------------------------
    -- Check_Rebindings_Unicity --
