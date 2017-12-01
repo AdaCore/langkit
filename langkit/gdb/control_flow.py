@@ -7,7 +7,7 @@ from langkit.gdb.debug_info import ExprDone, ExprStart, PropertyCall, Scope
 from langkit.gdb.utils import expr_repr
 
 
-def scope_start_location(context, scope, allow_degraded_mode=True):
+def scope_start_location(context, scope, from_line_no=None):
     """
     Return the line number in the generated source where to put a breakpoint
     for the beginning of a scope.
@@ -15,24 +15,28 @@ def scope_start_location(context, scope, allow_degraded_mode=True):
     :type context: langkit.gdb.context.Context
     :type scope: Scope
 
-    :param bool allow_degraded_mode: By default, use the sloc of the root
-        expression. If there is not and this is true, fallback on the first
-        line of `scope`, otherwise return None.
-
-        This last case is degraded mode, as the first line of the root
-        expression takes us closer to the interesting bits in source code.
+    :param int|None from_line_no: If given, don't consider line numbers lower
+        than or equal to `from_line_no`.
 
     :rtype: int|None
     """
+    def accepted(line_no):
+        return from_line_no is None or from_line_no < line_no
+
     # First look for the root expression in this scope
     events = scope.iter_events(filter=ExprStart)
     try:
-        return next(iter(events)).line_no
+        line_no = next(iter(events)).line_no
     except StopIteration:
         pass
+    else:
+        if accepted(line_no):
+            return line_no
 
     # Otherwise just return the first line of this scope
-    return scope.line_range.first_line if allow_degraded_mode else None
+    line_no = scope.line_range.first_line
+    if accepted(line_no):
+        return line_no
 
 
 def go_next(context):
@@ -53,9 +57,9 @@ def go_next(context):
         # evaluation is ahead), either it is about to return (root expr.  eval.
         # is behind).
         line_no = scope_start_location(context, state.property_scope.scope,
-                                       allow_degraded_mode=False)
+                                       from_line_no=state.line_no)
 
-        if line_no and state.line_no < line_no:
+        if line_no:
             # The first expression is ahead: resume execution until we reach
             # it.
             gdb.execute('until {}'.format(line_no))
