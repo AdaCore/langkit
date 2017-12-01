@@ -198,12 +198,44 @@ class ASTNodePrinter(BasePrinter):
 
 class LexicalEnv(object):
     """
-    Wrapper for Lexical_Env_Access values.
+    Wrapper for Lexical_Env/Lexical_Env_Access values.
     """
 
     def __init__(self, value, context):
-        self.value = value
         self.context = context
+
+        if self.matches_wrapper(value, context):
+            self.value = value['env']
+        else:
+            self.value = value
+        if not self.matches_access(self.value, context):
+            raise ValueError('Invalid lexical env: {}'.format(self.value))
+
+    @classmethod
+    def matches_wrapper(cls, value, context):
+        """
+        Return whether `value` is a Lexical_Env value.
+
+        :rtype: bool
+        """
+        return (value.type.code == gdb.TYPE_CODE_STRUCT and
+                value.type.name == context.implname('ast_envs__lexical_env'))
+
+    @classmethod
+    def matches_access(cls, value, context):
+        """
+        Return whether `value` is a Lexical_Env_Access value.
+
+        :rtype: bool
+        """
+        typ = value.type
+        if typ.code == gdb.TYPE_CODE_TYPEDEF:
+            return typ.name == context.implname('ast_envs__lexical_env_access')
+
+        return (typ.code == gdb.TYPE_CODE_PTR and
+                typ.target().code == gdb.TYPE_CODE_STRUCT and
+                (typ.target().name
+                 == context.implname('ast_envs__lexical_env_type')))
 
     @property
     def node(self):
@@ -240,11 +272,10 @@ class LexicalEnvPrinter(BasePrinter):
 
     @classmethod
     def matches(cls, value, context):
-        return (value.type.code == gdb.TYPE_CODE_STRUCT and
-                value.type.name == context.implname('ast_envs__lexical_env'))
+        return LexicalEnv.matches_wrapper(value, context)
 
     def to_string(self):
-        return LexicalEnv(self.value['env'], self.context).to_string()
+        return LexicalEnv(self.value, self.context).to_string()
 
 
 class EnvGetterPrinter(BasePrinter):
@@ -421,7 +452,7 @@ class RebindingsPrinter(BasePrinter):
             return 'null'
 
         def rebinding_img(value):
-            new_env = LexicalEnv(value['new_env']['env'], self.context)
+            new_env = LexicalEnv(value['new_env'], self.context)
             return ASTNodePrinter(new_env.node,
                                   self.context).sloc(with_end=False)
 
