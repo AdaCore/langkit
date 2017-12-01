@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="exts" file="extensions.mako" />
+
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 
@@ -7,6 +9,11 @@ with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 with Langkit_Support.Text;  use Langkit_Support.Text;
 
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
+
+${(exts.with_clauses(with_clauses + [
+   ((ctx.symbol_canonicalizer.unit_fqn, False)
+    if ctx.symbol_canonicalizer else None),
+]))}
 
 package body ${ada_lib_name}.Debug is
 
@@ -63,8 +70,15 @@ package body ${ada_lib_name}.Debug is
    -----------------
 
    function Sym_Matches (S : Symbol_Type; Text : String) return Boolean is
+      Symbol : constant Symbolization_Result :=
+         % if ctx.symbol_canonicalizer:
+            ${ctx.symbol_canonicalizer.fqn} (To_Text (Text))
+         % else:
+            Create_Symbol (To_Text (Text))
+         % endif
+      ;
    begin
-      return Image (S.all) = Text;
+      return Symbol.Success and then Image (S.all) = Image (Symbol.Symbol);
    end Sym_Matches;
 
 end ${ada_lib_name}.Debug;
