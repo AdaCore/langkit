@@ -3,14 +3,16 @@ from __future__ import absolute_import, division, print_function
 import gdb
 
 from langkit.gdb.breakpoints import BreakpointGroup
-from langkit.gdb.debug_info import ExprDone, ExprStart, PropertyCall, Scope
+from langkit.gdb.debug_info import (ExprDone, ExprStart, Property,
+                                    PropertyCall, Scope)
 from langkit.gdb.utils import expr_repr
 
 
-def scope_start_location(context, scope, from_line_no=None):
+def break_scope_start(context, scope, from_line_no=None):
     """
-    Return the line number in the generated source where to put a breakpoint
-    for the beginning of a scope.
+    Create a breakpoint group for all entry points that are relevant (for
+    users) for the given `scope`. Return None if we could find no relevant
+    location to break on, otherwise return the breakpoint group.
 
     :type context: langkit.gdb.context.Context
     :type scope: Scope
@@ -18,25 +20,33 @@ def scope_start_location(context, scope, from_line_no=None):
     :param int|None from_line_no: If given, don't consider line numbers lower
         than or equal to `from_line_no`.
 
-    :rtype: int|None
+    :rtype: BreakpointGroup|None
     """
-    def accepted(line_no):
-        return from_line_no is None or from_line_no < line_no
+    candidates = []
 
-    # First look for the root expression in this scope
+    # Consider the first line for this scope's root expression, if any
     events = scope.iter_events(filter=ExprStart)
     try:
         line_no = next(iter(events)).line_no
     except StopIteration:
-        pass
+        # If there is no root expression, just use the first scope line. It's
+        # degraded mode because users are interested in expressions rather than
+        # scopes.
+        candidates.append(scope.line_range.first_line)
     else:
-        if accepted(line_no):
-            return line_no
+        candidates.append(line_no)
 
-    # Otherwise just return the first line of this scope
-    line_no = scope.line_range.first_line
-    if accepted(line_no):
-        return line_no
+    # Consider memoization return points for properties
+    if isinstance(scope, Property):
+        lookup_scope = scope.memoization_lookup
+        if lookup_scope:
+            candidates.extend(m.line_no for m in lookup_scope.events)
+
+    # Filter candidates if needed with `from_line_no`
+    if from_line_no:
+        candidates = [l for l in candidates if from_line_no < l]
+
+    return BreakpointGroup(context, candidates) if candidates else None
 
 
 def go_next(context):
@@ -49,6 +59,12 @@ def go_next(context):
         print('Selected frame is not in a property.')
         return
 
+    # If execution reached the part of the code where the property is about to
+    # return a cached result, just let it return.
+    if state.in_memoization_lookup:
+        gdb.execute('finish')
+        return
+
     scope_state, current_expr = state.lookup_current_expr()
 
     if current_expr is None:
@@ -56,13 +72,13 @@ def go_next(context):
         # expressions: either the property just started (root expression
         # evaluation is ahead), either it is about to return (root expr.  eval.
         # is behind).
-        line_no = scope_start_location(context, state.property_scope.scope,
-                                       from_line_no=state.line_no)
+        bp_group = break_scope_start(context, state.property_scope.scope,
+                                     from_line_no=state.line_no)
 
-        if line_no:
+        if bp_group:
             # The first expression is ahead: resume execution until we reach
             # it.
-            gdb.execute('until {}'.format(line_no))
+            gdb.execute('continue')
         else:
             gdb.execute('finish')
 
@@ -219,9 +235,9 @@ def go_step_inside(context):
     # If the target is not a dispatcher, put a temporary breakpoint on the
     # first line in its body and continue to reach it.
     if not target.is_dispatcher:
-        line_no = scope_start_location(context, target)
-        if line_no:
-            continue_until(line_no, False)
+        bp_group = break_scope_start(context, target)
+        if bp_group:
+            gdb.execute('continue')
         else:
             go_next(context)
         return
@@ -254,4 +270,6 @@ def go_step_inside(context):
                for call in inner_scope.iter_events(filter=PropertyCall)
                if call.line_range.first_line in inner_scope.line_range]
     target = targets[0] if len(targets) == 1 else None
-    continue_until(scope_start_location(context, target), False)
+    bp_group = break_scope_start(context, target)
+    assert bp_group
+    gdb.execute('continue')
