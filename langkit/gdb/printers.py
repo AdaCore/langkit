@@ -401,12 +401,8 @@ class RebindingsPrinter(BasePrinter):
         return (
             value.type.code == gdb.TYPE_CODE_PTR
             and value.type.target().code == gdb.TYPE_CODE_STRUCT
-            and (
-                value.type.target().name
-                == '{}__analysis__ast_envs__env_rebindings_type'.format(
-                    context.lib_name
-                )
-            )
+            and (value.type.target().name
+                 == context.implname('ast_envs__env_rebindings_type'))
         )
 
     @property
@@ -425,7 +421,8 @@ class RebindingsPrinter(BasePrinter):
             return 'null'
 
         def rebinding_img(value):
-            return ASTNodePrinter(value['new_env']['node'],
+            new_env = LexicalEnv(value['new_env']['env'], self.context)
+            return ASTNodePrinter(new_env.node,
                                   self.context).sloc(with_end=False)
 
         # Gather all Env_Rebindings_Type records, parents last
