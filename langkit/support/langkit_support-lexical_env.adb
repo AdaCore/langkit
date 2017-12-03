@@ -48,7 +48,6 @@ package body Langkit_Support.Lexical_Env is
       Recursive     : Boolean := True;
       Rebindings    : Env_Rebindings := null;
       Metadata      : Element_Metadata := Empty_Metadata;
-      Stop_At_First : Boolean;
       Results       : in out Entity_Vectors.Vector);
 
    -----------------------
@@ -378,7 +377,6 @@ package body Langkit_Support.Lexical_Env is
       Recursive     : Boolean := True;
       Rebindings    : Env_Rebindings := null;
       Metadata      : Element_Metadata := Empty_Metadata;
-      Stop_At_First : Boolean;
       Results       : in out Entity_Vectors.Vector)
    is
       procedure Get_Refd_Elements (Self : Referenced_Env);
@@ -469,7 +467,6 @@ package body Langkit_Support.Lexical_Env is
                then Current_Rebindings
                else Shed_Rebindings (Env, Current_Rebindings)),
             Metadata => Current_Metadata,
-            Stop_At_First => Stop_At_First,
             Results    => Results);
 
          Dec_Ref (Env);
@@ -528,9 +525,7 @@ package body Langkit_Support.Lexical_Env is
                Current_Metadata,
                Current_Rebindings)
             then
-               if Stop_At_First then
-                  goto Early_Exit;
-               end if;
+               null;
             end if;
 
          end loop;
@@ -556,10 +551,9 @@ package body Langkit_Support.Lexical_Env is
            (Parent_Env, Key, From, True,
             Parent_Rebindings,
             Current_Metadata,
-            Stop_At_First, Results);
+            Results);
       end if;
 
-      <<Early_Exit>>
       Dec_Ref (Env);
    end Get_Internal;
 
@@ -584,7 +578,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       Get_Internal (Self, Key, From, Recursive, null,
-                    Empty_Metadata, False, V);
+                    Empty_Metadata, V);
 
       if Has_Trace then
          Traces.Trace (Me, "Returning vector with length " & V.Length'Image);
@@ -619,7 +613,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       Get_Internal (Self, Key, From, Recursive, null, Empty_Metadata,
-                    True, V);
+                    V);
 
       if Has_Trace then
          Traces.Trace (Me, "Returning vector with length " & V.Length'Image);
