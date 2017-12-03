@@ -48,8 +48,6 @@ package body Langkit_Support.Lexical_Env is
       Recursive     : Boolean := True;
       Rebindings    : Env_Rebindings := null;
       Metadata      : Element_Metadata := Empty_Metadata;
-      Filter        : access
-         function (Ent : Entity; Env : Lexical_Env) return Boolean := null;
       Stop_At_First : Boolean;
       Results       : in out Entity_Vectors.Vector);
 
@@ -380,22 +378,10 @@ package body Langkit_Support.Lexical_Env is
       Recursive     : Boolean := True;
       Rebindings    : Env_Rebindings := null;
       Metadata      : Element_Metadata := Empty_Metadata;
-      Filter        : access
-         function (Ent : Entity; Env : Lexical_Env) return Boolean := null;
       Stop_At_First : Boolean;
       Results       : in out Entity_Vectors.Vector)
    is
       procedure Get_Refd_Elements (Self : Referenced_Env);
-
-      function Is_Filtered_Out return Boolean is
-        (if From = No_Element or else Filter = null
-         then False
-         else not
-           Filter (Entity'(El => From,
-                           Info => No_Entity_Info),
-                   Self));
-      --  Return whether, according to Filter, Self should be discarded during
-      --  the lexical env lookup.
 
       function Append_Result
         (El         : Internal_Map_Element;
@@ -483,7 +469,6 @@ package body Langkit_Support.Lexical_Env is
                then Current_Rebindings
                else Shed_Rebindings (Env, Current_Rebindings)),
             Metadata => Current_Metadata,
-            Filter     => Filter,
             Stop_At_First => Stop_At_First,
             Results    => Results);
 
@@ -502,14 +487,17 @@ package body Langkit_Support.Lexical_Env is
       C                 : Cursor := Internal_Envs.No_Element;
       Elements          : Internal_Map_Element_Vectors.Vector;
    begin
-      if Self = Null_Lexical_Env then
+      if Self in Null_Lexical_Env | Empty_Env then
          return;
       end if;
 
       if Has_Trace then
-         Traces.Trace (Me,
-                       "Get_Internal env="
-                       & Lexical_Env_Image (Self, Dump_Content => False));
+         Me.Trace ("Get_Internal env="
+                   & Lexical_Env_Image (Self, Dump_Content => False)
+                   & " key = " & Image (Key.all)
+                   & " from = " & Image (if From /= No_Element
+                                         then Element_Image (From)
+                                         else "<null>"));
       end if;
 
       Current_Rebindings := Combine (Self.Env.Rebindings, Rebindings);
@@ -521,41 +509,38 @@ package body Langkit_Support.Lexical_Env is
 
       Env := Extract_Rebinding (Current_Rebindings, Self);
 
-      if not Is_Filtered_Out then
+      --  Phase 1: Get elements in own env if there are any
 
-         --  Phase 1: Get elements in own env if there are any
+      if Env.Env.Map /= null then
+         C := Env.Env.Map.Find (Key);
+      end if;
 
-         if Env.Env.Map /= null then
-            C := Env.Env.Map.Find (Key);
-         end if;
+      if Has_Element (C) then
+         Elements := Element (C);
 
-         if Has_Element (C) then
-            Elements := Element (C);
+         --  We iterate in reverse, so that last inserted results are
+         --  returned first.
 
-            --  We iterate in reverse, so that last inserted results are
-            --  returned first.
-
-            --  TODO??? Use "for .. of next" GPL release
-            for I in reverse Elements.First_Index .. Elements.Last_Index loop
-               if Append_Result
-                   (Elements.Get (I),
-                    Current_Metadata,
-                    Current_Rebindings)
-               then
-                  if Stop_At_First then
-                     goto Early_Exit;
-                  end if;
+         --  TODO??? Use "for .. of next" GPL release
+         for I in reverse Elements.First_Index .. Elements.Last_Index loop
+            if Append_Result
+              (Elements.Get (I),
+               Current_Metadata,
+               Current_Rebindings)
+            then
+               if Stop_At_First then
+                  goto Early_Exit;
                end if;
+            end if;
 
-            end loop;
-         end if;
-
-         --  Phase 2: Get elements in referenced envs
-
-         for Refd_Env of Self.Env.Referenced_Envs loop
-            Get_Refd_Elements (Refd_Env);
          end loop;
       end if;
+
+      --  Phase 2: Get elements in referenced envs
+
+      for Refd_Env of Self.Env.Referenced_Envs loop
+         Get_Refd_Elements (Refd_Env);
+      end loop;
 
       --  Phase 3: Get elements in parent envs
 
@@ -571,7 +556,6 @@ package body Langkit_Support.Lexical_Env is
            (Parent_Env, Key, From, True,
             Parent_Rebindings,
             Current_Metadata,
-            Filter,
             Stop_At_First, Results);
       end if;
 
@@ -587,10 +571,7 @@ package body Langkit_Support.Lexical_Env is
      (Self       : Lexical_Env;
       Key        : Symbol_Type;
       From       : Element_T := No_Element;
-      Recursive  : Boolean := True;
-      Rebindings : Env_Rebindings := null;
-      Filter     : access
-         function (Ent : Entity; Env : Lexical_Env) return Boolean := null)
+      Recursive  : Boolean := True)
       return Entity_Array
    is
       V : Entity_Vectors.Vector;
@@ -602,8 +583,8 @@ package body Langkit_Support.Lexical_Env is
          Traces.Increase_Indent (Me);
       end if;
 
-      Get_Internal (Self, Key, From, Recursive, Rebindings,
-                    Empty_Metadata, Filter, False, V);
+      Get_Internal (Self, Key, From, Recursive, null,
+                    Empty_Metadata, False, V);
 
       if Has_Trace then
          Traces.Trace (Me, "Returning vector with length " & V.Length'Image);
@@ -626,10 +607,7 @@ package body Langkit_Support.Lexical_Env is
      (Self       : Lexical_Env;
       Key        : Symbol_Type;
       From       : Element_T := No_Element;
-      Recursive  : Boolean := True;
-      Rebindings : Env_Rebindings := null;
-      Filter     : access function (Ent : Entity; Env : Lexical_Env)
-                   return Boolean := null) return Entity
+      Recursive  : Boolean := True) return Entity
    is
       V : Entity_Vectors.Vector;
    begin
@@ -640,8 +618,8 @@ package body Langkit_Support.Lexical_Env is
          Traces.Increase_Indent (Me);
       end if;
 
-      Get_Internal (Self, Key, From, Recursive, Rebindings, Empty_Metadata,
-                    Filter, True, V);
+      Get_Internal (Self, Key, From, Recursive, null, Empty_Metadata,
+                    True, V);
 
       if Has_Trace then
          Traces.Trace (Me, "Returning vector with length " & V.Length'Image);

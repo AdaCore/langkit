@@ -65,10 +65,10 @@ package Langkit_Support.Lexical_Env is
 
    use GNATCOLL;
 
-   Debug_Mode : constant Boolean := False;
+   Debug_Mode : constant Boolean := True;
 
    Me : constant Traces.Trace_Handle :=
-     Traces.Create ("Lexical_Env", Traces.Off, Stream => "&2");
+     Traces.Create ("Lexical_Env", Traces.From_Config, Stream => "&2");
    --  Trace to debug lexical envs. This trace is meant to be activated on
    --  demand, when the client of lexical env wants more information about
    --  this specific lookup.
@@ -419,10 +419,7 @@ package Langkit_Support.Lexical_Env is
      (Self       : Lexical_Env;
       Key        : Symbol_Type;
       From       : Element_T := No_Element;
-      Recursive  : Boolean := True;
-      Rebindings : Env_Rebindings := null;
-      Filter     : access
-         function (Ent : Entity; Env : Lexical_Env) return Boolean := null)
+      Recursive  : Boolean := True)
       return Entity_Array;
    --  Get the array of entities for this Key. If From is given, then
    --  elements will be filtered according to the Can_Reach primitive given
@@ -438,10 +435,7 @@ package Langkit_Support.Lexical_Env is
      (Self       : Lexical_Env;
       Key        : Symbol_Type;
       From       : Element_T := No_Element;
-      Recursive  : Boolean := True;
-      Rebindings : Env_Rebindings := null;
-      Filter     : access
-         function (Ent : Entity; Env : Lexical_Env) return Boolean := null)
+      Recursive  : Boolean := True)
       return Entity;
    --  Like Get, but return only the first matching entity. Return a null
    --  entity if no entity is found.
