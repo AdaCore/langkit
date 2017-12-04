@@ -1494,6 +1494,17 @@ package body ${ada_lib_name}.Analysis is
    -- Index --
    -----------
 
+   function Index (Token : Token_Type) return Token_Index is
+   begin
+      return (if Token.Trivia = No_Token_Index
+              then Token.Token
+              else Token.Trivia);
+   end Index;
+
+   -----------
+   -- Index --
+   -----------
+
    function Index (Token_Data : Token_Data_Type) return Token_Index is
    begin
       return Token_Data.Index;

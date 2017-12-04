@@ -358,6 +358,7 @@ package ${ada_lib_name}.Analysis is
       with Inline;
    ${ada_doc('langkit.token_is_trivia', 3)}
 
+   function Index (Token : Token_Type) return Token_Index with Inline;
    function Index (Token_Data : Token_Data_Type) return Token_Index
       with Inline;
    ${ada_doc('langkit.token_index', 3)}
