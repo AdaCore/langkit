@@ -365,14 +365,14 @@
                   ## Add the env, the key, and the value to the list of entries
                   ## contained in other units, so we can remove them when
                   ## reparsing val's unit.
-                  Get_Lex_Env_Data (B.F_Val).Is_Contained_By.Append
+                  Get_Lex_Env_Data (B.F_Val).Exiled_Entries.Append
                     ((Env, B.F_Key, ${root_node_type_name} (B.F_Val)));
 
                   if Env /= Root_Env then
                      ## Add Val to the list of entries that env's unit
                      ## contains, so that when the unit is reparsed, we can
                      ## call add_to_env again on those nodes.
-                     Get_Lex_Env_Data (Env.Env.Node).Contains.Append
+                     Get_Lex_Env_Data (Env.Env.Node).Foreign_Nodes.Append
                        (${root_node_type_name} (B.F_Val));
                   end if;
                end if;

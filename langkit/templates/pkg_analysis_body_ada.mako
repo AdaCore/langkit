@@ -793,10 +793,10 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Remove_Exiled_Entries (Self : Lex_Env_Data) is
    begin
-      for El of Self.Is_Contained_By loop
+      for El of Self.Exiled_Entries loop
          AST_Envs.Remove (El.Env, El.Key, El.Node);
       end loop;
-      Self.Is_Contained_By.Clear;
+      Self.Exiled_Entries.Clear;
    end Remove_Exiled_Entries;
 
    --------------------------
@@ -807,7 +807,7 @@ package body ${ada_lib_name}.Analysis is
      (Self : Lex_Env_Data; Root_Scope : Lexical_Env)
    is
       Els : ${root_node_type_name}_Vectors.Elements_Array :=
-         Self.Contains.To_Array;
+         Self.Foreign_Nodes.To_Array;
       Env : Lexical_Env;
    begin
       for El of Els loop
@@ -1153,8 +1153,8 @@ package body ${ada_lib_name}.Analysis is
 
    procedure Destroy (Self : in out Lex_Env_Data_Type) is
    begin
-      Self.Is_Contained_By.Destroy;
-      Self.Contains.Destroy;
+      Self.Exiled_Entries.Destroy;
+      Self.Foreign_Nodes.Destroy;
    end Destroy;
 
    -------------

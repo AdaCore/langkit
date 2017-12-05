@@ -721,14 +721,14 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Containing_Env_Element);
 
    type Lex_Env_Data_Type is record
-      Is_Contained_By : Containing_Envs.Vector;
+      Exiled_Entries : Containing_Envs.Vector;
       --  Lexical env population for the unit that owns this Lex_Env_Data may
       --  have added AST nodes it owns to the lexical environments that belong
-      --  to other units. For each of these AST nodes, this vector contains an
-      --  entry that records the target environment, the AST node and the
-      --  corresponding symbol.
+      --  to other units ("exiled" entries). For each of these AST nodes, this
+      --  vector contains an entry that records the target environment, the AST
+      --  node and the corresponding symbol.
 
-      Contains : ${root_node_type_name}_Vectors.Vector;
+      Foreign_Nodes : ${root_node_type_name}_Vectors.Vector;
       --  The unit that owns this Lex_Env_Data owns a set of lexical
       --  environments. This vector contains the list of AST nodes that were
       --  added to these environments and that come from other units.
