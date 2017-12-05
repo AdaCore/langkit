@@ -794,6 +794,8 @@ package body ${ada_lib_name}.Analysis is
    procedure Remove_Exiled_Entries (Self : Lex_Env_Data) is
    begin
       for El of Self.Exiled_Entries loop
+         --  Remove the `symbol -> AST node` associations that reference this
+         --  unit's nodes from foreign lexical environments.
          AST_Envs.Remove (El.Env, El.Key, El.Node);
       end loop;
       Self.Exiled_Entries.Clear;
@@ -810,6 +812,9 @@ package body ${ada_lib_name}.Analysis is
          Self.Foreign_Nodes.To_Array;
       Env : Lexical_Env;
    begin
+      --  Re-do a partial Populate_Lexical_Env pass for each foreign node that
+      --  this unit contains so that they are relocated in our new lexical
+      --  environments.
       for El of Els loop
          Env := El.Pre_Env_Actions (El.Self_Env, Root_Scope, True);
          El.Post_Env_Actions (Env, Root_Scope);

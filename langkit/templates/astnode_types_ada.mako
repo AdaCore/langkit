@@ -356,21 +356,21 @@
                     % endif
                );
 
-               ## If we're adding the element to an env that belongs to a
-               ## different unit, then:
+               ## If we're adding the element to an environment that belongs to
+               ## a different unit, then:
                if Env /= Empty_Env
                   and then (Env = Root_Env
                             or else Env.Env.Node.Unit /= Self.Unit)
                then
-                  ## Add the env, the key, and the value to the list of entries
-                  ## contained in other units, so we can remove them when
-                  ## reparsing val's unit.
+                  ## Add the environment, the key, and the value to the list of
+                  ## entries contained in other units, so we can remove them
+                  ## when reparsing Val's unit.
                   Get_Lex_Env_Data (B.F_Val).Exiled_Entries.Append
                     ((Env, B.F_Key, ${root_node_type_name} (B.F_Val)));
 
                   if Env /= Root_Env then
-                     ## Add Val to the list of entries that env's unit
-                     ## contains, so that when the unit is reparsed, we can
+                     ## Add Val to the list of foreign nodes that Env's unit
+                     ## contains, so that when that unit is reparsed, we can
                      ## call add_to_env again on those nodes.
                      Get_Lex_Env_Data (Env.Env.Node).Foreign_Nodes.Append
                        (${root_node_type_name} (B.F_Val));
