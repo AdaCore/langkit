@@ -828,23 +828,19 @@ package body ${ada_lib_name}.Analysis is
    procedure Reroot_Foreign_Nodes
      (Self : Lex_Env_Data; Root_Scope : Lexical_Env)
    is
-      Els : ${root_node_type_name}_Vectors.Elements_Array :=
+      Els : constant ${root_node_type_name}_Vectors.Elements_Array :=
          Self.Foreign_Nodes.To_Array;
-      Env : Lexical_Env;
    begin
       --  Make the Foreign_Nodes vector empty as the partial
       --  Populate_Lexical_Env pass below will re-build it.
       Self.Foreign_Nodes.Clear;
 
       for El of Els loop
-         --  Re-do a partial Populate_Lexical_Env pass for each foreign node
-         --  that this unit contains so that they are relocated in our new
-         --  lexical environments.
-         Env := El.Pre_Env_Actions (El.Self_Env, Root_Scope, True);
-         El.Post_Env_Actions (Env, Root_Scope);
-
-         --  Also filter the exiled entries in foreign units so that they don't
-         --  contain references to this unit's lexical environments.
+         --  First, filter the exiled entries in foreign units so that they
+         --  don't contain references to this unit's lexical environments. We
+         --  need to do that before running the partial Populate_Lexical_Env
+         --  pass so that we don't remove exiled entries that this pass will
+         --  produce.
          declare
             Exiled_Entries : Exiled_Entry_Vectors.Vector renames
                Get_Lex_Env_Data (El.Unit).Exiled_Entries;
@@ -857,6 +853,16 @@ package body ${ada_lib_name}.Analysis is
                   Current := Current + 1;
                end if;
             end loop;
+         end;
+
+         --  Re-do a partial Populate_Lexical_Env pass for each foreign node
+         --  that this unit contains so that they are relocated in our new
+         --  lexical environments.
+         declare
+            Env : constant Lexical_Env :=
+               El.Pre_Env_Actions (El.Self_Env, Root_Scope, True);
+         begin
+            El.Post_Env_Actions (Env, Root_Scope);
          end;
       end loop;
    end Reroot_Foreign_Nodes;
