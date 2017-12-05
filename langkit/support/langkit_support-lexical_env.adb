@@ -326,8 +326,11 @@ package body Langkit_Support.Lexical_Env is
       V : constant Internal_Envs.Reference_Type :=
          Self.Env.Map.Reference (Key);
    begin
-      --  Get rid of element
-      for I in 1 .. V.Length loop
+      --  Get rid of element. Do this in reverse order so that removing one
+      --  element does not make us "step over" the next item. Also don't do
+      --  this in place (using V.Pop) as we need to preserve the order of
+      --  elements.
+      for I in reverse 1 .. V.Length loop
          if V.Get (I).Element = Value then
             V.Remove_At (I);
             exit;
