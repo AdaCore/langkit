@@ -797,7 +797,27 @@ package body ${ada_lib_name}.Analysis is
          --  Remove the `symbol -> AST node` associations that reference this
          --  unit's nodes from foreign lexical environments.
          AST_Envs.Remove (El.Env, El.Key, El.Node);
+
+         --  Also filter the foreign's units foreign nodes information so that
+         --  it does not contain stale information (i.e. dangling pointers to
+         --  our nodes).
+         if El.Env.Env.Node /= null then
+            declare
+               Foreign_Nodes : ${root_node_type_name}_Vectors.Vector renames
+                  Get_Lex_Env_Data (El.Env.Env.Node.Unit).Foreign_Nodes;
+               Current       : Positive := Foreign_Nodes.First_Index;
+            begin
+               while Current <= Foreign_Nodes.Last_Index loop
+                  if Foreign_Nodes.Get (Current) = El.Node then
+                     Foreign_Nodes.Pop (Current);
+                  else
+                     Current := Current + 1;
+                  end if;
+               end loop;
+            end;
+         end if;
       end loop;
+
       Self.Exiled_Entries.Clear;
    end Remove_Exiled_Entries;
 
