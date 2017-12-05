@@ -1,0 +1,12 @@
+Empty vector
+[]
+Add 5 elements
+[ 1,  2,  3,  4,  5]
+Remove the middle element
+[ 1,  2,  4,  5]
+Remove the first element
+[ 2,  4,  5]
+Remove the last element
+[ 2,  4]
+Remove remaining elements
+[]
