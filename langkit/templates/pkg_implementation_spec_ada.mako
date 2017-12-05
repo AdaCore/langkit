@@ -709,19 +709,19 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  replace that by an array of parsers.
    end record;
 
-   type Containing_Env_Element is record
+   type Exiled_Entry is record
       Env  : Lexical_Env;
       Key  : Symbol_Type;
       Node : ${root_node_type_name};
    end record;
-   --  Tuple of values passed to Lexical_Env.Add. Used in the lexical
-   --  environment rerooting machinery: see Lex_Env_Data_Type.
+   --  Tuple of values passed to AST_Envs.Add. Used in the lexical
+   --  environment rerooting machinery: see Remove_Exiled_Entries and
+   --  Reroot_Foreign_Nodes.
 
-   package Containing_Envs is new Langkit_Support.Vectors
-     (Containing_Env_Element);
+   package Exiled_Entry_Vectors is new Langkit_Support.Vectors (Exiled_Entry);
 
    type Lex_Env_Data_Type is record
-      Exiled_Entries : Containing_Envs.Vector;
+      Exiled_Entries : Exiled_Entry_Vectors.Vector;
       --  Lexical env population for the unit that owns this Lex_Env_Data may
       --  have added AST nodes it owns to the lexical environments that belong
       --  to other units ("exiled" entries). For each of these AST nodes, this

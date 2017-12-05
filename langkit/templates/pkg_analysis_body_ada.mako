@@ -842,7 +842,7 @@ package body ${ada_lib_name}.Analysis is
          --  Also filter the exiled entries in foreign units so that they don't
          --  contain references to this unit's lexical environments.
          declare
-            Exiled_Entries : Containing_Envs.Vector renames
+            Exiled_Entries : Exiled_Entry_Vectors.Vector renames
                Get_Lex_Env_Data (El.Unit).Exiled_Entries;
             Current        : Positive := Exiled_Entries.First_Index;
          begin
