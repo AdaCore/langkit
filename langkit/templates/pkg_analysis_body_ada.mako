@@ -832,12 +832,28 @@ package body ${ada_lib_name}.Analysis is
          Self.Foreign_Nodes.To_Array;
       Env : Lexical_Env;
    begin
-      --  Re-do a partial Populate_Lexical_Env pass for each foreign node that
-      --  this unit contains so that they are relocated in our new lexical
-      --  environments.
       for El of Els loop
+         --  Re-do a partial Populate_Lexical_Env pass for each foreign node
+         --  that this unit contains so that they are relocated in our new
+         --  lexical environments.
          Env := El.Pre_Env_Actions (El.Self_Env, Root_Scope, True);
          El.Post_Env_Actions (Env, Root_Scope);
+
+         --  Also filter the exiled entries in foreign units so that they don't
+         --  contain references to this unit's lexical environments.
+         declare
+            Exiled_Entries : Containing_Envs.Vector renames
+               Get_Lex_Env_Data (El.Unit).Exiled_Entries;
+            Current        : Positive := Exiled_Entries.First_Index;
+         begin
+            while Current <= Exiled_Entries.Last_Index loop
+               if Exiled_Entries.Get (Current).Node = El then
+                  Exiled_Entries.Pop (Current);
+               else
+                  Current := Current + 1;
+               end if;
+            end loop;
+         end;
       end loop;
    end Reroot_Foreign_Nodes;
 
