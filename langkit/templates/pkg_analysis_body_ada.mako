@@ -832,6 +832,10 @@ package body ${ada_lib_name}.Analysis is
          Self.Foreign_Nodes.To_Array;
       Env : Lexical_Env;
    begin
+      --  Make the Foreign_Nodes vector empty as the partial
+      --  Populate_Lexical_Env pass below will re-build it.
+      Self.Foreign_Nodes.Clear;
+
       for El of Els loop
          --  Re-do a partial Populate_Lexical_Env pass for each foreign node
          --  that this unit contains so that they are relocated in our new
