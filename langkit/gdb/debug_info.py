@@ -198,6 +198,15 @@ class DebugInfo(object):
                     )
                 scope_stack[-1].events.append(d)
 
+            elif d.is_a(PropertyBodyStart):
+                if not scope_stack:
+                    raise ParseError(
+                        line_no,
+                        'property-body-start directive must appear inside a'
+                        ' property'
+                    )
+                scope_stack[0].body_start = d.line_no
+
             else:
                 raise NotImplementedError('Unknown directive: {}'.format(d))
 
@@ -358,6 +367,14 @@ class PropertyCall(object):
     def __init__(self, line_range, name):
         self.line_range = line_range
         self.name = name
+
+        self.body_start = None
+        """
+        Line number where to put breakpoints for the beginning of this
+        property, or None if this property has no code.
+
+        :type: int|None
+        """
 
     def property(self, context):
         """
@@ -573,6 +590,13 @@ class PropertyStart(Directive):
         return cls(name, dsl_sloc, is_dispatcher, line_no)
 
 
+class PropertyBodyStart(Directive):
+    @classmethod
+    def parse(cls, line_no, args):
+        assert len(args) == 0
+        return cls(line_no)
+
+
 class PropertyCallStart(Directive):
     def __init__(self, name, line_no):
         super(PropertyCallStart, self).__init__(line_no)
@@ -650,6 +674,7 @@ class ExprDoneDirective(Directive):
 
 Directive.name_to_cls.update({
     'property-start': PropertyStart,
+    'property-body-start': PropertyBodyStart,
     'property-call-start': PropertyCallStart,
     'memoization-lookup': MemoizationLookupDirective,
     'memoization-return': MemoizationReturnDirective,

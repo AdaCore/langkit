@@ -289,17 +289,14 @@ For instance::
             print('No such property: {}'.format(qualname))
             return
 
-        scopes = prop.subscopes
-        if not scopes:
-            print('{} has no code'.format(prop.name))
+        if prop.body_start is None:
+            print('Cannot break on {}: it has no code'.format(prop.name))
             return
 
         # Break on the first line of the property's first inner scope so that
         # we skip the prologue (all variable declarations).
-        return gdb.Breakpoint('{}:{}'.format(
-            self.context.debug_info.filename,
-            scopes[0].line_range.first_line
-        ))
+        return gdb.Breakpoint('{}:{}'.format(self.context.debug_info.filename,
+                                             prop.body_start))
 
     def break_on_dsl_sloc(self, dsl_sloc):
         """

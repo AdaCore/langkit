@@ -79,6 +79,8 @@ is
    % endif
 
 begin
+   ${gdb_property_body_start()}
+
    % if ctx.properties_logging:
       Properties_Traces.Trace
         ("${property.qualname} ("
