@@ -67,8 +67,8 @@ package body Langkit_Support.Vectors is
 
    procedure Remove_At (Self : in out Vector; Index : Index_Type) is
    begin
-      for I in Index + 1 .. Self.Length loop
-         Set (Self, I, Get (Self, I - 1));
+      for I in Index .. Self.Length - 1 loop
+         Set (Self, I, Get (Self, I + 1));
       end loop;
       Pop (Self);
    end Remove_At;
