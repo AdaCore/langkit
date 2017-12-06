@@ -757,6 +757,24 @@ class CompileCtx(object):
         # Langkit_Support.Lexical_Env generic package requires it.
         T.env_md.require_hash_function()
 
+    def check_concrete_subclasses(self, astnode):
+        """
+        Emit an error if `astnode` is abstract and has no concrete subclass.
+
+        :param ASTNodeType astnode: AST node to check.
+        """
+        # It's fine to have no list type, so as a special case we allow the
+        # generic list type to have no concrete subclass.
+        if astnode.is_generic_list_type or not astnode.abstract:
+            return
+
+        check_source_language(
+            astnode.concrete_subclasses,
+            '{} is abstract and has no concrete subclass'.format(
+                astnode.dsl_name
+            )
+        )
+
     def check_env_metadata(self, cls):
         """
         Perform legality checks on `cls`, the env metadata struct.
@@ -1271,6 +1289,8 @@ class CompileCtx(object):
             ASTNodePass('check homonym AST node fields',
                         lambda _, astnode: astnode.check_homonym_fields(),
                         auto_context=False),
+            ASTNodePass('reject abstract AST nodes with no concrete'
+                        ' subclasses', CompileCtx.check_concrete_subclasses),
             GlobalPass('compute AST node kind constants',
                        CompileCtx.compute_node_kind_constants),
             errors_checkpoint_pass,
