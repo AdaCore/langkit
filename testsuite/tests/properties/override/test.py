@@ -40,7 +40,6 @@ def run(name, astnode_fn):
     class ExampleNode(MiddleNode):
         get_random_node = Property(No(astnode))
 
-    @abstract
     class NullNode(FooNode):
         pass
 

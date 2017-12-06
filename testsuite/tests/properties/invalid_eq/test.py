@@ -1,9 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, LexicalEnvType, T, abstract
+from langkit.dsl import ASTNode, Field, LexicalEnvType, T
 from langkit.expressions import DynamicVariable, Literal, No, Property, Self
-from langkit.parsers import Grammar, Tok
+from langkit.parsers import Grammar, Or, Tok
 
 from lexer_example import Token
 from os import path
@@ -32,13 +32,13 @@ def run(name, lhs, rhs):
         prop = Property(lhs.equals(rhs), dynamic_vars=[Env])
         use_prop = Property(Env.bind(Self.node_env, Self.prop), public=True)
 
-    @abstract
     class Lit(FooNode):
-        pass
+        tok = Field()
 
     grammar = Grammar('main_rule')
     grammar.add_rules(
-        main_rule=Example(Tok(Token.Example)),
+        main_rule=Or(Example(Tok(Token.Example)),
+                     Lit(Tok(Token.Number, keep=True))),
     )
     emit_and_print_errors(grammar)
     Env.unfreeze()

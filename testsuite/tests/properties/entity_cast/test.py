@@ -7,9 +7,9 @@ from __future__ import absolute_import, division, print_function
 import os.path
 
 from langkit.diagnostics import Diagnostics
-from langkit.dsl import ASTNode, Field, abstract
+from langkit.dsl import ASTNode, Field
 from langkit.expressions import AbstractProperty, Property, Self
-from langkit.parsers import Grammar, Tok
+from langkit.parsers import Grammar, Or, Tok
 
 from lexer_example import Token
 from utils import build_and_run
@@ -22,7 +22,6 @@ class FooNode(ASTNode):
     pass
 
 
-@abstract
 class BarNode(FooNode):
     pass
 
@@ -43,7 +42,8 @@ class Literal(FooNode):
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
-    main_rule=Literal(Tok(Token.Number, keep=True)),
+    main_rule=Or(Literal(Tok(Token.Number, keep=True)),
+                 BarNode('example')),
 )
 build_and_run(foo_grammar, 'main.py')
 print('Done')

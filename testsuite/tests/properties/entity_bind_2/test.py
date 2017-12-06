@@ -9,7 +9,7 @@ import os.path
 
 from langkit.diagnostics import Diagnostics
 from langkit.dsl import (ASTNode, BoolType, Field, LongType, LogicVarType, T,
-                         UserField, abstract)
+                         UserField)
 from langkit.expressions import (
     AbstractProperty, Let, Property, Self, Bind, langkit_property
 )
@@ -24,11 +24,6 @@ Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 class FooNode(ASTNode):
     prop = AbstractProperty(runtime_check=True, type=LongType, public=True)
-
-
-@abstract
-class BarNode(FooNode):
-    pass
 
 
 class Literal(FooNode):
