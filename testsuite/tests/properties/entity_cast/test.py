@@ -1,6 +1,5 @@
 """
-Test that garbage tokens left after the main parsing rule completes does not
-crash. It used to!
+Test that cast expressions work on entity prefixes.
 """
 
 from __future__ import absolute_import, division, print_function
@@ -31,13 +30,9 @@ class BarNode(FooNode):
 class Literal(FooNode):
     tok = Field()
 
-    a = AbstractProperty(
-        runtime_check=True, type=FooNode.entity
-    )
+    a = AbstractProperty(runtime_check=True, type=FooNode.entity)
 
-    b = Property(
-        Self.a.cast(BarNode.entity)
-    )
+    b = Property(Self.a.cast(BarNode.entity))
 
     c = Property(Self.b, public=True)
 
