@@ -300,7 +300,7 @@ package ${ada_lib_name}.Analysis is
    ## Output subranges to materialize abstract classes as sets of their
    ## concrete subclasses.
    % for cls in ctx.astnode_types:
-      <% subclasses = cls.concrete_subclasses() %>
+      <% subclasses = cls.concrete_subclasses %>
       % if subclasses:
          subtype ${cls.ada_kind_range_name} is
             ${root_node_kind_name} range

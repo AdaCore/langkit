@@ -1892,6 +1892,7 @@ class ASTNodeType(BaseStructType):
         """
         return self._base
 
+    @property
     @memoized
     def concrete_subclasses(self):
         """
@@ -1907,7 +1908,7 @@ class ASTNodeType(BaseStructType):
             self.subclasses, key=lambda subcls: subcls.hierarchical_name()
         )
         for subcls in sorted_direct_subclasses:
-            result.extend(subcls.concrete_subclasses())
+            result.extend(subcls.concrete_subclasses)
 
         return result
 

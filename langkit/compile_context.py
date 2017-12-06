@@ -1034,12 +1034,12 @@ class CompileCtx(object):
                          if not p.abstract or p.abstract_runtime_check]
 
                 # Set of concrete nodes that can reach this property
-                nodes = set(astnode.concrete_subclasses())
+                nodes = set(astnode.concrete_subclasses)
 
                 # Process properties in reverse hierarchical order to process
                 # leaf properties before parent ones.
                 for p in reversed(props):
-                    reaching_p = set(p.struct.concrete_subclasses()) & nodes
+                    reaching_p = set(p.struct.concrete_subclasses) & nodes
                     if not reaching_p:
                         unreachable.append(p)
                     nodes = nodes - reaching_p
@@ -2124,7 +2124,7 @@ class CompileCtx(object):
             """
             # Don't bother processing classes unless they actually have
             # concrete subclasses, otherwise we would be producing dead code.
-            if not astnode.concrete_subclasses():
+            if not astnode.concrete_subclasses:
                 return
 
             to_pop = False

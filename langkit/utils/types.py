@@ -202,7 +202,7 @@ def astnode_kind_set(context, nodes):
     concrete_nodes = set()
     for n in nodes:
         if n.abstract:
-            concrete_nodes.update(n.concrete_subclasses())
+            concrete_nodes.update(n.concrete_subclasses)
         else:
             concrete_nodes.add(n)
 
@@ -248,11 +248,11 @@ def collapse_concrete_nodes(input_type, astnodes):
 
     :rtype: (list[set[ASTNodeType]], set[ASTNodeType])
     """
-    remaining_nodes = set(input_type.concrete_subclasses())
+    remaining_nodes = set(input_type.concrete_subclasses)
     result = []
 
     for node in astnodes:
-        candidates = set(node.concrete_subclasses())
+        candidates = set(node.concrete_subclasses)
         result.append(candidates & remaining_nodes)
         remaining_nodes -= result[-1]
 
