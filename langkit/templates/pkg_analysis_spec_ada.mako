@@ -8,10 +8,7 @@
 <%namespace name="list_types"      file="list_types_ada.mako" />
 <%namespace name="pretty_printers" file="pretty_printers_ada.mako" />
 
-<%
-   no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts)
-   library_private_field = lambda f: not library_public_field(f)
-%>
+<% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
 with Ada.Unchecked_Deallocation;
 

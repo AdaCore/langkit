@@ -173,7 +173,6 @@
    <%
       type_name = cls.value_type_name()
       base_name = cls.base().name
-      library_private_field = lambda f: not library_public_field(f)
       ext = ctx.ext('nodes', cls.raw_name, 'public_decls')
    %>
 
@@ -198,7 +197,7 @@
 
    ## Properties
    % for prop in cls.get_properties(include_inherited=False, \
-                                    predicate=library_public_field):
+                                    predicate=lambda f: f.is_public):
       ${prop.prop_decl}
    % endfor
 
@@ -206,7 +205,7 @@
 
    ## Private dispatching properties
    % for prop in cls.get_properties(include_inherited=False, \
-                                    predicate=library_private_field):
+                                    predicate=lambda f: f.is_private):
       % if prop.dispatching:
          ${prop.prop_decl}
       % endif
@@ -233,10 +232,9 @@
 <%def name="body_decl(cls)">
 
    <%
-      library_private_field = lambda f: not library_public_field(f)
       props = cls.get_properties(
          include_inherited=False,
-         predicate=lambda f: not library_public_field(f) and not f.dispatching
+         predicate=lambda f: f.is_private and not f.dispatching
       )
       untyped_wrappers = cls.get_properties(
          include_inherited=False,

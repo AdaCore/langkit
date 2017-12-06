@@ -13,7 +13,6 @@
 <%
    root_node_array = T.root_node.array
    no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts)
-   library_private_field = lambda f: not library_public_field(f)
 %>
 
 with Ada.Containers; use Ada.Containers;
@@ -480,7 +479,7 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    % for prop in T.root_node.get_properties( \
          include_inherited=False, \
-         predicate=library_public_field):
+         predicate=lambda f: f.is_public):
       ${prop.prop_decl}
    % endfor
 
@@ -573,7 +572,7 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    % for prop in T.root_node.get_properties( \
          include_inherited=False, \
-         predicate=library_private_field):
+         predicate=lambda f: f.is_private):
       % if prop.dispatching:
          ${prop.prop_decl}
       % endif

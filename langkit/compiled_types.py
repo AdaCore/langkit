@@ -30,16 +30,6 @@ def get_context(*args, **kwargs):
     return get_context(*args, **kwargs)
 
 
-def library_public_field(field):
-    """
-    Return whether we must generate accessors in APIs for this field.
-
-    :param AbstractNodeData field: Field to test.
-    :rtype: bool
-    """
-    return field.is_public
-
-
 def gdb_helper(*args):
     """
     Format given arguments into a special Ada comment for GDB helpers.
@@ -119,7 +109,6 @@ def make_renderer(base_renderer=None):
             'text_type':             CAPIType(capi, 'text').name,
             'diagnostic_type':       CAPIType(capi, 'diagnostic').name,
             'exception_type':        CAPIType(capi, 'exception').name,
-            'library_public_field':  library_public_field,
         })
     return base_renderer.update(template_args)
 
@@ -1968,7 +1957,7 @@ class ASTNodeType(BaseStructType):
         return [f
                 for f in self.get_abstract_fields(
                     include_inherited=False,
-                    predicate=library_public_field
+                    predicate=lambda f: f.is_public
                 )
                 if not f.is_overriding]
 
