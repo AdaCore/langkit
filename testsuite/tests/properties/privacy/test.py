@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import itertools
-import os.path
 
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType, abstract
 from langkit.expressions import AbstractProperty, Literal, Property, Self
 from langkit.parsers import Grammar, Or
@@ -26,7 +24,6 @@ def run(abstract_public, concrete_public):
         fmt_privacy[abstract_public],
         fmt_privacy[concrete_public]
     ))
-    Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
     class RootNode(ASTNode):
         pass

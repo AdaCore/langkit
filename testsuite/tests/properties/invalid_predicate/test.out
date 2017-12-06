@@ -1,21 +1,21 @@
 == No logic var ==
-File "test.py", line 38, in Example.prop
-  line 40, in Predicate expression
+File "test.py", line 33, in Example.prop
+  line 35, in Predicate expression
     Error: Predicate instantiation should have at least one logic variable expression
 
 == One missing logic var ==
-File "test.py", line 38, in Example.prop
-  line 40, in Predicate expression
+File "test.py", line 33, in Example.prop
+  line 35, in Predicate expression
     Error: Missing an actual for argument #1 (n)
 
 == Bad argument type ==
-File "test.py", line 38, in Example.prop
-  line 40, in Predicate expression
+File "test.py", line 33, in Example.prop
+  line 35, in Predicate expression
     Error: Argument #1 of predicate has type Boolean, should be FooNode.entity
 
 == Too many arguments ==
-File "test.py", line 38, in Example.prop
-  line 40, in Predicate expression
+File "test.py", line 33, in Example.prop
+  line 35, in Predicate expression
     Error: Too many actuals: at most 2 expected, got 3
 
 == Ok (no default var) ==

@@ -4,18 +4,12 @@ Test that Bind works when binding from entities.
 
 from __future__ import absolute_import, division, print_function
 
-import os.path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, LogicVarType, LongType, UserField
 from langkit.expressions import AbstractProperty, Let, Property, Self, Bind
 from langkit.parsers import Grammar, Tok
 
 from lexer_example import Token
 from utils import build_and_run
-
-
-Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
 class FooNode(ASTNode):

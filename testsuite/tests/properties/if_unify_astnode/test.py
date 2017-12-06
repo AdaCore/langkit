@@ -4,18 +4,12 @@ Check that the unification of the return type of match expression is correct.
 
 from __future__ import absolute_import, division, print_function
 
-import os.path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, T
 from langkit.expressions import If, No, Property, Self
 from langkit.parsers import Grammar, Or, Tok
 
 from lexer_example import Token
 from utils import emit_and_print_errors
-
-
-Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
 class FooNode(ASTNode):

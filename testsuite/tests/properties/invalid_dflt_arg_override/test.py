@@ -1,11 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType
 from langkit.expressions import AbstractKind, langkit_property
 from langkit.parsers import Grammar
 
-from os import path
 from utils import emit_and_print_errors
 
 
@@ -15,8 +13,6 @@ def run(name, arg_parent, arg_overriding):
     and "arg_overriding" "arg" as the first argument in FooNode.prop and
     Example.prop.
     """
-
-    Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
     print('== {} =='.format(name))
 

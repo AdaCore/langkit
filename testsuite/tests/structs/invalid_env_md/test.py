@@ -4,9 +4,7 @@ Test that invalid environment metadata structs are properly rejected.
 
 from __future__ import absolute_import, division, print_function
 
-import os.path
-
-from langkit.diagnostics import DiagnosticError, Diagnostics
+from langkit.diagnostics import DiagnosticError
 from langkit.dsl import ASTNode, Struct, T, UserField, env_metadata
 from langkit.parsers import Grammar, Tok
 
@@ -21,7 +19,6 @@ def run(md_constructor):
     """
 
     print('== {} =='.format(md_constructor.__name__))
-    Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
     class FooNode(ASTNode):
         pass

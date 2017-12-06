@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 import itertools
-import os.path
 
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, LexicalEnvType, BoolType, abstract
 from langkit.expressions import (AbstractProperty, DynamicVariable, Literal,
                                  Property, Self)
@@ -33,7 +31,6 @@ def run(abstract_dyn_vars, concrete_dyn_vars):
         fmt_value(abstract_dyn_vars),
         fmt_value(concrete_dyn_vars)
     ))
-    Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
     class RootNode(ASTNode):
         pass

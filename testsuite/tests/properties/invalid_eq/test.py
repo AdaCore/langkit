@@ -1,12 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, LexicalEnvType, T
 from langkit.expressions import DynamicVariable, Literal, No, Property, Self
 from langkit.parsers import Grammar, Or, Tok
 
 from lexer_example import Token
-from os import path
 from utils import emit_and_print_errors
 
 
@@ -20,8 +18,6 @@ def run(name, lhs, rhs):
     """
 
     global FooNode, BarNode, ListNode
-
-    Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
     print('== {} =='.format(name))
 

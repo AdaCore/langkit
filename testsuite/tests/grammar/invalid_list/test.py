@@ -1,16 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
-import os.path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, Annotations
 from langkit.parsers import Grammar, List, Tok
 
 from lexer_example import Token
 from utils import emit_and_print_errors, reset_langkit
-
-
-Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
 def create_nodes():

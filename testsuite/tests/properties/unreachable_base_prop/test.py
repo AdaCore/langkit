@@ -5,18 +5,12 @@ defined on an abstract node while all concrete subclasses have it overriden.
 
 from __future__ import absolute_import, division, print_function
 
-import os.path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.expressions import AbstractProperty, Property
 from langkit.parsers import Grammar, List, Or, Pick, Tok
 
 from lexer_example import Token
 from utils import emit_and_print_errors
-
-
-Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
 @abstract

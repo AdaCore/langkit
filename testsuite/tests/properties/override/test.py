@@ -5,9 +5,6 @@ subtype of A's.
 
 from __future__ import absolute_import, division, print_function
 
-import os.path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, T, abstract
 from langkit.expressions import AbstractProperty, No, Property, Self
 from langkit.parsers import Grammar, Or
@@ -20,8 +17,6 @@ def run(name, astnode_fn):
     Emit and print the errors we get for the below grammar with "match_expr" as
     a property in ExampleNode.
     """
-
-    Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
     print('== {} =='.format(name))
 

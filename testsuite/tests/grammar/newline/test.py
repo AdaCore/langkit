@@ -4,9 +4,6 @@ Test the newline and related parsers.
 
 from __future__ import absolute_import, division, print_function
 
-import os.path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field
 from langkit.lexer import (
     Eof, Ignore, Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText
@@ -49,8 +46,6 @@ foo_lexer.add_rules(
     (Pattern('[a-zA-Z_][a-zA-Z0-9_]*'), Token.Identifier),
 )
 L = foo_lexer
-
-Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
 class FooNode(ASTNode):

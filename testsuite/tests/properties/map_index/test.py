@@ -1,17 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
-from os import path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, List, Tok
 
 from lexer_example import Token
 from utils import build_and_run
-
-
-Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 
 class FooNode(ASTNode):

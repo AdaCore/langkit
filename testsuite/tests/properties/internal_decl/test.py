@@ -1,13 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
-from os import path
-
-from langkit.diagnostics import DiagnosticError, Diagnostics
+from langkit.diagnostics import DiagnosticError
 from langkit.dsl import ASTNode
 from langkit.expressions import Property, No
-
-
-Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 
 class FooNode(ASTNode):

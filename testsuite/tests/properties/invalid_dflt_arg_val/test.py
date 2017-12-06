@@ -1,11 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType, T
 from langkit.expressions import DynamicVariable, Literal, Property, Self
 from langkit.parsers import Grammar
 
-from os import path
 from utils import emit_and_print_errors
 
 
@@ -17,8 +15,6 @@ def run(name, expr, calling_expr=True):
     Emit and print the errors we get for the below grammar with "expr" as
     a property in BarNode.
     """
-
-    Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
     print('== {} =='.format(name))
 

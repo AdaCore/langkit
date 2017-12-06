@@ -14,43 +14,43 @@ Code generation was successful
 Code generation was successful
 
 == Boolean <-> ASTNode ==
-File "test.py", line 32, in Example.prop
-  line 32, in Eq expression
+File "test.py", line 28, in Example.prop
+  line 28, in Eq expression
     Error: Incompatible types for equality: Boolean and FooNode
 
 == ASTNode <-> Boolean ==
-File "test.py", line 32, in Example.prop
-  line 32, in Eq expression
+File "test.py", line 28, in Example.prop
+  line 28, in Eq expression
     Error: Incompatible types for equality: FooNode and Boolean
 
 == ASTNode <-> Entity ==
-File "test.py", line 32, in Example.prop
-  line 32, in Eq expression
+File "test.py", line 28, in Example.prop
+  line 28, in Eq expression
     Error: Incompatible types for equality: FooNode and FooNode.entity
 
 == Boolean <-> Entity ==
-File "test.py", line 32, in Example.prop
-  line 32, in Eq expression
+File "test.py", line 28, in Example.prop
+  line 28, in Eq expression
     Error: Incompatible types for equality: Boolean and FooNode.entity
 
 == ASTNode <-> Boolean ==
-File "test.py", line 32, in Example.prop
-  line 32, in Eq expression
+File "test.py", line 28, in Example.prop
+  line 28, in Eq expression
     Error: Incompatible types for equality: FooNode and Boolean
 
 == Long <-> Boolean ==
-File "test.py", line 32, in Example.prop
-  line 32, in Eq expression
+File "test.py", line 28, in Example.prop
+  line 28, in Eq expression
     Error: Incompatible types for equality: Integer and Boolean
 
 == ASTNode <-> ASTNode (never equal) ==
-File "test.py", line 32, in Example.prop
-  line 32, in Eq expression
+File "test.py", line 28, in Example.prop
+  line 28, in Eq expression
     Error: Example and Lit values are never equal
 
 == Entity <-> Entity (never equal) ==
-File "test.py", line 32, in Example.prop
-  line 32, in Eq expression
+File "test.py", line 28, in Example.prop
+  line 28, in Eq expression
     Error: Example.entity and Lit.entity values are never equal
 
 Done

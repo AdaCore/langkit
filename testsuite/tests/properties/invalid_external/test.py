@@ -1,11 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType, T, abstract
 from langkit.expressions import ExternalProperty, Property, Self
 from langkit.parsers import Grammar
 
-from os import path
 from utils import emit_and_print_errors
 
 
@@ -15,8 +13,6 @@ def run(name, abstract_prop, prop=None):
     as a property in AbstractExample and `prop` (if provided) as a property in
     Example.
     """
-
-    Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
     print('== {} =='.format(name))
 

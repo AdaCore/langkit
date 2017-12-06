@@ -1,8 +1,5 @@
 from __future__ import absolute_import, division, print_function
 
-import os.path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType, Field, LexicalEnvType, T
 from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import (DynamicVariable, New, Property, Self,
@@ -17,7 +14,6 @@ Env = DynamicVariable('env', LexicalEnvType)
 
 
 def run(name, prop, filter_prop=lambda foo_node: foo_node.filter_prop):
-    Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
     print('== {} =='.format(name))
 
     class FooNode(ASTNode):

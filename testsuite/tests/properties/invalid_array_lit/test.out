@@ -1,21 +1,21 @@
 == Empty: missing type ==
-File "test.py", line 26, in Example.p
-  line 32, in ArrayLiteral expression
+File "test.py", line 22, in Example.p
+  line 28, in ArrayLiteral expression
     Error: Missing element type for empty array literal
 
 == Empty: ok ==
-File "test.py", line 26, in Example.p
+File "test.py", line 22, in Example.p
     Warning: This private property is unused
 Code generation was successful
 
 == Single: ok ==
-File "test.py", line 26, in Example.p
+File "test.py", line 22, in Example.p
     Warning: This private property is unused
 Code generation was successful
 
 == Multiple: heterogeneous types ==
-File "test.py", line 26, in Example.p
-  line 32, in ArrayLiteral expression
+File "test.py", line 22, in Example.p
+  line 28, in ArrayLiteral expression
     Error: In Array literal, expected element of type Boolean, got Example
 
 Done

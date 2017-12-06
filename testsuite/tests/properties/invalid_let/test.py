@@ -1,11 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode
 from langkit.expressions import Literal, Property, Let
 from langkit.parsers import Grammar
 
-from os import path
 from utils import emit_and_print_errors
 
 
@@ -16,8 +14,6 @@ def run(name, expr):
     """
 
     global Compound, Expression, FooNode, NullNode, Number
-
-    Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
     print('== {} =='.format(name))
 

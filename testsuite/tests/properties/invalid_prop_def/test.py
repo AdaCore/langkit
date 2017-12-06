@@ -5,7 +5,6 @@ from langkit.dsl import ASTNode, LongType
 from langkit.expressions import Property
 from langkit.parsers import Grammar
 
-from os import path
 from utils import emit_and_print_errors
 
 
@@ -16,8 +15,6 @@ def run(name, prop_lambda):
     """
 
     global FooNode
-
-    Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
     print('== {} =='.format(name))
 

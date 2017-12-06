@@ -5,9 +5,6 @@ invalid input.
 
 from __future__ import absolute_import, division, print_function
 
-import os.path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType, Field, T
 from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import EmptyEnv, If, New, Self, Var, langkit_property
@@ -15,9 +12,6 @@ from langkit.parsers import Grammar, List, Tok
 
 from lexer_example import Token
 from utils import build_and_run
-
-
-Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
 class FooNode(ASTNode):

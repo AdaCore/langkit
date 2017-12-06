@@ -5,9 +5,6 @@ references to all transformed properties.
 
 from __future__ import absolute_import, division, print_function
 
-import os.path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, T, abstract, synthetic
 from langkit.envs import EnvSpec, add_env, add_to_env, reference
 from langkit.expressions import New, No, Self, langkit_property
@@ -15,9 +12,6 @@ from langkit.parsers import Grammar, List, Or, Pick, Tok
 
 from lexer_example import Token
 from utils import build_and_run
-
-
-Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
 @abstract

@@ -4,18 +4,12 @@ Test the handling of analysis units in the properties DSL.
 
 from __future__ import absolute_import, division, print_function
 
-import os.path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType
 from langkit.expressions import Cond, No, Self, langkit_property
 from langkit.parsers import Grammar, Tok
 
 from lexer_example import Token
 from utils import build_and_run
-
-
-Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
 class FooNode(ASTNode):

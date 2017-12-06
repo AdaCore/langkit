@@ -1,15 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType, T
 from langkit.expressions import No, langkit_property
 from langkit.parsers import Grammar
 
-from os import path
 from utils import build_and_run
-
-
-Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 
 class FooNode(ASTNode):

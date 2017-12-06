@@ -1,8 +1,5 @@
 from __future__ import absolute_import, division, print_function
 
-from os import path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, Field, Struct, abstract, env_metadata
 from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import Property, Self
@@ -10,9 +7,6 @@ from langkit.parsers import Grammar, List, Opt, Tok
 
 from lexer_example import Token
 from utils import emit_and_print_errors
-
-
-Diagnostics.set_lang_source_dir(path.abspath(__file__))
 
 
 @env_metadata

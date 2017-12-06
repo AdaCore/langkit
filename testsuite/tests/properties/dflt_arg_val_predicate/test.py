@@ -4,18 +4,12 @@ Test that Prediate works well with default argument values.
 
 from __future__ import absolute_import, division, print_function
 
-import os.path
-
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, BoolType, LogicVarType, T, UserField
 from langkit.expressions import (And, Predicate, Self, Var, langkit_property,
                                  ignore)
 from langkit.parsers import Grammar
 
 from utils import build_and_run
-
-
-Diagnostics.set_lang_source_dir(os.path.abspath(__file__))
 
 
 class FooNode(ASTNode):

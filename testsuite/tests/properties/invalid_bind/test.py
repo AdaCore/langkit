@@ -1,12 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.diagnostics import Diagnostics
 from langkit.dsl import ASTNode, LexicalEnvType, LogicVarType, T, UserField
 from langkit.expressions import (Bind, DynamicVariable, Property, Self, Var,
                                  langkit_property, ignore)
 from langkit.parsers import Grammar, Or
 
-from os import path
 from utils import emit_and_print_errors
 
 
@@ -20,7 +18,6 @@ def run(name, eq_prop):
     a property in BarNode.
     """
 
-    Diagnostics.set_lang_source_dir(path.abspath(__file__))
     for dynvar in [env, dyn_node]:
         dynvar.unfreeze()
 
