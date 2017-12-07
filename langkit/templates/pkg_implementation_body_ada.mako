@@ -73,6 +73,28 @@ package body ${ada_lib_name}.Analysis.Implementation is
       ${memoization.body()}
    % endif
 
+   % if ctx.has_env_assoc:
+      procedure Add_To_Env
+        (Self     : ${root_node_type_name};
+         Env      : Lexical_Env;
+         Mapping  : ${T.env_assoc.name};
+         MD       : ${T.env_md.name};
+         Resolver : Entity_Resolver);
+      --  Helper for Populate_Lexical_Env: add the key/element Mapping in the
+      --  Env lexical environment using the given metadata (MD).
+   % endif
+
+   % if ctx.has_env_assoc_array:
+      procedure Add_To_Env
+        (Self     : ${root_node_type_name};
+         Env      : Lexical_Env;
+         Mappings : in out ${T.env_assoc.array.name};
+         MD       : ${T.env_md.name};
+         Resolver : Entity_Resolver);
+      --  Add_To_Env overload to work on an array of key/element mappings.
+      --  Calling this takes an ownership share for Mappings.
+   % endif
+
    -------------------
    -- Solve_Wrapper --
    -------------------
@@ -94,6 +116,90 @@ package body ${ada_lib_name}.Analysis.Implementation is
             raise Property_Error with "logic resolution timed out";
       end;
    end Solve_Wrapper;
+
+   % if ctx.has_env_assoc:
+      ----------------
+      -- Add_To_Env --
+      ----------------
+
+      procedure Add_To_Env
+        (Self    : ${root_node_type_name};
+         Env     : Lexical_Env;
+         Mapping : ${T.env_assoc.name};
+         MD      : ${T.env_md.name};
+         Resolver : Entity_Resolver)
+      is
+         Root_Scope : Lexical_Env renames Self.Unit.Context.Root_Scope;
+      begin
+         if Mapping = No_Env_Assoc then
+            return;
+         end if;
+
+         <% astnode_fields = [f for f in T.env_md.get_fields()
+                              if f.type.is_ast_node] %>
+         % if astnode_fields:
+            --  Make sure metadata does not contain any foreign node
+            if ${(
+               ' or else '.join(
+                   ['({n} /= null and then {n}.Unit /= Self.Unit)'.format(
+                       n='MD.{}'.format(f.name)
+                   ) for f in astnode_fields]
+               )
+            )}
+            then
+               raise Property_Error
+                  with "Cannot add metadata that contains foreign nodes";
+            end if;
+         % endif
+
+         --  Add the element to the environment
+         Add (Self  => Env,
+              Key   => Mapping.F_Key,
+              Value => Mapping.F_Val,
+              MD    => MD,
+              Resolver => Resolver);
+
+         --  If we're adding the element to an environment that belongs to a
+         --  different unit, then:
+         if Env /= Empty_Env
+            and then (Env = Root_Scope
+                      or else Env.Env.Node.Unit /= Self.Unit)
+         then
+            --  Add the environment, the key, and the value to the list of
+            --  entries contained in other units, so we can remove them when
+            --  reparsing Val's unit.
+            Mapping.F_Val.Unit.Exiled_Entries.Append
+              ((Env, Mapping.F_Key, Mapping.F_Val));
+
+            if Env /= Root_Scope then
+               --  Add Val to the list of foreign nodes that Env's unit
+               --  contains, so that when that unit is reparsed, we can call
+               --  Add_To_Env again on those nodes.
+               Env.Env.Node.Unit.Foreign_Nodes.Append (Mapping.F_Val);
+            end if;
+         end if;
+      end Add_To_Env;
+   % endif
+
+   % if ctx.has_env_assoc_array:
+      ----------------
+      -- Add_To_Env --
+      ----------------
+
+      procedure Add_To_Env
+        (Self     : ${root_node_type_name};
+         Env      : Lexical_Env;
+         Mappings : in out ${T.env_assoc.array.name};
+         MD       : ${T.env_md.name};
+         Resolver : Entity_Resolver)
+      is
+      begin
+         for M of Mappings.Items loop
+            Add_To_Env (Self, Env, M, MD, Resolver);
+         end loop;
+         Dec_Ref (Mappings);
+      end Add_To_Env;
+   % endif
 
    -------------
    -- Destroy --

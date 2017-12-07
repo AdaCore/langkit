@@ -307,8 +307,8 @@
    <% call_prop = cls.env_spec._render_field_access %>
 
    <%def name="emit_add_to_env(exprs)">
-      ## If we have an _add_to_env specification, we generate code to
-      ## add elements to the lexical environment.
+      ## If we have an add_to_env specification, generate code to add elements
+      ## to the lexical environment.
 
       declare
          Env : Lexical_Env :=
@@ -318,69 +318,16 @@
             ${(call_prop(exprs.metadata_prop)
                if exprs.metadata else 'No_Metadata')};
 
-         ${"Mappings" if exprs.mappings_prop.type.is_array_type else "B"} :
-           ${exprs.mappings_prop.type.name}
-             := ${call_prop(exprs.mappings_prop)};
+         Mappings : ${exprs.mappings_prop.type.name} :=
+            ${call_prop(exprs.mappings_prop)};
+
+         Resolver : constant Entity_Resolver :=
+            ${("{}'Access".format(exprs.resolver.name)
+               if exprs.resolver else 'null')};
+
       begin
-         % if exprs.mappings_prop.type.is_array_type:
-         for B of Mappings.Items loop
-         % endif
-            if B /= No_Env_Assoc then
-               ## Make sure metadata does not contain any foreign node
-               <% astnode_fields = [f for f in T.env_md.get_fields()
-                                    if f.type.is_ast_node] %>
-               % if astnode_fields:
-                  if ${(
-                     ' or else '.join(
-                         ['({n} /= null and then {n}.Unit /= Self.Unit)'.format(
-                             n='MD.{}'.format(f.name)
-                         ) for f in astnode_fields]
-                     )
-                  )}
-                  then
-                     raise Property_Error
-                        with "Cannot add metadata that contains foreign nodes";
-                  end if;
-               % endif
-
-               ## Add the element to the environment
-               Add (Self  => Env,
-                    Key   => B.F_Key,
-                    Value => ${root_node_type_name} (B.F_Val),
-                    MD    => MD
-
-                    % if exprs.resolver:
-                    , Resolver => ${exprs.resolver.name}'Access
-                    % endif
-               );
-
-               ## If we're adding the element to an environment that belongs to
-               ## a different unit, then:
-               if Env /= Empty_Env
-                  and then (Env = Root_Env
-                            or else Env.Env.Node.Unit /= Self.Unit)
-               then
-                  ## Add the environment, the key, and the value to the list of
-                  ## entries contained in other units, so we can remove them
-                  ## when reparsing Val's unit.
-                  B.F_Val.Unit.Exiled_Entries.Append
-                    ((Env, B.F_Key, ${root_node_type_name} (B.F_Val)));
-
-                  if Env /= Root_Env then
-                     ## Add Val to the list of foreign nodes that Env's unit
-                     ## contains, so that when that unit is reparsed, we can
-                     ## call add_to_env again on those nodes.
-                     Env.Env.Node.Unit.Foreign_Nodes.Append
-                       (${root_node_type_name} (B.F_Val));
-                  end if;
-               end if;
-            end if;
-
-         % if exprs.mappings_prop.type.is_array_type:
-         end loop;
-         Dec_Ref (Mappings);
-         % endif
-
+         Add_To_Env (${root_node_type_name} (Self),
+                     Env, Mappings, MD, Resolver);
          Dec_Ref (Env);
       end;
    </%def>

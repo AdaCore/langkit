@@ -4,7 +4,7 @@ from funcy import split_by
 from itertools import count
 
 from langkit import names
-from langkit.compiled_types import AbstractNodeData, T
+from langkit.compiled_types import AbstractNodeData, T, get_context
 from langkit.diagnostics import (
     check_source_language, extract_library_location, Context
 )
@@ -345,17 +345,23 @@ class AddToEnv(EnvAction):
         self.resolver = resolver
 
     def check(self):
+        ctx = get_context()
         self.resolver = resolve_property(self.resolver)
         with self.mappings_prop.diagnostic_context:
-            check_source_language(
-                self.mappings_prop.type.matches(T.env_assoc) or
-                self.mappings_prop.type.matches(T.env_assoc.array),
-                'The bindings expression in environment specification '
-                ' must be either an env_assoc or an array of env_assocs: '
-                'got {} instead'.format(
-                    self.mappings_prop.type.dsl_name
+            mapping_type = self.mappings_prop.type
+            if mapping_type.matches(T.env_assoc):
+                ctx.has_env_assoc = True
+            elif mapping_type.matches(T.env_assoc.array):
+                ctx.has_env_assoc = True
+                ctx.has_env_assoc_array = True
+            else:
+                check_source_language(
+                    False,
+                    'The bindings expression in environment specification must'
+                    ' must be either an env_assoc or an array of env_assocs:'
+                    ' got {} instead'.format(mapping_type.dsl_name)
                 )
-            )
+
             if self.resolver:
                 # Ask for the creation of untyped wrappers for all
                 # properties used as entity resolvers.

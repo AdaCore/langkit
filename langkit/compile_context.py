@@ -550,6 +550,16 @@ class CompileCtx(object):
         :type: langkit.compiled_types.StructType
         """
 
+        self.has_env_assoc = False
+        """
+        Whether the env_assoc structure type is created.
+        """
+
+        self.has_env_assoc_array = False
+        """
+        Whether the array type for the env_assoc structure type is created.
+        """
+
         self.template_lookup_extra_dirs = template_lookup_extra_dirs or []
 
         self.additional_source_files = []
