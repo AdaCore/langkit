@@ -713,20 +713,6 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    package Exiled_Entry_Vectors is new Langkit_Support.Vectors (Exiled_Entry);
 
-   type Lex_Env_Data_Type is record
-      Exiled_Entries : Exiled_Entry_Vectors.Vector;
-      --  Lexical env population for the unit that owns this Lex_Env_Data may
-      --  have added AST nodes it owns to the lexical environments that belong
-      --  to other units ("exiled" entries). For each of these AST nodes, this
-      --  vector contains an entry that records the target environment, the AST
-      --  node and the corresponding symbol.
-
-      Foreign_Nodes : ${root_node_type_name}_Vectors.Vector;
-      --  The unit that owns this Lex_Env_Data owns a set of lexical
-      --  environments. This vector contains the list of AST nodes that were
-      --  added to these environments and that come from other units.
-   end record;
-
    function Token_Data (Unit : Analysis_Unit) return Token_Data_Handler_Access;
 
    procedure Register_Destroyable
@@ -766,8 +752,6 @@ package ${ada_lib_name}.Analysis.Implementation is
    end record;
    --  Simple holder to associate an object to destroy and the procedure to
    --  perform the destruction.
-
-   type Lex_Env_Data is access all Lex_Env_Data_Type;
 
    package Destroyable_Vectors is new Langkit_Support.Vectors
      (Destroyable_Type);
@@ -891,9 +875,17 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  Units that are referenced from this one. Useful for
       --  visibility/computation of the reference graph.
 
-      Lex_Env_Data_Acc  : Lex_Env_Data;
-      --  Lexical environment metadata for elements in this units' environments
-      --  that belong to other units.
+      Exiled_Entries : Exiled_Entry_Vectors.Vector;
+      --  Lexical env population for this unit may have added AST nodes it owns
+      --  to the lexical environments that belong to other units ("exiled"
+      --  entries). For each of these AST nodes, this vector contains an entry
+      --  that records the target environment, the AST node and the
+      --  corresponding symbol.
+
+      Foreign_Nodes : ${root_node_type_name}_Vectors.Vector;
+      --  This unit owns a set of lexical environments. This vector contains
+      --  the list of AST nodes that were added to these environments and that
+      --  come from other units.
 
       Rebindings        : aliased Env_Rebindings_Vectors.Vector;
       --  List of rebindings for which Old_Env and/or New_Env belong to this

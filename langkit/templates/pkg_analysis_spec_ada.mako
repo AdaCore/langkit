@@ -549,7 +549,4 @@ private
    --  Generic procedure to register an object so that it is automatically
    --  destroyed when Unit is destroyed.
 
-   function Get_Lex_Env_Data
-     (Unit : Analysis_Unit) return access Implementation.Lex_Env_Data_Type;
-
 end ${ada_lib_name}.Analysis;

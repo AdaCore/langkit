@@ -63,21 +63,16 @@ package body ${ada_lib_name}.Analysis is
 
    use AST_Envs;
 
-   procedure Remove_Exiled_Entries (Self : Lex_Env_Data);
-   --  Remove lex env entries that references some of the unit's nodes, in
-   --  lexical environments not owned by the unit.
+   procedure Remove_Exiled_Entries (Unit : Analysis_Unit);
+   --  Remove lexical environment entries that reference some of Unit's nodes,
+   --  in lexical environments it does not own.
 
    procedure Reroot_Foreign_Nodes
-     (Self : Lex_Env_Data; Root_Scope : Lexical_Env);
-   --  Re-create entries for nodes that are keyed in one of the unit's lexical
-   --  envs.
+     (Unit : Analysis_Unit; Root_Scope : Lexical_Env);
+   --  Re-create entries for nodes that are keyed in one of Unit's lexical envs
 
    procedure Update_After_Reparse (Unit : Analysis_Unit);
    --  Update stale lexical environment data after the reparsing of Unit
-
-   procedure Destroy (Self : in out Lex_Env_Data_Type);
-   procedure Destroy (Self : in out Lex_Env_Data);
-   --  Destroy data associated to lexical environments
 
    procedure Destroy (Unit : Analysis_Unit);
 
@@ -317,7 +312,9 @@ package body ${ada_lib_name}.Analysis is
          AST_Mem_Pool            => No_Pool,
          Destroyables            => Destroyable_Vectors.Empty_Vector,
          Referenced_Units        => <>,
-         Lex_Env_Data_Acc        => new Lex_Env_Data_Type,
+         Exiled_Entries          => Exiled_Entry_Vectors.Empty_Vector,
+         Foreign_Nodes           =>
+            ${root_node_type_name}_Vectors.Empty_Vector,
          Rebindings              => Env_Rebindings_Vectors.Empty_Vector,
          Cache_Version           => <>
          % if ctx.has_memoization:
@@ -651,7 +648,7 @@ package body ${ada_lib_name}.Analysis is
          Reset_Caches (Unit.Context);
 
          --  Remove all lexical environment artifacts from this analysis unit
-         Remove_Exiled_Entries (Unit.Lex_Env_Data_Acc);
+         Remove_Exiled_Entries (Unit);
 
          Unit.Context := null;
          Dec_Ref (Unit);
@@ -783,9 +780,9 @@ package body ${ada_lib_name}.Analysis is
    -- Remove_Exiled_Entries --
    ---------------------------
 
-   procedure Remove_Exiled_Entries (Self : Lex_Env_Data) is
+   procedure Remove_Exiled_Entries (Unit : Analysis_Unit) is
    begin
-      for El of Self.Exiled_Entries loop
+      for El of Unit.Exiled_Entries loop
          --  Remove the `symbol -> AST node` associations that reference this
          --  unit's nodes from foreign lexical environments.
          AST_Envs.Remove (El.Env, El.Key, El.Node);
@@ -796,7 +793,7 @@ package body ${ada_lib_name}.Analysis is
          if El.Env.Env.Node /= null then
             declare
                Foreign_Nodes : ${root_node_type_name}_Vectors.Vector renames
-                  Get_Lex_Env_Data (El.Env.Env.Node.Unit).Foreign_Nodes;
+                  El.Env.Env.Node.Unit.Foreign_Nodes;
                Current       : Positive := Foreign_Nodes.First_Index;
             begin
                while Current <= Foreign_Nodes.Last_Index loop
@@ -810,7 +807,7 @@ package body ${ada_lib_name}.Analysis is
          end if;
       end loop;
 
-      Self.Exiled_Entries.Clear;
+      Unit.Exiled_Entries.Clear;
    end Remove_Exiled_Entries;
 
    --------------------------
@@ -818,14 +815,14 @@ package body ${ada_lib_name}.Analysis is
    --------------------------
 
    procedure Reroot_Foreign_Nodes
-     (Self : Lex_Env_Data; Root_Scope : Lexical_Env)
+     (Unit : Analysis_Unit; Root_Scope : Lexical_Env)
    is
       Els : constant ${root_node_type_name}_Vectors.Elements_Array :=
-         Self.Foreign_Nodes.To_Array;
+         Unit.Foreign_Nodes.To_Array;
    begin
       --  Make the Foreign_Nodes vector empty as the partial
       --  Populate_Lexical_Env pass below will re-build it.
-      Self.Foreign_Nodes.Clear;
+      Unit.Foreign_Nodes.Clear;
 
       for El of Els loop
          --  First, filter the exiled entries in foreign units so that they
@@ -835,7 +832,7 @@ package body ${ada_lib_name}.Analysis is
          --  produce.
          declare
             Exiled_Entries : Exiled_Entry_Vectors.Vector renames
-               Get_Lex_Env_Data (El.Unit).Exiled_Entries;
+               El.Unit.Exiled_Entries;
             Current        : Positive := Exiled_Entries.First_Index;
          begin
             while Current <= Exiled_Entries.Last_Index loop
@@ -873,7 +870,7 @@ package body ${ada_lib_name}.Analysis is
 
          --  First we'll remove old entries referencing the old translation
          --  unit in foreign lexical envs.
-         Remove_Exiled_Entries (Unit.Lex_Env_Data_Acc);
+         Remove_Exiled_Entries (Unit);
 
          --  Then we'll recreate the lexical env structure for the newly parsed
          --  unit.
@@ -881,7 +878,7 @@ package body ${ada_lib_name}.Analysis is
 
          --  Finally, any entry that was rooted in one of the unit's lex envs
          --  needs to be re-rooted.
-         Reroot_Foreign_Nodes (Unit.Lex_Env_Data_Acc, Unit.Context.Root_Scope);
+         Reroot_Foreign_Nodes (Unit, Unit.Context.Root_Scope);
       end if;
    end Update_After_Reparse;
 
@@ -943,7 +940,8 @@ package body ${ada_lib_name}.Analysis is
    procedure Destroy (Unit : Analysis_Unit) is
       Unit_Var : Analysis_Unit := Unit;
    begin
-      Destroy (Unit.Lex_Env_Data_Acc);
+      Unit.Exiled_Entries.Destroy;
+      Unit.Foreign_Nodes.Destroy;
       Analysis_Unit_Sets.Destroy (Unit.Referenced_Units);
 
       % if ctx.has_memoization:
@@ -1150,16 +1148,6 @@ package body ${ada_lib_name}.Analysis is
       end if;
    end Is_Referenced_From;
 
-   ----------------------
-   -- Get_Lex_Env_Data --
-   ----------------------
-
-   function Get_Lex_Env_Data
-     (Unit : Analysis_Unit) return access Implementation.Lex_Env_Data_Type is
-   begin
-      return Unit.Lex_Env_Data_Acc;
-   end Get_Lex_Env_Data;
-
    --------------------------
    -- Register_Destroyable --
    --------------------------
@@ -1189,28 +1177,6 @@ package body ${ada_lib_name}.Analysis is
          Object.all'Address,
          Convert (Destroy_Procedure'Address));
    end Register_Destroyable_Gen;
-
-   -------------
-   -- Destroy --
-   -------------
-
-   procedure Destroy (Self : in out Lex_Env_Data_Type) is
-   begin
-      Self.Exiled_Entries.Destroy;
-      Self.Foreign_Nodes.Destroy;
-   end Destroy;
-
-   -------------
-   -- Destroy --
-   -------------
-
-   procedure Destroy (Self : in out Lex_Env_Data) is
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Lex_Env_Data_Type, Lex_Env_Data);
-   begin
-      Destroy (Self.all);
-      Free (Self);
-   end Destroy;
 
    -----------------
    -- First_Token --

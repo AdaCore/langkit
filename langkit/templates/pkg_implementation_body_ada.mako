@@ -56,10 +56,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
    function Convert is new Ada.Unchecked_Conversion
      (Analysis_Unit, Internal_Analysis_Unit);
 
-   function Get_Lex_Env_Data
-     (Node : access ${root_node_value_type}'Class) return Lex_Env_Data
-   is (Lex_Env_Data (${ada_lib_name}.Analysis.Get_Lex_Env_Data (Node.Unit)));
-
    procedure Destroy (Env : in out Lexical_Env_Access);
 
    procedure Register_Destroyable is new Register_Destroyable_Gen
