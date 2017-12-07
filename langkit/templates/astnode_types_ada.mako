@@ -337,21 +337,10 @@
          Ref_Env_Nodes : ${ref_env.nodes_property.type.name} :=
             ${call_prop(ref_env.nodes_property)};
       begin
-         for N of Ref_Env_Nodes.Items loop
-            if N /= null then
-               if N.Unit /= Self.Unit then
-                  raise Property_Error with
-                     "attempt to add a referenced environment to a foreign"
-                     & " unit";
-               end if;
-               Reference
-                 (Self.Self_Env, N,
+         Ref_Env (${root_node_type_name} (Self), Ref_Env_Nodes,
                   ${ref_env.resolver.name}'Access,
-                  ${'Self' if not ref_env.visible_to_children else 'null'},
-                  Transitive => ${"True" if ref_env.transitive else "False"});
-            end if;
-         end loop;
-         Dec_Ref (Ref_Env_Nodes);
+                  ${ref_env.visible_to_children},
+                  ${ref_env.transitive});
       end;
    </%def>
 

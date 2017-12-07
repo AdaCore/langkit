@@ -95,6 +95,17 @@ package body ${ada_lib_name}.Analysis.Implementation is
       --  Calling this takes an ownership share for Mappings.
    % endif
 
+   % if ctx.has_ref_env:
+      procedure Ref_Env
+        (Self                : ${root_node_type_name};
+         Ref_Env_Nodes       : in out ${T.root_node.array.name};
+         Resolver            : Lexical_Env_Resolver;
+         Visible_To_Children : Boolean;
+         Transitive          : Boolean);
+      --  Add referenced environments to Self.Self_Env. Calling this takes an
+      --  ownership share for Ref_Env_Nodes.
+   % endif
+
    -------------------
    -- Solve_Wrapper --
    -------------------
@@ -199,6 +210,36 @@ package body ${ada_lib_name}.Analysis.Implementation is
          end loop;
          Dec_Ref (Mappings);
       end Add_To_Env;
+   % endif
+
+   % if ctx.has_ref_env:
+      -------------
+      -- Ref_Env --
+      -------------
+
+      procedure Ref_Env
+        (Self                : ${root_node_type_name};
+         Ref_Env_Nodes       : in out ${T.root_node.array.name};
+         Resolver            : Lexical_Env_Resolver;
+         Visible_To_Children : Boolean;
+         Transitive          : Boolean)
+      is
+      begin
+         for N of Ref_Env_Nodes.Items loop
+            if N /= null then
+               if N.Unit /= Self.Unit then
+                  raise Property_Error with
+                     "attempt to add a referenced environment to a foreign"
+                     & " unit";
+               end if;
+               Reference
+                 (Self.Self_Env, N, Resolver,
+                  (if Visible_To_Children then null else Self),
+                  Transitive);
+            end if;
+         end loop;
+         Dec_Ref (Ref_Env_Nodes);
+      end Ref_Env;
    % endif
 
    -------------

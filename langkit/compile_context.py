@@ -560,6 +560,11 @@ class CompileCtx(object):
         Whether the array type for the env_assoc structure type is created.
         """
 
+        self.has_ref_env = False
+        """
+        Whether there is a RefEnvs action in environment specs.
+        """
+
         self.template_lookup_extra_dirs = template_lookup_extra_dirs or []
 
         self.additional_source_files = []

@@ -461,6 +461,8 @@ class RefEnvs(EnvAction):
         """
         Check that the resolver property is conforming.
         """
+        get_context().has_ref_env = True
+
         self.resolver = resolve_property(self.resolver)
         self.resolver.require_untyped_wrapper()
 
