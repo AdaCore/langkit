@@ -351,6 +351,12 @@ class ManageScript(object):
             help='Generate public properties in a separate package. This is a'
                  ' development helper only, to make builds faster with GNAT.'
         )
+        subparser.add_argument(
+            '--no-astdoc', '-D', dest='no_astdoc',
+            action='store_true',
+            help='Do not generate the HTML documentation for AST nodes, their'
+                 ' fields and their properties.'
+        )
 
     def add_build_args(self, subparser):
         """

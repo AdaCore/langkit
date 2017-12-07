@@ -1085,7 +1085,7 @@ class CompileCtx(object):
              main_programs=set(), annotate_fields_types=False,
              check_only=False, no_property_checks=False,
              warnings=None, generate_pp=False, properties_logging=False,
-             separate_properties=False):
+             separate_properties=False, generate_astdoc=False):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
@@ -1128,6 +1128,9 @@ class CompileCtx(object):
         :param bool separate_properties: Whether to generate public properties
             in a separate package. This is a development helper only, to make
             builds faster with GNAT.
+
+        :param bool generate_astdoc: Whether to generate the HTML documentation
+            for AST nodes, their fields and their properties.
         """
         if self.extensions_dir:
             add_template_dir(self.extensions_dir)
@@ -1138,6 +1141,7 @@ class CompileCtx(object):
         self.generate_pp = generate_pp
         self.properties_logging = properties_logging
         self.separate_properties = separate_properties
+        self.generate_astdoc = generate_astdoc
         if warnings:
             self.warnings = warnings
 
@@ -1410,9 +1414,10 @@ class CompileCtx(object):
             filename = os.path.basename(filepath)
             shutil.copy(filepath, path.join(src_path, filename))
 
-        with open(os.path.join(share_path, 'ast-types.html'), 'w') as f:
-            from langkit import astdoc
-            astdoc.write_astdoc(self, f)
+        if self.generate_astdoc:
+            with open(os.path.join(share_path, 'ast-types.html'), 'w') as f:
+                from langkit import astdoc
+                astdoc.write_astdoc(self, f)
 
         if self.verbosity.info:
             printcol("Generating sources... ", Colors.OKBLUE)
