@@ -198,15 +198,14 @@ package body ${ada_lib_name}.Analysis is
          Symbol_Literals => Create_Symbol_Literals (Symbols),
          % endif
 
-         Private_Part =>
-            new Analysis_Context_Private_Part_Type'(others => <>),
+         Parser => <>,
 
          Discard_Errors_In_Populate_Lexical_Env => <>,
          Logic_Resolution_Timeout => <>,
          In_Populate_Lexical_Env => False,
          Cache_Version => <>);
 
-      Initialize (Context.Private_Part.Parser);
+      Initialize (Context.Parser);
       ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}
       return Context;
    end Create;
@@ -469,7 +468,7 @@ package body ${ada_lib_name}.Analysis is
       declare
          use Ada.Exceptions;
       begin
-         Init_Parser (Unit, Read_BOM, Unit.Context.Private_Part.Parser);
+         Init_Parser (Unit, Read_BOM, Unit.Context.Parser);
       exception
          when Exc : Name_Error =>
             --  This happens when we cannot open the source file for lexing:
@@ -497,11 +496,11 @@ package body ${ada_lib_name}.Analysis is
       --  get.
 
       Unit.AST_Mem_Pool := Create;
-      Unit.Context.Private_Part.Parser.Mem_Pool := Unit.AST_Mem_Pool;
+      Unit.Context.Parser.Mem_Pool := Unit.AST_Mem_Pool;
 
       Unit.AST_Root := ${root_node_type_name}
-        (Parse (Unit.Context.Private_Part.Parser, Rule => Unit.Rule));
-      Unit.Diagnostics.Append (Unit.Context.Private_Part.Parser.Diagnostics);
+        (Parse (Unit.Context.Parser, Rule => Unit.Rule));
+      Unit.Diagnostics.Append (Unit.Context.Parser.Diagnostics);
    end Do_Parsing;
 
    -------------------
@@ -666,21 +665,14 @@ package body ${ada_lib_name}.Analysis is
    -------------
 
    procedure Destroy (Context : in out Analysis_Context) is
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Analysis_Context_Private_Part_Type, Analysis_Context_Private_Part);
    begin
       for Unit of Context.Units_Map loop
          Unit.Context := null;
          Dec_Ref (Unit);
       end loop;
       AST_Envs.Destroy (Context.Root_Scope);
-
       Destroy (Context.Symbols);
-
-      --  Free resources associated to the private part
-      Destroy (Context.Private_Part.Parser);
-      Free (Context.Private_Part);
-
+      Destroy (Context.Parser);
       Free (Context);
    end Destroy;
 

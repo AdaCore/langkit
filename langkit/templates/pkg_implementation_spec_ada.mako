@@ -702,12 +702,6 @@ package ${ada_lib_name}.Analysis.Implementation is
      % endif
    % endfor
 
-   type Analysis_Context_Private_Part_Type is record
-      Parser : Parser_Type;
-      --  Main parser type. TODO: If we want to parse in several tasks, we'll
-      --  replace that by an array of parsers.
-   end record;
-
    type Exiled_Entry is record
       Env  : Lexical_Env;
       Key  : Symbol_Type;
@@ -773,8 +767,6 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Simple holder to associate an object to destroy and the procedure to
    --  perform the destruction.
 
-   type Analysis_Context_Private_Part is access all
-      Analysis_Context_Private_Part_Type;
    type Lex_Env_Data is access all Lex_Env_Data_Type;
 
    package Destroyable_Vectors is new Langkit_Support.Vectors
@@ -827,7 +819,9 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  List of pre-computed symbols in the Symbols table
       % endif
 
-      Private_Part : Analysis_Context_Private_Part;
+      Parser : Parser_Type;
+      --  Main parser type. TODO: If we want to parse in several tasks, we'll
+      --  replace that by an array of parsers.
 
       Discard_Errors_In_Populate_Lexical_Env : Boolean := True;
       --  See the eponym procedure
