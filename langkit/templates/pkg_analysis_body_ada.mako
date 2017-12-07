@@ -67,8 +67,7 @@ package body ${ada_lib_name}.Analysis is
    --  Remove lexical environment entries that reference some of Unit's nodes,
    --  in lexical environments it does not own.
 
-   procedure Reroot_Foreign_Nodes
-     (Unit : Analysis_Unit; Root_Scope : Lexical_Env);
+   procedure Reroot_Foreign_Nodes (Unit : Analysis_Unit);
    --  Re-create entries for nodes that are keyed in one of Unit's lexical envs
 
    procedure Update_After_Reparse (Unit : Analysis_Unit);
@@ -814,9 +813,7 @@ package body ${ada_lib_name}.Analysis is
    -- Reroot_Foreign_Nodes --
    --------------------------
 
-   procedure Reroot_Foreign_Nodes
-     (Unit : Analysis_Unit; Root_Scope : Lexical_Env)
-   is
+   procedure Reroot_Foreign_Nodes (Unit : Analysis_Unit) is
       Els : constant ${root_node_type_name}_Vectors.Elements_Array :=
          Unit.Foreign_Nodes.To_Array;
    begin
@@ -848,7 +845,8 @@ package body ${ada_lib_name}.Analysis is
          --  that this unit contains so that they are relocated in our new
          --  lexical environments.
          declare
-            Env : constant Lexical_Env :=
+            Root_Scope : Lexical_Env renames Unit.Context.Root_Scope;
+            Env        : constant Lexical_Env :=
                El.Pre_Env_Actions (El.Self_Env, Root_Scope, True);
          begin
             El.Post_Env_Actions (Env, Root_Scope);
@@ -878,7 +876,7 @@ package body ${ada_lib_name}.Analysis is
 
          --  Finally, any entry that was rooted in one of the unit's lex envs
          --  needs to be re-rooted.
-         Reroot_Foreign_Nodes (Unit, Unit.Context.Root_Scope);
+         Reroot_Foreign_Nodes (Unit);
       end if;
    end Update_After_Reparse;
 
