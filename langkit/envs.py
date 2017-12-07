@@ -37,7 +37,8 @@ def add_env(no_parent=False):
     """
     Add an environment linked to the current node. This env action must be
     called as a pre action. The only actions that can precede this one in pre
-    actions are add_to_env actions with the current env as a destination.
+    actions are add_to_env actions with the current env as a destination. Also,
+    there can be only one add_env action per EnvSpec.
 
     :param bool no_parent: If passed, the new env will be created with no
         parent env.
@@ -238,9 +239,18 @@ class EnvSpec(object):
 
         :param langkit.compile_context.CompileCtx context: Current context.
         """
+        has_add_env = False
+
         with self.diagnostic_context:
+
             for action in self.actions:
                 action.check()
+
+                if isinstance(action, AddEnv):
+                    check_source_language(not has_add_env,
+                                          'There can be only one add_env'
+                                          ' action per EnvSpec')
+                    has_add_env = True
 
             pre_addenv, post_addenv = split_by(
                 lambda a: not isinstance(a, AddEnv), self.pre_actions
