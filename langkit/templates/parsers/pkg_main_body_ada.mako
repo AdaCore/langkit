@@ -9,6 +9,8 @@ with Langkit_Support.Text;    use Langkit_Support.Text;
 with ${ada_lib_name}.Analysis.Implementation;
 use ${ada_lib_name}.Analysis.Implementation;
 
+<% sorted_fns = sorted(ctx.fns, key=lambda f: f.gen_fn_name) %>
+
 package body ${ada_lib_name}.Analysis.Parsers is
 
    --  Prepare packrat instantiations: one per enum type and onefor each kind
@@ -55,7 +57,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
    type Parser_Private_Part_Type is record
       Parse_Lists : Free_Parse_List;
 
-      % for parser in sorted(ctx.fns):
+      % for parser in sorted_fns:
       <% ret_type = parser.get_type().storage_type_name %>
       ${parser.gen_fn_name}_Memo : ${ret_type}_Memos.Memo_Type;
       % endfor
@@ -232,7 +234,7 @@ package body ${ada_lib_name}.Analysis.Parsers is
       Parser := New_Parser;
 
       --  Reset the memo tables in the private part
-      % for fn in sorted(ctx.fns):
+      % for fn in sorted_fns:
          ${fn.get_type().storage_type_name}_Memos.Clear
            (Parser.Private_Part.${fn.gen_fn_name}_Memo);
       % endfor
