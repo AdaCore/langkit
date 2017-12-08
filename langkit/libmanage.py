@@ -615,7 +615,8 @@ class ManageScript(object):
                           no_property_checks=args.no_property_checks,
                           generate_pp=args.pp,
                           properties_logging=args.enabled_properties_logging,
-                          separate_properties=args.separate_properties)
+                          separate_properties=args.separate_properties,
+                          generate_astdoc=not args.no_astdoc)
 
         if args.check_only:
             return

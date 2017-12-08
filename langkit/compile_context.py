@@ -1100,7 +1100,7 @@ class CompileCtx(object):
              main_programs=set(), annotate_fields_types=False,
              check_only=False, no_property_checks=False,
              warnings=None, generate_pp=False, properties_logging=False,
-             separate_properties=False, generate_astdoc=False):
+             separate_properties=False, generate_astdoc=True):
         """
         Generate sources for the analysis library. Also emit a tiny program
         useful for testing purposes.
