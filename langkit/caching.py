@@ -5,8 +5,8 @@ import json
 
 
 class Cache(object):
-
-    """General purpose content cache.
+    """
+    General purpose content cache.
 
     Generating and building libraries can be quite long. This cache class is an
     attempt to reduce the time to do this.
