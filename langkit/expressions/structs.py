@@ -1167,7 +1167,7 @@ class Match(AbstractExpression):
                                   Severity.warning)
 
         mm = sorted(type_set.unmatched_types(input_type),
-                    key=lambda cls: cls.hierarchical_name())
+                    key=lambda cls: cls.hierarchical_name)
 
         check_source_language(
             not mm,

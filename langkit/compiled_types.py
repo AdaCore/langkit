@@ -1905,7 +1905,7 @@ class ASTNodeType(BaseStructType):
         result = [] if self.abstract else [self]
 
         sorted_direct_subclasses = sorted(
-            self.subclasses, key=lambda subcls: subcls.hierarchical_name()
+            self.subclasses, key=lambda subcls: subcls.hierarchical_name
         )
         for subcls in sorted_direct_subclasses:
             result.extend(subcls.concrete_subclasses)
@@ -1965,6 +1965,7 @@ class ASTNodeType(BaseStructType):
     def c_type(self, c_api_settings):
         return CAPIType(c_api_settings, 'base_node')
 
+    @property
     @memoized
     def hierarchical_name(self):
         """

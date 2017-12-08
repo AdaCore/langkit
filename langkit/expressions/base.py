@@ -3235,7 +3235,7 @@ class PropertyDef(AbstractNodeData):
             unmatched_types = sorted(
                 [t for t in type_set.unmatched_types(self.struct)
                  if not t.abstract],
-                key=lambda cls: cls.hierarchical_name()
+                key=lambda cls: cls.hierarchical_name
             )
 
             check_source_language(
