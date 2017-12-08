@@ -20,7 +20,6 @@ from glob import glob
 import inspect
 import os
 from os import path
-import shutil
 from StringIO import StringIO
 import subprocess
 import sys
@@ -76,6 +75,20 @@ def global_context(ctx):
     compile_ctx = ctx
     yield
     compile_ctx = old_ctx
+
+
+def copy_file(from_path, to_path):
+    """
+    Helper to copy a source file.
+
+    Return whether the file has been updated.
+
+    :param str from_path: Path of the file to copy.
+    :param str to_path: Destination path.
+    """
+    with open(from_path, 'r') as f:
+        content = f.read()
+    write_source_file(to_path, content)
 
 
 def write_source_file(file_path, source):
@@ -1452,7 +1465,7 @@ class CompileCtx(object):
         # Copy additional source files from the language specification
         for filepath in self.additional_source_files:
             filename = os.path.basename(filepath)
-            shutil.copy(filepath, path.join(src_path, filename))
+            copy_file(filepath, path.join(src_path, filename))
 
         if self.generate_astdoc:
             from langkit import astdoc
@@ -1564,7 +1577,7 @@ class CompileCtx(object):
         # Add any sources in $lang_path/extensions/support if it exists
         if self.ext('support'):
             for f in glob(path.join(self.ext('support'), "*.ad*")):
-                shutil.copy(f, src_path)
+                copy_file(f, src_path)
 
         if self.verbosity.info:
             printcol("Compiling the quex lexer specification", Colors.OKBLUE)
