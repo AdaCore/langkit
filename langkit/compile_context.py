@@ -1978,6 +1978,7 @@ class CompileCtx(object):
                     return prop.struct.name + prop.name
 
                 static_props = list(prop_set)
+                static_props.sort(key=lambda p: p.struct.hierarchical_name)
 
                 # After the transformation, only the dispatching property will
                 # require an untyped wrapper, so just remember if we need at
