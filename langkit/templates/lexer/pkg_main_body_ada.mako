@@ -3,6 +3,12 @@
 <%
    lexer = ctx.lexer
    termination = lexer.Termination.ada_name
+
+   def token_actions(action_class):
+       return sorted(tok.ada_name for tok in lexer.token_actions[action_class])
+
+   with_symbol_actions = token_actions('WithSymbol')
+   with_trivia_actions = token_actions('WithTrivia')
 %>
 
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
@@ -193,13 +199,10 @@ package body ${ada_lib_name}.Lexer is
 
          case Token_Id is
 
-         % if lexer.token_actions['WithSymbol']:
+         % if with_symbol_actions:
             ## Token id is part of the class of token types for which we want to
             ## internalize the text.
-            when ${" | ".join(
-               tok.ada_name
-               for tok in lexer.token_actions['WithSymbol']
-            )} =>
+            when ${' | '.join(with_symbol_actions)} =>
                declare
                   Bounded_Text : Text_Type (1 .. Natural (Token.Text_Length))
                      with Address => Token.Text;
@@ -220,11 +223,8 @@ package body ${ada_lib_name}.Lexer is
                end;
          % endif
 
-         % if lexer.token_actions['WithTrivia']:
-            when ${" | ".join(
-               tok.ada_name
-               for tok in lexer.token_actions['WithTrivia']
-            )} =>
+         % if with_trivia_actions:
+            when ${' | '.join(with_trivia_actions)} =>
                if With_Trivia then
                   if Last_Token_Was_Trivia then
                      Last_Element (TDH.Trivias).all.Has_Next := True;
