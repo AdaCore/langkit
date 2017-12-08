@@ -82,22 +82,34 @@ def write_source_file(file_path, source):
     """
     Helper to write a source file.
 
+    Return whether the file has been updated.
+
     :param str file_path: Path of the file to write.
     :param str source: Content of the file to write.
+
+    :rtype: bool
     """
-    with open(file_path, 'w') as f:
-        f.write(source)
+    context = get_context()
+    if context.cache.is_stale(file_path, source):
+        if context.verbosity.debug:
+            printcol('Rewriting stale source: {}'.format(file_path),
+                     Colors.OKBLUE)
+        with open(file_path, 'w') as f:
+            f.write(source)
+        return True
+    return False
 
 
 def write_cpp_file(file_path, source):
-    with open(file_path, "wb") as out_file:
-        if find_executable("clang-format"):
-            p = subprocess.Popen(["clang-format"], stdin=subprocess.PIPE,
-                                 stdout=out_file)
-            p.communicate(source)
-            assert p.returncode == 0
-        else:
-            out_file.write(source)
+    """
+    Helper to write a C/C++ source file.
+
+    :param str file_path: Path of the file to write.
+    :param str source: Content of the file to write.
+    """
+    if write_source_file(file_path, source):
+        if find_executable('clang-format'):
+            subprocess.check_call(['clang-format', '-i', file_path])
 
 
 ADA_SPEC = "spec"
@@ -122,8 +134,7 @@ def write_ada_file(out_dir, source_kind, qual_name, content):
     file_path = os.path.join(out_dir, file_name)
 
     # TODO: no tool is able to pretty-print a single Ada source file
-    with open(file_path, "wb") as out_file:
-            out_file.write(content)
+    write_source_file(file_path, content)
 
 
 class Verbosity(object):
@@ -1558,15 +1569,15 @@ class CompileCtx(object):
         if self.verbosity.info:
             printcol("Compiling the quex lexer specification", Colors.OKBLUE)
 
+        # Generating the lexer C code with Quex is quite long: do it only when
+        # the Quex specification changed from last build.
         quex_file = os.path.join(src_path,
                                  "{}.qx".format(self.lang_name.lower))
         quex_spec = self.lexer.emit()
-        write_source_file(quex_file, quex_spec)
-
-        # Generating the lexer C code with Quex is quite long: do it only when
-        # the Quex specification changed from last build.
-        if generate_lexer and self.cache.is_stale('quex_specification',
-                                                  quex_spec):
+        if (
+            write_source_file(quex_file, quex_spec) and
+            generate_lexer
+        ):
             quex_py_file = path.join(os.environ["QUEX_PATH"], "quex-exe.py")
             subprocess.check_call([sys.executable, quex_py_file, "-i",
                                    quex_file,
