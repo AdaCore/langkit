@@ -21,6 +21,7 @@ import inspect
 import os
 from os import path
 import shutil
+from StringIO import StringIO
 import subprocess
 import sys
 
@@ -75,6 +76,17 @@ def global_context(ctx):
     compile_ctx = ctx
     yield
     compile_ctx = old_ctx
+
+
+def write_source_file(file_path, source):
+    """
+    Helper to write a source file.
+
+    :param str file_path: Path of the file to write.
+    :param str source: Content of the file to write.
+    """
+    with open(file_path, 'w') as f:
+        f.write(source)
 
 
 def write_cpp_file(file_path, source):
@@ -1416,13 +1428,15 @@ class CompileCtx(object):
             lib_path, "gnat",
             "{}.gpr".format(self.ada_api_settings.lib_name.lower()),
         )
-        with open(main_project_file, "w") as f:
-            f.write(self.render_template(
+        write_source_file(
+            main_project_file,
+            self.render_template(
                 "project_file",
                 lib_name=self.ada_api_settings.lib_name,
                 os_path=os.path,
                 quex_path=os.environ['QUEX_PATH'],
-            ))
+            )
+        )
 
         # Copy additional source files from the language specification
         for filepath in self.additional_source_files:
@@ -1430,9 +1444,12 @@ class CompileCtx(object):
             shutil.copy(filepath, path.join(src_path, filename))
 
         if self.generate_astdoc:
-            with open(os.path.join(share_path, 'ast-types.html'), 'w') as f:
-                from langkit import astdoc
-                astdoc.write_astdoc(self, f)
+            from langkit import astdoc
+
+            f = StringIO()
+            astdoc.write_astdoc(self, f)
+            write_source_file(os.path.join(share_path, 'ast-types.html'),
+                              f.read())
 
         if self.verbosity.info:
             printcol("Generating sources... ", Colors.OKBLUE)
@@ -1483,13 +1500,15 @@ class CompileCtx(object):
                                "lexer/quex_interface_body_c"))
 
         imain_project_file = os.path.join(file_root, "src", "mains.gpr")
-        with open(imain_project_file, "w") as f:
-            f.write(self.render_template(
+        write_source_file(
+            imain_project_file,
+            self.render_template(
                 "mains_project_file",
                 lib_name=self.ada_api_settings.lib_name,
                 source_dirs=main_source_dirs,
                 main_programs=main_programs
-            ))
+            )
+        )
 
         # Emit C API
         self.emit_c_api(src_path, include_path)
@@ -1502,28 +1521,34 @@ class CompileCtx(object):
             self.emit_python_api(python_path)
 
             playground_file = os.path.join(file_root, "bin", "playground")
-            with open(playground_file, "w") as f:
-                f.write(self.render_template(
+            write_source_file(
+                playground_file,
+                self.render_template(
                     "python_api/playground_py",
                     module_name=self.python_api_settings.module_name
-                ))
+                )
+            )
 
             os.chmod(playground_file, 0o775)
 
         # Emit GDB helpers initialization script
         gdbinit_path = os.path.join(file_root, 'gdbinit.py')
-        with open(gdbinit_path, 'w') as f:
-            lib_name = self.ada_api_settings.lib_name.lower()
-            f.write(self.render_template(
+        lib_name = self.ada_api_settings.lib_name.lower()
+        write_source_file(
+            gdbinit_path,
+            self.render_template(
                 'gdb_py',
                 langkit_path=os.path.dirname(os.path.dirname(__file__)),
                 lib_name=lib_name,
                 prefix=(self.short_name.lower
                         if self.short_name else lib_name),
-            ))
-        with open(os.path.join(src_path, 'gdb.c'), 'w') as f:
-            f.write(self.render_template('gdb_c', gdbinit_path=gdbinit_path,
-                                         os_name=os.name))
+            )
+        )
+        write_source_file(
+            os.path.join(src_path, 'gdb.c'),
+            self.render_template('gdb_c', gdbinit_path=gdbinit_path,
+                                 os_name=os.name)
+        )
 
         # Add any sources in $lang_path/extensions/support if it exists
         if self.ext('support'):
@@ -1536,8 +1561,7 @@ class CompileCtx(object):
         quex_file = os.path.join(src_path,
                                  "{}.qx".format(self.lang_name.lower))
         quex_spec = self.lexer.emit()
-        with open(quex_file, 'w') as f:
-            f.write(quex_spec)
+        write_source_file(quex_file, quex_spec)
 
         # Generating the lexer C code with Quex is quite long: do it only when
         # the Quex specification changed from last build.
@@ -1638,21 +1662,24 @@ class CompileCtx(object):
         module_filename = "{}.py".format(self.python_api_settings.module_name)
 
         with names.camel:
-            with open(os.path.join(python_path, module_filename), "w") as f:
-                code = self.render_template(
-                    "python_api/module_py",
-                    c_api=self.c_api_settings,
-                    pyapi=self.python_api_settings,
-                )
+            code = self.render_template(
+                "python_api/module_py",
+                c_api=self.c_api_settings,
+                pyapi=self.python_api_settings,
+            )
 
-                # If pretty-printing failed, write the original code anyway in
-                # order to ease debugging.
-                try:
-                    pp_code = pretty_print(strip_white_lines(code))
-                except SyntaxError:
-                    f.write(code)
-                    raise
-                f.write(pp_code)
+            # If pretty-printing failed, write the original code anyway in
+            # order to ease debugging.
+            exc = None
+            try:
+                pp_code = pretty_print(strip_white_lines(code))
+            except SyntaxError as exc:
+                pp_code = code
+
+            write_source_file(os.path.join(python_path, module_filename),
+                              pp_code)
+            if exc:
+                raise exc
 
     @property
     def extensions_dir(self):
