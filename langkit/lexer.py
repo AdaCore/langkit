@@ -218,8 +218,10 @@ class LexerToken(object):
     # its value will always be zero.
     Termination = WithText()
 
-    # Built-in token to represent a lexing failure
-    LexingFailure = WithText()
+    # Built-in token to represent a lexing failure. Consider them as trivia so
+    # that we can try parsing ignoring them. Note that we need to emit a
+    # diagnostic when they occur.
+    LexingFailure = WithTrivia()
 
     def __init__(self, track_indent=False):
         import inspect

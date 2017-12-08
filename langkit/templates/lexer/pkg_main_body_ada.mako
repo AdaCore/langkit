@@ -245,6 +245,14 @@ package body ${ada_lib_name}.Lexer is
                   Last_Token_Was_Trivia := True;
                end if;
 
+               --  Whether or nottrivia is disabled, emit a diagnostic for
+               --  lexing failures.
+
+               if Token_Id = ${lexer.LexingFailure.ada_name} then
+                  Append (Diagnostics, Sloc_Range,
+                          "Invalid token, ignored");
+               end if;
+
                goto Dont_Append;
          % endif
 
