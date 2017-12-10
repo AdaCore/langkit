@@ -2023,6 +2023,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
    procedure Reset_Caches (Unit : Analysis_Unit) is
    begin
       if Unit.Cache_Version < Unit.Context.Cache_Version then
+         Main_Trace.Trace ("In reset caches for unit " 
+                           & To_String (Unit.File_Name));
          Unit.Cache_Version := Unit.Context.Cache_Version;
          % if ctx.has_memoization:
             Destroy (Unit.Memoization_Map);

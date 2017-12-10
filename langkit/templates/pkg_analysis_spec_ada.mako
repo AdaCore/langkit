@@ -14,6 +14,8 @@ with Ada.Unchecked_Deallocation;
 
 with System;
 
+with GNATCOLL.Traces;
+
 with Langkit_Support.Bump_Ptr;    use Langkit_Support.Bump_Ptr;
 with Langkit_Support.Diagnostics; use Langkit_Support.Diagnostics;
 with Langkit_Support.Slocs;       use Langkit_Support.Slocs;
@@ -35,6 +37,11 @@ ${exts.with_clauses(with_clauses)}
 --  Get_From_File and/or Get_From_Buffer.
 
 package ${ada_lib_name}.Analysis is
+
+   package Traces renames GNATCOLL.Traces;
+
+   Main_Trace : constant Traces.Trace_Handle :=
+     Traces.Create ("Main_Trace", Traces.From_Config, Stream => "&2");
 
    type Analysis_Context is private;
    ${ada_doc('langkit.analysis_context_type', 3)}
