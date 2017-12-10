@@ -315,7 +315,8 @@ package body ${ada_lib_name}.Analysis is
          Foreign_Nodes           =>
             ${root_node_type_name}_Vectors.Empty_Vector,
          Rebindings              => Env_Rebindings_Vectors.Empty_Vector,
-         Cache_Version           => <>
+         Cache_Version           => <>,
+         Unit_Version            => <>
          % if ctx.has_memoization:
          , Memoization_Map   => <>
          % endif
@@ -866,16 +867,18 @@ package body ${ada_lib_name}.Analysis is
          --  Reset the flag so that Populate_Lexical_Env does its work
          Unit.Is_Env_Populated := False;
 
-         --  First we'll remove old entries referencing the old translation
-         --  unit in foreign lexical envs.
+         --  Increment the unit's version number
+         Unit.Unit_Version := Unit.Unit_Version + 1;
+
+         --  Remove old entries referencing the old translation unit in foreign
+         --  lexical envs.
          Remove_Exiled_Entries (Unit);
 
-         --  Then we'll recreate the lexical env structure for the newly parsed
-         --  unit.
+         --  Recreate the lexical env structure for the newly parsed unit
          Populate_Lexical_Env (Unit);
 
-         --  Finally, any entry that was rooted in one of the unit's lex envs
-         --  needs to be re-rooted.
+         --  Any entry that was rooted in one of the unit's lex envs needs to
+         --  be re-rooted.
          Reroot_Foreign_Nodes (Unit);
       end if;
    end Update_After_Reparse;
@@ -1145,6 +1148,15 @@ package body ${ada_lib_name}.Analysis is
          return Analysis_Unit_Sets.Has (Unit.Referenced_Units, Referenced);
       end if;
    end Is_Referenced_From;
+
+   -------------
+   -- Version --
+   -------------
+
+   function Version (Unit : Analysis_Unit) return Natural is
+   begin
+      return Unit.Unit_Version;
+   end Version;
 
    --------------------------
    -- Register_Destroyable --

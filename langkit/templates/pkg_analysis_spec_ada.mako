@@ -278,6 +278,10 @@ package ${ada_lib_name}.Analysis is
    function Is_Referenced_From
      (Referenced, Unit : Analysis_Unit) return Boolean;
 
+   function Version (Unit : Analysis_Unit) return Natural;
+   --  Return the version for Unit. Version is a number that is incremented
+   --  every time Unit changes.
+
    -----------------------------
    -- Miscellanous operations --
    -----------------------------

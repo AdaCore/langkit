@@ -899,6 +899,10 @@ package ${ada_lib_name}.Analysis.Implementation is
 
       Cache_Version : Natural := 0;
       --  See the eponym field in Analysis_Context_Type
+
+      Unit_Version  : Natural := 0;
+      --  Version for this particular unit. This will be incremented every time
+      --  a reparse occurs.
    end record;
 
    procedure Reset_Caches (Context : Analysis_Context);
