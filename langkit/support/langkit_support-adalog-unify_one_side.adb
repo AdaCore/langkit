@@ -30,15 +30,21 @@ package body Langkit_Support.Adalog.Unify_One_Side is
             R_Val : L_Type := Convert (Self.R_Data, Self.Right);
             L_Val : L_Type := Get_Value (Self.Left);
          begin
-            Trace (L_Image (R_Val));
-            Trace (L_Image (L_Val));
+            if Debug.Debug then
+               Trace (L_Image (R_Val));
+               Trace (L_Image (L_Val));
+            end if;
 
             if Invert_Equals then
                Result := +Equals (Self.Eq_Data, R_Val, L_Val);
             else
                Result := +Equals (Self.Eq_Data, L_Val, R_Val);
             end if;
-            Trace ("Returning " & Result'Image);
+
+            if Debug.Debug then
+               Trace ("Returning " & Result'Image);
+            end if;
+
             L_Dec_Ref (R_Val);
             L_Dec_Ref (L_Val);
             return Result;

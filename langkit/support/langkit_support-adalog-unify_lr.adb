@@ -26,9 +26,11 @@ package body Langkit_Support.Adalog.Unify_LR is
 
             R := Get_Value (Self.Right);
             Result := +Equals (Self.Eq_Data, LC, R);
-            Trace ("In Unify_LR, Left value is : " & Element_Image (L));
-            Trace ("In Unify_LR, Right value is : " & Element_Image (R));
-            Trace ("In Unify_LR, both defined, returning " & Result'Image);
+            if Debug.Debug then
+               Trace ("In Unify_LR, Left value is : " & Element_Image (L));
+               Trace ("In Unify_LR, Right value is : " & Element_Image (R));
+               Trace ("In Unify_LR, both defined, returning " & Result'Image);
+            end if;
 
          else
             --  Left is defined, right is not, give right the value of left and
@@ -37,11 +39,14 @@ package body Langkit_Support.Adalog.Unify_LR is
             Set_Value (Self.Right, LC);
             Result := Satisfied;
             Self.State := Right_Changed;
-            Trace ("In Unify_LR, propagating right, from "
-                   & Image (Self.Left) & " to "
-                   & Image (Self.Right));
-            Trace ("In Unify_LR, From value is : " & Element_Image (L));
-            Trace ("In Unify_LR, New to value is : " & Element_Image (LC));
+
+            if Debug.Debug then
+               Trace ("In Unify_LR, propagating right, from "
+                      & Image (Self.Left) & " to "
+                      & Image (Self.Right));
+               Trace ("In Unify_LR, From value is : " & Element_Image (L));
+               Trace ("In Unify_LR, New to value is : " & Element_Image (LC));
+            end if;
          end if;
 
          L_Dec_Ref (L);
@@ -51,7 +56,10 @@ package body Langkit_Support.Adalog.Unify_LR is
       end if;
 
       if not Is_Defined (Self.Right) or else One_Side_Convert then
-         Trace ("No progress, one side convert = " & One_Side_Convert'Image);
+         if Debug.Debug then
+            Trace
+              ("No progress, one side convert = " & One_Side_Convert'Image);
+         end if;
          return No_Progress;
       end if;
 
@@ -68,8 +76,10 @@ package body Langkit_Support.Adalog.Unify_LR is
       end;
 
       Self.State := Left_Changed;
-      Trace ("In Unify_LR, propagating left,"
-             & " from " & Image (Self.Right) & " to " & Image (Self.Left));
+      if Debug.Debug then
+         Trace ("In Unify_LR, propagating left,"
+                & " from " & Image (Self.Right) & " to " & Image (Self.Left));
+      end if;
       return Satisfied;
    end Apply;
 
