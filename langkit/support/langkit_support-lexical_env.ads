@@ -30,6 +30,12 @@ with Langkit_Support.Vectors;
 --  want to make the type private at some point (or not).
 
 generic
+   type Unit_T is private;
+   No_Unit : Unit_T;
+   with function Get_Version (Unit : Unit_T) return Natural;
+   --  Unit is passed solely for the Get_Version function, that is used in
+   --  cache invalidation.
+
    type Element_T is private;
    type Element_Metadata is private;
    No_Element     : Element_T;
@@ -41,8 +47,6 @@ generic
    with procedure Raise_Property_Error (Message : String := "");
 
    with function Combine (L, R : Element_Metadata) return Element_Metadata;
-
-   with function Parent (El : Element_T) return Element_T is <>;
 
    with function Can_Reach (El, From : Element_T) return Boolean is <>;
    --  Function that will allow filtering nodes depending on the origin node of
@@ -62,6 +66,9 @@ generic
    --  Register a rebinding to be destroyed when Element is destroyed
 
 package Langkit_Support.Lexical_Env is
+
+   pragma Suppress (Container_Checks);
+   --  Remove container checks for standard containers
 
    use GNATCOLL;
 
@@ -130,11 +137,18 @@ package Langkit_Support.Lexical_Env is
       --  Dec_Ref at destruction time: This is useful because at analysis unit
       --  destruction time, this may be a dangling access to an environment
       --  from another unit.
+
+      Owner : Unit_T := No_Unit;
+      --  Unit that owns this lexical environment
+
+      Version : Natural := 0;
+      --  Version of the unit when this reference was made. Used to determine
+      --  whether this reference is valid or not.
    end record;
    --  Reference to a lexical environments. This is the type that shall be
    --  used.
 
-   Null_Lexical_Env : constant Lexical_Env := (null, 0, False);
+   Null_Lexical_Env : constant Lexical_Env := (null, 0, False, No_Unit, 0);
 
    type Lexical_Env_Resolver is access
      function (Ref : Entity) return Lexical_Env;
@@ -145,12 +159,14 @@ package Langkit_Support.Lexical_Env is
    ----------------
 
    type Env_Getter (Dynamic : Boolean := False) is record
+      Env : Lexical_Env := Null_Lexical_Env;
       case Dynamic is
          when True =>
             Node     : Element_T;
             Resolver : Lexical_Env_Resolver;
+            Computed : Boolean := False;
          when False =>
-            Env : Lexical_Env;
+            null;
       end case;
    end record;
    --  Link to an environment. It can be either a simple link (just a pointer)
@@ -158,6 +174,9 @@ package Langkit_Support.Lexical_Env is
    --  tho two constructors below.
 
    No_Env_Getter : constant Env_Getter := (False, Null_Lexical_Env);
+
+   procedure Resolve (Self : in out Env_Getter);
+   --  Resolve the reference for this env getter
 
    function Simple_Env_Getter (E : Lexical_Env) return Env_Getter;
    --  Create a static Env_Getter (i.e. pointer to environment)
@@ -167,7 +186,7 @@ package Langkit_Support.Lexical_Env is
    --  Create a dynamic Env_Getter (i.e. function and closure to compute an
    --  environment).
 
-   function Get_Env (Self : Env_Getter) return Lexical_Env;
+   function Get_Env (Self : in out Env_Getter) return Lexical_Env;
    --  Return the environment associated to the Self env getter
 
    function Equivalent (L, R : Env_Getter) return Boolean;
@@ -236,17 +255,22 @@ package Langkit_Support.Lexical_Env is
    -- Referenced environments --
    -----------------------------
 
+   type Refd_Env_State is (Active, Inactive);
+
    type Referenced_Env is record
       Is_Transitive : Boolean := False;
       --  Whether this reference is transitive. This changes the behavior of
       --  the Get lookup operation.
 
-      Getter : Env_Getter;
+      Getter        : Env_Getter;
       --  Closure to fetch the environment that is referenced
 
-      Creator : Element_T;
-      --  Node that triggered the creation of this environment reference
-      --  (optional, can be null).
+      Being_Visited : Boolean;
+      --  Flag set to true when Referenced_Env is being visited. Used as a
+      --  recursion guard. WARNING: Not thread safe.
+
+      State         : Refd_Env_State := Inactive;
+      --  State of the referenced env, whether active or inactive
    end record;
    --  Represents a referenced env
 
@@ -320,12 +344,63 @@ package Langkit_Support.Lexical_Env is
    --  Special constant for the Ref_Count field below that means: this lexical
    --  environment is not ref-counted.
 
+   type Result is record
+      E                    : Entity;
+
+      Filter_From          : Boolean;
+      --  Wether to filter with Can_Reach
+
+      Override_Filter_Node : Element_T := No_Element;
+      --  Node to use when filtering with Can_Reach, if different from the
+      --  Entity.
+   end record;
+   --  Represents an env lookup result
+
+   package Result_Vectors is new Langkit_Support.Vectors
+     (Result, Small_Vector_Capacity => 2);
+
+   type Result_Key is record
+      Key        : Symbol_Type;
+      --  Symbol for this lookup
+
+      Rebindings : Env_Rebindings;
+      --  Rebindings used for this lookup
+
+      Metadata   : Element_Metadata;
+      --  Metadata used for this lookup
+   end record;
+   --  Represents a key in the env lookup caches. Basically the parameters to
+   --  Get that are important for caching.
+
+   type Result_Cache_State is (Computing, Computed, None);
+
+   type Result_Val is record
+      State    : Result_Cache_State;
+      Elements : Result_Vectors.Vector;
+   end record;
+   --  The result of an env get
+
+   No_Result_Val : constant Result_Val := (None, Result_Vectors.Empty_Vector);
+
+   function Hash (Self : Result_Key) return Hash_Type
+   is
+     (Combine
+        (Combine (Hash (Self.Key), Hash (Self.Rebindings)),
+         Metadata_Hash (Self.Metadata)));
+
+   package Results_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Result_Key,
+      Element_Type    => Result_Val,
+      Hash            => Hash,
+      Equivalent_Keys => "=",
+      "="             => "=");
+
    type Lexical_Env_Type is record
       Parent : Env_Getter := No_Env_Getter;
       --  Parent environment for this env. Null by default.
 
       Transitive_Parent : Boolean := False;
-      --  Whether the parent link is transitive or not.
+      --  Whether the parent link is transitive or not
 
       Node : Element_T;
       --  Node for which this environment was created
@@ -348,6 +423,12 @@ package Langkit_Support.Lexical_Env is
       --  environment that owns this pool. As a consequence, this is allocated
       --  only for primary lexical environments that are rebindable.
 
+      Cached_Results  : Results_Maps.Map;
+
+      Cache_Active    : Boolean := False;
+
+      Cache_Valid     : Boolean := True;
+
       Ref_Count : Integer := 1;
       --  For ref-counted lexical environments, this contains the number of
       --  owners. It is initially set to 1. When it drops to 0, the env can be
@@ -367,7 +448,8 @@ package Langkit_Support.Lexical_Env is
       Node              : Element_T;
       Is_Refcounted     : Boolean;
       Default_MD        : Element_Metadata := Empty_Metadata;
-      Transitive_Parent : Boolean := False) return Lexical_Env;
+      Transitive_Parent : Boolean := False;
+      Owner             : Unit_T) return Lexical_Env;
    --  Constructor. Creates a new lexical env, given a parent, an internal data
    --  env, and a default metadata. If Is_Refcounted is true, the caller is the
    --  only owner of the result (ref-count is 1).
@@ -390,7 +472,6 @@ package Langkit_Support.Lexical_Env is
      (Self            : Lexical_Env;
       Referenced_From : Element_T;
       Resolver        : Lexical_Env_Resolver;
-      Creator         : Element_T;
       Transitive      : Boolean := False);
    --  Add a dynamic reference from Self to the lexical environment computed
    --  calling Resolver on Referenced_From. This makes the content of this
@@ -403,24 +484,28 @@ package Langkit_Support.Lexical_Env is
    --    * Can_Reach (Referenced_From, From) is True. Practically this means
    --      that the origin point of the request needs to be *after*
    --      Referenced_From in the file.
-   --    * Creator is null or is not a parent of From.
-   --
-   --  If Transitive, Creator must be No_Element.
 
    procedure Reference
      (Self         : Lexical_Env;
       To_Reference : Lexical_Env;
-      Creator      : Element_T;
       Transitive   : Boolean := False);
    --  Add a static reference from Self to To_Reference. See above for the
    --  meaning of arguments.
+
+   procedure Deactivate_Referenced_Envs (Self : Lexical_Env);
+   --  This procedure is meant to be called before calling
+   --  Recompute_Referenced_Envs, on every referenced envs reachable from this
+   --  (so including every referenced envs in the parents).
+
+   procedure Recompute_Referenced_Envs (Self : Lexical_Env);
+   --  This procedure will recompute the referenced envs for this env, meaning,
+   --  re-resolve the env they point to.
 
    function Get
      (Self       : Lexical_Env;
       Key        : Symbol_Type;
       From       : Element_T := No_Element;
-      Recursive  : Boolean := True)
-      return Entity_Array;
+      Recursive  : Boolean := True) return Entity_Array;
    --  Get the array of entities for this Key. If From is given, then
    --  elements will be filtered according to the Can_Reach primitive given
    --  as parameter for the generic package.
@@ -514,7 +599,12 @@ package Langkit_Support.Lexical_Env is
 
    procedure Dump_Lexical_Env_Parent_Chain (Env : Lexical_Env);
 
-   function Wrap (Env : Lexical_Env_Access) return Lexical_Env;
+   function Wrap
+     (Env   : Lexical_Env_Access;
+      Owner : Unit_T := No_Unit) return Lexical_Env;
+
+   function Is_Stale (Env : Lexical_Env) return Boolean;
+   --  Returns whether Env points to a now defunct lexical env
 
 private
 
@@ -528,12 +618,18 @@ private
       Default_MD                 => Empty_Metadata,
       Rebindings                 => null,
       Rebindings_Pool            => null,
-      Ref_Count                  => No_Refcount);
+      Ref_Count                  => No_Refcount,
+      Cache_Active               => False,
+      Cache_Valid                => False,
+      Cached_Results             => Results_Maps.Empty_Map);
 
    --  Because of circular elaboration issues, we cannot call Hash here to
    --  compute the real hash. Using a dummy precomputed one is probably enough.
-   Empty_Env : constant Lexical_Env := (Env  => Empty_Env_Record'Access,
-                                        Hash => 0,
-                                        Is_Refcounted => False);
+   Empty_Env : constant Lexical_Env :=
+     (Env           => Empty_Env_Record'Access,
+      Hash          => 0,
+      Is_Refcounted => False,
+      Owner         => No_Unit,
+      Version       => 0);
 
 end Langkit_Support.Lexical_Env;

@@ -92,6 +92,14 @@ begin
       Properties_Traces.Increase_Indent;
    % endif
 
+   ## If this property uses env, we want to make sure lexical env caches are up
+   ## to date.
+   % if property.uses_envs:
+      if Node /= null then
+         Reset_Caches (Node.Unit);
+      end if;
+   % endif
+
    % if property.is_public and property.uses_envs:
       Populate_Lexical_Env (Node.Unit);
    % endif

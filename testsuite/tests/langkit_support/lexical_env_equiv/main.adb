@@ -36,13 +36,18 @@ procedure Main is
    procedure Register_Rebinding (Node : Character; Rebinding : System.Address)
    is null;
 
+   function Get_Version (B : Boolean) return Natural is (0);
+
    package Envs is new Langkit_Support.Lexical_Env
-     (Element_T            => Character,
+     (Unit_T               => Boolean,
+      Get_Version          => Get_Version,
+      No_Unit              => False,
+      Element_T            => Character,
       Element_Metadata     => Metadata,
       No_Element           => ' ',
       Empty_Metadata       => Default_MD,
       Element_Hash         => Element_Hash,
-      Metadata_hash        => Metadata_Hash,
+      Metadata_Hash        => Metadata_Hash,
       Raise_Property_Error => Raise_Property_Error,
       Combine              => Combine,
       Can_Reach            => Can_Reach,
@@ -58,6 +63,7 @@ procedure Main is
    Root_A3 : Lexical_Env := Wrap (new Lexical_Env_Type'(Root_A2.Env.all));
 
    Root_A2_Getter : constant Env_Getter := Simple_Env_Getter (Root_A2);
+   Root_A3_Getter : constant Env_Getter := Simple_Env_Getter (Root_A3);
 
    Root_B1 : Lexical_Env := Wrap (new Lexical_Env_Type'
      (Root_A2.Env.all'Update (Node => 'B')));
@@ -75,9 +81,11 @@ procedure Main is
    end To_Refs;
 
    Ref_1 : constant Referenced_Env :=
-     (Is_Transitive => False, Getter => Root_A2_Getter, Creator => ' ');
+     (Is_Transitive => False, Getter => Root_A2_Getter,
+      Being_Visited => False, State => Active);
    Ref_2 : constant Referenced_Env :=
-     (Is_Transitive => False, Getter => Root_A2_Getter, Creator => 'A');
+     (Is_Transitive => False, Getter => Root_A3_Getter,
+      Being_Visited => False, State => Inactive);
 
    Env_Ref_1 : Lexical_Env := Wrap (new Lexical_Env_Type'
      (Root_A2.Env.all'Update (Referenced_Envs => To_Refs (Ref_1))));

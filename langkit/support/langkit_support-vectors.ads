@@ -47,6 +47,9 @@ package Langkit_Support.Vectors is
      with Inline;
    --  Appends Element to Self
 
+   procedure Concat (Self : in out Vector; Elements : Elements_Array);
+   --  Append every element of the Elements array in Self
+
    procedure Remove_At (Self : in out Vector; Index : Index_Type);
 
    function Get

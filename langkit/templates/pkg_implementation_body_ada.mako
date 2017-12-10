@@ -98,9 +98,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
    % if ctx.has_ref_env:
       procedure Ref_Env
         (Self                : ${root_node_type_name};
+         Dest_Env            : Lexical_Env;
          Ref_Env_Nodes       : in out ${T.root_node.array.name};
          Resolver            : Lexical_Env_Resolver;
-         Visible_To_Children : Boolean;
          Transitive          : Boolean);
       --  Add referenced environments to Self.Self_Env. Calling this takes an
       --  ownership share for Ref_Env_Nodes.
@@ -219,9 +219,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
       procedure Ref_Env
         (Self                : ${root_node_type_name};
+         Dest_Env            : Lexical_Env;
          Ref_Env_Nodes       : in out ${T.root_node.array.name};
          Resolver            : Lexical_Env_Resolver;
-         Visible_To_Children : Boolean;
          Transitive          : Boolean)
       is
       begin
@@ -233,8 +233,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
                      & " unit";
                end if;
                Reference
-                 (Self.Self_Env, N, Resolver,
-                  (if Visible_To_Children then null else Self),
+                 (Dest_Env, N, Resolver,
                   Transitive);
             end if;
          end loop;
@@ -247,7 +246,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -------------
 
    procedure Destroy (Env : in out Lexical_Env_Access) is
-      Mutable_Env : Lexical_Env := (Env, 0, Env.Ref_Count /= No_Refcount);
+      Mutable_Env : Lexical_Env :=
+        (Env, 0, Env.Ref_Count /= No_Refcount, No_Analysis_Unit, 0);
    begin
       Destroy (Mutable_Env);
       Env := null;
@@ -1973,15 +1973,62 @@ package body ${ada_lib_name}.Analysis.Implementation is
    end Reset_Caches;
 
    ------------------
+   --  Reset_Envs  --
+   ------------------
+
+   procedure Reset_Envs (Unit : Analysis_Unit) is
+
+      procedure Deactivate_Refd_Envs
+        (Node : access ${root_node_value_type}'Class) is
+      begin
+         if Node = null then
+            return;
+         end if;
+
+         Deactivate_Referenced_Envs (Node.Self_Env);
+
+         if Node.Self_Env /= Null_Lexical_Env then
+            Node.Self_Env.Env.Cache_Valid := False;
+         end if;
+
+         for Child of Node.Children loop
+            Deactivate_Refd_Envs (Child);
+         end loop;
+      end Deactivate_Refd_Envs;
+
+      procedure Recompute_Refd_Envs
+        (Node : access ${root_node_value_type}'Class) is
+      begin
+         if Node = null then
+            return;
+         end if;
+         Recompute_Referenced_Envs (Node.Self_Env);
+         for Child of Node.Children loop
+            Recompute_Refd_Envs (Child);
+         end loop;
+      end Recompute_Refd_Envs;
+
+   begin
+      --  First pass will deactivate every referenced envs that Unit possesses
+      Deactivate_Refd_Envs (Unit.AST_Root);
+
+      --  Second pass will recompute the env they are pointing to
+      Recompute_Refd_Envs (Unit.AST_Root);
+   end Reset_Envs;
+
+   ------------------
    -- Reset_Caches --
    ------------------
 
    procedure Reset_Caches (Unit : Analysis_Unit) is
    begin
-      % if ctx.has_memoization:
-         Destroy (Unit.Memoization_Map);
-      % endif
-      Unit.Cache_Version := Unit.Context.Cache_Version;
+      if Unit.Cache_Version < Unit.Context.Cache_Version then
+         Unit.Cache_Version := Unit.Context.Cache_Version;
+         % if ctx.has_memoization:
+            Destroy (Unit.Memoization_Map);
+            Reset_Envs (Unit);
+         % endif
+      end if;
    end Reset_Caches;
 
    % if ctx.has_memoization:
@@ -2000,9 +2047,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
       begin
 
          --  Make sure that we don't lookup stale caches
-         if Unit.Cache_Version < Unit.Context.Cache_Version then
-            Reset_Caches (Unit);
-         end if;
+         Reset_Caches (Unit);
 
          Unit.Memoization_Map.Insert (Key, Value, Cursor, Inserted);
 

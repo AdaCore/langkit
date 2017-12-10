@@ -47,25 +47,19 @@ def add_env(no_parent=False, transitive_parent=False):
     return AddEnv(no_parent, transitive_parent)
 
 
-def reference(nodes, through, transitive=False, visible_to_children=False):
+def reference(nodes, through, transitive=False, dest_env=None):
     """
     Reference a group of lexical environments, that will be lazily yielded by
     calling the `through` property on the array of nodes `nodes`.
 
     :param AbstractExpression nodes: An expression that yields a list of nodes.
     :param PropertyDef through: A property reference.
-    :param bool visible_to_children: If true, then the referenced environment
-        will be visible to the node, and the children of the node on which
-        the reference acts.
-
-        By default this is false, to prevent infinite recursions that can
-        happen if any children of node does an env-lookup as part of its env
-        spec. Use this flag if you need this reference to be visible to
-        children of node, and are sure that it can cause no infinite recursion.
+    :param AbstractExpression|None dest_env: If passed, the destination
+        environment for this reference.
 
     :rtype: RefEnvs
     """
-    return RefEnvs(through, nodes, transitive, visible_to_children)
+    return RefEnvs(through, nodes, transitive, dest_env=dest_env)
 
 
 def add_to_env(mappings, dest_env=None, metadata=None, resolver=None):
@@ -410,7 +404,7 @@ class RefEnvs(EnvAction):
     """
 
     def __init__(self, resolver, nodes_expr, transitive=False,
-                 visible_to_children=False):
+                 dest_env=None):
         """
         All nodes that nodes_expr yields must belong to the same analysis unit
         as the AST node that triggers this RefEnvs. Besides, the lexical
@@ -423,20 +417,15 @@ class RefEnvs(EnvAction):
             (explicit or implicit) appart from Self, and that returns a lexical
             environment.
 
+        :param bool transitive: Whether this reference is transitive or not.
+
+        :param AbstractExpression|None dest_env: Optional expression
+            designating the destination env.
+
         :param AbstractExpression nodes_expr: Abstract expression that
             returns an array of AST nodes. Each node will be given to the above
             resolver in order to get corresponding referenced lexical envs.
             In this array, null nodes are allowed: they are simply discarded.
-
-        :param bool visible_to_children: If true, then the referenced
-            environment will be visible to the node, and the children of the
-            node on which reference acts.
-
-            By default this is false, to prevent infinite recursions that can
-            happen if any children of node does an env-lookup as part of its
-            env spec. Use this flag if you need this reference to be visible to
-            children of node, and are sure that it can cause no infinite
-            recursion.
         """
         assert resolver
         assert nodes_expr
@@ -457,7 +446,7 @@ class RefEnvs(EnvAction):
 
         self.transitive = transitive
 
-        self.visible_to_children = visible_to_children
+        self.dest_env = dest_env
 
     def create_internal_properties(self, env_spec):
         """
@@ -466,6 +455,10 @@ class RefEnvs(EnvAction):
         """
         self.nodes_property = env_spec.create_internal_property(
             'Ref_Env_Nodes', self.nodes_expr, T.root_node.array
+        )
+
+        self.dest_env_prop = env_spec.create_internal_property(
+            'Env_Dest', self.dest_env, T.LexicalEnvType
         )
 
     def check(self):

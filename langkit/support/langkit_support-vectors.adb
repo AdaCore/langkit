@@ -61,6 +61,17 @@ package body Langkit_Support.Vectors is
       end;
    end Append;
 
+   ------------
+   -- Concat --
+   ------------
+
+   procedure Concat (Self : in out Vector; Elements : Elements_Array) is
+   begin
+      for El of Elements loop
+         Self.Append (El);
+      end loop;
+   end Concat;
+
    ---------------
    -- Remove_At --
    ---------------

@@ -314,6 +314,7 @@
          Env : Lexical_Env :=
            ${call_prop(exprs.dest_env_prop) \
              if exprs.dest_env_prop else "Initial_Env"};
+
          MD  : constant ${T.env_md.name} :=
             ${(call_prop(exprs.metadata_prop)
                if exprs.metadata else 'No_Metadata')};
@@ -336,11 +337,18 @@
       declare
          Ref_Env_Nodes : ${ref_env.nodes_property.type.name} :=
             ${call_prop(ref_env.nodes_property)};
+
+         Env : Lexical_Env :=
+           ${(call_prop(ref_env.dest_env_prop)
+              if ref_env.dest_env_prop else "Self.Self_Env")};
       begin
-         Ref_Env (${root_node_type_name} (Self), Ref_Env_Nodes,
-                  ${ref_env.resolver.name}'Access,
-                  ${ref_env.visible_to_children},
-                  ${ref_env.transitive});
+         Ref_Env
+           (${root_node_type_name} (Self),
+            Env,
+            Ref_Env_Nodes,
+            ${ref_env.resolver.name}'Access,
+            ${ref_env.transitive});
+         Dec_Ref (Ref_Env_Nodes);
       end;
    </%def>
 
@@ -362,9 +370,11 @@
         (Parent            => ${"No_Env_Getter" if add_env.no_parent else "G"},
          Node              => Self,
          Is_Refcounted     => False,
-         Transitive_Parent => ${add_env.transitive_parent});
+         Transitive_Parent => ${add_env.transitive_parent},
+         Owner             => Self.Unit);
 
       Register_Destroyable (Self.Unit, Self.Self_Env.Env);
+
    </%def>
 
    <%def name="emit_do(do_action)">

@@ -182,7 +182,8 @@ package body ${ada_lib_name}.Analysis is
          Root_Scope => AST_Envs.Create
                          (Parent        => AST_Envs.No_Env_Getter,
                           Node          => null,
-                          Is_Refcounted => False),
+                          Is_Refcounted => False,
+                          Owner         => No_Analysis_Unit),
 
          % if ctx.default_unit_provider:
          Unit_Provider => P,

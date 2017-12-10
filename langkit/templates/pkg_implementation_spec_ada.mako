@@ -169,7 +169,10 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Hash (Node));
 
    package AST_Envs is new Langkit_Support.Lexical_Env
-     (Element_T            => ${root_node_type_name},
+     (Unit_T               => Analysis_Unit,
+      No_Unit              => No_Analysis_Unit,
+      Get_Version          => Version,
+      Element_T            => ${root_node_type_name},
       Element_Metadata     => ${T.env_md.name},
       No_Element           => null,
       Empty_Metadata       => No_Metadata,
@@ -177,7 +180,6 @@ package ${ada_lib_name}.Analysis.Implementation is
       Metadata_Hash        => Hash,
       Raise_Property_Error => Raise_Property_Error,
       Combine              => Combine,
-      Parent               => Element_Parent,
       Element_Image        => AST_Envs_Element_Image,
       Register_Rebinding   => Register_Rebinding);
 
