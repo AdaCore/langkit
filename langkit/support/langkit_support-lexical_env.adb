@@ -653,7 +653,7 @@ package body Langkit_Support.Lexical_Env is
          --  We iterate in reverse, so that last inserted results are
          --  returned first.
 
-         --  TODO??? Use "for .. of next" GPL release
+         --  TODO??? Use "for ... of reverse" next GPL release
          for I in reverse Elements.First_Index .. Elements.Last_Index loop
             Append_Result
               (Elements.Get (I),
