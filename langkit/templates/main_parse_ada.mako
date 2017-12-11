@@ -11,8 +11,7 @@ with Ada.Text_IO;               use Ada.Text_IO;
 with GNAT.Command_Line; use GNAT.Command_Line;
 with GNAT.Strings;
 
-with Langkit_Support.Diagnostics;        use Langkit_Support.Diagnostics;
-with Langkit_Support.Slocs;              use Langkit_Support.Slocs;
+with Langkit_Support.Slocs; use Langkit_Support.Slocs;
 
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 with ${ada_lib_name}.Init;     use ${ada_lib_name}.Init;
@@ -146,7 +145,7 @@ procedure Parse is
       if Has_Diagnostics (Unit) then
          Put_Line ("Parsing failed:");
          for D of Diagnostics (Unit) loop
-            Put_Line (To_Pretty_String (D));
+            Put_Line (Format_GNU_Diagnostic (Unit, D));
          end loop;
       end if;
 
@@ -173,8 +172,7 @@ procedure Parse is
 
       if Has_Diagnostics (Unit) then
          for D of Diagnostics (Unit) loop
-            Put (File_Name & ": ");
-            Put_Line (To_Pretty_String (D));
+            Put_Line (Format_GNU_Diagnostic (Unit, D));
          end loop;
       end if;
 

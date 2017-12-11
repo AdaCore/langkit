@@ -243,6 +243,12 @@ package ${ada_lib_name}.Analysis is
    function Diagnostics (Unit : Analysis_Unit) return Diagnostics_Array;
    ${ada_doc('langkit.unit_diagnostics', 3)}
 
+   function Format_GNU_Diagnostic
+     (Unit : Analysis_Unit; D : Diagnostic) return String
+   is (Get_Filename (Unit) & ":" & To_Pretty_String (D));
+   --  Format a diagnostic in a GNU fashion. See
+   --  <https://www.gnu.org/prep/standards/html_node/Errors.html>.
+
    pragma Warnings (Off, "defined after private extension");
    function Root (Unit : Analysis_Unit) return ${root_entity.api_name};
    ${ada_doc('langkit.unit_root', 3)}
