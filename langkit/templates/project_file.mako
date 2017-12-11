@@ -130,7 +130,7 @@ library project ${lib_name} is
             ## TODO: This extension point is added to change the flags of
             ## Libadalang specific extension files. It is a temporary
             ## workaround, waiting for QC05-038 to be fixed.
-            ${exts.include_extension("prod_additional_flags")}
+            ${exts.include_extension(ctx.ext("prod_additional_flags"))}
 
       end case;
    end Compiler;
