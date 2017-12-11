@@ -86,7 +86,7 @@ def copy_file(from_path, to_path):
     :param str from_path: Path of the file to copy.
     :param str to_path: Destination path.
     """
-    with open(from_path, 'r') as f:
+    with open(from_path, 'rb') as f:
         content = f.read()
     write_source_file(to_path, content)
 
@@ -107,7 +107,7 @@ def write_source_file(file_path, source):
         if context.verbosity.debug:
             printcol('Rewriting stale source: {}'.format(file_path),
                      Colors.OKBLUE)
-        with open(file_path, 'w') as f:
+        with open(file_path, 'wb') as f:
             f.write(source)
         return True
     return False
