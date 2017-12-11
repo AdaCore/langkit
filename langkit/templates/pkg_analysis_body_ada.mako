@@ -467,6 +467,10 @@ package body ${ada_lib_name}.Analysis is
             --  This happens when we cannot open the source file for lexing:
             --  return a unit anyway with diagnostics indicating what happens.
 
+            Traces.Trace
+              (Main_Trace,
+               "WARNING: Could not open file " & To_String (Unit.File_Name));
+
             Add_Diagnostic
               (Exception_Message (Exc));
             return;
