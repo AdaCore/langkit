@@ -784,14 +784,14 @@ package ${ada_lib_name}.Analysis.Implementation is
    % endif
 
    type Analysis_Context_Type is record
-      Ref_Count  : Natural;
-      Units_Map  : Units_Maps.Map;
-      Symbols    : Symbol_Table;
+      Ref_Count : Natural;
+      Units_Map : Units_Maps.Map;
+      Symbols   : Symbol_Table;
 
-      Charset    : Unbounded_String;
+      Charset : Unbounded_String;
       --  Default charset to use in analysis units
 
-      With_Trivia       : Boolean;
+      With_Trivia : Boolean;
       --  Whether Trivia nodes were parsed and included in analysis units
 
       Root_Scope : Lexical_Env;
@@ -833,47 +833,47 @@ package ${ada_lib_name}.Analysis.Implementation is
    end record;
 
    type Analysis_Unit_Type is record
-      Context           : Analysis_Context;
+      Context : Analysis_Context;
       --  The owning context for this analysis unit
 
-      Ref_Count         : Natural;
+      Ref_Count : Natural;
       --  Ref count for the analysis unit. Note that in the Ada API you'll
       --  still have to call Inc_Ref/Dec_Ref manually.
 
-      AST_Root          : ${root_node_type_name};
+      AST_Root : ${root_node_type_name};
 
-      File_Name         : Unbounded_String;
+      File_Name : Unbounded_String;
       --  The originating name for this analysis unit. This should be set even
       --  if the analysis unit was parsed from a buffer.
 
-      Charset           : Unbounded_String;
+      Charset : Unbounded_String;
       --  The parsing charset for this analysis unit, as a string. If the
       --  charset used actually came from a byte order mark, this is
       --  nevertheless set to the one the user requested.
 
-      TDH               : aliased Token_Data_Handler;
+      TDH : aliased Token_Data_Handler;
       --  The token data handler that handles all token data during parsing and
       --  owns it afterwards.
 
-      Diagnostics       : Diagnostics_Vectors.Vector;
+      Diagnostics : Diagnostics_Vectors.Vector;
       --  The list of diagnostics produced for this analysis unit
 
-      Is_Env_Populated  : Boolean;
+      Is_Env_Populated : Boolean;
       --  Whether Populate_Lexical_Env was called on this unit. Used not to
       --  populate multiple times the same unit and hence avoid infinite
       --  populate recursions for circular dependencies.
 
-      Rule              : Grammar_Rule;
+      Rule : Grammar_Rule;
       --  The grammar rule used to parse this unit
 
-      AST_Mem_Pool      : Bump_Ptr_Pool;
+      AST_Mem_Pool : Bump_Ptr_Pool;
       --  This memory pool shall only be used for AST parsing. Stored here
       --  because it is more convenient, but one shall not allocate from it.
 
-      Destroyables      : Destroyable_Vectors.Vector;
+      Destroyables : Destroyable_Vectors.Vector;
       --  Collection of objects to destroy when destroying the analysis unit
 
-      Referenced_Units  : Analysis_Unit_Sets.Set;
+      Referenced_Units : Analysis_Unit_Sets.Set;
       --  Units that are referenced from this one. Useful for
       --  visibility/computation of the reference graph.
 
@@ -889,7 +889,7 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  the list of AST nodes that were added to these environments and that
       --  come from other units.
 
-      Rebindings        : aliased Env_Rebindings_Vectors.Vector;
+      Rebindings : aliased Env_Rebindings_Vectors.Vector;
       --  List of rebindings for which Old_Env and/or New_Env belong to this
       --  unit. When this unit gets destroyed or reparsed, these rebindings
       --  need to be destroyed too (see Destroy_Rebindings).
@@ -902,7 +902,7 @@ package ${ada_lib_name}.Analysis.Implementation is
       Cache_Version : Natural := 0;
       --  See the eponym field in Analysis_Context_Type
 
-      Unit_Version  : Natural := 0;
+      Unit_Version : Natural := 0;
       --  Version for this particular unit. This will be incremented every time
       --  a reparse occurs.
    end record;
