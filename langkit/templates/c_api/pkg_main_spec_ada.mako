@@ -137,8 +137,7 @@ package ${ada_lib_name}.Analysis.Implementation.C is
       Name        : ${text_type};
       Kind        : ${unit_kind_type};
       Charset     : chars_ptr;
-      Reparse     : int;
-      With_Trivia : int) return ${analysis_unit_type}
+      Reparse     : int) return ${analysis_unit_type}
       with Convention => C;
    ${ada_c_doc('langkit.unit_provider_get_unit_from_name_type', 3)}
 % endif
@@ -148,7 +147,8 @@ package ${ada_lib_name}.Analysis.Implementation.C is
    -------------------------
 
    function ${capi.get_name('create_analysis_context')}
-     (Charset            : chars_ptr
+     (Charset            : chars_ptr;
+      With_Trivia        : int
       % if ctx.default_unit_provider:
       ; Unit_Provider : ${unit_provider_type}
       % endif
@@ -193,8 +193,7 @@ package ${ada_lib_name}.Analysis.Implementation.C is
    function ${capi.get_name('get_analysis_unit_from_file')}
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
-      Reparse           : int;
-      With_Trivia       : int)
+      Reparse           : int)
       return ${analysis_unit_type}
       with Export        => True,
            Convention    => C,
@@ -206,8 +205,7 @@ package ${ada_lib_name}.Analysis.Implementation.C is
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
       Buffer            : chars_ptr;
-      Buffer_Size       : size_t;
-      With_Trivia       : int)
+      Buffer_Size       : size_t)
       return ${analysis_unit_type}
       with Export        => True,
            Convention    => C,
@@ -221,8 +219,7 @@ package ${ada_lib_name}.Analysis.Implementation.C is
          Name        : ${text_type};
          Kind        : ${unit_kind_type};
          Charset     : chars_ptr;
-         Reparse     : int;
-         With_Trivia : int)
+         Reparse     : int)
          return ${analysis_unit_type}
          with Export        => True,
               Convention    => C,

@@ -98,7 +98,6 @@ package body ${ada_lib_name}.Analysis is
    function Create_Unit
      (Context           : Analysis_Context;
       Filename, Charset : String;
-      With_Trivia       : Boolean;
       Rule              : Grammar_Rule) return Analysis_Unit
       with Pre => not Has_Unit (Context, Filename);
    --  Create a new analysis unit and register it in Context
@@ -111,7 +110,6 @@ package body ${ada_lib_name}.Analysis is
         access procedure (Unit     : Analysis_Unit;
                           Read_BOM : Boolean;
                           Parser   : in out Parser_Type);
-      With_Trivia       : Boolean;
       Rule              : Grammar_Rule)
       return Analysis_Unit;
    --  Helper for Get_From_File and Get_From_Buffer: do all the common work
@@ -157,7 +155,8 @@ package body ${ada_lib_name}.Analysis is
    ------------
 
    function Create
-     (Charset : String := Default_Charset
+     (Charset     : String := Default_Charset;
+      With_Trivia : Boolean := False
       % if ctx.default_unit_provider:
          ; Unit_Provider : Unit_Provider_Access_Cst := null
       % endif
@@ -175,15 +174,16 @@ package body ${ada_lib_name}.Analysis is
       Context        : Analysis_Context;
    begin
       Context := new Analysis_Context_Type'
-        (Ref_Count  => 1,
-         Units_Map  => <>,
-         Symbols    => Symbols,
-         Charset    => To_Unbounded_String (Actual_Charset),
-         Root_Scope => AST_Envs.Create
-                         (Parent        => AST_Envs.No_Env_Getter,
-                          Node          => null,
-                          Is_Refcounted => False,
-                          Owner         => No_Analysis_Unit),
+        (Ref_Count   => 1,
+         Units_Map   => <>,
+         Symbols     => Symbols,
+         Charset     => To_Unbounded_String (Actual_Charset),
+         With_Trivia => With_Trivia,
+         Root_Scope  => AST_Envs.Create
+                          (Parent        => AST_Envs.No_Env_Getter,
+                           Node          => null,
+                           Is_Refcounted => False,
+                           Owner         => No_Analysis_Unit),
 
          % if ctx.default_unit_provider:
          Unit_Provider => P,
@@ -294,7 +294,6 @@ package body ${ada_lib_name}.Analysis is
    function Create_Unit
      (Context           : Analysis_Context;
       Filename, Charset : String;
-      With_Trivia       : Boolean;
       Rule              : Grammar_Rule) return Analysis_Unit
    is
       Fname : constant Unbounded_String := To_Unbounded_String (Filename);
@@ -306,7 +305,6 @@ package body ${ada_lib_name}.Analysis is
          Charset                 => To_Unbounded_String (Charset),
          TDH                     => <>,
          Diagnostics             => <>,
-         With_Trivia             => With_Trivia,
          Is_Env_Populated        => False,
          Rule                    => Rule,
          AST_Mem_Pool            => No_Pool,
@@ -340,7 +338,6 @@ package body ${ada_lib_name}.Analysis is
         access procedure (Unit     : Analysis_Unit;
                           Read_BOM : Boolean;
                           Parser   : in out Parser_Type);
-      With_Trivia       : Boolean;
       Rule              : Grammar_Rule)
       return Analysis_Unit
    is
@@ -374,7 +371,7 @@ package body ${ada_lib_name}.Analysis is
       --  Create the Analysis_Unit if needed
 
       if Created then
-         Unit := Create_Unit (Context, Filename, Charset, With_Trivia, Rule);
+         Unit := Create_Unit (Context, Filename, Charset, Rule);
       else
          Unit := Element (Cur);
       end if;
@@ -382,15 +379,12 @@ package body ${ada_lib_name}.Analysis is
 
       --  (Re)parse it if needed
 
-      if Created
-         or else Reparse
-         or else (With_Trivia and then not Unit.With_Trivia)
-      then
+      if Created or else Reparse then
          Do_Parsing (Unit, Read_BOM, Init_Parser);
       end if;
 
       --  If we're in a reparse, do necessary updates
-      if Reparse or else (With_Trivia and then not Unit.With_Trivia) then
+      if Reparse then
          Update_After_Reparse (Unit);
       end if;
 
@@ -506,29 +500,25 @@ package body ${ada_lib_name}.Analysis is
    -------------------
 
    function Get_From_File
-     (Context     : Analysis_Context;
-      Filename    : String;
-      Charset     : String := "";
-      Reparse     : Boolean := False;
-      With_Trivia : Boolean := False;
-      Rule        : Grammar_Rule :=
+     (Context  : Analysis_Context;
+      Filename : String;
+      Charset  : String := "";
+      Reparse  : Boolean := False;
+      Rule     : Grammar_Rule :=
          ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit
    is
       procedure Init_Parser
         (Unit     : Analysis_Unit;
          Read_BOM : Boolean;
-         Parser   : in out Parser_Type)
-      is
+         Parser   : in out Parser_Type) is
       begin
          Init_Parser_From_File
-           (Filename, To_String (Unit.Charset), Read_BOM, Unit,
-            With_Trivia, Parser);
+           (Filename, To_String (Unit.Charset), Read_BOM, Unit, Parser);
       end Init_Parser;
    begin
       return Get_Unit
-        (Context, Filename, Charset, Reparse, Init_Parser'Access, With_Trivia,
-         Rule);
+        (Context, Filename, Charset, Reparse, Init_Parser'Access, Rule);
    end Get_From_File;
 
    ---------------------
@@ -540,7 +530,6 @@ package body ${ada_lib_name}.Analysis is
       Filename    : String;
       Charset     : String := "";
       Buffer      : String;
-      With_Trivia : Boolean := False;
       Rule        : Grammar_Rule :=
          ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit
@@ -552,12 +541,11 @@ package body ${ada_lib_name}.Analysis is
       is
       begin
          Init_Parser_From_Buffer
-           (Buffer, To_String (Unit.Charset), Read_BOM, Unit,
-            With_Trivia, Parser);
+           (Buffer, To_String (Unit.Charset), Read_BOM, Unit, Parser);
       end Init_Parser;
    begin
       return Get_Unit (Context, Filename, Charset, True, Init_Parser'Access,
-                       With_Trivia, Rule);
+                       Rule);
    end Get_From_Buffer;
 
    % if ctx.default_unit_provider:
@@ -571,13 +559,12 @@ package body ${ada_lib_name}.Analysis is
       Name        : Text_Type;
       Kind        : Unit_Kind;
       Charset     : String := "";
-      Reparse     : Boolean := False;
-      With_Trivia : Boolean := False)
+      Reparse     : Boolean := False)
       return Analysis_Unit
    is
    begin
       return Context.Unit_Provider.Get_Unit
-        (Context, Name, Kind, Charset, Reparse, With_Trivia);
+        (Context, Name, Kind, Charset, Reparse);
 
    exception
       when Property_Error =>
@@ -597,7 +584,6 @@ package body ${ada_lib_name}.Analysis is
       Filename    : String;
       Error       : String;
       Charset     : String := "";
-      With_Trivia : Boolean := False;
       Rule        : Grammar_Rule :=
          ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit
@@ -610,7 +596,7 @@ package body ${ada_lib_name}.Analysis is
       if Cur = No_Element then
          declare
             Unit : constant Analysis_Unit :=
-               Create_Unit (Context, Filename, Charset, With_Trivia, Rule);
+               Create_Unit (Context, Filename, Charset, Rule);
             Msg  : constant Text_Type := To_Text (Error);
          begin
             Append (Unit.Diagnostics, No_Source_Location_Range, Msg);
@@ -898,13 +884,11 @@ package body ${ada_lib_name}.Analysis is
       procedure Init_Parser
         (Unit     : Analysis_Unit;
          Read_BOM : Boolean;
-         Parser   : in out Parser_Type)
-      is
+         Parser   : in out Parser_Type) is
       begin
          Init_Parser_From_File
-           (To_String (Unit.File_Name),
-            To_String (Unit.Charset),
-            Read_BOM, Unit, Unit.With_Trivia, Parser);
+           (To_String (Unit.File_Name), To_String (Unit.Charset), Read_BOM,
+            Unit, Parser);
       end Init_Parser;
    begin
       Update_Charset (Unit, Charset);
@@ -928,8 +912,7 @@ package body ${ada_lib_name}.Analysis is
       is
       begin
          Init_Parser_From_Buffer
-           (Buffer, To_String (Unit.Charset), Read_BOM,
-            Unit, Unit.With_Trivia, Parser);
+           (Buffer, To_String (Unit.Charset), Read_BOM, Unit, Parser);
       end Init_Parser;
    begin
       Update_Charset (Unit, Charset);

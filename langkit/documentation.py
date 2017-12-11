@@ -154,6 +154,9 @@ base_langkit_docs = {
         ${TODO} Passing an unsupported charset here is not guaranteed to raise
         an error right here, but this would be really helpful for users.
 
+        When With_Trivia is true, the parsed analysis units will contain
+        trivias.
+
         % if ctx.default_unit_provider:
             If provided, Unit_Provider will be used to query the file name that
             corresponds to a unit reference during semantic analysis. If it is
@@ -210,9 +213,6 @@ base_langkit_docs = {
         If any failure occurs, such as file opening, decoding, lexing or
         parsing failure, return an analysis unit anyway: errors are described
         as diagnostics.
-
-        When With_Trivia is true, the parsed analysis unit will contain
-        trivias. Already existing analysis units are reparsed if needed.
     """,
     'langkit.get_unit_from_buffer': """
         Create a new analysis unit for Filename or return the existing one if
@@ -232,9 +232,6 @@ base_langkit_docs = {
         parsing failure, return an analysis unit anyway: errors are described
         as diagnostics of
         the returned analysis unit.
-
-        When With_Trivia is true, the parsed analysis unit will contain
-        trivias. Already existing analysis units are reparsed if needed.
     """,
     'langkit.get_unit_from_provider': """
         Create a new analysis unit for Name/Kind or return the existing one if
@@ -267,9 +264,6 @@ base_langkit_docs = {
         If any other failure occurs, such as file opening, decoding, lexing or
         parsing failure, return an analysis unit anyway: errors are described
         as diagnostics of the returned analysis unit.
-
-        When With_Trivia is true, the parsed analysis unit will contain
-        trivias. Already existing analysis units are reparsed if needed.
     """,
     'langkit.remove_unit': """
         Remove the corresponding analysis unit from this context. If someone

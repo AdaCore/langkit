@@ -791,6 +791,9 @@ package ${ada_lib_name}.Analysis.Implementation is
       Charset    : Unbounded_String;
       --  Default charset to use in analysis units
 
+      With_Trivia       : Boolean;
+      --  Whether Trivia nodes were parsed and included in analysis units
+
       Root_Scope : Lexical_Env;
       --  The lexical scope that is shared amongst every compilation unit. Used
       --  to resolve cross file references.
@@ -854,9 +857,6 @@ package ${ada_lib_name}.Analysis.Implementation is
 
       Diagnostics       : Diagnostics_Vectors.Vector;
       --  The list of diagnostics produced for this analysis unit
-
-      With_Trivia       : Boolean;
-      --  Whether Trivia nodes were parsed and included in this analysis unit
 
       Is_Env_Populated  : Boolean;
       --  Whether Populate_Lexical_Env was called on this unit. Used not to

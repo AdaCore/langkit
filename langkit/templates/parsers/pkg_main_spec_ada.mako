@@ -54,11 +54,10 @@ package ${ada_lib_name}.Analysis.Parsers is
      (Filename, Charset : String;
       Read_BOM          : Boolean;
       Unit              : Analysis_Unit;
-      With_Trivia       : Boolean := False;
       Parser            : in out Parser_Type);
    --  Init a parser to parse the source in Filename, decoding it using
-   --  Charset. The resulting tokens (and trivia if With_Trivia) are stored
-   --  into TDH.
+   --  Charset. The resulting tokens (and trivia if Unit.Context.With_Trivia)
+   --  are stored into TDH.
    --
    --  This can raise Lexer.Unknown_Charset or Lexer.Invalid_Input exceptions
    --  if the lexer has trouble decoding the input.
@@ -67,11 +66,10 @@ package ${ada_lib_name}.Analysis.Parsers is
      (Buffer, Charset : String;
       Read_BOM        : Boolean;
       Unit            : Analysis_Unit;
-      With_Trivia     : Boolean := False;
       Parser          : in out Parser_Type);
    --  Init a parser to parse the source in Buffer, decoding it using
-   --  Charset. The resulting tokens (and trivia if With_Trivia) are stored
-   --  into TDH.
+   --  Charset. The resulting tokens (and trivia if Unit.Context.With_Trivia)
+   --  are stored into TDH.
    --
    --  This can raise Lexer.Unknown_Charset or Lexer.Invalid_Input exceptions
    --  if the lexer has trouble decoding the input.

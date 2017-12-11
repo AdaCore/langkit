@@ -125,7 +125,7 @@ procedure Parse is
       Input_Str_Ptr    : Big_String_Access;
       Input_Str_Length : Natural;
 
-      Ctx  : Analysis_Context := Create;
+      Ctx  : Analysis_Context := Create (With_Trivia => Do_Print_Trivia);
       Unit : Analysis_Unit;
       Rule : Grammar_Rule;
    begin
@@ -167,8 +167,7 @@ procedure Parse is
       Time_After   : Time;
       AST          : ${root_entity.api_name};
    begin
-      Unit := Get_From_File (Ctx, File_Name, "", True,
-                             With_Trivia => Do_Print_Trivia);
+      Unit := Get_From_File (Ctx, File_Name, "", True);
       AST := Root (Unit);
       Time_After := Clock;
 
@@ -286,7 +285,8 @@ begin
    if File_List.all'Length /= 0 then
       declare
          F : File_Type;
-         Ctx : Analysis_Context := Create (Charset.all);
+         Ctx : Analysis_Context :=
+           Create (Charset.all, With_Trivia => Do_Print_Trivia);
       begin
          Open (F, In_File, File_List.all);
          while not End_Of_File (F) loop
@@ -303,7 +303,8 @@ begin
 
    elsif File_Name.all'Length /= 0 then
       declare
-         Ctx : Analysis_Context := Create (Charset.all);
+         Ctx : Analysis_Context :=
+           Create (Charset.all, With_Trivia => Do_Print_Trivia);
       begin
          Register_Lookups;
          Process_File (File_Name.all, Ctx);

@@ -145,8 +145,7 @@ typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
    ${text_type} *name,
    ${unit_kind_type} kind,
    const char *charset,
-   int reparse,
-   int with_trivia
+   int reparse
 
 );
 % endif
@@ -184,7 +183,8 @@ ${array_types.decl(T.entity.array)}
 ${c_doc('langkit.create_context')}
 extern ${analysis_context_type}
 ${capi.get_name("create_analysis_context")}(
-   const char *charset
+   const char *charset,
+   int with_trivia
    % if ctx.default_unit_provider:
    , ${unit_provider_type} unit_provider
    % endif
@@ -215,8 +215,7 @@ ${capi.get_name("get_analysis_unit_from_file")}(
         ${analysis_context_type} context,
         const char *filename,
         const char *charset,
-        int reparse,
-        int with_trivia);
+        int reparse);
 
 ${c_doc('langkit.get_unit_from_buffer')}
 extern ${analysis_unit_type}
@@ -225,8 +224,7 @@ ${capi.get_name("get_analysis_unit_from_buffer")}(
         const char *filename,
         const char *charset,
         const char *buffer,
-        size_t buffer_size,
-        int with_trivia);
+        size_t buffer_size);
 
 % if ctx.default_unit_provider:
 ${c_doc('langkit.get_unit_from_provider')}
@@ -236,8 +234,7 @@ ${capi.get_name("get_analysis_unit_from_provider")}(
         ${text_type} *name,
         ${unit_kind_type} kind,
         const char *charset,
-        int reparse,
-        int with_trivia);
+        int reparse);
 % endif
 
 ${c_doc('langkit.remove_unit')}

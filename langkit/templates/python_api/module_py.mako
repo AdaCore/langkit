@@ -199,6 +199,7 @@ class AnalysisContext(object):
 
     def __init__(self,
                  charset=None,
+                 with_trivia=False,
 % if ctx.default_unit_provider:
                  unit_provider=None,
 % endif
@@ -209,7 +210,7 @@ class AnalysisContext(object):
 % endif
         self._c_value = (
             _create_analysis_context(
-                charset,
+                charset, with_trivia,
 % if ctx.default_unit_provider:
                 c_unit_provider,
 % endif
@@ -233,32 +234,26 @@ class AnalysisContext(object):
     def __hash__(self):
         return hash(self._c_value)
 
-    def get_from_file(self, filename, charset=None, reparse=False,
-                      with_trivia=False):
+    def get_from_file(self, filename, charset=None, reparse=False):
         ${py_doc('langkit.get_unit_from_file', 8)}
         c_value = _get_analysis_unit_from_file(self._c_value, filename,
-                                               charset or '', reparse,
-                                               with_trivia)
+                                               charset or '', reparse)
         return AnalysisUnit(c_value)
 
-    def get_from_buffer(self, filename, buffer, charset=None, reparse=False,
-                        with_trivia=False):
+    def get_from_buffer(self, filename, buffer, charset=None, reparse=False):
         ${py_doc('langkit.get_unit_from_buffer', 8)}
         c_value = _get_analysis_unit_from_buffer(self._c_value, filename,
                                                  charset or '',
-                                                 buffer, len(buffer),
-                                                 with_trivia)
+                                                 buffer, len(buffer))
         return AnalysisUnit(c_value)
 
 % if ctx.default_unit_provider:
-    def get_from_provider(self, name, kind, charset=None, reparse=False,
-                          with_trivia=False):
+    def get_from_provider(self, name, kind, charset=None, reparse=False):
         ${py_doc('langkit.get_unit_from_provider', 8)}
         _name = _text._unwrap(name)
         _kind = _unwrap_unit_kind(kind)
         c_value = _get_analysis_unit_from_provider(
-            self._c_value, ctypes.byref(_name), _kind, charset or '', reparse,
-            with_trivia
+            self._c_value, ctypes.byref(_name), _kind, charset or '', reparse
         )
         if c_value:
             return AnalysisUnit(c_value)

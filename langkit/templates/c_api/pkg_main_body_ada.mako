@@ -49,8 +49,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Name        : Text_Type;
       Kind        : Unit_Kind;
       Charset     : String := "";
-      Reparse     : Boolean := False;
-      With_Trivia : Boolean := False) return Analysis_Unit;
+      Reparse     : Boolean := False) return Analysis_Unit;
 % endif
 
    function Value_Or_Empty (S : chars_ptr) return String
@@ -79,7 +78,8 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    -------------------------
 
    function ${capi.get_name("create_analysis_context")}
-     (Charset            : chars_ptr
+     (Charset            : chars_ptr;
+      With_Trivia        : int
       % if ctx.default_unit_provider:
       ; Unit_Provider : ${unit_provider_type}
       % endif
@@ -101,7 +101,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
          % endif
 
       begin
-         return Wrap (Create (C
+         return Wrap (Create (C, With_Trivia /= 0
             % if ctx.default_unit_provider:
             , U
             % endif
@@ -159,8 +159,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    function ${capi.get_name("get_analysis_unit_from_file")}
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
-      Reparse           : int;
-      With_Trivia       : int) return ${analysis_unit_type} is
+      Reparse           : int) return ${analysis_unit_type} is
    begin
       Clear_Last_Exception;
 
@@ -170,8 +169,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
            (Ctx,
             Value (Filename),
             Value_Or_Empty (Charset),
-            Reparse /= 0,
-            With_Trivia /= 0);
+            Reparse /= 0);
       begin
          return Wrap (Unit);
       end;
@@ -185,8 +183,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
      (Context           : ${analysis_context_type};
       Filename, Charset : chars_ptr;
       Buffer            : chars_ptr;
-      Buffer_Size       : size_t;
-      With_Trivia       : int) return ${analysis_unit_type} is
+      Buffer_Size       : size_t) return ${analysis_unit_type} is
    begin
       Clear_Last_Exception;
 
@@ -201,8 +198,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
            (Ctx,
             Value (Filename),
             Value_Or_Empty (Charset),
-            Buffer_Str,
-            With_Trivia /= 0);
+            Buffer_Str);
          return Wrap (Unit);
       end;
    exception
@@ -217,8 +213,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
          Name        : ${text_type};
          Kind        : ${unit_kind_type};
          Charset     : chars_ptr;
-         Reparse     : int;
-         With_Trivia : int) return ${analysis_unit_type} is
+         Reparse     : int) return ${analysis_unit_type} is
       begin
          Clear_Last_Exception;
 
@@ -233,8 +228,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
                Text_Name,
                Unwrap (Kind),
                Value_Or_Empty (Charset),
-               Reparse /= 0,
-               With_Trivia /= 0);
+               Reparse /= 0);
          begin
             return Wrap (Unit);
          end;
@@ -1072,8 +1066,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
       Name        : Text_Type;
       Kind        : Unit_Kind;
       Charset     : String := "";
-      Reparse     : Boolean := False;
-      With_Trivia : Boolean := False) return Analysis_Unit
+      Reparse     : Boolean := False) return Analysis_Unit
    is
       Name_Access  : Text_Access := Name'Unrestricted_Access;
       C_Charset    : chars_ptr := (if Charset'Length = 0
@@ -1082,7 +1075,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
 
       C_Result    : ${analysis_unit_type} := Provider.Get_Unit_From_Name_Func
         (Provider.Data, Wrap (Context), Wrap (Name_Access), Wrap (Kind),
-         C_Charset, Boolean'Pos (Reparse), Boolean'Pos (With_Trivia));
+         C_Charset, Boolean'Pos (Reparse));
    begin
       Free (C_Charset);
       if C_Result = ${analysis_unit_type} (System.Null_Address) then

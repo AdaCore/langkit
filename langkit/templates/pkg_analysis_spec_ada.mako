@@ -120,8 +120,7 @@ package ${ada_lib_name}.Analysis is
       Name        : Text_Type;
       Kind        : Unit_Kind;
       Charset     : String := "";
-      Reparse     : Boolean := False;
-      With_Trivia : Boolean := False) return Analysis_Unit is abstract;
+      Reparse     : Boolean := False) return Analysis_Unit is abstract;
    ${ada_doc('langkit.unit_provider_get_unit_from_name', 3)}
 
    procedure Destroy is new Ada.Unchecked_Deallocation
@@ -132,7 +131,8 @@ package ${ada_lib_name}.Analysis is
    ---------------------------------
 
    function Create
-     (Charset : String := Default_Charset
+     (Charset     : String := Default_Charset;
+      With_Trivia : Boolean := False
       % if ctx.default_unit_provider:
          ; Unit_Provider : Unit_Provider_Access_Cst := null
       % endif
@@ -154,12 +154,11 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.context_set_logic_resolution_timeout', 3)}
 
    function Get_From_File
-     (Context     : Analysis_Context;
-      Filename    : String;
-      Charset     : String := "";
-      Reparse     : Boolean := False;
-      With_Trivia : Boolean := False;
-      Rule        : Grammar_Rule :=
+     (Context  : Analysis_Context;
+      Filename : String;
+      Charset  : String := "";
+      Reparse  : Boolean := False;
+      Rule     : Grammar_Rule :=
          ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_file', 3)}
@@ -169,7 +168,6 @@ package ${ada_lib_name}.Analysis is
       Filename    : String;
       Charset     : String := "";
       Buffer      : String;
-      With_Trivia : Boolean := False;
       Rule        : Grammar_Rule :=
          ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit;
@@ -187,8 +185,7 @@ package ${ada_lib_name}.Analysis is
       Name        : Text_Type;
       Kind        : Unit_Kind;
       Charset     : String := "";
-      Reparse     : Boolean := False;
-      With_Trivia : Boolean := False)
+      Reparse     : Boolean := False)
       return Analysis_Unit;
    ${ada_doc('langkit.get_unit_from_provider', 3)}
 
@@ -197,7 +194,6 @@ package ${ada_lib_name}.Analysis is
       Filename    : String;
       Error       : String;
       Charset     : String := "";
-      With_Trivia : Boolean := False;
       Rule        : Grammar_Rule :=
          ${Name.from_lower(ctx.main_rule_name)}_Rule)
       return Analysis_Unit;
