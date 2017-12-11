@@ -864,8 +864,9 @@ package body ${ada_lib_name}.Analysis is
    is
    begin
       if Unit.Is_Env_Populated then
-         Main_Trace.Trace ("Updating unit after reparse: "
-                           & To_String (Unit.File_Name));
+         Traces.Trace
+           (Main_Trace,
+            "Updating unit after reparse: " & To_String (Unit.File_Name));
 
          --  Reset the flag so that Populate_Lexical_Env does its work
          Unit.Is_Env_Populated := False;

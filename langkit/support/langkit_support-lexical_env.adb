@@ -452,11 +452,10 @@ package body Langkit_Support.Lexical_Env is
       To_Reference : Lexical_Env;
       Transitive   : Boolean := False)
    is
+      Ref : constant Referenced_Env :=
+        (Transitive, Simple_Env_Getter (To_Reference), False, Active);
    begin
-      Referenced_Envs_Vectors.Append
-        (Self.Env.Referenced_Envs,
-         (Transitive, Simple_Env_Getter (To_Reference),
-          False, Active));
+      Referenced_Envs_Vectors.Append (Self.Env.Referenced_Envs, Ref);
       Self.Env.Cache_Valid := False;
    end Reference;
 
@@ -604,9 +603,10 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       if Has_Trace then
-         Me.Trace ("Get_Internal env="
-                   & Lexical_Env_Image (Self, Dump_Content => False)
-                   & " key = " & Image (Key.all));
+         Traces.Trace
+           (Me, "Get_Internal env="
+            & Lexical_Env_Image (Self, Dump_Content => False)
+            & " key = " & Image (Key.all));
       end if;
 
       if Do_Cache then
@@ -615,11 +615,13 @@ package body Langkit_Support.Lexical_Env is
             Reset_Caches (Self);
          end if;
 
-         Self.Env.Cached_Results.Insert
-           (Res_Key,
-            (Computing, Result_Vectors.Empty_Vector),
-            Cached_Res_Cursor,
-            Inserted);
+         declare
+            Val : constant Result_Val :=
+              (Computing, Result_Vectors.Empty_Vector);
+         begin
+            Self.Env.Cached_Results.Insert
+              (Res_Key, Val, Cached_Res_Cursor, Inserted);
+         end;
 
          if not Inserted then
             Res_Val := Element (Cached_Res_Cursor);
@@ -691,8 +693,11 @@ package body Langkit_Support.Lexical_Env is
       Dec_Ref (Env);
 
       if Do_Cache then
-         Self.Env.Cached_Results.Include
-           (Res_Key, (Computed, Local_Results));
+         declare
+            Val : constant Result_Val := (Computed, Local_Results);
+         begin
+            Self.Env.Cached_Results.Include (Res_Key, Val);
+         end;
 
          return Local_Results.To_Array;
       else

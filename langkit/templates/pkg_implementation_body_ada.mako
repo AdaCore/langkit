@@ -1979,6 +1979,15 @@ package body ${ada_lib_name}.Analysis.Implementation is
    procedure Reset_Envs (Unit : Analysis_Unit) is
 
       procedure Deactivate_Refd_Envs
+        (Node : access ${root_node_value_type}'Class);
+      procedure Recompute_Refd_Envs
+        (Node : access ${root_node_value_type}'Class);
+
+      --------------------------
+      -- Deactivate_Refd_Envs --
+      --------------------------
+
+      procedure Deactivate_Refd_Envs
         (Node : access ${root_node_value_type}'Class) is
       begin
          if Node = null then
@@ -1991,10 +2000,14 @@ package body ${ada_lib_name}.Analysis.Implementation is
             Node.Self_Env.Env.Cache_Valid := False;
          end if;
 
-         for Child of Node.Children loop
-            Deactivate_Refd_Envs (Child);
+         for I in 1 .. Node.Child_Count loop
+            Deactivate_Refd_Envs (Node.Child (I));
          end loop;
       end Deactivate_Refd_Envs;
+
+      -------------------------
+      -- Recompute_Refd_Envs --
+      -------------------------
 
       procedure Recompute_Refd_Envs
         (Node : access ${root_node_value_type}'Class) is
@@ -2003,8 +2016,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
             return;
          end if;
          Recompute_Referenced_Envs (Node.Self_Env);
-         for Child of Node.Children loop
-            Recompute_Refd_Envs (Child);
+         for I in 1 .. Node.Child_Count loop
+            Recompute_Refd_Envs (Node.Child (I));
          end loop;
       end Recompute_Refd_Envs;
 
@@ -2023,8 +2036,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
    procedure Reset_Caches (Unit : Analysis_Unit) is
    begin
       if Unit.Cache_Version < Unit.Context.Cache_Version then
-         Main_Trace.Trace ("In reset caches for unit " 
-                           & To_String (Unit.File_Name));
+         Traces.Trace
+           (Main_Trace,
+            "In reset caches for unit " & To_String (Unit.File_Name));
          Unit.Cache_Version := Unit.Context.Cache_Version;
          % if ctx.has_memoization:
             Destroy (Unit.Memoization_Map);
