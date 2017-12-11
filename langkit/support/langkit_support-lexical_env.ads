@@ -554,7 +554,7 @@ package Langkit_Support.Lexical_Env is
    function Rebind_Env
       (Base_Env   : Lexical_Env;
        Rebindings : Env_Rebindings) return Lexical_Env;
-   --  Returns a new env based on Base_Env to include the given Rebindings
+   --  Return a new env based on Base_Env to include the given Rebindings
 
    function Image (Self : Env_Rebindings) return Text_Type;
 
@@ -604,7 +604,7 @@ package Langkit_Support.Lexical_Env is
       Owner : Unit_T := No_Unit) return Lexical_Env;
 
    function Is_Stale (Env : Lexical_Env) return Boolean;
-   --  Returns whether Env points to a now defunct lexical env
+   --  Return whether Env points to a now defunct lexical env
 
 private
 
