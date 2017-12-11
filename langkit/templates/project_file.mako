@@ -1,5 +1,7 @@
 ## vim: filetype=makoada
 
+<%namespace name="exts" file="extensions.mako" />
+
 with "gnatcoll";
 with "gnatcoll_iconv";
 with "langkit_support";
@@ -124,6 +126,12 @@ library project ${lib_name} is
             --  Deactivate because of memory usage, see P726-024. This
             --  limits the memory usage peaks of GCC 6 based compilers
             --  and should prevent OOM on 32-bit platforms.
+
+            ## TODO: This extension point is added to change the flags of
+            ## Libadalang specific extension files. It is a temporary
+            ## workaround, waiting for QC05-038 to be fixed.
+            ${exts.include_extension("prod_additional_flags")}
+
       end case;
    end Compiler;
 
