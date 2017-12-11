@@ -52,9 +52,10 @@ library project ${lib_name} is
       "quex_lexer-token.h",
       "quex_lexer-token_ids.h");
 
-   for Source_Dirs use 
-      ("../../include/${lib_name.lower()}",
-       "${ctx.extensions_src_dir}");
+   <% source_dirs = ['../../include/{}'.format(lib_name.lower()),
+                     ctx.extensions_src_dir] %>
+   for Source_Dirs use
+     (${', '.join(string_repr(d) for d in source_dirs if d)});
 
    for Library_Dir use "../${lib_name.lower()}." & Library_Kind_Param;
    for Object_Dir use "../../obj/${lib_name.lower()}." & Library_Kind_Param;
