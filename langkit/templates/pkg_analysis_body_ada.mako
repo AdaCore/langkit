@@ -15,6 +15,7 @@ with Ada.Containers.Vectors;
 % endif
 with Ada.Exceptions;
 with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
+with Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
@@ -1050,6 +1051,24 @@ package body ${ada_lib_name}.Analysis is
       end loop;
       return Result;
    end Diagnostics;
+
+   ---------------------------
+   -- Format_GNU_Diagnostic --
+   ---------------------------
+
+   function Format_GNU_Diagnostic
+     (Unit : Analysis_Unit; D : Diagnostic) return String
+   is
+      Filename : constant String := Get_Filename (Unit);
+      Sloc     : constant Source_Location := Start_Sloc (D.Sloc_Range);
+      Msg      : constant String :=
+         Image
+           (Ada.Strings.Wide_Wide_Unbounded.To_Wide_Wide_String (D.Message));
+   begin
+      return (Filename
+              & (if Sloc = No_Source_Location then "" else ":" & Image (Sloc))
+              & ": " & Msg);
+   end Format_GNU_Diagnostic;
 
    % if ctx.default_unit_provider:
    -------------------

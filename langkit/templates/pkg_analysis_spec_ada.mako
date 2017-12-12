@@ -244,8 +244,7 @@ package ${ada_lib_name}.Analysis is
    ${ada_doc('langkit.unit_diagnostics', 3)}
 
    function Format_GNU_Diagnostic
-     (Unit : Analysis_Unit; D : Diagnostic) return String
-   is (Get_Filename (Unit) & ":" & To_Pretty_String (D));
+     (Unit : Analysis_Unit; D : Diagnostic) return String;
    --  Format a diagnostic in a GNU fashion. See
    --  <https://www.gnu.org/prep/standards/html_node/Errors.html>.
 
