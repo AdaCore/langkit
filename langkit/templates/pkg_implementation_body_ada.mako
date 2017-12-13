@@ -2040,9 +2040,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
            (Main_Trace,
             "In reset caches for unit " & To_String (Unit.File_Name));
          Unit.Cache_Version := Unit.Context.Cache_Version;
+         Reset_Envs (Unit);
          % if ctx.has_memoization:
             Destroy (Unit.Memoization_Map);
-            Reset_Envs (Unit);
          % endif
       end if;
    end Reset_Caches;
