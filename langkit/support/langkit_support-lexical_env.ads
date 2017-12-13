@@ -145,8 +145,7 @@ package Langkit_Support.Lexical_Env is
       --  Version of the unit when this reference was made. Used to determine
       --  whether this reference is valid or not.
    end record;
-   --  Reference to a lexical environments. This is the type that shall be
-   --  used.
+   --  Reference to a lexical environment. This is the type that shall be used.
 
    Null_Lexical_Env : constant Lexical_Env := (null, 0, False, No_Unit, 0);
 
