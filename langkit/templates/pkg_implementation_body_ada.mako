@@ -2061,7 +2061,6 @@ package body ${ada_lib_name}.Analysis.Implementation is
          Inserted : Boolean;
          Value    : constant Mmz_Value := (Kind => Mmz_Evaluating);
       begin
-
          --  Make sure that we don't lookup stale caches
          Reset_Caches (Unit);
 
