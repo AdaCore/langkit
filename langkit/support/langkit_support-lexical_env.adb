@@ -1606,9 +1606,8 @@ package body Langkit_Support.Lexical_Env is
       if Env.Owner /= No_Unit then
          return Get_Version (Env.Owner) > Env.Version;
       else
-         for I in
-           Env.Env.Referenced_Envs.First_Index
-             .. Env.Env.Referenced_Envs.Last_Index
+         for I in Env.Env.Referenced_Envs.First_Index
+               .. Env.Env.Referenced_Envs.Last_Index
          loop
             L := Get_Env (Env.Env.Referenced_Envs.Get_Access (I).Getter);
             if Is_Stale (L) then
