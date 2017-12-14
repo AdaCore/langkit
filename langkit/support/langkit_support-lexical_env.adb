@@ -11,7 +11,7 @@ with Langkit_Support.Images; use Langkit_Support.Images;
 package body Langkit_Support.Lexical_Env is
 
    function Is_Cache_Valid (Env : Lexical_Env) return Boolean;
-   --  Returns whether Env's cache is valid or not. This will check every
+   --  Return whether Env's lookup cache is valid. This will check every
    --  Cache_Valid flag up Env's parent chain.
 
    function Wrap
