@@ -422,11 +422,17 @@ package Langkit_Support.Lexical_Env is
       --  environment that owns this pool. As a consequence, this is allocated
       --  only for primary lexical environments that are rebindable.
 
-      Cached_Results  : Results_Maps.Map;
+      Cached_Results : Results_Maps.Map;
+      --  Cache for lexical environment lookups
 
       Cache_Active : Boolean;
+      --  Whether caching for lexical environment lookups is enabled for this
+      --  lexical environment. We enable it for primary environments and
+      --  disable it for grouped or orphaned ones.
 
-      Cache_Valid     : Boolean := True;
+      Cache_Valid : Boolean := True;
+      --  Whether Cached_Results contains lookup results that can be currently
+      --  reused (i.e. whether they are not stale).
 
       Ref_Count : Integer := 1;
       --  For ref-counted lexical environments, this contains the number of
