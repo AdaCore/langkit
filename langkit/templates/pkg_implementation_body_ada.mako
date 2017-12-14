@@ -1993,13 +1993,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
          if Node = null then
             return;
          end if;
-
          Deactivate_Referenced_Envs (Node.Self_Env);
-
-         if Node.Self_Env /= Null_Lexical_Env then
-            Node.Self_Env.Env.Cache_Valid := False;
-         end if;
-
          for I in 1 .. Node.Child_Count loop
             Deactivate_Refd_Envs (Node.Child (I));
          end loop;
