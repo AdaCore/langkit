@@ -87,7 +87,7 @@ package body Langkit_Support.Lexical_Env is
          Self.Env.Cached_Results.Reference (C).Elements.Destroy;
 
          Self.Env.Cached_Results.Replace_Element
-           (C, Result_Val'(None, Empty_Lookup_Result_Vector));
+           (C, No_Lookup_Cache_Entry);
       end loop;
 
       Self.Env.Cache_Valid := True;
@@ -590,7 +590,7 @@ package body Langkit_Support.Lexical_Env is
       Res_Key           : constant Lookup_Cache_Key :=
         (Key, Rebindings, Metadata);
       Cached_Res_Cursor : Results_Maps.Cursor;
-      Res_Val           : Result_Val;
+      Res_Val           : Lookup_Cache_Entry;
       Inserted          : Boolean;
       use Results_Maps;
 
@@ -616,7 +616,7 @@ package body Langkit_Support.Lexical_Env is
          end if;
 
          declare
-            Val : constant Result_Val :=
+            Val : constant Lookup_Cache_Entry :=
               (Computing, Empty_Lookup_Result_Vector);
          begin
             Self.Env.Cached_Results.Insert
@@ -694,7 +694,7 @@ package body Langkit_Support.Lexical_Env is
 
       if Do_Cache then
          declare
-            Val : constant Result_Val := (Computed, Local_Results);
+            Val : constant Lookup_Cache_Entry := (Computed, Local_Results);
          begin
             Self.Env.Cached_Results.Include (Res_Key, Val);
          end;

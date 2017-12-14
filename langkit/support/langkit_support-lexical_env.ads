@@ -397,13 +397,14 @@ package Langkit_Support.Lexical_Env is
    --  the cache is used to avoid destroying the cache map when clearing
    --  caches.
 
-   type Result_Val is record
+   type Lookup_Cache_Entry is record
       State    : Lookup_Cache_Entry_State;
       Elements : Lookup_Result_Item_Vectors.Vector;
    end record;
-   --  The result of an env get
+   --  Result of a lexical environment lookup
 
-   No_Result_Val : constant Result_Val := (None, Empty_Lookup_Result_Vector);
+   No_Lookup_Cache_Entry : constant Lookup_Cache_Entry :=
+     (None, Empty_Lookup_Result_Vector);
 
    function Hash (Self : Lookup_Cache_Key) return Hash_Type
    is
@@ -413,7 +414,7 @@ package Langkit_Support.Lexical_Env is
 
    package Results_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Lookup_Cache_Key,
-      Element_Type    => Result_Val,
+      Element_Type    => Lookup_Cache_Entry,
       Hash            => Hash,
       Equivalent_Keys => "=",
       "="             => "=");
