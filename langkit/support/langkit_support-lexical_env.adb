@@ -83,6 +83,11 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Reset_Lookup_Cache (Self : Lexical_Env) is
    begin
+      --  Don't destroy the map itself: preserve entries but clear their
+      --  contents. This is an optimization that will save time during
+      --  deallocation (here) and reallocation (when filling the cache again
+      --  with the lookups to come).
+
       for C in Self.Env.Lookup_Cache.Iterate loop
          Self.Env.Lookup_Cache.Reference (C).Elements.Destroy;
 
