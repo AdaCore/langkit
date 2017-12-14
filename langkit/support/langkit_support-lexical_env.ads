@@ -159,18 +159,25 @@ package Langkit_Support.Lexical_Env is
 
    type Env_Getter (Dynamic : Boolean := False) is record
       Env : Lexical_Env := Null_Lexical_Env;
+      --  If Dynamic, cache for the resolved lexical environment (valid iff
+      --  Computed is True).
+
       case Dynamic is
          when True =>
             Node     : Element_T;
             Resolver : Lexical_Env_Resolver;
+            --  Data and callable to resolve this getter
+
             Computed : Boolean := False;
+            --  Whether the Env member contains the resolved environment
+
          when False =>
             null;
       end case;
    end record;
    --  Link to an environment. It can be either a simple link (just a pointer)
    --  or a dynamic link (a function that recomputes the link when needed). See
-   --  tho two constructors below.
+   --  the two constructors below.
 
    No_Env_Getter : constant Env_Getter := (False, Null_Lexical_Env);
 
