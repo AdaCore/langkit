@@ -343,20 +343,30 @@ package Langkit_Support.Lexical_Env is
    --  Special constant for the Ref_Count field below that means: this lexical
    --  environment is not ref-counted.
 
-   type Result is record
-      E                    : Entity;
+   type Lookup_Result_Item is record
+      E : Entity;
+      --  Returned entity
 
-      Filter_From          : Boolean;
+      Filter_From : Boolean;
       --  Wether to filter with Can_Reach
 
       Override_Filter_Node : Element_T := No_Element;
       --  Node to use when filtering with Can_Reach, if different from the
       --  Entity.
    end record;
-   --  Represents an env lookup result
+   --  Lexical environment lookup result item. Lookups return arrays of these.
 
-   package Result_Vectors is new Langkit_Support.Vectors
-     (Result, Small_Vector_Capacity => 2);
+   package Lookup_Result_Item_Vectors is new Langkit_Support.Vectors
+     (Lookup_Result_Item, Small_Vector_Capacity => 2);
+
+   subtype Lookup_Result_Vector is Lookup_Result_Item_Vectors.Vector;
+   Empty_Lookup_Result_Vector : Lookup_Result_Vector renames
+      Lookup_Result_Item_Vectors.Empty_Vector;
+
+   subtype Lookup_Result_Array  is
+      Lookup_Result_Item_Vectors.Elements_Array;
+   Empty_Lookup_Result_Array : Lookup_Result_Array renames
+      Lookup_Result_Item_Vectors.Empty_Array;
 
    type Result_Key is record
       Key        : Symbol_Type;
@@ -375,11 +385,11 @@ package Langkit_Support.Lexical_Env is
 
    type Result_Val is record
       State    : Result_Cache_State;
-      Elements : Result_Vectors.Vector;
+      Elements : Lookup_Result_Item_Vectors.Vector;
    end record;
    --  The result of an env get
 
-   No_Result_Val : constant Result_Val := (None, Result_Vectors.Empty_Vector);
+   No_Result_Val : constant Result_Val := (None, Empty_Lookup_Result_Vector);
 
    function Hash (Self : Result_Key) return Hash_Type
    is

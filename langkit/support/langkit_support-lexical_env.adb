@@ -54,7 +54,7 @@ package body Langkit_Support.Lexical_Env is
       Recursive     : Boolean := True;
       Rebindings    : Env_Rebindings := null;
       Metadata      : Element_Metadata := Empty_Metadata)
-      return Result_Vectors.Elements_Array;
+      return Lookup_Result_Array;
 
    procedure Reset_Caches (Self : Lexical_Env);
    --  Reset caches for this env
@@ -63,8 +63,7 @@ package body Langkit_Support.Lexical_Env is
    -- Is_Cache_Valid --
    --------------------
 
-   function Is_Cache_Valid (Env : Lexical_Env) return Boolean
-   is
+   function Is_Cache_Valid (Env : Lexical_Env) return Boolean is
       P : Lexical_Env;
    begin
       if Env.Env.Cache_Valid then
@@ -88,7 +87,7 @@ package body Langkit_Support.Lexical_Env is
          Self.Env.Cached_Results.Reference (C).Elements.Destroy;
 
          Self.Env.Cached_Results.Replace_Element
-           (C, Result_Val'(None, Result_Vectors.Empty_Vector));
+           (C, Result_Val'(None, Empty_Lookup_Result_Vector));
       end loop;
 
       Self.Env.Cache_Valid := True;
@@ -469,10 +468,10 @@ package body Langkit_Support.Lexical_Env is
       Recursive     : Boolean := True;
       Rebindings    : Env_Rebindings := null;
       Metadata      : Element_Metadata := Empty_Metadata)
-      return Result_Vectors.Elements_Array
+      return Lookup_Result_Array
    is
 
-      Local_Results : Result_Vectors.Vector;
+      Local_Results : Lookup_Result_Vector;
 
       procedure Get_Refd_Elements (Self : in out Referenced_Env);
 
@@ -516,9 +515,9 @@ package body Langkit_Support.Lexical_Env is
                else El.Resolver.all (E));
          begin
             Local_Results.Append
-              (Result'(Resolved_Entity,
-                       Filter_From => El.Resolver = null,
-                       Override_Filter_Node => No_Element));
+              (Lookup_Result_Item'(E                    => Resolved_Entity,
+                                   Filter_From          => El.Resolver = null,
+                                   Override_Filter_Node => No_Element));
          end;
       end Append_Result;
 
@@ -546,7 +545,7 @@ package body Langkit_Support.Lexical_Env is
          Env := Get_Env (Self.Getter);
 
          declare
-            Refd_Results : constant Result_Vectors.Elements_Array :=
+            Refd_Results : constant Lookup_Result_Array :=
               Get_Internal
                 (Env, Key,
                  Recursive  => Recursive and Self.Is_Transitive,
@@ -559,7 +558,7 @@ package body Langkit_Support.Lexical_Env is
             if Self.Getter.Dynamic then
                for Res of Refd_Results loop
                   declare
-                     New_Res : Result := Res;
+                     New_Res : Lookup_Result_Item := Res;
                   begin
                      New_Res.Override_Filter_Node := Self.Getter.Node;
                      Local_Results.Append (New_Res);
@@ -599,7 +598,7 @@ package body Langkit_Support.Lexical_Env is
 
    begin
       if Self in Null_Lexical_Env | Empty_Env then
-         return Result_Vectors.Empty_Array;
+         return Empty_Lookup_Result_Array;
       end if;
 
       if Has_Trace then
@@ -617,7 +616,7 @@ package body Langkit_Support.Lexical_Env is
 
          declare
             Val : constant Result_Val :=
-              (Computing, Result_Vectors.Empty_Vector);
+              (Computing, Empty_Lookup_Result_Vector);
          begin
             Self.Env.Cached_Results.Insert
               (Res_Key, Val, Cached_Res_Cursor, Inserted);
@@ -627,7 +626,7 @@ package body Langkit_Support.Lexical_Env is
             Res_Val := Element (Cached_Res_Cursor);
 
             case Res_Val.State is
-            when Computing => return Result_Vectors.Empty_Array;
+            when Computing => return Empty_Lookup_Result_Array;
             when Computed => return Res_Val.Elements.To_Array;
             when None => null;
             end case;
@@ -701,8 +700,7 @@ package body Langkit_Support.Lexical_Env is
 
          return Local_Results.To_Array;
       else
-         return R : constant Result_Vectors.Elements_Array
-           := Local_Results.To_Array
+         return R : constant Lookup_Result_Array := Local_Results.To_Array
          do
             Local_Results.Destroy;
          end return;
@@ -731,8 +729,8 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       declare
-         Results : constant Result_Vectors.Elements_Array
-           := Get_Internal (Self, Key, Recursive, null, Empty_Metadata);
+         Results : constant Lookup_Result_Array :=
+            Get_Internal (Self, Key, Recursive, null, Empty_Metadata);
       begin
          for El of Results loop
             if From = No_Element
@@ -780,7 +778,7 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       declare
-         V : constant Result_Vectors.Elements_Array :=
+         V : constant Lookup_Result_Array :=
            Get_Internal (Self, Key, Recursive, null, Empty_Metadata);
       begin
 
