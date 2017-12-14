@@ -424,7 +424,7 @@ package Langkit_Support.Lexical_Env is
 
       Cached_Results  : Results_Maps.Map;
 
-      Cache_Active    : Boolean := False;
+      Cache_Active : Boolean;
 
       Cache_Valid     : Boolean := True;
 
