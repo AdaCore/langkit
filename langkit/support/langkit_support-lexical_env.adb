@@ -10,9 +10,9 @@ with Langkit_Support.Images; use Langkit_Support.Images;
 
 package body Langkit_Support.Lexical_Env is
 
-   function Is_Cache_Valid (Env : Lexical_Env) return Boolean;
+   function Is_Lookup_Cache_Valid (Env : Lexical_Env) return Boolean;
    --  Return whether Env's lookup cache is valid. This will check every
-   --  Cache_Valid flag up Env's parent chain.
+   --  Lookup_Cache_Valid flag up Env's parent chain.
 
    function Wrap
      (Env   : Lexical_Env_Access;
@@ -56,42 +56,42 @@ package body Langkit_Support.Lexical_Env is
       Metadata      : Element_Metadata := Empty_Metadata)
       return Lookup_Result_Array;
 
-   procedure Reset_Caches (Self : Lexical_Env);
-   --  Reset caches for this env
+   procedure Reset_Lookup_Cache (Self : Lexical_Env);
+   --  Reset Self's lexical environment lookup cache
 
-   --------------------
-   -- Is_Cache_Valid --
-   --------------------
+   ---------------------------
+   -- Is_Lookup_Cache_Valid --
+   ---------------------------
 
-   function Is_Cache_Valid (Env : Lexical_Env) return Boolean is
+   function Is_Lookup_Cache_Valid (Env : Lexical_Env) return Boolean is
       P : Lexical_Env;
    begin
-      if Env.Env.Cache_Valid then
+      if Env.Env.Lookup_Cache_Valid then
          P := Get_Env (Env.Env.Parent);
          if P /= Null_Lexical_Env then
-            return Is_Cache_Valid (P);
+            return Is_Lookup_Cache_Valid (P);
          else
             return True;
          end if;
       end if;
       return False;
-   end Is_Cache_Valid;
+   end Is_Lookup_Cache_Valid;
 
-   ------------------
-   -- Reset_Caches --
-   ------------------
+   ------------------------
+   -- Reset_Lookup_Cache --
+   ------------------------
 
-   procedure Reset_Caches (Self : Lexical_Env) is
+   procedure Reset_Lookup_Cache (Self : Lexical_Env) is
    begin
-      for C in Self.Env.Cached_Results.Iterate loop
-         Self.Env.Cached_Results.Reference (C).Elements.Destroy;
+      for C in Self.Env.Lookup_Cache.Iterate loop
+         Self.Env.Lookup_Cache.Reference (C).Elements.Destroy;
 
-         Self.Env.Cached_Results.Replace_Element
+         Self.Env.Lookup_Cache.Replace_Element
            (C, No_Lookup_Cache_Entry);
       end loop;
 
-      Self.Env.Cache_Valid := True;
-   end Reset_Caches;
+      Self.Env.Lookup_Cache_Valid := True;
+   end Reset_Lookup_Cache;
 
    -----------------------
    -- Simple_Env_Getter --
@@ -345,19 +345,19 @@ package body Langkit_Support.Lexical_Env is
       end if;
       return Wrap
         (new Lexical_Env_Type'
-           (Parent                     => Parent,
-            Transitive_Parent          => Transitive_Parent,
-            Node                       => Node,
-            Referenced_Envs            => <>,
-            Map                        => new Internal_Envs.Map,
-            Default_MD                 => Default_MD,
-            Rebindings                 => null,
-            Rebindings_Pool            => null,
-            Ref_Count                  => (if Is_Refcounted then 1
-                                           else No_Refcount),
-            Cache_Active               => True,
-            Cache_Valid                => True,
-            Cached_Results             => Results_Maps.Empty_Map),
+           (Parent              => Parent,
+            Transitive_Parent   => Transitive_Parent,
+            Node                => Node,
+            Referenced_Envs     => <>,
+            Map                 => new Internal_Envs.Map,
+            Default_MD          => Default_MD,
+            Rebindings          => null,
+            Rebindings_Pool     => null,
+            Ref_Count           => (if Is_Refcounted then 1
+                                    else No_Refcount),
+            Lookup_Cache_Active => True,
+            Lookup_Cache_Valid  => True,
+            Lookup_Cache        => Lookup_Cache_Maps.Empty_Map),
          Owner => Owner);
    end Create;
 
@@ -385,8 +385,8 @@ package body Langkit_Support.Lexical_Env is
          return;
       end if;
 
-      if Self.Env.Cache_Active then
-         Self.Env.Cache_Valid := False;
+      if Self.Env.Lookup_Cache_Active then
+         Self.Env.Lookup_Cache_Valid := False;
       end if;
 
       Map.Insert (Key, Internal_Map_Element_Vectors.Empty_Vector, C, Dummy);
@@ -416,8 +416,8 @@ package body Langkit_Support.Lexical_Env is
          end if;
       end loop;
 
-      if Self.Env.Cache_Active then
-         Self.Env.Cache_Valid := False;
+      if Self.Env.Lookup_Cache_Active then
+         Self.Env.Lookup_Cache_Valid := False;
       end if;
    end Remove;
 
@@ -439,7 +439,7 @@ package body Langkit_Support.Lexical_Env is
       Resolve (Refd_Env.Getter);
       Refd_Env.State := Active;
       Referenced_Envs_Vectors.Append (Self.Env.Referenced_Envs, Refd_Env);
-      Self.Env.Cache_Valid := False;
+      Self.Env.Lookup_Cache_Valid := False;
    end Reference;
 
    ---------------
@@ -455,7 +455,7 @@ package body Langkit_Support.Lexical_Env is
         (Transitive, Simple_Env_Getter (To_Reference), False, Active);
    begin
       Referenced_Envs_Vectors.Append (Self.Env.Referenced_Envs, Ref);
-      Self.Env.Cache_Valid := False;
+      Self.Env.Lookup_Cache_Valid := False;
    end Reference;
 
    ---------
@@ -589,13 +589,13 @@ package body Langkit_Support.Lexical_Env is
 
       Res_Key           : constant Lookup_Cache_Key :=
         (Key, Rebindings, Metadata);
-      Cached_Res_Cursor : Results_Maps.Cursor;
+      Cached_Res_Cursor : Lookup_Cache_Maps.Cursor;
       Res_Val           : Lookup_Cache_Entry;
       Inserted          : Boolean;
-      use Results_Maps;
+      use Lookup_Cache_Maps;
 
       function Do_Cache return Boolean is
-        (Recursive and then Self.Env.Cache_Active);
+        (Recursive and then Self.Env.Lookup_Cache_Active);
 
    begin
       if Self in Null_Lexical_Env | Empty_Env then
@@ -611,15 +611,15 @@ package body Langkit_Support.Lexical_Env is
 
       if Do_Cache then
 
-         if not Is_Cache_Valid (Self) then
-            Reset_Caches (Self);
+         if not Is_Lookup_Cache_Valid (Self) then
+            Reset_Lookup_Cache (Self);
          end if;
 
          declare
             Val : constant Lookup_Cache_Entry :=
               (Computing, Empty_Lookup_Result_Vector);
          begin
-            Self.Env.Cached_Results.Insert
+            Self.Env.Lookup_Cache.Insert
               (Res_Key, Val, Cached_Res_Cursor, Inserted);
          end;
 
@@ -696,7 +696,7 @@ package body Langkit_Support.Lexical_Env is
          declare
             Val : constant Lookup_Cache_Entry := (Computed, Local_Results);
          begin
-            Self.Env.Cached_Results.Include (Res_Key, Val);
+            Self.Env.Lookup_Cache.Include (Res_Key, Val);
          end;
 
          return Local_Results.To_Array;
@@ -821,18 +821,18 @@ package body Langkit_Support.Lexical_Env is
    begin
       return Wrap
         (new Lexical_Env_Type'
-           (Parent            => No_Env_Getter,
-            Transitive_Parent => False,
-            Node              => Env.Node,
-            Referenced_Envs   => Env.Referenced_Envs.Copy,
-            Map               => Env.Map,
-            Default_MD        => Env.Default_MD,
-            Rebindings        => Env.Rebindings,
-            Rebindings_Pool   => null,
-            Ref_Count         => <>,
-            Cache_Active      => False,
-            Cache_Valid       => False,
-            Cached_Results    => Results_Maps.Empty_Map),
+           (Parent              => No_Env_Getter,
+            Transitive_Parent   => False,
+            Node                => Env.Node,
+            Referenced_Envs     => Env.Referenced_Envs.Copy,
+            Map                 => Env.Map,
+            Default_MD          => Env.Default_MD,
+            Rebindings          => Env.Rebindings,
+            Rebindings_Pool     => null,
+            Ref_Count           => <>,
+            Lookup_Cache_Active => False,
+            Lookup_Cache_Valid  => False,
+            Lookup_Cache        => Lookup_Cache_Maps.Empty_Map),
          Owner => Self.Owner);
    end Orphan;
 
@@ -851,18 +851,18 @@ package body Langkit_Support.Lexical_Env is
             return Empty_Env;
          when others =>
             N := Wrap (new Lexical_Env_Type'
-                         (Parent            => No_Env_Getter,
-                          Transitive_Parent => False,
-                          Node              => No_Element,
-                          Referenced_Envs   => <>,
-                          Map               => null,
-                          Default_MD        => With_Md,
-                          Rebindings        => null,
-                          Rebindings_Pool   => null,
-                          Ref_Count         => <>,
-                          Cache_Active      => False,
-                          Cache_Valid       => False,
-                          Cached_Results    => Results_Maps.Empty_Map));
+                         (Parent              => No_Env_Getter,
+                          Transitive_Parent   => False,
+                          Node                => No_Element,
+                          Referenced_Envs     => <>,
+                          Map                 => null,
+                          Default_MD          => With_Md,
+                          Rebindings          => null,
+                          Rebindings_Pool     => null,
+                          Ref_Count           => <>,
+                          Lookup_Cache_Active => False,
+                          Lookup_Cache_Valid  => False,
+                          Lookup_Cache        => Lookup_Cache_Maps.Empty_Map));
 
             for Env of Envs loop
                Reference (N, Env, Transitive => True);
@@ -898,14 +898,13 @@ package body Langkit_Support.Lexical_Env is
 
                  --  This pool is only used on primary lexical environments, so
                  --  there is no need to convey it to synthetic lexical envs.
-                 Rebindings_Pool   => null,
+                 Rebindings_Pool => null,
 
-                 Cached_Results    => Results_Maps.Empty_Map,
-                 Cache_Active      => False,
+                 Lookup_Cache        => Lookup_Cache_Maps.Empty_Map,
+                 Lookup_Cache_Active => False,
+                 Lookup_Cache_Valid  => False,
 
-                 Cache_Valid       => False,
-
-                 Ref_Count         => <>),
+                 Ref_Count => <>),
               Owner => Base_Env.Owner)
       do
          Reference (N, Base_Env, Transitive => True);
@@ -934,7 +933,7 @@ package body Langkit_Support.Lexical_Env is
       --  Do not free the internal map for ref-counted allocated environments
       --  as all maps are owned by analysis unit owned environments.
 
-      Reset_Caches (Self);
+      Reset_Lookup_Cache (Self);
 
       if not Self.Is_Refcounted then
          for Elts of Self.Env.Map.all loop
@@ -1556,7 +1555,7 @@ package body Langkit_Support.Lexical_Env is
          return;
       end if;
 
-      Self.Env.Cache_Valid := False;
+      Self.Env.Lookup_Cache_Valid := False;
 
       if Self.Env.Parent /= No_Env_Getter
         and then Self.Env.Parent.Dynamic

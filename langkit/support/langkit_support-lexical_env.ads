@@ -412,7 +412,7 @@ package Langkit_Support.Lexical_Env is
         (Combine (Hash (Self.Symbol), Hash (Self.Rebindings)),
          Metadata_Hash (Self.Metadata)));
 
-   package Results_Maps is new Ada.Containers.Hashed_Maps
+   package Lookup_Cache_Maps is new Ada.Containers.Hashed_Maps
      (Key_Type        => Lookup_Cache_Key,
       Element_Type    => Lookup_Cache_Entry,
       Hash            => Hash,
@@ -447,15 +447,15 @@ package Langkit_Support.Lexical_Env is
       --  environment that owns this pool. As a consequence, this is allocated
       --  only for primary lexical environments that are rebindable.
 
-      Cached_Results : Results_Maps.Map;
+      Lookup_Cache : Lookup_Cache_Maps.Map;
       --  Cache for lexical environment lookups
 
-      Cache_Active : Boolean;
+      Lookup_Cache_Active : Boolean;
       --  Whether caching for lexical environment lookups is enabled for this
       --  lexical environment. We enable it for primary environments and
       --  disable it for grouped or orphaned ones.
 
-      Cache_Valid : Boolean := True;
+      Lookup_Cache_Valid : Boolean := True;
       --  Whether Cached_Results contains lookup results that can be currently
       --  reused (i.e. whether they are not stale).
 
@@ -648,18 +648,18 @@ private
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Type :=
-     (Parent                     => No_Env_Getter,
-      Transitive_Parent          => False,
-      Node                       => No_Element,
-      Referenced_Envs            => <>,
-      Map                        => Empty_Env_Map'Access,
-      Default_MD                 => Empty_Metadata,
-      Rebindings                 => null,
-      Rebindings_Pool            => null,
-      Ref_Count                  => No_Refcount,
-      Cache_Active               => False,
-      Cache_Valid                => False,
-      Cached_Results             => Results_Maps.Empty_Map);
+     (Parent              => No_Env_Getter,
+      Transitive_Parent   => False,
+      Node                => No_Element,
+      Referenced_Envs     => <>,
+      Map                 => Empty_Env_Map'Access,
+      Default_MD          => Empty_Metadata,
+      Rebindings          => null,
+      Rebindings_Pool     => null,
+      Ref_Count           => No_Refcount,
+      Lookup_Cache_Active => False,
+      Lookup_Cache_Valid  => False,
+      Lookup_Cache        => Lookup_Cache_Maps.Empty_Map);
 
    --  Because of circular elaboration issues, we cannot call Hash here to
    --  compute the real hash. Using a dummy precomputed one is probably enough.
