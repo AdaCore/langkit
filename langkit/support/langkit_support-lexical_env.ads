@@ -381,10 +381,24 @@ package Langkit_Support.Lexical_Env is
    --  Key in environment lookup caches. Basically the parameters for the Get
    --  functiont that are relevant for caching.
 
-   type Result_Cache_State is (Computing, Computed, None);
+   type Lookup_Cache_Entry_State is (Computing, Computed, None);
+   --  Status of an entry in lexical environment lookup caches.
+   --
+   --  Computing represents the dummy entry that is inserted during original
+   --  computation. That means that a cache hit that returns a Computing entry
+   --  reveals an infinite recursion (a lexical environment lookup that calls
+   --  itself recursively).
+   --
+   --  Computed represents an entry whose elements are fine to be used as a
+   --  cache hit.
+   --
+   --  None represents a cleared cache entry, i.e. getting it out of a cache
+   --  means there's a cache miss. Using this state instead of just removing
+   --  the cache is used to avoid destroying the cache map when clearing
+   --  caches.
 
    type Result_Val is record
-      State    : Result_Cache_State;
+      State    : Lookup_Cache_Entry_State;
       Elements : Lookup_Result_Item_Vectors.Vector;
    end record;
    --  The result of an env get
