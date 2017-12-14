@@ -368,18 +368,18 @@ package Langkit_Support.Lexical_Env is
    Empty_Lookup_Result_Array : Lookup_Result_Array renames
       Lookup_Result_Item_Vectors.Empty_Array;
 
-   type Result_Key is record
-      Key        : Symbol_Type;
+   type Lookup_Cache_Key is record
+      Symbol : Symbol_Type;
       --  Symbol for this lookup
 
       Rebindings : Env_Rebindings;
       --  Rebindings used for this lookup
 
-      Metadata   : Element_Metadata;
+      Metadata : Element_Metadata;
       --  Metadata used for this lookup
    end record;
-   --  Represents a key in the env lookup caches. Basically the parameters to
-   --  Get that are important for caching.
+   --  Key in environment lookup caches. Basically the parameters for the Get
+   --  functiont that are relevant for caching.
 
    type Result_Cache_State is (Computing, Computed, None);
 
@@ -391,14 +391,14 @@ package Langkit_Support.Lexical_Env is
 
    No_Result_Val : constant Result_Val := (None, Empty_Lookup_Result_Vector);
 
-   function Hash (Self : Result_Key) return Hash_Type
+   function Hash (Self : Lookup_Cache_Key) return Hash_Type
    is
      (Combine
-        (Combine (Hash (Self.Key), Hash (Self.Rebindings)),
+        (Combine (Hash (Self.Symbol), Hash (Self.Rebindings)),
          Metadata_Hash (Self.Metadata)));
 
    package Results_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Result_Key,
+     (Key_Type        => Lookup_Cache_Key,
       Element_Type    => Result_Val,
       Hash            => Hash,
       Equivalent_Keys => "=",

@@ -587,7 +587,8 @@ package body Langkit_Support.Lexical_Env is
       C                 : Cursor := Internal_Envs.No_Element;
       Elements          : Internal_Map_Element_Vectors.Vector;
 
-      Res_Key           : constant Result_Key := (Key, Rebindings, Metadata);
+      Res_Key           : constant Lookup_Cache_Key :=
+        (Key, Rebindings, Metadata);
       Cached_Res_Cursor : Results_Maps.Cursor;
       Res_Val           : Result_Val;
       Inserted          : Boolean;
