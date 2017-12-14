@@ -1546,35 +1546,11 @@ package body Langkit_Support.Lexical_Env is
               else Ret);
    end Get_Parent_Env;
 
-   -------------------------------
-   -- Recompute_Referenced_Envs --
-   -------------------------------
-
-   procedure Recompute_Referenced_Envs
-     (Self          : Lexical_Env)
-   is
-      R : access Referenced_Env;
-   begin
-      if Self = Null_Lexical_Env then
-         return;
-      end if;
-
-      for I in Self.Env.Referenced_Envs.First_Index
-        .. Self.Env.Referenced_Envs.Last_Index
-      loop
-         R := Self.Env.Referenced_Envs.Get_Access (I);
-         Resolve (R.Getter);
-         R.State := Active;
-      end loop;
-   end Recompute_Referenced_Envs;
-
    --------------------------------
    -- Deactivate_Referenced_Envs --
    --------------------------------
 
-   procedure Deactivate_Referenced_Envs
-     (Self : Lexical_Env)
-   is
+   procedure Deactivate_Referenced_Envs (Self : Lexical_Env) is
       R : access Referenced_Env;
    begin
       if Self = Null_Lexical_Env then
@@ -1590,12 +1566,32 @@ package body Langkit_Support.Lexical_Env is
       end if;
 
       for I in Self.Env.Referenced_Envs.First_Index
-        .. Self.Env.Referenced_Envs.Last_Index
+            .. Self.Env.Referenced_Envs.Last_Index
       loop
          R := Self.Env.Referenced_Envs.Get_Access (I);
          R.State := Inactive;
       end loop;
    end Deactivate_Referenced_Envs;
+
+   -------------------------------
+   -- Recompute_Referenced_Envs --
+   -------------------------------
+
+   procedure Recompute_Referenced_Envs (Self : Lexical_Env) is
+      R : access Referenced_Env;
+   begin
+      if Self = Null_Lexical_Env then
+         return;
+      end if;
+
+      for I in Self.Env.Referenced_Envs.First_Index
+            .. Self.Env.Referenced_Envs.Last_Index
+      loop
+         R := Self.Env.Referenced_Envs.Get_Access (I);
+         Resolve (R.Getter);
+         R.State := Active;
+      end loop;
+   end Recompute_Referenced_Envs;
 
    --------------
    -- Is_Stale --

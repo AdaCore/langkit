@@ -492,13 +492,21 @@ package Langkit_Support.Lexical_Env is
    --  meaning of arguments.
 
    procedure Deactivate_Referenced_Envs (Self : Lexical_Env);
-   --  This procedure is meant to be called before calling
-   --  Recompute_Referenced_Envs, on every referenced envs reachable from this
-   --  (so including every referenced envs in the parents).
+   --  Invalidate caches in Self. This:
+   --
+   --    * invalidates the environment lookup cache;
+   --    * invalidates the cached parent environment link (if the parent link
+   --      is dynamic);
+   --    * deactivate referenced environments.
 
    procedure Recompute_Referenced_Envs (Self : Lexical_Env);
-   --  This procedure will recompute the referenced envs for this env, meaning,
-   --  re-resolve the env they point to.
+   --  Recompute the referenced environments for this environment. In other
+   --  words, re-resolve the R.Getter for all referenced environments R in
+   --  Self.
+   --
+   --  Before calling this, one must call Deactivate_Referenced_Envs on every
+   --  referenced environment reachable from Self: referenced environments in
+   --  Self, but also referenced environments in Self's parents.
 
    function Get
      (Self       : Lexical_Env;
