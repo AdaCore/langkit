@@ -8,7 +8,7 @@ from testsuite_support.base_driver import BaseDriver, catch_test_errors
 
 
 class PythonDriver(BaseDriver):
-    TIMEOUT = 300
+    TIMEOUT = 600
 
     #
     # Driver entry poins
