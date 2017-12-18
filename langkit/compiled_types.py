@@ -853,9 +853,12 @@ class Argument(object):
     def type(self):
         return self.var.type
 
+    @property
+    def dsl_name(self):
+        return self.name.lower
+
     def __repr__(self):
-        return '<Argument {} : {}>'.format(self.name.lower,
-                                           self.type.name.camel)
+        return '<Argument {} : {}>'.format(self.dsl_name, self.type.dsl_name)
 
 
 class AbstractNodeData(object):
