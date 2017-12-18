@@ -4231,6 +4231,7 @@ class LocalVars(object):
             self.vars = vars
             self.name = name
             self.type = type
+            assert self.type is None or isinstance(self.type, CompiledType)
 
             self._scope = None
             """
