@@ -1,0 +1,14 @@
+Processing <Block foo 2:1-2:16> (0)
+  parent = <Block foo 2:1-2:16>
+  new = <Block new_baz 8:1-8:18>
+  old = <Block new_baz 8:1-8:18>
+Processing <Block foo 2:1-2:16> (1)
+  parent = <Block foo 2:1-2:16>
+  new = <Block new_bar 5:1-5:22>
+  old = <Block new_bar 5:1-5:22>
+Processing <Block foo 2:1-2:16> (2)
+  parent = raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : dereferencing a null access
+  new = raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : dereferencing a null access
+  old = raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : dereferencing a null access
+main.py: Done.
+Done
