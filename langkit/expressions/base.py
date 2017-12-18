@@ -4077,7 +4077,7 @@ class FieldAccessExpr(BasicExpr):
             constructor.
         """
         super(FieldAccessExpr, self).__init__(
-            'Fld', '{}.{}', result_type,
+            'Fld', '{}.{}', resolve_type(result_type),
             [NullCheckExpr(prefix_expr), field_name],
             requires_incref=do_explicit_incref,
             abstract_expr=abstract_expr,
