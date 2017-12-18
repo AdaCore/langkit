@@ -1928,7 +1928,7 @@ class CompileCtx(object):
                    'return type' if f.is_property else 'type',
                    [f.qualname])
             for arg in f.natural_arguments:
-                expose(arg.type, f, '"{}" argument'.format(arg.name),
+                expose(arg.type, f, '"{}" argument'.format(arg.dsl_name),
                        [f.qualname])
 
     def lower_properties_dispatching(self):
