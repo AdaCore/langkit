@@ -1150,8 +1150,7 @@ package body Langkit_Support.Lexical_Env is
    function Image (Self : Env_Rebindings) return Text_Type is
 
       function Image (Self : Lexical_Env) return Text_Type is
-        (if Self.Is_Refcounted
-         then "<synthetic>" else Element_Image (Self.Env.Node));
+        (Element_Image (Self.Env.Node));
 
       function Rebinding_Image (Self : Env_Rebindings) return Text_Type is
         (Image (Self.New_Env));
