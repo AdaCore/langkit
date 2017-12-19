@@ -1604,9 +1604,7 @@ package body Langkit_Support.Lexical_Env is
 
       Self.Env.Lookup_Cache_Valid := False;
 
-      if Self.Env.Parent /= No_Env_Getter
-        and then Self.Env.Parent.Dynamic
-      then
+      if Self.Env.Parent.Dynamic then
          Self.Env.Parent.Computed := False;
       end if;
 
