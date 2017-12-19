@@ -25,6 +25,9 @@ package body Langkit_Support.Lexical_Env is
        Version       => (if Owner /= No_Unit
                          then Get_Version (Owner) else 0)));
 
+   function OK_For_Rebindings (Self : Lexical_Env) return Boolean is
+     (not Self.Is_Refcounted and then Self.Env.Node /= No_Element);
+
    function Extract_Rebinding
      (Rebindings  : in out Env_Rebindings;
       Rebound_Env : Lexical_Env) return Lexical_Env;

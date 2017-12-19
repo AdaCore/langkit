@@ -227,10 +227,15 @@ package Langkit_Support.Lexical_Env is
    function Combine (L, R : Env_Rebindings) return Env_Rebindings;
    --  Return a new Env_Rebindings that combines rebindings from both L and R
 
+   function OK_For_Rebindings (Self : Lexical_Env) return Boolean;
+   --  Return whether Self is a lexical environment that can be used in
+   --  environment rebindings (for old or new env).
+
    function Append
      (Self             : Env_Rebindings;
       Old_Env, New_Env : Lexical_Env) return Env_Rebindings
-      with Pre => Is_Primary (Old_Env) and then Is_Primary (New_Env);
+      with Pre => OK_For_Rebindings (Old_Env)
+                  and then OK_For_Rebindings (New_Env);
    --  Create a new rebindings and register it to Self and to
    --  Old_Env/New_Env's analysis units.
 
@@ -238,7 +243,8 @@ package Langkit_Support.Lexical_Env is
      (Self    : Env_Rebindings;
       Old_Env : Lexical_Env;
       New_Env : Lexical_Env) return Env_Rebindings
-      with Pre => Is_Primary (Old_Env) and then Is_Primary (New_Env);
+      with Pre => OK_For_Rebindings (Old_Env)
+                  and then OK_For_Rebindings (New_Env);
 
    function Hash is new Hashes.Hash_Access
      (Env_Rebindings_Type, Env_Rebindings);
@@ -629,11 +635,6 @@ package Langkit_Support.Lexical_Env is
    procedure Destroy (Self : in out Lexical_Env);
    --  Deallocate the resources allocated to the Self lexical environment. Must
    --  not be used directly for ref-counted envs.
-
-   function Is_Primary (Self : Lexical_Env) return Boolean is
-     (not Self.Is_Refcounted and then Self.Env.Node /= No_Element);
-   --  Return whether Self is a lexical environment that was created in an
-   --  environment specification.
 
    function Is_Stale (Env : Lexical_Env) return Boolean;
    --  Return whether Env points to a now defunct lexical env
