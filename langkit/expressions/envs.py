@@ -4,7 +4,7 @@ from langkit import names
 from langkit.compiled_types import T, no_compiled_type
 from langkit.diagnostics import check_source_language
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, BasicExpr, CallExpr, ComputingExpr,
+    AbstractExpression, AbstractVariable, CallExpr, ComputingExpr,
     FieldAccessExpr, GetSymbol, LiteralExpr, NullCheckExpr, NullExpr,
     PropertyDef, Self, attr_call, auto_attr, construct, dsl_document
 )
@@ -267,9 +267,9 @@ def env_node(self, env):
 
     :param AbstractExpression env: The source environment.
     """
-    return BasicExpr('Env_Node', '{}.Env.Node', T.root_node,
-                     [construct(env, T.LexicalEnvType)],
-                     abstract_expr=self)
+    return CallExpr('Env_Node', 'AST_Envs.Env_Node', T.root_node,
+                    [construct(env, T.LexicalEnvType)],
+                    abstract_expr=self)
 
 
 @auto_attr

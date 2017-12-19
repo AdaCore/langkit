@@ -26,7 +26,7 @@ package body Langkit_Support.Lexical_Env is
                    then Get_Version (Owner) else 0)));
 
    function OK_For_Rebindings (Self : Lexical_Env) return Boolean is
-     (Self.Kind = Primary and then Self.Env.Node /= No_Element);
+     (Self.Kind = Primary and then Env_Node (Self) /= No_Element);
 
    function Extract_Rebinding
      (Rebindings  : in out Env_Rebindings;
@@ -281,8 +281,8 @@ package body Langkit_Support.Lexical_Env is
             Old_Env.Env.Rebindings_Pool.Insert (New_Env, Result);
          end if;
 
-         Register_Rebinding (Old_Env.Env.Node, Result.all'Address);
-         Register_Rebinding (New_Env.Env.Node, Result.all'Address);
+         Register_Rebinding (Env_Node (Old_Env), Result.all'Address);
+         Register_Rebinding (Env_Node (New_Env), Result.all'Address);
          Check_Rebindings_Unicity (Result);
          return Result;
       end;
@@ -297,7 +297,7 @@ package body Langkit_Support.Lexical_Env is
       Old_Env : Lexical_Env;
       New_Env : Lexical_Env) return Env_Rebindings is
    begin
-      if not Is_Rebindable (Old_Env.Env.Node) then
+      if not Is_Rebindable (Env_Node (Old_Env)) then
          Raise_Property_Error ("Illegal lexical environment rebinding");
       end if;
 
@@ -1107,8 +1107,8 @@ package body Langkit_Support.Lexical_Env is
       while
          First_Rebindable_Parent /= Empty_Env
          and then
-           (First_Rebindable_Parent.Env.Node = No_Element
-            or else not Is_Rebindable (First_Rebindable_Parent.Env.Node))
+           (Env_Node (First_Rebindable_Parent) = No_Element
+            or else not Is_Rebindable (Env_Node (First_Rebindable_Parent)))
       loop
          declare
             Next : constant Lexical_Env := Parent (First_Rebindable_Parent);
@@ -1172,7 +1172,7 @@ package body Langkit_Support.Lexical_Env is
    function Image (Self : Env_Rebindings) return Text_Type is
 
       function Image (Self : Lexical_Env) return Text_Type is
-        (Element_Image (Self.Env.Node));
+        (Element_Image (Env_Node (Self)));
 
       function Rebinding_Image (Self : Env_Rebindings) return Text_Type is
         (Image (Self.New_Env));
@@ -1485,10 +1485,10 @@ package body Langkit_Support.Lexical_Env is
                  & (if Parent (Self) /= Empty_Env
                     then Parent_Env_Id else "null"));
       end if;
-      if Self.Env.Node /= No_Element then
+      if Env_Node (Self) /= No_Element then
          New_Arg;
          Append (Result, "Node="
-                 & Image (Element_Image (Self.Env.Node, False)));
+                 & Image (Element_Image (Env_Node (Self), False)));
       end if;
       if Dump_Addresses then
          New_Arg;
@@ -1590,6 +1590,15 @@ package body Langkit_Support.Lexical_Env is
               then Empty_Env
               else Ret);
    end Parent;
+
+   --------------
+   -- Env_Node --
+   --------------
+
+   function Env_Node (Self : Lexical_Env) return Element_T is
+   begin
+      return Self.Env.Node;
+   end Env_Node;
 
    --------------------------------
    -- Deactivate_Referenced_Envs --

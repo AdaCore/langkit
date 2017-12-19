@@ -423,6 +423,9 @@ package Langkit_Support.Lexical_Env is
    --  Return the parent lexical env for env Self or Empty_Env if Self has no
    --  parent.
 
+   function Env_Node (Self : Lexical_Env) return Element_T;
+   --  Return the element node associated to Self, if any
+
    generic
       type Index_Type is range <>;
       type Lexical_Env_Array is array (Index_Type range <>) of Lexical_Env;
