@@ -70,14 +70,12 @@ package body Langkit_Support.Lexical_Env is
       P : Lexical_Env;
    begin
       if Env.Env.Lookup_Cache_Valid then
-         P := Get_Env (Env.Env.Parent);
-         if P /= Null_Lexical_Env then
-            return Is_Lookup_Cache_Valid (P);
-         else
-            return True;
-         end if;
+         P := Parent (Env);
+         return (P in Null_Lexical_Env | Empty_Env
+                 or else Is_Lookup_Cache_Valid (P));
+      else
+         return False;
       end if;
-      return False;
    end Is_Lookup_Cache_Valid;
 
    ------------------------
@@ -1484,7 +1482,7 @@ package body Langkit_Support.Lexical_Env is
          New_Arg;
          Append (Result,
                  "Parent="
-                 & (if Self.Env.Parent /= No_Env_Getter
+                 & (if Parent (Self) /= Empty_Env
                     then Parent_Env_Id else "null"));
       end if;
       if Self.Env.Node /= No_Element then
@@ -1550,7 +1548,7 @@ package body Langkit_Support.Lexical_Env is
                   Dump_Addresses => True));
          end;
          Id := Id + 1;
-         E := Get_Env (E.Env.Parent);
+         E := Parent (E);
       end loop;
       return To_String (Result);
    end Lexical_Env_Parent_Chain;
