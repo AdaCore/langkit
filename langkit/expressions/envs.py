@@ -362,6 +362,19 @@ def rebindings_parent(self, rebindings):
 
 
 @auto_attr
+def concat_rebindings(self, l_rebindings, r_rebindings):
+    """
+    Functionally append a rebinding from `old_env` to `new_env` (two lexical
+    environments) on top of `rebindings` (a chain of rebindings).
+    """
+    return CallExpr('Rebinding', 'AST_Envs.Combine',
+                    T.EnvRebindingsType,
+                    [construct(l_rebindings, T.EnvRebindingsType),
+                     construct(r_rebindings, T.EnvRebindingsType)],
+                    abstract_expr=self)
+
+
+@auto_attr
 def rebind_env(self, env, rebindings):
     """
     Return a new environment based on `env` to include the given `rebindings`.
