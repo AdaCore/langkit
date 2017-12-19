@@ -573,8 +573,9 @@ package Langkit_Support.Lexical_Env is
    function Orphan (Self : Lexical_Env) return Lexical_Env;
    --  Return a dynamically allocated copy of Self that has no parent
 
-   function Get_Parent_Env (Self : Lexical_Env) return Lexical_Env;
-   --  Return the parent lexical env for env Self, Empty_Env otherwise
+   function Parent (Self : Lexical_Env) return Lexical_Env;
+   --  Return the parent lexical env for env Self or Empty_Env if Self has no
+   --  parent.
 
    generic
       type Index_Type is range <>;

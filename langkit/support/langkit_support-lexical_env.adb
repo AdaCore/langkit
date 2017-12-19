@@ -693,7 +693,7 @@ package body Langkit_Support.Lexical_Env is
       --  Phase 3: Get elements in parent envs
 
       if Recursive or Self.Env.Transitive_Parent then
-         Parent_Env := Get_Parent_Env (Self);
+         Parent_Env := Parent (Self);
 
          Parent_Rebindings :=
            (if Env /= Self
@@ -1560,17 +1560,17 @@ package body Langkit_Support.Lexical_Env is
       Put_Line (Lexical_Env_Parent_Chain (Env));
    end Dump_Lexical_Env_Parent_Chain;
 
-   --------------------
-   -- Get_Parent_Env --
-   --------------------
+   ------------
+   -- Parent --
+   ------------
 
-   function Get_Parent_Env (Self : Lexical_Env) return Lexical_Env is
+   function Parent (Self : Lexical_Env) return Lexical_Env is
       Ret : constant Lexical_Env := Get_Env (Self.Env.Parent);
    begin
       return (if Ret = Null_Lexical_Env
               then Empty_Env
               else Ret);
-   end Get_Parent_Env;
+   end Parent;
 
    --------------------------------
    -- Deactivate_Referenced_Envs --
