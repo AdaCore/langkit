@@ -1,65 +1,32 @@
 --  Test that the Equivalence function for lexical envs works properly
 
-with Ada.Containers; use Ada.Containers;
-with Ada.Text_IO;    use Ada.Text_IO;
-
-with System;
+with Ada.Text_IO; use Ada.Text_IO;
 
 with Langkit_Support.Lexical_Env;
 with Langkit_Support.Text; use Langkit_Support.Text;
 
+with Support; use Support;
+
 procedure Main is
-
-   type Metadata is record
-      I : Integer;
-   end record;
-
-   Default_MD : constant Metadata := (I => 0);
-
-   function Element_Hash (C : Character) return Hash_Type is (0);
-   function Metadata_Hash (MD : Metadata) return Hash_Type is (0);
-
-   procedure Raise_Property_Error (Message : String := "") is
-   begin
-      raise Program_Error;
-   end Raise_Property_Error;
-
-   function Combine (L, R : Metadata) return Metadata is ((I => L.I + R.I));
-   function Parent (Node : Character) return Character is (' ');
-   function Can_Reach (Node, From : Character) return Boolean is (True);
-   function Is_Rebindable (Node : Character) return Boolean is (True);
-
-   function Element_Image
-     (Node : Character; Short : Boolean := True) return Text_Type
-   is (To_Text ("'" & Node & "'"));
-
-   procedure Register_Rebinding (Node : Character; Rebinding : System.Address)
-   is null;
-
-   function Get_Version (B : Boolean) return Natural is (0);
-
-   package Envs is new Langkit_Support.Lexical_Env
-     (Unit_T               => Boolean,
-      Get_Version          => Get_Version,
-      No_Unit              => False,
-      Element_T            => Character,
-      Element_Metadata     => Metadata,
-      No_Element           => ' ',
-      Empty_Metadata       => Default_MD,
-      Element_Hash         => Element_Hash,
-      Metadata_Hash        => Metadata_Hash,
-      Raise_Property_Error => Raise_Property_Error,
-      Combine              => Combine,
-      Can_Reach            => Can_Reach,
-      Is_Rebindable        => Is_Rebindable,
-      Element_Image        => Element_Image,
-      Register_Rebinding   => Register_Rebinding);
    use Envs;
 
    Root_A1 : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Node => 'A', Ref_Count => No_Refcount, others => <>));
+     (Kind => Primary, Node => 'A', Ref_Count => No_Refcount, others => <>));
    Root_A2 : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Root_A1.Env.all'Update (Ref_Count => 1)));
+     (Kind => Rebound,
+      Parent => Root_A1.Env.Parent,
+      Transitive_Parent => Root_A1.Env.Transitive_Parent,
+      Node => Root_A1.Env.Node,
+      Referenced_Envs => Root_A1.Env.Referenced_Envs,
+      Map => Root_A1.Env.Map,
+      Default_MD => Root_A1.Env.Default_MD,
+      Rebindings => Root_A1.Env.Rebindings,
+      Rebindings_Pool => Root_A1.Env.Rebindings_Pool,
+      Lookup_Cache => Root_A1.Env.Lookup_Cache,
+      Lookup_Cache_Active => Root_A1.Env.Lookup_Cache_Active,
+      Lookup_Cache_Valid => Root_A1.Env.Lookup_Cache_Valid,
+      Ref_Count => 1));
+
    Root_A3 : Lexical_Env := Wrap (new Lexical_Env_Type'(Root_A2.Env.all));
 
    Root_A2_Getter : constant Env_Getter := Simple_Env_Getter (Root_A2);

@@ -18,15 +18,15 @@ package body Langkit_Support.Lexical_Env is
      (Env   : Lexical_Env_Access;
       Owner : Unit_T := No_Unit) return Lexical_Env
    is
-     ((Env           => Env,
-       Hash          => Hash (Env),
-       Is_Refcounted => Env /= null and then Env.Ref_Count /= No_Refcount,
-       Owner         => Owner,
-       Version       => (if Owner /= No_Unit
-                         then Get_Version (Owner) else 0)));
+     ((Env     => Env,
+       Hash    => Hash (Env),
+       Kind    => (if Env = null then Primary else Env.Kind),
+       Owner   => Owner,
+       Version => (if Owner /= No_Unit
+                   then Get_Version (Owner) else 0)));
 
    function OK_For_Rebindings (Self : Lexical_Env) return Boolean is
-     (not Self.Is_Refcounted and then Self.Env.Node /= No_Element);
+     (Self.Kind = Primary and then Self.Env.Node /= No_Element);
 
    function Extract_Rebinding
      (Rebindings  : in out Env_Rebindings;
@@ -352,7 +352,8 @@ package body Langkit_Support.Lexical_Env is
       end if;
       return Wrap
         (new Lexical_Env_Type'
-           (Parent              => Parent,
+           (Kind                => Primary,
+            Parent              => Parent,
             Transitive_Parent   => Transitive_Parent,
             Node                => Node,
             Referenced_Envs     => <>,
@@ -850,7 +851,8 @@ package body Langkit_Support.Lexical_Env is
    begin
       return Wrap
         (new Lexical_Env_Type'
-           (Parent              => No_Env_Getter,
+           (Kind                => Orphaned,
+            Parent              => No_Env_Getter,
             Transitive_Parent   => False,
             Node                => Env.Node,
             Referenced_Envs     => Env.Referenced_Envs.Copy,
@@ -880,7 +882,8 @@ package body Langkit_Support.Lexical_Env is
             return Empty_Env;
          when others =>
             N := Wrap (new Lexical_Env_Type'
-                         (Parent              => No_Env_Getter,
+                         (Kind                => Grouped,
+                          Parent              => No_Env_Getter,
                           Transitive_Parent   => False,
                           Node                => No_Element,
                           Referenced_Envs     => <>,
@@ -917,7 +920,8 @@ package body Langkit_Support.Lexical_Env is
 
       return N : constant Lexical_Env :=
         Wrap (new Lexical_Env_Type'
-                (Parent            => No_Env_Getter,
+                (Kind              => Rebound,
+                 Parent            => No_Env_Getter,
                  Transitive_Parent => False,
                  Node              => Base_Env.Env.Node,
                  Referenced_Envs   => <>,
@@ -957,13 +961,15 @@ package body Langkit_Support.Lexical_Env is
    procedure Destroy (Self : in out Lexical_Env) is
       procedure Free is new Ada.Unchecked_Deallocation
         (Lexical_Env_Type, Lexical_Env_Access);
+
+      Is_Primary : constant Boolean := Self.Kind = Primary;
    begin
       --  Do not free the internal map for ref-counted allocated environments
       --  as all maps are owned by analysis unit owned environments.
 
       Reset_Lookup_Cache (Self);
 
-      if not Self.Is_Refcounted then
+      if Is_Primary then
          for Elts of Self.Env.Map.all loop
             Internal_Map_Element_Vectors.Destroy (Elts);
          end loop;
@@ -979,7 +985,7 @@ package body Langkit_Support.Lexical_Env is
       end loop;
       Self.Env.Referenced_Envs.Destroy;
 
-      if not Self.Is_Refcounted and then Self.Env.Rebindings_Pool /= null then
+      if Is_Primary and then Self.Env.Rebindings_Pool /= null then
          Destroy (Self.Env.Rebindings_Pool);
       end if;
 
@@ -993,7 +999,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Inc_Ref (Self : Lexical_Env) is
    begin
-      if Self.Is_Refcounted then
+      if Self.Kind /= Primary then
          Self.Env.Ref_Count := Self.Env.Ref_Count + 1;
       end if;
    end Inc_Ref;
@@ -1004,7 +1010,7 @@ package body Langkit_Support.Lexical_Env is
 
    procedure Dec_Ref (Self : in out Lexical_Env) is
    begin
-      if not Self.Is_Refcounted then
+      if Self.Kind = Primary then
          return;
       end if;
 
@@ -1223,11 +1229,11 @@ package body Langkit_Support.Lexical_Env is
       end Equivalent;
 
    begin
-      --  Optimization: if we have two un-refcounted environments, don't go
-      --  through structural comparison: we can use pointer equality as each
-      --  instance has its own identity.
+      --  Optimization: if we have two primary environments, don't go through
+      --  structural comparison: we can use pointer equality as each instance
+      --  has its own identity.
 
-      if not L.Is_Refcounted and then not R.Is_Refcounted then
+      if L.Kind = Primary and then R.Kind = Primary then
          return L = R;
       end if;
 
@@ -1455,7 +1461,7 @@ package body Langkit_Support.Lexical_Env is
          New_Arg;
          Append (Result, "Empty");
       end if;
-      if Self.Is_Refcounted then
+      if Self.Kind /= Primary then
          New_Arg;
          Append (Result, "Synthetic");
       end if;

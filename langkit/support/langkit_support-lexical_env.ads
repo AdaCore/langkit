@@ -118,6 +118,21 @@ package Langkit_Support.Lexical_Env is
    -- Lexical_Env Type --
    ----------------------
 
+   type Lexical_Env_Kind is (Primary, Orphaned, Grouped, Rebound);
+   --  Kind of lexical environment. Tells how a lexical environment was
+   --  created.
+   --
+   --  Primary ones are all lexical environments that are not ref-counted.
+   --  These are created by lexical environment population plus the special
+   --  Empty_Env, and each context's root scope.
+   --
+   --  Orphaned ones are copies whose parents have been stripped.
+   --
+   --  Grouped ones are just a collection of environments glued together as if
+   --  they were only one environment.
+   --
+   --  Rebound ones are copies annotated with environment rebindings.
+
    type Lexical_Env_Type;
    --  Value type for lexical envs
 
@@ -132,11 +147,11 @@ package Langkit_Support.Lexical_Env is
       --  even after Env is deallocated. This makes it possible to destroy a
       --  hash table that contains references to deallocated environments.
 
-      Is_Refcounted : Boolean;
-      --  Whether Env is ref-counted. When it's not, we can avoid calling
-      --  Dec_Ref at destruction time: This is useful because at analysis unit
-      --  destruction time, this may be a dangling access to an environment
-      --  from another unit.
+      Kind : Lexical_Env_Kind;
+      --  The kind of Env. When it is Primary, we can avoid calling Dec_Ref at
+      --  destruction time. This is useful because at analysis unit destruction
+      --  time, this may be a dangling access to an environment from another
+      --  unit.
 
       Owner : Unit_T := No_Unit;
       --  Unit that owns this lexical environment
@@ -147,7 +162,7 @@ package Langkit_Support.Lexical_Env is
    end record;
    --  Reference to a lexical environment. This is the type that shall be used.
 
-   Null_Lexical_Env : constant Lexical_Env := (null, 0, False, No_Unit, 0);
+   Null_Lexical_Env : constant Lexical_Env := (null, 0, Primary, No_Unit, 0);
 
    type Lexical_Env_Resolver is access
      function (Ref : Entity) return Lexical_Env;
@@ -580,7 +595,7 @@ package Langkit_Support.Lexical_Env is
    --  Special constant for the Ref_Count field below that means: this lexical
    --  environment is not ref-counted.
 
-   type Lexical_Env_Type is record
+   type Lexical_Env_Type (Kind : Lexical_Env_Kind) is record
       Parent : Env_Getter := No_Env_Getter;
       --  Parent environment for this env. Null by default.
 
@@ -667,7 +682,8 @@ private
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Type :=
-     (Parent              => No_Env_Getter,
+     (Kind                => Primary,
+      Parent              => No_Env_Getter,
       Transitive_Parent   => False,
       Node                => No_Element,
       Referenced_Envs     => <>,
@@ -683,10 +699,10 @@ private
    --  Because of circular elaboration issues, we cannot call Hash here to
    --  compute the real hash. Using a dummy precomputed one is probably enough.
    Empty_Env : constant Lexical_Env :=
-     (Env           => Empty_Env_Record'Access,
-      Hash          => 0,
-      Is_Refcounted => False,
-      Owner         => No_Unit,
-      Version       => 0);
+     (Env     => Empty_Env_Record'Access,
+      Hash    => 0,
+      Kind    => Primary,
+      Owner   => No_Unit,
+      Version => 0);
 
 end Langkit_Support.Lexical_Env;

@@ -246,8 +246,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -------------
 
    procedure Destroy (Env : in out Lexical_Env_Access) is
-      Mutable_Env : Lexical_Env :=
-        (Env, 0, Env.Ref_Count /= No_Refcount, No_Analysis_Unit, 0);
+      Mutable_Env : Lexical_Env := (Env, 0, Env.Kind, No_Analysis_Unit, 0);
    begin
       Destroy (Mutable_Env);
       Env := null;
@@ -1684,10 +1683,10 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
       function Trace_Image (Env : Lexical_Env) return String is
       begin
-         if Env.Is_Refcounted then
-            return "<LexicalEnv synthetic>";
-         else
+         if Env.Kind = Primary then
             return "<LexicalEnv for " & Trace_Image (Env.Env.Node) & ">";
+         else
+            return "<LexicalEnv synthetic>";
          end if;
       end Trace_Image;
 
