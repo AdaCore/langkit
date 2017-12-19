@@ -1105,19 +1105,24 @@ package body Langkit_Support.Lexical_Env is
       --  Look for the first environment in From_Env's parent chain whose Node
       --  is rebindable. Use null if there is no such env.
       First_Rebindable_Parent := From_Env;
+      Inc_Ref (First_Rebindable_Parent);
       while
-         First_Rebindable_Parent /= Null_Lexical_Env
+         First_Rebindable_Parent /= Empty_Env
          and then
            (First_Rebindable_Parent.Env.Node = No_Element
             or else not Is_Rebindable (First_Rebindable_Parent.Env.Node))
       loop
-         First_Rebindable_Parent :=
-            Get_Env (First_Rebindable_Parent.Env.Parent);
+         declare
+            Next : constant Lexical_Env := Parent (First_Rebindable_Parent);
+         begin
+            Dec_Ref (First_Rebindable_Parent);
+            First_Rebindable_Parent := Next;
+         end;
       end loop;
 
       --  If there is no rebindable parent anywhere, it means we cannot have
       --  rebindings. In that case, shed them all, i.e. return null rebindings.
-      if First_Rebindable_Parent = Null_Lexical_Env then
+      if First_Rebindable_Parent = Empty_Env then
          return null;
       end if;
 
@@ -1129,6 +1134,7 @@ package body Langkit_Support.Lexical_Env is
          Result := Result.Parent;
       end loop;
 
+      Dec_Ref (First_Rebindable_Parent);
       return Result;
    end Shed_Rebindings;
 
