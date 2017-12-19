@@ -243,6 +243,8 @@ package Langkit_Support.Lexical_Env is
    function Hash is new Hashes.Hash_Access
      (Env_Rebindings_Type, Env_Rebindings);
 
+   function Image (Self : Env_Rebindings) return Text_Type;
+
    -------------------------------------
    -- Arrays of elements and entities --
    -------------------------------------
@@ -284,195 +286,14 @@ package Langkit_Support.Lexical_Env is
      (Referenced_Env);
    --  Vectors of referenced envs, used to store referenced environments
 
-   ----------------------------------------
-   -- Lexical environment representation --
-   ----------------------------------------
+   ------------------------------------
+   -- Lexical environment public API --
+   ------------------------------------
 
    type Entity_Resolver is access function (Ref : Entity) return Entity;
    --  Callback type for the lazy entity resolution mechanism. Such functions
    --  must take a "reference" entity (e.g. a name) and return the referenced
    --  entity.
-
-   package Lexical_Env_Vectors is new Langkit_Support.Vectors (Lexical_Env);
-
-   type Internal_Map_Element is record
-      Element : Element_T;
-      --  If Resolver is null, this is the element that lexical env lookup must
-      --  return. Otherwise, it is the argument to pass to Resolver in order to
-      --  get the result.
-
-      MD : Element_Metadata;
-      --  Metadata associated to Element
-
-      Resolver : Entity_Resolver;
-   end record;
-
-   package Internal_Map_Element_Vectors is new Langkit_Support.Vectors
-     (Internal_Map_Element);
-
-   subtype Internal_Map_Element_Array is
-      Internal_Map_Element_Vectors.Elements_Array;
-
-   package Internal_Envs is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Symbol_Type,
-      Element_Type    => Internal_Map_Element_Vectors.Vector,
-      Hash            => Hash,
-      Equivalent_Keys => "=",
-      "="             => Internal_Map_Element_Vectors."=");
-
-   type Internal_Map is access all Internal_Envs.Map;
-   --  Internal maps of Symbols to vectors of elements
-
-   procedure Destroy is new Ada.Unchecked_Deallocation
-     (Internal_Envs.Map, Internal_Map);
-
-   function Equivalent (L, R : Lexical_Env) return Boolean;
-   --  Return whether L and R are equivalent lexical environments: same
-   --  envs topology, same internal map, etc.
-
-   function Hash (Env : Lexical_Env_Access) return Hash_Type;
-   function Hash (Env : Lexical_Env) return Hash_Type is (Env.Hash);
-
-   package Env_Rebindings_Pools is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Lexical_Env,
-      Element_Type    => Env_Rebindings,
-      Hash            => Hash,
-      Equivalent_Keys => "=",
-      "="             => "=");
-
-   type Env_Rebindings_Pool is access all Env_Rebindings_Pools.Map;
-   --  Pool of env rebindings to be stored in a Lexical_Env
-
-   procedure Destroy is new Ada.Unchecked_Deallocation
-     (Env_Rebindings_Pools.Map, Env_Rebindings_Pool);
-
-   No_Refcount : constant Integer := -1;
-   --  Special constant for the Ref_Count field below that means: this lexical
-   --  environment is not ref-counted.
-
-   type Lookup_Result_Item is record
-      E : Entity;
-      --  Returned entity
-
-      Filter_From : Boolean;
-      --  Wether to filter with Can_Reach
-
-      Override_Filter_Node : Element_T := No_Element;
-      --  Node to use when filtering with Can_Reach, if different from the
-      --  Entity.
-   end record;
-   --  Lexical environment lookup result item. Lookups return arrays of these.
-
-   package Lookup_Result_Item_Vectors is new Langkit_Support.Vectors
-     (Lookup_Result_Item, Small_Vector_Capacity => 2);
-
-   subtype Lookup_Result_Vector is Lookup_Result_Item_Vectors.Vector;
-   Empty_Lookup_Result_Vector : Lookup_Result_Vector renames
-      Lookup_Result_Item_Vectors.Empty_Vector;
-
-   subtype Lookup_Result_Array  is
-      Lookup_Result_Item_Vectors.Elements_Array;
-   Empty_Lookup_Result_Array : Lookup_Result_Array renames
-      Lookup_Result_Item_Vectors.Empty_Array;
-
-   type Lookup_Cache_Key is record
-      Symbol : Symbol_Type;
-      --  Symbol for this lookup
-
-      Rebindings : Env_Rebindings;
-      --  Rebindings used for this lookup
-
-      Metadata : Element_Metadata;
-      --  Metadata used for this lookup
-   end record;
-   --  Key in environment lookup caches. Basically the parameters for the Get
-   --  functiont that are relevant for caching.
-
-   type Lookup_Cache_Entry_State is (Computing, Computed, None);
-   --  Status of an entry in lexical environment lookup caches.
-   --
-   --  Computing represents the dummy entry that is inserted during original
-   --  computation. That means that a cache hit that returns a Computing entry
-   --  reveals an infinite recursion (a lexical environment lookup that calls
-   --  itself recursively).
-   --
-   --  Computed represents an entry whose elements are fine to be used as a
-   --  cache hit.
-   --
-   --  None represents a cleared cache entry, i.e. getting it out of a cache
-   --  means there's a cache miss. Using this state instead of just removing
-   --  the cache is used to avoid destroying the cache map when clearing
-   --  caches.
-
-   type Lookup_Cache_Entry is record
-      State    : Lookup_Cache_Entry_State;
-      Elements : Lookup_Result_Item_Vectors.Vector;
-   end record;
-   --  Result of a lexical environment lookup
-
-   No_Lookup_Cache_Entry : constant Lookup_Cache_Entry :=
-     (None, Empty_Lookup_Result_Vector);
-
-   function Hash (Self : Lookup_Cache_Key) return Hash_Type
-   is
-     (Combine
-        (Combine (Hash (Self.Symbol), Hash (Self.Rebindings)),
-         Metadata_Hash (Self.Metadata)));
-
-   package Lookup_Cache_Maps is new Ada.Containers.Hashed_Maps
-     (Key_Type        => Lookup_Cache_Key,
-      Element_Type    => Lookup_Cache_Entry,
-      Hash            => Hash,
-      Equivalent_Keys => "=",
-      "="             => "=");
-
-   type Lexical_Env_Type is record
-      Parent : Env_Getter := No_Env_Getter;
-      --  Parent environment for this env. Null by default.
-
-      Transitive_Parent : Boolean := False;
-      --  Whether the parent link is transitive or not
-
-      Node : Element_T;
-      --  Node for which this environment was created
-
-      Referenced_Envs : Referenced_Envs_Vectors.Vector;
-      --  A list of environments referenced by this environment
-
-      Map : Internal_Map := null;
-      --  Map containing mappings from symbols to elements for this env
-      --  instance. In the generated library, Elements will be AST nodes. If
-      --  the lexical env is refcounted, then it does not own this env.
-
-      Default_MD : Element_Metadata := Empty_Metadata;
-      --  Default metadata for this env instance
-
-      Rebindings : Env_Rebindings := null;
-
-      Rebindings_Pool : Env_Rebindings_Pool := null;
-      --  Cache for all parent-less env rebindings whose Old_Env is the lexical
-      --  environment that owns this pool. As a consequence, this is allocated
-      --  only for primary lexical environments that are rebindable.
-
-      Lookup_Cache : Lookup_Cache_Maps.Map;
-      --  Cache for lexical environment lookups
-
-      Lookup_Cache_Active : Boolean;
-      --  Whether caching for lexical environment lookups is enabled for this
-      --  lexical environment. We enable it for primary environments and
-      --  disable it for grouped or orphaned ones.
-
-      Lookup_Cache_Valid : Boolean := True;
-      --  Whether Cached_Results contains lookup results that can be currently
-      --  reused (i.e. whether they are not stale).
-
-      Ref_Count : Integer := 1;
-      --  For ref-counted lexical environments, this contains the number of
-      --  owners. It is initially set to 1. When it drops to 0, the env can be
-      --  destroyed.
-      --
-      --  For envs owned by analysis units, it is always No_Refcount.
-   end record;
 
    Empty_Env : constant Lexical_Env;
    --  Empty_Env is a magical lexical environment that will always be empty. We
@@ -602,12 +423,6 @@ package Langkit_Support.Lexical_Env is
        Rebindings : Env_Rebindings) return Lexical_Env;
    --  Return a new env based on Base_Env to include the given Rebindings
 
-   function Image (Self : Env_Rebindings) return Text_Type;
-
-   procedure Destroy (Self : in out Lexical_Env);
-   --  Deallocate the resources allocated to the Self lexical environment. Must
-   --  not be used directly for ref-counted envs.
-
    procedure Inc_Ref (Self : Lexical_Env);
    --  If Self is a ref-counted lexical env, increment this reference count. Do
    --  nothing otherwise.
@@ -622,10 +437,213 @@ package Langkit_Support.Lexical_Env is
    --  Return a new entity info from E_Info, shedding env rebindings that are
    --  not in the parent chain for the env From_Env.
 
+   function Equivalent (L, R : Lexical_Env) return Boolean;
+   --  Return whether L and R are equivalent lexical environments: same
+   --  envs topology, same internal map, etc.
+
+   function Hash (Env : Lexical_Env) return Hash_Type is (Env.Hash);
+
+   ---------------------------------------
+   -- Lexical environment lookup caches --
+   ---------------------------------------
+
+   type Lookup_Result_Item is record
+      E : Entity;
+      --  Returned entity
+
+      Filter_From : Boolean;
+      --  Wether to filter with Can_Reach
+
+      Override_Filter_Node : Element_T := No_Element;
+      --  Node to use when filtering with Can_Reach, if different from the
+      --  Entity.
+   end record;
+   --  Lexical environment lookup result item. Lookups return arrays of these.
+
+   package Lookup_Result_Item_Vectors is new Langkit_Support.Vectors
+     (Lookup_Result_Item, Small_Vector_Capacity => 2);
+
+   subtype Lookup_Result_Vector is Lookup_Result_Item_Vectors.Vector;
+   Empty_Lookup_Result_Vector : Lookup_Result_Vector renames
+      Lookup_Result_Item_Vectors.Empty_Vector;
+
+   subtype Lookup_Result_Array  is
+      Lookup_Result_Item_Vectors.Elements_Array;
+   Empty_Lookup_Result_Array : Lookup_Result_Array renames
+      Lookup_Result_Item_Vectors.Empty_Array;
+
+   type Lookup_Cache_Key is record
+      Symbol : Symbol_Type;
+      --  Symbol for this lookup
+
+      Rebindings : Env_Rebindings;
+      --  Rebindings used for this lookup
+
+      Metadata : Element_Metadata;
+      --  Metadata used for this lookup
+   end record;
+   --  Key in environment lookup caches. Basically the parameters for the Get
+   --  functiont that are relevant for caching.
+
+   type Lookup_Cache_Entry_State is (Computing, Computed, None);
+   --  Status of an entry in lexical environment lookup caches.
+   --
+   --  Computing represents the dummy entry that is inserted during original
+   --  computation. That means that a cache hit that returns a Computing entry
+   --  reveals an infinite recursion (a lexical environment lookup that calls
+   --  itself recursively).
+   --
+   --  Computed represents an entry whose elements are fine to be used as a
+   --  cache hit.
+   --
+   --  None represents a cleared cache entry, i.e. getting it out of a cache
+   --  means there's a cache miss. Using this state instead of just removing
+   --  the cache is used to avoid destroying the cache map when clearing
+   --  caches.
+
+   type Lookup_Cache_Entry is record
+      State    : Lookup_Cache_Entry_State;
+      Elements : Lookup_Result_Item_Vectors.Vector;
+   end record;
+   --  Result of a lexical environment lookup
+
+   No_Lookup_Cache_Entry : constant Lookup_Cache_Entry :=
+     (None, Empty_Lookup_Result_Vector);
+
+   function Hash (Self : Lookup_Cache_Key) return Hash_Type
+   is
+     (Combine
+        (Combine (Hash (Self.Symbol), Hash (Self.Rebindings)),
+         Metadata_Hash (Self.Metadata)));
+
+   package Lookup_Cache_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Lookup_Cache_Key,
+      Element_Type    => Lookup_Cache_Entry,
+      Hash            => Hash,
+      Equivalent_Keys => "=",
+      "="             => "=");
+
+   ----------------------------------------
+   -- Lexical environment representation --
+   ----------------------------------------
+
+   package Lexical_Env_Vectors is new Langkit_Support.Vectors (Lexical_Env);
+
+   type Internal_Map_Element is record
+      Element : Element_T;
+      --  If Resolver is null, this is the element that lexical env lookup must
+      --  return. Otherwise, it is the argument to pass to Resolver in order to
+      --  get the result.
+
+      MD : Element_Metadata;
+      --  Metadata associated to Element
+
+      Resolver : Entity_Resolver;
+   end record;
+
+   package Internal_Map_Element_Vectors is new Langkit_Support.Vectors
+     (Internal_Map_Element);
+
+   subtype Internal_Map_Element_Array is
+      Internal_Map_Element_Vectors.Elements_Array;
+
+   package Internal_Envs is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Symbol_Type,
+      Element_Type    => Internal_Map_Element_Vectors.Vector,
+      Hash            => Hash,
+      Equivalent_Keys => "=",
+      "="             => Internal_Map_Element_Vectors."=");
+
+   type Internal_Map is access all Internal_Envs.Map;
+   --  Internal maps of Symbols to vectors of elements
+
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (Internal_Envs.Map, Internal_Map);
+
+   package Env_Rebindings_Pools is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Lexical_Env,
+      Element_Type    => Env_Rebindings,
+      Hash            => Hash,
+      Equivalent_Keys => "=",
+      "="             => "=");
+
+   type Env_Rebindings_Pool is access all Env_Rebindings_Pools.Map;
+   --  Pool of env rebindings to be stored in a Lexical_Env
+
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (Env_Rebindings_Pools.Map, Env_Rebindings_Pool);
+
+   No_Refcount : constant Integer := -1;
+   --  Special constant for the Ref_Count field below that means: this lexical
+   --  environment is not ref-counted.
+
+   type Lexical_Env_Type is record
+      Parent : Env_Getter := No_Env_Getter;
+      --  Parent environment for this env. Null by default.
+
+      Transitive_Parent : Boolean := False;
+      --  Whether the parent link is transitive or not
+
+      Node : Element_T;
+      --  Node for which this environment was created
+
+      Referenced_Envs : Referenced_Envs_Vectors.Vector;
+      --  A list of environments referenced by this environment
+
+      Map : Internal_Map := null;
+      --  Map containing mappings from symbols to elements for this env
+      --  instance. In the generated library, Elements will be AST nodes. If
+      --  the lexical env is refcounted, then it does not own this env.
+
+      Default_MD : Element_Metadata := Empty_Metadata;
+      --  Default metadata for this env instance
+
+      Rebindings : Env_Rebindings := null;
+
+      Rebindings_Pool : Env_Rebindings_Pool := null;
+      --  Cache for all parent-less env rebindings whose Old_Env is the lexical
+      --  environment that owns this pool. As a consequence, this is allocated
+      --  only for primary lexical environments that are rebindable.
+
+      Lookup_Cache : Lookup_Cache_Maps.Map;
+      --  Cache for lexical environment lookups
+
+      Lookup_Cache_Active : Boolean;
+      --  Whether caching for lexical environment lookups is enabled for this
+      --  lexical environment. We enable it for primary environments and
+      --  disable it for grouped or orphaned ones.
+
+      Lookup_Cache_Valid : Boolean := True;
+      --  Whether Cached_Results contains lookup results that can be currently
+      --  reused (i.e. whether they are not stale).
+
+      Ref_Count : Integer := 1;
+      --  For ref-counted lexical environments, this contains the number of
+      --  owners. It is initially set to 1. When it drops to 0, the env can be
+      --  destroyed.
+      --
+      --  For envs owned by analysis units, it is always No_Refcount.
+   end record;
+
+   function Wrap
+     (Env   : Lexical_Env_Access;
+      Owner : Unit_T := No_Unit) return Lexical_Env;
+
+   procedure Destroy (Self : in out Lexical_Env);
+   --  Deallocate the resources allocated to the Self lexical environment. Must
+   --  not be used directly for ref-counted envs.
+
    function Is_Primary (Self : Lexical_Env) return Boolean is
      (not Self.Is_Refcounted and then Self.Env.Node /= No_Element);
    --  Return whether Self is a lexical environment that was created in an
    --  environment specification.
+
+   function Is_Stale (Env : Lexical_Env) return Boolean;
+   --  Return whether Env points to a now defunct lexical env
+
+   -------------------
+   -- Debug helpers --
+   -------------------
 
    function Lexical_Env_Image
      (Self           : Lexical_Env;
@@ -645,14 +663,9 @@ package Langkit_Support.Lexical_Env is
 
    procedure Dump_Lexical_Env_Parent_Chain (Env : Lexical_Env);
 
-   function Wrap
-     (Env   : Lexical_Env_Access;
-      Owner : Unit_T := No_Unit) return Lexical_Env;
-
-   function Is_Stale (Env : Lexical_Env) return Boolean;
-   --  Return whether Env points to a now defunct lexical env
-
 private
+
+   function Hash (Env : Lexical_Env_Access) return Hash_Type;
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Type :=
