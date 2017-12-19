@@ -893,7 +893,7 @@ package body Langkit_Support.Lexical_Env is
 
       return N : constant Lexical_Env :=
         Wrap (new Lexical_Env_Type'
-                (Parent            => Base_Env.Env.Parent,
+                (Parent            => No_Env_Getter,
                  Transitive_Parent => False,
                  Node              => Base_Env.Env.Node,
                  Referenced_Envs   => <>,
