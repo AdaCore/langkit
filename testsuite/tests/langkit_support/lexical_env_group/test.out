@@ -1,0 +1,7 @@
+Looking in Grouped (Recursive => True):
+  * '2'
+  * '1'
+  * '3'
+Looking in Grouped (Recursive => False):
+  * '2'
+  * '3'
