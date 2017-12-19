@@ -476,7 +476,9 @@ package body Langkit_Support.Lexical_Env is
       return Lookup_Result_Array
    is
 
-      Local_Results : Lookup_Result_Vector;
+      Local_Results      : Lookup_Result_Vector;
+      Current_Rebindings : Env_Rebindings;
+      Current_Metadata   : Element_Metadata;
 
       procedure Get_Refd_Elements (Self : in out Referenced_Env);
 
@@ -489,9 +491,34 @@ package body Langkit_Support.Lexical_Env is
 
       use Internal_Envs;
 
-      Current_Rebindings : Env_Rebindings;
+      function Get_Elements (Env : Lexical_Env) return Boolean;
 
-      Current_Metadata   : Element_Metadata;
+      function Get_Elements (Env : Lexical_Env) return Boolean is
+         C        : Cursor := Internal_Envs.No_Element;
+         Elements : Internal_Map_Element_Vectors.Vector;
+      begin
+         if Env.Env.Map /= null then
+            C := Env.Env.Map.Find (Key);
+         end if;
+
+         if Has_Element (C) then
+            Elements := Element (C);
+
+            --  We iterate in reverse, so that last inserted results are
+            --  returned first.
+
+            --  TODO??? Use "for ... of reverse" next GPL release
+            for I in reverse Elements.First_Index .. Elements.Last_Index loop
+               Append_Result
+                 (Elements.Get (I),
+                  Current_Metadata,
+                  Current_Rebindings);
+            end loop;
+            return True;
+         end if;
+
+         return False;
+      end Get_Elements;
 
       -------------------
       -- Append_Result --
@@ -589,14 +616,12 @@ package body Langkit_Support.Lexical_Env is
       Env               : Lexical_Env;
       Parent_Env        : Lexical_Env;
       Parent_Rebindings : Env_Rebindings;
-      C                 : Cursor := Internal_Envs.No_Element;
-      Elements          : Internal_Map_Element_Vectors.Vector;
 
       Res_Key           : constant Lookup_Cache_Key :=
         (Key, Rebindings, Metadata);
       Cached_Res_Cursor : Lookup_Cache_Maps.Cursor;
       Res_Val           : Lookup_Cache_Entry;
-      Inserted          : Boolean;
+      Inserted, Dummy   : Boolean;
       use Lookup_Cache_Maps;
 
       function Do_Cache return Boolean is
@@ -650,32 +675,19 @@ package body Langkit_Support.Lexical_Env is
 
       --  Phase 1: Get elements in own env if there are any
 
-      if Env.Env.Map /= null then
-         C := Env.Env.Map.Find (Key);
+      if not Get_Elements (Env) and then Env /= Self then
+         Dummy := Get_Elements (Self);
       end if;
 
-      if Has_Element (C) then
-         Elements := Element (C);
-
-         --  We iterate in reverse, so that last inserted results are
-         --  returned first.
-
-         --  TODO??? Use "for ... of reverse" next GPL release
-         for I in reverse Elements.First_Index .. Elements.Last_Index loop
-            Append_Result
-              (Elements.Get (I),
-               Current_Metadata,
-               Current_Rebindings);
-         end loop;
-      end if;
-
-      --  Phase 2: Get elements in referenced envs
+      --  Phase 2: Get elements in transitive referenced envs
 
       for I in
         Self.Env.Referenced_Envs.First_Index
           .. Self.Env.Referenced_Envs.Last_Index
       loop
-         Get_Refd_Elements (Self.Env.Referenced_Envs.Get_Access (I).all);
+         if Self.Env.Referenced_Envs.Get_Access (I).Is_Transitive then
+            Get_Refd_Elements (Self.Env.Referenced_Envs.Get_Access (I).all);
+         end if;
       end loop;
 
       --  Phase 3: Get elements in parent envs
@@ -694,6 +706,17 @@ package body Langkit_Support.Lexical_Env is
                Parent_Rebindings,
                Current_Metadata));
       end if;
+
+      --  Phase 4: Get elements in non transitive referenced envs
+
+      for I in
+        Self.Env.Referenced_Envs.First_Index
+          .. Self.Env.Referenced_Envs.Last_Index
+      loop
+         if not Self.Env.Referenced_Envs.Get_Access (I).Is_Transitive then
+            Get_Refd_Elements (Self.Env.Referenced_Envs.Get_Access (I).all);
+         end if;
+      end loop;
 
       Dec_Ref (Env);
 
