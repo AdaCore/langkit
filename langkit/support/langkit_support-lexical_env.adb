@@ -740,10 +740,10 @@ package body Langkit_Support.Lexical_Env is
    ---------
 
    function Get
-     (Self       : Lexical_Env;
-      Key        : Symbol_Type;
-      From       : Element_T := No_Element;
-      Recursive  : Boolean := True)
+     (Self      : Lexical_Env;
+      Key       : Symbol_Type;
+      From      : Element_T := No_Element;
+      Recursive : Boolean := True)
       return Entity_Array
    is
       FV : Entity_Vectors.Vector;

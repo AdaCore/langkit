@@ -365,10 +365,10 @@ package Langkit_Support.Lexical_Env is
    --  Self, but also referenced environments in Self's parents.
 
    function Get
-     (Self       : Lexical_Env;
-      Key        : Symbol_Type;
-      From       : Element_T := No_Element;
-      Recursive  : Boolean := True) return Entity_Array;
+     (Self      : Lexical_Env;
+      Key       : Symbol_Type;
+      From      : Element_T := No_Element;
+      Recursive : Boolean := True) return Entity_Array;
    --  Get the array of entities for this Key. If From is given, then
    --  elements will be filtered according to the Can_Reach primitive given
    --  as parameter for the generic package.
