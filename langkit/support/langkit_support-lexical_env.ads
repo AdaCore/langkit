@@ -327,28 +327,32 @@ package Langkit_Support.Lexical_Env is
       Node              : Element_T;
       Default_MD        : Element_Metadata := Empty_Metadata;
       Transitive_Parent : Boolean := False;
-      Owner             : Unit_T) return Lexical_Env;
-   --  Create a new un-refcounted lexical env
+      Owner             : Unit_T) return Lexical_Env
+      with Post => Create'Result.Kind = Primary;
+   --  Create a new primary lexical env
 
    procedure Add
      (Self     : Lexical_Env;
       Key      : Symbol_Type;
       Value    : Element_T;
       MD       : Element_Metadata := Empty_Metadata;
-      Resolver : Entity_Resolver := null);
+      Resolver : Entity_Resolver := null)
+      with Pre => Self.Kind = Primary;
    --  Add Value to the list of values for the key Key, with the metadata MD
 
    procedure Remove
      (Self  : Lexical_Env;
       Key   : Symbol_Type;
-      Value : Element_T);
+      Value : Element_T)
+      with Pre => Self.Kind = Primary;
    --  Remove Value from the list of values for the key Key
 
    procedure Reference
      (Self            : Lexical_Env;
       Referenced_From : Element_T;
       Resolver        : Lexical_Env_Resolver;
-      Transitive      : Boolean := False);
+      Transitive      : Boolean := False)
+      with Pre => Self.Kind = Primary;
    --  Add a dynamic reference from Self to the lexical environment computed
    --  calling Resolver on Referenced_From. This makes the content of this
    --  dynamic environment accessible when performing lookups on Self (see the
@@ -364,11 +368,13 @@ package Langkit_Support.Lexical_Env is
    procedure Reference
      (Self         : Lexical_Env;
       To_Reference : Lexical_Env;
-      Transitive   : Boolean := False);
+      Transitive   : Boolean := False)
+      with Pre => Self.Kind = Primary;
    --  Add a static reference from Self to To_Reference. See above for the
    --  meaning of arguments.
 
-   procedure Deactivate_Referenced_Envs (Self : Lexical_Env);
+   procedure Deactivate_Referenced_Envs (Self : Lexical_Env)
+      with Pre => Self.Kind = Primary;
    --  Invalidate caches in Self. This:
    --
    --    * invalidates the environment lookup cache;
@@ -376,7 +382,8 @@ package Langkit_Support.Lexical_Env is
    --      is dynamic);
    --    * deactivate referenced environments.
 
-   procedure Recompute_Referenced_Envs (Self : Lexical_Env);
+   procedure Recompute_Referenced_Envs (Self : Lexical_Env)
+      with Pre => Self.Kind = Primary;
    --  Recompute the referenced environments for this environment. In other
    --  words, re-resolve the R.Getter for all referenced environments R in
    --  Self.

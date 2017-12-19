@@ -897,7 +897,12 @@ package body Langkit_Support.Lexical_Env is
                           Lookup_Cache        => Lookup_Cache_Maps.Empty_Map));
 
             for Env of Envs loop
-               Reference (N, Env, Transitive => True);
+               declare
+                  Ref : constant Referenced_Env :=
+                    (True, Simple_Env_Getter (Env), False, Active);
+               begin
+                  Referenced_Envs_Vectors.Append (N.Env.Referenced_Envs, Ref);
+               end;
             end loop;
             return N;
       end case;
@@ -918,8 +923,9 @@ package body Langkit_Support.Lexical_Env is
          return Base_Env;
       end if;
 
-      return N : constant Lexical_Env :=
-        Wrap (new Lexical_Env_Type'
+      declare
+         N : constant Lexical_Env :=
+            Wrap (new Lexical_Env_Type'
                 (Kind              => Rebound,
                  Parent            => No_Env_Getter,
                  Transitive_Parent => False,
@@ -938,10 +944,13 @@ package body Langkit_Support.Lexical_Env is
                  Lookup_Cache_Valid  => False,
 
                  Ref_Count => <>),
-              Owner => Base_Env.Owner)
-      do
-         Reference (N, Base_Env, Transitive => True);
-      end return;
+              Owner => Base_Env.Owner);
+         Ref : constant Referenced_Env :=
+           (True, Simple_Env_Getter (Base_Env), False, Active);
+      begin
+         Referenced_Envs_Vectors.Append (N.Env.Referenced_Envs, Ref);
+         return N;
+      end;
    end Rebind_Env;
 
    ----------------
