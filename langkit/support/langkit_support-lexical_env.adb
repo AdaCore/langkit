@@ -340,7 +340,6 @@ package body Langkit_Support.Lexical_Env is
    function Create
      (Parent            : Env_Getter;
       Node              : Element_T;
-      Is_Refcounted     : Boolean;
       Default_MD        : Element_Metadata := Empty_Metadata;
       Transitive_Parent : Boolean := False;
       Owner             : Unit_T) return Lexical_Env is
@@ -358,8 +357,7 @@ package body Langkit_Support.Lexical_Env is
             Default_MD          => Default_MD,
             Rebindings          => null,
             Rebindings_Pool     => null,
-            Ref_Count           => (if Is_Refcounted then 1
-                                    else No_Refcount),
+            Ref_Count           => No_Refcount,
             Lookup_Cache_Active => True,
             Lookup_Cache_Valid  => True,
             Lookup_Cache        => Lookup_Cache_Maps.Empty_Map),

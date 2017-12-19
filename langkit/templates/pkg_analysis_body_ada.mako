@@ -181,10 +181,9 @@ package body ${ada_lib_name}.Analysis is
          Charset     => To_Unbounded_String (Actual_Charset),
          With_Trivia => With_Trivia,
          Root_Scope  => AST_Envs.Create
-                          (Parent        => AST_Envs.No_Env_Getter,
-                           Node          => null,
-                           Is_Refcounted => False,
-                           Owner         => No_Analysis_Unit),
+                          (Parent => AST_Envs.No_Env_Getter,
+                           Node   => null,
+                           Owner  => No_Analysis_Unit),
 
          % if ctx.default_unit_provider:
          Unit_Provider => P,

@@ -304,13 +304,10 @@ package Langkit_Support.Lexical_Env is
    function Create
      (Parent            : Env_Getter;
       Node              : Element_T;
-      Is_Refcounted     : Boolean;
       Default_MD        : Element_Metadata := Empty_Metadata;
       Transitive_Parent : Boolean := False;
       Owner             : Unit_T) return Lexical_Env;
-   --  Constructor. Creates a new lexical env, given a parent, an internal data
-   --  env, and a default metadata. If Is_Refcounted is true, the caller is the
-   --  only owner of the result (ref-count is 1).
+   --  Create a new un-refcounted lexical env
 
    procedure Add
      (Self     : Lexical_Env;
