@@ -1521,9 +1521,9 @@ package body Langkit_Support.Lexical_Env is
       return To_String (Result);
    end Lexical_Env_Image;
 
-   -----------------------------------
-   -- Dump_Lexical_Env_Parent_Chain --
-   -----------------------------------
+   ------------------------------
+   -- Lexical_Env_Parent_Chain --
+   ------------------------------
 
    function Lexical_Env_Parent_Chain (Env : Lexical_Env) return String is
       Id     : Positive := 1;
