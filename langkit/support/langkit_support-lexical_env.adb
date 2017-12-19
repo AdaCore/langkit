@@ -954,7 +954,6 @@ package body Langkit_Support.Lexical_Env is
    procedure Destroy (Self : in out Lexical_Env) is
       procedure Free is new Ada.Unchecked_Deallocation
         (Lexical_Env_Type, Lexical_Env_Access);
-      Primary : constant Boolean := Is_Primary (Self);
    begin
       --  Do not free the internal map for ref-counted allocated environments
       --  as all maps are owned by analysis unit owned environments.
@@ -977,7 +976,7 @@ package body Langkit_Support.Lexical_Env is
       end loop;
       Self.Env.Referenced_Envs.Destroy;
 
-      if Primary and then Self.Env.Rebindings_Pool /= null then
+      if not Self.Is_Refcounted and then Self.Env.Rebindings_Pool /= null then
          Destroy (Self.Env.Rebindings_Pool);
       end if;
 
@@ -1222,10 +1221,11 @@ package body Langkit_Support.Lexical_Env is
       end Equivalent;
 
    begin
-      --  Optimization: if we have two primary lexical environments, don't go
-      --  through structural comparison: we can use pointer equality.
+      --  Optimization: if we have two un-refcounted environments, don't go
+      --  through structural comparison: we can use pointer equality as each
+      --  instance has its own identity.
 
-      if Is_Primary (L) and then Is_Primary (R) then
+      if not L.Is_Refcounted and then not R.Is_Refcounted then
          return L = R;
       end if;
 
