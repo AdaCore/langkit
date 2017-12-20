@@ -410,6 +410,10 @@ package body Langkit_Support.Lexical_Env is
       V : constant Internal_Envs.Reference_Type :=
          Self.Env.Map.Reference (Key);
    begin
+      if Self = Empty_Env then
+         return;
+      end if;
+
       --  Get rid of element. Do this in reverse order so that removing one
       --  element does not make us "step over" the next item. Also don't do
       --  this in place (using V.Pop) as we need to preserve the order of
@@ -441,6 +445,9 @@ package body Langkit_Support.Lexical_Env is
          Dyn_Env_Getter (Resolver, Referenced_From),
          False, Inactive);
    begin
+      if Self = Empty_Env then
+         return;
+      end if;
       Resolve (Refd_Env.Getter);
       Refd_Env.State := Active;
       Referenced_Envs_Vectors.Append (Self.Env.Referenced_Envs, Refd_Env);
@@ -459,6 +466,9 @@ package body Langkit_Support.Lexical_Env is
       Ref : constant Referenced_Env :=
         (Transitive, Simple_Env_Getter (To_Reference), False, Active);
    begin
+      if Self = Empty_Env then
+         return;
+      end if;
       Referenced_Envs_Vectors.Append (Self.Env.Referenced_Envs, Ref);
       Self.Env.Lookup_Cache_Valid := False;
    end Reference;
@@ -1611,7 +1621,7 @@ package body Langkit_Support.Lexical_Env is
    procedure Deactivate_Referenced_Envs (Self : Lexical_Env) is
       R : access Referenced_Env;
    begin
-      if Self = Null_Lexical_Env then
+      if Self in Null_Lexical_Env | Empty_Env then
          return;
       end if;
 
@@ -1636,7 +1646,7 @@ package body Langkit_Support.Lexical_Env is
    procedure Recompute_Referenced_Envs (Self : Lexical_Env) is
       R : access Referenced_Env;
    begin
-      if Self = Null_Lexical_Env then
+      if Self in Null_Lexical_Env | Empty_Env then
          return;
       end if;
 
