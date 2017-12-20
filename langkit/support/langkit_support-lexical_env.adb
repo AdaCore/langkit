@@ -492,6 +492,12 @@ package body Langkit_Support.Lexical_Env is
       use Internal_Envs;
 
       function Get_Elements (Env : Lexical_Env) return Boolean;
+      --  Lookup for matching elements in Env's internal map and append them to
+      --  Local_Results. Return whether we found some.
+
+      ------------------
+      -- Get_Elements --
+      ------------------
 
       function Get_Elements (Env : Lexical_Env) return Boolean is
          C        : Cursor := Internal_Envs.No_Element;
