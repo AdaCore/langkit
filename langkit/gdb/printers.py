@@ -8,7 +8,7 @@ import gdb.printing
 
 from langkit.gdb.tdh import TDH
 from langkit.gdb.units import AnalysisUnit
-from langkit.gdb.utils import adaify_name, tagged_field, ptr_to_int
+from langkit.gdb.utils import adaify_name, tagged_field
 from langkit.utils import memoized
 
 
@@ -238,8 +238,38 @@ class LexicalEnv(object):
                  == context.implname('ast_envs__lexical_env_type')))
 
     @property
+    def _variant(self):
+        """
+        Return the record variant that applies to this env getter.
+        """
+        # With GNAT encodings, GDB exposes the variant part as a field that is
+        # an union. Sometimes it's half-decoded...
+        try:
+            outer_union = self.value['kind___XVN']
+        except gdb.error:
+            return self.value['S']
+
+        if self.kind == 'primary':
+            return outer_union['S0']
+
+        inner_union = outer_union['O']['kind___XVN']
+        field = {'orphaned': 'S1',
+                 'grouped': 'S2',
+                 'rebound': 'S3'}[self.kind]
+        return inner_union[field]
+
+    @property
+    def kind(self):
+        result = str(self.value['kind'])
+
+        # For some reason, GDB can return here the qualified name for the
+        # enumerator. Strip that.
+        chunks = result.split('__')
+        return chunks[-1]
+
+    @property
     def node(self):
-        return self.value['node']
+        return self._variant['node']
 
     @property
     def ref_count(self):
@@ -249,18 +279,29 @@ class LexicalEnv(object):
         if not self.value:
             return 'null'
 
-        empty_env = gdb.lookup_global_symbol(
-            self.context.implname('ast_envs__empty_env_record')
-        )
+        if self.kind == 'primary':
+            empty_env = gdb.lookup_global_symbol(
+                self.context.implname('ast_envs__empty_env_record')
+            )
 
-        if self.value == empty_env.value().address:
-            return '<LexicalEnv empty>'
-        elif self.node:
-            return '<LexicalEnv for {}>'.format(self.node)
-        elif self.ref_count == -1:
-            return '<LexicalEnv root>'.format(self.node)
+            if self.value == empty_env.value().address:
+                return '<LexicalEnv empty>'
+            elif self.node:
+                return '<LexicalEnv (primary) for {}>'.format(self.node)
+            else:
+                return '<LexicalEnv root>'
+
+        elif self.kind == 'orphaned':
+            return '<LexicalEnv (orphaned)>'
+
+        elif self.kind == 'grouped':
+            return '<LexicalEnv (grouped)>'
+
+        elif self.kind == 'rebound':
+            return '<LexicalEnv (rebound)>'
+
         else:
-            return '<LexicalEnv synthetic 0x{}>'.format(ptr_to_int(self.value))
+            return '<LexicalEnv (corrupted)]'
 
 
 class LexicalEnvPrinter(BasePrinter):
@@ -274,8 +315,47 @@ class LexicalEnvPrinter(BasePrinter):
     def matches(cls, value, context):
         return LexicalEnv.matches_wrapper(value, context)
 
+    @property
+    def env(self):
+        return LexicalEnv(self.value, self.context)
+
+    def display_hint(self):
+        kind = self.env.kind
+        if kind == 'primary':
+            return ''
+        elif kind == 'grouped':
+            return 'array'
+        else:
+            return 'map'
+
     def to_string(self):
-        return LexicalEnv(self.value, self.context).to_string()
+        return self.env.to_string()
+
+    def children(self):
+        env = self.env
+        if env.kind == 'orphaned':
+            yield ('key', 'orphaned')
+            yield ('value', env._variant['orphaned_env'])
+
+        elif env.kind == 'grouped':
+            # Manually decode the fat pointer that GDB gives us...
+            grouped_envs = env._variant['grouped_envs']
+            lower_bound = int(grouped_envs['P_BOUNDS']['LB0'])
+            upper_bound = int(grouped_envs['P_BOUNDS']['UB0'])
+            array_ptr = grouped_envs['P_ARRAY'].dereference()
+            element_type = array_ptr.type.target()
+            array = array_ptr.cast(element_type.array(lower_bound,
+                                                      upper_bound))
+            for i in range(lower_bound, upper_bound + 1):
+                e = array[lower_bound]
+                yield (str(i), e)
+
+        elif env.kind == 'rebound':
+            yield ('key', 'rebindings')
+            yield ('value', env._variant['rebindings'])
+
+            yield ('key', 'rebound_env')
+            yield ('value', env._variant['rebound_env'])
 
 
 class EnvGetterPrinter(BasePrinter):
