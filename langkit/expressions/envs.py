@@ -362,15 +362,14 @@ def rebindings_parent(self, rebindings):
 
 
 @auto_attr
-def concat_rebindings(self, l_rebindings, r_rebindings):
+def concat_rebindings(self, lhs, rhs):
     """
-    Functionally append a rebinding from `old_env` to `new_env` (two lexical
-    environments) on top of `rebindings` (a chain of rebindings).
+    Combine rebindings from the `lhs` and `rhs` environment rebindings.
     """
     return CallExpr('Rebinding', 'AST_Envs.Combine',
                     T.EnvRebindingsType,
-                    [construct(l_rebindings, T.EnvRebindingsType),
-                     construct(r_rebindings, T.EnvRebindingsType)],
+                    [construct(lhs, T.EnvRebindingsType),
+                     construct(rhs, T.EnvRebindingsType)],
                     abstract_expr=self)
 
 
