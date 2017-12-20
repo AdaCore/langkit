@@ -325,7 +325,6 @@ package Langkit_Support.Lexical_Env is
    function Create
      (Parent            : Env_Getter;
       Node              : Element_T;
-      Default_MD        : Element_Metadata := Empty_Metadata;
       Transitive_Parent : Boolean := False;
       Owner             : Unit_T) return Lexical_Env
       with Post => Create'Result.Kind = Primary;
@@ -601,56 +600,73 @@ package Langkit_Support.Lexical_Env is
    procedure Destroy is new Ada.Unchecked_Deallocation
      (Env_Rebindings_Pools.Map, Env_Rebindings_Pool);
 
-   No_Refcount : constant Integer := -1;
-   --  Special constant for the Ref_Count field below that means: this lexical
-   --  environment is not ref-counted.
+   type Lexical_Env_Array is array (Positive range <>) of Lexical_Env;
+   type Lexical_Env_Array_Access is access all Lexical_Env_Array;
+   procedure Destroy is new Ada.Unchecked_Deallocation
+     (Lexical_Env_Array, Lexical_Env_Array_Access);
 
    type Lexical_Env_Type (Kind : Lexical_Env_Kind) is record
-      Parent : Env_Getter := No_Env_Getter;
-      --  Parent environment for this env. Null by default.
+      case Kind is
+         when Primary =>
+            Parent : Env_Getter := No_Env_Getter;
+            --  Parent environment for this env. Null by default.
 
-      Transitive_Parent : Boolean := False;
-      --  Whether the parent link is transitive or not
+            Transitive_Parent : Boolean := False;
+            --  Whether the parent link is transitive or not
 
-      Node : Element_T;
-      --  Node for which this environment was created
+            Node : Element_T;
+            --  Node for which this environment was created
 
-      Referenced_Envs : Referenced_Envs_Vectors.Vector;
-      --  A list of environments referenced by this environment
+            Referenced_Envs : Referenced_Envs_Vectors.Vector;
+            --  A list of environments referenced by this environment
 
-      Map : Internal_Map := null;
-      --  Map containing mappings from symbols to elements for this env
-      --  instance. In the generated library, Elements will be AST nodes. If
-      --  the lexical env is refcounted, then it does not own this env.
+            Map : Internal_Map := null;
+            --  Map containing mappings from symbols to elements for this env
+            --  instance. In the generated library, Elements will be AST nodes.
+            --  If the lexical env is refcounted, then it does not own this
+            --  env.
 
-      Default_MD : Element_Metadata := Empty_Metadata;
-      --  Default metadata for this env instance
+            Rebindings_Pool : Env_Rebindings_Pool := null;
+            --  Cache for all parent-less env rebindings whose Old_Env is the
+            --  lexical environment that owns this pool. As a consequence, this
+            --  is allocated only for primary lexical environments that are
+            --  rebindable.
 
-      Rebindings : Env_Rebindings := null;
+            Lookup_Cache : Lookup_Cache_Maps.Map;
+            --  Cache for lexical environment lookups
 
-      Rebindings_Pool : Env_Rebindings_Pool := null;
-      --  Cache for all parent-less env rebindings whose Old_Env is the lexical
-      --  environment that owns this pool. As a consequence, this is allocated
-      --  only for primary lexical environments that are rebindable.
+            Lookup_Cache_Valid : Boolean := True;
+            --  Whether Cached_Results contains lookup results that can be
+            --  currently reused (i.e. whether they are not stale).
 
-      Lookup_Cache : Lookup_Cache_Maps.Map;
-      --  Cache for lexical environment lookups
+         when others =>
+            Ref_Count : Integer := 1;
+            --  Number of owners. It is initially set to 1. When it drops to 0,
+            --  the env can be destroyed.
 
-      Lookup_Cache_Active : Boolean;
-      --  Whether caching for lexical environment lookups is enabled for this
-      --  lexical environment. We enable it for primary environments and
-      --  disable it for grouped or orphaned ones.
+            case Kind is
+               when Primary =>
+                  null; --  Unreachable
 
-      Lookup_Cache_Valid : Boolean := True;
-      --  Whether Cached_Results contains lookup results that can be currently
-      --  reused (i.e. whether they are not stale).
+               when Orphaned =>
+                  Orphaned_Env : Lexical_Env;
+                  --  Lexical environment that is orphaned
 
-      Ref_Count : Integer := 1;
-      --  For ref-counted lexical environments, this contains the number of
-      --  owners. It is initially set to 1. When it drops to 0, the env can be
-      --  destroyed.
-      --
-      --  For envs owned by analysis units, it is always No_Refcount.
+               when Grouped =>
+                  Grouped_Envs : Lexical_Env_Array_Access;
+                  --  Array of lexical environment that are grouped together
+
+                  Default_MD : Element_Metadata := Empty_Metadata;
+                  --  Default metadata to use for lookups
+
+               when Rebound =>
+                  Rebound_Env : Lexical_Env;
+                  --  Lexical environment that is rebound
+
+                  Rebindings : Env_Rebindings;
+                  --  Rebindings for this rebound environment
+            end case;
+      end case;
    end record;
 
    function Wrap
@@ -661,8 +677,8 @@ package Langkit_Support.Lexical_Env is
    --  Deallocate the resources allocated to the Self lexical environment. Must
    --  not be used directly for ref-counted envs.
 
-   function Is_Stale (Env : Lexical_Env) return Boolean;
-   --  Return whether Env points to a now defunct lexical env
+   function Is_Stale (Self : Lexical_Env) return Boolean;
+   --  Return whether Self points to a now defunct lexical env
 
    -------------------
    -- Debug helpers --
@@ -692,19 +708,15 @@ private
 
    Empty_Env_Map    : aliased Internal_Envs.Map := Internal_Envs.Empty_Map;
    Empty_Env_Record : aliased Lexical_Env_Type :=
-     (Kind                => Primary,
-      Parent              => No_Env_Getter,
-      Transitive_Parent   => False,
-      Node                => No_Element,
-      Referenced_Envs     => <>,
-      Map                 => Empty_Env_Map'Access,
-      Default_MD          => Empty_Metadata,
-      Rebindings          => null,
-      Rebindings_Pool     => null,
-      Ref_Count           => No_Refcount,
-      Lookup_Cache_Active => False,
-      Lookup_Cache_Valid  => False,
-      Lookup_Cache        => Lookup_Cache_Maps.Empty_Map);
+     (Kind               => Primary,
+      Parent             => No_Env_Getter,
+      Transitive_Parent  => False,
+      Node               => No_Element,
+      Referenced_Envs    => <>,
+      Map                => Empty_Env_Map'Access,
+      Rebindings_Pool    => null,
+      Lookup_Cache_Valid => False,
+      Lookup_Cache       => Lookup_Cache_Maps.Empty_Map);
 
    --  Because of circular elaboration issues, we cannot call Hash here to
    --  compute the real hash. Using a dummy precomputed one is probably enough.

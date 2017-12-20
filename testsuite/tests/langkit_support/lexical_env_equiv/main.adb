@@ -10,78 +10,76 @@ with Support; use Support;
 procedure Main is
    use Envs;
 
-   Root_A1 : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Kind => Primary, Node => 'A', Ref_Count => No_Refcount, others => <>));
-   Root_A2 : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Kind => Rebound,
-      Parent => Root_A1.Env.Parent,
-      Transitive_Parent => Root_A1.Env.Transitive_Parent,
-      Node => Root_A1.Env.Node,
-      Referenced_Envs => Root_A1.Env.Referenced_Envs,
-      Map => Root_A1.Env.Map,
-      Default_MD => Root_A1.Env.Default_MD,
-      Rebindings => Root_A1.Env.Rebindings,
-      Rebindings_Pool => Root_A1.Env.Rebindings_Pool,
-      Lookup_Cache => Root_A1.Env.Lookup_Cache,
-      Lookup_Cache_Active => Root_A1.Env.Lookup_Cache_Active,
-      Lookup_Cache_Valid => Root_A1.Env.Lookup_Cache_Valid,
-      Ref_Count => 1));
+   Old_Env_1 : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Kind => Primary, others => <>));
+   New_Env_1 : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Kind => Primary, others => <>));
+   Old_Env_2 : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Kind => Primary, others => <>));
+   New_Env_2 : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Kind => Primary, others => <>));
 
-   Root_A3 : Lexical_Env := Wrap (new Lexical_Env_Type'(Root_A2.Env.all));
+   Prim_A : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Kind => Primary, others => <>));
+   Prim_B : Lexical_Env := Wrap (new Lexical_Env_Type'
+     (Kind => Primary, others => <>));
 
-   Root_A2_Getter : constant Env_Getter := Simple_Env_Getter (Root_A2);
-   Root_A3_Getter : constant Env_Getter := Simple_Env_Getter (Root_A3);
+   Orphaned_A1 : constant Lexical_Env := Orphan (Prim_A);
+   Orphaned_A2 : constant Lexical_Env := Orphan (Prim_A);
+   Orphaned_B  : constant Lexical_Env := Orphan (Prim_B);
 
-   Root_B1 : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Root_A2.Env.all'Update (Node => 'B')));
+   function Group is new Envs.Group (Positive, Lexical_Env_Array);
+   Grouped_1 : constant Lexical_Env := Group ((Orphaned_A1, Orphaned_B));
+   Grouped_2 : constant Lexical_Env := Group ((Orphaned_A1, Orphaned_B));
+   Grouped_3 : constant Lexical_Env := Group ((Orphaned_B, Orphaned_A1));
+   Grouped_4 : constant Lexical_Env :=
+      Group ((Orphaned_A1, Orphaned_B, Orphaned_A1));
+   Grouped_5 : constant Lexical_Env :=
+      Group ((Orphaned_A1, Orphaned_B), (I => 1));
 
-   Child : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Root_A2.Env.all'Update (Parent => Root_A2_Getter)));
+   R1 : constant Env_Rebindings := Append (null, Old_Env_1, New_Env_1);
+   R2 : constant Env_Rebindings := Append (null, Old_Env_2, New_Env_2);
+   pragma Assert (R1 /= R2);
 
-   function To_Refs
-     (Ref : Referenced_Env) return Referenced_Envs_Vectors.Vector
-   is
-      V : Referenced_Envs_Vectors.Vector;
-   begin
-      V.Append (Ref);
-      return V;
-   end To_Refs;
+   Rebound_A1X : constant Lexical_Env := Rebind_Env (Prim_A, R1);
+   Rebound_A1Y : constant Lexical_Env := Rebind_Env (Prim_A, R1);
+   Rebound_A2  : constant Lexical_Env := Rebind_Env (Prim_A, R2);
+   Rebound_B   : constant Lexical_Env := Rebind_Env (Prim_B, R1);
 
-   Ref_1 : constant Referenced_Env :=
-     (Is_Transitive => False, Getter => Root_A2_Getter,
-      Being_Visited => False, State => Active);
-   Ref_2 : constant Referenced_Env :=
-     (Is_Transitive => False, Getter => Root_A3_Getter,
-      Being_Visited => False, State => Inactive);
-
-   Env_Ref_1 : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Root_A2.Env.all'Update (Referenced_Envs => To_Refs (Ref_1))));
-   Env_Ref_2 : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Root_A2.Env.all'Update (Referenced_Envs => To_Refs (Ref_2))));
-   Env_Ref_3 : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Root_A2.Env.all'Update (Referenced_Envs => To_Refs (Ref_1))));
-
-   MD : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Root_A2.Env.all'Update (Default_MD => (I => 1))));
 begin
-   --  Check for various combinations of equivalent environments with
-   --  enabled/disable ref-counting.
-   pragma Assert (Equivalent (Root_A1, Root_A1));
-   pragma Assert (Equivalent (Root_A2, Root_A2));
-   pragma Assert (Equivalent (Root_A1, Root_A2));
-   pragma Assert (Equivalent (Root_A2, Root_A3));
+   --  Two primary environments are considered different unless it's actually
+   --  the same.
+   pragma Assert (not Equivalent (Prim_A, Prim_B));
+   pragma Assert (Equivalent (Prim_A, Prim_A));
 
-   --  Check different Parent
-   pragma Assert (not Equivalent (Root_A2, Child));
+   --  Two environments that have different kinds can never be equivalent
+   pragma Assert (not Equivalent (Prim_A, Orphaned_A1));
 
-   --  Check different Node
-   pragma Assert (not Equivalent (Root_A3, Root_B1));
+   --  Two orphaned environments are equivalent iff they have the same
+   --  referenced environment.
+   pragma Assert (Orphaned_A1 /= Orphaned_A2);
+   pragma Assert (Orphaned_A1 /= Orphaned_B);
+   pragma Assert (Equivalent (Orphaned_A1, Orphaned_A2));
+   pragma Assert (not Equivalent (Orphaned_A1, Orphaned_B));
 
-   --  Check Referenced_Envs
-   pragma Assert (not Equivalent (Root_A2, Env_Ref_1));
-   pragma Assert (Equivalent (Env_Ref_1, Env_Ref_3));
-   pragma Assert (not Equivalent (Env_Ref_1, Env_Ref_2));
+   --  Two grouped environments are equivalent iff:
+   --    * they contain the same number of environment;
+   --    * these environments are equivalent two by two;
+   --    * the attached metadata is the same.
+   pragma Assert (Grouped_1 /= Grouped_2);
+   pragma Assert (Grouped_1 /= Grouped_3);
+   pragma Assert (Grouped_1 /= Grouped_4);
+   pragma Assert (Grouped_1 /= Grouped_5);
+   pragma Assert (Equivalent (Grouped_1, Grouped_2));
+   pragma Assert (not Equivalent (Grouped_1, Grouped_3));
+   pragma Assert (not Equivalent (Grouped_1, Grouped_4));
+   pragma Assert (not Equivalent (Grouped_1, Grouped_5));
 
-   --  Check different Default_MD
-   pragma Assert (not Equivalent (Root_A2, MD));
+   --  Two rebound environments are equivalent iff:
+   --    * they point to equivalent environments;
+   --    * they contain equivalent rebindings.
+   pragma Assert (Rebound_A1X /= Rebound_A1Y);
+   pragma Assert (Equivalent (Rebound_A1X, Rebound_A1Y));
+   pragma Assert (not Equivalent (Rebound_A1X, Rebound_A2));
+   pragma Assert (not Equivalent (Rebound_A1X, Rebound_B));
 end Main;
