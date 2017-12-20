@@ -691,6 +691,21 @@ package Langkit_Support.Lexical_Env is
       Dump_Addresses : Boolean := False;
       Dump_Content   : Boolean := True;
       Prefix         : String := "") return String;
+   --  Return a textual representation of Self.
+   --
+   --  If provided, Env_Id and Parent_Env_Id are used to designate Self and its
+   --  parent environment.
+   --
+   --  If Dump_Addresses, include the hexadecimal address of each represented
+   --  lexical environment.
+   --
+   --  If Dump_Content, show the inner data in lexical environments: referenced
+   --  environments and internal map for primary environments, pointed
+   --  environment in orphaned environments, etc. If Dump_Content is true, the
+   --  result is a multi-line string, otherwise it's guaranteed to fit on a
+   --  single line.
+   --
+   --  Prefix is used to prefix each emitted line.
 
    function Lexical_Env_Parent_Chain (Env : Lexical_Env) return String;
 
