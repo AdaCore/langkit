@@ -181,7 +181,15 @@
    % else:
    pragma Warnings (Off, "referenced");
    function Create (Items : ${cls.array_type_name}) return ${cls.name} is
-     (new ${cls.pointed}'(N => Items'Length, Ref_Count => 1, Items => Items));
+   begin
+      % if cls.element_type.is_refcounted:
+         for El of Items loop
+            Inc_Ref (El);
+         end loop;
+      % endif
+      return
+        new ${cls.pointed}'(N => Items'Length, Ref_Count => 1, Items => Items);
+   end Create;
    pragma Warnings (On, "referenced");
    % endif
 
