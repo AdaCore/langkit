@@ -429,6 +429,7 @@ package body ${ada_lib_name}.Analysis is
       end Add_Diagnostic;
 
    begin
+      Traces.Trace (Main_Trace, "Parsing unit " & To_String (Unit.File_Name));
       Unit.Diagnostics.Clear;
 
       --  Reparsing will invalidate all lexical environments related to this
