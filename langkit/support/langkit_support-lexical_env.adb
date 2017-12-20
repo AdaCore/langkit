@@ -687,9 +687,8 @@ package body Langkit_Support.Lexical_Env is
 
       --  Phase 2: Get elements in transitive referenced envs
 
-      for I in
-        Self.Env.Referenced_Envs.First_Index
-          .. Self.Env.Referenced_Envs.Last_Index
+      for I in Self.Env.Referenced_Envs.First_Index
+            .. Self.Env.Referenced_Envs.Last_Index
       loop
          if Self.Env.Referenced_Envs.Get_Access (I).Is_Transitive then
             Get_Refd_Elements (Self.Env.Referenced_Envs.Get_Access (I).all);
@@ -715,9 +714,8 @@ package body Langkit_Support.Lexical_Env is
 
       --  Phase 4: Get elements in non transitive referenced envs
 
-      for I in
-        Self.Env.Referenced_Envs.First_Index
-          .. Self.Env.Referenced_Envs.Last_Index
+      for I in Self.Env.Referenced_Envs.First_Index
+            .. Self.Env.Referenced_Envs.Last_Index
       loop
          if not Self.Env.Referenced_Envs.Get_Access (I).Is_Transitive then
             Get_Refd_Elements (Self.Env.Referenced_Envs.Get_Access (I).all);
