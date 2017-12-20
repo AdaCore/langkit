@@ -1386,17 +1386,21 @@ package body Langkit_Support.Lexical_Env is
       Env_Id         : String := "";
       Parent_Env_Id  : String := "";
       Dump_Addresses : Boolean := False;
-      Dump_Content   : Boolean := True) return String
+      Dump_Content   : Boolean := True;
+      Prefix         : String := "") return String
    is
+      use Sorted_Envs;
 
       Result : Unbounded_String;
 
-      use Sorted_Envs;
+      Sub_Prefix : constant String := Prefix & "  ";
 
       function Short_Image
         (N : Element_T) return String
       is (if N = No_Element then "<null>"
           else Image (Element_Image (N, False)));
+      --  Wrapper around Element_Image to handle null elements.
+      --
       --  TODO??? This is slightly hackish, because we're converting a wide
       --  string back to string. But since we're using this solely for
       --  test/debug purposes, it should not matter. Still, would be good to
@@ -1404,117 +1408,148 @@ package body Langkit_Support.Lexical_Env is
 
       function Image (El : Internal_Map_Element) return String is
         (Short_Image (El.Element));
+      --  Wrapper around Element_Image to format a lexical env map element
 
-      function Image is new Internal_Map_Element_Vectors.Image
-        (Image);
-
-      procedure Dump_Referenced
-        (Name : String; Refs : in out Referenced_Envs_Vectors.Vector);
-
-      First_Arg : Boolean := True;
+      function Image is new Internal_Map_Element_Vectors.Image (Image);
 
       procedure New_Arg;
+      --  Helper to be called before emitting a new lexical env. "argument".
+      --  Used to separate each argument with a comma in Result.
+
+      -------------
+      -- New_Arg --
+      -------------
+
       procedure New_Arg is
       begin
-         if First_Arg then
-            First_Arg := False;
-         else
-            Append (Result, ", ");
-         end if;
+         Append (Result, ", ");
       end New_Arg;
-
-      ---------------------
-      -- Dump_Referenced --
-      ---------------------
-
-      procedure Dump_Referenced
-        (Name : String; Refs : in out Referenced_Envs_Vectors.Vector)
-      is
-         Is_First : Boolean := True;
-      begin
-         for I in Refs.First_Index .. Refs.Last_Index loop
-            declare
-               G   : Env_Getter renames Refs.Get_Access (I).Getter;
-               Env : Lexical_Env := Get_Env (G);
-            begin
-               if Env /= Empty_Env then
-                  if Is_First then
-                     Append (Result, "    " & Name & ":" & ASCII.LF);
-                     Is_First := False;
-                  end if;
-                  Append (Result, "      ");
-                  if G.Dynamic then
-                     Append (Result, Short_Image (G.Node) & ": ");
-                  end if;
-
-                  Append
-                    (Result,
-                     Lexical_Env_Image (Self           => Env,
-                                        Dump_Addresses => Dump_Addresses,
-                                        Dump_Content   => False));
-                  Append (Result, ASCII.LF);
-                  Dec_Ref (Env);
-               end if;
-            end;
-         end loop;
-      end Dump_Referenced;
 
    begin
       if Self = Null_Lexical_Env then
          return "";
       end if;
 
+      --  No matter what, emit a short description of this environment: kind,
+      --  whether it's empty, parent/node/... if asked.
+
       if Env_Id'Length /= 0 then
          Append (Result, Env_Id & " = ");
       end if;
-      Append (Result, "LexEnv(");
+      Append (Result, "LexEnv(" & (case Self.Kind is
+                                   when Primary => "Primary",
+                                   when Orphaned => "Orphaned",
+                                   when Grouped => "Grouped",
+                                   when Rebound => "Rebound"));
+
       if Self = Empty_Env then
          New_Arg;
          Append (Result, "Empty");
       end if;
-      if Self.Kind /= Primary then
-         New_Arg;
-         Append (Result, "Synthetic");
+
+      if Self.Kind = Primary then
+         if Parent_Env_Id'Length > 0 then
+            New_Arg;
+            Append (Result,
+                    "Parent="
+                    & (if Parent (Self) /= Empty_Env
+                       then Parent_Env_Id else "null"));
+         end if;
+
+         if Env_Node (Self) /= No_Element then
+            New_Arg;
+            Append (Result, "Node="
+                    & Image (Element_Image (Env_Node (Self), False)));
+         end if;
       end if;
-      if Parent_Env_Id'Length > 0 then
-         New_Arg;
-         Append (Result,
-                 "Parent="
-                 & (if Parent (Self) /= Empty_Env
-                    then Parent_Env_Id else "null"));
-      end if;
-      if Env_Node (Self) /= No_Element then
-         New_Arg;
-         Append (Result, "Node="
-                 & Image (Element_Image (Env_Node (Self), False)));
-      end if;
+
       if Dump_Addresses then
          New_Arg;
-         Append (Result, "0x" & System.Address_Image (Self.Env.all'Address));
+         Append (Result, "0x"
+                         & System.Address_Image (Self.Env.all'Address));
       end if;
       Append (Result, ")");
 
+      --  If that was all that was asked, stop here
       if not Dump_Content then
          return To_String (Result);
       end if;
+
+      --  Otherwise, go to details...
       Append (Result, ":" & ASCII.LF);
 
-      Dump_Referenced ("Referenced", Self.Env.Referenced_Envs);
+      case Self.Kind is
+         when Primary =>
+            declare
+               Refs : Referenced_Envs_Vectors.Vector
+                  renames Self.Env.Referenced_Envs;
+            begin
+               for I in Refs.First_Index .. Refs.Last_Index loop
+                  declare
+                     G   : Env_Getter renames Refs.Get_Access (I).Getter;
+                     Env : Lexical_Env := Get_Env (G);
+                  begin
+                     if Env /= Empty_Env then
+                        Append (Result, Sub_Prefix & "Referenced: ");
+                        if G.Dynamic then
+                           Append (Result, Short_Image (G.Node) & ": ");
+                        end if;
 
-      if Self.Env.Map = null then
-         Append (Result, "    <null>" & ASCII.LF);
-      elsif Self.Env.Map.Is_Empty then
-         Append (Result, "    <empty>" & ASCII.LF);
-      else
-         for El in To_Sorted_Env (Self.Env.Map.all).Iterate loop
-            Append (Result, "    ");
+                        Append
+                          (Result,
+                           Lexical_Env_Image (Self           => Env,
+                                              Dump_Addresses => Dump_Addresses,
+                                              Dump_Content   => False));
+                        Append (Result, ASCII.LF);
+                        Dec_Ref (Env);
+                     end if;
+                  end;
+               end loop;
+            end;
+
+            if Self.Env.Map.Is_Empty then
+               Append (Result, Sub_Prefix & "  <empty>" & ASCII.LF);
+            else
+               for El in To_Sorted_Env (Self.Env.Map.all).Iterate loop
+                  Append
+                    (Result,
+                     Sub_Prefix & "  "
+                     & Langkit_Support.Text.Image (Key (El).all) & ": "
+                     & Image (Element (El))
+                     & ASCII.LF);
+               end loop;
+            end if;
+
+         when Orphaned =>
             Append
-              (Result,
-               Langkit_Support.Text.Image (Key (El).all) & ": "
-               & Image (Element (El))
-               & ASCII.LF);
-         end loop;
-      end if;
+              (Result, Sub_Prefix & "Orphaned: " & Lexical_Env_Image
+                 (Self           => Self.Env.Orphaned_Env,
+                  Dump_Addresses => Dump_Addresses,
+                  Dump_Content   => Dump_Content,
+                  Prefix         => Sub_Prefix));
+
+         when Grouped =>
+            for E of Self.Env.Grouped_Envs.all loop
+               Append
+                 (Result, Sub_Prefix & "Grouped: " & Lexical_Env_Image
+                    (Self           => E,
+                     Dump_Addresses => Dump_Addresses,
+                     Dump_Content   => Dump_Content,
+                     Prefix         => Sub_Prefix));
+            end loop;
+
+         when Rebound =>
+            Append
+              (Result, Sub_Prefix & "Rebindings: "
+                       & Image (Image (Self.Env.Rebindings))
+                       & ASCII.LF);
+            Append
+              (Result, Sub_Prefix & "Rebound: " & Lexical_Env_Image
+                 (Self           => Self.Env.Rebound_Env,
+                  Dump_Addresses => Dump_Addresses,
+                  Dump_Content   => Dump_Content,
+                  Prefix         => Sub_Prefix));
+      end case;
 
       return To_String (Result);
    end Lexical_Env_Image;

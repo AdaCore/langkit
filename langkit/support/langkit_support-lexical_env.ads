@@ -689,7 +689,8 @@ package Langkit_Support.Lexical_Env is
       Env_Id         : String := "";
       Parent_Env_Id  : String := "";
       Dump_Addresses : Boolean := False;
-      Dump_Content   : Boolean := True) return String;
+      Dump_Content   : Boolean := True;
+      Prefix         : String := "") return String;
 
    function Lexical_Env_Parent_Chain (Env : Lexical_Env) return String;
 
