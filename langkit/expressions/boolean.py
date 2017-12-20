@@ -333,7 +333,7 @@ class If(AbstractExpression):
         """
         super(If, self).__init__()
         self.cond = cond
-        self.then = then
+        self._then = then
         self.else_then = else_then
 
     def construct(self):
@@ -344,7 +344,7 @@ class If(AbstractExpression):
         """
         from langkit.expressions import Cast
 
-        then = construct(self.then)
+        then = construct(self._then)
         else_then = construct(self.else_then)
         rtype = then.type.unify(
             else_then.type,
