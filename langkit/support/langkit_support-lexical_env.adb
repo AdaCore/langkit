@@ -879,13 +879,16 @@ package body Langkit_Support.Lexical_Env is
 
    function Orphan (Self : Lexical_Env) return Lexical_Env is
    begin
+      --  If Self is already an orphan, don't create yet another lexical env
+      --  wrapper: just return Self itself.
       Inc_Ref (Self);
-      return Wrap
-        (new Lexical_Env_Type'
-           (Kind         => Orphaned,
-            Ref_Count    => <>,
-            Orphaned_Env => Self),
-         Owner => Self.Owner);
+      return (if Self.Kind = Orphaned
+              then Self
+              else Wrap (new Lexical_Env_Type'
+                          (Kind         => Orphaned,
+                           Ref_Count    => <>,
+                           Orphaned_Env => Self),
+                         Owner => Self.Owner));
    end Orphan;
 
    -----------
