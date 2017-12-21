@@ -50,7 +50,8 @@ package body Langkit_Support.Lexical_Env is
    procedure Check_Rebindings_Unicity (Self : Env_Rebindings);
    --  Perform a unicity check on the various rebindings in Self. In
    --  particular, check that there are no two identical Old_Env and no two
-   --  identical New_Env in the set of rebindings.
+   --  identical New_Env in the set of rebindings. If there are, raise a
+   --  property error.
 
    function Get_Internal
      (Self          : Lexical_Env;
@@ -1165,8 +1166,11 @@ package body Langkit_Support.Lexical_Env is
       while L /= null loop
          R := L.Parent;
          while R /= null loop
-            pragma Assert
-              (L.Old_Env /= R.Old_Env and then L.New_Env /= R.New_Env);
+            if L.Old_Env = R.Old_Env then
+               Raise_Property_Error ("Old_Env present twice in rebindings");
+            elsif L.New_Env = R.New_Env then
+               Raise_Property_Error ("New_Env present twice in rebindings");
+            end if;
             R := R.Parent;
          end loop;
          L := L.Parent;
