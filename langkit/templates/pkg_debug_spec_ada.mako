@@ -3,6 +3,8 @@
 --  This package defines subprograms whose only purpose it to be used from a
 --  debugger. This is supposed to make developpers' life easier.
 
+with Langkit_Support.Adalog.Abstract_Relation;
+use Langkit_Support.Adalog.Abstract_Relation;
 with Langkit_Support.Symbols; use Langkit_Support.Symbols;
 
 with ${ada_lib_name}.Analysis.Implementation;
@@ -33,5 +35,7 @@ package ${ada_lib_name}.Debug is
    function Sym_Matches (S : Symbol_Type; Text : String) return Boolean;
    --  Return whether the text associated to S matches Text. There is a bug in
    --  GDB that makes comparison with "=" always return false.
+
+   procedure PRel (Rel : Relation; Context_Node : ${root_node_type_name});
 
 end ${ada_lib_name}.Debug;

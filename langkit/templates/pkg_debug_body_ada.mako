@@ -81,4 +81,14 @@ package body ${ada_lib_name}.Debug is
       return Symbol.Success and then Image (S.all) = Image (Symbol.Symbol);
    end Sym_Matches;
 
+   ----------
+   -- PRel --
+   ----------
+
+   procedure PRel (Rel : Relation; Context_Node : ${root_node_type_name}) is
+   begin
+      Assign_Names_To_Logic_Vars (Context_Node);
+      Print_Relation (Rel, null, False);
+   end PRel;
+
 end ${ada_lib_name}.Debug;
