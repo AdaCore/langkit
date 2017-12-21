@@ -146,6 +146,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
             return;
          end if;
 
+         if Mapping.F_Val.Unit /= Self.Unit then
+            raise Property_Error with "Cannot add_to_env an AST node that"
+                                      & " comes from another analysis unit";
+         end if;
+
          <% astnode_fields = [f for f in T.env_md.get_fields()
                               if f.type.is_ast_node] %>
          % if astnode_fields:

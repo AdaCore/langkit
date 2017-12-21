@@ -68,7 +68,8 @@ def add_to_env(mappings, dest_env=None, metadata=None, resolver=None):
 
     :param AbstractExpression mappings: One or several mappings of key to value
         to add to the environment. Must be either of type T.env_assoc, or
-        T.env_assoc.array.
+        T.env_assoc.array. All values must belong to the same unit as the node
+        that owns this EnvSpec.
 
     :param AbstractExpression dest_env: The destination environment in which to
         add the elements.
