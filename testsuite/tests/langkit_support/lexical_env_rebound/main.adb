@@ -1,5 +1,6 @@
 --  Test that lookups on grouped lexical envs works correctly
 
+with Ada.Exceptions;
 with Ada.Text_IO; use Ada.Text_IO;
 
 with Langkit_Support.Lexical_Env;
@@ -31,4 +32,15 @@ begin
 
    Put_Line ("Looking in Rebound:");
    Put_Line (Get (Rebound, Key_X));
+
+   declare
+      R : Env_Rebindings;
+   begin
+      R := Append (Rebindings, Old_Env, New_Env);
+      Put_Line ("Double rebinding: no error raised...");
+   exception
+      when Exc : Property_Error =>
+         Put_Line ("Got a Property_Error:");
+         Put_Line (Ada.Exceptions.Exception_Message (Exc));
+   end;
 end Main;

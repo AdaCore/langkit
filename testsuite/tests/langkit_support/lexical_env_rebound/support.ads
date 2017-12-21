@@ -10,6 +10,8 @@ package Support is
    type Metadata is null record;
    Default_MD : constant Metadata := (others => <>);
 
+   Property_Error: exception;
+
    function Element_Hash (C : Character) return Hash_Type is (0);
    function Metadata_Hash (MD : Metadata) return Hash_Type is (0);
    procedure Raise_Property_Error (Message : String := "");

@@ -8,7 +8,7 @@ package body Support is
 
    procedure Raise_Property_Error (Message : String := "") is
    begin
-      raise Program_Error;
+      raise Property_Error with Message;
    end Raise_Property_Error;
 
    --------------
