@@ -416,7 +416,9 @@ package Langkit_Support.Lexical_Env is
    --  entity if no entity is found.
 
    function Orphan (Self : Lexical_Env) return Lexical_Env;
-   --  Return a dynamically allocated copy of Self that has no parent
+   --  Return a dynamically allocated copy of Self that has no parent. If Self
+   --  is a grouped environment or if it has any transitive parent, this raises
+   --  a property error.
 
    function Parent (Self : Lexical_Env) return Lexical_Env;
    --  Return the parent lexical env for env Self or Empty_Env if Self has no

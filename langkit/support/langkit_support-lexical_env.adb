@@ -879,7 +879,39 @@ package body Langkit_Support.Lexical_Env is
    ------------
 
    function Orphan (Self : Lexical_Env) return Lexical_Env is
+
+      procedure Check_Valid (Env : Lexical_Env);
+      --  Raise a property error if we can't create an orphan for Env. Do
+      --  nothing otherwise.
+
+      -----------------
+      -- Check_Valid --
+      -----------------
+
+      procedure Check_Valid (Env : Lexical_Env) is
+      begin
+         case Env.Kind is
+            when Primary =>
+               if Env.Env.Transitive_Parent then
+                  Raise_Property_Error
+                     ("Cannot create an orphan for an environment with a"
+                      & " transitive parent");
+               end if;
+
+            when Orphaned => null;
+
+            when Grouped =>
+               Raise_Property_Error
+                 ("Cannot create an orphan for a grouped environment");
+
+            when Rebound =>
+               Check_Valid (Env.Env.Rebound_Env);
+         end case;
+      end Check_Valid;
+
    begin
+      Check_Valid (Self);
+
       --  If Self is already an orphan, don't create yet another lexical env
       --  wrapper: just return Self itself.
       Inc_Ref (Self);
