@@ -11,6 +11,7 @@ class Token(LexerToken):
     Def = WithText()
 
     Comma = WithText()
+    Dot = WithText()
     LPar = WithText()
     RPar = WithText()
     LBrace = WithText()
@@ -32,6 +33,7 @@ foo_lexer.add_rules(
     (Literal('def'),         Token.Def),
 
     (Literal(','),           Token.Comma),
+    (Literal('.'),           Token.Dot),
     (Literal('('),           Token.LPar),
     (Literal(')'),           Token.RPar),
     (Literal('{'),           Token.LBrace),
