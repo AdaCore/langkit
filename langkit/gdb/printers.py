@@ -260,6 +260,8 @@ class LexicalEnv(object):
 
     @property
     def kind(self):
+        if not self.value:
+            return 'primary'
         result = str(self.value['kind'])
 
         # For some reason, GDB can return here the qualified name for the
