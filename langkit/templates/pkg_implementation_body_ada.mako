@@ -134,10 +134,10 @@ package body ${ada_lib_name}.Analysis.Implementation is
       ----------------
 
       procedure Add_To_Env
-        (Self    : ${root_node_type_name};
-         Env     : Lexical_Env;
-         Mapping : ${T.env_assoc.name};
-         MD      : ${T.env_md.name};
+        (Self     : ${root_node_type_name};
+         Env      : Lexical_Env;
+         Mapping  : ${T.env_assoc.name};
+         MD       : ${T.env_md.name};
          Resolver : Entity_Resolver)
       is
          Root_Scope : Lexical_Env renames Self.Unit.Context.Root_Scope;
