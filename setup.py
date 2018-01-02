@@ -22,7 +22,11 @@ setup(
     url='https://www.adacore.com',
     description='A Python framework to generate language parsers',
     requires=['Mako', 'coverage', 'PyYAML', 'enum', 'enum34', 'funcy'],
-    packages=['langkit', 'langkit.utils', 'langkit.expressions'],
+    packages=['langkit',
+              'langkit.expressions',
+              'langkit.gdb',
+              'langkit.stylechecks',
+              'langkit.utils'],
     package_data={'langkit': [
         'support/*.adb', 'support/*.ads', 'support/*.gpr',
         'templates/*.mako', 'templates/*/*.mako'
