@@ -365,22 +365,18 @@ package ${ada_lib_name}.Analysis is
    --  Assuming that Token refers to a token that contains a symbol, return the
    --  corresponding symbol.
 
-   function Kind (Token_Data : Token_Data_Type) return Token_Kind
-      with Inline;
+   function Kind (Token_Data : Token_Data_Type) return Token_Kind;
    ${ada_doc('langkit.token_kind', 3)}
 
-   function Is_Trivia (Token_Data : Token_Data_Type) return Boolean
-      with Inline;
+   function Is_Trivia (Token_Data : Token_Data_Type) return Boolean;
    ${ada_doc('langkit.token_is_trivia', 3)}
 
-   function Index (Token : Token_Type) return Token_Index with Inline;
-   function Index (Token_Data : Token_Data_Type) return Token_Index
-      with Inline;
+   function Index (Token : Token_Type) return Token_Index;
+   function Index (Token_Data : Token_Data_Type) return Token_Index;
    ${ada_doc('langkit.token_index', 3)}
 
    function Sloc_Range
-     (Token_Data : Token_Data_Type) return Source_Location_Range
-      with Inline;
+     (Token_Data : Token_Data_Type) return Source_Location_Range;
    --  Source location range for this token. Note that the end bound is
    --  exclusive.
 
@@ -557,14 +553,5 @@ private
 
    function Raw_Data (T : Token_Type) return Lexer.Token_Data_Type;
    --  Return the raw token data for T
-
-   generic
-      type T (<>) is limited private;
-      type T_Access is access all T;
-      with procedure Destroy (Object : in out T_Access);
-   procedure Register_Destroyable_Gen
-     (Unit : Analysis_Unit; Object : T_Access);
-   --  Generic procedure to register an object so that it is automatically
-   --  destroyed when Unit is destroyed.
 
 end ${ada_lib_name}.Analysis;

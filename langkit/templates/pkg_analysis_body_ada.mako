@@ -123,12 +123,6 @@ package body ${ada_lib_name}.Analysis is
       --  Create pre-computed symbol literals in Symbols and return them
    % endif
 
-   procedure Register_Destroyable_Helper
-     (Unit    : Analysis_Unit;
-      Object  : System.Address;
-      Destroy : Destroy_Procedure);
-   --  Common underlying implementation for Register_Destroyable_Gen
-
    procedure Destroy_Rebindings
      (Rebindings : access Env_Rebindings_Vectors.Vector);
    --  Destroy all rebindings in Rebindings, plus their child rebindings. Note
@@ -1162,36 +1156,6 @@ package body ${ada_lib_name}.Analysis is
    begin
       return Unit.Unit_Version;
    end Version;
-
-   --------------------------
-   -- Register_Destroyable --
-   --------------------------
-
-   procedure Register_Destroyable_Helper
-     (Unit    : Analysis_Unit;
-      Object  : System.Address;
-      Destroy : Destroy_Procedure)
-   is
-   begin
-      Destroyable_Vectors.Append (Unit.Destroyables, (Object, Destroy));
-   end Register_Destroyable_Helper;
-
-   ------------------------------
-   -- Register_Destroyable_Gen --
-   ------------------------------
-
-   procedure Register_Destroyable_Gen
-     (Unit : Analysis_Unit; Object : T_Access)
-   is
-      function Convert is new Ada.Unchecked_Conversion
-        (System.Address, Destroy_Procedure);
-      procedure Destroy_Procedure (Object : in out T_Access) renames Destroy;
-   begin
-      Register_Destroyable_Helper
-        (Unit,
-         Object.all'Address,
-         Convert (Destroy_Procedure'Address));
-   end Register_Destroyable_Gen;
 
    -----------------
    -- First_Token --

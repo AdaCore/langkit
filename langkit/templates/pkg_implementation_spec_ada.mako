@@ -269,8 +269,7 @@ package ${ada_lib_name}.Analysis.Implementation is
    -------------------------------
 
    function Child_Count
-     (Node : access ${root_node_value_type}'Class) return Natural
-   with Inline;
+     (Node : access ${root_node_value_type}'Class) return Natural;
    --  Return the number of children Node has
 
    function First_Child_Index
@@ -608,8 +607,7 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  performance hit of creating an array.
 
    procedure Reset_Logic_Vars
-     (Node : access ${root_node_value_type}'Class)
-   with Inline;
+     (Node : access ${root_node_value_type}'Class);
    --  Reset the logic variables attached to this node
 
    procedure Set_Parents (Node, Parent : access ${root_node_value_type}'Class);

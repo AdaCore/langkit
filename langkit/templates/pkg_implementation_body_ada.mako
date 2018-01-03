@@ -43,6 +43,21 @@ ${(exts.with_clauses(with_clauses + [
 
 package body ${ada_lib_name}.Analysis.Implementation is
 
+   generic
+      type T (<>) is limited private;
+      type T_Access is access all T;
+      with procedure Destroy (Object : in out T_Access);
+   procedure Register_Destroyable_Gen
+     (Unit : Analysis_Unit; Object : T_Access);
+   --  Generic procedure to register an object so that it is automatically
+   --  destroyed when Unit is destroyed.
+
+   procedure Register_Destroyable_Helper
+     (Unit    : Analysis_Unit;
+      Object  : System.Address;
+      Destroy : Destroy_Procedure);
+   --  Common underlying implementation for Register_Destroyable_Gen
+
    function Solve_Wrapper
      (R            : Relation;
       Context_Node : ${root_node_type_name}) return Boolean;
@@ -57,6 +72,23 @@ package body ${ada_lib_name}.Analysis.Implementation is
      (Analysis_Unit, Internal_Analysis_Unit);
 
    procedure Destroy (Env : in out Lexical_Env_Access);
+
+   ------------------------------
+   -- Register_Destroyable_Gen --
+   ------------------------------
+
+   procedure Register_Destroyable_Gen
+     (Unit : Analysis_Unit; Object : T_Access)
+   is
+      function Convert is new Ada.Unchecked_Conversion
+        (System.Address, Destroy_Procedure);
+      procedure Destroy_Procedure (Object : in out T_Access) renames Destroy;
+   begin
+      Register_Destroyable_Helper
+        (Unit,
+         Object.all'Address,
+         Convert (Destroy_Procedure'Address));
+   end Register_Destroyable_Gen;
 
    procedure Register_Destroyable is new Register_Destroyable_Gen
      (AST_Envs.Lexical_Env_Type, AST_Envs.Lexical_Env_Access, Destroy);
@@ -1920,6 +1952,19 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    function Token_Data (Unit : Analysis_Unit) return Token_Data_Handler_Access
    is (Unit.TDH'Access);
+
+   --------------------------
+   -- Register_Destroyable --
+   --------------------------
+
+   procedure Register_Destroyable_Helper
+     (Unit    : Analysis_Unit;
+      Object  : System.Address;
+      Destroy : Destroy_Procedure)
+   is
+   begin
+      Destroyable_Vectors.Append (Unit.Destroyables, (Object, Destroy));
+   end Register_Destroyable_Helper;
 
    --------------------------
    -- Register_Destroyable --

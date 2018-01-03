@@ -100,8 +100,7 @@
    -------------------------------
 
    function Child_Count
-     (Node : ${root_entity.api_name}'Class) return Natural
-   with Inline;
+     (Node : ${root_entity.api_name}'Class) return Natural;
    --  Return the number of children Node has
 
    function First_Child_Index
@@ -159,23 +158,6 @@
                                return Visit_Status);
    --  This is the same as Traverse function except that no result is returned
    --  i.e. the Traverse function is called and the result is simply discarded.
-
-   generic
-      type Data_Type is private;
-      Reset_After_Traversal : Boolean := False;
-   function Public_Traverse_With_Data
-     (Node  : ${root_entity.api_name}'Class;
-      Visit : access function (Node : ${root_entity.api_name}'Class;
-                               Data : in out Data_Type)
-                               return Visit_Status;
-      Data  : in out Data_Type)
-      return Visit_Status;
-   --  This is the same as the first Traverse function except it accepts an
-   --  argument that is passed to all Visit calls.
-   --
-   --  If Reset_After_Traversal is True, the Data formal is left unchanged when
-   --  Traverse_With_Data returns no matter what Visit does. Visit can change
-   --  it otherwise.
 
    function Child_Index (Node : ${root_entity.api_name}'Class) return Natural;
    --  Return the 0-based index for Node in its parent's children
@@ -576,47 +558,6 @@
    begin
       Result_Status := Traverse (Node, Visit);
    end Traverse;
-
-   -------------------------------
-   -- Public_Traverse_With_Data --
-   -------------------------------
-
-   function Public_Traverse_With_Data
-     (Node  : ${root_entity.api_name}'Class;
-      Visit : access function (Node : ${root_entity.api_name}'Class;
-                               Data : in out Data_Type)
-                               return Visit_Status;
-      Data  : in out Data_Type)
-      return Visit_Status
-   is
-      E_Info : constant Public_Entity_Info := Node.E_Info;
-
-      ------------
-      -- Helper --
-      ------------
-
-      function Helper
-        (Node : access ${root_node_value_type}'Class) return Visit_Status
-      is
-         Public_Node : constant ${root_entity.api_name} :=
-           (${root_node_type_name} (Node), E_Info);
-      begin
-         return Visit (Public_Node, Data);
-      end Helper;
-
-      Saved_Data : Data_Type;
-      Result     : Visit_Status;
-
-   begin
-      if Reset_After_Traversal then
-         Saved_Data := Data;
-      end if;
-      Result := Node.Node.Traverse (Helper'Access);
-      if Reset_After_Traversal then
-         Data := Saved_Data;
-      end if;
-      return Result;
-   end Public_Traverse_With_Data;
 
    -----------------
    -- Child_Index --
