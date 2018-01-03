@@ -72,14 +72,27 @@ package body Langkit_Support.Tree_Traversal_Iterator is
       Natural_Vectors.Destroy (It.Stack);
    end Finalize;
 
+   ----------------
+   -- Initialize --
+   ----------------
+
+   procedure Initialize (It : out Traverse_Iterator'Class; Root : Node_Type) is
+   begin
+      It.Node := Root;
+      It.Parent := No_Node;
+      It.Stack := Natural_Vectors.Empty_Vector;
+      It.Continue := True;
+   end Initialize;
+
    ------------
    -- Create --
    ------------
 
    function Create (Root : Node_Type) return Traverse_Iterator is
    begin
-      return Traverse_Iterator'
-        (Ada.Finalization.Limited_Controlled with Root, others => <>);
+      return Result : Traverse_Iterator do
+         Initialize (Result, Root);
+      end return;
    end Create;
 
 end Langkit_Support.Tree_Traversal_Iterator;
