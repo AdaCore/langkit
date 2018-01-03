@@ -21,19 +21,18 @@ there are multiple.
 Enjoy!
 """.strip()
 
-ctx = ${module_name}.AnalysisContext('utf-8')
+ctx = ${module_name}.AnalysisContext('utf-8', with_trivia=True)
 
 parser = argparse.ArgumentParser(
     description="${module_name} playground. Analyze files passed as arguments."
 )
 parser.add_argument('files', nargs='+', help='Files')
 parser.add_argument('--semres', action='store_true')
-parser.add_argument('--trivia', action='store_true')
 args = parser.parse_args()
 
 
 def process_file(file_name):
-    u = ctx.get_from_file(file_name, with_trivia=args.trivia)
+    u = ctx.get_from_file(file_name)
     if args.semres:
         u.populate_lexical_env()
     return u
