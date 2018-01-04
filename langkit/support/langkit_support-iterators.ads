@@ -21,8 +21,8 @@ package Langkit_Support.Iterators is
    --  concrete interator implementations.
 
    function Next
-     (I        : in out Iterator;
-      Element  : out Element_Type) return Boolean is abstract;
+     (I       : in out Iterator;
+      Element : out Element_Type) return Boolean is abstract;
    --  Get the next iteration element. If there was no element to yield
    --  anymore, return False. Otherwise, return True and set Element.
 
