@@ -44,12 +44,12 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    overriding procedure Finalize (Provider : in out C_Unit_Provider_Type);
 
    overriding function Get_Unit
-     (Provider    : C_Unit_Provider_Type;
-      Context     : Analysis_Context;
-      Name        : Text_Type;
-      Kind        : Unit_Kind;
-      Charset     : String := "";
-      Reparse     : Boolean := False) return Analysis_Unit;
+     (Provider : C_Unit_Provider_Type;
+      Context  : Analysis_Context;
+      Name     : Text_Type;
+      Kind     : Unit_Kind;
+      Charset  : String := "";
+      Reparse  : Boolean := False) return Analysis_Unit;
 % endif
 
    function Value_Or_Empty (S : chars_ptr) return String
@@ -1061,15 +1061,15 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    --------------
 
    overriding function Get_Unit
-     (Provider    : C_Unit_Provider_Type;
-      Context     : Analysis_Context;
-      Name        : Text_Type;
-      Kind        : Unit_Kind;
-      Charset     : String := "";
-      Reparse     : Boolean := False) return Analysis_Unit
+     (Provider : C_Unit_Provider_Type;
+      Context  : Analysis_Context;
+      Name     : Text_Type;
+      Kind     : Unit_Kind;
+      Charset  : String := "";
+      Reparse  : Boolean := False) return Analysis_Unit
    is
-      Name_Access  : Text_Access := Name'Unrestricted_Access;
-      C_Charset    : chars_ptr := (if Charset'Length = 0
+      Name_Access : Text_Access := Name'Unrestricted_Access;
+      C_Charset   : chars_ptr := (if Charset'Length = 0
                                    then Null_Ptr
                                    else New_String (Charset));
 
