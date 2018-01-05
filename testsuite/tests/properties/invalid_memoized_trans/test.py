@@ -6,7 +6,7 @@ rejected.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, UserField, T
-from langkit.expressions import Self, langkit_property
+from langkit.expressions import Entity, Self, langkit_property
 from langkit.parsers import Grammar
 
 from utils import emit_and_print_errors
@@ -60,6 +60,24 @@ class Example(FooNode):
     @langkit_property(public=True, memoized=True, unsafe_memoization=True)
     def get_var2_public_wrapper2():
         return Self.get_var2
+
+    # Now, check that explicitely telling Langkit that a property cannot be
+    # used transitively in memoization works.
+    @langkit_property(
+        public=True, external=True, return_type=T.Entity,
+        uses_entity_info=True, uses_envs=True,
+        memoization_incompatible_reason='get_something_unmemoizable is'
+                                        ' unmemoizable')
+    def get_something_unmemoizable():
+        return
+
+    @langkit_property(public=True)
+    def get_var4():
+        return Entity.get_something_unmemoizable
+
+    @langkit_property(public=True, memoized=True)
+    def get_var4_public_wrapper():
+        return Entity.get_var4
 
 
 grammar = Grammar('main_rule')
