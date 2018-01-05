@@ -138,6 +138,13 @@ typedef void *${unit_provider_type};
 ${c_doc('langkit.unit_provider_destroy_type')}
 typedef void (*${unit_provider_destroy_type})(void *data);
 
+${c_doc('langkit.unit_provider_get_unit_filename_type')}
+typedef char *(*${unit_provider_get_unit_filename_type})(
+   void *data,
+   ${text_type} *name,
+   ${unit_kind_type} kind
+);
+
 ${c_doc('langkit.unit_provider_get_unit_from_name_type')}
 typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
    void *data,
@@ -415,6 +422,7 @@ extern ${unit_provider_type}
 ${capi.get_name('create_unit_provider')}(
    void *data,
    ${unit_provider_destroy_type} destroy_func,
+   ${unit_provider_get_unit_filename_type} get_unit_filename_func,
    ${unit_provider_get_unit_from_name_type} get_unit_from_name_func
 );
 

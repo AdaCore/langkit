@@ -114,6 +114,12 @@ package ${ada_lib_name}.Analysis is
       access constant Unit_Provider_Interface'Class;
    ${ada_doc('langkit.unit_provider_type', 3)}
 
+   function Get_Unit_Filename
+     (Provider : Unit_Provider_Interface;
+      Name     : Text_Type;
+      Kind     : Unit_Kind) return String is abstract;
+   ${ada_doc('langkit.unit_provider_get_unit_filename', 3)}
+
    function Get_Unit
      (Provider    : Unit_Provider_Interface;
       Context     : Analysis_Context;

@@ -38,10 +38,16 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    with record
       Data                    : System.Address;
       Destroy_Func            : ${unit_provider_destroy_type};
+      Get_Unit_Filename_Func  : ${unit_provider_get_unit_filename_type};
       Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type};
    end record;
 
    overriding procedure Finalize (Provider : in out C_Unit_Provider_Type);
+
+   overriding function Get_Unit_Filename
+     (Provider : C_Unit_Provider_Type;
+      Name     : Text_Type;
+      Kind     : Unit_Kind) return String;
 
    overriding function Get_Unit
      (Provider : C_Unit_Provider_Type;
@@ -1010,6 +1016,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    function ${capi.get_name('create_unit_provider')}
      (Data                    : System.Address;
       Destroy_Func            : ${unit_provider_destroy_type};
+      Get_Unit_Filename_Func  : ${unit_provider_get_unit_filename_type};
       Get_Unit_From_Name_Func : ${unit_provider_get_unit_from_name_type})
       return ${unit_provider_type}
    is
@@ -1021,6 +1028,7 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
               (Ada.Finalization.Controlled with
                Data                    => Data,
                Destroy_Func            => Destroy_Func,
+               Get_Unit_Filename_Func  => Get_Unit_Filename_Func,
                Get_Unit_From_Name_Func => Get_Unit_From_Name_Func);
       begin
          return Wrap (Result);
@@ -1055,6 +1063,32 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
    begin
       Provider.Destroy_Func (Provider.Data);
    end Finalize;
+
+   -----------------------
+   -- Get_Unit_Filename --
+   -----------------------
+
+   overriding function Get_Unit_Filename
+     (Provider : C_Unit_Provider_Type;
+      Name     : Text_Type;
+      Kind     : Unit_Kind) return String
+   is
+      Name_Access : Text_Access := Name'Unrestricted_Access;
+
+      C_Result    : chars_ptr := Provider.Get_Unit_Filename_Func
+        (Provider.Data, Wrap (Name_Access), Wrap (Kind));
+   begin
+      if C_Result = Null_Ptr then
+         raise Property_Error with "invalid AST node for unit name";
+      else
+         declare
+            Result : constant String := Value (C_Result);
+         begin
+            Free (C_Result);
+            return Result;
+         end;
+      end if;
+   end Get_Unit_Filename;
 
    --------------
    -- Get_Unit --
