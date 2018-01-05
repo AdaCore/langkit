@@ -146,7 +146,6 @@ typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
    ${unit_kind_type} kind,
    const char *charset,
    int reparse
-
 );
 % endif
 
