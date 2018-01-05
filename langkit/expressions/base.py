@@ -2675,7 +2675,8 @@ class PropertyDef(AbstractNodeData):
                  memoize_in_populate=False, external=False,
                  uses_entity_info=None, uses_envs=None,
                  optional_entity_info=False, warn_on_unused=True,
-                 ignore_warn_on_node=None):
+                 ignore_warn_on_node=None,
+                 memoization_incompatible_reason=None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -2765,6 +2766,11 @@ class PropertyDef(AbstractNodeData):
 
         :param bool|None ignore_warn_on_node: Wether to ignore warn_on_node
             warnings for this property. Defaults to None, which means inherit.
+
+        :param str|None memoization_incompatible_reason: If not-None, makes the
+            use of this property in a memoized context impossible. Must be used
+            for external properties that do side effects (such as loading an
+            analysis unit), as this conflicts with the memoization machinery.
         """
 
         self.prefix = prefix
@@ -2873,6 +2879,8 @@ class PropertyDef(AbstractNodeData):
         self._requires_untyped_wrapper = False
         self.warn_on_unused = warn_on_unused
         self._ignore_warn_on_node = ignore_warn_on_node
+
+        self._memoization_incompatible_reason = memoization_incompatible_reason
 
         self.dynvar_binding_stack = []
         """
@@ -3730,7 +3738,9 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: str|None
         """
-        if self._solves_equation:
+        if self._memoization_incompatible_reason:
+            return self._memoization_incompatible_reason
+        elif self._solves_equation:
             return 'Cannot memoize equation solving'
         elif self._gets_logic_var_value:
             return 'Cannot memoize extracting the value of a logic variable'
@@ -3830,7 +3840,7 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 # noinspection PyPep8Naming
 def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
              memoized=False, warn_on_unused=True, uses_entity_info=None,
-             ignore_warn_on_node=None):
+             ignore_warn_on_node=None, memoization_incompatible_reason=None):
     """
     Public constructor for concrete properties. You can declare your properties
     on your AST node subclasses directly, like this::
@@ -3847,11 +3857,13 @@ def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
     :type public: bool|None
     :rtype: PropertyDef
     """
-    return PropertyDef(expr, AbstractNodeData.PREFIX_PROPERTY, doc=doc,
-                       public=public, type=type, dynamic_vars=dynamic_vars,
-                       memoized=memoized, warn_on_unused=warn_on_unused,
-                       ignore_warn_on_node=ignore_warn_on_node,
-                       uses_entity_info=uses_entity_info)
+    return PropertyDef(
+        expr, AbstractNodeData.PREFIX_PROPERTY, doc=doc, public=public,
+        type=type, dynamic_vars=dynamic_vars, memoized=memoized,
+        warn_on_unused=warn_on_unused, ignore_warn_on_node=ignore_warn_on_node,
+        uses_entity_info=uses_entity_info,
+        memoization_incompatible_reason=memoization_incompatible_reason
+    )
 
 
 class AbstractKind(Enum):
@@ -3864,7 +3876,8 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
                      dynamic_vars=None, memoized=False,
                      unsafe_memoization=False, memoize_in_populate=False,
                      external=False, uses_entity_info=None, uses_envs=None,
-                     warn_on_unused=True, ignore_warn_on_node=None):
+                     warn_on_unused=True, ignore_warn_on_node=None,
+                     memoization_incompatible_reason=None):
     """
     Decorator to create properties from real Python methods. See Property for
     more details.
@@ -3890,7 +3903,8 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
             uses_entity_info=uses_entity_info,
             uses_envs=uses_envs,
             warn_on_unused=warn_on_unused,
-            ignore_warn_on_node=ignore_warn_on_node
+            ignore_warn_on_node=ignore_warn_on_node,
+            memoization_incompatible_reason=memoization_incompatible_reason,
         )
     return decorator
 
