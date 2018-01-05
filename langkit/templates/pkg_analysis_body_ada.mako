@@ -509,8 +509,7 @@ package body ${ada_lib_name}.Analysis is
       Charset  : String := "";
       Reparse  : Boolean := False;
       Rule     : Grammar_Rule :=
-         ${Name.from_lower(ctx.main_rule_name)}_Rule)
-      return Analysis_Unit
+         ${Name.from_lower(ctx.main_rule_name)}_Rule) return Analysis_Unit
    is
       procedure Init_Parser
         (Unit     : Analysis_Unit;
@@ -535,14 +534,12 @@ package body ${ada_lib_name}.Analysis is
       Charset     : String := "";
       Buffer      : String;
       Rule        : Grammar_Rule :=
-         ${Name.from_lower(ctx.main_rule_name)}_Rule)
-      return Analysis_Unit
+         ${Name.from_lower(ctx.main_rule_name)}_Rule) return Analysis_Unit
    is
       procedure Init_Parser
         (Unit     : Analysis_Unit;
          Read_BOM : Boolean;
-         Parser   : in out Parser_Type)
-      is
+         Parser   : in out Parser_Type) is
       begin
          Init_Parser_From_Buffer
            (Buffer, To_String (Unit.Charset), Read_BOM, Unit, Parser);
@@ -563,9 +560,7 @@ package body ${ada_lib_name}.Analysis is
       Name        : Text_Type;
       Kind        : Unit_Kind;
       Charset     : String := "";
-      Reparse     : Boolean := False)
-      return Analysis_Unit
-   is
+      Reparse     : Boolean := False) return Analysis_Unit is
    begin
       return Context.Unit_Provider.Get_Unit
         (Context, Name, Kind, Charset, Reparse);
