@@ -41,7 +41,7 @@ package ${ada_lib_name}.Analysis is
    package Traces renames GNATCOLL.Traces;
 
    Main_Trace : constant Traces.Trace_Handle :=
-     Traces.Create ("Main_Trace", Traces.From_Config, Stream => "&2");
+     Traces.Create ("Main_Trace", Traces.From_Config);
 
    type Analysis_Context is private;
    ${ada_doc('langkit.analysis_context_type', 3)}
