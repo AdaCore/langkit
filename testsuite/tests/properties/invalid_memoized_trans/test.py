@@ -47,17 +47,17 @@ class Example(FooNode):
         return Self.get_var_wrapper == Self.get_var2
 
     #
-    # ... but using unsafe_memoization, all should be fine!
+    # ... but using call_memoizable, all should be fine!
     #
 
     # First check that this attribute works on a property that cannot be
     # memoized because it contains an "immediately" unsafe construct.
-    @langkit_property(public=True, memoized=True, unsafe_memoization=True)
+    @langkit_property(public=True, memoized=True, call_memoizable=True)
     def get_var3():
         return Self.var.get_value
 
     # Then, on one that cannot be memoized because of transitivity
-    @langkit_property(public=True, memoized=True, unsafe_memoization=True)
+    @langkit_property(public=True, memoized=True, call_memoizable=True)
     def get_var2_public_wrapper2():
         return Self.get_var2
 
@@ -66,8 +66,8 @@ class Example(FooNode):
     @langkit_property(
         public=True, external=True, return_type=T.Entity,
         uses_entity_info=True, uses_envs=True,
-        memoization_incompatible_reason='get_something_unmemoizable is'
-                                        ' unmemoizable')
+        call_non_memoizable_because='get_something_unmemoizable is'
+                                    ' unmemoizable')
     def get_something_unmemoizable():
         return
 

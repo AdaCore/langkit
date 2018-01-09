@@ -2671,12 +2671,12 @@ class PropertyDef(AbstractNodeData):
 
     def __init__(self, expr, prefix, name=None, doc=None, public=None,
                  abstract=False, type=None, abstract_runtime_check=False,
-                 dynamic_vars=None, memoized=False, unsafe_memoization=False,
+                 dynamic_vars=None, memoized=False, call_memoizable=False,
                  memoize_in_populate=False, external=False,
                  uses_entity_info=None, uses_envs=None,
                  optional_entity_info=False, warn_on_unused=True,
                  ignore_warn_on_node=None,
-                 memoization_incompatible_reason=None):
+                 call_non_memoizable_because=None):
         """
         :param expr: The expression for the property. It can be either:
             * An expression.
@@ -2726,7 +2726,7 @@ class PropertyDef(AbstractNodeData):
         :param bool memoized: Whether this property must be memoized. Disabled
             by default.
 
-        :param bool unsafe_memoization: If true, allow memoization for this
+        :param bool call_memoizable: If true, allow memoization for this
             property or its callers even when it is unsafe to do so, for
             instance when using equation resolution constructs, which are
             memoization-unfriendly as they use side-effects. This should be
@@ -2767,9 +2767,9 @@ class PropertyDef(AbstractNodeData):
         :param bool|None ignore_warn_on_node: Wether to ignore warn_on_node
             warnings for this property. Defaults to None, which means inherit.
 
-        :param str|None memoization_incompatible_reason: If not-None, makes the
-            use of this property in a memoized context impossible. Must be used
-            for external properties that do side effects (such as loading an
+        :param str|None call_non_memoizable_because: If not-None, makes the use
+            of this property in a memoized context impossible. Must be used for
+            external properties that do side effects (such as loading an
             analysis unit), as this conflicts with the memoization machinery.
         """
 
@@ -2866,7 +2866,7 @@ class PropertyDef(AbstractNodeData):
         ":type: str|None"
 
         self.memoized = memoized
-        self.unsafe_memoization = unsafe_memoization
+        self.call_memoizable = call_memoizable
         self.memoize_in_populate = memoize_in_populate
 
         self.external = external
@@ -2880,7 +2880,7 @@ class PropertyDef(AbstractNodeData):
         self.warn_on_unused = warn_on_unused
         self._ignore_warn_on_node = ignore_warn_on_node
 
-        self._memoization_incompatible_reason = memoization_incompatible_reason
+        self._call_non_memoizable_because = call_non_memoizable_because
 
         self.dynvar_binding_stack = []
         """
@@ -3738,8 +3738,8 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: str|None
         """
-        if self._memoization_incompatible_reason:
-            return self._memoization_incompatible_reason
+        if self._call_non_memoizable_because:
+            return self._call_non_memoizable_because
         elif self._solves_equation:
             return 'Cannot memoize equation solving'
         elif self._gets_logic_var_value:
@@ -3840,7 +3840,7 @@ def AbstractProperty(type, doc="", runtime_check=False, **kwargs):
 # noinspection PyPep8Naming
 def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
              memoized=False, warn_on_unused=True, uses_entity_info=None,
-             ignore_warn_on_node=None, memoization_incompatible_reason=None):
+             ignore_warn_on_node=None, call_non_memoizable_because=None):
     """
     Public constructor for concrete properties. You can declare your properties
     on your AST node subclasses directly, like this::
@@ -3862,7 +3862,7 @@ def Property(expr, doc=None, public=None, type=None, dynamic_vars=None,
         type=type, dynamic_vars=dynamic_vars, memoized=memoized,
         warn_on_unused=warn_on_unused, ignore_warn_on_node=ignore_warn_on_node,
         uses_entity_info=uses_entity_info,
-        memoization_incompatible_reason=memoization_incompatible_reason
+        call_non_memoizable_because=call_non_memoizable_because
     )
 
 
@@ -3874,10 +3874,10 @@ class AbstractKind(Enum):
 
 def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
                      dynamic_vars=None, memoized=False,
-                     unsafe_memoization=False, memoize_in_populate=False,
+                     call_memoizable=False, memoize_in_populate=False,
                      external=False, uses_entity_info=None, uses_envs=None,
                      warn_on_unused=True, ignore_warn_on_node=None,
-                     memoization_incompatible_reason=None):
+                     call_non_memoizable_because=None):
     """
     Decorator to create properties from real Python methods. See Property for
     more details.
@@ -3897,14 +3897,14 @@ def langkit_property(public=None, return_type=None, kind=AbstractKind.concrete,
             abstract_runtime_check=kind == AbstractKind.abstract_runtime_check,
             dynamic_vars=dynamic_vars,
             memoized=memoized,
-            unsafe_memoization=unsafe_memoization,
+            call_memoizable=call_memoizable,
             memoize_in_populate=memoize_in_populate,
             external=external,
             uses_entity_info=uses_entity_info,
             uses_envs=uses_envs,
             warn_on_unused=warn_on_unused,
             ignore_warn_on_node=ignore_warn_on_node,
-            memoization_incompatible_reason=memoization_incompatible_reason,
+            call_non_memoizable_because=call_non_memoizable_because,
         )
     return decorator
 
