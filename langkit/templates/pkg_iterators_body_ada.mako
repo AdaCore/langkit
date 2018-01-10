@@ -14,10 +14,7 @@ package body ${ada_lib_name}.Iterators is
    function Traverse
      (Root : ${root_entity.api_name}'Class) return Traverse_Iterator is
    begin
-      return Result : Traverse_Iterator do
-         Traversal_Iterators.Initialize
-           (Result, As_${root_entity.el_type.kwless_raw_name} (Root));
-      end return;
+      return Create (As_${root_entity.el_type.kwless_raw_name} (Root));
    end Traverse;
 
    ----------
