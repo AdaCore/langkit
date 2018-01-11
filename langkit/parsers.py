@@ -1462,6 +1462,19 @@ class NodeToParsersPass(object):
         self.nodes_to_rules = defaultdict(list)
         self.canonical_rules = {}
 
+    def abort_pp(self, message):
+        """
+        Abort pretty-printer generation. Emit a warning to inform users with
+        the given message.
+        """
+        WarningSet.pp_bad_grammar.warn_if(
+            True,
+            '{} This prevents the generation of an automatic pretty printer.'
+            '\nFor more information, enable the the pp_eq'
+            ' trace'.format(message)
+        )
+        get_context().generate_pp = False
+
     def check_nodes_to_rules(self, ctx):
         """
         Check the results of the compute pass, to see if every node type only
@@ -1497,14 +1510,8 @@ class NodeToParsersPass(object):
             # structurally equivalent.
             if len(parsers) > 1:
                 if not pp_struct_eq(parsers):
-                    WarningSet.pp_bad_grammar.warn_if(
-                        True,
-                        'Node {} is parsed in different incompatible'
-                        ' ways. This prevents the generation of an automatic'
-                        ' pretty printer.\nFor more information, enable the'
-                        ' the pp_eq trace'.format(node.name),
-                    )
-                    ctx.generate_pp = False
+                    self.abort_pp('Node {} is parsed in different incompatible'
+                                  ' ways.'.format(node.name))
                     return
 
                 self.canonical_rules[node] = find_canonical_parser(parsers)
@@ -1532,11 +1539,10 @@ class NodeToParsersPass(object):
             for c in parser.children():
                 compute_internal(c)
 
-        WarningSet.pp_bad_grammar.warn_if(
-            not creates_node(parser),
-            "'{}' toplevel rule loses information. This prevents generation"
-            " generation of the pretty-printer.".format(parser.name)
-        )
+        if not creates_node(parser):
+            self.abort_pp("'{}' toplevel rule loses information.".format(
+                parser.name
+            ))
         compute_internal(parser)
 
 
