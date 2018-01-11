@@ -116,11 +116,6 @@ class ManageScript(object):
         self.subparsers = subparsers = args_parser.add_subparsers()
 
         args_parser.add_argument(
-            '--pp', action='store_true', default=False,
-            help='Whether to automatically generate a pretty-printer along'
-                 ' with the parser for the grammar.'
-        )
-        args_parser.add_argument(
             '--build-dir', default='build',
             help='Directory to use for generated source code and binaries. By'
                  ' default, use "build" in the current directory.'
@@ -356,6 +351,11 @@ class ManageScript(object):
             action='store_true',
             help='Do not generate the HTML documentation for AST nodes, their'
                  ' fields and their properties.'
+        )
+        subparser.add_argument(
+            '--pp', action='store_true', default=False,
+            help='Generate a pretty-printer along with the parser for the'
+                 ' grammar.'
         )
 
     def add_build_args(self, subparser):
