@@ -800,6 +800,12 @@ def Pick(*parsers):
             )
         pick_parser_idx = i
 
+    # If there is only one input parser, just return it instead of wrapping it
+    # in several useless layers. We do this only now so that we nevertheless
+    # check that it is a significant sub-result.
+    if len(parsers) == 1:
+        return parsers[0]
+
     if pick_parser_idx == -1:
         return _Row(*parsers)
     else:
