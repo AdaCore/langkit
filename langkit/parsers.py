@@ -1567,6 +1567,9 @@ def creates_node(p, follow_refs=True):
     if isinstance(p, Opt) and follow_refs and creates_node(p.parser):
         return True
 
+    if isinstance(p, Predicate) and follow_refs:
+        return creates_node(p.parser)
+
     return (
         isinstance(p, _Transform)
         or isinstance(p, List)
