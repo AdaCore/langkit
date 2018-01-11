@@ -1536,15 +1536,19 @@ class NodeToParsersPass():
 
 def creates_node(p, follow_refs=True):
     """
-    Predicate that is true on parsers that create a node directly, or are just
-    a reference to one or several parsers that creates nodes, without
-    additional parsing involved.
+    Return true on parsers that create a node directly, or are just a reference
+    to one or several parsers that creates nodes, without additional parsing
+    involved.
 
     For example::
         Node(..)               # <- True
         Or(a, b, c)            # <- True if a b & c creates_node
         _Row(a, b, c)          # <- False
         Pick(";", "lol", c)    # <- False
+
+    :param Parser p: Parser to analyze.
+    :param bool follow_refs: Whether to recurse on sub-parsers and dereference
+        Defer parsers.
     """
     from langkit.dsl import EnumNode
 
