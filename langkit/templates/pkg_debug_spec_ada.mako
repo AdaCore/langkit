@@ -37,5 +37,6 @@ package ${ada_lib_name}.Debug is
    --  GDB that makes comparison with "=" always return false.
 
    procedure PRel (Rel : Relation; Context_Node : ${root_node_type_name});
+   --  "Print Relation". Print Rel as a tree of logic relations
 
 end ${ada_lib_name}.Debug;
