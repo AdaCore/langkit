@@ -66,7 +66,7 @@
          ${emit_parser_pp_code(parser.parser, ast_el=ast_el)}
       % else:
          % if parser.get_type().is_list_type:
-         if not Is_Empty_List (${ast_el}) then
+         if ${ast_el}.Child_Count /= 0 then
          % else:
          if ${ast_el} /= null then
          % endif
