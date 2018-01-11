@@ -1451,7 +1451,7 @@ class Predicate(Parser):
 # pretty printers for Langkit grammars.
 
 
-class NodeToParsersPass():
+class NodeToParsersPass(object):
     """
     This pass computes the correspondence between AST node types and parsers.
     The end goal is to have one and only one non-ambiguous rule to pretty-print
