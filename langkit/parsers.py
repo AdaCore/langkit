@@ -784,7 +784,7 @@ def Pick(*parsers):
     Parser that scans a sequence of sub-parsers, remove tokens and ignored sub
     parsers, and extract the only significant sub-result.
 
-    If there are several significant sub-results, raises an error.
+    If there are multiple significant sub-results, raises an error.
     """
     location = extract_library_location()
     parsers = [resolve(p) for p in parsers if p]
@@ -1447,9 +1447,9 @@ class Predicate(Parser):
 
 class NodeToParsersPass():
     """
-    This pass computes the correspondence between node-types and parsers. The
-    end goal is to have one and only one non-ambiguous rule to pretty-print an
-    AST type.
+    This pass computes the correspondence between AST node types and parsers.
+    The end goal is to have one and only one non-ambiguous rule to pretty-print
+    an AST type.
     """
 
     def __init__(self):
@@ -1469,17 +1469,17 @@ class NodeToParsersPass():
         for node_type in CompiledTypeMetaclass.astnode_types:
             with node_type.diagnostic_context:
                 WarningSet.unused_node_type.warn_if(
-                    node_type not in self.nodes_to_rules.keys()
-                    and not node_type.abstract
-                    and not node_type.synthetic
+                    node_type not in self.nodes_to_rules.keys() and
+                    not node_type.abstract and
+                    not node_type.synthetic and
                     # We don't warn for base list types if they're not used,
                     # because the user has no way to mark them as abstract.
-                    and not (
-                        node_type.is_list_type
-                        and node_type.element_type.list == node_type
+                    not (
+                        node_type.is_list_type and
+                        node_type.element_type.list == node_type
                     ),
-                    "{} has no parser, and is marked neither abstract nor "
-                    "synthetic".format(node_type.name)
+                    '{} has no parser, and is marked neither abstract nor'
+                    ' synthetic'.format(node_type.name)
                 )
 
         # Exit early if no pretty-printer generation has been asked
@@ -1493,10 +1493,10 @@ class NodeToParsersPass():
                 if not pp_struct_eq(parsers):
                     WarningSet.pp_bad_grammar.warn_if(
                         True,
-                        "Node {} is parsed in different incompatible "
-                        "ways. This will prevent the generation of an "
-                        "automatic pretty printer.\nFor more information, "
-                        "enable the pp_eq trace".format(node.name),
+                        'Node {} is parsed in different incompatible'
+                        ' ways. This prevents the generation of an automatic'
+                        ' pretty printer.\nFor more information, enable the'
+                        ' the pp_eq trace'.format(node.name),
                     )
                     ctx.generate_pp = False
                     return
@@ -1505,15 +1505,14 @@ class NodeToParsersPass():
             else:
                 self.canonical_rules[node] = parsers[0]
 
-            Log.log("pp_canonical", node.name, self.canonical_rules[node])
+            Log.log('pp_canonical', node.name, self.canonical_rules[node])
 
             # Set the canonical parser on this ASTNodeType type
             node.parser = self.canonical_rules[node]
 
     def compute(self, parser):
         """
-        This is a grammar-rules pass implementation, whose goal is to map each
-        node type to one specific parser.
+        Map every AST node type to the set of parsers that return this type.
         """
 
         def compute_internal(parser):
@@ -1529,8 +1528,8 @@ class NodeToParsersPass():
 
         WarningSet.pp_bad_grammar.warn_if(
             not creates_node(parser),
-            "'{}' toplevel rule loses information. Prevents "
-            "generation of the pretty-printer".format(parser.name)
+            "'{}' toplevel rule loses information. This prevents generation"
+            " generation of the pretty-printer.".format(parser.name)
         )
         compute_internal(parser)
 
