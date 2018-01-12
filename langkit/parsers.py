@@ -1610,7 +1610,7 @@ def unparser_struct_eq(parsers, toplevel=True):
     :rtype: bool
     """
 
-    Log.log("unparser_eq_impl", "parsers: ".format(parsers))
+    Log.log('unparser_eq_impl', 'parsers: {}'.format(parsers))
 
     # If there is only one parser, the result is obviously True
     if len(parsers) == 1:
