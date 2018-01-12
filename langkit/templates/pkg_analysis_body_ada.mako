@@ -1124,6 +1124,15 @@ package body ${ada_lib_name}.Analysis is
    function Get_Filename (Unit : Analysis_Unit) return String is
      (To_String (Unit.File_Name));
 
+   -----------------
+   -- Get_Charset --
+   -----------------
+
+   function Get_Charset (Unit : Analysis_Unit) return String is
+   begin
+      return To_String (Unit.Charset);
+   end Get_Charset;
+
    --------------------
    -- Reference_Unit --
    --------------------

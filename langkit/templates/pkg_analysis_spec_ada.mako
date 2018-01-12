@@ -242,6 +242,9 @@ package ${ada_lib_name}.Analysis is
    function Get_Filename (Unit : Analysis_Unit) return String;
    ${ada_doc('langkit.unit_filename', 3)}
 
+   function Get_Charset (Unit : Analysis_Unit) return String;
+   --  Return the charset that was used to parse Unit
+
    function Has_Diagnostics (Unit : Analysis_Unit) return Boolean;
    ${ada_doc('langkit.unit_has_diagnostics', 3)}
 
