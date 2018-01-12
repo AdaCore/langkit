@@ -1611,10 +1611,9 @@ def unparser_struct_eq(parsers, toplevel=True):
 
     parsers_types = set(type(p) for p in parsers)
 
-    # First, if all sub-parsers return the same kind of node and there are Null
-    # parsers in the lot, we can safely ignore them, and run the algorithm on
-    # the remaining parsers.
-    if Null in parsers_types and is_same(p.get_type() for p in parsers):
+    # First, if there are Null parsers in the lot, we can safely ignore them,
+    # and run the algorithm on the remaining parsers.
+    if Null in parsers_types:
         # As we just filter parsers in the recursive calls, we must not pass
         # toplevel=False.
         return unparser_struct_eq(p for p in parsers
