@@ -830,11 +830,18 @@ class ${root_astnode_name}(object):
         Return an iterator that yields (name, value) couples for all abstract
         fields in this node. If "with_fields", this includes parsing fields. If
         "with_properties", this also includes properties.
+
+        If self is a list, field names will be 'item_{n}' with n being the
+        index.
         """
-        for field_name in self._field_names:
-            if ((field_name.startswith('f_') and with_fields) or
-                    (field_name.startswith('p_') and with_properties)):
-                yield (field_name, getattr(self, '{}'.format(field_name)))
+        if self.is_list_type:
+            for i, value in enumerate(self):
+                yield ("item_{}".format(i), value)
+        else:
+            for field_name in self._field_names:
+                if ((field_name.startswith('f_') and with_fields) or
+                        (field_name.startswith('p_') and with_properties)):
+                    yield (field_name, getattr(self, '{}'.format(field_name)))
 
     def dump_str(self):
         """
