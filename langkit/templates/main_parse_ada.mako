@@ -46,11 +46,24 @@ procedure Parse is
    Input_Str : Unbounded_String;
    Lookups   : String_Vectors.Vector;
 
+   function Get_Rule return Grammar_Rule;
    procedure Register_Lookups;
    procedure Process_Lookups (Node : ${root_entity.api_name}'Class);
    procedure Process_Node (Res : ${root_entity.api_name}'Class);
    procedure Parse_Input;
    procedure Process_File (File_Name : String; Ctx : in out Analysis_Context);
+
+   --------------
+   -- Get_Rule --
+   --------------
+
+   function Get_Rule return Grammar_Rule is
+   begin
+      return Grammar_Rule'Value (Rule_Name.all & "_Rule");
+   exception
+      when Constraint_Error =>
+         raise Program_Error with "Unsupported rule: " & Rule_Name.all;
+   end Get_Rule;
 
    ----------------------
    -- Register_Lookups --
@@ -131,21 +144,13 @@ procedure Parse is
 
       Ctx  : Analysis_Context := Create (With_Trivia => Do_Print_Trivia);
       Unit : Analysis_Unit;
-      Rule : Grammar_Rule;
    begin
-      begin
-         Rule := Grammar_Rule'Value (Rule_Name.all & "_Rule");
-      exception
-         when Constraint_Error =>
-            raise Program_Error with "Unsupported rule: " & Rule_Name.all;
-      end;
-
       Get_String (Input_Str, Input_Str_Ptr, Input_Str_Length);
       Unit := Get_From_Buffer
         (Context  => Ctx,
          Filename => "<input>",
          Buffer   => Input_Str_Ptr (1 .. Input_Str_Length),
-         Rule     => Rule);
+         Rule     => Get_Rule);
 
       if Has_Diagnostics (Unit) then
          Put_Line ("Parsing failed:");
@@ -171,7 +176,7 @@ procedure Parse is
       Time_After   : Time;
       AST          : ${root_entity.api_name};
    begin
-      Unit := Get_From_File (Ctx, File_Name, "", True);
+      Unit := Get_From_File (Ctx, File_Name, "", True, Rule => Get_Rule);
       AST := Root (Unit);
       Time_After := Clock;
 
