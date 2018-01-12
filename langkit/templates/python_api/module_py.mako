@@ -836,6 +836,17 @@ class ${root_astnode_name}(object):
                     (field_name.startswith('p_') and with_properties)):
                 yield (field_name, getattr(self, '{}'.format(field_name)))
 
+    def dump_str(self):
+        """
+        Dump the sub-tree to a string in a human-readable format.
+        """
+        import cStringIO
+        output = cStringIO.StringIO()
+        self.dump(file=output)
+        ret = output.getvalue()
+        output.close()
+        return ret
+
     def dump(self, indent='', file=sys.stdout):
         """
         Dump the sub-tree in a human-readable format on the given file.
