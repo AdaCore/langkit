@@ -1672,15 +1672,16 @@ def find_canonical_parser(parsers):
     that will be used to emit the unparser, which is considered the canonical
     one for unparsing.
 
+    :param list[parsers] parsers: List of parsers to analyze.
     :rtype: Parser
     """
     def has_null(parser):
         """
-        Return true if parser contains a null parser somewhere.
+        Return whether `parser` is a Null or recursivery has a Null children
+        parser.
         """
-        return isinstance(parser, Null) or any(
-            has_null(c) for c in parser.children()
-        )
+        return isinstance(parser, Null) or any(has_null(c)
+                                               for c in parser.children())
 
     nulls, no_nulls = split(has_null, parsers)
     return no_nulls[0] if no_nulls else nulls[0]
