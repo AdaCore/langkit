@@ -360,17 +360,17 @@ class WarningSet(object):
     )
     pp_bad_grammar = WarningDescriptor(
         'pp-bad-grammar', False,
-        'Warn if the grammar is not amenable to the automatic generation of a '
-        'pretty-printer'
+        'Warn if the grammar is not amenable to the automatic generation of a'
+        ' pretty-printer.'
     )
     unused_node_type = WarningDescriptor(
         'unused-node-type', True,
-        'Warn if a node type is not used in the grammar, and is not marked as '
-        'abstract nor synthetic'
+        'Warn if a node type is not used in the grammar, and is not marked as'
+        ' abstract nor synthetic.'
     )
     undocumented_public_properties = WarningDescriptor(
         'undocumented-public-properties', True,
-        'Warn if a public property is left undocumented'
+        'Warn if a public property is left undocumented.'
     )
     available_warnings = [
         prop_only_entities, unused_bindings, pp_bad_grammar, unused_node_type,
