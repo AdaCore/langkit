@@ -1601,10 +1601,13 @@ def creates_node(p, follow_refs=True):
 @Log.log_return('unparser_eq_impl')
 def unparser_struct_eq(parsers, toplevel=True):
     """
-    Determine if two parsers are structurally equal, with regards to unparsing.
+    Determine if all given parsers are structurally equal with regards to
+    unparsing.
 
-    :type parser: Parser
-    :type other_parser: Parser
+    :param list[Parser] parsers: List of parsers to compare. Must contain at
+        least one parser.
+    :param bool toplevel: Recursion helper.
+    :rtype: bool
     """
 
     Log.log("unparser_eq_impl", "parsers: ".format(parsers))
