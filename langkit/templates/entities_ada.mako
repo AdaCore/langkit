@@ -208,12 +208,6 @@
      (Node : ${root_entity.api_name}'Class) return Token_Iterator;
    --  Return an iterator on the range of tokens encompassed by Node
 
-   --------------
-   -- Unparser --
-   --------------
-
-   function Unparse (Node : ${root_entity.api_name}'Class) return String;
-
    -------------------
    -- Debug helpers --
    -------------------
@@ -487,24 +481,6 @@
       return Token_Iterator'(As_${T.root_node.kwless_raw_name} (Node),
                              Node.Node.Token_End_Index);
    end Token_Range;
-
-   -------------
-   -- Unparse --
-   -------------
-
-   function Unparse (Node : ${root_entity.api_name}'Class) return String is
-      Buffer : Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
-   begin
-      Node.Node.Unparse (Buffer);
-      declare
-         Result : constant Wide_Wide_String :=
-            Ada.Strings.Wide_Wide_Unbounded.To_Wide_Wide_String (Buffer);
-      begin
-         --  TODO??? Use GNATCOLL.Iconv to properly encode this wide wide
-         --  string into a mere string using this unit's charset.
-         return Image (Result);
-      end;
-   end Unparse;
 
    -----------
    -- Print --

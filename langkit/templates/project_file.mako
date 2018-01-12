@@ -42,6 +42,8 @@ library project ${lib_name} is
       "${lib_name.lower()}-iterators.ads",
       "${lib_name.lower()}-lexer.adb",
       "${lib_name.lower()}-lexer.ads",
+      "${lib_name.lower()}-unparsing.adb",
+      "${lib_name.lower()}-unparsing.ads",
       % for path in ctx.additional_source_files:
       "${os_path.basename(path)}",
       % endfor
