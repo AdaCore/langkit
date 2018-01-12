@@ -1460,7 +1460,6 @@ class NodeToParsersPass(object):
 
     def __init__(self):
         self.nodes_to_rules = defaultdict(list)
-        self.canonical_rules = {}
 
     def abort_unparser(self, message):
         """
@@ -1506,25 +1505,17 @@ class NodeToParsersPass(object):
             return
 
         for node, parsers in self.nodes_to_rules.items():
-            # If the node has more than one parser, check if those are
-            # structurally equivalent.
-            if len(parsers) > 1:
-                if not unparser_struct_eq(parsers):
-                    self.abort_unparser(
-                        'Node {} is parsed in different incompatible'
-                        ' ways.'.format(node.name)
+            # Check that all parsers are structurally equivalent, then consider
+            # only the canonical one to generate the unparser.
+            if not unparser_struct_eq(parsers):
+                self.abort_unparser(
+                    'Node {} is parsed in different incompatible ways.'.format(
+                        node.name
                     )
-                    return
-
-                self.canonical_rules[node] = find_canonical_parser(parsers)
-            else:
-                self.canonical_rules[node] = parsers[0]
-
-            Log.log('unparser_canonical', node.name,
-                    self.canonical_rules[node])
-
-            # Set the canonical parser on this ASTNodeType type
-            node.parser = self.canonical_rules[node]
+                )
+                return
+            node.parser = find_canonical_parser(parsers)
+            Log.log('unparser_canonical', node.name, node.parser)
 
     def compute(self, parser):
         """
