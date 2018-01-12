@@ -1609,6 +1609,8 @@ def unparser_struct_eq(parsers, toplevel=True):
     :param bool toplevel: Recursion helper.
     :rtype: bool
     """
+    # Make sure we can iterate multiple times on the input list of parsers
+    parsers = list(parsers)
 
     Log.log('unparser_eq_impl', 'parsers: {}'.format(parsers))
 
@@ -1618,56 +1620,56 @@ def unparser_struct_eq(parsers, toplevel=True):
 
     parsers_types = set(type(p) for p in parsers)
 
-    # First, if there are Null parsers in the lot, we can safely ignore them,
-    # and run the algorithm on the remaining parsers.
-    if Null in parsers_types:
-        if is_same(p.get_type() for p in parsers):
-            return unparser_struct_eq(
-                [p for p in parsers if not isinstance(p, Null)]
-            )
+    # First, if all sub-parsers return the same kind of node and there are Null
+    # parsers in the lot, we can safely ignore them, and run the algorithm on
+    # the remaining parsers.
+    if Null in parsers_types and is_same(p.get_type() for p in parsers):
+        # As we just filter parsers in the recursive calls, we must not pass
+        # toplevel=False.
+        return unparser_struct_eq(p for p in parsers
+                                  if not isinstance(p, Null))
 
-    # All parsers are of the same kind. Let's see if they're structurally
+    # If all parsers are of the same kind, let's see if they're structurally
     # equivalent.
     if len(parsers_types) == 1:
-        # We pick the type out of the set
+        # "typ" is the only parser kind we have in "parsers"
         typ = parsers_types.pop()
 
-        # For those parser kinds, we want to check if their children are the
-        # same.
+        # For those parser kinds, we only need to check that their lists of
+        # children are equivalent.
         if typ in (_Row, _Transform, List, Opt):
             children_lists = [p.children() for p in parsers]
             return is_same(len(c) for c in children_lists) and all(
                 unparser_struct_eq(c, False)
                 for c in zip(*children_lists)
             )
-        # For tok, we want to check that the parsed token is the same
+        # For Tok, we want to check that the parsed token is the same
         elif typ == Tok:
             return is_same(p.val for p in parsers)
-        # For extract, structural equality involves comparing indices too
+        # For _Extract, structural equality involves comparing the sub-parser
+        # and the extracted index.
         elif typ == _Extract:
-            return unparser_struct_eq(
-                [p.parser for p in parsers]
-            ) and is_same(p.index for p in parsers)
+            return (unparser_struct_eq(p.parser for p in parsers)
+                    and is_same(p.index for p in parsers))
         # Defer and Or will be handled by the same logic we use when the kind
         # of parser is not unique.
         elif typ in (Defer, Or):
             pass
         else:
-            raise Exception("Parser type not handled")
+            raise NotImplementedError('Parser type not handled')
 
     # If we fall down here, either:
     # 1. There are more than one parser kind.
     # 2. The kind is one of those not handled by the block of code above (Or
     #    and Defer).
 
-    # We will use a specific logic for sub-parsers (toplevel=False): If they
+    # We will use a specific logic for sub-parsers (toplevel=False): if they
     # all create nodes directly, without adding additional parser logic, then
-    # their uniqueness is already checked because we call
-    # unparser_struct_eq on all of those.
+    # their uniqueness is already checked because we call unparser_struct_eq on
+    # all of those.
     if not toplevel:
-        resolved_parsers = [
-            p.parser if isinstance(p, Defer) else p for p in parsers
-        ]
+        resolved_parsers = [p.parser if isinstance(p, Defer) else p
+                            for p in parsers]
         return all(creates_node(p) for p in resolved_parsers)
 
     return False
