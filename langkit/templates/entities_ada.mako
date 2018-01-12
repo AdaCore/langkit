@@ -220,8 +220,12 @@
 
    procedure Print
      (Node        : ${root_entity.api_name}'Class;
+      Show_Slocs  : Boolean := True;
       Line_Prefix : String := "");
    --  Debug helper: print to standard output Node and all its children.
+   --
+   --  If Show_Slocs, include AST nodes' source locations in the output.
+   --
    --  Line_Prefix is prepended to each output line.
 
    procedure PP_Trivia
@@ -499,9 +503,10 @@
 
    procedure Print
      (Node        : ${root_entity.api_name}'Class;
+      Show_Slocs  : Boolean := True;
       Line_Prefix : String := "") is
    begin
-      Node.Node.Print (Line_Prefix);
+      Node.Node.Print (Show_Slocs, Line_Prefix);
    end Print;
 
    ---------------

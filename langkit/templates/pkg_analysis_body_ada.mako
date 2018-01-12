@@ -950,12 +950,14 @@ package body ${ada_lib_name}.Analysis is
    -- Print --
    -----------
 
-   procedure Print (Unit : Analysis_Unit) is
+   procedure Print
+     (Unit       : Analysis_Unit;
+      Show_Slocs : Boolean := True) is
    begin
       if Unit.AST_Root = null then
          Put_Line ("<empty analysis unit>");
       else
-         Unit.AST_Root.Print;
+         Unit.AST_Root.Print (Show_Slocs);
       end if;
    end Print;
 

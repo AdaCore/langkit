@@ -1103,6 +1103,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    procedure Print
      (Node        : access ${root_node_value_type}'Class;
+      Show_Slocs  : Boolean;
       Line_Prefix : String := "")
    is
       K               : constant ${root_node_kind_name} := Node.Kind;
@@ -1110,7 +1111,11 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Children_Prefix : constant String := Line_Prefix & "|  ";
 
    begin
-     Put (Line_Prefix & Node.Kind_Name & "[" & Image (Node.Sloc_Range) & "]");
+     Put (Line_Prefix & Node.Kind_Name);
+     if Show_Slocs then
+        Put ("[" & Image (Node.Sloc_Range) & "]");
+     end if;
+
      if Node.all not in ${generic_list_value_type}'Class then
         New_Line;
      end if;
@@ -1138,7 +1143,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
                     New_Line;
                     for Child of {node}.Nodes (1 .. {node}.Count) loop
                        if Child /= null then
-                          Child.Print (Line_Prefix & "|  ");
+                          Child.Print (Show_Slocs, Line_Prefix & "|  ");
                        end if;
                     end loop;
                 """.format(node=node_expr))
@@ -1152,7 +1157,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
                            Put (Attr_Prefix & "{print_name}:");
                            if {node}.{field_name} /= null then
                               New_Line;
-                              {node}.{field_name}.Print (Children_Prefix);
+                              {node}.{field_name}.Print
+                                (Show_Slocs, Children_Prefix);
                            else
                               Put_Line (" <null>");
                            end if;

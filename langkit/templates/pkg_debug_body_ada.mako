@@ -32,7 +32,7 @@ package body ${ada_lib_name}.Debug is
 
    procedure PT (Node : ${root_node_type_name}) is
    begin
-      Node.Print;
+      Node.Print (Show_Slocs => True);
    end PT;
 
    ----------

@@ -276,9 +276,13 @@ package ${ada_lib_name}.Analysis is
    procedure Trigger_Envs_Debug (Is_Active : Boolean);
    --  Activate debug traces for lexical envs lookups
 
-   procedure Print (Unit : Analysis_Unit);
+   procedure Print
+     (Unit       : Analysis_Unit;
+      Show_Slocs : Boolean := True);
    --  Debug helper: output the AST and eventual diagnostic for this unit on
    --  standard output.
+   --
+   --  If Show_Slocs, include AST nodes' source locations in the output.
 
    procedure PP_Trivia (Unit : Analysis_Unit);
    --  Debug helper: output a minimal AST with mixed trivias

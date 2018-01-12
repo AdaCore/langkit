@@ -407,6 +407,7 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    procedure Print
      (Node        : access ${root_node_value_type}'Class;
+      Show_Slocs  : Boolean;
       Line_Prefix : String := "");
    --  Debug helper: print to standard output Node and all its children.
    --  Line_Prefix is prepended to each output line.
