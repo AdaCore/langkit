@@ -896,6 +896,20 @@ class ${root_astnode_name}(object):
         except Exception:
             return None
 
+    @property
+    def parent_chain(self):
+        """
+        Return the parent chain of self. Self will be the first element,
+        followed by the first parent, then this parent's parent, etc.
+        """
+        def _parent_chain(node):
+            yield node
+            if node.parent is not None:
+                for p in _parent_chain(node.parent):
+                    yield p
+
+        return list(_parent_chain(self))
+
     def finditer(self, ast_type_or_pred, **kwargs):
         """
         Find every node corresponding to the passed predicates.
