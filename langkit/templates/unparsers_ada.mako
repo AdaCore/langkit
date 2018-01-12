@@ -25,7 +25,7 @@
 
    % if not node_type and creates_node(parser):
       if ${ast_el} /= null then
-         Append (Buffer, ${ast_el}.Unparse);
+         ${ast_el}.Unparse (Result);
       end if;
 
    % elif is_transform(parser):
@@ -41,7 +41,7 @@
       for I in 1 .. Length (Node) loop
          <% assert creates_node (parser.parser) %>
 
-         Append (Buffer, Item (Node, I).Unparse);
+         Item (Node, I).Unparse (Result);
 
          % if parser.sep:
             if I < Length (Node) then
@@ -81,23 +81,21 @@
    % elif is_tok(parser):
 
       % if parser.match_text:
-         Append (Buffer, "${parser.match_text}");
+         Append (Result, "${parser.match_text}");
       % elif parser.val.matcher:
-         Append (Buffer, "${parser.val.matcher.to_match}");
+         Append (Result, "${parser.val.matcher.to_match}");
       % elif ast_el != "Node":
-         Append
-           (Buffer,
-            Image (Text (Token (Node, ${ast_el})), With_Quotes => False));
+         Append (Result, Text (Token (Node, ${ast_el})));
       % else:
          <% assert False %>
       % endif
 
-      Append (Buffer, " ");
+      Append (Result, " ");
 
    % elif creates_node(parser):
 
       if ${ast_el} /= null then
-         Append (Buffer, ${ast_el}.Unparse);
+         ${ast_el}.Unparse (Result);
       end if;
 
    % elif is_null(parser):
@@ -116,15 +114,10 @@
 <%def name="unparser(node_type)">
    --  In unparser(${node_type})
 % if node_type.parser:
-   declare
-      Buffer : Unbounded_String;
-   begin
-      null;
-      ${emit_unparser_code(node_type.parser, node_type, "Node")}
-      return To_String (Buffer);
-   end;
+   null;
+   ${emit_unparser_code(node_type.parser, node_type, "Node")}
 % else:
-   return "";
+   null;
 % endif
 
 </%def>

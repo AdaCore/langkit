@@ -33,8 +33,9 @@
 
    % if not element_type.has_abstract_list:
       % if ctx.generate_unparser:
-         overriding function Unparse
-           (Node : access ${value_type}) return String;
+         overriding procedure Unparse
+           (Node   : access ${value_type};
+            Result : in out Unbounded_Wide_Wide_String);
       % endif
    % endif
 
@@ -63,8 +64,9 @@
    % if not element_type.has_abstract_list:
 
       % if ctx.generate_unparser:
-         overriding function Unparse
-           (Node : access ${value_type}) return String is
+         overriding procedure Unparse
+           (Node   : access ${value_type};
+            Result : in out Unbounded_Wide_Wide_String) is
          begin
             ${unparsers.unparser(list_type)}
          end Unparse;

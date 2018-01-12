@@ -493,8 +493,17 @@
    -------------
 
    function Unparse (Node : ${root_entity.api_name}'Class) return String is
+      Buffer : Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
    begin
-      return Node.Node.Unparse;
+      Node.Node.Unparse (Buffer);
+      declare
+         Result : constant Wide_Wide_String :=
+            Ada.Strings.Wide_Wide_Unbounded.To_Wide_Wide_String (Buffer);
+      begin
+         --  TODO??? Use GNATCOLL.Iconv to properly encode this wide wide
+         --  string into a mere string using this unit's charset.
+         return Image (Result);
+      end;
    end Unparse;
 
    -----------

@@ -15,10 +15,11 @@
    no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts)
 %>
 
-with Ada.Containers; use Ada.Containers;
+with Ada.Containers;                  use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
-with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
+with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Unchecked_Deallocation;
 
 with System;
@@ -236,13 +237,10 @@ package ${ada_lib_name}.Analysis.Implementation is
       % endif
    % endfor
 
-   % if ctx.generate_unparser:
-   function Unparse
-     (Node : access ${root_node_value_type}) return String is abstract;
-   % else:
-   function Unparse (Node : access ${root_node_value_type}) return String is
-     (raise Program_Error with "Unparser not generated");
-   % endif
+   procedure Unparse
+     (Node   : access ${root_node_value_type};
+      Result : in out Unbounded_Wide_Wide_String)
+      ${'is abstract' if ctx.generate_unparser else ''};
 
    % if ctx.properties_logging:
       function Trace_Image

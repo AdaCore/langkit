@@ -1795,6 +1795,17 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    % endif
 
+   % if not ctx.generate_unparser:
+      procedure Unparse
+        (Node   : access ${root_node_value_type};
+         Result : in out Unbounded_Wide_Wide_String)
+      is
+         pragma Unreferenced (Node, Result);
+      begin
+         raise Program_Error with "Unparsed not generated";
+      end Unparse;
+   % endif
+
    % for struct_type in no_builtins(ctx.struct_types):
    ${struct_types.body(struct_type)}
    % endfor
