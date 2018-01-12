@@ -113,4 +113,7 @@ package ${ada_lib_name}.Lexer is
    --  If T has a symbol, return it. Otherwise, force its symbolization and
    --  return the symbol.
 
+   function Internal_Charset return String;
+   --  Return the charset used to store text internally
+
 end ${ada_lib_name}.Lexer;
