@@ -241,7 +241,7 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}) return String is abstract;
    % else:
    function Unparse (Node : access ${root_node_value_type}) return String is
-     ("Unparser not generated");
+     (raise Program_Error with "Unparser not generated");
    % endif
 
    % if ctx.properties_logging:
