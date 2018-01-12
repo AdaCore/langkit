@@ -824,7 +824,8 @@ class ${root_astnode_name}(object):
             return ${root_astnode_name}._wrap(result)
 
     def iter_fields(self, with_fields=True, with_properties=True):
-        """Iterate through all the fields this node contains
+        """
+        Iterate through all the fields this node contains
 
         Return an iterator that yields (name, value) couples for all abstract
         fields in this node. If "with_fields", this includes parsing fields. If
@@ -836,7 +837,8 @@ class ${root_astnode_name}(object):
                 yield (field_name, getattr(self, '{}'.format(field_name)))
 
     def dump(self, indent='', file=sys.stdout):
-        """Dump the sub-tree in a human-readable format on the given file.
+        """
+        Dump the sub-tree in a human-readable format on the given file.
 
         :param str indent: Prefix printed on each line during the dump.
         :param file file: File in which the dump must occur.
