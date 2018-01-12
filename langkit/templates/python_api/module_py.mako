@@ -825,7 +825,7 @@ class ${root_astnode_name}(object):
 
     def iter_fields(self, with_fields=True, with_properties=False):
         """
-        Iterate through all the fields this node contains
+        Iterate through all the fields this node contains.
 
         Return an iterator that yields (name, value) couples for all abstract
         fields in this node. If "with_fields", this includes parsing fields. If
