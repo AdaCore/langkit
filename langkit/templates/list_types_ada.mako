@@ -4,7 +4,7 @@
 ## Derived AST list types are handled directly in astnode_types_ada.mako, as
 ## their definition is much more like the ones of regular AST nodes.
 
-<%namespace name="pretty_printers" file="pretty_printers_ada.mako" />
+<%namespace name="unparsers" file="unparsers_ada.mako" />
 
 <%def name="public_incomplete_decl(element_type)">
 
@@ -32,9 +32,9 @@
       new ${generic_list_value_type} with null record;
 
    % if not element_type.has_abstract_list:
-      % if ctx.generate_pp:
-      overriding function PP
-        (Node : access ${value_type}) return String;
+      % if ctx.generate_unparser:
+         overriding function Unparse
+           (Node : access ${value_type}) return String;
       % endif
    % endif
 
@@ -62,13 +62,12 @@
 
    % if not element_type.has_abstract_list:
 
-      % if ctx.generate_pp:
-      overriding function PP
-        (Node : access ${value_type}) return String
-      is
-      begin
-         ${pretty_printers.pretty_printer(list_type)}
-      end PP;
+      % if ctx.generate_unparser:
+         overriding function Unparse
+           (Node : access ${value_type}) return String is
+         begin
+            ${unparsers.unparser(list_type)}
+         end Unparse;
       % endif
 
    % endif

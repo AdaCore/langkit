@@ -208,11 +208,11 @@
      (Node : ${root_entity.api_name}'Class) return Token_Iterator;
    --  Return an iterator on the range of tokens encompassed by Node
 
-   --------------------
-   -- Pretty-printer --
-   --------------------
+   --------------
+   -- Unparser --
+   --------------
 
-   function PP (Node : ${root_entity.api_name}'Class) return String;
+   function Unparse (Node : ${root_entity.api_name}'Class) return String;
 
    -------------------
    -- Debug helpers --
@@ -484,14 +484,14 @@
                              Node.Node.Token_End_Index);
    end Token_Range;
 
-   --------
-   -- PP --
-   --------
+   -------------
+   -- Unparse --
+   -------------
 
-   function PP (Node : ${root_entity.api_name}'Class) return String is
+   function Unparse (Node : ${root_entity.api_name}'Class) return String is
    begin
-      return Node.Node.PP;
-   end PP;
+      return Node.Node.Unparse;
+   end Unparse;
 
    -----------
    -- Print --

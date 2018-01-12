@@ -358,10 +358,10 @@ class WarningSet(object):
         'Warn about bindings (in properties) that are unused, or the ones used'
         ' while they are declared as unused.'
     )
-    pp_bad_grammar = WarningDescriptor(
-        'pp-bad-grammar', False,
-        'Warn if the grammar is not amenable to the automatic generation of a'
-        ' pretty-printer.'
+    unparser_bad_grammar = WarningDescriptor(
+        'unparser-bad-grammar', False,
+        'Warn if the grammar is not amenable to the automatic generation of an'
+        ' unparser.'
     )
     unused_node_type = WarningDescriptor(
         'unused-node-type', True,
@@ -373,8 +373,8 @@ class WarningSet(object):
         'Warn if a public property is left undocumented.'
     )
     available_warnings = [
-        prop_only_entities, unused_bindings, pp_bad_grammar, unused_node_type,
-        undocumented_public_properties
+        prop_only_entities, unused_bindings, unparser_bad_grammar,
+        unused_node_type, undocumented_public_properties
     ]
 
     def __init__(self):

@@ -353,9 +353,8 @@ class ManageScript(object):
                  ' fields and their properties.'
         )
         subparser.add_argument(
-            '--pp', action='store_true', default=False,
-            help='Generate a pretty-printer along with the parser for the'
-                 ' grammar.'
+            '--generate-unparser', action='store_true', default=False,
+            help='Generate an unparser along with the parser for the grammar.'
         )
 
     def add_build_args(self, subparser):
@@ -613,7 +612,7 @@ class ManageScript(object):
                           check_only=args.check_only,
                           warnings=args.enabled_warnings,
                           no_property_checks=args.no_property_checks,
-                          generate_pp=args.pp,
+                          generate_unparser=args.generate_unparser,
                           properties_logging=args.enabled_properties_logging,
                           separate_properties=args.separate_properties,
                           generate_astdoc=not args.no_astdoc)

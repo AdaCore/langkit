@@ -1134,7 +1134,7 @@ class CompileCtx(object):
     def emit(self, file_root='.', generate_lexer=True, main_source_dirs=set(),
              main_programs=set(), annotate_fields_types=False,
              check_only=False, no_property_checks=False,
-             warnings=None, generate_pp=False, properties_logging=False,
+             warnings=None, generate_unparser=False, properties_logging=False,
              separate_properties=False, generate_astdoc=True):
         """
         Generate sources for the analysis library. Also emit a tiny program
@@ -1169,8 +1169,8 @@ class CompileCtx(object):
 
         :param WarningSet warnings: Set of enabled warnings.
 
-        :param bool generate_pp: Whether to generate a pretty printer for the
-            given grammar.
+        :param bool generate_unparser: Whether to generate a pretty printer for
+            the given grammar.
 
         :param bool propeties_logging: Whether to instrument properties code to
             do logging.
@@ -1188,15 +1188,15 @@ class CompileCtx(object):
             add_template_dir(dirpath)
 
         self.no_property_checks = no_property_checks
-        self.generate_pp = generate_pp
+        self.generate_unparser = generate_unparser
         self.properties_logging = properties_logging
         self.separate_properties = separate_properties
         self.generate_astdoc = generate_astdoc
         if warnings:
             self.warnings = warnings
 
-        if self.generate_pp:
-            self.warnings.enable(self.warnings.pp_bad_grammar)
+        if self.generate_unparser:
+            self.warnings.enable(self.warnings.unparser_bad_grammar)
 
         # Automatically add all source files in the "extensions/src" directory
         # to the generated library project.

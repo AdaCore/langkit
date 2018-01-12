@@ -6,7 +6,7 @@
 <%namespace name="exts"              file="extensions.mako" />
 <%namespace name="list_types"        file="list_types_ada.mako" />
 <%namespace name="struct_types"      file="struct_types_ada.mako" />
-<%namespace name="pretty_printers"   file="pretty_printers_ada.mako" />
+<%namespace name="unparsers"         file="unparsers_ada.mako" />
 <%namespace name="public_properties" file="public_properties_ada.mako" />
 <%namespace name="memoization"       file="memoization_ada.mako" />
 
@@ -236,13 +236,12 @@ package ${ada_lib_name}.Analysis.Implementation is
       % endif
    % endfor
 
-   % if ctx.generate_pp:
-   function PP
+   % if ctx.generate_unparser:
+   function Unparse
      (Node : access ${root_node_value_type}) return String is abstract;
    % else:
-   function PP
-     (Node : access ${root_node_value_type}) return String
-   is ("Pretty printer not generated");
+   function Unparse (Node : access ${root_node_value_type}) return String is
+     ("Unparser not generated");
    % endif
 
    % if ctx.properties_logging:

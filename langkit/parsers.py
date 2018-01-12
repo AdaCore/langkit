@@ -1448,38 +1448,38 @@ class Predicate(Parser):
 
 
 # This part of the file contains experiments toward automatic generation of
-# pretty printers for Langkit grammars.
+# unparsers for Langkit grammars.
 
 
 class NodeToParsersPass(object):
     """
     This pass computes the correspondence between AST node types and parsers.
-    The end goal is to have one and only one non-ambiguous rule to pretty-print
-    an AST type.
+    The end goal is to have one and only one non-ambiguous rule to unparse an
+    AST type.
     """
 
     def __init__(self):
         self.nodes_to_rules = defaultdict(list)
         self.canonical_rules = {}
 
-    def abort_pp(self, message):
+    def abort_unparser(self, message):
         """
-        Abort pretty-printer generation. Emit a warning to inform users with
-        the given message.
+        Abort unparsers generation. Emit a warning to inform users with the
+        given message.
         """
-        WarningSet.pp_bad_grammar.warn_if(
+        WarningSet.unparser_bad_grammar.warn_if(
             True,
-            '{} This prevents the generation of an automatic pretty printer.'
-            '\nFor more information, enable the the pp_eq'
+            '{} This prevents the generation of an automatic unparser.'
+            '\nFor more information, enable the the unparser_eq'
             ' trace'.format(message)
         )
-        get_context().generate_pp = False
+        get_context().generate_unparser = False
 
     def check_nodes_to_rules(self, ctx):
         """
         Check the results of the compute pass, to see if every node type only
-        has one non ambiguous way of being pretty printed, and assign a
-        canonical representation to every node type.
+        has one non ambiguous way of being unparsed, and assign a canonical
+        representation to every node type.
         """
         from langkit.compiled_types import CompiledTypeMetaclass
 
@@ -1501,24 +1501,27 @@ class NodeToParsersPass(object):
                     ' synthetic'.format(node_type.name)
                 )
 
-        # Exit early if no pretty-printer generation has been asked
-        if not ctx.generate_pp:
+        # Exit early if unparser generation was not requested
+        if not ctx.generate_unparser:
             return
 
         for node, parsers in self.nodes_to_rules.items():
             # If the node has more than one parser, check if those are
             # structurally equivalent.
             if len(parsers) > 1:
-                if not pp_struct_eq(parsers):
-                    self.abort_pp('Node {} is parsed in different incompatible'
-                                  ' ways.'.format(node.name))
+                if not unparser_struct_eq(parsers):
+                    self.abort_unparser(
+                        'Node {} is parsed in different incompatible'
+                        ' ways.'.format(node.name)
+                    )
                     return
 
                 self.canonical_rules[node] = find_canonical_parser(parsers)
             else:
                 self.canonical_rules[node] = parsers[0]
 
-            Log.log('pp_canonical', node.name, self.canonical_rules[node])
+            Log.log('unparser_canonical', node.name,
+                    self.canonical_rules[node])
 
             # Set the canonical parser on this ASTNodeType type
             node.parser = self.canonical_rules[node]
@@ -1540,7 +1543,7 @@ class NodeToParsersPass(object):
                 compute_internal(c)
 
         if not creates_node(parser):
-            self.abort_pp("'{}' toplevel rule loses information.".format(
+            self.abort_unparser("'{}' toplevel rule loses information.".format(
                 parser.name
             ))
         compute_internal(parser)
@@ -1563,6 +1566,7 @@ def creates_node(p, follow_refs=True):
         Defer parsers.
     """
     from langkit.dsl import EnumNode
+    from langkit.lexer import LexerToken
 
     if isinstance(p, Or) and follow_refs:
         return all(creates_node(c) for c in p.children())
@@ -1576,6 +1580,16 @@ def creates_node(p, follow_refs=True):
     if isinstance(p, Predicate) and follow_refs:
         return creates_node(p.parser)
 
+    # As a special case, if "p" parses a node followed by a termination token,
+    # then consider it just creates a node.
+    if isinstance(p, _Extract) and follow_refs:
+        if len(p.parser.parsers) != 2:
+            return False
+        node, term = p.parser.parsers
+        return (creates_node(node) and
+                isinstance(term, Tok) and
+                term._val == LexerToken.Termination)
+
     return (
         isinstance(p, _Transform)
         or isinstance(p, List)
@@ -1584,17 +1598,16 @@ def creates_node(p, follow_refs=True):
 
 
 @Log.recursive
-@Log.log_return('pp_eq_impl')
-def pp_struct_eq(parsers, toplevel=True):
+@Log.log_return('unparser_eq_impl')
+def unparser_struct_eq(parsers, toplevel=True):
     """
-    Determine if two parsers are structurally equal, with regards to pretty
-    printing.
+    Determine if two parsers are structurally equal, with regards to unparsing.
 
     :type parser: Parser
     :type other_parser: Parser
     """
 
-    Log.log("pp_eq_impl", "parsers: ".format(parsers))
+    Log.log("unparser_eq_impl", "parsers: ".format(parsers))
 
     # If there is only one parser, the result is obviously True
     if len(parsers) == 1:
@@ -1606,7 +1619,7 @@ def pp_struct_eq(parsers, toplevel=True):
     # and run the algorithm on the remaining parsers.
     if Null in parsers_types:
         if is_same(p.get_type() for p in parsers):
-            return pp_struct_eq(
+            return unparser_struct_eq(
                 [p for p in parsers if not isinstance(p, Null)]
             )
 
@@ -1621,7 +1634,7 @@ def pp_struct_eq(parsers, toplevel=True):
         if typ in (_Row, _Transform, List, Opt):
             children_lists = [p.children() for p in parsers]
             return is_same(len(c) for c in children_lists) and all(
-                pp_struct_eq(c, False)
+                unparser_struct_eq(c, False)
                 for c in zip(*children_lists)
             )
         # For tok, we want to check that the parsed token is the same
@@ -1629,7 +1642,7 @@ def pp_struct_eq(parsers, toplevel=True):
             return is_same(p.val for p in parsers)
         # For extract, structural equality involves comparing indices too
         elif typ == _Extract:
-            return pp_struct_eq(
+            return unparser_struct_eq(
                 [p.parser for p in parsers]
             ) and is_same(p.index for p in parsers)
         # Defer and Or will be handled by the same logic we use when the kind
@@ -1647,7 +1660,7 @@ def pp_struct_eq(parsers, toplevel=True):
     # We will use a specific logic for sub-parsers (toplevel=False): If they
     # all create nodes directly, without adding additional parser logic, then
     # their uniqueness is already checked because we call
-    # pp_struct_eq on all of those.
+    # unparser_struct_eq on all of those.
     if not toplevel:
         resolved_parsers = [
             p.parser if isinstance(p, Defer) else p for p in parsers
@@ -1660,8 +1673,8 @@ def pp_struct_eq(parsers, toplevel=True):
 def find_canonical_parser(parsers):
     """
     From a list of parsers corresponding to the same node type, return the one
-    that will be used to emit the pretty-printer, which is considered the
-    canonical one for pretty-printing.
+    that will be used to emit the unparser, which is considered the canonical
+    one for unparsing.
 
     :rtype: Parser
     """

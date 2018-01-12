@@ -1,8 +1,8 @@
 ## vim: filetype=makoada
 
-<%namespace name="exts"            file="extensions.mako" />
-<%namespace name="prop_helpers"    file="properties/helpers.mako" />
-<%namespace name="pretty_printers" file="pretty_printers_ada.mako" />
+<%namespace name="exts"         file="extensions.mako" />
+<%namespace name="prop_helpers" file="properties/helpers.mako" />
+<%namespace name="unparsers"    file="unparsers_ada.mako" />
 
 <%def name="public_incomplete_decl(cls)">
 
@@ -180,12 +180,10 @@
    end record;
 
    % if not cls.abstract:
-
-      % if ctx.generate_pp:
-      overriding function PP
-        (Node : access ${type_name}) return String;
+      % if ctx.generate_unparser:
+         overriding function Unparse
+           (Node : access ${type_name}) return String;
       % endif
-
    % endif
 
    ## Field getters
@@ -286,12 +284,12 @@
 
    % if not cls.abstract:
 
-      % if ctx.generate_pp:
-      overriding function PP (Node : access ${type_name}) return String
+      % if ctx.generate_unparser:
+      overriding function Unparse (Node : access ${type_name}) return String
       is
       begin
-         ${pretty_printers.pretty_printer(cls)}
-      end PP;
+         ${unparsers.unparser(cls)}
+      end Unparse;
       % endif
 
    % endif
