@@ -1,16 +1,16 @@
 main.py: Running...
-<SynthNode>
+SynthNode 1:1-1:15
 |name: Token(u'main')
 |items:
-|  <LiteralList>
-|  |item 0:
-|  |  <Literal>
+|  LiteralList 1:7-1:14
+|  |item_0:
+|  |  Literal 1:7-1:8
 |  |  |tok: Token(u'1')
-|  |item 1:
-|  |  <Literal>
+|  |item_1:
+|  |  Literal 1:10-1:11
 |  |  |tok: Token(u'2')
-|  |item 2:
-|  |  <Literal>
+|  |item_2:
+|  |  Literal 1:13-1:14
 |  |  |tok: Token(u'3')
 main.py: Done.
 Done

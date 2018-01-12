@@ -865,11 +865,12 @@ class ${root_astnode_name}(object):
             else:
                 print('{}{}: {}'.format(indent, name, value), file=file)
 
-        print('{}<{}>'.format(indent, self.kind_name), file=file)
+        erepr = self.entity_repr[1:-1]
+        print('{}{}'.format(indent, erepr), file=file)
         indent = indent + '|'
         if self.is_list_type:
             for i, value in enumerate(self):
-                print_node("item {}".format(i), value)
+                print_node("item_{}".format(i), value)
         else:
             for name, value in self.iter_fields(with_properties=False):
                 # Remove the f_ prefix to have the same behavior as the Ada
