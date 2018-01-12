@@ -823,7 +823,7 @@ class ${root_astnode_name}(object):
         else:
             return ${root_astnode_name}._wrap(result)
 
-    def iter_fields(self, with_fields=True, with_properties=True):
+    def iter_fields(self, with_fields=True, with_properties=False):
         """
         Iterate through all the fields this node contains
 
