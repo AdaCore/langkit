@@ -41,6 +41,7 @@ procedure Parse is
    Print_Envs  : aliased Boolean;
    Count_Nodes : aliased Boolean;
    Do_Unparse  : aliased Boolean;
+   Hide_Slocs  : aliased Boolean;
 
    Input_Str : Unbounded_String;
    Lookups   : String_Vectors.Vector;
@@ -109,11 +110,15 @@ procedure Parse is
          if Do_Print_Trivia then
             PP_Trivia (Res);
          else
-            Print (Res);
+            Print (Res, not Hide_Slocs);
          end if;
       end if;
 
       Process_Lookups (Res);
+
+      if Do_Unparse then
+         Put_Line (Unparse (Res));
+      end if;
    end Process_Node;
 
    -----------------
@@ -180,7 +185,7 @@ procedure Parse is
          if Do_Print_Trivia then
             PP_Trivia (Unit);
          else
-            Print (AST);
+            Print (AST, not Hide_Slocs);
          end if;
 
          Process_Lookups (AST);
@@ -263,6 +268,9 @@ begin
    Define_Switch
      (Config, Do_Print_Trivia'Access, "-P", "--print-with-trivia",
       Help   => "Print a simplified tree with trivia included");
+   Define_Switch
+     (Config, Hide_Slocs'Access, "--hide-slocs",
+      Help   => "When printing the tree, hide source locations");
    Define_Switch
      (Config, File_Name'Access, "-f:", "--file-name:",
       Help   => "Parse file");
