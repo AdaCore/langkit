@@ -27,6 +27,7 @@
       if ${ast_el} /= null then
          Append (Buffer, ${ast_el}.Unparse);
       end if;
+
    % elif is_transform(parser):
 
       % if is_row(parser.parser):
@@ -107,7 +108,7 @@
       % endfor
 
    %else:
-      <% raise Exception("Not handled !") %>
+      <% raise NotImplementedError('Not handled parser: {}'.format(parser)) %>
    % endif
 </%def>
 
