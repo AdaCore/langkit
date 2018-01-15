@@ -159,11 +159,23 @@ procedure Destroy (Map : in out Memoization_Maps.Map) is
    --  We need keys and values to be valid when clearing the memoization map,
    --  but on the other hand we need to free keys and values as well. To
    --  achieve both goals, we first copy key and values into arrays, then we
-   --  clear the map, and then we free keys/values in the arrays.
+   --  clear the map, and then we free keys/values in the arrays. Allocate both
+   --  arrays on the heap to avoid stack overflow, as they can be quite big.
 
    Length : constant Natural := Natural (Map.Length);
-   Keys   : array (1 .. Length) of Mmz_Key_Array_Access;
-   Values : array (1 .. Length) of Mmz_Value;
+
+   type Key_Array is array (1 .. Length) of Mmz_Key_Array_Access;
+   type Key_Array_Access is access Key_Array;
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Key_Array, Key_Array_Access);
+
+   type Value_Array is array (1 .. Length) of Mmz_Value;
+   type Value_Array_Access is access Value_Array;
+   procedure Free is new Ada.Unchecked_Deallocation
+     (Value_Array, Value_Array_Access);
+
+   Keys   : Key_Array_Access := new Key_Array;
+   Values : Value_Array_Access := new Value_Array;
    I      : Positive := 1;
 begin
    for Cur in Map.Iterate loop
@@ -174,13 +186,13 @@ begin
 
    Map.Clear;
 
-   for K_Array of Keys loop
+   for K_Array of Keys.all loop
       Destroy (K_Array);
    end loop;
 
    <% refcounted_value_types = [t for t in value_types if t.is_refcounted] %>
    % if refcounted_value_types:
-      for V of Values loop
+      for V of Values.all loop
          case V.Kind is
             % for t in refcounted_value_types:
                when ${t.memoization_kind} =>
@@ -191,6 +203,9 @@ begin
          end case;
       end loop;
    % endif
+
+   Free (Keys);
+   Free (Values);
 end Destroy;
 
 -------------
