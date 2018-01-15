@@ -944,6 +944,10 @@ package body ${ada_lib_name}.Analysis.Implementation is
       function Hash (B : Boolean) return Hash_Type is (Boolean'Pos (B));
    % endif
 
+   % if T.LongType.requires_hash_function:
+      function Hash (I : Integer) return Hash_Type is (Hash_Type'Mod (I));
+   % endif
+
    % if T.entity_info.requires_hash_function:
       function Hash (Info : Entity_Info) return Hash_Type is
         (Combine (Hash (Info.MD), Hash (Info.Rebindings)));

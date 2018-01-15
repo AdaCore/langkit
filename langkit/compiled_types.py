@@ -2547,7 +2547,8 @@ def create_builtin_types():
         is_ptr=False,
         nullexpr='0',
         external=True,
-        c_type_name='int'
+        c_type_name='int',
+        hashable=True,
     )
 
     CompiledType(
