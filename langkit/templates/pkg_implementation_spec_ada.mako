@@ -40,7 +40,8 @@ with Langkit_Support.Text;        use Langkit_Support.Text;
 with Langkit_Support.Vectors;
 
 with ${ada_lib_name}.Analysis.Parsers;  use ${ada_lib_name}.Analysis.Parsers;
-with ${ada_lib_name}.Lexer;    use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Lexer;             use ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Rewriting;         use ${ada_lib_name}.Rewriting;
 use ${ada_lib_name}.Lexer.Token_Data_Handlers;
 
 % if ctx.separate_properties:
@@ -887,6 +888,9 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  Version number used to invalidate memoization caches in a lazy
       --  fashion. If an analysis unit's version number is strictly inferior to
       --  this, its memoization map should be cleared.
+
+      Rewriting_Handle : ${ada_lib_name}.Rewriting.Rewriting_Handle :=
+         No_Rewriting_Handle;
    end record;
 
    type Analysis_Unit_Type is record
@@ -1036,5 +1040,12 @@ package ${ada_lib_name}.Analysis.Implementation is
    --
    --  This require an access parameter in order to avoid aliasing issues in
    --  the body.
+
+   function Get_Rewriting_Handle
+     (Context : Analysis_Context) return Rewriting_Handle;
+   --  Return the Rewriting_Handle component of Context
+
+   procedure Reset_Rewriting_Handle (Context : Analysis_Context);
+   --  Clear the Rewriting_Handle component of Context
 
 end ${ada_lib_name}.Analysis.Implementation;

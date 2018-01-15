@@ -145,7 +145,9 @@ package body ${ada_lib_name}.Analysis is
          Discard_Errors_In_Populate_Lexical_Env => <>,
          Logic_Resolution_Timeout => <>,
          In_Populate_Lexical_Env => False,
-         Cache_Version => <>);
+         Cache_Version => <>,
+
+         Rewriting_Handle => <>);
 
       Initialize (Context.Parser);
       ${exts.include_extension(ctx.ext('analysis', 'context', 'create'))}

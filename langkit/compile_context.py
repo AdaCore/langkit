@@ -1486,7 +1486,9 @@ class CompileCtx(object):
             ('pkg_introspection',   'Introspection', True),
             # Unit for AST node iteration primitives
             ('pkg_iterators',       'Iterators', True),
-            # Unit for all parsers
+            # Unit for AST rewriting primitives
+            ('pkg_rewriting',       'Rewriting', True),
+            # Unit for AST unparsing primitives
             ('pkg_unparsing',       'Unparsing', True),
             # Unit for all parsers
             ('parsers/pkg_main',    'Analysis.Parsers', True),

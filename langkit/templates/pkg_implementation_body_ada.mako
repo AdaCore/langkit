@@ -2621,4 +2621,23 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end loop;
    end Destroy_Rebindings;
 
+   --------------------------
+   -- Get_Rewriting_Handle --
+   --------------------------
+
+   function Get_Rewriting_Handle
+     (Context : Analysis_Context) return Rewriting_Handle is
+   begin
+      return Context.Rewriting_Handle;
+   end Get_Rewriting_Handle;
+
+   ----------------------------
+   -- Reset_Rewriting_Handle --
+   ----------------------------
+
+   procedure Reset_Rewriting_Handle (Context : Analysis_Context) is
+   begin
+      Context.Rewriting_Handle := No_Rewriting_Handle;
+   end Reset_Rewriting_Handle;
+
 end ${ada_lib_name}.Analysis.Implementation;
