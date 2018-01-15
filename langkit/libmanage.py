@@ -355,6 +355,10 @@ class ManageScript(object):
         subparser.add_argument(
             '--generate-unparser', action='store_true', default=False,
             help='Generate an unparser along with the parser for the grammar.'
+                 ' Note that this machinery is intended only for languages'
+                 ' that have no significant whitespace, i.e. where whitespaces'
+                 ' can be abitrary inserted between two tokens without'
+                 ' affecting lexing.'
         )
 
     def add_build_args(self, subparser):
