@@ -109,15 +109,3 @@
       <% raise NotImplementedError('Not handled parser: {}'.format(parser)) %>
    % endif
 </%def>
-
-
-<%def name="unparser(node_type)">
-   --  In unparser(${node_type})
-% if node_type.parser:
-   null;
-   ${emit_unparser_code(node_type.parser, node_type, "Node")}
-% else:
-   null;
-% endif
-
-</%def>

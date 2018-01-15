@@ -6,7 +6,6 @@
 <%namespace name="exts"              file="extensions.mako" />
 <%namespace name="list_types"        file="list_types_ada.mako" />
 <%namespace name="struct_types"      file="struct_types_ada.mako" />
-<%namespace name="unparsers"         file="unparsers_ada.mako" />
 <%namespace name="public_properties" file="public_properties_ada.mako" />
 <%namespace name="memoization"       file="memoization_ada.mako" />
 
@@ -15,11 +14,10 @@
    no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts)
 %>
 
-with Ada.Containers;                  use Ada.Containers;
+with Ada.Containers;             use Ada.Containers;
 with Ada.Containers.Hashed_Maps;
-with Ada.Strings.Unbounded;           use Ada.Strings.Unbounded;
+with Ada.Strings.Unbounded;      use Ada.Strings.Unbounded;
 with Ada.Strings.Unbounded.Hash;
-with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Unchecked_Deallocation;
 
 with System;
@@ -240,10 +238,6 @@ package ${ada_lib_name}.Analysis.Implementation is
          ${astnode_types.public_incomplete_decl(astnode)}
       % endif
    % endfor
-
-   procedure Unparse_Dispatch
-     (Node   : access ${root_node_value_type}'Class;
-      Result : in out Unbounded_Wide_Wide_String);
 
    % if ctx.properties_logging:
       function Trace_Image

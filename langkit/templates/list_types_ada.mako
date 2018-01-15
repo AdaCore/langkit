@@ -4,8 +4,6 @@
 ## Derived AST list types are handled directly in astnode_types_ada.mako, as
 ## their definition is much more like the ones of regular AST nodes.
 
-<%namespace name="unparsers" file="unparsers_ada.mako" />
-
 <%def name="public_incomplete_decl(element_type)">
 
    <%
@@ -31,14 +29,6 @@
       ${'abstract' if element_type.has_abstract_list else ''}
       new ${generic_list_value_type} with null record;
 
-   % if not element_type.has_abstract_list:
-      % if ctx.generate_unparser:
-         procedure Unparse_${list_type.name}
-           (Node   : ${list_type.name};
-            Result : in out Unbounded_Wide_Wide_String);
-      % endif
-   % endif
-
    ## Helpers generated for properties code. Used in CollectionGet's and
    ## Map/Quantifier's code.
    function Item
@@ -60,19 +50,6 @@
       value_type = list_type.value_type_name()
       type_name = list_type.name
    %>
-
-   % if not element_type.has_abstract_list:
-
-      % if ctx.generate_unparser:
-         procedure Unparse_${list_type.name}
-           (Node   : ${list_type.name};
-            Result : in out Unbounded_Wide_Wide_String) is
-         begin
-            ${unparsers.unparser(list_type)}
-         end Unparse_${list_type.name};
-      % endif
-
-   % endif
 
    ---------
    -- Get --

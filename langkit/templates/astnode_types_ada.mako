@@ -2,7 +2,6 @@
 
 <%namespace name="exts"         file="extensions.mako" />
 <%namespace name="prop_helpers" file="properties/helpers.mako" />
-<%namespace name="unparsers"    file="unparsers_ada.mako" />
 
 <%def name="public_incomplete_decl(cls)">
 
@@ -179,14 +178,6 @@
       ${node_fields(cls)}
    end record;
 
-   % if not cls.abstract:
-      % if ctx.generate_unparser:
-         procedure Unparse_${cls.name}
-           (Node   : ${cls.name};
-            Result : in out Unbounded_Wide_Wide_String);
-      % endif
-   % endif
-
    ## Field getters
    % for field in cls.get_parse_fields(include_inherited=False):
       ${bare_field_decl(field)}
@@ -282,19 +273,6 @@
 
    ext = ctx.ext('nodes', cls.raw_name, 'bodies')
    %>
-
-   % if not cls.abstract:
-
-      % if ctx.generate_unparser:
-         procedure Unparse_${cls.name}
-           (Node   : ${cls.name};
-            Result : in out Unbounded_Wide_Wide_String) is
-         begin
-            ${unparsers.unparser(cls)}
-         end Unparse_${cls.name};
-      % endif
-
-   % endif
 
    ###################################
    ## Lexical Environments Handling ##
