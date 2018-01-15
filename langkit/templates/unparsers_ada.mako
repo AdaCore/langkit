@@ -25,7 +25,7 @@
 
    % if not node_type and creates_node(parser):
       if ${ast_el} /= null then
-         ${ast_el}.Unparse (Result);
+         Unparse_Dispatch (${ast_el}, Result);
       end if;
 
    % elif is_transform(parser):
@@ -41,7 +41,7 @@
       for I in 1 .. Length (Node) loop
          <% assert creates_node (parser.parser) %>
 
-         Item (Node, I).Unparse (Result);
+         Unparse_Dispatch (Item (Node, I), Result);
 
          % if parser.sep:
             if I < Length (Node) then
@@ -95,7 +95,7 @@
    % elif creates_node(parser):
 
       if ${ast_el} /= null then
-         ${ast_el}.Unparse (Result);
+         Unparse_Dispatch (${ast_el}, Result);
       end if;
 
    % elif is_null(parser):

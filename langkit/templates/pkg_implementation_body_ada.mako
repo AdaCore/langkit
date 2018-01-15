@@ -1799,16 +1799,24 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    % endif
 
-   % if not ctx.generate_unparser:
-      procedure Unparse
-        (Node   : access ${root_node_value_type};
-         Result : in out Unbounded_Wide_Wide_String)
-      is
+   procedure Unparse_Dispatch
+     (Node   : access ${root_node_value_type}'Class;
+      Result : in out Unbounded_Wide_Wide_String) is
+   begin
+      % if not ctx.generate_unparser:
          pragma Unreferenced (Node, Result);
-      begin
          raise Program_Error with "Unparsed not generated";
-      end Unparse;
-   % endif
+      % else:
+         case Node.Kind is
+            % for astnode in ctx.astnode_types:
+               % if not astnode.abstract:
+                  when ${astnode.ada_kind_name} =>
+                     Unparse_${astnode.name} (${astnode.name} (Node), Result);
+               % endif
+            % endfor
+         end case;
+      % endif
+   end Unparse_Dispatch;
 
    % for struct_type in no_builtins(ctx.struct_types):
    ${struct_types.body(struct_type)}

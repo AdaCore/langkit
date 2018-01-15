@@ -241,10 +241,9 @@ package ${ada_lib_name}.Analysis.Implementation is
       % endif
    % endfor
 
-   procedure Unparse
-     (Node   : access ${root_node_value_type};
-      Result : in out Unbounded_Wide_Wide_String)
-      ${'is abstract' if ctx.generate_unparser else ''};
+   procedure Unparse_Dispatch
+     (Node   : access ${root_node_value_type}'Class;
+      Result : in out Unbounded_Wide_Wide_String);
 
    % if ctx.properties_logging:
       function Trace_Image

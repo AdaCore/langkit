@@ -181,8 +181,8 @@
 
    % if not cls.abstract:
       % if ctx.generate_unparser:
-         overriding procedure Unparse
-           (Node   : access ${type_name};
+         procedure Unparse_${cls.name}
+           (Node   : ${cls.name};
             Result : in out Unbounded_Wide_Wide_String);
       % endif
    % endif
@@ -286,12 +286,12 @@
    % if not cls.abstract:
 
       % if ctx.generate_unparser:
-         overriding procedure Unparse
-           (Node   : access ${type_name};
+         procedure Unparse_${cls.name}
+           (Node   : ${cls.name};
             Result : in out Unbounded_Wide_Wide_String) is
          begin
             ${unparsers.unparser(cls)}
-         end Unparse;
+         end Unparse_${cls.name};
       % endif
 
    % endif

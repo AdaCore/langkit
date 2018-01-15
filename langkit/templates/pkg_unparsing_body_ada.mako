@@ -22,7 +22,7 @@ package body ${ada_lib_name}.Unparsing is
          return "";
       end if;
 
-      N.Unparse (Buffer);
+      Unparse_Dispatch (N, Buffer);
 
       --  GNATCOLL.Iconv raises a Constraint_Error for empty strings: handle
       --  them here.
