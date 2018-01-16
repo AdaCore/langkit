@@ -21,7 +21,8 @@ package body ${ada_lib_name}.Rewriting is
      (Context : Analysis_Context) return Rewriting_Handle
    is
       Result : constant Rewriting_Handle := new Rewriting_Handle_Type'
-        (Context => Context);
+        (Context => Context,
+         Units   => <>);
    begin
       Set_Rewriting_Handle (Context, Result);
       return Result;
@@ -39,5 +40,32 @@ package body ${ada_lib_name}.Rewriting is
       Free (Handle);
       Set_Rewriting_Handle (Ctx, Handle);
    end Apply;
+
+   ------------
+   -- Handle --
+   ------------
+
+   function Handle (Unit : Analysis_Unit) return Unit_Rewriting_Handle is
+      use Unit_Maps;
+
+      Context        : constant Analysis_Context := Analysis.Context (Unit);
+      Context_Handle : constant Rewriting_Handle := Handle (Context);
+      Filename       : constant Unbounded_String :=
+         To_Unbounded_String (Get_Filename (Unit));
+      Cur            : constant Cursor := Context_Handle.Units.Find (Filename);
+   begin
+      if Cur /= No_Element then
+         return Element (Cur);
+      end if;
+
+      declare
+         Result : constant Unit_Rewriting_Handle :=
+            new Unit_Rewriting_Handle_Type'(Context_Handle => Context_Handle,
+                                            Unit           => Unit);
+      begin
+         Context_Handle.Units.Insert (Filename, Result);
+         return Result;
+      end;
+   end Handle;
 
 end ${ada_lib_name}.Rewriting;

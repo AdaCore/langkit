@@ -226,6 +226,9 @@ package ${ada_lib_name}.Analysis is
       with Pre => not Has_Rewriting_Handle (Context);
    ${ada_doc('langkit.destroy_context', 3)}
 
+   function Context (Unit : Analysis_Unit) return Analysis_Context;
+   --  Return the analysis context that owns Unit
+
    procedure Inc_Ref (Unit : Analysis_Unit);
    ${ada_doc('langkit.unit_incref', 3)}
 

@@ -557,6 +557,15 @@ package body ${ada_lib_name}.Analysis is
    end Destroy;
 
    -------------
+   -- Context --
+   -------------
+
+   function Context (Unit : Analysis_Unit) return Analysis_Context is
+   begin
+      return Unit.Context;
+   end Context;
+
+   -------------
    -- Inc_Ref --
    -------------
 

@@ -1,5 +1,9 @@
 ## vim: filetype=makoada
 
+private with Ada.Containers.Hashed_Maps;
+private with Ada.Strings.Unbounded;
+private with Ada.Strings.Unbounded.Hash;
+
 with ${ada_lib_name}.Analysis; use ${ada_lib_name}.Analysis;
 
 package ${ada_lib_name}.Rewriting is
@@ -7,7 +11,12 @@ package ${ada_lib_name}.Rewriting is
    type Rewriting_Handle is private;
    --  Handle for an analysis context rewriting session
 
-   No_Rewriting_Handle : constant Rewriting_Handle;
+   type Unit_Rewriting_Handle is private;
+   --  Handle for the process of rewriting an analysis unit. Such handles are
+   --  owned by a Rewriting_Handle instance.
+
+   No_Rewriting_Handle      : constant Rewriting_Handle;
+   No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle;
 
    function Handle (Context : Analysis_Context) return Rewriting_Handle;
    --  Return the rewriting handle associated to Context, or
@@ -40,13 +49,35 @@ package ${ada_lib_name}.Rewriting is
            Post => Handle = No_Rewriting_Handle;
    --  Apply all modifications to Handle's analysis context and close Handle
 
+   function Handle (Unit : Analysis_Unit) return Unit_Rewriting_Handle
+      with Pre => Handle (Context (Unit)) /= No_Rewriting_Handle;
+   --  Return the rewriting handle corresponding to Unit
+
 private
+   use Ada.Strings.Unbounded;
+
+   type Rewriting_Handle_Type;
+   type Unit_Rewriting_Handle_Type;
+   type Rewriting_Handle is access Rewriting_Handle_Type;
+   type Unit_Rewriting_Handle is access Unit_Rewriting_Handle_Type;
+
+   No_Rewriting_Handle : constant Rewriting_Handle := null;
+   No_Unit_Rewriting_Handle : constant Unit_Rewriting_Handle := null;
+
+   package Unit_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => Unbounded_String,
+      Element_Type    => Unit_Rewriting_Handle,
+      Hash            => Ada.Strings.Unbounded.Hash,
+      Equivalent_Keys => "=");
 
    type Rewriting_Handle_Type is record
       Context : Analysis_Context;
+      Units   : Unit_Maps.Map;
    end record;
 
-   type Rewriting_Handle is access Rewriting_Handle_Type;
-   No_Rewriting_Handle : constant Rewriting_Handle := null;
+   type Unit_Rewriting_Handle_Type is record
+      Context_Handle : Rewriting_Handle;
+      Unit           : Analysis_Unit;
+   end record;
 
 end ${ada_lib_name}.Rewriting;
