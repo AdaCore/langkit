@@ -118,7 +118,8 @@ def build(grammar, lexer=None, warning_set=default_warning_set):
 
 
 def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
-                  warning_set=default_warning_set, properties_logging=False):
+                  warning_set=default_warning_set, properties_logging=False,
+                  generate_unparser=False):
     """
     Compile and emit code for `ctx` and build the generated library. Then, if
     `py_script` is not None, run it with this library available. If `ada_main`
@@ -131,6 +132,7 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
     :param WarningSet warning_set: Set of warnings to emit.
     :param bool properties_logging: Whether to enable properties logging in
         code generation.
+    :param bool generate_unparser: Whether to generate unparser.
     """
 
     if lexer is None:
@@ -158,6 +160,8 @@ def build_and_run(grammar, py_script=None, ada_main=None, lexer=None,
         argv.append('--enable-properties-logging')
     if pretty_print:
         argv.append('--pretty-print')
+    if generate_unparser:
+        argv.append('--generate-unparser')
     m.run(argv)
 
     # Flush stdout and stderr, so that diagnostics appear deterministically
