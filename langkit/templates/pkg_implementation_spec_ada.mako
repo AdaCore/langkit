@@ -1045,7 +1045,8 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Context : Analysis_Context) return Rewriting_Handle;
    --  Return the Rewriting_Handle component of Context
 
-   procedure Reset_Rewriting_Handle (Context : Analysis_Context);
-   --  Clear the Rewriting_Handle component of Context
+   procedure Set_Rewriting_Handle
+     (Context : Analysis_Context; Handle : Rewriting_Handle);
+   --  Set the Rewriting_Handle component of Context
 
 end ${ada_lib_name}.Analysis.Implementation;

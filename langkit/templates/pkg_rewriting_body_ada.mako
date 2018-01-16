@@ -18,9 +18,13 @@ package body ${ada_lib_name}.Rewriting is
    ---------------------
 
    function Start_Rewriting
-     (Context : Analysis_Context) return Rewriting_Handle is
+     (Context : Analysis_Context) return Rewriting_Handle
+   is
+      Result : constant Rewriting_Handle := new Rewriting_Handle_Type'
+        (Context => Context);
    begin
-      return new Rewriting_Handle_Type'(Context => Context);
+      Set_Rewriting_Handle (Context, Result);
+      return Result;
    end Start_Rewriting;
 
    -----------
@@ -32,8 +36,8 @@ package body ${ada_lib_name}.Rewriting is
         (Rewriting_Handle_Type, Rewriting_Handle);
       Ctx : constant Analysis_Context := Context (Handle);
    begin
-      Reset_Rewriting_Handle (Ctx);
       Free (Handle);
+      Set_Rewriting_Handle (Ctx, Handle);
    end Apply;
 
 end ${ada_lib_name}.Rewriting;

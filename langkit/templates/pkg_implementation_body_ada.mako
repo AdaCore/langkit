@@ -2631,13 +2631,14 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Context.Rewriting_Handle;
    end Get_Rewriting_Handle;
 
-   ----------------------------
-   -- Reset_Rewriting_Handle --
-   ----------------------------
+   --------------------------
+   -- Set_Rewriting_Handle --
+   --------------------------
 
-   procedure Reset_Rewriting_Handle (Context : Analysis_Context) is
+   procedure Set_Rewriting_Handle
+     (Context : Analysis_Context; Handle : Rewriting_Handle) is
    begin
-      Context.Rewriting_Handle := No_Rewriting_Handle;
-   end Reset_Rewriting_Handle;
+      Context.Rewriting_Handle := Handle;
+   end Set_Rewriting_Handle;
 
 end ${ada_lib_name}.Analysis.Implementation;
