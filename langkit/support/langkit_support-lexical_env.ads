@@ -616,7 +616,7 @@ package Langkit_Support.Lexical_Env is
             Transitive_Parent : Boolean := False;
             --  Whether the parent link is transitive or not
 
-            Node : Element_T;
+            Node : Element_T := No_Element;
             --  Node for which this environment was created
 
             Referenced_Envs : Referenced_Envs_Vectors.Vector;
