@@ -46,6 +46,7 @@ with ${ada_lib_name}.Analysis.Implementation;
 use ${ada_lib_name}.Analysis.Implementation;
 with ${ada_lib_name}.Analysis.Parsers; use ${ada_lib_name}.Analysis.Parsers;
 with ${ada_lib_name}.Lexer;
+with ${ada_lib_name}.Rewriting;
 
 % if ctx.separate_properties:
    with ${ada_lib_name}.Analysis.Properties;
@@ -235,6 +236,10 @@ package body ${ada_lib_name}.Analysis is
       Context.Discard_Errors_In_Populate_Lexical_Env := Discard;
    end Discard_Errors_In_Populate_Lexical_Env;
 
+   ----------------------------------
+   -- Set_Logic_Resolution_Timeout --
+   ----------------------------------
+
    procedure Set_Logic_Resolution_Timeout
      (Context : Analysis_Context; Timeout : Natural) is
    begin
@@ -253,6 +258,16 @@ package body ${ada_lib_name}.Analysis is
       return To_Unbounded_String (+Full_Name (Create_From_Base (+Filename),
                                               Normalize => True));
    end Normalize_Unit_Filename;
+
+   --------------------------
+   -- Has_Rewriting_Handle --
+   --------------------------
+
+   function Has_Rewriting_Handle (Context : Analysis_Context) return Boolean is
+      use ${ada_lib_name}.Rewriting;
+   begin
+      return Context.Rewriting_Handle /= No_Rewriting_Handle;
+   end Has_Rewriting_Handle;
 
    -----------------
    -- Create_Unit --

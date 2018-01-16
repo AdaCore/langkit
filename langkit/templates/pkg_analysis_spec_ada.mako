@@ -156,6 +156,12 @@ package ${ada_lib_name}.Analysis is
      (Context : Analysis_Context; Timeout : Natural);
    ${ada_doc('langkit.context_set_logic_resolution_timeout', 3)}
 
+   function Has_Rewriting_Handle (Context : Analysis_Context) return Boolean;
+   --  Return whether Context has a rewriting handler (see
+   --  ${ada_lib_name}.Rewriting), i.e. whether it is in the process of
+   --  rewriting. If true, this means that the set of currently loaded analysis
+   --  units is frozen until the rewriting process is done.
+
    function Get_From_File
      (Context  : Analysis_Context;
       Filename : String;
@@ -163,7 +169,8 @@ package ${ada_lib_name}.Analysis is
       Reparse  : Boolean := False;
       Rule     : Grammar_Rule :=
          ${Name.from_lower(ctx.main_rule_name)}_Rule)
-      return Analysis_Unit;
+      return Analysis_Unit
+      with Pre => not Has_Rewriting_Handle (Context);
    ${ada_doc('langkit.get_unit_from_file', 3)}
 
    function Get_From_Buffer
@@ -173,7 +180,8 @@ package ${ada_lib_name}.Analysis is
       Buffer      : String;
       Rule        : Grammar_Rule :=
          ${Name.from_lower(ctx.main_rule_name)}_Rule)
-      return Analysis_Unit;
+      return Analysis_Unit
+      with Pre => not Has_Rewriting_Handle (Context);
    ${ada_doc('langkit.get_unit_from_buffer', 3)}
 
    function Has_Unit
@@ -189,7 +197,8 @@ package ${ada_lib_name}.Analysis is
       Kind        : Unit_Kind;
       Charset     : String := "";
       Reparse     : Boolean := False)
-      return Analysis_Unit;
+      return Analysis_Unit
+      with Pre => not Has_Rewriting_Handle (Context);
    ${ada_doc('langkit.get_unit_from_provider', 3)}
 
    function Get_With_Error
@@ -209,11 +218,12 @@ package ${ada_lib_name}.Analysis is
    --  Object to translate unit names to file names
    % endif
 
-   procedure Remove
-     (Context : Analysis_Context; File_Name : String);
+   procedure Remove (Context : Analysis_Context; File_Name : String)
+      with Pre => not Has_Rewriting_Handle (Context);
    ${ada_doc('langkit.remove_unit', 3)}
 
-   procedure Destroy (Context : in out Analysis_Context);
+   procedure Destroy (Context : in out Analysis_Context)
+      with Pre => not Has_Rewriting_Handle (Context);
    ${ada_doc('langkit.destroy_context', 3)}
 
    procedure Inc_Ref (Unit : Analysis_Unit);
