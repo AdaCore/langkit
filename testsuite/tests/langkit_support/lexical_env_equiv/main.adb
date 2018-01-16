@@ -11,18 +11,18 @@ procedure Main is
    use Envs;
 
    Old_Env_1 : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Kind => Primary, others => <>));
+     (Kind => Primary, Node => 'O', others => <>));
    New_Env_1 : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Kind => Primary, others => <>));
+     (Kind => Primary, Node => 'N', others => <>));
    Old_Env_2 : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Kind => Primary, others => <>));
+     (Kind => Primary, Node => 'o', others => <>));
    New_Env_2 : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Kind => Primary, others => <>));
+     (Kind => Primary, Node => 'n', others => <>));
 
    Prim_A : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Kind => Primary, others => <>));
+     (Kind => Primary, Node => 'A', others => <>));
    Prim_B : Lexical_Env := Wrap (new Lexical_Env_Type'
-     (Kind => Primary, others => <>));
+     (Kind => Primary, Node => 'B', others => <>));
 
    Orphaned_A1 : constant Lexical_Env := Orphan (Prim_A);
    Orphaned_A2 : constant Lexical_Env := Orphan (Prim_A);
