@@ -1387,8 +1387,6 @@ class CompileCtx(object):
                        CompileCtx.check_memoized),
             errors_checkpoint_pass,
 
-            StopPipeline('check only', disabled=not check_only),
-
             GrammarRulePass('compute nodes parsers correspondence',
                             node_to_parsers.compute),
             ASTNodePass('warn imprecise field type annotations',
@@ -1396,6 +1394,8 @@ class CompileCtx(object):
                         astnode.warn_imprecise_field_type_annotations()),
             GlobalPass('log node parsers correspondence ',
                        node_to_parsers.check_nodes_to_rules),
+
+            StopPipeline('check only', disabled=not check_only),
 
             MajorStepPass('Prepare code emission'),
 
