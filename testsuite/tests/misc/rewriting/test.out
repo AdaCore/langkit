@@ -1,0 +1,11 @@
+Try to get a unit rewriting handle out of a rewriting session...
+   Got an assert failure
+Create a rewriting handle
+Try to create a second rewriting handle...
+   Got an assert failure
+Get a rewriting handle for the analysis unit
+Apply the rewriting
+Create a second rewriting handler
+Apply the rewriting
+main.adb: Done.
+Done
