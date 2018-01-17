@@ -1227,6 +1227,36 @@ class Field(AbstractField):
     """
     concrete = True
 
+    def __init__(self, repr=True, doc=None, type=None):
+        super(Field, self).__init__(repr, doc, type)
+
+        self._types_from_parser = set()
+        """
+        Set of types for values that parsers assign to this field. `self.type`
+        must be a supertype of each of them. Note that this can be an empty
+        set, for synthetic nodes.
+
+        :type: set[CompiledType]
+        """
+
+    @property
+    def inferred_type(self):
+        """
+        Return the type for this field that parsers inferred.
+
+        Note that this is None for synthetic nodes, as parsers don't create
+        them.
+
+        :rtype: CompiledType
+        """
+        types = list(self._types_from_parser)
+        if not types:
+            return None
+        result = types.pop()
+        while types:
+            result = result.unify(types.pop())
+        return result
+
 
 class UserField(AbstractField):
     """
@@ -1833,6 +1863,7 @@ class ASTNodeType(BaseStructType):
                         field.qualname, field.type.name, f_type.name
                     )
                 )
+            field._types_from_parser.add(f_type)
 
         # Only assign types if self was not yet typed. In the case where it
         # was already typed, we checked above that the new types were
