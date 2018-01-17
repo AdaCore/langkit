@@ -1391,6 +1391,9 @@ class CompileCtx(object):
 
             GrammarRulePass('compute nodes parsers correspondence',
                             node_to_parsers.compute),
+            ASTNodePass('warn imprecise field type annotations',
+                        lambda _, astnode:
+                        astnode.warn_imprecise_field_type_annotations()),
             GlobalPass('log node parsers correspondence ',
                        node_to_parsers.check_nodes_to_rules),
 

@@ -9,7 +9,7 @@ from langkit import names
 from langkit.c_api import CAPIType
 from langkit.common import get_type, null_constant, is_keyword
 from langkit.diagnostics import (
-    Context, check_source_language, extract_library_location
+    Context, WarningSet, check_source_language, extract_library_location
 )
 from langkit.template_utils import common_renderer
 from langkit.utils import (issubtype, memoized, not_implemented_error,
@@ -1892,6 +1892,21 @@ class ASTNodeType(BaseStructType):
                         )
                 else:
                     field.type = inferred_type
+
+    def warn_imprecise_field_type_annotations(self):
+        # The type of synthetic node fields are not inferred, so there is
+        # nothing to do for them.
+        if self.synthetic:
+            return
+
+        for field in self.get_parse_fields():
+            inferred_type = field.inferred_type
+            with field.diagnostic_context:
+                WarningSet.imprecise_field_type_annotations.warn_if(
+                    field.type != inferred_type,
+                    'Specified type is {}, but it could be more specific:'
+                    ' {}'.format(field.type.dsl_name, inferred_type.dsl_name)
+                )
 
     def get_inheritance_chain(self):
         """

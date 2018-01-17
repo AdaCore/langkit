@@ -372,9 +372,15 @@ class WarningSet(object):
         'undocumented-public-properties', True,
         'Warn if a public property is left undocumented.'
     )
+    imprecise_field_type_annotations = WarningDescriptor(
+        'imprecise-field-type-annotations', True,
+        'Warn about parsing field type annotations that are not as precise as'
+        ' they could be.'
+    )
     available_warnings = [
         prop_only_entities, unused_bindings, unparser_bad_grammar,
-        unused_node_type, undocumented_public_properties
+        unused_node_type, undocumented_public_properties,
+        imprecise_field_type_annotations,
     ]
 
     def __init__(self):
