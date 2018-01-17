@@ -831,12 +831,12 @@ class ${root_astnode_name}(object):
         fields in this node. If "with_fields", this includes parsing fields. If
         "with_properties", this also includes properties.
 
-        If self is a list, field names will be 'item_{n}' with n being the
+        If "self" is a list, field names will be "item_{n}" with "n" being the
         index.
         """
         if self.is_list_type:
             for i, value in enumerate(self):
-                yield ("item_{}".format(i), value)
+                yield ('item_{}'.format(i), value)
         else:
             for field_name in self._field_names:
                 if ((field_name.startswith('f_') and with_fields) or
