@@ -823,24 +823,20 @@ class ${root_astnode_name}(object):
         else:
             return ${root_astnode_name}._wrap(result)
 
-    def iter_fields(self, with_fields=True, with_properties=False):
+    def iter_fields(self):
         """
         Iterate through all the fields this node contains.
 
         Return an iterator that yields (name, value) couples for all abstract
-        fields in this node. If "with_fields", this includes parsing fields. If
-        "with_properties", this also includes properties.
-
-        If "self" is a list, field names will be "item_{n}" with "n" being the
-        index.
+        fields in this node. If "self" is a list, field names will be
+        "item_{n}" with "n" being the index.
         """
         if self.is_list_type:
             for i, value in enumerate(self):
                 yield ('item_{}'.format(i), value)
         else:
             for field_name in self._field_names:
-                if ((field_name.startswith('f_') and with_fields) or
-                        (field_name.startswith('p_') and with_properties)):
+                if field_name.startswith('f_'):
                     yield (field_name, getattr(self, '{}'.format(field_name)))
 
     def dump_str(self):
@@ -879,7 +875,7 @@ class ${root_astnode_name}(object):
             for i, value in enumerate(self):
                 print_node("item_{}".format(i), value)
         else:
-            for name, value in self.iter_fields(with_properties=False):
+            for name, value in self.iter_fields():
                 # Remove the f_ prefix to have the same behavior as the Ada
                 # dumper. Also filter out non-exposed types to keep the same
                 # output with debug builds.
@@ -995,7 +991,7 @@ class ${root_astnode_name}(object):
             return [i.to_data() for i in self if i is not None]
         else:
             return {n: v.to_data()
-                    for n, v in self.iter_fields(with_properties=False)
+                    for n, v in self.iter_fields()
                     if v is not None}
 
     def to_json(self):
