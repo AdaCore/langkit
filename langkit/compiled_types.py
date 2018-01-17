@@ -1633,7 +1633,7 @@ class ASTNodeType(BaseStructType):
                  env_spec=None, element_type=None, annotations=None,
                  is_generic_list_type=False, is_abstract=False,
                  is_synthetic=False, has_abstract_list=False,
-                 is_enum_node=False, is_bool_node=False):
+                 is_enum_node=False, is_bool_node=False, dsl_name=None):
         """
         :param names.Name name: Name for this node.
 
@@ -1676,6 +1676,9 @@ class ASTNodeType(BaseStructType):
 
         :param bool is_bool_node: Whether this not is a qualifier coming from
             the expansion of langkit.dsl.EnumNode.
+
+        :param str dsl_name: Name used to represent this type at the DSL level.
+            Useful to format diagnostics.
         """
         self.raw_name = name
         self.kwless_raw_name = (self.raw_name + names.Name('Node')
@@ -1807,9 +1810,11 @@ class ASTNodeType(BaseStructType):
         entity_type = self.entity
         del entity_type
 
+        self._dsl_name = dsl_name
+
     @property
     def dsl_name(self):
-        return self.raw_name.camel
+        return self._dsl_name or self.raw_name.camel
 
     def repr_name(self):
         """
@@ -1860,7 +1865,7 @@ class ASTNodeType(BaseStructType):
                 check_source_language(
                     f_type.matches(field.type),
                     "Field {} already had type {}, got {}".format(
-                        field.qualname, field.type.name, f_type.name
+                        field.qualname, field.type.dsl_name, f_type.dsl_name
                     )
                 )
             field._types_from_parser.add(f_type)
@@ -2078,7 +2083,8 @@ class ASTNodeType(BaseStructType):
             name=self.kwless_raw_name + names.Name('List'),
             location=None, doc=None,
             base=CompiledTypeMetaclass.root_grammar_class.generic_list_type,
-            fields=[], element_type=self
+            fields=[], element_type=self,
+            dsl_name='{}.list'.format(self.dsl_name)
         )
 
         ctx = get_context(True)
