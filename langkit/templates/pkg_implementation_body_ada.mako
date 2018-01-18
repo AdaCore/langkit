@@ -155,6 +155,8 @@ package body ${ada_lib_name}.Analysis.Implementation is
       begin
          return Solve (R, Context_Node.Unit.Context.Logic_Resolution_Timeout);
       exception
+         when Langkit_Support.Adalog.Early_Binding_Error =>
+            raise Property_Error with "invalid equation for logic resolution";
          when Langkit_Support.Adalog.Timeout_Error =>
             raise Property_Error with "logic resolution timed out";
       end;
