@@ -318,7 +318,7 @@ def domain(self, logic_var_expr, domain):
 
     So for example, in the equation::
 
-        Domain(A, [1, 2]) and Domain(B, [1, 2])
+        A.domain([1, 2]) and B.domain([1, 2])
 
     The set of solutions is::
 
@@ -327,9 +327,9 @@ def domain(self, logic_var_expr, domain):
     The ``or`` operator acts like concatenation on domains of logic variable,
     so for example::
 
-        Domain(A, [1, 2]) or Domain(A, [3, 4])
+        A.domain([1, 2]) or B.Domain([3, 4])
 
-    is equivalent to (but slower than) ``Domain(A, [1, 2, 3, 4])``.
+    is equivalent to (but slower than) ``A.domain([1, 2, 3, 4])``.
 
     You can define an equation that is invalid, in that not every equation has
     a domain, and, due to runtime dispatch, we cannot statically predict if
