@@ -1400,14 +1400,10 @@ class PropertyError(AbstractExpression):
 
     def construct(self):
         check_source_language(
-            isinstance(self.expr_type, CompiledType),
-            'Invalid input type: {}'.format(repr(self.expr_type))
-        )
-        check_source_language(
             self.message is None or isinstance(self.message, str),
             'Invalid error message: {}'.format(repr(self.message))
         )
-        return ErrorExpr(self.expr_type,
+        return ErrorExpr(resolve_type(self.expr_type),
                          names.Name('Property_Error'),
                          self.message)
 
