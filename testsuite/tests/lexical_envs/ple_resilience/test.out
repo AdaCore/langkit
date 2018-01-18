@@ -1,0 +1,23 @@
+main.py: Running...
+processing <DefList 2:5-17:6>
+  processing scope_1
+    processing a
+      a resolves to scope_1
+    processing b
+      processing c
+        processing unreachable
+          unreachable resolves to None
+    processing d
+      d resolves to scope_1
+  processing scope_2
+    processing e
+      e resolves to a
+    processing f
+      f resolves to b
+    processing g
+      g resolves to None
+    processing h
+      h resolves to d
+unreachable resolves to None
+main.py: Done.
+Done
