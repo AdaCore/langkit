@@ -375,7 +375,7 @@ class Predicate(AbstractExpression):
 
             # This is a valid Predicate instantiation for the above property
             equation = Property(
-                Predicate(FooNode.fields.test_property, Self.a, Self.b, 12)
+                Predicate(FooNode.test_property, Self.a, Self.b, 12)
             )
 
     """
