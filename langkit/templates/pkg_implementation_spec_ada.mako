@@ -648,10 +648,11 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  environments does not belong to a particular analysis unit, this raises
    --  a Property_Error.
 
-   procedure Populate_Lexical_Env
+   function Populate_Lexical_Env
      (Node     : access ${root_node_value_type}'Class;
-      Root_Env : Lexical_Env);
-   --  Populate the lexical environment for node and all its children
+      Root_Env : Lexical_Env) return Boolean;
+   --  Populate the lexical environment for node and all its children. Return
+   --  whether a Property_Error error occurred in the process.
 
    -----------------------------------
    -- Lexical utilities (internals) --

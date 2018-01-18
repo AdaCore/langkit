@@ -1008,19 +1008,20 @@ package body ${ada_lib_name}.Analysis is
       if Unit.AST_Root = null then
          return;
       end if;
-
       Unit.Context.In_Populate_Lexical_Env := True;
+      declare
+         Has_Errors : constant Boolean := Populate_Lexical_Env
+           (Unit.AST_Root, Unit.Context.Root_Scope);
       begin
-         Populate_Lexical_Env (Unit.AST_Root, Unit.Context.Root_Scope);
-      exception
-         when Property_Error =>
-            if not Unit.Context.Discard_Errors_In_Populate_Lexical_Env then
-               Unit.Context.In_Populate_Lexical_Env :=
-                  Saved_In_Populate_Lexical_Env;
-               raise;
-            end if;
+         Unit.Context.In_Populate_Lexical_Env :=
+            Saved_In_Populate_Lexical_Env;
+         if Has_Errors
+            and then not Unit.Context.Discard_Errors_In_Populate_Lexical_Env
+         then
+            raise Property_Error with
+               "errors occurred in Populate_Lexical_Env";
+         end if;
       end;
-      Unit.Context.In_Populate_Lexical_Env := Saved_In_Populate_Lexical_Env;
    end Populate_Lexical_Env;
 
    ---------------------

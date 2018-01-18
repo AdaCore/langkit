@@ -813,42 +813,77 @@ package body ${ada_lib_name}.Analysis.Implementation is
    -- Populate_Lexical_Env --
    --------------------------
 
-   procedure Populate_Lexical_Env
+   function Populate_Lexical_Env
      (Node     : access ${root_node_value_type}'Class;
-      Root_Env : AST_Envs.Lexical_Env)
+      Root_Env : AST_Envs.Lexical_Env) return Boolean
    is
 
-      procedure Populate_Internal
+      function Populate_Internal
         (Node      : access ${root_node_value_type}'Class;
-         Bound_Env : Lexical_Env);
+         Bound_Env : Lexical_Env) return Boolean;
+      --  Do the lexical env population on Node and recurse on its children
+
+      procedure Default_Initialize
+        (Node : access ${root_node_value_type}'Class);
+      --  If Node.Self_Env is left null, initialize it to Empty_Env. Recurse on
+      --  children.
 
       -----------------------
       -- Populate_Internal --
       -----------------------
 
-      procedure Populate_Internal
+      function Populate_Internal
         (Node      : access ${root_node_value_type}'Class;
-         Bound_Env : Lexical_Env)
+         Bound_Env : Lexical_Env) return Boolean
       is
+         Result      : Boolean := False;
          Initial_Env : Lexical_Env;
       begin
          if Node = null then
-            return;
+            return Result;
          end if;
 
          --  By default (i.e. unless env actions add a new env),
          --  the environment we store in Node is the current one.
          Node.Self_Env := Bound_Env;
 
-         Initial_Env := Node.Pre_Env_Actions (Bound_Env, Root_Env);
+         begin
+            Initial_Env := Node.Pre_Env_Actions (Bound_Env, Root_Env);
 
-         --  Call recursively on children
-         for C of ${root_node_array.api_name}'(Children (Node)) loop
-            Populate_Internal (C, Node.Self_Env);
-         end loop;
+            --  Call recursively on children
+            for C of ${root_node_array.api_name}'(Children (Node)) loop
+               Result := Populate_Internal (C, Node.Self_Env) or else Result;
+            end loop;
 
-         Node.Post_Env_Actions (Initial_Env, Root_Env);
+            Node.Post_Env_Actions (Initial_Env, Root_Env);
+         exception
+            when Property_Error =>
+               Default_Initialize (Node);
+               return True;
+         end;
+
+         return Result;
       end Populate_Internal;
+
+      ------------------------
+      -- Default_Initialize --
+      ------------------------
+
+      procedure Default_Initialize
+        (Node : access ${root_node_value_type}'Class) is
+      begin
+         if Node = null then
+            return;
+         end if;
+
+         if Node.Self_Env.Env = null then
+            Node.Self_Env := Empty_Env;
+         end if;
+
+         for C of ${root_node_array.api_name}'(Children (Node)) loop
+            Default_Initialize (C);
+         end loop;
+      end Default_Initialize;
 
       Env : AST_Envs.Lexical_Env := Root_Env;
    begin
@@ -859,7 +894,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
          raise Program_Error;
       end if;
 
-      Populate_Internal (Node, Env);
+      return Populate_Internal (Node, Env);
    end Populate_Lexical_Env;
 
    ----------------------------
