@@ -11,6 +11,12 @@ with GNATCOLL.Iconv;
 
 with ${ada_lib_name}.Analysis.Implementation;
 use ${ada_lib_name}.Analysis.Implementation;
+
+% if ctx.separate_properties:
+with ${ada_lib_name}.Analysis.Properties;
+use ${ada_lib_name}.Analysis.Properties;
+% endif
+
 with ${ada_lib_name}.Lexer; use ${ada_lib_name}.Lexer;
 
 package body ${ada_lib_name}.Unparsing is
@@ -38,7 +44,7 @@ package body ${ada_lib_name}.Unparsing is
       N      : constant ${root_node_type_name} := Bare_Node (Node);
    begin
       % if ctx.generate_unparser:
-         if Node.Is_Null then
+         if Is_Null (Node) then
             return "";
          end if;
 
