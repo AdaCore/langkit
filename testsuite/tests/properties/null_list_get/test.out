@@ -1,0 +1,9 @@
+main.py: Running...
+Running p_run_bare...
+    Got a PropertyError: raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : dereferencing a null access
+
+Running p_run_entity...
+    Got a PropertyError: raised LIBFOOLANG.ANALYSIS.PROPERTY_ERROR : dereferencing a null access
+
+main.py: Done.
+Done
