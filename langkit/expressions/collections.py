@@ -11,9 +11,9 @@ from langkit.diagnostics import (
     check_multiple, check_source_language, check_type
 )
 from langkit.expressions.base import (
-    AbstractExpression, AbstractVariable, CallExpr, ComputingExpr, PropertyDef,
-    SequenceExpr, T, UncheckedCastExpr, attr_expr, attr_call, auto_attr_custom,
-    auto_attr, construct, render, unsugar
+    AbstractExpression, AbstractVariable, CallExpr, ComputingExpr,
+    NullCheckExpr, PropertyDef, SequenceExpr, T, UncheckedCastExpr, attr_expr,
+    attr_call, auto_attr_custom, auto_attr, construct, render, unsugar
 )
 from langkit.expressions.envs import make_as_entity
 
@@ -694,6 +694,11 @@ def collection_get(self, collection, index, or_null):
             coll_expr.type.dsl_name
         )
     )
+
+    if coll_expr.type.is_ast_node:
+        coll_expr = NullCheckExpr(coll_expr)
+    elif coll_expr.type.is_entity_type:
+        coll_expr = NullCheckExpr(coll_expr, implicit_deref=True)
 
     or_null = construct(or_null)
     result = CallExpr('Get_Result', 'Get', coll_expr.type.element_type,
