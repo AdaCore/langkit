@@ -656,6 +656,7 @@ def localmain():
             b'doc',
             os.path.join(b'langkit', b'support', b'obj'),
             b'misc',
+            os.path.join(b'contrib', b'python', b'build'),
             b'out',
             os.path.join(b'stylechecks', b'tests.py'),
             os.path.join(b'testsuite', b'out'),
