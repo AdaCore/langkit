@@ -30,6 +30,7 @@ class PythonDriver(BaseDriver):
         # the environment so it can use it.
         derived_env = dict(os.environ)
         derived_env[b'PYTHON_INTERPRETER'] = self.python_interpreter
+        derived_env[b'LANGKIT_ROOT_DIR'] = self.langkit_root_dir
         derived_env['LANGKIT_PRETTY_PRINT'] = str(
             int(self.global_env['pretty_print']))
 
