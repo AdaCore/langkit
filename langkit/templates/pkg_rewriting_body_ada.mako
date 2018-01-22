@@ -33,11 +33,21 @@ package body ${ada_lib_name}.Rewriting is
    -----------
 
    procedure Apply (Handle : in out Rewriting_Handle) is
+
       procedure Free is new Ada.Unchecked_Deallocation
         (Rewriting_Handle_Type, Rewriting_Handle);
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Unit_Rewriting_Handle_Type, Unit_Rewriting_Handle);
+
       Ctx : constant Analysis_Context := Context (Handle);
    begin
+      --  Free all resources tied to Handle
+      for Unit of Handle.Units loop
+         Free (Unit);
+      end loop;
       Free (Handle);
+
+      --  Release the rewriting handle singleton for its context
       Set_Rewriting_Handle (Ctx, Handle);
    end Apply;
 
