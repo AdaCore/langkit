@@ -97,18 +97,30 @@ private
 
    type Rewriting_Handle_Type is record
       Context : Analysis_Context;
-      Units   : Unit_Maps.Map;
+      --  Analysis context this rewriting handle relates to
+
+      Units : Unit_Maps.Map;
+      --  Keep track of rewriting handles we create all units that Context owns
    end record;
 
    type Unit_Rewriting_Handle_Type is record
       Context_Handle : Rewriting_Handle;
-      Unit           : Analysis_Unit;
-      Nodes          : Node_Maps.Map;
+      --  Rewriting handle for the analysis context this relates to
+
+      Unit : Analysis_Unit;
+      --  Analysis unit this relates to
+
+      Nodes : Node_Maps.Map;
+      --  Keep track of rewriting handles we create for base AST nodes that
+      --  Unit owns.
    end record;
 
    type Node_Rewriting_Handle_Type is record
       Context_Handle : Rewriting_Handle;
-      Node           : AST_Node_Pointer;
+      --  Rewriting handle for the analysis context that owns Node
+
+      Node : AST_Node_Pointer;
+      --  Bare AST node which this rewriting handle relates to
    end record;
 
 end ${ada_lib_name}.Rewriting;
