@@ -97,9 +97,9 @@ package body ${ada_lib_name}.Analysis.Parsers is
    is
       TDH : Token_Data_Handler_Access renames Token_Data (Unit);
    begin
-      Lex_From_Filename (Filename, Charset, Read_BOM, TDH.all,
-                         Unit.Diagnostics, Unit.Context.With_Trivia);
       Reset (Parser);
+      Lex_From_Filename (Filename, Charset, Read_BOM, TDH.all,
+                         Parser.Diagnostics, Unit.Context.With_Trivia);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
       % if ctx.symbol_literals:
@@ -120,9 +120,9 @@ package body ${ada_lib_name}.Analysis.Parsers is
    is
       TDH : Token_Data_Handler_Access renames Token_Data (Unit);
    begin
-      Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH.all,
-                       Unit.Diagnostics, Unit.Context.With_Trivia);
       Reset (Parser);
+      Lex_From_Buffer (Buffer, Charset, Read_BOM, TDH.all,
+                       Parser.Diagnostics, Unit.Context.With_Trivia);
       Parser.Unit := Unit;
       Parser.TDH := TDH;
       % if ctx.symbol_literals:
