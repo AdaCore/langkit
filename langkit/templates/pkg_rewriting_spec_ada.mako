@@ -1,6 +1,7 @@
 ## vim: filetype=makoada
 
 private with Ada.Containers.Hashed_Maps;
+private with Ada.Containers.Vectors;
 private with Ada.Strings.Unbounded;
 private with Ada.Strings.Unbounded.Hash;
 
@@ -65,6 +66,12 @@ package ${ada_lib_name}.Rewriting is
       with Pre => Handle (Context (Get_Unit (Node))) /= No_Rewriting_Handle;
    --  Return the rewriting handle corresponding to Node
 
+   function Node
+     (Handle : Node_Rewriting_Handle) return ${root_entity.api_name}
+      with Pre => Handle /= No_Node_Rewriting_Handle;
+   --  Return the node which the given rewriting Handle relates to. This can
+   --  be the null entity if this handle designates a new node.
+
 private
    use Ada.Strings.Unbounded;
 
@@ -115,12 +122,35 @@ private
       --  Unit owns.
    end record;
 
+   package Node_Vectors is new Ada.Containers.Vectors
+     (Positive, Node_Rewriting_Handle);
+
+   type Node_Children (Expanded : Boolean := False) is record
+      case Expanded is
+         when False => null;
+         when True  => Vector : Node_Vectors.Vector;
+      end case;
+   end record;
+   --  Lazily evaluated vector of children for a Node_Rewriting_Handle.
+   --
+   --  In order to avoid constructing the whole tree of Node_Rewriting_Handle
+   --  for some analysis unit at once, we build them in a lazy fashion.
+
+   Unexpanded_Children : constant Node_Children := (Expanded => False);
+
    type Node_Rewriting_Handle_Type is record
       Context_Handle : Rewriting_Handle;
       --  Rewriting handle for the analysis context that owns Node
 
       Node : AST_Node_Pointer;
       --  Bare AST node which this rewriting handle relates to
+
+      Parent : Node_Rewriting_Handle;
+      --  Rewriting handle for Node's parent, or No_Node_Rewriting_Handle if
+      --  Node is a root node.
+
+      Children : Node_Children;
+      --  Lazily evaluated vector of children for the rewritten node
    end record;
 
 end ${ada_lib_name}.Rewriting;
