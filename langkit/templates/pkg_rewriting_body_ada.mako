@@ -1,5 +1,6 @@
 ## vim: filetype=makoada
 
+with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
 with ${ada_lib_name}.Analysis.Implementation;
@@ -12,6 +13,14 @@ package body ${ada_lib_name}.Rewriting is
 
    function Context (Handle : Rewriting_Handle) return Analysis_Context is
      (Handle.Context);
+
+   function Convert is new Ada.Unchecked_Conversion
+     (AST_Node_Pointer, ${root_node_type_name});
+   function Convert is new Ada.Unchecked_Conversion
+     (${root_node_type_name}, AST_Node_Pointer);
+
+   function Hash (Node : AST_Node_Pointer) return Ada.Containers.Hash_Type is
+     (Hash (Convert (Node)));
 
    ---------------------
    -- Start_Rewriting --
@@ -38,11 +47,16 @@ package body ${ada_lib_name}.Rewriting is
         (Rewriting_Handle_Type, Rewriting_Handle);
       procedure Free is new Ada.Unchecked_Deallocation
         (Unit_Rewriting_Handle_Type, Unit_Rewriting_Handle);
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Node_Rewriting_Handle_Type, Node_Rewriting_Handle);
 
       Ctx : constant Analysis_Context := Context (Handle);
    begin
       --  Free all resources tied to Handle
       for Unit of Handle.Units loop
+         for Node of Unit.Nodes loop
+            Free (Node);
+         end loop;
          Free (Unit);
       end loop;
       Free (Handle);
@@ -71,9 +85,40 @@ package body ${ada_lib_name}.Rewriting is
       declare
          Result : constant Unit_Rewriting_Handle :=
             new Unit_Rewriting_Handle_Type'(Context_Handle => Context_Handle,
-                                            Unit           => Unit);
+                                            Unit           => Unit,
+                                            Nodes          => <>);
       begin
          Context_Handle.Units.Insert (Filename, Result);
+         return Result;
+      end;
+   end Handle;
+
+   ------------
+   -- Handle --
+   ------------
+
+   function Handle
+     (Node : ${root_entity.api_name}'Class) return Node_Rewriting_Handle
+   is
+      use Node_Maps;
+
+      Bare_Node   : constant ${root_node_type_name} :=
+         Analysis.Implementation.Bare_Node (Node);
+      N           : constant AST_Node_Pointer := Convert (Bare_Node);
+      Unit_Handle : constant Unit_Rewriting_Handle := Handle (Node.Get_Unit);
+      Cur         : constant Cursor := Unit_Handle.Nodes.Find (N);
+   begin
+      if Cur /= No_Element then
+         return Element (Cur);
+      end if;
+
+      declare
+         Result : constant Node_Rewriting_Handle :=
+            new Node_Rewriting_Handle_Type'
+              (Context_Handle => Unit_Handle.Context_Handle,
+               Node           => N);
+      begin
+         Unit_Handle.Nodes.Insert (N, Result);
          return Result;
       end;
    end Handle;
