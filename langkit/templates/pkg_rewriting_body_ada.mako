@@ -40,6 +40,10 @@ package body ${ada_lib_name}.Rewriting is
    --  If Node.Children.Expanded, do nothing. Otherwise, populate Node's list
    --  of Children to mimic the related bare AST node.
 
+   procedure Free_Handles (Handle : in out Rewriting_Handle);
+   --  Free all resources tied to Handle. This also releases the rewriting
+   --  handle singleton in Handle's Context.
+
    ---------------------
    -- Start_Rewriting --
    ---------------------
@@ -60,27 +64,8 @@ package body ${ada_lib_name}.Rewriting is
    -----------
 
    procedure Apply (Handle : in out Rewriting_Handle) is
-
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Rewriting_Handle_Type, Rewriting_Handle);
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Unit_Rewriting_Handle_Type, Unit_Rewriting_Handle);
-      procedure Free is new Ada.Unchecked_Deallocation
-        (Node_Rewriting_Handle_Type, Node_Rewriting_Handle);
-
-      Ctx : constant Analysis_Context := Context (Handle);
    begin
-      --  Free all resources tied to Handle
-      for Unit of Handle.Units loop
-         for Node of Unit.Nodes loop
-            Free (Node);
-         end loop;
-         Free (Unit);
-      end loop;
-      Free (Handle);
-
-      --  Release the rewriting handle singleton for its context
-      Set_Rewriting_Handle (Ctx, Handle);
+      Free_Handles (Handle);
    end Apply;
 
    ------------
@@ -215,5 +200,33 @@ package body ${ada_lib_name}.Rewriting is
          end loop;
       end;
    end Expand_Children;
+
+   ------------------
+   -- Free_Handles --
+   ------------------
+
+   procedure Free_Handles (Handle : in out Rewriting_Handle) is
+
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Rewriting_Handle_Type, Rewriting_Handle);
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Unit_Rewriting_Handle_Type, Unit_Rewriting_Handle);
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Node_Rewriting_Handle_Type, Node_Rewriting_Handle);
+
+      Ctx : constant Analysis_Context := Context (Handle);
+   begin
+      --  Free all resources tied to Handle
+      for Unit of Handle.Units loop
+         for Node of Unit.Nodes loop
+            Free (Node);
+         end loop;
+         Free (Unit);
+      end loop;
+      Free (Handle);
+
+      --  Release the rewriting handle singleton for its context
+      Set_Rewriting_Handle (Ctx, Handle);
+   end Free_Handles;
 
 end ${ada_lib_name}.Rewriting;
