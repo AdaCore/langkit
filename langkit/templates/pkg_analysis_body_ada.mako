@@ -1134,15 +1134,6 @@ package body ${ada_lib_name}.Analysis is
       return To_String (Unit.Charset);
    end Get_Charset;
 
-   -------------
-   -- Version --
-   -------------
-
-   function Version (Unit : Analysis_Unit) return Natural is
-   begin
-      return Unit.Unit_Version;
-   end Version;
-
    -----------------
    -- First_Token --
    -----------------

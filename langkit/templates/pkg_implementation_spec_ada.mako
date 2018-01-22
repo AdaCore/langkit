@@ -167,6 +167,10 @@ package ${ada_lib_name}.Analysis.Implementation is
    function Named_Hash (Node : ${root_node_type_name}) return Hash_Type is
      (Hash (Node));
 
+   function Version (Unit : Analysis_Unit) return Natural;
+   --  Return the version for Unit. Version is a number that is incremented
+   --  every time Unit changes.
+
    package AST_Envs is new Langkit_Support.Lexical_Env
      (Unit_T               => Analysis_Unit,
       No_Unit              => No_Analysis_Unit,

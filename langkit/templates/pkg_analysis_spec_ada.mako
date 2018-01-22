@@ -290,10 +290,6 @@ package ${ada_lib_name}.Analysis is
    procedure PP_Trivia (Unit : Analysis_Unit);
    --  Debug helper: output a minimal AST with mixed trivias
 
-   function Version (Unit : Analysis_Unit) return Natural;
-   --  Return the version for Unit. Version is a number that is incremented
-   --  every time Unit changes.
-
    -----------------------------
    -- Miscellanous operations --
    -----------------------------

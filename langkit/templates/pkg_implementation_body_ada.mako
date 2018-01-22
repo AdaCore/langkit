@@ -990,6 +990,15 @@ package body ${ada_lib_name}.Analysis.Implementation is
         (Combine (Hash (Info.MD), Hash (Info.Rebindings)));
    % endif
 
+   -------------
+   -- Version --
+   -------------
+
+   function Version (Unit : Analysis_Unit) return Natural is
+   begin
+      return Unit.Unit_Version;
+   end Version;
+
    -----------------
    -- Short_Image --
    -----------------
