@@ -290,14 +290,6 @@ package ${ada_lib_name}.Analysis is
    procedure PP_Trivia (Unit : Analysis_Unit);
    --  Debug helper: output a minimal AST with mixed trivias
 
-   procedure Reference_Unit (From, Referenced : Analysis_Unit);
-   --  Set the Referenced unit as being referenced from the From unit. This is
-   --  useful for visibility purposes, and is mainly meant to be used in the
-   --  env hooks.
-
-   function Is_Referenced_From
-     (Referenced, Unit : Analysis_Unit) return Boolean;
-
    function Version (Unit : Analysis_Unit) return Natural;
    --  Return the version for Unit. Version is a number that is incremented
    --  every time Unit changes.

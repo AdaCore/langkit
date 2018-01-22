@@ -2165,4 +2165,30 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end Lookup_Memoization_Map;
    % endif
 
+   --------------------
+   -- Reference_Unit --
+   --------------------
+
+   procedure Reference_Unit (From, Referenced : Analysis_Unit) is
+      Dummy : Boolean;
+   begin
+      Dummy := Analysis_Unit_Sets.Add (From.Referenced_Units, Referenced);
+   end Reference_Unit;
+
+   ------------------------
+   -- Is_Referenced_From --
+   ------------------------
+
+   function Is_Referenced_From
+     (Referenced, Unit : Analysis_Unit) return Boolean is
+   begin
+      if Unit = null or else Referenced = null then
+         return False;
+      elsif Unit = Referenced then
+         return True;
+      else
+         return Analysis_Unit_Sets.Has (Unit.Referenced_Units, Referenced);
+      end if;
+   end Is_Referenced_From;
+
 end ${ada_lib_name}.Analysis.Implementation;

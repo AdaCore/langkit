@@ -919,4 +919,12 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  was created, return True. Otherwise, destroy Key and return False.
    % endif
 
+   procedure Reference_Unit (From, Referenced : Analysis_Unit);
+   --  Set the Referenced unit as being referenced from the From unit. This is
+   --  useful for visibility purposes, and is mainly meant to be used in the
+   --  env hooks.
+
+   function Is_Referenced_From
+     (Referenced, Unit : Analysis_Unit) return Boolean;
+
 end ${ada_lib_name}.Analysis.Implementation;
