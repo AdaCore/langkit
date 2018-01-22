@@ -905,6 +905,15 @@ package ${ada_lib_name}.Analysis.Implementation is
       --  a reparse occurs.
    end record;
 
+   type Reparsed_Unit is record
+      TDH          : Token_Data_Handler;
+      Diagnostics  : Diagnostics_Vectors.Vector;
+      AST_Mem_Pool : Bump_Ptr_Pool;
+      AST_Root     : ${root_node_type_name};
+   end record;
+   --  Holder for fields affected by an analysis unit reparse. This makes it
+   --  possible to separate the "reparsing" and the "replace" steps.
+
    procedure Reset_Caches (Context : Analysis_Context);
    --  Call Reset_Caches on all the units that Context contains. Note: this is
    --  is done lazily, just incrementing a version number.

@@ -71,8 +71,10 @@ package body ${ada_lib_name}.Analysis is
    procedure Reroot_Foreign_Nodes (Unit : Analysis_Unit);
    --  Re-create entries for nodes that are keyed in one of Unit's lexical envs
 
-   procedure Update_After_Reparse (Unit : Analysis_Unit);
-   --  Update stale lexical environment data after the reparsing of Unit
+   procedure Update_After_Reparse
+     (Unit : Analysis_Unit; Reparsed : in out Reparsed_Unit);
+   --  Update Unit's AST from Reparsed and update stale lexical environment
+   --  data after the reparsing of Unit.
 
    procedure Destroy (Unit : Analysis_Unit);
 
@@ -91,10 +93,11 @@ package body ${ada_lib_name}.Analysis is
       Read_BOM    : Boolean;
       Init_Parser : access procedure (Unit     : Analysis_Unit;
                                       Read_BOM : Boolean;
-                                      Parser   : in out Parser_Type));
-   --  Helper for Get_Unit and the public Reparse procedures: parse an analysis
-   --  unit using Init_Parser and replace Unit's AST_Root and the diagnostics
-   --  with the parsers's output.
+                                      Parser   : in out Parser_Type);
+      Result      : out Reparsed_Unit);
+   --  Helper for Get_Unit and the public Reparse procedures: parse text for
+   --  Unit using Init_Parser and store the result in Result. This leaves Unit
+   --  unchanged.
 
    function Create_Unit
      (Context           : Analysis_Context;
@@ -374,12 +377,12 @@ package body ${ada_lib_name}.Analysis is
       --  (Re)parse it if needed
 
       if Created or else Reparse then
-         Do_Parsing (Unit, Read_BOM, Init_Parser);
-      end if;
-
-      --  If we're in a reparse, do necessary updates
-      if Reparse then
-         Update_After_Reparse (Unit);
+         declare
+            Reparsed : Reparsed_Unit;
+         begin
+            Do_Parsing (Unit, Read_BOM, Init_Parser, Reparsed);
+            Update_After_Reparse (Unit, Reparsed);
+         end;
       end if;
 
       return Unit;
@@ -406,7 +409,8 @@ package body ${ada_lib_name}.Analysis is
       Init_Parser :
         access procedure (Unit     : Analysis_Unit;
                           Read_BOM : Boolean;
-                          Parser   : in out Parser_Type))
+                          Parser   : in out Parser_Type);
+      Result      : out Reparsed_Unit)
    is
 
       procedure Add_Diagnostic (Message : String);
@@ -418,39 +422,18 @@ package body ${ada_lib_name}.Analysis is
 
       procedure Add_Diagnostic (Message : String) is
       begin
-         Append (Unit.Diagnostics, No_Source_Location_Range,
+         Append (Result.Diagnostics, No_Source_Location_Range,
                  To_Text (Message));
       end Add_Diagnostic;
 
    begin
       Traces.Trace (Main_Trace, "Parsing unit " & To_String (Unit.File_Name));
-      Unit.Diagnostics.Clear;
 
-      --  Reparsing will invalidate all lexical environments related to this
-      --  unit, so destroy all related rebindings as well. This browses AST
-      --  nodes, so we have to do this before destroying the AST nodes pool.
-      Destroy_Rebindings (Unit.Rebindings'Access);
+      Result.AST_Root := null;
 
-      --  If we have an AST_Mem_Pool already, we are reparsing. We want to
-      --  destroy it to free all the allocated memory.
-      if Unit.AST_Root /= null then
-         Unit.AST_Root.Destroy;
-      end if;
-      if Unit.AST_Mem_Pool /= No_Pool then
-         Free (Unit.AST_Mem_Pool);
-      end if;
-      Unit.AST_Root := null;
-      Unit.Diagnostics.Clear;
-
-      --  As (re-)loading a unit can change how any AST node property in the
-      --  whole analysis context behaves, we have to invalidate caches. This is
-      --  likely overkill, but kill all caches here as it's easy to do.
-      Reset_Caches (Unit.Context);
-
-      --  Now create the parser. This is where lexing occurs, so this is where
-      --  we get most "setup" issues: missing input file, bad charset, etc.
-      --  If we have such an error, catch it, turn it into diagnostics and
-      --  abort parsing.
+      --  This is where lexing occurs, so this is where we get most "setup"
+      --  issues: missing input file, bad charset, etc. If we have such an
+      --  error, catch it, turn it into diagnostics and abort parsing.
 
       declare
          use Ada.Exceptions;
@@ -486,12 +469,12 @@ package body ${ada_lib_name}.Analysis is
       --  We have correctly setup a parser! Now let's parse and return what we
       --  get.
 
-      Unit.AST_Mem_Pool := Create;
-      Unit.Context.Parser.Mem_Pool := Unit.AST_Mem_Pool;
+      Result.AST_Mem_Pool := Create;
+      Unit.Context.Parser.Mem_Pool := Result.AST_Mem_Pool;
 
-      Unit.AST_Root := ${root_node_type_name}
+      Result.AST_Root := ${root_node_type_name}
         (Parse (Unit.Context.Parser, Rule => Unit.Rule));
-      Unit.Diagnostics.Append (Unit.Context.Parser.Diagnostics);
+      Result.Diagnostics.Append (Unit.Context.Parser.Diagnostics);
    end Do_Parsing;
 
    -------------------
@@ -840,9 +823,35 @@ package body ${ada_lib_name}.Analysis is
    -- Update_After_Reparse --
    --------------------------
 
-   procedure Update_After_Reparse (Unit : Analysis_Unit)
-   is
+   procedure Update_After_Reparse
+     (Unit : Analysis_Unit; Reparsed : in out Reparsed_Unit) is
    begin
+      --  Replace Unit's diagnostics by Reparsed's
+      Unit.Diagnostics := Reparsed.Diagnostics;
+      Reparsed.Diagnostics.Clear;
+
+      --  As (re-)loading a unit can change how any AST node property in the
+      --  whole analysis context behaves, we have to invalidate caches. This is
+      --  likely overkill, but kill all caches here as it's easy to do.
+      Reset_Caches (Unit.Context);
+
+      --  Reparsing will invalidate all lexical environments related to this
+      --  unit, so destroy all related rebindings as well. This browses AST
+      --  nodes, so we have to do this before destroying the old AST nodes
+      --  pool.
+      Destroy_Rebindings (Unit.Rebindings'Access);
+
+      --  Destroy the old AST node and replace it by the new one
+      if Unit.AST_Root /= null then
+         Unit.AST_Root.Destroy;
+      end if;
+      Unit.AST_Root := Reparsed.AST_Root;
+
+      --  Likewise for memory pools
+      Free (Unit.AST_Mem_Pool);
+      Unit.AST_Mem_Pool := Reparsed.AST_Mem_Pool;
+      Reparsed.AST_Mem_Pool := No_Pool;
+
       if Unit.Is_Env_Populated then
          Traces.Trace
            (Main_Trace,
@@ -884,10 +893,12 @@ package body ${ada_lib_name}.Analysis is
            (To_String (Unit.File_Name), To_String (Unit.Charset), Read_BOM,
             Unit, Parser);
       end Init_Parser;
+
+      Reparsed : Reparsed_Unit;
    begin
       Update_Charset (Unit, Charset);
-      Do_Parsing (Unit, Charset'Length = 0, Init_Parser'Access);
-      Update_After_Reparse (Unit);
+      Do_Parsing (Unit, Charset'Length = 0, Init_Parser'Access, Reparsed);
+      Update_After_Reparse (Unit, Reparsed);
    end Reparse;
 
    -------------
@@ -908,11 +919,13 @@ package body ${ada_lib_name}.Analysis is
          Init_Parser_From_Buffer
            (Buffer, To_String (Unit.Charset), Read_BOM, Unit, Parser);
       end Init_Parser;
+
+      Reparsed : Reparsed_Unit;
    begin
       Update_Charset (Unit, Charset);
-      Do_Parsing (Unit, Charset'Length = 0, Init_Parser'Access);
+      Do_Parsing (Unit, Charset'Length = 0, Init_Parser'Access, Reparsed);
       Unit.Charset := To_Unbounded_String (Charset);
-      Update_After_Reparse (Unit);
+      Update_After_Reparse (Unit, Reparsed);
    end Reparse;
 
    -------------
