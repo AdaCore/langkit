@@ -140,8 +140,7 @@ package body ${ada_lib_name}.Analysis is
    -- Update_Charset --
    --------------------
 
-   procedure Update_Charset (Unit : Analysis_Unit; Charset : String)
-   is
+   procedure Update_Charset (Unit : Analysis_Unit; Charset : String) is
    begin
       if Charset'Length /= 0 then
          Unit.Charset := To_Unbounded_String (Charset);
