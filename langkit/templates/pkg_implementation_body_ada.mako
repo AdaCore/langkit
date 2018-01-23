@@ -11,6 +11,7 @@
 <% root_node_array = T.root_node.array %>
 
 with Ada.Containers;                  use Ada.Containers;
+with Ada.Exceptions;
 with Ada.Strings.Wide_Wide_Unbounded; use Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Text_IO;                     use Ada.Text_IO;
 with Ada.Unchecked_Conversion;
@@ -2199,5 +2200,83 @@ package body ${ada_lib_name}.Analysis.Implementation is
          return Analysis_Unit_Sets.Has (Unit.Referenced_Units, Referenced);
       end if;
    end Is_Referenced_From;
+
+   ----------------
+   -- Do_Parsing --
+   ----------------
+
+   procedure Do_Parsing
+     (Unit        : Analysis_Unit;
+      Read_BOM    : Boolean;
+      Init_Parser :
+        access procedure (Unit     : Analysis_Unit;
+                          Read_BOM : Boolean;
+                          Parser   : in out Parser_Type);
+      Result      : out Reparsed_Unit)
+   is
+
+      procedure Add_Diagnostic (Message : String);
+      --  Helper to add a sloc-less diagnostic to Unit
+
+      --------------------
+      -- Add_Diagnostic --
+      --------------------
+
+      procedure Add_Diagnostic (Message : String) is
+      begin
+         Append (Result.Diagnostics, No_Source_Location_Range,
+                 To_Text (Message));
+      end Add_Diagnostic;
+
+   begin
+      Traces.Trace (Main_Trace, "Parsing unit " & To_String (Unit.File_Name));
+
+      Result.AST_Root := null;
+
+      --  This is where lexing occurs, so this is where we get most "setup"
+      --  issues: missing input file, bad charset, etc. If we have such an
+      --  error, catch it, turn it into diagnostics and abort parsing.
+
+      declare
+         use Ada.Exceptions;
+      begin
+         Init_Parser (Unit, Read_BOM, Unit.Context.Parser);
+      exception
+         when Exc : Name_Error =>
+            --  This happens when we cannot open the source file for lexing:
+            --  return a unit anyway with diagnostics indicating what happens.
+
+            Traces.Trace
+              (Main_Trace,
+               "WARNING: Could not open file " & To_String (Unit.File_Name));
+
+            Add_Diagnostic
+              (Exception_Message (Exc));
+            return;
+
+         when Lexer.Unknown_Charset =>
+            Add_Diagnostic
+              ("Unknown charset """ & To_String (Unit.Charset) & """");
+            return;
+
+         when Lexer.Invalid_Input =>
+            --  TODO??? Tell where (as a source location) we failed to decode
+            --  the input.
+            Add_Diagnostic
+              ("Could not decode source as """ & To_String (Unit.Charset)
+               & """");
+            return;
+      end;
+
+      --  We have correctly setup a parser! Now let's parse and return what we
+      --  get.
+
+      Result.AST_Mem_Pool := Create;
+      Unit.Context.Parser.Mem_Pool := Result.AST_Mem_Pool;
+
+      Result.AST_Root := ${root_node_type_name}
+        (Parse (Unit.Context.Parser, Rule => Unit.Rule));
+      Result.Diagnostics.Append (Unit.Context.Parser.Diagnostics);
+   end Do_Parsing;
 
 end ${ada_lib_name}.Analysis.Implementation;
