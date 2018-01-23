@@ -5,7 +5,6 @@
 <%namespace name="entities"      file="entities_ada.mako" />
 <%namespace name="enum_types"    file="enum_types_ada.mako" />
 <%namespace name="exts"          file="extensions.mako" />
-<%namespace name="list_types"    file="list_types_ada.mako" />
 
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
 
