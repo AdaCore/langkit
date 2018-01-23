@@ -52,10 +52,14 @@ package ${ada_lib_name}.Rewriting is
    --  will raise an Existing_Rewriting_Handle_Error exception if Context
    --  already has a living rewriting session.
 
-   procedure Apply (Handle : in out Rewriting_Handle)
+   function Apply (Handle : in out Rewriting_Handle) return Boolean
       with Pre  => Handle /= No_Rewriting_Handle,
-           Post => Handle = No_Rewriting_Handle;
-   --  Apply all modifications to Handle's analysis context and close Handle
+           Post => (if Apply'Result
+                    then Handle = No_Rewriting_Handle
+                    else Handle = Handle'Old);
+   --  Apply all modifications to Handle's analysis context. If that worked,
+   --  close Handle and return True. Otherwise, reparsing did not work, so keep
+   --  Handle and its Context unchanged and return False.
 
    function Handle (Unit : Analysis_Unit) return Unit_Rewriting_Handle
       with Pre => Handle (Context (Unit)) /= No_Rewriting_Handle;

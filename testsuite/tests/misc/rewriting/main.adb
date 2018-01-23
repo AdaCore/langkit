@@ -82,8 +82,12 @@ begin
    pragma Unreferenced (UH);
 
    Put_Line ("Apply the rewriting");
-   Apply (RH);
-   if Handle (Ctx) /= No_Rewriting_Handle then
+   if not Apply (RH) then
+      --  We don't expect any failure as we did not do any modification to
+      --  trees!
+      raise Program_Error;
+
+   elsif Handle (Ctx) /= No_Rewriting_Handle then
       raise Program_Error;
    end if;
 
@@ -93,7 +97,11 @@ begin
    Put_Line ("Create a second rewriting handler");
    RH := Start_Rewriting (Ctx);
    Put_Line ("Apply the rewriting");
-   Apply (RH);
+   if not Apply (RH) then
+      --  We don't expect any failure as we did not do any modification to
+      --  trees!
+      raise Program_Error;
+   end if;
 
    Put_Line ("main.adb: Done.");
 end Main;

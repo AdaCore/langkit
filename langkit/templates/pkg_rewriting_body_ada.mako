@@ -63,9 +63,51 @@ package body ${ada_lib_name}.Rewriting is
    -- Apply --
    -----------
 
-   procedure Apply (Handle : in out Rewriting_Handle) is
+   function Apply (Handle : in out Rewriting_Handle) return Boolean is
+
+      type Processed_Unit_Record is record
+         Unit     : Analysis_Unit;
+         New_Data : Reparsed_Unit;
+      end record;
+      type Processed_Unit is access Processed_Unit_Record;
+      procedure Free is new Ada.Unchecked_Deallocation
+        (Processed_Unit_Record, Processed_Unit);
+
+      package Processed_Unit_Vectors is new Ada.Containers.Vectors
+        (Positive, Processed_Unit);
+
+      Units   : Processed_Unit_Vectors.Vector;
+      Success : Boolean := True;
+
    begin
-      Free_Handles (Handle);
+      --  Try to reparse all units that were potentially modified
+      for Unit_Handle of Handle.Units loop
+         declare
+            PU : constant Processed_Unit := new Processed_Unit_Record'
+              (Unit     => Unit_Handle.Unit,
+               New_Data => <>);
+         begin
+            Units.Append (PU);
+            --  TODO: unparse rewritten tree and call
+            --  Do_Parsing/Remove_Exiled_Entries on the result. If there is an
+            --  error, set Success to False and abort.
+         end;
+      end loop;
+
+      --  If all reparsing went fine, actually replace the AST nodes all over
+      --  the context and free all resources associated to Handle.
+      if Success then
+         for PU of Units loop
+            Update_After_Reparse (PU.Unit, PU.New_Data);
+         end loop;
+         Free_Handles (Handle);
+      end if;
+
+      --  Clean-up our local resources and return
+      for PU of Units loop
+         Free (PU);
+      end loop;
+      return Success;
    end Apply;
 
    ------------
