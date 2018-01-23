@@ -950,4 +950,26 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Parse text for Unit using Init_Parser and store the result in Result.
    --  This leaves Unit unchanged.
 
+   procedure Update_After_Reparse
+     (Unit : Analysis_Unit; Reparsed : in out Reparsed_Unit);
+   --  Update Unit's AST from Reparsed and update stale lexical environment
+   --  data after the reparsing of Unit.
+
+   procedure Remove_Exiled_Entries (Unit : Analysis_Unit);
+   --  Remove lexical environment entries that reference some of Unit's nodes,
+   --  in lexical environments it does not own.
+
+   procedure Reroot_Foreign_Nodes (Unit : Analysis_Unit);
+   --  Re-create entries for nodes that are keyed in one of Unit's lexical envs
+
+   procedure Destroy_Rebindings
+     (Rebindings : access Env_Rebindings_Vectors.Vector);
+   --  Destroy all rebindings in Rebindings, plus their child rebindings. Note
+   --  that children can belong to various analysis units, so this takes care
+   --  of removing the destroyed rebindings from each concerned analysis unit's
+   --  Rebindings vector.
+   --
+   --  This require an access parameter in order to avoid aliasing issues in
+   --  the body.
+
 end ${ada_lib_name}.Analysis.Implementation;

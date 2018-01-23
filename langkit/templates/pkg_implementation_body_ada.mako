@@ -2279,4 +2279,222 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Result.Diagnostics.Append (Unit.Context.Parser.Diagnostics);
    end Do_Parsing;
 
+   --------------------------
+   -- Update_After_Reparse --
+   --------------------------
+
+   procedure Update_After_Reparse
+     (Unit : Analysis_Unit; Reparsed : in out Reparsed_Unit) is
+   begin
+      --  Replace Unit's diagnostics by Reparsed's
+      Unit.Diagnostics := Reparsed.Diagnostics;
+      Reparsed.Diagnostics.Clear;
+
+      --  As (re-)loading a unit can change how any AST node property in the
+      --  whole analysis context behaves, we have to invalidate caches. This is
+      --  likely overkill, but kill all caches here as it's easy to do.
+      Reset_Caches (Unit.Context);
+
+      --  Reparsing will invalidate all lexical environments related to this
+      --  unit, so destroy all related rebindings as well. This browses AST
+      --  nodes, so we have to do this before destroying the old AST nodes
+      --  pool.
+      Destroy_Rebindings (Unit.Rebindings'Access);
+
+      --  Destroy the old AST node and replace it by the new one
+      if Unit.AST_Root /= null then
+         Unit.AST_Root.Destroy;
+      end if;
+      Unit.AST_Root := Reparsed.AST_Root;
+
+      --  Likewise for memory pools
+      Free (Unit.AST_Mem_Pool);
+      Unit.AST_Mem_Pool := Reparsed.AST_Mem_Pool;
+      Reparsed.AST_Mem_Pool := No_Pool;
+
+      if Unit.Is_Env_Populated then
+         Traces.Trace
+           (Main_Trace,
+            "Updating unit after reparse: " & To_String (Unit.File_Name));
+
+         --  Reset the flag so that Populate_Lexical_Env does its work
+         Unit.Is_Env_Populated := False;
+
+         --  Increment the unit's version number
+         Unit.Unit_Version := Unit.Unit_Version + 1;
+
+         --  Remove old entries referencing the old translation unit in foreign
+         --  lexical envs.
+         Remove_Exiled_Entries (Unit);
+
+         --  Recreate the lexical env structure for the newly parsed unit
+         Populate_Lexical_Env (Unit);
+
+         --  Any entry that was rooted in one of the unit's lex envs needs to
+         --  be re-rooted.
+         Reroot_Foreign_Nodes (Unit);
+      end if;
+   end Update_After_Reparse;
+
+   ---------------------------
+   -- Remove_Exiled_Entries --
+   ---------------------------
+
+   procedure Remove_Exiled_Entries (Unit : Analysis_Unit) is
+   begin
+      for El of Unit.Exiled_Entries loop
+         --  Remove the `symbol -> AST node` associations that reference this
+         --  unit's nodes from foreign lexical environments.
+         AST_Envs.Remove (El.Env, El.Key, El.Node);
+
+         --  Also filter the foreign's units foreign nodes information so that
+         --  it does not contain stale information (i.e. dangling pointers to
+         --  our nodes).
+         if El.Env.Env.Node /= null then
+            declare
+               Foreign_Nodes : ${root_node_type_name}_Vectors.Vector renames
+                  El.Env.Env.Node.Unit.Foreign_Nodes;
+               Current       : Positive := Foreign_Nodes.First_Index;
+            begin
+               while Current <= Foreign_Nodes.Last_Index loop
+                  if Foreign_Nodes.Get (Current) = El.Node then
+                     Foreign_Nodes.Pop (Current);
+                  else
+                     Current := Current + 1;
+                  end if;
+               end loop;
+            end;
+         end if;
+      end loop;
+
+      Unit.Exiled_Entries.Clear;
+   end Remove_Exiled_Entries;
+
+   --------------------------
+   -- Reroot_Foreign_Nodes --
+   --------------------------
+
+   procedure Reroot_Foreign_Nodes (Unit : Analysis_Unit) is
+      Els : constant ${root_node_type_name}_Vectors.Elements_Array :=
+         Unit.Foreign_Nodes.To_Array;
+   begin
+      --  Make the Foreign_Nodes vector empty as the partial
+      --  Populate_Lexical_Env pass below will re-build it.
+      Unit.Foreign_Nodes.Clear;
+
+      for El of Els loop
+         --  First, filter the exiled entries in foreign units so that they
+         --  don't contain references to this unit's lexical environments. We
+         --  need to do that before running the partial Populate_Lexical_Env
+         --  pass so that we don't remove exiled entries that this pass will
+         --  produce.
+         declare
+            Exiled_Entries : Exiled_Entry_Vectors.Vector renames
+               El.Unit.Exiled_Entries;
+            Current        : Positive := Exiled_Entries.First_Index;
+         begin
+            while Current <= Exiled_Entries.Last_Index loop
+               if Exiled_Entries.Get (Current).Node = El then
+                  Exiled_Entries.Pop (Current);
+               else
+                  Current := Current + 1;
+               end if;
+            end loop;
+         end;
+
+         --  Re-do a partial Populate_Lexical_Env pass for each foreign node
+         --  that this unit contains so that they are relocated in our new
+         --  lexical environments.
+         declare
+            Root_Scope : Lexical_Env renames Unit.Context.Root_Scope;
+            Env        : constant Lexical_Env :=
+               El.Pre_Env_Actions (El.Self_Env, Root_Scope, True);
+         begin
+            El.Post_Env_Actions (Env, Root_Scope);
+         end;
+      end loop;
+   end Reroot_Foreign_Nodes;
+
+   ------------------------
+   -- Destroy_Rebindings --
+   ------------------------
+
+   procedure Destroy_Rebindings
+     (Rebindings : access Env_Rebindings_Vectors.Vector)
+   is
+      procedure Destroy is new Ada.Unchecked_Deallocation
+        (Env_Rebindings_Type, Env_Rebindings);
+
+      procedure Recurse (R : Env_Rebindings);
+      --  Destroy R's children and then destroy R. It is up to the caller to
+      --  remove R from its parent's Children vector.
+
+      procedure Unregister
+        (R          : Env_Rebindings;
+         Rebindings : in out Env_Rebindings_Vectors.Vector);
+      --  Remove R from Rebindings
+
+      -------------
+      -- Recurse --
+      -------------
+
+      procedure Recurse (R : Env_Rebindings) is
+      begin
+         for C of R.Children loop
+            Recurse (C);
+         end loop;
+         R.Children.Destroy;
+
+         Unregister (R, R.Old_Env.Env.Node.Unit.Rebindings);
+         Unregister (R, R.New_Env.Env.Node.Unit.Rebindings);
+
+         declare
+            Var_R : Env_Rebindings := R;
+         begin
+            Destroy (Var_R);
+         end;
+      end Recurse;
+
+      ----------------
+      -- Unregister --
+      ----------------
+
+      procedure Unregister
+        (R          : Env_Rebindings;
+         Rebindings : in out Env_Rebindings_Vectors.Vector) is
+      begin
+         for I in 1 .. Rebindings.Length loop
+            if Rebindings.Get (I) = R then
+               Rebindings.Pop (I);
+               return;
+            end if;
+         end loop;
+
+         --  We are always supposed to find R in Rebindings, so this should be
+         --  unreachable.
+         raise Program_Error;
+      end Unregister;
+
+   begin
+      while Rebindings.Length > 0 loop
+         declare
+            R : constant Env_Rebindings := Rebindings.Get (1);
+         begin
+            --  Here, we basically undo what has been done in AST_Envs.Append
+
+            --  If this rebinding has no parent, then during its creation we
+            --  registered it in its Old_Env. Otherwise, it is registered
+            --  in its Parent's Children list.
+            if R.Parent = null then
+               R.Old_Env.Env.Rebindings_Pool.Delete (R.New_Env);
+            else
+               Unregister (R, R.Parent.Children);
+            end if;
+
+            --  In all cases it's registered in Old_Env's and New_Env's units
+            Recurse (R);
+         end;
+      end loop;
+   end Destroy_Rebindings;
+
 end ${ada_lib_name}.Analysis.Implementation;
