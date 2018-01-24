@@ -25,23 +25,22 @@ package ${ada_lib_name}.Lexer is
    % endif
 
    type Token_Data_Type is record
-      Kind         : Token_Kind;
+      Kind : Token_Kind;
       --  Kind for this token
 
       Source_First : Positive;
       Source_Last  : Natural;
       --  Bounds in the source buffer corresponding to this token
 
-      Symbol       : Symbol_Type;
+      Symbol : Symbol_Type;
       --  Depending on the token kind (according to the lexer specification),
       --  this is either null or the symbolization of the token text.
       --
       --  For instance: null for keywords but actual text for identifiers.
 
-      Sloc_Range   : Source_Location_Range;
+      Sloc_Range : Source_Location_Range;
       --  Source location range for this token. Note that the end bound is
       --  exclusive.
-
    end record;
 
    package Token_Data_Handlers is new Langkit_Support.Token_Data_Handlers
