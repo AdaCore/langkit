@@ -525,21 +525,22 @@ package ${ada_lib_name}.Analysis.Implementation is
    -------------------------------
 
    type ${root_node_value_type} is abstract tagged record
-      Parent                 : ${root_node_type_name} := null;
+      Parent : ${root_node_type_name} := null;
+      --  Reference to the parent node, or null if this is the root one
 
-      Unit                   : Analysis_Unit := No_Analysis_Unit;
+      Unit : Analysis_Unit := No_Analysis_Unit;
       --  Reference to the analysis unit that owns this node
 
-      Token_Start_Index      : Token_Index  := No_Token_Index;
-      Token_End_Index        : Token_Index  := No_Token_Index;
+      Token_Start_Index : Token_Index  := No_Token_Index;
+      Token_End_Index   : Token_Index  := No_Token_Index;
       --  Reference to the start and end token that constitutes this node. If
       --  this node is a ghost, Token_Start_Index is the token that this AST
       --  node relates to and Token_End_Index is No_Token_Index. Otherwise,
       --  both tokens are inclusive, i.e. they both belong to this node.
 
-      Extensions             : Extension_Vectors.Vector;
+      Extensions : Extension_Vectors.Vector;
 
-      Self_Env               : Lexical_Env;
+      Self_Env : Lexical_Env;
       --  Hold the environment this node defines, or the parent environment
       --  otherwise.
 
