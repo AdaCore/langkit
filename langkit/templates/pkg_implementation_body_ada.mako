@@ -1931,14 +1931,17 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return To_String (Kind_Names (Node.Kind));
    end Kind_Name;
 
-   Kind_To_Counts : array (${root_node_kind_name}) of Integer :=
-     (${", \n".join(cls.ada_kind_name
-                    + " => {}".format(
-                        len(cls.get_parse_fields(lambda f: f.type.is_ast_node))
-                        if not cls.is_list_type
-                        else -1
-                    )
-                    for cls in ctx.astnode_types if not cls.abstract)});
+   Kind_To_Node_Children_Count : array (${root_node_kind_name}) of Integer :=
+     (${', \n'.join(
+           '{} => {}'.format(
+              cls.ada_kind_name,
+              (len(cls.get_parse_fields(lambda f: f.type.is_ast_node))
+               if not cls.is_list_type else -1)
+           )
+           for cls in ctx.astnode_types if not cls.abstract)});
+   --  For each AST node kind, this array gives the number of AST node children
+   --  it has. For AST node lists, this is -1 as this number varies from one
+   --  list instance to another.
 
    -----------------
    -- Child_Count --
@@ -1947,7 +1950,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
    function Child_Count
      (Node : access ${root_node_value_type}'Class) return Natural
    is
-      C : Integer := Kind_To_Counts (Node.Kind);
+      C : Integer := Kind_To_Node_Children_Count (Node.Kind);
    begin
       if C = -1 then
          return ${generic_list_type_name} (Node).Count;
