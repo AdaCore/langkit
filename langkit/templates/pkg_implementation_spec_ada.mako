@@ -52,6 +52,24 @@ ${exts.with_clauses(with_clauses)}
 
 package ${ada_lib_name}.Analysis.Implementation is
 
+   type Abstract_Node_Type is abstract tagged null record;
+   type Abstract_Node is access all Abstract_Node_Type'Class;
+
+   function Kind
+     (Node : access Abstract_Node_Type) return ${root_node_kind_name}
+     is abstract;
+   --  Return the kind for Node
+
+   function Children_Count
+     (Node : access Abstract_Node_Type) return Natural is abstract;
+   --  Return the number of children that Node has
+
+   function Abstract_Child
+     (Node  : access Abstract_Node_Type;
+      Index : Positive) return Abstract_Node is abstract;
+   --  Return the Node's child number Index. Index is a 1-based index. If it is
+   --  out of bounds, a Constraint_Error is raised.
+
    % if ctx.properties_logging:
       Properties_Traces : constant GNATCOLL.Traces.Trace_Handle :=
          GNATCOLL.Traces.Create
@@ -290,10 +308,6 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  For each AST node kind, this array gives the number of AST node children
    --  it has. For AST node lists, this is -1 as this number varies from one
    --  list instance to another.
-
-   function Children_Count
-     (Node : access ${root_node_value_type}'Class) return Natural;
-   --  Return the number of children Node has
 
    function First_Child_Index
      (Node : access ${root_node_value_type}'Class) return Natural;
@@ -551,7 +565,7 @@ package ${ada_lib_name}.Analysis.Implementation is
    -- Root AST node (internals) --
    -------------------------------
 
-   type ${root_node_value_type} is abstract tagged record
+   type ${root_node_value_type} is new Abstract_Node_Type with record
       Parent : ${root_node_type_name} := null;
       --  Reference to the parent node, or null if this is the root one
 
@@ -576,6 +590,16 @@ package ${ada_lib_name}.Analysis.Implementation is
 
       ${astnode_types.node_fields(T.root_node, emit_null=False)}
    end record;
+
+   function Kind
+     (Node : access ${root_node_value_type}) return ${root_node_kind_name};
+
+   overriding function Children_Count
+     (Node : access ${root_node_value_type}) return Natural;
+
+   overriding function Abstract_Child
+     (Node  : access ${root_node_value_type};
+      Index : Positive) return Abstract_Node;
 
    function Pre_Env_Actions
      (Self                : access ${root_node_value_type}'Class;

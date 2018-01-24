@@ -1962,16 +1962,42 @@ package body ${ada_lib_name}.Analysis.Implementation is
    --------------------
 
    function Children_Count
-     (Node : access ${root_node_value_type}'Class) return Natural
+     (Node : access ${root_node_value_type}) return Natural
    is
       C : Integer := Kind_To_Node_Children_Count (Node.Kind);
    begin
       if C = -1 then
-         return ${generic_list_type_name} (Node).Count;
+         declare
+            N : constant ${root_node_type_name} :=
+               ${root_node_type_name} (Node);
+         begin
+            return ${generic_list_type_name} (N).Count;
+         end;
       else
          return C;
       end if;
    end Children_Count;
+
+   ----------
+   -- Kind --
+   ----------
+
+   overriding function Kind
+     (Node : access ${root_node_value_type}) return ${root_node_kind_name} is
+   begin
+      return Node.Kind;
+   end Kind;
+
+   --------------------
+   -- Abstract_Child --
+   --------------------
+
+   overriding function Abstract_Child
+     (Node  : access ${root_node_value_type};
+      Index : Positive) return Abstract_Node is
+   begin
+      return Abstract_Node (${root_node_type_name}'(Node.Child (Index)));
+   end Abstract_Child;
 
    ----------------------
    -- Reset_Logic_Vars --
