@@ -17,7 +17,6 @@ from collections import defaultdict
 from contextlib import contextmanager, nested
 from distutils.spawn import find_executable
 from glob import glob
-import inspect
 import os
 from os import path
 from StringIO import StringIO
@@ -1831,8 +1830,9 @@ class CompileCtx(object):
         import lib2to3.main
 
         astnodes_files = {
-            path.abspath(inspect.getsourcefile(n))
+            n.location.file
             for n in self.astnode_types
+            if n.location is not None
         }
 
         lib2to3.main.main(

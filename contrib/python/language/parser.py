@@ -1,6 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, EnumNode, abstract
+from langkit.dsl import ASTNode, Field, EnumNode, T, abstract
+from langkit.envs import EnvSpec, add_to_env, add_env
+from langkit.expressions import Self, Property, No
 from langkit.parsers import Grammar, List, Opt, Or, Pick, _
 from language.lexer import python_lexer as L
 
@@ -21,64 +23,86 @@ class PythonNode(ASTNode):
     pass
 
 
-class Decorator(PythonNode):
-    dec_name = Field()
-    arg_list = Field()
-
-
-class Decorated(PythonNode):
-    decorators = Field()
-    defn = Field()
-
-
-class FileNode(PythonNode):
-    statements = Field()
-
-
-class FuncDef(PythonNode):
-    name = Field()
-    parameters = Field()
-    body = Field()
-
-
-class Params(PythonNode):
-    single_params = Field()
-
-
-class SingleParam(PythonNode):
-    is_varargs = Field()
-    is_kwargs = Field()
-    name = Field()
-    default_value = Field()
-
-
 @abstract
 class Stmt(PythonNode):
     pass
 
 
+class Decorator(PythonNode):
+    dec_name = Field(type=T.Name)
+    arg_list = Field(type=T.Arg.list)
+
+
+class Decorated(Stmt):
+    decorators = Field(type=T.Decorator.list)
+    defn = Field(type=T.DefStmt)
+
+
+class FileNode(PythonNode):
+    statements = Field(type=T.PythonNode.list)
+
+
+@abstract
+class DefStmt(Stmt):
+    env_spec = EnvSpec(add_env())
+
+
+class FuncDef(DefStmt):
+    name = Field(type=T.Id)
+    parameters = Field(type=T.Params)
+    body = Field(type=T.PythonNode)
+
+
+class Params(PythonNode):
+    single_params = Field(type=T.SingleParam.list)
+
+
+class SingleParam(PythonNode):
+    is_varargs = Field(type=T.VarArgsFlag)
+    is_kwargs = Field(type=T.KwArgsFlag)
+    name = Field(type=T.PythonNode)
+    default_value = Field(type=T.Expr)
+
+    env_spec = EnvSpec(
+        add_to_env(Self.name.match(
+            lambda i=T.Id: T.env_assoc.new(key=i.sym, val=Self).singleton,
+            lambda l=T.Id.list: l.map(
+                lambda i: T.env_assoc.new(key=i.sym, val=Self)
+            ),
+            lambda _: No(T.env_assoc.array)
+        ))
+    )
+
+
 class AugAssignStmt(Stmt):
-    l_value = Field()
-    op = Field()
-    r_value = Field()
+    l_value = Field(type=T.Expr.list)
+    op = Field(type=T.Op)
+    r_value = Field(type=T.PythonNode)
 
 
 class AssignStmt(Stmt):
-    l_value = Field()
-    r_values = Field()
+    l_value = Field(type=T.Expr.list)
+    r_values = Field(type=T.PythonNode.list)
+
+    env_spec = EnvSpec(
+        add_to_env(Self.l_value.filtermap(
+            lambda e: T.env_assoc.new(key=e.cast_or_raise(T.Id).sym, val=Self),
+            lambda e: e.is_a(T.Id),
+        ))
+    )
 
 
 class PrintStmt(Stmt):
-    exprs = Field()
+    exprs = Field(type=T.Expr.list)
 
 
 class StreamPrintStmt(Stmt):
-    stream_expr = Field()
-    exprs = Field()
+    stream_expr = Field(type=T.Expr)
+    exprs = Field(type=T.Expr.list)
 
 
 class DelStmt(Stmt):
-    exprs = Field()
+    exprs = Field(type=T.Expr.list)
 
 
 class PassStmt(Stmt):
@@ -94,25 +118,25 @@ class ContinueStmt(Stmt):
 
 
 class ReturnStmt(Stmt):
-    exprs = Field()
+    exprs = Field(type=T.Expr.list)
 
 
 class RaiseStmt(Stmt):
-    exprs = Field()
+    exprs = Field(type=T.Expr.list)
 
 
 class ImportName(Stmt):
-    imported_names = Field()
+    imported_names = Field(type=T.PythonNode.list)
 
 
 class ImportFrom(Stmt):
-    rel_name = Field()
-    imported = Field()
+    rel_name = Field(type=T.PythonNode)
+    imported = Field(type=T.PythonNode)
 
 
 class RelName(PythonNode):
-    dots = Field()
-    name = Field()
+    dots = Field(type=T.Dot.list)
+    name = Field(type=T.Name)
 
 
 class ImportStar(PythonNode):
@@ -120,8 +144,8 @@ class ImportStar(PythonNode):
 
 
 class AsNameNode(PythonNode):
-    imported = Field()
-    as_name = Field()
+    imported = Field(type=T.Expr)
+    as_name = Field(type=T.Expr)
 
 
 @abstract
@@ -129,99 +153,104 @@ class Expr(PythonNode):
     pass
 
 
-class DottedName(Expr):
-    prefix = Field()
-    suffix = Field()
+@abstract
+class Name(Expr):
+    pass
+
+
+class DottedName(Name):
+    prefix = Field(type=T.Expr)
+    suffix = Field(type=T.Id)
 
 
 class CallExpr(Expr):
-    prefix = Field()
-    suffix = Field()
+    prefix = Field(type=T.Expr)
+    suffix = Field(type=T.Arg.list)
 
 
 class SubscriptExpr(Expr):
-    prefix = Field()
-    suffix = Field()
+    prefix = Field(type=T.Expr)
+    suffix = Field(type=T.Expr.list)
 
 
 class GlobalStmt(Stmt):
-    names = Field()
+    names = Field(type=T.Id.list)
 
 
 class ExecStmt(Stmt):
-    expr = Field()
-    in_list = Field()
+    expr = Field(type=T.Expr)
+    in_list = Field(type=T.Expr.list)
 
 
 class AssertStmt(Stmt):
-    test_expr = Field()
-    msg = Field()
+    test_expr = Field(type=T.Expr)
+    msg = Field(type=T.Expr)
 
 
 class ElsePart(PythonNode):
-    statements = Field()
+    statements = Field(type=T.PythonNode)
 
 
 class IfStmt(Stmt):
-    cond_test = Field()
-    statements = Field()
-    elif_branchs = Field()
-    else_part = Field()
+    cond_test = Field(type=T.Expr)
+    statements = Field(type=T.PythonNode)
+    elif_branchs = Field(type=T.ElifBranch.list)
+    else_part = Field(type=T.ElsePart)
 
 
 class ElifBranch(Stmt):
-    cond_test = Field()
-    statements = Field()
+    cond_test = Field(type=T.Expr)
+    statements = Field(type=T.PythonNode)
 
 
 class WhileStmt(Stmt):
-    cond_test = Field()
-    statements = Field()
-    else_part = Field()
+    cond_test = Field(type=T.Expr)
+    statements = Field(type=T.PythonNode)
+    else_part = Field(type=T.ElsePart)
 
 
 class ForStmt(Stmt):
-    bindings = Field()
-    expr = Field()
-    statements = Field()
-    else_part = Field()
+    bindings = Field(type=T.Expr.list)
+    expr = Field(type=T.Expr.list)
+    statements = Field(type=T.PythonNode)
+    else_part = Field(type=T.ElsePart)
 
 
 class TryStmt(Stmt):
-    statements = Field()
-    except_parts = Field()
-    else_part = Field()
-    finally_part = Field()
+    statements = Field(type=T.PythonNode)
+    except_parts = Field(type=T.ExceptPart.list)
+    else_part = Field(type=T.ElsePart)
+    finally_part = Field(type=T.PythonNode)
 
 
 class ExceptPart(PythonNode):
-    as_name = Field()
-    statements = Field()
+    as_name = Field(type=T.AsNameNode)
+    statements = Field(type=T.PythonNode)
 
 
 class WithStmt(Stmt):
-    bindings = Field()
-    statements = Field()
+    bindings = Field(type=T.AsNameNode.list)
+    statements = Field(type=T.PythonNode)
 
 
 class IfExpr(Expr):
-    expr = Field()
-    cond = Field()
-    else_expr = Field()
+    expr = Field(type=T.Expr)
+    cond = Field(type=T.Expr)
+    else_expr = Field(type=T.Expr)
 
 
 class OrOp(Expr):
-    left = Field()
-    right = Field()
+    left = Field(type=T.Expr)
+    right = Field(type=T.Expr)
 
 
 class AndOp(Expr):
-    left = Field()
-    right = Field()
+    left = Field(type=T.Expr)
+    right = Field(type=T.Expr)
 
 
 class NotOp(Expr):
-    expr = Field()
+    expr = Field(type=T.Expr)
 
 
 class CompOpKind(EnumNode):
@@ -232,30 +261,30 @@ class CompOpKind(EnumNode):
 
 
 class CompOp(Expr):
-    left = Field()
-    op = Field()
-    right = Field()
+    left = Field(type=T.Expr)
+    op = Field(type=T.CompOpKind)
+    right = Field(type=T.Expr)
 
 
 class OrExpr(Expr):
-    left = Field()
-    right = Field()
+    left = Field(type=T.Expr)
+    right = Field(type=T.Expr)
 
 
 class XorExpr(Expr):
-    left = Field()
-    right = Field()
+    left = Field(type=T.Expr)
+    right = Field(type=T.Expr)
 
 
 class AndExpr(Expr):
-    left = Field()
-    right = Field()
+    left = Field(type=T.Expr)
+    right = Field(type=T.Expr)
 
 
 class ShiftExpr(Expr):
-    left = Field()
-    op = Field()
-    right = Field()
+    left = Field(type=T.Expr)
+    op = Field(type=T.Op)
+    right = Field(type=T.Expr)
 
 
 class Op(PythonNode):
@@ -263,79 +292,79 @@ class Op(PythonNode):
 
 
 class ArithExpr(Expr):
-    left = Field()
-    op = Field()
-    right = Field()
+    left = Field(type=T.Expr)
+    op = Field(type=T.Op)
+    right = Field(type=T.Expr)
 
 
 class Factor(Expr):
-    op = Field()
-    expr = Field()
+    op = Field(type=T.Op)
+    expr = Field(type=T.Expr)
 
 
 class Term(Expr):
-    left = Field()
-    op = Field()
-    right = Field()
+    left = Field(type=T.Expr)
+    op = Field(type=T.Op)
+    right = Field(type=T.Expr)
 
 
 class Power(Expr):
-    left = Field()
-    right = Field()
+    left = Field(type=T.Expr)
+    right = Field(type=T.Expr)
 
 
 class DictAssoc(PythonNode):
-    key = Field()
-    value = Field()
+    key = Field(type=T.Expr)
+    value = Field(type=T.Expr)
 
 
 class YieldExpr(Expr):
-    exprs = Field()
+    exprs = Field(type=T.Expr.list)
 
 
 class ListGen(Expr):
-    expr = Field()
-    comprehension = Field()
+    expr = Field(type=T.Expr)
+    comprehension = Field(type=T.CompForL)
 
 
 class TupleLit(Expr):
-    exprs = Field()
+    exprs = Field(type=T.Expr.list)
 
 
 class ListComp(Expr):
-    expr = Field()
-    comprehension = Field()
+    expr = Field(type=T.Expr)
+    comprehension = Field(type=T.CompForL)
 
 
 class ListLit(Expr):
-    exprs = Field()
+    exprs = Field(type=T.Expr.list)
 
 
 class SetComp(Expr):
-    expr = Field()
-    comprehension = Field()
+    expr = Field(type=T.Expr)
+    comprehension = Field(type=T.CompFor)
 
 
 class SetLit(Expr):
-    exprs = Field()
+    exprs = Field(type=T.Expr.list)
 
 
 class DictComp(Expr):
-    assoc = Field()
-    comprehension = Field()
+    assoc = Field(type=T.DictAssoc)
+    comprehension = Field(type=T.CompFor)
 
 
 class DictLit(Expr):
-    assocs = Field()
+    assocs = Field(type=T.DictAssoc.list)
 
 
 class InlineEval(Expr):
-    exprs = Field()
+    exprs = Field(type=T.Expr.list)
 
 
 class LambdaDef(Expr):
-    args = Field()
-    expr = Field()
+    args = Field(type=T.Params)
+    expr = Field(type=T.Expr)
 
 
 class EllipsisExpr(Expr):
@@ -343,18 +372,18 @@ class EllipsisExpr(Expr):
 
 
 class SliceExpr(Expr):
-    first = Field()
-    last = Field()
+    first = Field(type=T.Expr)
+    last = Field(type=T.Expr)
 
 
 class ExtSliceExpr(SliceExpr):
-    stride = Field()
+    stride = Field(type=T.Expr)
 
 
-class ClasssDef(Stmt):
-    name = Field()
-    bases = Field()
-    statements = Field()
+class ClassDef(DefStmt):
+    name = Field(type=T.Id)
+    bases = Field(type=T.Expr.list)
+    statements = Field(type=T.PythonNode)
 
 
 @abstract
@@ -363,21 +392,21 @@ class Arg(PythonNode):
 
 
 class ArgAssoc(Arg):
-    name = Field()
-    expr = Field()
+    name = Field(type=T.Expr)
+    expr = Field(type=T.Expr)
 
 
 class ArgGen(Arg):
-    expr = Field()
-    comprehension = Field()
+    expr = Field(type=T.Expr)
+    comprehension = Field(type=T.CompFor)
 
 
 class VarArgs(Arg):
-    expr = Field()
+    expr = Field(type=T.Expr)
 
 
 class KwArgs(Arg):
-    expr = Field()
+    expr = Field(type=T.Expr)
 
 
 @abstract
@@ -386,28 +415,32 @@ class Comprehension(PythonNode):
 
 
 class CompFor(Comprehension):
-    exprs = Field()
-    target = Field()
-    comp = Field()
+    exprs = Field(type=T.Expr.list)
+    target = Field(type=T.Expr)
+    comp = Field(type=T.PythonNode)
 
 
 class CompForL(Comprehension):
-    exprs = Field()
-    target = Field()
-    comp = Field()
+    exprs = Field(type=T.Expr.list)
+    target = Field(type=T.Expr.list)
+    comp = Field(type=T.PythonNode)
 
 
 class CompIf(PythonNode):
-    test = Field()
-    comp = Field()
+    test = Field(type=T.Expr)
+    comp = Field(type=T.PythonNode)
 
 
 def TrailList(el, sep, empty_valid=False):
     return Pick(List(el, sep=sep, empty_valid=empty_valid), Opt(sep))
 
 
-class Name(Expr):
+class Id(Name):
     token_node = True
+
+    sym = Property(
+        Self.symbol, doc="Shortcut to get the symbol of this node"
+    )
 
 
 class NumberLit(Expr):
@@ -419,8 +452,8 @@ class StringLit(Expr):
 
 
 class ConcatStringLit(Expr):
-    first_str = Field()
-    subsequent_str = Field()
+    first_str = Field(type=T.StringLit)
+    subsequent_str = Field(type=T.StringLit.list)
 
 
 class Dot(Expr):
@@ -435,7 +468,7 @@ python_grammar = Grammar('main_rule')
 P = python_grammar
 
 python_grammar.add_rules(
-    name=Name(L.Identifier),
+    name=Id(L.Identifier),
     number=NumberLit(L.Number),
     string=StringLit(L.String),
     cat_string=ConcatStringLit(P.string, List(P.string)),
@@ -519,16 +552,20 @@ python_grammar.add_rules(
         P.with_stmt | P.func_def | P.class_def | P.decorated
     ),
     else_part=ElsePart('else', ':', P.suite),
+
     if_stmt=IfStmt(
         'if', P.test, ':', P.suite,
         List('elif', ElifBranch(P.test, ':', P.suite), empty_valid=True),
         Opt(P.else_part)
     ),
+
     while_stmt=WhileStmt('while', P.test, ':', P.suite, Opt(P.else_part)),
+
     for_stmt=ForStmt(
         'for', P.expr_list, 'in', P.test_list, ':', P.suite,
         Opt(P.else_part)
     ),
+
     try_stmt=TryStmt(
         'try', ':', P.suite,
 
@@ -540,8 +577,11 @@ python_grammar.add_rules(
         Opt(P.else_part),
         Opt('finally', ':', P.suite),
     ),
+
     with_stmt=WithStmt('with', List(P.with_item, sep=','), ":", P.suite),
+
     with_item=AsNameNode(P.test, Opt('as', P.expr)),
+
     suite=Or(
         Pick(newlines(), L.Indent,
              List(newlines(), P.stmt, newlines()),
@@ -585,12 +625,14 @@ python_grammar.add_rules(
     term=Or(Term(P.term, Op(Or('*', '/', '%', '//')), P.factor), P.factor),
     factor=Or(Factor(Op(Or('+', '-', '~')), P.factor), P.power),
     power=Or(Power(P.atom_expr, '**', P.factor), P.atom_expr),
+
     atom_expr=Or(
         DottedName(P.atom_expr, ".", P.name),
         CallExpr(P.atom_expr, '(', P.arg_list, ')'),
         SubscriptExpr(P.atom_expr, '[', P.subscript_list, ']'),
         P.atom
     ),
+
     dict_assoc=DictAssoc(P.test, ':', P.test),
     yield_expr=YieldExpr('yield', Opt(P.test_list)),
     atom=Or(
@@ -619,9 +661,9 @@ python_grammar.add_rules(
         P.test,
     ),
     expr_list=TrailList(P.expr, ','),
-    test_list=Or(P.test, TrailList(P.test, ',')),
+    test_list=TrailList(P.test, ','),
     empty_test_list=TrailList(P.test, ',', empty_valid=True),
-    class_def=ClasssDef(
+    class_def=ClassDef(
         'class', P.name, Opt('(', Opt(P.test_list), ')'), ':', P.suite
     ),
     arg_list=TrailList(Or(
