@@ -798,7 +798,7 @@ class ${root_astnode_name}(object):
     def __len__(self):
         """Return the number of ${root_astnode_name} children this node has."""
         node = self._unwrap(self)
-        return _node_child_count(ctypes.byref(node))
+        return _node_children_count(ctypes.byref(node))
 
     def __getitem__(self, key):
         """
@@ -1417,8 +1417,8 @@ _lookup_in_node = _import_func(
      ctypes.POINTER(Sloc._c_type),
      ctypes.POINTER(${c_entity})], None
 )
-_node_child_count = _import_func(
-    '${capi.get_name("node_child_count")}',
+_node_children_count = _import_func(
+    '${capi.get_name("node_children_count")}',
     [ctypes.POINTER(${c_entity})], ctypes.c_uint
 )
 _node_child = _import_func(

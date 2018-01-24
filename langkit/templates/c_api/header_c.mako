@@ -353,9 +353,9 @@ ${capi.get_name("lookup_in_node")}(${entity_type} *node,
                                    const ${sloc_type} *sloc,
                                    ${entity_type} *result_p);
 
-${c_doc('langkit.node_child_count')}
+${c_doc('langkit.node_children_count')}
 extern unsigned
-${capi.get_name("node_child_count")}(${entity_type} *node);
+${capi.get_name("node_children_count")}(${entity_type} *node);
 
 ${c_doc('langkit.node_child')}
 extern int

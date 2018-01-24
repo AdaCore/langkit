@@ -406,12 +406,12 @@ package ${ada_lib_name}.Analysis.Implementation.C is
            External_name => "${capi.get_name('lookup_in_node')}";
    ${ada_c_doc('langkit.lookup_in_node', 3)}
 
-   function ${capi.get_name('node_child_count')}
+   function ${capi.get_name('node_children_count')}
      (Node : ${entity_type}_Ptr) return unsigned
       with Export        => True,
            Convention    => C,
-           External_name => "${capi.get_name('node_child_count')}";
-   ${ada_c_doc('langkit.node_child_count', 3)}
+           External_name => "${capi.get_name('node_children_count')}";
+   ${ada_c_doc('langkit.node_children_count', 3)}
 
    function ${capi.get_name('node_child')}
      (Node    : ${entity_type}_Ptr;

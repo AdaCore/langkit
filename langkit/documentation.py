@@ -403,8 +403,8 @@ base_langkit_docs = {
         Return the bottom-most AST node from NODE that contains SLOC, or
         ${null} if there is none.
     """,
-    'langkit.node_child_count': """
-        Return the number of AST node in NODE's fields.
+    'langkit.node_children_count': """
+        Return the number of AST node children in NODE.
     """,
     'langkit.node_child': """
         Get the Nth child AST node in NODE's fields and store it into *CHILD_P.

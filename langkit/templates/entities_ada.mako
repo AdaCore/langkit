@@ -99,7 +99,7 @@
    -- Tree traversal operations --
    -------------------------------
 
-   function Child_Count
+   function Children_Count
      (Node : ${root_entity.api_name}'Class) return Natural;
    --  Return the number of children Node has
 
@@ -366,14 +366,14 @@
 
    % endfor
 
-   -----------------
-   -- Child_Count --
-   -----------------
+   --------------------
+   -- Children_Count --
+   --------------------
 
-   function Child_Count
+   function Children_Count
      (Node : ${root_entity.api_name}'Class) return Natural is begin
-      return Node.Node.Child_Count;
-   end Child_Count;
+      return Node.Node.Children_Count;
+   end Children_Count;
 
    -----------------------
    -- First_Child_Index --

@@ -266,7 +266,7 @@ package ${ada_lib_name}.Analysis.Implementation is
    -- Tree traversal operations --
    -------------------------------
 
-   function Child_Count
+   function Children_Count
      (Node : access ${root_node_value_type}'Class) return Natural;
    --  Return the number of children Node has
 
@@ -296,8 +296,8 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}'Class)
       return ${root_node_array.api_name};
    --  Return an array containing all the children of Node.
-   --  This is an alternative to the Child/Child_Count pair, useful if you want
-   --  the convenience of Ada arrays, and you don't care about the small
+   --  This is an alternative to the Child/Children_Count pair, useful if you
+   --  want the convenience of Ada arrays, and you don't care about the small
    --  performance hit of creating an array.
 
    function Parents
@@ -602,8 +602,8 @@ package ${ada_lib_name}.Analysis.Implementation is
      (Node : access ${root_node_value_type}'Class)
       return ${root_node_array.name};
    --  Return an array containing all the children of Node.
-   --  This is an alternative to the Child/Child_Count pair, useful if you want
-   --  the convenience of ada arrays, and you don't care about the small
+   --  This is an alternative to the Child/Children_Count pair, useful if you
+   --  want the convenience of ada arrays, and you don't care about the small
    --  performance hit of creating an array.
 
    procedure Reset_Logic_Vars

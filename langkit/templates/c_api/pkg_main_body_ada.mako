@@ -638,11 +638,11 @@ package body ${ada_lib_name}.Analysis.Implementation.C is
          Set_Last_Exception (Exc);
    end;
 
-   function ${capi.get_name("node_child_count")}
+   function ${capi.get_name("node_children_count")}
      (Node : ${entity_type}_Ptr) return unsigned is
    begin
       Clear_Last_Exception;
-      return unsigned (Child_Count (Node.El));
+      return unsigned (Children_Count (Node.El));
    exception
       when Exc : others =>
          Set_Last_Exception (Exc);

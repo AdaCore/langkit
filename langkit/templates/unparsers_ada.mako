@@ -64,7 +64,7 @@
          ${emit_unparser_code(parser.parser, ast_el=ast_el)}
       % else:
          % if parser.get_type().is_list_type:
-         if ${ast_el}.Child_Count /= 0 then
+         if ${ast_el}.Children_Count /= 0 then
          % else:
          if ${ast_el} /= null then
          % endif
