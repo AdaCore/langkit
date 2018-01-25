@@ -117,9 +117,11 @@
       Index           : Positive;
       Index_In_Bounds : out Boolean;
       Result          : out ${root_entity.api_name});
-   --  Get the Index'th child of Node, storing it into Result. Child indexing
-   --  is 1-based. Store in Index_In_Bounds whether Node had such a child; if
-   --  not, the content of Result is undefined.
+   --  Return the Index'th child of node, storing it into Result.
+   --
+   --  Child indexing is 1-based. Store in Index_In_Bounds whether Node had
+   --  such a child: if not (i.e. Index is out-of-bounds), the content
+   --  of Result is undefined.
 
    function Child
      (Node  : ${root_entity.api_name}'Class;
