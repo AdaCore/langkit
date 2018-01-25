@@ -1624,7 +1624,8 @@ class ASTNodeType(BaseStructType):
                  env_spec=None, element_type=None, annotations=None,
                  is_generic_list_type=False, is_abstract=False,
                  is_synthetic=False, has_abstract_list=False,
-                 is_enum_node=False, is_bool_node=False, dsl_name=None):
+                 is_enum_node=False, is_bool_node=False, is_token_node=False,
+                 dsl_name=None):
         """
         :param names.Name name: Name for this node.
 
@@ -1665,8 +1666,12 @@ class ASTNodeType(BaseStructType):
         :param bool is_enum_node: Whether this node comes from the expansion of
             langkit.dsl.EnumNode.
 
-        :param bool is_bool_node: Whether this not is a qualifier coming from
+        :param bool is_bool_node: Whether this node is a qualifier coming from
             the expansion of langkit.dsl.EnumNode.
+
+        :param bool is_token_node: Whether this node only materializes a parsed
+            token. If so, grammars that produce such nodes must parse only one
+            token (.token_start must be equal to .token_end).
 
         :param str dsl_name: Name used to represent this type at the DSL level.
             Useful to format diagnostics.
@@ -1796,6 +1801,7 @@ class ASTNodeType(BaseStructType):
 
         self.is_enum_node = is_enum_node
         self.is_bool_node = is_bool_node
+        self.is_token_node = is_token_node
 
         # Make sure we have one entity type for each AST node type
         entity_type = self.entity

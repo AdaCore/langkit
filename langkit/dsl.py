@@ -426,6 +426,7 @@ class _ASTNodeMetaclass(type):
                     fields=cls._fields,
                     env_spec=cls._env_spec,
                     annotations=cls._annotations,
+                    is_token_node=cls._is_token_node,
                 )
 
             astnode_type.dsl_decl = cls
@@ -471,6 +472,28 @@ class _ASTNodeMetaclass(type):
         else:
             element_type = None
 
+        # Determine if this is a token node
+        with node_ctx:
+            is_token_node = dct.pop('token_node', None)
+            check_source_language(
+                is_token_node is None or isinstance(is_token_node, bool),
+                'The "token_node" field, when present, must contain a boolean'
+            )
+
+            # If "token_node" allocation is left to None, inherit it (default
+            # is False).
+            if is_token_node is None:
+                is_token_node = bool(base._is_token_node)
+
+            # Otherwise, make sure that all derivations of a token node are
+            # token nodes themselves.
+            elif not is_token_node:
+                check_source_language(
+                    is_token_node == base._is_token_node,
+                    '"token_node" annotation inconsistent with inherited AST'
+                    ' node'
+                )
+
         fields = ASTNode.collect_fields(name, location, dct, AbstractNodeData)
 
         # AST list types are not allowed to have syntax fields
@@ -488,6 +511,7 @@ class _ASTNodeMetaclass(type):
         dct['_fields'] = fields
         dct['_base'] = base
         dct['_env_spec'] = env_spec
+        dct['_is_token_node'] = is_token_node
 
         # Make sure subclasses don't inherit the "list_type" cache from their
         # base classes.
@@ -530,6 +554,12 @@ class ASTNode(BaseStruct):
     """
     Cache for the `list_type` method.
     :type: _ASTNodeList
+    """
+
+    _is_token_node = None
+    """
+    Whether this node only materializes a token.
+    :type: bool
     """
 
     @classproperty
