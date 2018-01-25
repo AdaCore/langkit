@@ -1,13 +1,25 @@
 main.py: Running...
 [PROPERTIES] Decl.internal_md_1 (<Decl main.txt:1:1-1:5>):
+   [PROPERTIES] HasPlus.p_as_bool (<HasPlusAbsent main.txt:1:1-1:1>):
+      [PROPERTIES] HasPlusAbsent.p_as_bool (<HasPlusAbsent main.txt:1:1-1:1>):
+         [PROPERTIES] Result: False
+      [PROPERTIES] Result: False
    [PROPERTIES] Result: (F_B => False)
 [PROPERTIES] Decl.internal_env_mappings_0 (<Decl main.txt:1:1-1:5>):
    [PROPERTIES] Result: (F_Key => "a", F_Val => <Decl main.txt:1:1-1:5>)
 [PROPERTIES] Decl.internal_md_1 (<Decl main.txt:1:6-1:12>):
+   [PROPERTIES] HasPlus.p_as_bool (<HasPlusAbsent main.txt:1:6-1:6>):
+      [PROPERTIES] HasPlusAbsent.p_as_bool (<HasPlusAbsent main.txt:1:6-1:6>):
+         [PROPERTIES] Result: False
+      [PROPERTIES] Result: False
    [PROPERTIES] Result: (F_B => False)
 [PROPERTIES] Decl.internal_env_mappings_0 (<Decl main.txt:1:6-1:12>):
    [PROPERTIES] Result: (F_Key => "b", F_Val => <Decl main.txt:1:6-1:12>)
 [PROPERTIES] Decl.internal_md_1 (<Decl main.txt:1:13-1:18>):
+   [PROPERTIES] HasPlus.p_as_bool (<HasPlusPresent main.txt:1:13-1:13>):
+      [PROPERTIES] HasPlusPresent.p_as_bool (<HasPlusPresent main.txt:1:13-1:13>):
+         [PROPERTIES] Result: True
+      [PROPERTIES] Result: True
    [PROPERTIES] Result: (F_B => True)
 [PROPERTIES] Decl.internal_env_mappings_0 (<Decl main.txt:1:13-1:18>):
    [PROPERTIES] Result: (F_Key => "c", F_Val => <Decl main.txt:1:13-1:18>)

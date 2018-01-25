@@ -10,7 +10,7 @@ Test that the populate lexical env pass is resilent to errors:
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, T, abstract
+from langkit.dsl import ASTNode, EnumNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env, add_env, do
 from langkit.expressions import (AbstractProperty, If, New, No, PropertyError,
                                  Self, langkit_property)
@@ -22,6 +22,10 @@ from utils import build_and_run
 
 class FooNode(ASTNode):
     pass
+
+
+class HasError(EnumNode):
+    qualifier = True
 
 
 @abstract
@@ -59,9 +63,9 @@ class Scope(Def):
     env_spec = EnvSpec(
         add_to_env(New(T.env_assoc, key=Self.name.symbol, val=Self)),
         add_env(),
-        do(If(Self.error.is_null,
-              No(T.FooNode),
-              PropertyError(T.FooNode))),
+        do(If(Self.error.as_bool,
+              PropertyError(T.FooNode),
+              No(T.FooNode))),
     )
 
 
@@ -81,7 +85,8 @@ G.add_rules(
     defs=List(G.def_rule, empty_valid=True),
     def_rule=Or(G.scope, G.var),
 
-    scope=Scope(Opt('error').as_bool(), Tok(Token.Identifier, keep=True),
+    scope=Scope(Opt('error').as_bool(HasError),
+                Tok(Token.Identifier, keep=True),
                 '{', G.defs, '}'),
     var=Var(Tok(Token.Identifier, keep=True), '=', G.name),
 

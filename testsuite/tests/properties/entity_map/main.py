@@ -26,7 +26,9 @@ def eimage(entity):
 
 libfoolang._trace = True
 for decl in u.root:
-    print('{}{}:'.format('+' if decl.f_has_plus else '', decl.f_name.text))
+    print('{}{}:'.format(
+        '+' if decl.f_has_plus.p_as_bool else '', decl.f_name.text
+    ))
     for ref in decl.f_items:
         ref_decl = ref.p_decl
         print('  {} -> {}'.format(nimage(ref), eimage(ref_decl)))

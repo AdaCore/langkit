@@ -1000,11 +1000,9 @@ class Opt(Parser):
 
         self._booleanize = None
         """
-        If it is bool_type, then the result is booleanized into a regular
-        boolean.
-
         If it is an EnumNode subclass with qualifier set to True, then the
         result is booleanized into the corresponding two alternatives.
+        Otherwise, must be None.
 
         :type: DSLType|CompiledType|None
         """
@@ -1035,33 +1033,28 @@ class Opt(Parser):
         """
         return copy_with(self, _is_error=True)
 
-    def as_bool(self, dest=None):
+    def as_bool(self, dest):
         """
-        Returns the self parser, modified to return a bool rather than the
-        sub-parser result. The result will be true if the parse was
-        successful, false otherwise.
+        Return the self parser, modified to return `dest` nodes rather than the
+        sub-parser result. `dest` must be a qualifier EnumNode: the parser
+        result will be the "true" qualifier if the parse was successful, and
+        the "false" qualifier otherwise.
 
         This is typically useful to store specific tokens as attributes,
         for example in Ada, you'll mark a subprogram as overriding with the
         "overriding" keyword, and we want to store that in the tree as a
         boolean attribute, so we'll use::
 
-            Opt("overriding").as_bool()
+            Opt("overriding").as_bool(OverridingQualifier)
 
-        :param langkit.dsl.EnumNode|None dest: If not None, then it is expected
-            that this is an EnumNode subclass with qualifier set to True. In
-            this cases, the result will be booleanized using this enum type.
+        :param langkit.dsl.EnumNode dest: EnumNode subclass with qualifier set
+            to True. The result will be booleanized using this enum type.
 
         :rtype: Opt
         """
         from langkit.dsl import EnumNode
 
-        if dest is None:
-            booleanize = T.BoolType
-        else:
-            booleanize = assert_type(dest, EnumNode)
-
-        return copy_with(self, _booleanize=booleanize)
+        return copy_with(self, _booleanize=assert_type(dest, EnumNode))
 
     @property
     def booleanized_type(self):
@@ -1080,8 +1073,6 @@ class Opt(Parser):
     def get_type(self):
         if self._booleanize is None:
             return self.parser.get_type()
-        elif self._booleanize is T.BoolType:
-            return self._booleanize
         else:
             assert self._booleanize._type
             return resolve_type(self._booleanize._type)

@@ -4,8 +4,8 @@ Check that instrumentation properties logging is working property.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import (ASTNode, BoolType, Field, Struct, UserField, T,
-                         env_metadata)
+from langkit.dsl import (ASTNode, BoolType, EnumNode, Field, Struct, UserField,
+                         T, env_metadata)
 from langkit.envs import EnvSpec, add_to_env
 from langkit.expressions import New, Self, langkit_property
 from langkit.parsers import Grammar, List, Opt, Tok
@@ -23,6 +23,10 @@ class FooNode(ASTNode):
     pass
 
 
+class HasPlus(EnumNode):
+    qualifier = True
+
+
 class Decl(FooNode):
     has_plus = Field()
     name = Field()
@@ -30,7 +34,7 @@ class Decl(FooNode):
 
     env_spec = EnvSpec(
         add_to_env(mappings=New(T.env_assoc, key=Self.name.symbol, val=Self),
-                   metadata=New(Metadata, b=Self.has_plus))
+                   metadata=New(Metadata, b=Self.has_plus.as_bool))
     )
 
     @langkit_property(public=True, return_type=T.Ref.entity.array)
@@ -45,7 +49,7 @@ class Ref(FooNode):
 fg = Grammar('main_rule')
 fg.add_rules(
     main_rule=List(fg.decl),
-    decl=Decl(Opt('+').as_bool(),
+    decl=Decl(Opt('+').as_bool(HasPlus),
               Tok(Token.Identifier, keep=True),
               '(', fg.ref_list, ')'),
     ref_list=List(fg.ref, empty_valid=True),
