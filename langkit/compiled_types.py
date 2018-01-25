@@ -440,15 +440,6 @@ class CompiledType(object):
         return self._element_type is not None
 
     @property
-    def is_enum_type(self):
-        """
-        Return whether this is an instance of EnumType.
-
-        :rtype: bool
-        """
-        return isinstance(self, EnumType)
-
-    @property
     def is_env_rebindings_type(self):
         """
         Return whether this is the env rebindings type.
@@ -2385,95 +2376,6 @@ class ArrayType(CompiledType):
         """
         return (not self.element_type.is_struct_type or
                 self.element_type.emit_c_type)
-
-
-class EnumType(CompiledType):
-    """
-    Enumeration type. This is a compiled type that hold a single value in a set
-    of possible ones.
-    """
-
-    def __init__(self, name, location, doc, alternatives, suffix):
-        """
-        :param name: See CompiledType.__init__.
-        :param location: See CompiledType.__init__.
-        :param doc: See CompiledType.__init__.
-
-        :param list[str] alternatives: The list of alternatives for this
-            EnumType subclass.
-
-        :param str suffix: Suffix to use for the alternatives when they are
-            invalid identifiers in some target language.
-        """
-        super(EnumType, self).__init__(
-            name, location, doc,
-            exposed=True, is_ptr=False, nullexpr='Uninitialized'
-        )
-        self.alternatives = alternatives
-        self.suffix = suffix
-
-    class Alternative(object):
-        """
-        Specific enum value.
-        """
-
-        def __init__(self, enum_type, alt):
-            self.enum_type = enum_type
-            self.alt = alt
-            assert alt in self.enum_type.alternatives
-
-        @property
-        def enumerator(self):
-            """
-            Return `get_enumerator` for this alternative.
-            :rtype: names.Name
-            """
-            return self.enum_type.get_enumerator(self.alt)
-
-    def base_name(self):
-        """
-        Return a names.Name instance holding the unescaped name for this type.
-
-        :rtype: names.Name
-        """
-        return self._name
-
-    @property
-    def name(self):
-        return self._name + names.Name('Type')
-
-    def c_type(self, c_api_settings):
-        return CAPIType(c_api_settings, self.base_name())
-
-    def get_enumerator(self, alt):
-        """
-        Return a names.Name instance for alt's enumerator name.
-
-        This is used in Ada code generation.
-
-        :param str alt: The alternative for which we want the enumerator name.
-        :rtype: names.Name
-        """
-        result = names.Name(alt)
-        return (result + names.Name.from_lower(self.suffix)
-                if is_keyword(result) else result)
-
-    def alternatives_for(self, language_settings):
-        """
-        Return the sequence of names to use for alternatives in the language
-        corresponding to language_settings.
-
-        :param AbstractAPISettings language_settings: The language for which we
-            want the enum names.
-        """
-        type_name = self.base_name()
-        return [
-            language_settings.get_enum_alternative(
-                type_name, names.Name.from_lower(alt),
-                names.Name.from_lower(self.suffix)
-            )
-            for alt in self.alternatives
-        ]
 
 
 def create_enum_node_types(cls):

@@ -3,7 +3,6 @@
 <%namespace name="array_types"   file="array_types_ada.mako" />
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
 <%namespace name="entities"      file="entities_ada.mako" />
-<%namespace name="enum_types"    file="enum_types_ada.mako" />
 <%namespace name="exts"          file="extensions.mako" />
 
 <% no_builtins = lambda ts: filter(lambda t: not t.is_builtin(), ts) %>
@@ -400,10 +399,6 @@ package ${ada_lib_name}.Analysis is
    -----------------------
 
    function Image (Value : Boolean) return String;
-
-   % for cls in ctx.sorted_types(ctx.enum_types):
-   ${enum_types.public_decl(cls)}
-   % endfor
 
    -----------------
    -- Array types --

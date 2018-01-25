@@ -3,7 +3,6 @@
 <%namespace name="array_types"   file="array_types_c.mako" />
 <%namespace name="struct_types"  file="struct_types_c.mako" />
 <%namespace name="astnode_types" file="astnode_types_c.mako" />
-<%namespace name="enum_types"    file="enum_types_c.mako" />
 <%namespace name="exts" file="../extensions.mako" />
 
 <% entity_type = root_entity.c_type(capi).name %>
@@ -164,11 +163,6 @@ typedef ${analysis_unit_type} (*${unit_provider_get_unit_from_name_type})(
 /*
  * Data structures held in AST nodes
  */
-
-
-% for enum_type in ctx.sorted_types(ctx.enum_types):
-    ${enum_types.decl(enum_type)}
-% endfor
 
 ${array_types.decl(T.root_node.array)}
 ${array_types.decl(T.entity.array)}

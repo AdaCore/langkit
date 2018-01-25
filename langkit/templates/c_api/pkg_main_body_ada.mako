@@ -3,7 +3,6 @@
 <%namespace name="array_types"   file="array_types_ada.mako" />
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="enum_types"    file="enum_types_ada.mako" />
 <%namespace name="exts"          file="../extensions.mako" />
 
 <% entity_type = root_entity.c_type(capi).name %>

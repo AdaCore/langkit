@@ -3,7 +3,6 @@
 <%namespace name="array_types"   file="array_types_ada.mako" />
 <%namespace name="struct_types"  file="struct_types_ada.mako" />
 <%namespace name="astnode_types" file="astnode_types_ada.mako" />
-<%namespace name="enum_types"    file="enum_types_ada.mako" />
 <%namespace name="exts"          file="../extensions.mako" />
 
 <% entity_type = root_entity.c_type(capi).name %>
@@ -489,14 +488,6 @@ package ${ada_lib_name}.Analysis.Implementation.C is
       ctx.ext('analysis', 'c_api', 'unit_providers', 'spec')
    )}
 % endif
-
-   -----------------------
-   -- Enumeration types --
-   -----------------------
-
-   % for enum_type in ctx.sorted_types(ctx.enum_types):
-      ${enum_types.spec(enum_type)}
-   % endfor
 
    ------------------
    -- Struct types --

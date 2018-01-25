@@ -415,13 +415,6 @@ class CompileCtx(object):
         :type: set[parsers.Parser]
         """
 
-        self.enum_types = set()
-        """
-        Set of all _EnumType instances.
-
-        :type: set[langkit.compiled_types._EnumType]
-        """
-
         self.astnode_types = []
         """
         List for all ASTnodeType instances, sorted so that A is before B when A
@@ -746,7 +739,7 @@ class CompileCtx(object):
         available for code generation.
         """
         from langkit.compiled_types import CompiledTypeMetaclass, StructType, T
-        from langkit.dsl import _EnumMetaclass, _StructMetaclass
+        from langkit.dsl import _StructMetaclass
 
         # Make sure the language spec tagged at most one metadata struct.
         # Register it, if there is one.
@@ -774,7 +767,6 @@ class CompileCtx(object):
             t.element_type for t in CompiledTypeMetaclass.pending_list_types
         )
         self.array_types.update(CompiledTypeMetaclass.pending_array_types)
-        self.enum_types = {et._type for et in _EnumMetaclass.enum_types}
 
         self.generic_list_type = self.root_grammar_class.generic_list_type
         self.env_metadata = CompiledTypeMetaclass.env_metadata

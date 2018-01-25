@@ -59,10 +59,6 @@ class PythonAPISettings(AbstractAPISettings):
             (T.SymbolType, lambda _: '{}._wrap()'),
             (T.BoolType, lambda _: 'bool({{}}{})'.format(value_suffix)),
             (T.LongType, lambda _: '{{}}{}'.format(value_suffix)),
-            (ct.EnumType, lambda _: '{}_to_str[{{}}{}]'.format(
-                type.c_type(self.c_api_settings).name,
-                value_suffix,
-            )),
             (ct.ArrayType, lambda cls: '{}({{}}, inc_ref={})'.format(
                 self.array_wrapper(type),
                 inc_ref
@@ -97,11 +93,6 @@ class PythonAPISettings(AbstractAPISettings):
             )),
             (T.BoolType, lambda _: 'bool({})'),
             (T.LongType, lambda _: 'int({})'),
-            (ct.EnumType, lambda _:
-                '_unwrap_enum({{}}, str_to_{}, {})'.format(
-                    type.c_type(self.c_api_settings).name,
-                    type.name.camel
-                )),
             (ct.ArrayType, lambda cls: '{}._unwrap({{}})'.format(
                 self.array_wrapper(cls)
             )),
@@ -139,7 +130,6 @@ class PythonAPISettings(AbstractAPISettings):
             (T.AnalysisUnitType, lambda _: 'AnalysisUnit._c_type'),
             (T.AnalysisUnitKind, lambda _: ctype_type('c_uint')),
             (ct.ASTNodeType, lambda _: '_ASTNodeExtension.c_type'),
-            (ct.EnumType, lambda _: ctype_type('c_uint')),
             (ct.ArrayType, lambda cls:
                 '{}._c_type'.format(self.array_wrapper(cls))),
             (ct.EntityType, lambda _: '{}._c_type'.format(

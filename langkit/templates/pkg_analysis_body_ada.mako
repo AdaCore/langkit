@@ -2,7 +2,6 @@
 
 <%namespace name="array_types" file="array_types_ada.mako" />
 <%namespace name="entities"    file="entities_ada.mako" />
-<%namespace name="enum_types"  file="enum_types_ada.mako" />
 <%namespace name="exts"        file="extensions.mako" />
 <%namespace name="list_types"  file="list_types_ada.mako" />
 

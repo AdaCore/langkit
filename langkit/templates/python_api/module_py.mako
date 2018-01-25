@@ -13,7 +13,6 @@ from __future__ import (absolute_import, division, print_function,
 
 <%namespace name="array_types"   file="array_types_py.mako" />
 <%namespace name="astnode_types" file="astnode_types_py.mako" />
-<%namespace name="enum_types"    file="enum_types_py.mako" />
 <%namespace name="struct_types"  file="struct_types_py.mako" />
 <%namespace name="exts"          file="/extensions.mako" />
 
@@ -1196,12 +1195,6 @@ class EnvRebindings(object):
     % if astnode != T.root_node:
 ${astnode_types.decl(astnode)}
     % endif
-% endfor
-
-UNINITIALIZED = 'uninitialized'
-
-% for enum_type in ctx.sorted_types(ctx.enum_types):
-${enum_types.decl(enum_type)}
 % endfor
 
 

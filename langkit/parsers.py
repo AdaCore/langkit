@@ -1354,45 +1354,6 @@ class Null(Parser):
                 resolve_type(self.typ))
 
 
-class Enum(Parser):
-    """
-    Wrapper parser used to return an enumeration value for a match.
-    """
-
-    def _is_left_recursive(self, rule_name):
-        if self.parser:
-            return self.parser._is_left_recursive(rule_name)
-        return False
-
-    def __repr__(self):
-        return "Enum({0}, {1})".format(self.parser, self.enum_type_inst)
-
-    def __init__(self, parser, enum_type_inst):
-        """
-        Create a wrapper parser around `parser` that returns `enum_type_inst`
-        (an EnumType subclass instance) when matching.
-        """
-        Parser.__init__(self)
-        self.parser = resolve(parser) if parser else None
-        ":type: Parser|_Row"
-
-        self.enum_type_inst = enum_type_inst._enum_value
-
-    def create_vars_after(self, start_pos):
-        self.init_vars(
-            pos_var=self.parser.pos_var if self.parser else start_pos
-        )
-
-    def children(self):
-        return keep([self.parser])
-
-    def get_type(self):
-        return self.enum_type_inst.enum_type
-
-    def generate_code(self):
-        return self.render('enum_code_ada')
-
-
 _ = Discard
 
 

@@ -269,14 +269,6 @@ def write_astdoc(context, file):
         js=ASTDOC_JS
     ), file=file)
 
-    if context.enum_types:
-        print('<h2>Enumeration types</h2>', file=file)
-
-        print('<dl>', file=file)
-        for enum_type in context.enum_types:
-            print_enum(context, file, enum_type)
-        print('</dl>', file=file)
-
     print('<h2>Structure types</h2>', file=file)
 
     print('<dl>', file=file)

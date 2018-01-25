@@ -58,9 +58,7 @@
                arg_ref = '{}.all'.format(arg_ref)
          %>
          Unwrapped_${arg.name} : constant ${arg.type.name} :=
-            % if arg.type.is_enum_type:
-               ${field.type} (${arg_ref})
-            % elif arg.type.is_bool_type:
+            % if arg.type.is_bool_type:
                ${arg_ref} /= 0
             % elif arg.type.is_long_type:
                Integer (${arg_ref})
@@ -138,10 +136,7 @@
             Result := ${field_access};
 
             Value_P.all :=
-               % if field.type.is_enum_type:
-                   ${field.type.c_type(capi).name}
-                     (${field.type.name}'Pos (Result))
-               % elif field.type.is_bool_type:
+               % if field.type.is_bool_type:
                    ${bool_type} (Boolean'Pos (Result))
                % elif field.type.is_long_type:
                    int (Result)
