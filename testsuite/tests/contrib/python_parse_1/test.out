@@ -10,15 +10,19 @@ FileNode[1:1-7:1]
 |  |  |  |single_params:
 |  |  |  |  SingleParamList[2:10-2:14]
 |  |  |  |  |  SingleParam[2:10-2:11]
-|  |  |  |  |  |is_varargs: False
-|  |  |  |  |  |is_kwargs: False
+|  |  |  |  |  |is_varargs:
+|  |  |  |  |  |  VarArgsFlagAbsent[2:10-2:10]
+|  |  |  |  |  |is_kwargs:
+|  |  |  |  |  |  KwArgsFlagAbsent[2:10-2:10]
 |  |  |  |  |  |name:
 |  |  |  |  |  |  Name[2:10-2:11]
 |  |  |  |  |  |  |id: a
 |  |  |  |  |  |default_value: <null>
 |  |  |  |  |  SingleParam[2:13-2:14]
-|  |  |  |  |  |is_varargs: False
-|  |  |  |  |  |is_kwargs: False
+|  |  |  |  |  |is_varargs:
+|  |  |  |  |  |  VarArgsFlagAbsent[2:13-2:13]
+|  |  |  |  |  |is_kwargs:
+|  |  |  |  |  |  KwArgsFlagAbsent[2:13-2:13]
 |  |  |  |  |  |name:
 |  |  |  |  |  |  Name[2:13-2:14]
 |  |  |  |  |  |  |id: b

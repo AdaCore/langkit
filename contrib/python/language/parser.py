@@ -1,11 +1,20 @@
 from __future__ import absolute_import, division, print_function
-from langkit.dsl import ASTNode, Field, abstract, EnumNode
+
+from langkit.dsl import ASTNode, Field, EnumNode, abstract
 from langkit.parsers import Grammar, Or, List, Pick, Opt, _
 from language.lexer import python_lexer as L
 
 
 def newlines():
     return _(List(P.nl, empty_valid=True, discard=False))
+
+
+class VarArgsFlag(EnumNode):
+    qualifier = True
+
+
+class KwArgsFlag(EnumNode):
+    qualifier = True
 
 
 class PythonNode(ASTNode):
@@ -440,7 +449,7 @@ python_grammar.add_rules(
     varargslist=Params(
         List(
             SingleParam(
-                Opt('*').as_bool(), Opt('**').as_bool(),
+                Opt('*').as_bool(VarArgsFlag), Opt('**').as_bool(KwArgsFlag),
                 P.fpdef, Opt('=', P.test)
             ),
             empty_valid=True, sep=","
