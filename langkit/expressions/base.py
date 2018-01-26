@@ -2131,28 +2131,34 @@ Entity = EntityVariable()
 @attr_expr('symbol')
 class GetSymbol(AbstractExpression):
     """
-    Return the symbol associated to `token`.
+    Return the symbol associated to `node`. `token` must be an AST node that is
+    a token node.
     """
 
-    def __init__(self, token):
-        """
-        :param AbstractExpression token: Expression returning a token.
-        """
+    def __init__(self, node):
         super(GetSymbol, self).__init__()
-        self.token_expr = token
+        self.node_expr = node
 
     def construct(self):
-        """
-        Construct a resolved expression for this.
-
-        :rtype: CallExpr
-        """
-        token = construct(self.token_expr, T.TokenType)
-        return self.construct_static(token, abstract_expr=self)
+        node = construct(self.node_expr)
+        if node.type.is_entity_type:
+            node = FieldAccessExpr(node, 'Node', node.type.astnode,
+                                   do_explicit_incref=False)
+        check_source_language(
+            node.type.is_ast_node,
+            'Token node expected, but got instead {}'
+            .format(node.type.dsl_name)
+        )
+        check_source_language(
+            node.type.is_token_node,
+            'Token node expected, but the input {} node is not a token node'
+            .format(node.type.dsl_name)
+        )
+        return self.construct_static(node, abstract_expr=self)
 
     @staticmethod
-    def construct_static(token_expr, abstract_expr=None):
-        return CallExpr('Sym', 'Get_Symbol', T.SymbolType, [token_expr],
+    def construct_static(node_expr, abstract_expr=None):
+        return CallExpr('Sym', 'Get_Symbol', T.SymbolType, [node_expr],
                         abstract_expr=abstract_expr)
 
     def __repr__(self):

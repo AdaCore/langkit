@@ -27,8 +27,8 @@ except TypeError as exc:
     res_error = '<TypeError: {}>'.format(exc)
 print('u.root.p_sym(42) = {}'.format(res_error))
 
-res_field = u.root.p_sym(u.root.f_tok.text)
-print('u.root.p_sym(u.root.f_tok.symbol) = {}'.format(res_field))
+res_field = u.root.p_sym(u.root.token_start.text)
+print('u.root.p_sym(u.root.token_start.text) = {}'.format(res_field))
 
 res_no_such_symbol = u.root.p_sym('no_such_symbol')
 print('u.root.p_sym("no_such_symbol") = {}'.format(res_no_such_symbol))

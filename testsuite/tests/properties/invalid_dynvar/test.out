@@ -8,7 +8,7 @@ File "test.py", line 30, in ExampleNode.prop
   line 44, in access to .implicit_prop
     Error: In call to ExampleNode.p_implicit_prop, some dynamic variables need to be bound: env
 
-== <bind(<DynamicVariable env>, <FieldAccess .node_env>, <EnvGet(<DynamicVariable env>, <FieldAccess .tok>)>)> ==
+== <bind(<DynamicVariable env>, <FieldAccess .node_env>, <EnvGet(<DynamicVariable env>, <Var Self>)>)> ==
 Code generation was successful
 
 == <bind(<DynamicVariable env>, <FieldAccess .node_env>, <FieldAccess .implicit_prop>)> ==

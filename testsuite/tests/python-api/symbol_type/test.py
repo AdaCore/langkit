@@ -4,7 +4,7 @@ Test that Symbol bindings in the Python API are properly working.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, SymbolType, TokenType
+from langkit.dsl import ASTNode, SymbolType
 from langkit.expressions import langkit_property
 from langkit.parsers import Grammar
 
@@ -17,7 +17,7 @@ class FooNode(ASTNode):
 
 
 class Example(FooNode):
-    tok = Field(type=TokenType)
+    token_node = True
 
     @langkit_property(public=True, return_type=SymbolType)
     def sym(sym=SymbolType):

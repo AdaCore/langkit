@@ -21,7 +21,7 @@ def load_unit(name):
 
 
 def name_img(node):
-    return node.f_name.f_tok.text
+    return node.f_name.text
 
 
 def Name_repr(self):

@@ -155,11 +155,19 @@ class EnvGet(AbstractExpression):
         env_expr = construct(self.env, T.LexicalEnvType)
 
         sym_expr = construct(self.symbol)
-        if sym_expr.type == T.TokenType:
+
+        if sym_expr.type.is_ast_node:
+            check_source_language(
+                sym_expr.type.is_token_node,
+                'AST node type for key (here: {}) must be a token node'.format(
+                    sym_expr.type.dsl_name
+                )
+            )
             sym_expr = GetSymbol.construct_static(sym_expr)
+
         check_source_language(
             sym_expr.type == T.SymbolType,
-            'Wrong type for symbol expr: {}'.format(sym_expr.type.dsl_name)
+            'Invalid key type: {}'.format(sym_expr.type.dsl_name)
         )
 
         from_expr = (construct(self.sequential_from, T.root_node)

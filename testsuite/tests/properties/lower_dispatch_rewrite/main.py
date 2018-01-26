@@ -36,7 +36,7 @@ def parent_def(self):
 def ref_repr(self):
     return '<{} {} (from {})>'.format(
         type(self).__name__,
-        self.f_tok.text,
+        self.f_name.text,
         parent_def(self).f_name.text
     )
 

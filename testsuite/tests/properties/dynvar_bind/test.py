@@ -16,6 +16,10 @@ class FooNode(ASTNode):
     pass
 
 
+class Name(FooNode):
+    token_node = True
+
+
 class Decl(FooNode):
     name = Field()
     refs = Field()
@@ -47,10 +51,10 @@ foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=List(foo_grammar.decl),
     decl=Decl(
-        Token.Identifier,
+        Name(Token.Identifier),
         '(', List(foo_grammar.ref, empty_valid=True), ')',
     ),
-    ref=Ref(Token.Identifier),
+    ref=Ref(Name(Token.Identifier)),
 )
 build_and_run(foo_grammar, 'main.py')
 print('Done')

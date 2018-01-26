@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, LexicalEnvType
+from langkit.dsl import ASTNode, LexicalEnvType
 from langkit.expressions import DynamicVariable, Property, Self
 from langkit.parsers import Grammar
 
@@ -23,7 +23,7 @@ def run(expr):
         pass
 
     class ExampleNode(FooNode):
-        tok = Field()
+        token_node = True
 
         implicit_prop = Property(Self.as_bare_entity, dynamic_vars=[Env])
 
@@ -42,6 +42,6 @@ def run(expr):
 
 run(Env.get(Self.tok))
 run(Self.implicit_prop)
-run(Env.bind(Self.node_env, Env.get(Self.tok)))
+run(Env.bind(Self.node_env, Env.get(Self)))
 run(Env.bind(Self.node_env, Self.implicit_prop))
 print('Done')

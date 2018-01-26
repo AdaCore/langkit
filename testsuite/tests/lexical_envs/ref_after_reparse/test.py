@@ -22,19 +22,15 @@ class FooNode(ASTNode):
 
 
 class Name(FooNode):
-    tok = Field()
-
-    @langkit_property()
-    def sym():
-        return Self.tok.symbol
+    token_node = True
 
     @langkit_property(dynamic_vars=[Env])
     def ambiant_entity():
-        return Env.get(Self.sym).at(0)
+        return Env.get(Self).at(0)
 
     @langkit_property()
     def designated_env():
-        return Self.unit.root.node_env.get(Self.sym).at(0).children_env
+        return Self.unit.root.node_env.get(Self).at(0).children_env
 
     @langkit_property(public=True)
     def entity():
@@ -48,7 +44,7 @@ class Block(FooNode):
     refs = Field()
 
     env_spec = EnvSpec(
-        add_to_env(New(T.env_assoc, key=Self.name.sym, val=Self)),
+        add_to_env(New(T.env_assoc, key=Self.name.symbol, val=Self)),
         add_env()
     )
 
@@ -57,7 +53,7 @@ class Decl(FooNode):
     name = Field()
 
     env_spec = EnvSpec(
-        add_to_env(New(T.env_assoc, key=Self.name.sym, val=Self))
+        add_to_env(New(T.env_assoc, key=Self.name.symbol, val=Self))
     )
 
 

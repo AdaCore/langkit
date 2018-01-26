@@ -18,6 +18,10 @@ class FooNode(ASTNode):
     pass
 
 
+class Name(FooNode):
+    token_node = True
+
+
 @abstract
 class Stmt(FooNode):
     pass
@@ -27,7 +31,6 @@ class Def(Stmt):
     id = Field()
     body = Field()
 
-    name = Property(Self.id)
     env_spec = EnvSpec(
         add_to_env(Self.id.symbol, Self),
         add_env()
@@ -45,7 +48,7 @@ class Block(Stmt):
 grammar = Grammar('stmts_rule')
 grammar.add_rules(
     def_rule=Def(
-        Token.Identifier,
+        Name(Token.Identifier),
         Opt('(', grammar.stmts_rule, ')')
     ),
 

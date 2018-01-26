@@ -34,11 +34,11 @@ class Name(FooNode):
 
 
 class Id(Name):
-    tok = Field()
+    token_node = True
 
     @langkit_property()
     def resolve():
-        return Self.node_env.get_first(Self.tok.symbol)
+        return Self.node_env.get_first(Self)
 
 
 class Prefix(Name):
@@ -86,11 +86,11 @@ G.add_rules(
     def_rule=Or(G.scope, G.var),
 
     scope=Scope(Opt('error').as_bool(HasError),
-                Token.Identifier,
+                Id(Token.Identifier),
                 '{', G.defs, '}'),
-    var=Var(Token.Identifier, '=', G.name),
+    var=Var(Id(Token.Identifier), '=', G.name),
 
-    name=Or(Prefix(G.name, '.', Token.Identifier),
+    name=Or(Prefix(G.name, '.', Id(Token.Identifier)),
             Id(Token.Identifier)),
 )
 build_and_run(G, 'main.py')

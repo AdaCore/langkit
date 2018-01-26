@@ -18,6 +18,10 @@ class FooNode(ASTNode):
     pass
 
 
+class Name(FooNode):
+    token_node = True
+
+
 @abstract
 class Def(FooNode):
     name = AbstractProperty(T.SymbolType, public=True)
@@ -28,10 +32,10 @@ class Def(FooNode):
 
 class Block(Def):
     params = Field(type=T.Params)
-    tok = Field(type=T.TokenType)
+    name_field = Field(type=T.Name)
     vars = Field(type=T.BlockVar.list)
 
-    name = Property(Self.tok.symbol)
+    name = Property(Self.name_field.symbol)
 
     @langkit_property(public=True)
     def rebind(from_block=T.Block.entity, to_block=T.Block.entity):
@@ -70,8 +74,8 @@ class Block(Def):
 
 
 class Param(Def):
-    tok = Field(type=T.TokenType)
-    name = Property(Self.tok.symbol)
+    name_field = Field(type=T.Name)
+    name = Property(Self.name_field.symbol)
 
 
 class Params(Param.list):
@@ -79,22 +83,21 @@ class Params(Param.list):
 
 
 class BlockVar(Def):
-    tok = Field(type=T.TokenType)
-    name = Property(Self.tok.symbol)
+    name_field = Field(type=T.Name)
+    name = Property(Self.name_field.symbol)
 
 
 grammar = Grammar('main_rule')
 grammar.add_rules(
     main_rule=List(grammar.block),
-    block=Block(grammar.params,
-                Token.Identifier,
-                grammar.vars),
+    name=Name(Token.Identifier),
+    block=Block(grammar.params, grammar.name, grammar.vars),
 
     params=Pick('(', List(grammar.param, list_cls=Params), ')'),
-    param=Param(Token.Identifier),
+    param=Param(grammar.name),
 
     vars=Pick('{', List(grammar.var), '}'),
-    var=BlockVar(Token.Identifier),
+    var=BlockVar(grammar.name),
 )
 build_and_run(grammar, 'main.py')
 print('Done')

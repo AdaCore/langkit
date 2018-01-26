@@ -18,9 +18,13 @@ class FooNode(ASTNode):
     @langkit_property()
     def resolve_ref():
         return Self.match(
-            lambda r=T.Ref: r.parent.parent.node_env.get(r.name.symbol).at(0),
+            lambda r=T.Ref: r.parent.parent.node_env.get(r.name).at(0),
             lambda _: No(T.entity),
         )
+
+
+class Name(FooNode):
+    token_node = True
 
 
 class Decl(FooNode):
@@ -45,17 +49,17 @@ class Ref(FooNode):
 
     @langkit_property(public=True)
     def resolve():
-        return Self.node_env.get(Self.name.symbol).at(0)
+        return Self.node_env.get(Self.name).at(0)
 
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=List(foo_grammar.decl),
     decl=Decl(
-        Token.Identifier,
+        Name(Token.Identifier),
         '(', List(foo_grammar.ref, empty_valid=True), ')'
     ),
-    ref=Ref(Token.Identifier),
+    ref=Ref(Name(Token.Identifier)),
 )
 build_and_run(foo_grammar, 'main.py')
 print('Done')

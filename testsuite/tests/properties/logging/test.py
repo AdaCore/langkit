@@ -27,6 +27,10 @@ class HasPlus(EnumNode):
     qualifier = True
 
 
+class Name(FooNode):
+    token_node = True
+
+
 class Decl(FooNode):
     has_plus = Field()
     name = Field()
@@ -50,10 +54,11 @@ fg = Grammar('main_rule')
 fg.add_rules(
     main_rule=List(fg.decl),
     decl=Decl(Opt('+').as_bool(HasPlus),
-              Token.Identifier,
+              fg.name,
               '(', fg.ref_list, ')'),
     ref_list=List(fg.ref, empty_valid=True),
-    ref=Ref(Token.Identifier),
+    ref=Ref(fg.name),
+    name=Name(Token.Identifier),
 )
 build_and_run(fg, 'main.py', properties_logging=True)
 print('Done')

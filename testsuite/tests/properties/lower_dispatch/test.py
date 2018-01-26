@@ -26,6 +26,10 @@ class FooNode(ASTNode):
     pass
 
 
+class Name(FooNode):
+    token_node = True
+
+
 @abstract
 class Expr(FooNode):
 
@@ -46,7 +50,7 @@ class Atom(Expr):
 
 
 class Lit(Atom):
-    tok = Field()
+    token_node = True
 
     @langkit_property()
     def evaluate_abstract():
@@ -62,11 +66,11 @@ class Lit(Atom):
 
 
 class Ref(Atom):
-    tok = Field()
+    name = Field()
 
     @langkit_property(public=True)
     def resolve():
-        return Self.node_env.get_first(Self.tok.symbol).cast_or_raise(T.Def)
+        return Self.node_env.get_first(Self.name.symbol).cast_or_raise(T.Def)
 
     @langkit_property()
     def evaluate_abstract():
@@ -113,8 +117,9 @@ class Def(FooNode):
 
 grammar = Grammar('main_rule')
 grammar.add_rules(
+    name=Name(Token.Identifier),
     main_rule=List(Or(
-        Def('def', Token.Identifier, grammar.expr),
+        Def('def', grammar.name, grammar.expr),
         grammar.expr
     )),
 
@@ -122,7 +127,7 @@ grammar.add_rules(
 
     atom=Or(grammar.lit, grammar.ref),
     lit=Lit(Token.Number),
-    ref=Ref(Token.Identifier),
+    ref=Ref(grammar.name),
 
     plus=Pick('(', Plus(grammar.expr, '+', grammar.expr), ')'),
 )

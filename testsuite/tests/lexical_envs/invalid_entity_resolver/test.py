@@ -23,6 +23,9 @@ def run(name, prop):
     class FooNode(ASTNode):
         resolve_ref = prop
 
+    class Name(FooNode):
+        token_node = True
+
     class Decl(FooNode):
         name = Field()
         refs = Field()
@@ -44,16 +47,16 @@ def run(name, prop):
 
         @langkit_property(public=True)
         def resolve():
-            return Self.node_env.get(Self.name.symbol).at(0)
+            return Self.node_env.get(Self.name).at(0)
 
     grammar = Grammar('main_rule')
     grammar.add_rules(
         main_rule=List(grammar.decl),
         decl=Decl(
-            Token.Identifier,
+            Name(Token.Identifier),
             '(', List(grammar.ref, empty_valid=True), ')'
         ),
-        ref=Ref(Token.Identifier),
+        ref=Ref(Name(Token.Identifier)),
     )
     emit_and_print_errors(grammar)
 

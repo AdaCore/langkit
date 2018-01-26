@@ -45,9 +45,9 @@ class Literal(Expression):
 
 
 class Name(Expression):
-    tok = Field(type=TokenType)
+    token_node = True
 
-    env_element = Property(Self.children_env.get(Self.tok.symbol).at(0))
+    env_element = Property(Self.children_env.get(Self.symbol).at(0))
     deref_env_element = Property(Self.env_element.null_node, public=True)
     match_env_element = Property(
         Self.env_element.match(

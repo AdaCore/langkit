@@ -29,7 +29,7 @@ class Scope(FooNode):
     content = Field()
 
     env_spec = EnvSpec(
-        add_to_env(New(T.env_assoc, key=Self.name.get_symbol, val=Self)),
+        add_to_env(New(T.env_assoc, key=Self.name.symbol, val=Self)),
         add_env()
     )
 
@@ -46,11 +46,7 @@ class Id(FooNode):
 
 
 class SimpleId(Id):
-    name = Field(type=T.TokenType)
-
-    @langkit_property()
-    def get_symbol():
-        return Self.name.symbol
+    token_node = True
 
     @langkit_property()
     def simple_name():
@@ -58,7 +54,7 @@ class SimpleId(Id):
 
     @langkit_property()
     def resolve(base_env=T.LexicalEnvType):
-        return base_env.get_first(Self.get_symbol).el.cast(T.Scope)
+        return base_env.get_first(Self.symbol).el.cast(T.Scope)
 
 
 class ScopedId(Id):
@@ -72,7 +68,7 @@ class ScopedId(Id):
     @langkit_property()
     def resolve(base_env=T.LexicalEnvType):
         return (Self.scope.resolve(base_env)
-                .children_env.get_first(Self.name.get_symbol).el
+                .children_env.get_first(Self.name.symbol).el
                 .cast(T.Scope))
 
 
@@ -81,7 +77,7 @@ class ForeignDecl(FooNode):
 
     env_spec = EnvSpec(
         add_to_env(
-            New(T.env_assoc, key=Self.id.simple_name.get_symbol, val=Self),
+            New(T.env_assoc, key=Self.id.simple_name.symbol, val=Self),
             dest_env=Self.id.match(
                 lambda simple=T.SimpleId:
                     simple.node_env,
@@ -99,7 +95,7 @@ class SelfDecl(FooNode):
     env_spec = EnvSpec(
         add_to_env(
             New(T.env_assoc,
-                key=Self.id.simple_name.get_symbol,
+                key=Self.id.simple_name.symbol,
                 val=Self.id.resolve(Self.node_env)),
             metadata=New(
                 T.Metadata,

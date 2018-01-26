@@ -19,6 +19,10 @@ class FooNode(ASTNode):
     pass
 
 
+class Name(FooNode):
+    token_node = True
+
+
 @abstract
 class Expr(FooNode):
     pass
@@ -34,15 +38,15 @@ class Lit(Atom):
 
 
 class Ref(Atom):
-    tok = Field()
+    name = Field()
 
     @langkit_property(public=True)
     def resolve():
-        return Self.node_env.get_first(Self.tok.symbol)
+        return Self.node_env.get_first(Self.name.symbol)
 
     @langkit_property(public=True)
     def dummy():
-        return Self.referenced_env.get(Self.tok.symbol)
+        return Self.referenced_env.get(Self.name.symbol)
 
     @langkit_property()
     def referenced_env():
@@ -60,7 +64,7 @@ class MiddleRef(Ref):
 class DerivedRef(MiddleRef):
     @langkit_property()
     def referenced_env():
-        return Self.unit.root.node_env.get_first(Self.tok.symbol).children_env
+        return Self.unit.root.node_env.get_first(Self.name.symbol).children_env
 
 
 class Plus(Expr):
@@ -97,23 +101,24 @@ class Def(FooNode):
 
 grammar = Grammar('main_rule')
 grammar.add_rules(
+    name=Name(Token.Identifier),
     main_rule=List(Or(
-        Def('def', Token.Identifier,
+        Def('def', grammar.name,
             grammar.imports, grammar.vars, grammar.expr),
         grammar.expr
     )),
 
     imports=Pick('(', List(grammar.derived_ref, empty_valid=True), ')'),
 
-    var=Var(Token.Identifier, '=', grammar.expr),
+    var=Var(grammar.name, '=', grammar.expr),
     vars=Pick('{', List(grammar.var, empty_valid=True), '}'),
 
     expr=Or(grammar.atom, grammar.plus),
 
     atom=Or(grammar.lit, grammar.ref),
     lit=Lit(Token.Number),
-    ref=Ref(Token.Identifier),
-    derived_ref=DerivedRef(Token.Identifier),
+    ref=Ref(grammar.name),
+    derived_ref=DerivedRef(grammar.name),
 
     plus=Pick('(', Plus(grammar.expr, '+', grammar.expr), ')'),
 )
