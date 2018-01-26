@@ -1249,6 +1249,8 @@ class _Transform(Parser):
         """
         from langkit.dsl import ASTNode
 
+        assert isinstance(parser, _Row)
+
         Parser.__init__(self)
         assert (issubtype(typ, ASTNode)
                 or isinstance(typ, T.Defer)
