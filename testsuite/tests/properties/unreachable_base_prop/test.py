@@ -39,7 +39,7 @@ class Atom(Expr):
 
 
 class Lit(Atom):
-    tok = Field()
+    token_node = True
 
     prop1 = Property(2)
     prop2 = Property(2)
@@ -47,7 +47,7 @@ class Lit(Atom):
 
 
 class Ref(Atom):
-    tok = Field()
+    token_node = True
 
     prop1 = Property(3)
     prop2 = Property(3)

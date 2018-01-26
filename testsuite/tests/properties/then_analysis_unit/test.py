@@ -5,7 +5,7 @@ return analysis units.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, T
+from langkit.dsl import ASTNode, T
 from langkit.expressions import Property, Self
 from langkit.parsers import Grammar, List
 
@@ -21,7 +21,7 @@ class FooNode(ASTNode):
 
 
 class Name(FooNode):
-    tok = Field()
+    token_node = True
 
 
 class Scope(Name.list):

@@ -75,18 +75,14 @@ class CompositeNode(FooNode):
 foo_grammar = Grammar('main_rule')
 A = foo_grammar
 
-indent = L.Indent(keep=False)
-dedent = L.Dedent(keep=False)
-new_line = L.Newline(keep=False)
-
 foo_grammar.add_rules(
     lit=Literal(Token.Number),
-    nl=NewLineNode(A.lit, new_line, A.lit),
-    ind=IndentNode(A.lit, new_line, indent, A.lit, dedent),
+    nl=NewLineNode(A.lit, L.Newline, A.lit),
+    ind=IndentNode(A.lit, L.Newline, L.Indent, A.lit, L.Dedent),
     comp=CompositeNode(
-        A.lit, new_line,
-        A.lit, new_line, indent,
-        A.lit, new_line, dedent,
+        A.lit, L.Newline,
+        A.lit, L.Newline, L.Indent,
+        A.lit, L.Newline, L.Dedent,
         A.lit
     ),
     main_rule=Or(A.comp, A.ind, A.nl)

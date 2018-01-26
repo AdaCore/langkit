@@ -5,8 +5,7 @@ them.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import (AnalysisUnitType, ASTNode, Field, T, TokenType,
-                         abstract)
+from langkit.dsl import AnalysisUnitType, ASTNode, Field, T, abstract
 from langkit.expressions import No, Property, Self
 from langkit.parsers import Grammar, Or, Pick
 
@@ -41,7 +40,7 @@ class Expression(FooNode):
 
 
 class Literal(Expression):
-    tok = Field(type=TokenType)
+    token_node = True
 
 
 class Name(Expression):

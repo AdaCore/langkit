@@ -18,7 +18,7 @@ class ListNode(FooNode):
 
 
 class NumberNode(FooNode):
-    tok = Field()
+    token_node = True
 
 
 foo_grammar = Grammar('main_rule')

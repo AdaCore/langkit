@@ -34,7 +34,7 @@ def run(name, match_expr):
         pass
 
     class Number(Expression):
-        tok = Field()
+        token_node = True
 
     class Compound(Expression):
         prefix = Field()

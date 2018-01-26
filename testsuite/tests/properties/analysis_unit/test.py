@@ -26,13 +26,13 @@ class Expression(FooNode):
 
 
 class Literal(Expression):
-    tok = Field()
+    token_node = True
 
     result = ExternalProperty(uses_entity_info=False, uses_envs=False)
 
 
 class Name(Expression):
-    tok = Field()
+    token_node = True
 
     designated_unit = ExternalProperty(
         type=AnalysisUnitType, uses_entity_info=False, uses_envs=True

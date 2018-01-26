@@ -30,7 +30,7 @@ class Param(FooNode):
 
 
 class Name (FooNode):
-    tok = Field(type=T.TokenType)
+    token_node = True
 
 
 foo_grammar = Grammar('main_rule')

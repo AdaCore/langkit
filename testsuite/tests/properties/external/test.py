@@ -24,7 +24,7 @@ class Expression(FooNode):
 
 
 class Literal(Expression):
-    tok = Field()
+    token_node = True
 
     result = ExternalProperty(uses_entity_info=False, uses_envs=False)
 

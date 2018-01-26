@@ -4,7 +4,7 @@ Check that match expression on entity types works properly.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, T
+from langkit.dsl import ASTNode, T
 from langkit.expressions import AbstractProperty, Property, Self
 from langkit.parsers import Grammar, Or
 
@@ -21,7 +21,7 @@ class Example(FooNode):
 
 
 class Literal(FooNode):
-    tok = Field()
+    token_node = True
 
     get_num = Property(3)
 

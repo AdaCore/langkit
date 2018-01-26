@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, TokenType
+from langkit.dsl import ASTNode
 from langkit.parsers import Grammar, List, Or
 
 from lexer_example import Token
@@ -16,7 +16,7 @@ class Sequence(Element.list):
 
 
 class Atom(Element):
-    tok = Field(type=TokenType)
+    token_node = True
 
 
 grammar = Grammar('main_rule')

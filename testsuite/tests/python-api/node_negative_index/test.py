@@ -5,7 +5,7 @@ getters.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, T
+from langkit.dsl import ASTNode
 from langkit.parsers import Grammar, List
 
 from lexer_example import Token
@@ -17,7 +17,7 @@ class FooNode(ASTNode):
 
 
 class Name(FooNode):
-    tok = Field(type=T.TokenType)
+    token_node = True
 
 
 foo_grammar = Grammar('main_rule')

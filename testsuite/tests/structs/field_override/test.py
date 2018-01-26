@@ -29,7 +29,7 @@ class Expr(RootNode):
 
 
 class Name(RootNode):
-    tok = Field()
+    token_node = True
 
 
 grammar = Grammar('main_rule')

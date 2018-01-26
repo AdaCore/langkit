@@ -42,7 +42,7 @@ class Metadata(Struct):
 
 
 class Literal(FooNode):
-    tok = Field()
+    token_node = True
 
 
 class Couple(FooNode):

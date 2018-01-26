@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, LexicalEnvType, T
+from langkit.dsl import ASTNode, LexicalEnvType, T
 from langkit.expressions import DynamicVariable, Literal, No, Property, Self
 from langkit.parsers import Grammar, Or
 
@@ -29,7 +29,7 @@ def run(name, lhs, rhs):
         use_prop = Property(Env.bind(Self.node_env, Self.prop), public=True)
 
     class Lit(FooNode):
-        tok = Field()
+        token_node = True
 
     grammar = Grammar('main_rule')
     grammar.add_rules(

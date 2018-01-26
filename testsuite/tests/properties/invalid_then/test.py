@@ -25,7 +25,7 @@ def run(name, expr_fn):
         prop = Property(expr_fn)
 
     class Name(FooNode):
-        tok = Field()
+        token_node = True
 
     grammar = Grammar('main_rule')
     grammar.add_rules(

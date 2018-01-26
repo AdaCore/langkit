@@ -34,7 +34,7 @@ class Atom(Expr):
 
 
 class Lit(Atom):
-    tok = Field()
+    token_node = True
 
 
 class Ref(Atom):

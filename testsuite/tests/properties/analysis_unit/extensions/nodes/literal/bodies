@@ -3,5 +3,5 @@
 overriding function P_Result (Node : access Bare_Literal_Type) return Integer
 is
 begin
-    return Integer'Value (Text (F_Tok (Node)));
+    return Integer'Value (Image (Node.Text));
 end P_Result;

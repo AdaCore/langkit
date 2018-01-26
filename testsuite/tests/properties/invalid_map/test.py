@@ -29,7 +29,7 @@ def run(name, expr):
         prop = Property(expr, public=True)
 
     class NumberNode(FooNode):
-        tok = Field()
+        token_node = True
 
     grammar = Grammar('main_rule')
     grammar.add_rules(

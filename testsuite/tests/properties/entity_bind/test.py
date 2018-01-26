@@ -4,7 +4,7 @@ Test that Bind works when binding from entities.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, LogicVarType, LongType, UserField
+from langkit.dsl import ASTNode, LogicVarType, LongType, UserField
 from langkit.expressions import AbstractProperty, Let, Property, Self, Bind
 from langkit.parsers import Grammar
 
@@ -17,7 +17,7 @@ class FooNode(ASTNode):
 
 
 class Literal(FooNode):
-    tok = Field()
+    token_node = True
 
     a = AbstractProperty(runtime_check=True, type=FooNode.entity)
     var = UserField(LogicVarType, public=False)

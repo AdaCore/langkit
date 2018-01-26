@@ -4,7 +4,7 @@ Test AST node synthetization and a basic use of it in the Python API.
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, TokenType, synthetic
+from langkit.dsl import ASTNode, Field, synthetic
 from langkit.expressions import New, Self, langkit_property
 from langkit.parsers import Grammar, List
 
@@ -17,12 +17,16 @@ class FooNode(ASTNode):
 
 
 class Literal(FooNode):
-    tok = Field()
+    token_node = True
+
+
+class Name(FooNode):
+    token_node = True
 
 
 @synthetic
 class SynthNode(FooNode):
-    name = Field(type=TokenType)
+    name = Field(type=Name)
     items = Field(type=Literal.list)
 
 
@@ -44,7 +48,7 @@ foo_grammar.add_rules(
     main_rule=foo_grammar.list_rule,
     list_rule=LiteralSequence(
         '(',
-        Token.Identifier,
+        Name(Token.Identifier),
         List(foo_grammar.list_item, sep=','),
         ')'
     ),

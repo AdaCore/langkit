@@ -34,7 +34,7 @@ def run(name, expr):
         public_prop = Property(Self.prop.as_bare_entity, public=True)
 
     class NumberNode(FooNode):
-        tok = Field()
+        token_node = True
 
     grammar = Grammar('main_rule')
     grammar.add_rules(

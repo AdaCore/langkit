@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, T
+from langkit.dsl import ASTNode, T
 from langkit.expressions import New, Property
 from langkit.parsers import Grammar, List, Pick
 
@@ -20,7 +20,7 @@ def run(name, prop_fn, prop_memoized):
         pass
 
     class Literal(FooNode):
-        tok = Field()
+        token_node = True
 
     class EmptyNode(FooNode):
         pass

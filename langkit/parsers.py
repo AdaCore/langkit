@@ -142,7 +142,7 @@ def resolve(parser):
     if isinstance(parser, Parser):
         return parser
     elif isinstance(parser, basestring):
-        return _Token(parser, keep=False)
+        return _Token(parser)
     elif isinstance(parser, TokenAction):
         return _Token(parser)
     else:
@@ -635,12 +635,12 @@ class _Token(Parser):
         return "Token({0})".format(repr(self._val))
 
     def discard(self):
-        return not self.keep
+        return True
 
     def _is_left_recursive(self, rule_name):
         return False
 
-    def __init__(self, val, keep=True, match_text=""):
+    def __init__(self, val, match_text=""):
         """
         Create a parser that matches a specific token.
 
@@ -664,8 +664,6 @@ class _Token(Parser):
             "Tok matcher has match text, but val is not a WithSymbol instance,"
             " got {} instead".format(val)
         )
-
-        self.keep = keep
 
     @property
     def can_parse_token_node(self):
@@ -1309,7 +1307,7 @@ class _Transform(Parser):
             fields_types = [parser.get_type()
                             for parser in self.parser.parsers
                             if not parser.discard()]
-        elif isinstance(self.parser, _Token) and not self.parser.keep:
+        elif isinstance(self.parser, _Token):
             fields_types = []
         else:
             fields_types = [self.parser.get_type()]

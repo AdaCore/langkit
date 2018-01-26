@@ -3,7 +3,7 @@
 function P_Designated_Unit
   (Node : access Bare_Name_Type'Class) return Analysis_Unit
 is
-    Filename : constant String := Text (F_Tok (Node)) & ".txt";
+    Filename : constant String := Image (Node.Text) & ".txt";
     Context  : constant Analysis_Context := Node.Unit.Context;
 begin
     return Get_From_File (Context, Filename);

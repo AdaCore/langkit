@@ -5,7 +5,7 @@ crash. It used to!
 
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field
+from langkit.dsl import ASTNode
 from langkit.parsers import Grammar
 
 from lexer_example import Token
@@ -17,7 +17,7 @@ class FooNode(ASTNode):
 
 
 class Literal(FooNode):
-    tok = Field()
+    token_node = True
 
 
 foo_grammar = Grammar('main_rule')

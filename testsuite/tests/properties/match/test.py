@@ -72,20 +72,24 @@ class Expr(FooNode):
 
 @abstract
 class Atom(Expr):
-    pass
+    token_node = True
 
 
 class Lit(Atom):
-    tok = Field()
+    pass
 
 
 class Ref(Atom):
-    tok = Field()
+    pass
 
 
 class Plus(Expr):
     lhs = Field()
     rhs = Field()
+
+
+class Name(FooNode):
+    token_node = True
 
 
 class Def(FooNode):
@@ -96,7 +100,7 @@ class Def(FooNode):
 grammar = Grammar('main_rule')
 grammar.add_rules(
     main_rule=List(Or(
-        Def('def', Token.Identifier, grammar.expr),
+        Def('def', Name(Token.Identifier), grammar.expr),
         grammar.expr
     )),
 
