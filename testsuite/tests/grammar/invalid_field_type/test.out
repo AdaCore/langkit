@@ -1,0 +1,4 @@
+File "test.py", line 22, in SynthExample
+  line 23, in SynthExample.f
+    Error: AST node parse fields must all be AST node themselves. Here, field type is TokenType
+Done
