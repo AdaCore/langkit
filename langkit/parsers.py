@@ -498,6 +498,16 @@ class Parser(object):
         """
         raise NotImplementedError()
 
+    @property
+    def can_parse_token_node(self):
+        """
+        Return whether this parser can be used as a sub-parser to build token
+        nodes.
+
+        :rtype: bool
+        """
+        return False
+
     def children(self):
         """
         Parsers are combined to create new and more complex parsers.  They make
@@ -654,6 +664,10 @@ class Tok(Parser):
 
         self.keep = keep
 
+    @property
+    def can_parse_token_node(self):
+        return True
+
     def get_type(self):
         return T.TokenType
 
@@ -715,6 +729,9 @@ class Or(Parser):
 
         # ... and we want to memoize the result.
         self.cached_type = None
+
+    def can_parse_token_node(self):
+        return all(p.can_parse_token_node for p in self.parsers)
 
     def children(self):
         return self.parsers
@@ -1266,6 +1283,22 @@ class _Transform(Parser):
         return resolve_type(self.typ)
 
     def compute_fields_types(self):
+        typ = self.get_type()
+
+        # Sub-parsers for Token nodes must parse exactly one token
+        if typ.is_token_node:
+            check_source_language(
+                len(self.parser.parsers) == 1,
+                'Building {} requires a single input token (got {} subparsers)'
+                .format(typ.dsl_name, self.parser)
+            )
+            check_source_language(
+                self.parser.parsers[0].can_parse_token_node,
+                'Building {} requires a single input token (got {})'.format(
+                    typ.dsl_name, self.parser
+                )
+            )
+
         # Gather field types that come from all child parsers
         if isinstance(self.parser, _Row):
             # There are multiple fields for _Row parsers
@@ -1281,8 +1314,6 @@ class _Transform(Parser):
             "Internal error when computing field types for {}:"
             " some are None: {}".format(self.typ, fields_types)
         )
-
-        typ = self.get_type()
 
         # Check that the number of values produced by self and the number of
         # fields in the destination node are the same.
