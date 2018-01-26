@@ -6,7 +6,7 @@ getters.
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T
-from langkit.parsers import Grammar, List, Tok
+from langkit.parsers import Grammar, List
 
 from lexer_example import Token
 from utils import build_and_run
@@ -23,7 +23,7 @@ class Name(FooNode):
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=List(foo_grammar.name),
-    name=Name(Tok(Token.Identifier, keep=True)),
+    name=Name(Token.Identifier),
 )
 build_and_run(foo_grammar, 'main.py')
 print('Done')

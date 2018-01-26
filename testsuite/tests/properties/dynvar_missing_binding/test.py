@@ -1,10 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
-from langkit.dsl import ASTNode, Field, T
+from langkit.dsl import ASTNode, T
 from langkit.expressions import DynamicVariable, Property, Self
-from langkit.parsers import Grammar, Tok
+from langkit.parsers import Grammar
 
-from lexer_example import Token
 from utils import emit_and_print_errors
 
 
@@ -16,8 +15,6 @@ class FooNode(ASTNode):
 
 
 class Example(FooNode):
-    tok = Field()
-
     # The "construct" pass on p1 will require the type of p2 and thus trigger
     # the construction of p2. A bug used to propagate the binding of "dynvar"
     # from the construction of p1 to p2's.
@@ -26,8 +23,6 @@ class Example(FooNode):
 
 
 grammar = Grammar('main_rule')
-grammar.add_rules(
-    main_rule=Example(Tok(Token.Example, keep=True)),
-)
+grammar.add_rules(main_rule=Example('example'))
 emit_and_print_errors(grammar)
 print('Done')

@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T
 from langkit.expressions import New, Property
-from langkit.parsers import Grammar, List, Pick, Tok
+from langkit.parsers import Grammar, List, Pick
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -34,7 +34,7 @@ def run(name, prop_fn, prop_memoized):
         list_rule=Pick(
             '(', List(grammar.list_item, sep=',', cls=LiteralList), ')'
         ),
-        list_item=Literal(Tok(Token.Number, keep=True)),
+        list_item=Literal(Token.Number),
     )
     emit_and_print_errors(grammar)
     print('')

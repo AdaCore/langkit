@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field
 from langkit.expressions import Entity, Property
-from langkit.parsers import Grammar, List, Tok
+from langkit.parsers import Grammar, List
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -35,7 +35,7 @@ def run(name, expr):
     grammar.add_rules(
         main_rule=BarNode('example', grammar.list_rule),
         list_rule=ListNode(
-            List(NumberNode(Tok(Token.Number, keep=True)))
+            List(NumberNode(Token.Number))
         ),
     )
     emit_and_print_errors(grammar)

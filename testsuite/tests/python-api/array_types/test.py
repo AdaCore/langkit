@@ -6,9 +6,8 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, T
 from langkit.expressions import Entity, Property, langkit_property
-from langkit.parsers import Grammar, List, Or, Tok
+from langkit.parsers import Grammar, List, Or
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -39,8 +38,8 @@ foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=List(foo_grammar.node, list_cls=Sequence),
     node=Or(foo_grammar.example, foo_grammar.null),
-    example=Example(Tok(Token.Example)),
-    null=Null(Tok(Token.Null)),
+    example=Example('example'),
+    null=Null('null'),
 )
 
 build_and_run(foo_grammar, 'main.py')

@@ -7,9 +7,8 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, T
 from langkit.expressions import No, Self, langkit_property
-from langkit.parsers import Grammar, List, Tok
+from langkit.parsers import Grammar, List
 
-from lexer_example import Token
 from utils import build_and_run
 
 
@@ -38,7 +37,7 @@ class Example(FooNode):
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
-    main_rule=List(Example(Tok(Token.Example))),
+    main_rule=List(Example('example')),
 )
 build_and_run(foo_grammar, 'main.py')
 print('Done')

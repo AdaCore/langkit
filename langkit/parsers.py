@@ -142,9 +142,9 @@ def resolve(parser):
     if isinstance(parser, Parser):
         return parser
     elif isinstance(parser, basestring):
-        return Tok(parser)
+        return Tok(parser, keep=False)
     elif isinstance(parser, TokenAction):
-        return Tok(parser, keep=True)
+        return Tok(parser)
     else:
         raise Exception("Cannot resolve parser {}".format(parser))
 
@@ -640,7 +640,7 @@ class Tok(Parser):
     def _is_left_recursive(self, rule_name):
         return False
 
-    def __init__(self, val, keep=False, match_text=""):
+    def __init__(self, val, keep=True, match_text=""):
         """
         Create a parser that matches a specific token.
 

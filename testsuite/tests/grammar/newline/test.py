@@ -8,7 +8,7 @@ from langkit.dsl import ASTNode, Field
 from langkit.lexer import (
     Eof, Ignore, Lexer, LexerToken, Literal, Pattern, WithSymbol, WithText
 )
-from langkit.parsers import Grammar, Tok, Or
+from langkit.parsers import Grammar, Or
 
 from utils import build_and_run
 
@@ -75,14 +75,18 @@ class CompositeNode(FooNode):
 foo_grammar = Grammar('main_rule')
 A = foo_grammar
 
+indent = L.Indent(keep=False)
+dedent = L.Dedent(keep=False)
+new_line = L.Newline(keep=False)
+
 foo_grammar.add_rules(
-    lit=Literal(Tok(Token.Number, keep=True)),
-    nl=NewLineNode(A.lit, L.Newline(), A.lit),
-    ind=IndentNode(A.lit, L.Newline(), L.Indent(), A.lit, L.Dedent()),
+    lit=Literal(Token.Number),
+    nl=NewLineNode(A.lit, new_line, A.lit),
+    ind=IndentNode(A.lit, new_line, indent, A.lit, dedent),
     comp=CompositeNode(
-        A.lit, L.Newline(),
-        A.lit, L.Newline(), L.Indent(),
-        A.lit, L.Newline(), L.Dedent(),
+        A.lit, new_line,
+        A.lit, new_line, indent,
+        A.lit, new_line, dedent,
         A.lit
     ),
     main_rule=Or(A.comp, A.ind, A.nl)

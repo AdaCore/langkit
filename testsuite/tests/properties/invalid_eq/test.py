@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, LexicalEnvType, T
 from langkit.expressions import DynamicVariable, Literal, No, Property, Self
-from langkit.parsers import Grammar, Or, Tok
+from langkit.parsers import Grammar, Or
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -33,8 +33,8 @@ def run(name, lhs, rhs):
 
     grammar = Grammar('main_rule')
     grammar.add_rules(
-        main_rule=Or(Example(Tok(Token.Example)),
-                     Lit(Tok(Token.Number, keep=True))),
+        main_rule=Or(Example('example'),
+                     Lit(Token.Number)),
     )
     emit_and_print_errors(grammar)
     Env.unfreeze()

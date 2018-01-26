@@ -8,7 +8,7 @@ from langkit.dsl import ASTNode, Field, LongType, abstract
 from langkit.expressions import (
     AbstractProperty, ExternalProperty, Property, Self
 )
-from langkit.parsers import Grammar, Or, Tok
+from langkit.parsers import Grammar, Or
 
 from lexer_example import Token
 from utils import build_and_run
@@ -42,7 +42,7 @@ foo_grammar.add_rules(
         Plus(foo_grammar.atom, '+', foo_grammar.main_rule),
         foo_grammar.atom
     ),
-    atom=Literal(Tok(Token.Number, keep=True)),
+    atom=Literal(Token.Number),
 )
 build_and_run(foo_grammar, 'main.py')
 print('Done')

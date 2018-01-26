@@ -6,9 +6,8 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.diagnostics import DiagnosticError
 from langkit.dsl import ASTNode, Struct, T, UserField, env_metadata
-from langkit.parsers import Grammar, Tok
+from langkit.parsers import Grammar
 
-from lexer_example import Token
 from utils import emit_and_print_errors, reset_langkit
 
 
@@ -27,7 +26,7 @@ def run(md_constructor):
         pass
 
     grammar = Grammar('main_rule')
-    grammar.add_rules(main_rule=Example(Tok(Token.Example)))
+    grammar.add_rules(main_rule=Example('example'))
 
     try:
         md_constructor()

@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field, Struct, abstract, env_metadata
 from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import Property, Self
-from langkit.parsers import Grammar, List, Opt, Tok
+from langkit.parsers import Grammar, List, Opt
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -45,7 +45,7 @@ class Block(Stmt):
 grammar = Grammar('stmts_rule')
 grammar.add_rules(
     def_rule=Def(
-        Tok(Token.Identifier, keep=True),
+        Token.Identifier,
         Opt('(', grammar.stmts_rule, ')')
     ),
 

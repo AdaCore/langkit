@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field, T, TokenType
 from langkit.envs import EnvSpec, add_env, add_to_env
 from langkit.expressions import Self, langkit_property
-from langkit.parsers import Grammar, List, Pick, Tok
+from langkit.parsers import Grammar, List, Pick
 
 from lexer_example import Token
 from utils import build_and_run
@@ -39,8 +39,8 @@ class Block(FooNode):
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=Block(
-        Tok(Token.Identifier, keep=True),
-        Pick('(', List(Ref(Tok(Token.Identifier, keep=True))), ')')
+        Token.Identifier,
+        Pick('(', List(Ref(Token.Identifier)), ')')
     )
 )
 build_and_run(foo_grammar, 'main.py')

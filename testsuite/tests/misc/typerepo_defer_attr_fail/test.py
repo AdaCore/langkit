@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T
-from langkit.parsers import Grammar, Tok
+from langkit.parsers import Grammar
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -16,8 +16,6 @@ class Example(FooNode):
 
 
 fg = Grammar('main_rule')
-fg.add_rules(
-    main_rule=Example(Tok(Token.Example, keep=True)),
-)
+fg.add_rules(main_rule=Example(Token.Example))
 emit_and_print_errors(fg)
 print('Done')

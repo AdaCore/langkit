@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field, T
 from langkit.envs import EnvSpec, add_to_env
 from langkit.expressions import Entity, New, Self, langkit_property
-from langkit.parsers import Grammar, List, Tok
+from langkit.parsers import Grammar, List
 
 from lexer_example import Token
 from utils import build_and_run
@@ -41,10 +41,9 @@ class Ref(FooNode):
 fg = Grammar('main_rule')
 fg.add_rules(
     main_rule=List(fg.decl),
-    decl=Decl(Tok(Token.Identifier, keep=True),
-              '(', fg.ref_list, ')'),
+    decl=Decl(Token.Identifier, '(', fg.ref_list, ')'),
     ref_list=List(fg.ref, empty_valid=True),
-    ref=Ref(Tok(Token.Identifier, keep=True)),
+    ref=Ref(Token.Identifier),
 )
 build_and_run(fg, 'main.py')
 print('Done')

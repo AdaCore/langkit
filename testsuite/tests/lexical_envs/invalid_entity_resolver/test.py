@@ -8,7 +8,7 @@ from langkit.dsl import ASTNode, Field, LexicalEnvType, T
 from langkit.envs import EnvSpec, add_to_env, add_env
 from langkit.expressions import (DynamicVariable, New, Property, Self,
                                  langkit_property)
-from langkit.parsers import Grammar, List, Tok
+from langkit.parsers import Grammar, List
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -50,12 +50,10 @@ def run(name, prop):
     grammar.add_rules(
         main_rule=List(grammar.decl),
         decl=Decl(
-            Tok(Token.Identifier, keep=True),
-            Tok(Token.LPar),
-            List(grammar.ref, empty_valid=True),
-            Tok(Token.RPar)
+            Token.Identifier,
+            '(', List(grammar.ref, empty_valid=True), ')'
         ),
-        ref=Ref(Tok(Token.Identifier, keep=True)),
+        ref=Ref(Token.Identifier),
     )
     emit_and_print_errors(grammar)
 

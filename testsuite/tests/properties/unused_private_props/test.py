@@ -9,7 +9,7 @@ from langkit.expressions import (
     AbstractProperty, No, ExternalProperty, Property, Self,
     langkit_property
 )
-from langkit.parsers import Grammar, Or, Tok
+from langkit.parsers import Grammar, Or
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -82,8 +82,8 @@ grammar.add_rules(
         grammar.atom
     ),
     atom=Or(
-        Literal(Tok(Token.Number, keep=True)),
-        Name(Tok(Token.Identifier, keep=True)),
+        Literal(Token.Number),
+        Name(Token.Identifier),
     ),
 )
 emit_and_print_errors(grammar)

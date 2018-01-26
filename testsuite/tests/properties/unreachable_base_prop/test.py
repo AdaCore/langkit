@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.expressions import AbstractProperty, Property
-from langkit.parsers import Grammar, List, Or, Pick, Tok
+from langkit.parsers import Grammar, List, Or, Pick
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -70,8 +70,8 @@ grammar.add_rules(
     expr=Or(grammar.atom, grammar.plus),
 
     atom=Or(grammar.lit, grammar.ref),
-    lit=Lit(Tok(Token.Number, keep=True)),
-    ref=Ref(Tok(Token.Identifier, keep=True)),
+    lit=Lit(Token.Number),
+    ref=Ref(Token.Identifier),
 
     plus=Pick('(', Plus(grammar.expr, '+', grammar.expr), ')'),
 )

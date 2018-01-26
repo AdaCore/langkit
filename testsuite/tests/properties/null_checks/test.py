@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import (AnalysisUnitType, ASTNode, Field, T, TokenType,
                          abstract)
 from langkit.expressions import No, Property, Self
-from langkit.parsers import Grammar, Or, Pick, Tok
+from langkit.parsers import Grammar, Or, Pick
 
 from lexer_example import Token
 from utils import build_and_run
@@ -73,8 +73,8 @@ foo_grammar.add_rules(
         foo_grammar.atom,
     ),
     atom=Or(
-        Literal(Tok(Token.Number, keep=True)),
-        Name(Tok(Token.Identifier, keep=True)),
+        Literal(Token.Number),
+        Name(Token.Identifier),
     ),
 )
 build_and_run(foo_grammar, 'main.py')

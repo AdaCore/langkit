@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, TokenType
-from langkit.parsers import Grammar, List, Or, Tok
+from langkit.parsers import Grammar, List, Or
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -28,7 +28,7 @@ grammar.add_rules(
                   sep=',',
                   list_cls=Sequence,
                   empty_valid=True),
-    atom=Tok(Token.Identifier, keep=True),
+    atom=Token.Identifier,
 )
 emit_and_print_errors(grammar)
 

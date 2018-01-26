@@ -8,7 +8,7 @@ from langkit.dsl import ASTNode, Field, abstract
 from langkit.envs import EnvSpec, add_env, add_to_env
 from langkit.expressions import (AbstractProperty, Entity, New, Property, Self,
                                  T, Var, langkit_property)
-from langkit.parsers import Grammar, List, Pick, Tok
+from langkit.parsers import Grammar, List, Pick
 
 from lexer_example import Token
 from utils import build_and_run
@@ -87,14 +87,14 @@ grammar = Grammar('main_rule')
 grammar.add_rules(
     main_rule=List(grammar.block),
     block=Block(grammar.params,
-                Tok(Token.Identifier, keep=True),
+                Token.Identifier,
                 grammar.vars),
 
     params=Pick('(', List(grammar.param, list_cls=Params), ')'),
-    param=Param(Tok(Token.Identifier, keep=True)),
+    param=Param(Token.Identifier),
 
     vars=Pick('{', List(grammar.var), '}'),
-    var=BlockVar(Tok(Token.Identifier, keep=True)),
+    var=BlockVar(Token.Identifier),
 )
 build_and_run(grammar, 'main.py')
 print('Done')

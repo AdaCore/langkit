@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, BoolType, Field, abstract
 from langkit.expressions import Literal, Property, Self
-from langkit.parsers import Grammar, Or, Tok
+from langkit.parsers import Grammar, Or
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -55,7 +55,7 @@ def run(name, match_expr):
             )
         ),
 
-        number=Number(Tok(Token.Number, keep=True)),
+        number=Number(Token.Number),
 
         expression=Or(
             Compound(grammar.number, ',', grammar.expression),

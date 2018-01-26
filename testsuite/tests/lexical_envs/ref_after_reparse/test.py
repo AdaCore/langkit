@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field, LexicalEnvType, T
 from langkit.envs import EnvSpec, reference, add_to_env, add_env
 from langkit.expressions import DynamicVariable, New, Self, langkit_property
-from langkit.parsers import Grammar, List, Pick, Tok
+from langkit.parsers import Grammar, List, Pick
 
 from lexer_example import Token
 from utils import build_and_run
@@ -81,22 +81,15 @@ foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
     main_rule=List(foo_grammar.block),
 
-    name=Name(Tok(Token.Identifier, keep=True)),
+    name=Name(Token.Identifier),
 
     block=Block(foo_grammar.name,
                 foo_grammar.decl_list,
-                Tok(Token.LBrace),
-                foo_grammar.using_list,
-                foo_grammar.ref_list,
-                Tok(Token.RBrace)),
+                '{', foo_grammar.using_list, foo_grammar.ref_list, '}'),
 
-    decl_list=Pick(Tok(Token.LPar),
-                   List(foo_grammar.decl, empty_valid=True),
-                   Tok(Token.RPar)),
+    decl_list=Pick('(', List(foo_grammar.decl, empty_valid=True), ')'),
 
-    using_list=Pick(Tok(Token.LPar),
-                    List(foo_grammar.using, empty_valid=True),
-                    Tok(Token.RPar)),
+    using_list=Pick('(', List(foo_grammar.using, empty_valid=True), ')'),
 
     ref_list=List(foo_grammar.ref, empty_valid=True),
 

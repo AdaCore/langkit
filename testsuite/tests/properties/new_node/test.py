@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, TokenType, synthetic
 from langkit.expressions import New, Self, langkit_property
-from langkit.parsers import Grammar, List, Tok
+from langkit.parsers import Grammar, List
 
 from lexer_example import Token
 from utils import build_and_run
@@ -44,11 +44,11 @@ foo_grammar.add_rules(
     main_rule=foo_grammar.list_rule,
     list_rule=LiteralSequence(
         '(',
-        Tok(Token.Identifier, keep=True),
+        Token.Identifier,
         List(foo_grammar.list_item, sep=','),
         ')'
     ),
-    list_item=Literal(Tok(Token.Number, keep=True)),
+    list_item=Literal(Token.Number),
 )
 build_and_run(foo_grammar, 'main.py')
 print('Done')

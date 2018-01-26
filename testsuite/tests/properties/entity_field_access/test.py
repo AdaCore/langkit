@@ -13,7 +13,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import (ASTNode, BoolType, EnvRebindingsType, Field, Struct,
                          T, UserField, env_metadata)
 from langkit.expressions import New, No, Self, langkit_property
-from langkit.parsers import Grammar, Or, Tok
+from langkit.parsers import Grammar, Or
 
 from lexer_example import Token
 from utils import build_and_run
@@ -74,7 +74,7 @@ foo_grammar.add_rules(
     main_rule=foo_grammar.item,
     item=Or(foo_grammar.couple, foo_grammar.literal),
     couple=Couple('(', foo_grammar.item, ',', foo_grammar.item, ')'),
-    literal=Literal(Tok(Token.Number, keep=True)),
+    literal=Literal(Token.Number),
 )
 build_and_run(foo_grammar, 'main.py')
 print('Done')

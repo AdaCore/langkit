@@ -430,17 +430,22 @@ class NL(PythonNode):
 python_grammar = Grammar('main_rule')
 P = python_grammar
 
+indent = L.Indent(keep=False)
+dedent = L.Dedent(keep=False)
+new_line = L.Newline(keep=False)
+termination = L.Termination(keep=False)
+
 python_grammar.add_rules(
-    name=Name(L.Identifier(keep=True)),
-    number=NumberLit(L.Number(keep=True)),
-    string=StringLit(L.String(keep=True)),
+    name=Name(L.Identifier),
+    number=NumberLit(L.Number),
+    string=StringLit(L.String),
     cat_string=ConcatStringLit(P.string, List(P.string)),
-    nl=NL(L.Newline()),
+    nl=NL(new_line),
     main_rule=FileNode(
-        List(newlines(), P.stmt, newlines()), L.Termination()
+        List(newlines(), P.stmt, newlines()), termination
     ),
     decorator=Decorator(
-        '@', P.dotted_name, Opt('(', P.arg_list, ')'), L.Newline()
+        '@', P.dotted_name, Opt('(', P.arg_list, ')'), new_line
     ),
     decorators=List(P.decorator),
     decorated=Decorated(P.decorators, Or(P.class_def, P.func_def)),
@@ -459,7 +464,7 @@ python_grammar.add_rules(
     name_list=TrailList(P.name, sep=','),
     stmt=Or(P.simple_stmt, P.compound_stmt),
     simple_stmt=Pick(Or(P.small_stmt, TrailList(P.small_stmt, sep=';')),
-                     L.Newline()),
+                     new_line),
     small_stmt=(
         P.expr_stmt | P.print_stmt | P.del_stmt | P.pass_stmt | P.flow_stmt
         | P.import_stmt | P.global_stmt | P.exec_stmt | P.assert_stmt
@@ -539,9 +544,9 @@ python_grammar.add_rules(
     with_stmt=WithStmt('with', List(P.with_item, sep=','), ":", P.suite),
     with_item=AsNameNode(P.test, Opt('as', P.expr)),
     suite=Or(
-        Pick(newlines(), L.Indent(),
+        Pick(newlines(), indent,
              List(newlines(), P.stmt, newlines()),
-             L.Dedent()),
+             dedent),
         P.simple_stmt,
     ),
     test=Or(

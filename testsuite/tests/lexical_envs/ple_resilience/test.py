@@ -14,7 +14,7 @@ from langkit.dsl import ASTNode, EnumNode, Field, T, abstract
 from langkit.envs import EnvSpec, add_to_env, add_env, do
 from langkit.expressions import (AbstractProperty, If, New, No, PropertyError,
                                  Self, langkit_property)
-from langkit.parsers import Grammar, List, Opt, Or, Tok
+from langkit.parsers import Grammar, List, Opt, Or
 
 from lexer_example import Token
 from utils import build_and_run
@@ -86,12 +86,12 @@ G.add_rules(
     def_rule=Or(G.scope, G.var),
 
     scope=Scope(Opt('error').as_bool(HasError),
-                Tok(Token.Identifier, keep=True),
+                Token.Identifier,
                 '{', G.defs, '}'),
-    var=Var(Tok(Token.Identifier, keep=True), '=', G.name),
+    var=Var(Token.Identifier, '=', G.name),
 
-    name=Or(Prefix(G.name, '.', Tok(Token.Identifier, keep=True)),
-            Id(Tok(Token.Identifier, keep=True))),
+    name=Or(Prefix(G.name, '.', Token.Identifier),
+            Id(Token.Identifier)),
 )
 build_and_run(G, 'main.py')
 print('Done')

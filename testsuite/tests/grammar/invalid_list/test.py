@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, Annotations
-from langkit.parsers import Grammar, List, Tok
+from langkit.parsers import Grammar, List
 
 from lexer_example import Token
 from utils import emit_and_print_errors, reset_langkit
@@ -23,7 +23,7 @@ def create_nodes():
 create_nodes()
 grammar = Grammar('main_rule')
 grammar.add_rules(
-    main_rule=ListNode(List(Tok(Token.Number, keep=True))),
+    main_rule=ListNode(List(Token.Number)),
 )
 emit_and_print_errors(grammar)
 
@@ -31,7 +31,7 @@ reset_langkit()
 create_nodes()
 grammar = Grammar('main_rule')
 grammar.add_rules(
-    num=Num(Tok(Token.Number, keep=True)),
+    num=Num(Token.Number),
     main_rule=List(grammar.num, list_cls=ListNode)
 )
 emit_and_print_errors(grammar)

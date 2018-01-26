@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, T, abstract
 from langkit.expressions import Entity, No, langkit_property
-from langkit.parsers import Grammar, List, Or, Pick, Tok
+from langkit.parsers import Grammar, List, Or, Pick
 
 from lexer_example import Token
 from utils import build_and_run
@@ -96,15 +96,15 @@ class Def(FooNode):
 grammar = Grammar('main_rule')
 grammar.add_rules(
     main_rule=List(Or(
-        Def('def', Tok(Token.Identifier, keep=True), grammar.expr),
+        Def('def', Token.Identifier, grammar.expr),
         grammar.expr
     )),
 
     expr=Or(grammar.atom, grammar.plus),
 
     atom=Or(grammar.lit, grammar.ref),
-    lit=Lit(Tok(Token.Number, keep=True)),
-    ref=Ref(Tok(Token.Identifier, keep=True)),
+    lit=Lit(Token.Number),
+    ref=Ref(Token.Identifier),
 
     plus=Pick('(', Plus(grammar.expr, '+', grammar.expr), ')'),
 )

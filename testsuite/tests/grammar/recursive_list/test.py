@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, Field
 from langkit.envs import EnvSpec
 from langkit.expressions import Self
-from langkit.parsers import Grammar, List, Pick, Tok
+from langkit.parsers import Grammar, List, Pick
 
 from lexer_example import Token
 from utils import emit_and_print_errors
@@ -22,7 +22,7 @@ class Def(FooNode):
 grammar = Grammar('stmt_rule')
 grammar.add_rules(
     def_rule=Def(
-        Tok(Token.Identifier, keep=True),
+        Token.Identifier,
         '(', grammar.stmt_rule, ')'
     ),
     stmt_rule=List(

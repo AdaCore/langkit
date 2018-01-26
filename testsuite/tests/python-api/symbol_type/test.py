@@ -6,7 +6,7 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, SymbolType, TokenType
 from langkit.expressions import langkit_property
-from langkit.parsers import Grammar, Tok
+from langkit.parsers import Grammar
 
 from lexer_example import Token
 from utils import build_and_run
@@ -26,7 +26,7 @@ class Example(FooNode):
 
 foo_grammar = Grammar('main_rule')
 foo_grammar.add_rules(
-    main_rule=Example(Tok(Token.Identifier, keep=True)),
+    main_rule=Example(Token.Identifier),
 )
 
 build_and_run(foo_grammar, 'main.py')

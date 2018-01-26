@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function
 from langkit.dsl import ASTNode, EnumNode, Field, Struct, UserField, T
 from langkit.envs import EnvSpec, add_env, add_to_env
 from langkit.expressions import New, Self, langkit_property
-from langkit.parsers import Grammar, List, Opt, Tok
+from langkit.parsers import Grammar, List, Opt
 
 from lexer_example import Token
 from utils import build_and_run
@@ -64,10 +64,10 @@ fg = Grammar('main_rule')
 fg.add_rules(
     main_rule=List(fg.decl),
     decl=Decl(Opt('+').as_bool(HasPlus),
-              Tok(Token.Identifier, keep=True),
+              Token.Identifier,
               '(', fg.ref_list, ')'),
     ref_list=List(fg.ref, empty_valid=True),
-    ref=Ref(Tok(Token.Identifier, keep=True)),
+    ref=Ref(Token.Identifier),
 )
 build_and_run(fg, 'main.py')
 print('Done')

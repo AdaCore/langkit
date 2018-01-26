@@ -2,8 +2,9 @@ from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, LexicalEnvType
 from langkit.expressions import DynamicVariable, Property, Self
-from langkit.parsers import Grammar, Tok
+from langkit.parsers import Grammar
 
+from lexer_example import Token
 from utils import emit_and_print_errors
 
 
@@ -33,9 +34,7 @@ def run(expr):
         )
 
     grammar = Grammar('main_rule')
-    grammar.add_rules(
-        main_rule=ExampleNode(Tok('example', keep=True)),
-    )
+    grammar.add_rules(main_rule=ExampleNode(Token.Example))
     emit_and_print_errors(grammar)
     Env.unfreeze()
     print('')
