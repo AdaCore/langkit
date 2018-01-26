@@ -75,6 +75,16 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Return a short representation of the node, containing just the kind
    --  name and the sloc.
 
+   Is_Token_Node_Kind : constant array (${root_node_kind_name}) of Boolean :=
+     (${', '.join('{} => {}'.format(n.ada_kind_name, n.is_token_node)
+                  for n in ctx.astnode_types if not n.abstract)});
+   --  For each node kind, return whether it is a node that contains only a
+   --  single token.
+
+   function Is_Token_Node
+     (Node : access ${root_node_value_type}'Class) return Boolean;
+   --  Return whether Node is a node that contains only a single token
+
    ----------------
    -- Extensions --
    ----------------

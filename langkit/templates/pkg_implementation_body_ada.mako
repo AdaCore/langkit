@@ -73,6 +73,17 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
    procedure Destroy (Env : in out Lexical_Env_Access);
 
+   -------------------
+   -- Is_Token_Node --
+   -------------------
+
+   function Is_Token_Node
+     (Node : access ${root_node_value_type}'Class) return Boolean
+   is
+   begin
+      return Is_Token_Node_Kind (Node.Kind);
+   end Is_Token_Node;
+
    ------------------------------
    -- Register_Destroyable_Gen --
    ------------------------------
