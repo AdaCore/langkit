@@ -1895,6 +1895,18 @@ class ASTNodeType(BaseStructType):
                 else:
                     field.type = inferred_type
 
+    def check_parse_fields(self):
+        """
+        Check that parse fields have legal type annotations.
+        """
+        for f in self.get_parse_fields():
+            with f.diagnostic_context:
+                check_source_language(
+                    f.type.is_ast_node,
+                    'AST node parse fields must all be AST node themselves.'
+                    ' Here, field type is {}'.format(f.type.dsl_name)
+                )
+
     def warn_imprecise_field_type_annotations(self):
         # The type of synthetic node fields are not inferred, so there is
         # nothing to do for them.

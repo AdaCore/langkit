@@ -1334,6 +1334,10 @@ class CompileCtx(object):
             # This cannot be done before as the "compute fields type" pass will
             # create AST list types.
             GlobalPass('compute types', CompileCtx.compute_types),
+            ASTNodePass('check resolved ASTnode subclasses',
+                        lambda _, astnode: astnode.check_resolved()),
+            ASTNodePass('check AST node parse fields',
+                        lambda _, astnode: astnode.check_parse_fields()),
             ASTNodePass('check homonym AST node fields',
                         lambda _, astnode: astnode.check_homonym_fields(),
                         auto_context=False),
@@ -1362,8 +1366,6 @@ class CompileCtx(object):
                        CompileCtx.compute_uses_envs_attr),
             EnvSpecPass('check env specs',
                         EnvSpec.check_spec),
-            ASTNodePass('check resolved ASTnode subclasses',
-                        lambda _, astnode: astnode.check_resolved()),
             GlobalPass('warn on unused private properties',
                        CompileCtx.warn_unused_private_properties),
             GlobalPass('warn on unreachable base properties',
