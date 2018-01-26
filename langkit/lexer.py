@@ -138,8 +138,8 @@ class TokenAction(Action):
         """
         Shortcut to create token parsers in the grammar.
         """
-        from langkit.parsers import Tok
-        return Tok(self, *args, **kwargs)
+        from langkit.parsers import _Token
+        return _Token(self, *args, **kwargs)
 
     @property
     def base_name(self):

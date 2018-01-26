@@ -120,7 +120,7 @@ class GeneratedParser(object):
 
 def render(*args, **kwargs):
     return compiled_types.make_renderer().update({
-        'is_tok':       type_check_instance(Tok),
+        'is_tok':       type_check_instance(_Token),
         'is_row':       type_check_instance(_Row),
         'is_defer':     type_check_instance(Defer),
         'is_transform': type_check_instance(_Transform),
@@ -142,9 +142,9 @@ def resolve(parser):
     if isinstance(parser, Parser):
         return parser
     elif isinstance(parser, basestring):
-        return Tok(parser, keep=False)
+        return _Token(parser, keep=False)
     elif isinstance(parser, TokenAction):
-        return Tok(parser)
+        return _Token(parser)
     else:
         raise Exception("Cannot resolve parser {}".format(parser))
 
@@ -617,7 +617,7 @@ class Parser(object):
             context.add_symbol_literal(sym)
 
 
-class Tok(Parser):
+class _Token(Parser):
     """
     Parser that matches a specific token.
     """
@@ -632,7 +632,7 @@ class Tok(Parser):
         )
 
     def __repr__(self):
-        return "Tok({0})".format(repr(self._val))
+        return "Token({0})".format(repr(self._val))
 
     def discard(self):
         return not self.keep
@@ -1308,7 +1308,7 @@ class _Transform(Parser):
             fields_types = [parser.get_type()
                             for parser in self.parser.parsers
                             if not parser.discard()]
-        elif isinstance(self.parser, Tok) and not self.parser.keep:
+        elif isinstance(self.parser, _Token) and not self.parser.keep:
             fields_types = []
         else:
             fields_types = [self.parser.get_type()]
@@ -1566,7 +1566,7 @@ def creates_node(p, follow_refs=True):
             return False
         node, term = p.parser.parsers
         return (creates_node(node) and
-                isinstance(term, Tok) and
+                isinstance(term, _Token) and
                 term._val == LexerToken.Termination)
 
     return (
@@ -1622,7 +1622,7 @@ def unparser_struct_eq(parsers, toplevel=True):
                 for c in zip(*children_lists)
             )
         # For Tok, we want to check that the parsed token is the same
-        elif typ == Tok:
+        elif typ == _Token:
             return is_same(p.val for p in parsers)
         # For _Extract, structural equality involves comparing the sub-parser
         # and the extracted index.
