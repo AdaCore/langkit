@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from langkit.dsl import ASTNode, Field, EnumNode, abstract
-from langkit.parsers import Grammar, Or, List, Pick, Opt, _
+from langkit.parsers import Grammar, List, Opt, Or, Pick, _
 from language.lexer import python_lexer as L
 
 
