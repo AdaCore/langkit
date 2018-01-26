@@ -1301,9 +1301,10 @@ class _Transform(Parser):
                     typ.dsl_name, self.parser
                 )
             )
+            fields_types = []
 
         # Gather field types that come from all child parsers
-        if isinstance(self.parser, _Row):
+        elif isinstance(self.parser, _Row):
             # There are multiple fields for _Row parsers
             fields_types = [parser.get_type()
                             for parser in self.parser.parsers
