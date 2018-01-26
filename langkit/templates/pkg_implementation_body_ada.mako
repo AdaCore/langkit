@@ -365,6 +365,16 @@ package body ${ada_lib_name}.Analysis.Implementation is
       end case;
    end Post_Env_Actions;
 
+   ----------------
+   -- Get_Symbol --
+   ----------------
+
+   function Get_Symbol
+     (Node : access ${root_node_value_type}'Class) return Symbol_Type is
+   begin
+      return Get_Symbol (Node.Token (Node.Token_Start_Index));
+   end Get_Symbol;
+
    ---------------------
    -- Is_Visible_From --
    ---------------------

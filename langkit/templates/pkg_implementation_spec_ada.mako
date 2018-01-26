@@ -578,6 +578,12 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Internal procedure that will execute all post add to env actions for
    --  Node. This is meant to be called by Populate_Lexical_Env.
 
+   function Get_Symbol
+     (Node : access ${root_node_value_type}'Class) return Symbol_Type
+      with Pre => Is_Token_Node (Node);
+   --  Assuming Node is a token node, return the corresponding symbol for the
+   --  token it contains.
+
    ------------------------------
    -- Root AST node properties --
    ------------------------------
