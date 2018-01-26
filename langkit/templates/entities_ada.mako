@@ -203,6 +203,9 @@
    --  Shortcut to get the source buffer slice corresponding to the text that
    --  spans between the first and last tokens of an AST node.
 
+   function Text (Node : ${root_entity.api_name}'Class) return String;
+   --  Overload to get the source buffer slice as a string
+
    --  TODO??? Bind Children_With_Trivia (changing the Node type in
    --  Child_Record).
 
@@ -467,6 +470,15 @@
    function Text (Node : ${root_entity.api_name}'Class) return Text_Type is
    begin
       return Text (Token_Start (Node), Token_End (Node));
+   end Text;
+
+   ----------
+   -- Text --
+   ----------
+
+   function Text (Node : ${root_entity.api_name}'Class) return String is
+   begin
+      return Image (Text (Node));
    end Text;
 
    --  TODO??? Bind Children_With_Trivia (changing the Node type in
