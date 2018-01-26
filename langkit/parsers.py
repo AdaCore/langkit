@@ -37,7 +37,7 @@ from langkit.diagnostics import (
     Severity, WarningSet
 )
 from langkit.expressions import resolve_property
-from langkit.lexer import WithSymbol
+from langkit.lexer import TokenAction, WithSymbol
 from langkit.utils import (Log, assert_type, copy_with, is_same, issubtype,
                            type_check_instance)
 
@@ -143,6 +143,8 @@ def resolve(parser):
         return parser
     elif isinstance(parser, basestring):
         return Tok(parser)
+    elif isinstance(parser, TokenAction):
+        return Tok(parser, keep=True)
     else:
         raise Exception("Cannot resolve parser {}".format(parser))
 
