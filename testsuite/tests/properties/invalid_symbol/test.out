@@ -1,0 +1,14 @@
+== Valid   - Token node ==
+Code generation was successful
+
+== Invalid - Bad type ==
+File "test.py", line 28, in Example.p
+  line 28, in GetSymbol expression
+    Error: Token node expected, but got instead Boolean
+
+== Invalid - Non-token node ==
+File "test.py", line 28, in Example.p
+  line 28, in GetSymbol expression
+    Error: Token node expected, but the input FooNode node is not a token node
+
+Done
