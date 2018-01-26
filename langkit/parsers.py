@@ -206,6 +206,7 @@ class Grammar(object):
         keywords = {kw.arg: kw.value for kw in the_call.the_call.keywords}
 
         for name, rule in kwargs.items():
+            rule = resolve(rule)
             rule.set_name(names.Name.from_lower(name))
             rule.set_grammar(self)
             rule.set_location(Location(loc.file, keywords[name].lineno, ""))
