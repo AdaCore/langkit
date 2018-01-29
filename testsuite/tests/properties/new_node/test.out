@@ -1,14 +1,14 @@
 main.py: Running...
 SynthNode 1:1-1:15
 |name:
-|  Name 1:2-1:6
+|  Name 1:2-1:6: main
 |items:
 |  LiteralList 1:7-1:14
 |  |item_0:
-|  |  Literal 1:7-1:8
+|  |  Literal 1:7-1:8: 1
 |  |item_1:
-|  |  Literal 1:10-1:11
+|  |  Literal 1:10-1:11: 2
 |  |item_2:
-|  |  Literal 1:13-1:14
+|  |  Literal 1:13-1:14: 3
 main.py: Done.
 Done

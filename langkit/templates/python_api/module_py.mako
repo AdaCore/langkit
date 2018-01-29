@@ -867,14 +867,14 @@ class ${root_astnode_name}(object):
             if isinstance(value, ${root_astnode_name}):
                 print('{}{}:'.format(indent, name), file=file)
                 value.dump(indent + '  ', file)
-            elif isinstance(value, Token):
-                print('{}{}: Token({})'.format(indent, name, repr(value.text)),
-                      file=file)
             else:
                 print('{}{}: {}'.format(indent, name, value), file=file)
 
         erepr = self.entity_repr[1:-1]
-        print('{}{}'.format(indent, erepr), file=file)
+        print('{}{}{}'.format(
+            indent, erepr,
+            ': {}'.format(self.text) if self.is_token_node else ''
+        ), file=file)
         indent = indent + '|'
         if self.is_list_type:
             for i, value in enumerate(self):
