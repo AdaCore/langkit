@@ -584,6 +584,10 @@ package ${ada_lib_name}.Analysis.Implementation is
    --  Assuming Node is a token node, return the corresponding symbol for the
    --  token it contains.
 
+   function Text
+     (Node : access ${root_node_value_type}'Class) return Text_Type;
+   --  Retun the fragment of text from which Node was parsed
+
    ------------------------------
    -- Root AST node properties --
    ------------------------------

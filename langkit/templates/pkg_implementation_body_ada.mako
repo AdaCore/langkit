@@ -375,6 +375,19 @@ package body ${ada_lib_name}.Analysis.Implementation is
       return Get_Symbol (Node.Token (Node.Token_Start_Index));
    end Get_Symbol;
 
+   ----------
+   -- Text --
+   ----------
+
+   function Text
+     (Node : access ${root_node_value_type}'Class) return Text_Type
+   is
+      Start_T : constant Token_Type := Node.Token (Node.Token_Start_Index);
+      End_T   : constant Token_Type := Node.Token (Node.Token_End_Index);
+   begin
+      return Text (Start_T, End_T);
+   end Text;
+
    ---------------------
    -- Is_Visible_From --
    ---------------------
