@@ -1238,30 +1238,16 @@ package body ${ada_lib_name}.Analysis.Implementation is
 
             elif repr_fields:
                 for i, field in enumerate(repr_fields):
-                    if field.type.is_ptr:
-                        handler = """
-                           Put (Attr_Prefix & "{print_name}:");
-                           if {node}.{field_name} /= null then
-                              New_Line;
-                              {node}.{field_name}.Print
-                                (Show_Slocs, Children_Prefix);
-                           else
-                              Put_Line (" <null>");
-                           end if;
-                        """
-
-                    elif field.type.is_token_type:
-                        handler = """
-                           Put_Line
-                             (Attr_Prefix & "{print_name}: "
-                              & Text ({field_name} ({node})));
-                        """
-
-                    else:
-                        handler = """
-                           Put_Line (Attr_Prefix & "{print_name}: "
-                                     & Image ({node}.{field_name}));
-                        """
+                    handler = """
+                       Put (Attr_Prefix & "{print_name}:");
+                       if {node}.{field_name} /= null then
+                          New_Line;
+                          {node}.{field_name}.Print
+                            (Show_Slocs, Children_Prefix);
+                       else
+                          Put_Line (" <null>");
+                       end if;
+                    """
 
                     result.append(handler.format(
                         node=node_expr,
