@@ -410,6 +410,9 @@ base_langkit_docs = {
         Get the Nth child AST node in NODE's fields and store it into *CHILD_P.
         Return zero on failure (when N is too big).
     """,
+    'langkit.node_is_null': """
+        Return whether NODE is a null AST node reference.
+    """,
     'langkit.node_short_image': """
         Return a representation of NODE as a string.
     """,

@@ -6,7 +6,7 @@
 <%def name="decls1()">
 
    function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean;
-   --  Return whether Node references to AST node
+   ${ada_doc('langkit.node_is_null', 3)}
 
    function "=" (L, R : ${root_entity.api_name}'Class) return Boolean;
    --  Return whether L and R designate the same entity

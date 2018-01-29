@@ -315,6 +315,7 @@ ${capi.get_name("unit_populate_lexical_env")}(${analysis_unit_type} unit);
  * General AST node primitives
  */
 
+${c_doc('langkit.node_is_null')}
 static inline int
 ${capi.get_name("node_is_null")}(${entity_type} *node) {
     return node->el == NULL;
