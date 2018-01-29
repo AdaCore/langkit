@@ -83,7 +83,7 @@ package ${ada_lib_name}.Analysis.Implementation is
 
    function Is_Token_Node
      (Node : access ${root_node_value_type}'Class) return Boolean;
-   --  Return whether Node is a node that contains only a single token
+   ${ada_doc('langkit.node_is_token_node', 3)}
 
    ----------------
    -- Extensions --

@@ -8,6 +8,10 @@
    function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean;
    ${ada_doc('langkit.node_is_null', 3)}
 
+   function Is_Token_Node
+     (Node : ${root_entity.api_name}'Class) return Boolean;
+   ${ada_doc('langkit.node_is_token_node', 3)}
+
    function "=" (L, R : ${root_entity.api_name}'Class) return Boolean;
    --  Return whether L and R designate the same entity
 
@@ -258,6 +262,13 @@
 
    function Is_Null (Node : ${root_entity.api_name}'Class) return Boolean is
      (Node.Node = null);
+
+   -------------------
+   -- Is_Token_Node --
+   -------------------
+
+   function Is_Token_Node (Node : ${root_entity.api_name}'Class) return Boolean
+   is (Node.Node.Is_Token_Node);
 
    ---------
    -- "=" --

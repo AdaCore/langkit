@@ -413,6 +413,9 @@ base_langkit_docs = {
     'langkit.node_is_null': """
         Return whether NODE is a null AST node reference.
     """,
+    'langkit.node_is_token_node': """
+        Return whether NODE is a node that contains only a single token.
+    """,
     'langkit.node_short_image': """
         Return a representation of NODE as a string.
     """,
