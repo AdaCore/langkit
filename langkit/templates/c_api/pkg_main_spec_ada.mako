@@ -381,6 +381,13 @@ package ${ada_lib_name}.Analysis.Implementation.C is
            Convention    => C,
            External_name => "${capi.get_name('node_is_ghost')}";
 
+   function ${capi.get_name('is_token_node')}
+     (Node : ${entity_type}_Ptr) return int
+      with Export        => True,
+           Convention    => C,
+           External_name => "${capi.get_name('node_is_token_node')}";
+   ${ada_c_doc('langkit.node_is_token_node', 3)}
+
    function ${capi.get_name('node_short_image')}
      (Node : ${entity_type}_Ptr) return ${text_type}
       with Export        => True,

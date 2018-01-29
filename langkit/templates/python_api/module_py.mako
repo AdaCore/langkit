@@ -762,6 +762,12 @@ class ${root_astnode_name}(object):
         return bool(_node_is_ghost(ctypes.byref(node)))
 
     @property
+    def is_token_node(self):
+        ${py_doc('langkit.node_is_token_node', 8)}
+        node = self._unwrap(self)
+        return bool(_node_is_token_node(ctypes.byref(node)))
+
+    @property
     def sloc_range(self):
         ${py_doc('langkit.node_sloc_range', 8)}
         node = self._unwrap(self)
@@ -1394,6 +1400,10 @@ _kind_name = _import_func(
 )
 _node_is_ghost = _import_func(
     '${capi.get_name("node_is_ghost")}',
+    [ctypes.POINTER(${c_entity})], ctypes.c_int
+)
+_node_is_token_node = _import_func(
+    '${capi.get_name("node_is_token_node")}',
     [ctypes.POINTER(${c_entity})], ctypes.c_int
 )
 _node_short_image = _import_func(
