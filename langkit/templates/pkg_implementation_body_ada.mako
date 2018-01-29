@@ -1200,7 +1200,9 @@ package body ${ada_lib_name}.Analysis.Implementation is
         Put ("[" & Image (Node.Sloc_Range) & "]");
      end if;
 
-     if Node.all not in ${generic_list_value_type}'Class then
+     if Is_Token_Node_Kind (Node.Kind) then
+        Put_Line (": " & Image (Node.Text));
+     elsif Node.all not in ${generic_list_value_type}'Class then
         New_Line;
      end if;
 
