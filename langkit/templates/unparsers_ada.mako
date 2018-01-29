@@ -85,9 +85,12 @@
       % elif parser.val.matcher:
          Append (Result, "${parser.val.matcher.to_match}");
       % elif ast_el != "Node":
-         Append (Result, Text (Token (Node, ${ast_el})));
+         Append (Result, Text (Node.Token (${ast_el})));
       % else:
-         <% assert False %>
+         <% assert node_type and node_type.is_token_node, (
+               'Cannot produce unparser for Token parser {}: node_type={}'
+               .format(parser, node_type)
+            ) %>
       % endif
 
       Append (Result, " ");
