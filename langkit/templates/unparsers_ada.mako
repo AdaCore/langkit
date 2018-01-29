@@ -28,6 +28,10 @@
          Unparse_Dispatch (${ast_el}, Result);
       end if;
 
+   % elif node_type and node_type.is_token_node:
+      Append (Result, Node.Text);
+      Append (Result, " ");
+
    % elif is_transform(parser):
 
       % if is_row(parser.parser):
