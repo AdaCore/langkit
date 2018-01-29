@@ -258,6 +258,10 @@ class ShiftExpr(Expr):
     right = Field()
 
 
+class Op(PythonNode):
+    token_node = True
+
+
 class ArithExpr(Expr):
     left = Field()
     op = Field()
@@ -403,15 +407,15 @@ def TrailList(el, sep, empty_valid=False):
 
 
 class Name(Expr):
-    id = Field()
+    token_node = True
 
 
 class NumberLit(Expr):
-    num = Field()
+    token_node = True
 
 
 class StringLit(Expr):
-    str = Field()
+    token_node = True
 
 
 class ConcatStringLit(Expr):
@@ -430,22 +434,17 @@ class NL(PythonNode):
 python_grammar = Grammar('main_rule')
 P = python_grammar
 
-indent = L.Indent(keep=False)
-dedent = L.Dedent(keep=False)
-new_line = L.Newline(keep=False)
-termination = L.Termination(keep=False)
-
 python_grammar.add_rules(
     name=Name(L.Identifier),
     number=NumberLit(L.Number),
     string=StringLit(L.String),
     cat_string=ConcatStringLit(P.string, List(P.string)),
-    nl=NL(new_line),
+    nl=NL(L.Newline),
     main_rule=FileNode(
-        List(newlines(), P.stmt, newlines()), termination
+        List(newlines(), P.stmt, newlines()), L.Termination
     ),
     decorator=Decorator(
-        '@', P.dotted_name, Opt('(', P.arg_list, ')'), new_line
+        '@', P.dotted_name, Opt('(', P.arg_list, ')'), L.Newline
     ),
     decorators=List(P.decorator),
     decorated=Decorated(P.decorators, Or(P.class_def, P.func_def)),
@@ -464,7 +463,7 @@ python_grammar.add_rules(
     name_list=TrailList(P.name, sep=','),
     stmt=Or(P.simple_stmt, P.compound_stmt),
     simple_stmt=Pick(Or(P.small_stmt, TrailList(P.small_stmt, sep=';')),
-                     new_line),
+                     L.Newline),
     small_stmt=(
         P.expr_stmt | P.print_stmt | P.del_stmt | P.pass_stmt | P.flow_stmt
         | P.import_stmt | P.global_stmt | P.exec_stmt | P.assert_stmt
@@ -472,8 +471,8 @@ python_grammar.add_rules(
     expr_stmt=Or(
         AugAssignStmt(
             P.test_list,
-            Or('+=', '-=', '*=', '/=', '%=', '&=',
-               '|=', '^=', '<<=', '>>=', '**=', '//='),
+            Op(Or('+=', '-=', '*=', '/=', '%=', '&=',
+                  '|=', '^=', '<<=', '>>=', '**=', '//=')),
             Or(P.yield_expr, P.test_list)
         ),
         AssignStmt(
@@ -544,9 +543,9 @@ python_grammar.add_rules(
     with_stmt=WithStmt('with', List(P.with_item, sep=','), ":", P.suite),
     with_item=AsNameNode(P.test, Opt('as', P.expr)),
     suite=Or(
-        Pick(newlines(), indent,
+        Pick(newlines(), L.Indent,
              List(newlines(), P.stmt, newlines()),
-             dedent),
+             L.Dedent),
         P.simple_stmt,
     ),
     test=Or(
@@ -579,12 +578,12 @@ python_grammar.add_rules(
     xor_expr=Or(XorExpr(P.xor_expr, '^', P.and_expr), P.and_expr),
     and_expr=Or(AndExpr(P.and_expr, '&', P.shift_expr), P.shift_expr),
     shift_expr=Or(
-        ShiftExpr(P.shift_expr, Or('<<', '>>'), P.arith_expr),
+        ShiftExpr(P.shift_expr, Op(Or('<<', '>>')), P.arith_expr),
         P.arith_expr
     ),
-    arith_expr=Or(ArithExpr(P.arith_expr, Or('+', '-'), P.term), P.term),
-    term=Or(Term(P.term, Or('*', '/', '%', '//'), P.factor), P.factor),
-    factor=Or(Factor(Or('+', '-', '~'), P.factor), P.power),
+    arith_expr=Or(ArithExpr(P.arith_expr, Op(Or('+', '-')), P.term), P.term),
+    term=Or(Term(P.term, Op(Or('*', '/', '%', '//')), P.factor), P.factor),
+    factor=Or(Factor(Op(Or('+', '-', '~')), P.factor), P.power),
     power=Or(Power(P.atom_expr, '**', P.factor), P.atom_expr),
     atom_expr=Or(
         DottedName(P.atom_expr, ".", P.name),
