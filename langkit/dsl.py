@@ -161,7 +161,7 @@ class BaseStruct(DSLType):
 
         # Sort fields by creation time order so that users get fields in the
         # same order as it was declared in the DSL.
-        result.sort(key=lambda (_, f): f._index)
+        result.sort(key=lambda (_, f): f._serial)
         return result
 
 

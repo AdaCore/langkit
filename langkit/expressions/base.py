@@ -2984,7 +2984,7 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: str
         """
-        return str(self._index)
+        return str(self._serial)
 
     @classmethod
     def get(cls):

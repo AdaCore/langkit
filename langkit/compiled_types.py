@@ -911,7 +911,7 @@ class AbstractNodeData(object):
             not create an ownership share: callers must call Inc_Ref
             themselves. See the eponym property.
         """
-        self._index = next(self._counter)
+        self._serial = next(self._counter)
         self._is_public = public
 
         self.location = extract_library_location()
@@ -1204,7 +1204,7 @@ class AbstractField(AbstractNodeData):
         self._type = typ
 
     def __repr__(self):
-        return '<ASTNode {} Field({})>'.format(self._index, self.qualname)
+        return '<ASTNode {} Field({})>'.format(self._serial, self.qualname)
 
     @property
     def doc(self):
