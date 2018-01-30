@@ -60,7 +60,7 @@ def format_doc(entity):
 
 def print_struct(context, file, struct):
     is_astnode = struct.is_ast_node
-    base = struct.base() if is_astnode else None
+    base = struct.base if is_astnode else None
 
     # Do not document internal fields
     fields = [f for f in struct.get_abstract_fields() if not f.is_internal]

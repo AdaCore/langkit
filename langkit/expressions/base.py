@@ -3087,8 +3087,8 @@ class PropertyDef(AbstractNodeData):
 
         :rtype: PropertyDef|None
         """
-        if self.struct.is_ast_node and self.struct.base():
-            result = self.struct.base().get_abstract_fields_dict(
+        if self.struct.is_ast_node and self.struct.base:
+            result = self.struct.base.get_abstract_fields_dict(
                 field_class=PropertyDef
             ).get(self._name.lower, None)
 

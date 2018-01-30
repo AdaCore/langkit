@@ -1268,7 +1268,7 @@ class CompileCtx(object):
                          if f.type.is_struct_type)
             if (struct_type.is_entity_type and not
                     struct_type.el_type.is_root_node):
-                result.add(struct_type.el_type.base().entity)
+                result.add(struct_type.el_type.base.entity)
             return result
 
         struct_types = CompiledTypeMetaclass.struct_types

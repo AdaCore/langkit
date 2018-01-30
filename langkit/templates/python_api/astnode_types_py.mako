@@ -31,8 +31,8 @@
 <%def name="subclass_decls(cls)">
     <%
         # Parent class for "cls", or None if "cls" is actually the root AST
-        # node (if we called .base() on it, it would return ASTNodeType).
-        parent_cls = cls.base() if T.root_node != cls else None
+        # node (if we called .base on it, it would return ASTNodeType).
+        parent_cls = cls.base if T.root_node != cls else None
 
         # Python expression that yield a tuple that contains the names for all
         # fields that "cls" inherits.
@@ -78,7 +78,7 @@
 
 <%def name="decl(cls)">
 
-class ${cls.kwless_raw_name.camel}(${cls.base().kwless_raw_name.camel}):
+class ${cls.kwless_raw_name.camel}(${cls.base.kwless_raw_name.camel}):
     ${py_doc(cls, 4)}
 ${subclass_decls(cls)}
 

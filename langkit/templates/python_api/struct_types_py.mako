@@ -98,7 +98,7 @@ class _BaseEntity(_BaseStruct):
     if cls == T.entity:
         base_cls = '_BaseEntity'
     elif cls.is_entity_type:
-        base_cls = cls.el_type.base().entity.name.camel
+        base_cls = cls.el_type.base.entity.name.camel
     else:
         base_cls = '_BaseStruct'
 %>

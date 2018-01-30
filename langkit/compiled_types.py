@@ -962,7 +962,7 @@ class AbstractNodeData(object):
         from langkit.expressions import PropertyDef
 
         assert self._name and self.struct and self.struct.is_ast_node
-        parent_cls = self.struct.base()
+        parent_cls = self.struct.base
         properties_to_override = ([p._name
                                    for p in parent_cls.get_properties()]
                                   if parent_cls else [])
@@ -1603,7 +1603,7 @@ class EntityType(StructType):
 
         :rtype: EntityType
         """
-        return None if self.is_root_type else self.astnode.base().entity
+        return None if self.is_root_type else self.astnode.base.entity
 
     @property
     def api_name(self):
@@ -1933,7 +1933,7 @@ class ASTNodeType(BaseStructType):
         result = []
         while node is not None:
             result.append(node)
-            node = node.base()
+            node = node.base
         return reversed(result)
 
     @staticmethod
@@ -1951,9 +1951,12 @@ class ASTNodeType(BaseStructType):
             zip(*map(ASTNodeType.get_inheritance_chain, nodes))
         ))[-1][0]
 
+    @property
     def base(self):
         """
-        Helper to return the base type of this AST node type.
+        Return the base type of this AST node type. This is None for the root
+        one.
+
         :rtype: ASTNodeType|None
         """
         return self._base
@@ -2162,8 +2165,8 @@ class ASTNodeType(BaseStructType):
         Emit non-fatal errors if some fields in this subclass have conflicting
         homonym fields in a superclass.
         """
-        inherited_fields = (self.base().get_abstract_fields_dict()
-                            if self.base() else {})
+        inherited_fields = (self.base.get_abstract_fields_dict()
+                            if self.base else {})
         for f_n, f_v in self._fields.items():
             with f_v.diagnostic_context:
                 homonym_fld = inherited_fields.get(f_n)

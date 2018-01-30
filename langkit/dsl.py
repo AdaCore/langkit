@@ -361,7 +361,7 @@ class Annotations(object):
 
         :rtype: Annotations
         """
-        bn = self.node.base()
+        bn = self.node.base
         return bn.annotations if bn else None
 
 

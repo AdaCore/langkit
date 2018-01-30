@@ -169,12 +169,12 @@
 
    <%
       type_name = cls.value_type_name()
-      base_name = cls.base().name
+      base_name = cls.base.name
       ext = ctx.ext('nodes', cls.raw_name, 'public_decls')
    %>
 
    type ${type_name} is ${"abstract" if cls.abstract else ""}
-      new ${cls.base().value_type_name()} with record
+      new ${cls.base.value_type_name()} with record
       ${node_fields(cls)}
    end record;
 
