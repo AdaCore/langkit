@@ -1230,6 +1230,8 @@ class Field(AbstractField):
         :type: set[CompiledType]
         """
 
+        self._index = None
+
     @property
     def inferred_type(self):
         """
@@ -1247,6 +1249,27 @@ class Field(AbstractField):
         while types:
             result = result.unify(types.pop())
         return result
+
+    @property
+    def index(self):
+        """
+        Return the 0-based index of this parsing field in the owning AST node's
+        children list.
+
+        :rtype: int
+        """
+        assert self._index is not None
+        return self._index
+
+    @property
+    def introspection_enum_literal(self):
+        """
+        Return the name of the enumeration literal to use to represent this
+        field.
+
+        :rtype: str
+        """
+        return (self.struct.entity.api_name + self.name).camel_with_underscores
 
 
 class UserField(AbstractField):

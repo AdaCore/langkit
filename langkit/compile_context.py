@@ -653,6 +653,14 @@ class CompileCtx(object):
         :type: dict[(str, str), list[(str, bool)]
         """
 
+        self.sorted_parse_fields = None
+        """
+        Sorted list of all parsing fields. Used to generate the AST node
+        introspection API.
+
+        :type: list[langkit.compiled_types.Field]
+        """
+
     def add_with_clause(self, from_pkg, source_kind, to_pkg, use_clause=False):
         """
         Add a WITH clause for `to_pkg` in the `source_kind` part of the
@@ -1339,8 +1347,8 @@ class CompileCtx(object):
                         auto_context=False),
             ASTNodePass('reject abstract AST nodes with no concrete'
                         ' subclasses', CompileCtx.check_concrete_subclasses),
-            GlobalPass('compute AST node kind constants',
-                       CompileCtx.compute_node_kind_constants),
+            GlobalPass('compute AST node constants',
+                       CompileCtx.compute_astnode_constants),
             errors_checkpoint_pass,
 
             MajorStepPass('Compiling properties'),
@@ -1476,9 +1484,11 @@ class CompileCtx(object):
             ('pkg_analysis',        'Analysis', True),
             # Unit for implementation of analysis primitives
             ('pkg_implementation',  'Analysis.Implementation', True),
+            # Unit for AST introspection
+            ('pkg_introspection',   'Introspection', True),
             # Unit for AST node iteration primitives
             ('pkg_iterators',       'Iterators', True),
-            # Unit for AST unparsing primitives
+            # Unit for all parsers
             ('pkg_unparsing',       'Unparsing', True),
             # Unit for all parsers
             ('parsers/pkg_main',    'Analysis.Parsers', True),
@@ -1831,10 +1841,11 @@ class CompileCtx(object):
              "--no-diff", "-w"] + list(astnodes_files)
         )
 
-    def compute_node_kind_constants(self):
+    def compute_astnode_constants(self):
         """
-        Compute kind constants for all concrete AST nodes.
+        Compute several constants for the current set of AST nodes.
         """
+        # Compute the set of "kind" constants
         for i, astnode in enumerate(
             (astnode
              for astnode in self.astnode_types
@@ -1845,6 +1856,18 @@ class CompileCtx(object):
         ):
             self.node_kind_constants[astnode] = i
             self.kind_constant_to_node[i] = astnode
+
+        # Compute the list of parse fields, for introspection. Also compute
+        # their indexes.
+        self.sorted_parse_fields = []
+        for n in self.astnode_types:
+            for i, f in enumerate(n.get_parse_fields()):
+                if f._index is None:
+                    f._index = i
+                else:
+                    assert f._index == i
+                if f.struct is n:
+                    self.sorted_parse_fields.append(f)
 
     def expose_public_api_types(self, astnode):
         """

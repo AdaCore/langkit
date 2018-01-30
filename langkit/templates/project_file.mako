@@ -38,6 +38,7 @@ library project ${lib_name} is
       "${lib_name.lower()}-debug.ads",
       "${lib_name.lower()}-init.adb",
       "${lib_name.lower()}-init.ads",
+      "${lib_name.lower()}-introspection.ads",
       "${lib_name.lower()}-iterators.adb",
       "${lib_name.lower()}-iterators.ads",
       "${lib_name.lower()}-lexer.adb",
