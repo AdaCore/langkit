@@ -1334,12 +1334,8 @@ class CompileCtx(object):
             # This cannot be done before as the "compute fields type" pass will
             # create AST list types.
             GlobalPass('compute types', CompileCtx.compute_types),
-            ASTNodePass('check resolved ASTnode subclasses',
-                        lambda _, astnode: astnode.check_resolved()),
-            ASTNodePass('check AST node parse fields',
-                        lambda _, astnode: astnode.check_parse_fields()),
-            ASTNodePass('check homonym AST node fields',
-                        lambda _, astnode: astnode.check_homonym_fields(),
+            ASTNodePass('validate AST node fields',
+                        lambda _, astnode: astnode.validate_fields(),
                         auto_context=False),
             ASTNodePass('reject abstract AST nodes with no concrete'
                         ' subclasses', CompileCtx.check_concrete_subclasses),

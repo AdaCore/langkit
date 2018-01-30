@@ -1895,18 +1895,6 @@ class ASTNodeType(BaseStructType):
                 else:
                     field.type = inferred_type
 
-    def check_parse_fields(self):
-        """
-        Check that parse fields have legal type annotations.
-        """
-        for f in self.get_parse_fields():
-            with f.diagnostic_context:
-                check_source_language(
-                    f.type.is_ast_node,
-                    'AST node parse fields must all be AST node themselves.'
-                    ' Here, field type is {}'.format(f.type.dsl_name)
-                )
-
     def warn_imprecise_field_type_annotations(self):
         # The type of synthetic node fields are not inferred, so there is
         # nothing to do for them.
@@ -2142,29 +2130,43 @@ class ASTNodeType(BaseStructType):
         """
         return EntityType(self)
 
-    def check_resolved(self):
+    def validate_fields(self):
         """
-        Emit a non-fatal error if this ASTNodeType subclass is not type
-        resolved.
+        Perform various checks on this ASTNodeType's fields.
+
+        In particular, make sure:
+        * the AST node is type resolved (i.e. all fields have a type);
+        * all fields are AST nodes themselves;
+        * it does not hold homonym parse fields.
+
+        Emit errors when appropriate.
         """
+        parse_fields = self.get_parse_fields()
+
         # Consider that AST nodes with type annotations for all their fields
         # are type resolved: they don't need to be referenced by the grammar.
         self.is_type_resolved = (
             self.is_type_resolved
-            or all(f._type is not None for f in self.get_parse_fields())
+            or all(f._type is not None for f in parse_fields)
         )
+        with self.diagnostic_context:
+            check_source_language(
+                self.is_type_resolved,
+                'Unresolved ASTNode subclass. Use it in the grammar or provide'
+                ' a type annotation for all its fields'
+            )
 
-        check_source_language(
-            self.is_type_resolved,
-            'Unresolved ASTNode subclass. Use it in the grammar or provide a'
-            ' type annotation for all its fields'
-        )
+        # All fields must be AST nodes
+        for f in parse_fields:
+            with f.diagnostic_context:
+                check_source_language(
+                    f.type.is_ast_node,
+                    'AST node parse fields must all be AST node themselves.'
+                    ' Here, field type is {}'.format(f.type.dsl_name)
+                )
 
-    def check_homonym_fields(self):
-        """
-        Emit non-fatal errors if some fields in this subclass have conflicting
-        homonym fields in a superclass.
-        """
+        # Unless the special case of inheritted properties, reject fields which
+        # are homonym with inherited fields.
         inherited_fields = (self.base.get_abstract_fields_dict()
                             if self.base else {})
         for f_n, f_v in self._fields.items():
