@@ -1237,7 +1237,7 @@ package body ${ada_lib_name}.Analysis.Implementation is
                 pass
 
             elif repr_fields:
-                for i, field in enumerate(repr_fields):
+                for field in repr_fields:
                     handler = """
                        Put (Attr_Prefix & "{print_name}:");
                        if {node}.{field_name} /= null then
