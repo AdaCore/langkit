@@ -36,6 +36,7 @@ pragma Warnings (On, "referenced");
 
 with ${ada_lib_name}.Lexer;
 
+with ${ada_lib_name}.Introspection;
 ${(exts.with_clauses(with_clauses + [
    ((ctx.env_hook_subprogram.unit_fqn, False)
     if ctx.env_hook_subprogram else None)
@@ -1206,57 +1207,51 @@ package body ${ada_lib_name}.Analysis.Implementation is
          New_Line;
       end if;
 
-      <%
-        root_type = ctx.root_grammar_class.name
+      % if ctx.generic_list_type.concrete_subclasses:
+         --  List nodes are displayed in a special way (they have no field)
+         if K in ${ctx.generic_list_type.ada_kind_range_name} then
+            declare
+               List : constant ${ctx.generic_list_type.name} :=
+                  ${ctx.generic_list_type.name} (Node);
+            begin
+               if List.Count = 0 then
+                  Put_Line (": <empty list>");
+                  return;
+               end if;
 
-        def get_actions(astnode, node_expr):
-            repr_fields = astnode.get_parse_fields(
-                lambda f: f.repr,
-                include_inherited=False
-            )
+               New_Line;
+               for Child of List.Nodes (1 .. List.Count) loop
+                  if Child /= null then
+                     Child.Print (Show_Slocs, Line_Prefix & "|  ");
+                  end if;
+               end loop;
+            end;
+            return;
+         end if;
+      % endif
 
-            result = []
-
-            # Emit only one processing code for all list types: no need to
-            # repeat it multiple times.
-            if astnode.is_generic_list_type:
-                result.append("""
-                    if {node}.Count = 0 then
-                       Put_Line (": <empty list>");
-                       return;
-                    end if;
-
-                    New_Line;
-                    for Child of {node}.Nodes (1 .. {node}.Count) loop
-                       if Child /= null then
-                          Child.Print (Show_Slocs, Line_Prefix & "|  ");
-                       end if;
-                    end loop;
-                """.format(node=node_expr))
-            elif astnode.is_list:
-                pass
-
-            elif repr_fields:
-                for field in repr_fields:
-                    handler = """
-                       Put (Attr_Prefix & "{print_name}:");
-                       if {node}.{field_name} /= null then
-                          New_Line;
-                          {node}.{field_name}.Print
-                            (Show_Slocs, Children_Prefix);
-                       else
-                          Put_Line (" <null>");
-                       end if;
-                    """
-
-                    result.append(handler.format(
-                        node=node_expr,
-                        print_name=field._name.lower,
-                        field_name=field.name
-                    ))
-            return '\n'.join(result)
-      %>
-      ${ctx.generate_actions_for_hierarchy('Node', 'K', get_actions)}
+      % if ctx.sorted_parse_fields:
+         --  This is for regular nodes: display each field
+         declare
+            use ${ada_lib_name}.Introspection;
+            Field_List : constant Field_Reference_Array := Fields (K);
+         begin
+            for I in Field_List'Range loop
+               declare
+                  Child : constant ${root_node_type_name} :=
+                     Node.Child (I);
+               begin
+                  Put (Attr_Prefix & Field_Name (Field_List (I)) & ":");
+                  if Child /= null then
+                     New_Line;
+                     Child.Print (Show_Slocs, Children_Prefix);
+                  else
+                     Put_Line (" <null>");
+                  end if;
+               end;
+            end loop;
+         end;
+      % endif
    end Print;
 
    ------------
