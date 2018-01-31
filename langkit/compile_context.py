@@ -2143,8 +2143,8 @@ class CompileCtx(object):
         generate specific code for `B.f`, `C.f` and `D.f` when we could just
         generate code for `A.f`.
 
-        :param str node_var: Name of the variable that holds the AST node to
-            process.
+        :param str|None node_var: Name of the variable that holds the AST node
+            to process. None if the generated code must work only on the kind.
         :param str kind_var: Name of the variable that holds the kind of the
             AST node to process. Holding it in a variables is handy to avoid
             computing it multiple times.
@@ -2276,23 +2276,28 @@ class CompileCtx(object):
                 case.astnode.ada_kind_range_name, kind_var
             ))
             for m in case.matchers:
-                new_node_type = m.astnode.name.camel_with_underscores
-                new_node_var = m.new_node_var(m.astnode)
-                result.append("""
-                    when {range} =>
+                result.append(
+                    'when {} =>'.format(m.astnode.ada_kind_range_name)
+                )
+                if node_var is None:
+                    new_node_var = None
+                else:
+                    new_node_type = m.astnode.name.camel_with_underscores
+                    new_node_var = m.new_node_var(m.astnode)
+                    result.append("""
                        declare
                           {new_node_var} : constant {new_node_type} :=
                              {new_node_type} ({node_var});
                        begin
-                """.format(
-                    range=m.astnode.ada_kind_range_name,
-                    node_var=node_var,
-                    new_node_type=new_node_type,
-                    new_node_var=new_node_var,
-                ))
+                    """.format(
+                        node_var=node_var,
+                        new_node_type=new_node_type,
+                        new_node_var=new_node_var,
+                    ))
                 result.append(m.actions)
                 print_case(m.inner_case, new_node_var)
-                result.append('end;')
+                if node_var is not None:
+                    result.append('end;')
 
             result.append('when others => null;')
             result.append('end case;')
