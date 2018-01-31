@@ -1195,16 +1195,16 @@ package body ${ada_lib_name}.Analysis.Implementation is
       Children_Prefix : constant String := Line_Prefix & "|  ";
 
    begin
-     Put (Line_Prefix & Node.Kind_Name);
-     if Show_Slocs then
-        Put ("[" & Image (Node.Sloc_Range) & "]");
-     end if;
+      Put (Line_Prefix & Node.Kind_Name);
+      if Show_Slocs then
+         Put ("[" & Image (Node.Sloc_Range) & "]");
+      end if;
 
-     if Is_Token_Node_Kind (Node.Kind) then
-        Put_Line (": " & Image (Node.Text));
-     elsif Node.all not in ${generic_list_value_type}'Class then
-        New_Line;
-     end if;
+      if Is_Token_Node_Kind (Node.Kind) then
+         Put_Line (": " & Image (Node.Text));
+      elsif Node.all not in ${generic_list_value_type}'Class then
+         New_Line;
+      end if;
 
       <%
         root_type = ctx.root_grammar_class.name
