@@ -8,13 +8,18 @@ declare
    A   : Bind_Default_Default.Impl.Unify_Left.R_Type_Array (1 .. Length (Dom));
 begin
    for J in 0 .. Length (Dom) - 1 loop
-      A (J + 1) := (
-         % if expr.domain.static_type.element_type.is_entity_type:
-            Get (Dom, J)
-         % else:
-            (El => Get (Dom, J), others => <>)
-         % endif
-      );
+      declare
+         Item : constant ${expr.domain.type.element_type.name} :=
+            Get (Dom, J);
+      begin
+         A (J + 1) := (
+            % if expr.domain.static_type.element_type.is_entity_type:
+               (El => ${root_node_type_name} (Item.El), Info => Item.Info)
+            % else:
+               (El => Item, others => <>)
+            % endif
+         );
+      end;
    end loop;
 
    ${expr.result_var.name} :=
