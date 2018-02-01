@@ -12,8 +12,9 @@ from langkit.diagnostics import (
 )
 from langkit.expressions.base import (
     AbstractExpression, AbstractVariable, CallExpr, ComputingExpr,
-    NullCheckExpr, PropertyDef, SequenceExpr, T, UncheckedCastExpr, attr_expr,
-    attr_call, auto_attr_custom, auto_attr, construct, render, unsugar
+    FieldAccessExpr, NullCheckExpr, PropertyDef, SequenceExpr, T,
+    UncheckedCastExpr, attr_expr, attr_call, auto_attr_custom, auto_attr,
+    construct, render, unsugar
 )
 from langkit.expressions.envs import make_as_entity
 
@@ -717,8 +718,18 @@ def length(self, collection):
     """
     Compute the length of `collection`.
     """
-    return CallExpr('Len', 'Length', T.LongType,
-                    [construct(collection, lambda t: t.is_collection)],
+    coll_expr = construct(collection)
+    orig_type = coll_expr.type
+
+    if coll_expr.type.is_entity_type:
+        coll_expr = FieldAccessExpr(coll_expr, 'El', coll_expr.type.astnode,
+                                    do_explicit_incref=False)
+    check_source_language(
+        coll_expr.type.is_collection,
+        'Collection expected but got {} instead'.format(orig_type.dsl_name)
+    )
+
+    return CallExpr('Len', 'Length', T.LongType, [coll_expr],
                     abstract_expr=self)
 
 
