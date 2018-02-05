@@ -899,16 +899,16 @@ Here we are! Let's try this interpreter on some "real-world" Kaleidoscope code:
 .. code-block:: text
 
     def add(a, b)
-      a + b
+      a + b;
 
     def sub(a, b)
-      a - b
+      a - b;
 
-    1
-    add(1, 2)
-    add(1, sub(2, 3))
+    1;
+    add(1, 2);
+    add(1, sub(2, 3));
 
-    meh()
+    meh();
 
 Save this to a ``foo.kal`` file, for instance, and run the interpreter:
 
