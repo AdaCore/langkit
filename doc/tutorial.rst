@@ -87,7 +87,7 @@ If everything went fine, you should be able to run the ``parse`` test binary:
 
     $ build/bin/parse
     Parsing failed:
-    Line 1, column 1: Expected "example", got "Termination"
+    <input>:1:1: Expected 'example', got Termination
     <null node>
 
 Great! This binary just tries to parse its command-line argument and displays
@@ -251,7 +251,10 @@ rejected by the lexer:
 
     $ build/bin/parse def
     Parsing failed:
-    Line 1, column 1: Expected "Example", got "LexingFailure"
+    <input>:1:1: Invalid token, ignored
+    <input>:1:2: Invalid token, ignored
+    <input>:1:3: Invalid token, ignored
+    <input>:1:4: Expected 'example', got Termination
     <null node>
 
 Now, you should get this:
@@ -259,7 +262,7 @@ Now, you should get this:
 .. code-block:: text
 
     Parsing failed:
-    Line 1, column 1: Expected "Example", got "Def"
+    <input>:1:1: Expected 'example', got 'def'
     <null node>
 
 The parser is still failing but that's not a surprise since we only took care
@@ -271,7 +274,7 @@ Let's check with numbers:
 
     $ build/bin/parse 0
     Parsing failed:
-    Line 1, column 1: Expected "Example", got "Number"
+    <input>:1:1: Expected 'example', got Number
     <null node>
 
 Looking good! Lexing seems to work, so let's get the parser working.
@@ -306,12 +309,12 @@ Take your code editor, open ``language/parser.py`` and replace the
         pass
 
     class Number(Expr):
-        value = Field()
+        token_node = True
 
     class Identifier(Expr):
-        name = Field()
+        token_node = True
 
-    class Operator(EnumType):
+    class Operator(EnumNode):
         alternatives = ['plus', 'minus', 'mult', 'div']
 
     class BinaryExpr(Expr):
@@ -324,7 +327,7 @@ Take your code editor, open ``language/parser.py`` and replace the
         args = Field()
 
 As usual, new code comes with its new dependencies: also complete the
-``langkit.dsl`` import statement with ``abstract``, ``EnumType`` and ``Field``.
+``langkit.dsl`` import statement with ``abstract``, ``EnumNode`` and ``Field``.
 
 Each class definition is a way to declare how a particular AST node will look.
 Think of it as a kind of structure: here the ``Function`` AST node has two
@@ -348,11 +351,17 @@ from the ``KaleidoscopeNode`` class, and you can create abstract classes (using
 the ``abstract`` class decorator) to create a hierarchy of node types.
 
 Careful readers may also have spotted something else: the ``Operator``
-enumeration type. We use an enumeration type in order to store in the most
-simple way what kind of operation a ``BinaryExpr`` represents. As you can see,
-creating an enumeration type is very easy: just subclass ``EnumType`` and set
-the ``alternatives`` field to a sequence of strings that will serve as
-identifiers for the enumeration values (also called *enumerators*).
+enumeration node type. We use an enumeration node type in order to store in the
+most simple way what kind of operation a ``BinaryExpr`` represents. As you can
+see, creating an enumeration node type is very easy: just subclass ``EnumNode``
+and set the ``alternatives`` field to a sequence of strings that will serve as
+names for the enumeration node values (also called *enumerators*).
+
+There is also the special ``token_node = True`` annotations, which both the
+``Number`` and ``Identifier`` classes have. This annotation specifies that
+these nodes don't hold any field but instead are used to materialize in the
+tree a single token. When compiling the grammar, Langkit will make sure that
+parsers creating these kind of nodes do consume only one token.
 
 Fine, we have our data structures so now we shall use them! In order to create
 a parser, Langkit requires you to describe a grammar, hence the ``Grammar``
@@ -370,12 +379,12 @@ Langkit generates recursive descent parsers using `parser combinators
 examples:
 
 * ``'def'`` matches exactly one ``def`` token;
-* ``Def('def', Tok(Token.Identifier))`` matches a ``def`` token followed by an
+* ``Def('def', Token.Identifier)`` matches a ``def`` token followed by an
   identifier token, creating a ``Def`` node.
 * ``Or('def', 'extern')`` matches either a ``def`` keyword, either a ``extern``
   one (no more, no less).
 
-The basic idea is that you use the callables Langkit provides (``Tok``, ``Or``,
+The basic idea is that you use the callables Langkit provides (``List``, ``Or``,
 etc. from the ``langkit.parsers`` module) in order to compose in a quite
 natural way what rules can match. Let's move forward with a real world example:
 Kaleidoscope! Each chunk of code below appears as a keyword argument of the
@@ -385,6 +394,12 @@ one). But first, let's add a shortcut for our grammar instance:
 .. code-block:: python
 
     G = kaleidoscope_grammar
+
+We also need to import the ``Token`` class from our lexer module:
+
+.. code-block:: python
+
+    from language.lexer import Token
 
 Now, redefine the ``main_rule`` parsing rule:
 
@@ -444,8 +459,8 @@ that take no argument.
     expr=Or(
         Pick('(', G.expr, ')'),
         BinaryExpr(G.expr,
-            Or(Enum('+', Operator('plus')),
-               Enum('-', Operator('minus'))),
+            Or(Operator.alt_plus('+'),
+               Operator.alt_minus('-')),
             G.prod_expr
         ),
         G.prod_expr,
@@ -463,10 +478,10 @@ An expression can be either:
 
   .. code-block:: python
 
-      Enum('+', Operator('plus'))
+      Operator.alt_plus('+')
 
   This matches a ``+`` token (``Plus`` in our lexer definition) and yields the
-  ``plus`` enumerator from the ``Operator`` enumeration type.
+  ``plus`` node enumerator from the ``Operator`` enumeration node type.
 
 * The ``prod_expr`` kind of expression: see below.
 
@@ -474,8 +489,8 @@ An expression can be either:
 
     prod_expr=Or(
         BinaryExpr(G.prod_expr,
-            Or(Enum('*', Operator('mult')),
-               Enum('/', Operator('div'))),
+            Or(Operator.alt_mult('*'),
+               Operator.alt_div('/')),
             G.call_or_single
         ),
         G.call_or_single,
@@ -508,18 +523,14 @@ Well, this time there is nothing new. Moving on to the two last rules...
 
 .. code-block:: python
 
-    identifier=Tok(Token.Identifier, keep=True) ^ Identifier,
-    number=Tok(Token.Number, keep=True) ^ Number,
+    identifier=Identifier(Token.Identifier),
+    number=Number(Token.Number),
 
 Until now, the parsing rules we wrote only used string literals to match
 tokens. While this works for things like keywords, operators or punctuation, we
-cannot match a token kind with no specific text associated this way and
-besides, here we need to *keep* the text associated to the tokens. So these
-rules use instead the ``Tok`` combinator, which takes a token from your
-``language.lexer.Token`` class (don't forget to import it!) and which has a
-``keep`` argument that enables us to keep the token so that transform operators
-can store them in our AST... which is what both rules do right after the
-``Tok`` returns.
+cannot match a token kind with no specific text associated this way. So these
+rules use instead directly reference the tokens defined in your
+``language.lexer.Token`` class (don't forget to import it!).
 
 Until now, we completely put aside types in the AST: fields were declared
 without associated types. However, in order to generate the library, someone
@@ -530,7 +541,7 @@ For instance, doing the following (fictive example):
 
 .. code-block:: python
 
-    Enum('sometok', SomeEnumeration('someval')) ^ SomeNode
+    SomeNode(SomeEnumeration.alt_someval('sometok'))
 
 Then the typer will know that the type of the SomeNode's only field is the
 ``SomeEnumeration`` type.
@@ -554,45 +565,38 @@ to launch another build and then run ``parse`` on some code:
     |  |proto:
     |  |  Prototype[1:8-1:14]
     |  |  |name:
-    |  |  |  Identifier[1:8-1:11]
-    |  |  |  |name: foo
+    |  |  |  Identifier[1:8-1:11]: foo
     |  |  |args:
     |  |  |  IdentifierList[1:12-1:13]
-    |  |  |  |  Identifier[1:12-1:13]
-    |  |  |  |  |name: a
+    |  |  |  |  Identifier[1:12-1:13]: a
     |  FunctionNode[1:16-1:44]
     |  |proto:
     |  |  Prototype[1:20-1:29]
     |  |  |name:
-    |  |  |  Identifier[1:20-1:23]
-    |  |  |  |name: bar
+    |  |  |  Identifier[1:20-1:23]: bar
     |  |  |args:
     |  |  |  IdentifierList[1:24-1:28]
-    |  |  |  |  Identifier[1:24-1:25]
-    |  |  |  |  |name: a
-    |  |  |  |  Identifier[1:27-1:28]
-    |  |  |  |  |name: b
+    |  |  |  |  Identifier[1:24-1:25]: a
+    |  |  |  |  Identifier[1:27-1:28]: b
     |  |body:
     |  |  BinaryExpr[1:30-1:44]
     |  |  |lhs:
-    |  |  |  Identifier[1:30-1:31]
-    |  |  |  |name: a
-    |  |  |op: mult
+    |  |  |  Identifier[1:30-1:31]: a
+    |  |  |op:
+    |  |  |  OperatorMult[1:32-1:33]
     |  |  |rhs:
     |  |  |  CallExpr[1:34-1:44]
     |  |  |  |callee:
-    |  |  |  |  Identifier[1:34-1:37]
-    |  |  |  |  |name: foo
+    |  |  |  |  Identifier[1:34-1:37]: foo
     |  |  |  |args:
     |  |  |  |  ExprList[1:38-1:43]
     |  |  |  |  |  BinaryExpr[1:38-1:43]
     |  |  |  |  |  |lhs:
-    |  |  |  |  |  |  Identifier[1:38-1:39]
-    |  |  |  |  |  |  |name: a
-    |  |  |  |  |  |op: plus
+    |  |  |  |  |  |  Identifier[1:38-1:39]: a
+    |  |  |  |  |  |op:
+    |  |  |  |  |  |  OperatorPlus[1:40-1:41]
     |  |  |  |  |  |rhs:
-    |  |  |  |  |  |  Number[1:42-1:43]
-    |  |  |  |  |  |  |value: 1
+    |  |  |  |  |  |  Number[1:42-1:43]: 1
 
 
 Yay! What a pretty AST! Here's also a very useful tip for grammar development:
@@ -605,13 +609,12 @@ with it:
 
     $ build/bin/parse -r expr '1 + 2'
     BinaryExpr[1:1-1:6]
-    | lhs:
-    | | Number[1:1-1:2]
-    | | | value: 1
-    | op: plus
-    | rhs:
-    | | Number[1:5-1:6]
-    | | | value: 2
+    |lhs:
+    |  Number[1:1-1:2]: 1
+    |op:
+    |  OperatorPlus[1:3-1:4]
+    |rhs:
+    |  Number[1:5-1:6]: 2
 
 So we have our analysis library: there's nothing more we can do right now to
 enhance it, but on the other hand we can already use it to parse code and get
@@ -677,21 +680,26 @@ can then browse the AST nodes programmatically:
     # <KaleidoscopeNodeList 1:1-1:21>
 
     unit_2.root.dump()
-    # <KaleidoscopeNodeList>
-    # |item 0:
-    # |  <FunctionNode>
+    # KaleidoscopeNodeList 1:1-1:21
+    # |item_0:
+    # |  FunctionNode 1:1-1:20
     # |  |proto:
+    # |  |  Prototype 1:5-1:14
+    # |  |  |name:
+    # |  |  |  Identifier 1:5-1:8: foo
     # ...
 
     print unit_2.root[0]
     # <FunctionNode 1:1-1:20>
 
     print list(unit_2.root[0].iter_fields())
-    # [(u'proto', <Prototype 1:5-1:14>),
-    #  (u'body', <BinaryExpr 1:15-1:20>)]
+    # [(u'f_proto', <Prototype 1:5-1:14>),
+    #  (u'f_body', <BinaryExpr 1:15-1:20>)]
 
     print list(unit_2.root[0].f_body)
-    # <BinaryExpr 1:15-1:20>
+    # [<Identifier 1:15-1:16>,
+    #  <OperatorPlus 1:17-1:18>,
+    #  <Identifier 1:19-1:20>]
 
 Note how names for AST node fields got a ``f_`` prefix: this is used to
 distinguish AST node fields from generic AST node attributes and methods, such
@@ -777,7 +785,7 @@ important bits in ``Interpreter``:
         assert isinstance(ast, lkl.KaleidoscopeNodeList)
         for node in ast:
             if isinstance(node, lkl.FunctionNode):
-                self.functions[node.f_proto.f_name.f_name.text] = node
+                self.functions[node.f_proto.f_name.text] = node
 
             elif isinstance(node, lkl.ExternDecl):
                 raise ExecutionError(
@@ -815,15 +823,15 @@ Now comes the last bit: expression evaluation.
             env = {}
 
         if isinstance(node, lkl.Number):
-            return float(node.f_value.text)
+            return float(node.text)
 
         elif isinstance(node, lkl.Identifier):
             try:
-                return env[node.f_name.text]
+                return env[node.text]
             except KeyError:
                 raise ExecutionError(
                     node.sloc_range,
-                    'Unknown identifier: {}'.format(node.f_name.text)
+                    'Unknown identifier: {}'.format(node.text)
                 )
 
 This first chunk introduces how we deal with "environments" (i.e. how we
@@ -839,10 +847,10 @@ class:
 
     # Mapping: enumerators for the Operator type -> callables to perform the
     # operations themselves.
-    BINOPS = {'plus':  lambda x, y: x + y,
-              'minus': lambda x, y: x - y,
-              'mult':  lambda x, y: x * y,
-              'div':   lambda x, y: x / y}
+    BINOPS = {lkl.OperatorPlus:  lambda x, y: x + y,
+              lkl.OperatorMinus: lambda x, y: x - y,
+              lkl.OperatorMult:  lambda x, y: x * y,
+              lkl.OperatorDiv:   lambda x, y: x / y}
 
 Now, we can easily evaluate binary operations. Get back to the ``evaluate``
 method definition and complete it with:
@@ -852,7 +860,7 @@ method definition and complete it with:
         elif isinstance(node, lkl.BinaryExpr):
             lhs = self.evaluate(node.f_lhs, env)
             rhs = self.evaluate(node.f_rhs, env)
-            return self.BINOPS[node.f_op](lhs, rhs)
+            return self.BINOPS[type(node.f_op)](lhs, rhs)
 
 Yep: in the Python API, enumerators appear as strings. It's the better tradeoff
 we found so far to write concise code while avoiding name clashes: this works
@@ -863,7 +871,7 @@ And finally, the very last bit: function calls!
 .. code-block:: python
 
         elif isinstance(node, lkl.CallExpr):
-            name = node.f_callee.f_name.text
+            name = node.f_callee.text
             try:
                 func = self.functions[name]
             except KeyError:
@@ -885,7 +893,7 @@ And finally, the very last bit: function calls!
                 )
 
             # Evaluate arguments and then evaluate the call itself
-            new_env = {f.f_name.text: self.evaluate(a, env)
+            new_env = {f.text: self.evaluate(a, env)
                        for f, a in zip(formals, actuals)}
             result = self.evaluate(func.f_body, new_env)
             return result
