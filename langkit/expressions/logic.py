@@ -283,11 +283,17 @@ class DomainExpr(ComputingExpr):
     static_type = T.EquationType
 
     def __init__(self, domain, logic_var_expr, abstract_expr=None):
+        from langkit.compile_context import get_context
+
         self.domain = domain
         ":type: ResolvedExpression"
 
         self.logic_var_expr = logic_var_expr
         ":type: ResolvedExpression"
+
+        # Generated code relies on the instantiation of a logic binder package
+        # for the default case (no convertion nor equality properties).
+        get_context().do_generate_logic_binder()
 
         super(DomainExpr, self).__init__('Domain_Equation',
                                          abstract_expr=abstract_expr)
