@@ -1194,6 +1194,16 @@ class EnvRebindings(object):
     def __repr__(self):
         return '<EnvRebindings at {}>'.format(hex(self._address))
 
+    def __eq__(self, other):
+        return (isinstance(other, EnvRebindings) and
+                self._address == other._address)
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __hash__(self):
+        return hash(self._address)
+
     class _c_type(ctypes.c_void_p):
         pass
 
