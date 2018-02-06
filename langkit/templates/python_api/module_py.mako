@@ -1170,17 +1170,17 @@ def _node_ext_dtor_py(c_node, c_pyobj):
     ctypes.pythonapi.Py_DecRef(c_pyobj)
 
 
+## TODO: use the _Extension mechanism for env rebindings
+
 class EnvRebindings(object):
     ${py_doc('langkit.env_rebindings_type', 4)}
 
-    def __init__(self, c_value, inc_ref=False):
+    def __init__(self, c_value):
         """
         This constructor is an implementation detail, and is not meant to be
         used directly.
         """
         self._c_value = c_value
-        if inc_ref:
-           self._inc_ref(self._c_value)
 
     class _c_type(ctypes.c_void_p):
         pass
