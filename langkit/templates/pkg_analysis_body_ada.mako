@@ -19,6 +19,7 @@ with Ada.Unchecked_Conversion;
 with Ada.Unchecked_Deallocation;
 
 with GNATCOLL.Traces;
+with GNATCOLL.VFS;
 
 % if not ctx.separate_properties:
    with Langkit_Support.Array_Utils;
@@ -74,11 +75,16 @@ package body ${ada_lib_name}.Analysis is
    --  If Charset is an empty string, do nothing. Otherwise, update
    --  Unit.Charset field to Charset.
 
+   function Normalize_Unit_Filename
+     (Filename : String) return Unbounded_String;
+   --  Try to return a canonical filename. This is used to have an
+   --  as-unique-as-possible analysis unit identifier.
+
    function Create_Unit
      (Context           : Analysis_Context;
-      Filename, Charset : String;
+      Filename, Charset : Unbounded_String;
       Rule              : Grammar_Rule) return Analysis_Unit
-      with Pre => not Has_Unit (Context, Filename);
+      with Pre => not Has_Unit (Context, To_String (Filename));
    --  Create a new analysis unit and register it in Context
 
    function Get_Unit
@@ -248,22 +254,34 @@ package body ${ada_lib_name}.Analysis is
       Context.Logic_Resolution_Timeout := Timeout;
    end Set_Logic_Resolution_Timeout;
 
+   -----------------------------
+   -- Normalize_Unit_Filename --
+   -----------------------------
+
+   function Normalize_Unit_Filename
+     (Filename : String) return Unbounded_String
+   is
+      use GNATCOLL.VFS;
+   begin
+      return To_Unbounded_String (+Full_Name (Create_From_Base (+Filename),
+                                              Normalize => True));
+   end Normalize_Unit_Filename;
+
    -----------------
    -- Create_Unit --
    -----------------
 
    function Create_Unit
      (Context           : Analysis_Context;
-      Filename, Charset : String;
+      Filename, Charset : Unbounded_String;
       Rule              : Grammar_Rule) return Analysis_Unit
    is
-      Fname : constant Unbounded_String := To_Unbounded_String (Filename);
       Unit  : Analysis_Unit := new Analysis_Unit_Type'
         (Context                 => Context,
          Ref_Count               => 1,
          AST_Root                => null,
-         File_Name               => Fname,
-         Charset                 => To_Unbounded_String (Charset),
+         File_Name               => Filename,
+         Charset                 => Charset,
          TDH                     => <>,
          Diagnostics             => <>,
          Is_Env_Populated        => False,
@@ -283,7 +301,7 @@ package body ${ada_lib_name}.Analysis is
       );
    begin
       Initialize (Unit.TDH, Context.Symbols);
-      Context.Units_Map.Insert (Fname, Unit);
+      Context.Units_Map.Insert (Filename, Unit);
       return Unit;
    end Create_Unit;
 
@@ -304,8 +322,10 @@ package body ${ada_lib_name}.Analysis is
    is
       use Units_Maps;
 
-      Fname   : constant Unbounded_String := To_Unbounded_String (Filename);
-      Cur     : constant Cursor := Context.Units_Map.Find (Fname);
+      Canon_Filename : constant Unbounded_String :=
+         Normalize_Unit_Filename (Filename);
+
+      Cur     : constant Cursor := Context.Units_Map.Find (Canon_Filename);
       Created : constant Boolean := Cur = No_Element;
       Unit    : Analysis_Unit;
 
@@ -332,7 +352,7 @@ package body ${ada_lib_name}.Analysis is
       --  Create the Analysis_Unit if needed
 
       if Created then
-         Unit := Create_Unit (Context, Filename, Charset, Rule);
+         Unit := Create_Unit (Context, Canon_Filename, Actual_Charset, Rule);
       else
          Unit := Element (Cur);
       end if;
@@ -360,7 +380,8 @@ package body ${ada_lib_name}.Analysis is
      (Context       : Analysis_Context;
       Unit_Filename : String) return Boolean is
    begin
-      return Context.Units_Map.Contains (To_Unbounded_String (Unit_Filename));
+      return Context.Units_Map.Contains
+        (Normalize_Unit_Filename (Unit_Filename));
    end Has_Unit;
 
    -------------------
@@ -453,13 +474,15 @@ package body ${ada_lib_name}.Analysis is
    is
       use Units_Maps;
 
-      Fname : constant Unbounded_String := To_Unbounded_String (Filename);
-      Cur   : constant Cursor := Context.Units_Map.Find (Fname);
+      Canon_Filename : constant Unbounded_String :=
+         Normalize_Unit_Filename (Filename);
+      Cur            : constant Cursor :=
+         Context.Units_Map.Find (Canon_Filename);
    begin
       if Cur = No_Element then
          declare
-            Unit : constant Analysis_Unit :=
-               Create_Unit (Context, Filename, Charset, Rule);
+            Unit : constant Analysis_Unit := Create_Unit
+              (Context, Canon_Filename, To_Unbounded_String (Charset), Rule);
             Msg  : constant Text_Type := To_Text (Error);
          begin
             Append (Unit.Diagnostics, No_Source_Location_Range, Msg);
@@ -479,7 +502,8 @@ package body ${ada_lib_name}.Analysis is
    is
       use Units_Maps;
 
-      Cur : Cursor := Context.Units_Map.Find (To_Unbounded_String (File_Name));
+      Cur : Cursor := Context.Units_Map.Find
+        (Normalize_Unit_Filename (File_Name));
    begin
       if Cur = No_Element then
          raise Constraint_Error with "No such analysis unit";
